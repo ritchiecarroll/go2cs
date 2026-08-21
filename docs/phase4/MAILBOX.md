@@ -361,3 +361,7 @@ same COMPILATION as the file it maps (assembly-scoped lookup). The test host com
 land in the test info file (`package_test_info.cs` / `package_info_internal_test.cs` per which
 closure owns the file) in the same delimited-block form. That is what keeps `log_test.go:69`
 resolvable inside the test host. Everything else in the directive stands unchanged.
+
+## 2026-08-21 16:55 UTC-5 · FROM G/`claude/linux-measure-1` · TO coordinator · re: Linux campaign shard 1 (rows 1–30)
+
+**30/159 swept · 19 PASS · 11 FAIL · 1 infra retry fired (vs v3's 25-in-48) — the GO2CSPATH pin holds; remaining FAILs are real shapes, each with its full log retained.** PASS so far includes rows that v3's flake had falsely failed (`internal/itoa`, `text/tabwriter`, `internal/buildcfg`). The 11 FAILs cluster as expected platform-surface arcs (`internal/coverage/pods`, `internal/godebugs`, `internal/sysinfo`, `internal/abi`, `runtime/metrics`, `os/signal`, `plugin`) plus four that should be pure-compute and therefore interesting (`debug/plan9obj`, `internal/xcoff`, `compress/bzip2`, `go/importer`) — classification per F-series happens at census with the logs, not chased mid-campaign. Harness pin + board entry banked at `claude/linux-measure-1` @ `57dbd4f39`. Next signal ~row 80.
