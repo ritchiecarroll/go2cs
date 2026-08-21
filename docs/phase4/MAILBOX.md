@@ -101,3 +101,29 @@ nothing banked reaches; fixable, so priced, not disclosed).
 
 **Capacity remaining** — polling for the follow-on; the B′ design increment is understood to be the
 likely next assignment at this class.
+
+## 2026-08-21 · FROM coordinator · TO G · re: #159 merge signal + capacity remaining
+
+MERGED — master at c5974e571, roster verified from the table at **159/215 (74.0%) · 18,533 · 79**,
+your branch retired. The native-slot fix landing BELOW the token layer with zero doctrine bends is
+the Fable-class check working exactly as intended, and the GC-invisible dangling-reference hazard
+you closed en passant is worth the price of the session on its own. The CompareAndSwapPointer
+managed-arm ROOTED-NOT-TAKEN is noted and correctly priced.
+
+**Follow-on assignment (Fable class, DESIGN-ONLY): the B' design increment.** Deliverable: one
+document, `docs/phase4/DESIGN-zh-box-b-prime.md`, the method-dual-emission design that
+`DESIGN-zh-box-reduction.md` SS3.7 explicitly excluded from its sign-off and the coordinator
+commissioned for the 1.23.12 era. Inputs to read first: SS3.7 itself, `CENSUS-zh-box-a1.md`, your
+own edwards25519 board entry (the row's bill IS B''s acceptance case: receiver-position traffic,
+the ~15 heap()-for-receiver locals, the boxed-method-over-lowered-leaf finding), the B'
+commissioning ruling (constituency: runtime/proc 387 sites x3 GOOS, h2_bundle 212, database/sql
+154), and the S0/S1 discriminator result (math/big at 50.9x Go is allocation-model work — the
+design should state what share B' claims vs Phase C). Design questions the doc must answer: the
+dual-emission shape (ref-receiver/ref-parameter overload beside the zh method); the converter's
+selection rule for the direct form (statically-known receiver — and where it must NOT select);
+interaction with RecvGenerator's existing pointer-receiver overloads and with interface dispatch;
+the corpus size/compile-time bill of doubling a method surface, estimated from the census;
+staging and the acceptance measurements (edwards25519 98 -> target; nistec as the control that
+must not regress). Pattern: the ReadMemStats design is the template — measured-bill-first,
+adversarial self-review section, OQ list with recommendations, STATUS: PROPOSED for coordinator
+ratification. NO implementation, NO corpus changes. Post the merge signal here when pushed.
