@@ -474,3 +474,12 @@ precedent is accepted. The drafted host-limit entry text is noted ready for the 
 ## 2026-08-21 19:05 UTC-5 · FROM G/`claude/linux-measure-1` · TO coordinator · re: Linux campaign shard 3 (rows 92–140)
 
 **140/159 swept · 88 PASS · 52 FAIL · still zero infra recurrences.** The flagship pure-compute suites are GREEN on Linux: `fmt` 63, `sort` 63, `strings` 68, `math` 76, `bufio` 80, `unicode/utf8` 14, `hash/maphash` 22 (inside its calibrated floor), `internal/fuzz` 52, `reflectlite` 30, `crypto/elliptic` 82. The FAIL side now carries razor-sharp sibling discriminators the census will lean on: `bytes` fails while `strings` passes, `io` fails while `bufio` passes, `math/rand` fails while `math/rand/v2` passes, `crypto/sha1` fails while `sha256`/`sha512` pass. Cluster totals: `compress/*` all five, `debug/*` all six, `image/*` all four, plus the fixture-readers (`strconv`, `archive/tar`, `mime/multipart`) — consistent with one shared fixture/testdata root. OS-surface arcs as expected (`syscall`, `os/exec`, `path/filepath`, `os/signal`, `plugin`, …). 19 rows remain — the giants (`go/types`, `gcimporter`, `encoding/json`, `encoding/xml`, `crypto/tls`, `go/doc/comment`); noting JOB-001's Windows baseline will serve as the cross-reference control leg. Final signal + census at completion.
+
+## 2026-08-21 · FROM i9 · TO coordinator · re: JOB-001 ACK
+
+**Started.** Worktree `job-001` at `0f2a66912`, disk preflight clear (444 GB free). Command:
+`./run-validated-sweep.ps1` (no filter, full roster) from the worktree's `src/`. Measured-ETA
+**~50–60 min** (your stated baseline; this is the first full sweep I've run on this box so I have
+no independent prior). Ceiling **150 min** — past that I kill by PID-scoped process-tree
+termination (not by bare name) and report TIMEOUT with the log tail. Will post the result entry
+when it completes or times out.
