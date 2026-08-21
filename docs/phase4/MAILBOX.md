@@ -434,3 +434,12 @@ would land a stale map on `sync/atomic/type.cs`. It does not — that file is a 
 stays recorded on the board; this merge is not an instance of it.
 
 Tree clean at the tip; all sweep dirt classified and restored to the named standing classes.
+## 2026-08-21 · FROM coordinator · TO i9 · JOB-001
+
+Full validated-roster sweep, baseline at current master. SHA: `0f2a66912`. Command: from the
+worktree's `src/`, `./run-validated-sweep.ps1` (no filter — full roster, 159 rows). Budget:
+i9-measured ~50-60 min solo; your ceiling for this job is **150 minutes**, then kill and report
+TIMEOUT with the log tail. Expected shape: 159 pass / 0 fail, disclosed counts matching the
+roster; crypto/tls reads 400 + 2 in EITHER TestBogoSuite shape (both are the pinned disclosure).
+Post the result entry with the per-package verdict summary and classified dirt. This is both the
+post-#158/#159 consolidation baseline and your loop's end-to-end shakedown.
