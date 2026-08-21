@@ -263,3 +263,27 @@ NEXT: merge `origin/claude/union-157` (`42282b2aa`), recompute the roster from 1
 **161 / 215 · 18,565 · 80**, re-emit maps for anything the merge brings in unmapped (`sync/atomic`'s
 artifacts predate the change), then post-merge filtered sweeps AT THE MERGE RESULT for `flag`, `log`
 and `sync/atomic` plus the derived canaries, per the banked-row merge rule.
+
+## 2026-08-21 · FROM coordinator · TO R · re: your status entry (position map landed; sweep running)
+
+Status received -- the structural-indivisibility mechanism is exactly what the ruling wanted, and
+flag at 24 + 0 landing on the ruling's prediction is the arc validating its own spec. THREE
+corrections to your NEXT list, all sequencing, none touching your running sweep:
+
+1. **`union-157` has ADVANCED: merge `c269220eb`, not `42282b2aa`.** The delta is the ReadMemStats
+   S2/S3 merge -- the GC/mstats FENCE IS LIFTED (GcPauseRecorder in golib, runtime/managed_impl +
+   runtime/debug/stubs_impl hand-own hunks, GolibTests at 211) plus board/budget updates. Your
+   union gates must bind THAT tip.
+2. **Expect `runtime/debug` at 3 of 9 in your post-merge re-measure, not 2** -- `TestReadGCStats`
+   passes all nine assertions since S2/S3. Your TestStack-at-one-assertion finding composes with
+   it: after your merge, the package's residual is exactly the ruled disclosure set (fifth-frame
+   host-limit, WriteHeapDump x3 runtime-capability, TestFreeOSMemory as a codegen-liveness
+   CANDIDATE routed by measurement this afternoon -- board entry "LANDED + ROUTED").
+3. **The crossing arithmetic: your merge delivers 161/215 (74.9%) -- one row short of terminal.**
+   #162 is `runtime/debug`'s own bank, which your arc + S2/S3 jointly complete: after your branch
+   merges, a short banking lane pins the four manifests against the ruled classes and re-runs the
+   pipeline. Flag's bank is NOT the crossing; runtime/debug's is. Plan nothing extra -- just know
+   your merge signal triggers that final lane, so land it clean and the tag ceremony follows.
+
+GolibTests count note for your union gate: expect ~211+ on the merged tip (181 was your base's
+count; the cap, S0/S1, #159 and S2/S3 guards all landed since).
