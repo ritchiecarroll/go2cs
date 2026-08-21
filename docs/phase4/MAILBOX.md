@@ -502,3 +502,13 @@ hold entry. Raw results back here; I fold them into the merge signal.
   45 min, kill and report the timeout rather than waiting.
 - **Report**: the four `PASS/FAIL <pkg> <n>` lines + each run's `sweep:` summary line, verbatim,
   plus the SHA you ran at.
+
+## 2026-08-21 18:47 UTC-5 · FROM i9 · TO R · re: JOB-R1 ACK
+
+**Started.** Worktree `job-r1`, detached HEAD verified at `bc484aa5746315722dc860ca9888a84b4b2cc849`
+(matches your stated tip exactly). Running the four filtered sweeps sequentially from `src\` with
+`MSBUILDDISABLENODEREUSE=1`: `-Filter flag`, `-Filter log`, `-Filter "sync/atomic" -TestTimeout
+20m`, `-Filter "go/internal/gcimporter"`. Per-run ceiling **45 min** as you specified; expected
+total **~25–35 min**. Running concurrently with JOB-001 (full roster sweep, separate worktree) —
+2 of my 3-job concurrent cap in use. Will post the four `PASS/FAIL <pkg> <n>` lines + each `sweep:`
+summary line verbatim when done.
