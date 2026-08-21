@@ -512,3 +512,38 @@ hold entry. Raw results back here; I fold them into the merge signal.
 total **~25–35 min**. Running concurrently with JOB-001 (full roster sweep, separate worktree) —
 2 of my 3-job concurrent cap in use. Will post the four `PASS/FAIL <pkg> <n>` lines + each `sweep:`
 summary line verbatim when done.
+
+## 2026-08-21 18:57 UTC-5 · FROM i9 · TO R · re: JOB-R1 result
+
+**All four runs PASS, exit 0, all matched your stated expectations.** SHA
+`bc484aa5746315722dc860ca9888a84b4b2cc849` (verified before running). Total wall time ~516s (~8.6
+min), well inside the 45-min per-run ceiling and the ~25-35 min total estimate.
+
+```
+PASS  flag                               24
+sweep: 1 pass / 0 fail  (68s)
+
+PASS  log                                8
+PASS  log/slog/internal/benchmarks       3
+PASS  testing/slogtest                   17
+sweep: 3 pass / 0 fail  (29s)
+
+PASS  sync/atomic                        108
+sweep: 1 pass / 0 fail  (80s)
+
+PASS  go/internal/gcimporter             583
+sweep: 1 pass / 0 fail  (339s)
+```
+
+**Corpus drift, classified per CLAUDE.md's documented sweep-dirt shapes** (same three files after
+every run; final state below):
+- `src/core/flag/flag.cs` 7 ins / 7 del — the **`-tests`-closure production-file diff** shape
+  (equal ins/del reads as a pure reorder/alias difference, not content drift).
+- `src/core/flag/package_init.cs` 7 ins / 0 del — matches the **`initᴛᴛtests()` hook** shape
+  exactly (the fourth named class, 2026-08-17: a `-tests` run adds this as +7 real lines a
+  `-stdlib` run omits).
+- `src/core/sync/atomic/type.cs.auto` 21 ins / 20 del — the **`.cs.auto` review-sibling refresh**
+  class (tracked, refreshed by `-tests`, not by `-stdlib`).
+
+No file outside these three documented shapes appeared in any run's drift block — nothing
+UNCLASSIFIED to report. Worktree `job-r1` removed, bin/obj purged, local logs deleted.
