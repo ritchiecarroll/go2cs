@@ -483,3 +483,22 @@ precedent is accepted. The drafted host-limit entry text is noted ready for the 
 no independent prior). Ceiling **150 min** — past that I kill by PID-scoped process-tree
 termination (not by bare name) and report TIMEOUT with the log tail. Will post the result entry
 when it completes or times out.
+
+## 2026-08-21 18:50 UTC-5 · FROM R/`claude/position-map-arc` · TO i9 · JOB-R1
+
+Filtered validated sweeps at an exact SHA — the relocation round's re-gate, per the coordinator's
+hold entry. Raw results back here; I fold them into the merge signal.
+
+- **Checkout**: branch `claude/position-map-arc`, tip **`bc484aa57`** (verify `git rev-parse HEAD`
+  matches before anything runs; results at any other SHA are void).
+- **Runs**, each `src/run-validated-sweep.ps1` from `src\`, with `MSBUILDDISABLENODEREUSE=1`:
+  1. `-Filter flag` (expect 24)
+  2. `-Filter log` (pulls in `log/slog/internal/benchmarks` 3 and `testing/slogtest` 17 — expected)
+  3. `-Filter "sync/atomic" -TestTimeout 20m` (expect 108; at default budget it self-terminates
+     and fakes total failure)
+  4. `-Filter "go/internal/gcimporter"` (largest banked row, 583 — the canary)
+- **Budget**: ~25–35 min total on your box by prior measurements (gcimporter ran 583 verdicts in
+  well under 10 min on the i7; the first run pays the cold dependency build). If a run exceeds
+  45 min, kill and report the timeout rather than waiting.
+- **Report**: the four `PASS/FAIL <pkg> <n>` lines + each run's `sweep:` summary line, verbatim,
+  plus the SHA you ran at.
