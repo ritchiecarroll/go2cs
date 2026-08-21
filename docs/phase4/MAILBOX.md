@@ -229,3 +229,37 @@ parts, in order, all on your Linux lane:
 This runs in parallel with the terminal push by design — your Linux box collides with nobody.
 Post shard progress here as you go (a signal per shard is fine); the coordinator merges
 incrementally rather than waiting for the whole campaign.
+
+## 2026-08-21 13:25 UTC-5 · FROM R/`claude/position-map-arc` · TO coordinator
+
+Status while a full sweep runs — nothing to act on yet; merge signal follows here.
+
+**Both halves of the position map are LANDED and measured on the lane tip.** Design note committed
+FIRST and alone (`a3e1d2229`, `docs/phase4/DESIGN-position-map.md`) per the ruling's charter-§7
+gate; mechanism `74cd60bdc`; corpus + behavioral regen `d0cf003c4`; rows `ecea96588`.
+
+MECHANISM: one `[assembly: GoPositionMap("<go file>", "<cs file>", "<table>")]` per converted file,
+emitted INTO that file, carrying the identity AND the C#-line→Go-line table together — so
+indivisibility is structural rather than a rule; there is no code path that could report half a
+position. **0.91% of the corpus** (1,339 records, 0.35 MB against 38.73 MB) versus `#line`'s
++28–47% of LINES. All three identity forms measured against Go controls, `-recurse` included, and
+`main/main.go` is structurally impossible — nothing composes a path from a namespace.
+
+CONSUMERS: `flag` **24 + 0**, exactly the ruling's prediction. `log` **8 + 1** — `TestAll` PASSES,
+the yield the file half could not deliver. `runtime/debug` **2 of 9 unchanged**, but `TestStack` is
+down to ONE assertion, the fifth frame (the host); its `host-limit` entry text is drafted in the
+board entry, ready to paste when that row banks.
+
+GATES GREEN: `go2cs-stdlib.slnx` 307/0 · `go2cs.slnx` 0 errors · behavioral **603/603** + 577
+stdout comparisons vs `go run .` · CNR **byte-identical across 630 packages**, 0 NOT MEASURED ·
+GolibTests 181/181 · converter `go test ./...` green.
+
+RUNNING: the full **160-row** sweep (started 11:29 CDT; 37 done / 0 fails at 13:13). Full roster
+rather than a canary subset deliberately — this is a corpus-wide EMISSION change, so the
+direct-import derivation and the board's frame-file blast radius are both proper subsets of what
+runs. ETA ~3 h (`crypto/dsa` alone took 35 min; `hash/maphash` and `index/suffixarray` still ahead).
+
+NEXT: merge `origin/claude/union-157` (`42282b2aa`), recompute the roster from 159 →
+**161 / 215 · 18,565 · 80**, re-emit maps for anything the merge brings in unmapped (`sync/atomic`'s
+artifacts predate the change), then post-merge filtered sweeps AT THE MERGE RESULT for `flag`, `log`
+and `sync/atomic` plus the derived canaries, per the banked-row merge rule.
