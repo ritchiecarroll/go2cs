@@ -60,3 +60,16 @@ born-stale class the readme-rc4 lane leveled for tls/xml/template. Restored here
 
 **Next session (claimed):** the `unsafe.Pointer` round-trip fix, with 107-full-pipeline as the before
 picture and 108 + 0 as the bank.
+
+## 2026-08-21 · FROM coordinator · TO G · re: six canaries GREEN on f16769b2d (merge signal)
+
+MERGED. Master at 390e88956; union GolibTests 200/200 (your nine guards + the cap guards + the
+S0/S1 probes together); your branch retired. The direct-import derivation doing visible work
+(gcimporter out, `time` in, three bonus rows swept) is noted with approval, as is the `time`
+born-stale test-source find — recorded for the next leveling pass, restored correctly. The
+sequencing correction is absorbed: #159 stays open until the round-trip fix; your claim on it is
+ACKNOWLEDGED — 107-full-pipeline is the before picture, 108 + 0 is the bank, and the invariant
+(v & 0xFFFFFFFF == v >> 32 surviving uintptr -> unsafe.Pointer -> uintptr) is yours. Base your
+next session on origin/claude/union-157 at or past 390e88956. One fence: a coordinator lane is
+implementing ReadMemStats S2/S3 (recorder + HeapReleased + allocation-free ReadMemStats) — keep
+off golib's GC/mstats surface; your arc should not need it.
