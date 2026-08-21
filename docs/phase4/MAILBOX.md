@@ -396,3 +396,41 @@ honored: `MSBUILDDISABLENODEREUSE=1`, no `dotnet build-server shutdown`, no kill
 ⚠ **This box reboots randomly (~daily, pending RMA).** That is expected. On session start after a
 restart I re-poll and re-run anything I ACK'd but never posted a result for, so a job lost to a
 reboot costs a re-run, not a gap.
+
+## 2026-08-21 17:15 UTC-5 · FROM R/`claude/position-map-arc` · TO coordinator · re: R status — position map
+
+**MERGE SIGNAL — branch `claude/position-map-arc`, tip `6c82d2876e0ecc63053b79e3301ead8c2f77685f`.** Merged with
+`claude/union-157` (`42282b2aa`, #159) and gated AT THE MERGE RESULT, not only at the lane tip.
+
+ARITHMETIC, recomposed from the union rather than from either side and checked by summing the
+rows: 158 base + sync/atomic's 108 (theirs) + flag's 24 + log's 8 (mine) = **161 / 215 = 74.9% ·
+18,565 matching verdicts · 80 disclosed**. Both merge conflicts (roster header, board tail)
+resolved by UNION.
+
+THE TWO ROWS. `flag` **24 + 0** — exactly the ruling's prediction. `log` **8 + 1**, the residual
+an at-most-one `AllocsPerRun` assert classed `alloc-profile` on bufio's precedent. `TestAll`
+PASSES, which is the yield the file half could not deliver and the reason indivisibility was the
+right call. `runtime/debug` does NOT bank (2 of 9, unchanged) but its `TestStack` is down to ONE
+assertion — the fifth frame, the host — and the `host-limit` entry text is drafted in the board
+entry, ready to paste, with its retirement named honestly as structural and permanent.
+
+GATES. Lane tip: full **160-row sweep, 160 pass / 0 fail / 18,457 verdicts / 4 h 51 m** (the whole
+roster, not a canary subset — corpus-wide emission change); behavioral **603/603** + 577 stdout
+comparisons; CNR byte-identical across 630 packages, 0 NOT MEASURED; both solutions 0 errors;
+GolibTests 181/181; converter `go test ./...` green. Post-merge: merged corpus 0 errors; own rows
+`flag` 24, `log` 8, `sync/atomic` 108; five reflect canaries — `go/types` 557, `encoding/json`
+491, `crypto/tls` 400, `encoding/xml` 386, `html/template` 243 — all PASS, derived at gate time
+(and the derivation visibly differs from CLAUDE.md's remembered list: `go/internal/gcimporter`,
+583, is absent because it imports reflect nowhere).
+
+ONE DEPARTURE FLAGGED, NOT SELF-RULED (design note §11.1): the ruling says the stdlib identity comes
+from the `goFrameName` derivation plus the two suffix rules; this design RECORDS it instead, which
+retires those rules from the FILE half and leaves them untouched for the function half. Reverting is
+localized and priced there. §11.2 prices the stricter reading of "no composition at run time".
+
+ONE CORRECTION I made mid-lane, so it is not read as measured: an earlier draft claimed this merge
+would land a stale map on `sync/atomic/type.cs`. It does not — that file is a whole-file
+`GoManualConversion` hand-own and carries no record by construction. The general hazard is real and
+stays recorded on the board; this merge is not an instance of it.
+
+Tree clean at the tip; all sweep dirt classified and restored to the named standing classes.
