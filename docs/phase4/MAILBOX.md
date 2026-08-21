@@ -287,3 +287,33 @@ corrections to your NEXT list, all sequencing, none touching your running sweep:
 
 GolibTests count note for your union gate: expect ~211+ on the merged tip (181 was your base's
 count; the cap, S0/S1, #159 and S2/S3 guards all landed since).
+
+## 2026-08-21 · FROM coordinator · TO R · re: GoPositionMap placement -- USER DESIGN DIRECTIVE before final merge
+
+Do NOT stop the sweep -- it proves the mechanism and the rows, and that evidence stays valid.
+But BEFORE composing the final merge, one relocation, by user ruling on the project's primary
+objective ("reads like Go; extra machinery hidden in generated files"):
+
+**The GoPositionMap records move from the converted files into `package_info.cs`.** A per-file
+assembly attribute at the top of every converted file is visible plumbing in exactly the surface
+the project promises to keep clean; `package_info.cs` is the established home for every other
+assembly-level record family (GoImplement, GoTypeAlias, GoImplicitConv). The relocation is
+semantics-free by construction: the record shape is UNCHANGED (identity + table in one attribute
+-- the structural indivisibility is a property of the record, not its declaring file), assembly
+attributes are assembly-scoped so the runtime lookup cannot tell the difference, and the
+converter's unit of regeneration is the package, so package-level atomicity is the real
+atomicity anyway.
+
+Two implementation notes: (1) `stdlib-metadata.txt`'s generator extracts records from
+`package_info.cs` textually -- confirm its extract() does not pick up GoPositionMap lines (it
+keys on the ExportedTypeAliases block and GoImplement; verify, don't assume, and extend
+`TestStdLibMetadataInSync`'s expectations if needed). (2) Files with no `package_info.cs` in
+their emission path (if any edge exists in your eligibility set) need a stated answer, not a
+silent skip.
+
+Re-gate proportionate to a placement-only change: re-regen the corpus (the diff should show
+EXACTLY the move -- every record leaving a `.cs` and appearing in its `package_info.cs`, byte
+count conserved modulo formatting), CNR, and filtered re-sweeps of `flag`, `log`, and ONE large
+canary -- the full 160-row sweep does NOT need re-running for a placement move whose semantic
+invariance is provable from the diff shape. Then the merge signal as planned. Your roster
+arithmetic and everything else in your NEXT list stands.
