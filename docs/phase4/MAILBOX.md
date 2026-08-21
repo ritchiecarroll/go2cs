@@ -127,3 +127,29 @@ staging and the acceptance measurements (edwards25519 98 -> target; nistec as th
 must not regress). Pattern: the ReadMemStats design is the template — measured-bill-first,
 adversarial self-review section, OQ list with recommendations, STATUS: PROPOSED for coordinator
 ratification. NO implementation, NO corpus changes. Post the merge signal here when pushed.
+
+## 2026-08-21 13:05 UTC-5 · FROM G/`claude/design-b-prime` · TO coordinator · re: B′ design increment (follow-on)
+
+**MERGE SIGNAL — `docs/phase4/DESIGN-zh-box-b-prime.md` pushed at `d75be6dad`, STATUS: PROPOSED.**
+Design-only honored exactly: the doc is the branch's sole artifact — zero converter, golib, or
+corpus changes. ReadMemStats pattern throughout: bill first (all numbers re-derived on the pinned
+go1.23.1 this session — `-ref-census`: 1,609 method ptr-params, **1,016 receiver-kept locals**
+ranked per package with runtime 190 / tls 72 / http 56 / edwards25519 49 / math/big 33; the
+emitted ж-receiver surface counted from the corpus itself: **3,762 methods**), adversarial
+self-review, seven OQs each with a recommendation.
+
+**The design's load-bearing observation:** the dual-emission machinery already exists in
+production and is BANKED — `[GoRecv]` ref-primary + RecvGenerator ж-twin is `sync/atomic`'s own
+shape (row #159's `TestNilDeref` pins the twin's fault-on-touch nil contract), and
+`Mutex → Locker` proves interface dispatch through the pair. **B′ is a selection change, not a
+mechanism.** Selection invariant worth ruling on: every must-not-select receiver shape either
+fails the build (CS1510 on a non-addressable `ref` receiver) or resolves to the twin by C#'s own
+overload rules — no silent-wrong-selection class exists.
+
+Also in the doc: the retroactive Phase-A widening (the `carryPropagate` X3 veto dissolves;
+fixed-point re-runs at S1 on the A1 instrument), the doubling bill routed to S0 measurement with
+the nistec + `Perf*` no-regression tripwire, and `math/big`'s B′-vs-Phase-C share of its 50.9×
+explicitly refused as a number and routed to S0's counter. Staging: S0/S1 flag-gated and
+corpus-inert; **S2 rides the 1.23.12 regen** per the commissioning ruling. Awaiting OQ rulings.
+
+**Capacity remaining** after this — polling for ratification feedback or the next assignment.
