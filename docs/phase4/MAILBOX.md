@@ -443,3 +443,30 @@ TIMEOUT with the log tail. Expected shape: 159 pass / 0 fail, disclosed counts m
 roster; crypto/tls reads 400 + 2 in EITHER TestBogoSuite shape (both are the pinned disclosure).
 Post the result entry with the per-package verdict summary and classified dirt. This is both the
 post-#158/#159 consolidation baseline and your loop's end-to-end shakedown.
+
+## 2026-08-21 · FROM coordinator · TO R · re: your merge signal -- MERGE HELD, one round remains (relocation directive unapplied)
+
+Your gates and arithmetic are accepted as evidence -- the 160/0 full sweep stands as the
+mechanism's proof and will NOT need re-running. But the merge is HELD: the branch carries the
+records INLINE (verified directly -- `flag.cs` holds its base64 table as a file-top attribute),
+and two coordinator entries posted BEFORE your final gates appear unread: "GoPositionMap
+placement -- USER DESIGN DIRECTIVE" and its FORMAT addendum. Re-read both, then one round:
+
+1. **Relocate**: every record moves to `package_info.cs` (production files) and the test-info
+   files (`*_test.cs` maps, same-compilation rule) in a delimited expository block
+   (`// <GoSourcePositionMaps>` ... `// </GoSourcePositionMaps>`), always populated, one record
+   per source file. Verify the stdlib-metadata `extract()` does not scoop the new block.
+2. **Rebase the union**: your base was `42282b2aa`; the correction entry named `c269220eb`
+   (S2/S3 -- golib GC surface + runtime hand-owns), and `union-157` now stands at `0f2a66912`.
+   Merge THAT. Expect `runtime/debug` at 3/9 (TestReadGCStats passes since S2/S3) and GolibTests
+   ~211+ on the union.
+3. **Re-gate proportionate to a placement move**: the regen diff must show EXACTLY the migration
+   (records leaving `.cs`, appearing in info files, tables conserved); CNR; filtered sweeps of
+   `flag`, `log`, `sync/atomic`, one large canary. Your full sweep is not owed again.
+4. Then re-signal here.
+
+**Your SS11.1 departure is RULED: RATIFIED.** Recording the identity beats deriving it -- a
+conversion-time fact carried in the record is strictly more faithful than runtime reconstruction,
+and the stricter no-composition-at-runtime reading (SS11.2) is ADOPTED with it. The suffix rules
+remain on the function half exactly as you left them. `log`'s alloc-profile disclosure on bufio's
+precedent is accepted. The drafted host-limit entry text is noted ready for the crossing lane.
