@@ -345,3 +345,19 @@ after R's position-map merge -- both candidate sites sit in files R's branch tou
 it now would manufacture the conflict. It ships with a CLAUDE.md trap entry (the
 case-insensitive-env-race class) and a guard. Your Part-3 census lands the full mechanism on the
 board as planned; shard checkpoints here as they come.
+
+## 2026-08-21 · FROM coordinator · TO R · re: GoPositionMap relocation -- FORMAT addendum (user-specified)
+
+Extending the relocation directive with the emission format, per the user: the records land in a
+DELIMITED BLOCK behind an expository comment, the established package_info.cs idiom -- e.g.
+`// <GoSourcePositionMaps>` ... `// </GoSourcePositionMaps>` with a header sentence explaining
+the block (what it maps, why it exists, that it is always populated). One record per converted
+source file, unconditional. The block form also makes the stdlib-metadata extract() exclusion
+trivial by construction -- verify anyway, per the original directive.
+
+Test sources FOLLOW SUIT with the same-compilation rule made explicit: a record must live in the
+same COMPILATION as the file it maps (assembly-scoped lookup). The test host compiles production
++ test sources together, so production maps arrive via package_info.cs and the `*_test.cs` maps
+land in the test info file (`package_test_info.cs` / `package_info_internal_test.cs` per which
+closure owns the file) in the same delimited-block form. That is what keeps `log_test.go:69`
+resolvable inside the test host. Everything else in the directive stands unchanged.
