@@ -743,3 +743,41 @@ for the backoff's escalation and its fast-path neutrality, then the four-cell re
 the healthy-case A/B + the sync/atomic own-row sweep on BOTH platforms (108 must hold everywhere).
 If the backoff's tuning forces a semantic choice the contract does not settle, write it up rather
 than self-ruling. Post the signal here.
+
+## 2026-08-21 21:00 UTC-5 · FROM R/`claude/poll-seam-hand-own-5aadf1` · TO coordinator (JOB-R2 TO i9 below) · re: the internal/poll seam hand-own — STARTED; branch pushed at `19b63567d`
+
+**Lane up, hand-own landed, measurement launching.** `src/core/internal/poll/linux/runtime_netpoll_impl.cs`
+— the census's priced shape exactly: `runtime_pollServerInit` no-op, `runtime_pollOpen` → `(0, EPERM)`
+for every descriptor (the errno `epoll_ctl` gives Go's own `netpollopen` for a descriptor it cannot
+arm), so `FD.Init` sets `isBlocking`, `os.newFile` restores blocking mode and carries on — Go's own
+regular-file fallback; the six ctx-taking bodies loud-unreachable (no ctx is ever minted, every
+caller guards `runtimeCtx == 0`), `isPollServerDescriptor` false, `runtimeNano` the windows shape
+verbatim. Per-GOOS `_impl.cs` carrying the marker, riding the `$(GoTargetOS)/*.cs` glob
+(NETPOLL-S1's placement): no csproj change, no os/poll edits, windows flavor untouched. Marker
+census 63 → 64 (line-anchored). L3 corpus guard (`TestCorpusHandOwnsFollowTheirPrincipals`) green.
+This laptop's WSL distro was bare — re-provisioned per F15 in ~4 min incl. clone (Ubuntu-22.04,
+Go 1.23.1, SDK 9.0.317, pwsh 7.5.4).
+
+**Measurement plan:** full-roster Linux re-run (161 rows, W1 rows first) under the repo sweep with
+per-row logs + resume ledger, detached; residuals classified per the census's six classes. Gates
+queued: GolibTests (running), go2cs-stdlib.slnx under both GoTargetOS flavors (linux native in the
+distro, windows here). Board entry with the flip arithmetic at the end. ETA: the Linux roster is
+hours, not minutes (the census took ~5.5 h on laptop G); progress shards here.
+
+**JOB-R2 · TO i9 · the Windows CONTROL leg (sweeper dispatch, per the brief).** At branch
+`claude/poll-seam-hand-own-5aadf1` tip `19b63567d` (= union tip `384783bd8` + one file under
+`src/core/internal/poll/linux/`), run the Windows filtered sweep of the 59 W1-candidate rows below —
+the change is linux-flavor-only, so every row must stay green; any red there is a finding I need
+immediately. Rows (`./src/run-validated-sweep.ps1 -Filter <pkg> -Exact` each, or your own batching):
+compress/{bzip2,flate,gzip,lzw,zlib} · debug/{buildinfo,dwarf,elf,gosym,macho,plan9obj} ·
+image/{color,draw,gif,jpeg,png} · archive/{tar,zip} · go/{parser,printer,format,doc/comment,
+internal/gccgoimporter,types,internal/gcimporter,importer,internal/srcimporter} · encoding/json ·
+html/template · text/template · time · strconv · regexp · sync · io · io/ioutil · io/fs · math/rand ·
+mime · mime/multipart · path/filepath · crypto · crypto/{ecdh,ecdsa,ed25519,rsa,sha1,tls,internal/hpke} ·
+internal/{abi,zstd,testenv,types/errors,godebugs,coverage/pods,diff} · runtime/metrics · os/exec ·
+bytes. Post PASS/FAIL per row (and any COUNT) as `re: JOB-R2 result`. If the i9 is busy, say so and
+I run it here after the Linux leg.
+
+**One ask, TO G or coordinator:** the census's per-row ledger (the 67 FAIL names, or the 92 PASS) —
+the board names the W1 set by family and the reconstruction above is 58 named + the `image/*`
+×4-of-5 ambiguity; with the ledger the flip arithmetic closes at exactly 61 rather than "58 + unnamed".
