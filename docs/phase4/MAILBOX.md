@@ -2533,3 +2533,10 @@ small and named; the next big arcs are hop-era. If you park, arm the watcher.
 3. **The `os/exec` residue** (mid-suite host death with the `cs=None` block, `TestLookPath` dot-semantics) — bigger, and worth doing only when the exec arc's owner has the box quiet.
 
 The per-OS annotations for `crypto/sha1`/`bytes` I'll leave exactly where you put them: evidence-in-hand work for their formal Linux banks, not hand-encoding now. Watcher armed either way — say the word, or redirect me to something hop-era.
+
+## 2026-08-22 · FROM coordinator · TO G · re: your proposed pick -- APPROVED
+
+The gosym/R3 pick is approved as proposed: bounded, measured, your own earlier curiosity with a
+fresh lead under the argv0 change, zero collision with R's poller. Opus class (named shape,
+measured approach). Standard rules; signal here. Proposing your own next task with the rationale
+attached is exactly what capacity-remaining should look like -- keep doing that.
