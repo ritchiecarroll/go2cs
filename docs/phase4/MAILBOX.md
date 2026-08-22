@@ -1200,3 +1200,36 @@ Worktree `job-r3` being removed, bin/obj purged, local logs deleted now that thi
 **The 13 R1/R4-attributed rows on Linux, against the 122 baseline — every attribution cleared exactly as predicted:** **7 flip to sweep-PASS at banked counts** — archive/zip 100 (was "not a valid zip file" ×45), debug/dwarf 40, html/template 243, io/ioutil 28, io/fs 18, internal/diff 13, archive/tar 97 (os/user.Current works) — **+1 validates at its Linux count**: path/filepath 54/54 matching, comparison VALIDATED (the banked 61 is Windows-shaped; same W4 arithmetic as mime/crypto/rand) — and **5 are improved to a residual of a DIFFERENT class**: time 156/157 (TestSleep flipped; R6 ZONEINFO caching remains), go/doc/comment 10,058/10,059 (all 53 TestTestdata subtests flipped; TestStd = R2), text/template 51/52 (both ParseGlob flipped; TestLinkerGC = R2), os/exec now RUNS — the R4 package-level death is gone, 16/72 verdicts, remainder = the exec wall R2, as the poll-seam entry predicted "R2 behind R4" — and go/internal/srcimporter 4/7 (the R1 tests flipped; TestImportStdLib fails on the GO side on this host; TestImportedTypes/TestCgo = R2 by code path). The mirror answers the truth: the probe that read `isDir=false, mode=p---------` now reads the kernel's record, and `StatLayoutTruth` prints the same bytes as `go run` on both OSes.
 
 **Running:** the other 26 poll-seam residuals, then the 122-row control (no regressions expected and none tolerated). Full board entry with the table at the end; one note for the regen owner is already on the branch (syscall/linux/package_info.cs lacks the windows flavor's 8 GoPositionMap records at 189ff02cc — pre-existing, not overlaid). Also re-measured on the way: a bare `go2cs.exe <dir>` on this laptop mints an EMPTY alias block with no warning because `~/go2cs` is a Feb-2025 deployed tree (a STALE root is "working"; only a missing one warns) — CLAUDE.md's standing -go2cspath rule, with its silent variant named.
+
+## 2026-08-22 04:35 UTC-5 · FROM coordinator/`worktree-agent-aef2216c6bd01a654` · TO coordinator
+
+**75% CROSSED. Branch `worktree-agent-aef2216c6bd01a654`, tip `fc293c938`, deliberately NOT pushed**
+(the brief says push nothing — merge from the worktree on this box). Four signed commits: the design
+note, the crash-report arc, the bank, and one self-review correction to the board.
+
+`runtime/debug` VALIDATES **4 + 5** as roster row **#162** — **162 / 215 = 75.3%**, 18,569 matching
+verdicts, 85 disclosed, recomputed by summing the table. `TestSetCrashOutput` passes all six of its
+assertions: an unhandled panic now prints Go's own crash report (`panic: <value>`, blank line,
+`goroutine N [running]:`, the Go-spelled traceback) to stderr and tees it to `SetCrashOutput`'s fd.
+`runtime-capability` joined the roster preamble with the banking commit, per Ruling B.
+
+Gates: pipeline VALIDATES exit 0 · GolibTests 226/226 (5 guards proven failing-first) · behavioral
+604/604 with 578 Output compared and **0 failed** · `go2cs.slnx --no-incremental` 0 errors ·
+converter `go test ./...` ok · sweep **8/8, 2,262 verdicts** (go/types 557, encoding/json 491,
+crypto/tls 400, encoding/xml 386, html/template 243, database/sql 137, sync 44, runtime/debug 4).
+CNR not owed — no converter file moved, and the suite's Target phase byte-compared all 604 goldens.
+Tree clean.
+
+Three things for you, all detailed on the board:
+
+1. The i7-5820K's **2,400 s behavioral batch-build budget is too small at 604 projects** — it
+   false-redded a healthy run into 603 per-project attributions. `--build-timeout 9000` built clean
+   in one shot. CLAUDE.md's budget row wants raising.
+2. **A transpile timeout can leave a TRUNCATED `.cs` that `UpToDate` then protects** — an empty file
+   is still newer than `go2cs.exe`, so the next run SKIPS it and the batch build reports
+   `CS5001: no static 'Main'`, which reads exactly like a converter regression. New shape of the
+   stale-output family; here it faked a red, but it could hide a real one.
+3. The sweep surfaced **stale banked test artifacts in four other packages** — `encoding/xml`,
+   `go/types`, `html/template` missing the `-tests` `initᴛᴛtests()` hook, and `crypto/tls` missing
+   the (empty) position-map section. Not from this lane (no converter file moved) and all four
+   passed at full count. Restored rather than levelled; they want their own commit.
