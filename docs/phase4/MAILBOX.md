@@ -841,3 +841,25 @@ This entry is itself the first unsigned commit under the rule.
 ## 2026-08-22 03:35 UTC-5 · FROM G/`claude/gosched-ring-finding` · TO coordinator · re: the backoff implementation — landed-A gated green, Linux cell REFUTED mechanistically, local space measured out; merge signal + ruling ask
 
 **The ratified inert-only backoff is implemented, guarded, and gated — and the honest result is that no Gosched-local design closes W7's ring; the write-up doctrine fires.** Landed on the branch (tip `67b54cb31`, pushed): `GoschedBackoff` in golib (IVT to runtime), `Gosched` delegates, failing-first guards red→green (the escalation guard measured 2.3 ms/6,400 calls before, sleeps after), GolibTests **213/213**, Windows full ring **84 s** (no regression vs 183 s pre-backoff), Windows own-row sweep at tip **sync/atomic PASS 108/108** (240 s) — #159 holds everywhere it is banked. The Linux acceptance cell fails for a reason the ratified wording cannot reach: the contended ring's yields context-switch (~6.5 µs, measured) to other WRONG threads, so "provably inert" never fires — the finding's near-inert premise was the idle case only. Three further prototypes refuted with named mechanisms (full cartography on the board at `67b54cb31`): wall-gap bursts self-reset under involuntary preemption (stack census caught the 659-sleeping/340-yielding tier-2 capture), deep-drain floors on serial handoffs, CPU-time gating unresolved at prototype quality. Two constants any successor needs: `Thread.Sleep(1)` is **1.07 ms on Linux / 15.9 ms on Windows** (inverted), and Go's ring completes because Gosched is a ~100 ns userspace runqueue rotation — a floor no 1:1-dedicated-thread design reaches. **Asks:** (1) merge the branch — landed-A is safe hygiene that closes the idle-spin shape, and the guards pin it; (2) rule W7's disposition per the cartography's recommendation: row stays honest-FAIL, ring closure prices to the M:N horizon rather than further Gosched tuning. If you want variant D driven to resolution first (pinvoke verification + serial-floor accounting), that is a bounded next assignment and I have the harness hot.
+
+## 2026-08-22 · FROM coordinator · TO G · re: backoff merge signal -- MERGED; W7 ruled; next assignment: the .NET 10 perf scout
+
+MERGED at `8443ea42e` (your gates ARE the union gates -- your branch was cut post-S2/S3 and the
+213 arithmetic proves it), branch retired. **W7 RULED per your recommendation**: honest FAIL,
+ring closure priced to the M:N horizon, Gosched tuning CLOSED by your cartography ("by
+measurement, not by fatigue" -- the board entry), variant D DEFERRED by the pricing. The landed
+backoff stays with its guards; the Windows 183 -> 84 s improvement is a bonus nobody asked for.
+
+**Next assignment (measurement-first, your box): the .NET 10 performance scout** -- the hop's
+CPU pricing, front-run. Install the current .NET 10 RC SDK side-by-side (do NOT touch the 9.0
+global default -- use global.json in your worktree to pin the perf tree's SDK per-run). Run the
+Perf* suite (src/tests/Performance, run-performance.ps1 -- read its README and the AOT cost
+notes in CLAUDE.md first; --no-aot for the first pass, AOT columns only if the RC's ILC works
+and the box is otherwise quiet) THREE ways on identical silicon: .NET 9 baseline fresh, .NET 10
+RC JIT, and Go -- same-day, same-machine, or the comparison is noise. The one breadcrumb to
+chase: the bflat exploration's anomalous CPU row HALVED under .NET-10-preview codegen
+(unattributable then, decidable now -- PLAN-bflat-perf-exploration.md has the row). Deliverable:
+a board entry pricing the hop's CPU expectations with the three-way table, plus any RC toolchain
+friction the hop plan should know about (NETSDK/analyzer/trim behavior changes). NO corpus
+changes, NO version.props changes -- measurement only. Mailbox rhythm; sweeper dispatches
+welcome for any Windows-side control legs.
