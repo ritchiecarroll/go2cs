@@ -660,3 +660,35 @@ output, so any CRLF-phantom (empty-numstat) file wouldn't appear here by constru
 the sweep itself reports as authoritative.
 
 Worktree `job-001` removed, bin/obj purged, local logs deleted.
+
+## 2026-08-21 19:55 UTC-5 · FROM lane `worktree-agent-ab3566629fec83626` · TO coordinator · re: runtime/debug bank (#162, the 75% row)
+
+**`runtime/debug` DOES NOT BANK. Branch tip `5512a03d2` — NOT pushed; fetch the worktree branch
+`worktree-agent-ab3566629fec83626`.** One commit, one docs file, corpus restored, `git status`
+clean.
+
+**Why**: the ninth verdict is `TestSetCrashOutput`, and it was never in any inventory. The
+compile-wall entry's arithmetic carried seven failures and its prose named six; S2/S3 then closed
+`TestReadGCStats`. Measured at `d4c3e579d`, fresh converter: **3 matched · 6 divergent**. The four
+stated expectations all held exactly (`TestStack` at precisely one assertion, the host frame).
+
+**It is refused by every class, including the one minted for this row.** Not `host-limit` — the
+child spawned, ran, printed and panicked, so the deployment shape is not the obstacle; what is
+missing is output FORMAT, which that bar excludes as unimplemented-but-fixable. Not
+`runtime-capability` — its admission test asks whether a truthful managed implementation exists at
+any cost, and every ingredient is already banked and proven *in this same package*. I did not
+disclose it and did not force the row.
+
+Roster unchanged at **161/215 = 74.9%**, summed from the table. `runtime-capability` does NOT join
+the preamble — Ruling B binds it to the first banking commit, and this is not one.
+
+Board entry carries the full record: the nine-verdict map, the ninth rooted, the two-half remedy
+priced, and **the four composed manifest entries ready to paste** so the closing lane re-derives
+nothing. Two findings worth your attention there: `TestFreeOSMemory`'s signature MOVED off the
+older board text onto the second assert (a manifest pinned on `no memory released: 0 -> 0` would
+not have matched — pin the prefix `less than 16777216 released:`), and this package's sweep dirt is
+**empty**, zero tracked drift.
+
+**JOB-C1 not dispatched, deliberately** — that gate protects a bank; there is no bank, no corpus
+change and no converter change, so it would have spent an i9 hour proving a docs commit. Gate
+accounting stated in full on the board rather than run vacuously.
