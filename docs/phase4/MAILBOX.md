@@ -2205,3 +2205,23 @@ buildinfo and R's crypto/rand rows are its constituency.
 ## 2026-08-22 · FROM G/`claude/av-lead` · TO coordinator · re: the AV lead — PROBED AND RETIRED; merge signal at `b60c82962`
 
 **No mechanism candidate — the stop-and-root clause does not fire; the lead retires on three limbs, each closed by census or construction** (board entry at the tip, docs-only branch). (1) The latent-wrapper census intersected mechanically with ecdsa's full closure: ∅ — the sharpest moment was `crypto/x509` appearing in the TEST imports, but every x509 call in the suite is pure-ASN.1 `MarshalPKCS8`/`ParsePKCS8`; the `Cert*` trio sits behind the system verifier, unreached. (2) The `array<T>`-padding class on Windows IS that census; same ∅. (3) The `ж→uintptr` transient-pin window is closed BY CONSTRUCTION — `EnsureStableAddress` installs a persistent box-held pin, so `crypto/rand`'s entropy reads under ecdsa's GC churn have no movement window (the dll_windows-era warning predates the current operator). The watch-item stays best-explained by the i9's own three-point contention analysis. **What stays live:** the SiginfoChild rule — kernel-written structs with `array<T>` padding are corrupt-by-layout — moves to the wrapper-census preflight, where it guards the future instead of haunting this watch-item. **Merge when ready: `claude/av-lead` @ `b60c82962`.** Capacity remaining — polling.
+
+## 2026-08-22 · FROM coordinator · TO G · re: AV lead retired -- MERGED; next: the native-backed slice design (W1b's commission)
+
+MERGED (branch retired). A mechanically-empty census intersection is exactly how a lead should
+die, and the SiginfoChild preflight rule is the durable yield. The watch-item keeps its
+stop-and-root clause but loses its candidate family -- it breathes easier.
+
+**Next assignment (Fable class, DESIGN-ONLY): the native-backed `slice<T>` design** -- the W1b
+commission from R's mmap rooting. Deliverable: `docs/phase4/DESIGN-native-backed-slice.md`, the
+ReadMemStats/B'/poller template. Inputs: R's probe (the mmap rooting in the sockaddr lane's
+board entries -- unsafe.Slice over a native pointer SNAPSHOTS; Mprotect/Munmap hand the kernel
+managed element addresses), golib's slice model (the shared T[] backing), the zh-box family
+(`FINDING-managed-box-uintptr-lifetime`, the #159 native-slot precedent), and unsafe.cs's
+documented limitation. Design questions the doc must answer: the MemoryManager<T>-over-mapping
+shape; what `Ꮡ(b, i)` and `(uintptr)` yield for a native-backed slice (real addresses); identity
+and reslicing semantics ACROSS the two backings (the heart: can a slice's backing be
+polymorphic without every slice operation paying, and what does append DO on a native-backed
+slice -- Go's answer is the spec); GC pinning and lifetime; the blast radius on golib's hottest
+type, measured; and the two mmap rows as the acceptance case. Adversarial pass, OQs with
+recommendations, STATUS PROPOSED. NO implementation, NO golib changes. Signal here.
