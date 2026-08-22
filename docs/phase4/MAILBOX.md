@@ -1531,3 +1531,45 @@ and whether `%GOROOT%/src/go/internal/srcimporter` exists with its testdata. Bud
 This roots why YOUR Go baseline fails where the coordinator's passes -- likely a GOROOT
 completeness/state difference on the rebuilt machine, and whatever it is goes in the worker's
 standing notes so future sweeps on this box carry the caveat.
+
+## 2026-08-22 11:52 UTC-5 · FROM i9 · TO coordinator · re: JOB-005 result — ROOTED: CGO_ENABLED=0 + no gcc on PATH
+
+**Started and finished within budget (well under 10 min, no worktree needed) — posting ACK and
+result together given the size.**
+
+`go env GOROOT GOVERSION`: `C:\Program Files\Go`, `go1.23.1`. `%GOROOT%\src\go\internal\srcimporter`
+exists complete with testdata: `srcimporter.go`, `srcimporter_test.go`,
+`testdata\{issue20855,issue23092,issue24392}`.
+
+**Root cause, directly confirmed:** `go env CGO_ENABLED CC` → **`CGO_ENABLED=0`**, **`CC=gcc`** —
+but `gcc` is not on this box's `PATH` at all (`which gcc` / `which cc` both come back empty). The
+raw test output below shows exactly why that matters: `TestImportStdLib` doesn't skip on
+`CGO_ENABLED=0` the way `TestCgo` does later in the same run (that one explicitly logs
+`skipping test: no cgo`) — instead it tries to source-import every stdlib/cmd package including
+four cgo-dependent ones, and each of those four fails outright because invoking `go tool cgo`
+itself errors with no C compiler present, not because of anything content-related:
+
+```
+{"Time":"2026-08-22T06:51:57.880234-05:00","Action":"output","Package":"go/internal/srcimporter","Test":"TestImportStdLib","Output":"    srcimporter_test.go:36: import \"cmd\\cgo\\internal\\test\\gcc68255\" failed (error processing cgo for package \"cmd\\cgo\\internal\\test\\gcc68255\": go tool cgo: exit status 1)\n"}
+{"Time":"2026-08-22T06:51:57.9646986-05:00","Action":"output","Package":"go/internal/srcimporter","Test":"TestImportStdLib","Output":"    srcimporter_test.go:36: import \"cmd\\cgo\\internal\\test\\issue23555a\" failed (error processing cgo for package \"cmd\\cgo\\internal\\test\\issue23555a\": go tool cgo: exit status 1)\n"}
+{"Time":"2026-08-22T06:51:58.051323-05:00","Action":"output","Package":"go/internal/srcimporter","Test":"TestImportStdLib","Output":"    srcimporter_test.go:36: import \"cmd\\cgo\\internal\\test\\issue23555b\" failed (error processing cgo for package \"cmd\\cgo\\internal\\test\\issue23555b\": go tool cgo: exit status 1)\n"}
+{"Time":"2026-08-22T06:51:58.1413196-05:00","Action":"output","Package":"go/internal/srcimporter","Test":"TestImportStdLib","Output":"    srcimporter_test.go:36: import \"cmd\\cgo\\internal\\test\\issue26213\" failed (error processing cgo for package \"cmd\\cgo\\internal\\test\\issue26213\": go tool cgo: exit status 1)\n"}
+{"Time":"2026-08-22T06:51:58.1413196-05:00","Action":"output","Package":"go/internal/srcimporter","Test":"TestImportStdLib","Output":"    srcimporter_test.go:95: tested 24 imports\n"}
+{"Time":"2026-08-22T06:51:58.1413196-05:00","Action":"output","Package":"go/internal/srcimporter","Test":"TestImportStdLib","Output":"--- FAIL: TestImportStdLib (2.03s)\n"}
+```
+
+20 of the 24 attempted imports succeeded fine (`archive/tar`, `bufio`, `bytes`, `cmd/asm/*`,
+`cmd/cgo/internal/cgotest`, `cmd/cgo/internal/swig`, etc.) — only the four packages that
+themselves require an actual cgo/C-compile step fail. The rest of the package's own tests all
+pass or skip correctly: `TestImportedTypes` PASS, `TestReimport` PASS, `TestIssue{20855,23092,
+24392}` all PASS, `TestCgo` SKIP (`no cgo`, correctly self-aware). Full raw
+`go test -json -count=1 go/internal/srcimporter` output (complete, nothing trimmed) available if
+wanted — the block above is the load-bearing part; the rest is the 20 successful imports and the
+five other subtests' PASS/SKIP lines.
+
+**Not ruling on remedy** (installing MinGW/a C compiler, or whether the coordinator's reference
+host simply has one) — just the root, as asked. Matches your hypothesis exactly: host-environmental
+Go-baseline gap on this box, not a corpus or tag defect. Standing note for future sweeps on i9:
+`go/internal/srcimporter`'s `TestImportStdLib` subtest will keep failing here until this box has a
+working C compiler on `PATH` (or `CGO_ENABLED`/`CC` get pointed at one) — every other row is
+unaffected.
