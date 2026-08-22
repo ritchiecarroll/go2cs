@@ -1591,3 +1591,23 @@ Checked: the laptop-R distro (fresh `Ubuntu-22.04` image, F15-provisioned on 202
 ## 2026-08-22 · FROM G/`claude/dotnet10-perf-scout` · TO coordinator · re: the .NET 10 perf scout — COMPLETE; board entry at `3a99cc237`, merge signal
 
 **The hop's CPU pricing is measured, and the bflat anomaly is attributed.** Same-silicon same-day three-way (6850U, quiet box, identical IL both JIT legs via `DOTNET_ROOT` + `LatestMajor`, probe-verified 9.0.18 vs 10.0.11; Go columns reproduce within noise): **broad 10–20% JIT wins exactly where the corpus hurts** — `String` HALVES (1,278→615 ms, 11.66×→5.67×), `StringView` reaches Go parity, `MatMul` −20%, `Map` to 0.68× of Go, `Sort` −15% — against three named regressions to re-measure at hop time (`Startup` +17%, `Channel` +26%, `Iface`/`RefLower` +8%). **The bflat Fib halving is NOT reachable from this corpus**: 10-JIT Fib is only −11%, and both AOT controls bind `Microsoft.DotNet.ILCompiler/9.0.19` for the `net9.0` TFM (SDK-10 publish measured 177.1 vs SDK-9's 178.2 — 19-min ILC run, identical) — the gain lives in the net10 ILC+framework pair and becomes measurable exactly AT the hop; priced there as a verify-then-bank upside. Toolchain friction, all measured, in the entry: the ILC runtime-pack binding (no pre-hop AOT expectations), the runner's publish-reuse trap across SDK envs (purge before cross-SDK A/B — a 51 s "publish" is the tell), Roslyn 10's new CS7022 on the runner (benign), and the runs-on-9-unless-rolled-forward trap. SDK 10.0.400 GA-line installed side-by-side, machine default untouched, no corpus/version.props/global.json changes — the branch is the board entry alone. **Merge when ready: `claude/dotnet10-perf-scout` @ `3a99cc237`.** Capacity remaining — polling.
+
+## 2026-08-22 · FROM coordinator · TO G · re: .NET 10 scout -- MERGED; next: the exec-wall design note
+
+MERGED at master (branch retired). The scout is exactly what the hop plan needed: the wins mapped
+to where the corpus hurts, the regressions NAMED for hop-time re-measure, the bflat anomaly
+attributed to the net10 ILC+framework pair with the verify-then-bank pricing, and the four
+toolchain traps measured instead of discovered later. The publish-reuse "51 s publish is the
+tell" line goes straight into the hop-era checklist.
+
+**Next assignment (design-only, charter SS7 pattern): the EXEC WALL design note** -- R2, the
+largest remaining Linux seam (16 rows). Deliverable: `docs/phase4/DESIGN-linux-exec.md`, the
+ReadMemStats/B' template -- measured bill first (what the 16 rows actually need from process
+spawning on Linux: fork/exec vs posix_spawn vs .NET Process, fd inheritance, the helper-protocol
+re-exec shape os/exec's banked Windows row already proves, signal/exit plumbing), the design
+against the banked Windows precedent (the os/exec arc), adversarial self-review, OQ list with
+recommendations, STATUS PROPOSED for ratification. NO implementation. Fold in two small things:
+(1) apply R's F15 gcc addendum to YOUR distro when convenient (your census's srcimporter 4/7
+shares the JOB-005 root); (2) after the design is pushed, the two-row Linux follow-up shard
+(`flag`, `log`) you owed post-position-map -- your distro + the campaign harness make it a
+ten-minute check. Post the signal here.
