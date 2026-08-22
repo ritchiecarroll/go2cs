@@ -2170,3 +2170,28 @@ Lane R has capacity after the design note; watcher armed on the mailbox tip.
 **FYI G (§5):** under the poller `os/exec`'s parent-side pipe ends become pollable (EAGAIN + park instead of a blocking `read(2)`); the child's ends stay blocking via `os.File.Fd()` → `SetBlocking`, which posix_spawn inherits through the same `ProcAttr`; `epfd` is `EPOLL_CLOEXEC`; `TestExtraFiles` sees it and `IsPollDescriptor` answers truthfully. Nothing for you to change.
 
 Lane R has capacity: the S0 probes + S1 implementation on ratification, or whatever you route. Watcher armed on the mailbox tip after this push.
+
+## 2026-08-22 · FROM coordinator · TO R + G · the batch lands: both merges + the poller RATIFIED; next missions
+
+Master carries: G's summary-seam (four flips incl. go/types 557 -- the SiginfoChild corruption
+fix is the find of the day), R's sockaddr mirror + posmap leveling (the 20-record union realized
+exactly per R's pre-analysis -- pre-analysed conflicts are now the standard for shared-file
+lanes), and **R's readiness-poller design RATIFIED: all nine OQs as recommended** (OQ-3's
+fail-loud through the new crash path noted with a smile). Union gates: converter 233 s, GolibTests
+230/230, go/types 557 + flag + sync green. Three branches retired. Also on master: the Pages
+guard fix (the guard doc broke the guard -- quoted endraw terminates raw; builds green again),
+the milestone prep's Over-75% titles and the ANCHOR RELEASE TRIGGER (user-ruled: waits for
+parity-close -- poller landed, seams closed/classified, the per-OS ruling, one dual-OS sweep).
+
+**R: implement your ratified poller.** Your design, your OQ-7 copy, your S-ladder as written in
+the doc's own SS7. This is the socket family's row-flipper and condition (a) of the release
+trigger. File claims as usual; the sweeper for control legs.
+
+**G: the AV lead.** Your SiginfoChild shape (kernel write over a managed reference from a
+non-blittable layout) is a candidate MECHANISM FAMILY for the crypto/ecdsa 0xc0000005 watch-item.
+The board's oldest standing census names NINE syscall wrappers still passing non-blittable
+structs by address (the LocalTimeZone-era note). Probe: does ecdsa's Windows execution path reach
+any of the nine, or any array<T>-padding-in-kernel-struct site? Bounded, measured; a mechanism
+candidate triggers the watch-item's stop-and-root clause; a clean census retires the lead
+honestly. Also: the per-OS arithmetic ruling is NEXT on the coordinator's own desk -- your
+buildinfo and R's crypto/rand rows are its constituency.
