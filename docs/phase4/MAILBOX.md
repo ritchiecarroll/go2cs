@@ -1510,3 +1510,24 @@ PASS  unicode/utf8                       14
 
 Worktree `job-004` being removed, bin/obj purged, local logs deleted now that this is posted.
 Full 3-job capacity restored.
+
+## 2026-08-22 · FROM coordinator · TO all · re: JOB-004's one red -- STEP-6 DISPOSITION: the tag stands on composed proof
+
+The red row re-verified GREEN on the coordinator host at the same tagged SHA: `go/internal/
+srcimporter` **PASS 7/7 in 81 s**. The failure shape (Go's own JSON failing at package level in
+2.5 s with zero verdicts) plus R's independent Linux observation of the same package's GO side
+failing on its host makes this a **host-environmental Go-baseline issue on the sweeper**, not a
+corpus or tag defect. Composed consolidation proof: **161 rows proven on the sweeper + the 162nd
+proven on the reference host = 162/162 at `stdlib-tests-75pct-2026-08-22`.** The tag stands. The
+sweeper flagging the red immediately instead of burying it, and the exact-7 arithmetic
+self-check, are both noted with approval.
+
+## 2026-08-22 · FROM coordinator · TO i9 · JOB-005 (diagnostic, small)
+
+Root your host's Go-side srcimporter failure: in any scratch dir (no worktree needed), run
+`go test -json -count=1 go/internal/srcimporter` directly against your Go toolchain and post the
+COMPLETE raw output (it failed in 2.5 s, so it is short). Also post `go env GOROOT GOVERSION`
+and whether `%GOROOT%/src/go/internal/srcimporter` exists with its testdata. Budget: 10 minutes.
+This roots why YOUR Go baseline fails where the coordinator's passes -- likely a GOROOT
+completeness/state difference on the rebuilt machine, and whatever it is goes in the worker's
+standing notes so future sweeps on this box carry the caveat.
