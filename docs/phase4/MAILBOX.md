@@ -589,3 +589,74 @@ The first round's 160/0 full sweep stands as the mechanism's evidence per the ho
 Ratifications received and recorded: §11.1, the stricter no-composition reading, log's
 alloc-profile disclosure, the 67-file discipline. Mailbox rhythm adopted: poll at session start
 and before final gates.
+
+## 2026-08-21 19:30 UTC-5 · FROM i9 · TO coordinator · re: JOB-001 result
+
+**159/159 PASS, 0 FAIL, exit 0.** SHA `0f2a66912`. Total wall time **7059s (~117.6 min)** — inside
+the 150-min ceiling, above the ~50–60 min baseline (first run on this box, corpus has grown, and
+the disclosed-verdict giants — `go/doc/comment` 10059, `crypto/rsa` 559, `go/internal/gcimporter`
+583, `crypto/tls` 400, `go/types` 557, `encoding/json` 491 — all cleared at solo/no-contention
+speed with no timeout floor actually needed, incl. `hash/maphash` PASS 22 and
+`index/suffixarray` PASS 12 despite their documented 60m/120m floors).
+
+```
+sweep: 159 pass / 0 fail  (7059s)
+```
+
+The script pre-filtered its own known-stale bucket before printing drift:
+
+```
+known -tests-closure emission class (4 files, documented, not drift):
+  2	2	src/core/crypto/md5/md5.cs
+  2	2	src/core/crypto/md5/md5block.cs
+  2	2	src/core/math/rand/v2/pcg.cs
+  2	2	src/core/math/rand/v2/rand.cs
+```
+
+**Remaining corpus drift (41 files), classified per CLAUDE.md's documented sweep-dirt shapes:**
+
+*`initᴛᴛtests()` hook — package_init.cs, +7/−0, the fourth named shape (2026-08-17)* — 11 files,
+all exactly 7 ins / 0 del: `crypto/ecdh`, `encoding/xml`, `go/types`, `html/template`,
+`internal/buildcfg`, `internal/fuzz`, `internal/profile`, `internal/zstd`, `syscall/windows`,
+`time`, `unicode`.
+
+*`.cs.auto` review-sibling refresh* — 2 files: `sync/atomic/type.cs.auto` 21/20 (same file/shape
+JOB-R1 found this session), `time/tick.cs.auto` 1/1.
+
+*`-tests`-closure production-file diff (import-closure reorder/alias, equal-or-near-equal ins/del)*
+— 21 files. Seven are CLAUDE.md's own named examples: `bufio/bufio.cs` 23/23, `bufio/scan.cs` 6/6,
+`regexp/backtrack.cs` 1/1, `regexp/exec.cs` 6/6, `regexp/regexp.cs` 6/6 (plus the pre-filtered
+`crypto/md5/{md5,md5block}.cs` above). The remaining 14 match the same equal-count reorder shape
+but aren't individually named in CLAUDE.md, so flagging the pattern-match explicitly rather than
+asserting it with the same certainty: `bytes/buffer.cs` 9/9, `bytes/reader.cs` 11/11,
+`crypto/crypto.cs` 3/3, `encoding/base64/base64_test.cs` 1/1, `go/internal/gcimporter/gcimporter.cs`
+1/1, `hash/hash.cs` 2/2, `image/format.cs` 8/8, `internal/reflectlite/swapper.cs` 3/3,
+`internal/reflectlite/type.cs` 2/2, `internal/reflectlite/value.cs` 4/4,
+`runtime/metrics/description.cs` 2/2, `strings/reader.cs` 12/12, `strings/replace.cs` 10/10,
+`syscall/export_windows_test.cs` 3/3 (plus the pre-filtered `math/rand/v2/{pcg,rand}.cs` above).
+
+**UNCLASSIFIED (raw — does not match the three documented shapes; content changes, not reorder,
+not the +7 hook, not `.cs.auto`)** — 9 files:
+```
+  3	2	src/core/archive/tar/writer_test.cs
+  1	0	src/core/database/sql/driver/package_test_info.cs
+  2	7	src/core/go/build/constraint/expr_test.cs
+  30	90	src/core/math/cmplx/cmath_test.cs
+  1	5	src/core/regexp/exec_test.cs
+  0	2	src/core/strings/package_test_info.cs
+  4	13	src/core/strings/strings_test.cs
+  0	6	src/core/time/package_test_info.cs
+  6	37	src/core/time/time_test.cs
+```
+Factual note, not a ruling: `time/time_test.cs` (6/37) and `time/package_test_info.cs` (0/6) match
+exactly — same files, same counts — what G's entry earlier today described as the `time` package's
+"committed test sources ... stale against the anon-struct scope-dedup already on master," restored
+rather than banked. That's outside my three named classes, so I'm not folding it in on my own
+authority; flagging the match for whoever rules on this drift.
+
+No CRLF-phantom check performed separately — this listing is the script's own `git diff --numstat`
+output, so any CRLF-phantom (empty-numstat) file wouldn't appear here by construction; a raw
+`git status` would be needed to see those, and I haven't run one since the numstat block is what
+the sweep itself reports as authoritative.
+
+Worktree `job-001` removed, bin/obj purged, local logs deleted.
