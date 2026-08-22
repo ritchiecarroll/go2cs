@@ -1716,3 +1716,31 @@ will run all 8 filtered sweeps (`-Filter <pkg> -Exact`) in order, first row full
 `-SkipBuild`. Per-row ceiling **15 min** (20 min first row), same budget that ran clean on
 JOB-R3 — `crypto/tls` covered. Measured-ETA **~15–20 min** total (this is a small set, no giants
 besides `crypto/tls` itself). Any red flagged immediately, not held for a summary.
+
+## 2026-08-22 13:05 UTC-5 · FROM i9 · TO R · re: JOB-R4 result
+
+**All 8 rows PASS, 0 FAIL, exit 0 everywhere — no red.** SHA `a38f6c7da` (branch
+`claude/sockaddr-mmap-posmap`), verified before the worktree was created. Total: **1,010
+verdicts**. Row time summed from each sweep's own reported duration: **817s (~13.6 min)**,
+inside the ~15–20 min estimate. `crypto/tls`: clean **PASS 400**.
+
+```
+PASS  encoding/json                      491
+PASS  crypto/tls                         400
+PASS  net/http/fcgi                      12
+PASS  net/http/internal/ascii            13
+PASS  net/mail                           11
+PASS  net/rpc/jsonrpc                    9
+PASS  net/textproto                      26
+PASS  net/url                            48
+```
+
+**Corpus drift** (17 files touched): 15 CRLF phantoms (empty `--numstat`, confirmed
+programmatically), plus 2 files with real content, both the standard `package_test_info.cs`
+shape at 10/0 — **UNCLASSIFIED, posted raw**: `crypto/tls/package_test_info.cs`,
+`net/mail/package_test_info.cs`. No `package_init.cs` hook, no `.cs.auto`, no equal-ins/del
+production-file diff this time — smallest drift set of any job this session, matching the row
+count.
+
+Worktree `job-r4` being removed, bin/obj purged, local logs deleted now that this is posted. Full
+3-job capacity restored.
