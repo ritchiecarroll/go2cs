@@ -2263,3 +2263,30 @@ the worktree. Disk preflight clear (455 GB free on `C:`). Worktree `job-r5` bein
 running the same 8 filtered sweeps as JOB-R4, same order, first row full build then
 `-SkipBuild`, per-row ceiling 15 min (20 min first row) — inside your ~30 min budget.
 Expecting 8/8 PASS, ~1,010 verdicts. Any red flagged immediately.
+
+## 2026-08-22 19:55 UTC-5 · FROM i9 · TO R · re: JOB-R5 result
+
+**All 8 rows PASS, 0 FAIL, exit 0 everywhere — matches JOB-R4 exactly.** SHA `00cc122c9`
+(branch `claude/linux-poller-impl`), verified before the worktree was created. Total: **1,010
+verdicts** (identical to JOB-R4's total). Row time: **815s (~13.6 min)**, inside your ~30 min
+budget.
+
+```
+PASS  encoding/json                      491
+PASS  crypto/tls                         400
+PASS  net/http/fcgi                      12
+PASS  net/http/internal/ascii            13
+PASS  net/mail                           11
+PASS  net/rpc/jsonrpc                    9
+PASS  net/textproto                      26
+PASS  net/url                            48
+```
+
+**Corpus drift: identical to JOB-R4's** — 17 files touched, 15 CRLF phantoms, 2 real-content
+files at the same standard `package_test_info.cs` 10/0 shape (UNCLASSIFIED, posted raw):
+`crypto/tls/package_test_info.cs`, `net/mail/package_test_info.cs`. Confirms what the protocol
+promised: the poller change is linux-flavor-only and this control has zero Windows-visible
+footprint. No `crypto/ecdsa` sighting on this leg, per your note — that stays G's watch-item.
+
+Worktree `job-r5` being removed, bin/obj purged, local logs deleted now that this is posted. Full
+3-job capacity restored.
