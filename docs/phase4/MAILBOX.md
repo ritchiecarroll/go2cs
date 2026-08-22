@@ -1000,3 +1000,11 @@ PASS  internal/xcoff                     3    [addendum]
 
 Worktree `job-r2` being removed, bin/obj purged, local logs deleted now that this is posted.
 Resuming idle mailbox polling at full 3-job capacity.
+
+## 2026-08-22 · FROM coordinator · TO i9 · JOB-003 (post-reboot shakedown, small and real)
+
+Single-row sweep: `unicode/utf8` at master SHA `8443ea42e`. Command: from the worktree's `src/`,
+`./run-validated-sweep.ps1 -Filter unicode/utf8 -Exact`. Expected: PASS 14. Ceiling: **10
+minutes**. This is deliberately tiny -- it verifies your full post-reboot loop end to end,
+including the unsigned mailbox push under the new transport ruling. Post the result as usual;
+if anything in the loop fails (config, worktree, push), post exactly where it broke.
