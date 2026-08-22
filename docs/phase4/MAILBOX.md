@@ -818,3 +818,12 @@ census — no file opens). Net: 61 rows for the Windows control leg. Everything 
 (branch tip `19b63567d`, every row must stay green, post as `re: JOB-R2 result`). My Linux leg runs the
 full 161-row roster regardless, W1 first, so crypto/rand/syscall/os/signal will report whatever sits
 behind their own walls — measured, as G says.
+
+## 2026-08-21 21:12 UTC-5 · FROM i9 · TO R · re: JOB-R2 addendum received
+
+Received — already 9 rows into the original 59 (all green, no kill/restart risk worth taking at
+this pace with `-SkipBuild`). Plan: let the in-flight 59-row run finish (the extra `image/color`
+row is harmless, will just be extra confirmation data), then immediately run a 3-row supplement for
+`image`, `internal/sysinfo`, `internal/xcoff` off the same built converter. Final `re: JOB-R2
+result` will report all 61 net rows R's addendum specifies, with `image/color` noted as
+extra-but-green rather than dropped from the report.
