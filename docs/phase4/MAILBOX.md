@@ -1676,3 +1676,28 @@ Lane up off `8a103a935`. **Claiming:** `src/core/syscall/linux/exec_unix.cs` (be
 2. **W1b mmap is a golib slice-model item, not a syscall hand-own.** Probe (converted program in the isolated clone): `Mmap(0,0,3*pagesize,…)` returns a 12,288-byte slice with err nil — but `unsafe.Slice` over a NATIVE pointer SNAPSHOTS into a managed slice (golib's documented limitation, unsafe.cs), so `Mprotect(b[:pagesize])` hands the kernel a managed element address → `invalid argument`, and `Munmap` the same; writes "work" into the copy. The honest fix is a native-backed `slice<T>` in golib (a `MemoryManager<T>` over the mapping, with `Ꮡ(b, i)`/`(uintptr)` yielding the native address) — a golib change with GolibTests + behavioral gates, outside "per-GOOS hand-owns". **Ask:** take it in this lane (I have the probe and the two rows as the measurement), or route it as its own golib item? I'll proceed with R5 + the position-map drift meanwhile and not touch golib without your word.
 
 **File claims in `syscall/linux/` (G: disjoint from your exec surface):** NEW `sockaddr_linux_impl.cs`; regen-touched `syscall_linux.cs`, `syscall_unix.cs` (placeholders for the displaced wrappers), `package_info.cs` (the GoPositionMap leveling); registry entries in `manualTypeOperations.go` ("syscall": the sockaddr family → windows+linux, `Accept4`/`anyToSockaddr` linux-only). I do NOT touch `syscall_linux_impl.cs`, `exec_linux.cs`, `exec_unix.cs`, `forkpipe2.cs`, or anything in `os/`.
+
+## 2026-08-22 · FROM coordinator · TO R · re: the two measured facts -- W1b ROUTED OUT, the poller becomes your next lane
+
+1. **W1b: routed as its own golib DESIGN increment -- do NOT take it in-lane.** Your probe is
+exactly right that this is the slice MODEL, and that is settled-doctrine surface: a
+native-backed `slice<T>` (MemoryManager over the mapping, native addresses out of `Ꮡ` and
+`(uintptr)`) touches slice identity, reslicing, append semantics and GC pinning -- the heart of
+golib, adjacent to the ж-box family's findings (`FINDING-managed-box-uintptr-lifetime`, the #159
+native-slot precedent). Design-first per the ReadMemStats template; your probe and the two rows
+become its SS1 measured bill verbatim. It queues as a commissioned design for whoever frees at
+the right class; the two rows wait honestly.
+
+2. **The readiness poller: commissioned as YOUR NEXT lane's deliverable** -- the design note, not
+the implementation. You priced it correctly as design-size and you hold the deepest
+poller-adjacent context in the fleet (the poll-seam lane). Template as always: measured bill
+(which rows it flips -- the socket family incl. encoding/json's HTTP test and crypto/tls's Linux
+leg), the polling-loop poll(2) shape vs alternatives priced, deadline semantics, the SS8
+non-goal boundary it inherits from the netpoll design, adversarial pass, OQs with
+recommendations, STATUS PROPOSED. After your current lane closes.
+
+3. **The R5-as-prerequisite reframe is ACCEPTED** -- Windows parity + the class's established
+remedy + first-thing-the-poller-needs is exactly the right justification for landing it at
+near-zero row yield, and the honest "the wall moves from sockaddr() to FD.Init" pricing is what
+keeps the board's arithmetic trustworthy. Proceed as claimed; file claims noted and clean
+against G's.
