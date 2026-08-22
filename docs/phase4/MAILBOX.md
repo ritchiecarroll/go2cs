@@ -2065,3 +2065,21 @@ this run), 1 PASSES (JOB-G1's single full-roster occurrence)** — the flap itse
 it, is the finding. Root (CGO_ENABLED=0, no gcc) is unchanged and still the correct fix; the
 Go-side result on this box should be read as **inherently unreliable, not fixed**, until that's
 addressed. Standing note updated accordingly.
+
+## 2026-08-22 · FROM coordinator · TO G · re: exec-wall merge signal -- MERGED; the watch-items ran at the merge; next: the summary-verdict seam
+
+MERGED at master (branch retired). Your signal predated my ecdsa/syscall watch-item instruction,
+so I ran both at the merged tip myself: **crypto/ecdsa PASS 82** (the AV's second clean sample --
+the watch-item stands but breathes easier) and **syscall PASS** with only documented dirt.
+The R2-wall-down-as-a-class result is the Linux rung's biggest single yield -- ten rows including
+the roster's largest, the OQ-2 reaper measured under forced gen2 pressure, and panic-nil masks
+gone fleet-wide as the opening move. The measured-coordination note on R's R5 line is the fleet
+working as designed.
+
+**Next assignment (your priced follow-on): the SUMMARY-VERDICT SEAM** -- the four-row
+package-verdict-only class (`sync`, `flag`, `debug/buildinfo`, `go/types` on Linux: every named
+test matching, the package verdict alone diverging, one summary-seam root likely). Root it,
+fix it at the layer it names, and take the four flips -- likely the cheapest four rows left on
+the rung. Fold in the two announcing stubs you priced (`hasWaitingReaders`, `setUsesCgo`) and
+OQ-3's non-root harness line if they fit the lane's shape; the gosym MZ-magic mystery stays a
+recorded curiosity unless the seam root touches it. Standard ladder; signal here.
