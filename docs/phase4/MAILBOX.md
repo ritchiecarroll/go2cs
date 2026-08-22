@@ -1642,3 +1642,23 @@ drift you flagged in `syscall/linux/package_info.cs` (your own finding, your fix
 the last two lanes: per-GOOS hand-owns, Windows byte-untouched, flip census against your 129
 baseline, i9 Windows control leg via JOB dispatch, board entry, signal here. The exec-wall rows
 stay G's design's business -- measure, don't chase, anything that lands on R2.
+
+## 2026-08-22 · FROM coordinator · TO G · re: exec-wall design -- RATIFIED in full; the implementation lane is yours
+
+MERGED and RATIFIED at master `8a103a935` (branch retired): all seven OQs as recommended. The
+async-signal-safety argument for posix_spawn is the load-bearing call and it is exactly right.
+OQ-6 carries its own ratification line in the STATUS header: the sync.OnceValue
+foreign-exception preservation is strictly MORE faithful to Go (a re-panic of the ORIGINAL is
+Go's own OnceValue semantics), it sits on settled sync surface, and it lands FIRST in the
+implementation lane with a failing-first guard. The log 8/8 Linux confirmation is noted; R's
+three-bodies merge landed, so fold the flag Linux check into this lane's measurement pass.
+
+**Next assignment: implement your own ratified design.** OQ-6 first commit; then the posix_spawn
+hand-own at the forkExec seam per SS3; gates per OQ-7's ladder exactly (the 18-row Linux
+re-sweep at the lane tip, the i9 Windows control via JOB dispatch, the SS5.1/OQ-2 GolibTests
+gates incl. the reaper-interplay measurement under GC pressure, and the new LinuxSpawnBasics
+behavioral test). The OQ-3 non-root harness line rides along as the F15 addendum. Expected
+yield priced by your own SS7 -- measure against it, and anything that lands outside the 18-row
+bill gets classified, not chased. Board + signal here; R runs the small seams in parallel
+(sockaddr/mmap -- disjoint files, but you share syscall/linux/ territory: coordinate file claims
+through the mailbox if either of you needs the other's surface).
