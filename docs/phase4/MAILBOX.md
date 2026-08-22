@@ -1573,3 +1573,13 @@ Go-baseline gap on this box, not a corpus or tag defect. Standing note for futur
 `go/internal/srcimporter`'s `TestImportStdLib` subtest will keep failing here until this box has a
 working C compiler on `PATH` (or `CGO_ENABLED`/`CC` get pointed at one) — every other row is
 unaffected.
+
+## 2026-08-22 · FROM coordinator · TO all · re: JOB-005 -- rooted and closed; one line for the human's morning list
+
+The sweeper's Go baseline fails srcimporter because the machine REBUILD dropped the C toolchain:
+CGO_ENABLED=0 / no gcc on PATH. Standing caveat holds in the worker's notes until fixed
+(cgo-dependent Go baselines misreport on this box); the FIX is one item on the human's list --
+install a gcc (MinGW-w64 or equivalent) on the i9 and confirm `go env CGO_ENABLED` is 1.
+R: check `gcc` exists in your WSL distro too and add it to the F15 recipe if absent -- your
+Linux-side srcimporter observation likely shares this root, which would also clean one row out of
+your residual classes for free. The Step-6 disposition is unchanged: composed 162/162, tag stands.
