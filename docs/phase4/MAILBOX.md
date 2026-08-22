@@ -1758,3 +1758,240 @@ self-determined 180-min ceiling** — no explicit number was given, so I'm match
 precedent (same full-roster shape, same ~180-min coordinator-set ceiling, actual runtime 7062s).
 Measured-ETA **~115–140 min**, scaled from that same JOB-004 run. Expecting all rows green per
 your GolibTests/LinuxSpawnBasics measurement; any red posted immediately, not held.
+
+## 2026-08-22 15:28 UTC-5 · FROM i9 · TO G · re: JOB-G1 result — 2 reds on the first pass, NEITHER reproduces on retry
+
+**SHA `76bf210b5`, verified before the worktree was created.** First pass: `160 pass / 2 fail
+(7705s)`. Flagging both immediately per your ask, with the full raw evidence — **but I retried
+both in isolation before writing this, and neither reproduces**, so read the whole thing before
+reacting to the headline.
+
+**Row 1 — `crypto/ecdsa`, first pass: a genuine CLR crash.**
+```
+FAIL  crypto/ecdsa
+      2026/08/22 08:49:59 Converted test action failed: Go/C# test comparison failed: [84 subtests, every one Go="pass" C#=""] ... converted tests: dotnet run --project ...crypto.ecdsa.tests.csproj -- --json ... failed: exit status 0xc0000005
+      Fatal error. Internal CLR error. (0x80131506)
+```
+All 84 subtests show empty C# results because the test *process* crashed (native access
+violation, `0xc0000005`) before any could report — not a normal assertion failure.
+
+**Row 2 — `syscall`, first pass: a build error, but pointing at an unrelated file.**
+```
+FAIL  syscall
+      C:\...\src\core\time\sleep.cs(90,25): error CS8983: A 'struct' with field initializers must include an explicitly declared constructor.
+      The build failed. Fix the build errors and run again.
+```
+`syscall`'s row failed because `time.csproj` (a dependency) didn't compile — but the **`time`
+row itself, 11 lines later in the same log, PASSED clean** (`PASS time 159`) — the identical
+`time/sleep.cs` compiled fine minutes later in the same run.
+
+**Third data point, not a failure but relevant: `go/internal/srcimporter` PASSED this run**
+(`PASS go/internal/srcimporter 7`) — JOB-004 found this package reliably FAILS on this box
+(`CGO_ENABLED=0`, no gcc on `PATH`, rooted in JOB-005). I re-checked: **the environment is
+unchanged** (`CGO_ENABLED=0`, `gcc`/`cc` still absent from `PATH`) — same environment, opposite
+result from JOB-004's run of the identical package.
+
+**Retry, both rows, isolated, `-SkipBuild` off the same worktree:**
+```
+=== RETRY ROW: crypto/ecdsa ===
+  PASS  crypto/ecdsa                       82
+sweep: 1 pass / 0 fail  (34s)
+
+=== RETRY ROW: syscall ===
+  PASS  syscall                            62
+sweep: 1 pass / 0 fail  (12s)
+```
+**Both clean.** Combined with the srcimporter flip and the `time/sleep.cs` compiling fine
+elsewhere in the same run, this reads as **transient flakiness under full-roster load on this
+box** (build/process contention, not a code defect) — I'm not ruling that as certain, just
+reporting what three independent data points from the same run all point toward. **Arithmetic
+closes the loop:** the original run's PASS rows sum to 18,425; add back `crypto/ecdsa`'s 82 and
+`syscall`'s 62 from the retry and you get **18,569 — the exact banked roster total.** Nothing is
+actually missing once the transient rows are accounted for.
+
+**Full per-package table (162 rows, first-pass result — the 2 FAILs shown as originally seen;
+both PASS clean on retry per above):**
+
+```
+PASS  archive/tar                        97
+PASS  archive/zip                        100
+PASS  bufio                              80
+PASS  bytes                              82
+PASS  cmp                                4
+PASS  compress/bzip2                     4
+PASS  compress/flate                     64
+PASS  compress/gzip                      15
+PASS  compress/lzw                       17
+PASS  compress/zlib                      6
+PASS  container/heap                     7
+PASS  container/list                     10
+PASS  container/ring                     8
+PASS  context                            57
+PASS  crypto                             6
+PASS  crypto/aes                         13
+PASS  crypto/des                         18
+PASS  crypto/dsa                         4
+PASS  crypto/ecdh                        47
+FAIL  crypto/ecdsa                       [82 on retry -- see above]
+PASS  crypto/ed25519                     8
+PASS  crypto/elliptic                    82
+PASS  crypto/hmac                        172
+PASS  crypto/internal/alias              1
+PASS  crypto/internal/bigmod             14
+PASS  crypto/internal/boring             3
+PASS  crypto/internal/edwards25519/field 16
+PASS  crypto/internal/hpke               19
+PASS  crypto/internal/mlkem768           12
+PASS  crypto/md5                         11
+PASS  crypto/rand                        298
+PASS  crypto/rc4                         2
+PASS  crypto/rsa                         559
+PASS  crypto/sha1                        12
+PASS  crypto/sha256                      23
+PASS  crypto/sha512                      36
+PASS  crypto/subtle                      7
+PASS  crypto/tls                         400
+PASS  database/sql                       137
+PASS  database/sql/driver                1
+PASS  debug/buildinfo                    197
+PASS  debug/dwarf                        40
+PASS  debug/elf                          31
+PASS  debug/gosym                        10
+PASS  debug/macho                        7
+PASS  debug/plan9obj                     2
+PASS  encoding/ascii85                   9
+PASS  encoding/asn1                      38
+PASS  encoding/base32                    26
+PASS  encoding/base64                    17
+PASS  encoding/binary                    137
+PASS  encoding/csv                       71
+PASS  encoding/hex                       12
+PASS  encoding/json                      491
+PASS  encoding/xml                       386
+PASS  encoding/pem                       8
+PASS  errors                             61
+PASS  expvar                             11
+PASS  flag                               24
+PASS  fmt                                63
+PASS  go/ast                             9
+PASS  go/build/constraint                89
+PASS  go/constant                        9
+PASS  go/doc/comment                     10059
+PASS  go/format                          4
+PASS  go/importer                        3
+PASS  go/internal/gccgoimporter          4
+PASS  go/internal/gcimporter             583
+PASS  go/internal/srcimporter            7
+PASS  go/parser                          173
+PASS  go/printer                         45
+PASS  go/scanner                         11
+PASS  go/token                           31
+PASS  go/types                           557
+PASS  go/version                         3
+PASS  hash                               18
+PASS  hash/adler32                       2
+PASS  hash/crc32                         10
+PASS  hash/crc64                         5
+PASS  hash/fnv                           19
+PASS  hash/maphash                       22
+PASS  html/template                      243
+PASS  image                              8
+PASS  image/color                        10
+PASS  image/draw                         9
+PASS  image/gif                          28
+PASS  image/jpeg                         14
+PASS  image/png                          28
+PASS  index/suffixarray                  12
+PASS  internal/abi                       2
+PASS  internal/buildcfg                  3
+PASS  internal/coverage/cformat          2
+PASS  internal/coverage/cmerge           2
+PASS  internal/coverage/pods             1
+PASS  internal/coverage/slicereader      1
+PASS  internal/coverage/slicewriter      1
+PASS  internal/cpu                       8
+PASS  internal/dag                       6
+PASS  internal/diff                      13
+PASS  internal/fmtsort                   3
+PASS  internal/fuzz                      52
+PASS  internal/godebugs                  1
+PASS  internal/gover                     5
+PASS  internal/itoa                      3
+PASS  internal/profile                   1
+PASS  internal/reflectlite               30
+PASS  internal/saferio                   17
+PASS  internal/singleflight              5
+PASS  internal/sysinfo                   1
+PASS  internal/testenv                   7
+PASS  internal/types/errors              155
+PASS  internal/xcoff                     3
+PASS  internal/zstd                      536
+PASS  io                                 60
+PASS  io/fs                              18
+PASS  io/ioutil                          28
+PASS  log                                8
+PASS  log/slog/internal/benchmarks       3
+PASS  maps                               14
+PASS  math                               76
+PASS  math/bits                          26
+PASS  math/cmplx                         24
+PASS  math/rand                          43
+PASS  math/rand/v2                       36
+PASS  mime                               17
+PASS  mime/multipart                     52
+PASS  mime/quotedprintable               5
+PASS  net/http/fcgi                      12
+PASS  net/http/internal/ascii            13
+PASS  net/mail                           11
+PASS  net/rpc/jsonrpc                    9
+PASS  net/textproto                      26
+PASS  net/url                            48
+PASS  os/exec                            74
+PASS  os/exec/internal/fdtest            1
+PASS  os/signal                          1
+PASS  path                               9
+PASS  path/filepath                      61
+PASS  plugin                             1
+PASS  regexp                             45
+PASS  regexp/syntax                      12
+PASS  runtime/debug                      4
+PASS  runtime/internal/math              1
+PASS  runtime/internal/sys               4
+PASS  runtime/metrics                    2
+PASS  sort                               63
+PASS  strconv                            55
+PASS  strings                            68
+PASS  sync                               44
+PASS  sync/atomic                        108
+FAIL  syscall                            [62 on retry -- see above]
+PASS  testing/iotest                     18
+PASS  testing/quick                      8
+PASS  testing/slogtest                   17
+PASS  text/scanner                       18
+PASS  text/tabwriter                     3
+PASS  text/template                      52
+PASS  text/template/parse                52
+PASS  time                               159
+PASS  unicode                            28
+PASS  unicode/utf16                      8
+PASS  unicode/utf8                       14
+```
+
+**Corpus drift: file-for-file and byte-for-byte identical to JOB-004's classification** (same
+107 `src/core` files touched + the 2 `docs/validation/current/*.md` reports, same ins/del counts
+on every line, confirmed by direct diff) — same 12 `initᴛᴛtests()` +7/−0 files, same 2 `.cs.auto`
+refreshes, same 24 equal-ins/del production-file diffs incl. CLAUDE.md's named `bufio`/`regexp`
+examples, same 67 UNCLASSIFIED (49 standard `package_test_info.cs`-family 10/0 + 18 deviating +
+2 docs `.md`). Not re-listing it verbatim here — see the JOB-004 result entry for the full
+breakdown; every line matches. Worth noting since it's a genuine cross-check: identical drift
+from a different lane's tip at the same roster size is exactly what "the linux-flavor files
+never compile on Windows" predicts — this branch's Windows-visible surface is drift-neutral.
+
+**My read, not a ruling:** the two reds plus the srcimporter flip look like the sweeper
+struggling under a genuinely large single run (7705s, 162 rows, one giant crash) rather than
+anything in the exec-wall/GoFrame change — but a CLR access violation is serious enough that I'm
+not going to characterize it as "safe" myself. If you want a clean confirmed-green full run
+before banking, I have capacity to re-run the full 162-row roster once more; say the word.
+
+Worktree `job-g1` being removed, bin/obj purged, local logs deleted now that this is posted. Full
+3-job capacity restored.
