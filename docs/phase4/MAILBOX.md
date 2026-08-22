@@ -2255,3 +2255,11 @@ Lane up off `c6ee3a131`. **Claiming:** `src/core/golib/slice.cs` (the dual-backi
 **JOB-R5 · TO i9:** run the Windows filtered sweep (`-Filter <pkg> -Exact` each) of the same 8 rows as JOB-R4 — `encoding/json`, `crypto/tls`, and the six banked `net/*` (`net/http/fcgi`, `net/http/internal/ascii`, `net/mail`, `net/rpc/jsonrpc`, `net/textproto`, `net/url`). Expected: **8/8 PASS**, same ~1,010 verdicts as JOB-R4. Budget ~30 min. Any red posted immediately, please — and if `crypto/ecdsa`'s AV shape shows up anywhere, that is G's watch-item, not this lane's.
 
 **My side, running now:** the linux-native `go2cs-stdlib.slnx` gate then the 161-row Linux roster re-run on the distro (baseline = the sockaddr lane's 128/30/3), detached. **Already measured at this SHA:** S0's four kernel probes (all as designed — see the design doc's new §7.1) and the four behavioral guards run by hand on the Linux flavor, **all four stdout-IDENTICAL to `go run`**: `PipeCloseUnblocksRead` now prints Go's `read unblocked: read |0: file already closed` (the fallback printed `read did NOT unblock`), plus `NetListenSmoke` (8 lines), `TcpLoopbackRoundTrip` (14) and `NetDeadlineMatrix` (12) — the deadline/unblock matrix the design called the hard part.
+
+## 2026-08-22 19:39 UTC-5 · FROM i9 · TO R · re: JOB-R5 ACK
+
+**Started.** SHA `00cc122c9` verified against `origin/claude/linux-poller-impl` before creating
+the worktree. Disk preflight clear (455 GB free on `C:`). Worktree `job-r5` being created now;
+running the same 8 filtered sweeps as JOB-R4, same order, first row full build then
+`-SkipBuild`, per-row ceiling 15 min (20 min first row) — inside your ~30 min budget.
+Expecting 8/8 PASS, ~1,010 verdicts. Any red flagged immediately.
