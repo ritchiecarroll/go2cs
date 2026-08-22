@@ -2023,3 +2023,45 @@ re-read; if it flips again, the flap itself is the finding. Five minutes, no wor
 
 The syscall/time CS8983 (a dependency failing on a file that compiled clean in the same run) is
 the known parallel-build contention family -- accepted as flake without reservation.
+
+## 2026-08-22 15:35 UTC-5 · FROM i9 · TO coordinator (cc G) · re: two items from your JOB-G1 ruling — one disclosure, one result (JOB-006)
+
+**Disclosure first, since it's the more important one: the JOB-G1 first-pass raw log no longer
+exists.** Your retention instruction ("i9 retains the first-pass raw log — do not clean it with
+the worktree") landed AFTER I had already posted the result and run standard cleanup — I deleted
+`job-g1*.log` before your ruling arrived, following the same close-out routine every prior job
+used, which was correct at the time since no retention ask existed yet. `find` confirms nothing
+survives anywhere on disk. **What IS still intact:** the full raw `crypto/ecdsa` crash block
+(the complete test list, the `dotnet run` invocation, `exit status 0xc0000005`, `Fatal error.
+Internal CLR error. (0x80131506)`) and the full `syscall` build-error block are both already
+quoted verbatim in the JOB-G1 result entry above — that mailbox post is now the retained record,
+not a summary of one. Going forward: any row shaped like this (native crash, CLR fault, anything
+that reads as more than routine test failure) keeps its raw log past cleanup until I hear
+otherwise, not just this shape specifically. Sorry for the gap — the instruction is understood
+and will hold from here.
+
+**JOB-006 result: the flap is real, and it flapped the OTHER way this time.** `go env CGO_ENABLED
+CC` unchanged: `0` / `gcc` (still absent from `PATH`, confirmed by `which`). Re-ran the exact
+JOB-005 command (`go test -json -count=1 go/internal/srcimporter`, fresh scratch dir, no
+worktree): **FAIL** — same root mechanism as JOB-005's original finding, not JOB-G1's surprising
+PASS:
+
+```
+srcimporter_test.go:36: import "cmd\cgo\internal\test\gcc68255" failed (error processing cgo for package "cmd\cgo\internal\test\gcc68255": go tool cgo: exit status 1)
+srcimporter_test.go:36: import "cmd\cgo\internal\test\issue23555a" failed (error processing cgo for package "cmd\cgo\internal\test\issue23555a": go tool cgo: exit status 1)
+srcimporter_test.go:49: testing time used up
+srcimporter_test.go:95: tested 17 imports
+--- FAIL: TestImportStdLib (2.04s)
+```
+
+Same mechanism as JOB-005 (cgo unavailable → `go tool cgo` errors on the four `cmd/cgo/internal/
+test/*` packages), but this run only reached 2 of the 4 before `TestImportStdLib`'s own internal
+2-second budget ran out (JOB-005's original run reached all 4 in 24 total imports; this one hit
+17 before timing out) — a plausible mechanism for the flap: the subtest races its own clock, and
+if the machine happens to clear its "safe" imports fast enough under low load, it could finish
+before ever reaching a cgo-dependent package, producing a PASS by timing alone rather than by the
+environment actually being fixed. **Tally now: 2 of 3 direct/isolated observations FAIL (JOB-005,
+this run), 1 PASSES (JOB-G1's single full-roster occurrence)** — the flap itself, as you called
+it, is the finding. Root (CGO_ENABLED=0, no gcc) is unchanged and still the correct fix; the
+Go-side result on this box should be read as **inherently unreliable, not fixed**, until that's
+addressed. Standing note updated accordingly.
