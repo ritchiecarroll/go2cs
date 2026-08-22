@@ -1109,3 +1109,86 @@ packages (`go/doc/comment` 10059, `go/internal/gcimporter` 583, `go/types` 557, 
 491, `crypto/tls` ~400) weighted in — a rough estimate, will report the real number. Any row that
 goes red is flagged immediately per your ask, not buried in the final summary. Running solo (2 of
 my 3-job concurrent cap free if anything else lands).
+
+## 2026-08-22 08:03 UTC-5 · FROM i9 · TO R · re: JOB-R3 result
+
+**All 39 rows PASS, 0 FAIL, exit 0 everywhere — no red to flag.** SHA `5e5bf29c6` (branch
+`claude/three-bodies-r4r1`), verified before the worktree was created. Total: **14,148 verdicts**.
+Row time summed from each sweep's own reported duration: **2,431s (~40.5 min)**, plus the first
+row's cold build — inside the ~45–70 min estimate. `crypto/tls` specifically: clean **PASS 400**
+this time, comfortably inside the corrected 15-min outer ceiling (the 8-min mistake from JOB-R2
+does not repeat).
+
+```
+PASS  archive/zip                        100
+PASS  debug/dwarf                        40
+PASS  html/template                      243
+PASS  path/filepath                      61
+PASS  io/ioutil                          28
+PASS  io/fs                              18
+PASS  internal/diff                      13
+PASS  go/internal/srcimporter            7
+PASS  archive/tar                        97
+PASS  time                               159
+PASS  os/exec                            74
+PASS  go/doc/comment                     10059
+PASS  text/template                      52
+PASS  debug/buildinfo                    197
+PASS  debug/elf                          31
+PASS  debug/gosym                        10
+PASS  encoding/json                      491
+PASS  sync                               44
+PASS  math/rand                          43
+PASS  mime                               17
+PASS  crypto/ecdh                        47
+PASS  crypto/ed25519                     8
+PASS  crypto                             6
+PASS  internal/abi                       2
+PASS  internal/testenv                   7
+PASS  internal/types/errors              155
+PASS  internal/godebugs                  1
+PASS  go/types                           557
+PASS  go/internal/gcimporter             583
+PASS  go/importer                        3
+PASS  crypto/sha1                        12
+PASS  bytes                              82
+PASS  crypto/tls                         400
+PASS  crypto/rand                        298
+PASS  flag                               24
+PASS  internal/cpu                       8
+PASS  os/signal                          1
+PASS  sync/atomic                        108
+PASS  syscall                            62
+```
+
+**Corpus drift, classified per CLAUDE.md's documented sweep-dirt shapes** (78 files touched total):
+
+- **CRLF phantoms** (empty `--numstat`, invisible LF/CRLF drift on checkout) — 45 files, all
+  `.cs` — confirmed programmatically (`git status --short` lists them, `git diff --numstat` shows
+  nothing for them). Not individually named; the shape is the documented class.
+- **`initᴛᴛtests()` hook** (+7/−0, the fourth named class) — 6 files: `crypto/ecdh/package_init.cs`,
+  `flag/package_init.cs`, `go/types/package_init.cs`, `html/template/package_init.cs`,
+  `syscall/windows/package_init.cs`, `time/package_init.cs`.
+- **`.cs.auto` review-sibling refresh** — 2 files: `sync/atomic/type.cs.auto` 21/20,
+  `time/tick.cs.auto` 1/1.
+- **`-tests`-closure production-file diff** (equal ins/del) — 7 files: `flag/flag.cs` 7/7
+  (CLAUDE.md's own named example, also seen this way in JOB-R1), `bytes/buffer.cs` 9/9,
+  `bytes/reader.cs` 11/11, `crypto/crypto.cs` 3/3, `crypto/package_info.cs` 1/1,
+  `internal/types/errors/package_info.cs` 1/1, `syscall/export_windows_test.cs` 3/3.
+- **UNCLASSIFIED, posted raw** — 18 files: 16 `package_test_info.cs` /
+  `package_info_internal_test.cs` variants (mostly 10/0, not uniform:
+  `crypto/ecdh/package_test_info.cs` 3/0, `time/package_test_info.cs` 1/6) —
+  `archive/tar/package_info_internal_test.cs` 1/0, `archive/tar/package_test_info.cs` 10/0,
+  `archive/tar/writer_test.cs` 3/2, `archive/zip/package_test_info.cs` 10/0,
+  `bytes/package_info_internal_test.cs` 10/0, `crypto/ecdh/package_info_external_test.cs` 10/0,
+  `crypto/ecdh/package_test_info.cs` 3/0, `crypto/sha1/package_test_info.cs` 10/0,
+  `crypto/tls/package_test_info.cs` 10/0, `internal/cpu/package_info_internal_test.cs` 10/0,
+  `mime/package_test_info.cs` 10/0, `os/signal/package_test_info.cs` 10/0,
+  `path/filepath/package_info_internal_test.cs` 10/0, `syscall/package_info_internal_test.cs`
+  10/0, `time/package_test_info.cs` 1/6, `time/time_test.cs` 6/37 (alongside `tick.cs.auto` —
+  matches JOB-001/JOB-R2's prior finding for the same pair, noted not self-ruled) — plus 2
+  `docs/validation/current/*.md` report files (`archive.tar.md` 4/2, `os.exec.md` 3/3), which
+  aren't corpus `.cs` at all so I'm not guessing which class they'd belong to.
+
+Worktree `job-r3` being removed, bin/obj purged, local logs deleted now that this is posted.
+2 of 3 job slots still free.
