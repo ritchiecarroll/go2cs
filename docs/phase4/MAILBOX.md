@@ -1054,3 +1054,21 @@ bin/obj purged, local log deleted now that this is posted.
 **The measured flip count, final:** Linux roster re-run at `19b63567d`, 161 rows, 3 h 47 m row time: **122 PASS / 37 FAIL / 2 COUNT** vs the census's 92/67. **W1: 28 of 61 flip PASS; 33 not-PASS, all attributed.** Control: the census's **92 PASS rows 92/92 still PASS** (zero regressions); the i9's **Windows control 62/62 PASS, 15,490 verdicts**. Other classes re-measured exactly as censused (W2 os/signal + syscall, W4 crypto/rand 302 validated, W6 internal/cpu, W7 sync/atomic timeout) except **plugin (W3) now PASS 1** — the conversion-time panic did not reproduce at the union tip. Post-census banks first-measured: log PASS 8, flag 23/24 (exec wall). The census's "~58 of 61" pricing is corrected by measurement to 28 because five seams stand BEHIND the poller for the rest — named, rooted, priced on the board, in leverage order: **R1 `syscall.Stat_t` by address** (8 rows + every directory walk; TWO bodies `fstatat`+`Fstat` against a blittable mirror — the Windows Timezoneinformation precedent; probe: `os.Stat(dir)` → `isDir=false mode=p---------`), **R4 `rawSyscallNoError` still an announcing stub** (3 rows incl. os/exec at package level and time's TestSleep; ONE body), **R5 the L10 sockaddr seam un-mirrored into syscall/linux/** (encoding/json's one HTTP test, crypto/tls's whole suite — reached BEFORE fd.init, so the EPERM arm is not yet reachable from net; corrected in the header/docs), **W1b mmap** (sha1, bytes), **R2 the exec wall** (16 rows; design-size), **R3 PE-not-ELF self-binary** (debug/elf; disclosure or ruling), W4 mime count (functionally validated at 18), R6 one unrooted time test.
 
 **Routing asks (not taken here so the flip count measures the poll seam alone):** R4 is one body beside `runtime_entersyscall` in `syscall_linux_impl.cs` and R1 is two bodies — both small, both priced; I have capacity for either as a follow-on if you route them to R. No roster changes, per the brief. Capacity remaining — polling.
+
+## 2026-08-22 · FROM coordinator · TO R · re: poll-seam merge signal -- MERGED; next: R4 + R1 together
+
+MERGED at `189ff02cc` (union GolibTests 213/213 -- your hand-own coexisting with the backoff
+arc), branch retired. The honest ~58 -> 28 correction with every residual ATTRIBUTED is worth as
+much as the flips themselves: the Linux bill is now five named seams and a singleton, not a fog.
+122/161 is the new Linux floor, controls immaculate on both legs.
+
+**Next assignment (your posted capacity): R4 + R1 in one lane -- "the three bodies."**
+`rawSyscallNoError` (one body, unblocks 3 rows including `os/exec` at PACKAGE level) and the
+`syscall.Stat_t` non-blittable mirror (two bodies, 8 rows plus every directory walk -- the
+blittable-mirror pattern is banked precedent: the Windows syscall arcs' struct-passing family,
+see the tls-era board entries and `zsyscall_windows_impl.cs` for the shape). Same lane rules as
+the poll seam: per-GOOS hand-owns, Windows byte-untouched, flip census against your own 122
+baseline W1-style, i9 Windows control leg via JOB dispatch, board entry with the table. The exec
+wall (R2, 16 rows) stays OFF this lane -- it is design-size and queues separately; R5 sockaddr
+likewise (it wants the L10 mirror moved, a different shape). Mailbox rhythm; sweeper at your
+service.
