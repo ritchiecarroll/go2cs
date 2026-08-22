@@ -547,3 +547,45 @@ every run; final state below):
 
 No file outside these three documented shapes appeared in any run's drift block — nothing
 UNCLASSIFIED to report. Worktree `job-r1` removed, bin/obj purged, local logs deleted.
+
+## 2026-08-21 19:05 UTC-5 · FROM R/`claude/position-map-arc` · TO coordinator · re: MERGE HELD — relocation round complete
+
+**RE-SIGNAL — branch `claude/position-map-arc`, tip `52dae9e12`.** The hold's four items, in order:
+
+**1. RELOCATED** (`4c7fa5398` mechanism, `ea659f141` migration). Every record lives in a
+`// <GoSourcePositionMaps>` delimited expository block in the info file of the compilation that
+compiles the mapped source — `package_info.cs` for production, the test-info anchors for `-tests`
+variants routed exactly as GoImplement records are. The migration diff IS the move: 1,811 corpus +
+1,308 behavioral sources each lose exactly their two record lines, 490 + 631 info files gain
+sections, one named mover (`runtime/windows/mheap.cs` levels the union's zero-size layout emission
+with a freshly derived table). The 148-record count delta closed exactly: declaration-only files'
+EMPTY tables (GoLineFor answers 0 — behaviorally identical to no record) are no longer emitted.
+extract() verified, not assumed: `TestStdLibMetadataExtractIgnoresPositionMaps` pins it. Two things
+the relocation surfaced, both closed in the mechanism commit: the hand-own `.cs.auto` record would
+have landed in the COMPILED info file (now skipped — recording nothing for a manualConversion
+visit), and section merge semantics are load-bearing for the recompile-model test assembly (the
+seeded test-info file is the only route production records have into it).
+
+**Worth the coordinator's eye — §6.4 fired on the migration itself and the A/B caught it:** the
+script's first output moved every table verbatim while deleting the record's two lines from each
+file top — every moved table skewed by exactly +2, and nothing would have gone red. Caught by
+running `sort` through the real pipeline and comparing bytes; fixed by re-deriving (decode, shift,
+re-encode with the canonical encoder); validated closed-loop twice (sort's 7 records, log's 1,
+byte-exact against pipeline ground truth).
+
+**2. REBASED**: `claude/union-157` @ `0f2a66912` merged (`686f3981b`); one conflict (board),
+union-resolved. **GolibTests 211/211** — the hold entry's predicted number. Roster stands at
+**161 / 215 · 18,565 · 80** from the first round's merge, unchanged by this docs-only round.
+
+**3. RE-GATED, proportionate:** migration diff shape exactly the move · CNR **NO REGRESSION,
+byte-identical across all 631** behavioral packages · migrated `go2cs-stdlib.slnx` **0 errors** ·
+converter `go test ./...` green (incl. the new extract guard) · `RuntimeCallerFrames` **4/4
+phases** · pipeline re-validations `flag` **24**, `log` **8 + 1** · `sort` (the A/B vehicle)
+own-row sweep **PASS 63**. Sweeps at the branch: the i9 worker's JOB-R1, **4/4 PASS at `bc484aa57` verified** — `flag` 24, `log` 8 (+ `log/slog/internal/benchmarks` 3, `testing/slogtest` 17), `sync/atomic` 108, `go/internal/gcimporter` 583, ~8.6 min total, drift classified by the worker to the named standing classes. (The dispatched SHA `bc484aa57`
+differs from tip only by two docs commits — the board entry and this signal's design-note
+paragraph; no code between them.)
+
+The first round's 160/0 full sweep stands as the mechanism's evidence per the hold entry.
+Ratifications received and recorded: §11.1, the stricter no-composition reading, log's
+alloc-profile disclosure, the 67-file discipline. Mailbox rhythm adopted: poll at session start
+and before final gates.
