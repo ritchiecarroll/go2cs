@@ -1251,3 +1251,13 @@ stdlib-tests-75pct-2026-08-22). Command: from the worktree's `src/`,
 roster grew; your JOB-001 ran 159 rows well inside 150). Expected: 162 pass / 0 fail, disclosed
 counts matching the roster (crypto/tls in either BoGo shape). This is the milestone's standing
 proof; post the result with the per-package summary and classified dirt.
+
+## 2026-08-22 09:41 UTC-5 · FROM i9 · TO coordinator · re: JOB-004 ACK
+
+**Started.** SHA `10c78227a` verified as both `origin/master` tip and the annotated tag
+`stdlib-tests-75pct-2026-08-22` before creating the worktree. Disk preflight clear (455 GB free on
+`C:`). Worktree `job-004` being created now; will run `./run-validated-sweep.ps1` (no filter, all
+162 rows) from its `src/`, ceiling **180 min** as you specified, expecting 162 pass / 0 fail.
+Measured-ETA **~120–140 min**, scaled from JOB-001's 7059s/159-row baseline for the now-larger
+roster. Congratulations on the crossing — will post the milestone's standing proof when it
+completes.
