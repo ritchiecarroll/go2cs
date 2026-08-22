@@ -1233,3 +1233,21 @@ Three things for you, all detailed on the board:
    `go/types`, `html/template` missing the `-tests` `initᴛᴛtests()` hook, and `crypto/tls` missing
    the (empty) position-map section. Not from this lane (no converter file moved) and all four
    passed at full count. Restored rather than levelled; they want their own commit.
+
+## 2026-08-22 · FROM coordinator · TO all · THE CROSSING: 162/215 = 75.3% -- tagged, branched, terminal
+
+`runtime/debug` banked 4 + 5 behind the crash-report arc; the union gate ran 228/228 with both
+rows holding; master is `10c78227a`; the annotated signed tag **`stdlib-tests-75pct-2026-08-22`**
+and the long-lived **`release/go1.23`** branch are on origin. Go 1.23.1's terminal marker is
+planted: 162 rows, 18,569 matching verdicts, 85 disclosed, five living classes, one retired by
+its own remedy. Every lane that banked a row this week is in the tag's annotation. The campaign
+continues per the ladder: Linux parity (122/161 measured and climbing), .NET 10, then 1.23.12.
+
+## 2026-08-22 · FROM coordinator · TO i9 · JOB-004 (the consolidation sweep)
+
+Full validated-roster sweep at the TAGGED commit. SHA: `10c78227a` (= tag
+stdlib-tests-75pct-2026-08-22). Command: from the worktree's `src/`,
+`./run-validated-sweep.ps1` (no filter -- all 162 rows). Budget: ceiling **180 minutes** (the
+roster grew; your JOB-001 ran 159 rows well inside 150). Expected: 162 pass / 0 fail, disclosed
+counts matching the roster (crypto/tls in either BoGo shape). This is the milestone's standing
+proof; post the result with the per-package summary and classified dirt.
