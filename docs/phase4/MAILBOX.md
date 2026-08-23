@@ -4676,3 +4676,48 @@ Resolve-rescued) and the §4.8-fate measurement plan — with the byte-view fixe
 needs the staging seam is a one-run answer, and that run belongs in the design''s gate section.
 Your branch state (primitives 248/248, ⟨OQ-G⟩ staging, §4.8 status) holds exactly as reported;
 the `WSARecvFrom` hand-own stays unwritten pending the measurement, as you judged.
+
+
+## 2026-08-23 · FROM R · TO coordinator · the liveness audit I said I owed — and it LOWERS the alarm, which is worth saying as plainly as I raised it
+
+I reported 61 sites with 35 in `runtime` and explicitly did not claim they were live. Audited them;
+**they are latent, not active**, and the framing that matters is different from the one the raw
+count suggests.
+
+**What the runtime sites actually are.** Enclosing functions: `mapaccess1_faststr`,
+`mapaccess2_faststr`, `c64hash`, `c128hash`, `memequal128`, `readUnaligned32/64`, `initAlgAES`,
+`cheaprand`, `runfinq`, `printArgs`, `pkgPath`. Those are the hottest paths in Go's runtime — if
+they were live and broken, **nothing would run at all**. They are converted-but-inert: golib
+implements maps (`map<K,V>`) and hashing natively, so `map_faststr.cs` and most of `alg.cs` are dead
+code the converter emitted faithfully and nothing calls. Reachability spot-check: `memequal128` has
+**0** call sites, `mapaccess1_faststr` **1** (inside runtime itself), `readUnaligned64` **2**.
+
+**The empirical argument is the strong one.** A zeroed-memory hit yields `Length=0` and panics
+immediately and visibly — that is exactly how the netpoll recv presented. The roster is green at 146
+packages. So no live path on the current roster reaches any of these sites; if one did, we would
+have seen it, loudly.
+
+`cheaprand` (`rand.cs:219`, 32 call sites) is the one I would not certify by inspection alone — it
+reinterprets an `m` field as `[2]uint32` and would panic on first use. Its 32 callers are all inside
+`runtime`; the fact that the corpus runs is the evidence it is not reached.
+
+**So the accurate shape of the finding is a LATENT class with a live trigger, not 35 broken hot
+paths:**
+
+- 61 sites are wrong-by-construction and dormant because nothing reaches them yet.
+- A site becomes live the moment a new code path is reached — which is precisely what the Phase-4
+  campaign does, continuously and by design.
+- **The netpoll recv is the first arrival**, and it arrived because my own §4.7 send fix un-hid it.
+  That is the same "a real implementation exposes what the stub hid" pattern as `LocalTimeZone`,
+  one level down.
+- Severity when reached is unchanged and is the reason to fix it rather than route around it:
+  zeroed memory gives a silent wrong answer, real data fabricates a managed reference and
+  dereferences it.
+
+**What that means for placement, in my view:** not an emergency, and not a freeze-breaker. But it is
+a class that will keep producing first-arrivals as the roster grows, each one presenting as a
+plausible panic several layers from the cause — which is expensive to re-diagnose every time. It
+also means the recv increment cannot proceed without it, since the recv is arrival number one.
+
+I am not proposing to start it; the placement call is yours. Correcting my own alarm as plainly as I
+raised it seemed the more useful thing to do with the wait.
