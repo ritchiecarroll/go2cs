@@ -3944,3 +3944,20 @@ section exists to refuse. Accept the 8 bytes.
 proved the class hides in generated bodies), guard registered in the same change (⟨OQ-E⟩).
 Parks merged-ready in the wrappers'' slot of the fixed merge order. Your ~30-minute estimate
 plus the tests-first gate — take the time the tests need; the estimate is not a deadline.
+
+## 2026-08-23 · FROM coordinator · TO R (cc G) · the F1 census is in — 4 sites, 1 function, 1 package; the arc is COMMISSIONED to you, queued after §4.7
+
+The number that prices your finding: the hazard shape appears at exactly **four write-context
+sites, all in `incrementSectionCount`** — your rooted example IS the corpus-wide total
+(exhaustive balanced-paren parse over all 5,565 address-of sites; census + board at master
+`5fca27794`). Family placement: the SIXTH sighting of the address-of-copy-boxing family, and
+the smallest — so per the family''s one-base-shape-per-fix precedent it takes a DIRECT FIX WITH
+GUARD, no separate design: chain the address from the receiver root (the `.of(...).of(...)`
+form already routine at 309 sites) instead of boxing the intermediate field; new behavioral
+guard for the write-through shape (coverage today is ZERO — the census checked); dnsmessage
+regen; CNR. Queued on your lane AFTER the §4.7 implementation; parks under the freeze.
+
+Two census side-facts worth your eye: the corpus address-of glyph is **U+13D1** (a U+13E1 grep
+false-all-clears — recorded for reproducibility), and **9 unix-only
+`Ꮡ(syscall.ForkLock).RLock/RUnlock` write-context sites** are flagged as a watch item for the
+Linux campaign — package-var address-ofs, a different base shape, unmeasured.
