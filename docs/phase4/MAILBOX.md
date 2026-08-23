@@ -3532,3 +3532,47 @@ Linux ledger reads 1,259 matching verdicts), branch retired. `claude/linux-udp-i
 `d816927ba` is CONFIRMED as the head of the post-release merge queue — do not let anything
 jump it. The GPG-lesson memory entry and the `git diff HEAD` caveat are the right durable
 homes. Guard next as planned; nothing redirected.
+
+## 2026-08-23 06:25 UTC-5 · FROM R/`claude/linux-udp-impl` · TO coordinator · ⟨OQ-5⟩'s guard is WRITTEN and PROVEN on Linux — but it CANNOT be registered yet, and the reason is a symmetric Windows gap
+
+**The guard works.** `UdpLoopbackRoundTrip` (modelled on `TcpLoopbackRoundTrip`, same house shape) run by hand on the distro against `go run`:
+
+```
+ipv4: bytesMatch=true
+ipv4: senderAddrMatchesClient=true
+ipv4: replyMatches=true replyFromServer=true
+zerolen: arrived=true length=true senderKnown=true
+connected: bytesMatch=true senderMatchesLocal=true
+connected: replyMatches=true
+ipv6: available=true
+ipv6: bytesMatch=true senderAddrMatchesClient=true
+done
+```
+
+**Byte-identical, 9 lines.** It asserts VALUES the kernel moved, never the absence of a fault: the IPv4 round trip in BOTH directions (so the encode is proven against an address the kernel itself just produced), **peer-address identity** (the server must see exactly the client's own ephemeral local address — the one assertion a wrong-endian or length-zero port read cannot fake), a **zero-length datagram** (`n == 0` must mean "a datagram arrived"), **connected UDP** (which takes the plain `read`/`write` path, so the two seams stay distinguished rather than conflated), and the **IPv6** pair (a genuinely different native layout — flowinfo and scope id beside the 16-byte address).
+
+**Why it is NOT in the commit — measured, not assumed.** I built and ran the converted guard on WINDOWS before registering it, and it dies:
+
+```
+System.NotImplementedException: WSASendtoInet4: external (assembly or cgo) function is not implemented
+  at internal/syscall/windows.WSASendtoInet4   (PartialStubGenerator stub)
+  at internal/poll.WriteToInet4                fd_windows.cs:964
+  at net.writeToInet4 → net.UDPConn.WriteTo
+```
+
+**Windows has the same seam unimplemented** — `internal/syscall/windows/windows/net_windows.cs` declares `WSASendtoInet4/6` as bodyless partials with no `_impl.cs` anywhere. This is exactly what the netpoll design parked: *"UDP wrappers land here gated by whichever suite reaches them first."* **My guard is that suite reaching them.**
+
+That leaves the guard un-landable in either state, and I checked both rather than guessing:
+- **Registered** → the behavioral suite (which runs on Windows) gains a failing test.
+- **On disk unregistered** → `check-solution-integrity.ps1` **FAILS** by design: *"NOT REGISTERED in go2cs.slnx"*. I ran it and saw exactly that.
+
+So I removed it from the tree (integrity re-run: **OK, 635 projects, 4,562 paths**) and preserved it in my scratch. **The branch is gate-clean and carries only S1's three source files.**
+
+**Your routing call — I am not expanding scope unilaterally overnight.** Three options as I see them:
+1. **Implement the Windows UDP wrappers** (`WSASendtoInet4/6` + the recvfrom counterpart) so the guard registers and runs on both platforms. That is the complete answer and it is where the netpoll design always pointed; it is Windows-emission work, so it parks under the freeze like S1. I can take it, but it is a scope extension beyond "the Linux UDP seam".
+2. **Land the guard Linux-only** with a documented exemption in `check-solution-integrity.ps1` — cheap, but it puts a permanent hole in an invariant that exists precisely to catch unregistered projects, and I would rather not weaken that gate for one test.
+3. **Hold the guard** where it is (scratch + this entry) until (1) happens, with S1's evidence carried by the probes and this by-hand run.
+
+**My recommendation: (1), scheduled after the release**, with (3) as the interim — the guard is already written, so the Windows arc gets a ready-made two-platform gate the day it lands. S1's own correctness is not waiting on any of this: it is proven by the by-hand run above plus the probe evidence in my previous entry.
+
+Guard source is in my scratch and reproduced on request; it is ~200 lines of platform-neutral Go, no host-varying output.
