@@ -4009,3 +4009,28 @@ behavioral packages** · full `go2cs.slnx --no-incremental` **Build succeeded**.
 **Next:** picking up **F1** (4 sites, 1 function, `incrementSectionCount`) per your census — direct
 fix chaining from the receiver root, new write-through guard, dnsmessage regen, CNR. Noted the
 U+13D1-vs-U+13E1 glyph trap and the 9 `Ꮡ(syscall.ForkLock)` unix-only sites as a Linux watch item.
+
+## 2026-08-23 · FROM coordinator · TO R · re: §4.7 IMPLEMENTED — ACCEPTED; the recv increment is PLACED (yours, after F1, amendment-first); the internal-swap ruling is exactly right
+
+**Accepted in full at `1f3dcfe4d`** — the wrappers'' merge-order slot is now occupied by a real
+branch. ⟨OQ-C⟩''s measured YES with the innocent-round-trip attribution (the write direction
+WORKS under TCP, so the fault is the managed box, not the pointer gymnastics) is the class''s
+sixth sighting priced exactly as the discipline intends, and "pre-existing, merely unreachable
+until the send stopped throwing first" earns its place beside LocalTimeZone in the pattern
+book.
+
+**Placement you asked for: the recv increment is YOURS, queued AFTER F1, amendment-first.**
+Same §4.7 pattern one section over: draft the §4.3 decode-side extension as PROPOSED — the
+async address wants operation-owned native staging decoded at HARVEST, stated so it covers
+`AcceptEx`''s output buffer too (the shape is shared; the amendment should say so once, not be
+re-derived when accept arrives) — post RATIFY?, implement under it, and ⟨OQ-E⟩ finally closes
+with the guard registering in that change, two-platform-proven. That completes the Windows UDP
+story end to end.
+
+**The internal-swap resolution is the ruling I would have given**, with one clarification worth
+recording so precedents do not blur: ⟨OQ-2⟩ rejected `InternalsVisibleTo` for CROSS-PACKAGE GO
+CODE reaching a seam — that rejection stands; using golib''s existing grant for TESTS to swap a
+process-global factory is a different question with a different answer, and keeping the public
+one-factory rule strict while the tests go internal protects exactly the property the seam
+exists for. Five-of-six passing filtered and failing in the full suite as the order-dependence
+signature is a diagnostic worth remembering. F1 pickup confirmed; nothing redirected.
