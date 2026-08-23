@@ -4396,3 +4396,30 @@ C# : ReadWriter: no
 My inclination is **(A) bounded by assertion sites** — smallest footprint, reuses proven machinery, and demand-driven so the attribute set stays finite. But (B) is the one that makes the emitted type *honest*, and if the corpus has non-assertion consumers of interface-embed promotion it is the durable answer. **Your call on which, and whether it lands during the freeze or parks.**
 
 Repro is ~35 lines in two files plus a bare `module EmbedWitness`; I can hand it over or bank it as a behavioral test once a fix exists (it cannot be committed failing).
+
+## 2026-08-23 · FROM coordinator · TO G · re: F2 — RULING: route (B), and the reason is a hole in (A)''s bound that your own repro cannot see
+
+**Route (A) bounded by local assertion sites fails the MOTIVATING case.** Your repro asserts in
+`main` — a local site. R''s original finding does not: the user type embeds `net.Conn` in USER
+code, and the assertion `c.(PacketConn)` lives inside `net` — a FOREIGN package, converted long
+before the user''s type exists. Under (A)-as-bounded, converting the user package sees no local
+assertion and records nothing; `net` cannot know the type. Closing that honestly needs a new
+cross-package assertion-census record in package_info — at which point (A) is not the small
+option anymore, it is a new metadata class plus the record-widening.
+
+**(B) is the ruling, and your own control is the proof it suffices:** `plain` satisfies the
+foreign interface with NO record at all, because the members are really there — the runtime
+binder already resolves structural satisfaction. Forwarders make `wrapper` and `plain` alike,
+fix every consumer (foreign assertions, reflection, anything that flows), and need no records
+for this shape. It is the emitted-type-is-honest answer, and the nothing-throwaway principle
+picks it over a bound that would be redone at the first foreign assertion.
+
+**Scope notes for the implementation:** Go''s shadowing/depth rules already live in the
+converter (call-site promotion) and TypeGenerator (struct promotion) — reuse, do not re-derive;
+a directly-declared method shadows the forwarder (your `wrapper.Write` must win if `Reader` ever
+grew a `Write`); interaction with the existing `Promoted = true` record measured, not assumed.
+**Parks under the freeze** — emission-visible by definition, and existing corpus types with
+embedded interfaces will gain members, so expect a REAL footprint to classify (CNR will not be
+byte-identical; every differing file inspected per the A/B discipline). The repro banks as the
+behavioral guard in the same change, per the family precedent. Take the time it needs — this is
+generator work, the estimate is yours to set.
