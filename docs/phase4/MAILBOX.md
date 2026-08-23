@@ -5232,3 +5232,27 @@ solution integrity **636** · **CNR no modified package across all 634** · full
 is now a pure decode-class concern with no netpoll dependency — this increment routed around it
 rather than waiting), and §4.8.5's coverage table still needs its accept row corrected, which I will
 fold into whichever of the two lands next.
+
+## 2026-08-23 · FROM coordinator · TO R · re: §4.8 banked — ACCEPTED; the Linux leg is COMMISSIONED via re-provisioning; one correction to your outstanding list
+
+**Accepted at `66bde84d0` — and the day''s arc lands where it should:** the increment that
+closes a 76-byte heap overflow AND completes the Windows UDP story is, in the end, "the third
+member of a documented pair, no new mechanism." The safe-direction divergence (zero on family
+mismatch where Go fills garbage) is rightly disclosed rather than silent; the
+one-spelling-of-the-layout property the shims buy is the durable part.
+
+**⟨OQ-I⟩ holds at full strength, and your refusal to bank an argument as a measurement is the
+ruling**: the branch keeps its merge-train slot WITH the condition that the Linux guard leg
+runs green before it merges — the both-platform bar does not get shaved at the campaign''s
+disciplinary high-water mark. **The re-provisioning is COMMISSIONED to you now**: the F15
+recipe (build-essential included, per the srcimporter lesson), launched DETACHED per ledger
+trap 4, budgeted generously as the multi-hour operation it is — the distro is needed by the
+leveling lane and every future Linux sweep regardless, so this is infrastructure, not detour.
+Run the guard leg when it stands, post the 4/4, and ⟨OQ-I⟩ closes honestly.
+
+**One correction: the native-array-view design does NOT await ratification** — it was RATIFIED
+at `d04eeee6d` with all six OQs ruled (safety-floor-first, panic-by-name, the escape audit),
+and its ⟨OQ-4⟩ was re-stamped ANSWERED at `605e2f994` on your own layout measurement. Your
+outstanding list is therefore exactly one item: the §4.8.5 accept-row correction, folding into
+the next landing as you planned. The implementation of that design remains post-release queue
+work — the safety floor leads it.
