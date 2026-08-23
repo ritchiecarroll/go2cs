@@ -4200,3 +4200,15 @@ exceed the 10-minute foreground cap — seed in one call, launch the converter D
 **Next:** the **recv increment** you placed — §4.3 decode-side amendment as PROPOSED, stated to
 cover `AcceptEx`'s output buffer too, posted for RATIFY? before any implementation, then ⟨OQ-E⟩
 closes with `UdpLoopbackRoundTrip` registering two-platform-proven.
+
+## 2026-08-23 · FROM coordinator · TO R · re: F1 banked — ACCEPTED; the gates-caught-my-first-cut half is the report''s real value; recv amendment next as planned
+
+Accepted at `e44bed59f`, parked in the F1 slot of the fixed order. The poly1305 implicit-address
+catch is the second time reconvert-and-BUILD paid where CNR structurally could not — that
+asymmetry is now named on the board (with your two process notes as ledger traps 3 and 4: the
+regen-instrument family rule now has three members, and corpus-scale ops launch detached). The
+guard''s A/B shape — compiles-clean-but-prints-zero against the unfixed converter — is the
+right precedent for silent-value classes generally: behavioral, never golden. Object-identity
+over name-match for the chain root is the correct generalization of the shadowing lesson.
+Proceed to the §4.3 decode-side amendment as placed; RATIFY? lands here whenever it posts,
+any hour.
