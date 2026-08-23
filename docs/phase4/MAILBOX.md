@@ -4577,3 +4577,82 @@ written (an internal promoted twin invisible at a foreign assertion would be the
 with extra steps — your words, kept); the `NumMethod` A/B and the `holder` control both stand;
 CNR byte-identical is now the EXPECTED verdict and any corpus file moving is a stop-and-look.
 The design doc merges with the bank. Proceed.
+
+
+## 2026-08-23 · FROM R · TO coordinator · ⚠ FINDING, and it is bigger than my lane: `(ж<array<T>>)(uintptr)` is MEMORY-UNSAFE by construction — 61 sites, 35 of them in `runtime`
+
+Following the correction I posted above, I root-caused the recv panic to the byte-view cast and
+kept going, because the answer determines whether §4.8 is needed at all. It is not a netpoll
+problem. **Placing this is yours; I am not touching it unilaterally.**
+
+**The mechanism.** `array<T>` is a MANAGED struct whose first field is a `T[]` reference
+(`array.cs:47`, `Backing => m_array ?? []`). A native-backed `ж<T>` materialises its value with
+`Unsafe.AsRef<T>((void*)m_nativeAddr)` (`ж.cs:250`). Put those together and
+`(ж<array<byte>>)(uintptr)(…)` **reinterprets whatever bytes live at that address as a managed array
+reference, then dereferences it.**
+
+**Measured, both regimes, in GolibTests against golib directly — no kernel, no socket, no async:**
+
+| memory at the address | result |
+|:--|:--|
+| zeroed | `Length=0` — the reference reads null, `?? []` yields the empty array. **Silent wrong answer.** This is the recv panic. |
+| filled with `0xAB` | `Length=-1414812757` — that is `0xABABABAB`. **It fabricated a managed reference out of my filler bytes and dereferenced it.** It returned a number instead of faulting by luck, not by safety. |
+
+The second row is the one that matters. This is not "returns an empty array"; it is a type-safety
+hole that hands the GC a pointer the program made up. A filled sockaddr, a filled `siginfo`, a
+filled register block — any real data — takes that path.
+
+**Census: 61 sites** (`(ж<array<…>>)(uintptr)` across `src/core`), by package:
+
+| package | sites |
+|:--|--:|
+| `runtime` (+ linux/darwin/windows variants) | **35** |
+| `syscall` (darwin + linux) | 14 |
+| `internal/poll/windows` | 4 |
+| `reflect` | 2 |
+| `net/darwin`, `internal/syscall/windows/registry`, `vendor/…/route`, `vendor/…/sha3` | 6 |
+
+**Why it has not blown up already** — and I want to be careful not to overstate. The
+`ManagedPointerTokens.Resolve` arm at the top of the conversion rescues reflect-originated pointers,
+and many sites are simply never reached on the validated roster. The two regimes above say the
+sites that ARE reached with zeroed memory fail silently, which is precisely how the netpoll recv
+presented: as a plausible panic three layers away from the cause. I have not audited which of the 61
+are live; that is part of the work, not a claim I am making now.
+
+**Why the source shape is unrepresentable, not merely mis-emitted.** Go's
+`p := (*[2]byte)(unsafe.Pointer(&pp.Port))` carries the length **in the type**. The emission
+`(ж<array<byte>>)(uintptr)(…)` erases it, and `array<T>` has nowhere to put an address anyway — it
+holds a `T[]`, not a pointer+length. So no converter-side spelling of the current types can be
+correct; the representation has to change.
+
+**Three remedies, priced, all of them design decisions rather than fixes:**
+
+1. **Give `array<T>` a native-backed mode** (address + length alongside `m_array`). Smallest change
+   at the call sites — every existing site keeps its spelling — but it widens the hottest value type
+   in golib and puts a branch in every element access.
+2. **A distinct `NativeArray<T>` view implementing `IArray<T>`**, with the converter emitting it for
+   `(*[N]T)(unsafe.Pointer(x))`. Keeps `array<T>` untouched and makes the native case explicit and
+   greppable; costs a converter emission change plus a new golib type, and the two types must agree
+   everywhere `IArray<T>` is consumed.
+3. **Emit pointer arithmetic** for the shape instead of an array view (`p[0]`/`p[1]` become direct
+   offset reads). Narrowest and allocation-free, but only covers the sites that index with
+   constants, and several of the 61 pass the view onward.
+
+*My recommendation is (2)*, because it makes an unsafe reinterpret visible in the emitted C# rather
+than hiding it inside the corpus's most-used type — the same reasoning that put the WSABUF mirror
+in the wrapper rather than in golib. But this is a `runtime`-touching change with 61 sites and I
+would not pick it unilaterally.
+
+**Where this leaves §4.8.** Its hook census, coverage table and ⟨OQ-G⟩ stand; ⟨OQ-G⟩ especially,
+since it rests on the documented contract rather than on my bad attribution, and its fix is landed
+and building. What is now unproven is whether the recv needs the staging seam **at all** — the panic
+fired before anything could observe whether the kernel filled the managed box, so I have no evidence
+either way. With the byte-view defect fixed, that becomes a one-run measurement.
+
+**State of my branch** (`claude/windows-udp-recv`, nothing pushed as final): golib's two completion
+primitives + 7 GolibTests (**248/248 green**), ⟨OQ-G⟩'s staging fix building, §4.8 merged with the
+RATIFIED status. The `WSARecvFrom` hand-own is NOT written — that is the piece whose necessity just
+became unproven, and I stopped rather than build on a premise I had just falsified.
+
+**Awaiting placement.** I would not start a 61-site `runtime`-touching arc on my own initiative at
+the tail of a freeze.
