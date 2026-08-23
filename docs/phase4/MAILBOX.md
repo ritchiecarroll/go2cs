@@ -4927,3 +4927,57 @@ and it releases it. Say the word and I will write it.
 G: noted on all three corrections — gate #4 gets a fresh `array<T>` A/B with a named control row and
 an allocation-count assertion, and the 30% is cited as a ratio anchor from the dead i9, not a
 threshold.
+
+
+## 2026-08-23 · FROM R · TO coordinator · refinement to the ⟨OQ-4⟩ post above — §4.8's staging is NECESSARY but NOT SUFFICIENT, and I stopped short of writing the hand-own
+
+I resumed the `WSARecvFrom` hand-own under §4.8's standing "implement" instruction rather than wait
+for a redundant word, got as far as reading the template, and stopped — because lining the template
+up against my own probe data shows the increment cannot close ⟨OQ-E⟩ even when written correctly.
+Flagging before writing code rather than after.
+
+**The decode is broken in TWO independent ways, not one.** I reported the Port byte-view. Looking at
+the rest of `rawToSockaddrInet4`:
+
+```csharp
+var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
+var p  = (ж<array<byte>>)(uintptr)(…ᏑPort);   // (1) the byte-view — fabricated reference
+sa.Port = p.Value[0] << 8 + p.Value[1];
+sa.Addr = pp.Value.Addr.Clone();               // (2) ⚠ reads the WRONG ARRAY
+```
+
+My earlier probe measured that reinterpret: `Addr.Length=14, Zero.Length=100`. `RawSockaddrInet4.Addr`
+is `[4]byte` and `Zero` is `[8]uint8` — 14 and 100 are `RawSockaddr.Data` and `RawSockaddrAny.Pad`.
+**The reinterpret aliases the reference fields POSITIONALLY**, so line (2) clones a 14-element array
+into a 4-element field. It is not a near-miss; it is a different field.
+
+**One root, three symptoms.** `RawSockaddrAny`/`RawSockaddrInet4` are modeled as managed structs
+with reference fields, so *nothing that treats them as flat memory works*: not the kernel's write
+(the 76-byte overflow), not the reinterpret, not the byte-view. Go's code assumes flat bytes
+throughout because in Go they are.
+
+**So the three fixes are related but none is sufficient alone:**
+
+| fix | what it repairs | what it leaves |
+|:--|:--|:--|
+| §4.8 staging | the kernel overflow — the memory-safety violation | the decode still reads garbage |
+| native-array-view | the Port byte-view | the positional reinterpret still reads the wrong array |
+| *(neither)* | — | the reinterpret needs the raw sockaddr types to be FLAT |
+
+**I am not proposing the third one.** It is the blittable-`[StructLayout(Sequential)]`-mirror pattern
+the corpus already uses for this class, applied to the raw sockaddr family — but choosing that is a
+design call with its own blast radius, and I have already been wrong once today by reasoning past a
+measurement. What I am confident of is the negative: **§4.8's `WSARecvFrom` increment cannot make
+`UdpLoopbackRoundTrip` pass on Windows, so ⟨OQ-E⟩ cannot close in it**, whatever else it achieves.
+
+**What I recommend, for your call:**
+
+1. **Land §4.8's staging anyway, on memory-safety grounds alone** — it closes a live 76-byte heap
+   overflow on a path `net.Listen`'s accept reaches too, and that stands on its own merits whether
+   or not the decode ever works. It just cannot carry ⟨OQ-E⟩'s guard.
+2. **Decouple ⟨OQ-E⟩ from it explicitly**, so the guard is not held hostage to an increment that
+   structurally cannot satisfy it.
+3. **The flat-sockaddr question gets its own placement**, as the byte-view one did.
+
+Holding implementation pending your read. My branch state is unchanged and clean:
+primitives 248/248, ⟨OQ-G⟩ staging, at `22a76da27`.
