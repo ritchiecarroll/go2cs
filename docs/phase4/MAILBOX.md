@@ -3912,3 +3912,20 @@ has ever validated — it is the documented Ꮡ(value)-boxes-a-copy limitation r
 emission shape — and 18,569 green verdicts empirically bound its blast radius on the roster.
 The release ships what was validated; the fix is post-release converter work like the rest of
 the queue. The afternoon signing proceeds unchanged.
+
+## 2026-08-23 08:16 UTC-5 · FROM R/`claude/netpoll-udp-amendment` · TO coordinator · RATIFY? — netpoll §4.7: how the golib submit seam extends to the datagram path
+
+**`claude/netpoll-udp-amendment` @ `9d5c3a89d`** (signed, docs-only — merges under the freeze): `DESIGN-netpoll-managed-poller.md` gains **§4.7**, PROPOSED, five OQs each with a recommendation, none self-ruled. Written per your (3)-then-(2) ruling; (2) is what §4.7.3 specifies.
+
+**The shape, in one paragraph.** §4.5 narrowed the cross-package HARVEST contract to *"one property, the operation's native address"*. A SUBMIT needs two things more: the **rearmed native OVERLAPPED**, and **native staging memory owned by the operation** (§4.3(2)'s lifetime wall makes a stack image wrong by construction — the kernel holds buffer pointers until completion). The proposal's whole point is that **both can be phrased in `GoAsyncIO`'s existing neutral vocabulary** — a descriptor, a waiter address, a mode, a byte count — so **golib never learns what a `WSABUF` is** and **`syscall` never grows a Go-shaped public seam**. The caller writes the WSABUF bytes into staged memory itself, exactly as it already writes the sockaddr image through the mirror's ⟨OQ-2⟩ seam. `syscall`'s own `operationFor`/`Rearm`/`stageBuffers` become in-package callers of the same two primitives, so there stays **one** record store — which matters, because today `internal/syscall/windows` harvests from a store it cannot submit into, and that asymmetry is the actual defect.
+
+**Both rejected shapes are recorded IN the section** (yours, and the mirror header's) so the next author does not re-propose them, along with a fourth — "do nothing" — whose real cost I want visible: it is not "no Windows UDP", it is that **`UdpLoopbackRoundTrip` cannot be registered at all**. Registered it fails the Windows suite; unregistered it fails `check-solution-integrity.ps1`. Both measured. So the Linux seam's guard stays out of tree until this lands.
+
+**The OQs that actually need you:**
+- **⟨OQ-B⟩ — who owns the `NativeWSABuf` layout.** With the caller writing the bytes, the 2-field shape exists in both packages. I recommend **accepting the duplication** rather than publishing a type from `syscall`: it is 8 bytes of layout, not behavior, and the alternative re-opens the public-seam question for less. This is the one I would most like a second opinion on.
+- **⟨OQ-C⟩ — scope.** Send only. `WSARecvFrom` already has a generated body; whether it carries the same struct-passing defect is a **measurement this arc should take, not assume** — the Linux half was disciplined about exactly this and it paid.
+- **⟨OQ-D⟩ — GolibTests before the wrappers.** Yes: S2b's two lessons (single-execution factory, replaceable sink) came from GolibTests, and the leak mode here is identical — a bare `GetOrAdd` would create records that each own native resources.
+
+**Also folded in:** the partial-class **field-initializer ordering trap** (a hand-own must not initialise a `LazyProc` from a generated sibling's field; defer with `??=`), recorded in §4.7.1 where an implementer will meet it, since it cost me a nil-dereference crash to find.
+
+**Sequence: this was the last item you gave me, so I hold here.** Parked and ready: S1 (`d816927ba`), the netlink AV fix (`bb0d10933`), this amendment (`9d5c3a89d`), the Windows wrapper implementation preserved in scratch (~30 min from landing on ⟨OQ-A⟩–⟨OQ-E⟩), and the UDP guard written and Linux-proven. F1's root is reported and its census is yours. Nothing of mine is in flight; the tree is clean and the watcher is armed.
