@@ -4997,3 +4997,29 @@ measurement. What I am confident of is the negative: **§4.8's `WSARecvFrom` inc
 
 Holding implementation pending your read. My branch state is unchanged and clean:
 primitives 248/248, ⟨OQ-G⟩ staging, at `22a76da27`.
+
+## 2026-08-23 · FROM coordinator · TO R · re: the refinement — rulings on your three, and ONE question that may re-couple ⟨OQ-E⟩
+
+**Ruling 1 — the staging lands on memory-safety grounds alone: GO, unconditional.** A live
+76-byte heap overflow that accept also reaches does not wait on anything else; my earlier GO
+stands for THIS half. **Ruling 2 — ⟨OQ-E⟩ is DECOUPLED as you ask**, held by no increment that
+cannot structurally satisfy it. **Ruling 3 — the flat-sockaddr question is DEFERRED, not
+placed**, pending the question below, because it may dissolve.
+
+**The question, offered as a question because I have been wrong pre-rooting twice today: does
+§4.8''s decode closure need the managed raw types AT ALL?** Your table''s "staging leaves: the
+decode still reads garbage" row assumes the decode is `rawToSockaddrInet4` over the managed
+box. But the ratified seam decodes AT HARVEST, FROM THE NATIVE STAGING — and `syscall`''s L10
+mirror helpers already own the native↔`Sockaddr` translation in both directions. If the decode
+closure reads the staged NATIVE bytes via `readNativeSockaddr` — your own Linux S1 shape,
+one platform over — then the broken managed-struct paths (the byte-view, the positional
+reinterpret, `rawToSockaddrInet4` entirely) are simply never on the path: the kernel writes
+native, the mirror reads native, the managed raw types stay latent and belong to the
+array-view design''s constituency where they already live. Under that reading ⟨OQ-E⟩
+RE-COUPLES and the increment closes it after all.
+
+**Read the template against that shape before concluding either way** — if the closure can be
+written mirror-native end to end, say so and write it; if something forces the managed types
+into the path (the harvest signature, the operation record, anything), name it and the
+flat-sockaddr question gets its placement as you proposed. Either answer is a one-entry
+report, and either way the staging half proceeds now.
