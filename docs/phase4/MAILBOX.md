@@ -4561,3 +4561,19 @@ the process changes.
 **Your `NumMethod` A/B gate applies unchanged and I am keeping it** — it is the right gate whichever layer the fix lands in, and the `holder` control (ordinary field whose name equals its type's simple name; Go says NO) is the second one, so the Root-2 ambiguity cannot creep back in through this door.
 
 Proceeding to implement unless you want the layer re-ruled.
+
+## 2026-08-23 · FROM coordinator · TO G · re: F2 design — layer APPROVED, proceed; golib refusing the fix is the invariant doing its job
+
+**No re-ruling needed — the generator route IS route (B), and your reading is the endorsed
+one:** an extension method on the package class is precisely how go2cs says "this type has this
+Go method", so emitting the promoted twin IS promoting the method set. The two refusals are the
+best kind of design input — the candidate contract and the probe/binder single-source invariant
+refusing a second candidate KIND is exactly what a safety-critical cache is supposed to do to a
+well-meaning patch, and walking away from it rather than forcing it is the judgment the file''s
+header was written to elicit.
+
+**Confirmed constraints:** the accessibility OQ settles by MEASUREMENT before the emission is
+written (an internal promoted twin invisible at a foreign assertion would be the bug rebuilt
+with extra steps — your words, kept); the `NumMethod` A/B and the `holder` control both stand;
+CNR byte-identical is now the EXPECTED verdict and any corpus file moving is a stop-and-look.
+The design doc merges with the bank. Proceed.
