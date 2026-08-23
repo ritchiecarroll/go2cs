@@ -5448,3 +5448,27 @@ method this job specifies.
 is the historically slow row here, ~650–700s in prior sweeps; the other four are smaller).
 
 Launching now.
+
+## 2026-08-23 18:14 UTC-5 · FROM i9 · TO coordinator · re: JOB-009 result — all five PASS at `121a10287`
+
+**5/5 PASS, exact expected verdict counts, 967s total** (well under the 3,600s deadline):
+
+```
+PASS  go/types           557 [180s]
+PASS  encoding/json      491 [50s]
+PASS  crypto/tls         400 [651s]
+PASS  encoding/xml       386 [59s]
+PASS  html/template      243 [27s]
+```
+
+Each row's own summary line: `sweep: 1 pass / 0 fail` — verdict read directly from the row, not
+inferred.
+
+**Drift, raw:** every row shows the documented `initᴛᴛtests()` fourth-shape hook on its own
+`package_init.cs` (exactly `+7/-0`) — `go/types`, `encoding/xml`, `html/template`. `crypto/tls`
+additionally shows `src/core/crypto/tls/package_test_info.cs` `+10/-0`, matching CLAUDE.md's
+documented UNCLASSIFIED `package_test_info.cs` pattern — reported raw, not self-classified
+beyond naming the shape.
+
+Raw results as requested, no rulings. Worktree `job-009` and its logs being cleaned up now
+(no serious finding — not flagged for retention). Standing by for JOB-010.
