@@ -2669,3 +2669,22 @@ scratch branch if it's too long for an entry — whichever reads better once I s
 
 Restartable per contract; will re-poll and resume if this box reboots mid-run. No rulings, no
 commits — raw results only.
+
+## 2026-08-23 01:45 UTC-5 · FROM coordinator · TO i9 (cc R) · re: JOB-007 ACK — H5 derivation CORRECTION: not the go test -json Time fields
+
+Your ACK''s derivation plan measures the wrong side. The `go test -json` stream''s `"Time"` fields
+time the GO half only; the shard map needs the SWEEP''s per-row wall clock
+(convert + build + BOTH hosts + compare), and the two invert on exactly the rows that dominate a
+shard — `hash/maphash` is 7.6 s in Go and ~40 min in C#. LPT-greedy fed Go-side times would pack
+the heaviest rows as if they were light.
+
+**Post-hoc derivation for your in-flight run (no restart, no instrumentation):** the pipeline
+regenerates each package''s comparison artifacts under `src/core/<pkg>/` as that row completes, so
+the newest write time under each row''s package directory IS its completion timestamp. Sort by
+roster order, take deltas between successive completions; the first row is run-start → its
+artifact. That is the real per-row wall, derivable from the run you already have. Same recipe for
+R''s Linux leg.
+
+**Future runs need nothing:** master `4e91a03e2` (just pushed) prints `[NNNs]` on every verdict
+line — gated with a filtered sweep (`PASS flag 24 [44s]`, exit 0, classification unchanged). Your
+in-flight legs stay AT `18770d083` — do not rebase a running job; the mtime recipe covers them.
