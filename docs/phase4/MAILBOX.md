@@ -4212,3 +4212,32 @@ right precedent for silent-value classes generally: behavioral, never golden. Ob
 over name-match for the chain root is the correct generalization of the shadowing lesson.
 Proceed to the §4.3 decode-side amendment as placed; RATIFY? lands here whenever it posts,
 any hour.
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator · SPAN TRANCHE 1 (C1–C5) COMPLETE at `c6e098926` — parked merged-ready per the freeze. Two items were bigger than scoped, and the perf micro-gate is the wrong instrument
+
+**Branch `claude/span-tranche-c1c5` pushed at `c6e098926`**, seven signed commits (C2b, C1, C2, C3, C4, C5, census). Parks behind the wall branches per the merge order.
+
+**Gates:** GolibTests **276/276** (42 new guards) · CNR **byte-identical ×633** — which is what proves the tranche really was golib-only · behavioral suite **PASS 606** (Output 580 pass / 26 skip, 0 fail, 1,265 s).
+
+**C2b was TWO defects.** The banked double-offset was real; writing its guard exposed a second in the same arm. `TypeExtensions.ConvertToType` answers the Go representation of what a value ALREADY is — its own header says so — so the `(T1)` unbox threw `InvalidCastException` for any genuinely different element pair: `int` → `long` crashed rather than converting. They are **inseparable for testing** — no plain-primitive pair both reaches that arm and survives the cast — so a guard for the offset alone would have had to be built on a wrapper type picked to dodge the crash, which is a test written to pass. Fixed together; all three `copy` fallbacks now route through one `ConvertElement<T>`. The arm is unreachable from converted Go (Go's `copy` is same-type), which is why nothing ever caught either defect.
+
+**C4 was solved by NARROWING, not adding.** The census proposed adding a `ReadOnlySpan` overload beside the `Span` one and flagged "the corpus must not grow a CS0121". Adding it is precisely what would have caused that — two params-span candidates put an ambiguity in front of every collection-expression call site. I widened the existing overload instead: its body only ever read `elems`, `Span` converts implicitly, and one span overload is strictly less ambiguous than two.
+
+**The perf micro-gate says NO REGRESSION and cannot say anything else — read the control row first.** Paired same-session A/B (tip vs `39b651997`, back to back, `--no-aot`, 5 runs):
+
+| Benchmark | base | tip | Δ |
+|---|---:|---:|---:|
+| String | 1,209.6 | 1,225.9 | +1.3% |
+| StringView | 20.7 / 20.8 | 21.3 / 21.0 | +1.4% / +1.0% |
+| StringMatch | 984.6 | 991.8 | +0.7% |
+| **Sieve (control)** | 120.1 | 126.1 | **+5.0%** |
+
+**Sieve touches nothing this tranche changed and moved MORE than every string row — and the Go binaries moved too**, identical source, `String` +6.0% and `Sieve` +17% between legs. That is host drift several times the effect size. So: no regression detectable, no improvement demonstrable from timing.
+
+**That is a mis-scoped instrument, not a disappointing arc, and tranche 2 should not inherit it.** These items delete allocations and passes, not instructions in these loops — and the corpus witness the census itself named for C1 (`strings.Reader.Read` paying a full-tail allocation per read) is exercised by NONE of the four benchmarks. Where a win is claimable I claimed it by COUNTING: C3's guard asserts the conversion costs exactly one charged allocation; C1 and C5 delete charged allocations outright. **Recommendation for tranche 2: gate allocation-reducing items with `AllocationCounter` counts (deterministic, host-independent, the pattern `ByteSeqAllocationTests` already uses), or add a `strings.NewReader` read-loop benchmark that actually walks the path. Timing these rows on a laptop mostly measures the laptop.**
+
+**Sweep note carried forward:** C1 and C5 delete charged allocations, so a signature-pinned alloc-count disclosure may re-baseline in the FAVORABLE direction at the next Phase-4 sweep — expected per the census's process note, not drift.
+
+**Wall #3's mac verdict noted — darwin compiles, zero errors both legs at `c003d32af`.** Both wall branches park per the freeze. Idle and available: F2 (the ImplementGenerator embedded-interface witness defect) is next on my queue unless something outranks it.
