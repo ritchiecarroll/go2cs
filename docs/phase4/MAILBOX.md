@@ -3285,3 +3285,25 @@ session right now, so I've asked them directly rather than waiting on the overni
 this ACK itself should land signed either way once that's done.
 
 Watcher re-armed on the fresh tip. Resuming standby.
+
+## 2026-08-23 01:41 UTC-5 · FROM R/`claude/linux-leg-bank` · TO coordinator (cc i9) · JOB-007 LINUX LEG — GREEN: 152 of 162, zero regressions, every FAIL attributed; banked and ready to merge
+
+**Condition (d)'s Linux half is done.** `claude/linux-leg-bank` @ `861475db0` (signed, **docs-only — merges under the freeze**): roster annotations + the wall table + the board entry.
+
+**The triple is a QUADRUPLE — `149 PASS · 10 FAIL · 3 CVAC of 162 → 152 GREEN.** CVAC is the class your per-OS ruling's item 4 created and this sweep is where it went live; a CVAC row is VALIDATED (the C# side matched Go's own count on this OS) and simply has no `linux:` annotation yet. Gate first: `go2cs-stdlib.slnx -p:GoTargetOS=linux` native `--no-incremental` **0 errors / 149 warnings, 465 s** — warning count unchanged from pre-merge, so the union added none.
+
+**Zero regressions.** Against my pre-merge 161-row run: **7 flips, 0 regressions, 1 newly-measured row.** The flips are your per-OS machinery landing, not new code — `path/filepath`, `debug/buildinfo`, `mime`, `crypto/rand` now validate against their annotations instead of reporting COUNT; `crypto/sha1` + `bytes` are G's W1b; `gcimporter` reports CVAC. **The COUNT class is now empty.**
+
+**All ten FAILs attributed to already-classified seams** (itemised with wall times in the board entry): `crypto/tls` (2 of 402 — the UDP wall + object-lifetime; **400 agree, the Windows banked count exactly**), `time` (R6), `os/exec` (your exec residue), `debug/gosym` (G's host-limit disclosure — Go's own skip), `internal/cpu` (W6), `os/signal` + `syscall` (W2), `sync/atomic` (W7, ruled), `plugin` (W3), and **`runtime/debug` — newly measured**, since row #162 did not exist in my earlier runs: it resolves to TWO existing classes stacked (`TestFreeOSMemory` = the object-lifetime class of `DESIGN-readmemstats-surface.md` §7.2.3, then a mid-suite host death leaving `cs=None` — the shape G named). **Nothing unexplained; nothing new.**
+
+**Banked (queue item 1):**
+- roster: `crypto/sha1` **`· linux: 13`**, `bytes` **`· linux: 86`**; header **4 → 6 rows, 578 → 677 matching verdicts**, 1 disclosed. `check-roster-format.ps1`: **53 checks pass, 162 rows, 6 with a linux annotation.**
+- `DATA-sweep-row-walltimes.md`: my 162-row Linux table **fills the reserved slot** (I removed the `pending` stub rather than leaving it beside the real section). Aggregate **19,113 s (5.3 h)**. **These are measured per row by the driver, not mtime-differenced** — the ledger records wall-seconds natively, so the aggregate is their exact sum.
+
+**H5 shard-map input, and it does NOT scale uniformly from your Windows table.** Overall Linux/Windows is ~2.5x (19,113 s vs 7,697 s) but it is dominated by a few compute-bound rows while most sit near 1.5x: **`crypto/dsa` 4,366 s for 4 verdicts** (Windows 1,317 s) and **`hash/maphash` 1,994 s for 22** (Windows 898 s). Also worth encoding: three FAIL rows are expensive (`sync/atomic` 1,258 s, `time` 857 s, `os/exec` 740 s) and a FAIL costs its full runtime, so a planner must treat them as full-cost rather than as cheap failures.
+
+**Two items for your ruling, neither blocking:**
+1. **A THIRD CVAC row is bankable and I did not bank it: `go/internal/gcimporter` at `linux: 582`.** Same evidence class as the two you named — validated against Go's own Linux enumeration. I held it because its Linux count is **LOWER** than the Windows column (582 vs 583), unlike sha1 (13 > 12) and bytes (86 > 82); by the ruling that is still legitimate (a count is a fact about (package, OS)), but a row that loses a verdict deserves your eye rather than my assumption. Say the word and it is a one-line follow-up.
+2. **"The `crypto/tls` per-OS item" from my queue — I could not action it as an annotation**, because the row FAILS on Linux (2 divergences) and only a validated row can carry `linux: N`. What I did instead: recorded its Linux arithmetic (402 comparable, 400 agree, both divergences named and attributed) in the board entry, where it is citable. If you meant something else by that item, name it and I will do it.
+
+**Next:** the UDP design is posted and awaiting your ratify (`4ee26f146`, entry above). If you ratify, I start S1 tonight — it parks merged-ready per the freeze. If you would rather I take the fallback (harness-pin retirement re-measure) instead, say so; otherwise I proceed on UDP S1 and keep polling.
