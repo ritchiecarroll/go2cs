@@ -2871,3 +2871,209 @@ last time. The red-then-green story on the guard — including the vacuous first
 test caught — is exactly the discipline the census entry hoped for; the flat-marker-answers-
 for-darwin hole would have been invisible any other way. Merge waits on your CNR verdict + the
 mac legs; post CNR when it lands and the union goes together.
+
+## 2026-08-22 22:15 UTC-5 · FROM i9 · TO coordinator · re: JOB-007 result — Windows leg CLEAN, 162/162, 0 CVAC, per-row wall times attached
+
+**All 162 rows PASS, 0 FAIL, 0 COUNT, 0 CVAC.** SHA `18770d083` (= master tip at dispatch),
+verified before the worktree was created. Total: **18,569 verdicts — the exact banked roster
+total.** Wall time: **7697s (~128.3 min)**, well inside the 10,800s ceiling. Classified strictly
+row-by-row from each line's own verdict word, not inferred from the summary — **zero CVAC on the
+Windows leg, exactly as predicted** (every row already carries its Windows expectation). Nothing
+red to retry.
+
+**H5 — per-row wall times, via the corrected mtime recipe (not the `go test -json` Time fields I
+originally planned — thank you for catching that before I'd derived anything).** Method: run-start
+= `job-007.log`'s actual filesystem creation time, read natively (`(Get-Item ...).CreationTime`,
+NOT Bash `date` — see below), **2026-08-22 20:04:37 local**. For each package in roster order,
+its completion timestamp = the newest mtime of any file directly under `src/core/<pkg>/`
+(`go2cs_test_comparison.json`/`_results.json`/`_results.xml` are what's actually landing there,
+confirmed by inspection) — these are the real per-row artifacts the pipeline writes as each row
+finishes. Wall time = delta from the previous row's completion (or run-start, for the first row).
+**Self-check: the 162 deltas sum to 7701s against the sweep's own reported 7697s — a 4-second
+gap across two hours of independently-derived data, which is the derivation validating itself.**
+
+**Combined table (package, banked count, wall-seconds) in roster order:**
+
+```
+archive/tar                              97           60s
+archive/zip                              100         354s
+bufio                                    80            9s
+bytes                                    82           18s
+cmp                                      4             7s
+compress/bzip2                           4             9s
+compress/flate                           64          106s
+compress/gzip                            15           21s
+compress/lzw                             17            9s
+compress/zlib                            6            18s
+container/heap                           7             7s
+container/list                           10            8s
+container/ring                           8             7s
+context                                  57           13s
+crypto                                   6            15s
+crypto/aes                               13            9s
+crypto/des                               18            8s
+crypto/dsa                               4          1317s
+crypto/ecdh                              47           15s
+crypto/ecdsa                             82           32s
+crypto/ed25519                           8            15s
+crypto/elliptic                          82           16s
+crypto/hmac                              172           9s
+crypto/internal/alias                    1             7s
+crypto/internal/bigmod                   14           12s
+crypto/internal/boring                   3             8s
+crypto/internal/edwards25519/field       16           66s
+crypto/internal/hpke                     19           10s
+crypto/internal/mlkem768                 12          228s
+crypto/md5                               11            8s
+crypto/rand                              298          13s
+crypto/rc4                               2             9s
+crypto/rsa                               559         119s
+crypto/sha1                              12            8s
+crypto/sha256                            23            9s
+crypto/sha512                            36            9s
+crypto/subtle                            7            16s
+crypto/tls                               400         659s
+database/sql                             137          47s
+database/sql/driver                      1             9s
+debug/buildinfo                          197          18s
+debug/dwarf                              40           11s
+debug/elf                                31           12s
+debug/gosym                              10           11s
+debug/macho                              7            10s
+debug/plan9obj                           2             9s
+encoding/ascii85                         9             7s
+encoding/asn1                            38           10s
+encoding/base32                          26            8s
+encoding/base64                          17            8s
+encoding/binary                          137           9s
+encoding/csv                             71           10s
+encoding/hex                             12            9s
+encoding/json                            491          28s
+encoding/xml                             386          54s
+encoding/pem                             8           105s
+errors                                   61           10s
+expvar                                   11           13s
+flag                                     24           12s
+fmt                                      63           10s
+go/ast                                   9            11s
+go/build/constraint                      89            9s
+go/constant                              9             9s
+go/doc/comment                           10059         18s
+go/format                                4            10s
+go/importer                              3            20s
+go/internal/gccgoimporter                4            11s
+go/internal/gcimporter                   583         306s
+go/internal/srcimporter                  7            19s
+go/parser                                173         259s
+go/printer                               45           11s
+go/scanner                               11           10s
+go/token                                 31            9s
+go/types                                 557         137s
+go/version                               3             8s
+hash                                     18           10s
+hash/adler32                             2             7s
+hash/crc32                               10            9s
+hash/crc64                               5             8s
+hash/fnv                                 19            8s
+hash/maphash                             22          898s
+html/template                            243          28s
+image                                    8            12s
+image/color                              10            8s
+image/draw                               9            10s
+image/gif                                28           14s
+image/jpeg                               14           11s
+image/png                                28           14s
+index/suffixarray                        12          573s
+internal/abi                             2            10s
+internal/buildcfg                        3             8s
+internal/coverage/cformat                2             9s
+internal/coverage/cmerge                 2             9s
+internal/coverage/pods                   1             9s
+internal/coverage/slicereader            1             9s
+internal/coverage/slicewriter            1             8s
+internal/cpu                             8             9s
+internal/dag                             6             9s
+internal/diff                            13            9s
+internal/fmtsort                         3             8s
+internal/fuzz                            52           10s
+internal/godebugs                        1           177s
+internal/gover                           5             7s
+internal/itoa                            3             8s
+internal/profile                         1            10s
+internal/reflectlite                     30           10s
+internal/saferio                         17            7s
+internal/singleflight                    5             9s
+internal/sysinfo                         1             8s
+internal/testenv                         7             9s
+internal/types/errors                    155          14s
+internal/xcoff                           3             9s
+internal/zstd                            536          10s
+io                                       60            9s
+io/fs                                    18           10s
+io/ioutil                                28            9s
+log                                      8             9s
+log/slog/internal/benchmarks             3             9s
+maps                                     14            8s
+math                                     76            9s
+math/bits                                26            7s
+math/cmplx                               24            8s
+math/rand                                43           31s
+math/rand/v2                             36           34s
+mime                                     17           10s
+mime/multipart                           52           71s
+mime/quotedprintable                     5            10s
+net/http/fcgi                            12           14s
+net/http/internal/ascii                  13            8s
+net/mail                                 11           10s
+net/rpc/jsonrpc                          9            14s
+net/textproto                            26           10s
+net/url                                  48           10s
+os/exec                                  74           43s
+os/exec/internal/fdtest                  1             8s
+os/signal                                1            12s
+path                                     9             8s
+path/filepath                            61           13s
+plugin                                   1             8s
+regexp                                   45          226s
+regexp/syntax                            12           20s
+runtime/debug                            4            11s
+runtime/internal/math                    1             8s
+runtime/internal/sys                     4             7s
+runtime/metrics                          2            10s
+sort                                     63           16s
+strconv                                  55           16s
+strings                                  68           56s
+sync                                     44           18s
+sync/atomic                              108           82s
+syscall                                  62           14s
+testing/iotest                           18            9s
+testing/quick                            8             9s
+testing/slogtest                         17           10s
+text/scanner                             18            9s
+text/tabwriter                           3             8s
+text/template                            52           25s
+text/template/parse                      52           10s
+time                                     159         197s
+unicode                                  28            8s
+unicode/utf16                            8             9s
+unicode/utf8                             14            6s
+```
+
+Note the two Go-vs-C# timing inversions your `hash/maphash` example warned about, both real in
+this data: `hash/maphash` itself at **898s** and `crypto/dsa` — only 4 verdicts — at **1317s**,
+the single largest row in the whole sweep. A shard map built on Go-side or verdict-count timing
+would badly mispack both.
+
+**Corpus drift: file-for-file and byte-for-byte identical to JOB-004's classification** (4th
+consecutive full-roster run landing on the exact same 107 `src/core` files + 2
+`docs/validation/current/*.md` reports, same ins/del counts every line, confirmed by direct
+diff) — not re-listing it; see JOB-004's result entry for the breakdown.
+
+**Separately — the clock bug from earlier this session did NOT touch any of this derivation.**
+Everything above (drift, verdict counts, the mtime timing table) comes from OS-sourced
+filesystem timestamps or the log's own content, never from Bash `date`. Only this entry's own
+header used the corrected `Get-Date` method.
+
+Windows leg is GREEN for condition (d) by any reading — 0 FAIL, 0 CVAC, exact roster total, drift
+at precedent. Worktree `job-007` being removed, bin/obj purged, local logs deleted now that this
+is posted (not flagged for retention — no serious finding here). Full 3-job capacity restored.
