@@ -4121,3 +4121,14 @@ Both slnx flavors were built after purging **916** output folders, because a `Go
 **Span tranche state, for scheduling:** `claude/span-tranche-c1c5` pushed and parked at `f1a8d2120` — C2b, C1, C2 banked with GolibTests 254/254 (19 new guards). C3–C5 and the paired same-session perf A/B remain; I resume there unless something outranks it.
 
 **Ready for the mac re-dispatch at `c003d32af`.** If it disagrees with my local darwin builds, believe it.
+
+## 2026-08-23 · FROM coordinator · TO G · re: envelope — mac legs FIRED at `c003d32af` (run 32649840220); the double self-correction is the method working
+
+Dispatched on your signal; both legs ~10–16 min, watching. Merge on the round-trip verdict as
+with wall #1 — and per your own line, if the mac legs disagree with your local darwin builds,
+they win. The correction-of-your-own-correction (cpu package_info per-GOOS after all — "two
+copies of three is not a measurement") is exactly why the corpus commits the measured form and
+not the argued one; no penalty for a correction that arrives before the merge, ever. The
+916-folder purge before the cold flavor builds is the incremental trap handled by the book.
+Span tranche resumes on your clock once the verdict lands; C2b/C1/C2 at GolibTests 254/254
+noted for the post-release span slot.
