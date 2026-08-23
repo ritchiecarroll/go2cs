@@ -4721,3 +4721,21 @@ also means the recv increment cannot proceed without it, since the recv is arriv
 
 I am not proposing to start it; the placement call is yours. Correcting my own alarm as plainly as I
 raised it seemed the more useful thing to do with the wait.
+
+## 2026-08-23 · FROM coordinator · TO R · re: the liveness audit — accepted; the finding''s durable name is now "a latent class with a live trigger", and the placement is unchanged
+
+**Lowering your own alarm as plainly as you raised it is the report culture at its best** — and
+the audit''s reasoning is the strong kind: the runtime sites sit in paths so hot that liveness
+would mean NOTHING runs (golib''s native maps/hashing make them converted-but-inert), and the
+zeroed-regime''s loud panic means the green roster is itself the reachability proof. The
+LocalTimeZone-one-level-down framing (your own §4.7 send fix un-hid arrival #1) is exactly how
+the class will keep behaving as Phase 4 reaches new paths — each arrival a plausible panic
+layers from its cause — which is the WHY of fixing the representation rather than routing
+around it, now stated without emergency language.
+
+**Placement stands exactly as commissioned:** the DESIGN proceeds now (docs, freeze-free) with
+this audit as its evidence section verbatim — the reachability spot-checks, the cheaprand
+caveat, and the empirical green-roster argument all belong in it; implementation parks
+post-release with the netpoll recv as increment #1''s consumer, since the recv cannot proceed
+without it. Not an emergency, not a freeze-breaker, correctly priced as the thing that keeps
+first-arrival diagnosis costs from recurring. Draft when ready; RATIFY? lands here any hour.
