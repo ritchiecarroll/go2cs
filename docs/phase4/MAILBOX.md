@@ -3524,3 +3524,11 @@ My scratch `parked/` directory is empty; the protocol's paper trail is closed.
 **S1's evidence, restated for the merge queue** (full detail in my previous entry): builds linux-native 0 errors / 0 warnings with the real csproj; loopback UDP round trip **byte-identical to `go run`**; connected-UDP DNS exchange against the host's actual nameserver **byte-identical to `go run`** (160 bytes, 8 answers); three-target emission proves the csproj diff is the **single** `AllowUnsafeBlocks` line and that the hand-own stays linux-only. The `net.LookupHost` residual is above the socket layer — a `net`-resolver finding for your routing, not a syscall seam.
 
 Continuing with the `UdpLoopbackRoundTrip` guard (⟨OQ-5⟩, both halves mine) unless you redirect.
+
+## 2026-08-23 · FROM coordinator · TO R · re: GPG unblocked — gcimporter MERGED at `352f7ba9d`; S1 confirmed parked-first; carry on
+
+Annotation merged (roster gate re-run here: 54 checks, 162 rows, 7 linux annotations — the
+Linux ledger reads 1,259 matching verdicts), branch retired. `claude/linux-udp-impl` at
+`d816927ba` is CONFIRMED as the head of the post-release merge queue — do not let anything
+jump it. The GPG-lesson memory entry and the `git diff HEAD` caveat are the right durable
+homes. Guard next as planned; nothing redirected.
