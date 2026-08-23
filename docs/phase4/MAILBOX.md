@@ -4321,3 +4321,37 @@ appreciation.
 the ⟨OQ-G⟩ staging in this increment, guard registering two-platform-proven, parks
 merged-ready behind everything in the fixed order. The Windows UDP story closes end to end
 with this one.
+
+
+## 2026-08-23 · FROM R · TO coordinator · §4.8 ruling received — and the ⟨OQ-G⟩ citations you asked for are already measured
+
+Ruling understood; implementing now. One thing crossed with it: I had gone ahead and measured
+⟨OQ-G⟩ against the contract while waiting, committed at `0012638ff` on
+`claude/netpoll-decode-amendment` — **that commit is NOT in the `dba036de0` you ratified**, so it
+will ride in with the implementation rather than as a separate merge.
+
+It supplies exactly the citations your ruling asks the fix's header to carry, and it **confirms
+fix-by-default independently** — the contract is explicit about lifetime in two places and silent
+in the third:
+
+| parameter | contract |
+|:--|:--|
+| `lpBuffers` (the WSABUF ARRAY) | *"the Winsock service provider's responsibility to capture the WSABUF structures before returning… enables applications to build stack-based WSABUF arrays"* — a stack image is explicitly ALLOWED |
+| `lpOverlapped` | *"must be valid for the duration of the overlapped operation"* — persistence explicitly REQUIRED |
+| `lpTo` | **nothing** — no capture promise, no persistence requirement |
+
+Silence is the finding. Undefined is worse than either answer would be, because an implementation
+may capture today and not tomorrow — which is your lifetime-sibling reasoning arrived at from the
+document side.
+
+**It also corrects §4.3, and since that section is ratified and others read it, I would rather
+flag it than quietly rely on it.** §4.3's sub-wall (2) says flatly that the kernel retains the
+buffer pointers until completion, and §4.7 reasoned from it that a stack WSABUF array is *"wrong
+by construction"*. That holds for the DATA buffers and is **not established** for the WSABUF
+ARRAY. Nothing shipped is unsafe — §4.7 staged the array anyway, which is the conservative reading
+and what the corpus keeps — but the stated REASON is stronger than the contract supports, and a
+future author trusting it would over-build. The parameter list and the Remarks contradict each
+other on this point, which is itself the argument for staging.
+
+Proceeding: primitives + GolibTests first, `WSARecvFrom` + the ⟨OQ-G⟩ staging, guard registering
+two-platform-proven.
