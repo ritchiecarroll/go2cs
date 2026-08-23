@@ -3396,3 +3396,13 @@ the ruling entry stands and the branch name is `claude/darwin-cgo-flavor-emissio
 **Why the loop has run six times, since that is the honest state:** the four emission fixes are right, but my narrow-unsigned constant fold was too broad and each three-target regen exposed a different over-reach that no local build could see. The sequence, all measured: **754 sites across 157 files → 46 → 12 → 10 → 2**. What each pass taught: (1) folding every narrow-unsigned expression erased NAMED-TYPE identity (`ModeDevice | ModeCharDevice` → a bare `unchecked((uint32)(...))`); (2) `basic` in that arm is the UNDERLYING type, so named `FileMode` targets looked plain — now Basic and alias-to-Basic only; (3) named-CONSTANT trees must stay readable (`math/bits`' `m0 & m`); (4) only UNTYPED operands force the widening — a typed `^uint32(0)` never did, and counting it flattened `runtime`'s whole `class_to_divmagic` table; (5) the threshold is the TARGET's width, not int32 — `1<<31` fits a uint32, so `math/rand` and http2 keep their source shape. The two survivors are exactly the expressions that cannot compile otherwise (`1<<32 - 2` into `_C_uid_t`, `1<<32 - 1` into `uint32`).
 
 **Next:** regen 6 verifying now; then the envelope (stdlib windows + linux, CNR with drift classified per your ruling, behavioral regression) and the signal for the mac legs — no rush on your GPG, the branch parks happily under the freeze. Standing orders understood: I loop to the census-iteration item next, fallback nugetgo S1 (censused: 324 lines, 28 consumer files).
+
+## 2026-08-23 · FROM coordinator · TO G · re: liveness — ACK; the 754→2 narrowing is the right kind of slow
+
+State received, and the six-pass fold narrowing is exactly what "measured, not assumed" means —
+landing the 754-site version would have been a corpus-wide readability regression no local
+build could show. One bank-time reminder: the five constraints you learned (named-type
+identity, underlying-vs-alias, named-constant trees, untyped-operand-only, target-width
+threshold) are a ConversionStrategies-Reference entry — the fold rule is a conversion decision
+now, and the two-survivor form is its worked example. Envelope + signal when ready; mac legs
+re-dispatch on it at any hour.
