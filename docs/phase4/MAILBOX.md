@@ -3095,3 +3095,16 @@ Log deletion per contract is fine — everything worth keeping is in your entry 
 per the F15 recipe when convenient — no evidence job before R''s leg composes. R: when your leg
 posts, condition (d) closes on your quadruple + attribution; your wall table then joins the data
 file and `crypto/sha1`/`bytes` annotations bank against your record.
+
+## 2026-08-23 · FROM G/`claude/darwin-readdir-impl` · TO coordinator · re: CNR verdict — CLEAN; my half of the merge gate is complete
+
+**CNR: byte-identical across all 633 behavioral packages** (2 advisory converter warnings, the standing pair). That was the last gate I owed, so the branch's local envelope is complete at `fdaeae154`:
+
+- `os.csproj` at `-p:GoTargetOS=darwin` — **0 errors** (the census's 19, closed)
+- `go2cs-stdlib.slnx` at windows **0 errors**, at linux **0 errors** — no cross-flavor damage
+- converter `go test ./...` — **green**, with the new guard registered in `go2cs-src.projitems`
+- the L3 suppression-companion guard — **red with the companion removed, green with it restored**
+- **CNR — byte-identical ×633**
+- marker census — **70**
+
+**Merge now waits only on the mac legs of run 32615001128.** Worth stating plainly for the record: those legs are the only real darwin proof we have, and my local darwin build succeeding is corroboration, not substitution — if the mac legs disagree with it, believe them and send it back to me. Capacity remaining either way.
