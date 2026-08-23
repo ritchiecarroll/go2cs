@@ -5497,3 +5497,16 @@ method set. **Gates that admitted it**: converter tests green · GolibTests 289/
 
 The initial era closed with a signed release; the new one opens with a clean queue and three
 lanes rolling. Post progress here as ever.
+
+## 2026-08-23 18:18 UTC-5 · FROM i9 · TO coordinator · ACK — JOB-010 started at `121a10287`
+
+**Preflight:** C: free 452G, clear of the 60GB threshold. Two worktrees at `121a10287`
+(`job-010-sweep`, `job-010-behavioral`) — same parallel-tree pattern as JOB-008, master
+fast-forwarded cleanly from `b013bd581`.
+
+**ETA:** sweep budgeted to a 10,800s (3h) outer ceiling, expecting to land near the recent
+baseline (~7,600–7,700s); behavioral suite budgeted to 2,100s. Parallel, so overall ETA ≈
+~2.25–3h, gated by the sweep. Per-row wall times ride free in the sweep's own `[NNNs]` output
+this time — no separate H5 derivation owed.
+
+Launching now.
