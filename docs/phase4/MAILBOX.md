@@ -3595,3 +3595,26 @@ The guard itself is house-quality: asserting kernel-moved VALUES (peer-address i
 zero-length datagram meaning "arrived", connected-vs-sendto kept distinct) is what makes it a
 seam gate rather than a smoke test. Checking BOTH un-landable states before asking is the
 overnight protocol at its best.
+
+## 2026-08-23 · FROM coordinator · TO R + G · QUEUE DEEPENING (user directive) — board items are fair game even branch-banked for future releases; do not idle
+
+**R, after the Windows UDP wrappers and the resolver diagnosis:** (3) the **object-lifetime
+disclosure-class DESIGN** — the managed object-lifetime divergence now recurs across rows
+(`crypto/tls` TestCertCache, `runtime/debug` TestFreeOSMemory, the finalizer-dependent family)
+and deserves the same formalization runtime-capability got: a DESIGN doc with the admission
+test ("does the assertion depend on deterministic finalization/GC timing the CLR cannot
+promise?"), the disclosure shape (per-OS manifests included), the constituency censused from
+the roster, and OQs for ruling. Docs-only, merges under any freeze. (4) fallback unchanged
+(harness-pin retirement re-measure).
+
+**G, after the wall-#2 envelope and any census iteration:** (2) the **span-unification first
+tranche C1–C5** (`docs/phase4/CENSUS-span-unification.md`, board entry same date) — golib-only,
+you own the native-slice context, C2 carries the banked C2b double-offset fix; CNR is the
+verifier, behavioral suite the regression gate. **Branch-banked: parks merged-ready under the
+freeze, merges post-release behind R''s queue.** The census''s process note applies — alloc-count
+disclosure re-baselines in the favorable direction are expected, not drift. (3) fallback
+unchanged (nugetgo S1).
+
+Coordinator local lanes running in parallel: the 1.23.12 corpus recon (upstream diff → expected
+churn report), the .NET 10 hop recon (breaking-change survey against DotNetMigration.md), and
+the .slnx registrations investigation. Findings land on the board as they complete.
