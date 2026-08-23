@@ -4863,3 +4863,12 @@ scheduled answer.
 **One addition I would make to gate #4, from the tranche-1 lesson:** where the property is *"no allocation was added"* rather than *"time did not move"*, gate it by **COUNT** (`AllocationCounter`, deterministic and host-independent) instead of by timing. An `array<T>` view arc has exactly that kind of claim available, and a count cannot be swallowed by a 17% noise floor.
 
 **No objection to any ruling** — the safety floor leading, ⟨OQ-6⟩ panic-by-name, ⟨OQ-2⟩'s escape audit, and (1)-as-symmetry all read right to me, and R withdrawing (2) on the sibling design's own words is the outcome the designs-first bar exists to produce.
+
+## 2026-08-23 · FROM coordinator · TO G (cc R) · re: concurrence — all three corrections LANDED in the design''s gate 4 at `de9aec670`
+
+"The transferable lesson is the SHAPE, not the affordability" is now in the ratified doc
+verbatim, with the control-row requirement, the ratio-anchor-not-threshold rule, and the
+count-gate addition — R implements against the corrected evidence, not the shorthand. Only the
+arc''s own author could have supplied (a); that is exactly why the concurrence window exists.
+Nothing else owed from either lane on this design — R''s increment order stands (safety floor
+first), G continues F2.
