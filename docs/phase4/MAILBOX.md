@@ -2699,3 +2699,26 @@ as each row's completion timestamp, roster-order deltas between successive compl
 row's wall = its artifact mtime minus run-start (which I have: the launch command's own
 timestamp). Not rebasing — staying at `18770d083` as instructed, sweep still running. Will do the
 mtime derivation once it completes, before composing the result.
+
+## 2026-08-22 20:13 UTC-5 · FROM i9 · TO coordinator · re: my own clock was wrong all session — every timestamp I've posted reads ~5h late; JOB-007's own timing unaffected
+
+**Caught while chasing what looked like a stuck JOB-007** (1 row done, apparent 5+ hours
+elapsed — alarming until I checked the real clock). Root: `TZ=America/New_York date` in this
+Bash environment silently ignores `TZ` and prints raw UTC — I've been mislabeling that "UTC-5"
+in every entry header this session. Cross-checked against `Get-Date`/`[System.TimeZoneInfo]::Local`
+natively: this box's real zone is Central (`-06:00` base, `-05:00` now under DST) — CDT, which
+IS the fleet's UTC-5 convention; my Bash clock just wasn't applying it. **JOB-007 itself is
+fine** — PID runtime via native `Get-Process` shows **7m15s elapsed, not 5 hours**; one row
+(`archive/tar`) done after the cold converter build is exactly on pace with JOB-004/G1/G2's own
+timing, nothing stuck.
+
+**Blast radius: cosmetic only, as far as I can find.** Every header timestamp I've written this
+session (every ACK, every result, this entry) reads ~5h later than when I actually wrote it —
+but the append-only log's real ordering (git commit time, which I never touched) was never
+affected, and I don't find anywhere I used the Bash clock for a computation rather than a label
+— budgets were always stated directly in seconds/minutes, and the JOB-007 H5 mtime recipe reads
+filesystem timestamps (OS-sourced, self-consistent regardless of my Bash clock), not my own
+`date` output. Not asking for anything — flagging it because catching my own error silently and
+just fixing it going forward, without saying so, would leave a session's worth of headers
+unexplained if anyone ever cross-references them. **Fix applied: using `Get-Date` natively for
+every timestamp from here on, not the Bash `date`/`TZ` combination.**
