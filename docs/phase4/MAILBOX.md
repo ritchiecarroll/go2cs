@@ -4540,3 +4540,24 @@ lane attribution and one lane layer-diagnosis were all wrong TODAY — and every
 corrected by measurement before implementation spent against it, at a total cost of hours
 rather than arcs. That is the diagnosis-first standing order paying for itself; nothing about
 the process changes.
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator · F2 design banked at `346d4acbf` — the ROOT is stable, the REMEDY's layer moved once more, and this time it is designing rather than re-rooting
+
+**This is not a third root correction.** The root is exactly what you approved: *a promoted interface method is a Go method of the type, and it is the one kind of Go method that never becomes an extension method, so the structural probe cannot see it.* That stands unchanged. What moved is WHERE to fix it, and I found the reason by trying to write the golib change you sanctioned.
+
+**Golib refuses the fix, for two stated reasons — both in the file's own words, not my judgement:**
+
+1. **The candidate contract.** Every entry in `GetGoMethodSetCandidates` is assumed to be an EXTENSION method whose first parameter is the receiver — `PrefersBindableShape` indexes `GetParameters()[0]`, and `ResolveReceiverElement`/`IsUniversalReceiver` read the same slot. A promoted member is a no-argument method; adding it throws there. The contract is load-bearing.
+2. **The probe/binder invariant.** `GetGoMethodSetEntries`' header states that the probe, `GoMethodSetCount` (→ `reflect.Type.NumMethod`) and `AdapterBinder` resolve through ONE candidate source *precisely so they cannot disagree about a method set*. Teaching only `StructurallyImplements` about promoted members, while the binder still cannot bind them, produces exactly the failure that invariant exists to prevent: `Implements` says yes, shell creation fails, the assert reports a type that implements-but-cannot-bind. Fixing both sides means introducing a second candidate KIND into the most safety-critical cache in golib.
+
+**The generator route is one emission and no golib change:** `InterfaceImplTemplate` already writes the promoted MEMBER (`public @string Read() => Reader.Read();`) from the `Promoted = true` record; have it also write the promoted method as an EXTENSION method on the enclosing `<pkg>_package`. Then the promoted method IS an ordinary Go method — probe finds it, binder binds it, `NumMethod` counts it (correctly: Go counts promoted methods), and `wrapper` becomes structurally identical to my `plain` control. **I now read this as the most faithful form of your route (B)**: an extension method on the package class is precisely how go2cs represents "this type has this Go method", so emitting one IS promoting the method set onto the type.
+
+**Footprint is better than either of us expected:** generator output lives under git-ignored `Generated/`, so **CNR stays byte-identical and no corpus file moves** — the "real footprint to classify" your ruling budgeted for does not materialize.
+
+**Design banked at `346d4acbf`** (`docs/phase4/DESIGN-promoted-interface-method-set.md`) with the four controls that each killed a candidate root, why the two obvious fixes are wrong, and **five open questions the implementation must MEASURE** — the sharpest being accessibility: the converter emits a Go method's extension at its receiving TYPE's accessibility, and if `ExtensionMethodRegistry` only registers public extensions, an `internal` promoted twin is invisible exactly where F2 bites (a foreign assertion), reproducing the bug with extra steps. I will settle that before writing the emission, not after.
+
+**Your `NumMethod` A/B gate applies unchanged and I am keeping it** — it is the right gate whichever layer the fix lands in, and the `holder` control (ordinary field whose name equals its type's simple name; Go says NO) is the second one, so the Root-2 ambiguity cannot creep back in through this door.
+
+Proceeding to implement unless you want the layer re-ruled.
