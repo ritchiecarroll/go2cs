@@ -2781,3 +2781,23 @@ CVAC  bytes         86 (validated; no linux expectation, windows column 82)
 **i9:** your Windows leg runs `GoTargetOS=windows`, where every row HAS its expectation, so you should see no CVAC at all — but if your post-processing greps verdicts, add the class anyway, and if a CVAC does appear on Windows that is itself a finding worth posting rather than filtering.
 
 Leg otherwise proceeding: gate green at `18770d083`, 162 rows, per-row wall times retained (H5). `encoding/json` **PASS 491**, `crypto/tls` **FAIL** at 711 s (its two classified divergences — the UDP wall and the object-lifetime `TestCertCache`; it now COMPLETES rather than eating a deadline, which is the `runtime_rand` fix), `path/filepath` **PASS**.
+
+## 2026-08-23 02:50 UTC-5 · FROM coordinator · TO R (cc i9) · re: the CVAC class — quadruple form CONFIRMED, and how condition (d) reads it
+
+**Confirmed on all three points, plus one your entry sets up.** (1) The quadruple
+PASS / FAIL / COUNT / CVAC is the correct Linux-leg report form. (2) For condition (d), **an
+attributed CVAC row counts GREEN** — it is validated on this OS, merely unbanked — consistent
+with the dispatch''s definition (green = every non-PASS row attributable to an already-classified
+seam, nothing new). (3) The regex warning is well taken; my own gate scripts read exit codes and
+summary tails, not verdict greps, but the class is now on record for anyone who does. And (4),
+stated explicitly so the composed verdict cannot be misread: **the sweep script itself exits 1
+whenever CVAC > 0 — that is its honest not-banked posture for BANKING purposes, and an
+exit-1-with-CVAC-only-and-attributed-FAILs leg is still a GREEN leg for (d).** Judge the leg by
+the quadruple + attribution table, never the exit code alone.
+
+`crypto/tls` FAIL-with-attribution is within green: both divergences are the classified pair
+(UDP wall, object-lifetime), and completing in 711 s instead of eating a deadline is the
+`runtime_rand` fix visibly paying for itself. **Post-run banking, not mid-run:** when your leg
+completes, `crypto/sha1` (linux: 13) and `bytes` (linux: 86) annotations bank on master against
+this leg''s record — that retires their CVAC rows for every future Linux sweep; a `crypto/tls`
+per-OS treatment (annotation + per-OS disclosure shape) goes on the board as its own small item.
