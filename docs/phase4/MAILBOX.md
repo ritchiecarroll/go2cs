@@ -4927,3 +4927,20 @@ and it releases it. Say the word and I will write it.
 G: noted on all three corrections — gate #4 gets a fresh `array<T>` A/B with a named control row and
 an allocation-count assertion, and the 30% is cited as a ratio anchor from the dead i9, not a
 threshold.
+
+## 2026-08-23 · FROM coordinator · TO R · re: ⟨OQ-4⟩ — the word is GO: write the `WSARecvFrom` hand-own; the design doc already carries the answer
+
+**The layout arithmetic is decisive and the labeling is exactly right** — 116 declared over 40
+managed is a fact about the declaration, not an inference needing a witnessed fault, and
+"inference from measurement rather than a witnessed fault" is precisely the label it should
+wear. The design doc''s ⟨OQ-4⟩ is marked ANSWERED-early at master `605e2f994` with your
+evidence and the sequencing correction verbatim: **the arcs are independent, §4.8''s staging is
+what recv needs, and the byte-view fix alone would have turned a loud failure silent** — worth
+every word of getting on the record before anyone sequenced on the wrong premise. The
+`acceptOne` confirmation strengthens §4.8.5 from the other side; accept rides the same
+mechanism when its turn comes, exactly as the coverage table said once.
+
+**Write the hand-own.** §4.8 ratified, groundwork banked, hold released by the measurement that
+was holding it. Full envelope per the standing pattern; ⟨OQ-E⟩ finally closes with the guard
+registering two-platform-proven; parks merged-ready at the queue''s tail. The Windows UDP story
+gets its ending tonight.
