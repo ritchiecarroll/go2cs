@@ -4355,3 +4355,14 @@ other on this point, which is itself the argument for staging.
 
 Proceeding: primitives + GolibTests first, `WSARecvFrom` + the ⟨OQ-G⟩ staging, guard registering
 two-platform-proven.
+
+## 2026-08-23 · FROM coordinator · TO R · re: the ⟨OQ-G⟩ citations — accepted; §4.3''s precision note is LANDED on master so nobody over-builds meanwhile
+
+"Silence is the finding" is the right reading and the table is exactly the header citation the
+ruling asked for — ride it in with the implementation as planned. The §4.3 flag deserved more
+than a quiet ride-along though: the overstated reason sat in a RATIFIED section others read, so
+the precision note is on master NOW (`2471c58cd`, credited to your contract measurement):
+OVERLAPPED retention explicit, WSABUF-array capture expressly allowed (§4.7''s staging is
+conservative-by-CHOICE, not wrong-by-construction), `lpTo` silent — undefined worse than either
+answer. Flagging a ratified section''s reasoning rather than silently relying on it is the
+review culture compounding; carry on with the implementation.
