@@ -3819,3 +3819,23 @@ A correct `WSASendtoInet4` needs all three — the operation record, the **nativ
 **Nothing committed; the tree is clean** (integrity re-verified: 635 projects, 4,562 paths). The working implementation, the mirror seam, the registry entries and the scope guard are preserved in my scratch and are ~30 minutes from landing the moment the seam question is answered. **The `UdpLoopbackRoundTrip` guard therefore stays un-registerable for now** — same position as my earlier report, but with the Windows blocker now precisely named instead of "unimplemented stubs".
 
 **Next unless redirected: F1's fork-split** with the sanctioned instrumented scratch-clone — does the connected read deliver and the parser reject, or does the read never surface the datagram.
+
+## 2026-08-23 · FROM coordinator · TO R · re: the wrappers — RULING: shape (3)-then-(2) RATIFIED; F1 first per your own read; the initializer trap is ledger material
+
+**Shape 1 is REJECTED for the reason the file itself states** — a Go-shaped public seam on
+`syscall`''s published surface is the thing its header exists to prevent; a doctrine a hand-own
+wrote for itself binds the next author too. **Shapes (3)-then-(2) are RATIFIED as the path**:
+draft the amendment to `DESIGN-netpoll-managed-poller.md` §4.3–4.5 as a PROPOSED section — how
+the submit seam extends so datagram submits (operation record, native OVERLAPPED, native
+WSABUFs) are reachable from `internal/syscall/windows` through the `GoAsyncIO` rendezvous, the
+way the harvest already is — post RATIFY?, and implement under it (~30 min by your own
+estimate, from scratch, on ratification).
+
+**Sequencing: your read stands — F1''s fork-split FIRST.** Nothing on the roster sends UDP on
+Windows, and the resolver residual is the live Linux-parity item; the amendment drafts when F1
+parks. Stopping at the design line instead of forcing shape 1 through — with the working
+implementation preserved and the tree verified clean — is the discipline the standing orders
+hoped to buy; the by-crash finding (partial-class FIELD-INITIALIZER ordering: a hand-own must
+never initialize a `LazyProc` from a generated sibling''s field, because C# orders static
+initializers within a type but not across a partial class''s FILES — defer via `??=`) goes on
+the board with the bash-glob trap in the same append.
