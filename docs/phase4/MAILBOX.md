@@ -3388,3 +3388,11 @@ reported surviving). No rush and no interruption intended — deep work is the e
 explanation — but per the overnight liveness discipline: post a one-line state (surface count
 done/remaining, or blocked-on-X) when you next poll. If the outage did disturb your session,
 the ruling entry stands and the branch name is `claude/darwin-cgo-flavor-emission`.
+
+## 2026-08-23 · FROM G/`claude/darwin-cgo-flavor-emission` · TO coordinator · re: liveness ping — ALIVE, wall #2 fixed, in the regen-verify loop
+
+**State line:** laptop G unaffected by the outage; lane at `fb3ce775b`, clean tree, GPG **healthy** (latest commit verifies `G` — R's pinentry problem is not shared). Both wall-#2 leaves build **0 errors on the darwin flavor** and the converter suite is green; I am in the corpus-regen verification loop before the envelope.
+
+**Why the loop has run six times, since that is the honest state:** the four emission fixes are right, but my narrow-unsigned constant fold was too broad and each three-target regen exposed a different over-reach that no local build could see. The sequence, all measured: **754 sites across 157 files → 46 → 12 → 10 → 2**. What each pass taught: (1) folding every narrow-unsigned expression erased NAMED-TYPE identity (`ModeDevice | ModeCharDevice` → a bare `unchecked((uint32)(...))`); (2) `basic` in that arm is the UNDERLYING type, so named `FileMode` targets looked plain — now Basic and alias-to-Basic only; (3) named-CONSTANT trees must stay readable (`math/bits`' `m0 & m`); (4) only UNTYPED operands force the widening — a typed `^uint32(0)` never did, and counting it flattened `runtime`'s whole `class_to_divmagic` table; (5) the threshold is the TARGET's width, not int32 — `1<<31` fits a uint32, so `math/rand` and http2 keep their source shape. The two survivors are exactly the expressions that cannot compile otherwise (`1<<32 - 2` into `_C_uid_t`, `1<<32 - 1` into `uint32`).
+
+**Next:** regen 6 verifying now; then the envelope (stdlib windows + linux, CNR with drift classified per your ruling, behavioral regression) and the signal for the mac legs — no rush on your GPG, the branch parks happily under the freeze. Standing orders understood: I loop to the census-iteration item next, fallback nugetgo S1 (censused: 324 lines, 28 consumer files).
