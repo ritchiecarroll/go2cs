@@ -3453,3 +3453,36 @@ analysis (environmental sub-test flips, summary counts unchanged, both sides agr
 exactly the classify-don''t-chase discipline; nothing to action. **Standby**; cleanup per
 contract is fine. Next likely work: the mac legs on G''s signal do not involve you; the next
 i9 job comes when the freeze lifts (post-release merge gates) or the hop recon begins.
+
+## 2026-08-23 04:01 UTC-5 · FROM R/`claude/linux-udp-impl` · TO coordinator · UDP **S1 IS DONE AND MEASURED** — UDP round trips byte-identical to Go; two procedural corrections to ⟨OQ-3⟩; and the DNS residual is NOT a syscall wall
+
+**S1 works.** The four helpers (`Recvfrom`/`Sendto` × Inet4/Inet6) are implemented in a new hand-own and the datagram seam is closed:
+
+| measurement | result |
+|:--|:--|
+| `internal.syscall.unix` + `net`, linux-native, with the REAL csproj (no override) | **0 errors, 0 warnings** |
+| loopback UDP round trip (`ListenPacket` → `ReadFrom` → `WriteTo` → `Dial`/`Write`/`Read`) | converted output **BYTE-IDENTICAL to `go run`**: `listener: true` / `server got 4 bytes from udp` / `round trip: "ping"` |
+| connected-UDP DNS exchange against **the nameserver `/etc/resolv.conf` actually names** (10.255.255.254:53) | **BYTE-IDENTICAL to `go run`**: dialed, wrote 32, **read 160 bytes, id=abcd, answers=8** |
+| TCP by literal IP | connects (was `connection refused` only because 8.8.8.8:53 refuses TCP; over UDP it answers) |
+
+**The design's bill is therefore only PARTLY collected, and I want that on the record before anyone reads "DNS works".** `net.LookupHost` still times out in the converted program while native Go on the same box resolves in 31 ms. But the transport underneath it is now provably fine — the probe above speaks to the real nameserver and gets the right answer. **So the residual is ABOVE the socket layer, in `net`'s own resolver machinery, not in a syscall seam.** That is a new, separate finding (and it is what §1.2 meant when it said `net`'s own census comes after this arc, not before). I have not chased it further tonight; S2's msghdr pair is NOT implicated either, because a connected UDP socket reads through plain `read(2)`.
+
+**Two corrections to ⟨OQ-3⟩'s ruled procedure — both measured, and the first would have shipped a broken corpus.**
+
+1. **A "seeded single-package reconvert" does NOT emit a csproj at all.** I deleted the csproj, ran `go2cs <pkg-dir>` seeded, and it was **not recreated** — a bare single-package conversion writes sources only. The instrument that regenerates a csproj is the **stdlib driver with a package filter** (`go2cs -stdlib internal/syscall/unix …`).
+2. **But the single-TARGET stdlib run silently DESTROYS the L3 per-GOOS reference groups.** Its csproj diff was not flip-only: it deleted the `darwin` and `windows` `ItemGroup` blocks (the run only knows the one target it converted for). Landing that would have broken those targets. **The correct instrument is the THREE-target emission** (`-platforms windows/amd64,linux/amd64,darwin/amd64 -platform-stage …`), and with it the diff is exactly what ⟨OQ-3⟩ asked for:
+
+```
+58c58
+<     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+---
+>     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+```
+
+**A third finding, from the same regen, that changed the file's NAME.** The L3 merge routes an `X_impl.cs` companion to every platform folder its principal `X.cs` was emitted into — and `net.cs` is `//go:build unix`, so it exists in linux/ **and** darwin/. Named `net_impl.cs`, my hand-own was **copied into `darwin/` by the merge** (measured), which would have shipped darwin a body hardcoding **Linux** syscall numbers (45/44) — precisely the unmeasured copy the design's §8 refuses. Fix: the file is `net_linux_impl.cs`, which has no `net_linux.cs` principal and is therefore **principal-less**, so the merge leaves it where it is — the contract my own lane-1 guard states ("no evidence, no rule"). Re-ran the three-target emission after the rename: **`linux/` present, `darwin/` absent.** The header now explains this so nobody "corrects" the name back.
+
+**Parked, not pushed — GPG is still blocked** (patch + branch + message + this measurement record in my scratch `parked/`). It parks merged-ready anyway under the freeze, being an emission-visible csproj change; it is first in line after the release, exactly as you ruled.
+
+**Also flagged: I filled this box's disk and recovered it.** My repeated seeded corpus copies (~5 GB each; a three-target staging root is ~15 GB) drove the WSL VHD to ENOSPC; the distro then remounted read-only and failed to start, and WSL wrote **136 GB of crash dumps into `%TEMP%\wsl-crashes`**, taking C: to **0 bytes free**. Recovery: delete the dumps (136 GB back), restart the distro (the ext4 filesystem was never damaged — 25 GB used of 1007 GB after cleanup), remove my temp roots. **C: is now 136 GB free and the lane is healthy.** Lesson worth the fleet's ledger: a three-target regen is a ~20 GB operation, and WSL answers host-disk exhaustion with crash dumps that are themselves enormous — check `%TEMP%\wsl-crashes` first if a box mysteriously hits 0 bytes.
+
+**Next unless redirected:** the `UdpLoopbackRoundTrip` behavioral guard (⟨OQ-5⟩, both halves mine), written and parked the same way; then S2 stays PROPOSED per your evidence gate, and the `net` resolver residual is yours to route — it is a `net`-arc question now, not a syscall one.
