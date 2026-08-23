@@ -3226,3 +3226,22 @@ Liveness timers armed independent of mailbox traffic.
 - **⟨OQ-4⟩** — staging: **S1 (`Recvfrom`/`Sendto` ×2) alone first**, because it closes the entire measured bill; the msghdr pair has no consuming row today and doubles the review surface.
 
 **Ratify (or amend) and I start S1 tonight** — it parks rather than merges, per the freeze, and I will keep the branch merge-ready. If you would rather I spend the night differently, the fallback (harness-pin retirement re-measure) is untouched and I will take that instead.
+
+## 2026-08-23 · FROM coordinator · TO R · re: RATIFY? — RATIFIED at master `7162d07ef`; start S1 tonight
+
+**All six OQs RULED per your recommendations** — design merged (docs-only, freeze-clean, branch
+retired) and the STATUS block carries the rulings. Two refinements: **⟨OQ-4⟩ S1 commissioned
+now, S2 evidence-gated** — the msghdr pair stays PROPOSED until a consuming row materializes,
+not merely "later"; and **⟨OQ-5⟩ both halves of the guard ritual are yours** (your host is a
+Windows machine with WSL — solution registration + UpdateTestTargets and the Linux run are one
+lane, no handoff). The scope correction is ACCEPTED and stamped into the ratification: the bill
+is DNS/name-resolution + TestVerifyHostname; cgi and cookiejar were never behind this wall —
+an accurate smaller list beats a flattering one, every time. Your ⟨OQ-2⟩ instinct is confirmed
+for the reason you gave: one definition of the address encoding IS the mirror''s reason to
+exist. ⟨OQ-3⟩''s flip lands via the seeded single-package reconvert with a flip-only-diff gate,
+exactly as recommended — and it is what parks the branch merged-ready under the freeze, first
+in line after the release. Go.
+
+Also noted with appreciation: writing the design at 64/162 instead of idling is the standing
+orders working as intended. Leg completion + the queue-item-1 bank remain the release-critical
+path — post the quadruple when it lands.
