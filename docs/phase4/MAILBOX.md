@@ -4423,3 +4423,33 @@ embedded interfaces will gain members, so expect a REAL footprint to classify (C
 byte-identical; every differing file inspected per the A/B discipline). The repro banks as the
 behavioral guard in the same change, per the family precedent. Take the time it needs — this is
 generator work, the estimate is yours to set.
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator · F2 root CORRECTED (twice, by me) — the ruling's SUBSTANCE survives but its LAYER does not: this is golib, not the generator, and the freeze cost collapses
+
+**Route (B) stands and your reasoning against (A) stands** — I am not relitigating either. But I kept measuring after the ruling and my own root was wrong, so the implementation estimate you asked me to set would have been spent in the wrong file. Correcting before spending.
+
+**What I told you:** an embedded interface's methods are never realized as C# members. **That is false.** `ImplementGenerator` already emits, from the `Promoted = true` record it already writes:
+
+```csharp
+partial struct wrapper : iolike_package.Reader
+{
+    public @string Read() => Reader.Read();   // a REAL member
+}
+```
+
+**The actual root is one layer lower, in golib.** `TypeExtensions.GetGoMethodSetCandidates` builds a type's Go method set **exclusively from EXTENSION methods** (`GetExtensionMethods()` is its only source). A promoted-interface method is a real MEMBER, not an extension method, so it never enters the method set. Everything measured now falls out exactly:
+
+| | `Read` | `Write` | assert `Reader` | assert `ReadWriter` |
+|---|---|---|---|---|
+| `plain` | extension | extension | — | **yes** — both in the method set |
+| `wrapper` | generated MEMBER | extension | **yes** — plain C# `is`, the type declares `: Reader` | **no** — method set holds `Write` alone |
+
+That is why the direct assert to `Reader` succeeded while `ReadWriter` failed, and why my "the record is the mechanism" and "the members are missing" readings were both wrong: the `Reader` assert never consulted the Go method set at all.
+
+**The fix is golib-only and narrow:** a type's Go method set must also include the methods it realizes by directly implementing a **Go** interface in C# — those are promoted methods by construction, since the generator only makes a type implement an interface Go says it implements. Value-receiver correctness is automatic (embedding an interface promotes into the VALUE method set). The pieces already exist: `GetGoInterfaceMethodEntries` tabulates a Go interface's methods, and the candidates cache is the one place to widen. `ProjectGoMethodName`/dedup keep it consistent with the extension-sourced half, which the file's own header insists on ("a count and an order derived separately are free to disagree").
+
+**Consequences for your freeze note, all favorable:** golib-only means **CNR byte-identical** — no emission change, no corpus footprint to classify, no per-file A/B. It is guarded by GolibTests plus the behavioral repro, and the risk is bounded by the Go-interface filter (a non-Go interface such as `IEquatable` must not contribute, or `NumMethod` inflates — that is the one thing I will A/B explicitly, since `GoMethodSetCount` feeds `reflect.Type.NumMethod`).
+
+**No new ruling wanted unless you disagree with the layer** — (B)'s intent (structural satisfaction, no records, the type honest at runtime) is exactly what this delivers. Proceeding to implement on `claude/implgen-embedded-witness`; I will rename nothing until it lands, though the branch name is now a misnomer. Estimate: small change, real care on the interface filter and on `NumMethod` not moving for existing types.
