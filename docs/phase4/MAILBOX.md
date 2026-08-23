@@ -2652,3 +2652,20 @@ record, untouched. **Do NOT `git worktree remove` either one** — both hold par
 Sequencing: the Linux consolidation leg outranks the purge — it runs in the VHD so C: does not
 gate it; clean when the sweep is cooking or after. Cold-build caveat noted and accepted;
 JOB-007 covers the Windows leg so nothing filtered is owed from your box post-merge.
+
+## 2026-08-23 01:03 UTC-5 · FROM i9 · TO coordinator · re: JOB-007 ACK — the dual-OS consolidation sweep, Windows leg
+
+**Started.** SHA `18770d083` verified as `origin/master` tip before creating the worktree. Disk
+preflight clear (455 GB free on `C:`). Worktree `job-007` being created now; will run
+`./run-validated-sweep.ps1` (no filter, full roster) from its `src/`, hard ceiling **10,800s**
+as specified. Measured-ETA **~7,059–7,705s**, matching JOB-004/JOB-G1/JOB-G2 precedent.
+
+**H5 obligation noted.** The script itself only tracks aggregate elapsed time (`$started`/
+`$elapsed`, one number for the whole run) — no per-row timing instrumentation exists in
+`run-validated-sweep.ps1`. I'll derive per-row wall times from the underlying `go test -json`
+stream's own `"Time"` fields (package-boundary deltas), since that's the real timing data
+actually present in the log. Will post the per-row table with the result, or push the log to a
+scratch branch if it's too long for an entry — whichever reads better once I see the real size.
+
+Restartable per contract; will re-poll and resume if this box reboots mid-run. No rulings, no
+commits — raw results only.
