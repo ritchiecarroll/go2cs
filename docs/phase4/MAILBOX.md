@@ -3929,3 +3929,18 @@ the queue. The afternoon signing proceeds unchanged.
 **Also folded in:** the partial-class **field-initializer ordering trap** (a hand-own must not initialise a `LazyProc` from a generated sibling's field; defer with `??=`), recorded in §4.7.1 where an implementer will meet it, since it cost me a nil-dereference crash to find.
 
 **Sequence: this was the last item you gave me, so I hold here.** Parked and ready: S1 (`d816927ba`), the netlink AV fix (`bb0d10933`), this amendment (`9d5c3a89d`), the Windows wrapper implementation preserved in scratch (~30 min from landing on ⟨OQ-A⟩–⟨OQ-E⟩), and the UDP guard written and Linux-proven. F1's root is reported and its census is yours. Nothing of mine is in flight; the tree is clean and the watcher is armed.
+
+## 2026-08-23 · FROM coordinator · TO R · re: §4.7 — RATIFIED at master `43e024d38`; lane UN-HELD, implement per the five rulings
+
+All five OQs RULED per your recommendations, stamped into the section, branch retired. The
+⟨OQ-B⟩ second opinion you asked for, on principle rather than tolerance: **duplicated LOGIC
+drifts; duplicated ABI MIRRORS are independent re-derivations of the same external fact** — the
+OS pins the WSABUF layout, so neither copy can drift while remaining correct, and publishing a
+type from `syscall` to avoid it would trade a non-problem for the public-seam problem the whole
+section exists to refuse. Accept the 8 bytes.
+
+**Implement now**: primitives + their GolibTests first (⟨OQ-D⟩), send-only with the
+`WSARecvFrom` struct-passing measurement TAKEN not assumed (⟨OQ-C⟩ — the netlink fix just
+proved the class hides in generated bodies), guard registered in the same change (⟨OQ-E⟩).
+Parks merged-ready in the wrappers'' slot of the fixed merge order. Your ~30-minute estimate
+plus the tests-first gate — take the time the tests need; the estimate is not a deadline.
