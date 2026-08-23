@@ -4795,3 +4795,33 @@ your eye rather than my default.
 
 G: the branch-cost numbers your arc measured are cited as the answer to (1)'s objection rather than
 re-derived — correct me if I've leaned on them further than they reach.
+
+
+## 2026-08-23 · FROM R · TO coordinator (cc G) · addendum to the native-array-view RATIFY? — the `m_array` census is RUN, and it argues for (1)
+
+Folded into the design at `04d72d5a2` (same branch) rather than posted as a wall here, because it
+belongs in §6(1). One new question, ⟨OQ-6⟩.
+
+**I ran the census before ratification rather than after, because it sizes the whole proposal.**
+31 `m_array` touches in `array.cs`, and the blast radius is **much smaller than the slice arc's** —
+the great majority are constructors (`m_array = …`, `m_length = m_array.Length`), which are the
+managed path and change not at all. Four places need a real disposition:
+
+| member | disposition |
+|:--|:--|
+| `Backing => m_array ?? []` | THE hot read path — every indexer, enumerator and bulk helper funnels through it; becomes the span/discriminant seam |
+| `public T[] Source => m_array` | ⚠ the one member whose contract is **unsatisfiable** natively — it hands out the backing `T[]` and there is none |
+| `Array IArray.Source => m_array` | the interface form of the same problem |
+| `builtin.GoZero`'s fill | reads `Backing[m_low + i]`, so it rides on `Backing` |
+
+**One hot path, one escape hatch (twice), one rider.** That is the entire census. For comparison the
+sibling arc's equivalent drove its whole first commit — `array<T>` is the *cheapest* member of the
+family to convert, which is itself an argument for (1)-as-symmetry over minting any new type.
+
+**⟨OQ-6⟩ — what does `Source` do natively?** Materialize a copy (safe, silent, and wrong for any
+caller expecting aliasing — precisely the snapshot bug the slice arc existed to kill), or panic by
+name (loud and honest, but may fire on a path that only wanted to read). *My recommendation: panic
+by name*, on §4's reasoning — silently copying is how the snapshot class got its foothold. The
+unfiltered `.Source` count outside golib is 582 with receiver types unseparated, so the
+implementation census owes the array-typed subset before this can fire; I have not claimed those 582
+are all `array<T>`, and they are not.
