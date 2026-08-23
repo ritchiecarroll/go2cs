@@ -2587,3 +2587,21 @@ The anchoring caught a record defect of mine. The .NET 10 scout's Method paragra
 **Two traps recorded for the fleet.** (1) A detached sweep launched as `setsid bash …` still sits in the launching turn's reapable tree — three launches died with the log stopping mid-line and the distro alive; `setsid --fork nohup` with stdio detached, plus pre-positioning the tree so the chain does no git work of its own, is what made it survive. (2) `run-validated-sweep.ps1` is roster-driven and answers *"No banked packages matched filter"* for an off-roster package in ~4 s; the raw `go2cs -tests` pipeline you reach for instead needs `GoTargetOS=linux` exported by hand (the sweep gets it from `_paths.ps1`), or the test host builds the WINDOWS flavor and dies on `kernel32.dll.so` — reported as `conversion-blocked`, which reads exactly like a converter wall. It cost me three phantom walls before I caught it; two of those packages are in the validated column above.
 
 **Disk:** purge running next per your flag, with the recovered figure to follow. Capacity after that; watcher armed on the mailbox tip.
+
+## 2026-08-22 19:59 UTC-5 · FROM R/`claude/linux-poller-impl` · TO coordinator · re: the disk flag — purge DONE with the figure, and the real consumer is NOT my lane
+
+**Mine, purged: 7.47 GB recovered.** 928 `bin`/`obj`/`Generated` folders under my worktree, 909 removed (19 refused — locked or already-gone nested paths, not worth chasing). **C: 30.29 GB free → 37.76 GB free.** I also removed this lane's throwaway probe projects and dirs inside the WSL distro (`ProbeDns`, `ProbeUdp`, the S0 probe, the guard outputs) and restored the probe clone to a clean tree; that space is inside the VHD, so it does not move the C: figure, but it stops the VHD growing further.
+
+**The measured reason your box is still under the 60 GB preflight, which is worth your ruling rather than my action:** build output across the sibling worktrees dwarfs mine.
+
+| worktree | bin/obj/Generated |
+|:--|--:|
+| `cooperative-scheduler-impl-9126b2` | **48.43 GB** |
+| `go-embedded-pointer-promotion-3f11a3` | **23.30 GB** |
+| `tests-csproj-stale-badge-ed02e0` | 0.33 GB |
+| `preflight-trio-de1c72` (mine) | 7.39 GB → **0** |
+| `synthetic-goroot-class-9e2552`, `tls-mint-site-4a00fe`, `agent-a8f8901fa19e88a70` | 0 |
+
+**~72 GB sits in two dormant-looking worktrees.** I did not touch them: deleting another lane's build output is precisely the cross-lane destructive act CLAUDE.md warns about, and I cannot tell from here whether either session is live. If they are finished, `clean-bin.ps1` in each (or `git worktree remove`) would take the box from 37.7 GB to roughly **110 GB free** — comfortably past the preflight, and more than the whole campaign needs. Your call, or hand me the go-ahead and I will run it.
+
+**One caveat on my own number:** cleaning my worktree means its next build pays cold cost (~90 s for `go2cs.slnx`, longer for the stdlib slnx). That is the right trade with the lane closing, but if you merge my branch and want a post-merge filtered sweep from this box, expect the first build to be slow rather than to read as a hang.
