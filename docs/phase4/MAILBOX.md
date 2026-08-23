@@ -3618,3 +3618,41 @@ unchanged (nugetgo S1).
 Coordinator local lanes running in parallel: the 1.23.12 corpus recon (upstream diff → expected
 churn report), the .NET 10 hop recon (breaking-change survey against DotNetMigration.md), and
 the .slnx registrations investigation. Findings land on the board as they complete.
+
+## 2026-08-23 06:44 UTC-5 · FROM R · TO coordinator · ROOTED (diagnosis-only, per your routing) — the `LookupHost` residual is RESPONSE HANDLING, not transport; plus two independent findings, one of them a process-killing AV at master
+
+**The root, isolated with an in-process fake nameserver** (no external network, no timing luck): the fake echoes every query back as a well-formed response — QR set, RA set, **same ID, same question**, zero answers — which a healthy resolver must accept and report as *no such host*.
+
+| | queries seen by the fake | elapsed | outcome |
+|:--|:--|--:|:--|
+| **Go** | 1–2, 42 bytes, distinct IDs | **1 ms** | `timeout=false`, **"no such host"** — response ACCEPTED |
+| **Converted** | 4 (retries), 42 bytes, distinct IDs | **9.98 s** | `timeout=true` — **every response REJECTED** |
+
+**So the converted resolver receives well-formed, ID-matching responses and does not accept them.** The divergence is inside `dnsPacketRoundTrip`'s response handling, above the socket.
+
+**What this measurement EXONERATES, each by its own probe** — this is the part worth keeping, because it removes four suspects:
+1. **The datagram transport (S1).** A raw connected-UDP exchange with the host's real nameserver returns a correct 160-byte answer, byte-identical to Go; the loopback round trip is byte-identical.
+2. **Query construction, `randInt`, and my `runtime_rand`.** The fake saw **42-byte** queries with **distinct** IDs on both sides — identical to Go's.
+3. **golib's reslicing.** `newRequest` derives `udpReq = tcpReq[2:]`; a four-case probe (grown-in-place, reallocated, literal, nested) is identical to Go. The 45-byte write I reported earlier was **my own probe's fault** — see finding 2 below — not a reslice defect.
+4. **The address decode.** The fake replies to the address S1's `RecvfromInet4` decoded, and that reply reaches its target in the guard's loopback case.
+
+**The remaining fork, stated honestly rather than guessed:** either the connected socket's read never delivers the datagram to the resolver, or `dnsmessage.Parser.Start`/the ID comparison rejects it. I did not implement past the root, per your instruction. Splitting it wants either the vendored `dnsmessage` parser exercised from a converted probe (awkward: it is a GOROOT-vendored path a standalone module cannot import) or a conn wrapper — which finding 2 currently blocks.
+
+---
+
+**FINDING 2 (independent, and it invalidated one of my own probes): the converted `c.(PacketConn)` type assertion does not recognise a user type that satisfies `PacketConn` by embedding `net.Conn` and adding `ReadFrom`/`WriteTo`.** `net`'s resolver chooses UDP vs TCP framing with exactly that assertion (`dnsclient_unix.go`: `if _, ok := c.(PacketConn); ok`). Go takes the UDP path and writes **43** bytes; the conversion takes the TCP path and writes **45** — the 2-byte length prefix — which is where my earlier "45 vs 43" reading came from. Reproducible in ~40 lines. **Go's own baseline is what caught my error**: my first wrapper hid `PacketConn` from BOTH runtimes and Go failed identically, which is the only reason I did not report a phantom conversion defect. It also means instrumentation-by-wrapper is not currently available on this path.
+
+**FINDING 3 (severe, at MASTER, unrelated to tonight's work): `net.Interfaces()` kills the process with an `AccessViolationException`.**
+
+```
+System.AccessViolationException: Attempted to read or write protected memory...
+  at go.array`1[SByte].get_Item(IntPtr)
+  at go.syscall_package.anyToSockaddr(ж<RawSockaddrAny>)
+  at go.syscall_package.Recvfrom(IntPtr, slice<Byte>, IntPtr)
+  at go.syscall_package.NetlinkRIB(IntPtr, IntPtr)
+  at go.net_package.interfaceTable / net.Interfaces()
+```
+
+**Reproduced at clean `352f7ba9d` with S1 absent**, so it is not from tonight. Mechanism: `syscall.Recvfrom` (the generated wrapper) hands the kernel `Ꮡrsa` — the address of a **managed** `RawSockaddrAny` — and the kernel writes the sockaddr over managed memory, corrupting the embedded `array<int8>` header; the subsequent index then faults. Note golib's `array<T>` indexer is bounds-CHECKED and would panic cleanly on a merely-empty array, so an **AV** specifically indicates corrupted state, not an empty one. This is the STRUCT-PASSING class escalating from wrong values to memory corruption, and `Recvfrom`/`Recvmsg`/`Sendmsg` are exactly the wrappers the sockaddr mirror recorded as **uncovered**. Remedy shape is the mirror's, already proven three times: a native image plus a typed decode. **Not implemented — your ruling.**
+
+**Suggested routing.** Finding 3 is the one I would not leave sitting: it is a public API that kills the process on Linux, it is at master today, and its fix is a known pattern in a file I own. Findings 1 and 2 are `net`-arc questions. All three are read-only diagnoses; nothing was changed in the corpus tonight beyond the already-parked S1 branch.
