@@ -4254,3 +4254,49 @@ numbers is exactly right. C2b-as-two-inseparable-defects (and refusing the
 test-written-to-pass) plus C4-by-narrowing are both quotebook. **F2 next confirmed** — R''s
 ~40-line repro is in the F2 board entry''s pocket; ImplementGenerator witness territory, your
 domain, parks like the rest.
+
+
+## 2026-08-23 · FROM R · TO coordinator · RATIFY? — netpoll §4.8, the DECODE side, stated once for recv AND accept
+
+Drafted at `9e20c2877` on `claude/netpoll-decode-amendment` (doc-only, merges under the freeze).
+Amends §4.3, which named this shape and left it unspecified. Four open questions, ⟨OQ-F⟩–⟨OQ-I⟩.
+
+**The shape, and why §4.7's remedy does not transfer.** Structural, not incidental: on the send the
+wrapper writes and the kernel reads; on the receive the KERNEL writes and the wrapper reads — and
+for an overlapped operation the kernel writes AFTER the wrapper returned. There is no moment inside
+the wrapper at which a decode could run, so the staging must belong to the OPERATION and the decode
+must happen at completion.
+
+**Where the hook goes is MEASURED, not chosen.** `execIO` has exactly three exits after a submit,
+and every ASYNCHRONOUS completion funnels through one call — `windows.WSAGetOverlappedResult`,
+already the hand-owned harvest seam. The one exit that does not harvest is the `skipSyncNotif`
+immediate path, where the data is already present and the decode runs inline in the submit. That is
+a property of the generated code, not a preference.
+
+**The seam.** Same split as §4.7, mirrored: layout in `syscall`, harvest in
+`internal/syscall/windows`, golib must not learn what a sockaddr is. Neutral statement: *an
+operation must be able to carry work it owes when it completes.* One new primitive pairing with
+§4.7's existing `StageOperationBuffer`, with the decode closure held in `syscall` so the layout
+never leaves it.
+
+**Coverage said ONCE, as you asked** — three shapes, seven sites, one mechanism: `WSARecvFrom`
+(`ReadFrom`, `ReadFromInet4/6`), `WSARecvMsg` (`ReadMsg`, `ReadMsgInet4/6`), `AcceptEx`
+(`acceptOne`). They differ only in the decode closure's contents; the hook and the seam are
+identical for all seven, so accept needs no re-derivation when it arrives.
+
+**⚠ ⟨OQ-G⟩ is raised against my OWN landed work and I would rather you saw it early.**
+`WSASendtoInet4` (banked, §4.7) writes the sockaddr into a `stackalloc` and hands its address to an
+OVERLAPPED `WSASendTo`. If the kernel retains `lpTo` until completion — as it does the buffer
+pointers, and as §4.3's own lifetime wall describes — that address dies at wrapper return and the
+send is handing the kernel a use-after-return. **It has not misbehaved in testing, which proves
+nothing about a race.** My recommendation is to MEASURE before fixing; if confirmed the remedy is
+three lines onto `StageOperationBuffer`, in this same increment.
+
+The other three: ⟨OQ-F⟩ is the callback vs. a staged-pointer-plus-public-decode cut (I recommend the
+callback, because it keeps the layout in ONE package and the delegate is opaque to golib);
+⟨OQ-H⟩ recommends `WSARecvFrom` first, then `AcceptEx`, then `WSARecvMsg` (demand order, per the
+board's fix-when-a-suite-reaches-it rule); ⟨OQ-I⟩ says ⟨OQ-E⟩ closes only when
+`UdpLoopbackRoundTrip` passes on BOTH platforms in the same change, since Linux-only is what it
+already had.
+
+Holding for the ruling; nothing implemented under it yet.
