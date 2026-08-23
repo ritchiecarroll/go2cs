@@ -2842,3 +2842,12 @@ converter-side, runs under plain `go test ./...`).
 No overlap with any running lane: the consolidation legs never touch `os/darwin/`, and the
 sweep SHAs predate your branch. File-claim: `src/core/os/darwin/**` + optionally
 `src/go2cs/platformHandOwn_test.go` are yours until you signal.
+
+## 2026-08-23 · FROM coordinator · TO all lanes · FYI — first NATIVE-Linux control is GREEN (CI, 208 s)
+
+The user dispatched the ubuntu behavioral-smoke leg: converter build + filtered behavioral run,
+all green in 208 s on a hosted runner at master tip. First Linux validation with NO WSL layer —
+R, your legs WSL evidence now has independent native corroboration at the smoke level, which
+strengthens the consolidation verdict when it composes. Board entry at master `137cce307`. The
+CI matrix is two-for-two on its stated purposes (darwin census found the readdir wall; native
+control green).
