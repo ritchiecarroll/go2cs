@@ -5181,3 +5181,54 @@ inverted and named — is the reason the next lane will re-derive per-target ins
 **Standby granted with thanks; your day''s ledger is: three darwin walls, the span tranche, F2,
 the seeder, and two censuses that each corrected their own commissioning brief.** The next call
 is the merge train.
+
+
+## 2026-08-23 · FROM R · TO coordinator · §4.8 IMPLEMENTED — **Windows receives datagrams**; ⟨OQ-E⟩ closes on Windows, blocked on Linux for an environment reason
+
+Banked signed at `66bde84d0` on `claude/windows-udp-recv`, pushed, parks merged-ready behind the
+wrappers' slot.
+
+**`UdpLoopbackRoundTrip` PASSES ON WINDOWS** — all four phases, stdout byte-identical to `go run`:
+IPv4 and IPv6, connected and unconnected, zero-length datagram, sender address decoded correctly.
+The Windows UDP story is complete end to end.
+
+**Your question was the whole increment.** You asked whether the decode needs the managed raw types
+at all, and the answer was that the remedy was already in the tree: `AcceptEx` +
+`GetAcceptExSockaddrs` + `RawSockaddrAny.Sockaddr` are a documented pair — stage native, transcribe
+field-for-field, flatten back to decode — and `WSARecvFrom` is simply the third member. **No new
+mechanism, and the flat-sockaddr question dissolved exactly as you suspected.** Had I read the
+nearest hand-own's header before proposing a representation change, the deferred question would
+never have been raised.
+
+**The measured bill it closes:** the generated body handed the kernel a pinned MANAGED
+`RawSockaddrAny` declared as 116 bytes; the managed struct is **40 bytes and contains references**.
+A 76-byte overflow into the GC heap, on a path accept also reaches.
+
+**Two more hand-owns, and they are the last managed-representation obstacle on this path.**
+`internal/poll`'s `rawToSockaddrInet4/6` fail in two different ways — the reinterpret clones the
+WRONG FIELD (`Addr` measures Length=14, which is `RawSockaddr.Data`), and the byte view fabricates
+a managed reference. They now route through `syscall`'s already-hand-owned `Sockaddr()`, so the
+sockaddr layout is spelled in exactly **one** place in the corpus. One deliberate divergence, in the
+safe direction: they check the family and leave `sa` zero on a mismatch where Go fills garbage.
+
+**⟨OQ-E⟩: Windows CLOSED, Linux BLOCKED — and not for a code reason.** The WSL lane is a bare
+distro: no `/root/go2cs`, no `go`, no `dotnet`. Most likely lost to the disk exhaustion earlier in
+the campaign. So the both-platform proof ⟨OQ-I⟩ requires is outstanding pending re-provisioning,
+which is a multi-hour operation on a shared resource and yours to place rather than mine to start.
+
+I could argue the Linux half is safe — the guard was Linux-proven before this change, and the change
+is Windows-scoped registry entries plus two additive platform-neutral golib primitives. **That is an
+argument, not a measurement, and after today I am not banking one as the other.** The guard is
+registered and green on Windows; whether it merges before the Linux re-run is your call.
+
+**Gates, all green:** converter `go test ./...` clean · marker gate **71 marked / 0 violations** ·
+seeded full-stdlib reconvert touched **exactly the four expected files** · windows builds of
+`syscall`/`internal.poll`/`internal.syscall.windows` 0 errors · linux builds of
+`golib`/`internal.poll` 0 errors · GolibTests **248/248** · **UdpLoopbackRoundTrip PASS 4/4** ·
+solution integrity **636** · **CNR no modified package across all 634** · full `go2cs.slnx
+--no-incremental` **Build succeeded**.
+
+**Outstanding from me, none blocking:** the native-array-view design still awaits ratification (it
+is now a pure decode-class concern with no netpoll dependency — this increment routed around it
+rather than waiting), and §4.8.5's coverage table still needs its accept row corrected, which I will
+fold into whichever of the two lands next.
