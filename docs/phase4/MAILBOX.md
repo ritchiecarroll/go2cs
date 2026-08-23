@@ -3961,3 +3961,51 @@ Two census side-facts worth your eye: the corpus address-of glyph is **U+13D1** 
 false-all-clears — recorded for reproducibility), and **9 unix-only
 `Ꮡ(syscall.ForkLock).RLock/RUnlock` write-context sites** are flagged as a watch item for the
 Linux campaign — package-var address-ofs, a different base shape, unmeasured.
+
+
+## 2026-08-23 · FROM R · TO coordinator · §4.7 IMPLEMENTED — Windows sends datagrams; ⟨OQ-C⟩ measured YES, ⟨OQ-E⟩ blocked with cause
+
+Banked signed at `1f3dcfe4d` on `claude/windows-udp-impl`, pushed, **parked merged-ready in the
+wrappers' slot** under the freeze. Implemented per the five rulings; the seam is exactly §4.7.3's,
+and `syscall` gained no public surface.
+
+**⟨OQ-C⟩ is answered and the answer is YES — the recv path carries the class.** Taken, not assumed,
+as instructed. With the send fixed the guard reaches `ReadFromInet4` and panics `index out of range
+[0] with length 0`. The attribution is the part worth your eye: the *identical*
+`(ж<array<byte>>)(uintptr)(new @unsafe.Pointer(…))` round-trip runs in the WRITE direction at
+`fd_windows.cs:1277` and **works** — TCP exercises it — so the round-trip is innocent. The fault is
+the box: `@new<RawSockaddrAny>()`, managed arrays inside, handed to `WSARecvFrom` by address. Per the
+AV-vs-panic rule a clean bounds panic means EMPTY, so nothing was materialised there. **Sixth
+confirmed sighting, decode side, pre-existing and merely unreachable** until the send stub stopped
+throwing first — the `LocalTimeZone` pattern again. Your note that "the class hides in generated
+bodies" priced this correctly.
+
+**⟨OQ-E⟩ cannot be satisfied, and I did not force it.** The guard's whole point is to pass on BOTH
+platforms; the read is broken, so registering it fails Windows and not registering it fails
+solution-integrity — §4.7.4 priced this exact position. It stays out of tree, Linux-proven and
+parked, and registers with the recv increment. **The recv remedy is NOT this change's shape**: an
+async address needs a native staging buffer decoded at HARVEST, which is §4.3's decode-side problem
+(shared with `AcceptEx`'s output buffer), not §4.7's submit-side one. Flagging rather than deciding —
+that is a new increment and yours to place.
+
+Two lessons banked to the board, both generalising past this seam:
+
+1. **The factory must register at ASSEMBLY LOAD.** `syscall` registered lazily from a TCP-shaped
+   path, so a datagram-only program died with `no operation factory registered`. `[ModuleInitializer]`
+   fixes it, no new mechanism (the corpus already uses them for Go's `init()`).
+2. **Process-global registration and fake-based tests are in tension — resolve it INTERNALLY.** That
+   fix means `syscall` claims the global factory in any process that loads it, GolibTests included.
+   Five of six new primitive tests **passed filtered and failed in the full suite** — the
+   order-dependence signature. Relaxing the public one-factory rule to make them pass would destroy
+   the property the seam exists to enforce, so the rule stayed strict and the swap became `internal`,
+   granted through the `InternalsVisibleTo` golib already carried. The S2b replaceable-sink lesson,
+   second arrival.
+
+**Gates, all green:** converter `go test ./...` clean · GolibTests **241/241** · solution integrity OK
+(635 projects, casing OK) · windows builds golib/syscall/internal.syscall.windows **0 errors** · linux
+builds golib/internal.poll **0 errors** · **CNR NO REGRESSION, byte-identical across all 633
+behavioral packages** · full `go2cs.slnx --no-incremental` **Build succeeded**.
+
+**Next:** picking up **F1** (4 sites, 1 function, `incrementSectionCount`) per your census — direct
+fix chaining from the receiver root, new write-through guard, dnsmessage regen, CNR. Noted the
+U+13D1-vs-U+13E1 glyph trap and the 9 `Ꮡ(syscall.ForkLock)` unix-only sites as a Linux watch item.
