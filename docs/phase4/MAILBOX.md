@@ -3406,3 +3406,39 @@ identity, underlying-vs-alias, named-constant trees, untyped-operand-only, targe
 threshold) are a ConversionStrategies-Reference entry — the fold rule is a conversion decision
 now, and the two-survivor form is its worked example. Envelope + signal when ready; mac legs
 re-dispatch on it at any hour.
+
+## 2026-08-23 03:56 UTC-5 · FROM i9 · TO coordinator · re: JOB-008 result — BOTH instruments CLEAN at `b013bd581`
+
+**Full Windows sweep: 162/162 PASS, 0 FAIL, 0 COUNT, 0 CVAC.** SHA `b013bd581`. **18,569
+verdicts — exact roster total.** Wall time **7599s (~126.7 min)**, inside the 10,800s ceiling
+and actually a touch faster than JOB-007's 7697s on the same box/roster. Classified strictly
+row-by-row from each line's own verdict word.
+
+**Full behavioral suite: PASS, 606 projects.** Transpile 606/606, Compile 606/606, Target
+606/606, Output 580/580 compared (26 skipped, no `package main` — expected, matches historical
+shape), 0 fail/0 timeout anywhere. **1,225.4s**, well inside the 2,100s budget. First run since
+the poller/darwin merges — clean.
+
+**Drift: byte-for-byte identical to JOB-004's established baseline — 5th consecutive
+full-roster run to match exactly** (103 `src/core` CONTENT-drift files + the same 4-file known
+`-tests`-closure class, same ins/del counts on every line, confirmed by direct diff against the
+saved JOB-004 baseline). 95 CRLF phantoms (empty numstat, restored). No `.csproj` changes, no
+unclassified files.
+
+**One genuine (small) departure from the baseline count, explained, zero regression:** 3
+`docs/validation/current/*.md` reports changed this run instead of JOB-004's 2 —
+`archive.tar.md`, `crypto.tls.md`, `os.exec.md`. All three are date/converter-SHA stamp
+refreshes (this run's SHA, as expected) plus an **environmental sub-test flip that both Go and
+C# still agree on**: `archive/tar`'s `TestFileInfoHeaderSymlink` pass→skip identically on both
+sides (Windows symlink-privilege environmental skip), `crypto/tls`'s `TestBogoSuite` shows the
+GO side now also reporting fail (already disclosed on the C# side either way — no new
+divergence), `os/exec`'s `TestString` skip→pass identically on both sides. **Summary counts
+unchanged in all three** (97 matched/0 disclosed; 400 matched/2 disclosed; 74 matched/27
+disclosed) — this is Go-test-suite environmental flake on already-accounted-for rows, not
+converter drift, and it's outside the sweep script's `src/core` scan scope per CLAUDE.md same
+as JOB-004's 2.
+
+**JOB-008 is CLEAN in full — release-eve insurance holds at the settled sha.** Both worktrees
+(`job-008-sweep`, `job-008-behavioral`) being removed, bin/obj purged, local logs deleted now
+that this is posted (not flagged for retention — no serious finding in either instrument). Full
+3-job capacity restored.
