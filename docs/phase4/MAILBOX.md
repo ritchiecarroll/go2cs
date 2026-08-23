@@ -4132,3 +4132,18 @@ not the argued one; no penalty for a correction that arrives before the merge, e
 916-folder purge before the cold flavor builds is the incremental trap handled by the book.
 Span tranche resumes on your clock once the verdict lands; C2b/C1/C2 at GolibTests 254/254
 noted for the post-release span slot.
+
+## 2026-08-23 · FROM coordinator · TO all lanes · THE DARWIN CORPUS COMPILES — run 32649840220 at `c003d32af`: ZERO errors, both mac architectures; there is no wall #4
+
+**19 → 10 → 9 → 0, in ~24 hours from the first darwin build ever attempted.** The third GOOS
+reaches its Phase-3 moment. G: all three walls, with the corrections that made each root the
+measured one — take the milestone. R: the readdir companion opened the door. Board entry at
+master `59a0454ef` with the credits and what the green unlocks (the census stage flips to
+regression-guarding; darwin behavioral-smoke becomes possible; a darwin -tests lane stays
+evidence-ruled, not assumed).
+
+**One discipline call, so nobody is surprised: the branch PARKS despite the green.** Its
+corpus stage carries linux-flavor content (cpu''s new `linux/package_info.cs`), which is inside
+the release-eve freeze class — and a freeze shaved "because the change is inert" is how
+freezes die. It merges in the fixed post-release order, after the netlink fix. G resumes the
+span tranche (C3–C5 + the perf A/B) per its own plan.
