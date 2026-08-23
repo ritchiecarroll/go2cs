@@ -4366,3 +4366,33 @@ OVERLAPPED retention explicit, WSABUF-array capture expressly allowed (§4.7''s 
 conservative-by-CHOICE, not wrong-by-construction), `lpTo` silent — undefined worse than either
 answer. Flagging a ratified section''s reasoning rather than silently relying on it is the
 review culture compounding; carry on with the implementation.
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator · F2 ROOTED — and it is NOT ImplementGenerator, and it is NOT the embedding alone. Reproduced from scratch; one scoping ruling wanted before I fix it
+
+**Reproduced without net.** Minimal module (`C:\Temp\g-f2-repro3`, mine, reproducible from the listing below): a sub-package `iolike` declares `Reader` and `ReadWriter`; `main` declares `wrapper` embedding `iolike.Reader` and adding `Write` directly, then asserts `value.(iolike.ReadWriter)`.
+
+```
+Go : ReadWriter: yes
+C# : ReadWriter: no
+```
+
+**Three measurements narrowed it, and each killed a plausible root:**
+
+1. **Same-package version WORKS.** Move `Reader`/`ReadWriter` into `main` and the conversion prints `yes`. So embedding alone is not the defect — the axis is that the asserted interface is **FOREIGN**.
+2. **A no-embedding control WORKS cross-package.** A sibling type `plain` declaring BOTH methods directly satisfies the same foreign `iolike.ReadWriter` and prints `yes` — *with no `GoImplement` record either*. So the runtime binder resolves satisfaction structurally when the methods are really on the C# type, and "the record is the mechanism" (my first inference) is wrong.
+3. **A DIRECT promoted call works:** `w.Read()` converts to `w.Reader.Read()` and prints correctly. The **converter** resolves the embed hop statically at call sites.
+
+**Root:** an embedded INTERFACE field's method set is promoted by Go, and by the converter at call sites — but it is never realized as a MEMBER on the generated C# type. `wrapper` has `Write` and no `Read`, so nothing at runtime can discover that it satisfies `ReadWriter`. Embedded STRUCTS do get promoted members; the marker the generator keys on (`isPromotedStruct`) is really *"the converter emitted this member as a `partial ref` PROPERTY"*, which it does for an embedded struct and not for an embedded interface — that member is emitted as a plain field.
+
+**Why ImplementGenerator is exonerated:** it already handles this shape. The same-package case emits `[assembly: GoImplement<wrapper, ReadWriter>]` and the generated adapter forwards `Read` through the embed and `Write` to the type — correctly, today. Cross-package, that record is simply never written: records come from CASTS, and `recordSamePackageImplements` (which exists precisely to record satisfied-but-unwitnessed pairs) is gated to *"a defined type and an interface, BOTH declared in the package being converted"*. A type assertion from `any` is not a cast of `wrapper`, so nothing witnesses the pair.
+
+**Two routes, and I want your ruling before spending:**
+
+- **(A) Widen the record.** Record a LOCAL type → FOREIGN interface pair it satisfies, and the existing adapter machinery does the rest — proven, since that is exactly the same-package path. The worry is SCOPE: every local type satisfies `error`, `fmt.Stringer`, `io.Writer`… so an unbounded "record everything satisfied" would explode the attribute set corpus-wide. A bounded variant: record only pairs whose foreign interface is named by an **assertion site in this package**, which is finite and demand-driven.
+- **(B) Promote the interface's method set onto the type** — forwarders for each method of the embedded interface. More general (it fixes the type's C# method set, not just assertions, and would make `plain` and `wrapper` alike structurally), but it is real generator work: Go's shadowing and depth-aware ambiguity rules, a possibly-foreign interface's method list, and the interaction with the `Promoted = true` record that already exists for `wrapper → Reader`.
+
+My inclination is **(A) bounded by assertion sites** — smallest footprint, reuses proven machinery, and demand-driven so the attribute set stays finite. But (B) is the one that makes the emitted type *honest*, and if the corpus has non-assertion consumers of interface-embed promotion it is the durable answer. **Your call on which, and whether it lands during the freeze or parks.**
+
+Repro is ~35 lines in two files plus a bare `module EmbedWitness`; I can hand it over or bank it as a behavioral test once a fix exists (it cannot be committed failing).
