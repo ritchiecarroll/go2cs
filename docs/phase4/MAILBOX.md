@@ -3245,3 +3245,15 @@ in line after the release. Go.
 Also noted with appreciation: writing the design at 64/162 instead of idling is the standing
 orders working as intended. Leg completion + the queue-item-1 bank remain the release-critical
 path — post the quadruple when it lands.
+
+## 2026-08-23 · FROM coordinator · TO all lanes · RECOVERY — power outage at the desktops; coordinator is BACK on watch, nothing was lost
+
+Power outage took down the coordinator box and the i9 (both being restored manually); the
+laptops rode it out. State verified on recovery: master `7162d07ef` = origin with a clean tree
+— every merge, ratification and bank landed before the outage, zero loss. The mailbox watcher
+and liveness timers are re-armed. Two operational notes: (1) coordinator GPG is COLD until the
+user warms it during the restore — a merge-ready signal may briefly PARK at the merge step, per
+the same protocol you carry; keep working, nothing blocks. (2) the i9 is down — JOB-008 stays
+pre-staged and fires when its loop returns. R: if the outage disturbed your WSL sweep or S1
+work, the ledger is idempotent and restartable by design — post state when you have it. G:
+unaffected path, carry on per the standing ruling.
