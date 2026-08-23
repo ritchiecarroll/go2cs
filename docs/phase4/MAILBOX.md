@@ -3139,3 +3139,28 @@ so and stop — a priced finding beats a forced fix.
 - **`net` remains: the CS0246 `int` slip (1) and the TypeGenerator generics gap (2).** Rooted: Go's `doBlockingWithCtx[T any]` declares a LOCAL named type (`type result struct{...}`) that closes over `T`. `visitIdent.go`'s intra-function lift renames it to package scope (`doBlockingWithCtx_result`) but carries no type-parameter list, so the emitted `partial struct` has a `T` field and no `<T>` — and go2cs-gen faithfully generates field-refs and ctors over the same missing `T`.
 
 **Judgment you asked for: MECHANICAL, not deep — but wider than a one-line fix, so I want your call before I spend it.** The lift site is single (visitIdent.go:45/89) and Go's rule is simple (a local type closes over exactly the enclosing function's type parameters), but a faithful fix threads those parameters through the declaration, every USE inside the function body, the `[GoType]` record, and the generator's own struct emission — four surfaces, with the behavioral corpus as the regression risk since local named types are common. **Options: (a) I take it now on this branch;** (b) I bank the two closed classes plus the `int` slip and price the generics gap as its own dispatch. I lean (a) — it is the last thing between `net` and a clean darwin build — but it is your budget. Gates so far: converter `go test ./...` green, `os/user` darwin 0 errors; full envelope + CNR before any signal.
+
+## 2026-08-23 · FROM coordinator · TO G · re: wall #2 — RULING: take (a) now, with one scoping directive that keeps CNR byte-identical
+
+**Take it on this branch.** You have the roots hot and re-dispatch would spend more than the fix.
+Two conditions:
+
+**1. Thread only the type parameters the local type ACTUALLY REFERENCES, not all enclosing
+ones.** This is what makes the fix emission-invariant everywhere the bug does not bite: a local
+named type that uses no enclosing parameter lifts exactly as today (the corpus compiles clean on
+windows/linux, so every existing lift site is in that class — a site that needed `<T>` could not
+have compiled). Under that scoping the expected CNR verdict is **byte-identical outside the
+darwin cgo files**, and the behavioral corpus is a pure regression gate rather than a rebank.
+If you find Go semantics genuinely demanding all enclosing parameters somewhere, stop and say
+so rather than widening silently.
+
+**2. The alias-door fix (`typeDeclaredInConvertedPackage`) may retire generator RECORDS that
+exist today** — if any current package aliases to a primitive the way `os/user` does, its
+`package_info.cs` records change and CNR will show it. That drift, if it appears, is INTENDED —
+classify it file-by-file as the alias-door class and carry it in the footprint; do not assume
+byte-identical there, and do not restore it as phantom. Zero occurrences is also a fine answer.
+
+Both closed roots read exactly right — the fold-then-cast arm and especially the phantom-record
+diagnosis (failing CS1729-on-ctor instead of CS0246-on-name because the alias RESOLVES is a
+lovely tell, worth its line in ConversionStrategies-Reference when you bank). Full envelope +
+CNR before signal as you planned; mac legs re-dispatch on your signal.
