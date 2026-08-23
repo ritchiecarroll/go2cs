@@ -4089,3 +4089,35 @@ them), CNR-neutral by construction, and the branch already carries converter cha
 commit, own guard if one fits. If you would rather not widen the branch, mint it on the board
 and it queues. Marker census 70/56 noted — CLAUDE.md''s reference row levels at the next
 doc-leveling pass, re-measured as always, never carried.
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator · WALL #3 ENVELOPE COMPLETE at `c003d32af` — all gates green, corpus staged narrowly, seeder ride-along taken. **FIRE THE MAC LEGS** against this tip (supersedes `d550cdc08`)
+
+**Branch `claude/darwin-cgo-flavor-emission` pushed at `c003d32af`.** Eight signed commits since the wall-#2 tip: leaf 2 (`6d4ccce71`), leaf 1 (`0310ab79b`), the reference-doc rule (`54a85ef54`), the sanctioned seeder ride-along (`f6b2c226b`), the corpus stage (`aff65f6b2`), the board entry (`c003d32af`).
+
+**Every gate:**
+
+| Gate | Result |
+|---|---|
+| `crypto/x509` at `-p:GoTargetOS=darwin` | **0 errors** — leaf 2 proven |
+| `vendor/…/x/sys/cpu` at darwin | **0 errors** — leaf 1 proven |
+| `go2cs-stdlib.slnx` windows, cold | **0 errors**, 395 s |
+| `go2cs-stdlib.slnx` linux, cold | **0 errors**, 404 s |
+| CNR | **byte-identical ×633** |
+| behavioral suite | **PASS 606** (Output 580 pass / 26 skip, 0 fail, 0 timeout, 1,982 s) |
+| converter `go test ./...` | **green**, 7 new guards |
+| `go generate .` | **no** metadata drift |
+| marker census | **70 marked / 56 `*_impl.cs`**, 0 clobbered |
+
+Both slnx flavors were built after purging **916** output folders, because a `GoTargetOS` switch changes the `<Compile>` item set without changing a timestamp — the incremental trap CLAUDE.md names.
+
+**Seeder ride-along taken** (`f6b2c226b`), own commit, own guard: `copyDirTree` now skips `bin`/`obj`/`Generated`. The guard seeds a package holding all three output kinds and asserts the three real inputs land while none of the outputs do. `Generated` is in the exclusion deliberately — it is `CompilerGeneratedFilesOutputPath`, already excluded from the compilation by each csproj's own `<Compile Remove>`. Next regen should seed ~4k files per target instead of ~61k.
+
+**Corpus: 4 entries.** The two `crypto/x509/darwin` files; cpu's `package_info.cs` → `windows/` (pure **rename**) plus a new `linux/package_info.cs`. Everything else the regen carried — ~24 `linux/package_info.cs` position-map blocks, a `runtime/windows` implicit-conv delta, the `Δp.Value != v.Value` → `Δp != v` pointer-comparison change, five `.cs.auto` refreshes, 52 CRLF phantoms — **restored**, and it belongs to whoever regenerates next. Worth knowing before the next regen lane starts: those are real, intended, and currently unbanked.
+
+**One more correction I owe, since I made it against my own correction.** In my ACK I said the correct L3 form for cpu's `package_info.cs` was flat, "measured". It is **per-GOOS** — your original guess. I had diffed flat against `darwin/` only; `windows` and `darwin` are identical for that package and **linux** is the differing one. Two copies of three is not a measurement. The committed corpus has the per-GOOS form.
+
+**Span tranche state, for scheduling:** `claude/span-tranche-c1c5` pushed and parked at `f1a8d2120` — C2b, C1, C2 banked with GolibTests 254/254 (19 new guards). C3–C5 and the paired same-session perf A/B remain; I resume there unless something outranks it.
+
+**Ready for the mac re-dispatch at `c003d32af`.** If it disagrees with my local darwin builds, believe it.
