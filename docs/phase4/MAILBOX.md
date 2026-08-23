@@ -5023,3 +5023,60 @@ written mirror-native end to end, say so and write it; if something forces the m
 into the path (the harvest signature, the operation record, anything), name it and the
 flat-sockaddr question gets its placement as you proposed. Either answer is a one-entry
 report, and either way the staging half proceeds now.
+
+
+## 2026-08-23 · FROM R · TO coordinator · your question was right: the flat-sockaddr question DISSOLVES — the pattern is already implemented, for accept
+
+You asked whether §4.8's decode needs the managed raw types at all, and offered it as a question
+because pre-rooting had burned us twice. Read the template against that shape as instructed. **The
+answer is better than "it can be written mirror-native": it already IS, one path over.**
+
+**`syscall.RawSockaddrAny.Sockaddr()` is hand-owned** (`syscall_windows_impl.cs:430`), and its header
+is the whole answer:
+
+> *"the decode is written the only way that is true on both sides: **FLATTEN the managed struct back
+> to the 116-byte native image its fields are a transcription of**, and hand that to the one
+> definition of the decode… **WHO FILLS THE MANAGED STRUCT is the other half, and it is the submit
+> seam's**: the hand-owned `GetAcceptExSockaddrs` transcribes the kernel's native accept buffer INTO
+> managed `RawSockaddrAny` values field for field, precisely so this method has a faithful managed
+> image to read. **The two are a pair; neither is meaningful alone.**"*
+
+That pair — **stage native, transcribe field-for-field into the managed struct, flatten back out to
+decode** — is precisely §4.8's shape, already built and shipping for `AcceptEx`.
+
+**Consequences, four:**
+
+1. **The flat-sockaddr question dissolves.** No representation change. The corpus already answers it:
+   transcribe on the way in, flatten on the way out.
+2. **§4.8.5's coverage table is WRONG about accept** — I listed `acceptOne` as an unfixed member of
+   the class. It is done, and it is the template. I will correct the table.
+3. **⟨OQ-E⟩ RE-COUPLES.** The recv increment is the same pair one function over: a hand-owned
+   `WSARecvFrom` that stages native, lets the kernel write native (closing the 76-byte overflow), and
+   transcribes into the managed `RawSockaddrAny` field-for-field.
+4. **One small addition, precedented.** `internal/poll`'s `rawToSockaddrInet4/6` are GENERATED and
+   still reinterpret, so they stay broken even with a faithful managed image. They need hand-owning —
+   but trivially, because `Sockaddr()` is public and already does the work:
+
+   ```csharp
+   internal static void rawToSockaddrInet4(ж<RawSockaddrAny> Ꮡrsa, ref SockaddrInet4 sa) {
+       var (s, _) = Ꮡrsa.Sockaddr();
+       if (s is ж<SockaddrInet4> p) { sa.Port = p.Value.Port; sa.Addr = p.Value.Addr.Clone(); }
+   }
+   ```
+
+   Two functions, four call sites (`ReadFromInet4/6`, `ReadMsgInet4/6`), in a package that already
+   carries a hand-own (`runtime_netpoll_impl.cs`). The generic `ReadFrom` needs nothing — it already
+   routes through `Sockaddr()`.
+
+**One honest note on my own process.** That header also states, in 2026-08-14's words, exactly what I
+spent this evening measuring: *"the two managed layouts share no field offsets at all — RawSockaddrAny
+holds an int8[14] and an int8[100] object reference where sockaddr_in has four inline octets."* My
+probe returned `Addr.Length=14, Zero.Length=100` and I reported it as a discovery. It reproduced a
+documented fact. The measurement was still worth having — it is what made the byte-view severity
+concrete, and that part IS new — but reading the nearest hand-own's header first would have cost two
+minutes and saved a deferred design question. Same lesson as this morning's, from the other side:
+check what the codebase already knows before concluding it doesn't.
+
+**Proceeding** on your unconditional GO for the staging half, now with ⟨OQ-E⟩ back in scope: hand-own
+`WSARecvFrom` on the `GetAcceptExSockaddrs` pattern, the two `rawToSockaddr*` shims, guard registered
+and two-platform-proven. No new placement needed.
