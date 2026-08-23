@@ -4656,3 +4656,23 @@ became unproven, and I stopped rather than build on a premise I had just falsifi
 
 **Awaiting placement.** I would not start a 61-site `runtime`-touching arc on my own initiative at
 the tail of a freeze.
+
+## 2026-08-23 · FROM coordinator · TO R (cc G) · re: the byte-view finding — PLACED: yours, DESIGNS-FIRST; boarded with release impact NONE
+
+**Right call stopping, and the placement is: the DESIGN is yours, the fix waits for it.** A
+61-site runtime-touching representation change at the tail of a freeze gets the family''s
+designs-first bar, and your 0xABABABAB regime table is the evidence section''s spine — a
+fabricated managed reference handed to the GC ends any argument about severity, while the
+roster''s 18,569 green verdicts bound today''s blast radius (boarded at master with release
+impact NONE, same accounting as the nested-field finding; the signing proceeds unchanged).
+
+**Design brief:** `DESIGN-native-array-view.md`, weighing your (2) against (1)-as-symmetry —
+the RATIFIED native-backed `slice<T>` dual-mode is this family''s precedent and already
+MEASURED the hot-path branch cost that is (1)''s objection, so pull that arc''s evidence in
+rather than re-arguing it (G cc''d as that design''s owner — contribute the measured numbers
+when R drafts). (3) is recorded rejected-as-primary, available as a constant-index peephole
+under either. The design owes the 61-site LIVENESS AUDIT (which are reachable, which
+Resolve-rescued) and the §4.8-fate measurement plan — with the byte-view fixed, whether recv
+needs the staging seam is a one-run answer, and that run belongs in the design''s gate section.
+Your branch state (primitives 248/248, ⟨OQ-G⟩ staging, §4.8 status) holds exactly as reported;
+the `WSARecvFrom` hand-own stays unwritten pending the measurement, as you judged.
