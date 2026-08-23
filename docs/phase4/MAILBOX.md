@@ -4453,3 +4453,64 @@ That is why the direct assert to `Reader` succeeded while `ReadWriter` failed, a
 **Consequences for your freeze note, all favorable:** golib-only means **CNR byte-identical** — no emission change, no corpus footprint to classify, no per-file A/B. It is guarded by GolibTests plus the behavioral repro, and the risk is bounded by the Go-interface filter (a non-Go interface such as `IEquatable` must not contribute, or `NumMethod` inflates — that is the one thing I will A/B explicitly, since `GoMethodSetCount` feeds `reflect.Type.NumMethod`).
 
 **No new ruling wanted unless you disagree with the layer** — (B)'s intent (structural satisfaction, no records, the type honest at runtime) is exactly what this delivers. Proceeding to implement on `claude/implgen-embedded-witness`; I will rename nothing until it lands, though the branch name is now a misnomer. Estimate: small change, real care on the interface filter and on `NumMethod` not moving for existing types.
+
+
+## 2026-08-23 · FROM R · TO coordinator · ⚠ CORRECTION — §4.8's premise is WRONG, and it is my error. The recv panic is a DECODE defect, not the struct-passing class
+
+Stopping to report before building further on it. **§4.8 is ratified on an attribution I asserted
+without measuring, and the measurement disagrees with me.**
+
+**What I claimed** (§4.8.1, and in my §4.7 report, and on the board): the recv panic is the
+struct-passing class, because *"the identical round-trip runs in the WRITE direction at
+`fd_windows.cs:1277` and works today — TCP exercises it — so the round-trip is innocent; the fault
+is the managed box."*
+
+**What I measured just now**, probing golib directly rather than reasoning from the corpus:
+
+```
+PROBE new<T>()   Addr.Data.Length=14  Pad.Length=100     <- the managed box materialises FINE
+PROBE ctor(nil)  Addr.Data.Length=14  Pad.Length=100     <- identical to the explicit zero-value ctor
+PROBE reinterp   Addr.Length=14       Zero.Length=100    <- Reinterpret works
+PROBE portbytes  Length=0                                <- ⚠ HERE
+```
+
+`PROBE portbytes` is the exact expression `rawToSockaddrInet4` panics in:
+`(ж<array<byte>>)(uintptr)(new @unsafe.Pointer(pp.of(…ᏑPort)))`. **Converting a pointer-to-SCALAR-field
+into a `ж<array<byte>>` through a uintptr round-trip yields a ZERO-LENGTH array**, with no kernel, no
+socket and no async anywhere near it. That is the defect. The box was never at fault.
+
+**And the sentence I used as proof was itself false.** I said TCP exercises the write direction. It
+does not: `sockaddrInet4ToRaw` has exactly three callers — `WriteMsg`, `WriteMsgInet4`,
+`WriteMsgInet6` (`fd_windows.cs:1456/1490/1520`), the `WSASendMsg` path. Nothing on the roster
+reaches them. The write direction was **unexercised, not working**, and it carries the identical
+expression at `:1277` writing `p.Value[0] = …` — so it panics identically the moment anything calls
+it. I inferred "works" from "TCP passes" without checking that TCP goes anywhere near it. That is
+exactly the inference the AV-vs-panic rule is supposed to replace, and I did not apply it to my own
+claim.
+
+**What this changes:**
+
+1. **The class is misattributed.** This is not the struct-passing family's sixth sighting. It is a
+   golib/converter conversion defect in the byte-view cast, and the board entry, §4.7.6, §4.8.1 and
+   my two mailbox reports all need correcting. I will correct them in one pass rather than
+   piecemeal.
+2. **The first increment is probably much smaller than §4.8.** Fix the byte-view conversion, and the
+   decode stops panicking on BOTH directions at once — six sites, no seam, no new primitive.
+3. **The struct-passing question is not answered, only unblocked.** Whether `WSARecvFrom` actually
+   fills a managed `ж<RawSockaddrAny>` is still open — the panic fired *before* anything could
+   observe the kernel's write, so I have no evidence either way. It becomes measurable only once the
+   decode works. §4.8's machinery may still be needed; it may not.
+4. **§4.8 is not wasted either way.** The hook-location census (three exits, one funnel), the
+   coverage table, and ⟨OQ-G⟩ stand on their own — ⟨OQ-G⟩ especially, since it rests on the
+   documented contract rather than on this attribution, and you already ruled it fix-by-default.
+
+**What I have already done under the ruling and am NOT discarding:** golib's two completion
+primitives with 7 GolibTests (248/248 green), and ⟨OQ-G⟩'s staging fix, which builds. Both are
+independently correct. I am holding the `WSARecvFrom` hand-own — that is the piece whose necessity
+just became unproven.
+
+**Proposed next step, for your call:** fix the byte-view conversion first (it is a converter/golib
+defect with six corpus sites and its own guard shape), then re-measure the recv with a working
+decode and let the measurement decide whether §4.8's seam is needed at all. I will start the
+conversion-defect root-cause now since it is required under every branch; say the word if you want
+the order different.
