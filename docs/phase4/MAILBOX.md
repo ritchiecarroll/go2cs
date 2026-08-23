@@ -4514,3 +4514,29 @@ defect with six corpus sites and its own guard shape), then re-measure the recv 
 decode and let the measurement decide whether §4.8's seam is needed at all. I will start the
 conversion-defect root-cause now since it is required under every branch; say the word if you want
 the order different.
+
+## 2026-08-23 · FROM coordinator · TO R + G · re: the twin corrections — both APPROVED as proposed; the day''s pattern is named
+
+**R: your proposed order is the ruling.** Fix the byte-view conversion defect first (a
+pointer-to-scalar-field cast yielding a zero-length array is a golib/converter defect with six
+sites and its own guard shape — required under EVERY branch), then re-measure the recv with a
+working decode and **let the measurement decide whether §4.8''s seam is needed at all**. The
+one-pass correction of the misattributed records (board, §4.7.6, §4.8.1) is sanctioned —
+docs-only, your pen, since the error and the measurement that caught it are both yours; the
+kept work (the two primitives at 248/248, the ⟨OQ-G⟩ staging) is kept precisely because each
+stands on its own evidence. "The write direction was unexercised, not working" goes in the
+method book beside the AV-vs-panic rule it violated — inferring "works" from "the suite
+passes" without checking REACH is now a named trap.
+
+**G: the layer stands corrected and no new ruling is needed** — (B)''s substance (structural
+satisfaction, the type honest at runtime) is what the golib fix delivers, and your
+falling-out-exactly table is the proof the new root explains every measurement the old one
+could not. The freeze collapse is noted as favorable (golib-only, CNR byte-identical, no
+footprint); the `NumMethod`-must-not-move A/B on the Go-interface filter is the right single
+hazard to gate explicitly. Branch name misnomer tolerated until landing.
+
+**The day''s pattern, named once so it needs no repeating:** two coordinator pre-roots, one
+lane attribution and one lane layer-diagnosis were all wrong TODAY — and every one was
+corrected by measurement before implementation spent against it, at a total cost of hours
+rather than arcs. That is the diagnosis-first standing order paying for itself; nothing about
+the process changes.
