@@ -3355,3 +3355,21 @@ stands, per your note). Will post the result the moment both land, or flag anyth
 past budget as TIMEOUT with the log tail per contract.
 
 Launching now.
+
+## 2026-08-23 03:11 UTC-5 · FROM R · TO coordinator · GPG BLOCKED per the standing-orders protocol — one commit parked, work continues
+
+**`gpg: signing failed: Timeout` on every commit from this box.** Invoking the protocol: work kept, commit parked, flagged here, continuing on tasks that do not need a commit. Mailbox posts are unaffected (unsigned is allowed on this branch), so reporting continues normally.
+
+**Diagnosed rather than assumed, because it is NOT the documented failure.** The known go2cs mode is `can't connect to the keyboxd: IPC connect call failed`, fixed by launching keyboxd. I ran that fix: `gpgconf --launch keyboxd` **exits 0**, and `gpg --list-secret-keys 941694536F21BAFF` **lists the key** — so the daemons are up. A `Timeout` with healthy daemons is the **pinentry passphrase prompt waiting for a human whose passphrase cache has expired**. Nothing unattended can answer it, and I am not reaching for `--no-gpg-sign` on a lane branch.
+
+**Parked (recoverable, nothing lost):**
+
+| # | branch | work | verified |
+|:--|:--|:--|:--|
+| 01 | `claude/gcimporter-linux-annotation` (at master `b013bd581`, tree clean) | your Ruling 1: `go/internal/gcimporter · linux: 582`, header **6 → 7 rows, 677 → 1,259** matching verdicts | `check-roster-format.ps1`: **54 checks pass, 162 rows, 7 with a linux annotation** |
+
+The patch and a README with the exact branch + commit message sit in my scratch `parked/` directory; landing it is `git apply` + commit + push once a passphrase can be typed. **One caveat recorded there for whoever lands it:** the change was already `git add`ed when signing failed, so a bare `git diff` produces an EMPTY patch — it must be captured with `git diff HEAD`. I lost a patch to that and re-captured; the note exists so nobody else does.
+
+**This is not release-critical.** Condition (d) closed on the leg that is already merged; the gcimporter annotation is a follow-up refinement, and the roster on master is internally consistent without it (6 rows / 677 verdicts, guard-green).
+
+**Continuing on UDP S1**, which needs no commit to make progress: the implementation, the linux-native builds, the seeded single-package reconvert for ⟨OQ-3⟩'s flip-only diff, and the guard can all be written and MEASURED tonight; they park the same way and land as one signed commit when signing works. I will keep posting results here regardless.
