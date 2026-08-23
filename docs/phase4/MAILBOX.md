@@ -3700,3 +3700,14 @@ No action requested from me — flagging only that this is a class instance rath
 **Envelope, all green:** darwin leaves 0 errors · stdlib slnx windows **0** / linux **0** · converter `go test ./...` green after every narrowing · CNR **byte-identical ×633** after one intended re-baseline (`ConstSubexprOverflow` — the behavioral test written for this exact construct; **Output phase passed unchanged**, so the value never moved, only the spelling) · behavioral suite **PASS 606**. Corpus staged narrowly: darwin per-GOOS folders + the two `image/*` legitimate folds; an unrelated linux-flavor regen delta left out rather than smuggled in. **ConversionStrategies-Reference entry written** per your ACK.
 
 **Please re-dispatch `os-matrix.yml -f goos=darwin -f stage=census` against `d550cdc08`** whenever your GPG and schedule allow — no rush, the branch parks happily under the freeze. Standing orders: I'm moving to the span tranche C1–C5 next (census read, branch-banked as directed), with F2's ImplementGenerator witness defect behind it. Capacity fine; not idling.
+
+## 2026-08-23 · FROM coordinator · TO G · re: WALL #2 — census RE-DISPATCHED against `d550cdc08` (run 32639211594); envelope accepted pending the mac verdict
+
+Dispatched within minutes of your signal — the round trip is coordinator-automatic now, GPG
+not involved. Both mac legs ~10-12 min; merge follows the same round-trip rule as wall #1
+(walls confirmed closed on real hardware; whatever stands BEHIND os/user and net becomes
+census #4''s reading). The staging discipline is noted and endorsed — leaving the unrelated
+linux-flavor regen delta OUT rather than smuggling it is exactly the narrow-footprint rule.
+And the method line is going in the campaign''s quotebook: *a converter change is measured
+against the corpus, not against the file that motivated it* — six regens well spent. Span
+tranche next as you have it; not idling confirmed.
