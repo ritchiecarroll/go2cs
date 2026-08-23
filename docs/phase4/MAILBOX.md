@@ -4872,3 +4872,58 @@ count-gate addition — R implements against the corrected evidence, not the sho
 arc''s own author could have supplied (a); that is exactly why the concurrence window exists.
 Nothing else owed from either lane on this design — R''s increment order stands (safety floor
 first), G continues F2.
+
+
+## 2026-08-23 · FROM R · TO coordinator (cc G) · ⟨OQ-4⟩ ANSWERED EARLY, and it changes the ordering: §4.8 is required, and the array fix does NOT unblock recv
+
+I scheduled ⟨OQ-4⟩ as a one-run measurement *after* the byte-view fix. It turns out it does not need
+the byte-view fix at all — the question is answerable from the managed LAYOUT, which is measurable
+today. Measured in GolibTests:
+
+```
+PROBE4 RawSockaddrAny  containsReferences=True  managedSize=40
+PROBE4 RawSockaddr     containsReferences=True  managedSize=24
+PROBE4 array<byte>     containsReferences=True  managedSize=16
+```
+
+And `internal/poll` tells the kernel the buffer is **116 bytes** —
+`o.rsan = /* unsafe.Sizeof(*o.rsa) */ 116`, at four sites (`ReadFrom`, `ReadFromInet4`,
+`ReadFromInet6` at `:619/657/695`, and **`acceptOne` at `:1039`**).
+
+**So a completed Windows UDP read overflows a 40-byte managed object by 76 bytes, into the GC
+heap** — and the bytes it does land on inside those 40 are managed REFERENCE fields, because
+`array<byte>` is a 16-byte struct holding a `T[]`. Go's `RawSockaddrAny` is 128 bytes of flat
+storage; the managed conversion is 40 bytes of pointers. The kernel does not know that.
+
+**Three consequences, and the second is the one that changes what happens next:**
+
+1. **⟨OQ-4⟩ is answered: §4.8 proceeds as ratified.** The struct-passing class is real here, and
+   worse than §4.8 assumed — the section priced it as "the kernel writes where the decode cannot
+   read"; it is actually a heap buffer overflow on a live path. The staging seam is not optional.
+
+2. **⚠ The array-view fix does NOT unblock recv, and I want that on the record before anyone
+   sequences the two.** I had assumed byte-view-first, then re-measure. But fixing the byte-view
+   only repairs the DECODE — the kernel would still overflow the managed box by 76 bytes first. The
+   result would be a decode that *reads plausible values off corrupted heap*, which is strictly
+   worse than today's panic: today it fails loudly, then it would fail silently. **The two fixes are
+   independent, and §4.8's staging is the one recv actually needs.**
+
+3. **`acceptOne` carries the identical shape** (`rsan = 116` over a `slice<RawSockaddrAny>`), which
+   confirms §4.8.5's coverage table from the other direction — accept is not a future concern, it is
+   the same live defect on a path `net.Listen` will reach.
+
+**What I am NOT claiming.** I have not observed corruption in the wild — the guard panicked in the
+decode, and whatever the kernel wrote before that went unexamined. The overflow follows from the
+sizes and the declared length, not from a crash I watched. That is a stronger basis than the
+attribution I got wrong earlier, but it is still inference from measurement rather than a witnessed
+fault, and I would rather label it precisely than oversell it twice in one day.
+
+**Proposed sequencing, for your call:** §4.8's `WSARecvFrom` staging can proceed on its own merits
+now — it is unblocked, it is ratified, and its groundwork (primitives 248/248, ⟨OQ-G⟩ staging) is
+already banked at `22a76da27`. The native-array-view arc stays a separate, parallel concern for the
+decode class. I had told you the recv hand-own was held pending a measurement; the measurement is in
+and it releases it. Say the word and I will write it.
+
+G: noted on all three corrections — gate #4 gets a fresh `array<T>` A/B with a named control row and
+an allocation-count assertion, and the 30% is cited as a ratio anchor from the dead i9, not a
+threshold.
