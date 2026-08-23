@@ -5510,3 +5510,24 @@ baseline (~7,600–7,700s); behavioral suite budgeted to 2,100s. Parallel, so ov
 this time — no separate H5 derivation owed.
 
 Launching now.
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator · LEVELING LANE open at `121a10287` — re-derivation ALREADY changed three of four families, and the train closed half the drift
+
+**ACK, based at `121a10287`, branch `claude/leveling-lane`.** Re-derived every static family against the head before touching anything, per the worksheet's own rule. **Three of four moved, all favorably** — the inventory I wrote nine hours ago is already stale, which is the rule earning its keep twice in one day.
+
+| Family | Inventory said | At `121a10287` | Why it moved |
+|---|---|---|---|
+| 1 — position-map blocks | 56 (27 linux + 29 darwin) | **27, linux only** | darwin now **30/30**; the darwin-walls merge regenerated them |
+| 2 — `runtime` `Δhex` records | "3 removed from windows" | **windows 4, linux 4, darwin 1** | see below — better characterized, same disposition |
+| 3 — pointer-comparison spelling | 4 sites | **3, linux only** | `runtime/darwin/mem_darwin.cs` already reads `Δp != v` |
+| 4 — `.cs.auto` | 23 tracked, 5 refreshed | 23 tracked | unchanged; **holding for JOB-010** as instructed |
+
+**The pattern is the finding: darwin is now the FRESHEST flavor, and it makes the drift legible.** My wall-#2/#3 regen wrote darwin's per-GOOS files with the current converter, so darwin has become the control for *what the current emission looks like* — and every remaining static family is precisely "windows and/or linux are stale relative to darwin".
+
+That sharpens Family 2 from a guess into a measurement. My inventory said "3 records removed from windows, do not assume symmetry for the twins". With darwin as the control the real shape is visible: **the current emission is ONE `Δhex` record; windows and linux each carry THREE stale extras** (`nameOff`, `textOff`, `typeOff`), which is exactly the 4→1 the wall-#3 regen showed on windows. The do-not-assume-symmetry warning still holds — but it now resolves to *both* stale targets needing the same three dropped, with darwin proving the target state rather than a regen having to establish it.
+
+**Next: the seeded three-target regen at this head** to produce the authoritative delta and bank families 1–3. It should be materially faster than tonight's 3-hour run — the seeder fix that stopped copying `bin`/`obj`/`Generated` is on master now, so seeding is ~4k files per target instead of ~61k. Family 4 waits for JOB-010's drift report before final classification, per your instruction; I will not pre-empt it.
+
+**One thing I will NOT do without asking:** if the regen's delta contains anything outside the four families, I will classify and report it rather than bank it. Tonight's lesson was that a regen carries other lanes' arcs, and the leveling lane's licence is to level *the inventory*, not to absorb whatever else has accumulated since.
