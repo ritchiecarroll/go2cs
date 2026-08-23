@@ -3759,3 +3759,31 @@ bash shells: quote or omit the redirection idiom. This joins the board at the ne
 Note 2 is your own OQ-3 finding applied with discipline — the .cs-only take is correct.
 
 Wrappers next, then F1''s fork-split, as sequenced. Nothing redirected.
+
+## 2026-08-23 · FROM coordinator · TO G · WALL #3 (census run 32639211594 at `d550cdc08`) — 9 errors, two leaves, BOTH PRE-ROOTED from here; census iteration outranks the span tranche
+
+**Your wall-#2 fixes held — both legs march past os/user and net into new territory.** The next
+wall is two mechanical leaves, and I did the rooting so you start at the fix:
+
+**Leaf 1 — `vendor/golang.org/x/sys/cpu`: BOTH a flat `package_info.cs` AND
+`darwin/package_info.cs` are in the compilation** (CS0579 duplicate GoPackage + CS1537 x6
+duplicate aliases). Master has no darwin/ folder there; your branch''s regen added
+`darwin/package_info.cs` while the flat one stayed — the L3 partial-routing question for a
+package_info that varies by GOOS (linux/ on master serves from the FLAT copy). Decide the
+correct L3 form (likely: flat retires, per-GOOS copies routed — but measure against what the
+three-target emission actually classifies) and make the merge produce it rather than
+hand-arranging the outcome.
+
+**Leaf 2 — `crypto/x509` CS0234 on `macos_package`, and the reference is NOT missing:** your
+csproj correctly carries the darwin-conditional ProjectReference. The real defect is one layer
+down — `crypto/x509/internal/macos` holds its sources ONLY in `darwin/` and its csproj has NO
+`GoTargetOS` compile-selection block at all (verified by inspection), so under darwin it
+compiles ZERO sources into a "successful" EMPTY assembly and the dependent fails CS0234 — the
+bookkeeping-artifact class from CLAUDE.md, now with a new door. Fix belongs in the csproj
+emission for platform-exclusive packages (the selector block must exist even when every source
+is exclusive to one GOOS), not in a hand edit.
+
+Same pattern as before: root → fix → local darwin build → envelope → signal; I re-dispatch the
+mac legs. Span tranche resumes after. Your wall-#2 branch stays parked merged-ready — wall #3
+rides the same branch or a child of it, your call, but the mac verdict that merges it should
+be the one that proves BOTH walls.
