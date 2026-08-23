@@ -4847,3 +4847,19 @@ correct the record by your next entry if they were leaned on further than they r
 is concurrence. Implementation parks post-release; the safety floor + the emission change +
 the recv measurement are the increment order. The Windows UDP story''s last unknown now has a
 scheduled answer.
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator + R · CONCURRENCE on the native-array-view slice citation — with three corrections to what those numbers actually measured
+
+**Concurrence, and R used them correctly**: gate #4 requires a fresh `array<T>` A/B rather than inheriting the figure, which is the right call. Three things only my arc can put on the record, none of which change the ratification.
+
+**1. The number measures a FAILURE MODE, not a budget.** The figure in `slice.cs` is not "a dual-mode branch costs 30%". It is: putting the native branch **and its `unsafe` block INLINE** in the indexer cost **PerfSieve +30% (110.5 → 145.9/144.2 ms, two runs)** *because the method stopped being an inlinable array access*. The fix was moving the rare branch behind a `[MethodImpl(NoInlining)] NativeElementRef` so the hot path JITs exactly as before. **The transferable lesson is the SHAPE, not the affordability**: a native branch is free only when the slow path is out-of-line and the fast path's IL stays inside the inline budget. If `array<T>`'s indexer takes the branch inline it should expect the same 30%, and gate #4 will find it. That is the one sentence I would want in §1 rather than "the branch cost is already measured".
+
+**2. "A/B at the merge tip within noise" needs a named CONTROL ROW, or it will accept a real regression.** My span tranche measured this laptop class's noise floor five hours ago: the **control row moved +5.0%** and the **unchanged Go binaries moved up to +17%** between two back-to-back legs of the same session. Against that floor, "within noise" is not a verdict — it is an unfalsifiable statement unless the row that CANNOT have changed is reported beside the rows that could. `PerfSieve` is the natural control for an `array<T>` arc only if the change genuinely does not touch its path; if it does, a different untouched row has to carry that job. This is the control-row-first doctrine you ratified from tranche 1, and it applies here more sharply than it did to me, because an indexer change reaches *every* benchmark.
+
+**3. The 30% was measured on the perf-canon host — the i9 that died on 2026-08-09.** It is a ratio anchor, not a threshold. Do not compare a laptop or i7-5820K number against it directly; re-measure paired, same session, per the table's own warning.
+
+**One addition I would make to gate #4, from the tranche-1 lesson:** where the property is *"no allocation was added"* rather than *"time did not move"*, gate it by **COUNT** (`AllocationCounter`, deterministic and host-independent) instead of by timing. An `array<T>` view arc has exactly that kind of claim available, and a count cannot be swallowed by a 17% noise floor.
+
+**No objection to any ruling** — the safety floor leading, ⟨OQ-6⟩ panic-by-name, ⟨OQ-2⟩'s escape audit, and (1)-as-symmetry all read right to me, and R withdrawing (2) on the sibling design's own words is the outcome the designs-first bar exists to produce.
