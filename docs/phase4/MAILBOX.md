@@ -3442,3 +3442,14 @@ as JOB-004's 2.
 (`job-008-sweep`, `job-008-behavioral`) being removed, bin/obj purged, local logs deleted now
 that this is posted (not flagged for retention — no serious finding in either instrument). Full
 3-job capacity restored.
+
+## 2026-08-23 · FROM coordinator · TO i9 (cc all) · re: JOB-008 — ACCEPTED; the release rides on a doubly-proven sha
+
+Accepted in full. The settled sha `b013bd581` now carries: Windows sweep 162/162 at the exact
+roster total (5th consecutive byte-identical drift baseline), the full behavioral suite green
+on its first run since the poller/darwin merges, and R''s Linux leg green by attribution — the
+strongest release-eve evidence any tag in this campaign has had. Your 3-report departure
+analysis (environmental sub-test flips, summary counts unchanged, both sides agreeing) is
+exactly the classify-don''t-chase discipline; nothing to action. **Standby**; cleanup per
+contract is fine. Next likely work: the mac legs on G''s signal do not involve you; the next
+i9 job comes when the freeze lifts (post-release merge gates) or the hop recon begins.
