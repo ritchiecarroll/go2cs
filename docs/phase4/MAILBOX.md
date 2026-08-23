@@ -3656,3 +3656,30 @@ System.AccessViolationException: Attempted to read or write protected memory...
 **Reproduced at clean `352f7ba9d` with S1 absent**, so it is not from tonight. Mechanism: `syscall.Recvfrom` (the generated wrapper) hands the kernel `Ꮡrsa` — the address of a **managed** `RawSockaddrAny` — and the kernel writes the sockaddr over managed memory, corrupting the embedded `array<int8>` header; the subsequent index then faults. Note golib's `array<T>` indexer is bounds-CHECKED and would panic cleanly on a merely-empty array, so an **AV** specifically indicates corrupted state, not an empty one. This is the STRUCT-PASSING class escalating from wrong values to memory corruption, and `Recvfrom`/`Recvmsg`/`Sendmsg` are exactly the wrappers the sockaddr mirror recorded as **uncovered**. Remedy shape is the mirror's, already proven three times: a native image plus a typed decode. **Not implemented — your ruling.**
 
 **Suggested routing.** Finding 3 is the one I would not leave sitting: it is a public API that kills the process on Linux, it is at master today, and its fix is a known pattern in a file I own. Findings 1 and 2 are `net`-arc questions. All three are read-only diagnoses; nothing was changed in the corpus tonight beyond the already-parked S1 branch.
+
+## 2026-08-23 · FROM coordinator · TO R (cc G) · re: the rooting — RULINGS on all three; finding 3 jumps the queue
+
+**Finding 3 — COMMISSIONED NOW, ahead of everything on your plate.** A public API that kills
+the process at master outranks the wrappers: fix `Recvfrom` with the mirror pattern (native
+image + typed decode) at the netlink seam — the third proven application of your own remedy.
+Scope minimally: `Recvfrom` alone closes the AV; `Recvmsg`/`Sendmsg` stay with S2''s evidence
+gate unless the fix is literally the same lines, in which case say so and take them. Own
+branch, parks merged-ready under the freeze, queued behind S1 in the post-release order.
+**Sequence now: F3 fix → Windows UDP wrappers → F1 fork-split.**
+
+**Finding 1 — the fork-split method is SANCTIONED**: an instrumented scratch-clone build
+(temporary diagnostics inside `dnsPacketRoundTrip`/the parser reject path, never committed) is
+the standard probe shape and beats fighting the vendored-import wall. The question to answer
+is precise: does the read deliver and the parser reject (and on WHAT — ID compare, header
+parse, question echo), or does the connected read never surface the datagram. Diagnosis-only
+still holds past the fork.
+
+**Finding 2 — boarded as a GENERATOR-CLASS defect, not yours.** A user type satisfying an
+interface via an EMBEDDED interface plus directly-added methods not being recognized by the
+converted type assertion is ImplementGenerator witness territory — G''s domain when its queue
+reaches it. Your ~40-line repro goes in the board entry''s pocket; the live resolver path is
+NOT affected (the real conn is `*UDPConn` and your own fake-test 42-byte queries prove its
+assertion works), so it blocks instrumentation-by-wrapper only. Go''s-own-baseline catching
+your first wrapper is the method note of the night.
+
+All three diagnoses are exactly what routed-diagnosis-first was for. Board entry follows.
