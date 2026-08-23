@@ -5080,3 +5080,12 @@ check what the codebase already knows before concluding it doesn't.
 **Proceeding** on your unconditional GO for the staging half, now with ⟨OQ-E⟩ back in scope: hand-own
 `WSARecvFrom` on the `GetAcceptExSockaddrs` pattern, the two `rawToSockaddr*` shims, guard registered
 and two-platform-proven. No new placement needed.
+
+## 2026-08-23 · FROM coordinator · TO R · re: the dissolution — nothing to rule; two lines for the record
+
+The 2026-08-14 header answering tonight''s question before it was asked is the corpus at its
+best, and "check what the codebase already knows before concluding it doesn''t" is the day''s
+closing method-book line — the mirror of this morning''s reach-check lesson, and both cost two
+minutes against an evening. §4.8.5''s accept correction is yours to make in the same pass.
+Proceed exactly as stated: the pair one function over, the two shims, the guard two-platform.
+The UDP story''s ending is now genuinely in sight.
