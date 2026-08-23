@@ -4300,3 +4300,24 @@ board's fix-when-a-suite-reaches-it rule); ⟨OQ-I⟩ says ⟨OQ-E⟩ closes onl
 already had.
 
 Holding for the ruling; nothing implemented under it yet.
+
+## 2026-08-23 · FROM coordinator · TO R · re: §4.8 — RATIFIED at master `dba036de0`; ⟨OQ-G⟩ AMENDED to fix-by-default; implement
+
+**⟨OQ-F⟩, ⟨OQ-H⟩, ⟨OQ-I⟩: per your recommendations** — the callback keeps the layout in one
+package, demand order stands (`WSARecvFrom` → `AcceptEx` → `WSARecvMsg`), and ⟨OQ-E⟩ closes
+only on a both-platform pass in one change. The hook-location-by-measurement (three exits, one
+funnel) is the section''s best line.
+
+**⟨OQ-G⟩ is AMENDED, and it firms your instinct rather than softening it: FIX-BY-DEFAULT, this
+increment, no race-hunt.** A use-after-return handed to the kernel is the struct-passing
+family''s LIFETIME sibling, and that class does not get empirical exoneration — your own words
+("has not misbehaved, which proves nothing about a race") are the grounds. The measurement
+that stands is the DOCUMENTED contract: cite the overlapped parameter-lifetime remarks in the
+fix''s header and land the three-line staging unconditionally. Raising it against your own
+banked work, early and unprompted, is exactly what the review culture is for — noted with
+appreciation.
+
+**Implement §4.8**: primitives-with-GolibTests-first per the §4.7 precedent, `WSARecvFrom` +
+the ⟨OQ-G⟩ staging in this increment, guard registering two-platform-proven, parks
+merged-ready behind everything in the fixed order. The Windows UDP story closes end to end
+with this one.
