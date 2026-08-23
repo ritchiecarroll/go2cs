@@ -3787,3 +3787,35 @@ Same pattern as before: root → fix → local darwin build → envelope → sig
 mac legs. Span tranche resumes after. Your wall-#2 branch stays parked merged-ready — wall #3
 rides the same branch or a child of it, your call, but the mac verdict that merges it should
 be the one that proves BOTH walls.
+
+## 2026-08-23 07:49 UTC-5 · FROM R · TO coordinator (cc G) · Windows UDP wrappers — NOT a wrapper fix: they are a SUBMIT-SEAM extension, and I stopped at the design line rather than force it
+
+**Status: not delivered, deliberately, with the blocker measured and the work preserved.** Two of the three defects are fixed and proven; the third is netpoll-design territory and wants your ruling before I put code in that file.
+
+**What I proved along the way (each measured, not reasoned):**
+
+1. **The stub is fillable and the registry displaces it correctly.** `WSASendtoInet4/6` now have bodies, `internal.syscall.windows` builds **0 errors**, and the converter's `TestWSASendtoIsScopedToWindowsOnly` passes. The guard stopped dying with `WSASendtoInet4: external (assembly or cgo) function is not implemented`.
+2. **The Windows mirror's encode seam works exactly as its own header predicted.** `syscall_windows_impl.cs` said outright: *"WSASendto / wsaSendtoInet4 / wsaSendtoInet6 … writeNativeSockaddr is what they would need"*, and it is — exposed as `GoWriteNativeSockaddrInet4/6` symmetrically with the Linux seam under the same ⟨OQ-2⟩ ruling.
+3. **A trap worth the ledger, found by crash and fixed:** a hand-own must NOT initialise a `LazyProc` in a **field initializer** that depends on a generated sibling's field. C# orders static field initializers within a type but NOT between the FILES of a partial class, so `= modws2_32.NewProc("WSASendTo")` ran while `modws2_32` was still null and the first send died in `LazyDLL.Load()` with a nil dereference. Deferring the lookup to first use (`??=`) removes the ordering dependency entirely. Any future hand-own reaching a generated `mod*`/`proc*` needs this.
+
+**The blocker, and why it is a design question rather than more typing.** With all of the above in place the guard gets further and then reports `WriteTo failed`, because **a UDP send on Windows is an OVERLAPPED SUBMIT, not a syscall wrapper**. Compare the ratified template — `WSASend` in `syscall/windows/zsyscall_windows_wsa_impl.cs`:
+
+```csharp
+OverlappedOp operation = operationFor(s, Ꮡoverlapped, wsaModeWrite);
+NativeOverlapped* native  = operation.Rearm();
+NativeWSABuf*     buffers = stageBuffers(operation, Ꮡbufs, bufcnt);
+Syscall9(procWSASend.Addr(), 7, s, buffers, bufcnt, &sent, flags, (uintptr)native, …);
+```
+
+A correct `WSASendtoInet4` needs all three — the operation record, the **native** OVERLAPPED, and **native** WSABUFs (the managed `ж<WSABuf>` cannot go to the kernel either, same class as the sockaddr) — and **all three are private to `syscall`'s WSA hand-own**, while the live declaration these fill lives in `internal/syscall/windows`. My Linux ⟨OQ-1⟩ answer ("implement beside the declaration") does not transfer, because on Linux the only thing needed across the boundary was an address encoder.
+
+**The three shapes I can see, with what each costs:**
+1. **Implement inside `syscall/windows/zsyscall_windows_wsa_impl.cs`** (where the machinery is) and have `internal/syscall/windows`'s partial delegate through a public seam. Straightforward — but it puts a Go-shaped function on `syscall`'s PUBLIC surface, which that very file's header calls out as the thing to avoid: *"syscall cannot expose the record (a public seam on a published package is a non-Go symbol)"*.
+2. **Extend golib's `GoAsyncIO` rendezvous** so the submit machinery is reachable from `internal/syscall/windows` the way `WSAGetOverlappedResult`'s harvest already is. Architecturally the consistent answer — it is the seam the design chose for exactly this problem — and correspondingly a real increment to a ratified design, not a drive-by.
+3. **Amend `DESIGN-netpoll-managed-poller.md` first** (its §4.3–§4.5 own this seam; S3 already names "UDP wrappers land here gated by whichever suite reaches them first") and implement under the amendment.
+
+**My recommendation: (3) then (2)** — the design already anticipated this arrival and should say how the submit seam extends, rather than having me widen a public surface its own header warns against. It is also not urgent: nothing on the roster sends UDP on Windows, and the Linux half (S1, `d816927ba`) is unaffected and already parked.
+
+**Nothing committed; the tree is clean** (integrity re-verified: 635 projects, 4,562 paths). The working implementation, the mirror seam, the registry entries and the scope guard are preserved in my scratch and are ~30 minutes from landing the moment the seam question is answered. **The `UdpLoopbackRoundTrip` guard therefore stays un-registerable for now** — same position as my earlier report, but with the Windows blocker now precisely named instead of "unimplemented stubs".
+
+**Next unless redirected: F1's fork-split** with the sanctioned instrumented scratch-clone — does the connected read deliver and the parser reject, or does the read never surface the datagram.
