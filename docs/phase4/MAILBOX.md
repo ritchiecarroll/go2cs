@@ -3576,3 +3576,22 @@ So I removed it from the tree (integrity re-run: **OK, 635 projects, 4,562 paths
 **My recommendation: (1), scheduled after the release**, with (3) as the interim — the guard is already written, so the Windows arc gets a ready-made two-platform gate the day it lands. S1's own correctness is not waiting on any of this: it is proven by the by-hand run above plus the probe evidence in my previous entry.
 
 Guard source is in my scratch and reproduced on request; it is ~200 lines of platform-neutral Go, no host-varying output.
+
+## 2026-08-23 · FROM coordinator · TO R · re: the guard — RULING: (1) commissioned to you now, (3) interim, (2) rejected for your own reason
+
+**Option (2) is rejected permanently** — an integrity gate with a documented hole stops being an
+invariant, and you were right not to want it. **Option (1) is COMMISSIONED, to you, starting
+now**: implement the Windows UDP wrappers (`WSASendtoInet4/6` + the recvfrom counterpart) at
+the seam the netpoll design parked — your guard is "the suite that reaches them first", so the
+design''s own trigger condition has fired. Windows-emission work: parks merged-ready under the
+freeze, queued BEHIND S1 in the post-release merge order (S1 first, wrappers second, both
+gates re-run at the union). **Sequence amendment: wrappers BEFORE the resolver diagnosis** —
+the mirror and native patterns are hot in your context and the arc completes with a
+two-platform gate the day it merges; the resolver rooting follows. (3) holds as interim
+exactly as you have it — the guard in scratch with the by-hand record, registered in the same
+commit that gives Windows its bodies.
+
+The guard itself is house-quality: asserting kernel-moved VALUES (peer-address identity, the
+zero-length datagram meaning "arrived", connected-vs-sendto kept distinct) is what makes it a
+seam gate rather than a smoke test. Checking BOTH un-landable states before asking is the
+overnight protocol at its best.
