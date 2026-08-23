@@ -5256,3 +5256,49 @@ and its ⟨OQ-4⟩ was re-stamped ANSWERED at `605e2f994` on your own layout mea
 outstanding list is therefore exactly one item: the §4.8.5 accept-row correction, folding into
 the next landing as you planned. The implementation of that design remains post-release queue
 work — the safety floor leads it.
+
+
+## 2026-08-23 · FROM R · TO coordinator · Linux lane RE-PROVISIONED and the guard leg is **GREEN** — ⟨OQ-I⟩ closes, with one merge-order fact you need
+
+**F15 re-provisioning: done, 50 seconds**, verified to the recipe — `go1.23.1 linux/amd64` (pinned),
+`.NET SDK 9.0.317` (the exact pinned build, no fallback needed), `pwsh 7.5.4`, `gcc 11.4.0`
+(build-essential, per the srcimporter lesson), fresh clone onto ext4. Launched detached per ledger
+trap 4; the distro is standing and available to the leveling lane and every future Linux sweep.
+
+**The guard leg is GREEN on Linux** — `GUARD_LEG_RESULT: MATCH`, C# stdout byte-identical to
+`go run`, all nine assertions: IPv4, IPv6, connected, unconnected, zero-length datagram, sender
+address. **⟨OQ-I⟩ closes: `UdpLoopbackRoundTrip` now passes on BOTH platforms.**
+
+**⚠ But it closes at the UNION, not on my branch, and that is a merge-order fact rather than a
+detail.** The first Linux run — on `claude/windows-udp-recv` alone — **FAILED**:
+
+```
+System.NotImplementedException: SendtoInet4: external (assembly or cgo) function is not implemented
+  at internal/syscall/unix.SendtoInet4 → internal/poll.WriteToInet4 → net.UDPConn.WriteTo
+```
+
+That is **S1's** file (`internal/syscall/unix/linux/net_linux_impl.cs`), which lives on
+`claude/linux-udp-impl` and is in **neither master nor my branch**. The Windows work has no Linux
+send; the Linux send has no Windows anything. Each is green alone; the guard needs both.
+
+So I built the union and measured THERE: `claude/r-union-probe` at `bf86a58d4`
+(`claude/windows-udp-recv` + `claude/linux-udp-impl`, **merged clean, no conflicts**) is the tree the
+green leg was run on. That is precisely the banked-row-protection shape the crypto/tls regression
+taught — *each side green alone, the union never swept* — except this time the union was swept before
+anything merged.
+
+**What that means for the merge train, for your call:**
+
+1. **`claude/linux-udp-impl` (S1) must merge BEFORE or WITH `claude/windows-udp-recv`.** If recv
+   lands first, master has a registered guard that passes on Windows and fails on Linux — a
+   self-inflicted red on the very both-platform bar this increment exists to satisfy.
+2. **The union merges clean**, so ordering is the only question; there is no integration work.
+3. `claude/r-union-probe` is pushed and exists purely as the measurement's evidence — **not a merge
+   candidate**, and I will delete it once the ordering is set.
+
+**Gate summary for the Linux leg:** converter built on Linux from the union tree; guard transpiled
+with explicit `-go2cspath`; `GoTargetOS=linux` build succeeded; Go baseline green; C# exit 0;
+`diff` byte-identical.
+
+Windows remains as banked at `5a4ad95d2` (4/4, and the §4.8.5 accept-row correction rode in there).
+My outstanding list is now empty.
