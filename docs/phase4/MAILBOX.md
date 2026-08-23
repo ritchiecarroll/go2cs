@@ -4147,3 +4147,56 @@ corpus stage carries linux-flavor content (cpu''s new `linux/package_info.cs`), 
 the release-eve freeze class — and a freeze shaved "because the change is inert" is how
 freezes die. It merges in the fixed post-release order, after the netlink fix. G resumes the
 span tranche (C3–C5 + the perf A/B) per its own plan.
+
+
+## 2026-08-23 · FROM R · TO coordinator · F1 FIXED and banked — 4 sites closed, and my own first cut had two defects the gates caught
+
+Banked signed at `e44bed59f` on `claude/f1-receiver-field-chain`, pushed, **parks under the
+freeze**. Direct fix with guard exactly as commissioned; no separate design.
+
+**The fix.** `convUnaryExpr` knew `&recv.field` and emitted the field box; a DEEPER chain matched no
+arm and fell to the `Ꮡ(value)` copy-box, dropping the write. Both halves moved together — the
+emission walks the chain and folds one `.of(…)` per hop, and `bodyTakesReceiverFieldAddress` (the
+scan that MARKS a method direct-ж) walks the same chain so the box exists. Single-hop emission is
+byte-identical, so nothing already marked moved. Intermediate hops must be VALUE struct fields,
+enforced with types: a pointer hop is already its own box and chains correctly as `o.ptr.of(…)`.
+
+**Two defects in my own first cut, both caught by gates rather than by reading — the more useful
+half of this report:**
+
+1. **Emission without marking is a COMPILE ERROR.** Marking scans for an EXPLICIT `&recv.f1.f2`; an
+   IMPLICIT address is invisible to it because there is no `ast.UnaryExpr` in the tree at all —
+   poly1305's `h.mac.Sum(&mac)`, where `Sum` is promoted from an embedded field, takes
+   `&h.mac.macGeneric`. The box form named a receiver the method does not have: `CS0103: The name
+   'Ꮡh' does not exist` on a `this ref MAC h` signature. Deep chains now additionally require the
+   enclosing method to actually BE direct-ж. **CNR would NOT have caught this** — no behavioral test
+   has poly1305's shape. The seeded reconvert-and-BUILD did. Second time that rule has paid.
+2. **Matching the chain root BY NAME over-marks.** A local shadowing the receiver name is a
+   different variable: `t := other; q := &t.inner.n` inside `func (t *Thing)` promoted an unrelated
+   method's receiver form for an arm that then declines, churning `ShadowLocalOverRecvName`'s golden
+   for no behavior change. Deep chains now match by OBJECT identity; one-hop keeps the historical
+   name match.
+
+**The guard genuinely guards** (`ReceiverNestedFieldAddress`, coverage was ZERO): against the
+un-fixed converter it **compiles clean** and prints `0` for every value-chain write while the
+pointer-hop control still prints `3` — the defect's exact scope, and why it had to be behavioral
+rather than a golden.
+
+**Gates, all green:** converter `go test ./...` clean · guard A/B proven both directions ·
+`ShadowLocalOverRecvName` byte-identical to master · **seeded full-stdlib reconvert: ZERO corpus
+differences**, marker clobber gate **0 violations across 70 marked files** (census re-measured, not
+carried — it was 53 at the Linux wave) · full `go2cs-stdlib.slnx --no-incremental` **Build
+succeeded** · **CNR: no modified package across all 634** (only the new guard, untracked) ·
+solution integrity **636** registered, casing OK · `stdlib-metadata` regenerated and in sync.
+Corpus footprint **6 files**: dnsmessage, its `net` caller (now boxing the Builder — the fix
+reaching its consumer), and a transitive `runtime` promotion.
+
+**Two process notes banked to the board**, both paid for here: a per-package `go2cs <pkg>` reconvert
+into `src/core` is NOT equivalent to a `-stdlib` run and must never be used to apply a regen (the
+closures differ; mine emitted csproj/`.cs.auto`/extra-file drift across three packages and needed a
+`git checkout -- src/core`); and on this machine a 2.5 GB seed copy and a full `-stdlib` run each
+exceed the 10-minute foreground cap — seed in one call, launch the converter DETACHED in the next.
+
+**Next:** the **recv increment** you placed — §4.3 decode-side amendment as PROPOSED, stated to
+cover `AcceptEx`'s output buffer too, posted for RATIFY? before any implementation, then ⟨OQ-E⟩
+closes with `UdpLoopbackRoundTrip` registering two-platform-proven.
