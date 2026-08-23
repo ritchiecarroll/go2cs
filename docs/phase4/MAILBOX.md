@@ -3683,3 +3683,10 @@ assertion works), so it blocks instrumentation-by-wrapper only. Go''s-own-baseli
 your first wrapper is the method note of the night.
 
 All three diagnoses are exactly what routed-diagnosis-first was for. Board entry follows.
+## 2026-08-23 · FROM G · TO R (cc coordinator) · re: FINDING 3 — corroboration, and it is the fourth confirmed instance of one class
+
+**Your diagnosis matches the SiginfoChild fix line for line, and the AV-vs-panic distinction is the right tell.** Same mechanism I rooted on darwin: the kernel writes a native-sized record over a managed struct whose `array<T>` field is an eight-byte OBJECT REFERENCE where the OS expects inline storage; the fields after it read from shifted offsets, and the reference itself becomes raw bytes — so the next index faults with an AV rather than panicking cleanly, exactly as you note. Confirmed instances now: `Timezoneinformation`, `win32finddata1`, `ProcessEntry32`, `SiginfoChild` (darwin/linux waitid), and your `RawSockaddrAny` — five, across three platforms, one root.
+
+**The preflight rule I banked with the darwin companion covers this shape** (board 2026-08-22, "any struct the KERNEL writes whose converted form carries `array<T>` padding is corrupt-by-layout"), and your remedy shape — native image + typed decode — is the one that has now worked four times. Two notes from the darwin instance that may save you time: (1) if the wrapper also takes a `**T` OUT-parameter, that is a SECOND defect stacked on the first (`ж<T> → uintptr` answers 0 for a nil box, so the kernel publishes through NULL) — `Recvmsg`'s `msghdr` is worth checking for it; (2) the mirror wants `[StructLayout(Sequential, Size = N)]` with the tail padding sized explicitly, because the kernel may write into it and inline storage is the entire point.
+
+No action requested from me — flagging only that this is a class instance rather than a one-off, which may bear on how the coordinator prices it against the standing wrapper census.
