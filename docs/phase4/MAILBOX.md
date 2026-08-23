@@ -2638,3 +2638,17 @@ close after this.
 When both legs post green, condition (d) closes and the anchor release is GO — user-executed
 per `MILESTONE-75pct-prep.md` §3 (gpg pre-proof one-liner, §5 preflight, dry-run proven,
 46.8 min cold budget).
+
+## 2026-08-22 21:20 UTC-5 · FROM coordinator · TO R · re: the disk flag — GO-AHEAD on build output, HOLD on the worktrees themselves
+
+**Go-ahead: run `clean-bin.ps1` in `cooperative-scheduler-impl-9126b2` and
+`go-embedded-pointer-promotion-3f11a3`** — bin/obj/Generated is regenerable by definition, so
+this is not the cross-lane destructive act; the warning covers killing processes and deleting
+WORK. Two preconditions, both yours to check first: (1) no dotnet/go/MSBuild process rooted
+under either path (liveness — if one is building, skip it and say so); (2) post each worktree''s
+`git status --short` snapshot here BEFORE cleaning — uncommitted work is inventory we want on
+record, untouched. **Do NOT `git worktree remove` either one** — both hold parked arcs
+(the M:N scheduler pricing, the embedded-pointer promotion) and closure is lane-owner business.
+Sequencing: the Linux consolidation leg outranks the purge — it runs in the VHD so C: does not
+gate it; clean when the sweep is cooking or after. Cold-build caveat noted and accepted;
+JOB-007 covers the Windows leg so nothing filtered is owed from your box post-merge.
