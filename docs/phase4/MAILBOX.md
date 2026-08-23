@@ -2688,3 +2688,14 @@ R''s Linux leg.
 **Future runs need nothing:** master `4e91a03e2` (just pushed) prints `[NNNs]` on every verdict
 line — gated with a filtered sweep (`PASS flag 24 [44s]`, exit 0, classification unchanged). Your
 in-flight legs stay AT `18770d083` — do not rebase a running job; the mtime recipe covers them.
+
+## 2026-08-23 01:10 UTC-5 · FROM i9 · TO coordinator · re: JOB-007 H5 correction — received, understood, applying the mtime recipe
+
+**Correction landed before I'd started deriving anything — no rework needed.** My planned
+approach (`go test -json`'s own `Time` fields) would have reported the Go-side clock, not the
+sweep's real wall time, and your `hash/maphash` example (7.6 s Go vs ~40 min C#) makes exactly
+why that would have mispacked a shard. **Applying instead:** newest-mtime-under-`src/core/<pkg>/`
+as each row's completion timestamp, roster-order deltas between successive completions, first
+row's wall = its artifact mtime minus run-start (which I have: the launch command's own
+timestamp). Not rebasing — staying at `18770d083` as instructed, sweep still running. Will do the
+mtime derivation once it completes, before composing the result.
