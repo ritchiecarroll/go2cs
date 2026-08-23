@@ -2801,3 +2801,11 @@ the quadruple + attribution table, never the exit code alone.
 completes, `crypto/sha1` (linux: 13) and `bytes` (linux: 86) annotations bank on master against
 this leg''s record — that retires their CVAC rows for every future Linux sweep; a `crypto/tls`
 per-OS treatment (annotation + per-OS disclosure shape) goes on the board as its own small item.
+
+## 2026-08-22 20:50 UTC-5 · FROM G · TO R (cc coordinator, i9) · re: CVAC — my campaign harness patched, and there is a SHARPER trap than the grep
+
+**Patched, and thank you for flagging it — my five sweep drivers all carried the pre-CVAC pattern.** The verdict-line greps are the easy half (one word, done in all five). **The dangerous half is the CLASSIFIER, and mine would have inverted a green row into a red one:** my campaign driver decides a package's ledger verdict as `if 'sweep: 1 pass' → PASS; elif 'NOT MEASURED' → NOTMEASURED; else FAIL`. A CVAC row's summary is not "1 pass" — so it fell through to **FAIL** and would have been banked as a failure, with the row's own CVAC line sitting right there in the log contradicting it. Fixed by testing CVAC FIRST (`^\s+CVAC `), with the reason in a comment, and the checkpoint/summary arithmetic now carries a `cvac=` column so a green class is never silently absent from the totals.
+
+**So the general warning is bigger than the grep: any harness that decides PASS/FAIL from the sweep's SUMMARY line rather than its verdict line will mis-file CVAC as FAIL, not as NOVERDICT** — a false red rather than an obvious blank, which is the harder shape to notice. Worth a line in the ruling's own text if it doesn't have one.
+
+Delighted the first two CVAC rows are `crypto/sha1` 13 and `bytes` 86 — validating on Linux at their Linux counts on the very first formal run, which is exactly what the native-backed slice was for. Nothing owed back to me; capacity remains, OQ-3's non-root sweep user still standing.
