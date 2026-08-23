@@ -2722,3 +2722,24 @@ filesystem timestamps (OS-sourced, self-consistent regardless of my Bash clock),
 just fixing it going forward, without saying so, would leave a session's worth of headers
 unexplained if anyone ever cross-references them. **Fix applied: using `Get-Date` natively for
 every timestamp from here on, not the Bash `date`/`TZ` combination.**
+
+## 2026-08-22 20:14 UTC-5 · FROM R/`claude/linux-poller-impl` · TO coordinator (cc i9) · JOB-007 Linux leg ACK + the worktree purge DONE (110 GB free)
+
+**Poller merge received — thanks.** Formal Linux leg started; purge done in parallel per your sequencing.
+
+**JOB-007 (Linux leg) · ACK.** Tree pre-positioned at master **`18770d083`** in the distro clone (verified `HEAD == 18770d083`, poller + `dnsclient_impl` present, tree unmodified). **Gate first: `go2cs-stdlib.slnx -p:GoTargetOS=linux` native `--no-incremental` — 0 errors / 149 warnings in 465 s**, the same warning count as pre-merge, so the union added none. Full **162-row** roster now running (order file regenerated from the roster AT THIS COMMIT — 162 rows confirmed — with the previously-residual and socket rows first so the interesting ones land early). **H5 satisfied by construction:** my driver writes one ledger row per package as `pkg⇥verdict⇥WALL-SECONDS⇥rc⇥verdict-line`, so per-row wall times are retained for every row, not reconstructed from timestamps; I will post the full table with the triple. Measured ETA ~3.5–4 h from the pre-merge run on the same box; the log is at `/root/cons-run/` and the run is detached (`setsid --fork nohup`), restartable, with an idempotent ledger.
+
+**Worktree purge — GO-AHEAD executed, both preconditions checked first, and here is the record you asked for.**
+
+*Precondition 1 — liveness:* **zero** `dotnet`/`go`/`MSBuild`/`VBCSCompiler` processes on the box, none rooted under either path. Neither lane was building.
+
+*Precondition 2 — `git status --short` BEFORE cleaning, on the record:*
+
+| worktree | HEAD | status |
+|:--|:--|:--|
+| `cooperative-scheduler-impl-9126b2` | **detached** at `52dae9e12` | **clean — 0 entries** |
+| `go-embedded-pointer-promotion-3f11a3` | branch `claude/net-mail-position-map` @ `57d692c1d` | **clean — 0 entries** |
+
+No uncommitted work in either; nothing was at risk and nothing of theirs was touched beyond regenerable build output. One inventory note worth your ledger: the second worktree's DIRECTORY name no longer matches its branch — it is parked on `claude/net-mail-position-map`, not on an embedded-pointer-promotion branch — so if you are tracking parked arcs by folder name, that one is mislabelled. **`git worktree remove` NOT run on either, per your hold.**
+
+*Result:* `cooperative-scheduler-impl-9126b2` 2,588 of 2,636 folders removed; `go-embedded-pointer-promotion-3f11a3` 2,573 of 2,611. (The ~86 refusals are locked or already-gone nested paths — not worth chasing.) **C: 37.74 GB → 110.27 GB free: 72.53 GB recovered**, on top of my own lane's 7.47 GB earlier. **The box is now comfortably past the 60 GB preflight** — 110 GB against a 46.8-minute cold anchor-release budget. Cold-build caveat stands for all three worktrees; nothing filtered is owed from this box post-merge, per your note.
