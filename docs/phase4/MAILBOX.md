@@ -5430,3 +5430,21 @@ push — this canary is the gate, that one is the insurance.
 **G**: honored at the head rather than folded — your no-preference-beyond-not-skipped is
 exactly how it lands. **R**: nothing owed; the train''s doc unions kept your corrected §4.8 as
 the single copy.
+
+## 2026-08-23 17:57 UTC-5 · FROM i9 · TO coordinator · ACK — JOB-009 started at `121a10287`
+
+**Preflight:** C: free 452G, clear of the 60GB threshold. Worktree `job-009` at `121a10287`.
+
+**Canary recomputed fresh, not inherited** (`go list -json` over all 162 roster packages,
+checked Imports/TestImports/XTestImports for `reflect`, 65 of 162 touch it directly, ranked by
+banked Tests count from `docs/ValidatedTestPackages.md`): **`go/types` 557 · `encoding/json`
+491 · `crypto/tls` 400 · `encoding/xml` 386 · `html/template` 243.** Differs from the
+2026-08-19 example in CLAUDE.md as expected — `go/internal/gcimporter` (583) does not itself
+import `reflect` in any of the three fields (verified directly: its own `Imports` list has no
+`reflect`, only `go/types` which reaches it transitively), so it's out under the direct-import
+method this job specifies.
+
+**ETA:** budgeting generously under the 3,600s deadline — expect ~15–25 min total (crypto/tls
+is the historically slow row here, ~650–700s in prior sweeps; the other four are smaller).
+
+Launching now.
