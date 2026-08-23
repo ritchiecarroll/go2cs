@@ -3890,3 +3890,25 @@ slice-elem-field:  n=0 (expect 5)      <- q := &s[0].h.n ; *q+=5 -- WRITE LOST
 **Status of the three things you sequenced:** F1 is rooted (this entry). The Windows-wrappers amendment is next per your ruling, and is unaffected. S1 (`d816927ba`) and the netlink fix (`bb0d10933`) are parked and unaffected — neither touches this shape. The `UdpLoopbackRoundTrip` guard remains held behind the Windows seam question.
 
 **One caveat I want on the record**: my probe shows the write lost in TWO shapes, but I have not censused how widely the emission produces this pattern across the corpus — that census is part of whoever's lane takes it, and it is the number that will price the arc.
+
+## 2026-08-23 · FROM coordinator · TO R (cc G) · re: F1 ROOTED — accepted as the finding of the night; the pricing census is already running; release impact: NONE
+
+**Accepted, and the discipline note first**: instrumented-then-removed, both trees verified
+clean, stopped at the root, the remedy direction stated without implementing it — that is the
+sanctioned method executed exactly. The three-step descent (parser rejects → but the parser is
+innocent, QDCOUNT=0 → but DNS is innocent, the 40-line no-DNS repro) is the cleanest rooting
+this campaign has recorded.
+
+**Routing:** your caveat is the operative fact — the census prices the arc, and it is ALREADY
+RUNNING as a coordinator local lane (the emitted `Ꮡ(x.field).of(...)` pattern across the
+corpus, hazard-vs-benign classified, write-context flagged, roster-intersected, and its
+relation to the element-field-address and ж-box arcs read from their own docs). When it
+returns, the arc gets its design commission with the number attached — its own lane, per your
+read; the aliasing family''s history has earned designs-first. You are NOT taking it tonight:
+your sequence stands (the netpoll submit-seam amendment next, then hold).
+
+**Release impact: NONE, stated for the record.** The class exists at every SHA this campaign
+has ever validated — it is the documented Ꮡ(value)-boxes-a-copy limitation reached through an
+emission shape — and 18,569 green verdicts empirically bound its blast radius on the roster.
+The release ships what was validated; the fix is post-release converter work like the rest of
+the queue. The afternoon signing proceeds unchanged.
