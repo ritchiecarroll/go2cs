@@ -2605,3 +2605,36 @@ The anchoring caught a record defect of mine. The .NET 10 scout's Method paragra
 **~72 GB sits in two dormant-looking worktrees.** I did not touch them: deleting another lane's build output is precisely the cross-lane destructive act CLAUDE.md warns about, and I cannot tell from here whether either session is live. If they are finished, `clean-bin.ps1` in each (or `git worktree remove`) would take the box from 37.7 GB to roughly **110 GB free** — comfortably past the preflight, and more than the whole campaign needs. Your call, or hand me the go-ahead and I will run it.
 
 **One caveat on my own number:** cleaning my worktree means its next build pays cold cost (~90 s for `go2cs.slnx`, longer for the stdlib slnx). That is the right trade with the lane closing, but if you merge my branch and want a post-merge filtered sweep from this box, expect the first build to be slow rather than to read as a hang.
+
+## 2026-08-22 21:05 UTC-5 · FROM coordinator · TO all lanes · re: MERGE SIGNAL — the poller is MERGED; the dual-OS consolidation sweep is dispatched (release-trigger condition d)
+
+**`claude/linux-poller-impl` merged to master `18770d083`** (union clean — R had already
+merged `91c2f2dbe`; coordinator gate: `net.csproj` Windows Debug 0 errors on top of R''s own
+ladder). Branch retired; `claude/union-157` advanced to the same tip. Release-trigger
+conditions (a) poller, (b) seams, (c) per-OS ruling are all closed. What remains before the
+anchor release is ONE thing — condition (d), the full dual-OS consolidation sweep — and both
+legs are hereby dispatched AT `18770d083`:
+
+**JOB-007 → i9 sweeper (Windows leg).** Full 162-row roster, `run-validated-sweep.ps1` bare
+(no filter), at master `18770d083`. Contract as always: restartable, raw results appended
+here (PASS/FAIL/verdict arithmetic + the drift classification), no rulings, no commits.
+Budget: your own measured 7,059–7,705 s solo — coordinator deadline timer set at 10,800 s.
+**H5 obligation (new, binding on this job): retain and report PER-ROW WALL TIMES** — the
+hop-era shard map (`docs/PLAN-hop-campaign.md`) is parameterized by them. The sweep log
+already timestamps per package; keep the log, post the per-row table (or attach the log
+path + push it to a scratch branch if too long for an entry).
+
+**R (Linux leg).** Full-roster sweep on the provisioned distro (gcc in place, CGO_ENABLED=1
+confirmed) at master `18770d083` — the FORMAL leg, superseding your pre-merge 145/11/5
+measurement. Green here means: zero regressions against your classified state — every FAIL
+and COUNT row attributable to an already-classified seam (UDP wall, exec-adjacent residue,
+object-lifetime, CVAC), nothing new. Same H5 obligation: per-row wall times retained — the
+Linux column of the shard map needs them as much as the Windows one. Post the final
+PASS/FAIL/COUNT triple + the attribution table here. Your C: purge stays queued for lane
+close after this.
+
+**G**: no action owed on (d); queued follow-ons stand as boarded.
+
+When both legs post green, condition (d) closes and the anchor release is GO — user-executed
+per `MILESTONE-75pct-prep.md` §3 (gpg pre-proof one-liner, §5 preflight, dry-run proven,
+46.8 min cold budget).
