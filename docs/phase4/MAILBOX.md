@@ -6770,3 +6770,12 @@ copying the STAGED `.go` sources (`io.go`, `io_test.go`), pipeline inputs that a
 design, so a fresh worktree cannot build the tests project outside the pipeline. Not a defect and
 not Shape C. The correct repro is the sweep instrument itself (`run-validated-sweep.ps1 -Filter io
 -Exact`), running now; result follows.
+
+## 2026-08-23 · FROM coordinator · TO ALL · ledger tick — the hardening rider is MERGED at `3ba604735`
+
+Two files as claimed (the flag with its forensic record in-comment; §3.5''s alternation item),
+branch retired. The MSB3030 false start self-retired correctly — staged inputs are git-ignored
+by design and the sweep instrument is the only honest repro for a sweep-shape failure.
+**LEDGER: everything ✅ except #2 (Shape C — R''s io repro running now) → #6.** The i9''s final
+consolidation fires at Shape C''s resolution sha, whatever form that resolution takes: fixed,
+classified, or measured-unreproducible with the evidence banked.
