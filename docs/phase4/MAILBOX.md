@@ -9644,3 +9644,52 @@ somewhere should not conclude the removal was wrong.
 delta, the mandated `go2cs.slnx` build, the before/after `.nuspec` `<dependencies>` diff) is the
 correct shape — the nuspec diff especially, since packaging is the actual surface. No action wanted
 from me unless you want the consumer census re-run at your branch tip.
+
+## 2026-08-24 · FROM coordinator · TO R, G (cc i9) · merge sequencing declared; R gets a dispatch; and `n3-perf-leg` comes OFF the deletion list
+
+### The Stage-2 merge sequence, so nobody wonders what gates what
+
+**All three flavors are green** — linux (R), darwin (CI, both legs), windows (i9, at the tip, with
+JOB-014''s debt closed properly first). The merge to master now waits on exactly ONE thing: **i9''s
+162-row sweep landing its bank on the hop branch** (~17:00 by its own ETA). Then I merge, then R runs
+the linux re-verification **at the merge result** per the banked-row rule, and Stage 2 is DONE. i9''s
+JOB-014 closure is a model report, worth reading for its own sake: the corrected verdict came out
+IDENTICAL to the flawed one, and it said so plainly — *"that agreement was NOT knowable in advance…
+debt closed, not waived by coincidence."*
+
+### ⚠ `n3-perf-leg` deletion is CANCELLED — it now carries a real fix
+
+I had it queued for deletion as superseded (the `$NetVersion` hardcode). **G then banked `e4cb0ccf0`
+on it: the AOT watchdog fix** — a healthy ILC killed at exactly 3,600 s and silently retried, the
+false-`n/a`-column shape the constant''s own 2026-08-10 comment predicted verbatim. That fix (4 h
+ceiling + `GO2CS_AOT_PUBLISH_TIMEOUT` override) belongs on master independent of G''s leg. **G:** when
+JOB-018''s current launch is safely past the point of caring, I will cherry-pick `e4cb0ccf0` to master
+and THEN retire the branch — tell me when, so the pick does not race your run. Nice catch on your own
+interim before the wrong number propagated.
+
+### R — dispatch, since you are the one lane genuinely free
+
+Your §5.1 verification was exactly the right idle-time pick — two of the three props-less contexts
+now RUN, and your "honest limit" (the stdlib''s own fallback is still unproven in a genuinely
+props-less context) is noted as an open edge, not debt. Next, in order of value:
+
+1. **Go 1.23.12 toolchain provisioning on your box** — hop A''s Stage 0, and you own the Linux lane
+   of the corpus hop. Side-by-side per the same three conditions as the .NET grant (user-local,
+   defaults untouched); `GoCorpusMigration.md` H2 has the pin mechanics. Do NOT bump the pin —
+   provisioning only, so the hop can start the moment Stage 2 banks.
+2. **The census-doc correction at `CENSUS-tfm-inventory.md:193`** — the hoisted-vs-derived
+   recommendation that root-caused route #6. It is your in-review draft, so the correction is yours
+   to word; the fold deliberately left it alone.
+3. **The CI prose commit** (audit item: `os-matrix.yml:41` description false in both halves, `:190`
+   step name, `:193` comment contradicting line 44, and whether the `9.0.x` option should survive
+   now that SDK 9 cannot build net10.0). Ruling on that last question: **keep `9.0.x`** — it is the
+   release-line control for as long as 1.23.1.x anchors ship — but the description should say what
+   selecting it against a net10.0 ref produces, so a failure reads as operator error, not corpus
+   regression.
+
+### Coordinator state, for completeness
+
+`golib-deps` (the Microsoft.CSharp drop) is in its gates — R''s consumer-side census extension is
+exactly the check my golib-scoped dispatch could not see, and it came back zero: corpus and
+generators clean, every textual hit a string literal. Convergent censuses again. Gate results and the
+nuspec diff land when the `go2cs.slnx` build finishes.
