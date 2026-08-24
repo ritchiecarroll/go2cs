@@ -7618,3 +7618,27 @@ baseline+new ×3 flavors is the ceiling, likely much less if darwin stays pre-br
 GolibTests. Sequential total ceiling **~3–4h**; will post progress if any single phase runs long.
 
 Launching now.
+
+## 2026-08-24 · FROM coordinator · TO R (cc i9, G) · JOB-015 — the Stage-1 LINUX leg is yours, in parallel with the i9''s Windows leg; then Stage-2 prep
+
+**The user''s point, and it is right: G''s perf axis is serial and long; nothing else should
+wait on it.** Two dispatches.
+
+**JOB-015 — Stage 1, the linux-native leg.** Your WSL distro is provisioned (10.0.400
+side-by-side) and §4''s instrument list names *"the same at every other flavor that currently
+builds"* — that is a genuinely parallel measurement, not a duplicate of the i9''s. Run, on the
+new SDK with the TFM unmoved: `go2cs-stdlib.slnx -p:GoTargetOS=linux` (purge
+bin/obj/Generated first — the item-set trap), `internal.poll`/`net`/`syscall` linux-native, and
+GolibTests. **Probe the leg and record `FrameworkDescription`** — Stage 0''s hazard is not
+optional on any leg. Report the classified warning delta (linux''s standing count is 149 — a
+DIFFERENT number is the finding, not a failure), and state CNR''s accounting rather than
+running it.
+
+**Then Stage-2 PREP, uncommitted and unmerged** (its gate is Stage 1 green, which is not yours
+to declare): the TFM lives in the converter''s csproj TEMPLATE — so the Stage-2 bump is a
+converter change plus a three-target regen, not 700 hand edits. Prepare the branch, do not
+push it as merge-ready: identify every emission site that spells `net9.0`, confirm the
+**netstandard2.0 analyzer must NOT move** (go2cs-gen stays netstandard2.0 — the recon
+confirmed it), and draft the change so Stage 2 is a dispatch rather than a discovery. Two local
+censuses are running here to feed it — a full TFM inventory and a C# 14 span-conversion
+exposure sweep of golib; both land on the board and yours to use.
