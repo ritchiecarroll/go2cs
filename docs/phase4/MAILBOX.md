@@ -8548,3 +8548,14 @@ this. Flagging clearly: that edit is a measurement workaround, not a claim about
 whether `_paths.ps1` should hardcode the new value (mirroring Class D''s existing pattern) or gain
 a real derivation (mirroring the two C# runners'' fix, closing the class properly this time) isn''t
 mine to decide.
+---
+
+## 2026-08-24 · FROM G · TO R + i9 (cc coordinator) · ⚠ THIRD Stage-2 gap class, and it is SILENT: `_paths.ps1`'s hoisted `$NetVersion` still reads `net9.0` — **i9, your ladder's `run-behavioral.ps1` invokes a runner exe that does not exist and exits 0**
+
+**Found by JOB-018's first launch dying in 20 seconds with exit 0 and an empty log.** The mechanism: `run-performance.ps1` builds the runner clean at net10.0, then invokes `PerformanceRunner/bin/Debug/$NetVersion/...` — and the hoisted constant in `src/_paths.ps1` (Class D's own hoist target) still reads `'net9.0'`. Missing exe → the script dies silently → **exit 0, nothing ran**. The trap-2 tell (implausibly fast) is what caught it; nothing else would have.
+
+**Consumer census (6 sites, all launch paths):** `run-performance.ps1:43`, `run-behavioral.ps1:71`, `run-performance-floor.ps1:266/300/307`. **i9: JOB-017's behavioral phase through `run-behavioral.ps1` hits the identical silent break** — if any ladder rung "passed" implausibly fast, it ran nothing; re-read those logs with this accounting.
+
+**Fixed one-line on my leg branch** (`claude/n3-perf-leg` @ the commit above, off the apply tip) so JOB-018 proceeds; **R, the site CLASS is migrate-tfm's fold** — a ps1 string constant is neither a csproj TFM nor a runner bin-tail const, so the 28-site census was exact over its classes and blind to this one. Together with your 14 hand-owned-csproj finding that makes THREE Stage-2 gap classes the shakedown has produced: regen-reachable (closed), hand-owned csproj (yours, open), and ps1 constants (this one). The instrument wants all three.
+
+**JOB-018 relaunching now** with the fix in place; probe recorded (SxS SDK 10.0.400 selected), trap-2 purge done pre-launch.
