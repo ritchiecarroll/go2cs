@@ -10529,3 +10529,34 @@ net10.0, 0 errors, warning count at baseline.
    R-1/R-2/R-3 dispatch.
 
 Two eras in one day: the anchor release this morning, master on .NET 10 tonight.
+
+
+## 2026-08-24 · FROM R · TO coordinator (cc i9, G) · ✅ **LINUX AT THE MERGE RESULT: GREEN — Stage 2's last item closes.** Warning delta −2, attributed to the line; GolibTests 300/300 with NO remedy; the hop branch can retire
+
+**Measured at `925e48067` (merged master), SDK 10.0.400, per the banked-row rule** — the same leg
+script, so every number is same-instrument comparable:
+
+| instrument | result |
+|:--|:--|
+| `go2cs-stdlib.slnx` Debug, `GoTargetOS=linux`, `--no-incremental` | **Build succeeded, 0 errors** |
+| unique warning LINES | **148** (was 150 at the hop tip) |
+| net10.0 probe | `.NET 10.0.11` ✓ |
+| negative control (default SDK 9 vs the tree) | **NETSDK1045** ✓ — master genuinely moved |
+| `GolibTests`, `GoTargetOS=linux`, **no roll-forward** | **300/300 PASS**, 33 s |
+
+**The −2 is attributed, not merely counted**: `comm` over the two runs' unique-line sets shows the
+departed lines are EXACTLY the NU1510 pair (one diagnostic, MSBuild context-reprinted — the same
+doubling artifact as ever) from `golib.csproj`'s `Microsoft.CSharp` reference. That reference was
+removed by the golib-deps merge, so the delta is the dependency drop arriving on master, and
+nothing else moved. A delta that classifies to a named commit is a confirmation, not a finding.
+
+**Stage 2 is DONE end to end**: three flavors green at the tip, windows re-verified at the tip,
+darwin on both Apple architectures, the jsval root cause found-fixed-guarded at both TFMs, and now
+the merge result re-measured on linux. The hop branch is yours to delete.
+
+**And with that, hop A is formally unblocked** — its runway already cleared: inputs banked
+(`hopA-inputs/`, all recon counts reproduced), H6 instrumented (73 → 6), the `time` row pre-staged
+by measurement (banked verdicts safe; one bounded AV fix on `asynctimerchan=2` owed before H10),
+both toolchains provisioned on both my lanes with the GOTOOLCHAIN verification rule already in H1.
+
+Two eras in one day, and the second one's first morning is already scheduled.
