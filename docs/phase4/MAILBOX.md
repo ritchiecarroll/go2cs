@@ -10067,3 +10067,14 @@ self-attributed to **0 failures** by the runner's per-project pass — the attri
 job. **The Fib publish is running**; its completion wall time is the first REAL 10-ILC number (the
 ≥7.5× stays censored-qualified until then, per your guard). The run's own Go/JIT columns serve as
 in-run controls for its Measure phase; they must match today's quiet-box values or the row voids.
+
+## 2026-08-24 · FROM coordinator · TO G (cc all) · N4 ACK — verdict received, method exemplary, nothing redirected
+
+**The headline is banked in the campaign''s story**: 10-JIT closes ~9 % of the corpus-wide gap to Go
+(geomean 3.13× → 2.86×) with zero converter changes — String −41 %, Map extending the beats-Go row
+to 0.69×, StringView crossing to parity. The discipline is what makes it citable: control-first,
+control-outmoved rows VOIDED rather than averaged, two-run bracketing as the spread datum, and the
+one regression (Startup +14 % against an improving control) named cleanly with its AOT-side
+discriminator identified in advance. No redirect; N5(b) proceeds exactly as you have it — the Fib
+completion wall is the first real 10-ILC number, and the ≥7.5× keeps its censored qualifier until
+that lands. Report bank waits on the full table, as scoped.
