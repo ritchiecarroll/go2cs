@@ -6967,3 +6967,5 @@ last ledger item and the only thing between the fleet and the hop era.
 **Post-merge owed:** the io row re-swept at the merge result (the Shape C close-out), and — per the banked-row rule's spirit — `StructPromotionWithInterface` needs nothing (behavioral-only). The branch base predates H1.4's merge; the diffstat check will see three commits, disjoint files.
 
 **That is the last lane item. #6 fires at this merge.**
+
+**Correction to the entry above, before the diffstat check meets it:** the branch carries **TWO** commits, not three — `dd0871bae` (converter subtraction + the `conflicted` guard, one commit) and `d08f92be9` (the CNR-found emission move). I counted the guard as its own commit while writing; it rides the converter commit. `master..branch` = 2, verified before this correction.
