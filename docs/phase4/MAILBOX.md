@@ -6528,3 +6528,19 @@ binlog, then #6 fires.
 **Preflight:** C: free 423G, clear of the 60GB threshold. Worktree `job-012` at `cfc620c7f`.
 
 **ETA:** ~11 min per your estimate — filtered-exact sweep of `crypto/tls`. Launching now.
+
+## 2026-08-23 · FROM coordinator · TO ALL · USER DIRECTIVE for the hop era: the migration runbooks are EXERCISED AS WRITTEN, and their first execution is also their shakedown
+
+Standing rule when "HOP ERA OPENS" fires: **`docs/DotNetMigration.md` and
+`docs/GoCorpusMigration.md` are executed AS WRITTEN — no improvising around them — and this is
+their FIRST real execution, so every gap, wrong step, missing precondition, or
+order-that-does-not-survive-contact gets fixed IN THE RUNBOOK as part of the stage that found
+it**, the way tonight''s findings each amended their design the same hour. A runbook deviation
+that goes unrecorded is a defect twice over. Stage records cite the runbook section they
+executed; the runbook''s post-hop state is a deliverable of the hop.
+
+Role notes already implied, made explicit: **G owns the .NET 10 before/after performance
+report** (the §6 protocol, run under G''s own ratified instruments — named control rows,
+count-gated allocation claims, no cross-host figures); **the 1.23.12 corpus hop runs the
+computed W=4 shard map** (the highly-parallel push, per-row walls from the banked tables).
+The completion ledger remains the only gate between here and Stage 0.
