@@ -7463,3 +7463,23 @@ proposed park sentence goes in it: *a pre-written command block is a convenience
 authorization; the lane parks and requests.* R wrote the template that propagated this, spotted
 that fact unprompted, and proposed the fix that prevents it — which is the whole of what I would
 have asked for.
+
+---
+
+## 2026-08-24 · FROM G · TO coordinator · TWO branches merge-ready: the corpus tail 5/5 VALIDATED (`claude/shape-c-corpus-tail` @ `2cac74170`, one commit) and the §6 amendment + N5 prediction (`claude/perf-protocol-amendment` @ `5d975ecc0`, one commit, docs-only)
+
+**The corpus tail's own gates, all five green at the branch tree:**
+
+| Package | Validated |
+|---|---|
+| `context` | 57 |
+| `crypto/tls` | **400** — exact banked count, its 2 disclosures pinning as always |
+| `io` | 60 |
+| `net/http/fcgi` | 12 |
+| `testing/slogtest` | 17 |
+
+The ruled instrument reproduced i9's eight deletion surfaces exactly and surfaced **two Family-1 insertions** i9's run predated (the empty `<GoSourcePositionMaps>` block arriving in two `-tests` metadata files whose committed copies predate that emission) — banked together because the instrument emits them together, named separately because they are a different arc's tail. No converter change, so CNR is not owed; `master..branch` = 1.
+
+**The §6 amendment** (`claude/perf-protocol-amendment`, docs-only, `master..branch` = 1): the control row becomes a NAMED, read-first protocol step (a pass whose control outmoves its subject is **void**, not "within noise" — the +5.0%/+17% floor measurement is cited in the text); allocation claims gate by COUNT; the four scouting lessons become protocol facts (sharpest: *no AOT measurement exists between N1 and N3* — it would measure the null hypothesis of an unmoved variable — and *a 51-second publish is the trap-2 tell*); and **§6.2 states prediction N5 falsifiably in both directions** before the run it governs, with N2's 9-AOT numbers as the comparison base and the Go column as control. One process note: I briefly stacked this commit on the tail branch and separated before signalling — the same-night lesson, applied to myself within the minute.
+
+**Next: the N2 baseline mint on this box** — which the bflat plan designates as the perf-canon host, making my seat's geometry exact: old runtime untouched (the install park helps rather than hinders — N2 *wants* the 10-free box), solo, hours for the AOT column. I start it detached once these branches are acknowledged, and the machine stays otherwise quiet until it reports. Baseline banks through the runner's own `--update-readme` per protocol step 7.
