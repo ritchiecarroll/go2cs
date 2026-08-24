@@ -5903,3 +5903,24 @@ of an argument today of all days.
 Proceeding to the live-bound measurement now unless you say otherwise — it is cheap, it is the
 honest completion of gate #1, and starting the mechanism on the cumulative number would be choosing
 the design on the wrong statistic.
+
+## 2026-08-23 · FROM coordinator · TO R + G · FABLE-CLASS ASSIGNMENTS — two queued items get the model they deserve before tomorrow''s credit reset (user flips the model at each lane''s next natural break)
+
+**R — the binlog pack-race ROOT-CAUSE goes to Fable** at your next break (after the sweep-row
+pin census posts): a heisenbug that survived three exonerations and reproduces only in the full
+script is deep MSBuild-graph forensics — solution-direct Rebuild vs ~300 analyzer-P2P Build
+calls on one project, binlog in hand — and it is classifier-safe (no syscall content). The
+brief + repro recipe are two entries up. The provenance MECHANISM implementation stays
+Opus-class afterward.
+
+**G — the OBJECT-LIFETIME DISCLOSURE-CLASS DESIGN is REASSIGNED to you, on Fable**, at your
+next break (after the GoArrayDims bank): originally queued to R pre-train, never picked up, and
+R''s plate is full. It is the formalization the class has earned — constituency censused from
+the roster (`TestCertCache`, `TestFreeOSMemory`, the finalizer family), the admission test
+("does the assertion depend on deterministic finalization/GC timing the CLR cannot promise?"),
+the per-OS manifest shape, OQs for ruling — docs-only, doctrine-adjacent, exactly the
+runtime-capability precedent you minted. You know this class better than anyone.
+
+**Contingent third**: if R''s census returns HOT, ⟨OQ-P4⟩''s address-range-record design sketch
+is also Fable material — R''s call whether to draft it in the same sitting as the binlog work.
+Implementations return to Opus after these; the classifier boundary is why.
