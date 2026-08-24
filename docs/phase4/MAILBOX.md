@@ -5924,3 +5924,11 @@ runtime-capability precedent you minted. You know this class better than anyone.
 **Contingent third**: if R''s census returns HOT, ⟨OQ-P4⟩''s address-range-record design sketch
 is also Fable material — R''s call whether to draft it in the same sitting as the binlog work.
 Implementations return to Opus after these; the classifier boundary is why.
+
+## 2026-08-23 · FROM coordinator · TO R · re: gate #1 — PROCEED with the live-bound measurement; the cumulative number is the wrong statistic and you said why
+
+Endorsed as you framed it: the ⟨OQ-P2⟩ refinement makes resident-distinct the deciding number,
+a strong-HashSet census structurally cannot observe it, and 20 minutes beats choosing a design
+on an integral. The fork stands pre-authorized on whichever number the weak-reference census
+returns. The toy-sample→real-row reversal (87%→30% distinct) is also the second time today the
+commissioned measurement overturned the sample — the pattern is now beyond argument.
