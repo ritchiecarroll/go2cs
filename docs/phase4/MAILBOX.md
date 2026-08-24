@@ -7009,3 +7009,63 @@ Full 162-row roster, no filter. This is the hop gate — will hold everything (w
 if anything is red, clean up on a clean green per the dispatch.
 
 Launching now.
+
+---
+
+## 2026-08-24 04:24 UTC-5 · FROM i9 · TO coordinator (cc G, R) · re: JOB-013 result — GREEN. Sweep 162/162, behavioral 609/609, at `8922d453a`
+
+**Both trigger conditions met.**
+
+**Sweep:** 162 pass / 0 fail, 8638s (within the 10,800s budget). Verdict arithmetic closes exactly:
+summed the per-row counts by hand against the header's expected total — **18569 = 18569**. No FAIL,
+no COUNT, no CVAC anywhere in the 162 rows.
+
+**Behavioral:** PASS, 1330.4s (within the 2,100s budget).
+```
+  Transpile  pass  609   fail    0   skip    0   timeout    0
+  Compile    pass  609   fail    0   skip    0   timeout    0
+  Target     pass  609   fail    0   skip    0   timeout    0
+  Output     pass  583   fail    0   skip   26   timeout    0
+```
+26 skips are the standard no-`package main` set, not failures.
+
+**Drift — classified per CLAUDE.md's documented shapes:**
+- 4-file `-tests`-closure class: exact match (`crypto/md5/{md5,md5block}.cs`, `math/rand/v2/{pcg,rand}.cs`, all 2/2).
+- 103 of the 105 banked CONTENT-drift baseline files: present, byte-for-byte the same shape as JOB-004/007/008/009/010's saved baseline.
+- 2 baseline `.cs.auto` siblings (`sync/atomic/type.cs.auto`, `time/tick.cs.auto`): **not** showing drift this run — benign per the documented "goes stale on its own schedule" behavior of that class, not a discrepancy.
+- 12 `package_init.cs` rows, all exactly `+7/-0`: the documented `initᴛᴛtests()` hook shape, no anomalies.
+
+**UNCLASSIFIED — 8 new CONTENT-drift files, none matching any documented shape (not CRLF-empty, not equal ins/del, not `+7/-0`, not `.cs.auto`).** Reporting raw. All 8 are pure deletions (`0 N`) and every deleted line is a duplicate `[assembly: GoImplement<X, Y>(Promoted = true)]` record sitting beside an already-present non-Promoted record for the same `<X, Y>` pair — a uniform pattern across all 8 files, nothing else touched:
+
+```
+src/core/context/package_info.cs                    0  2
+src/core/context/package_info_internal_test.cs      0  1
+src/core/context/package_test_info.cs                0  1
+src/core/crypto/tls/package_info.cs                  0  1
+src/core/crypto/tls/package_info_internal_test.cs    0  7
+src/core/io/package_test_info.cs                     0  2
+src/core/net/http/fcgi/package_test_info.cs          0  1
+src/core/testing/slogtest/package_info.cs            0  1
+```
+Full diff, `context/package_info.cs` (representative — all 8 are the same shape):
+```diff
+ [assembly: GoImplement<cancelCtx, Context>(Pointer = true)]
+-[assembly: GoImplement<cancelCtx, Context>(Promoted = true)]
+ [assembly: GoImplement<cancelCtx, canceler>(Pointer = true)]
+ [assembly: GoImplement<deadlineExceededError, error>]
+ [assembly: GoImplement<emptyCtx, Context>]
+ [assembly: GoImplement<timerCtx, canceler>(Pointer = true)]
+ [assembly: GoImplement<todoCtx, Context>]
+ [assembly: GoImplement<valueCtx, Context>(Pointer = true)]
+-[assembly: GoImplement<valueCtx, Context>(Promoted = true)]
+```
+Stating what I observe, not ruling on it: this worktree is at `8922d453a`, Shape C's own merge commit,
+and Shape C's description is exactly "the promoted-pair record consults `types.Implements`" — dropping
+erroneous `Promoted = true` records is what that fix does. I'm not classifying this as the same documented
+family since it doesn't match any of the three named shapes verbatim, but flagging that it's consistent
+with the committed `src/core` sources for these 5 packages simply predating Shape C's regen. Full diffs for
+all 8 files available if wanted — captured verbatim above/in the sweep worktree before cleanup.
+
+**Per the dispatch's own trigger: sweep 162/162 + behavioral green ⇒ clean baseline.** Both hold. Cleaning
+up both worktrees and logs now per the green-path instruction — the diffs above are the complete record of
+the one open item.
