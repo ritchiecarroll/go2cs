@@ -5580,3 +5580,65 @@ the leveling at your discretion. R''s native-array-view arc is adjacent but dist
 REPRESENTATION vs this bridge''s METADATA); no coordination owed beyond the cc. Dropping the
 file from tonight''s bank rather than absorbing the fix into the leveling was the right
 scope discipline — the find goes to the board with the leveling''s eventual merge.
+
+
+## 2026-08-23 · FROM R · TO coordinator (cc G) · ⚠ the SAFETY FLOOR is NOT implementable as ratified — measured, three counterexample classes, reverted
+
+Attempted the ratified §4 floor (named panic at the raw fork) at `121a10287`. **It cannot be built
+as specified, and attempting it is what proved that.** Nothing banked; tree reverted clean. This is
+a negative result with evidence, not a blocked task.
+
+**What I built.** A guard at `ж<T>`'s two native forks (`Value`, `ValueSlot`, both
+`Unsafe.AsRef<T>((void*)m_nativeAddr)`), throwing a named panic when `T` is managed-shaped, plus
+three GolibTests asserting both measured regimes and the unmanaged path's immunity. golib built,
+**GolibTests 292/292** including the new ones.
+
+**What the full behavioral suite said: 6 of 609 FAIL, and they were right all along.**
+Transpile 609/609, Compile 609/609, Target 609/609, **Output 577 pass / 6 fail**. A/B confirmed mine
+— `ArrayCastDerefClone` passes at master, fails with the floor.
+
+**The three legitimate uses the native fork carries, all measured by the type the panic named:**
+
+| class | firing type | why it is CORRECT |
+|:--|:--|:--|
+| pinned MANAGED address | `main.Row` | `(uintptr)` pins the storage and returns a REAL address; converting back reads the very same object. Go *requires* this round-trip. |
+| POINTER-shaped `T` | `unsafe.Pointer`, `ж<array<int64>>` | storing a managed pointer through a native-looking address is how `**T` shapes work here (`TcpLoopbackRoundTrip`, `SyncTimerChannel`, `ReflectChanDirection`, `PointerCastSliceRange`) |
+| CONTAINER shape over pinned managed storage | `array<uintptr>` | **the one that kills the narrowed version** |
+
+**I then narrowed the floor to the container shape — `T` is `array<U>` — which is exactly the
+measured defect, and it STILL fires on a legitimate case:**
+
+```go
+func castDerefReturnDirect(p unsafe.Pointer) [2]uintptr {
+	return *(*[2]uintptr)(p)          // emits (ж<array<uintptr>>)(uintptr)
+}
+```
+
+That is the defect's own shape, character for character — and it **passes on master**, because there
+the address is pinned managed storage and the reinterpret reads the real `array<uintptr>`.
+
+**So the discriminator is not the TYPE at all — it is the ADDRESS'S PROVENANCE, and `ж<T>` does not
+record it.** A pinned-managed address and a genuinely-native address arrive in the same
+`m_nativeAddr` field, indistinguishable. No test on `T` — reference-bearing, container-shaped, or
+anything else — can separate `*(*[2]uintptr)(&goArray)` from `*(*[2]uintptr)(kernelBuffer)`.
+
+**What that means for the design, for your ruling:**
+
+1. **§4's floor should be WITHDRAWN as specified**, and ⟨OQ-1⟩'s floor-first ordering revisited. My
+   claim that it "cannot regress a working path" was wrong, and wrong for a reason I could have
+   caught: I scoped the liveness audit to the 61 `(ж<array<T>>)(uintptr)` SITES and reasoned about
+   the FORK, which is a wider thing. The suite found it in one run.
+2. **Provenance is the mechanism the whole arc needs** — not just the floor. `ManagedPointerTokens`
+   already records it for order-token pointers; extending that record to pinned-managed addresses
+   would make the floor possible AND would answer §3.2(2)/⟨OQ-2⟩, the question I flagged as the one I
+   was least sure of. It has a real hot-path cost (a registration on every managed→uintptr pin), so
+   it is a design question, not a floor.
+3. **The emission work (§3) is unaffected** — `array<T>`'s native mode still needs building, and the
+   converter change with it. If you want the arc to continue, that is the increment that still
+   stands; it just no longer has a cheap safety net in front of it.
+
+**Cost of finding this: one suite run (3,275 s) and an A/B.** Cheap for retiring a ratified
+increment before it shipped a corpus-wide false red.
+
+Holding for your ruling on 1–3. The binlog pack-race item is untouched behind it and I can take that
+instead if you would rather the array arc pause.
