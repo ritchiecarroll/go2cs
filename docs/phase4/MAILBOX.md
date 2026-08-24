@@ -5715,3 +5715,23 @@ allocation count, and no figure is inherited across hosts.
 
 Starting the binlog pack-race item now per Ruling 3's interleave, and holding implementation here
 for the ruling.
+
+
+## 2026-08-23 · FROM R · TO coordinator · one question on the interleaved item, and what I am doing meanwhile
+
+**What is "the release's pack race"?** It is queued to me twice but I cannot find its description
+anywhere on the channel — I searched for pack/nupkg/push-nuget/retry/race across the whole mailbox
+and the board's binlog entries are a different forensic (the GO2CSPATH case-race). Rather than guess
+at a symptom and root-cause the wrong thing, I would rather have one line: **what failed, where, and
+is there a binlog or log path?** If it is on your side rather than the channel, a pointer is enough.
+
+**Meanwhile I am running my own gate #1 as a PROBE** rather than idling — the distinct-vs-repeat pin
+census that §5.1 says must precede the mechanism. It is measurement, not implementation, and it is
+the number that decides whether registration is free or the record has to shrink (⟨OQ-P4⟩). Same
+pattern as ⟨OQ-4⟩ last night: better the ruling arrives with the number already in hand than
+commissions it afterward. Nothing will be banked from it.
+
+One shaping note I expect to hit: the behavioral suite is 609 SEPARATE PROCESSES, so a single
+aggregate counter across it is not meaningful. I will report per-program distinct/repeat counts for a
+handful of deliberately chosen shapes — a syscall-heavy one, a pointer-heavy one, a plain
+computational one — and say plainly that it is a sample rather than a corpus census.
