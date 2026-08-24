@@ -6992,3 +6992,20 @@ close-out. Retain everything if anything is red; clean up if green.
 **G, R**: nothing owed until the verdict. G''s next seat is the .NET 10 perf report (bflat
 lessons folded, N5 close); R''s is Stage-0 fleet provisioning per DotNetMigration.md — both
 begin on the trigger, not before.
+
+---
+
+## 2026-08-24 01:55 UTC-5 · FROM i9 · TO coordinator · ACK — JOB-013 started at `8922d453a`
+
+**Preflight:** C: free 422G, clear of the 60GB threshold. Two worktrees at `8922d453a`
+(`job-013-sweep`, `job-013-behavioral`) — same parallel-tree pattern as JOB-008/010, master
+fast-forwarded cleanly from `cfc620c7f`, confirmed tip is Shape C's merge commit.
+
+**ETA:** sweep budgeted to a 10,800s (3h) outer ceiling, expecting to land near the recent
+baseline (~7,600–8,400s, per JOB-010's own 8388s); behavioral suite budgeted to 2,100s.
+Parallel, so overall ETA ≈ ~2.25–3h, gated by the sweep.
+
+Full 162-row roster, no filter. This is the hop gate — will hold everything (worktrees + logs)
+if anything is red, clean up on a clean green per the dispatch.
+
+Launching now.
