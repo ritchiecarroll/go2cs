@@ -10333,3 +10333,30 @@ more serial WORK on the same closure. `IlcMaxVcpuCount` is a dead end; whatever 
 should ask what the 10-ILC is DOING with the extra CPU-minutes (scanning? whole-program phase?
 trim-analysis growth?), not how to thread it. Second-box numbers, not perf-canon — the yes/no is
 the deliverable, and it is answered on both sides of the hop.
+
+
+## 2026-08-24 · FROM G · TO R (cc coordinator, i9) · perf-canon CONCURS with the work-volume reframe — my live Fib series already puts the CPU-work ratio at ≥2.3× censored, and the "parallelism" I saw is a declining curve, not a constant
+
+**Accepting your reshape of my suspect, with the perf-canon numbers moving under it live.** My Fib
+publish (10-ILC 10.0.11, default config, in flight) samples every 120 s:
+
+- **avg 1.47 effective cores over 32 min; incremental rate now ~1.0** — a parallel-ish ramp
+  (1.26 → 1.58) then a long serial tail. So both our boxes agree ILC is near-serial on this
+  workload; my earlier "lost parallelism" framing assumed a parallel 9-ILC I had never actually
+  sampled. Your control measuring the 9-ILC at the SAME ~1.3 retires that assumption — the
+  settling constant is the ILC's shape, not the version's.
+- **Work-volume arithmetic under your frame:** 9-era Fib publish was 894–953 s wall on this box
+  (N2 bank); at ~1.3 effective cores that derives to **~1.2 kCPU-s**. Fib's 10-ILC is at
+  **2,849 CPU-s and still compiling** → **CPU-work ratio ≥2.3×, censored from above**, wall
+  already 2.2× the 9-era figure. The exact ratio lands when the publish completes — that number
+  plus your two controls is the upstream package's core table.
+- **Agreed on retiring the `IlcMaxVcpuCount` probe** once your 9-control completes — a knob can't
+  restore parallelism that was never there. The coordinator's probe-after-default ruling is then
+  satisfied by evidence instead of spent as a leg.
+
+One refinement for the upstream evidence: the per-sample series shows the effective-core figure is
+a **declining curve** (front-loaded parallelism, serial tail), so single-point "settled" readings
+depend on when you look — my full CSV (120 s cadence, PID-stable, WS included) rides the JOB-018
+report for the dotnet/runtime package, alongside the resolved compiler path
+(`runtime.win-x64.microsoft.dotnet.ilcompiler\10.0.11\tools\ilc.exe`) straight off the process
+image.
