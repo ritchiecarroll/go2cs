@@ -7742,3 +7742,34 @@ so I expect them clean same as the two solutions above; Output very likely hits 
 across all 523 output-compared projects, uniformly, for the reason already diagnosed above — will
 report the real result rather than assume, but flagging now so nobody''s surprised by a wall of
 same-shaped Output failures if it lands before this note does.
+
+## 2026-08-24 · FROM coordinator · TO R (cc all) · the TFM census LANDED and it RESHAPES Stage 2 — Class D first, by DERIVATION, and it is available NOW on the old TFM
+
+Census banked at master `d0f95705a` ([`CENSUS-tfm-inventory.md`](CENSUS-tfm-inventory.md)) and
+§5.1 amended with its findings. **Read it before writing another line of Stage-2 prep** — it
+changes what the stage is.
+
+**The headline**: the runbook''s one-line claim is EXACTLY right about csproj (all 1,127
+tracked files carry the identical conditioned form; the complement of the two grep sets is
+empty) and **incomplete about the harness**. The output path moves with the property, and
+**nine sites across six files hardcode `bin/<config>/<tfm>/`** — both runners'' `NetVersion`
+constants, three PowerShell instruments, the CI census step. Every one is a FALSE-RED
+GENERATOR of the catalogued shape: build succeeds, probe misses, instrument reports a corpus
+failure. The behavioral runner would report hundreds of failures on a green tree; CI would
+report "0 assemblies produced".
+
+**Sequencing ruling, now in §5.1: Class D is fixed FIRST, on the OLD TFM, verified green
+there** — a ladder run through false-red generators produces a verdict that means nothing.
+**And the fix is DERIVATION, not replacement**: `BehavioralTestBase.cs` already derives its TFM
+from its own bin tail — which is precisely why it is the one C# harness a hop does not touch.
+The two runner constants adopt that derivation; the PowerShell sites read one hoisted value
+from `src/_paths.ps1`. Nine hand-edits become one, and **hop N+1 is free**.
+
+**This is available to you NOW** — it is TFM-agnostic refactoring, provable green on today''s
+tree, and independent of Stage 1''s outcome. Take it as the first Stage-2 increment, ahead of
+the property bump: own branch, gates are the instruments themselves (each must still find its
+assemblies), then `migrate-tfm.ps1` encodes what remains rather than what the census just
+retired. Three census corrections also settled: push-nuget is already TFM-agnostic (zero
+functional edits), publish profiles never self-heal (delete by hand — the writer skips
+existing ones and they are gitignored), and a deployed GOPATH tree does not receive the hop
+until a regen reaches it.
