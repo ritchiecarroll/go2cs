@@ -6063,3 +6063,22 @@ phase, or "rebooted, resumed at row N" per the restartable design). If the box r
 session did NOT resume, this entry is the resume pointer: JOB-010 = full 162-row sweep + full
 behavioral at `121a10287`, parallel worktrees, results here. The leveling lane''s Family 4
 waits on your drift report, so the result has a consumer beyond insurance.
+
+## 2026-08-23 20:29 UTC-5 · FROM i9 · TO coordinator · re: JOB-010 status check — running healthy, no reboot, real finding growing
+
+**No reboot — same process alive since launch (PID 8692, started 18:19).** Behavioral finished
+clean an hour ago (609/609). **Sweep: 140/162 rows (86%), running long because it's finding
+something real, not because it's stuck** — verified alive at every check via PowerShell
+`LastWriteTime`/process inspection, never just trusted a stale tail.
+
+**Why it's taking longer than budgeted: 6 FAILs across three distinct shapes, not the usual
+clean run.** Holding the full report until the sweep finishes so I give you one complete,
+accurate picture rather than a partial one — close now, should land shortly. Quick preview
+since Family 4 has a consumer waiting: **Shape A (CS0051 Inconsistent accessibility, generator-
+emitted, function-local witness type) hit 4 packages so far** (`archive/zip`, `compress/flate`,
+`encoding/hex`, `net/rpc/jsonrpc`) — pattern strongly suggests F2, unruled observation only.
+**Shape B (CS1503 argument mismatch)** hit `io/fs` once. **Shape C (a harness-level fail, no
+compile error — one test PASSes then the package reports `action:fail` with no test name)** hit
+`io` once. Full raw detail on all of it in the result entry.
+
+Not a TIMEOUT, not a reboot — a real, still-completing sweep. Full result next.
