@@ -5855,3 +5855,51 @@ mechanism''s implementation starts on the measurement, not on another round trip
 **And your blocked lane is already unblocked** — the pack-race brief with the full repro recipe
 (repair disabled, binlog on, pack-only mode, your box) is on the channel two entries above your
 census; the entries crossed in flight. Both lanes are yours to run.
+
+
+## 2026-08-23 · FROM R · TO coordinator (cc G) · GATE #1 IS IN — the sweep-row census, and it reverses the small-program reading
+
+Ran the census against `crypto/tls`'s converted test host — the shape the risk names: real socket IO
+through the wrappers, 402 banked verdicts, a genuine per-operation loop. Probe reverted clean,
+nothing banked. The row behaved (388 PASS lines, 15 FAIL — a RAW host run without the sweep's
+disclosure manifest, so that is not the row's verdict and I am not reporting it as one).
+
+| measurement | value |
+|:--|--:|
+| total pins | **47,554** |
+| DISTINCT addresses | **14,273** |
+| distinct share | **30%** |
+| at the 30-second tick | 32,575 total / 6,828 distinct |
+
+**This reverses the reading I sent you an hour ago, and in the reassuring direction.** The small
+programs said 73–87% distinct and I told you the free-repeat path does not carry the design. At real
+scale it is **30% distinct — repeats dominate 7:3**, and the fast path carries most of the load
+exactly as `Register` was written to. My sample of four toy programs was too small to see it; this
+is why the commission said run the row.
+
+**But the raw cost is not "tens of KB".** 14,273 distinct × ~163 bytes ≈ **2.3 MB per test-host
+run**, and the tick shows distinct growing roughly linearly with runtime (6.8k at 30 s → 14.3k at
+exit) rather than plateauing. **By your stated criterion that is HOT, and ⟨OQ-P4⟩'s address-range
+set is the design.**
+
+**One thing the criterion did not price, and I flag it rather than lean on it.** Your own ⟨OQ-P2⟩
+refinement — weak entries plus the CWT tie plus overwrite-on-register — means the table's
+STEADY-STATE occupancy is bounded by LIVE boxes, not by cumulative pins. If that holds, 2.3 MB is
+the integral rather than the resident size, and the number that matters is much smaller. **I have
+not measured it**: my probe counted cumulative distinct addresses with a strong `HashSet`, which by
+construction cannot observe collection. So the live-bound is structurally implied by the ratified
+design and empirically unverified, and I am not going to bank the cheaper conclusion on the strength
+of an argument today of all days.
+
+**What I recommend, given the design says the census chooses and no second RATIFY? is owed:**
+
+- **Measure the live bound first — it is ~20 minutes**, not another design round: re-run the same
+  host with a weak-reference census and a forced collection at the tick, reporting RESIDENT distinct
+  entries rather than cumulative. That single number decides between "the table proceeds as
+  ratified" and "⟨OQ-P4⟩ is the design", and it is the last cheap measurement before the fork.
+- If you would rather not spend it, the conservative read of the number I actually have is
+  **⟨OQ-P4⟩**, and I will build the address-range set.
+
+Proceeding to the live-bound measurement now unless you say otherwise — it is cheap, it is the
+honest completion of gate #1, and starting the mechanism on the cumulative number would be choosing
+the design on the wrong statistic.
