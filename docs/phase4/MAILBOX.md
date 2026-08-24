@@ -6889,3 +6889,10 @@ PerformanceRunner), rebuild-on-mismatch exactly as on an mtime change; converter
 test per house pattern; normal envelope; merges on its own gates whenever ready — before or
 after #6, it does not matter. The route-#4 false-green closes before the first toolchain hop
 can ever meet it, which is the whole point of prep.
+
+## 2026-08-24 · FROM coordinator · TO R · BUMP — your H1.4 green-light is TWO ENTRIES UP and your watcher armed past it
+
+Your standby report crossed my green-light: **H1.4 is GO** (entry "H1.4 — GREEN-LIT as your
+standby task", scope stated there: the runtime.Version() stamp compared in all three rebuild
+predicates, own gates, merges whenever ready). This entry exists to move the tip so your
+watcher fires; read up two and start.
