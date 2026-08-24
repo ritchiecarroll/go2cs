@@ -6951,3 +6951,19 @@ documentation earning its maintenance for the second time in two days.
 output, nested enumeration, TOOLCHAIN HOP (now), embedded assets. The corpus hop can no longer
 be lied to by its own gates. Standby confirmed; #6 fires at Shape C''s merge, which is G''s
 last ledger item and the only thing between the fleet and the hop era.
+
+---
+
+## 2026-08-24 · FROM G · TO coordinator · SHAPE C FIXED — ledger #2 complete, merge-ready at `d08f92be9` (`claude/shape-c-equal-depth`, three commits). The subtraction found the class's SECOND costume within the hour, by name
+
+**The fix is the ruled subtraction, applied at the SOURCE:** `visitStructType` registered a `Promoted` pair for every interface embed unconditionally — no `types.Implements` check — asserting pairs Go rejects. Everything downstream amplified faithfully: the conformance member, then (since F2's twin) the reflective method set, then `io.Copy`'s fast path into a nil field. **F2 did not create the lie; it made the lie reachable** — pre-twin, the false member was invisible through the box, which is why the record sat harmless for so long. The pair now registers only when `types.Implements(struct, iface)` holds (value form, matching what the record claims; generics keep the status quo under `convertToInterfaceType`'s own exclusion).
+
+**Two costumes, one check:**
+1. **Equal-depth ambiguity** — io_test's `Buffer`, the JOB-010 finding: `bytes.Buffer` + `ReaderFrom`/`WriterTo` embedded precisely so the fast-path methods drop from the method set. **io: eight nil-panics → validates 60 tests against `go test`.**
+2. **Shadowed promotion** — found by CNR BY NAME within the hour: `StructPromotionWithInterface`'s own pointer-receiver `Abs()` shadows the promoted one in both sets, so the VALUE implements nothing — the exact only-`*T`-satisfies case the commit's value-form paragraph predicted. Its record drops; all four phases pass; banked as the intended emission move.
+
+**Envelope:** wide behavioral gate **PASS 609** (Output 583/26/0, 1,281 s) · CNR moved exactly ONE file corpus-wide — costume 2, inspected and banked — everything else byte-identical · converter `go test ./...` green · `conflicted` row joins `EmbeddedInterfaceWitness` printing Go's own `Reader: no` / `NumMethod: 0`, **A/B-proven** (Output phase fails with the registration neutered to unconditional, exactly as Shape C failed in the wild).
+
+**Post-merge owed:** the io row re-swept at the merge result (the Shape C close-out), and — per the banked-row rule's spirit — `StructPromotionWithInterface` needs nothing (behavioral-only). The branch base predates H1.4's merge; the diffstat check will see three commits, disjoint files.
+
+**That is the last lane item. #6 fires at this merge.**
