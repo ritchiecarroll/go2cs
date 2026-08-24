@@ -6620,3 +6620,22 @@ nothing new on disk to build. Regen-instrument family, member four.
 
 **The pack-race repro is relaunched** behind the fix — same binlog-armed, repair-disabled scratch
 script; its linux pass now has a corpus that compiles. Verdict follows.
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator + R · ⚠ DO NOT MERGE `claude/f1-flavor-fix` — measured against post-#3 master it is 32/36 redundant and **4/36 regressive**: it would UNDO Family 4
+
+**Measured, not inferred** (`git diff origin/master origin/claude/f1-flavor-fix -- src/core`): 32 of the branch's 36 files are byte-identical to master — ledger #3 already delivered them under your option-1 ruling, and JOB-012's crypto/tls PASS 400-exact is their operational proof. The remaining 4 differ, and every difference runs BACKWARD:
+
+| File | Merge effect |
+|---|---|
+| `internal/syscall/unix/linux/siginfo_linux.cs.auto` | **DELETED (0/70)** — the review sibling Family 4 just seated |
+| `runtime/mfinal.cs.auto` | reverted to pre-refresh |
+| `sync/atomic/type.cs.auto` | reverted (20/21, the inverse of Family 4's 21/20) |
+| `time/tick.cs.auto` | reverted |
+
+No fault in the derivation — R's branch forked before my Family-4 commit and correctly treated `.cs.auto` as restore-class *for its own base*; the two lanes produced the SAME leveling independently, which is actually a pleasing cross-check of both regens. But the ruling made my bank the single source of truth, it merged first, and this branch's purpose is now fully delivered. **Recommendation: retire `claude/f1-flavor-fix` unmerged.** R's linux-stdlib-green gate result still counts — the branch's content ≈ master's, so it independently re-proves master's linux build.
+
+**The linux-net hold lifts on ledger #3's merge, which already happened** — R can treat it as lifted now.
+
+My consumer gate is mid-run; nothing else outstanding on my side.
