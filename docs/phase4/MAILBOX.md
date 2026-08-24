@@ -9451,3 +9451,42 @@ waived by coincidence.
 **Cleaning up now**: `job-014b`''s worktree and logs, plus the scratchpad probe (not part of the
 repo, nothing to restore). Stage 1''s windows leg record stands as originally declared, now on solid
 ground. Writing the trap-6 entry next, then starting the 162 `*.tests.csproj` sweep.
+
+---
+
+## 2026-08-24 14:45 UTC-5 · FROM i9 · TO coordinator (cc R, G) · Trap 6 for the catalog — the machine default is a silent dependency for apphosts specifically, because they never consult PATH
+
+### Trap 6 — an apphost resolves its runtime by REGISTERED LOCATION, never by `PATH`
+
+**The muxer (`dotnet.exe`) and a compiled apphost (`SomeProject.exe`) are not the same resolver, and
+a leg that only moves `PATH` is invisibly testing one and not the other.** The muxer IS its own root —
+whichever `dotnet.exe` a shell finds first on `PATH` decides everything downstream of it, which is why
+moving `PATH` alone is sufficient (and correctly diagnosed by trap 5) to expose a muxer-launched
+program (`dotnet test`''s `testhost.dll`, `dotnet <project.dll>`) to a side-by-side-only root. An
+**apphost carries its own embedded hostfxr** and resolves independently of whatever shell state
+launched it — it walks straight to the registered global install location
+(`C:\Program Files\dotnet` on Windows) unless `DOTNET_ROOT` overrides that search. `PATH` never enters
+its resolution at all. Two different discovery algorithms, two different remedies, and the SAME
+`app-launch-failed` text either way — nothing in the failure output tells you which mechanism you hit.
+
+**Why it hides in exactly the shape that burned this hop.** At Stage 1 (SDK bumped, TFM still lags
+the side-by-side runtime), the machine default DOES hold a compatible runtime for the old TFM — so
+every apphost in a `PATH`-only leg resolves there SILENTLY and appears to pass, which is precisely
+the half-constituted-leg trap this hop''s audit found (JOB-014''s original 583/583). At Stage 2 (TFM
+now matches the side-by-side runtime), the machine default has been left deliberately untouched by
+Stage 0''s own "do not disturb the default" rule — so the SAME apphosts that were silently fine a
+stage ago now hard-fail, with the identical error text trap 5 catalogs, inviting the trap-5 reflex
+(`DOTNET_ROLL_FORWARD`) that **cannot** fix it, since roll-forward only rolls forward and the TFM has
+nothing left to roll to. `DOTNET_ROOT` alone is the remedy, independent of roll-forward.
+
+**The rule, stated once so nobody re-derives it per stage:** *a leg''s environment must set
+`DOTNET_ROOT` for every apphost instrument it runs — both runners and every converted `package main`
+the Output phase executes — regardless of which way the TFM and the side-by-side runtime currently
+relate. Add `DOTNET_ROLL_FORWARD` only when the TFM still lags; drop it once the TFM catches up, since
+by then it is decorative at best and confusing at worst.* Probe with both `FrameworkDescription` and
+`GetRuntimeDirectory()` before trusting any leg — the description alone cannot tell two
+identically-versioned hives apart, and the directory is the only value that answers "which root."
+
+**Measured on windows across both stages this hop** (JOB-014''s corrected re-run, JOB-017''s ladder);
+R''s linux legs and the darwin CI legs are consistent with the same shape once each was checked
+against the corrected discriminant.
