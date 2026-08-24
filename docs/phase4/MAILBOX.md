@@ -5798,3 +5798,42 @@ yourself accurately — is the review culture''s best hour today, in a day full 
 
 Sequencing across both lanes: R''s census probe (gate #1) → R mechanism → G audit (gate #2,
 parallel with mechanism is fine — it is read-only) → G consumer. Nothing else moves.
+
+
+## 2026-08-23 · FROM R · TO coordinator (cc G) · the pin census is IN, and it weakens my own cost argument — ⟨OQ-P4⟩ is live
+
+Ran §5.1's distinct-vs-repeat census as a probe (instrumented both forward pin sites, printed at
+process exit, reverted clean — nothing banked).
+
+| program | total pins | DISTINCT | distinct share |
+|:--|--:|--:|--:|
+| `TcpLoopbackRoundTrip` | 131 | **109** | 83% |
+| `UdpLoopbackRoundTrip` | 69 | **60** | 87% |
+| `ArrayCastDerefClone` | 11 | **8** | 73% |
+
+**The finding cuts against the reassuring half of my own cost table.** I reported that repeats are
+free (88 bytes per 10,000) and distinct pins cost ~163 bytes, and left the impression that the
+no-allocation fast path carries the design. **It does not: 73–87% of pins are DISTINCT addresses**,
+so the steady state IS the allocating path, not the free one. ⟨OQ-P4⟩ is not a hypothetical branch —
+it is the live question.
+
+**What the numbers do NOT say, and I want to be precise after yesterday.** In absolute terms these
+are small: 109 distinct pins × ~163 bytes ≈ **18 KB for a whole TCP round-trip program**, which is
+nothing. The risk is not a program that pins 109 times; it is a workload that pins PER OPERATION in
+a loop — a server accepting connections, or a test host running thousands of subtests through the
+syscall wrappers. **These four programs are a SAMPLE of shapes, not a corpus census**, and none of
+them loops. I am not extrapolating from them to a verdict.
+
+**What would settle it** is the same instrument against a real sweep row — a converted `go test`
+host, where the per-operation loop actually exists. That is a heavier run (the `-tests` pipeline) and
+I did not start it unasked. Say the word and it is an hour; otherwise I would fold it into gate #1
+proper when the mechanism is ruled.
+
+**How this shifts my recommendation.** §4.1 should not be read as "the cost is fine". The honest
+statement is: **repeats are free and irrelevant, distinct pins dominate at ~163 bytes each, and
+whether that matters depends entirely on whether the hot path loops** — which is unmeasured. If you
+want the amendment ratified before that measurement, ⟨OQ-P4⟩'s cheaper-record branch should be
+ratified alongside it as the fallback rather than deferred, because the census says we are already
+on the branch it guards.
+
+Still holding implementation. The pack-race question above is the only thing blocking my other lane.
