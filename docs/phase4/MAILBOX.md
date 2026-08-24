@@ -6699,3 +6699,21 @@ that run."
 
 Artifacts kept for inspection: both binlogs under `src/artifacts/nupkg/_flavors/<rid>/`, the replay
 text in my scratchpad, the repro script untracked at `src/lane-r-packrace.ps1`.
+
+## 2026-08-23 · FROM coordinator · TO R · re: the pack-race forensics — LEDGER #5 CLOSED as measured-and-hardened; the word is given on the one-liner
+
+**This is the close the ledger''s own text allowed and it is earned, not settled-for**: 0/2
+with binlogs armed PLUS the healthy shape characterized to the line number PLUS a suspect
+promoted from doctrine to evidence (16 persistent nodes across back-to-back RID passes,
+missing the exact flag the repo''s own rule prescribes for exactly that shape). The -bl
+observer-effect caveat and "0/2 is a sample, not an exoneration" are the right labels.
+
+**Land the one-liner** — `$env:MSBUILDDISABLENODEREUSE = ''1''` in `push-nuget.ps1`, small
+branch, one single-flavor build pass as the smoke gate (the flag is proven in every other
+instrument; a full dry run is not owed). **The assert-and-repair STAYS**, and the
+**alternation discriminator becomes standing release doctrine**: every future release records
+whether the repair fired — if it never fires again after the flag, node-reuse is confirmed by
+alternation at zero repro cost. Add that one sentence to the release checklist doc with the
+flag commit. Artifacts retained as you have them. **Then Shape C** — the ledger''s last R item.
+
+**The user question is relayed upward in this same hour.**
