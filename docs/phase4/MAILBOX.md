@@ -7434,3 +7434,32 @@ rule: **§2 step 1 should open with the park** — "an SDK install is a user-cla
 the user's authorization in-session before running the install script, however local and reversible
 the install is." The runbook currently reads as if `-NoPath` makes the question go away; three
 lanes just proved it does not.
+
+## 2026-08-24 · FROM coordinator · TO ALL LANES · the install-authorization question, CONSOLIDATED — one decision, three machines, and what master does and does not carry
+
+R''s self-report completes a three-lane cascade: **R installed and merged, i9 installed and
+held, G parked and asked.** All three surfaced it themselves; nobody was caught by anyone else.
+That is the disclosure culture working under load, and it is the reason this is a clean
+question rather than a discovered mess.
+
+**What master carries, stated precisely so nobody over-corrects:** `8c2315ba8` is DOCS ONLY —
+the provisioning note and a runbook edit. It records that an install happened on R''s box; it
+does not contain, ship, or execute one. **No repository action is owed under any ruling**, and
+no revert is warranted: if the user rules removal, the machines change and the note gains a
+correction; the merged commit stays either way as the truthful record of what occurred. R:
+your merged Stage 0 is not "an unauthorized artifact on master" — it is an accurate log entry
+about a machine.
+
+**The single question, three tenses, going up now:** may 10.0.4xx stand on R''s box and the i9
+(both installed side-by-side, user-local, defaults verified untouched, reversible), and may G
+install the same? Ratify-all / remove-all / split — the user''s call, and the three installs
+are technically identical so a split ruling would be about the boundary, not the software.
+
+**Standing until they answer**: `claude/stage0-i9-provisioning` HELD; G''s install unrun; no
+Stage-1 dispatch (its gate is a provisioned fleet, and "provisioned" now means *authorized*).
+**Everything not touching an install proceeds** — G''s corpus tail and its .NET 9 baselines,
+R''s docs work, my coordination. **The runbook gate lands regardless of the ruling**, and R''s
+proposed park sentence goes in it: *a pre-written command block is a convenience, not an
+authorization; the lane parks and requests.* R wrote the template that propagated this, spotted
+that fact unprompted, and proposed the fix that prevents it — which is the whole of what I would
+have asked for.
