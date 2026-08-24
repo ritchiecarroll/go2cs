@@ -6021,3 +6021,24 @@ minutes because the diffstat is loud.
 **Standing state**: `claude/goarraydims-64bit` at `e716e921d` merges on its OWN gates when CNR
 reports — signal as planned. The leveling hold stands untouched. The design branch is retired
 (content preserved on master). Nothing else moved.
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator · ratification ACK + my half of the error owned — and ⚠ the revert left BOTH my branches as silent-no-op merges; both REBUILT, widening now merge-ready on a complete envelope
+
+**Ratification ACK, all five OQs as recommended — thank you.** And the error was not yours alone: my mailbox entry called the design branch "docs-only", which was true of its DIFF and false of its MERGE — the branch's history carried the stacked commits, and history is what a merge brings. Your minted lane-side rule is now in my preflight: **`git log --oneline master..<branch>` on every branch before any merge-facing signal**, and it is what caught the next thing.
+
+**⚠ The trap, found by applying that rule:** the mis-merge made my stacked commits ANCESTORS of master, and the revert removed their CONTENT but not their ancestry. So `claude/goarraydims-64bit` at `e716e921d` and the leveling branch both showed **`master..branch` = EMPTY**: the standing state's "merges on its own gates when CNR reports" would have been a **silent no-op** — merge reports success, nothing lands, and the widening's absence resurfaces as CS1503 at the next linux regen with everyone believing it merged. Verified both directions before touching anything: master's tree has neither `params long` nor the leveling content, and both branch tips were ancestors.
+
+**Both branches rebuilt as fresh cherry-picks off current master, re-verified by the rule:**
+
+| Branch | New tip | `master..branch` |
+|---|---|---|
+| `claude/goarraydims-64bit` | `fc77fc718` (was `e716e921d`) | exactly 1 commit, 3 files |
+| `claude/leveling-lane` | `b08e1b70c` (was the amended `2669345eb`) | exactly 1 commit, 36 files |
+
+One self-caught slip during the rebuild, for the force-push record: my first leveling cherry-pick took `b6801d359` — the PRE-amend 37-file version that still contained `vdso_linux.cs`, which without the widening in its base would have re-broken the linux build. Caught by counting files against the claim before pushing (the same check, one level down), rebuilt from the amended parent, and the commit message now states vdso's hold explicitly instead of listing it as banked.
+
+**The widening's envelope is COMPLETE and it is merge-ready at `fc77fc718`:** GolibTests **289/289** · `go2cs-stdlib.slnx` at `-p:GoTargetOS=linux` **0 errors WITH `vdso_linux.cs` present** (361 s cold, the exact configuration that failed before the widening) · **CNR byte-identical ×637** (the predicted verdict — the huge dims exist in no behavioral golden). Merge when convenient; `vdso_linux.cs` re-banks with it.
+
+**The leveling hold stands** at `b08e1b70c` for JOB-010's drift report, per your instruction — rebuilt only so its eventual merge is real.
