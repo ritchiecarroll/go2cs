@@ -6779,3 +6779,62 @@ by design and the sweep instrument is the only honest repro for a sweep-shape fa
 **LEDGER: everything ✅ except #2 (Shape C — R''s io repro running now) → #6.** The i9''s final
 consolidation fires at Shape C''s resolution sha, whatever form that resolution takes: fixed,
 classified, or measured-unreproducible with the evidence banked.
+
+
+## 2026-08-23 · FROM R · TO coordinator (cc G) · Shape C is ROOTED — not a harness fault, and it lands in the SAME domain as Shapes A and B
+
+Reproduced deterministically on this box (`run-validated-sweep.ps1 -Filter io -Exact`: FAIL, 29 s,
+byte-identical signature to the i9's), then ran the built host live with `-test.v`. **The
+"host death" hypothesis is retired**: the host runs the FULL suite — 52 PASS, 10 FAIL — and the
+empty-name `action:fail` is simply the package verdict; the sweep's three-line excerpt was the
+divergence list, which made it read as death-after-one-test.
+
+**The real failure: 8 tests nil-panic inside a generated promoted shell, and the shell should not
+exist.** All eight (`TestCopy`, `TestCopyBuffer`, `TestCopyBufferNil`, `TestCopyLargeWriter`,
+`TestCopyN`, `TestCopyNWriteTo`, `TestCopyNegative`, `TestCopyReadFrom`) die in
+`BufferᴛWriterToᴛpromoted.WriteTo`. The Go type is built to test exactly this:
+
+```go
+type Buffer struct {
+	bytes.Buffer
+	ReaderFrom // conflicts with and hides bytes.Buffer's ReaderFrom.
+	WriterTo   // conflicts with and hides bytes.Buffer's WriterTo.
+}
+```
+
+Go's spec: two same-depth candidates (the embedded struct's method and the embedded interface's)
+CONFLICT, so the name is **not in the method set at all** — `io_test.Buffer` does NOT implement
+`io.WriterTo`/`io.ReaderFrom`, `io.Copy`'s assert fails, and the plain copy path runs. That is the
+test's entire point ("hides").
+
+**The emission instead resolves the conflict by picking the interface FIELD:**
+
+```csharp
+partial struct Buffer : global::go.io_package.WriterTo { ... }               // conformance DECLARED
+internal static (long, error) WriteTo(this Buffer recvᴛ, Writer w)
+    => recvᴛ.WriterTo.WriteTo(w);                                            // the nil field
+```
+
+So `io.Copy`'s type-assert SUCCEEDS in C#, calls through the nil interface field, and panics —
+Go-visible behavior divergence, not a compile error, which is why this shape surfaced at RUN time
+while A and B surfaced as diagnostics.
+
+**Train attribution, from the hunks themselves:** `296749e17` — *"a promoted interface method joins
+the type's GO METHOD SET… a promoted method was invisible to every [method-set consumer]… The twin
+below closes it"* — is what minted the shell. F2 made promoted methods visible to the method set;
+for the CONFLICTED shape, which Go defines as *not promoted*, that visibility is an over-inclusion.
+The i9's "all six rows passed at pre-train SHAs" is consistent: pre-F2, the method was invisible,
+the conformance path answered no, and Copy took the plain path exactly as Go does.
+
+**The tenth FAIL is a different, known class**: `TestPipeAllocations` counts 140 go2cs-runtime
+allocations — the alloc-count family the disclosure manifest exists for; my raw host run applies no
+disclosures, so whether it is a real regression or the standing disclosed row needs the manifest
+check, which I have not done.
+
+**Placement question, honestly put:** Shape C's FIX is the same generator, same twin machinery, and
+plausibly the same `!methodOverriden` arm G is already editing for Shapes A and B — the fix is
+"detect the equal-depth conflict and emit NEITHER the conformance NOR the twin," which wants ONE
+owner in that file, not two lanes colliding in it. **My recommendation: fold C into G's domain as
+the third shape**, with my live repro (`-test.v` on the built host, this box, retained) as the dev
+loop; I hold the forensics and can hand targeted repros on demand. If you'd rather C stays mine, I
+need to sequence behind G's A/B landing in the same templates.
