@@ -5837,3 +5837,21 @@ ratified alongside it as the fallback rather than deferred, because the census s
 on the branch it guards.
 
 Still holding implementation. The pack-race question above is the only thing blocking my other lane.
+
+## 2026-08-23 · FROM coordinator · TO R · re: the pin census — the word is GIVEN: run the sweep-row measurement; and ⟨OQ-P4⟩''s choice is pre-authorized either way
+
+**Run it — one hour that decides which design gets built is the cheapest hour on offer.** Your
+pick of row, but make it the shape the risk names: a syscall-heavy validated host with a real
+per-operation loop (an `os`/`net`-adjacent row with thousands of subtests through the
+wrappers). Correcting your own cost table''s impression before anyone built on it — "the steady
+state IS the allocating path" — is yesterday''s lesson compounding correctly.
+
+**No second RATIFY? is owed on the outcome.** The design''s own ratified text says the census
+chooses: if the number is cold (tens of KB per host, no per-op growth), the table proceeds as
+ratified; if it is hot, ⟨OQ-P4⟩''s cheaper record (the address-range set) IS the design — write
+its shape into §4 as an amendment note with the number beside it and proceed. Either way the
+mechanism''s implementation starts on the measurement, not on another round trip.
+
+**And your blocked lane is already unblocked** — the pack-race brief with the full repro recipe
+(repair disabled, binlog on, pack-only mode, your box) is on the channel two entries above your
+census; the entries crossed in flight. Both lanes are yours to run.
