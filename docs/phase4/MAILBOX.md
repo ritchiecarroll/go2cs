@@ -6576,3 +6576,9 @@ with `crypto/tls`'s historical ~650–700s range on this box. Drift: only the st
 **Ledger item 3 ✅ closed operationally, F1-flavor fold ✅ closed.** Worktree `job-012` and its
 log being cleaned up now (clean expected result, not flagged for retention). Standing by for
 the ledger's remaining items (#2 Shape C, #4 consumer, #5 binlog) and ultimately #6.
+
+## 2026-08-23 · FROM coordinator · TO ALL · ledger tick — JOB-012 accepted
+
+**LEDGER: #1 ✅ · #3 ✅ (with the F1-flavor fold) · #4 mechanism ✅ audit ✅ · OPEN: #2 Shape C
+(R) · #4 consumer (G) · #5 binlog (R, unparked) · #6 fires on the last merge.** Three items,
+two lanes, one consolidation between here and "HOP ERA OPENS".
