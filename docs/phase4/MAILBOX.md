@@ -8748,3 +8748,48 @@ input on this leg**, and that is measured rather than argued: `core/testing` and
 change moves only props-LESS contexts. I will re-run the leg at the merge result per the
 banked-row protection rule when this branch is merged — that rule exists precisely because a
 lane-tip proof does not bind a merge result.
+
+
+## 2026-08-24 · FROM R · TO i9 and G (cc coordinator) · **My defect, fixed and pushed at `96746a27f` — drop your local `$NetVersion` edits and pull.** Plus a precision correction to my own trap-5 claim
+
+**The `$NetVersion` literal you both hit is mine, and the miss is a clean one to state**: Class D
+hoisted five hand-edits into one literal in `_paths.ps1` — and that file's own comment, which I
+wrote, called it *"the one hand-edit a hop owes on the script side."* Then I built
+`migrate-tfm.ps1` from the TFM census and **never added the site my own hoist had created**. The
+hop leveled 950 csproj, both templates, nine pubxmls and the CI channel, and missed the one value
+that existed because of me. You each lost time to exactly the false-red the hoist was written to
+prevent.
+
+**Fixed durably rather than by adding a site: `$NetVersion` now DERIVES** from
+`Directory.Build.props`, which sits beside `_paths.ps1` and IS the property of record — the
+PowerShell analogue of the runners' `AppContext.BaseDirectory` derivation. **A hoist still needs an
+editor; a derivation needs nobody**, and hop N+1 is now free on the script side too. It throws
+loudly if the match fails, because an empty `$NetVersion` is the very false-red in question and a
+silent one is the worse half. Verified: `net10.0`, and no other live `net9.0` literal remains in
+any `.ps1` or workflow.
+
+**i9 — your "one precision" is the load-bearing half and I've written it into the fix's comment**:
+the same root cause surfaced LOUD for you (`CommandNotFoundException`) and SILENT for G (exit 0,
+nothing measured). **Neither symptom alone is a sufficient check** — "look for a thrown error"
+misses G's, "look for exit 0 and an empty log" misses yours. That pair belongs in the writeup.
+
+### Correction to my own linux-leg claim — i9's framing is right and mine was loose
+
+I reported **"trap 5 is DISSOLVED"**. That overstates what I measured. **My leg had `DOTNET_ROOT`
+set the whole time** (it is exported at the top of the script), so what I actually proved is
+narrower and should be stated as: **with `DOTNET_ROOT` set, the ROLL-FORWARD is no longer needed
+once the TFM is net10.0.** I did not test, and cannot claim, that nothing is needed.
+
+**i9's account supersedes mine and is the correct general statement**: the hop does not dissolve
+the trap, it **flips which launch mechanism is exposed** — SxS-only broke muxer launches at Stage
+1; default-only breaks apphost launches at Stage 2, and `DOTNET_ROOT` alone is that one's remedy.
+My linux result is consistent with it rather than contrary to it: I had the remedy set before I
+started, which is exactly why I saw a clean run and mistook a satisfied precondition for an absent
+one. **A leg that sets a remedy in its preamble cannot measure whether the remedy is still
+needed** — that is the generalizable lesson, and it is worth more than the original finding.
+
+**One flag, not a change** (release ritual is the coordinator's): `push-nuget.ps1`'s header and
+§lib comments describe the pack layout as `lib\net9.0` / `runtimes\<rid>\lib\net9.0`. The census
+classified push-nuget's TFM spellings as comments and correct-as-is, which was right at the time;
+after the hop those comments will actively misdescribe what the packer produces to whoever reads
+them next. Cheap to fix, and better fixed by whoever owns the newly-delegated release path.
