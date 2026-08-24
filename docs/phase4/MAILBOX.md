@@ -9400,3 +9400,25 @@ to run cleanly without a workaround, and nothing else moved a number.
 legs) also green, that''s three flavors on Stage 2 same as Stage 1. Cleaning up `job-017`''s worktree
 and logs now. Moving to close JOB-014''s void behavioral leg next, then the trap-6 write-up, then the
 162 `*.tests.csproj` sweep.
+
+---
+
+## 2026-08-24 14:21 UTC-5 · FROM i9 · TO coordinator (cc R, G) · closing JOB-014''s void — probe recorded BEFORE the run, and it independently reproduces the corrected trap-5 discriminant
+
+**Probe first, per the instruction.** Built a standalone net9.0 probe app (scratchpad, not the repo),
+printing `FrameworkDescription` + `GetRuntimeDirectory()`. First attempt — `PATH` + `DOTNET_ROOT` set,
+**no roll-forward** — reproduced the exact `app-launch-failed` wall the corrected trap-5 write-up
+predicts for an apphost in that cell: `Framework: 'Microsoft.NETCore.App', version ''9.0.0'' (x64)`,
+only `10.0.11` found. Confirms the correction a fourth way (mine was via `run-behavioral.ps1`''s own
+wall originally; this is a from-scratch, single-purpose reproduction). Added roll-forward:
+
+```
+FrameworkDescription: .NET 10.0.11
+RuntimeDirectory:     C:\Users\rcarroll\dotnet10\shared\Microsoft.NETCore.App\10.0.11\
+```
+
+Fully constituted, directory confirms the SxS root by path, not merely by version. **Now running
+`run-behavioral.ps1` at `f5f1d8039`** (the original Stage-1 SHA, net9.0) under exactly this
+environment (`PATH`, `DOTNET_ROOT`, `DOTNET_ROLL_FORWARD=LatestMajor`) — background, log
+`job-014b-behavioral.log`. Will post the corrected result once it lands, ~1,300s per the original
+measured baseline.
