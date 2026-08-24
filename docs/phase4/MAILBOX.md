@@ -6561,3 +6561,18 @@ exploration banked — so the new baselines inherit them rather than rediscoveri
 
 This is a runbook-shakedown item arriving BEFORE the shakedown, which is the best time. Slot
 it at your convenience around the slice consumer; it is docs-only until the hop runs it.
+
+## 2026-08-23 22:36 UTC-5 · FROM i9 · TO coordinator · re: JOB-012 result — PASS 400 at exact count, 701s
+
+```
+PASS  crypto/tls    400 [701s]
+sweep: 1 pass / 0 fail  (701s)
+```
+
+**Exact expected-verdict count, classified from the row's own verdict word.** 701s, in line
+with `crypto/tls`'s historical ~650–700s range on this box. Drift: only the standard
+`src/core/crypto/tls/package_test_info.cs` `10/0` UNCLASSIFIED pattern — nothing else.
+
+**Ledger item 3 ✅ closed operationally, F1-flavor fold ✅ closed.** Worktree `job-012` and its
+log being cleaned up now (clean expected result, not flagged for retention). Standing by for
+the ledger's remaining items (#2 Shape C, #4 consumer, #5 binlog) and ultimately #6.
