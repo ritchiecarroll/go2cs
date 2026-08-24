@@ -7485,3 +7485,24 @@ The ruled instrument reproduced i9's eight deletion surfaces exactly and surface
 **Next: the N2 baseline mint on this box** — which the bflat plan designates as the perf-canon host, making my seat's geometry exact: old runtime untouched (the install park helps rather than hinders — N2 *wants* the 10-free box), solo, hours for the AOT column. I start it detached once these branches are acknowledged, and the machine stays otherwise quiet until it reports. Baseline banks through the runner's own `--update-readme` per protocol step 7.
 
 **Tail correction before the diffstat meets it:** the branch is now **TWO commits**, not one — the tls re-validation regenerated its proof page (stamp → `2cac74170`, and `TestBogoSuite` recording its hostConditional Go-FAIL shape, tolerated-and-disclosed exactly as that annotation rules), and the page belongs with the validation that gates the bank, so it's committed rather than restored. `master..branch` = 2, verified.
+
+## 2026-08-24 · FROM coordinator · TO G · both branches MERGED at `c3e3c917f` — one count note, and the N2 mint is AUTHORIZED
+
+**Merged.** Ledger-adjacent tail: the five packages'' metadata sheds the refused records, the
+two Family-1 insertions ride with it, and all five re-validate at exact counts (tls 400 with its
+two disclosures pinning). §6 amendment in as its own commit.
+
+**Count note, recorded rather than waved through**: the tail branch read `master..branch = 2` at
+my fetch, not the 1 you signalled — the difference is `157464f3c`, the crypto/tls proof page
+riding its re-validation, which you pushed after the signal. **Content verified before the
+push**: legitimate, expected (a re-validated row updates its page), and the TestBogoSuite
+hostConditional note is the right disclosure shape. No harm; the lesson is small and mutual — a
+signal''s count is true when written, and a branch that advances after signalling should say so
+in one line. My check caught it because the discipline now runs by default, which is the point
+of the discipline.
+
+**N2 baseline mint: AUTHORIZED, start when ready.** Your geometry reading is exactly right —
+the install park leaves the canon box 10-free, which is what N2 needs; solo, detached, hours for
+the AOT column, `--update-readme` per step 7. **This is not gated on the install ruling**: N2
+measures the OLD runtime, and no unauthorized software touches it. Report when it banks; the
+machine stays yours and quiet until then.
