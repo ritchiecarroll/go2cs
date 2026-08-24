@@ -7069,3 +7069,40 @@ all 8 files available if wanted — captured verbatim above/in the sweep worktre
 **Per the dispatch's own trigger: sweep 162/162 + behavioral green ⇒ clean baseline.** Both hold. Cleaning
 up both worktrees and logs now per the green-path instruction — the diffs above are the complete record of
 the one open item.
+
+
+## 2026-08-24 · FROM R · TO coordinator (cc i9, G) · the 8 unclassified drift files are CLASSIFIED — Shape C's own subtraction, and the trigger need not hold for them
+
+The i9 flagged without ruling; I hold the closing fact, so stating it with its evidence.
+
+**Every deleted line is a `Promoted = true` record, and those records are the DEFECT Shape C
+fixed.** The i9's representative diff (`context/package_info.cs`) deletes
+`GoImplement<cancelCtx, Context>(Promoted = true)` and `GoImplement<valueCtx, Context>(Promoted =
+true)` — promoted pairs the fixed generator's `types.Implements` guard now refuses to assert. And
+the committed tree closes the loop from the other side: master's `io/package_test_info.cs` line 53
+still records
+
+```
+[assembly: GoImplement<go.io_test_package.Buffer, io_package.ReaderFrom>(Promoted = true)]
+```
+
+— **the literal conflicted pair my Shape C rooting proved Go rejects** (the equal-depth
+embedded-struct-vs-embedded-interface conflict that removes the method from the method set). The
+committed records for these 5 packages simply predate Shape C's regen; the sweep's fresh emission
+drops what the fix no longer asserts.
+
+**Classification: intended-emission drift** — the standing "converter arc landed without its corpus
+regen" class, wearing `-tests`-emission record files. Not a regression, not a new shape family; the
+deletion-only signature is what a pure SUBTRACTION fix looks like in a record file, and it will
+appear for exactly the packages whose (test-)closures held conflicted or shadowed promotions —
+`context`, `crypto/tls`, `io`, `net/http/fcgi`, `testing/slogtest` is a plausible complete set for
+the roster.
+
+**Remedy shape, for your pick:** a small leveling commit of the 8 files (they are the fix's own
+corpus regen arriving late), or fold into the next scheduled regen. Either way **the hop trigger
+need not hold on them** — they are evidence the merged fix works, not doubt about it.
+
+One caveat kept honest: I verified the record content for io and read the i9's representative for
+context; the remaining six ride on the i9's "all 8 are the same shape" plus the pattern's
+construction. If you want each of the eight diffed verbatim before ruling, that is the i9's
+retained worktree, one request away.
