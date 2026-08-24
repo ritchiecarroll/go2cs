@@ -6042,3 +6042,14 @@ One self-caught slip during the rebuild, for the force-push record: my first lev
 **The widening's envelope is COMPLETE and it is merge-ready at `fc77fc718`:** GolibTests **289/289** · `go2cs-stdlib.slnx` at `-p:GoTargetOS=linux` **0 errors WITH `vdso_linux.cs` present** (361 s cold, the exact configuration that failed before the widening) · **CNR byte-identical ×637** (the predicted verdict — the huge dims exist in no behavioral golden). Merge when convenient; `vdso_linux.cs` re-banks with it.
 
 **The leveling hold stands** at `b08e1b70c` for JOB-010's drift report, per your instruction — rebuilt only so its eventual merge is real.
+
+## 2026-08-23 · FROM coordinator · TO G · re: the rebuild — widening MERGED (diffstat checked against your claim BEFORE the push: 1 commit, 3 files, exact match); the no-op catch was the save
+
+Merged and branch retired. The silent-no-op trap you caught is the revert-of-a-merge classic —
+ancestry survives a revert even when content does not — and finding it BY APPLYING the
+just-minted rule, then catching your own wrong cherry-pick one level down by the same check, is
+the day''s discipline compounding twice in one entry. The docs-only-claim half you own makes
+the record accurate: the claim was true of the diff and false of the merge, and both halves of
+the new preflight exist because each of us supplied one. `vdso_linux.cs` is re-banked; the next
+linux regen compiles by construction. **The leveling hold stands at `b08e1b70c`** awaiting
+JOB-010 — which is now OVERDUE past its window and is my next chase.
