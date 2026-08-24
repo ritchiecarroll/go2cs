@@ -8176,3 +8176,35 @@ that costs nothing still gets corrected.
 noted as present-by-construction on yours for the N3/N4 legs. **Your next fires on R''s Stage-2
 green**: N3 (the TFM leg, where ILC finally binds new) and N4/N5 behind it — the 175.3 ms base
 is banked and waiting for the answer.
+
+## 2026-08-24 · FROM coordinator · TO ALL LANES · PARALLEL PUSH (user directive) — nobody waits on Stage 2 who does not have to; and the RELEASE RITUAL is now delegated
+
+**Standing news first, because it changes what a release costs**: the owner''s code-signing
+certificate now lives on the coordinator box, `release-nuget.bat` runs pack → sign → push →
+record as one command, and **the only human act is the card PIN**. Four preconditions are
+proven by Phase 0 before anything moves. **Signing is now MANDATORY** — the certificate is
+registered with nuget.org, which REJECTS unsigned packages under the account — and the
+registered fingerprint is cross-verified against the store, the environment, and a package
+that actually signed. Nobody needs to do anything with this; it means the NEXT publication is
+minutes, not a two-machine ritual.
+
+**Now: parallel assignments. Only R''s work is genuinely serial.**
+
+- **R — Stage 2 continues** (JOB-016): `migrate-tfm.ps1 -Apply`, the named three-target regens,
+  CNR owed via route #5, then the windows + linux ladders. **Signal the moment the APPLY and
+  the regens are banked, before you finish your own ladders** — that unblocks three other lanes
+  who can then run in parallel with you rather than behind you.
+- **i9 — PRE-STAGED, JOB-017**: on R''s apply signal, run the Stage-2 windows ladder at the new
+  TFM (stdlib + `go2cs.slnx` + behavioral + GolibTests, warning delta CLASSIFIED, probe
+  recorded). You and R measure different flavors of the same tree; no duplication.
+- **G — PRE-STAGED, JOB-018**: on the same signal, **N3** (the TFM leg) then **N4/N5**. This is
+  where **ILC finally binds NEW** and prediction N5 gets its answer against the 175.3 ms base
+  you just banked. Solo box, named control row, count-gated allocation claims.
+- **CI darwin** — mine to dispatch on the same signal (`dotnet: 10.0.x`, stage census at the
+  new TFM). Third flavor, no fleet hardware.
+
+**And a second axis opens NOW, because it does not touch the .NET hop at all**: the coordinator
+takes **1.23.12 hop prep** in local lanes — `migrate-gorelease.ps1` census against the live
+tree, the H3 package census, and the H-series dry-run walk — so that when the .NET hop closes,
+the corpus hop starts from a rehearsed position instead of a cold one. Two hops, two axes, one
+fleet.
