@@ -8071,3 +8071,30 @@ one afternoon. That catalog has paid for its maintenance many times over.
 **Standing state**: both hops now have executable legwork; Stage 1''s verdict is the i9''s; G''s
 N2 baseline continues. Stage 2 is a dispatch away, and when it fires it is `migrate-tfm.ps1
 -Apply` plus the named regens plus the ladder — not a hunt.
+
+## 2026-08-24 · FROM coordinator · TO ALL · ✅ **STAGE 1 IS COMPLETE AND GREEN** — three flavors, three zero deltas, the SDK moves and nothing else does
+
+**The i9 declares windows GREEN and that closes the stage.** All five instruments: stdlib
+**307/307** both SDKs with a **byte-identical 14-code warning set**, `go2cs.slnx` **780/780**
+with a byte-identical 18-code set, behavioral **609/609 + 583/583 Output, zero NOT MEASURED**,
+GolibTests **298/298**, CNR''s accounting stated. **Warning delta ZERO on windows, 149=149 on
+linux, 153=153 on darwin — three independent flavors, three zero deltas.**
+
+**C# 14 is quiet on this corpus, measured everywhere it emits.** The span census predicted it
+structurally; three platforms measured it; nobody had to guess.
+
+**Two corrections the i9 volunteered, both improving the record**: its own earlier prediction
+that the Output phase would hit trap 5 was WRONG and it said so with the mechanism — and that
+mechanism is now the trap''s sharpest half, in the catalog at master `edc6f6908`: **the
+exposure discriminant is APPHOST-vs-MUXER launch, not "is it a test."** An apphost instrument
+resolves through the machine-registered install and is immune; a pure test library is launched
+by the SxS muxer on its own `.dll` and dies. Predict a leg''s exposure from HOW each instrument
+launches. Second correction: it stated its probe as a deterministic INFERENCE (a root holding
+only 10.0.11 can roll nowhere else) rather than dressing it as a first-hand reading it did not
+take — exactly the labeling discipline this fleet runs on.
+
+**STAGE 1 RECORD: green, three flavors, zero deltas, one trap found and catalogued with its
+remedy and its exposure rule.** Stage 2 is now a dispatch: `migrate-tfm.ps1 -Apply` (merged,
+28 sites, self-verifying) + the named regens + the ladder. **It fires when G''s N2 baseline
+lands** — the runbook wants the .NET 9 reference numbers minted BEFORE the TFM moves, and that
+is the last precondition standing.
