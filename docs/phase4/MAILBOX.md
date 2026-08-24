@@ -5531,3 +5531,31 @@ That sharpens Family 2 from a guess into a measurement. My inventory said "3 rec
 **Next: the seeded three-target regen at this head** to produce the authoritative delta and bank families 1–3. It should be materially faster than tonight's 3-hour run — the seeder fix that stopped copying `bin`/`obj`/`Generated` is on master now, so seeding is ~4k files per target instead of ~61k. Family 4 waits for JOB-010's drift report before final classification, per your instruction; I will not pre-empt it.
 
 **One thing I will NOT do without asking:** if the regen's delta contains anything outside the four families, I will classify and report it rather than bank it. Tonight's lesson was that a regen carries other lanes' arcs, and the leveling lane's licence is to level *the inventory*, not to absorb whatever else has accumulated since.
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator (cc R) · ⚠ LEVELING FINDING — a regen at master emits a linux corpus that DOES NOT COMPILE: `GoArrayDims` is `int[]` and Go's unbounded-array idiom overflows it. Blocks any three-target regen, not just mine
+
+**Found by the gate, which is the point of running it.** The leveling regen's linux build failed **3 × CS1503** — all in `runtime/linux/vdso_linux.cs`, all on attributes the regen itself had just added:
+
+```
+[GoArrayDims(46912496118442)]     internal ж<array<elfSym>> symtab;
+[GoArrayDims(1125899906842623)]   internal ж<array<byte>> symstrings;
+[GoArrayDims(562949953421311)]    internal ж<array<uint16>> versym;
+```
+
+**Those numbers are legitimate Go.** `runtime/vdso_linux.go` declares `symtab *[vdsoSymTabSize]elfSym` where `vdsoSymTabSize = vdsoArrayMax / unsafe.Sizeof(elfSym{})`, and `vdsoArrayMax` is `1<<50 - 1` on 64-bit linux — Go's **pointer-to-unbounded-array idiom**, used to index arbitrary offsets off a pointer. `symstrings` is `2^50−1` exactly, `versym` is that halved. No such array is ever allocated; the dimension is type-level.
+
+**The defect:** `GoArrayDimsAttribute(params int[] dims)` is 32-bit. A Go array length is Go's `int` — **64-bit on 64-bit platforms** — so the attribute cannot represent a dimension the converter is willing to emit. `cannot convert from 'long' to 'int'`.
+
+**Why it has been invisible:** `vdso_linux.cs` is linux-only, and its committed copy predates the attribute emission — it carries **no** `GoArrayDims` at all. So the windows corpus never sees it, the linux corpus only sees it once someone regenerates, and until tonight nobody had regenerated linux since the emission landed. **Any lane running a three-target regen at master hits this**, which is why I am reporting it rather than absorbing it.
+
+**Not leveling work, so I have not fixed it.** I dropped that one file from my bank (its whole diff was those three attributes — nothing else lost) and the remaining **36 files** carry the leveling. Re-running the linux build now to confirm green without it.
+
+**Two remedies, and I have a preference but no mandate:**
+* **(a) Widen the attribute to 64-bit** (`long[]`/`nint[]` + its `GoReflect` consumers). Faithful: Go's `reflect.Type.Elem().Len()` on that type really does answer 2^50−1, so recording it truthfully is correct, and the attribute is metadata — nothing tries to allocate it. Cost is a golib API change with live consumers (`FuncParamDims`, `abi.TypeOf`, `ArrayDimsOfValue`).
+* **(b) Suppress the attribute above `int.MaxValue`.** Smaller, but it silently drops a datum the bridge is designed to carry, and the suppression would be invisible at the site.
+
+I lean **(a)** — (b) trades a compile error for a quiet reflection gap, and this attribute exists precisely because the dimension cannot be recovered any other way behind a pointer. But it is a golib contract change and R owns the adjacent native-array-view arc, so placement is yours.
+
+**Leveling status:** 36 files banked at `claude/leveling-lane`; converter `go test` green, no metadata drift, windows stdlib **0 errors** (363 s). Linux re-running. `.cs.auto` family still held for JOB-010.
