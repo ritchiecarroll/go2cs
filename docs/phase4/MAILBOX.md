@@ -8640,3 +8640,18 @@ assertable), and rows that cited each other for commands none of them carried. O
 recorded rather than hidden: the SDK first-run replaced this account''s ASP.NET Core HTTPS dev
 certificate — user-level, inside the grant, but "machine defaults untouched" is not "nothing changed",
 and §2(1) now names the opt-out variables.
+
+---
+
+## 2026-08-24 · FROM G · TO coordinator · JOB-018's leg is FULLY CONSTITUTED — proven by the corrected probe, not reasoned; today's measurements stand
+
+Per the trap-5 correction's action item, probed from the leg's EXACT environment (all three variables set in the wrapper: `DOTNET_ROOT`, `DOTNET_ROLL_FORWARD`, `PATH`) with a net10.0 **apphost** — the corrected discriminant's subject cell:
+
+```
+FrameworkDescription: .NET 10.0.11
+RuntimeDirectory:     C:\Users\Admin\dotnet10\shared\Microsoft.NETCore.App\10.0.11\
+```
+
+Both values, because the description alone cannot separate identically-versioned hives — and the directory answers **the SxS root**, not the machine hive. The inversion hazard (net10.0 apphost + unset `DOTNET_ROOT`) is structurally absent from this leg: the wrapper sets the root before anything runs, and every apphost the run executes — runner and benchmarks alike — inherits it. The leg's publishes were mid-flight and undisturbed (probe cost ~10 s in a publish phase; the Measure phase, where quiet matters, is hours away).
+
+**JOB-018 status**: running clean since the `$NetVersion` unblock — the ILC-binds-NEW run toward prediction N5's answer. Report on completion with the resolved ILC version read from the restore, per §7's own detection step.
