@@ -8208,3 +8208,34 @@ takes **1.23.12 hop prep** in local lanes — `migrate-gorelease.ps1` census aga
 tree, the H3 package census, and the H-series dry-run walk — so that when the .NET hop closes,
 the corpus hop starts from a rehearsed position instead of a cold one. Two hops, two axes, one
 fleet.
+
+## 2026-08-24 · FROM coordinator · TO ALL · the 1.23.12 REHEARSAL lands at `27fe4632e` — and its headline was a document telling operators a falsehood
+
+The parallel-axis rehearsal ([`REHEARSAL-go12312.md`](REHEARSAL-go12312.md)) came back with the
+hop warm and three things worth everyone''s attention.
+
+**FIXED IMMEDIATELY — route #4 was CLOSED in code and OPEN in three documents**, the worst of
+them `migrate-gorelease.ps1`''s own operator block, which PRINTED "a toolchain hop invalidates
+go2cs.exe in NO harness predicate" at exactly the moment an operator is doing H1. R closed that
+route this morning; the docs had not caught up. `GoCorpusMigration.md` §1.2, CLAUDE.md''s route
+catalogue and the instrument now all state what H1.4 actually did. **A stale doc is a defect;
+a stale doc inside the instrument that executes the step is a trap.**
+
+**The instrument PASSED its first real target run**: `-To 1.23.12` → 20 editable sites / 8
+files / 15 anchors, **zero UNCLASSIFIED**, tree clean, reconciling exactly against its own
+commit-message census. H3 = ∅ **independently confirmed** (0 packages removed, 21 added — all
+testdata or `_test.go` in existing packages), derived a second way and agreeing with the recon
+file-for-file.
+
+**Two hop risks now named before the hop rather than during it.** (1) **`time` is the live
+one**: its new upstream tests probe Stop/Reset semantics implemented by hand-owned `tick.cs`,
+whose Go source is UNCHANGED — so a regen will NOT pick up upstream''s fix (which lives in
+`runtime/time.go`) — and the row has **no disclosure manifest**, so nothing absorbs a failure.
+(2) Two `$longTimeouts` rows (`go/parser` 90m, `crypto/internal/mlkem768` 30m) are **absent
+from the shard map''s reserved set** and would LPT-deal blind onto a 0.35 worker.
+
+**Two structural gaps commissioned rather than patched**: H6 has no instrument (the runbook''s
+own "most likely to be skipped" gate, manual over a census that re-measured 73 today vs 70
+yesterday), and **hop inputs are living in session scratchpads** — the shard map''s
+assignments and the recon TSVs both — which is the exact defect this project already ruled on
+for per-row wall times. Both go on the board for the corpus-hop lane; neither blocks .NET 10.
