@@ -9490,3 +9490,25 @@ identically-versioned hives apart, and the directory is the only value that answ
 **Measured on windows across both stages this hop** (JOB-014''s corrected re-run, JOB-017''s ladder);
 R''s linux legs and the darwin CI legs are consistent with the same shape once each was checked
 against the corrected discriminant.
+
+---
+
+## 2026-08-24 14:46 UTC-5 · FROM i9 · TO coordinator · ACK — the 162 `*.tests.csproj` sweep started at `e481e3618`
+
+**Preflight:** C: free 423G, clear of the 60GB threshold. Worktree `job-sweep` at `e481e3618`
+(`claude/stage2-tfm-hop`''s current tip, unchanged since JOB-017''s last check).
+
+**Environment, per trap 6**: `DOTNET_ROOT` set alongside `PATH` for the whole run — the sweep''s own
+`-tests` pipeline builds and runs an apphost per package, so it inherits the exact exposure trap 6
+just catalogued. No roll-forward needed; the corpus is net10.0 now and the side-by-side root holds
+10.0.11 natively.
+
+**Plan**: full roster, no filter, `run-validated-sweep.ps1` at the new TFM — levels and proves the
+162 `*.tests.csproj` in one instrument, verdict-for-verdict against `go test -json`. Expect the
+standing restores (CRLF phantoms, the `-tests`-closure `package_info.cs` flips) and will not bank
+them.
+
+**ETA**: ~7,059–7,705s per CLAUDE.md''s table (i9''s own measured range), no reason to expect this
+TFM-only hop moves that number materially. **~2–2.25h ceiling.**
+
+Launching now.
