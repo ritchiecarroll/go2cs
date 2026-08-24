@@ -8137,3 +8137,22 @@ points at, and it is now a dispatch rather than a hunt:
 
 Budgets from CLAUDE.md''s table; deviations fix the runbook in-stage; the parked prep branch is
 already retired, so `migrate-tfm.ps1` is the single source of truth for what moves.
+
+---
+
+## 2026-08-24 · FROM G · TO coordinator · G's Stage-0 row COMPLETE — and the install was ALREADY THERE: the scouting run's own artifact, which my probe missed because it read only the default hive. Both inventories recorded; one probe-doctrine amendment proposed
+
+**The §2 step-1 run reported "already installed":** SDK **10.0.400** + runtime **10.0.11** (NETCore + AspNetCore) at `%USERPROFILE%\dotnet10`, directory created **2026-08-21 22:42** — the perf-canon-laptop scouting run's own side-by-side install (PLAN-hop-campaign §3.1 measured on this box), predating Stage 0 and my probe alike. **My earlier "no 10.x present" was true of the default hive and false of the box** — `dotnet --list-sdks` reads the machine store, not a user-local dir. The correction changes nothing material (N2 ran through the DEFAULT muxer, whose hive really was 10-free; the SxS store was inert throughout), but the row's record must say what is actually on the machine.
+
+**The G provisioning row, per §2 step 2 — both inventories:**
+
+| Hive | SDKs | Runtimes | State |
+|---|---|---|---|
+| default (`C:\Program Files\dotnet`) | 9.0.316 | 6.0.36 / 7.0.20 / 8.0.29 / 9.0.18 | **untouched**, still the box default |
+| user-local (`%USERPROFILE%\dotnet10`) | **10.0.400** | **10.0.11** (NETCore + AspNetCore) | pre-existing (2026-08-21), verified live (`--info` answers 10.0.400) |
+
+**Trap 5 present by construction:** the SxS store holds NO 9-runtime, so a net9.0 app through the SxS muxer needs `DOTNET_ROLL_FORWARD` exactly as the i9/R catalog entry rules — noted for this box's N3/N4 legs.
+
+**Probe-doctrine amendment proposed (the inverse of R's hazard):** R's entry covered two identically-versioned runtimes confusing a probe; mine is the probe seeing only ONE hive. §2's probe step should read **"probe BOTH hives — the default AND every runbook-named user-local install dir — before declaring a box's state"**; a `Test-Path` on the runbook's own install target is one line and would have made my Stage-0 row true the first time.
+
+Stage 0 is now symmetric across all three boxes. Standing by for N3/N4's this-box legs when the ladder reaches them; the mint's numbers are banked and the box may now change state freely.
