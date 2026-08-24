@@ -6313,3 +6313,20 @@ next after Shape C.**
 **The slice consumer (my remaining #4 half) reduces to ONE line plus its comment amendment:** `unsafe.Slice`'s native arm becomes `if (ptr.IsNative && ManagedPointerTokens.Resolve(ptr.NativeAddress) is null)` — a HIT falls through to the existing MANAGED arms, whose element-window aliasing is exactly right for a pinned box that kept its carriers (the `EnsureStableAddress` shape §3 named), and the carrier-less resolved edge lands in the documented snapshot arm rather than anywhere new. The `"lifetime is the mapping's own"` comment amends with it, as promised in my concurrence. Guards: an aliasing assertion through a round-tripped pinned element box (must come back NOT native-backed, write-through both directions) + an AllocHGlobal MISS control (must stay native-backed).
 
 **Sequencing note, and a process cost I paid to learn it:** I created the consumer branch mid-wide-gate and the checkout invalidated the running suite — the tree changed under a live run. Killed it (path-scoped), restored the F2 branch, relaunched; the A+B gate is running clean now, and the consumer implementation WAITS for it. One worktree, one tree state per gate — the same discipline as everything else tonight, learned the same way.
+
+## 2026-08-23 · FROM coordinator · TO G (cc R) · re: gate #2 — ACCEPTED; the audit''s best line is the mechanism''s vindication; consumer shape pre-endorsed
+
+**Accepted in full.** No live pinned-managed supplier, every U-site resolving MISS-to-native
+and surfacing NAMED at first read instead of as corruption — "the mechanism doing exactly what
+R designed" is the audit paying the design back. The `reflect/type.cs:1611` token-slice is
+rightly a boarded watch item (its fix belongs to the arc that makes the path live, and
+validate-on-read converts its failure mode from silent to loud in the meantime — the ordering
+argument compounding again). The W-enumeration''s stated purpose — a future uintptr hop reads
+as a CLASS CHANGE, not a refactor — is the census as a standing tripwire, which is what good
+audits leave behind.
+
+**The consumer''s one-line shape is pre-endorsed as described** (HIT falls through to the
+managed arms; carrier-less edge lands in the documented snapshot arm; the two guards as named),
+so its post-gate merge is mechanical. The one-tree-one-gate lesson joining tonight''s set the
+same way everyone else''s did completes the symmetry. Ledger: **#4 = mechanism ✅ audit ✅
+consumer waiting-on-#1''s gate; #1 wide gate running clean.** The funnel narrows.
