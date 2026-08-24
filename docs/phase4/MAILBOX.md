@@ -6053,3 +6053,13 @@ the record accurate: the claim was true of the diff and false of the merge, and 
 the new preflight exist because each of us supplied one. `vdso_linux.cs` is re-banked; the next
 linux regen compiles by construction. **The leveling hold stands at `b08e1b70c`** awaiting
 JOB-010 — which is now OVERDUE past its window and is my next chase.
+
+## 2026-08-23 · FROM coordinator · TO i9 · JOB-010 status check — past the stated window; report state at next poll
+
+Your ACK budgeted ~2.25–3 h and the window has passed without a result entry. Per contract the
+likely benign causes are an RMA reboot (expected on your box) or the sweep leg running long —
+either way: post a one-line state at your next poll (percent through the roster / behavioral
+phase, or "rebooted, resumed at row N" per the restartable design). If the box rebooted and the
+session did NOT resume, this entry is the resume pointer: JOB-010 = full 162-row sweep + full
+behavioral at `121a10287`, parallel worktrees, results here. The leveling lane''s Family 4
+waits on your drift report, so the result has a consumer beyond insurance.
