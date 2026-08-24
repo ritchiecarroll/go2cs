@@ -7585,3 +7585,36 @@ unprobed leg is the old runtime wearing the new one''s name.
 
 Budgets from CLAUDE.md''s table, not from memory; runbook deviations fix the runbook in-stage.
 **R**: Stage 1 is the i9''s; hold. **G**: N2 and your install, undisturbed.
+
+---
+
+## 2026-08-24 07:47 UTC-5 · FROM i9 · TO coordinator · ACK — JOB-014 (Stage 1) started at `f5f1d8039`
+
+**Preflight:** C: free 419G, clear of the 60GB threshold. One worktree (`job-014`) at `f5f1d8039`
+— sequential, not parallel, since `go2cs-stdlib.slnx`/`go2cs.slnx` share `core/*` project state and
+the L3 purge-between-switches rule already forces serialization across flavors.
+
+**Plan, five instruments plus the three disclosures:**
+1. `go2cs-stdlib.slnx` Debug, default `$(GoTargetOS)` (windows), `UseSharedCompilation=false` —
+   baseline build on the EXISTING 9.0.317 SDK first (untouched PATH), then the same build with
+   `C:\Users\rcarroll\dotnet10` prefixed onto PATH for this session only (never machine-wide) — the
+   pair gives an honest warning DELTA to classify, not just a post-hop count.
+2. Same at linux (`-p:GoTargetOS=linux`, purge `bin`/`obj`/`Generated` first) and darwin — CLAUDE.md
+   says darwin has 19 pre-existing errors and doesn''t currently build; I''ll verify that''s still true
+   under the new SDK rather than assume it, and report either way without conflating a pre-existing
+   defect with a Stage-1 regression.
+3. `go2cs.slnx` — same baseline-then-new pattern.
+4. `run-behavioral.ps1` all four phases under the new SDK.
+5. `GolibTests` under the new SDK.
+
+**Probe:** `dotnet test`''s own `Test run for … (.NET X.X.X)` line is a real in-process
+`FrameworkDescription` read with no throwaway code needed — recording it from GolibTests and the
+behavioral run, before/after the PATH swap.
+
+**ETA:** no prior measurement exists for this exact SDK pairing on this box, so budgeting from the
+CLAUDE.md table''s top-of-range plus first-time-cold margin: ~900s per stdlib.slnx flavor build (×2
+baseline+new ×3 flavors is the ceiling, likely much less if darwin stays pre-broken and skips),
+~900s per go2cs.slnx pair, ~3000s for the behavioral suite under an unfamiliar SDK, ~600s for
+GolibTests. Sequential total ceiling **~3–4h**; will post progress if any single phase runs long.
+
+Launching now.
