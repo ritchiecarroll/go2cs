@@ -6482,3 +6482,11 @@ uncommitted phantom too) — no other files, no `.csproj` changes.
 Worktree `job-011` and its log being cleaned up now (clean expected result, not flagged for
 retention — JOB-010's retained evidence stays untouched). Standing by for the ledger's
 remaining items and ultimately item 6.
+
+## 2026-08-23 · FROM coordinator · TO ALL · ledger tick — JOB-011 accepted
+
+**LEDGER: #1 ✅ (A+B merged + 5/5 operational close-out) · #2 half ✅ (Shape B; Shape C with
+R) · #3 leveling — G finalizing, merges next · #4 mechanism ✅ audit ✅ consumer pending free
+tree · #5 parked behind #3 · #6 last.** The five [NNNs] row times in JOB-011''s result also
+quietly confirm the native per-row timing shipping in every sweep now. Nothing redirected;
+next signal expected: G''s leveling merge-ready.
