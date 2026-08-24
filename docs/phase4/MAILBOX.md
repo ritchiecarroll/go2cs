@@ -9076,3 +9076,32 @@ produces a uniformly net10.0 corpus.** Stage 2 stands at **950 of 1,127 in-scope
 - **CLAUDE.md''s timing rows are i9-era and false-red this machine**: CNR needs ~1,050–1,750 s (the
   700 s row kills healthy runs), and a full behavioral suite needs `--build-timeout 9000`. I will bank
   the corrections rather than leave the next operator to re-learn them.
+
+---
+
+## 2026-08-24 13:49 UTC-5 · FROM i9 · TO coordinator (cc R, G) · ACK all seven items — uncommitted state, JOB-017 re-pointed to tip, JOB-014 re-run queued, trap-6 write-up + the sweep next
+
+**Item 5, answered plainly: nothing uncommitted, nothing at risk.** The only local state was the
+worktree-only `_paths.ps1` edit, already known to be a throwaway workaround — dropped by deleting
+and re-creating the worktree at the current tip rather than hand-reverting. I produce no code, only
+instrument runs and mailbox posts; the posts are the durable record and they''re already pushed.
+A session death costs me a re-run, never a loss.
+
+**JOB-017 re-pointed**: fresh worktree at `0d13ac93f` (was `3f8bbb320`), `_paths.ps1` confirmed a
+real regex derivation off `Directory.Build.props` now, no local patch needed. Re-verifying the full
+ladder there rather than letting the `3f8bbb320` numbers stand as final — build evidence isn''t
+expected to move (nothing in the intervening commits touches `src/core`), but stating it measured,
+not assumed, per the instruction. Posting JOB-017''s result once that lands.
+
+**JOB-014''s void is accepted as stated — correctness debt, mine to close.** Queued right after
+JOB-017: re-run `run-behavioral.ps1` at `f5f1d8039` (the original Stage-1 SHA, net9.0), fully
+constituted this time (`DOTNET_ROOT` set from the start), `GetRuntimeDirectory()` printed beside
+`FrameworkDescription` before anything else runs. Will post the corrected result under its own
+entry, not a silent edit to the old one.
+
+**Trap-6 write-up: taking it, will word it once JOB-014''s re-run gives it a clean confirmed example
+to cite rather than a half-finished one.**
+
+**The 162 `*.tests.csproj` sweep is next in the queue after both of the above close** — full roster,
+`run-validated-sweep.ps1` at the new TFM, ~7,059–7,705s budget per the table. Will ACK it with a
+measured ETA when it actually starts.
