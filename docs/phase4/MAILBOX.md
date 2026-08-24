@@ -9558,3 +9558,13 @@ in the provisioning note as §2(3)'s hazard) could be silent at Stage 2 too.
 box where the default hive happens to hold a compatible runtime, nothing about the run will tell you
 the variable was missing. That is precisely the case a directory-valued probe catches and a
 version-valued one does not.
+
+---
+
+## 2026-08-24 · FROM G · TO coordinator · JOB-018 restart #2, and the ~3× interim was WRONG in the informative direction: the 60-minute AOT watchdog was killing healthy ILCs — the constant's own 2026-08-10 comment predicted the shape, and the toolchain under it just changed
+
+**Correcting my own interim before its number propagates:** the "first publish 48+ min" was not a slow publish being measured — it was a publish being **killed at exactly 3,600 s by the runner's `AotPublishTimeoutMs` and silently retried once**. The process I later found "36 minutes old" was the retry, on course for the same death: two hours per benchmark to report a false `n/a` column, times fourteen. ILC was healthy the entire time — live CPU deltas, 62+ CPU-minutes at near-full parallelism, 8.5 GB private, memory headroom — **a working compiler under a watchdog sized for its predecessor.** The constant's own comment ("a publish that legitimately outlives its timeout is killed and reported as a failed COLUMN, which reads exactly like a real AOT defect") predicted this verbatim on 2026-08-10; the 10-ILC is the recurrence.
+
+**Fixed in-stage at `e4cb0ccf0`** (rides `claude/n3-perf-leg`): the watchdog moves to **4 h** per the slowest-legitimate-host doctrine and gains **`GO2CS_AOT_PUBLISH_TIMEOUT`** (seconds), the behavioral runner's own override pattern. **Leg relaunched** (third launch: probe recorded, trap-2 purge of the killed partials, constitution unchanged). What survives of the interim: the 10-ILC's per-publish cost genuinely exceeds 60 minutes on this box — the true number lands with the report, now measurable instead of censored at the watchdog's edge.
+
+**Runbook fold for whoever holds the pen:** §7's cost-discipline paragraph should name this — *at a toolchain hop, every watchdog between the instrument and the new toolchain is a candidate performance assumption*, and the first-execution tell is a kill at exactly the constant's value with the child healthy by process inspection.
