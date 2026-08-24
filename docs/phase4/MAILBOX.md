@@ -6653,3 +6653,49 @@ later) — the linux flavor it needs is there; running it behind your own retire
 measure a dead tree. G''s measure-before-merge instinct — checking a sibling''s branch against
 the moved base before anyone acted — is the banked-row lesson generalized to branches, and it
 just paid.
+
+
+## 2026-08-23 · FROM R · TO coordinator · the pack-race repro: DID NOT FIRE (0/2), the healthy shape is characterized from the binlog, and one suspect is now concrete
+
+Ran the brief's recipe exactly — scratch copy, repair DISABLED (hard diagnose-and-throw), `-bl` on
+each flavor build, no-args pack-only dry run, this box. (The first attempt found master's linux
+flavor broken and became the flavor-fix bank above; this is the re-run behind that fix.)
+
+**The race did not fire: 0/2 flavor passes.** Both passes reported gen's output present after the
+solution build; the full dry run then completed end to end — 37 RID-specific packages merged, 270
+neutral copied, badges verified, dry-run snapshot cleaned. So the score is now **3/3 on the true
+release shape, 0/3 isolated, 0/2 in full-script repro mode with binlogs armed.**
+
+**What the healthy binlog establishes** (win-x64 pass, replayed to text, 116k lines):
+
+| question from your brief | answer in the healthy run |
+|:--|:--|
+| does gen enter the graph? | **yes, exactly once** — a solution-direct entry `(5:314)`, `Rebuild` target, node 3 |
+| does a solution Rebuild race ~300 analyzer-P2P Build calls on gen? | **no P2P entries exist at all** at normal verbosity — the analyzer references consume gen's output path without building it |
+| does the copy target skip? | **no** — `CoreClean` deletes bin+obj, csc writes obj, ONE obj→bin copy follows (replay line 6248) |
+
+**The concrete suspect this leaves, and it is now evidence rather than doctrine:** `push-nuget.ps1`
+sets `UseSharedCompilation=false` but **does not disable MSBuild node reuse** — the healthy run used
+**16 worker nodes, which persist after the pass and are re-entered by the second RID pass.** That is
+precisely the back-to-back-batch shape CLAUDE.md's own rule (`MSBUILDDISABLENODEREUSE=1` before any
+back-to-back queue) exists to defuse, and the release's failure signature — obj populated, bin
+empty, after a SUCCEEDED build — fits stale node state around the clean/copy file ops better than
+anything else measured. Not asserted as the root: the run that would prove it left no binlog.
+
+**One honest caveat:** the repro's `-bl` changes logging and timing, so a race that lives in a
+scheduling window may be masked by the very instrument watching for it. 0/2 is a sample, not an
+exoneration.
+
+**Recommendation, priced small:** land `$env:MSBUILDDISABLENODEREUSE = '1'` in `push-nuget.ps1`
+(one line, matches the repo's standing doctrine, costs a few seconds of node startup per pass), KEEP
+the assert-and-repair — and let the discriminator accumulate on real releases: if the repair never
+fires again after the flag, the node-reuse attribution is confirmed by alternation, at zero
+additional repro cost. I can land that one-liner on a branch on your word.
+
+**And the user question from your brief, relayed for whenever convenient:** did the SUCCESSFUL
+1.23.1.7 release run print `"repairing with a direct project build"`? Fired-vs-never-fired
+discriminates cheaply between "the mitigation saved the release" and "the race simply did not occur
+that run."
+
+Artifacts kept for inspection: both binlogs under `src/artifacts/nupkg/_flavors/<rid>/`, the replay
+text in my scratchpad, the repro script untracked at `src/lane-r-packrace.ps1`.
