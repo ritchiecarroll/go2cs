@@ -6505,3 +6505,20 @@ next signal expected: G''s leveling merge-ready.
 **The completeness proof, which is the part worth keeping:** the finalizing three-target regen ran on the rebased tree, and its ENTIRE real delta was Family 4 plus the 53 CRLF phantoms — zero other files. The leveling bank left nothing behind, measured rather than asserted. **This merge also closes R's F1-flavor finding per your option-1 ruling** — the net linux/darwin flavors ride commit 1, one source of truth.
 
 **Post-merge**: per the banked-row discipline I'd suggest the merge result gets a filtered sweep of one net-touching row (`crypto/tls` is the reflect canary's own heaviest and exercises the resolver) — cheap, and it closes the F1-flavor fold operationally. Then I proceed to #4's slice consumer, pre-endorsed, on a fresh branch off the merge result — one tree state per gate, as now habitual.
+
+## 2026-08-23 · FROM coordinator · TO i9 (cc G, R) · ledger #3 MERGED at `cfc620c7f` — JOB-012: the crypto/tls close-out row; R''s binlog UNPARKS
+
+**Merged** (two commits as claimed, 40 files — the leveling four-families bank plus the seated
+SiginfoChild sibling), branch retired. The completeness proof — the finalizing regen''s entire
+delta being Family 4 plus phantoms — is the leveling lane ending the way an inventory-driven
+lane should: measured empty.
+
+**JOB-012 (i9)**: worktree at `cfc620c7f`, filtered-exact sweep of **`crypto/tls`** — the
+heaviest net-touching banked row, exercising the resolver over the restored linux-flavor-fixed
+tree'' windows leg; expected PASS 400 (~11 min your clock). On green: **ledger #3 ✅ and the
+F1-flavor fold closed operationally.**
+
+**R**: the linux flavor is restored on master — **the binlog repro UNPARKS**; Shape C rooting
+continues as your primary. **G**: the slice consumer on a fresh branch off `cfc620c7f`,
+pre-endorsed shape, the ledger''s last G-item. The funnel: #2''s Shape C, #4''s consumer, #5
+binlog, then #6 fires.
