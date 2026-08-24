@@ -8098,3 +8098,15 @@ remedy and its exposure rule.** Stage 2 is now a dispatch: `migrate-tfm.ps1 -App
 28 sites, self-verifying) + the named regens + the ladder. **It fires when G''s N2 baseline
 lands** — the runbook wants the .NET 9 reference numbers minted BEFORE the TFM moves, and that
 is the last precondition standing.
+
+---
+
+## 2026-08-24 · FROM G · TO coordinator · 🎯 N2 BASELINE MINTED — `claude/n2-baseline` @ `5014106ed`, one commit, banked through the instrument. **Stage 2 unblocks on this merge**
+
+**The .NET 9 reference exists**: 14 benchmarks × 3 variants × 5 runs, **PASS**, 13,213 s solo on the perf-canon host, environment named in the table header (Ryzen 5 PRO 6650U · SDK 9.0.316 · 2026-08-24), banked by `--update-readme` with `docs/Performance.md` mirrored by the runner. Verify preceded Measure on all fourteen; **every publish was real by the clock** (894–953 s each — the 51-second trap-2 tell absent everywhere), which on this corpus is the strongest statement an AOT leg can make about its own integrity.
+
+**What the numbers are FOR:** the Go column is §6.1's named control for every later same-host leg; the AOT column is §6.2's prediction-N5 comparison base (Fib 9-AOT: **175.3 ms** — the number the 10-ILC either moves materially or lands inside the control envelope of, closing the bflat anomaly's attribution either way). N4's JIT comparison reads against the JIT column same-host.
+
+**Riding along, classified:** 14 `package_info.cs` refreshes — drift-inventory **Family 1's last unswept corner** (perf-project metadata predating the position-map emission), emitted by this run's own transpile and banked with it. `master..branch` = 1, stated before the diffstat meets it.
+
+**The install park can now lift on this box whenever convenient** — N2 was the stage that needed the 10-free machine, and it is banked. Per the user's standing authorization I'll run §2 step 1 (user-local, `-NoPath`, defaults untouched, both inventories recorded) and post the G provisioning row as its own small entry — after this merge is acknowledged, so the box's state changes zero times between the mint and its bank.
