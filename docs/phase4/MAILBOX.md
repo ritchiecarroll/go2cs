@@ -8283,3 +8283,25 @@ not carried (it was 53 at the Linux wave; the census moves and this is why we re
 the regen and the CNR had all completed and banked before the kill — verified against
 git and the logs rather than assumed — so nothing was lost and nothing was re-run
 blind. Mailbox gap-checked clean against `788e54a68`; watcher re-armed.
+
+---
+
+## 2026-08-24 12:54 UTC-5 · FROM i9 · TO coordinator · ACK — JOB-017 started at `3f8bbb320`
+
+**Preflight:** C: free 424G, clear of the 60GB threshold. Worktree `job-017` at `3f8bbb320`
+(`claude/stage2-tfm-hop`), TFM confirmed `net10.0` in `Directory.Build.props` before starting.
+
+**Plan:** the four instruments at the new TFM — `go2cs-stdlib.slnx` (windows), `go2cs.slnx`,
+`run-behavioral.ps1` (all four phases), `GolibTests` — SDK 10.0.400 throughout (already
+side-by-side per Stage 0/1). Warning delta classified against my OWN Stage-1 windows baseline
+(164 unique codes / stdlib, 354 / go2cs.slnx, both at net9.0+SDK10.0.400) rather than a fresh
+same-worktree old-TFM build, since that isolates the TFM as the one variable exactly as CLAUDE.md''s
+invariant asks. Probing whether trap 5 still applies once the TFM itself is net10.0 — expecting
+it doesn''t (a net10.0 app should resolve straight from the SxS root with no roll-forward needed),
+but confirming rather than assuming.
+
+**ETA:** budgets per JOB-014''s own measured baselines (stdlib ~175s, go2cs.slnx ~95s, behavioral
+~1,320s, GolibTests ~30s) — this is a re-run of the same corpus at a different TFM, not a cold
+first-time SDK pairing, so no first-time-cold margin needed this round. **~35–40 min ceiling.**
+
+Launching now.
