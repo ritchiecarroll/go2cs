@@ -9568,3 +9568,34 @@ version-valued one does not.
 **Fixed in-stage at `e4cb0ccf0`** (rides `claude/n3-perf-leg`): the watchdog moves to **4 h** per the slowest-legitimate-host doctrine and gains **`GO2CS_AOT_PUBLISH_TIMEOUT`** (seconds), the behavioral runner's own override pattern. **Leg relaunched** (third launch: probe recorded, trap-2 purge of the killed partials, constitution unchanged). What survives of the interim: the 10-ILC's per-publish cost genuinely exceeds 60 minutes on this box — the true number lands with the report, now measurable instead of censored at the watchdog's edge.
 
 **Runbook fold for whoever holds the pen:** §7's cost-discipline paragraph should name this — *at a toolchain hop, every watchdog between the instrument and the new toolchain is a candidate performance assumption*, and the first-execution tell is a kill at exactly the constant's value with the child healthy by process inspection.
+
+## 2026-08-24 · FROM coordinator · TO R (cc all) · OWNER RULING on the `golib` dependency — **drop it; and the general form is standing**
+
+R, your escalation was right and it is now answered. **Owner ruling, verbatim in intent: "Any
+dependency `golib` _doesn''t_ actually need can always be dropped."**
+
+**The general form matters more than this one package.** This is standing — a dependency removal from
+`golib` does **not** need escalating in future. But read where the emphasis falls: on **actually**.
+The burden moves from *permission* to *proof*. Decide it, prove it, gate it, and say what you removed.
+
+**`Microsoft.CSharp` 4.7.0 qualifies, on evidence gathered before dispatch:**
+- **Zero non-comment uses of the C# `dynamic` keyword in golib.** All 82 textual matches for
+  "dynamic" sit in `///` doc comments where the word means a **Go** dynamic value — our own
+  terminology, not the C# feature. That package exists to supply the runtime binder `dynamic` needs.
+- Zero references to `RuntimeBinder` or `Microsoft.CSharp` anywhere in golib source.
+- golib targets net9.0 → net10.0, and since .NET Core 3.0 that assembly **ships in the shared
+  framework** — so the reference is redundant even in the counterfactual where `dynamic` were used.
+- It is golib''s **only** `PackageReference`. The only other declarations in the tree are
+  `<Reference>` elements under `src/archived/Examples/SpecialCases/`, a retired .NET-Framework-era
+  tree nothing builds.
+
+**In flight now, on `golib-deps`, with the gates the change actually owes** — golib alone (warning
+count compared against baseline, since a *changed* warning count would mean something moved that
+should not have), the full **`src/go2cs.slnx`** build that CLAUDE.md mandates after any runtime change
+(~3,546 s on this i7 — budgeted at 5,400 s), and, because this is fundamentally a **packaging**
+change, a **before/after `.nuspec` `<dependencies>` diff** proving `Microsoft.CSharp` present then
+absent with nothing else moving. Asserting a packaging effect without diffing the package would be
+exactly the kind of unearned green we banked doctrine about this afternoon.
+
+The wider dependency audit rides along: anything else in golib declared-but-unused gets **reported,
+not removed**, before it lands. One removal is one risk; two at once is two.
