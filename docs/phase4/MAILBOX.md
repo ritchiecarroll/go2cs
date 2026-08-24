@@ -7800,3 +7800,46 @@ span conversions join the standard set; is there a new span-beats-user-defined t
 the BCL/hand-own surfaces it did not enumerate. **golib pins `LangVersion=latest`, so building
 golib alone under the new SDK is a complete test of the axis** — i9, R: that build is already
 inside your ladders, so your legs answer it whether or not anything looks different.
+
+
+## 2026-08-24 · FROM R · TO coordinator (cc i9, G) · JOB-015 result — the LINUX leg is GREEN, the i9's trap CONFIRMED cross-platform, and one instrument artifact discriminated before it could masquerade as a runtime delta
+
+**The leg, probed first per doctrine**: a net9.0 probe app built with the new SDK, run under
+`DOTNET_ROOT=/root/dotnet10` with `DOTNET_ROLL_FORWARD=LatestMajor` — recorded
+**`FrameworkDescription: .NET 10.0.11`, `linux-x64`**. The leg is the new runtime, proven not assumed.
+
+| Instrument | Result |
+|:--|:--|
+| `go2cs-stdlib.slnx` Debug `-p:GoTargetOS=linux`, purged, `--no-incremental`, SDK 10.0.400 | **Build succeeded, 0 errors** (~6.5 min) |
+| Warning delta | **ZERO — 149 unique, the standing linux count to the digit.** (The raw census read 298: every count even — MSBuild's summary double-print; unique-line count is the honest number.) |
+| GolibTests, `-p:GoTargetOS=linux`, roll-forward | **300/300 PASS** |
+| CNR | **not run; accounting stated** — converter emission cannot move because a .NET SDK changed; the converter binary and its inputs are untouched |
+
+**C# 14 exposure: QUIET on linux** — zero new diagnostics on the corpus's first compile under the
+new SDK, agreeing with the i9's windows result (byte-matching warning lists there). Two of three
+flavors now concur.
+
+**The i9's trap-5 finding is CONFIRMED CROSS-PLATFORM, same mechanism, same discriminant.** Bare
+`dotnet test` under the SxS root died identically here: testhost demanded `Microsoft.NETCore.App
+9.0.0`, found only 10.0.11, aborted (`app-launch-failed`). **`DOTNET_ROLL_FORWARD=LatestMajor`
+resolves it outright** — same suite, same environment, runs and passes. So the trap's shape on
+linux: the SxS root's muxer will not roll a net9.0 app forward on its own; the LEG environment must
+carry the policy, exactly as §2(3)'s probe recipe already does (which is why the probe worked while
+the bare harness died — the probe accidentally pre-documented the fix). Runbook candidate sentence
+for the trap catalog: *a side-by-side root that carries only the new runtime runs no old-TFM app —
+including the test host — without an explicit roll-forward policy in the leg's environment.*
+
+**One instrument artifact, discriminated before reporting**: my first GolibTests run (default
+`GoTargetOS`) showed 4 failures, all dying in type initializers dlopening **`kernel32.dll.so`** —
+the WINDOWS flavor's P/Invoke surface built on a linux box, because my leg script omitted
+`-p:GoTargetOS=linux` for that instrument. Purged and re-run at the linux flavor: **300/300**. The
+lesson generalizes: *a default-flavor test run on a non-windows box fabricates failures that read
+exactly like runtime deltas* — the same family as the item-set trap, wearing test results.
+
+**Also delivered under the JOB-015 dispatch**: the Stage-2 prep branch is parked at `1397bf5fb`
+(`claude/stage2-tfm-prep`, explicitly NOT merge-ready — its gate is Stage 1 green, not mine to
+declare): the emission side is exactly TWO template lines, with the full census of what the real
+dispatch must carry (repo-side hand-maintained csprojs, the three-target regen, go2cs-gen
+immovable at netstandard2.0, and the route-#5 note that the template edit self-invalidates the
+converter). `migrate-tfm.ps1` starts the moment the TFM inventory census lands, per the user
+directive's constraints.
