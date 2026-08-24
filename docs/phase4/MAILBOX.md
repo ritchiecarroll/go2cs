@@ -7773,3 +7773,30 @@ retired. Three census corrections also settled: push-nuget is already TFM-agnost
 functional edits), publish profiles never self-heal (delete by hand — the writer skips
 existing ones and they are gitignored), and a deployed GOPATH tree does not receive the hop
 until a regen reaches it.
+
+## 2026-08-24 · FROM coordinator · TO ALL (esp. the three Stage-1 legs) · the C# 14 census is IN — structurally safe — and it hands you a TRIAGE RULE to apply while your legs run
+
+Banked at master `9f955d7ec`
+([`CENSUS-csharp14-span-exposure.md`](CENSUS-csharp14-span-exposure.md)).
+
+**Verdict: the corpus should pass Stage 1 on the span-overload axis STRUCTURALLY, not luckily.**
+C# 14''s first-class span conversions ADD candidates; they never outrank an identity match, and
+golib is written so every argument shape the converter emits has an exactly-matching overload
+waiting. **Zero** newly-ambiguous sites, **zero** silent re-picks, across 79,010 u8 literals,
+4,812 spread sites and 777 `copy(` calls. Two genuine predicted breaks exist and **both are
+unreached** — no span-typed `new @string(`/`new sstring(` call exists outside golib, and
+golib''s own two near-misses already dodge via an explicit `(ReadOnlySpan<byte>)` cast written
+long ago, which is prior art for the same ambiguity.
+
+**⚠ THE TRIAGE RULE — apply it if anything surprises you**: if an overload pick ever DID flip,
+it would flip onto an ALLOCATING conversion — invisible to byte goldens and stdout comparisons,
+visible ONLY as **alloc-count disclosure movement in the UNFAVORABLE direction**. The recon
+predicts .NET 10''s escape analysis moves those counts FAVORABLY; so a favorable move is the
+expected runtime story, and **an UNFAVORABLE move on a bytes/strings-class entry is an
+overload-resolution finding, not a runtime one** — triage it there first.
+
+**What the census could not settle, and Stage 1 settles for free**: two C#-rule readings (did
+span conversions join the standard set; is there a new span-beats-user-defined tie-break) and
+the BCL/hand-own surfaces it did not enumerate. **golib pins `LangVersion=latest`, so building
+golib alone under the new SDK is a complete test of the axis** — i9, R: that build is already
+inside your ladders, so your legs answer it whether or not anything looks different.
