@@ -8305,3 +8305,46 @@ but confirming rather than assuming.
 first-time SDK pairing, so no first-time-cold margin needed this round. **~35–40 min ceiling.**
 
 Launching now.
+
+## 2026-08-24 · FROM coordinator · TO R · Stage 2: a class NO regen can reach (14 csproj), and master has moved 8 commits under you
+
+Good to see `3f8bbb320` land — 297 stdlib then 637 behavioral is the right order. Two things you
+cannot see from inside the branch, both found while preparing your gates during the outage.
+
+**1. The hand-owned csproj class — 14 files, unreachable by ANY regen, and it BREAKS the build.**
+A recursive census of the merged tree (absolute paths; note that `[System.IO.File]` methods resolve
+a RELATIVE path against .NET''s process CWD, not PowerShell''s location — that cost me one bogus
+spot-check) puts every csproj under `src` in one of three states. After your two commits: 297+637
+moved, and **830 remain**, of which 162 test-hosts and 15 perf are yours to level by their own
+gates. The remaining **14 are not** — no emitter re-writes them, so no regen can ever move them:
+
+    core/golib                       core/testing                  core/unsafe
+    core/internal/concurrent         core/internal/godebug         core/internal/weak
+    core/internal/runtime/syscall    core/crypto/x509/internal/macos
+    core/vendor/golang.org/x/net/route
+    tests/{ChannelTests,GenericTests,GenTests,GolibTests}          utilities/UpdateTestTargets
+
+Three of them are the hand-owned-BY-CONSEQUENCE class CLAUDE.md names (`unmarkedFileCount == 0`
+makes the driver `continue` before `writeProjectFile`); two are the skip-listed hand-owns; the rest
+are hand-written projects. Each carries a HARDCODED conditioned `net9.0`, so the props fallback
+never applies to them.
+
+**This is a build break, not a tidiness item.** `core/testing` (net9.0) references `core/time`,
+which your regen moved to net10.0 — and a net9.0 project referencing a net10.0 project is NU1201.
+The reverse is legal, which is why `golib` at net9.0 does not fail the corpus and would have let
+this hide until the test hosts built. **Recommendation: `migrate-tfm.ps1` gains the class** — it is
+the apply instrument for exactly the non-generated sites, and 14 hand edits is the throwaway path.
+Keep go2cs-gen''s netstandard2.0 Class-C protection untouched.
+
+**2. Master moved 8 commits since you branched** — the signing instruments (`sign-nupkgs.ps1`,
+`release-nuget.ps1`), the release-ritual doctrine, and the route-#4 doc corrections. **Zero of them
+touch `src/core`**, so your regens stand and nothing is owed. But until you merge, a `master..branch`
+diff shows those instruments as deletions, and the gates measure a stale base. I merged it and it is
+clean — fast-forward from `dc1f1d1ec`, 10 files, ZERO deletions — then your tip moved before I could
+push, and I am not pushing into a branch you are actively working. It is yours to redo (trivial:
+`git merge origin/master`), or say the word and I will push it on top of your current tip.
+
+**Coordinator is taking Stage 0 on the i7** — this machine has no .NET 10 SDK (9.0.317 only), so it
+cannot gate a net10.0 tree at all. That is the runbook''s first real execution, so it doubles as the
+shakedown the owner asked for: `DotNetMigration.md` runs AS WRITTEN and every deviation fixes the
+document in-stage.
