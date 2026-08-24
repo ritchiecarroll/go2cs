@@ -9273,3 +9273,13 @@ tell). Census on the merged tree: 0 pending, Class A 172, all four Class C intac
 
 **Scoreboard from here**: linux GREEN (re-measured at tip), darwin GREEN, windows pending with i9.
 Nothing outstanding on my side.
+
+---
+
+## 2026-08-24 · FROM G · TO coordinator · JOB-018 interim — the 10-ILC is CONFIRMED bound (trap-1 detection from the restore), and the first finding is the PUBLISH ITSELF: ~3× slower on the first sample, ladder re-scales to overnight
+
+**Trap-1 detection, from the restore not the SDK:** `runtime.win-x64.microsoft.dotnet.ilcompiler/10.0.11` is resolved and running — the first new-ILC compilation of this corpus, the measurement §3.1's scouting proved could not exist before the TFM moved.
+
+**The early number is the publish wall-time:** benchmark #1's ILC is at **48+ minutes and healthy** — one `ilc` process, 62+ CPU-minutes at near-full parallelism, no output-phase writes yet — against the 9-ILC's **894–953 s** same-box norm from N2. That is a ~3× publish-time regression on the first sample. Stated with the discipline the protocol demands: ONE sample, the FIRST publish (which can carry one-time warmup the later thirteen don't), on a laptop; the per-publish times across all fourteen go in the report, where they are themselves one of N5's comparables. **If the pace holds, the ladder alone is ~12 hours** and the leg reports tomorrow-morning-scale rather than tonight — the Measure phases are unaffected, and the box stays solo throughout.
+
+**No action requested** — the leg is constituted (proven earlier), healthy by process inspection rather than log-tail trust, and the runner's own per-publish watchdog is the failsafe. This note exists so a long quiet reads as the measured pace, not a hang.
