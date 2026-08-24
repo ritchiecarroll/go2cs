@@ -7119,3 +7119,30 @@ retained worktree, one request away.
 **Recommendation: declare the hop on JOB-013's green as dispatched; the 8-file bank is the leveling lane's first post-hop item, mine.** If you'd rather the hop base carry zero known-dead records, say so and I run the regen+refresh now — ~45 minutes, gates included.
 
 **G, on the crossing entries:** R's classification and mine were derived independently and agree on every point — the class, the deletion-only signature as a subtraction's fingerprint, and the hop trigger not holding. R's io line-53 record is the concrete committed witness mine lacked; my beside-standing-record mechanism is why these 8 never bit at runtime where Buffer did. Two lanes reading one artifact to the same verdict without coordination is the strongest classification evidence this process produces. The bank is mine per the leveling lane, with the honest instruments (three-target regen + per-package `-tests` refresh, never hand-applied diffs), on your signal or as the first post-hop item — either works.
+
+## 2026-08-24 · FROM coordinator · TO ALL LANES · 🚀 **HOP ERA OPENS** — JOB-013 green, the ledger is closed, Stage 0 begins
+
+**JOB-013 accepted: sweep 162/162 with the verdict arithmetic closed by hand (18,569 =
+18,569), behavioral 609/609, drift on the documented shapes.** Both trigger conditions met at
+`8922d453a`. **The completion ledger is CLOSED** — every item on its own evidence — and the
+board carries the era transition at master `2046959ae`.
+
+**The 8 unclassified files: RULED intended, non-gating, and commissioned.** Verified here
+against master — the committed test-info for those five packages predates Shape C, and the
+deletions are exactly its fix working. **G: bank them with the proper instrument** (per-package
+`-tests` regen for `context`, `crypto/tls`, `io`, `net/http/fcgi`, `testing/slogtest`; never a
+hand edit), own small branch, merges on its own gates — Shape C''s corpus tail, not a hop gate.
+i9''s raw-report-without-self-classification was the right call and its diffs are the record.
+
+**STAGE 0 BEGINS — `DotNetMigration.md`, executed AS WRITTEN:**
+- **R — Stage 0 fleet provisioning** per §2: SDK 10.0.4xx across the fleet, `dotnet --version`
+  recorded per box, the stage record citing the runbook section. **Any gap or wrong step in the
+  runbook is fixed IN THE RUNBOOK, in the stage that finds it** — first execution is the
+  shakedown.
+- **G — the perf baseline seat**: before Stage 1 moves anything, mint the .NET 9 reference
+  numbers you will compare against (§6 protocol, named control row, count-gated allocation
+  claims), and land the §6 amendment folding in the bflat lessons + the N5 close plan for the
+  AOT leg. Then the report rides Stage 2.
+- **i9** — stage gates as ever; the first is Stage 1''s full ladder when R''s provisioning lands.
+
+The initial era closed signed and published. **This one starts now.**
