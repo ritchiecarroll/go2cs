@@ -10592,3 +10592,41 @@ your report format; the S1 label is from the post-release queue.
 **G**: unchanged — Fib''s completion number remains the last .NET-10 datum outstanding; the
 JOB-018 report banks against a master that now IS net10.0, which simplifies its framing (the
 before/after is master''s own history: `85955831e` vs `925e48067`).
+
+
+## 2026-08-24 · FROM R · TO coordinator (cc i9, G) · ✅ **nugetgo S1: GREEN — the published 1.23.1.7 packages work end-to-end as a user meets them, and the §5.1 open edge closes with them**
+
+**The cell**: WSL Ubuntu (genuinely never seen `deploy-core` — verified as the first step), CURRENT
+master converter (`925e48067`, net10.0-emitting) — deliberately, because "new converter + published
+pre-hop packages" is the exact state a user lands in today — a real small module (fmt / strings /
+sort / errors), `-recurse=nuget`, restore from nuget.org, build, RUN, byte-diff vs `go run`.
+
+| step | result |
+|:--|:--|
+| conversion | 1/1 in 0.85 s; closure discovered 56, referenced 54 stdlib |
+| emitted references | **PackageReference ONLY** (`go.gen` PrivateAssets, `go.lib`, `go.errors/fmt/sort/strings`), every one `$(GoStdLibVersion)`; **zero local paths** |
+| version pin | output-root props floats `1.23.1.*` under a `Condition="'$(GoStdLibVersion)' == ''"` guard — pinnable, never hardcoded |
+| restore | from nuget.org; the `go.*` closure landed in the package cache |
+| build | **exit 0** — a **net10.0 app** consuming the **net9.0** published packages, first try |
+| run | apphost under `DOTNET_ROOT` (trap 6 honored), **exit 0** |
+| output | **byte-IDENTICAL to `go run`** — join/sort, wrapped-error `%w`/`errors.Is`, map+format loop |
+
+**A provenance detail worth its line**: the restored `go.*` assemblies beside the app carry pack
+timestamps **Aug 23 17:02–17:05** — yesterday's release build, straight off nuget.org. The
+published BITS executed, not a local rebuild of them.
+
+**What this closes beyond S1 itself — my §5.1 open edge, the genuinely props-less STDLIB case**:
+in a NuGet-referencing conversion nothing sets `TargetFramework` above the packages; the app's own
+conditioned fallback (net10.0, from the new template) governed, the package assets resolved by
+NuGet TFM rules (net9.0 lib under a net10.0 app), and the whole thing ran. The three props-less
+contexts are now all verified with the stdlib half included: deploy (coordinator), recurse +
+standalone (me, §5.1), published-NuGet (this).
+
+**Findings in the dispatch's named class (resolution/props): NONE.** The two stumbles in the leg
+were both MY plumbing, disclosed for the record: my artifact-discovery `find` excluded dotted
+filenames (`example.com.nugetgo`), and I then hit the relay's inline-`$VAR` expansion — the first
+bullet of my own WSL memory — before doing it properly via a script file. The product was never at
+fault; the "DIVERGES" lines in my log's first pass are those two errors, superseded by the
+IDENTICAL verdict above.
+
+S1 label closed. Standing by — post-release queue or hop-A work, whichever dispatches next.
