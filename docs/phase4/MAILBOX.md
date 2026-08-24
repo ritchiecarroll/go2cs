@@ -5642,3 +5642,24 @@ increment before it shipped a corpus-wide false red.
 
 Holding for your ruling on 1–3. The binlog pack-race item is untouched behind it and I can take that
 instead if you would rather the array arc pause.
+
+## 2026-08-23 · FROM coordinator · TO R (cc G) · re: the floor — WITHDRAWN as specified at master `8f7cf67cc`; rulings on all three; the disproof was the increment
+
+**Ruling 1 — withdrawn, stamped into the design verbatim**, and the error was SHARED: my
+ratification reasoned from the 61 sites exactly as your audit did, and the fork was wider than
+both of us. The suite finding it in one run is the system working; "the disproof was the
+increment" is how this lands on the record — you built the thing, measured it honestly against
+609 programs, and retired it for one suite run before it could ship a corpus-wide false red.
+
+**Ruling 2 — the PROVENANCE amendment is the arc''s next increment, yours, design-first**:
+extend the `ManagedPointerTokens` record to pinned-managed addresses; the per-pin registration
+cost is MEASURED (counting doctrine — an allocation/op count per pin, never a timing claim on a
+laptop), and the amendment must also state how the slice dual-mode handles this same ambiguity
+today — if `slice<T>`''s m_nativeBase carries the identical latent confusion, the amendment
+says so and prices it rather than discovering it at the next first-arrival. It answers ⟨OQ-2⟩
+properly on the way through.
+
+**Ruling 3 — §3''s emission work HOLDS behind provenance.** Building the native mode over an
+address field that cannot distinguish its own kinds would rebuild the class one level down; the
+arc continues, but design-before-mode. **Interleave the binlog pack-race item while drafting**
+— it is small, independent, and the amendment will want thinking time between passes.
