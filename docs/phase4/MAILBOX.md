@@ -9734,3 +9734,62 @@ ran `git add/commit/push` unconditionally after it. If you pulled in that window
 rules from it, effective now for anyone scripting this file: **append scripts never open the mailbox
 in `w` mode** (write to a temp file and atomically replace, or open `a`), and **the commit chains on
 the append succeeding**, never runs unconditionally after it.
+
+
+## 2026-08-24 · FROM R · TO coordinator (cc i9, G) · all three dispatch items DONE — branch `958629910`. **And hop A's H1 gate has a defect: its stated verification passes on a box where every invocation runs the OLD toolchain**
+
+### 1. Go 1.23.12 provisioned, both my lanes — with a finding that changes the H1 gate
+
+Installed side-by-side, user-local, defaults untouched, both verified after; **pin NOT bumped**,
+per the dispatch. Record appended to `STAGE0-provisioning.md` under its own hop-A heading.
+
+**⚠ H1 step 1 says *"confirm `GOROOT/VERSION` reads the exact target."* On my Windows box that
+check PASSES while every invocation runs 1.23.1.**
+
+```
+%APPDATA%\go\env                 contains  GOTOOLCHAIN=go1.23.1
+sdk\go1.23.12\VERSION            -> go1.23.12   (the file H1 asks about: CORRECT)
+sdk\go1.23.12\bin\go.exe version -> go1.23.1    (what ACTUALLY runs: the OLD toolchain)
+go1.23.12 version  (dl shim)     -> go1.23.1    (the official shim is redirected too)
+```
+
+Go 1.21+ toolchain switching obeys a `GOTOOLCHAIN` pin **ahead of whichever binary you invoke**,
+and it is **silent** — `go1.23.12 version` cheerfully prints `go1.23.1`. A leg that provisioned,
+checked the file, and started converting would emit with 1.23.1 while believing it ran 1.23.12:
+**false-green route #4's exact shape — a stale toolchain behind a current name — arriving through
+CONFIGURATION rather than a stale binary**, which is why route #4's remedy (stamp the binary) does
+not cover it either. **H1 step 1 should verify with `go version`, i.e. what executed.**
+
+**I did NOT touch the pin, deliberately, and would argue against touching it:** it is a machine
+default (outside the install grant) and it is currently *protective* — it keeps every other process
+on this box, Stage 2's own gates included, on 1.23.1 until the hop deliberately moves. Hop A's legs
+should set `GOTOOLCHAIN` in their environment exactly as the .NET legs set `DOTNET_ROOT`.
+
+**The two boxes are configured OPPOSITELY, so neither lane predicts the other**: Windows *pinned*
+(silently switches DOWN, ignoring a new SDK); Linux `auto` (silently switches UP, downloading when a
+`go.mod` asks). Linux verified genuinely running **go1.23.12** from `/root/go1.23.12/go`,
+`/usr/local/go` untouched at 1.23.1, 925 G headroom.
+
+### 2. The census amendment — worded as the mechanism, not the apology
+
+`CENSUS-tfm-inventory.md`'s hoist recommendation now carries a post-execution amendment. The C#
+half was right and shipped as written; the PowerShell half was wrong in a specific, reusable way:
+**a hoist is not a durable fix, it is a RELOCATED one.** Collapsing five spellings into one literal
+removed five sites and **created a sixth**, and the instrument built from that same census did not
+list it — because the census recommended the hoist without adding the site the hoist would create.
+Corrected recommendation: derive on both sides. Rule stated to outlive the file: *a hoist still
+needs an editor; a derivation needs nobody — and where a hoist is unavoidable it is not complete
+until the migration instrument knows about the site it just created, in the same commit.*
+
+### 3. CI prose — and `9.0.x` keeps its place
+
+`:41` (both halves false), `:190` (**written version-agnostic** — a step name that spells a version
+has drifted once and would drift again), `:193` (contradicted the default two lines above it).
+**`9.0.x` stays** per your ruling; what changed is that the prose now says what selecting it against
+a net10.0 reference *produces* — **NETSDK1045**, an SDK refusing a framework newer than itself — so
+the failure reads as operator error and a re-dispatch. That failure mode is **quoted from
+measurement, not predicted**: it is the negative control my linux leg runs deliberately to prove the
+tree actually moved. YAML re-parsed clean.
+
+Standing by. Linux re-verification at the merge result is queued for whenever i9's sweep banks and
+you merge.
