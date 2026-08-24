@@ -7693,3 +7693,52 @@ coordinator lane starting now from its own census (the Go release''s sites: `ver
 `GoStdLibVersion`, the toolchain pin, badge/proof-page links, docs statements — note
 `set-version.ps1` already owns part of this surface and the new script must COMPOSE with it,
 not duplicate it). Both land as normal branches with normal gates.
+
+---
+
+## 2026-08-24 08:03 UTC-5 · FROM i9 · TO coordinator (cc R, G) · ⚠ JOB-014 finding — the side-by-side SDK''s own muxer cannot RUN net9.0 apps at all; matches none of §3''s four documented traps
+
+**Compile-side is clean and complete first.** `go2cs-stdlib.slnx` (windows) and `go2cs.slnx`: both
+build 307/307 and 780/780 respectively under the new 10.0.400 SDK, **zero warning delta** against
+the untouched-9.0.317 baseline — identical CS-code sets both times (164 and 354 warnings, byte-for-byte
+matching lists), zero skips, zero errors. The C# 14 span-conversion hazard RECON-dotnet10.md flagged
+did not surface here.
+
+**Run-side is where it breaks, and it breaks completely, not silently.** `GolibTests` under the new
+SDK (`dotnet test`, PATH-prefixed with `C:\Users\rcarroll\dotnet10`, nothing else changed):
+
+```
+Testhost process for source(s) '...\GolibTests.dll' exited with error: You must install or update .NET to run this application.
+App: ...\testhost.dll
+Architecture: x64
+Framework: 'Microsoft.NETCore.App', version '9.0.0' (x64)
+.NET location: C:\Users\rcarroll\dotnet10\
+The following frameworks were found:
+  10.0.11 at [C:\Users\rcarroll\dotnet10\shared\Microsoft.NETCore.App]
+The following frameworks for other architectures were found:
+  x86
+    6.0.36 / 7.0.20 / 8.0.30 / 9.0.19 at [C:\Program Files (x86)\dotnet\shared\Microsoft.NETCore.App]
+Test Run Aborted.
+```
+
+The side-by-side install has no bundled net9.0 runtime (only 10.0.11), and the machine-global x64
+9.0.19 (confirmed present at `C:\Program Files\dotnet`, Stage 0''s own provisioning row) is never
+found — old-style multi-level lookup evidently doesn''t reach it. **Two diagnostics run before
+reporting:**
+1. `DOTNET_ROOT=C:\Program Files\dotnet` set alongside the PATH prefix — **no change**, identical
+   failure, testhost still reports `.NET location: C:\Users\rcarroll\dotnet10\`.
+2. The exact same already-built `GolibTests.dll` (compiled BY the new SDK), run via the plain
+   unprefixed default `dotnet` (9.0.317) — **298/298 PASS, 24s, clean.** The artifact is fine; only
+   the new SDK''s own muxer can''t find a runtime to execute it with.
+
+**This doesn''t match any of §3''s four traps** — trap 4 describes the OLD runtime loading
+silently by default (a false sense of measuring the new one); this is the opposite shape, a hard
+launch failure with no silent fallback at all. Reporting raw rather than naming a fifth trap myself
+— that''s the runbook owners'' call, not mine to make.
+
+**In progress:** `run-behavioral.ps1`''s four phases under the same new-SDK PATH, background,
+log `job-014-newsdk-behavioral.log`. Transpile/Compile/Target don''t need to RUN a net9.0 program
+so I expect them clean same as the two solutions above; Output very likely hits this identical wall
+across all 523 output-compared projects, uniformly, for the reason already diagnosed above — will
+report the real result rather than assume, but flagging now so nobody''s surprised by a wall of
+same-shaped Output failures if it lands before this note does.
