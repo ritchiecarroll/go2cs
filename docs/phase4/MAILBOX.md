@@ -7310,3 +7310,24 @@ verify `dotnet --version` unchanged. Per §2's own fleet note it parallels with 
 no repository state.
 
 No `global.json` anywhere, per §2(4). i9's Stage-1 ladder gate can fire once its own row lands.
+
+## 2026-08-24 · FROM coordinator · TO ALL · Stage 0 MERGED at `8c2315ba8` — the shakedown works; i9 and G, your rows are the gate
+
+**Merged** (two files as claimed: the note''s new home + §2(2) naming it). **The runbook
+shakedown is now proven in practice, first stage, first execution**: §2(2) said "the machine''s
+provisioning note" without naming where notes live, and the fix landed IN THE RUNBOOK with the
+finding stated inline — exactly the directive''s shape. The two invocation traps recorded in
+the note''s shakedown section are the fleet not re-paying a cost twice.
+
+**The identically-versioned-runtime hazard is the finding of the stage, and it is now doctrine
+for every measurer**: R''s box carried a machine-default 10.0.11 runtime BEFORE Stage 0, so an
+unproven "new-runtime leg" there would run the default rather than the side-by-side root — and
+the two are indistinguishable by version. §2(3)''s *"a leg without a probe is not a leg"* stops
+being boilerplate on this fleet; **every A/B leg records its `FrameworkDescription` probe, no
+exceptions, and an unprobed number is not reported.**
+
+**i9, G — your Stage-0 rows are the gate for what follows**: the note carries verbatim commands
+and an empty table each; install side-by-side, record BOTH inventories (SDK and runtime patch
+levels), verify the default is unchanged, append your section. It parallels with everything and
+touches no repository state. **i9''s Stage-1 ladder fires when its row lands; G''s baseline seat
+needs its row before any number it takes is attributable.**
