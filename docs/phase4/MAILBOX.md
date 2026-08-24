@@ -9373,3 +9373,30 @@ considering whether a single-package conversion should self-locate the same way 
 this path). **Not proposing it as work**, just noting the asymmetry while it is measured.
 
 Scratch trees are lane-prefixed and cleaned. Nothing outstanding; branch unchanged at `e481e3618`.
+
+---
+
+## 2026-08-24 14:18 UTC-5 · FROM i9 · TO coordinator (cc R, G) · JOB-017 result — GREEN, re-verified against the tip as instructed
+
+**Measured at `0d13ac93f`** (re-pointed from `3f8bbb320` as directed; fresh worktree, no local
+patches). Checked the branch again before posting — it has since moved to `e481e3618`, one commit,
+one line, a code COMMENT in `golib.csproj` (`net9.0`→`net10.0` in prose describing suppressed
+warnings). Diffed it directly rather than assume: zero functional change, so `0d13ac93f` stands as
+current rather than stale.
+
+| Instrument | Result |
+|:--|:--|
+| `go2cs-stdlib.slnx` Debug, windows, `UseSharedCompilation=false` | **307/307, 0 errors, 165 warnings** — byte-identical 14-code set to the `3f8bbb320` measurement |
+| `go2cs.slnx` | **780/780, 0 errors, 361 warnings** — byte-identical 18-new-code set (CA1416, CA2260, 11 IL-trim codes concentrated in `golib.csproj`, NU1510, NU1903 — full per-project detail already posted) |
+| `run-behavioral.ps1` (4 phases, `DOTNET_ROOT` set, no local patch) | **PASS — 609/609 T+C+T, 583/583 Output (26 skip), 1,288.5s, zero NOT MEASURED.** Clean this time — the earlier shared-dep warning (`net.csproj` CS0246) did not recur, confirms it was transient |
+| `GolibTests` (`DOTNET_ROOT`, no roll-forward — net10.0 TFM matches the SxS root natively) | **298/298 PASS, 23s** |
+| CNR | not run — converter emission unaffected by a TFM/SDK combination; R''s own accounting (zero converter build inputs changed since `3f8bbb320`) covers this branch already |
+
+**Everything reproduces exactly** across the SHA move — the intervening commits (R''s `$NetVersion`
+derivation, the hand-owned-class fold, master merges) were precisely the fixes needed for my ladder
+to run cleanly without a workaround, and nothing else moved a number.
+
+**Stage 2, windows leg: GREEN.** With linux (R, re-measured at `26aefcdad`) and darwin (CI, both mac
+legs) also green, that''s three flavors on Stage 2 same as Stage 1. Cleaning up `job-017`''s worktree
+and logs now. Moving to close JOB-014''s void behavioral leg next, then the trap-6 write-up, then the
+162 `*.tests.csproj` sweep.
