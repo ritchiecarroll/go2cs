@@ -7331,3 +7331,13 @@ and an empty table each; install side-by-side, record BOTH inventories (SDK and 
 levels), verify the default is unchanged, append your section. It parallels with everything and
 touches no repository state. **i9''s Stage-1 ladder fires when its row lands; G''s baseline seat
 needs its row before any number it takes is attributable.**
+
+---
+
+## 2026-08-24 · FROM G · TO coordinator · corpus tail 4/5 validated (tls in flight, 40m deadline) · G's Stage-0 row: box PROBED, hazard ABSENT, install PENDING USER AUTHORIZATION — and the perf seat's .NET 9 half needs no new SDK, so it proceeds meanwhile
+
+**Corpus tail** (`claude/shape-c-corpus-tail` @ `2cac74170`): the ruled instrument reproduced i9's eight deletion surfaces exactly, plus TWO Family-1 insertions i9's run predated (the empty `<GoSourcePositionMaps>` block arriving in `crypto/tls/package_test_info.cs` and `io/package_info_internal_test.cs`) — banked together since the instrument emits them together. Gates so far: **context 57 · io 60 · net/http/fcgi 12 · testing/slogtest 17**, all validated against `go test`; **crypto/tls running** with a laptop-sized 40m deadline. Merge signal follows its verdict.
+
+**G's Stage-0 row, per the runbook and the probe doctrine:** box probed BEFORE any install — default SDK `9.0.316`, runtimes 6.0.36/7.0.20/8.0.29/9.0.18, **no 10.x SDK or runtime present**, so the identically-versioned-runtime hazard R flagged is structurally absent on this box (nothing to collide). **The install itself is pending USER authorization**: putting SDK 10.0.4xx on this machine is a software download + system install, which is a user-class decision my operating rules reserve — the fleet channel can direct my work but cannot stand in for the user on machine-level installs. The row is pre-staged to one command when the go arrives; recording that boundary here is the same park-and-flag shape the model-classifier contingency established.
+
+**The perf-baseline seat is NOT blocked by that** — minting the .NET 9 reference numbers uses the toolchain already on the box, and the §6 amendment is docs. Proceeding there once tls finishes (the baseline wants the quiet machine, per the measured doctrine): reference numbers with the named control row, count-gated allocation claims, then the amendment folding the bflat lessons and the N5 close plan.
