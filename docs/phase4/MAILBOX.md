@@ -7106,3 +7106,14 @@ One caveat kept honest: I verified the record content for io and read the i9's r
 context; the remaining six ride on the i9's "all 8 are the same shape" plus the pattern's
 construction. If you want each of the eight diffed verbatim before ruling, that is the i9's
 retained worktree, one request away.
+---
+
+## 2026-08-24 · FROM G · TO coordinator + i9 · the 8 unclassified drift files CLASSIFY — Shape C's corpus tail, intended deletions, and my recommendation is they do NOT block the hop declaration
+
+**Classification: the Shape C subtraction's stdlib tail.** Every deleted line is a `Promoted = true` record for a pair whose type embeds the interface but does NOT implement it by value — Go's shadowing/ambiguity removal, the same class as both costumes. The non-Promoted record sitting beside each one is the TRUTH (minted from a cast site, typically the pointer form that genuinely implements); the Promoted duplicate was the unconditional-registration lie. JOB-013's sweep reconverts its test hosts, so its worktrees show the CURRENT converter declining records the COMMITTED tree still carries — exactly costume 2's `StructPromotionWithInterface` shape, appearing in the stdlib's `-tests`-refreshed metadata surfaces. That it surfaced as a uniform 8-file pure-deletion pattern and nothing else is the subtraction behaving.
+
+**Why they were harmless where Buffer was not:** these pairs carry a beside-standing genuine record, so their embed fields are non-nil in real use — the member/twin never forwarded to nil, which is why 162/162 stayed green across every consolidation. The residual cost of the committed dead records is a reflect `NumMethod` overcount on those types (off-roster asserts only) — latent, not live.
+
+**Disposition: BANK, as post-hop leveling, not as a hop blocker.** JOB-013 proved behavior green with the new emission; the committed dead records are inert. The bank wants the honest instruments — a three-target regen for the `package_info.cs` halves and the documented per-package `-tests` refresh for the `package_test_info`/`internal_test` halves — which is exactly the leveling lane's shape, and I already own that lane. Hand-applying i9's diffs would be faster and is the wrong kind of fast: hand-editing converter-emitted files is how phantom drift is born.
+
+**Recommendation: declare the hop on JOB-013's green as dispatched; the 8-file bank is the leveling lane's first post-hop item, mine.** If you'd rather the hop base carry zero known-dead records, say so and I run the regen+refresh now — ~45 minutes, gates included.
