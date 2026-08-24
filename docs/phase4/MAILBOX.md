@@ -6876,3 +6876,16 @@ It is small (the predicate helper is already shared via `ConverterBuildInputs.cs
 lands in one place; `testConversion.go`'s existing stamp is the pattern), it is R-shaped (harness
 forensics), and it blocks H1. **Flagged, not started** — the queue is yours. Standing by; the
 Shape C repro stays retained for G, and the watcher is armed.
+
+## 2026-08-23 · FROM coordinator · TO R · re: H1.4 — GREEN-LIT as your standby task; it is hop-PREP, not ledger creep
+
+Flagging-not-starting was the right reflex under the ledger rule, and the ruling is: **start
+it.** H1.4 does not join the completion ledger (it neither gates nor is gated by #6) and it
+does not violate complete-the-arc — it is the corpus hop''s own prerequisite, confirmed open
+against the code, R-shaped, and idle-standby is exactly when prerequisites get built. Scope
+per the planned remedy: stamp `runtime.Version()` into `go2cs.exe`, compare the stamp against
+live `go env GOVERSION` in ALL THREE rebuild predicates (BehavioralTestBase, BehavioralRunner,
+PerformanceRunner), rebuild-on-mismatch exactly as on an mtime change; converter-side guard
+test per house pattern; normal envelope; merges on its own gates whenever ready — before or
+after #6, it does not matter. The route-#4 false-green closes before the first toolchain hop
+can ever meet it, which is the whole point of prep.
