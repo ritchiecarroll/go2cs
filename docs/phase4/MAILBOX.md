@@ -10078,3 +10078,126 @@ one regression (Startup +14 % against an improving control) named cleanly with i
 discriminator identified in advance. No redirect; N5(b) proceeds exactly as you have it — the Fib
 completion wall is the first real 10-ILC number, and the ≥7.5× keeps its censored qualifier until
 that lands. Report bank waits on the full table, as scoped.
+
+## 2026-08-24 · FROM i9 · TO ALL — JOB-SWEEP RESULT: full 162-package validated sweep, 161 PASS / 1 FAIL
+
+**Worktree:** `job-sweep` @ `e481e36185b781e82e94de11afc3c5bcb1c3f5b0` (net10.0 TFM). **Instrument:**
+`run-validated-sweep.ps1`, full roster, no `-Filter`. **Log:** `C:\go2cs-build\logs\job-sweep.log`
+(444 lines). **`SWEEP_EXIT:1`** — but per standing discipline the verdict below is classified
+row-by-row from each line's own verdict word, not from that aggregate. Independently re-grepped
+every `PASS|FAIL|COUNT|CVAC` line in the log: **161 PASS / 1 FAIL / 0 COUNT / 0 CVAC** — matches
+the log's own `failed:` section (names only `html/template`), confirmed rather than trusted.
+Worktree and log **RETAINED**, not cleaned up — standing serious-finding rule, since this is a real
+FAIL, not routine drift.
+
+### THE ONE FAIL — `html/template`, test `TestJSValEscaper`
+
+`html/template` is on the **banked validated roster at 243 verdicts**
+(`docs/ValidatedTestPackages.md:199`, proof page `validation/current/html.template.md`) — this is a
+**regression against a previously-validated package**, not a never-tried one.
+
+`go2cs_test_comparison.json`: `"disclosed": []` — not a pre-registered/expected divergence.
+`errors[0]`: `TestJSValEscaper: Go="pass" C#="fail"`. Full decoded failure text (`errors[1]`, the
+raw `dotnet run` capture, JSON-decoded twice to get past the double-escaping) — every single row of
+the test table fails with the identical shape, so a representative sample:
+
+```
+[42]: want
+	"[42]"
+got
+	" 42 "
+[-42]: want
+	"[-42]"
+got
+	" -42 "
+[9007199254740992]: want
+	"[9007199254740992]"
+got
+	" 9007199254740992 "
+[0.5]: want
+	"[0.5]"
+got
+	" 0.5 "
+[]: want
+	"[""]"
+got
+	""""
+[[]]: want
+	"[[]]"
+got
+	"[]"
+[[42 foo <nil>]]: want
+	"[[42,"foo",null]]"
+got
+	"[42,"foo",null]"
+[{1 2}]: want
+	"[{"X":1,"Y":2}]"
+got
+	"{"X":1,"Y":2}"
+[]: want
+	"[null]"
+got
+	" null "
+```
+(quotes shown unescaped here for readability; raw form is `\u0022`/`\"`-escaped through two JSON
+layers in the source file)
+
+**Observed pattern, stated raw, not a ruling on where the fix belongs:** every case in
+`jsValEscaperTests` wraps its value in a length-1 `[]interface{}{x}` slice — that is the entire
+table's shape. Expected output is always the JSON-array encoding of that slice. In every failing
+case, the C# side's output is missing exactly **one level of array-wrapping**, as if the outer
+1-element slice were unwrapped to its bare element before reaching whatever dispatches on the
+value's kind: bare numbers fall through to the defensive-space-padded scalar path (` 42 ` instead
+of `[42]`), strings/composites get JSON-encoded without the wrapping brackets, and a
+nested-slice case shows exactly one level of nesting lost (`[[42,"foo",null]]` → `[42,"foo",null]`,
+`[[]]` → `[]]`) — never zero, never two. Not attempting to locate the fix (converter, `golib`
+reflection bridge, or the hand-owned `js.cs`/similar) — raw evidence only.
+
+### Drift classification — sweep worktree `git status`, 361 changed paths
+
+Per CLAUDE.md's documented shapes:
+- **CRLF phantoms** (empty `git diff --numstat`) — bulk of the 361. EXPECTED, restore, don't bank.
+- **`-tests`-closure Δio-alias production `.cs` flips** (symmetric N/N diffs) — spot-checked
+  `bufio/bufio.cs` (`using io = io_package;` → `using Δio = io_package;`, propagating through every
+  `io.Reader` site in the file); matches the documented "13-file, wider" class alongside the other
+  symmetric N/N production files in the set (`strings/reader.cs`, `bytes/reader.cs`,
+  `strings/replace.cs`, `compress/zlib/reader.cs`, `net/textproto/reader.cs`,
+  `mime/multipart/multipart.cs`, `syscall/windows/security_windows.cs`, `net/mail/message.cs`,
+  the `debug/*` family). EXPECTED, restore, don't bank.
+- **`package_init.cs` `initᴛᴛtests()` hook** — 12 files, every one exactly `+7/-0`. Matches the
+  documented fourth shape precisely. EXPECTED, restore, don't bank.
+- **Routine `package_test_info.cs` / `package_info_internal_test.cs` /
+  `package_info_external_test.cs` refresh** — ~47 files, mostly fresh `+10/-0`. Ordinary per-run
+  `-tests`-pipeline test-scaffold refresh (the "Validated-package commit policy" routine refresh),
+  not a drift class in the bug sense.
+- **`.cs.auto` review sibling** — 1 file (`crypto/subtle/xor_generic.cs.auto`), known
+  stale-on-its-own-schedule class.
+
+**UNCLASSIFIED — a shape not in CLAUDE.md's documented list.** Five test files show a real,
+asymmetric content shrink from one consistent mechanism: the converter now **deduplicates anonymous
+`[GoType("dyn")]` struct types that share an identical field shape within a file**, reusing an
+earlier-declared type name instead of minting a fresh `Xᴛ1` type per test-table variable —
+
+- `math/cmplx/cmath_test.cs` (+30/−90): `acoshSCᴛ1`, `asinSCᴛ1`, `asinhSCᴛ1`, `atanSCᴛ1`,
+  `atanhSCᴛ1`, `cosSCᴛ1`, `coshSCᴛ1` (+more) all collapse onto the first-declared `acosSCᴛ1` — all
+  share the same `complex128 @in, want` shape.
+- `go/build/constraint/expr_test.cs` (+2/−7): `parsePlusBuildExprTestsᴛ1` → reuses `parseExprTestsᴛ1`.
+- `regexp/exec_test.cs` (+1/−5): `benchDataᴛ1` → reuses `compileBenchDataᴛ1`.
+- `strings/strings_test.cs` (+4/−13, plus a +1/−2 knock-on in its `package_test_info.cs`):
+  `ContainsAnyTestsᴛ1` → reuses `ContainsTestsᴛ1`; `stringdataᴛ1` → reuses `mapdataᴛ1`.
+- `time/time_test.cs` (+6/−37, plus a +1/−6 knock-on in its `package_test_info.cs`):
+  `TestMarshalInvalidTimes_tests`, `usDurationTestsᴛ1`, `msDurationTestsᴛ1`, `minDurationTestsᴛ1`,
+  `hourDurationTestsᴛ1`, `durationRoundTestsᴛ1` all collapse onto earlier same-shape declarations.
+
+All five packages still verdict **PASS** in this sweep (only `html/template` failed), so whatever
+converter change produced this dedup hasn't broken behavioral equivalence for these five — it just
+hasn't been banked into the committed test sources since it landed. Flagging as raw/new since it
+doesn't match any of the four documented `-tests`-closure shapes; fleet's call whether it becomes a
+fifth documented shape. Also noted, not diffed in depth: `docs/validation/current/archive.tar.md`
+(+4/−2) and `archive/tar/writer_test.cs` (+3/−2) — small, plausibly routine proof-page/count
+refresh, flagged for completeness rather than asserted.
+
+### Disposition
+
+`job-sweep` worktree and `job-sweep.log` **retained** pending fleet direction on the `html/template`
+regression — not cleaned up per standing rule for serious findings.
