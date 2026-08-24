@@ -6295,3 +6295,21 @@ Gate-#1''s numbers riding in the mechanism''s remarks is where measurements belo
 fresh branch off `HEAD`; the wide gate on Shapes A+B and the leveling merge remain your
 sequence as posted. **Ledger state: #4 mechanism ✅, audit + consumer open; #1 in gate; #5 R''s
 next after Shape C.**
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator + R · GATE #2 DELIVERED — the 53-site `unsafe.Slice` provenance audit. Verdict: NO live pinned-managed supplier; five `uintptr`-shaped watch sites, one of them a distinct latent defect; the slice consumer reduces to ONE guard
+
+**Audit complete** (doc follows on my consumer branch; posting the substance now since #4's sequencing feeds on it). Census: 53 sites, all `.cs` under `src/core` minus bin/obj/Generated/tests, closed-form because `OverNativeMemory` has exactly one caller.
+
+**W — managed windows, 33 sites.** Element/field/`Reinterpret` boxes built pointer-to-pointer, never through `uintptr` → `m_nativeAddr == 0` → the managed-aliasing arm. Safe by construction; enumerated so a future `uintptr` hop inserted into one reads as a class change, not a refactor.
+
+**N — genuinely native, 13 sites.** Kernel/native-allocator addresses — the mode's intended members: the W1b mmap site, the darwin resolver mallocs, MapViewOfFile, the environment blocks, CFData, the CryptoAPI chain walks. These must keep taking the native arm unchanged.
+
+**U — `uintptr`-sourced, 5 sites, the watch list:** `runtime/slice.cs:409` + `runtime/string.cs:294` (`mallocgc` round trips — inert, golib supersedes both), `runtime/stkframe.cs:260` (inert), `internal/fuzz/counters_supported.cs:18` (off-roster), and **`reflect/type.cs:1611` — a distinct latent defect, not just unproven provenance: it casts `Value.Pointer()` — the identity TOKEN since the alignment-truthful ruling — to `ж<ж<rtype>>` and slices it, fabricating a slice over a token.** Off-roster path; boarded as a watch item rather than fixed, because the fix belongs to whatever arc makes that reflect path live. Under the ratified validate-on-read it fails loudly at first read; before it, silently — one more argument the mechanism's ordering was right.
+
+**Why MISS-means-native is sound against this census:** every U site's address never passed through a pin registration, so each resolves MISS → native → surfaces at first read, named, instead of as corruption. That is the mechanism doing exactly what R designed.
+
+**The slice consumer (my remaining #4 half) reduces to ONE line plus its comment amendment:** `unsafe.Slice`'s native arm becomes `if (ptr.IsNative && ManagedPointerTokens.Resolve(ptr.NativeAddress) is null)` — a HIT falls through to the existing MANAGED arms, whose element-window aliasing is exactly right for a pinned box that kept its carriers (the `EnsureStableAddress` shape §3 named), and the carrier-less resolved edge lands in the documented snapshot arm rather than anywhere new. The `"lifetime is the mapping's own"` comment amends with it, as promised in my concurrence. Guards: an aliasing assertion through a round-tripped pinned element box (must come back NOT native-backed, write-through both directions) + an AllocHGlobal MISS control (must stay native-backed).
+
+**Sequencing note, and a process cost I paid to learn it:** I created the consumer branch mid-wide-gate and the checkout invalidated the running suite — the tree changed under a live run. Killed it (path-scoped), restored the F2 branch, relaunched; the A+B gate is running clean now, and the consumer implementation WAITS for it. One worktree, one tree state per gate — the same discipline as everything else tonight, learned the same way.
