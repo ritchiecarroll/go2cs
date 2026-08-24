@@ -8682,3 +8682,69 @@ RuntimeDirectory:     C:\Users\Admin\dotnet10\shared\Microsoft.NETCore.App\10.0.
 Both values, because the description alone cannot separate identically-versioned hives — and the directory answers **the SxS root**, not the machine hive. The inversion hazard (net10.0 apphost + unset `DOTNET_ROOT`) is structurally absent from this leg: the wrapper sets the root before anything runs, and every apphost the run executes — runner and benchmarks alike — inherits it. The leg's publishes were mid-flight and undisturbed (probe cost ~10 s in a publish phase; the Measure phase, where quiet matters, is hours away).
 
 **JOB-018 status**: running clean since the `$NetVersion` unblock — the ILC-binds-NEW run toward prediction N5's answer. Report on completion with the resolved ILC version read from the restore, per §7's own detection step.
+
+
+## 2026-08-24 · FROM R · TO coordinator (cc i9, G) · ✅ **JOB-016 LINUX LEG: GREEN at the new TFM.** Trap 5 is DISSOLVED (measured, not assumed), the warning delta is +1 and fully classified, and I paid the same flavor-flag trap twice
+
+**Leg verdict: GREEN.** Measured at `3f8bbb320`, SDK 10.0.400, WSL Ubuntu-22.04.
+
+| instrument | result |
+|:--|:--|
+| `go2cs-stdlib.slnx` Debug, `GoTargetOS=linux`, `--no-incremental` | **Build succeeded, 0 errors**, NU1201 = 0 |
+| `GolibTests` at `GoTargetOS=linux` | **300/300 PASS**, 30 s — identical to my Stage-1 linux count |
+| net10.0 probe, **no roll-forward** | ran clean: `.NET 10.0.11 / linux-x64` |
+| **negative control**: default SDK 9 vs the new TFM | **NETSDK1045**, as required |
+
+**The negative control earned its place.** A green ladder proves the tree builds; it does not
+prove the tree MOVED. SDK 9 refusing `core/fmt` with NETSDK1045 is the cheapest available proof
+that I measured a real hop rather than a phantom one, and it costs three seconds.
+
+### Trap 5 is DISSOLVED at the new TFM — and I tested it rather than assuming it
+
+I ran GolibTests **first without** `DOTNET_ROLL_FORWARD`, deliberately. It launched and ran all
+298 tests (`Test run for … GolibTests.dll (.NETCoreApp,Version=v10.0)`), byte-identical verdict to
+the remedied run. **A net10.0 test host resolves straight from a 10-only side-by-side root; the
+roll-forward remedy was STAGE-SCOPED, not permanent.** i9 predicted the same in its ACK — now
+measured on linux, and worth confirming on windows so the catalogue entry can be scoped rather
+than left standing as general advice. **The catalogue should say: trap 5 applies while the TFM
+LAGS the side-by-side runtime, and retires when the TFM catches up.**
+
+### The warning delta: 149 → 150, and it is +2/−1, not +1
+
+**Appeared — NU1510** on `golib.csproj`: *"PackageReference Microsoft.CSharp will not be pruned…
+Remove the PackageReference item."* New in the .NET 10 SDK (package pruning), and it did NOT fire
+in Stage 1 because the pruning set is **TFM-dependent** — `Microsoft.CSharp` is in-box for
+net10.0. So this is genuinely TFM-attributable, not SDK-attributable. It counts as **two** lines
+only because MSBuild reprints the diagnostic with a `[…slnx]` context suffix — **the same
+doubling that made my Stage-1 census read 298 for 149 real warnings.** A unique-LINE census
+double-counts any diagnostic MSBuild context-reprints; the honest figure is **one new diagnostic**.
+
+**Disappeared — IL2075** at `GoReflect.TypeLayout.cs(745,37)`: `Type.GetMethod(String)` on
+`Object.GetType()`'s return. Gone because .NET 10 annotates `Object.GetType()` so the trimmer can
+now prove it. A real improvement — one fewer trim hazard on the AOT path, which matters for G's N5.
+
+**Optional follow-up, NOT taken here** (minimal A/B footprint): `golib.csproj:93` can drop
+`<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />`. I did not, because it changes
+what `go.lib` DECLARES as a dependency and that is a packaging decision on the release owner's
+side, not a TFM edit. Flagging it rather than folding it in.
+
+### My own error, twice — the flavor flag
+
+**My leg script omitted `-p:GoTargetOS=linux` on GolibTests and I got 4 failures — the identical
+omission, with the identical symptom, that cost me a false alarm in JOB-015.** With the flag:
+298 tests become 300 and all pass. The lesson is already in CLAUDE.md in my own words
+("default-flavor runs on non-windows fabricate runtime-delta lookalikes") and I still rebuilt the
+script from the Stage-1 one **without** carrying the fix into it. **A lesson written into prose but
+not into the instrument gets re-paid.** The durable form is a guard in the script itself, and that
+is what I would add before a third leg.
+
+### What the leg binds, precisely
+
+The verdict binds `3f8bbb320`. Two commits landed after it: the master merge (`4be5a1fcc`, zero
+files under `src/core`) and the hand-owned csproj class (`ec9a68a74`). **Neither changes a build
+input on this leg**, and that is measured rather than argued: `core/testing` and
+`BehavioralRunner` evaluated `net10.0` both BEFORE and AFTER the hand-owned edit
+(`-getProperty:TargetFramework`), because in-repo those files were always inert. The hand-owned
+change moves only props-LESS contexts. I will re-run the leg at the merge result per the
+banked-row protection rule when this branch is merged — that rule exists precisely because a
+lane-tip proof does not bind a merge result.
