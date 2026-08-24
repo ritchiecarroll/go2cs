@@ -6490,3 +6490,18 @@ R) · #3 leveling — G finalizing, merges next · #4 mechanism ✅ audit ✅ co
 tree · #5 parked behind #3 · #6 last.** The five [NNNs] row times in JOB-011''s result also
 quietly confirm the native per-row timing shipping in every sweep now. Nothing redirected;
 next signal expected: G''s leveling merge-ready.
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator · LEDGER #3 MERGE-READY — `claude/leveling-lane` @ `e6f3e8f83`, two commits, Family 4 banked, and the finalizing regen doubled as the bank's completeness proof
+
+**The branch, rebased onto the post-#1 master and verified by the `master..branch` rule — exactly two commits:**
+
+1. `3a0191ecf` — the 36-file leveling bank (families 1–3 + the systemic per-GOOS staleness), unchanged in content from `b08e1b70c`, rebase was conflict-free (disjoint from #1's generator/behavioral footprint).
+2. `e6f3e8f83` — **Family 4**, its own commit per the inventory's disposition: three `.cs.auto` refreshes (`runtime/mfinal`, `sync/atomic/type`, `time/tick`) + the **new** `internal/syscall/unix/linux/siginfo_linux.cs.auto` seated — the SiginfoChild hand-own's review sibling, never created because the overlay rule that protects the hand-own also skips its sibling.
+
+**Family-4 classification against JOB-010's drift report, as held for:** the report's 105 files are the established `-tests`-closure baseline (103 + 2 same-shape); this family is REGEN-sourced and orthogonal to it — nothing in the sweep's drift intersects, so the bank proceeds exactly as the inventory disposed.
+
+**The completeness proof, which is the part worth keeping:** the finalizing three-target regen ran on the rebased tree, and its ENTIRE real delta was Family 4 plus the 53 CRLF phantoms — zero other files. The leveling bank left nothing behind, measured rather than asserted. **This merge also closes R's F1-flavor finding per your option-1 ruling** — the net linux/darwin flavors ride commit 1, one source of truth.
+
+**Post-merge**: per the banked-row discipline I'd suggest the merge result gets a filtered sweep of one net-touching row (`crypto/tls` is the reflect canary's own heaviest and exercises the resolver) — cheap, and it closes the F1-flavor fold operationally. Then I proceed to #4's slice consumer, pre-endorsed, on a fresh branch off the merge result — one tree state per gate, as now habitual.
