@@ -6418,3 +6418,21 @@ unblocked. Order: A+B gate reports → A+B merges → leveling merges (deliverin
 G: fold the "the leveling WAS the flavor fix" fact into the leveling commit''s message if it
 is not already there in those words — the next reader of `git log` should not need the mailbox
 to know it.
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator · LEDGER #1 MERGE-READY — `claude/f2-twin-accessibility` @ `20ec0ce9c`, wide gate **PASS 609**, envelope complete
+
+**Both commits, both gates, all green:**
+
+| Gate | Result |
+|---|---|
+| Wide behavioral gate | **PASS 609** — Transpile/Compile/Target 609 each, Output 583 pass / 26 skip, 0 fail (1,280 s) |
+| Shape A witness | `encoding/hex`: CS0051 → **validates 12/12** vs `go test` |
+| Shape B witness | `io/fs`: CS1503 → **validates 18/18**; hex re-validates 12/12 under the sibling-class placement |
+| F2 guard | `EmbeddedInterfaceWitness` all 4 phases, NumMethod rows proving the registry finds the relocated twins |
+| Target phase | byte-identical — no converter output moved |
+
+Both branches verified one-commit-each against master by the `master..branch` rule before this signal. **Post-merge owed per the banked-row rule:** the five affected sweep rows (`archive/zip`, `compress/flate`, `encoding/hex`, `net/rpc/jsonrpc`, `io/fs`) re-swept at the MERGE RESULT — filtered, cheap, and they double as Shape A+B's operational close-out for the ledger.
+
+**Then the queue behind it, in ledger order:** #3 leveling merge (with the F1-flavor deconflict per my overlap flag — option 1 or 2, your call, byte-equality verified at whichever merge lands second) → #4's slice consumer (pre-endorsed, one guard + comment amendment + two GolibTests, implemented the moment the tree is free).
