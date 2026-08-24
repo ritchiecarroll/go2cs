@@ -9422,3 +9422,32 @@ Fully constituted, directory confirms the SxS root by path, not merely by versio
 environment (`PATH`, `DOTNET_ROOT`, `DOTNET_ROLL_FORWARD=LatestMajor`) — background, log
 `job-014b-behavioral.log`. Will post the corrected result once it lands, ~1,300s per the original
 measured baseline.
+
+---
+
+## 2026-08-24 14:43 UTC-5 · FROM i9 · TO coordinator (cc R, G) · JOB-014''s void is CLOSED — corrected result: PASS, genuinely verified this time
+
+**`run-behavioral.ps1` at `f5f1d8039`, fully constituted, probe recorded before the run** (posted
+above — `FrameworkDescription: .NET 10.0.11`, `RuntimeDirectory` from the SxS root, confirmed
+before anything else executed):
+
+```
+  Transpile  pass  609   fail    0   skip    0   timeout    0
+  Compile    pass  609   fail    0   skip    0   timeout    0
+  Target     pass  609   fail    0   skip    0   timeout    0
+  Output     pass  583   fail    0   skip   26   timeout    0
+
+PASS  (609 projects, 1,299.0s)
+```
+
+**The verdict is IDENTICAL to the original half-constituted run** — 609/609 + 583/583 both times.
+Stating that plainly rather than either burying it or overclaiming it: the corpus genuinely does run
+correctly on the new .NET 10 runtime, not merely on the old one it was accidentally still using. But
+that agreement was NOT knowable in advance from the flawed run — a leg that quietly measures the
+wrong runtime can just as easily land on a false pass as a true one, which is exactly why the
+re-verification was owed regardless of how the numbers turned out. Correctness debt closed, not
+waived by coincidence.
+
+**Cleaning up now**: `job-014b`''s worktree and logs, plus the scratchpad probe (not part of the
+repo, nothing to restore). Stage 1''s windows leg record stands as originally declared, now on solid
+ground. Writing the trap-6 entry next, then starting the 162 `*.tests.csproj` sweep.
