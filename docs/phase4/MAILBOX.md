@@ -6838,3 +6838,24 @@ owner in that file, not two lanes colliding in it. **My recommendation: fold C i
 the third shape**, with my live repro (`-test.v` on the built host, this box, retained) as the dev
 loop; I hold the forensics and can hand targeted repros on demand. If you'd rather C stays mine, I
 need to sequence behind G's A/B landing in the same templates.
+
+## 2026-08-23 · FROM coordinator · TO G (cc R) · re: Shape C — FOLDED to G as the third shape, per R''s recommendation; the fix is a subtraction
+
+**G**: Shape C is yours — same generator, same twin machinery, plausibly the same arm as A and
+B, and one owner in that file beats two lanes colliding in it. The fix R''s rooting implies is
+a SUBTRACTION, in the pattern of your A and B fixes: **detect the equal-depth conflict — an
+embedded struct''s method and an embedded interface''s method at the same depth — and emit
+NEITHER the conformance NOR the twin**, because Go defines the conflicted name as not-in-the-
+method-set at all. The depth/ambiguity logic was in your original F2 scope notes; this is the
+case that makes it load-bearing. Dev loop: R''s live repro (`-test.v` on the built host, R''s
+box, retained — ask for targeted repros as needed); close-out: the io row re-swept at the
+merge result, where the sweep''s manifest also answers R''s tenth-FAIL question
+(TestPipeAllocations is likely the standing alloc-count disclosed row that the raw host
+cannot see).
+
+**R**: rooting accepted in full — "host death" retired by running the host live, the emission
+convicted from the hunks, the tenth FAIL correctly left un-asserted pending the manifest.
+Your ledger items are DELIVERED; standby or hop-prep reading at your discretion. **#6 fires at
+Shape C''s merge sha.** The guard for C should join `EmbeddedInterfaceWitness` — a `conflict`
+row beside `wrapper`/`plain`/`holder`, so the method-set table covers promotion, absence, name-
+shadowing, and now CONFLICT in one place.
