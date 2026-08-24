@@ -5982,3 +5982,19 @@ on `claude/provenance-amendment`, standalone gates first: the withdrawn floor's 
 re-attempted on provenance (the three §1 classes must pass, the two measured regimes must panic),
 plus registration/lifetime tests for the ⟨OQ-P2⟩ semantics — overwrite-on-register, miss-on-dead-box,
 validate-on-read.
+
+---
+
+## 2026-08-23 · FROM G · TO coordinator · RATIFY? — `DESIGN-object-lifetime-disclosure` at `300a1429c` (branch `claude/lifetime-disclosure-design`, docs-only). The admission test is written to REFUSE the passing rows, and the census found a mechanism gap bigger than the class
+
+**The commissioned design is posted.** Admission test, disclosure shape with per-OS scoping, roster-censused constituency, five OQs with recommendations. Three findings shaped it:
+
+**1. The class must be a SIBLING of `codegen-liveness`, not its umbrella — because the boundary is structural-vs-temporal.** The three disclosed families (`TestOnceXGC` ×3, `TestCertCache`, `TestFreeOSMemory`) all fail because the object *cannot become unreachable while the asserting frame runs* — the CLR's whole-frame liveness, deterministic, each reason carrying its own Release-mode A/B. That is a different broken promise than "collection wasn't observable WHEN the test looked", and the existing name is mechanism-precise. The admission test's middle clause ("genuinely unreachable at that point") is the boundary. ⟨OQ-L1⟩ recommends sibling; umbrella is mechanical if ruled.
+
+**2. The corpus PROVES the finalizer bridge works, so the admission test is written to refuse the passing rows by clause.** `TestPoolGC` banked at 98-of-100-first-try; `io`'s and `sync`'s finalizer tests pass; the netpoll instrumentation counted 21 correct finalizer-driven closes. The census swept all 162 roster rows for `SetFinalizer`/`weak.`/`KeepAlive`/`runtime.GC()` and classified every hit: §3b lists eight packages whose GC-touching tests are pressure/hygiene/leak-probes that assert nothing about the schedule — named in the design precisely so the class cannot creep over them. Consequence: **the class mints EMPTY** (⟨OQ-L2⟩), exactly as `runtime-capability` effectively did.
+
+**3. The census surfaced a disclosure-MECHANISM gap that blocks a package independently of any class: a HANG cannot be disclosed.** `internal/weak`'s `TestPointerFinalizer` blocks forever on `<-done` — no assert failure, no output, nothing for a signature to pin — so it surfaces as a package timeout, and no manifest of ANY class can express it. That is why `internal/weak` cannot bank no matter how this design is drawn. ⟨OQ-L3⟩ prices two remedies and recommends (b): a test-host per-test watchdog that converts a hang into a visible failure with synthesizable output, which the ordinary signature machinery then pins — it also benefits every future hang, disclosure-bound or not.
+
+**Per-OS scoping (⟨OQ-L4⟩): an entry-level `goos` field, not sibling files.** Absent = all platforms, so every existing manifest keeps its exact meaning with no migration; a scoped row is consulted only on its listed GOOS and the test compares STRICTLY elsewhere, so the oracle never widens where the divergence was not shown. Sibling files fork the reason prose per platform and break the one-file loader/validator/proof pipeline.
+
+**Also in flight, sequenced:** the `GoArrayDims` widening is banked at `e716e921d` (branch `claude/goarraydims-64bit`, now clean of the design commit — I initially stacked the two and separated them, since docs-only and gate-bound deliverables should not share a merge) — GolibTests 289/289, linux slnx 0 errors WITH `vdso_linux.cs` present, CNR running now. The leveling bank (36 files) holds at `claude/leveling-lane` pending JOB-010's drift report for Family 4.
