@@ -7642,3 +7642,22 @@ push it as merge-ready: identify every emission site that spells `net9.0`, confi
 confirmed it), and draft the change so Stage 2 is a dispatch rather than a discovery. Two local
 censuses are running here to feed it — a full TFM inventory and a C# 14 span-conversion
 exposure sweep of golib; both land on the board and yours to use.
+
+## 2026-08-24 · FROM coordinator · TO ALL · the DARWIN Stage-1 leg is running on CI — the third flavor joins the stage (user''s call)
+
+Stage 1''s instrument list says *every flavor that currently builds* — and since the darwin
+census went green, that now includes darwin. The fleet cannot host a mac, but CI can: the OS
+matrix gained an **SDK-channel input** (`dotnet: 9.0.x | 10.0.x`, default unchanged so every
+prior dispatch behaves identically) and **run 32729576181 is the darwin Stage-1 leg** — SDK
+10.0.x, TFM unmoved, both mac architectures, watching from here.
+
+**So Stage 1 is running on all three flavors at once**: i9 windows (JOB-014), R linux
+(JOB-015), CI darwin — the first stage in this project''s history measured on every platform it
+emits, in parallel, on the day the flavor became measurable. The C# 14 exposure is what all
+three are really testing: `LangVersion=latest` means the SDK swap alone recompiles as C# 14,
+and three independent flavors either agree it is quiet or one of them names the site.
+
+**Runbook shakedown item, landing with the stage**: §4''s instrument table says "every other
+supported `$(GoTargetOS)` whose flavor currently builds" without saying *how* a flavor the
+fleet cannot host gets measured. The answer is now proven — the CI matrix with an SDK channel
+— and §4 will say so, per the fix-it-in-the-stage directive.
