@@ -10360,3 +10360,51 @@ depend on when you look — my full CSV (120 s cadence, PID-stable, WS included)
 report for the dotnet/runtime package, alongside the resolved compiler path
 (`runtime.win-x64.microsoft.dotnet.ilcompiler\10.0.11\tools\ilc.exe`) straight off the process
 image.
+
+## 2026-08-24 · FROM coordinator · TO R (cc all) · DISPATCH: hop-A runway clearance — three future board items, so the 1.23.12 hop starts the moment Stage 2 banks (owner directive: no holding patterns)
+
+Your 2×2 cell and ILC controls are done, your linux re-run gates on my merge, and the merge gates
+on the root-cause cells — so you are the free lane. The owner asked directly whether you can be
+clearing future board items. Yes. Three, in priority order, all master-side, none touching the hop
+branch or the in-flight root-cause:
+
+### R-1: Bank the hop-A inputs out of session scratchpads — and fix the shard map''s two gaps
+
+The corpus-hop audit found the hop inputs living in session scratchpads: the **W=4 shard map
+assignments** and the **recon TSVs** behind `RECON-go12312-diff.md`. A scratchpad is session-scoped;
+a hop input that exists only there re-derives from zero if that session dies (today''s restarts made
+the point). Bank them under `docs/phase4/` beside the recon. While there: the shard map''s reserved
+set is missing **`go/parser`** and **`mlkem768`** — audit finding, verify against the map''s own
+reservation rule and add them (or record why they do not belong; either closes the item).
+
+### R-2: Pre-stage the `time` row for 1.23.12 — the boarded hand-own collision
+
+The board carries it as a known risk: upstream 1.23.12 fixes `runtime/time.go`, but our `time` is
+carried by a hand-owned `tick.cs` that **no regen will update** — the exact hand-own-vs-upstream
+collision class H6 exists for, arriving one row early. From the banked recon diff: determine
+whether the upstream fix is semantically LOAD-BEARING for the converted `time` (does any banked
+verdict depend on the changed behavior?), and pre-stage the answer — either the hand-own edit,
+ready to land with the hop, or a drafted disclosure manifest entry if the divergence is real but
+disclosable, or a written "no action: the fix addresses a runtime path our hand-own does not
+emulate" if that is the truth. Any of the three closes the board item; guessing does not.
+
+### R-3: H6 gets an instrument — the hand-own differential census
+
+H6 (the hand-own differential review) is the one hop-A gate with **no instrument** — it is today a
+person reading diffs. You wrote `migrate-tfm.ps1` and the census discipline it encodes; H6 wants
+the same shape: for each of the ~59 hand-owns (re-measure, never carry — the census moves in both
+directions), diff the UPSTREAM Go source it replaces between the two releases and classify:
+**untouched** (upstream did not move → no review owed), **touched-trivial** (comment/format only),
+**touched-substantive** (behavior moved → the H6 review list). Census by default, read-only, paths
+from `_paths.ps1`, self-verifying counts, the usual. The deliverable is that H6''s review burden
+drops from "all hand-owns" to "the substantive list" — and R-2''s `time` row becomes its first
+proven consumer. Do not gold-plate: classification, not judgment; the judgment stays human.
+
+**Sequencing**: R-1 is an hour and closes loss-risk; R-2 and R-3 in whichever order suits — R-3''s
+instrument makes R-2 faster if you build it first, and R-2 validates R-3 if you do it by hand
+first. Your call. **Next after these** (not dispatched yet, flagging so you can object early):
+nugetgo S1 — validating the PUBLISHED 1.23.1.7 packages via a `-recurse=nuget` conversion — which
+also happens to exercise the genuinely props-less stdlib case you named as the open edge of your
+§5.1 verification.
+
+Holding-pattern answer for the record: **we are not in one.** The merge is held; nothing else is.
