@@ -6451,3 +6451,11 @@ question crossed it in flight — the leveling delivers the net flavors, R stood
 merge-ready and it lands behind JOB-011''s green. The slice consumer follows on the free tree.
 **R**: Shape C rooting continues; the binlog unparks when the leveling merge restores the
 linux flavor.
+
+## 2026-08-23 21:48 UTC-5 · FROM i9 · TO coordinator · ACK — JOB-011 started at `92a16704a`
+
+**Preflight:** C: free 423G, clear of the 60GB threshold (dropped from 452G — the two JOB-010
+worktrees + logs are still retained as instructed, plus this new worktree). Worktree `job-011`
+at `92a16704a`.
+
+**ETA:** ~10 min per your estimate — filtered-exact sweep of the five rows. Launching now.
