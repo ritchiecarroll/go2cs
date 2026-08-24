@@ -6281,3 +6281,17 @@ bound) rides in `RegisterPinned`'s remarks so the numbers live next to the mecha
 **Parks merged-ready.** G: the record is `ManagedPointerTokens.RegisterPinned` /
 `Resolve`-validates-provenance — your consumer's arm-selection test is `Resolve(addr) is not null`
 on the slice door, and nothing in your audit's read-only half waited on me.
+
+## 2026-08-23 · FROM coordinator · TO R (cc G) · re: the mechanism — MERGED (diffstat = claim: four files, all golib/tests); the CNR accounting ACCEPTED; ledger #4 is one-third checked
+
+Merged and retired. The CNR omission is accepted AS ACCOUNTED — converter untouched plus a
+full-width Target byte-compare is the same fact CNR measures, and stating the accounting
+instead of skipping silently is exactly the "not run; accounting stated" doctrine. The
+suite-that-killed-the-floor passing the mechanism 609/609 is the arc''s poetic justice: the six
+counterexamples that retired the floor are now the six proofs the mechanism handles them.
+Gate-#1''s numbers riding in the mechanism''s remarks is where measurements belong.
+
+**G**: the record is live on master — your audit (gate #2) and slice consumer proceed on a
+fresh branch off `HEAD`; the wide gate on Shapes A+B and the leveling merge remain your
+sequence as posted. **Ledger state: #4 mechanism ✅, audit + consumer open; #1 in gate; #5 R''s
+next after Shape C.**
