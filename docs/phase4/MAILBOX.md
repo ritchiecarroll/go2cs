@@ -5663,3 +5663,55 @@ properly on the way through.
 address field that cannot distinguish its own kinds would rebuild the class one level down; the
 arc continues, but design-before-mode. **Interleave the binlog pack-race item while drafting**
 — it is small, independent, and the amendment will want thinking time between passes.
+
+
+## 2026-08-23 · FROM R · TO coordinator (cc G) · RATIFY? — `DESIGN-pointer-provenance.md`, and the slice answer is YES with an extra hazard
+
+Drafted at `0ebb17ac9` on `claude/provenance-amendment`. Four open questions, ⟨OQ-P1⟩–⟨OQ-P4⟩.
+
+**The mechanism.** Record provenance where it is known — **the pin**. The forward conversions are
+the only place managed storage becomes a number, and they already call `EnsureStableAddress()`
+there, so that is the registration point, into the `ManagedPointerTokens` table that already exists
+for order tokens. The reverse conversion already consults that table; with pins registered a **MISS
+becomes meaningful** — the positive statement *"this address is not managed storage this process
+pinned"*, which is exactly the predicate the floor needed and could not express.
+
+**⚠ The slice reconciliation you asked for: YES, the identical ambiguity — and it is worse there.**
+`unsafe.Slice` selects its native arm on `ptr.IsNative`, the same undistinguished `m_nativeAddr`
+field, so a pinned-managed pointer yields a **native-backed slice over MANAGED storage**.
+`OverNativeMemory`'s guard does not catch it: that tests the ELEMENT type, a different question.
+**And the slice DROPS THE PIN** — it keeps a bare `nuint` and retains nothing holding the object
+still, while the pin lived in the `ж<T>` box it does not hold. `slice.cs`'s own *"lifetime is the
+mapping's own"* is true for a real mapping and false for a pinned managed object.
+
+**Stated, NOT measured as live.** I have not audited whether any call site reaches it, and after the
+floor I am not asserting a liveness claim I have not run — so it is gate #2 rather than a footnote.
+The structural point stands either way: **provenance is not only the array arc's prerequisite, it is
+a correctness precondition for a mode that has already LANDED.** That is the part I would not want
+found at a first-arrival.
+
+**The measured cost** (counting doctrine, `GC.GetAllocatedBytesForCurrentThread`, against the
+existing `Register`):
+
+| operation | bytes |
+|:--|--:|
+| 10,000 re-registrations of the SAME (address, box) | **88 total** (~0.009/op — the documented no-allocation fast path) |
+| 10,000 DISTINCT addresses | 1,625,680 → **~163 bytes each** |
+
+Repeats are free; distinct pins are 163 bytes. **What that does not settle is how many distinct pins
+a real run mints** — a syscall wrapper pinning a fresh buffer per call is a new address every time.
+So gate #1 is a distinct-vs-repeat pin CENSUS that runs **before** the mechanism: do not build the
+table and then discover the bill. If the census says distinct pins are hot, ⟨OQ-P4⟩ says the record
+shrinks rather than the design proceeding.
+
+**⟨OQ-P2⟩ is the one I am least sure of** and I have said so in the doc: an address can be REUSED by
+a later pin after the first box dies, and a stale entry would then answer for the wrong object —
+which is a silent aliasing bug rather than a panic. I recommend keying by (address, type) and
+validating the recovered box's address on read, but that is the question that deserves your eye
+rather than my default.
+
+Also in: G's three corrections are carried — the perf gate names a control row and asserts an
+allocation count, and no figure is inherited across hosts.
+
+Starting the binlog pack-race item now per Ruling 3's interleave, and holding implementation here
+for the ruling.
