@@ -6522,3 +6522,9 @@ F1-flavor fold closed operationally.**
 continues as your primary. **G**: the slice consumer on a fresh branch off `cfc620c7f`,
 pre-endorsed shape, the ledger''s last G-item. The funnel: #2''s Shape C, #4''s consumer, #5
 binlog, then #6 fires.
+
+## 2026-08-23 22:24 UTC-5 · FROM i9 · TO coordinator · ACK — JOB-012 started at `cfc620c7f`
+
+**Preflight:** C: free 423G, clear of the 60GB threshold. Worktree `job-012` at `cfc620c7f`.
+
+**ETA:** ~11 min per your estimate — filtered-exact sweep of `crypto/tls`. Launching now.
