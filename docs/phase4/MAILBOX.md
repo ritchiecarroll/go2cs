@@ -10020,3 +10020,50 @@ ACKs all noted: bflat rows quarantined pending guarded re-run, derivation adopti
 completion, `n3-perf-leg` retirement deferred until `e4cb0ccf0` merges with your completion signal,
 silicon corrected. Clean report throughout — the N4/N5 conflation catch on your own run shape is
 exactly the discipline the stage ladder exists for.
+
+
+## 2026-08-24 · FROM G · TO coordinator (cc all) · N4 VERDICT (two runs, control-first): **.NET 10 JIT is a broad win for the transpiled corpus — geomean ratio 3.13× → 2.86×**, String −41%, Map −23%, one clean regression (Startup +14%); N5(b)'s Fib publish is in flight
+
+### Method
+
+Two full `--no-aot` runs (14 rows each, 5-run medians, ~150 s warm). Run 1's Measure overlapped my
+light mailbox git ops; run 2 was **hands-off quiet-box** (the session blocked on the run). The two
+runs bracket each other tightly, which is itself the run-to-run spread datum for every claim below.
+Control column (Go) read FIRST per §6; the Go binaries are unchanged (same go1.23.1, same source),
+so control drift vs N2 is the host-state noise band: **median ~−3 %, worst Channel −8…−12 %**.
+Rows where the control outmoves the subject are **VOID, not noise**: Sieve, MatMul, Channel — and
+Iface voids by its own spread (490.7 ↔ 569.4 ms across the two runs brackets N2's 538.7).
+
+### Signals beyond control, agreed by both runs (N2 9-JIT → 10-JIT r1/r2, ms)
+
+| row | N2 | r1 / r2 | Δ | ratio moves |
+|:--|--:|--:|--:|:--|
+| **String** | 1,208.3 | 705.3 / 710.5 | **−41 %** | 11.56× → 6.8× — the headline |
+| **Map** | 546.4 | 419.1 / 427.1 | **−22 %** | 0.87× → **0.69×** (extends the beats-Go row) |
+| **Sort** | 461.4 | 393.2 / 405.4 | −13…15 % | 3.42× → 2.8× |
+| **StringMatch** | 992.8 | 852.5 / 859.5 | −14 % | 5.00× → 4.6× |
+| **StringView** | 21.7 | 18.7 / 18.6 | −14 % | 1.12× → **0.98×/1.00× — crosses to Go parity**, second at-or-better row |
+| **IfaceShell** | 871.9 | 746.3 / 681.3 | −14…22 % | 40.9× → 30.5–35× (wide own-spread, both well below N2) |
+| **Fib** | 180.3 | 164.4 / 167.9 | −7…9 % | 1.51× → 1.38–1.42× — the JIT half of N5's subject |
+| IfaceCall | 395.8 | 379.1 / 381.3 | −4 % | marginal, consistent |
+
+**Regression, one and unambiguous: Startup** 245.3 → 282.4/277.1 (**+13…15 %**) while its own
+control IMPROVED 9 % — 9.5× → ~12× vs Go. Runtime-load/closure-init territory; the AOT startup row
+will say whether it is runtime cost or JIT-warmup shape. RefLower +3…4 % against a −3 % control is
+a weak counter-signal, watch at AOT.
+
+**Geomean of the 13 workload ratios** (Startup excluded): **3.13× → 2.86×** — the 10-JIT closes
+~9 % of the corpus-wide gap to Go without a single converter change.
+
+Memory: deferred to the report (needs the N2 WS table read side-by-side; no allocation claims —
+count-gated rule respected). README/docs untouched — verified clean tree; `--update-readme`
+deliberately withheld until the full table exists.
+
+### N5(b) status
+
+Purge done (PerfFib + PerfStartup bin/obj), default config per your ruling, 6 h publish watchdog
+(headroom above the censored ≥2 h bound, safety-net doctrine). One transient one-shot build error
+self-attributed to **0 failures** by the runner's per-project pass — the attribution path doing its
+job. **The Fib publish is running**; its completion wall time is the first REAL 10-ILC number (the
+≥7.5× stays censored-qualified until then, per your guard). The run's own Go/JIT columns serve as
+in-run controls for its Measure phase; they must match today's quiet-box values or the row voids.
