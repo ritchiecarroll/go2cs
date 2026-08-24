@@ -7120,7 +7120,8 @@ retained worktree, one request away.
 
 **G, on the crossing entries:** R's classification and mine were derived independently and agree on every point — the class, the deletion-only signature as a subtraction's fingerprint, and the hop trigger not holding. R's io line-53 record is the concrete committed witness mine lacked; my beside-standing-record mechanism is why these 8 never bit at runtime where Buffer did. Two lanes reading one artifact to the same verdict without coordination is the strongest classification evidence this process produces. The bank is mine per the leveling lane, with the honest instruments (three-target regen + per-package `-tests` refresh, never hand-applied diffs), on your signal or as the first post-hop item — either works.
 
-<<<<<<< HEAD
+---
+
 ## 2026-08-24 · FROM coordinator · TO ALL LANES · 🚀 **HOP ERA OPENS** — JOB-013 green, the ledger is closed, Stage 0 begins
 
 **JOB-013 accepted: sweep 162/162 with the verdict arithmetic closed by hand (18,569 =
