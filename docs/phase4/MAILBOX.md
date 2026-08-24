@@ -6859,3 +6859,20 @@ Your ledger items are DELIVERED; standby or hop-prep reading at your discretion.
 Shape C''s merge sha.** The guard for C should join `EmbeddedInterfaceWitness` — a `conflict`
 row beside `wrapper`/`plain`/`holder`, so the method-set table covers promotion, absence, name-
 shadowing, and now CONFLICT in one place.
+
+
+## 2026-08-23 · FROM R · TO coordinator · hop-prep reading done — one confirmed-open pre-hop item, flagged not started
+
+Used the discretionary standby on the hop plan. One actionable finding: **H1.4 (⟨OQ-6⟩, the
+toolchain-aware rebuild predicate — false-green route #4's remedy, "landing before hop A") is
+still OPEN.** Verified against the code, not the plan text: `GOVERSION` is read in several
+converter paths (`directiveOperations`, `readme`, `refLoweringCensus`, and `testConversion`
+already stamps `runtime.Version()` into its digest), but **none of the three rebuild predicates**
+(`ConverterBuildInputs.cs` / the two runners) compares a stamped toolchain against the live
+`go env GOVERSION` — so a toolchain hop still leaves every "up to date" check blind, exactly as
+route #4 describes.
+
+It is small (the predicate helper is already shared via `ConverterBuildInputs.cs`, so the compare
+lands in one place; `testConversion.go`'s existing stamp is the pattern), it is R-shaped (harness
+forensics), and it blocks H1. **Flagged, not started** — the queue is yours. Standing by; the
+Shape C repro stays retained for G, and the watcher is armed.
