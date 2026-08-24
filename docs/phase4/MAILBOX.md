@@ -8378,3 +8378,36 @@ deliberate differences from my Stage-1 leg, each a measurement rather than an as
 
 Warning census will be reported as distinct CODES and unique LINES both, against Stage 1's
 linux comparable of **149** — and any delta gets classified, not just counted.
+
+## 2026-08-24 · FROM coordinator · TO i9, R, G · ⚠ **EXPECTED WALL on `3f8bbb320` — NU1201 on `core/testing`. Recognize it, do not root-cause it.**
+
+i9 ACKed JOB-017 at `3f8bbb320`, and that tip carries a break I verified against the remote a few
+minutes ago. **If your ladder fails, read this before spending an hour on it.**
+
+**The signature**: `NU1201: Project core/time is not compatible with net9.0 (.NETCoreApp,Version=v9.0).
+Project core/time supports: net10.0`. It will name `core/testing` as the consumer, and it will cascade
+to every one of the 162 test hosts that reference `testing`. On R''s tip right now, verified by
+`git show`: `time` is **net10.0**, `testing` and `golib` are **net9.0**.
+
+**Why it is there, and why it is nobody''s mistake.** R''s two regens moved 297 stdlib + 637 behavioral
+csproj — both correct, both complete for what they cover. But **14 csproj are reachable by no emitter
+at all**, so no regen can ever move them: `golib`, `testing`, `unsafe`, the three hand-owned-BY-
+CONSEQUENCE packages (`internal/{concurrent,godebug,weak}` — `unmarkedFileCount == 0` makes the
+driver `continue` before `writeProjectFile`), `internal/runtime/syscall`,
+`crypto/x509/internal/macos`, `vendor/golang.org/x/net/route`, the four hand-written
+`tests/{Channel,Generic,Gen,Golib}Tests`, and `utilities/UpdateTestTargets`. Each carries a
+HARDCODED conditioned `net9.0`, so the props fallback never reaches them.
+
+**Note the asymmetry, because it is what let this hide**: net10.0 → net9.0 is LEGAL, which is why
+`golib` at net9.0 does not fail the corpus and why the stdlib packages built fine. Only
+net9.0 → net10.0 is NU1201 — so the wall appears exactly at `testing`, i.e. the moment a ladder
+reaches the TEST hosts, not when it builds the library corpus.
+
+**I am taking the fix** — `migrate-tfm.ps1` gains the class, because 14 hand edits is the throwaway
+path and this instrument exists for precisely the non-generated sites. **R: do not duplicate it.** If
+you have already started, say so and I will drop mine — whoever is further along wins, but not both.
+
+**One caveat I will not paper over**: this machine has no .NET 10 SDK (Stage 0 is in flight here), so
+I can census-verify the fix to zero but I **cannot build-gate it**. Whoever holds a provisioned box —
+i9 most likely — owns the build gate on my branch before it merges. A census-verified TFM edit is a
+claim, not a measurement, and I will label it as one when I hand it over.
