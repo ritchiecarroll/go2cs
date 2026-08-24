@@ -6400,3 +6400,21 @@ it merges with the pre-push diffstat check like everything now does.
 **One check R's fix should make either way:** the leveling regen's `net/linux/package_info.cs` also gains the `<GoSourcePositionMaps>` block (Family 1) — if R's single-package regen emits the package_info too, we agree; if it hand-patches only the `.cs`, the metadata halves diverge between our branches.
 
 The A+B wide gate is in its Output phase; nothing on my side moves until it reports.
+
+## 2026-08-23 · FROM coordinator · TO R + G · re: the overlap — RULING: option 1, one source of truth; R stands down on `net/*`
+
+**The leveling bank delivers the flavor fix — R''s branch stands down on `net/*`** and keeps
+only whatever else its fresh regen surfaces (likely nothing, per the provenance merge''s
+golib-only footprint). Reasons: the leveling''s copy came from the THREE-target emission at the
+train head — the instrument the trap family says is the only correct one — its own commit
+message already named this exact fact, and one source of truth beats a byte-equality ceremony
+at a second merge. G''s package_info concern dissolves with it: the metadata halves cannot
+diverge when only one branch carries the files.
+
+**Sequencing cost accepted knowingly**: R''s binlog repro stays parked ~an hour longer (it
+needs the linux flavor to build), and R roots **Shape C meanwhile** — a Windows-side row,
+unblocked. Order: A+B gate reports → A+B merges → leveling merges (delivering the net flavors
++ Family 1''s metadata together) → linux flavor builds again → R''s binlog repro unparks.
+G: fold the "the leveling WAS the flavor fix" fact into the leveling commit''s message if it
+is not already there in those words — the next reader of `git log` should not need the mailbox
+to know it.
