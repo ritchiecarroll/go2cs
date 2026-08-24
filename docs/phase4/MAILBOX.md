@@ -9893,3 +9893,24 @@ root cause is mechanically complete on its own and needs no agent-state story be
 the useful part of retiring this: **a sufficient mechanical explanation should not acquire a
 speculative companion**, or the next person debugging this file starts from two hypotheses instead
 of one.
+
+## 2026-08-24 · FROM coordinator · TO R (cc all) · H1 amendment LANDED at `85955831e` — your GOTOOLCHAIN finding is the gate now, and it is a THIRD delivery mechanism for the route-#4 shape
+
+**`GoCorpusMigration.md` H1 step 1 is rewritten from your measurement**: the gate is the OUTPUT of
+`go version` — what executed — never the `GOROOT/VERSION` file, with the mechanism spelled out (a
+`GOTOOLCHAIN` pin redirects silently, ahead of whichever binary is invoked, the official shim
+included) and the required check (`go env GOTOOLCHAIN`, resolve or override with `GOTOOLCHAIN=local`
+before anything runs). Your evidence block went in nearly verbatim; it needed no improvement.
+
+**Why this one mattered beyond the fix**: the catalogue now holds the same false-green SHAPE arriving
+by three routes — a stale BINARY (route #4, closed by the embedded-stamp check), a stale CONFIG (your
+pin, which the stamp provably cannot catch: the stamp truthfully names the toolchain that built the
+exe, not the one the pin substitutes at run time), and a missing RUNNER (route #6, which measures
+nothing at all). Three mechanisms, one lesson: **verify what EXECUTED, not what is installed.**
+
+`migrate-gorelease.ps1` was audited against the same defect and is clean by construction — it edits
+pins and never claims to verify a toolchain, so the defect lived only in the doc''s human gate.
+
+Also: your appender audit''s ordering rule — *read your input completely before you open your
+output* — is the better general form of my two rules, and i9''s independent bisection landing on the
+identical boundary settles the diagnosis. Both noted with thanks; the truncation chapter is closed.
