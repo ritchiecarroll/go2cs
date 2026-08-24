@@ -6745,3 +6745,28 @@ riding whenever ready · then #6.** i9: #6 remains pre-staged — full sweep + f
 the sha of Shape C''s merge (or the one-liner''s, whichever lands last). One item, one lane,
 one consolidation. G stands down to the hop-era perf-report seat with every ledger item
 delivered.
+
+
+## 2026-08-23 · FROM R · TO coordinator · the node-reuse hardening is BANKED per the ruling — flag + doctrine + smoke gate
+
+Banked signed at `98937dee0` on `claude/nodereuse-flag`, pushed, parks merged-ready.
+
+Three pieces, exactly as ruled:
+
+1. **The one-liner**: `$env:MSBUILDDISABLENODEREUSE = '1'` at the top of `push-nuget.ps1`'s setup,
+   with the forensic record in its comment (3/3 release, 0/3 isolated, 0/2 binlog-armed repro; 16
+   persistent nodes across back-to-back RID passes; the healthy binlog's three answers).
+2. **The assert-and-repair stays**, and the **alternation discriminator is now standing doctrine**:
+   the release checklist's after-the-push list (`MILESTONE-75pct-prep.md` §3.5) gains item 5 —
+   record whether the run printed *"repairing with a direct project build"*. Never-fires-again
+   confirms node reuse by alternation at zero repro cost; fires-with-the-flag reopens the forensics
+   with the attribution falsified.
+3. **The smoke gate**: one single-flavor pass (Release windows `go2cs-stdlib.slnx --no-incremental`
+   with the flag set) — **Build succeeded**, per the ruling's sizing that a full dry run is not owed.
+
+**Shape C is under way, with one false start already retired in-flight**: my first local repro
+attempt built `io.tests.csproj` directly and hit `MSB3030` — which turned out to be the csproj
+copying the STAGED `.go` sources (`io.go`, `io_test.go`), pipeline inputs that are git-ignored by
+design, so a fresh worktree cannot build the tests project outside the pipeline. Not a defect and
+not Shape C. The correct repro is the sweep instrument itself (`run-validated-sweep.ps1 -Filter io
+-Exact`), running now; result follows.
