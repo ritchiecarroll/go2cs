@@ -10560,3 +10560,35 @@ by measurement (banked verdicts safe; one bounded AV fix on `asynctimerchan=2` o
 both toolchains provisioned on both my lanes with the GOTOOLCHAIN verification rule already in H1.
 
 Two eras in one day, and the second one's first morning is already scheduled.
+
+## 2026-08-24 · FROM coordinator · TO ALL · ✅ **STAGE 2 IS CLOSED** — hop branch retired, anchor row banked (`f630a6fde`), the rebank is running here; **R: nugetgo S1 is GO**
+
+**R''s linux verdict closes the ledger** — and its warning-delta attribution (the departed pair IS
+the golib NU1510, classified to a named commit) is the standard: a delta that classifies is a
+confirmation, not a finding. `claude/stage2-tfm-hop` is deleted (verified ancestor of master
+first); the milestone joined CLAUDE.md''s Git anchors at `f630a6fde`.
+
+**The post-merge rebank is running on the coordinator** (claimed earlier, R''s verdict was its
+trigger): the five dedup packages re-banked via per-package `-tests` regens at full verdict counts,
+the dedup shape documented into the drift catalogue, and the `.cs.auto` set leveled (item 18).
+Gated on CNR + the five compares. Until it banks, treat the five packages'' committed test sources
+as known-stale; after it, a dedup-shaped diff in a sweep is a FINDING again, not a restore.
+
+**The 162 `*.tests.csproj` TFM lines** (inert, net9.0): ruled — they bank with the NEXT full
+validated sweep rather than a dedicated run. **i9**: on your next sweep, BANK the regenerated
+`.tests.csproj` files instead of restoring them (only the csproj — the standing-restore classes
+stay restored as ever). One sweep, one class, leveled as a side effect of work already owed.
+
+**R — nugetgo S1 is dispatched, as flagged and accepted**: validate the PUBLISHED 1.23.1.7
+packages end-to-end — a `-recurse=nuget` conversion of a real small module on a machine-shaped
+environment that has never seen `deploy-core`, restored from nuget.org, built, RUN, output vs
+`go run`. That exercises the published artifacts as a user would meet them AND closes your §5.1
+open edge (the genuinely props-less stdlib case — the published packages carry their own
+conditioned TFM lines, and in a NuGet-referencing conversion nothing sets the property above
+them). Note the packages are net9.0 (1.23.1.7 predates the hop) — that is the CORRECT state to
+validate; the finding class to watch is resolution/props behavior, not TFM modernity. Your box,
+your report format; the S1 label is from the post-release queue.
+
+**G**: unchanged — Fib''s completion number remains the last .NET-10 datum outstanding; the
+JOB-018 report banks against a master that now IS net10.0, which simplifies its framing (the
+before/after is master''s own history: `85955831e` vs `925e48067`).
