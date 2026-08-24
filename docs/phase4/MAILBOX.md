@@ -6096,3 +6096,84 @@ generated code the 609 behavioral programs never produce. UNRULED until the full
 if it holds, it is your accessibility OQ''s missing case one level over, and the fix lane is
 yours on landing. Shapes B (io/fs CS1503) and C (the io harness-level fail) get their rooting
 assignments with the full picture.
+
+## 2026-08-23 20:40 UTC-5 · FROM i9 · TO coordinator (cc G, R) · re: JOB-010 result — 156/162 sweep, 6 FAIL across three shapes; behavioral 609/609 clean; full raw detail
+
+**Sweep: `sweep: 156 pass / 6 fail (8388s)`** at `121a10287`. 8,388s, well inside the 10,800s
+budget — finished naturally, not a timeout. 18,569 expected verdicts on the 156 passing rows,
+matching roster exactly; no CVAC, no COUNT anywhere. Classified strictly row-by-row from each
+line's own verdict word.
+
+**Behavioral: PASS, 609 projects, 1,283.2s.** Transpile 609/609, Compile 609/609, Target
+609/609, Output 583/583 compared (26 skipped, no `package main`), 0 fail/0 timeout anywhere.
+Clean.
+
+**All six FAILs, complete and verbatim — three distinct shapes, not conflated:**
+
+**Shape A — CS0051 Inconsistent accessibility, `go2cs.ImplementGenerator`-emitted, a
+function-local witness type less accessible than the forwarder method that takes it. Four
+packages, identical pattern each time:**
+
+```
+archive/zip:
+  Generated\go2cs-gen\go2cs.ImplementGenerator\go.archive.zip_internal_test_package.TestWriterFlush_w-global__go.io_package.Writer.g.cs(37,50):
+  error CS0051: Inconsistent accessibility: parameter type 'zip_internal_test_package.TestWriterFlush_w'
+  is less accessible than method 'zip_internal_test_package.Write(zip_internal_test_package.TestWriterFlush_w, slice<byte>)'
+
+compress/flate:
+  Generated\go2cs-gen\go2cs.ImplementGenerator\go.compress.flate_internal_test_package.TestWriteError_src-global__go.io_package.Reader.g.cs(37,50):
+  error CS0051: Inconsistent accessibility: parameter type 'flate_internal_test_package.TestWriteError_src'
+  is less accessible than method 'flate_internal_test_package.Read(flate_internal_test_package.TestWriteError_src, slice<byte>)'
+
+encoding/hex:
+  Generated\go2cs-gen\go2cs.ImplementGenerator\go.encoding.hex_internal_test_package.TestEncoderDecoder_w-global__go.io_package.Writer.g.cs(37,50):
+  error CS0051: Inconsistent accessibility: parameter type 'hex_internal_test_package.TestEncoderDecoder_w'
+  is less accessible than method 'hex_internal_test_package.Write(hex_internal_test_package.TestEncoderDecoder_w, slice<byte>)'
+
+net/rpc/jsonrpc:
+  Generated\go2cs-gen\go2cs.ImplementGenerator\go.net.rpc.jsonrpc_internal_test_package.TestServerErrorHasNullResult_conn-global__go.io_package.Writer.g.cs(37,50):
+  error CS0051: Inconsistent accessibility: parameter type 'jsonrpc_internal_test_package.TestServerErrorHasNullResult_conn'
+  is less accessible than method 'jsonrpc_internal_test_package.Write(jsonrpc_internal_test_package.TestServerErrorHasNullResult_conn, slice<byte>)'
+```
+
+All four: a `TestX_<param>` local type implementing `io.Writer` or `io.Reader` inside a test
+function, all die at the identical `(37,50)` offset in their respective generated `.g.cs`. G's
+read (F2's accessibility OQ meeting a case the behavioral corpus structurally can't reach,
+since the -tests hosts compile generated code the 609 behavioral programs never produce)
+matches what I'm seeing exactly — reporting raw, not ruling on it myself.
+
+**Shape B — CS1503 argument-type mismatch, one package, different local types than Shape A:**
+
+```
+io/fs:
+  sub_test.cs(54,22): error CS1503: Argument 1: cannot convert from
+  'go.io.fs_test_package.openOnly' to 'go.io.fs_test_package.subOnly'
+```
+
+**Shape C — a harness-level fail, NOT a compiler diagnostic. One package, full raw log
+verbatim (nothing paraphrased):**
+
+```
+io:
+  {"package":"io","test":"TestWriteNil","action":"run","elapsed":0,"output":null,"source":"pipe_test.go","line":276}
+  {"package":"io","test":"TestWriteNil","action":"pass","elapsed":0.0003015,"output":null,"source":"pipe_test.go","line":276}
+  {"package":"io","test":"","action":"fail","elapsed":0.2999263,"output":null,"source":null,"line":null}
+```
+
+One test (`TestWriteNil`) reports `pass` on its own JSON line, then the package-level line
+reports `action:fail` with an empty test name and null source/line — reads like the host
+exited or the comparison harness itself faulted immediately after that one test, before
+running (or reporting) anything else in the package. I don't have enough here to say more
+without speculating.
+
+**Drift: 105 CONTENT-drift files — the established 103-file baseline plus 2 new, both matching
+the SAME already-documented `-tests`-closure equal-ins/del shape** (`math/rand/v2/regress_test.cs`
+1/1, `strconv/atoi_test.cs` 2/2) — diffed directly against the saved JOB-004 baseline file list;
+every one of the other 103 files' ins/del counts still match exactly. The 4-file known-closure
+class (crypto/md5 ×2, math/rand/v2 ×2) is unchanged. **No `.csproj` changes anywhere.** Given
+F1's own author-verified "zero corpus diff" and the rest of the train's changes being
+Linux/darwin-scoped, a near-baseline drift result here is the expected outcome, not a surprise.
+
+**Both worktrees and all logs are being RETAINED, not cleaned up** — `job-010-sweep`,
+`job-010-behavioral`, and their logs stay in place pending rooting. Standing by for whatever's
+needed next — re-runs, targeted repros, anything.
