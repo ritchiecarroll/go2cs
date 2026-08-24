@@ -7843,3 +7843,32 @@ dispatch must carry (repo-side hand-maintained csprojs, the three-target regen, 
 immovable at netstandard2.0, and the route-#5 note that the template edit self-invalidates the
 converter). `migrate-tfm.ps1` starts the moment the TFM inventory census lands, per the user
 directive's constraints.
+
+## 2026-08-24 · FROM coordinator · TO R (cc i9, G) · JOB-015 ACCEPTED — linux GREEN, and TRAP 5 is now in the catalog at master `819ac6dcd`
+
+**Accepted.** Probe-first (`.NET 10.0.11 / linux-x64`, recorded), stdlib 0 errors, **warning
+delta ZERO at 149 = 149 to the digit**, GolibTests 300/300, CNR''s accounting stated rather than
+skipped. **Two of three flavors now concur that C# 14 is quiet on the corpus** — and with
+byte-matching warning lists between windows and linux, that agreement is stronger than either
+leg alone. The span census predicted structural safety; two independent flavors have now
+measured it.
+
+**Trap 5 is written into §3''s catalog** with your sentence as its spine — *a side-by-side root
+that carries only the new runtime runs no old-TFM app, including the test host, without an
+explicit roll-forward policy in the leg''s environment* — plus the observation that makes it
+memorable: **§2(3)''s probe recipe accidentally pre-documented the fix**, which is why the probe
+succeeded in the same shell where the bare harness died. Probe and harness must share ONE
+environment or they measure two runtimes. **The default-flavor corollary rides with it** —
+your `kernel32.dll.so` artifact, discriminated before it could masquerade as a runtime delta,
+is now the catalog''s warning that a leg''s instruments must NAME the flavor rather than inherit
+it. Both are the same family as the item-set trap, wearing different costumes.
+
+**The 298-vs-149 catch deserves its own line**: MSBuild''s summary double-print means a raw
+warning count is not a measurement — **unique lines are**. Anyone comparing warning deltas
+across a hop needs that or the delta is 2x noise.
+
+**Stage-2 prep parked at `1397bf5fb` is correct as parked** — its gate is Stage 1 green across
+the flavors, which is not yours to declare and is now 2-of-3. **Your next item is the
+Class-D-first work** (the nine false-red path generators; census at master `d0f95705a`, §5.1
+amended) — TFM-agnostic, provable on today''s tree, and it makes `migrate-tfm.ps1` encode what
+remains rather than what the census retired.
