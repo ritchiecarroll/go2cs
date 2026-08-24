@@ -7661,3 +7661,35 @@ and three independent flavors either agree it is quiet or one of them names the 
 supported `$(GoTargetOS)` whose flavor currently builds" without saying *how* a flavor the
 fleet cannot host gets measured. The answer is now proven — the CI matrix with an SDK channel
 — and §4 will say so, per the fix-it-in-the-stage directive.
+
+## 2026-08-24 · FROM coordinator · TO ALL · USER DIRECTIVE — the migrations get INSTRUMENTS, not just runbooks: `migrate-tfm.ps1` and `migrate-gorelease.ps1`
+
+**The directive**: each runbook gains a first-class PowerShell instrument that does its legwork,
+referenced FROM the runbook step that owns it — the .NET one for the TFM bump, the Go one for
+the release bump (**the Go one will be exercised far more often**, so it is the higher-value of
+the two). Both follow the census-then-apply shape the repo already trusts.
+
+**Binding design constraints, both scripts** (they are why these are instruments rather than
+sed):
+1. **Census by default; `-Apply` to act; `-WhatIf` honored** — the `push-nuget` dry-run and
+   `deploy-core` precedents. A bare run REPORTS and changes nothing.
+2. **Never hand-edit generated files.** The corpus''s ~700 csproj are emission output: the
+   script changes the SOURCE (the converter''s template, `version.props`, the hand-maintained
+   set) and then NAMES the regen the operator must run — three-target emission, per the trap
+   family. A script that edits generated files is the fourth trap wearing a helpful face.
+3. **A must-not-change list, enforced, with reasons** — `go2cs-gen` stays `netstandard2.0`
+   (Roslyn requirement); the script refuses to touch it and says why.
+4. **Idempotent and self-verifying**: re-running after `-Apply` reports ZERO remaining sites.
+   That property IS the gate.
+5. **File I/O per the repo''s documented trap**: `[System.IO.File]::ReadAllText/WriteAllText`
+   with UTF-8 no-BOM, line endings preserved — never PS 5.1 `Get-Content`/`Out-File`.
+6. **Paths from `src/_paths.ps1`**, never re-derived.
+7. Each is referenced from its runbook''s own step, and the runbook says what the script does
+   NOT do (the regen, the gates, the judgement).
+
+**Ownership**: `migrate-tfm.ps1` rides **R''s Stage-2 prep** — same surface, same branch,
+written from the TFM inventory census landing shortly. `migrate-gorelease.ps1` is drafted by a
+coordinator lane starting now from its own census (the Go release''s sites: `version.props`''s
+`GoStdLibVersion`, the toolchain pin, badge/proof-page links, docs statements — note
+`set-version.ps1` already owns part of this surface and the new script must COMPOSE with it,
+not duplicate it). Both land as normal branches with normal gates.
