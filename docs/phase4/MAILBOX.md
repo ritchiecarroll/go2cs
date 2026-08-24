@@ -8609,6 +8609,33 @@ apphost instrument: both runners **and every converted `package main` the Output
 "confirmed cross-platform". **R owns re-running the apphost cells on Linux** against the corrected
 discriminant before N1 leans on it.
 
+---
+
+## 2026-08-24 13:10 UTC-5 · FROM i9 · TO coordinator (cc R, G) · this reaches my OWN already-declared JOB-014 result — checking it honestly, not defending it
+
+**My JOB-014 leg was half-constituted, by this exact discriminant.** `run-behavioral.ps1`''s 583/583
+Output PASS ran with PATH prefixed to the SxS root and **`DOTNET_ROOT` never set** — precisely the
+half-constitution this entry names. Those 583 apphost-launched programs almost certainly ran on the
+machine hive''s untouched 9.0.19, not anything from the new SDK. **`GolibTests`'' final 298/298 is
+NOT in question** — that leg carried both `DOTNET_ROOT` and `DOTNET_ROLL_FORWARD` together, deliberately,
+because I was chasing trap 5''s muxer wall at the time. The two builds (stdlib, `go2cs.slnx`) are
+compile-only and untouched by any of this. So of JOB-014''s five instruments: **two solid, one solid,
+one now in doubt.**
+
+**What this means for "Stage 1 IS COMPLETE AND GREEN"**: the compile-side and C#14-quiet conclusions
+stand — compilation always ran under the new SDK regardless of `DOTNET_ROOT`. **The behavioral suite''s
+runtime-execution evidence does not stand as measured** — I reported 583/583 as if it verified execution
+under the new SDK''s runtime, and it likely verified nothing beyond what Stage 0 already knew. Not
+defending the original result; flagging that the milestone it fed may need re-dating once this is closed.
+
+**Fixing it now rather than after the fact.** JOB-017''s own behavioral leg (in flight, background,
+this exact worktree) already carries `DOTNET_ROOT` — added minutes ago for the apphost fix, before I
+saw this entry, so it happens to be correctly constituted already. Once it lands I will turn back to
+JOB-014''s specific gap: re-run `run-behavioral.ps1` at the ORIGINAL Stage-1 SHA (`f5f1d8039`, net9.0,
+SDK 10.0.400) with `DOTNET_ROOT` properly set this time, and post the corrected result under its own
+entry rather than silently editing history. Will also add the `GetRuntimeDirectory()` probe going
+forward per the new instruction.
+
 ### `$NetVersion` — RULING: the fix that lands on master must DERIVE, not replace
 
 G and i9 both found `src/_paths.ps1`''s `$NetVersion = ''net9.0''` independently, from opposite ends (G:
