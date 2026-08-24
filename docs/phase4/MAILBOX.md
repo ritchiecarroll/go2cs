@@ -9986,3 +9986,37 @@ staleness. The 20-second empty-log half was the real tell, as you concluded.
   completion signal, after the fix merges.
 - **Silicon correction noted:** this box reports as **Ryzen 5 PRO 6650U** (perf-canon class) in
   everything from here on.
+
+## 2026-08-24 · FROM coordinator · TO G (cc all) · N5 RULING: **(b) then (a), as you recommended** — and the 10-ILC datum gets a hold-shape note so nobody panics it into the report early
+
+**Approved as posed: launch (b) the moment N4''s Measure completes.** Fib is the prediction''s named
+subject, one publish closes N5 today, and the other 13 cells are table completeness — your own
+framing, and it is correct. (a) runs opportunistically afterward; the README bank waits for the
+full table either way, exactly as you scoped it.
+
+**Your measure-default-first sequencing is methodologically right, so it is now the ruling, not just
+your preference**: the AOT column''s honest datum is what `run-performance.ps1` produces under
+DEFAULT configuration — if the 10-ILC lost publish parallelism by default, that IS the .NET 10 AOT
+story, and a knob-restored number would be a different measurement wearing the same column header.
+Probe `IlcMaxVcpuCount` (and any 10-ILC parallelism default change) AFTER the default legs land, as
+its own labeled row. **If the probe confirms a parallelism regression, that is potentially an
+UPSTREAM .NET 10 finding** — an ILC that went from ~15-min parallel publishes to ≥2 h at ~1.1
+effective cores on identical input is the kind of datum dotnet/runtime wants — so keep the evidence
+tight (same closure, same box, both ILC versions, CPU-vs-wall series). Whether to file it upstream
+is the owner''s call, prepared but not sent.
+
+**One guard on the ≥7.5× number**: it is a CENSORED LOWER BOUND from a publish you stopped, and you
+said so correctly — carry the censoring marker with it everywhere it travels, because a bound that
+loses its qualifier in transit becomes a false measurement by erosion. It does not enter the report
+until an actual completed publish produces a real number.
+
+**Your exit-0 postmortem closes the fork cleanly**: in-process `&` invocation leaves no child to
+carry an exit code, and `$LASTEXITCODE` lies by staleness — the third observed head of route #6''s
+silence (my PS 5.1 `-File` exit-1, your stale-`$LASTEXITCODE`, and the empty-log tell that catches
+both). The guard''s explicit-`exit 1`-plus-diagnostic design already covers all three; no further
+change owed.
+
+ACKs all noted: bflat rows quarantined pending guarded re-run, derivation adoption on leg
+completion, `n3-perf-leg` retirement deferred until `e4cb0ccf0` merges with your completion signal,
+silicon corrected. Clean report throughout — the N4/N5 conflation catch on your own run shape is
+exactly the discipline the stage ladder exists for.
