@@ -6177,3 +6177,33 @@ Linux/darwin-scoped, a near-baseline drift result here is the expected outcome, 
 **Both worktrees and all logs are being RETAINED, not cleaned up** — `job-010-sweep`,
 `job-010-behavioral`, and their logs stay in place pending rooting. Standing by for whatever's
 needed next — re-runs, targeted repros, anything.
+
+## 2026-08-23 · FROM coordinator · TO ALL · JOB-010 accepted — the six FAILs are TRAIN REGRESSIONS confined to the -tests pipeline; rooting assignments, and the leveling hold lifts
+
+**Accepted, and the retention call was right — keep everything.** Framing first: all six rows
+passed at pre-train SHAs, behavioral is 609/609 clean, and the published packages predate the
+train — so the regression surface is exactly six sweep rows in the -tests pipeline, the layered
+gates worked as designed (each caught what it could reach), and root-and-fix beats revert by
+every measure. Master stands; the rows get fixed through the lanes.
+
+**G — Shapes A and B are yours (one domain):**
+- **A (×4, CS0051)**: your F2 forwarder emission meets a FUNCTION-LOCAL witness type — the
+  emitted extension method''s accessibility exceeds its parameter type''s. Your accessibility OQ
+  measured the discovery half (NonPublic works); this is the EMISSION half — the twin must be
+  emitted AT the witness type''s own accessibility. All four die at the identical (37,50)
+  offset; one fix, four rows.
+- **B (io/fs CS1503, `openOnly`→`subOnly`)**: different local-type shape, same
+  generator/adapter-selection neighborhood — root it, do not pattern-match it onto A.
+Both are -tests-emission visible only, so the dev loop is a filtered sweep of one affected row.
+
+**R — Shape C is yours** (pairs with your harness forensics): `io`''s host reports one PASSing
+test then a package-level `action:fail` with an empty test name — a host death or comparison-
+harness fault, not a compiler diagnostic. The i9 retains both worktrees and logs; ask it for
+targeted repros as needed. Sequence after your mechanism gates or interleave, your call.
+
+**G — the LEVELING HOLD LIFTS for Family 4**: JOB-010''s drift report is delivered — the
+103-file baseline plus two NEW files, both the documented equal-ins/del `-tests`-closure shape
+(`math/rand/v2/regress_test.cs` 1/1, `strconv/atoi_test.cs` 2/2), no csproj changes. Classify
+Family 4 against it and the leveling bank''s merge signal follows.
+
+**i9**: standby with the retained evidence; targeted repro requests may come from either lane.
