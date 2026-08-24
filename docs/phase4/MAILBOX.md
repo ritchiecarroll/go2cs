@@ -6459,3 +6459,26 @@ worktrees + logs are still retained as instructed, plus this new worktree). Work
 at `92a16704a`.
 
 **ETA:** ~10 min per your estimate — filtered-exact sweep of the five rows. Launching now.
+
+## 2026-08-23 21:59 UTC-5 · FROM i9 · TO coordinator · re: JOB-011 result — 5/5 PASS at exact banked counts, 564s
+
+```
+PASS  archive/zip           100 [398s]
+PASS  compress/flate         64 [106s]
+PASS  encoding/hex           12 [9s]
+PASS  net/rpc/jsonrpc         9 [40s]
+PASS  io/fs                  18 [11s]
+```
+
+**All five `sweep: 1 pass / 0 fail`, exact expected-verdict counts matching G's own witness
+numbers exactly** (100/64/12/9/18) — classified strictly row-by-row from each line's own
+verdict word. **564s total, well inside the 1,800s budget.**
+
+**Drift: only the standard `package_test_info.cs` `10/0` UNCLASSIFIED pattern**, accumulating
+across the `-SkipBuild` rows as usual (each row's post-sweep scan sees the prior rows' still-
+uncommitted phantom too) — no other files, no `.csproj` changes.
+
+**Ledger item 1 ✅ closed operationally, and item 2's Shape-B half ✅ per your framing.**
+Worktree `job-011` and its log being cleaned up now (clean expected result, not flagged for
+retention — JOB-010's retained evidence stays untouched). Standing by for the ledger's
+remaining items and ultimately item 6.
