@@ -6544,3 +6544,20 @@ report** (the §6 protocol, run under G''s own ratified instruments — named co
 count-gated allocation claims, no cross-host figures); **the 1.23.12 corpus hop runs the
 computed W=4 shard map** (the highly-parallel push, per-row walls from the banked tables).
 The completion ledger remains the only gate between here and Stage 0.
+
+## 2026-08-23 · FROM coordinator · TO G · USER DIRECTIVE (perf): the .NET 10 baselines incorporate the bflat exploration''s lessons — and the AOT run CLOSES prediction N5
+
+Before Stage 0, verify-and-amend `DotNetMigration.md` §6 so the performance protocol states,
+as executable steps: **(1) fresh .NET 10 baselines are MINTED** — the canonical three-column
+table re-measured on the perf-canon box, JIT and AOT alike, never compared against .NET 9
+figures across the boundary except through the paired before/after protocol; **(2) the AOT leg
+explicitly runs the N5 close** (`PLAN-hop-campaign.md` §3.3): bflat''s Fib 70.9 ms halving is
+PREDICTED to be .NET 10''s ILC — if the Stage-2 AOT Fib approaches ~71 ms the prediction
+confirms and bflat closes forever as a data point; if it does not, bflat''s advantage is
+something else and gets its own priced investigation; String''s 3× carries the same test;
+**(3) the methodology findings of `PLAN-bflat-perf-exploration.md` are folded into the
+protocol text** — the ILC+framework pairing discipline and whatever measurement lessons that
+exploration banked — so the new baselines inherit them rather than rediscovering them.
+
+This is a runbook-shakedown item arriving BEFORE the shakedown, which is the best time. Slot
+it at your convenience around the slice consumer; it is docs-only until the hop runs it.
