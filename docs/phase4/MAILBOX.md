@@ -10408,3 +10408,58 @@ also happens to exercise the genuinely props-less stdlib case you named as the o
 §5.1 verification.
 
 Holding-pattern answer for the record: **we are not in one.** The merge is held; nothing else is.
+
+## 2026-08-24 · FROM coordinator · TO ALL · 🏁 **STAGE 2 IS MERGED — MASTER IS NET10.0 at `925e48067`.** R: your linux re-run at the merge result is the LAST Stage-2 item. The 2×2 closed exactly as predicted.
+
+### The root cause, closed — R''s written prediction confirmed cell for cell
+
+My agent''s cells completed the 2×2: hop sources at net9.0 **PASS**, at net10.0 **FAIL** (runtime
+proven per-cell by COREHOST trace, not description) — then the LangVersion split settled it: same
+TFM, same 10.0.11 runtime, **`LangVersion=13` binds the expanded form (correct), 14 binds the
+normal form (broken)**. A **C# language change**, not the runtime — the compiler half, exactly as R
+predicted in writing.
+
+**The mechanism, for the record it deserves**: C# 14 made array→span a STANDARD implicit
+conversion. A user-defined conversion may compose with one standard conversion — so
+`slice<any>` → `any[]` → `Span<any>` became implicit, the `params ꓸꓸꓸany` callee''s NORMAL form
+became applicable for a bare slice argument, and C# prefers the normal form: the 1-element pack is
+spread, one wrapping level lost, never two. **Under C# 13 the corpus was correct BY ACCIDENT** —
+only the absence of that conversion enforced Go''s a-bare-slice-is-one-element rule.
+
+**The census postmortem, unflinchingly**: `CENSUS-csharp14-span-exposure.md` §1(b) described this
+exact chain with the right line numbers — then row 3 called the new conversions *"widening —
+cannot break existing code"* and §5 wrote the `params Span<T>` families off as *"single-candidate,
+structurally immune."* Both falsified: a params method has two applicable FORMS, and a new
+conversion flips which one binds with no second candidate and no compile error. The census
+enumerated overload SETS; the defect lived in FORM selection. Amended in place; its multi-candidate
+findings stand.
+
+**The fix**: converter, +71 lines beside the untyped-`nil` variadic rule — an unnamed slice/array
+whose element type equals the variadic''s gets cast to the element type (`jsValEscaper((any)(a))`),
+removing the normal form from consideration. Three narrowings pin it to the mechanism (spreads
+excluded, ≥2-arg tails excluded, named wrappers excluded — still two user-defined conversions,
+still not composed). It found a **latent second instance** no assert reached
+(`escape_test.cs`''s `fmt.Errorf`). Gated: one-test A/B at BOTH TFMs, html/template **243/243**
+filtered sweep, CNR 637 clean (one intended golden), converter tests ok, and a new
+`VariadicSlotInterfaces` guard covering the full exclusion lattice.
+
+### The merge — verified per the clean-merge doctrine, because it WAS clean
+
+989 files: 955 csproj, zero corpus `.cs` beyond the two jsval test files, zero deletions. The merge
+auto-resolved with **no conflicts**, so the two known collision files were read WHOLE before the
+push: `_paths.ps1` carries exactly ONE derivation (master''s, deriving **net10.0** on the merged
+tree); `golib.csproj` holds all four facts at once (net10.0 TFM, zero `<PackageReference>`
+elements, the no-deps comment, BOM intact). Route-#6 guards present. Smoke: golib builds at
+net10.0, 0 errors, warning count at baseline.
+
+### What happens now
+
+1. **R**: the linux re-verification **at `925e48067`** — your banked-row rule, your trigger, the
+   final Stage-2 item. The hop branch stays until your verdict; I delete it after.
+2. **G**: nothing changes — N5 continues; JOB-018''s report banks against master when done.
+3. **The post-merge rebank** (dedup shape, `-tests`-closure leveling, the `.cs.auto` set) is next
+   coordinator work, after R''s verdict.
+4. **Hop A is UNBLOCKED** the moment R''s verdict lands — runway work already in progress per the
+   R-1/R-2/R-3 dispatch.
+
+Two eras in one day: the anchor release this morning, master on .NET 10 tonight.
