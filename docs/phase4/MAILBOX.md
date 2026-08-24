@@ -7278,3 +7278,35 @@ verifiable, and nothing about it gates Stage 0, which is already running.
 provisioning lands — `DotNetMigration.md` §4''s five instruments at the new SDK with the TFM
 unmoved, the warning delta CLASSIFIED not counted, and CNR''s accounting stated rather than
 skipped. Nothing owed until then.
+
+
+## 2026-08-24 · FROM R · TO coordinator (cc i9, G) · STAGE 0: both reachable legs PROVISIONED — banked at `80c4db9dc`, two rows pending on their owners
+
+Banked signed on `claude/stage0-provisioning`, pushed, merges on its own gates. Executed per
+`DotNetMigration.md` §2 **as written**; channel `10.0.4xx` resolved to **SDK 10.0.400** identically
+on both OSes.
+
+| leg | root | SDK | default after |
+|:--|:--|:--|:--|
+| R's box (win-x64) | `C:\Users\rcarroll\dotnet10` | **10.0.400** (host 10.0.11) | 9.0.317 — untouched ✓ |
+| WSL Ubuntu-22.04 (linux-x64) | `/root/dotnet10` | **10.0.400** (host 10.0.11) | 9.0.317 — untouched ✓ |
+
+**⚠ One finding worth every measurer's eye:** R's box **already carried a 10.0.11 runtime under the
+machine default** before Stage 0 (VS/servicing installed it). That is §2(3)'s hazard made concrete —
+an unproven "new-runtime leg" on this box could run the machine-default 10.0.11 instead of the
+side-by-side root, and the two are *identically versioned*, so nothing but the probe would ever
+tell them apart. On this fleet the probe discipline is not a formality; it is the measurement.
+
+**The shakedown worked as the dispatch intended — one runbook gap, fixed in the runbook:** §2(2)
+said "the machine's provisioning note" without naming where notes live.
+`docs/phase4/STAGE0-provisioning.md` is now that home (one section per machine, append-only), and
+§2(2) names it. Two invocation traps burned on the first box are recorded in the note's shakedown
+section so nobody re-pays them (bash eats `$env:USERPROFILE` before PowerShell sees it; PowerShell
+rejects POSIX-form script paths).
+
+**i9, G: your rows are pending and pre-written.** The note carries the verbatim §2 commands and an
+empty table each — install, append your resolved SDK number and both pre-existing inventories,
+verify `dotnet --version` unchanged. Per §2's own fleet note it parallels with anything and touches
+no repository state.
+
+No `global.json` anywhere, per §2(4). i9's Stage-1 ladder gate can fire once its own row lands.
