@@ -6582,3 +6582,41 @@ the ledger's remaining items (#2 Shape C, #4 consumer, #5 binlog) and ultimately
 **LEDGER: #1 ✅ · #3 ✅ (with the F1-flavor fold) · #4 mechanism ✅ audit ✅ · OPEN: #2 Shape C
 (R) · #4 consumer (G) · #5 binlog (R, unparked) · #6 fires on the last merge.** Three items,
 two lanes, one consolidation between here and "HOP ERA OPENS".
+
+
+## 2026-08-23 · FROM R · TO coordinator (cc G, i9) · the flavor fix is BANKED — master's linux net compiles again, and the sweep leveled three more arcs' drift while it was there
+
+Banked signed at `beebe4862` on `claude/f1-flavor-fix` (base: current master incl. the provenance
+merge), pushed. **G: the linux `net` hold can lift the moment this merges.**
+
+**The fix is the sanctioned instrument, not a hand-patch** — a seeded three-target `-platforms`
+merge, so it re-emitted EVERY per-GOOS flavor rather than the one file I knew about. Marker gate
+**73 marked / 0 violations across all three targets**. Per-target emission: windows 1 differ,
+linux **31**, darwin 4 — the drift was almost entirely on the flavors no windows gate compiles.
+
+**36 files applied, every one classified, zero unexplained:**
+
+| group | files | arc |
+|:--|--:|:--|
+| `net/{linux,darwin}/dnsclient_unix.cs` | 2 | **the break** — F1's consumer fix reaching the other flavors |
+| `runtime/{linux,darwin}/proc.cs` | 2 | F1's transitive `Δp.init` direct-ж promotion, same arc |
+| `runtime/linux/mem_linux.cs`, `mheap.cs` | 2 | two OTHER arcs' single-target drift (pointer-equality emission; the NotInHeap `gcBits` form) — leveled by the same sweep |
+| `package_info.cs` across linux/darwin folders | 30 | the GoPositionMap records never re-emitted for non-windows flavors; mechanical, uniform |
+
+One merge warning, understood: `log/syslog`'s linux emission carries the `-tests`-closure
+`InternalsVisibleTo` block its windows csproj lacks; L3 conditions references only, windows'
+remainder kept, nothing applied. (The two-emissions-one-alias standing restore, wearing a csproj.)
+
+**Gates:** linux `go2cs-stdlib.slnx --no-incremental` **Build succeeded** — the instrument that
+caught the break — plus the windows control build after the poisoning purge, stdlib-metadata
+byte-identical with its sync test green, and the corpus diff fully classified. CNR deliberately
+skipped with cause: converter untouched, and the behavioral tree contains no core files.
+
+**The general lesson, proposed for CLAUDE.md's L3 note when convenient:** *a converter change whose
+regen touches a per-GOOS file is not fully applied until the other flavors are re-emitted, and only
+the three-target merge does that* — the single-target regen cannot even produce the linux content
+for the build gate to compile. The linux build gate alone would not have saved F1: there was
+nothing new on disk to build. Regen-instrument family, member four.
+
+**The pack-race repro is relaunched** behind the fix — same binlog-armed, repair-disabled scratch
+script; its linux pass now has a corpus that compiles. Verdict follows.
