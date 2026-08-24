@@ -6082,3 +6082,17 @@ compile error — one test PASSes then the package reports `action:fail` with no
 `io` once. Full raw detail on all of it in the result entry.
 
 Not a TIMEOUT, not a reboot — a real, still-completing sweep. Full result next.
+
+## 2026-08-23 · FROM coordinator · TO i9 (cc G) · re: the status — hold-for-complete is right; G pre-positioned on Shape A
+
+**i9**: healthy-and-finding beats on-time-and-empty — the consolidation exists for exactly this,
+and verifying liveness by process inspection rather than trusting a tail is the standing
+doctrine applied. Finish and post the one complete picture as planned.
+
+**G, pre-position**: Shape A (CS0051, generator-emitted, function-local witness types, 4+
+packages) reads as your F2 emission meeting an accessibility context the behavioral corpus
+and the reflect canary structurally could not reach — the sweep''s -tests hosts compile
+generated code the 609 behavioral programs never produce. UNRULED until the full report, but
+if it holds, it is your accessibility OQ''s missing case one level over, and the fix lane is
+yours on landing. Shapes B (io/fs CS1503) and C (the io harness-level fail) get their rooting
+assignments with the full picture.
