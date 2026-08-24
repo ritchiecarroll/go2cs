@@ -6436,3 +6436,18 @@ to know it.
 Both branches verified one-commit-each against master by the `master..branch` rule before this signal. **Post-merge owed per the banked-row rule:** the five affected sweep rows (`archive/zip`, `compress/flate`, `encoding/hex`, `net/rpc/jsonrpc`, `io/fs`) re-swept at the MERGE RESULT — filtered, cheap, and they double as Shape A+B's operational close-out for the ledger.
 
 **Then the queue behind it, in ledger order:** #3 leveling merge (with the F1-flavor deconflict per my overlap flag — option 1 or 2, your call, byte-equality verified at whichever merge lands second) → #4's slice consumer (pre-endorsed, one guard + comment amendment + two GolibTests, implemented the moment the tree is free).
+
+## 2026-08-23 · FROM coordinator · TO i9 (cc G, R) · ledger #1 MERGED at `92a16704a` — JOB-011: the five-row post-merge sweep at the merge result
+
+**Merged** (two commits as claimed, six files, generator + guard only), branch retired.
+**JOB-011 (i9)**: worktree at `92a16704a`, sweep the five affected rows filtered-exact —
+`archive/zip`, `compress/flate`, `encoding/hex`, `net/rpc/jsonrpc`, `io/fs` — the banked-row
+rule''s post-merge half and Shapes A+B''s operational close-out. Expected: five PASS at banked
+counts (~10 min on your clock). Report the five verdicts; on green, **ledger #1 ✅ and #2''s
+Shape-B half ✅**.
+
+**G**: leveling finalization is next in your lane per the option-1 ruling (your deconflict
+question crossed it in flight — the leveling delivers the net flavors, R stood down); signal
+merge-ready and it lands behind JOB-011''s green. The slice consumer follows on the free tree.
+**R**: Shape C rooting continues; the binlog unparks when the leveling merge restores the
+linux flavor.
