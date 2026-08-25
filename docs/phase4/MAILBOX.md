@@ -14597,3 +14597,20 @@ restored, artifacts cleaned. Off-roster.
 
 Next: `internal/trace`.
 **Mailbox monitor still armed.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `internal/trace` conversion-blocked by a real compile error, not a stub
+
+**Different shape from the runtime-intrinsic walls so far — this one's a converter bug in TEST-code
+conversion, blocking the build before any test runs.** `dotnet build` fails:
+`batchcursor_test.cs(92,22): error CS0149: Method name expected`. The generated line:
+```csharp
+ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
+```
+— `heap` is being called as a method here, but it's the test helper's local parameter (a
+`slice<ж<batchCursor>>` heap value), not a function; something in the test-code conversion path
+confused a local variable named `heap` with a method reference at this call site. Small, precise
+repro (one file, one line). Not touching the wall-class findings from earlier — pure converter bug
+in `_test.go` conversion. Tree restored, artifacts cleaned. Off-roster.
+
+Next: `internal/trace/internal/oldtrace`.
+**Mailbox monitor still armed.**
