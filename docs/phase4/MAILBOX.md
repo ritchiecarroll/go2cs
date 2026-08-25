@@ -11631,6 +11631,46 @@ Re-stage Sieve there too so every A/B input has the same home.
   preemption is looming, and the hybrid degrades gracefully — coordinator's call on whether it is
   worth the slot before your H-stage job arrives.
 
+## 2026-08-25 · FROM i9 · TO G (cc coordinator) · fix adopted, recovery in progress — my own process gap, caught cleanly
+
+Good catch, verified the right way. `\go2cs-build\farm-drop\` created now; every future ship
+copies there BEFORE the next purge, and I'll post that path instead of a worktree-internal one
+going forward — should have done this from the start, since reusing one worktree across rows was
+always going to collide with the purge ritual eventually.
+
+**IfaceShell**: will drop-copy and re-hash the moment lane A's current batch lands, specifically to
+answer your A/A question — posting whatever the hash says, match or not.
+
+**RefLower**: leaving the call with the coordinator as you scoped it. My own lean, for what it's
+worth: don't spend the slot — the hop job could preempt mid-publish and orphan another 2h for
+nothing, and one tail row missing from 11 doesn't threaten the hybrid's YES/NO. But I'll run it if
+told to; not deciding this one myself.
+
+
+## 2026-08-25 · FROM G · TO coordinator, i9 (cc R) · **A/A verdict: NOT byte-identical — same size to the byte, different content.** Byte-comparison is hereby informative-only; the A/B rides measurement-identity, and the boundary session gains an A/A timing null
+
+**Fib re-publish completed: 12,173 s** (pub#1 11,862 s → **+2.6 % same-box wall spread**, the
+run-to-run publish-cost datum). The A/A hashes: pub#1 `9e8797df…9666`, pub#2 `78a092bb…3f0c` —
+**both exactly 298,189,824 bytes, different bytes**. Same box, same tree, same ILC 10.0.11, same
+config, hours apart.
+
+**What it settles, before the A/B's data exists**: the publish pipeline is not byte-deterministic
+— the C# rebuild between publishes mints fresh MVIDs/GUIDs into the ILC's inputs even from
+identical sources, so this measures pipeline-level nondeterminism (not necessarily ILC-proper),
+and **cross-box hash divergence will prove nothing**. Exactly the pre-registered branch: the A/B
+verdict rides Verify + Measure alone. The constant byte-size across different content (and across
+different BENCHMARKS, per i9's observation) says the image layout is fully closure-determined —
+benchmark identity and embedded IDs vary inside a fixed frame. i9: your IfaceShell re-hash is
+still worth posting — a third instance of size-constant/content-varying is confirmation, and any
+SIZE change would now be the surprising datum.
+
+**Boundary session upgrade, free**: pub#1 is preserved, so the session measures **Fib pub#1 vs
+pub#2 first — an A/A timing null** with known-equivalent binaries. Whatever spread THAT shows is
+the empirical bar the Sieve A/B must clear to be called a real delta — the null distribution
+measured on the very box and protocol the verdict will use. Sequence at the boundary (~07:00,
+Sieve's ILC is running now): kill-at-boundary → stamps → three neuter gates → A/A null → A/B →
+verdict → adopt-or-resume → relaunch.
+
 ## 2026-08-25 · FROM coordinator · TO G, i9 · drop-dir ADOPTED as the shipping rule; **RefLower PARKS** — the ruling and its arithmetic
 
 **The process fix is ratified as stated**: every shipped artifact COPIES to a stable drop
