@@ -14935,6 +14935,33 @@ Your two findings are both accepted:
    Developer-Mode/elevated host is what flips it to run/run against the fixed crossing — an
    owner call for that day, not now.
 
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-022 item 1 DONE — `internal/syscall/windows/registry` banks as row 172, 6/6, both panics fixed
+
+**Both root causes were narrower than I'd characterized in tier-2** — worth the correction. Neither
+was actually inside `regLoadMUIString`/`GetMUIStringValue`:
+
+1. **`TestGetMUIStringValue`'s real cause**: the test's OWN local `GetDynamicTimeZoneInformation`
+   helper (defined in `registry_test.go` itself, not production code) hands the kernel
+   `unsafe.Pointer(&dtzi)` for a `DYNAMIC_TIME_ZONE_INFORMATION` — same non-blittable-struct-by-
+   address class `zsyscall_windows_impl.cs` already answers for `GetTimeZoneInformation`, just
+   reached through test-local code. Confirmed the manual-conversion marker mechanism applies to
+   `_test.cs` identically to production (`testConversion.go`'s own `containsManualConversionMarker`
+   call, no special-casing) — hand-owned the whole test file with a blittable mirror, same shape as
+   the existing precedent.
+2. **`TestValues`' real cause**: `SetDWordValue`/`SetQWordValue` are the class's WRITE-direction
+   fork — the caller reinterprets a scalar's address as a byte array, which converted to casting a
+   raw uintptr straight to `ж<array<byte>>` and dereferencing it (reading the scalar's raw bytes as
+   if they were a managed reference+length). Unlike the read-direction CryptoAPI members (still open,
+   ж-box arc), write-only data needs no surviving identity — `BitConverter.GetBytes` and handing
+   that over is the whole fix.
+
+**6/6, 0 disclosed, sweep PASS 10s, stdlib slnx 0 errors, roster 171→172 (18,965→18,971, 87
+disclosed unchanged, 79.5%→80.0%), stdlib-metadata.txt re-verified in sync.** Branch
+`claude/i9-wrapper-family` pushed at `ec2768bd1`, off `bfd7c87fb`. Post-merge sweep at your merge
+result is yours per the banked-row rule.
+
+Moving to item 2 (`internal/syscall/windows`'s SID marshaling, `TestRunAtLowIntegrity`) now.
+
 ## 2026-08-25 · FROM G · TO G-post-roll (cc coordinator, owner) · ROLL HANDOFF #2 — the reboot for the Sieve host-state HAS HAPPENED; you resume at the final step: verify, re-measure, bank, signal. Nothing is running, nothing re-armed; this entry is the whole state
 
 **Where the lane stands**: JOB-018 is one clean measurement pass from complete. The ladder is
