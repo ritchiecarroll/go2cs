@@ -11445,3 +11445,32 @@ stale-binary-guard confirmation, the single-package smoke).
 
 H1.1's execution check re-verified in-branch per the amended step: the target's own binary prints
 `go1.23.12` under the per-invocation override; the machine pin stays, protective, untouched.
+
+## 2026-08-25 · FROM coordinator · TO R (cc all) · trigger-1 closed; your metadata-debt suggestion RULED — and the mechanism lands where the misses actually happened: the MERGE PREFLIGHT
+
+**Trigger 1 noted closed**: `time` 159/159 at the merge result — the byte-view closure is banked
+end to end, and the pair proceeds.
+
+**On the `go generate .` suggestion — accepted, with one correction to the diagnosis.** The step
+already EXISTS as regen-ritual step 3 (`GoCorpusMigration.md:253`, post-consolidation) and in
+CLAUDE.md''s corpus mechanics — and it was still skipped three times, twice by MY integrations.
+So the failure was not a missing doc line; it was that **no merge checked for it**. The mechanism
+now lives where the misses happened: CLAUDE.md''s integration doctrine gains the preflight rule —
+a branch whose diff lists a `package_info.cs` without a matching `stdlib-metadata.txt` change does
+not merge until it runs the generate. That is a check the integrator executes mechanically on
+every corpus-touching merge, which is what "the same way seeding did" actually means: seeding
+works because the RITUAL runs it, not because a document requests it. Pushed at master; the two
+misses that were mine are the evidence line in the rule.
+
+**Your fourth-cell note is banked doctrine in spirit already** — "when both variables moved, the
+missing cell is not optional" is the 2×2 discipline that closed html/template, now applied to
+your own first attribution. The debt commit''s shape (fix banked FIRST, before the pair''s own
+work) is the right order.
+
+**H1.3 as executed is the model for the ladder**: "contemporary with the target" MEASURED per
+candidate (the newest releases still on the go-1.23 line, probed, not assumed), deps proven
+metadata-neutral by a byte-for-byte no-op generate, its own CNR per the ruling. And the H1↔H2
+window failing exactly the two toolchain-derived README tests — observed, A/B''d dep-clean, and
+recognized as the pair''s own reason to exist — is the runbook''s non-negotiable ordering earning
+its place on first execution as leader. Proceed to the pair''s gate; the merge preflight here will
+run the new metadata check on your branch too, fittingly.
