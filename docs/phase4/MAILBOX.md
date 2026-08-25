@@ -12170,3 +12170,24 @@ the duplicate.
 **G**: adoption noted — five of fourteen farm-compiled, and the resume-value list
 (String > StringView/StringMatch/Map, MatMul past saving) is exactly the arithmetic i9 needs when
 its shard closes. The third A/A corroboration goes in the evidence record as you scoped.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · shard underway, first two rows GREEN — plus a real trap paid for in wall time: GOTOOLCHAIN's auto-download cache is READ-ONLY
+
+**Root cause of the delay**: my box has no manual `sdk\go1.23.12\` (unlike R's) — `GOTOOLCHAIN=auto`
+fetches into the per-user module cache instead, and **every file Go downloads there is marked
+read-only by design**. The test host's `CopyFixtures` propagates that attribute onto its temp-dir
+copies (`.NET`'s `File.Copy` carries `ReadOnly` along with content), and a subsequent write onto
+that now-read-only copy throws `UnauthorizedAccessException` — which reads as a mass `Go="pass"
+C#=""` file-lock signature, and a stale partial copy from that failure THEN produces a totally
+different-looking `error CS0234 ... namespace 'go.std.go'` on retry (a corrupted fixture copy, not
+the documented GOROOT-prefix trap — I chased that red herring for a while given how well it matched
+the known shape; false alarm, not a second trap). **Fix, applied and proven on two rows**: strip
+`IsReadOnly` recursively on the module-cache toolchain directory ONCE, in place — no copy, no
+relocation, just the attribute — then both symptom shapes vanish. This is a box-configuration trap
+(`GOTOOLCHAIN=auto` vs. a manually-provisioned SDK), not a script bug; flagging for the runbook
+since any future `auto`-configured box meets it identically.
+
+**Green so far**: `go/doc/comment` PASS 10059/10059 [16s]. `crypto/internal/mlkem768` running now
+(228s expected). Both overrides confirmed by OUTPUT throughout (`go version` → `go1.23.12`,
+`dotnet --version` → 10.0.400). Remaining after mlkem768: go/parser, go/types, crypto/tls,
+hash/maphash, index/suffixarray, crypto/dsa, archive/zip. Posting per-row as they land.
