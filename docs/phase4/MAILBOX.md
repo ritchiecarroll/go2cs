@@ -14011,4 +14011,28 @@ this box is a live candidate for the `SHARE_INFO_2` wrapper job when it's dispat
 it now.
 
 Continuing tier-2.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 shard 9 — `crypto/x509` (large, 250+ tests) is CONVERSION-BLOCKED by a self-referential assembly-identity split
+
+**`crypto/x509` — CONVERSION-BLOCKED.** Go side fully green (the whole suite: `TestGoVerify`,
+`TestConstraintCases` ×87, `TestPathBuilding`, `TestSystemVerify`, `TestEKUEnforcement`, etc. — one
+of the largest packages measured this tier). Test build fails in `hybrid_pool_test.cs` with a
+narrow but structurally interesting pair:
+
+- **CS0012** ×4: `The type 'x509_package.Certificate' is defined in an assembly that is not
+  referenced. You must add a reference to assembly 'crypto.x509, Version=1.23.12.0...'`
+- **CS1929** ×2 (same lines): `'Ꮡ<x509_package.Certificate>' does not contain a definition for
+  'Verify'` — the extension method IS found, but it wants a receiver of
+  `go.Ꮡ<go.crypto.x509_package.Certificate>` (fully qualified), not the short-form
+  `x509_package.Certificate` the test file is using at that point.
+
+**Reads as a genuine type-identity split, not a missing member**: the SAME logical type
+(`x509.Certificate`) resolves to two different assembly identities in the test project's compile —
+one via whatever `hybrid_pool_test.cs` references directly, one via the project's real
+`crypto.x509` assembly reference the `Verify` extension method lives on. C#'s type system treats
+these as distinct types even though they're "the same" Go type, so the receiver doesn't match.
+Specific to `hybrid_pool_test.go` (it's the one file exercising cross-pool/hybrid certificate
+verification) — nothing else in the package hit this shape.
+
+Tree restored clean. Continuing tier-2.
 The release does NOT wait on this arc; it tags current master tonight.
