@@ -14719,6 +14719,68 @@ artifacts cleaned. Off-roster.
 Next: `runtime/race` — the LAST package in the tier-2 tail.
 **Mailbox monitor still armed.**
 
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 TIER-2 CLOSE-OUT — the tail is empty, full ledger below
+
+**`runtime/race` closes it**: `"status": "not-applicable"` — race-detector runtime support needs
+the `-race` instrumented build, no eligible tests outside it. Clean E1. Tree confirmed clean,
+nothing to restore. **The 11-package tail from the 19:35 refresh is now fully measured; JOB-019
+tier-2 is CLOSED.** Everything below is raw measurement (fix-nothing/bank-nothing held throughout);
+full detail for any row is in its own post earlier in this file — this is the organized index.
+
+**Ledger, by category (today's tail + the earlier tier-2 rows this campaign):**
+
+**Fully validated, strong banking candidates** — `crypto/cipher` (14/14, 1 disclosed platform-skip,
+the first independent proof of that class), `net/http/internal` (15/15, 1 disclosed alloc-profile
+per the interface-shell doctrine). Plus the earlier-banked/mid-bank cluster from this campaign:
+`testing/fstest`, `go/doc`, `internal/platform`, `net/smtp`, `net/http/httptest`,
+`net/http/httputil`, `net/rpc`.
+
+**Genuine converter/runtime bugs — actionable, distinct root causes:**
+- `debug/pe` — padding array sized 8 vs 3 (`TestReadCOFFSymbolAuxInfo`), precise one-line repro
+- `internal/trace` — `CS0149` real compile error in `_test.go` conversion (`batchcursor_test.cs:92`)
+- `internal/trace/internal/oldtrace` — parser event-ordering state bug on 2 canned traces
+- `net/http/httptrace` — `reflect.MakeFunc`/`funcLayout` crash, reflect-bridge relevant
+- `net/http/pprof` — `threadCreateProfileInternal` nil-deref (distinct from the stub walls below)
+- `internal/syscall/windows/registry` — 2 panics, buffer/length marshaling (MUI string, DWORD write)
+- `internal/syscall/windows` — SID marshaling Win32 error (`TestRunAtLowIntegrity`)
+- `log/slog` — caller-info package-qualifier leak (likely systemic to the `-tests` pipeline, not
+  slog-specific) + a default-handler nil-deref at `handler.cs:120` (possible init-order relevance)
+- `unique` — GC-retention correctness bug (earlier this campaign)
+
+**Known architectural walls — not bugs, unimplemented-intrinsic gaps:**
+- `runtime/trace` — `getg` stub; `net/http/pprof` — 5 endpoints hit the already-known
+  `runtime/pprof` stub set (mem/mutex/block/goroutine/cpu-profile internals), now cross-confirmed
+  through a second, independent caller
+- `crypto/internal/boring/bcache` — `registerCache` stub, conversion-blocked at static-init;
+  likely inert-when-BoringCrypto-disabled on the Go side — exclusion-ledger candidate, not asserted
+- host-chdir class (`go/build`, `internal/coverage/cfile`) and the `reflect.typelinks`/
+  `runtime.newcoro` walls from earlier this campaign — `reflect.typelinks` closed itself via the
+  StructOf/gob merge
+
+**The allocation-guarantee class — now well-established across 5 independent packages, same
+signature every time (Go proves zero/N heap allocations via escape analysis or algorithmic design;
+the CLR has no equivalent and allocates)**: `math/big` (`TestNewIntAllocs` 0→1, `TestMulUnbalanced`
+excess), `net/netip` (57 fails, literally its entire alloc-guarantee surface —
+`TestNoAllocs`/`TestAddrStringAllocs`/`TestParsePrefixAllocs`), `log/slog` (12 of 23),
+`log/slog/internal/buffer`, `os` (`TestWriteStringAlloc` 1→4). Consistent enough now that it reads
+as a category the reduction arc or an E-class ruling should weigh in on as a class, not case by case.
+
+**Environment / not-a-finding:**
+- `os/user` — E2 broken-oracle (this box's AD domain trust is down; Go's own test fails here too)
+- `os` — `TestOpenFileCreateExclDanglingSymlink` + `TestReadlink`'s 6 volume/drive sub-cases +
+  `TestUTF16Alloc` all fail identically on Go AND C# on this box (matched, not divergences) —
+  environment (symlink rights / single drive letter), not conversion
+
+**Not-applicable (E1, no eligible Windows tests)**: `internal/syscall/unix`,
+`net/internal/socktest`, `internal/runtime/syscall` (converter-level refusal, same shape),
+`log/syslog`, `runtime/race`.
+
+**Deliberately still deferred, not in this tail**: `net`, `net/http`, `reflect`, `runtime` — the
+four hardest, largest packages; `net/http/cgi` and `net/http/cookiejar` were already characterized
+by someone else this campaign (S3 finding) and weren't re-measured.
+
+**Standing by for the next dispatch — mailbox monitor armed (background task).**
+
 
 ## 2026-08-25 18:30 · FROM G · TO coordinator (cc owner) · the Sieve anomaly is a HOST-STATE change, not a transient and not the instrument — every suspect measured and eliminated except one that a reboot settles; the bank is one 5-minute re-measure from clean
 
