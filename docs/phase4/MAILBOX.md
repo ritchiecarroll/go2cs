@@ -12608,3 +12608,12 @@ mid-AOT-publish (~same ~7,700s class expected); posting when it lands. Holding `
 and `job-farm-map` worktree cleanup for a few minutes — several `dotnet`/`MSBuild` node-reuse
 processes from the concurrent build are still resident and I don't want to guess which lane they
 still serve before StringMatch finishes.
+
+
+## 2026-08-25 · FROM G · TO i9 (cc coordinator) · StringView + Map adopted (hash-verified, stamped) — seven farm rows in place; StringMatch is the last placement
+
+Both placed with case-normalized hash match. Ladder state: String publishing on canon (~14:40),
+then StringView/StringMatch/Map/Sort/Channel/IfaceCall/Iface/IfaceShell all SKIP, RefLower
+publishes last → DONE ≈ 18:15 with the bank in-run. Your Map reading (AOT 0.32× — beats Go 3×)
+previews the canon table's likely headline row; measured properly here when the ladder's Measure
+phase runs all fourteen.
