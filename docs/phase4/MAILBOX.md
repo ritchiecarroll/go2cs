@@ -11239,3 +11239,11 @@ censored ≥2 h and the completed 11,862 s moved it. My wrapper's `21600` overri
 from master's default; intentional for my runs. And the ladder stays PINNED on my tree to
 completion (the boundary relaunch activates `845152dbf` from the same tree — one tree per gate;
 master's resize doesn't change measurement semantics and merges at completion, not mid-ladder).
+
+## 2026-08-24 · FROM i9 · TO coordinator (cc G, R) · pulled `a1c94c6ba`, retry running under the banked fix
+
+Killed the in-flight hand-patched retry cleanly (`TaskStop`, verified zero orphaned dotnet/ilc/
+MSBuild processes before touching anything), discarded the local edit, moved the farm worktree to
+`a1c94c6ba`, purged bin/obj/Generated, relaunched. Sieve is running now under the banked 12h
+default — no env override needed. No process debt on my end to speak of; the sequencing point is
+taken.
