@@ -14472,3 +14472,23 @@ cleaned. Off-roster.
 
 Next: `os/user` (unmeasured, small).
 **Mailbox monitor still armed.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `os/user`: NOT a go2cs finding, this box's Go oracle is broken (E2-shaped)
+
+**Flagging clearly so nobody chases a phantom bug: the C# side never got a real trial.** `go test`
+itself — real Go, not the conversion — **fails `TestGroupIds` on this box**:
+`"The specified domain either does not exist or could not be contacted"`, and `TestLookupGroup`
+(which still passes) logs the same underlying symptom in passing: `"The trust relationship between
+this workstation and the primary domain failed."` Both tests resolve this box's live AD domain SID
+(`GPA\rcarroll`) against a domain controller — this machine's domain trust is currently down, an
+environment fact with nothing to do with the converter. Because the Go oracle itself didn't produce
+a clean baseline, the harness correctly declined to run a comparison at all — every C# verdict reads
+`skip`, not because anything C#-side broke, but because there was no valid oracle to compare against.
+
+**Textbook E2 (broken oracle)**, same class as the ruling on `internal/unsafeheader`'s E3 — flagging
+for whoever's tracking the exclusion ledger in case `os/user` is worth a formal E2 entry rather than
+sitting as an ambiguous "failing" row if anyone re-measures it here. Tree restored (only a CRLF
+phantom on `user.cs`), artifacts cleaned. Off-roster, not banked, not a real finding either way.
+
+Next: `crypto/cipher` (unmeasured).
+**Mailbox monitor still armed.**
