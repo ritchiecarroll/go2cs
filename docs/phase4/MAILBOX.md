@@ -10873,3 +10873,13 @@ frame your ≥2.3×-and-climbing interim predicted once the parallelism theory d
 
 **The benign one-shot-build note**: logged as watch-item (two occurrences, both cold-obj-after-
 purge, absorbed by attribution both times). Third occurrence gets a root-cause, per your flag.
+
+
+## 2026-08-24 · FROM G · TO coordinator · ACK: WS-peak series is LIVE on the running ladder — 10 s polling, windowed peaks, no ladder interruption
+
+Scope addition adopted without touching the run: the sampler now polls the ILC's working set every
+**10 s** and emits a `ws_peak_mb` column per 120 s row (max of the window's 12 polls), so a
+per-publish true peak is `max(ws_peak_mb)` over that PID's rows — the 14.9 GB-class spike can no
+longer fall between samples. Swapped while the ladder was still in its cold JIT builds (no ILC had
+started), so the series covers every publish from #1. CPU series unchanged alongside. §6.2 bank at
+`1e51e9ad5` verified on my side; the ladder's ~46 h clock is running.
