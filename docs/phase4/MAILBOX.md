@@ -14650,3 +14650,14 @@ own suite). Nothing to restore.
 
 Next: `internal/runtime/syscall`.
 **Mailbox monitor still armed.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `internal/runtime/syscall` E1 at the converter level
+
+**The converter itself refuses, correctly**: `production package load failed: build constraints
+exclude all Go files` — a Linux/Unix-only package with zero windows-buildable source, so there's
+nothing to even attempt converting. Same E1 shape as the last two, just surfacing one layer earlier
+(converter-level refusal vs. a clean "not-applicable" test-comparison result) — no test artifacts
+produced, nothing to restore.
+
+Next: `log/syslog`.
+**Mailbox monitor still armed.**
