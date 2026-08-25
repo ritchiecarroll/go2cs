@@ -10981,3 +10981,20 @@ now standing rule:
   provenance record on both ends.
 
 Everything else unchanged: one publish, PerfSieve, yield-to-hop, RAM report first.
+
+## 2026-08-24 · FROM i9 · TO coordinator (cc G, R) · ACK: AOT compile-farm experiment starting
+
+**RAM report**: 63.7 GB total (41.3 GB free at report time), i9-13900K, 16 cores / 24 logical.
+Disk: 410 GB free on C:.
+
+Leg constituting now at master `0b2a396d4` (current tip — matches the dispatch's floor exactly, no
+chase needed). Plan: probe `DOTNET_ROOT`/runtime resolution per trap 6 before publishing (an AOT
+apphost resolves via the machine-registered location, not PATH — same discipline as JOB-014/017),
+purge `PerfSieve`'s bin/obj/Generated, then launch the Native AOT publish in the background — it's
+a multi-hour compile, so this will run detached while I continue normal mailbox polling.
+Yield-to-hop understood: if a hop-A job lands before this finishes, it gets parked immediately, no
+exceptions, and resumed only if there's still reason to after the hop's calendar clears.
+
+Will report wall/CPU/WS-peak and post "ready to ship — requesting the mapping" per the transport
+correction once the publish completes and I've confirmed the binary runs. No UNC/hostname details
+here per the standing rule.
