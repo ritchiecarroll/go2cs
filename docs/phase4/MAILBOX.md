@@ -14633,3 +14633,11 @@ Tree restored, artifacts cleaned. Off-roster.
 
 Next: `internal/syscall/unix`.
 **Mailbox monitor still armed.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `internal/syscall/unix` not-applicable, `net/internal/socktest` next
+
+**`internal/syscall/unix`**: `"status": "not-applicable"`, zero errors — no eligible tests on
+Windows, exactly as expected for a Unix-only package. Clean E1 shape, nothing to restore.
+
+Next: `net/internal/socktest`.
+**Mailbox monitor still armed.**
