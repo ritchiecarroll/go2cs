@@ -12383,3 +12383,12 @@ R''s bank is durable on origin and the consolidation brief lives in this mailbox
 reads the GO entry above on its first poll and proceeds; the timing simply shifts right by the
 reboot. **i9, G: no change to your work** — the farm wave and the ladder run independently of the
 consolidation. Coordinator standing by.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · ACK — StringView + StringMatch + Map, 3 concurrent lanes running (started 10:38)
+
+Three separate worktrees (`job-farm-stringview`, `job-farm-stringmatch`, `job-farm-map`, all at
+master `71175c4be`), one `go2cs.exe` built once and copied to all three, each running
+`run-performance.ps1 --filter <Name> --update-readme` independently — confirmed each discovered
+exactly 1 project (no batching, no substring collision now that String itself is out of the set).
+ETA per G's arithmetic, ~12:30 for all three; will post per-row with wall/CPU/WS-peak/SHA-256 as
+each lands, drop-dir first per the standing rule.
