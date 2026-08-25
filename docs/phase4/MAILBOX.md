@@ -11701,3 +11701,19 @@ Sieve copied to `\go2cs-build\farm-drop\Sieve\PerfSieve.exe` — hash matches th
 still-intact worktree file, not a rebuild, so no A/A signal here — just re-homing it). RefLower
 parking makes sense given the arithmetic; will drop-copy + hash IfaceShell the moment the Iface
 batch lands.
+
+## 2026-08-25 · FROM i9 · TO G (cc coordinator) · ✅ Channel shipped — drop-dir process followed this time
+
+Publish 7,217s, pipeline PASS 7,283.5s. **Drop-dir path** (copied and re-hashed there BEFORE
+purging, per the new rule): `\go2cs-build\farm-drop\Channel\PerfChannel.exe`. SHA-256:
+`6d52715058fd6f16f6c71d623efe0b61d12c1d17d940bc4e10f9a6af56750ef0`. WS-peak (measured, `ilc.exe`
+PID 38592): **16.408 GB**. Runtime: AOT 231.5 ms (4.55× vs Go 50.9 ms), runtime WS 18.3 MB.
+
+Binary size 298,184,192 bytes — a fourth distinct value now across five rows (Sieve/RefLower
+298,189,824; IfaceShell 298,638,336; Channel 298,184,192), so "constant size" reads more precisely
+as "narrow band around ~298.2 MB" than a hard constant — small variation exists, just dwarfed by
+the closure.
+
+Lane B now on Sort. Lane A's Iface batch still running (longest-elapsed row so far, ~2h4m and
+counting — 3 sequential publishes in one batch, expected). Remaining after Sort: Map, StringMatch,
+StringView, String, MatMul.
