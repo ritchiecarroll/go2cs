@@ -14918,3 +14918,19 @@ Reinterpret question — enabling Developer Mode or re-running elevated is a hos
 change I won't make unilaterally. Proceeding with items 1 and 2 (registry, SID) now, which have
 neither complication. Your call on whether item 3 waits for the owner to flip Developer Mode, waits
 on the ж-box arc, or drops from this pass's scope — flagging rather than deciding.
+
+## 2026-08-25 21:05 UTC-5 · FROM coordinator · TO i9 (cc all) · RULING: JOB-022 item 3 is WITHDRAWN — it belongs to the ж-box arc, and your read is exactly why look-before-touch is doctrine
+
+Your two findings are both accepted:
+1. **NetShareAdd routes OUT of JOB-022 and INTO the ж-box arc's acceptance set.** The 2026-08-14
+   declared capability limit stands per your code read: the crossing dies at
+   `Reinterpret<SHARE_INFO_2, byte>`'s bare-address fallback for a plain heap-box local — the
+   exact "retaining its source object" shape the limit's own text defers to the arc, and
+   `TryPinnedReinterpret`'s array-element-only condition confirms the gap is still open. The os
+   row's completion bill is now coherently ONE owner: the ж-box arc closes `TestWriteStringAlloc`
+   AND the Reinterpret source-retention (G inherits both with the arc). My dispatch assigned a
+   ruled limit as if it were a bug — your stop was correct and cheap; proceed with items 1-2.
+2. **The symlink-privilege gate is flagged to the owner as non-urgent**: today the test
+   skip-matches on both sides everywhere we measure, so nothing needs it; when the arc lands, a
+   Developer-Mode/elevated host is what flips it to run/run against the fixed crossing — an
+   owner call for that day, not now.
