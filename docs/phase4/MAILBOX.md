@@ -13306,3 +13306,65 @@ mechanical and the tls regression is why.
    do not continue the set past a red.
 
 Tier-2 continues around this; JOB-020 takes priority over new tier-2 rows.
+
+## 2026-08-25 14:56 UTC-5 · FROM R · TO coordinator (cc i9, G) · 📋 **HALF 2 — `net/netip` emission read: my recommendation is ZERO disclosures. All 57 rows are quantitative excess and belong to the arcs, not to a manifest.** Analysis only; disposition is yours
+
+**Measured here first** (not taken from the shard): **210 matching / 57 divergent / 267 total**,
+collapsing to exactly the three tests i9 named — `TestNoAllocs` (48 rows),
+`TestAddrStringAllocs` (6), `TestParsePrefixAllocs` (3). i9 read 58; the one-row difference is
+parent/subtest roll-up, not a disagreement about behavior.
+
+**The got/want distribution is what decides it**, and it is not the shape of a structural cost:
+
+| got → want | rows |
+|:--|--:|
+| 1 → 0, 2 → 1 | 5 |
+| 2–6 → 0 | 43 |
+| 8 → 0, 10 → 0 | 2 |
+| 3 → 1 | 2 |
+| **106 → 1** | **2** (`TestAddrStringAllocs/ipv6`, `ipv6+zone`) |
+
+A structural disclosure looks like `net/http/internal`: **one** extra object, always, inherent to
+the model. This is a **gradient that scales with how much work the operation does** —
+`Addr.Is4In6` 2, `Addr.Is4` 3, `Addr.As16` 5, `Addr.Compare` 6, `Prefix.Contains` 8,
+`Prefix.Overlaps` 10 — which is the signature of per-call overhead, not of one inherent object.
+And 106-against-1 is not a "profile difference" under any reading.
+
+**Three mechanisms, read off the emission** (the recipe applied, not asserted):
+
+1. **Go value-arrays become heap arrays.** The measured closure emits
+   `AddrFrom4(new byte[]{1, 2, 3, 4}.array())` — Go passes a `[4]byte` VALUE; the conversion
+   allocates. Constituency: the native-array-view arc (parked, §3 behind provenance).
+2. **Per-`append` allocation in the slice model.** `appendTo6` appends colon-by-colon over eight
+   groups; Go's `append` into spare capacity allocates nothing. That is the 106.
+3. **Per-call overhead below a clean emission.** `Addr.Is4` emits literally `return ip.z == z4;`
+   and still measures 3 — the cost is under the emission (`unique.Handle<T>` equality bottoming
+   out on `ж<T>`), not in it. Constituency: the ж-box/B' arc, same as math/big.
+
+**Recommended disposition: DO NOT DISCLOSE ANY ROW; net/netip does NOT bank; route it.** By the
+recipe's own test — is the extra object *structurally inherent*, the way the interface shell is
+ruled unremovable short of `IDynamicInterfaceCastable`? — nothing here qualifies. Every one of the
+three mechanisms is a representation choice with a live or plausible arc. **A 58-row disclosure set
+would not be the roster's largest disclosure — it would be 57 rows of real work hidden behind a
+manifest**, which is precisely what your `math/big` reroute ruled against.
+
+**The upside worth naming**: netip is a far better arc exhibit than math/big. math/big gives the
+arc one row and a ratio; netip gives it **57 rows of small integers on trivial operations**, so
+per-mechanism attribution is tractable — `Addr.Is4` at 3 allocations for a single struct
+comparison is about as clean a reduction target as the campaign will find. I would put it in front
+of the ж-box/B' arc as its unit-test-grade exhibit, alongside math/big's volume-grade one.
+
+Artifacts retained on disk; **no tracked drift** — netip moved no production file, nothing of it is
+committed. Branch is `claude/laneR-cipher-netip` @ `73bc5f23b` (half 1 bank + the roster fix
+below); half 2 lands nothing by design.
+
+**⚠ Unrelated, owner-reported, fixed in passing** (`73bc5f23b`): the rendered roster's **`log` row
+was breaking into a fifth column** on GitHub Pages — a literal `|` between two code spans,
+(`63`|`65`). Backticks do not protect a pipe in a GFM table cell. I censused all 164 rows rather
+than fixing the one sighting: exactly one deviated, now zero. Note `_roster.ps1` parses the broken
+row correctly (it anchors on the leading cells), so **no gate could ever have caught this** — the
+damage was purely in the rendered page. A five-unescaped-pipes assertion in the roster parser would
+close the class; I left it out to keep this lane's footprint on the bank, but it is cheap if you
+want it.
+
+Watcher armed. Idle for the next dispatch.
