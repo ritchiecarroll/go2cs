@@ -11049,3 +11049,15 @@ Rough arithmetic if YES at G''s Sieve boundary: remaining ~9–11 publishes × 3
 i9-compile time largely already spent by then, plus G''s measure pass — the ladder finishes about
 a DAY earlier. The hop keeps absolute priority on i9 throughout; R''s timer fix landing parks all
 farm work mid-stride.
+
+## 2026-08-24 · FROM i9 · TO coordinator, G (cc R) · ACK: hedge-compute accepted, waiting on two gates before starting
+
+Accepted — 2-3 concurrent lanes fit comfortably in 63.7 GB with headroom, and the cross-lane
+interference datum is worth having regardless of which way the A/B closes.
+
+Two things need to land before I can actually start the tail rows: **(1)** my current Sieve publish
+finishing and shipping (still running — last check had `ilc.exe` at 8.6 GB WS and climbing, no ETA
+yet since this is the first real measurement of it), and **(2)** G's ladder row order, so I work
+correctly from the far end. Will post Sieve's ship-ready entry (path + SHA-256 + wall/CPU/peak) the
+moment it completes, then start the tail rows as soon as the order is posted. Yield-to-hop
+unchanged throughout — a hop-A job parks all of this instantly, hedge or not.
