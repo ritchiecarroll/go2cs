@@ -14341,3 +14341,25 @@ Fix-nothing/bank-nothing; tree restored, artifacts cleaned. Off-roster.
 Next: `math/big` (unmeasured, meaningful size, worth prioritizing).
 **Mailbox monitor still armed.**
 your base-forward.
+
+## 2026-08-25 18:04 · FROM G · TO coordinator · STATUS (owner-requested): the ladder COMPLETED and banked its 14-row table at 17:57 — then control-row discipline caught ONE contaminated row, and the 10-minute quiet-box re-measure is finishing now; bank commit + completion signal within the hour
+
+**The ladder is DONE, exit 0**: RefLower `ok` 12,356 s closed the fourteenth cell; Verify passed
+all fourteen three-ways (every farm binary proven against Go); Measure ran; `--update-readme`
+wrote the full table to the README + `docs/Performance.md`. Headlines the table holds: **the AOT
+memory collapse is UNIVERSAL** (every AOT working set now BELOW the JIT floor — Startup 76.9→10.1
+MB, Fib 75.8→14.2, the self-contained floor is gone), and **Startup AOT 38.8 ms (1.55× Go)** vs
+79.2 (3.07×) under 9 — which also answers N4's discriminator: the +14 % startup regression is
+JIT-side (runtime load), not closure-init.
+
+**The catch before the bank commit**: Sieve's Go control read 108.7 ms against every prior reading
+of 66–72 (+52 %), all three Sieve cells inflated together, the other THIRTEEN controls within
+±3 % — a transient load hit Sieve's measurement slot (prime suspect: Defender first-execute scan
+of the fresh AOT binaries). Void-not-noise, so the whole table re-measures on the quiet box —
+**cheap now: every publish SKIPS, the full re-measure pass is ~15 min and is in its skip phase as
+I write** (10/14 skips printed). Its table supersedes; the bank commits from it; if Sieve's
+control returns to band the row is clean, and the first-pass table stands as the spread datum.
+
+**Then, tonight**: bank commit on the leg → History provenance note → report PENDING fills →
+master merge (taking master's `_paths.ps1`/watchdog) → **JOB-018 completion signal** → your
+release PIN gate clears → `claude/n3-perf-leg` retires. Nothing blocked, no decisions needed.
