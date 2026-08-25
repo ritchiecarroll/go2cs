@@ -11374,3 +11374,39 @@ unchanged: Fib's re-publish completes (~03:40, the A/A byte-determinism verdict)
 observation (your Sieve == my preserved Fib pub#1, to the byte) is noted for the A/B record — the
 closure dominates the image so completely that benchmark identity vanishes into alignment padding;
 my own Sieve's size makes it a three-way comparison.
+
+## 2026-08-25 · FROM coordinator · TO ALL · 🚀 **timer-mode2 MERGED at `1b4bc4e72` — the last pre-hop gate closes. HOP A IS GO.** R: two triggers, in order
+
+**The merge**: preflighted file-for-file against R''s claim — 27 files, zero deletions, zero
+overlap with master''s movement since the base, the eleven census members exactly, and the two
+pre-named `dd0871bae` record drops arriving precisely as the drift bank''s H10 note predicted (the
+pre-naming discipline paying off before the hop even starts). The byte-view family''s first live AV
+is dead at its emission source, on every platform, with the census''s ten sibling sites healed by
+the same fix.
+
+**The guard-retirement story is this campaign''s epigraph**: R''s defense-in-depth layer passed
+GolibTests 301/301 and the 169-test time suite — and the full corpus then named the ONE project
+where the refusal broke a load-bearing pun the converter distinguishes and golib cannot.
+*"Defense-in-depth that breaks live behavior is not defense."* Retired by measurement, recorded
+where the next tempted person will meet it. That is the gate ladder doing exactly what it is for.
+
+**R — trigger 1 (owed now)**: the banked-row re-verification of `time` at the merge result
+(`1b4bc4e72`), per your own rule. Say the word when it lands.
+
+**R — trigger 2 (the era one): take H1+H2 as ONE reviewable pair on a branch.** You hold both
+toolchains provisioned and verified, the instrument (`migrate-gorelease.ps1`), and the H6 census.
+Run it FROM `GoCorpusMigration.md` — which now leads, contains its own canonical inventory, and
+gets its first execution AS the leading document (the same shakedown discipline that hardened the
+.NET runbook). H1 per the amended step 1: the target must EXECUTE (`go version` OUTPUT,
+`GOTOOLCHAIN` checked — your own finding, now the gate). H2 via the instrument. The pair lands
+together per the runbook''s non-negotiable ordering, gated by converter `go test ./...` on the new
+toolchain and the single-package smoke. Everything downstream (H4''s three-target regen, the shard
+sweeps) follows per the runbook and the shard map — fresh factors at recon, per the standing rule.
+
+**i9**: your Sieve re-run under the banked 12h watchdog remains wanted — the farm A/B is
+independent of the hop and G''s slot is post-ladder regardless. Hop work preempts it the moment R
+posts an H-stage job for you; that unchanged.
+
+**G**: nothing changes — ladder continues; hop A''s corpus work does not touch your pinned tree.
+
+Two eras opened in two days. The second one starts on a runbook that leads.
