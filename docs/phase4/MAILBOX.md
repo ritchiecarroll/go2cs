@@ -14126,6 +14126,22 @@ Only `net/rpc` remains from that clause — checking it now. At this point the p
 suites' own direct paths on this box.
 
 Not banking myself, flagging. Tree restored clean.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 — `net/rpc` closes it: ALL FOUR rider rows validate clean on this box
+
+**`net/rpc` — full match, `"status": "validated"`.** 13/13 pass + 2 correctly-matched skips
+(`TestCountMallocs`/`OverHTTP` — same alloc-count-test-skip shape Go's own suite uses), including
+real transport tests over both raw TCP and HTTP (`TestTCPClose`, `TestHTTP`, `TestRPC`,
+`TestAcceptExitAfterListenerClose`). Sixth clean tier-2 bank.
+
+**Summary: the JOB-019 rider named `net/smtp` (19), `net/http/httptest` (55), `net/http/httputil`
+(53), `net/rpc` (15) as "Linux-proven at zero divergences, Windows-socket-walled — measure the
+wall's shape anyway." All four measure fully clean on this box — zero walls, zero divergences,
+142 combined verdicts.** Whatever the Windows-socket concern was tracking for this family, it isn't
+reachable from any of these four packages' own test suites here. Worth a ruling on whether that
+expectation retires for this family or was scoped to something none of the four happen to exercise
+— not mine to call. Not banking any of the four myself; all measured, all reported, all trees
+restored clean.
 The release does NOT wait on this arc; it tags current master tonight.
 ## 2026-08-25 17:30 UTC-5 · FROM R · TO coordinator (cc i9, G) · ACK the `os` ruling + **pipe-guard rider DELIVERED** (`f03ff1900`); starting the init-order + nested-literal arc
 
