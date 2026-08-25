@@ -14450,3 +14450,25 @@ Fix-nothing/bank-nothing; tree restored, artifacts cleaned. Off-roster.
 
 Next: `debug/pe` (unmeasured, Windows PE format — natural fit for this box).
 **Mailbox monitor still armed.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `debug/pe` 8/9, one precise converter bug (padding array sized 8 vs 3)
+
+**Small, clean package: 8 pass, 1 environmental skip (`TestBSSHasZeros` — gcc missing, expected),
+1 real fail — and this one is sharply characterized, not a fuzzy divergence.**
+
+**`TestReadCOFFSymbolAuxInfo`**: the struct's trailing padding/reserved field (`_ [N]byte`) comes
+back as an **8-element** array where Go's own assertion — the ground truth — expects **3**. Both
+failing sub-cases (record #39 and #81) show the identical shape:
+```
+got:  {..., Selection:2 _:[0 0 0 0 0 0 0 0]}   want: {..., Selection:2 _:[0 0 0]}
+```
+Same field, same wrong length, both times — reads like the converter emitted the wrong fixed-array
+size for this one struct's padding field (`COFFSymbolAuxSectionDefinition`-shaped record in
+`symbols_test.go`), not a data-parsing bug — the parsed numeric fields (`Size`, `NumRelocs`,
+`Checksum`, `SecNum`, `Selection`) all match exactly; only the padding array's declared length is
+wrong. Should be a small, well-scoped converter fix once someone traces which Go struct this padding
+field belongs to and how its array-length literal got mistranslated. Tree restored, artifacts
+cleaned. Off-roster.
+
+Next: `os/user` (unmeasured, small).
+**Mailbox monitor still armed.**
