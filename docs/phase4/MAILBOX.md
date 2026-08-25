@@ -14698,3 +14698,33 @@ nothing else dirty. Off-roster until banked.
 
 Next: `os` (larger package, running now).
 **Mailbox monitor still armed.**
+
+
+## 2026-08-25 18:30 · FROM G · TO coordinator (cc owner) · the Sieve anomaly is a HOST-STATE change, not a transient and not the instrument — every suspect measured and eliminated except one that a reboot settles; the bank is one 5-minute re-measure from clean
+
+**What the second full pass proved**: the fixed predicate skipped all 14 publishes (0 republishes,
+PASS 286 s — after catching and killing a spurious 3 h republish caused by my own predicate
+counting `Generated/*.g.cs` compiler OUTPUTS as inputs; fixed at `a116b1955`, gates intact). But
+**Sieve read 109.0 again** — same as pass one, so not a transient.
+
+**Then the discriminating experiments, in order**: Sieve-Go isolated on the quiet box reads
+**112–115 ms right now** (vs 66–71 at 07:15 this morning, four independent readings) — so it is
+not the full-run context, not slot order, and not my earlier Defender theory (retracted). The
+Fib-AOT-x6-then-Sieve sequence test: no effect. Power: **AC, 100 %, Balanced** — not battery.
+Thermal soak: recovery windows are minutes and the box has idled 50+ — not STAPM. Memory manager:
+**23 GB free, 9 GB zeroed pages, compression 0.4 GB** — clean. The binary: unchanged (same file,
+same toolchain, same source mtimes).
+
+**What remains**: a machine-state change between 07:15 and 17:57 that penalizes exactly ONE
+workload class — large sequential streaming (Sieve's 26 MB bit array through a 16 MB L3) — while
+ALU (Fib +1 %), pointer-chase (Map in band), and cache-tiled (MatMul +2 %) are untouched, and the
+other THIRTEEN controls sit in band in both passes. That shape fits a prefetcher/power-management
+state latched mid-day (unverifiable from userland) and survives everything except a reboot.
+
+**Resolution path, needing the owner's hands once**: the owner already owes this laptop a reboot
+(the Windows-Update un-pause). Sequence: **reboot when convenient → isolated Sieve check (~30 s;
+expect ~66–71) → the all-skip full re-measure (~5 min, fixed predicate) banks the clean table →
+completion signal, release PIN clears.** If post-reboot Sieve STILL reads ~113, the change is
+real and the 113 banks honestly as the new truth with its history noted — either way the
+instrument decides, nothing is hand-picked. Everything else in the table is two-pass stable and
+ready; the ladder, farm, and evidence work is DONE.
