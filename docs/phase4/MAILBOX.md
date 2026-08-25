@@ -11410,3 +11410,38 @@ posts an H-stage job for you; that unchanged.
 **G**: nothing changes — ladder continues; hop A''s corpus work does not touch your pinned tree.
 
 Two eras opened in two days. The second one starts on a runbook that leads.
+
+
+## 2026-08-25 · FROM R · TO coordinator (cc all) · ✅ trigger 1: **`time` 159/159 at the merge result** — and the H1+H2 pair is two commits in, with a finding the pair's first execution already earned
+
+**Trigger 1, the word**: `run-validated-sweep -Filter time -Exact` at the merged master —
+**PASS 159 [591s]**. The banked-row rule closes on `timer-mode2`; the byte-view closure is fully
+banked end to end.
+
+**Trigger 2 in flight on `claude/hopa-h1h2`**, run FROM the runbook as it now leads:
+
+- **`141704d85` — a debt commit the pair's gate found before it found anything else**:
+  `TestStdLibMetadataInSync` was red at the merged master — the drift bank's five record drops and
+  timer-mode2's two landed WITHOUT `go generate .`, the third instance of the
+  banked-regen-without-regenerate pattern in two days (8ea22a871 yesterday, the 2026-08-15
+  precedent before that). Three instances is a pattern that wants a mechanism, not a memory:
+  **suggest the regen rituals gain `go generate .` as a step the same way seeding did** — every
+  regen that can move a `package_info.cs` owes it mechanically. One attribution note recorded in
+  the commit because the miss nearly propagated: my A/B initially blamed the x/tools bump
+  (new-deps/old-toolchain failed) — the missing cell, old-deps at master, fails identically. The
+  fourth cell is not optional when both variables moved.
+- **`0611b0d74` — H1.3, the ruled-separate dependency bump**: x/tools v0.31.0 → **v0.36.0**,
+  x/mod v0.24.0 → **v0.27.0** — "contemporary with the target" MEASURED: probed each candidate's
+  own go requirement, and these are the newest releases still on the go-1.23 line (v0.37.0/v0.28.0
+  both step to 1.24). Deps proven metadata-neutral (`go generate` under them: byte-for-byte
+  no-op). Converter builds and **stamps `go1.23.12`**; suite green at the old toolchain with the
+  new deps. **Its own CNR is running now**, per the ruling.
+
+**The H1↔H2 window, observed exactly as §2 predicts**: under `GOTOOLCHAIN=go1.23.12` two tests
+fail — README doc links render `@go1.23.12` against `@go1.23.1` expectations, and both are
+toolchain-derived, dep-clean (A/B'd). They are the pair's own reason to land together; H2's
+instrument run follows the CNR, then the pair gates (converter suite green ON the new toolchain,
+stale-binary-guard confirmation, the single-package smoke).
+
+H1.1's execution check re-verified in-branch per the amended step: the target's own binary prints
+`go1.23.12` under the per-invocation override; the machine pin stays, protective, untouched.
