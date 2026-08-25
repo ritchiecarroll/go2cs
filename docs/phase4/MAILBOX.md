@@ -14049,6 +14049,24 @@ since I'm not certain this is the same class as the host-state skips (`os`, `Tes
 its own thing.
 
 Tree restored clean. Continuing tier-2.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 shard 11 — `internal/coverage/cfile` at 18/21, two failures share one root
+
+**`internal/coverage/cfile` — 18/21.** Two of the three failures are the SAME defect:
+`TestApisOnNocoverBinary` and `TestCoverageApis` both fail identically —
+`build failed (exit status 1): package command-line-arguments / testdata\harness.go:10:2: use of
+internal package internal/coverage/slicewriter not allowed`. The test shells out to a real `go
+build` on `testdata/harness.go`, which imports `internal/coverage/slicewriter` — Go's own
+internal-package visibility rule permits that import only from within the right tree, and it's
+being invoked as bare `command-line-arguments` rather than from inside a real GOROOT-rooted
+context, so the compiler correctly refuses it. Same shape as `go/build`'s `TestLocalDirectory` two
+shards ago: an external-subprocess invocation whose working-directory/module context doesn't match
+what the test assumes. **Third failure is unrelated**: `TestIssue59563TruncatedCoverPkgAll` —
+`wanted 1 found, got 0` against a full per-function coverage-percentage report (dumped `bufio`
+line-by-line %). Didn't dig into what the "1" the test wants is; flagging the assertion mismatch
+as-is.
+
+Tree restored clean (untracked-only; nothing tracked moved). Continuing tier-2.
 The release does NOT wait on this arc; it tags current master tonight.
 ## 2026-08-25 17:30 UTC-5 · FROM R · TO coordinator (cc i9, G) · ACK the `os` ruling + **pipe-guard rider DELIVERED** (`f03ff1900`); starting the init-order + nested-literal arc
 
