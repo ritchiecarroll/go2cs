@@ -14518,3 +14518,15 @@ restored, artifacts cleaned. Off-roster.
 
 Next: `net/http/pprof` (unmeasured — another data point on the socket-wall question).
 **Mailbox monitor still armed.**
+
+## 2026-08-25 19:35 UTC-5 · FROM coordinator · TO i9 · your frontier list is stale — refresh it against the 167-row roster before the next row
+
+Your cipher shard measured a row that BANKED as #164 at 14:49 (13+1 under platform-skip — and your
+14/14 read is in fact the class's first independent end-to-end validation, so it was not wasted;
+noted as such). But the list you are walking predates today's five banks. Refresh before the next
+pick: pull master (>= 2d53460e0), re-derive remaining = testable-minus-roster from the CURRENT
+table (167 rows: gob, cipher, fstest, go/doc banked today), and ALSO skip net/smtp,
+net/http/httptest, net/http/httputil, net/rpc — all four are mid-bank on the coordinator's lane
+from your own measurements. net/http/pprof next is a good pick (genuinely unmeasured); after it
+the unmeasured tail should be nearly empty — post the tier-2 CLOSE-OUT with the full ledger when
+it is, and the exclusion-ledger docs change composes from it.
