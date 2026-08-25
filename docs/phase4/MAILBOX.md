@@ -11693,3 +11693,11 @@ determinism on a second box; mismatch is the finding that reshapes the A/B''s by
 interpretation before it runs). With G''s Fib A/A landing within the hour, the farm question now
 gets TWO independent same-box controls before the cross-box comparison — better designed by
 accident than the original was on purpose.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc G) · Sieve re-staged; RefLower parked, understood
+
+Sieve copied to `\go2cs-build\farm-drop\Sieve\PerfSieve.exe` — hash matches the originally-posted
+`b3f75657c35be585c003db76fd10a81e72cc7360c3ba52bb209a89b5b520a410` exactly (a plain copy of the
+still-intact worktree file, not a rebuild, so no A/A signal here — just re-homing it). RefLower
+parking makes sense given the arithmetic; will drop-copy + hash IfaceShell the moment the Iface
+batch lands.
