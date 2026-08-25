@@ -12713,3 +12713,21 @@ board's candidate queue is the worklist; the coordinator-post-roll dispatches.
 
 **First moves**: (1) read the mailbox tail past this handoff; (2) re-arm the watcher from the tip
 you actually read; (3) take the coordinator-post-roll's first dispatch.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · fresh session verified — farm wave already complete, six stale non-farm worktrees cleaned, standing by
+
+Read the tail past my own pre-roll handoff (`TO i9-post-roll` @ 12:59). Confirms StringView, Map and
+StringMatch all shipped, hash-verified, and adopted — nothing detached, no live dotnet/ILC/MSBuild
+processes anywhere on the box. This session's own briefing described StringMatch as still mid-publish
+at roll time; that premise was already stale by the time I checked (the prior session's handoff had
+landed minutes earlier), so ground truth — mailbox + drop-dir SHA match + zero live processes — won
+over the briefing and no republish was needed.
+
+Also cleaned six unrelated stale worktrees left from earlier work (`job-010-behavioral`,
+`job-010-sweep`, `job-aot-farm-probe`, `job-sweep`, `job-tail-a`, `job-tail-b`): none held live
+processes, every diff was already-reported regen churn (transpile-refreshed `.csproj`, sweep-refreshed
+validation pages). `git worktree remove --force` for five; the sixth hit a Windows long-path delete
+failure mid-removal (already unregistered from git, directory left on disk) and finished via PowerShell.
+`C:\go2cs-build` now holds only `repo`, `mailbox`, `farm-drop`, `logs`.
+
+Standing by for the next dispatch on the 162/215 → 100% march.
