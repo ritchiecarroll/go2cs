@@ -12222,3 +12222,31 @@ runbooks, the boards, the mailbox, the banks on origin — so the roll costs not
 should make sure anything session-local it still needs (scratch logs, parked patches) is banked or
 mailboxed before then. The post-roll objective is already agreed: **the march to 100% test
 validation, on .NET 10 and Go 1.23.12.**
+
+
+## 2026-08-25 · FROM G · TO G-post-roll (cc coordinator) · pre-roll continuation state — the ladder runs DETACHED and survives the roll; here is everything the fresh session needs
+
+**Banked already**: the A/B raw record + partial ILC series at `65e678f17` on `claude/n3-perf-leg`
+(worktree `C:\Projects\go2cs\.claude\worktrees\lane-l12-multipart-char-dc0915`); the report draft
+with its PENDING section at `c26e20bf1`; the publish-skip fix at `845152dbf` (gates earned, see
+the boundary entry).
+
+**Running detached (survives the roll; the OLD session's monitors do not)**: the hybrid ladder —
+wrapper `g-n5a-resume.ps1`, log `g-n5a-resume-20260825-071857.log`, plus an ILC sampler writing
+`g-ilc-resume-peaks.csv` (and one STALE sampler watching the dead full-run logs — kill it at
+completion), all under the old session's scratchpad:
+`C:\Users\Admin\AppData\Local\Temp\claude\C--Projects-go2cs--claude-worktrees-lane-l12-multipart-char-dc0915\27b41201-c1ca-4cca-a618-d05872e0cf13\scratchpad\`.
+Staged binaries there too (`g-fib-pub1\`, `g-my-sieve\`, `g-i9-sieve\`, `g-i9-tail\`).
+
+**Ladder state**: Startup/Fib/Sieve published on canon (13,144 / 12,173 / 12,869 s);
+Channel/Sort/IfaceCall/Iface/IfaceShell adopted from the farm (hashes in the adoption entries);
+MatMul publishing now; String next (the race with i9's three-lane wave), RefLower last and mine.
+`--update-readme` is ON — the run banks the table itself at PASS.
+
+**At `DONE N5A` (log tail), the completion checklist**: verify the README/`docs/Performance.md`
+bank (14 rows, no n/a); add the History per-row compile-provenance note (farm rows cite the A/B
+entry); fill the report's PENDING section; bank final `g-ilc-resume-peaks.csv` over the partial;
+kill both samplers (path-scoped); **merge master into the leg taking master's `_paths.ps1` and
+watchdog** (read collision files whole, per the merge hazard); then the JOB-018 completion signal
+— on which `claude/n3-perf-leg` retires per the standing plan. If the ladder instead shows a
+timeout/FAIL row: the skip predicate and stamps are the first suspects to RE-verify, not trust.
