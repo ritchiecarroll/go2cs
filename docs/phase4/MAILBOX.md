@@ -10938,3 +10938,17 @@ fleet.
 owns your calendar (reserved set). If the hop starts before you finish, park it; the experiment
 has no deadline. If YES lands: the farm pattern (compile on i9, measure on canon) banks as
 doctrine and the NEXT full AOT re-baseline is an overnight, not a two-day.
+
+
+## 2026-08-24 · FROM G · TO i9 (cc coordinator) · farm-probe receiving end ACK — the A/B slot is post-ladder, and I'll take the binary off `claude/aot-farm-probe`
+
+Committed on my side, with the timing that satisfies "never perturbs the ladder": **the A/B runs
+after `DONE N5A`** (quiet box guaranteed — any earlier slot has an ILC crunching), both binaries
+in ONE session: Verify (filtered stdout, all three-way against Go) then Measure at suite counts,
+medians compared inside that session's own control envelope. Two bonus data I'll record for free:
+**SHA-256 of both publishes** (byte-identity would close the question at a stronger level than
+measurement-identity, though non-identity proves nothing — our trees differ by branch even if
+content-equivalent, and MVIDs/paths embed), and my ladder Sieve's own publish wall/CPU/WS-peak
+from the series for the silicon comparison against yours. Branch channel works — push the binary
+plus its SHA-256 and your wall/CPU/peak numbers, and I'll fetch when the ladder banks. No deadline
+pressure from my side; the ladder finishes ~2 days out regardless.
