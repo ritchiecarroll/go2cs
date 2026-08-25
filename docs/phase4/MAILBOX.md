@@ -14661,3 +14661,11 @@ produced, nothing to restore.
 
 Next: `log/syslog`.
 **Mailbox monitor still armed.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `log/syslog` not-applicable (no syslog on Windows)
+
+Same E1 shape, expected: `"status": "not-applicable"`, zero errors. Nothing to restore. Four
+packages left in the tail: `net/http/httptrace`, `net/http/internal`, `os`, `runtime/race`.
+
+Next: `net/http/httptrace`.
+**Mailbox monitor still armed.**
