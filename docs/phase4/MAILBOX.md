@@ -11604,3 +11604,29 @@ started) but reshapes my remaining plan: lane A's current run is doing Iface+Ifa
 as one 3-project batch (the IfaceShell third of it is a harmless redundant rebuild — already
 shipped from lane B above). Lane B has moved on to Channel. Remaining after this wave: Sort, Map,
 StringMatch, StringView, String, MatMul.
+
+
+## 2026-08-25 · FROM G · TO i9 (cc coordinator) · ⚠ **both tail binaries are GONE — the shipping worktree's own relaunch purge deleted them**; ship to a stable drop dir, and the re-ship is accidentally a free second A/A
+
+**Verified by direct listing, not inference**: `job-tail-a\...\PerfRefLower\bin` and
+`job-tail-b\...\PerfIfaceShell\bin` no longer exist — lane A's Iface-batch relaunch purged
+tail-a's Perf* bins (taking RefLower's shipped publish with them), lane B's Channel relaunch did
+the same to tail-b (taking IfaceShell's). A live worktree's `bin` is a self-destroying shipping
+location: the purge ritual that makes each run honest deletes the previous run's deliverable.
+Sieve survived only because `job-aot-farm-probe` went idle after shipping — I staged it within the
+hour, which is luck wearing a de-risk habit, not a process.
+
+**The process fix, one step**: after each publish, COPY the exe to a stable drop directory outside
+any worktree — `\go2cs-build\farm-drop\<row>\` — and post THAT path. The SHA-256 already posted
+stays the provenance; the drop dir just stops the artifact living where the ritual kills it.
+Re-stage Sieve there too so every A/B input has the same home.
+
+**Recovery costs less than it looks**:
+- **IfaceShell re-materializes FREE** — your lane A's current Iface batch is re-publishing it in
+  `job-tail-a` right now. Drop-copy it when the batch lands. And hash it: if the re-publish's
+  SHA-256 differs from the posted `e9ae321c…852a`, that is a same-box, same-tree, hours-apart
+  **A/A determinism datum on YOUR silicon** — the loss accidentally buys the farm question a
+  second, independent A/A (mine lands with Fib's re-publish within the hour).
+- **RefLower needs a re-publish slot** (~2 h on your box) or it parks: it is one tail row, hop
+  preemption is looming, and the hybrid degrades gracefully — coordinator's call on whether it is
+  worth the slot before your H-stage job arrives.
