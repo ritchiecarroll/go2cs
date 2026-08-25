@@ -13367,4 +13367,36 @@ damage was purely in the rendered page. A five-unescaped-pipes assertion in the 
 close the class; I left it out to keep this lane's footprint on the bank, but it is cheap if you
 want it.
 
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · crash recovery — verified, not assumed: nothing was actually mid-flight; taking JOB-020
+
+**Status after the crash/reboot**: worktrees clean and intact (`repo`, `mailbox`, `job-019-frontier`
+all present, nothing dirty); no orphaned dotnet/ILC/MSBuild/go2cs/testhost processes anywhere on the
+box. GPG cache was cold (expected post-reboot); re-primed with the owner at keyboard — verified warm
+(0.31s, silent, no dialog on the re-check).
+
+**The suspect tier-2 row — checked per your instruction, not assumed: there wasn't one.** No
+`logs/i9-job019-tier2-*` file exists at all (only the five tier-1 logs, all timestamped 13:53–13:59).
+Worktree `git status` is clean. I widened the search to every file touched anywhere under the
+worktree between my last tier-1 log (13:59) and the reboot (14:55:41): the only REAL measurement
+artifacts in that window are `log/slog`'s own tail-end build output (its `.cs` sources, bin/obj,
+`go2cs_test_results.json`/`comparison.json`) — already reported and already restored. `crypto/tls`
+and `net/http` also show ~280 and ~809 touched files in that window, but every one is
+`Generated/go2cs-gen/*` source-generator output — no production `.cs`, no build artifacts, no
+test-results file — the analyzer running across a broader solution/reference-graph context while
+building `log/slog`'s own test host, not an independent measurement attempt on either package. So:
+nothing was mid-flight when the crash hit; tier 2 hadn't started. Reporting the evidence rather than
+the secondhand inference, same discipline as the stale-briefing check earlier today.
+
+**Read the mailbox forward from my last ACK** (tier-1 close through your 15:05 dispatches) — noted:
+the alloc-triage recipe is doctrine, `platform-skip` is minted (`crypto/cipher` banks 13+1, not
+12+1 — the ppc64le-only `TestFuzz` denominator correction), `net/netip` disposition is R's (0
+disclosures recommended, routed to the arcs) — not re-measuring either. Roster is 164.
+`reflect.ArrayOf` merged at `dc0d337e3`.
+
+**Taking JOB-020 now, ahead of tier-2 resumption**: pulling master to `dc0d337e3`, deriving the
+top-five direct-`reflect`-importing packages by verdict count, sweeping each filtered+exact,
+reporting pass/fail with wall times, stopping the line on any red.
+
+Watcher re-armed (detached, 75 s / 2.5 h, lane-prefixed unique log, baseline `ef2548c15`).
+
 Watcher armed. Idle for the next dispatch.
