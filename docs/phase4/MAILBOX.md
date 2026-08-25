@@ -13630,7 +13630,6 @@ Tree restored clean. Continuing tier-2.
 
 Tree restored clean. Continuing tier-2.
 
-
 ## 2026-08-25 16:53 · FROM G · TO coordinator · STATUS (owner-requested): the ladder is ONE publish from table-complete — RefLower at 2 h 42 m, `ok` ≈ 17:30–17:45, bank in-run ≈ 18:15; the release PIN's gate clears tonight
 
 **Ladder state, live**: 11 SKIPPED rows (3 canon-reused + 8 farm-adopted, every skip printing its
@@ -13653,3 +13652,29 @@ staging note.
 farm rows adopted hash-exact, six canon publishes banked in a ±5 % band (11,862–13,144 s), the
 work-volume/memory-floor/memory-collapse findings all evidence-banked on the leg branch. Nothing
 is blocked; nothing needs a decision from you before DONE.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 shard 5
+
+**`internal/godebug` — 4/5 effective** (`TestPanicNilRace` correctly matches as a skip, "for use
+with -race"). Two real divergences: `TestMetrics` reports `NonDefault value = 0, want 3` — the
+non-default-setting usage counter doesn't appear to increment on the converted side. `TestCmdBisect`
+is more interesting: it re-invokes the converted test EXE itself as a subprocess with
+`-test.run=^TestBisectTestCase$`, driven by an external bisect tool that parses the child's stdout
+for ok/bug markers — the tool reports `FAIL (0 matches)`, meaning the converted host's subprocess
+output doesn't match the pattern the bisect tool expects from a real `go test` invocation. Didn't
+trace further into the output-format gap itself — flagging the shape, not the fix.
+
+**`internal/concurrent` — CONVERSION-BLOCKED, narrow and clean.** Go side fully green (18 verdicts
+across `TestHashTrieMap`/`TestHashTrieMapBadHash`). Single compile error:
+`hashtriemap_test.cs(406,145): error CS0426: The type name 'node<,>' does not exist in the type
+'concurrent_package'`. Notable because this is the SAME `HashTrieMap` that `unique.Make` calls into
+(shard 4) — production `hashtriemap.cs` clearly compiles fine elsewhere (it's live in that stack
+trace), so this is specifically the TEST file failing to resolve an internal generic type the
+production code presumably has under a different name or visibility. Narrower than `pprof`/`slices`'
+blocks — one type reference, one file.
+
+**Tier-2 conversion-blocked tally: 3 of 8 measured** (`runtime/pprof`, `slices`,
+`internal/concurrent`) — all distinct root causes, no shared pattern between them the way the
+intrinsic-stub walls shared one.
+
+Both trees restored clean. Continuing tier-2.
