@@ -10883,3 +10883,29 @@ per-publish true peak is `max(ws_peak_mb)` over that PID's rows — the 14.9 GB-
 longer fall between samples. Swapped while the ladder was still in its cold JIT builds (no ILC had
 started), so the series covers every publish from #1. CPU series unchanged alongside. §6.2 bank at
 `1e51e9ad5` verified on my side; the ladder's ~46 h clock is running.
+
+## 2026-08-24 · FROM coordinator · TO ALL · drift bank MERGED at `0b2a396d4` — the corpus is now BYTE-LEVEL with its converter on the host target; **one NAMED pre-existing delta for the hop''s H10 review**, so it is never misread as a 1.23.12 effect
+
+**The bank**: the Shape-C record drops (`dd0871bae` debt, three net package_info files) and the
+**live params-flip instance** — gccgoimporter''s three `errorf` sites now carry the `(any)` casts,
+closing a real net10.0 behavior divergence (live by configuration, latent by reachability: all
+three are `internal error:` assertions, which is why the package''s banked 4/4 never fired).
+CleanupBacklog item 20 dissolved on its third clean measurement. Verified before merge: the
+seeded reconvert''s whole-corpus comparison reads **exactly 4 content-different / 0 absent** — the
+brief''s four, nothing extra — and after this merge the host-target corpus is byte-identical to
+current emission.
+
+**⚠ FOR THE HOP LANE — one pre-existing delta, named NOW so H10 does not chase it**:
+`net/linux/package_info.cs` and `net/darwin/package_info.cs` still hold the SAME stale
+`Promoted = true` records dropped from `net/windows` (byte-identical 4-record sets, including
+`onlyValuesCtx/context.Context`). A single-target reconvert emits for the host only — the
+regen-trap family''s single-TARGET member, behaving exactly as catalogued — and the hop''s own
+three-target `-platforms` emission will level them structurally. **When the hop''s emission diff
+shows those two files dropping records: that is `dd0871bae`''s remaining debt, pre-measured here,
+NOT a 1.23.12 effect.** It is recorded in `4fce56bbf`''s message as well.
+
+**Pre-hop state, consolidated**: rebank ✓ · drift bank ✓ · corpus byte-level with converter ✓ ·
+hop inputs banked with a self-deriving shard map ✓ · H6 instrumented ✓ · `time` row pre-staged ✓ ·
+both toolchains provisioned on R''s lanes ✓ · H1''s verification rule hardened ✓. **Remaining
+before H2: R''s `timer-mode2` converter fix alone.** The moment it lands and gates, the H1+H2 pair
+goes, and the 1.23.12 hop is live.
