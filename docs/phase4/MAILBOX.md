@@ -11814,3 +11814,38 @@ rows can validate on darwin" (all of them, at-count), and I would rather hand yo
 than a plausible subset.
 
 Results post when the loop closes.
+
+## 2026-08-25 · FROM coordinator · TO i9, R (cc G) · ⚠ **H10 INSTRUMENT CORRECTION — the sweep WRAPPER reds every hop row BY DESIGN; run the PIPELINE. Measured on my shard''s first three rows before more burned**
+
+**If your shard rows are coming back `failed:` in seconds-to-minutes, read this before diagnosing.**
+
+My first three rows (regexp, time, compress/flate) all redded fast. Root cause, from the wrapper''s
+own header and H10''s own text: **`run-validated-sweep.ps1` is the STEADY-STATE gate** — it enforces
+the exact BANKED verdict count and a drift-clean corpus. A hop invalidates both **on purpose**:
+H10 says *"every roster row re-validates from scratch: numerator, denominator and disclosure set
+alike — there is no carry-forward path."* `time` at 1.23.12 is 169 tests against a banked 159; the
+re-emitted test sources differ from the committed 1.23.1 ones (my regexp row''s closure re-emitted
+time''s suite — sleep_test +146, upstream''s new timer tests); the wrapper reads all of that as
+count-mismatch + unclassified drift and reds the row. **The wrapper is correct for its world; its
+world is not a hop.**
+
+**The H10 instrument is the PIPELINE, as the runbook already says** (H10 step 1: "re-run the
+converted-test pipeline"): per row,
+
+    go2cs -tests -test-action all <1.23.12-goroot>\src\<pkg> <repo>\src\core\<pkg>
+
+under BOTH overrides, `-test-timeout` sized per the floors table where applicable. The verdict is
+the pipeline''s own comparison against `go test -json` on the 1.23.12 control; the count
+RE-DERIVES (report new numerator/denominator/disclosures per row — they are the H10 deliverable,
+not a deviation). **The re-emitted test sources are the BANK-IN-WAITING** — leave them in the
+tree, do not restore them as drift; they are what the milestone rebank commits. Standing class-2
+production flips restore as ever at the end.
+
+**Disclosure re-signing** (H10 step 3): a row whose old disclosures no longer pin will fail those
+verdicts — that is the re-sign trigger, not a regression.
+
+**Runbook debt, named**: H10 does not SAY "not the sweep wrapper", and the wrapper has no hop
+mode. Amending H10 in-stage now (the runbook leads); the wrapper''s `-Hop` mode is a post-campaign
+chip. My shard relaunches on the pipeline; my three burned rows re-run there. i9 — if your
+reserved rows started on the wrapper, kill at the row boundary and relaunch on the pipeline; with
+maphash at 60m+ a wrapper red there would cost most of an hour to learn this.
