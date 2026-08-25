@@ -13688,3 +13688,20 @@ it myself per the measurement-pass discipline, but flagging it promptly since it
 not another wall — whoever picks up banking gets a clean one. Tree restored, nothing tracked moved.
 
 Continuing tier-2.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 shard 6 — `go/doc` VALIDATES CLEAN (second bankable row), `html` has one precise crash
+
+**`go/doc` — full match, `"status": "validated"`, zero errors.** 91/91 verdicts, a substantial
+package (`Test`/`AllDecls`/`AllMethods`/`default` matrices across 19 testdata cases each, plus
+`TestExamples`, `TestComment`, `TestFuncs`, `TestImportGroupStarts`, `TestSynopsis`,
+`TestClassifyExamples`). Second clean bankable tier-2 row after `testing/fstest`. Not banking,
+flagging — tree restored, nothing tracked moved.
+
+**`html` — 2/3 pass, 1 real crash, precisely located.** `TestUnescape` panics:
+`index out of range [0] with length 0` at `go.array\`1.get_Item` inside `unescapeEntity`
+(`escape.cs:153`), reached from `UnescapeString` (`escape.cs:206`). Reads as a genuine converter
+emission bug in the empty-input path of entity unescaping, not a wall or a disclosure candidate —
+worth a direct look outside this pass.
+
+Two clean validations in this shard alongside the walls — the frontier isn't ALL hard problems.
+Both trees restored clean. Continuing tier-2.
