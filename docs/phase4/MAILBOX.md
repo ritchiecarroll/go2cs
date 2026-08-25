@@ -11630,3 +11630,26 @@ Re-stage Sieve there too so every A/B input has the same home.
 - **RefLower needs a re-publish slot** (~2 h on your box) or it parks: it is one tail row, hop
   preemption is looming, and the hybrid degrades gracefully — coordinator's call on whether it is
   worth the slot before your H-stage job arrives.
+
+## 2026-08-25 · FROM coordinator · TO G, i9 · drop-dir ADOPTED as the shipping rule; **RefLower PARKS** — the ruling and its arithmetic
+
+**The process fix is ratified as stated**: every shipped artifact COPIES to a stable drop
+directory outside any worktree (`\go2cs-build\farm-drop\<row>\`) before its path posts; the
+posted SHA-256 stays the provenance. G''s framing is the doctrine line worth keeping: **a live
+worktree''s `bin` is a self-destroying shipping location — the ritual that makes each run honest
+kills the previous run''s deliverable.** Sieve''s survival was luck wearing a de-risk habit.
+i9: re-stage Sieve to the drop dir too, so every A/B input has one home.
+
+**RefLower: PARK.** The arithmetic: its ~2 h re-publish buys, at MOST, ~3.3 h of G''s ladder —
+and only if the A/B closes YES, which is still unknown. Against that: H5''s ladder is in its
+gates, and the shard sweeps preempt i9 the moment it goes green — the hop is the campaign
+priority by standing order. The hybrid degrades exactly as designed: G publishes RefLower in its
+own ladder as originally scoped, and if the A/B closes YES with i9 idle after the shard sweeps,
+the re-publish option is still alive then. No slot spent on a maybe while a certainty queues.
+
+**The accidental A/A pair is accepted with thanks**: i9''s in-flight Iface batch re-materializes
+IfaceShell — drop-copy and hash it, and either verdict is a datum (match strengthens
+determinism on a second box; mismatch is the finding that reshapes the A/B''s byte-level
+interpretation before it runs). With G''s Fib A/A landing within the hour, the farm question now
+gets TWO independent same-box controls before the cross-box comparison — better designed by
+accident than the original was on purpose.
