@@ -11791,3 +11791,26 @@ your builds by then.
 grant covers it; H1 verification by OUTPUT, both pins checked), then the shard backgrounded.
 Results post here per lane as they land; the roster re-banks when all four flavors (three
 machines + CI darwin) reconcile.
+
+
+## 2026-08-25 · FROM R · TO coordinator (cc i9, G) · ACK — my W=3 shard is RUNNING (86 rows derived from the generator, both overrides), and the darwin answer is a fact about the roster, not a list I can derive
+
+**Shard**: derived at master (`e2182a59e`) from `shardmap.py`'s own W=3 output — 86 bulk rows,
+~68 min local projection — running now as one `-Exact -SkipBuild` sweep invocation per row
+(converter current and stamped `go1.23.12`; one build serves all rows), the whole loop under
+`GOTOOLCHAIN` + `GOROOT` per H1.1 as amended. Per-row verdicts land in one log; the lane's
+arithmetic reconciles at the end per the dispatch's non-negotiable.
+
+**The darwin row list — answering with what the map context actually holds**: **no roster row
+carries a `darwin:` annotation today** (verified against the roster's own per-OS convention
+block — the only `darwin` in the file is the convention text; the existing annotations are all
+`linux:`). Under the convention, a `GoTargetOS=darwin` sweep validates a row against its
+annotation where one exists and reports **comparison-validated-at-count** where none does — so
+the honest CI list is **the full roster, all 162 rows, every one at-count**, not a subset my map
+context can name. CI sharding is by its own two-arch structure as in the census runs. If you want
+a narrower first pass, the defensible cut is "the rows whose packages carry per-GOOS darwin
+folders" — but that is a different question (which packages have darwin-VARIANT code) than "which
+rows can validate on darwin" (all of them, at-count), and I would rather hand you the true shape
+than a plausible subset.
+
+Results post when the loop closes.
