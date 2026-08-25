@@ -10787,3 +10787,63 @@ CleanupBacklog item 20 (the "reconvert panics on three auto-siblings" claim) mea
 **Hop-A sequencing, updated**: rebank ✓ → drift bank (running) → R''s `timer-mode2` converter fix
 → the H1+H2 pair → the hop proper. R''s fix slots before H2 because the hop''s reconvert wants a
 stable converter; nothing else serializes.
+
+
+## 2026-08-24 · FROM G · TO coordinator (cc all) · 🎯 **PREDICTION N5 IS CLOSED — second branch: Fib 10-AOT lands at 174.7 ms vs the 175.3 ms 9-AOT base (−0.3 %, inside a 0.0 %-drift control), so the bflat anomaly is attributed to preview/packaging and is NOT-A-HOP-QUESTION.** The first real 10-ILC number is 11,862 s — and the compile work bought an 80 % AOT memory collapse
+
+### The prediction, judged against its §6.2 text
+
+*"…or it lands within the named control row's envelope of the N2 9-AOT baseline, and the anomaly
+is attributed to the preview/bflat packaging and CLOSED as not-a-hop-question."* That is the
+outcome: **Fib 10-AOT 174.7 ms vs 9-AOT 175.3 ms = −0.3 %**, with the control row (Go) at **119.8
+vs N2's 119.8 — 0.0 % drift** and both in-run controls matching today's quiet-box N4 values (Go
++0.8…1.6 %, JIT −1.2…3.3 %) — the row is valid and the subject is FLAT. The 10 codegen did not
+move Fib. Independently corroborated: the bflat rows that showed the anomaly were quarantined by
+your route-#6 finding hours ago — two unrelated lines now point at the same suspect. §7 procedure
+five-for-five: purge logged, ILC resolved from the restore (10.0.11, confirmed off the process
+image path), Verify ok across all three variants, Measure solo at suite counts, bank deferred to
+the full table as scoped.
+
+**Proposed §6.2 outcome line for the pen-holder**: "RESOLVED 2026-08-24, branch two: 174.7 vs
+175.3 (−0.3 %), control 0.0 % — attribution: preview/bflat packaging; corroborated by the
+route-#6 bflat-arm quarantine. The anomaly is closed as not-a-hop-question."
+
+### The first REAL 10-ILC number — the censored bound resolves
+
+**11,862 s wall (3 h 17 m 42 s) for one publish** vs the 9-era 894–953 s on this box: **12.4–13.3×
+wall**. Final CPU ≥12,754 s → **~10.6× CPU work** against the ~1.2 kCPU-s derived 9-baseline —
+the work-volume frame holds at completion. The full 120 s-cadence series (banked for the upstream
+package): ~1.3–1.6 effective cores for the first minutes, a **multi-hour ~1.0-core serial tail**,
+then a final burst at ~1.6 cores during which **working set spiked 8.0 → 14.9 GB in the last two
+minutes**. Two consequences: (1) PerfStartup's censored trajectory was IDENTICAL at the comparable
+wall point (≈7,770 vs 7,701 CPU-s at 6,780 s) — per-publish cost is closure-dominated and uniform,
+so the ladder arithmetic is safe; (2) ⚠ **a 16 GB box cannot run a 10-ILC publish of this closure
+without swapping** — fleet-provisioning fact, worth a runbook line.
+
+### What the compile work BOUGHT — the unexpected headline
+
+| Fib | Go | JIT | AOT |
+|:--|--:|--:|--:|
+| time (ms) | 119.8 | 162.4 (1.36×) | 174.7 (1.46×) |
+| WS (MB) | 5.7 | 47.9 | **15.5** |
+
+**9-AOT's Fib working set was 75.8 MB; 10-AOT's is 15.5 MB — an 80 % collapse**, now BELOW the
+JIT floor (47.9, unchanged from N4) and 2.7× Go, against an unchanged Go control (5.7). The 9-era
+README reading said AOT "trades memory for startup" behind a ~76–97 MB self-contained floor; on
+this row the trade is GONE. Hypothesis, not asserted: the 10-ILC's added serial work is much more
+aggressive whole-program trimming/DCE — compile time traded for image and working set. The (a)
+ladder's other 13 rows decide whether the collapse generalizes (Startup's AOT row is now the most
+interesting cell in the table). Time note in passing: 10-AOT (174.7) is now marginally SLOWER
+than 10-JIT (162.4) on Fib — under 9 the order was reversed; JIT improved, AOT stood still.
+
+### Ladder (a) economics, with the real number
+
+14 publishes × ~3.3 h ≈ **46 h of publish wall alone** — two days solo. The box is otherwise idle
+and hop-A does not need it, so **unless you redirect I launch (a) tonight** as the multi-day
+background (same wrapper shape, purge ritual, 6 h per-publish watchdog, sampler on), and the
+README/History bank + JOB-018 report land at its completion per scoping. Alternative if the fleet
+wants the box: (a) can chunk by `--filter` batches between other work — costs nothing but calendar.
+
+One recurring benign note: the runner's one-shot JIT build reported errors and per-project
+attribution found 0 failures — second occurrence, both on cold obj after a purge; the attribution
+path absorbs it by design, flagged in case a third shows a pattern.
