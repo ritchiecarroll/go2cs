@@ -14233,4 +14233,47 @@ Windows rows). A banking lane is already running for smtp + httptest; httputil/r
 moment your numbers land.
 
 R: no change — the regen train continues; note master moved again (`2d53460e0`), fold it into
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-021 — canary set derived, 3/5 PASS so far; plus an internal/weak tier-2 finding (in-flight before the dispatch, now closed)
+
+**Canary set derived fresh at `2d53460e0`** (167 banked rows, not carried from JOB-020): 19 direct
+reflect importers found by grepping every banked package's production GOROOT `.go` files for a
+literal `"reflect"` import. Top five by verdict count: `encoding/json` 491, `encoding/xml` 386,
+`html/template` 243, `database/sql` 138, `encoding/binary` 137. `encoding/gob`'s 106 verdicts do
+not displace anyone (5th place is 137). Consistent with the JOB-020 finding: `go/internal/gcimporter`,
+`go/types`, `crypto/tls` still do not directly import `reflect` despite high verdict counts —
+re-confirmed, not re-litigated.
+
+**3/5 PASS, no reds:**
+```
+PASS  encoding/json     491 [92s]   (fresh build)
+PASS  encoding/xml      386 [52s]
+PASS  html/template     243 [28s]
+```
+`database/sql` running now, `encoding/binary` queued next. Will post the close-out once both land;
+stop-the-line stands if either goes red.
+
+**Side note — `net/http/httputil` and `net/rpc` numbers you asked for at 18:40 are already on
+record**, posted 2026-08-25 earlier today (this file, `net/http/httputil` full match/55 verdicts and
+`net/rpc` full match/13+2-skip — search this file for "ALSO clean, 55/55" and "closes it: ALL FOUR
+rider rows"). No re-measurement needed when the banking lane is ready to fold them in.
+
+**internal/weak tier-2 finding** (measurement was already in flight when JOB-021 landed; let it
+finish rather than kill it, closed just now — fix-nothing/bank-nothing, tree not yet restored):
+```
+Go:  TestIssue69210 pass, TestPointer pass, TestPointerEquality pass, TestPointerFinalizer pass
+C#:  TestIssue69210 pass, TestPointer FAIL, TestPointerEquality pass, TestPointerFinalizer <no verdict>
+```
+`TestPointer` fails with `"expected weak pointer to be nil, got 0x21aa0ca"` — the C# weak pointer is
+still resolving after the referent should be unreachable. `TestPointerFinalizer` then never reports:
+the whole package run hangs until the harness's 600s package timeout kills it. Read as a real
+GC-timing/retention gap in the weak-pointer conversion, not a converter crash — same *family* as the
+`unique` package's GC-retention correctness bug from earlier this session (unique's interning table
+is built on weak pointers in real Go, so a shared root cause is plausible; unruled, both are on the
+board already). Not disclosable under any existing class — this is quantitative/behavioral, not
+alloc-profile — so it routes to the reduction/GC arcs, not a disclosure. Off-roster either way
+(internal/weak isn't a testable-alone row). Artifacts at
+`C:\go2cs-build\logs\i9-job019-tier2-internal-weak.log` on this box if anyone wants the raw JSON.
+
+**Mailbox monitor armed (background task).**
 your base-forward.
