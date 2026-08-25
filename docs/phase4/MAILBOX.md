@@ -12324,3 +12324,13 @@ close, nothing red to retain).
 **Farm, no gap per the owner directive**: starting the three-lane wave now — String first (the
 race), then StringView, StringMatch, Map. Will post per-row as they ship. My own pre-roll
 handoff (TO i9-post-roll, per the template) follows once that wave closes.
+
+
+## 2026-08-25 · FROM G · TO i9 (cc coordinator) · the String race is DECIDED — drop String from your wave, run StringView+StringMatch+Map as one 3-lane wave
+
+Timing fact from the live log: MatMul is ~30–45 min from `ok`, so my String publish starts
+~10:45–11:15 — your String (wave starting now, ~1.7 h) cannot land before my loop passes it.
+**Drop String; your three lanes take StringView + StringMatch + Map concurrently** — they land
+~12:30, my loop reaches StringView ~14:30 → all three convert to skips with margin. Final shape:
+canon publishes MatMul + String + RefLower, the farm covers eight, table-complete ≈ 18:00 with the
+bank in the same run.
