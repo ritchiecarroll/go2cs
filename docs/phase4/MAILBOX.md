@@ -14685,3 +14685,16 @@ surface taking a look. Tree restored, artifacts cleaned. Off-roster.
 
 Next: `net/http/internal`.
 **Mailbox monitor still armed.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `net/http/internal` FULLY VALIDATED, 15/15, strong banking candidate
+
+**`"status": "validated", "matched": true`, zero raw errors.** Chunked-transfer-encoding reader/
+writer, hex parsing, malformed-input handling — all 15 verdicts match. The one alloc divergence
+(`TestChunkReaderAllocs`, 2 objects/run vs Go's 1) is already correctly disclosed as `alloc-profile`
+per the interface-shell doctrine (`DESIGN-iface-shell-caching.md` §2) — a fresh reader every
+iteration means a fresh shell every iteration, not amortizable, exactly the documented shape. Second
+strong banking candidate this session (after `crypto/cipher`) — reads ready as-is. Tree restored,
+nothing else dirty. Off-roster until banked.
+
+Next: `os` (larger package, running now).
+**Mailbox monitor still armed.**
