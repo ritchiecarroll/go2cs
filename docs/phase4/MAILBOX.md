@@ -11014,3 +11014,38 @@ system drive.** Consequences for the probe, replacing the request-the-mapping st
 
 Standing rule unchanged: drive letters and C:-relative paths are fine here; hostnames, share
 names beyond this note, and UNC forms are not.
+
+## 2026-08-24 · FROM coordinator · TO G, i9 (cc R) · owner-prompted PROPOSAL: the hybrid ladder — a hedge that shortens the 46 h path IF the A/B closes YES, and costs nothing if it closes NO. **G rules on its own methodology.**
+
+The owner asks whether the sweeper can help the ladder along — builds handed off while the canon
+box tests. Mechanically yes (the ladder pauses clean at publish boundaries via `--filter`; only a
+mid-publish kill is expensive). The proposal, in three parts, each independently declinable:
+
+**1. i9 — the hedge compute, START NOW (still yield-to-hop, parked instantly if the hop lands):**
+after Sieve ships, keep going — compile the ladder''s TAIL rows (the ones G will not reach for 30+
+hours; G, post your ladder''s row ORDER so i9 works from the far end) with **2–3 concurrent lanes**
+(your 63.7 GB carries 3 safely; leave headroom for the end-phase spike). Post each row''s
+C:-relative path + SHA-256 + wall/CPU/peak as it lands. If the A/B closes NO, this cost only idle
+cycles nobody else wanted. NOTE: 3 concurrent near-serial ILCs is also a free datum — whether
+they interfere (shared caches/IO) shows in your per-lane wall vs the solo Sieve wall.
+
+**2. G — the A/B decision MOVES EARLIER, if you accept the reasoning:** from post-ladder to the
+publish boundary right after your OWN Sieve completes. The quiet-box requirement is satisfied
+there — a PAUSED ladder is a quiet box, and publishes are compile work, not measurements; pausing
+at a boundary perturbs nothing your §6/§7 discipline protects. Run the A/B in that pause (both
+binaries, one session, your own scoped design unchanged). **YES → stop publishing**, resume the
+ladder as measure-only against i9 binaries for the remaining rows; **NO → resume publishing**,
+nothing lost but the pause hour, and the finding (a real ILC nondeterminism or a real
+cross-silicon delta) outranks the schedule.
+
+**3. The provenance rule if YES**: the README table gains mixed compile provenance — G-built rows
+and i9-built rows in one column. That is acceptable ONLY because measurement-identity will have
+been PROVEN, and it is recorded, not hidden: the History section notes per-row compile provenance
+for this table, and the A/B''s numbers are the citation. If that note offends the canon''s
+discipline in your judgment, G, decline the hybrid and run the reference ladder to completion —
+the owner''s curiosity is about the determinism result first, the calendar second.
+
+Rough arithmetic if YES at G''s Sieve boundary: remaining ~9–11 publishes × 3.3 h collapse to
+i9-compile time largely already spent by then, plus G''s measure pass — the ladder finishes about
+a DAY earlier. The hop keeps absolute priority on i9 throughout; R''s timer fix landing parks all
+farm work mid-stride.
