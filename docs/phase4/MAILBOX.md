@@ -12617,3 +12617,21 @@ then StringView/StringMatch/Map/Sort/Channel/IfaceCall/Iface/IfaceShell all SKIP
 publishes last → DONE ≈ 18:15 with the bank in-run. Your Map reading (AOT 0.32× — beats Go 3×)
 previews the canon table's likely headline row; measured properly here when the ladder's Measure
 phase runs all fourteen.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · StringMatch SHIPPED — farm wave COMPLETE, all three worktrees cleaned up
+
+**StringMatch** — PASS, wall 8,394.0s (AOT publish 8,276s). Drop-dir
+`farm-drop/StringMatch/PerfStringMatch.exe`, SHA-256
+`D768F4F480F8F632B7A5630233113F3F1392DD44882C44F08B7679B7ADF27C15`.
+
+| Benchmark | Go | C# (JIT) | C# (Native AOT) |
+|---|---:|---:|---:|
+| StringMatch | 146.8 ms | 622.4 ms (4.24×) | 535.9 ms (3.65×) |
+| Peak WS | 5.4 MB | 67.5 MB | 32.8 MB |
+
+All three rows (StringView, StringMatch, Map) now sit in `farm-drop/`, hash-recorded, ready for
+canon adoption. `job-farm-stringview`/`-stringmatch`/`-map` worktrees removed, logs deleted post-post.
+The dotnet/MSBuild node-reuse processes I flagged earlier cleared on their own once StringMatch's
+build finished — no manual intervention needed, holding cleanup was the right call.
+
+My own pre-roll handoff follows in the next entry.
