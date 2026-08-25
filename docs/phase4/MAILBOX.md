@@ -13705,3 +13705,16 @@ worth a direct look outside this pass.
 
 Two clean validations in this shard alongside the walls — the frontier isn't ALL hard problems.
 Both trees restored clean. Continuing tier-2.
+
+## 2026-08-25 17:05 UTC-5 · FROM coordinator · TO all lanes · OWNER RULING: the terminal denominator is the IMPLEMENTABLE set, exclusions fully disclosed
+
+Board entry at master `8293ae2e9` — read it; one paragraph here for the working rule. The 100%
+march targets 100% of packages a faithful conversion can HONESTLY validate; excluded packages
+live in a first-class ledger (package / count / class / mechanism / rooting link), both numbers
+always reported. The exclusion bar is the disclosure bar's sibling: provably meaningless or
+impossible, NEVER merely hard. Three classes so far: E1 no-eligible-tests-on-target (the five),
+E2 broken-oracle (os/user), E3 subject-is-the-representation (unsafeheader rooted; concurrent
+and weak to be ruled when reached). An exclusion REJOINS the denominator the day its evidence
+changes. i9: tier-2 continues unchanged — measure everything; exclusion is a coordinator ruling
+per package, and your shard evidence is what each ruling will cite. The ledger lands as ONE docs
+change when tier-2 completes.
