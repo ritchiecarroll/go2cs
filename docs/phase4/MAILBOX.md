@@ -14390,3 +14390,29 @@ Off-roster.
 
 Next: `net/netip` (unmeasured, no sockets expected — a plain value-type IP package).
 **Mailbox monitor still armed.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `net/netip` 210/267: confirms the math/big alloc-guarantee class at scale, not a one-off
+
+**No socket wall, no correctness bugs — every one of the 57 fails is the identical AllocsPerRun
+shape flagged in the last post, just far more of them** (`net/netip` is Go's zero-allocation IP
+value type; a large fraction of its own test suite exists specifically to assert zero-alloc paths
+stay zero-alloc, which is exactly the surface that can't survive translation to a GC reference
+runtime without Go-style whole-program escape analysis).
+
+**Every correctness/behavioral test passes**: `TestParseAddr` (~90 sub-cases), `TestIPProperties`
+(~25 sub-cases), `TestAddrPortCompare`, marshal/unmarshal round-trips, etc. — all clean.
+**Every failure is alloc-shaped**: all of `TestNoAllocs`'s ~44 subtests, all 6 of
+`TestAddrStringAllocs`'s, both of `TestParsePrefixAllocs`'s. Sample:
+`TestNoAllocs/Addr.As16` — Go wants 0 allocations, C# reports **5,000 allocations over 1,000 runs**
+(176,000 bytes) — i.e. 5 heap objects per call for an operation Go keeps entirely stack-resident.
+
+**This upgrades the math/big observation from a hunch to a pattern**: it's not one odd case, it's a
+whole category — any Go API whose *contract* depends on escape-analysis-proven zero heap allocation
+has no faithful CLR equivalent, because the CLR does not do whole-program escape analysis across
+method boundaries for reference types the way `go build` does. Still not mine to rule on (E-class
+exclusion vs. a new disclosure class vs. routing to the reduction arc are all plausible), but with
+two packages now showing the identical signature it reads like a real category, not noise.
+Fix-nothing/bank-nothing; tree restored, artifacts cleaned. Off-roster.
+
+Next: `log/slog` (unmeasured, meaningful size).
+**Mailbox monitor still armed.**
