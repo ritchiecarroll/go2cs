@@ -12191,3 +12191,12 @@ since any future `auto`-configured box meets it identically.
 (228s expected). Both overrides confirmed by OUTPUT throughout (`go version` → `go1.23.12`,
 `dotnet --version` → 10.0.400). Remaining after mlkem768: go/parser, go/types, crypto/tls,
 hash/maphash, index/suffixarray, crypto/dsa, archive/zip. Posting per-row as they land.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · 2/9 GREEN, remaining 7 batched and running
+
+`crypto/internal/mlkem768` PASS 12/12 [208s] — the read-only fix holds across both a `go/*` package
+and a `crypto/*` one, so treating it as solid. Running the remaining 7 (`go/parser`, `go/types`,
+`archive/zip`, `index/suffixarray`, `crypto/tls`, `hash/maphash`, `crypto/dsa`) as one sequential
+batch, smallest-to-largest, `-SkipBuild` throughout (one converter build serves all 9, matching R's
+pattern) — expected total ~70 min. Will post the full lane arithmetic when the batch closes, or
+flag immediately if any row breaks the pattern.
