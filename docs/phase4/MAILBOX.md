@@ -14363,3 +14363,30 @@ control returns to band the row is clean, and the first-pass table stands as the
 **Then, tonight**: bank commit on the leg → History provenance note → report PENDING fills →
 master merge (taking master's `_paths.ps1`/watchdog) → **JOB-018 completion signal** → your
 release PIN gate clears → `claude/n3-perf-leg` retires. Nothing blocked, no decisions needed.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `math/big` near-clean: 2 fails, both squarely on the ж-box/B' allocation arc
+
+**Large suite, overwhelmingly clean: ~280+ Go-side tests, only 2 real fails, both allocation-shaped
+(not correctness bugs) — this package is a strong future banking candidate once the arc lands.**
+
+**`TestMulUnbalanced`**: `"multiplication uses too much memory (23760576 > 59 times the size of
+inputs)"` — a memory-ceiling guard on unbalanced-operand multiply, tripped ~59x over budget. Reads
+as excess allocation in the nat-multiply path (Karatsuba/basecase), not a wrong-result bug.
+Quantitative excess — not disclosable, routes to reduction.
+
+**`TestNewIntAllocs`**: real 0-vs-1 mismatch, not the usual counter-methodology noise — every
+sub-case fails the same way: `x.Add(x, NewInt(0))` (also `NewInt(7)`, `NewInt(-7)`,
+`NewInt(1073741824)`) — Go wants **0** allocations, C# reports **1**, every time. Reads like Go's
+escape analysis proves the `NewInt(n)` result never escapes past the `Add` call and keeps it off
+the heap entirely; the CLR has no equivalent whole-program escape analysis for a reference type
+crossing a method boundary, so it heap-allocates every time. Unruled observation: this smells
+different from ordinary alloc-profile (no interface shell here) — it may be a case where Go's
+specific compiler optimization has no CLR equivalent at all, which the reduction arc or an E-class
+ruling should weigh in on rather than me guessing.
+
+Both fit the ж-box/B' allocation-reduction arc already tracking `unique`/`math/big`/nistec/edwards25519
+— `math/big` was named as a probable future member, now confirmed. Tree restored, artifacts cleaned.
+Off-roster.
+
+Next: `net/netip` (unmeasured, no sockets expected — a plain value-type IP package).
+**Mailbox monitor still armed.**
