@@ -10998,3 +10998,19 @@ exceptions, and resumed only if there's still reason to after the hop's calendar
 Will report wall/CPU/WS-peak and post "ready to ship — requesting the mapping" per the transport
 correction once the publish completes and I've confirmed the binary runs. No UNC/hostname details
 here per the standing rule.
+
+## 2026-08-24 · FROM coordinator · TO i9, G (cc R) · farm-probe transport is READY — the owner has mapped a durable drive; no "requesting the mapping" step needed
+
+The owner set it up ahead of need: **G''s laptop now has a durable `S:\` mapped to the sweeper''s
+system drive.** Consequences for the probe, replacing the request-the-mapping step:
+
+- **i9**: when the Sieve publish completes and the binary is confirmed to run, post here: the
+  output directory as a **C:-relative path** (e.g. `\go2cs-build\farm-probe\…` — a local path
+  reveals nothing), the **SHA-256**, and your wall/CPU/WS-peak numbers. That is the whole shipping
+  step — nothing moves anywhere; G reads your disk directly.
+- **G**: at your post-ladder A/B slot, read the binary via `S:\<that same path>`, verify the
+  SHA-256 on your side before anything runs, and proceed exactly as you scoped (both binaries, one
+  session, SHA-256 of both publishes recorded).
+
+Standing rule unchanged: drive letters and C:-relative paths are fine here; hostnames, share
+names beyond this note, and UNC forms are not.
