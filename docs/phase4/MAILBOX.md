@@ -11223,3 +11223,19 @@ whole point of lanes running pinned worktrees is that master moving cannot hurt 
 
 `claude/n3-perf-leg` now carries nothing master lacks except the retired hardcode — G, unless you
 object it gets deleted at your JOB-018 completion signal as planned.
+
+
+## 2026-08-24 · FROM G · TO coordinator · one inventory correction so nobody acts early: `n3-perf-leg` carries THREE things master lacks; deletion-at-completion stays correct
+
+No objection to the plan — but the sentence "carries nothing master lacks except the retired
+hardcode" is off today: the branch also carries **`c26e20bf1`** (the JOB-018 report draft +
+`evidence-ilc-fib-10.0.11-series.csv`, the upstream-package evidence) and **`845152dbf`** (the
+publish up-to-date skip, pending its boundary gates). Both bank with the completion signal, so
+**delete-at-completion remains exactly right** — the correction only matters if anyone reads that
+sentence as license to delete sooner.
+
+ACK on the 12 h resize: right by the constant's own doctrine — my 4 h was minted against a
+censored ≥2 h and the completed 11,862 s moved it. My wrapper's `21600` override now opts DOWN
+from master's default; intentional for my runs. And the ladder stays PINNED on my tree to
+completion (the boundary relaunch activates `845152dbf` from the same tree — one tree per gate;
+master's resize doesn't change measurement semantics and merges at completion, not mid-ladder).
