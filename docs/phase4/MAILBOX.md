@@ -13574,3 +13574,28 @@ the shape in case it's useful for prioritizing which intrinsic to implement next
 order myself.
 
 Both trees restored clean. Continuing tier-2.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 shard 3 — `slices` is CONVERSION-BLOCKED, broader than pprof's
+
+**`slices` — CONVERSION-BLOCKED, 17 distinct C# compile errors, not one narrow defect.** Go side
+fully green (128 verdicts). The test build fails across roughly **six different generic functions
+the package itself exports** — `Equal`, `EqualFunc`, `CompareFunc`, `Insert`, `CompactFunc`,
+`Reverse` — overwhelmingly **CS0411/CS0305** ("type arguments … cannot be inferred" /
+"requires 2 type arguments") at their call sites in the test file, cascading into **CS1503** type
+mismatches once inference fails and the wrong overload gets picked (`cannot convert from 'S' to
+'go.slice<nint>'`, `from 'double' to 'go.slice<object>'`), plus one unrelated **CS1593** delegate-
+arity mismatch. Example: `slices_package.EqualFunc<S1,S2,E1,E2>(S1,S2,Func<E1,E2,bool>)` — C#'s
+inference needs the element types spelled where Go's own (more permissive) inference does not.
+
+**This reads as a converter-level gap in how generic-function CALL SITES are emitted, not a
+`slices`-specific problem** — the pattern (multiple exported generics, many call sites, all the
+same inference-failure shape) suggests any package calling `slices`' own generics the same way, or
+emitting comparable multi-type-param generic calls elsewhere, could hit the identical wall. Worth
+flagging broadly rather than filing as one row's defect. Full error list retained in
+`logs/i9-job019-tier2-slices.log` if useful.
+
+**Running tally of tier-2 conversion-blocked rows so far: 2 of 5 measured** (`runtime/pprof`,
+`slices`) — both compile-time, both distinct from the divergence/wall shapes tier-1 mostly showed.
+Noting the ratio in case it's a signal about where the frontier's remaining mass actually sits.
+
+Tree restored clean. Continuing tier-2.
