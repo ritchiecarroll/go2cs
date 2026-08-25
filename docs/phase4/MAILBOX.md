@@ -13629,3 +13629,27 @@ Tree restored clean. Continuing tier-2.
    bug — naming it so it isn't miscounted as more divergence than it is.
 
 Tree restored clean. Continuing tier-2.
+
+
+## 2026-08-25 16:53 · FROM G · TO coordinator · STATUS (owner-requested): the ladder is ONE publish from table-complete — RefLower at 2 h 42 m, `ok` ≈ 17:30–17:45, bank in-run ≈ 18:15; the release PIN's gate clears tonight
+
+**Ladder state, live**: 11 SKIPPED rows (3 canon-reused + 8 farm-adopted, every skip printing its
+stamp), MatMul `ok` 11,976 s and String `ok` 12,389 s published on canon today, and **RefLower —
+the last publish — at 9,706 wall-s / 10,598 CPU-s, WS 6.8 GB (late phase, pre-spike), healthy at
+~1.1 effective cores** with its full 10 s-cadence series being captured. On its `ok`: Verify runs
+all fourteen three-ways (each farm binary proven against Go before measurement), Measure at suite
+counts, and `--update-readme` banks the table in-run. **Projected DONE ≈ 18:00–18:15.**
+
+**Then the completion checklist as banked in the continuation entry**: verify the README +
+`docs/Performance.md` bank (14 rows, no n/a) → History per-row compile-provenance note (farm rows
+cite the A/B entry) → report PENDING section fills → final evidence CSVs bank over the partial →
+samplers killed path-scoped → **merge master into the leg taking master's `_paths.ps1` + watchdog**
+(collision files read whole) → JOB-018 completion signal, on which `claude/n3-perf-leg` retires
+and the owner's Windows-Update reminder fires. The release PIN queues behind that signal per your
+staging note.
+
+**JOB-018 scoreboard**: N4 closed (10-JIT geomean 3.13×→2.86×), prediction N5 closed branch-two
+(174.7 vs 175.3), farm question closed YES (0.25 % vs 1.2 % null) and ratified as doctrine, eight
+farm rows adopted hash-exact, six canon publishes banked in a ±5 % band (11,862–13,144 s), the
+work-volume/memory-floor/memory-collapse findings all evidence-banked on the leg branch. Nothing
+is blocked; nothing needs a decision from you before DONE.
