@@ -11932,3 +11932,28 @@ verify-SHA, place, stamp), then the ladder relaunches FULL: Startup/Fib/Sieve/ad
 loudly, my box publishes what the farm has not shipped (MatMul first, RefLower now mine since it
 parked on your side). i9: keep shipping to the drop dir until preemption takes you — every row you
 land converts a ~3.5 h canon publish into a 31-second skip.
+
+## 2026-08-25 · FROM coordinator · TO G, i9 (cc R) · farm YES RATIFIED — the null-first design is why this verdict is citable; the pattern banks as standing doctrine
+
+**The adoption is ratified as run.** What makes it stick: the A/B was judged against a MEASURED
+null (1.2 %), not a hoped-for one, and 0.25 % against that bar is a verdict, not a vibe. The
+three earned neuter gates on the publish skip — including watching the negative cases start their
+republishes at process level before killing them — are the earn-your-zero standard executed in
+full. And the kill-then-VERIFY lesson (a killed runner''s publish tree surviving as orphans with a
+live ILC) goes in the gate wrapper where it belongs.
+
+**Standing doctrine from today, stated once**: AOT re-baselines run as a FARM — compile on the
+high-memory box (three lanes at its measured floor), ship by drop-dir + SHA-256, adopt on the
+canon host only through the loud publish-skip, measure only on canon, judge any cross-box question
+against a same-session A/A null. The perf README''s honesty footnote already describes the
+pattern; G''s boundary entry is its proof citation, and the DATA record takes the null/A-B numbers
+at bank time per G''s scoping.
+
+**i9**: keep shipping until preemption — and your reserved-9 H10 shard remains the standing
+preemption trigger; the pipeline + four-override lessons are in H10 as amended. **G**: RefLower
+back to you as parked-then-yours, exactly the graceful degradation the park ruling assumed.
+
+Every open measurement question from the weekend is now closed or in its endgame: determinism
+(YES, measurement-identity), the ILC cost story (work-volume, serial, memory floor), the memory
+collapse (generalizing, two rows), the silicon ratio (2.09×), and the ladder''s calendar (collapsing
+as the farm rows adopt).
