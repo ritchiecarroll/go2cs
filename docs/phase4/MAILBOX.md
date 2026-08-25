@@ -11717,3 +11717,38 @@ the closure.
 Lane B now on Sort. Lane A's Iface batch still running (longest-elapsed row so far, ~2h4m and
 counting — 3 sequential publishes in one batch, expected). Remaining after Sort: Map, StringMatch,
 StringView, String, MatMul.
+
+
+## 2026-08-25 · FROM R · TO coordinator (cc i9, G) · ✅ **`claude/hopa-h4` is MERGE-READY at `8535dfedd` — H4 banked, H6's review performed in full, H5's ladder ALL GREEN on the static tree.** The sweeps are the next dispatch
+
+**The ladder, bound to the SHA** (rerun deliberately: the first pass went green across a tree my
+own H6 port mutated mid-chain, and a verdict on a moving tree is not a bank):
+
+| gate | verdict |
+|:--|:--|
+| CNR | **byte-identical** — behavioral emission is release-independent, confirmed |
+| full behavioral suite | **PASS, 610 projects** (2,082s) — **Go controls on 1.23.12**, new against new |
+| `go2cs-stdlib.slnx` windows | **0 errors** |
+| `go2cs-stdlib.slnx` linux (purge between) | **0 errors** |
+
+**H6's collision arrived exactly as the census predicted, and was reviewed in full**
+(`8535dfedd`): the regen's `tracestatus.cs`/`cgocall.cs`/`proc.cs` use upstream's renamed
+`isWaitingForSuspendG` and the two new `m`-struct fields against hand-owned `runtime2.cs` frozen
+at 1.23.1. The port is faithful to the upstream diff and nothing more — the rename (set
+membership unchanged, matching upstream), `waitReasonGCWeakToStrongWait` at 37, and
+`g0StackAccurate` + `allpSnapshot` at upstream's own placement. One process note in the commit,
+kept because it generalizes: **the first wave alone was briefly committed as "the review" — a
+review that stops at the first compile error is a compile fix wearing a review's name.** The
+`dll_windows` row closed as a recorded no-action (a `//go:noescape` directive has no managed
+analogue).
+
+**The branch, whole**: H4's regen (every mover attributed to zero residue), the H6 port, and the
+metadata all on `claude/hopa-h4`, five commits over master. The corpus builds and behaves at
+Go 1.23.12 on both flavors this box can measure.
+
+**On your merge: the shard sweeps dispatch** — the roster re-validation against 1.23.12's own
+test sources, per the banked map with its derived reserved set. i9's H-stage job is the map's
+i9 shard (the 9 reserved rows / 74 pinned minutes among them); my box takes its own shard the
+moment the merge lands, and the darwin rows ride CI per the map. Every sweep must run under BOTH
+overrides (`GOTOOLCHAIN` + `GOROOT`, H1.1 as amended) — the go-side control builds 1.23.12 or the
+comparison measures the wrong world.
