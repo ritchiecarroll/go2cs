@@ -14842,3 +14842,38 @@ wrapper-marshaling job (NetShareAdd + registry buffer/SID) lands on once G's ban
 window clear. Mailbox monitor stays armed in the meantime.
 
 **R**: regen train continues; note master moved twice more (`bfd7c87fb`) — fold into base-forward.
+
+## 2026-08-25 20:40 UTC-5 · FROM coordinator · TO i9 · JOB-022: the Windows wrapper-marshaling family — fix, verify on YOUR box, and BANK what validates
+
+You are the one box that can exercise every member (LanmanServer running, the registry and SID
+crashes measured locally). This is implementation + banking work, not a measurement pass — the
+full discipline changes accordingly (guards failing-first, gates per CLAUDE.md, banking ritual
+where a row validates). Branch `claude/i9-wrapper-family` off master (>= `bfd7c87fb`).
+
+Scope, in leverage order — root each against the documented wrapper classes (CLAUDE.md "Windows
+local time works" section + the board's syscall census: non-blittable struct by ADDRESS; `**T`
+out-param arriving null; caller-reinterpreted byte buffer) and fix per the precedents
+(`Timezoneinformation` blittable mirror; the L10 sockaddr mirror; `interface_windows_impl.cs`
+chain transcription):
+
+1. **`internal/syscall/windows/registry`** — your two measured panics: `RegLoadMUIStringW`'s
+   returned-length OUT param reading garbage (`TestGetMUIStringValue`), and `TestValues`'
+   never-allocated buffer at `value.cs:285`. Target 6/6; if it validates, BANK the row (full
+   ritual — it is on the 215 frontier). Mind the MSB4006 restore-cycle hazard its census notes
+   (its test half imports registry<->syscall/windows both ways).
+2. **`internal/syscall/windows`** — the SID marshaling (`TestRunAtLowIntegrity`,
+   ERROR_INVALID_SID building a low-integrity SID). Target 2/2; BANK if clean.
+3. **`NetShareAdd`/`SHARE_INFO_2`** — the os AV, reachable on your box (Go does NOT skip
+   `TestNetworkSymbolicLink` where LanmanServer runs). Fix the wrapper against a blittable
+   mirror, then verify by running the os pipeline and confirming that test's verdict MATCHES Go
+   on your host (os itself still does not bank — `TestWriteStringAlloc` waits on the ж-box arc —
+   your deliverable is the fixed crossing plus the measured verdict pair).
+
+Gates: converter `go test -count=1` only if converter files move (unlikely — this is hand-own
+territory; marker rules apply, `_impl.cs` companions per precedent); GolibTests if golib moves;
+stdlib slnx build; filtered sweeps for any banked row at your tip; `stdlib-metadata.txt`
+companion if any `package_info.cs` moves; dirt classified. Env discipline as always (your
+side-by-side SDK + GOROOT spelling). Merge signals to me per row or batched — your call; the
+post-merge sweeps at the merge result are mine. If a member roots into a shape the precedents do
+not cover (a genuinely NEW marshaling class), stop that member and report — a new class is a
+board entry, not an improvisation.
