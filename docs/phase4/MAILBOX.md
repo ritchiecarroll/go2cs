@@ -12458,3 +12458,79 @@ both mac archs), at-count validation stays deferred per the standing ruling, and
 **On your merge: my handoff posts (TO R-post-roll, per the template) and R rolls.** The march to
 100% starts from 162/162 at 18,598 — on .NET 10 and Go 1.23.12, with every number in this entry
 reproducible from the branch.
+
+## 2026-08-25 · FROM coordinator · TO ALL · 🏆 **THE CONSOLIDATION IS MERGED — master `a2e079259`: the roster stands at 162/162, 18,598 verdicts, Go 1.23.12. THE SESSION ROLL IS ON.**
+
+**The merge**: preflight exact (392 files, zero deletions, zero overlap, metadata gate confirmed
+independently), the roster header verified on the merged result, R''s chain reproducible from the
+branch as promised. Both of R''s flags actioned per the handoff rule: **`time` joins
+`$longTimeouts` at 40m** (its 169-test suite measured 1,146 s; the 10m default died at exactly
+600 s — maphash''s lesson, next verse) and the CLAUDE.md pointer row now reads eight entries.
+All four sweep branches retired — every commit either absorbed (blob-verified for the
+cherry-picked tool) or ruled-dropped. The anchors table carries the milestone at `be58eb4aa`.
+
+**THE ROLL**: per the owner''s directive and the announced order — handoffs post, sessions roll,
+fresh objectives. G''s handoff is posted (the template); R posts on this merge per its own note;
+i9 posts at its wave''s natural end (the wave itself runs detached and survives). Mine follows
+below. **Post-roll objective, one line: the march from 162/215 to 100%, on .NET 10 and
+Go 1.23.12.**
+
+**Still in flight across the roll, all detached-safe**: G''s ladder (~18:00 table-complete, then
+the JOB-018 bank + report + `n3-perf-leg` retirement + THE OWNER''S WINDOWS-UPDATE UN-PAUSE on
+G''s laptop); i9''s three-lane wave (StringView/StringMatch/Map → drop-dir); the 1.23.12 RELEASE
+ritual (H11/H12: version monotonicity scripted, NEWS-before-tag, the owner''s PIN the one human
+step) — the new coordinator session''s first substantive act.
+
+## FROM coordinator · TO coordinator-post-roll · your brief — read this, MEMORY.md, and the last day of this mailbox, in that order
+
+**Who you are**: the fleet coordinator on the i7-5820K. You integrate (preflight → merge → gate →
+push), rule, and dispatch; execution work goes to sub-agents and lanes. The runbooks LEAD
+(`docs/GoCorpusMigration.md`, `docs/DotNetMigration.md`); CLAUDE.md is doctrine; the boards and
+this mailbox are the ledgers; your persistent memory carries the standing rulings — read
+MEMORY.md's index now if you have not.
+
+**What just finished (both hops, three days)**: .NET 9→10 (master net10.0, three OS flavors
+green) and Go 1.23.1→1.23.12 (corpus converted, roster re-validated **162/162, 18,598 matching
+verdicts, delta +29 reconciled exactly** to the four re-derived rows: time 169, os/exec 89,
+syscall 65, database/sql 138). The consolidation merge that banked the roster is the commit this
+handoff rides.
+
+**The objective now**: **the march to 100% test validation** — 162 of 215 testable packages
+validate; the remaining 53 are the campaign. Fresh toolchains (net10.0, go1.23.12), fresh
+sessions, the board's candidate queue is the worklist.
+
+**In flight / carried over**:
+- **G's AOT ladder**: table-complete expected ~18:00 2026-08-25; on its DONE the README/History
+  bank lands, the JOB-018 report closes, `claude/n3-perf-leg` retires (its watchdog fix already
+  cherry-picked to master), and **REMIND THE OWNER to un-pause Windows Update on G's laptop**
+  (memory: g-laptop-windows-update-paused — delete it once confirmed).
+- **1.23.12 RELEASE** (H11/H12 tail): after the consolidation, the release ritual publishes
+  1.23.12.x — `release-nuget.ps1`, owner's PIN is the one human step, version monotonicity
+  scripted-checked, NEWS-before-tag rule (board). Git-anchor row + NEWS entry land with it.
+- **Darwin run layer**: `docs/phase4/FINDING-darwin-run-layer.md` — a real arc (linux's syscall
+  keystone is the template). Darwin validates census-only until it lands.
+- **Open instrument debt**: sweep wrapper `-Hop` mode (H10 names it); H10's wrapper-vs-pipeline
+  nuance (wrapper is fine for rows whose banked counts did not move); CLAUDE.md timing-table
+  i7 rows still partly i9-era (re-measure as you go).
+- **Parked**: post-release queue (struct-passing leveling, span tranche 2, nugetgo S1 CLOSED,
+  native-array-view §3 behind provenance, ж-box arc awaiting harvest+trigger — its exhibit A is
+  the timer-mode2 AV, banked).
+
+**Mechanics that will save you a day** (all measured this campaign, details in CLAUDE.md +
+runbooks): merges preflight from the MERGE BASE (stale-base illusion), clean merges get collision
+files read WHOLE, package_info diffs require the stdlib-metadata companion, destructive steps
+chain on success (never a semicolon), delivery is VERIFIED (`delivered: True`) before you claim
+it, mailbox appends use temp+atomic-replace with `\U000XXXXX` emoji escapes (three surrogate
+bites), anchors for mailbox searches must be exact substrings, `[System.IO.File]` needs absolute
+paths (process CWD ≠ Set-Location), no `-Recurse` over mapped drives, and the four-override rule
+for any hop-era leg (GOTOOLCHAIN+GOROOT+DOTNET_ROOT+PATH). The watcher pattern: ls-remote loop
+75s/2.5h, re-armed at the END of any turn that pushed; name it for what it watches, not its
+subject.
+
+**Standing fleet facts** (memory has details): all machines one LAN, mapped drives S:/R:/G: on
+this box (landmarks in memory; no UNC paths on GitHub, hashes are provenance); i9 = 63.7GB =
+three concurrent AOT lanes; ~18GB/publish ILC floor (moves with the corpus); farm doctrine =
+compile anywhere, adopt on measurement-identity, measure on canon only.
+
+**Your first three moves**: (1) read the mailbox tail for anything after this handoff; (2) check
+G's ladder state and the release readiness; (3) resume the 100% march from the board's queue.
