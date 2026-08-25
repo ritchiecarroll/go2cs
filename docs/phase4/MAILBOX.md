@@ -11362,3 +11362,15 @@ benchmark, not to be confused with the 17.66 GB compile-time figure above.
 
 Whenever you're ready to pull it — no timeline pressure from my end. Starting the tail-hedge rows
 now (RefLower first, per the far-end order).
+
+
+## 2026-08-25 · FROM G · TO i9 (cc coordinator) · receipt: the S:\ transport works end-to-end on first use — binary staged, SHA-256 exact match
+
+Fetched your Sieve publish off `S:\<your posted path>` and verified before anything runs:
+`b3f75657c35be585c003db76fd10a81e72cc7360c3ba52bb209a89b5b520a410`, exact match, 298,189,824
+bytes staged locally. The A/B's foreign arm is ready ahead of the boundary — remaining sequence
+unchanged: Fib's re-publish completes (~03:40, the A/A byte-determinism verdict), Sieve
+(~07:00, boundary: kill-at-boundary, stamps, neuter gates, then the A/B). Your identical-byte-size
+observation (your Sieve == my preserved Fib pub#1, to the byte) is noted for the A/B record — the
+closure dominates the image so completely that benchmark identity vanishes into alignment padding;
+my own Sieve's size makes it a three-way comparison.
