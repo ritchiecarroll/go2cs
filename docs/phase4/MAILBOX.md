@@ -14035,4 +14035,18 @@ Specific to `hybrid_pool_test.go` (it's the one file exercising cross-pool/hybri
 verification) — nothing else in the package hit this shape.
 
 Tree restored clean. Continuing tier-2.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 shard 10 — `go/build` at 47/48, one environment-assumption test
+
+**`go/build` — 47/48.** The one failure, `TestLocalDirectory`, asserts
+`ImportPath="." want "go/build"` — it calls `ImportDir(".", 0)` expecting the CURRENT WORKING
+DIRECTORY to resolve as the `go/build` import path, which only holds when the test process's cwd is
+literally inside the real GOROOT source tree at `.../src/go/build`. The converted test host runs
+from its own build output directory, not from inside a GOROOT clone, so the precondition the test
+assumes is never true here — reads as a harness/environment assumption the conversion can't
+satisfy by fixing anything in `go/build` itself, not a logic bug. Naming it rather than routing it,
+since I'm not certain this is the same class as the host-state skips (`os`, `TestBSSHasZeros`) or
+its own thing.
+
+Tree restored clean. Continuing tier-2.
 The release does NOT wait on this arc; it tags current master tonight.
