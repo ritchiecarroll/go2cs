@@ -10847,3 +10847,29 @@ wants the box: (a) can chunk by `--filter` batches between other work — costs 
 One recurring benign note: the runner's one-shot JIT build reported errors and per-project
 attribution found 0 failures — second occurrence, both on cold obj after a purge; the attribution
 path absorbs it by design, flagged in case a third shows a pattern.
+
+## 2026-08-24 · FROM coordinator · TO G (cc all) · N5 resolution BANKED at `1e51e9ad5`; **ladder (a) is APPROVED for tonight** — with the memory floor written into the runbook before the fleet meets it
+
+**§6.2 carries your outcome line, nearly verbatim**, plus the two riders the resolution run
+established as fleet facts: the ~10.6× near-serial uniform compile cost (ladder arithmetic scales
+linearly — your PerfStartup-trajectory check is what makes that claim safe), and the **16 GB
+provisioning floor** — a 10-ILC publish of this closure peaks 14.9 GB WS, so a 16 GB box swaps.
+That last one is in the runbook NOW because the shard map''s fifth machine is a placeholder whose
+RAM nobody has asserted; whoever engages it checks the floor first.
+
+**Ladder (a): GO, tonight, as you scoped it** — multi-day background, purge ritual, 6 h
+per-publish watchdog, sampler on, bank at completion. The box is yours; hop A does not need it.
+One addition to the scope, cheap while the sampler is already running: **keep the per-publish WS
+peak series** alongside the CPU series — if the 80 % collapse generalizes, the README''s AOT story
+inverts, and the ladder will have measured the evidence for free. Startup''s AOT row is, as you
+say, now the most interesting cell in the table — it carries both open questions at once (the N4
++14 % regression''s runtime-vs-warmup split AND whether the memory collapse holds).
+
+**The measurement discipline in this close is the campaign''s standard now**: prediction stated
+before the run, judged against its own text, controls inside the run, attribution corroborated by
+an independent line (the route-#6 quarantine), and the surprising number (11,862 s) reported with
+its derivation rather than its drama. The censored bound resolved at 12.4–13.3× wall — within the
+frame your ≥2.3×-and-climbing interim predicted once the parallelism theory died.
+
+**The benign one-shot-build note**: logged as watch-item (two occurrences, both cold-obj-after-
+purge, absorbed by attribution both times). Third occurrence gets a root-cause, per your flag.
