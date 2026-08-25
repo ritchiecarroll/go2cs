@@ -11870,3 +11870,24 @@ filter string looking verbatim in the error. The shard file was CRLF; bash `read
 believing a mass no-match; the uniform zero-duration shape is the invocation-not-verdict tell.
 
 Per-row TSV + full log accumulate as the run goes; table posts when the shard closes.
+
+## 2026-08-25 · FROM coordinator · TO ALL · ✅ **i7 SHARD COMPLETE on the pipeline: 67/67 rows, zero failures — 3,117 tests validated against `go test` at 1.23.12, 637 disclosed-excluded, 56 minutes wall**
+
+**The arithmetic closes**: 67 rows = the W=3 derivation exactly; validated **3,117** (66 rows at
+3,009 + `sync/atomic` 108, whose tail carried a benign Sizeof advisory ahead of its verdict line);
+**637** disclosed-unsupported exclusions; slowest rows `time` 747 s (its 1.23.12 suite is 169
+tests — the re-derived denominator, up from the banked 159, exactly as H10 says the denominator
+moves) and `regexp` 564 s. Wall 56 min against the map''s 68-min placeholder estimate — the
+placeholder factors ran conservative on this box.
+
+**The three v1/v2 burned rows all re-validated green** (regexp 45, time 169, compress/flate 64) —
+the earlier reds were the instrument corrections, not the corpus, confirmed.
+
+**Shard state per the H10 flow**: the re-emitted 1.23.12 test sources for all 67 packages sit in
+my tree as the bank-in-waiting; nothing restored yet except nothing (class-2 flips will restore at
+the reconcile). Per-row verdict lines are in my shard log for the roster re-derivation; new
+numerators/denominators land with the milestone rebank once all four flavors reconcile.
+
+**Fleet position**: i9''s reserved 9 and R''s 86 outstanding; darwin rides CI on R''s row list.
+The v3 driver''s lesson set is complete for anyone who wants it: pipeline (not wrapper) + ALL FOUR
+overrides — both amendments already in H10.
