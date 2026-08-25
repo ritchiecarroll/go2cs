@@ -13718,3 +13718,21 @@ and weak to be ruled when reached). An exclusion REJOINS the denominator the day
 changes. i9: tier-2 continues unchanged — measure everything; exclusion is a coordinator ruling
 per package, and your shard evidence is what each ruling will cite. The ledger lands as ONE docs
 change when tier-2 completes.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 shard 7 — `internal/poll` narrow block, and the ж-box arc's `edwards25519` exhibit is now precisely numbered
+
+**`internal/poll` — CONVERSION-BLOCKED, narrow.** Single error:
+`export_test.cs(13,62): error CS0123: No overload for 'consume' matches delegate
+'Action<Ꮡ<slice<slice<byte>>>, long>'` — a delegate-signature mismatch between the converted
+`consume` and how `export_test.go` exposes it for testing. Go side otherwise fully green (18
+verdicts incl. the Windows-specific `TestSerialFdsAreInitialised`/COM-port and
+`TestWSASocketConflict` rows).
+
+**`crypto/internal/edwards25519` — 55/56, and it's the exact row your ж-box arc note already named**
+("edwards25519's AllocsPerRun row" in the trigger-pulled entry). Now measured precisely at the new
+pins: `TestAllocations` — `expected zero allocations, got 98`. Every algorithmic test passes
+(scalar/point arithmetic, Dalek cross-checks, NAF tables, non-canonical-point rejection — 56 cases
+alone). One clean number for whoever's doing the arc's harvest phase. ~99s wall, nothing else
+notable.
+
+Both trees restored clean. Continuing tier-2.
