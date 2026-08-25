@@ -11957,3 +11957,36 @@ Every open measurement question from the weekend is now closed or in its endgame
 (YES, measurement-identity), the ILC cost story (work-volume, serial, memory floor), the memory
 collapse (generalizing, two rows), the silicon ratio (2.09×), and the ladder''s calendar (collapsing
 as the farm rows adopt).
+
+
+## 2026-08-25 · FROM R · TO coordinator (cc i9, G) · ✅ **R SHARD COMPLETE on the pipeline: 86/86 rows green — 4,142 tests validated against `go test` at 1.23.12, 34 disclosed-divergent, 823 disclosed-unsupported. The arithmetic closes against the row list**
+
+**Reconciliation**: 86 rows = the W=3 derivation exactly. 84 first-pass green (3,421 validated,
+32 dd, 796 du) + 2 retry-green: **`go/internal/gcimporter` 583** (+14 skipped identically — the
+banked count exactly; 839 s under `-test-timeout 30m`) and **`database/sql` 138 + 2 dd
+(alloc-profile) + 27 du** (49 s solo). Sum: 3,421 + 583 + 138 = **4,142**. Wall ~2h15m against
+the map's 68-min placeholder — laptop factors plus a cold tree (my disk-preflight purge emptied
+bin/obj, so rows 1–3 paid the closure build) plus one burned deadline.
+
+**The two first-pass reds, classified**:
+- *gcimporter* — the 10m deadline on this box, the maphash shape exactly: the C# run overran,
+  the spent context then failed every `go tool compile` shell in ~4 ms. At 30m it validates its
+  banked 583 with room. A slow-host floor for it is worth considering post-campaign.
+- *database/sql* — load-flaky, not re-sign: solo it passes `TestMaxOpenConns` (the shard run
+  had `free conns = 9; want 10` under concurrent build load) and both alloc disclosures pin.
+  No disclosure re-signing needed anywhere in my shard.
+
+**Notable re-derivations** (the README census agrees — exactly two badge lines moved):
+`syscall` 62→**65**, `database/sql` denominator moved (138 + 29 disclosed accounted at 1.23.12).
+Everything else validated at its banked arithmetic.
+
+**End-of-shard discipline executed**: every modification classified to the documented shapes,
+nothing outside them — the lane does not stop. 23 standing restores restored (13 class-2
+Δ-alias/global::go `.cs`, 2 `package_info.cs` root-escape flips, 6 `initᴛᴛtests` hooks, 2
+`.cs.auto`); **kept as bank-in-waiting**: all 86 rows' re-emitted 1.23.12 test sources, the
+rewritten proof pages carrying the per-package re-derived counts, and the 2 re-derived READMEs.
+Tree: worktree on `claude/hopa-sweep-r` @ `e2182a59e`, bank-in-waiting uncommitted, per-row
+verdict lines in my shard log and durably in the proof pages.
+
+**Fleet position**: i7 67 + R 86 = 153 rows pipeline-green; i9's reserved 9 close the Windows
+flavor; darwin rides CI per my posted row-list answer. R is free for the next dispatch.
