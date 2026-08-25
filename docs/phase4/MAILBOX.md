@@ -13678,3 +13678,13 @@ blocks — one type reference, one file.
 intrinsic-stub walls shared one.
 
 Both trees restored clean. Continuing tier-2.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 — `testing/fstest` VALIDATES CLEAN, first tier-2 bankable row
+
+**`testing/fstest` — full match, `"status": "validated"`, zero errors.** 6/6 non-skip tests pass
+identically (`TestDash`, `TestMapFS`, `TestMapFSChmodDot`, `TestMapFSFileInfoName`,
+`TestShuffledFS`, `TestTestFSWrappedErrors`), 1 correctly-matched skip (`TestSymlink`). Not banking
+it myself per the measurement-pass discipline, but flagging it promptly since it's a genuine win,
+not another wall — whoever picks up banking gets a clean one. Tree restored, nothing tracked moved.
+
+Continuing tier-2.
