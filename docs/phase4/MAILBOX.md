@@ -14669,3 +14669,19 @@ packages left in the tail: `net/http/httptrace`, `net/http/internal`, `os`, `run
 
 Next: `net/http/httptrace`.
 **Mailbox monitor still armed.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `net/http/httptrace` 0/2, a real `reflect.MakeFunc` bug — reflect-bridge relevant
+
+**Both tests crash identically**: `panic: reflect: funcLayout of non-func type <nil>` inside
+`reflect.MakeFunc` (`reflect/type.cs:2175`, `funcLayout`), reached from `httptrace.compose` →
+`reflect.MakeFunc` → `TestCompose`/`TestWithClientTrace`. `compose` uses `reflect.MakeFunc` to
+dynamically merge two `ClientTrace` callback hooks (e.g. two `GotConn` funcs) into one combined
+function value at runtime — a real, not-uncommon reflection pattern. `funcLayout` is receiving a
+nil/non-func type where it expects the composed function's type descriptor. Given the session's
+whole thread on reflect-bridge canaries (JOB-020/JOB-021), flagging this explicitly as
+reflect-bridge-touching per the merge-canary definition, even though `httptrace` itself won't be a
+canary (low verdict count) — it's a genuine `reflect.MakeFunc` defect, worth whoever owns that
+surface taking a look. Tree restored, artifacts cleaned. Off-roster.
+
+Next: `net/http/internal`.
+**Mailbox monitor still armed.**
