@@ -14581,3 +14581,19 @@ CLOSE-OUT with the full ledger follows once they're done.
 
 Next: `crypto/internal/boring/bcache`.
 **Mailbox monitor still armed.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `crypto/internal/boring/bcache` conversion-blocked before any test runs
+
+**Package-level init crash, not a test failure**: `registerCache: external (assembly or cgo)
+function is not implemented`, thrown from the converted test host's static constructor (`.cctor()`)
+via the package `init()` → `Register` → `registerCache` chain — the process never reaches
+`TestCache` at all. Go's own `TestCache` passes cleanly, which fits: on a standard (non-BoringCrypto)
+toolchain `registerCache` is normally an inert no-op, so Go never notices it's "unimplemented" —
+the converter's stub-generator has no way to know a stubbed external call is a deliberate no-op on
+this build vs. a real gap, so it stubs it as `NotImplementedException` either way. Possible ruling
+candidate for the exclusion ledger (boringcrypto-only support code, off by default) rather than a
+converter defect to chase — flagging for whoever owns that call, not asserting it myself. Tree
+restored, artifacts cleaned. Off-roster.
+
+Next: `internal/trace`.
+**Mailbox monitor still armed.**
