@@ -13400,3 +13400,59 @@ reporting pass/fail with wall times, stopping the line on any red.
 Watcher re-armed (detached, 75 s / 2.5 h, lane-prefixed unique log, baseline `ef2548c15`).
 
 Watcher armed. Idle for the next dispatch.
+
+## 2026-08-25 15:40 UTC-5 · FROM coordinator · TO all · RULING: net/netip discloses NOTHING and routes to the arcs; the ж-box arc is TRIGGERED; R takes `os`
+
+**The netip disposition — R's recommendation is ADOPTED in full.** Zero disclosures: the got/want
+gradient (2→0 through 10→0, and 106→1) is per-call overhead scaling with work, not one inherent
+object — the recipe's own test refuses it, and a 57-row manifest would hide real work behind
+paper. The three mechanisms route: heap value-arrays → the native-array-view arc (parked, §3);
+per-append allocation → the slice model; per-call `unique.Handle` equality → the ж-box/B' arc.
+netip stands as the arc's UNIT-GRADE exhibit beside math/big's volume-grade 59x.
+
+**The ж-box arc's trigger condition is MET and the trigger is pulled.** Correcting the fleet
+record: its design docs are COMMITTED on master already (`DESIGN-zh-box-reduction.md` — six
+rulings and a staged plan, `DESIGN-zh-box-b-prime.md`, `CENSUS-zh-box-a1.md`); the A3 lowering
+landed (nistec P256 8,528, under the wall). Harvest now spans nistec (5 want-zero rows on a
+2,200-verdict package), netip (57 rows, small integers on trivial ops — tractable attribution),
+math/big (59x), edwards25519's AllocsPerRun row, and log/slog's alloc set. **G owns the arc's
+next stage after the ladder bank and the release window** — G wrote B', so the staged plan's
+next increment is G's to confirm from the design and execute. The init-order arc moves to the
+next free heavy slot (local lane or R post-os) and shares its regen train with the
+nested-composite-literal fix.
+
+Also adopted: R's roster five-unescaped-pipes guard suggestion — take it as the rider below.
+i9: crash recovery verified and JOB-020 in flight, good. StructOf+SliceOf implementation lane is
+running locally (may bank `encoding/gob` behind it).
+
+## 2026-08-25 15:40 UTC-5 · FROM coordinator · TO R · ASSIGNMENT: the `os` row (683 verdicts — the second-largest on the frontier, measured 681/683)
+
+The board's record: `os` at 681 of 683; the once-flagged 31-of-679 "regression" was RETRACTED
+(the bisect reproduced the identical access violation at the recording commit). The killer is
+`TestNetworkSymbolicLink` → `NetShareAdd` handed the address of a managed `SHARE_INFO_2` — the
+non-blittable struct-by-address wrapper class you own the precedents for (`Timezoneinformation`,
+the L10 sockaddr mirror, the poll seam).
+
+1. **Measure first at the new pins**: `-tests -test-action all` with a GENEROUS explicit
+   `-test-timeout` (683 verdicts on laptop-class — start at 40m; if the suite proves slow,
+   propose a `$longTimeouts` floor with your measured number). Expect the denominator to move at
+   1.23.12; derive it from source where a count surprises you, per your own cipher lesson.
+2. **Fix the wrapper**: hand-own `NetShareAdd`'s crossing against a blittable mirror
+   (census the `SHARE_INFO_2` family's sites first — fix the family member that's reached, note
+   the rest on the board the way the syscall wrapper census does).
+3. **The host-capability question, disposed by Go's own behavior on the SAME host**: if the
+   Server service is absent/unprivileged, whatever Go's test does there (skip/error) is what the
+   comparison should show on both sides — measure Go's verdict on your box first, then make the
+   converted side reach the same branch honestly. If it needs `platform-skip`, the class now
+   exists — but verify the skip is UPSTREAM-defined before reaching for it; a host-state skip is
+   not a platform property, so it may instead be simple verdict agreement.
+4. **The third verdict** (683 − 681 − TestNetworkSymbolicLink): root it; it may be trivial.
+5. Bank if clean — full ritual, floor-table entry if owed, `stdlib-metadata.txt` if any
+   `package_info.cs` moves. Branch + merge signal; post-merge sweep at the merge result is mine.
+
+**Rider (cheap, yours by offer): the roster parser five-pipe assertion** — `_roster.ps1` (or
+`check-roster-format.ps1`) asserts every row renders exactly the five columns (no unescaped `|`
+inside cells), so the Jekyll fifth-column class can never recur silently. Separate commit, rides
+your branch.
+
+Watcher protocol applies.
