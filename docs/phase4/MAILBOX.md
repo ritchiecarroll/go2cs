@@ -13511,3 +13511,38 @@ at gate time): `encoding/json` 491, `encoding/xml` 386, `html/template` 243, `da
 **ACK on the watcher/loop protocol amendment.** Re-arming as watcher (detached, memory) + wake loop
 (heartbeat) per the new requirement — posting once both are confirmed armed, in the next entry.
 Resuming tier-2 now that JOB-020 is clear.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · watcher + wake loop both armed; JOB-019 tier-2 shard 1
+
+**Watcher/loop amendment confirmed satisfied**: detached watcher re-armed fresh (baseline
+`42f11f0ca`, 75s/2.5h, unique lane-prefixed log) plus a self-scheduling wake loop (20m fixed
+interval — 25 wouldn't divide 60 cleanly, rounded within your stated 20-30 range) whose tick reads
+the watcher log, independently `ls-remote`s diffed from the last hash I actually read, acts on
+anything addressed to i9, re-arms the watcher on expiry, and re-arms itself every cycle. "watcher
+armed + wake loop armed (20m)" going forward, per the new ACK wording.
+
+**Tier-2, first two rows — one big move, one real converter defect:**
+
+**`internal/runtime/atomic` — 13/13 pass + 1 correctly-matched skip (`TestUnaligned64`, 32-bit-only),
+1 divergence.** This is the row you flagged might have moved once sync/atomic's sibling double-Ꮡ
+root closed — **it did**: previously 0/15, now 14/15 effective. The one holdout,
+`TestStorepNoWB` ("Bad escape analysis of StorepNoWB"), reads as a Go-COMPILER escape-analysis
+diagnostic test — it appears to assert something about `go build`'s own escape-analysis output,
+which has no C#/.NET analog to compare against (same shape as the documented `codegen-liveness`
+class: a property only meaningful inside Go's own compilation model). Naming it, not classifying
+it — that's a ruling call.
+
+**`runtime/pprof` — CONVERSION-BLOCKED, not merely divergent.** The Go side ran fully (100+
+verdicts, mostly `TestGoroutineProfileConcurrency`'s subtests, 2 correctly-matched skips); the C#
+side never got that far — `runtime.pprof.tests.csproj` fails to BUILD. Root cause, precise:
+`pprof_test.cs:3261-3265` calls a converter-emitted generic helper
+`testProfileRecordNullPadding<T>` whose constraint requires `T : IEqualityOperators<T,T,bool>`
+(`System.Numerics`), but the three Go-struct-derived types it's instantiated with —
+`BlockProfileRecord`, `StackRecord`, `MemProfileRecord` — don't implement that interface: **5×
+CS0315** ("no boxing conversion from X to IEqualityOperators<X,X,bool>"). A separate, unrelated
+**CS0149** ("Method name expected") at `pprof_test.cs:709` also blocks the build. This is a
+converter emission defect, not a wall — worth a look outside this measurement pass; I did not
+investigate whether the `IEqualityOperators` constraint pattern appears in other generic-helper
+emissions elsewhere in the corpus.
+
+Both trees restored clean. Continuing tier-2.
