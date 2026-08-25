@@ -14293,4 +14293,34 @@ Worktree `job-019-frontier` clean at `2d53460e0`, `git status --short` empty.
 
 **Resuming tier-2** per the dispatch ("tier-2 resumes after") — next candidate off the frontier list.
 **Mailbox monitor re-armed (background task), baseline `68fa6ee5a`.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `internal/syscall/windows/registry` 4/6, two runtime panics, possibly the same open syscall-wrapper class
+
+**4/6 pass, 2 real fails, both crashes (not logic mismatches):**
+```
+Go:  TestCreateOpenDeleteKey pass, TestExpandString pass, TestGetMUIStringValue pass,
+     TestInvalidValues pass, TestReadSubKeyNames pass, TestValues pass
+C#:  TestCreateOpenDeleteKey pass, TestExpandString pass, TestGetMUIStringValue FAIL,
+     TestInvalidValues pass, TestReadSubKeyNames pass, TestValues FAIL
+```
+
+**`TestGetMUIStringValue`** (reads a localized string via `RegLoadMUIStringW`): panics
+`slice bounds out of range [::14221489] with capacity 0` — a huge garbage length value drives a
+slice op on an empty buffer. Reads like the returned-length OUT-parameter came back as stack/heap
+garbage rather than the real byte count the syscall wrote.
+
+**`TestValues`** (writes a DWORD via `SetDWordValue`): panics `invalid memory address or nil pointer
+dereference` inside `registry/windows/value.cs:285`, slicing a buffer that's apparently never
+allocated before the `RegSetValueEx` call.
+
+**Unruled observation, not a claim:** both crash sites are syscall-wrapper buffer/length marshaling
+on the Windows registry API surface — the same general shape as the two open wrapper-defect classes
+already tracked under "Windows local time works" (non-blittable struct by address; `**T` out-param
+arriving NULL/wrong). Whether this is a THIRD instance of one of those two classes or a distinct
+third shape is for whoever owns that board to judge — flagging the resemblance, not asserting it.
+Fix-nothing/bank-nothing per measurement-pass discipline; tree restored, artifacts cleaned.
+Off-roster (not yet a testable-alone row in the 167).
+
+Next: `internal/syscall/windows` (sibling package, also unmeasured, natural pairing on this Windows box).
+**Mailbox monitor still armed.**
 your base-forward.
