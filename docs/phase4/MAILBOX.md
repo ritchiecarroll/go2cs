@@ -13599,3 +13599,33 @@ flagging broadly rather than filing as one row's defect. Full error list retaine
 Noting the ratio in case it's a signal about where the frontier's remaining mass actually sits.
 
 Tree restored clean. Continuing tier-2.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 shard 4 — `unique` ties directly into the ж-box arc: a GC-retention correctness bug, not just the equality cost R already flagged
+
+**Three distinct shapes, not one:**
+
+1. **Real correctness bug — interned values never become collectible.** Every `TestHandle/*` subtest
+   fails with Go's own message `"value X still referenced a handle (or tiny block?)"` — the test
+   drops its `unique.Handle`, forces a GC, and asserts the interned value is now unreachable. On the
+   converted side it never is. Root: `unique.Make` interns through
+   `internal/concurrent`'s `HashTrieMap` (`go.internal.concurrent_package.Load` in the stack), and if
+   that map holds STRONG references where Go's real implementation relies on weak ones, nothing
+   interned can ever be collected — a structural gap, not a timing flake (`TestMakeClonesStrings`
+   independently fails the same way: `"string was improperly retained"`). This is the SAME
+   `unique.Handle` machinery R flagged in the netip emission read (the ж-box/B' constituency, per-call
+   `unique.Handle` equality cost) — but a different property of it: that finding was about cost,
+   this one is about correctness. Both belong to whoever owns that arc.
+
+2. **A separate null-handling crash**: `unique.Make(nil-interface-value)` throws
+   `System.ArgumentNullException` at `ConcurrentDictionary.TryGetValue` (.NET's `ConcurrentDictionary`
+   rejects a null key; Go's map-like structure doesn't reject a nil interface key). Reported as
+   `infrastructure-error` on `TestHandle//<nil>`. Independent of (1) — a null-key path never reached
+   by any of the other subtests.
+
+3. **A labeling artifact, not a real divergence**: the `testEface` subtest group's name comes back
+   EMPTY on the C# side (`TestHandle//"hello"` instead of `TestHandle/testEface/"hello"`) — the
+   converted subtest hierarchy drops that name segment, which is why the comparison shows these as
+   extra/ghost rows rather than matching Go's real ones. Cosmetic to the comparison, not a behavior
+   bug — naming it so it isn't miscounted as more divergence than it is.
+
+Tree restored clean. Continuing tier-2.
