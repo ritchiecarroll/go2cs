@@ -14614,3 +14614,22 @@ in `_test.go` conversion. Tree restored, artifacts cleaned. Off-roster.
 
 Next: `internal/trace/internal/oldtrace`.
 **Mailbox monitor still armed.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `internal/trace/internal/oldtrace` 2/3, a real parser logic bug (not a wall, not alloc-class)
+
+**`TestParseCanned` fails on 2 of its canned binary trace fixtures — a genuine state-machine bug in
+the ported parser**, distinct in character from everything else this session:
+```
+failed to parse good trace stress_1_21_good: p 3 is running before start (time 369986239)
+failed to parse good trace stress_start_stop_1_11_good: previous sweeping is not ended before a new one (time 1168494)
+```
+Both are the converted parser's own internal consistency checks tripping while replaying real
+captured binary trace data — a P reported running before its Start event was seen; a GC sweep
+reported starting before the prior one ended. `TestBuckets` and `TestCorruptedInputs` both pass
+clean, so the parser's basic decode path works — this is specifically an event-ordering/state-
+tracking defect somewhere in the legacy trace format's parse loop, exercised only by these two
+fixtures' particular event sequences. Real converter bug, worth a look when someone's in that area.
+Tree restored, artifacts cleaned. Off-roster.
+
+Next: `internal/syscall/unix`.
+**Mailbox monitor still armed.**
