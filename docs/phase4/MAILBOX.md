@@ -12534,3 +12534,50 @@ compile anywhere, adopt on measurement-identity, measure on canon only.
 
 **Your first three moves**: (1) read the mailbox tail for anything after this handoff; (2) check
 G's ladder state and the release readiness; (3) resume the 100% march from the board's queue.
+
+
+## 2026-08-25 · FROM R · TO R-post-roll (cc coordinator) · your brief — lane R on RITCHIE-LAPTOP, everything banked, nothing detached, clean start
+
+**Who you are**: fleet lane R on RITCHIE-LAPTOP (Ryzen 7 PRO 6850U, 16 threads — laptop-class:
+budget from the TOP of every timing range and treat 10m package deadlines as suspect on big
+suites). You execute the coordinator's mailbox dispatches; the mailbox
+(`docs/phase4/MAILBOX.md`, branch `claude/mailbox`) is the command channel — pull before append,
+append-only, push immediately, refetch-reappend-retry on rejection, NEVER force, unsigned commits
+on the mailbox branch ONLY. Your persistent memory's MEMORY.md carries the standing mechanics
+(GPG two-failure-mode doctrine + owner-present cache priming, WSL lane, watcher gap-check: diff
+from the last hash actually READ, not the last one fetched).
+
+**Banked — everything; you own no unpushed state**: master `a2e079259` carries the consolidated
+1.23.12 roster (162/162, 18,598 verdicts; milestone anchor `be58eb4aa`). The hop-A sweep branches
+are retired. This box's worktrees: `lane-r-runway` (was the consolidation workspace; its branch
+is merged — reusable or disposable) and `preflight-trio-de1c72` (the old session's cwd, branch
+long merged — disposable). Both trees are bin/obj-purged (owner's cleanup): first builds are
+COLD everywhere. Untracked `lane-r-runway\lane-r-shard.txt` is disposable (re-derives from
+`docs/phase4/hopA-inputs/shardmap.py`, whose data path now derives from its own location).
+
+**Detached/running: NOTHING.** No processes, no samplers, no watcher armed at roll time. WSL:
+`Ubuntu-22.04` is the Linux lane (`/root/go2cs`, 8.7 GB); the plain `Ubuntu` instance was cleared
+with the owner for removal.
+
+**The objective**: the march from 162/215 to **100% test validation** on .NET 10 + Go 1.23.12.
+The board's candidate queue is the worklist; the coordinator-post-roll dispatches.
+
+**This session's paid lessons your predecessors want you to keep** (beyond what CLAUDE.md holds):
+- A shard/row file written on Windows is CRLF; bash `read -r` keeps the `\r` and every filter
+  built from it fails while echoing back verbatim-looking. `od -c` the file before believing a
+  mass no-match; uniform zero-duration failure = invocation, not verdict.
+- Piping a native long-runner into `head`/`-First N` KILLS it mid-run when the pipe closes.
+  Redirect to a file; read the file.
+- Long loops: self-checkpoint at row boundaries (`CHECKPOINT next=N` + resume arg) so no outer
+  budget can kill a row mid-flight. A TaskStop tree-kill leaves orphans — kill-then-VERIFY by
+  parentage (`go2cs.exe → dotnet run` pairs survive and hold file locks that fake mass-empty
+  verdicts on the next run).
+- Sweep FAIL ≠ divergence until the comparison JSON says so: a passing test mid-run at exactly
+  the deadline is the false-red shape (`time` needed 19 min at 169 tests; it now floors at 40m).
+- Any roster-walking script owes a parse-count control (must equal the row count) — the first
+  regex silently skipped every blank-Disclosed row and produced a plausible near-empty census.
+- The flag-handoff rule: a flag RAISED to the coordinator is actioned centrally unless dispatched
+  back — the flag itself is the handoff. Do not action what you already handed off.
+
+**First moves**: (1) read the mailbox tail past this handoff; (2) re-arm the watcher from the tip
+you actually read; (3) take the coordinator-post-roll's first dispatch.
