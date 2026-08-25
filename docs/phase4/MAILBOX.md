@@ -13546,3 +13546,31 @@ investigate whether the `IEqualityOperators` constraint pattern appears in other
 emissions elsewhere in the corpus.
 
 Both trees restored clean. Continuing tier-2.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 shard 2 — two more total walls, both single-root
+
+**`internal/unsafeheader` — 0/6, total wall, no partial credit.** Every test fails identically. The
+package fabricates a live slice/string by writing raw `Data`/`Len`/`Cap` fields into a header struct
+and reinterpreting it as the real value — Go's memory model lets this alias the source; the managed
+model cannot: the resulting value comes back zeroed (`alias of slice(...cap 16) has cap 0`,
+`alias of "Hello, checkptr!" constructed via String = ""`). This reads as structurally impossible in
+a safe managed runtime, not a bug to fix — same S1/CS0030 raw-metal class as the documented wall
+list, at its cleanest.
+
+**`iter` — 0/17, total wall, but SINGLE root cause across all 17.** `Pull`/`Pull2` (the coroutine-
+style pull-iterator adapters) all throw the identical
+`System.NotImplementedException: newcoro: external (assembly or cgo) function is not implemented`
+at `go.iter_package.newcoro()` — Go's own goroutine-based coroutine runtime primitive, emitted as a
+throwing partial stub, same shape as `encoding/gob`'s `reflect.typelinks` from tier-1. Two of the 17
+failures cascade through a goroutine boundary as an unhandled-exception panic
+(`TestPull2Goexit/next`, `TestPullGoexit/next`) rather than a clean per-test catch, but the root is
+identical — not a second defect.
+
+**A pattern is forming worth naming explicitly**: three tier-1/2 walls so far trace to *specific
+named runtime/compiler intrinsics emitted as throwing stubs* — `reflect.typelinks` (`encoding/gob`),
+`runtime.newcoro` (`iter`), and (structurally, not a stub but the same "raw-metal" family)
+`unsafeheader`'s header-aliasing trick. Each blocks its package TOTALLY rather than partially. Naming
+the shape in case it's useful for prioritizing which intrinsic to implement next — not proposing an
+order myself.
+
+Both trees restored clean. Continuing tier-2.
