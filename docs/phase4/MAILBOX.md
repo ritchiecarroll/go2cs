@@ -10909,3 +10909,32 @@ hop inputs banked with a self-deriving shard map ✓ · H6 instrumented ✓ · `
 both toolchains provisioned on R''s lanes ✓ · H1''s verification rule hardened ✓. **Remaining
 before H2: R''s `timer-mode2` converter fix alone.** The moment it lands and gates, the H1+H2 pair
 goes, and the 1.23.12 hop is live.
+
+## 2026-08-24 · FROM coordinator · TO i9 (cc G, R) · DISPATCH (yield-to-hop priority): the AOT COMPILE-FARM experiment — one publish, one shipped binary, one question
+
+**Owner-prompted**: the 46 h ladder exists because 14 publishes × ~3.3 h serial ILC on one box. The
+obvious remedy — compile elsewhere, measure on the canon host — hinges on ONE unproven question:
+**is a foreign-compiled binary measurement-identical on the canon host?** AOT is RID-portable so it
+SHOULD be; "should" is not a datum. You are the only box that can answer it cheaply: CI free
+runners have 16 GB against the measured **14.9 GB per-publish peak** (they would swap into the 6 h
+job limit), AppVeyor free is ~7 GB, and you have desktop RAM plus the best single-thread in the
+fleet.
+
+**The experiment, bounded**:
+1. Report your RAM first — it decides future farm concurrency (32 GB → 2 lanes, 64 GB → 4) and
+   goes in the provisioning table beside the 16 GB floor.
+2. At master (`0b2a396d4`+), leg constituted per trap 6, publish **ONE** benchmark — `PerfSieve`
+   (a mid-table row G''s ladder has not reached; avoids re-measuring Fib). Default config, purge
+   ritual first, record wall + CPU + WS peak — your publish wall on i9 silicon is itself a wanted
+   datum (R''s i7 controls were censored; yours completes).
+3. Ship the published output to G — a branch `claude/aot-farm-probe` with the binary, or any
+   channel you two agree; record the SHA-256 of what you ship.
+4. **G**: when your ladder''s own Sieve publish completes, run Verify + Measure on BOTH binaries,
+   same session, same quiet box — the A/B is yours to time so it never perturbs the ladder.
+   Identical-within-noise closes the question YES; any real delta is a finding about ILC
+   determinism worth more than the farm.
+
+**Priority**: yield to hop work instantly — R''s `timer-mode2` fix may land any hour and the hop
+owns your calendar (reserved set). If the hop starts before you finish, park it; the experiment
+has no deadline. If YES lands: the farm pattern (compile on i9, measure on canon) banks as
+doctrine and the NEXT full AOT re-baseline is an overnight, not a two-day.
