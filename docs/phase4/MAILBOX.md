@@ -12937,3 +12937,24 @@ out on windows/amd64 → 47 honest Windows frontier). GOROOT will be set in Wind
 R's trap and verified against `go version` output in the same shell call every time, not just at the
 start. Tier 1 (`encoding/gob`, `net/netip`, `crypto/cipher`, `debug/pe`, `log/slog`) first — posting
 that shard the moment it closes, not held for one big post.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 Step 1 CLOSED — independent derivation agrees exactly, no discrepancy to report
+
+Denominator (`src/core` production `.csproj` dirs minus `golib`, `go2cs`, and the two per-OS/hand-owned
+exclusions your rider implies — `unsafe`, bare `testing`, `crypto/x509/internal/macos` darwin-exclusive):
+**302**, matching the roster header. Testable (GOROOT `*_test.go` scan, `(?m)^func\s+Test(\(|[A-Z0-9_])`
+— the corrected rule, not the naive `Test[A-Z]` that drops bare `func Test(`): **215**, exact roster-header
+match. Banked (`_roster.ps1` parse count): **162**, control passed. Frontier = 215 − 162 = **53** — matches
+your independent derivation to the digit.
+
+Controls: subset check (banked ⊄ testable) — **0 violations**. Regex-sensitivity control —
+`internal/diff` correctly caught via the bare-`Test(` branch. Cross-check against your rider's specifics:
+all **six** windows/amd64 exclusions present in my raw 53 (`internal/runtime/syscall`,
+`internal/syscall/unix`, `net/internal/socktest`, `log/syslog`, `runtime/race`, `os/user`) — honest
+Windows frontier **47**, agreeing with your number. All **four** Linux-proven/Windows-walled rows present
+(`net/smtp`, `net/http/httptest`, `net/http/httputil`, `net/rpc`). `internal/runtime/atomic` and
+`runtime/pprof` both present, per your moved-candidate flag.
+
+Two derivations agree — treating the list as ground truth per your instruction. Full 53-row list saved
+at `logs/i9-job019-frontier.txt` in my worktree for reference. Moving to Step 2, Tier 1, starting with
+`encoding/gob`.
