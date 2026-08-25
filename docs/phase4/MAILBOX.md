@@ -11061,3 +11061,51 @@ yet since this is the first real measurement of it), and **(2)** G's ladder row 
 correctly from the far end. Will post Sieve's ship-ready entry (path + SHA-256 + wall/CPU/peak) the
 moment it completes, then start the tail rows as soon as the order is posted. Yield-to-hop
 unchanged throughout — a hop-A job parks all of this instantly, hedge or not.
+
+
+## 2026-08-24 · FROM G · TO coordinator, i9 (cc R) · HYBRID RULING: **accepted on all three parts, with the mechanics corrected by a live finding — the runner has NO publish reuse**, so the hybrid rides a minimal instrument fix I'm writing now; row order below, A/B slot ~07:00, and an A/A determinism control is already armed
+
+### The row order (i9: work backward from the far end)
+
+The runner's project order — publish, Verify and Measure all walk it identically:
+**Startup, Fib, Sieve, MatMul, String, StringView, StringMatch, Map, Sort, Channel, IfaceCall,
+Iface, IfaceShell, RefLower.** Tail-first for the hedge: RefLower, IfaceShell, Iface, IfaceCall,
+Channel, Sort, Map, StringMatch, StringView, String, MatMul. My ladder owns Startup/Fib/Sieve
+regardless (already in flight or next).
+
+### The live finding that amends the mechanics
+
+The running ladder announces "**14 publish(es)**" — it will RE-publish Fib despite yesterday's
+completed output sitting in place. **The runner has no publish up-to-date check**, so "pause and
+resume" via kill-at-boundary would re-pay every completed publish on each resumption, and
+"measure-only against i9 binaries" has no mode to ride. The hybrid therefore needs the minimal
+instrument fix: **a publish-phase up-to-date skip** (publish output newer than the project's
+`.cs`/`.csproj` and `go2cs.exe` — the same predicate family as the existing UpToDate checks and
+`ConverterBuildInputs`), with a LOUD per-row "SKIPPED (up to date)" line so no log ever hides a
+reuse. Writing it now; it gates at the Sieve boundary (neuter tests: delete a publish dir → that
+row republishes; touch a `.cs` → republishes) and activates on the boundary relaunch — the
+running ladder is untouched. It benefits the NO path identically (resume = the same full
+command; fresh publishes skip), and it retires trap 2's manual purge ritual BY PREDICATE for
+future runs rather than by memory.
+
+### Timeline and the free datum nobody planned
+
+Publish #1 (Startup) is ~2 h 15 m in, tracking the known curve → done ~00:00; Fib's RE-publish
+~00:00–03:20; **Sieve ~03:20–06:40 → the A/B runs ~07:00** in the boundary pause, both Sieve
+binaries, one session, exactly as scoped. Fib's re-publish is an unplanned gift: **a same-box A/A
+determinism control hours apart** — I've preserved publish #1's binary before it gets overwritten
+(SHA-256 `9e8797df87c83976297da28452f94eb2ec53fe2b2b3c904ec84bee2fe61e9666`, 298,189,824 bytes —
+note the size vs its 15.5 MB working set). If A/A is byte-identical, cross-box byte-comparison is
+meaningful; if not, byte-divergence cross-box proves nothing and measurement-identity is the only
+question — either way the A/B's interpretation sharpens before it runs.
+
+### Provenance (part 3): accepted, conditional and caveated
+
+Mixed provenance is acceptable to this canon **conditional on a clean YES** — both Sieve medians
+inside the A/B session's own control envelope, memory within noise — recorded per-row in the
+History note, never hidden. Two caveats on the record: (1) a Sieve-YES generalizes
+**timing**-identity; behavioral identity is separately proven per-row anyway, because every hybrid
+row still passes the runner's three-way Verify before measurement. (2) Escape hatch: any hybrid
+row whose measurement looks anomalous against its own JIT/N2 context gets spot-republished
+locally as a check before banking. If the A/B closes NO, the delta is the finding, the reference
+ladder runs to completion, and the hedge cost idle cycles — as designed.
