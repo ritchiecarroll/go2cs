@@ -14934,3 +14934,54 @@ Your two findings are both accepted:
    skip-matches on both sides everywhere we measure, so nothing needs it; when the arc lands, a
    Developer-Mode/elevated host is what flips it to run/run against the fixed crossing — an
    owner call for that day, not now.
+
+## 2026-08-25 · FROM G · TO G-post-roll (cc coordinator, owner) · ROLL HANDOFF #2 — the reboot for the Sieve host-state HAS HAPPENED; you resume at the final step: verify, re-measure, bank, signal. Nothing is running, nothing re-armed; this entry is the whole state
+
+**Where the lane stands**: JOB-018 is one clean measurement pass from complete. The ladder is
+DONE (all 14 AOT cells exist: 6 canon publishes 11,862–13,144 s, 8 farm-adopted, every hash
+verified), N4 and prediction N5 are closed, the farm A/B closed YES and is doctrine, and TWO full
+Verify+Measure passes ran green — but both carried a Sieve row inflated ~+52 % by a host-state
+change (rooted in the 18:30 entry: streaming-bandwidth class alone, every other suspect measured
+and eliminated, persists across processes, reboot-resolvable). **The owner has NOW rebooted the
+laptop for exactly this.** The working tree's README/`docs/Performance.md` hold the pass-2 table
+(Sieve contaminated) — **UNCOMMITTED, deliberately: do not commit them until the clean pass
+rewrites them.**
+
+**Your sequence, in order** (worktree
+`C:\Projects\go2cs\.claude\worktrees\lane-l12-multipart-char-dc0915`, branch `claude/n3-perf-leg`
+@ `a116b1955`, pushed):
+1. **Isolated Sieve check** (~30 s): run
+   `src\tests\Performance\PerfSieve\bin\Release\Go\PerfSieve.exe` 5–6×, read `elapsed_ns`.
+   Expect **~66–71 ms** (this morning's four-reading baseline). If it STILL reads ~110, the
+   change survived the reboot — then it is the machine's new truth: proceed anyway and note it.
+2. **The all-skip full re-measure** (~5–15 min): launch
+   `<old-scratchpad>\g-n5a-resume.ps1 <newlog>` detached (it rebuilds the runner from the FIXED
+   tree — `a116b1955` excludes `Generated/` from the skip predicate; the earlier self-invalidation
+   is documented in the commit). Expect **14 SKIPPED, 0 publishes**, then Verify 14×, Measure,
+   `--update-readme` writes the clean table. Quiet box during Measure. Old scratchpad:
+   `C:\Users\Admin\AppData\Local\Temp\claude\C--Projects-go2cs--claude-worktrees-lane-l12-multipart-char-dc0915\27b41201-c1ca-4cca-a618-d05872e0cf13\scratchpad\`
+   (staged binaries + all series CSVs + logs live there; it survives on disk).
+3. **Accept the table** iff Sieve's Go control sits in band (or the reboot-survival note applies)
+   and the other 13 match the two stable passes. Then in ONE bank commit on the leg: README +
+   `docs/Performance.md` + the History section gains (a) the .NET 9 table it replaces (from git
+   history at the pre-bank HEAD) and (b) the **per-row compile-provenance note** (farm rows:
+   Sieve/Channel/Sort/IfaceCall/Iface/IfaceShell/StringView/StringMatch/Map are i9-built,
+   citation: the farm-YES + ratification entries) — plus fill `docs/phase4/REPORT-dotnet10-perf.md`'s
+   PENDING section (final table, per-publish economics incl. the 11,976/12,389/12,356 s canon
+   rows, the WS-peak series verdicts: Startup 18.4 GB, String 17.0 GB spike-captured) and bank the
+   final series CSVs (`g-ilc-resume-peaks2.csv` + the earlier partial) beside the report.
+4. **Merge master into the leg** — take master's `_paths.ps1` and watchdog wholesale (mine are
+   superseded), read both collision files WHOLE per the merge hazard, build the runner once as
+   smoke.
+5. **JOB-018 completion signal** to the mailbox → the coordinator retires `claude/n3-perf-leg`,
+   the release PIN gate clears, and the owner's **Windows-Update un-pause** confirmation rides
+   the same exchange (the reboot just happened — it may already be done; ask, then the
+   coordinator's memory note deletes).
+6. Then your queued lane: the **ж-box arc next stage** (post-release), whose docket grew all day
+   (timer-mode2 AV = exhibit A, netip unit-grade exhibit, unique GC-retention, WriteStringAlloc,
+   wrapper item 3's Reinterpret source-retention).
+
+**Do NOT redo**: the boundary gates (earned, logged), the A/B/A-A (closed, evidence at
+`evidence-aot-farm-ab-session.md`), the farm adoptions (hashes in the entries), prediction N5
+(§6.2 carries the outcome). **Nothing detached is running** — the reboot cleared every process;
+arm your own mailbox monitor per PROTOCOL v3 and nothing else until step 2.
