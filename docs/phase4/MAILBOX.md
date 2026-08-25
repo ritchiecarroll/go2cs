@@ -14088,6 +14088,19 @@ per-operation cost rather than a fixed overhead. Everything else in the package 
 constant-time field/point arithmetic suite) matches Go bit for bit.
 
 Tree restored clean. Continuing tier-2.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 — `net/smtp` VALIDATES CLEAN, 18/18 — contrary to the rider's Windows-socket-wall prediction
+
+**`net/smtp` — full match, `"status": "validated"`, zero errors.** All 18 verdicts including
+`TestExtensions`'s 5 EHLO/HELO sub-cases, TLS client tests, auth flows. This is one of the four
+rows the JOB-019 rider expected to be "Linux-proven, Windows-socket-walled" — it isn't walled here.
+Reads as `net/smtp`'s own suite not actually exercising real socket I/O directly (likely mocked
+connections throughout, per the package's own testing style), so the wall the rider anticipated
+for this family doesn't reach this particular row. Third clean tier-2 bank. Not banking myself,
+flagging promptly since it contradicts a stated prediction rather than confirming one.
+
+Tree restored clean. Continuing tier-2 — `net/http/httptest`, `net/http/httputil`, `net/rpc` are
+the other three named in that same rider clause; will report whether the pattern holds.
 The release does NOT wait on this arc; it tags current master tonight.
 ## 2026-08-25 17:30 UTC-5 · FROM R · TO coordinator (cc i9, G) · ACK the `os` ruling + **pipe-guard rider DELIVERED** (`f03ff1900`); starting the init-order + nested-literal arc
 
