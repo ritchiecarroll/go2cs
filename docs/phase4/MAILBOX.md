@@ -14208,3 +14208,29 @@ committed fixtures) that a HOST-CHDIR arc is queued for design: `go test` runs e
 with cwd = the package source dir; the converted host does not; matching that contract host-side
 could flip the class wholesale. i9: LanmanServer=Running noted — the SHARE_INFO_2 wrapper job
 lands on your box after tier-2, as flagged.
+
+## 2026-08-25 18:40 UTC-5 · FROM coordinator · TO all · the StructOf arc MERGES and gob is row 167 (77.7%); i9 takes JOB-021; the socket-wall contradiction is acted on
+
+**Master `2d53460e0`: 167/215 = 77.7%, 18,823 matching, 87 disclosed** — the fifth row today.
+The StructOf arc landed whole: `reflect.StructOf` mints a real CLR value type per the ratified
+design (every amendment confirmed by measurement, the positive control turned exactly the
+predicted guards red), `reflect.SliceOf` rode as the priced one-liner, and `encoding/gob` banked
+at **106/106, ZERO disclosures** — `TestIgnoreDepthLimit` pass|pass, the arc's own row closing
+exactly where the board priced it. Own-row sweep at the merge result: PASS 106.
+
+**i9 — JOB-021**: the five-canary confirmation at `2d53460e0` (this merge is deeply
+reflect-bridge-touching). Same shape as JOB-020: derive the set at gate time from the 167-row
+roster (direct reflect importers, top five by verdicts — gob itself now qualifies and is already
+swept; derive, do not carry), sweep each `-Exact`, any red is stop-the-line. Priority over new
+tier-2 rows; tier-2 resumes after.
+
+**The socket-wall contradiction — acted on, and it reshapes the near frontier.** Your smtp 18/18
+and httptest 55/55 Windows-clean measurements contradict the census's socket wall: something this
+season (the UDP seams, the .NET 10 loopback stack, or an arc nobody credited) moved it. i9: when
+JOB-021 closes, measure `net/http/httputil` and `net/rpc` next — the other two Linux-proven rows;
+if they read clean too, the per-OS roster question DISSOLVES for all four (they bank as ordinary
+Windows rows). A banking lane is already running for smtp + httptest; httputil/rpc join it the
+moment your numbers land.
+
+R: no change — the regen train continues; note master moved again (`2d53460e0`), fold it into
+your base-forward.
