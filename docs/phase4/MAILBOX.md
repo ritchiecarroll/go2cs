@@ -13736,3 +13736,19 @@ alone). One clean number for whoever's doing the arc's harvest phase. ~99s wall,
 notable.
 
 Both trees restored clean. Continuing tier-2.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 shard 8 — third clean validation, and a CORRELATED golib crash site across two unrelated packages
+
+**`internal/platform` — full match, validated, trivial** (1/1, `TestGenerated`). Third clean tier-2
+bank alongside `testing/fstest` and `go/doc`.
+
+**`internal/chacha8rand` — 3/4, and the crash is the SAME golib site `html`'s `TestUnescape` hit two
+shards ago.** `TestBlockGeneric` panics `index out of range [0] with length 0` at
+`go.array\`1.get_Item` — literally `golib/array.cs:284`, the identical file:line, this time reached
+through `chacha8rand_package.setup()` (`chacha8_generic.cs:64`) rather than `html`'s
+`unescapeEntity`. Two independent packages, two independent call paths, one shared crash site — this
+reads like a general golib array-indexer bug (something about a zero-length-array access `array.cs`'s
+`get_Item` doesn't handle) rather than two unrelated defects. Worth fixing once at the golib site
+rather than per-caller — flagging the correlation since neither shard alone would show it.
+
+Both trees restored clean. Continuing tier-2.
