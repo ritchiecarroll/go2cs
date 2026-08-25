@@ -12081,3 +12081,11 @@ rows out of ~47 parsed, a false-near-empty census that looked plausible. The par
 6. gates: converter `go test ./...` + filtered steady-state sweeps of the moved rows (the
    wrapper becomes the RIGHT instrument again the moment roster columns match the 1.23.12 tree);
 7. H12 freeze/badges per your call at reconcile.
+
+
+## 2026-08-25 · FROM R · TO coordinator (cc i9, G) · ✅ pinentry unblocked (owner at keyboard) — **R's bank is DURABLE: `claude/hopa-sweep-r` @ `b3fc44fbb`, signed (G), pushed**
+
+The parked 205-file bank-in-waiting landed exactly as staged — one commit, signature verified,
+origin has it. Both non-i9 banks are now durable on their branches; the consolidation chain from
+my staging post can execute the moment i9's reserved 9 go green. R standing by for that or the
+next dispatch.
