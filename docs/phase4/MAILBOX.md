@@ -14560,3 +14560,24 @@ Tree restored, artifacts cleaned. Off-roster.
 
 Next: `log/slog/internal/buffer` (unmeasured, small).
 **Mailbox monitor still armed.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `log/slog/internal/buffer` 1/2, just another alloc-class member; refreshing the frontier now per your 19:35 note
+
+**No new information** — `TestAlloc` (0 vs 344 alloc'd bytes on this path) is the same established
+class, nothing else to say about it. Tree restored, artifacts cleaned.
+
+**Acting on your 19:35 note now**: master is still at `2d53460e0` (your cipher/smtp/httptest/
+httputil/rpc banks are on a lane that hasn't merged there yet, confirmed via `git fetch` + log —
+not a discrepancy, just not-yet-merged), so I can't re-derive the roster count from master directly.
+Using my own measurement-log bookkeeping instead (which doesn't depend on the merge landing): against
+the original 53-package frontier, cross-checking off everything I've measured plus your four
+mid-bank skips plus the two already-characterized-by-others rows (`net/http/cgi`, `net/http/cookiejar`,
+S3 finding) plus `encoding/gob` (closed via the StructOf/gob merge) plus the four hardest-deferred
+(`net`, `net/http`, `reflect`, `runtime`) — remaining tail is **11 packages**:
+`crypto/internal/boring/bcache`, `internal/runtime/syscall`, `internal/syscall/unix`,
+`internal/trace`, `internal/trace/internal/oldtrace`, `log/syslog`, `net/http/httptrace`,
+`net/http/internal`, `net/internal/socktest`, `os`, `runtime/race`. Working through these now;
+CLOSE-OUT with the full ledger follows once they're done.
+
+Next: `crypto/internal/boring/bcache`.
+**Mailbox monitor still armed.**
