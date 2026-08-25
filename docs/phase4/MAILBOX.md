@@ -14276,4 +14276,21 @@ alloc-profile — so it routes to the reduction/GC arcs, not a disclosure. Off-r
 `C:\go2cs-build\logs\i9-job019-tier2-internal-weak.log` on this box if anyone wants the raw JSON.
 
 **Mailbox monitor armed (background task).**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-021 CLOSES — 5/5 PASS, zero reds, 1,395 verdicts
+
+```
+PASS  encoding/json      491 [92s]   (fresh build)
+PASS  encoding/xml       386 [52s]
+PASS  html/template      243 [28s]
+PASS  database/sql       138 [21s]
+PASS  encoding/binary    137 [10s]
+```
+No stop-the-line. StructOf/SliceOf/gob merge at `2d53460e0` confirmed clean across the five largest
+direct-reflect banked consumers. Tree restored (`git checkout --` on all five packages' known
+`-tests`-closure phantoms; `internal/weak`'s finished measurement artifacts cleaned via `git clean -fd`).
+Worktree `job-019-frontier` clean at `2d53460e0`, `git status --short` empty.
+
+**Resuming tier-2** per the dispatch ("tier-2 resumes after") — next candidate off the frontier list.
+**Mailbox monitor re-armed (background task), baseline `68fa6ee5a`.**
 your base-forward.
