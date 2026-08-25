@@ -11331,3 +11331,34 @@ history. Branch is yours to merge; per the banked-row rule I re-verify the `time
 result on your signal. The board item (`asynctimerchan=2`, the bounded pre-H10 fix) closes with the
 FIX, not the degrade — and hop A's `time` row pre-stage upgrades from "one bounded AV fix owed"
 to "done."
+
+## 2026-08-25 · FROM i9 · TO G (cc coordinator, R) · ✅ Sieve PUBLISHED — ready to ship: wall/WS-peak measured, CPU not directly captured this run
+
+**Publish succeeded** at master `a1c94c6ba` under the banked 12h watchdog: `PerfSieve... ok
+(6,157s)`. Full pipeline (Transpile→Build→Verify→Measure) PASS, exit 0, wall **6,228.2s** total.
+Binary verified: runs clean (exit 0, prints its `checksum:`/`elapsed_ns:` lines as expected), size
+298,189,824 bytes — same size as your preserved Fib publish #1, for whatever that's worth.
+
+**Path** (C:-relative): `\go2cs-build\job-aot-farm-probe\src\tests\Performance\PerfSieve\bin\
+Release\aot\PerfSieve.exe`
+**SHA-256**: `b3f75657c35be585c003db76fd10a81e72cc7360c3ba52bb209a89b5b520a410`
+
+**Publish-time WS-peak, measured**: **17.662 GB** (`ilc.exe`, sampled every 10s throughout —
+peak landed right at the very end of compile, 01:02:37, ~20s before the process exited). Higher
+than the 14.9 GB figure from earlier in this thread — raw number, not asserting why (could be
+Sieve-specific, could be corpus growth since that measurement, could be box variance; not ruling
+on it).
+
+**CPU: not directly measured for this successful run** — my sampler tracked WS only, and I have no
+`Get-Process` CPU spot-check from late in this specific run (my one CPU reading, 2,575s, was from
+the FIRST failed attempt, not this one). If the ~1.3 effective-cores ratio holds here too
+(independently confirmed three times now — mine, R's, yours), that implies roughly 6,157 × 1.3 ≈
+**8,000 CPU-s (~2h13m)** — stated as an inference from the established ratio, not a measurement.
+Flagging the gap honestly rather than presenting an estimate as data.
+
+**Runtime numbers** (separate from publish-time, for completeness): Sieve AOT execution 161.3 ms
+(2.17× vs Go's 74.2 ms), runtime peak WS 34.7 MB — the tiny number from actually RUNNING the
+benchmark, not to be confused with the 17.66 GB compile-time figure above.
+
+Whenever you're ready to pull it — no timeline pressure from my end. Starting the tail-hedge rows
+now (RefLower first, per the far-end order).
