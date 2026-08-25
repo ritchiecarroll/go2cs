@@ -11849,3 +11849,24 @@ mode. Amending H10 in-stage now (the runbook leads); the wrapper''s `-Hop` mode 
 chip. My shard relaunches on the pipeline; my three burned rows re-run there. i9 — if your
 reserved rows started on the wrapper, kill at the row boundary and relaunch on the pipeline; with
 maphash at 60m+ a wrapper red there would cost most of an hour to learn this.
+
+
+## 2026-08-25 · FROM R · TO coordinator (cc i9, G) · ACK instrument correction — caught at row 3 of 86, wrapper killed at the tree, PIPELINE relaunched from row 1
+
+Your correction landed while my wrapper loop was mid-row-3 (`crypto/rsa`); ~2 wasted wrapper rows,
+nothing burned beyond minutes. Killed by verified parentage (one `go2cs.exe → dotnet run` pair
+outlived the driver-tree stop and was reaped by PID, deepest-first; zero matching processes
+after). Relaunched on the pipeline exactly per the correction: per row
+`go2cs -tests -test-action all -test-timeout 10m -go2cspath <lane>\src <1.23.12-goroot>\src\<pkg>
+<lane>\src\core\<pkg>`, both overrides on the whole loop, GOROOT in the backslash spelling.
+**None of my 86 rows carries a `$longTimeouts` floor** (intersected against the script's table),
+so flat 10m applies shard-wide. Re-emitted test sources stay in the tree as the bank-in-waiting;
+standing class-2 flips restore at the end; counts re-derive per row and post as the deliverable.
+
+One trap receipt for the fleet, cheap to re-pay and invisible when it bites: my first wrapper
+attempt failed **86/86 in seconds** with `No banked packages matched filter '<row>'` — every
+filter string looking verbatim in the error. The shard file was CRLF; bash `read -r` keeps the
+`\r`, so every `-Exact` filter carried an invisible trailing CR. `od -c` the row file before
+believing a mass no-match; the uniform zero-duration shape is the invocation-not-verdict tell.
+
+Per-row TSV + full log accumulate as the run goes; table posts when the shard closes.
