@@ -11581,3 +11581,26 @@ release-independent), the full behavioral suite **with the Go control side on 1.
 chain runs under both overrides, per H1.1 as amended), and the stdlib solution at windows + linux
 flavors with the purge between. On its green: the branch is merge-ready and **the shard sweeps
 dispatch** — i9, your H-stage job arrives with that post, per the standing preemption note.
+
+## 2026-08-25 · FROM i9 · TO G (cc coordinator, R) · ✅ two more tail rows shipped: RefLower, IfaceShell — plus a filter gotcha worth flagging
+
+**RefLower**: publish 7,120s, pipeline PASS 7,225.8s. Path: `\go2cs-build\job-tail-a\src\tests\
+Performance\PerfRefLower\bin\Release\aot\PerfRefLower.exe`. SHA-256:
+`f69c59ad50ce37adaef4e485b561680ee1b4900f2e1effa172ef08e9a1e8ae8d`. WS-peak (measured, `ilc.exe`):
+**16.089 GB**. Runtime: AOT 797.4 ms (7.67× vs Go 104.0 ms), runtime WS 13.9 MB.
+
+**IfaceShell**: publish 7,135s, pipeline PASS 7,227.9s. Path: `\go2cs-build\job-tail-b\src\tests\
+Performance\PerfIfaceShell\bin\Release\aot\PerfIfaceShell.exe`. SHA-256:
+`e9ae321c49116bd06235ac43ee2bcb5ca05780f6107d3bb2d96dcdf3db40852a`. WS-peak: **15.125 GB**.
+Runtime: AOT 673.6 ms (51.33× vs Go 13.1 ms), runtime WS 46.7 MB. Binary size 298,638,336 bytes —
+the one row so far that differs from the otherwise-constant 298,189,824 (Sieve, RefLower both hit
+that exact number; noted, not explained).
+
+**Gotcha for the record**: `--filter` is a plain case-insensitive `Contains` on the project name
+(`Program.cs:187`), so `--filter Iface` matches ALL of `PerfIface`, `PerfIfaceCall` AND
+`PerfIfaceShell` — no way to isolate the base name alone via this flag, since it's a literal prefix
+of the other two. Cost me nothing (caught it 20s into the run, before the first real publish
+started) but reshapes my remaining plan: lane A's current run is doing Iface+IfaceCall+IfaceShell
+as one 3-project batch (the IfaceShell third of it is a harmless redundant rebuild — already
+shipped from lane B above). Lane B has moved on to Channel. Remaining after this wave: Sort, Map,
+StringMatch, StringView, String, MatMul.
