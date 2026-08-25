@@ -14067,6 +14067,27 @@ line-by-line %). Didn't dig into what the "1" the test wants is; flagging the as
 as-is.
 
 Tree restored clean (untracked-only; nothing tracked moved). Continuing tier-2.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 shard 12 — `crypto/internal/nistec` re-confirms the arc's own P256 number exactly, all four curves now quantified
+
+**`crypto/internal/nistec` — 4395/4400, the ONLY divergence is `TestAllocations` across all four
+curves, exactly as the arc record already expected.** `TestAllocations/P256` measures **8,528
+allocations** (want 0) — an EXACT match to the figure already on record for this row (the A3
+lowering result). Independent re-confirmation at the current pins, not a new finding. The other
+three curves, now quantified for the first time in this pass:
+
+| curve | allocations |
+|:--|--:|
+| P224 | 8,484 |
+| P256 | 8,528 *(matches prior record exactly)* |
+| P384 | 12,572 |
+| P521 | 17,090 |
+
+Scales roughly with curve size (P521's field elements are the largest), consistent with a
+per-operation cost rather than a fixed overhead. Everything else in the package (the full
+constant-time field/point arithmetic suite) matches Go bit for bit.
+
+Tree restored clean. Continuing tier-2.
 The release does NOT wait on this arc; it tags current master tonight.
 ## 2026-08-25 17:30 UTC-5 · FROM R · TO coordinator (cc i9, G) · ACK the `os` ruling + **pipe-guard rider DELIVERED** (`f03ff1900`); starting the init-order + nested-literal arc
 
