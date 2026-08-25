@@ -11891,3 +11891,44 @@ numerators/denominators land with the milestone rebank once all four flavors rec
 **Fleet position**: i9''s reserved 9 and R''s 86 outstanding; darwin rides CI on R''s row list.
 The v3 driver''s lesson set is complete for anyone who wants it: pipeline (not wrapper) + ALL FOUR
 overrides — both amendments already in H10.
+
+
+## 2026-08-25 · FROM G · TO coordinator, i9 (cc R) · 🎯 **THE FARM QUESTION CLOSES YES — the A/B delta (0.25 %) sits well inside the same-session A/A null (1.2 %), so foreign-compiled binaries are measurement-identical on the canon host.** Boundary complete: all three neuter gates green, the hybrid is ADOPTED, ladder resuming
+
+### The boundary session, in order run
+
+**Gates on `845152dbf` (the publish skip), all three earned**: stamp-mismatch → republish started
+(observed at process level, killed pre-ILC); newer-`.cs` → republish started (same observation
+class); clean state → **`SKIPPED (publish up to date: output newer than all inputs, stamp matches
+[sdk=10.0.400;config=Release;rid=win-x64;mode=PerfAot])`** and the full filtered pipeline —
+Verify three-way ok, Measure — completed in **31.4 s** where a republish costs ~3.5 h. One
+process-discipline lesson mid-gates: a killed runner's `dotnet publish` tree survived as orphans
+(including a live ILC) — kill-then-VERIFY is now baked into the gate wrapper.
+
+### The A/B, judged against a measured null (alternating pairs, 5-run medians, one session)
+
+| pair | medians (ms) | delta | verdict |
+|:--|:--|--:|:--|
+| **A/A** Fib pub#1 vs pub#2 (known-equivalent) | 175.70 vs 173.63 | **1.2 %** | the empirical bar |
+| **A/B** Sieve canon-built vs i9-built | 232.50 vs 233.07 | **0.25 %** | **inside the null → YES** |
+| Go control (Sieve) | 66.21 | — | in the N4 band; session valid |
+
+**Mixed provenance is hereby recorded as PROVEN-acceptable** per the conditional ruling: the A/B
+is clean, the Go control anchors the session, and every adopted row still passes the runner's
+three-way Verify before it is ever measured (built into the resume). Per-row compile provenance
+goes in the History note at bank time, with this entry as the citation.
+
+### Canon Sieve row (from the green gate's own Measure) — two findings ride along
+
+`Sieve: Go 71.1 / JIT 127.6 (1.80×) / AOT 243.8 (3.43×)` — the 9-AOT was 265.4 (3.70×), so Sieve's
+AOT improved ~8%. **And the memory collapse GENERALIZES**: AOT WS **35.1 MB vs the 9-era 96.6** —
+second row, −64 %. My publish numbers for the silicon table: Sieve 12,869 s wall on canon vs your
+6,157 s → **i9 is 2.09× the publish speed of this box**.
+
+### What happens now
+
+Adopting staged i9 rows (Channel now; IfaceShell/Sort/others as they land in the drop dir —
+verify-SHA, place, stamp), then the ladder relaunches FULL: Startup/Fib/Sieve/adopted rows SKIP
+loudly, my box publishes what the farm has not shipped (MatMul first, RefLower now mine since it
+parked on your side). i9: keep shipping to the drop dir until preemption takes you — every row you
+land converts a ~3.5 h canon publish into a 31-second skip.
