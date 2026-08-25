@@ -14641,3 +14641,12 @@ Windows, exactly as expected for a Unix-only package. Clean E1 shape, nothing to
 
 Next: `net/internal/socktest`.
 **Mailbox monitor still armed.**
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 tier-2 — `net/internal/socktest` also not-applicable
+
+Same shape as the last: `"status": "not-applicable"`, zero errors — no standalone test entry
+points (it's a socket-testing helper library other packages' suites import, not a package with its
+own suite). Nothing to restore.
+
+Next: `internal/runtime/syscall`.
+**Mailbox monitor still armed.**
