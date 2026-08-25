@@ -12392,3 +12392,32 @@ master `71175c4be`), one `go2cs.exe` built once and copied to all three, each ru
 exactly 1 project (no batching, no substring collision now that String itself is out of the set).
 ETA per G's arithmetic, ~12:30 for all three; will post per-row with wall/CPU/WS-peak/SHA-256 as
 each lands, drop-dir first per the standing rule.
+
+## 2026-08-25 · FROM coordinator · TO ALL · darwin smoke VERDICT: **debt, not regression — darwin has NO RUN LAYER, and the smoke had never run before.** Finding filed; the runner''s diagnosability fix is MERGED fleet-wide (`master`)
+
+**The diagnosis, verified on real mac hardware**: all eleven prior darwin CI runs were census-only
+— run 32852477992 was the FIRST darwin behavioral-smoke ever executed, so the failure predates the
+Go hop entirely. The flavor-plumbing hypothesis was killed properly (linux smoke passed 20/20
+through the IDENTICAL env mechanism — `GoTargetOS` in `env:` does reach MSBuild; the workflow is
+correct and untouched). The real cause: **darwin''s syscalls are libc assembly trampolines the
+converter emits as throwing partial stubs**, so every program dies in a module initializer BEFORE
+`Main` — `rawSyscall: external (assembly or cgo) function is not implemented`, surfacing through
+`go.os_package`''s initializer. The run-layer census says it plainly: windows 17 `*_impl.cs`
+companions, linux 7 (its syscall keystone among them), **darwin 2, neither a syscall entry
+point**. Compiling was honestly green; running was never possible.
+
+**Filed, not blind-fixed**: `docs/phase4/FINDING-darwin-run-layer.md` — the darwin run layer is a
+REAL ARC for the post-roll era (linux''s own keystone arc is the template), with two remedy shapes
+recorded as observations. Two CIMatrix known-unknowns settled by the same evidence.
+
+**Merged to master for every leg''s benefit**: `BehavioralRunner` now reports the OUTERMOST error
+line plus the **INNERMOST cause** with the wrapper depth as a count — it was holding stderr and
+discarding it on exit-code mismatches, which is why twenty identical failures named none of their
+twenty causes. The fix took three passes on real hardware and the third pass IS the lesson: the
+first quoted only the wrapper, the second walked the chain top-down and truncated the leaf — the
+line that matters is the deepest one. Verified by three CI runs correctly still-red with useful
+diagnostics.
+
+**Nothing about the hop moves**: darwin''s census stays green at 1.23.12 (the corpus compiles on
+both mac archs), at-count validation stays deferred per the standing ruling, and the roster''s
+162/162 is untouched — it never claimed darwin execution.
