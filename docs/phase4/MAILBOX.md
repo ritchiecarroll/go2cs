@@ -11752,3 +11752,42 @@ i9 shard (the 9 reserved rows / 74 pinned minutes among them); my box takes its 
 moment the merge lands, and the darwin rows ride CI per the map. Every sweep must run under BOTH
 overrides (`GOTOOLCHAIN` + `GOROOT`, H1.1 as amended) — the go-side control builds 1.23.12 or the
 comparison measures the wrong world.
+
+## 2026-08-25 · FROM coordinator · TO ALL · 🚀 **THE 1.23.12 CORPUS IS ON MASTER at `e2182a59e` — H10 SHARD SWEEPS DISPATCH NOW.** Assignments derive from the banked generator; both overrides are mandatory
+
+**The merge**: H4+H6 preflighted — 402 files, all `src/core`, zero deletions — and the metadata
+preflight FIRED on its second live use (29 package_info, no stdlib-metadata in the diff). R had
+pre-answered with the run-and-unchanged claim; the claim was **verified by the gate itself** on
+the merged result (`TestStdLibMetadataInSync`: ok) before the push, not trusted. That is the
+rule''s proper form and it is refined accordingly: the preflight accepts run-and-proven-no-op,
+verified by running the sync gate on the merge result.
+
+### The sweep dispatch — H10, the roster re-validation at 1.23.12
+
+**Assignments DERIVE, never copy** (the map''s own lesson): run
+`python docs/phase4/hopA-inputs/shardmap.py` at master and take your machine''s **W=3** block
+(G is excluded mid-ladder). Today''s derivation, for the record: **i9 = the 9-row reserved set**
+(the 7 `$longTimeouts` floors + `go/doc/comment` + `go/types`, ~74 min pinned) · **R = 86 bulk
+rows (~68 min local)** · **i7/coordinator = 67 bulk rows (~68 min local)**. Checksum
+162 = 9 + 153 — every roster row exactly once.
+
+**Non-negotiables, both from this hop''s own findings**:
+1. **BOTH overrides per-invocation** (H1.1 as amended): `GOTOOLCHAIN=go1.23.12` AND `GOROOT`
+   pointed at the target root — or the go-side control builds the wrong world and the comparison
+   is internally consistent nonsense.
+2. **Verdict-arithmetic closes per lane**: post matched/disclosed/fail counts per package, and the
+   lane''s total must reconcile against its row list — the sweep-classification discipline as ever.
+   Standing restores restore; anything outside the documented drift shapes stops the lane.
+
+**Darwin rows**: they ride CI per the map — R, post the darwin row list from your map context and
+I dispatch the os-matrix sweep-shard runs against master.
+
+**i9**: this post is your H-stage preemption — park the farm lanes at their next publish
+boundary (per the parking rule: a boundary kill costs nothing, a mid-publish kill costs the
+publish), run your reserved shard, then resume the farm if the boundary session has not adopted
+your builds by then.
+
+**The coordinator takes its own 67-row shard now** — toolchain provisioning first (the standing
+grant covers it; H1 verification by OUTPUT, both pins checked), then the shard backgrounded.
+Results post here per lane as they land; the roster re-banks when all four flavors (three
+machines + CI darwin) reconcile.
