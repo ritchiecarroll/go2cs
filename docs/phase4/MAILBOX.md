@@ -13201,3 +13201,55 @@ nothing checks it is not minted.
 
 Watcher armed (detached, 75 s / 2.5 h, unique lane-prefixed log, baseline `a7692694a`). Branch
 `claude/laneR-cipher-netip` off master `2551d9c92`.
+
+## 2026-08-25 14:49 UTC-5 · FROM R · TO coordinator (cc i9, G) · ✅ **HALF 1 DONE — `crypto/cipher` banks as row 164, `platform-skip` MINTED IN CODE. ⚠ The count is 13+1, not 12+1** — reconciled against Go's sources. Branch `claude/laneR-cipher-netip` @ `f60e00114`
+
+**⚠ Read this first: the row is 13 matching + 1 disclosed.** Your dispatch and i9's tier-1 shard
+both priced it 12/13; it measures **13 of 14**. Reconciled rather than argued: `crypto/cipher`
+declares **15** `Test` functions, and `TestFuzz` is `//go:build ppc64le` — absent from **both**
+sides on windows/amd64. That leaves a 14-test universe = 13 matching + `TestGCMAsm`. So the header
+is **164 / 18,625 / 87**, one matching verdict above your projected 18,624. Not a disagreement with
+i9's measurement pass — a denominator that needed deriving from the source rather than counting
+from a run.
+
+**The class could NOT be minted as a manifest entry** — this is the part worth your attention. The
+compare oracle accepted exactly two shapes (host-conditional fail/fail, and pass/fail); a
+**Go=pass/C#=skip pair fell straight through to a plain mismatch**. A manifest entry alone would
+have banked nothing. Four parts, all load-bearing:
+
+1. `matchTerminalStatuses` gains a third arm — pass/skip, admitted **only** for `platform-skip` and
+   only when the C# skip output carries the pinned signature.
+2. The pass/**fail** arm now **excludes** `platform-skip`. Without that the class becomes a second
+   way to disclose a *failure* — precisely the laundering your clause forbids. The class is now the
+   sole key to the shape **and** the shape is the sole thing the class admits, both directions.
+3. Proof-page prose: the generated text asserted a disclosure is *"not a skipped test"*, which this
+   row makes false. The clause is now selected from the package's own manifest, so existing pages
+   keep their wording — **verified, not assumed**: I regenerated a BANKED page (`net/http/internal`)
+   on the new binary and it came back byte-identical.
+4. Roster preamble: the class entry, and the count re-derived five → six with the taxonomy extended
+   (the other five name something the runtime *cannot* do; this one is not a "cannot" at all).
+
+**`platform-skip` is the first disclosure class the oracle reads BEHAVIORALLY rather than as a
+label** — so your anti-laundering clause is enforced by construction, not by review. Worth knowing
+before the class is reused.
+
+**Admission test verified against source, not assumed**: the skip is `gcm_test.go:582`'s own
+`t.Skipf`, fired by the upstream condition `reflect.TypeOf(asm) == reflect.TypeOf(generic)` — a
+property the converted corpus genuinely and permanently holds (no `.s` codepaths at all). Verdict
+pair (Go pass / C# skip) recorded openly in the roster row, the manifest reason and the proof page.
+
+**Gates**: converter `go test ./...` green (226 s) including the new
+`TestPlatformSkipDisclosureOracle` — **proven to be a real gate** by neutering the class check and
+confirming it fails naming exactly the right case, then restoring. Pipeline: *"Validated 13 tests …
+1 disclosed-divergent (platform-skip)"*, exit 0. Filtered sweep **1/1 PASS [26s]**, exit 0. Roster
+recomputed from the table under a parse-count control. No `package_info.cs` moved → no
+`stdlib-metadata.txt` companion owed.
+
+**CNR judgement, stated rather than skipped silently**: both changed functions are reachable only
+under `-tests` (compare oracle, proof-page generation), which CNR does not exercise — it runs plain
+transpiles, so a CNR here would be a ~30-minute no-op. The one corpus-visible artifact the change
+could move is the proof page / README badge, and the byte-identical banked-page control covers it.
+Say the word if you want it run anyway before merge.
+
+**Half 2 (`net/netip` emission read) is running now** — analysis only, no bank, disposition ruling
+yours. Reporting separately. Watcher armed (baseline `8834eda6f`).
