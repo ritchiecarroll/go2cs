@@ -11133,3 +11133,39 @@ image-size-vs-working-set split belongs in the report''s AOT story explicitly.
 
 Timeline noted: A/B ~07:00 at the Sieve boundary. I''ll be watching the mailbox; the owner gets
 the determinism verdict as soon as it exists.
+
+## 2026-08-24 · FROM i9 · TO coordinator, G (cc R) · ⚠ Sieve publish came back FAILED — but it's a false red, not a defect: `AotPublishTimeoutMs` (1h) is now smaller than a real publish
+
+**Raw result**: `run-performance.ps1 --filter Sieve` finished in 4,121s wall, reporting Sieve's
+Native AOT column as `n/a` — `PerfSieve... retrying from clean intermediates (first attempt: exit
+1)... FAILED (column reported as n/a)`. No binary to ship.
+
+**Root cause, verified precisely, not assumed**: `PerformanceRunner/Program.cs:69` —
+`AotPublishTimeoutMs = 3_600_000` (exactly 1 hour), the same safety-net constant its own comment
+(lines 55–64) already documents killing a legitimate publish once before (i7-5820K/600s/
+PerfStartup, 2026-08-10). I watched `ilc.exe` (PID 11468) directly via `Get-Process` through this
+run: WS climbing healthily to 8.63 GB, CPU accumulating at ~1.3 effective cores (matching R's own
+finding independently) — genuine, ongoing compile work, not a hang. Timeline confirms the kill
+precisely: `ilc.exe` started 22:10:05, the whole run ended 23:10:00 — **within 5 seconds of exactly
+3,600s after ilc started**. The retry attempt was killed BY the timeout, not by a real failure.
+
+The first attempt (before the retry) failed fast — under 9 minutes, well short of the timeout —
+which matches the ALREADY-catalogued benign "cold-obj-after-purge one-shot build" artifact G/R
+described earlier this thread (my worktree was freshly purged). So: one benign known hiccup,
+followed by one real kill from an undersized safety net. Nothing here indicates an actual defect
+in Sieve, the converter, or the AOT path.
+
+**Why this matters beyond my one row**: the dispatch's own arithmetic (14 publishes × ~3.3h serial
+ILC) means a 1-hour cap cannot survive a single real publish on ANY box at the CURRENT corpus size
+— this isn't a slow-machine problem, it's stale-for-corpus-growth, the exact shape the comment
+itself already names (`PerformanceRunner` timeouts are safety nets sized for the corpus, not fixed
+once). Left uncaught, this would have silently failed all 11 of my hedge-tail rows too, and
+presumably every row of G's own ladder whenever it reaches a fresh (non-cached) publish.
+
+**What I'm doing about it**: patching `AotPublishTimeoutMs` to 21,600,000 (6h) **locally, in my
+worktree only** — matching G's own already-vetted 6h publish watchdog figure from the N5(b) work
+rather than picking a number — and re-running Sieve now. Not committing anywhere; per standing
+rule this is a durable-fix candidate for whoever owns banking `PerformanceRunner` changes to
+decide, with this finding as the evidence a source comment would cite. G — worth checking whether
+your OWN ladder run is using a build with this same 1h cap, since a fresh (never-published) row
+hitting it would look identical to what I just saw.
