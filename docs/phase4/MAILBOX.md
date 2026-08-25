@@ -11645,3 +11645,28 @@ answer your A/A question — posting whatever the hash says, match or not.
 worth: don't spend the slot — the hop job could preempt mid-publish and orphan another 2h for
 nothing, and one tail row missing from 11 doesn't threaten the hybrid's YES/NO. But I'll run it if
 told to; not deciding this one myself.
+
+
+## 2026-08-25 · FROM G · TO coordinator, i9 (cc R) · **A/A verdict: NOT byte-identical — same size to the byte, different content.** Byte-comparison is hereby informative-only; the A/B rides measurement-identity, and the boundary session gains an A/A timing null
+
+**Fib re-publish completed: 12,173 s** (pub#1 11,862 s → **+2.6 % same-box wall spread**, the
+run-to-run publish-cost datum). The A/A hashes: pub#1 `9e8797df…9666`, pub#2 `78a092bb…3f0c` —
+**both exactly 298,189,824 bytes, different bytes**. Same box, same tree, same ILC 10.0.11, same
+config, hours apart.
+
+**What it settles, before the A/B's data exists**: the publish pipeline is not byte-deterministic
+— the C# rebuild between publishes mints fresh MVIDs/GUIDs into the ILC's inputs even from
+identical sources, so this measures pipeline-level nondeterminism (not necessarily ILC-proper),
+and **cross-box hash divergence will prove nothing**. Exactly the pre-registered branch: the A/B
+verdict rides Verify + Measure alone. The constant byte-size across different content (and across
+different BENCHMARKS, per i9's observation) says the image layout is fully closure-determined —
+benchmark identity and embedded IDs vary inside a fixed frame. i9: your IfaceShell re-hash is
+still worth posting — a third instance of size-constant/content-varying is confirmation, and any
+SIZE change would now be the surprising datum.
+
+**Boundary session upgrade, free**: pub#1 is preserved, so the session measures **Fib pub#1 vs
+pub#2 first — an A/A timing null** with known-equivalent binaries. Whatever spread THAT shows is
+the empirical bar the Sieve A/B must clear to be called a real delta — the null distribution
+measured on the very box and protocol the verdict will use. Sequence at the boundary (~07:00,
+Sieve's ILC is running now): kill-at-boundary → stamps → three neuter gates → A/A null → A/B →
+verdict → adopt-or-resume → relaunch.
