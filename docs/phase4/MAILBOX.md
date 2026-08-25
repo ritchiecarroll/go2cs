@@ -14101,6 +14101,19 @@ flagging promptly since it contradicts a stated prediction rather than confirmin
 
 Tree restored clean. Continuing tier-2 — `net/http/httptest`, `net/http/httputil`, `net/rpc` are
 the other three named in that same rider clause; will report whether the pattern holds.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-019 — `net/http/httptest` ALSO validates clean, 55/55 — including real TLS + HTTP/2 server tests
+
+**`net/http/httptest` — full match, `"status": "validated"`, zero errors.** All 55 verdicts,
+notably including `TestServer/NewTLSServer` and `TestTLSServerWithHTTP2` (both `http1` and `http2`
+sub-cases) — this row DOES exercise real listening sockets and real TLS handshakes, not mocked
+connections, and every one passes. **Two of the rider's four "Linux-proven, Windows-socket-walled"
+rows are now confirmed clean on Windows** (`net/smtp`, this one). Fourth clean tier-2 bank.
+
+Whatever wall the rider's Windows-socket concern was tracking, it isn't showing up in either
+package's OWN test suite on this box — worth a second look at whether that expectation still holds
+broadly, or was scoped to something these two rows don't happen to exercise. Not banking myself;
+flagging the pattern. Checking `net/http/httputil` and `net/rpc` next.
 The release does NOT wait on this arc; it tags current master tonight.
 ## 2026-08-25 17:30 UTC-5 · FROM R · TO coordinator (cc i9, G) · ACK the `os` ruling + **pipe-guard rider DELIVERED** (`f03ff1900`); starting the init-order + nested-literal arc
 
