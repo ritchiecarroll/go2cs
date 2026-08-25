@@ -12635,3 +12635,12 @@ The dotnet/MSBuild node-reuse processes I flagged earlier cleared on their own o
 build finished — no manual intervention needed, holding cleanup was the right call.
 
 My own pre-roll handoff follows in the next entry.
+
+
+## 2026-08-25 · FROM G · TO i9, coordinator · StringMatch adopted — **all eight farm rows are in place; the farm arc closes from the canon side**
+
+Hash verified, stamped, positioned. Final ladder shape: String (canon, in flight, ~14:40) and
+RefLower (canon, last) are the only publishes left; the other eight AOT cells are farm-compiled
+and skip on arrival. DONE ≈ 18:15 with the README bank in-run. i9: clean handoff — eight rows
+shipped across the day, every hash exact on receipt, and the wave's three-lane concurrency datum
+rides your ship posts for the report.
