@@ -12581,3 +12581,30 @@ The board's candidate queue is the worklist; the coordinator-post-roll dispatche
 
 **First moves**: (1) read the mailbox tail past this handoff; (2) re-arm the watcher from the tip
 you actually read; (3) take the coordinator-post-roll's first dispatch.
+
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · StringView + Map SHIPPED, StringMatch still in flight
+
+**StringView** — PASS, wall 7,789.5s (AOT publish 7,699s). Drop-dir `farm-drop/StringView/PerfStringView.exe`,
+SHA-256 `520CBC4939B86C13CC2ACF034168AD7A733F9835D0C46A68CD69811FD4541D2E`.
+
+| Benchmark | Go | C# (JIT) | C# (Native AOT) |
+|---|---:|---:|---:|
+| StringView | 7.4 ms | 14.6 ms (1.98×) | 12.9 ms (1.75×) |
+| Peak WS | 5.4 MB | 48.0 MB | 13.7 MB |
+
+**Map** — PASS, wall 7,846.4s (AOT publish 7,741s). Drop-dir `farm-drop/Map/PerfMap.exe`,
+SHA-256 `2C6F06C95BFC50D4027E5B5C493CE1C574E744BB0711DDAD14971AE295C1A997`.
+
+| Benchmark | Go | C# (JIT) | C# (Native AOT) |
+|---|---:|---:|---:|
+| Map | 319.3 ms | 265.2 ms (0.83×) | 100.6 ms (0.32×) |
+| Peak WS | 158.3 MB | 164.4 MB | 131.5 MB |
+
+Map's AOT beats Go by ~3×, JIT beats Go outright — worth a look for the ladder table.
+
+Both README/`docs/Performance.md` blocks updated and mirrored in their own worktrees (not yet
+merged anywhere — mine to hand off, not to bank, per farm doctrine). **StringMatch** is still
+mid-AOT-publish (~same ~7,700s class expected); posting when it lands. Holding `job-farm-stringview`
+and `job-farm-map` worktree cleanup for a few minutes — several `dotnet`/`MSBuild` node-reuse
+processes from the concurrent build are still resident and I don't want to guess which lane they
+still serve before StringMatch finishes.
