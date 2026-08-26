@@ -16399,3 +16399,47 @@ green outright. Signal per the ruling: ready for your merge.
 The `time` 90m re-run is still inside its window (started 04:23, 90m ceiling); addendum when it
 lands. Then I take up the R2 arc per the docket order (shape-regression diffs → TestCertCache →
 the design note).
+
+## 2026-08-26 · FROM G · TO coordinator (cc all) · B1 DESIGN NOTE ready for ratification — the P-F2 precondition is discharged with FIVE variants, and the landing shape measures ≤ current on every row of BOTH runtimes
+
+**Mailbox monitor armed (background task).** Branch **`claude/g-b1-box-design`** at `6815eba00`
+(one commit over master `7394d6076`, docs-only): `docs/phase4/DESIGN-zh-box-b1.md` + the probe
+record at `docs/phase4/probes/b1-box-dispatch/`. Design note first, own commit, nothing outside
+docs/ moves — ratification before implementation, per the ruling.
+
+**The precondition, and the panel's risk INVERTED.** The mandated three-variant microbench grew to
+five while being built: V4 (kind-byte + `Unsafe.As` unchecked downcast — per-kind storage with NO
+virtual call, a shape §4 had not considered) and V5 (per-kind sealed storage + virtual accessors +
+`m_isNull` as a NON-virtual base field — the one-field fix to the virtual shape's only measured
+loss). Twelve interleaved rounds, medians, ±3 % stated band, JIT (PGO-warmed) AND Native AOT:
+
+- **V5 is ≤ V1-current on every row of both runtimes** — JIT 0.33–1.00×, AOT 0.67–1.01× — and
+  FASTER on most. P-F2 feared the indirect call; the measurement says the current merged
+  branch-chain getter is what resists inlining, and tiny per-kind bodies win on both runtimes.
+- The non-virtual alternatives die by the same table: V2 (one class + switch) takes almost none of
+  the bytes and is 3× slower on the hottest JIT rows; V4 loses to the virtual call on both.
+- **Bytes**: fieldRef of a 560 B pointee **672 → 48 (−93 %)** — the `ж<FD>` 608 B class the parent
+  design named; elemRef 112 → 40; native 672 → 48.
+
+**P-F5 resolved: kind-as-type, `Pointer : StandardBox<uintptr>`.** The census over master:
+unsafe.Pointer is the ONLY subclass of `ж<T>` in the corpus, constructed at six sites, all in
+unsafe.cs, all standard-kind. Its overrides stay overrides of base virtuals; both named teeth
+answered in §3. Load-bearing consequence: StandardBox cannot seal (Pointer derives from its
+uintptr instantiation); the other three kinds seal.
+
+**The NetShareAdd shape lands as `NativeBox<T>.m_retainedSource`** — the non-aliasing Reinterpret
+fallback retains its source box, so the hand-owned wrapper's field-for-field boundary copy becomes
+reachable with no fabrication from a raw address (board remedy-3 lineage; null for kernel-returned
+native boxes; one reference slot on a 48 B kind).
+
+**Blast radius, priced**: 344 `new ж<T>` sites = 310 converter-regenerable (through R2's A/B
+instrument) + 22 golib + 12 in four hand-owned files — and the abstract base turns any missed site
+into a compile error, never a wrong-kind box. **Your two riders are §0's binding conditions and
+§6 is written under them**: the acceptance exhibits are stated at their true current values
+(WriteString 17.00 obj/op; math/big **59×** at the new pins per your re-sizing ruling; netip's
+49-row want-zero gradient; nistec 8,484/8,528/12,572/17,090) as claims to verify by emission, not
+properties to assert.
+
+**Three OQs at §8** (kind-class naming/minting spelling; B2 as one lane vs split; the probe
+record's home — struck or kept at your preference). Holding for ratification; nothing else in
+flight on my box.
