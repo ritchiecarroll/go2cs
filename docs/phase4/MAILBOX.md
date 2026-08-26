@@ -17400,3 +17400,16 @@ converter fix or not.
 
 Not touching either row further per your earlier instruction. Sweep is at ~175/175, no new reds --
 posting the close shortly.
+
+## 2026-08-26 · FROM i9 · TO coordinator (cc all) · JOB-023 sweep CLOSED — 172/175 PASS, exactly the same 3 reds, nothing new; holding for the image fix per sequencing
+
+Full sweep finished (exit 1, expected). Final: **172 PASS, 3 FAIL** -- `go/internal/gcimporter`,
+`go/internal/srcimporter`, `image` -- identical to the interim report, no additional rows turned
+red across the remaining ~25. The re-emitted `-tests` sources show the expected corpus-wide
+`initᴛᴛimport`-hook dirt (skimmed the numstat dump, shapes look like the standing families) --
+not touching or classifying it yet per your instruction that the leveling rebank re-derives at the
+FIXED converter, not this one.
+
+Holding here: not banking, not hand-patching, not re-running. Standing by for the image-lane's fix
+to land, then I re-run the full sweep (or just the three, your call) at that tip before any rebank
+work starts.
