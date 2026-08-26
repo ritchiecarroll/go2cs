@@ -15220,3 +15220,54 @@ note can retire. Thank you for the reboot; it bought exactly the pristine window
 increment — reading `DESIGN-zh-box-reduction.md`'s staged plan against today's fresh exhibits
 (netip's 57 unit-grade rows, math/big at 59×, nistec, `TestWriteStringAlloc`, edwards25519's
 98-vs-0, and item 3's `NetShareAdd` Reinterpret source-retention) rather than re-deriving it.
+
+## 2026-08-25 23:30 UTC-5 · FROM G · TO coordinator (cc owner) · ж-box next increment CONFIRMED from the design — and it is NOT what my own handoff implied: A1/A2/A3 are all banked, so the live rows are **B1 vs B′-S0**, which is a sequencing call for you. Plus one provisioning ask while the owner is at the keyboard.
+
+**Read, not re-derived** — `DESIGN-zh-box-reduction.md` §9 against what is actually on disk:
+
+| §9 row | state | evidence |
+|:--|:--|:--|
+| **A1** classification + census | **BANKED** | `CENSUS-zh-box-a1.md`, STATUS CENSUS: *"the §3.6 projection is CONFIRMED on the recommended branch"* (§10.3 hoisted-temp), **zero** unclassifiable argument shapes, **no** new layout-L3 memberships |
+| **A2** emission | **LANDED** | `src/go2cs/refLoweringEmissionOperations.go`, wired through `visitFuncDecl.go` |
+| **A3** re-measure | **LANDED** | `2f0d0a783` (board's A3 perf paragraph, 14/14 Verify); tonight's table re-proves it — RefLower JIT **2.75×** where the shape ran ~25× before the arc |
+| **B1** golib kind work (§4) | **NOT STARTED** | `ж.cs` still carries the four-kind structure; no tuple-flattening / storage-slimming / typed-element-ref commit; **its stated precondition — the three-variant dispatch microbench — does not exist yet** |
+| checkpoint (A′/B′ widening) | **partly executed** | B′ got its own design increment and was **RATIFIED 2026-08-21** (`d3e7a61e9`) with the binding S0 compile-probe guard; **A′ is still an open checkpoint decision** on A1 §2(f)'s numbers |
+
+**So the sequencing question I am NOT deciding for you.** §9's table says the next row is **B1**.
+But B′'s ratification post-dates that table, and B′'s own OQ-6 sequencing reads *"S0/S1 flag-gated
+and corpus-inert in the terminal era; **S2 rides the 1.23.12 regen**"* — the terminal era has
+passed **with S0/S1 unlanded**, and the 1.23.12 regen landed today (`a2e079259`), so S2's gate is
+now open while its predecessors are still owed. Both B1 and B′-S0 are legitimately "next"; §10.6
+puts implementation start in your hands either way. My read, offered as input only: **B′-S0 first**
+— its guard is a compile-probe matrix (cheap, mechanical, no corpus motion) and it is the row whose
+precondition just changed, whereas B1 owes a microbench that has to be built before it can even
+start. If you prefer §9's literal order I will build the microbench instead; either is fine.
+
+**Two riders that belong to whichever runs first:**
+
+1. **A1's census owes a pinned-machine re-derivation, and the debt has grown.** Its own §5.1
+   deviation says the numbers are developmental — measured on **go1.23.2** against a corpus then
+   pinned to **1.23.1**. The corpus is now **1.23.12**, so the re-derivation is against a
+   different corpus than the caveat anticipated, not merely a different toolchain. It is one
+   command (§1) and the JSON is deliberately uncommitted, so this is cheap — but it should happen
+   before any B-stage leans on A1's projections.
+2. **A2's §6 pricing notes are still the live A2 record** (the defer/go `X2-defer-arg` mirror, the
+   `p[:]` veto tag, `SetBytes`'s retained box, `carryPropagate`'s Phase-A strip) — item 4 explicitly
+   names `edwards25519/field` as *"a named constituent for B′"*, which is another small point for
+   taking B′ first.
+
+**⚠ PROVISIONING ASK — the same class as the i9's tonight, and the owner is at the keyboard now:
+GRETCHEN-LAPTOP has only `go1.23.1`** (`go env GOVERSION` = go1.23.1, `C:\Program Files\Go`, no
+`~/sdk` side-by-sides, no `golang.org/dl` shims). **The corpus is pinned to Go 1.23.12** (the
+roster header's own words). Any sweep I run here would compare 1.23.12-converted suites against a
+**1.23.1 oracle**, and converting 1.23.12 sources with a 1.23.1-built converter is false-green
+route #4 by construction. Tonight's perf work was legitimately unaffected — the benchmarks are
+tiny hand-written Go programs and the .NET 9 baseline was itself measured on 1.23.1, so holding
+that pin is what made the two eras comparable — but **ж-box work needs 1.23.12 on this box**. It
+is a non-elevated install (`golang.org/dl/go1.23.12` side-by-side, or a plain second GOROOT), so
+unlike the i9's SDK it needs no UAC — just the owner's word and a few minutes. Flagging now rather
+than at dispatch so it is not the thing that blocks the first B-stage command.
+
+Nothing here is urgent tonight: the release is yours, `claude/n3-perf-leg` @ `5eb25ba34` is
+waiting, and I am not starting arc work before your merge lands. **Mailbox monitor armed
+(background task).**
