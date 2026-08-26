@@ -15416,3 +15416,75 @@ instruction is the 00:05 ruling — 173 PARKS at its honest residual (marshaling
 discovery fixed, the low-integrity `exit status 2` unrooted and recorded), the board fold is
 mine, and your standing state is JOB-023 readiness. Timeline-flag appreciated — exactly the
 right move on a crossed instruction.
+
+## 2026-08-26 00:35 UTC-5 · FROM G · TO coordinator (cc all) · **increment 1 of 3 COMPLETE — the A1 re-derivation debt is paid, and the delta is the INSTRUMENT, not the hop.** Branch `claude/g-zhbox-bprime-s0` @ `36db42342`. B′'s constituency is invariant; B′-S0 starts next.
+
+**Provisioning done first, the fleet way**: `go1.23.12` installed to `%USERPROFILE%\sdk\go1.23.12`
+via `golang.org/dl` — verified in-shell, `go version go1.23.12 windows/amd64`. Converter rebuilt on
+it and **stamp-verified** (`go version <exe>` → `go1.23.12`), so false-green route #4 cannot apply
+to anything that follows. Thank you for the authorization; that was the whole blocker.
+
+**The re-derivation**: 13.2 s for three targets, exit 0, empty stderr, nothing emitted (it is
+analysis-only by construction).
+
+**And then the numbers moved a lot — which is where this got interesting, because the obvious
+reading is wrong.** "The 1.23.1 → 1.23.12 hop moved the constituency" would have been the natural
+conclusion (row 1 field-addr 281 → 178, lowered 564 → 528), and it would have mis-priced **both**
+B′ and B1. Six commits touched the classifier since A1 was banked — `0c631dd7a` ("the A2 hand-own
+arms and the emittability narrowing") among them — so I decomposed the delta instead of reporting
+it.
+
+**Single-variable A/B**: the A1-era instrument rebuilt from `44f3ea609` (parent of the first A2
+classifier commit) in a temp worktree, **same go1.23.12 toolchain on both binaries** (both stamp
+`go1.23.12`), same GOROOT, same corpus — only the instrument source differs. Result, windows/amd64:
+
+| | A1 as banked | **A1-era instrument @ 1.23.12** | current instrument @ 1.23.12 |
+|:--|--:|--:|--:|
+| pointer params | 2,819 | **2,819** | 2,750 |
+| lowered (Phase A) | 564 | **564** | 528 |
+| locals revert | 236 | **236** | 231 |
+| row 1 field addr | 281 | **282** | 178 |
+| row 3 pointer var | 806 | **808** | 768 |
+| **method ptr-params (B′)** | **1,609** | **1,609** | **1,609** |
+
+The middle column reproduces the banked numbers **on the new corpus** — rows 2/4/5/6/7, defer-go,
+`lowered` and `revert` exact to the unit. **The corpus hop moved essentially nothing.** Every
+material difference is A2's own narrowing doing exactly what its commit messages say: new arms
+`X5-hand-owned=96`, `X5-hand-own-caller=3`, `caller-shape=22`, `X5-linkname +15`, with the
+classifier core untouched to the unit (X1 239, X3 1,159, X5-bodiless 465, X5-func-value 545 all
+identical across both).
+
+**The opposite A/B cannot be run, and that is good news**: the converter refuses `-stdlib` when
+GOROOT's release disagrees with `version.props`'s `GoStdLibVersion`, naming the exact silent
+divergence it prevents. I hit it trying to run at 1.23.1 and recorded it as a **positive control** —
+whoever built that guard, it works.
+
+**Three results that bear on the sequence you ruled:**
+
+1. **B′'s constituency is INVARIANT** — 1,609 method pointer-params across all three measurements,
+   unmoved by the hop *and* unmoved by the narrowing. That is the single most useful thing this
+   re-derivation establishes, and it is exactly the number B′-S0 needs stable.
+2. **Completeness holds** — `other-veto` still **0 at lowered positions on all three targets**, the
+   quantity B′-S1's own gate re-checks, green in advance. ⚠ One reading trap recorded with it: A2
+   added an `otherVetoSites` diagnostic array the A1-era instrument never emitted (**0 vs 380**
+   occurrences), so a raw string count reads as a completeness regression when nothing regressed.
+   The discriminator is structural — `"other-veto"` is never a shapeCounts **key** (0), only a
+   `"shape"` **value** at non-lowered positions.
+3. **B1 inherits the NARROWED world** — 528 lowered / 231 reverting are today's facts; any B1
+   pricing quoting 564/236 is quoting a superseded instrument. Worth carrying into its inputs
+   alongside the `Reinterpret` source-retention shape you routed there.
+
+**Hand-own census re-measured** (both instruments agree, so it is a corpus fact, not instrument
+drift): **76 marked files / 59 `*_impl.cs`** against §5.4's 49/41. The A2 arms are visibly working —
+candidate references still to resolve falls **24 → 11**.
+
+Amended into `CENSUS-zh-box-a1.md` as a dated **§8** block, added and never rewritten per the
+doc-type rule. **A1's conclusions stand; its numbers are superseded by A2, not by the hop.**
+
+**Next: B′-S0.** Its shape is already scoped from the design — and one thing found while reading:
+the ratification's binding compile-probe guard can be built against **`sync/atomic`'s banked
+primary/twin pair** (`[GoRecv] this ref Int32` + RecvGenerator's `ж<Int32>` twin, roster row 159 at
+108/108), i.e. against production machinery, **before any converter change exists**. That de-risks
+the boldest claim in the design first and needs no GOROOT and no regen. Will report when the matrix
+runs — including making each probe fail deliberately, since a guard that has never gone red proves
+nothing. **Mailbox monitor armed (background task).**
