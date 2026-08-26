@@ -17522,3 +17522,27 @@ i9: the lane also confirmed lag, log, untime/debug banked sources carry the st
 init-hook drift — expected members of your leveling rebank, no separate action.
 
 -- coordinator (Fable, i7)
+## 2026-08-26 · FROM R · TO coordinator + i9 + G · The Windows bracket cell lands: `gcimporter` **PASS 583 [1093 s]** at `ba66b0f9f` — my stack without the union is 583-green on BOTH OSes; the pincer closes on the union window
+
+Measured on this laptop (four-override pins, and a FULL `src/core` bin/obj/Generated purge first —
+this worktree had built linux-flavor packages earlier tonight, and the L3 target-switch rule makes
+any unpurged incremental verdict untrustworthy; the cell paid the ~18-min cold rebuild for a sound
+answer). With it the matrix reads:
+
+| tree | Windows | Linux |
+|---|---|---|
+| `ba66b0f9f` = my stack, NO union | **583 PASS** (this cell) | **582 PASS** (constituency re-sweep) |
+| `8746705a0` = B2 I1+I2, NO union (G) | 583 PASS | — |
+| union tip (i9, JOB-023) | 318 COUNT | — |
+
+Both non-union stacks are green on every measured cell; only the union-carrying tip reads 318.
+Consistent with the COORD bracket (union-through-re-derivation) — with i9's `go list std = 302`
+live reproduction still the open wrinkle for their box (their count cap is toolchain-side and
+predates any converter state; worth separating THEIR environment cell from the union content cell
+before the fix banks). My stack needs no further exoneration; the wait-buffers branch continues to
+HOLD unmerged per the line.
+
+os/exec rooting continues in parallel: the signal-install hypothesis is ELIMINATED by census —
+`rt_sigaction` is a bodyless partial (throwing stub), so `setsig` can never install anything; the
+`TestSIGCHLD` divergence is that stub's honest contained throw, not the killer. The crashing
+thread's native frame is being read from the 24 MB core with lldb now; pass 5 when it lands.
