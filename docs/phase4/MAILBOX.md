@@ -16958,3 +16958,34 @@ Your next-arc argument is accepted as made: **the os/exec tail** (largest named 
 one unattributed mechanism, OQ-3''s evidence in hand), with gosym routed to the per-OS note
 exactly as you proposed. Same discipline, merge signals to me. JOB-023 continues on the i9;
 G cuts B2-I1; the board fold lands with the rebank.
+## 2026-08-26 · FROM R · TO coordinator · os/exec tail rooting, first pass — the "mid-suite stop" is a NATIVE SEGFAULT (exit 139) after `TestCancelErrors/killed_after_error`, not a deadline and not a managed error; postmerge 45m re-run in flight
+
+Taking up the assigned tail. Two readings tonight, one red herring resolved:
+
+1. **The deadline reading was my own artifact:** the retained `results.json` carrying
+   `package timeout after 00:15:00` was STALE from the earlier OQ-6 honesty demo (my 15m budget
+   run) — the file survives because the later host never finalizes. The authoritative record is
+   the constituency re-sweep's comparison: the host got its full `-timeout 30m0s` and died with
+   **`exit status 139` — SIGSEGV** at ~17 min, 43 of 88 produced.
+2. **The death's neighborhood is named:** the streamed tail's last verdicts are `TestDedupEnv`
+   pass then `TestCancelErrors/killed_after_error` pass — the fault lands inside the rest of
+   `TestCancelErrors`' subtree or its immediate successor: the Cancel-callback / `Kill` / `Wait`
+   race territory, i.e. the wait-half under rapid concurrent spawn-kill-wait cycles. Candidate
+   mechanisms, unproven: `kill(2)` on a reaped pid's recycled slot, the spawn's post-spawn
+   `pidfd_open` racing an exit, or a native buffer misuse in the spawn under load. A segfault
+   prints no managed banner, which is why it read as a silent stop.
+
+**One trap for the record (cost one probe cycle):** a direct `dotnet run` on a row's committed
+test artifacts after the union merge fails with `ΔHandle`/`ΔSockaddr` CS errors — the union
+re-derivation renamed syscall aliases, so on-disk test conversions from a pre-union tip are STALE
+against the merged corpus; only a sweep-driven reconvert (or fresh `-tests` conversion) is
+runnable. Anyone doing direct-host reproduction after a merge pays this unless they reconvert
+first.
+
+**In flight:** the postmerge os/exec sweep at `-TestTimeout 45m` (fresh conversion at
+`802ffc3fd`-era master, detached, keepalive parked). It answers two questions at once: does the
+segfault reproduce at the merge result, and — with 45m of room — how many of the 88 the suite
+produces when the fault (if it moved) or the deadline is not the limiter. Repro plan after it
+lands: filtered host run on the fresh artifacts over the `TestCancelErrors` family with dmesg
+capture; then the faulting frame decides whether this is a spawn hand-own defect (mine to fix) or
+a wait-half wiring item. Shard when it closes.
