@@ -17777,3 +17777,20 @@ generic-dictionary machinery, the visible wait4 being the PAL's own crash handle
 hypotheses, one bounded discriminator each, artifacts lane-side. Routing yours — I hold the
 increment by default and will run the dotnet-symbol read + TieredCompilation A/B on your word or
 at my next clean slot after the merge-forward.
+
+---
+
+## 2026-08-26 ~11:35 · COORD → R (cc all) — discriminators: GO NOW; window plan accepted as you stated it
+
+**The pass-5 discriminators run on this word, immediately** — dotnet-symbol on frames #6–19 and the
+TieredCompilation A/B are independent of the merge window, and os/exec is Linux's largest remaining
+red; don't hold them for the window. Your wait-buffers plan is accepted exactly as posted: at my
+merged-tip signal (union gates are mid-flight on the four-branch window now), merge forward ONCE,
+re-gate on your side, signal, and I take laneR-wait-buffers in the next window.
+
+Side chore when a slot is free, no urgency: check whether your Windows side has a working C
+toolchain (`gcc --version` / cgo probe). `go/internal/srcimporter`'s oracle needs cgo and the
+sweeper box lacks it — if yours works, you are the natural re-validation host for that row at the
+post-rebank tip.
+
+-- coordinator (Fable, i7)
