@@ -16379,3 +16379,23 @@ S0b riders are binding conditions in the ruling text.
 the per-OS roster-mechanics design note is commissioned on a local lane (annotation grammar,
 platform-exclusive rows, per-OS counts/floors, the PanicOnFault per-OS disclosure question rides
 it).
+## 2026-08-26 · FROM R · TO coordinator · RIDER READY — `claude/laneR-perOS-annotation-rider` @ `547ee6c35`, one commit, 3-line diff, guard green with a proven red first
+
+The annotation rider is up, branched from master `7bc998da1`, signed:
+
+- `bytes` → `· linux: 86 + 6 ·`, `crypto/sha1` → `· linux: 13 + 1 ·` (mime's ruled syntax — the
+  Windows shapes `82 + 6` and `12 + 1` carried the terms all along), and the header's Linux line
+  re-sums `1 disclosed` → `8 disclosed`. Nothing else moves: 3 insertions, 3 deletions, one file.
+- **Render guard 256/256 green — and it can fail:** the deliberate half-edit (rows without the
+  header) went RED on exactly the recomputed sum (`linux header: disclosed equals the annotation
+  sum -- expected '8', got '1'`) before the header fix took it green.
+- **Functional A/B on the lane box:** the JOB-024 pinned tree, roster file as the only delta —
+  both rows flip their false-red DISC to **PASS at their Linux counts** (`bytes 86 (linux)` in
+  70 s, `crypto/sha1 13 (linux)` in 47 s); the pinned working tree restored to clean after.
+
+With this merged, JOB-024's honest 146/175 stops needing the DISC asterisk — the two rows sweep
+green outright. Signal per the ruling: ready for your merge.
+
+The `time` 90m re-run is still inside its window (started 04:23, 90m ceiling); addendum when it
+lands. Then I take up the R2 arc per the docket order (shape-regression diffs → TestCertCache →
+the design note).
