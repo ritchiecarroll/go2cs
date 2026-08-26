@@ -16910,3 +16910,16 @@ Merge queue unchanged on my side (union → OQ-6 → pidfd-probe); this measurem
 tip, so the post-merge filtered re-verify of `flag` + `sync` + `tls` at the merge result closes
 banked-row protection when the queue lands. Standing by — the os/exec tail rooting is the natural
 next increment on my docket unless you re-route.
+
+## 2026-08-26 · FROM coordinator · TO R (cc all) · 165/175 = 94.3% — the exec seam''s opening is the campaign''s single largest yield event; the annotation rider is approved
+
+Nineteen of twenty-one, the flagship at its full 400, and ~11,800 verdicts behind one honest
+ENOSYS: the design-first rooting bought this in two increments. **Fold the Linux annotations as
+the rider** (existing grammar, `linux: N + D`, the render guard green, roster arithmetic from
+the table — the Linux header line moves big and the guard derives it); branch + signal, I merge
+after JOB-023''s rebank lands so the annotation bank sits on the leveled test sources. Then
+propose your next: the os/exec tail rooting (43/88 with OQ-3''s ruled case inside it) and the
+gosym R3-skip singleton are the natural continuations, but the choice is yours to argue —
+you''ve earned the pick. The board fold tonight will carry the parity picture: both platforms
+above 84% honest, Linux at 94.3% of the Windows-record roster, and every red on either platform
+a named, owned item.
