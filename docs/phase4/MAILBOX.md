@@ -16033,3 +16033,60 @@ does not reach" — the parity arc prices as R2 + per-OS mechanics + leftovers (
 later in the run; floor rows incl. `time`, `crypto/tls`, `sync/atomic` at the tail).
 
 Shard 3 when the non-floor roster closes; final ledger + honest count after the floors.
+
+## 2026-08-26 02:20 UTC-5 · FROM R · TO coordinator (cc all) · JOB-024 SHARD 3 — non-floor roster CLOSED (167/175): 138 PASS · 27 FAIL · 2 DISC, every non-PASS row attributed; THREE seams collapsed silently, R2 absorbed everything else
+
+Non-floor sweep complete at pinned `59af260e0` (go1.23.12/.NET 10, WSL2). The 8 `$longTimeouts`
+floor rows run now (`archive/zip` in flight). Every one of the 29 non-PASS rows classifies into
+a named bucket — nothing unattributed:
+
+**COLLAPSED SINCE THE CENSUS (the JOB-024 question):**
+1. **R5 (sockaddr → FD.Init/pollOpen EPERM) — gone.** `encoding/json` full 491; the whole
+   `net/*` sub-family PASSES (10 rows incl. `net/http/httptest` 55 — live listeners). `crypto/tls`
+   confirms or complicates from the package side when its floor row lands.
+2. **R3 (self-binary identity) — gone.** `debug/elf` PASS 31, `TestNoSectionOverlaps` pass/pass:
+   on Linux the apphost IS an ELF, so `elf.Open(os.Args[0])`'s bad-magic wall dissolved (argv[0]
+   evidently resolves to the apphost now). `debug/gosym` keeps one R3-adjacent
+   `TestSymVersion` go=pass/cs=skip.
+3. **W1b (mmap/page-boundary) — gone** (shard 2; re-stated for the ledger).
+And R1/R4/W1 all HOLD closed: `debug/dwarf`, `html/template`, `path/filepath` (54),
+`io/ioutil`, `io/fs`, `internal/diff`, `archive/tar` 97, all of `compress/*`, `mime` (18+1),
+`crypto/rand` (302) — PASS.
+
+**WHAT STANDS — the full non-PASS classification (29 rows):**
+- **R2 exec wall — 20 rows**, the entire correctness story now: `crypto`, `crypto/ecdh`,
+  `crypto/ed25519`, `debug/buildinfo`, `debug/gosym`, `flag`†, `go/doc/comment` (10,058/10,059),
+  `go/importer`, `go/internal/gcimporter`‡, `go/internal/srcimporter`, `go/types` (504/557),
+  `internal/abi`, `internal/godebugs`, `internal/platform`† (row 173: `TestGenerated`
+  infrastructure-error — the toolchain round trip), `internal/testenv`, `internal/types/errors`,
+  `math/rand`, `os/exec`‡, `sync` (ONLY `TestMutexMisuse`; all 7 disclosures fire on Linux),
+  `text/template` (ONLY `TestLinkerGC`). † new members since the census (both banked post-census
+  on Windows). ‡ **shape regressions inside R2**: `os/exec` produced 16/72 verdicts at
+  three-bodies, now 1/88 (dies at `TestAbsPathExec`); `go/internal/gcimporter` agreed 281/581 at
+  the census, now 15/582. Same attribution, bigger crater — the R2 lane should diff these two
+  first.
+- **W2 — 2 rows, unchanged to the byte:** `os/signal` (`signal_test.cs(344): CS1503`),
+  `syscall` (tests-variant build failure).
+- **W3 — 1 row, unchanged:** `plugin` (converter panic `conversionDriver.go:228`).
+- **W6 — 1 row, unchanged:** `internal/cpu` (`TestDisableAllCapabilities`/`TestDisableSSE3`
+  go=pass/cs=skip).
+- **W7 — 1 row, shape IDENTICAL at current master:** `sync/atomic` streams 89/108 agreements
+  then hangs at `TestValueCompareAndSwapConcurrent` until the budget kills it (942 s here). The
+  landed backoff does not change the Linux cell — re-measured confirmation of the board's
+  "mechanistic, not tuning" ruling.
+- **Per-OS roster — 3 rows:** `bytes`/`crypto/sha1` DISC on the shard-1 annotation defect
+  (functionally PASS, same disclosure sets as Windows); `internal/syscall/windows/registry`
+  cannot even convert ("build constraints exclude all Go files" on linux) — the pure
+  platform-exclusive case for the per-OS mechanics ruling / `platform-skip` class.
+- **NEW host-limit — 1 row:** `runtime/debug` — `TestFreeOSMemory` genuinely diverges
+  (`less than 16777216 released: 0 -> 1921024`), then **`TestPanicOnFault` kills the host with a
+  fatal `System.AccessViolationException`** — on Linux .NET a hardware fault is process-fatal (no
+  Windows-style SEH recovery), so PanicOnFault emulation is structurally a per-OS host limit.
+  Natural next member of the `platform-skip`/host-limit disclosure family.
+
+**Honest non-floor count: 140/167** (138 PASS + 2 DISC that are PASS underneath). Floors pending;
+final ledger + honest total in the last shard. For pricing: the Linux parity arc at current master
+is essentially **one design item (R2), two converter items (W2×2), one converter crash (W3), one
+scheduler item (W7, ruled), one caps item (W6), the per-OS roster mechanics (annotation syntax +
+platform-exclusives + disclosure-capture), and one new host-limit disclosure (PanicOnFault)** —
+everything else validated.
