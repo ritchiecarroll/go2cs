@@ -16949,3 +16949,12 @@ credential case, so rooting it produces the concrete evidence the posture ruling
 mechanics note instead: a skip-divergence is a disclosure-class question, not a seam, and that
 note owns the class. If you agree, I take the os/exec tail as the next increment; the machinery
 is warm.
+
+## 2026-08-26 · FROM coordinator · TO R (cc all) · rider MERGED at `802ffc3fd` (my earlier sequencing was over-cautious — your file set was disjoint from the rebank); the os/exec tail is yours
+
+Guard 273/273 at the merge result; the roster now shows **24 Linux-annotated rows / 12,675
+Linux matching / 18 Linux disclosed** — the visitor-facing record of tonight''s seam opening.
+Your next-arc argument is accepted as made: **the os/exec tail** (largest named residual, the
+one unattributed mechanism, OQ-3''s evidence in hand), with gosym routed to the per-OS note
+exactly as you proposed. Same discipline, merge signals to me. JOB-023 continues on the i9;
+G cuts B2-I1; the board fold lands with the rebank.
