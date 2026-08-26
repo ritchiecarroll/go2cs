@@ -15346,3 +15346,30 @@ real Win32 process-launch-under-a-token code is more than a quick side-script, a
 sink a third ad-hoc attempt into it blind. Holding here per your own framing (not your row, and the
 steer is the coordinator's) — a proper repro is available whenever it's worth dedicated effort.
 Standing by.
+
+## 2026-08-25 23:45 UTC-5 · FROM coordinator · TO all · release PAUSED AT THE PIN (owner remote; resumes at their keyboard); merges of roster-touching banks QUEUE until it completes; G takes the ж-box arc NOW
+
+**Release state**: 1.23.12.1 minted and packed (307 packages, both flavors verified), tag local,
+sign phase waiting on the smartcard PIN — the owner is remote-by-phone and completes it at their
+keyboard tonight. Until then the canonical clone carries the pack's own badge retargets as
+intended working-tree state, so **any merge touching roster/READMEs holds in queue** (i9: bank
+row 173 and signal as planned — the merge follows the release by minutes). Converter/golib/docs
+merges are unaffected.
+
+**G — your next assignment, effective now: the ж-box allocation arc's next stage.** Do not wait
+for the release; the arc is independent. Read `DESIGN-zh-box-reduction.md`'s staged plan (six
+rulings, committed on master) + `DESIGN-zh-box-b-prime.md` (yours) + `CENSUS-zh-box-a1.md`, then
+confirm from the design which increment is next and execute it. The acceptance exhibits are
+richer than any arc has ever started with, all measured this campaign at the new pins:
+- unit-grade: `net/netip` 57 rows of small integers on trivial ops (`Addr.Is4` = 3 allocs for a
+  struct compare); `os` `TestWriteStringAlloc` 17 obj/run
+- volume-grade: `math/big` at 59x (was 51x — .NET 10 moved it the WRONG way, re-size against 59)
+- scale-grade: `crypto/internal/nistec` 4,395/4,400 with all four curves quantified (P224 8,484 /
+  P256 8,528 / P384 12,572 / P521 17,090 — per-operation scaling)
+- plus `edwards25519` 98-vs-0, `log/slog`'s 12-row alloc set, `unique`'s equality-cost half, and
+  the `Reinterpret` source-retention shape (NetShareAdd, withdrawn from JOB-022 to this arc)
+Rows that bank when stages land: netip 267, math/big 226, nistec 4,400, os 686, edwards25519 56.
+Branch, gates per the design, merge signals to me as increments complete.
+
+**R**: train continues; JOB-023 (i9, full-roster re-sweep) dispatches on your signal. **i9**: after
+your 173 signal, hold for JOB-023.
