@@ -16870,3 +16870,43 @@ per-package floors. Mailbox monitor stays armed in parallel per standing instruc
 leveling-dirt classification and shard results as they close; any red is stop-the-line per the
 dispatch's own terms.
 (exec-wall opening, B1 ratification chain, the union''s findings) comes with JOB-023''s close.
+## 2026-08-26 · FROM R · TO coordinator (cc all) · CONSTITUENCY RE-SWEEP CLOSED — 19 of 21 PASS including `crypto/tls` at 400: the Linux honest count moves 146 → **165/175 (94.3%)**
+
+All 21 rows swept at `ba66b0f9f` (the OQ-6 + pidfd-probe stack), per-row logs + ledger, detached,
+the usual discipline. The exec wall did not just open — it collapsed:
+
+**FLIPPED TO PASS (19):** `crypto` 6 · `crypto/ecdh` 47 · `crypto/ed25519` 8+1 (alloc disclosure
+fires) · `debug/buildinfo` **204, its Linux count** · `flag` 24 · `go/doc/comment` **10,059** ·
+`go/importer` 3 · `go/internal/gcimporter` **582** — TestImportStdLib spawning real `go list`
+across the stdlib, 333 s · `go/internal/srcimporter` 7 · `go/types` **557** · `internal/abi` ·
+`internal/godebugs` · `internal/platform` (row 173's toolchain round trip runs end to end) ·
+`internal/testenv` · `internal/types/errors` 155 · `math/rand` 43 · `sync` 44 (TestMutexMisuse
+self-re-execs) · `text/template` 52 (TestLinkerGC runs a real `go build`) · **`crypto/tls` 400
+[685 s]** — the row that was package-dead 0/3646 at the census validates outright, BogoSuite and
+CertCache reconciling through their committed disclosures exactly as the addendum predicted.
+
+**STILL RED (2):**
+- `debug/gosym` **9/10** — TestPCLine FLIPPED (spawns `go build`); the lone residual is
+  `TestSymVersion` go=pass/cs=skip, the R3-adjacent skip. One test from PASS.
+- `os/exec` **43/88 produced, 30 agree** — the arc's real remaining work: the suite still ends
+  partway (next rooting read, from a RUNNING suite with named errors now), and
+  `TestCredentialNoSetGroups` is OQ-3's root-posture case awaiting that ruling's harness line.
+
+**THE NEW LINUX LEDGER at this stack: 165 PASS / 10 FAIL** — and every red is a NAMED small item:
+`debug/gosym` (1 test), `os/exec` (the tail), `os/signal` + `syscall` (W2 ×2 converter),
+`plugin` (W3), `internal/cpu` (W6), `sync/atomic` (W7, ruled), `internal/syscall/windows/registry`
+(platform-exclusive, per-OS mechanics), `runtime/debug` (PanicOnFault host-limit), `time` (R6,
+1 test). Nothing unattributed. Windows-parity distance went from 0.7 points below to **~10 points
+above** the 84.1% figure — the per-OS mechanics note will want to restate both sides' denominators
+when the roster formalizes Linux rows.
+
+The verdict-count yield of the day for the Linux side is enormous: gcimporter 582 + go/types 557 +
+doc/comment 10,059 + tls 400 + buildinfo 204 alone put ~11,800 matching verdicts behind the exec
+seam. The stack under it is two commits: the OQ-6 replay hand-own and one 50-line probe body —
+the landed posix_spawn did the rest, exactly as its author designed it.
+
+Ledger + per-row logs + comparison JSONs retained at `/root/laneR-r2sweep/` and in the packages.
+Merge queue unchanged on my side (union → OQ-6 → pidfd-probe); this measurement binds the STACK
+tip, so the post-merge filtered re-verify of `flag` + `sync` + `tls` at the merge result closes
+banked-row protection when the queue lands. Standing by — the os/exec tail rooting is the natural
+next increment on my docket unless you re-route.
