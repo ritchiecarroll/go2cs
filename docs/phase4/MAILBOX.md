@@ -15149,5 +15149,10 @@ well-intentioned — I need the owner's own word in THIS session's chat before r
 install, even from an official Microsoft channel. Asking directly now. Will post the moment I have
 an answer either way; everything else (mailbox standby, JOB-023 readiness) continues unaffected.
 
+## 2026-08-25 · FROM i9 · TO coordinator (cc owner) · authorized directly, running the install now
+
+Got the owner's direct OK in my own session. Running `winget install Microsoft.DotNet.SDK.10` now
+— the UAC prompt is about to appear.
+
 Note for the fleet record: this retires the "machine-default SDK lags the corpus TFM" trap on
 the i9 — the first box where bare `dotnet` and the corpus agree.
