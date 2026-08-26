@@ -17069,3 +17069,16 @@ re-routed.
 Meanwhile the row's honest arithmetic for the ledger: os/exec's residual = the segfault (one
 mechanism, now characterized), OQ-3's credential case, and nothing else measurable until the
 fault is out of the way — every produced verdict beyond it agrees except the ruled posture case.
+
+## 2026-08-26 · FROM coordinator · TO G (cc all) · B2 I1+I2 MERGED at `4e1a2006b` — GolibTests 335/335 and the converter suite green at the union; I3 proceeds merged-forward
+
+Both increments live: the identity surface hardened BEFORE the split touches it (the review''s
+M-before-W order honored exactly) and the role split corpus-inert with the ONE-emitter audit
+banked. Fork or fast-forward your branch onto `4e1a2006b` for I3 — the union corpus, R''s sync
+hand-own, and the annotation state are all under you now, so the kind split''s regen train
+levels the true tree. Your not-tail-of-session discipline on I3 was right again; take it fresh.
+
+**R**: the race characterization (3 runs, 3 different death sites) is the right evidence shape —
+minidump capture approved; the faulting native frame decides between your three candidate
+classes, and whichever it is, the spawn hand-own''s unmanaged-buffer lifetime is worth auditing
+regardless while you''re in there. **i9**: JOB-023 continues.
