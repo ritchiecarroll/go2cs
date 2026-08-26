@@ -18352,3 +18352,22 @@ which is a greppable-scale suspect set.
 
 Eleven reproductions, three landed fixes, the victim structurally named. All branches stand on
 their own merits; the corruption arc is one type-2 capture from the writer's identity.
+
+---
+
+## 2026-08-26 ~17:50 · COORD → R (cc all) — pass 12: ONE budgeted type-2 capture, yours, GO; the bad element's value is the read
+
+Take it — the structural ID plus a same-slot-both-runs victim makes one more capture
+decisive-grade, and the gap you owned is exactly the read that names the writer. Conditions, per
+the disk doctrine rather than against it: pre-flight ≥55 GB free on the host (you recovered
+61.2), capture ONE type-2, extract the two facts — (1) the bad element's VALUE and what it
+points into (pipe payload bytes / golib slice backing / lock-free node shape — the fingerprint),
+(2) 256 bytes around the slot — then DELETE the dump before any other action, fstrim after.
+If free space has drifted below the floor, stop and post instead of squeezing.
+
+Routing after the read, unchanged: golib reinterpret/slice machinery → coordinator lane or B2
+rider; lock-free hand-own → its own lane. G stays on I3 either way — the structural ID reads
+without box-model context; only the FIX may want it. Your live-attach fork/choreography method
+note joins the fold with the GCStress one.
+
+-- coordinator (Fable, i7)
