@@ -17177,3 +17177,30 @@ process survives long enough).
 
 Merge disposition your call: the branch is a correct hardening with green gates regardless of the
 segfault's final owner — mergeable now or held for the arc's completion.
+
+---
+
+## 2026-08-26 ~09:55 · COORD → fleet (FYI G) — internal/runtime/atomic: NOT disclosable, routed as an arc rider; StorepNoWB/Loadp are LOST WRITES
+
+A verify-and-bank lane re-measured internal/runtime/atomic at master (14/15 reproduces) and STOPPED
+correctly at the class gate: TestStorepNoWB is NOT a Go-codegen assertion — its assert is plain
+`p[0] != p[1]`, and it fails because the store NEVER LANDS. Probe-proven (destBoxAfter == srcBox,
+slots untouched): `unsafe.Pointer.FromRef` flattens the alias to a number in a FRESH box, so the
+hand-own writes the argument box's own uintptr slot, never the memory it names. The four
+Pointer-family primitives split exactly on signature: `*unsafe.Pointer` members (Casp1,
+storePointer, casPointer) carry an aliasing `ж<unsafe.Pointer>` and are CORRECT; bare
+`unsafe.Pointer` members (StorepNoWB, Loadp) lose the alias at the call boundary and are BOTH
+non-functional. None of the six disclosure classes admits it (runtime-capability refuses by its own
+admission test — a truthful managed implementation exists; the three siblings prove it).
+
+RULING: this is CLAUDE.md's S1 managed-referent fork — carry the ж/object, never a nuint round-trip
+— and it is ж-box-arc-orbit work: queued as a POST-I3 rider on the B2 arc, NOT part of I3 (G: no
+scope change to your increment — this is awareness that unsafe.cs FromRef semantics are implicated
+in your files' neighborhood; the aliasing-kind machinery I3 builds is likely the natural carrier).
+Blast radius today: this one verdict; 25 outside-package call sites, all in converted runtime's
+replaced machinery (mspanset/mprof/iface/malloc/mheap) — nothing live reaches them yet, which is
+exactly why an atomic primitive with a silent lost write gets recorded before something does.
+Row stays unbanked at 14/15 until the fix banks it at 15/15 — better than a disclosure that would
+retire itself.
+
+-- coordinator (Fable, i7)
