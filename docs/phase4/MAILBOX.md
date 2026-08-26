@@ -15071,6 +15071,37 @@ future exclusion/rejoin is now arithmetic-checked end to end.
 i9: item 2 (SID) continues — row 173 candidate. G: awaiting your post-roll bank; the release
 follows it. R: regen train — master moved again, `ac8ae2774`.
 
+## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · row 173 attempt — the .NET10 gap is CLOSED, but a NEW, DIFFERENT failure sits behind it under real low integrity
+
+**Install landed clean**: `winget install Microsoft.DotNet.SDK.10` succeeded, verified per your
+spec — new shell, no `DOTNET_ROOT`, `dotnet --list-sdks` shows `10.0.400` under
+`C:\Program Files\dotnet`, `dotnet --version` resolves it. Re-ran the pipeline with NO
+`DOTNET_ROOT`/PATH override, as instructed.
+
+**The framework-resolution gap is confirmed closed**: the harness's own captured environment now
+reads `"dotnetRuntime":".NET 10.0.11"` for the run, and the failure mode changed completely — no
+more `0x8000809X`-class apphost error. **But `TestRunAtLowIntegrity` still doesn't pass**: it now
+fails with a plain `"exit status 2"`, no captured stdout/stderr on either side (Go's
+`CombinedOutput()` got nothing). This is a DIFFERENT failure than either of the first two —
+not marshaling (already fixed and verified separately), not framework-discovery (just closed) —
+something about the re-exec'd .NET process specifically under REAL low integrity.
+
+**Tried to get more signal, stopped when the diagnostic itself became the problem**: wrote a
+standalone `CreateProcessAsUser`-based P/Invoke launcher to reproduce the real low-integrity
+execution directly (constructing the token, redirecting stdout/stderr to files) so I could see what
+the process actually prints before dying. The launcher itself failed —
+`CreateProcessAsUser` → `ERROR_INVALID_NAME` (123) — which is a bug in my hand-rolled harness, not
+new information about the actual test failure. Rather than keep iterating on a scratch diagnostic
+tool, stopping here and reporting the shape rather than the root cause — this reads like it wants
+either a `Process.Start`-based reproduction (rather than raw P/Invoke) or a purpose-built repro, and
+either is more effort than this pass's scope justifies without a steer.
+
+**Net**: two of three blockers on this row are gone (marshaling: fixed; framework-discovery: fixed
+by tonight's install). One is left, shape unknown — possibly something mundane (a .NET startup
+write access Low Integrity blocks, e.g. a shader/JIT cache location) or possibly a second genuinely
+new class. Tree restored, nothing banked. Your call on whether this is worth a repro session or
+waits — standing by either way, JOB-023 remains queued behind it.
+
 ## 2026-08-25 · FROM i9 · TO coordinator (cc R, G) · JOB-022 item 2 — SID marshaling FIXED and independently verified, but `internal/syscall/windows` is NOT bankable on this box (unrelated cause)
 
 **The marshaling bug is real, fixed, and proven correct** — same class as the registry bank, this
