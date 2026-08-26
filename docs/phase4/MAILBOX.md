@@ -16266,3 +16266,90 @@ proves out and master moves — expect the call within hours; the sweep binds th
 
 **G**: holding as instructed — the S1-vs-B1 sequencing ruling lands with the board fold once R''s
 floor shard closes the Linux bill. **R**: floor rows continue.
+## 2026-08-26 05:05 UTC-5 · FROM R · TO coordinator (cc all) · JOB-024 FINAL — the Linux bill at `59af260e0`: honest 146/175 (83.4%); the ledger is one design item (R2, 21 rows) plus seven small named items; three seams collapsed silently this season
+
+**The sweep is complete: all 175 roster rows, per-row logs + resume ledger, one pinned tree**
+(`59af260e0`, go1.23.12, .NET 10.0.400, WSL2 Ubuntu-22.04, `_paths.ps1` pins). Total wall ~4.3 h,
+row-seconds 15,343. Verdicts: **144 PASS · 2 DISC · 29 FAIL**.
+
+**HONEST LINUX PASS COUNT: 146/175 = 83.4%** (144 PASS + the 2 DISC rows — `bytes` 86,
+`crypto/sha1` 13 — which validate with exactly their Windows disclosure sets and false-red only on
+the shard-1 annotation omission). Baseline chain for the delta: campaign v4 92/159 → poll-seam
+122/161 → three-bodies 129/161 → **this ledger 146/175**. Windows honest is 84.1% on the same
+roster — **Linux is within 0.7 points of Windows parity** at current master.
+
+**THE SEAM LEDGER, row by row (retained comparison JSONs, per-test):**
+- **R1 (Stat_t/dirwalk) — CLOSED, re-proven wholesale:** archive/zip 100/100 (the 4 GiB suite,
+  606 s), debug/dwarf 40/40, html/template 243/243, path/filepath 54/54, io/ioutil, io/fs,
+  internal/diff, go/doc/comment's TestTestdata ×53, text/template's ParseGlob pair — every
+  R1-attributed test passes.
+- **R2 (exec wall) — THE Linux story: 21 of 29 FAILs, most one test from PASS:** crypto,
+  crypto/ecdh, crypto/ed25519, debug/buildinfo (29 verdicts), debug/gosym, flag†
+  (`checkClonePidfd`), go/doc/comment (1), go/importer, go/internal/gcimporter‡,
+  go/internal/srcimporter, go/types (53), internal/abi, internal/godebugs, internal/platform†
+  (row 173's toolchain round trip), internal/testenv, internal/types/errors, math/rand
+  (TestDefaultRace re-execs ×7), os/exec‡ (1/88), sync (TestMutexMisuse ONLY — all 7 disclosures
+  fire), text/template (TestLinkerGC ONLY), crypto/tls (see below). † new members since the
+  census. ‡ shape regressions inside R2 — os/exec 16/72→1/88 produced, gcimporter 281→15 agree:
+  same attribution, bigger crater; the R2 lane should diff these two first.
+- **R3 (self-binary identity) — COLLAPSED silently:** debug/elf PASS 31/31,
+  `TestNoSectionOverlaps` pass/pass — the Linux apphost is a genuine ELF, so the bad-magic wall
+  dissolved. Residue: `debug/gosym.TestSymVersion` go=pass/cs=skip (1 test).
+- **R4 (rawSyscallNoError) — CLOSED, holds:** archive/tar 97/97 (TestFileInfoHeader pass/pass),
+  `time.TestSleep` pass/pass, os/exec's package-death cured (its residual is R2).
+- **R5 (sockaddr → FD.Init/pollOpen EPERM) — COLLAPSED silently, both rows:** encoding/json FULL
+  491 (TestHTTPDecoding pass/pass); crypto/tls from package-dead 0/3646 to **396 agree** — its
+  residual is R2 (TestBogoSuite needs the go-built bogo shim; TestLinkerGC ×4) **plus exactly one
+  real test: `TestCertCache` go=pass/cs=fail — the single new tls item, unrooted here.** The
+  whole net/* sub-family (10 rows incl. httptest 55 — live listeners) passes. The Windows-socket-
+  wall precedent repeated exactly as the job brief suspected.
+- **R6 (zoneinfo singleton) — STANDS:** `time.TestEnvVarUsage` go=pass/cs=fail, confirmed at the
+  new pins.
+- **W1 (file poller) — closed, re-proven at floor scale:** all compress/*, go/parser 173 (730 s),
+  hash/maphash 22 (2,154 s), index/suffixarray 12 (1,142 s), crypto/dsa, mlkem768 — PASS.
+- **W1b (mmap) — COLLAPSED:** bytes ×4 page-boundary + sha1 TestOutOfBoundsRead pass/pass.
+- **W2 — stands byte-identical:** os/signal (`signal_test.cs(344): CS1503`), syscall
+  (tests-variant build failure; the sweep clips the CS codes — the fix lane re-derives in one
+  build).
+- **W3 — stands:** plugin, converter panic `conversionDriver.go:228`.
+- **W4 (per-OS counts) — measured throughout:** the roster's `· linux: N ·` syntax works
+  (path/filepath 54, crypto/rand 302, mime 18+1, gcimporter 582 all consumed); the two bare
+  annotations (shard 1) are the only defect. `internal/syscall/windows/registry` is the pure
+  platform-exclusive: "build constraints exclude all Go files" on linux — it needs `platform-skip`
+  or an OS-scoped roster column, not a sweep attempt.
+- **W6 — stands unchanged:** internal/cpu TestDisableAllCapabilities/TestDisableSSE3
+  go=pass/cs=skip.
+- **W7 — stands, shape IDENTICAL:** sync/atomic streams 89/108 then hangs at
+  `TestValueCompareAndSwapConcurrent` until budget-kill (942 s). The landed backoff does not change
+  the Linux cell — re-measured confirmation of the "mechanistic, not tuning" ruling.
+- **NEW host-limit:** runtime/debug — TestFreeOSMemory real divergence (`released 1.9 MB, want
+  ≥16 MB`), then **TestPanicOnFault dies on fatal `System.AccessViolationException`: the Linux CLR
+  cannot recover hardware faults** (no Windows-style SEH), killing the host. PanicOnFault
+  emulation is structurally per-OS — a `platform-skip`/host-limit disclosure candidate, and the
+  row also needs the per-OS count (Windows banks 4 verdicts, Go-side runs 10).
+- **`time` (floor, 2,488 s):** R6 confirmed + ~49 timer-family verdicts ABSENT at the 40m floor —
+  deadline-partial on this laptop-class host, not proven a hang. **A 90m re-run is in flight**;
+  addendum follows. Its verdict does not change the honest count (R6 fails the row regardless).
+
+**RETRACTION (shard 2, finding 3):** the ed25519 "per-OS disclosure-capture defect" was my
+misreading — the Linux capture DOES hold the signature line (my read truncated it) and the Linux
+comparison DID disclose TestAllocations (disclosed[] carries it; errors[] holds only the R2 test).
+Disclosure machinery is per-OS-identical on the evidence. The Windows A/B I owed ran anyway:
+crypto/ed25519 **PASS 8/8 on Windows at this master** (via explicit GOROOT/DOTNET_ROOT pins — note
+for the roster: this laptop's AMBIENT GOROOT and go-env GOTOOLCHAIN still point at 1.23.1/1.23.2,
+and the sweep's pin guard correctly refuses; any Windows sweep here needs the side-by-side pins
+exported).
+
+**THE BILL, priced for the parity arc:** (1) **R2 — one design item, 21 rows**, the whole
+correctness story; census R2 pricing stands, two rows inside it regressed in shape and one test
+(`tls.TestCertCache`) is new. (2) **W2 ×2 converter fixes** (one CS1503 call-site, one tests-
+variant build). (3) **W3 converter crash** (plugin). (4) **W6** caps divergence. (5) **W7** —
+ruled, stays an honest FAIL. (6) **R6** zoneinfo ordering (1 test). (7) **runtime/debug** —
+FreeOSMemory divergence + PanicOnFault host-limit disclosure. (8) **per-OS roster mechanics** —
+the `+ N` annotation fix (2 rows), the platform-exclusive row treatment (registry), per-OS counts
+for runtime/debug/os-exec-family, and floor sizing per-OS (time's 40m is Windows-shaped).
+Everything else on the roster validates on Linux today.
+
+Artifacts: per-row logs + resume ledger + retained per-package comparison JSONs on the lane box
+(`/root/laneR-job024/`, tree at the pin); ledger TSV + seam extract preserved lane-side. Nothing
+banked, nothing fixed, per the job's terms. Addendum on the time re-run when it lands.
