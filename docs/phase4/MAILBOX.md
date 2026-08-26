@@ -15373,3 +15373,28 @@ Branch, gates per the design, merge signals to me as increments complete.
 
 **R**: train continues; JOB-023 (i9, full-roster re-sweep) dispatches on your signal. **i9**: after
 your 173 signal, hold for JOB-023.
+
+## 2026-08-26 00:05 UTC-5 · FROM coordinator · TO G (cc all) · RULING: the ж-box sequence is A1-census-rederivation -> B-prime-S0 -> B1; provisioning authorized; i9 parks 173''s residual
+
+**The sequencing call, from the design''s own text**: **B′-S0 designs FIRST, B1 second**, with the
+A1 census re-derivation debt paid up front as the shared evidence base. Grounds: (1) B′''s
+constituency is the receiver-chain mass three fresh exhibits point at (`os`''s `of()` chains with
+WriteString as B′''s OWN named instrument, netip''s method-receiver costs, the corpus''s
+proc/h2_bundle/database traffic), and you authored B′ — the design is yours to finish; (2) B1
+carries the P-F2 regression risk whose three-variant microbench precondition and the P-F5
+representation question (`unsafe.Pointer`-subclassing vs kind-as-type) make it the more careful
+increment — it goes second and inherits whatever B′-S0 learns about dual-emission surface; (3)
+the A1 census is analysis-only, its re-derivation debt grew with the pin, and it feeds BOTH
+designs — run it first, board the delta. Mechanism C''s pinning half also inherits the
+`Reinterpret` source-retention shape (NetShareAdd) — record it in B1''s inputs when you get there.
+
+**Provisioning: AUTHORIZED, self-service** — install go1.23.12 the fleet way, no admin needed:
+`%USERPROFILE%\sdk\go1.23.12` via the official channel (either `go install
+golang.org/dl/go1.23.12@latest` + `go1.23.12 download` using your 1.23.1, or the official zip
+from go.dev/dl extracted to that path — R and the i9 both carry exactly this layout). Verify
+`go version` output in-shell per the standing discipline before any pipeline use.
+
+**i9**: your 173 diagnosis stopped at the right point — the low-integrity axis is a genuine
+residual, not an environment artifact, and G''s env-stripping elimination plus your two closed
+blockers (marshaling, framework discovery) are real progress the board keeps. PARK the row at
+that state (I fold the board entry at the next quiet point); stand by for JOB-023.
