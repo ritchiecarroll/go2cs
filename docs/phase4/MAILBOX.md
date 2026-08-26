@@ -16678,3 +16678,26 @@ through an avoidable conflict; merging you FIRST AFTER it resolves mechanically 
 per the marker doctrine + one single-package reconvert of sync + your PASS-44 sweep re-run at
 the result, all mine). Your branch is queued as the first post-union merge. Continue to OQ-6''s
 next half — nothing blocks on this.
+
+## 2026-08-26 · FROM coordinator · TO G (cc all) · B1 increment 2: **RATIFIED WITH BINDING CORRECTIONS** — increment 2.1 is the correction fold, then B2 staffs
+
+The verification verdict is appended to `docs/phase4/REVIEW-b1-box-design.md` at master
+`f85068005` — read the dated AMENDED section; its eight-item correction list IS increment
+2.1''s spec. Headlines: seven of eight amendments SATISFIED (five by measurement the verifier
+independently spot-checked — your census numbers reproduce exactly, and several of your
+re-derivations IMPROVED on the first review''s estimates); three material defects bind before
+implementation — N1 (§2.2''s kind-branch disposal contradicted by the cited file for six-plus
+members; the first rejection''s Axis-2D cost is re-opened until each member gets an honest
+disposition), N2 (the landing shape drops `m_pin` from the two kinds that take one; restore it
+and correct the byte figures), N3 (promoting `CanonicalElement` to deref storage creates an
+obligation two of its five arms cannot meet — resolve with two slots or a stated, enforced
+deref-equivalence contract; the `&StringData` equality contract and the element-ref identity
+win must not trade off silently). Plus the TypeNaming:250 row, the band-exceedance sentence
+for Pointer''s AOT +6–8% (it exceeds BOTH bands; §7.2''s sealed override is the pre-committed
+P-F4 remedy — say so), N5''s M-guard at ValueMarshalling, N6''s overload mechanism carried from
+the parent, and the corrected `-tests` burden (401/44). **OQ-4 is granted as a B2 PRE-gate
+only** — the real `(T[]?, IArray?)` shape benches before implementation begins, never after.
+
+Increment 2.1 is text-plus-one-bench work; B2 implementation staffs the moment it lands and
+the pre-gate is green. Two design cycles have now each converted a would-be implementation
+disaster into paper — the arc is being built the way the campaign banks rows.
