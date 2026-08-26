@@ -15156,3 +15156,67 @@ Got the owner's direct OK in my own session. Running `winget install Microsoft.D
 
 Note for the fleet record: this retires the "machine-default SDK lags the corpus TFM" trap on
 the i9 — the first box where bare `dotnet` and the corpus agree.
+
+## 2026-08-25 23:05 UTC-5 · FROM G · TO coordinator (cc owner) · **JOB-018 IS COMPLETE — the clean table is banked and merged forward; MERGE SIGNAL: `claude/n3-perf-leg` @ `5eb25ba34`. Your release PIN gate clears. One finding rides along: master's `docs/Performance.md` mirror was silently self-reverting.**
+
+**The reboot settled it, and the table is clean.** Sieve's Go control returned to band on the
+first check — **65.3 / 71.5 / 70.6 / 71.4 / 67.6 / 71.6 ms** against the contaminated 108.7 — so
+the 18:30 rooting (host-state change, streaming-bandwidth class, reboot-resolvable) is confirmed
+by outcome, not just by elimination. The third pass then read **Sieve Go 68.5 ms** with the other
+thirteen controls matching the two prior passes within a few percent. **PASS, exit 0, 14 projects,
+215.3 s** — four minutes, not another 46 hours, because the up-to-date predicate reused every
+publish: **14 SKIPPED, 0 publishes**, each printing its stamp. That predicate and its `Generated/`
+exclusion are the reason a voided control was re-measurable at all instead of forcing a choice
+between banking known-bad data and re-paying the ladder.
+
+**The two verdicts the completed ladder settles:**
+
+1. **The AOT working-set collapse is UNIVERSAL.** Not a Fib curiosity: under .NET 9 the AOT
+   working set exceeded the JIT's on **14 of 14** rows; under .NET 10 it is below the JIT's on
+   **14 of 14** (Startup 76.9 → 12.5 MB against a 46.1 → 47.4 JIT; IfaceShell 96.3 → 35.7). The
+   self-contained floor that made AOT the memory-expensive option is gone.
+2. **Startup's AOT cell answers N4's open discriminator.** Same closure, published AOT, moved the
+   OTHER way (79.2 → 36.7 ms, 3.07× → 1.60× Go) while the JIT kept its +14 % regression. A
+   closure-init cause moves both together; this one did not. **Runtime-load-side**, and a cost the
+   AOT deployment does not pay.
+
+**Banked** (`e2d2c3695`): README + `docs/Performance.md` tables, a NEW **History** section carrying
+the .NET 9 table it replaces plus the per-row compile-provenance note the farm ratification owed,
+the report's PENDING resolved (per-publish economics: seven publishes across six rows, band
+11,862–13,144 s, mean ~3 h 27 m — the closure-dominated cost model now confirmed from seven points
+rather than one; WS peaks attributed per publish — Startup 18.4 GB, RefLower 17.6, String 17.0,
+Sieve 16.5, Fib#2 13.3), and the final series CSV.
+
+**⚠ CORRECTION to my own handoff, caught before it reached a banked note**: the farm set is
+**EIGHT** rows, not nine. My continuation entry listed Sieve among them; Sieve's table cell is the
+A/B's **canon** side (`evidence-aot-farm-ab-session.md` names `sieve-canon`, 12,869 s). 6 canon +
+8 farm = 14 reconciles against "all eight farm rows are in place"; 6 + 9 does not. The banked
+provenance table carries the corrected split.
+
+**FINDING — master's `docs/Performance.md` had diverged from the README it declares itself an
+auto-copy of, in BOTH directions, and the divergence was self-destructing.** The README carried the
+"What the AOT column costs to produce" footnote but still asked for a **".NET 9 SDK"**; the mirror
+carried the corrected SDK wording (`8725297b2`) and a methodology bullet summarizing the footnote —
+neither of which existed in the README. `run-performance.ps1` rewrites `docs/Performance.md` from
+the README after **every successful run**, so the next perf run anywhere would have destroyed both
+mirror-only edits and pushed the stale .NET 9 line back onto the visitor-facing docs site, while
+reporting success. Nothing is dropped: both mirror-only edits are folded INTO the README verbatim
+and at their same positions, and the mirror is regenerated through the script's own rule and
+byte-verified. **The invariant is true again and the next perf run is a no-op against it.** Worth a
+board line — the shape (a generated file hand-edited because its header was not believed) is not
+specific to this pair.
+
+**Merge resolutions, each read whole** — `_paths.ps1`: master's DERIVED `$NetVersion` taken
+wholesale, zero delta remains. **AOT watchdog**: master's 12h taken over my 4h — and note master's
+`0f22a8e22` IS my `e4cb0ccf0` landing twice, the exact silent-duplication shape CLAUDE.md warns
+about; it conflicted rather than doubling, and the whole file was read to confirm ONE
+`AotPublishTimeoutMs` survives with my publish-skip predicate intact. Runner builds Release clean.
+**Also carried**: the 14 benchmark csprojs are still `net9.0` on master — the leg levels them.
+
+**Owner**: the bank has posted — **Windows Update can be un-paused**, and your coordinator memory
+note can retire. Thank you for the reboot; it bought exactly the pristine window it was meant to.
+
+**Mailbox monitor armed (background task).** Standing by for the merge, then the ж-box arc's next
+increment — reading `DESIGN-zh-box-reduction.md`'s staged plan against today's fresh exhibits
+(netip's 57 unit-grade rows, math/big at 59×, nistec, `TestWriteStringAlloc`, edwards25519's
+98-vs-0, and item 3's `NetShareAdd` Reinterpret source-retention) rather than re-deriving it.
