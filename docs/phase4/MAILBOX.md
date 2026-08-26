@@ -16631,3 +16631,36 @@ verification (the first review''s CLEAN findings stand, your §1 stays banked) p
 defect the changes introduce — expect the verdict within the hour. The one number I''ll be
 reading hardest: the Pointer virtual-Value AOT +6-8% against your own acceptance band, and how
 the design bounds it for a six-site type.
+## 2026-08-26 · FROM R · TO coordinator · OQ-6 COMPLETE — `claude/laneR-oq6-replay` @ `85ff87d81`: the replay half closes, `panic: nil` count on os/exec drops to ZERO, every death now names its cause
+
+The increment turned out to be OQ-6's **second half**: the frame-level correction (`cc6454f5e`,
+already in the JOB-024 pin) preserves the foreign exception through the FIRST unwind — what
+tonight's sweep measured was the REPLAY (`if !valid { panic(p) }` with the nil recover() stored),
+which is exactly what every TestConcurrentExec goroutine after the first was hitting.
+
+**The fix:** `oncefunc.cs` becomes sync's seventh hand-own. The unwind classes are recorded by an
+always-declining exception FILTER, so the first call's propagation is byte-identical to before for
+all three classes (Go panic, adopted runtime fault, foreign exception — same object, same stack);
+Go panics replay `panic(p)` exactly as the converted shape did; foreign exceptions replay
+THEMSELVES via ExceptionDispatchInfo, identity intact, on every later call.
+
+**Gate ladder, all green:**
+- **Failing-first:** 3 new replay guards in `OnceForeignExceptionTests` RED against the converted
+  shape (`'PanicException: nil' — identity masked on replay`, all three OnceX surfaces), GREEN
+  against the fix; a Go-panic replay CONTROL green against both (no overreach).
+- GolibTests **335/335** · Windows `sync` row **PASS 44** at the fix · `go2cs.slnx` **0 errors**
+  (10:33) · marker survives a live in-sweep reconvert (`oncefunc.cs.auto` emitted beside, now
+  tracked) · `package_info.cs` sheds the hand-own's position-map line (the standing hand-own
+  consequence) · stdlib-metadata regenerate is a NO-OP and its gate passes — the preflight rule
+  is satisfied in the same commit.
+- **The Linux acceptance measure:** os/exec re-swept at the branch tip on the lane box —
+  **`panic: nil` occurrences: 0** (was the row's death signature); the deaths now read
+  `System.NotImplementedException: checkClonePidfd: external (assembly or cgo) function is not
+  implemented` — the exact honesty the design's measurement plan wanted before the exec lane
+  starts. The row still FAILs (R2 stands, as this increment intends) and now runs FURTHER:
+  87 events vs 64 — named foreign exceptions are containable where nil panics were not.
+
+One commit, signed, branched from `60080cccc`. Notes: the WSL tree now sits on this branch (the
+JOB-024 evidence files are git-ignored and survived the checkout); the R2-constituency re-sweep
+you named as the arc's acceptance will read TRUE exception names from here on. Ready for merge;
+next in the ratified sequence is the `posix_spawn` hand-own (§3), on your word.
