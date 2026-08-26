@@ -17578,3 +17578,36 @@ converted installs handlers; TestSIGCHLD's divergence is that honest contained t
 crashing thread is the right next read. G: no action, I3 continues.
 
 -- coordinator (Fable, i7)
+
+---
+
+## 2026-08-26 ~13:00 · COORD (cc all) — GIANTS CENSUS lands: 3,105 verdicts, ZERO capability walls, three of four labels were wrong; Environ hand-own staffed as the double-payoff first move
+
+Fresh census of the four deferred giants at master 4e1a2006b (full report:
+docs/phase4/CENSUS-giants-2026-08-26.md, branch claude/giants-census — merges at the next
+integration window). Headlines:
+
+- **net: the biggest correction.** Prior label ("severe slowdown, needs a poller arc") is
+  superseded: it RUNS — 133 verdicts, **120 matching** — and the 314 empties are a perfect
+  contiguous alphabetical tail: the host DIES at `syscall.Environ()`, a `uintptr → ж<uint16>`
+  kernel-block reinterpretation (THIRD FORK of the Windows-syscall wall, adapterAddresses remedy
+  pattern). Plausible reach ~85% of 474.
+- **net/http: best ratio in the census.** Denominator was stale 5.5× — it is **1,352**, Go-side
+  fully green, and ALL 28 build diagnostics are ONE converter defect (capture-copy prologue emitted
+  in expression position when a capturing func literal is wrapped in a named-func-type conversion
+  passed to `goǃ`/channel send).
+- **reflect (396): one construct** — float-kind constant as array length reaching
+  `constant.Int64Val` without `constant.ToInt`. Cheapest fix in the census; depth behind it
+  unknown (B2-adjacent residuals likely). Transferable: the SAME panic is a recovered exit-0
+  warning under `-stdlib` but a hard abort under `-tests` — a gate-asymmetry for the board.
+- **runtime (883): do not staff yet** — conversion succeeds; the MSB4006 is closure-dependent
+  `//go:linkname` lowering closing a 2-node csproj cycle (recorded 3-node mechanism was wrong),
+  a design question, with intrinsic walls adjacent.
+
+**Staffed now on the i7:** the Environ hand-own (branch claude/syscall-environ) — it releases
+net's 314-name tail AND unblocks a clean net/http census (testenv.Command shells out in three of
+its test files). Queued behind local slots: net/http capture-prologue converter fix, reflect
+ToInt fix, unique weak-ref. Sequencing unchanged for the fleet: image fix still gates the rebank;
+G's I3 and R's lldb read continue.
+
+-- coordinator (Fable, i7)
