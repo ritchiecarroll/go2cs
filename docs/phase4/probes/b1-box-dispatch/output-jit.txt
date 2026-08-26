@@ -1,0 +1,21 @@
+﻿runtime: JIT (CoreCLR)  10.0.11  X64
+rounds: 12 interleaved; medians reported (ns/op)
+
+workload               V1-current    V2-switch  V3-subclass  V4-kindbyte   V5-landing   (vs V1)
+std-Value(rw)               1.626        5.524        0.944        2.509        0.944    3.40x  0.58x  1.54x  0.58x
+std-DerefOrNull             2.064        1.381        2.075        1.606        1.150    0.67x  1.01x  0.78x  0.56x
+fieldRef-Value              1.604        1.396        1.609        2.301        1.605    0.87x  1.00x  1.43x  1.00x
+mixed-90/8/1.5/.5           3.360        3.316        2.174        2.969        2.053    0.99x  0.65x  0.88x  0.61x
+native-Value                0.686        2.058        0.230        1.829        0.230    3.00x  0.34x  2.67x  0.33x
+
+== per-box allocated bytes (median of 5x64 mints; standard kind includes its slot) ==
+kind/T                         V1-current    V2-switch  V3-subclass  V4-kindbyte   V5-landing
+standard  T=long                      144          112           80           80           80
+standard  T=Big(560B)                 672          640          608          608          608
+fieldRef  T=long                      112           80           40           48           48
+fieldRef  T=Big(560B)                 672          640           40           48           48
+elemRef   T=long                      112           80           32           40           40
+native    T=long                      112           80           40           48           48
+native    T=Big(560B)                 672          640           40           48           48
+
+(sink 1229010009112587000)

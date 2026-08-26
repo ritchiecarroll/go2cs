@@ -1,0 +1,21 @@
+﻿runtime: Native AOT  10.0.11  X64
+rounds: 12 interleaved; medians reported (ns/op)
+
+workload               V1-current    V2-switch  V3-subclass  V4-kindbyte   V5-landing   (vs V1)
+std-Value(rw)               4.621        4.637        3.933        4.635        3.942    1.00x  0.85x  1.00x  0.85x
+std-DerefOrNull             2.772        2.777        3.239        2.781        1.866    1.00x  1.17x  1.00x  0.67x
+fieldRef-Value              2.082        2.314        1.858        2.313        1.844    1.11x  0.89x  1.11x  0.89x
+mixed-90/8/1.5/.5           4.272        5.183        4.310        5.079        4.332    1.21x  1.01x  1.19x  1.01x
+native-Value                1.856        1.854        1.618        1.848        1.613    1.00x  0.87x  1.00x  0.87x
+
+== per-box allocated bytes (median of 5x64 mints; standard kind includes its slot) ==
+kind/T                         V1-current    V2-switch  V3-subclass  V4-kindbyte   V5-landing
+standard  T=long                      144          112           80           80           80
+standard  T=Big(560B)                 672          640          608          608          608
+fieldRef  T=long                      112           80           40           48           48
+fieldRef  T=Big(560B)                 672          640           40           48           48
+elemRef   T=long                      112           80           32           40           40
+native    T=long                      112           80           40           48           48
+native    T=Big(560B)                 672          640           40           48           48
+
+(sink 1229010009112587000)
