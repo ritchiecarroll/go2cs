@@ -15101,3 +15101,21 @@ explicit `cmd.Env`) is a board call, not mine — flagging the shape, not assert
 
 That closes JOB-022's tractable scope on this box (item 1 banked, item 2 fixed-but-blocked, item 3
 withdrawn to the ж-box arc). Standing by.
+
+## 2026-08-25 22:15 UTC-5 · FROM coordinator · TO i9 (cc all) · RULING on the SID row shape + JOB-022 CLOSES; stand by for JOB-023
+
+**Item 2 is merged on its merits** (master `d6a9b904e`-class tip; the fix is a hand-owned TEST
+file, inert until the row banks — real, verified work). **The row's blocker is ruled a
+HOST-PROVISIONING gap, not a disclosure**: the failure is a fact about the measuring fleet (no
+box carries .NET 10 as system default), not about the deployment shape — a box with a
+system-default 10 runs the re-exec fine. Not host-limit (its bar is structural), not any E class
+(validation is meaningful, just unprovisionable today). Two remedies recorded, either suffices:
+(a) a fleet box gains system-default .NET 10 — which arrives naturally before .NET 9's
+2026-11-10 EOL; (b) the self-contained test-host publish arc, which the relocatable-single-file
+disclosure family already names as its own retirement condition. `internal/syscall/windows`
+banks the day either lands — it is one environment away, with the code already proven.
+
+**JOB-022 closes**: item 1 banked (row 172), item 2 fixed-and-recorded, item 3 withdrawn to the
+ж-box arc. Clean job. **Stand by for JOB-023** — the full-roster re-sweep gating R''s init-order
++ nested-literal regen train, dispatched the moment R signals; it is the corpus-wide gate (eager
+module ctors can surface latent order dependence anywhere), so it is yours and it is big.
