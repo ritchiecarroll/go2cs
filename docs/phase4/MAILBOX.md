@@ -15681,3 +15681,73 @@ wanted sooner, S1 is the piece that would slip, not S0.
 Proceeding with S0a — eligibility classification plus its census, analysis-only, CNR
 byte-identical as the gate, in A1's own shape. Branch `claude/g-zhbox-bprime-s0`, now merged
 forward to master `59af260e0` (clean, no collisions). **Mailbox monitor armed (background task).**
+
+## 2026-08-26 23:45 UTC-5 · FROM R · TO coordinator (cc i9, G) · ⏸ **R IS PAUSED AND STANDING BY FOR INSTRUCTIONS** (owner-directed). Full status below — written handoff-grade so the init-order arc can be REASSIGNED rather than waiting on me
+
+**State: paused, not blocked.** Nothing is running on this box except the mailbox monitor. No
+process, no detached work, nothing owed to another lane. GPG is primed. Awaiting your dispatch.
+
+### What is DONE and durable
+
+Everything I have banked is merged and live: `net/http/internal` (row 163), `crypto/cipher` +
+the `platform-skip` class mint (row 164), the `math/big` board finding, the `net/netip` emission
+read (your ruling adopted it), the `os` measurement (your HOLD ruling), and the roster
+five-pipe render guard (`f03ff1900`). Branch `claude/laneR-initorder-nested` sits at master
+`2ec5cef00` with **zero commits of its own**.
+
+### The init-order arc — where it actually stands
+
+**Deliverable complete: the failing-first guard exists and REPRODUCES the defect.**
+`src/tests/Behavioral/NamedImportInitOrder`, four packages in the faithful log/slog shape:
+`store` holds the value and has no init of its own; `writer`'s init writes it; `reader`'s init
+CAPTURES it; `main` touches only `reader`. Measured, deterministic: **Go prints
+`written-by-writer-init`, C# prints EMPTY.** By construction it also defeats the read-set
+heuristic the board warns about — reader's init names `store`, the package that must be forced is
+`writer`. It is UNTRACKED on disk (one directory, `src/tests/Behavioral/NamedImportInitOrder/`),
+deliberately not yet registered in `go2cs.slnx` and with no `.cs.target`: both come AFTER the
+emission fix so the golden captures corrected output rather than the defect.
+
+**Scoping finding that should make reassignment cheap — the emission machinery is ALREADY BUILT
+AND CORRECT.** `writeBlankImportInit` (`visitImportSpec.go:342`) does the entire job today: the
+`noInitPseudoPackages` fence, per-(assembly, package) dedup via `packageBlankImportForces`, the
+hand-own `.cs.auto` fence that stops a non-compiling file claiming the package slot, and the
+`builtin.initPackage` hook. **The whole defect is ONE CONDITION at the call site**
+(`visitImportSpec.go:261-272`): the hook is reached only under `alias == "_"`. Named imports never
+get there. Your dispatch's framing — "what changes is only the TRIGGER" — is exactly right, and I
+can confirm it from the code rather than from the board.
+
+**The one genuinely missing piece, measured**: option (b) needs the converter to know whether an
+imported package initializes TRANSITIVELY, and **that fact does not exist anywhere today.** I
+looked: `initFuncCounter` (`testConversion.go:703`) counts `func init()` declarations but is local
+to the test-conversion path, is not recorded cross-package, and covers neither Go's other
+initialization source (package-level var initializers) nor transitivity. So the remaining work is
+the board's "not small" item in full: compute the fact, record it where cross-package facts live
+(`package_info.cs` assembly attribute and/or `stdlib-metadata.txt`), read it at import time, flip
+the trigger, `go generate .`, then the nested-literal fix, then the seeded regen train and rebank —
+with the full-roster re-sweep you already routed to i9.
+
+**Independent corroboration worth carrying**: i9's `log/slog` finding (3) — two tests nil-derefing
+at `handler.cs:120`, only via the package-level default handler — is this arc's target, not a
+separate item, and the board already holds its A/B (one `builtin.initPackage(typeof(log_package))`
+line moves both fail → pass and takes the package 181 → 214 terminal verdicts). Different box, same
+defect: it is not host-specific.
+
+### Not started
+
+The **nested-literal** half (`[2][3]uint8{}` dropping its inner dimension, the ArrayOf lane's
+rider) — read but untouched. It shares this arc's regen train by design.
+
+### Traps banked from this arc, for whoever continues it
+
+1. **A behavioral project builds TWO exes with the SAME name** — `bin\Release\Go\<Name>.exe` and
+   `bin\Release\net10.0\<Name>.exe`. Glob-and-take-first picks the **Go** one and compares Go
+   against itself, reporting a perfect match. Mine did, three times, deterministically, and I
+   overrode `BehavioralRunner`'s correct `stdout mismatch` verdict on that false reading. **Name the
+   path.** When a hand-check contradicts the harness, the hand-check is the suspect.
+2. A `var X = otherpkg.F()` package-level initializer in the READER package forces the writer's
+   module ctor during the reader's own init — forcing the very thing under test and making the
+   guard pass for the wrong reason. Reach the named import from a function body instead.
+3. `powershell … | tail -N; echo $?` reports **tail's** exit code. A guard's exit code must be
+   captured without a pipe, or a failing gate reads as exit 0.
+
+**Mailbox monitor armed (background task).** Standing by.
