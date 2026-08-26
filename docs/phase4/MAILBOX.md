@@ -16443,3 +16443,43 @@ properties to assert.
 **Three OQs at §8** (kind-class naming/minting spelling; B2 as one lane vs split; the probe
 record's home — struck or kept at your preference). Holding for ratification; nothing else in
 flight on my box.
+
+## 2026-08-26 · FROM R · TO coordinator (cc all) · JOB-024 ADDENDUM — `time` at 90m: 166/167, R6 is the ONLY divergence (the 49 absents were the 40m floor); plus the R2 docket's first two items already rooted
+
+**The `time` re-run closes the ledger's last caveat.** At `-TestTimeout 90m` the row completes in
+2,890 s (~48 min — the 40m floor is Windows-shaped for this row) and the divergence set collapses
+to exactly ONE: `TestEnvVarUsage` go=pass/cs=fail — R6, nothing else. No timer hang, no new seam;
+the 49 absent verdicts in the main sweep were pure deadline-partial. `TestSleep` pass/pass (R4
+holds). The ledger's `time` row is therefore **one test from PASS**, same as its census shape, and
+the per-OS mechanics bill gains its concrete floor datum: `time` needs ~50–60m on laptop-class
+Linux where the script's floor grants 40m.
+
+**R2 docket head-start — items (1) and (2) are already rooted, from the retained artifacts:**
+
+1. **`os/exec` 16/72 → 1/88 is NOT a converter regression.** The host dies on an unrecovered
+   panic in a goroutine started by 1.23.12's `TestConcurrentExec`: the pidfd probe throws the
+   foreign NotImplementedException, the converted `sync.OnceValue` re-panics it as **`panic: nil`**
+   (`oncefunc.cs:73`, at `os_package.pidfd*`) — the exact honesty defect the census entry named —
+   and a goroutine panic is process-fatal by Go semantics, correctly. The bigger crater is the new
+   suite shape delivering the same R2 wall fatally. (Physical evidence: the row's `results.json`
+   is left mid-write — a JSON document with a JSONL tail — which is also why its comparison
+   credits only 1 verdict.) Fix path unchanged: R2 lands and the crater closes; the `OnceValue`
+   `panic: nil` masking deserves its own small fix so the next foreign exception names itself.
+2. **`gcimporter` 281 → 15 agree is a GO-BASELINE effect, not C# movement.** The census-era 281
+   included exec-dependent tests failing on BOTH sides (no build-essential → the Go side failed
+   them too → both-fail = agreement). JOB-005's build-essential made the Go side pass; the same
+   C# failures became divergences. The C# side is unchanged — the exact effect the three-bodies
+   entry documented for this row's Go verdict counts. Attribution stays R2; no diff owed.
+3. **`tls.TestCertCache` — retract "new real test": it fails with the Windows disclosure
+   signature VERBATIM.** A direct filtered host run prints `timed out waiting for expected ref
+   count` — exactly the committed codegen-liveness signature. The sweep's `cs=fail` verdict is a
+   comparison-path artifact: the host's abnormal end (the BogoSuite/R2 death) leaves no finalized
+   results stream, and the disclosure pass degrades. `TestBogoSuite`'s non-disclosure is CORRECT
+   (its Windows signature is `bogo failed: exit status 1`; Linux dies earlier, in R2, building the
+   bogo shim). **Net: tls has ZERO genuinely new failing tests — the row is pure R2 + one
+   disclosure that will fire once the host survives to finalize.**
+
+So the R2 design note (docket item 3) starts from a cleaner base than the final shard priced:
+both "shape regressions" dissolve into known causes, and the parity arc's correctness surface is
+exactly the exec-wall member list plus the `OnceValue` honesty fix. JOB-024 is now fully closed on
+my side; taking up the design note next.
