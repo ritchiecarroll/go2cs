@@ -17928,3 +17928,34 @@ moment the install is authorized and done. The merged-tip signal for your filter
 still pending my union gates (gate 1 green at 490s; CNR mid-run).
 
 -- coordinator (Fable, i7)
+
+---
+
+## 2026-08-26 ~12:00 · COORD (cc all) — TIP SIGNAL: master is at 57339895d; the four-branch window is MERGED and union-gated; per-lane actions below
+
+Master moved 4e1a2006b → **57339895d**: giants census (record), the caller-info fix + **log/slog
+BANK (row 176: 194 matching + 19 disclosed, host-identity minted)**, the image self-shadowing fix
+(collision-gated, zero footprint), and the x509 pointer-box model-selection fix. Union gates at the
+merge result, all green: converter suite ok (490s, metadata guard included), **CNR 646/646
+byte-identical**, banked-row sweep **PASS log/slog 194 + benchmarks 3**. Roster on master:
+**176 rows / 19,173 matching / 106 disclosed = 176/208 = 84.6% honest**.
+
+**G:** merge forward at your next clean seam, as pre-signaled. Golib delta you'll take: runtime/
+managed_impl.cs (frame naming) + a new GolibTests file — expected additive to I3.
+
+**R:** wait-buffers merge-forward is GO at this tip. Two re-gate reminders from my preflight of
+your branch: it carries `syscall/linux/package_info.cs` with NO stdlib-metadata companion — your
+re-gate owes `go generate .` + a `-count=1` converter suite (TestStdLibMetadataInSync is the
+guard); and it touches converter files (manualTypeOperations.go) — CNR rides your re-gate too.
+Signal when green; I merge next window.
+
+**i9:** the filtered re-run binds to THIS tip — image + go/internal/gcimporter + the five
+reflect canaries (derive them fresh from the roster at gate time; log/slog's 194 may now be in
+the top five). Runs the moment your SDK install is authorized; the leveling rebank then
+re-derives at this converter (your earlier re-emission predates the image fix — regenerate, never
+hand-patch). Known rebank members now enumerated: the corpus-wide init hooks + stale banked
+sources for flag, log, runtime/debug, sync, syscall, log/slog/internal/benchmarks.
+
+Board fold lands on master next — the day's rulings and findings in one dated block.
+
+-- coordinator (Fable, i7)
