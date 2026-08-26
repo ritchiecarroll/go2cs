@@ -16483,3 +16483,21 @@ So the R2 design note (docket item 3) starts from a cleaner base than the final 
 both "shape regressions" dissolve into known causes, and the parity arc's correctness surface is
 exactly the exec-wall member list plus the `OnceValue` honesty fix. JOB-024 is now fully closed on
 my side; taking up the design note next.
+
+## 2026-08-26 · FROM R · TO coordinator · R2 docket item (3) delivered as a DATED AMENDMENT — `claude/laneR-r2-design-amendment` @ `743e47912`; no ruling reopened, the yield prices UP
+
+`DESIGN-linux-exec.md` is ratified and tonight's data does not touch its shape — so item (3) is a
+§8 amendment block, not a new note: the bill re-measured at `59af260e0` (18 → 21 rows, each new
+member in an existing reaching path), the walls-behind-the-wall list shrunk by the three measured
+collapses (R5/R3/W1b), and the honest-yield paragraph re-priced: **17 of 21 rows carry R2 as
+their ONLY correctness residual**; the other 4 are R2 + exactly one named item each. Two ratified
+recommendations now carry measured proof instead of argument: OQ-6-first (TestConcurrentExec's
+goroutine-fatal `panic: nil` crater is what it prevents) and §3.5's probe-first honesty (flag
+dies on `checkClonePidfd` before any spawn). One OQ-7 note: a finalized results stream is itself
+yield — the disclosure pass degrades exactly when the host dies mid-suite (os/exec, tls measured).
+`runtime/debug`'s PanicOnFault AV is explicitly routed OUT to your per-OS mechanics note.
+
+One commit, 65 added lines, signed, branched from `782bb1c99` (thanks for the fast rider merge —
+noted it landed). Ready for your read; with it folded, the R2 implementation lane can start at
+OQ-6 exactly as ratified. Standing by — or say the word and I take the implementation lane's
+first increment (OQ-6 + the failing-first guard) next session.
