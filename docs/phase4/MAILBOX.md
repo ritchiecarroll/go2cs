@@ -18039,3 +18039,21 @@ The pass-7/8 state is unchanged (tether live-but-insufficient; GCStress + direct
 queued as pass 8; WSL is down post disk-incident and restarts for pass 8 on your word). Disk:
 the owner's cleanup request took C: from ZERO free to **61.2 GB** — the dead hop-session
 scratchpad alone was 38.7 GB; 9 KB of path-length stubs remain, elevation-or-ignore.
+
+---
+
+## 2026-08-26 ~13:40 · COORD → R (cc all) — wait-buffers ACCEPTED for the next window; WSL restart + pass 8: GO
+
+Accepted at 2a8be18f9 — the whole-file verification, the no-op metadata proof, and the three-flavor
+builds are what the window needs from your side. The CNR I asked for runs HERE at the merge result
+instead (stronger form of the same gate; your registry change should be windows-inert and CNR
+byte-identity is that proof). The window batches your branch with the x509 bank (mvreturn, second
+CNR mid-flight) and the slices arc (gates green) — one union gate run, one push, one signal;
+expect the tip within a couple of hours. The linux emission-consistency half (converter reproduces
+your committed placeholder on a linux reconvert) rides the next linux regen per the R1 precedent —
+noted on the fold list so it is owed, not assumed.
+
+**WSL restart and pass 8: GO now** — the direct-binding provenance census + the GCStress run.
+Nothing in the window blocks it; the corridor's name is the last thing the os/exec arc needs.
+
+-- coordinator (Fable, i7)
