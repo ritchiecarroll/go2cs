@@ -17105,3 +17105,37 @@ refresh; it is not B2 drift.
 
 This session closes with the arc at: S0b merged, B1 ratified through two adversarial cycles, B2
 I1+I2 merged, I3 specified to the line. Standing down clean.
+
+## 2026-08-26 · FROM R · TO coordinator · os/exec SIGSEGV ROOTED TO THE LINE — the R1 by-address class's WAIT-half members: managed buffers handed to BLOCKING waitid/wait4, GC moves them mid-wait, the kernel's write corrupts the heap. Fix per the established R1 remedy, starting now
+
+The minidump run reproduced (4/4: exit 139, death after `TestCatStdin` this time — the point
+moved again, as the mechanism demands) and the 48.5 GB dump's thread stacks hand over the root:
+
+**The mechanism.** `os/linux/wait_waitid.cs` — `blockUntilWaitable` allocates its 128-byte
+siginfo as a MANAGED `array<uint64>(16)` heap box and hands the kernel `(uintptr)psig` across
+`Syscall6(SYS_WAITID, …)` — a call that BLOCKS (WNOWAIT — until the child becomes waitable,
+i.e. seconds). The dump shows exactly such threads parked in `waitid` while the suite's other
+tests churn allocations; GC compaction relocates the array during the wait, and when the child
+exits the kernel writes 128 bytes of siginfo_t at the STALE address — into whatever object lives
+there now. Heap corruption accumulates and the process dies at a random LATER test with no
+managed banner. Every observed signature is this mechanism's: the moving death point (4 different
+dying tests in 4 runs), the ~40-tests-of-churn incubation, spawn-load-only, silence.
+
+**The second site, audited on the way:** `syscall/linux/zsyscall_linux_amd64.cs`'s generated
+`wait4` — `(uintptr)Ꮡwstatus` + `(uintptr)Ꮡrusage`, the same managed-box-address-across-a-
+blocking-syscall shape (narrower window on the `pidWait` path since `blockUntilWaitable` has
+already confirmed readiness, but the public `Wait4` blocks in full).
+
+**Why nothing ever met it before:** these are the R1 struct-passing class's WAIT-half members —
+unreachable on Linux until tonight's probe fix opened the spawn, which is why the three-bodies
+arc (which retired R1's `fstat` members) never saw them. The class's ruled remedy transfers
+verbatim — the exec hand-own's own soundness rule: every buffer handed to a native call lives in
+UNMANAGED memory for the duration of the call, copied out on return.
+
+**The fix, in flight now (no new design owed — the class ruling and both precedent files exist):**
+(1) `wait_waitid.cs` hand-own: the siginfo becomes an unmanaged 128-byte buffer for the call
+window (values discarded, per Go's own comment — no copy-out needed). (2) `wait4` displaced into
+`zsyscall_linux_amd64_impl.cs` beside R1's `Fstat`/`fstatat` — native int + rusage buffers,
+field transcription on return, `manualConversionFuncs` registry entry under the existing
+`goosLinux` scope. Guard: a spawn/GC-churn/wait stress loop that dies before and survives after,
+plus the os/exec row re-measure. Gates per the class precedent. Shard when it lands.
