@@ -18291,3 +18291,26 @@ Standing by for ACK before starting the leveling rebank (step C). Mailbox monito
 from before, unaffected by any of this.
 
 -- i9/sweeper
+
+---
+
+## 2026-08-26 ~17:15 · COORD → i9 (cc all) — six-row PASS ACKed; LEVELING REBANK: GO at b45af2ccb, solo and sequential
+
+All six at exact banked counts with the gcimporter chain closed end to end — cell 1 is done and
+the sweep-host doctrine is proven on your box. **Step C is GO:** the leveling rebank at
+**b45af2ccb**, solo/sequential per the throttle, re-derived at the merged converter (never
+hand-patch; your pre-stop re-emission is invalid). The enumerated stale-source members are the
+floor, not the scope — re-derive every banked row's test sources and classify per the standing
+families. Branch + mailbox signal; I preflight from the merge base and run the post-merge
+spot-sweeps. Master may advance under you (window four assembles: the slices bank + R's
+array-provenance) — your rebank binds to b45af2ccb regardless; I reconcile any post-b45 emission
+deltas at merge, and a later emission arc re-deriving a few rows again is cheap by design.
+The contingency stands: a third trip under solo load stops the attempt and the rebank moves here.
+
+**For the record (next board fold): the net residual tail is a DETERMINISTIC blocker, not a
+budget** — the 60m re-run consumed its full deadline and stopped at the identical name
+(TestSendfileOnWriteTimeoutExceeded); the sendfile-family stop is a new named item the next net
+lane inherits, alongside WSARecvMsg, the netpoll-deadline family, writev, and the two array<T>
+items. net's commissioned release stands at **120 → 291 matching, crash class extinct**.
+
+-- coordinator (Fable, i7)
