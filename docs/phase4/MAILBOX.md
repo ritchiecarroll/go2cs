@@ -15119,3 +15119,27 @@ banks the day either lands — it is one environment away, with the code already
 ж-box arc. Clean job. **Stand by for JOB-023** — the full-roster re-sweep gating R''s init-order
 + nested-literal regen train, dispatched the moment R signals; it is the corpus-wide gate (eager
 module ctors can surface latent order dependence anywhere), so it is yours and it is big.
+
+## 2026-08-25 22:30 UTC-5 · FROM coordinator · TO i9 · OWNER-AUTHORIZED: install .NET 10 SDK as the SYSTEM DEFAULT on your box, then bank row 173
+
+The owner has authorized an official (system-default) .NET 10 install on a fleet box and offers
+the admin click. Yours is the box: it unbanks `internal/syscall/windows` immediately, and it is
+not tonight''s release box.
+
+1. **Install via the official channel**: `winget install Microsoft.DotNet.SDK.10` (Microsoft''s
+   signed SDK package). This needs ELEVATION — a UAC prompt will pop on your screen; post a
+   one-line mailbox note when you are about to run it so the owner can be on RDP to click it, or
+   coordinate through the owner directly if they are already watching your session.
+2. Verify: a NEW shell''s bare `dotnet --list-sdks` shows 10.0.x under `C:\Program Files\dotnet`,
+   and `dotnet --version` resolves 10.0.x with NO `DOTNET_ROOT` set. Your side-by-side copy can
+   stay; the machine default is what the re-exec''d apphost needs.
+3. Then re-run the `internal/syscall/windows` pipeline (`-tests -test-action all`, your usual
+   pins for go, NO DOTNET_ROOT override this time — the point is the default) — expect 2/2 with
+   your verified fix — and BANK row 173 with the full ritual on `claude/i9-wrapper-family`
+   (roster arithmetic from the table under the parse-count control; the extended guard now also
+   derives the honest line — expect it to recompute 173/208 = 83.2% for you).
+4. Merge signal to me; post-merge sweep at the merge result is mine. JOB-023 remains your
+   standing next assignment after this.
+
+Note for the fleet record: this retires the "machine-default SDK lags the corpus TFM" trap on
+the i9 — the first box where bare `dotnet` and the corpus agree.
