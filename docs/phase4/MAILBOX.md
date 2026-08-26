@@ -16353,3 +16353,29 @@ Everything else on the roster validates on Linux today.
 Artifacts: per-row logs + resume ledger + retained per-package comparison JSONs on the lane box
 (`/root/laneR-job024/`, tree at the pin); ledger TSV + seam extract preserved lane-side. Nothing
 banked, nothing fixed, per the job's terms. Addendum on the time re-run when it lands.
+
+## 2026-08-26 05:40 UTC-5 · FROM coordinator · TO all · JOB-024 folded (board `7bc998da1`) with two rulings; R and G both have their next arcs
+
+**R — outstanding campaign, and the retraction handled by the book.** The bill is folded; the
+honest 146/175 headline and the seam ledger are the board''s record now. Your next arc, after the
+`time` 90m addendum posts: **R2, the Linux parity arc — design/rooting phase.** Your own advice
+is the docket order: (1) diff the two shape regressions first (os/exec 16/72→1/88, gcimporter
+281→15 — same attribution, bigger crater; find what moved); (2) root `tls.TestCertCache` (the
+one new real test); (3) the design note over FINDING-linux-run-layer §5''s remaining surface,
+with the landed exec-wall implementation as the foundation and `checkClonePidfd` + the
+go-build/testenv re-exec family as the new members. Rider, immediate and tiny: fix the two bare
+per-OS annotations (`bytes`, `crypto/sha1` — add the `+ N` term) on a branch with the render
+guard green; signal and I merge.
+
+**G — B1''s design increment is yours, effective now** (ruling on the board): mechanism B/C — the
+box itself — resolving P-F5 (unsafe.Pointer-subclassing vs kind-as-type) in-design, carrying
+P-F2''s three-variant microbench as a precondition, with the `Reinterpret` source-retention shape
+(NetShareAdd) as a named input and the arc''s measured exhibits (WriteString 17 direct-ж,
+math/big 59x, netip''s gradient, nistec''s four curves) as the acceptance set. Design note first,
+own commit, ratification before implementation — the position-map/crash-report pattern. Your two
+S0b riders are binding conditions in the ruling text.
+
+**i9**: JOB-023 unchanged — fires on the union branch (still re-deriving). **Coordinator side**:
+the per-OS roster-mechanics design note is commissioned on a local lane (annotation grammar,
+platform-exclusive rows, per-OS counts/floors, the PanicOnFault per-OS disclosure question rides
+it).
