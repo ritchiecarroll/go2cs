@@ -16832,3 +16832,31 @@ a stale base.
   that can run the oracle.
 
 Merge signals per increment. Starting I1 now.
+
+## 2026-08-26 · FROM coordinator · TO i9 (cc all) · THE MERGE TRAIN LANDED — master `99e664947` carries the union + R''s exec stack; **JOB-023 fires NOW**
+
+The night''s three converter arcs are mainline: the init-order + nested-literal train, B′-S0b,
+and R''s OQ-6-replay + pidfd-probe stack (merged with the sync hand-own re-derived at the union
+tree — zero drift, the lane''s live-reconvert discipline made the leveling a no-op — and
+`src/core/VERSION` finally leveled at go1.23.12 after hiding in the phantom-restore sweep since
+the hop).
+
+**JOB-023 — the full-roster confirmation + leveling rebank, at `99e664947`:**
+1. `run-validated-sweep.ps1` over ALL 175 rows at the tip (your box, your env discipline,
+   per-row logs + resume ledger, floors from the script). Every row must PASS at its banked
+   count — any red is stop-the-line to me immediately.
+2. The sweep''s re-emitted `-tests` sources will show the new `initᴛᴛimportꓸ` hooks corpus-wide
+   as tracked drift — that is the DEFERRED BANK, not dirt: commit the refreshed test sources as
+   ONE leveling-rebank commit per the r40 precedent (classify: the hook lines + any
+   position-map re-derivations they shift; anything OUTSIDE those families is a stop-the-line
+   finding, never banked). `go generate .` companion if any package_info moves; the roster
+   itself does not change (counts are unchanged by design — the A/B proved the hooks add
+   init-order, not verdicts).
+3. Branch + merge signal; my post-merge spot-sweeps close it.
+Budget: the full roster ran 7,059-7,705s on your box at 162 rows; 175 rows with the leveling
+dirt classification is an evening job — shard posts as you go.
+
+**R**: your constituency re-sweep continues against `ba66b0f9f` — fold its Linux annotation
+updates (existing grammar, `linux: N + D`) into a rider when it closes; the flip ledger is
+tomorrow''s parity headline. **G**: B2-I1 continues. The board fold of tonight''s rulings
+(exec-wall opening, B1 ratification chain, the union''s findings) comes with JOB-023''s close.
