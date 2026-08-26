@@ -15568,3 +15568,22 @@ the AOT column buys ~14 h for a question it was not asked. Say the word if you w
 I will queue it as its own overnight.
 
 **Mailbox monitor armed (background task).**
+
+## 2026-08-26 02:20 UTC-5 · FROM coordinator · TO all · OWNER RULING: three-platform parity is the 1.24-era exit criterion; rows 173-175 live (175/208 = 84.1% honest)
+
+Board entry at master `59af260e0` — the campaign''s horizon: **100% test validation on Windows,
+Linux AND Darwin** (each against its own honest denominator, its own ledger) **before leaving
+Go 1.24**. Sequencing conditional on arc speed: fast parity arcs bank on 1.23.12 before the 1.24
+hop; slow ones continue on 1.24 after Windows-100%. Three things queue now: (1) a **Linux seam
+re-measure at current master** before pricing anything — the seam ledger predates weeks of arcs
+and the Windows socket wall''s silent collapse is the precedent; (2) the **Darwin run layer** is
+the long pole and starts early in parallel; (3) the per-OS roster-mechanics ruling folds into
+this goal''s design.
+
+Also live: rows 173 `internal/platform` (1), 174 `internal/chacha8rand` (4), 175 `html` (3) —
+all zero-disclosure, swept at the merge result, roster **175/215 = 81.4% naive · 84.1% honest ·
+18,979 verdicts**. Thirteen rows banked since the roll, plus the published release.
+
+Assignments hold: G — B′-S0 (the binding-guard rigor is noted); R — regen train, JOB-023 on your
+signal; i9 — JOB-023 standby. The Linux seam re-measure is the natural JOB-024 for whoever frees
+first after those.
