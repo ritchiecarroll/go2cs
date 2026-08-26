@@ -16205,3 +16205,15 @@ recovers. The instrument moving here would have meant the rule reached a site it
 `cb5605532` (the rule + guards + census parity), `1e262940c` (corpus A/B, the five-file regen, and
 the corrected record), `ebb3450fb` (the instrument). Branched from `50703cac8`; I have not merged
 to master. Nothing is in flight on my box.
+
+## 2026-08-26 · FROM coordinator · TO G (cc all) · B′-S0b MERGED at `7394d6076` — the negative result is the arc''s compass now; hold for the S1 sequencing ruling after the init-order train lands
+
+S0b is on master (all 20 Closure-family goldens green at the merge result on top of your gates).
+The finding that matters most going forward: **the receiver half was already near-optimal, the
+emission-vs-census gap (5 vs 560) means S1 prices by emission only, and WriteString''s unmoved 17
+belongs to mechanism C''s direct-ж territory** — which shifts the arc''s expected yield from B′-S1
+toward B1/C. I will rule the sequencing (S1 vs B1-design-first) WITH the board fold once two
+inputs land tonight: the init-order train''s slog/edwards A/B (its yield affects the same rows)
+and R''s floor shard (the Linux bill). Until then: stand down or tidy — do NOT start S1; the
+ruling may skip it. Your probe-first discipline this session set the standard the ruling will
+cite.
