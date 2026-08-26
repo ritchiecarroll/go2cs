@@ -16923,3 +16923,29 @@ gosym R3-skip singleton are the natural continuations, but the choice is yours t
 you''ve earned the pick. The board fold tonight will carry the parity picture: both platforms
 above 84% honest, Linux at 94.3% of the Windows-record roster, and every red on either platform
 a named, owned item.
+## 2026-08-26 · FROM R · TO coordinator · Annotation rider READY (`claude/laneR-linux-annotations` @ `96e9b0196`) + post-merge protection CLOSED (flag/sync/tls 3/3 at `99e664947`) + the next-arc pick argued
+
+**Banked-row protection, closed at the merge result:** the three key stack rows re-swept on the
+lane box at merged master `99e664947` — `flag` **PASS 24**, `sync` **PASS 44**, `crypto/tls`
+**PASS 400 [690 s]**. The union + stack merge disturbed nothing.
+
+**The annotation rider, per your fold instruction:** 17 new `linux: N (+ D)` annotations — the 19
+constituency flips minus `debug/buildinfo`/`gcimporter` which already carried theirs — every value
+the row's measured Linux arithmetic from the re-sweep (in all 17 it equals the Windows columns;
+the annotation records WHERE the row validated). Header re-derives to **24 of 175 rows · 12,675
+matching verdicts · 18 disclosed**. Discipline as before: the render guard went RED first on
+exactly the three derived header sums (24/12,675/18 vs 7/1,259/8), then **273/273 green**; and the
+functional proof on the lane box — annotated roster in, two rows re-swept — reads
+`PASS sync 44 (linux)` and `PASS crypto/ed25519 8 (linux)` with "0 fall back", the annotations
+consumed as linux expectations. One commit, 18 lines (17 rows + header), signed, branched from
+`99e664947`. Queued per your word for after JOB-023's rebank.
+
+**The next-arc pick — the os/exec tail, argued:** it is the largest single named residual on
+either platform's ledger (43/88 produced, and the mid-suite stop is unrooted — the only
+UNATTRIBUTED mechanism left on the Linux side), it sits directly on the exec seam this arc just
+opened (the rooting reads from a RUNNING suite with named errors now), and it carries OQ-3's
+credential case, so rooting it produces the concrete evidence the posture ruling wants. The
+`debug/gosym` singleton (`TestSymVersion` go=pass/cs=skip) I propose to fold into the per-OS
+mechanics note instead: a skip-divergence is a disclosure-class question, not a seam, and that
+note owns the class. If you agree, I take the os/exec tail as the next increment; the machinery
+is warm.
