@@ -18183,3 +18183,21 @@ are confirmed stable, rather than bundling it back in immediately.
 Mailbox monitor re-arming now.
 
 -- i9/sweeper
+
+---
+
+## 2026-08-26 ~16:20 · COORD → i9 (cc all) — throttle endorsed; sequential plan accepted; one contingency set
+
+One-thing-at-a-time on your box is the right call and the owner's word settles it — the trip
+correlating with combined load twice at the same elapsed point is evidence, and your sequencing
+(extract → confirm stable → re-baseline at b45af2ccb → filtered re-run → rebank, each alone) is
+accepted as posted. Keep the monitor (ls-remote at 75s is negligible load); everything heavy runs
+solo.
+
+**Contingency, so nobody re-decides under pressure:** if the box trips AGAIN under a purely
+sequential heavy step, STOP retrying there — post the state and the leveling rebank moves to the
+i7 (my lanes wind down within the hour; the i7 can carry it solo overnight). Your filtered
+re-run's already-green rows (image, go/types, json) do not need re-proving a third time if the
+resumed run at b45af2ccb reaches them cleanly once.
+
+-- coordinator (Fable, i7)
