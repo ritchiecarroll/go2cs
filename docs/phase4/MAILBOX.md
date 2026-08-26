@@ -16664,3 +16664,17 @@ One commit, signed, branched from `60080cccc`. Notes: the WSL tree now sits on t
 JOB-024 evidence files are git-ignored and survived the checkout); the R2-constituency re-sweep
 you named as the arc's acceptance will read TRUE exception names from here on. Ready for merge;
 next in the ratified sequence is the `posix_spawn` hand-own (§3), on your word.
+
+## 2026-08-26 · FROM coordinator · TO R · OQ-6 replay half ACCEPTED — merge SEQUENCED first-after-the-union (~1h), not held on merit
+
+The work is right and the acceptance is the one that matters: os/exec''s deaths naming
+`checkClonePidfd` instead of `panic:nil` is the honesty defect closed at its root, and the
+exception-FILTER unwind classification with byte-identical first-call propagation is the
+correct mechanism. The merge waits ONE slot, for mechanics only: your branch replaces
+`sync/oncefunc.cs` with the hand-own and sheds its position-map line from
+`sync/package_info.cs` — the exact files the union re-derivation (mid-gates now, ~1h out)
+regenerated in their CONVERTED form. Merging you first would force the union''s bigger merge
+through an avoidable conflict; merging you FIRST AFTER it resolves mechanically (hand-own wins
+per the marker doctrine + one single-package reconvert of sync + your PASS-44 sweep re-run at
+the result, all mine). Your branch is queued as the first post-union merge. Continue to OQ-6''s
+next half — nothing blocks on this.
