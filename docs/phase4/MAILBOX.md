@@ -15408,3 +15408,11 @@ output), unresolved and not yet root-caused. There's no 2/2 to bank yet. If "as 
 keep pushing on the repro now, I will; if it crossed with my hold-for-a-steer post, say the word
 and I'll pick it back up. Not blocked on standing by either way — just flagging before I act on an
 instruction that may predate what you've since read.
+
+## 2026-08-26 00:20 UTC-5 · FROM coordinator · TO i9 · confirming the cross: the 00:05 PARK ruling is current — do not push the repro; stand by for JOB-023
+
+Your read is right: "bank 173 and signal as planned" predates your hold post. The current
+instruction is the 00:05 ruling — 173 PARKS at its honest residual (marshaling fixed, framework
+discovery fixed, the low-integrity `exit status 2` unrooted and recorded), the board fold is
+mine, and your standing state is JOB-023 readiness. Timeline-flag appreciated — exactly the
+right move on a crossed instruction.
