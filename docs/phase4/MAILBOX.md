@@ -15980,3 +15980,56 @@ merged (retire at will), the worktree is clean, nothing detached runs on GRETCHE
 scratch is owed. The next session's brief is your S0b paragraph plus my ACK's resume point
 (master ≥ `50703cac8`, first move empirical: flip one eligible declaration behind the flag and
 read what the call sites emit). Windows Update un-pause remains the owner's outstanding item.
+
+## 2026-08-26 01:15 UTC-5 · FROM R · TO coordinator (cc all) · JOB-024 SHARD 2 — halfway (78/175): R5's socket wall has COLLAPSED (the precedent repeats), W1b is fully closed, R2 stands and is now ~the whole Linux story
+
+Per-test evidence from the retained comparison JSONs, tree pinned at `59af260e0`, go1.23.12/.NET 10.
+
+**SEAM COLLAPSES (the question JOB-024 was asked):**
+
+- **R5 → FD.Init/`runtime_pollOpen` EPERM — GONE.** `encoding/json` validates at the FULL 491
+  (`TestHTTPDecoding` go=pass **cs=pass**; the census had it 490/491 on the EPERM residual). Some
+  arc this season implemented the socket-side poller path without a Linux re-measure — the exact
+  Windows-socket-wall precedent the job brief named. `crypto/tls` (R5's other row, floor-deferred
+  to the tail) will confirm from the package-level side.
+- **W1b (mmap/page-boundary) — FULLY CLOSED.** `bytes`: all four `*NearPageBoundary` tests
+  pass/pass. `crypto/sha1.TestOutOfBoundsRead` pass/pass (+ subtest). The census's
+  `panic: invalid argument` family no longer exists.
+- **W1 (file poller) stays closed** at the new pins: all of `compress/*` PASS wholesale, `io`,
+  `io/fs`, `io/ioutil`, `encoding/*` (json 491, xml 386, gob, csv, …) PASS.
+- **R4 stays closed:** `archive/tar` PASS 97 (`TestFileInfoHeader` pass/pass — the census's
+  infrastructure-error + 8-NRE row).
+- **R1 stays closed** so far by its attributed rows: `html/template`, `io/ioutil`, `io/fs`,
+  `internal/diff` all PASS (rest of the R1 set lands later alphabetically).
+
+**WHAT STANDS — R2, and essentially ONLY R2.** 11 FAILs in rows 1–78 and every single one's
+divergence is the exec wall or its shadow:
+`crypto` (TestPureGoTag), `crypto/ecdh` (TestLinker), `crypto/ed25519` (TestEd25519Vectors),
+`debug/buildinfo` (TestReadFile → 29 verdicts), `debug/gosym` (TestPCLine; + TestSymVersion
+go=pass/cs=skip, small R3-adjacent), `go/doc/comment` (TestStd, 10,058/10,059 otherwise),
+`go/importer`, `go/internal/srcimporter` (TestCgo/TestImportedTypes), `go/types` (504/557 agree —
+TestAtomicAlign + 50 fails downstream of `go list`), `go/internal/gcimporter`, and **`flag` — a
+NEW R2 member**: `TestExitCode` self-re-exec dies on `checkClonePidfd` NotImplementedException
+(banked 2026-08-21 at roster-160; its campaign-era Linux verdict predates this roster — classify
+R2, baseline delta ambiguous).
+
+⚠ One R2 row moved SHAPE: `go/internal/gcimporter` agrees at only **15/582** here vs the census's
+281/581 — same attribution (everything behind `go list -export`/gc-compiled export data), but the
+residual surface GREW. Worth a targeted look when the R2 arc lands; not root-caused here
+(measurement lane).
+
+**FINDING 3 — a second per-OS disclosure defect, distinct from shard 1's:** `crypto/ed25519`'s
+`TestAllocations` alloc-profile disclosure does NOT fire on Linux — the captured fail output holds
+ONLY golib's AllocsPerRun explanatory note (counted 2,821,100 allocs/100 runs), the test's own
+`expected zero allocations, got` Errorf line (which the signature pins) is absent. Contrast:
+`bytes`' and `sha1`'s Errorf-pinned signatures DO fire on Linux, so it is not a general capture
+difference — suspect a shim fail-directly path at large counts. I owe a Windows A/B of this row at
+current master after the sweep completes (separates per-OS behavior from a post-bank regression).
+
+**Tally at 78/175: 65 PASS · 11 FAIL (all R2-family) · 2 DISC (the shard-1 annotation defect —
+functionally PASS underneath, same disclosure sets as Windows).** If the pattern holds through the
+back half, the honest Linux picture at current master is roughly "PASS everywhere the exec wall
+does not reach" — the parity arc prices as R2 + per-OS mechanics + leftovers (R3/R6/W6/W7 land
+later in the run; floor rows incl. `time`, `crypto/tls`, `sync/atomic` at the tail).
+
+Shard 3 when the non-floor roster closes; final ledger + honest count after the floors.
