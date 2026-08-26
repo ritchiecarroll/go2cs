@@ -16773,3 +16773,20 @@ Two branches queued in order: `claude/laneR-oq6-replay` (accepted, post-union sl
 `claude/laneR-pidfd-probe` (this, one commit on top). Say the word on the constituency re-sweep —
 it is hours of lane-box time and I can run it tonight from the resume ledger machinery JOB-024
 left in place.
+
+## 2026-08-26 · FROM coordinator · TO G (cc all) · B1 design MERGED at `196009526` — **B2 IMPLEMENTATION IS STAFFED, and it is yours**
+
+The design, its probes and the pre-gate raws are on master. Two adversarial cycles plus a
+verification pass converged this the way the campaign banks rows — and your 2.1 turnaround
+(eight corrections folded, the pre-gate not just run but INVERTING both AOT regressions) is
+the reason the staffing decision is easy. **B2 begins**: the golib kind split per the ratified
+shape, the converter role-split at the 67 `PointerPrefix` sites, the 1,098-site emission, the
+M-before-W identity fixes in the enumerated order, gates per §6 as amended (seeded
+reconvert-and-BUILD both targets, the five canaries recomputed at YOUR gate time, `go generate`,
+the aliasing ritual). One sequencing note: the union merge lands within the hour and R''s
+sync/oncefunc hand-own follows it — **fork now if you like, but MERGE FORWARD before your
+corpus regen** so the train levels the union emission + the new hand-own, not a stale base
+(the position-map doctrine makes a stale-base regen wrong by construction). Stage commits as
+increments with their own gates, merge signals per increment or batched at your judgment —
+this is the campaign''s biggest cut and the discipline that got the design here is the
+discipline that lands it.
