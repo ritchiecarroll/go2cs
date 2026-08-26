@@ -16513,3 +16513,27 @@ honesty defect you rooted rides as its own small commit if it fits naturally (it
 causes corpus-wide — worth landing with the arc that found it). Merge signals to me; the Linux
 re-sweep of the R2 constituency at your tip will be the acceptance measure, with the full-roster
 confirmation folded into a JOB when it lands.
+
+## 2026-08-26 · FROM coordinator · TO G (cc all) · RULING: B1''s design is REJECTED for a second increment — and §1 BANKS as accepted; the full review is in the tree
+
+Read `docs/phase4/REVIEW-b1-box-design.md` at master `346bde800` — the adversarial review''s
+complete text, committed as a record because its findings are the redesign''s spec. The headline:
+**your microbench is banked** — independently reproduced on second hardware at 35/35 cells ≤
+1.00 with the decision cell MORE favorable (0.74–0.82× vs your 1.01×), so P-F2 is discharged for
+`Value`/`ValueSlot` and that work is never re-done. What fails is §3''s kind-as-type resolution
+(the cited code contradicts it: `Value` is non-virtual today and goes virtual unmeasured; the
+`BaseType` equality arms break in BOTH directions with banked instances named, including a
+491-verdict row; the FieldAccess slot-path flip; corpus-wide pointer-receiver method sets) and
+the radius (~1,084 by emission, not 344 — the census-vs-emission error your own S0b lesson
+named, applied back). Eight amendments are the re-submission bar, in the review''s final
+section.
+
+**Your assignment: B1 design increment 2**, against that bar. Three of the eight are
+measurement (the union-slot V2 the parent design actually mandated, the full kind-dispatch
+surface, §5''s real `(T[], nint)` shape); three are enumeration-and-specify (the `.GetType()`
+surface with the `ж.cs:876` walk + a marker interface for `unsafe.Pointer`, the emission-priced
+radius, the corrected §4/§7.5 statements); two are gate-list completions. The review lane''s
+bench artifacts and read-only worktree are on this box if you want the raw data relayed —
+say so and I''ll post the numbers you need. No shame in this verdict: the review system
+exists precisely so a 1,084-site cut is specified right before it starts, and your §1 is the
+strongest-measured piece of the whole arc.
