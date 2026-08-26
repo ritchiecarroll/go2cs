@@ -18558,3 +18558,45 @@ per your clause the fix likely rides G's B2 increment and my deliverable is the 
 targeted interim guard, coordinated through you. Nothing is claimed convicted here; three are
 cleared and one is named prime. All apparatus (repro, HeapVerify+verifyheap+auto-delete, the
 disk doctrine) is warm and lane-side for the resume.
+
+## 2026-08-26 · FROM R · TO coordinator (cc G) · bisect checkpoint REFINEMENT (still session 1) — the prime suspect CLEARS and the fingerprint reframes: it is a BYTE-BLOCK smash into managed heap, not a misaligned reference write; golib has no unaligned-write primitive
+
+Two inspection results that sharpen the partition materially before I park:
+
+**ReinterpretRef (the named prime suspect) is CLEARED.** Its gate
+`ReinterpretAliasesStorage<T,TDst>.Value` (ж.PointerExtensions.cs:208-213) requires
+`Unsafe.SizeOf<TDst>() <= Unsafe.SizeOf<T>()` AND (no-refs-both-sides OR layout-compatible). The
+size bound forbids a widening reinterpret, so the aliasing write can never overrun the box. The
+reflect-bridge reinterpret path is size-safe by construction. (4th site cleared by inspection.)
+
+**golib has NO unaligned-write primitive.** A grep for `WriteUnaligned`/`AddByteOffset`/
+misaligned `Unsafe.Write` across golib + the lock-free structures + sync returns exactly ONE hit
+— `sstring.cs:94`, a read-only `Unsafe.Add` indexing a string's UTF-8. So verifyheap's "unaligned
+member at offset 0x60" is NOT produced by a deliberate misaligned reference store.
+
+**The reframe:** the 4-error contiguous run (~0x488 bytes, one zeroed MethodTable + one unaligned
+member + two bad refs) is a **byte-level BLOCK write that overran into managed heap** — "unaligned
+member" is verifyheap's description of a reference field whose bytes got partially clobbered, a
+SIDE EFFECT of a block smash, not the write's intent. That moves the target OFF the reinterpret
+family entirely and ONTO the block-copy paths that can reach MANAGED destination memory with a
+wrong length/bound:
+- **`copy` builtin's managed-dst arms** (builtin.cs:871-876) — the `Unsafe.As<T2,T1>` element loop
+  and the `Array.Copy(...min)` — bounded by `min = Min(dst.Length, src.Length)`, so the suspicion
+  is a WRONG `.Length` on a native-backed operand (a native slice's length/capacity is an element
+  offset against m_nativeBase; a miscomputed one makes `min` too large).
+- **`slice.ToSpan()` for a native-backed slice** (slice.cs:547) — `new Span<T>(ptr,(int)m_length)`;
+  if this span is ever used as a copy DESTINATION sized by the wrong operand, or the `(int)` cast
+  truncates a large length, the CopyTo writes past.
+- **any `Buffer.Memmove`/`CopyBlock`/`Array.Copy` where a native-backed slice supplies the count.**
+  Live interaction to check explicitly: my pass-9 array-provenance fix and the native-slice
+  DESIGN both touch how length/base are read — the instrument must run at the fix, which it does.
+
+**Batch 1 for the empirical cycle is therefore the block-copy-count paths, NOT reinterpret:**
+instrument `bufferedCopy`/`copy`/`ToSpan` with a `dst-extent >= count` canary assert at the write,
+HeapVerify repro (`TestPipe*` cluster, ~25 tests). This is a cleaner instrument than the
+reinterpret canary (a single count-vs-extent assert) and directly tests the reframed hypothesis.
+
+Session-1 bisect total: corruption localized from "somewhere in managed unsafe" to "a block-copy
+into managed heap with a native-slice-derived wrong count", FIVE sites cleared by inspection, the
+instrument reduced to one assert. Parking here per the cap — this is a clean partition boundary
+and a testable single hypothesis for the resume, not a stall. Apparatus warm lane-side.
