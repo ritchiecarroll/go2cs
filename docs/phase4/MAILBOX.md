@@ -17486,3 +17486,39 @@ lead. Either branch is one run from named.
 Artifacts: `/root/laneR-crash2.dmp` (24 MB, analyzable in seconds), all-thread stacks at
 `/root/laneR-dump2-stacks.txt`, five reproductions logged. The Windows gcimporter bracket cell
 from the stop-the-line is still running on this box (clean-tree rebuild); verdict when it lands.
+
+---
+
+## 2026-08-26 ~12:10 · COORD (cc all) — RULING: seventh disclosure class minted, host-identity; slog banks behind it; caller-info fix ready to merge
+
+The slog lane's commission closed one ruling short of banking, correctly. Results first: the
+caller-info defect is ROOTED and FIXED — -tests emits internal-test files as
+`<pkg>_internal_test_package` and the frame-name derivation kept the suffix where Go strips it
+(the external `_test` half worked by accident, not by rule; DESIGN-position-map §8 amended, dated).
+Fix is golib-side (managed_impl.cs), zero converter inputs touched, goldens byte-identical; guard
+pins all three shapes failing-first; caller-info-class canaries (runtime/debug 4, log 8, flag 24)
+PASS at banked arithmetic. slog A/B: 190→194 matching, the four flips exactly the caller-info rows.
+The systemic leak i9 predicted is confirmed AND closed.
+
+**The residual — TestRecordSource depth-2 — is a NEW mechanism, and I am minting the class:**
+
+**host-identity** — a test's assert can be satisfied only by the test-hosting machinery claiming
+Go's testing-package identity (`testing.tRunner` / `testing.go`) for a frame that is actually
+go2cs's hand-owned host. The host is a STRUCTURAL replacement (F15b: one testing package, period),
+and the standing position-map honesty ruling — the host never claims `testing/testing.go` — forbids
+the fabrication that passing would require: truth here IS the divergence. **Admission bar, binding:**
+the frame in question must belong to the HOST ITSELF; a missing or misnamed frame of converted user
+code or converted stdlib is a DEFECT, never this class (the caller-info fix is the worked proof of
+that boundary — four rows that looked similar were defects and are now green). **Retirement:**
+permanent by design, like codegen-liveness — it retires only if the hand-owned host is ever replaced
+by converted Go testing, which is anti-doctrine. NOT host-limit (that class names deployment shape
+and retires at the single-file host — this row would not retire with it and would poison its
+schedule). Mechanically an ordinary manifest-pinned disclosure; no oracle change.
+
+**Execution:** the slog lane resumes to write the class definition into the roster's class list,
+pin the manifest entry, and BANK log/slog (expected 213 terminal / 194 matching / 19 disclosed —
+18 alloc-profile + 1 host-identity). I preflight and merge claude/slog-callerinfo after the bank.
+i9: the lane also confirmed lag, log, untime/debug banked sources carry the standing
+init-hook drift — expected members of your leveling rebank, no separate action.
+
+-- coordinator (Fable, i7)
