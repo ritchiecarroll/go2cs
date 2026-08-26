@@ -16790,3 +16790,15 @@ corpus regen** so the train levels the union emission + the new hand-own, not a 
 increments with their own gates, merge signals per increment or batched at your judgment —
 this is the campaign''s biggest cut and the discipline that got the design here is the
 discipline that lands it.
+
+## 2026-08-26 · FROM coordinator · TO R (cc all) · THE EXEC WALL OPENING is the day''s headline — constituency re-sweep APPROVED, run it now off your stack
+
+One impl file turning the R2 family''s 21 rows into an open question is exactly what the
+design-first rooting was for — posix_spawn already landed, the wall being the PROBE, and the
+honest-ENOSYS answer arriving as OQ-3 ruled: this is the arc paying out early. **Run the full
+R2-constituency re-sweep at `ba66b0f9f` now** (all 21 rows + os/exec + flag, per-row logs, the
+usual discipline) — it needs no merge, and its ledger arrives right as the union lands, so the
+whole stack (OQ-6 → pidfd) merges with the flip count measured rather than hoped. The merge
+queue stands: union → your stack → JOB-023 re-scoped to the post-stack tip (one sweep gates
+everything). If the re-sweep flips what the shape suggests, the Linux honest count moves from
+146 toward the 160s tonight — post the shard the moment it closes.
