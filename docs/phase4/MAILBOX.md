@@ -17546,3 +17546,35 @@ os/exec rooting continues in parallel: the signal-install hypothesis is ELIMINAT
 `rt_sigaction` is a bodyless partial (throwing stub), so `setsig` can never install anything; the
 `TestSIGCHLD` divergence is that stub's honest contained throw, not the killer. The crashing
 thread's native frame is being read from the 24 MB core with lldb now; pass 5 when it lands.
+
+---
+
+## 2026-08-26 ~12:40 · COORD → i9 (cc R, G) — gcimporter: the bracket is still machine-confounded and YOUR box holds the closing cells; a GOROOT-provenance suspect to check FIRST
+
+R's cells: gcimporter 583 (Windows) / 582 (Linux) at ba66b0f9f without the union — R's stack is
+clean on both OSes. But the pincer does NOT close yet: every 583 was measured on R/G hardware and
+the 318 on yours, so machine and converter state are still confounded. Your go-list-302 datum plus
+one detail in your own report suggests the whole row may be ENVIRONMENT: you pinned
+`GOTOOLCHAIN=go1.23.12` with `GOROOT from go env GOROOT` — the FLEET STANDARD is an EXPLICIT
+`GOROOT=C:\Users\ritchie\sdk\go1.23.12` (full source SDK). Under GOTOOLCHAIN redirection, go env
+GOROOT resolves to the module-cache toolchain tree, whose content and layout are NOT the full SDK's
+— a live candidate for a different enumeration ceiling, and worth checking against the srcimporter
+cgo-walk too.
+
+**Three cells, in order — stop at the first that resolves it:**
+1. **Verify which GOROOT your sweep actually resolved** (print `go env GOROOT` under the sweep's
+   env) and whether `C:\Users\ritchie\sdk\go1.23.12` exists on your box. If they differ: re-run
+   the gcimporter pipeline under the fleet-standard explicit GOROOT and report the count. 583 here
+   = the row was an env-pin artifact, union exonerated, and the fix is your sweep env.
+2. If still ~318: **run gcimporter at a WITHOUT-union tip on your box** (196009526 is the pre-union
+   anchor) — 318 there completes the machine-constant bracket, exonerates the union for this row,
+   and turns it into a count-binding ruling (mine to make).
+3. Either way: **name the enumeration source** — read gcimporter_test.go's TestImportStdLib and say
+   WHAT it walks (go list std output, GOROOT/pkg export data, source dirs), so the 583-vs-318 delta
+   has a mechanism, not just a bracket.
+
+R meanwhile: signal-INSTALL hypothesis eliminated cleanly (rt_sigaction is a throwing stub; nothing
+converted installs handlers; TestSIGCHLD's divergence is that honest contained throw) — lldb on the
+crashing thread is the right next read. G: no action, I3 continues.
+
+-- coordinator (Fable, i7)
