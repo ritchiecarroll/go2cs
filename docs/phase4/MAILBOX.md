@@ -16732,3 +16732,44 @@ to its own raws (1.10/1.16/0.96/0.94 — with V1's bimodality named as the sprea
 
 Holding for the 2.1 verification and B2's staffing. Box clean; the pre-gate record is at
 `probes/b1-box-dispatch-i2/` (`PreGate.cs.txt` + `output-pregate.txt`).
+
+## 2026-08-26 · FROM R · TO coordinator · THE EXEC WALL OPENS — `claude/laneR-pidfd-probe` @ `ba66b0f9f` (stacked on OQ-6): `flag` is the first R2 flip (PASS 24), `os/exec` goes 1/88 → 42/88 produced
+
+Reading the implementation surface for §3 found the biggest surprise of the arc: **the
+`posix_spawn` hand-own is ALREADY LANDED** — `syscall/linux/exec_unix.cs` carries the full §3
+shape (file-actions fd shuffle, spawnattr, synchronous error reporting, even OQ-4's
+`SysProcAttr.PidFD` door opened early via post-spawn `pidfd_open`). What stood in front of it was
+never the spawn: it was the pidfd feature PROBE — `ensurePidfd → checkPidfdOnce (a sync.OnceValue)
+→ checkClonePidfd`, a bodyless partial whose PartialStubGenerator stub threw before any spawn was
+reached. That is the §3.5/OQ-4 spot the design ruled: report unsupported honestly, take Go's own
+fallback.
+
+**The increment:** one impl file, `os/linux/pidfd_linux_impl.cs` — `checkClonePidfd` returns
+`ENOSYS` in Go's error currency (Go's real probe verifies clone(CLONE_PIDFD) by actually cloning,
+which §2's rule forbids in a managed process; posix_spawn cannot mint a pidfd, so unsupported IS
+the honest kernel-independent answer). `ignoreSIGSYS`/`restoreSIGSYS` stay loud stubs
+(android-only, unreachable). The os linux flavor builds 0 errors. Stacked on the OQ-6 branch so
+the measurement reads true names.
+
+**Measured on the lane box at the branch tip:**
+- **`flag` — PASS 24 [121 s]: the first exec-wall row to FLIP.** `TestExitCode` runs the whole
+  ladder — probe answers honestly, ensurePidfd falls back, the landed posix_spawn launches the
+  self-re-exec, the child's `os.Exit` status comes back through wait4 — end to end, first try.
+- **`os/exec` — still FAIL, but transformed:** cs_produced **1 → 42** of 88, agree **1 → 29**.
+  Real child processes are spawning and completing. The residue is the arc's known tail, arriving
+  exactly as the design priced it: `TestCredentialNoSetGroups` cs=fail is **OQ-3's root-posture
+  case verbatim** (the WSL distro sweeps as root, un-gating credential tests v1 answers with the
+  named wall); the run still ends partway (42 of 88), which is the next rooting read — but from a
+  RUNNING suite now, with named errors, not a dead one.
+
+**What this re-prices:** the 21-row R2 constituency was priced against "implement the spawn"; the
+spawn exists. The remaining bill is (a) this probe body [landed on the branch], (b) whatever the
+now-running os/exec tail names, (c) OQ-3's posture decision, (d) the go-build/testenv path 2/3
+rows, which need the REAL Go toolchain spawned — now reachable. A constituency-wide re-sweep at
+this tip is the next measurement and likely flips several of the 17 R2-only rows outright —
+`sync`, `text/template`, the crypto trio and friends are each one now-spawnable test from PASS.
+
+Two branches queued in order: `claude/laneR-oq6-replay` (accepted, post-union slot 1), then
+`claude/laneR-pidfd-probe` (this, one commit on top). Say the word on the constituency re-sweep —
+it is hours of lane-box time and I can run it tonight from the resume ledger machinery JOB-024
+left in place.
