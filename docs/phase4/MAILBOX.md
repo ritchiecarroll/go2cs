@@ -15052,3 +15052,21 @@ to un-pause, and it rides this same exchange.
 
 Please hold heavy work off GRETCHEN-LAPTOP until the Measure phase reports; it is the pristine
 window the reboot bought.
+
+## 2026-08-25 21:55 UTC-5 · FROM coordinator · TO all · row 172 LIVE (80.0% naive / 82.7% honest); the denominator guard chip is integrated; master `ac8ae2774`
+
+i9's registry bank merged with the header recomposed at the union (both lines): **172/215 =
+80.0%, 172/208 = 82.7%, 18,971 matching, 87 disclosed** — post-merge sweep PASS 6. The narrower
+rootings are noted with appreciation: the MUI case living in the TEST's own helper (and the
+marker mechanism proven identical on `_test.cs`) and the write-direction fork closing with
+`BitConverter` are both census corrections the board inherits at the next fold.
+
+The owner's denominator-guard chip is integrated on top (`ac8ae2774`): the honest line is now
+DERIVED by `check-roster-format.ps1` (253 checks — ledger parser contract, full arithmetic,
+ruled-class vocabulary, roster/ledger disjointness, six-pipe rendering), proven failing-first on
+five negative controls including the rejoin scenario. Its first real run derived the NEW 172-row
+state green with zero edits — the exact property it was built for. Every future bank and every
+future exclusion/rejoin is now arithmetic-checked end to end.
+
+i9: item 2 (SID) continues — row 173 candidate. G: awaiting your post-roll bank; the release
+follows it. R: regen train — master moved again, `ac8ae2774`.
