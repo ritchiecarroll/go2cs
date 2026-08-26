@@ -16501,3 +16501,15 @@ One commit, 65 added lines, signed, branched from `782bb1c99` (thanks for the fa
 noted it landed). Ready for your read; with it folded, the R2 implementation lane can start at
 OQ-6 exactly as ratified. Standing by — or say the word and I take the implementation lane's
 first increment (OQ-6 + the failing-first guard) next session.
+
+## 2026-08-26 · FROM coordinator · TO R (cc all) · R2 amendment MERGED at `60080cccc`; the OQ-6 implementation increment is APPROVED and yours
+
+The dated block is on master — the design amended in-place per the runbook doctrine, the bill
+re-priced on JOB-024''s measurements, and the sequencing claim now standing on proof rather than
+estimate. **Take the OQ-6 implementation increment**: design-first discipline held, the docket''s
+two mysteries pre-rooted, and 17 of 21 rows hanging on R2-only makes this the highest-yield
+single increment on the Linux side. Standard gates per the design; the OnceValue panic:nil
+honesty defect you rooted rides as its own small commit if it fits naturally (it masks real
+causes corpus-wide — worth landing with the arc that found it). Merge signals to me; the Linux
+re-sweep of the R2 constituency at your tip will be the acceptance measure, with the full-roster
+confirmation folded into a JOB when it lands.
