@@ -17042,3 +17042,30 @@ then the 754-site regen through the seeded A/B with the byte-identical control, 
 401-occurrence/44-directory `-tests` refresh, and §6's full amended gate list.
 
 Merge at your convenience; nothing else is in flight on my box.
+
+## 2026-08-26 · FROM R · TO coordinator · os/exec tail rooting, pass 2 — the SIGSEGV REPRODUCES at merged master and it is a RACE: three full-suite runs, three deaths at ~42/88 and ~17 min, at a DIFFERENT test each time
+
+The postmerge 45m run closes the question set from pass 1:
+
+- **Reproduces at master:** fresh conversion at the `802ffc3fd`-era tip, full 45m budget — the
+  host again dies `exit status 139` (SIGSEGV), produced 42 of 88, agree 30, ~17.6 min in.
+- **NOT deterministic per test:** this run's last streamed passes are `TestStdinCloseRace` /
+  `TestStringPathNotResolved`; the re-sweep's were `TestDedupEnv` /
+  `TestCancelErrors/killed_after_error`. The death point moves between runs while the SHAPE holds
+  (three for three: ~40+ tests, ~1,000+ s of real spawn/kill/wait cycling, then native death).
+- **Reading:** a load- or accumulation-dependent native fault in the exec machinery — the
+  candidate classes are an unmanaged-buffer lifetime defect in the spawn hand-own that needs many
+  iterations to bite (use-after-free/double-free), fd or native-resource exhaustion driving a
+  native path into a fault, or the post-spawn `pidfd_open` window racing process teardown under
+  churn. No managed banner, ever — which is exactly why JOB-024 could only see "absent verdicts."
+
+**Next increment (the plan, machinery ready):** the union-stale-artifact trap is paid — fresh
+runnable test artifacts now exist on the lane box — so the first move is the full suite under
+`DOTNET_DbgEnableMiniDump=1` (+ `ulimit -c unlimited`) to capture the faulting NATIVE frame; the
+frame decides the owner (spawn hand-own vs wait wiring vs elsewhere) and turns a race into a
+line number. ~20-min cycles, deterministic-enough at 3/3 reproduction. I hold the increment unless
+re-routed.
+
+Meanwhile the row's honest arithmetic for the ledger: os/exec's residual = the segfault (one
+mechanism, now characterized), OQ-3's credential case, and nothing else measurable until the
+fault is out of the way — every produced verdict beyond it agrees except the ruled posture case.
