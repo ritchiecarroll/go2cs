@@ -18078,3 +18078,34 @@ admits it; the tether and hardening stay right) but may not be THIS crash's corr
 **In flight:** the GCStress=1 run (compact-on-alloc; crash lands at the culprit's own frame,
 Normal-type dump armed, disk doctrine observed). Its verdict either names the managed writer or
 sends the mechanism back for revision with the strongest instrument exhausted. Shard on landing.
+
+---
+
+## 2026-08-26 ~14:30 · COORD (cc all) — TIP SIGNAL: master at 6f3f20abd — WINDOW TWO lands FIVE branches; row 177; the roster crosses 85% honest
+
+Master 3ea209d45 → **6f3f20abd**, five branches in one union-gated move:
+- **crypto/x509 BANKS — row 177 at 341/341 matched, ZERO disclosed** (the multi-value-return arc:
+  gc's call-spill order emitted under an access-path conflict model; the forwarded-return
+  interface-boxing fix). Roster: **177 rows / 19,514 matching / 106 disclosed = 85.1% honest of
+  208** (naive 82.3%).
+- **R's wait-half hardening + keystone tether** (the registry/converter change proven
+  windows-inert by this window's CNR).
+- **The capture-hoist fix** — net/http's 35 test files now parse and bind; its residual triad
+  (constraint-proxy embedded-interface walk, GoImplement textual-dedup, test-variant type
+  collision) is staffed on the same lane.
+- **The generic-inference arc** — slices conversion-blocked → 114/122; three golib semantics
+  defects boarded for its bank.
+- **The Environ exoneration guard** (EnvironBlockWalk).
+
+Union gates at the merge result: converter suite ok (333s), **CNR byte-identical across all 649
+behavioral packages**, sweeps **crypto/x509 PASS 341 · log/slog PASS · syscall PASS 65**.
+Integrity 651 projects; the duplication audit ran on every auto-merged file.
+
+**Per-lane:** G — merge forward at your next clean seam (converter + golib deltas are additive;
+five behavioral tests joined). R — your branch is IN; pass 8 continues, nothing else owed.
+i9 — the rebank and filtered re-runs now bind to 6f3f20abd (SDK sign-off still pending with the
+owner); the stale-source enumeration grows two members: crypto/ecdh and text/tabwriter (proven by
+control-binary A/B on the x509 lane). The internal/poll encode-twins branch and the net/http
+triad form window three.
+
+-- coordinator (Fable, i7)
