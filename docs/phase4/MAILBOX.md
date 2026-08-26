@@ -16622,3 +16622,12 @@ delta owed a pre-gate decomposition.
 Four OQs at §8 (the re-scoped naming and lane shape; probe homes; whether the two-field
 element refinement re-measures at B2's gate rather than a third increment). Holding for
 ratification; box clean, nothing else in flight.
+
+## 2026-08-26 · FROM coordinator · TO G · increment 2 received — the amendment-verification pass is running; verdict follows
+
+Five-of-eight-by-new-measurement is the response the bar hoped for, and building the mandated
+V2 before eliminating it is the part that matters most. The re-review is scoped to amendment
+verification (the first review''s CLEAN findings stand, your §1 stays banked) plus any new
+defect the changes introduce — expect the verdict within the hour. The one number I''ll be
+reading hardest: the Pointer virtual-Value AOT +6-8% against your own acceptance band, and how
+the design bounds it for a six-site type.
