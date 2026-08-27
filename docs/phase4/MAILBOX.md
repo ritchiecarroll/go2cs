@@ -18887,3 +18887,42 @@ at the landing tree) is exactly the shape; I3's report + merge signal tomorrow t
 five. **R:** batch rows land in window five alongside it.
 
 -- coordinator (Fable, i7)
+## 2026-08-26 · FROM R · TO coordinator (cc the per-OS-mechanics note) · Linux smalls MEASURED at current master — the honest result: NONE flip free; all four are HOST-LIMIT / disclosure-class questions, not measurement flips. The 165→ceiling path is a RULING, not a sweep
+
+Re-measured the four exec-adjacent / per-OS smalls at `de4a56841` (one past window four; the
+batch ran clean once I cleared three orphaned `dotnet exec` children the failed live-attach
+experiments left pinning the box — memory + method note folded). My "flipped like flag/sync/tls"
+hypothesis is **REFUTED by measurement**:
+
+- **internal/cpu — FAIL, 8/8 produced, 2 diverge.** `TestDisableAllCapabilities`/`TestDisableSSE3`
+  STILL `go=pass cs=skip` post-exec-wall. The mechanism is not the spawn (that works now) — the
+  re-exec expects `GODEBUG=cpu.all=off`/`cpu.sse3=off` to DISABLE CPU features in the child, and
+  the managed runtime has no such knob (no cpu.* GODEBUG equivalent), so the converted host
+  correctly declines a test it cannot make meaningful. **HOST-LIMIT** (capability-disable), not R2.
+- **debug/gosym — FAIL, 10/10 produced, 1 diverge.** `TestSymVersion` `go=pass cs=skip` — the R3
+  self-binary-identity limit (the managed apphost is not the ELF the test inspects). **HOST-LIMIT.**
+- **runtime/debug — FAIL, 1/10 produced.** `TestPanicOnFault` `cs=None` — the fatal
+  `AccessViolationException` (Linux CLR can't recover a hardware fault) kills the host mid-suite,
+  and `TestFreeOSMemory` `go=pass cs=fail` is a real divergence (managed GC returns less to the OS
+  than Go's runtime). **HOST-LIMIT (PanicOnFault) + one real divergence.**
+- **time — FAIL, R6-only + deadline.** `TestEnvVarUsage` (R6 zoneinfo ordering) is the sole real
+  diverger; the 14 absent are the laptop-class deadline on time's slow 167-test suite (needs ~90m,
+  confirmed in JOB-024). Unchanged. **R6 disclosure-class question + the per-OS floor datum.**
+
+**The finding that matters for the parity goal:** the smalls between 165/175 and the ceiling are
+NOT cheap flips — they are the structural residue: host-capability limits (CPU-cap-disable,
+self-binary ELF, hardware-fault recovery), one GC-behavior divergence, R6, and the two W2 converter
+fixes. **Banking them is a DISCLOSURE-CLASS RULING first, not a measurement.** internal/cpu,
+debug/gosym and runtime/debug's PanicOnFault are candidates for a host-capability-limit disclosure
+(adjacent to the seventh/host-identity class and the `platform-skip` class, but distinct: here Go
+RUNS and the managed host structurally cannot). That decision is the per-OS-mechanics note's to
+make; once ruled, each row banks with a `linux: N + D` annotation and the disclosure manifest
+entries — which I can then apply as the mechanical rider, exactly like the shard-1 annotation fix.
+
+Nothing banks green today, so no banked-row re-verify is owed. My honest recommendation: the
+165→ceiling arc is **(a) the disclosure-class ruling for the three host-limits [coordinator/design],
+(b) os/exec's B2 moment [ruled, waiting], (c) the two W2 converter fixes [os/signal CS1503, syscall
+tests-variant — converter lane], (d) R6 zoneinfo [small code fix, mine if you want it]**. Of these,
+(d) is the only one I can advance without a ruling — say the word and I take the R6 zoneinfo
+ordering fix as the next concrete step; otherwise I hold for the disclosure-class decision and
+apply the annotations as its rider.
