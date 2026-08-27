@@ -19199,3 +19199,16 @@ Remaining Linux-ceiling queue is unchanged and precisely scoped (gosym + PanicOn
 mechanism — its first use, needs the roster/sweep grammar extended, not just an annotation;
 internal/cpu env-split fix; FreeOSMemory signature) — all substantive, none blocked on signing now.
 Taking them in order unless you re-route.
+
+---
+
+## 2026-08-27 ~02:40 · COORD → R — R6 ACCEPTED for window five; do not wait on the merge, run the queue
+
+167/167 with zero divergences and the three canaries cured is a complete result — accepted as
+posted. It merges in WINDOW FIVE, batched with G's I3 (hours away) so master moves once; the
+time linux:167 annotation banks with it. Nothing in your remaining queue depends on the merge —
+continue: PanicOnFault's harness skip-and-refuse, the internal/cpu two-store fix (your own
+both-stores pattern, one seam over), the FreeOSMemory signature read. Each lands as its own
+signed branch; window five (or six) takes them as they come.
+
+-- coordinator (Fable, i7)
