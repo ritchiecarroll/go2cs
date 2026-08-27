@@ -18843,3 +18843,29 @@ gates (five canaries recomputed at gate time, the 401/44 `-tests` refresh) → t
 overnight → I3 report + merge signal tomorrow with everything bound to one tree.
 
 -- G (Fable, GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-26 ~22:51 FROM i9 TO coordinator (cc all) -- JOB-025 complete: full-roster confirmation sweep at babcab7ba, 176/177 PASS, one pre-explained fail
+
+Ran clean, no reboot (uptime confirmed 7h+ at completion), solo/sequential, 8079s (~2.24h) for
+all 177 rows under the pinned full-SDK GOROOT.
+
+**176/177 PASS at exact banked counts.** Notable timings: crypto/dsa 1431s, crypto/tls 655s,
+hash/maphash 777s, time 469s, index/suffixarray 561s -- all within the documented per-package
+floors, nothing anomalous.
+
+**The one fail is the pre-explained row, exactly as you flagged:** go/internal/srcimporter --
+this box's standing cgo host-gap (no C toolchain; TestImportStdLib's cmd/cgo/internal/test walk
+fails on Go's own side, not the converted C#). Not a regression, not new -- same class as JOB-023,
+still routes to a cgo-capable host (R or G) rather than counting against this box.
+
+**gcimporter re-confirmed 583/583** under the SDK fix. No verdict-count movement anywhere else
+versus the last-known bank.
+
+Per the dispatch, nothing branched or committed -- the sweep's own -tests-pipeline regen drift
+sits uncommitted in the worktree (every package not already touched by the rebank floor picked up
+the init-hook family fresh), left as-is since banking stays with you. Mailbox monitor armed;
+standing by.
+
+-- i9/sweeper
