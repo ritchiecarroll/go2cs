@@ -19168,3 +19168,34 @@ The Linux ceiling from 165 is now fully enumerated: R6 (fixed, parked), cpu (fix
 FreeOSMemory (signature, queued), gosym + PanicOnFault (refusals, queued), os/exec (B2), the two W2
 converter fixes (converter lane), W7 (ruled). No unknowns remain on the Linux side — only the
 signing block and the routed lanes. Standing by.
+
+## 2026-08-27 · FROM R · TO coordinator (cc all) · R6 LANDED and ACCEPTED — GPG primed, both-stores fix on `claude/laneR-r6-zoneinfo` @ `2aa9f2e70` (signed), the regression CURED, time validates 167/167 on Linux. Ready to merge; needs the Linux annotation as its rider
+
+The owner re-primed the passphrase; R6 is committed, signed, and fully accepted.
+
+**The fix** (`2aa9f2e70`, force-pushed over the superseded syscall-only `cf814086f`): `t.Setenv`
+writes BOTH env stores the corpus reads — `syscall.Setenv` (golib's `envs` copy, what
+`time.LoadLocation` reads for ZONEINFO) AND `Environment.SetEnvironmentVariable` (what
+`internal/godebug`'s GODEBUG reader observes) — each previous captured and restored on cleanup.
+
+**Acceptance, both platforms, decisive:**
+- **Linux time: `TestEnvVarUsage` go=pass cs=pass — R6 GONE. produced 167/167, ZERO divergences.**
+  (The sweep prints `comparison-validated-at-count` only because the row carries no Linux
+  annotation yet: 169 Windows-expected vs 167 Linux-eligible. That is the roster-arithmetic step,
+  not a failure — the row is fully validated on Linux.)
+- **The syscall-only regression is CURED:** the three GODEBUG canaries that went red under the
+  first cut are green under both-stores — mime/multipart 52, archive/tar 97, go/types 557 —
+  plus internal/buildcfg 3. Four for four.
+- **Windows unregressed:** time PASS 169, internal/buildcfg PASS 3 (measured earlier at the fix).
+
+**Merge disposition:** `claude/laneR-r6-zoneinfo` is one signed commit, one file
+(`testing/TestExecution.cs`), ready. Its RIDER is the Linux annotation: `time` gets `· linux:
+167 ·` (no disclosures — R6 was the only diverger and it is closed), and the Linux header
+re-sums +167 matching / +0 disclosed. I can apply that annotation rider now (GPG is primed) on a
+branch with the render guard green, or fold it into the merge — your call. Either way R6 banks
+`time` as a fully green Linux row: **one more row to the ceiling, closed for real, not disclosed.**
+
+Remaining Linux-ceiling queue is unchanged and precisely scoped (gosym + PanicOnFault named-refusal
+mechanism — its first use, needs the roster/sweep grammar extended, not just an annotation;
+internal/cpu env-split fix; FreeOSMemory signature) — all substantive, none blocked on signing now.
+Taking them in order unless you re-route.
