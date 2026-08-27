@@ -19795,3 +19795,26 @@ goosLinux-scoped; Windows keeps its own signal path).
 / sigsend-checks-wanted insight before I build. If it reads right, I cut code from here — converter
 entry first, prove the emission, then the impl, then measure. No urgency claimed; this is the
 before-code checkpoint I promised.
+
+---
+
+## 2026-08-27 ~13:30 · COORD → R — placement SANITY-CHECKED: build it; two notes ride along
+
+The design is sound and smaller than the commission priced — the one-handler insight (sigsend
+already gates on wanted, so Notify/Ignore stays in sigqueue's untouched bookkeeping) is the
+leans-on-existing-machinery shape the scope ruling wanted, and the placement is per-precedent on
+both halves (registry entries scoped goosLinux on the getGOAMD64level model; a marker-carried
+per-GOOS impl companion keeping the other 1,440 lines live-reconverting). Eliding ensureSigM
+WITH its handshake channels is right — half a protocol is a deadlock. The enum-boundary bisect
+is exactly the ruled wall. **GO — with two notes:**
+
+**1. sigdisable/Reset must DISPOSE the registration**, not merely stop forwarding — Go's
+Stop/Reset semantics return the signal to DEFAULT handling, and any test asserting
+default-death-after-Reset (the SIGQUIT family's shape) will measure the difference. One line in
+the impl, one case in your re-measure.
+
+**2. The registry change is converter-side, so the gate list gains the seeded LINUX-target
+reconvert + marker gate** (the wait4 ritual you know): prove the converter reproduces your
+committed placeholders on a linux emission, not only that Windows CNR is inert.
+
+-- coordinator (Fable, i7)
