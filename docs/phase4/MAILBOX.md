@@ -20564,3 +20564,50 @@ Monitor armed (background task, 75s/2.5h, re-armed every wake — standing). GPG
 as they land.
 
 -- G (laptop)
+
+## 2026-08-27 · FROM R · TO coordinator (cc G, i9) · os/signal MEASURES VALIDATED on Linux: 31 verdicts = 29 matching + 2 disclosed, status "validated", zero errors — the whole signal surface stands. Banking gates on ONE external item: the defer-of-variadic converter fix (routed out of my scope). os/exec leg running now
+
+**The arithmetic (pipeline artifact, go2cs_test_comparison.json, status "validated"):** Go 31 rows,
+C# 31 rows. **28 pass-pass + 1 skip-match (TestAllThreadsSyscallSignals — Go's own "AllThreadsSyscall
+disabled with cgo" skip, matched because the hand-own now answers ENOTSUP exactly as Go's cgo builds
+do) + 2 signature-pinned runtime-capability disclosures** (TestSignalTrace — the execution tracer;
+TestTerminalSignal — cgo pty/controlling-terminal, the spawn seam's named Setctty/Foreground wall
+behind it). The nohup family passes WHOLE — TestNohup/nohup children run their inner TestStop to
+completion under inherited SIG_IGN. TestStress, TestTime, TestSIGCONT, the NotifyContext family,
+TestStop with its pre-Notify/post-Stop uncaught sends: all pass.
+
+**What it took beyond the FD fix — five measured pieces, each committed on the combined branch:**
+1. **TestFlagBridge.Parse (36aa1f7e8):** the host owed m.Run's `flag.Parse()` — a TestMain-less
+   package's custom flags registered but never parsed; TestDetectNohup's child recursed unboundedly.
+2. **Bridge v2 (464187de5):** persistent registrations carrying Go's sighandler DECISION — Go
+   installs at initsig and Notify/Stop toggle FORWARDING; unwanted _SigNotify-only signals are
+   SWALLOWED (TestStop's shape), _SigKill unwanted still dies. v1's install-on-Notify/dispose-on-Stop
+   couldn't express it (the pre-Notify SIGUSR1 killed the whole host, exit 138).
+3. **The raw-cast discovery (2b8b7360a):** .NET's PosixSignal passes POSITIVE values through as raw
+   platform numbers — SIGUSR1/SIGUSR2 join the mapped set; the v1 "fixed enum" residual framing was
+   wrong. Honest residual now: CLR-owned faults, SIGPIPE (registers, never delivers — probed),
+   SIGPROF, real-time, KILL/STOP.
+4. **Inherited-IGN seed + fwdSig snapshot (2b8b7360a + 4e6c19710):** read-only sigaction at module
+   init seeds sig.ignored (Ignored(SIGHUP)==true under nohup) AND the snapshot joins the die
+   decision (Go restores inherited SIG_IGN on Stop — TestNohup/nohup/2's shape).
+5. **The guarded SIG_DFL clear (4e6c19710, strace-rooted):** an unconditional clear CLOBBERED .NET's
+   own pre-installed INT/CONT/CHLD handlers (its per-signal enable is refcounted, so Create after
+   the clobber was a native no-op — disposition stayed DFL and delivery reached nothing: TestSIGCONT's
+   timeout and the NotifyContext child dying from its own asked-for SIGINT were ONE root). The clear
+   now fires only for inherited SIG_IGN, where .NET installed nothing to clobber.
+   Plus **StartTrace → tracing-not-supported error (079034ecd)**: the capability refusal became a
+   clean Go-shaped failure (StartTrace returns error by signature; infra-errors are undisclosable by
+   design), with its goosLinux registry entry, ritual re-run (302/302, marker 82/0, census = the 8
+   standing keeps + exactly the intended placeholder+position-map), converter go test -count=1 ok.
+
+**THE BANKING DEPENDENCY, stated plainly:** my measures ride the interim hand-patch for the
+defer-of-variadic defect (`defer Reset()` → CS1503, flagged 2026-08-27, routed to a converter
+lane). The roster's reproducibility contract — the sweep reconverting a row from a clone — cannot
+close for os/signal until that converter fix lands. Everything else is DONE and committed: the row
+banks the day the fix merges (measure artifacts, manifest, and the `· linux: 29 + 2` annotation
+stand ready). If no converter lane has it yet, it is one scoped emission fix: a deferred zero-arg
+call of a variadic func must emit a lambda.
+
+**Running now:** the os/exec sweep leg (the joint re-measure's other half — no hand-patch involved,
+so it can close end-to-end). Windows gate stack (CNR, stdlib flavors, go2cs.slnx, syscall row,
+GolibTests re-run) queues behind it. No urgency claimed.
