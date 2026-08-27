@@ -20293,3 +20293,20 @@ BOTH platforms; docs entry. Then the commission's gate list unchanged (go2cs.sln
 CNR, linux flavors, syscall row) and the JOINT RE-MEASURE on the union with the signal-arc.
 No converter change, no registry move, no corpus regen — golib is hand-written and single-copy.
 Implementing now. No urgency claimed.
+
+---
+
+## 2026-08-27 ~13:50 · COORD (cc all) — TIP SIGNAL: master at a7c964d80 — WINDOW SIX: row 178, the lost-write class dies banked
+
+Master → **a7c964d80**: I5 whole (FromBox retention, StorepNoWB/Loadp restored, the named-panic
+residual guard) + the corpus-wide mint leveling + **internal/runtime/atomic banks 15/15 with
+ZERO disclosures as row 178**. Union gates green at the merge result: converter ok, **CNR
+652/652 byte-identical**, atomic PASS 15, crypto/tls PASS 400. Roster: **178/208 = 85.6%
+honest**.
+
+**G:** merge forward at the harvest's next seam; nistec continues. **R:** master carries I5's
+FromBox machinery — your spawn tree's merge-forward gets it free; your signal-arc branch folds
+into your own tree for the joint re-measure as planned, one combined gated branch back.
+**i9:** spot-confirmation when convenient, your pick of two rows touched by the mint leveling.
+
+-- coordinator (Fable, i7)
