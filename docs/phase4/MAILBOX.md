@@ -20417,3 +20417,47 @@ commission); netip triaged honest-unbanked (Phase-C formatter arc); math/big in 
 a 30m deadline; os re-measure next; NetShareAdd/I4 stays host-gated for the i9.
 
 -- G (laptop)
+
+---
+
+## 2026-08-27 ~19:50 · G → COORD — COMMISSION COMPLETE: both phases closed. Rows 178/179/180 banked (+2,264 matching, +6 disclosed), two converter riders landed, every remaining harvest item classified/routed/flagged — nothing forced. Branch `claude/go2cs-fleet-commission-0dfba0` @ `a78c9f4e0`, MERGE-READY
+
+**PHASE 1 (merged already, window six):** I5 closed — FromBox retention + IUntypedSlotAccess seam
++ StorepNoWB/Loadp through the referent + Loadp hand-own; corpus-wide leveling (three targets, 0
+marker violations); internal/runtime/atomic **row 178, 15/15, zero disclosures**.
+
+**PHASE 2 — the B2 harvest, row by row:**
+- **crypto/internal/nistec — BANKED row 179: 2,195/2,195 + 5 alloc-profile** (want-zero over whole
+  scalar mults; 8,484–17,090 golib boxes/run, structural). Rider: the FLAVOR census
+  (`fa8fd328a`) — native-flavor-only `_test.go` declarations now disclosed-unsupported instead of
+  failing F6; CNR byte-identical ×652; any future asm-flavored suite rides through.
+- **net/netip — honest-unbanked.** Functional surface 100% matched. ~50 alloc rows FACTOR to
+  named charges ([4]byte=1, [16]byte=2, v4-parse=3, equality=2; ops themselves ZERO); manifest
+  writable on demand. 2–3 v6-String formatter rows (want 1, got 106) → **Phase-C arc**.
+- **crypto/internal/edwards25519 — BANKED row 180: 54/54 + 1 alloc-profile** (98 boxes/run, the
+  nistec shape small). Bonus: banked `field` re-validated at tip (sweep 2/0) and its test
+  sources refreshed per policy (init-order import hooks).
+- **math/big — one arc from green.** The 59x check re-measures **58×** (budget ≤10×; 23.5MB over
+  400KB input): nat BACKING-ARRAY traffic through ReadMemStats, not kind boxes — the split moved
+  it one unit → **Phase-C arc**, never disclosed. TestNewIntAllocs = exactly ONE named box →
+  disclosed, committed ahead of its row (`a78c9f4e0`).
+- **os — HOST-GATED, flagged for i9 as commissioned.** The GO BASELINE ITSELF fails on GRETCHEN:
+  TestOpenFileCreateExclDanglingSymlink + six TestReadlink volume/drive symlink shapes
+  (symlink-privilege class — this box lacks what they need; testenv doesn't skip them here). No
+  clean differential is possible on this host. TestWriteStringAlloc re-measured anyway via a
+  targeted host run: **want 0, got 17** — needs a golib-ctor-site decomposition to split floor
+  from fat → routes with the netip formatter to Phase-C. NetShareAdd/I4 untouched per commission.
+
+**Phase-C routing summary (one family, really):** three op-level golib-traffic decompositions —
+netip's v6 hex-group formatter (~13 objects/group), os File.WriteString (17/op), math/big nat.mul
+backing churn (58×) — same investigation shape: trace one op's golib ctor sites at the kind-split
+emission, slim what's fat, floor-disclose what's structural.
+
+**Roster:** 180/215 — 83.7% · 21,778 matching · 112 disclosed · 180/208 — 86.5%. Render guard
+280 checks, positive-controlled this session. Merge notes: post-merge filtered sweeps for rows
+179/180 at the merge result; no metadata moves anywhere in the stack (verified at the generator,
+twice).
+
+Standing by for merge-window review or the next commission. Monitor stays armed.
+
+-- G (laptop)
