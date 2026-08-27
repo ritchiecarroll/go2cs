@@ -20211,3 +20211,37 @@ On `claude/posix-spawn-forkexec-02c5e3` from master 030f9e783. GPG primed. Plan 
 Out of scope, per commission: the defer-of-variadic converter defect (converter lane), Windows
 os/signal measurement (flag for staffing after Linux proves the arc). Monitor arming next
 (75s/2.5h, re-arm on wake). Will merge forward at clean seams if master moves (G row 178 pending).
+
+---
+
+## 2026-08-27 ~14:30 · G → COORD — PHASE 1 COMPLETE, MERGE SIGNAL: `claude/go2cs-fleet-commission-0dfba0` @ `1f0adff31` — I5 closed at row 178, gated whole; B2 harvest opening
+
+**The stack (three commits, signed, tree clean):**
+- `f925130c3` — the I5 fix: FromBox retaining mint (NativeBox §4 family), golib's internal
+  `IUntypedSlotAccess` seam, StoreThrough/LoadThrough referent-first-then-registry with named
+  residual panics, Loadp into `manualConversionFuncs`. Failing-first RED recorded, 6/6 guards,
+  GolibTests 380/380, converter `go test -count=1` clean.
+- `5624f984f` — the corpus leveling: three-target regen (marker gate 0×3), 57 mint files + 4
+  behavioral goldens; 604 diff lines = 475 intended + 129 closure-restored, arithmetic exact;
+  stdlib slnx 0 errors windows AND linux (purged between); CNR = exactly the four predicted
+  projects; FULL behavioral 621/621 + 595/595 outputs (1,586s); go2cs.slnx 0 errors.
+- `1f0adff31` — the bank: **internal/runtime/atomic 15/15, row 178, zero disclosures**
+  (TestStorepNoWB passes through retention; TestUnaligned64 identical skip). Header 178/215 —
+  82.8%, 19,529 matching, 106 disclosed, 178/208 — 85.6%; render guard 278 checks,
+  positive-controlled. Proof page regenerated at the leveling tip (the first emission carried the
+  branch-base SHA — a 14/15 converter — so the page was re-stamped at the tree that produces its
+  verdicts). Filtered sweep at tip: PASS 15, twice.
+
+**Merge notes per doctrine:** post-merge filtered sweep of `internal/runtime/atomic` at the merge
+RESULT is owed (lane-tip proof necessary-not-sufficient). And a judgment call for your gate: the
+fix adds an internal interface to the abstract ж<T> box itself — not equality/adapter/GoReflect
+machinery, but it IS the box every bridge path handles, so if you read "reflect-bridge-touching"
+broadly, the five-largest-reflect-consumers canary (derived at gate time) is cheap insurance. No
+`package_info` GoImplement moves (position maps only — metadata sync verified green twice).
+
+**PHASE 2 OPENS NOW:** crypto/internal/nistec first (my 5 want-zero rows — classify or route,
+never force), then net/netip + edwards25519, math/big's 59x re-measure, os TestWriteStringAlloc
+(NetShareAdd/I4 stays host-gated). Alloc-triage recipe per row; per-row arithmetic reported as
+rows land.
+
+-- G (laptop)
