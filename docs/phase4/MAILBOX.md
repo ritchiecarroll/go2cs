@@ -18984,3 +18984,67 @@ sign (owner re-primes the cache), the patch amends `cf814086f` on `claude/laneR-
 full canary+time acceptance re-runs at the both-stores fix, and I signal ready. Nothing else of mine
 is blocked — os/exec holds against B2, the three host-limits await the class-fit brief (next), and
 all other banks are merged. I proceed to the host-limit brief, which needs no commit.
+
+## 2026-08-26 · FROM R · TO coordinator · CLASS-FIT BRIEF for the three host-limit-shaped Linux rows (asserts READ from source, mechanism, proposed class, admission test quoted against the fit) — one raises a run-vs-exclude question
+
+Per your spec. Classes and admission tests quoted from the roster header's own definitions.
+
+### internal/cpu — TestDisableAllCapabilities, TestDisableSSE3 (2 tests)
+- **ASSERT (cpu_test.go:26-53):** `runDebugOptionsTest` re-execs `os.Args[0]` with
+  `GODEBUG=cpu.all=off` (resp. `cpu.sse3=off`); the child (`TestAllCapabilitiesDisabled`/
+  `TestSSE3DebugOption`) requires `godebug.New("#cpu.all").Value()=="off"` AND the corresponding
+  `cpu.X86.Has*` feature bits actually CLEARED.
+- **MECHANISM:** the managed runtime has no `cpu.*` GODEBUG knob — it uses hardware intrinsics
+  unconditionally and cannot mask a CPU-feature bit from a GODEBUG string. Post-exec-wall the
+  re-exec works; the child still cannot make `HasSSE3==false`.
+- **PROPOSED CLASS: `runtime-capability`.** Admission test — *"does a truthful managed
+  implementation of the asserted behavior exist at any cost?"* — **NO**: GODEBUG cpu-gating is
+  defined over Go's runtime's own cpu-init bookkeeping; the CLR has no equivalent and any rendering
+  is fabrication. Anti-laundering clause is satisfiable: the two rows pin AS FAILING (we never fake
+  a disabled feature). **FIT: strong** — the paradigm "runtime facility defined over the replaced
+  runtime's internals." NB the current verdict is `cs=skip`; a runtime-capability disclosure pins
+  it failing, so the manifest entry (not a skip) is the correct shape.
+
+### debug/gosym — TestSymVersion (1 test)
+- **ASSERT (pclntab_test.go:271-282):** `skipIfNotELF` passes on linux (it is in the ELF list),
+  then `getTable(t)` reads the Go symbol table from `os.Args[0]` and asserts every func's
+  `goVersion != verUnknown`. The converted side reaches `table.go12line == nil` and skips ("not
+  relevant to Go 1.2+ symbol table", line 276).
+- **MECHANISM:** the running binary is the .NET apphost ELF, not a Go-compiled ELF — it carries no
+  `.gopclntab`, so `getTable` finds no Go symbol table. The test's premise is that `os.Args[0]` IS
+  a Go binary with Go's own pclntab.
+- **PROPOSED CLASS: `host-limit`, STRUCTURAL-PERMANENT** (the `TestStack` sub-case). Admission —
+  "an entry must name a structural property of the deployment shape, never an unimplemented-but-
+  fixable defect." A .NET apphost carrying Go's `.gopclntab` is not a single-file-publish fix; it
+  is foreclosed by the same one-testing-package/host-is-hand-written-C# fact that makes
+  `runtime/debug`'s `TestStack` permanent. **FIT: strong** — same family, same permanence
+  argument, on the Linux flavor where the apphost first becomes ELF-inspectable at all.
+
+### runtime/debug — TestFreeOSMemory (cs=fail) and TestPanicOnFault (cs=None, host-fatal)
+- **TestFreeOSMemory ASSERT (garbage_test.go:93+):** after `FreeOSMemory()`, the freed 32 MiB must
+  shift into `MemStats.HeapReleased`. **MECHANISM:** the managed GC's return-to-OS is a different
+  regime; there is no HeapReleased equivalent to populate. **PROPOSED CLASS: `runtime-capability`**
+  — GC bookkeeping is "defined over the replaced runtime's own internals"; admission answers NO,
+  same family as the `ReadMemStats`/`ReadGCStats` disclosures this package already banks on Windows.
+  **FIT: strong.**
+- **TestPanicOnFault ASSERT (panic_test.go:29+):** mmap a PROT_READ page, WRITE to it (SIGSEGV),
+  and require `recover()` to catch a `runtime.Error` naming the fault address. **MECHANISM:** .NET
+  makes a hardware AccessViolation process-FATAL and non-catchable BY DESIGN; Go's SIGSEGV handler
+  makes it a recoverable panic. In KIND this is textbook `runtime-capability` ("the CLR says no by
+  design"). **BUT the admission raises a run-vs-exclude question I flag rather than resolve:** the
+  `runtime-capability` clause pins a row AS FAILING, which requires the test to RUN and be COMPARED;
+  here the fatal AV KILLS THE WHOLE HOST (produced 1/10 — every later test poisoned), and the CLR
+  cannot contain an uncatchable AV to a per-test failure. So the honest question is whether
+  TestPanicOnFault is a `runtime-capability` DISCLOSURE (row runs-and-fails) or an **E-ledger
+  EXCLUSION** (the converted host structurally cannot even survive running it, so it must not run) —
+  the two classes' boundary is exactly "can the test run to a comparable verdict without taking the
+  suite down." My read: EXCLUSION, because a host-fatal test has no comparable per-test verdict to
+  disclose; but that is the coordinator's boundary to draw, and it may set precedent for any future
+  host-fatal test.
+
+**Summary of proposals:** internal/cpu ×2 → runtime-capability; gosym TestSymVersion → host-limit
+(structural-permanent); runtime/debug TestFreeOSMemory → runtime-capability; runtime/debug
+TestPanicOnFault → runtime-capability-in-kind but host-FATAL, so exclude-vs-disclose is yours to
+rule. On your ruling, the per-OS annotation mechanics carry the four as named refusals and I apply
+the `linux: N + D` rider — banking internal/cpu, debug/gosym, and (modulo the PanicOnFault ruling)
+runtime/debug at their honest Linux counts. That is the ceiling path for these three rows.
