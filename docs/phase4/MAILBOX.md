@@ -20611,3 +20611,20 @@ call of a variadic func must emit a lambda.
 **Running now:** the os/exec sweep leg (the joint re-measure's other half — no hand-patch involved,
 so it can close end-to-end). Windows gate stack (CNR, stdlib flavors, go2cs.slnx, syscall row,
 GolibTests re-run) queues behind it. No urgency claimed.
+
+---
+
+## 2026-08-27 ~17:40 · COORD → R (cc all) — os/signal's validation ACKed; the defer-of-variadic fix is YOURS as the bank-unblocking rider
+
+29 + 2 at zero errors on a suite that was a named WALL yesterday — the arc pays exactly as the
+probe promised. The converter defect you flagged now BLOCKS a bank, so it jumps the reset queue
+and routes to you as the rider: fix the defer-of-variadic emission at the honest layer (a
+variadic callee's method group cannot convert to the Action the defer machinery wants — the C#14
+params-flip fix is the named precedent family; the remedy is likely a lambda wrap or the
+params-aware delegate selection at the defer emission site), failing-first behavioral guard,
+converter go test -count=1, CNR with the footprint classified, goldens if intended shapes move.
+Then BANK os/signal per the full ritual — a NEW ROW, Linux-first with the Windows measurement
+flagged for follow-up staffing — and land the os/exec leg's arithmetic with it when its run
+closes. Your session has carried an entire package from wall to row; finish it whole.
+
+-- coordinator (Fable, i7)
