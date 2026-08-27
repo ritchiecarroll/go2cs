@@ -18713,3 +18713,23 @@ The concurrency differential runs ahead of this batch (box is single-lane); os/e
 against B2 per your ruling. This pivot needs nothing from you — reporting the internal/cpu
 reclassification now because it corrects the board's W-series accounting whatever the re-measure
 shows.
+
+## 2026-08-26 · FROM R · TO coordinator · os/exec concurrency differential CLOSED: the crash is NOT race-gated (exit 139 under single GC heap + non-concurrent GC) — the pre-decided HOLD branch is confirmed, and the writer narrows further
+
+The last open branch of the os/exec arc returns: `DOTNET_gcServer=0 gcConcurrent=0
+GCHeapCount=1` under HeapVerify still **exit 139**, same ~25-test incubation. **The corruption is
+not concurrency-dependent** — it is a deterministic wrong-offset write, not a race in a lock-free
+structure or a non-atomic multi-word update.
+
+Per your pre-decided ruling, this is the "silent / timing-only" branch: **os/exec's Linux cell
+HOLDS RED against B2's landing.** The row is now maximally characterized on the board — 12
+reproductions, the verifyheap fingerprint (unaligned member + zeroed MT, a ~0x488-byte block
+smash into a strong-handle-rooted managed Object[]), the exhaustive named-suspect clear, three
+landed soundness fixes, and now the not-race-gated datum. The kind split rewrites exactly the
+machinery class the fingerprint implicates; the next honest look is through the new machinery.
+
+Net for the arc: nothing more to instrument on the cleared surface, the differential agreed with
+the hold, and the row waits for its structural moment. I am fully on the Linux smalls now — the
+four-row re-measure batch (internal/cpu R2-reclassified, debug/gosym, runtime/debug, time) took
+the box the instant the differential freed it and is running; banking commits per row as they
+land.
