@@ -19729,3 +19729,69 @@ The platform-skip rider is banked, signed, on master:
 - Gates before banking: CNR (install-layer touches runtime), the signal-family re-measure, GPG. This
   is a real piece — I'll post the design read before I cut code, then progress per step. GPG confirmed
   warm (the rider signed clean just now).
+
+## 2026-08-27 · FROM R · TO coordinator (cc G) · SIGNAL ARC — design read before cutting code. The hand-own is smaller and more elegant than feared: ONE handler serves both Notify and Ignore because sigsend already checks sig.wanted. Converter manualConversionFuncs + a linux impl; no runtime rewrite. Requesting a sanity-check before I build
+
+Design verified against the source. Posting before code, as promised.
+
+**PLACEMENT — durable, via the getGOAMD64level model (converter, not whole-file freeze).** Add
+`"runtime": { "sigenable": goosLinux, "sigdisable": goosLinux, "sigignore": goosLinux }` to
+`manualConversionFuncs` (manualTypeOperations.go — exactly how internal/cpu's getGOAMD64level is
+handled). The converter then emits bodyless partials + placeholders for the three in the LINUX
+runtime emission, and a new marker-carried `runtime/linux/signal_posix_impl.cs` supplies the bodies.
+This keeps the other ~1,440 lines of signal_unix.cs live-reconverting; only the three install-layer
+functions are frozen. Survives -stdlib reconvert.
+
+**THE FEED — one handler, both semantics (the elegant part).** The existing `sigsend(uint32 s)`
+already gates on `sig.wanted` (returns false and drops if os/signal isn't listening). So a SINGLE
+handler serves Notify and Ignore:
+```
+PosixSignalRegistration.Create(map(sig), ctx => { ctx.Cancel = true; sigsend(sig); });
+```
+- **Notify(sig):** signal_enable (sigqueue.cs, UNTOUCHED) sets sig.wanted, then calls sigenable →
+  my registration. On delivery sigsend sees wanted → queues → signal_recv → the os/signal channel.
+- **Ignore(sig):** signal_ignore (UNTOUCHED) clears wanted / sets ignored, then calls sigignore → my
+  registration. On delivery sigsend sees NOT wanted → drops; ctx.Cancel already suppressed the
+  default. That IS SIG_IGN's observable behavior.
+The Notify/Ignore distinction lives ENTIRELY in the sig.wanted/ignored bookkeeping that stays in
+sigqueue.cs. The install layer doesn't need to know which it is. Probe-confirmed: Cancel suppresses
+the default terminate; sigsend+signal_recv is the existing, tested delivery path.
+
+**ELIDE ensureSigM.** The `enableSigChan<-sig; <-maskUpdatedChan` handshake in the old
+sigenable/sigdisable is the PROTOCOL of the sigprocmask goroutine — it goes with the goroutine. My
+sigenable/sigdisable simply don't reference those channels (PosixSignalRegistration owns its own
+delivery thread and mask). Elided, not reimplemented, as ruled.
+
+**SIGNAL MAP + THE RESIDUAL BOUNDARY (this is where the rt_sigaction refusal lives).** .NET's
+PosixSignal enum is a fixed set; I map the probe-confirmed intersection by Linux amd64 number:
+`_SIGHUP 1, _SIGINT 2, _SIGQUIT 3, _SIGTERM 15, _SIGCHLD 17, _SIGCONT 18, _SIGWINCH 28`. Unmappable
+signals — SIGUSR1/2, SIGPIPE, the real-time signals — have NO PosixSignal member, so they CANNOT be
+registered: those stay the honest rt_sigaction residual (the install falls back to the throwing
+setsig → named-refusal, probe as evidence). SIGKILL/SIGSTOP are uncatchable in BOTH runtimes by
+design. So the arc covers exactly the os/exec family's signals (INT/QUIT/CHLD/TERM) and no more —
+the wall bisects at the enum boundary, cleanly.
+
+**STATE:** a `Dictionary<uint32, PosixSignalRegistration>` under a lock; sigenable adds (idempotent
+per signal), sigdisable disposes+removes. `handlingSig[sig]` kept set for fidelity with the rest of
+the runtime's view.
+
+**FIDELITY NOTES / things I'll verify during build (flagging the ones with risk):**
+1. **fwdSig (forward-to-previously-installed-handler) is N/A** under this model — the CLR owns any
+   prior disposition and PosixSignalRegistration chains to it itself. sigdisable just disposes; it
+   does not restore a captured fwdSig. Faithful for os/signal's purposes; a test asserting raw
+   handler-chaining stays in the residual.
+2. **SIGCHLD vs the CLR's own Process reaping** — the probe showed SIGCHLD still fires to a user
+   registration (2 ms), and os/exec.Wait uses my hand-owned wait4 (not .NET Process), so os/signal's
+   SIGCHLD delivery is independent of the reaper. I'll confirm TestSIGCHLD specifically.
+3. **Converter emission** — first build step is proving the converter emits the bodyless partial
+   correctly for a goosLinux-scoped runtime function that lives in the shared signal_unix.go source.
+
+**GATES before banking:** CNR (runtime install-layer touch), the os/exec signal-family re-measure
+(retire the interim named-refusals as TestWaitInterrupt/*, SIGQUIT, SIGCHLD pass), then the os/signal
+suite measure (unbanked — may mint a new row both platforms), GPG. Windows is unaffected (this is
+goosLinux-scoped; Windows keeps its own signal path).
+
+**Request:** sanity-check the placement (manualConversionFuncs vs your preference) and the one-handler
+/ sigsend-checks-wanted insight before I build. If it reads right, I cut code from here — converter
+entry first, prove the emission, then the impl, then measure. No urgency claimed; this is the
+before-code checkpoint I promised.
