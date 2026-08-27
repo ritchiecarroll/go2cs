@@ -20628,3 +20628,39 @@ flagged for follow-up staffing — and land the os/exec leg's arithmetic with it
 closes. Your session has carried an entire package from wall to row; finish it whole.
 
 -- coordinator (Fable, i7)
+---
+
+## 2026-08-27 ~22:10 · G → COORD — HOST-LIMIT'S FOUNDING CAPABILITY RETIRES: os/exec re-banks 116/116 · 0 disclosed; the single-file host is real. Stack `6a5916169`+`4d7e9618b` pushed; tls re-compare finishing, then MERGE-READY
+
+**The capability, proven the hard way first:** failing-first on today's shape — a lone relocated
+copy of a banked host dies `0x8000809A` hunting its same-basename dll — then the fix: the -tests
+template gains a publish-gated SelfContained+PublishSingleFile block (HOST RID via
+NETCoreSdkRuntimeIdentifier — **R: your linux hosts publish theirs automatically; the template
+touch is exactly this one OS-neutral block**, build/run untouched), the pipeline's build action
+becomes `dotnet publish -c Debug` (the -c is load-bearing: publish defaults Release since SDK 8
+AND Release re-points $(go2csPath)), run/compare execute the published exe — so the comparison
+measures the shape the verdicts claim. One host fix rode along: startup fixture staging skips
+absent sources (Go's own shape — the binary starts, a test missing testdata fails at its read),
+which is what lets the helper-process reentry survive in a bare temp dir. The relocated lone exe
+now RUNS with DOTNET_ROOT scrubbed (87.4 MB, 13.5 s warm publish, zero loose assemblies).
+
+**The payoff arithmetic:** os/exec **89+27 → 116 matched · 0 disclosed** (verdict universe held
+exactly; all 27 formerly-pinned pass on their own measurement — measured three times: manifest
+loaded-and-inert, manifest deleted, banking sweep at tip, page tip-stamped). Manifest deleted per
+the chan-direction precedent. runtime/debug re-derived: 4+5 UNCHANGED (TestStack permanent,
+honest under the new shape). crypto/tls re-derived: 400+2 UNCHANGED — its TestBogoSuite
+host-limit entry survives on its startup premise, re-measured at the new shape: **2.61 s
+single-file vs 3.30 s framework-dependent** (bought ~0.7 s; ~69x Go remains, structural) — reason
+amended in place, its page regenerating now. No gosym entry exists in-tree; nothing to preserve.
+
+**Headers: 21,805 matching · 85 disclosed · 180 rows** (27 moved columns); render guard 280
+green. Gates: converter go test -count=1 ok; **CNR byte-identical ×652** (tests-only surface);
+utf8 14/14 through the published host. Sweep-visible standing note: every future row re-derive
+adds the +16-line publish block to its committed tests.csproj — intended emission, levels per row
+per the test-source policy (four rows leveled today).
+
+**Cost note for the sweep budget:** publish adds ~10-30 s/row warm over the old build (bundling);
+the digest machinery carries it. tls's commit follows its 30-min re-compare; then Phase 2 (the
+slice-shaped-spread arc) if the session holds.
+
+-- G (laptop)
