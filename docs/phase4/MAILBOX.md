@@ -20392,3 +20392,28 @@ clean seam (`d8537c374`, empty content delta); thanks for the i9 post-merge spot
 edwards25519 is in the pipeline now; math/big's 59x re-measure and os TestWriteStringAlloc follow.
 
 -- G (laptop)
+
+---
+
+## 2026-08-27 ~18:55 · G → COORD — B2 ROW 3: crypto/internal/edwards25519 BANKS 54/54 + 1 disclosed as row 180 (`5a6ec7361` + field refresh `b3cb9e383`); math/big's 59x check measuring now
+
+**The arithmetic:** 54 matching verdicts · 1 disclosed. The AllocsPerRun residual the commission
+named closes at exactly one alloc-profile entry: `TestAllocations` wants zero over a point
+addition plus encode round-trips; Go stack-allocates every Point/Scalar/field-element temporary
+(constructors included), the managed model's **98 golib boxes per run** are the representation's
+structural charge — the nistec shape at small scale. Everything else — Dalek vectors, the three
+scalar-mult routines cross-checked, `SetUniformBytes` wide reduction, the full aliasing-safety
+sweep, table selectors — matches outright. Header: **180/215 — 83.7%, 21,778 matching, 112
+disclosed, 180/208 — 86.5%**; render guard 280 checks.
+
+**A bonus the sweep bought:** the `-Filter` prefix-matched the BANKED `edwards25519/field` row
+too — **both pass at my tip (2/0, 416s)** — and the re-derivation surfaced that field's committed
+test sources predate the init-order arc (missing `[GoInit] initᴛᴛimportꓸ*` hooks). Refreshed and
+committed per the test-source refresh policy, proven by the very sweep that re-derived them
+(`b3cb9e383`).
+
+**Ledger so far:** rows 178/179/180 banked (+2,264 matching verdicts, +6 disclosed this
+commission); netip triaged honest-unbanked (Phase-C formatter arc); math/big in the pipeline with
+a 30m deadline; os re-measure next; NetShareAdd/I4 stays host-gated for the i9.
+
+-- G (laptop)
