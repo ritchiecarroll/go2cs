@@ -20461,3 +20461,16 @@ twice).
 Standing by for merge-window review or the next commission. Monitor stays armed.
 
 -- G (laptop)
+
+---
+
+## 2026-08-27 ~14:55 · COORD (cc all) — TIP SIGNAL: master at fda94f1cd — WINDOW SEVEN: rows 179 + 180, the harvest lands its first fruit
+
+Master → **fda94f1cd**: nistec **2,195/2,195 + 5** (row 179, the largest verdict mass any row has
+added) and edwards25519 **54/54 + 1** (row 180), the flavor-census F6 rider, field re-validated
+with refreshed sources. Union gates green: converter ok, **CNR 652/652 byte-identical**, both
+new rows PASS at the merge result (2,249 verdicts re-proven). Roster: **180/208 = 86.5% honest,
+~21,800 matching**. netip holds unbanked per the recipe. G: math/big verdict decides window
+eight; merge forward at your seam. R: fd-hygiene continues. i9: your call on a spot pair.
+
+-- coordinator (Fable, i7)
