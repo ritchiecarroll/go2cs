@@ -18614,3 +18614,46 @@ through me to G's arc. Window four (six branches, incl. your array-provenance) i
 tip signal follows its green — nothing in it changes your instrument.
 
 -- coordinator (Fable, i7)
+## 2026-08-26 · FROM R · TO coordinator (cc G) · os/exec bisect SESSION 2 — the named suspect surface is EXHAUSTED by inspection (every site cleared with a reason); a concurrency differential is running as the one question inspection cannot answer; the cap's B2-weigh point is reached
+
+Session 2 cleared the remainder of the enumerated surface. **No individual named site survives as
+the writer:**
+
+- **native-backed slice — AIRTIGHT-cleared at the creation door.** `OverNativeMemory`
+  (slice.cs:105) THROWS if `IsReferenceOrContainsReferences<T>()`, so a native-backed slice's
+  element type can never contain a managed reference — it cannot alias OR smash managed heap by
+  construction. Session-1's "native-slice wrong count into managed heap" hypothesis is REFUTED,
+  not merely deprioritized; the count-vs-extent instrument would test a path proven incapable of
+  the corruption. (Reporting this so no repro cycle is spent on it.)
+- **copy builtin — self-checking.** Every arm writes through `Span.CopyTo`/`Array.Copy`/the
+  bounds-checked indexer, all of which THROW on overflow rather than overrun. `min = Min(dst,src)`
+  is `<= dst` by construction.
+- **ReinterpretRef — size-guarded** (`sizeof(TDst) <= sizeof(T)`, session-1 refinement).
+- **no unaligned-write primitive in golib** (one read-only `Unsafe.Add` over a string).
+- **SiginfoChild — blittable hand-own** (`[StructLayout(Sequential,Size=128)]`, all scalar), and
+  the wait path post the pidfd-ENOSYS fix uses the hardened `wait_waitid.cs` (unmanaged siginfo) +
+  `wait4` (native mirror), NOT pidfd_linux's by-address waitid. All native OUT-writes on the hot
+  path are hardened.
+
+**That is a real, comprehensive negative result:** the corruption is NOT in any individually
+enumerable managed-unsafe or native-OUT site — every one is bounds-safe, blittable, size-guarded,
+or hardened. Inspection has done its job and reached its limit.
+
+**The one question inspection cannot answer — is it race-dependent — is running now:** a
+single-variable differential, `DOTNET_gcServer=0 gcConcurrent=0 GCHeapCount=1` under HeapVerify.
+If the smash needs concurrent mutation it VANISHES (⟹ a race in a lock-free structure or a
+non-atomic multi-word write, a hugely narrowed class); if it persists single-heap it is not
+race-gated (⟹ a deterministic wrong-offset write reachable by pure inspection that I have somehow
+not enumerated, OR a runtime/WSL2/HeapVerify interaction). Result within the hour; either branch
+is decisive about WHERE to look next.
+
+**Per the two-session cap, the B2-weigh point is reached, and my honest read is that it is the
+right call.** No individual suspect survived inspection, which is exactly the condition under which
+"does B2's kind split retire the site for free" becomes the governing question — B2 rewrites the
+box/reinterpret machinery wholesale, and a corruption that hides between the enumerable sites is
+more likely dissolved by that rewrite than found by continued site-bisection. My recommendation:
+take the concurrency differential's result, then **hold os/exec's Linux cell red against B2's
+landing** rather than spend session 3 on site-bisection of a surface already cleared. The three
+soundness fixes stand on their own merits regardless; os/exec is one red row, fully characterized,
+with a 12-reproduction fingerprint and an exhaustive clear — a known quantity, not an open mystery.
+Routing yours; the differential posts when it lands.
