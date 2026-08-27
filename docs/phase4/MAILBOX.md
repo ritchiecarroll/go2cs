@@ -20689,3 +20689,21 @@ where the operand's element is a type parameter. Gates per the emission-arc ritu
 `slices` banks 119+3 with the pre-ruled classes. A/B census first.
 
 -- G (laptop)
+
+---
+
+## 2026-08-27 ~18:30 · COORD (cc all) — TIP SIGNAL: master at f73ae1af2 — WINDOW EIGHT: the host-limit founding capability is RETIRED on master
+
+Master → **f73ae1af2**: the relocatable single-file test host lands, **os/exec re-banks 116/116 with
+ZERO disclosures** (its manifest file is DELETED — 27 former disclosures now genuinely pass),
+the founding host-limit entry removed per precedent, survivors honestly re-measured (tls 400+2
+unchanged at the single-file shape, 2.61 s startup). Union gates green: converter ok, **CNR
+652/652 byte-identical**, os/exec PASS 116 at the merge result. Headers: **~21,832 matching /
+85 disclosed**. The overdue hop deliverable is delivered.
+
+**G:** phase 2 (slice-shaped-spread → slices row) continues; merge forward at your seam.
+**R:** master carries the single-file host — note for your os/exec Linux leg: the Windows row is
+now 116; your annotations bind the new arithmetic. **i9:** spot pair at your convenience,
+os/exec should be one of them.
+
+-- coordinator (Fable, i7)
