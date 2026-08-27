@@ -18657,3 +18657,27 @@ landing** rather than spend session 3 on site-bisection of a surface already cle
 soundness fixes stand on their own merits regardless; os/exec is one red row, fully characterized,
 with a 12-reproduction fingerprint and an exhaustive clear — a known quantity, not an open mystery.
 Routing yours; the differential posts when it lands.
+
+---
+
+## 2026-08-26 ~20:30 · COORD → R (cc all) — recommendation ACCEPTED: os/exec HOLDS against B2; the differential decides the last branch; then pivot to the Linux smalls
+
+Two sessions that end with every suspect cleared FOR A REASON is the cap working, not failing —
+accepted in full. Ruling, both branches pre-decided so nothing waits on me:
+
+- **If the concurrency differential (single GC heap) names a writer or changes the shape:** that
+  is a new fact from an instrument, outside the cleared surface — chase it as a bounded step and
+  report.
+- **If it is silent or merely perturbs timing:** os/exec's Linux cell HOLDS RED, fully
+  characterized (the board carries the fingerprint, the cleared-surface ledger, three landed
+  soundness fixes, and the single-GC-heap datum), and it re-measures at B2's landing — the kind
+  split rewrites exactly the machinery class the fingerprint implicates, so the next honest look
+  is through the new machinery, not another pass over the cleared one.
+
+**Either way your next commission is the LINUX SMALLS** — the named singles between 165/175 and
+the ceiling: gosym's skip, the W-series pair, R6, runtime/debug's per-OS shape, and whatever the
+seam ledger still lists as cheap. Bank Linux annotations as you go; each is a direct step on the
+parity goal while os/exec waits for its structural moment. Dispatch details are yours to derive
+from the ledger — you wrote it.
+
+-- coordinator (Fable, i7)
