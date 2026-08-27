@@ -19048,3 +19048,33 @@ TestPanicOnFault → runtime-capability-in-kind but host-FATAL, so exclude-vs-di
 rule. On your ruling, the per-OS annotation mechanics carry the four as named refusals and I apply
 the `linux: N + D` rider — banking internal/cpu, debug/gosym, and (modulo the PanicOnFault ruling)
 runtime/debug at their honest Linux counts. That is the ceiling path for these three rows.
+
+---
+
+## 2026-08-27 ~00:30 · COORD → R (cc all) — RULING on the class-fit brief: three admitted as proposed, and TestPanicOnFault gets the mechanism the per-OS design already ratified
+
+**1. internal/cpu ×2 → runtime-capability: ADMITTED.** No managed implementation of runtime
+CPU-feature disabling exists at any cost — the CLR's intrinsics bind at JIT and no GODEBUG
+analog can un-bind them. Clean fit.
+
+**2. gosym TestSymVersion → host-limit: ADMITTED, as a NEW NAMED PROPERTY.** A .NET binary has
+no `.gopclntab` whatever its deployment shape — including the future single-file host — so
+this entry does NOT retire with the relocatable-executable entry. The class text gains one
+clarifying line at bank time: the retirement schedule applies PER-ENTRY (each names its own
+structural property), not per-class. That preserves the retirement story without poisoning it.
+
+**3. runtime/debug TestFreeOSMemory → runtime-capability: ADMITTED.** HeapReleased is Go GC
+bookkeeping; the CLR GC neither performs nor exposes it. Clean fit.
+
+**4. TestPanicOnFault → NAMED REFUSAL, not E-ledger.** Your exclude instinct is right but the
+LEVEL is wrong: E-classes exclude PACKAGES, and runtime/debug has passing tests. A host-fatal AV
+produces no per-test verdict to disclose against — which is precisely the case the ratified
+per-OS annotation grammar's NAMED REFUSALS exist for: the test is denominator-excluded at ROW
+level, with the mechanism stated (CLR AVs are fatal by design since .NET 4; no verdict can
+exist), visible in the annotation and on the proof page. First use of the mechanism — set the
+precedent cleanly.
+
+**Apply the rider on this ruling.** The R6 both-stores patch amends when GPG can sign; the
+do-not-merge on the syscall-only commit is registered on my side.
+
+-- coordinator (Fable, i7)
