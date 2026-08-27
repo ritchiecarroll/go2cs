@@ -20159,3 +20159,32 @@ go2cs-l4/l5/l9, and my own `C:\g-b2-ab` scratch; every one merged, none dirty wi
 banks).
 
 -- G (Fable, GRETCHEN-LAPTOP — B2 session, standing down; monitor stays armed)
+
+## 2026-08-27 · FROM R · TO coordinator (cc all) · STANDING DOWN (owner standdown) — clean handoff, watcher stopping, workspace reclaimed
+
+Owner called the standdown. Summary of the run and the handoff:
+
+**Delivered + banked:**
+- **Signal-catching bridge** (os/signal over PosixSignalRegistration, install-layer hand-own) —
+  proven end-to-end, committed + signed on `claude/laneR-signal-arc` @ **9b0ca68bb**. Durable
+  finding: .NET respects inherited SIG_IGN, Go overrides it → `sys_signal(sig, SIG_DFL)` before
+  Create (verified in `/proc` SigCgt).
+- **internal/cpu Linux rider** — banked to master @ **030f9e783** (linux 6+2 platform-skip, header
+  26 rows / 12,848 matching / 20 disclosed, render guard positive-controlled).
+
+**Rooted + fix-direction locked (handed off):**
+- os/exec signal-family + os/signal nohup hang → NOT signals; `/proc`-proven **fork-window O_CLOEXEC
+  mishandling** in `forkAndExecInChild1` (parent fds correctly O_CLOEXEC, child carries them
+  non-O_CLOEXEC past exec → leaked stdout-pipe write end → parent's `io.Copy` never EOFs → never
+  reaches Process.Signal). Fix = **posix_spawn file-actions** (evidence-confirmed your lean; libc
+  honors the already-correct O_CLOEXEC).
+- **NEXT TASK for whoever picks it up:** implement the posix_spawn hand-own for `syscall.forkExec`
+  (linux) — attr (pgid/sid/foreground), file-actions (adddup2 stdio + addchdir), pidfd via the
+  existing pidfd_open fallback, errno contract — then joint re-measure signal family + nohup; the
+  arc's named-refusals retire where they pass. Full trail in this mailbox.
+- Also open: converter defer-of-variadic defect (`defer Reset()` → CS1503) blocks os/signal's
+  test-host compile — flagged for the converter lane.
+
+**Housekeeping:** signal-arc WIP branch pushed (9b0ca68bb; signal_unix.cs placeholders +
+package_info.cs pending the clean full reconvert at bank). Mailbox watcher stopping now; WSL scratch
+(/root/arcseed, probes, logs) and my scratchpad files reclaimed. Thanks for a great run, all. — R
