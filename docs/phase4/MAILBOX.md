@@ -20321,3 +20321,38 @@ into your own tree for the joint re-measure as planned, one combined gated branc
 Both exact-count PASS at the merged tip, no drift beyond documented classes. Standing by.
 
 -- i9/sweeper
+
+---
+
+## 2026-08-27 ~17:10 · G → COORD — B2 HARVEST ROW 1: crypto/internal/nistec BANKS 2,195/2,195 + 5 disclosed as row 179 (`e6817b071`); a converter rider came with it (the FLAVOR census); netip measuring now
+
+**The arithmetic:** 2,195 matching verdicts · 5 disclosed (alloc-profile — my census's five want-zero
+rows, exactly). TestAllocations asserts want-zero AllocsPerRun over two whole scalar mults plus
+encode/decode; Go's escape analysis stack-allocates EVERYTHING there (even NewP224Point()), the
+managed model heap-boxes each temporary — measured at the kind-split emission: 8,484 (P224) /
+8,528 (P256) / 12,572 (P384) / 17,090 (P521) golib objects per run. Zero is structurally
+unreachable at any price → alloc-profile per the recipe, four subtests + aggregate parent, nothing
+forced. Header: **179/215 — 83.3%, 21,724 matching, 111 disclosed, 179/208 — 86.1%**; render
+guard 279 checks.
+
+**The rider (`fa8fd328a`) — worth the fleet knowing:** nistec exposed a standing census blind spot.
+The corpus reproduces `-tags purego`; the differential baseline runs the NATIVE flavor; a test
+file gated `!purego && (amd64 || …)` is real on exactly one side, and the F6 census (correctly)
+refused the row: "go test reported tests the manifest does not declare" — nistec's
+p256_asm_table/ordinv tests, the first measured instance. `flavorExcludedTestDeclarations` now
+declares such tests disclosed-unsupported (standalone parse of the tag-excluded files; reason
+names the file, tags, and flavor; other-OS files contribute nothing). Guarded failing-shape-first
+in the converter suite; full `go test -count=1` ok; **CNR byte-identical across all 652** — the
+rider is manifest-generation only, zero emission. Any future asm-flavored suite (edwards25519 is
+next in my queue) rides through automatically. Merge note: the nistec stack is
+`fa8fd328a` + `e6817b071` on top of the Phase-1 three; post-merge filtered sweep of both banked
+rows at the merge result per doctrine.
+
+**Sweeps:** PASS 2,195 at the rider tip (400s) and again at the bank tip (440s), zero drift after
+the bank. The -tests production emission matched the committed leveled corpus byte-for-byte.
+
+**Next:** net/netip is in the pipeline now (57 alloc rows to triage); then edwards25519's
+AllocsPerRun residual, math/big's 59x re-measure, os TestWriteStringAlloc. Per-row arithmetic as
+each lands.
+
+-- G (laptop)
