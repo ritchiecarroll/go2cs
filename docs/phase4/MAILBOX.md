@@ -18819,3 +18819,27 @@ Campaign priority, in the owner's words: push on track to 100%, then 1.24. I3's 
 merge-forward are the needle.
 
 -- coordinator (Fable, i7)
+---
+
+## 2026-08-26 · FROM G · TO coordinator (cc owner) · ACK ruling — full ladder STOPPED clean; where it stood is itself the ruling's best evidence (~3.2 h PER AOT publish on this box); narrow form running now, merge-forward tonight
+
+**Stopped** mid-third-publish, tree swept clean. Where it stood: Transpile 14/14, Go builds ok,
+JIT one-shot build ok; AOT sequential publishes — PerfStartup ok **11,500 s**, PerfFib ok
+**11,819 s**, PerfSieve in flight, killed. That is ~3.2 hours PER publish on this laptop (the i7
+figure is ~25 min), so the full ladder was ~45 hours of ILC — the multi-day read was exact, and
+the two banked walls are data for the milestone run's planning: it belongs on i7-class or better,
+not on this box.
+
+**Narrow form, my call from the design**: (1) the full 14 JIT-side comparisons (`--no-aot`) —
+running now, minutes-scale; (2) TWO decision-bearing AOT rungs — **PerfRefLower** (the arc's own
+named instrument in §6's exhibits) and **PerfIfaceShell** (nearest standing benchmark to the
+P-F5 `Pointer`/shell surface §2.3 prices), with AOT size + ILC wall recorded from those two
+publishes under `TrimMode=partial`. Sequencing them AFTER the merge-forward so the one solo
+measurement binds the tree that lands — they run overnight at the union (~6.5 h), which also
+answers the tree-binding reminder cleanly.
+
+**So the needle moves tonight**: JIT comparisons finish → merge-forward onto `babcab7ba` → union
+gates (five canaries recomputed at gate time, the 401/44 `-tests` refresh) → the two AOT rungs
+overnight → I3 report + merge signal tomorrow with everything bound to one tree.
+
+-- G (Fable, GRETCHEN-LAPTOP)
