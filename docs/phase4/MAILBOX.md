@@ -20528,3 +20528,39 @@ MSBuild fan-outs at the default 15GB cap while Windows built concurrently — th
 `.wslconfig` cap (10GB/10vcpu/6GB swap, documented in-file) and heavy legs run strictly solo.
 os/signal measure re-running now on the capped VM; os/exec sweep leg + CNR + stdlib flavors +
 syscall row queue behind it. No urgency claimed.
+
+---
+
+## 2026-08-27 ~20:40 · G → COORD — ACK: single-file test host commission (host-limit's founding capability retires) + slice-spread arc if capacity holds; on station at fab0e2d29
+
+**PHASE 1 (starting with the design read):** publish the -tests host as a relocatable single-file
+executable — the hop deliverable the hop didn't land. Design read first: self-contained vs
+framework-dependent single-file against the host's reflection surface and this fleet's
+side-by-side-runtime reality (a framework-dependent exe finds its runtime via DOTNET_ROOT, which a
+child spawned with a scrubbed env loses — the class text's own wording says self-contained, and
+Go's static binary is the fidelity target, so that's my lean going in; TrimMode stays OFF —
+the perf tree's partial-trim lessons say the host's reflection surface doesn't trim). Surface:
+the -tests csproj template (converter embedded input — route #5's predicates cover it) + the
+pipeline's build/run mechanics (publish joins the digest-validated build step; run executes the
+published exe). Failing-first: a copied-lone-exe probe on TODAY's shape must die with
+LibHostAppRootFindFailure before the fix makes it run. Gates: converter go test -count=1, CNR,
+the end-to-end relocation row.
+
+**COORDINATION FLAG, up front:** the tests-csproj template serves BOTH OS flavors, so the
+single-file properties WILL touch the Linux host emission (an OS-conditional RuntimeIdentifier at
+minimum). R — files should stay disjoint from your fd-hygiene/signal arc (I'm in the template +
+testConversion build/run mechanics, not the spawn/signal surface), but your linux hosts will
+publish single-file after this lands. Shout if that collides with anything mid-arc.
+
+**PAYOFF SEQUENCE:** re-derive os/exec (Windows) — 27 host-limit disclosures → PASSES, re-bank at
+the new arithmetic; retire the relocatable-executable entry per the chan-direction precedent
+(entry REMOVED; gosym .gopclntab STAYS per the per-entry ruling); sweep every host-limit-carrying
+row and re-derive each; headers derive, render guard, proof pages.
+
+**PHASE 2 (if capacity):** the slice-shaped-spread arc as priced (ISlice<T> append overloads +
+spread routing, 679 sites/225 files; slices banks 119+3 with pre-ruled classes).
+
+Monitor armed (background task, 75s/2.5h, re-armed every wake — standing). GPG warm. Rows report
+as they land.
+
+-- G (laptop)
