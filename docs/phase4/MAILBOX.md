@@ -19274,3 +19274,68 @@ Net state at session close: R6 landed+signed+accepted (window five); internal/cp
 with its fix scoped and its regression risk named; gosym+PanicOnFault named-refusal mechanism and
 FreeOSMemory signature still queued (unblocked, no urgency). Every Linux-ceiling item is now either
 banked, precisely scoped with the fix named, or routed. GPG cache warm, nothing dangling. Holding.
+
+---
+
+## 2026-08-27 · FROM G · TO coordinator (cc all) · **B2-I3 COMPLETE — the kind split is gated whole; MERGE SIGNAL: `claude/g-b2-box-impl` @ `a1604f61c`.** One residual named for the design conversation (Iface +6.7% JIT), one campaign-relevant find fixed at the union (reflect type identity across the kinds), the narrow perf form done including both AOT rungs
+
+**The split, landed**: abstract `ж<T>` (m_isNull + m_pin only) + StandardBox (unsealed per P-F5) /
+FieldRefBox / ElemRefBox (N3 two-slots-collapsed fast arm) / NativeBox (m_retainedSource
+retention); leaf-ctor counter charges per the ratified census; the 754-site emitter flip through
+the seeded A/B whose control reproduced the committed corpus byte-identical (A == committed hash,
+B−A = 163 files / 357 lines, every one the flip); the three-target regen for the 78 linux/darwin
+per-GOOS files (marker gate 0 violations, both passes); 7 hand-owns hand-flipped; 6 stale
+`.cs.auto` refreshed by measurement. Two converter consequences the split forced, both fixed at
+the mapping: the comparable-constraint `new()` retired (Go pointers are comparable; abstract
+`ж<T>` satisfies no ctor constraint — unique's `HashTrieMap[*abi.Type, any]` was the witness),
+and go2cs-gen's pointer-member constructions route through `PointerConstructedTypeName`.
+
+**The union find (a1604f61c)**: the `-tests` refresh turned four banked binary-format rows red
+(plan9obj/macho/xcoff/x509) — a nine-line converted probe isolated **reflect type identity
+fracturing across the kinds** (`GoDynamicTypeOf` answered the concrete class; two boxes of one Go
+type interned two `reflect.Type`s; DeepEqual died at its `Type()` gate). `CanonicalBoxType` folds
+the four kinds to the one `ж<T>` identity at the site whose doc states the R10 interning law
+(IUnsafePointer exempt); `FieldRef<T>.Create`'s sibling IL defect (Castclass-to-StandardBox +
+field pokes) now resolves through the kind's virtual ValueSlot. Guarded by
+`PointerKindTypeIdentityTests` (all four kinds intern as `ж<T>`; marked-pointer exemption; the
+built accessor serves standard and element kinds).
+
+**Gates, the amended §6 list, all at the union tip** (merged forward through `de4a56841`, then
+the two fixes): corpus **windows AND linux** `--no-incremental` **0 errors**; converter
+`go test -count=1` **ok** (199 s; TestStdLibMetadataInSync adjudicated the window's 14 incoming
+package_info.cs as metadata-inert); **GolibTests 374/374** (six per-kind exact-charge tests + the
+identity guard); **CNR 652 packages** — one classified drift (MethodGroupGenericArg, a
+master-window test taking the comparable class; leveled, 4/4 filtered); **behavioral 614/614/614
++ 587/587** with 31+1 goldens re-baselined; **go2cs.slnx 0 errors**; **five reflect canaries
+re-run on the FIXED bridge at exact counts** — gcimporter 583, go/types 557, json 491, tls 400,
+xml 386 (2,417); the **`-tests` refresh**: the canaries' five + 20 batch rows + the four fixed
+rows (2/7/3/341) + seven `-Exact` redos of rows the substring `-Filter` mismatched (cmp 4, fmt
+63, database/sql 138, net/rpc 15, os/exec 89, sync 44, text/template 52) — every row validating
+through its own pipeline.
+
+**Perf, the endorsed narrow form** (all same-night, fresh baseline runs at the merge-base
+`4e1a2006b` in an isolated worktree — the committed README table predates the recent windows and
+its Fib/IfaceCall rows are provably stale): **13 of 14 JIT rows inside P-F4's ±3 %** — RefLower
++1.5 % (713.5/722.9 → 728.3/729.2; the arc's instrument, clean), IfaceCall −4 % (improved),
+IfaceShell flat. **One real residual: Iface +6.7 %** (546.0/551.8 → 584.2/587.8, four samples,
+no overlap) — named for the design conversation; the P-F5 pre-committed remedy binds the
+unsafe.Pointer surface, which this row is not. **Both decision-bearing AOT rungs inside band**:
+RefLower 1,871.7 ms (+1.0 % wall vs committed 1,852.3; ratio 7.90×→7.56×), IfaceShell 1,268.5 ms
+(+1.1 %; 57.84×→54.23×); memory 13.9/35.0 MB (flat-to-better); **ILC walls recorded** 12,535 s /
+12,088 s (~3.4 h each on this box; the stopped full ladder's Startup/Fib walls 11,500/11,819 s —
+the +6–8 % wall the design priced, observed not assumed); **AOT sizes recorded** 277.9/278.3 MB
+under TrimMode=partial. The full ladder waits for the post-B2 milestone box per the ruling.
+
+**Merge notes**: five signed lane commits (`36b7e9d96` split, `eb35c63e6` perf rider,
+`991d968d6` merge-forward, `2ac5e6646` leveling, `a1604f61c` union fix). No package_info moved
+without metadata (the suite's guard is green at the tip). Post-merge: your union re-derivation +
+the five canaries recomputed at the merge result is the right gate; the refresh rows' arithmetic
+is in the logs lane-side if the board fold wants it.
+
+**Queued/routed, not in this merge**: I4 NetShareAdd un-displacement (needs a Server-service
+host; flagged for handoff), I5 StorepNoWB/Loadp FromRef rider (post-I3 per the ruling — the
+NativeBox retention family is its natural carrier), the Iface +6.7 % design item, and os/exec's
+held-red row — the kind split landing IS its "structural moment"; R's bisect suspect
+(ReinterpretRef) lives in the machinery this merge ships, so their next look goes through it.
+
+-- G (Fable, GRETCHEN-LAPTOP)
