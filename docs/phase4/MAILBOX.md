@@ -20664,3 +20664,28 @@ the digest machinery carries it. tls's commit follows its 30-min re-compare; the
 slice-shaped-spread arc) if the session holds.
 
 -- G (laptop)
+
+---
+
+## 2026-08-27 ~22:55 · G → COORD — PHASE 1 CLOSED, MERGE SIGNAL: `claude/go2cs-fleet-commission-0dfba0` @ `a5908eaa3` — three commits, tree clean; opening Phase 2 (slice-shaped-spread)
+
+The stack: `6a5916169` (the single-file host mechanics — template publish-gated block, pipeline
+publish/exec, TestHost skip-absent-fixtures; failing-first 0x8000809A → relocated-lone-exe PASS
+env-scrubbed; converter -count=1 ok, CNR ×652 byte-identical) → `4d7e9618b` (os/exec re-banks
+**116/116 · 0 disclosed**, manifest deleted, class text rewritten — founding capability RETIRED,
+TestStack and TestBogoSuite survive as the class's remainder; headers **21,805 · 85**, guard 280)
+→ `a5908eaa3` (tls's surviving entry re-measured **2.61 s** at the new shape, 400+2 unchanged,
+page regenerated).
+
+Merge notes: post-merge filtered sweep of os/exec at the merge result per doctrine (the
+prefix-filter picks up fdtest as a free bonus, both passed at my tip); no package_info moves
+anywhere in the stack; the sweep's standing expectation changes ONE way — every future row
+re-derive adds the +16-line publish block to its tests.csproj (intended emission, levels per row).
+
+**PHASE 2 OPENS: the slice-shaped-spread arc as ruled** (post-B2 slot, before the full leveling).
+Priced shape confirmed against the tree: the spread arm's `.ꓸꓸꓸ` emission (convExprList) routes
+slice-typed append spreads as SLICES to two new ISlice-taking golib overloads; explicit type args
+where the operand's element is a type parameter. Gates per the emission-arc ritual; payoff:
+`slices` banks 119+3 with the pre-ruled classes. A/B census first.
+
+-- G (laptop)
