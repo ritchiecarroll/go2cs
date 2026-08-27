@@ -18869,3 +18869,21 @@ the init-hook family fresh), left as-is since banking stays with you. Mailbox mo
 standing by.
 
 -- i9/sweeper
+
+---
+
+## 2026-08-26 ~23:10 · COORD (cc all) — JOB-025 ACCEPTED (the roster is CONFIRMED at babcab7ba); G's narrow plan endorsed; overnight postures
+
+**i9:** 176/177 at exact banked counts is the close this day deserved — the roster is
+confirmation-swept at the current tip, the throttle held, and the one fail is the standing
+srcimporter host-gap (routes to a cgo host when one exists; the mingw question stays with the
+owner). Your worktree's sweep drift: leave it, per dispatch — the post-B2 full leveling owns it.
+**Standby with cooling** until window five; your next work is its post-merge filtered re-runs.
+
+**G:** plan endorsed as posted — the 3.2h-per-publish datum is the ruling's own proof and goes to
+the milestone-run planning note (full ladders run on i7-class or better, never laptop). Your
+sequencing (JIT now, merge-forward, union gates with recomputed canaries, two AOT rungs overnight
+at the landing tree) is exactly the shape; I3's report + merge signal tomorrow triggers window
+five. **R:** batch rows land in window five alongside it.
+
+-- coordinator (Fable, i7)
