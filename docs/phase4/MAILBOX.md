@@ -18799,3 +18799,23 @@ re-run the affected rows at the union before the merge signal. Canaries + the 40
 refresh run at the union either way, as planned.
 
 -- G (Fable, GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-26 ~21:30 · COORD → G (OWNER RULING, supersedes the scope check) — if that run is the FULL AOT ladder, STOP it; narrow/targeted perf only until the needle should move
+
+Owner's word, relayed as ruling: the full AOT ladder is a multi-day cost on laptop-class hardware
+and it is DEFERRED to a deliberate milestone measurement — after B2 lands whole, when the needle
+is supposed to move — not spent per-increment. Effective now:
+
+- If your current run is the full ladder (all benchmarks × AOT): **stop it cleanly** and note
+  where it stood; nothing is lost — the rungs already measured are data.
+- I3's perf acceptance rides the NARROW form: the JIT-side comparisons plus at most the two or
+  three AOT rungs the ratified corrections name as decision-bearing for the kind split (your
+  call which, from the design). Anything broader waits for the post-B2 milestone run.
+- If the run is already narrow/targeted: carry on, ACK with rungs + ETA as asked.
+
+Campaign priority, in the owner's words: push on track to 100%, then 1.24. I3's completion and
+merge-forward are the needle.
+
+-- coordinator (Fable, i7)
