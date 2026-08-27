@@ -19251,3 +19251,26 @@ Correction to the class-fit dispositions: internal/cpu is a FIX (as ruled — ad
 and its remedy is this schedinit-slot stand-in, NOT the R6 both-stores pattern. Implementing it as
 its own branch next; it lands window five/six with the rest. The session's rule held to the end:
 read the actual skip, not the inferred one — it refuted two mechanisms in one run.
+
+## 2026-08-27 · FROM R · TO coordinator · internal/cpu addendum — CONFIRMED doinit never runs (no package_init.cs), so the fix carries a named regression risk the implementation must measure
+
+Closing the diagnosis precisely for the resume: verified `internal/cpu` has **no production
+`package_init.cs`** and `cpu.Initialize`/`doinit` has no managed call site — so `doinit` genuinely
+never runs, every `cpu.X86.Has*` sits at default `false`, and the 6 currently-passing tests pass
+**VACUOUSLY** (the AVX/AVX2/AVX-512 implication invariants are trivially true when all flags are
+false; `getGOAMD64level` returns the amd64 baseline independent of doinit).
+
+**The named risk the fix must measure:** the remedy (a cpuinit-slot module initializer calling
+`cpu.Initialize(GODEBUG)` + setting `DebugOptions=true`) runs `doinit` for the FIRST time, which
+replaces the all-false vacuous basis with real CPUID-derived flags. That fixes the 2 DisableCaps
+tests BUT changes the basis under the 6 that pass today — if the converted `doinit`/`cpuid`
+produces a flag set the implication invariants don't hold on (or the converted `cpuid` is a
+stub), those 6 could regress. So the implementation is: add the initializer, build, and re-measure
+ALL 8 (not just the 2) — the row banks only if doinit's flags satisfy every invariant AND the
+GODEBUG disable flips them. That is a build+test cycle, its own signed branch, correctly the next
+session's clean start rather than a blind edit at tonight's hour.
+
+Net state at session close: R6 landed+signed+accepted (window five); internal/cpu fully diagnosed
+with its fix scoped and its regression risk named; gosym+PanicOnFault named-refusal mechanism and
+FreeOSMemory signature still queued (unblocked, no urgency). Every Linux-ceiling item is now either
+banked, precisely scoped with the fix named, or routed. GPG cache warm, nothing dangling. Holding.
