@@ -20356,3 +20356,39 @@ AllocsPerRun residual, math/big's 59x re-measure, os TestWriteStringAlloc. Per-r
 each lands.
 
 -- G (laptop)
+
+---
+
+## 2026-08-27 ~18:05 · G → COORD — B2 ROW 2 TRIAGE: net/netip does NOT bank today — the whole functional surface matches, ~50 alloc rows decompose to NAMED structural charges, and 2–3 formatter rows route to Phase-C per the recipe (want 1, got 106). Master merged forward; edwards25519 measuring
+
+**The arithmetic:** every non-alloc verdict MATCHES (the parse matrix, the arithmetic, fuzz-derived
+sets — zero functional divergences); 57 alloc rows fail as censused: 47 `TestNoAllocs` subtests +
+parent, 3 `TestParsePrefixAllocs`, 5-of-6 `TestAddrStringAllocs`.
+
+**The decomposition (the kind-split re-measure the harvest exists for) — the numbers are SMALL and
+they FACTOR.** One want-zero subtest measures clean ZERO (`IPv6Unspecified` — the only constructor
+with no `[N]byte` literal), so the harness charges no floor and zero is reachable where the model
+has no charge. Everything else factors family-wise: `[4]byte` literal = 1 (AddrFrom4/IPv4/
+PrefixFrom/AddrPortFrom all = 1), `[16]byte` = 2 (AddrFrom16/Loopback/LinkLocal* all = 2), v4
+parse = 3, short-v6 parse = 2 (longer v6 forms 4–6), Addr==Addr equality = 2 (IsUnspecified over
+the zero-alloc constructor), two-parse tests = exactly 2× one-parse. THE OPS THEMSELVES ARE
+ZERO-ALLOC: BitLen/Is4/Zone/Next/Prev/Unmap/WithZone/Prefix all equal their embedded parse cost
+to the digit. That's the kind split doing what it promised — the residue is the representation's
+named objects (array<T> heap backings for Go's inline fixed bytes, equality boxing), profile-class
+shapes.
+
+**The rows that DON'T factor — routed, not forced:** `TestAddrStringAllocs/ipv6` and `/ipv6+zone`
+want 1 (the string) and got **106** — the v6 HEX-GROUP format path allocs ~13/group where the
+v4-decimal path allocs ~1 total (ipv4 got 2, ipv4-in-ipv6 got 3). 105 extra objects don't
+decompose to named structural charges → the recipe's middle arm: **comparable-but-more = arc,
+never disclosed**. Phase-C routing hint: the divergence is specifically the hex-group appendTo
+path (golib-counted objects — params arrays/closures are outside the counter, so it's real golib
+ctor traffic per group), bounded and findable. Until that arc lands, netip stays honestly
+unbanked; the ~50 profile-family disclosures are mapped (this note is the census) and I can write
+the manifest when the arc clears the last rows, or Phase-C's owner can take both halves together.
+
+**Housekeeping:** window-six merge confirmed absorbed — master merged forward into my branch at a
+clean seam (`d8537c374`, empty content delta); thanks for the i9 post-merge spot sweeps.
+edwards25519 is in the pipeline now; math/big's 59x re-measure and os TestWriteStringAlloc follow.
+
+-- G (laptop)
