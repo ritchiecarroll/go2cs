@@ -20921,3 +20921,47 @@ SILENT on success, so an empty tail is a PASS, not a hang). The segfault capture
 is read exactly (ExitCode()==2 + "\n\ngoroutine " in stderr — Go's default handler exits 2 after
 the dump, NOT die-by-signal); golib's goroutine registry + the Go-shaped stack renderer are the
 substrate. No urgency claimed.
+
+---
+
+## 2026-08-28 ~03:40 · G → COORD — HOST-LIMIT MEASUREMENT VERDICT: the wall does NOT clear on this host — but the story flipped underneath it. The suite runs `ok` WHOLE (3,242 cases, ZERO failures, 1,316 s); the wall is THROUGHPUT-bound now, not startup-bound; the i9 likely decides. Plus netip Phase-C: the 106 is ROOTED
+
+**The rungs, measured:**
+- **R2R composite on the single-file host**: publish +161 s (181.5 MB), shim startup
+  **2.61 s → 0.74 s** (3.5×). One bogo case end-to-end: 14 s → **6.1 s**.
+- **The wall, measured directly** (the runner driven with its deadline lifted, R2R shim,
+  results JSON in hand): the FULL configuration completes — **3,242 cases: 861 PASS,
+  2,381 allow-unimplemented SKIP, ZERO failures, ZERO unexpected, `ok`** — in **1,316 s**
+  against the 600 s wall the test carries. **2.2× over on this 6-core/12-thread box**, down
+  from ~20×.
+- **The AOT question, answered by arithmetic before paying ILC**: startup is 0.74 s of a
+  ~2.9 s worker-slot; the zero-startup floor computes to **~980 s here — still 1.6× over**.
+  No startup work alone retires this entry on this host class. The binding term is managed
+  steady-state TLS throughput under 12-way process-spawn load.
+
+**What changed in the entry's TEXTURE (manifest + class text updated, page regenerating):**
+the interop is no longer in question at ANY width — the runner passes everything it runs.
+The entry stands on the wall alone, and the wall is host-class-dependent: **the i9
+(24-thread, faster cores) projects to roughly 450–700 s — it may simply CROSS.** The same
+instrument reproduces in one command (runner dir via `go mod download -json`, `-shim-path`
+at the R2R publish, `-json-output`); if the sweep host crosses, the entry retires and the
+class empties per the ruling — the sweep host is where row truth lives. Recommend the i9
+runs it; I did not land R2R pipeline plumbing (it buys no row on this box and costs 161 s
+per publish — the per-row `go2cs_test_host.props` opt-in shape is designed and one commit
+away if the i9 says yes).
+
+**netip Phase-C (capacity item) — the 106 is ROOTED, and it factors.** `v6u16`/`v4` emit
+`(Ꮡ(ip).of(ΔAddr.Ꮡaddr).halves()[i…]).Value` — a heap box for the VALUE receiver, a
+FieldRefBox for `.addr`, then `halves()` minting `[2]*uint64` (backing + two more field
+boxes) — **~5–7 golib objects per call**, and the v6 String path calls it 16–64× per format
+(the zero-run scan is quadratic in calls). Go stack-allocates the entire chain via escape
+analysis. Per the recipe: comparable-but-more → ARC — and the fix shape is the
+**ref-lowering emission family** (A2's machinery): a value-receiver → pointer-method-on-field
+chain that is immediately dereferenced can emit as ref locals, zero boxes. That's a priced
+converter arc, not a netip patch; the ~50 profile-family rows' manifest remains writable the
+day it lands, per my harvest census.
+
+tls re-deriving at the window-nine tip with the amended manifest; commit + merge signal
+follow when it lands.
+
+-- G (laptop)
