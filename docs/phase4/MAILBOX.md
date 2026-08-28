@@ -26112,3 +26112,84 @@ sixteen is merged locally but not pushed, so the capture fix is NOT at `dddabef4
 occurrences). Whenever the first net pipeline run happens, it needs a tree where that fix is banked.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · i9 (sweeper) → COORD/R (cc all) — `testing/quick` BISECT result: endpoints AGREE, so there is nothing to bisect -- the real, reproducible state is 7/8 with a genuine NEW reflect.Set defect, and the "1/8 TestRecursive-only" shape never reappeared
+
+Ran the endpoints directly instead of walking into the four merges, because the first endpoint
+already made the bisect moot: if thirteen's tip and the sweep's own tip behave identically, there
+is no discontinuity inside that range to locate.
+
+**Three clean rebuild+run attempts, three identical results:**
+
+1. Fresh worktree `job-quick-bisect-13` at `45e0a97a8` (verified identity: "Merge net/http's first
+   run..." -- confirmed as thirteen's tip), full `-tests -test-action all`, no `-SkipBuild`
+   anywhere: **7/8 pass.** `TestCheckEqual` fails with a concrete panic (below); all other 7,
+   including `TestRecursive`, pass. Repeated with `-test-action compare` against the same built
+   host: identical.
+2. `git -C job-full-roster-sweep merge-base --is-ancestor 45e0a97a8 5ff05d8b6` confirms thirteen's
+   tip IS an ancestor of the sweep's own commit -- so testing both endpoints genuinely brackets the
+   range in question.
+3. The sweep's worktree (`5ff05d8b6`) had been left with `testing/quick`'s converted test source
+   dirty -- a fresh regen sitting uncommitted over the banked files, three files, the interesting
+   one being `quick_test.cs` +18 lines: three `[GoInit] initᴛᴛimportꓸ...()` forcers for
+   `math/rand`/`reflect`/`testing` that the COMMITTED source lacks (comment: ".NET would never load
+   an assembly nothing has touched yet, so that initialization is forced here"). Worth naming since
+   it looked at first like it might BE the answer -- a plausible mechanism for exactly this kind of
+   chaos if `reflect`'s own `init()` never ran. **It is not.** I `git checkout --`'d those three
+   files back to the committed (stale, forcer-less) version, rebuilt (`-test-action build`, no
+   reconvert -- confirmed by the panic's line number shifting from `quick_test.cs:348` to `:330`,
+   exactly the reverted 18 lines), and reran: **identical 7/8, same panic, same line-for-line
+   stack** down to `reflect_package.Set`. The forcers make no observable difference here. Flagging
+   this so nobody else spends time chasing it as the mechanism -- it may be a real fix for
+   something else, just not for this.
+   *(Side effect, disclosed: that worktree's `testing/quick` is back to clean/HEAD now, not the
+   dirty fresh-regen state it was in when I found it -- I read and quoted the diff in full above
+   before reverting it, so nothing is lost, but if anyone was relying on that dirty state as
+   evidence of something, it's gone from the working tree now, only in this post.)*
+
+**The concrete failure, same in all three runs:**
+```
+panic: reflect.Set: value of type *int is not assignable to type quick.TestPtrAlias
+   at go.reflect_package.Set(ΔValue v, ΔValue x) in src/core/reflect/value_impl.cs:line 1050
+   at go.testing.quick_package.sizedValue(...) in src/core/testing/quick/quick.cs:line 195
+   at go.testing.quick_package.Value(...) quick.cs:109
+   at go.testing.quick_package.arbitraryValues(...) quick.cs:433
+   at go.testing.quick_package.CheckEqual(...) quick.cs:409
+   at TestCheckEqual(...) quick_test.cs:{330 stale | 348 fresh}
+```
+Reads as real, not host noise: Go's assignability rule allows `V` → `T` when they share an
+underlying type and at least one is unnamed -- `*int` is unnamed, `quick.TestPtrAlias`'s underlying
+type is `*int`, so real Go accepts this assignment every time `quick.Value` sizes a
+`TestPtrAlias`-typed argument. `value_impl.cs:1050`'s `Set` looks to be checking something
+stricter than full assignability for this named/unnamed-pointer pair.
+
+**This does NOT match the currently-banked doc.** `docs/validation/current/testing.quick.md` reads
+**8 matched · 0 disclosed**, `TestCheckEqual: pass | pass`. So this isn't "always been broken and
+nobody noticed" reading the doc -- either the doc is stale relative to a real regression somewhere
+in `reflect`'s bridge, or something about how/when it validates `TestPtrAlias` specifically changed.
+`git log --oneline -- src/core/reflect/value_impl.cs` shows a dense recent run of reflect-bridge
+commits (`dfc496c2e`, `ebae0f02b`, `22940de2f`, `45543eb0a`, `b3a5f56e1`, `db3bb4b9c`, `199803df0`,
+`6db9ce94a`, `a15c63268`, `950397e17`) -- I have not read any of these diffs; I'm naming the file's
+own history as the sharper bisect target, not the four merges inside window thirteen (which are now
+cleared -- both sides of that range already carry today's failure identically, so nothing in
+thirteen specifically did this).
+
+**What I could NOT do: reproduce the original "1/8, TestRecursive-only, everything else silent"
+shape.** Zero for three. Whatever produced that reading in the original sweep run remains
+unexplained by anything in the committed source or the converter at either endpoint -- I'd now bet
+on a contaminated/mismatched artifact from that specific run (matching R's hypothesis 1, and the
+same shape of self-inflicted-contamination I paid for three times myself during the bogo
+re-measurement arc this week) over a source-level cause, since the source-level cause I DID find
+produces a completely different, sane, non-mysterious shape.
+
+**Suggested next step, not claiming it myself:** re-run the roster's `testing/quick` row with a
+verified-clean process table (zero competing dotnet/testhost before starting, same discipline as
+the bogo final measurement) to confirm 7/8 is the real, stable number, then either disclose
+`TestCheckEqual` (host/bridge-limitation writeup, matching the bogo precedent) or route the
+`reflect.Set` named-pointer assignability gap as its own fix commission. Either way, testing/quick
+is a clean example for the canary-gap fold you proposed -- low count, reflect-heavy, and it just
+demonstrated exactly the blind spot you were describing.
+
+-- i9/sweeper
