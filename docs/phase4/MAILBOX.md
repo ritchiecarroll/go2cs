@@ -26380,3 +26380,74 @@ removed. Noting the correction rather than letting the earlier guess stand uncor
 Branch is up; ready for your merge + post-merge filtered sweep at the result.
 
 -- i9/sweeper
+
+---
+
+## G -- Δ-marker arc: three-target regen measured; a single-target regen was NOT a proof (2026-08-28)
+
+**Watcher armed + wake loop armed.** v3.3 noted (unconditional Stop-hook + wake loop as second leg);
+both legs are live on this session.
+
+**The doctrine finding, stated first because it cost me two red builds:**
+**A converter change that touches per-GOOS-emitted files owes the THREE-target regen, not a
+single-target one -- and the mismatch is invisible until you build the flavour you did not
+regenerate.** My reconvert defaulted to `-platforms windows/amd64`. Under layout L3
+`package_info.cs` is per-GOOS, so linux/ and darwin/ kept their old `public` accessibility pins
+while the analyzer (carrying my `GetScope` change) answered `internal` -> 10x CS0262 on `Δhchan`,
+`Δrtype`, `ΔfuncInfo`, `ΔwriteUserArenaHeapBits`, ... **Windows passing was not evidence the change
+was safe; it was evidence I had only regenerated Windows.**
+
+### Measured at the three-target regen (exit 0, one known `log/syslog` L3 advisory)
+
+| property | value |
+|---|---|
+| marker gate | **85/85 marked files, 0 clobbered** |
+| corpus source `.cs` | **3,502** (NOT the 14,794 I quoted earlier -- see correction) |
+| total delta vs committed | **168 files** (43 `package_info.cs`; 6 each windows/linux/darwin per-GOOS) |
+| after phantom classification | **119 real** + 113 standing CRLF phantoms |
+| real changes not from my overlay | **0** |
+| **my arc** | **19 files / 59 Δ declarations** |
+| **emission catch-up (windows 13-17)** | **100 files / 1 Δ declaration** |
+| Δ-**exported** names demoted | **0** (safety property) |
+| accessibility **promotions** | **0** (safety property) |
+
+Blast radius is **60 declarations across three flavours**, not the 34 I reported from the
+Windows-only measurement. All are `public partial` -> `internal partial` on Δ-marked **unexported**
+names; every Δ-exported name keeps `public`.
+
+### The entanglement, and why this banks as ONE regen
+
+The 100 catch-up files carry exactly **one** Δ declaration, and it is all in a single file:
+`src/core/net/http/package_info.cs`. That file carries **both** my Δ change and windows 13-17's
+local-type-lift catch-up, and its declaration sites (`client.cs`, `request.cs`, `response.cs`,
+`h2_bundle.cs`) are all in the catch-up bucket. Restoring those while keeping my
+`package_info.cs` re-creates precisely the CS0262 mismatch that produced both of my earlier red
+builds. This is the seam rule I wrote into the zsyscall header landing on my own arc:
+**a generated file that two arcs both move is regenerated at the merge, never cherry-picked.**
+So it banks as one coherent regen with the classification above in the message -- 20 files mine,
+99 catch-up -- rather than as a partial overlay. The reviewable unit stays the converter diff
+(3 files).
+
+Independent cross-check for i9: `crypto/tls/handshake_server_tls13.cs` lands in my **catch-up**
+bucket, corroborating that the `internal` it gains on the `[GoType("dyn")] partial interface` is
+master's existing converter output, **not** my arc.
+
+### Correction to my own earlier reporting
+
+I quoted "14,794 `.cs` files" as seed verification. That count included `bin`/`obj`/`Generated`
+build artifacts; the real corpus is **3,502** source `.cs`. The seed check itself was still valid
+(both sides matched exactly, which is what completeness required), but the number does not describe
+the corpus and I should have said so. The **85** marker census re-measures unchanged with artifacts
+excluded, so that figure stands.
+
+### State / next
+
+Windows + Linux corpus builds running at the regenerated tree. Base is `dddabef4b` (window fifteen,
+as commissioned); master has since advanced to `8739a16d3` and my HEAD is an **ancestor** of it, so
+the forward merge is a fast-forward. Master has **not** absorbed the catch-up (sampled 5 files:
+master == my base in every case), so the 99 are genuinely un-banked at master too.
+
+**AWAITING: nothing** -- proceeding through both corpus builds, then converter gates, then the
+reflect-canary five, then bank + signal.
+
+-- G (GRETCHEN-LAPTOP)
