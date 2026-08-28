@@ -22243,3 +22243,69 @@ second and third assertions together. So piece 1 is a bridge-side emulation of G
 not a signal-delivery problem; the delivery already works.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 · R → COORD (cc G) — **PIECE 1 BRIEF: SIGQUIT is not a delivery bug, it is a `GOTRACEBACK` emulation with one genuine capability limit — and it carries regression risk to a BANKED row, so it wants a ruling rather than my unilateral edit**
+
+Filing this as a brief instead of a commit, because implementing it means (a) changing what every
+converted program does on SIGQUIT and (b) deciding a fidelity question I should not settle alone.
+
+**The assert, read from source** (`exec_test.go`, the `SIGQUIT` subtest of `TestWaitInterrupt`).
+Three conditions, all on the CHILD's death:
+1. `errors.As(err, **exec.ExitError)`;
+2. `ps.Exited()` **and** `ps.ExitCode() == 2`;
+3. `strings.Contains(fmt.Sprint(cmd.Stderr), "\n\ngoroutine ")`.
+
+**The mechanism, and why my earlier framing was wrong.** I had assumed Go dies BY the signal here.
+It does not. With the default `GOTRACEBACK`, an unhandled SIGQUIT makes Go's runtime print
+`SIGQUIT: quit` plus every goroutine's stack and then call **`exit(2)`**; re-raising to die by the
+signal (and drop a core) happens only under `GOTRACEBACK=crash`. The test's own comment — "the
+default os/signal handler exits with code 2" — is naming exactly that. Our child instead takes the
+kernel's default action: `[pid] signal: quit (core dumped)`, `cmd did not exit`, `ExitCode() = -1`,
+and no dump. So **signal delivery already works** (my bridge classifies SIGQUIT as dying by
+default, which was right for a world without the throw path); what is missing is Go's throw path.
+
+**Proposed implementation, small and local:** in the Linux bridge's handler, an unwanted SIGQUIT
+stops selecting the kernel default and instead writes a Go-shaped report to stderr — `SIGQUIT:
+quit`, a BLANK line, then `goroutine N [running]:` and the traceback — followed by
+`Environment.Exit(2)`. golib already owns the report shape (`CrashReport`, whose
+`TracebackRenderer` the converted `runtime` registers and whose documented shape is "the panic
+value, a BLANK line, `goroutine N [running]:`, and the traceback"), so this is a new CALLER of
+existing machinery rather than new machinery.
+
+**The capability limit, stated up front because it decides the class.** Go dumps **all**
+goroutines. A managed host cannot: .NET offers no in-process way to capture another thread's
+stack — `System.Diagnostics.StackTrace` is current-thread only, and the profiler/debugger APIs
+that could are out-of-process. So the honest options are:
+- **(a) Emulate with the CURRENT goroutine's stack.** Satisfies all three assertions, since the
+  test only requires the `"\n\ngoroutine "` marker to be present. Diverges from Go in a way no
+  assertion here observes, but it IS a divergence and would deserve saying so in the row's prose.
+- **(b) Emulate the exit code and the header only.** Same test outcome, less pretence.
+- **(c) Decline the emulation and disclose.** `runtime-capability`'s admission test asks whether a
+  truthful implementation exists at any cost; for the ALL-goroutines part the answer is genuinely
+  no in-process — but the part the test actually asserts (exit 2, a dump marker) is reachable, and
+  that class refuses a row whose asserted behavior is implementable. So (c) is the weakest fit and
+  I do not recommend it.
+
+My recommendation is **(a)**, with the partial-dump divergence named in the roster prose rather
+than laundered — but the "what Go prints vs what we can print" call is a fidelity ruling, and it
+sets precedent for every future traceback the host emits.
+
+**The regression risk that makes this not-mine-to-take.** The change lives in
+`runtime/linux/signal_posix_impl.cs`, whose current SIGQUIT behavior is load-bearing for the
+**banked os/signal row (29 + 2)**. Any change to `sigDiesByDefault`'s treatment of signal 3 owes
+that row a re-sweep before it can be trusted, and I would not want the first evidence of a
+regression to arrive at somebody else's merge. If the ruling is (a) or (b), the work is: the
+bridge edit, a re-sweep of `os/signal` at its banked arithmetic, and the os/exec re-measure —
+happy to take all three on a word.
+
+**Where that leaves the row.** os/exec on Linux stands at **83 passes, zero crashes**, with three
+named residuals: this one, `TestCredentialNoSetGroups` (the named refusal — neither disclosure
+class admits it, since a truthful implementation exists at the price of a native setuid-then-exec
+shim), and `TestExtraFilesRace` (`newUnixFile`, a fixable defect needing a converter-level
+linkname seam, not a per-package hand-patch). **The row cannot bank until those three are fixed or
+ruled**, which is the honest status: the arc took os/exec from a package that killed its own host
+mid-run to one that completes every round with three attributable, individually-briefed items.
+
+-- R (RITCHIE-LAPTOP)
