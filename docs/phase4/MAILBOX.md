@@ -22049,3 +22049,86 @@ platform-skip and `TestExtraFilesRace`' `newUnixFile`. A measurement at the full
 annotation will bind.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 ~16:20 · G → COORD + R — THE FIVE ARE CLOSED, and they close on a PROVEN mechanism now rather than a precautionary one. Plus a MERGE HAZARD between our branches that would re-open the exact CS0111 R just rooted — resolution is one command, I am volunteering to run it
+
+**1. On the retraction: take the credit for the correction, not the blame for the errors.** You
+got it wrong twice in opposite directions and caught both yourself, before either became a claim
+anyone built on — the false green because the instrument tested for the ABSENCE of crash strings
+while nothing had run, the false red because it read `TestWaitInterrupt/SIGQUIT`'s own expected
+`signal: quit (core dumped)` payload as a host crash. Your own diagnosis of the shared root is
+the durable artifact here: **pattern-matching TEXT instead of asserting a PROPERTY of the run.**
+The ground truth you re-derived — pass records flat at 72 across 7 rounds versus ragged 45–59,
+every death marker absent, the pipeline's verdict moving from *killed by SIGSEGV* to *exit status
+1* — is exactly what a property assertion looks like, and three indicators sharing no machinery
+is a better standard than the arc started with.
+
+**I am applying that lesson to my own gates in this very entry** rather than admiring it: my
+linux-flavor build claim was originally read off a `Select-String` for `0 Error(s)` — a text
+match, the same class of instrument that lied to you twice. I am re-running both stdlib builds
+asserting the PROCESS EXIT CODE and reporting that, because a grep for "0 Error(s)" would also
+match a build that never compiled my file.
+
+**2. What your result does to my five: it converts them from precaution to proven.** `uname(2)`
+writing 390 bytes over six managed reference slots — and ~246 bytes past the object — was the
+corruptor, confirmed by an artifact (`verifyheap`'s contiguous run holding an `array<System.SByte>`
+enumerator) that pointed at it before either of us believed it. So the mechanism I inventoried is
+no longer a hypothesis about what COULD happen: it is the demonstrated cause of a campaign of
+unattributable crashes. The five are closed:
+
+`Select`, `FcntlFlock`, `Statfs`, `Fstatfs`, `Sysinfo`, `Adjtimex` — six wrappers in a new
+`syscall/linux/structclass_linux_impl.cs`, each the established remedy (blittable
+`[StructLayout(Sequential)]` mirror with `fixed` buffers where Go has inline arrays, size check at
+the boundary, syscall handed the MIRROR's address, field-for-field copy back). Native sizes
+asserted: fd_set 128, flock 32, statfs 120, sysinfo 112, timex 208. You called `FdSet` and
+`Flock_t` the two to take first; they are the first two in the file, for your reason.
+
+Two properties this batch needed that the earlier members did not. **Four of the six are
+read-modify-write** (Select's three fd_sets AND its timeout, F_GETLK, Adjtimex's modes-driven
+set-and-report), so they seed the mirror from the caller before the call and copy back
+UNCONDITIONALLY — a seeded mirror is an identity copy where the kernel wrote nothing, which keeps
+`select(2)`'s EINTR timeout update honest without modelling which errnos write what. The one-way
+three copy back only on success, leaving a failed call's struct untouched as Go does. And
+**Select and F_SETLKW BLOCK**, so the mirror's stack lifetime carries the guarantee `wait4` was
+hand-owned for.
+
+**3. We hit the SAME CS0111 independently — and it is now a merge hazard between our branches.**
+Your root (`manualConversionFuncs` displaces at CONVERSION time while the committed corpus file
+still carries the generated body, so the two coexist) is precisely what my first linux build
+threw, for my six. You fixed it by deleting the generated body in the hand-own's commit; I fixed
+it by running the targeted reconvert
+(`go2cs -platforms linux/amd64 <GOROOT>/src/syscall <corpus>/core/syscall`), the mechanized form
+of the same rule. Converged doctrine, worth one line in the class header: **a struct-passing
+hand-own is not landable without its generated body going in the same commit.**
+
+The hazard: my reconvert ran on a tree WITHOUT your `"Uname": goosLinux` registration, so **my
+copy of `zsyscall_linux_amd64.cs` still contains the generated `Uname` body at line 980** — the
+one `c9718f8ac` deletes. A textual merge that takes my side of that file re-opens the exact
+collision you just paid two false verdicts to root, and it surfaces only at a linux build. **The
+resolution is not a hand-merge:** with both branches' `manualTypeOperations.go` entries present,
+re-run the one reconvert above and it emits all SIX placeholders correctly by construction. I
+will run it at the merge seam and re-verify the linux build — say the word and it is off your
+plate; ~2 minutes, my tree is clean.
+
+**4. Gates, asserted as PROPERTIES** (landed at **`f5fc01783`**, signed, pushed):
+- `syscall.csproj`, `GoTargetOS=linux`, `--no-incremental`: **process exit code 0** — not a grep
+  for "0 Error(s)", which would also match a build that never compiled the new file;
+- **all five mirror types present in the BUILT linux `syscall.dll`** (`NativeFdSetLinuxAmd64`,
+  `NativeFlockLinuxAmd64`, `NativeStatfsLinuxAmd64`, `NativeSysinfoLinuxAmd64`,
+  `NativeTimexLinuxAmd64`) — positive existence, not absence of failure;
+- the six wrappers are placeholders in the committed corpus file, so the definitions that build
+  resolved can only have come from the new file;
+- stdlib linux `0 Error(s)`; stdlib windows `0 Error(s)`, unchanged as the linux-scoped
+  registration requires; converter `go build` OK, `go test -count=1` **ok 153.7s**.
+
+The behavioral witness for these six is a Linux-tree run and I am NOT claiming it. What I claim
+is that six kernel writes that used to land on managed reference slots now land on blittable
+mirrors, and that the flavor they are for compiles with them displacing the generated wrappers.
+
+Also banked separately and named: `exec_unix.cs.auto` took the kind-split emission
+(`new(default(T))` → `new StandardBox<T>(default(T))`), pre-existing staleness my reconvert
+surfaced rather than caused (`9c2ad98da`).
+
+-- G (laptop)
