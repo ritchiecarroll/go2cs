@@ -27995,3 +27995,59 @@ master — the lift arc, the arity ladder, and your Δ work retired 73 diagnosti
 and the last three are one declaration from zero.
 
 -- coordinator (Fable, i7)
+---
+
+## G -- REFLECT FIRST RUN, run 2: accessibility root CLEARED, 37 errors behind it now visible
+
+**Watcher armed + wake loop armed.** Branch `g-reflect-host` on master `e6033ac8a`.
+
+### The nested-lift rule works
+
+**CS0052 / CS0050 / CS0051 → 0.** `typeᴛ38_A` is now pinned `public`, tracking the exported field
+`A` it exists to serve. Rule as GO'd: strip the synthesized scaffolding; if a Go identifier remains,
+apply the export rule to *it*; if none remains, there is no export status and it stays public.
+
+**Committed-corpus blast radius: ZERO.** Predicted from the census (23 of 24 nested lifts serve
+UNEXPORTED fields and stay internal) and confirmed by measurement — 0 real changes anywhere in
+`src/core` outside reflect's own new test artifacts. `reflect/{package_info,type}.cs` show modified
+but are the documented `-tests`-closure `global::go.*` root escape, restored per doctrine, not drift.
+Converter `go vet` clean; scope test green with **11** new cases including both-direction negative
+controls (`typeᴛ_A`, `typeᴛ38_`, `type_`, `typeParam_A`, `TypeParam_A`).
+
+### The diagnostic the commission asked for
+
+**The production `reflect` package converts and BUILDS** — `reflect.dll`, no errors, only CS8619
+nullability warnings on the generated `Δcommon` shell. The whole closure builds. That is the
+headline: reflect itself is not the wall.
+
+The **test host** now fails with **37** errors in 10 families — the classic "fixing the blocker
+raises the count because newly-reachable code surfaces its own defects":
+
+| family | n | where |
+|---|---|---|
+| CS1061 no such member | 10 | `ImplementGenerator` shells for `TestCallPanic_T` / `_T2` referencing `TestCallPanic_T1` / `_t0` **as members** |
+| CS0120 object ref required for non-static | 8 | same shells |
+| CS0030 cannot convert | 5 | `all_test.cs` — `ж<array<byte>>` → `ж<MyBytesArray0>` (named-array pointer) |
+| CS7036 missing required param | 4 | `abi_test.cs` — `SetArgRegs(nint, nint, uintptr)` called without `floats` |
+| CS1503 argument conversion | 4 | `all_test.cs` |
+| CS0266 no implicit conversion | 2 | `all_test.cs:1693` — `double` → `go.complex64` |
+| CS8917 / CS1729 / CS0841 / CS0029 | 1 each | `all_test.cs`, `S1.g.cs` |
+
+By file: `all_test.cs` **16**, the two `TestCallPanic` generator shells **16**, `abi_test.cs` **3**,
+`S1.g.cs` **2**.
+
+**Shape of the work, on first read (NOT yet rooted — flagging as hypotheses):** the 16 generator-shell
+errors look like ONE root — `ImplementGenerator` treating a function-local type lift as a member name
+when building the interface witness — so the 37 may collapse to roughly **five** roots, not thirty-seven.
+`abi_test`'s `SetArgRegs` is an internal-test-hook signature mismatch (the converted hook takes a third
+`floats` parameter the test does not pass). `complex64` and the named-array pointer conversion are
+converter families we have seen before. I will root them rather than assume.
+
+### Next
+
+Converter suite + CNR running for the nested-lift fix. Then I take the generator-shell family first —
+best ratio, 16 of 37 behind one suspected root — and report each root as it lands rather than batching.
+
+**AWAITING: nothing.**
+
+-- G (GRETCHEN-LAPTOP)
