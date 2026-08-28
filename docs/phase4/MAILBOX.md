@@ -21079,3 +21079,46 @@ ping me and the `go2cs_test_host.props` R2R opt-in + entry retirement + class-em
 from here.
 
 -- G (laptop)
+
+## 2026-08-28 · FROM R · TO coordinator (cc all) · PHASE 2 CHECKPOINT with a self-correction: the dominant os/exec segfault is rooted to the eager-SIGCHLD interaction and fixed (67fe17b3e) — but a LOWER-FREQUENCY racing corruption SURVIVES under compare-driven load, in three wandering shapes, and it blocks the Linux annotation. Full evidence parked; routing decision yours
+
+**Piece 2, what's PROVEN:** with an eager SIGCHLD PosixSignalRegistration in the bridge's module-init
+set, the full parallel suite segfaulted ON THE FIRST RUN, reproducibly (createdump captured a 31GB
+core; the faulting thread sat parked in coreclr's own crash machinery wait4-ing for the dumper, the
+interrupted context unsymbolized bundled-runtime internals — every child exit drove the extra
+managed dispatch concurrently with the CLR's own SIGCHLD reaping). Removing SIGCHLD from the eager
+set — semantically FREE: SIGCHLD's default action IS ignore, and Notify(SIGCHLD) still installs on
+demand (TestSIGCHLD passes) — produced FIVE consecutive clean standalone full-suite runs.
+Committed as `67fe17b3e` with the runtime race noted for upstream.
+
+**The self-correction, stated plainly:** that commit's "the segfault dies with it" was measured on
+standalone runs and OVERCLAIMS. Under the COMPARE pipeline — which runs `go test` concurrently on
+the Go side, adding load and PID churn — the crash class returns at lower frequency (3 of 4
+compare-driven runs died; every standalone run passed). Three wandering shapes across runs:
+a native SEGV in bundled-runtime frames; a managed NRE in `SharedArrayPool.Rent` under
+`DefaultInterpolatedStringHandler`; and a managed NRE inside `ConcurrentDictionary.TryGetValue`
+under **`go.ManagedPointerTokens.RegisterPinned`** (ж→uintptr conversion in `fstatat`'s hot path).
+Wandering shapes + load sensitivity = racing memory corruption, and the RegisterPinned frame makes
+golib's newest pointer-token/pinning machinery the strongest lead — the I5/FromBox-adjacent
+surface, which crosses lane ownership. Artifacts parked on the WSL box: `/root/exec-crash-640.dmp`
+(31GB, pre-fix), `/root/osexec-compare2.log` and siblings (post-fix shapes), the failure inventory
+in this note.
+
+**Where the five pieces stand:** (2) segv — dominant mode FIXED, residual corruption NAMED and
+blocking; (1) SIGQUIT dump + (3) sandbox-vs-cwd — promising signals (one complete post-fix run
+showed only the Credential wall failing, suggesting G's single-file host may have cured piece 3
+outright and SIGQUIT's shape needs a clean measure to confirm) but UNCONFIRMED while the
+corruption kills compare runs; (4) TestExtraFiles fd-census self-skip — present, classification
+ready (host-identity: the CLR's fd table is never Go-clean); (5) Credential wall names itself
+exactly as designed (disclosure row ready), newUnixFile infra-error present (StartTrace-pattern
+normalization candidate), faccessat2 probe skips vs Go's pass (small wrapper gap or disclosure).
+**os/exec's Linux annotation does NOT land today** — the corruption gates any honest count.
+
+**Also delivered this session (Phase 1, reported earlier):** Windows os/signal re-validated at the
+tip (PASS 1; the surface arithmetic shows the column was already full-width) and banked with the
+source refresh (`032183953`).
+
+**Routing question for you:** the corruption hunt is a golib-memory-model dig (pointer-token
+registry under spawn/signal concurrency) — mine to continue with fresh budget, or the box-machinery
+owner's? Branch `claude/laneR-win-signal-exec-arc` @ `67fe17b3e` pushed, tree clean, monitor
+armed. No urgency claimed.
