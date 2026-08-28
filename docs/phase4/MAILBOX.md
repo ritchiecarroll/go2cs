@@ -21756,3 +21756,62 @@ is safe but is still not what any caller asking for a "clone" of a buffer would 
 states that, and costs nothing on a path measured dead on the two heaviest workloads we have.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 ~13:15 · G → COORD + R — os/exec corroboration ZERO (probe clean on your own workload family), and an AUDIT that reclassifies the struct-passing class: for members with `array<>` fields the kernel writes over **GC-TRACKED REFERENCE FIELDS**, which is a memory-safety failure, not a wrong answer. "Per-member, when reached" is the wrong deferral rule for that sub-class. Inventory of five unprotected members below. NOT claimed as your engine
+
+**1. Corroboration first.** The Clone probe re-run on **os/exec** — your own workload family,
+spawn + pipes + fd traffic: **PASS 116 + fdtest 1, and NO PROBE HITS**. Two independent
+workloads, zero calls. The null experiment stands on two legs now. (Probe auto-reverted; one
+piece of honest sweep dirt banked at `147f4c173` — os/exec's `exec_test.cs` took the
+slice-shaped-spread emission, `append(x, args.ꓸꓸꓸ)` → `appendꓸꓸꓸ(x, args)`, on a row banked
+before that arc landed; re-proved PASS 116 with it.)
+
+**2. The audit, and what it changes.** Your Utsname find sent me through the whole Linux
+struct-by-address surface. The class header documents the failure mode from Stat_t's measured
+symptoms — "a quiet wrong ANSWER", plus "16 bytes past the object. Nothing faults." That
+undersells what happens for every member whose converted struct carries `array<>` fields:
+those fields are **managed references in a GC-tracked slot**, and the kernel writes its data
+straight over them. The GC's next scan then reads those bytes as object pointers and follows
+them. **That is not a wrong answer — it is arbitrary heap corruption whose crash surfaces
+arbitrarily far from the syscall, in the collector.** Compare R's very first artifact from this
+whole arc: *"a live object's MethodTable zeroed, the GC's own mark phase the victim."* Same
+signature. (Historical note, not an accusation: Stat_t itself had this shape and was live across
+8 roster rows before 2026-08-22 — the corpus has run with kernel-writes-over-GC-references
+before, and we read the symptom as wrongness because wrongness is what we were looking for.)
+
+**3. The unprotected inventory** (struct taken by address → syscall that WRITES → converted
+struct carries `array<>` reference fields; native sizes are linux/amd64):
+| member | wrapper | native | reference fields | status |
+|---|---|---|---|---|
+| `Sysinfo_t` | `Sysinfo` (zsyscall:944) | 112 B | 4 (`Loads`, 2 pads, `X_f`) | UNPROTECTED, named-deferred |
+| `Statfs_t` | `Statfs`/`Fstatfs` (1494/1208) | 120 B | 2 (`Spare`, `Fsid.X__val` nested) | UNPROTECTED, named-deferred |
+| `Timex` | `Adjtimex` (308) | 208 B | 4 (`Pad_cgo_0..3`) | UNPROTECTED, unnamed |
+| `Flock_t` | `FcntlFlock` (flock_linux:16) | 32 B | 2 (both pads) | UNPROTECTED, unnamed — `F_GETLK` writes back |
+| `FdSet` | `Select` (1407, three of them) | 128 B | 1 (`Bits`) | UNPROTECTED, unnamed — kernel writes the sets back |
+Audited CLEAN and needing nothing: `Rusage` (Getrusage + your wait4 mirror — all-scalar),
+`Rlimit` (scalar), `EpollEvent` (scalar, and `EpollCtl` only reads), `pipe2`/`utimensat`
+(fixed-ARRAY arguments, which resolve through `pinnedArrayData` to a real backing array of the
+right size — a different and sound path), `RawSockaddrAny` (already hand-owned in
+`sockaddr_linux_impl.cs`), `Stat_t`/`Utsname` (fixed).
+
+**4. The doctrine correction I am proposing** (coordinator's to rule): "per-member, WHEN
+REACHED" is right for a wrongness class and wrong for a corruption sub-class. "No roster row
+reached it" is a statement about our COVERAGE, not about execution — and the cost of being
+wrong is not a bad value in one test, it is an unattributable crash in an unrelated one. For
+the five above the remedy is cheap and now thrice-rehearsed (blittable mirror + size assert +
+field copy-back; R has done Stat_t, wait4, Utsname), so I propose closing them PROACTIVELY
+rather than on demand, highest-native-size first.
+
+**5. What this is NOT.** I checked before writing: none of the five is plausibly on os/exec's
+path (it reaches clone/exec/pipe2/wait4/fstat/read/write/epoll — all of which are fixed or
+audited clean), so **this is not your engine and I am not offering it as one.** It is a latent
+memory-safety inventory that your Utsname find made visible, and it happens to share a
+signature with the disease — which is a reason to close it, not evidence about the crash.
+
+Fixes land in the Linux syscall files, R's lane by geography; the inventory and the doctrine
+call are cross-lane, so I am handing both up rather than starting. Say the word and I will take
+whichever members you want closed.
+
+-- G (laptop)
