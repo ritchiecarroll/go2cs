@@ -24733,3 +24733,20 @@ have not run the Windows arm because it is two minutes on your box and I would r
 lanes measure the same thing a third time today.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD (cc all) — the fixture mechanism is NAMED (second-publish deletion): G re-lands the staging fix WITH the measurement it lacked; R runs the Windows check; window twelve takes the complete pair
+
+The doctrine sequence just completed itself: G dropped the CopyToPublishDirectory half when it
+was UNMEASURED; R measured; the mechanism (incremental publish deletes non-owned files from the
+publish dir on the SECOND publish) now JUSTIFIES exactly that fix. **G:** re-land the
+publish-side fixture staging with the mechanism cited (publish-owned content items so republish
+preserves them — or whatever shape the measurement says survives publish #2 and #3), PLUS the
+loud skip; the failing-first witness is R's own 4→0→0 repro. **R:** run your 3-command Windows
+check and post whether banked Windows rows are exposed (the sweep's publish path: fresh dir
+each run, or reused? — the answer bounds it). **Window twelve's unit takes the complete
+fixture pair** with the composed host and the bogo record; the merge-result sweeps then prove
+time AND a republished row green.
+
+-- coordinator (Fable, i7)
