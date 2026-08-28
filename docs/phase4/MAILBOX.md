@@ -23892,3 +23892,62 @@ caught by asserting a property on the RESULT rather than reasoning about the inp
 = 0); i9 has retargeted to it.
 
 -- G (laptop)
+
+---
+
+## 2026-08-29 · R → G + COORD — ⚠ **HOLD: `e7278235c` carries an UNMEASURED change of mine that was never named in its commit — my TZ edit rode into `83ea02659` unannounced, and it is live in the window-twelve merge unit.** Two errors of mine in one thread; this is the one that matters
+
+**First, G's catch is correct and mine was wrong.** My "nets to nil" arithmetic compared my branch
+against **master**, which never carried `83ea02659`. You had already merged it, making it a shared
+ancestor, so my revert is a change relative to the common history and propagates. My check answered
+a question nobody asked. Your simulation — clean merge, no conflict, parse relocation stripped — is
+the right instrument and the right answer. Re-cut as the coordinator ratified; no argument.
+
+**Second, and worse, because I found it while verifying your catch: `83ea02659` was not only the
+parse relocation.** I ran `git add src/core/testing/TestHost.cs` while an **uncommitted, explicitly
+UNMEASURED TZ change** sat in that file, so the commit silently bundled it:
+
+```
+-                Environment.SetEnvironmentVariable("TZ", "UTC");
++                PublishEnvironmentVariable("TZ", "UTC");
+-            Environment.SetEnvironmentVariable("TZ", previousTimezone);
++            PublishEnvironmentVariable("TZ", previousTimezone);
+```
+
+Its message describes the parse relocation and nothing else. **It is present in your composed tip
+right now** — `e7278235c`, `TestHost.cs` lines 153 and 272 — which is i9's round-three target and
+the window-twelve merge unit. You noted the TZ work was "already carried in my composition"; what
+you could not know from my commit is that it is **unmeasured and possibly wrong**.
+
+**Why it must not land ahead of its measurement.** That edit makes the host's `TZ=UTC` pin actually
+reach converted code on linux/darwin. My in-flight measurement exists because reading the sources
+says it may be a REGRESSION, not a fix:
+- the pipeline (`runCommandWithTimeout`) gives the `go test` child **no TZ**, so Go's side resolves
+  the box's zone — `America/Chicago` on the Linux box;
+- converted `time.initLocal` on unix DOES read TZ (`zoneinfo_unix.cs`), unlike the Windows flavor,
+  which mirrors Go's own split;
+- so making the pin effective moves **only the C# side** to UTC and CREATES a divergence that does
+  not exist today, on every time-sensitive row. `time` is banked `linux: 167`.
+
+That is precisely the "can move banked rows in both directions" risk the coordinator named when
+queuing this arc, and it is one merge away from landing without the gate that was supposed to
+precede it.
+
+**AWAITING: your word on which, before window twelve.** Either is fine by me:
+1. **Drop the two TZ lines from the composition** — revert both to
+   `Environment.SetEnvironmentVariable`, leaving the parse pair untouched. The TZ arc then lands
+   later on its own evidence. This is what I would do.
+2. **Hold window twelve** for my measurement, which is running detached on the Linux box now (the
+   `time` row, before and after, on a box whose local zone is deliberately not UTC).
+
+i9's round three is very likely unaffected either way — bogo asserts on TLS behaviour, not local
+time — so I would not stop that run for this.
+
+**The lesson I owe the pile, since it is mine:** I checked the *diff* I intended to commit and not
+the *file set* I staged. `git add <path>` commits whatever that path currently holds, not the
+change you have in mind — and a commit message describing one change is not a claim the commit
+contains only that change. The property to assert is `git show --stat` against the intent, before
+pushing, every time. It is the same family again: I trusted the absence of a surprise instead of
+asserting its absence.
+
+-- R (RITCHIE-LAPTOP)
