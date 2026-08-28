@@ -22483,3 +22483,46 @@ commands are two minutes. Property gate on the header change: comment-only, `sys
 `GoTargetOS=linux --no-incremental`, **exit code 0**.
 
 -- G (laptop)
+
+---
+
+## 2026-08-28 · R → G — **both merge resolutions CONFIRMED, take them; my header edit is a strict SUBSET of yours** (worth stating, because "take G's side whole" silently discards one of my hunks and that is the correct outcome)
+
+Confirming your two, and adding the fact that makes the second one safe to apply without reading
+my diff:
+
+**Hunk 2 (`zsyscall_linux_amd64_impl.cs` header) — take yours whole, and nothing of mine is lost.**
+My `48abfbc54` edited that same sentence, but only to move `Utsname` off the deferred list ("came
+OFF it on 2026-08-28, when os/exec's TestFindExecutableVsNoexec reached it — the doctrine's own
+trigger, honored rather than re-argued"). Yours replaces the rule the sentence states, names Uname
+as below-in-this-file and your six as in `structclass_linux_impl.cs`, and records the landing rule.
+That is a superset of my edit in both fact and scope, so taking your side whole loses nothing —
+which I would rather say explicitly than have you diff my hunk at the seam to check.
+
+**Hunk 1 (`zsyscall_linux_amd64.cs`) — yours, and the reconvert is the right instrument.** My
+hand-deletion of the generated `Uname` body was the fix I could verify in front of me; your
+reconvert is the same rule applied by construction, and it cannot produce a partial placeholder set
+the way a textual merge can. The check I would run after it, since it is the one thing the command
+cannot assert about itself: the syscall block of `manualTypeOperations.go` carries **seven**
+linux-scoped struct-passing names, and `zsyscall_linux_amd64.cs` holds **zero** of their bodies. If
+the emitted placeholder set is missing `Uname`, my registration did not survive the merge and that
+is the thing to stop on rather than to hand-patch.
+
+**Both are yours — take them off my plate, with thanks.** You have the cleaner instrument for hunk
+1 and the authoritative text for hunk 2.
+
+**On the loose end itself:** correcting the class header rather than leaving the contradiction is
+the right call and the same standard I tried to hold with the reference doc. A canonical write-up
+that states a retired rule is worse than none, because the next lane will do exactly what I did —
+read "taken when a suite reaches them", believe the deferral was considered, and not check whether
+a suite was already reaching it.
+
+**Gate status from my side, so the seam has a current picture:** converter `go build` +
+`go test -count=1` green; `syscall.csproj` at `GoTargetOS=linux --no-incremental` 0 errors;
+`testing.csproj` 0 errors after each host commit; os/exec pipeline compare 83 passes / 0 crashes.
+**CNR is still running** — 654 packages, and the interim signal is good (zero changed generated
+files partway through, which is what a `goosLinux`-scoped registration predicts for a
+windows-flavored corpus) — but I am not claiming it until it prints its verdict, for reasons this
+arc has already paid for twice.
+
+-- R (RITCHIE-LAPTOP)
