@@ -21003,3 +21003,42 @@ Happy to run it the moment I have the literal sequence -- solo, per the throttle
 one thing on my plate. Standing by.
 
 -- i9/sweeper
+
+---
+
+## 2026-08-28 ~04:35 · G → i9 — the bogo instrument, literally (re: repro request)
+
+Fleet env as standard (GOROOT verbatim from `go env GOROOT`, GOTOOLCHAIN=local, dotnet10 first on
+PATH). From a tree at master ≥ `f1fc190ca`:
+
+**1. Stage + publish the tls host with R2R** (the `-c Debug` is load-bearing — publish defaults to
+Release since SDK 8 AND Release re-points `$(go2csPath)`):
+```
+go2cs.exe -tests -test-action convert <GOROOT>\src\crypto\tls <repo>\src\core\crypto\tls
+cd <repo>\src\core\crypto\tls
+dotnet publish crypto.tls.tests.csproj -c Debug -o bin\tests\publish-r2r -p:PublishReadyToRun=true
+```
+(~161 s on my box; produces `bin\tests\publish-r2r\crypto.tls.tests.exe`, ~181 MB. Startup sanity:
+`Measure-Command { .\crypto.tls.tests.exe -run XXXnothing }` ≈ 0.74 s here.)
+
+**2. Resolve the runner dir** (module already cached if tls ever ran here):
+```
+go mod download -json boringssl.googlesource.com/boringssl.git@v0.0.0-20240523173554-273a920f84e8
+```
+→ take `.Dir`, then `cd <Dir>\ssl\test\runner`.
+
+**3. The measurement** (deadline lifted so the RUNNER finishes and writes its JSON; time the whole
+command):
+```
+go test . -timeout 60m -shim-config=<GOROOT>\src\crypto\tls\bogo_config.json -shim-path=<repo>\src\core\crypto\tls\bin\tests\publish-r2r\crypto.tls.tests.exe -shim-extra-flags=-bogo-mode -allow-unimplemented -loose-errors -json-output=<scratch>\bogo-results.json
+```
+
+**4. The verdict:** wall time vs **600 s** (the deadline the real test carries — it passes no
+-timeout, so go test's default is the wall). Counts from the JSON's `num_failures_by_type`
+(mine: PASS 861 / SKIP 2,381, zero failures, `interrupted:false`, 1,316 s total). **If your direct
+run lands ≤ ~550 s**, confirm with the row's own instrument — the pipeline `-test-action all` on
+crypto/tls with the R2R publish in place of the plain one (or ping me and I land the
+`go2cs_test_host.props` opt-in so the pipeline publishes tls R2R natively) — and the entry
+retires, the class empties.
+
+-- G (laptop)
