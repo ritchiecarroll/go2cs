@@ -27735,3 +27735,61 @@ the suite has held since the campaign began. Bucket by mechanism per the first-r
 bank only if it cleanly banks.
 
 -- coordinator (Fable, i7)
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) — DNS RECORD-TYPE ARC COMPLETE at `dc4243702`: **17 fixed, 0 newly broken, 0 DNS remaining.** net's residual is 35 → 17, and the remainder is five arcs none of which are this one
+
+Branch `claude/laneR-net-residual` @ `dc4243702`, signed, pushed. Ruling (A) built as the pair.
+
+**MEASURED, same pipeline and toolchain pin both sides, baseline on an untouched tree:**
+
+|  | run | pass | fail | skip | mismatches |
+|---|---|---|---|---|---|
+| before | 475 | 370 | 61 | 44 | **34** |
+| after | 475 | 387 | 44 | 44 | **17** |
+
+**FIXED: exactly the 17 DNS entries, by name. NEWLY BROKEN: 0. DNS remaining: 0.**
+Residual 17 = writev 9 + error-identity 3 + AF_UNIX 2 + alloc-class 2 + multicast 1 — every one an
+arc this change does not touch, and the decomposition closes with nothing unattributed.
+
+**Combined with the earlier discharge, net's residual has gone 35 → 17 today** (the capture fix took
+`TestConcurrentSetDeadline`, this takes the DNS 17).
+
+**THE MEASUREMENT EARNED ITS COST — it caught two defects of mine that review had not.** The first
+after-run came back **13 of 17**, with `TestNilResolverLookup` NEWLY RED. That reads as "mostly
+worked, plus an unrelated regression," and both halves of that reading were wrong:
+
+* the 4 stragglers were all TXT, and
+* `TestNilResolverLookup` was not a second bug — it calls `lookupTXT` and panicked at the SAME line.
+  One root, two symptoms. Reading the failure OUTPUT rather than the failure LIST is what
+  distinguished them.
+
+Root: Go walks TXT's variable-length `pStringArray[1]` by aliasing a huge window from
+`&StringArray[0]` and re-slicing to `StringCount`. Against a managed payload `Ꮡ(expr)` boxes a
+COPY, so `AliasPointer`'s `TryGetElementStorage` fails, it takes its documented raw-address fork,
+and returns a window of **capacity ZERO** — `slice bounds out of range [::1] with capacity 0`.
+
+**That is the SAME golib refusal that opened this arc, seen from the other side**, and I think it is
+the durable lesson: golib will not fabricate managed storage from an address, so it hands back
+something contained instead of something corrupt. It made the reinterpret hazard visible as a
+refused alias, and it made this one visible as a loud panic with the line number on it. Both
+expressions are *correct Go* and read as faithful conversions. **At these seams "port the idiom
+faithfully" is the wrong instinct** — the hand-own boundary does not stop at the wrapper, it extends
+to every downstream expression that assumed native memory.
+
+Second defect, same class of surprise: the payload dispatch cannot be a `switch`, because go2cs
+emits `DNS_TYPE_*` as PROPERTIES (`public static UntypedInt DNS_TYPE_NS => 0x0002;`) and a property
+is not a constant — CS9135 ×6. The addrinfo precedent could not have taught me either of these; it
+gave the architecture, the build and the run gave the rest. Both are recorded as
+"must NOT be restored" comments, since both wrong forms look *more* faithful than the right ones.
+
+**Gates:** converter builds, gofmt-clean modulo CRLF; `syscall` green (which is also the CS0111
+proof — registration and body-deletion in the same change); `net` green; pipeline as tabled.
+Diffstat asserted against the claim BEFORE committing (4 files: 310/0 new impl, 2/13 placeholders,
+49/8 consumer, 17/0 registration) — the discipline I dropped on the doc commit this morning.
+
+**Still owed on this branch before it merges:** the marker census re-measured (83 in my seed this
+morning; G's `[ -f seed ]` finding means a SHRINK now needs explaining), and a windows corpus build.
+Both next.
+
+-- R (RITCHIE-LAPTOP)
