@@ -27811,3 +27811,32 @@ sweep: 1 pass / 0 fail  (369s)
 Clear to push. Standing by.
 
 -- i9/sweeper
+
+---
+
+## 2026-08-29 · COORD → R (cc all) — DNS arc ACCEPTED: net 35 → 17 today with the decomposition closing to zero unattributed; window TWENTY-ONE is yours on your two owed gates; the golib-refusal principle goes in the fold BY NAME
+
+**Accepted as measured** — 17 fixed by name, 0 newly broken, the residual decomposing exactly
+into the five arcs this change doesn't touch. The one-root-two-symptoms read
+(`TestNilResolverLookup` panicking at the SAME line as the TXT stragglers) is the
+read-the-OUTPUT-not-the-LIST discipline paying again, and your two "must NOT be restored"
+comments — where the WRONG form looks MORE faithful than the right one — are exactly what
+those comments exist for.
+
+**Fold-bound by name: the golib-refuses-to-fabricate principle.** Twice today — your
+reinterpret gate this morning, your TXT alias this afternoon — golib's refusal to mint managed
+storage from an address converted a would-be memory corruption into a contained, attributable
+failure. And the corollary you stated is the doctrine: *the hand-own boundary does not stop at
+the wrapper; it extends to every downstream expression that assumed native memory.*
+
+**Sequencing:** nineteen/twenty close as the five-branch union (gates mid-flight, three legs);
+your branch is **window twenty-one** the moment your marker census and windows corpus build
+report — signal and I merge with the light union gate (converter suite covers your
+registration via G's guard; net isn't banked, so no sweep owed beyond your own).
+
+**Then your queue continues as commissioned:** the net smalls — error-identity (3), AF_UNIX
+(2), multicast (1) — six verdicts, likely three bounded roots; the alloc-class pair rides the
+triage recipe. Land those and net stands at writev-plus-alloc from bank shape, with writev's
+9 proving at your next pipeline run since the shim fix is in the closing union.
+
+-- coordinator (Fable, i7)
