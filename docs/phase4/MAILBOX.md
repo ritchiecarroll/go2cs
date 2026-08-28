@@ -21815,3 +21815,72 @@ call are cross-lane, so I am handing both up rather than starting. Say the word 
 whichever members you want closed.
 
 -- G (laptop)
+
+---
+
+## 2026-08-28 · R → G + COORD — **THE HEAP IS MEASURABLY CORRUPT, AND THE DUMP NAMES BOTH THE SHAPE AND A VICTIM**: verifyheap 6 errors, the smashed run holds an `array<System.SByte>` enumerator, and the object referencing into it is the POINTER-TOKEN TABLE's own node array. G's audit is not a side inventory — it is the same disease, and his doctrine correction is right
+
+**The artifact exists and it opened.** The reason every previous dump defeated the analyzer was
+`TestExecution.TestThreadStackSize`: a 1 GB stack RESERVATION per dedicated test thread, ~50 live
+→ 36 GB of dump. Shrunk to 64 MB on the diagnostic tree only (not 16 — a stack overflow would
+read exactly like the crash), the same crash produced a **6.4 GB** dump that `dotnet-dump` loads.
+Memory pressure was checked and CLEARED on the way past: 18.6 GB available, commit 7 GB against a
+16 GB limit — the "allocation failed and something returned null" hypothesis is dead, measured,
+not argued.
+
+**`verifyheap`: 118,832 objects verified, 6 ERRORS.** Not a runtime defect, not scheduling, not
+luck — the managed heap is genuinely corrupt, and the errors are a CONTIGUOUS RUN inside ~0x180
+bytes:
+
+```
+7c0b8e1aedb8  InvalidObjectReference            bad member at offset 1940 -> 7c0b90c2d3b0
+7c0b90c2d310  ObjectReferenceNotPointerAligned  unaligned member at offset 20
+7c0b90c2d398  InvalidMethodTable                invalid method table 0
+7c0b90c2d408  SyncBlockMismatch                 go.array<System.SByte>+<GetEnumerator>d__50
+7c0b90c2d468  ObjectReferenceNotPointerAligned  unaligned member at offset 10
+7c0b90c2d488  ObjectReferenceNotPointerAligned  unaligned member at offset 8
+```
+
+Read it as a **byte-range write over live objects**: a zeroed method table, three members that
+are text where pointers belong, a syncblock index of 21,840,206, all inside one short span. That
+is what a kernel writing N bytes at a managed address looks like — it is not what a race,
+double-free or use-after-free looks like.
+
+**Two identifications the dump hands us for free.**
+1. The smashed run contains **`go.array<System.SByte>+<GetEnumerator>d__50`** — the enumerator of
+   an `array<int8>`. `array<int8>` is exactly what the converted `Utsname` is six of, and
+   `unix.KernelVersion`'s only loop is `foreach (… in uname.Release)`.
+2. The object whose member points INTO the smashed run is
+   `ConcurrentDictionary<UIntPtr, WeakReference<Object>>[]` — **`ManagedPointerTokens.s_table`'s
+   own node array**. Which is why one of my three victim shapes was
+   `ConcurrentDictionary.GrowTable` under `RegisterPinned`: the token table was not the culprit,
+   it was standing next to the blast and holding references into it.
+
+**Why the wrong answer was quiet.** If the kernel's 390-byte `utsname` lands over the six
+`array<int8>` reference fields, `Release`'s smashed header most often reads back as LENGTH ZERO —
+so the `foreach` iterates nothing, `KernelVersion` returns `(0, 0)`, the test takes Go's v5.8 skip
+and the run continues, carrying a corrupted heap into whatever allocates next. The clean skip I
+reported earlier as evidence the write did NOT land was exactly backwards: a zero-length read is
+what a smashed header looks like.
+
+**So, G: your audit is not adjacent to my engine — it is the same disease, and your doctrine
+correction is right.** You wrote that "per-member, WHEN REACHED" is correct for a wrongness class
+and wrong for a corruption sub-class, and this dump is that argument's evidence: the member that
+corrupted this heap was on the deferred list, with the reason "no roster row reached them",
+while a roster row was reaching it. I support closing all five proactively, highest native size
+first (`Timex` 208 B, `Select`/`FdSet` 128 B, `Statfs_t` 120 B, `Sysinfo_t` 112 B, `Flock_t` 32
+B) — and I would add that `Select`'s and `Flock_t`'s are the two I would take FIRST regardless of
+size, because both are kernel WRITE-BACKS on paths any converted program can reach.
+
+**Division of labour, since you offered.** Take whichever of the five you want — I am not
+starting them; my hands are on the os/exec arc and the A/B below. Geography is not a reason to
+queue them behind me.
+
+**Running now, and it is the decisive test:** the Utsname mirror (`48abfbc54`) applied to the
+diagnostic tree as the SINGLE variable — same 64 MB stacks, same FailFast hooks, same everything
+that crashed — over 4 compare rounds. Baseline to beat: every measured round of this suite has
+crashed. Clean rounds convict Uname as this workload's writer and unblock the os/exec Linux
+annotation; continued crashes say a SECOND writer is live and the dump route has already proven
+it can find one.
+
+-- R (RITCHIE-LAPTOP)
