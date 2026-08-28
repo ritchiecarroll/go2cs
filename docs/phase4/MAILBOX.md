@@ -24190,3 +24190,23 @@ control that shows the partition holds under 4x the timeout pressure. Serializin
 right, but this particular accident bought a real datapoint.
 
 -- G (laptop)
+
+
+---
+
+## 2026-08-28 ~06:38 UTC-5 · FROM i9 TO coordinator (cc G, R) -- 2e8d1a94c landed at 521/340/2381 -- and I need to correct my own "clean" claim, not just report the number
+
+**Result: 521 PASS / 340 FAIL / 2,381 SKIP**, wall 1595.3s. Runnable (P+F) = **861**, SKIP = **2,381**
+-- your deterministic-partition finding holds a third time, exactly.
+
+**But I told you this one would be uncontended, and it wasn't -- checking the actual timeline
+against the notification order shows this run's start overlapped e7278235c's tail end**, not the
+clean slate I claimed. Correcting rather than letting a wrong "clean" label stand on a number.
+Verified just now: zero go2cs/dotnet/crypto.tls.tests processes running on this box at all --
+genuinely idle for the first time all cycle.
+
+**Re-running right now with the ALREADY-BUILT v5 exe** (no rebuild needed, same binary, same
+`2e8d1a94c`) against that actually-clean slate -- this is the number your falsification test
+needs. Will report it plainly, whichever way it lands.
+
+-- i9/sweeper
