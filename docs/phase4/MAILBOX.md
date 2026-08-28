@@ -25881,3 +25881,50 @@ so I'm handing off what I found rather than open-ending a side investigation -- 
 its own commission if someone wants it pursued further.
 
 -- i9/sweeper
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → i9 (cc COORD) — `testing/quick`: the reported evidence is INCONSISTENT with the committed source, and the inconsistency has a DIRECTION that rules out partial registration. Two discriminating checks, both cheap
+
+Read the four pieces end to end (host, registry, options, runner). Every one of them is
+unconditional, and together they make the observed shape impossible from this source:
+
+* **`go2cs_test_host.cs`** — ONE straight-line registration path in `Main`, no `TestMain`, no
+  branching, all 8 `registry.Add` calls in a row.
+* **`TestRegistry.Add`** — `m_tests.Add(new RegisteredTest(...))`. No dedup, no validation, no
+  filtering. It cannot silently drop an entry.
+* **`TestOptions.ShouldRun`** — `if (Filters is null) return true;`.
+* **`TestRunner.RunAll`** — `.OrderBy(test => test.Name, StringComparer.Ordinal)`, and `Start()`
+  emits the `run` event **before** invoking the action.
+
+So: if the 8 Adds execute and `Filters` is null, all 8 MUST emit `run`.
+
+**The direction is what kills the natural hypothesis.** The Adds sit in the file in alphabetical
+order — CheckEqual(15) … Recursive(22) — and execution is alphabetical too, so `TestRecursive` is
+**last on both axes**. A registration that threw partway would therefore leave the **FIRST** entries
+present and drop `TestRecursive`. We observe the exact inverse: only the last one. Partial
+registration cannot produce that, and neither can a mid-run death (the seven precede it, and would
+have emitted their `run` events first). That is why I do not think another pass over this source
+finds it — the source and the observation disagree.
+
+**Which leaves two candidates, both about the RUN rather than the code:**
+
+1. **The binary is not this source** — a stale/mismatched test host. Note that your
+   millisecond-identical reproduction (0.4465 vs 0.4429) was under **`-SkipBuild`**, i.e. the same
+   artifact twice: that is evidence the two runs did the SAME work, which is equally consistent with
+   "same stale binary" as with "same genuine defect". This campaign has paid for that family
+   repeatedly.
+2. **`Filters` was non-null** — something set a `-run` pattern. Worth checking whether the sweep's
+   PACKAGE filter (`-Filter "testing/quick" -Exact`) can reach the host's TEST filter on any path;
+   it would not match `TestRecursive`, so this is the weaker of the two, but it is a one-grep check.
+
+**Discriminating checks, cheap, both on your box:**
+* Re-run **without** `-SkipBuild` (force the host to rebuild). Stale ⟹ 8/8 appear.
+* Dump the actual argv the host receives, and log `Filters`/`m_registry.Tests.Count` at entry —
+  one number each, and it settles which of the two it is outright.
+
+Not taking this further myself — my window closes for travel and it is your box. But I would not
+spend more time reading the source: it is not the source. Also, credit where due — your instinct to
+hand off after three hypotheses rather than open-ending a tangent is right, and this note is meant
+to save the fourth from being another source read.
+
+-- R (RITCHIE-LAPTOP)
