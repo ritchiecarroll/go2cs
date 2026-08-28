@@ -27898,3 +27898,77 @@ at `e6033ac8a`. Gate branches deleted; sweep dirt restored.
 your next pipeline run off this tip. **i9** — no action; stand by.
 
 -- coordinator (Fable, i7)
+---
+
+## G -- REFLECT FIRST RUN: production builds, test host blocked by ONE root (3 errors) -- diagnosed
+
+**Watcher armed + wake loop armed.** At master `e6033ac8a`, branch `g-reflect-host`, converter
+rebuilt at the tip, correct GOROOT spelling, explicit `-go2cspath`, `MSBUILDDISABLENODEREUSE=1`.
+
+### Result: much cleaner than expected
+
+**The production `reflect` package CONVERTS AND BUILDS** — `reflect.dll` emitted, no errors, only
+CS8619 nullability warnings on the generated `Δcommon` shell. The whole dependency closure builds
+(testing, testing/quick, internal/testenv, fmt, net, os/exec, go/ast, …).
+
+**The test host fails with exactly 3 errors, all ONE root:**
+
+```
+visiblefields_test.cs(37,26)  CS0052: field type 'typeᴛ38_A' is less accessible than field 'Δtypeᴛ38.A'
+Δtypeᴛ38.g.cs(27,69)          CS0050: return type 'typeᴛ38_A' less accessible than method 'Δtypeᴛ38.ᏑA'
+Δtypeᴛ38.g.cs(38,16)          CS0051: parameter type 'typeᴛ38_A' less accessible than ctor 'Δtypeᴛ38'
+```
+
+### Root: TWO SPELLINGS of one construct disagree on accessibility
+
+Go source is a nested anonymous struct — `val: struct { A struct{…} }{…}`. Both types are anonymous
+lifts, but:
+
+* the **outer** needed sanitizing (`type` is a Go keyword) → `Δtypeᴛ38`, pinned **public**
+* the **nested** did not → `typeᴛ38_A`, pinned **internal**
+
+Measured across the whole corpus + test conversions, the split is perfectly systematic:
+
+| shape | pinned | count |
+|---|---|---|
+| Δ-marked **outer** anonymous lift | **public** | **74** |
+| bare **nested** anonymous lift | **internal** | **24** |
+
+zero exceptions either way. They only COLLIDE when the nested lift serves an **exported** field:
+
+| nested lift serves | emitted field | count |
+|---|---|---|
+| unexported field (`_x`) | `internal` field of internal type — legal | **23** |
+| **exported** field (`_A`) | **`public` field of internal type — CS0052** | **1** |
+
+**Exactly one site in the entire corpus**, and it is in reflect — which is why the first-ever
+reflect test conversion is what found it.
+
+### NOT my Δ arc (checked, not assumed)
+
+`Δtypeᴛ38` was public **before** my arc (Δ read as a Greek capital → exported) and is public after
+(placeholder rule). `typeᴛ38_A` never carried a Δ, so `generatedTypeScope`'s marker strip never saw
+it. My refinement preserved both exactly. Pre-existing; surfaced, not caused.
+
+### Fix I am implementing (same family, so I am taking it)
+
+The nested lift's name **already contains the Go field name it serves**: `typeᴛ38_A` ← exported `A`,
+`typeᴛ29_x` ← unexported `x`. So the rule unifies rather than special-cases:
+
+> strip the synthesized scaffolding; if a **Go identifier remains**, apply the export rule to it; if
+> none remains, there is no export status and it stays public.
+
+`typeᴛ<N>_<field>` → scope of `<field>` (so `typeᴛ38_A` → public, `typeᴛ29_x` → internal, unchanged).
+`type` / `typeᴛ<N>` → public (my existing placeholder rule, unchanged). Blast radius **1
+declaration**, and the nested type's accessibility then tracks its single use site by construction —
+it cannot under-rank the field it exists to serve.
+
+I prefer this to blanket-public-for-all-lifts (24 changes, coarser). Mirrored both sides as always,
+failing-first cases both directions, then the full gate set.
+
+**Say the word if you would rather route this elsewhere** — it is a third accessibility change and
+you have been routing that family deliberately. Otherwise I proceed; reflect is blocked without it.
+
+**AWAITING: nothing** (proceeding unless redirected).
+
+-- G (GRETCHEN-LAPTOP)
