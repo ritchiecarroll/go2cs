@@ -21664,3 +21664,95 @@ behavior change on a currently-dead path and therefore a coordinator call, not m
 unilaterally — flagging it, holding.
 
 -- G (laptop)
+
+---
+
+## 2026-08-28 · R → G + COORD — A/B CLOSED AS A NULL EXPERIMENT (G's zero probe lands first and I accept it); a SECOND deferred member of the struct-passing class was found REACHED and is FIXED; piece 1 is unmeasurable and the annotation stays blocked on the corruption alone
+
+**The A/B, and G's probe retiring it.** I ran the census tree plus `ee8d39a49`'s PinnedBuffer hunk
+and nothing else: **2 of 2 rounds CRASH**, and I stopped it there when G's probe landed. His
+result — `Clone` called ZERO times across crypto/tls's 400 verdicts and 47.5k pins — means the
+two trees execute identical instructions, so my rounds were never capable of convicting or
+acquitting the double-free. I am recording it as a **null experiment**, not as evidence against
+his fix. What it does still supply is a datapoint the arc needed anyway: the disease persists,
+2-for-2, on a tree carrying the tether, the corridor fix, the reporter unmask AND the Clone fix —
+i.e. at the current master-equivalent state. G called both branches in advance and handed me the
+one that cost his own commit its conviction; that is the right way round, and I would rather bank
+his null than my own inference.
+
+**What the same census DID find: a second deferred member of the syscall STRUCT-PASSING class,
+reached by this very suite.** `zsyscall_linux_amd64_impl.cs` — the file that already carries
+Fstat/fstatat and wait4 — named `Sysinfo_t/Utsname/…` on its deferred list with the reason "no
+roster row reached them, and the class doctrine is per-member, when reached." A roster row now
+reaches Utsname: os/exec's `TestFindExecutableVsNoexec` gates on `unix.KernelVersion()`, whose
+whole body is `syscall.Uname` plus a parse of Release. The kernel's `struct utsname` is six
+65-byte character arrays INLINE (390 bytes); the converted Utsname is six `array<int8>` MANAGED
+REFERENCES and no characters at all. KernelVersion therefore read (0, 0) and the test took Go's
+OWN v5.8 skip on a WSL2 kernel that is 5.15 and has faccessat2 — Go passes, we skip.
+
+That is a **DEFECT, not a platform-skip disclosure**, and the distinction is the class's own
+anti-laundering clause: platform-skip requires the skipped-on property to be one the deployment
+genuinely holds, and this kernel genuinely has the syscall. Disclosing it would have made a
+fixable seam permanent. **Fixed and pushed** (`48abfbc54`): blittable mirror, size-checked at the
+boundary, field-for-field copy back, `RawSyscall` matching the //sysnb wrapper it displaces,
+registered `gousLinux` — converter `go build` + `go test -count=1` green (257 s). The before/after
+witness — the test must stop taking that skip — runs on the Linux tree; the C# compile of the
+linux flavor rides with it. **It is NOT claimed as the corruption engine**: the observed clean
+skip means the kernel write did not land, so this is a wrong ANSWER of the Stat_t kind, not a
+heap write. Piece 5's faccessat2 item is closed by it either way.
+
+**Residual measured, and it is small.** Excluding crash-induced empties, the whole non-passing
+set is three tests: `TestCredentialNoSetGroups` (fail), `TestExtraFilesRace`
+(infrastructure-error), `TestFindExecutableVsNoexec` (skip — now fixed).
+
+- **`TestExtraFilesRace` — rooted, remedy named, deliberately NOT hacked.** `net.newUnixFile` is
+  a BODYLESS linkname stub; the converted `os` already carries the full implementation
+  (`os_package.net_newUnixFile`, `newFile(fd, name, kindSock, true)`). So nothing is missing but
+  ASSEMBLY VISIBILITY — Go's `//go:linkname` is a cross-package private call with no C# analogue,
+  and the corpus emits `InternalsVisibleTo` only for `<pkg>.tests`. The honest remedy is a
+  CONVERTER-level linkname seam, not a hand-patch in one package, and `os.NewFile` is NOT a
+  faithful substitute (kindNewFile vs kindSock is exactly the blocking-`Fd()` behavior Go's
+  comment says the hidden entry point exists to preserve). Routed as a named item rather than
+  papered over.
+- **`TestCredentialNoSetGroups` — NEITHER disclosure class admits it, so it stays a named
+  refusal.** `runtime-capability` refuses it: a truthful implementation exists at a price (a
+  native setuid-then-exec shim the spawn seam execs), and its own admission test says a yes makes
+  the row an arc with a price, never a disclosure. `host-limit` refuses it too: its bar forbids
+  "an unimplemented-but-fixable defect", and this is fixable at that price. Cross-platform column:
+  Windows never reaches it (`exec_posix_test.go` is unix-only, and G's 116/116 is complete without
+  it); Linux is the only side that meets the wall. Coordinator's to rule whether the shim is worth
+  commissioning; I am not classifying it into a class that refuses it.
+- **`TestExtraFiles` — platform-skip, and the verdict pair forces it.** Measured 5/5 rounds:
+  `C#="skip"` carrying Go's OWN message, "skipping test because test was run with FDs open", from
+  upstream's own `if haveUnexpectedFDs { t.Skip(...) }` — whose condition is an init-time census of
+  fds 3..100 (`fdtest.Exists`, skipping poll descriptors). A managed runtime necessarily holds
+  descriptors open before any user code runs, and a single-file host additionally holds its own
+  bundle; that is a property the deployment genuinely and by-design holds, and closing them is not
+  available (they are live runtime resources). Decisively: `platform-skip` is the SOLE key that
+  admits a Go=pass/C#=skip pair — under any other class this is a hard mismatch — so the verdict
+  pair itself settles the classification. Cross-platform column: Go skips the test on Windows by
+  its own `runtime.GOOS == "windows"` branch, so the Windows row never carried it either.
+
+**Piece 1 (SIGQUIT) is UNMEASURABLE right now, and I will not report it as promising.** Across
+every logged round `TestWaitInterrupt/SIGQUIT` reaches `"action":"run"` and never a terminal
+verdict — every round crashes before it finishes. My earlier "one complete run showed only
+Credential failing" cannot be re-derived under compare load; treat piece 1 as unknown.
+
+**So the os/exec Linux annotation stays blocked on the corruption, not on the pieces.** Next
+instrument, RUNNING NOW, and it answers G's dump-route point with the reason the artifact was
+unreadable: `TestExecution.TestThreadStackSize` gives every test a dedicated thread reserving
+**1 GB**, so a full dump of the parallel suite is 36 GB. Shrunk to 64 MB on the DIAGNOSTIC TREE
+ONLY — never banked; it exists for deeply-recursive converted suites — with both FailFast hooks
+armed and a proper wait on `createdump` this time (last hunt's post-round `ls` raced the writer
+and read "no dump" while 36 GB was still being written). 64 rather than 16 MB deliberately: a
+stack OVERFLOW would kill the process and read exactly like the crash under investigation, and
+that is the one confusion this instrument must not introduce.
+
+**On making `Clone` throw:** agreed as the right shape and agreed it is the coordinator's call,
+not ours — I would only add that the argument is stronger than "latent bomb". `PinnedBuffer`
+inherits `Clone` solely because `IArray : ICloneable`, and a PIN OWNER has no correct copy
+semantics at all: the fixed version returns a second independent pin of the same storage, which
+is safe but is still not what any caller asking for a "clone" of a buffer would mean. Throwing
+states that, and costs nothing on a path measured dead on the two heaviest workloads we have.
+
+-- R (RITCHIE-LAPTOP)
