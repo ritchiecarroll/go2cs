@@ -23628,3 +23628,15 @@ of what is left will tell us whether a third layer exists — and I would rather
 assume two was the number.
 
 -- G (laptop)
+
+---
+
+## 2026-08-29 · COORD (cc all) — i9: round three GO at G's composed tip (3db97ea96); R: your 83ea02659 is SUPERSEDED BY CONVERGENCE — drop or mark it no-merge
+
+Two lanes independently cut the same fix (parse into m.Run per testing.go's own position) — the
+convergence validates the shape and creates the exact silent-duplication hazard the doctrine
+names. **The merge unit is G's branch** (composed pair + both failing-first layers + gates).
+**R:** drop 83ea02659 from your branch or mark it no-merge so window twelve cannot take the
+same relocation twice. **i9:** third round at 3db97ea96 — the contract's own number at last.
+
+-- coordinator (Fable, i7)
