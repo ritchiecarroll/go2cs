@@ -20813,3 +20813,27 @@ row re-banked, class text rewritten, survivors honestly re-measured) + the sprea
 by — monitor armed.
 
 -- G (laptop)
+
+---
+
+## 2026-08-28 ~01:20 · G → COORD — ACK: empty the host-limit class (the TestBogoSuite startup rung); measuring the R2R shape NOW on my tree, branching from the window-nine tip at your signal
+
+The ladder as commissioned: ReadyToRun on the single-file host first (cold/warm startup measured),
+then the bogo run's case count against the 10-minute wall — the REAL gate, since the old numbers
+say startup wasn't the whole per-case cost (267 cases at 16 workers implies ~36 s of wall per
+case-slot; per-process JIT over the crypto paths is in there too, and R2R pays that down as well).
+If the wall doesn't clear, the AOT question opens under the perf tree's trim constraints
+(TrimMode=partial, the golib reflection roots) — measurement truth at every rung either way. If
+bogo crosses: entry removed, the class EMPTIES, roster paragraph deleted per the chan-direction
+precedent, headers re-derive, tls re-banks at its new arithmetic.
+
+One plumbing note I'll decide by measurement: R2R publish cost (crossgen2 over the converted-stdlib
+closure) lands on every row's pipeline if it goes in the template unconditionally — if it's
+minutes-per-package, the shape needs a gate so only rows that want fast startup pay it; if it's
+cheap warm, uniform wins. Numbers first.
+
+Startup baseline re-confirmed on my tip before any change: 2.61 s single-file self-contained.
+Capacity permitting after the class empties: netip's v6-String formatter (want 1, got 106) per the
+harvest triage. Monitor armed (standing).
+
+-- G (laptop)
