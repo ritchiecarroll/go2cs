@@ -26914,3 +26914,68 @@ DNS_RECORD *variant* payload pointers are the hazard that makes a verbatim `Data
 use-after-free rather than a fix.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — DNS arc: STOP-AND-REPORT before building. The syscall-layer fix alone is NOT sufficient and would be ACTIVELY WORSE than the bug — proven at golib, not argued
+
+Continuing the `**DNSRecord` rooting. I was about to write the wrapper against the addrinfo template
+and checked the consumer's side first. **The obvious fix ships a use-after-free / type-safety break.**
+Reporting rather than building, because this changes the arc's shape and someone else may reach for
+the same one-wrapper fix.
+
+**What the consumer does** (`net/windows/lookup_windows.cs`, all six record types):
+
+    var v = p.at(syscall.DNSRecord.ᏑData, 0).Reinterpret<byte, syscall.DNSSRVData>();
+    … absDomainName(syscall.UTF16ToString((~array<uint16>.AliasPointer((~v).Target, 256))[..]))
+
+`DNSRecord.Data` is `array<byte>(40)` (Go's union buffer) and every payload struct carries a
+MANAGED REFERENCE — `DNSSRVData.Target`, `DNSMXData.NameExchange`, `DNSPTRData.Host`,
+`DNSTXTData.StringArray` are all `ж<uint16>` / `array<ж<uint16>>`.
+
+**Why that reinterpret can never be safe, decided in golib rather than by my reasoning.**
+`ж.PointerExtensions.Reinterpret<T,TDst>` gates the safe managed-alias route on
+`ReinterpretAliasesStorage<T,TDst>.Value`. Here T is `byte` (the element the `.at(…,0)` names), so:
+
+    Unsafe.SizeOf<DNSSRVData>() (16) <= Unsafe.SizeOf<byte>() (1)   →  FALSE
+
+It fails the SIZE test outright, before the managed-reference clause is even reached, and falls
+through to `TryPinnedReinterpret ?? (ж<TDst>)(uintptr)box` — i.e. `Unsafe.AsRef<DNSSRVData>` over
+raw bytes, which loads 8 of them AS AN OBJECT REFERENCE. golib's own comment names the consequence:
+*"a fabricated managed reference is a CLR type-safety break (an access violation, or silent heap
+corruption on a write), which is strictly worse than the wrong-but-contained read the address route
+produces."*
+
+**And it is unavoidable at the syscall layer, either way I could build it:**
+* Publish the native head (the cheap ptrout fix) → `NativeBox<T>.Value` is
+  `Unsafe.AsRef<T>((void*)addr)` → fabrication from native bytes.
+* Transcribe addrinfo-style into a managed `DNSRecord` → the consumer still reinterprets a managed
+  `array<byte>`, `TryPinnedReinterpret` pins it, and the fabrication happens over the pinned copy.
+
+Either way the pointer field is materialised from bytes. **So today's silent "no record" is the
+CONTAINED failure, and the one-wrapper fix trades it for an AV or silent heap corruption.** That is
+the specific outcome the ptrout header predicted ("a fabricated-reference landmine"); I can now name
+the mechanism and the exact gate that decides it, and confirm the syscall layer cannot reach it.
+
+**So the arc is a PAIR, not a wrapper** — and I want your ruling on which half before I build:
+
+**(A) Hand-own the CONSUMER too** — `net/windows/lookup_windows.cs` reads the six record types from
+a managed side-channel the `DnsQuery` hand-own populates (real `ж<uint16>` boxes over copied names),
+and never reinterprets. Contained, follows the hand-own doctrine, but hand-owns a `net` file whose
+Go original is ordinary code.
+
+**(B) Change the CONVERTED REPRESENTATION of the union** — `Data` stops being `array<byte>` for
+records whose payload bears pointers. Structural, reaches beyond DNS to every Go union-buffer idiom,
+and is a converter arc rather than a hand-own.
+
+My read: **(A) for this campaign** — it is bounded, it is the same shape as the `IpAdapterAddresses`
+and ADDRINFOW hand-owns already in the tree, and it unblocks the 17 verdicts; **(B) recorded as the
+general item** it plainly is, since the pointer-bearing-union class will recur. But (B) is
+leveling-scale and not mine to choose unasked.
+
+**AWAITING: your ruling on (A) vs (B).** Not blocked meanwhile — I will build (A)'s wrapper half
+(the native out-cell plus the chain transcription), which both options need, and hold the consumer
+half for the ruling. Flagging plainly: had I not checked the consumer first, I would have shipped
+the wrapper alone and turned 17 wrong answers into a memory-safety defect.
+
+-- R (RITCHIE-LAPTOP)
