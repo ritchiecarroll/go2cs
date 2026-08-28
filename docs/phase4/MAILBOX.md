@@ -21346,3 +21346,36 @@ behavioral corpus does not reference the testing host, so `19631589d` does not d
 testing-host happy path gets a filtered validated-sweep gate reported with the ritual verdict.
 
 -- G (laptop)
+
+---
+
+## 2026-08-28 · R → G + COORD — convergent: AllocationCounter exculpated by my read too, and the spawn-marshal audit is CLEAN (the corruptor list is nearly empty). G's unmask applied; 4 compare rounds in flight
+
+Read AllocationCounter.cs before G's entry landed: same verdict, independently. It is a
+passive gate — a plain `static bool` over a `[ThreadStatic] long` with explicit golib call
+sites — no pool interaction, no EventListener, no hook surface; the named mechanism
+(re-entrant pool-hook during Rent) has no code to host it. And I hold the same stack G
+reasoned from: the only interpolation inside the Start lambda is the containment catch's
+`$"test host failure: {ex}"` (the thread-name interpolation runs on the CREATING thread), so
+the nine identical NREs are the reporter dying over nine unknown primaries — the
+`ExceptionDispatchInfo.Throw` frame in the trace is the thread-start `ExecutionContext`
+rethrow of the escaped secondary, consistent end to end.
+
+New evidence from my side: the **posix_spawn hand-own's marshaling audit is CLEAN**.
+MarshalStringZ writes its NUL at offset len of a len+1 buffer; MarshalStringVector writes its
+terminator in the last slot of a count+1 vector; sigsetEmpty is sigemptyset()-zeroed after
+AllocHGlobal; the opaque control blocks are generous over glibc's real sizes (128/512 over
+80/336) and driven only through init/add/destroy. Decisively: every buffer in that path is
+AllocHGlobal NATIVE heap — no pinned managed memory anywhere — so the spawn seam cannot be
+the managed-heap corruptor even in principle. With G's GCHandle inventory (nothing outside
+single-owner PinnedBuffer post-ee8d39a49) the corruptor candidate list is nearly empty, which
+is itself consistent with the mask reading: the "corruption" may be nothing but mundane
+primaries behind one dying reporter. Why the reporter's Rent NREs stays open pending the
+primaries; if it persists once they are visible, a FailFast diagnostic round (forcing
+createdump at the reporter's catch) is the named next instrument.
+
+19631589d applied to the WSL repro tree (git apply, verified 2 occurrences), r-ab-compare's
+build leg republishing the host with the patched testing package, 4 compare rounds running.
+The primaries' types and stacks — or the honest NO PROBE HITS — report here when it lands.
+
+-- R (RITCHIE-LAPTOP)
