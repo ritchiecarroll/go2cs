@@ -26525,3 +26525,60 @@ the 38 the comments carried from the superseded Windows-only measurement -- fixe
 **AWAITING: nothing.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- Δ-marker arc: BOTH corpus flavours green; converter suite green; CNR running (2026-08-28)
+
+**Watcher armed + wake loop armed.**
+
+### Gate status
+
+| gate | result |
+|---|---|
+| three-target regen | **exit 0** (one known `log/syslog` L3 advisory) |
+| marker gate | **85/85, 0 clobbered** |
+| **Windows corpus** (`-p:GoTargetOS=windows`, `--no-incremental`) | **exit 0, 0 errors** |
+| **Linux corpus** (`-p:GoTargetOS=linux`, `--no-incremental`, purged between) | **exit 0, 0 errors** |
+| `go generate .` (stdlib-metadata) | exit 0, **no drift** -- accessibility is not part of what the metadata records |
+| converter `go test ./...` | **ok go2cs 198.751s, exit 0** |
+| CNR | running |
+| goldens | **2 expected to move**: `GenericTypeInstantiation`, `NamedDelegateStructuralParam` (the only two `.cs.target` of 137 Δ-carrying ones matching `public ... Δ<lowercase>`) |
+| reflect-canary five | queued after CNR |
+
+Linux is the flavour that carried the 10x CS0262 (`Δhchan`, `Δrtype`, `ΔfuncInfo`,
+`ΔwriteUserArenaHeapBits`, ...). It is green now, so the three-target regen closed the loop it was
+run to close.
+
+### A new member of the false-green-through-a-pipe family, and a fresh sub-trap
+
+My first CNR launch **never ran** and **reported exit 0**. Two independent defects stacked:
+
+1. **Bash glob-expanded PowerShell's redirection operator.** I wrote
+   `powershell -File ./check-no-regression.ps1 *>&1` from the Bash tool. In PowerShell `*>&1` means
+   "redirect all streams"; in **bash** the `*` is a **glob**, so it expanded to the directory names
+   in `src/tests/Behavioral` and the script received `AdapterNameInterfaceCollision` as a positional
+   argument -> `PositionalParameterNotFound`, nothing transpiled.
+2. **The exit code lied.** `... | tee ... | tail -40; echo "exit=$?"` reports **`tail`'s** status,
+   not the script's. Printed `PROPERTY: CNR exit=0` over a script that had failed to start.
+
+This is the same family as the `.ps1`-via-bash false green I reported earlier, with a new first
+stage. The `*>&1` capture idiom is already in CLAUDE.md as **required** (a repo script's
+`Write-Host` goes to the INFORMATION stream, so a bare `2>&1` drops every `==>` line) -- what is NOT
+recorded is that **the idiom is unsafe from the Bash tool specifically**, because bash owns `*`
+before PowerShell sees it. Run it from the PowerShell tool, and assert **`$LASTEXITCODE`**, never
+`$?` through a pipe. Relaunched that way it is genuinely running (preflight: 661 projects
+registered, 4,740 paths case-checked, converter rebuilt, 659 packages transpiling).
+
+Two CLAUDE.md additions I will propose when this banks: this one, and the CRLF
+working-file-vs-`git show` comparison trap from my previous post.
+
+### Corpus census drift, incidentally
+
+CNR's own preflight reports **661 registered behavioral projects / 659 packages**. The CLAUDE.md
+table still says 570 (543+25 era). Measured, not decremented -- flagging for whoever next levels
+that row.
+
+**AWAITING: nothing.**
+
+-- G (GRETCHEN-LAPTOP)
