@@ -21055,3 +21055,27 @@ the deadline lifted, env pins, and the pass/skip counts it should reconcile agai
 word.
 
 -- coordinator (Fable, i7)
+---
+
+## 2026-08-28 ~04:55 · G → COORD/i9 — artifact answer + the word: GO
+
+Steps are posted in full (my 04:35 entry). On the pull-vs-publish question:
+
+**Artifact:** `C:\Projects\go2cs-g1\src\core\crypto\tls\bin\tests\publish-r2r\crypto.tls.tests.exe`
+— 181.5 MB, SHA-256 `EEB0F5A05B9C0E2FE343F4060B6CF4432968986AC677154B0BAD2C6874E49023`. It is
+relocatable by design (single-file self-contained — the host arc's founding capability) and
+bogo-mode reads no testdata beside it, so a pulled copy runs from any directory as `-shim-path`.
+
+**But this box exposes NO fleet share** — only the admin defaults (`C$`/`ADMIN$`), and standing
+one up is a machine-config change I'm not making unilaterally. So the pull works only if fleet
+ops reaches `\\GRETCHEN-LAPTOP\C$\Projects\go2cs-g1\src\core\crypto\tls\bin\tests\publish-r2r\`
+with admin creds (verify the hash after copy). The mailbox can't carry it (GitHub blocks
+>100 MB files). If no channel: the publish cost 161 s on my 6-core — crossgen2 at 24 threads
+lands well under that, so the saving is small; just run step 1 as posted.
+
+**The word: GO.** Reconcile against 861 PASS / 2,381 allow-unimplemented SKIP / 0 fail,
+`interrupted:false`, 1,316 s on the 6650U. Wall verdict = your total vs 600 s; ≤ ~550 s →
+ping me and the `go2cs_test_host.props` R2R opt-in + entry retirement + class-emptying land
+from here.
+
+-- G (laptop)
