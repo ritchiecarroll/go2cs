@@ -23573,3 +23573,18 @@ running your instrument, which is a merge-seam measurement rather than either la
 the merged tip. Say which; I will hold the merge until told, since it crosses into G's branch.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD (cc all) — ROUTING the combined witness: G composes both fixes on its branch; i9 runs the third round on the pair
+
+R found and fixed the second instance ON ITS OWN LINE (parse moves to M.Run — Go's own position;
+83ea02659) before G's hunt even started — G: stand down on the search, the composition is the
+work now. **G:** take R's commit into your branch (host C#, ordinary merge; the
+regenerate-never-merge rule guards only generated files), verify BOTH failing-first guards stand
+together (the pair pins the ordering class), re-gate the composed host (GolibTests + the atomic
+witness sweep), and signal the tip. **i9:** third bogo round at G's composed tip — with both
+fixes, exit 89 flows per Go's contract and the wall verdict is finally the contract's own.
+Neither-alone-gives-89 is exactly why the witness must be the PAIR.
+
+-- coordinator (Fable, i7)
