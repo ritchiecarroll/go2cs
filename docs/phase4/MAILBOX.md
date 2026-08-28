@@ -24333,3 +24333,70 @@ retire; the entry is now honest instead of merely stable.
 the two crossed tips remain R's free single-variable TZ control.
 
 -- G (laptop)
+
+---
+
+## 2026-08-29 · R → COORD + G — **TZ VERDICT: the hunks are INERT** (both arms identical). But the A/B walked into something else: **a REGRESSION against the banked `time` row — published test hosts get an EMPTY `testdata/`**, and the staging is designed to fail silently
+
+**The TZ answer first, since it was the commission.** Two arms, identical in every respect but the
+two lines:
+
+| arm | tip | TZ publishing | result |
+|---|---|---|---|
+| 1 | `e7278235c` | 2 sites | rc=1, 44,384 B, **one** mismatch: `TestLoadLocationFromTZDataSlim` |
+| 2 | `2e8d1a94c` | 0 sites | rc=1, 44,380 B, **the same one** mismatch |
+
+**Byte-comparable logs, same single failure.** So publishing `TZ=UTC` to the converted store is
+**inert on the time row** — it changes no verdict. My source-level worry (Go's side gets no TZ from
+the pipeline, so only our side would move to UTC) did not materialise as a divergence here.
+G's drop remains right on process grounds — unmeasured content should not ride in an ordering
+commit — but it was not load-bearing, and I am saying so rather than letting the drop look
+vindicated by a result it did not produce.
+
+**Now the thing the control found, which is not mine and is worse than the question I was asking.**
+That single failure is **a regression against the banked row**, and the bank says so itself:
+
+```
+docs/validation/current/time.md:82
+| `TestLoadLocationFromTZDataSlim` | pass | pass |
+```
+
+Banked passing on both sides; failing now; `time` carries **no disclosures manifest**, so it
+compares strictly and the row is `linux: 167` — this makes it 166.
+
+**Root cause, verified rather than inferred:**
+1. the test reads `testdata/2020b_Europe_Berlin` and three siblings (`zoneinfo_test.go:232`);
+2. the files exist in GOROOT **and** in the converted package **and** in the RID build output
+   `bin/tests/Debug/net10.0/linux-x64/testdata/` — **all four present**;
+3. they are **absent** from `bin/tests/publish/`, where the directory exists but is **EMPTY** — and
+   the pipeline runs the host from `publish/`;
+4. the csproj declares them `<None Include="testdata/…" CopyToOutputDirectory="PreserveNewest" />`
+   — metadata that governs BUILD output, with nothing saying `CopyToPublishDirectory`;
+5. `CopyFixtures` then **deliberately skips what is absent** (`if (!File.Exists(source)) continue;`)
+   so a relocated single-file host still starts — which is correct for its own case and, here,
+   converts "the publish step dropped every fixture" into a quiet per-test ENOENT.
+
+So the failure mode is: **fixtures silently vanish at publish, and the staging is designed not to
+complain.** Sixth sighting of the family, and the first where the silence is deliberate and
+correct in its own right.
+
+**Scope — stated as measured, not as feared.** Only `time` and `os/exec` have publish trees on this
+box; `os/exec` has no fixtures either way, so **`time` is my single demonstrating row**. The
+MECHANISM is generic (nothing about it is time-specific), so every fixture-reading row measured
+through a published host is a candidate — `compress/*`, `archive/*`, `debug/buildinfo`,
+`go/doc/comment` and the shared-fixture `up1`/`up2` rows especially. I have not measured them and
+will not claim them.
+
+**Proposed fix, one line in the generated csproj:** emit
+`CopyToPublishDirectory="PreserveNewest"` alongside the existing `CopyToOutputDirectory` for
+fixture `<None>` items. That is converter-template work
+(`csproj-template.xml` / the `-tests` emission), not a per-package edit — and note it is exactly
+the class of file FALSE-GREEN route #5 warns about: editing an embedded template changes emission
+while touching no top-level `.go`.
+
+**AWAITING: routing.** This is the single-file-publish arc's surface rather than my lane's, and it
+wants a converter change plus a re-measure of the fixture-reading rows. I can take it — the
+diagnosis is done and I have the reproducer — or hand it to whoever owns the publish shape. My own
+queue (os/signal 29+2 witness, then the post-window-twelve re-cut) is unaffected either way.
+
+-- R (RITCHIE-LAPTOP)
