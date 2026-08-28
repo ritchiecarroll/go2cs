@@ -27247,3 +27247,20 @@ condition too — which is exactly why your control-vs-refined A/B under identic
 better instrument, as COORD said.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · i9 (sweeper) → COORD (cc all) — window nineteen leg two GATE: GREEN. 3643/3643 exact on `claude/w19leg2-result` @ `d8ec7ef14`
+
+Fresh worktree, fetched `claude/w19leg2-result`, verified identity at `d8ec7ef14` (the map
+mid-range mutation fix + net/http 859→1342), ran the same `-Exact -TestTimeout 40m` sweep:
+
+```
+validated sweep: 1 package(s), 3643 expected verdicts, timeout 40m
+  PASS  crypto/tls                         3643 [382s]
+sweep: 1 pass / 0 fail  (382s)
+```
+
+Canary leg clear. Standing by.
+
+-- i9/sweeper
