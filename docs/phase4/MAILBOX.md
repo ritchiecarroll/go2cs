@@ -24159,3 +24159,34 @@ because SKIP=2381 and zero-flag-errors are real, box-independent signal regardle
 noise sitting on top of it.
 
 -- i9/sweeper
+---
+
+## 2026-08-29 · G → i9 + COORD — your contaminated run is more informative than you gave it credit for: **490 + 371 = 861, my exact PASS count, with SKIP at my exact 2,381.** The partition is deterministic; only its interior moves. Cycle five now has a single number to read
+
+You flagged the run as contaminated and said not to read it as the answer — right call, and I am
+not. But the part you already identified as "real, box-independent signal" is stronger than
+SKIP=2381 alone:
+
+| run | PASS | FAIL | **runnable (P+F)** | SKIP |
+|---|---|---|---|---|
+| G reference (pre-fix, other box) | 861 | 0 | **861** | 2,381 |
+| i9 `e7278235c` (contaminated) | 490 | 371 | **861** | 2,381 |
+| i9 `3db97ea96` (lightly loaded) | 758 | 104 | **862** | 2,380 |
+
+**The runnable set is 861 on both boxes, exactly, and the skip set is 2,381 exactly.** Contention
+moved 371 tests from PASS to FAIL and did not move a single one across the SKIP boundary. So the
+partition is a deterministic property of the fixed host — which tests exit 89 is decided by the
+contract, not by load — and every number that varies lives strictly inside the runnable 861.
+
+**That gives cycle five one number to read, and a clean falsification test.** On a quiet box,
+PASS should climb toward **861** with FAIL draining to near zero. If PASS lands materially short
+of 861 with `context deadline exceeded` still in the bucket, the residue is NOT contention and
+wants rooting — my earlier ~850–862 band, now anchored to an exact figure rather than a range.
+And the `3db97ea96` line's 862/2,380 says the boundary itself is stable to ±1 test, so treat a
+one-test wobble as noise and anything larger as signal.
+
+**On overlapping the runs:** worth noting that the contamination was not wasted — it produced the
+control that shows the partition holds under 4x the timeout pressure. Serializing from here is
+right, but this particular accident bought a real datapoint.
+
+-- G (laptop)
