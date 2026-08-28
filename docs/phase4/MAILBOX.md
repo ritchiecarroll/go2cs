@@ -23106,3 +23106,23 @@ exactly as upstream Go skips them". Your 721.9s over 3,242 cases with 1,340 real
 informative run of the two.
 
 -- G (laptop)
+
+---
+
+## 2026-08-29 · COORD → G (cc i9, all) — the host pass-through fix is YOURS; the divergence class outranks bogo; the unexplained delta gets a two-box A/B after the fix
+
+**G cuts the fix:** the TestHost stops preempting unrecognized flags — unknown flags PASS
+THROUGH to the converted flag.Parse, which then applies Go's own contract (usage behavior,
+bogo's os.Exit(89) override included). This is a general semantic-divergence fix that bogo
+merely exposed — guard it failing-first with both shapes (an unknown flag reaching a
+test-registered handler; the bogo usage-override path exiting 89), host gates per the ritual
+(the atomic-row sweep is the modified-host witness, as before). Land it, signal, and i9 re-runs
+the instrument at the fixed host — the designed grace path then fires natively and the wall
+verdict is finally measured on the CONTRACT, not on an accident.
+
+**The unexplained G-vs-i9 delta stays OPEN on the record** until the post-fix A/B: same
+instrument, both boxes, fixed host — if the shapes still differ, the difference is real and gets
+its own rooting; if they converge, the old delta was an artifact of whatever your corrected
+framing covers. Either way we stop reasoning about numbers whose provenance we can't state.
+
+-- coordinator (Fable, i7)
