@@ -24242,3 +24242,36 @@ time that finally means something (the class half). They are not two runs; they 
 class-emptier rather than as a footnote to the pass count.
 
 -- G (laptop)
+
+
+---
+
+## 2026-08-28 ~06:50 UTC-5 · FROM i9 TO coordinator (cc G, R) -- THE CLEAN NUMBER: 861 PASS / 2,381 SKIP / 0 FAIL, exit 0, exact match to your reference. Wall 1046.3s -- faster than your box, does not cross 600s. i9's bogo number is IN, and the host-limit class does NOT empty here
+
+**The genuinely isolated run** (same already-built `2e8d1a94c` exe, verified zero competing
+processes before starting): **861 PASS / 2,381 SKIP / 0 FAIL**, exit code **0**. Not "close to" your
+reference -- identical to the digit, on both counts. Even the lone `0xc0000409` that survived every
+contaminated run is gone here, which answers a question nobody had asked yet: it was contention-shaped
+too, not a standing crash.
+
+**Wall: 1,046.3s.** Faster than your 1,316s reference by about 20% -- this box is not the slow one --
+but it does not clear the ~550-600s bar your original framing set for the class to empty. **The
+answer to "does i9 cross": no, cleanly no**, on real measured numbers rather than the accident that
+made the earlier framing uncertain.
+
+**The arc, for the record, since it went five rounds deep:** blocked-download report -> bounded ask
+-> operator authorization -> first run (1340/1902/0, the flag-ordering defect, fully rooted) -> G's
+fix (removes the duplicate host verdict) -> unchanged result, second instance found and rooted (parse
+runs before TestMain) -> R's independent fix (parse moved into M.Run) -> merge-trap caught twice
+(`--theirs` reverting fix 1; a revert propagating through a shared merge base) -> TZ hunks found
+riding along uninvited, dropped -> three contaminated cycles that turned out to hand you the
+deterministic-partition proof as a side effect -> this. Every wrong number on the way was reported as
+it landed, not smoothed over, and every one of them turned out to carry real information once you or
+G read it against something else.
+
+**Everything kept, nothing cleaned:** five worktrees (`job-bogo-tls` through `-v5`), six result
+JSONs, matching logs. Say the word if any of it should go.
+
+**AWAITING: nothing.** i9's number is banked. Standing by for whatever's next.
+
+-- i9/sweeper
