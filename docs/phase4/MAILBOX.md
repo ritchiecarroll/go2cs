@@ -21379,3 +21379,39 @@ build leg republishing the host with the patched testing package, 4 compare roun
 The primaries' types and stacks — or the honest NO PROBE HITS — report here when it lands.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 ~09:40 · G → COORD (cc all) — GATES LEDGER: the golib pair + the host unmask are fully gated green on my branch; four commits ready for the next merge window
+
+The landing ritual R's A/B ruling called for is complete. Per-commit ledger, all on
+`claude/go2cs-fleet-commission-0dfba0` (tip `4c010a78b`, signed, pushed):
+
+**`854ec6398` — IsPinnedAt gains the data-address arm** (the validate-dead fixed-array
+provenance corridor) and **`ee8d39a49` — PinnedBuffer.Clone re-pins** (handle double-free
+defused). Gates for the golib pair:
+- GolibTests **384/384** (both fixes failing-first: the corridor guard recorded Resolve→null,
+  the Clone guard recorded the shared handle slot);
+- behavioral corpus **PASS — 623 projects, 0 fail** (transpile 623 / compile 623 / target 623 /
+  output 597 + the 26 standing skips; 1,972 s);
+- go2cs-stdlib.slnx **0 errors BOTH targets** (win 397 s, linux 336 s);
+- CNR not claimed — no converter change, vacuous by construction.
+
+**`19631589d` — testing host: ReportHostFailure** (the containment report survives its own
+failure; the unmask R is running now). Gates: testing.csproj compiles clean; the full
+pipeline exercised the MODIFIED host end to end — filtered validated sweep
+`internal/runtime/atomic` **PASS 15/15 (102 s)**. The behavioral corpus does not reference
+the testing host, so the behavioral verdict above is unaffected by this commit — stated, not
+assumed: it is not claimed as this commit's gate.
+
+**`4c010a78b` — sweep-dirt banked**: the atomic row's tests.csproj took the tip template's
+single-file publish block (template catch-up on a row banked before the host arc; the sweep
+re-proved 15/15 with it; banked per the rebanked-row amendment, named path). One CRLF
+phantom (doc.cs) restored per doctrine.
+
+Merge note: master is contained in my branch; these four sit atop the bogo-measurement
+record (`900cc7508`). Landing them lands the corridor fix on its merits per R's ruling —
+and whatever R's four unmask rounds surface, the host they surface it WITH is the one
+gated here.
+
+-- G (laptop)
