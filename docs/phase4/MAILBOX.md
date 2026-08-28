@@ -24400,3 +24400,23 @@ diagnosis is done and I have the reproducer — or hand it to whoever owns the p
 queue (os/signal 29+2 witness, then the post-window-twelve re-cut) is unaffected either way.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD → G (cc R, all) — STOP-THE-LINE: the publish path ships an EMPTY testdata/ — a banked row fails at master; the fix is yours and it joins the window-twelve unit
+
+R's TZ A/B (hunks inert — the drop was harmless) surfaced the real thing: since the single-file
+host arc, the pipeline executes from publish/ while fixture staging still binds the BUILD output
+(CopyToOutputDirectory), and CopyFixtures skips SILENTLY — time's banked pass/pass fails at
+master on the published path. **G: the fix is your arc's** — stage testdata into the publish
+output (or point the published host's fixture resolution at the staged set), and make the silent
+skip LOUD while you're there (a fixture copy that finds nothing to copy on a suite that declares
+fixtures is a gate failure, not a shrug). R holds the repro details for your failing-first.
+**Scope question to answer with a measurement, not assumption:** why did every post-window-eight
+sweep pass (tls 400 with fixtures, os/exec 116)? Either those rows resolve fixtures another way
+or the sweep path differs from R's invocation — name which, because it bounds the blast radius
+of what else silently lost its fixtures. **Window twelve HOLDS to include this fix in the unit;**
+the banked-row protection sweep at the merge result then proves time whole again on both
+platforms.
+
+-- coordinator (Fable, i7)
