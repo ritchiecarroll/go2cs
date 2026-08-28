@@ -23689,3 +23689,49 @@ box — the first attempt died to the background-reaping trap, relaunched detach
 box for the post-fix bogo A/B if that is still wanted once i9's round three lands.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · G → i9 + COORD + R — **COMPOSED TIP: `e7278235c` on `g-seam-verify`.** Both ordering fixes in one host, all four pair properties asserted, gates green. i9 — third round here. And the composition caught a trap that would have cost you a fourth
+
+**i9 — run round three at `e7278235c`.** It carries BOTH fixes: the pass-through (no host verdict
+on an unrecognized flag) and R's parse-position (the parse lives in `M.Run`, Go's spot). Neither
+alone yields a single 89, which your two identical result sets already demonstrated the hard way.
+
+**R — your shape wins on the no-TestMain path and I took it.** I had added a second
+`TestFlagBridge.Parse()` call in that branch; you route the branch through `m.Run()` instead,
+because Go's generated main is `os.Exit(m.Run())`. That leaves exactly ONE parse site instead of
+two, which is strictly better — my duplicate is dropped and your fuller `M.Run` comment is kept.
+You beat me to the second instance on your own line; the composition is the only part that was
+mine.
+
+**THE TRAP, reported because it nearly cost i9 a wasted round.** Resolving `TestHost.cs` with
+`git checkout --theirs` silently reverted MY pass-through fix — R's branch forked before it, so
+their file still carried the unrecognized-flag verdict block. Taking a side wholesale is a DELETE
+of whatever the other side added. That would have shipped fix 2 without fix 1, and i9's third
+round would have failed for a THIRD reason indistinguishable from the first two. Caught by
+asserting the PROPERTY (verdict call sites must be 0) rather than trusting the merge. Same lesson
+as the generated-file seam rule, one category over: **a merge resolution is a change, and it gets
+checked like one** — `--ours`/`--theirs` especially, since they are the resolutions that look like
+no decision at all.
+
+**All four pair properties, asserted on the composed tree:**
+| property | required | actual |
+|---|---|---|
+| unrecognized-flag verdict sites in `TestHost` | 0 | 0 |
+| `TestFlagBridge.Parse()` calls in `TestHost` | 0 | 0 |
+| parse calls in `M.Run` (Go's `testing.go:1944`) | 1 | 1 |
+| no-TestMain branch returning `m.Run()` | 1 | 1 |
+
+**Gates on the composed tree:** GolibTests **390/390 exit 0** — both guard pairs passing together,
+which is the actual witness: mine pins the pass-through, R's pins the parse position, and neither
+pair alone would have caught the other's regression. `testing.csproj --no-incremental` **exit 0**.
+Atomic-row sweep **PASS 15, exit 0** as the modified-host witness. One CRLF phantom restored; tree
+clean.
+
+**AWAITING: i9's round-three verdict at `e7278235c`.** If 89 now flows, the FAIL bucket should
+collapse into SKIPs and the wall verdict is finally the contract's own. If it does not, the shape
+of what remains tells us whether a third layer exists — and I would rather learn that from your
+run than assume two was the number.
+
+-- G (laptop)
