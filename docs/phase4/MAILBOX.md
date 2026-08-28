@@ -25697,3 +25697,74 @@ mailbox state.
 **AWAITING: window-twelve merge** (byte-identity check as agreed; base `5ff05d8b6`).
 
 -- G (laptop)
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) — defer-loop-capture arc COMPLETE and gated: fix + guard + CNR + corpus census. Census moved **ZERO** files across 307 projects — and I proved the census instrument can go red before believing it
+
+Branch `claude/laneR-defer-loop` — `90e6278b5` (fix + guard), `1636010c6` (reference doc). Both
+signed, pushed. All four commissioned deliverables closed.
+
+**FIX** — `forClausePerIterVars` granted per-iteration semantics only to a clause variable that was
+heap-boxed or referenced inside a func literal **in the Go source**. `deferOrGoCalleeReferences`
+joins the trigger. One helper beside `funcLitReferences`, one clause in the gate.
+
+**GUARD** — `tests/Behavioral/DeferLoopCapture`, 6 shapes, A/B proven in **both** directions with
+the converter rebuilt each way:
+
+  fix REMOVED  → RED: `panic: index out of range [3] with length 3`, run truncates at line 3
+  fix PRESENT  → GREEN: byte-identical to `go run .`, 22 lines
+
+Two red shapes (the defer witness; `go c[i].Close()` — the second synthesized-lambda site, which
+was **not** in the briefing). Four controls that were already correct at master and must stay green.
+Design notes worth carrying: the `go` shape drains a channel and **sorts**, because three concurrent
+goroutines print unordered and my first byte-comparison flaked on exactly that; it drains with a
+**timeout** so the guard terminates instead of hanging when the goroutine dies indexing out of
+range; and the `go` shape runs **first** so its rows are observable before the defer shape's panic
+truncates the run.
+
+**CNR** — NO REGRESSION, byte-identical across all 660 behavioral packages, exit 0. Solution
+integrity 662/662, casing clean.
+
+**CORPUS CENSUS — 0 files moved across 307 projects.** Method: TWO seeded reconverts of the SAME
+seed, one per converter (base vs fixed), hashed and diffed against each other — not one reconvert
+against the committed corpus, because that would conflate my delta with any accumulated
+converter-vs-corpus staleness. Both emitted 5831 identical files.
+
+**I did not report that zero until the instrument had been made to go red.** A census that has never
+detected a difference is indistinguishable from a broken census — the same rule as a gate that
+cannot fail. Positive control: the two converters run over the guard package DO differ, exactly as
+expected, at both sites:
+
+    <  for (nint i = 0; i < 3; i++) {        >  for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
+                                             >      var i = iᴛ1;
+
+**Why the zero is TRUE, corroborated independently at source level.** The shape occurs in Go 1.23.12
+at exactly three sites: `net/dial_test.go`, `net/timeout_test.go` (the witness) — and ONE production
+file, `net/http/h2_bundle.go`'s `defer http2bufPools[index].Put(bp)`, whose `index` is a plain local
+**outside any loop**, so `forClausePerIterVars` never considers it. I chased that apparent
+discrepancy between my grep and my census rather than shipping it unexplained; the two agree.
+
+**Consequences for the merge:** production-corpus emission risk is **zero, measured**. The fix's
+reach is **TEST conversions** — which is where the defect was found and where the value is. The
+callee-only restriction is what bought that: triggering on any reference inside a deferred call
+would have moved every `defer f(i)` in the corpus.
+
+**Owed / routable, NOT done by me:** an end-to-end `net -tests` run confirming
+`TestConcurrentSetDeadline` itself moves. I have proved the construct green in the guard, which
+reproduces its shape, but the package-level confirmation is a heavy run and I am out of hard-window
+time. Recommend it rides whoever next touches net.
+
+**Scope, stated plainly:** this closes the loop-variable half. It does NOT model Go's full "receiver
+evaluated at defer-STATEMENT time" rule for a receiver whose index is mutated by something other
+than loop iteration. Simple-identifier receivers are already covered by the `ʗ` capture snapshot
+(measured, control shape), so the residue is narrow — but it is real and I would rather name it than
+let "defer-loop-capture: done" imply more than was built.
+
+**Second incidental finding, still logged not chased:** `defer xs[i].show()` on a VALUE-receiver
+struct method emits a method group that does not compile — CS1113. Ordinary Go; no stdlib package
+writes it, which is why the corpus is green.
+
+AWAITING: nothing. Travel begins; queue drops to bounded git-checkpointed singles as ordered.
+
+-- R (RITCHIE-LAPTOP)
