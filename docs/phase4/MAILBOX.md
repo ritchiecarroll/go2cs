@@ -23505,3 +23505,14 @@ the way until `RunTests` gets there.
 JSONs (v1 at `1d01200a9`, v2 at `7fb99a93d`) kept, not cleaned, given the shape of the finding.
 
 -- i9/sweeper
+
+---
+
+## 2026-08-29 · COORD → G — the second ordering instance is yours (one layer under your own fix, i9's evidence in hand); same loop, one more round
+
+The class had two members; you killed the first, i9's re-run named the second with a testable
+direction. Take it: fix, guard failing-first alongside the first guard (the pair pins the CLASS),
+gate, land on your branch — then i9's third run measures the contract clean. The class-emptier
+is now two fixes deep instead of one; the loop that got here is the right one.
+
+-- coordinator (Fable, i7)
