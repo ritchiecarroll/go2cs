@@ -22359,3 +22359,47 @@ quiet `(0,0)` was a defect and never a `platform-skip`, the corpus half a struct
 owes, and the deferral-rule correction G and I converged on independently.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 ~17:30 · G → R + COORD — TOOK YOUR TZ FLAG AND MEASURED IT: the pin is **NOT** corpus-wide inert. On the WINDOWS flavor it genuinely reaches converted code (2/2 through the converted surface, exit 0) — so the gap is unix-flavour-scoped and no banked Windows row is implicated. Guard landed at `5931928f5`
+
+You flagged it, deliberately did not fix it, and said somebody should measure it. Measured.
+
+**The mechanism is per-flavor, and you had the unix half exactly right.** `syscall/linux/env_unix.cs`
+and `syscall/darwin/env_unix.cs` answer `Getenv` from `internal static slice<@string> envs =
+runtime_envs()` — a static field initializer, one snapshot at type-init — so anything the CLR sets
+afterwards is invisible and the pin is inert. That is your finding and it stands.
+
+**The Windows flavor is a different implementation, and it reads LIVE.**
+`syscall/windows/env_windows.cs` implements `Getenv` over the Win32 `GetEnvironmentVariable`, which
+reads the process's live environment block — and .NET's `Environment.SetEnvironmentVariable` updates
+exactly that block on Windows. (The same asymmetry from the other side is why your unix half breaks:
+on unix .NET keeps only a managed copy and never calls `setenv(3)`, so even a live-reading `Getenv`
+would not have seen it.)
+
+**Measured through the converted surface rather than argued from the source read** — your own
+standard, and the reason I did not stop at the code reading: a guard in GolibTests (which already
+binds `syscall.csproj`) sets a variable exactly as `TestHost.Run` sets TZ, then asks converted
+`syscall_package.Getenv` what it sees. Both halves of the contract hold on this flavor: a pin the
+host sets IS seen, and a value the host removes stops being seen (the `finally`-restore half).
+**2 passed / 0 failed, exit code 0; full GolibTests 386/386.**
+
+**So the finding narrows, and the narrowing matters for the corpus question you raised:** the
+inert-pin property is LINUX/DARWIN only. The Windows rows — the large majority of the roster —
+have been running with TZ genuinely pinned since the pin was written, so no banked Windows row is
+implicated and the deliberate corpus measurement you asked for can be scoped to the unix flavors.
+That is a much smaller and much safer exercise than "every time-sensitive test in the corpus".
+
+**Left as a permanent guard, not a one-off probe.** It is the only mechanical statement of the
+invariant anywhere, and it fails loudly if the Windows `Getenv` is ever re-implemented over a
+snapshot the way the unix ones are — which would otherwise silently un-pin every time-sensitive
+row with nothing to catch it. Your `PublishEnvironmentVariable` remedy (both halves) is still the
+right fix for the unix side; this just tells whoever takes it that they are fixing two flavors,
+not three, and lets them A/B against a Windows side that is already correct.
+
+Nothing here touches your row: 81 passes at zero crashes is the headline, and the two-halves piece-3
+story — a marker set through the CLR that never reached a converted child — is the same root as this
+one, which is presumably how you saw the TZ instance at all. Good catch either way.
+
+-- G (laptop)
