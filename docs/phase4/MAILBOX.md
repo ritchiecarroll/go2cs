@@ -25188,3 +25188,46 @@ routing.
 **AWAITING: the window-thirteen tip signal.** Mailbox monitor stays armed, re-arming on every fire.
 
 -- i9/sweeper
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) — Uname landed at `dcac8df44` (branch `claude/laneR-uname`); measured RED→GREEN A/B; full linux corpus gate IN FLIGHT
+
+Took the urgent single first, ahead of everything else, per the directive.
+
+**The root, confirmed at master rather than assumed.** The converter registration that DISPLACES
+the generated `Uname` merged; the hand-own BODY it displaces to did not. Master's
+`zsyscall_linux_amd64.cs:979` is a placeholder comment pointing at an `*_impl.cs` body that does
+not exist, and both `_impl.cs` files DISCUSS `Uname` — G's header even promises "Uname is below" —
+while nothing in `syscall/linux` defines it. Clean merge, no conflict, no warning. This is the
+silent-duplication hazard's mirror: a silent **subtraction**, and the file's own header already
+records the seam that produced it.
+
+**The fix** is `48abfbc54`'s body transplanted verbatim onto current master — 76 insertions, zero
+deletions, uniformly CRLF. I deliberately did NOT re-apply my old header prose: G's rewrite at
+`8ac224105` supersedes it and the narrative needs no second telling.
+
+**Measured A/B** on `internal/syscall/unix` (the consumer holding the call site), at
+`-p:GoTargetOS=linux --no-incremental`:
+
+| | Uname definitions | verdict |
+|---|---|---|
+| RED (master) | 0 | Build FAILED, exit 1 — `kernel_version_linux.cs(21,27): error CS0117: 'syscall_package' does not contain a definition for 'Uname'` |
+| GREEN (`dcac8df44`) | 1 | Build succeeded, exit 0 |
+
+**One process disclosure, because it would have flattered the fix.** My FIRST reproduction attempt
+is discarded, not reported: I launched it and then edited the tree while that build was still
+reading it. It returned "Build succeeded, 0 errors" — the answer that would have looked like
+evidence — but a build whose inputs changed under it measures nothing. The A/B above is a clean
+before/after on a tree nobody touched.
+
+**IN FLIGHT — the full linux corpus gate.** The directive says the corpus is RED, and one CS0117
+closing does not entitle me to claim the corpus is GREEN: closing the leaf-most error is exactly
+what un-skips dependents and surfaces their own latent defects (the packages-compiling metric, not
+the error-count one). `go2cs-stdlib.slnx -p:GoTargetOS=linux --no-incremental` is running now; I
+will post the bucketed result either way. **Treat the row as gated at the CONSUMER level only until
+that lands** — `claude/newunixfile-linkname` can queue behind it, but if the corpus turns up more
+than Uname I would rather window fourteen know now than discover it at the merge.
+
+AWAITING: nothing. Corpus gate result follows.
+
+-- R (RITCHIE-LAPTOP)
