@@ -26046,3 +26046,69 @@ will start by measuring what the converted resolver actually answers for MX/NS/T
 than reading the resolver and theorising, and post the shape before touching anything.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) — DNS record-type ROOTED by inspection, no suite run needed: it is `DnsQuery`'s `**DNSRecord` OUT-parameter, and the previous author DEFERRED IT TO THIS ARC BY NAME
+
+Rooted before coding, as promised — and it did not need net's 475-test suite or a network probe.
+Branch `claude/laneR-net-residual` cut from `dddabef4b`.
+
+**THE ROOT, confirmed at three levels:**
+
+1. **The wrapper is still GENERATED.** `zsyscall_windows.cs:444`:
+
+       var (r0, _, _) = Syscall6(procDnsQuery_W.Addr(), 6, …, (uintptr)Ꮡqrs, (uintptr)Ꮡpr);
+
+   `Ꮡqrs` is `ж<ж<DNSRecord>>` — a `**DNSRecord` OUT parameter, and per the documented class a
+   heap-boxed pointer that is still nil converts to **uintptr 0**. So `DnsQuery_W` receives a NULL
+   `ppQueryResults`, returns `ERROR_INVALID_PARAMETER`, `status` comes back non-nil, and every
+   record-type lookup reports **no records**. That is the whole "answers no-record for
+   MX/NS/TXT/SRV/PTR" divergence, and it is the OUT-parameter class CLAUDE.md already names.
+
+2. **It is NOT registered in `manualConversionFuncs`** — the only mention is a comment naming the
+   eight deferred wrappers.
+
+3. **The previous author routed it here explicitly.** `zsyscall_windows_ptrout_impl.cs`'s header:
+   *"DnsQuery / _DnsQuery (`**DNSRecord`) — the pointee is a LINKED native chain whose converted
+   record holds managed references, so publishing the address alone would replace a silent nil with
+   a fabricated-reference landmine. … it wants the whole chain transcribed the way
+   zsyscall_windows_addrinfo_impl.cs transcribes ADDRINFOW. **It belongs to a `net` DNS arc.**"*
+   This is that arc. The per-member-when-reached doctrine worked exactly as designed.
+
+**THE PRECEDENT is real and directly transferable** — `zsyscall_windows_addrinfo_impl.cs` (17 KB):
+transcribe the native chain into managed records EAGERLY, **free the native chain inside the
+wrapper**, and make the paired free a **no-op**, because the caller's `defer FreeAddrInfoW(result)`
+now holds a managed chain and handing that to ws2_32 would free memory it never allocated. DNS maps
+one-to-one: `DnsQuery` transcribes then frees the native head immediately; `DnsRecordListFree`
+becomes the no-op.
+
+**THE PART THAT IS NOT A COPY, and why this is an arc rather than a single.** ADDRINFOW is uniform;
+`DNS_RECORD` is a **variant**, and `net/windows/lookup_windows.cs` reads the union by
+reinterpreting it:
+
+    p.at(syscall.DNSRecord.ᏑData, 0).Reinterpret<byte, syscall.DNSSRVData>()   // and MX, PTR, TXT
+
+So a verbatim byte copy of `Data` is **not sufficient and is actively dangerous**: the payload
+structs carry POINTERS into the native chain (`DNSSRVData.Target`, `DNSMXData.NameExchange`,
+`DNSPTRData.Host`, `DNSTXTData.StringArray`), and the wrapper frees that chain. Copying those bytes
+verbatim would leave the caller reinterpreting pointers into freed native memory — trading today's
+silent no-record for a use-after-free, which is strictly worse and is precisely the
+"fabricated-reference landmine" the header warned about. Each record type therefore needs its
+payload transcribed AND its pointer fields rewritten to anchored managed buffers — the same
+anchoring shape addrinfo already uses (`ConditionalWeakTable s_sockaddrAnchors`). Six types in the
+corpus's reach: CNAME, SRV, MX, NS, TEXT, PTR.
+
+**Sizing, honestly:** this is NOT a bounded travel single. Six variant transcriptions plus anchoring
+plus the free-ownership flip plus a guard. It is a solid multi-hour arc with an existing template.
+
+**What I am doing with my remaining hard window:** starting the implementation against the addrinfo
+template, committing incrementally so it is resumable mid-arc by me or anyone. If it does not close
+before I lose the window, the rooting above stands on its own and whoever takes it starts from a
+named root, a named precedent, and a named hazard rather than from a symptom.
+
+Also for the ledger: the `TestConcurrentSetDeadline` confirmation cannot ride master yet — window
+sixteen is merged locally but not pushed, so the capture fix is NOT at `dddabef4b` (verified: 0
+occurrences). Whenever the first net pipeline run happens, it needs a tree where that fix is banked.
+
+-- R (RITCHIE-LAPTOP)
