@@ -27264,3 +27264,62 @@ sweep: 1 pass / 0 fail  (382s)
 Canary leg clear. Standing by.
 
 -- i9/sweeper
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) — NET PIPELINE RUN COMPLETE at `d6a176ae9`: the capture confirmation DISCHARGES (residual 35 → 34), and the remaining 34 decompose EXACTLY onto the five named arcs. DNS record-type is 17, named test by test
+
+Full `-tests -test-action all -test-timeout 30m` run on net at master. Both sides compiled (zero
+toolchain-mismatch lines), host ran to completion: **475 run / 370 pass / 61 fail / 44 skip**.
+
+**Every mismatch has the SAME shape — `Go=pass → C#=fail`, 34 of them. No empties at all.** By the
+ordering-rule tell that matters: no contiguous alphabetical tail, no scattered-empty set, so this is
+34 genuine divergences and not a partial death wearing their clothes.
+
+**LEDGER 1 — the capture confirmation DISCHARGES.** `TestConcurrentSetDeadline`: **run → pass**, and
+it is absent from the mismatch list entirely. That is the `defer c[i].Close()` witness that panicked
+`index out of range [3]` before the fix, now green end to end on the real package rather than on my
+guard's reproduction of its shape. **The residual moves 35 → 34, and the delta is exactly this one
+test** — the arithmetic below closes on that.
+
+**LEDGER 2 — writev's 9 are MEASURED but NOT discharged, and correctly so.** `TestBuffers_WriteTo`
+plus its 8 subtests = **exactly 9**, still red here. Verified why before reporting it:
+`git merge-base --is-ancestor bab7398d4 HEAD` says **the writev fix is NOT in my base** — leg two is
+merged locally at `d8ec7ef14`, not pushed. So these 9 predate the fix; they are not a regression and
+not a contradiction of the writev lane's gates. They discharge on the first net run at a tree
+carrying `bab7398d4`.
+
+**LEDGER 3 — DNS record-type is EXACTLY 17, and here they are:**
+
+    TestLookupGmailMX          TestNSLookupCNAME    TestNSLookupCNAME/default/mail.golang.com
+    TestLookupGmailNS          TestNSLookupMX       TestNSLookupMX/default/gmail.com
+    TestLookupGmailTXT         TestNSLookupNS       TestNSLookupMX/default/mail.golang.com
+    TestLookupGoogleSRV        TestNSLookupTXT      TestNSLookupNS/default/gmail.com
+    TestLookupLocalPTR                              TestNSLookupNS/default/mail.golang.com
+    TestLookupPTR                                   TestNSLookupTXT/default/gmail.com
+                                                    TestNSLookupTXT/default/mail.golang.com
+
+MX, NS, TXT, SRV, PTR, CNAME — the exact six record types `DnsQuery`'s `**DNSRecord` OUT-parameter
+starves. The inventory's "17" is confirmed independently rather than inherited.
+
+**THE DECOMPOSITION CLOSES TO THE DIGIT — 34 = 17 + 9 + 3 + 2 + 1 + 2:**
+
+| arc | n | tests |
+|---|---|---|
+| DNS record-type | **17** | the table above — MINE, hand-own drafted |
+| writev | **9** | `TestBuffers_WriteTo` + 8 subtests — fix exists, not in this base |
+| error-identity | **3** | `TestResolveIPAddr`, `TestResolveTCPAddr`, `TestResolveUDPAddr` |
+| AF_UNIX | **2** | `TestModeSocket`, `TestUnixConnLocalWindows` |
+| multicast | **1** | `TestIPv4MulticastListener` |
+| alloc class | **2** | `TestAllocs`, `TestTCPReadWriteAllocs` — the disclosure family, not one of the five |
+
+Nothing unattributed, nothing left over. The residual-35 inventory the net lane named is confirmed
+in full, one test flipped by my capture fix, and the five arcs I am commissioned for are now
+enumerated by NAME rather than by count — which is what the DNS half needed before it could be
+measured as fixed.
+
+**Next:** apply the DNS pair (hand-own + consumer companion, both drafted, ruling-A bindings in the
+headers), then re-run this exact pipeline and require those 17 to flip with the other 17 unmoved.
+This run is the before-baseline for that, taken on an untouched tree.
+
+-- R (RITCHIE-LAPTOP)
