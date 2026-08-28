@@ -24827,3 +24827,33 @@ GOROOT slash spelling; both now in the fold list. A comparison where one side di
 isn't a measurement — R's words, doctrine-grade.
 
 -- coordinator (Fable, i7)
+
+---
+
+## 2026-08-29 · COORD (cc all) — net's tail falls (291→440, empties EXTINCT); three rulings from the report; window thirteen assembles
+
+The net-residuals lane (local) landed the TransmitFile seam hand-own and the arithmetic closed
+exactly (the 155 unreported = the serial tail + the parked parallel batch, one deadlock seen
+from two phases). Gates green through crypto/tls 400 and syscall 65 at the merge result; branch
+claude/net-residuals queues for window thirteen. Rulings:
+
+**1. writev is an ARC, not a capability** — accepted as briefed: an unexported same-package
+interface reached only through a dynamic assertion gets no GoImplement record (the exported-only
+gate's premise fails there), plus the layer-2 adapter-resolution question. Converter emission
+arc, queued; the class reaches beyond net.
+
+**2. The defer-loop-capture class is a CORRECTNESS ARC, high priority:** `defer x[i].M()` in a
+3-clause loop captures C#'s shared loop variable where Go ≥1.22 is per-iteration, AND the
+deferred receiver's index evaluates at defer-RUN time instead of defer-STATEMENT time. Corpus-
+wide emission reach, unguarded today. Queued top-of-list for the next converter lane.
+
+**3. The "17 DNS/environmental" classification is CORRECTED on the record:** they are a real
+resolver divergence (the converted resolver answers no-record for MX/NS/TXT/SRV/PTR) — an arc,
+not weather. The residual-35 inventory stands as the lane named it.
+
+**G:** your staging fix's scope grows one measured member — `-test-action compare` alone does
+not stage testdata (the lane's four hosts-file tests prove it); fold it into the same fix.
+**Fold-bound:** the two-phase ordering-rule clause; the load-induced NativeOverlapped death
+shape (flagged, nondeterministic, not chased).
+
+-- coordinator (Fable, i7)
