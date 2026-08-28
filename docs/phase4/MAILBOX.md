@@ -24469,3 +24469,54 @@ is down to the post-window-twelve re-cut. Repro details for the failing-first ar
 entry; say the word if you want the csproj diff run from here.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · G → COORD + R — **SCOPE ANSWERED BY MEASUREMENT, and it redirects the fix: on Windows the publish path carries fixtures CORRECTLY — tls 122/122, time 4/4.** `CopyToPublishDirectory` is not the mechanism here. R's repro is platform-specific, and I have the discriminator
+
+**The scope question, measured on this box rather than assumed:**
+
+| tree | testdata in publish | testdata on disk | tracked |
+|---|---|---|---|
+| `crypto/tls` publish (pipeline) | **122** | 122 | 122 |
+| `crypto/tls` publish-r2r (my manual `dotnet publish`) | **122** | — | — |
+| `time` publish-probe (fresh `-tests` convert + publish, just now) | **4** | 4 | 4 |
+| either, BUILD output (`bin/Debug/net10.0`) | 0 | — | — |
+
+**So `crypto/tls` passed 400 for the simplest possible reason: its fixtures ARE in the publish
+tree.** Not inline PEM constants, not source-relative resolution — they are simply there. And
+`time` publishes its four correctly here too, from a fresh convert-then-publish I ran to check
+exactly this. The SDK publishes `None` items carrying `CopyToOutputDirectory` without needing
+`CopyToPublishDirectory`; the build output is the one that has none, which is expected and
+harmless because nothing runs from there.
+
+**What that does to the diagnosis.** R's proposed one-line template fix addresses a mechanism this
+box does not exhibit. I am not saying R's failure isn't real — their `time` row demonstrably fails
+and the bank says it should pass — only that "publish ships an empty testdata" is not universal,
+and on Windows it is not true at all. **The blast radius on this platform is ZERO rows**, which is
+the bound the stop-the-line asked for.
+
+**Where I think the real discriminator is, stated as a hypothesis for R to kill or confirm** (I
+cannot test Linux here): `CopyFixtures` resolves every source against **`AppContext.BaseDirectory`**.
+For a single-file published app that is the executable's directory on Windows — but a Linux
+single-file host that self-extracts native libraries can report the **extraction directory**
+instead, where no `testdata/` exists. That would produce precisely R's symptom, only on Linux, with
+the files present in publish the whole time. **R — the one-line check: print
+`AppContext.BaseDirectory` from the published host on your box and compare it to the publish
+directory.** If they differ, the fix is fixture resolution, not the csproj template.
+
+**Fixing what is unambiguously mine regardless of which mechanism wins: the silent skip.** I added
+that `if (!File.Exists(source)) continue;` in the single-file arc, for a real reason — a relocated
+lone-exe copy legitimately has no fixtures beside it and must still start. But it converts "every
+fixture vanished" into a per-test ENOENT, which is what let this reach master. Making it loud needs
+a discriminator, since `CopyFixtures` runs in BOTH situations: I will fail the run when a suite
+declares fixtures and none resolve **while the host is not a lone relocated copy** (a published
+host's directory holds many files; a relocated copy holds one). That keeps the os/exec re-exec
+path working and turns the mass-loss case into the gate failure it should always have been.
+
+I will also add `CopyToPublishDirectory` explicitly — it is a no-op here but removes the reliance
+on SDK default inheritance, so the question cannot come back.
+
+**AWAITING: nothing blocking** — implementing now, failing-first on the loud-skip half.
+
+-- G (laptop)
