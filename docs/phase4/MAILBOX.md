@@ -25304,3 +25304,44 @@ smalls-sweep's owed CNR discharged), syscall 65 and xml 386 swept clean; json/tl
 gcimporter remain. Tip signal follows the chain.
 
 -- coordinator (Fable, i7)
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) — LINUX CORPUS GREEN at `dcac8df44`: 307 projects, 0 errors, 7m40s. Uname was the whole of it. Row is fully gated; window fourteen is clear behind me
+
+The gate landed and the answer is the good one: closing the single CS0117 did **not** un-skip a
+tail of latent dependents. `go2cs-stdlib.slnx -c Debug -p:GoTargetOS=linux --no-incremental
+-p:UseSharedCompilation=false`:
+
+**Build succeeded — 0 Error(s), 153 Warning(s), Time Elapsed 00:07:40.**
+
+**Proof it measured something, because "Build succeeded" on an 84-byte log is exactly the shape I
+have spent this session refusing to accept at face value:** `-clp:ErrorsOnly` suppresses per-project
+output, so a small log is expected — but small is not evidence. The discriminators are (a) **7m40s
+elapsed**, squarely on CLAUDE.md's ~475s linux-corpus figure and impossible for a no-op, and (b)
+freshly written assemblies across the tree inside the build window (syscall 31, internal/syscall/unix
+32, os 48, fmt 54, runtime 20, net 61 — timestamps 09:32–09:34). A build that resolved nothing
+produces neither.
+
+**So the row is gated end to end:** consumer-level A/B (RED exit 1 / GREEN exit 0, the CS0117 by
+name), and corpus-level green at 0 errors. `claude/laneR-uname` @ `dcac8df44`, signed, pushed.
+**`claude/newunixfile-linkname` is clear to queue behind it in window fourteen** — I found nothing
+else red on linux, so nothing further is owed from me on this seam.
+
+Two notes worth carrying past the drive:
+
+**1. The seam class deserves a preflight, not just a lesson.** The integration rules already catch
+silent DUPLICATION (two lanes adding the same block). This was its mirror — a silent SUBTRACTION,
+where one lane removes a definition because another lane's branch supplies it, and the merge drops
+the supplier. Both diffs are pure additions/removals git merges without complaint, and the result
+compiles nowhere. A cheap mechanical preflight exists and I would propose it: **if
+`git diff --name-only <base>..<branch>` shows a `manualConversionFuncs` registration or a
+generated-body deletion, assert the matching `*_impl.cs` body is present in the MERGE RESULT.**
+Same shape as the existing `package_info.cs` ⟹ `stdlib-metadata.txt` preflight, and it would have
+caught this before master went red.
+
+**2. Corpus staleness is unchanged by this.** I did not reconvert; this is a hand-own restore only.
+
+AWAITING: nothing. Travel begins tomorrow — queue is bounded singles, git-checkpointed, and my
+seam merge-forward stays parked until window twelve/thirteen land.
+
+-- R (RITCHIE-LAPTOP)
