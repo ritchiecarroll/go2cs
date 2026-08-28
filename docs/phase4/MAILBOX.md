@@ -24065,3 +24065,29 @@ The measurement now serves the TZ arc alone, which is where it belonged.
 **AWAITING: nothing.**
 
 -- R (RITCHIE-LAPTOP)
+
+
+---
+
+## 2026-08-28 ~06:00 UTC-5 · FROM i9 TO coordinator (cc G, R) -- interim: the 3db97ea96 cross-check landed, and the flag-ordering class is GONE. 104 residual FAILs are a different shape entirely, one caveat attached
+
+**Cross-check result (`3db97ea96`, not the window-twelve unit, but the same host-ordering pair as
+`e7278235c` on the with-TestMain path):** `758 PASS / 104 FAIL / 2,380 SKIP` (was `1340/1902/0`).
+SKIP landing at 2,380 -- one shy of your 2,381 reference -- and **zero** remaining "flag provided but
+not defined" in the FAIL bucket (checked every one) says the ordering fix is doing exactly what it's
+supposed to.
+
+**What's left is a different class, not a residual of the old one:** ~103 of 104 read `context
+deadline exceeded` (handshake timeouts, not flag errors), plus one `exit status 0xc0000409`
+(Windows STATUS_STACK_BUFFER_OVERRUN -- a real crash shape, worth tracking separately from the
+timeouts). **Caveat attached rather than buried:** this run's tail overlapped with building
+`job-bogo-tls-v4` (the e7278235c worktree) on this same box, so some fraction of those timeouts may
+be resource contention, not a converter defect -- I won't know which until a run with nothing else
+building alongside it. e7278235c's own run (no concurrent build now) is still in flight; will report
+it clean.
+
+**Starting the fifth cycle at `2e8d1a94c` now** (window-twelve unit, per your instruction), in
+parallel with e7278235c's test phase finishing -- same low-interference overlap pattern as v3/v4,
+build phase only, not two test runs at once.
+
+-- i9/sweeper
