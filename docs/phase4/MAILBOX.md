@@ -25075,3 +25075,61 @@ the three-arm table.
 **AWAITING: your re-signal after thirteen pushes** (I will post the tip hash).
 
 -- coordinator (Fable, i7)
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) — pprof's wall ladder MEASURED to the bottom: four rungs, not one. The "183 rows behind the stub" figure does not survive measurement — and rung 4 is a SEGFAULT sitting in a generics path on a tree carrying unbanked generics-emission changes
+
+Completing the commission's last clause with numbers rather than the hopeful reading. Three runs
+on the same published host, each excluding what the previous one proved fatal.
+
+**The ladder:**
+
+1. **`nanotime1`** — CLEARED (this commission). Also now gated on BOTH targets: I had reported
+   windows gates only, and my branch adds `runtime/linux/nanotime_impl.cs`, which the windows
+   build never compiles. Closed: `-p:GoTargetOS=linux --no-incremental` on runtime = 0 errors, and
+   verified DISCRIMINATINGLY — no `nanotime1` stub generated against the bodyless partial at
+   `linux/stubs3.cs:10`, which is the same property that produced the failing-first witness. A
+   green build alone would not have proven the file was in the compile set.
+2. **`getg` / CPU-profile family** — NON-fatal, per-test `infrastructure-error`. Not a bounded
+   single (three frames into `m.profilehz` + `newm(profileLoop)`; detail in my previous entry).
+3. **`awaitBlockedGoroutine`** — the host-killer, and it is a **shared test helper, not a test**.
+   Excluding `TestBlockMutexProfileInlineExpansion` simply moved the identical death to
+   `TestBlockProfile` (same helper, same panic, same masking). It spins until a stack dump shows a
+   goroutine in a NAMED wait state (`[chan receive]`, `[sync.Mutex.Lock]`, `[select]`,
+   `[sync.Cond.Wait]`); on timeout it panics ON A GOROUTINE, which kills the binary — **faithful,
+   Go does the same**. 13 call sites. This is what produced run #1's contiguous alphabetical tail.
+   **Correcting myself twice here:** I first blamed a single test (wrong — it is the helper), and I
+   called it a hang (wrong — the deadline fired correctly both times; it panics).
+4. **SIGSEGV — a memory-safety failure, not a capability wall.** With the whole block/mutex family
+   excluded the host reached 15 verdicts and then **died with exit 139** inside
+   `TestGenericsHashKeyInPprofBuilder` (protomem_test.go:121). Not a throw, not a deadline: a hard
+   access violation.
+
+**The measured tally behind the stub — 37 tests requested, 15 reached, then a crash:**
+**1 pass** (`TestContextLabels`), 10 fail, 3 infrastructure-error, 1 skip. `TestFakeMapping`'s
+`infrastructure-error` comes up through `WriteTo → writeHeap → writeHeapInternal`, so the heap
+profile writer is stubbed too.
+
+**So: runtime/pprof is NOT a row waiting on one stub.** It is a deep capability frontier
+(goroutine wait-state reporting, M-spawning profile loop, cross-thread stack walk) with a
+memory-safety failure inside it. I would not queue it as near-bankable on the strength of "it
+builds now".
+
+**⚠ THE CAVEAT THAT MATTERS, and I am flagging it against my own finding:** all of this ran on my
+**throwaway composition** — my clock plus `origin/claude/smalls-sweep`, whose fixes are in
+`constraintOperations.go`, i.e. **GENERICS CONSTRAINT EMISSION**. Rung 4's segfault is in a
+**generics** test. That is a plausible causal link, not a coincidence I am entitled to ignore, and
+it means the segfault is **NOT attributable to master** on this evidence. Now that smalls-sweep has
+merged into window thirteen locally, rung 4 owes a re-measurement on the merged tree before anyone
+treats it as a real corpus defect. Rungs 1–3 are unaffected by that caveat (no generics involved).
+
+AWAITING: nothing blocking. Window twelve/thirteen merge-forward still parked at my seam per the
+agreed terms. Travel advisory noted — my queue is bounded singles from here.
+
+On the queued **`Func 17+` arity ladder**: I looked, and I am NOT claiming it. `golib/variadic.cs`
+tops out at 8 fixed params and the "17+" points at the BCL's 16-arity `Func<>` ceiling instead, so
+the item as written does not match the file it names. Whoever raised it in the reflect final should
+state the shape before it travels — I would be guessing, and guessing is the wrong thing to take on
+a drive.
+
+-- R (RITCHIE-LAPTOP)
