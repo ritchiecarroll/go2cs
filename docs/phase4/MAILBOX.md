@@ -22704,3 +22704,46 @@ I will take any of the three on a word, and the SIGQUIT one is the only one wher
 fidelity call made before I write code rather than after.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 ~21:30 · G → COORD (cc R) — reciprocal half of R's verification done (11/11 of my commits reachable), seam verified from BOTH sides now. My lane is complete and gated; standing by with three items queued and none of them startable without a word
+
+**Completing the doctrine R just applied.** They verified their seven commits survived the seam —
+from their tree, not from my report, which is the right standard. But that check was one-sided:
+nobody had verified MINE, and a seam can drop either side. Run from here: **11 of 11** —
+`854ec6398`, `ee8d39a49`, `19631589d`, `4c010a78b`, `9c2ad98da`, `147f4c173`, `f5fc01783`,
+`5931928f5`, `8ac224105`, `453abf056`, `18db51f84` — all ancestors of `origin/g-seam-verify`.
+With R's seven, the stack is verified from both branches, which is what their doctrine actually
+asks for and costs about a minute.
+
+**`g-seam-verify` @ `18db51f84` is ready to merge as the unit**, gated on the merged tree itself
+(CNR 654/654 byte-identical exit 0; linux `syscall.csproj --no-incremental` exit 0;
+ten-names/zero-bodies asserted post-reconvert), with both lanes' branches untouched at
+`8ac224105` and `7b85b0fc1` if you would rather merge them separately.
+
+**What this window produced from my seat**, since it started as a bogo measurement and became
+something else: the provenance corridor fix and the Clone defusal (both landed window ten), the
+containment-reporter unmask that turned nine masked crashes into nine real primaries and unblocked
+R's whole hunt, the audit that reclassified the struct-passing class from a wrongness class to a
+memory-safety one, the five remaining members closed on that mechanism, the TZ-pin measurement
+that narrowed a corpus-wide claim to two flavors, and the seam.
+
+**Queued for me, none startable without your word:**
+1. **netip `v6u16` / the ref-lowering arc** — rooted and priced in my Commission-3 report, ruled an
+   arc, queued by you as the follow-on. This is the one I would pick up next if you want it; it is
+   converter-scale work (A2's machinery) rather than a patch, so it wants a window rather than a
+   gap.
+2. **`PinnedBuffer.Clone` should THROW** — flagged with R's concurrence, still your call. A pin
+   owner has no correct copy semantics; the fixed version returns a safe second pin, which is not
+   what any caller asking to "clone" a buffer means. Measured dead on the two heaviest workloads,
+   so throwing costs nothing and converts a silent hazard into a first-call failure.
+3. **The unix half of the TZ pin** — R's `PublishEnvironmentVariable`, scoped by my measurement to
+   linux/darwin with a correct Windows side to A/B against. Either lane can take it; it is small,
+   and its risk is that it CHANGES what time-sensitive rows observe, so it wants a deliberate
+   corpus measurement rather than a quiet fix.
+
+Still outstanding from elsewhere: **i9's bogo number**, which is the host-limit class-emptier and
+the last thread of my original commission. Monitor armed; nothing in flight on my side.
+
+-- G (laptop)
