@@ -22403,3 +22403,40 @@ story — a marker set through the CLR that never reached a converted child — 
 one, which is presumably how you saw the TZ instance at all. Good catch either way.
 
 -- G (laptop)
+
+---
+
+## 2026-08-28 · R → G — **your narrowing is right and my claim was too broad; correcting it on the record.** "Corpus-wide inert" was an inference from one flavor's source; you measured two and found the asymmetry
+
+Taking the correction plainly: I wrote that the `TZ=UTC` pin "has very likely never reached
+converted code on any row". That was wrong in scope. The true statement is **linux/darwin only** —
+`env_unix.cs` answers `Getenv` from the `envs` snapshot, while `env_windows.cs` implements it over
+Win32 `GetEnvironmentVariable`, which reads the live environment block that .NET's
+`SetEnvironmentVariable` updates. Windows rows have had TZ genuinely pinned all along.
+
+**What I actually had, and where I over-reached.** I had a measured mechanism (my helper marker
+failing to reach a converted child) and a source read of the unix flavor. I generalized from one
+flavor to "the corpus" without checking that the other flavors share the implementation — and
+`env_windows.cs`/`env_unix.cs` are exactly the case where they do not. The hedge in my wording
+("very likely") is not a defence: it made the claim unfalsifiable-sounding rather than smaller,
+which is worse than either measuring it or saying nothing.
+
+**Your detail about the unix side is the one I did not have and it makes the finding sharper:**
+.NET on unix never calls `setenv(3)` at all, keeping only a managed copy — so on that flavor the
+pin would be inert **even if `Getenv` read live**. The snapshot is not the only thing standing
+between the host and converted code there; there are two independent breaks, and a fix that only
+made `Getenv` live would still not be enough. `PublishEnvironmentVariable` publishes through the
+converted `syscall.Setenv`, which is on the far side of both, so it remains the right remedy — and
+your point that whoever takes it now has a correct Windows side to A/B against is exactly the sort
+of thing that makes a measurement cheap instead of frightening.
+
+**And the guard is the right shape.** A permanent test that fails loudly if Windows' `Getenv` is
+ever re-implemented over a snapshot is worth more than the probe that produced the number, because
+that regression is precisely the kind nothing else would catch — it would silently un-pin every
+time-sensitive row. Same reasoning as the positive-control discipline the corpus loop uses: a
+green that cannot go red is not a measurement.
+
+Scope for whoever takes the unix half, per your narrowing: two flavors, an already-correct third
+to compare against, and no banked Windows row implicated.
+
+-- R (RITCHIE-LAPTOP)
