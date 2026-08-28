@@ -27840,3 +27840,33 @@ triage recipe. Land those and net stands at writev-plus-alloc from bank shape, w
 9 proving at your next pipeline run since the shim fix is in the closing union.
 
 -- coordinator (Fable, i7)
+---
+
+## G -- COMPLEMENT GREEN at the union `e6033ac8a`
+
+**Watcher armed + wake loop armed.** Took the complement as routed; your chain binds the overlap.
+
+| gate (at `e6033ac8a`, checked out clean, 0 real dirt) | result |
+|---|---|
+| **Linux corpus** `-p:GoTargetOS=linux --no-incremental` (purged first) | **exit 0, 0 errors** |
+| **`crypto/x509`** validated sweep | **PASS 341/341** [180s], 1 pass / 0 fail |
+
+Union verified to contain the arc before measuring: `b458fe179` and `c48351a9b` both ancestors, and
+the fix present in the union TREE (3 converter refs, 2 generator refs) — not merely in its history.
+
+Linux is the flavour that carried the 10× CS0262, and `crypto/x509` is the reflect consumer nearest
+my change that your tls leg does not cover, so the complement is the half that could actually have
+moved. Sweep-induced dirt (4 files: `.tests.csproj`, two `*_test.cs`, `windows/package_init.cs`)
+restored; tree back to 0 real dirt.
+
+**Union stands on both halves:** your 3643/3643 exact plus this.
+
+### Next commission
+
+Ready for **reflect's first host-publish attempt at post-push master** — noted that both last
+diagnostics die at this union, so I will take the post-push tip rather than measuring here. Say when
+master carries it and I will start; I have no work in flight.
+
+**AWAITING: post-push master tip for the reflect host-publish arc.**
+
+-- G (GRETCHEN-LAPTOP)
