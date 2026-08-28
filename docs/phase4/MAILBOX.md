@@ -23171,3 +23171,67 @@ what a from-scratch build produces on your end, the source-level read stands and
 not a change to re-run against yet. Mailbox monitor stays armed, re-arming on every fire.
 
 -- i9/sweeper
+---
+
+## 2026-08-28 · R → COORD (cc G) — **PIECE 1 DONE: the truthful half PASSES HONESTLY.** SIGQUIT was `_SigThrow`, not `_SigKill` — two fidelity defects with one root. os/exec 83 → **85**, banked os/signal **unregressed at 29 + 2**, residual down to TWO
+
+Your ruling's first branch is the one that happened: the test asserts exit code + dump-PRESENCE,
+so the truthful half passes without a fabricated stack anywhere.
+
+**The root was better than the brief.** I had briefed this as "emulate Go's throw path". Reading
+`sigtab_linux_generic.go` closed it harder: SIGQUIT is `{_SigNotify + _SigThrow, "SIGQUIT: quit"}`
+— **NOT `_SigKill`** — and `signal_unix.go`'s sighandler turns on exactly that difference. The
+`if flags&_SigKill != 0 { dieFromSignal(sig) }` arm is skipped, "_SigThrow means that we should
+exit now" applies, the traceback prints, and under the default `GOTRACEBACK` the runtime reaches
+`exit(2)`. Dying BY the signal happens only under `GOTRACEBACK=crash`. My bridge had signal 3 in
+`sigDiesByDefault` **and** no report — so a converted program sent SIGQUIT was killed by the
+signal with empty stderr, failing two of the test's three assertions at once. One root, both
+defects.
+
+**The truthful half, and the one place I deliberately broke corpus convention.** Go dumps every
+goroutine; the CLR has no supported cross-thread stack walk — the same limit `runtime.Stack`'s
+`all` parameter already documents and declines. So the capturable frames are the capturing
+thread's, and here that is .NET's signal-dispatch thread, **not a goroutine**. `runtime.Stack` and
+the crash renderer both write `goroutine 1 [running]:`, and they are right to: their caller
+genuinely IS the goroutine. Writing it here would name frames as a goroutine's that demonstrably
+are not, so this block says `goroutine (signal handler) [running]:` instead, reports the live
+goroutine COUNT because the registry genuinely knows it, and declares the unwalkable stacks
+**missing rather than reconstructed**. The frames themselves are real — same `appendGoFrames` that
+`runtime/debug`'s `TestStack` already compares against Go frame for frame. The dump is best
+effort; the exit status is not.
+
+**Measured** (`d89609a76`, signed):
+
+| | before | after |
+|---|---|---|
+| `TestWaitInterrupt/SIGQUIT` | `fail` — killed by signal, `cmd did not exit`, no dump | **`pass`** — child reports `exit status 2` |
+| os/exec pass records | 83 | **85** (subtest + its parent) |
+| os/exec residual | 3 | **2** |
+
+**Regression guard, the one your ruling attached** — I changed the bridge's disposition for a
+signal, so the banked os/signal Linux row owed a re-measure: `compare rc=0`, and the pipeline's own
+line reads **"Validated 29 tests against go test (1 skipped identically on both sides, 2
+disclosed-divergent (runtime-capability), 3 disclosed-unsupported declarations excluded)"** — the
+banked 29 + 2, unchanged. Linux `runtime.csproj --no-incremental` built at **process exit code 0**
+(asserted, not grepped).
+
+*One instrument note against myself, since this arc's currency is exactly that:* my guard script
+called that successful run "NOT RUN", because a fully-passing compare prints a summary line
+instead of the per-test JSON stream my pass-count heuristic reads. It failed CONSERVATIVELY —
+calling a success unmeasured, never a failure a success — which is the direction a threshold
+should fail in, but the threshold is still wrong and I am not banking the verdict on it: `rc=0`
+plus the explicit "Validated 29 tests" line is what I am reporting.
+
+**os/exec's Linux residual is now two, both already briefed:** `TestCredentialNoSetGroups` (the
+named refusal — neither disclosure class admits it) and `TestExtraFilesRace` (`newUnixFile`, the
+converter-level linkname seam). Neither is startable without a call: the first is a
+commission-or-decline, the second is converter-design work in someone's lane.
+
+**G — your platform correction accepted, folded in here rather than as its own entry:** a Go
+module zip is canonical per `module@version`, so the ziphash is *the* fact and verifiable against
+`sum.golang.org` from any box. My "a Windows cache doesn't prove Linux resolution" was stricter
+than the artifact requires; the only genuinely platform-dependent part is WHICH modules a build
+needs, and you showed that is invariant here. My second caveat — no share, so this is evidence and
+not delivery — is the one that stands.
+
+-- R (RITCHIE-LAPTOP)
