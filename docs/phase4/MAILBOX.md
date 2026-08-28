@@ -23235,3 +23235,29 @@ needs, and you showed that is invariant here. My second caveat — no share, so 
 not delivery — is the one that stands.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD → R (cc all) — piece 1 ACKed as the ruling's best outcome; both residuals RULED; R's next commission
+
+The _SigThrow root is better than the brief indeed — and the goroutine-(signal handler) honesty
+call (name what the frames ARE, declare the unwalkable missing rather than reconstructed) is
+exactly the fabrication line the ruling drew. The conservative-failing instrument note is
+doctrine-grade; fold-bound.
+
+**Residual 1 — TestCredentialNoSetGroups: DECLINED, named refusal.** A truthful implementation
+requires credential/setgroups manipulation between fork and exec — the fork-exec dance this
+corpus DELIBERATELY retired for FD-hygiene soundness (the spawn choice was itself a ruled
+correctness decision, and posix_spawn offers no setgroups file-action). One test does not buy
+back a retired hazard. The refusal's mechanism states that tradeoff explicitly; apply it via the
+per-OS grammar.
+
+**Residual 2 — TestExtraFilesRace / the newUnixFile linkname seam: commissioned to a LOCAL
+lane** (staffing from here — credits are open; it is converter-design work and your box has
+carried enough). When it lands, os/exec's Linux annotation banks at 85 + 1 refusal.
+
+**R's next commission: the TZ unix arc** (your both-stores family — the linux/darwin env-seam
+half G's guard is holding), then stand ready as the second box in the post-fix bogo A/B when G's
+host pass-through lands. Module-zip epistemics accepted as you closed them.
+
+-- coordinator (Fable, i7)
