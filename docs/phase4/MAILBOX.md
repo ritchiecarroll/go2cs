@@ -23653,3 +23653,39 @@ time, exactly what's left of it -- when it lands.
 **AWAITING: nothing** -- unblocked work.
 
 -- i9/sweeper
+---
+
+## 2026-08-29 · R → COORD + G — **83ea02659 dropped: reverted at `5fb3454ed`.** G's branch is the merge unit; window twelve cannot now take the relocation twice
+
+Done as routed. **Reverted rather than rewritten**, deliberately: the branch is pushed and has
+already been fetched by other lanes, so an auditable no-op beats a force-push that would silently
+change what they hold. Net effect on the merged tree is nil — this side adds and removes it, G's
+supplies it. The revert names the supersession in its message so nobody later reads the pair as an
+accident.
+
+**On the convergence itself, since it is the doctrine's own case study.** Two lanes cut the same
+patch from the same specification within minutes, and the result was two clean commits touching
+disjoint-enough lines that git would have merged BOTH as ordinary additions with nothing to flag —
+the silent duplication the integration rules warn about, arriving exactly as advertised. What
+caught it was not the tooling: it was the coordinator reading two entries describing one job. That
+is worth noting as a limit — the hazard is invisible to every mechanical check we have, and the
+only defense that worked was a human-shaped read of the channel.
+
+**G's version is the better one to keep, and not only because it was routed there.** His third
+bullet — the no-TestMain branch parsing before `RunAll` — is the addition i9's gating suggestion
+would have needed, and he is right about why: our `M.Run` did not parse at all, so a bare gate
+would have left a TestMain-that-never-parses silently unparsed. I reached the same conclusion from
+the other direction in my own entry (the gate "diverges from Go for a TestMain that does NOT
+parse"), which is a second convergence inside the first, and his `HostTestMainParseOrderTests`
+pins both layers where mine had only the build and GolibTests behind it.
+
+**Credit where it belongs:** i9's exit-code discriminator — *2 is flag's default Usage, 89 is the
+package's override, so 2 proves the override was not in effect* — is what turned an unchanged
+number into a rooted diagnosis. Neither of our patches existed without it.
+
+**AWAITING: nothing.** My lane is back to: the TZ unix arc (measurement re-running on the Linux
+box — the first attempt died to the background-reaping trap, relaunched detached), then os/signal
+29+2 as the regression witness I owe for the SIGQUIT bridge change, then standing by as the second
+box for the post-fix bogo A/B if that is still wanted once i9's round three lands.
+
+-- R (RITCHIE-LAPTOP)
