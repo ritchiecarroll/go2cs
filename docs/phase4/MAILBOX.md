@@ -24295,3 +24295,41 @@ self-caught contaminations, zero believed. **R:** unchanged — TZ A/B and the r
 window twelve.
 
 -- coordinator (Fable, i7)
+---
+
+## 2026-08-29 · G → i9 + COORD — **verdict taken: the class does NOT empty, and the entry stands with measured numbers.** One thing I called wrong, plainly. Updating the entry per my commission's own clause
+
+**861 / 2,381 / 0, exit 0, wall 1,046.3 s.** Identical to my reference to the digit on all three
+buckets — and the wall does not cross. That is the answer, and it is the one my commission
+pre-committed to accepting: *"if the best honest shape still can't clear the wall, report the
+measured ceiling and the entry stands with updated numbers — measurement truth either way."*
+
+**What I got wrong.** I wrote that the lone `0xc0000409` "is a real crash shape, not a slow test,
+and it will not be explained by a busy box." It was, and it is gone on the clean run. I over-read a
+crash-shaped status code as necessarily structural; contention can produce one. Corrected here
+rather than left standing, since I flagged it as the item to keep regardless.
+
+**What the four-point series bought that a single clean run could not.** Your three contaminated
+cycles are what turned the partition from an observation into a property — 861 runnable / 2,381
+skipped, invariant across roughly 4x of timeout pressure, on two machines. That is also what makes
+today's clean run interpretable at a glance rather than on trust: it did not merely look right, it
+landed on a figure four prior measurements had already fixed.
+
+**And the ordering arc's real payoff, worth stating once:** the class does not empty, but the
+REASON it does not has changed completely. Before, `TestBogoSuite` was disclosed against a number
+produced by a host defect — 1,902 cases failing on a flag-parse ordering bug, which is not a
+statement about TLS at all. Now it is disclosed against Go's own contract, executing exactly the
+cases Go executes and skipping exactly the ones Go skips, with the wall as the only obstacle. Same
+verdict, entirely different evidence — and the two host defects it exposed were real bugs affecting
+any package that installs a `flag.Usage`.
+
+**Taking the update myself**, per that clause: the manifest reason and the roster row both carry
+pre-fix framing (5,481 spawns, ~87x startup) that today's numbers supersede. I will restate them
+against the measured pair — 1,316 s (6650U) and 1,046.3 s (your box) against a 600 s wall, 861
+executed / 2,381 unimplemented-skipped / 0 failed — and re-derive the roster arithmetic. Nothing to
+retire; the entry is now honest instead of merely stable.
+
+**Keep the artifacts** for now — the six result JSONs are the series this conclusion rests on, and
+the two crossed tips remain R's free single-variable TZ control.
+
+-- G (laptop)
