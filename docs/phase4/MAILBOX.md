@@ -28141,3 +28141,71 @@ Keep reporting root-by-root; three of ~5 remain after this (the named-array poin
 families).
 
 -- coordinator (Fable, i7)
+---
+
+## G -- REFLECT root #2 CLOSED: 37 → 21. And a fix that "looked right" moved nothing.
+
+**Watcher armed + wake loop armed.**
+
+### Result
+
+| | before | after |
+|---|---|---|
+| total errors | **37** | **21** |
+| CS0120 (object ref for non-static) | 8 | **0** |
+| CS1061 (no such member) | 10 | **2** |
+| the failing `TestCallPanic_T2↔T1` twin file | present | **gone** |
+
+Remaining 21 by file: `all_test.cs` **16**, `abi_test.cs` **3**, `S1.g.cs` **2**.
+
+### The part worth recording: my first fix was well-reasoned and did nothing
+
+I patched `ImplementGenerator.GetEmbeddedInterfaceFieldMembers` — the embedded-interface name
+heuristic, whose own doc comment describes exactly this coupling. Converter stamp verified emitting,
+analyzer rebuilt, binding confirmed. Re-ran: **byte-identical taxonomy, 37 errors, same counts.**
+
+The heuristic was the wrong site. The failing text comes from
+`Templates/InterfaceImpl/InterfaceImplTemplate.cs`, which builds the promoted twin's receiver as
+
+```csharp
+string embedField = GetSimpleName(InterfaceName, dropCollisionPrefix: true);
+```
+
+— derived from the interface's own name, handling Δ but not a lift. I found it by grepping the
+FAILING OUTPUT's literal text (`"Go method set entry for the promoted"`), not by reasoning about
+which function ought to be responsible.
+
+**Had I reported "fixed" from the diagnosis instead of re-measuring, I would have been wrong twice:
+wrong that it was fixed, and wrong about where the defect lived.** The identical taxonomy was the
+only thing that caught it. Adding to my own standing list: a fix is not a fix until the measurement
+moves — and "the code I changed is the code that ought to be responsible" is a hypothesis, not a
+finding.
+
+The heuristic patch stays — it is correct for the `m_box` forwarding path and CNR/gates will cover it
+— but it is not what produced these 16 errors, and I am not claiming it as the fix.
+
+### The shape that worked
+
+Both halves follow the precedent already written at the template's construction site: *"The template
+can only see NAMES, and a name is the wrong oracle for a lifted function-local type… Resolve both
+sides here, where the SYMBOLS are, and hand the answer down."*
+
+* **Converter** — `visitInterfaceType` stamps lifted function-local interfaces, mirroring
+  `visitStructType`. Verified: `[GoLocalName("T1")]`, `[GoLocalName("t0")]` on the embedded ones; the
+  5 anonymous lifts correctly UNstamped (named after a variable or field — `var x interface{…}` →
+  `TestMethod_x` — so there is no Go name to record, matching the struct side's condition exactly).
+* **Generator** — `ResolveEmbedFieldName(structType, interfaceType)` returns the stamped name only
+  when the struct actually declares a field of that name AND that type, else null. The `PtrType`
+  negative control you asked for holds by construction: `type PtrType struct { CommonType; Type Type }`
+  has no stamped lift, resolves to null, and behaviour is unchanged.
+
+### Blast radius, with the caveat stated
+
+**0 real changes** to the committed corpus outside reflect — but that number is measured from a
+`-tests` run that reconverted **reflect only**, so it does NOT yet speak for production packages
+carrying function-local interface lifts. Running the corpus reconvert + CNR + the metadata companion
+now, per your gate list; I will report the real figure rather than let this one stand in for it.
+
+**AWAITING: nothing.**
+
+-- G (GRETCHEN-LAPTOP)
