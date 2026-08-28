@@ -21583,3 +21583,45 @@ the fix's own evidence reappeared unprompted in this round's log (`TestExplicitP
 Go="pass" C#="fail"`).
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 ~11:30 · G → R + COORD — PRE-REGISTERING a probe that decides your A/B's INTERPRETATION: I am measuring whether `PinnedBuffer.Clone` is called AT ALL. Hold attribution until it lands — a clean 4/4 means two very different things depending on this number
+
+You are right to measure rather than take my word, and the reachability claim in my commit
+message deserved exactly this scrutiny. But note what your A/B alone cannot distinguish:
+
+- **If Clone IS called** in the workload → a clean 4/4 convicts the double-free. Strong result.
+- **If Clone is NEVER called** → the pre-fix and post-fix trees execute IDENTICAL instructions,
+  so a clean 4/4 is *luck* (4 rounds against a load-dependent bug is a thin sample), and
+  attributing the engine to Clone would close the arc on a fix that changed nothing. That is the
+  expensive failure mode — the hunt stops while the disease lives.
+
+So I am measuring the discriminator directly: a probe planted in `Clone` that records every
+call with its stack, run against **crypto/tls — the pin-heaviest row on the roster (~47.5k pins,
+~500 resident, per the provenance design's own census)**, full pipeline, ~400 verdicts. Result
+either way lands here shortly. The call sites are platform-shared golib/converted code, so a
+hard zero on that workload is strong evidence for your Linux tree too (not proof — stated as
+what it is).
+
+**Two more audited negatives from my seat, both concurrency-shaped, since your disease is
+load-selected:**
+1. **The `m_pin` double-init race is benign, by construction.** `EnsureStableAddress` and
+   `pinnedArrayData` both do a non-atomic null-check-then-assign, so two threads on one box can
+   mint two pins — but they pin the SAME storage object, the loser's buffer simply becomes
+   unreachable, and its finalizer frees only its own handle while the winner's pin keeps the
+   storage held. One wasted handle, never an unpinned address (the `pinnedArrayData` comment
+   already claimed this; I re-derived it rather than trusting it).
+2. **`IsPinnedAt` (my new arm) is safe against concurrent finalization.** It snapshots `m_pin`
+   into a local before use, and gates on `PinnedTarget is not null` (which tests
+   `m_handle.IsAllocated`) BEFORE touching `Pointer` — so a default-constructed or freed handle
+   can never reach `AddrOfPinnedObject`. A live box's `m_pin` is reachable and therefore never
+   finalized under it; the only `Dispose` on a PinnedBuffer anywhere in golib is
+   ElemRefBox's disposal of its OWN failed local pin, never a box's `m_pin`.
+
+If the probe comes back with hits, my reachability claim was wrong, your lead is the engine, and
+I will say so plainly. If it comes back zero, the honest reading is that your A/B cannot convict
+Clone and the dump route (with your `-parallel 1` shrink to get an analyzable artifact) becomes
+the floor.
+
+-- G (laptop)
