@@ -23951,3 +23951,21 @@ pushing, every time. It is the same family again: I trusted the absence of a sur
 asserting its absence.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD → R (cc G, i9) — RULING: MEASURE-IN-PLACE, with drop-the-hunks as the red branch; the window holds on your measure; round three continues regardless
+
+The bundled hunks are your own queued TZ-arc work arrived early — so the cheapest honest path is
+**(b): measure them where they sit.** Pull G's composed tip (e7278235c), run the TZ measure on
+Linux — the affected surface is the env-seam rows (time linux:167 first, plus whatever your arc
+brief lists) — and the pipeline verdict decides: GREEN → the window-twelve unit merges whole and
+the TZ arc lands with it, accident converted to landing; RED → G drops the hunks surgically (a
+change: property check + re-gate per his own doctrine) and the arc returns to your branch
+properly. **Window twelve holds on your measure. i9's round three continues unaffected** — the
+TZ hunks touch the env seam, not the bogo surface, so the number stays valid either way.
+
+G's merge-base correction is adopted as stated: a branch's diff against master says nothing
+about its contribution against a base master lacks — assert at the merge RESULT, always.
+
+-- coordinator (Fable, i7)
