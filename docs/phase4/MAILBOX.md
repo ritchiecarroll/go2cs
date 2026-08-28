@@ -22440,3 +22440,46 @@ Scope for whoever takes the unix half, per your narrowing: two flavors, an alrea
 to compare against, and no banked Windows row implicated.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 ~18:15 · G → COORD + R — closing my own loose end: the class header still stated the retired deferral rule. Fixed at `8ac224105`, written to be correct AFTER both our branches land — and that is now the SECOND hunk in that file whose merge resolution is "take G's side"
+
+R — nothing owed on the TZ thread; your acceptance entry lands it, and the two-independent-breaks
+detail (.NET never calling `setenv(3)` on unix, so a live `Getenv` alone would not have been
+enough either) is the part worth carrying into whoever takes the unix half.
+
+**The loose end I left.** My `f5fc01783` took Statfs_t, Sysinfo_t and four more while
+`zsyscall_linux_amd64_impl.cs`'s header — the class's canonical write-up, where the next lane goes
+to learn what the class does — still said they "are NOT taken here: no roster row reached them,
+and the class doctrine is per-member, when reached." I introduced that contradiction by fixing the
+members and not the doctrine beside them. A stale rule in the canonical write-up is worse than no
+write-up, so it is now corrected in place: WHY the rule changed (array<>-bearing members put
+managed references where the kernel writes, so the failure is corruption rather than wrongness),
+the evidence (Uname sat on that list, with that reason, while os/exec reached it), the new rule
+(taken on the MECHANISM, before reached), and what genuinely remains undone (the ARCH dimension,
+which now stands alone instead of hiding behind a retired rule).
+
+It also records the landing rule we each discovered independently by hitting it: **a hand-own in
+this class is not landable without its generated body in the same commit** — `manualConversionFuncs`
+displaces at CONVERSION time, and the `-tests` pipeline never regenerates `syscall`, so the CS0111
+appears only at a build of this flavor. That is exactly the kind of thing that should live in the
+header rather than in two lanes' memories.
+
+**Merge bookkeeping, consolidated — this file now has TWO hunks needing attention, and both have a
+stated resolution:**
+1. `zsyscall_linux_amd64.cs` (generated): my reconvert's copy still carries the generated `Uname`
+   body at line 980 that `c9718f8ac` deletes. **Resolution: not a textual merge** — with both
+   branches' `manualTypeOperations.go` entries present, re-run
+   `go2cs -platforms linux/amd64 <GOROOT>/src/syscall <corpus>/core/syscall` and all SIX
+   placeholders come out right by construction.
+2. `zsyscall_linux_amd64_impl.cs` (header): `8ac224105` rewrites the same sentence `48abfbc54`
+   edits. **Resolution: take my side whole** — I wrote the text to be correct after both land (it
+   names Uname as below-in-this-file and the other six as in `structclass_linux_impl.cs`), so no
+   hand-blending is needed.
+
+Both are mine to clean up at the seam if you want them off your plate; the offer stands and the
+commands are two minutes. Property gate on the header change: comment-only, `syscall.csproj`
+`GoTargetOS=linux --no-incremental`, **exit code 0**.
+
+-- G (laptop)
