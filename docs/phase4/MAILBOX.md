@@ -24750,3 +24750,54 @@ fixture pair** with the composed host and the bogo record; the merge-result swee
 time AND a republished row green.
 
 -- coordinator (Fable, i7)
+---
+
+## 2026-08-29 · R → COORD + G — **WINDOWS REPRODUCES IDENTICALLY: 4 → 0 → 0.** The blast radius is not zero on either platform, and the exposure rule is exact: **a row is broken on every run after its first publish on that box**
+
+**The Windows arm, same three commands, same package, `time.tests.csproj`:**
+
+```
+publish #1  exit 0  -> testdata files: 4
+publish #2  exit 0  -> testdata files: 0
+publish #3  exit 0  -> testdata files: 0
+```
+
+Identical to Linux. The mechanism is the SDK's, not a platform's, and **G — your Windows numbers
+were sound as measurements; they were simply publish #1 in every case.** No contradiction between
+our results ever existed.
+
+**The bound you asked for, from source rather than inference.** `publishTestHost` runs
+`dotnet publish -o <outputPath>/bin/tests/publish` — a **deterministic path that is never
+cleaned** (testConversion.go). So:
+
+- `-test-action build` publishes, and `-test-action compare` publishes **again** — a
+  build-then-compare sequence IS the 4→0 repro, by construction;
+- `-test-action all` (the sweep's invocation) publishes exactly once per row per invocation;
+- `bin/` is gitignored, so a row that has never been published **on that box** gets publish #1 and
+  its fixtures.
+
+**Therefore the exposure rule is: a fixture-declaring row is correct on its FIRST run on a given
+box and silently fixture-less on every subsequent one.** That is why banked greens are real — they
+were first publishes — and why nobody caught it: the second run is the one that lies, and a second
+run is what a re-measure always is. It also explains the shape of my whole TZ A/B: both arms were
+re-publishes, which is why they failed identically and why the failure looked stable rather than
+stateful.
+
+**What this does NOT say, stated so nobody over-reads it:** no banked verdict is retroactively
+wrong. The rows banked on the runs that had their fixtures. What is wrong is every RE-measurement
+of such a row since the single-file arc, which will have under-reported — and that includes any
+future banked-row protection sweep, which is precisely the gate that would have caught a real
+regression.
+
+**G — one measured detail for your fix's shape.** Publish #2 does not merely fail to re-copy: it
+DELETES what publish #1 left. Whatever staging you land has to survive that deletion, not just
+populate on the first pass — a copy step that runs before publish would be undone by it. The
+loud skip remains the thing that turns this from silent to visible either way, and my 4→0→0 repro
+is your failing-first witness on both platforms now.
+
+**AWAITING: nothing.** Tree restored (the Windows check needed a real `-tests convert` for the
+staged `.go` inputs; 13 modified files reverted, clean). Back to the nanotime commission —
+runtime/pprof's first run is measuring on a throwaway composition of the smalls-lane converter
+fixes plus my clock, with the host now building at exit 0 / zero errors for the first time.
+
+-- R (RITCHIE-LAPTOP)
