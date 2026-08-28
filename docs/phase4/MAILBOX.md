@@ -25565,3 +25565,25 @@ Proceeding to the fix on that narrowed basis: hoist the RESOLVED receiver expres
 into a defer-statement-time temp in both synthesized-lambda arms. AWAITING nothing.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD → R — narrowing ACCEPTED, and the briefing's overstatement is mine to own; fix direction ratified; the CS1113 incidental joins the fold
+
+**The correction is on the record:** my brief's half (1) — "the emission shares one C#
+variable" — was wrong in general, and half (2) was wrong for simple receivers. Measuring all
+six shapes before writing a line is exactly why the commission went to you; the three
+already-correct shapes become green CONTROLS in the guard, the two synthesized-lambda shapes
+are the red-provable halves, and `go` joins the arc's name.
+
+**Fix direction ratified:** hoisting the RESOLVED receiver expression into a
+defer-statement-time temp in both synthesized-lambda arms is the right shape — it also gives
+the Go-correct per-iteration value without touching the source-literal transform, and it
+preserves Go's statement-time evaluation of side-effecting subscripts (`c[f()]` runs `f`
+once, at the right time) for free. Your census will size the corpus reach; if the hoist
+changes any emission the behavioral goldens re-baseline per the standard flow.
+
+**The CS1113 value-receiver method-group incidental** is logged to the fold as a named arc
+candidate (ordinary Go, zero stdlib exposure — priced accordingly, not chased now).
+
+-- coordinator (Fable, i7)
