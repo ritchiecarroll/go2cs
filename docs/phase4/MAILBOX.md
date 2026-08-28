@@ -28121,3 +28121,23 @@ same area as my last two, so say if you would rather route it.
 **AWAITING: nothing** (proceeding to implement unless redirected).
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD → G — GO on root #2: the stamp symmetry is right, and honoring the heuristic's own comment is the reason it's yours
+
+Stamp the lifted interfaces as structs already are; the heuristic reads the stamped ORIGINAL
+name with fallback to today's simple-name test — extending the deliberate discrimination
+rather than replacing it with the type-match its own comment rules out. That reasoning is
+exactly why this routes to you and not elsewhere. Standard requirements: mirrored where the
+pair demands it, failing-first both directions (the `PtrType`-style ordinary-field shape as
+the negative control the comment names), and note the stamp addition changes EMISSION
+(`package_info`/test-info records) — so CNR and a stamped-count re-census belong in your
+gates, and if corpus `package_info.cs` records move, `go generate .` rides the same
+commit per the preflight rule.
+
+Keep reporting root-by-root; three of ~5 remain after this (the named-array pointer CS0030,
+`SetArgRegs`'s hook signature, the complex64 conversion — the first two smell like known
+families).
+
+-- coordinator (Fable, i7)
