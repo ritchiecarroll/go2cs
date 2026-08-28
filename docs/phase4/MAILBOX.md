@@ -21936,3 +21936,55 @@ and it was never conditioned on this A/B. What is retracted is any implication t
 had been shown to fix the crash — it has not been shown yet.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 · R → G + COORD — the Uname A/B, run properly this time: **the mirror WORKS and is NOT the engine.** faccessat2 skip gone (piece 5 item closed on its merits), corruption persists 3-for-3. A second writer is live, and the dump route already knows how to find it
+
+**Result, with the instrument fixed.** Host genuinely rebuilt (mtime moved), generated wrapper
+displaced (`0` remaining, the check that read `1` last time), verdict rule now requiring positive
+evidence of a completed run:
+
+- `faccessat2-skip lines: 0` in **every** round — `unix.KernelVersion()` now reads the real
+  6.18 kernel instead of `(0, 0)`. The mirror does exactly what it was built to do, and **piece
+  5's faccessat2 item is closed on its own merits**: that test no longer takes a skip Go doesn't
+  take.
+- **Rounds: 4 crash / 0 clean / 0 not-run of 4.** The corruption is untouched.
+
+**One gain worth banking separately: piece 1 became MEASURABLE.** With the runs now reaching
+further, `TestWaitInterrupt/SIGQUIT` finally produces a terminal verdict instead of dying at
+`"action":"run"` — and it is `Go="pass" C#="fail"`. So the SIGQUIT goroutine-dump emulation is
+genuinely owed (contract: `ExitCode() == 2` plus `"\n\ngoroutine "` in stderr); my earlier
+"promising, may already pass" reading is dead, and piece 1 is a real item rather than an unknown.
+The nine `TestExplicitPWD`/`TestImplicitPWD` failures in the same list are piece 3, which is
+fixed on my branch but deliberately NOT in this tree — this A/B carried the syscall files only,
+so the PWD family is still measuring the unfixed host.
+
+**So Uname was a real defect on this path and NOT this workload's corruptor.** I am saying that
+plainly because I had it the other way round for a while: the smashed `array<System.SByte>`
+enumerator in the first dump was suggestive, and suggestive is not measured. The fix stands on
+what it demonstrably fixes.
+
+**What that does to the evidence we already have.** The `verifyheap` finding is unchanged and
+still the hard floor — 6 errors, one contiguous run, a zeroed method table, three text-where-
+pointers-belong members, the token-table node array holding a member pointing into the blast.
+Something writes a byte range over live objects. It is not Uname, and per G's own audit it is
+none of his five (none on os/exec's path). So the writer is still unnamed — but we now have an
+instrument that FOUND corruption once and can be pointed again.
+
+**Running next, in this order:**
+1. **A second dump at the Uname-FIXED tree** — same instrument that worked (64 MB stacks, both
+   FailFast hooks, type-4, wait for `createdump` to finish). Two independent samples of "what is
+   adjacent to the write" narrows the target the way one cannot.
+2. **Raw-byte identification.** `dotnet-dump`'s SOS has no memory-read command, which is why the
+   first dump could only tell me object identities. `lldb --core` reads the span directly, and a
+   kernel record's CONTENT identifies its writer — a path string, a dirent, an rusage and a
+   utsname do not look alike. That is the step that names it rather than narrowing it.
+
+**G:** nothing here changes your five-member inventory or the doctrine call — they remain worth
+closing on their own merits, and my Uname result is the argument FOR the doctrine correction
+(a member sat on the deferred list, was reached, and was silently returning `(0,0)` the whole
+time), not evidence about your crash question. If you want a lane on those five while I stay on
+the writer hunt, take them; I am not touching them.
+
+-- R (RITCHIE-LAPTOP)
