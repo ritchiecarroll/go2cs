@@ -20773,3 +20773,43 @@ owner. **Windows os/signal measurement**: flagged for staffing per the commissio
 proves the arc; the Windows console model is its own measure).
 
 Branch pushed, every commit signed, tree clean. Monitor stays armed. — R
+
+---
+
+## 2026-08-28 ~00:55 · G → COORD — PHASE 2 CLOSED, COMMISSION COMPLETE: the slice-shaped spread lands and slices BANKS 119/119 + 3 as row 181. MERGE SIGNAL: `claude/go2cs-fleet-commission-0dfba0` @ `edabcc0af`, tree clean, master merged forward
+
+**The arc, as priced and gated whole:** a slice-typed spread operand now travels AS THE SLICE IT
+IS — `appendꓸꓸꓸ(s, t)` for Go's `append(s, t...)`, `appendꓸꓸꓸ<S, E>` for the constrained form
+(explicit args: constraint surfaces don't infer). The name is distinct from `append` BY DESIGN —
+sharing the overload set re-entered the C#14 params/betterness thicket (measured CS0121) — and it
+reads as Go with the dots on the callee. golib: two `builtin.appendꓸꓸꓸ` overloads over a new
+`slice<T>.Append(…, ISlice<T>)` core (span fast-path byte-identical in allocs; zero-size windows
+route by arithmetic BEFORE any span — `make([]struct{}, MaxInt)` flows allocation-free, the
+even-rounding guarded at MaxInt; foreign wrappers lend their own `ꓸꓸꓸ` inside the core; native
+past-ceiling meets Go's growslice panic). Converter: ~20 lines (classification + spread-arm +
+Phase-9 rename, `typeParamSliceCore` reused).
+
+**Census + gates:** 401 sites / 151 corpus files routed (679/225 was the all-spreads price;
+strings keep the span route). Three-target regen, classification exact (4 hook restores per the
+amendment incl. edwards25519's banked hook, 53 phantoms); stdlib 0 errors BOTH targets; converter
+-count=1 ok ×2; CNR = exactly 11 behavioral projects / 28 lines / ZERO residue; goldens
+re-baselined; FULL behavioral 621/621 + 595/595 (1,582 s); go2cs.slnx 0 errors. The reference
+doc's own ceiling entry (which priced this arc) amended in place.
+
+**The row:** slices **119 matched · 3 disclosed** — the ruling's exact arithmetic, with
+`TestConcat_too_large` PASSING (the arc's target: the MaxInt zero-size fakes). Disclosures are
+the pre-ruled classes with measured numbers (Concat/Grow alloc-count-semantics; Insert
+alloc-profile, 242 vs <25). Banking sweep at the merged tip: PASS 119 (180 s), page tip-stamped.
+**Headers: 181/215 — 84.2% · 21,924 matching · 88 disclosed · 181/208 — 87.0%**; guard 281.
+
+**Merge notes:** post-merge filtered sweep of `slices` at the merge result per doctrine; no
+GoImplement/metadata moves (position maps only — TestStdLibMetadataInSync green twice); master
+f73ae1af2 merged forward pre-bank (`177e9eb4e`), so the union should be trivial. Standing
+expectation unchanged from window eight: re-derived rows gain the publish-block csproj lines.
+
+**Commission ledger, both phases:** host-limit's founding capability retired (os/exec 116/116·0,
+row re-banked, class text rewritten, survivors honestly re-measured) + the spread arc landed
+(slices row 181). Six signed commits this commission, every gate named in its message. Standing
+by — monitor armed.
+
+-- G (laptop)
