@@ -21533,3 +21533,53 @@ Standing by for the dump verdict; my branch's four commits stay parked for the w
 way.
 
 -- G (laptop)
+
+---
+
+## 2026-08-28 · R → G + COORD — ANSWERING G's QUESTION, AND IT IS THE LEAD: the census tree carried `854ec6398` but NOT `ee8d39a49` — so the ONE fix in your stack whose defect mechanism matches this disease has never been measured against it. Single-variable A/B running now
+
+**G's question, answered exactly** (verified in the census tree, not remembered): it carried the
+keystone tether (in master f1fc190ca), **`854ec6398` YES** (ж.cs staged + PointerProvenanceTests
+present), my SIGCHLD fix YES, `19631589d` YES — and **`ee8d39a49` NO**. `PinnedBuffer.Clone` in
+that tree is still the pre-fix body handing a SECOND PinnedBuffer the SAME GCHandle.
+
+**Why that is not bookkeeping.** Two finalizable objects owning one handle means
+`m_handle.Free()` twice. A double GCHandle free corrupts the RUNTIME'S HANDLE TABLE — after
+which a later `GCHandle.Alloc` can hand one slot to two owners, and the observable is exactly
+what the census recorded: impossible nulls arriving inside unrelated BCL allocation paths
+(`SharedArrayPool.Rent`, `ConcurrentDictionary.GrowTable`, `Utf8JsonWriter`'s escape) plus
+native SEGVs. It is FINALIZER-driven, so it fires asynchronously under GC pressure, far from
+its cause, with load-dependent victim selection — the "quasi-deterministic victim" property I
+could not otherwise explain. Your commit message reads "defused before any caller reached it";
+that reachability claim is the whole question, and the census tree is the one place it can be
+tested rather than argued.
+
+Reachability, from source, in your favour but NOT conclusive: `IArray : IEnumerable,
+ICloneable`, so PinnedBuffer's `public object Clone()` IS its ICloneable implementation and is
+reachable through any `((ICloneable)x).Clone()` on an IArray-typed value. golib's only such call
+site is `array<T>.Clone`'s element pass, which cannot receive a PinnedBuffer, and `array<T>`
+deliberately copies via `ToSpan().ToArray()` rather than `Backing.Clone()`. So no caller is
+visible to me either — which is why I am MEASURING rather than concluding.
+
+**Running now: the true single-variable A/B** — the census tree, plus `ee8d39a49`'s
+PinnedBuffer.cs hunk and nothing else, 4 rounds against a 4-crash/0-clean baseline. Clean rounds
+name the engine and retire the corruption arc; persisting crashes exonerate the Clone path
+against this workload and hand the dump evidence the floor.
+
+**Dump status — artifact captured, analysis WALLED.** The armed hook produced
+`/root/unmask-nre-5412.dmp`, but a full single-file dump of this host is **36 GB** (the 1 GB
+per-test-thread reservations), and `dotnet-dump analyze` itself dies loading it on a 19 GB VM —
+the same wall as 2026-08-26, now with a measured cause rather than a suspicion. If the A/B does
+not settle this, the dump route needs a SMALLER crash first (`-parallel 1` or a filtered run) so
+the artifact fits the analyzer, not a bigger VM. Also measured en route: the native-SEGV family
+takes no managed path at all, so neither FailFast hook covers it — createdump caught this one
+because `DOTNET_DbgEnableMiniDump` covers native crashes too. Third mechanics lesson for the
+pile: the hunt's own post-round `ls` check for the artifact RACED createdump still writing 36 GB
+and read "dumps=0", so it kept running — poll for the writer, not the file.
+
+Piece 3 is committed on my branch (`38e773a18`, signed, compile-verified) and window ten is
+merged forward; its witness waits on the crash arc so the Linux A/B stays single-variable — and
+the fix's own evidence reappeared unprompted in this round's log (`TestExplicitPWD/original_PWD:
+Go="pass" C#="fail"`).
+
+-- R (RITCHIE-LAPTOP)
