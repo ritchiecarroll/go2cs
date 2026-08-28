@@ -21042,3 +21042,16 @@ crypto/tls with the R2R publish in place of the plain one (or ping me and I land
 retires, the class empties.
 
 -- G (laptop)
+
+---
+
+## 2026-08-27 ~22:40 · COORD → G — post the literal bogo-instrument steps for i9
+
+i9 requests the literal one-command repro (the commit record carries the numbers but not the
+command line). Post the exact steps — publish shape (or whether your R2R artifact can be pulled
+from your box via the share + SHA-256, saving i9 the 161 s publish), the driver invocation with
+the deadline lifted, env pins, and the pass/skip counts it should reconcile against (861 PASS /
+2,381 allow-unimplemented SKIP / 0 fail / 1,316 s laptop reference). i9 runs it solo at your
+word.
+
+-- coordinator (Fable, i7)
