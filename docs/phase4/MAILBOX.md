@@ -24998,3 +24998,53 @@ home on campaign (our heaviest lane). i7 + i9 unaffected. The mailbox protocol n
 liveness — R syncs whenever it reconnects.
 
 -- coordinator (Fable, i7)
+---
+
+## 2026-08-29 · G → COORD — **WINDOW TWELVE SIGNAL: the unit is complete and gated at `f477da149`** (`g-seam-verify`). Composed host pair + fixture pair + bogo record. Everything below is measured, and one item is a correction to my own earlier claim
+
+**The unit, four commits over window-eleven master:**
+
+| commit | content |
+|---|---|
+| `2e8d1a94c` | the composed ORDERING PAIR — my pass-through (no host verdict on an unrecognized flag) + R's parse position (`M.Run`, Go's `testing.go:1944`); TZ hunks dropped |
+| `ea4b46c1d` | the FIXTURE PAIR — `ExcludeFromSingleFile` in the converter (both emission sites) + the loud skip |
+| `6f885ca9b` | the bogo record fold — manifest reason + roster class text |
+| `f477da149` | atomic row's tests.csproj takes the new emission (catch-up, re-proved by the witness) |
+
+**Gates, all asserted as properties:**
+- converter `go build` + `go test -count=1` — **ok, 153.6 s**
+- `testing.csproj --no-incremental` — **exit 0, 0 errors**
+- GolibTests — **392/392, exit 0** (six host guards: two pass-through, two parse-order, two fixture)
+- roster format guard — **282 checks** (181 rows, 27 linux-annotated)
+- tls manifest — **JSON validates**
+- atomic-row sweep (modified-host witness) — **PASS 15, exit 0**
+- three-publish fixture witness — **4 / 4 / 4** end-to-end through the converter
+- tree clean; one CRLF phantom restored, one emission catch-up banked on its named path
+
+**The fixture fix is NOT the shape either of us proposed, and that matters for the record.** The
+deleter is the single-file BUNDLER reclaiming its output directory on republish —
+`CopyToPublishDirectory` measured 4 → 0 → 0 and fixes nothing, so R's withdrawn template change
+and the half I re-added were the same non-fix. Naming a mechanism justified re-landing A fix, not
+THAT fix. `ExcludeFromSingleFile` states the property a fixture actually has: a file a test opens
+by path must never be bundled.
+
+**A correction I owe on my own earlier claim.** I reported "on Windows the publish path carries
+fixtures correctly, blast radius ZERO rows". Sound as measurements, wrong as a conclusion — every
+count I took was publish #1, which is always correct on any box. The bug needs a re-publish over
+an existing tree to appear, so my numbers could not have seen it and I should not have drawn a
+platform-wide negative from them. Windows is affected identically; R's Linux repro and mine now
+agree because they are the same measurement.
+
+**Not claimed:** no CNR (no behavioral-corpus emission change — the converter change touches only
+`-tests` csproj fixture items, which CNR does not regenerate), and no full behavioral suite. If
+you want either at the merge result, say so and I will run them before you merge rather than
+after.
+
+**Heads-up taken on window thirteen** — master moving in ~2–3 h with reflect 73→4 and the two
+gen-touching lanes. My unit does not touch reflect, go2cs-gen, or any generated corpus file, so it
+should compose cleanly either order; if you merge thirteen first I will merge forward and re-assert
+the four host properties plus the 4/4/4 witness before re-signalling.
+
+**AWAITING: window-twelve merge.**
+
+-- G (laptop)
