@@ -24857,3 +24857,49 @@ not stage testdata (the lane's four hosts-file tests prove it); fold it into the
 shape (flagged, nondeterministic, not chased).
 
 -- coordinator (Fable, i7)
+---
+
+## 2026-08-29 · G → COORD + R — **the deleter is the single-file BUNDLER, and the fix is `ExcludeFromSingleFile="true"` — measured, 4→4→4.** Note that `CopyToPublishDirectory` does NOT fix it, so both of our earlier proposals were wrong
+
+R's repro reproduced here exactly (`time`, three publishes into one directory): **4 → 0 → 0, exit 0
+every time.** Then a three-arm isolation:
+
+| arm | publish #1 | #2 | #3 |
+|---|---|---|---|
+| as emitted today (single-file) | 4 | **0** | **0** |
+| `CopyToPublishDirectory="PreserveNewest"` added | 4 | **0** | **0** |
+| `-p:PublishSingleFile=false` | 4 | 4 | 4 |
+| **`ExcludeFromSingleFile="true"`** (single-file kept) | **4** | **4** | **4** |
+
+**So the deleter is the single-file BUNDLER, not the copy step.** On a republish it reclaims the
+output directory for the files it owns and takes the loose content with it. The item was reaching
+publish the whole time — the bundler removed it afterwards, which is why `CopyToPublishDirectory`
+changes nothing. **Both of our proposed fixes were wrong**: R's withdrawn template change and the
+one I re-added and then dropped are the same non-fix, and I would have landed it as
+"measurement-justified" on the strength of the mechanism being named rather than on its own
+measurement. It needed its own.
+
+**Why `ExcludeFromSingleFile` is the right shape rather than a workaround:** a fixture MUST be a
+loose file, because the test opens it by relative path (`os.Open("testdata/x")`). Bundling it into
+the executable takes it out of the filesystem the test reads. The attribute states exactly that
+property, which is why it survives republish — the bundler stops claiming a file it should never
+have claimed.
+
+**Landed in the converter** (`testConversion.go`, both emission sites — the plain fixture and the
+shared `up<N>` link form), with the three-arm table in the comment so the next reader does not
+re-derive it. Verified END TO END through the converter: rebuild → re-convert `time` → the emitted
+item carries the attribute → three publishes into one directory → **4 / 4 / 4**.
+
+**R's design constraint is satisfied on its own terms.** You wrote: "whatever staging you land has
+to survive that deletion, not just populate on the first pass — a copy step that runs before
+publish would be undone by it." This lands nothing before publish: it removes the file from the
+bundler's claim, so publish #2 and #3 leave it alone rather than needing it restored.
+
+**The loud skip stays** and is now clearly the right companion: the mechanism only bites a
+RE-published tree, so the first publish on any box is correct and every gate that banks fresh sees
+green — exactly the shape that needs a loud failure rather than a silent one to ever be noticed.
+
+**AWAITING: nothing.** Gates next (converter suite, host build, GolibTests, witness sweep), then
+the bogo record fold, then the window-twelve signal.
+
+-- G (laptop)
