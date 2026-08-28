@@ -24903,3 +24903,61 @@ green — exactly the shape that needs a loud failure rather than a silent one t
 the bogo record fold, then the window-twelve signal.
 
 -- G (laptop)
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) — nanotime commission COMPLETE; pprof's first run bucketed; and a CORRECTION to the queued getg single: on Windows it is not bounded
+
+**The clock landed** (`claude/laneR-nanotime`, `b15d01641`, signed): `MonotonicClock.Nanoseconds()`
+in golib (Stopwatch-derived, seconds/remainder split so the ns multiply cannot overflow) behind
+per-GOOS `runtime/{windows,linux}/nanotime_impl.cs` — per-GOOS because darwin already carries a
+real body. Failing-first proven as a PROPERTY, not a claim: two throwing `nanotime1` stubs before,
+**0 after a clean rebuild**, build succeeding (a stub plus a body would be CS0111). Gates: golib
+green, windows runtime `--no-incremental` exit 0, runtime/pprof production build exit 0,
+**GolibTests 389/389** (386→389, three clock guards each pinned to a distinct failure mode).
+
+**runtime/pprof's first run, measured with both sides compiling** (the PATH pin held — zero
+toolchain-mismatch lines, every Go verdict present, so this one IS a measurement):
+
+- **The nanotime wall is gone.** The host now advances past it into the profile path.
+- **Read the shape before the numbers.** 2 tests reported, 181 empty — and the empties are a
+  CONTIGUOUS ALPHABETICAL TAIL after test #2. By the tell already in CLAUDE.md that is a run that
+  DIED PARTWAY, not 181 divergences. The host died on `TestBlockMutexProfileInlineExpansion`,
+  whose wait panics **on a goroutine**; an unrecovered goroutine panic kills the binary, and Go
+  does exactly the same — so this is faithful behavior masking the rest of the row, not a host
+  defect. Measuring what is actually behind it now (same published host, `-run` excluding only
+  that test).
+- `getg` is **not** fatal: it surfaces as a per-test `infrastructure-error` and the run continued.
+
+**The correction — `getg` is NOT a bounded single on Windows, and I do not think it should be
+queued as one.** I scouted it because it is my finding and the queue would have paid for the
+framing. Three frames, not one:
+
+1. `setcpuprofilerate` (windows/proc.cs:5556) uses `getg()` for **`gp.m.locks++/--` only** — a
+   preemption-disable pair, a no-op in the managed model. This frame alone WOULD be a narrow
+   hand-own.
+2. `setThreadCPUProfiler` (windows/os_windows.cs:1238) calls `getg()` **again** and stores into
+   **`m.profilehz`** — a real m field, not a counter we can shrug at.
+3. `setProcessCPUProfiler` (:1225) calls **`newm(profileLoop, nil, -1)`** — it spawns an M running
+   Go's profile loop, and sample delivery then walks goroutine stacks from another thread: the same
+   cross-thread stack-walk boundary the SIGQUIT arc already measured.
+
+So implementing `getg` clears frame 1 and lands immediately on the g/m/p model that
+`stubs_impl.cs` says is gone. That file left `getg` throwing **on purpose**, with the rationale
+written down: so that any path reaching it "surfaces as a loud, locatable failure rather than
+quietly operating on a fabricated goroutine descriptor." There are **560 `getg()` call sites**
+corpus-wide reading `stack.lo/hi`, `m`, `p`, `goid`, `preempt`, `gsignal`. A managed `getg` can
+return an identity; it cannot make those fields true. Implementing it converts one loud failure
+into 559 quiet ones — the exact trade the repo's own doctrine refuses.
+
+**Recommendation:** classify the CPU-profile family as **`runtime-capability`**, not a bounded
+single. If the row is later worth carrying, the cheap and honest lever is the narrow one — hand-own
+`setcpuprofilerate` to drop the managed no-op `m.locks` pair (same shape of argument as
+`systemstack`'s "that branch is the only branch") — which clears frame 1 WITHOUT minting a
+fabricated g, and leaves frames 2–3 failing loudly where they genuinely cannot be answered. I have
+NOT cut that; it is a finding, and the row's value depends on the exclusion measurement in flight.
+
+AWAITING: nothing blocking. Reporting the behind-the-killer count when it lands; then merging
+window twelve/thirteen forward at my seam and re-cutting the signal/exec arc.
+
+-- R (RITCHIE-LAPTOP)
