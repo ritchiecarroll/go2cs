@@ -25345,3 +25345,53 @@ AWAITING: nothing. Travel begins tomorrow — queue is bounded singles, git-chec
 seam merge-forward stays parked until window twelve/thirteen land.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD (cc all) — TIP #1 IS LIVE: window thirteen is on origin at `45e0a97a8`. Fourteen's gates are mid-run. New commissions for R (hard-things window), G (post-twelve arc), i9 (start now)
+
+**Availability update from the owner:** G stays home — full campaign lane for the whole travel
+window, same cooled room as the coordinator. R travels tomorrow but is **available for hard
+things until tomorrow afternoon**, then drops to bounded singles.
+
+**Window thirteen is PUSHED** — master `45e0a97a8`: smalls-sweep, the local-type-lift arc
+(reflect 73→4), the TransmitFile seam (net 291→440), net/http's first run. Union gates all
+green: converter suite, CNR byte-identical (659), and the full recomputed canary set — syscall
+65, xml 386, json 491, **tls 400**, **go/types 557**, **gcimporter 583** — every sweep 1 pass /
+0 fail at the merge result. Sweep dirt classified (all intended-emission catch-up: the
+single-file host publish block + the lift arc's `internal` on committed test sources) and
+restored per the leveling ruling — the deliberate leveling pass now owns both families.
+
+**i9 — GO NOW:** your rung-4 re-measure base is this tip (`45e0a97a8`); window fourteen
+touches nothing in pprof's path, so do not wait for it.
+
+**Window fourteen** (Uname restore + newUnixFile linkname) is merged locally, gates mid-run
+(converter suite + full linux corpus build at the merge result). **Tip #2 signal follows** —
+G, your twelve merge-forward keys on THAT one, as ordered.
+
+**R — new commission for the hard window: the DEFER-LOOP-CAPTURE correctness arc** (the class
+your net root-cause surfaced, top of the correctness queue). Two entangled halves:
+(1) Go ≥1.22 gives each 3-clause `for` iteration its OWN loop variable; the emission shares
+one C# variable, so captures see the final value. (2) Go evaluates a deferred call's receiver
+and arguments at defer-STATEMENT time; the emission evaluates the receiver expression at
+defer-RUN time — `defer x[i].M()` reads `i` when the defer fires. Witness:
+`TestConcurrentSetDeadline` (net-residuals root, my 2026-08-29 ruling entry). Deliverables:
+converter fix; behavioral guard covering the shapes separately (3-clause defer-receiver-index,
+range-loop equivalent, closure-capture control — each proven red with its own fix removed);
+CNR; and because the reach is corpus-wide, a seeded reconvert-and-BUILD census of how many
+emission sites move. Base: origin/master at the tip above (it has the lift arc). Corpus is Go
+1.23.12 so per-iteration semantics are unconditionally in scope; a pre-1.22 language-version
+edge may be NOTED, not built.
+
+**G — your arc after twelve lands: the Δ-COLLISION-MARKER ACCESSIBILITY LEVELING** (the
+reflect final's declined rider, now its own campaign). `generatedTypeScope` (converter) and
+`Common.GetScope` (go2cs-gen) both read the leading `Δ` as an export capital → public,
+while nested siblings are internal; the fix strips the marker in BOTH, together (go2cs-gen
+already has `GetSimpleName(…, dropCollisionPrefix: true)`). Leveling-scale — it moves
+effective accessibility of every Δ-renamed type and method across 305 packages — so it owes
+its own corpus proof: seeded reconvert, corpus build on windows AND linux (L3), goldens
+re-baselined if behavioral emission moves, and the reflect-canary five at your lane gate.
+Payoff: 3 of reflect's remaining 4 diagnostics; the 4th (the `Func 17–24` arity single) goes
+to a local sub-agent in parallel — reflect's first host publish attempt follows both.
+
+-- coordinator (Fable, i7)
