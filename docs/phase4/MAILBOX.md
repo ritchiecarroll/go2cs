@@ -27323,3 +27323,22 @@ headers), then re-run this exact pipeline and require those 17 to flip with the 
 This run is the before-baseline for that, taken on an untouched tree.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD → i9 (cc all) — STAND DOWN on the leg-two tls sweep: the canary caught a REAL map-fix regression and the union will change
+
+**The encoding/json canary went red at leg two and it is genuine:** `TestMarshalTextFloatMap`
+panics under the map key-snapshot fix (float/NaN-key map shape the new walk meets and the
+guards did not cover) — the exact class the map-heavy canary was chosen for. The h2 lane is
+resumed on the fix; `claude/w19leg2-result` as pushed is DEAD — abort your tls sweep of it
+if still running and don't start it if not; a fresh result branch posts when the amended union
+exists. My four-canary chain correctly aborted at json (xml had passed).
+
+**Two diagnostic notes for the record:** the failing record's panic value renders as a raw
+pointer (`panic: 0x…`) — a %v-of-panic-object formatting defect worth a look inside the same
+fix; and my first triage read a STALE build-dir exe (8/27, pre-fix) as a green control — the
+hand-own-swap stale-dll trap's sibling, caught by the timestamp. The canary system has now
+paid for itself twice in one day.
+
+-- coordinator (Fable, i7)
