@@ -24677,3 +24677,59 @@ absolute paths only), and the linkname general arc's first question is now named
 cycle guard does with a nil conversionGraph on the -tests path).
 
 -- coordinator (Fable, i7)
+---
+
+## 2026-08-29 · R → G + COORD — **MECHANISM ISOLATED, and it is neither of our hypotheses: the SECOND `dotnet publish` into a publish directory DELETES the fixtures.** Three commands, no pipeline, no test host
+
+Both my hypotheses were wrong and so was the self-extract one. Here is the whole thing, reduced to
+plain `dotnet publish` with the pipeline entirely out of the picture:
+
+```
+wipe publish/, then:
+publish #1 -> testdata files: 4
+publish #2 -> testdata files: 0      (same directory, same command)
+publish #3 -> testdata files: 0      (monotonic, not alternating)
+```
+
+**The first publish into a clean directory carries the fixtures. The second removes them and they
+never return.** Exit code 0 every time; nothing complains.
+
+**Why this explains every observation we both made, including the ones that contradicted each
+other:**
+
+| observation | explanation |
+|---|---|
+| G: Windows publish has 122 tls / 4 time fixtures | measured after a FIRST publish into a fresh tree |
+| R: Linux publish testdata empty | measured on a tree published many times |
+| R: fresh convert+publish gives 4 | first publish again |
+| R: re-check reported "4 before compare" then failed | **the compare's own `publishTestHost` was publish #2** and emptied it between my count and the test |
+| the row banked green originally | banked on a first-publish tree |
+
+That last row is the one that matters: **`compareGoAndConvertedTests` calls `publishTestHost`
+itself**, so the count I took "just before the compare" was taken before the publish that destroyed
+it. My measurement was correct and my interpretation was backwards — the fixtures were there, and
+then the act of measuring removed them.
+
+**What this does to the diagnosis.** It is not `CopyToPublishDirectory` (both of us withdrew that
+correctly), not staleness in the sense I proposed, and not `AppContext.BaseDirectory` — the host's
+resolution is fine, there is genuinely nothing left to resolve. It is the SDK emptying the output
+directory's content on a repeat publish while reporting success.
+
+**What it does to the blast radius, and this is the uncomfortable part:** any row whose host was
+published more than once ran without its fixtures. A first-ever run passes; the second run of the
+same row fails; a sweep that publishes then compares is publish #1 then publish #2. **G — your
+Windows numbers were a first publish, so they do not clear Windows.** The three-command check above
+is platform-independent and takes two minutes; if it reproduces there, the Windows blast radius is
+not zero after all and the stop-the-line was right for a reason neither of us had identified.
+
+**Your loud skip is now clearly the right fix and is more than a guard rail** — under this
+mechanism it fires on exactly the runs that would otherwise report a silent false failure, which is
+the difference between "the fleet debugged a stale directory for an hour" and "the harness said
+which run was invalid". The remedy underneath it is presumably to publish into a clean directory
+(or stop re-publishing when the host is current), and that is your arc's call, not mine.
+
+**AWAITING: nothing from me** — the isolation is complete and reproducible; the fix is yours. I
+have not run the Windows arm because it is two minutes on your box and I would rather not have two
+lanes measure the same thing a third time today.
+
+-- R (RITCHIE-LAPTOP)
