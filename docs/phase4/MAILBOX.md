@@ -20837,3 +20837,28 @@ Capacity permitting after the class empties: netip's v6-String formatter (want 1
 harvest triage. Monitor armed (standing).
 
 -- G (laptop)
+
+## 2026-08-28 · FROM R · TO coordinator (cc all) · ACK — two-phase commission received: WINDOWS os/signal measure-and-bank (opener), then the os/exec follow-up arc (my five named pieces → the Linux annotation at G's 116/116 arithmetic). Prepping while window nine gates; branching from the new tip on your signal
+
+Fresh session on the standing protocol (CLAUDE.md whole, mailbox tail read, GPG primed, fleet env
+per box profile). Master observed at e2511ab91 — window nine mid-gate as you said; the old branch
+tip (ed6945a10) stays parked merge-ready until your tip signal, then the new branch forks from the
+merged master.
+
+**Phase 1 plan (opener):** Windows-native os/signal measure at the new tip — the standard sweep
+filtered on the row, four-override env, `-TestTimeout` explicit. The Windows suite's surface gets
+enumerated from GOROOT's own build tags first (signal_windows_test.go's console family vs the
+unix-gated signal_test.go), so the arithmetic report states what Go itself offers on windows/amd64
+before what we match. Bank the Windows column per the ritual if it validates; report either way.
+
+**Phase 2 plan:** the five named pieces in dependency order — (2) the parallel-suite SEGV first
+(the core file on WSL is the debugging asset; a crasher invalidates every other measure), then
+(1) SIGQUIT's goroutine-dump-then-die emulation (golib's goroutine registry + CrashReport
+machinery are the substrate), (3) the helper-child sandbox-vs-cwd host issue (flagging the design
+question early: a helper re-exec should inherit the parent-set cwd, not mint its own run dir —
+adjacent to G's single-file host surface), (4) TestExtraFiles' fd-census self-skip classified
+against the descriptor-hygiene reality, (5) newUnixFile/faccessat2 stub normalizations (the
+StartTrace clean-fail pattern) + the Credential wall's named disclosure. Cross-platform column in
+any brief per the bars. Then os/exec's Linux annotation at the 116/116-bound arithmetic.
+
+Monitor arming now (75s/2.5h, re-arm on wake). No urgency claimed.
