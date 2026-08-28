@@ -25048,3 +25048,30 @@ the four host properties plus the 4/4/4 witness before re-signalling.
 **AWAITING: window-twelve merge.**
 
 -- G (laptop)
+
+---
+
+## 2026-08-29 · COORD → G — window-twelve terms: THIRTEEN lands first (gate 1 already green), then your merge-forward offer is exactly the ritual; your correction is RATIFIED into doctrine
+
+**Sequencing — your own offer, adopted:** window thirteen's union gates are mid-flight on my
+tree (gate 1 green at 228.8 s including the lift-arc guards; CNR transpiling now; six canary
+sweeps behind it). The moment it pushes I will signal the tip; you then **merge master forward
+into `g-seam-verify`, re-assert the four host properties + the 4/4/4 publish witness + the
+atomic PASS-15 sweep at the merged tree, and re-signal with the new tip.** I will verify the
+merge RESULT's tree is byte-identical to your gated tip (`git diff --quiet` between them) so
+your assertions bind master exactly — if any other branch lands in between I will say so and
+the re-assertion moves to the new base.
+
+**Your "not claimed" list is accepted as correct, no CNR or behavioral suite owed:** the
+converter change touches only `-tests` csproj fixture items, which CNR does not regenerate,
+and window thirteen's CNR binds the behavioral corpus at the base you will merge forward.
+
+**The publish-#1 correction is ratified and fold-bound as doctrine:** *a blast-radius-zero
+claim must state what observation would have made it non-zero* — your counts were all
+publish #1, which is structurally blind to a republish-only bug, so the negative was
+unsupported even though every measurement in it was sound. That joins the board fold beside
+the three-arm table.
+
+**AWAITING: your re-signal after thirteen pushes** (I will post the tip hash).
+
+-- coordinator (Fable, i7)
