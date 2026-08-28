@@ -26657,3 +26657,87 @@ annotation is very likely stale in the same direction — a capable-host linux r
 convenient.
 
 -- coordinator (Fable, i7)
+---
+
+## G -- Δ arc: the behavioral suite caught a REAL defect that both green corpus builds missed (2026-08-28)
+
+**Watcher armed + wake loop armed.**
+
+### What happened
+
+Both corpus flavours were green (307 projects x 2 platforms, 0 errors). The behavioral suite then
+failed on the very first affected project:
+
+```
+AnonymousInterfaces.cs(108,28): error CS0061: Inconsistent accessibility:
+base interface 'main_package.Δtype' is less accessible than interface 'main_package.InlineEmbed'
+```
+
+**Two green corpus builds were not evidence the change was safe -- the corpus simply does not
+contain the shape.** This is the same lesson as my earlier "Windows-green meant only that Windows
+was regenerated", arriving from a different direction, and it is the reason the commission listed
+behavioral verification as a separate gate rather than a formality.
+
+### Root cause: the Δ marker covers TWO populations
+
+1. **Collision-renamed USER types** -- `Δmark`, `Δp`, `Δpool<T>`, `Δany`, `Δrune`, `Δsliceᴛ`, ...
+   The text after the marker is a real Go identifier and its case genuinely encodes export status.
+   Demoting the unexported ones is correct, and remains the arc's point.
+2. **SYNTHESIZED anonymous-type lifts** -- `Δtype`, `Δtypeᴛ<N>`. The converter names *every*
+   anonymous struct/interface/composite-literal type with the literal placeholder `"type"`
+   (`convInterfaceType.go:25`, `convStructType.go:37`, `convCompositeLit.go:283`,
+   `visitStructType.go:39`). There is no Go identifier and no export status to read.
+
+My fix stripped the marker and applied the export rule to **both**. For (2) that demotes a type
+which is emitted as the **BASE** of the named type that embedded it -- and C# forbids a public
+interface whose base interface is less accessible. Go source that produces it:
+
+```go
+type InlineEmbed interface {
+	interface{ Close() error }   // lifted to Δtype, emitted as a base of InlineEmbed
+	Flush() error
+}
+```
+
+### The fix, and why it is not a special case
+
+`isAnonymousTypePlaceholder` / `IsAnonymousTypePlaceholder` (mirrored, both sides, as the pair must
+be): after stripping the marker, the placeholder `type` -- alone or with the arity suffix `ᴛ<N>` --
+returns public. **`type` is a Go KEYWORD, so no user type can ever collide with the match.** Negative
+controls in the test: `ΔtypeDecl`->internal, `ΔTypeDecl`->public, `Δsliceᴛ`->internal, `Δtypeᴛ`
+(no digits) ->internal, `Δtypeᴛx`->internal.
+
+This is not a carve-out; it is the principle **already written into go2cs-gen** one function below
+`GetScope`, for function-local type lifts: *"a name is the wrong oracle for anything go2cs
+SYNTHESIZED."* Stripping the marker exposes the Go identifier where there IS one; where there is
+none, there is no export rule to apply.
+
+### The near-miss worth knowing about
+
+`src/core/internal/reflectlite/package_test_info.cs` pins **31** `Δtype`/`Δtypeᴛ<N>` types, all
+`public` -- including `Δtypeᴛ30`, a public partial **interface**, exactly the CS0061 shape. The
+un-refined fix would have demoted all 31 in a **banked validated reflect-bridge package**. It never
+showed up in my 119-file corpus measurement because `-stdlib` does not regenerate
+`package_test_info.cs` -- only `-tests` does. So the `-stdlib` corpus is **not** a complete
+emission surface for an accessibility change, and a green corpus build cannot speak for the banked
+test conversions. Flagging this for anyone else touching written accessibility: the refined fix
+leaves all 31 untouched, but the gap in coverage is real and general.
+
+Related coverage gap, same family: **`package_info.cs` has no golden** (zero
+`package_info.cs.target` exist). It carries the accessibility pins that CS0262 is *about*, so the
+behavioral suite's TargetComparison structurally cannot catch pin drift there -- only CNR's
+`git status` can, plus the compile phase when a conflict is fatal.
+
+### State
+
+Converter `go vet` clean; the scope test passes with 3 positive + 5 negative new cases. Re-running
+the 8 affected behavioral projects now, then CNR, then a three-target regen diff to prove the corpus
+emission is unchanged by the refinement (expected: unchanged -- the only production pin matching
+`Δtype*` is `ΔtypeDecl`, a real Go `typeDecl`, which the negative control covers).
+
+Corpus/gate results from before the refinement still stand for the 34-name population; I will
+re-assert them rather than carry them.
+
+**AWAITING: nothing.**
+
+-- G (GRETCHEN-LAPTOP)
