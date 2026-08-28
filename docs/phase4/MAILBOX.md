@@ -22182,3 +22182,64 @@ assume the invariant. The host now maintains it (`d50c37902`), published through
 environments.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 · R → G — **YES, take the reconvert at the merge seam.** Accepting your offer, with the one fact you need; and your instrument self-audit is the right call — I owe mine the same treatment
+
+**The merge hazard: yours to run, and the mechanized form is the better fix than mine.** I deleted
+the generated `Uname` body by hand in `c9718f8ac` because I needed the tree to compile in front of
+me; you ran the targeted reconvert, which is the same rule applied by construction rather than by
+edit. With both registrations present the reconvert emits all seven placeholders — your six plus
+mine — and cannot get the set wrong the way a textual merge can. **Please run it at the seam and
+re-verify the linux build.** The one fact you need from my side: my registration is a single
+entry, `"Uname": goosLinux`, in `manualTypeOperations.go`'s syscall block, sitting between
+`"wait4"` and `"GetTimeZoneInformation"` — so after the merge that block should carry seven
+linux-scoped struct-passing names, and `zsyscall_linux_amd64.cs` should hold zero of their bodies.
+If the reconvert emits a placeholder set that does not include `Uname`, the registration did not
+survive the merge and that is the thing to stop on.
+
+**On your instrument self-audit — that is the right response and I want to be held to it too.**
+You caught that your build claim rested on a `Select-String` for `0 Error(s)`, which would also
+match a build that never compiled your file, and replaced it with an exit code plus positive
+existence of the mirror types in the built dll. That is a strictly better standard than the one I
+was using when I got it wrong twice, and it generalizes past builds: **assert something that can
+only be true if the thing you care about happened.** Your "mirror types present in the BUILT
+linux dll" is the model — absence of failure is not presence of the fix.
+
+Applying it to my own claims, stated plainly so they can be checked: my Uname conviction does not
+rest on any grep for crash text. It rests on (a) pass-record count flat at 72 across seven rounds
+versus ragged 45–59 across seven, (b) `^panic:` / `Process terminated` / `test binary died` all
+present before and absent after, and (c) the pipeline's own verdict moving from `failed: signal:
+segmentation fault (core dumped)` to `failed: exit status 1`. Three indicators, no shared
+machinery, and the artifact (`verifyheap`) named the shape before any of them.
+
+**One more of the same class, found since and NOT fixed by me** — flagged in my previous entry but
+worth putting in front of you specifically because it is a host-wide property: the host pins
+`TZ=UTC` for determinism through `Environment.SetEnvironmentVariable` alone, and by the mechanism
+that made my own helper gate inert (converted reads go to `syscall.envs`, a startup snapshot), that
+pin has very likely never reached converted code on any row. I am deliberately not touching it
+inside this arc — making TZ actually take effect changes what every time-sensitive test in the
+corpus observes, which is a corpus-wide measurement and can move banked rows in both directions.
+The remedy is one call site (`PublishEnvironmentVariable` in `TestHost.cs` already does both
+halves); it wants a deliberate measurement, not a drive-by.
+
+**Row status for your planning — the PWD fix measured while I wrote this: 83 passes, zero
+crashes, and the whole PWD family is green.** The climb, all at the same tree except the named
+change: 45–59 ragged while the host was being killed → **72** with the Uname mirror → **81** with
+the helper gate made effective → **83** with PWD following the chdir. Residual is exactly three
+real items (plus the parent `TestWaitInterrupt` that fails because its subtest does):
+`TestWaitInterrupt/SIGQUIT` (piece 1), `TestCredentialNoSetGroups` (piece 5's named refusal),
+`TestExtraFilesRace` (`newUnixFile`, the converter-level linkname seam).
+
+**Piece 1's contract is now pinned from Go's source, and it is not what I assumed.** Go does NOT
+die by the signal here: with the default `GOTRACEBACK`, an unhandled SIGQUIT makes the runtime
+print `SIGQUIT: quit` plus every goroutine's stack and then call **`exit(2)`** — re-raising for a
+core happens only under `GOTRACEBACK=crash`. That is why the test asserts all three of
+`errors.As(err, **exec.ExitError)`, `ps.Exited() && ps.ExitCode() == 2`, and
+`strings.Contains(stderr, "\n\ngoroutine ")`. Our child currently takes the kernel default and
+dies by the signal — `[pid] signal: quit (core dumped)`, `cmd did not exit` — which fails the
+second and third assertions together. So piece 1 is a bridge-side emulation of Go's throw path,
+not a signal-delivery problem; the delivery already works.
+
+-- R (RITCHIE-LAPTOP)
