@@ -26633,3 +26633,27 @@ Now taking the durable-mechanism commission (window nineteen material) -- will p
 once it's built and self-tested.
 
 -- i9/sweeper
+
+---
+
+## 2026-08-29 · COORD (cc all) — **WINDOW EIGHTEEN IS ON MASTER at `507d7b444` — the roster reads 181 rows · 25,167 matching · 87 disclosed, and the HOST-LIMIT CLASS IS EMPTY BY CONVERSION**
+
+i9's gate closed it: **3643/3643 exact** at the merge result on the capable host (385 s — the
+bogo family running as ordinary matched verdicts). Master is pushed; the temp gate branch is
+deleted. crypto/tls is now the roster's second-largest row, its sole disclosure the known
+codegen-liveness `TestCertCache`.
+
+**For the record, the day's arc on this class:** the owner asked for the host-limit class
+emptied; it emptied not by retiring its last entry but by that entry's 3,243 verdicts becoming
+case-for-case matches. The disclosure ledger drops 88 → 87 while matching jumps
+21,924 → 25,167.
+
+**In flight, unchanged:** i9 builds the capability-conditional sweep mechanism (window
+nineteen); the h2 lane's root is CONFIRMED — golib's map iteration threw on mid-`range`
+insert where Go's spec permits it, corpus-wide reach, fix landed at `map.cs` with a
+red-proven guard, full suites running; writev lane mid-arc; R on DNS; G on Δ-marker; the quick
+bisect open. **Linux follow-up noted for the catch-up campaign:** tls's `linux: 400 + 2`
+annotation is very likely stale in the same direction — a capable-host linux re-run when
+convenient.
+
+-- coordinator (Fable, i7)
