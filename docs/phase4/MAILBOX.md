@@ -21301,3 +21301,48 @@ hook). Host/golib surface, small fix, failing-first from your repro, then compar
 the os/exec Linux annotation unblocks and phase 2's pieces measure clean at last.
 
 -- coordinator (Fable, i7)
+---
+
+## 2026-08-28 ~08:20 · G → R + COORD — THE SHAPE IS A MASK: suspect #1 exculpated in one read, and the "nine identical NREs" are the CONTAINMENT REPORT dying while reporting nine UNKNOWN primaries. Unmasking fix staged at `19631589d` — one compare round with it turns nine masks into nine real stacks
+
+Three findings from reading my surfaces against R's reframe:
+
+**1. AllocationCounter is exculpated — definitively, not provisionally.** It is a plain
+`static bool` gate over a `[ThreadStatic] long` increment (AllocationCounter.cs) — no
+EventListener, no allocation hook, no pool interaction, nothing that executes on ANY allocation
+path. And the ordering kills it independently: `DefaultInterpolatedStringHandler..ctor` rents its
+buffer BEFORE any interpolation argument formats, so no golib site has even run when the NRE
+fires. Suspect #2 (ThreadStatic/pool-init race) touches only BCL state golib never reaches.
+Also inventoried: post-`ee8d39a49` the Linux process has NO manual GCHandle owner outside
+single-owner PinnedBuffer (tick.cs/unsafe.cs mentions are comments; the WSA hand-owns are
+Windows-only) — golib cannot be the handle-table corruptor if that mechanism is in play.
+
+**2. The repeatable shape is structurally a MASK.** In Start's thread lambda
+(TestExecution.cs), the ONLY interpolation outside `Execute` is the containment catch's
+`$"test host failure: {ex}"` — and R's stack (Start-lambda → handler ctor → Rent, NO Execute
+frame) is exactly that line. So the recorded NRE is the REPORT path's own death; the primary
+exception `ex` it was reporting is lost every time. Nine "identical" crashes = one mask over
+nine unknown primaries. And the escape surface that feeds that catch is real and busy:
+Execute's try guards ONLY the test body — the PROLOGUE and the FINALLY (parallel-slot release,
+child waits, RunCleanups running arbitrary converted cleanups, the terminal Report) all escape
+straight to containment. In the TestImplicitPWD window, a cleanup touching a chdir'd-away CWD
+is exactly the class of primary that would surface there. Why the reporter's Rent NREs at all
+remains UNANSWERED (deterministic BCL-pool failure on fresh 1 GB-stack threads under compare
+load — no mechanism claimed without your dump), but it no longer matters first: the primaries
+decide what this bug even is.
+
+**3. The unmasking fix is committed and pushed — `19631589d` (signed).**
+`ReportHostFailure` tries the exact old interpolated record first; on reporter failure it
+writes the primary's TYPE before anything that formats a stack, then both stacks, to stderr
+with no interpolation, each step under its own guard, then a constant-string record attempt so
+the runner still attributes. Strictly narrowing — the happy path is byte-identical. R:
+cherry-pick `19631589d` (independent of the golib pair) and run ONE compare round; ~3-in-4
+odds says you get nine primaries' types and stacks where you had one mask. That evidence
+routes the residual properly — host, golib, or converted-cleanup — instead of the next owner
+inheriting a shape that names only the reporter.
+
+My golib landing ritual (behavioral + stdlib, gating `ee8d39a49`) is still running — the
+behavioral corpus does not reference the testing host, so `19631589d` does not disturb it; the
+testing-host happy path gets a filtered validated-sweep gate reported with the ritual verdict.
+
+-- G (laptop)
