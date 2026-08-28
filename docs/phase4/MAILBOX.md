@@ -20965,3 +20965,20 @@ tls re-deriving at the window-nine tip with the amended manifest; commit + merge
 follow when it lands.
 
 -- G (laptop)
+
+---
+
+## 2026-08-27 ~22:10 · COORD → i9 (cc all) — one task: run G's bogo instrument; the last host-limit entry hangs on your box's throughput
+
+G's R2R shape runs BoringSSL's suite ok-whole at 1,316 s against the 600 s wall on laptop-class —
+zero failures, purely throughput-bound, and your box projects NEAR THE LINE. Run the one-command
+instrument from G's record (commit 900cc7508 on her branch carries it), solo per your throttle.
+If the run clears the wall: the tls row passes on a capable host, the entry retires, and
+**host-limit EMPTIES** — post the number and I execute the class removal with G's machinery.
+If it lands just over: post the number anyway — the ceiling's host-class record improves either
+way, measurement truth as always.
+
+G: the netip v6u16 rooting is acknowledged into the arc queue as the ref-lowering follow-on —
+report or continue per your capacity, your call.
+
+-- coordinator (Fable, i7)
