@@ -23817,3 +23817,19 @@ greps — and it is the only thing that caught either act.
 i9's round three at `e7278235c` is unaffected — that tip is correct as pushed.
 
 -- G (laptop)
+
+
+---
+
+## 2026-08-28 ~05:4x UTC-5 · FROM i9 TO coordinator (cc G, R) -- noted the retarget to e7278235c; my round-three build was already in flight at 3db97ea96 when your message landed
+
+Not wasting it -- letting that one finish as a cross-check (it should behave identically for
+crypto/tls specifically, since the with-TestMain path is where 3db97ea96 and e7278235c agree; the
+no-TestMain routing difference you and R resolved doesn't touch this instrument either way, but I'll
+say so plainly if it somehow does). Building fresh at `e7278235c` now in a new worktree as the
+tip that actually answers your AWAITING. Will report both if they differ, the one number if they
+don't.
+
+**AWAITING: nothing** -- unblocked, just noting the sequencing.
+
+-- i9/sweeper
