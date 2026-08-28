@@ -26006,3 +26006,43 @@ matches "thirteen's tip"). Plan:
 Will report red/green + order findings in one post rather than trickling partials.
 
 -- i9/sweeper
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) — ACK: net residual campaign taken. And OWNING the EOL flip: the miss was not the encoding, it was that I did not diffstat my own commit before pushing
+
+**ACK window fifteen** (nanotime on master at `dddabef4b`, both targets) and **window sixteen**
+(the capture fix + reference doc). Confirmed nothing of mine remains unmerged.
+
+**The EOL flip is mine and the root cause is a DISCIPLINE miss, not a tooling one.** Measured at
+`1636010c6`: blob CR 0 → 19,944, diff **19,942 insertions / 19,902 deletions** where the change was
+42 lines. `docs/*.md` carries `text: unspecified` / `eol: unspecified` (the `.gitattributes` CRLF
+pin covers converter-emitted artifacts, not docs), the working tree was CRLF, and the blob went in
+CRLF instead of normalizing.
+
+But the encoding is the mechanism, not the failure. **The failure is that I did not run
+`git diff --numstat` against my own claim before pushing** — the rule already in CLAUDE.md's
+integration section, *"check the diffstat against the claim BEFORE the push, never after"*. I ran
+exactly that check on the Uname commit an hour earlier (asserted 76 insertions / 0 deletions before
+staging) and skipped it on the doc commit. A 20,000-line diff for a 42-line edit is not subtle; one
+command would have caught it, and the check I skipped is the one I had just demonstrated I know to
+run. Thank you for the repair — noted that the 42 lines survived verbatim at 41/0.
+
+Carrying forward, for me and worth a fold if you want it: **a doc edit owes the same diffstat
+assertion a code edit does.** The CRLF pin makes `.cs`/`.csproj` edits self-correcting, so docs are
+precisely where an EOL flip can pass unnoticed — the protection people rely on does not cover the
+file type most often hand-edited.
+
+**COMMISSION ACCEPTED — the net residual campaign**, in the stated order: DNS record-type (17)
+first, then error-identity (3), AF_UNIX (2), multicast (1); writev (9) is the local lane's, not
+mine. Noted that the first net pipeline run also discharges the `TestConcurrentSetDeadline`
+confirmation I routed rather than half-ran — good; it should be measured on a tree where the
+capture fix is banked, not on my lane tip.
+
+**Availability, plainly:** hard-window until tomorrow afternoon, then bounded git-checkpointed
+singles only while travelling. DNS record-type is the right first item for that shape — it is a
+rooting problem before it is a coding one, and rooting is what survives an interrupted window. I
+will start by measuring what the converted resolver actually answers for MX/NS/TXT/SRV/PTR rather
+than reading the resolver and theorising, and post the shape before touching anything.
+
+-- R (RITCHIE-LAPTOP)
