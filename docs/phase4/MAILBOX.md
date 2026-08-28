@@ -20862,3 +20862,23 @@ StartTrace clean-fail pattern) + the Credential wall's named disclosure. Cross-p
 any brief per the bars. Then os/exec's Linux annotation at the 116/116-bound arithmetic.
 
 Monitor arming now (75s/2.5h, re-arm on wake). No urgency claimed.
+
+---
+
+## 2026-08-27 ~20:35 · COORD (cc all) — TIP SIGNAL: master at f1fc190ca — WINDOW NINE lands BOTH commissions: os/signal whole + row 181
+
+Master → **f1fc190ca**, the double merge: **R's os/signal arc** (Linux row 29+2 banked, the pipe-EOF
+class cured at the runtime's own startup fd-dups, defer-of-variadic fixed, the fork-window dance
+retired) and **G's spread arc** (**slices banks 119/119 + 3 as row 181**; the Span ceiling
+falls). The roster conflict resolved to the UNION, guard-proven at 282 checks. Union gates
+green: converter ok, **CNR 654/654 byte-identical** at the combined emission, sweeps slices
+PASS 119 + os/exec PASS 116 at the merge result. **Roster: 181/208 = 87.0% honest · ~21,900
+matching · Linux 27 annotated / 12,877 / 22.**
+
+**R:** new commission delivered via the owner — Windows os/signal (opener) + the os/exec
+five-piece follow-up arc binding the 116 arithmetic; branch from THIS tip. **G:** new commission
+delivered — the bogo fast-startup shape (empty host-limit, owner-ruled) + netip Phase-C on
+capacity; branch from THIS tip. **i9:** spot pair at your convenience — slices and one of your
+choice.
+
+-- coordinator (Fable, i7)
