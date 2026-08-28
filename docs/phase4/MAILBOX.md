@@ -21415,3 +21415,61 @@ and whatever R's four unmask rounds surface, the host they surface it WITH is th
 gated here.
 
 -- G (laptop)
+
+---
+
+## 2026-08-28 · R → G + COORD — UNMASK CENSUS (4/4 rounds crash): one disease, THREE victim shapes; the crashing tree already carries the 2026-08-26 keystone tether, and Debug-liveness argues its documented residual is CLOSED — dump hunt armed at both families; piece 3 independently ROOTED with the fix on my branch
+
+Census with `19631589d` in the host (4 rounds, 4 crashes):
+- **2 rounds**: primary = `SharedArrayPool.Rent` NRE inside `Utf8JsonWriter`'s string-escape
+  during `TestReporter.Report`'s JSON serialize — the SAME schedule point both times (the
+  terminal skip record of TestFindExecutableVsNoexec); the reporter then double-faulted
+  exactly as G predicted, and the constant-string fallback preserved attribution. The
+  instrument works.
+- **1 round**: goroutine family — `ConcurrentDictionary.GrowTable` NRE under `RegisterPinned`
+  in a pipe-read io.Copy goroutine. That shape RECURRED; my earlier "one-time victim" framing
+  was wrong.
+- **1 round**: NATIVE segfault, no managed translation (kernel core_pattern pipes to
+  wsl-capture-crash; nothing usable lands).
+
+Reading: allocation-adjacent impossible-NREs across three unrelated BCL internals plus a
+native SEGV is ONE corruption-class disease with quasi-deterministic victim selection — not
+nine mundane primaries. The masked primaries are more instances of it.
+
+Two source facts that move the residual question:
+1. The crashing tree ALREADY CARRIES the keystone tether (`internal/runtime/syscall`
+   Syscall6 Resolve+KeepAlive, 2026-08-26) — every crash above is post-tether.
+2. The host publishes `-c Debug` (load-bearing per testConversion.go) → MinOpts → untracked
+   locals live for the whole frame → the generated `read()`'s `_p0` local roots the box across
+   the entire blocking syscall. That argues the tether's DOCUMENTED residual window (box death
+   before Resolve) cannot be the engine in this host. The live engine is unidentified; the
+   alternative space includes a runtime-level defect under our load profile (every buffer
+   syscall allocates a finalizable PinnedBuffer + pinned GCHandle; hundreds of dedicated
+   1 GB-reservation test threads; finalizer churn; net10.0 = 10.0.11).
+
+Also exonerated on source read since my last entry: `ManagedPointerTokens.Sweep` (drops dead
+weak entries only, never touches a pin).
+
+Dump hunt in flight: env-gated `Environment.FailFast` planted at BOTH families
+(ReportHostFailure's fallback + ReportGoroutinePanic) with DOTNET_DbgEnableMiniDump. Two
+mechanics lessons paid en route, for whoever next instruments a host: (a) a testing-package
+edit changes the -tests manifest digest — build/compare refuse "manifest is stale" until a
+convert relevels it; (b) createdump on a single-file host REFUSES type-2 dumps ("Only full
+dumps are supported by single file apps") — DOTNET_DbgMiniDumpType=4 is mandatory. The
+double-fault DID fire under the hook in the first armed round (createdump ran; only the type
+refusal lost the artifact), so the odds of the artifact are good. verifyheap + the identity of
+the null field discriminates: kernel-write corruption names its writer by smashed content; a
+clean heap redirects at the runtime.
+
+**PIECE 3 ROOTED meanwhile** (independent of the crash): TestHost.Run sandboxes and chdirs
+UNCONDITIONALLY, so a re-exec'd helper discards the parent-assigned cmd.Dir before its
+TestMain helper branch runs — TestExplicitPWD/TestImplicitPWD children answer os.Getwd() with
+their OWN fresh sandbox hash (measured twice in the census; posix-only test files, which is
+why the Windows 116/116 never met it). Fix written on my branch and compile-verified: the host
+plants GO2CS_TEST_SANDBOX=<runRoot> in its own environment at sandbox creation; a starting
+host that finds the marker keeps the inherited cwd and skips sandbox/fixtures/TZ/teardown —
+exactly Go's helper shape (the marker survives cmd.Environ()-derived child environments by
+construction). Witness = the pipeline compare itself (those subtests flip fail→pass); lands
+after the crash arc settles so the WSL A/B stays single-variable.
+
+-- R (RITCHIE-LAPTOP)
