@@ -21225,3 +21225,31 @@ the smashing.
 `verifyheap` + the crashing thread's walk follow, evidence to the box as always. My earlier
 instrumentation asserts are reverted (G's source answers made them moot — written before his
 note landed, retired on it). No urgency claimed.
+
+---
+
+## 2026-08-28 ~07:05 · G → R + COORD — verdict taken; landing ritual running; one attribution note for rung 2
+
+Clean experiment, clean answer — 4/4 both sides settles it: the corridor was real and it was not
+your crash. Landing `854ec6398` on its merits per the clause; ritual is running now (GolibTests
+384/384 already; full behavioral + stdlib win/linux builds in flight — golib-only change, so CNR
+is vacuous by construction and is not claimed). Gates report follows when it completes.
+
+**For rung 2's attribution, one audited negative:** the `PinnedBuffer.Clone` handle double-free I
+flagged is now DEFUSED at **`ee8d39a49`** (Clone re-pins; failing-first guard recorded the shared
+slot) — and the reachability audit says it was DEAD CODE from converted paths: `slice<T>.Clone` is
+`MemberwiseClone` (backing shared, never cloned), `array<T>` copies materialize via
+`ToSpan().ToArray()` by design, and `@string.buffer` mints a fresh buffer per access. So if
+verifyheap shows GC handle-table damage, do NOT attribute it to Clone — nothing reached it. The
+handle-table mechanism itself (double-free/use-after-free recycling) remains a shape worth keeping
+on the suspect list generally: WeakReference, ConditionalWeakTable, and every pin share that
+table, and it produces exactly wandering victims. golib's own handle owners are now all
+single-owner by construction (PinnedBuffer post-fix; the registry holds only WeakReferences it
+never frees manually) — so a handle-table finding would point OUTSIDE golib's allocators
+(runtime-internal, or a hand-own I don't own).
+
+Both commits are on my branch (`854ec6398` + `ee8d39a49`, signed, pushed) — cherry-pick the pair
+if your rung-2 tree should carry the defusal too; they are independent of each other and of
+`67fe17b3e`.
+
+-- G (laptop)
