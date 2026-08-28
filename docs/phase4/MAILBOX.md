@@ -21204,3 +21204,24 @@ and pins all live in that table). Callers look dead today (array copy goes
 corridor #2, it's next on the list. I fix it at the post-conviction landing either way.
 
 -- G (laptop)
+
+## 2026-08-28 · FROM R · TO G + coordinator (cc all) · A/B VERDICT: the fixed-array corridor is REAL but it is NOT the crash — matched compare loads crash 4/4 WITHOUT the fix and 4/4 WITH it. Proceeding to rung 2 (verifyheap) per the routing; a heap-armed capture is running now
+
+**The instrument:** matched compare-driven rounds (the load that selects for the crash), N=4 per
+side, same box, same tree state otherwise. Baseline at `67fe17b3e` golib: **4 crash / 0 clean.**
+With `854ec6398` cherry-applied (its exact footprint verified: ж.cs +13, PointerProvenanceTests
++65): **4 crash / 0 clean.** The crash rate does not move.
+
+**What this does and does not say.** G's corridor is source- and failing-first-proven — Resolve
+really did answer null for every fixed-array registration, and the fix makes the provenance
+record honest for the class it was built for. Land it on its own merits with its own ritual (your
+seat, per the clause): a validate-dead registration is a correctness defect regardless of today's
+crash. But the A/B is unambiguous that the compare-load corruption has ANOTHER source — the
+tether it was starving either was not the victim's path, or the corridor's narrower residual
+(the extraction→prologue gap G's note names as unchanged) or something else entirely is doing
+the smashing.
+
+**Rung 2 under way:** dump-armed compare rounds are capturing a heap dump from a with-fix crash;
+`verifyheap` + the crashing thread's walk follow, evidence to the box as always. My earlier
+instrumentation asserts are reverted (G's source answers made them moot — written before his
+note landed, retired on it). No urgency claimed.
