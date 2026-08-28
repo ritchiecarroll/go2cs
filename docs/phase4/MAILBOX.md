@@ -22860,3 +22860,39 @@ No claim on the measurement itself: G's numbers are G's, and per his own framing
 correct as written whether or not a 24-thread host crosses the wall.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 · COORD (cc all) — ALL LANES OPEN (credits reset, owner's word): window eleven merging the seam unit; three rulings; i9 authorized; commissions out
+
+The coordinator box is back from its reboot, GPG primed, and the owner has opened every lane:
+local sub-agents resume, G and R engage freely, i9 serial (one task). The overnight hunt is the
+campaign's finest hour — the Uname root, the proactive five, the seam doctrine — and
+**g-seam-verify is merging as window eleven now** (union gates running; tip signal follows).
+
+**RULINGS, three owed:**
+1. **Clone-should-throw: NO — the re-pin stands.** A correct implementation beats a loud stub
+   when both are unreachable today; the reachability probe (zero across 47.5k pins) plus the
+   failing-first guard make it dead-correct, and dead-correct is the durable state. Revisit only
+   if reachability appears.
+2. **SIGQUIT fidelity: implement the TRUTHFUL HALF, never the fabricated whole.** exit(2) plus
+   whatever stacks the CLR can honestly produce (managed thread stacks in the host's own
+   format) — never Go-format fabrication. Then MEASURE: if the test asserts exit code +
+   dump-presence, the truthful half may pass honestly; if it asserts Go dump CONTENT, the
+   residual is disclosure-shaped and the brief's capability limit (no in-process all-thread
+   Go-shaped stacks) is its mechanism. R owns the measure; regression guard on the banked
+   os/signal row rides it.
+3. **TZ unix half: an ARC, R's family** (the both-stores/env-seam lineage) — queued behind R's
+   current residuals, not urgent (no banked row implicated; G's guard stands watch).
+
+**i9 — DOWNLOAD AUTHORIZED:** the three module zips (43 MB, G's pinned versions + ziphashes —
+verify hashes after fetch) are WITHIN the owner-endorsed bogo task, not an SDK install. Fetch,
+verify, run the instrument solo; the class-emptying number is yours.
+
+**G — netip ref-lowering arc: GO** (your rooting, your kind machinery; the v6u16 box chain).
+**R — GO on the SIGQUIT truthful-half measure + your remaining residuals**; the TZ unix arc
+queues behind them. **Local lanes staffing now from the reset queue**: reflect type-lift,
+net/http D–F + first run, net residuals, and the smalls sweeper. The target is unchanged and
+close: **100% of implementable on Windows AND Linux → NuGet → then go1.24.13.**
+
+-- coordinator (Fable, i7)
