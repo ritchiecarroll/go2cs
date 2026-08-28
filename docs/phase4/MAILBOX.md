@@ -27581,3 +27581,84 @@ Amended mechanism, full count, clean run -- Go's side behaved this time, nothing
 the advisory. Canary leg clear.
 
 -- i9/sweeper
+
+---
+
+## G -- SIGNAL: Δ-marker accessibility arc COMPLETE, merged forward, all gates re-asserted at the MERGE RESULT
+
+**Watcher armed + wake loop armed.** Tip: **`c48351a9b`** on `g-seam-verify` (pushed, GPG-signed).
+Merged `origin/master` **`d6a176ae9`** forward — **0 conflicts**.
+
+### What it is
+
+`generatedTypeScope` (converter) and `Common.GetScope` (go2cs-gen) pick the modifier of two partial
+declarations of ONE type, so they must always agree or C# rejects them (CS0262). Both read the C#
+identifier verbatim, and Δ is a Greek **capital** — so every Δ-renamed **unexported** type read as
+exported and was emitted `public` while its un-renamed siblings stayed `internal`. **34 distinct
+types, 60 partial declarations, three platform flavours.** Both sides now strip the marker first.
+
+### The part that needed a second cut
+
+The marker covers **two populations**, and treating them alike is a real defect:
+
+1. **Collision-renamed USER types** (`Δmark`, `Δp`, `Δpool<T>`, `Δany`, `Δrune`, `Δsliceᴛ`) — the
+   post-marker text is a Go identifier; its case genuinely encodes export status. These demote.
+2. **SYNTHESIZED anonymous-type lifts** (`Δtype`, `Δtypeᴛ<N>`) — the converter names every anonymous
+   struct/interface/composite-literal type with the placeholder `"type"`. No Go identifier, no
+   export status, no rule to apply. These stay public. `type` is a Go KEYWORD, so the match cannot
+   catch a user type.
+
+Demoting (2) produced **CS0061** on `AnonymousInterfaces` — a lifted anonymous interface is emitted
+as the BASE of the exported interface that embedded it. **Both green corpus builds missed it**; the
+stdlib has no such shape. Near-miss: the un-refined rule would also have demoted **31** public
+`Δtype*` pins in `internal/reflectlite`'s banked test surface (one a public partial INTERFACE),
+which `-stdlib` never regenerates.
+
+### Gates — all re-asserted at the MERGE RESULT unless noted
+
+| gate | result |
+|---|---|
+| converter `go test ./...` at merge result | **ok 158.209s, exit 0** (master's `TestNestedSiblingTestdataIsStaged` + my 5 Δ cases coexisting) |
+| **Windows corpus** at merge result | **0 errors** |
+| **Linux corpus** at merge result | **0 errors** (was 10× CS0262) |
+| three-target regen | exit 0; **marker gate 85/85, 0 clobbered** |
+| refined emission vs corpus | **0 content differences**, positive-controlled |
+| `go generate .` | clean, no metadata drift |
+| CNR | exactly the **6** intended files, all Δ public→internal |
+| behavioral, 8 affected projects | **8/8 PASS** |
+| **reflect canaries** (roster-derived at gate time, **2358 verdicts**) | gcimporter **583/583**, go/types **557/557**, encoding/json **491/491**, encoding/xml **386/386**, crypto/x509 **341/341** — **0 fail** |
+| goldens | **none owed** (no `package_info.cs.target` exists; no `.cs.target` moved) |
+| working tree | **0 real dirt** (65 standing CRLF phantoms) |
+
+`crypto/tls` routed to i9 per COORD (3643 at master, needs bogo capability this host lacks);
+`crypto/x509` (341) substituted to keep the canary set at five. Sweep-induced dirt (**21** files:
+`.tests.csproj`, `*_test.cs`, `package_test_info.cs`, `package_init.cs`'s `+7` initᴛᴛtests hook)
+was restored, verified by **set comparison** back to exactly the arc's 119.
+
+### Bank classification — 128 files, only 23 are this arc
+
+3 converter/generator + 6 behavioral `package_info.cs` + 119 corpus, of which **20** carry Δ
+demotions and **99** are windows 13–17 emission catch-up the corpus had never been regenerated for.
+`net/http/package_info.cs` is entangled (both arcs), and its declaration sites are all in the
+catch-up set — a generated file two arcs both move is regenerated at the merge, never
+cherry-picked, which is exactly what produced two red builds earlier in this arc. 4 of the 99 are
+byte-identical to master's own `internal/trace` bank: an unplanned positive control that this regen
+reproduces master's emission exactly.
+
+### Findings handed off (none blocking)
+
+1. **Marker-gate presence arm** — ratified by COORD. `[ -f "$SEED/$rel" ] && ! cmp` cannot see a
+   hand-own the merge DELETES or RELOCATES; it reads 0 clobbered. **1 of 85** today
+   (`runtime/linux/trace_impl.cs`, flattened by the L3 merge; reproduces with the un-refined binary,
+   so pre-existing).
+2. **`package_test_info.cs` is outside `-stdlib`** — a green corpus build cannot speak for banked
+   test conversions on an accessibility change.
+3. **No `package_info.cs` golden exists** — TargetComparison structurally cannot catch pin drift;
+   only CNR can.
+4. GOROOT forward-slash trap — R's; my instance two-directional (300 `std.*.csproj` vs 0), caveat
+   that GOROOT and `-go2cspath` moved together so the PAIR is implicated. Glad to see the namespace
+   guard already in leg two v2.
+
+**Ready for window twenty on your call.** **AWAITING: merge decision.**
+
+-- G (GRETCHEN-LAPTOP)
