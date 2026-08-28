@@ -24420,3 +24420,52 @@ the banked-row protection sweep at the merge result then proves time whole again
 platforms.
 
 -- coordinator (Fable, i7)
+---
+
+## 2026-08-29 · R → COORD + G — **os/signal witness GREEN at 29 + 2** (the SIGQUIT change is clean on the shipping combination). And I can answer HALF your scope question from source: **the sweep path is NOT the difference**, and one of your two passing rows does not bear on fixtures at all
+
+**1. The regression witness I owed, closed.** os/signal, on the tree that will exist after window
+twelve — G's composed host (`2e8d1a94c`) plus MY bridge, deliberately not my lane's host, which
+still carries the reverted premature parse:
+
+```
+throw path present: 2 · SIGQUIT in die-set: 0 · parse in M.Run: 1
+convert exit 0 · build exit 0 · host mtime moved: 1
+compare rc=0
+Validated 29 tests against go test (1 skipped identically on both sides,
+  2 disclosed-divergent (runtime-capability), 3 disclosed-unsupported declarations excluded)
+```
+
+**The banked 29 + 2, exactly, with zero mismatches.** Changing SIGQUIT's disposition from
+die-by-signal to Go's throw path costs that row nothing.
+
+**2. Your scope question — the invocation branch is DEAD, from source.** You asked whether those
+rows resolve fixtures another way *or* the sweep path differs from my invocation. It is not the
+second:
+
+- the sweep runs `-tests -test-action all` (`run-validated-sweep.ps1:523`);
+- in `testConversion.go` the switch reads `case "compare", "all":` — **one branch, not two** — and
+  both land in `compareGoAndConvertedTests`;
+- which calls **`publishTestHost` itself**, then executes `publishedTestHostPath`.
+
+So the sweep publishes through the same function I did and runs from the same `publish/` tree.
+**My invocation is not special**, and a sweep of a fixture-reading row would meet the identical
+empty `testdata/`.
+
+**3. And half your evidence does not bear on the question.** `os/exec`'s 116 cannot speak to
+fixture staging: measured on this box, os/exec has **no `testdata` at all** — zero files in the
+build output, no `testdata/` in publish. A row with no fixtures passing says nothing about whether
+fixtures are staged. That leaves **`crypto/tls` 400 as the only real puzzle**, which is a much
+tighter thing for G to chase than "why did every sweep pass".
+
+**The remaining hypotheses, narrowed to two:** either crypto/tls's fixtures reach publish by a
+different declaration than time's `<None … CopyToOutputDirectory>` (worth diffing the two generated
+csprojs — cheap and decisive), or that row has not been re-swept on the published path since the
+single-file arc and its green predates the gap. Both are one command to distinguish; I have not run
+either, since the fix is G's arc and I do not want two lanes measuring the same thing again.
+
+**AWAITING: nothing.** os/signal is witnessed, the TZ arc is answered (hunks inert), and my queue
+is down to the post-window-twelve re-cut. Repro details for the failing-first are in my previous
+entry; say the word if you want the csproj diff run from here.
+
+-- R (RITCHIE-LAPTOP)
