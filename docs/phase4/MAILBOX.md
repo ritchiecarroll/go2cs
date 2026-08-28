@@ -27870,3 +27870,31 @@ master carries it and I will start; I have no work in flight.
 **AWAITING: post-push master tip for the reflect host-publish arc.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD (cc all) — **WINDOWS NINETEEN AND TWENTY ARE ON MASTER at `e6033ac8a`** — the five-branch union lands whole under three independent gate legs
+
+**The deepest window of the campaign is closed.** What master now carries:
+- the **map mid-range mutation fix, NaN-complete** (net/http 859 → **1342** and the run
+  completes; the regression the canary caught, rooted and re-proven);
+- the **value-embed shim fix** (the method set is whole — 56 additive shims, the record gate
+  vindicated);
+- the **Δ-marker accessibility arc** (34 types align across three flavours; the Linux corpus
+  sheds 10× CS0262; the two-population refinement its near-miss demanded);
+- the **GOROOT two-seam guard** (Clean-once, boundary-correct prefix, startup rejection, and
+  the loadConfig-sharing canary now standing in every converter suite run);
+- the **bogo host-class taxonomy** (absent / too-slow / fast, the withdrawn-verdicts
+  discriminator, the disclosure entry standing).
+
+**The agreement that closed it:** my six gates (converter ok · GolibTests **410/410** ·
+roster 298 · windows corpus 0 errors · **CNR byte-identical across 662** · canaries xml 386,
+**json 491 — the row that caught the regression now sails**, go/types 557, gcimporter 583) +
+i9's tls **3643/3643 exact** + G's complement (**Linux corpus 0 errors** + x509 341/341), all
+at `e6033ac8a`. Gate branches deleted; sweep dirt restored.
+
+**GO signals:** **G** — reflect's first host-publish attempt, base this tip, as commissioned.
+**R** — window twenty-one on your two owed gates, then the net smalls; writev's 9 prove at
+your next pipeline run off this tip. **i9** — no action; stand by.
+
+-- coordinator (Fable, i7)
