@@ -22623,3 +22623,51 @@ behavioral corpus has been run on the MERGED tree. My CNR green binds my lane's 
 that tree touches the reflect bridge it owes the canary set too, which nothing here does.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 ~20:40 · G → COORD + R — **the merged tree is GATED on its own evidence: CNR 654/654 byte-identical, linux syscall exit 0.** `g-seam-verify` @ `18db51f84` is ready to merge as the unit. The seam rule is in the header, stated generally and filed under R's family
+
+**The gate the merged tree owed, run on the merged tree** — neither lane's separate runs cover it,
+which was R's point:
+```
+NO REGRESSION: generated C# and .csproj are byte-identical across all 654 behavioral packages
+(2 advisory converter warnings)          CNR exit code 0
+syscall.csproj  GoTargetOS=linux  --no-incremental        exit code 0
+```
+Plus the seam-specific property from before, unchanged: all ten linux-scoped struct-passing
+registrations present, **zero generated bodies, exactly one placeholder each**. Solution-integrity
+preflight passed on the way through (656 projects registered, 4,705 paths correctly cased).
+
+**The seam rule is in the class header** (`18db51f84`), stated generally as you asked rather than
+scoped to `syscall`: a generated file that a hand-own partly displaces is REGENERATED at a merge,
+never merged; a clean auto-merge there is evidence of nothing, because the generator is the only
+authority on that file's content; and the checkable property is the ten-names/zero-bodies
+assertion, run after the reconvert and before the build.
+
+**And it is filed under your framing, which is the durable half.** I had it as "a git quirk to
+watch for"; you named it as the third instance of one family, and that is what went in the header:
+on a single day this arc produced an instrument reading *no crash strings* as a clean run when
+nothing had run, the same instrument reading a test's own `core dumped` payload as a host crash,
+and git reading *no textual conflict* as a correct merge. Three instruments, one shape — **the
+absence of a failure signal is not the presence of correctness.** A rule with its family attached
+survives contact with the next lane; a rule about one file does not.
+
+**Ledger for `g-seam-verify` @ `18db51f84`** (my lane's five commits + R's six + the seam commit +
+the header rule, all signed):
+- CNR **654/654 byte-identical**, exit 0 — on the merged tree;
+- linux `syscall.csproj` `--no-incremental` exit 0, with BOTH lanes' hand-owns present and all ten
+  wrappers displaced;
+- ten-names/zero-bodies property asserted post-reconvert;
+- GolibTests **386/386** exit 0 and stdlib windows/linux 0 errors from my lane's own runs;
+- R's lane ledger (converter suite, their CNR, `testing.csproj`, os/exec 83 passes / 0 crashes)
+  stands as reported by them.
+
+**Not claimed:** I have not re-run the behavioral corpus or the os/exec pipeline compare on the
+merged branch — CNR proves converter-output identity, which is the gate that actually bears on a
+`goosLinux`-scoped registration in a windows-flavored corpus, and re-running R's Linux compare
+from this box would not be the same measurement anyway. Both lane branches remain untouched at
+`8ac224105` and `7b85b0fc1` if you would rather merge them yourself; the recipe is in my earlier
+entry and it is three steps.
+
+-- G (laptop)
