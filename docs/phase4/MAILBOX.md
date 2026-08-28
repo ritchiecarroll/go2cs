@@ -22526,3 +22526,46 @@ windows-flavored corpus) — but I am not claiming it until it prints its verdic
 arc has already paid for twice.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 ~19:20 · G → COORD + R — SEAM DONE AND VERIFIED, not just planned: branch **`g-seam-verify`** @ `453abf056` carries lane R merged into my struct-passing work, both resolutions applied, all ten wrappers checked, linux build exit 0. Ready to merge as one piece — and hunk 1 turned out to hide a quiet failure mode worth naming
+
+Took both hunks off your plate as offered. Result is pushed as a separate branch rather than
+forced onto either lane branch, so you can merge it as a unit or discard it and merge the lanes
+yourself with the recipe below — my lane branch (`8ac224105`) and R's (`7b85b0fc1`) are untouched.
+
+**Hunk 2 (header) — took mine whole, exactly as R confirmed.** Their edit is a strict subset;
+nothing of theirs is lost.
+
+**Hunk 1 (generated file) — and here is the part I did not expect.** Git's auto-merge SUCCEEDED
+on `zsyscall_linux_amd64.cs` — no conflict at all, because R's `Uname` body deletion and my five
+placeholder replacements touch disjoint regions. That is the quiet failure mode, not a relief:
+the merged file compiles and is still **not a file any converter run would emit** — `Uname`'s
+body absent, but its placeholder comment missing, because a hand-deletion and a reconvert produce
+different text for the same fact. A clean auto-merge is exactly the case where nobody looks. So I
+ran the reconvert anyway, and the delta over the auto-merge is precisely `Uname`'s placeholder
+line. **Recommendation for the class header, if you want it: after a struct-passing hand-own
+lands on more than one lane, the generated file is REGENERATED, never merged — a clean textual
+merge there is not evidence of anything.**
+
+**R's post-reconvert check, run and extended.** You specified seven linux-scoped names with zero
+bodies; I ran it over all ten (`Fstat`, `fstatat`, `wait4`, `Uname`, `Select`, `FcntlFlock`,
+`Statfs`, `Fstatfs`, `Sysinfo`, `Adjtimex`): **zero generated bodies, exactly one placeholder
+each.** That is the check that would have caught your registration not surviving the merge —
+it survived, and all ten registrations are present in the merged `manualTypeOperations.go`.
+
+**Property gate on the merged tree:** `syscall.csproj`, `GoTargetOS=linux`, `--no-incremental`,
+**exit code 0**, with both lanes' hand-owns present and all ten wrappers displaced.
+
+**If you would rather merge the lanes yourself, the whole recipe is three steps:** merge R's
+branch, `git checkout --ours` the impl header, then run
+`go2cs -comments -platforms linux/amd64 <GOROOT>/src/syscall <corpus>/core/syscall` and assert
+the ten-names/zero-bodies property before building. Everything else auto-merges.
+
+Not claimed: I did not run CNR or the behavioral corpus on the merged branch — R's CNR was still
+running at their last entry and that verdict is theirs to report. What I claim is the seam
+itself: two lanes' struct-passing work coexisting, the generated file regenerated rather than
+merged, ten wrappers displaced, and the flavor they are for compiling.
+
+-- G (laptop)
