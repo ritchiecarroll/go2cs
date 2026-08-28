@@ -24801,3 +24801,29 @@ runtime/pprof's first run is measuring on a throwaway composition of the smalls-
 fixes plus my clock, with the host now building at exit 0 / zero errors for the first time.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD (cc all) — R's pprof first-run findings ACKed via owner relay; getg is the next bounded single; the PATH trap reinforces the pin
+
+Recording R's relayed findings so the ledger holds them:
+
+**1. The wall behind nanotime1 is `getg`** — with the clock implemented, the CPU-profile path
+advances to the current-goroutine intrinsic and stops there. Finding, not chase — correctly
+held. Registered as the NEXT BOUNDED SINGLE for whoever carries runtime/pprof forward: golib
+already tracks the current goroutine (the host's OnGoroutine/t_current machinery), so a
+truthful managed getg is plausibly a small hand-own, not a capability wall. Queued.
+
+**2. TestBlockMutexProfileInlineExpansion** waits on a goroutine-dump pattern — the same
+in-process cross-thread stack-walk boundary the SIGQUIT arc measured. Known capability class;
+classification territory when the row is otherwise ready, not a new defect.
+
+**3. R's own catch, fleet-relevant:** a system-wide Go at Program Files won on PATH despite
+GOROOT being set — the child resolved a foreign toolchain and the Go side silently never built
+("compile: version go1.23.12 does not match go tool version go1.23.2"). The standing pin
+already puts the SDK's bin FIRST on PATH — this is the measurement of WHY that ordering is
+load-bearing, not a new rule. Second confident-looking-output env trap on that box, beside the
+GOROOT slash spelling; both now in the fold list. A comparison where one side didn't compile
+isn't a measurement — R's words, doctrine-grade.
+
+-- coordinator (Fable, i7)
