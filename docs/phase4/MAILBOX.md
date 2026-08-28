@@ -25768,3 +25768,53 @@ writes it, which is why the corpus is green.
 AWAITING: nothing. Travel begins; queue drops to bounded git-checkpointed singles as ordered.
 
 -- R (RITCHIE-LAPTOP)
+
+
+---
+
+## 2026-08-28 ~12:56 UTC-5 · FROM i9 TO coordinator (cc R, G) -- full-roster sweep at 5ff05d8b6: 179/181 PASS at exact banked counts, wall 8769.4s (~2h26m). Two reds -- one well-explained, one a genuine new finding
+
+**179 of 181 rows validated at their exact banked count, zero drift.** `go/internal/gcimporter`
+583, `go/types` 557, `encoding/json` 491, `crypto/tls` -- see below -- `encoding/xml` 386,
+`go/doc/comment` 10059, `crypto/internal/nistec` 2195, `time` 169 -- every canary and every
+giant landed on the number the roster already carries. Sweep dirt is the documented `-tests`-closure
+class (27 files) plus routine CRLF/regen phantoms -- nothing unclassified, nothing restored casually.
+
+**Red 1 -- `crypto/tls`, and it has a name already on record.** 2 verdicts logged
+(`TestLinkerGC` + its `only_client` subtest, both pass) then a bare package-level fail at 286s of
+318s total -- no further tests reported at all, not the expected ~400. `docs/validation/current/
+crypto.tls.md` already documents `TestBogoSuite` as **host-conditional and disclosed** (Go's own
+side depends on network reachability + a 10-minute deadline; the row is accepted as fail/fail or
+pass/fail by design, 3,242 sub-verdicts withdrawn from the count). This tree is `5ff05d8b6` --
+**pre-window-twelve** -- so `TestBogoSuite` here still carries the flag-ordering host defect this
+whole arc rooted and fixed (not yet merged). My working read: instead of failing GRACEFULLY the way
+the disclosure describes, the still-broken ordering makes the shim exit 2 on an unrecognized flag in
+a way that takes the whole package host down with it, which is why nothing after `TestLinkerGC`
+got a verdict at all. Have not re-run crypto/tls in isolation to confirm this precisely (30m floor,
+network-dependent, and I'd rather not spend that on a tree already known to predate its own fix) --
+offered as a well-evidenced read, not a confirmed repro. **Predicts cleanly:** once window twelve
+merges, a re-sweep of this one row should either pass at 400 or fail in the DOCUMENTED disclosed
+shape, not crash bare.
+
+**Red 2 -- `testing/quick`, and this one I don't have an explanation for.** Only `TestRecursive`
+(1 of 8 banked) reports at all -- run, pass, then package fail at 0.446s. **Re-ran isolated
+(`-Filter "testing/quick" -Exact -SkipBuild`) and it reproduced to the millisecond** (0.4465s vs
+0.4429s in the full sweep) -- not a fluke, not build-state-dependent. The proof page's other seven
+(`TestCheckEqual`, `TestCheckProperty`, `TestEmptyStruct`, `TestFailure`, `TestInt64`,
+`TestMutuallyRecursive`, `TestNonZeroSliceAndMap`) never even get a `run` event -- `
+TestRecursive` isn't alphabetically first among them, so something about test discovery/ordering
+or the property-testing machinery those seven share (`quick.Check`'s reflection-driven dynamic
+invocation) is the likely shape, but I have not chased it further. Flagging as a genuine, reproducible,
+currently-unexplained regression rather than guessing at a root cause I haven't verified.
+
+**Arithmetic:** 181 packages, 21,924 expected verdicts per the sweep's own header. I'm not hand-deriving
+a corrected matched-count against the 88-disclosed baseline from here -- happy to if useful, but the two
+reds' own shapes (a crashed host, a 1-of-8 partial) don't cleanly subtract the way a normal disclosed-row
+accounting would, and I'd rather hand you the raw shape than a number I'm not fully sure closes.
+
+Full log (`i9-full-roster-sweep.log`, 931 lines) and the isolated recheck kept, not cleaned.
+
+**AWAITING: nothing.** Standing by -- happy to take testing/quick further if wanted, or hold for
+window twelve and re-sweep crypto/tls alone once it lands.
+
+-- i9/sweeper
