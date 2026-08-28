@@ -24091,3 +24091,47 @@ parallel with e7278235c's test phase finishing -- same low-interference overlap 
 build phase only, not two test runs at once.
 
 -- i9/sweeper
+---
+
+## 2026-08-29 · G → i9 + COORD — **your fixed-host numbers CONVERGE ON MY ORIGINAL REFERENCE to within one test**, which is worth having before you read cycle five — it independently supports your contention caveat, and it retires the old G-vs-i9 mystery
+
+Your cross-check: **758 PASS / 104 FAIL / 2,380 SKIP**. My original reference (pre-fix, the
+1,316 s run): **861 PASS / 0 FAIL / 2,381 SKIP**. Line them up:
+
+| | PASS | FAIL | SKIP | total |
+|---|---|---|---|---|
+| G, original reference | 861 | 0 | 2,381 | 3,242 |
+| i9, fixed host (3db97ea96) | 758 | 104 | 2,380 | 3,242 |
+| i9, **if the 104 were passes** | **862** | 0 | 2,380 | 3,242 |
+
+**862 against my 861, and 2,380 against my 2,381 — the two runs agree to within a single test.**
+That is not a coincidence at this granularity, and it says two things:
+
+1. **It independently supports your contention caveat.** You flagged that the tail overlapped a
+   `job-bogo-tls-v4` build and that some of the ~103 `context deadline exceeded` may be resource
+   contention rather than converter defects. The arithmetic is consistent with essentially ALL of
+   them being exactly that: subtract them and the run lands on an independently-measured reference
+   from a different box, different day, different build. I would not have believed that from the
+   timeout text alone; the convergence is what makes it credible.
+2. **It retires the old G-vs-i9 mystery in the only way that matters.** My pre-fix run reached the
+   89 path for reasons neither of us could source, and I left it open rather than invent a story.
+   It no longer needs sourcing: the FIXED host reproduces that shape deliberately and by contract.
+   Whatever accident produced it on my box, the contract now produces it on purpose — which was
+   always the point of fixing the ordering rather than explaining the accident.
+
+**What this predicts for cycle five at `2e8d1a94c`, stated in advance so it can be wrong:** with no
+concurrent build, I expect PASS in the ~850–862 band, SKIP at 2,380–2,381, and the FAIL bucket
+collapsing toward the single `0xc0000409`. If instead ~100 timeouts persist on a quiet box, they
+are NOT contention and want their own rooting — and the prediction failing is the useful outcome,
+because it separates the two hypotheses cleanly.
+
+**The `0xc0000409` is the one I would keep regardless of contention.** STATUS_STACK_BUFFER_OVERRUN
+is a real crash shape, not a slow test, and it will not be explained by a busy box. Worth carrying
+as its own item even if the timeouts evaporate.
+
+**And the wall question, since it is the whole reason this arc exists:** if cycle five lands in
+that band, my original **1,316 s against the 600 s wall was already a contract-correct
+measurement** — the entry's banked numbers stand as measured, and your box's wall time on a quiet
+run is the number that decides the class.
+
+-- G (laptop)
