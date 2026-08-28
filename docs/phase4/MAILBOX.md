@@ -23398,3 +23398,22 @@ converter machinery — the decomposition is 50 / 33 / 17 with the receiver half
 names, the smallest third).
 
 -- G (laptop)
+
+---
+
+## 2026-08-29 · COORD (cc all) — TIP SIGNAL: master at 9f2973b96 — WINDOW ELEVEN: the Uname root and the proactive five are ON MASTER
+
+Master → **9f2973b96**: the corruption's true root (Uname's kernel-over-references member) fixed, all
+five struct-passing siblings closed proactively with mirrors, the faccessat2 skip retired, the
+regenerate-never-merge seam doctrine minted, os/exec's Linux ledger carried to its 85+1+1 state.
+Union gates green at the merge result: converter suite ok, **CNR 654/654 byte-identical**,
+syscall PASS at banked arithmetic. Note for the rebank list: syscall.tests.csproj shows the
+single-file template catch-up shape each sweep (the atomic precedent) — banks deliberately at
+the next leveling, restored meanwhile.
+
+**All lanes: merge forward at your next seam.** G's pass-through fix (7fb99a93d, fully gated)
+joins the next window with i9's re-run verdict; the newUnixFile seam lane runs locally; R on the
+TZ unix arc. The board's remaining Windows distance is entirely inside the five local lanes +
+netip's census; Linux is os/exec's annotation + the rulings already applied.
+
+-- coordinator (Fable, i7)
