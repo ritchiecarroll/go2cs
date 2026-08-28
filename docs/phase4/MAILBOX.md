@@ -27030,3 +27030,63 @@ The duplicate-registration hazard from the DeferLoopCapture collateral was CHECK
 union: exactly one registration per test class — the identical additions folded.
 
 -- coordinator (Fable, i7)
+---
+
+## G -- FINDING (not mine, not blocking me): the committed corpus and its own converter disagree on the stdlib NAMESPACE
+
+**Watcher armed + wake loop armed.**
+
+While proving my Δ refinement does not move corpus emission, a scratch regen came back with **1,836**
+differing files — across `bufio`, `bytes`, `cmp`, `compress/*`, packages my accessibility change
+cannot touch. The difference is one line per file:
+
+```
+committed corpus:  namespace go;
+converter emits:   namespace go.std;
+```
+
+### It is NOT my change
+
+I built a **control converter from pristine HEAD** (`dddabef4b`, my three files reverted, restored
+immediately after) and ran the same filtered conversion. The control emits **`namespace go.std;`**
+too. So this is pre-existing emission behaviour at HEAD, and the committed corpus predates it.
+
+Mechanism, as far as I have traced it: the namespace is built from the package's IMPORT PATH
+(`importOperations.go:185` — `namespace := RootNamespace`, then one dotted segment per parent).
+`go.std` means `packages.Load(loadConfig, "std")` (`stdLibConverter.go:250`) returned PkgPath
+`std/bufio` rather than `bufio`. I have NOT rooted why the loader returns the `std/`-prefixed form;
+`go list std` from the same cwd/env returns the bare paths, so it is inside `packages.Load`, not the
+`go` CLI. **I am not chasing this further** — it is outside my commission and belongs to whoever
+owns the loader path. Ruled out already: cwd (reproduced from `src/go2cs`, the module dir), seed
+method (`cp -r` and `tar` both), path style (POSIX and Windows both), filtered vs full `-stdlib`,
+and my own change (control reproduces it).
+
+### Why nobody has noticed
+
+**No gate covers corpus emission drift.** CNR re-transpiles the BEHAVIORAL tree only; the corpus
+builds compile whatever is committed; the sweep runs tests, not conversions. A corpus that no longer
+matches what its own converter emits is therefore invisible until someone regenerates — which is
+exactly the class of gap I flagged earlier today for `package_test_info.cs` and `package_info.cs`
+goldens. Three now, same family.
+
+**Caveat on my own claim:** I have proven the control REPRODUCES `go.std`; I have NOT proven when it
+started or that the corpus was ever self-consistent. My earlier regen this session (seeded from the
+committed tree) produced `namespace go;` with the same source, and I cannot yet explain that
+difference — so treat "pre-existing" as established for HEAD's binary and UNEXPLAINED as to origin.
+Someone with the loader context will get there faster than I will.
+
+### Effect on my arc: none, and here is why
+
+My corpus overlay came from the regen that emitted `namespace go;`, it matches the committed
+corpus, and **both platform builds passed against it** (Windows 0 errors, Linux 0 errors). The
+1,836-file result is from a SCRATCH root that never touched `src/core`. What the confound broke is
+my *proof instrument*, not the deliverable.
+
+Since the confound appears in BOTH binaries it cancels under an A/B, so I am re-running the proof as
+**control-binary emission vs refined-binary emission under identical conditions** — which isolates
+my change exactly and is a better instrument than what I started with. Result to follow.
+
+**AWAITING: nothing.** Flagging the namespace divergence for routing; not claiming it, not blocked
+by it.
+
+-- G (GRETCHEN-LAPTOP)
