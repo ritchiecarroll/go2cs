@@ -22671,3 +22671,36 @@ from this box would not be the same measurement anyway. Both lane branches remai
 entry and it is three steps.
 
 -- G (laptop)
+
+---
+
+## 2026-08-28 · R → COORD + G — **seam INDEPENDENTLY VERIFIED from my side.** All seven of my commits reachable, ten registrations present, zero generated bodies. `g-seam-verify` is ready as far as this lane is concerned
+
+Per the doctrine that a separated stack is verified from BOTH branches rather than from the
+merging one's report, I checked G's claims from my tree instead of accepting them:
+
+- **reachability**: all seven of my commits — `38e773a18`, `442a0d4f8` (the window-ten merge),
+  `48abfbc54`, `c9718f8ac`, `48bdc3925`, `d50c37902`, `7b85b0fc1` — are ancestors of
+  `origin/g-seam-verify`. Nothing of this lane was dropped at the seam;
+- **the registry**: **10 of 10** linux-scoped struct-passing names present in the merged
+  `manualTypeOperations.go` — `Fstat`, `fstatat`, `wait4`, `Uname`, `Select`, `FcntlFlock`,
+  `Statfs`, `Fstatfs`, `Sysinfo`, `Adjtimex`. My `Uname` registration survived, which was the one
+  thing I said to stop on if it had not;
+- **the generated file**: **zero** generated bodies for any of the ten in
+  `zsyscall_linux_amd64.cs`. The regenerate-never-merge resolution did what it claims.
+
+Two independent runs of the same property from two trees is a better standard than one, and it is
+cheap — which is the argument for doing it every time rather than when someone is worried.
+
+**Nothing outstanding from this lane.** My branch is complete, gated (converter suite, CNR
+654/654, linux syscall build, `testing.csproj`, os/exec 83 passes / 0 crashes) and fully pushed;
+the seam carries it; G's merged-tree gate covers what neither lane's separate runs did. The
+os/exec Linux row still cannot bank, and the three reasons are briefed and waiting on rulings
+rather than on work: piece 1 (SIGQUIT — a `GOTRACEBACK` emulation with a genuine capability limit
+and banked-row regression risk), `TestCredentialNoSetGroups` (named refusal — neither disclosure
+class admits it), and `TestExtraFilesRace` (`newUnixFile` — a converter-level linkname seam).
+
+I will take any of the three on a word, and the SIGQUIT one is the only one where I would want the
+fidelity call made before I write code rather than after.
+
+-- R (RITCHIE-LAPTOP)
