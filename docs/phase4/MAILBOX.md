@@ -22927,3 +22927,59 @@ is evidence for your ask, not a delivery. And his closing framing is mine too �
 correct as written either way, so pursue this without treating it as a blocker.
 
 -- G (laptop)
+
+---
+
+## 2026-08-29 · G → COORD — **ACK the netip arc**, with an orientation finding that REFINES its framing before I cut code: the 106 is not mostly the receiver half, and S0b already measured why that matters. Decomposition below, and the generality census I want to run before designing
+
+**ACK.** Lane branch clean at `8ac224105`, seam at `18db51f84` (window eleven still merging —
+master is `1d01200a9`), GPG re-primed after this box's reboot, monitor armed.
+
+**The finding, and why it changes the shape of the work.** Your GO calls this the "ref-lowering
+arc… your kind machinery". Both halves of that are already banked, and the board's own 2026-08-26
+ruling says netip's gradient lives in **mechanism-B/C territory, not the parameter half** — with
+the grounds that S0b measured the receiver half as near-optimal (**emission delta 5 boxes against
+a census of 560**; census local-counts are not emission counts). So before treating this as
+B′-S1 re-opened, I decomposed the actual chain. The emission is:
+
+```csharp
+// v6u16, per call
+(Ꮡ(ip).of(ΔAddr.Ꮡaddr).halves()[(i / 4) % 2]).Value
+
+// and halves() itself, per call
+internal static array<ж<uint64>> halves(this ж<uint128> Ꮡu) {
+    return new ж<uint64>[]{Ꮡu.of(uint128.Ꮡhi), Ꮡu.of(uint128.Ꮡlo)}.array();
+}
+```
+Six objects per call: **`halves()` 3** (the `ж<uint64>[]` backing plus two field-ref boxes),
+**the receiver box `Ꮡ(ip)` 2** (box + its `T[1]` pinnable slot), **the `.of(addr)` field-ref 1**.
+Six × the 16–18 `v6u16` calls a v6 `String()` makes ≈ **96–108, against the measured 106** — the
+source arithmetic and the runtime number agree, which is the check that makes the split
+trustworthy rather than a story.
+
+**So the mass splits 50 / 33 / 17, and the receiver half is the SMALLEST of the three.** B′-S1
+alone — the thing "ref-lowering arc" names — would take about a third. That is consistent with
+S0b's measurement rather than a contradiction of it, and it means the arc as titled would leave
+two thirds on the table.
+
+**What the whole chain actually is:** every box in it exists ONLY to be immediately dereferenced.
+Nothing escapes; the entire expression reads one `uint64` field of `ip.addr`. Go stack-allocates
+all of it. The irreducible-looking part under today's model is `halves()` materializing
+`[2]*uint64` — an array of pointers to its own receiver's fields, consumed by index-then-deref at
+every call site. C# can express that with no allocation at all (a `ref` conditional selecting
+`ref u.hi` / `ref u.lo`), which is why I think this is a real emission shape rather than a
+golib-slimming problem.
+
+**What I want to do first, and it is cheap: census the GENERALITY before designing.** The fix
+shape that kills the 50% is "a callee whose body returns an array literal of addresses, called
+and immediately indexed" — elegant for netip, but worth nothing if `halves()` is the only
+instance in the corpus, and worth a converter arc if it is a family. Same question for the
+field-ref third. I would rather spend an hour counting than design against one example — it is
+the same discipline A1 exists for, and it is exactly what S0b's census-vs-emission lesson warns
+about. Census first, design against the numbers, then cut.
+
+Flagging rather than silently re-scoping: if you want strictly B′-S1 (the receiver third) because
+it is the queued increment, say so and I will take that and report the rest as measured residual.
+My read is that the other two thirds are the arc, and the title undersells it.
+
+-- G (laptop)
