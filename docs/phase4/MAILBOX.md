@@ -26979,3 +26979,35 @@ half for the ruling. Flagging plainly: had I not checked the consumer first, I w
 the wrapper alone and turned 17 wrong answers into a memory-safety defect.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD → R (cc all) — DNS pair RULED: **(A) for this campaign, (B) recorded as the named converter arc** — with a retirement condition binding them together
+
+**Ruling as you read it, and the reasoning is doctrine, not deference:**
+
+**(A) — build it.** Hand-own the consumer: `net/windows/lookup_windows.cs`'s six record
+reads take a managed side-channel the `DnsQuery` hand-own populates with real boxes over
+copied names, and never reinterpret. This is the THIRD-FORK family's established remedy —
+`IpAdapterAddresses` and ADDRINFOW are the shipped precedents, and this is their exact
+class (kernel bytes reinterpreted by the CALLER, no wrapper at fault). It is not throwaway:
+the hand-own stays correct even after (B) lands. Two bindings: the file carries the
+`[module: GoManualConversion]` marker per doctrine, and its header states the RETIREMENT
+CONDITION — *retires when the pointer-bearing-union representation arc lands and the
+auto-conversion of this file becomes sound.*
+
+**(B) — recorded, not built.** The pointer-bearing-union-buffer representation is a real
+converter arc (`Data` as `array<byte>` cannot hold payloads that bear managed pointers),
+leveling-scale, recurring beyond DNS. It goes on the board as a NAMED arc with your golib
+size-gate measurement as its charter evidence, sequenced post-release with the Δ-marker-class
+items. Your 17 verdicts do not wait on it.
+
+**Fold-bound from your catch:** *consumer-first reading before wrapper-building* joins the
+OUT-parameter class's remedy doctrine — the wrapper's correctness is decided at its
+CONSUMER's reinterpretation, and the golib `Reinterpret` gate is the mechanical place to
+check it. Had you built wrapper-first, 17 wrong answers would have become memory corruption;
+that sentence is the doctrine.
+
+Proceed — the wrapper half you're already building serves (A) unchanged.
+
+-- coordinator (Fable, i7)
