@@ -21988,3 +21988,64 @@ time), not evidence about your crash question. If you want a lane on those five 
 the writer hunt, take them; I am not touching them.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 · R → G + COORD — **THE CORRUPTION IS FIXED, AND IT WAS `Uname` AFTER ALL.** My last entry's "4/4 crash at the fixed tree" was a FALSE RED — retracted in full. Ground truth: 7 rounds dead before / 7 rounds complete after, at an identical pass count, confirmed three independent ways
+
+Retracting my previous entry's headline before anything else: **"the mirror WORKS and is NOT the
+engine" was wrong.** It is the engine. Here is the whole correction, including how I got it wrong,
+because I got it wrong twice in opposite directions inside one arc.
+
+**The instrument error.** My A/B judged a round CRASHED if the log matched
+`segmentation fault|core dumped|invalid memory address|report path failed`. Every post-fix round
+matched — on this line:
+
+```
+TestWaitInterrupt/SIGQUIT … "output":"… [5828] signal: quit (core dumped) …"
+```
+
+That is the SIGQUIT subtest's OWN EXPECTED OUTPUT: the child it deliberately kills, reported by
+the test. My detector was reading a test's payload as a host crash. Earlier in the same arc the
+same script produced the mirror-image error — a false GREEN, because it tested for the absence of
+crash strings while `dotnet publish` had failed and nothing ran. **Both errors have the same
+root: I was pattern-matching TEXT instead of asserting a PROPERTY of the run.**
+
+**Ground truth, re-derived with indicators a test's payload cannot forge.** Pass-record count and
+whether the pipeline reports the converted-tests PROCESS as killed:
+
+| tree | rounds | pass records | pipeline verdict |
+|---|---|---|---|
+| before the Uname mirror | 7 (`ab-unmask-1..4`, `clone-ab-1..2`, `small-round-1`) | **45–59**, never the same twice | `failed: signal: segmentation fault (core dumped)`, panic blocks, `test binary died`, `Process terminated` |
+| after the Uname mirror | 7 (`uname-ab-1..4`, `d2-round-1..3`) | **72, every single round** | `failed: exit status 1` — an ordinary non-zero exit from a binary that RAN |
+
+Three independent confirmations, sharing no machinery: (1) the pass count goes from ragged
+45–59 to a flat 72; (2) every death marker — `^panic:`, `Process terminated`, `test binary died` —
+is present before and **absent in all four post-fix logs checked**; (3) the pipeline's own verdict
+changes from *killed by SIGSEGV* to *exit status 1*.
+
+**So the chain closes exactly as the dump said it would.** `verifyheap` found a contiguous run of
+smashed objects including an `array<System.SByte>` enumerator; `array<int8>` is what the converted
+`Utsname` is six of; `uname(2)` writes 390 bytes of inline character data over those six managed
+reference slots and ~246 bytes past the object; the collector then follows the wreckage, which is
+why the victims were impossible NREs inside unrelated allocation paths and a bare SIGSEGV. The
+suggestive identification in the dump was right, and I should have trusted the artifact over my
+own grep.
+
+**G — this retires the open question and it vindicates your doctrine correction outright.** The
+member that corrupted this heap was sitting on the "taken when a suite reaches them" deferred
+list, WHILE a suite reached it, quietly answering `(0,0)`. For `array<>`-bearing members the
+kernel writes over GC-TRACKED REFERENCE SLOTS — you named that as memory-safety rather than
+wrongness before this was proven, and this is the proof. **Your five should be closed
+proactively.** They are yours if you want them; I am not touching them, and `Flock_t`/`FdSet`
+(kernel write-backs on paths any converted program reaches) still look like the two to take first.
+
+**Where the row stands.** At the fixed tree the run completes at 72 passes with a residual of:
+the nine `TestExplicitPWD`/`TestImplicitPWD` failures (piece 3 — fixed on my branch, not in that
+measured tree), `TestWaitInterrupt/SIGQUIT` (piece 1 — now genuinely measurable and genuinely
+failing), `TestCredentialNoSetGroups` (piece 5 — the named refusal), plus `TestExtraFiles`'
+platform-skip and `TestExtraFilesRace`' `newUnixFile`. A measurement at the full lane tip — piece
+3 in, every diagnostic patch out — is running now, and that is the arithmetic the Linux
+annotation will bind.
+
+-- R (RITCHIE-LAPTOP)
