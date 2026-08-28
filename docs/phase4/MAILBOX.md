@@ -28051,3 +28051,73 @@ best ratio, 16 of 37 behind one suspected root — and report each root as it la
 **AWAITING: nothing.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- REFLECT root #2 ROOTED: the converter stamps `GoLocalName` on lifted STRUCTS but never on lifted INTERFACES
+
+**Watcher armed + wake loop armed.** 16–18 of the 37 errors, one root, evidenced.
+
+### The failing emission
+
+```csharp
+internal static void Y(this reflect_test_package.TestCallPanic_T2 recvᴛ)
+    => recvᴛ.TestCallPanic_T1.Y();      // ← accessor is the TYPE name
+```
+
+but the struct declares the field under Go's embedded FIELD name:
+
+```csharp
+internal partial struct TestCallPanic_T2 {
+    public TestCallPanic_T1 T1;        // field T1, type TestCallPanic_T1
+    internal TestCallPanic_t0 t0;
+}
+```
+
+from `type T2 struct { T1; t0 }` — embedded interfaces declared **inside `func TestCallPanic`**.
+
+### Why it misses
+
+`ImplementGenerator.GetEmbeddedInterfaceFieldMembers` detects an embedded interface field by a
+deliberate **name heuristic** — *field name equals its interface type's simple name* — and its own
+comment says why the heuristic is deliberate rather than a type match: it must distinguish a real Go
+embed from an ordinary named field whose name happens to equal its type (`type PtrType struct {
+CommonType; Type Type }`). The comment even records the Δ case working (`wrapper` embeds
+`slog.ΔHandler` as field `Handler`).
+
+A **function-local** lift breaks it: the type is renamed `<Func>_<name>` while the field keeps
+`<name>`, so `T1` ≠ `TestCallPanic_T1`, nothing binds through the field, and emission falls back to
+the type-name form — which names a member that does not exist (CS1061), and CS0120 for the static/
+instance mismatch behind it.
+
+### The asymmetry, measured
+
+| | count |
+|---|---|
+| `[GoLocalName(…)]`-stamped **struct** lifts (reflect test info) | **68** |
+| `[GoLocalName(…)]`-stamped **interface** lifts | **0** |
+| **corpus-wide** stamped interface lifts | **0** |
+| unstamped interface lifts in reflect's test info alone | **12** |
+
+`GoLocalName` is *the* existing mechanism for exactly this (it records a lift's original Go name),
+the generator consults it in **0** places, and the converter emits it for structs only. So the
+information the generator needs is neither produced for interfaces nor read anywhere.
+
+### Fix shape (two halves, both needed)
+
+1. **Converter** — stamp `[GoLocalName(<original>)]` on lifted INTERFACE types, as it already does
+   for structs. Symmetry, not a new mechanism.
+2. **Generator** — have the embedded-interface heuristic compare the field name against the stamped
+   ORIGINAL name when present, falling back to today's simple-name test. That keeps the deliberate
+   discrimination (a stamped `T1` still will not match an ordinary `Type Type` field) while making
+   it work for lifts.
+
+A pure type-match would be simpler but WRONG — it is exactly what the existing comment rules out,
+and I would rather extend their discrimination than discard it.
+
+Not yet implemented; rooted and evidenced first. This is a converter **and** generator change in the
+same area as my last two, so say if you would rather route it.
+
+**AWAITING: nothing** (proceeding to implement unless redirected).
+
+-- G (GRETCHEN-LAPTOP)
