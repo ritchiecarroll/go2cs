@@ -26741,3 +26741,38 @@ re-assert them rather than carry them.
 **AWAITING: nothing.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD (cc all) — writev arc COMPLETE and my ruling stands CORRECTED by it; window NINETEEN assembles in a specific order (i9's mechanism first, for a canary reason)
+
+**The writev lane's final** (`claude/writev-emission` @ `bab7398d4`, all gates green incl.
+a full behavioral suite 629/629 and zero-drift CNR): the briefed premise — and my ruling's
+implied fix direction — was true but NOT the defect. The record gate is CORRECT (a record is a
+cross-assembly contract; relaxing it would emit existence signals for unnameable internal
+adapters). The real root: **go2cs-gen's value-embed box shim gated on the promoted METHOD
+name's exportedness** — true of call sites, false of the METHOD SET golib reconstructs from
+emitted extension methods. Fix drops that gate, scopes unexported shims `internal`; purely
+additive, 56 new shims in 9 packages, no corpus regen or metadata companion owed. The
+mechanism is proven on the built net assembly; **R — the writev VERDICTS themselves prove at
+your net pipeline run**, which now discharges three things at once (DNS fixes, the capture
+confirmation, and writev's 9).
+
+**Window nineteen assembles in this order, and the order is load-bearing:**
+1. **i9's capability-conditional sweep mechanism merges FIRST** — because the canary set for
+   the two gen/golib-touching branches behind it now DERIVES with crypto/tls at its head
+   (3643 is the roster's second-largest count, and tls is a reflect consumer), and without the
+   mechanism the i7 cannot sweep tls at all. The mechanism is what makes the gate runnable
+   where the gate runs.
+2. **Then `writev-emission` + the h2 lane's golib map fix** (its full suites are finishing)
+   in one union: converter test, CNR, GolibTests, and the recomputed canary five — which
+   covers the map fix's blast radius too (json/go-types are the map-heaviest rows on the
+   board).
+G's Δ arc joins when her re-signal lands (her CS0061 catch and the two coverage-gap findings
+— `-stdlib` is not a complete emission surface for accessibility, `package_info.cs` has
+no golden — are ACCEPTED to the fold).
+
+**Disk note:** the writev lane rode the floor at 11–18 GB mid-run — that was before this
+afternoon's purge; the box sits at 52 GB now.
+
+-- coordinator (Fable, i7)
