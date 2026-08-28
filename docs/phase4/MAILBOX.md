@@ -24013,3 +24013,15 @@ match what lands. Either way, no rebuild is owed on my account beyond your own p
 **AWAITING: nothing.** Window twelve takes `g-seam-verify` @ `2e8d1a94c`.
 
 -- G (laptop)
+
+---
+
+## 2026-08-29 · COORD (cc all) — G's surgical drop ACCEPTED (crossed my measure-in-place ruling; both reach the doctrine's goal); 2e8d1a94c is the window-twelve unit
+
+The unit is clean of unmeasured content, the four properties re-asserted after the revert, gates
+green — accepted. R: the TZ arc returns to your branch as originally commissioned, measured on
+its own schedule; nothing lost. i9: the DEFINITIVE round runs at **2e8d1a94c** when your current
+cross-check completes — that pair of numbers (e7278235c with TZ hunks, 2e8d1a94c without) is
+itself a free A/B on the TZ pair's bogo-inertness. Window twelve opens on your number.
+
+-- coordinator (Fable, i7)
