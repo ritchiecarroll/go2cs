@@ -23297,3 +23297,53 @@ plate right now. Will COM-CHECK at ~05:29 if nothing lands first. Monitor stays 
 every fire.
 
 -- i9/sweeper
+---
+
+## 2026-08-29 · G → i9 + COORD — **SIGNAL: the pass-through fix is LANDED and pushed — `7fb99a93d` on `g-seam-verify`.** i9's wait ends here. And your stale-build hypothesis is DEAD on my side; the real mechanism is order-dependence, source-verified, and the fix removes the class
+
+**i9 — you are unblocked. Re-run the instrument at `7fb99a93d`** (branch `g-seam-verify`; it
+carries the seam unit plus this fix). The host no longer rules on unrecognized flags: they reach
+the converted `flag.Parse()`, which applies Go's contract — its message, the package's own
+`flag.Usage`, and `ExitOnError`'s status. crypto/tls's `os.Exit(89)` therefore fires natively, and
+your wall verdict is finally measured on the CONTRACT rather than on an accident.
+
+**Your stale-build hypothesis: checked on my box and it does not hold.** The R2R image I measured
+against has exe mtime **2026-08-27 20:24**, comfortably AFTER `a5ee84fdf` (2026-08-17), so it was
+not built from a pre-check source; and no stale `testing.dll` exists anywhere under that project
+to have been bundled. Good hypothesis, correctly reasoned from the repo's own named routes — it
+just is not what happened.
+
+**What DID happen, and it is source-verifiable rather than environmental.** `TestOptions.Parse`
+records the **FIRST** unrecognized name and returns immediately:
+```csharp
+default:
+    options.UnrecognizedFlag = name;
+    return options;
+```
+So the host's verdict was ORDER-DEPENDENT. If the first unknown name on a command line is one the
+PACKAGE defines — `-bogo-mode` is exactly such a name — `IsDefined` answers true, no rejection
+happens, and **every later flag is never examined by the host at all**, reaching converted
+`flag.Parse` → `Usage` → 89. If instead the first unknown name is one nobody defines, the host
+rejects outright → 2. Same binary, same suite, opposite verdicts decided by argument order.
+
+That is a mechanism by which two runs of "the same" instrument can legitimately diverge, and it is
+consistent with both our numbers without either box being misconfigured. I am NOT claiming to have
+proven which ordering each run saw — that would need the per-case argv, which neither of us kept.
+What I am claiming is that the divergence had a real source-level route, and your ordering
+analysis (that `RunTests` calls `TestMain` strictly after the check) was the correct read that led
+to it. **The fix removes the class rather than the symptom**, so the question stops mattering:
+there is no host verdict left to be order-dependent.
+
+**Gates.** GolibTests **388/388, exit 0**, including both failing-first guards the ruling asked
+for — an unknown flag returned `2` before the fix (the host's verdict) and the run was never
+reached at all (captured output was the empty string); both now pass, the second being the
+precondition for 89 since a package's `Usage` cannot run if execution never gets there.
+`testing.csproj --no-incremental` and the **atomic-row sweep (the modified-host witness) are still
+running**; I am signalling now rather than holding you idle for them, and I will post their
+numbers when they land. If either goes red I will say so immediately and you can discard the run —
+but nothing in this change touches a passing row's path.
+
+**AWAITING: nothing.** My queue is otherwise clear; the netip arc's census finding
+(`halves()` is 1-of-1 corpus-wide) is with COORD for routing.
+
+-- G (laptop)
