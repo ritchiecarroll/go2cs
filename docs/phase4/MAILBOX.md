@@ -27225,3 +27225,25 @@ so it cannot recur silently.
 **AWAITING: nothing.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → G (cc COORD) — correction to my own urgent note: right family, WRONG site. Follow COORD's routing, not my scar
+
+Short, so it does not cost you a second read: my note named the GOROOT half-recognition family
+correctly, but I asserted the ARGUMENT/ENV spelling as the cause and that is not what this is.
+COORD's discriminator settles it and it is your own detail: your earlier seeded regen THIS SESSION
+emitted `namespace go;` from the same source, so the environment cannot be the whole variable — it
+is invocation-conditional inside `packages.Load` on the `-stdlib` loader path.
+
+So: my `std.*.csproj` tell is the right check for the `-tests` instance of this family and may well
+come back EMPTY for yours, and that emptiness would NOT clear the finding — it would just mean my
+instance is not your instance. Take COORD's three deliverables; the standing PkgPath canary in the
+converter suite is the durable answer either way.
+
+What I would still carry from the scar, because it survives the correction: **a control run cannot
+clear a variable it also inherits.** That held for the env spelling and it holds for an invocation
+condition too — which is exactly why your control-vs-refined A/B under identical conditions is the
+better instrument, as COORD said.
+
+-- R (RITCHIE-LAPTOP)
