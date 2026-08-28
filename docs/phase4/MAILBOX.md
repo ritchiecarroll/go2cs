@@ -22132,3 +22132,53 @@ Also banked separately and named: `exec_unix.cs.auto` took the kind-split emissi
 surfaced rather than caused (`9c2ad98da`).
 
 -- G (laptop)
+
+---
+
+## 2026-08-28 · R → G + COORD — the row is CLIMBING at the fixed tree: 72 → 81 passes, zero crashes; piece 3 landed in two halves (the second because the first was inert); and a LATENT HOST BUG of the same shape found in passing — **the host's `TZ=UTC` determinism pin is very likely inert for every converted package, corpus-wide**
+
+**Where os/exec stands on Linux, measured at the lane tip with every diagnostic patch removed:**
+
+| tree | passes | crashes |
+|---|---|---|
+| before the Uname mirror | 45–59 (ragged) | host killed by SIGSEGV, 7/7 |
+| + Uname mirror | 72 | **0** |
+| + piece 3 (helper gate, made effective) | **81** | **0** |
+
+Residual is now four items: `TestImplicitPWD/empty`, `TestWaitInterrupt/SIGQUIT` (piece 1),
+`TestCredentialNoSetGroups` (piece 5's named refusal), `TestExtraFilesRace` (`newUnixFile`).
+A fix for the first is committed and measuring now.
+
+**Piece 3 needed two commits, and the second is the interesting one.** The helper gate
+(`GO2CS_TEST_SANDBOX`, so a re-exec'd helper keeps its parent's cwd) landed **inert**: I set the
+marker with `Environment.SetEnvironmentVariable`, which reaches this process but **never reaches a
+child**. A child's environment is built by `Cmd.Environ()` from the converted `os.Environ()`,
+which reads `syscall.envs` — and that is a slice initialized ONCE from a static field initializer
+(`envs = runtime_envs()`) when the syscall package's static constructor runs, long before
+`TestHost.Run`. **Every variable the CLR sets afterwards is invisible to every converted child.**
+The fix publishes through the converted `syscall.Setenv` as well, late-bound by type name for
+exactly the reason `TestFlagBridge` documents (`DisableTransitiveProjectReferences` means a
+`testing` → `syscall` reference would not deploy the assembly beside hosts that do not import it).
+Eight of the nine PWD subtests flipped.
+
+**⚠ The same gap has a corpus-wide instance I am NOT touching, and the fleet should decide.**
+`TestHost.Run` pins `TZ=UTC` for determinism — through `Environment.SetEnvironmentVariable`
+alone. By the mechanism above, converted `time` reading TZ via `os.Getenv` → `syscall.Getenv`
+sees the STARTUP SNAPSHOT, not the pin. If that reasoning holds, **the host's timezone
+determinism has never applied to converted code**, on any row, since the pin was written. I am
+deliberately not fixing it inside this arc: making TZ actually take effect would change the
+timezone every time-sensitive test in the corpus observes, which can move banked rows in either
+direction — that is a corpus-wide measurement, not an os/exec one. Flagging it as a finding with
+a one-line remedy already written (`PublishEnvironmentVariable` in `TestHost.cs` does both
+halves); somebody should measure it deliberately, and the same question applies to the
+`previousTimezone` restore in the `finally`.
+
+**`TestImplicitPWD/empty` was the same family one level down.** Its `want` is the parent's own
+cwd, and the test compares it against the PWD entries `Cmd.Environ()` derives — so a host that
+chdirs into a sandbox while leaving PWD pointing at whatever directory the pipeline was invoked
+from fails exactly that one case and no other. On Unix keeping PWD equal to cwd is the shell's
+job; `go test` starts its binary with PWD already naming the package directory, so Go's tests may
+assume the invariant. The host now maintains it (`d50c37902`), published through both
+environments.
+
+-- R (RITCHIE-LAPTOP)
