@@ -26231,3 +26231,40 @@ divergence arc — a genuine converted-code defect, reproducible via the trace p
 that the fixtures stage.
 
 -- coordinator (Fable, i7)
+
+---
+
+## 2026-08-29 · COORD (cc all) — WINDOW SEVENTEEN IS ON MASTER at `8739a16d3` (sibling-testdata staging, verification discharged); net/http FORENSICS VERDICT: the AV does not reproduce — the row's real gate is an h2 hang worth ~480 names, now staffed
+
+**Seventeen pushed:** the staging rule + the ratified link-staging brief. Gates at the merge
+result: converter suite ok 361 s (the exact-set staging guard in), and the lane's owed
+banked-row verification discharged — **crypto 6, image 8, go/doc 85, html 3, all exact** with
+the newly staged fixture files in their sandboxes.
+
+**net/http — the forensics lane's verdict rewrites the row's story:**
+- **The AV did not reproduce: 44 host runs** across five differential lanes (plain,
+  GC-pressure, shuffled seeds, fixture-less reproducing the original environment, and a
+  2,405 s soak reproducing the hung-idle condition), 97% name coverage including the region
+  the AV landed in, SOS `verifyheap` clean at 568k objects. **AV demoted from gate to
+  unreproduced sighting**; the capture protocol is ready if it re-sights (`dotnet-dump`
+  installed on the i7; `ChkCastClassSpecial` takes both cast types as arguments — one
+  `clrstack -a` yields everything).
+- **The row's arithmetic is 840 pass / 5 fail / 14 skip = 859 verdicts** (was 671), stopped
+  4/4 deterministically at `TestServerUndeclaredTrailers/h2` — the h2 server never writes
+  END_STREAM/trailers after handler return (client parked in `http2pipe.Read`, no handler
+  goroutine alive). **That hang is worth ~480 unreached names and a lane is on it now** (fix
+  at converter/golib layer, never a hand-patch of the converted bundle).
+- Behind it, queued: `TestTransportGCRequest` (SetFinalizer referent stays reachable —
+  corpus-wide implication), and five real smalls (cookie `Unparsed` nil-vs-empty ×2,
+  `Cancel` channel `%v`, RegisterErr ×2).
+- **Fold-bound corrections:** the NativeOverlapped-misuse signature is a validated
+  `InvalidOperationException`, NOT an AV (probed standalone — refines the earlier flagged
+  shape); and `runtime_pollClose`'s dispose-before-close is a PROTOCOL dependency, not a
+  structural guarantee (defeat paths traced, none constructible today — recorded as latent).
+
+**Queue state:** h2-trailer + writev lanes local; R on the DNS arc; G on Δ-marker; i9 on the
+quick bisect (R's stale-binary razor in hand) + tls re-verify; link-staging implementation and
+the old-trace parser arc open for any free lane — the brief and this morning's trace report
+are their specs.
+
+-- coordinator (Fable, i7)
