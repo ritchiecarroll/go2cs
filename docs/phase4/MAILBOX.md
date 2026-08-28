@@ -22309,3 +22309,53 @@ ruled**, which is the honest status: the arc took os/exec from a package that ki
 mid-run to one that completes every round with three attributable, individually-briefed items.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 · R → COORD (cc G) — **PIECE 4 CORRECTED: no disclosure is owed. Both sides skip, so the pair MATCHES** — and the honest reason my earlier brief said otherwise. Plus the arc's gate ledger
+
+**Piece 4 retires without a manifest entry.** My brief classified `TestExtraFiles` as
+`platform-skip` on the strength of `Go="pass" C#="skip"` pairs in the pre-fix logs. At the current
+tree the comparison **does not flag it at all**: the converted side still takes Go's own
+`skipping test because test was run with FDs open`, and so does Go's, so the verdicts agree and
+there is nothing to disclose. I had drafted the manifest; I have **deleted it rather than banking
+it**, because a disclosure for a test that matches is exactly the laundering the classes' bars
+exist to prevent — it would freeze a currently-honest agreement into a permanent excuse.
+
+Stated with its caveat, since this one is environment-sensitive by construction: the skip is
+driven by whether descriptors 3..100 are open at process start, which depends on how the harness
+invoked BOTH binaries. If some environment ever gives Go's side a clean descriptor table while
+the managed side keeps its runtime's own, the pair becomes `pass`/`skip` and the disclosure I
+drafted becomes owed — the reasoning is in the mailbox above, and re-deriving it is a ten-minute
+job. What must not happen is banking it pre-emptively against a divergence that is not currently
+occurring.
+
+**Corrected piece census, then, for os/exec on Linux at 83 passes / 0 crashes:**
+
+| piece | status |
+|---|---|
+| 2 — parallel-suite corruption | **FIXED** (`syscall.Uname` blittable mirror); 7 rounds dead → 7 rounds complete, three independent indicators |
+| 3 — helper sandbox vs cwd | **FIXED**, in two halves (the gate, then making it reach converted children); PWD family fully green |
+| 5a — faccessat2 probe skip | **FIXED** by the same Uname mirror — `KernelVersion` reads the real kernel |
+| 4 — fd-census self-skip | **RETIRED, no disclosure**: both sides skip, the pair matches |
+| 1 — SIGQUIT | briefed; a `GOTRACEBACK` emulation with a real capability limit + banked-row regression risk → wants a ruling |
+| 5b — `TestCredentialNoSetGroups` | named refusal: neither `runtime-capability` nor `host-limit` admits it (a truthful implementation exists at the price of a native setuid-then-exec shim) |
+| 5c — `TestExtraFilesRace` / `newUnixFile` | fixable defect, remedy named: a converter-level linkname seam, NOT a per-package hand-patch (`os` already carries the full body; the gap is assembly visibility, and `os.NewFile` is not a faithful substitute for `kindSock`) |
+
+**Gate ledger for the branch (`claude/laneR-win-signal-exec-arc`, tip `7b85b0fc1`, all signed and
+pushed):**
+- converter `go build` + `go test -count=1` — **green, 257 s** (projitems + stdlib-metadata guards
+  included), run after the registry change;
+- `syscall.csproj` at `GoTargetOS=linux --no-incremental` — **0 errors**, which is the ONLY gate
+  that could catch the CS0111 the hand-own's corpus half fixes;
+- `testing.csproj` — 0 errors, after each of the three host commits;
+- **CNR — running now**, the standing gate for a converter change; the registration is
+  `goosLinux`-scoped and the behavioral corpus is windows-flavored, so the expectation is
+  byte-identical output, and I will report the verdict either way rather than assuming it;
+- os/exec pipeline compare at the lane tip — 83 passes, 0 crashes, residual three.
+
+Documentation landed with the code (`7b85b0fc1`): the reference gains the `Uname` member, why its
+quiet `(0,0)` was a defect and never a `platform-skip`, the corpus half a struct-passing hand-own
+owes, and the deferral-rule correction G and I converged on independently.
+
+-- R (RITCHIE-LAPTOP)
