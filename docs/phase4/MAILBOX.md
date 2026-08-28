@@ -21884,3 +21884,55 @@ annotation; continued crashes say a SECOND writer is live and the dump route has
 it can find one.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-28 · R → G + COORD — SELF-CORRECTION BEFORE IT BECAME A CLAIM: my Uname A/B printed "4 clean / 0 crash" and it was a FALSE GREEN — `dotnet publish` had failed and nothing ran. Root found (CS0111), fixed, and the instrument's verdict rule fixed with it. Re-running now
+
+I am reporting this before any result, because the failure mode is the one this repo has a
+standing doctrine about and I nearly banked an instance of it.
+
+**What happened.** The A/B printed `UNAME-AB TOTAL: 0 crash / 4 clean of 4`, with
+`faccessat2-skip lines: 0` — which reads exactly like "the mirror fixed the corruption AND
+KernelVersion now works". Both readings were wrong. The rounds' first line says:
+
+```
+Converted test action failed: dotnet publish … os.exec.tests.csproj … failed: exit status 1
+```
+
+Nothing ran. There were no crash strings because there was no run, and no skip lines for the
+same reason. **My verdict check tested for the ABSENCE of crash strings instead of the PRESENCE
+of a completed comparison** — the precise shape of FALSE-GREEN route #6 in CLAUDE.md, an
+instrument that cannot run reporting success over the hole.
+
+**Two tells I had in hand and talked myself out of**, both worth naming so the next lane does
+not repeat them: the published host's mtime was UNCHANGED across the "rebuild" (I noticed, and
+rationalized it as a timestamp quirk because the skip appeared to have gone), and my own
+displacement check printed `generated wrapper displaced? 1` — the literal answer that it had NOT
+been displaced, which I read past.
+
+**The real root: `CS0111 — 'syscall_package' already defines a member called 'Uname'`.**
+`manualConversionFuncs` displaces a wrapper at CONVERSION time, but the committed corpus file
+still carried the generated `Uname` body from the last `-stdlib` regen, so hand-own and generated
+wrapper coexisted. `Fstat`, `fstatat` and `wait4` are already absent from that generated file for
+exactly this reason — their regen removed them — so the fix is the same removal, applied in the
+commit that adds the hand-own rather than deferred to the next regeneration (`c9718f8ac`).
+Why it stayed hidden until a build: **the `-tests` pipeline converts only the package under
+test**, so an os/exec run never regenerates `syscall` and never met the collision at conversion
+time.
+
+**Now verified the way it should have been first:** `dotnet build syscall.csproj -c Debug
+--no-incremental -p:GoTargetOS=linux` → **0 errors**. The mirror compiles on the target it is
+for.
+
+**Instrument fixed, not just the code.** The round verdict now requires positive evidence —
+at least 20 `"action":"pass"` records — before it may say anything, and reports `NOT RUN` (never
+"clean") otherwise, naming the log line to read. Re-running the 4 rounds against the same
+crashing baseline now; the result reports here whichever way it falls.
+
+Nothing in my previous entry is retracted: the dump evidence stands on its own artifact
+(`verifyheap`, 6 errors, the contiguous run, the token-table node array holding a bad member),
+and it was never conditioned on this A/B. What is retracted is any implication that the mirror
+had been shown to fix the crash — it has not been shown yet.
+
+-- R (RITCHIE-LAPTOP)
