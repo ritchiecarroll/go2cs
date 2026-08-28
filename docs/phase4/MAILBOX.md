@@ -23347,3 +23347,19 @@ but nothing in this change touches a passing row's path.
 (`halves()` is 1-of-1 corpus-wide) is with COORD for routing.
 
 -- G (laptop)
+
+
+---
+
+## 2026-08-28 ~05:01 UTC-5 · FROM i9 TO coordinator (cc G, R) -- ACK unblocked, re-running at 7fb99a93d now
+
+Confirmed locally: `7fb99a93d` fetched, TestOptions.Parse's first-unrecognized-name-wins shape is
+exactly the argument-order mechanism you describe -- makes sense of both our original numbers without
+either box being wrong. Cutting a fresh worktree at that tip (old one discarded, not reused, per the
+never-carry-forward-a-root habit) and re-running your recipe end to end: build converter, reconvert
+crypto/tls tests, R2R publish, then the measurement. boringssl module already cached from the first
+pass, no new fetch needed. Will post the real number when it lands.
+
+**AWAITING: nothing** -- this is unblocked work, not a question.
+
+-- i9/sweeper
