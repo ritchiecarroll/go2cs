@@ -31336,3 +31336,85 @@ the net/http 90m re-run. Final-six reflect lane still implementing locally. The 
 divergence finding (every per-OS divergence sits in an OS-facing row) is noted for the board
 fold â€” it is the strongest evidence yet that the Linux frontier is a bounded set of named seams,
 not a diffuse tax.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — the `syscall` single: **the two OSes do not share a test population.** 22 divergences, THREE roots, and the "65/65" figure cannot mean what it looks like
+
+**watcher armed + wake loop armed.** Pre-travel single delivered. Full artifact saved off-lane:
+`laneR-syscall-comparison.json` (28 KB, complete Go/C# verdict maps + raw JSONL).
+
+### First, the headline — and it is not a regression
+
+**`syscall` on Windows and `syscall` on Linux are almost entirely DISJOINT suites.** The Linux run
+draws from **11 test files** — `exec_linux_test.go`, `syscall_linux_test.go`, `creds_test.go`,
+`exec_pdeathsig_test.go`, `syscall_ptrace_test.go`, `dirent_test.go`, `mmap_unix_test.go`,
+`rlimit_test.go`, `exec_unix_test.go`, `syscall_unix_test.go`, `syscall_test.go` — and **zero**
+`*_windows_test.go`. Build constraints make the split total.
+
+The roster's `syscall` **65** is, by its own description, the *Windows* surface: WTF-8/UTF-16
+surrogate round-trips, `EscapeArg` quoting, `StartupInfo`/handle inheritance, `TOKEN_ALL_ACCESS`,
+`Getwd` past `MAX_PATH`. **None of those 65 tests exists on Linux.** So a "syscall 65/65 on Linux"
+citation is measuring something the Linux suite does not contain — I would not treat it as a
+baseline this run contradicts; I would treat the two numbers as answers to different questions.
+
+**This row cannot take an ordinary `linux: N` annotation.** There is no "the same 65, measured on
+Linux". If you want the row annotated it needs a different convention — a distinct Linux population
+count, flagged as non-comparable — and that is your call, not mine to invent mid-sweep.
+
+### The run itself is sound — this is a real divergence set, not a partial run
+
+55 entries on each side, **0 Go-only, 0 C#-only**: nothing crashed, nothing was truncated, no
+alphabetical tail. 33 match, 22 diverge. Go spread `pass 40 / skip 15`; C# `pass 26 / fail 20 /
+skip 7 / infrastructure-error 2`.
+
+### 22 divergences → THREE roots (+1 residual)
+
+**Root 1 — the `posix_spawn` seam: 17 of 22.** Every one fails with a literal, deliberate refusal —
+`fork/exec …: posix_spawn seam: SysProcAttr.<field> is not supported` — across six fields:
+`Credential` (5), `Cloneflags` (4), `Unshareflags` (3), `Foreground` (2), `Ptrace` (1), `Chroot` (1),
+plus the `TestCloneNEWUSERAndRemap` parent. This is an **architectural limitation announcing
+itself**, not a defect discovered. Namespaces, credential-switching, ptrace, controlling-terminal and
+chroot all need a real `fork`+`exec` window that `posix_spawn` does not give you.
+
+**Root 2 — unimplemented cgo/assembly intrinsics: 2.** `runtime_BeforeExec` (→ `TestExec`) and
+`gettimeofday` (→ `TestGettimeofday`), both `NotImplementedException` thrown straight out of
+`PartialStubGenerator` stubs. These are the two the host classifies `infrastructure-error`, correctly.
+
+**Root 3 — SCM/ancillary data over unix sockets: 2.** `TestPassFD` and `TestSCMCredentials`, both
+`WriteMsgUnix: write unix : sendmsg: invalid argument`. Same shape as the fd-passing/credential
+ancillary path — plausibly one root, and the only one of the three that looks like an ordinary bug
+rather than a declared limit.
+
+**Residual — 1.** `TestDeathSignalSetuid`: "did not receive start from child". Probably downstream of
+root 1 (Pdeathsig + setuid), not independently rooted. Not claiming it.
+
+### A sub-finding worth its own line
+
+**8 of the 22 are `Go=skip` → `C#=fail`.** Go skips them (root-only guards, cgo-disabled guards); the
+C# side *attempts the exec and fails on the seam*. So those eight are not behavioural divergences at
+all — they are **skip guards not being reached**. If the guards evaluated as Go's do, 22 becomes 14
+and root 1 shrinks to the tests that genuinely exercise the seam. That is the cheapest real lead here.
+
+### Two errors of mine, disclosed
+
+1. **I queued `hash/maphash` into batch 7.** It carries a **60m floor**, so it would have starved a
+   16-package batch — and worse, when I launched the syscall single it ran **concurrently with the
+   maphash conversion in the same root**, which is the r41 "never let two conversions overlap"
+   hazard. Caught it by process listing, killed the batch-7 tree by verified parentage (refusing to
+   kill anything matching `syscall`), kept the single. The finding is unaffected — the batch-5 run
+   reported the same FAIL at 37s standalone, and this one at 32s, so it reproduces across an
+   overlapping and a non-overlapping run. **Long-floor packages need their own slot; my queue
+   derivation sorts by verdict count and is blind to the floors. I will exclude them explicitly.**
+2. **I reported the artifact as destroyed by my own `git clean`. It was not.** The file is
+   `go2cs_test_comparison.json` — a FILE; I probed for a `go2cs_test_comparison/` DIRECTORY, got
+   "absent", and believed it. Same shape as the false-RED near-miss I logged on provisioning: a
+   broken probe yielding a confident wrong conclusion. The 32s re-run was therefore unnecessary
+   (harmless, and it gave an independent reproduction). **My cleanup does still delete these
+   artifacts between packages** — `git clean -fd` removes an untracked directory wholesale even when
+   its contents are individually gitignored — so I am excluding the comparison artifacts from it.
+
+**Batch 7 to be relaunched minus the long-floor packages; 97 rows remain.** Travel this afternoon;
+everything completed is pushed and nothing merge-blocking parks on me.
+
+-- R (RITCHIE-LAPTOP)
