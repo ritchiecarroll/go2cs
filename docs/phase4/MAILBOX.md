@@ -29563,3 +29563,53 @@ Rooted: #3 (4, flagged), #5 (4, **awaiting routing**), #7 (2, spec complete, del
 **AWAITING: merge decision on `g-reflect-host`, routing on #5.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- reflect root #9 ROOTED: `(funcType)(nil)` converts the nil to the func's FIRST PARAMETER type
+
+**Watcher armed + wake loop armed.** 2 errors (CS0030), one root, two independent instances that
+prove each other.
+
+| Go | emitted | nil became |
+|---|---|---|
+| `(func(Point) int)(nil)` | `(Funcꓸꓸꓸ<Point, nint>)((Point)(default!))` | `(Point)` |
+| `(func(...int))(nil)` (`all_test.go:6375`) | `((Actionꓸꓸꓸ<nint>)((Actionꓸꓸꓸ<nint>)((nint)(default!))))` | `(nint)` |
+
+In both, the conversion's OPERAND — a bare `nil` — is rendered as a conversion to the func type's
+first **parameter** type, then cast to the delegate. `Point` and `nint` are exactly the first
+parameters of the two func types, which is what makes this one root rather than two coincidences.
+
+The correct operand is the typed nil for the delegate itself (`default!` / the delegate's nil form);
+converting to a parameter type is never right for `(funcType)(nil)`.
+
+Note the second instance also shows a redundant double cast
+(`(Actionꓸꓸꓸ<nint>)((Actionꓸꓸꓸ<nint>)…)`) — harmless, but a hint that the target type is being
+applied twice while the operand is resolved against the wrong node.
+
+### Remaining, fully rooted now
+
+The CS0030 bucket is exhausted: 2 named-array (#7), 2 func-nil (#9), 1 `ж<nint>` → `unsafe.Pointer`
+(unrooted — golib's `Pointer : ж<uintptr>`, and `convCallExpr` has adjacent handling I have not yet
+traced).
+
+### Arc, complete picture
+
+| root | errors | state |
+|---|---|---|
+| #1 nested anonymous lift accessibility | 3 | **banked** `5a31fc178` |
+| #2 lifted-interface embed field | 16 | **banked** `5a31fc178` |
+| #4 promotion dedupe vs ambiguity counter | 2 | **banked** `63a57ea0a` |
+| #6 complex64 literal suffix | 2 | **banked** `0f393196c` |
+| #3 `defer f(g())` multi-value spread | 4 | rooted — flagged, defer machinery |
+| #5 `len`/`cap` on `*[N]T` | 4 | rooted — **awaiting routing**, golib API |
+| #7 pointer-to-named-array | 2 | rooted, spec complete, deliberately unbanked |
+| #8 select temp un-renamed identifier | 1 | rooted |
+| **#9 `(funcType)(nil)` operand** | **2** | **rooted** |
+| unrooted | 4 | `ж<nint>`→Pointer, CS1503 ×4 residue, CS8917, CS1729, CS0029 |
+
+**23 of the original 37 are now banked or rooted with a named mechanism.**
+
+**AWAITING: merge decision on `g-reflect-host` @ `0f393196c`, routing on #5.**
+
+-- G (GRETCHEN-LAPTOP)
