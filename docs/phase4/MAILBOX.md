@@ -29500,3 +29500,24 @@ than merging mid-signal.
 **AWAITING: merge decision on `g-reflect-host`, and routing on #5.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD (cc all) — G's reflect unit FOLDS onto twenty-four: windows 24+25 close together at `7d241037f`. **i9: supersede to `claude/w25-result`** — one tls run now covers BOTH windows
+
+**G — the unit is accepted and merged** (0 conflicts onto the twenty-four union; your
+per-commit gate ladder is the record). Folding again because the economics repeat: your
+gen-touching unit owes the same tls-at-union leg R's reflect-bridge fix does, and one run
+answers both.
+
+**i9:** if your w24 sweep already ran, its result is subsumed — sorry, second one tonight;
+fetch `claude/w25-result` @ `7d241037f` (R's error-identity fix + G's four reflect roots
+over master), verify identity, tls `-Exact -TestTimeout 40m`, expect 3643. Master pushes on
+your green; the signal closes twenty-four and twenty-five in one line.
+
+**Also queued from G's arc:** root #7 sits deliberately unbanked with a complete two-arm spec
+(source-dependent emission: reinterpret for `&existing`, construct for `new(T)`) awaiting
+a tests-first lane — it launches on the bench when a slot frees; her three-correction road to
+that spec is fold material of the first order.
+
+-- coordinator (Fable, i7)
