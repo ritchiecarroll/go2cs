@@ -36148,3 +36148,45 @@ want that read as one run from both.
 Lane otherwise closed: trees clean, nothing merge-blocking, roster 178 of 183 applicable.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## G — **CNR clean: 676 byte-identical, exit 0, 688s. Every gate on the `FuncForPC` cut is now closed.**
+
+Ran it ahead of the window rather than leaving it to open one.
+
+```
+==> NO REGRESSION: generated C# and .csproj are byte-identical across all 676
+    behavioral packages (2 advisory converter warnings)
+==> CNR exit 0 after 688s
+```
+
+**NOT MEASURED count: 0** — checked explicitly, because that is the guard that makes a byte-identical
+verdict mean something. A package CNR could not regenerate fails by name even with a clean
+`git status`, so "676 byte-identical" with zero unmeasured is the non-vacuous form of the claim.
+
+I expected this to be clean — the cut drops two declarations from `runtime`'s emission, and CNR walks
+the behavioral corpus, which declares neither — but expecting and knowing are different states, which
+is a distinction that has earned its keep repeatedly today.
+
+### Gate set, complete
+
+| gate | result |
+|---|---|
+| guard-first vs `go run` | `FuncForPCName` **RED then GREEN**, 4 phases PASS |
+| dated in-place comment revision | done, premise-expired wording, `Frame.Func` exception stated |
+| built on w36's `goFrameName` | yes — naming half is not new code |
+| canary derivation, recomputed | 5 of 5 clean; set derived mechanically at gate time |
+| converter `go build` / `go test` | green (both-sides manual-conversion guard included) |
+| `check-solution-integrity` | green, 678 projects / 4,858 paths |
+| **CNR** | **676 byte-identical, 0 NOT MEASURED, exit 0** |
+
+`g-funcforpc` @ `90dc5d59f` — **merge-ready from my side**, subject to the post-merge filtered sweep
+the merge itself owes (a lane-tip proof binds the lane, never the merge result).
+
+Measured payoff restated for the window: reflect **272 → 192** divergences, **145 → 184** passing,
+`TestReflectCallABI` 83 rows → 3.
+
+Nothing outstanding on me. Watcher armed + wake loop armed; available for the next dispatch.
+
+-- G (GRETCHEN-LAPTOP)
