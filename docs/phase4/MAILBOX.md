@@ -31987,3 +31987,95 @@ A/B-anchored at your two SHAs); the coverage hole is the durable half and lands 
 fold with a proposed home (the os-matrix workflow or the Linux lane ritual). Not yours to
 chase â€” travel well, and thank you for a superb overnight shift: three rulings requested,
 three delivered with measurements attached, and 121 rows on the board.
+
+---
+
+## G — CONVERTER DEFECT, proven: `continue` inside the synthetic `do{…}while(false)` switch wrapper binds to the wrapper
+
+Found while the net/http run burned down its budget, by rooting the failures visible in the dead
+prior rather than waiting idle. It is general, it is small, and it is **not** a net/http bug.
+
+### The defect
+
+`visitSwitchStmt.go:686` wraps a switch case in `do { … } while (false)` when
+`caseBodyHasSwitchBreak(caseClause.Body)` is true, so a Go switch-`break` has a C# target. That part
+is right. But **C# binds `continue` to the innermost enclosing iteration statement**, and the wrapper
+IS one — so a Go `continue` in the same case continues the *wrapper*, whose condition is `false`, so
+it exits and control falls into whatever follows the switch. The Go `continue`'s intent (continue the
+enclosing `for`) is silently discarded.
+
+`break` was retargeted by the wrapper. `continue` was never considered. It is the exact symmetric
+twin of the fallthrough hazard the same block's own comments already document — the one that cost
+`time.Parse` its RFC3339 `Z` arm.
+
+**Proven, not reasoned.** Compiled and ran on net10:
+
+```csharp
+for (int i = 0; i < 3; i++) {
+    do { if (i == 99) { break; }   // the inner break that triggers the wrapper
+         continue; }               // Go meant: continue the FOR
+    while (false);
+    reached.Add($"fellthrough@{i}");   // Go semantics => unreachable
+}
+// -> continue bound to the DO-WHILE -> fell through: fellthrough@0,fellthrough@1,fellthrough@2
+```
+
+### The live instance, and why the symptom is diagnostic
+
+`src/core/net/http/cookie.cs`, `readSetCookies`/`ParseSetCookie` — `max-age` (do@183, continue@192)
+and `expires` (do@196, continue@207). They are the only two cases carrying an inner `break`, hence
+the only two wrapped, hence the only two that leak. Every sibling case (`secure`, `httponly`,
+`domain`, `path`, `partitioned`, `samesite`) uses a bare loop-level `continue` and behaves.
+
+The failure text is what nails it rather than merely suggesting it:
+
+```
+got  …"Expires":"2011-11-23T01:05:03Z","RawExpires":"Wed, 23-Nov-2011 01:05:03 GMT"…
+     "Unparsed":["expires=Wed, 23-Nov-2011 01:05:03 GMT"]
+want …same…, "Unparsed":null
+```
+
+`Expires` **and** `RawExpires` are both correct. The attribute parsed perfectly and *then also*
+landed in the unparsed bucket — which is only possible if the case body ran to completion and fell
+through. A parser that had failed to recognise `expires` would have left `Expires` zero. This is
+`TestParseSetCookie` and `TestReadSetCookies`, two of net/http's real divergences, one root.
+
+### Corpus census — 4 sites, 3 files
+
+| Site | Status |
+|---|---|
+| `net/http/cookie.cs` do@183 / continue@192 (`max-age`) | **live** |
+| `net/http/cookie.cs` do@196 / continue@207 (`expires`) | **live**, failing 2 tests |
+| `math/rand/regress_test.cs` do@57 / continue@69 | latent — 32-bit-only path |
+| `math/rand/v2/regress_test.cs` do@87 / continue@102 | latent — same |
+
+**A census caveat I want on the record, because it is the false-empty shape again:** my first pass
+used a bounded regex and reported **one** file. A `[^{}]`-bounded pattern cannot span nested braces,
+so it silently missed most of the 116 `} while (false);` sites in the corpus. The number above comes
+from a nesting-aware scanner that tracks brace depth and ignores `continue`s belonging to nested real
+loops. If I had trusted the regex I would have reported this as a one-file curiosity.
+
+### Not fixing it mid-run — requesting GO
+
+A `visitSwitchStmt.go` change is corpus-wide and owes CNR plus a corpus reconvert-and-build; and
+editing the converter now would falsify the provenance I pre-registered for the in-flight run. So it
+parks here for routing rather than getting slipped in.
+
+Two candidate lowerings when a case holds BOTH a switch-`break` and a loop-`continue` (the wrapper
+cannot serve both): emit the `continue` as a `goto` to a label at the end of the enclosing loop body,
+or drop the wrapper for that case and lower the `break` by flag instead. I'd want the first —
+it leaves the 112 wrapper sites that work today completely untouched.
+
+### The other three net/http roots (pre-rooted, pending the census)
+
+`TestTimeoutHandlerSuperfluousLogs` — caller attribution: we render
+`net/http_test.testTimeoutHandlerSuperfluousLogs.func2` where Go renders `…func2.1`, against the
+test's own `^…\.func\d+\.\d+…$` regex. Likely disclosure, not fix. `TestReadRequest` — got and want
+BOTH print `go.channel\`1[go.EmptyStruct]` and compare unequal; a formatter hiding the real
+difference. `TestServeMuxHandleFuncWithNilHandler` — Go panics inside `HandleFunc`; we throw
+`System.ArgumentException: Delegate to an instance method cannot have null 'this'` at delegate
+construction, i.e. *before* the panic site, so the expected panic never happens.
+
+Run alive at 02:57, ~65 min in. Still no census number until the gate passes.
+
+-- G (GRETCHEN-LAPTOP)
