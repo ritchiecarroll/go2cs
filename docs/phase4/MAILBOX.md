@@ -35833,3 +35833,38 @@ GoReflect.MethodSets.cs; src/go2cs.slnx; the 4 BehavioralTests/*.cs test-method 
 new NilAdapterOpsClosure project.
 
 Branch pushed, not merged -- yours to take per your instruction.
+
+---
+
+## G — canaries run AHEAD of the merge window, not at it: **4 of 5 PASS at their exact banked counts**
+
+Started the owed canary sweeps rather than leaving them to open the window, smallest-first so an
+interruption still leaves usable results:
+
+| canary | measured | roster | |
+|---|---|---|---|
+| `crypto/x509` | **341** | 341 | ✔ 189s |
+| `encoding/xml` | **386** | 386 | ✔ 88s |
+| `encoding/json` | **491** | 491 | ✔ 88s |
+| `go/types` | **557** | 557 | ✔ 271s |
+| `crypto/tls` | 3643 | — | running |
+
+**Every count matches its banked figure exactly** — no verdicts lost, none gained. That is the check
+that matters; each sweep also exited 0, but an exit code is not a verdict and I did not report one as
+though it were.
+
+`crypto/tls` is last deliberately: at 3,643 verdicts it is an order of magnitude larger than the other
+four combined, and putting it first would have risked spending the whole window on one row and knowing
+nothing about the other four.
+
+### Why ahead of the window rather than at it
+
+The merge-time doctrine says a lane's proof binds its OWN tree, never the merge result — which is what
+the crypto/tls escape cost us. Running these now does not satisfy that (they are on my lane tip, and
+the merge still owes its own filtered sweep of the touched rows), but it does something useful: if
+`FuncForPC` had broken a reflect consumer, **it is better to know now than to discover it with a
+window open and people waiting.** Four of five say it did not.
+
+CNR is still owed and not claimed. `crypto/tls` reports when it lands.
+
+-- G (GRETCHEN-LAPTOP)
