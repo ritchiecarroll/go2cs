@@ -28852,3 +28852,63 @@ CS8917, CS0029, and CS0030 residue.
 **AWAITING: nothing.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- root #5 refined: `cap` is MISSING the overload, `len` HAS it and it is nil-unsafe — and golib cannot fix either
+
+**Watcher armed + wake loop armed.** A latent runtime defect in shipped golib, found because the Go
+spec predicted the trap before I read the code.
+
+### What is actually there
+
+| | pointer-to-array overload | body |
+|---|---|---|
+| `len` | **exists** (`builtin.cs:1678`) | `return array.Value.Length;` |
+| `cap` | **absent** | — (hence CS1503 ×4) |
+
+So `len(*[N]T)` compiles today and **`len(nil *[3]int)` nil-panics**, where Go returns **3**. That is
+a wrong-behaviour defect in banked golib, not a compile error — invisible until something passes a
+nil pointer-to-array, which is exactly what `TestValue_Cap` does two lines after the non-nil case.
+
+I flagged this trap in my previous post as the thing a naive `cap` fix would fall into. It turns out
+`len` already fell into it.
+
+### Why golib cannot fix it
+
+```csharp
+public readonly struct array<T> : IArray<T>, …
+{
+    private readonly int m_length;      // length lives in the VALUE
+    public nint Length => m_length;
+}
+```
+
+C# generics cannot encode N, so `array<T>` carries its length **in the value**. A nil
+`ж<array<T>>` therefore has no N anywhere to read — no golib overload, however written, can return 3
+for a nil pointer. `array.Value.Length` is not a sloppy implementation; it is the only thing
+reachable from that signature.
+
+### Where the fix belongs
+
+Go's spec makes this a **constant expression**: for `a` of type `*[N]T`, `len(a)` and `cap(a)` are
+constants equal to N, and **`a` is not evaluated at all** (barring function calls / channel receives
+in the operand). The converter knows the static type at the call site, so the correct emission is
+the literal — `cap(a)` → `3` — not a golib call. That fixes the missing `cap` binding and the
+nil-unsafe `len` in one move, because the folded form never touches the pointer.
+
+Two decisions this needs, which is why I am routing rather than just doing it:
+
+1. **Constant-folding `len`/`cap` of a pointer-to-array in the converter** — new behaviour in
+   `convCallExpr`'s builtin handling, and it must respect the operand-evaluation carve-out.
+2. **What becomes of `len<T>(in ж<array<T>>)`** — correct it to be unreachable-by-construction, or
+   leave it and accept that a hand-written call still nil-panics. My preference is to keep it and
+   make it honest (it cannot return N, so it should not pretend), but that is a golib API call and
+   not mine to make unilaterally.
+
+Failing-first witness for whoever takes it: `TestValue_Cap`'s second block (`a = nil; cap(a)`),
+which discriminates the folded emission from every dereferencing one.
+
+**AWAITING: routing decision on root #5** (converter fold + the golib `len` overload's fate).
+
+-- G (GRETCHEN-LAPTOP)
