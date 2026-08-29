@@ -36558,3 +36558,65 @@ Get-DnsClientServerAddress -AddressFamily IPv6 | Select-Object -ExpandProperty S
 Result posts either way, with a checkpoint branch.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **net IS BANKED at 472 | 2, and the post-bank sweep reproduces it.** 187 / 215 = 87.0%, honest 89.9%
+
+**watcher armed + wake loop armed.** `claude/laneR-net-windows-bank` @ **`5f8005e2a`** — signed,
+pushed, **NOT merged**. Well inside 13:15.
+
+### The result
+
+```
+pipeline  -test-action all   status=validated  matched=true  exit 0
+          474 entries EACH side, ZERO orphans   472 matching | 2 disclosed | 44 agreeing skips
+
+post-bank sweep (the proof)   PASS  net  472  [312s]   sweep exit 0   1 pass / 0 fail
+```
+
+**Two consecutive clean runs at 472.** That second run is not ceremony — the oracle still flaps ~8%,
+and this row's STOP yesterday was caused by a count that moved between identical runs. One clean run
+banks it; two at the same count make it trustworthy.
+
+### It was the host, not the conversion — worth stating plainly
+
+Nothing about net's conversion changed between the STOP and the bank. Go's own reference failed 26
+DNS rows here until the `fec0:0:0:ffff::*` placeholders were replaced; after the owner's fix **Go's
+own failures went 26 → 1** and the row closed first attempt. The survivor is `TestLookupCNAME`,
+**stale upstream rather than environmental** (`www.iana.org` now CNAMEs to Cloudflare, so Go's
+expectation fails on any host) — and C# matches it, so it costs nothing.
+
+### Bank surface, classified rather than swept
+
+* **BANKED** — 54 test sources, host, `package_test_info`, `net.tests.csproj`, the two disclosures,
+  `net/testdata` (22 files, referenced by 2 test files), proof page, index entry, README badge,
+  roster row + header.
+* **RESTORED** — 23 production `.cs`, the standing `-tests`-closure re-flip. I read all 183 changed
+  lines: **148 are the `Δos` alias escape** (same shape as the documented `Δio`), the other 35 are
+  `windows/package_info.cs` position-map shifts plus two dropped `GoLocalName` records. Tree rests
+  on the `-stdlib` side; banking these would flip CNR.
+* **LEFT, with reasons** — `net/http/testdata` (3 files, referenced by ZERO of net's tests; belongs
+  to a package this row does not bank), and **`windows/lookup_windows.cs.auto`**. That last is a
+  genuine omission I am flagging rather than fixing here: `.cs.auto` review siblings ARE tracked by
+  convention (29 corpus-wide) and my DNS hand-own arc never banked this one. It wants a deliberate
+  bank, not a sweep-in during a different row's commit.
+
+### Header arithmetic — the guard was the calculator
+
+It named **all seven** stale numbers, including the one easiest to miss: **a Windows-only row raises
+the LINUX applicable denominator 185 → 186.** Final:
+
+```
+187 / 215 = 87.0%     25,816 matching     91 disclosed     honest 187 / 208 = 89.9%
+check-roster-format.ps1: 476 checks pass, exit 0
+```
+
+Roster inserted alphabetically between `mime/quotedprintable` and `net/http/fcgi`, **neighbours read
+back** — the adjacent-INSERT hazard, from my own near-miss yesterday.
+
+**Not composed against the two unmerged sibling banks**, per your instruction; the three-way header
+is yours at the banking window. Tree clean, nothing merge-blocking. Ready for the next single or the
+car, whichever comes first.
+
+-- R (RITCHIE-LAPTOP)
