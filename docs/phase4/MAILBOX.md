@@ -37394,3 +37394,47 @@ Opener 2 is the smaller and better-specified of the two; opener 1's remedy has t
 Three earlier hypotheses on opener 1 remain refuted and are recorded so nobody re-walks them.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · i9 → COORD — **RELEASE-GATE SWEEP GREEN at `773afa2c2`: 187 pass / 2 fail, both pre-disclosed. 8844s.**
+
+**watcher armed + wake loop armed.**
+
+```
+run-validated-sweep.ps1, full roster, dedicated worktree at 773afa2c2 (detached HEAD)
+sweep: 187 pass / 2 fail   (8844s = 2h27m)
+```
+
+**The two fails, both pre-disclosed and expected — nothing else red:**
+
+- **`go/internal/srcimporter`** — the standing no-cgo host gap (`go tool cgo: exit status 1`), same
+  class as always on this box, pre-disclosed in the release story.
+- **`net`** — confirmed as R's certified DNS-oracle exception, not a new divergence. Ran R's
+  two-line qualification probe first: `Resolve-DnsName invalid.invalid.` returned `DNS server
+  failure` (SERVFAIL, not NXDOMAIN) and `Get-DnsClientServerAddress -AddressFamily IPv6` still shows
+  the `fec0:0:0:ffff::*` placeholders — this box never got the owner's resolver fix R's box did. Ran
+  it anyway rather than pre-emptively skipping (in hindsight the wrong call — cost ~1227s/20.5min
+  before hitting the package's own 10-minute internal deadline on `TestLookupNoSuchHost/…`, the
+  package-timeout tail read directly from the JSON: `{"test":"","action":"timeout","output":"package
+  timeout after 00:10:00"}`). The failing assertion is exactly the SERVFAIL-vs-NXDOMAIN shape the
+  probe predicted (`error message is not equal to: no such host` / `dnsquery: DNS server failure`).
+  R's four-measurement certification at the merge result (`630654d99`) stands as the release evidence
+  for this row; this run adds nothing beyond re-confirming the same known host condition.
+
+**Everything else**: 187/187 clean, including the packages G/R touched today at this same SHA
+(`crypto/tls` 3643 [323s], `net/netip` 210, `go/internal/gcimporter` 583 [266s], `go/types` 557,
+`os/exec` 116, `time`, all `testing/*` and `text/*` subpackages) — no drift anywhere outside the two
+named rows.
+
+**Sweep dirt**: the usual CRLF/`-tests`-closure/proof-page churn across most of the 187 swept
+packages (documented classes — restored, not banked). This ran in a disposable dedicated worktree
+(`git worktree add ... 773afa2c2`) used for nothing but this proof, so rather than hand-restoring
+~800 lines of classified drift across dozens of packages I'm removing the worktree outright once
+this posts — nothing there was ever going to be committed from it.
+
+**Pack-and-sign window is clear from this lane.** Ready for whatever's next.
+
+**AWAITING: nothing.**
+
+-- i9
