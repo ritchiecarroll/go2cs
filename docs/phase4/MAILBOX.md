@@ -37334,3 +37334,63 @@ are permitted until the packs, so **say the word and it is a short guard-first p
 Opener 1 (`TestIsZero`) remains narrowed-not-rooted, three hypotheses eliminated.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — opener 1 (`TestIsZero`) **ROOTED**: a typed nil of kind **Func** or **UnsafePointer** loses its type in an interface
+
+The mechanical step I said was next, done: I replicated Go's 91-entry table with a per-entry
+`recover` so a panicking entry names its own index instead of aborting the run. Go's side prints
+nothing but `done`; ours prints three.
+
+```
+ 52  PANIC  reflect: call of reflect.Value.IsZero on zero Value
+ 88  PANIC  runtime error: invalid memory address or nil pointer dereference
+ 89  PANIC  reflect: call of reflect.Value.IsZero on zero Value
+```
+
+| # | entry |
+|---|---|
+| 52 | `{(func())(nil), true}` |
+| 88 | `{setField(struct{ _, a [256]S }{}, 0*unsafe.Sizeof(int64(0)), int64(1)), true}` |
+| 89 | `{(unsafe.Pointer)(nil), true}` |
+
+### The root, with its boundary measured in the same run
+
+```
+                          Go                     C#
+(func())(nil)             kind=func        ->    kind=invalid   X
+unsafe.Pointer(nil)       kind=unsafe.Ptr  ->    kind=invalid   X
+(chan string)(nil)        kind=chan        ->    kind=chan      ok
+(map[string]string)(nil)  kind=map         ->    kind=map       ok
+([]string)(nil)           kind=slice       ->    kind=slice     ok
+(*int)(nil)               kind=ptr         ->    kind=ptr       ok
+```
+
+**A typed nil keeps its dynamic type when boxed into an interface — except for the two kinds whose
+managed representation is a bare null**: a null `Delegate` (func) and a null pointer
+(`unsafe.Pointer`). chan/map/slice/ptr survive because golib gives them typed boxes that carry the
+type through boxing. `ValueOf` therefore answers the INVALID zero Value for those two, and `IsZero`
+panics on it — correctly, given what it was handed.
+
+The negative controls are in the same measurement rather than assumed, which is what makes this a
+boundary and not just an observation: four kinds prove the mechanism is representation-specific, not
+a general typed-nil failure.
+
+Entry 88 is separate — `setField` + `unsafe.Add` pointer arithmetic into a struct with blank fields,
+failing with a nil deref, and it belongs to the `Reinterpret`/unsafe family already routed.
+
+### Both openers now rooted
+
+| opener | root | remedy |
+|---|---|---|
+| `TestIsZero` | typed nil of kind Func/UnsafePointer boxes to a bare null, losing its type | carry the type for those two kinds at the interface boundary — golib/conv, NOT reflect |
+| `SetIterKey` | `MapIter` half hand-owned: `Next`/`Key`/`Value` managed, `SetIterKey`/`SetIterValue` still auto over Go's `hiter` | hand-own the two setters over the same `mapEnum`, preserving Go's two distinct panic texts |
+
+Neither cut — both touch hand-owned or golib territory and my practice today has been to route those.
+Opener 2 is the smaller and better-specified of the two; opener 1's remedy has the wider blast radius
+(it is an interface-boxing question, not a reflect one) and wants your call on where it belongs.
+
+Three earlier hypotheses on opener 1 remain refuted and are recorded so nobody re-walks them.
+
+-- G (GRETCHEN-LAPTOP)
