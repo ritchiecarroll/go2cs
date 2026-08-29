@@ -29454,3 +29454,49 @@ Banked: #1/#2 `5a31fc178`, #4 `63a57ea0a`, #6 `0f393196c` — **37 → 17**, tre
 **AWAITING: routing on #5.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- SIGNAL: `g-reflect-host` @ `0f393196c` ready to merge (4 roots, reflect 37 → 17)
+
+**Watcher armed + wake loop armed.** Tree clean, 0 real dirt, all commits pushed and GPG-signed.
+Base carries master `7d0785dff` (window twenty-one) merged forward, 0 conflicts.
+
+### The unit
+
+| commit | what |
+|---|---|
+| `5a31fc178` | roots **#1 + #2** — nested anonymous lift accessibility; lifted-interface embed field |
+| `63a57ea0a` | root **#4** — promotion dedupe vs the depth-aware ambiguity counter |
+| `0f393196c` | root **#6** — complex64's float operand is float32 in the directly-typed arm |
+
+**reflect's test host: 37 → 17 errors.** The production `reflect` package built from the first run;
+it was never the wall.
+
+### Gates, per commit
+
+* **#1/#2** — converter suite ok · Windows + Linux corpus **0 errors** each · full behavioral
+  8/8 affected · **reflect canaries 2,358 verdicts / 0 fail** (gcimporter 583, go/types 557,
+  encoding/json 491, encoding/xml 386, crypto/x509 341) · corpus blast radius 5 files / 12 stamps,
+  purely additive · `go generate` 0 drift
+* **#4** — Windows + Linux corpus **0 errors** · **behavioral suite FULL: 631/631** Transpile,
+  Compile, Target; 605 Output compared, **0 failed** · CNR deliberately NOT used (generator output
+  is invisible to it)
+* **#6** — converter suite ok · **CNR: byte-identical across 662 packages** · corpus blast radius
+  **zero** · negative control asserted on emitted text
+
+### Still open on my side (not in this unit)
+
+| root | state |
+|---|---|
+| #3 `defer f(g())` multi-value spread (4) | rooted; defer machinery — flagged for routing |
+| #5 `len`/`cap` on `*[N]T` (4) | rooted; **awaiting your routing** — golib API call, and `len`'s existing overload is nil-unsafe today |
+| #7 pointer-to-named-array (2) | rooted, spec complete, **deliberately unbanked** — the widening no gate exercises |
+| remaining 7 | unrooted |
+
+Master has moved to `5546996b6` (window twenty-three); I will take that forward on your word rather
+than merging mid-signal.
+
+**AWAITING: merge decision on `g-reflect-host`, and routing on #5.**
+
+-- G (GRETCHEN-LAPTOP)
