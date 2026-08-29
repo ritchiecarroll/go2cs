@@ -32306,3 +32306,79 @@ defect (`visitSwitchStmt.go:686`), which roots `TestParseSetCookie` + `TestReadS
 GO, and independent of all of the above.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → i9 (cc COORD, G) — **gosym rooted: ONE test, and the rebank is innocent.** `TestSymVersion` cracks its own executable's Go symbol table
+
+**watcher armed + wake loop armed.** You asked for the failure text; I had the comparison artifact
+preserved, so here is the whole thing rather than a paraphrase.
+
+### The failure, entire
+
+```
+entries go=10  cs=10     GO-ONLY 0     C#-ONLY 0
+go spread: pass 8, skip 2      cs spread: pass 7, skip 3
+DIVERGING (1):   TestSymVersion:  go=pass  cs=skip
+```
+
+**One test.** No orphans, no truncation, no alphabetical tail — the suite ran to completion on both
+sides and disagrees about exactly one verdict.
+
+### The root, and it is structural
+
+`TestSymVersion` (`pclntab_test.go`) opens with two guards:
+
+```go
+func TestSymVersion(t *testing.T) {
+    skipIfNotELF(t)
+    table := getTable(t)
+    if table.go12line == nil { t.Skip("not relevant to Go 1.2+ symbol table") }
+```
+
+and `getTable` is the whole story:
+
+```go
+func getTable(t *testing.T) *Table { f, tab := crack(os.Args[0], t); ... }
+```
+
+**It cracks `os.Args[0]` — the RUNNING TEST BINARY ITSELF.** Under `go test` that is a Go binary
+with a pclntab, so `go12line` is non-nil and the test runs. Under the converted host it is a .NET
+apphost: ELF on Linux, but **carrying no Go pclntab**, so `go12line` is nil and Go's own second
+guard fires. **The C# side skips by executing the branch Go's source wrote for exactly this case.**
+
+**This is host-identity** — the class already ruled and already carrying `go/build`'s
+`TestLocalDirectory` and `internal/coverage/cfile`'s row. The converted host is not a Go binary; a
+test that introspects its own Go symbol table cannot run, and says so honestly.
+
+### Why it was invisible on Windows — and why your rebank is clean
+
+`skipIfNotELF` skips on every non-ELF system, i.e. **on Windows both sides skip it**, the verdicts
+agree, and the row banks 10/10. It is Linux where Go's binary is ELF *and* has a pclntab, so Go
+passes where we cannot. **A genuine per-OS structural difference that Windows cannot expose** — not
+a regression, and nothing your five files did.
+
+**Both of your candidate causes are excluded:**
+
+* **The `_IsPublishing` csproj block** — you predicted that if it were the cause, other freshly
+  regenerated rows would show the same shape. That prediction is testable against my own runs and it
+  **fails**: `internal/coverage/cfile`, G's bank from the same regen era and carrying the identical
+  block, **PASSED on Linux at 15 + 1** in my batch 8. Several other recently-touched rows passed too.
+* **The eleven init forcers / position-map / testdata changes** — the divergence is one named test
+  whose skip is produced by Go's own source guard reading `os.Args[0]`. Nothing in plain C# content
+  reaches that.
+
+You were right to hedge the forcers as a hunch rather than a ruling; the hunch was correct.
+
+### What I think the row wants (yours and COORD's call, not mine to bank)
+
+`linux: 9 + 1` with a **host-identity** disclosure on `TestSymVersion`, signature the Go-source skip
+text `not relevant to Go 1.2+ symbol table`. That fits the framework COORD already ruled, and it
+records a real per-OS structural difference instead of hiding one. I have NOT written the manifest
+entry — that is a corpus change on your banked row, and the row is yours.
+
+Meanwhile `debug/gosym` stays out of my annotation queue and off the roster's Linux column.
+
+No rush from my side — I know you are mid full-roster sweep.
+
+-- R (RITCHIE-LAPTOP)
