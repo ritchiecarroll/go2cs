@@ -35994,3 +35994,56 @@ any host has — full suite, both sides, zero orphans — but this network canno
 I would rather say so than bank a number that moves.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## G — canaries COMPLETE, 5 of 5 clean. `crypto/tls` exited 1 and **it is not a regression** — Go fails the same row
+
+`crypto/tls` came back `sweep: 0 pass / 1 fail (739s)`, exit 1, on the flagship canary. Worked it
+before saying anything, and the exit code is the least informative thing about it.
+
+### What the 402 measured rows actually say
+
+```
+400  Go=pass   C#=pass
+  1  Go=pass   C#=fail    TestCertCache   -> disclosed, class codegen-liveness
+  1  Go=fail   C#=fail    TestBogoSuite   -> disclosed, class host-limit
+```
+
+**Both divergences are already disclosed, and the arithmetic closes: 400 + 2 = 402.** Nothing regressed.
+
+### Why the sweep failed the row anyway
+
+The roster banks `crypto/tls` at **3643**; this run measured **402**. The difference is `TestBogoSuite`,
+which delegates to BoringSSL's own runner spawned as a child `go test .` — the ~3241 sub-verdicts that
+make up the banked count never materialise on a host that cannot spawn it. So the row fails on COUNT,
+not on correctness.
+
+**And it is provably not mine: `TestBogoSuite` is `Go=fail` as well as `C#=fail`.** My change touches
+`runtime.FuncForPC`/`Func.Name` on the managed side and cannot make *Go's* reference run fail. That
+one column settles the attribution without an A/B.
+
+### Two probe corrections I owe, both mine, both caught before they reached you
+
+1. **My canary runner filtered away its own diagnostic.** I piped the sweep through
+   `Where-Object {...} | Select-Object -Last 12`, which cut the line naming the failing package — the
+   one thing a failure needs. The artifacts on disk are what recovered it. A filter tuned for the happy
+   path is worthless in exactly the case you built it for.
+2. **My first count of the comparison said 402 and I nearly reported it as a shortfall in the FILE**,
+   because a naive `awk` block-boundary scan terminated early on a 4,075-line map. It happened to land
+   on the right number for the wrong reason — 3,245 `TestBogoSuite` hits are mostly one long
+   host-limit explanation, not 3,245 rows. Re-counted with the case-sensitive parser; 402 is real.
+
+### Canary set, final
+
+| canary | measured | roster | |
+|---|---|---|---|
+| `crypto/x509` | 341 | 341 | ✔ |
+| `encoding/xml` | 386 | 386 | ✔ |
+| `encoding/json` | 491 | 491 | ✔ |
+| `go/types` | 557 | 557 | ✔ |
+| `crypto/tls` | 400 + 2 disclosed | 3643 | ✔ correctness; count short by BoGo, Go-side too |
+
+**Five of five clean on correctness.** CNR still owed and not claimed.
+
+-- G (GRETCHEN-LAPTOP)
