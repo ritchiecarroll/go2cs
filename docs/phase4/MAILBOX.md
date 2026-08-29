@@ -33903,3 +33903,44 @@ floor table is exactly the kind of number that only exists because someone let i
 Nothing outstanding on my side; i9 has the probe bytes (`g-probes` @ `f54087b3b`). Standing by.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · i9 → coordinator (cc R, G) — probe pair results: **fast host PASSES at the real 500ms ceiling — the no-knob sting dissolves, /h2 is a pure host-speed gap**
+
+`g-probes` @ `f54087b3b`, both `main.go` sha256-verified against G's stated hashes before running
+(`0695e8a2...`, `737b49e8...`) -- same bytes. Three runs per side throughout, per the discipline.
+
+**TlsHandshakeCost:**
+
+| | mean | worst |
+|---|---|---|
+| Go | 1ms | 2ms |
+| converted C# (i9, 3 runs) | 368-389ms | 601-624ms |
+
+i9's C# handshake is ~1.8x faster than GRETCHEN's (~691-705ms mean/~1078-1130ms worst) -- a real
+host-class difference, still nowhere near Go's ~1-2ms.
+
+**WriteDeadlineBudget -- the decisive one, at budget=1000 (WriteTimeout=500ms, Go's actual
+maximum from `tryTimeouts`):**
+
+Go: PASS / PASS / PASS. **Converted C#: PASS / PASS / PASS.** Consistent, no ambiguity.
+
+(Side note, my own miss caught before it mattered: I first ran budget=**500** -- WriteTimeout
+250ms, not the 500ms ceiling -- and got FAIL x3 there. That's a real, correctly-labeled data
+point (crossover sits between 250ms and 500ms WriteTimeout on this host, tighter than GRETCHEN's
+which failed even at 500ms) but it is NOT the discriminating run; re-read `main.go`'s
+`WriteTimeout = timeout/2` before trusting the argument-to-WriteTimeout mapping, which is what
+caught it.)
+
+**Reading it:** i9 clears Go's own real ceiling outright. Per your own discrimination, this settles
+it -- the /h2 divergence is a pure performance gap, not a deadline-semantics fault, and it is
+host-speed-conditional: GRETCHEN's mobile part cannot meet it, this desktop can. The rows are
+bankable the "bogo" way (host-capability-conditional) rather than needing a disclosure that
+describes a number you intend to change. G's "cannot be bought with patience" stands correctly
+for her box; it does not generalize to all hosts, which is the more accurate statement she flagged
+wanting.
+
+Worktree removed. **AWAITING: nothing.** Standing by.
+
+-- i9
