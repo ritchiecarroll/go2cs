@@ -35929,3 +35929,68 @@ Diffstat: 1 file changed, 12 insertions(+), 1 deletion(-) -- src/core/reflect/va
 Branch pushed, not merged. Standing by for routing -- happy to continue the descriptor-cache
 thread if you want it to stay with me, or hand it off if it belongs with whoever holds
 abi.Type/descriptor-interning work.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **net STOP-REPORT: the conversion is in excellent shape and the row still cannot bank.** Go's OWN reference run fails 26 on this host, unstably
+
+**watcher armed + wake loop armed.** `claude/laneR-net-windows-bank` @ **`62a804a09`**, signed,
+pushed, NOT merged. The manifest is committed because it is proven work; **the row is NOT banked.**
+
+### What succeeded — and it is a lot
+
+```
+474 entries on EACH side, ZERO orphans (no Go-only, no C#-only)
+run 1:  472 matching   2 diverging  <- EXACTLY the predicted alloc pair
+```
+
+**The expected residual was exactly right.** `TestAllocs` (71,000 allocs / 1,000 runs) and
+`TestTCPReadWriteAllocs` (35,000) — both authored as `alloc-profile` with the counter-line
+signature you named as the stable pin, and **proven to bind**: the re-run's comparison lists both
+under `disclosed`. Reasons grounded in mechanism, not label: both asserts are guarded by
+`SkipIfOptimizationOff` because Go's escape analysis is what reaches zero, and the converted path
+cannot (slice<T> over a heap T[], the Conn/PacketConn surface, per-call syscall marshalling). TCP's
+count being LOWER (35 vs 71) corroborates — no msghdr, no address value.
+
+### Why it does not bank — and it is not net
+
+**Go's own reference run fails 26 tests here**, all one family: `TestLookupNoSuchHost` (25) +
+`TestLookupCNAME` (1), every one a DNS lookup.
+
+```
+lookup invalid.invalid.: dnsquery: DNS server failure.          <- SERVFAIL, not NXDOMAIN
+IsNotFound is set to false                                       <- Go cannot classify SERVFAIL
+lookup invalid.invalid. on [fe80::...]:53: server misbehaving    <- IPv6 link-local resolver
+"the timeout period expired"                                     <- intermittent
+TestLookupCNAME: got www.iana.org.cdn.cloudflare.net.; want icann.org.   <- STALE UPSTREAM, not env
+```
+
+**The intermittency is the disqualifier, and it is measured, not feared.** Run 1: 2 divergences.
+Run 2, identical command: **3** — the extra being
+`TestLookupNoSuchHost/LookupHost_NXDOMAIN/default_resolver` flipping to **go=fail cs=PASS**, the
+opposite direction, having MATCHED in run 1. **A row whose count moves between identical runs cannot
+be banked at a count.** Banking run 1's 472 would have been banking a coin flip.
+
+### A hypothesis of mine, refuted mid-diagnosis
+
+I predicted **DNS hijacking** (resolver answering for nonexistent names) and probed it: `.invalid`
+and a random `.com` both returned **NXDOMAIN correctly**. Refuted. The real mechanism is SERVFAIL
+plus timeouts on `invalid.invalid.` *specifically*, and a misbehaving IPv6 link-local resolver.
+Directionally right, mechanically wrong — **my probe was too coarse because it did not use the name
+the test uses**. Recording it because the next attempt should not re-derive it.
+
+Note also that `TestLookupCNAME` is NOT environmental: `www.iana.org` now CNAMEs to Cloudflare, so
+that expectation is stale upstream and would fail on any host.
+
+### What the next attempt needs
+
+A host whose resolver returns **NXDOMAIN (not SERVFAIL)** for `invalid.invalid.` and has no
+misbehaving link-local DNS server — **or** a ruling on whether the DNS-lookup family is
+environment-disclosable. **The alloc pair is settled either way**: identical across both runs,
+disclosures written and proven to bind, so whoever gets a conforming host starts from 472 + 2.
+
+The dispatch's premise was that my box was the only one that could close this. It got closer than
+any host has — full suite, both sides, zero orphans — but this network cannot close it either, and
+I would rather say so than bank a number that moves.
+
+-- R (RITCHIE-LAPTOP)
