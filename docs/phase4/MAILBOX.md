@@ -37162,3 +37162,62 @@ Thanks for a good day's coordinating — the 90% bar and net aboard it.
 Your closing line about the eight probes is going in the fold as the day's epigraph. Safe
 drive tomorrow â€” the release you built ships this afternoon, and the frontier you mapped will
 be waiting, named and bucketed, wherever you open the lid next.
+
+---
+
+## G — **DOUBLE RE-CENSUS AT THE RC `773afa2c2`, both MEASURED.** net/http 18 → **9**, reflect **192** confirmed
+
+Both gated, both diagnostic-only, neither banking anything.
+
+### net/http — post-cookie + post-ordinals
+
+| | this morning | **RC** |
+|---|---|---|
+| divergences | 18 / 10 parents | **9 / 4 parents** |
+| `Go=pass C#=pass` | — | **1317** |
+| `Go=skip C#=skip` | — | 19 |
+| go / c# names | 1345 / 1345 | **1345 / 1345** |
+
+**Union is 1345 — ZERO orphan rows.** Every naming divergence is gone; the entire census is now
+`Go=pass C#=fail` and nothing else. Closed since this morning: the cookie pair
+(`TestParseSetCookie`, `TestReadSetCookies` — the `continue`-wrapper defect), `TestRegisterErr` and
+`TestServeMuxHandleFuncWithNilHandler` (i9's chips), and `TestWriteHeaderNoCodeCheck` + `_h1hijack`.
+
+**The nine remaining, all four parents:**
+
+* `TestReadRequest` (1) — i9 has a fix on `claude/i9-ctor-initializers` @ `0ef998bfa`, unmerged
+* `TestTimeoutHandlerSuperfluousLogs` (4) — caller attribution, **not** fixed by ordinals; see below
+* `TestWriteDeadlineEnforcedPerStream/h2` (2) + `TestWriteDeadlineExtendedOnNewRequest/h2` (2) —
+  the TLS handshake performance gap, host-speed-conditional, already ruled and on the perf queue
+
+### The ordinals result is SPLIT, and the split confirms an earlier read
+
+I reported that family as one root with **two symptoms**: an off-by-one (`func0` where Go says
+`func1`) and a missing NESTED form (`func2` where Go says `func2.1`). The RC settles it:
+
+* **`TestWriteHeaderNoCodeCheck` + `_h1hijack` — FIXED** by ordinals. That was the off-by-one.
+* **`TestTimeoutHandlerSuperfluousLogs` — still failing.** That is the nested form, and it needs the
+  `funcN.M` spelling, not just a corrected N.
+
+So the ordinals lane closed 3 of that family's 7 rows and the nested-literal half is a distinct
+remainder. Not a defect in their fix — a second symptom I named before either was cut, now separated
+by measurement rather than argument.
+
+### reflect — post-FuncForPC, measured not projected
+
+**192 divergences / 87 parents, 184 passing**, 325 started / 325 terminal / **0 in flight**, gate
+QUOTABLE. **Identical in every cell to the figure I measured on my own branch**, which is the point of
+re-running it here: the branch number and the RC number are now the same number, and the RC is the one
+that ships.
+
+### One instrument note
+
+net/http's `results.json` was **stale** (03:23) while its comparison was fresh (13:30) — my tail gate
+caught it and refused the census, correctly. I gated on the captured stream instead (0 timeouts,
+package-level `run -> fail`). reflect's results.json WAS fresh in the same session, so the `--run`
+non-write reproduces for one package and not the other — consistent with my withdrawal of that
+finding's generality, and still unrooted.
+
+Proceeding to the reflect tail, largest-first, with the two named panics as openers. Branches only.
+
+-- G (GRETCHEN-LAPTOP)
