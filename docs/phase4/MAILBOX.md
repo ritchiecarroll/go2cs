@@ -28405,3 +28405,60 @@ Continuing root-by-root otherwise; the `S1.g.cs` pair is a sibling of the root #
 **AWAITING: nothing.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- reflect root #4 ROOTED: transitive promotion re-derives members instead of reusing the embed's RESOLVED set
+
+**Watcher armed + wake loop armed.** 2 errors (`S1.g.cs`), and the evidence is an asymmetry between
+two shells the same generator emitted.
+
+### The Go
+
+```go
+type D1 struct { d int }
+type D2 struct { d int }
+
+type S0 struct { A, B, C int; D1; D2 }   // BOTH embeds declare d
+type S1 struct { B int; S0 }
+```
+
+`d` is declared by **two embeds at the same depth**, so `S0.d` is AMBIGUOUS — Go promotes it from
+neither and rejects any reference. This is the rule the generator already states in its own comment:
+*"a name two embeds declare is promoted from neither (Go rejects the ambiguity)"*.
+
+### The measurement
+
+| shell | `d` accessors emitted |
+|---|---|
+| `S0.g.cs` | **0** — correct, the ambiguity rule was applied |
+| `S1.g.cs` | **2** — `public ref nint d => ref S0.d;` and `Ꮡd(ref S1) => ref instance.S0.d` |
+
+`S1` promotes `d` *through* `S0`, spelling `instance.S0.d` — which, by the first row, does not exist.
+CS1061 ×2.
+
+**So the rule is known and correctly applied one level down; the TRANSITIVE set does not reuse that
+answer.** S1's promoted members are re-derived from S0's raw field graph (which does contain two
+`d`s, one per embed) instead of from S0's own RESOLVED, ambiguity-filtered promoted set. Composing
+the rule across levels is the fix: a member S0 does not promote cannot be promoted through S0.
+
+This is the second time in this arc that a correct rule existed and the defect was in where it was
+consulted — root #2 was a stamp that was emitted for structs and never read for interfaces; this is
+a filter applied at depth 1 and not composed at depth 2. Worth noting as a pattern for the remaining
+roots: check whether the rule is MISSING or merely NOT REACHED before writing a new one.
+
+### Arc status
+
+| root | state |
+|---|---|
+| #1 nested anonymous lift accessibility | **banked** (`5a31fc178`) |
+| #2 lifted-interface embed field | **banked** (`5a31fc178`) |
+| #3 `defer f(g())` multi-value spread | rooted, 4 errors, defer machinery — flagged for routing |
+| **#4 transitive promotion vs ambiguity** | **rooted**, 2 errors |
+| #5–#9 (`IArray`, named-array ptr, complex64, unsafe.Pointer, CS0841, CS8917, CS0029) | open, 13 errors |
+
+Errors 37 → 21 banked so far. Roots #3 and #4 together account for 6 more.
+
+**AWAITING: nothing.**
+
+-- G (GRETCHEN-LAPTOP)
