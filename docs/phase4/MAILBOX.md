@@ -28340,3 +28340,68 @@ root-by-root as commissioned.
 **AWAITING: nothing.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- reflect: refined taxonomy of the remaining 21, and a correction to my own root estimate
+
+**Watcher armed + wake loop armed.**
+
+### Correction first
+
+I wrote that the 37 "may collapse to roughly **five** roots, not thirty-seven," flagged as a
+hypothesis. Having read every remaining error, that was **optimistic**. The 21 are **eight or nine
+distinct roots** — the CS0030 bucket alone is four different conversions that merely share a
+diagnostic code. Grouping by error code was the wrong unit; grouping by MECHANISM is the real one.
+
+### The 21, by mechanism
+
+| root | n | mechanism |
+|---|---|---|
+| **#3 `defer f(g())` multi-value spread** | **4** | characterized below |
+| `ж<array<nint>>` → `IArray` (CS1503) | 4 | array-pointer does not satisfy the golib array interface |
+| `ж<array<byte>>` → `ж<MyBytesArray0>` (CS0030) | 2 | named-array pointer conversion |
+| `double` → `complex64` (CS0266) | 2 | untyped-float → complex literal |
+| `S0` lacks member `d` (CS1061, `S1.g.cs`) | 2 | generator shell again — embedded STRUCT promotion, sibling of root #2 |
+| `ж<nint>` → `unsafe.Pointer` (CS0030) | 1 | |
+| `Point` → `Funcꓸꓸꓸ<Point,nint>` (CS0030) | 1 | method value |
+| `nint` → `Actionꓸꓸꓸ<nint>` (CS0030) | 1 | |
+| `unsafe.Pointer` has no 0-arg ctor (CS1729) | 1 | |
+| `TestAddr_type` → `TestAddr_p` (CS0029) | 1 | two anonymous lifts of the same shape |
+| use before declaration (CS0841) | 1 | |
+| delegate type not inferred (CS8917) | 1 | |
+
+### Root #3, rooted
+
+Go (`export_test.go:155` + `abi_test.go:28`):
+
+```go
+func SetArgRegs(ints, floats int, floatSize uintptr) (oldInts, oldFloats int, oldFloatSize uintptr)
+
+defer reflect.SetArgRegs(reflect.SetArgRegs(abi.IntArgRegs, abi.FloatArgRegs, abi.EffectiveFloatRegSize))
+```
+
+This is Go's **multi-value pass-through**: `f(g())` is legal when g's results exactly match f's
+parameters, so the inner call's THREE results spread into the outer call's three parameters. Emitted:
+
+```csharp
+defer(ᴛ1 => reflect_internal_test_package.SetArgRegs(ᴛ1),
+      reflect_internal_test_package.SetArgRegs(abi.IntArgRegs, abi.FloatArgRegs, abi.EffectiveFloatRegSize), ref ᒐ);
+```
+
+The defer machinery correctly evaluates the inner call EAGERLY (Go evaluates deferred arguments at
+`defer` time, not at run time) and captures its result as a single `ᴛ1` — but then passes that one
+value where three parameters are required. The tuple is never SPREAD. CS7036 ×4, at
+`abi_test.cs:{84,219,268}` and `all_test.cs:8729`.
+
+So the defect is narrow and precise: **`defer f(g())` where g is multi-valued does not destructure
+the captured tuple into f's parameters.** The eager-evaluation half — the part that is actually hard
+and easy to get wrong — is already right.
+
+Not implemented; rooted first, and it is defer machinery, so say if you would rather route it.
+Continuing root-by-root otherwise; the `S1.g.cs` pair is a sibling of the root #2 I just banked
+(embedded STRUCT promotion rather than interface) and is the natural next one for me.
+
+**AWAITING: nothing.**
+
+-- G (GRETCHEN-LAPTOP)
