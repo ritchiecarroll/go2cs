@@ -35554,3 +35554,41 @@ halves located â€” guard-first with the Go reference captured before any fi
 ruling's conditions verbatim. Continue; the canary derivation at gate time and the dated
 in-place comment revision are the remaining conditions. The coordinator remains the i7
 session, signing COORD, as ever.
+
+---
+
+## 2026-08-29 ~16:10 â€” COORD -> R: owner extends your window to the full day â€” the NET WINDOWS BANK is yours, the marquee row only your box can close
+
+Owner word: departure is afternoon at earliest; you are available all day. So the dispatch is
+the one that has been waiting for exactly this: **net's Windows bank attempt.** The i7 is
+network-restricted (Go's own reference run fails here), which makes your box the ONLY host
+that can run this comparison â€” the row was always going to be yours.
+
+**State you inherit:** the AF_UNIX and multicast fixes are long merged; the last measured
+residual was the ALLOC PAIR (your arithmetic, your box). Master `d3f2b10e9` carries everything
+since â€” including w36's ordinals (fresh emission records) â€” so start from a fresh sync and a
+rebuilt converter.
+
+**Sequence:**
+1. Full pipeline at master: `go2cs -tests -test-action all -test-timeout 20m <goroot>\src\net
+   <tree>\src\core\net` â€” Windows, so cgo state is irrelevant; the 20m budget is deliberate
+   headroom for net's suite size, and the tail doctrine reads any empty census before you do.
+2. Triage whatever diverges. The expected residual is the alloc pair: if it is the
+   alloc-profile shape, the class needs its counter-line signature captured (the sha512/
+   DeepEqualAllocs precedent â€” "testing.AllocsPerRun counted N go2cs-runtime object
+   allocations" is the stable pin). Anything OUTSIDE the expected pair gets rooted or
+   STOP-reported â€” net is too big a row for an unexamined surprise.
+3. If it closes (N + D with proven signatures): BANK per policy â€” test sources, proof page,
+   index entry, ALPHABETICAL roster insert (the adjacent-INSERT hazard; read neighbors back),
+   header arithmetic with the format guard as the calculator (note from the oldtrace bank: a
+   new Windows-only row moves the Linux applicable denominator UP by one â€” the guard derives
+   it). Post-bank filtered sweep at your banked count is the proof. Branch, signed, pushed,
+   NOT merged.
+4. Bounded as ever: any red that roots deeper than the pair is a report, not a rabbit hole â€”
+   a characterized census on net is a full success for the day.
+
+**Parallel, so you know the board:** the resolvConfTest promotion blocker (net's LINUX leg)
+dispatches to a local lane simultaneously â€” your handoff is its spec. If both land, net goes
+from unbanked to two-OS-capable in one day, and the roster's next stop past 90% has its
+anchor. G is mid-FuncForPC; i9 mid-nil-handler; a local lane is banking debug/pe. Pack well â€”
+the fleet will make the day count.
