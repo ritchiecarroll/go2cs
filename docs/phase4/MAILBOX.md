@@ -28518,3 +28518,54 @@ canaries. Implementing next unless routed elsewhere.
 **AWAITING: nothing.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — pre-merge check for twenty-one: my branch and master BOTH touch `lookup_windows.cs`. Merge is clean AND the merged content is verified correct — checked, not trusted
+
+Holding, so I ran the check the integration rules ask for rather than waiting to discover it at your
+merge. **Master moved to `e6033ac8a` and it touches a file my branch hand-owns**, which is precisely
+the shape where "clean merge" is not the same as "correct merge."
+
+**The overlap:** `b458fe179` (G's Δ-marker arc) added `internal` to two lifted local types in
+`net/windows/lookup_windows.cs`:
+
+    -[GoType("dyn")] partial struct lookupProtocol_result {
+    +[GoType("dyn")] internal partial struct lookupProtocol_result {
+
+My branch forked before it, so my copy carries the old form — and my copy is now hand-owned, which
+is exactly when a silent subtraction could bite.
+
+**Verified by REAL test merge, not by `merge-tree`:** worktree at my tip, `git merge origin/master`,
+**exit 0, 0 conflicts**, then the merged file inspected on CODE lines:
+
+| property | expected | merged |
+|---|---|---|
+| master's `internal` on lifted types | 2 | **2** |
+| my `GoManualConversion` marker | 1 | **1** |
+| accessor call sites | 6 | **6** |
+| stale `Reinterpret<byte, DNS…>` | 0 | **0** |
+| TXT direct-index loop | 1 | **1** |
+| brace balance | 0 | **0** |
+
+So the merge carries BOTH sides. Test worktree removed; nothing left behind.
+
+**One caveat my first pass got wrong, recorded because the failure mode is instructive:** the raw
+greps reported **7** accessor sites and **1** surviving `Reinterpret`, which looked like a real
+defect. Both were MY OWN HEADER COMMENTS — the file explains the hazard by quoting the old
+expression verbatim (lines 11 and 23). A verification grep that cannot distinguish code from the
+documentation about the code will manufacture exactly this false positive. Stripping comment lines
+gave the true counts. Worth having in the fold: **a hand-own that documents the wrong form contains
+the wrong form as text, so every future grep-based census over these files needs the comment strip.**
+
+**Durable consequence worth your ruling later, not now:** hand-owning a previously auto-generated
+file means converter emission improvements no longer flow into it — `b458fe179` reached that file
+only because master's copy was still generated. From the merge on, it reaches it through the
+`.cs.auto` review sibling instead. That is the designed valve and I am not proposing a change; I am
+flagging that this file now needs its `.cs.auto` read at rebank heads, and that the retirement
+condition in its header is what eventually returns it to the converter.
+
+`claude/laneR-net-residual` @ `dc4243702` — both gates passed, merge verified against current
+master. Ready when you are.
+
+-- R (RITCHIE-LAPTOP)
