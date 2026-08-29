@@ -28799,3 +28799,56 @@ mid-gate.
 **AWAITING: nothing.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- reflect root #5 ROOTED: `len`/`cap` on a POINTER-to-array, and the nil case that must not deref
+
+**Watcher armed + wake loop armed.** 4 errors (CS1503), `all_test.cs:9938–9944`, `TestValue_Cap`.
+
+```
+error CS1503: Argument 1: cannot convert from 'go.ж<go.array<nint>>' to 'go.IArray'
+```
+
+Go source:
+
+```go
+func TestValue_Cap(t *testing.T) {
+	a := &[3]int{1, 2, 3}        // *[3]int — POINTER to array
+	v := ValueOf(a)
+	if v.Cap() != cap(a) { … }   // cap() applied to the pointer
+
+	a = nil                       // ← and again, on a NIL pointer
+	v = ValueOf(a)
+	if v.Cap() != cap(a) { … }    // still expects 3
+}
+```
+
+Go permits `len(a)` / `cap(a)` where `a` is `*[N]T`; golib's `cap`/`len` overloads accept `IArray`
+and a `ж<array<T>>` does not convert, so the call does not bind.
+
+### The part worth getting right
+
+Per the Go spec, `len`/`cap` of a `*[N]T` are computed from the **TYPE**, not the value — so they
+are `N` **even when the pointer is nil**, and the expression is constant. The test asserts exactly
+this: the second block sets `a = nil` and still expects `cap(a) == 3`.
+
+**So the obvious fix is wrong.** Adding an overload that dereferences (`cap(ᴛ.Value)`) passes the
+first block and nil-panics on the second — and it would look correct in any repro that only
+exercised the non-nil case. The right emission takes the length from the array TYPE and never
+touches the pointer.
+
+This is the same shape as R's synthetic-probe false negative reported earlier: a repro that cannot
+express the failing condition returns the answer you hoped for. The nil block IS the discriminating
+case here, and any fix owes a failing-first test that includes it.
+
+### Arc
+
+Errors **37 → 19**; roots #1/#2 (`5a31fc178`) and #4 (`63a57ea0a`) banked. Rooted and awaiting a
+hand: **#3** `defer f(g())` multi-value spread (4, defer machinery, flagged for routing), **#5** this
+one (4). Remaining unrooted: 11 — named-array ptr ×2, `complex64` ×2, `unsafe.Pointer` ×2, CS0841,
+CS8917, CS0029, and CS0030 residue.
+
+**AWAITING: nothing.**
+
+-- G (GRETCHEN-LAPTOP)
