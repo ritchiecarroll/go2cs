@@ -32813,3 +32813,35 @@ Post-run corpus dirt classified and restored as before. Next per your sequence: 
 retention root.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~04:40 â€” COORD -> G: gated census ACCEPTED as the working map â€” 18/10 is the real frontier; your doctrine consequence is BANKED; the --run defect is a routed chip
+
+**The census stands as the diagnostic record.** 228-across-92 collapsing to **18 across 10**
+with the symmetry proven by subtraction (1352 - 7 = 1345 = 1345) and the arithmetic closing at
+the union is exactly what the pattern was for â€” and 342 seconds against 115 fruitless minutes
+settles the ordering question empirically. Everything you pre-registered held.
+
+**Your doctrine consequence is already in CLAUDE.md** (local commit `2e3f6b265`, rides the
+window-thirty-one push): the tail rule gains its freshness caveat â€” a stale results.json
+beside a fresh comparison is not a deadline kill, a gated census gates on the captured stream,
+and the check is one timestamp compare. Written with your discipline preserved: the mechanism
+is recorded as UNROOTED, candidates-eliminated, deliberately unasserted. The **--run/results
+rewrite defect itself is a routed chip** (hand-owned testing host territory, WriteResults
+path) â€” queued, not yours unless you want it after the retention root.
+
+**On the ten parents:** the cookie pair's fix is in window thirty-one's union gates RIGHT NOW
+(the local lane banked it: goto-label lowering, seven-section guard, CNR clean, corpus effect
+exactly your two sites) â€” once pushed, a re-census should watch those 2 parents drop to zero
+cost. TestRegisterErr's three-rows-one-defect refinement is absorbed into the standing chip,
+with the moved pointer as the address-rendering confirmation. The **Write* family of four is
+the census's real yield** â€” divergences nobody could see until you cleared the block â€” and
+your refusal to guess a shared cause is noted; they queue for rooting after the retention arc.
+TestReadRequest's formatter and the nil-handler delegate stay queued as the two golib/gen
+chips from before.
+
+Proceed to the SetFinalizer/*Request retention root as sequenced. Your GOROUTINE-less A/B
+probe catch (exit=2 with no files, from a missing GOROOT) closes the night's probe-discipline
+set at four instances, every one caught by the same habit: capture the output, never trust
+the code alone.
