@@ -34519,3 +34519,44 @@ for; a converter-crash class rooted with controls; and the before/after pair on 
 your own hands. Travel well â€” nothing merge-blocking parks on you, and the frontier you leave
 is countable, named, and routed. The owner wakes to a pushed digest naming the night's
 headlines; the full record is Fold #4 on master.
+
+---
+
+## 2026-08-29 ~09:40 â€” COORD: DAY-SHIFT DISPATCHES (owner-directed) â€” R has six bounded hours, G is on the reflect prize, i9 takes a chip
+
+Owner check-in: goal INTACT and closer â€” Windows 184/208 = 88.5% with all 24 remaining rows
+in mapped (not mystery) state after tonight; Linux 178/183 = 97.3% with five named rows.
+Assignments:
+
+**R â€” two singles sized to your six hours, in this order:**
+1. **net's Linux FIRST CONTACT** at or after `cc33cff36` â€” the direct payoff of your own cgo
+   fix. Convert / build / compare census, exactly G's net/http staging (each step gated so a
+   hang can never read as a compile wall); if a block appears, prove it with the
+   two-budgets-zero-delta standard and gate it with `-test-filter` per the pattern â€” census
+   first, rooting is NOT in today's scope. Post whatever the clock allows; a convert+build
+   result alone is banking-grade news for the parity path.
+2. **If time remains: the sync/atomic hang reproducer** â€” `-test-filter
+   TestValueCompareAndSwapConcurrent` for a seconds-scale artifact, characterize only (does it
+   hang alone? does it hang at N iterations? thread-count sensitivity if cheap) and park the
+   artifact + observations for the golib investigation. Do NOT root into golib today.
+Hard stop when travel calls â€” everything you post is a checkpoint, nothing owes completion.
+
+**G â€” the REFLECT DIVERGENCE ARC is yours.** The biggest prize on the board, in your own
+arc shape: apply the block-gated census pattern at master (`-test-filter` exclusion for
+`TestOffsetLock` + any of the 11 non-reporters that prove blocked â€” each exclusion proven,
+named in the header, diagnostic-never-banked), produce reflect's FIRST real census, then root
+by family. Named roots already on the record to seed the cut: `SetMapIndex` panic
+(value_impl.cs:1160), zero-Value panic (value.cs:1663), the method-table/code-pointer identity
+family, and the 40-row DeepEqualAllocs block (likely the alloc-profile class). The final-six
+lane's reports are in the mailbox history; its worktree evidence is preserved if you need the
+partial-run artifacts.
+
+**i9 â€” the TestRegisterErr chip**: one root, three rows, fully specified in the record â€” the
+adapter shell type leaking into %T-style rendering (`http_test.http_HandlerFuncá´ Î”Handler` where
+Go prints `http.HandlerFunc`) and typed-nil identity lost through the shell (prints an address
+where Go prints `(http.HandlerFunc)(nil)`). golib/gen territory, guard-first, branch when
+done. The moved-pointer observation (0x3742b01 -> 0x13e7d0e across runs) is your
+address-rendering confirmation.
+
+Local: the ordinals lane is on its last gate and merges at thirty-six. Watchers per v3.4;
+ACKs with both legs.
