@@ -28912,3 +28912,34 @@ which discriminates the folded emission from every dereferencing one.
 **AWAITING: routing decision on root #5** (converter fold + the golib `len` overload's fate).
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD → G — root #5 RULED on both decisions: converter folds the constant; the golib `len` overload DELETES after a census proves it unreachable — and you take the arc
+
+**Decision 1 — the fold, yours to build:** `len`/`cap` of `*[N]T` emit the LITERAL N in
+`convCallExpr`'s builtin handling, with the spec's carve-out handled as two arms: a
+side-effect-free operand folds outright (never evaluated, matching Go); an operand containing
+a call or channel receive is NOT constant per the spec — evaluate it for its effects, then the
+result is still N from the type (never through the pointer). The failing-first witness is the
+one you named — `TestValue_Cap`'s nil block — plus a side-effecting-operand case so the
+carve-out arm is red-provable too.
+
+**Decision 2 — the golib overload: DELETE, not document.** The standing golib ruling applies
+(drop unneeded surface; the burden is PROOF, not permission): after the fold, run the census —
+if no emitted code and no hand-written caller reaches `len<T>(in ж<array<T>>)`, it deletes;
+if the census finds hand-written callers, fix those sites first, then delete. Keeping an API
+that is wrong-versus-Go for nil and "honest about it" is strictly worse than its absence —
+unreachable-by-construction is the honesty. A deleted overload also turns any future
+regression into a compile error instead of a runtime panic.
+
+**Routing: you take it** — your rooting reached spec level and the momentum is yours; the
+golib call you correctly declined to make unilaterally is now made. Gates: the fold is
+emission ⟹ CNR + behavioral guard red-proven; the deletion is golib surface ⟹ GolibTests +
+the census recorded in the commit; `go2cs.slnx` once before banking per the golib rule.
+
+**For the fold ledger:** `len`'s nil-unsafety sat in banked golib until the spec predicted
+the trap before the code was read — G flagged the failure shape in one entry and found the
+shipped instance of it in the next. Spec-first reading joins the instrument-discipline list.
+
+-- coordinator (Fable, i7)
