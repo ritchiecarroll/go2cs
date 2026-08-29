@@ -37552,3 +37552,79 @@ Still unattributed in `did not panic`: `TestArrayOfAlg`, `TestCallPanic`, `TestS
 Branches only; nothing committed.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — the reflect `did not panic` family is CLOSED: 5 remaining members, 4 roots, every one controlled
+
+`TestArrayOfAlg`, `TestCallPanic`, `TestStructOfAlg`, `TestUnexported`, `TestValuePanic` are all
+attributed. I did not guess these: each failure event carries an exact `all_test.cs` line, so the
+failing `shouldPanic` site is named, and I then measured every root against a Go binary with a
+**passing control** beside it. Probe = `g-panicprobe`, 15 cases, one process per case (see the
+severity note in R3 for why a single process could not carry them all).
+
+| | root | site | tests |
+|---|---|---|---|
+| **R1** | `valueInterface` accepts `safe` and **ignores** it | `reflect/value_impl.cs:95` | `TestUnexported` |
+| **R2** | `Elem()` on an INTERFACE-kinded Value **drops flagRO** | reflect | `TestCallPanic` |
+| **R3** | typed accessors carry **no kind guard** | `reflect/value_impl.cs:144` (`Bool`), `Int`, `Len` | `TestValuePanic` |
+| **R4** | `AreEqual` never detects an **uncomparable dynamic type** | `golib/builtin.cs` | `TestArrayOfAlg`, `TestStructOfAlg` |
+
+```
+CASE                              Go        C#           verdict
+Bool on float64                   PANIC     ABORT(exc)   DIVERGE   R3
+Int on string                     PANIC     no panic     DIVERGE   R3
+Len on int                        PANIC     no panic     DIVERGE   R3
+Addr unaddressable                PANIC     PANIC        match     <- R3 control
+Interface unexp fld               PANIC     no panic     DIVERGE   R1
+Interface exp fld                 no panic  no panic     match     <- R1 control
+Call via unexp fld                PANIC     PANIC        match     <- R2 control
+unexp iface .Elem().Call          PANIC     no panic     DIVERGE   R2
+unexp iface .Elem().Interface()   PANIC     no panic     DIVERGE   R2
+EXPORTED iface .Elem().Interface() no panic no panic     match     <- R2 control
+== array-of-slice                 PANIC     no panic     DIVERGE   R4
+== struct-w-slice                 PANIC     no panic     DIVERGE   R4
+== map iface                      PANIC     no panic     DIVERGE   R4
+== slice iface                    PANIC     no panic     DIVERGE   R4
+```
+
+### Two things I got wrong, corrected on the record
+
+**I predicted `TestCallPanic` was flagRO-not-set on unexported fields. It is not.** `Field` sets the
+bit correctly — with a careful sticky-vs-embed distinction — and `Call` through an unexported field
+panics exactly as Go does (the R2 control). Re-reading the named line, the failing `badCall` is the
+SECOND one, which differs from the first by a single `.Elem()`. So the bit is set and then **lost by
+`Elem()` on an interface-kinded Value**. The control pair proves it both ways: same expression with
+and without `.Elem()`, panic and no panic.
+
+**R3 is worse than "did not panic", and the label hid it.** `Bool()` on a float64 does not fail to
+panic — it throws a raw `InvalidCastException` that `recover()` **cannot catch**, killing the process.
+Go has a recoverable panic there. Three accessors fail three different ways: `Bool` aborts
+unrecoverably, `Int` and `Len` return quietly. That is why the probe needed one process per case; the
+first case took the whole run down.
+
+### R4 is not a reflect defect
+
+The last two rows have **no reflect in them at all** — `var m any = map[string]int{}; _ = m == m` is
+plain Go, and it panics in Go and answers quietly for us. `AreEqual`'s only `uncomparable` throw is
+the nil-func-adapter case; slices, maps and structs/arrays containing them are not detected. reflect
+merely surfaces it. So R4's blast radius is **language-level interface equality**, not two reflect
+rows, and it should be scoped as such before anyone sizes it.
+
+### Tail state
+
+| root | rows | state |
+|---|---|---|
+| `Reinterpret` prefix-downcast | 15 + 13 + `TestIsZero`[88] | routed |
+| alloc-profile (2 variants) | 41 | disclosure candidate |
+| `MapIter` hand-own incomplete both ways | 4 | rooted, remedy specified |
+| typed nil Func/UnsafePointer | 2 + 1 | rooted, routed |
+| **R1 / R2 / R3 / R4** | **1 / 1 / 1 / 2** | **rooted, controlled, unrouted** |
+
+`did not panic` now has no unattributed members. Flagging one adjacency without claiming it: I earlier
+rooted `EqualNonComparable` to the typed-nil family, and R4 is close enough to it that the attribution
+is worth re-testing — I have not re-measured it and am not moving it.
+
+Branches only; nothing committed.
+
+-- G (GRETCHEN-LAPTOP)
