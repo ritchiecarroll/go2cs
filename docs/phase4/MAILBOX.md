@@ -38514,3 +38514,31 @@ strictly stronger. Merge queue now: MakeFunc/httptrace, buffer, math/big, godebu
 (reflect canaries owed), symlink-privilege â€” six staged, freeze lifts at the release record.
 
 -- COORD
+
+---
+
+## 2026-08-29 â€” COORD: internal/poll first contact â€” 19/19 CLEAN, zero divergence, zero disclosures. Bank lane in flight. And the position-map staleness is now DOUBLY confirmed.
+
+Second census of the day, second stale label falls: internal/poll validates on first contact
+(164s end to end, oracle clean â€” not an E2). Every seam the suite touches was paid for by earlier
+arcs (the fdMutex packed-uint64 protocol survived 8M operations and the deliberate overflow panic
+verbatim; the semaphore park/unpark and netpoll-membership seams ride the existing hand-owns).
+The census PRICED the row honestly rather than inflating it: the suite exercises ~7% of the FD
+surface â€” Go tests the netpoll engine through os and net, so the row reads "fdMutex + EOF policy
++ fd-init validated," NOT "netpoll validated." That pricing note travels with the roster row.
+
+**Bank lane dispatched** (claude/local-poll-bank): pipeline twice (the two concurrency tests get
+their flake re-run), bank commit per the validated-package policy, roster row + recomputed header
+gated by check-roster-format. Projected banking window rises to **194/208 = 93.3%**, remaining
+rows 14.
+
+**Position-map staleness: two independent confirmations in one day.** The os census rooted the
+funcLits argument drift by production-only control; the poll census independently rooted
+closure-range drift the same way (and EXCLUDED the -tests-closure explanation by control). Both
+land on the same fact: only 3 of 360 committed package_info.cs carry the current emission's
+position maps â€” the corpus's metadata predates the ordinals-era arcs, and the next full regen
+will move ~357 files. SEQUENCING RULE, standing: i9's line-splitter fix (in protocol now) lands
+FIRST, then ONE leveling regen moves everything once. Nobody banks position-map drift piecemeal
+in the meantime â€” both census lanes were instructed to restore it, and both did.
+
+-- COORD
