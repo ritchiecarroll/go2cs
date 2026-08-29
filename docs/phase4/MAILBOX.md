@@ -32845,3 +32845,65 @@ Proceed to the SetFinalizer/*Request retention root as sequenced. Your GOROUTINE
 probe catch (exit=2 with no files, from a missing GOROOT) closes the night's probe-discipline
 set at four instances, every one caught by the same habit: capture the output, never trust
 the code alone.
+
+---
+
+## G — retention root, first cut: THREE hypotheses eliminated, and `SetFinalizer` is PROVEN WORKING. The retention is net/http's
+
+Progress by subtraction rather than by a guess that happened to land.
+
+### 1. Closure display-class merging — ELIMINATED
+
+My first hypothesis, and the most plausible on paper: C# merges nested closures, so `didGC` being
+captured by the IIFE, the finalizer lambda AND the outer loop could have put `req` in a display class
+the outer frame holds for the whole loop. **The emitted code refutes it.** `req` is a plain local of
+the IIFE lambda (`var (req, _) = NewRequest(...)`), and the finalizer lambda captures only `didGCʗ2`.
+Roslyn hoists only what is captured, so `req` is not in any display class. The conversion is correct
+here.
+
+### 2. `reqCanceler` as an unfaithful conversion — ELIMINATED
+
+`Transport.reqCanceler` is a `map<ж<Request>, Action<error>>` — a live map, owned by a long-lived
+Transport, keyed by the request pointer. It looked ideal, especially since box identity is a known
+hazard in this codebase (`mfinal.cs`'s own comment: a go2cs pointer box "is frequently a per-expression
+temporary", which is why `SetFinalizer` had to key on `ReferentOf`). But insert and delete both use the
+same captured `Ꮡreq`, and **Go's `prepareTransportCancel` has the identical structure** — same map,
+same delete inside the same cancel closure (`transport.go:869-878`). Our conversion is faithful. Go
+passes this test with that map in place, so the map is not the divergence.
+
+### 3. The `SetFinalizer` bridge itself — ELIMINATED, and this is the load-bearing one
+
+I built a minimal probe mirroring the failing test's exact shape: an object whose only reference dies
+with its frame, a finalizer closing a channel, a bounded GC loop (bounded deliberately — the probe must
+report a fact, not inherit the hang it is investigating).
+
+```
+Go   : finalizer: RAN
+C#   : finalizer: RAN
+```
+
+**The converted runtime's finalizers fire.** That is the fifteenth time this session the answer has
+been *the capability exists and one path fails to reach it* — and it means the remaining search space is
+net/http's own retention of the `*Request`, not the runtime.
+
+Note the probe had to be built with `-p:go2csPath=C:/Projects/go2cs-g1/src/` (forward slashes) because
+it lives outside the tree; the first build's 16 CS0246s were that, not a conversion failure.
+
+### What I have NOT established
+
+**Where** net/http retains it. The failing subtest is specifically `h1/Body`, so the candidates are the
+h1 `persistConn`/`readLoop` path holding `treq`, or `cancel` never firing on normal completion (in Go
+the request context's cancel runs on body close and is what deletes the map entry). **I am not asserting
+either.** Next step is to extend the probe into a miniature of the failing test — one real request
+through the converted transport, then ask whether the request finalizes — which bisects it without
+paying 342 s per attempt.
+
+### A gap worth filling regardless of where this lands
+
+**There is no behavioral test covering `SetFinalizer` anywhere in the corpus** — I checked; every grep
+hit was a compiled `.dll`, zero source. Given the runtime bridge is hand-owned, non-obvious (the
+referent-vs-box keying is subtle and was clearly hard-won), and now measurably correct, the probe above
+is one `go.mod` away from being the behavioral test that locks it in. Offering it as a candidate rather
+than banking it unasked — say the word and it goes in with the standard registration + golden flow.
+
+-- G (GRETCHEN-LAPTOP)
