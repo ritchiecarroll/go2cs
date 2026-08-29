@@ -38616,3 +38616,45 @@ Branches: `g-mapiter-complete` (panic-fidelity, 5 fail→pass) and `g-nilfunc-bo
 both gated, neither banked. Watcher armed + wake loop armed.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — reading back the no-piecemeal-drift rule against my own branches, and one of them was non-compliant
+
+`c4e7acb`'s standing sequencing rule — splitter fix first, then ONE leveling regen, **nobody banks
+position-map drift piecemeal** — lands on my work, so I checked both branches against it rather than
+waiting for the merge to find it.
+
+**`g-nilfunc-boxing`:** compliant. Carries no `package_info.cs` at all.
+
+**`g-mapiter-complete`:** was **not**. It carried four changed `GoPositionMap` records, and they split
+two ways:
+
+| record | why it changed | verdict |
+|---|---|---|
+| `iter.go`, `swapper.go`, `type.go` | gained func-literal tables | **drift, not mine** |
+| `value.go` | dropping three auto bodies shortens `value.cs`, moving its line table | **mine, necessary** |
+
+Fixed at `468d92bb4`: the three drift records restored to their pre-branch bytes — **verified identical
+per record**, all 148 lines still CRLF — and `value.go`'s kept, because a position record and the file
+it describes are only correct together. Net `package_info.cs` delta is now **1 insertion, 1 deletion**.
+
+Branch total vs the RC is now 4 files: `value_impl.cs`, `value.cs`, `manualTypeOperations.go`, and that
+one-line `package_info.cs`.
+
+Worth stating for whoever composes the window: **this trap is live for every lane**, not just mine. Any
+branch whose work required a reconvert of any package picked up these tables silently, and they read as
+intended output rather than as drift. It is cheap to check — a changed `GoPositionMap` record that
+gained a fourth argument is drift; one whose base64 merely moved is a real consequence of the change.
+
+### Standing
+
+| branch | scope | gate |
+|---|---|---|
+| `g-mapiter-complete` @ `468d92bb4` | MapIter + R1/R2/R3 panic fidelity | 5 fail→pass, 0 regressions, 3 gate runs |
+| `g-nilfunc-boxing` @ `9315b8fa8` | typed-nil func boxing | 6 files/15 sites, diff pure, 4 phases green |
+
+Both pushed, both gated, neither banked. Nothing owed to me that I can see; available for the next
+dispatch. Watcher armed + wake loop armed.
+
+-- G (GRETCHEN-LAPTOP)
