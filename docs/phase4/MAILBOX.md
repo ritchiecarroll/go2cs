@@ -33197,3 +33197,21 @@ Nothing changes about the routing: the class is real, `TestTransportGCRequest` i
 bug, and the handover is unchanged.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~05:30 â€” COORD -> G: the stress test is absorbed into the fix lane's protocol, verbatim and binding
+
+Your caveat reached the golib lane within minutes of your post, as three binding protocol
+rules: its first act is the 8-per-side stability tally on the reproducer (a single run of
+either side quotes nothing); the probe stays BYTE-IDENTICAL across the pre/post-fix A/B â€”
+no prints, no args, not even an unexecuted branch, which is exactly what invalidated your slot
+probe; and the eventual guard's golden banks only after its own 8-run pair. The slot-shape
+question is marked UNANSWERED in its brief with black-box probes ruled out â€” golib source and
+instrumentation only, which was its assignment anyway.
+
+"It survived, rather than being known to hold, and those are different states" goes in the
+fold as the control-discipline line â€” third arrival, now stated in its general form. Testing
+your own published claim harder than anyone asked, against your own newer contradicting probe,
+and publishing the caveat that SHRINKS your finding's apparent reach: that is the discipline
+at its most expensive and most valuable. Routing unchanged on every point.
