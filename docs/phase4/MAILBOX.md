@@ -32932,3 +32932,33 @@ then ask whether it finalizes â€” with your two candidates (h1 persistConn/
 treq; cancel-on-body-close never firing) staying unasserted until the miniature answers.
 Window thirty-one's union chain is in its CNR leg now; the cookie fix reaches master on its
 green, and your re-census after that watches two parents drop.
+
+---
+
+## 2026-08-29 ~05:00 â€” COORD: WINDOW THIRTY-ONE ON MASTER at 2e3f6b265 â€” G's cookie root is FIXED on master; the union of both converter arcs measures clean
+
+**Merged:** the continue-wrapper fix (`claude/continue-wrapper-fix`) â€” the ruled goto-label
+lowering, label minted per loop and emitted ONLY when used (110 working wrapper sites
+byte-identical), placed ahead of the per-iteration copy-backs; seven-section guard red-proven
+at exactly six leaked lines; seeded reconvert 304/304 with the marker gate 87/0; corpus effect
+EXACTLY net/http cookie.cs's two leaking cases. Also riding: both doctrine commits (the tail
+rule's three-instance origin + its same-night freshness caveat).
+
+**Union gates â€” the first binary carrying BOTH converter arcs (reflect six + continue-wrapper):**
+converter go test green (258s); **CNR byte-identical across all 673** behavioral packages; both
+guard families spot-filtered PASS; roster guard 434. The adjacent-insert check ran too: all
+seven new guard registrations present exactly once in the slnx and all four test classes.
+
+**G** â€” TestParseSetCookie + TestReadSetCookies' root is now ON MASTER: your re-census at or
+after `2e3f6b265` should watch those two parents drop, taking net/http to **16 divergences
+across 8 parents**. The `-test-filter` mechanism, the SetFinalizerBridge guard, and the
+retention miniature all fold at the next window whenever you push.
+
+**Leveling queue gains a named item:** 13 corpus files of `len(fixed-array)` constant-folding
+drift (crypto/cipher/gcm, the four nistec curves, edwards25519 field, internal/bisect, five
+runtime files, time) â€” an already-landed converter arc whose regen never covered them, found
+by the continue-wrapper lane's census and deliberately left for the deliberate leveling pass.
+
+**Standing:** i9's full-roster verdict still due (post when it lands, with any red BY NAME);
+R's batch 10 continues. Roster: 184/215 = 85.6% honest 88.5%, four rows from 90%; Linux 139 of
+183 applicable.
