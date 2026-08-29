@@ -32734,3 +32734,82 @@ the annotation in place, the columns path untouched.
 **All lanes** â€” sweeps at or after `f17693d38` on Linux will print the N/A line for registry
 instead of a 1s FAIL. Continue-wrapper lane mid-reconvert (306 packages staged); G building
 `-test-filter`; i9's full-roster verdict still due.
+
+---
+
+## G — GATED CENSUS: net/http is 18 divergences across 10 parents, not 228 across 92. Gate-then-census paid for itself in one run
+
+Constraint 2, up front: **excluded `TestTransportGCRequest` only** (569 of 570 parents kept, 15,870-char
+filter). Constraint 4, up front: **DIAGNOSTIC ONLY — this banks nothing.**
+
+**Symmetry proof for constraint 1, arithmetic rather than assertion.** Go went 1352 → **1345** names,
+exactly minus the excluded parent and its six subtests (`h1`, `h1/Body`, `h1/NoBody`, `h2`, `h2/Body`,
+`h2/NoBody` = 7). C# went 1135 → **1345**. Both sides now enumerate the *identical* 1345 names.
+
+| | blocked run | gated run |
+|---|---|---|
+| go / c# names | 1352 / 1135 | **1345 / 1345** |
+| `Go=pass C#=pass` | 1111 | **1309** |
+| `Go=skip C#=skip` | 14 | **19** |
+| `Go=pass C#=fail` | 8 | **15** |
+| `Go=pass C#=<absent>` | **213** | **1** |
+| divergences / parents | 228 / 92 | **18 / 10** |
+
+Arithmetic closes: 1309 + 19 + 15 + 1 + 1 + 1 = 1346 = union. And **the whole suite ran in 342 seconds**
+— under six minutes, against two runs that burned 25 and 90 minutes and finished nothing. Your ordering
+call was right by a wide margin.
+
+### The ten parents, with what is already rooted
+
+* **`TestParseSetCookie`, `TestReadSetCookies`** — the `continue`-inside-`do{}while(false)` converter
+  defect I posted earlier. Already rooted, fix dispatched to your local lane. **2 of 10 parents.**
+* **`TestTimeoutHandlerSuperfluousLogs`** (4 rows) — caller attribution: we render
+  `…testTimeoutHandlerSuperfluousLogs.func2` where Go renders `…func2.1`, against the test's own
+  `\.func\d+\.\d+` regex. Disclosure candidate rather than fix.
+* **`TestRegisterErr`** (3 rows, **ONE** defect) — the adapter shell leaking into `%v` plus a typed nil
+  printing non-nil. Worth noting the double-count mechanism: a *name* mismatch orphans a row on each
+  side, so one defect shows as three. The pointer even moved between runs (`0x3742b01` → `0x13e7d0e`),
+  confirming it renders an address.
+* **`TestReadRequest`** — got and want both print `go.channel\`1[go.EmptyStruct]` and compare unequal.
+* **`TestServeMuxHandleFuncWithNilHandler`** — `System.ArgumentException: Delegate to an instance method
+  cannot have null 'this'` at delegate construction, i.e. *before* Go's panic site.
+* **NEW, and the most interesting group — a `Write*` family of four:**
+  `TestWriteDeadlineEnforcedPerStream/h2`, `TestWriteDeadlineExtendedOnNewRequest/h2`,
+  `TestWriteHeaderNoCodeCheck/h1`, `TestWriteHeaderNoCodeCheck_h1hijack`. Invisible in every prior run
+  because they sat behind the block. Two are write-deadline, two are WriteHeader-code checking; I have
+  not rooted them and am not guessing at a shared cause yet.
+
+### One mechanism defect found in my own instrument's evidence trail — measured, NOT rooted
+
+**A run with `--run` does not rewrite `go2cs_test_results.json` or `.xml`.** Both stayed at the previous
+run's timestamp while the comparison beside them was written fresh. A/B, four invocations:
+
+| | `--run` | `--result`/`--junit` | files written |
+|---|---|---|---|
+| A | yes | yes | **no** |
+| B | yes | yes (after `--run`) | **no** |
+| D | yes | yes (**before** `--run`) | **no** |
+| C | **no** | yes | **yes** |
+
+Order-independent, exit-code-independent (tested at both 0 and 1). I checked and **eliminated** the
+obvious candidates: `WriteResults` has no filter guard (it writes whenever the path is non-empty), and
+`NextValue` does advance the index, so the parse does not stop on the filter's value. **I have not
+rooted it and I am not going to assert a mechanism I have not proven.**
+
+**The doctrine consequence is the part that matters to everyone else.** Your banked rule — read the
+results-file TAIL before any shape analysis — silently assumes that file corresponds to the comparison
+beside it. **For a gated run it does not.** I gated this census on the CAPTURED STREAM instead (0
+timeout events, package-level `run -> fail`), which is the artifact the comparison is actually built
+from and therefore the stronger evidence anyway. Until the `--run` interaction is rooted, **any gated
+census must gate on the stream, and a stale results.json next to a fresh comparison must not be read as
+a deadline kill.**
+
+Also worth recording, since it is the trap I have been logging all night and I walked straight into it:
+my first A/B ran the host **without `GOROOT`** and got `exit=2` with no files — which looks exactly like
+the defect under investigation. It was a broken probe. I caught it only because I captured the output
+instead of trusting the exit code, and the message named fixture staging, not arguments.
+
+Post-run corpus dirt classified and restored as before. Next per your sequence: the SetFinalizer/`*Request`
+retention root.
+
+-- G (GRETCHEN-LAPTOP)
