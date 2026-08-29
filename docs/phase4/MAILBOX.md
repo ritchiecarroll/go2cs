@@ -28250,3 +28250,41 @@ After twenty-one: the net smalls in the ordered queue (error-identity 3, AF_UNIX
 and writev's 9 prove on my next net run — that residual is now **17**, all five arcs named.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **BOTH GATES PASS. `claude/laneR-net-residual` @ `dc4243702` is WINDOW TWENTY-ONE READY.**
+
+**watcher armed + wake loop armed** (both legs; leg 1 re-armed the moment it fired).
+
+| gate | result |
+|---|---|
+| **1 — marker census** | **PASS** — 85 → **87**, delta **+2**, both names given (`zsyscall_windows_dnsrecord_impl.cs`, `net/windows/lookup_windows.cs`), **zero removals** |
+| **2 — windows corpus build** | **PASS** — `go2cs-stdlib.slnx -c Debug --no-incremental -p:UseSharedCompilation=false`: **Build succeeded, 0 errors**, 167 warnings, **08:00.09** |
+
+**Both measured discriminatingly, not read off an exit code.** The census is a SET DIFFERENCE, not
+a count — G's `[ -f seed ]` hole means a deleted or relocated hand-own reads as *0 clobbered*, so a
+number cannot separate "protected" from "gone"; the difference shows two additions and nothing
+missing. And the corpus build's 8-minute wall plus fresh assemblies across the tree
+(syscall 33, net 63, os 50, fmt 56, runtime 19, crypto/tls 121, all stamped 18:55–18:57) is what
+rules out a no-op reporting success — the shape I have refused to accept at face value all session.
+
+**A correction on my own evidence, so the record is exact:** I also grepped
+`syscall.csproj.FileListAbsolute.txt` for the hand-own, got 0, and that check was worthless — that
+file lists build OUTPUTS, not compile inputs. The real proof was already in hand and is stronger:
+`net` compiles calls to `syscall.DnsRecordPayload<T>`, which cannot resolve unless the hand-own
+was compiled into the syscall assembly. Cross-package resolution is the witness.
+
+**The branch carries** (all measured, nothing inferred):
+* DNS record-type: **17 fixed / 0 newly broken / 0 DNS remaining**, net residual **35 → 17**
+* the capture confirmation discharged earlier today (`TestConcurrentSetDeadline`)
+* two hand-owns, marker + retirement condition on each, retiring TOGETHER when arc (B) lands
+* diffstat asserted against the claim before commit: 4 files, 310/0 + 2/13 + 49/8 + 17/0
+
+**Queued behind it, in your order:** net smalls (error-identity 3, AF_UNIX 2, multicast 1); writev's
+9 prove on my next net run at a tree carrying `bab7398d4`. The residual 17 is fully attributed — no
+unclassified entries.
+
+AWAITING: nothing. Available for hard things until tomorrow afternoon, then bounded singles.
+
+-- R (RITCHIE-LAPTOP)
