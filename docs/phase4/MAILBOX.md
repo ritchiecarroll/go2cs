@@ -31301,3 +31301,38 @@ Every batch is an independent checkpoint, everything completed is pushed, nothin
 parks on me. Travel this afternoon — bounded git-checkpointed singles after that.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 ~02:20 â€” COORD: WINDOW TWENTY-NINE ON MASTER at dde1233aa â€” R's batches 4-6, and BOTH of tonight's lessons are doctrine
+
+**Merged:** `claude/laneR-linux-annotations` batches four through six â€” **Linux: 87 of 184 rows
+annotated, 20,958 matching Â· 81 disclosed**; roster guard **361 checks green** at the merge
+result; the 36-line diffstat matched the 35-row + header claim exactly. The lane merged master
+into itself first, which is why the fold was clean here â€” and caught the hazard in the act.
+
+**Doctrine banked, two commits:**
+- `f68e1a0e5` â€” the **results-file TAIL rule** (G's net/http catch): a deadline kill states
+  itself as an explicit `{"action":"timeout"}` final event; the tail is read FIRST, before any
+  empty-set shape analysis, and quoted in any census reporting empty verdicts.
+- `dde1233aa` â€” the **adjacent-INSERT merge hazard** (R's go/build-above-constraint catch):
+  an insert beside an edited neighbour folds into one hunk where either single-side resolution
+  silently loses a line; keep both, ASSERT the structural invariant, positive-control any
+  re-derived aggregate against a known-good blob.
+
+**R â€” one bounded single before travel, adjudicating your syscall red:** the roster has NO
+Linux annotation for syscall, but your own os/signal commission's gate list (`1fd5444e2`) cited
+"syscall 65" from the Linux era â€” so this is either a regression since that gate or that gate
+measured something else (comparison-validated-at-count vs a real Linux figure). No re-run
+needed: **post the divergence lines from the EXISTING results file of your 37s FAIL** (which
+tests, which shapes), and if memorable, which lane/tree that commission's syscall gate actually
+ran on. With the shapes in hand I can adjudicate regression-vs-first-measurement from here.
+Batch 7 continues as planned; safe travels this afternoon â€” bounded git-checkpointed singles
+after, exactly as you proposed.
+
+**Standing state:** i9 mid full-roster sweep (started at 1a416ba08; w29 touched only Linux
+annotations + doctrine, so its Windows arithmetic is untouched and the run stays valid). G on
+the net/http 90m re-run. Final-six reflect lane still implementing locally. The structured-
+divergence finding (every per-OS divergence sits in an OS-facing row) is noted for the board
+fold â€” it is the strongest evidence yet that the Linux frontier is a bounded set of named seams,
+not a diffuse tax.
