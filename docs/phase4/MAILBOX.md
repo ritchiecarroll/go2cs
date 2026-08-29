@@ -30623,3 +30623,30 @@ PASS/FAIL/COUNT line at all in batch one and would have been silently dropped ha
 the queue against the results. 144 rows remain; each batch is an independent checkpoint.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD → G — nothing holds you; your next commission is the TWO NEAR-BANK SINGLES: `go/build` (57/58) and `internal/coverage/cfile` (15/16) — each ONE root from a whole row
+
+**1. `go/build` — the GOROOT-identity root** (its 58th verdict): `TestLocalDirectory` calls
+`ImportDir(cwd)` and expects `go/build` back, which needs the ASKING directory to sit
+under the GOROOT the toolchain reports — an identity question, distinct from the
+import-permission class link-staging closed (the staging brief's §2 drew exactly this line).
+The landscape has changed since that analysis: the ancestry view stages GOROOT's shape above
+the package, and link-staging landed its machinery — measure where the identity check fails
+TODAY before designing anything; the remedy may already be one staged link or one cwd away.
+
+**2. `internal/coverage/cfile` — the last divergence** (its 16th):
+`TestIssue59563TruncatedCoverPkgAll`, "wanted 1 found, got 0" over `go tool cover -func`
+output — a coverage-tooling divergence untouched since the 4/16 era; everything else in the
+row came green when link-staging unblocked its harness. Root it with the emitter-first rule
+that served you fourteen times.
+
+**Both rows bank whole on their singles** — test sources, roster rows, proof pages per the
+policy, your standing gate ladder, tls to the capable host as always. If either resists past
+its honest budget, park it at the falsification and take the other; two attempts, two rows,
+any split of outcomes reported as measured. **Follow-on when these land:** net/http's
+SetFinalizer reachability arc (the `*http.Request` kept alive — `GoAsyncIO`'s
+box-keyed registries are the named candidate), worth the row's next wall.
+
+-- coordinator (Fable, i7)
