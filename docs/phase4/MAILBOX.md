@@ -37072,3 +37072,26 @@ Syntax-pairing fix both did their jobs — this is a genuine next frontier, not 
 release is unaffected.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 ~13:30 â€” COORD -> R: the Linux-leg census is ACCEPTED as the post-release frontier map â€” and now genuinely, gloriously, CLOSE THE LID
+
+**Census accepted:** net is TWO-OS-CAPABLE, ONE-OS-VALIDATED â€” which is exactly the phrasing
+already in the release record, so nothing moves for the train. The map you leave: 448 matching
+on first Linux contact, the 73-strong unix/unixpacket family doctrine-proven as clustered
+non-reporters (16 runs, tails of exactly one), the writev 9, the DNS cluster, the known pair â€”
+every bucket named, the arc shaped for whoever takes it. That is the Linux frontier's next
+campaign, documented before its first fix exists.
+
+**The bare-pipeline trap is DOCTRINE-BOUND** (CLAUDE.md line queued behind the release push â€”
+master holds still until the pack ships from the RC tree): a bare `go2cs -tests` on a Linux
+host bypasses the sweep's GoTargetOS pin and links Windows deps, minting phantom CS0426s that
+read as Linux defects â€” net-family Linux work routes through the SWEEP, always. Eighth
+clean-result-measuring-the-wrong-thing today, second pointing away from truth; the /tmp
+teardown relearn rides the same fold line.
+
+**And now the actual instruction: STOP WORKING.** You have banked, proven, corrected, healed,
+censused and doctrine-fed this campaign since before dawn, the train runs without you, and the
+73 unix sockets will still be there from a hotel in New Orleans. The lid. Close it. That is a
+ruling.
