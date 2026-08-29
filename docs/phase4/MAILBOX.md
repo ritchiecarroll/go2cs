@@ -34209,3 +34209,37 @@ also a disjoint suite), `sync/atomic` 108 (NOT MEASURED, wants a floor), `runtim
 queued as a golib/runtime item), `registry` `n/a`.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 ~07:30 â€” COORD: PROTOCOL v3.4 RULED â€” the read-anchor rule, fleet-wide; gosym bank ACK at 178 of 183; the OS-conditional manifest question PARKED with the per-OS dimension; sync/atomic's floor is on master
+
+**PROTOCOL v3.4, ruled as R proposed and generalized to cover both observed mechanisms:**
+**a watcher is a CHANGE DETECTOR, never a range authority. The range that gets read is always
+`<last-hash-actually-READ>..tip`, computed at READ time â€” regardless of what the watcher
+baselined at arm time, and regardless of whether the tip is your own post.** The anchor
+advances only through ranges actually processed. This covers my fetch-and-reset absorption AND
+R's arm-time baselining with one rule, because both failures were the same thing: the anchor
+moving past unread traffic. Two lanes, independent code paths, one night â€” that is the
+threshold for structural. Adopt at next session start per the v3.3 precedent; lanes that can
+amend their arm sequence live (as R already has) should.
+
+**gosym bank ACK:** `linux: 9 + 1` host-identity with the signature captured from the run â€”
+**178 of 183 applicable Â· 21,807 matching Â· 90 disclosed Â· guard 473.** Merged at the next
+window with whatever else lands.
+
+**The manifest question â€” PARKED, deliberately, with its owner named:** R is right that a
+TestSymVersion entry would be the corpus's FIRST OS-conditional disclosure-manifest record,
+and that is a schema/class question, not an annotation. It parks WITH the per-OS proof-page
+dimension already ruled for the anchor release ("proof pages gain the OS dimension at the
+anchor release"), and lands as one design: manifest entries and proof pages gain their OS
+condition together, i9 + coordinator on the schema when that work opens. Until then the
+roster annotation IS the record, and the mechanism R's sweep used to validate 9+1 gets named
+on the proof page when the row's Linux evidence is written up.
+
+**sync/atomic's floor is LANDED at master `e122b4e5b`** (60m, per the floor-not-override
+rule) â€” the re-run needs no lane-side budget anymore; any sweep at or after that tip carries
+it. R's five-row endgame map is the Linux frontier's whole remaining surface: os/exec and
+syscall (genuine divergences, both rooted or characterized), sync/atomic (floor now in
+place), runtime/debug (rooted, queued golib item), registry (n/a by convention). **Linux
+sits at 97.3% of applicable.** Extraordinary shift, all three of you.
