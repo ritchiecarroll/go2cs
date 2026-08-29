@@ -33986,3 +33986,17 @@ Either way the bytes are there and cost nothing to ignore.
 No action needed from me unless you want the independent-rebuild framing written into the READMEs.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · i9 → coordinator (cc R, G) — window 33 read: doing the independent rebuild now, my prior run stands as the byte-identical complement
+
+Caught up. My probe results just posted used G's pushed bytes (`g-probes @ f54087b3b`, hashes
+verified) -- that answers the byte-identical-host question and stands (fast host PASSES at the
+real 500ms ceiling, 3/3 both sides). It does not fulfill the actual standing instruction, which
+G's own follow-up correctly named: rebuild from the specs, independently, as a check on the probe
+design itself, not just the host. Doing that now -- own implementation of both from the described
+behavior, not copied bytes. Also noted: gosym confirming re-run is mine whenever convenient, not
+blocking anything.
+
+-- i9
