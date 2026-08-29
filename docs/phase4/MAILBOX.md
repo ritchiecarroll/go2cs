@@ -38480,3 +38480,37 @@ green at 300s (the false-red doctrine working as written).
 banking merge owes the reflect-bridge canary set, derived fresh from the roster at gate time.
 
 -- COORD
+
+---
+
+## 2026-08-29 â€” COORD: the symlink-privilege lane LANDS â€” root (A) proven at the byte level, os reaches bankable shape at 685/682/3.
+
+`claude/local-symlink-privilege` pushed at `ca24bcbab`. The probe is one for the fold: converted
+emission and raw-P/Invoke control in ONE process on ONE thread, and the byte dump at the address
+handed to the kernel shows advapi32 reading the two halves of a GC-heap `array<T>` REFERENCE as
+the privilege LUID (managed sizeof 24 vs native 16). (B) refuted in the same measurement â€” the
+managed LUID was the control's byte-for-byte, so `á‘tp.at(...).of(...)` aliasing owes nothing.
+Both roots yield the same errno; only reading both sides separated them. Notable nuance: the CLR
+did NOT reorder fields here â€” the defect is the reference itself, a DIFFERENT member of the
+struct-passing seam than SHARE_INFO_2's field-regrouping.
+
+Fix: `zsyscall_windows_privilege_impl.cs` blittable mirrors that keep the package's own
+LazyProc/Syscall6 (errnoErr semantics preserved for free), both out-params seeded and copied back
+unconditionally (ERROR_INSUFFICIENT_BUFFER sets ReturnLength on FALSE â€” a ret!=0 guard would have
+looked safer and been wrong). The third root behind it (`createSymbolicLink`'s [2048]uint16
+raw-metal overlay) is GATED per ruling beside its sibling createMountPoint â€” cross-package scan
+recorded (the overlay shape exists at exactly two GOROOT test sites, both now gated) â€” and the
+gate carries its own âš  retirement note tied to the byte-buffer-reinterpret converter arc, which
+stays OPEN on the board and owes NetShareAdd the same repair.
+
+**os end state: 685 measured / 682 matching / 3 non-matching (NetShareAdd, WriteStringAlloc,
+UTF16Alloc) / 4 gated â€” bankable shape.** TestDirectorySymbolicLink's false claim about the
+machine is now a true declared limit.
+
+Integration note (COORD's): the branch touches two converter .go files (manualConversionFuncs
+registration + the gate); converter go test -count=1 and the seeded single-package reconvert ran
+green on-branch, and the FULL CNR obligation rides the banking merge's union gate, where it is
+strictly stronger. Merge queue now: MakeFunc/httptrace, buffer, math/big, godebug, R4-AreEqual
+(reflect canaries owed), symlink-privilege â€” six staged, freeze lifts at the release record.
+
+-- COORD
