@@ -32962,3 +32962,63 @@ by the continue-wrapper lane's census and deliberately left for the deliberate l
 **Standing:** i9's full-roster verdict still due (post when it lands, with any red BY NAME);
 R's batch 10 continues. Roster: 184/215 = 85.6% honest 88.5%, four rows from 90%; Linux 139 of
 183 applicable.
+
+---
+
+## G — retention root LOCALIZED to the idle `persistConn`, five hypotheses eliminated, and the 342-second block now reproduces in TWO SECONDS
+
+I have a standalone 45-line program that reproduces the block. That is the headline: the instrument
+that cost 342 s (or, before the gate, 25 and 90 minutes finishing nothing) now costs **two seconds**,
+so this is bisectable at conversational speed.
+
+```
+Go : request finalizer: RAN
+C# : request finalizer: DID NOT RUN in 400 attempts
+```
+
+### The bisection
+
+| probe | Go | C# | reads as |
+|---|---|---|---|
+| `NewRequest` + finalizer, **no round trip** | RAN | **RAN** | construction is clean |
+| GET, **nil body**, + `Do` | RAN | DID NOT RUN | the body is irrelevant |
+| POST + body + `Do` | RAN | DID NOT RUN | the ROUND TRIP retains |
+| own `Transport`, **dropped** in-frame | RAN | DID NOT RUN | not the Transport object |
+| own Transport + **`CloseIdleConnections()`** | RAN | **RAN** | ← **the idle `persistConn` holds it** |
+
+**Root, stated as far as the evidence goes: an idle `persistConn` in the converted transport retains
+the request it last served.** Dropping the Transport does not free it because the conn is rooted
+independently — its `readLoop`/`writeLoop` goroutines are alive and blocked. Tearing those down
+releases the request immediately. Go's equivalent conn goes back to the idle pool holding nothing.
+
+### Five hypotheses eliminated, three of them ones I would have bet on
+
+1. **Closure display-class merging** — refuted by the emitted code (`req` is captured by nothing).
+2. **`reqCanceler` unfaithfully converted** — refuted; byte-faithful to `transport.go:869-878`.
+3. **The `SetFinalizer` bridge** — refuted by a working probe; converted finalizers fire.
+4. **`channel<T>` retaining its last-received value** — my best structural guess, since `persistConn`
+   holds the request ONLY through `reqch`/`writech` and Go's runtime `typedmemclr`s the slot for
+   exactly this reason. **Refuted: C# releases in both buffered and unbuffered.** (Aside worth a
+   footnote: on the BUFFERED variant Go itself reported RETAINED, so that variant does not test what I
+   designed it to test and I draw nothing from it — only the unbuffered comparison is load-bearing.)
+5. **Debug-JIT local liveness** — the JIT keeps locals alive to end-of-scope in Debug, which would root
+   `rc := <-pc.reqch` while readLoop blocks, and we build Debug. **Refuted: Release is byte-identical
+   in behaviour.**
+
+### Leading remaining hypothesis, NOT asserted
+
+Go's per-iteration locals in `readLoop`/`writeLoop` becoming **C# closure captures on a long-lived
+delegate**. A captured variable lives as long as the delegate does; Go's local dies at last use. That
+would retain across the goroutine's whole life and be freed exactly when the loops are torn down —
+which is the `closeidle` result. It is consistent with everything measured and I have not confirmed
+it, so it stays a hypothesis. If it holds it is a CLASS, not an instance: any converted long-lived
+goroutine loop would retain its last iteration's values.
+
+### Parked cleanly
+
+Four probes (`g-finprobe`, `2`, `3`, `4`) plus the channel probe are in my scratchpad, each a
+`go.mod`-and-`main.go` pair that converts and builds clean with
+`-p:go2csPath=C:/Projects/go2cs-g1/src/`. The `SetFinalizer` behavioral-test candidate offer stands —
+still zero coverage in the corpus.
+
+-- G (GRETCHEN-LAPTOP)
