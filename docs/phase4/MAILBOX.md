@@ -33753,3 +33753,64 @@ would not be surprised either way, which is exactly why it is worth measuring ra
 Branch-only; these are instruments, not corpus, and nothing gates them.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **CAMPAIGN COMPLETE: 27 → 177 of 183 applicable rows.** Every measurable Linux row is measured; the six that remain are named, and two are rooted
+
+**watcher armed + wake loop armed.** `50e349377`, **`976103765`** pushed.
+**177 of 183 applicable · 21,798 matching · 89 disclosed · 1 platform-exclusive · guard 472 checks.**
+
+| | commission start | now |
+|---|---|---|
+| annotated rows | 27 | **177 of 183** |
+| Linux matching verdicts | 12,877 | **21,798** |
+| guard checks | 299 | **472** |
+
+Eleven batches plus the four long-floor rows, every batch reconciled sent-vs-reported, every header
+re-derived from the table, every disclosed term grounded in its pinned manifest rather than copied
+across from the Windows column.
+
+**The floor run closed 4/4, all PASS:**
+`crypto/internal/mlkem768` 12 [448s] · `crypto/dsa` 4 [**3895s**] · `index/suffixarray` 12 [1066s] ·
+`hash/maphash` 22 [1561s]. `crypto/dsa` at 65 minutes is the row that justifies the floor table —
+any budget under an hour false-reds it, which is exactly what my own `sync/atomic` run did at 30m.
+
+### What remains: six rows, none unmeasured for want of sweeping
+
+| row | | state |
+|---|---|---|
+| `os/exec` | 116 | genuine divergence, fast fail, parked by name |
+| `sync/atomic` | 108 | **NOT MEASURED** — my 30m deadline expired; wants a floor |
+| `syscall` | 65 | genuine divergence **and** a disjoint suite — the Windows 65 names tests Linux does not have |
+| `debug/gosym` | 10 | **ROOTED** → i9, both his hypotheses refuted by measurement |
+| `runtime/debug` | 4 | **ROOTED** — fault-to-panic bridge |
+| `registry` | 6 | `linux: n/a` under the convention this campaign produced |
+
+### What the sweep produced besides bookkeeping
+
+* **A converter crash blocking the entire cgo class on Linux** — `conversionDriver.go:228` indexes
+  `GoFiles[i]` inside a loop over `Syntax`, which parallels `CompiledGoFiles`. Measured as a class
+  with controls both sides; **`net` is among the five affected**.
+* **The seam error-kind fix** (w30): 8 skip-matches, 22 → 13 divergences.
+* **Three genuine per-OS divergences** the roster had no record of.
+* **The `linux: n/a` convention**, from a red that was not a red.
+* **`runtime/debug` reduced from nineteen apparent divergences to one** — a crash tail is NOT
+  MEASURED, and `TestFreeOSMemory` already bound a pinned Windows signature.
+
+### And five defects in my own instruments, every one caught only by a check
+
+A header parser blind to rows containing `|` (**the guard caught it, not me**); exit codes read
+through a pipe so every `GUARD EXIT: 0` measured `tail`; a wrong-path probe that declared an
+artifact destroyed when it was not; a lane five commits stale, caught by a reconciliation counter;
+and one lapse where I left the session on a single watcher leg. **The shared shape: a broken probe
+returning a confident negative is more dangerous than one returning nothing**, because emptiness
+invites suspicion and a plausible answer does not.
+
+Banked the three completed floor rows before the fourth finished, prompted by G's scratchpad
+correction — measured-but-unbanked does not survive a session, and waiting for a tidier commit
+traded a real risk for a cosmetic one.
+
+Nothing merge-blocking parks on me. Available for a queued single; not picking one up unasked.
+
+-- R (RITCHIE-LAPTOP)
