@@ -37221,3 +37221,60 @@ finding's generality, and still unrooted.
 Proceeding to the reflect tail, largest-first, with the two named panics as openers. Branches only.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — reflect tail opener 1 (`TestIsZero`): failure point LOCATED to the line, **three hypotheses refuted**, root not found
+
+Reporting a narrowed field rather than a story. The two named panics needed locating by MESSAGE first:
+the line numbers in the dispatch have drifted — `value_impl.cs:1160` is now `MakeMapWithSize`, not a
+`SetMapIndex` panic — so I rooted from the RC census text instead.
+
+* **zero-Value panic** = `TestIsZero` → `panic: reflect: call of reflect.Value.IsZero on zero Value`
+* **iterator panic** = `TestMapIterSet` + `TestSetIter` (2 rows) → `Value.SetIterKey called before Next`
+
+### `TestIsZero`: located exactly
+
+```
+panic: reflect: call of reflect.Value.IsZero on zero Value
+  at reflect.IsZero(ΔValue v)      value_impl.cs:635
+  at reflect_test.TestIsZero       all_test.cs:2045
+```
+
+`all_test.cs:2045` is `var b = x.IsZero();`, and the two lines above it are the part that matters —
+the test does **not** always use `ValueOf`:
+
+```csharp
+var (v, ok) = tt.x._<reflectꓸValue>(ᐧ); if (ok) { x = v; } else { x = ValueOf(tt.x); }
+```
+
+So `x` reaches `IsZero` with kind `Invalid`, via one of ~80 table entries.
+
+### Three hypotheses, each measured against Go, each REFUTED
+
+| # | hypothesis | probe result |
+|---|---|---|
+| 1 | array-of-`reflect.Value` (`{[3]Value{}, true}`) — the walk calls `IsZero` on an element whose kind is Invalid | **byte-identical to Go** (kind=array, IsZero=true/false correctly) |
+| 2 | our `Interface()` leaks a `ΔValue`, so the type assertion wrongly succeeds and `x` becomes a zero Value | **byte-identical** — only a genuine `reflect.Value` asserts, exactly as Go |
+| 3 | `New(TypeOf(new(error)).Elem()).Elem()` yields Invalid instead of an addressable Interface Value (our `Elem()` comment says a structurally nil pointer answers the invalid zero Value) | **byte-identical** — kind=interface, valid=true, IsZero=true |
+
+Every one was specific, mechanically plausible, and wrong. Hypothesis 3 in particular had a comment in
+our own source that appeared to predict it.
+
+### What that leaves, stated so nobody re-walks the dead ends
+
+Untested candidates, in the order I would take them: the three `setField(...)` entries (generic +
+`unsafe.Add` pointer arithmetic into a struct with blank fields — the most exotic thing in the table),
+the `{New, false}` entry (the `reflect.New` *function* as a value), and the Struct section beyond what
+I read.
+
+**Not claiming a root.** The failure point is exact, the mechanism is "some entry produces kind Invalid
+where Go does not", and three of the plausible ways that could happen are eliminated. Next step is
+mechanical rather than clever: replicate the table entry-by-entry and let the failing index name itself
+— which is what I would do with more runway, and is cheap for whoever picks it up.
+
+Opener 2 (`SetIterKey called before Next`, 2 rows) not yet started.
+
+Branches only; nothing committed.
+
+-- G (GRETCHEN-LAPTOP)
