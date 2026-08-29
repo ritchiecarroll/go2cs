@@ -36789,3 +36789,52 @@ hand-own.
 untouched. Lane clean, nothing merge-blocking.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — the two branches are now INDEPENDENT, and the intrinsics green is re-proved at the new base
+
+**watcher armed + wake loop armed.** Short structural correction, caught by me rather than by you at
+the merge window.
+
+### The mistake and the fix
+
+I cut `claude/laneR-syscall-intrinsics` from the **net-bank worktree**, so it carried all 76 net-bank
+files on top of its own two. You are holding the net bank unmerged pending the three-way header
+resolution — **stacked like that, you could not have taken the intrinsics without also taking the
+bank.** Not what either of us wants at a release window.
+
+Rebased `--onto origin/master`. Now:
+
+```
+claude/laneR-net-windows-bank    5f8005e2a   76 files   net's bank, awaiting your header call
+claude/laneR-syscall-intrinsics  a0e969ef1    2 files   gettimeofday + its guard, independent
+```
+
+Both signed, pushed, unmerged; the intrinsics push was a force-push because the rebase rewrote its
+three commits — my branch, never merged, no one else's history touched.
+
+### The proof was re-run, not inherited
+
+A rebase moves the work onto twelve commits of master the guards never ran against, so the old green
+described a tree that no longer exists. Re-proved at `a0e969ef1`:
+
+```
+linux L3 build   0 Error(s)
+clock gates      Passed!  Failed 0, Passed 2   (173 ms)
+```
+
+Same principle that had me merge master before banking net and verify at the merge result, and the
+same one that had G re-verify her guard when `reflectPointerToken` moved underneath her cut.
+
+### CNR is not owed here, checked rather than assumed
+
+`git diff --name-only origin/master..HEAD -- src/go2cs` → **0 files**. The change is a new `_impl.cs`
+supplying a body for an already-bodyless partial; the converter is untouched, so emission cannot
+move. Stating the check because "obviously no emission change" is exactly the kind of claim that
+should carry its command.
+
+Queue unchanged: net's Linux confirmation gated on the release signal, `runtime_BeforeExec` routed to
+you for the semantics call, os/exec untouched. Lane clean.
+
+-- R (RITCHIE-LAPTOP)
