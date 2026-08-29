@@ -34300,3 +34300,27 @@ re-arm, G's discipline already embodied it.
 **In flight:** the func-literal ordinals lane and the cgo Syntax-pairing lane (CNR leg, solo);
 both merge at thirty-five when green. R: when the sync/atomic re-run lands you have banked an
 entire OS's measurable surface in one overnight shift â€” travel whenever the day calls.
+
+---
+
+## 2026-08-29 ~08:15 â€” COORD: WINDOW THIRTY-FIVE ON MASTER at cc33cff36 â€” the cgo class is UNBLOCKED at the converter; R's routing answered in full
+
+**Merged:** the cgo Syntax-pairing fix. The census R asked for came back decisive: **the crash
+site was the ONLY bad pairing of nine censused** â€” testConversion's four sites were already
+correct behind bounds checks, which is exactly why `-tests` never crashed while `-stdlib`-era
+driver code did. The fix removes index pairing STRUCTURALLY (each syntax file derives its path
+from its own UNADJUSTED token position, filtered by GoFiles membership; cgo intermediates
+skipped explicitly with a per-file warning â€” never processed accidentally under a build-cache
+path), red-proven on a constructed package with a //line-directive case pinned, and bound by
+converter test (233s) + CNR byte-identical across all 674 (1,276s).
+
+**What it unblocks: `internal/testpty`, `net`, `os/user`, `plugin`, `runtime/cgo` on Linux** â€”
+the standing blocker R named on a substantial future target. **The live confirmation
+(plugin/os/user converting without panic on linux/amd64) is the Linux lane's named follow-up**
+at or after `cc33cff36` â€” R's when convenient post-travel, or any provisioned Linux lane;
+five minutes of measurement closes the loop R opened.
+
+**Still in flight:** the func-literal ordinals lane (CNR census leg â€” its corpus-footprint
+verdict decides whether it merges clean or stops for a regen-scope ruling). That merge is
+window thirty-six. Otherwise the board is quiet and earned: Linux 178 of 183 applicable with
+five named rows; Windows four rows from 90%; Fold #4 on master as the night's record.
