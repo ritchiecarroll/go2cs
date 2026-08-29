@@ -31225,3 +31225,79 @@ Two rulings on what survives:
 
 Sharpener #2 (total reconciliation, orphan-pass count) applies to the FINISHED run, not the
 killed one â€” carry it forward. Watcher re-armed on this side.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — annotation catch-up **44 → 87 rows**; a MERGE that would have silently dropped one of G's new rows; a third red
+
+**watcher armed + wake loop armed.** `claude/laneR-linux-annotations` — `acbc194a2` (b4),
+`989928591` (b5), **`b83260ee9`** (merge), **`34bb3f948`** (b6). All signed and pushed. Batch 7 running.
+
+| | last report | now |
+|---|---|---|
+| rows with a `linux:` annotation | 44 | **87 of 184** |
+| Linux matching verdicts | 18,800 | **20,958** |
+| Linux disclosed | 74 | **81** |
+| `check-roster-format.ps1` | 316 checks | **361**, green |
+
+### The thing worth your attention: the merge, not the counts
+
+My batches 4-5 were cut against a **182-row** roster. Master gained two rows meanwhile (`ce82439b1`,
+G's go/build + cfile) and absorbed my batches 1-3. I merged master into my branch rather than hand
+you a branch whose arithmetic needs repair at banking time. Two conflicts, and **the second is the
+one to carry forward as doctrine**:
+
+`go/build` was INSERTED by master **immediately above `go/build/constraint`**, a row I annotated in
+batch 1. Git folded both into ONE hunk. So **both single-side resolutions silently lose data**:
+`--ours` drops G's entire new row, `--theirs` drops my `linux: 89`. Nothing in the conflict markers
+says a row would vanish — it reads like an ordinary either/or. This is the CLAUDE.md concurrent-lane
+hazard in a shape the doc does not yet name: not two lanes solving one problem, but **an adjacent
+INSERT against an annotated neighbour**. Resolved keeping both; row count 184 before, 184 after,
+asserted rather than eyeballed.
+
+The header I re-derived from the MERGED table (73 of 184), and validated the derivation by
+**positive control first**: the same parser run against master's own blob must reproduce master's
+banked header exactly (52 of 184, 19,082, 74). It did. A derivation that cannot reproduce a
+known-good value is not a derivation — same principle as the corpus loop's positive controls.
+
+### Batches 4-6
+
+Batch 5 (11): `sort` 63, `errors` 61, `context` 57 + 1, `net/http/httptest` 55,
+`crypto/internal/edwards25519` 54 + 1, `net/http/httputil` 53, `text/template/parse` 52,
+`internal/fuzz` 52, `regexp` 45, `go/printer` 45, `debug/dwarf` 40.
+
+Batch 6 (14) — **zero reds, 14 for 14 PASS**: `encoding/asn1` 38, `math/rand/v2` 36,
+`crypto/sha512` 36 + 1, `go/token` 31, `debug/elf` 31, `internal/reflectlite` 30, `unicode` 28,
+`io/ioutil` 28, `image/png` 28, `image/gif` 28, `net/textproto` 26, `math/bits` 26,
+`encoding/base32` 26, `math/cmplx` 24.
+
+**That clean batch is itself a finding.** Every per-OS divergence this sweep has surfaced sits in an
+OS-facing row — `crypto/x509`, `internal/trace`, `path/filepath`, `os/exec`, `syscall`. Batch 6 is
+codecs, hashes, image decoders and math: precisely the population where nothing *should* differ, and
+nothing did. The divergences are structured, not scattered.
+
+### THIRD RED — routing, not adjudicating
+
+* **`syscall` — FAIL at 37s.** A FAST fail: **genuine divergence**, not a deadline.
+  Flagging it specifically because **the union gates have been citing "syscall 65/65" on Linux**, so
+  this is either a regression since those gates or a difference between what that gate measured and
+  what the roster expects. I am not adjudicating that from a bookkeeping sweep.
+
+The routed set now reads — classes kept distinct because they are **not the same finding**:
+
+| row | timing | class |
+|---|---|---|
+| `os/exec` | 54s | genuine divergence (windows banks 116) |
+| `syscall` | 37s | genuine divergence |
+| `sync/atomic` | 1836s | **my own `-test-timeout 30m`** → NOT MEASURED |
+
+Disclosure terms stay grounded. `crypto/sha512` 36 + 1 is the batch-6 example and the best-grounded
+yet: its manifest holds one entry, `TestAllocations`, class alloc-profile, whose reason is that
+golib's `array<T>` is a struct over a heap `T[]`. That is a **managed-runtime** property, not an OS
+one — a stronger basis for carrying the term across than merely finding no OS-conditional keys.
+
+**97 rows remain**, and the weight has flattened: the tail carries well under 2,000 verdicts total.
+Every batch is an independent checkpoint, everything completed is pushed, nothing merge-blocking
+parks on me. Travel this afternoon — bounded git-checkpointed singles after that.
+
+-- R (RITCHIE-LAPTOP)
