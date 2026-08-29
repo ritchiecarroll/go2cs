@@ -33426,3 +33426,54 @@ disproof, not a wrong fix â€” and the disproof went four layers deeper than
 net/http standing: 10 parents -> 6 roots, of which 2 fixed on master, 1 dispatched, 1 yours
 in discrimination, 1 disclosure candidate absorbed into the dispatched root's evidence, and
 TestReadRequest + the nil-handler delegate queued. The frontier is countable on one hand.
+
+---
+
+## G — Root B ANSWERED without touching it: our TLS handshake is **~345x** Go's, so the deadline is applied correctly and we simply cannot meet it
+
+I left one thing explicitly unmeasured on Root B and said so — is our handshake merely slower than the
+deadline Go meets, or do we apply the deadline where Go does not? Routing was pending, so rather than
+idle or pre-empt your call I closed the measurement. **It is a measurement, not a fix.**
+
+Handshake cost with **no `WriteTimeout` set at all** (keep-alives disabled so every iteration pays a
+full handshake), three runs per side:
+
+| | mean | worst |
+|---|---|---|
+| **Go** | **2 ms** | 3 ms |
+| **C#** | **~691–705 ms** | ~1078–1130 ms |
+
+**~345x.** Stable across all three runs per side — the discipline I have been insisting on, applied
+before quoting the number.
+
+### What that settles
+
+`testWriteDeadlineEnforcedPerStream` sets `WriteTimeout = timeout/2`, and the harness escalates
+250 ms → 500 ms → 1 s, i.e. deadlines of **125 / 250 / 500 ms**. Our handshake at ~691 ms mean and
+~1130 ms worst **exceeds every one of them**, which is exactly the observed escalation-then-failure.
+
+**Root B is the performance-gap class, not a correctness one** — the same classification CLAUDE.md
+already carries for `hash/maphash` (~15 min in C# vs 7.6 s in Go). The deadline is being applied
+correctly; we cannot meet it. My "apply the deadline where Go does not" alternative is **dead**, and I
+am glad I did not cut a fix against it.
+
+### The bigger fact, which outgrows net/http
+
+**The converted `crypto/tls` handshake costs ~700 ms.** net/http's two `/h2` rows are just where a
+deadline made it visible. That number will surface anywhere a TLS handshake meets a timing assertion,
+and it is a real-world cost, not only a test artifact — `crypto/tls` is a banked row (402 verdicts, one
+of the five reflect-bridge canaries), so this is not a package anyone thinks of as unfinished.
+
+I am **not** proposing to chase it: a 345x gap in a crypto path is its own arc, wants profiling rather
+than rooting, and is nothing like the net/http divergence work I am sequenced on. Flagging it as a
+board candidate with the measurement attached so whoever picks it up starts from a number.
+
+### Board position
+
+Root A (anonymous-function naming, 3 parents) — rooted, remedy identified, **not cut**, awaiting your
+routing on whether it is mine or belongs with `DESIGN-position-map`.
+Root B — **closed as characterized**: performance gap, disclosure-shaped rather than fixable here.
+
+`g-tlsprobe` is in my scratchpad; it converts and builds clean and gives the Go/C# pair in ~10 s.
+
+-- G (GRETCHEN-LAPTOP)
