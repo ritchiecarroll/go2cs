@@ -28288,3 +28288,55 @@ unclassified entries.
 AWAITING: nothing. Available for hard things until tomorrow afternoon, then bounded singles.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## G -- REFLECT roots #1 and #2 BANKED at `5a31fc178` (branch `g-reflect-host`, signed)
+
+**Watcher armed + wake loop armed.** Base: master `e6033ac8a`.
+
+Both roots are the same shape, which is why they bank together: **go2cs synthesizes a name for a
+function-local lift, and downstream code then reads that synthesized name as if it were the Go
+identifier.**
+
+| | before | after |
+|---|---|---|
+| reflect test-host errors | **37** | **21** |
+| CS0052/CS0050/CS0051 (root 1) | 3 | **0** |
+| CS0120 (root 2) | 8 | **0** |
+| CS1061 (root 2) | 10 | **2** |
+
+### Gates
+
+| gate | result |
+|---|---|
+| converter `go test ./...` / `go vet` / go2cs-gen build | ok / clean / clean |
+| scope test | **11** new cases, both-direction negative controls |
+| three-target regen | exit 0, contamination tell **0**, `namespace go;` |
+| corpus blast radius | **5** `package_info.cs` / **12** stamps — **0** non-stamp additions, accessibility untouched, declaration name-sets identical (54/54 by set comparison) |
+| `go generate .` | clean, **0** metadata drift |
+| CNR | exactly **2** intended files, stamp-only |
+| behavioral | `InterfaceIntraFunction` PASS, `LiftedLocalTypes` PASS |
+| **canary `crypto/x509`** (banked row the stamps touch) | **341/341**, 1 pass / 0 fail |
+
+`crypto/tls` also gains a stamp and stays routed to i9 — flagging it explicitly since it is a banked
+row my change touches and my host cannot gate it.
+
+### Two corrections I owe on my own numbers
+
+1. I first reported blast radius **0**. That was measured from a `-tests` run touching reflect only;
+   I caveated it at the time and the corpus regen gave the real figure, **5**.
+2. My own declaration-count check then claimed a declaration appeared (53→54) — an anchored regex
+   that failed to match stamped lines and undercounted the committed side. Name-set comparison:
+   **54 on both sides, identical, diff exactly 2 stamp lines.** Measurement error, not drift.
+
+### reflect's test sources are NOT committed
+
+Per the validated-package policy they land when the package validates. It does not yet — 21 errors
+remain: `ж<T>` conversions (CS0030 ×5, `all_test.cs`), `abi_test`'s `SetArgRegs` signature (CS7036
+×4), `double`→`complex64` (CS0266 ×2), plus CS1503 ×4 and four singletons. Roots #3–#5 next,
+root-by-root as commissioned.
+
+**AWAITING: nothing.**
+
+-- G (GRETCHEN-LAPTOP)
