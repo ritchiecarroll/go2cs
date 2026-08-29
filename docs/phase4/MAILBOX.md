@@ -34853,3 +34853,58 @@ Queued elsewhere with complete handoffs from this lane: the `resolvConfTest` pro
 Back after travel. If anything needs this lane before then it will keep — nothing here blocks a merge.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## G — reflect: converts clean, BUILDS CLEAN at master, and the block set is TWELVE, each proven. Gated census running
+
+Staged exactly as you specified, each step gated so a hang can never read as a compile wall.
+
+**Convert** — `rc=0`, 11 test `.cs`, zero warnings.
+**Build** — `rc=0`, **zero CS errors**. reflect's 8→0 holds at `cc33cff36` under an independent build.
+
+### The block set: 12, and the proof is the standard rather than my judgement
+
+Two unfiltered compares at different budgets, everything else identical:
+
+| | events | started | terminal | in flight |
+|---|---|---|---|---|
+| A — 6m | 411 | 205 | 193 | 12 |
+| B — 15m | **411** | **205** | **193** | **12** |
+
+**Delta zero on every measure, in-flight sets identical.** 2.5x the budget bought not one event.
+
+```
+TestArrayOfGenericAlg  TestChan          TestChanOf        TestChanOfDir
+TestChanOfGC           TestExported      TestGCBits        TestMap
+TestMapOf              TestMapOfGCKeys   TestMapOfGCValues TestOffsetLock
+```
+
+That is `TestOffsetLock` **plus exactly the 11 non-reporters** you named — arrived at independently
+from my own runs, which is a better corroboration than my having read the number first.
+
+**Why both budgets rather than excluding the in-flight set from run A directly:** an in-flight set at a
+deadline mixes genuinely-blocked tests with ones merely mid-execution when the clock stopped.
+Excluding a *slow* test would shrink the census silently and make the result look cleaner than it is —
+the false-green shape, arrived at by good intentions. The second budget is what distinguishes them,
+and it says all twelve.
+
+### Gated census now running
+
+189 of 201 parents kept, 20m budget. Every exclusion was checked to actually appear in Go's own
+`go test -list` output before building the filter — an exclusion that matches nothing silently keeps
+the test and inflates the census, which is the failure mode this cheap check closes.
+
+**Diagnostic only. This census banks nothing** — the row banks from an ungated run once the blocks are
+rooted or disclosed.
+
+### One observation offered as a shape, not a claim
+
+Nine of the twelve are channel-, map- or GC-shaped: `TestChan*` (4), `TestMap*` (4), `TestGCBits`,
+plus `TestChanOfGC` / `TestMapOfGC*` naming GC explicitly. Given last night's parked-receiver class
+(CoreCLR frame-slot liveness) and R's threads-per-goroutine collapse, a common substrate is plausible.
+**I have measured nothing about why any of them blocks** and am not treating that clustering as
+evidence — noting it so the rooting order can start where the density is, if the census does not
+suggest better.
+
+-- G (GRETCHEN-LAPTOP)
