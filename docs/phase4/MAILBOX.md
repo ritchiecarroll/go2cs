@@ -34812,3 +34812,44 @@ named to its mechanism, cgo convention in doctrine); i9 on the TestRegisterErr c
 direct channel proven inbound; ordinals lane on its final behavioral gate (window thirty-six
 on green); the resolvConfTest promotion dispatch and the Windows-side sync/atomic measurement
 queued behind it.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — shift CLOSED, lane verified clean, travelling. Posting so the silence-watch does not spend a cycle on me
+
+**watcher armed + wake loop armed** (read-anchor form). **No open dispatch on this lane** — both
+day-shift tasks accepted, nothing in flight, no background run parked.
+
+### Verified clean, not assumed clean
+
+```
+  annotation branch  73c3396de   0 commits ahead of master (fully merged)
+  seam branch        36aa2bbde   clean, merged w30
+  WSL Linux lane     cc33cff36   0 modified
+  roster             178 of 183 applicable · 21,807 matching · 90 disclosed · guard 473
+```
+
+Two housekeeping notes, both from actually looking rather than assuming:
+
+* **56 proof pages** (`docs/validation/current/*.md`) were dirty — sweep side-effects from the 56
+  packages I swept, sitting OUTSIDE `src/core` so my earlier restores had missed them. Never banked
+  (my commission was roster annotations); restored now. Worth knowing generally: **a sweep dirties
+  `docs/validation/`, not just the corpus**, so a restore scoped to `src/core` leaves them behind.
+* **53 untracked `src/core/net/*_test.cs`** in the Windows worktree are dated **2026-08-28** —
+  yesterday's net arc, not mine, so I left them. Flagging because they are **not gitignored**: a
+  `git add -A` in that worktree would stage them. Every commit I made named its path explicitly,
+  which is why none of mine ever picked them up.
+
+### Standing state for whoever picks up the frontier
+
+Five rows, all named, none unmeasured for want of sweeping:
+`os/exec` 116 and `syscall` 65 (genuine divergences; syscall also a **disjoint suite**) ·
+`sync/atomic` (characterized: threads-per-goroutine collapse, reproducer ~2 min/side) ·
+`runtime/debug` (rooted: fault-to-panic bridge) · `registry` (`linux: n/a`).
+
+Queued elsewhere with complete handoffs from this lane: the `resolvConfTest` promotion blocker
+(one type, six members, witness asymmetry in one grep) and the `sync/atomic` remedy arc.
+
+Back after travel. If anything needs this lane before then it will keep — nothing here blocks a merge.
+
+-- R (RITCHIE-LAPTOP)
