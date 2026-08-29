@@ -30862,3 +30862,53 @@ prefix rather than the missing rows I first suspected.
 roster edits.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — annotation catch-up: **27 → 44 rows** across two banked batches. TWO REDS, and they are NOT the same kind of red
+
+**watcher armed + wake loop armed.** `claude/laneR-linux-annotations` — `f3622ce94` (batch 1),
+**`aadfeb627`** (batch 2), both signed and pushed.
+
+| | start | now |
+|---|---|---|
+| rows with a `linux:` annotation | 27 | **44** |
+| Linux matching verdicts | 12,877 | **18,800** |
+| Linux disclosed | 22 | **74** |
+| `check-roster-format.ps1` | 299 checks | **316**, green |
+
+Batch 2: `database/sql` 138 + 2, `encoding/binary` 137 + 9, `slices` 119 + 3, `bufio` 80 + 1,
+`fmt` 63, `io` 60 + 1, `strconv` 55 + 11. Header re-derived FROM THE TABLE each time, never
+hand-summed; +7 guard checks for +7 annotations.
+
+**A confirmation worth more than an annotation:** `text/template` was in my queue and is NOT
+re-annotated — it already banks `linux: 52`, and the sweep validated AGAINST that expectation (its
+verdict line carries the `(linux)` suffix). **A lane provisioned four hours ago independently
+reproduced previously banked Linux data.** That is better evidence the lane is sound than any of my
+own provisioning checks.
+
+**THE TWO REDS — please route these, I am not annotating either (a row without a count has nothing
+to bank), and they are different classes:**
+
+* **`os/exec` — FAIL at 54s. A FAST fail: genuine divergence.** Windows banks 116. This is my old
+  territory (the five-piece arc closed at 85 on Linux), so a red here may be a regression from
+  something merged since rather than a lane artifact. Characterised, NOT chased — opening it at
+  this hour on a bookkeeping commission, with the drive pending, is exactly the scope creep the
+  commission's "interruptible" framing warns against.
+* **`sync/atomic` — FAIL at 1836s, which is MY OWN `-test-timeout 30m` expiring.** That is the
+  TIMEOUT class: **NOT MEASURED**, not a divergence. Windows banks 108. Either the row needs a
+  longer floor on a Linux lane or it hangs there. **Passing the sweep's bare FAIL label along
+  unqualified would have read as two corpus regressions when one of them is a budget I chose.**
+
+**Method note carried from batch 1:** every disclosed term is grounded in the pinned manifests —
+`database/sql`, `encoding/binary`, `slices`, `bufio`, `strconv`, `io` all carry ZERO OS-conditional
+entries, so the same disclosure set applies on both runtimes and, with matched counts measured
+equal, the disclosed counts follow. An inference from two measurements, stated so it can be
+overturned rather than passed off as read from a run. The shortcut it replaces is falsified by the
+roster itself (`crypto/tls`: windows `3643 + 1` → `linux: 400 + 2`).
+
+**Batch 3 running** (path/filepath, net/url, mime/multipart, compress/flate, encoding/csv,
+text/scanner, hash/crc32, math/big, container/heap, regexp/syntax). 137 rows remain; each batch is
+an independent checkpoint and everything completed is already pushed.
+
+-- R (RITCHIE-LAPTOP)
