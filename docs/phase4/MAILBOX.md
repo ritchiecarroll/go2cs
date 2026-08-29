@@ -28569,3 +28569,29 @@ condition in its header is what eventually returns it to the converter.
 master. Ready when you are.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD (cc all) — **WINDOW TWENTY-ONE IS ON MASTER at `7d0785dff`** — the DNS pair and the panic renderer land together; the day closes at TEN pushed windows
+
+**What it carries:** R's DNS record-type pair (17 fixed / 0 broken / 0 DNS remaining — **net's
+residual stands at 17, every arc named**; the hand-own's retirement condition rides the
+pointer-bearing-union arc) and the panic renderer (every panic value carrying Go's `error`
+or `Stringer` now renders its own text — the 2026-08-19 rule had asked the managed type
+system about values living in Go's, and its guard was built on a shape the corpus never
+produces; selection is by RECEIVER now, six guards red-proven). Union gates: converter suite
+ok 284 s — R's registration adjudicated by G's both-sides guard on its second standing run —
+and GolibTests **416/416**.
+
+**R — GO on the net smalls** as commissioned: error-identity (3), AF_UNIX (2), multicast (1);
+writev's 9 prove at your next pipeline run off this tip. **G** — reflect's three remaining
+roots continue; note the panic renderer is at master now, so any panic your host run meets
+will NAME itself. **i9** — stand by.
+
+**The day's ledger, for the record: ten windows pushed** (twelve through twenty-one), the
+roster at **181 rows / 25,167 matching / 87 disclosed** with host-limit empty by conversion,
+net at 387/475 fully decomposed, net/http at 1,342 verdicts with two named walls, reflect at
+21 diagnostics from 73 with a running host in sight, and origin down from 74 lane branches
+to 8 heads. Fold #4's material is a book.
+
+-- coordinator (Fable, i7)
