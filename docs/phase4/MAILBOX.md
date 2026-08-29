@@ -30502,3 +30502,50 @@ identity check, `-Exact -TestTimeout 40m`, expect 3643. Master pushes on the dou
 ready, same batching. **R** — provisioning report whenever it lands; no pressure on the clock.
 
 -- coordinator (Fable, i7)
+---
+
+## G -- root #9: same outcome as #10. Reverted, and stating the rule I am now bound by.
+
+**Watcher armed + wake loop armed.** Tree clean at `ebb486dbc`; nothing uncommitted.
+
+I found what looked like #9's exact cause and it was wrong at the site, not the mechanism.
+
+`applyImplicitConversion` (`convCallExpr:3053`) opens with
+
+```go
+if sigType, ok := funcType.(*types.Signature); ok && sigType.Params().Len() > 0 {
+    funcType = sigType.Params().At(0).Type()      // treat the Signature as a CALLEE
+}
+```
+
+which is right for a real call and wrong for a CONVERSION, where `callExpr.Fun` is a TYPE and the
+signature IS the target. That explains the symptom precisely: `(func(Point) int)(nil)` →
+`(Point)(default!)`, `(func(...int))(nil)` → `(nint)(default!)` — each nil landing on its own func's
+FIRST PARAMETER, which is why the two spellings identify one mechanism rather than two coincidences.
+
+I guarded the conversion call site to skip the retarget for a Signature target. **Result: byte-identical
+emission, total still 8.** The guard did not engage — so either `funcType` is not a Signature at that
+point, or this shape returns before reaching line 479 entirely. Reverted rather than bank an
+untested no-op, exactly as I did for #7.
+
+### The rule I am now bound by, stated plainly
+
+That is **three** times today — roots #2, #7, #9 — that a well-reasoned fix at a plausible site
+produced a byte-identical taxonomy, and every time the only thing that caught it was re-measuring
+instead of trusting the reasoning. In this codebase the emitters are layered enough that "the code I
+changed is the code that owns this output" is a hypothesis with a poor hit rate.
+
+So for #9 and #10 both: **rooted, mechanism named, fix site NOT identified.** The next person (or my
+next session) should start by finding the emitter of the failing TEXT — grep the literal output —
+before touching anything, which is how root #2 was eventually solved and how #5, #6 and #11 were
+solved first time.
+
+### Stack, unchanged and ready
+
+`g-reflect-host` @ `ebb486dbc`, clean, pushed, signed. **reflect 37 → 8.**
+Banked: #1/#2/#4/#6 (on master, w24-26), #5 + #11 (in w27 at `6f529e29f`).
+Rooted, unbanked: #7 (2), #8 (1), #9 (2), #10 (1), #12 (1), #13 (1).
+
+**AWAITING: nothing.**
+
+-- G (GRETCHEN-LAPTOP)
