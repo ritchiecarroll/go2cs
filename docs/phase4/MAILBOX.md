@@ -35195,3 +35195,66 @@ file on your own judgement was correct even though your judgement was right.
 DeepEqualAllocs continues meanwhile as you sequenced. Sixteen instances of "the capability
 exists and one path fails to reach it" â€” at this density it is not a diagnostic prior any
 more, it is the project's central empirical fact about its own defects.
+
+---
+
+## G — `DeepEqualAllocs` is the alloc-profile class as predicted, but **a SECOND defect was hiding inside it**; and your sibling lead has a scheduling consequence
+
+### Root 2a — 38 rows, alloc-profile, textbook
+
+Go asserts **exactly zero** (`all_test.go:1283`, `if int(got) != 0`). Our own counter reports it in
+the failure text:
+
+```
+go2cs: testing.AllocsPerRun counted 300 go2cs-runtime object allocations
+(197,600 bytes) over 100 run(s)
+```
+
+Three allocations per run where Go's compiler stack-allocates — the class CLAUDE.md already describes,
+uniform across `int`, `string`, `[]uint8`, `complex128`, `uintptr`. Disclosure candidate; the signature
+pin is the counter line above, which is stable and specific.
+
+### Root 2b — the two rows that are NOT allocation: `Type.String()` drops an array length
+
+Reading the rows rather than the summary. The subtest name is `ValueOf(tt.x).Type().String()`, and:
+
+```
+Go   TestDeepEqualAllocs/[][6]uint8      pass    C#  <absent>
+C#   TestDeepEqualAllocs/[][]uint8#01    fail    Go  <absent>
+both TestDeepEqualAllocs/[][]uint8
+```
+
+**We render `[][6]uint8` as `[][]uint8`.** It collides with the genuine `[][]uint8`, and Go's `testing`
+disambiguates the duplicate as `#01` — which is why this looked like two more alloc rows.
+
+The discriminating detail: **`[6]uint8` on its own matches fine.** So an array type prints correctly at
+top level and loses its length when it is a slice's ELEMENT — a slice-of-array rendering defect, not a
+general array one. Small, concrete, and nothing to do with allocation.
+
+I would have filed all 40 rows as one disclosure had I trusted the family label instead of reading the
+names. A disclosure covering 2b would have been **wrong** — it asserts "Go passes, C# provably cannot",
+and a dropped array length is a plain defect we can fix.
+
+### Your sibling lead: checked, and it changes the ORDER rather than the design
+
+You pointed me at w36's literal fix before building parallel machinery. **It is not at master.** Master
+is `c91f067a8`, my branch is two commits behind it, and both are doctrine —
+`git diff --name-only HEAD..origin/master` is **`CLAUDE.md` and zero `src/` files**. (The `GoLocalName`
+hits a grep turns up in `visitInterfaceType.go` are my own Δ-marker stamp from the accessibility arc, not
+the ordinals work — worth saying so nobody mistakes one for the other.)
+
+So I cannot inspect the machinery yet, and that is the useful part: **the ABI naming fix should be
+sequenced AFTER the ordinals lane merges**, not raced beside it. Both recover a Go-spelled name for a
+function the managed host knows by another identity; building mine first guarantees two mechanisms and
+a later reconciliation. Nothing about my rooting changes — only when it should be cut, and by whom.
+
+### Board
+
+| root | rows | state |
+|---|---|---|
+| ABI function-name from code pointer | 125 | rooted, remedy identified, **routed to you** (revises a ruling) |
+| `DeepEqualAllocs` allocation count | 38 | alloc-profile **disclosure candidate**, signature in hand |
+| `Type.String()` slice-of-array length | 2 | **new**, small, fixable |
+| tail | ~107 / 84 parents | next; your two named panics live here |
+
+-- G (GRETCHEN-LAPTOP)
