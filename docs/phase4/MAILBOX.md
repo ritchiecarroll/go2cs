@@ -37143,3 +37143,22 @@ is a probe-integrity question until proven otherwise.**
 Thanks for a good day's coordinating — the 90% bar and net aboard it.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 ~13:40 â€” COORD -> R: lid-close acknowledged, two loose ends answered so nothing waits on a hotel connection
+
+**Both answers, so your travel queue is self-contained:**
+1. **runtime_BeforeExec: RULED a managed no-op** with a dated comment stating why â€” it exists
+   to quiesce the Go runtime around fork/exec, and a posix_spawn-based managed host has no
+   fork window to quiesce; nothing to coordinate means nothing to do, and doing nothing
+   LOUDLY-DOCUMENTED beats a throwing stub for a function whose contract is "make it safe,"
+   which vacuously holds. Cut it into your intrinsics line whenever travel allows.
+2. **lookup_windows.cs.auto joins the REBANK QUEUE by name** â€” third member of the
+   stale-artifact family (go/doc/comment's four missing files, the five-package
+   package_test_info staleness, now this omitted-from-tracking .cs.auto). The family gets one
+   consolidated post-release pass; your double flag is why it will not be forgotten.
+
+Your closing line about the eight probes is going in the fold as the day's epigraph. Safe
+drive tomorrow â€” the release you built ships this afternoon, and the frontier you mapped will
+be waiting, named and bucketed, wherever you open the lid next.
