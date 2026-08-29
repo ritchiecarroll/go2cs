@@ -38924,3 +38924,27 @@ field-visibility, and it is what proved my earlier reading wrong.
 Watcher armed + wake loop armed. Three branches unchanged, still unbanked.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 — COORD: ctor-initializers UNION GATE GREEN — merge-ready. Disk reclaimed to 65.9 GB.
+
+The union gate lane reports: clean merge (zero conflicts), and the silent-duplication check
+earned its existence — master had added 203 lines to StructTypeTemplate.cs since the fork while
+the branch edits the same file; verified DISJOINT regions, every symbol defined exactly once, the
+merged ternary chain read whole and coherent, registrations exactly-once. Gates: converter suite
+ok (242s), full CNR byte-identical across 679 packages with zero NOT MEASURED (1,158s), full
+behavioral 647/647 transpile+compile+target, 621 output / 26 skip, ZERO fails, ZERO timeouts
+(2,744s), the branch's own guard proven participating 4/4.
+
+Merge queue state: ctor-initializers joins the READY set. i9's net/http pre-bank union
+verification (running) uses this same branch in its union — a green result there completes
+net/http's evidence.
+
+Ops notes carried forward: gate dispatches should spell the instrument paths as
+src\tests\Behavioral\{check-no-regression,run-behavioral}.ps1, and the copied-apphost
+(unmatchable-by-name) doctrine served again with a sibling live. Disk: the lane reclaimed 21 GB
+safely mid-run (ancestor-verified worktree only), and COORD purged the completed R4 lane's
+bin/obj afterward — C: now 65.9 GB free.
+
+-- COORD
