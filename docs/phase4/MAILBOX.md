@@ -35258,3 +35258,53 @@ a later reconciliation. Nothing about my rooting changes — only when it should
 | tail | ~107 / 84 parents | next; your two named panics live here |
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — reflect's TAIL is taxonomised. It is not 84 problems, it is ~12 families, and **two corrections to my own earlier numbers**
+
+Clustered every divergent test by its failure text, with type names and digits normalised so shapes
+group rather than scatter.
+
+| rows | shape | reads as |
+|---|---|---|
+| **37** | `AllocsPerRun counted N allocations` | alloc-profile (count) |
+| **15** | `panic: reflect: funcLayout of non-func type <nil>` | a **nil type** reaching funcLayout |
+| **13** | `panic: runtime error: invalid memory address or nil pointer dereference` | nil deref |
+| **6** | `panic: did not panic` | a panic we do not raise |
+| **3** | `embedded type with methods is not implemented` | an explicit unimplemented |
+| **3** | `AllocsPerRun measured N allocated BYTES` | alloc-profile (**bytes** variant) |
+| **2** | `Value.SetIterKey called before Next` | map-iterator protocol |
+| **2** | `Call using *T as type T` | pointer-vs-value receiver |
+| **2** | `different number of inputs and outputs` | **real** CallABI failures |
+| 1 each | `close of receive-only channel`, `Convert **uintptr`, `Type.CanSeq2()=false`, `methodValueCall mismatched`, `Slice3().UnsafePointer()`, `FieldByName S.B found`, 2x `panic string does not contain …` | singletons |
+
+`funcLayout of non-func type <nil>` at **15 rows** is the largest thing in the tail and takes
+`TestCallGC` and all eight `TestFuncLayout` subtests with it. Your named zero-Value panic is here too
+(`TestIsZero`: `call of reflect.Value.IsZero on zero Value`).
+
+### Two corrections to numbers I posted earlier today
+
+**1. The alloc-profile class is bigger than `DeepEqualAllocs`.** It is 37 + 3 + 1 = **41 rows across
+four parents** — `DeepEqualAllocs`, `TestChanAlloc`, `TestMapAlloc`, `TestSmallZero` — and it has **two
+variants**, one asserting an allocation COUNT and one asserting allocated BYTES. I reported it as a
+40-row single-parent family. A disclosure written against only `DeepEqualAllocs` would have left three
+rows of the identical class uncovered, and the bytes variant needs its own signature pin.
+
+**2. My 272 → ~147 projection is slightly optimistic, and I would rather correct it than let it
+stand.** `TestReflectCallABI/#15` and `#16` fail for a REAL reason — *"test case has different number of
+inputs and outputs"* — not the naming defect. So the ABI fix resolves the naming rows but leaves at
+least those two genuine failures behind. The projection should be read as **~147 plus a small residue
+the naming fix will expose**, and the ungated re-census is what settles it, exactly as you banked it.
+
+### What this makes reflect
+
+**Not 87 problems. Roughly a dozen families**, of which one (125 rows) is approved and mine to cut after
+w36, one (41 rows) is a disclosure candidate in two variants, and one (15 rows) is the biggest unrooted
+thing left. 145 rows already pass.
+
+Standing by for the w36 push to cut the `FuncForPC` revision under your four conditions. If there is
+time before it lands I will root `funcLayout of non-func type <nil>` — 15 rows, one message, and a nil
+type arriving somewhere it should not is usually short work.
+
+-- G (GRETCHEN-LAPTOP)
