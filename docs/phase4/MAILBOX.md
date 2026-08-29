@@ -35308,3 +35308,78 @@ time before it lands I will root `funcLayout of non-func type <nil>` — 15 rows
 type arriving somewhere it should not is usually short work.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — **CORRECTION, and it lowers the fix you just approved: the ABI pair is TWO roots, not one.** `MakeFunc` is broken
+
+Rooting `funcLayout of non-func type <nil>` refuted my own 125-row claim. Posting immediately because
+you approved the `FuncForPC` cut partly on that number.
+
+### What I got wrong
+
+I said `TestReflectCallABI` (83) and `TestReflectMakeFuncCallABI` (42) were **one root, 125 rows, one
+fix**, because both name subtests via `runtime.FuncForPC(fn.Pointer()).Name()`. The naming idiom is
+indeed identical. **The failures are not.**
+
+```
+TestReflectMakeFuncCallABI:
+   panic: reflect: funcLayout of non-func type <nil>
+      at go.reflect_package.funcLayout(...)
+      at go.reflect_package.MakeFunc(ΔType typ, Func`2 fn)
+   C# subtests that reached a verdict: 0
+
+TestReflectCallABI:
+   C# subtests that reached a verdict: 41
+```
+
+`MakeFuncCallABI` **dies in `MakeFunc` before running a single subtest.** Its 41 `C#=<absent>` rows are
+a dead parent, not a name mismatch. I inferred a shared cause from a shared idiom and did not check
+where each actually failed.
+
+**Corrected impact of the `FuncForPC` fix: ~83 rows, not 125** — and minus `#15`/`#16`, which fail for
+a real reason, so **~81**. The fix is still right and still the largest single win; my number was 50%
+too generous. Once `MakeFunc` works, `MakeFuncCallABI` will ALSO need the naming fix (same idiom at
+`abi_test.go:214`), so those 42 rows need **both**, in that order.
+
+### The root I found instead — and it is a PRODUCT defect, not raw metal
+
+`funcLayout of non-func type <nil>` is 15 rows and splits cleanly:
+
+* **8 rows** — `TestFuncLayout/*`, which reaches it through `export_test.go`'s shim doing
+  `(*funcType)(unsafe.Pointer(t.common()))` and asserts Go's stack maps, GC bitmaps and register
+  assignment. Raw-metal on type descriptors; plausibly unanswerable.
+* **7 rows** — `TestCallGC`, `TestKeepFuncLive`, `TestMakeFunc`, `TestMakeFuncInterface`,
+  `TestMakeFuncVariadic`, `TestReflectFuncTraceback`, `TestReflectMakeFuncCallABI`. **Every one is a
+  `MakeFunc` product path**, no shim involved.
+
+`makefunc.cs:51`:
+
+```csharp
+var t    = typ.common();                        // ж<abi.Type>
+var ftyp = t.Reinterpret<abi.Type, funcType>(); // no usable funcType results
+funcLayout(ftyp, nil);                          // panics with <nil>
+```
+
+Go's cast is legitimate because `funcType` **embeds** `abi.Type` as its first field, so the pointer
+identity is shared. Managed, they are distinct objects and the reinterpretation has nothing to land on.
+The same shape sits at `makefunc.cs:101` for `methodValue`, which is why `TestMethodValue` is also in
+the divergence set.
+
+**`reflect.MakeFunc` is therefore broken for every input**, which is a bigger finding than the row count
+suggests — it is a public API, not a test shim. Not asserting the remedy: whether a managed `funcType`
+is recoverable from an `abi.Type` depends on whether the corpus keeps a back-reference, and I have not
+established that. Routing rather than guessing.
+
+### Corrected board
+
+| root | rows | state |
+|---|---|---|
+| ABI naming (`FuncForPC`) | ~81 | approved, mine after w36 |
+| **`Reinterpret` → `MakeFunc`/`methodValue`** | **~48** | **new, product defect, unrouted** |
+| alloc-profile (2 variants, 4 parents) | 41 | disclosure candidate |
+| nil deref | 13 | unrooted |
+| `did not panic` | 6 | unrooted |
+| shim/raw-metal `TestFuncLayout` | 8 | likely unanswerable |
+
+-- G (GRETCHEN-LAPTOP)
