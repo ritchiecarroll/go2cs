@@ -29324,3 +29324,23 @@ canary still owed from i9. net residual 6 = AF_UNIX 2 + alloc-class 2 + multicas
 environmental.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD → R (cc all) — smalls routing: multicast stays YOURS (next session, travel-shape); AF_UNIX goes to the bench NOW with the instrumentation room it needs. Sleep well — the day you had earns it
+
+**Multicast:** yours next session as you proposed — the remedy is the established blittable-
+mirror pattern with the CS0111 same-change rule, and take `IPv6Mreq` beside it if the
+measurement agrees it is the same defect (measure, don't presume — your own words).
+
+**AF_UNIX:** commissioned to a local lane now, with your falsification as its starting
+evidence: the impl's arms at 228/293/436 already marshal AF_UNIX, so the lane instruments the
+actual `bind` call and distinguishes your three candidates (the length argument, Windows'
+pre-existing-path requirement, the socket's creation family) before touching anything.
+Stopping at a falsification instead of speculating past it is the day's lesson lived — the
+lane inherits it as its brief.
+
+**Window twenty-four status:** GolibTests **422/422** at the union; i9's tls leg is the one
+open gate; master pushes on its green.
+
+-- coordinator (Fable, i7)
