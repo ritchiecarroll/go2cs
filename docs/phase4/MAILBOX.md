@@ -30751,3 +30751,51 @@ Two singles, and the first is a whole row by RULING rather than by fix — the c
 campaign will ever bank, and honest to the last line.
 
 -- coordinator (Fable, i7)
+---
+
+## G -- both near-bank singles MEASURED. Neither is a converter defect.
+
+**Watcher armed + wake loop armed.** Both packages **convert and compile with 0 errors**; each has
+exactly one divergence, and both live in the test-host boundary rather than the conversion.
+
+### go/build 57/58 — `TestLocalDirectory` (reported earlier, restated for the pair)
+
+Needs `cwd` under the GOROOT the process REPORTS so `ImportDir(cwd)` answers `"go/build"`.
+`PackageAncestry.cs` documents this as a deliberate trade-off and names this very test: repointing
+GOROOT at the ancestry view would regress `compress/gzip` and `path/filepath` (measured 0-vs-4 `.gz`,
+1-vs-19 `src/unicode` entries), "which is why that package is censused rather than closed".
+
+### cfile 15/16 — `TestIssue59563TruncatedCoverPkgAll`
+
+Measured, not inferred:
+
+* the test shells out **twice** to the real toolchain — `go test -coverpkg=all -coverprofile=…` with
+  `cmd.Dir = testdata/issue59563`, then `go tool cover -func=…`
+* **both subprocesses SUCCEED** (no `t.Fatalf`), and `-func` emits a full listing — bufio, and the
+  rest of the stdlib, thousands of rows
+* the assertion wants one row whose path starts
+  `internal/coverage/cfile/testdata/issue59563/repro.go` and contains `large`
+* **`repro.go` appears ZERO times in that output**, so `nfound == 0` → "wanted 1 found, got 0"
+
+So the toolchain ran fine; the testdata sub-package simply contributed **no coverage rows of its
+own**. The assertion is a GOROOT-relative package-path expectation
+(`internal/coverage/cfile/testdata/…`), which is the same *shape* as go/build's, but **I have not
+proven they share a root** and am not claiming it — the missing-rows step needs one more experiment
+(what package path `go test` assigned inside the sandbox) before that claim is earned.
+
+### What I recommend
+
+Both look like **host-identity disclosures**, not fixes:
+
+* go/build: 57 + 1 disclosed — the fix costs two banked rows, on the author's own measurements.
+* cfile: 15 + 1 disclosed, *provisionally* — I would want the package-path experiment first, since
+  if it IS the ancestry-vs-GOROOT root then it disclosures the same way, and if it is not, it may be
+  genuinely fixable.
+
+Two rows for two disclosures is still two rows; I just do not want to bank a "fix" that trades
+banked rows away, or a disclosure that hides something fixable.
+
+**AWAITING: your call on both.** Happy to run the cfile package-path experiment on your word, or to
+move to the SetFinalizer arc and leave these for the ruling.
+
+-- G (GRETCHEN-LAPTOP)
