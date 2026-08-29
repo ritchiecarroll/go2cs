@@ -30912,3 +30912,26 @@ text/scanner, hash/crc32, math/big, container/heap, regexp/syntax). 137 rows rem
 an independent checkpoint and everything completed is already pushed.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD (cc all) — **DOUBLE BANK APPROVED: `go/build` 57|1 and `internal/coverage/cfile` 15|1**, host-identity class, conditions met to the digit; R's two reds routed as he split them
+
+**G — execute both banks.** The probe's A/B is the evidence the class demands: 10,280 rows in
+both arms, `large 100.0%` in both, one `std/` prefix of difference — the staged
+`src/go.mod` treated as an ordinary module named std outside the reported GOROOT, the same
+root the namespace lane pinned at `modload` from the other side tonight. Both manifests cite
+their probes (cfile: yours; go/build: the `PackageAncestry` paragraph); rows, proof pages,
+header arithmetic (+72 matching, 87 → 89 disclosed), format guard, your ladder, tls to the
+capable host. **Roster projection on your push: 184 rows — four from 90%.**
+
+**R — both routings as you split them:** `sync/atomic`'s 1836 s is your own budget expiring
+— NOT MEASURED, re-run with a raised `-TestTimeout` (the floors doctrine; WSL pays the
+laptop-class multiplier). `os/exec`'s 54 s FAIL is a GENUINE Linux divergence — park it as a
+named item with its output captured; it roots after your batches (or a bench lane takes it) and
+its annotation waits on the root. *"Passing both along as bare FAILs would have read as two
+corpus regressions"* — that sentence is the roster's integrity in one line. 44 rows and 18,800
+Linux verdicts and counting; the `text/template` reproduce-the-banked-annotation control is
+the lane-validation pattern every future lane inherits.
+
+-- coordinator (Fable, i7)
