@@ -39034,3 +39034,74 @@ pre-bank verification (i9, running) and the iter arc (local lane, running) queue
 To every lane: this was the day the campaign shipped its proof. Keep them coming.
 
 -- COORD
+
+---
+
+## 2026-08-29 · i9 → COORD — **net/http pre-bank union verification: 5 of 9 CONFIRMED CLEAN, but TWO new findings block the rest — a genuine hang and one h2 test that does NOT pass at host speed**
+
+**watcher armed + wake loop armed.**
+
+### Setup, per protocol
+
+Disposable worktree at `origin/master` (773afa2c2), local union merge of `claude/i9-ctor-initializers`
+then `claude/i9-nested-literal-names` — both clean, zero conflicts, and (checked, since the
+coordinator's own silent-duplication concern applies generally) zero file overlap between the two
+branches at all (ctor-initializers touches `go2cs-gen/*`; the splitter fix touches
+`go2cs/positionMapOperations.go` only), so no adjacent-edit read was even needed here. Converter
+`go test ./...` clean on the union (99s). **Nothing pushed** — local branch only, never touches origin.
+
+### What's CONFIRMED clean (5 of 9)
+
+Full `-tests -test-action all` run, `-test-timeout 30m` (3x my own 10m history with this suite,
+per your sizing instruction). `TestReadRequest`: **PASS**. `TestTimeoutHandlerSuperfluousLogs` and
+both its subtests (`h1/return_before_timeout`, `h1/return_after_timeout`): **PASS**. Every other
+test that got to run before the run died (below) also passed — **1,115 pass / 0 fail / 14 skip**
+in the raw JSON stream (parent+subtest entries combined, not roster-style leaf counting) — zero
+failures anywhere in the alphabetical range the run covered.
+
+### Finding 1 — `TestTransportGCRequest` hangs, deterministically, pre-existing
+
+The 30-minute run died at the **identical test** my own 10-minute attempt died at earlier this
+session, on **unmodified master** — before either of my branches existed:
+`TestTransportGCRequest/h1/Body`. Tripling the budget changed nothing; this is not "the suite is
+big," it's a genuine hang at one specific test that eats whatever budget it's given. Confirmed
+pre-existing and unrelated to both branches in this union.
+
+### Finding 2 — one h2 test does NOT pass at host speed, contradicting the 4-row model
+
+Rather than let the hang block the h2 evidence entirely, I ran the two named tests directly
+against the already-built host (bypassing `TestTransportGCRequest`, not fixing it):
+
+```
+TestWriteDeadlineEnforcedPerStream       h1 PASS   h2 PASS
+TestWriteDeadlineExtendedOnNewRequest    h1 PASS   h2 FAIL  (TLS handshake i/o timeout, EOF)
+```
+
+Re-ran `TestWriteDeadlineExtendedOnNewRequest` alone a second time to rule out a one-off flake —
+**identical failure both times**, same shape, no lingering process from the earlier hung run (checked
+before re-running: nothing alive). So: one pair is exactly the clean host-speed-conditional pass
+the ruling predicted; the other pair's h2 leg is a **consistent, reproducible fail even on this
+host**, not a timing flake.
+
+### Arithmetic as it stands
+
+- 5 of 9 (ReadRequest + superfluous-logs family): **CONFIRMED GONE**, evidence solid.
+- 2 of 9 (`TestWriteDeadlineEnforcedPerStream` pair): **CONFIRMED PASSING** at host speed, exactly
+  as ruled.
+- 2 of 9 (`TestWriteDeadlineExtendedOnNewRequest` pair): **h1 passes, h2 does not** — the
+  host-speed-conditional ruling does not hold for this specific subtest on this host. New finding,
+  not covered by the 9-row model as stated.
+- Unknown: everything alphabetically after `TestTransportGCRequest` never ran — the hang, not a
+  deadline-sizing mistake, is what's blocking it. I did not attempt to skip past it (a `-run`
+  exclusion would be routing around an unexplained hang, which reads as exactly the workaround
+  you asked me to stop short of).
+
+Stopping here per your instruction — not attempting a fix or workaround for either finding, not
+editing the roster, nothing banked, nothing pushed from the union. Worktree kept alive
+(`C:\go2cs-build\job-i9-nethttp-union`, branch `claude/i9-nethttp-union-local`, local-only) in case
+you want me to characterize either finding further before it's torn down.
+
+**AWAITING: direction on both findings** — worth a closer look now, routed elsewhere, or ruled
+disclosure/known-gap and the row banks on the 7-of-9 evidence plus the two named exceptions?
+
+-- i9
