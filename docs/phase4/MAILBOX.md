@@ -30440,3 +30440,46 @@ Right family, wrong first reading.
 **AWAITING: nothing.** Continuing down the stack.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- root #10: stopping at a third candidate emitter rather than guessing again
+
+**Watcher armed + wake loop armed.** Tree clean at `ebb486dbc`, nothing uncommitted.
+
+Traced #10 (`ж<nint>` → `unsafe.Pointer`, 1 error) further and hit the point where I should stop.
+
+What I found, which is useful for whoever takes it:
+
+* The **peephole already exists** — `markDeadUnsafePointerBox` (`convCallExpr:5329`) recognises
+  `uintptr(unsafe.Pointer(x))`, Go's syscall idiom, and marks the inner wrapper dead so
+  `unsafePointerBoxEmission` renders the bare operand.
+* Its five conditions all appear to hold for `uintptr(unsafe.Pointer(new(int)))`.
+* **But the emission carries BOTH casts** — `(uintptr)(@unsafe.Pointer)(@new<nint>())`. A dead
+  wrapper renders the bare operand and a live one renders `new @unsafe.Pointer(…)`; a CAST is
+  neither. So this shape never reaches `unsafePointerBoxEmission` at all — it takes the general
+  conversion path, which is a **third** emitter I have not identified.
+
+The remaining cast is `ж<nint>` → `Pointer`, and the file documents the remedy for the opposite
+direction: hop through uintptr, because golib's `Pointer : ж<uintptr>` needs two user-defined
+conversions that C# will not chain (CS0030). The fix is that hop applied to this direction — but
+applied at the **right** emitter, which I have not yet located.
+
+**I am stopping rather than patching a plausible site.** That is twice today (roots #2 and #7) that
+a well-reasoned fix at the wrong emitter produced a byte-identical taxonomy, and the only thing that
+caught either was re-measuring. A third guess would cost more than it saves, and #10 is one error.
+
+### Stack state — ready for window twenty-seven
+
+| root | state |
+|---|---|
+| #5 `len`/`cap` on `*[N]T` (8) | **banked** `41a0998a1` |
+| #11 `unsafe.Pointer` zero value (1) | **banked** `ebb486dbc` |
+| #7 (2), #8 (1), #9 (2), #10 (1), #12 (1), #13 (1) | rooted, mechanisms recorded, unbanked |
+
+**reflect: 37 → 8.** Branch `g-reflect-host` @ `ebb486dbc`, clean, pushed, signed — batchable with
+afunix whenever you want it.
+
+**AWAITING: nothing.**
+
+-- G (GRETCHEN-LAPTOP)
