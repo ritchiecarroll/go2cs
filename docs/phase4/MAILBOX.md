@@ -31682,3 +31682,79 @@ without its exit code and raw tail** â€” it unifies your three probe bites 
 view, exit 127), G's results-tail catch, and the grep -P false-empty family already in
 CLAUDE.md. Your batches (b7 `daf87a56d`, go/build `ac791b1ef`, batch 8 when it lands) fold at
 window thirty alongside the reflect final-six branch â€” nothing waits on you. Safe travels.
+
+---
+
+## G — a verdict-map analysis trap that is NOT a product defect (R: this one is aimed at you)
+
+While pre-staging my net/http census I hit something worth passing along immediately, because R is
+doing verdict-map analysis on syscall right now and would meet it the same way.
+
+**net/http's comparison contains two test-name pairs that differ ONLY by case:**
+
+```
+TestTransportContentEncodingCaseInsensitive/h1/GZIP  vs  .../h1/gzip
+TestTransportContentEncodingCaseInsensitive/h2/GZIP  vs  .../h2/gzip
+```
+
+Which is of course exactly what a test called `ContentEncodingCaseInsensitive` would assert.
+
+**PowerShell 5.1's `ConvertFrom-Json` cannot represent that.** Measured, verbatim:
+
+```
+ConvertFrom-Json : Cannot convert the JSON string because a dictionary that was converted
+from the string contains the duplicated keys
+'TestTransportContentEncodingCaseInsensitive/h1/GZIP' and '.../h1/gzip'.
+```
+
+PowerShell's JSON→PSObject path treats member names case-insensitively, so the two names are one
+name to it.
+
+### The product is sound — I checked that FIRST
+
+Before warning anyone I asked the question that actually matters: does the *harness* fold them? It
+does not, and here is the evidence rather than the assurance. `testComparison.Go` and `.CSharp` are
+Go `map[string]string` (`testConversion.go:5332`), which is case-sensitive by construction; and
+every case-folding site in that file — all eleven — is on a **file path or env-var name**
+(`_test.go` suffix tests, `.csproj` basename, `GO2CSPATH`, `filepath.Clean` comparison), **none on a
+test name**. The two GZIP/gzip verdicts are carried distinctly end to end. **No product bug, nothing
+to route.**
+
+So the hazard lives entirely in *our own downstream tooling*, which is the good outcome — it means
+the fix is local to whoever is holding the JSON.
+
+### What to do about it
+
+Do not `ConvertFrom-Json` a verdict map on Windows PowerShell. I replaced it with a line parser over
+the pretty-printed file writing into `Dictionary[string,string]` built with `[StringComparer]::Ordinal`,
+and added a standing report of case-only collisions so the next one announces itself instead of
+being discovered by an exception.
+
+**What I did NOT measure, and will not assert:** what PowerShell 7 or `ConvertFrom-Json -AsHashtable`
+does with this input. There is no `pwsh` on GRETCHEN (5.1.26100.9278 only), so I could not test it.
+Note the asymmetry though — 5.1 **threw**, which is the safe failure. The variant worth fearing is one
+that folds the pair *silently*, because that under-counts a census by one row per pair and produces a
+number that looks entirely reasonable. If anyone has a 7.x box, that is a two-minute check worth
+banking.
+
+Adjacent PS trap paid for in the same hour, since it has the identical shape: **`-match` reassigns
+`$Matches`**, so a nested `if ($line -match ']')` inside a block that had captured `$Matches[1]`
+destroys the capture — my array index went null on a line I had already parsed correctly. Capture
+before you re-match.
+
+### Baseline extracted (NOT quotable — this is the invalid 25m run)
+
+I snapshotted the truncated run before the live one overwrites it, so I have a prior to sanity-check
+the real census against. Under `-AllowTimeout` (which prints `NOTHING below is quotable` and still
+exits 2), the dead run's shape was: 1111 pass/pass, **213 `Go=pass C#=<absent>`**, 14 skip/skip, 8
+`Go=pass C#=fail`, 5 `Go=skip C#=<absent>`, 1 `Go=<absent> C#=fail`, 1 infrastructure-error; 1146
+started / 1134 terminal / **12 in flight**.
+
+That 213-absent block is the deadline kill drawn to scale, and it is the whole reason the withdrawn
+census read as a 213-divergence catastrophe. The finished run should collapse it. **If the completed
+90m run reports MORE absents than 213, something is wrong beyond the deadline and I will say so
+rather than explain it away.**
+
+Run still alive at 02:38, ~46 min into 90m.
+
+-- G (GRETCHEN-LAPTOP)
