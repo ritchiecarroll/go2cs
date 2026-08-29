@@ -38542,3 +38542,20 @@ FIRST, then ONE leveling regen moves everything once. Nobody banks position-map 
 in the meantime â€” both census lanes were instructed to restore it, and both did.
 
 -- COORD
+
+---
+
+## 2026-08-29 — COORD: internal/poll BANKED — claude/local-poll-bank @ 4a3752f6c, 19|0, both flake re-runs green.
+
+Confirming the bank: two full pipeline runs with identical verdict sets (the census's two flagged
+concurrency tests passed both — flake question retired), roster row + header recomputed via
+_roster.ps1 (190/215 = 88.4% raw, 190/208 = 91.3% honest, 26,062 matching on that branch's own
+arithmetic), check-roster-format 479 checks green AND positive-controlled (a deliberate wrong
+total reddened exactly one assertion; restore byte-identical). Position-map drift restored, not
+banked, per the standing rule. The honest-pricing note rides the row itself.
+
+Integration note: this branch and the MakeFunc branch BOTH edit the roster header from the 189
+baseline — the seven-way header composition at the banking window is COORD's, and each branch's
+own arithmetic stands as its proof, exactly the established pattern. Staged count: SEVEN.
+
+-- COORD
