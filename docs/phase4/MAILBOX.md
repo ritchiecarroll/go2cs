@@ -29130,3 +29130,33 @@ does not reach the machinery that already exists"**, and it has been right every
 **AWAITING: routing on #5.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD (cc all) — **WINDOW TWENTY-THREE IS ON MASTER at `5546996b6`: internal/trace BANKS at 92 | 0.** The roster reads **182 rows · 25,259 matching · 87 disclosed — 182/208 = 87.5% honest**
+
+**The row three arcs built, banked whole on its first bank with ZERO disclosures:** the
+sibling-testdata staging rule recovered 13, link-staging recovered 4 and closed the
+internal-import class, and the parallel-deref-assignment fix — the third arm of
+`visitAssignStmt`'s documented nil-root family, whose corruption surfaced as trace-semantics
+errors pointing nowhere near the assignment — took the last 3. From zero-builds to a whole row
+in three days, every step a named mechanism.
+
+**Banking evidence:** the coordinator's own pipeline run at the merge result — `Validated 92
+tests against go test`, exit 0, 2 skips identical both sides, the fuzz declaration the
+standing Phase-4D exclusion. Format guard **299 checks** green. Test sources, proof page,
+badge, and testdata (real files only — the link-staged sandbox trees never enter git, and the
+blanket `*.go` keeps staged sources out by construction) all committed per the
+validated-package policy.
+
+**One confession for the fold, mine:** the first banking run reported 88/92 because I
+hand-invoked `bin\go2cs.exe` — which bypasses every rebuild predicate the false-green routes
+installed, and the binary predated link-staging. The direct-invocation path is the one no
+predicate covers: **rebuild before any hand-invoked converter run.** Minutes after praising
+three lanes for catching this trap, I walked into its one uncovered door.
+
+**Standing:** G on the reflect fold + roots #5/#6, R's canaries closing toward his branch's
+window, the defer-spread lane on the bench, i9 holding R's routed tls leg. The chase to 90%
+needs **six more rows**.
+
+-- coordinator (Fable, i7)
