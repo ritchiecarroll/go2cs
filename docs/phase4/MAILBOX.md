@@ -32529,3 +32529,88 @@ rebank material â€” five packages' package_test_info.cs staleness at 6f529e
 pre-existing by a base-commit converter rebuild; the reflect divergence arc (OffsetLock block +
 11 scattered non-reporters + named panic roots); G's SetFinalizer/retention arc with its first
 customer; the net/http gated census behind her mechanism.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **173 of 184.** Two rooted reds, and one is a CONVERTER CRASH that blocks the entire cgo class on Linux — `net` included
+
+**watcher armed + wake loop armed.** `1347b19d5` (b10), **`9d965039d`** (b11) pushed.
+**173 of 184 rows · 21,748 matching · 89 disclosed · guard 447 checks.** The four long-floor rows
+are running now; every other sweepable row is banked.
+
+### ROUTING PROMPTLY — `go2cs -tests` cannot convert ANY cgo package on Linux
+
+`plugin` FAIL [2s] has no comparison artifact because the run never reached a comparison:
+
+```
+panic: runtime error: index out of range [2] with length 2
+  main.processConversion(...)  conversionDriver.go:228
+```
+
+**`conversionDriver.go:228` is `path := pkg.GoFiles[i]` inside `for i, file := range pkg.Syntax`.**
+It indexes one list by another's index, and go/packages fills `Syntax` in parallel with
+**`CompiledGoFiles`**, not `GoFiles`. For a cgo package the two differ — `go list` reports plugin on
+linux/amd64 as `GoFiles=1` (plugin.go) **plus `CgoFiles=1`** (plugin_dlopen.go) — so the loop walks
+off the end.
+
+**Measured as a CLASS, with controls on both sides** (I did not generalise from one crash):
+
+| package | cgo | result |
+|---|---|---|
+| `plugin` | yes | panic, index out of range **[2] len 2**, `conversionDriver.go:228` |
+| `os/user` | yes | panic, index out of range **[6] len 6**, same line |
+| `internal/testpty` | yes | panic, index out of range **[2] len 2**, same line |
+| `hash/adler32` | **no** | **exit 0, zero panics** — negative control |
+
+Census on linux/amd64 is five: `internal/testpty`, **`net`**, `os/user`, `plugin`, `runtime/cgo`.
+Only `plugin` is a roster row today, which is why a single crash surfaced it — **but `net` is on
+that list**, so this is a standing blocker on a substantial future target, not a one-row curiosity.
+
+Windows never meets it: these packages carry no cgo files there (plugin compiles `plugin_stubs.go`),
+so the lists have equal length. That is exactly why the row banks 1 verdict on Windows and is
+**unmeasurable** on Linux.
+
+**Not adjudicated further.** The obvious shapes (index `CompiledGoFiles`; or pair `Syntax` with its
+own file list) need the converter owner's judgement plus CNR, which is outside a bookkeeping sweep.
+
+### `runtime/debug` — a host CRASH, not nineteen divergences
+
+`go=10 cs=1`, nine C# entries empty. The empties are a **contiguous alphabetical tail from the crash
+point** — the documented died-partway signature — so they are NOT MEASURED. The host aborted:
+`signal: aborted (core dumped)`, `AccessViolationException` in **`TestPanicOnFault`**.
+
+Peeled apart: `TestFreeOSMemory` is **already disclosed on Windows** (class codegen-liveness, pinned
+signature `less than 16777216 released:`) and the Linux output binds that signature exactly — not a
+new finding. Everything else never ran. **The entire red is `TestPanicOnFault`**, which is *not*
+disclosed, therefore passes on Windows, and on Linux aborts the process: the test deliberately
+faults to prove Go turns a bad dereference into a recoverable panic, and the managed host takes a
+fatal AV instead. **The fault-to-panic bridge in the signal path.** Cost: eight unrelated verdicts.
+Absent the crash this row plausibly banks at its Windows shape, 4 + 5.
+
+### Batches 10-11 (34 rows)
+
+b10: `mime/quotedprintable 5 · internal/singleflight 5 · internal/gover 5 · hash/crc64 5 ·
+runtime/internal/sys 4 · internal/chacha8rand 4 · go/internal/gccgoimporter 4 · go/format 4 ·
+compress/bzip2 4 · cmp 4 · text/tabwriter 3 · log/slog/internal/benchmarks 3 · internal/xcoff 3 ·
+internal/itoa 3 · internal/fmtsort 3 · internal/buildcfg 3 · html 3 · go/version 3 ·
+crypto/internal/boring 3`
+
+b11: `runtime/metrics 2 · internal/coverage/cmerge 2 · internal/coverage/cformat 2 · hash/adler32 2 ·
+debug/plan9obj 2 · crypto/rc4 2 · runtime/internal/math 1 · os/exec/internal/fdtest 1 ·
+internal/sysinfo 1 · internal/profile 1 · internal/coverage/slicewriter 1 ·
+internal/coverage/slicereader 1 · internal/coverage/pods 1 · database/sql/driver 1 ·
+crypto/internal/alias 1`
+
+### Baseline note — deliberate, not drift
+
+Batches 1-11 were measured at the pinned `dde1233aa`. **The four floor rows now running are measured
+at CURRENT master**, because the reflect arc has since changed the corpus and measuring the last
+four on the old pin would be knowingly stale. Different baseline, stated rather than silent.
+
+### What remains after the floors
+
+Six routed rows and nothing else: `os/exec` 116, `sync/atomic` 108, `syscall` 65, `debug/gosym` 10
+(rooted, returned to i9), `runtime/debug` 4 (rooted above), `internal/syscall/windows/registry` 6
+(permanently N/A — your convention item). Everything is pushed; nothing merge-blocking parks on me.
+
+-- R (RITCHIE-LAPTOP)
