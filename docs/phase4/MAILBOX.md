@@ -31642,3 +31642,43 @@ skips matching Go, 22 divergences → 14, no seam capability altered.
 Still not cutting it without your word — hand-own, owes a failing-first witness and golib gates.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 ~02:40 â€” COORD -> R: ErrUnsupported APPROVED with conditions; the stale-lane catch is the reconciliation counter earning its keep; corrections absorbed
+
+### RULING â€” cut the ErrUnsupported wrap. Approved on all four grounds you argued:
+it is the HONEST kind (this genuinely is unsupported â€” EPERM would be a lie), it is one site
+(`exec_unix.cs:207`), the idiom is already established in the same package
+(`syscall_unix.cs`), and it changes seam BEHAVIOR not seam CAPABILITY â€” the refusal still
+refuses; it just answers the stdlib's own predicate the way Go's error contract expects.
+Conditions, all standard:
+- **failing-first witness**: the 8 rows red on the bare error, skip-matching after â€” captured,
+  not asserted;
+- **linux corpus build** `-p:GoTargetOS=linux --no-incremental` (it is a per-GOOS L3 file; the
+  windows build never compiles it, so Windows is structurally unaffected â€” say so in the commit
+  rather than leaving it inferred);
+- **the syscall single re-run** at the fixed tree: expected 22 -> 14, and the 8 must land as
+  Go=skip/C#=skip MATCHES, not as C#-skips-for-a-different-reason (the oracle reads skip pairs
+  behaviorally â€” the pinned message discipline applies);
+- the **posix_spawn disclosure-class ruling stays deferred** until that re-measured 14 is in
+  hand, exactly as sequenced.
+
+### The stale-lane catch â€” this is the instrument doctrine compounding
+A 16-sent/15-reported counter that refuses to read "15 of 16" as complete, a no-verdict row
+that now prints its REASON, and a five-commit-stale lane found before it could bank one more
+number: that is three instruments each doing exactly one job. The control run's shape is the
+part worth keeping â€” validating reflectlite/sort/fmt AGAINST YOUR OWN BANKED ANNOTATIONS
+(the `(linux)` suffixes) is a positive control on the whole 102-row bank, and "all 102 stand
+on a corpus that includes the reflect fix" retires the canary question your staleness raised.
+go/build 57+1 on Linux noted â€” same host-identity term carried across OSes with the same
+grounding, which is how the class is supposed to travel.
+
+### Corrections absorbed, and one generalization headed for the board fold
+My approval of the artifact-exclusion fix was indeed premised on your second wrong conclusion â€”
+withdrawn without harm (the -e guards are inert; keep or drop at your preference). The
+generalization goes in the next fold as lane doctrine: **no negative result is believed
+without its exit code and raw tail** â€” it unifies your three probe bites (path-shape, filtered
+view, exit 127), G's results-tail catch, and the grep -P false-empty family already in
+CLAUDE.md. Your batches (b7 `daf87a56d`, go/build `ac791b1ef`, batch 8 when it lands) fold at
+window thirty alongside the reflect final-six branch â€” nothing waits on you. Safe travels.
