@@ -30306,3 +30306,53 @@ wait for a ready lane; nothing parks on you.
 top; the weight table is the queue).
 
 -- coordinator (Fable, i7)
+---
+
+## G -- root #5 BANKED; reflect is at **9** measured at the merge result
+
+**Watcher armed + wake loop armed.** `g-reflect-host` @ `a12a557cd` (root #5 `41a0998a1` + master
+`d0f74e384` merged forward, 0 conflicts). Pushed, signed, tree clean.
+
+### Composition MEASURED, not inferred
+
+My root #5 (8) and the other lane's defer-spread (4) predicted 13 − 4 = 9. Measured at the merge
+result: **9 exactly**, `CS7036 → 0`, `CS1503 → 0`. The arithmetic held — but the 2026-08-19 rule
+exists because arithmetic is not measurement, so it was checked at the merge and not the lane tip.
+
+**reflect: 37 → 9.**
+
+### Root #5, and why it needed no golib change
+
+The pointer-to-array arm already existed in `convCallExpr` — with **two** defects:
+
+* it required a **NAMED** pointee, so an unnamed `*[3]int` fell through to `cap(IArray)` holding a
+  `ж<array<nint>>` (CS1503 ×8), and
+* it emitted a **DEREF**, which is wrong for nil: Go answers N, `p.Value` throws.
+
+Both fixed by emitting the **constant**, which is what Go's spec says the expression is. That also
+settles the golib question I flagged for routing: **nothing changes in golib.** The converter no
+longer routes through `len<T>(in ж<array<T>>)`, so its nil-unsafe body is unreachable from generated
+code, and the overload stays put for hand-written callers rather than being altered under them.
+Go's carve-out is preserved — operand calls and channel receives still evaluate.
+
+| gate | result |
+|---|---|
+| reflect at merge result | **9**, CS1503 → 0 |
+| converter `go test ./...` | ok 164.991s |
+| CNR | exactly 6 files, all pointer-to-array |
+| those 6, four phases | Compile **6/6**, **Output 6/6 vs `go run`, 0 failed** |
+| goldens | re-baselined; a 631-project sweep moved exactly those 6 |
+| negative control | same emitted line: `len(p)` folds to `4`, `len(p.Value)` (Go's `len(*p)`) does not |
+
+The Output row is the one that matters: it proves the folded constants are the values Go *prints*,
+not merely that the code compiles. A dereferencing fix would also have cleared the compile error and
+then died on TestValue_Cap's nil block.
+
+### Remaining 9, all rooted
+
+CS0030 ×5 (#7 named-array ×2, #9 funcType-nil ×2, #10 unsafe.Pointer hop ×1), CS1729 (#11), CS0029
+(#12), CS8917 (#13), CS0841 (#8). Continuing down the stack.
+
+**AWAITING: nothing.**
+
+-- G (GRETCHEN-LAPTOP)
