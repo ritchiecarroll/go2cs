@@ -33270,3 +33270,50 @@ hand-own rather than changing a construct's mapping. Say the word if you want a 
 **Moving to the `Write*` family of four as sequenced.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~05:45 â€” COORD: the parked-receiver saga RESOLVES â€” it is CoreCLR frame-slot liveness, a bounded PLATFORM RESIDUAL, and it lands in an EXISTING disclosure class
+
+The golib lane hit its stop-and-report constraint exactly as instructed, and the report is
+definitive. **G â€” your class is real, and it is nobody's defect.**
+
+**The demonstrated holder (gcroot, not plausibility):** the payload is held by the receiver
+goroutine's OWN loop-frame stack slots â€” heap dumps mid-park after forced compacting gen2 GCs
+show exactly 3 stack-slot roots (the `v` local + Roslyn's tuple-deconstruction temps) and ZERO
+heap paths; with tiering off, still 8/8 RETAINED via ONE untracked struct-temp slot. Your
+Waiter.Elem suspect died twice: source shows a fresh Waiter per park (no pooling anywhere),
+and the dump shows the dequeued first-park waiter COLLECTED outright â€” its sticky Elem dies
+with the receive frame. Three sealing A/Bs: clearing Elem changes nothing (8/8 retained);
+moving the receive into a named function RELEASES 8/8 with zero golib change (frame residency
+is the whole mechanism); two sequential payloads show a SINGLE OVERWRITTEN SLOT â€” first
+released, second retained. **Bounded at one last-delivered value per parked receiver
+goroutine. Never accumulates.**
+
+**Mechanism, named:** Go's per-PC stack maps kill the local at the loop back-edge, so Go's GC
+frees it while parked; CoreCLR reports untracked frame slots live for the standing frame â€” a
+goroutine body called once never tiers up, and even full-opt keeps the unpromoted tuple temp.
+golib cannot reach a caller's frame; a converter dead-store cannot reach the Roslyn temp and
+full-opt would elide it anyway.
+
+**RULINGS:**
+1. **Recorded as a platform-liveness fidelity residual** â€” the next board fold carries it with
+   the frame-variant and single-slot bounds. NOT a golib defect, NOT a converter defect; the
+   same artifact family as Go's own finalizer non-promptness, which G herself showed flips on
+   an unexecuted branch.
+2. **TestTransportGCRequest routes to the EXISTING codegen-liveness disclosure class** when
+   net/http banks â€” the class TestCertCache already grounds (the platform's liveness model
+   differing from Go's). The test asserts on collection that CoreCLR's model cannot promise
+   for a parked frame; it can never pass here, and saying so openly with this evidence chain
+   is exactly what the class is for. The 40-line reproducer + gcroot transcripts are the proof
+   page's evidence when that row lands.
+3. **A converter-territory narrowing (helper-frame receives) is board-parked, explicitly NOT
+   scheduled** â€” it would reshape every channel receive for a memory-promptness nicety, and
+   nothing correctness-bearing needs it before 1.24.
+4. No commits banked, no guard constructible (no red-to-green exists for a platform property)
+   â€” the lane's zero-change discipline was correct. Evidence bundle preserved under its
+   scratchpad prr- prefix, dumps included.
+
+One night, one test: a 25-minute timeout misread, a proven block, a census pattern, a
+mechanism gap, a runtime-class hypothesis, and a CoreCLR liveness proof â€” each step measured,
+three lanes and five instruments sharper for it. This is what rooting to the bottom looks like.
