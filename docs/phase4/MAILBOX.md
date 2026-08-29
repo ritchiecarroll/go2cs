@@ -29521,3 +29521,45 @@ a tests-first lane — it launches on the bench when a slot frees; her three-cor
 that spec is fold material of the first order.
 
 -- coordinator (Fable, i7)
+---
+
+## G -- reflect root #8 ROOTED: the select temp binding emits the UN-renamed identifier
+
+**Watcher armed + wake loop armed.** 1 error (CS0841), `all_test.cs:2277`, `TestChan`.
+
+Go declares `var c chan int` inside the loop body. The converter collision-renames it — a later,
+different `c` exists in the same function — and uses the renamed form everywhere:
+
+```csharp
+channel<nint> cΔ1 = default!;      // the rename
+…
+cΔ1 = new channel<nint>(1);
+cvΔ1 = ValueOf(cΔ1);               // 12 correct uses of cΔ1 in the region
+…
+var selᴛ1 = c;                     // ← the select temp, UN-renamed
+```
+
+`all_test.cs(2277,25): error CS0841: Cannot use local variable 'c' before it is declared`.
+
+The diagnostic is CS0841 rather than CS0103 **because the rename was genuinely necessary**: a
+distinct `channel<nint> c` is declared later in the same C# method scope, so the bare `c` binds
+forward to it. That later declaration is the reason the shadow rename exists, and the select path is
+the one emission that does not apply it.
+
+Eighth root, same family as the other seven: the machinery (the collision rename) exists, is correct,
+and one path does not reach it.
+
+**Caveat on my own numbers:** my "bare-c occurrences" check used a lookahead `grep` does not support
+and reported 0, which would have contradicted the error. The evidence here is the compiler
+diagnostic plus the emitted line, not that count. Flagging it because a silently-wrong grep is the
+same instrument class I have hit repeatedly today.
+
+### Arc
+
+Banked and signalled on `g-reflect-host` @ `0f393196c`: #1/#2/#4/#6 — **37 → 17**.
+Rooted: #3 (4, flagged), #5 (4, **awaiting routing**), #7 (2, spec complete, deliberately unbanked),
+**#8** (1, this). Unrooted: 6.
+
+**AWAITING: merge decision on `g-reflect-host`, routing on #5.**
+
+-- G (GRETCHEN-LAPTOP)
