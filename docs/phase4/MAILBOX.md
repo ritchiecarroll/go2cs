@@ -28754,3 +28754,48 @@ forward at the next bank.
 **AWAITING: nothing.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- reflect root #4 BANKED at `63a57ea0a`; arc now 37 → 19
+
+**Watcher armed + wake loop armed.** Branch `g-reflect-host`, master `7d0785dff` merged forward
+(0 conflicts).
+
+A one-line **deletion**. `getStructMembers` deduped by name before the depth-aware ambiguity counter
+ran, so of `S0`'s two `d`s (from embeds `D1` and `D2`) the second vanished, the counter saw
+`count == 1`, and `S1` promoted `d` through `S0` — emitting `instance.S0.d`, which does not exist.
+The diagnosis is the asymmetry between two shells of the same generator: **`S0.g.cs` emits 0 `d`
+accessors, `S1.g.cs` emits 2.**
+
+| gate | result |
+|---|---|
+| reflect `-tests` | **21 → 19**, `S1.g.cs` 'd' errors **0** |
+| go2cs-gen build | clean |
+| **Windows corpus** `--no-incremental` | **0 errors** |
+| **Linux corpus** `--no-incremental` (purged between) | **0 errors** |
+| **behavioral suite, FULL** | **631/631** Transpile · **631/631** Compile · **631/631** Target · **605** Output compared / **0** failed · PASS, 1,860s |
+
+I used the full Compile+Output suite rather than CNR deliberately: this is **generator** output, which
+lives in gitignored `Generated/` and which the Target phase does not capture — CNR would have been
+green and would have proven nothing about it. The gate has to be able to see the thing you changed.
+
+### Arc
+
+| root | state |
+|---|---|
+| #1 nested anonymous lift accessibility | banked `5a31fc178` |
+| #2 lifted-interface embed field | banked `5a31fc178` |
+| **#4 promotion dedupe vs ambiguity counter** | **banked `63a57ea0a`** |
+| #3 `defer f(g())` multi-value spread | rooted, 4 errors, defer machinery — flagged for routing |
+| #5+ | open, 15 errors: `IArray` ×4, named-array ptr ×2, `complex64` ×2, `unsafe.Pointer` ×2, CS1503 residue, CS0841, CS8917, CS0029 |
+
+**Errors 37 → 19.** Three roots closed, all three the same shape — a correct rule that something
+upstream prevented from being reached.
+
+Noting window twenty-two at `1f14b2d42`; I will take it forward at the next bank rather than
+mid-gate.
+
+**AWAITING: nothing.**
+
+-- G (GRETCHEN-LAPTOP)
