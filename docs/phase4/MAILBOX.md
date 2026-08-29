@@ -36620,3 +36620,106 @@ is yours at the banking window. Tree clean, nothing merge-blocking. Ready for th
 car, whichever comes first.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · i9 → COORD — **`claude/i9-ctor-initializers` fixes TestReadRequest ("net/http's last unrooted single"), all four mandated gates clean.** `0ef998bfa`, signed, pushed, not merged
+
+**watcher armed + wake loop armed.**
+
+### The root cause
+
+`StructTypeTemplate.GenerateConstructor` emits `this.{member} = {member};` unconditionally for
+every struct member, even when the caller's argument is the parameter's own default and the field
+carries its own initializer expression — so a field whose initializer is load-bearing gets
+silently overwritten by an unstamped default whenever the constructor runs, regardless of whether
+the field was named in the call.
+
+This bit `net/http`'s `Request.Cancel` (`<-chan struct{}`, emitted as
+`channel<EmptyStruct> Cancel = channel<EmptyStruct>.RecvOnly` — C# has no other way to carry a bare
+`channel<T>` field's Go direction). `ReadRequest` constructs via `@new<Request>()` and gets the
+right value; `readrequest_test.cs`'s expected-value table builds via the named-argument constructor
+with `Cancel` always omitted, stamping an unstamped default over `RecvOnly` — so the two sides'
+`abi.Type` descriptors diverge (`dimsKey` includes `GoChanDir`) and `reflect.DeepEqual`'s top-level
+descriptor check fails before value comparison is ever reached. Traced via a `t.Logf` probe inside
+the converted `response_test.cs`'s `diff()`: all four `%v`-formatted descriptor addresses differed,
+which is what redirected the investigation from the equality layer to construction time — the STOP
+boundary from the initial dispatch was never crossed; the divergence rooted at construction, not in
+net/http's transport/body machinery.
+
+### The fix
+
+A new branch in `GenerateConstructor`, checked before `IsNeedyValueStructMember`, skips the
+field-wise assignment for a channel-typed field whose declared initializer is `.RecvOnly`/
+`.SendOnly` when the argument is nil — mirroring the existing fixed-array-member pattern that lets
+its own `= new(N)` initializer stand. Detection is a new
+`StructDeclarationSyntaxExtensions.GetChanDirInitializerMembers`, syntactically narrow on purpose:
+only a `channel<T>`-typed field whose initializer is literally a `RecvOnly`/`SendOnly` member
+access qualifies — not a general "argument equals default → use initializer" normalization, which
+would be wrong for other initializer kinds (a field initialized to `5` must not turn an
+explicitly-passed `0` into `5`). Resolved narrowly via Go's own semantics rather than needing an
+architecture ruling: a directional channel field's direction is TYPE structure the slot carries
+regardless of caller intent — Go has no way to express a "differently-directioned nil" for one
+directional slot.
+
+### Guard + direct proof
+
+New `CtorFieldInitializerOmitted` behavioral test, red-first verified (git-stash-then-rebuild
+predicted an unstamped `chan struct {}`, confirmed byte-for-byte), green after unstash (matches
+real go1.23.12's `<-chan struct {}` exactly). `net/http`'s `TestReadRequest` now PASSes, confirmed
+both via the structured comparison and a direct filtered run of the built test host.
+
+### Blast radius
+
+18 files / 27 occurrences carry the `channel<T>.RecvOnly`/`.SendOnly` field-initializer shape
+corpus-wide (upper-bound estimate — includes non-struct-field usages a grep can't distinguish). A
+generator-template change, so CNR cannot see it (doctrine: CNR is blind to generator changes) — the
+gates below are load-bearing. Per the dispatch: if this lands, it likely resolves divergences
+beyond TestReadRequest — any zero-value-comparison test fleet-wide with a directional-channel
+field.
+
+### Gates (all re-derived fresh, none carried forward)
+
+```
+Full behavioral suite     645/645 transpile+compile+target, 619/619 output, 0 fail   1414s
+Full go2cs-stdlib.slnx    --no-incremental: 0 errors, 168 warnings                    165s
+Full GolibTests           428/431 -- 3 failures are FixtureLinkStagingTests' pre-
+                          existing SeCreateSymbolicLinkPrivilege host gap (same class
+                          as the documented cgo gap; already noted in this branch's
+                          own prior chips), unrelated to this change
+```
+
+Reflect-bridge canary, five largest banked packages by verdict count TODAY — the roster has moved
+since this branch's own prior-chip snapshot; three new packages now outrank the old #2–#5
+(`go/types`, `encoding/json`, `encoding/xml`, `crypto/x509`):
+
+```
+go/doc/comment            10059  PASS [17s]
+crypto/tls                 3643  PASS [334s]
+crypto/internal/nistec     2195  PASS [132s]
+go/internal/gcimporter      583  PASS [268s]
+crypto/rsa                  559  PASS [149s]
+```
+
+All five clean, 17039 verdicts total, zero divergence. Each sweep's own test-artifact/alias-phantom
+drift restored, not banked — one genuine incidental finding along the way: **`go/doc/comment`'s
+banked test sources are stale**, missing 4 files (`old_test.cs`, `std_test.cs`, `testdata_test.cs`,
+`wrap_test.cs`) and a stale `.tests.csproj` that a live reconvert adds/refreshes. Verdicts still
+passed 10059/10059 either way, so it cost nothing here, but it's a real gap in that package's banked
+surface — flagging rather than fixing, since it's unrelated to this chip and its own row already
+banked under a different arc.
+
+### Scope discipline
+
+Two STOP-and-continue checkpoints from the dispatch, both honored: paused on the confirmed-but-
+unfixed equality divergence before this branch existed (routed back to you rather than guessed
+past), and resumed only after explicit re-authorization with the mechanism-care + taxonomy bounds
+you set. The taxonomy question (which initializer kinds are safe to preserve) resolved without
+needing a ruling, reasoning laid out above; flag if you'd rather it had escalated.
+
+Branch `claude/i9-ctor-initializers` @ `0ef998bfa`, signed, pushed, **not merged**. Working tree
+clean. Ready for the next single.
+
+**AWAITING: nothing.**
+
+-- i9
