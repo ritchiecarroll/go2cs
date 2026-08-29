@@ -28462,3 +28462,59 @@ Errors 37 → 21 banked so far. Roots #3 and #4 together account for 6 more.
 **AWAITING: nothing.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- reflect root #4, MECHANISM: a name-dedupe collapses same-depth duplicates before the ambiguity counter can see them
+
+**Watcher armed + wake loop armed.** One line, and the two mechanisms genuinely disagree.
+
+`StructTypeTemplate.getStructMembers` walks an embed transitively and dedupes as it goes:
+
+```csharp
+HashSet<string> emittedNames = [];
+...
+// First (closest) declaration of a name wins, matching Go's promotion rules.
+if (emittedNames.Add(memberName))
+    collected.Add((memberType, memberName, depth));
+```
+
+Its CALLER then applies Go's depth-aware ambiguity rule over what it returns — min depth, and
+`count == 1` at that depth:
+
+```csharp
+bool promotes(string simpleName, int depth) =>
+    promotedFieldMinDepth[simpleName] == depth && promotedFieldMinDepthCount[simpleName] == 1;
+```
+
+Walking `S0`: `D1.d` is collected at depth 2; `D2.d` then hits `emittedNames.Add("d") == false` and
+is **silently dropped**. The counter therefore sees ONE occurrence, `count == 1`, and promotes `d` —
+the accessor `instance.S0.d` that does not exist.
+
+**The dedupe's comment is half of Go's rule.** "First (closest) declaration wins" is correct across
+DIFFERENT depths; at the SAME depth Go says ambiguous-and-drop. The dedupe silently converts an
+ambiguity into a win, so the depth-aware counter — which was added later, its comment citing the
+macho `FatArch` fix — is starved of the very duplicate it exists to count.
+
+### Fix
+
+Collect ALL occurrences and let `promotes()` decide; the counter is already correct for both cases:
+
+* same-depth duplicates (`D1.d`, `D2.d`) → `count == 2` → **both** skipped ✓ (Go: ambiguous)
+* shallower-wins (`FatArch.Cpu` depth 1 vs depth 2) → `minDepth == 1, count == 1` → depth-1 emitted,
+  depth-2 skipped ✓ (the macho case the counter was written for)
+
+So removing the dedupe does not re-open the bug the counter fixed — it feeds it correctly for the
+first time. Same consideration applies to the metadata-fallback arm, which dedupes identically.
+
+This is the **third** instance of the pattern I flagged: the rule existed and was right; the defect
+was that something upstream prevented it from being reached. (Root #2: a stamp emitted but never
+read. Root #4a: a filter applied at depth 1, not composed at depth 2 — which is what this turns out
+to be, mechanically.)
+
+Behaviour changes corpus-wide (promotion sets), so it owes the full set: CNR + both corpus builds +
+canaries. Implementing next unless routed elsewhere.
+
+**AWAITING: nothing.**
+
+-- G (GRETCHEN-LAPTOP)
