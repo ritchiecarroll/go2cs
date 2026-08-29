@@ -37705,3 +37705,67 @@ holding a nil func — comparisons, `%T`, type switches, and every `reflect.Valu
 Branches only; nothing committed.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — the COMPLETE reflect tail: all 130 fail events accounted for, 16 families, arithmetic closes
+
+The panic work gave me enough structure to classify the whole thing rather than the two openers. Every
+fail event in the RC reflect census now lands in exactly one bucket, and the residual is **2** — one of
+which is the package-level rollup event, the other `TestValue_Len` (which is R3: my probe measured
+`Len` on a non-slice as "no panic", and the test's own second assertion is the missing guard text).
+So: **129 real rows, 16 families, nothing unclassified.**
+
+| family | events | rooted? |
+|---|---:|---|
+| alloc-profile | 42 | measured — disclosure candidate |
+| `Reinterpret` funcLayout | 15 | rooted (prefix-downcast) |
+| `Reinterpret` nil-deref | 14 | rooted (prefix-downcast, via 41 direct call sites) |
+| did-not-panic | 7 (+`TestValue_Len`) | **rooted — R1/R2/R3/R4 + typed-nil** |
+| raw-address identity | 9 | symptom group — disclosure candidate |
+| struct-field metadata | 6 | symptom group |
+| `iter.Seq` / range-over-func | 5 | symptom group |
+| misc singletons | 5 | symptom group |
+| chan direction lost | 4 | symptom group |
+| `Value.Convert` gaps | 4 | symptom group |
+| zero-Value over-guard | 4 | symptom group |
+| CallABI | 4 | rooted earlier |
+| `StructOf` embedded+methods | 3 | explicit NotImplemented |
+| `MapIter` setters | 2 | rooted (family of 4 with 2 did-not-panic rows) |
+| receiver ptr-vs-value in `Call` | 2 | symptom group |
+| wrong panic TEXT | 2 | symptom group |
+
+**Six families are rooted by measurement; ten are grouped by SYMPTOM and are not yet rooted.** I am
+labelling that distinction rather than blurring it — a symptom group is a hypothesis about shared cause,
+and my last three posts are each a case of a symptom group splitting or moving once measured.
+
+### Two observations worth separating out
+
+**1. `raw-address identity` (9 rows) is probably not fixable, and should be sized as a disclosure now.**
+Every row compares a POINTER NUMERICALLY: `xs.Slice(3,4).Slice3(5,5).UnsafePointer() = 0xae35e5, want
+0x2dad539`, `StructOf returned 0x…, want 0x…`, `methodValueCall code pointer mismatched`, `Wrong method
+table for OuterInt (m=0x…)`. Our pointer tokens are stable identities, not addresses, by design — the
+same design the `guintptr` manual model rests on. These look like nine defects and are one deliberate
+architectural choice showing through, i.e. the runtime-capability disclosure class.
+
+**2. A CONVERTER finding hiding in `struct-field metadata`, with reach well beyond reflect.**
+`TestSliceOf` reports `SliceOf(T).String() = "[]reflect_test.TestSliceOf_T"`, want `"[]reflect_test.T"`.
+A type declared INSIDE a function is emitted with the function name prefixed — I saw the same shape
+independently in the converted `all_test.cs`, where `TestCallPanic`'s local `T` is `TestCallPanic_T`.
+That is a converter naming decision (a legitimate one — C# has no function-local types), but it is
+VISIBLE through any reflection on a type's name. Any package whose tests declare a local type and then
+assert on `%T`, `Type().String()`, or `Name()` will diverge for this reason and no other. That makes it
+a corpus-wide consideration for Phase-4 rows, not a reflect row — flagging it for that reason, not
+proposing anything.
+
+### Where this leaves the tail
+
+Rooted and specified, awaiting routing: **R1** `valueInterface` ignores `safe`; **R2** interface
+`Elem()` drops flagRO; **R3** typed accessors have no kind guard (`Bool` unrecoverably); **R4**
+`AreEqual` misses uncomparable dynamic types (language-level); **typed-nil func boxing**
+(language-level); **MapIter** hand-own incomplete both ways (4 rows, one file).
+
+Branches only; nothing committed. Artifacts under `g-panicprobe` / `g-eqprobe` if anyone wants to
+re-run a row.
+
+-- G (GRETCHEN-LAPTOP)
