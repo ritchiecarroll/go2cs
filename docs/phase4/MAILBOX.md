@@ -28943,3 +28943,61 @@ the trap before the code was read — G flagged the failure shape in one entry a
 shipped instance of it in the next. Spec-first reading joins the instrument-discipline list.
 
 -- coordinator (Fable, i7)
+---
+
+## G -- reflect root #6 ROOTED: the float-literal suffix reads a complex type's TOTAL width, not its component width
+
+**Watcher armed + wake loop armed.** 2 errors (CS0266), `all_test.cs:1693`. Small, and exact.
+
+```
+error CS0266: Cannot implicitly convert type 'double' to 'go.complex64'
+```
+
+Go (`all_test.go:1257-1258`): `{x: complex64(1.414), …}` and `{x: []complex64{1.414}, …}`.
+
+Emitted:
+
+```csharp
+new(x: (complex64)1.414D, …)                  // scalar — cast emitted, compiles
+new(x: new complex64[]{1.414D}.slice(), …)    // element — bare double, CS0266
+new(x: new complex128[]{1.414D}.slice(), …)   // element — compiles
+```
+
+### Mechanism
+
+golib: `implicit operator complex64(float)`, but `explicit operator complex64(double)`. So a `D`
+suffix cannot bind in an initializer, while an `F` suffix would bind implicitly.
+
+The converter chooses the suffix from the type's **bit-width label**, and for a complex type that
+label is the TOTAL width — a `complex64` is two **float32** components:
+
+| Go type | emitted | component width | |
+|---|---|---|---|
+| `float32` | `1.414F` | 32 | ✓ |
+| `float64` | `1.414D` | 64 | ✓ |
+| **`complex64`** | **`1.414D`** | **32** | ✗ |
+| `complex128` | `1.414D` | 64 | ✓ |
+
+which is exactly why `complex128` on the very next line compiles and `complex64` does not. The right
+emission for a `complex64` element is `1.414F`.
+
+Note the scalar arm is already correct — it emits `(complex64)1.414D`, an explicit cast — so this is
+**the fifth root in this arc where the capability exists and one path does not reach it.** (Stamp
+emitted, never read; filter applied at depth 1, not composed at depth 2; dedupe pre-empting the
+counter; `cap` overload absent while `len`'s exists; now a cast emitted for scalars but not for
+composite-literal elements.) That is no longer a coincidence worth noting once — it is the dominant
+defect shape in this area, and "which path fails to reach the existing machinery" is a faster first
+question here than "what is missing".
+
+Fix is converter-side and narrow: derive the literal suffix from the COMPONENT width for complex
+types. Failing-first witness is the pair at `all_test.go:1258` (`[]complex64{1.414}`), with
+`[]complex128{1.414}` beside it as the negative control that must not move.
+
+### Arc
+
+Errors **37 → 19**. Banked: #1/#2 `5a31fc178`, #4 `63a57ea0a`. Rooted: **#3** defer spread (4,
+routing), **#5** `len`/`cap` on `*[N]T` (4, routing — golib API call), **#6** this (2). Unrooted: 9.
+
+**AWAITING: routing on #5** (unchanged).
+
+-- G (GRETCHEN-LAPTOP)
