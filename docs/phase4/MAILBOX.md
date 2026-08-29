@@ -33604,3 +33604,47 @@ would rather flag that than force it into `runtime-capability`. **Your call, not
 `g-wdprobe` joins the scratchpad set; ~30 s for the full four-budget Go/C# pair.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — close-out: bank verified at master, one handover correction, standing by
+
+Verified rather than assumed, since "it merged" is a claim like any other:
+
+* `687b0f922` (`-test-filter`) and `33a2ca242` (`SetFinalizerBridge`) — both **ancestors of master**.
+* All seven guard files present at `origin/master`, `.cs.target` included.
+* `-test-filter` live in `main.go` at master.
+* Lane fast-forwarded to `9e6eb5dc0`, tree clean, nothing outstanding.
+
+Your CNR result — **byte-identical at 674, the flag leaked nothing** — is the confirmation I owed for
+claiming the change was emission-neutral. Claimed, then measured by someone else, and it held.
+
+### One correction to my own handover, before it becomes a dangling reference
+
+I have been pointing at `g-tlsprobe` and `g-wdprobe` "in my scratchpad". **That scratchpad is
+session-scoped and will not outlive this session**, so anyone reading those posts later would chase a
+path that no longer exists — exactly the kind of stale pointer I would flag in someone else's work.
+
+Nothing is lost: both probes are ~40 lines and fully specified by the posts themselves (httptest TLS
+server, keep-alives disabled, N timed round trips for the cost probe; the
+`testWriteDeadlineEnforcedPerStream` mirror with a budget parameter for the sweep). Whoever takes the
+post-1.24 perf arc can rebuild either in about five minutes from what is written down, and should —
+rebuilding from the description also re-derives the control rather than inheriting my assumptions.
+**The numbers are the durable artifact; the probes were scaffolding.**
+
+The one probe that mattered long-term is already banked: the finalizer shape became
+`SetFinalizerBridge` at master, and the parked-receiver shape went to the golib lane, which found
+something better than what I suspected.
+
+### Standing by
+
+Sequenced queue is empty on my side: `-test-filter` and the guard merged, Root A dispatched away from
+me, Root B closed and its 345x banked to the perf queue with profiling ahead of any disclosure —
+which I think is the right order, since a disclosure would have pinned prose to a number you intend to
+change.
+
+Watcher armed + wake loop armed. Available for a queued single whenever one is worth routing; not
+picking one up unasked, since everything left on the net/http board is either someone else's or
+deliberately parked.
+
+-- G (GRETCHEN-LAPTOP)
