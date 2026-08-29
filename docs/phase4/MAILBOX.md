@@ -31870,3 +31870,81 @@ repo first." Both are cheap to obey and each just caught a live defect.
 net/http's 90m verdict lands on the fresh tail doctrine â€” read the last line first, quote it
 in the census either way. Prior stands at 213; more absents than that means something beyond
 the deadline, exactly as you framed it.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **seam ErrUnsupported LANDED: all eight land as skip-MATCHES, 22 → 13.** Plus a pre-existing OQ-2 gate failure that an A/B proves is not mine
+
+**watcher armed + wake loop armed.** `claude/laneR-seam-errkind` — `7b3fa26ba` (witness),
+**`36aa2bbde`** (fix). Both signed and pushed. All four conditions met; nothing merged without your word.
+
+### The measurement
+
+```
+THE EIGHT (Go=skip; had to become C#=skip and MATCHING):
+  TestAmbientCaps  TestCloneTimeNamespace  TestDeathSignalSetuid  TestGroupCleanup
+  TestGroupCleanupUserNamespace  TestUnshare  TestUnshareMountNameSpace
+  TestUnshareMountNameSpaceChroot          →  all eight  go=skip cs=skip  MATCH
+```
+
+**Divergences 22 → 13.** I predicted 14; it is 13 because a NINTH resolved that I did not forecast —
+`TestCloneNEWUSERAndRemap`, the PARENT, now passes once its two subtests skip. Verdict spread moves
+`fail 20→5`, `skip 7→21`, `pass 26→27`, and the arithmetic closes to zero (−15 +14 +1), so nothing
+moved that I cannot account for.
+
+### The remaining 13 are exactly what the root analysis said they would be
+
+* **6 changed `fail` → `skip`, still divergent, and CORRECTLY so** (`TestAmbientCapsUserns`,
+  both `TestCloneNEWUSERAndRemap` subtests, `TestEmptyCredGroupsDisableSetgroups`,
+  `TestPidFDWithUserNS`, `TestUnshareUidGidMapping`). Go **passes** these — the operation genuinely
+  works unprivileged — and our seam genuinely cannot express it. So the divergence SHOULD remain
+  visible; the fix changed its character from "we tried and broke" to "we reported unsupported and
+  Go's own guard skipped", without papering over a real capability gap. That distinction is the
+  point of the change.
+* **2 unchanged — the intrinsics** (`TestExec`/`runtime_BeforeExec`, `TestGettimeofday`), still
+  `infrastructure-error`. Root 2, untouched, as predicted.
+* **2 unchanged — the sendmsg pair** (`TestPassFD`, `TestSCMCredentials`). Root 3, untouched.
+* **3 seam refusals whose tests carry no `SyscallIsNotSupported` guard** (`TestExecPtrace`,
+  `TestForeground`, `TestForegroundSignal`) — they fail because Go's source never wrote a skip
+  branch there, not because the kind is wrong. Correct, and not something a kind can fix.
+
+### Conditions
+
+| condition | result |
+|---|---|
+| failing-first witness | RED at `7b3fa26ba`, **on the intended assertion** (line 144), with the earlier asserts PASSING — so the seam refused, the refusal reached the gate, and only the kind was missing |
+| linux L3 build | 0 errors — WSL **and** an independent Windows `-p:GoTargetOS=linux` build |
+| new gate green | passes at `36aa2bbde` |
+| single re-run, the 8 as skip-matches | **8 of 8 MATCH** |
+| disclosure ruling | deferred to the re-measured 13, per your routing |
+
+### A SECOND finding, routed not folded: `UnobservedChildSurvivesUntilWait` fails, and it is NOT mine
+
+The other ratified seam gate — **OQ-2, the proof that the CLR's reaper does not steal children this
+seam spawns** — fails with `go.PanicException: nil pointer dereference`. My change touches only the
+unsupported-field path and that test sets no `SysProcAttr` at all, so "obviously unrelated" was the
+tempting call. **I ran the A/B instead**, three repeats per side:
+
+```
+A: PRE-FIX  7b3fa26ba (fix=0)   Failed  Failed  Failed
+B: WITH FIX 36aa2bbde (fix=1)   Failed  Failed  Failed
+```
+
+Identical, six runs: **pre-existing and DETERMINISTIC** — the repeats were there to separate a flake
+from a defect, and it is a defect. Exonerates the fix; the reasoning could not have, only the A/B did.
+
+**Hypothesis, offered as such:** this may never have executed on Linux at all rather than having
+regressed. It is linux-only by construction (Windows reports `Inconclusive`), and a grep across
+`.github/workflows` and the repo's PowerShell instruments finds `GolibTests` in exactly one place —
+`migrate-tfm.ps1`, a TFM migration tool. **No CI gate and no sweep runs that project on Linux.** I
+have not chased the panic; scope was the eight, and this is a different change.
+
+### Not banked
+
+The sweep leaves the usual `-tests`-closure drift on syscall's test artifacts (`go2cs_test_host.cs`,
+`package_test_info.cs`, `syscall.tests.csproj`, …). Left alone, per the standing restore rule.
+
+**Roster stands at 121 of 184 / 21,511 matching / 87 disclosed, guard 395** (`8d4ff314d`). 63 rows
+remain. Travel this afternoon; everything is pushed and nothing merge-blocking parks on me.
+
+-- R (RITCHIE-LAPTOP)
