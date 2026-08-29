@@ -34699,3 +34699,58 @@ candidates. It dispatches when the ordinals lane's behavioral suite clears the b
 own environment, one rooted single-type blocker from building â€” from "unconvertible" to
 "one defect from a test host" in the twelve hours since you routed a panic at 03:42.
 Proceed to the sync/atomic reproducer as sequenced; hard stop stands.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **`sync/atomic` characterized: not a correctness bug, a THREADS-PER-GOROUTINE collapse.** Measured with a control on both sides
+
+**watcher armed + wake loop armed.** Day-shift task 2 of 2. Tree restored; nothing banked.
+
+### The measurement
+
+| | goroutines | OS threads | result |
+|---|---|---|---|
+| **Go**, full size | 1000 | few (M:N) | **PASS in 9.07 s** |
+| **C#**, full size | 1000 | **1010 on 10 cores** | **does not finish in 170 s** |
+| **C#**, `-test.short` | 100 | ~110 | **PASS in 0.225 s** |
+
+`TestValueCompareAndSwapConcurrent` (`value_test.go:249`) launches **m=1000 goroutines**, each
+spinning `for j := i; j < m*n; runtime.Gosched()` on a CAS retry. Under threads-per-goroutine that
+is **1010 OS threads on 10 cores — 101x oversubscription**, and `Gosched` becomes a kernel yield
+among a thousand runnable threads.
+
+**The short-mode control is what makes this a finding rather than a guess.** Same test, same binary,
+same host, only `m` drops 1000 → 100: it **passes in 0.225 s**. So the conversion is CORRECT and the
+collapse is **superlinear in goroutine count** — 10x the goroutines is not 10x the time, it is more
+than 750x and still unfinished.
+
+Reproducer: ~2 min per side, no sweep, no hour. `-test-filter` is **not in this lane's tree** at
+`cc33cff36`, so I drove the published host directly with `-test.run` (which exists on both sides) —
+worth knowing before someone plans around the flag being available.
+
+**NOT asserted:** that oversubscription is the whole mechanism. What is demonstrated is that the
+goroutine count is the variable, correctness is not implicated, and the cost is superlinear. Whether
+the remedy is scheduler-side (M:N, a bounded pool for spin loops) or a `Gosched` that does not
+consume a kernel yield is a golib/runtime judgement, not mine, and this is the queued frontier item
+you already named.
+
+**This is the cooperative-scheduler bill in CLAUDE.md's own terms** (SCHED-S1, threads-per-goroutine)
+meeting a test written to stress exactly that. It is Linux-only in the roster because Windows banks
+the row at full count — worth someone checking whether Windows simply has more headroom or schedules
+differently, since the same arithmetic should apply there.
+
+### Seventh probe defect, and it would have refuted the CORRECT hypothesis
+
+My first thread census reported **1 thread**, which would have killed the oversubscription
+hypothesis outright and sent me looking for a CAS bug. I had used `pgrep … | head -1` — and that
+returned the **`timeout` wrapper**, not the host. The real host was its child at **1010** threads.
+
+Caught because "1 thread" is implausible for any .NET process, which always carries GC and finalizer
+threads. **The tell was domain knowledge contradicting the instrument, not the instrument
+complaining** — it reported cleanly and precisely, and was measuring the wrong process. Same family
+as this morning's stale binary: seventh instance, and the second where the false reading pointed
+away from a correct conclusion rather than toward a wrong one.
+
+Both day-shift tasks are done inside the bound. Nothing merge-blocking parks on me.
+
+-- R (RITCHIE-LAPTOP)
