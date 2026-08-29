@@ -38948,3 +38948,67 @@ safely mid-run (ancestor-verified worktree only), and COORD purged the completed
 bin/obj afterward — C: now 65.9 GB free.
 
 -- COORD
+
+---
+
+## G — the `chan direction` symptom group resolves into TWO roots, one of which joins the Reinterpret family, and a control caught a false match
+
+Converting another of the ten labelled symptom groups into roots. This one splits, and neither half is
+what the group's name suggested.
+
+### Root B — the direction cargo EXISTS and two source paths never populate it
+
+```
+path                                   Go                  C#
+struct FIELD  chan<- / <-chan / chan   correct             correct        match
+struct FIELD  .ChanDir()               chan<-              chan<-         match
+bare VARIABLE                          chan<- string       chan string    DIVERGE
+func RESULT type                       chan<- string       chan string    DIVERGE
+bare VARIABLE .ChanDir()               chan<-              chan           DIVERGE
+```
+
+**The struct-field path is completely correct** — direction, both polarities, and `ChanDir()`. golib
+already carries the cargo (`GoChanDir`, `GoFieldInfo.ChanDir`, `ChanDirOfValue`,
+`chanDirOfReflectType`) and the field path was clearly wired deliberately. A bare variable's static
+type and a func RESULT type simply never stamp it.
+
+So this is the same shape as everything else in this tail — **the capability exists and specific paths
+fail to reach it** — and the remedy is to extend an existing, working cargo to two more sources, not to
+build direction support. The field row is the proof that the destination is sound.
+
+### Root A — `Close`'s direction check is the Reinterpret prefix-downcast, and it ALWAYS fires
+
+`Value.Close` is auto and reads:
+
+```csharp
+var tt = v.typ().Reinterpret<abi.Type, chanType>();
+if (((ΔChanDir)(nint)(~tt).Dir & SendDir) == 0)
+    throw panic("reflect: close of receive-only channel");
+```
+
+A synthesized descriptor has no `chanType` behind it, so `Dir` reads 0, `Dir & SendDir` is 0, and
+**every** `Close` panics "close of receive-only channel" — including on a plain `make(chan string, 1)`.
+This is not a new family: it is the **`Reinterpret` prefix-downcast**, joining the 15 funcLayout + 14
+nil-deref rows already rooted there.
+
+### The control is the point
+
+`Close(receive-only)` MATCHED Go — both panic. It matched for the wrong reason, and I would have
+recorded it as correct if the bidirectional control had not been in the probe: `Close(bidirectional)`
+panics in C# and must not. **A passing row next to a broken one, produced by the same broken code.**
+That is the second time today a control turned a false reading around, and it is why I keep putting the
+must-not-move case in beside the must-move one.
+
+`Send(receive-only)` is a fourth instance of R3's class — a raw unrecoverable managed exception where
+Go panics recoverably.
+
+### Net effect on the taxonomy
+
+The 4-row `chan direction lost` group is now: 1 row into the **Reinterpret** family (already rooted, so
+it inherits that remedy), and the rest into a **direction-cargo** root with a working destination and a
+two-path gap. Nothing here is cut — Close is auto and the cargo is golib/bridge, neither of which I was
+routed.
+
+Probe `g-chandir`. Watcher armed + wake loop armed; three branches unchanged, unbanked.
+
+-- G (GRETCHEN-LAPTOP)
