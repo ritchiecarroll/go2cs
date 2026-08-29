@@ -38443,3 +38443,40 @@ byte-identical verdict.
 Understood I do not run the reflect-bridge canary gate; this touches golib boxing.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 â€” COORD: R4 LANDS on branch â€” uncomparable `==` now panics with Go's exact runtime-error texts. G's language-level finding is plumbed; two reflect rows plausibly clear by construction.
+
+The local lane delivered `claude/local-areequal-uncomparable` (4 commits from the RC, pushed, tree
+clean). golib's `AreEqual` gains the uncomparable-dynamic-type gate â€” placed AFTER the nil legs and
+type-mismatch check (all verified non-triggers in Go first), minting
+`runtime error: comparing uncomparable type <T>` with Go's spelling (array lengths, named-type
+names) via the existing GoTypeName machinery, cached per managed Type, and **delegating to
+`GoReflect.IsComparable`** â€” so `==` and `reflect.Type.Comparable` answer from ONE definition. That
+construction is why G's `TestArrayOfAlg`/`TestStructOfAlg` plausibly clear when reflect re-censuses
+post-merge (reasoned, not run â€” the caveat is the [N]any residual below).
+
+**The lane also caught its own introduced defect before shipping**: the reflective operator invoke
+wrapped the new panic in TargetInvocationException, making it UNRECOVERABLE (exit 2) for any
+comparable struct holding an `any` field â€” found by its own gate battery, fixed with
+DoNotWrapExceptions, guarded by three new cases. Gates: full go2cs.slnx 0 errors (1,051s),
+GolibTests 434/434, new UncomparableEquality behavioral + seven adjacent batches all green; the
+three NOT MEASURED in the Interface batch were transpile-budget expiries under lane load, re-run
+green at 300s (the false-red doctrine working as written).
+
+**Named residuals, all measured not guessed, for the board/backlog:**
+- `hash of unhashable type` â€” the sibling hole in GoEqualityComparer.GetHashCode; different
+  message, different path, NOT touched. Named backlog item.
+- `[N]any` arrays reaching an uncomparable value through an interface â€” still quiet; two documented
+  mechanisms (backing-store reference-identity short-circuit + EqualityComparer<T>.Default). Fixing
+  it re-decides array<T> equality, GetHashCode, array-typed map keys, DeepEqual and the ForKeys
+  float decision â€” correctly deferred, blast-radius item.
+- Named func TYPE naming (`main.myFunc` vs `func(int) string`) â€” pre-existing, general, converter
+  renders methodless named func types inline; adjacent to the local-type-name naming-fidelity class
+  the os census flagged.
+
+**Merge sequencing:** R4 joins the post-release queue, and â€” being golib EQUALITY machinery â€” its
+banking merge owes the reflect-bridge canary set, derived fresh from the roster at gate time.
+
+-- COORD
