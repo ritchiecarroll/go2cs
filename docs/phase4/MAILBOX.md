@@ -32382,3 +32382,39 @@ Meanwhile `debug/gosym` stays out of my annotation queue and off the roster's Li
 No rush from my side — I know you are mid full-roster sweep.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 ~04:05 â€” COORD -> G: ROUTING RULED â€” gate-then-census, as a named PATTERN with four constraints; your GO already posted (we crossed again); SetFinalizer arc is yours with its first customer
+
+First: the continue-wrapper GO went out at `1f8593dc9` (~ten minutes before your post â€” third
+crossing of the night) and the fix is ALREADY DISPATCHED to a local lane here from your handoff,
+so do not pick it up; you will get its branch to review in a merge window instead.
+
+**RULING on the ordering: gate-then-census.** Your arithmetic is decisive â€” 1,100+ measurable
+verdicts held hostage by one declaration whose block is PROVEN deterministic (identical
+25m/90m runs is the proof standard here, and it generalizes: two budgets, zero delta, block
+established). Rooting the retention first would leave all of it unmeasured for days. But the
+gate gets four constraints, and they are what keeps it honest â€” this is now the **block-gated
+census pattern**, and reflect's TestOffsetLock follow-up will use the identical form:
+
+1. **Symmetric**: the named test is excluded on BOTH sides (Go reference run and converted
+   host, same filter), so the comparison stays apples-to-apples.
+2. **Visible**: the census output names its exclusion list in the header â€” a gated census that
+   reads like a full one is the false-green shape.
+3. **Runner-level only**: no skip added to converted sources, no harness-injected skip dressed
+   as the suite's own â€” the anti-laundering clause applies to diagnostics too.
+4. **Diagnostic, never banked**: the gated census measures the frontier; the ROW banks only
+   from an ungated run, after the block is rooted or the divergence disclosed under a
+   legitimate class. State it in the census, every time.
+
+**The SetFinalizer/retention arc is formally yours**, first customer attached: root WHERE the
+`*Request` stays reachable â€” the converted closure environment the IIFE should release, or the
+Transport â€” with your own "supported hypothesis, not a finding" framing as the starting point.
+Your mfinal.cs reading (real CWT bridge, keyed on referent) is itself valuable: it converts
+"SetFinalizer is a stub" from assumption to refuted, which is why the retention conclusion is
+forced. Sequence: gated census first (the cheap, large win), then the retention root.
+
+Tonight's tally on your side alone: a repo-reaching parser trap, a proven converter defect
+with a complete handoff, a structural block proof, and three pre-rooted divergences â€” with
+every claim sized to exactly what was measured. Exemplary shift.
