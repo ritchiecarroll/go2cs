@@ -32614,3 +32614,64 @@ Six routed rows and nothing else: `os/exec` 116, `sync/atomic` 108, `syscall` 65
 (permanently N/A — your convention item). Everything is pushed; nothing merge-blocking parks on me.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## G — `-test-filter` BUILT, gated and pushed (`g-test-filter` @ `687b0f922`); gated census running now
+
+Mechanism is done and on a branch, ready for a merge window. +34/−4 across three files.
+
+**What it does.** One flag, threaded **verbatim** to both sides of a compare:
+
+```
+-test-filter <regex>  ->  go test -json -count=1 -timeout T -run <regex> .
+                      ->  <host>.exe --json -timeout T --run <regex> …
+```
+
+`-run` rather than the more obvious `-skip` because `run`/`test.run` exists on **both** sides today
+(`TestOptions.cs:178`) while `skip` exists only on Go's — so `-skip` would have cost a hand-owned-host
+change to buy the same thing.
+
+**Two design points I want on the record, because both are load-bearing rather than stylistic.**
+
+*The flag never composes the string.* It forwards it. That is what makes your constraint 1 auditable:
+the two command lines in the log carry the **identical** filter, checkable by eye, instead of two
+expressions a reviewer would have to prove equivalent. A cleverer flag that built each side's filter
+would be the thing constraint 1 exists to prevent.
+
+*Validation compiles the pattern with Go's RE2* — the **stricter** of the two engines it is handed to,
+since the host parses it with .NET `Regex`. So a pattern only .NET would accept is rejected here too.
+The asymmetry is deliberate: it keeps the sides identical rather than merely similar. And it dies at
+the flag naming itself rather than reaching two children that each reject it in their own dialect —
+your requested `-test-timeout` posture.
+
+Your constraint 4 is in the **help text**, verbatim, because the flag is the last thing a user reads
+before running one.
+
+**Gates.** `go build` clean, `go vet` clean, converter `go test ./...` **green (156 s)**. Both controls
+checked on REAL exit codes, not a piped `$?` (the trap I have been flagging all night): invalid regex
+→ **exit 1**, `Invalid -test-filter "^(?:Test[": error parsing regexp: missing closing ]`; valid regex
+→ passes the check and fails later on its input path. **Emission is untouched** — the flag is inert
+when empty, so CNR should be trivially byte-identical; it still owes one at the merge window.
+
+### Two things the run-up taught, neither of them mine to claim as design
+
+**The harness refused my first launch** — `test manifest is stale: input digest changed` — because
+restoring `src/core/` and rebuilding the converter both moved the digest. That guard did exactly its
+job and stopped me comparing stale artifacts; I switched to `-test-action all`. Worth saying out loud
+since I have spent the night hunting false greens: **that is what a good one looks like.**
+
+**Post-`-tests` dirt classified before I touched anything**: 200 modified, **zero unclassified** — 64
+CRLF phantoms (empty numstat) plus 18 closure files, all in `net/http`, seventeen symmetric N/N
+(`global::go.*` root escape) and `package_init.cs` at exactly the **7/0 `initᴛᴛtests()`** shape
+CLAUDE.md names. Restored, not banked.
+
+### Census in flight
+
+Excluding **`TestTransportGCRequest` only** — 569 of 570 parents kept, 15,870-char filter, named in
+the header per constraint 2. `-test-action all` (the digest guard forces a reconvert), 60m budget.
+If a SECOND block sits behind the first, this run will find it the same way: two budgets, zero delta.
+
+**Diagnostic only. Nothing from this run banks a row.**
+
+-- G (GRETCHEN-LAPTOP)
