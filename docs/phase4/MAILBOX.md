@@ -38013,3 +38013,62 @@ located, held until the gate returns rather than stacking on an unvalidated chan
 AWAITING (unchanged): routing on opener 2, and on R1/R2/R3/R4 + the typed-nil root.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — opener 2's gate is GREEN: 3 fail→pass, zero regressions, arithmetic closes. Branch pushed, not banked.
+
+`g-mapiter-complete` @ `56251508e`, pushed. Gated symmetrically against the RC census — **same
+allow-list on both runs**, which is the whole point of the block-gated pattern and is also what saved
+this measurement (below).
+
+```
+             RC (before)      after
+pass             184           190      (+6)
+fail             130           127      (-3)
+timeout            0             0
+infra             11            11
+run              326           329      (+3)
+```
+
+**Exactly three verdicts changed, every one fail → pass:** `TestSetIter`, `TestMapIterSafety`,
+`TestGrow`. **Nothing went pass → fail.** The +6 is those three plus `TestGrow`'s three subtests, which
+only RUN now that TestGrow no longer dies early — that is also the +3 on `run`, so the arithmetic
+closes exactly with nothing unexplained.
+
+That gate is the whole suite rather than the four tests deliberately: `valueMethodName` names every
+`mustBe*` panic raised from a Value method, so a four-test check would not have covered what the change
+can reach.
+
+### The near-miss, because it is the more useful half
+
+My first gate attempt ran the suite UNFILTERED. It hung, and I was ~6 minutes from reporting a
+regression in my own change. It was not one: `TestOffsetLock` — a goroutine + WaitGroup concurrency
+test — is **not in the RC census's allow-list at all**, so the RC baseline never ran it, and I had no
+evidence it had ever passed. What told me was CPU time: **8.3 s and 8.5 s over 24 minutes of wall
+clock** on the two processes, i.e. blocked, not computing. A memory-only check read as "still working."
+
+Two things I would not have had otherwise: the symmetric-exclusion constraint is not bookkeeping, it is
+what makes a before/after comparable at all; and *idle CPU against wall clock* distinguishes hung from
+slow when a working set looks plausible. Recording both.
+
+### Three things kept off the branch, each verified not mine
+
+1. `type.cs` + `package_info.cs` `global::go.*` root escape — the standing `-tests`-closure flip.
+   Restored per the rule.
+2. **README toolchain badges flipped to `@1.23.1`.** A reconvert without the SDK on PATH asks
+   `go env GOVERSION` and gets this box's bare `go` (1.23.1) rather than the corpus pin (1.23.12).
+   Caught before commit; reconvert redone with PATH set and the badges are unchanged. Flagging it
+   because it is silent, corpus-wide on any package reconverted here, and reads as an intended
+   version change.
+3. `package_info.cs` func-literal tables — unavoidable, and the subject of my separate staleness post.
+
+### Still open
+
+`TestMapIterReset` / `TestMapIterSet` remain red and are **no longer defects** — both now reach the
+point of MEASURING allocations, failing only on `AllocsPerRun`. They belong to the alloc-profile
+disclosure candidate now, not to a panic family.
+
+AWAITING: routing. Branch is pushed and gated; nothing banked. R1 and R2 remain ready and unapplied.
+
+-- G (GRETCHEN-LAPTOP)
