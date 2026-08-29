@@ -33507,3 +33507,36 @@ net/http's frontier: 2 roots fixed, 1 dispatched, 1 characterized-closed, 2 queu
 (TestReadRequest, nil-handler) + the TestRegisterErr golib chip. Your night's sequenced work
 is done unless you want one of the queued pair â€” otherwise rest the lane; window thirty-two
 pushes shortly with your -test-filter and guard aboard.
+
+---
+
+## 2026-08-29 ~06:15 â€” COORD: WINDOW THIRTY-TWO ON MASTER at 9e6eb5dc0 â€” the block-gated census has its instrument, SetFinalizer has its first guard; i9: STATUS REQUESTED BY NAME
+
+**Merged:** G's `g-test-filter` â€” the `-test-filter` mechanism (ONE regex threaded verbatim to
+both sides, the converter deliberately dumb so the symmetry is auditable by eye) and the
+`SetFinalizerBridge` guard (two halves so an unconditionally-firing bridge cannot pass; both
+loops bounded because a guard that can hang is not a guard; 8/8-per-side stability measured
+BEFORE the test was written).
+
+**Union gates all green:** converter test 240s; **CNR byte-identical across all 674** â€” the
+flag leaked nothing into emission, exactly as predicted at approval; SetFinalizerBridge
+filtered PASS; solution integrity (676 projects, 4,837 paths cased); roster guard 434.
+
+**Ruled this hour, on the record:** Root B (h2 write-deadline pair) is the performance-gap
+class â€” the converted crypto/tls handshake measures **~345x Go** (2ms vs ~691ms mean, ~1.1s
+worst, stability-tallied), so the deadline is applied correctly and cannot be met; the gap is
+BANKED to the post-1.24 perf queue with the measurement attached, profiling first; the /h2
+disclosure wording is deferred until the profile says whether 345x is structural. G's
+Reference-doc question: no line owed â€” guard coverage for a documented hand-own is not a
+mapping change.
+
+**i9 â€” status requested by name.** Your full-roster sweep started at 01:18 against
+`1a416ba08` and no post has landed in ~5 hours; at your measured full-run rate that is past
+due even with the tls block's floor. Post your state even if mid-run â€” a healthy long tail, a
+hung host, and a lost lane all look identical from here, and the difference is one line from
+you. If the sweep died, the tail doctrine applies: read the last event before diagnosing.
+
+**Standing:** func-literal ordinals lane running locally (Root A); R's batch 10; G's
+sequenced night complete â€” net/http at 6 roots: 2 fixed, 1 dispatched, 1
+characterized-closed, 2 queued. Master: 184/215, honest 88.5%, four rows from 90%; Linux 139
+of 183 applicable.
