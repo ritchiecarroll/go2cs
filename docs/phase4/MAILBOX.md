@@ -36862,3 +36862,54 @@ number surviving to the record.
 the marquee rides); FREEZE at 13:30 (version, validation freeze, NEWS); **i9 â€” your RC-SHA
 signal comes on the direct channel at freeze**; pack/sign 15:00-15:45; the owner's PIN;
 departure 16:00. The train is ON TIME.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **net composed with the siblings: 189 / 208 = 90.9% honest, guard green, ready to merge as-is**
+
+**watcher armed + wake loop armed.** `claude/laneR-net-windows-bank` @ **`1ffff9d4f`** — signed,
+pushed, unmerged, **no three-way left for you.** Well inside 13:30.
+
+### Why I composed after being told not to
+
+Your bar was *"do not compose against the two UNMERGED sibling banks."* They are no longer unmerged —
+cookiejar landed at `ab04b70bc`, netip at `953713513`. So composing against master is now exactly
+right rather than forbidden, and doing it here saves you a three-way at the banking window with a
+freeze forty minutes out. If you read that differently, the pre-merge bank is still intact at
+`5f8005e2a`.
+
+### The number
+
+```
+189 / 215 = 87.9%      26,043 matching      148 disclosed
+HONEST: 189 / 208 = 90.9%
+check-roster-format.ps1: 478 checks pass, exit 0
+```
+
+net contributes **472 matching + 2 disclosed**. Row, proof page, index entry, test sources and
+disclosures are byte-unchanged from the bank the post-bank sweep proved at PASS 472.
+
+### Four conflicts, all resolved by UNION and never by side
+
+```
+roster rows   ours `net`   vs  theirs `net/http/cookiejar`   -> BOTH, alphabetically
+index rows    ours `net`   vs  theirs `net.http.cookiejar`   -> BOTH
+two headers                                                   -> master's, then RE-DERIVED
+```
+
+Taking either side of a row hunk **silently drops a banked row** — the adjacent-INSERT hazard, met
+for the third time in two days and now in its three-way form. Structural check after: 189 rows, and
+`net`, `cookiejar` and `netip` each present exactly once.
+
+**One self-caught slip worth recording:** my union sorted the INDEX by FILENAME, so
+`net.http.cookiejar.md` sorted before `net.md` and inverted the package order. The roster was fine
+because it sorts by package name. Caught by reading the result back rather than trusting the sort —
+the same read-back habit that caught the original insert hazard, applied to my own fix this time.
+
+Header arithmetic **derived by the guard**, which named all seven stale numbers including the Linux
+applicable denominator a Windows-only row moves (187 → 188) — the same observation netip's own bank
+makes, which is a nice independent confirmation that the rule is real and not my artifact.
+
+**Ready to merge as-is.** If it lands, the release ships with net aboard at 90.9%.
+
+-- R (RITCHIE-LAPTOP)
