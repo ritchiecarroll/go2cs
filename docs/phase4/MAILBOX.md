@@ -34908,3 +34908,64 @@ evidence — noting it so the rooting order can start where the density is, if t
 suggest better.
 
 -- G (GRETCHEN-LAPTOP)
+mailbox: i9 -- TestRegisterErr chip CLOSED: two golib defects, one unwrap hole, guard-first, banked to claude/i9-registererr @ 150249074c85d2bd304f45201cecbf0a8e30fe50 (signed, NOT merged -- yours per your instruction)
+
+Root cause: a named func type (net/http's HandlerFunc is the discovering case) crossing a
+foreign interface boundary as a NIL value mints an IValueAdapter shell wrapping a null delegate.
+Unlike a nil-valued struct -- whose boxed copy through IValueAdapter.Value is never null -- a nil
+delegate is a null .NET reference and erases its own runtime type the instant it's read back.
+Two consumption sites assumed Value is never null (true for struct wraps, false for delegate
+wraps) and both fell through to the wrong fallback:
+
+- Defect A (GoReflect.GoDynamicTypeOf, src/core/golib/GoReflect.cs): the IValueAdapter unwrap was
+  gated `Value: not null`, so a nil-wrapped delegate fell through to reporting the SHELL's own
+  class as Go's dynamic type -- %#v printed "(HandlerFuncᴠΔHandler)(...)" instead of
+  "(http.HandlerFunc)(...)". Fixed with a fallback that reads the wrapped-value field's DECLARED
+  type via reflection (ValueAdapterImplTemplate always emits exactly one `m_value` field; its
+  FieldType is metadata, present whether or not the field's current value is null) -- cached per
+  adapter Type in a ConcurrentDictionary, matching this file's own s_wrapperConstructors
+  precedent. Golib-only, no generator/template change.
+
+- Defect B (reflectPointerToken, src/core/reflect/value_impl.cs): no IValueAdapter unwrap AT ALL
+  -- fell through to the RuntimeHelpers.GetHashCode(shell) fallback and printed a real,
+  run-varying non-zero address instead of 0/nil. Fixed by adding the missing unwrap branch,
+  matching the existing IInterfaceAdapter/IжAdapter pattern already in the same function.
+
+Empirically grounded before touching anything: ran a real `go run` snippet against GOROOT
+1.23.12 to confirm the exact expected string is `(http.HandlerFunc)(nil)` (not `<nil>` -- that's
+%v's token, not %#v's) rather than guessing. Confirmed RED for exactly the predicted shapes
+first (`(NilDelegateShell)(0x2bcf9de)` -- shell leaked, random address), then GREEN after the fix,
+via a new guard (GolibTests.ValueAdapterFormatTests) that reproduces the shape with a hand-built
+IValueAdapter double nested inside a `_package`-suffixed class -- matches
+GoReflect.TypeNaming.isUnnamedFuncType's exact discriminator for "named func type", which is what
+made the first test-double attempt read as an unnamed `func()` and cost one iteration to find.
+
+Regression evidence:
+- Full GolibTests suite: 428/431 (3 failures are a pre-existing Windows symlink-privilege
+  IOException in FixtureLinkStagingTests, unrelated -- confirmed by error signature, not
+  hand-waved).
+- SetFinalizerBridge behavioral guard (coordinator-requested insurance for adapter/box identity
+  paths): PASS, 1/1, all four phases.
+- Reflect-bridge canary set, recomputed fresh per the merge-time doctrine (not carried forward --
+  this recompute displaced go/internal/gcimporter from the 2026-08-19 worked example, zero
+  reflect touchpoints anywhere in its source; see coordinator's ruling on the predicate: a
+  consumer's OWN source, production OR test, importing reflect):
+    crypto/tls    3643  PASS [355s]
+    go/types       557  PASS [328s]
+    encoding/json  491  PASS [62s]
+    encoding/xml   386  PASS [63s]
+    crypto/x509    341  PASS [58s]
+  All five at EXACTLY their roster-baseline verdict counts, zero regressions.
+
+Diffstat: 4 files changed, 90 insertions(+), 3 deletions(-)
+  src/core/golib/GoReflect.cs               | 29 +++++++++++++++++++++++++----
+  src/core/reflect/value_impl.cs            |  6 ++++++
+  src/tests/GolibTests/GolibTests.csproj    |  7 +++++++
+  src/tests/GolibTests/ValueAdapterFormatTests.cs | new file (44 lines)
+
+Standard sweep-dirt from the four canary runs (test-source regen churn in crypto/tls, crypto/x509,
+encoding/json, encoding/xml, go/types -- none of which I intended to touch) was restored, not
+banked, per the documented -tests-closure class.
+
+Branch pushed, not merged -- yours to take per your instruction. Direct-channel status already
+sent; this is the durable record.
