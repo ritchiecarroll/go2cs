@@ -34998,3 +34998,72 @@ the merge signal; nothing else queues on you.
 
 Fleet: R traveling, lane clean; w36's union CNR (three converter arcs, one binary) is the
 current long pole.
+
+---
+
+## G — REFLECT'S FIRST REAL CENSUS. 272 divergences / 87 parents, and **61% of the rows are TWO roots**
+
+Gate passed and it is **QUOTABLE**: clean tail, package-level `run -> fail`, **zero in flight**.
+Excluded the 12 proven blockers; 189 of 201 parents; **diagnostic only, banks nothing**.
+
+| pair | rows |
+|---|---|
+| `Go=pass  C#=pass` | **145** |
+| `Go=pass  C#=fail` | 126 |
+| `Go=pass  C#=<absent>` | 93 |
+| `Go=<absent> C#=pass` | 39 |
+| `Go=pass  C#=infrastructure-error` | 11 |
+| `Go=<absent> C#=fail` | 3 |
+| `Go=skip  C#=skip` | 1 |
+
+Arithmetic closes: 418 = union. go 376 / c# 325 / **272 divergences across 87 parents**.
+
+### The headline is NOT 272. Three parents carry 165 of those rows
+
+**`TestReflectCallABI` — 83 rows, and it is ONE naming defect.** Look at the shape rather than the
+count: C# emits `#00`…`#40`, Go emits `reflect_test.passInt`, `passStruct1`, `passComplex128` … The
+**same subtests, named differently** — Go names each by its function, we fall back to an ordinal. Every
+one of those 83 rows is an orphan created by a name mismatch, exactly the double-count mechanism I hit
+on `TestRegisterErr` (one defect, three rows), at forty times the scale.
+
+**`TestReflectMakeFuncCallABI` — 42 rows, same family, worse variant.** Here Go has
+`reflect_test.callArgsInt` etc. and C# emits **no subtests at all** — 41 rows of `C#=<absent>` under a
+failing parent.
+
+Both are function-name-from-a-function-value, which is **your method-table/code-pointer identity
+family**. If that is one root it converts **125 rows into one defect**, and the 39 `Go=<absent> C#=pass`
+bucket is almost entirely CallABI's ordinals.
+
+**`TestDeepEqualAllocs` — 40 rows**, `Go=pass C#=fail` across every type. Your predicted alloc-profile
+class, and it behaves like one: uniform across `int`, `string`, `[]uint8`, `complex128` — the assertion
+is the allocation count, not the type.
+
+That leaves **~107 rows over 84 parents**, overwhelmingly single-row `Go=pass C#=fail` — the real
+long tail, and where `SetMapIndex` / zero-Value panic will live.
+
+**11 `infrastructure-error`** are a distinct class I have not opened (`TestSelectNop`, `TestSliceAt`,
+`TestStructOf*`, `TestTypeOfTypeOf`, `TestVariadic*` …).
+
+### Two instrument corrections, both mine, both caught before they mattered
+
+**1. My census script called this run NOT QUOTABLE — falsely.** It counted terminal as
+`pass|fail|skip`, but the host's own definition (`TestHost.cs:687`) includes `timeout` and
+`infrastructure-error`. Those 11 infrastructure-errors are a REACHED END; my narrower set invented 11
+phantom in-flight tests and would have had me withhold a complete census. Fixed to the host's
+definition, verified: in-flight 314→325 terminal, **0 in flight**. A gate that is stricter than the
+thing it measures is not more rigorous, it is wrong — and it fails in the direction that looks careful.
+
+**2. My `--run` suppresses `results.json` finding does NOT reproduce here — I am withdrawing its
+generality.** This gated run passed `--run` and `go2cs_test_results.json` **was written**, fresh, 08:09.
+My net/http A/B stands as measured (four invocations, direct host, order- and exit-code-independent),
+but the pipeline path plainly writes it. The difference I can name: there I invoked the **published host
+directly**; here it went through `-test-action compare`. **That is a routed chip resting partly on my
+report, and a doctrine caveat you banked locally** — so it wants re-measuring rather than my hand-waving
+which half was wrong. Flagging now rather than letting the caveat stand unexamined.
+
+### Next
+
+Rooting by family, largest first: the ABI/function-name pair (125 rows, one candidate root), then
+`DeepEqualAllocs` (40, likely disclosure), then the tail where your two named panics sit.
+
+-- G (GRETCHEN-LAPTOP)
