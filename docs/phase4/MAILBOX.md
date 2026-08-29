@@ -29665,3 +29665,68 @@ work for whoever picks it up rather than an investigation.
 **AWAITING: merge decision on `g-reflect-host` @ `0f393196c`, routing on #5.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- reflect: ALL 37 ERRORS NOW ROOTED. Three final roots, and one bucket that was not new.
+
+**Watcher armed + wake loop armed.**
+
+### The CS1503 four were never a separate root
+
+`all_test.cs:9938-9944` is `TestValue_Cap` — `cap(a)` on `ж<array<nint>>`, including the nil block
+at 9942 (`a = default!`). That is **root #5**, already rooted, so those 4 errors were double-counted
+in my earlier taxonomy. Correcting my own arithmetic: root #5 covers **8** errors, not 4.
+
+### Three final roots
+
+**#11 — `unsafe.Pointer` zero value** (CS1729, `all_test.cs:4129`)
+
+```csharp
+ref var x = ref heap(new @unsafe.Pointer(), out var Ꮡx);   // golib Pointer has no 0-arg ctor
+```
+from Go's `var x unsafe.Pointer`. **The working form is in the same file** at line 2038:
+`(@unsafe.Pointer)default!`. Eleventh instance of the pattern.
+
+**#12 — two lifts minted for one anonymous type** (CS0029, `all_test.cs:4223`)
+
+```csharp
+p = v0.Interface()._<TestAddr_type>();     // p is TestAddr_p
+```
+`package_test_info.cs` declares BOTH `TestAddr_p` and `TestAddr_type` — the same Go anonymous type
+lifted twice under two naming rules (once after the variable `p`, once after the `type` placeholder),
+so the assertion yields one and the variable is the other. They can never unify.
+
+**#13 — lambda assigned to `var`** (CS8917, `all_test.cs:8499`)
+
+```csharp
+var g = (slice<reflectꓸValue> @in) => { … };   // CS8917: delegate type cannot be inferred
+```
+from `g := func(in []Value) []Value {…}`. C# cannot infer a delegate type for a lambda bound to
+`var`; the emission needs the explicit `Funcꓸꓸꓸ<…>` type the converter already renders elsewhere.
+
+### Complete: 37 of 37
+
+| root | errors | state |
+|---|---|---|
+| #1 nested anonymous lift accessibility | 3 | **banked** `5a31fc178` |
+| #2 lifted-interface embed field | 16 | **banked** `5a31fc178` |
+| #4 promotion dedupe vs ambiguity counter | 2 | **banked** `63a57ea0a` |
+| #6 complex64 literal suffix | 2 | **banked** `0f393196c` |
+| #5 `len`/`cap` on `*[N]T` | **8** | rooted — **awaiting routing** |
+| #3 `defer f(g())` multi-value spread | 4 | rooted — flagged |
+| #7 pointer-to-named-array | 2 | rooted, unbanked by choice |
+| #9 `(funcType)(nil)` operand | 2 | rooted |
+| #8 select temp un-renamed identifier | 1 | rooted |
+| #10 unsafe.Pointer uintptr hop | 1 | rooted |
+| #11 unsafe.Pointer zero value | 1 | rooted |
+| #12 duplicate anonymous lifts | 1 | rooted |
+| #13 lambda assigned to `var` | 1 | rooted |
+
+**Nothing in reflect's first host-publish attempt is now unexplained.** 23 errors banked away; the
+remaining 14 each have a named mechanism, a failing-first witness, and — in eleven of thirteen roots
+— a working form already present in the codebase to copy.
+
+**AWAITING: merge decision on `g-reflect-host` @ `0f393196c`, routing on #5.**
+
+-- G (GRETCHEN-LAPTOP)
