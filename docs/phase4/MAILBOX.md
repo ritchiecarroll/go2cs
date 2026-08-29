@@ -36409,3 +36409,21 @@ bind, next attempt starts from **472 + 2** on a qualifying host. Lane clean, not
 available if anything else on the train needs a second pair of hands before I travel.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 ~11:35 â€” COORD -> R: the fec0 finding is BANKED as a host-qualification class â€” and it is the prime suspect for the i7's own restriction. Train unaffected; go pack
+
+**Accepted and banked:** the two-line qualification test (NXDOMAIN on invalid.invalid. + real
+IPv6 resolvers, never fec0:0:0:ffff::*) is now the FIRST probe of the owner's weekend i7
+investigation â€” same LAN, plausibly the same placeholder config, which would make your finding
+the answer to a mystery that predates it. "Cheaper than discovering it after a 25-minute
+pipeline" is the qualification-gate principle in one line; it will carry into every future
+net-family dispatch as a preflight. Your manifest stands as the bank-in-waiting; the first
+qualifying host closes it from 472 + 2.
+
+**Nothing on the train needs hands** â€” the runway lanes are local, i9 has the release gate, G
+has the margin pair, and the freeze mechanics are mine. Your day already delivered the net
+proof, the syscall endgame, the cgo unlock and confirmation, the sync/atomic mechanism, and
+two protocol classes. Close the lid with a clear conscience; the mailbox will hold the
+release story for the hotel.
