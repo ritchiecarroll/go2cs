@@ -38379,3 +38379,67 @@ Proceeding to cut unless you redirect. Branch will be separate from the panic-fi
 can be judged apart.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — typed-nil func boxing CUT and measured: 7 of 9 rows match, and the 2 that don't are a SECOND defect that fails on a non-nil row
+
+Branch `g-nilfunc-boxing`, off the RC, separate from the panic-fidelity cut as promised. CNR is IN
+FLIGHT — this changes emission corpus-wide, so I am not calling it clean until that returns.
+
+### The cut, exactly as pinned
+
+- **golib** gains `OrTypedNilFunc<TDelegate>(this TDelegate?)` → `CanonicalNilFunc(typeof(TDelegate))`
+  for null. The func twin of `OrTypedNil`, same one-interned-instance rule, **no new representation** —
+  the carrier and all four read-back paths already existed.
+- **converter**: `typedNilInterfaceBoxing.go` gains `applyTypedNilFuncBox`, composed OVER the existing
+  variadic cast rather than replacing it (the cast decides WHICH type is carried; this decides that one
+  is carried at all, and a variadic nil func needs both). Plus `anyBoxedFuncArgs`, the func twin of
+  `anyBoxedPtrArgs`, because the call-ARGUMENT path applies its accessor directly and does not route
+  through the shared function — `reflect.ValueOf(nilFunc)` was still erasing after the first pass.
+
+Func literals are excluded for the same reason `pointerExprNeverRendersNull` excludes `&x`: provably
+non-nil, so the accessor would be noise.
+
+### Measured, Go vs C#
+
+```
+                      Go                          C# after
+NIL  unnamed   ==nil=false  %T=func()          ==nil=false  %T=func()          match
+NIL  named     ==nil=false  %T=main.NamedFunc  ==nil=false  %T=func()          DIFFERS
+LIVE unnamed   ==nil=false  %T=func()          ==nil=false  %T=func()          match
+LIVE named     ==nil=false  %T=main.NamedFunc  ==nil=false  %T=func()          DIFFERS
+CTRL ptr nil   ==nil=false  %T=*int            ==nil=false  %T=*int            match  <- control held
+ValueOf(nilfn).IsValid()      true                          true               match
+ValueOf(namednil).IsValid()   true                          true               match
+ValueOf(nilfn).Type()         func()                        func()             match
+a.(func()) assertion          ok=true                       ok=true            match
+```
+
+Every row in the routed scope closed: `==nil` for both shapes, `%T` for unnamed, `IsValid`, `Type()`,
+and the type assertion. The pointer control did not move.
+
+### The 2 remaining rows are NOT this defect, and the LIVE row proves it
+
+`NIL named` and `LIVE named` both print `func()` where Go prints `main.NamedFunc`. **`LIVE named` has
+no nil in it** — a fully constructed, non-nil named func also loses its name, so this cannot be the
+typed-nil root and my fix was never going to close it. The cause is upstream of boxing: a named func
+type is EMITTED as the structural delegate (`Action`), so there is no distinct managed type left to
+name. I measured this before designing, which is why the cut was not shaped around it.
+
+**Second defect, cleanly separable, not claimed by me:** named func types lose their identity at
+declaration. It predicts a divergence in any package asserting on `%T` / `Type().String()` /
+`Type().Name()` of a named func type — the same family as the local-type-name finding you
+board-flagged, and I would suggest it lands beside it rather than in this arc.
+
+### Gate status
+
+CNR in flight. ⚠ Note for whoever reads it: a **deliberate emission change makes CNR red by
+construction** — byte-identical is the wrong success criterion here. The question is whether the diffs
+are confined to the expected family (func-into-`any` sites gaining the accessor) and whether the
+behavioral suite stays green after re-baselining. I will report the footprint by family, not a
+byte-identical verdict.
+
+Understood I do not run the reflect-bridge canary gate; this touches golib boxing.
+
+-- G (GRETCHEN-LAPTOP)
