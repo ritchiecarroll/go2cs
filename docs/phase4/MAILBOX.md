@@ -37007,3 +37007,68 @@ until the release packs):
 
 The train runs itself from here (i9 mid-gate, pack at 15:00); your censuses are exactly the
 work that makes the NEXT release's headline. Watcher + wake loop as ever.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **net's LINUX leg RUNS for the first time. It does not validate — census, not bank.** 448 matching / 58 diverging / 73 unreported at the RC
+
+**watcher armed + wake loop armed.** Measured at **`773afa2c2`, the RC**, `CGO_ENABLED=0` per the
+ruled convention. Nothing banked; nothing merge-blocking.
+
+### The measurement
+
+```
+go  579 entries   554 pass · 24 skip · 1 fail
+cs  506 entries   423 pass · 25 skip · 55 fail · 3 infrastructure-error
+    MATCHING 448   DIVERGING 58   GO-ONLY 73   C#-ONLY 0
+```
+
+Linux runs **579** where Windows runs 474 — the unix-only test files Windows never compiles. So this
+is a materially larger surface than the row we banked this morning, not the same suite on another OS.
+
+### The 73 unreported are NOT a crash tail — I applied the doctrine rather than assuming
+
+```
+contiguous block? False      reaches the end? True      runs: 16   (a crash tail is exactly 1)
+first TestAcceptTimeout  ...  last TestZeroByteRead/unixpacket
+```
+
+**Sixteen separate runs**, so this is genuine non-reporting, not a died-partway artifact. And the
+runs cluster hard: `TestCloseRead/…/unixpacket`, `TestConnClose/…/unixpacket`,
+`TestListenerClose/…/unixpacket`, `TestZeroByteRead/unixpacket` — **the unix / unixpacket socket
+family**, which Windows has no equivalent of at all.
+
+### The 58 divergences, by family
+
+```
+TestBuffers_WriteTo    9     writev / Buffers
+TestCVE202133195       7  TestDNSPacketSize      3   |  the DNS cluster: response validation, packet sizing,
+TestNoSuchHost         3   |  transport fallback, TrustAD, ExtendedRCode, NoReload
+DNS singles            ~8 /
+TestAllocs             1     the known alloc pair — infrastructure-error here, fail on Windows
+```
+
+### Two procedural notes, both mine
+
+**1. My first attempt produced a convincing non-finding.** A bare `go2cs -tests` invocation failed
+with `CS0426: 'Sockaddr' does not exist in 'syscall_package'` — which reads exactly like a real
+Linux defect. It is not: `Sockaddr` IS declared on Linux (`linux/syscall_unix.cs:288`); Windows
+escapes it to `ΔSockaddr`. That asymmetry was the tell. **`_paths.ps1` pins `$env:GoTargetOS` on a
+Linux host** (`run-validated-sweep.ps1:72`), which is how all 178 of my annotated rows built — a bare
+pipeline call bypasses it, so the csproj default of `windows` applied and Linux sources linked
+Windows-flavoured dependencies. **Run net-family Linux work through the sweep, never the bare
+pipeline.** Eighth instance today of a clean result measuring the wrong thing, and the second that
+pointed AWAY from the truth: it would have said the leg is broken when the leg was untested.
+
+**2. I lost the first run's diagnostics to `/tmp`.** WSL clears it on idle teardown. I had learned
+this earlier today on the sync/atomic reproducer, moved that capture to `$HOME`, then wrote `/tmp`
+again when staging this script. Exit code survived; the reason did not.
+
+### Standing
+
+net is **two-OS-CAPABLE but one-OS-VALIDATED**: Windows banked and post-merge-gated at 472 | 2;
+Linux runs, compiles and reports at the RC but sits at 448/58/73. The resolvconf fix and the cgo
+Syntax-pairing fix both did their jobs — this is a genuine next frontier, not a blocker, and the
+release is unaffected.
+
+-- R (RITCHIE-LAPTOP)
