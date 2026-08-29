@@ -35868,3 +35868,64 @@ window open and people waiting.** Four of five say it did not.
 CNR is still owed and not claimed. `crypto/tls` reports when it lands.
 
 -- G (GRETCHEN-LAPTOP)
+mailbox: i9 -- TestReadRequest chip: STOPPING per your own boundary, reporting narrowed diagnosis rather than continuing deeper. One independently-correct fix banked to claude/i9-readrequest @ 7b4c4fa2d3f4678bd6c32697a5a42d223294703a (signed, NOT merged), the real divergence still open.
+
+VERIFY-FIRST (step 1): ran TestReadRequest at the (then-unmerged) notnull-closure tip -- still
+failing, unchanged from your census. Confirmed not-already-fixed before rooting.
+
+go-run ground truth (step 2, per your instruction): `%v` of a nil `<-chan struct{}` field is
+`<nil>`; a real one prints its raw address (`0xc00001c1c0`). Neither matches the observed
+`go.channel\`1[go.EmptyStruct]` on either side -- confirmed both layers you named are real.
+
+WHAT I RULED OUT, with evidence, not assumption:
+
+- The comparison/formatter machinery for CHANNEL VALUES is NOT broken. Direct GolibTests probe
+  (reflect.ValueOf(ж<HolderProbe>).Elem().Field(0), a struct with one channel<EmptyStruct> field,
+  matching Request.Cancel's shape exactly): .Interface() on a nil channel field correctly returns
+  a boxed channel<EmptyStruct> (never null, never a wrong type), and builtin.AreEqual on two
+  independently-constructed nil channel values returns True. So neither packInterfaceValue nor
+  AreEqual nor channel<T>'s own == operator is the defect.
+
+- The Request struct's generated constructor is not the defect either: Cancel = default! is the
+  EXPLICIT default for the omitted named argument in the test table's `new Request(...)`
+  literals, and channel<T> has no custom parameterless constructor to override C#'s zero-fill --
+  both construction paths should yield a genuinely nil channel (m_core null).
+
+WHAT I FOUND AND FIXED (independently correct, does not resolve this test):
+reflectPointerToken (backing reflect.Value.Pointer()/UnsafePointer()) had the exact shape of bug
+this class has had all session -- a nil golib container (channel is the concrete case) falls
+through its INilPointer-only nil check to the generic identity-hash fallback, answering a real,
+run-varying non-zero address for what should be 0. Generalized to GoReflect.IsNilGoValue (already
+handles this correctly and more broadly). Verified independently sound: GolibTests 428/431
+(baseline), same 5-canary set clean at baseline. But re-running TestReadRequest after this fix
+reproduces the IDENTICAL failure output byte-for-byte -- this genuinely is not the mechanism.
+
+WHERE I STOPPED, one layer past what I could confirm: `diff()`'s `!reflect.DeepEqual(hf, wf)`
+routes Chan kind to deepValueEqualBoxed's DEFAULT case (no explicit Chan arm exists, unlike Func's
+explicit "both nil" rule at line 192-201) -- `AreEqual(valueInterface(v1,false),
+valueInterface(v2,false))`, which my probe already proved correct for the VALUES. That leaves
+deepValueEqualBoxed's OWN top-level type-descriptor check (`if (!AreEqual(v1.Type(), v2.Type()))
+return false`) as the remaining candidate -- comparing two `reflectꓸType` wrappers, not the
+channel values themselves. abi.TypeOf's descriptor cache (internal/abi/type_impl.cs, s_descriptors)
+keys on (System.Type, dimsKey) where dimsKey EXPLICITLY INCLUDES the channel direction ("chan<- int
+and <-chan int are DISTINCT Go types... interning them together would let whichever arrived first
+answer ChanDir() for both" -- ITS OWN comment). channel<T>'s VALUE-level == operator explicitly
+IGNORES direction for equality ("two nil channels of different Go directions are still the same
+channel value" -- ALSO its own comment). That is a real, documented asymmetry between the
+descriptor layer and the value layer, and it is exactly shaped to produce a type-identity mismatch
+for a value round-tripped through .Interface() -- but I have NOT confirmed the two sides actually
+compute different ChanDir stamps for Cancel, nor traced why (if so) construction differs between
+ReadRequest's own path and the test table. That confirmation is the next concrete step, not a new
+unknown -- I am naming it precisely rather than guessing further into it.
+
+This is deeper than the "formatter + one field's construction difference" shape the dispatch
+named, and per your own instruction I'm stopping here rather than continuing to speculate.
+Nothing net/http-specific was implicated at any point -- this stayed inside the reflect bridge
+throughout (abi.Type descriptor interning, not transport/body machinery) -- so it may not be the
+boundary you meant, but the depth felt like the right trigger regardless.
+
+Diffstat: 1 file changed, 12 insertions(+), 1 deletion(-) -- src/core/reflect/value_impl.cs only.
+
+Branch pushed, not merged. Standing by for routing -- happy to continue the descriptor-cache
+thread if you want it to stay with me, or hand it off if it belongs with whoever holds
+abi.Type/descriptor-interning work.
