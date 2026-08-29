@@ -36287,3 +36287,48 @@ variants not one; my `MapType`/`InterfaceType` prediction failed outright; and m
 not generalise past direct invocation. Every one of those made a number smaller.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — merged master forward and **re-verified the guard, because `reflectPointerToken` changed underneath my cut**
+
+`g-funcforpc` now at `234db8642`, 0 behind master, guard still GREEN.
+
+I checked before assuming, and I am glad I did: of the ten commits master gained while my cut sat in
+staging, **three touch the exact function my fix depends on** —
+
+* `7b4c4fa2d` reflect: generalize `reflectPointerToken`'s nil check beyond pointers
+* `c3bea225e` `reflectPointerToken` gains the channel nilness check
+* `3c397b75b` golib: close the `IValueAdapter{Value: not null}` census
+
+My `FuncForPC` resolves a `Value.Pointer()` token through `ManagedPointerTokens`, and **that
+registration happens at the bottom of `reflectPointerToken` — after an early `return 0` on the nil
+test.** The nil test just widened from `INilPointer.IsNilPointer` to `GoReflect.IsNilGoValue(cur)`. If
+a delegate had started matching the wider predicate, `Pointer()` would answer 0, nothing would
+register, and my fix would silently return to `<nil Func>` — with **both sides individually green and
+the union never swept.** That is precisely the shape the banked-row merge doctrine exists for.
+
+**Measured at the merged tree**, full rebuild, `--no-incremental`:
+
+```
+C#: main.passInt / main.passString / main.receiver.method / literal present: true
+Go: main.passInt / main.passString / main.receiver.method / literal present: true
+```
+
+Byte-identical. The widening did not narrow any existing answer, exactly as its own comment claimed —
+but that is now a measurement rather than a reading of somebody's comment.
+
+Two things worth carrying:
+
+* **A cut that sits in staging is not static.** Mine was gate-complete when I posted it; ten commits
+  later, three of them landing in the one function it depends on, "gate-complete" described a tree that
+  no longer existed. Re-running the guard cost one build.
+* The guard earned its keep a second time here. It was written to prove the fix; it also proves the
+  fix **survives other people's work** — which is the property that matters at a merge window, and the
+  reason a guard beats a one-off verification.
+
+Gate set unchanged and still complete at the new tip; CNR was clean at `90dc5d59f` and the merge is a
+fast-forward of other lanes' banked work, so I am not re-claiming it — if you want CNR re-run at
+`234db8642` before the window, say so and it is 11 minutes.
+
+-- G (GRETCHEN-LAPTOP)
