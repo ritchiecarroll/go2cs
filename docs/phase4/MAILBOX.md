@@ -35383,3 +35383,62 @@ established that. Routing rather than guessing.
 | shim/raw-metal `TestFuncLayout` | 8 | likely unanswerable |
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — `MakeFunc` ROOTED, and the remedy is already in the file: **the prefix-downcast class was fixed for 2 of 5 accessors and `FuncType` is one of the three left behind**
+
+Followed the chain to the end. This is not a new class — it is a **known, documented, already-solved
+class with three unconverted members**.
+
+### The chain
+
+`MakeFunc` → `t.Reinterpret<abi.Type, funcType>()` → `funcLayout(<nil>)` → panic.
+
+`Reinterpret` (`golib/ж.PointerExtensions.cs:137`) tries three routes: alias managed storage, pinned
+reinterpret, else **raw address**. `funcType` is larger than `abi.Type`, so aliasing is correctly
+refused, and the address route yields a box with nothing behind it.
+
+And `abi.Type.FuncType()` (`internal/abi/type.cs:361`) — the accessor that ought to be the managed
+downcast — does **the same `Reinterpret`**, so it fails identically.
+
+### The part that makes this small rather than large
+
+`type_impl.cs` already documents this defect **in its own words**:
+
+> *"Go's `Elem()` casts the Type header to the sliceType/arrayType/chanType/mapType/ptrType the linker
+> really allocated behind it … both inherited exactly the defect documented above — **Reinterpret
+> rightly refuses to alias managed storage for a reference-bearing pair** — and answered nil for every
+> slice, array, chan, map and pointer descriptor in the corpus."*
+
+…and fixes it by **synthesizing the descriptor from the carried `System.Type`**, cached:
+`s_arrayTypes.GetOrAdd(Ꮡt, box => synthesizeArrayType(box))`. Eleven `synthesize` helpers exist.
+
+**But only two of the five prefix-downcast accessors were converted:**
+
+| accessor | state |
+|---|---|
+| `StructType`, `ArrayType` | hand-owned in `type_impl.cs`, working |
+| `MapType`, **`FuncType`**, `InterfaceType` | **still on the broken `Reinterpret` in `type.cs`** |
+
+`FuncType` being one of the three is the whole of `MakeFunc`. Seventeenth time this session the answer
+is *the capability exists and one path fails to reach it* — and the strongest instance yet, because
+here the **remedy** exists too, in the same file, applied to its siblings.
+
+### Prediction, stated before measuring it
+
+If `MapType` and `InterfaceType` are broken the same way, they should be visible elsewhere in the
+census. Two candidates I have NOT yet attributed: the **13-row nil-deref** family and the **3-row
+`embedded type with methods is not implemented`**. I am not claiming them — but if the class explains
+them, converting three accessors closes roughly 48 + 13 + 3 rows rather than 48.
+
+### Routing
+
+This is a hand-owned `internal/abi` change following a template in the same file — small, precedented,
+and independent of w36 (it touches nothing the ordinals lane touches). **Not cutting it unasked**, since
+it is a third arc beyond the two you have already given me, and `reflect.MakeFunc` being broken for
+every input is a bigger fact than reflect's row count and may want its own lane.
+
+Say the word and it is a short piece of work; otherwise it is fully specified for whoever takes it.
+
+-- G (GRETCHEN-LAPTOP)
