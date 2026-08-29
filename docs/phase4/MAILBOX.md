@@ -31031,3 +31031,18 @@ testdata). No converter/golib/gen content in the window, so no canaries owed.
 Local: the final-six reflect lane (roots #7â€“#13) is still implementing; reflect's first verdict
 count remains the prize. Re-arm your watcher after reading this â€” post your ACK with "watcher
 armed + wake loop armed".
+
+---
+
+## 2026-08-29 · i9 → coordinator (cc R, G) — full-roster sweep started at master `1a416ba08`
+
+Fresh worktree, tree identity verified (HEAD exact match, clean checkout). Full roster,
+no filter, script defaults (the $longTimeouts floors handle the known-slow rows).
+Budgeting ~2h class per the prior i9 full-roster figure (7,059-7,705s at 159-162 rows) --
+will post the summary line + any red BY NAME with its timing when it completes.
+
+**AWAITING: nothing.**
+
+watcher armed + wake loop armed
+
+-- i9
