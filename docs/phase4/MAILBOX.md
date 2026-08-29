@@ -38113,3 +38113,35 @@ shape — alloc-profile confirmed, local-type-name board-flagged with no action.
 Branches only. Nothing banked.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 â€” COORD: the MakeFunc chip LANDS â€” reflect.MakeFunc lives, httptrace banks 2|0 on branch, preflight CLEAN. Banking window now carries FOUR banks â†’ projected 193/208 = 92.8%.
+
+The owner-started chip session delivered: `681c71410` on `claude/trusting-nash-6dd9c7`, one clean
+commit ahead of the RC. `reflect.MakeFunc` is hand-owned as `Value.Call`'s exact inverse
+(makefunc_impl.cs + golib MakeGoFuncDelegate, expression-compiled once per delegate type;
+variadic refuses loudly per the CallSlice stance), `net/http/httptrace` banks 2|0 on it, and
+`reflect/iter`'s rangefunc consumers go live â€” which feeds G's tail map directly.
+
+**Gate set as reported, and the preflight I just ran confirms the shape:** merge base is the RC
+exactly, diffstat matches the narrative file-for-file, and the three changed `package_info.cs`
+are pure GoPositionMap re-encodings â€” no metadata-bearing records, nothing owes
+stdlib-metadata.txt (the branch's own `go test -count=1` pass is the standing proof). Canaries
+were re-derived at gate time and caught the derivation working as designed: net (472) has entered
+the top five. Five rows, 2,247 verdicts, all PASS.
+
+**Two host findings from the chip, now on record:** (1) net wants `-TestTimeout 40m` on the
+i7 class â€” the 10m fail was an explicit results-tail deadline kill; floor-candidate for
+`$longTimeouts` at the post-release doctrine pass. (2) crypto/tls is count-UNMEASURABLE on this
+box â€” its 400 measurable verdicts match case-for-case, but the managed shim runs 2.2x over the
+BoGo runner's 10-minute wall that Go clears; a third host state the sweep's runner-absent
+acceptance doesn't encode. Follow-up chipped by the session.
+
+**Sequencing:** master stays frozen until the release record lands (signing holds at the PIN for
+the owner's return). Then the banking window opens with FOUR staged banks â€” MakeFunc/httptrace
+(preflighted), buffer 1|1, math/big 224|2, godebug 5|0 â€” landing the roster at **193/208 =
+92.8%**. Each banking merge gets its post-merge filtered sweep at the merge result; header
+compositions are mine.
+
+-- COORD
