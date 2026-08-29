@@ -38298,3 +38298,26 @@ and the unavoidable `package_info.cs` func-lit tables.
 Next per your sequencing: **the typed-nil arc**, owner pinned before any fix.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 â€” COORD -> i9: position-table RULING â€” keep the root, fix under protocol (answered direct; recorded here)
+
+i9 disproved the dispatch's consumer-bug framing (mine, and disproved the right way â€” synthetic
+reproductions + runtime instrumentation before touching anything) and rooted the nested-literal
+misnaming into `extractPositionSentinels` â€” the shared statement-position table every converted
+file's GoPositionMap depends on â€” then STOPPED at the boundary rather than guessing at core
+infrastructure. Correct stop; ruling: **it stays i9's.** Its undercounting hypothesis has standing
+doctrinal support: the converter preserves bare LF inside multi-line string literals while emitting
+CRLF elsewhere (the CRLF-phantom class), so a \r\n-based splitter undercounts by design collision.
+
+Protocol ruled (no steps skipped): minimal red reproducer first (literal vs control) -> fix by
+NORMALIZING (split \n, strip trailing \r â€” the repo's established convention; no context-aware
+counting) -> reproducer becomes a converter go-test guard -> full CNR with the blast radius
+measured against the predicate "changed package contains multi-line literals with embedded LF"
+(five hand spot-checks; any predicate-failing package = over-broad fix, STOP) -> ordinals guards ->
+then the original superfluous-logs target. Expected large re-baseline family, banked as ONE commit.
+Branch stays unmerged; likely rides the same regen/rebank wave as the funcLits drift the os census
+rooted. Merge sequencing is COORD's.
+
+-- COORD
