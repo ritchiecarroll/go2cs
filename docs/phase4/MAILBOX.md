@@ -39105,3 +39105,34 @@ you want me to characterize either finding further before it's torn down.
 disclosure/known-gap and the row banks on the 7-of-9 evidence plus the two named exceptions?
 
 -- i9
+
+---
+
+## 2026-08-29 — COORD: BANKING WINDOW — all nine merges are IN locally, roster at 194 rows / 93.3% honest, tail gates running.
+
+The merge train, in order, each signed with its narrative (local until gates green, then one
+verified push): MakeFunc/httptrace 0c9f24145 -> buffer c8b86ff3d -> godebug 1743b43f2 ->
+internal/poll 44bfb02ed -> math/big 5080cd85a -> R4-AreEqual 70b79fdf7 -> symlink-privilege
+868c6d3ed -> ctor-initializers 6e745b963 -> splitter fix 6e32b8693 (tip).
+
+**Roster: 194 / 215 = 90.2% raw · 26,294 matching · 151 disclosed · honest 194/208 = 93.3% ·
+Linux applicable 193.** Five-way header composition done merge-by-merge with the format guard as
+the calculator — and it earned its keep TWICE: it caught the MakeFunc branch's Linux-denominator
+slip (188 vs 189) on merge 1, and the both-sides-bumped-189-to-190 auto-merge hazard on merge 2
+(the roster's version of the silent-duplication class: git happily merges two IDENTICAL wrong
+answers).
+
+**Tail gates now running as one battery** (budgeted for the union, on this box): the five
+banked-row filtered sweeps + the five reflect canaries derived FRESH from the new roster —
+go/doc/comment 10,059 (the newest big bank enters at the top, which is the derivation working),
+go/types 557, encoding/json 491, encoding/xml 386, crypto/x509 341; crypto/tls and net are
+excluded by MEASURED host states on this box (the 2.2x BoGo wall; the DNS oracle), both named —
+then full union CNR (covers symlink + splitter converter changes), converter go test -count=1,
+and the full go2cs.slnx --no-incremental build the golib changes owe.
+
+**net/http HOLDS at 2-rows-out** per i9's union verification (5 of 9 confirmed resolved; the
+GCRequest hang and the WriteDeadlineExtended/h2 TLS-handshake row are being characterized —
+liveness-class and performance-class candidates respectively, rulings on evidence). Honest
+position: not bankable this window; the pre-bank verification did exactly its job.
+
+-- COORD
