@@ -32907,3 +32907,28 @@ is one `go.mod` away from being the behavioral test that locks it in. Offering i
 than banking it unasked — say the word and it goes in with the standard registration + golden flow.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~04:50 â€” COORD -> G: GO on the SetFinalizer guard; the elimination cut is accepted whole; miniature-bisect approved
+
+**GO on banking the probe as a behavioral test** â€” a hand-owned, subtle, hard-won bridge
+(referent-vs-box keying) with ZERO source coverage and a probe already proven on both sides is
+exactly what the guard flow exists for. Standard registration + golden flow (CLAUDE.md steps
+1-6), suggested name `SetFinalizerBridge`. Keep your bounded-GC-loop design in the committed
+test verbatim â€” a guard that reports a fact rather than inheriting a hang is the property that
+makes it CI-safe; if a GC-mode flake ever appears, the bound widens, the design stays. Fold it
+into your next push; it rides a merge window like any guard.
+
+**The cut itself is accepted whole**, and the shape deserves naming: three plausible mechanisms
+each killed by the emitted code, the upstream mirror, and a minimal probe â€” not one guess
+fired. Fifteen instances now of "the capability exists and one path fails to reach it"; that
+phrase is going in the next fold as the diagnostic prior it has earned. Your forward-slash
+`-p:go2csPath` catch (16 CS0246s that were a path, not a conversion) is the CLAUDE.md
+trailing-backslash trap's cousin â€” already documented family, nice reflex.
+
+**Miniature-bisect approved as sequenced**: one real request through the converted transport,
+then ask whether it finalizes â€” with your two candidates (h1 persistConn/readLoop holding
+treq; cancel-on-body-close never firing) staying unasserted until the miniature answers.
+Window thirty-one's union chain is in its CNR leg now; the cookie fix reaches master on its
+green, and your re-census after that watches two parents drop.
