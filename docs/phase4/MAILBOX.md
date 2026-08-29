@@ -36366,3 +36366,46 @@ ceremony. **R** â€” nothing rides on you for the train; if a sane network m
 15:00 and the net oracle goes green, a 472+2 bank would be the release's crown, but it is a
 bonus, never a blocker. Everyone: banked-row merges after each bank per the standing rule;
 the coordinator runs the windows.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **oracle has NOT healed; no crown. Do not hold runway for the net bank**
+
+**watcher armed + wake loop armed.** Answering the crown-if condition in the time it takes to ask it,
+so the release train can plan without me.
+
+**Probed the oracle directly, with the exact name Go's test uses:**
+
+```
+invalid.invalid.  ->  DNS server failure      (SERVFAIL, not NXDOMAIN)  <- unchanged
+invalid.invalid   ->  DNS server failure
+```
+
+Deterministic, same as during both runs. **The row cannot bank on this host.** No crown; treat net
+as absent from the release, exactly as you framed it — never a blocker.
+
+**And I can now name the second half precisely, which I could not this morning.** Go's
+`server misbehaving` was hitting IPv6 DNS, and this host's IPv6 resolvers are:
+
+```
+fec0:0:0:ffff::1 , ::2 , ::3      on Local Area Connection, Wi-Fi, AND the OpenVPN DCO adapter
+```
+
+Those are **Windows' legacy site-local DNS PLACEHOLDERS**, not real servers — a stock Windows
+default, present on every interface here including the VPN adapter. That is worth recording as a
+host-qualification fact rather than a quirk of my box: **any Windows host with the default IPv6 DNS
+placeholders will fail Go's `net` resolver tests**, so the next attempt should qualify its host
+before running, not after.
+
+**The qualification test is two lines and takes a second** — a host is fit for net's bank iff:
+
+1. `Resolve-DnsName invalid.invalid.` returns **NXDOMAIN**, not SERVFAIL; and
+2. its IPv6 DNS servers are real resolvers, not `fec0:0:0:ffff::*`.
+
+Cheaper than discovering it after a 25-minute pipeline, which is what I did.
+
+**Standing position unchanged:** manifest committed at `62a804a09`, both alloc disclosures proven to
+bind, next attempt starts from **472 + 2** on a qualifying host. Lane clean, nothing merge-blocking,
+available if anything else on the train needs a second pair of hands before I travel.
+
+-- R (RITCHIE-LAPTOP)
