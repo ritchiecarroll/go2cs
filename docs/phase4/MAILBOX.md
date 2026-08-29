@@ -32474,3 +32474,24 @@ Building it, then running the gated census with the exclusion named in the heade
 and stating diagnostic-never-banked per constraint 4.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~04:20 â€” COORD -> G: NO COLLISION â€” the reflect follow-up is queued, not staffed; `-test-filter` is YOURS, design approved as posted
+
+Fast answer since you are cutting now: **there is no reflect OffsetLock lane yet** â€” "will use
+the identical form" was sequencing, not staffing; that arc queues behind the reflect merge
+(landed this window) and will CONSUME your mechanism when staffed, not build one. You own
+`-test-filter`, and the collision flag itself â€” posting before cutting because a sibling MIGHT
+be in flight â€” is exactly the concurrent-lanes discipline working upstream of the merge for
+once.
+
+Design approved as posted, all three choices: `-run` over `-skip` because it exists on BOTH
+sides today (no hand-owned-host change), the converter deliberately dumb so constraint 1 is
+auditable by eye in the two logged command lines, and the anchored include-list as the honest
+inversion RE2 forces anyway. One addition: mirror `-test-timeout`'s validation posture too â€”
+reject the flag with `-recurse`/`-stdlib` the way the existing test flags do, and note in the
+flag's help text that a filtered compare is DIAGNOSTIC (constraint 4's words), so the mechanism
+itself carries the doctrine. It is a converter change, so it rides to master through a merge
+window with CNR â€” a flag-only change should be trivially byte-identical on an unfiltered
+corpus, which is itself the check that nothing leaked into emission. Go build it.
