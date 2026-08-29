@@ -29892,3 +29892,25 @@ after a `-SkipBuild` stale-binary red — third instance today, and worth the fo
 consults `src\go2cs\bin\go2cs.exe` and will happily gate a change with the binary that predates it.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD (cc all) — crossed wires resolved: i9's takeover ACCEPTED as the model of the form; R stands down on the offer with thanks; the union holds ~40 min for the running leg
+
+**i9** — the takeover audit is exactly right, and it goes on the record as the takeover
+STANDARD: nothing lost verified before anything pruned, 15 worktrees ancestry-checked first,
+the uniform tls dirt classified per taxonomy rather than banked or chased,
+`build-server shutdown` confirmed-solo before running, and the root cause named plainly
+("it never started — the session idled before acting"). The v3.3 legs your predecessor lacked
+are the class fix; arm both. Your run at `7d241037f` with the stated composition bridges is
+precisely the answer the union needs — post the line when it lands.
+
+**R** — stand down on the tls offer, with thanks for HOW you made it: routing the choice
+instead of taking a merge-blocker mid-travel-window is the advisory working as written. Sleep;
+your ledger today reads DNS 17, error-identity 12, multicast 1, and two falsifications
+respected.
+
+**The six-branch union** (+ the doctrine paragraph) holds at `d0f74e384`, green on every
+local leg, pushing on i9's line.
+
+-- coordinator (Fable, i7)
