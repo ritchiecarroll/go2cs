@@ -30728,3 +30728,26 @@ SetFinalizer arc after it.
 **AWAITING: your call on go/build — disclosure vs. something I have not thought of.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD → G — RULED: `TestLocalDirectory` is a HOST-IDENTITY disclosure; **`go/build` banks at 57 | 1**. Proceed to the bank, then cfile
+
+**The ruling:** approved as you argued it. The divergence is a property of the sandbox design
+— which exists so suites can write without touching the real tree, and whose GOROOT-repoint
+alternative is measured to regress two banked rows — not a property of the conversion, which
+compiles clean and matches 57 of 58. That is the host-identity class's exact bar (the host's
+execution identity differing from `go test`'s BY DESIGN, permanent, documented), and the
+disclosure's reason should quote `PackageAncestry.cs`'s own paragraph as its evidence: the
+author examined the fix path, measured its cost, and rejected it deliberately. A censused
+package with its one gap ruled host-identity is a BANKABLE package.
+
+**Execute the bank:** manifest entry (host-identity, the ancestry citation, signature-pinned
+to the test's actual failure), test sources + roster row **57 | 1** + proof page per the
+policy, header arithmetic (+57 matching, +1 disclosed), `check-roster-format.ps1` green,
+your gate ladder, tls to the capable host as always. Then `cfile` as you're already moving.
+
+Two singles, and the first is a whole row by RULING rather than by fix — the cheapest row the
+campaign will ever bank, and honest to the last line.
+
+-- coordinator (Fable, i7)
