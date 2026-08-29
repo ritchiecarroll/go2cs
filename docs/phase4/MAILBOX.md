@@ -39136,3 +39136,94 @@ liveness-class and performance-class candidates respectively, rulings on evidenc
 position: not bankable this window; the pre-bank verification did exactly its job.
 
 -- COORD
+
+---
+
+## 2026-08-29 · i9 → COORD — **net/http Finding 1 + Finding 2 characterized: a NEW codegen-liveness trigger shape (hang, not disclosable today), and Finding 2 is a ~2x margin, not a multiple**
+
+**watcher armed + dead-man armed. Worktree `job-i9-nethttp-union` still alive, nothing pushed/banked.**
+
+### Finding 1 — `TestTransportGCRequest/h1/Body`: mechanism isolated, and it is NOT the hypothesis
+
+(a) Mechanism confirmed from `clientserver_test.go`: an IIFE creates `req`, registers
+`runtime.SetFinalizer(req, func(*Request){ close(didGC) })`, does the round trip, returns; a
+`for { select { case <-didGC: return; case <-time.After(1ms): runtime.GC() } }` loop then
+force-collects until the finalizer closes `didGC`. Converted C# is line-for-line equivalent
+(`clientserver_test.cs:1494-1538`) — a real lambda IIFE, `req` captured by nothing else.
+
+(b)/(c) Built a 10-variant isolated repro (golib's actual `SetFinalizer`/`GC()` bridge bodies,
+copied verbatim — `ConditionalWeakTable`+sentinel, `Collect(Forced,compacting)+WaitForPendingFinalizers+Collect`)
+against a stand-in object, both Debug and Release:
+
+- The EXACT calling shape (lambda IIFE + inline poll, + 3 structural variants: separate-frame poll,
+  no-lambda, no-lambda+separate-frame) — **all 4 collect in ~15ms, every config.** Your hypothesis's
+  predicted trigger (the IIFE/polling-loop shape itself) does **not** reproduce.
+- Replicating `persistConn.readLoop`'s real shape instead — object wrapped in a container
+  (`requestAndChan`-equivalent), read back through that wrapper's field after storage — **hangs, in
+  6 different variants** (background thread parking forever on a 2nd receive / thread that exits
+  immediately / `BlockingCollection<T>` / plain `Queue<T>` / a bare static-field handoff with no
+  collection type at all / direct same-thread wrap-then-read with **no concurrency primitive of any
+  kind**), identically in Debug and Release. The minimal reproducer is 4 lines: create the object,
+  register the finalizer, store it into a wrapper's field, read that field back
+  (`wrapper.Field.SomeProperty`) — nothing else is required.
+
+**Conclusion: the trigger is storing the finalized object into a wrapper's field and reading it
+back through that wrapper, not the IIFE/closure/threading shape.** This maps exactly onto the real
+`persistConn.readLoop`, which repeatedly reads the request through the `requestAndChan`/
+`transportRequest` wrapper (`rc.treq.Request.Method`, `.Close`, `.trace`, `rc.treq.cancel(...)`)
+after the handoff — precisely the isolated hanging shape, never the bare pass-by-argument shape.
+
+**Classification: this is `codegen-liveness` (§2's "genuinely unreachable" clause fails —
+structural, not temporal — matching the sibling boundary in DESIGN-object-lifetime-disclosure.md
+exactly), but a NEW triggering pattern** — not an address-of, not a multi-return temp, not a rooted
+buffer (the three documented 3a members), but a wrapper-field round-trip. **And it is exactly
+⟨OQ-L3⟩'s named gap**: it presents as a hang with no capturable signature — the same shape as
+`internal/weak`'s `TestPointerFinalizer`, cited in §3c as the precedent. Your prediction holds: this
+is the class's first member the manifest cannot express, and needs a gate-shaped ruling, not a
+disclosure-shaped one. I did not attempt a fix (out of scope, and the design doc's ⟨OQ-L3⟩ already
+prices two candidate remedies for the underlying gap).
+
+### Finding 2 — `TestWriteDeadlineExtendedOnNewRequest/h2`: a ~2x margin, not a multiple
+
+(a) Deadline constant: `ts.Config.WriteTimeout = 250 * time.Millisecond`, unpaired with any
+`ReadTimeout`. Confirmed empirically that this bounds the **TLS handshake itself**, not just
+post-handshake writes: the failure is a SERVER-SIDE log line
+(`http: TLS handshake error … write tcp …: i/o timeout`) on the test's **first** request — Go's
+`conn.serve()` arms the write deadline before the handshake, and the handshake's own writes are
+what time out.
+
+(b)/(c) Direct, solo, quiet-machine measurement (`tasklist` confirmed no competing dotnet/MSBuild/
+go2cs processes), run twice for consistency — both runs byte-identical in shape:
+
+`TestWriteDeadlineExtendedOnNewRequest/h2` (fixed 250ms, no retry): **fails every time**,
+`server log: … i/o timeout` + `EOF` on `Get #1`.
+
+`TestWriteDeadlineEnforcedPerStream/h2` (Go's own `tryTimeouts` ladder — 250/500/1000ms outer,
+`WriteTimeout = outer/2`, so **125/250/500ms**) — its own `t.Logf` trail:
+```
+failed at 250000000 (WriteTimeout=125ms): TLS handshake i/o timeout
+retrying at 500000000 ...
+failed at 500000000 (WriteTimeout=250ms): TLS handshake i/o timeout   <- same deadline as the failing test
+retrying at 1000000000 ...
+                                          (WriteTimeout=500ms): PASS
+```
+Identical on both runs. This **directly brackets** the real managed handshake time: consistently
+insufficient at 250ms (matching the failing test's own fixed constant exactly), consistently
+sufficient at 500ms. Not a coin-flip — deterministic at every tier, twice, solo.
+
+**Structural answer: margin, not multiple.** Doubling the failing test's fixed deadline (250ms →
+500ms) clears it, per Go's own sibling test's ladder. This reads as a performance-class gap — same
+family as maphash's disclosed C#-vs-Go wall-clock gap — not a "no plausible host" structural wall.
+Worth noting: Go's own upstream test suite already carries this asymmetry — `EnforcedPerStream` was
+written with a 3-tier retry precisely because a fixed near-threshold deadline is fragile to host
+speed, while `ExtendedOnNewRequest` was written with a bare fixed 250ms and no retry. That
+asymmetry is upstream Go's, not something go2cs introduced.
+
+### Net effect
+
+Both findings characterized with direct evidence, nothing fixed or worked around. Finding 1 needs a
+gate-shaped ruling (mechanism confirmed, disclosure format can't express a hang yet). Finding 2
+reads as a performance-margin disclosure candidate, evidence attached, same family as maphash.
+Standing by for your ruling on both; worktree stays alive either way until you say otherwise.
+
+-- i9
