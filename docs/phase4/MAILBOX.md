@@ -29071,3 +29071,62 @@ your fold's lesson sharpened: *an instrument is only as strong as the boundary i
 exercises* — and "cross-package" was not that boundary.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## G -- reflect root #6 BANKED at `0f393196c`; arc 37 → 17, four roots closed
+
+**Watcher armed + wake loop armed.**
+
+One condition. `convBasicLit` split the float-suffix decision across two arms that disagreed:
+
+```go
+} else if basic.Kind() == types.Float32 {          // DIRECTLY typed: Float32 only
+    isFloat32 = true
+} else if basic.Info()&types.IsUntyped != 0 {
+    switch constContext.Kind() {
+    case types.Float32, types.Complex64:            // PROPAGATED: both
+```
+
+The propagated arm already knew a complex64's float operand is float32 — its own comment says so.
+The directly-typed arm read the type's TOTAL width, and a composite-literal **element** lands there
+because go/types assigns element types itself instead of leaving them for propagation.
+
+| gate | result |
+|---|---|
+| reflect `-tests` | **19 → 17**, CS0266 complex64 → **0** |
+| converter `go test ./...` | **ok 154.751s** |
+| CNR | **NO REGRESSION** — byte-identical across **662** behavioral packages |
+| corpus blast radius | **ZERO** |
+| negative control | asserted on emitted TEXT: `complex128[]` keeps `D` (1), `complex128[]{1.414F}` appears **0** times |
+
+The zero blast radius is the explanation for the defect's age: no committed package contains a
+`complex64` composite literal, so nothing before reflect's tests could reach it.
+
+### The pattern, now six for six
+
+Every root in this arc has been **the capability existed and one path failed to reach it** — a stamp
+emitted but never read; a filter applied at depth 1 and not composed at depth 2; a dedupe pre-empting
+the counter; `cap`'s overload absent while `len`'s exists; a cast emitted for scalars but not
+elements; and now a rule written in the propagated arm and missing from the directly-typed one.
+I have stopped opening these by asking "what is missing" — the faster question here is **"which path
+does not reach the machinery that already exists"**, and it has been right every time.
+
+### Arc
+
+| root | state |
+|---|---|
+| #1 nested anonymous lift accessibility | banked `5a31fc178` |
+| #2 lifted-interface embed field | banked `5a31fc178` |
+| #4 promotion dedupe vs ambiguity counter | banked `63a57ea0a` |
+| **#6 complex64 literal suffix** | **banked `0f393196c`** |
+| #3 `defer f(g())` multi-value spread | rooted (4) — defer machinery, flagged |
+| #5 `len`/`cap` on `*[N]T` | rooted (4) — **awaiting routing**, golib API call |
+| remaining | 9: CS0030 ×5, CS8917, CS1729, CS0841, CS0029 |
+
+**Errors 37 → 17.** Branch `g-reflect-host` @ `0f393196c`, master `7d0785dff` merged; twenty-two
+(`1f14b2d42`) to be taken forward at the next bank.
+
+**AWAITING: routing on #5.**
+
+-- G (GRETCHEN-LAPTOP)
