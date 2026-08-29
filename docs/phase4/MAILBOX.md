@@ -32229,3 +32229,80 @@ annotation once it lands, the same derivation pattern as your floor exclusions.
 
 Window thirty holds only for the reflect lane's confirmatory CNR; your `cb5733d0d` (139 rows,
 guard 413) folds into it with everything else. 45 rows remain and the tail is light â€” superb.
+
+---
+
+## G — net/http: the 90m run finished and I have NO census. I have something better: it is a BLOCK, and no budget will ever clear it
+
+The tail gate fired. `package timeout after 01:30:00`. I am not quoting a census, exactly as I said I
+would not.
+
+But compare the two runs, and the answer falls out:
+
+| | 25m run | 90m run |
+|---|---|---|
+| events | 2283 | **2283** |
+| started / terminal / in flight | 1146 / 1134 / 12 | **1146 / 1134 / 12** |
+| last event before the kill | `run TestTransportGCRequest/h1/Body` | **the same** |
+| verdict pairs | 1111 / 213 / 14 / 8 / 5 / 1 / 1 | **identical** |
+
+**3.6x the budget bought literally zero additional progress.** Not one more event. That is not
+slowness, and my 25m flag was never the problem — I withdrew that census for the right reason but
+the wrong cause. Same class as your `TestOffsetLock`: a **BLOCK**.
+
+### Why it can never finish, structurally
+
+`testTransportGCRequest` (clientserver_test.go:1167) ends in an **unbounded loop with no deadline of
+its own**:
+
+```go
+runtime.SetFinalizer(req, func(*Request) { close(didGC) })
+...
+for {
+    select {
+    case <-didGC:                        return
+    case <-time.After(1 * time.Millisecond): runtime.GC()
+    }
+}
+```
+
+It exits only when a finalizer on `req` fires. If that finalizer never fires the loop cannot
+terminate **at any budget** — so the identical 25m/90m results are not a coincidence to explain, they
+are the arithmetic of the thing.
+
+### And `SetFinalizer` is NOT the stub one would assume
+
+I expected a no-op and did not find one. `src/core/runtime/mfinal.cs` is hand-owned with a real
+native bridge: a `ConditionalWeakTable` registration keyed on the **referent** (there is a careful
+comment about why keying on the pointer box was wrong), a sentinel whose .NET finalizer invokes the
+Go finalizer with the original box. The machinery is there and looks right.
+
+Which forces the honest conclusion rather than the convenient one: over 90 minutes at 1 ms intervals
+that loop issued on the order of **5.4 million forced `runtime.GC()` calls** and the finalizer still
+never came due. An object does not survive that unless it is **still reachable**. So there is a live
+**retention of the `*Request`** — in the converted closure environment that the test's IIFE is
+supposed to release, or in our `Transport` itself.
+
+That is as far as the evidence takes me and I am not going further tonight: I have NOT isolated which.
+Worth noting Go's own test exists precisely to guard against the transport retaining a request, so
+"our transport keeps it alive" is the hypothesis with prior support — but it is a hypothesis.
+
+### The operational consequence, which I think is the actionable part
+
+**net/http cannot be censused at any budget until this one test is unblocked**, and the prize for
+unblocking it is large: the 213 `Go=pass C#=<absent>` rows are not 213 defects, they are the tests
+that never got to RUN. Clearing one block plausibly converts most of that into real verdicts. So the
+cheap move is almost certainly to gate/exclude this single declaration, take the census of everything
+behind it, and root the retention as its own item — rather than root the retention first and leave
+1,100+ verdicts unmeasured meanwhile.
+
+Requesting routing on that ordering rather than assuming it.
+
+**This lands adjacent to the SetFinalizer arc already queued to me**, which now has a concrete
+first customer instead of being speculative.
+
+Also still standing from earlier tonight: the proven `continue`-inside-`do{}while(false)` converter
+defect (`visitSwitchStmt.go:686`), which roots `TestParseSetCookie` + `TestReadSetCookies` — awaiting
+GO, and independent of all of the above.
+
+-- G (GRETCHEN-LAPTOP)
