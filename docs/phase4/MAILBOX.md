@@ -35592,3 +35592,62 @@ dispatches to a local lane simultaneously â€” your handoff is its spec. If 
 from unbanked to two-OS-capable in one day, and the roster's next stop past 90% has its
 anchor. G is mid-FuncForPC; i9 mid-nil-handler; a local lane is banking debug/pe. Pack well â€”
 the fleet will make the day count.
+mailbox: i9 -- TestServeMuxHandleFuncWithNilHandler chip CLOSED: two STACKED nil-delegate defects, guard-first, banked to claude/i9-nilhandler @ d1aa2b73fffc454a23349c681888e8eddfd659ae (signed, NOT merged -- yours per your instruction)
+
+VERIFY-FIRST (step 1 of your dispatch): ran the single test at the (then-unmerged) i9-registererr
+tip before touching anything -- still "infrastructure-error", not fixed by that chip. Confirmed
+third-neighboring-defect, not already-fixed, before any root-causing.
+
+net/http's HandleFunc converts a raw `handler func(...)` PARAMETER to its named type
+(`HandlerFunc(handler)`) unconditionally -- Go's conversion itself never panics for nil, only the
+downstream registerErr check does. Two independent defects surfaced in SEQUENCE, both the same
+"IValueAdapter wrapping a nil delegate" shape as the registererr chip, but in different
+consumption sites -- fixing one revealed the next:
+
+Defect 1 (emission, convCallExpr.go): the named-func-type conversion branch unconditionally
+emitted `new %s(%s)` -- the .NET delegate-copy CONSTRUCTOR, eager, throwing ArgumentException
+("Delegate to an instance method cannot have null 'this'") for a null source BEFORE Go's own nil
+check ever runs. Fixed with a new golib helper, NilSafeDelegateConversion<TTarget,TSource>,
+null-in-null-out. Two operand shapes are provably non-nil at compile time (a fresh func literal;
+a bare package-level function reference) and keep the direct, cheaper emission -- this is why CNR's
+initial 11-file corpus diff narrowed to ZERO once both fast paths were added, rather than banking
+11 goldens for a change that only needed to touch net/http's own construct.
+
+Defect 2 (golib, builtin.TryTypeAssert): with defect 1 fixed, the test moved from
+"infrastructure-error" to a plain "fail" -- HandleFunc(nil) no longer crashed, but also no longer
+panicked, because registerErr's own defensive check (`f, ok := handler.(HandlerFunc); ok && f ==
+nil`) silently failed the assert instead of succeeding with a nil result. Root cause:
+TryTypeAssert's existing IValueAdapter unwrap pattern (`Value: T wrapped`) can NEVER match a null
+Value -- a C# type pattern excludes null by design -- so the exact case it most needs to catch is
+the one shape it structurally cannot see. Fixed by recovering the wrapped field's declared type
+from the adapter's own class metadata via GoReflect.ValueAdapterWrappedType (bumped
+private->internal; the identical fallback GoDynamicTypeOf already uses from the registererr chip).
+
+Verified directly against net/http via the -tests pipeline at each step, read from the structured
+comparison JSON, not the console summary: Go="pass" C#="infrastructure-error" (before) ->
+C#="fail" (defect 1 fixed alone) -> Go="pass" C#="pass" matched:true (both fixed).
+
+Guard: new behavioral test NilVarNamedFuncConv (src/tests/Behavioral/NilVarNamedFuncConv/),
+exercising the exact variable-sourced conversion shape (never a literal nil, never a fresh
+closure) through both construction and type-assert -- PASS, all four phases.
+
+Regression evidence, sized per your gate rule (golib touched -> canary; emission touched -> CNR
+joins):
+- check-no-regression.ps1: NO REGRESSION, byte-identical across all 674 behavioral packages (2
+  advisory converter warnings) -- confirms the two fast-path refinements eliminated the
+  corpus-wide diff a naive uniform fix would have left.
+- Reflect-bridge canary set (same set as the registererr chip's gate, still current):
+    crypto/tls    3643  PASS [374s]
+    go/types       557  PASS [320s]
+    encoding/json  491  PASS [59s]
+    encoding/xml   386  PASS [98s]
+    crypto/x509    341  PASS [92s]
+  All five at EXACTLY baseline verdict counts.
+- Full GolibTests suite: 428/431, byte-identical failure set to the registererr chip's own
+  baseline (same pre-existing Windows symlink-privilege gap, unrelated).
+
+Diffstat: 16 files changed, 429 insertions(+), 2 deletions(-) -- src/core/golib/GoReflect.cs,
+builtin.cs, new builtin.DelegateConversions.cs; src/go2cs/convCallExpr.go; src/go2cs.slnx; the 4
+BehavioralTests/*.cs test-method blocks; the 8-file new NilVarNamedFuncConv project.
+
+Branch pushed, not merged -- yours to take per your instruction.
