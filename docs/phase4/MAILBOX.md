@@ -38658,3 +38658,77 @@ Both pushed, both gated, neither banked. Nothing owed to me that I can see; avai
 dispatch. Watcher armed + wake loop armed.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · i9 → COORD — **CLOSED: the position-table splitter fix lands, and the original nested-literal target resolves as a side effect.** `507e0a4f1`, signed, pushed, not merged
+
+**watcher armed + wake loop armed.**
+
+Full protocol followed, in order, per your ruling:
+
+**1. Red reproducer, with a control.** Two minimal Go programs, identical except one embeds a
+9-line raw-string const, the other the same content on one line via `\n` escapes. Real Go:
+`mark1/2/3` report lines 31/32/33 (with-literal) and 23/24/25 (without) — both correct by
+construction. Converted C#, pre-fix: WITH the literal, all three report the SAME wrong line (37);
+WITHOUT it, byte-identical to `go run`. Red for the documented reason, isolated from every other
+variable.
+
+**2. Fix, exactly as specified — normalize, don't count.**
+`extractPositionSentinels` now splits (and rejoins) on bare `"\n"` alone, never on
+`v.newline`/`\r\n`. A trailing `"\r"`, where present, rides along as ordinary content in the split
+piece — the existing `ownLine` check already treats it as whitespace, so no separate strip/re-add
+step was needed. The now-dead `newline` parameter is removed; all four call sites (production +
+3 existing tests) updated. No context-aware `\r\n` counting anywhere.
+
+**3. Reproducer → converter guard, red then green.**
+`TestExtractPositionSentinelsCountsBareLFInsideALiteral` added beside the three existing
+`extractPositionSentinels` tests. Confirmed red against a temporarily-reverted split (csLine 2
+instead of 6, same undercounting shape), green under the fix. Full `go test ./...` clean, twice
+(once mid-investigation, once final).
+
+**4. Full CNR + blast radius, measured by isolation not assumption.**
+CNR: 3 behavioral packages (Solitaire, SortArrayType, UntypedConstWideMask) — verified, then
+RESTORED per your sequencing rule (see below), not banked.
+Stdlib: **the naive committed-tree diff was a trap** — 147+ files, almost all pre-existing drift
+unrelated to this fix (confirmed by decoding the SAME package's baseline-vs-committed table:
+identical Go lines, only the recorded C# line moved by a constant, file-specific offset — the
+ordinals-era staleness G/R independently rooted the same day, not mine). The real measurement
+needed two independent seeded `-stdlib` reconverts — one from the pre-fix converter, one from the
+fixed one — diffed **against each other**, never against the committed corpus. That isolation
+gives **26 stdlib `package_info.cs` files, zero non-`package_info.cs` files** — confirming the fix
+touches only recorded position data, never emitted code.
+
+Sample-verified 5 by hand (archive/zip, math/big, net/http, go/doc/comment, runtime/windows —
+chosen for diversity): every one confirmed a genuine multi-line bare-LF block in the SPECIFIC file
+whose record changed. No changed package failed the predicate. **Worth carrying forward**: the
+true predicate is wider than "multi-line string literals" (my own framing, inherited from
+CLAUDE.md's prose) — a multi-line `/* */` block comment (a Go package doc comment, converted
+verbatim) triggers the identical bare-LF shape. archive/zip/struct.cs's own package doc comment
+(lines 5-21) was sample #1; math/big and go/doc/comment were both inline block comments inside
+const declarations; net/http/pattern.cs was a genuine raw-string `fmt.Sprintf` format. Both
+shapes real, both now correctly counted.
+
+**5. Ordinals-era guards + behavioral suite.**
+Full 4-phase suite: **646/646** transpile+compile+target, **620/620** output, 0 failures (two
+earlier attempts hit transient NuGet-restore/no-diagnostic flakes — third attempt clean, matching
+the documented false-red shapes; not a real regression, no fix needed). FuncLiteralCallerNames,
+SetFinalizerBridge, FuncForPCName all covered by that same clean pass.
+
+**6. The original target.**
+`TestTimeoutHandlerSuperfluousLogs` — **PASSES**, both subtests, confirmed via a fresh `-tests`
+reconvert and a direct run of the built host. Resolved as a side effect of the general fix, not a
+targeted patch — consistent with your note that this arc "likely resolves divergences beyond
+TestTimeoutHandlerSuperfluousLogs."
+
+**Sequencing honored**: working tree carries ONLY the two converter files
+(`positionMapOperations.go`, `positionMap_test.go`) — the 3 behavioral packages' position-map
+drift was verified and then restored, not banked, so this lands as the standalone "splitter fix
+first" step your ruling named, ahead of the one leveling regen.
+
+Branch `claude/i9-nested-literal-names` @ `507e0a4f1`, based on `773afa2c2`, signed, pushed,
+**not merged**. Ready for whatever's next.
+
+**AWAITING: nothing.**
+
+-- i9
