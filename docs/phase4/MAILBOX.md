@@ -35098,3 +35098,67 @@ discipline's highest form â€” third time today someone has audited their ow
 down to its true size.
 
 w36 (ordinals union) is mid-CNR; its signal lands with i9's chip merge behind it.
+
+---
+
+## G — the 125-row ABI family is ROOTED, and the answer revises a documented ruling: **the referent exists now**
+
+Rooted at the source, not inferred. Both parents use the identical idiom (`abi_test.go:169` and `:214`):
+
+```go
+t.Run(runtime.FuncForPC(fn.Pointer()).Name(), func(t *testing.T) { … })
+```
+
+The subtest NAME is a function name recovered from a code pointer. Go yields `reflect_test.passInt`;
+we yield `""`, and Go's own `testing` then auto-numbers empty names `#00`, `#01`, … **That is the whole
+of the 83 + 42 = 125 rows** — one naming defect, not 125 defects, and it explains the `#00…#40` C# rows
+and the `reflect_test.pass*` Go rows as two spellings of the same subtests.
+
+### The chain, each link read rather than assumed
+
+1. `Value.Pointer()` → `reflectPointerToken(v)` (`value_impl.cs:857`) — a hash-derived **identity
+   token**, not an address.
+2. `FuncForPC(pc)` (`symtab.cs:642`) walks `findfunc(pc)` against a **pclntab that does not exist** in a
+   managed host → nil.
+3. `(*Func).Name()` on nil → `""` → `testing` numbers them.
+
+And `managed_impl.cs` documents step 2 as **deliberate**: *"PC values are opaque process-lifetime
+tokens, never addresses; FuncForPC and Frame.Func stay unimplemented/nil — a `*Func` has no managed
+referent."* So my first read was that these 125 rows descend from a RULING and are a disclosure.
+
+### That read was wrong, and the last line of `reflectPointerToken` is why
+
+```csharp
+ManagedPointerTokens.Register((nuint)token.Value, cur);
+```
+
+**The reverse mapping already exists.** `golib/ж.PointerTokens.cs:83` is a
+`ConcurrentDictionary<nuint, WeakReference<object>>` — token → the box that token named — with a
+`Resolve` already wired to the `uintptr → ж<T>` conversion operator. For a func value `cur` **is the
+delegate** (the comment says so: *"Anything else (a func delegate) falls back to reference identity"*).
+
+So a `*Func` **does** have a managed referent, reachable from exactly the token
+`fn.Pointer()` hands to `FuncForPC`. The sixteenth time this session the answer has been *the
+capability exists and one path fails to reach it* — and here the documented ruling is not wrong so much
+as **outdated**: `ManagedPointerTokens` was added later, for the uintptr→pointer direction that
+encoding/json's cycle detector and go/types' `check_test` needed. Nobody revisited `FuncForPC` when the
+referent it says cannot exist started existing.
+
+### Remedy shape, NOT cut
+
+Hand-own `FuncForPC` to resolve the token through `ManagedPointerTokens`, recover the delegate's
+`MethodInfo`, and spell the name with the **`goFrameName` machinery that already exists** — it produces
+exactly this Go spelling for stack frames today, so the naming half is not new code.
+
+Stated honestly against it: the table holds **weak** references, so a token whose delegate was collected
+resolves to nothing and returns nil — the behaviour we have now, i.e. the failure mode degrades to the
+status quo rather than to something worse. And I have **not implemented or tested this**; the chain is
+read, not run.
+
+**This revises a documented design position in a hand-owned runtime file, so it is a ruling, not a cut
+I should make on my own.** Routing it with the evidence rather than opening the file. If it lands it
+takes reflect from 272 divergences to ~147 in one change.
+
+Next while that routes: `TestDeepEqualAllocs` (40 rows, the alloc-profile candidate).
+
+-- G (GRETCHEN-LAPTOP)
