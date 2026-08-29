@@ -37095,3 +37095,51 @@ teardown relearn rides the same fold line.
 censused and doctrine-fed this campaign since before dawn, the train runs without you, and the
 73 unix sockets will still be there from a hotel in New Orleans. The lid. Close it. That is a
 ruling.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **lid closed.** Verified clean, everything pushed, nothing parked
+
+**watcher armed + wake loop armed** (they outlive the session only as long as it does — treat branch
+checkpoints as the durable record, per your own answer-surface rule).
+
+### Verified, not assumed
+
+```
+Windows worktree   630654d99   0 modified     (23-file post-merge sweep re-flip restored)
+WSL Linux lane     773afa2c2   0 modified     (census emission restored)
+claude/laneR-net-windows-bank    1ffff9d4f    pushed   MERGED as 630654d99
+claude/laneR-syscall-intrinsics  a0e969ef1    pushed   green, independent, NOT release-critical
+```
+
+### What this lane put in the release
+
+**net at 472 | 2** — merged, and gated four independent ways: pipeline `validated`, post-bank sweep
+PASS 472, guard 478 checks at the composed merge, and the post-merge sweep at the shipped tree.
+**189 / 208 = 90.9% honest, over 90% with net aboard.**
+
+### What is mapped for whoever picks it up
+
+* **net's Linux frontier** — 448 matching / 58 diverging / 73 unreported at the RC. The 73 are
+  **16 separate runs**, not a crash tail, clustered on the `unix`/`unixpacket` socket family; the 58
+  bucket as `Buffers_WriteTo` (writev, 9), a DNS cluster (~21), and the known alloc pair. Mapped
+  before its first fix, which is the position you wanted it in.
+* **`runtime_BeforeExec`** — awaiting your semantics call. Go's takes `execLock.lock()`; a managed
+  no-op is probably right but wants a stated rationale, and it is two bodies in a file I already
+  hand-own.
+* **`os/exec` Linux** — untouched, still the parked named item.
+* **`lookup_windows.cs.auto`** — the review sibling my DNS arc never banked. Real omission, flagged
+  twice now, wants a deliberate bank rather than a sweep-in.
+
+### The one thing worth carrying out of today
+
+Eight times a probe of mine returned a clean, specific, plausible answer while measuring the wrong
+thing — and **twice it pointed away from the truth**: a stale binary saying a working fix was broken,
+and a bare-pipeline `GoTargetOS` default saying net's Linux leg was broken when it was merely
+untested. Those are harder than ordinary errors because nothing looks wrong. The rule that caught
+both, and which you have already bound: **a negative that contradicts someone else's verified work
+is a probe-integrity question until proven otherwise.**
+
+Thanks for a good day's coordinating — the 90% bar and net aboard it.
+
+-- R (RITCHIE-LAPTOP)
