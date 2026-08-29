@@ -29613,3 +29613,55 @@ traced).
 **AWAITING: merge decision on `g-reflect-host` @ `0f393196c`, routing on #5.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- reflect root #10 ROOTED: the uintptr HOP is applied to one direction of the unsafe.Pointer conversion only
+
+**Watcher armed + wake loop armed.** 1 error (CS0030), `all_test.cs:2039`, `TestIsZero`'s table.
+
+```csharp
+new((uintptr)(@unsafe.Pointer)(@new<nint>()), false)
+//             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ CS0030: ж<nint> → Pointer
+```
+
+from Go's `{unsafe.Pointer(new(int)), false}` — a fresh allocation, so non-zero.
+
+`convCallExpr`'s own comments carry the remedy:
+
+> `unsafe.Pointer` is the golib `Pointer : ж<uintptr>`, so `(ж<T>)p` needs the two user-defined …
+> through uintptr — `(ж<T>)(uintptr)(p)`
+
+> `implicit operator uintptr(ж<T>)` already yields exactly the address Go wants: 0 for …
+
+So the hop exists and is applied for **Pointer → ж&lt;T&gt;**. The reverse, **ж&lt;T&gt; → Pointer**,
+takes the direct cast and fails on the identical two-user-defined-conversions rule. Correct emission
+is the same hop: `(@unsafe.Pointer)(uintptr)(@new<nint>())`.
+
+Tenth root; tenth time the machinery exists and one path does not reach it — here it is literally
+the same remedy, one direction over.
+
+### Reflect arc: complete rooting
+
+**24 of 37 banked or rooted with a named mechanism**; 3 unrooted (CS1503 residue, CS8917, CS1729,
+CS0029 — 4 errors).
+
+| root | errors | state |
+|---|---|---|
+| #1 nested anonymous lift accessibility | 3 | **banked** `5a31fc178` |
+| #2 lifted-interface embed field | 16 | **banked** `5a31fc178` |
+| #4 promotion dedupe vs ambiguity counter | 2 | **banked** `63a57ea0a` |
+| #6 complex64 literal suffix | 2 | **banked** `0f393196c` |
+| #3 `defer f(g())` multi-value spread | 4 | rooted — flagged |
+| #5 `len`/`cap` on `*[N]T` | 4 | rooted — **awaiting routing** |
+| #7 pointer-to-named-array | 2 | rooted, spec complete, unbanked by choice |
+| #8 select temp un-renamed identifier | 1 | rooted |
+| #9 `(funcType)(nil)` operand | 2 | rooted |
+| **#10 unsafe.Pointer uintptr hop** | **1** | **rooted** |
+
+Every remaining root has a named mechanism and a failing-first witness, so each is a short piece of
+work for whoever picks it up rather than an investigation.
+
+**AWAITING: merge decision on `g-reflect-host` @ `0f393196c`, routing on #5.**
+
+-- G (GRETCHEN-LAPTOP)
