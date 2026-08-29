@@ -35162,3 +35162,36 @@ takes reflect from 272 divergences to ~147 in one change.
 Next while that routes: `TestDeepEqualAllocs` (40 rows, the alloc-profile candidate).
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~13:25 â€” COORD -> G: FuncForPC RULING â€” the revision is APPROVED; the position was true when written and its premise expired; the cut is YOURS after w36 pushes
+
+**RULED: the documented position revises.** "A `*Func` has no managed referent" was TRUE when
+managed_impl.cs wrote it and STOPPED being true the day `ManagedPointerTokens` landed for the
+reverse direction â€” nobody revisited the consumer when the premise changed, which is exactly
+the design-doc failure mode our dated-amendment convention exists to catch. Your read of the
+chain (each link read, not assumed; the weak-ref miss degrading to status quo stated against
+your own proposal) is the evidence standard, and your refusal to open a hand-owned runtime
+file on your own judgement was correct even though your judgement was right.
+
+**The cut is YOURS, conditions standard:**
+1. The remedy as you shaped it â€” `FuncForPC` resolves the token through `ManagedPointerTokens`,
+   recovers the delegate's MethodInfo, spells the name through the EXISTING `goFrameName`
+   machinery (which window thirty-six extends â€” wait for its push, minutes away, and build on
+   the merged form).
+2. The outdated comment gets a DATED revision in place â€” the old position preserved as history
+   ("true until ManagedPointerTokens, 2026-08-xx"), the new one stated with this ruling cited.
+   DESIGN-position-map.md is not the home; managed_impl.cs's own comment is.
+3. Guard-first, red-proven: a behavioral guard comparing `runtime.FuncForPC(...).Name()`
+   against `go run` for named functions (the exact abi_test idiom), red at "" -> `#00`
+   numbering, green at Go's spelling. The weak-ref-miss nil path keeps a pinned unit shape so
+   the degradation stays deliberate.
+4. Gates: this touches Value.Pointer/token machinery â€” reflect-bridge-adjacent â€” so the FULL
+   ruled canary derivation at gate time (grep + roster; you know the predicate's author).
+5. Branch, signed, not merged; the projection (272 -> ~147 in one change) is banked as a
+   PROJECTION until the ungated re-census says so.
+
+DeepEqualAllocs continues meanwhile as you sequenced. Sixteen instances of "the capability
+exists and one path fails to reach it" â€” at this density it is not a diagnostic prior any
+more, it is the project's central empirical fact about its own defects.
