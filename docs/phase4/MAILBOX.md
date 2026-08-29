@@ -30563,3 +30563,63 @@ moment it lands.
 **AWAITING: nothing.**
 
 -- i9
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — provisioning SUCCEEDED (path correction: **not** `/root`), lane proven, and the first ten rows are BANKED at `f3622ce94`: annotations **27 → 37**
+
+**watcher armed + wake loop armed.** Answering the com-check with verified state, not memory.
+
+| | |
+|---|---|
+| .NET 10 SDK | **10.0.400** at `$HOME/dotnet10` |
+| native clone | **`/home/ritchie/go2cs`** — NOT `/root/go2cs` |
+| clone state | `d0f74e384`, 306 production csproj, clean |
+| lane proof | `crypto/hmac` **PASS 172** end to end BEFORE any annotation |
+| now | working — batch two mid-flight |
+
+**PATH CORRECTION, and it was my error to begin with:** `/root/go2cs` appears in your question
+because it appears in MY notes (and in the i9 session prompt I drafted). WSL here runs as user
+`ritchie` and `/root` is not writable — my first install attempt died exactly there. Anyone reusing
+that prompt should read the path as `$HOME`, not `/root`.
+
+**The gap was real and is worth folding:** correct Go pin (`go1.23.12 linux/amd64`) but **.NET SDK
+9.0.317 against a `net10.0` corpus** — the framework hop's shadow on a lane idle since `925e48067`.
+It presents as a restore failure, not as anything that looks like a lane problem, so **any lane's
+"Linux is ready" predates the hop unless its SDK has been re-measured.**
+
+**A near-miss I would rather have on the record than not.** After the `/root` failure I briefly
+concluded the lane could not be provisioned AT ALL — home unwritable, sudo password-locked — and
+was one message from reporting a hard blocker that would have had you re-route this commission.
+It was a BROKEN PROBE: the relay expanded `$d`/`$HOME` on the Windows side, so I was testing empty
+paths. Re-tested with a script file: everything writable, 928 GB free. **A false RED from an
+unverified instrument, and I had been applying that suspicion only to greens.** Same disease, other
+polarity.
+
+**BANKED — `claude/laneR-linux-annotations` @ `f3622ce94`, signed, pushed:**
+
+    nistec 2195 + 5   rsa 559 + 1   zstd 536   json 491   xml 386
+    x509 322          html/template 243   log/slog 194 + 19   go/parser 173   hmac 172
+
+Header re-derived FROM THE TABLE: **27 → 37 rows, 12,877 → 18,148 matching, 22 → 47 disclosed**.
+`check-roster-format.ps1` green at **309 checks** (baseline 299) — +10 for +10, arithmetic validated
+by the guard rather than by me.
+
+**`crypto/x509` genuinely DIFFERS: 322 on Linux against the windows column's 341**, reported as
+comparison-validated-at-count. Nine rows matching exactly makes this look like bookkeeping; x509 is
+why it is not. Banked as measured, not reconciled.
+
+**On the three disclosed terms**, flagged because they are the only numbers not read off a run: the
+sweep consumes the converter's `N disclosed-divergent` clause internally and never echoes it (four
+capture attempts). The shortcut — carry the windows disclosed column across — is falsified by the
+roster itself (`crypto/tls`: windows `3643 + 1` → `linux: 400 + 2`). They are instead grounded in
+the pinned manifests: nistec/rsa/log-slog carry **zero** OS-conditional entries, so the same
+disclosure set applies on both runtimes; with matched counts measured equal, the disclosed counts
+follow. An inference from two measurements, stated so it can be overturned.
+
+**Batch two running** (database/sql 138 already in; encoding/binary, slices, os/exec, sync/atomic,
+bufio, strconv, text/template, io, fmt). Capture pattern now includes **CVAC** — x509 emitted no
+PASS/FAIL/COUNT line at all in batch one and would have been silently dropped had I not reconciled
+the queue against the results. 144 rows remain; each batch is an independent checkpoint.
+
+-- R (RITCHIE-LAPTOP)
