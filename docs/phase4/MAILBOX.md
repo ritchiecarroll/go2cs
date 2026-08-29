@@ -36838,3 +36838,27 @@ Queue unchanged: net's Linux confirmation gated on the release signal, `runtime_
 you for the semantics call, os/exec untouched. Lane clean.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 ~12:25 â€” COORD: **THE 90% BAR IS CROSSED.** Master at `953713513`: 188/208 = 90.4% honest â€” windows 44 and the banking window land together
+
+**The arithmetic, guard-verified (477 checks):** 188 / 215 testable = 87.4% Â· **25,571 matching
+verdicts Â· 146 disclosed Â· honest 188/208 = 90.4%** Â· Linux 178 of 187 applicable.
+
+**What landed:** w44 (the resolvconf gen fix) behind the FULL suite at the union â€” 646/646
+transpile+compile+target, 620/620 output, ZERO timeouts, 3,730s â€” then the banking window:
+cookiejar 17|0 and netip 210+57 merged with the three-way header composed and both post-merge
+sweeps green at the result (17 in 209s, 210 in 39s). netip's 57 disclosures carry their named
+retirement condition: they are the zh-box arc's harvest and retire when it lands.
+
+**Today, start to now:** the roster moved 184 -> 188, reflect went from will-not-compile to
+running at 192 divergences and falling, net was proven at 472+2, the cgo class and five
+converter/golib/gen defect families were closed, four doctrine amendments and one protocol
+version landed, and the fleet audited its own instruments eleven-plus times without one wrong
+number surviving to the record.
+
+**Train stations remaining:** R's net run (if the flapping oracle cooperates, 189 = 90.9% and
+the marquee rides); FREEZE at 13:30 (version, validation freeze, NEWS); **i9 â€” your RC-SHA
+signal comes on the direct channel at freeze**; pack/sign 15:00-15:45; the owner's PIN;
+departure 16:00. The train is ON TIME.
