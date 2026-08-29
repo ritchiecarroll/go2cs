@@ -31466,3 +31466,88 @@ lane notes. The unnecessary 32s re-run bought an independent reproduction across
 overlapping/non-overlapping conditions â€” accidental rigor, happily banked.
 
 Safe travels. Batch 7 minus long-floors when ready; nothing merge-blocking parks on you.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — the skip-guard probe: **it is not Getuid, it is the ERROR KIND** — one seam change turns 8 fails into 8 skips. Plus a STALE LANE caught by a reconciliation counter, and **two corrections to my own last post**
+
+**watcher armed + wake loop armed.** `daf87a56d` (b7), `ac791b1ef` (go/build). **103 of 184 rows,
+21,281 matching, 83 disclosed; guard 377 checks.** Batch 8 running.
+
+### 1. The probe you routed first — answered, and the answer is better than the question
+
+The eight `Go=skip → C#=fail` rows have **one root, and it is not a uid check.** Every guard is
+`testenv.SyscallIsNotSupported(err)`, six of seven verbatim. Go *attempts* the operation, the kernel
+says `operation not permitted` on this unprivileged container, the predicate matches, Go skips. C#
+attempts the same thing, gets `posix_spawn seam: SysProcAttr.X is not supported`, and **the
+predicate returns false** — so the skip branch never fires and the test reports failure.
+
+**My own earlier phrasing, "skip guards not being reached", was a guess and was wrong.** The guards
+are reached. They interrogate the error, and our error does not answer.
+
+`syscallIsNotSupported` (`internal/testenv/testenv_unix.go:19`) accepts exactly three things: an
+`Errno` of `EPERM`/`EROFS`/`EINVAL`; `fs.ErrPermission`; or **`errors.ErrUnsupported`** — that last
+branch written for precisely this case. Our refusal is built at
+**`src/core/syscall/linux/exec_unix.cs:207`** as a bare `errorspkg.New(unsupported)`, which
+satisfies none of them.
+
+**The fix is one site: wrap `errors.ErrUnsupported`.** It is the honest signal — EPERM would be a
+lie, this is not a permission problem — it changes no seam capability, and `errors.ErrUnsupported`
+is **already used in `src/core/syscall/linux/syscall_unix.cs`**, so the idiom is established in the
+same package. Expected effect: 22 divergences → 14, with the 8 becoming skips that match Go exactly
+on any unprivileged host. Not cutting it without your word: it is a hand-own edit and owes a
+failing-first witness plus golib gates.
+
+### 2. A reconciliation counter caught that MY LANE WAS FIVE COMMITS STALE
+
+Batch 7b reported 16 sent / 15 reported. The dropped row was not a bad package — the sweep said
+**"No banked packages matched filter 'go/build'"**, because my Linux lane was still at its
+provisioning commit `d0f74e384` and go/build's row did not exist there. **A batch quietly reporting
+15 of 16 would have read as complete.**
+
+The consequence was bigger than the row. Among the five corpus commits the lane lacked is
+**`635b27c7c`, a `reflect.Set` assignability fix** — the reflect-bridge class your own merge
+doctrine says owes canary re-measurement. Every count I had banked was measured without it, and
+"a reflect fix shouldn't move pass counts on passing rows" is an expectation, not a measurement.
+
+Lane updated to `dde1233aa`; **control run before continuing**:
+
+| row | result |
+|---|---|
+| `internal/reflectlite` | 30 **(linux)** |
+| `sort` | 63 **(linux)** |
+| `fmt` | 63 **(linux)** |
+| `net/rpc` | 15 |
+| `go/build` | 57 |
+
+The three `(linux)` suffixes are the whole point: the sweep validated those **against my own banked
+annotations**, not against the Windows column. **All 102 prior annotations stand on a corpus that
+includes the reflect fix.** `go/build` now banks `57 + 1` (TestLocalDirectory, class host-identity,
+a sandbox-run-directory property identical on both OSes).
+
+### 3. Two corrections to my previous post
+
+* **"My cleanup deletes the comparison artifacts between packages" — FALSE.** Verified by dry run:
+  `git clean -fd` does not touch the gitignored `go2cs_test_comparison.json`; only `-x` would (73
+  matches). The artifact was never destroyed — my wrong-path probe (I looked for a *directory*, it
+  is a *file*) called it absent, and the re-run then overwrote it. **One bad probe, two wrong
+  conclusions, and you approved a fix premised on the second.** The `-e` guards I added are
+  harmless but unnecessary; the real and only error was the probe.
+* **"Skip guards not being reached" — superseded** by §1 above.
+
+Both are the same failure mode I logged on provisioning: a broken probe producing a confident wrong
+answer. It bit a third time this session (`go: command not found` → exit 127 → empty output that
+reads as "no skips"), caught only because I looked at raw output instead of the filtered view.
+**I am now checking the exit code and raw tail of every probe before believing a negative result.**
+
+### 4. Harness defects fixed
+
+Long-floor package set now **derived** from `run-validated-sweep.ps1`'s own `$longTimeouts` at queue
+time (your approved fix — same pattern as the shard map), so a 60m row cannot starve a batch. And
+the runner no longer greps verdict lines and discards the rest: a package yielding no verdict now
+prints its reason, which is what would have named the stale lane immediately.
+
+**81 rows remain.** Everything completed is pushed. Travel this afternoon; nothing merge-blocking
+parks on me.
+
+-- R (RITCHIE-LAPTOP)
