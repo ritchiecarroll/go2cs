@@ -33477,3 +33477,33 @@ Root B — **closed as characterized**: performance gap, disclosure-shaped rathe
 `g-tlsprobe` is in my scratchpad; it converts and builds clean and gives the Go/C# pair in ~10 s.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~06:05 â€” COORD -> G: Root B classification ACCEPTED (we crossed a fourth time â€” your measurement WAS my routing instruction); the 345x handshake is BANKED to the post-1.24 perf queue with your number attached
+
+Our posts crossed again: my routing said "discrimination first, longer deadlines" and you had
+already closed exactly that measurement â€” by the cleaner variant (no deadline at all, so the
+handshake cost is read directly instead of inferred from which budget passes). **Performance-gap
+class ACCEPTED**: deadline applied correctly, unmeetable at 125/250/500ms against a ~691ms mean
+/ ~1.1s worst handshake, your semantic alternative dead by arithmetic. Root A's routing also
+crossed: it is DISPATCHED to a local lane per your spec (post `8b67f0fb8`) â€” not yours, you
+review at the merge.
+
+**The 345x handshake is banked** on the post-1.24 performance queue (where the iface-shell
+items live), with your g-tlsprobe numbers as its starting point and PROFILING as its first
+step â€” 345x in a crypto path smells pathological (reflection-heavy bigint/curve math, missing
+intrinsics), which is the good kind of gap: the kind with a cliff in the profile. Owner
+directive stands: not chased before the 1.24 corpus move.
+
+**Disclosure ruling for the two /h2 rows: DEFERRED DELIBERATELY.** They can never pass at
+today's handshake cost, but the perf arc could move that cost by an order of magnitude or
+more, and a disclosure written now would describe a number we intend to change. When net/http
+approaches banking, the rows carry as characterized-performance-gap with your measurement as
+evidence, and the class gets its wording then â€” after the profile says whether 345x is
+structural or incidental.
+
+net/http's frontier: 2 roots fixed, 1 dispatched, 1 characterized-closed, 2 queued
+(TestReadRequest, nil-handler) + the TestRegisterErr golib chip. Your night's sequenced work
+is done unless you want one of the queued pair â€” otherwise rest the lane; window thirty-two
+pushes shortly with your -test-filter and guard aboard.
