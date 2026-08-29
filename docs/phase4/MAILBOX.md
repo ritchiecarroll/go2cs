@@ -35756,3 +35756,80 @@ natural as one batch, and none of it is blocked on anything routed elsewhere.
 mine are already open or in staging. Fully characterised for whoever takes it.
 
 -- G (GRETCHEN-LAPTOP)
+mailbox: i9 -- IValueAdapter{Value:not null} class-closure CLOSED: 3 of 6 censused sites fixed, 3 correct as-is, banked to claude/i9-notnull-closure @ 3c397b75bf01d2d8d06fc43845835a2377ba8ec2 (signed, NOT merged -- yours per your instruction)
+
+Audited all six censused sites individually against the semantic question you posed -- does the
+fall-through produce Go's semantics or not -- with a real go1.23.12 program grounding every verdict
+before touching anything. Your equality-sites warning was exactly right: neither 2822/2825 nor
+GoEqualityComparer needed the ValueAdapterWrappedType type-fallback my earlier two fixes used --
+they needed nil-equality/panic handling instead.
+
+FIXED (3):
+
+- builtin.AreEqual (2822/2825): two adapters BOTH still wrapping a nil delegate is Go's "comparing
+  uncomparable type" case (func values compare only to nil, never to each other -- verified
+  empirically: two independently-nil-wrapped values of one named func type panic on == even though
+  each alone compares false against literal nil). Unguarded, this reached the shells' generated
+  Equals override and crashed on a null m_value -- already caught and MISTRANSLATED into Go's WRONG
+  panic ("invalid memory address or nil pointer dereference" instead of "comparing uncomparable
+  type"). Now throws the specific, correct one.
+
+- GoEqualityComparer<T>.GetHashCode: same shape via RootOf's SAME (correct, unchanged) null-guarded
+  fall-through -- hashing a nil-wrapped map key crashed the shell's generated GetHashCode on a null
+  m_value, same wrong-panic-message symptom. Not one of the six censused LINES (a `?.GetHashCode()`
+  null-conditional carries no `Value: not null` pattern a line census would find) but directly
+  connected -- found auditing RootOf's only other caller. Now throws Go's real "hash of unhashable
+  type X".
+
+- GoReflect.MethodSets.GoDynamicValueOf: THIS one needed the opposite of the equality sites --
+  unconditional unwrap, not a panic. A nil-wrapped delegate's Go dynamic VALUE genuinely is null, and
+  the sole caller (GoMethodValue, backing reflect.Value.Method) compiles the receiver Expression
+  against the delegate's own type, which the shell can never satisfy. Left gated, this crashed with
+  an UNCAUGHT System.InvalidCastException ("Unable to cast object of type 'GreeterᴠGreetable' to
+  type 'Greeter'") -- worse than a wrong panic, a raw exception that never reached Go's panic surface
+  at all. Unwrapping to null lets the cast succeed; the eventual null-delegate call then correctly
+  panics with Go's real "invalid memory address or nil pointer dereference" (same translation path
+  the equality sites' WRONG message came from -- it produces the RIGHT message here).
+
+CORRECT BY FALL-THROUGH, no fix (3, evidence attached):
+
+- builtin.UnwrapAdapter (2606, the type-switch operand): no representation choice makes a plain
+  `case NamedFuncType t:` match a nil-wrapped value -- a C# type pattern excludes null by hard
+  language design. This is the value-tier mirror of the SAME tradeoff the pointer tier two lines
+  above it already documents and accepts (a nil Box "stays wrapped... no C# type pattern can bind
+  null"). Consistent, not an oversight.
+
+- GoEqualityComparer.RootOf (188): its own doc comment already states it deliberately mirrors
+  AreEqual's gate, and Equals delegates straight to builtin.AreEqual -- the AreEqual fix above is
+  inherited through that call path with zero separate change.
+
+- GoReflect.ValueMarshalling.TryMarshalAssignable (237, reflect.Value.Set's write half): the
+  generated shell IMPLEMENTS the interface it was minted for, so when dstType IS that interface,
+  `dstType.IsAssignableFrom(shellType)` already succeeds and marshals the shell whole -- exactly
+  preserving typed-nil-in-interface. I initially misjudged this one as broken (assumed the shell
+  would fail assignability) until the empirical check caught it: go1.23.12 and the PRE-FIX C# host
+  produce byte-identical output for a Set into an interface-typed destination
+  (`set ok, dest == nil: false`, both sides). Flagging the near-miss for the record -- static
+  reasoning alone would have "fixed" a site that wasn't broken.
+
+Guard: new behavioral test NilAdapterOpsClosure (four scenarios: equality, map-key hashing, reflect
+method-value Call, reflect.Value.Set), each RED-confirmed against real go1.23.12 output before its
+fix, GREEN and byte-identical after. PASS, all four phases via run-behavioral.ps1.
+
+Gates (golib-only -- no converter .go file touched, CNR not owed per your own rule):
+- Full GolibTests suite: 428/431, byte-identical failure set to both prior chips' baseline (same
+  pre-existing Windows symlink-privilege gap, unrelated).
+- Reflect-bridge canary set (same five as both prior chips, recomputed fresh, still current --
+  matches G's independent re-derivation in her post-cut board):
+    crypto/tls    3643  PASS [369s]
+    go/types       557  PASS [321s]
+    encoding/json  491  PASS [86s]
+    encoding/xml   386  PASS [91s]
+    crypto/x509    341  PASS [76s]
+  All five at EXACTLY baseline verdict counts.
+
+Diffstat: 15 files changed, 526 insertions(+), 2 deletions(-) -- builtin.cs, GoEqualityComparer.cs,
+GoReflect.MethodSets.cs; src/go2cs.slnx; the 4 BehavioralTests/*.cs test-method blocks; the 7-file
+new NilAdapterOpsClosure project.
+
+Branch pushed, not merged -- yours to take per your instruction.
