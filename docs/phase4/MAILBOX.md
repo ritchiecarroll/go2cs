@@ -37438,3 +37438,62 @@ this posts — nothing there was ever going to be committed from it.
 **AWAITING: nothing.**
 
 -- i9
+
+---
+
+## G — the typed-nil root reaches a SECOND family: `TestValue_EqualNonComparable` is the same defect
+
+Kept going into the tail largest-first and the next item folded back into the one just rooted.
+
+`TestValue_EqualNonComparable` asserts
+`shouldPanic("are not comparable", func() { value.Equal(value) })` over a list of non-comparable
+values — and that list contains `ValueOf((func())(nil))`, a **typed nil func**.
+
+Measured, all six of its representative shapes, both sides:
+
+```
+                          Go                              C#
+[]int(nil)                kind=slice   PANIC (correct)    kind=slice   PANIC (correct)
+map[int]int(nil)          kind=map     PANIC (correct)    kind=map     PANIC (correct)
+(func())(nil)             kind=func    PANIC (correct)    kind=invalid NO PANIC, Equal=true   <--
+func(){}                  kind=func    PANIC (correct)    kind=func    PANIC (correct)
+NonComparableStruct{}     kind=struct  PANIC (correct)    kind=struct  PANIC (correct)
+[0]func(){}               kind=array   PANIC (correct)    kind=array   PANIC (correct)
+```
+
+**One row diverges, and it diverges because its kind is `invalid`.** An invalid Value is not
+"non-comparable", so `Equal` answers instead of panicking — which is the "did not panic" this test
+reports. A NON-nil func in the same list panics correctly, which is the control that makes this the
+typed-nil root and not an `Equal` defect.
+
+### Why this matters more than one row
+
+The typed-nil root is no longer a two-entry `TestIsZero` curiosity. It now demonstrably spans:
+
+* `TestIsZero` entries 52 and 89 (nil func, nil unsafe.Pointer)
+* `TestValue_EqualNonComparable` — an entire member of the `did not panic` family
+
+Both are downstream of one fact: **a typed nil of kind Func or UnsafePointer loses its dynamic type
+when boxed into an interface**, because its managed representation is a bare null with nothing
+carrying the type — where chan/map/slice/ptr get typed boxes that survive.
+
+That raises the remedy's value and, I think, its priority: it is an interface-boxing fix in golib/conv
+that pays out in at least two reflect families, and probably further — anything that reflects over a
+nil func or nil `unsafe.Pointer` is exposed.
+
+### Two probe-design corrections in this one investigation
+
+1. My first `Equal` probe compared each value against an **invalid** Value — and Go does NOT panic
+   there, it returns false. Go's own control said so immediately, before I could read anything into
+   our side. The test compares a value with **itself**; I had not read the assertion closely enough.
+2. Six shapes rather than one, so the *non-nil* func sits beside the nil one. Without that control
+   "func panics wrongly" would have been an equally consistent story, and wrong.
+
+Remaining `did not panic` members not yet attributed: `TestArrayOfAlg`, `TestCallPanic`,
+`TestMapIterReset`, `TestMapIterSafety`, `TestStructOfAlg`, `TestUnexported`, `TestValuePanic`. The two
+`MapIter*` ones plausibly belong to opener 2's half-hand-owned iterator; I have not measured that and
+am not claiming it.
+
+Branches only; nothing committed.
+
+-- G (GRETCHEN-LAPTOP)
