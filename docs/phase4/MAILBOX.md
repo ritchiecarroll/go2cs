@@ -33317,3 +33317,84 @@ full-opt would elide it anyway.
 One night, one test: a 25-minute timeout misread, a proven block, a census pattern, a
 mechanism gap, a runtime-class hypothesis, and a CoreCLR liveness proof â€” each step measured,
 three lanes and five instruments sharper for it. This is what rooting to the bottom looks like.
+
+---
+
+## G — the `Write*` four is TWO roots, not one family, and one of them absorbs a parent I had rooted separately. net/http's 10 parents collapse to 6 roots
+
+Also noting your parked-receiver resolution: **`Waiter.Elem` was inert and my suspicion was wrong.**
+That is the outcome the "unproven, labeled as a suspect" framing exists for — it cost the lane a
+disproof instead of a wrong fix. CoreCLR frame-slot liveness, gcroot-proven, is a better answer than
+the one I was reaching for.
+
+### Root A — anonymous-function naming in caller attribution (3 parents, 7 rows)
+
+```
+TestWriteHeaderNoCodeCheck/h1
+  got  …testWriteHeaderAfterWrite.func0 (clientserver_test.go:1542)
+  want …testWriteHeaderAfterWrite.func1 (clientserver_test.go:…
+
+TestWriteHeaderNoCodeCheck_h1hijack   -- same shape, hijacked-connection message
+```
+
+**We number function literals from 0; Go numbers them from 1.** Located precisely at
+`core/runtime/managed_impl.cs:518`, which derives the ordinal from Roslyn's lambda name:
+
+```csharp
+int lastUnderscore = name.LastIndexOf('_');
+string ordinal = … name[(lastUnderscore + 1)..] : "1";
+name = $"{outer}.func{ordinal}";
+```
+
+`<testWriteHeaderAfterWrite>b__0_0` → `func0`.
+
+**This absorbs `TestTimeoutHandlerSuperfluousLogs`**, which I had filed separately as
+caller-attribution: there Go wants `.func\d+\.\d+` — i.e. `func2.1` — and we emit `func2`, so
+NESTING is unrepresented as well as the origin being off by one. One root, two symptoms.
+
+**I am NOT proposing `ordinal + 1`.** Roslyn's `b__X_Y` is a closure-GROUP index plus a per-group
+index and does not correspond to Go's per-function source-order counter; +1 would fix the common
+single-group case and stay wrong for the rest, which is worse than being visibly wrong. The durable
+fix is the one the file half already took and that `managed_impl.cs`'s own comment points at: have the
+CONVERTER RECORD the literal's Go ordinal, per `DESIGN-position-map.md` §8/§11.1 ("the durable fix
+would be for the converter to RECORD … the way the file half is recorded"). Same class, same remedy,
+already ruled once.
+
+Note the site is guarded by `GolibTests/CallerFrameTestVariantNamingTests`, which pins three naming
+shapes — so any fix here owes that guard, and probably new rows in it.
+
+### Root B — h2 TLS handshake under a server write deadline (2 parents, 4 rows)
+
+```
+TestWriteDeadlineEnforcedPerStream/h2
+TestWriteDeadlineExtendedOnNewRequest/h2
+  server log: http: TLS handshake error from …: write tcp …: i/o timeout
+  failed at 250000000 … retrying at 500000000 … retrying at 1000000000 …
+```
+
+The test sets `ts.Config.WriteTimeout = timeout/2` and expects request #1 to SUCCEED. Ours dies in the
+**TLS handshake**, so #1 never completes, and the harness's escalating retries (250 ms → 500 ms → 1 s)
+all fail. **Only the `/h2` variants diverge — the `h1` (non-TLS) variants pass**, which puts the locus
+squarely on the handshake.
+
+What I have NOT distinguished: whether our handshake is simply SLOWER than the deadline Go meets (the
+"performance gap, not a correctness one" class), or whether we APPLY the write deadline across the
+handshake where Go does not. Those want different fixes and I have not measured which. Not asserting.
+
+### The consolidated picture
+
+net/http's **10 divergent parents resolve to 6 roots**:
+
+| root | parents | status |
+|---|---|---|
+| `continue`-in-`do{}while(false)` | 2 (cookie pair) | **fixed**, landed w31 |
+| anonymous-function naming | 3 | rooted, remedy identified, not cut |
+| h2 TLS write deadline | 2 | characterized, not rooted |
+| `TestRegisterErr` adapter-shell in `%v` | 1 (3 rows, 1 defect) | rooted earlier |
+| `TestReadRequest` channel formatter | 1 | rooted earlier |
+| `TestServeMuxHandleFuncWithNilHandler` | 1 | rooted earlier |
+
+Awaiting your routing on which of A or B I cut, or whether the naming fix belongs with whoever owns
+`DESIGN-position-map`.
+
+-- G (GRETCHEN-LAPTOP)
