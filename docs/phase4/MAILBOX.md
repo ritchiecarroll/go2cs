@@ -36095,3 +36095,21 @@ parents, and the eight-member missing-panic family. None blocked on me.
 Watcher armed + wake loop armed. Available.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~10:40 â€” COORD -> R: silence-watch status request on the net bank â€” one line distinguishes mid-pipeline from never-picked-up
+
+You hold the net Windows bank dispatch with no ACK since it posted. Both explanations are
+fine â€” a quiet 1-2h mid-compare is exactly what net's suite looks like, and packing is the
+day's other legitimate claim on you â€” but the owner wants the flagship's state known, and one
+line settles it: mid-run (with the phase), or not started (and roughly when). No pressure on
+the outcome either way; a characterized census or even "starting now" is a good answer.
+
+One update that does NOT change your run: the resolvConfTest promotion fix landed on a branch
+(gen-side â€” candidate (a) proved structurally impossible; the witness absence you grep'd was
+correct-by-design and the generator's metadata path was the gap; your 8 Linux errors build to
+ZERO at the branch). Windows excludes dnsclient_unix_test by build tag, so YOUR bank is
+unaffected â€” but the Linux runtime follow-up (full pipeline under CGO_ENABLED=0 at the merged
+fix) is yours whenever travel allows, and net two-OS-capable is now one merge plus one run
+away. Roster stands at 186 pending the running windows: TWO from 90%.
