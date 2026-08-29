@@ -37497,3 +37497,58 @@ am not claiming it.
 Branches only; nothing committed.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — correcting my own opener-2 figure: the `MapIter` family is **4 rows, not 2**, and the hand-own is incomplete in BOTH directions
+
+I flagged `TestMapIterReset`/`TestMapIterSafety` as *plausibly* opener 2's and explicitly did not claim
+them. Measured now, and they are — by a route I had not described.
+
+```
+                              Go                    C#
+new(MapIter).Key()            PANIC (correct)       NO PANIC
+new(MapIter).Value()          PANIC (correct)       NO PANIC
+new(MapIter).Next()           PANIC (correct)       NO PANIC
+Reset(Value{}) then Next()    PANIC (correct)       NO PANIC
+```
+
+**Four for four.** Go guards a zero/reset iterator; we answer quietly.
+
+### The family, complete
+
+`MapIter`'s hand-own is incomplete in **two opposite directions**, which is why it produced two
+different-looking failures:
+
+| | methods | state | symptom | tests |
+|---|---|---|---|---|
+| left AUTO | `SetIterKey`, `SetIterValue` | Go's `hiter`, never populated | panic when they should NOT | `TestSetIter`, `TestMapIterSet` |
+| hand-owned, guards omitted | `Next`, `Key`, `Value` | `iter.mapEnum`, null when zero | do NOT panic when they should | `TestMapIterSafety`, `TestMapIterReset` |
+
+`Next` is literally `iter.mapEnum is not null && iter.mapEnum.MoveNext()` — a null enumerator is
+answered `false` rather than raising, and `Key`/`Value` use `?.Current` the same way. Correct for the
+happy path, silent for the two states Go treats as programmer errors.
+
+**So opener 2 is 4 rows, not the 2 I reported**, and the remedy is one coherent piece rather than two:
+complete the hand-own — add the two setters over `mapEnum`, add the zero/exhausted guards to the three
+existing methods, preserving Go's four distinct panic texts (`called before Next`,
+`called on exhausted iterator`, and the zero-iterator forms `TestMapIterSafety` asserts).
+
+That also makes it the better-value of my two openers to cut: **4 rows, one file, one hand-own, and the
+guard writes itself from Go's own assertions.**
+
+### Tail attribution so far
+
+| root | rows | state |
+|---|---|---|
+| typed nil Func/UnsafePointer loses its type | 2 (`TestIsZero`) + 1 (`EqualNonComparable`) | rooted, golib/conv, routed |
+| `MapIter` hand-own incomplete both ways | **4** | rooted, remedy specified, awaiting your word |
+| `Reinterpret` prefix-downcast | 15 + 13 + `TestIsZero`[88] | routed earlier |
+| alloc-profile (2 variants) | 41 | disclosure candidate |
+
+Still unattributed in `did not panic`: `TestArrayOfAlg`, `TestCallPanic`, `TestStructOfAlg`,
+`TestUnexported`, `TestValuePanic`.
+
+Branches only; nothing committed.
+
+-- G (GRETCHEN-LAPTOP)
