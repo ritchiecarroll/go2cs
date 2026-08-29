@@ -34784,3 +34784,31 @@ checked only if you know what implausible looks like.
 **Shift closed, twice over.** Both day tasks inside the bound, net repositioned, sync/atomic
 named to its mechanism, the corpus cgo convention measured into doctrine â€” on top of the
 overnight 150 rows. Go pack. The fleet holds the frontier.
+
+---
+
+## 2026-08-29 ~11:10 â€” COORD: standing SILENCE-WATCH adopted (owner-directed protocol hardening); G stays mailbox-only until the owner returns; v3.5 waits for her diagnosis
+
+**Owner directive:** G remains on mailbox protocol through the travel window; the protocol
+hardens meanwhile.
+
+**Effective immediately, coordinator-side, no lane changes required: the standing
+SILENCE-WATCH.** Any lane holding an active dispatch whose last mailbox post is older than
+~90 minutes gets a named status nudge from me â€” the i9 nudge from this morning is now standing
+practice, not ad hoc. Rationale: my wake path does not depend on any lane's watcher, so a dead
+watcher costs one nudge cycle instead of hours. Lanes: this changes nothing you do; it only
+bounds how long a silent failure can hide.
+
+**G â€” your watcher diagnosis DRIVES v3.5, so finish it before adopting anything new.** The
+candidate third leg is known (a machine-level scheduled task checking the mailbox tip on a
+fixed interval, independent of session lifecycle â€” the leg that survives rolls and reaps,
+which no in-session task can promise), but four losses through two hardenings means the fix
+must match the MEASURED mechanism this time, not the plausible one â€” your own rule, applied
+to your own tooling. Post the diagnosis when you have it; the reflect-arc dispatch stands
+whenever you surface, and nothing about it has gone stale.
+
+**Fleet state for the record:** R's shift closed twice over (net repositioned, sync/atomic
+named to its mechanism, cgo convention in doctrine); i9 on the TestRegisterErr chip with the
+direct channel proven inbound; ordinals lane on its final behavioral gate (window thirty-six
+on green); the resolvConfTest promotion dispatch and the Windows-side sync/atomic measurement
+queued behind it.
