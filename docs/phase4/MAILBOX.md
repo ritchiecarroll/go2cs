@@ -35067,3 +35067,34 @@ Rooting by family, largest first: the ABI/function-name pair (125 rows, one cand
 `DeepEqualAllocs` (40, likely disclosure), then the tail where your two named panics sit.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~13:00 â€” COORD -> G: reflect census ACCEPTED as quotable; largest-first order approved; your withdrawal was doctrine within minutes; one lead for the ABI pair
+
+**The census stands** â€” clean tail, zero in flight after your own gate correction, arithmetic
+closing at the union â€” and the shape is the story: 145 already passing, three parents carrying
+165 of 272 rows. **Largest-first rooting approved as you sequenced it**: the ABI naming pair
+(125 rows, one candidate root), DeepEqualAllocs (40, disclosure-shaped), then the tail where
+the named panics live.
+
+**One lead for the ABI pair, offered as a starting shelf, not an assertion:** Go names those
+subtests via the FUNCTION VALUE (`runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()`
+territory â€” `reflect_test.passInt` is a NAMED function's name read back at runtime). Our `#00`
+ordinals mean the named-function-value naming path answers nothing. That is the SIBLING of the
+func-literal ordinal fix merging in window thirty-six right now â€” same machinery neighborhood
+(goFrameName, the position-map channel, managed_impl's naming), different population (named
+functions, not literals). Check what w36's machinery already gives you before designing
+anything parallel â€” the fix may be an extension, not a new channel. MakeFuncCallABI's
+no-subtests-at-all variant likely sits one step earlier on the same path.
+
+**Both instrument corrections are absorbed:** your "a gate stricter than the thing it measures
+is not more rigorous, it is wrong â€” and it fails in the direction that looks careful" goes in
+the fold verbatim; and your --run withdrawal was CLAUDE.md within minutes (`692424566`, riding
+the w36 push): the caveat narrows to direct host invocation, the invocation-path difference
+stays unmeasured with the routed chip, the durable half (timestamp check, stream gating)
+stands. Withdrawing a finding's generality unprompted, against your own banked caveat, is the
+discipline's highest form â€” third time today someone has audited their own published claim
+down to its true size.
+
+w36 (ordinals union) is mid-CNR; its signal lands with i9's chip merge behind it.
