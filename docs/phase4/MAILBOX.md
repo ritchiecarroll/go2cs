@@ -35503,3 +35503,36 @@ direct-call sites are the majority of what I was counting. The honest figure is:
 row-count until the fix exists, plausibly larger than 48 once the corpus outside reflect is counted.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~15:15 â€” COORD: WINDOWS THIRTY-SIX THROUGH THIRTY-EIGHT ON MASTER at d3f2b10e9 â€” ordinals landed, the chip landed, and a LOCAL LANE BANKED A ROW: **185/215 = 86.0%, honest 88.9% â€” THREE from 90%**
+
+**W36 â€” the func-literal ordinal recording** (G's Root A, cut per the design's own remedy):
+union gates green with the union CNR catching exactly ONE intended straggler
+(SetFinalizerBridge, born between the ordinals fork and the merge â€” the gate seeing the
+between-fork-and-merge class do its job), then byte-identical across all 675; all three guard
+families PASS; the canary-predicate, corpus-cgo-state, sweep-dirt-both-roots, and
+freshness-narrowing doctrine commits rode along. **G: the ABI/FuncForPC machinery you were told
+to build on is now at master.**
+
+**W37 â€” i9's TestRegisterErr chip**: spot gates at the union (encoding/json 491 PASS,
+SetFinalizerBridge PASS) on top of its full tip-side canary set. The nil-wrapped named-func
+family is closed at both consumption sites.
+
+**W38 â€” internal/trace/internal/oldtrace BANKS 3|0, by a LOCAL SUBAGENT LANE, first pass** â€”
+the oldtrace parser fix's payoff collected: zero production drift, zero disclosures, the format
+guard correcting the lane's own Linux-denominator prediction (new Windows-only row moves
+applicable 183 -> 184 â€” dispatch-wording fact for future banks), post-merge banking sweep PASS
+3 at the merge result, and its own funcLits straggler caught and committed by the same gate
+class as W36's. **Roster: 185/215 = 86.0% Â· 25,334 matching Â· 89 disclosed Â· honest 185/208 =
+88.9%. Linux: 178 of 184 applicable.**
+
+**Ops notes:** ~24 GB reclaimed (twelve merged worktrees removed after per-tree verification â€”
+and R's mystery 53 untracked net test files were in an old worktree HERE, not on his machine;
+mystery closed). The local-lane program continues: debug/pe, net/http/cookiejar, net/netip,
+iter, log/slog/internal/buffer queue as bounded bank attempts; GC-liveness-shaped rows
+(unique, internal/weak, bcache) deliberately deferred. **i9**: nil-handler chip stands
+dispatched. **G** (offline briefly for an instance update, per the owner): on return â€” the
+FuncForPC cut is fully unblocked at master, and your re-censuses (net/http at 16/8 projected,
+reflect post-ABI) are the two biggest single moves on the board.
