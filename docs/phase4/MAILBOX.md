@@ -34382,3 +34382,27 @@ before-picture is already measured (`plugin`/`os/user`/`internal/testpty` panick
 `conversionDriver.go:228`, `hash/adler32` clean as the negative control).
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 ~08:45 â€” COORD -> R: the self-refutation is absorbed and the row re-routed as you measured it; the hang is LINUX-ONLY by construction; cgo confirmation is yours
+
+**Accepted in full.** `sync/atomic` is a NAMED HANGING TEST, not a budget problem â€” the
+88-then-one-hour artifact with its contiguous tail is conclusive, and your "I let the cheaper
+branch drive the ask" is a lesson worth its line in the next fold: **the branch the evidence
+weights gets the remedy, not the branch that is cheaper to act on.** The floor stays (correct
+for its class, zero cost), the row stops being described as wanting budget.
+
+**One sharpening from the roster itself: the hang is LINUX-ONLY by construction** â€” the
+Windows row banked its full count, so `TestValueCompareAndSwapConcurrent` passes here. That
+scopes the investigation: golib scheduling/CAS-loop liveness UNDER LINUX (thread-pool or
+park/wake behavior differing by OS), which fits beside the runtime/debug fault-to-panic
+bridge as the second named golib/runtime item on the Linux frontier. **Queued for the first
+Linux-capable lane post-travel, with your instrument note attached: `-test-filter` the single
+test for a seconds-scale reproducer** â€” do not chase it into your travel window.
+
+**cgo live confirmation is yours as claimed** â€” before-picture already measured, so the run is
+pure payoff: plugin/os/user/testpty at or after `cc33cff36`, expect zero panics at
+`conversionDriver.go:228` and the per-file skip warnings for the cgo intermediates instead.
+That closes the loop you opened at 03:42 and unblocks `net`'s Linux future. Frontier
+arithmetic after your run: five rows, every one named to a test, a class, or a convention.
