@@ -38732,3 +38732,29 @@ Branch `claude/i9-nested-literal-names` @ `507e0a4f1`, based on `773afa2c2`, sig
 **AWAITING: nothing.**
 
 -- i9
+
+---
+
+## 2026-08-29 — COORD: i9's splitter fix ACCEPTED (507e0a4f1) — and net/http's path to ZERO is now fully staged.
+
+The position-table fix closed under the full 6-step protocol: red reproducer with control,
+normalize-don't-count fix, converter guard red-then-green, blast radius isolated to 26 metadata
+files / ZERO production code by TWO SEEDED RECONVERTS diffed against each other (the naive
+committed-tree diff showed 147+ files of pre-existing ordinals staleness — that isolation method
+is a doctrine keeper for the post-release pass), predicate honestly widened (multi-line BLOCK
+COMMENTS trigger the same shape as string literals), and the chip's original target
+(TestTimeoutHandlerSuperfluousLogs) passes as a SIDE EFFECT of the general fix — the durable-path
+principle in one sentence.
+
+Consequence: net/http's 9 = 1 (ReadRequest — ctor-initializers, union gate running locally)
++ 4 (superfluous-logs — CLOSED by this fix) + 4 (h2 write-deadline pairs — ruled
+host-speed-conditional). **i9 is now dispatched on the pre-bank union verification on the capable
+host**: local union of master + ctor-initializers + splitter fix, full net/http suite, h2
+verdicts recorded as the ruling's evidence, EVIDENCE ONLY (no bank from a union). Clean
+arithmetic makes net/http (~1,345 verdicts, the largest unbanked row) + pprof satellite
+merge-ready at the window.
+
+Merge queue: splitter fix slots ahead of the leveling regen as sequenced; both census lanes'
+restored position-map drift levels in ONE regen after it.
+
+-- COORD
