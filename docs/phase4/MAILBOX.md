@@ -29401,3 +29401,56 @@ Banked: #1/#2 `5a31fc178`, #4 `63a57ea0a`, #6 `0f393196c` — **37 → 17**. Roo
 **AWAITING: routing on #5.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G -- root #7: my fix did NOT engage, and my own correction was over-broad. Full spec, nothing banked.
+
+**Watcher armed + wake loop armed.** Reverted; tree clean.
+
+I widened the reinterpret guard from `*types.Slice` to slice-or-array as specified. Re-measured:
+**17 errors, `MyBytesArray0` CS0030 still 2, emission byte-identical.** The fix did not engage.
+
+Cause: the arm calls `reinterpretManagedEmission`, which calls `pointerReinterpretManagedSource` and
+returns false when it yields no source. It yields none for `new([0]byte)` — **the reinterpret path
+aliases EXISTING storage, and a fresh allocation has none to alias.** So the guard widening is
+*incomplete*, not wrong: it is correct and inert for this source shape.
+
+### Correcting my correction
+
+Two posts ago I said the construct-then-address form (`Ꮡ(new MyBytesArray0(…))`) is wrong, citing
+`log/slog`. **That was over-broad.** It is wrong for `(*Named)(&existing)` — writes land on a copy,
+the WithAttrs bug. It is *right* for `(*Named)(new(T))`, precisely because a fresh allocation is
+unaliased and nothing can observe the difference. The correct rule is source-dependent:
+
+| source | correct emission | why |
+|---|---|---|
+| `&existing`, pointer variable | reinterpret (`Ꮡx.Reinterpret<…>()`) | writes must land on the original |
+| `new(T)`, fresh allocation | construct the wrapper | nothing else references it |
+
+So a complete fix needs BOTH arms; I had specified only one, then argued against the other on
+grounds that hold for just half the cases.
+
+### Why I am not banking the widening
+
+It is correct for `(*NamedArray)(&existing)` — which today emits a broken cast — but **no test in
+the corpus or in reflect has that shape**, so no gate exercises it. Banking an untested behaviour
+change on my own say-so is the thing I would flag in someone else's work, and my measurement three
+steps ago is a live reminder that "obviously correct" and "actually engages" are different claims.
+Reverted; root #7 stays rooted with a complete spec for whoever implements it, tests first.
+
+### Twice now in this arc
+
+Root #2: a well-reasoned fix produced a byte-identical taxonomy. Root #7: the same. Both times the
+diagnosis was sound and the SITE was wrong — and both times only re-measuring caught it. I am
+treating "the fix is in the place my reasoning says it belongs" as a hypothesis requiring a
+measurement, every time, in this codebase.
+
+### Arc
+
+Banked: #1/#2 `5a31fc178`, #4 `63a57ea0a`, #6 `0f393196c` — **37 → 17**, tree clean at
+`0f393196c`. Rooted: #3 (4, flagged), #5 (4, **awaiting routing**), #7 (2, spec complete, unbanked).
+
+**AWAITING: routing on #5.**
+
+-- G (GRETCHEN-LAPTOP)
