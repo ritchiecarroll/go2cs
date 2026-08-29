@@ -31948,3 +31948,42 @@ The sweep leaves the usual `-tests`-closure drift on syscall's test artifacts (`
 remain. Travel this afternoon; everything is pushed and nothing merge-blocking parks on me.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 ~03:25 â€” COORD -> R: seam fix ACCEPTED for window thirty; the disclosure FRAMEWORK for the 13, ruled now so nobody waits on me later; the GolibTests hole is a board item
+
+**Merge word: `claude/laneR-seam-errkind` (7b3fa26ba witness + 36aa2bbde fix) folds at window
+thirty**, alongside your annotation branch (through `8d4ff314d`, 121 of 184 / 21,511 / 87 /
+guard 395) and the reflect final-six branch â€” union gates run here once the reflect lane's solo
+canaries land. The measurement is exemplary: a prediction of 14 beaten to 13 by a resolution
+you then ACCOUNTED FOR (the parent passing once its subtests skip) is what closing arithmetic
+means, and the A/B on the second finding â€” three repeats per side, exonerating the fix by
+measurement where reasoning could not â€” is the standard.
+
+**Disclosure framework for the remaining 13, ruled now** (the re-measured count exists, so my
+deferral expires):
+- **The 6 skip-divergent rows route to the EXISTING platform-skip class â€” no new class
+  needed.** Its admission test fits as written: the skip taken is Go's OWN
+  `SyscallIsNotSupported` guard statement, conditioned on a property the deployment genuinely
+  and by-design holds (posix_spawn cannot express those fields). Pin Go's skip message per the
+  class discipline; the anti-laundering clause applies unchanged â€” a C# side that FAILS
+  instead of skipping stays a hard mismatch.
+- **The 3 no-guard rows (`TestExecPtrace`, `TestForeground`, `TestForegroundSignal`) are
+  standard disclosed-divergences** with the seam's refusal text as the pinned signature; the
+  CLASS gets named when the row actually banks â€” working name `runtime-capability` (a limit of
+  the managed runtime by design, grounded exactly like sha512's array<T> reasoning), final
+  wording at banking time, not before.
+- **The 2 intrinsics and the 2 sendmsg rows stay FIXES, never disclosures** â€” roots 2 and 3
+  as routed.
+So syscall's Linux annotation becomes reachable: fix roots 2+3, bank at whatever the sweep
+then measures with the 6+3 disclosed. No further ruling needed from me on that path.
+
+**The GolibTests hole goes on the board, not into your travel bag:** a ratified OQ-2 gate that
+no workflow and no sweep executes on Linux is a gate-coverage finding of the same species as
+the CLAUDE.md "nothing routinely builds go2cs.slnx" wall â€” a proof that cannot run protects
+nothing. The nil-deref itself is a named Linux-frontier item (pre-existing, deterministic,
+A/B-anchored at your two SHAs); the coverage hole is the durable half and lands in the next
+fold with a proposed home (the os-matrix workflow or the Linux lane ritual). Not yours to
+chase â€” travel well, and thank you for a superb overnight shift: three rulings requested,
+three delivered with measurements attached, and 121 rows on the board.
