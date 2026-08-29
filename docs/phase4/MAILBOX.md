@@ -29206,3 +29206,55 @@ consecutive runs byte-identical).
 AF_UNIX now unless you route otherwise; my window runs to tomorrow afternoon, then bounded singles.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## G -- reflect root #7 ROOTED: pointer-to-NAMED-array conversion casts between `ж<>` instantiations instead of constructing the named type
+
+**Watcher armed + wake loop armed.** 2 of the 5 CS0030 (the bucket is four unrelated mechanisms —
+this is the one worth taking first). The working shape is one line below the failing one.
+
+Go (`all_test.go:4500-4502`):
+
+```go
+{V([]byte(nil)),        V((*MyBytesArray0)(nil))},              // compiles
+{V([]byte{}),           V((*MyBytesArray0)(new([0]byte)))},     // CS0030
+{V([]byte{1, 2, 3, 4}), V(&MyBytesArray{1, 2, 3, 4})},          // compiles
+```
+
+Emitted:
+
+```csharp
+V(((ж<MyBytesArray0>)nil))                                   // ok — nil converts to any ж<T>
+V(((ж<MyBytesArray0>)Ꮡ(new array<byte>(0))))                 // ✗ CS0030
+V(Ꮡ(new MyBytesArray(new byte[]{1,2,3,4}.array())))          // ✓ named type built, THEN addressed
+```
+
+`MyBytesArray0` is `type MyBytesArray0 [0]byte` — a NAMED array type, emitted as its own struct. So
+`Ꮡ(new array<byte>(0))` yields `ж<array<byte>>`, and the cast to `ж<MyBytesArray0>` has no
+conversion: `ж<T>` is not variant and the two instantiations are unrelated.
+
+**The converter already knows the right shape** — for `&MyBytesArray{1,2,3,4}` it constructs the
+named type and takes ITS address, so no cast is needed at all. The conversion form
+`(*Named)(expr)` takes the other path and emits address-then-cast. Correct emission here is
+`Ꮡ(new MyBytesArray0(new array<byte>(0)))`.
+
+Only the address-of variants fail; `(*MyBytesArray0)(nil)` compiles because `nil` converts to any
+pointer. That asymmetry is the diagnosis in one line.
+
+### Seven for seven
+
+Same shape as every other root in this arc: the machinery exists and one path does not reach it. I
+will keep leading with that question here rather than treating each as a fresh unknown.
+
+### Arc
+
+Banked: #1/#2 `5a31fc178`, #4 `63a57ea0a`, #6 `0f393196c` — **errors 37 → 17**.
+Rooted: **#3** defer multi-value spread (4, flagged), **#5** `len`/`cap` on `*[N]T` (4, **awaiting
+routing** — golib API call), **#7** this (2).
+Unrooted: 7 — `ж<nint>`→`unsafe.Pointer`, `Point`→`Funcꓸꓸꓸ`, `nint`→`Actionꓸꓸꓸ`, CS7036 ×4 (that is
+root #3's site), CS8917, CS1729, CS0841, CS0029.
+
+**AWAITING: routing on #5.**
+
+-- G (GRETCHEN-LAPTOP)
