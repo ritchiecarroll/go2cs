@@ -30665,3 +30665,66 @@ This is the double green you were waiting on. Worktree being removed now.
 **AWAITING: nothing.** Standing by.
 
 -- i9
+
+---
+
+## G -- go/build 57/58: the root is ALREADY KNOWN and fixing it the obvious way costs two banked rows
+
+**Watcher armed + wake loop armed.** Measured before implementing, and I think the commission's
+premise needs revisiting.
+
+### The single divergence, named
+
+`go/build` converts and compiles **0 errors**, runs, and diverges on exactly one test:
+
+```
+TestLocalDirectory: Go="pass" C#="fail"
+```
+
+```go
+cwd, _ := os.Getwd()
+p, _ := ImportDir(cwd, 0)
+if p.ImportPath != "go/build" { t.Fatalf(…) }
+```
+
+Go's `go test` runs with cwd = the package source dir under GOROOT, so `ImportDir(cwd)` answers
+`"go/build"`. The converted host runs in a sandbox run-directory, so it cannot.
+
+### This is documented, deliberate, and load-bearing
+
+`src/core/testing/PackageAncestry.cs` (lines 34–46) states it outright:
+
+> **This view is an ANCESTRY, deliberately not a GOROOT.** … Reads THROUGH a junction resolve to real
+> content, but a directory WALK does not descend into one … Measured against Go 1.23.1 on a
+> junction-mirrored root, a walk counting `*.gz` under GOROOT finds **0** where the real tree has
+> **4**, and a walk of `src/unicode` reports **1** entry against the real **19**. Two already-validated
+> packages walk GOROOT that way (`compress/gzip`'s issue14937 test and `path/filepath`), so
+> **repointing GOROOT at this view would REGRESS them**. … The one shape this cannot serve is a test
+> that requires cwd to sit under the GOROOT the process REPORTS — `go/build`'s `ImportDir(cwd)` —
+> **which is why that package is censused rather than closed.**
+
+So the obvious fix — point GOROOT at the ancestry so cwd sits under it — **trades one new row for two
+banked ones**, and the numbers for that regression are already measured. The author examined this
+path and rejected it.
+
+### What I think the right answer is
+
+**`TestLocalDirectory` is a host-identity disclosure, not a defect.** The divergence is a property of
+the sandbox design (which exists so tests can write without touching the real tree), not of the
+conversion — `go/build` compiles clean and 57 of 58 match. That fits the existing host-identity class
+exactly.
+
+The only remedy I can see that does NOT regress the two banked rows would be running this one test
+with cwd at the real `$GOROOT/src/go/build` — it only READS — but "this test only reads" is not
+something the host can detect, so it would have to be a per-test annotation, which is a bigger
+mechanism than the row is worth.
+
+**Not proceeding to a fix on my own judgement.** If you want the row, my recommendation is 57 + 1
+disclosed rather than 58 matched. Say which and I will do it.
+
+Meanwhile I am taking the **cfile coverage divergence (15/16)** next, which is independent, and the
+SetFinalizer arc after it.
+
+**AWAITING: your call on go/build — disclosure vs. something I have not thought of.**
+
+-- G (GRETCHEN-LAPTOP)
