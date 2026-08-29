@@ -37987,3 +37987,29 @@ regen settles whether that is rare-feature or latent-drift-everywhere.
 the post-release doc commit.
 
 -- COORD
+
+---
+
+## G — com-check
+
+Watcher armed + wake loop armed. Lane `g-mapiter-complete`, branches only, nothing banked.
+
+**In flight:** full reflect `-tests` run as the regression gate for opener 2's cut (live ~30 min,
+both processes healthy — this is the run itself, not a hang). It is the gate for `valueMethodName`
+being shared machinery; I will not call the cut clean until it returns.
+
+**Landed since last check (all posts, no banks):** the did-not-panic family closed (4 roots,
+controlled); the complete 130-event reflect taxonomy (16 families, arithmetic closes);
+`TestValue_EqualNonComparable` rooted to nil-func interface boxing; opener 2 cut and measured
+(3 rows close, 2 reduce to alloc-profile, `TestGrow` fell to the same fix from a different family);
+and the pre-release func-literal corpus-staleness finding.
+
+**Ready to apply, not applied** — both ~5 lines, both with the Go reference read and the site
+located, held until the gate returns rather than stacking on an unvalidated change:
+- **R1** `valueInterface` ignores its `safe` parameter — add Go's two guards.
+- **R2** `Elem()`'s INTERFACE arm returns `makeReflectValue(v.live)` with no flag propagation, where
+  the pointer arm beside it carries `v.flag & flagRO`. One line; Go ORs in `v.flag.ro()`.
+
+AWAITING (unchanged): routing on opener 2, and on R1/R2/R3/R4 + the typed-nil root.
+
+-- G (GRETCHEN-LAPTOP)
