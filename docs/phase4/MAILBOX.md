@@ -37278,3 +37278,59 @@ Opener 2 (`SetIterKey called before Next`, 2 rows) not yet started.
 Branches only; nothing committed.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — reflect tail opener 2 (`SetIterKey`): **ROOTED.** The map iterator is HALF hand-owned
+
+Opposite outcome to opener 1, and a much shorter walk.
+
+### The observation that located it
+
+`TestSetIter` **expects** `"called before Next"` twice — before the loop and after exhaustion — both
+caught by `shouldPanic`. So an ESCAPING panic with that text cannot be either of those; it has to come
+from inside the `for i.Next() { k.SetIterKey(i) }` loop, where the call must succeed. That single
+observation turned "an iterator panic somewhere" into "Next ran and SetIterKey still says it did not".
+
+### The root
+
+`MapIter`'s hand-own is **partial**:
+
+| method | state | where |
+|---|---|---|
+| `MapIter.Next` | `iter.mapEnum.MoveNext()` | hand-owned, `value_impl.cs:1458` |
+| `MapIter.Key` / `.Value` | `iter.mapEnum.Current` | hand-owned |
+| **`Value.SetIterKey` / `.SetIterValue`** | **`iter.hiter.initialized()`, `mapiterkey(...)`** | **auto, `value.cs:1554`** |
+
+`Next` advances a managed `IEnumerator`. `SetIterKey` interrogates Go's runtime `hiter` — a structure
+the managed `Next` never populates and nothing else writes — so `initialized()` is false forever and
+the guard fires on every call, including the legitimate ones. The auto body also carries
+`iter.m.typ().Reinterpret<abi.Type, mapType>()` at `value.cs:1569`, i.e. it would have hit the
+prefix-downcast class too had it survived the first guard.
+
+**It is the same shape as three other things today**: a hand-own that stopped at the API boundary its
+author needed, leaving a sibling on the auto path reading state nobody writes. `Func.Name` had to come
+WITH `FuncForPC` for exactly this reason, and I said so in that commit — this is that rule with the
+pairing missed rather than made.
+
+### Remedy, concrete and precedented
+
+Hand-own `Value.SetIterKey` and `Value.SetIterValue` in `value_impl.cs` over the same `iter.mapEnum`
+the other three already use — `v.mustBeAssignable()` then set from `iter.Key()` / `iter.Value()`. The
+one piece of real work is preserving Go's TWO distinct panics, since .NET's enumerator conflates them:
+never-started and exhausted both fail `Current`, while Go says `"called before Next"` and
+`"called on exhausted iterator"` respectively, **and `TestSetIter` asserts both texts**. A started flag
+distinguishes them.
+
+Registration is two lines beside the existing `Value.*` entries in `manualConversionFuncs`.
+
+### Asking rather than cutting
+
+This touches hand-owned reflect, and my standing practice today has been to route hand-own changes
+rather than take them unilaterally — the `FuncForPC` cut was approved before I wrote a line. Branches
+are permitted until the packs, so **say the word and it is a short guard-first piece**: 2 rows,
+`TestSetIter` + `TestMapIterSet`, and the guard writes itself from Go's own three assertions.
+
+Opener 1 (`TestIsZero`) remains narrowed-not-rooted, three hypotheses eliminated.
+
+-- G (GRETCHEN-LAPTOP)
