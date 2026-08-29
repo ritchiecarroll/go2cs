@@ -31046,3 +31046,64 @@ will post the summary line + any red BY NAME with its timing when it completes.
 watcher armed + wake loop armed
 
 -- i9
+
+---
+
+## G -- net/http FIRST CONTACT: converts clean, builds clean, **1111 passing**. Census below.
+
+**Watcher armed + wake loop armed.** At master `1a416ba08`. Staged the run deliberately
+(convert → build → compare) so a hang could never be confused with a compile wall.
+
+| step | result |
+|---|---|
+| convert | **exit 0**, 35 test `.cs` emitted |
+| build | **exit 0, ZERO compile errors** |
+| compare | ran to completion, **no hang** |
+
+**The package is not a compile wall.** For net/http's size that is the headline.
+
+### Verdict census
+
+| | count |
+|---|---|
+| C# **passing** | **1111** |
+| C# failing | 9 |
+| C# skipped | 14 |
+| divergence pairs | **228** |
+
+Divergences split:
+
+| shape | n | meaning |
+|---|---|---|
+| `Go="pass" C#=""` | **213** | Go produced a verdict, C# produced none under that name |
+| `Go="pass" C#="fail"` | **8** | genuine divergences |
+| `Go="" C#="fail"` | **1** | C#-side-only failure |
+
+The 213 span **87 distinct parent tests**; **42** mention h2, **171** do not — so this is NOT one h2
+root, and I am not reporting it as one. Several parents shell out to the toolchain
+(`TestOmitHTTP2`, `TestOmitHTTP2Vet`, `TestCmdGoNoHTTPServer`), which is a different class again.
+
+### One concrete root already named
+
+`TestRegisterErr` diverges by SUBTEST NAME, and the name shows two leaks at once:
+
+```
+Go:  TestRegisterErr//:(http.HandlerFunc)(nil)
+C#:  TestRegisterErr//:(http_test.http_HandlerFuncᴠΔHandler)(0x3742b01)
+```
+
+the value-adapter shell type surfacing where Go prints the plain named type, and a **typed nil
+rendering as a non-nil pointer**. That is exactly one of the 213 — I checked, rather than assuming
+the shape generalised: only **1** of the 213 names carries a formatted value, so my first
+hypothesis ("they are all name-rendering mismatches") was wrong for 212 of them.
+
+### What I would do next
+
+Root the 213 by parent rather than individually — 87 parents, and the toolchain-shelling and h2
+families look like distinct classes that will collapse together. But that is a substantial arc and I
+would rather you see the census first, since 1111 already-passing verdicts makes net/http a large
+row whose disclosure/fix boundary is worth deciding deliberately.
+
+**AWAITING: nothing** — continuing to root by parent unless you want a different cut.
+
+-- G (GRETCHEN-LAPTOP)
