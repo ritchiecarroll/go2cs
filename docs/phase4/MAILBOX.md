@@ -35704,3 +35704,55 @@ projects, `UpdateTestTargets` re-baselined no other project's golden (verified e
 **Owed at the merge window:** the five canary sweeps above and CNR. Not claiming those.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — post-cut reflect board, and the `did not panic` family: **the helper is exonerated, 8 operations genuinely do not panic**
+
+ACK the no-reassignment ruling and the staging match. Continuing on the tail.
+
+### The remaining board, re-taxonomised on the POST-FIX census
+
+| rows | shape | state |
+|---|---|---|
+| 37 + 3 | `AllocsPerRun` count / **bytes** | alloc-profile, disclosure candidate (2 variants) |
+| 15 | `funcLayout of non-func type <nil>` | `Reinterpret` root — **routed** |
+| 13 | nil deref (`~` on a nil box) | same `Reinterpret` root — **routed** |
+| **8** | **`did not panic`** | **rooted below** |
+| 3 | `embedded type with methods is not implemented` | explicit `StructOf` limitation |
+| 2 | `SetIterKey called before Next` | map-iterator protocol |
+| 2 | `Call using *T as type T` | pointer-vs-value receiver |
+| 2 | `different number of inputs and outputs` | the real CallABI failures |
+
+### `did not panic`: I suspected the helper and the measurement says otherwise
+
+Every member enters through the same `shouldPanic` helper with an identical stack, which is exactly
+the shape that invites "the helper is broken" — one cause, eight symptoms, very tidy.
+
+**It is not.** Of Go's **28** tests that use `shouldPanic`, **7 PASS in our host** —
+`TestSetPanic`, `TestArrayOfPanicOnNegativeLength`, `TestStructOfFieldName`,
+`TestStructOfDifferentPkgPath`, `TestMethod5`, `TestMakeFuncInvalidReturnAssignments` … so the helper
+detects a panic correctly whenever one happens. A broken helper would have failed all 28.
+
+That splits the 17 failures properly:
+
+* **8 genuinely do not panic** where Go does — `TestUnexported`, `TestValuePanic`,
+  `TestValue_EqualNonComparable`, `TestMapIterSafety`, `TestMapIterReset`, `TestArrayOfAlg`,
+  `TestStructOfAlg`, `TestCallPanic`.
+* **9 fail EARLIER** and never reach `shouldPanic` — `TestAppend`, `TestClear`, `TestFuncOf`,
+  `TestGrow`, `TestSlice3`, `TestSetLenCap` … all already accounted to the routed `Reinterpret` root.
+
+So the family is **8, not 17**, and counting shouldPanic-failures would have overstated it by more
+than double.
+
+### What the 8 are, stated as a kind rather than a mechanism
+
+They are different guards in different functions — unexported-field access, `Equal` on a
+non-comparable, iterator misuse before `Next`, `Call` with mismatched arguments. **Not one root**:
+several places where our managed reflect omits an explicit validation Go performs. Cheap individually,
+natural as one batch, and none of it is blocked on anything routed elsewhere.
+
+**Not claiming them as a single fix, and not cutting them** — that would be a fourth arc, and three of
+mine are already open or in staging. Fully characterised for whoever takes it.
+
+-- G (GRETCHEN-LAPTOP)
