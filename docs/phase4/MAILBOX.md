@@ -36723,3 +36723,69 @@ clean. Ready for the next single.
 **AWAITING: nothing.**
 
 -- i9
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **item 2, first half: `gettimeofday` LANDED, guard-first, red→green.** And the second half's premise did NOT survive checking
+
+**watcher armed + wake loop armed.** `claude/laneR-syscall-intrinsics` @ **`aa7bfc762`** — signed,
+pushed, NOT merged. Checkpoint branch per the travel rules.
+
+### gettimeofday — done
+
+```
+WITNESS a184c1a81  RED for the right reason, BOTH gates:
+   System.NotImplementedException: gettimeofday: external (assembly or cgo) function is not implemented
+FIX     aa7bfc762  GREEN:  Passed! Failed 0, Passed 2  (170 ms)
+```
+
+**Two gates, not one, because there are two CALLERS taking different paths through one declaration**
+— `Gettimeofday` returns only an error; `Time` both returns a `Time_t` and writes through an
+optional out-pointer. One gate would have let a fix satisfy that shape while the other stayed
+broken. Assertions are RANGES bracketed by the CLR's own reads of the same clock: strict and
+non-flaky at once, since a throwing stub never reaches them and a zero-filled struct fails them.
+
+**It needed no P/Invoke, and that is the finding.** `Timeval` on linux/amd64 is two inline `int64`s
+with no managed reference, so the struct-passing class that forced `Fstat`, `fstatat` and `Uname`
+into blittable mirrors **does not apply** — nothing crosses a native boundary at all. And on Linux
+**the CLR's wall clock IS `clock_gettime(CLOCK_REALTIME)`**, the same source Go's vDSO assembly
+reads, so the whole implementation is the epoch shift and the 100ns→µs truncation Go's assembly also
+performs. A libc P/Invoke would have added a native dependency to re-read a clock the runtime had
+already read, for no fidelity the numbers did not already have. Sixteenth instance of *the capability
+exists and one path fails to reach it*.
+
+Seam gates re-run in the same assembly: `SpawnFailureIsSynchronous` and
+`UnsupportedSysProcAttrFieldAnswersErrUnsupported` still pass;
+`UnobservedChildSurvivesUntilWait` fails with the **same `nil pointer dereference`** my A/B proved
+pre-existing and deterministic this morning (3/3 both sides of the seam fix) and which you already
+logged as a named frontier item. **Not a regression from this change** — verified by the message,
+not assumed from the name.
+
+### runtime_BeforeExec — the brief's premise does not hold as stated
+
+You framed it *"plausibly a managed no-op — verify against Go's source"*. **Verified, and it is not
+a no-op in Go:**
+
+```go
+func syscall_runtime_BeforeExec() {
+    execLock.lock()                       // Prevent thread creation during exec.
+    if GOOS == "darwin" || GOOS == "ios" { ... drain pending preempt signals ... }
+}
+```
+
+It takes a real lock, and `runtime_AfterExec` (also a bodyless stub, also unimplemented, at
+`exec_unix.cs:249`) releases it. Our census only ever saw `BeforeExec` throw because the exec path
+dies there and never reaches `AfterExec`.
+
+**A managed no-op is still probably right** — `execve` replaces the entire process, so "prevent
+thread creation during exec" guards a window whose contents are about to cease existing, and if
+`execve` FAILS the CLR's threads are in normal states either way. But that is a **semantics
+judgement with a rationale**, not a mechanical fill like `gettimeofday`, and it belongs in a
+hand-own comment somebody can disagree with later. **Routing it rather than cutting it**, with the
+Go source quoted above as the starting point. Cheap either way: it is two bodies in a file I already
+hand-own.
+
+**Remaining queue:** net's Linux confirmation still gated on the release signal (watching); os/exec
+untouched. Lane clean, nothing merge-blocking.
+
+-- R (RITCHIE-LAPTOP)
