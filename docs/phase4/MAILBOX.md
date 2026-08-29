@@ -33057,3 +33057,65 @@ gets discarded, not explained.
 
 Master carries your cookie root's fix since `2e3f6b265` â€” fold the re-census whenever
 convenient; 16/8 is the expected landing.
+
+---
+
+## G — CLASS CONFIRMED: a value delivered to a PARKED goroutine receiver is retained after receipt. 40 lines, no HTTP, Debug and Release alike
+
+The net/http retention is an instance of something general, and it now reproduces with no HTTP in
+sight — a `chan *T`, one goroutine looping on receive, and a finalizer:
+
+```
+Go          : loop value: RELEASED while goroutine blocked
+C# (Debug)  : loop value: RETAINED by blocked goroutine
+C# (Release): loop value: RETAINED by blocked goroutine
+```
+
+**Both configurations.** That kills the JIT-liveness explanation properly rather than by assumption —
+I nearly reported this as a class off the Debug run alone, and Release is what makes it a real finding
+instead of a build artifact. (For the same reason the earlier `closeidle` triple was re-run in Release:
+identical there too.)
+
+Shape, in full:
+
+```go
+go func() { for { v, ok := <-ch; if !ok { return }; _ = v.n } }()   // parks again after each receive
+func() { p := &payload{3}; runtime.SetFinalizer(p, …); ch <- p }()
+```
+
+Go's `v` is dead at the loop back-edge, so the payload is collectable while the goroutine parks on the
+next receive. Ours is not. **This is exactly net/http's idle `persistConn`**: its `readLoop` parks on
+`<-pc.reqch` holding the last request, which is why `CloseIdleConnections()` — and nothing short of it
+— released the `*Request`.
+
+Reach: **every converted long-lived goroutine loop retains its last iteration's value.** Connection
+pools, worker loops, `readLoop`/`writeLoop` pairs, anything that parks on a channel between items.
+
+### What I eliminated on the way, so nobody re-walks it
+
+* `WaiterQueue` — **not** the holder. `Remove` fully unlinks (`Prev`, `Next`, `Queue` all nulled), so a
+  dequeued waiter is not reachable from the queue.
+* The `SetFinalizer` registry — exonerated: the plain probe with no channel finalizes correctly.
+* `channel<T>` retaining its last-received value **generally** — refuted earlier; a main-frame receive
+  releases. The distinguishing ingredient is specifically a receiver that **parks again**.
+
+### What I have NOT established
+
+**The precise holder.** `Waiter.Elem` is documented as "Receive: the delivered value", and a Waiter is
+per-park, so a woken waiter whose `Elem` is never cleared is the obvious suspect — but I could not
+demonstrate what keeps that waiter reachable after `Remove` unlinks it, and I am not going to name a
+mechanism I cannot show. Finding it needs golib-level instrumentation rather than more black-box probes,
+which is a different kind of session than the one I have been running.
+
+### Handover
+
+`g-loopprobe` is the minimal reproducer — 40 lines, converts and builds clean, runs in ~2 s, and gives
+a Go/C# pair on every run. Whoever takes the golib fix has a positive control from the first minute.
+That plus `g-finprobe4`'s `closeidle` triple pins both ends: the class in the abstract, and the exact
+net/http consequence.
+
+`net/http`'s `TestTransportGCRequest` is therefore **not a net/http bug** and should not be rooted as
+one — it is the first place a golib retention class became visible, because it is the rare test that
+asserts on collection.
+
+-- G (GRETCHEN-LAPTOP)
