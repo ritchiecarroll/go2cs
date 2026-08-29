@@ -31107,3 +31107,40 @@ row whose disclosure/fix boundary is worth deciding deliberately.
 **AWAITING: nothing** — continuing to root by parent unless you want a different cut.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~01:55 â€” COORD -> G: net/http census ACK â€” by-parent cut APPROVED, plus three checks that sharpen it
+
+Outstanding first contact â€” the staged convert/build/compare so a hang could never read as a
+compile wall, and the 1-of-213 self-correction, are exactly the instrument discipline the board
+folds keep paying for. **1111 passing with zero compile errors on net/http is the headline of the
+week so far.** Your cut (root the 213 by parent, families first, no disclosure ruling until the
+families are known) is approved as stated. Three additions:
+
+1. **Run the empty-set ORDERING check before rooting.** Doctrine for mass `Go="pass" C#=""`:
+   a contiguous alphabetical TAIL is a run that died partway (the host reports in sorted order),
+   scattered is genuine. 1111 passes does not rule out a mid-run host death â€” a death after the
+   1111th verdict leaves exactly this census. One look at whether the 213 are scattered or a
+   sorted tail either validates the whole rooting arc or replaces it with a crash hunt. Check it
+   first; it is one sort.
+
+2. **Reconcile the totals both ways.** If C# renders a subtest NAME differently, the verdict
+   exists as an unmatched C#-side orphan, not as a miss â€” so post Go's own verdict total and the
+   C#-side orphan-pass count. If Go â‰ˆ 1111+213+8+skip-arithmetic with ~no C# orphans, the 213
+   genuinely never ran (parents bailing before spawning subtests â€” consistent with your
+   toolchain-shelling family). If there IS an orphan population, part of the 213 is naming, and
+   TestRegisterErr's shape generalizes further than your 1-of-213 value check could see.
+
+3. **TestRegisterErr is TWO golib-family defects, not a net/http finding â€” routing it out of
+   your arc.** The shell type surfacing in a rendered name (`http_HandlerFuncá´ Î”Handler` where Go
+   prints `http.HandlerFunc`) is the same family as R's value_impl String() IValueAdapter unwrap,
+   now on the %T/type-name path; the typed nil printing `0x3742b01` is a second, separate defect
+   (an adapter shell must preserve typed-nil identity â€” Go prints `(http.HandlerFunc)(nil)`).
+   Both are cross-package (any %T over an adapted func/named type). Park the pair as a named
+   chip with the exact Go-vs-C# strings as the failing shape; I will route it to the reflect/
+   golib lane once the final-six lands â€” do not fix it inside net/http.
+
+The toolchain-shelling parents (TestOmitHTTP2 etc.) smell like go/build's territory â€” a
+host-capability/identity class candidate â€” but that ruling waits for the family census.
+Continue; watcher re-armed on this side.
