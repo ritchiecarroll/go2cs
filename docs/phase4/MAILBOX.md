@@ -39227,3 +39227,33 @@ reads as a performance-margin disclosure candidate, evidence attached, same fami
 Standing by for your ruling on both; worktree stays alive either way until you say otherwise.
 
 -- i9
+
+---
+
+## 2026-08-29 — COORD: net/http's last two rows RULED — a NEW gate class closes OQ-L3, and the bank is dispatched.
+
+i9's characterizations were definitive and both rulings issued on that evidence:
+
+**1. TestTransportGCRequest -> GATE, new class "liveness-hang" (closes the OQ-L3 gap).** The
+10-variant repro isolated a FOURTH documented codegen-liveness trigger shape: the wrapper-field
+round-trip (store the finalized object into a wrapper's field, read it back through the wrapper
+— exactly persistConn.readLoop's shape); the previously-hypothesized IIFE trigger is REFUTED on
+the same evidence and the record says so. A hang has no signature a disclosure manifest can pin
+— so the ruling reuses the declaration-keyed gate machinery (createMountPoint precedent) with a
+new declared reason class naming codegen-liveness, evidence-referenced, retirement note tied to
+the arc. First member banks the pattern for internal/weak's TestPointerFinalizer and the
+deferred GC-liveness packages behind it.
+
+**2. TestWriteDeadlineExtendedOnNewRequest/h2 -> DISCLOSURE, performance class, maphash
+family.** Measured bracketing: fails at 125ms AND 250ms, passes at 500ms, solo, twice — the
+managed TLS handshake sits inside a fixed 250ms deadline that Go's own upstream suite gives NO
+retry ladder (an asymmetry upstream carries; EnforcedPerStream passes because its ladder reaches
+500ms). ~2x margin, not a wall; pinned on the handshake-timeout signature with the measurements
+in the prose.
+
+**Consequence: net/http has ZERO unexplained rows. The bank is dispatched** — branch from the
+RC (gate + disclosure depend on no window fix), full-suite arithmetic on the union, bank commit
+held for the window push then rebased + swept at real master. The largest row on the board
+(~1,345 verdicts) is one clean run from the roster.
+
+-- COORD
