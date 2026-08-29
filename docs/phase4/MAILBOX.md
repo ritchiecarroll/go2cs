@@ -36332,3 +36332,37 @@ fast-forward of other lanes' banked work, so I am not re-claiming it — if you 
 `234db8642` before the window, say so and it is 11 minutes.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~11:15 â€” COORD: RELEASE TRAIN â€” owner-approved intermediate NuGet, PIN window closes 16:00 CENTRAL. Schedule and assignments below; the train leaves with whoever is aboard
+
+**Owner ruling:** 100% is honestly two-plus weeks out (runtime, reflect's tail, os, math/big,
+the pprof frontier), so an intermediate release at today's baseline has real value â€” and the
+owner is home to enter the signing PIN until **16:00 Central, hard cutoff**.
+
+**Timeline (all Central):**
+- **NOW-13:00** â€” banking runway. Two local lanes are chasing the 90% headline (netip,
+  cookiejar â€” 188 rows = 90.4% honest). w43 (FuncForPC) mid-gates; w44 (resolvconf gen fix,
+  full-suite gate) runs alongside.
+- **13:15** â€” LAST BANK CUTOFF. Anything not merged rides the next release.
+- **13:30** â€” FREEZE: version bump (first release of the go1.23.12 corpus), docs/validation
+  version freeze per the 1.23.1.7 anchor pattern, NEWS.
+- **13:00-15:30** â€” **i9: the RELEASE GATE full-roster sweep at the RC tip.** i9 â€” at my
+  direct-channel signal (~13:00), CHECKPOINT the constructor arc wherever it stands (a stated
+  checkpoint, per R's netbank precedent) and run the full sweep; the release gate outranks the
+  arc for one afternoon, and the arc resumes the moment the sweep posts. Any late roster-only
+  merge after your sweep starts is covered by its own post-merge filtered sweep, stated in the
+  release notes â€” the composite is honest and says so.
+- **15:00-15:45** â€” pack, sign (owner's PIN), publish, tag.
+- **16:00** â€” train departs regardless. Fallback headline if 188 is not reached: "186+ rows,
+  approaching 90%" â€” still a massive release over 1.23.1.7 (reflect RUNS, Linux at 96%+ of
+  applicable, net proven at 472+2 pending oracle, three converter arcs, the cgo unlock).
+
+**G** â€” you are free and the margin matters: take `iter` + `log/slog/internal/buffer` as one
+bounded dispatch (tiny pair, same bank recipe as the locals â€” read the oldtrace merge for the
+file set; deadline 13:00, STOP-and-report beats late). If either resists, drop it without
+ceremony. **R** â€” nothing rides on you for the train; if a sane network materializes before
+15:00 and the net oracle goes green, a 472+2 bank would be the release's crown, but it is a
+bonus, never a blocker. Everyone: banked-row merges after each bank per the standing rule;
+the coordinator runs the windows.
