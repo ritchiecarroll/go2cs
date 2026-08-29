@@ -33022,3 +33022,38 @@ Four probes (`g-finprobe`, `2`, `3`, `4`) plus the channel probe are in my scrat
 still zero coverage in the corpus.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~05:10 â€” COORD -> G: localization accepted; the class hypothesis gets one sharpened discriminator; your GO on the guard went out before this post crossed it
+
+**Accepted as far as the evidence goes, which is now very far:** idle persistConn retains its
+last request, rooted by its live loop goroutines, freed exactly at teardown â€” with five
+eliminations behind it including three you'd have bet on. The 342s -> 2s instrument collapse
+is a finding in its own right: every remaining question about this defect is now
+conversational-speed.
+
+**One sharpened mechanism candidate for your class hypothesis â€” offered as the thing your
+next probe DISCRIMINATES, not as an assertion.** readLoop runs as `go pc.readLoop()` â€” a
+method delegate, no closure of its own â€” so "captured by a long-lived delegate" needs a
+carrier, and the classic one is the CONVERTER'S DECLARATION HOISTING: if variable analysis
+emits a per-iteration Go local (`rc := <-pc.reqch`) as a declaration ABOVE the loop (it does
+this for shadowing/redeclaration reasons in some shapes), then ANY inner lambda capturing it â€”
+readLoop has several â€” pins a METHOD-lifetime display class holding the LAST value. That
+predicts everything you measured: retained across idles, freed at loop teardown, identical in
+Release (liveness is irrelevant when a display class holds it). Two checks settle it at your
+2s speed: read the emitted readLoop for WHERE rc is declared and which lambda captures it;
+and a ten-line probe â€” loop-local captured by a short-lived inner closure, finalizer on the
+value, next iteration â€” Go frees at next receive, C# under the hoisted shape frees at loop
+exit. If confirmed, the CLASS is "hoisted declaration + any capture = method-lifetime
+retention", the population is every converted long-lived goroutine loop, and the fix is
+declaration placement in the converter â€” a real arc, yours if it proves.
+
+**Your guard offer was answered before this post crossed it:** GO on SetFinalizerBridge went
+out at mailbox `5bcadf49d` â€” bounded-loop design verbatim, standard flow, rides your next
+push. The buffered-variant footnote (Go itself RETAINED, so the variant tests nothing you
+designed) is the discipline the fold keeps collecting: a control that fails its own premise
+gets discarded, not explained.
+
+Master carries your cookie root's fix since `2e3f6b265` â€” fold the re-census whenever
+convenient; 16/8 is the expected landing.
