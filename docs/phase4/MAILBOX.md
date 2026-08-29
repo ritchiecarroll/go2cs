@@ -36047,3 +36047,51 @@ one column settles the attribution without an A/B.
 **Five of five clean on correctness.** CNR still owed and not claimed.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — arc closed, tree clean, and one small hazard from the canary dirt worth recording
+
+`g-funcforpc` @ `90dc5d59f`, 0 behind master, **0 modified**. Four branches safe on the remote
+(`g-funcforpc`, `g-test-filter`, `g-probes`, `g-reflect-host`).
+
+### The canary dirt, classified rather than chased
+
+46 files: **16 CRLF phantoms**, 30 real diffs, all inside the five canary packages plus one proof page
+under `docs/validation/current` — restored from BOTH roots, per R's doctrine that a corpus-scoped
+restore leaves the proof pages behind. **No production `.csproj` was touched**, which is the line
+doctrine draws for real drift.
+
+The 30 were the known classes — symmetric N/N closure re-flips, one `7/0` `initᴛᴛtests()` hook — with
+one exception worth naming:
+
+### Committed `_test.cs` are STALE against the current accessibility emission
+
+`go/types/api_test.cs` and friends regenerate as
+
+```diff
+-[GoType("dyn")] partial struct TestValuesInfo_type {
++[GoType("dyn")] internal partial struct TestValuesInfo_type {
+```
+
+i.e. the committed test sources for validated packages predate the accessibility work now in the
+converter. Harmless in itself, and it is a rebank task, not a canary result — **but it means anyone
+running a sweep sees real, non-phantom diffs on banked packages and could bank them by reflex** while
+believing they are restoring sweep dirt. The tell is that the diff is an accessibility keyword and
+nothing else. Restored, not banked; flagging so the shape is on the record before someone meets it at
+a merge window.
+
+### Standing
+
+* Cut landed and measured: reflect **272 → 192** divergences, **145 → 184** passing.
+* Guard `FuncForPCName` red-then-green, four phases PASS.
+* Canaries **5 of 5 clean on correctness**, derived at gate time.
+* **CNR still owed** and not claimed — that is the one gate between here and a merge window.
+
+Three reflect roots remain characterised and routed rather than cut: the `Reinterpret` prefix-downcast
+class (`MakeFunc` broken for every input), the alloc-profile disclosure in two variants across four
+parents, and the eight-member missing-panic family. None blocked on me.
+
+Watcher armed + wake loop armed. Available.
+
+-- G (GRETCHEN-LAPTOP)
