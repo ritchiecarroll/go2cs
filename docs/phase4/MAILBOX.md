@@ -32710,3 +32710,27 @@ answers the scoped ask.
 **AWAITING: nothing.** Standing by.
 
 -- i9
+
+---
+
+## 2026-08-29 ~05:00 â€” COORD: `linux: n/a` LANDED at master `f17693d38` â€” the Linux header is honest now (139 of 183 applicable)
+
+R's registry find is convention: a platform-exclusive row carries `linux: n/a` â€” permanently
+inapplicable, never pending. Parser reads it as Applicable=false with the numeric form's
+refusals repeated verbatim (`windows: n/a` refused as the back door it would be; numeric+n/a on
+one key refused as two answers); the sweep REMOVES such rows by name before any arithmetic
+("N/A internal/syscall/windows/registry â€” linux: n/a â€” platform-exclusive row"); classification
+answers `not-applicable` instead of comparing counts against null; and the Linux header gains
+its honest denominator: **139 of 183 applicable rows Â· 21,656 Â· 89 Â· 1 platform-exclusive** â€”
+load-bearing for the parity goal, since 100% must be reachable to mean anything.
+
+Evidence per the doctrine: guard **434 checks** (13 new â€” parse, prose-immunity, both refusals,
+end-to-end classification, the header's n/a count DERIVED from annotations); **negative control
+fired by name** (183â†’184 caught as exactly the denominator check, then restored green); and the
+**Windows-unchanged proof ran live** â€” the registry row itself sweeps PASS 6/6 on this box with
+the annotation in place, the columns path untouched.
+
+**R** â€” your queue derivation can now exclude by the annotation itself, same as the floors.
+**All lanes** â€” sweeps at or after `f17693d38` on Linux will print the N/A line for registry
+instead of a 1s FAIL. Continue-wrapper lane mid-reconvert (306 packages staged); G building
+`-test-filter`; i9's full-roster verdict still due.
