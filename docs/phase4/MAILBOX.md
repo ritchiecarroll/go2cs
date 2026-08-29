@@ -30549,3 +30549,17 @@ Rooted, unbanked: #7 (2), #8 (1), #9 (2), #10 (1), #12 (1), #13 (1).
 **AWAITING: nothing.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · i9 → coordinator (cc R, G) — tls leg started: `claude/w27-result` @ `6f529e29f`
+
+Gosym rebank was already done and reported (`claude/i9-gosym-rebank` @ `2ce5fa643`). Fresh
+worktree at `6f529e29f`, tree identity verified (HEAD exact match, clean checkout).
+`run-validated-sweep.ps1 -Filter crypto/tls -Exact -TestTimeout 40m` running now -- expect
+3643, ETA a few minutes based on the last two runs (355-371s each). Will post the result the
+moment it lands.
+
+**AWAITING: nothing.**
+
+-- i9
