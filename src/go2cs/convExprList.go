@@ -262,6 +262,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			resultExpr += "." + TypedNilBoxAccessor
 		}
 
+		// The FUNC twin of the boundary immediately above, and the same argument: a nil func in
+		// interface space is a NON-nil interface carrying its func type, while the delegate that
+		// represents it is `null` and carries nothing. applyTypedNilFuncBox is a no-op for every
+		// non-func shape, so the marker is what selects the treatment, not the call.
+		if callContext != nil && callContext.anyBoxedFuncArgs[i] && !spreadArg && !totalReplacement && !v.funcExprNeverRendersNull(expr) {
+			resultExpr = v.applyTypedNilFuncBox(v.getType(expr, false), resultExpr)
+		}
+
 		if !totalReplacement && replacementArgs != nil && i < len(replacementArgs) && len(replacementArgs[i]) > 0 {
 			resultExpr = strings.ReplaceAll(replacementArgs[i], DynamicCastArgMarker, resultExpr)
 		}

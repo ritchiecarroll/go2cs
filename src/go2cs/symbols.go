@@ -104,6 +104,17 @@ const NilDeferringDerefAccessor = "DerefOrNull()"
 // the receiver box itself (AdapterImplTemplate). Includes `()` as it is a method call.
 const TypedNilBoxAccessor = "OrTypedNil()"
 
+// TypedNilFuncAccessor is TypedNilBoxAccessor's FUNC twin - the golib extension a func value takes on
+// its way into an EMPTY interface. The argument is the pointer one's, unchanged: a Go func in
+// interface space is a value WITH a dynamic type (`any((func())(nil))` is a NON-nil interface whose
+// %T prints `func()`), a Go func emits as a managed delegate whose nil IS `null`, and a null
+// reference carries nothing once boxed. The carrier it substitutes (GoReflect.CanonicalNilFunc, an
+// interned NilFuncValue) and every path that resolves the carrier back to a nil delegate already
+// existed for the eface packers in reflect and internal/reflectlite; this is the LANGUAGE boxing site
+// joining them, which is why `reflect.ValueOf(nilFunc)` was already right while `var x any = nilFunc`
+// erased. Includes `()` as it is a method call.
+const TypedNilFuncAccessor = "OrTypedNilFunc()"
+
 // The -tests package-init hook: the erasable classic-partial method a production
 // package_init.cs static ctor ends with when converting under -tests, IMPLEMENTED by the
 // internal test variant's relocated-initializer file (go2cs initOrderOperations.go /

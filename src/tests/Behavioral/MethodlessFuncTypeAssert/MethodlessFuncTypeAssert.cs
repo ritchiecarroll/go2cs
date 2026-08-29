@@ -22,7 +22,7 @@ internal static Func<nint, nint> lookup(any i) {
 }
 
 internal static void Main() {
-    any i = new Func<nint, nint>((nint w) => w * 2);
+    any i = new Func<nint, nint>((nint w) => w * 2).OrTypedNilFunc();
     var c = lookup(i);
     fmt.Println(c(21));
     any j = (nint)(7);

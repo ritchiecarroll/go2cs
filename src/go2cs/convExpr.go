@@ -52,6 +52,13 @@ type CallExprContext struct {
 	// typedNilInterfaceBoxing.go). Distinct from argTypeIsPtr, which decides the BOX-vs-value-
 	// alias rendering and fires for pointer slots of every kind.
 	anyBoxedPtrArgs map[int]bool
+	// anyBoxedFuncArgs is anyBoxedPtrArgs' FUNC twin: the slot is a real EMPTY interface and the
+	// value is a Go func, so it crosses carrying its type, and a NIL delegate — which is simply
+	// `null`, carrying nothing once boxed — renders as the canonical typed nil instead (see
+	// typedNilInterfaceBoxing.go). Kept SEPARATE from anyBoxedPtrArgs rather than merged into it
+	// because the two take different accessors, and because a value is a pointer or a func and
+	// never both, so one flag could not describe which treatment applies.
+	anyBoxedFuncArgs map[int]bool
 	// genericResultInferredFuncArgs marks func-LITERAL arguments whose DECLARED parameter type
 	// is a signature with a type parameter in its RESULT list (`OnceValue[T any](f func() T)`).
 	// C# must infer that type argument FROM THE LAMBDA'S RETURN TYPE, so the arms' natural C#
@@ -136,6 +143,7 @@ func DefaultCallExprContext() *CallExprContext {
 		useGoStringArg:      make(map[int]bool),
 		argTypeIsPtr:        make(map[int]bool),
 		anyBoxedPtrArgs:     make(map[int]bool),
+		anyBoxedFuncArgs:    make(map[int]bool),
 		interfaceTypes:      make(map[int]types.Type),
 		hasSpreadOperator:   false,
 		keyValueSource:      StructSource,
@@ -382,8 +390,8 @@ func DefaultIdentContext() IdentContext {
 		isMethod:                false,
 		suppressGenericTypeArgs: false,
 		ident:                   nil,
-		fieldCollidesWithType: false,
-		fieldTypeIsRenamed:    false,
+		fieldCollidesWithType:   false,
+		fieldTypeIsRenamed:      false,
 	}
 }
 

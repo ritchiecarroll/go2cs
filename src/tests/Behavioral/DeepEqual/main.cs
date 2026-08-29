@@ -166,8 +166,8 @@ internal static void Main() {
     }}.slice()));
     fmt.Println(reflect.DeepEqual(new map<@string, Action>{["k"u8] = default!}, new map<@string, Action>{["k"u8] = default!}));
     Action nilFn = default!;
-    fmt.Println(reflect.DeepEqual(nilFn, nilFn));
-    fmt.Println(reflect.DeepEqual(nilFn, () => {
+    fmt.Println(reflect.DeepEqual(nilFn.OrTypedNilFunc(), nilFn.OrTypedNilFunc()));
+    fmt.Println(reflect.DeepEqual(nilFn.OrTypedNilFunc(), () => {
     }));
     var g1 = Ꮡ(new guarded(n: 1, name: "a"u8));
     var g2 = Ꮡ(new guarded(n: 1, name: "a"u8));

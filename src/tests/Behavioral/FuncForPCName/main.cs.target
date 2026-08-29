@@ -66,7 +66,7 @@ internal static void Main() {
     fmt.Println(methodˢ, nameOf((Action<receiver>)(method)));
     var literal = () => {
     };
-    fmt.Println(literalPresentˢ, nameOf(literal) != "<empty name>"u8 && nameOf(literal) != "<nil Func>"u8);
+    fmt.Println(literalPresentˢ, nameOf(literal.OrTypedNilFunc()) != "<empty name>"u8 && nameOf(literal.OrTypedNilFunc()) != "<nil Func>"u8);
 }
 
 } // end main_package

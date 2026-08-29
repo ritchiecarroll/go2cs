@@ -131,7 +131,7 @@ internal static void Main() {
         var t = reflect.TypeOf(f);
         fmt.Printf("func %-34s name=%q variadic=%v\n"u8, t.String(), t.Name(), t.IsVariadic());
     }
-    fmt.Printf("%T | %T\n"u8, mixed, named);
+    fmt.Printf("%T | %T\n"u8, mixed, named.OrTypedNilFunc());
     var custom = new definedBytes(new definedByte[]{(rune)'h', (rune)'i', (rune)'!'}.slice());
     var cv = reflect.ValueOf(custom);
     var got = cv.Bytes();

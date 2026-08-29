@@ -107,7 +107,19 @@ func (v *Visitor) applyTypedNilPointerBox(value ast.Expr, rendered string) strin
 		// The sibling treatment this file owns, at the same boundary and mutually exclusive
 		// with the pointer one: a VARIADIC func value must carry its Go func type, or C#'s
 		// synthesized natural delegate becomes the box's dynamic type. See the file header.
-		return v.applyVariadicFuncBoxCast(valueType, rendered)
+		//
+		// A func value ALSO loses its type here when it is NIL, for the pointer's exact reason —
+		// a null delegate reference carries nothing once boxed — so the func arm applies the
+		// typed-nil treatment too, composed OVER the variadic cast (the cast fixes which type is
+		// carried; it cannot make a null carry one). A declared func is excluded because it is
+		// both never-nil and a C# method group, which no extension method can be invoked on.
+		rendered = v.applyVariadicFuncBoxCast(valueType, rendered)
+
+		if v.funcExprNeverRendersNull(value) {
+			return rendered
+		}
+
+		return v.applyTypedNilFuncBox(valueType, rendered)
 	}
 
 	if v.pointerExprNeverRendersNull(value) {
@@ -137,10 +149,69 @@ func (v *Visitor) applyTypedNilPointerBoxToType(valueType types.Type, rendered s
 	}
 
 	if _, isPointer := valueType.(*types.Pointer); !isPointer {
-		return v.applyVariadicFuncBoxCast(valueType, rendered)
+		return v.applyTypedNilFuncBox(valueType, v.applyVariadicFuncBoxCast(valueType, rendered))
 	}
 
 	return rendered + "." + TypedNilBoxAccessor
+}
+
+// applyTypedNilFuncBox is the pointer treatment's func twin: a FUNC value entering an EMPTY-interface
+// slot takes the accessor that substitutes the canonical typed nil for a null delegate, so the box
+// carries (type=func-type, value=nil) as Go's does rather than a bare null that carries nothing.
+//
+// It is a no-op for every non-func shape, which is what lets both callers above hand it whatever fell
+// out of the pointer test. The two func treatments COMPOSE rather than exclude: the variadic cast
+// decides WHICH type is carried, this decides that one is carried at all, and a variadic func that is
+// also nil needs both.
+//
+// golib already had the carrier and every read-back path already resolved it — GoDynamicTypeOf, the
+// type assertion, TryMarshalAssignable, IsNilGoValue — but it was minted ONLY by the eface packers in
+// reflect and internal/reflectlite. That is exactly why `reflect.ValueOf(nilFunc)` was correct while
+// the LANGUAGE-level `var x any = nilFunc` erased: the read path had the treatment and the write path
+// did not. This is the write path joining it.
+func (v *Visitor) applyTypedNilFuncBox(valueType types.Type, rendered string) string {
+	if rendered == "" || valueType == nil {
+		return rendered
+	}
+
+	if _, isFunc := valueType.Underlying().(*types.Signature); !isFunc {
+		return rendered
+	}
+
+	return rendered + "." + TypedNilFuncAccessor
+}
+
+// funcExprNeverRendersNull is pointerExprNeverRendersNull's func twin, and it is REQUIRED rather than
+// an optimization. A DECLARED func — `passInt`, or a method value — is two things at once here: it can
+// never be nil in Go, and it renders as a C# METHOD GROUP, which is not an expression an extension
+// method can be invoked on at all (CS0119: "is a method, which is not valid in the given context").
+// So the accessor must not merely be skipped as noise; emitting it does not compile.
+//
+// A func LITERAL is excluded for the first reason alone. Everything else — a variable of func type, a
+// struct field, a map element, a call result — stays conservative and takes the accessor, which is the
+// same conservatism the pointer twin applies.
+func (v *Visitor) funcExprNeverRendersNull(expr ast.Expr) bool {
+	switch expr := expr.(type) {
+	case *ast.ParenExpr:
+		return v.funcExprNeverRendersNull(expr.X)
+	case *ast.FuncLit:
+		return true
+	case *ast.Ident:
+		_, isDeclaredFunc := v.info.Uses[expr].(*types.Func)
+		return isDeclaredFunc
+	case *ast.SelectorExpr:
+		// A method VALUE (`x.M` used as a func) is a selection; a package-qualified function
+		// (`strings.NewReader`) is not, and resolves through Uses on the selector's own ident.
+		if sel, ok := v.info.Selections[expr]; ok {
+			_, isMethod := sel.Obj().(*types.Func)
+			return isMethod
+		}
+
+		_, isDeclaredFunc := v.info.Uses[expr.Sel].(*types.Func)
+		return isDeclaredFunc
+	}
+
+	return false
 }
 
 // applyVariadicFuncBoxCast casts an already-rendered VARIADIC func value to its Go func type's C#

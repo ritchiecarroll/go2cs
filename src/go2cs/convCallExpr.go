@@ -1864,6 +1864,17 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 								}
 
 								callExprContext.emptyInterfaceArgs[j] = true
+							} else if argType := v.getType(callExpr.Args[j], false); argType != nil {
+								// The FUNC half of the pointer boundary handled just below: a func
+								// value crossing into a real `any` slot carries its Go type, and a
+								// nil delegate is `null`, which carries nothing once boxed. A func
+								// LITERAL takes the arm above and is excluded here for the reason
+								// pointerExprNeverRendersNull excludes `&x` — it provably cannot be
+								// nil, so the accessor would be noise. See typedNilInterfaceBoxing.go
+								// (consumed in convExprList).
+								if _, isSig := argType.Underlying().(*types.Signature); isSig {
+									callExprContext.anyBoxedFuncArgs[j] = true
+								}
 							}
 						}
 

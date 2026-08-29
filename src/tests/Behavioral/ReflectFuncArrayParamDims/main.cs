@@ -74,18 +74,18 @@ internal static void Main() {
         return len(@in) * len(@in[0]);
     };
     var plain = (nint a, slice<byte> s) => a + len(s);
-    report(f32ˢ, reflect.TypeOf(f32));
-    report(f64ˢ, reflect.TypeOf(f64));
-    report(nestedˢ, reflect.TypeOf(nested));
-    report(plainˢ, reflect.TypeOf(plain));
+    report(f32ˢ, reflect.TypeOf(f32.OrTypedNilFunc()));
+    report(f64ˢ, reflect.TypeOf(f64.OrTypedNilFunc()));
+    report(nestedˢ, reflect.TypeOf(nested.OrTypedNilFunc()));
+    report(plainˢ, reflect.TypeOf(plain.OrTypedNilFunc()));
     report(declaredˢ, reflect.TypeOf(declared));
-    fmt.Println(distinctIn0Typesˢ, !AreEqual(reflect.TypeOf(f32).In(0), reflect.TypeOf(f64).In(0)));
-    fmt.Println(sameAsItselfˢ, AreEqual(reflect.TypeOf(f32).In(0), reflect.TypeOf(f32).In(0)));
-    var inner = reflect.TypeOf(nested).In(0).Elem();
+    fmt.Println(distinctIn0Typesˢ, !AreEqual(reflect.TypeOf(f32.OrTypedNilFunc()).In(0), reflect.TypeOf(f64.OrTypedNilFunc()).In(0)));
+    fmt.Println(sameAsItselfˢ, AreEqual(reflect.TypeOf(f32.OrTypedNilFunc()).In(0), reflect.TypeOf(f32.OrTypedNilFunc()).In(0)));
+    var inner = reflect.TypeOf(nested.OrTypedNilFunc()).In(0).Elem();
     fmt.Println(nestedElemˢ, inner, inner.Len());
-    var field = reflect.TypeOf(f64).In(1).Field(0);
+    var field = reflect.TypeOf(f64.OrTypedNilFunc()).In(1).Field(0);
     fmt.Println(structFieldˢ, field.Name, field.Type, field.Type.Len());
-    fmt.Println(generatedCallˢ, generateAndCall(reflect.ValueOf(f32)));
+    fmt.Println(generatedCallˢ, generateAndCall(reflect.ValueOf(f32.OrTypedNilFunc())));
     fmt.Println(generatedCallˢ, generateAndCall(reflect.ValueOf(declared)));
     reportMethod();
 }

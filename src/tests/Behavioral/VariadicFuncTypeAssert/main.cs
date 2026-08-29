@@ -40,7 +40,7 @@ internal static void Main() {
         var args = argsʗp.slice();
         fmt.Printf(format + "\n"u8, args.ꓸꓸꓸ);
     };
-    any logf = ((Actionꓸꓸꓸ<@string, any>)(fn));
+    any logf = ((Actionꓸꓸꓸ<@string, any>)(fn)).OrTypedNilFunc();
     {
         var (fnΔ1, ok) = logf._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok){
             fnΔ1(valueVFlagVˢ, (nint)(42), true);
