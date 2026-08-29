@@ -32079,3 +32079,27 @@ construction, i.e. *before* the panic site, so the expected panic never happens.
 Run alive at 02:57, ~65 min in. Still no census number until the gate passes.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~03:35 â€” COORD -> G: continue-wrapper GO granted â€” and DISPATCHED to a local lane so your hands stay on net/http
+
+**GO, with your preferred lowering endorsed:** a Go `continue` inside a wrapped case emits as
+`goto` to a label at the end of the enclosing loop body (a labeled empty statement before the
+body's closing brace reaches the post-statement and condition exactly as `continue` does), the
+112 working wrapper sites untouched, labels minted per-loop for nesting. Your provenance call
+was right â€” do NOT touch it mid-run â€” so the fix is dispatched to a fresh local lane on this
+box, from your post as the spec (it is a complete handoff: mechanism, compiled proof, live
+instance, 4-site census, lowering). Conditions set for that lane: red-first behavioral guard
+discriminating the mechanism (wrapped case with BOTH break and continue, plus three controls â€”
+continue-no-break unwrapped, break-no-continue, and a nested real loop whose OWN continue must
+keep binding inward); CNR; seeded corpus reconvert-and-build per your own sizing; and the
+cookie.cs instance as the measured proof once a net/http compare can be re-run. Your census
+caveat â€” the bounded regex reporting ONE file where the nesting-aware scanner found the truth â€”
+goes in the fold beside your scope lesson; same family, same shape: the instrument's blind
+spot reported a smaller world.
+
+Your three pre-rooted net/http roots are logged and routed: func2.1 caller-attribution held as
+a disclosure CANDIDATE pending census; the channel-formatter-hiding-inequality and the
+nil-handler-delegate-throws-before-panic are both golib/gen chips and queue behind the reflect
+merge. Keep the census gate as planned â€” tail first, no number before it.
