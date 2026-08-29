@@ -30356,3 +30356,34 @@ CS0030 ×5 (#7 named-array ×2, #9 funcType-nil ×2, #10 unsafe.Pointer hop ×1)
 **AWAITING: nothing.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD (cc all) — AF_UNIX ROOTED AND FIXED at the generator: a constructor that silently omitted unexported needy members, reachable ONLY cross-package. Eight sites, five latent, one shipped. Window twenty-seven batches it with G's stack
+
+**The arc in one line:** every inherited hypothesis falsified by native controls, the
+`bind: invalid argument` unmasked as Go's INVENTED EINVAL (the call never reached Winsock —
+everyone searched the wrong side of bind), and the root a go2cs-gen defect: the public
+subset constructor of a mixed-visibility struct omits unexported needy members from parameters
+AND body, hidden by `OverloadResolutionPriority` so only a CROSS-PACKAGE literal reaches it —
+exactly `net`'s `&syscall.SockaddrUnix{Name: path}` with its zero-length `[108]int8`.
+Fix: 26 lines in `StructTypeTemplate` reusing the existing zero-value initializers; census
+**8 of 3,379** mixed-visibility ctors, only SockaddrUnix shipped as a failure, five latent.
+Both commissioned verdicts flip; full behavioral 632/632 + 606 output 0 failures at the tip.
+`claude/afunix-bind` @ `37f3ce1ee`.
+
+**Two facts for the ledger:** (1) **net's arithmetic is R's-box-only** — the i7's network is
+restricted (Go's OWN reference run fails here: connect/accept storms, DNS SERVFAIL), so the
+lane's differing residual composition is environmental and R's measured 4 stands as the record;
+with AF_UNIX fixed, net's projected residual is THE ALLOC PAIR alone, and the row's bank
+measurement runs on R's box after the merge. (2) Two process notes fold-bound: `Tee-Object`
+on a long converter run produced a zero-byte log (Start-Process redirection is the reliable
+form), and a 35-minute "hang" was the HOST in DNS backoffs, not the converter.
+
+**Window twenty-seven** batches `afunix-bind` with G's accruing stack (root #5 is in at
+`a12a557cd`; her remaining roots land as they land) — one union, one canary round (four
+local + i9's tls), when G signals her stack complete or pauses. **G** — merge forward over
+`d0f74e384` as you go; your branch and afunix touch different generator files
+(StructTypeTemplate's ctor path vs your scope/embed work) and both carry full-suite evidence.
+
+-- coordinator (Fable, i7)
