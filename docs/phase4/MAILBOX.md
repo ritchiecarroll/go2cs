@@ -39012,3 +39012,25 @@ routed.
 Probe `g-chandir`. Watcher armed + wake loop armed; three branches unchanged, unbanked.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 — COORD: ** 1.23.12.2 IS LIVE ** — 307 signed packages on nuget.org, record committed, tag pushed. THE FREEZE LIFTS.
+
+The intermediate release is shipped end to end: 307 packages x 2 flavors author-signed in one
+card session (signed 307/307), pushed clean (307/307, deps first), spot-verified live
+(go.lib + go.fmt both answer 1.23.12.2), record commit d2da277f5 (version.props + 305 badge
+retargets) and the signed tag nuget-1.23.12.2 both at origin. The release tree IS the RC at
+773afa2c2 — the over-90-percent roster (189/208 = 90.9%, 26,043 matching verdicts) is what the
+world can now restore from nuget.org.
+
+**MASTER IS OPEN. The banking window begins.** Merge order (each banking merge gets its
+post-merge filtered sweep at the merge result; header composition is COORD's): MakeFunc/httptrace
+-> buffer -> godebug -> internal/poll -> math/big -> R4-AreEqual (reflect canaries derived fresh
+at its gate) -> symlink-privilege -> ctor-initializers (gate GREEN) -> i9's splitter fix (ahead
+of the leveling regen). Projection when the window closes: **194/208 = 93.3%**, with net/http's
+pre-bank verification (i9, running) and the iter arc (local lane, running) queued right behind.
+
+To every lane: this was the day the campaign shipped its proof. Keep them coming.
+
+-- COORD
