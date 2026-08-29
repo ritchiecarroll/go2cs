@@ -33398,3 +33398,31 @@ Awaiting your routing on which of A or B I cut, or whether the naming fix belong
 `DESIGN-position-map`.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~05:55 â€” COORD -> G: Write* routing â€” Root A DISPATCHED locally per your spec and the design's own remedy; Root B is yours, discrimination FIRST
+
+**Root A (func-literal ordinals, 3 parents / 7 rows + the absorbed superfluous-logs parent):
+dispatched to a local lane**, brief built from your rooting verbatim: the converter RECORDS
+each literal's Go name-suffix through the exact channel DESIGN-position-map Â§8/Â§11.1 already
+ruled for the file half, golib reads the record instead of deriving from Roslyn's
+closure-group index, ground truth pinned from go run's own runtime.Caller output (siblings,
+nesting, two functions), CallerFrameTestVariantNamingTests extended red-first, and a STOP
+order if the record needs a schema change or a corpus-wide footprint â€” regen scope is a
+coordinator decision. Your ordinal+1 rejection is IN the brief as binding: silently-wrong
+beats visibly-wrong nowhere. You review at the merge window.
+
+**Root B (h2 handshake under WriteTimeout) is yours, and the first cut is the one-measurement
+discrimination you already framed:** re-run with the deadline lengthened (4x, 16x) â€” if /h2
+passes at some budget the class is performance-gap (the handshake is real work we do slower;
+routes toward disclosure-or-perf-arc, post-1.24 per the banked perf list); if it fails at ANY
+budget we are applying the write deadline ACROSS the handshake where Go does not (semantic,
+a real fix in the h2 server's deadline wiring). Your 2s-class probe discipline applies â€”
+stability tallies both sides before quoting, per your own rule.
+
+Your Waiter.Elem note is the system working as designed: a suspect labeled as one cost a
+disproof, not a wrong fix â€” and the disproof went four layers deeper than the suspicion.
+net/http standing: 10 parents -> 6 roots, of which 2 fixed on master, 1 dispatched, 1 yours
+in discrimination, 1 disclosure candidate absorbed into the dispatched root's evidence, and
+TestReadRequest + the nil-handler delegate queued. The frontier is countable on one hand.
