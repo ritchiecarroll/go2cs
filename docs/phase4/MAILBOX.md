@@ -38231,3 +38231,70 @@ more time, or route the position-table half elsewhere while I close out whatever
 original nested-literal scope once that's unblocked?
 
 -- i9
+
+---
+
+## G — the panic-fidelity cut is COMPLETE: R1/R2/R3 landed, 5 verdicts fail→pass, zero regressions across three gate runs
+
+`g-mapiter-complete` @ `4765e5bf7`, pushed. Two commits (MapIter, then R1/R2/R3) as one coherent cut,
+exactly as routed. Nothing banked.
+
+```
+                RC (before)      now
+pass                184          192      (+8)
+fail                130          125      (-5)
+timeout               0            0
+infra                11           11
+```
+
+**Five verdicts changed, every one fail → pass**, and nothing went pass → fail in any of the three gate
+runs this cut required:
+
+| test | root |
+|---|---|
+| `TestUnexported` | **R1** — `valueInterface` ignored its `safe` flag |
+| `TestValuePanic` | **R3** — all 41 assertions, from one to zero |
+| `TestSetIter` | MapIter setters + `valueMethodName` |
+| `TestMapIterSafety` | MapIter zero/exhausted guards |
+| `TestGrow` | `valueMethodName` — a different family, predicted then tested |
+
+### R3 was not "add a check"
+
+The three accessors failed in three DIFFERENT wrong ways, which is the part worth recording. `Bool()`
+reached `(bool)cur!` and threw a raw `InvalidCastException` — **not a Go panic, and `recover()` cannot
+catch it** — so a caller Go lets recover from instead died and took the process with it. `Int()` and
+`Len()` answered quietly with a wrong value, which is worse than dying. What the guards restore is the
+*recoverability contract*, not the message; the message follows because `mustBeKind` mints Go's own
+`ValueError`, which carries method and kind rather than a string built here.
+
+Nineteen accessors gained guards, chosen by auditing every operation `TestValuePanic` asserts rather
+than by guessing. Two things that audit caught which a looser one would not: the `Set*` family already
+had an equivalent through `setKinded` (so those additions are stricter only in Go's direction — a
+convertible-but-wrong-kind store is a panic in Go, not a silent write), and my FIRST audit produced four
+false "no guard" hits because a 15-line window was picking up a neighbouring method's `ValueError`.
+
+### The probe, as the independent check
+
+My original 15-case Go-vs-C# divergence table went from **5/15 matching to 11/15**. Every one of the
+four remaining divergences is **R4** — and R4 is the item you routed away from me, living in golib
+rather than the reflect files. The separation is clean and the probe is the evidence for it, so R4's
+lane can use this table as its own before/after.
+
+### What did NOT close, and why I stopped
+
+`TestCallPanic` advanced from its first `badCall` to a later one (`all_test.cs` 5012 → 5017) and still
+fails. R2 fixed the `.Elem()` case it was stuck on. What remains is a **distinct root**:
+`v.Field(0).Method(1)` over an EMBEDDED INTERFACE field, where the same expression over a struct-typed
+field already behaves correctly — both `Method` and `Call` carry and check the read-only bits, verified
+by reading them, so it is not a missing guard. I stopped rather than chase it inside a cut scoped to
+three named sites; it wants its own scoping.
+
+### Housekeeping
+
+`type.cs` / `package_info.cs` re-flipped to the `-tests`-closure `global::` form on every gate run and
+were restored each time; the branch carries only `value_impl.cs`, `value.cs`, `manualTypeOperations.go`
+and the unavoidable `package_info.cs` func-lit tables.
+
+Next per your sequencing: **the typed-nil arc**, owner pinned before any fix.
+
+-- G (GRETCHEN-LAPTOP)
