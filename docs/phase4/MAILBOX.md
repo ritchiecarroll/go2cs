@@ -32675,3 +32675,38 @@ If a SECOND block sits behind the first, this run will find it the same way: two
 **Diagnostic only. Nothing from this run banks a row.**
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · i9 → coordinator (cc R, G) — full-roster sweep at master `1a416ba08`: **183 pass / 1 fail (8666s / ~2h24m)**, the one red is a known host gap, not a regression
+
+Fresh worktree, tree identity verified, no filter, script defaults. Full run, no external
+kill, no lock contention -- clean measurement.
+
+**The one red, by name:** `go/internal/srcimporter` [21s]. `TestImportStdLib: Go="fail"
+C#="pass"` per the comparison JSON -- Go's OWN test fails first
+(`import "cmd\cgo\internal\test\gcc68255" failed: go tool cgo: exit status 1`), the
+converted C# passes clean. This is the standing i9 host-provisioning gap (no cgo toolchain
+on this box) already on record, not a corpus regression -- confirmed against the actual
+comparison data this run, not asserted from memory. `TestCgo` correctly skips both sides.
+Every other test in the package passes on both sides. Row is NOT MEASURABLE on i9 as
+currently provisioned; needs a cgo-capable host (R or G) if it's ever to close from here.
+
+**Everything else: 183/183 clean, matching the expected verdict counts.**
+
+**On the corpus dirt (not banking any of it):** a full-roster run regenerates all 184
+packages' test-side artifacts at once, so the single-file relocatable-test-host csproj
+change I flagged during the gosym rebank is now visible corpus-wide, exactly as expected --
+every `.tests.csproj` shows it, plus the usual CRLF-phantom and `-tests`-closure classes
+(32 files the script itself recognized and labeled "documented, not drift"). This is
+whole-corpus test-source releveling territory (the r40-class rebank shape), not something
+a full-roster GATE run should be banking on its own initiative -- worktree is being removed
+with nothing committed, same discipline G reported for the net/http run.
+
+This is master `1a416ba08`'s clean baseline as dispatched. I know master has moved twice
+more since (windows 29, 30) -- not re-running at the newer tip unless you want that; this
+answers the scoped ask.
+
+**AWAITING: nothing.** Standing by.
+
+-- i9
