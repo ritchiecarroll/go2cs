@@ -37949,3 +37949,41 @@ from any gate: CNR re-transpiles the BEHAVIORAL corpus, not the stdlib, so nothi
 a stdlib artifact that predates a converter feature.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 â€” COORD: os FIRST-CONTACT CENSUS lands â€” 682/686 matching (99.42%), zero unreached. The "week-class, unattempted" label was stale history.
+
+A local census lane ran the full os suite through the pipeline at the RC (773afa2c2), both new pins
+(go1.23.12 + net10.0), ~3 min wall. **686 verdict rows, 682 matching, zero unreached, zero empty**
+â€” the standing 679-of-683 board record reproduces across BOTH runtime pins with the SAME four
+divergent rows and no new ones. Every historically-troubled row (TestPipeEOF, TestStartProcess,
+TestReadStdin, the load-flake cluster) came back pass/pass.
+
+**The four rows, classified:**
+1. `TestNetworkSymbolicLink` â€” the declared NetShareAdd host limit (SHARE_INFO_2), stands as designed.
+2. `TestDirectorySymbolicLink` â€” the board's unattributed row now has a MEASURED candidate root:
+   `internal/syscall/windows.adjustTokenPrivileges` passes a TOKEN_PRIVILEGES holding a managed
+   `array<T>` where advapi32 expects 12 inline bytes â€” textbook struct-passing seam, wrapper is
+   auto-generated (zsyscall_windows.cs:104). Alternative exposure: LookupPrivilegeValue's *LUID
+   out-param into a possibly-detached box. Discriminating experiment named (print the LUID before
+   the adjust). **A local fix lane is dispatched on it now** (branch claude/local-symlink-privilege).
+3. `TestWriteStringAlloc` â€” the alloc arc, IMPROVED: 3,168 â†’ ~1,185 B/op since r39. Still a zero
+   bound, still an arc, not a disclosure.
+4. `TestUTF16Alloc` â€” disclosed, but the disclosure's units-mismatch reason predates the counter
+   rewrite (host now reports real counts: 4 vs want 1). **RULED: stays disclosed, prose rewritten at
+   os's bank** to the honest current reason (managed allocation-profile overhead, alloc-profile
+   class) â€” a disclosure with a stale reason is how a real divergence gets laundered, so the text
+   gets fixed the moment the row is next touched.
+
+**Incidental, rooted by production-only control:** os's committed `package_info.cs` carries UNBANKED
+converter drift â€” four GoPositionMap records gain the funcLits 5th argument under a plain reconvert.
+NOT the -tests-closure class; joins the rebank-family queue. Corpus-wide extent unmeasured (only 3
+of 360 package_info.cs at HEAD carry 5-arg records); the seeded-reconvert classification at the next
+regen settles whether that is rare-feature or latent-drift-everywhere.
+
+**What this does to the map:** os moves from week-class to DAYS-class â€” bankable shape (682|1 with
+2-3 residuals) once the seam row settles. Full census record: `CENSUS-os-first-contact.md`, riding
+the post-release doc commit.
+
+-- COORD
