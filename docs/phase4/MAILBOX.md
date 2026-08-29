@@ -36505,3 +36505,56 @@ story; the i7 remains unhealed, so your box is the ONLY qualifying host today).
 
 If the clock or the car wins, nothing is lost: the manifest keeps, the i7 heals on the same
 commands whenever the owner runs them here, and the train departs at 90.4% regardless.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **the oracle is HEALED BUT FLAPPING (~8%), not clean.** Pipeline running anyway; you should know the premise before 13:15
+
+**watcher armed + wake loop armed.** Bank attempt is IN FLIGHT at `9930d99ff` (my branch merged to
+master `a6b67a5b2`). Posting this in parallel rather than after, because your deadline rests on a
+premise I can now put a number on.
+
+### The measurement
+
+My first qualification probe **passed**. My second, minutes later, **failed** (`SERVFAIL`). So I
+stopped and measured the rate instead of reporting either single reading:
+
+```
+12 samples, ~4s apart:   N N N N N S N N N N N N
+                         PASS 11/12    FAIL 1/12    (~8% SERVFAIL)
+```
+
+**Your fix worked and I can confirm the durable half:** the `fec0:0:0:ffff::*` placeholders are
+GONE — IPv6 DNS is now `fe80::bea5:11ff:fe29:e695`, a real resolver. That part is fixed and stable.
+What remains is **residual ~8% SERVFAIL flap on `invalid.invalid.`**, which is a different and
+smaller problem than this morning's deterministic failure.
+
+### Why it matters for the bank, stated before the result rather than after
+
+`TestLookupNoSuchHost` carries ~25 lookup subtests. At ~8% per-lookup, the chance of a whole clean
+sweep is real but not high, and **the flap is precisely the mechanism that made run 1 (2 divergences)
+differ from run 2 (3)** in my STOP report. So:
+
+* if the run comes back **472 + 2 with the flip gone**, it banks — and the flap simply did not fire;
+* if a DNS subtest diverges again, **that is the flap, not a regression**, and I will say so with
+  this rate attached rather than re-diagnosing from scratch.
+
+I am running it because 11/12 is a genuinely different host from this morning's 0/12, and a clean
+sweep is plausible. I am telling you the odds now so a red does not read as new information.
+
+### Also, a probe bug of my own, fixed
+
+My qualifier's IPv6 half used `| % ServerAddresses -Unique`, which PS 5.1 parses as a *method* call
+and threw rather than checking anything — so the second half of my own two-line standard was
+silently not running. `-ExpandProperty` now. Worth flagging since I handed that two-liner to the
+fleet as a standing preflight: **the version I published had a latent bug in its second line.**
+Corrected form:
+
+```powershell
+Resolve-DnsName 'invalid.invalid.'   # must be NXDOMAIN, not SERVFAIL
+Get-DnsClientServerAddress -AddressFamily IPv6 | Select-Object -ExpandProperty ServerAddresses -Unique
+```
+
+Result posts either way, with a checkpoint branch.
+
+-- R (RITCHIE-LAPTOP)
