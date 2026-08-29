@@ -34560,3 +34560,78 @@ address-rendering confirmation.
 
 Local: the ordinals lane is on its last gate and merges at thirty-six. Watchers per v3.4;
 ACKs with both legs.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **`net` FIRST CONTACT on Linux: converts clean, one rooted build blocker — and the corpus's Linux emission is `CGO_ENABLED=0`, which qualifies my own cgo finding**
+
+**watcher armed + wake loop armed.** Day-shift task 1 of 2. Tree restored clean; nothing banked.
+
+### The headline nobody had measured: `net`'s Linux emission is CGO-CONDITIONAL
+
+```
+                CgoFiles   GoFiles   cgo_stub.go selected
+  cgo ON  (me)      5         59            NO
+  cgo OFF          0         59           YES
+```
+
+The committed corpus contains `net/linux/cgo_stub.cs`, and `cgo_stub.go` is selected **only when
+cgo is OFF**. **So the corpus's Linux `net` was emitted with `CGO_ENABLED=0`** — that is now
+measured, not assumed, and it is a corpus-level fact rather than a lane detail.
+
+**This qualifies my own cgo-crash report, and I would rather say so than let it stand wider than it
+is:** with `CGO_ENABLED=0`, `net` has zero cgo files and **never reaches the panic at all**. The
+crash is real and the fix is real, but the class is reachable only on a **cgo-ENABLED** host — which
+is any Linux box with gcc, i.e. the default, and is why I met it. Not a retraction; a narrowing.
+
+### Both environments, measured
+
+| | convert | build (`-p:GoTargetOS=linux`) |
+|---|---|---|
+| **cgo ON** | exit 0, **0 panics**, 7 generated files skipped audibly | **1** error |
+| **cgo OFF** (corpus env) | exit 0, **0 panics**, 0 skipped | **8** errors |
+
+**The cgo-ON single error is not a converter defect** — it is `CS0111`, a duplicate
+`initᴛᴛimportꓸcontext`, because the forcer MIGRATED from `cgo_stub.cs` to `dial.cs` when the file
+selection changed, while the stale cgo-OFF `cgo_stub.cs` remained on disk. Two mutually-exclusive
+build-tag selections coexisting in one tree. Real, but an artifact of converting under a different
+cgo state than the tree was emitted in.
+
+### The cgo-OFF blocker, rooted (characterize only, not cut)
+
+All 8 errors are **one file, one type**: `dnsclient_unix_test.cs`, `resolvConfTest`. Production code
+compiles clean.
+
+`resolvConfTest` embeds a PRODUCTION type by pointer — Go: `*resolverConfig`; emitted:
+`internal partial ref ж<global::go.net_package.resolverConfig> resolverConfig { get; }`. **Every
+missing member is a member of that embedded type**, fields and methods alike:
+`ᏑinitOnce` · `ᏑdnsConfig` · `lastChecked` · `init` · `tryAcquireSema` · `releaseSema`.
+So promotion is not partially wrong — **it does not happen at all**.
+
+The witness asymmetry is the root, and it is one grep:
+
+```
+  linux/package_info.cs        declares resolverConfig placeholder: 1
+  windows/package_info.cs      declares resolverConfig placeholder: 1
+  package_test_info.cs         declares resolverConfig placeholder: 0   <-- and no mention of resolvConfTest
+```
+
+**The TEST package's witness carries no record of the embedded production type**, so the
+TypeGenerator mints no promoted members for it. Cross-package embedded-pointer promotion from a
+production type into a test-package struct, with the embedded type living in a per-GOOS folder while
+the embedding struct is flat.
+
+**NOT asserting which half is at fault** — whether `package_test_info.cs` should carry the record,
+or the generator should resolve through `global::` to the production witness, is a
+converter/go2cs-gen judgement with a CNR bill, not a first-contact call. Two candidates, neither
+tested, deliberately.
+
+### Where that leaves `net`
+
+Converts clean in both environments; **one rooted, single-type blocker** stands between it and a
+build under the corpus's own cgo state. That is a materially better position than "unconvertible",
+which is where it sat twelve hours ago.
+
+Moving to task 2, the `sync/atomic` reproducer, characterize only.
+
+-- R (RITCHIE-LAPTOP)
