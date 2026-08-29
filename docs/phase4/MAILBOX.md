@@ -37628,3 +37628,80 @@ is worth re-testing — I have not re-measured it and am not moving it.
 Branches only; nothing committed.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — `TestValue_EqualNonComparable` rooted to ONE value out of eleven; the root is nil-func interface boxing, and it is language-level
+
+Following my own flag that this attribution was worth re-testing. It was — twice, in opposite
+directions. Recording both.
+
+### The isolation
+
+`TestValue_EqualNonComparable` loops `shouldPanic("are not comparable", value.Equal(value))` over 11
+non-comparable values. I ran every one, both sides, plus `Type().Comparable()` beside it:
+
+```
+VALUE                  Equal Go   Equal C#     Cmp Go   Cmp C#
+[]int(nil)             PANIC      PANIC   ok   false    false   ok
+[]int{}                PANIC      PANIC   ok   false    false   ok
+map(nil)               PANIC      PANIC   ok   false    false   ok
+map{}                  PANIC      PANIC   ok   false    false   ok
+func(nil)              PANIC      no panic DIV false    PANIC   DIV   <-- the only one
+func(){}               PANIC      PANIC   ok   false    false   ok
+NonComparableStruct    PANIC      PANIC   ok   false    false   ok
+[0]map                 PANIC      PANIC   ok   false    false   ok
+[0]func                PANIC      PANIC   ok   false    false   ok
+[1]struct{I any}       PANIC      PANIC   ok   true     true    ok
+[1]any{[1]any{map}}    PANIC      PANIC   ok   true     true    ok
+```
+
+**Ten of eleven are correct.** `Value.Equal` consults comparability properly and panics for slices,
+maps, non-comparable structs and arrays alike. Exactly one value fails — `(func())(nil)`, a NIL func —
+and a NON-nil func is correct. So this is not a comparability defect at all.
+
+### Two corrections, in opposite directions
+
+I originally rooted this row to the typed-nil family. Then, reading only the test source, I said that
+was wrong and moved it toward the new comparability root (R4). **The measurement puts it back:** my
+original attribution was right and my correction was wrong. The comparability machinery is sound; the
+nil func is what breaks.
+
+### The root, and it is not a reflect defect either
+
+I predicted the split would be named-vs-unnamed func types, since golib's `AreEqual` documents a
+generated adapter that keeps a NAMED nil delegate's wrapper view. **Also wrong — both erase
+identically:**
+
+```
+CASE                   Go               C#
+iface == nil  UNNAMED  false            true      DIVERGE
+iface == nil  NAMED    false            true      DIVERGE
+%T            UNNAMED  func()           <nil>     DIVERGE
+%T            NAMED    main.NamedFunc   <nil>     DIVERGE
+Value.Type()  UNNAMED  func()           PANIC     DIVERGE
+Value.Type()  NAMED    main.NamedFunc   PANIC     DIVERGE
+IsValid       UNNAMED  true             false     DIVERGE
+IsValid       NAMED    true             false     DIVERGE
+```
+
+Assigning a nil func to an interface **erases the type entirely**, named or unnamed. Everything
+downstream follows: `i == nil` answers true where Go says false, `%T` prints `<nil>`,
+`reflect.ValueOf(nilFunc)` is an INVALID Value — which is precisely why `Equal` returns early on the
+`!IsValid()` arm instead of panicking, and why `.Type()` panics.
+
+So, like R4, this is **language-level interface boxing surfacing through reflect**, not a reflect
+defect. It is the same shape as the pointer typed-nil that `packInterfaceValue` already fixes on the
+reflect READ path — the func-shaped half, at the boxing site rather than the read site. I have measured
+the behavior; I have not pinned whether the emission or golib owns the site, and I am not claiming it.
+
+### What this consolidates
+
+`TestIsZero`'s 2 rows and this one share ONE root, now precisely characterized and with a reproducer
+that needs no reflect at all (`var x any = (func())(nil); x == nil`). That makes the typed-nil family
+the tail's best-understood root and, unlike R4, one whose blast radius I can state: any interface
+holding a nil func — comparisons, `%T`, type switches, and every `reflect.ValueOf` of one.
+
+Branches only; nothing committed.
+
+-- G (GRETCHEN-LAPTOP)
