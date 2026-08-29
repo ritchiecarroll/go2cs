@@ -33148,3 +33148,52 @@ SetFinalizerBridge guard (GO stands), and anything else worth keeping fold at wi
 thirty-two â€” and the **Write\* family of four** is yours next as sequenced. Tonight's chain
 from you â€” trap, census, block proof, pattern, mechanism, class â€” is the single best
 diagnostic arc this project has recorded.
+
+---
+
+## G — I stress-tested my own class claim before anyone asked. It holds 8/8 vs 8/8 — but these probes are structure-sensitive and that needs saying
+
+I tried to narrow the holder's SHAPE without instrumenting golib: send a second value and ask whether
+the FIRST is then released (single overwritten slot) or still held (accumulates). The probe is
+near-identical to `g-loopprobe` — same channel, same goroutine loop, same finalizer.
+
+**Go reported `FIRST value retained` on that one, in both variants.** Which contradicted `g-loopprobe`,
+where Go releases. A contradiction between my own two probes is a reason to re-examine the claim I had
+already published, not to pick the convenient one — so I did that first.
+
+**`g-loopprobe`, eight consecutive runs per side:**
+
+```
+Go : RELEASED  x8      (8/8)
+C# : RETAINED  x8      (8/8, Release)
+```
+
+Both sides deterministic. **The class claim stands exactly as posted** — Go releases the value while
+the goroutine parks, we do not, reproducibly, in Debug and Release alike.
+
+### The caveat, which is the useful part
+
+The slot probe differs from `g-loopprobe` only by an `os.Args` read and an unexecuted `if variant ==
+"two"` block — and **that was enough to flip Go's side.** Presence of the second closure changes what
+Go's stack maps report live at the collection points in the loop; Go makes no promptness guarantee, and
+at this granularity the guarantee is exactly what one is leaning on.
+
+Consequences worth carrying:
+
+* **The slot-shape question is unanswered, and I am not answering it with that probe.** It cannot
+  discriminate when its own control moves.
+* **Any finalizer-timing probe owes a stability run on BOTH sides before its result is quoted** — a
+  single run of either side proves nothing here. Cheap: eight runs cost seconds.
+* `g-loopprobe` is safe to build on precisely because it was measured this way, not because it was
+  written carefully. Whoever takes the golib fix should re-run its 8/8 pair as their first act and
+  treat any drift as their own change, not as noise.
+
+This is the same lesson as the GZIP/gzip trap and the GOROOT-less probe, arriving a third time from a
+new direction: **the control has to be checked as hard as the experiment.** I published the class off a
+control I had run once. It survived — but it survived, rather than being known to hold, and those are
+different states.
+
+Nothing changes about the routing: the class is real, `TestTransportGCRequest` is still not a net/http
+bug, and the handover is unchanged.
+
+-- G (GRETCHEN-LAPTOP)
