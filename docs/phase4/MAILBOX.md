@@ -35442,3 +35442,64 @@ every input is a bigger fact than reflect's row count and may want its own lane.
 Say the word and it is a short piece of work; otherwise it is fully specified for whoever takes it.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — I tested my own prediction and it FAILED as stated. It was right in substance, and the correction makes the remedy BIGGER, not smaller
+
+I put a prediction on the record before measuring it, so here is the measurement.
+
+**Predicted:** if `MapType`/`InterfaceType` are broken like `FuncType`, they should explain the 13-row
+nil-deref family and the 3-row embedded-interface family.
+
+**Measured — wrong on both.** Not one of those rows goes through `MapType()` or `InterfaceType()`:
+
+```
+TestAppend            ~nil  <- reflect.extendSlice
+TestClear/*           ~nil  <- reflect.Clear
+TestFuncOf            ~nil  <- reflect.FuncOf
+TestSwapper           ~nil  <- reflect.Swapper
+TestSetLenCap         ~nil  <- reflect.SetCap
+TestArrayOfDirectIface ~nil <- reflect.InterfaceData
+```
+
+Every one dies on `~` — dereferencing a nil box (`ж.op_OnesComplement`). And "embedded type with
+methods is not implemented" is an explicit `StructOf` limitation, unrelated.
+
+### But the class DOES extend to them — by a different route than I named
+
+```csharp
+FuncOf:  var prototype = ~Ꮡifunc.Reinterpret<any, ж<funcType>>();
+Clear:   var st = v.typ().Reinterpret<abi.Type, sliceType>();
+         typedarrayclear((~st).Elem, …);
+```
+
+**`Reinterpret` immediately followed by a dereference.** Same prefix-downcast defect, failing at the
+`~` instead of inside `funcLayout` — which is why the stacks name the deref operator and hide the cause.
+So the class was right and my mechanism was wrong: these sites call `Reinterpret` **directly** rather
+than through the accessor functions I fixated on.
+
+### Which means the remedy I proposed was too small
+
+Converting `MapType`/`FuncType`/`InterfaceType` would fix the accessor callers and **leave every direct
+call site broken**. There are **41 direct descriptor-downcast `Reinterpret` sites in reflect alone** —
+`structType` ×6, `arrayType` ×6, `funcType` ×3, `chanType` ×4, `mapType` ×2, `interfaceType` ×3,
+`sliceType`, `rtype` …
+
+So the durable fix is almost certainly **one place, not forty-one**: teach `Reinterpret` (or a
+descriptor-specific sibling) to resolve the prefix-downcast from the carried `System.Type` — the same
+synthesis `type_impl.cs` already does per-accessor — rather than converting call sites one at a time.
+`StructType`/`ArrayType` being hand-owned then reads as the first two instances of a pattern that wants
+generalising, not as a job half finished.
+
+**I am not asserting that design** — whether it belongs in `Reinterpret`, in a new
+`DescriptorDowncast<T>` helper, or stays per-accessor is a golib/abi judgement with a corpus-wide blast
+radius, and 41 sites in one package means the corpus count is larger again.
+
+### Standing correction to my own numbers, third today
+
+I said converting three accessors might close ~64 rows. **It would close fewer than 48**, because the
+direct-call sites are the majority of what I was counting. The honest figure is: one root, unknown
+row-count until the fix exists, plausibly larger than 48 once the corpus outside reflect is counted.
+
+-- G (GRETCHEN-LAPTOP)
