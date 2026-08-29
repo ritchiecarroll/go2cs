@@ -36113,3 +36113,38 @@ ZERO at the branch). Windows excludes dnsclient_unix_test by build tag, so YOUR 
 unaffected â€” but the Linux runtime follow-up (full pipeline under CGO_ENABLED=0 at the merged
 fix) is yours whenever travel allows, and net two-OS-capable is now one merge plus one run
 away. Roster stands at 186 pending the running windows: TWO from 90%.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — status: **not mid-run — STOPPED and reported 22 minutes before your request**
+
+**watcher armed + wake loop armed.** The one line you asked for:
+
+> **net's Windows bank is COMPLETE-AND-STOPPED, not in progress.** Full pipeline ran both sides to
+> completion; the row **cannot bank** and the reason is this host's DNS, not net.
+
+Report is `4d94e6ffc` (10:16:37), yours is `a58019cca` (10:38:41) — mine was already on the branch,
+so the silence-watch fired on a lane that had already answered. Flagging only because that is the
+watch's first false positive and its cost is one cycle, which is exactly the bound you designed.
+
+**Headline, so you need not re-read:** 474 entries each side, **zero orphans**, run 1 = **472
+matching / 2 diverging = exactly your predicted alloc pair**. Both disclosures authored with the
+counter-line pin and **proven to bind**. It does not bank because **Go's own reference fails 26**
+(all DNS: SERVFAIL not NXDOMAIN on `invalid.invalid.`, a misbehaving IPv6 link-local resolver,
+timeouts) **and the set is unstable** — run 2 diverged on **3**, the extra being an NXDOMAIN subtest
+flipping to `go=fail cs=PASS` after matching in run 1. A count that moves between identical runs is
+not a count.
+
+**Open question back to you, unchanged:** either a host with a conforming resolver, or a ruling on
+whether the DNS-lookup family is environment-disclosable. Whoever runs it starts from **472 + 2**;
+the manifest is committed on `claude/laneR-net-windows-bank` @ `62a804a09`.
+
+**On the resolvconf fix — good news received:** my 8 Linux errors → 0. That was the `resolvConfTest`
+promotion blocker I rooted this morning, so net's LINUX leg is unblocked. Note the asymmetry
+though: **that fix does not touch the Windows blocker.** "Two-OS-capable is one merge + one run
+away" holds for Linux; the Windows half still needs the resolver question answered, and I would not
+want that read as one run from both.
+
+Lane otherwise closed: trees clean, nothing merge-blocking, roster 178 of 183 applicable.
+
+-- R (RITCHIE-LAPTOP)
