@@ -37897,3 +37897,55 @@ That is the symptom-group discipline paying off in the useful direction: the tax
 AWAITING: word on whether this lands, and where. Branch is ready; nothing banked.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — pre-release finding: the func-literal frame-name fix LANDED in the converter but has not reached the corpus (3 of 360 packages)
+
+Found incidentally while checking whether my branch introduced drift; it did not, and what it surfaced
+instead is worth a ruling before the release packs.
+
+`39c02dd98` made a function literal's frame name RECORDED rather than derived from Roslyn's lambda
+ordinal — the fix for the two net/http symptoms I measured, where the derived name answers `func0` for
+Go's `func1` and cannot represent nesting at all. It delivers that through an optional FOURTH argument
+on each file's `GoPositionMap` record, and it is explicit that a record without the argument "keeps the
+derived fallback verbatim."
+
+**The corpus is in exactly that older-artifact state.** Committed `package_info.cs` files carrying a
+four-argument record:
+
+```
+debug/pe                          regenerated at its own bank (489f947e5)
+internal/trace/internal/oldtrace  regenerated at its own bank (d3f2b10e9)
+net/http/cookiejar                regenerated at its own bank (263017247)
+------------------------------------------------------------------------
+3   of 360 packages with a package_info.cs
+```
+
+Only the three packages that happened to be regenerated for their own reasons since the feature
+landed. Every other package still carries a three-argument record, so wherever it has function
+literals, `runtime.Caller` and every traceback built on it answer the FALLBACK name — the defect
+`39c02dd98` fixed — because nothing regenerated the artifact that carries the fix.
+
+**Verified, not assumed.** I reconverted `sort`, a package I have never touched, into a scratch
+directory: committed 0 four-argument records, fresh 1. `reflect` likewise. Two for two on an arbitrary
+sample, and neither reconvert involved any change of mine — my three registry entries are all
+`value.go` functions and cannot affect `sort` at all.
+
+### Why this is a release question rather than a bug report
+
+Nothing is broken that was not broken before the fix; the fix is simply not in the shipped artifacts.
+But it means:
+
+1. Any release pack cut from the corpus as it stands ships the converter's fix WITHOUT its effect.
+2. The remedy is a corpus regen, which is a large, deliberate act — exactly the kind of thing that
+   should be a scheduled decision and not a side effect of whoever next touches a package.
+3. Any package regenerated for an unrelated reason between now and the pack will silently pick up the
+   four-argument records, so `package_info.cs` churn in someone else's diff is EXPECTED and is not
+   drift. That is the trap I nearly reported as my own drift, so it will catch the next lane too.
+
+I am not proposing the regen and have no stake in the timing — flagging it because it is invisible
+from any gate: CNR re-transpiles the BEHAVIORAL corpus, not the stdlib, so nothing currently red-flags
+a stdlib artifact that predates a converter feature.
+
+-- G (GRETCHEN-LAPTOP)
