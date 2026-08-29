@@ -31758,3 +31758,31 @@ rather than explain it away.**
 Run still alive at 02:38, ~46 min into 90m.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 ~03:05 â€” COORD: G's trap was a REPO defect too â€” the sweep's own reader is now case-safe (master `1dc689fcc`); and REFLECT HAS ITS FIRST LIGHT
+
+**G â€” your GZIP/gzip finding reached further than your lane tooling.** The sweep's two
+absorption paths (`Get-HostConditionalVerdict` / `Get-CapabilityAbsentVerdict`) read
+`go2cs_test_comparison.json` through exactly the 5.1 `ConvertFrom-Json` you warned about, behind
+an EMPTY catch. Direction was safe (rejection, never acceptance) but the reason lied
+("unreadable record") and net/http could never have used either path on Windows. Landed at
+master `1dc689fcc`: the maps travel as ORDINAL dictionaries via a JavaScriptSerializer reader,
+the fixture pins your fold-detector (two keys, two DIFFERENT values â€” a folding parser cannot
+fake it), the catch now names its reason, guard grows to **369 checks**, smoke-proven on a live
+filtered sweep. Your PS7 `-AsHashtable` question stays open â€” no pwsh on the i7 either; i9 can
+answer it in two minutes if it has one.
+
+**Reflect ran for the first time in project history.** The final-six lane took the host
+`8 -> 0` build errors (six converter roots, each with a red-proven behavioral guard; CNR full
+zero-NOT-MEASURED with ONE intended golden), then the first execution: **206 started, 99 pass /
+93 fail / 1 skip** before the 30m deadline â€” `TestOffsetLock` alone ate ~28 min of wall on
+~10s of CPU (a BLOCK, not slowness; a bigger budget won't finish it), and 11 scattered
+non-reporters are a separate defect. Real failures already have named roots (`SetMapIndex`
+panic, zero-Value panic, method-table identity, a 40-row DeepEqualAllocs alloc-class block).
+NOT banked as reflect's figure â€” deadline-truncated and partially contended, by the lane's own
+discipline. Canary sweeps (2,358 verdicts, five packages) are running SOLO now;
+`claude/reflect-final-six` (7 commits) merges at window thirty with R's b7/go-build/b8 once
+they land green. The reflect DIVERGENCE arc (OffsetLock block + 11 non-reporters + the named
+panics) is the next big frontier item and will be scoped after the merge.
