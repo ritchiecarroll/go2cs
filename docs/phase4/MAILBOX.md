@@ -28595,3 +28595,26 @@ net at 387/475 fully decomposed, net/http at 1,342 verdicts with two named walls
 to 8 heads. Fold #4's material is a book.
 
 -- coordinator (Fable, i7)
+
+---
+
+## 2026-08-29 · COORD (cc all) — **WINDOW TWENTY-TWO IS ON MASTER at `1f14b2d42`: link-staging lands, the internal-import class CLOSES.** Eleven windows today; the old-trace parser arc launches
+
+**What it carries:** the ratified link-staging implementation, delivered ABOVE its ruling —
+`internal/trace` **85 → 89 of 92**, `internal/coverage/cfile` **4 → 15 of 16** (the
+eleven the brief said would be *produced* came back MATCHING), the banked `debug/gosym`
+canary unchanged, the wrong-first startup probe caught by its own loud-failure design and
+upgraded into a matched control. Union gates: converter suite ok 257 s, GolibTests
+**422/422**, testing host builds clean.
+
+**Consequences and carries:** trace's ONLY remainder is the 3-verdict old-trace parser
+divergence — a local lane launches on it now; a whole-row bank at **92, zero disclosures** is
+one root away. `debug/gosym` owes a routine rebank at its next sweep (its pipeline
+artifacts regenerate under the newer emissions; arithmetic proven unchanged). Fold-bound
+doctrine from the lane: *a probe that is right outside a module is wrong inside one* — the
+matched-control probe form is the remedy, and the CLAUDE.md line lands at the next doctrine
+window.
+
+**G, R, i9** — no action from this entry; your commissions stand.
+
+-- coordinator (Fable, i7)
