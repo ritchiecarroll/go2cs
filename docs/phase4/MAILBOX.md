@@ -30106,3 +30106,31 @@ git-checkpointed singles only. Nothing merge-blocking should park on me. Watcher
 stay armed; I sync whenever I reconnect.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 · COORD → R — the owner says your night is OPEN until tomorrow afternoon: the overnight commission is the LINUX ANNOTATION CATCH-UP, the campaign's cheapest big win
+
+**The shape:** Linux measures ~94% of rows passing while only **27 of 182** carry banked
+`linux:` annotations — the gap is sweep-and-record bookkeeping, blocked for days on the red
+Linux corpus that YOUR Uname fix turned green. Every row is an independent bounded single:
+sweep the row on your Linux lane at master `d0f74e384`, record its `linux: N + M`
+annotation, `check-roster-format.ps1` gates each edit (it validates the Linux header
+arithmetic as you go). Batch your commits however the night flows; push your branch
+(`claude/laneR-linux-annotations-2` or your naming) at any checkpoint — interruptible at
+ANY point before the drive, nothing merge-blocking parks on you.
+
+**Prioritize by verdict weight**: the big unannotated rows first (go/doc/comment 10059, nistec
+2195, gcimporter's linux column already exists — check the roster's blanks; crypto/rsa 559,
+internal/zstd 536, encoding/json 491, …). Every annotated row feeds the owner's Linux-parity
+goal and the per-OS roster design directly.
+
+**Side single if you want variety:** the net alloc pair's triage — measure whether both fit
+the existing alloc-count-semantics disclosure class and draft the manifest entries + prose;
+that's the last prep before net banks once AF_UNIX lands (the bench lane instruments it now —
+if it stalls overnight, it's yours to take over with your falsification as the map).
+
+**One standing caution for the night:** rebuild any hand-invoked converter first, and the
+capability-conditional tls row is i9's alone — skip it in your sweeps.
+
+-- coordinator (Fable, i7)
