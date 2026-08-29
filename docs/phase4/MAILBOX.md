@@ -38860,3 +38860,67 @@ a missing guard.
 Idle and available.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## G — `TestCallPanic`'s residual ROOTED, and it is not what I said it was: unexported METHOD, not read-only propagation
+
+I closed the panic-fidelity cut saying the residual was `Field(0).Method(1)` over an embedded INTERFACE
+field, and flagged it as needing its own scoping. Measured now, in idle time, and **my characterization
+was wrong** — the field has nothing to do with it.
+
+### The isolation
+
+Go's exact `TestCallPanic` shape: `t0` an interface with `W()` exported and `w()` unexported, embedded
+unexported in a struct alongside an exported field of the same type.
+
+```
+CASE                              Go          C#
+NumMethod(embedded iface fld)     2           2            match
+unexp fld .Method(0)=W  .Call     PANIC       PANIC        match   <- R2's fix, working
+unexp fld .Method(1)=w  .Call     PANIC       ABORT        DIVERGE
+EXP   fld .Method(0)=W  .Call     no panic    no panic     match
+EXP   fld .Method(1)=w  .Call     PANIC       ABORT        DIVERGE
+CanInterface(unexp fld)           false       false        match
+CanInterface(exp fld)             true        true         match
+```
+
+The two diverging rows are the two **unexported-METHOD** rows, and they diverge through the EXPORTED
+field as well as the unexported one. Read-only propagation is correct throughout — `CanInterface`
+agrees on both fields, and `Method(0)` through an unexported field panics exactly as Go does. So R2 is
+doing its job and this is a different root entirely.
+
+### The root
+
+```
+C#:   System.MissingMethodException: Method 'main.timp.w' not found
+        at GoReflect.GoMethodValue   (golib/GoReflect.MethodSets.cs:207)
+        at reflect.Method            (reflect/value_impl.cs:1477)
+Go:   panic "reflect: Call of unexported method"
+```
+
+Two differences, and the second is the one that matters:
+
+1. **Wrong stage.** Go's `Method(i)` SUCCEEDS for an unexported method — it returns a Value with
+   `flagMethod` set — and the refusal happens later, in `Call`. Ours throws inside `Method` itself.
+2. **Wrong kind.** A raw `MissingMethodException` is not a Go panic and `recover()` cannot catch it.
+   This is the **third measured instance of the class R3 named** (`Bool()` on a float64 was the first,
+   `Int`/`Len` the quiet variants): an unrecoverable managed exception standing where Go has a
+   recoverable panic. That is why the row reads as "did not panic" rather than as a wrong message.
+
+There is also an internal inconsistency worth naming on its own: **`NumMethod` counts `w` (answers 2)
+while `GoMethodValue` cannot bind it.** The method SET and the method-value GETTER disagree, so the
+count promises an index the getter refuses — any caller that iterates `0..NumMethod()` walks into it.
+
+### Not cutting this
+
+It lives in `golib/GoReflect.MethodSets.cs`, which is shared machinery rather than the reflect files I
+was routed, and the faithful remedy moves the refusal from `Method` to `Call` with Go's exact text —
+a behavioral relocation, not a guard addition. Routing it to you rather than taking it.
+
+Probe is `g-callpanic`; the exported-field row is the control that separates method-visibility from
+field-visibility, and it is what proved my earlier reading wrong.
+
+Watcher armed + wake loop armed. Three branches unchanged, still unbanked.
+
+-- G (GRETCHEN-LAPTOP)
