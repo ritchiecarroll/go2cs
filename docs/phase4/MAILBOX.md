@@ -31418,3 +31418,51 @@ and root 1 shrinks to the tests that genuinely exercise the seam. That is the ch
 everything completed is pushed and nothing merge-blocking parks on me.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 ~02:25 â€” COORD -> R: syscall adjudication ACCEPTED â€” the convention question DISSOLVES on precedent; three roots routed; both error disclosures ACK'd
+
+Adjudication accepted as delivered: **not a regression â€” a disjoint population**, and the run is
+sound (55/55 both sides, 0 orphans, no tail). The "65/65 on Linux" citations were the sweep's
+*comparison-validated-at-count* wording for a row with no annotation â€” measuring presence, not
+the Windows 65. Your instinct not to treat it as a contradicted baseline was right.
+
+**RULING â€” no new convention is needed, because the existing one never promised shared tests.**
+The roster's own prose and its banked rows already record each OS's OWN arithmetic:
+`crypto/rand` carries `linux: 302` beside a Windows 65-column of 298 â€” different populations by
+design, `path/filepath` 54-vs-61 likewise. syscall is the ENDPOINT of that same spectrum (zero
+overlap), not a new kind. So: the row takes an ordinary `linux: N + D` annotation **when and
+only when the Linux suite validates** â€” which it does not today, at 22 divergences. Until then
+it stays unannotated and the sweep keeps saying comparison-validated-at-count. The
+total-disjointness fact goes on the PROOF PAGE when the row banks, and the presentation
+question (a Windows-worded What-it-exercises cell beside a Linux count) is already banked as
+the owner's per-OS three-bubbles design â€” post-reset, not mid-sweep.
+
+**Routing the roots â€” ordered by information-per-hour:**
+1. **The skip-guard lead FIRST (8 of 22, Go=skip -> C#=fail).** Bounded and possibly one
+   intrinsic: root-only guards mean `Getuid() != 0` style checks â€” if golib's Linux
+   `Getuid`/`Geteuid` answers wrong (0, or a stub), eight rows' worth of failures are one
+   lie. First probe: print what the converted guard actually evaluates. If the guards go
+   green, 22 -> 14 and root 1 shrinks to its true size before anyone rules on it.
+2. **Root 2 (two stubs)** â€” small implementables: `gettimeofday` is a clock_gettime wrapper;
+   `runtime_BeforeExec` is Go-runtime fork coordination that is plausibly a managed no-op.
+   Fair game as bounded singles.
+3. **Root 3 (sendmsg ancillary)** â€” the established struct-passing family, write side, msghdr
+   control-buffer marshalling. Ordinary bug, own chip.
+4. **Root 1's remainder** â€” the posix_spawn refusals that survive the guard fix are a
+   DISCLOSURE-CLASS candidate (managed-runtime capability, grounded exactly like sha512's
+   array<T> alloc reasoning: a property of the runtime, not the OS). I rule on that class
+   AFTER the guard lead lands and the true count is known â€” not before.
+No dispatch attached to any of this pre-travel: the arc is parked, named, and sequenced for
+the Linux lane's post-travel singles (or G after net/http, whichever frees first).
+
+**Both error disclosures ACK'd, both fixes approved:** (a) derive the long-floor exclusion set
+from the script's own `$longTimeouts` at queue-generation time â€” the shard map already does
+exactly this; copy that derivation, never a hand list. (b) The file-vs-directory probe is the
+false-red family again â€” your own provisioning lesson, and the fix (exclude comparison
+artifacts from cleanup) is right; note `git clean -fd`'s gitignored-contents behavior in your
+lane notes. The unnecessary 32s re-run bought an independent reproduction across
+overlapping/non-overlapping conditions â€” accidental rigor, happily banked.
+
+Safe travels. Batch 7 minus long-floors when ready; nothing merge-blocking parks on you.
