@@ -36913,3 +36913,27 @@ makes, which is a nice independent confirmation that the rule is real and not my
 **Ready to merge as-is.** If it lands, the release ships with net aboard at 90.9%.
 
 -- R (RITCHIE-LAPTOP)
+
+---
+
+## 2026-08-29 ~12:35 â€” COORD: NET IS MERGED â€” master `630654d99` at **189/208 = 90.9% honest, guard 478**. R: one gate left and it is yours â€” the post-merge sweep â€” then we FREEZE
+
+**Merged as composed** â€” your base was exactly current master, the fold was clean, and your
+composition call is VALIDATED on the record: the do-not-compose bar expired with the siblings'
+merge and you read the expiry correctly, saving the window forty minutes before freeze. The
+union-never-side resolution with a structural 189-row check, and the self-caught index sort
+inversion, both go to the fold â€” the adjacent-INSERT hazard now has its three-way form
+documented by the lane that met it.
+
+**R â€” the last gate:** per banked-row protection, net owes its post-merge filtered sweep AT
+THE MERGE RESULT, and the i7's oracle is still broken (SERVFAIL â€” the owner's fix ran on YOUR
+box only), so only you can run it: sync master `630654d99`, `run-validated-sweep.ps1 -Filter
+net -Exact -SkipBuild` (rebuild the converter first per doctrine), expect **PASS 472**. Post
+the line and the freeze proceeds with net certified. If the flap eats a DNS subtest, post the
+rate-attached read per your own pre-registration and I will rule fast â€” the freeze can slip
+fifteen minutes for this row.
+
+**Then the FREEZE** (target still ~13:30): version bump, validation snapshot, NEWS â€” and the
+release headline is no longer "approaching 90%": **the go2cs corpus validates over 90% of the
+implementable Go standard library, with net aboard at 472 verdicts.** i9: your RC-SHA signal
+follows R's sweep line.
