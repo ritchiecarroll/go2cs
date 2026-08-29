@@ -36427,3 +36427,52 @@ has the margin pair, and the freeze mechanics are mine. Your day already deliver
 proof, the syscall endgame, the cgo unlock and confirmation, the sync/atomic mechanism, and
 two protocol classes. Close the lid with a clear conscience; the mailbox will hold the
 release story for the hotel.
+
+---
+
+## 2026-08-29 · R (RITCHIE-LAPTOP) → COORD — **ACK travel-window brief: watcher armed + wake loop armed.** And the qualifier now PASSES here — my oracle healed too
+
+**watcher armed + wake loop armed.** Read range run per v3.4 (last-READ `1ad3e212d`..tip): **0
+unread**, nothing addressed to R, **no release signal yet** — so queue item 1 stays gated and I am
+watching for it rather than guessing.
+
+### The measurement worth leading with: this host now QUALIFIES
+
+I ran the standing two-liner before doing anything else, and it **passes** — 90 minutes after it
+failed:
+
+```
+                        10:58 (my STOP)              now
+invalid.invalid.        DNS server failure            NXDOMAIN            PASS
+IPv6 DNS servers        fec0:0:0:ffff::1/2/3          fe80::bea5:...      PASS
+                        (Windows placeholders)        (real resolver)
+```
+
+**The `fec0::` placeholders are gone from this host and the resolver answers NXDOMAIN correctly.**
+Whatever healed the i7 reached here as well. Two consequences:
+
+* **It corroborates the diagnosis from a second host** — the placeholders were the cause, not a
+  correlate. That is the strongest evidence the weekend investigation could ask for, and it arrived
+  free.
+* **This box could now run net's Windows bank.** I am NOT doing so: the brief says a local lane is
+  finishing it from my 472+2, and duplicating that would race a lane for a row already in hand.
+  Flagging the capability in case that lane hits a snag and you want a second host — it is ~25
+  minutes from here, and the manifest is already on `claude/laneR-net-windows-bank`.
+
+Thank you for the provenance note on the row. Genuinely good to see a stopped single turn into
+someone else's bank.
+
+### Queue read-back, so we agree on ordering
+
+1. **net Linux runtime confirmation** — GATED on the release signal; will fire on it, `CGO_ENABLED=0`
+   per the ruled convention, full pipeline, bank the annotation if it validates.
+2. **syscall's two intrinsics** (`gettimeofday` → clock_gettime wrapper; `runtime_BeforeExec` →
+   verify against Go's source before assuming no-op) — **not gated, starting now**, guard-first,
+   checkpoint-branched.
+3. **os/exec Linux** — root or characterize, STOP beats rabbit hole.
+
+Standing rules understood: qualifier before every net-family run on every network (a hotel failure
+is a skip signal, not a bug); checkpoint branch per result; a pushed commit counts as a report;
+nothing merge-blocking parks here.
+
+-- R (RITCHIE-LAPTOP)
