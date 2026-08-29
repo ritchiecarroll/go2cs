@@ -35651,3 +35651,56 @@ builtin.cs, new builtin.DelegateConversions.cs; src/go2cs/convCallExpr.go; src/g
 BehavioralTests/*.cs test-method blocks; the 8-file new NilVarNamedFuncConv project.
 
 Branch pushed, not merged -- yours to take per your instruction.
+
+---
+
+## G — **FuncForPC CUT AND MEASURED: reflect 272 → 192 divergences, 145 → 184 passing.** `g-funcforpc` @ `90dc5d59f`
+
+Rebooted, GPG re-primed, cut taken at master `d3f2b10e9`. All four of your conditions met.
+
+### Measured, same 12 exclusions and the same filter either side
+
+| | before | after |
+|---|---|---|
+| divergences | 272 | **192** (−80) |
+| `Go=pass C#=pass` | 145 | **184** (+39) |
+| `Go=<absent> C#=pass` | 39 | **0** |
+| `TestReflectCallABI` | 83 rows | **3** |
+
+**My corrected projection was ~81 rows; it delivered 80.** The three survivors are the ones I said
+would remain — `passManyFloat64` and `passManyInt` fail on their own merits, now under their Go names
+instead of `#15`/`#16`, which is itself the fix working. `MakeFuncCallABI` stays at 42 exactly as
+predicted, because it dies earlier in `MakeFunc`'s own `Reinterpret`.
+
+### Your four conditions
+
+1. **Guard-first vs `go run`** — `tests/Behavioral/FuncForPCName`, written and proven **RED** first:
+   C# answered `<nil Func>` three times where Go answers `main.passInt`, `main.passString`,
+   `main.receiver.method`. Now GREEN and byte-identical. It covers the method-receiver spelling and a
+   function literal, not just plain funcs, so a fix that only handled the easy case would still fail it.
+2. **Dated in-place comment revision** — the header's ruling is revised, not deleted: it now records
+   that the position held, and that its premise *expired* when `ManagedPointerTokens` landed, dated
+   2026-08-29. `Frame.Func` stays nil and says why (not a token this host mints).
+3. **Built on w36's merged `goFrameName`** — the naming half is not new code; I resolve the token and
+   hand the `MethodBase` to the existing speller.
+4. **Canary derivation, recomputed now** — and it has MOVED from the CLAUDE.md example, which is why
+   the rule says derive rather than carry: **`crypto/tls` 3643, `go/types` 557, `encoding/json` 491,
+   `encoding/xml` 386, `crypto/x509` 341**. Derived mechanically — largest banked rows whose `.csproj`
+   references `core/reflect` — not by intuition. (`crypto/tls` alone is 3643 now, against the 402 the
+   doc's worked example shows.)
+
+### What I did NOT bank
+
+Reconverting `runtime` also surfaced **other lanes' pending drift** — `runtime.csproj` gaining a
+windows syscall reference, plus `mpallocbits`/`rand`/`string`/`windows/*` churn from converter work
+merged in w36–38 that the committed corpus predates. **I restored all of it** and banked only the two
+dropped declarations. That is somebody's regen to do deliberately, not mine to smuggle in under a
+runtime change.
+
+Gates: converter `go build` + `go test` green (the both-sides guard is what proves a registration has a
+real destination), filtered behavioral **1/1/1/1 PASS**, `check-solution-integrity` green at 678
+projects, `UpdateTestTargets` re-baselined no other project's golden (verified explicitly).
+
+**Owed at the merge window:** the five canary sweeps above and CNR. Not claiming those.
+
+-- G (GRETCHEN-LAPTOP)
