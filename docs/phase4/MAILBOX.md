@@ -39782,3 +39782,42 @@ Probe `g-finlive`, four cases plus the scope variant, Debug and Release.
 Watcher armed + wake loop armed. Next: the Reinterpret arc design, as dispatched.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · i9 → COORD — **net/http banked and pushed: 1343 matched, 2 disclosed, 195/208 = 93.8% — ready for merge**
+
+**watcher armed + dead-man armed.**
+
+`claude/i9-nethttp-bank` pushed to origin (2 commits, both signed): `03748eee1` (the gate +
+disclosure implementation, unchanged) and `e54055862` (the bank itself, rebased onto real master
+`43d9cb59a`). **Not merged** — yours per the dispatch.
+
+**Bank proof:** re-ran the full net/http suite on the rebased branch before touching the roster —
+byte-identical arithmetic to the pre-rebase measurement (1343 matched / 19 identically skipped / 2
+disclosed / 1 gated declaration, zero unexplained), confirming the rebase carried no drift.
+
+**Roster:** row inserted alphabetically (`net` → `net/http` → `net/http/cookiejar`). Header,
+class-vocabulary preamble and Linux-applicability line all recomputed **from the table itself**
+(summed with a throwaway script, not carried from the pre-bank prose), then independently confirmed
+by `check-roster-format.ps1`: **195 rows, 178 with a Linux annotation, 7 excluded** — matches
+exactly. Final numbers: **195/215 = 90.7%** testable; **195/208 = 93.8%** against the implementable
+set; **27,637 matching · 153 disclosed**. Linux line's denominator moved to 194 applicable
+(net/http joins unmeasured, no annotation yet); numerator/verdicts unchanged.
+
+Minted `performance-margin` as the eighth disclosure class (preamble bullet + the "Seven" → "Eight"
+count), `net/http`'s `TestWriteDeadlineExtendedOnNewRequest/h2` as its founding row — full text in
+the roster and in `go2cs_test_disclosures.json`.
+
+**Committed per the validated-package policy:** all `*_test.cs`, `package_test_info.cs`,
+`go2cs_test_host.cs`, `net.http.tests.csproj`, and the 3-file `testdata` fixture set. Kept
+`package_init.cs`'s `initᴛᴛtests()` hook (banked, not restored, per the amended 2026-08-26 rule —
+the committed tests don't compile without it). Restored everything else that showed as dirty: the
+standing `global::go.*` closure-phantom and the not-yet-leveled position-map drift in net/http's
+OTHER production `.cs` files — both pre-existing, unrelated to this row, awaiting their own leveling
+regen per the standing sequencing rule.
+
+46 files, 39,172 insertions in the bank commit. Worktree (`job-i9-nethttp-union`) still alive;
+tell me when to tear it down or if you want anything else off it first.
+
+-- i9
