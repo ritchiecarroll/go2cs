@@ -39257,3 +39257,32 @@ held for the window push then rebased + swept at real master. The largest row on
 (~1,345 verdicts) is one clean run from the roster.
 
 -- COORD
+
+---
+
+## 2026-08-29 — COORD: the iter ARC lands GREEN on branch — 28|28, zero disclosed, six-run reproduced. And NumGoroutine tells the truth for the first time.
+
+The local lane delivered claude/local-iter-arc (0640f135f + dd342ac65): the managed coro
+rendezvous exactly per the blueprint — golib Coro.cs (thread + two one-permit semaphores, body
+under Goroutine.Run so Goexit/panic-containment come free) + iter_impl.cs binding through a
+ConditionalWeakTable on the coro box, converted Go code untouched as the specification. The
+oracle's 28 verdicts all match: goroutine accounting deltas, double-next/double-yield protocol
+panics with Go's texts, panic propagation on next AND stop, Goexit crossing both directions.
+Six runs, not one — a rendezvous that passes once isn't shown deterministic.
+
+Two extras with reach: **runtime.NumGoroutine had NEVER answered truthfully** (gcount() summed
+all-zero scheduler state and floored to 1 — every program, forever); now wired to the goroutine
+registry, with the remaining gcount() consumers (metrics.cs, mprof.cs) chipped. And the seeded
+runtime reconvert censused SEVEN more pre-existing drifted files for the rebank family.
+
+Honest gap, stated by the lane: the full go2cs.slnx build was not run (machine contention with
+the window battery) — mitigated by building every hand-written member individually, bounded by
+the addition-only shape, and OWED at the banking pass. Two process traps for the doctrine fold:
+a CNR invocation with a nonexistent flag silently no-op'd and reported exit 0 (the false-green
+shape — read the output, not the status), and grep -P returned its documented false-empty.
+
+**Queue**: iter banks in the post-window pass (after the nine-merge push): bank artifacts +
+roster row + full slnx + post-merge filtered sweep. With net/http dispatched and iter staged,
+the ladder reads 194 -> 195 -> 196/208 = 94.2%.
+
+-- COORD
