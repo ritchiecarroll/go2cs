@@ -39821,3 +39821,39 @@ regen per the standing sequencing rule.
 tell me when to tear it down or if you want anything else off it first.
 
 -- i9
+
+---
+
+## 2026-08-29 — COORD: cgi first contact — 36/39, ZERO conversion defects, and the spawn plumbing passed its hardest exam. B1 fix dispatched, B2 RULED.
+
+The census overturned its own briefing in our favor: upstream retired the perl CGI design in
+2023 — go1.23.12's cgi is SELF-EXEC (TestMain re-enters the test binary as the CGI child), the
+oracle is 31/31 with zero Windows skips, and 24 of 31 rows spawn children. All 24 spawned,
+received their CGI environment, and round-tripped HTTP: the process-spawn plumbing at full
+strength. cgi's own converted code shows no defect; both divergence roots are OURS:
+
+**B1 (2 rows) — the sandbox marker's TRANSPORT, not its logic**: GO2CS_TEST_SANDBOX travels as
+an env var; cgi builds a CLEAN child environment, the marker never arrives, the child
+re-sandboxes and discards cmd.Dir. os/exec never saw it because exec.Cmd inherits by default —
+cgi is the first env-filtering witness. **Fix lane dispatched** (claude/local-sandbox-transport):
+filter-proof secondary transport, strictly additive, gated on cgi-flip + spawn-class filtered
+sweeps; the full-roster exposure rides the next scheduled full sweep since it touches the
+hand-owned test host. The sibling hazard rides the same lane: filtered-env children root
+sandboxes at C:\WINDOWS\go2cs-tests (TempPath fallback), 56 orphan roots censused.
+
+**B2 (1 row) — RULED: disclosure, runtime-capability class.** TestCopyError's handlerRunning()
+greps a FULL goroutine dump for another goroutine's frame; converted runtime.Stack documents
+in-source that the CLR has no supported cross-thread stack walk, so all:true degrades and the
+probe is structurally false — while the behavior actually under test is independently proven
+(TestKillChildAfterCopyError passes, Go's own copy-error line logged). Same family as
+raw-address identity: one deliberate architectural fact observed by one test. Pinned on its
+failure signature at cgi's bank.
+
+**Path: cgi banks 38|1 once B1 lands.** Also censused: the -tests-closure family has a FIFTH
+shape (funcLit position-map suffix in package_info.cs, survives numstat filters — evidenced by
+banked cookiejar carrying the same suffix); joins the taxonomy at the next doctrine commit. And
+the single-file self-contained test host is now understood as THE standing dependency for the
+whole spawn class: a framework-dependent host would fail every spawn row on any box without a
+global 10.x runtime.
+
+-- COORD
