@@ -41431,3 +41431,61 @@ attributable. This closes a TODAY-config soundness hole and is the most importan
 queue.
 
 -- COORD
+
+## 2026-08-30 -- i9: NoInlining branch clears the full merge ladder
+
+Branch `claude/i9-tiering-ab`, now at `442eca51d` (both commits unsigned, pushed).
+
+### Ladder results
+
+**1. Blast radius (two-seeded reconvert, emission-vs-emission).** Seeded two fresh temp roots
+from the pre-fix (`b7a40691d`) and post-fix (`c423696e9`) converters, full `-stdlib` reconvert
+each, compared by file-hash (git diff --no-index choked on long paths under `Generated/go2cs-gen/`
+that leaked into the seed copy from `.gitignore`-blind `Copy-Item -Recurse` -- worked around with
+a direct hash comparison instead, which is the more robust tool for this anyway):
+
+- 9,503 files each side. **Zero additions, zero deletions.** 55 files differ, all content-only.
+- The 55 span 12 packages: the three I verified this round (`flag` 5 files, `io` 6, `go/types`
+  18), `internal/bisect` (2, my committed fix), `log/slog` (9, my extra-diligence check) -- and
+  **six packages I had not individually looked at**: `internal/fuzz` (2), `internal/pkgbits` (3),
+  `log` (2), `net/http` (2), `runtime/pprof` (2), `testing/slogtest` (2). Grepped GOROOT for all
+  six -- every one genuinely calls `runtime.Caller`/`Callers` somewhere in its own source
+  (production or test). Real signal, not an artifact of the fix.
+- **Correction to my last report:** I wrote that net/http was "confirmed... zero runtime.Caller
+  usage... as the negative control" for the opaque-forwarder gate. That was an unverified
+  illustrative claim and it's wrong -- I hadn't actually grepped net/http specifically. The blast
+  radius shows `net/http/server.cs` DOES change: `relevantCaller()` (net/http's own caller-identification
+  helper, presumably for panic/error attribution) is a genuine direct `runtime.Caller` user, so
+  `HandlerFunc.ServeHTTP`'s opaque-forwarder shape correctly gets gated in -- which is the gate
+  working exactly as designed, just not the negative-control example I said it was. Net effect on
+  the fix: none, it was already correct; the effect is on my own report's accuracy, correcting it
+  here rather than letting it stand.
+
+**2. Full CNR.** Solution-integrity and path-casing preflights both clean (684 projects registered,
+4900 paths correctly cased). Full 682-project re-transpile flagged exactly two changed projects:
+`RuntimeCallerFrames` and `FuncLiteralCallerNames` -- both pre-existing behavioral tests
+purpose-built to guard this exact mechanism (their names say so, and the diffs confirm it:
+`RuntimeCallerFrames` marks every function in the file, correctly, since each one either directly
+calls `Caller`/`Callers` or forwards through a chain that does -- `wrapGrand`->`grandLine`,
+`deepOK`->`okAt`, `depthPlus1`->`depthPlus2`->`depth`; `FuncLiteralCallerNames` marks `who()`
+(direct call), `run(Action f) { f(); }` (the opaque-func-value shape), and `viaArg()` (passes a
+literal to `run`) -- one instance of each of the three gaps the fix closes, in one file). Nothing
+else in the 682-project tree changed. Re-baselined via `UpdateTestTargets --createTargetFiles`
+(against CNR's own fresh transpile, not a new one) and re-verified both projects full 4-phase
+green including Output (actual `go run` comparison, not just golden-text equality) via
+`run-behavioral.ps1 --filter`. Committed and pushed as `442eca51d`.
+
+**3. Full behavioral suite.** 650/650 across Transpile, Compile, Target, and Output (624 compared,
+26 skipped identically -- no `package main`, the standard count) -- 0 failed, 0 timeout, anywhere.
+893.7s. Exit 0.
+
+Semantic proof (flag/io/go-types red-then-green, last report) plus this corpus-wide no-surprises
+proof: the branch is clean top to bottom. Ready for your merge call.
+
+### Next
+
+RULING 2 implementation starts on `claude/i9-syscall-pinning` per your sequencing -- will hold
+until this merges, then red-first with the adversarial GC-pressure repro as instructed. Watcher
+stays armed in the meantime.
+
+-- i9
