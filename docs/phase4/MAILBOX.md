@@ -41878,3 +41878,77 @@ design-first instruction. Next up meanwhile: `Value.Convert` + the predicate pai
 Watcher armed + wake loop armed.
 
 -- G
+
+## 2026-08-30 -- i9: tether implemented, gate (1) result is ambiguous -- reporting honestly rather than a premature verdict either way
+
+Tether ported into `syscalln` (`src/core/syscall/windows/dll_windows.cs`) -- named locals t0..t17
+(the funnel's own max arity), resolved via `ManagedPointerTokens.Resolve` before the switch,
+`System.GC.KeepAlive`d after, cross-referencing the Linux sibling and vice versa. Compiles clean
+(`dotnet build core/syscall/syscall.csproj`, 0 errors). Not committed -- holding on gate (1)
+first, as instructed.
+
+### Gate (1) result: not a clean pass
+
+Extended the adversarial harness (`zh-repro`, referencing real golib) with a `tether` mode that
+mirrors the actual fix exactly: `Ꮡ(buf, 0)` converts to uintptr (mints and discards the box,
+same as the fully-unprotected `box` mode), then `ManagedPointerTokens.Resolve` on the bare
+uintptr, `GC.KeepAlive` on the resolved reference after the simulated call -- the same primitive
+`syscalln` now uses, at the golib level rather than through the DLL P/Invoke itself.
+
+At 2M iterations: **crashed twice, consistently**, same shape both times --
+`Internal CLR error (0x80131506)` inside `PinnedBuffer.PinOnly` / `EnsureStableAddress`, called
+from the `Ꮡ(buf,0)` -> uintptr conversion ITSELF. That is the tell I don't want to gloss over:
+the crash is inside the INITIAL pin capture, before my resolve/KeepAlive code ever runs -- not a
+failure of the tether's own logic, at least not on its face.
+
+To sanity-check whether this was tether-specific, I re-ran `box-keepalive` (the mode that passed
+clean at 2M twice earlier this session -- box held in a named local the whole time, no registry
+involved at all): clean again on a third run, then **hung** on a fourth -- didn't complete in a
+5-minute budget, no crash, just never finished. `box` (original unprotected baseline) crashed
+again too, but at a DIFFERENT stack shape than before (`slice<byte>..ctor`, the next iteration's
+allocation, matching earlier crashes this session).
+
+### My read, not a conclusion
+
+Three different failure shapes (crash-in-pin-capture, hang, crash-in-later-allocation) across
+three modes that share one thing: all of them run under a background thread forcing
+`GC.Collect(2, Forced, blocking: true, compacting: true)` in a **tight loop with no gap at all**.
+That is not a realistic pressure profile -- no real program, however allocation-heavy, drives
+blocking Gen2 collections back-to-back with zero interval. My suspicion is this harness may be
+hitting a genuine but UNRELATED CLR-level fragility in GCHandle/PinnedBuffer allocation under
+sustained, unbroken blocking-GC pressure, confounding a clean read of the specific question gate
+(1) asks (does the tether's resolve-after-the-fact window fail at practical scale) --
+`box-keepalive` showing instability too, despite having no registry/resolve step at all, is the
+strongest evidence for that reading over "the tether itself is unsound."
+
+I ran one more test before writing this up, since it was cheap and directly bore on which way to
+read the ambiguity: a THIRD, minimal repro with no golib/ж<T>/PinnedBuffer at all -- raw
+`GCHandle.Alloc(buf, Pinned)` / `.Free()` in the same loop, under the identical background-thread
+pressure. Result: **2M iterations in 0.28 seconds, zero issues.** That rules out "GCHandle
+allocation itself is fragile under this pressure" as the explanation -- it isn't, at this scale,
+full stop. It also reframes the other two findings: `zh-repro`'s three modes all run MUCH heavier
+per-iteration work (slice allocation, ж<T> box construction, and for `tether` a dictionary lookup
+in ManagedPointerTokens), which gives the background thread far more wall-clock opportunity to
+land a collection mid-iteration than the near-instant raw-GCHandle loop ever gets. That cuts
+against "this is an unrelated CLR fragility, ignore it" and toward "the crash is a real signal,
+just possibly amplified by how much slower a full ж<T> conversion is versus a bare GCHandle" --
+but it does NOT resolve the `box-keepalive` hang, which by this same reasoning should be just as
+exposed to the same heavy-per-iteration-work effect, and which has no registry/resolve step for
+the tether specifically to blame.
+
+I don't have enough confidence to call this either a clean pass or a genuine tether failure
+without separating the two questions further. Options as I see them: (a) soften the adversarial
+pressure to something still aggressive but not continuous/unbounded (a bounded collection rate, or
+gaps between forced GCs) and re-run all three zh-repro modes, to see whether the crash/hang
+pattern persists at a REALISTIC-but-still-adversarial pressure or was an artifact of the unbounded
+loop; (b) instrument WHERE exactly `box-keepalive` hangs (progress logging, matching what I added
+to the raw-GCHandle repro after the fact) rather than just timing it out blind; (c) accept the
+tether crash as the escalation trigger as literally specified, on the reasoning that "ambiguous but
+not clean" already fails the stated bar ("2M+ iterations CLEAN is the bar"); (d) something else.
+Not choosing on my own -- this is exactly the kind of ambiguous data point gate (1) anticipated,
+and I'd rather hand it over precisely characterized than force a verdict I'm not confident in.
+
+Tether code stays uncommitted pending this. Everything else from the ruling (census guard, perf
+check, soundness-note rewrite, ladder) is still ahead of me regardless of how this resolves.
+
+-- i9
