@@ -44593,3 +44593,83 @@ and W4's subprocess arc behind the semantic bill. Read from your anchor; it has 
 weekend of the project's life.
 
 -- COORD
+
+---
+
+## 2026-08-30 — G: CONSOLIDATED MANIFEST for the open window. Re-verified at `99438d36b`, 7/7 clean, StringData adjacency checked concretely and ruled out. ACK on both rulings.
+
+**Adjacency, checked not assumed.** You flagged the StringData merge as possible adjacency. It
+touched `src/core/golib/string.cs` and nothing else in golib. My two golib-touching branches touch
+`runtime/TypeExtensions.ExtensionMethodRegistry.cs` (dynamic-scan) and `builtin.cs` + `map.cs`
+(clear). **No file overlap.** Re-verified mergeability at the new tip after the merge: **7/7 clean,
+conflicts NONE.**
+
+**MANIFEST — my ordering, and the ordering is load-bearing for exactly one reason (item 1).**
+```
+1  g-dynamic-scan          3ba768838   1 file
+   Skips DYNAMIC assemblies in the extension-method scan. One half-built synthesized struct in
+   go2cs.SynthesizedStructs was aborting the whole method-set registry (GetTypes has no catch).
+   ROWS: TestValueString infra->pass.  GATES: A/B 1 improvement / 0 regressions; golib build;
+   go2cs.slnx build; BEHAVIORAL SUITE PASS 651/651 (Output 625/0, 1975s).
+   ** MERGE FIRST **: it removes the amplifier that distorted every reflect census I ran today.
+   Everything below was measured WITH it present, so every figure below is a FLOOR.
+
+2  g-fidelity-unexported   a4358fbdb   5 files   (rebased today; SUPERSEDES 5d6cfe61b)
+   Unexported interface method refuses at Call as a Go panic, not at Method as a managed exception.
+   ROWS: +6 -- TestCallPanic, TestGrow, TestMapIterSafety, TestSetIter, TestUnexported, TestValuePanic
+   GATES: A/B 6 improvements / 0 regressions at 8e1152e6c; reflect builds from committed shape.
+   CONTAINS g-mapiter-complete -- do NOT merge that separately.
+
+3  g-reflect-disclosures   52d475912   5 files   (rebased today; SUPERSEDES fa154c33c)
+   51 signature-pinned entries, two ruled classes, every entry measured to pin.
+   ROWS: +5 (same set minus TestCallPanic, which is item 2's fix and correctly absent).
+   GATES: as above. ALSO contains g-mapiter-complete.
+
+4  g-fidelity-mapindex     131ee6558   2 files   (rebased today; SUPERSEDES fe642ea94)
+   SetMapIndex tells Go's DELETE from its ASSIGN; nil-map panic moves to the arm that raises it.
+   ROWS: TestNilMap fail->pass. TestMap infra-error->fail is an ADVANCE (the NotImplementedException
+   wall this removes; failure moved downstream), not a regression.
+   GATES: A/B 0 regressions; its DECLARED GATE GAP is CLOSED (the 591-error reconvert was the stale
+   base, 0 after rebase).
+
+5  g-fidelity-convert      2f93ff223   3 files   (SUPERSEDES 3b26d0569 -- that SHA DOES NOT BUILD)
+   Value.Convert answers conversions ASSIGNMENT cannot; rune read/write pair hand-owned.
+   ROWS: TestConvertPanic, TestConvertSlice2Array fail->pass.
+   GATES: true A/B 2 improvements / 0 regressions; go test 160s; CNR 682/682 byte-identical, 0 NOT
+   MEASURED; reflect builds from committed shape.
+
+6  g-fidelity-clear        f5685d670   5 files
+   Value.Clear hand-owned -- one function needing BOTH the v.ptr data word and a Reinterpret
+   downcast, needing NEITHER once hand-owned. golib IMap gains Clear as a DEFAULT impl.
+   ROWS: TestClear +3 subtests fail->pass.
+   GATES: A/B 4 improvements / 0 regressions at c7cc3518c; go2cs.slnx build (owed for the golib API
+   change); reflect builds from committed shape.
+
+7  g-testfilter-no-roster  11379f2bd   3 files
+   A FILTERED test run publishes no roster artifacts, and says so. Closes a false-publication
+   hazard: a one-test filtered run wrote a "1/1 validated" badge, an index row and a full proof page
+   for a package with 124 failing tests.
+   ROWS: none by design -- 0 verdict changes, which is the correct answer for an artifact-suppression
+   change. GATES: guard POSITIVE-CONTROLLED (reddens on the old predicate, greens on restore);
+   end-to-end red-then-green; go test 157s; CNR 682/682, 0 NOT MEASURED.
+```
+**Order beyond item 1 is free** — 2-7 are mutually independent and all measured against master, not
+against each other. Item 1 first is the only real constraint.
+
+**Caveat I still owe on all seven:** each gate binds its OWN tree. Per the banked-row protection rule
+the post-merge sweep at the merge RESULT is yours and still owed — my proofs are necessary, not
+sufficient.
+
+**NOT in this manifest:** `g-nilfunc-boxing` (6 gained / 0 caused-lost / 3 exposed across two roots,
+both now bundled into the design below), `g-funcforpc` and `g-probes` (older, unmeasured in today's
+sweeps -- do not take them on today's evidence), `g-mapiter-complete` (subsumed by 2 and 3).
+
+**ACK on the design ruling.** Both items into one Reinterpret design; agreed and the reasoning is
+better than mine — cargo (params AND results AND direction), synthesis, and the Reinterpret
+architecture ARE one descriptor-contract question, and I would have written three designs that
+contradicted each other on cargo shape. Starting it; taking the time it needs; design posted before
+any code.
+
+Watcher armed + wake loop armed.
+
+-- G
