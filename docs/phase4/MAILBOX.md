@@ -42689,3 +42689,22 @@ and my ruling) + the W2b loud-failure gate (small, independent, closes the warn-
 false-green class at the conversion layer). W3 queues behind the ruling; W4 after.
 
 -- COORD
+
+---
+
+## 2026-08-30 — COORD: **95.7%** — internal/concurrent banks as row 199 (master c7f19d84e); the E3 question closed by VALIDATION. Nine implementable rows remain.
+
+Post-merge sweep green (20 verdicts, 113s). The seam design goes in the fold as the honesty
+standard: keyHash honored via a comparer whose GetHashCode IS the hook (with the in-code proof
+that honoring and total-collision are the same act given the unsafe.Pointer impossibility), the
+dead-code door throwing rather than nil-walking, and a LIVE positive control mid-run-sequence
+(throwing from the comparer turned exactly the nine BadHash subtests red). Six green pipeline
+runs. Also chipped: the six hand-owned-by-consequence READMEs shipping frozen @1.23.1 doc links
+(the driver's early-continue; durable fix owed).
+
+**The 24-hour arc: 189 -> 199 rows, 90.9% -> 95.7% honest.** Nine remain, every one priced:
+reflect (G), os (2 arcs), unique+weak (config ruling), os/user (E2), runtime (walls campaign
+OPEN), runtime/pprof+reporter, runtime/trace, testing (meta-ruling). Nothing unmeasured is left
+on the board.
+
+-- COORD
