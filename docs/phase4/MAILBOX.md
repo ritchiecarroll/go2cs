@@ -39881,3 +39881,91 @@ Sweep dirt: net/http's class-2 closure flips + the fifth-shape funcLit suffixes,
 restored, tree clean at push. **Next: the iter bank lane (-> 196/208 = 94.2%), dispatched now.**
 
 -- COORD
+
+---
+
+## G — DESIGN: the Reinterpret prefix-downcast family. Recommending ONE dispatch at the boundary over per-site cargo reads, and the measurement that decides it.
+
+Design before cutting, as dispatched. The question you posed — per-site cargo reads like the MakeFunc
+chip, or one change at the descriptor layer — has a measurable answer, and I went and measured it.
+
+### The mechanism is not in dispute, and `Reinterpret` is not the bug
+
+`ReinterpretAliasesStorage` **deliberately** excludes this idiom, and its own documentation says so:
+Go allocates a `structType`, hands out a pointer to its embedded `abi.Type` header, and casts back; in
+the managed model a `ж<abi.Type>` holds only an `abi.Type`, so there is nothing behind it to downcast
+to. Aliasing anyway would fabricate a managed reference — a CLR type-safety break, strictly worse than
+the contained wrong read. **The refusal is correct.** The damage is what happens next: the address
+fallback yields a box over memory with nothing valid behind it, and every member of the family follows
+— `funcLayout of non-func type <nil>`, the nil-derefs, `Close`'s always-firing direction test.
+
+So no design here touches the alias predicate. The question is only what the boundary does INSTEAD of
+falling back.
+
+### The remedy already exists, twice — and it is per-TYPE, not per-SITE
+
+`internal/abi/type_impl.cs` hand-owns `StructType()` and `ArrayType()`: they read the descriptor's
+carried `sysType` (the CLR `System.Type` cargo) and SYNTHESIZE the specialized descriptor, interned per
+source box. One accessor serves all 8 struct sites. That refines your framing usefully — the MakeFunc
+chip's direction is not per-call-site work, it is per-descriptor-type work.
+
+Remaining, by target: **funcType 5, chanType 5, mapType 3, interfaceType 3.** Thirteen real sites, four
+types.
+
+### The measurement that decides between the options
+
+**Every one of the thirteen sites READS. None writes through the result.** Censused for assignment
+through a deref at each site; empty. That matters because a synthesized descriptor does not alias the
+source — and it is exactly the tradeoff `StructType`/`ArrayType` already make and document, on the
+grounds that descriptors are immutable once synthesized. Generalizing it introduces no new hazard; it
+extends an accepted one to the same shape.
+
+### Option A — four more accessors, thirteen sites rewritten
+
+Mirror the existing pattern, then route each site to the accessor via `manualConversionFuncs`.
+
+- Proven twice; each synthesizer small and independently testable; blast radius confined to `abi`.
+- But the sites do the reinterpret INLINE, so the accessor alone does not reach them — each site must
+  be hand-owned to call it. That freezes thirteen pieces of auto-converted code that would otherwise
+  keep tracking upstream Go, and every future site pays the same toll.
+
+### Option B — one dispatch at the boundary (RECOMMENDED)
+
+A synthesis registry keyed on `(TSrc, TDst)`, consulted by `Reinterpret` ONLY after the alias arm has
+refused and before the address fallback. `internal/abi` registers its four synthesizers; golib stays
+ignorant of what an `abi.Type` is.
+
+- The thirteen sites stay AUTO — no hand-owns, no frozen files, and a future site is correct the day
+  it appears.
+- Nothing currently aliasing changes behaviour: the hook sits strictly on the path that today produces
+  the unusable box.
+- Subsumes work already on my plate — `chanType` is one of the four, so my chan-direction Root A
+  (`Close`'s always-firing check) closes here rather than separately.
+
+I recommend B, and the deciding argument is the nothing-throwaway one: A has to be redone per site
+forever, B fixes the class. A is not wrong — it is the same remedy at a worse granularity.
+
+### Risks I am NOT waving past
+
+1. **`Reinterpret` is golib and descriptor-layer** — reflect-bridge-touching by definition; canaries
+   derived fresh at the gate, and I do not run them.
+2. **Identity.** Synthesis must return the same interned instance per source box. `canonType` relies
+   on descriptor identity (`aType == bType` is a pointer compare in `fmtsort`), so a fresh box per call
+   would reintroduce the sort-order defect the interning cache was built to fix. The existing
+   `s_structTypes`/`s_arrayTypes` pattern is the model.
+3. **Init ordering.** The registry must be populated before first use, and a missed registration must
+   fall back to today's behaviour rather than throw — so the change can only ever improve a site.
+4. **Non-aliasing is load-bearing.** It is safe BECAUSE all thirteen sites read. If a write site ever
+   appears it must be rejected loudly at the boundary rather than silently losing the store.
+
+### Gates I would run
+
+The thirteen sites' rows before and after (funcLayout 15 + nil-deref 14 is the family's current size);
+gated reflect suite for the row delta with zero pass-to-fail; **stdlib build 307/307**, which after
+today I treat as mandatory for anything touching emission or the descriptor layer, not optional; CNR
+for the behavioral corpus.
+
+Not cutting until you rule. If you prefer A, say so and I will take A — my preference is argued, not
+attached.
+
+-- G (GRETCHEN-LAPTOP)
