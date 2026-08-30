@@ -41541,3 +41541,87 @@ that's built and the census-derived call sites are actually passing under the sa
 harness, not just compiling.
 
 -- i9
+
+## 2026-08-30 -- i9: STOP before implementing -- the approved design's premise doesn't hold, and the real gap is different (and possibly broader) than scoped
+
+Still on `claude/i9-syscall-pinning`, no corpus/converter changes yet -- everything below is scratch
+repro work. Flagging before writing a single line of the approved fix, because what I found changes
+what the fix needs to BE.
+
+### The premise I designed against was wrong
+
+I built RULING 2's census and design believing `ж<T>`'s `uintptr`/`void*` conversion captured a
+managed address with NO pin at all -- that's the literal reading of `dll_windows.cs`'s own
+soundness note ("golib's ж→uintptr conversion cannot pin across the call"). It's stale. Reading
+`ж.cs` on current master (`ca33b1f5a`) directly: the `uintptr`/`void*` conversion operators already
+call `value.EnsureStableAddress()` before returning the address, which allocates a REAL
+`GCHandle.Pinned` (via `PinnedBuffer`, cached on the box's own `m_pin` field) and holds it for the
+box's lifetime. This is presumably recent work from another lane -- the surrounding comments
+reference "the ratified provenance design" and "the os/exec heap-corruption arc, 2026-08-26."
+
+So the mechanism the approved design assumed doesn't exist (`GetPinnableReference()`/`fixed` as the
+FIRST pin) is arguably already redundant with what's there. That's not why I'm stopping, though --
+what I found next is.
+
+### The real gap: the pin's lifetime is tied to a value nothing keeps alive
+
+`Ꮡ(buf, 0)` mints a TRANSIENT `ж<T>` box. `(uintptr)` that box and the conversion pins the box's
+storage and returns a bare `uintptr` -- a plain number, carrying no reference back to the box that
+produced it. Once the conversion expression finishes, NOTHING references the box anymore (only the
+bare uintptr survives, passed on to `Syscall`/`SyscallN`). The box is immediately eligible for
+collection. If it's collected and finalized WHILE the native call is still using the address the
+now-dead box's pin used to protect, the storage can be freed/moved out from under an address a
+native callee is actively holding -- a full pin doesn't help if what owns the pin dies mid-flight.
+
+Verified directly, through the REAL `ж<T>` type (not a synthetic analog -- referenced golib's actual
+`golib.csproj`, called the actual `Ꮡ` helper and the actual `uintptr` conversion operator), under
+the same adversarial GC-pressure harness as the earlier repro:
+
+- `Ꮡ(buf, 0)` converted to `uintptr`, used, box left to die naturally (mirrors what a zsyscall
+  wrapper's `(uintptr)Ꮡbuf` argument actually does): **crashes**, 2M iterations, "Fatal error.
+  Internal CLR error (0x80131506)" -- inside `AllocationCounter.NewArray` on a LATER, unrelated
+  iteration, consistent with real heap corruption from an earlier iteration.
+- Identical shape, but the box itself held in a local and `GC.KeepAlive(box)` called after the
+  simulated native call: **clean**, 2M iterations, 0 corruption.
+
+So the existing pin genuinely works -- IF something keeps the box that owns it alive through the
+call. Nothing currently does, at any of the ~204 census sites (every one converts `Ꮡ...` straight
+into a `uintptr`/`void*` argument inline, keeping no reference to the box).
+
+### Why this isn't just a mechanism swap
+
+The approved design's `fixed`/`GetPinnableReference()` primary mechanism doesn't map onto this
+shape cleanly: `fixed` would pin AGAIN (redundant with the existing GCHandle) and its own C#-level
+lifetime is exactly as narrow as what's failing now unless the whole call is textually inside the
+`fixed` block. GCHandle is already what's under the hood. The actual fix looks more like: capture
+each `Ꮡ...`-derived box in a temp BEFORE converting it, and `GC.KeepAlive()` every such temp AFTER
+the syscall statement -- extending the EXISTING pin's lifetime rather than adding a new one. That's
+a real converter-emission change (temp-capture + KeepAlive insertion around every
+Syscall*/SyscallN/LazyProc.Call statement with pointer arguments), but a different shape than the
+census and gate plan you approved were built around, and I don't want to build the wrong thing
+confidently.
+
+### The bigger open question
+
+`syscalln` can't be the fix point -- by the time it receives its `ReadOnlySpan<uintptr>`, the boxes
+are already gone; a `uintptr` carries no reference back. Whatever keeps a box alive has to happen at
+the ORIGINAL call site, before/around the conversion. And that raises the question I don't have an
+answer to yet: is this bug scoped to the syscall funnel, or is EVERY `ж<T>` → `uintptr`/`void*`
+conversion fed into ANY native call (P/Invoke `IntPtr` params, other `calli` sites, anything holding
+a converted address across a call) exposed the same way? The conversion operator itself is generic
+machinery in `ж.cs`, not syscall-specific -- I have not censused beyond the syscall funnel and don't
+want to guess at the blast radius before measuring it.
+
+### What I'm asking
+
+Not proceeding with the approved `GetPinnableReference`/GCHandle-split implementation as designed --
+it doesn't fit what I actually found. Options as I see them, not picking one: (a) redesign around
+the KeepAlive-extension shape for the syscall funnel specifically, re-running the same gate plan
+against it; (b) widen the census first to find out whether this is a syscall-specific fix or a
+`ж<T>`-conversion-wide one, before designing anything, since the right fix location depends on the
+answer; (c) something else you see that I don't. Holding here rather than picking a direction
+alone, given how much the ground shifted from the approved design's premise. Repro code (both the
+original unpinned-vs-fixed/GCHandle harness and this one against the real `ж<T>`) is in my
+scratchpad, ready to extend whichever way this goes.
+
+-- i9
