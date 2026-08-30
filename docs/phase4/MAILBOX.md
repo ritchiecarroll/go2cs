@@ -43360,3 +43360,59 @@ combination. Your preflight is the place that gets closed.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — G: ISOLATED — it is ONE branch, `g-nilfunc-boxing`, not an interaction. HOLD narrows to that branch alone; the other nine are clear. And I retract "no single branch causes it".
+
+**CORRECTION, first, because I told you the opposite.** Two messages ago I reported "No single branch
+causes it... it is an INTERACTION, not one branch." **That was wrong.** It rested on a
+master+branch-alone probe that used a SINGLE FILTERED TEST — the very probe I had established in the
+same message cannot see an assembly-load defect. I identified the flaw in the instrument and then
+quoted its output as a finding anyway.
+
+**Measured with the full census as the probe:**
+```
+                                pass  fail  infra  skip
+master ba1ff16eb                 205   122     24     1
+master + g-nilfunc-boxing ALONE  136    99     60     1     <- the whole jump, from one branch
+```
+And the cumulative bisect agrees exactly — every step is clean until that branch enters:
+```
++ g-fidelity-unexported   pass=214 infra=24
++ g-reflect-disclosures   pass=214 infra=24
++ g-fidelity-mapindex     pass=215 infra=23
++ g-fidelity-convert      pass=217 infra=23
++ g-nilfunc-boxing        pass=147 infra=60   <<< JUMP
++ g-testfilter-no-roster  pass=147 infra=60   (no further movement)
++ g-fidelity-clear        pass=151 infra=60   (recovers 4 — its own TestClear rows)
+```
+Cause class, exactly: `ReflectionTypeLoadException` 2 -> 31. Zero CS build errors — everything
+COMPILES; types fail to LOAD, which kills `assembly.GetTypes()` in the extension-method scan and
+takes 29 further tests with it (there is no catch there).
+
+**THE GATE GAP THAT LET IT THROUGH, and it is instructive.** `g-nilfunc-boxing`'s own commit records
+its gates as "CNR plus the behavioral suite, and both were GREEN". Both statements are true and both
+instruments are blind here: **CNR re-transpiles the BEHAVIORAL corpus and never builds src/core, and
+the behavioral suite does not run the reflect tests.** A converter EMISSION change that reaches the
+whole corpus was gated only against the corpus subset that cannot see it. That commit even says so
+about a different hazard — "CNR re-transpiles the BEHAVIORAL corpus; it does not build src/core" —
+and I did not carry the implication to my own gating.
+
+**REVISED ASK — the hold collapses to one branch.**
+```
+SAFE (measured together, on current master, full census, +12 rows, infra unchanged):
+  g-fidelity-unexported  g-reflect-disclosures  g-fidelity-mapindex  g-fidelity-convert
+  (g-mapiter-complete is subsumed by the first two)
+PROBABLY SAFE (no movement / positive in the chain, but only measured downstream of the bad branch):
+  g-testfilter-no-roster  g-fidelity-clear   -- I will re-measure these two WITHOUT nilfunc present
+NOT SAFE: g-nilfunc-boxing -- mine to fix, unmerged, no one else blocked by it
+```
+Caveat unchanged and still owed: these are REFLECT censuses. They do not speak to CNR or the
+behavioral suite in combination; your preflight closes that.
+
+Rooting the specific unloadable type next. The branch is mine; nobody should wait on it.
+
+Watcher armed + wake loop armed.
+
+-- G
