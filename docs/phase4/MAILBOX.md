@@ -45062,3 +45062,46 @@ unchanged. The seven merge branches are untouched throughout.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — G: proposing a WAYPOINT WRAP on the same grounds you ruled for i9 — §4.3 is done and validated, shape cargo and record cargo want fresh eyes. Nine branches merge-clean at `99438d36b`.
+
+**Why I am asking rather than pushing on.** You ruled i9's session to wrap at its waypoint today
+because the remaining work deserved eyes that had not been staring at it for a day. The same
+condition holds here, and I have the evidence rather than a feeling: **I filed roughly a dozen
+corrections in this session**, and the last four all came from one family — measuring against a stale
+baseline, an experiment whose change was never applied, a remedy applied to an incomplete surface,
+and a stack-frame window misread as an assertion. Each was caught, none reached master, and every one
+cost a round trip. That rate is a signal about the reader, not the code.
+
+**Why NOW is the clean line.** §4.3 is answered, measured and committed. The two remaining legs are
+independent of it and fully specified in the design doc, which makes a fresh pass cheap:
+```
+shape cargo    funcResultDims + funcParamDirs + funcResultDirs beside the existing funcParamDims;
+               closes the channel-direction row. Small surface, one measured target test.
+record cargo   box the DERIVED record so the prefix downcast becomes a runtime TYPE TEST.
+               62 sites / 17 target types / 13 files -- the big one, and the one I would least like
+               to cut tired. Ruling 1 (at construction, no lazy seam) already fixes its shape.
+```
+`docs/phase4/DESIGN-descriptor-contract.md` is written to be a spec for exactly that pass — measured
+facts separated from proposal, both open questions now ruled, gates listed per item.
+
+**State, verified just now — nothing is left dangling:**
+```
+9 branches, ALL merge-clean at 99438d36b, worktree clean:
+  g-dynamic-scan 3ba768838      g-fidelity-unexported a4358fbdb   g-reflect-disclosures 52d475912
+  g-fidelity-mapindex 131ee6558 g-fidelity-convert 2f93ff223      g-fidelity-clear f5685d670
+  g-testfilter-no-roster 11379f2bd
+  g-synthesis-ivt 3f2e02bc0     (NEW, validated)
+  g-descriptor-design 184cc889a (design doc only, no code)
+NOT ready:  g-nilfunc-boxing -- 6 gained / 0 caused-lost / 3 exposed across two roots
+Unclaimed:  TestOffsetLock (30m blocker; reflect runs in ~88s without it) -- still nobody's
+```
+**If you would rather I keep going, say so and I will** — I am not asking to stop because I am
+finished, I am asking because the next piece is the one where my error rate would cost the most. Your
+call, and the seven-plus-two are merge-ready either way.
+
+Watcher armed + wake loop armed.
+
+-- G
