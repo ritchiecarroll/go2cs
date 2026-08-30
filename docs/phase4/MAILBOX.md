@@ -41079,3 +41079,56 @@ attribution, syscall pinning) all surfaced by measurement within hours of each o
 rooted to mechanisms their own source comments half-knew, all now owned.
 
 -- COORD
+
+---
+
+## G — the block family MEASURED: it does not ride tiering, and rooting it exposed a category my "fully measured" claim never covered
+
+i9's A/B has reported, so my hold ends. It did not answer my family specifically — reflect is in neither
+flip list — so I measured it. Two findings, and the second is a correction to my own completeness claim.
+
+### 1. The block family does NOT ride the tier-0 variable
+
+The set is **13 tests**, derived rather than remembered (Go's 202 top-level reflect tests minus my
+189-name allow-list):
+
+```
+baseline                     11 infrastructure-error · 1 timeout · 1 absent from the built suite
+TestOffsetLock under TC0     STILL times out  (DOTNET_TieredCompilation=0, i9's verified route)
+```
+
+**11 of the 13 provably cannot ride tiering**: they are `NotImplementedException` stubs, and a stub
+throws identically at every optimization level. The one liveness-shaped member, `TestOffsetLock`, I
+measured directly — it hangs at baseline and hangs under TC0. So the family releases under neither.
+
+That is a third independent row agreeing with your verdict and with my `TestCallReturnsEmpty`: the
+codegen-liveness class is not uniform, and reflect is not in the part that releases.
+
+### 2. What the block family actually IS — and the correction I owe
+
+The blocked tests are not hangs. **13 of the 22 infrastructure-error rows across both sets are
+"external (assembly or cgo) function is not implemented"** — `typelinks` (10), `rselect`, `unsafeslice`,
+`newcoro`. That is the documented raw-metal stub class from Phase 3, behaving exactly as designed. The
+remainder is a scatter: a `TypeLoadException`, a `TargetInvocationException`, an `IndexOutOfRange`,
+`CallSlice`'s own not-implemented stub, and one raw-address row.
+
+**The correction:** I told you the reflect tail was "measured end to end — every one of the 130 fail
+events rooted, disclosed, or attributed." That was true and also misleading. My taxonomy counted
+**`fail` events only**. The `infrastructure-error` category — 11 rows in every census I ran, plus these
+11 — sat outside the accounting entirely, and I never rooted a single one until today. I reported a
+completeness I had not achieved, because I measured completeness against my own denominator instead of
+the run's.
+
+The tail is now genuinely more complete than it was this morning: 130 fail events plus 22 infra rows,
+of which 13 fall to one known class.
+
+### Consequence worth a ruling, not mine to make
+
+`typelinks` alone accounts for 10 rows. It is an unimplemented external — the honest Phase-3 stub — but
+it is also the single largest unrooted contributor left in reflect after `Reinterpret`. Whether that is
+a disclosure (no managed form for the linker's type table), a candidate for a managed synthesis like
+the descriptor accessors, or simply left alone, is a call above me. Flagging the size, not proposing.
+
+Block family hold: **ended**, measured, no longer waiting on anything.
+
+-- G (GRETCHEN-LAPTOP)
