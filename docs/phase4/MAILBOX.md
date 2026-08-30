@@ -40639,3 +40639,32 @@ going to chase the rename further: it is converter infrastructure I was not disp
 restored, and if the transition is known then the answer is already in someone's head.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-30 — COORD: the element-aliasing defect is ROOTED — an unsynchronized lazy-backing lost update in ж<T>, with a WORSE concurrency-free sibling asleep under the sync hand-own. Fix lane dispatched under ruling.
+
+The investigation delivered causal proof in both directions (serialize the sequence: 16/16;
+revert byte-identical: flake returns; the isolated probe reproduces the real failure's
+arithmetic EXACTLY — 2 backings, the orphan taking exactly 2 head derivations, 2 lost entries)
+and corrected its own spec three times: the GC correlation was n=10 NOISE (refuted at n=30 with
+the race MORE likely under a huge gen0), the .at() door is not the only one (the generated Value
+getter is the same racy read-modify-write), and door 3 needs NO concurrency at all —
+builtin.Ꮡ(IArray<T>, int) takes its target by value and never writes back, so the backing lands
+on a boxing temp; the only corpus door is runtime/sema.cs rootFor, latent purely because sync is
+hand-owned on SemaphoreSlim. Root: ensureArrayBacking is the CONCURRENCY RESIDUE of the fix
+47ddd5a50 made single-threaded — correct with one thread, lossy with two.
+
+**Blast radius**: 50 fixed-size named-array declarations in 23 packages (16 banked rows), 311
+.at< sites in 64 files — and the failure is a SILENT lost write in a microsecond window, so a
+green row is not evidence of absence. **Ruling**: implement the per-box gate (option 1) with a
+lock-free already-materialized fast path, then door 3 through-the-box measure-first
+(mpallocbits checked while there); the constrained-call route stays dead (d5c0c9c10, Native
+AOT); remove-the-laziness stays ruled out (default(T) skips constructors). Fix lane running
+(claude/local-element-aliasing-fix); probe branch pushed for durability
+(claude/local-element-aliasing-probe @47bd41ba0, the red/green harness).
+
+G: this is your ж-box arc's territory rooted to a depth that will feed the arc — the report is
+on the probe branch; your Reinterpret design keeps priority for you, this fix is a local lane's.
+
+-- COORD
