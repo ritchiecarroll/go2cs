@@ -43199,3 +43199,50 @@ census's G6 prediction activates: the boss's next pipeline run stops at the CONV
 naming its three unresolved types — W2a's turn.
 
 -- COORD
+
+## 2026-08-30 -- i9: mpallocbits third door CLOSED -- both dispatch items done
+
+Read the owner's note. Grateful to have been part of this weekend, and back to it.
+
+Dispatch item (2) done, clean, no design escalation needed -- the shape generalized through
+machinery that already existed.
+
+**Root cause**: `(*pageBits)(b).setRange(...)` converted as a VALUE conversion,
+`Ꮡ((pageBits)(b))`. The generated Array-kind wrapper's conversion operator takes its argument BY
+VALUE, so a still-lazy source materializes on the OPERATOR'S OWN PARAMETER COPY -- the caller's
+storage is never written. Single-threaded, no race needed, which is why this door was tracked
+separately from doors 1-3.
+
+**Fix**: `pointerReinterpretManagedSource` (convCallExpr.go) already routes every OTHER
+managed-source pointer reinterpret through golib's `Reinterpret<T,TDst>()` -- an ALIASING path,
+not a copy -- but excluded every pointer-to-array target as a blanket rule. Correct for the
+general case (Reinterpret's own size/reference gate would refuse it anyway); wrong for the one
+sub-case pallocBits/pageBits IS: sibling names over the identical array shape, which go2cs-gen
+gives the same one-field layout regardless of Go name, so golib's own layout check already
+recognizes them as alias-safe. Narrowed the exclusion to that one sub-case. Emission:
+`Ꮡ((pageBits)(b))` -> `Ꮡb.Reinterpret<pallocBits, pageBits>()`, and the deref-and-rebind prologue
+this shape only existed to feed drops out too.
+
+**Verification**: ElemAliasProbe arm8 stays red (now documented as the general hand-written-
+conversion hazard, not the corpus's own site); new arm8b measures the actual fixed emission --
+not exposed, cold or warm. All other arms (0,1-4,5,5b,6,7,9,10) unchanged. Found a bonus: an
+EXISTING behavioral test, `NamedArrayWrapper` (built for the door-2 arc), already exercises this
+exact pallocBits/pageBits pattern -- re-baselined its golden and its Output phase passes against
+real `go run`, the strongest confirmation available. Full corpus reconvert+build: isolated blast
+radius exactly 2 files, 307 projects, 0 errors. CNR byte-identical, full suite 651/651 PASS.
+
+One process note: my first verification attempt used an ISOLATED single-package reconvert of
+`runtime`, which silently regenerated `runtime.csproj` with a NEW conditional ProjectReference to
+`internal/syscall/windows` that isn't in the committed corpus -- creating a real circular
+dependency with that package's OWN existing reference back to runtime (MSB4006). Not caused by
+this fix (Reinterpret is pure golib); reverted and re-verified through a proper seeded full
+`-stdlib` reconvert instead, which reproduces the committed dependency graph exactly. Flagging in
+case it's useful to whoever next reconverts `runtime` in isolation -- didn't chase it further,
+out of scope for this door.
+
+Committed and pushed: `claude/i9-mpallocbits` @ `9028f55ef`. `docs/phase4/
+INVESTIGATION-element-aliasing.md` carries the full record (new sec 6b).
+
+Both dispatch items closed. Watcher + dead-man re-armed. Standing by.
+
+-- i9
