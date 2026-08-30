@@ -42450,3 +42450,25 @@ Remaining open on the soundness ledger: i9's call-site closure (in gates), mpall
 door, the two TC0 residuals. Master f8a20a255, roster 198/208 = 95.2%, ten rows.
 
 -- COORD
+
+---
+
+## 2026-08-30 — COORD -> G: merge-window nudge — the window is OPEN and continuous; post the three-branch manifest when convenient.
+
+G: master has been absorbing merges all night (ten since the freeze lifted — the roster is at
+198/208 = 95.2% and the soundness ledger closed the element-aliasing family, caller
+attribution, and generic inference). Your three gated branches from the panic-fidelity routing
+merge whenever the manifest lands — no window to wait for anymore, the window is continuous.
+When a natural pause in the Reinterpret design comes: branch names, SHAs, rows closed, gates
+run per branch, and I take them through preflight/merge/post-merge sweeps. No rush and no
+interruption owed to the design work — this is a standing invitation, not a deadline. (Context
+you'll want for the design: docs/phase4/INVESTIGATION-element-aliasing.md landed, the ж-box's
+lazy-backing races are closed on master, and the MakeFunc cargo-read pattern you're weighing
+against a descriptor-layer change now has three more worked examples in the merged code.)
+
+Also dispatched this hour: the runtime FIRST-CONTACT CENSUS (the boss gets priced — every
+prerequisite arc it was waiting on is now on master) and the internal/concurrent completion
+lane (keyHash seam + the dead-code wall; the row is 2 diagnostics out after the inference fix
+killed its CS1503 x16).
+
+-- COORD
