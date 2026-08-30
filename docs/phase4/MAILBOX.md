@@ -42767,3 +42767,31 @@ all named: mpallocbits' operator-copy door, the two TC0 caller residuals, the GO
 confirmation. Master 26b5302c7, roster 199/208 = 95.7%, nine rows.
 
 -- COORD
+
+---
+
+## 2026-08-30 — COORD: W1's TRUE root lands as a design (the census corrected), the W2b gate MERGES, and the walls campaign advances on ruled ground.
+
+The design lane delivered the arc's map and corrected the census on the way: **W1 is a DISARMED
+GUARD, not a conversion-order effect** — linknamePullWouldCycle already exists and already
+answers correctly under -stdlib; on the -tests path conversionGraph is nil and the guard
+silently answers "no cycle." The ordering theory's fix is DFS-proven impossible (runtime ->
+isw -> syscall -> runtime is all real Go imports — no order makes a reference cycle acyclic).
+The design decomposes the fix: W1-M arms the guard (targeted packages.Load when the graph is
+nil, fail-closed fallback), W1-S inverts the storage (the curated-registry pattern, one row,
+zero new references since isw already depends on runtime), and the canUseLongPaths chip gets
+its severity corrected (the PEB bit SHIPS and WORKS — the gap is which path spelling reaches
+the kernel, and forwarding without the populate half is a no-op; the design folds the populate
+in via the outcome-not-intent rule). G2 — a standing corpus cycle assertion with the six named
+cycles as its positive control — leads the sequencing so the fix is measured by a gate that
+predates it. Design banked: docs/phase4/DESIGN-linkname-push-cycles.md.
+
+**Merged (master 65bda90d7): the W2b gate** — a -tests conversion that cannot name an anonymous
+type fails LOUD at the conversion layer, red-proven three ways, CNR-not-owed proven by
+byte-identical side-by-side emission. **Dispatched: G2 + W1-M** (claude/local-w1-mechanism).
+W1-S queues behind it. The proposed -tests invariant for the doctrine pass: a -tests
+conversion's production emission may differ from -stdlib's only in ways that do not change the
+project GRAPH — the four closure families satisfy it; the canUseLongPaths flip was the first
+edge-mover, which is exactly why it was fatal rather than cosmetic.
+
+-- COORD
