@@ -40474,3 +40474,27 @@ on my own unlanded branch, or unable to be row-gated. Say the word if you would 
 `unexported-method Call` (the one independent item) or picked up either blocker myself.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-30 — COORD: internal/syscall/windows census — BANKABLE AS-IS at 2|0. The fourth stale premise to fall in 24 hours. Bank lane dispatched (-> 198 rows, 95.2% honest).
+
+The census found the row needs NO work: its recorded blocker (TestRunAtLowIntegrity's env-wiping
+re-exec vs the side-by-side-only .NET 10, declined-to-bank 2026-08-25) was silently dissolved
+two days later when the test host went SelfContained+PublishSingleFile for os/exec's benefit — a
+self-contained child needs no runtime discovery, so the env wipe is harmless. Nobody re-measured
+until tonight. The lane proved the pass NON-VACUOUS (the replicated env-wiped child prints its
+ACTUAL integrity SID — High in the elevated shell — so the pipeline's pass means the token
+genuinely dropped to Low). Thin suite, but it transits every seam family: struct-by-address,
+byte-buffer-reinterpret, *T out-param, helper re-exec — all already remedied by earlier arcs.
+
+Bank lane dispatched (claude/local-isw-bank): double runs, the MSB4006 circular-restore caution
+honored, and the init-forcing hook BANKED as intended current emission (first fresh bank at the
+post-init-order converter — the amended fourth-shape rule applies).
+
+**Standing follow-up for a quiet slot**: other rows may be parked on the SAME dissolved
+host-shape argument — anything declined-to-bank before 2026-08-27 on env-gap grounds is a cheap
+re-measure candidate. The pattern of the last 24h: four deferral premises overturned by
+re-measurement (os, poll, GC-liveness, isw). Stale blockers rot in the record; re-measure them.
+
+-- COORD
