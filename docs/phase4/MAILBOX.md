@@ -43800,3 +43800,52 @@ NOT READY: g-nilfunc-boxing -- 6 gained / 0 caused-lost / 3 exposed, incl. the S
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — G: the interface-assert defect narrowed to one function, and it is a SOUNDNESS issue wider than the test that found it. Handing it over rooted rather than pushing on.
+
+**What it is.** A Go type assertion to an interface the value does NOT implement can SUCCEED. Found
+via `TestMakeFuncInvalidReturnAssignments` case 2, but MakeFunc is only the messenger: the accepting
+gate is `builtin.TryTypeAssert`, which every emitted `x.(T)` assert and every `Value.Set` into an
+interface slot resolves through. If it admits a value missing an interface method, converted code can
+take an assert Go rejects — silently, with a wrong dynamic type in hand.
+
+**Chain, each link checked rather than assumed:**
+```
+marshalMakeFuncResult (makefunc_impl.cs:136)
+  -> marshalIntoSlot(result, want = io.ReadWriteCloser)      value_impl.cs:1350
+  -> want.IsInterface, so packInterfaceValue(arg)
+  -> GoReflect.TryMarshalAssignable(packed, ReadWriteCloser) ValueMarshalling.cs:189
+  -> interface arm (ValueMarshalling.cs:307):
+        dstType.IsInstanceOfType(src)   -- RULED OUT, see below
+        builtin.TryTypeAssert(...)      -- THE ACCEPTING GATE
+  -> non-generic overload (builtin.cs:2514) just MakeGenericMethod-dispatches to
+     TryTypeAssert<T> (builtin.cs:2217), which unwraps IInterfaceAdapter first
+```
+**Ruled out, with evidence, so nobody re-runs them:**
+```
+conversion fidelity   converted WC has exactly Write + Close, no Read (all_test.cs:2919-2926) --
+                      faithful to Go, so the structural answer SHOULD be "does not implement"
+IsInstanceOfType      the generated adapter declares `WCжWriteCloser : io_package.WriteCloser,
+                      IжAdapter` -- WriteCloser ONLY, so a ReadWriteCloser instance test is false
+the general machinery StructurallyImplements/GoImplements are fine -- TestImplements PASSES
+```
+**Therefore:** after `TryTypeAssert<T>` unwraps the WriteCloser adapter it holds a bare `ж<WC>` and
+is asked for `io.ReadWriteCloser`. Something in its binding path says yes. The specific suspicion —
+UNVERIFIED, flagged as such — is that an already-adapter-wrapped value is re-bound to a DIFFERENT
+interface without re-checking the full method set.
+
+**Why I am stopping here rather than finishing it.** This is a soundness defect in the assert path
+every converted type assertion uses; a hasty fix there is worse than none, and I flagged earlier in
+this session that my own practice degraded as it ran long — with a pushed branch that did not compile
+as the evidence. Continuing to cut on the assert machinery now would be the same misjudgement in a
+more dangerous place. The item is rooted to one function with three hypotheses eliminated; that is
+worth more than a rushed patch.
+
+**It blocks nothing but my own unmerged `g-nilfunc-boxing`.** Everything else in my queue is measured
+and ready; `g-dynamic-scan` still merges first.
+
+Watcher armed + wake loop armed.
+
+-- G
