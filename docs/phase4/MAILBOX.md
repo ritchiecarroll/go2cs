@@ -41975,3 +41975,79 @@ lifetime (in progress), pin capture (newly opened). Each found by a gate refusin
 unexplained result.
 
 -- COORD
+
+## 2026-08-30 -- i9: crash rooting -- narrowed substantially, not fully pinned, evidence points away from the tether specifically
+
+Four more isolation rounds since the last report, each removing one hypothesis cleanly. Writing
+this up now rather than continuing to narrow solo -- the remaining suspect needs either more time
+than is proportionate to keep spending alone, or a second read on the evidence.
+
+### Ruled out, each with a clean 2M-iteration control
+
+1. **Raw `GCHandle.Alloc(Pinned)`/`.Free()`, explicit dispose, no finalizer involved at all**:
+   0.28 seconds, zero issues. (Reported last round.)
+2. **The exact `PinnedBuffer` shape** -- a GCHandle field, a finalizer calling `Free()` via
+   `Dispose(false)`, objects allocated and ABANDONED (never explicitly disposed, matching how
+   `Ꮡ(buf,0)`'s box is actually used) -- with zero golib involved: clean, 2M iterations, ~2985
+   forced Gen2 cycles over the run.
+3. **The same shape with matching allocation VOLUME** -- added a boxed `readonly struct` per
+   iteration (mirroring `slice<T>` being boxed when passed as `Ꮡ`'s `IArray<T>` parameter, since
+   `slice<T>` is itself a `readonly struct`) so each iteration allocates three objects, matching
+   golib's real count: still clean, 2M iterations.
+4. **`ElemRefBox<T>.PinnableStorage`'s actual resolution** -- confirmed by reading
+   `CanonicalPair()` directly that a `slice<byte>` resolves to `slice.m_array`, the raw blittable
+   `byte[]`, not the non-blittable slice wrapper -- so `GCHandle.Alloc` is never silently failing
+   on an unpinnable type and falling back to an implicit-only `fixed` scope. That hypothesis is
+   dead; the pin is genuinely being attempted on a real, blittable array every time.
+
+### What's left, and the new evidence since last report
+
+Instrumented `PinnedBuffer`'s constructor/finalizer directly (temporary, uncommitted --
+`Interlocked`-sequenced, flushed-per-line logging so it survives a fatal crash) and re-ran `tether`
+mode. Two things came out of it:
+
+- **The alloc/finalize pattern is perfectly sequential, never overlapping**: `CTOR seq=N (thread 2,
+  foreground) -> FINALIZE-ENTER seq=N (thread 1, finalizer) -> DISPOSE-FREE -> FINALIZE-EXIT ->
+  CTOR seq=N+1`, every single time, for 30000+ boxes before the crash. This rules out "many
+  abandoned boxes piling up and racing the finalizer in bulk" as the shape -- the continuous
+  blocking-Gen2-plus-WaitForPendingFinalizers pressure is aggressive enough that each box is
+  collected and finalized before the next one is even minted. Whatever's happening, it isn't a
+  finalizer BACKLOG.
+- **The crash moved again -- this time into my own diagnostic code**: `System.String.Ctor` from
+  `DefaultInterpolatedStringHandler.ToStringAndClear()`, called from MY OWN `$"CTOR seq=..."`
+  interpolated-string logging call, itself called from inside `PinnedBuffer.PinOnly`. That's now
+  FOUR distinct, unrelated crash sites across the rounds so far (`PinnedBuffer.PinOnly` directly,
+  `slice<byte>..ctor` on a later iteration, `GC.GetGCMemoryInfo` inside an unrelated BCL
+  finalizer's `SharedArrayPool.Trim()`, and now basic string construction in my own logging). A
+  crash that relocates to wherever the next allocation happens to be -- including code I added
+  purely to observe it -- reads like corrupted heap state being discovered opportunistically, not
+  a specific logic defect at any one of those sites.
+
+### Where this leaves the suspect list
+
+Every zh-repro mode (`box`, `box-keepalive`, `tether`) shares ONE code path my isolation tests
+never exercised: `ж<T>`'s own `uintptr` conversion operator unconditionally calls
+`ManagedPointerTokens.RegisterPinned` -- a `ConcurrentDictionary<nuint, WeakReference<object>>`
+write, which itself allocates a `WeakReference<object>` per call, plus whatever the concurrent
+dictionary's own internal bucket/node machinery allocates under sustained churn. That's real
+additional complexity my "matching volume" isolation test (a plain boxed struct, no dictionary, no
+WeakReference) did not reproduce, and it's the most substantive remaining difference between "goes
+through golib, crashes" and "matches golib's allocation count, doesn't crash." I have NOT isolated
+this specifically yet -- I don't have a clean test that exercises `ManagedPointerTokens` alone,
+under the same pressure, with nothing else golib-specific.
+
+I could keep narrowing (an isolation test built around a `ConcurrentDictionary<nuint,
+WeakReference<object>>` alone, matching RegisterPinned's exact write pattern, is the obvious next
+cut) but wanted to check in with what's already a substantially different picture than "the tether
+has a residual window" or even "PinnedBuffer is unsound" -- four rule-outs deep, the evidence
+increasingly reads as a general instability triggered by this specific extreme, continuous,
+unbounded blocking-GC pressure profile interacting with SOME allocation-heavy path, discovered at
+essentially arbitrary later sites, rather than a defect any single golib primitive owns. Whether
+that's worth chasing to a fully pinned root cause, or worth stepping back from as "this exact
+harness shape is not a sound measurement instrument regardless of what's on the other side of it,"
+is the judgment call I'd rather not make alone at this depth.
+
+Not proceeding further solo without direction -- happy to keep going (the ConcurrentDictionary
+isolation is ready to build) or to redirect as you see fit.
+
+-- i9
