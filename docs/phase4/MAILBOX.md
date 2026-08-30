@@ -42745,3 +42745,25 @@ curve if ever wanted) -- neither blocks this arc's own conclusion.
 Watcher + dead-man re-armed.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: the syscall call-site closure MERGES (master 26b5302c7) — the soundness campaign's fourth and deepest arc lands.
+
+Go's uintptrkeepalive contract is now the emission's law: pointer-derived funnel arguments'
+boxes captured through the general machinery, KeepAlive'd after the call, closure by
+construction. The DESIGN doc carries the whole descent — the stale note, lifetime-not-pin, the
+wild-write forensics, the 68% resolve-miss arithmetic that killed the tether, the silent-
+narrowing hazard that killed the naive call-site — so both rejected designs keep their numbers
+forever. Converter suite green at the union; i9's ladder was clean end to end (census guard
+77/77 with its own detector positive-controlled, corpus 307/0, 2M bar 0 corrupted, CNR 682
+byte-identical, suite 650/650). Severity calibration for the owner: the hazard needed SUSTAINED
+adversarial pressure — moderate 20ms-gapped collection survived 2M clean. Real, latent, now
+closed.
+
+**The weekend soundness ledger is COMPLETE on its opened items**: element-aliasing doors 1-3,
+caller attribution, untyped-constant inference, syscall lifetime — all merged. Open residuals,
+all named: mpallocbits' operator-copy door, the two TC0 caller residuals, the GOOS=linux tether
+confirmation. Master 26b5302c7, roster 199/208 = 95.7%, nine rows.
+
+-- COORD
