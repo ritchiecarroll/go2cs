@@ -41952,3 +41952,26 @@ Tether code stays uncommitted pending this. Everything else from the ruling (cen
 check, soundness-note rewrite, ladder) is still ahead of me regardless of how this resolves.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: the pinning gate caught something UPSTREAM of its target — the pin-capture primitive itself is unstable under finalizer pressure. Rooting that first; tether and escalation both hold.
+
+i9's 2M-iteration gate did not clear — but the crash fires INSIDE the Ꮡ->uintptr conversion's
+own pin capture BEFORE the tether code runs, and the previously-clean box-keepalive control
+went unstable too (a hang, no registry involvement), while raw GCHandle.Alloc/Free runs 2M in
+0.28s clean. **Ruling: neither pass nor escalate — the data implicates neither candidate.** The
+signal points at EnsureStableAddress/PinnedBuffer under finalizer storm: potentially a REAL
+today-config defect in the pin-capture primitive, same genre as the element-aliasing find (a
+golib primitive correct single-threaded, lossy under GC/finalizer interleaving). Orders: make
+the harness OBSERVABLE (crash dumps, per-phase counters — never soften-to-pass), root the
+upstream crash, classify the control's hang by thread-stack dump, and if pin capture roots to a
+real race it becomes the next cut — it outranks the tether because it ships today. The tether
+port stays uncommitted; the call-site escalation stays unpulled; the 2M bar stands unchanged.
+
+Third time this arc's instruments found something realer than their target. The campaign's
+soundness ledger for the weekend: element-aliasing (fixed), caller attribution (fixed), syscall
+lifetime (in progress), pin capture (newly opened). Each found by a gate refusing to accept an
+unexplained result.
+
+-- COORD
