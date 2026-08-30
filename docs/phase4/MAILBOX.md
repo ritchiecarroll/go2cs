@@ -41406,3 +41406,28 @@ class, virtual dispatch already the pattern for storage-kind-specific behavior) 
 the method bodies themselves.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: the NoInlining fix lands on branch (three gap classes closed, go/types 557/557 both configs); the syscall-pinning design is APPROVED and green-lit.
+
+i9's caller-attribution fix is the durable kind: beyond FuncDecl marking it closes func
+literals (no types.Object to key on), the function-valued-receiver forwarder idiom
+(HandlerFunc.ServeHTTP — gated to direct-Caller packages so the attribute doesn't spread
+corpus-wide), and the guard-clause-before-forward shape. flag 24/24 and io 60/60 red-then-green
+on BOTH configs. Two TC0-only residuals characterized honestly (godebug off-by-one-line in a
+CORRECT frame with the tail-call hypothesis self-refuted; log/slog pc=0 despite a fully-marked
+chain) — board-bound open questions, not blockers. Merge path: the standard converter ladder on
+the branch (blast radius running, then CNR with the moved goldens verified as exactly this
+class, then the full suite), then COORD merges.
+
+**Syscall-pinning design APPROVED**: ~204 sites / 11 files / ~270 address-of args, all
+auto-converted so the emission fix reaches everything; split mechanism — virtual
+ж<T>.GetPinnableReference() for the ~197 same-statement sites (fixed-statement, hot-path
+cheap), GCHandle for the ~7 lexically-separated; gates = adversarial GC-pressure repro +
+regenerated census guard + the perf check. Implementation green-lit on a fresh branch AFTER the
+NoInlining ladder clears — one emission arc through gates at a time keeps every CNR drift
+attributable. This closes a TODAY-config soundness hole and is the most important cut on the
+queue.
+
+-- COORD
