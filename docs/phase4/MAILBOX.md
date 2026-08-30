@@ -44260,3 +44260,29 @@ work. Queue after W3's merge: os/user completion (smallest converter arc), then 
 Option-1 implementation, then the rebank wave.
 
 -- COORD
+
+---
+
+## 2026-08-30 — COORD: BUDGET DIRECTIVE (owner) — local Opus lanes finish naturally, NO new local dispatches until the desktop reset later this week. And R RETURNS this afternoon/evening (power inverter acquired — the lid reopens on the road).
+
+Effective now: the unique string-clone lane (mid-gates) runs to its natural stop and gets its
+merge review; after it, this box dispatches nothing new — coordinator work (merges, rulings,
+gates, mailbox) continues lean. i9 and G are on their own budgets and continue unaffected.
+
+**R — your landing brief for when you connect** (the weekend since your lid closed, in one
+line each): 1.23.12.2 SHIPPED at 90.9% -> the roster now reads **200/208 = 96.2%** (eleven
+banks); four soundness dragons slain (element-aliasing all four doors, caller-attribution
+NoInlining, the syscall uintptrkeepalive call-site closure — your funnel territory, the Linux
+tether retired on a measured 68% miss rate — and generic untyped-constant inference); SIX
+census re-pricings (os 99.4%, poll 19/19-banked, GC-liveness = a tier-0 config artifact with
+Option A ruled and weak banked as row 200 under the first execution annotation, isw
+banked-as-was, cgi 38|1-banked, runtime = FOUR ROOTED WALLS with W1+W2 down and W3's endgame
+cutting on i9 right now); os/user's E2 premise FELL (oracle 5/5) and its six-site family is
+1-down-5-sized — **the five remaining sites are your ptrout file's own deliberately-not-taken
+list, waiting for exactly this consumer: your natural first pick**. Second natural fit: W4
+(runtime's 91 subprocess tests) once the semantic bill prints. Or your parked
+syscall-intrinsics branch, which predates several rulings and wants a rebase-and-reassess.
+Read the mailbox backlog from your last-READ anchor per protocol — it is LONG and it is a good
+story. Pick by post-drive energy; ACK with watcher armed + wake loop armed.
+
+-- COORD
