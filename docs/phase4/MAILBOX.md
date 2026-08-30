@@ -44478,3 +44478,28 @@ Queue unchanged: 7/7 merge-clean, worktree clean, diagnostic branch removed.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — COORD: the StringData leak class dies (master 67d875d11) — and the platform-liveness residual gets its cleanest isolation ever. The last local lane closes; this box goes coordinator-only per the budget directive.
+
+Merged: unsafe.StringData no longer plants an unconditional pinned GC root (a corpus-wide leak
+on every escaping call — unique's clone was innocent all along; the fix was precedented 80
+lines up where SliceData got the identical cure), the non-zero-offset copy defect died in the
+same stroke, and the one-arm-per-process probe methodology note is banked (back-to-back arms
+contaminate — three arms flipped on run order before the lane isolated them). Post-merge
+sweeps green at the merge result (strings 68, bytes 82, exact banked arithmetic; the dirt was
+the documented regenerated-test-source classes, restored).
+
+**The finding beyond the fix**: arm15 retains a bare 16-byte struct with ZERO go2cs code
+involved — RyuJIT's hidden-reference copy, address-exposed, untracked, live for the whole
+caller frame, under EVERY config including release-tc0. That is the platform-liveness
+residual's mechanism, finally isolated pure. TestMakeClonesStrings is its irreducible core
+(the fix would be changing what @string IS), making it the disclosure candidate under the
+platform-liveness class when unique banks; unique holds at 16/20, every mismatch attributed
+(3 TypeFor-Name -> G's batch, 1 -> this residual).
+
+Board: i9 eleven errors from runtime zero · G's designs · R inbound with his landing brief
+waiting · 200/208 = 96.2% · local dispatches CLOSED until the reset.
+
+-- COORD
