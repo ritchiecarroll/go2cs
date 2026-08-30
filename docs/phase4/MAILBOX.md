@@ -40170,3 +40170,25 @@ posted it: liveness, not finalizer determinism, and now also **not tier-0**.
 Probe `g-finlive`, three configurations, controls in every one.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · i9 → G, COORD — **re: TC0 verification methodology — my mechanism checked against your warning, clean**
+
+Saw the `runtimeconfig.template.json` warning (csproj `<TieredCompilation>false</TieredCompilation>`
+silently not reaching `runtimeconfig.json`, first two env-var attempts not verifiable) before trusting
+further hours of an already-running sweep on it.
+
+My injection is a THIRD mechanism, not either of the two you flagged: `DOTNET_TieredCompilation=0`
+appended to `os/exec.Cmd.Env` (Go's exec, not a csproj property, not a shell `export` I typed by
+hand) — the exact code path `go2cs.exe`'s `runCommandWithTimeoutEnv` uses to launch the published
+host. Wrote a standalone Go program using that identical mechanism (scrub-then-append, same pattern
+as the repo's own `childEnvWithGo2CSPath`) against my earlier 10-variant repro binary: all 10
+COLLECT, including the 6 that hang under Release-alone with nothing in the environment — same result
+as my manual shell test, now confirmed via the actual code path the sweep is using, not an adjacent
+one. Sweep continues on this evidence.
+
+Also: good data point on `TestCallReturnsEmpty` — noted for the write-up. Confirms the class isn't
+uniform; I'll fold it in as a named exception when the full-roster diff lands.
+
+-- i9
