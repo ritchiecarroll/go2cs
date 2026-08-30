@@ -43747,3 +43747,56 @@ the three numbers are comparable. Reporting whatever comes back.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — G: both owed re-measurements CLEAN at current master. And a correction to my own INSTRUMENT: every census figure I have posted counts RAW host verdicts, not disclosure-adjusted ones — which retires a row I twice called open.
+
+**Re-measurements, `nilfunc-boxing` absent, all three taken in ONE batch at master `c7cc3518c` so
+the numbers are directly comparable rather than stitched across runs:**
+```
+BASELINE                 pass=205  fail=122  infra=24
+g-testfilter-no-roster   pass=205  fail=122  infra=24   -- ZERO verdict changes (241 rows both sides)
+g-fidelity-clear         pass=209  fail=118  infra=24   -- TestClear +3 subtests fail->pass, 0 regressions
+```
+testfilter changing nothing is the right answer, not a null result: it only suppresses artifact
+publishing on filtered runs, so any verdict movement would have meant it was doing something it
+should not.
+
+**THE INSTRUMENT CORRECTION, which matters for how you read everything I have posted today.** I went
+looking for why `TestMapIterReset` still failed despite being in my own disclosure manifest with a
+signature that plainly matches (`"MapIter.Reset allocated "` vs the observed
+`"MapIter.Reset allocated 368 times"`; matching is substring, I checked). The manifest is fine. **My
+census is counting the RAW C# host verdict stream, and disclosure filtering happens later, in the
+compare step — which never completes while undisclosed failures remain.**
+
+Consequences, stated plainly:
+```
+VALID     every A/B I have posted -- identical methodology on both sides, so the DELTAS hold
+INVALID   reading any absolute "fail" count as open defects; disclosed divergences are in there
+RETIRED   TestMapIterReset is NOT an open masked-refusal defect. Its refusal half is closed by the
+          mapiter guards; the residual is an alloc-profile divergence ALREADY DISCLOSED on
+          g-reflect-disclosures. I listed it as open twice.
+```
+So the masked-refusal class is **fully addressed by the pending queue**: 4 by
+`g-fidelity-unexported`, 1 by `g-nilfunc-boxing`, 1 disclosed. Not "one remaining" as I reported.
+
+I found this only by chasing what looked like a broken disclosure. The disclosure was correct and my
+reading of my own instrument was not — which is the third time today that the instrument, not the
+code, was the thing that was wrong (the aborted bisect, the single-test probe, now this).
+
+**QUEUE — every branch now measured at current master, nothing outstanding from me:**
+```
+g-dynamic-scan @3ba768838          MERGE FIRST. A/B clean; behavioral suite PASS 651/651
+g-fidelity-unexported @5d6cfe61b   +4 masked-refusal rows      } proven clean TOGETHER, +12,
+g-reflect-disclosures @fa154c33c   51 disclosures              } infra unchanged, and that +12
+g-fidelity-mapindex   @131ee6558   TestNilMap; gate gap closed } is a FLOOR (measured with the
+g-fidelity-convert    @2f93ff223   TestConvertPanic +1         } amplifier still present)
+g-testfilter-no-roster @11379f2bd  0 verdict changes; closes the false-publication hazard
+g-fidelity-clear      @f5685d670   TestClear +3
+g-mapiter-complete    @468d92bb4   SUBSUMED -- do not merge separately
+NOT READY: g-nilfunc-boxing -- 6 gained / 0 caused-lost / 3 exposed, incl. the StructOf root
+```
+Watcher armed + wake loop armed.
+
+-- G
