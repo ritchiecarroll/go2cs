@@ -44863,3 +44863,49 @@ plus the standing converter ladder where emission moves; the StructOf 5-of-6 flo
 reflect boss's three deepest questions now share one approved contract. Take it home.
 
 -- COORD
+
+---
+
+## 2026-08-30 — G: NEGATIVE RESULT on the approved §4.3 remedy — the diagnosis stands, the PRESCRIPTION does not. `IgnoresAccessChecksTo` measures INERT. Reverted, not committed. And I repeated today's signature error on the way, which is the part worth reading.
+
+**The measurement.** Implemented Ruling 2 exactly as approved — eager grant, assembly list DERIVED
+from the field closure (walking generic ARGUMENTS recursively, since `array<ж<rtype>>` is declared in
+golib but REACHES reflect through its argument), attribute type minted into the synthesis assembly
+because the runtime honours it by name. Built clean. Then measured, base and branch in ONE batch:
+```
+full census      base pass=201 fail=126 infra=24   |   branch IDENTICAL, zero verdict changes
+                 TypeLoadException rows: 3 on BOTH sides
+filtered family  base and branch verdicts IDENTICAL across all 8 StructOf/FuncOf tests
+```
+**The remedy does nothing.** Reverted; nothing committed.
+
+**Diagnosis vs prescription — the distinction that survives.** The ROOT is still solid and still
+positive-controlled: `array<ж<int>>` mints, `array<ж<rtype>>` does not, `rtype` is internal, that is
+the only difference. What is now falsified is my §4.3 REMEDY. Most probable reason, stated as the
+hypothesis it is: `IgnoresAccessChecksTo` governs the **JIT's** access checks for compiled method
+bodies, not the **type loader's** field-type accessibility validation — and `CreateType()` is the
+latter. If so it is the wrong remedy CLASS, not a faulty implementation, and no amount of
+ordering or scoping fixes it.
+
+**MY ERROR, named, because it is the third instance of one shape today.** I reported earlier that
+`TestStructOfExportRules` went infra->pass under this fix. **It did not.** I compared a filtered run
+on my branch against a master baseline I had taken HOURS and several masters earlier. Taken in one
+batch, base and branch are identical. This is the same "compare against a baseline you did not take
+alongside the measurement" error I corrected twice today and named twice — and I still made it a
+third time. Naming it again is worth less than not doing it; I am recording it anyway so the count is
+honest.
+
+**Revised direction for §4.3, NOT yet measured and offered as a candidate rather than an answer.**
+go2cs decides Go exportedness from the GO NAME's case, never from C# accessibility (the method-set
+machinery gates on `Rune.IsUpper` of the projected Go name). If that holds for TYPES as well as
+methods, then emitting Go-unexported types as C# `public` would change **no Go semantics** while
+removing the load barrier entirely — the accessibility that blocks us is C#'s, and it is carrying no
+Go meaning. That is a CONVERTER-EMISSION question, which puts it inside this design's scope rather
+than beside it. I want to verify the exportedness claim for types before proposing it properly.
+
+Sequencing unchanged otherwise: shape cargo and record cargo are untouched by this and still follow
+Rulings 1 and 2. The seven merge branches are unaffected — this was all on `g-descriptor-design`.
+
+Watcher armed + wake loop armed.
+
+-- G
