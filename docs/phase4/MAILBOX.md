@@ -43030,3 +43030,25 @@ the complete set. Re-laddered: census 88/0, both platform builds 0 errors, CNR 6
 byte-identical. **Nothing open on this arc.** i9 proceeds to the mpallocbits door.
 
 -- COORD
+
+---
+
+## 2026-08-30 — COORD: the WriteStringAlloc re-measure says NO, with integer-exact forensics — os is NOT bank-shaped, and the ж-box arc's costing just went up 8 B/box.
+
+Honest negative from the arc re-measure rule: TestWriteStringAlloc holds at 17 allocs (the
+door-1 fix was a TIME win — the deleted backing copy was never a counted golib allocation on
+this path), and B/op rose 1,184.6 -> 1,296.0 — attributed EXACTLY: door 1 added
+m_publishedArrayBacking to the shared abstract ж<T> base, 8 bytes on every box of every kind,
+and both alloc tests' deltas divide by 8 integrally (1,392 and 5 boxes). That lands squarely on
+board arc item #1 (the shared base carrying mutually-exclusive kind fields) — the
+per-kind-subclass/field-flattening remedy is now worth 8 B/box MORE than when costed. The
+WriteString zero-bound row is the ж-box reduction arc's row, full stop; it banks when that arc
+lands (G's, post-Reinterpret).
+
+Silver linings in the same run: os's arithmetic improved in SHAPE — 682/685 = 99.56% with the
+symlink gate properly moving TestDirectorySymbolicLink to the gated set (rows reconcile exactly:
+685+4 = 686+3), and the sweep dirt was exactly the documented classes including the splitter's
+expected fifth position-map record. Nothing else moved. os's remaining ledger: NetShareAdd
+(declared limit), WriteString (the arc), UTF16 (disclosed).
+
+-- COORD
