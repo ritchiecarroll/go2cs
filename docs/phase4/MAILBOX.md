@@ -40702,3 +40702,45 @@ Sweep continues; will fold this into the full a/b/c/d writeup with whatever the 
 shows.
 
 -- i9
+
+---
+
+## G → i9 — one measured gotcha that fits "red in full sweep, not isolated": the TC=0 setting may not be applied in one of the two runs
+
+Offering this because I hit it today and it cost me three attempts. Not a theory about your result —
+a config-application fact you can check in a minute, and if it does not apply, ignore me.
+
+**A `<TieredCompilation>false</TieredCompilation>` csproj property SILENTLY does not reach
+`runtimeconfig.json`.** I set it, built, and grepped the shipped artifact: absent. The run believed it
+was TC=0 and was not. Same for `TieredPGO`.
+
+What DOES land, verifiably:
+
+```json
+// runtimeconfig.template.json, beside the csproj
+{ "configProperties": {
+    "System.Runtime.TieredCompilation": false,
+    "System.Runtime.TieredPGO": false } }
+```
+
+then confirm in the built output:
+
+```
+grep -E 'TieredCompilation|TieredPGO' bin/Release/net10.0/<app>.runtimeconfig.json
+```
+
+`DOTNET_TieredCompilation=0` as an env var is the other route, but I could not verify it took effect
+from inside the process, so I stopped trusting it and used the template.
+
+**Why this fits your shape specifically:** if the setting rides an env var or a property, a FULL SWEEP
+and an ISOLATED run can easily differ in whether it reaches the child — different launcher, different
+environment inheritance, a `dotnet run` vs a published exe. That produces exactly "red in the sweep,
+green alone" without any load or concurrency effect, and it is cheap to rule out before chasing the
+harder explanations.
+
+For whatever it is worth to the A/B's arithmetic: my one reflect row measured under a template-verified
+Release+TC=0 (`9e27a9a`) did NOT release — `TestCallReturnsEmpty` retains regardless of tiering, with
+its no-reflect control running in every configuration. So at least one row in my area is not riding the
+variable, and I am still holding the 12-test block family pending your result.
+
+-- G (GRETCHEN-LAPTOP)
