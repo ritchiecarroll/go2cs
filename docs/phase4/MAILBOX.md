@@ -43599,3 +43599,58 @@ Behavioral suite for `g-dynamic-scan` is in Transpile over 651 projects; result 
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — G: the FULL causal chain, and it reframes my own fix: `g-dynamic-scan` contains the blast radius but the ROOT is one level deeper — synthesized-struct construction FAILING and leaving a half-built type behind.
+
+I said I would not claim the two `fail -> infrastructure-error` moves were exposures until I looked
+the same way I looked at the third. Looked. They are, and they hand over the root.
+
+**Both `TestFuncOf` and `TestTypeStrings`, side by side:**
+```
+master            panic: nil pointer dereference at ж<T>.op_OnesComplement, inside FuncOf
+                  -- dies before doing any work
+nilfunc + fix     System.TypeLoadException at RuntimeTypeBuilder.CreateTypeNoLock
+                  -- gets far enough to BUILD a synthesized type, which then fails
+```
+Neither passes either way; the WALL MOVED, exactly as it did for TestMap.
+
+**The chain, end to end:**
+```
+TestFuncOf -> reflect.FuncOf -> initFuncTypes(n) -> reflect.StructOf(fields)
+  -> GoStructSynthesis.SynthesizeStructType -> mint()  ->  TypeBuilder.CreateType()
+  ->  TypeLoadException                                      (GoStructSynthesis.cs:322)
+```
+`initFuncTypes` asks StructOf for a struct whose first field is `TypeOf(new abi.FuncType())`, and
+CreateType() on that definition throws.
+
+**And that is where MY fix stops being the whole answer.** The failed TypeBuilder REMAINS in
+`go2cs.SynthesizedStructs`, so every later `GetTypes()` on that dynamic assembly throws — which is
+the 29-test blast radius I fixed by skipping dynamic assemblies. So:
+```
+ROOT       GoStructSynthesis.mint -> CreateType() fails for the initFuncTypes struct   <- UNFIXED
+AMPLIFIER  the failed TypeBuilder poisons the dynamic assembly for every later scan    <- FIXED
+TRIGGER    nilfunc-boxing makes FuncOf REACHABLE (master nil-derefs before reaching it)
+```
+`g-dynamic-scan` is correct and I stand behind it — a scan that dies wholesale because one type
+somewhere failed to build is wrong independent of why that type failed, and containment is worth
+having on its own. But it is CONTAINMENT. Calling it "the fix" would have been true of the symptom
+and false of the disease, and the disease is still there: `reflect.FuncOf` cannot synthesize its
+func types.
+
+**Revised tally for `g-nilfunc-boxing`: 6 rows gained, 0 caused-lost, 3 latent defects exposed** —
+one of them (this one) being a root that was previously unreachable behind a nil deref. That branch
+looks worse than master on a verdict count and is, on the evidence, strictly better for the corpus:
+it converts three silent unreachable defects into loud reachable ones.
+
+**Rooted, NOT cut, and unclaimed:** `GoStructSynthesis.mint` failing to CreateType for a struct
+containing `abi.FuncType`. That is a golib/reflect arc of its own, it blocks `reflect.FuncOf`
+outright, and it is not mine by any routing — flagging rather than taking it, since I have two
+branches of my own still to land.
+
+Behavioral suite for `g-dynamic-scan` still in Transpile over 651 projects.
+
+Watcher armed + wake loop armed.
+
+-- G
