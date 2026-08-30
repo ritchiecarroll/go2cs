@@ -43547,3 +43547,55 @@ pass->fail is rooted.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — G: the last `g-nilfunc-boxing` regression is a REVEALED defect too, and it is precisely located — adapter-wrapped NARROWER interface accepted into a WIDER interface slot.
+
+**Which assertion, exactly.** `TestMakeFuncInvalidReturnAssignments` has four `shouldPanic("")`
+cases. The failing frame is case TWO — `func() io.ReadWriteCloser` whose body returns an
+`io.WriteCloser`. Go requires a panic: WriteCloser lacks Read, so it is not assignable to
+ReadWriteCloser.
+
+**What that frame tells us for free, and it is the useful part.** Case ONE (`func() error`
+returning `ValueOf(int(7))`) must have panicked correctly, or `shouldPanic` would have raised at its
+line instead. So:
+```
+int -> error                        correctly REJECTED   (assignability works)
+WriteCloser -> ReadWriteCloser      wrongly ACCEPTED     (the defect)
+```
+That narrows it from "MakeFunc return validation is broken" to something much sharper: the check
+rejects a wrong CONCRETE type but accepts a value whose interface is a strict SUBSET of the slot's.
+The emission shows the returned value is an adapter shell (`WCжWriteCloser`), so the suspicion is
+that an adapter satisfying a narrower interface is accepted on identity rather than re-checked
+against the wider interface's full method set. `marshalIntoSlot` packs an interface-typed slot
+through `packInterfaceValue` and hands it to `TryMarshalAssignable`; that is where I will look.
+
+**Hypothesis I FALSIFIED on the way, recorded so nobody re-runs it:** "the bridge does not validate
+MakeFunc returns at all, so master passes for lack of a check". It does validate —
+`marshalMakeFuncResult` (makefunc_impl.cs:136) panics "reflect.MakeFunc: value of type X is not
+assignable to type Y". Not that.
+
+**Why this is REVEALED, not caused — same shape as TestMap.** At master, `Func<io.ReadWriteCloser> f
+= default!` is a bare null, so `TypeOf(f)` is invalid and `MakeFunc` panics EARLY. `shouldPanic("")`
+takes ANY panic — Go's own test specifies no message here — so the wrong panic satisfies it and the
+test passes without ever reaching the assertion it exists to make. Once `g-nilfunc-boxing` makes
+`TypeOf` of a typed-nil func answer correctly, MakeFunc proceeds and the real check is reached for
+the first time — and fails.
+
+So the count on that branch is now: **6 rows gained, 0 rows caused-lost, 3 latent defects EXPOSED.**
+I called it "+6 and -3" last message; on this evidence the minus sign was wrong. I am not going to
+claim the two fail->infrastructure-error moves are exposures too until I have looked at them the
+same way.
+
+**This is the third time today an "empty-expect" shouldPanic has hidden a real defect behind a
+wrong-reason panic** (TestMap, TestValuePanic's neighbours, now this). Where Go's own test pins no
+message, our bridge can pass it by panicking for any reason at all — which means the
+`did not panic` census I ran earlier is a floor for a SECOND reason: those tests are not even
+guaranteed to be testing what their name says while an earlier wall stands.
+
+Behavioral suite for `g-dynamic-scan` is in Transpile over 651 projects; result to follow.
+
+Watcher armed + wake loop armed.
+
+-- G
