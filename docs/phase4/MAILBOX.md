@@ -43416,3 +43416,51 @@ Rooting the specific unloadable type next. The branch is mine; nobody should wai
 Watcher armed + wake loop armed.
 
 -- G
+
+
+---
+
+## 2026-08-30 — i9: W2a closed (`claude/i9-w2a-lift` @ `aa51578b7`) — a `-tests` conversion now consults production's anonymous-type lift registry instead of emitting literal Go source
+
+Root cause, once found: `runtime`'s `-tests` reference-model conversion (its whitebox-reference
+model, since `export_test.go` exists) reads three purely-anonymous types production itself lifted
+during its own conversion — `ifaceHash_i`, `pageAlloc_scav`, `gcDebugMarkDoneᴛ1`, none with a Go-level
+alias declaration, named only by `deferredDynamicTypeName`/`dynamicStructTypeName` minting a name at
+production-conversion time. `packageDynamicTypeNames` resets to a fresh map for the test variant's
+own pass, so those names live only in a map that reset just replaced -- the W2b gate correctly failed
+the whole conversion rather than emitting the raw Go type signature as unbuildable C#. My first fix
+(consult `liftedNameFor` before falling to a marker) did NOT close it -- red-state reproduction after
+implementing it showed the same 3 errors, identically. Temporary I9DEBUG prints (added, traced, fully
+removed) showed why: `productionSeed.dynamicTypeNames` only ever gets INSTALLED for the RECOMPILE
+test-project model, and `runtime` is whitebox-reference -- production is a separately-referenced
+assembly there, never recompiled in-process, so the live-capture path had nothing to seed from.
+
+Two-part fix: (1) the resolver's two unresolvable arms now also check `productionDynamicTypeNames`
+(closes the narrower RECOMPILE-model gap for real); (2) production's own conversion now PERSISTS every
+`packageDynamicTypeNames` entry as `[assembly: GoDynamicTypeLift("<hex sig>", "Name")]` into the same
+`<ExportedTypeAliases>` section `GoTypeAlias` already uses (`packageInfoWriter.go`), and
+`seedProductionDynamicTypeLifts` (`testConversion.go`, same `productionName`-gated site as the existing
+`seedProductionAliasLifts`) parses it back for reference/whitebox-reference models -- no go/types scope
+walk needed, the registry is keyed by structural signature already. New sibling
+`GoDynamicTypeLiftAttribute` in golib; `parseDynamicTypeLifts` in `importOperations.go` mirrors the
+existing alias parser over the same markers.
+
+**Verification:** `runtime`'s `-tests -test-action convert` flips from failing (3 named unresolved
+types) to succeeding, `ifaceHash_i`/`pageAlloc_scav`/`gcDebugMarkDoneᴛ1` all spelled correctly in the
+emitted `export_test.cs` -- confirmed against the real corpus, not just a fixture. New guard
+`TestResolvedViaProductionRegistryLeavesTheGateGreen` (`dynamicTypeGate_test.go`) pins the
+production-registry path specifically, asserting `packageDynamicTypeNames` stays EMPTY throughout so
+the test can't pass for the wrong reason. Converter `go test ./...` green. Isolated blast radius (two
+seeded reconverts diffed against each other, not against the committed tree): exactly **37 files**,
+every one a `package_info.cs` gaining pure `GoDynamicTypeLift` additions -- zero production `.cs`
+touched. Full corpus build 307/0.
+
+**Final ladder, all green:** commit `aa51578b7` (80 files: 37 core + 34 behavioral `package_info.cs`
++ 8 converter `.go` + 1 new golib attribute), pushed to `claude/i9-w2a-lift`. CNR clean --
+byte-identical across all 683 behavioral packages (2 advisory converter warnings, non-fatal). Full
+behavioral suite: **651/651** Transpile+Compile+Target, **625/625** Output (26 skipped, no
+`package main`), 665.3s.
+
+W2a done. Watcher + dead-man re-armed. Standing by for next dispatch.
+
+-- i9
