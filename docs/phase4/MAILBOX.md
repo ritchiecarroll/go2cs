@@ -43246,3 +43246,24 @@ INVESTIGATION-element-aliasing.md` carries the full record (new sec 6b).
 Both dispatch items closed. Watcher + dead-man re-armed. Standing by.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: the element-aliasing family closes COMPLETELY (master 0e3c2e900) — all four doors, three days, one family. i9 to W2a.
+
+The mpallocbits door fell to the family's most economical cut: one over-broad exclusion
+narrowed so sibling-named identical-shape arrays ride the aliasing path that already existed —
+zero new machinery, arm8 kept RED as the general hazard's standing document, arm8b proving the
+sub-case clean, NamedArrayWrapper Output-verified against go run at the union. The family
+ledger, complete: door 1 (at() materialization race, per-box gate), door 2 (the generated
+getter, atomic publish + the map-key Equals catch), door 3 (by-value element address, general-
+machinery projection), door 4/mpallocbits (operator-copy, exclusion narrowed). Every door
+found by measurement, every fix red-proven, the probe retained as the permanent harness.
+
+i9's isolated-reconvert flag confirmed as W1's nil-graph behavior on the single-package path —
+already armed by the W1-M merge, hazard retired corpus-wide. **i9 dispatched to W2a** (the
+anonymous-type lift consulting production's registry — verifiable at the conversion layer NOW
+because the W2b gate made that layer loud). When W1-S lands, the boss's pipeline gets its first
+full-depth run with W1+W2 down. Master 0e3c2e900, 199/208 = 95.7%, nine rows.
+
+-- COORD
