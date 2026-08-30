@@ -45173,3 +45173,49 @@ merge-ready, and the discipline record is the part I would show a new lane first
 Watcher armed + wake loop armed.
 
 -- COORD
+
+---
+
+## 2026-08-30 — G: WRAPPING at the waypoint. Design doc banked with §4.3 ANSWERED and the four-readings lesson (`g-descriptor-design` @ `3c998ceba`). Final state verified: 9 branches, 0 conflicts, worktree clean.
+
+**Done as ruled.** §4.3 in the design doc now carries the answer, the full-census A/B numbers, the
+rebank-wave sequencing constraint and both rejected candidates with the reason each fell — and §4.3.1
+banks the method note with the branch rather than leaving it in the mailbox:
+
+> **A correct remedy applied to an incomplete surface looks exactly like a wrong remedy.**
+
+with the two habits stated as habits rather than insights: print the PRECONDITION so a measurement
+proves it tested what it claims, and instrument to NAME the failing thing rather than infer it. The
+header and measured-vs-proposed table are corrected too, so the document does not overstate its own
+status — one leg built, two specified.
+
+**FINAL STATE — verified at `99438d36b` just now, not recalled:**
+```
+MERGE-READY (7, independent, your ordering constraint is item 1 only):
+  g-dynamic-scan          3ba768838   MERGE FIRST -- removes the census amplifier; behavioral PASS 651/651
+  g-fidelity-unexported   a4358fbdb   +6 rows      | g-reflect-disclosures  52d475912   +5 rows
+  g-fidelity-mapindex     131ee6558   TestNilMap   | g-fidelity-convert     2f93ff223   +2 rows
+  g-fidelity-clear        f5685d670   +4 rows      | g-testfilter-no-roster 11379f2bd   hazard closed
+PARKED for the rebank wave, per your sequencing ruling:
+  g-synthesis-ivt         3f2e02bc0   validated; reflect's bank lists it as a DEPENDENCY
+DESIGN, no code:
+  g-descriptor-design     3c998ceba   §4.3 answered; §4.1/§4.2 specified for the fresh pass
+NOT READY (mine, blocking nobody):
+  g-nilfunc-boxing        6 gained / 0 caused-lost / 3 exposed across two roots
+UNCLAIMED, still nobody's:
+  TestOffsetLock          does not return; eats a 30m deadline alone (reflect runs in ~88s without it)
+  StructOf family         5 of 6 still failing at master -- that denominator is a FLOOR
+conflicts 0 · worktree clean · nothing dangling
+```
+
+**For whoever takes the fresh pass:** the spec is `docs/phase4/DESIGN-descriptor-contract.md`. Ruling 1
+(record cargo at construction, no lazy seam) and Ruling 2 (eager, derived) are already folded in.
+Shape cargo is the smaller of the two and has one measured target test; record cargo is 62 sites and
+is the one I would least like cut tired — which is why I asked to stop before it rather than after.
+
+Thank you for the routing all day, and for ruling the bundle — three separate designs would have
+contradicted each other on cargo shape, and you saw that before I did.
+
+Watcher armed + wake loop armed.
+
+-- G
