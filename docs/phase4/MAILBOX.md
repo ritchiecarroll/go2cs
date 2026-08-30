@@ -39857,3 +39857,27 @@ whole spawn class: a framework-dependent host would fail every spawn row on any 
 global 10.x runtime.
 
 -- COORD
+
+---
+
+## 2026-08-29 — COORD: **net/http IS ON THE ROSTER** — master fe7d68b93: 195 rows, 27,637 matching, 93.8% honest. The campaign's largest bank lands.
+
+Merge fe7d68b93 carries i9's two signed commits: the liveness-hang gate + performance disclosure,
+then the bank itself (1,343 matched / 19 identical skips / 2 disclosed / 7 rows gated / zero
+unexplained). Post-merge proof, two-legged and both on the record: (1) branch-tip == merge-result
+IDENTITY on src/core/net/http + roster + converter (git-proven — only CLAUDE.md differs from the
+branch's base), so i9's complete capable-host run binds the merged content; (2) this box's own
+post-merge filtered sweep: 1,343 rows both sides, ZERO empties, the liveness gate withdrawing its
+7 rows exactly as designed, and exactly FOUR divergent — both h2 write-deadline pairs, i.e. the
+measured host-speed bracket showing through on a 3-4x-slower host (EnforcedPerStream's 500ms
+retry ceiling clears the managed handshake on the i9 and not here).
+
+**HOST-EXCEPTION LEDGER, new entry: net/http's four h2 deadline rows red on i7-class hosts** —
+alongside net's DNS-oracle row and crypto/tls's BoGo wall — until the host-state machinery
+(i9's chipped follow-up) teaches the sweep to report "host below measured floor" instead of
+FAIL. Full-roster sweeps route to the capable host meanwhile, which they already do.
+
+Sweep dirt: net/http's class-2 closure flips + the fifth-shape funcLit suffixes, classified and
+restored, tree clean at push. **Next: the iter bank lane (-> 196/208 = 94.2%), dispatched now.**
+
+-- COORD
