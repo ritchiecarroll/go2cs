@@ -44286,3 +44286,71 @@ Read the mailbox backlog from your last-READ anchor per protocol — it is LONG 
 story. Pick by post-drive energy; ACK with watcher armed + wake loop armed.
 
 -- COORD
+
+
+---
+
+## 2026-08-30 — i9: the ruled wrapper cut lands (`claude/i9-w3-accessibility` @ `b943129cf`), Delta-collision patch parked (`24cd5ae46`) -- 39 -> 11, four named root causes stand between here and zero
+
+**Wrapper cut landed as approved**, constructor/`.Value` downgrade + implicit-operator omission,
+test-file-scoped. One correction worth recording: the corpus-wide regression my first, unscoped
+attempt measured (`unsafe_package.ArbitraryType`, `internal/goarch`'s `ArchFamilyType`) traced to
+TWO bugs riding together, not one -- the missing test-file gate, yes, but ALSO `MemberScope`'s
+access check using exact string equality against `"public"`, which silently failed for every
+`"Numeric"`-TypeClass wrapper (`TypeGenerator` sets `Scope = "{scope} readonly"` there) regardless
+of the gate. Both types are numeric wrappers, so the regression traced mostly to the second bug.
+Fixed both -- the gate, and `StartsWith("public")` in place of the exact match. Caught it by tracing
+a debug exception through the actual generator run rather than reasoning from the error text alone;
+worth remembering as its own lesson (an exact-string accessibility check is fragile the moment ANY
+caller composes a compound modifier).
+
+**Verification:** 39 -> 11. Full corpus build 307/0 (load-bearing -- confirms the canary types
+specifically). CNR byte-identical, 683/683.
+
+**Delta-collision patch re-applied and parked**, `24cd5ae46`, exactly per the ruling -- committed
+with a `PARKED / NOT verified for this arc, do not build on` header, not touched further, not relied
+on by anything else in this arc. Re-measured runtime's own build against the current tip (wrapper
+cut + parked patch together, since that's what's physically on the branch now): still 11, identical
+breakdown -- the parked patch has zero effect on runtime's own picture, consistent with it not
+resolving the target case.
+
+**The 11 that remain, four distinct root causes, each now precisely named** (not census-level
+estimate -- traced to source):
+
+1. **W3c, family 1** -- `go.go.` double-root escape (1 CS0234 + part of 2 CS0246, all in
+   `package_test_info.cs`). `runtime_internal_test_package` (the synthetic bridge class) is
+   misclassified by `isStrippedGoPathPackageRef`'s registry check as a stripped `go/*` import,
+   because that registry (`packageQualifiedNamespaces`) is populated only from REAL Go import
+   paths -- a synthetic test-bridge class was never a candidate for registration.
+2. **W3c, family 2** -- `@unsafe.` unresolved in a generic witness argument (`package_test_info.cs`,
+   same 2 CS0246). The precedent fix (`visitTypeSpec.go:230-239`'s `@unsafe.` -> `unsafe_package.`
+   rewrite) is scoped to `[GoType(...)]` attribute strings; whatever builds
+   `package_test_info.cs`'s witness/type-argument text runs the identifier through ordinary
+   keyword-escaping instead and never gets the same rewrite.
+3. **A fourth, newly surfaced site** -- promoted-struct-member forwarding (2 CS0051,
+   `AddrRanges.g.cs`). `AddrRanges` embeds `addrRanges` and inherits its `cloneInto` method by Go's
+   ordinary struct-embedding promotion; the forwarding overload `TypeGenerator` emits for a
+   PROMOTED member (as opposed to the constructor/`.Value`/operators the ruled cut already handles)
+   is unconditionally `public` regardless of the embedded type's own accessibility -- same family,
+   different emission path, not yet fixed.
+4. **The parked Delta-collision-rename** (5 CS0426, `mgcscavenge_test.cs`/`mpallocbits_test.cs`) --
+   status unchanged from the last report, root not yet found (routes through neither
+   `typeNameResolution.go` function I already patched).
+
+Amending the census's own estimate, as asked: W3c's counts (3 errors, two families) were exactly
+right; "trivial" was not -- reaching either family needed the wrapper wall down first (both were
+invisible behind it, per the census's own W2-gates-W3 ordering), and each is its own small but real
+investigation, not a one-line patch. Recorded as a dated block in
+`docs/phase4/CENSUS-runtime-first-contact.md` rather than rewriting the original entry.
+
+Not yet done, flagging rather than silently deferring: the "never emit something more permissive
+than Go grants" principle from the design's alias refutation hasn't been written into
+`docs/ConversionStrategies-Reference.md` yet -- next, alongside whichever of the four remaining
+items gets picked up next, or on its own if the queue wants the doc update decoupled.
+
+Branch `claude/i9-w3-accessibility` @ `24cd5ae46` (wrapper cut `b943129cf`, parked patch `24cd5ae46`
+on top), pushed. Continuing toward zero -- item 3 (promoted-member forwarding) looks like the
+nearest, same-family win; W3c's two families next; the Delta-rename stays parked. Watcher + dead-man
+re-armed.
+
+-- i9
