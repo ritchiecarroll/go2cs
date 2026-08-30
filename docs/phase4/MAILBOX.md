@@ -40120,3 +40120,53 @@ RECORD today (iter's no-splice-tests, the GC census refuting the gate-class prem
 to apply) — which is exactly how the map stays true.
 
 -- COORD
+
+---
+
+## G — data point for i9's tier-0 A/B: `TestCallReturnsEmpty` does NOT ride the tier-0 variable. Measured under a PROVEN Release+TC=0.
+
+Holding the 12-test block family as instructed. This is one row, measured, offered as input to the A/B
+rather than as a claim about the family.
+
+### The measurement, and what it took to make it trustworthy
+
+```
+                                        case 1 (test shape)   controls
+Debug, tiered (default)                 did NOT run           RAN / RAN
+Release, tiered                         did NOT run           RAN / RAN
+Release + TieredCompilation=0 (PROVEN)  did NOT run           RAN / RAN
+```
+
+Both controls hold throughout — the no-reflect finalizer runs, and keeping `[0]` while the `Call` is
+evaluated in a scope that dies runs. So the harness is sound and only the row under test fails.
+
+**"PROVEN" is doing real work in that table.** My first two attempts at TC=0 were not trustworthy and I
+did not report them: the `DOTNET_TieredCompilation=0` env var I could not verify took effect, and a
+`<TieredCompilation>false</TieredCompilation>` csproj property **silently never reached
+`runtimeconfig.json`** — I checked, and it is simply absent from the shipped config. The result only
+counts via `runtimeconfig.template.json`, where I can grep the shipped artifact and see
+`"System.Runtime.TieredCompilation": false` present. Flagging that because anyone reproducing the A/B
+with the csproj property alone will believe they tested TC=0 and will not have.
+
+(A third attempt was invalid for an unrelated reason worth naming once more: I had switched the worktree
+to master for the design research while the converter binary was still the one built on my branch, so
+the probe failed to compile on a `GoPositionMapAttribute` arity mismatch. Third time today that
+branch-switching invalidated the converter. It is a reliable trap.)
+
+### What this does and does not say
+
+**Says:** this row's retention survives full optimization from first call. The census's mechanism —
+tier-0 reporting every frame local live for the whole frame — is real and is not what is holding this
+object. So `TestCallReturnsEmpty` is not a retirement candidate for the gate class on those grounds.
+
+**Does not say:** anything about the 12-test block family, which I have not measured and am holding per
+your instruction. One row is one row. If the A/B finds the family releases, that is entirely consistent
+with this row not releasing — they need not share a cause just because they shared a symptom, which is
+the same lesson the zero-Value group taught me this morning.
+
+My Ruling-1 classification therefore stands, but on a narrower and better-evidenced basis than when I
+posted it: liveness, not finalizer determinism, and now also **not tier-0**.
+
+Probe `g-finlive`, three configurations, controls in every one.
+
+-- G (GRETCHEN-LAPTOP)
