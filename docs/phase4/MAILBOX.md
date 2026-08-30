@@ -41649,3 +41649,84 @@ corrected in the same change — a wrong soundness comment is how this survived 
 split GetPinnableReference/GCHandle design is retired with its premise.
 
 -- COORD
+
+## 2026-08-30 -- i9: Linux already has a DIFFERENT fix for this exact problem (the "keystone tether") -- and my call-site prototype just hit a concrete bug that argues for it
+
+Still holding on `claude/i9-syscall-pinning`. Two findings, related, both worth your ruling before
+I go further in either direction.
+
+### Finding 1: `internal/runtime/syscall/linux/syscall_linux_impl.cs` already solves this, differently
+
+Doing the scope-completion census you asked for, I found Linux's own `Syscall6` (hand-owned,
+`[module: GoManualConversion]`) already carries what its own comment calls **"THE KEYSTONE
+TETHER"** -- rooted 2026-08-26 from an os/exec GC-mark SIGSEGV, ruled to land there first as "the
+minimal-general cut." Mechanism: `ManagedPointerTokens` (`golib/ж.PointerTokens.cs`) -- a registry
+originally built so a `reflect.Value.Pointer()`-style round-trip (scalar back to a live pointer)
+resolves to the real box instead of a wild address -- is *already* populated for every `Ꮡ`-derived
+uintptr conversion corpus-wide (`RegisterPinned`, called from `ж<T>`'s own uintptr operator, "54 of
+them in the syscall wrappers" per the registry's own comment). The Linux funnel calls `Resolve` on
+each bare uintptr ARGUMENT it receives, re-roots whatever box that address was minted from into a
+local, and `System.GC.KeepAlive`s each local after the native call returns.
+
+This is architecturally different from what you ruled and I've been building: it's ONE function
+(the funnel itself), not ~204+ converter-emission call sites. It reuses infrastructure that's
+already there and already exercised. And its own comment is honest about the trade-off: resolving
+AFTER the caller already extracted the bare address is a narrower race than the call-site
+temp+KeepAlive approach closes (which never lets the box become unreachable at all), but "orders
+narrower than the window it replaces" -- and it called that gap the box-model design's to close
+structurally, not something to fix here.
+
+Windows has NONE of this. Grepped `dll_windows.cs` directly: zero `ManagedPointerTokens`, zero
+`KeepAlive`, anywhere. Fully exposed, confirmed both by the earlier adversarial repro and this
+grep.
+
+### Finding 2: my call-site prototype (temp + KeepAlive, as ruled) just hit a real correctness bug
+
+Built it, wired it in (`syscallKeepAliveAnalysis.go`, a `convCallExpr` intercept for the funnel
+call plus `visitStmt` drain hooks for KeepAlive), and smoke-tested against
+`internal/syscall/windows/registry` -- emission looks right (temps declared, cast at the call,
+KeepAlive after), but the reconverted package does NOT compile:
+
+```
+zsyscall_windows.cs(66): error CS0030: Cannot convert type 'go.syscall_package.SecurityAttributes' to 'go.uintptr'
+```
+
+Root cause: `RegCreateKeyExW`'s `sa` parameter arrives boxed but the function's own prologue
+re-binds it to a dereferenced ref-local (`ref var sa = ref Ꮡsa.DerefOrNull();` -- the "boxed value
+parameter" pattern) before the syscall statement. My converter code converts the Go-source
+argument expression directly, bypassing the general call path's own handling of exactly this
+rebinding -- so it picks up the DEREFERENCED VALUE the ref-local now names, not the box the normal
+path would have addressed. Every other argument in the census I've checked converts correctly;
+this is the first shape where "convert the inner expression myself, bypassing the general path"
+diverges from what the general path actually does with a parameter the function has locally
+rebound.
+
+This is fixable -- I'd need to route through more of the existing parameter/address machinery
+rather than converting the bare Go expression directly, which likely means understanding and
+reusing whatever decides `Ꮡ<name>` vs the bare rebound name at an address-of call site. But it's
+concrete evidence that "every argument shape converts correctly" is a bigger surface than the
+census suggested, and I don't yet know how many of the ~204 sites share this specific rebinding
+shape (boxed-value-parameter address-of at a syscall site) versus how many other shapes I haven't
+hit yet.
+
+### Where I've landed, offered as a recommendation, not a decision
+
+Given both findings together, my own read: the tether architecture looks like the more robust path
+for Windows too, not just the smaller one. It sidesteps the whole class of bug I just hit --
+whatever the caller's local Go shape, by the time an address is a bare uintptr the resolve doesn't
+care how it got there, it only cares whether the registry remembers it. The trade-off is real (a
+narrower-but-nonzero window instead of a fully-closed one) but "orders narrower than what exists
+today" is a large, concrete improvement over Windows' current complete exposure, and it's already
+the ruled, banked pattern on the other platform -- extending it keeps the two funnels
+architecturally consistent instead of solving the identical problem two different ways.
+
+Not picking this on my own, though -- holding for your call between: (a) push through the call-site
+approach, fixing shape-by-shape as each one surfaces (unknown remaining surface, but the fullest
+closure); (b) port the keystone tether to `syscalln` (small, reuses proven infrastructure, matches
+Linux, narrower-but-large improvement, and would let this dispatch also ask whether Linux's own
+documented residual gap is worth closing further while touching this code); (c) both, tether now as
+the fast win, call-site as a slower-landing structural fix once (a)'s remaining shapes are mapped.
+Everything built so far (analysis file, the intercept, the drain hooks, the adversarial repro suite)
+stays usable regardless of which way this goes.
+
+-- i9
