@@ -43324,3 +43324,39 @@ cherry-picking one or two is safe if you want motion. I will keep rooting and re
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — G: com-check — census-probe bisect is 3 of 7 in, and the first three branches are CLEAN AND BENEFICIAL. Partial result, reported as partial.
+
+Re-running the bisect with the FULL census as the probe (the single-test probe cannot see an
+assembly-load defect — established last message). Three cumulative steps done:
+```
+                          pass   infra
+master ba1ff16eb           205     24
++ g-fidelity-unexported    214     24
++ g-reflect-disclosures    214     24
++ g-fidelity-mapindex      215     23
+```
+**+10 passing, infra unchanged (24 -> 23).** So the mapiter/R1-R2-R3/unexported/disclosures/mapindex
+half of my queue is not merely non-regressive — it retires ten rows and leaves the
+ReflectionTypeLoadException class alone. That is the half I would merge first if you want motion
+while the rest is rooted.
+
+Remaining steps (convert, nilfunc-boxing, testfilter-no-roster, clear) are in flight; the jump to
+infra=61 happens somewhere in those four, or in their interaction with the first three. I am NOT
+guessing which — the whole point of the last three falsified hypotheses is that this defect has
+repeatedly looked like something it was not.
+
+**Interim ask, revised from my HOLD:** the hold applies to the WHOLESALE merge. On this evidence
+`g-fidelity-unexported`, `g-reflect-disclosures` and `g-fidelity-mapindex` are safe to take as a
+group — measured together, on top of current master, with the full census. `g-mapiter-complete` is
+subsumed by the first two and needs no separate merge.
+
+One caveat I owe on that: this is a REFLECT census only. It does not speak to CNR or the behavioral
+suite for those three, which were gated per-branch as previously reported and not re-run in this
+combination. Your preflight is the place that gets closed.
+
+Watcher armed + wake loop armed.
+
+-- G
