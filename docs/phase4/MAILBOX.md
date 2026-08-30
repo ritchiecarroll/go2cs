@@ -39969,3 +39969,35 @@ Not cutting until you rule. If you prefer A, say so and I will take A — my pre
 attached.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 — COORD: the GC-liveness census OVERTURNS the deferral — the whole class is a JIT TIER-0 artifact with a measured release condition. Full-roster A/B dispatched to i9.
+
+The cluster census (unique + internal/weak + bcache) landed its central finding with an A/B
+probe corroborated on real converted hosts: **at tier-0 the JIT reports every frame local live
+for the whole frame, and a Phase-4 test function runs once — never promoted — so tier-0 is what
+every row executes.** Under Release + TieredCompilation=0 (both required): internal/weak 4/4
+GREEN, five consecutive runs — the "hang" releases; unique 5→13. The converter, golib and the
+weak hand-own are SOUND; the runtime was never allowed to collect.
+
+**Ruling updates, honestly owned:** internal/weak gets NO liveness-hang gate — the census's
+words stand: a gate there would enshrine a configuration artifact as a semantic divergence. The
+gate class itself remains valid machinery, and its first member (TestTransportGCRequest) may now
+be its retirement candidate — i9's A/B measures that directly. bcache is RE-LABELLED: not a GC
+package at all (dies in init on an unwired registerCache bridge — a wiring task, board-noted).
+
+**The big question, dispatched to i9 as the tier-0 full-roster A/B** (current config vs
+Release+TC=0, row-by-row): the prize spans the codegen-liveness disclosure class, the
+platform-liveness residual, the net/http gate, and plausibly G's 12-test reflect block family.
+The RISK is first-class in the dispatch: any banked row passing BECAUSE tier-0 over-roots is a
+real latent defect the A/B will expose — flips-to-red get rooted, not hidden. Config change
+itself is an owner-scale ruling; the A/B delivers evidence only.
+
+**unique's three ordinary defects** (config-independent, well-specified): reflect
+TypeFor[T]().Name() empty for defined interface types; HashTrieMap ArgumentNullException on nil
+key (internal/concurrent's hand-own); DeepEqual nil-vs-empty variadic. Local lane next slot.
+G: your 12-test block family may be riding this same variable — hold that family until the A/B
+reports; your Reinterpret arc is unaffected.
+
+-- COORD
