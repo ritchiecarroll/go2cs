@@ -44164,3 +44164,54 @@ on me, nothing blocked on you.
 Watcher armed + wake loop armed.
 
 -- G
+
+
+---
+
+## 2026-08-30 — i9: the W3a-residual design is posted (`claude/i9-w3-accessibility` @ `8b50ae1de`), and a status-honest note on the two contained items
+
+**Design doc:** `docs/phase4/DESIGN-w3a-wrapper-scaffolding.md`. Headline finding, load-bearing for
+the whole recommendation: **none of the census's nine wrapper types are Go aliases** -- I grepped the
+real GOROOT source (`type MSpan mspan`, `type PallocBits pallocBits`, ... -- all defined-type syntax,
+zero `=`). Option (a) from the ruling (true C# alias) isn't incomplete, it's wrong for every occupant:
+a defined type needs EXPLICIT Go conversion and eight of the nine carry their own methods (1-7 each);
+a `global using` would make the two types silently interchangeable in C#, more permissive than Go's
+own type system.
+
+Two experiments run and reverted (nothing banked): downgrading the WRAPPER STRUCT'S OWN scope
+cascades (32->70, measured -- every other test-declared function naming the wrapper computes its own
+accessibility independently). Downgrading only the wrapper's OWN storage accessors -- the constructor
+and `.Value`, the members that touch the wrapped type directly -- does NOT cascade (39->12, zero new
+errors). The residual 12 are `implicit operator` conversions, which C# flatly refuses to let be
+non-public (CS0558); the answer there is to omit them, not weaken them, which costs nothing Go
+promised. A third finding from the same pass: the check has to be test-file-gated, or it also
+downgrades ordinary PRODUCTION wrappers corpus-wide (`unsafe_package.ArbitraryType`,
+`internal/goarch`'s `ArchFamilyType` both broke when I ran it unscoped) -- now the design's G1/G2.
+
+Recommendation is (b2)+(c) in the doc's numbering. Full gate plan included. Standing by for the
+ruling.
+
+**Status-honest note on the two contained items** (the ones I was told to proceed on under my own
+judgment): I did NOT land either, and want that on the record rather than implied by silence.
+
+- The Δ-collision-rename (`PallocBits` declared `ΔPallocBits`, referenced bare from
+  `mgcscavenge_test.cs`/`mpallocbits_test.cs`): I found and fixed a REAL gap in two shared type-
+  name-rendering functions (`getFullyQualifiedTypeName`, `getAliasQualifiedTypeName` -- both had a
+  same-package fall-through using the raw Go name instead of the collision-checked one), but it did
+  NOT resolve the specific case I was chasing -- those two files' references route through neither
+  function's fixed path, which points at something deeper (a `nameCollisions` population possibly
+  scoped per test-variant load rather than per Go package). I measured the fix's real blast radius
+  properly this time (two seeded reconverts diffed against each other, not against the committed
+  tree) and it touches ~25 files across `go/types`, `reflect`, `hash/maphash`, `net/http` and others
+  -- real, but unverified for correctness and not what I set out to fix. Reverted rather than bank an
+  unverified wide-radius change; not on any branch.
+- W3c's two families (the `go.go.` double-root-escape on a synthetic bridge class; `@unsafe.` left
+  unresolved in a `package_test_info.cs` witness argument): characterized in my last report, not yet
+  even attempted -- I reallocated the remaining time to the design doc once it became clear both
+  items needed more than the "trivial" budget the census estimated, and the design felt like the
+  higher-value use of it.
+
+Both stay open. I can pick either back up, or move to something else -- whatever the queue wants next.
+Watcher + dead-man re-armed.
+
+-- i9
