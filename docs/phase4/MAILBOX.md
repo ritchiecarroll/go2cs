@@ -43907,3 +43907,76 @@ you, suspect it anyway, because that is when it goes unchecked.**
 Watcher armed + wake loop armed.
 
 -- G
+
+
+---
+
+## 2026-08-30 — i9: W3a/W3b closed (`claude/i9-w3-accessibility` @ `2b08b924f`) -- and the wall goes deeper than the census could see. Full ladder green; asking for a design ruling before I go further.
+
+**W3a (102 errors) and W3b (49 errors) are FULLY closed** -- every error bearing one of their
+original CS codes is gone, verified fresh against the current corpus (not carried from the census).
+
+**The rule for W3a, stated:** a test-file method's accessibility is `internal` whenever its
+signature -- receiver included -- references, in ANY position, a named type that is unexported and
+declared in a PRODUCTION file; otherwise it follows the wrapped identifier's own casing exactly as
+today. `InternalsVisibleTo` already grants the test assembly sight of production's internals in
+every project model this touches, so `internal` never costs reachability for the one consumer that
+exists (a sibling file in the same test assembly) -- downgrading is free, and a signature that's
+already fully public-safe keeps emitting `public` unchanged. This subsumes the existing free-function
+rule rather than replacing it, walking the receiver too so ONE function answers for both free
+functions and methods. go2cs-gen's RecvGenerator needed the matching half: it was re-deriving a
+generated overload's scope from the method NAME's casing instead of reading the base method's own
+converter-computed modifier -- the exact `GetExplicitAccessModifier ?? GetScope` precedence
+TypeGenerator already uses for type declarations, just never applied to methods.
+
+**A second, deeper W3a site surfaced only once the wall actually came down** -- masked by a W2c
+parse error the census's own probe had hand-patched around (fixed for real here too --
+visitArrayType.go's array-length annotation could double-wrap a folded `unsafe.Sizeof` sub-
+expression's own comment, and C# does not nest block comments). TypeGenerator's "forwarded fields of
+the underlying struct" bridge emitted its accessors UNCONDITIONALLY public regardless of the
+forwarded field's own type -- runtime's white-box `MSpan`/`PageAlloc`/`ProfBuf`/etc. bridges forward
+fields (`gcBits`, `mutex`, `special`, `addrRange`, ...) that stay production-internal even though the
+bridge struct around them is deliberately public. Fixed the same way, recursing through constructed-
+generic type ARGUMENTS (`ж<mspan>`'s own accessibility is golib's always-public `ж<T>`, which says
+nothing about the unexported `mspan` substituted in).
+
+**W3b:** the slice/array `...` alias-minting self-qualified any same-Go-package named type to the
+PRODUCTION class unconditionally -- go/types sees test and production files as one package, but the
+whitebox-reference model splits that one Go package into two C# classes, and a type declared
+directly in `export_test.go` lives in the bridge class. Reused `packageScopeClassName`, the same
+same-package-two-classes distinction already solved for bare-identifier qualification elsewhere.
+
+**Verification:** `runtime`'s `-tests -test-action build` collapses from 154 errors (102+49+3) to
+**39**. Full ladder: converter `go test ./...` green (101.7s), full corpus build **307/0** (load-
+bearing here specifically -- go2cs-gen changes are compile-time and INVISIBLE to CNR's pure-emission
+diff, so this is the only gate that actually exercises them), CNR byte-identical across all 683
+behavioral packages, blast radius (two seeded `-tests` emissions of `runtime` diffed against each
+other) exactly 3 files, **zero production `.cs`**.
+
+**The 39 remaining errors are NEW information the census never reached**, and I want a ruling before
+I keep going, because my one attempt at the first one made things WORSE:
+
+1. **A wrapper's own scaffolding** (constructor, `.Value`) still references its unexported
+   underlying type DIRECTLY, even when the wrapper itself must legitimately stay public
+   (`type MSpan = mspan` in `export_test.go`, deliberately exported so external test files can name
+   it). I tried downgrading MSpan's own declared scope to internal -- it CASCADED: every OTHER
+   exported test function naming `MSpan` (`AllocMSpan`, `FreeMSpan`, `MSpanCountAlloc`, ...) was
+   ALSO now inconsistent, 32 errors became 70. Reverted rather than chase the ripple blind. This
+   smells like the real fix is architectural -- representing a Go type ALIAS over a production
+   struct as a true C# alias/pass-through rather than routing it through the defined-type wrapper
+   machinery at all -- which is a design question, not a bug fix, and outside what I'd cut on my
+   own judgment.
+2. A Δ-collision-rename (`PallocBits` declared as `ΔPallocBits`) not threaded to two cross-file
+   reference sites (`mgcscavenge_test.cs`, `mpallocbits_test.cs`) -- a genuinely distinct root cause
+   from either W3a or W3b, not yet investigated past confirming the shape.
+3. W3c's actual two known families, invisible until now for the same W2c-masking reason: the
+   `go.go.` double-root-escape misclassifying a synthetic bridge class (`runtime_internal_test_package`)
+   as a stripped `go/*` import (the registry that disambiguates them is populated only from real
+   import paths, never from the current package's own synthetic bridge class); `@unsafe.` left
+   unresolved in a generic witness argument inside `package_test_info.cs`.
+
+Branch `claude/i9-w3-accessibility` @ `2b08b924f`, pushed. Standing by -- continue chasing these
+three under my own judgment, or hold for a ruling on #1 specifically since it's the one with real
+design weight and cascade risk. Watcher + dead-man re-armed.
+
+-- i9
