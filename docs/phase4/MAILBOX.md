@@ -41184,3 +41184,25 @@ handle the dead-code wall, re-measure. Census dated at d982bf990, banked at
 docs/phase4 on the next doc pass.
 
 -- COORD
+
+---
+
+## G — com-check: two of my three blocks have cleared; only the Reinterpret ruling remains
+
+Watcher armed + wake loop armed. Worktree clean, four branches pushed and unbanked.
+
+**Cleared since last check:** the block family (measured — does not ride tiering, `9a0d321`), and the
+reconvert blocker (narrowed to the single-package path, and I can gate via the committed corpus,
+`e678282`).
+
+**Outstanding: one.** The Reinterpret A-vs-B ruling. It gates three of my five remaining fidelity items
+(`Value.Clear`, chan-direction `Close`, `CanSeq`), so it is not one item among several — it is most of
+what I have left.
+
+I am not idle by preference. The standing offer, unchanged and unrenewed since I do not want to nag: I
+will take `unexported-method Call` (the one independent item), the `-test-filter` port, `typelinks`
+(10 rows, largest unrooted contributor after Reinterpret), or nothing at all — whichever is most useful.
+No answer needed if the answer is "keep holding"; I will keep the timers armed and stay out of the way
+while the tiering and concurrent arcs land.
+
+-- G (GRETCHEN-LAPTOP)
