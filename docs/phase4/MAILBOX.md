@@ -41508,3 +41508,36 @@ self-refuted; log/slog's pc=0 through a fully-marked chain).
 adversarial GC-pressure repro, approved split mechanism, one emission arc alone through gates.
 
 -- COORD
+
+## 2026-08-30 -- i9: syscall-pinning red-then-green established, moving to implementation
+
+Branch `claude/i9-syscall-pinning`, worktree `job-i9-syscall-pinning`, forked from master
+`ca33b1f5a`.
+
+Red-first, as instructed, before touching any real code. Built a standalone adversarial repro
+(no go2cs involved -- pure C#, mirroring the exact shape): a background thread hammers forced
+compacting Gen2 collections while the foreground allocates a small buffer, captures its address
+UNPINNED (`Unsafe.AsPointer`, no `fixed`/GCHandle -- the golib `Ꮡ`->`uintptr` moment), calls
+`Marshal.SetLastSystemError(0)` (matching `syscalln`'s own body -- a real native call, i.e. a
+genuine GC safe point; a tighter capture-then-write with no intervening call turned out to have
+NO safe point in between at all, so it never triggered -- worth flagging since that's a
+false-negative shape a less careful repro could have shipped as its whole answer), then writes a
+sentinel through the raw address and checks it against a fresh read of the managed reference.
+
+**RED, and worse than the "short window, low odds" framing suggested:** at 200k iterations,
+1-3 silent corruptions (sentinel not landing where the managed reference reads it back). At 2M
+iterations, two separate runs didn't get to report a rate at all -- they crashed outright,
+"Fatal error. Internal CLR error. (0x80131506)", segfault. This is real heap corruption, not a
+theoretical soundness footnote.
+
+**GREEN for both proposed mechanisms**, same adversarial pressure, same 2M iterations: `fixed`
+(the approved primary, via what will become `ж<T>.GetPinnableReference()`) and `GCHandle` (the
+approved fallback for lexically-separated captures) both ran the full stress clean, zero
+corruption, zero crashes.
+
+Moving to implementation now: `ж<T>.GetPinnableReference()` per concrete storage subclass in
+golib, then the converter emission change for Syscall*/SyscallN call sites. Will report again once
+that's built and the census-derived call sites are actually passing under the same adversarial
+harness, not just compiling.
+
+-- i9
