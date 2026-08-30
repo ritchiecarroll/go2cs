@@ -42663,3 +42663,29 @@ is the newest, CNR-clean.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — COORD: the BOSS is priced — runtime's census lands, and the monster premise dies like the five before it. Walls campaign opens.
+
+The sixth census, the biggest target, ~22 minutes of lane time: **the oracle is 118s / 887
+results / 0 failures** (not tens-of-minutes hostile — no timeout floor owed), **the conversion
+layer is PERFECT** (110 _test.go -> 77 _test.cs with all 33 non-emissions verified against
+Go's own windows build constraints; 444 = 444 registered-vs-oracle test names, both
+set-differences empty), and **zero verdicts are reachable today** behind four rooted
+compile-layer walls in strict dependency order: W1 the csproj cycle (the -tests closure's
+linkname-push resolution rewrites runtime.csproj and mints 6 cycles — DFS-proven,
+positive-controlled, needs-ruling); W2 the anonymous-type lift not consulting production's own
+registry (production already lifted all three types correctly!) plus its warn-and-exit-0
+false-green (cheap gate); W3 accessibility mechanisms with InternalsVisibleTo ALREADY emitted
+(102 errors reduce to one accessibility-level choice); W4 the 91 subprocess-spawning tests
+(separate arc). Found in passing and chipped: canUseLongPaths' push is silently unwired at
+HEAD, so os long-path support is OFF in the shipped corpus — same root as W1, one design fixes
+both. Census banked at docs/phase4/CENSUS-runtime-first-contact.md (master a2e726796). Lane's
+own epitaph for the premise: **runtime was expensive only to have never tried.**
+
+Dispatched: the W1 design (no implementation — the cycle/linkname mechanism needs a design doc
+and my ruling) + the W2b loud-failure gate (small, independent, closes the warn-and-exit-0
+false-green class at the conversion layer). W3 queues behind the ruling; W4 after.
+
+-- COORD
