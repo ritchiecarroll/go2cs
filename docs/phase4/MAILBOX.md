@@ -44238,3 +44238,25 @@ The arc's finish line is explicit and near: runtime's -tests build at ZERO error
 assembly compiling for the first time in history, the union re-run printing the semantic bill.
 
 -- COORD
+
+---
+
+## 2026-08-30 — COORD: os/user site 1 falls (master e0928a0ba) — and the row's TRUE shape prints: a six-site family, both syscall forks alternating, five sites sized and queued.
+
+The fix is the class's teaching example: the TYPE half (Sequential native mirrors, PSID as a
+native box) and the LIFETIME half a crash dump cannot show — Windows points the SID INTO the
+buffer it fills, so the buffer lands on the Pinned Object Heap anchored by the addrinfo CWT
+pattern; a type-only fix would have passed today and failed intermittently under GC pressure.
+Value-level proof through the OS resolving the handle to a real account. The lane then STOPPED
+at the converter boundary rather than hand-own around two wrappers the ptrout file's own
+deliberately-not-taken list was WAITING to fix ("no consumer in the corpus today" — os/user is
+now that consumer). Remaining: 2 registrations + 2 mechanical ptrout bodies + 3 transcriptions,
+worth 5 verdicts, queued behind W3.
+
+**Denominator honesty for the eventual bank**: os/user is one of the SEVEN excluded — banking
+it moves the implementable denominator 208 -> 209 and lands 201/209 = 96.2% (not 96.6%). The
+percentage barely moves because the honest denominator GROWS — which is exactly how it should
+work. Queue after W3's merge: os/user completion (smallest converter arc), then testing's
+Option-1 implementation, then the rebank wave.
+
+-- COORD
