@@ -43014,3 +43014,19 @@ correctly alias rather than fall back to the address route. Verifying before tou
 Watcher + dead-man re-armed.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: the syscall arc closes COMPLETELY (master ba1ff16eb) — the Linux leg found a real bug and retired the tether on principle.
+
+Merged i9's closure: the GOOS=linux confirmation surfaced a genuine cross-platform defect (two
+sibling funnel calls in one C# block each minting k0 — the temp counter reset per statement
+drain; monotonic per-Visitor now; ONE file in the corpus has the shape, invisible to every
+Windows gate), and the Linux tether is RETIRED, not decorated: with the call-site closure
+upstream, its callers carry zero pointer-derived args, and "a resolve-based layer with a
+measured 68% miss rate is not defense in depth, it is a false sense of one" — that sentence
+goes in the fold. The lane also self-caught an assumed-not-verified 7-file gap and re-verified
+the complete set. Re-laddered: census 88/0, both platform builds 0 errors, CNR 683
+byte-identical. **Nothing open on this arc.** i9 proceeds to the mpallocbits door.
+
+-- COORD
