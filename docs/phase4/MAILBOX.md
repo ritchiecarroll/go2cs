@@ -41815,3 +41815,66 @@ design-first and I am holding to that.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — G: unexported-method Call BANKED to branch (full-context confirmed); TWO findings that matter more than the cut — reflect has a 30-minute blocker, and `-test-filter` WRITES ROSTER ARTIFACTS FROM A DIAGNOSTIC RUN.
+
+**Cut landed**: `g-fidelity-unexported` @ `5d6cfe61b` (signed, golib-only, ONE file). Detail in the
+commit message; the short version is in my previous com-check. Confirmation strengthened since:
+`TestCallPanic` now measured PASSING **in full-suite context**, not only filtered.
+
+---
+
+**FINDING 1 — `TestOffsetLock` does not return, and it alone makes reflect unmeasurable.**
+
+The ungated 30m run died at `package timeout after 00:30:00` sitting in `TestOffsetLock`. It is not
+slowness: the slowest test that COMPLETES takes 7.06s, and with `TestOffsetLock` excluded the ENTIRE
+suite finishes in **~88 seconds**. So one test was eating a 30-minute budget by itself.
+
+Consequence worth flagging: the host runs alphabetically, so every prior reflect measurement that hit
+this deadline only ever reached **A–N**. Everything P–Z was UNMEASURED, not passing. The gated run is
+the first to reach that tail — which is why the failure count moves 90 (A–N, truncated) → 124 (A–Z).
+
+Gated census, symmetric exclusion, 201 of 202 tests: **193 pass / 124 fail / 1 skip**, zero timeouts,
+no further blockers.
+
+I am NOT attributing the blocker. My change cannot reach it (`TestOffsetLock` drives
+`ResolveReflectName` across four goroutines; `GoMethodValue`'s single tree-wide caller is not on that
+path) — but no control run exists at this tree, so it is recorded as **observed-here**, not asserted
+pre-existing. Rooting it is high value: it converts reflect from "unmeasurable in 30m" to "fully
+measurable in 90s". Unrouted; I have not claimed it.
+
+---
+
+**FINDING 2 — a DEFECT in the `-test-filter` mechanism I built. Please read this one.**
+
+The doctrine "a gated census is DIAGNOSTIC ONLY and must never bank a row" is enforced by DISCIPLINE
+ALONE. The pipeline does not know the run was filtered, so a filtered run **auto-writes roster
+artifacts**. My one-test run (`-test-filter '^TestCallPanic$'`) produced, unprompted:
+
+  - `src/core/reflect/README.md` — Tests badge flipped `not_yet_validated` -> **`1/1 validated`**
+  - `docs/validation/index.md` — a new `reflect` roster row
+  - `docs/validation/current/reflect.md` — a full "validation proof" page for reflect
+
+reflect has **124 failing tests**. Any of those three landing in a commit publishes a false validation
+claim, and the badge/proof page are exactly the artifacts a reader trusts. I caught all three only
+because I classify every dirty file before committing; a `git add -A` would have banked them silently.
+Restored/removed; my commit is one file.
+
+This is my own mechanism and my own near-miss, so I am reporting it rather than quietly cleaning up.
+Proposed fix (not started, not claimed): when `testFilter != ""`, SUPPRESS the badge/index/proof-page
+emission outright and say so on stderr — make the doctrine mechanical instead of remembered. That is
+the same reasoning as the seeded-reconvert ritual: a rule you must remember is a rule that eventually
+gets skipped. Route it wherever it belongs; I will take it if it is mine.
+
+---
+
+**Still AWAITING — Reinterpret prefix-downcast, A vs B.** Design posted; six COORD messages since,
+none addressing it. Gates `Value.Clear`, chan-direction `Close`, `CanSeq`. Not started, per the
+design-first instruction. Next up meanwhile: `Value.Convert` + the predicate pair, which the
+`g-mapiter-complete` tip unblocks, on its own branch.
+
+Watcher armed + wake loop armed.
+
+-- G
