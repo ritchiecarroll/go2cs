@@ -43484,3 +43484,66 @@ pipeline runs full-depth for the first time and the campaign sees the number it 
 seen: the boss's actual semantic bill. Master c7cc3518c, 199/208 = 95.7%, nine rows.
 
 -- COORD
+
+---
+
+## 2026-08-30 — G: ROOTED. The 29 infrastructure-errors were ONE half-built synthesized struct aborting the whole extension-method registry. Fix on `g-dynamic-scan` @ `3ba768838`. And `g-nilfunc-boxing` was never the disease — it was the symptom carrier.
+
+**Root cause.** `TypeExtensions.LoadAssemblyExtensionMethods` walks every loaded assembly and calls
+`GetTypes()` with NO catch. One of those assemblies is **`go2cs.SynthesizedStructs`** — the DYNAMIC
+assembly the bridge itself builds, where `reflect.StructOf` mints synthesized structs
+(`GoStructSynthesis`, AssemblyBuilder/Run). `GetTypes()` on a dynamic assembly throws
+`ReflectionTypeLoadException` while ANY TypeBuilder in it is still incomplete — so a single
+synthesized struct in flight aborts the ENTIRE extension scan, and with it every method-set question
+resolving through `GetGoMethodSetCandidates`.
+
+Found by instrumenting the scan to print `LoaderExceptions` (there was no other way to see it — the
+exception names no type in its message), running under the FULL census because the fault does not
+reproduce filtered-alone, then reverting the instrumentation.
+
+**Why it looked like anything but itself.** It surfaces in tests that never touch StructOf, out of
+`StructurallyImplements`/`GoImplements`, and it is TIMING-dependent on what else is under
+construction. That is why it impersonated stale artifacts, then my own IMap change, then a
+multi-branch interaction. Three wrong answers, each plausible, none of them the shape of the thing.
+
+**Fix — `g-dynamic-scan` @ `3ba768838`, off master, one file, 18 lines.** Skip `assembly.IsDynamic`
+ahead of the existing name-prefix filters. Not a workaround: an assembly the bridge EMITS holds
+synthesized structs and can contain no Go extension method by construction, so the scan loses no
+candidate by not looking. `IsDynamic` is the structural property; a name match would not be.
+```
+TRUE A/B vs master ba1ff16eb:   TestValueString  infrastructure-error -> pass
+                                regressions NONE (241 rows both sides)
+golib build clean; go2cs.slnx clean; behavioral suite RUNNING (a golib RUNTIME change owes it and
+CNR cannot cover it -- CNR compares transpile OUTPUT and never executes golib)
+```
+One row on master is the honest headline; the value is that it removes a LATENT CLASS.
+
+**AND THE CORRECTION THAT MATTERS MOST: `g-nilfunc-boxing` was not the defect.**
+```
+master alone                              pass=205  infra=24
+master + nilfunc-boxing                   pass=136  infra=60
+master + nilfunc-boxing + THE FIX         pass=210  infra=25
+```
+It was not creating the fault. It was putting more synthesized structs in flight and making a
+pre-existing latent fault LIKELY. I named that branch as the culprit two messages ago; it is the
+carrier, not the cause. The distinction is not pedantic — reverting or reworking that branch would
+have fixed nothing and lost six real rows.
+
+**But it is still not merge-ready, and I am not going to round that up.** With the fix applied it is
++6 rows and −3 against master:
+```
+IMPROVES  TestComparable, TestMakeFuncStackCopy, TestNumMethodOnDDD, TestValueString,
+          TestValue_EqualNonComparable, TestVariadicType
+REGRESSES TestMakeFuncInvalidReturnAssignments   pass -> FAIL   <- a real regression, unrooted
+          TestFuncOf, TestTypeStrings            fail -> infrastructure-error
+```
+That pass->fail is mine to root before that branch merges. Nobody is blocked by it.
+
+**Manifest now ELEVEN branches.** Merge order that follows from the measurements: `g-dynamic-scan`
+first (it is what makes the rest measurable), then the four already proven clean together, then
+testfilter/clear re-measured without nilfunc present, and `g-nilfunc-boxing` last and only after its
+pass->fail is rooted.
+
+Watcher armed + wake loop armed.
+
+-- G
