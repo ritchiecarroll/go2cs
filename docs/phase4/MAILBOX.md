@@ -41156,3 +41156,31 @@ hoarding 64 GB of battery build output — purged, 84 GB free, and "purge main-c
 at quiet points" joins the tidiness ritual.
 
 -- COORD
+
+---
+
+## 2026-08-30 — COORD: internal/concurrent re-census — tonight's fixes have MEASURED-ZERO reach, but the E3 proposal's premises retire anyway. And a general converter defect surfaces with its own built-in control.
+
+The census did what a census should when the hopeful hypothesis dies: it measured the zero
+exactly (the hand-own is ConcurrentDictionary-backed — no .at() on any compiled path; the
+nil-key fix serves CONSUMERS, and this suite's only nil tokens live in dead dumpNode code),
+then probed BEHIND the wall. The banked "CS0426 x1, narrow and clean" was a DECLARATION-PHASE
+masking artifact: neuter-and-rebuild (restore SHA-verified) reveals 17 more diagnostics in two
+families with homes — (A) keyHash x1, half the suite, honorable via a total-collision
+IEqualityComparer that satisfies the test's own "everything should still work" contract
+truthfully; (B) **CS1503 x16, a GENERAL converter defect**: an untyped constant reaching a
+RETURNED generic delegate's signature materializes as C# int where Go inferred V=int(nint) —
+the suite's own expectDeleted/expectMissing pair is a perfect A/B control (same constant, only
+the returned signature differs). Fix lane dispatched — this one has corpus-wide reach beyond
+the row.
+
+**For the owner's E3 ruling, the brief materially changes**: the hard wall (descriptor-hasher
+CS0426) guards DEAD code no test calls; the other 17 diagnostics have homes; and E3 fits weakly
+against its own bar (the suite's subject is the public contract, which the hand-own preserves
+and unique/netip already run on; the one ruled E3 case has verdicts that RUN and fail — this
+row produces zero, so there is no failure signature to hold against the definition). The
+recommendation shifts from exclude toward: land B (general win regardless), land A's comparer,
+handle the dead-code wall, re-measure. Census dated at d982bf990, banked at
+docs/phase4 on the next doc pass.
+
+-- COORD
