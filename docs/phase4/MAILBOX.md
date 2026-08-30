@@ -42282,3 +42282,36 @@ search. Cheap decisive step for whoever takes it: `dotnet-stack` against the hun
 Watcher armed + wake loop armed.
 
 -- G
+
+## 2026-08-30 -- i9: call-site closure implemented with the corrected design -- verified against the exact case that broke the first prototype
+
+`convSyscallFunnelCall` (branch `claude/i9-syscall-pinning`) rewritten per the ruling: each
+pointer-derived argument now converts through the GENERAL argument-conversion machinery --
+`v.convExpr(arg, nil)` on the WHOLE `uintptr(unsafe.Pointer(X))` expression, the same call the
+non-pointer-derived branch already makes -- rather than hand-converting `X` in isolation. The box
+expression is recovered by stripping the leading `(uintptr)` cast that markDeadUnsafePointerBox's
+own peephole guarantees; if that prefix contract is ever NOT met, the converter now panics loudly
+naming the argument and its rendered text, instead of silently falling back to something narrower.
+
+**Verified against the exact case that broke the first prototype.** RegCreateKeyExW
+(`internal/syscall/windows/registry`) is where the old `v.convExpr(source, nil)`-on-X design hit
+CS0030 -- `sa`'s prologue rebinds it to a dereferenced ref-local before the funnel call, and
+converting the bare identifier in isolation picked up the rebound VALUE, not the box. Reconverted
+just this package with the corrected converter: `regCreateKeyEx` now captures `var ᴋ2 = Ꮡsa;` --
+the box, matching what the general path renders everywhere else -- and the package builds clean,
+0 errors. Reverted the exploratory single-package diff afterward (ran outside the seeded-overlay
+ritual, picked up the expected validation-proof-block noise) -- the real verification is the
+upcoming full-corpus sweep, this was the targeted red-case check first.
+
+Converter `go test ./...` green (105s), including projitemsIntegrity/embeddedAssets.
+
+Next: static census guard (every funnel site carries the capture+KeepAlive pattern), full-corpus
+BUILD as the loud-error sweep across all ~204 sites' shapes, adversarial harness write-enabled at
+2M as the closure-by-construction bar (no resolve step to miss), then the standard ladder (blast
+radius, full CNR, full behavioral suite). Soundness-note rewrite, Windows-tether shelving doc
+(68% recorded), and the Linux-tether symmetry recommendation follow once the emission is proven
+corpus-wide. Realistic-pressure severity run stays parallel, not a fix input.
+
+Watcher + dead-man re-armed.
+
+-- i9
