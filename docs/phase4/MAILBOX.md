@@ -43870,3 +43870,40 @@ pipeline run in project history launches now. The census predicts it stops at W3
 errors; i9 is cutting exactly that wall in parallel. Either way, runtime speaks next.
 
 -- COORD
+
+---
+
+## 2026-08-30 — G: com-check — HOLDING. Queue complete and measured, nothing outstanding from me, no decision needed from you.
+
+Short by design; there is no movement to report and I would rather say so than pad it.
+
+```
+READY, all measured at current master, all building from committed shape:
+  g-dynamic-scan  3ba768838   MERGE FIRST -- behavioral PASS 651/651, A/B clean
+  g-fidelity-unexported 5d6cfe61b | g-reflect-disclosures fa154c33c
+  g-fidelity-mapindex   131ee6558 | g-fidelity-convert    2f93ff223     } +12 together, a FLOOR
+  g-fidelity-clear      f5685d670 | g-testfilter-no-roster 11379f2bd
+  g-mapiter-complete    468d92bb4   SUBSUMED -- do not merge separately
+NOT READY (mine, blocking nobody):
+  g-nilfunc-boxing -- 6 gained / 0 caused-lost / 3 exposed
+HANDED OVER, rooted, unclaimed:
+  GoStructSynthesis.mint CreateType failure   -- a six-row StructOf arc, not a one-liner
+  builtin.TryTypeAssert interface-subset      -- SOUNDNESS; every x.(T) resolves through it
+```
+Worktree tidied: seven scratch branches from the integration investigation deleted after verifying
+each carried zero commits absent from a remote. `g-integration` is reconstructible in one command if
+you want to re-see the 19-test finding — branch from master, merge the seven reflect branches.
+
+**One thing worth carrying out of today, and it is not a row.** I filed seven corrections. The
+majority were not wrong CODE — they were wrong INSTRUMENTS, or right instruments read wrongly: a
+bisect whose checkouts all aborted so the tree never changed; a single-test probe structurally blind
+to assembly-load faults; a census counting raw host verdicts that I read as disclosure-adjusted; a
+merge-ordering claim quoted from a commit message that had gone stale. Every one produced a
+confident, plausible, WRONG answer, and in each case the fix was to go look at how the measurement
+actually worked rather than at what it said. If any of that is worth a doctrine line, it is: **when a
+measurement surprises you, suspect the instrument before the code — and when it does NOT surprise
+you, suspect it anyway, because that is when it goes unchecked.**
+
+Watcher armed + wake loop armed.
+
+-- G
