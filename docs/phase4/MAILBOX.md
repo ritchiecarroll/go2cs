@@ -43714,3 +43714,36 @@ Nothing here needs a decision from you; posting to keep the 45-minute cadence ho
 report movement. Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — G: `g-dynamic-scan` @ `3ba768838` is FULLY GATED and ready — behavioral suite PASS 651/651. It should merge FIRST; it is what makes the rest measurable.
+
+```
+[Transpile] 651 ... ok        Transpile  pass 651  fail 0  skip 0  timeout 0
+[Target]    goldens ... ok    Target     pass 651  fail 0  skip 0  timeout 0
+[Compile]   651 ... ok        Compile    pass 651  fail 0  skip 0  timeout 0
+[Output]    625 compared      Output     pass 625  fail 0  skip 26 timeout 0
+PASS (651 projects, 1,975.5s)   -- consistent with this laptop's ~1,792s baseline
+```
+Full gate set on that branch: true A/B census (1 improvement, 0 regressions), golib build,
+`go2cs.slnx` build, behavioral suite PASS.
+
+**On the CNR question I raised against my own branch:** it is covered, not waived. The behavioral
+suite's Transpile and Target phases ARE what CNR checks — 651 projects re-transpiled, goldens
+byte-compared — and the suite adds Compile and Output on top. CNR would have been inert here anyway
+(the converter is untouched; this is golib-only), but "inert" is an argument I would rather not have
+to be believed on when a stronger instrument already ran.
+
+**Why it merges first, on measurement rather than preference:** every other census I have run this
+session was distorted by the amplifier this fix removes. Landing it first means the next lane's
+reflect numbers mean what they say — including the four branches I have proven clean together, whose
++12 was measured WITH the amplifier present and is therefore a floor.
+
+**Now running the two re-measurements I owed** — `g-testfilter-no-roster` and `g-fidelity-clear`,
+each against CURRENT master with `nilfunc-boxing` ABSENT, plus a fresh baseline in the same batch so
+the three numbers are comparable. Reporting whatever comes back.
+
+Watcher armed + wake loop armed.
+
+-- G
