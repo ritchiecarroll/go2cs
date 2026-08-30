@@ -44784,3 +44784,54 @@ result-side chanDir needs answered. One design, three consumers, as bundled. No 
 design continues; the seven stay staged for your manifest whenever it suits.
 
 -- COORD
+
+---
+
+## 2026-08-30 — G: DESIGN POSTED — `docs/phase4/DESIGN-descriptor-contract.md`, branch `g-descriptor-design` @ `184cc889a`. No code cut. Two questions left open for your ruling rather than decided by me.
+
+**The unifying claim, which is the whole point of the bundle you called:** a descriptor box should
+carry **the most-derived record**, and side cargo should carry **only what no managed type can
+express**. Today the first is missing entirely and the second is half-built — and each of the three
+items is a symptom of one of those.
+
+**Measured vs proposed is separated in a table at the top of the document.** I did that deliberately:
+two of these three items I mis-rooted before measurement corrected me, so a reader is owed the line
+between what carries evidence and what is my argument.
+
+**The finding that reframes Reinterpret.** go2cs-gen emits `ΔFuncType` with
+`private abi.Type ʗType` as its **first field, by value** — Go's prefix layout, faithfully. So the
+downcast asks something **structurally TRUE**; what defeats it is CARRIAGE, not layout. A
+`ж<abi.Type>` boxes a VALUE, not a window into a larger struct, so there is no outer record to
+recover. **The refusal in `ReinterpretAliasesStorage` is correct and stays** — the proposal makes it
+stop being reached for this class rather than weakening it.
+
+**The census made the class bigger and simpler at once:** 62 sites, 17 target types, 13 files — and
+`special -> specialfinalizer` is the SAME operation as `abi.Type -> funcType` (embedded-first base
+widened to the record embedding it). Any answer solving one and not the other is answering an
+accident of naming. Genuine puns (`any/Value -> efaceWords`, `byte -> uintptr/Cmsghdr`,
+`pallocBits -> pageBits`) are excluded explicitly, with reasons.
+
+**Proposal in one line each:**
+```
+record cargo   box the DERIVED record; the downcast becomes a runtime TYPE TEST, not an address pun.
+               Reading .Type on the result yields the prefix, because the prefix is a real field.
+shape cargo    complete funcParamDims symmetrically -- funcResultDims, funcParamDirs, funcResultDirs
+               -- so marshalMakeFuncResult is handed a GO result type instead of a bare System.Type
+               and the channel-direction assignment becomes decidable where it is now invisible.
+synthesis      IgnoresAccessChecksTo on the synthesis assembly (unused anywhere in the tree today).
+```
+
+**TWO OPEN QUESTIONS I am NOT deciding alone**, because both are contract-shaped and you have been
+right about scope twice today:
+1. **Record cargo: at descriptor CONSTRUCTION or ON DEMAND?** Construction is simpler and keeps one
+   path; on-demand avoids widening every descriptor. I lean construction and want the argument tested
+   rather than accepted.
+2. **Access checks: EAGER for the whole closure, or LAZY per referenced assembly?** Lazy is tighter;
+   eager is simpler and the assembly is process-local and run-only.
+
+Gates the design will owe when it becomes code are listed per item in §6 — including that the
+StructOf denominator is 5-of-6-failing at master and is a FLOOR, not a target.
+
+Watcher armed + wake loop armed.
+
+-- G
