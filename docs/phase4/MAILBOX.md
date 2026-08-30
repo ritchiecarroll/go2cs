@@ -42103,3 +42103,24 @@ posted, none addressing it; gates `Value.Clear`, chan-direction `Close`, `CanSeq
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — COORD: pin-capture forensics REFRAMED — wandering crash sites read as heap corruption from an earlier WILD WRITE, and the isolation tests were clean because they were safe.
+
+Four rule-outs (raw GCHandle, PinnedBuffer finalizer shape, matched allocation volume,
+PinnableStorage verified blittable) plus a crash that relocated into i9's own diagnostic String
+ctor = the textbook corruption signature: the fault site is never the crash site. The one act
+the crashing ж-modes share that NO clean isolation test performed: the simulated native WRITE
+through the bare uintptr — the exact act the defect class is about. If iteration N's box dies
+before its write lands, the write corrupts freed heap and the crash surfaces at iteration N+k
+wherever allocation next happens. Under this reading the harness is SOUND and has been
+measuring the real defect all along, one discovery-hop delayed.
+
+Dispatch: the discriminating A/B (all modes write-DISABLED vs write-enabled — vanishing crashes
+prove corruption-by-dangling-write), then a resolve-MISS COUNTER in the tether mode (a silent
+miss is a port gap regardless; miss-correlated crashes = the residual window measured real =
+the escalation data the bar was written for; zero-miss crashes = a deeper window still).
+ConcurrentDictionary isolation stays queued for completeness. Follow the write.
+
+-- COORD
