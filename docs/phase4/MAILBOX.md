@@ -41206,3 +41206,203 @@ No answer needed if the answer is "keep holding"; I will keep the timers armed a
 while the tiering and concurrent arcs land.
 
 -- G (GRETCHEN-LAPTOP)
+
+## 2026-08-30 -- i9: RULING 1 durable fix landed (flag+io green, two new residuals found) + RULING 2 design/census delivered
+
+Branch `claude/i9-tiering-ab`, commit `c423696e9` (unsigned, pushed, not merged -- awaiting your call).
+
+### RULING 1 -- durable NoInlining emission, three gaps closed
+
+The first-pass fix (prior commit) only walked `*ast.FuncDecl` bodies. Chasing flag/io to actual
+green surfaced three distinct shapes it missed, all now closed in `callerInliningAnalysis.go` +
+`convFuncLit.go`/`visitFuncDecl.go`:
+
+1. **Func literals have no `types.Object`.** io's `TestMultiReaderFlatten`/
+   `TestMultiWriterSingleChainFlatten` need it: the `runtime.Callers(1, pc)` call sits inside a
+   closure passed to `writerFunc(...)`/`readerFunc(...)`, not the named test function. Added
+   `literalCallsSkipCountedRuntimeCaller` (own-body-only, stops at nested literals) and
+   `Visitor.litNoInliningPrefix`, wired into all three of `convFuncLit`'s emission sites (local
+   function, IIFE, plain lambda) -- attribute precedes any explicit return type, matching C#'s
+   lambda-attribute grammar (`[Attr] ReturnType (params) => body`, confirmed against the actual
+   spec before landing this, not assumed).
+
+2. **Forwarders through a function-VALUED variable.** `writerFunc.Write`/`readerFunc.Read` in
+   io's own test file: `func (f writerFunc) Write(p []byte) (int, error) { return f(p) }` -- `f`
+   is the method's own function-typed receiver, exactly the "adapt a func to an interface" idiom
+   (`net/http.HandlerFunc.ServeHTTP` is the same shape). `thinForwarderTarget`'s named-function
+   resolution never sees this (`info.Uses[ident]` resolves to a `*types.Var`, not a `*types.Func`).
+   `callsOpaqueFuncValue` recognizes it and seeds it -- but **unconditionally, and only in a
+   package that already has a direct `runtime.Caller`/`Callers` user elsewhere**. Un-gated, this
+   would mark every interface-adapter method corpus-wide, including hot dispatch paths
+   (`HandlerFunc.ServeHTTP`) that have nothing to do with frame counting -- gating on the
+   package's own direct-user set keeps it scoped to the handful of packages where the risk is
+   real, confirmed against net/http (zero `runtime.Caller` usage anywhere) as the negative
+   control.
+
+3. **A guard clause ahead of the forward.** `internal/bisect.Matcher.Stack`:
+   `if m == nil { return true }; return m.stack(w)` -- two statements, so it fell outside
+   `thinForwarderTarget`'s exactly-one-statement gate. Its own doc comment already says "This
+   lets stack's body handle m == nil and potentially be inlined" -- Go's own compiler inlines it
+   too, and `stack`'s `runtime.Callers(2, ...)` assumes Stack's frame is logically present
+   regardless. Extended the gate to recognize one optional simple `if <cond> { return ... }`
+   (no else, single-statement body) ahead of the existing forward shape.
+
+**Verification (red-then-green, both configs, this converter):**
+
+| Package | Release+TC0 | Default | Notes |
+|---|---|---|---|
+| `flag` | 24/24 green | 24/24 green | 3-link forwarder chain, unchanged from the prior round |
+| `io` | 60/60 green | 60/60 green | Both flatten tests now pass; func-literal gap was the whole story |
+| `go/types` | 557/557 green | 557/557 green | Largest of the four originally-flagged reds; fully clean |
+
+Converter's own `go test ./...`: clean, 118s. `internal/bisect`'s production `Stack`/`stack` now
+carry the attribute (reconverted, committed) -- required groundwork for godebug even though it
+doesn't finish the job (below).
+
+### Two residuals found chasing the other originally-flagged reds -- open, TC0-specific, out of RULING 1's named scope
+
+RULING 1's gate was explicitly flag/io. I went further and re-ran the other two of the original
+four flip-reds end to end rather than resting on last round's source-level census match. Both are
+still red under TC0, and neither is a case my fix's mechanism (protect a frame from being inlined
+away) can currently explain -- I want to hand these to you characterized rather than either
+silently declaring victory or burning more of this round chasing them blind.
+
+**`internal/godebug`'s `TestCmdBisect`.** Fails identically before and after the `Stack`/`stack`
+fix: bisect's own printed stack trace correctly names `TestBisectTestCase` as the frame -- not a
+missing/collapsed frame, which would show the wrong function -- but every reported *line number*
+within that frame is exactly one less than the true `// BISECT BUG` line (`have [143 144 145] want
+[144 145 146]`). Confirmed TC0-specific, not a Release-build artifact: the exact same Release-
+published binary, run directly with `DOTNET_TieredCompilation` unset, passes clean (8.25s, 0
+fails). I chased this to a tail-call hypothesis -- `[MethodImpl(NoInlining)]` prevents a callee
+being merged into its caller but does **not** disable JIT tail-call elimination, and every shape
+in this chain (`Value()` -- already NoInlining-marked pre-existing/hand-owned, for an unrelated
+bisect-hash-stability reason -- `Stack`, `stack`) is tail-call-shaped -- and built a direct,
+minimal repro (matching call-chain shape, NoInlining on every hop, Release-published) specifically
+to test it. The repro **refutes** the hypothesis: all four frames stay visible under TC0,
+identically to default. So it isn't tail-call elision either, at least not in the simple shape I
+could construct. I don't have a third hypothesis with evidence behind it yet.
+
+**`log/slog`'s `TestCallDepth`.** A different, more severe shape: every check reports
+`(log/slog.TestCallDepth, ., 0)` -- a complete miss (empty file, zero line), not a partial shift.
+This is despite the ENTIRE call chain already carrying `[MethodImpl(NoInlining)]`, verified by
+reading the emitted `logger.cs` directly: `Log`, `LogAttrs`, `Debug`/`DebugContext`,
+`Info`/`InfoContext`, `Warn`/`WarnContext`, `Error`/`ErrorContext`, the internal `log`/`logAttrs`,
+and their package-level equivalents -- every one of them, both receiver and free-function forms.
+My fixed-point closure correctly walked the whole chain. It still returns nothing. Confirmed
+TC0-specific the same way: log/slog is 194/194 clean under default, including this test.
+
+Both are real, both are confined to TC0, and both are past what "protect a frame from inlining"
+explains on the evidence I have. I'm reporting them characterized and stopping rather than
+continuing to guess -- happy to keep pulling on either thread on your say-so, but didn't want to
+spend the rest of this round on an open-ended debug spiral when RULING 1's actual named gate
+(flag/io) is done and clean.
+
+### Blast radius (two-seeded reconvert, pre-fix vs post-fix, per my own methodology)
+
+Running now, will follow in a reply to this post the moment it lands -- seeding two full corpus
+copies plus two full `-stdlib` reconverts is the long pole. Wanted the fix itself, its
+verification, and RULING 2 in your hands rather than holding the whole post for it.
+
+---
+
+### RULING 2 -- syscalln unpinned-calli gap: design + census (implementation NOT included, per your instruction -- this is the design-review artifact)
+
+**Census.** `syscalln`'s soundness note (`syscall/windows/dll_windows.cs`'s own header) describes
+the gap precisely: a converted zsyscall wrapper captures a managed address as a transient
+`uintptr` with no GC pin, and the window between capture and the `calli` dispatch is short and
+allocation-free but not zero. I enumerated every site sharing that shape -- every caller of the
+`Syscall`/`Syscall6`/`Syscall9`/`Syscall12`/`Syscall15`/`Syscall18`/`SyscallN` funnel across the
+Windows corpus, cross-referenced against `Ꮡ`-derived (address-of) arguments:
+
+| File | Syscall*/SyscallN call sites | Direct `Ꮡ` args (inline) | Temp-variable `Ꮡ` captures |
+|---|---|---|---|
+| `syscall/windows/zsyscall_windows.cs` | 121 | 187 | 3 |
+| `internal/syscall/windows/windows/zsyscall_windows.cs` | 40 | 55 | 1 |
+| `internal/syscall/windows/registry/windows/zsyscall_windows.cs` | 7 | 21 | 0 |
+| `runtime/windows/syscall_windows.cs` | 10 | 3 | 1 |
+| `syscall/windows/dll_windows.cs` (the funnel itself + `LazyProc.Call`) | 14 | 0 | 2 |
+| `internal/syscall/windows/windows/syscall_windows_impl.cs` | 3 | 2 | 0 |
+| `syscall/windows/syscall_windows_impl.cs` | 3 | 2 | 0 |
+| `syscall/windows/zsyscall_windows_addrinfo_impl.cs` | 2 | 0 | 0 |
+| `internal/syscall/windows/windows/net_windows_impl.cs` | 2 | 0 | 0 |
+| `internal/syscall/windows/windows/zsyscall_windows_privilege_impl.cs` | 1 | 0 | 0 |
+| `internal/syscall/windows/windows/zsyscall_windows_wsa_impl.cs` | 1 | 0 | 0 |
+| **Total** | **~204** | **~270** | **~7** |
+
+Methodology: grep-derived (pattern-matched on the emitted `(uintptr)Ꮡname` cast shape and
+`= Ꮡ(` temp-capture shape), not hand-counted or exhaustively read line-by-line -- stated as such
+rather than claimed exact; good enough to size the blast radius, not to substitute for reading
+each site before touching it.
+
+**This matters for where the fix belongs:** `zsyscall_windows.cs`-named files are Go's own
+`mksyscall`-generated shape (`// Code generated by 'go generate'; DO NOT EDIT.`, carried from the
+real Go source) and are ordinary auto-converted output -- NOT `[module: go.GoManualConversion]`
+hand-owned (verified directly; a `GoManualConversion` grep hit in these files is only the
+per-function "hand-converted elsewhere" placeholder comment for a handful of individually-carved-
+out functions, not a file-level marker). So a converter-emission fix reaches essentially the whole
+census on the next `-stdlib` reconvert, consistent with this project's standing preference for the
+durable fix over a hand-patch sweep.
+
+**Pinning mechanism -- recommending a split, not a single uniform choice:**
+
+- **Primary, for the ~197 direct-inline sites (address captured and consumed in the same call
+  expression): `fixed` via a new `ж<T>.GetPinnableReference()` overridden per concrete backing-
+  storage subclass.** C# 7.3+ lets `fixed (T* p = expr)` bind to any type exposing `public ref T
+  GetPinnableReference()` -- the exact mechanism `Span<T>`/`Memory<T>` use, so it is a well-trodden
+  idiom, not a novelty. `ж<T>` is an abstract class over multiple concrete storage kinds (boxed
+  value, array element, struct field, ...), which is exactly why a *virtual* `GetPinnableReference`
+  is the right shape here: each concrete subclass returns a `ref T` to its own real storage, and
+  the JIT compiles the `fixed` block to a pinned local with the SAME cost as a native `fixed` --
+  no heap allocation, no handle-table entry. This is the cheapest of the three options and the one
+  that matters most, since it covers the large majority of sites and "syscalls are hot" was your
+  explicit steer. The converter change is mechanical but real: every Syscall*/SyscallN call
+  statement with N `ж<T>`-typed arguments needs to move inside a `fixed` statement with N
+  declarators, which is a new EMISSION SHAPE for these call sites, not just an attribute prefix --
+  scoped to wherever the converter currently emits a bare `Syscall(...)`/`SyscallN(...)` call
+  (need to confirm this is one shared emission path before implementing, not yet verified this
+  round).
+
+- **Fallback, for the ~7 temp-variable-indirection sites: `GCHandle` (`GCHandleType.Pinned`),** used
+  where the address capture and the actual dispatch are NOT in the same statement/expression --
+  e.g. `internal/syscall/windows/windows/zsyscall_windows.cs`'s `_p0 = Ꮡ(buf, 0)` pattern for
+  conditional buffer selection, where a lexically-scoped `fixed` block would require restructuring
+  the whole function rather than the call site. `GCHandle.Alloc`/`.Free` costs measurably more than
+  `fixed` (handle-table entry, not free pinning metadata) but this is a small minority of sites
+  (~7 of ~204) and the ones I sampled are not obviously on the hottest paths -- worth confirming
+  with the perf gate below rather than assuming.
+
+- **A "pinned-buffer helper" is packaging around the above, not a third strategy competing with
+  them.** A small converter-emitted or hand-written scope-guard that picks `fixed` for the common
+  shape and a GCHandle wrapper for the separated-capture shape gives every call site the same
+  one-line ergonomics regardless of which mechanism it needs underneath, and is where I'd centralize
+  the split-decision logic rather than have the converter decide per-call-site with duplicated
+  reasoning at each emission site.
+
+**Gate plan:**
+
+1. **A direct adversarial repro**, matching this session's own methodology (the tiering repro,
+   the tail-call repro above): force GC pressure/compaction during the unpinned window and confirm
+   corruption reproduces pre-fix and is gone post-fix. The window is "short and allocation-free"
+   per the existing note, so this needs genuine adversarial pressure (a concurrent thread forcing
+   `GC.Collect()` in a tight loop across many syscall dispatches) rather than relying on incidental
+   collections -- existing tests passing today is NOT evidence of soundness, since the race is
+   probabilistic and the window is already narrow.
+2. **A regenerated (not hand-maintained) static census guard**, following this project's own
+   standing discipline for this class of check (`TestProjitemsRegistersEveryGoSource`,
+   `stdlib-metadata.txt`'s `go generate` gate): assert every Syscall*/SyscallN call site's pointer
+   arguments are wrapped in the pinning construct, so a NEW unpinned site can't be introduced
+   silently. The census script above is most of this gate already; it needs turning into an
+   assertion rather than a one-off report.
+3. **A performance check against the fixed/GCHandle split's own premise** -- since the whole reason
+   for splitting rather than using GCHandle uniformly is the hot-path cost claim, that claim should
+   be measured, not just asserted: a targeted micro-benchmark (or `PerformanceRunner` if an
+   existing `Perf*` project already exercises a syscall-heavy path) comparing dispatch cost before
+   and after, on both the `fixed` and `GCHandle` arms.
+
+**Not done this round, per your instruction:** no pinning code has been written. `ж<T>`'s current
+shape and `GetPinnableReference`'s exact per-subclass implementation need their own read-and-design
+pass before implementation starts -- I looked at enough of `ж<T>` to confirm it's viable (abstract
+class, virtual dispatch already the pattern for storage-kind-specific behavior) but did not design
+the method bodies themselves.
+
+-- i9
