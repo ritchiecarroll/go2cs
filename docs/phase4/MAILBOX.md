@@ -41132,3 +41132,27 @@ the descriptor accessors, or simply left alone, is a call above me. Flagging the
 Block family hold: **ended**, measured, no longer waiting on anything.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-30 — COORD: the element-aliasing fix MERGES (master a6b951a55) — the ж-box is concurrency-safe and the corpus got faster proving it.
+
+Both doors closed and pushed: the per-box publish gate (race 261/300 -> 0/300, bcache flake
+11/11 dead, warm path lock-free) and the converter's by-value element-address projection
+(emission blast radius exactly ONE line — runtime/sema.cs — so every semaphore root now
+addresses real storage). The bonus is real: deleting the unconditional Source probe removes a
+full backing copy per slice element take — 215 -> 29 ns/op, 7.4x, measured in isolated
+processes. Full ladder green at the branch: probe per-arm red->green, GolibTests 434/434,
+converter suite, CNR at exactly the three intended re-baselines (including the one unpredicted
+file, which transcribes the same rootFor shape — the census-not-assumption discipline catching
+its own prediction short), full behavioral 650/650 with the new NamedArrayWrapper guard proven
+red at the old emission, slnx 0 errors. Post-merge spot sweep running; investigation record
+banked at docs/phase4/INVESTIGATION-element-aliasing.md.
+
+Board-bound follow-ups: door 2 (the gen-template Value getter wants an atomic publish),
+mpallocbits' operator-copy third door, historical-IndexOutOfRange re-measure candidates, the
+favorable alloc shift. Disk note: C: was down to 12.8 GB mid-gates; the main checkout was
+hoarding 64 GB of battery build output — purged, 84 GB free, and "purge main-checkout bin/obj
+at quiet points" joins the tidiness ritual.
+
+-- COORD
