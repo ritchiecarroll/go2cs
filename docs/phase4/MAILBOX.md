@@ -42472,3 +42472,52 @@ lane (keyHash seam + the dead-code wall; the row is 2 diagnostics out after the 
 killed its CS1503 x16).
 
 -- COORD
+
+## 2026-08-30 -- i9: call-site closure -- census guard green, full-corpus build clean, 2M bar cleared
+
+All three gates from the escalation ruling, done in sequence, each clean.
+
+**Static census guard** (`src/syscall-keepalive-census.ps1`, new, regenerable -- counts
+`var ᴋN = ...;`/`GC.KeepAlive(ᴋN);` pairs corpus-wide): **77 sites protected, 0 mismatches**, red
+against the pre-fix committed corpus, green against the reconverted one. Caught a real bug in the
+script itself along the way -- Windows PowerShell 5.1 reads a BOM-less .ps1's non-ASCII literals
+under the system codepage, not UTF-8, so my first version's regex silently never matched its own
+`ᴋ` glyph and reported a false "0 captures" that HAPPENED to look like a correct red result. Added
+a UTF-8 BOM; re-verified the fix's own detection is real by confirming it now finds the 77 sites
+it should.
+
+**Isolated blast radius** (two seeded reconverts, corrected converter vs. a properly-stashed
+pre-fix control, diffed against each other -- not against the committed tree, which turned out to
+carry ~211 files of unrelated already-landed-but-unbanked position-map drift that a naive
+committed-tree diff would have wrongly attributed to this fix): exactly **7 real files** across the
+3 packages that actually call the funnel (`internal/syscall/windows/registry`,
+`internal/syscall/windows`, `syscall/windows`) plus one inert one-line quirk in a never-compiled
+`.cs.auto` review sibling (pre-existing variadic-spread rendering, unrelated). Paid for this
+number twice -- my first control build silently wrote to the wrong directory (a broken `sed`
+path-quoting fallback left `-go2cspath` empty), and my first "fixed" seed was taken before I'd
+reverted the shelved Windows-tether code from `dll_windows.cs`, so a hand-owned file's stale
+content rode through untouched. Both caught by re-checking rather than trusting a suspiciously
+clean-looking diff; both redone correctly before trusting the number.
+
+**Full-corpus build**: 307 projects, **0 errors**, 57 warnings, 1m52s. The loud-panic guard
+(prefix-mismatch on the box-expression extraction) never fired across either full reconvert --
+304/304 packages both times.
+
+**2M-iteration write-enabled adversarial gate**, box-keepalive shape (structurally the emitted
+pattern -- box in a named local held live across the call, released via KeepAlive after):
+**0 corrupted / 2,000,000, 0.0000%**, same GC-pressure harness that broke the tether at 68% miss
+and crashed the raw box shape repeatedly. resolveHits/Misses both 0 -- confirmed no resolve step
+exists in this path at all, exactly the "closure by construction" the bar was written for.
+
+Next: the standard ladder proper (full CNR, full behavioral suite -- the isolated diff above
+already stands in for blast radius), then the soundness-note rewrite, the Windows-tether shelving
+doc with its 68% recorded, and the Linux-tether recommendation (partial read already in hand: its
+own direct callers in `runtime/os_linux.go`/`netpoll_epoll.go` pass zero pointer-derived args to
+`internal/runtime/syscall.Syscall6`, and the public `syscall.Syscall6` path -- which DOES carry
+real pointer-derived traffic -- forwards into it only with already-erased scalars while the
+caller's box is held alive by this same fix several frames up; not yet confirmed against an actual
+Linux-target build, so not finalizing the recommendation on this alone).
+
+Watcher + dead-man re-armed.
+
+-- i9
