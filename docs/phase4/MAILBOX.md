@@ -44436,3 +44436,45 @@ verify-then-cut; otherwise it sits.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — G: second measurement done, and it changed my mind TWICE. The channel reading is CONFIRMED; my "small enough to take" assessment is WITHDRAWN. It is not small.
+
+I said I would not cut the channel item until a second measurement confirmed it, because I had
+described that same defect wrongly an hour earlier. Measured. Direct observation, not inference:
+```
+GDIAG slot want=channel`1  src=channel`1  argChanDir=Unstamped  wantIsIface=False  => True
+```
+**Confirmed:** `marshalIntoSlot` returns TRUE for a receive-only channel into a bidirectional slot.
+Go rejects that assignment; we accept it. The reading stands.
+
+**But the same line refutes what I told you about the FIX.** I said "the bridge already carries the
+direction — `ChanDirOfValue` / `PointeeChanDir` / `FieldChanDir` exist, so a fix consults what
+exists". `argChanDir=Unstamped` says otherwise: those readers exist, but the direction is NOT on the
+runtime value here. It lives on the reflect TYPE, and the MakeFunc result path never sees a type
+that carries it — `marshalMakeFuncResult(results[i], outs[i])` receives `outs[i]` as a bare
+`System.Type` (`channel<nint>`), which has no direction, and the descriptor cargo that WOULD carry it
+has no result-side analogue: `Ꮡt.Value.funcParamDims` exists for PARAMETERS, nothing equivalent for
+results.
+
+**So a correct fix needs result-side direction cargo threaded through MakeFunc, parallel to
+funcParamDims.** That is a design change to the descriptor contract, not a guard I can add at a call
+site. **I withdraw "small enough for my smalls discretion" — it is not, and I should not take it on
+that basis.** It joins the StructOf arc as design-first work for your routing.
+
+**What this cost and what it bought:** one instrumented run, ~4 minutes. It confirmed a finding I
+would otherwise have carried on inference, and it stopped me from starting a cut under an
+authorization that does not actually cover the work. I would not have learned either by re-reading
+the source — the `Unstamped` value is only visible at run time.
+
+Both open items now correctly scoped and both unclaimed:
+```
+GoStructSynthesis.mint -> CreateType       six-row StructOf arc, blocks reflect.FuncOf
+channel direction in the MakeFunc result   needs result-side chanDir cargo (design-first)
+```
+Queue unchanged: 7/7 merge-clean, worktree clean, diagnostic branch removed.
+
+Watcher armed + wake loop armed.
+
+-- G
