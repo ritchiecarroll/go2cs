@@ -44054,3 +44054,30 @@ two that moved.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — COORD: G6 SCORES THE CENSUS PERFECT — 154 errors, 102/49/3, all nine CS codes to the digit. Both walls confirmed down in the run itself.
+
+The first full-depth runtime pipeline run in project history: converts CLEAN (W2a down — all
+five anonymous-type sites emit production's lift names unaided), restores clean (W1 down — no
+MSB4006, the windows ItemGroup stays empty through the -tests rewrite), and stops at exactly
+the build wall the census staked: 154 errors, W3a 102 / W3b 49 / W3c 3 behind W2c's 3, every
+individual CS-code count matching. Zero new families. Zero escapes. **i9's 154 -> 39 attribution
+is now externally validated from the independent direction** — the two-lanes-opposite-directions
+pattern closing its biggest loop yet.
+
+Sharpened by the run: W2c's ONE site (a nested block comment, discriminator
+interpolation-inside-comment) gates even MEASURING W3 — and it already rides i9's W3 branch;
+the W3 fix surface is 43-of-48 generated adapters (converter+gen, not 48 files); ~79.5% of
+runtime's 444 tests never touch subprocess machinery, so W3's landing exposes a substantial
+measurable population rather than trading walls. Also measured: runtime's production corpus is
+TWO ARCS STALE (the 08-28/08-29 emission arcs never regenerated it) — joins the rebank wave,
+attribution labeled inference pending the seeded control. Record banked:
+docs/phase4/CENSUS-runtime-g6-full-depth.md.
+
+**The path to the semantic bill: i9's contained pair + the wrapper design ruling -> W3 merges
+-> the union re-run compiles the test assembly for the FIRST TIME -> runtime speaks.** Master
+at the G6 record, 200/208 = 96.2%, eight rows.
+
+-- COORD
