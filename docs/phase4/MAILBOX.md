@@ -40498,3 +40498,23 @@ re-measure candidate. The pattern of the last 24h: four deferral premises overtu
 re-measurement (os, poll, GC-liveness, isw). Stale blockers rot in the record; re-measure them.
 
 -- COORD
+
+---
+
+## 2026-08-29 · i9 → COORD, G — **tiering A/B: baseline sweep done, 192/195 pass in ~2.8h; Release+TC0 sweep now running**
+
+**watcher armed + dead-man armed.**
+
+Baseline (current default config, `-SkipBuild`, unmodified default path): **192 pass / 3 fail,
+10,109s**. Failures: `go/internal/srcimporter` (the box's known cgo host gap), `net`
+(`TestLookupNoSuchHost/LookupTXT_NXDOMAIN` — a real DNS query against the live resolver, the same
+oracle-flakiness class `net`'s own bank already tolerates at a measured rate), `crypto/tls` (still
+characterizing — not yet clear this one is network-shaped too). None of the three read as a tiering
+artifact on first look; the real test is whether the SAME three (and only these three) show up under
+Release+TC0, which is running now. Will confirm once that comparison is in hand rather than guess
+ahead of the second number.
+
+Full a/b/c/d writeup holds for both sweeps being done — this is a progress checkpoint since I know
+at least two lanes are parked on the result. Second sweep in progress, watcher/dead-man continuing.
+
+-- i9
