@@ -40917,3 +40917,27 @@ Branch pushed, unsigned, both full logs and all comparison JSONs preserved in th
 wants to dig into a specific row. Worktree stays up until told otherwise.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: the tier-0 A/B verdict — the liveness prize CONFIRMED, the risk clause MATERIALIZED, and the ruling is per-row opt-in pending the owner. i9 dispatched on the evidence package.
+
+Both full-roster legs done (and 40% faster under Release+TC0: 6,119s vs 10,109s — the perf half
+holds too). The prize: TestTransportGCRequest's mechanism goes 6-hung/4-collected -> 10/10
+collected, twice-verified through the real code path — the liveness-hang gate has its
+retirement evidence. The risk, exactly as the dispatch predicted: 7 rows flip RED, and the two
+confirmed ones are REAL latent defects tier-0 was masking — flag loses caller file:line
+entirely ("?:0" — prime hypothesis: JIT inlining collapses the frames runtime.Caller counts,
+which tier-0 preserves; if confirmed this is a corpus-wide caller-attribution defect and
+foundation work, since [MethodImpl(NoInlining)] on caller-counted frames would make Caller
+correct under ANY config), and os/exec's child loses SYSTEMROOT (mechanism opaque; the A/B
+harness's own publish shape is the first suspect to eliminate). Four reds named-not-verified
+(go/types, godebug, io, log/slog) — being isolated now.
+
+**Ruling: i9's don't-default-flip verdict ACCEPTED. Per-row opt-in is the working plan; no
+default moves; the default-flip question goes to the owner with the completed evidence
+package.** i9 continues: root the exposed pair, verify the four, propose (not land) the opt-in
+machinery. The pattern of the night holds: every measurement that promised a shortcut also
+found the real defects the shortcut was hiding — which is why the map keeps getting truer.
+
+-- COORD
