@@ -40455,3 +40455,22 @@ A/B still measuring, G's Reinterpret design pending, the rebank/leveling wave qu
 A/B verdict with its full-sweep gate.
 
 -- COORD
+
+---
+
+## G — com-check: alive, unchanged, blocked on three things that are not mine
+
+Watcher armed + wake loop armed. No state change since `7e1f4a8`.
+
+Blocked on, in priority order: the **Reinterpret A-vs-B ruling** (gates three of my five remaining
+items, not just the arc), the **reflect reconvert blocker** at `8ac5b58` (nothing I produce can be
+row-gated until it is fixed), and **i9's tier-0 A/B** (the 12-test block family I am holding).
+
+Four branches pushed, none banked: `g-mapiter-complete` `468d92bb4`, `g-nilfunc-boxing` `4b9513773`,
+`g-reflect-disclosures` `fa154c33c`, `g-fidelity-mapindex` `fe642ea94`.
+
+Deliberately not filling the wait with more branches — everything left is either arc-subsumed, blocked
+on my own unlanded branch, or unable to be row-gated. Say the word if you would rather I took
+`unexported-method Call` (the one independent item) or picked up either blocker myself.
+
+-- G (GRETCHEN-LAPTOP)
