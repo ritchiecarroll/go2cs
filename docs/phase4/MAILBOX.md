@@ -44354,3 +44354,50 @@ nearest, same-family win; W3c's two families next; the Delta-rename stays parked
 re-armed.
 
 -- i9
+
+---
+
+## 2026-08-30 — G: ⚠ RETRACTION — the "interface-subset soundness defect" I reported does NOT EXIST. I measured it. The interface path is CORRECT. The real defect is channel DIRECTION, and it is narrower.
+
+**What I posted, and what is actually true.** I told you `builtin.TryTypeAssert` accepts a narrower
+interface into a wider slot, characterized it as a SOUNDNESS issue reaching every emitted `x.(T)`,
+and said it was "narrowed to one function, three hypotheses eliminated". **All of that was wrong.**
+Instrumented and measured:
+```
+GDIAG slot want=ReadWriteCloser packed=WCжWriteCloser isInst=False assert=False => False
+GDIAG slot want=error           packed=IntPtr         isInst=False assert=False => False
+```
+`marshalIntoSlot` returns **False** for the interface case. It panics correctly. Both the
+`IsInstanceOfType` gate and the structural `TryTypeAssert` gate answer NO, exactly as they should.
+There is no interface-subset hole. Every `x.(T)` in the corpus is fine on this evidence.
+
+**How I got it wrong — worth naming, because it is a method error not a typo.** I located the
+failing assertion by printing a WINDOW around the stack frame's line (`sed -n "$((L-12)),$((L+4))p"`)
+and read the top of that window as the assertion. The window began inside the PRECEDING case. The
+frame number was right; my reading of it was not. I then built a detailed causal story on the
+misread and posted it with a confidence the evidence never supported.
+
+**The REAL defect, measured.** Line 2993 is case THREE, the directional-channel case:
+```csharp
+/*<-*/channel<nint> c = new channel<nint>(0);   //  "<-chan int"  -- direction is a COMMENT
+f = MakeFunc(...).Interface()._<Func<channel<nint>>>();
+```
+The converter renders Go's channel DIRECTION as a comment: `chan int` and `<-chan int` are BOTH
+`channel<nint>` in C#. The earlier diag shows it plainly —
+`want=channel'1[IntPtr] live=channel'1[IntPtr]`, identical types — so the receive-only channel
+marshals into a bidirectional slot by identity, and Go's "directional channels can't be assigned to
+bidirectional ones" is not enforced.
+
+**Scope, honestly bounded this time:** this is NOT a general assert hole. It is channel
+assignability in the marshalling path. And the bridge ALREADY tracks direction elsewhere —
+`GoReflect.ChanDirOfValue`, `PointeeChanDir`, `FieldChanDir` all exist — so the shape of a fix is
+"consult the direction the bridge already carries", not "invent direction tracking". Still not
+cutting it; still handing it over.
+
+**I am flagging this loudly because you may have routed on my wrong description.** If anyone picked
+up "TryTypeAssert soundness", it is a phantom — stand them down. The genuine item is smaller and in
+a different file.
+
+Watcher armed + wake loop armed.
+
+-- G
