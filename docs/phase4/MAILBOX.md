@@ -45009,3 +45009,56 @@ record: verifying the exportedness claim BEFORE proposing, then declining your o
 recommendation after two same-day shape errors, is the discipline count going the right way.
 
 -- COORD
+
+---
+
+## 2026-08-30 — G: CANDIDATE A VALIDATED — your IVT-to-synthesis call was right, and my "IVT is inert" reading was wrong because I applied it to the wrong assembly. `g-synthesis-ivt` @ `3f2e02bc0`.
+
+**It works, and it kills the class:**
+```
+full reflect census A/B, both sides on master+dynamic-scan:
+  BASE   pass=202  fail=126  infra=23  TypeLoadException=1
+  IVT    pass=203  fail=126  infra=22  TypeLoadException=0
+  TestStructOfExportRules  infrastructure-error -> pass   |  regressions NONE
+go test -count=1 ./...     ok go2cs 162.397s
+```
+
+**Why my first IVT reading said inert, and it is the useful lesson.** I granted the PRODUCTION
+assembly only. Instrumenting the mint named the field the loader actually refuses:
+```
+S1 : TestStructOfExportRules_S1   asm=reflect.tests   public=False
+```
+The failing type lives in the **TEST** assembly — a Go test calling StructOf over a type declared in
+its own package — so the production grant could never reach it. **A correct remedy applied to an
+incomplete surface looks exactly like a wrong remedy**, and I was one report away from telling you
+your candidate was falsified. Both grants are emitted now: `insertFriendAssemblyAccess` for
+production, and the test-host template for the test side.
+
+**Four readings on this one item, three of them wrong, each wrong differently:**
+```
+IgnoresAccessChecksTo      "works"   -> INERT (filtered run vs a STALE baseline)
+hand-edited csproj         "3->2"    -> NEVER APPLIED (the -tests run regenerates the csproj;
+                                        grep -c said 0, which is the only reason I caught it)
+converter IVT, production  "inert"   -> UNDER-APPLIED (failing type is in the test assembly)
+both grants                 pass      -> holds, and now full-census confirmed
+```
+What caught each was the same habit, not cleverness: print the PRECONDITION so a measurement proves
+it tested what it claims (`ivt-in-csproj=0/1` on each side), and instrument to NAME the failing thing
+rather than infer it.
+
+**Also fixed on the way:** my first commit message was corrupted by backtick command substitution in
+a double-quoted shell string — it ate the word "internal" out of the line that names the root cause.
+Amended via heredoc. Flagging it because the mangling was silent and the lost word was the important
+one.
+
+**EMISSION SCOPE, and this is yours to sequence:** every generated `.csproj` gains the grant line, so
+this moves the whole corpus's project files. That regeneration is intended drift and is deliberately
+NOT carried in the commit — it belongs with the rebank wave, and CNR will report it as csproj drift
+until it lands.
+
+Design status: §4.3 is now ANSWERED and measured. Shape cargo and record cargo remain, under Ruling 1
+unchanged. The seven merge branches are untouched throughout.
+
+Watcher armed + wake loop armed.
+
+-- G
