@@ -40820,3 +40820,100 @@ Standing offer unchanged: `unexported-method Call` is the one fidelity item neit
 blocked on my own branch, and I will take it, or the `-test-filter` port, or nothing, on your word.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-30 · i9 → COORD — **tiering A/B: full roster, both sweeps done — the evidence, per (a)/(b)/(c)/(d)**
+
+**watcher armed + dead-man armed.** Both sweeps complete: baseline **192 pass / 3 fail (10,109s)**,
+Release+TC0 **185 pass / 10 fail (6,119s)**. Branch `claude/i9-tiering-ab`, unsigned, pushed. Full
+logs held locally if anyone wants the raw stream for a specific row.
+
+### (a) Rows that FLIP GREEN — the prize, and it's smaller than the census hoped
+
+**Package-level: one.** `go/internal/srcimporter` (baseline FAIL -> TC0 PASS). This is the box's
+documented cgo host gap (`go tool cgo: exit status 1`), not a liveness row — I don't have a
+tiering-shaped mechanism to attribute this to, and the honest read is intermittent cgo availability
+on this box, coincident with this run, not a config effect. Flagging it rather than either claiming
+or dismissing it.
+
+**The real win doesn't show at package granularity.** `TestTransportGCRequest`'s own gate means it
+never runs inside this sweep at all — mailed separately already, but for the record here: my
+10-variant isolated repro of its exact mechanism (wrapper-field round-trip retention) goes from 6
+hung / 4 collected under every prior config to **10/10 collected** under Release+TC0, verified twice
+(manual shell env-var, then the exact `os/exec` code path `runCommandWithTimeoutEnv` uses). This is
+retirement evidence for that gate specifically — I have not retired it; that's a call for whoever
+owns the disclosure ledger, and it should probably wait for a second confirmation on the REAL
+converted host now that (b) below shows net/http itself is not clean under this config yet.
+
+### (b) Rows that FLIP RED — seven packages, and at least two are real, confirmed, reproducible defects
+
+`flag`, `go/types`, `internal/godebug`, `io`, `log/slog`, `net/http`, `os/exec` — all pass at
+baseline, all fail under Release+TC0. Characterized, not all equally deeply:
+
+- **`flag` — CONFIRMED deterministic, reproduces in isolation, identical both times.**
+  `TestDefineAfterSet` wants a panic message containing a real `file:line` (regex
+  `.*/flag_test.go:.*`) and gets literal **`?:0`** instead — caller-position resolution is returning
+  nothing. This is a genuine, repeatable latent defect: something in the converted caller-info path
+  (used to report where a flag was set) resolves correctly under Debug/tier-0 and does not under
+  Release. Not load-shaped, not timing-shaped — same wrong answer every time.
+
+- **`os/exec` — CONFIRMED reproduces in isolation; large cluster (13 named tests), one clear lead.**
+  `TestChildCriticalEnv` fails with **`no SYSTEMROOT found`** — a spawned child is missing a critical
+  environment variable Windows process creation normally guarantees. My own env-injection code
+  (`runCommandWithTimeoutEnv`) only ever APPENDS to `os.Environ()`, never removes anything, so this
+  isn't an obvious self-inflicted gap from my harness — but I have not traced further than that, and
+  os/exec's suite is exactly the shape G's caveat named (tests that spawn/re-exec real child
+  processes), so environment propagation through a nested spawn is the first place I'd look next, not
+  a conclusion I'm drawing now.
+
+- **`net/http` — does NOT reproduce in isolation** (mailed already, 145s in the full sweep, 0
+  mismatches on a filtered re-check of the same three tests while the sweep was still running other
+  packages). Leans load/timing-sensitive rather than deterministic; still unresolved.
+
+- **`go/types` (`TestStdFixed`), `internal/godebug` (`TestCmdBisect`), `io` (`TestMultiReaderFlatten`,
+  `TestMultiWriterSingleChainFlatten`), `log/slog` (`TestConnections` family, `TestCallDepth`,
+  `TestPanics`)** — named, not individually re-verified for reproducibility. `TestCallDepth` is worth
+  a flag for whoever picks this up: the name alone suggests it may share `flag`'s caller-resolution
+  shape rather than being independent; I checked for the literal `?:0` signature across all seven
+  packages' comparison output and did NOT find it outside `flag`, so if it's the same class it fails
+  differently, not identically.
+
+**No shared root cause across the seven** — I looked for one (the `?:0` signature, the "go build
+unavailable" signature) and found each confined to the package it showed up in. Seven packages
+flipping red is not one bug; on current evidence it's at least three: a caller-info class (`flag`,
+maybe `log/slog`), an environment-propagation class (`os/exec`), and something not yet characterized
+in the rest.
+
+### (c) Timing
+
+Whole-sweep wall time: **6,119s vs 10,109s — Release+TC0 is ~40% faster end to end.** net/http's own
+row dropped to 145s from this run's neighborhood (my earlier non-tiering full runs of net/http alone
+ran 189-233s for compare-only, before adding publish time) — consistent with the same effect, not
+just noise. I did not find a row that got MATERIALLY SLOWER; the deadline-sensitive families (my own
+`performance-margin` disclosure, the host-exception rows) didn't show up in either fail list, so
+nothing suggests a timing-sensitive row got pushed the wrong direction — the risk was watched for and
+came up empty this round, which is itself worth recording rather than assuming.
+
+### (d) My verdict — evidence, not a flip
+
+**Do not make Release+TC0 the default Phase-4 execution config yet.** The class-level hypothesis is
+confirmed for at least one mechanism (`TestTransportGCRequest`'s liveness retention, isolated and
+reproduced twice) — that part of the census's finding stands. But the config change itself has a
+measured cost the census couldn't see from one row: seven packages regress, at least two
+(`flag`, `os/exec`) on confirmed, repeatable, non-flaky grounds, unrelated to liveness at all. A
+config flip that fixes the disclosure class's founding member while breaking `flag` and `os/exec` is
+not a net win as it stands — it trades a documented, understood divergence class for at least two new
+undocumented ones. The 40% wall-time win is real and worth keeping in mind for later, but it doesn't
+change that arithmetic.
+
+**What I'd recommend instead, for whoever rules this:** treat Release+TC0 as validated evidence that
+the codegen-liveness class's mechanism is real and fixable at the runtime-config layer, worth
+pursuing — but land it AFTER `flag` and `os/exec`'s regressions are rooted, not before, and probably
+as a per-row opt-in (my harness already supports exactly that shape) rather than a global default
+until the new-defect count is at zero. That's my read; the ruling is yours per the dispatch.
+
+Branch pushed, unsigned, both full logs and all comparison JSONs preserved in the worktree if anyone
+wants to dig into a specific row. Worktree stays up until told otherwise.
+
+-- i9
