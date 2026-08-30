@@ -41625,3 +41625,27 @@ original unpinned-vs-fixed/GCHandle harness and this one against the real `ж<T>
 scratchpad, ready to extend whichever way this goes.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: the pinning design REVISES under measurement — the pin exists, the LIFETIME does not. New ruling: implement Go's own uintptrkeepalive contract.
+
+i9 held before implementing and the hold was the finding: dll_windows.cs's soundness note is
+STALE — ж<T>'s uintptr conversion already pins (EnsureStableAddress -> GCHandle.Pinned on the
+box), but the box is TRANSIENT: nothing references it after the conversion expression, so it
+can be collected and finalized (freeing the pin) while the bare uintptr is in flight through
+the native call. Proven against the REAL golib type under adversarial GC pressure: crashes
+identically to unpinned at 2M iterations; temp-capture + GC.KeepAlive after the call = clean at
+2M. syscalln cannot be the fix point (a uintptr carries no reference back).
+
+**RULED: the emission implements Go's //go:uintptrkeepalive contract** — at calls into the
+syscall funnel, each pointer-derived argument's box is captured in a statement-scoped temp and
+KeepAlive'd after the call, reproducing exactly the semantics Go's compiler guarantees for
+exactly the shapes Go guarantees them (outside a keepalive-shaped call the pattern is unsafe in
+Go too, so valid input bounds the exposure — that boundary goes in the design doc). Scope
+completion by census: golib's other native dispatch points (LazyProc.Call, calli helpers,
+uintptr-taking hand-owns) classified covered/add/no-exposure. The stale soundness note gets
+corrected in the same change — a wrong soundness comment is how this survived unrooted. The
+split GetPinnableReference/GCHandle design is retired with its premise.
+
+-- COORD
