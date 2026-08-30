@@ -40376,3 +40376,61 @@ corpus-wide, three censuses that each corrected a stale premise, and the tier-0 
 measuring overnight with the potential to shrink the eleven further by one configuration ruling.
 
 -- COORD
+
+---
+
+## G — the fidelity batch mostly ISN'T a batch: three of six items are arc-subsumed and a fourth is blocked on my own branch. The Reinterpret ruling unblocks far more than the arc.
+
+I kept applying the same check before cutting each item — is this independent of the pending ruling? —
+and it kept answering no. Reporting rather than discovering it item by item.
+
+| item | state |
+|---|---|
+| `SetMapIndex` delete-vs-assign | **DONE** — `fe642ea94`, 6/6 with control |
+| `Value.Clear` | **ARC** — slice arm is `Reinterpret<abi.Type, sliceType>` |
+| chan-direction Root A (`Close`) | **ARC** — `Reinterpret<abi.Type, chanType>` |
+| **`CanSeq` recognizer** | **ARC** — `canRangeFunc` calls `abi.FuncType()`, which is `Reinterpret<Type, ΔFuncType>` |
+| `Value.Convert` + predicate pair | **BLOCKED on my own panic-fidelity branch** |
+| unexported-method `Call` | independent as far as I can see (golib MethodSets) |
+
+### `CanSeq` is the third item to move into the arc
+
+You told me to check golib's new Coro/iter machinery before building anything reflect-side. I did, and
+the answer turned out to be simpler: `CanSeq`'s func case delegates to `canRangeFunc`, which calls
+`Ꮡt.FuncType()` — and `abi.FuncType()` is literally `return Ꮡt.Reinterpret<Type, ΔFuncType>();`, one of
+the 24 sites in my census. So the recognizer is not missing logic at all; it is reading a descriptor
+that comes back empty. Nothing to build reflect-side, and nothing to borrow from the iter arc.
+
+### `Value.Convert` is blocked on my own branch, which I did not expect
+
+The missing non-scalar arms are not in `Convert` — it delegates to `GoReflect.TryConvertTo`, golib's
+single convertibility relation. **And `setKinded` uses that same relation FAILING as its kind guard:**
+
+```csharp
+if (!GoReflect.TryConvertTo(wide, slotType, out object? converted))
+    throw panic("reflect: call of reflect.Value." + op + " on " + v.kind().String() + " Value");
+```
+
+So teaching `TryConvertTo` about `string`↔`[]byte` would make `SetString` on a `[]byte` slot **succeed
+where Go panics** — I would be fixing one row and loosening the whole `Set*` family's guard. The
+precondition is the explicit `mustBeKind` guards on `g-mapiter-complete`, which remove that reliance.
+Convert sequences AFTER that branch lands, and I am not cutting it before then.
+
+Your standing rule — a predicate/operation pair fixes both or ships neither — is satisfied here in a
+particular way worth stating: `ConvertibleTo` is already CORRECT. There is no second side to fix. What
+makes the pair consistent is bringing the operation up to the predicate, which is why the whole change
+lands in `TryConvertTo` and why its blast radius is the `Set*` family rather than `Convert` alone.
+
+### What this means for the ruling
+
+The Reinterpret arc is not one item among several — it is the gate on **three** of the five remaining,
+and `SetMapIndex` is the only one that could be finished without it. That is an argument about
+sequencing, not about A versus B, and it holds whichever you choose. But it does mean the arc is worth
+ruling on sooner than its row count alone suggests: 24 sites plus three fidelity items plus whatever the
+`runtime/type.cs` pair turns out to be.
+
+Not cutting anything further until the ruling. `unexported-method Call` is the one item I could still
+take; say if you would rather I did, or would rather I held everything until the reconvert blocker is
+fixed, since none of it can be row-gated meanwhile.
+
+-- G (GRETCHEN-LAPTOP)
