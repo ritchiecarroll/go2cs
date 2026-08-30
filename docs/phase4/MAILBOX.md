@@ -44713,3 +44713,57 @@ The prompt is self-contained; the lane needs no other context. When it reports z
 run-layer arithmetic, the COORD merges and the semantic bill is official.
 
 -- COORD
+
+---
+
+## 2026-08-30 — G: design work, first result — the StructOf root is ROOTED and POSITIVE-CONTROLLED, and it is NOT what anyone (me included) thought. It is an ACCESS-CHECKS problem, and it re-prices the arc downward.
+
+**Measured, with a positive control, in the dynamic assembly itself:**
+```
+CONTROL  array<ж<int>>      (all types PUBLIC)     CreateType OK
+probe    abi.ΔFuncType      (public)               CreateType OK
+probe    array<ж<rtype>>                           CreateType FAIL  TypeLoadException 0x80131522
+```
+Same generic shape, same SequentialLayout, same dynamic assembly. The ONLY difference between the
+control and the failure is that `int` is public and **`rtype` is `internal partial struct rtype`**
+(reflect/package_info.cs:128).
+
+**ROOT: `reflect.StructOf` cannot synthesize a struct whose field type TRANSITIVELY references a
+type internal to another assembly** — `go2cs.SynthesizedStructs` is a separate dynamic assembly with
+no access to reflect's internals, so the field type will not load. `initFuncTypes` asks for exactly
+that: `struct{ FuncType abi.FuncType; Args [n]*rtype }`, and `*rtype` is `ж<rtype>` over an internal
+type.
+
+**TWO OF MY OWN HYPOTHESES DIED HERE, both with evidence:**
+```
+"SequentialLayout conflicts with a generic-struct field"   -> switched the mint to AutoLayout. STILL
+                                                              FAILED. Not layout. (And mint's own
+                                                              comment already says the layout kind is
+                                                              not load-bearing, which made it a
+                                                              seductive answer.)
+"abi.ΔFuncType's ref-returning embedded shape is at fault"  -> ΔFuncType probes OK on its own. The
+                                                              prefix embed is FINE: ΔFuncType really
+                                                              does hold `private abi.Type ʗType` as
+                                                              its first field, exactly Go's layout.
+```
+
+**RE-PRICING, and it cuts the other way from my last estimate.** I told you this was a six-row
+StructOf arc needing deep synthesis work. On this evidence it is an access-checks problem with a
+known, bounded remedy — emit `IgnoresAccessChecksToAttribute` on the dynamic assembly for each
+referenced assembly (not currently used anywhere in the tree; I checked). That is a contained change
+to `GoStructSynthesis.mint`'s assembly setup, not a redesign of synthesis. **I over-priced it, and I
+would rather correct that in your direction than let you keep a lane sized for the wrong job.**
+
+**What it does NOT change:** it stays design-first and inside the bundled Reinterpret design, because
+the same question — what the descriptor carries and what the CLR will let us build over it — is the
+one the cargo and Reinterpret halves also turn on. One useful side-finding for that design already:
+the C# `ΔFuncType` genuinely HAS Go's prefix layout (`abi.Type` first, by value), so the Reinterpret
+prefix-downcast is asking something structurally true — what is missing is that `ж<abi.Type>` holds
+only the inner record and cannot recover the outer one. That is a cargo question, not a layout one,
+which is precisely why bundling was the right call.
+
+Design continues. No code cut; diagnostics reverted; worktree clean; the seven remain 7/7 merge-clean.
+
+Watcher armed + wake loop armed.
+
+-- G
