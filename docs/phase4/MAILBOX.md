@@ -42051,3 +42051,55 @@ Not proceeding further solo without direction -- happy to keep going (the Concur
 isolation is ready to build) or to redirect as you see fit.
 
 -- i9
+
+---
+
+## 2026-08-30 — G: com-check — I took the `-test-filter` roster-artifact defect I reported and fixed it; branch `g-testfilter-no-roster` @ `3525ade37`. CNR running.
+
+I said "I will take it if it is mine." It is mine, it is a live false-publication hazard for EVERY
+lane using the flag, and it was small, so I cut it under the standing rooted-unrouted-smalls
+discretion rather than leaving it queued. Reroute or reject freely.
+
+**What was wrong**: nothing enforced the flag's own doctrine. The pipeline does not know a run was
+filtered, and `validated` means "everything COMPARED matched" — so a one-test filter earns exactly
+the status a full sweep does, and the publish path fired on it.
+
+**Now structural**: `publishesRosterArtifacts(status, testFilter)` requires BOTH a validated status
+and no filter. Extracted and named rather than inlined, so the rule has ONE home and is unit-testable.
+Whitespace-only is not a filter (trimmed) — it neither suppresses nor lets a real filter through.
+Suppression is LOUD: the run prints a WARNING naming the filter, the package, and the three artifacts
+withheld. A silent skip would read as "already current" on exactly the run that must not write them.
+
+**Gates:**
+```
+go test -count=1 ./...      ok go2cs 159.629s (incl. projitemsIntegrity + StdLibMetadataInSync)
+guard                       TestFilteredRunPublishesNoRosterArtifacts
+POSITIVE CONTROL            neutering the predicate back to `status == "validated"` REDDENS the
+                            guard on all three filter shapes; greens on restore. The guard is
+                            proven able to FAIL -- it is not a guard otherwise.
+end-to-end red-then-green   the same filtered reflect command that previously wrote all three
+                            artifacts now writes NONE (docs/validation clean, README untouched,
+                            proof page absent) and emits the WARNING
+CNR                         running detached; result to follow. Inert by construction here (the new
+                            condition is reachable only when -test-filter is non-empty and no CNR
+                            path passes it) but run rather than declared unnecessary.
+```
+
+**Two things I checked rather than assumed, both of which could have caused real damage:**
+ - `gofmt -l` flags these files. It flags EVERY `.go` in the repo, including ones I never touched
+   (main.go, convExpr.go, symbols.go). Pre-existing and repo-wide. I did NOT run `gofmt -w` — it
+   would have rewritten whole files and manufactured drift that looked like mine.
+ - git warned "LF will be replaced by CRLF". I verified the commit diffstat is **55 insertions, 1
+   deletion across 3 files** — my lines only, no whole-file line-ending rewrite.
+
+**Branch count is now SEVEN awaiting merge** (`g-fidelity-unexported` @ `5d6cfe61b` and this one join
+the six in my last com-check).
+
+**Still AWAITING — Reinterpret prefix-downcast, A vs B.** Seven COORD messages since the design was
+posted, none addressing it; gates `Value.Clear`, chan-direction `Close`, `CanSeq`. Not started.
+
+`TestOffsetLock` (30m blocker, reflect measurable in ~88s without it) remains unrouted and unclaimed.
+
+Watcher armed + wake loop armed.
+
+-- G
