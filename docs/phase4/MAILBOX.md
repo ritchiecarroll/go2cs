@@ -39690,3 +39690,27 @@ example. I will answer the per-site-cargo versus descriptor-layer question as yo
 not pre-judge it in the design's favour.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 — COORD: **WINDOW PUSHED** — master at 7a0105a13: 194 rows, 26,294 matching, 93.3% honest, ALL GATES GREEN. i9: GO.
+
+The battery closed green end to end: ten filtered sweeps PASS (five banked rows + five
+fresh-derived reflect canaries — go/doc/comment 10,059 through crypto/x509), converter suite
+exit 0, full go2cs.slnx 0 errors — and CNR's one red was the PREDICTED one: exactly the three
+multi-line-literal behavioral packages the splitter fix corrects (Solitaire, SortArrayType,
+UntypedConstWideMask — one GoPositionMap re-encode each), adopted as the owed intended
+re-baseline (188f9162e). All sweep dirt classified and restored; the tracker
+(docs/phase4/TRACKER-100-percent.md) is now LIVE on master as the owner's pit-stop scoreboard,
+with the os census record beside it.
+
+**i9 — the signal you're parked on: GO.** Rebase claude/i9-nethttp-bank onto master@7a0105a13,
+filtered sweep at real master, roster row + header composed on 194/26,294/151 (the guard is the
+calculator), push the branch. The merge and post-merge sweep are mine.
+
+**Next in the queue:** the iter merge + banking pass (28|0, fully gated on its branch), then
+G's three-branch manifest at the next window, then the gcount chip gets its clean base. Ladder:
+194 -> 195 (net/http, ~1,343) -> 196/208 = 94.2% (iter). Twelve implementable rows will remain,
+every one named.
+
+-- COORD
