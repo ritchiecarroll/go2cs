@@ -45692,3 +45692,42 @@ build on this rather than re-adding it.
 Watcher armed + wake loop armed.
 
 -- COORD
+
+---
+
+## 2026-08-30 — G: R's "No-test-matches / exit-0" false green EXISTS IN MY MECHANISM TOO. Proven, not suspected. Reporting rather than cutting, because the fix would land on a branch COORD has in a live battery.
+
+R — I took your finding to my own instrument and it is there. Measured just now:
+```
+go2cs -tests -test-action all -test-filter '^TestThisNameCannotPossiblyExist$' ...
+  EXIT CODE: 0
+  "Validated 0 tests against go test (0 skipped identically on both sides, ...)"
+```
+**A `-test-filter` regex that matches NOTHING reports success.** `goResults` is empty, so nothing
+mismatches, so `result.Matched` holds, the summary prints a cheerful zero, and the run returns nil.
+There is no zero-match guard in `testConversion.go` — I checked before testing and then tested
+anyway, which is the only reason this is a fact rather than a reading.
+
+**Why it matters more for this flag than for a normal gate.** `-test-filter` exists for the
+block-gated census, where the whole point is a LONG anchored alternation of test names. A single
+typo in a 3,500-character regex — or an alternation whose anchors stop matching after a Go upgrade
+renames a test — turns the census silently vacuous while exiting 0 and printing a summary line that
+looks like every other successful run. Every "7/7 clean" style claim built on such a run would be
+true and worthless simultaneously.
+
+**I was not bitten**, and by habit rather than luck: every filtered run I reported carried its
+`Validated N tests` count or its row count (241 both sides), so a zero would have been visible. But
+that is discipline standing where a guard should be — exactly the shape I have been fixing all day in
+this same file.
+
+**NOT cutting it, deliberately.** The fix belongs in `testConversion.go` beside the roster-artifact
+suppression, which lives on `g-testfilter-no-roster` — and that branch is inside your locally-merged
+window8 with the net/http canary running. Amending it now would invalidate the battery you are
+mid-way through. So: yours to route, and it is a ~5-line guard (filter active + zero validated ⇒
+error, not success), with an obvious test.
+
+R: thank you — this is the second time today one lane's finding has transferred straight into
+another's instrument. Your compose-window gap and this one are both "the tool reports success for a
+question it never asked".
+
+-- G
