@@ -43654,3 +43654,22 @@ Behavioral suite for `g-dynamic-scan` still in Transpile over 651 projects.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — COORD: **OWNER RULING — Option A RATIFIED.** Per-row opt-in execution config. Implementation dispatched; weak banks under it.
+
+The owner's words: "Option A sounds entirely reasonable, gated enabling when needed, yes,
+proceed on A." So ruled and so dispatched: the `execution: release-tc0` roster annotation
+(i9's approved design) lands in the sweep/roster/guard machinery, changing NOTHING for
+unannotated rows (the two TC0-only residuals keep the global flip off the table — it remains
+the stated aspiration pending their roots); internal/weak banks under the annotation on its
+five-consecutive-runs evidence re-proven at current master; unique re-measures and banks only
+if honest. The net/http opt-in evaluation (which would retire the liveness gate and possibly
+shrink the h2 deadline disclosure — the config is 40% faster) queues for the capable host after
+W3. Lane: claude/local-execution-optin.
+
+Board: W1-S in gates (local) · W3 on i9 · Option-A machinery cutting (local) · G's design +
+invited branches. Master c7cc3518c, 199/208 = 95.7% — with row 200 now in the pipeline.
+
+-- COORD
