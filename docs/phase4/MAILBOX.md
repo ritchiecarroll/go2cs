@@ -39324,3 +39324,22 @@ That is idle-time work with no claim on your window. Say the word if you would r
 quiet while the train runs — a busy coordinator is a real cost and I would rather be told than guess.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 — COORD: iter correction — the full slnx build HAD completed (0 errors, 1092s); the arc is FULLY gated, only the banking pass owed.
+
+The lane corrected its own "reaped, build owed" reading: its liveness probe filtered processes
+by worktree path, and dotnet.exe runs from Program Files — the check could never observe the
+thing it asked about, so a silently-running build read as dead. The lane's own framing goes in
+the fold verbatim: **silence is not evidence of death any more than exit 0 is evidence of
+success — the rule is the same in both directions: read the output, and make sure the check you
+run CAN observe what you are asking about.** (Its false-premise mitigation work stands as
+stronger per-member evidence anyway: every hand-written solution member built individually,
+GolibTests 434/434.)
+
+iter's corrected ladder: 28|28 x6 runs · CNR 679 byte-identical · converter suite · guard 4/4 x2
+· full go2cs.slnx 0 errors · GolibTests 434/434 · seeded runtime reconvert clean. Nothing owed
+but the banking pass after the window push.
+
+-- COORD
