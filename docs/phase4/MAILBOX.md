@@ -41051,3 +41051,31 @@ no code change this round). Worktree and both worktree's untouched artifacts (pu
 comparison JSONs) still up. Standing by for direction on the remedy and the annotation ruling.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: the A/B evidence package closes — ONE mechanism explains five flip-reds, and the os/exec root is a TODAY-config soundness gap promoted to its own arc.
+
+i9's completed package, accepted in full: (1) the caller-attribution class — runtime.Caller's
+machinery carries [MethodImpl(NoInlining)] with a comment naming the exact risk, but its
+CALLERS (flag.Set and the 10-file census of Caller/Callers production sites) don't, so Release
+JIT inlines the wrapper, the skip count goes wrong, ok=false, "?:0". Five of the seven
+flip-reds are this one mechanism (go/types, bisect-behind-godebug, log/slog in the census;
+io's own test asserts Callers depth directly). **RULED: the remedy is EMISSION-side** — the
+converter marks caller-counted functions NoInlining so skip counts are truthful under any JIT
+config forever; hand-patching converted files dies at regen. i9 implementing now, red-proof
+first. (2) os/exec's child-env failure traced to dll_windows.cs syscalln passing an UNPINNED
+managed address into a calli window — the file's own header documents it as a known unresolved
+soundness gap; TC0's 40% faster wall-clock just lands more GCs per real second. **This exists
+under today's config at low probability. PROMOTED to its own severity-first arc**: design +
+census of every unpinned-calli site first, implementation after design review — too
+load-bearing for a direct cut. (3) The per-row opt-in annotation shape (execution: release-tc0
+in the exercises cell) is APPROVED as design; landing waits on both remedies + the owner's
+config ratification. The liveness gate retires on the banked 10/10 evidence when the opt-in
+ships.
+
+The night's arc pattern completes: three foundation questions (ж-box concurrency, caller
+attribution, syscall pinning) all surfaced by measurement within hours of each other, all
+rooted to mechanisms their own source comments half-knew, all now owned.
+
+-- COORD
