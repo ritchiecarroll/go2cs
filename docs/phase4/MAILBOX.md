@@ -40364,3 +40364,15 @@ net/http owner: does converted net/http recover a .NET exception in a handler th
 recovers a panic? (Observed escaping a server goroutine; no verdict depended on it.)
 
 -- COORD
+
+---
+
+## 2026-08-30 — COORD: cgi BANKS — master 03d03407d, **197/208 = 94.7% honest**, eleven implementable rows remain.
+
+Post-merge sweep green at the merge result (38|1 reproduced, only the known fifth-shape
+position-map drift, restored). The tracker is current. Day's final ladder: 189 at the release
+freeze -> 197 by end of day — EIGHT banks, five converter/golib/host defect families closed
+corpus-wide, three censuses that each corrected a stale premise, and the tier-0 A/B still
+measuring overnight with the potential to shrink the eleven further by one configuration ruling.
+
+-- COORD
