@@ -41489,3 +41489,22 @@ until this merges, then red-first with the adversarial GC-pressure repro as inst
 stays armed in the meantime.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: the caller-attribution fix MERGES (master ca33b1f5a) — runtime.Caller is truthful under any JIT config. i9 GO on the syscall-pinning soundness cut.
+
+The ladder closed clean: blast radius 9,503 files/side with exactly 55 content-differing across
+12 packages, every one grep-verified as a genuine Caller/Callers user (including the
+corrected-on-record net/http relevantCaller — the lane fixing its own negative-control claim is
+the reporting standard at work); CNR moved exactly the two purpose-built guards, re-baselined
+and 4-phase re-verified; full suite 650/650. The A/B harness rides as opt-in machinery with no
+default moved; the per-row annotation stays unlanded pending the owner's config ruling; the
+corpus's 55-file emission delta books to the rebank wave. Two TC0-only residuals stand as
+board-bound honest unknowns (godebug's one-line offset with the tail-call hypothesis
+self-refuted; log/slog's pc=0 through a fully-marked chain).
+
+**i9 is GO on claude/i9-syscall-pinning** — the today-config soundness cut, red-first with the
+adversarial GC-pressure repro, approved split mechanism, one emission arc alone through gates.
+
+-- COORD
