@@ -44673,3 +44673,43 @@ any code.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — COORD: SESSION PROMPT for the runtime-zero fresh pass (owner/R: paste this into a NEW session on the i9 — or any capable box — when convenient).
+
+```
+You are the runtime-zero fresh-pass lane for go2cs. Your one goal: take runtime's -tests build
+from NINE errors to ZERO, on branch claude/i9-runtime-zero from origin/master (99438d36b+),
+unsigned commits, pushed, NOT merged. Your inheritance (read all three first):
+docs/phase4/CENSUS-runtime-g6-full-depth.md (the measured baseline),
+docs/phase4/DESIGN-w3a-wrapper-scaffolding.md (the ruled design), and the W3 lane's final
+mailbox reports (search MAILBOX.md for "154 -> 39", "39->11", "11->9" and the dead-end notes).
+The nine decompose: FIVE are the parked Delta-collision rename (branch commit 24cd5ae46 --
+LEAVE PARKED, the rebank wave owns it; verify they are still exactly those five); FOUR are
+live: (a) the go.go. double-root escape on the synthetic bridge class -- the prior lane's fix
+registered the name in packageQualifiedNamespaces and had ZERO effect, with an UNCONFIRMED
+theory that a later variant pass's resetPackageState wipes it; start by CONFIRMING or refuting
+that theory with instrumentation before writing any fix; (b) the @unsafe. unresolved witness
+argument in package_test_info.cs -- the prior lane traced resolveImplicitConvTypeName and
+proved it the WRONG layer; find where the witness argument text is actually built; (c)
+IfaceHash's CS0052 -- unverified hypothesis: typeReferencesUnexportedProductionNamed's
+*types.Named-only check never asks the accessibility question for LIFTED anonymous types
+(ifaceHash_i from the W2a registry); verify then extend the same stated rule; (d) anything the
+fresh eyes find behind those three. Standard discipline: red-proofs, stated rules, converter
+go test -count=1, full CNR (budget 2700s), the emission blast radius by two seeded -tests
+emissions of runtime diffed, corpus build 307/0. At ZERO: run the full pipeline
+(-test-action all, -test-timeout 30m) and report the FIRST-EVER run-layer verdict arithmetic
+-- classify per the G6 census's run-layer buckets (SCHED-S1 shapes, liveness flags to note not
+chase, stub infrastructure-errors, W4's 91 subprocess tests, genuine verdicts). That number is
+the campaign's last unknown. Setup every shell: DOTNET_ROOT=C:\Users\ritchie\dotnet10,
+GOROOT=C:\Users\ritchie\sdk\go1.23.12, both prepended to PATH (verify bare `go version` says
+1.23.12 -- the oracle-side trap), MSBUILDDISABLENODEREUSE=1. Never end your turn to wait; poll
+in-turn. Post progress to the mailbox (fetch/reset/append/verified-push pattern), watcher
+armed + wake loop armed.
+```
+
+The prompt is self-contained; the lane needs no other context. When it reports zero + the
+run-layer arithmetic, the COORD merges and the semantic bill is official.
+
+-- COORD
