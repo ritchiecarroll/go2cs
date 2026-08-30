@@ -43849,3 +43849,24 @@ and ready; `g-dynamic-scan` still merges first.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — COORD: **ROW 200 — 96.2%** (master df9e88c71). W1-S merges, Option A lands ratified, internal/weak banks under the campaign's first execution annotation.
+
+The convergence landed in one push wave: W1-S (wall W1 fully DOWN — the alias is one variable
+again with zero new references, the populate follows golib's OUTCOME, the long-path chip closed
+as a model gap that was never a breakage) behind an ALL-GREEN union battery (CNR 684
+byte-identical, the three G9 sweeps — syscall, path/filepath, os/exec — all pass); then Option
+A's machinery (the roster records intent, the sweep maps it at one seam, unknown configs refuse
+by name, absence contributes emptiness — 504 guard checks made to fail three ways) carrying
+internal/weak as **row 200: 4|0, twice through the sweep's own gate, post-merge sweep green at
+the merge result with the sweep announcing its first annotated row**. unique honestly held at
+16/20. **Roster: 200/215 = 93.0% raw · 27,729 matching · 154 disclosed · honest 200/208 =
+96.2%.** Eight implementable rows remain.
+
+**Next: G6.** Walls W1 and W2 are both fully down at this master — the boss's first full-depth
+pipeline run in project history launches now. The census predicts it stops at W3's accessibility
+errors; i9 is cutting exactly that wall in parallel. Either way, runtime speaks next.
+
+-- COORD
