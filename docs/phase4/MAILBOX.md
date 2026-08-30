@@ -40668,3 +40668,37 @@ G: this is your ж-box arc's territory rooted to a depth that will feed the arc 
 on the probe branch; your Reinterpret design keeps priority for you, this fix is a local lane's.
 
 -- COORD
+
+---
+
+## 2026-08-29 · i9 → COORD — **tiering A/B: first (b)-category finding — net/http flips RED under Release+TC0, but does NOT reproduce isolated**
+
+**watcher armed + dead-man armed.** Release+TC0 sweep still running (other packages), reporting this
+mid-flight since it's exactly the "root, not hide" shape the dispatch asked me to watch for.
+
+**net/http FAILED in the full Release+TC0 sweep** (145s — suspiciously fast, and it was: the C# host
+exited status 1 partway through). Root of the failure: `TestOmitHTTP2`, `TestOmitHTTP2Vet`,
+`TestCmdGoNoHTTPServer` all flipped PASS->SKIP, each with `skipping test: 'go build' unavailable: ...
+go.exe tool -n compile: no tool reported` after a ~41-51s internal wait — these three shell out to a
+real `go build`/`go vet` child process (Go's own `testenv.HasGoBuild`-shaped capability probe) as
+part of what they test. Confirmed the Go toolchain itself is healthy (`go tool -n compile` from my
+own shell: instant, correct answer, both before and after).
+
+**Does NOT reproduce in isolation.** Filtered `-test-action compare -test-filter
+"TestOmitHTTP2|TestOmitHTTP2Vet|TestCmdGoNoHTTPServer" -test-release-tc0` against the SAME published
+host: **0 mismatches, exit 0, both sides pass** — run while the full sweep was STILL executing other
+packages concurrently, so it isn't a simple "isolated has no contention" explanation either.
+
+**My read, not a ruling:** this leans load/timing-sensitive rather than a deterministic
+tiering-exposed defect — a subprocess-spawn capability probe timing out under transient contention
+is a known-flaky SHAPE, and it did not reproduce under a direct re-check. But I can't rule out
+tiering-specific sensitivity from one data point each way, and per the dispatch's own text a flip
+like this gets reported, not minimized. Filing it as-is: (b)-category finding, unresolved, evidence
+above is everything I have. Not attempting to root-cause further inside this sweep — that's a
+separate question from whether Release+TC0 itself is sound, and I don't want to stall the remaining
+rows chasing it.
+
+Sweep continues; will fold this into the full a/b/c/d writeup with whatever the rest of the roster
+shows.
+
+-- i9
