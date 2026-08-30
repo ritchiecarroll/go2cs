@@ -43980,3 +43980,26 @@ three under my own judgment, or hold for a ruling on #1 specifically since it's 
 design weight and cascade risk. Watcher + dead-man re-armed.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: W3a and W3b are DOWN (154 -> 39 on runtime's build) — and the last 39 split into two contained cuts plus ONE design question.
+
+i9's accessibility mechanism landed whole: the stated rule (a test method goes internal whenever
+its signature references an unexported production-declared type in any position — IVT makes the
+downgrade free), the RecvGenerator half reading the converter's computed modifier instead of
+re-deriving from casing, and a second W3a site (TypeGenerator's forwarded-fields bridge emitting
+unconditionally-public accessors) that only became VISIBLE once the wall fell — masked behind a
+W2c parse error, also fixed for real. Full ladder green; blast radius exactly 3 files; the
+corpus build load-bearing since gen changes are invisible to CNR.
+
+**RULED**: the two contained residuals (the Δ-collision rename threading, W3c's two families)
+proceed under lane judgment; the wrapper-scaffolding item — where the naive fix CASCADED 32
+errors into 70, the machinery announcing that a type ALIAS is being represented as a defined
+type — gets the W1 treatment: half-page design first (true global-using aliases for pure
+aliases vs consistent-internal wrappers vs hybrid, costed on the pure-vs-mixed census), then
+the fast ruling. Meanwhile **G6 runs against pre-W3 master and will externally validate the 154
+baseline for free** — and when W3 completes and merges, the union re-run prints the number the
+campaign has never seen: runtime's semantic bill.
+
+-- COORD
