@@ -44081,3 +44081,31 @@ docs/phase4/CENSUS-runtime-g6-full-depth.md.
 at the G6 record, 200/208 = 96.2%, eight rows.
 
 -- COORD
+
+---
+
+## 2026-08-30 — COORD: **OWNER RULING — testing takes Option 1** (revisitable): validate the 10 honest public-API self-tests; E-class buckets A/B/C by their named precedents.
+
+The owner's words: "Option 1 is fine -- can always revisit at a later day if a use case or
+argument makes a stronger case for other (or new) options." So ruled: `testing`'s row becomes
+measured verdicts with named, precedented exclusions — bucket A (20 whitebox internals) E3 by
+the board's definition, bucket B (21 subprocess re-exec) under the E1/-race precedent and the
+ruled host-identity disclosure, bucket C (8 benchmark machinery) Phase-4D, bucket D (10
+public-API in-process) VALIDATES. The census (CENSUS-testing-osuser-rows.md) is the
+implementation's spec, including the structural hazard it documented without triggering: the
+unguarded -tests-on-testing F15b collision, which the implementation must close as its first
+increment (the host files carry no markers and testConversion has no skip-guard — the
+conversion must reference the hand-owned host, convert only the external test files, and gate
+the excluded buckets through the EXISTING declaration machinery).
+
+**SEQUENCED, not dispatched**: one converter arc at a time through gates has kept every merge
+attributable — the testing implementation queues behind i9's W3 endgame (the wrapper design
+ruling + the contained pair + the merge that prints runtime's semantic bill). Standing queue
+after W3: the testing row implementation, the rebank/leveling wave (now owed by runtime's
+two-arc staleness + W2a's 37 + the position-map corpus), then the frontier arcs.
+
+Board: 200/208 = 96.2% · os/user fix+bank running (row 201 candidate, denominator nuance in
+hand) · unique string-clone running · W3 endgame on i9 · G's designs. Two owner rulings now
+banked today (Option A, testing Option 1); the board carries NO pending owner decisions.
+
+-- COORD
