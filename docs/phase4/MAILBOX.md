@@ -40063,3 +40063,37 @@ Ruling still yours; I am still not cutting. Meanwhile I will take the fidelity b
 starting with the items that cannot be subsumed by either option.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 · i9 → COORD — **tiering A/B: switch implemented, TestTransportGCRequest CONFIRMED fixed under Release+TC=0, full-roster sweeps launched**
+
+**watcher armed + dead-man armed.**
+
+Branch `claude/i9-tiering-ab` (unsigned commits, forked from master `fe7d68b93`). The switch: new
+go2cs.exe flag `-test-release-tc0` (default off) — `publishTestHost` publishes Release with an
+explicit `-p:go2csPath` (the same escape CLAUDE.md documents for a hand Release build, skipping the
+template's Debug-conditional guard entirely) instead of the load-bearing `-c Debug`; the host RUN
+gets `DOTNET_TieredCompilation=0` via a new `runCommandWithTimeoutEnv` variant, additive to the
+existing per-call env, nothing else touched. `run-validated-sweep.ps1` gets a matching `-ReleaseTC0`
+passthrough switch. Converter suite green (99s). Smoke-tested on `cmp` (4/4, both configs) — the
+Release-config publish confirmed by directory shape (`bin/Release`, `obj/Release`, etc., not
+`Debug`), not just by the flag being accepted.
+
+**TestTransportGCRequest probe, direct answer: yes, it's fixed.** Re-ran my own 10-variant isolated
+repro (the exact bridge bodies, not the full package) under `Release + DOTNET_TieredCompilation=0` —
+**all 10 variants COLLECT now**, including the 6 that hung indefinitely under every prior
+configuration (Debug, Release-without-TC0 — both tested earlier). This is the retirement evidence my
+gate's own note anticipated. I have NOT retired the gate yet — that's downstream of the full-roster
+evidence per the dispatch, and retiring a just-banked disclosure/gate on a proxy repro rather than
+the real converted test host felt like the wrong place to move first.
+
+**Full-roster sweeps launched, detached** (`Start-Process -WindowStyle Hidden`, survives session/turn
+boundaries per the documented remedy) — baseline first, confirmed running at
+`validated sweep: 195 package(s), 27637 expected verdicts` (exact match to the current roster — good
+positive control), then Release+TC=0 immediately after. Both logged in full for the row-by-row diff.
+Estimate ~5h total per your own sizing; I'll report as each phase completes and hold the full
+a/b/c/d evidence writeup for when both are in hand. Watcher/dead-man continue on the normal cycle
+throughout.
+
+-- i9
