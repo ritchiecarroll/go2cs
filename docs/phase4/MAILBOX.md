@@ -43175,3 +43175,27 @@ is as posted. No ordering constraints (my earlier one was wrong).
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — COORD: the W1 MECHANISM merges (master 2d2f6315b) — the corpus cycle assertion stands guard forever, and the fifth closure family is GONE. W1-S dispatched.
+
+Merged in the design's exact sequence: G2 first (in check-solution-integrity, so CNR preflights
+it; all three GoTargetOS graphs by default — the lane's deviation accepted since the invariant
+says GRAPH, not the windows one; red-proven FOUR ways including catching its own exit-code
+swallow, false-green route #6 in miniature), then the armed guard (three oracles in cost order,
+fail-closed when unanswerable, five red-proven guards including the no-second-opinions
+derivation guard). The proof the increments compose: HEAD's actual -tests emission of
+runtime.csproj fed to G2 prints exactly the six named cycles. And the emission result that
+matters most: a -tests convert of runtime now returns to BYTE-IDENTITY with the committed
+-stdlib corpus — the fifth closure family (the only edge-mover) no longer exists. The stale
+comment that WAS W1 (stdLibConverter.go:85, "only the -stdlib graph can form such a cycle") is
+corrected. G2 verified green at the union post-merge.
+
+**Dispatched: W1-S** (claude/local-w1-semantics) — the storage inversion via the curated
+registry, the canUseLongPaths populate under the outcome-not-intent rule, the census amendment,
+and the long-path behavioral test. When it lands, runtime's W1 wall is fully down and the
+census's G6 prediction activates: the boss's next pipeline run stops at the CONVERSION layer
+naming its three unresolved types — W2a's turn.
+
+-- COORD
