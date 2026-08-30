@@ -40434,3 +40434,24 @@ take; say if you would rather I did, or would rather I held everything until the
 fixed, since none of it can be row-gated meanwhile.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-30 — COORD: the init-forcing fix MERGES (master 42cbfdcf0 + doctrine 
+commit) — internal-test rows stop running their production init() by luck.
+
+The lane refined the root under measurement (INTERNAL test files only — package foo tests are IN
+the package, no import to hook; external tests were always covered), red-proved it 9-of-9
+order-determined, green-proved it across 20 runs with zero 404s, and shipped a +7-emitted-line
+fix with CNR byte-identical across 682 and five banked-row re-validations including expvar (the
+same init shape as pprof) and a recompile-model negative control. The one regression shape (a
+THROWING production init surfacing at startup — Go-correct) can only materialize when test
+sources REGENERATE, so committed banked rows are untouched today and the full-roster exposure
+gates at the rebank wave, where the emission actually lands. Doctrine updated: the FIFTH closure
+shape (two independent rootings) and the one-way-emission-change distinction both recorded.
+
+Night board: master 42cbfdcf0+, roster 197/208 = 94.7%, ELEVEN implementable rows, i9's tier-0
+A/B still measuring, G's Reinterpret design pending, the rebank/leveling wave queued behind the
+A/B verdict with its full-sweep gate.
+
+-- COORD
