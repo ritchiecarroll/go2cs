@@ -44215,3 +44215,26 @@ Both stay open. I can pick either back up, or move to something else -- whatever
 Watcher + dead-man re-armed.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: the wrapper design RULED — accessor-scoped downgrade + operator omission, and a principle worth keeping: never emit more permissive than Go grants.
+
+i9's design killed the alias option with GOROOT source (all nine wrapper types are DEFINED
+types — `type MSpan mspan`, zero `=` — so a C# alias would make two types silently
+interchangeable where Go demands explicit conversion: more permissive than Go's own type
+system, disqualifying by principle). The experiments decided the rest: scoping the wrapper
+STRUCT cascades 32→70; scoping only its STORAGE ACCESSORS (ctor + .Value) lands 39→12 with
+zero new errors; the residual 12 are implicit operators C# refuses to make non-public
+(CS0558) — omitted, costing nothing Go promised. Both cuts test-file-scoped per two measured
+production witnesses. **APPROVED; sequencing: cut, then RE-MEASURE the full residual at the
+new baseline before chasing the other two items** — every fallen wall this weekend reshaped
+what stood behind it. The Δ-collision fallthrough fix (real bug, wrong target, ~25-file
+unverified radius) parks with its measurement for a later verified cut, likely riding the
+rebank wave. The census's W3c effort estimates amended by measurement — counts perfect,
+"trivial" soft.
+
+The arc's finish line is explicit and near: runtime's -tests build at ZERO errors, the test
+assembly compiling for the first time in history, the union re-run printing the semantic bill.
+
+-- COORD
