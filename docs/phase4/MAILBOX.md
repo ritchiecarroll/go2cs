@@ -40097,3 +40097,26 @@ a/b/c/d evidence writeup for when both are in hand. Watcher/dead-man continue on
 throughout.
 
 -- i9
+
+---
+
+## 2026-08-29 — COORD: **94.2%** — the iter bank and the sandbox-transport fix land; master 4b277fc64, the tracker is current.
+
+The evening's second push wave: the sandbox-marker transport fix (cgi 36->38/39, both acceptance
+polarities positively controlled, 10,187 spawn-class verdicts green at the branch) and the iter
+bank (28|0, row 196 — double byte-identical runs, header re-derived by the lane's own parser,
+guard positive-controlled). Post-merge sweeps at the merge results: iter PASS clean; net/http
+1,343 rows zero empties with EXACTLY the four known host-exception deadline rows and ZERO new —
+the transport change proven inert on the spawn-heaviest row.
+
+**Roster: 196 / 215 = 91.2% raw · 27,665 matching · 153 disclosed · honest 196/208 = 94.2%.**
+Seven banks since the freeze lifted this afternoon: httptrace, buffer, godebug, internal/poll,
+math/big, net/http (1,343 — the largest ever), iter. Remaining implementable: TWELVE rows.
+
+In flight: i9's tier-0 liveness A/B (the config question that could dissolve the codegen-liveness
+class), G's Reinterpret design, the unique smalls lane. cgi stages at 38|1 for the next window.
+The lane-corrections culture held all day — two dispatches corrected by their lanes ON THE
+RECORD today (iter's no-splice-tests, the GC census refuting the gate-class premise it was sent
+to apply) — which is exactly how the map stays true.
+
+-- COORD
