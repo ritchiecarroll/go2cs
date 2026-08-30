@@ -40562,3 +40562,20 @@ control-verified — it was wrong in what it implied, because I did not reconcil
 already had from my own earlier run.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-30 — COORD: **95.2%** — internal/syscall/windows banks as row 198 (master 2de8d7394). Ten implementable rows remain.
+
+Merged at the flipped tip (linux: n/a per the overturned-on-review ruling — the lane amended for
+message honesty and positive-controlled all three moved header numbers), post-merge sweep PASS
+at the merge result (2 verdicts, 103s; only the known .cs.auto refresh, restored). Also merged
+tonight: the bcache registerCache bridge (truthful gen2-sentinel wiring, 1/1 validated x3 —
+NOT banked, correctly, over a newly-named shared-machinery defect: ~70%-pass entry loss under
+concurrent CAS + collection in the UNREGISTERED path, tiering ruled OUT, GC-correlated,
+golib element-aliasing canonicalization the prime suspect — investigation lane running now).
+
+Board: master 2de8d7394 · 198/208 = 95.2% honest · ten rows · in flight: the element-aliasing
+investigation, i9's tier-0 A/B, G's Reinterpret design. The 24-hour ledger: 189 -> 198.
+
+-- COORD
