@@ -44003,3 +44003,54 @@ baseline for free** — and when W3 completes and merges, the union re-run print
 campaign has never seen: runtime's semantic bill.
 
 -- COORD
+
+---
+
+## 2026-08-30 — G: two branches had gone CONFLICTING under master's movement — rebased, re-gated, re-pushed. All seven now merge clean against `ba3be3c67`. My "ready to merge" had a shelf life I had not accounted for.
+
+**Found by re-checking, not by being told.** After ROW 200 moved master I re-ran mergeability rather
+than trusting my own manifest. Two branches had gone from clean to conflicting:
+```
+g-fidelity-unexported   CONFLICT  93 behind    -> rebased, now a4358fbdb  CLEAN
+g-reflect-disclosures   CONFLICT  93 behind    -> rebased, now 52d475912  CLEAN
+g-mapiter-complete      CONFLICT  93 behind    -> SUBSUMED, do not merge separately; moot
+```
+Every conflict was `src/core/reflect/package_info.cs`. **Useful asymmetry: staleness alone does not
+predict conflict** — `g-probes` at 144 behind and `g-funcforpc` at 108 behind merge clean, because
+they touch no GENERATED file that master also regenerates. It is generated-file overlap that bites,
+not distance.
+
+**The resolution needed care, and `--theirs` would have been silently wrong.** Taking master's
+`package_info.cs` drops the position-map record the original commit deliberately carried ("carry only
+the record this change actually moves"). I regenerated authoritatively with a SINGLE-PACKAGE
+conversion — which yields the `-stdlib` shape, not the `-tests` closure — and it came back with
+**exactly one changed line**, matching the original intent. A `-tests` regen would have committed
+`global::` root-escapes plus two `GoDynamicTypeLift` records sourced from reflect's TEST files.
+
+**RE-GATED at the new master, both clean:**
+```
+BASE ba3be3c67           pass=205  fail=122  infra=24
+g-fidelity-unexported    pass=214                        +6  TestCallPanic, TestGrow,
+                                                             TestMapIterSafety, TestSetIter,
+                                                             TestUnexported, TestValuePanic
+g-reflect-disclosures    pass=213                        +5  (same minus TestCallPanic, which is
+                                                             the unexported fix and correctly absent)
+regressions              NONE either branch; reflect.csproj builds from committed shape for both
+```
+Note both gained rows I had not previously attributed to them — `TestGrow`, `TestSetIter` — because
+the earlier measurement was taken against a master where other lanes' work had not yet landed. The
++12-together figure I gave you stands as a FLOOR for the same reason.
+
+**A hazard of my own making that I only just caught.** reflect's README kept regenerating with a
+false `Tests-1/1_validated` badge. Cause: an UNTRACKED `docs/validation/current/reflect.md` left in
+my worktree by a filtered run at 09:10. I removed the tracked artifacts at the time and missed the
+untracked page, so it silently re-injected the false badge into every regeneration for two hours.
+That is exactly what `g-testfilter-no-roster` prevents — demonstrated on myself, twice, which is
+about as good an argument for that branch as I can offer.
+
+**All seven verified merge-clean against `ba3be3c67` just now.** Manifest SHAs updated above for the
+two that moved.
+
+Watcher armed + wake loop armed.
+
+-- G
