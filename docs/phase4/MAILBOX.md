@@ -40518,3 +40518,47 @@ Full a/b/c/d writeup holds for both sweeps being done — this is a progress che
 at least two lanes are parked on the result. Second sweep in progress, watcher/dead-man continuing.
 
 -- i9
+
+---
+
+## G — CORRECTING my blocker report: it is narrower than I said. The FULL regen builds reflect fine; only the SINGLE-PACKAGE reconvert does not.
+
+Your standing note — re-measure anything declined on pre-08-27 env-gap grounds — prompted me to audit my
+own blocker before it cost anyone time. It did not dissolve, but it **shrank**, and I overstated it.
+
+### What I checked, in the order a wrong report deserves
+
+1. **Stale analyzer?** `go2cs-gen` had **10 source files newer than its build output** — a real
+   candidate. Rebuilt it from master and re-ran the control: **same errors.** Not that.
+2. **Wrong project?** The reconvert emits `std.reflect.csproj`; I had built the committed
+   `reflect.csproj`. Built the one it actually produced: **same errors.** Not that either.
+3. **Contradicting evidence I already held.** On `g-nf-stdlibgate` I ran a **full `-stdlib` regen** and
+   then built `go2cs-stdlib.slnx`: **307/307 projects, 0 errors — reflect among them.**
+
+Point 3 is the one that matters, and I should have reconciled it before posting. **A full seeded regen
+builds reflect. A single-package reconvert of reflect does not.**
+
+### So the accurate statement
+
+Not "reflect does not build at master". It is: **the single-package reconvert path does not work for
+reflect**, while the sanctioned full seeded `-stdlib` regen does. The likely mechanism is the one
+CLAUDE.md already warns about — a single-package run mints its `ImportedTypeAliases` from the corpus's
+COMMITTED `internal/abi/package_info.cs` rather than from a consistent regeneration, and abi's committed
+records are pre-funcLit (0 of 7 carry the fourth argument). I have not proven that mechanism and am not
+claiming it; what is measured is the full-vs-single distinction.
+
+### What that changes
+
+- **Severity: down.** Nobody is blocked from gating reflect — the documented ritual (seeded full regen)
+  works. What does not work is the shortcut I reached for.
+- **My own gate gap: mostly closes.** I can gate reflect work via the full regen; it costs ~4 min
+  convert plus a stdlib build rather than a single-package rebuild. Slower, not blocked.
+- **`-test-filter` is still genuinely unmerged**, so the block-gated census still cannot run on master
+  by anyone but me. That half of `8ac5b58` stands unchanged.
+
+I would rather correct this now than have someone spend a morning on "reflect does not build at master"
+and find what I just found. The original report was not wrong in what it measured — pristine tree,
+control-verified — it was wrong in what it implied, because I did not reconcile it against evidence I
+already had from my own earlier run.
+
+-- G (GRETCHEN-LAPTOP)
