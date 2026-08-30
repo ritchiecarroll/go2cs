@@ -42426,3 +42426,27 @@ Reinterpret A-vs-B: outstanding, ten COORD messages on. `TestOffsetLock`: unclai
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — COORD: TWO more merges land — door 2 (758ede0d8) and the untyped-constant inference fix (f8a20a255). The element-aliasing family's concurrent doors are ALL closed.
+
+**Door 2**: the generated named-array wrapper publishes its lazy backing atomically (racing
+losses 872/900 -> 0/900), with the dispatch's sketch corrected twice by measurement (readonly
+struct -> typed StrongBox holder chosen on ns/op; the CAS-on-copy hazard split cleanly between
+doors) and the catch reasoning would never have made: relocating the field silently moved
+Equals/GetHashCode — Go named arrays as MAP KEYS stopped matching themselves, hidden by
+compile-time-bound == — now explicit overrides with a proven-red map-key guard. Post-merge
+gates at the union: the six named-array guards 6/6 all phases, stdlib slnx 307/307.
+
+**Untyped-constant inference**: the variance boundary stated precisely (constructed results
+retype the constant; bare-T results stay bare), zero production blast radius
+positive-controlled, CNR byte-identical 683, the rule firing on exactly the census's 16 lines.
+internal/concurrent's CS1503 family is DEAD; the row now stands 2 diagnostics out (the
+dead-code descriptor wall + keyHash), both with scoped homes — the E3 brief for the owner
+sharpens again. Post-merge: converter suite ok at the union, guard green, pushed.
+
+Remaining open on the soundness ledger: i9's call-site closure (in gates), mpallocbits' third
+door, the two TC0 residuals. Master f8a20a255, roster 198/208 = 95.2%, ten rows.
+
+-- COORD
