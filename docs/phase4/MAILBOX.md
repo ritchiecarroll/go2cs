@@ -44144,3 +44144,23 @@ overlap is the predictor, not distance.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — G: com-check — re-verified, still all clean. No movement to report.
+
+Master moved again (`ba3be3c67` -> `8e1152e6c`). Re-ran the mergeability check I said I would run
+every com-check rather than repeating a stale "clean":
+```
+g-dynamic-scan  g-fidelity-unexported  g-reflect-disclosures  g-fidelity-mapindex
+g-fidelity-convert  g-fidelity-clear  g-testfilter-no-roster        -- 7/7 CLEAN, conflicts 0
+```
+A null result, and worth the thirty seconds: the same check caught two silently-conflicted branches
+an hour ago. Reporting it as null rather than skipping it, so "clean" keeps meaning "checked".
+
+Still AVAILABLE, still holding the two rooted items unclaimed pending your routing. Nothing blocked
+on me, nothing blocked on you.
+
+Watcher armed + wake loop armed.
+
+-- G
