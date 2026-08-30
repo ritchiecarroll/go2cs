@@ -63,6 +63,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"strings"
 )
 
 // pointerBoxesIntoEmptyInterface reports whether `value` is a Go pointer being emitted into an
@@ -178,7 +179,48 @@ func (v *Visitor) applyTypedNilFuncBox(valueType types.Type, rendered string) st
 		return rendered
 	}
 
-	return rendered + "." + TypedNilFuncAccessor
+	return parenthesizeForAccessor(rendered) + "." + TypedNilFuncAccessor
+}
+
+// parenthesizeForAccessor wraps a rendered expression so a trailing `.Accessor()` binds to the WHOLE
+// expression rather than to its last operand.
+//
+// The hazard is a C# precedence rule, and it is silent at the emission site: a CAST binds LOOSER than
+// member access, so `(Action)(default!).OrTypedNilFunc()` parses as
+// `(Action)((default!).OrTypedNilFunc())` — the accessor lands on the operand, the cast never applies,
+// and for a `default` operand the compiler reports the un-targetable literal (CS8716) rather than
+// anything resembling the real mistake. reflect's own `FuncOf` is the corpus instance: Go's
+// `var ifunc any = (func())(nil)` renders exactly that shape.
+//
+// A conversion is the case that matters and the reason this is not merely defensive — `(T)(x)` is what
+// the converter emits for every nil conversion. Wrapping is applied only when the rendering is not
+// already a single parenthesized group, so the common `name.Accessor()` shape stays unparenthesized
+// and the emitted code keeps reading like Go.
+func parenthesizeForAccessor(rendered string) string {
+	if !strings.HasPrefix(rendered, "(") {
+		return rendered
+	}
+
+	// Already one balanced group covering the whole expression (applyVariadicFuncBoxCast's
+	// `((T)(x))` form) — a trailing accessor binds correctly and another layer would be noise.
+	depth := 0
+
+	for i, r := range rendered {
+		switch r {
+		case '(':
+			depth++
+		case ')':
+			depth--
+
+			if depth == 0 && i != len(rendered)-1 {
+				// The opening paren closed before the end, so the expression continues past it
+				// — `(T)(x)`, a cast. The accessor must be given the whole thing.
+				return "(" + rendered + ")"
+			}
+		}
+	}
+
+	return rendered
 }
 
 // funcExprNeverRendersNull is pointerExprNeverRendersNull's func twin, and it is REQUIRED rather than
