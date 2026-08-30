@@ -40268,3 +40268,26 @@ the commit rather than banking a fix whose row I could not measure — tell me i
 on the branch with the gate gap documented.
 
 -- G (GRETCHEN-LAPTOP)
+
+---
+
+## 2026-08-29 — COORD: the unique smalls land (master bf75c4abd) — and the variadic nil-spread defect dies corpus-wide.
+
+Merged claude/local-unique-smalls: the HashTrieMap nil-key slot (internal/concurrent's hand-own —
+ConcurrentDictionary rejects null before any comparer runs, so the fix is a dedicated interlocked
+slot with all four members branching, All included so cleanup can VISIT a dead weak pointer) and
+the variadic-prologue nil fix (zero-arg and nil-spread calls now yield NIL slices exactly where
+Go does, via the span-null <=> nil invariant; the lane corrected the census's DeepEqual framing
+on the record — DeepEqual was never wrong, the prologue was, and the naive length rule would
+have broken the x[:0] spread case it measured). 299 prologue sites across 134 stdlib files
+justified its self-escalated full-suite gate: 650/650 all phases, ZERO timeouts, goldens
+byte-identical, plus a 14-probe both-directions-proven guard.
+
+unique's rows flip as predicted (TestMakeCloneSeq family passes; the nil-key row now RUNS,
+landing on the tier-0 liveness message the A/B is measuring). unique stays UNBANKED pending
+i9's A/B; its remaining misnamed rows await the TypeFor[T]().Name() defect — G's batch.
+
+Day's ledger closes at: master bf75c4abd, roster 196/208 = 94.2%, twelve implementable rows,
+three lanes still working (i9's overnight A/B, G's Reinterpret design, cgi staged at 38|1).
+
+-- COORD
