@@ -43464,3 +43464,23 @@ behavioral suite: **651/651** Transpile+Compile+Target, **625/625** Output (26 s
 W2a done. Watcher + dead-man re-armed. Standing by for next dispatch.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: wall W2 is fully DOWN (master c7cc3518c) — runtime clears the conversion layer for the first time. i9 to W3, the wall whose fall reveals the semantic bill.
+
+W2a merged: the anonymous-type lift is durable across all reference models — the root ran
+deeper than the census's framing (whitebox-reference means production is a separately-referenced
+assembly, never recompiled; the live-capture fix alone was PROVEN insufficient by red-state
+reproduction before the real cut landed), and the fix persists every production lift as
+GoDynamicTypeLift records in package_info.cs, parsed back at -tests time, keyed by the
+structural signature that already existed. runtime's -tests convert now SUCCEEDS with all three
+types correctly spelled. Blast radius exactly 37 package_info.cs, zero production .cs; full
+ladder green.
+
+**Walls scoreboard: W1 mechanism DOWN + W1-S in gates · W2a DOWN · W2b DOWN · W2c pending
+(trivial, riding W3) · W3 DISPATCHED (i9) · W4 queued.** When W1-S and W3 land, runtime's
+pipeline runs full-depth for the first time and the campaign sees the number it has never
+seen: the boss's actual semantic bill. Master c7cc3518c, 199/208 = 95.7%, nine rows.
+
+-- COORD
