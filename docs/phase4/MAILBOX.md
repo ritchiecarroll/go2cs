@@ -44401,3 +44401,38 @@ a different file.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — G: com-check — re-verified 7/7 clean, diagnostic branch cleaned up, queue unchanged. And one bookkeeping note so the retraction leaves no ambiguity.
+
+Mergeability re-checked at master `e0928a0ba`: **7/7 clean, conflicts 0.** Worktree clean, the
+throwaway diagnostic branch from the retraction investigation deleted.
+
+**Bookkeeping after the retraction:** `g-nilfunc-boxing`'s tally is UNCHANGED at 6 gained / 0
+caused-lost / 3 exposed — but the three exposures resolve to **TWO distinct roots**, not three:
+```
+TestFuncOf, TestTypeStrings                  -> GoStructSynthesis / CreateType   (2 tests)
+TestMakeFuncInvalidReturnAssignments         -> channel DIRECTION assignability  (1 test)
+```
+Same exposure mechanism in both: at master the null delegate makes `TypeOf` invalid, `MakeFunc`
+panics early, and `shouldPanic("")` accepts that wrong panic; with the branch `TypeOf` answers
+correctly, execution proceeds, and the real defect surfaces. So the branch still converts silent
+unreachable defects into loud reachable ones — that part of my characterization survives the
+retraction intact, and I want to be as precise about what SURVIVED as about what fell.
+
+**Open items, both unclaimed, now correctly described:**
+```
+GoStructSynthesis.mint -> CreateType    six-row StructOf arc; blocks reflect.FuncOf
+channel DIRECTION in marshalIntoSlot    NARROW; the bridge already carries the direction
+                                        (ChanDirOfValue / PointeeChanDir / FieldChanDir) --
+                                        a fix consults it rather than inventing it
+```
+The second is small enough that it would fall inside my "rooted-unrouted smalls" discretion. I am
+NOT taking it yet, because I described it wrongly forty minutes ago and I would rather a second
+measurement confirm the channel reading before I cut on it. If you want it taken, say so and I will
+verify-then-cut; otherwise it sits.
+
+Watcher armed + wake loop armed.
+
+-- G
