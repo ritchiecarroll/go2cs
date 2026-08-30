@@ -40192,3 +40192,79 @@ Also: good data point on `TestCallReturnsEmpty` — noted for the write-up. Conf
 uniform; I'll fold it in as a named exception when the full-roster diff lands.
 
 -- i9
+
+---
+
+## G — BLOCKER at master: a single-package reconvert of `reflect` produces a corpus that does not build. Control-verified without any change of mine.
+
+Found while gating the first fidelity item. Reporting ahead of the fix itself because it blocks more
+than me: **nobody can currently reconvert-and-build `reflect` at master**, which is the gate every
+reflect row needs.
+
+### The control makes it unambiguous
+
+```
+committed reflect, no reconvert, at master        Build succeeded
+committed reflect + MY two-file fix               Build succeeded
+PRISTINE master, no changes, reconvert reflect    Build FAILED
+```
+
+Third row is the control: `git checkout HEAD -- src/core/reflect`, wipe `Generated`/`obj`/`bin`,
+reconvert with master's own converter, build. 26 files rewritten, then:
+
+```
+Generated\...ImplicitConvGenerator\go.reflect_package.flag-go.internal.abi_package.ΔKind.g.cs(23,146):
+  error CS1061: 'reflect_package.flag' does not contain a definition for 'Value'
+  error CS1729: 'reflect_package.flag' does not contain a constructor that takes 1 arguments
+  ... same for ΔKind and ΔChanDir
+```
+
+The failures are in **generator output**, not in converted source — the ImplicitConv generator emits
+conversions against a `flag`/`ΔKind`/`ΔChanDir` shape the reconverted sources no longer present. So the
+committed corpus and today's converter have drifted apart for this package, and not merely staleness:
+the reconvert output does not compile.
+
+**Caveat I am not skipping:** this is a SINGLE-PACKAGE reconvert, not the sanctioned seeded full
+`-stdlib` regen. A single-package run legitimately differs (the `-tests`-closure shapes, and the
+`ImportedTypeAliases` block minted from the resolved root). I have NOT shown a seeded full regen fails,
+and I am not claiming the corpus is broken — only that this path, the one a lane uses to gate one
+package, does not currently work for reflect.
+
+### How it surfaced, and a second gap worth a ruling
+
+I could not run my usual gated reflect census at all, for a separate reason: **`-test-filter` is my own
+flag and was never merged to master.** It lives only on my branches, so master's converter rejects it
+and prints usage. That means my reflect gating method — the block-gated census the whole tail work rests
+on — **is not reproducible by anyone else on master.** I would rather that were fixed than keep gating
+with a private flag; your call whether it merges, and I am not smuggling it into a fidelity branch to
+get my own gate working.
+
+Attempting to cherry-pick it revealed why it has not merged cleanly: it conflicts with master's compare
+invocation, and my branch's version depends on `publishTestHost`/`publishedTestHostPath`, which master
+does not have. So the flag needs a real port, not a pick.
+
+### Where that leaves the fidelity item
+
+`SetMapIndex` delete-vs-assign is **implemented and measured**, on `g-fidelity-mapindex` (uncommitted
+pending this):
+
+```
+CASE                     Go                              C#            verdict
+delete from NIL map      legal no-op                     ok            match
+assign into NIL map      PANIC "assignment to entry..."  same text     match
+delete present key       [a c]                           [a c]         match
+delete ABSENT key        len 1                           len 1         match
+assign (CONTROL)         1 9 2                           1 9 2         match   <- must not move
+iface-map delete         len 2                           len 2         match
+```
+
+6/6 with the assign control held. golib gains `DeleteMapEntry` (the `SetMapEntry` twin, via
+`IMap<K,V>.Remove` so golib's dedicated nil-key slot is reached); reflect's `SetMapIndex` gets Go's
+ordering, `key.mustBeExported()`, and the nil-map panic moved to the ASSIGN arm where Go raises it.
+golib and reflect both build.
+
+What I cannot produce is the reflect-suite row confirmation, for the two reasons above. I am holding
+the commit rather than banking a fix whose row I could not measure — tell me if you would rather have it
+on the branch with the gate gap documented.
+
+-- G (GRETCHEN-LAPTOP)
