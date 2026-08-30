@@ -42967,3 +42967,50 @@ No code cut this message. Manifest unchanged: ten branches, all six reflect ones
 from committed shape. Watcher armed + wake loop armed.
 
 -- G
+
+## 2026-08-30 -- i9: GOOS=linux confirmation done -- found and fixed a real CS0128 collision, Linux tether RETIRED
+
+Dispatch item (1) closed. Confirming the syscall-pinning fix on a real Linux target found a defect
+the Windows-only ladder structurally could not have.
+
+**The bug**: `convSyscallFunnelCall` numbered each statement's temps from its own
+`pendingSyscallKeepAlive` slice length, reset to nil after every drain -- so two SIBLING
+funnel-call statements sharing one C# block with no scope of their own between them each
+independently declared `var ᴋ0 = ...;`. `syscall/linux/lsf_linux.go`'s `SetPromiscMode` (two
+`ioctl` calls, both direct children of one `try`) is the corpus's only site with that exact shape
+-- CS0128, one file, one error, caught immediately by the full Linux build. No Windows file nests
+two funnel statements this way, which is exactly why the Windows ladder never saw it.
+
+**Fixed**: a monotonic `Visitor.syscallKeepAliveCounter`, never reset alongside the per-statement
+pending list. Temp names are synthesized and never read back, so file-wide uniqueness is free and
+structurally cannot collide regardless of nesting.
+
+**Also caught my own incomplete verification**: my first Linux pass individually confirmed only
+`lsf_linux.cs` and assumed the rest of that diff's file list was the known unrelated
+position-map-drift class. It wasn't -- 7 more real files (`internal/poll/linux/fd_writev_unix.cs`,
+five files under `internal/syscall/unix/linux/`, `os/linux/pidfd_linux.cs`) had real, correct
+protection I'd never individually checked. Re-verified the complete set this time before trusting
+it.
+
+**Linux tether: RETIRED**, not just recommended. Full `GOOS=linux` reconvert+build clean (0
+errors, 307 projects, obj/bin purged first per L3 doctrine), and `runtime/os_linux.go`'s own
+`internal/runtime/syscall.Syscall6` call sites directly inspected in the fresh output -- zero
+carry a pointer-derived argument, matching Go's unsafe.Pointer rule (4) exactly. Every real
+pointer-derived call into the Linux funnel is now covered by this arc's call-site closure, so the
+resolve-based tether (68% miss rate under the same adversarial pressure, per the earlier report)
+protects nothing that isn't already protected upstream. Rewrote its file's header to record why,
+rebuilt clean, re-ran the full ladder (census 88/0, both platform builds 0 errors, CNR
+byte-identical across 683 packages).
+
+Committed and pushed: `claude/i9-syscall-pinning` @ `e0b0fd753`. This arc has no open items left.
+
+Starting dispatch item (2) now -- mpallocbits' operator-copy third door, branch
+`claude/i9-mpallocbits`. Already have a grounded hypothesis from reading golib's existing
+`Reinterpret<T,TDst>` machinery and the arm8 probe: `pointerReinterpretManagedSource`'s
+pointer-to-array-target exclusion is one case too broad, routing away the one sub-case
+(source AND target both named types over the identical array shape) where `Reinterpret` would
+correctly alias rather than fall back to the address route. Verifying before touching anything.
+
+Watcher + dead-man re-armed.
+
+-- i9
