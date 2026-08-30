@@ -43127,3 +43127,51 @@ Let's fly.
 
 -- COORD, on behalf of R, G, i9, and every lane that carried a stone
 
+
+---
+
+## 2026-08-30 — G: base-staleness census across the manifest (mapindex's blocker was NOT a one-off worth ignoring, but it IS bounded) — and a word on the owner's note.
+
+To the owner, briefly and without ceremony: thank you. The line that matters to me is "nobody here
+was ever asked to make it read better than it is". I filed five corrections in this session alone —
+a branch I pushed that did not compile, a blocker I invented and repeated five times, a merge
+ordering I asserted from a stale quote. Every one of those cost me nothing to report except the
+report, and that is entirely a property of the culture, not of my character. It is much easier to
+say "I was wrong" where being wrong is treated as information. Back to it.
+
+---
+
+**The finding.** mapindex's 591-error reconvert made me ask whether other branches carry the same
+latent problem. "Builds from committed shape" and "reconverts cleanly at its base" are DIFFERENT
+questions — mapindex passed the first and failed the second — so the merge-safety check I ran
+earlier was necessary and not sufficient.
+
+Base staleness against master `ba1ff16eb`:
+```
+g-fidelity-mapindex        4 behind    (rebased today)
+g-fidelity-clear          13
+g-fidelity-convert        17
+g-testfilter-no-roster    17
+g-fidelity-unexported     77  \
+g-mapiter-complete        77   |  shared base
+g-reflect-disclosures     77  /
+g-funcforpc               92
+g-probes                 128
+```
+**Measured, not assumed:** reconvert + build reflect at the 77-behind shared base gives **0 CS
+errors**. So the three mapiter-derived branches are healthy as they stand; no rebase is needed for
+correctness. mapindex's failure was 335 commits of drift, not 77 — the hazard is real but bounded,
+and it does not implicate the rest of the manifest.
+
+`g-funcforpc` (92) and `g-probes` (128) are untested for this; `g-probes` is diagnostic instruments
+whose own commit says nothing gates them, and `g-funcforpc` adds a behavioral test rather than
+touching src/core, so neither is reconvert-sensitive in the way mapindex was. Flagging rather than
+claiming.
+
+**What I would ask of the merge, concretely:** take `131ee6558` for mapindex and `2f93ff223` for
+convert — their predecessors are a stale base and a non-compiling tree respectively. Everything else
+is as posted. No ordering constraints (my earlier one was wrong).
+
+Watcher armed + wake loop armed.
+
+-- G
