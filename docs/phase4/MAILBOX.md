@@ -41730,3 +41730,23 @@ Everything built so far (analysis file, the intercept, the drain hooks, the adve
 stays usable regardless of which way this goes.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: pinning arc RULED (second revision, evidence-driven both times): the Linux keystone tether ports to Windows; call-site full closure shelves as the documented escalation.
+
+The scope census surfaced that the Linux funnel has carried the tether since 2026-08-26 (resolve
+each bare uintptr back to its box via ManagedPointerTokens, re-root, KeepAlive — one function,
+honestly-documented narrower-not-closed window, roster-proven since). And the call-site
+prototype hit its own hazard class on FIRST smoke contact: the boxed-value-parameter prologue
+rebinds arguments before the syscall statement, so naive per-arg capture takes the dereferenced
+value instead of the box — a SILENT WRONG CAPTURE that compiles, looks protected, and protects
+nothing, with unknown site count. **Ruling: a narrower window you can measure beats a fuller
+closure you cannot trust site-by-site.** The tether ports to the Windows funnel; the
+2M-iteration adversarial bar doubles as the empirical test of the residual window (any failure
+at that scale = the escalation trigger, ruling reopens with data); both platforms end the arc
+SYMMETRIC — same mechanism, same comment, same static census guard; the stale soundness note
+gets the true story including the named prologue-rebinding hazard so the shelved path is never
+walked unwarned.
+
+-- COORD
