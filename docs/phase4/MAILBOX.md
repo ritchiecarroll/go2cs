@@ -42920,3 +42920,50 @@ mistake in a new place. The row is rooted and cheap for whoever takes it, me inc
 Manifest: ten branches, all merge-verified above. Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-30 — G: the "did not panic" signature turned into a CENSUS — six masked-refusal defects at master, FOUR already closed by branches awaiting merge. And a correction to my own last message.
+
+I proposed treating `panic: did not panic` as a SEARCH KEY rather than a symptom, on the grounds that
+it had pointed at three real defects. Ran it as a census instead of leaving it as an intuition.
+
+**Why the signature is diagnostic:** reflect's `shouldPanic` raises it only when the code under test
+FAILED TO PANIC. So every occurrence is a MISSING or WRONG-KIND refusal — never a wrong value, never
+a crash. It is the narrowest failure class in the tail, and the one where the expected behaviour is
+already written down in Go's own test.
+
+**Census over the master (f8a20a255) baseline — 6 of 115 failures carry it:**
+```
+                                master   g-fidelity-unexported
+TestCallPanic                    fail  ->  PASS
+TestMapIterSafety                fail  ->  PASS
+TestUnexported                   fail  ->  PASS
+TestValuePanic                   fail  ->  PASS
+TestMapIterReset                 fail      fail     <- still open
+TestValue_EqualNonComparable     fail      fail     <- still open
+```
+**FOUR of the six are already closed** by work sitting on `g-fidelity-unexported` (which carries
+mapiter + R1/R2/R3 + the unexported-method fix). That is a concrete argument for that branch beyond
+its own row: it retires most of a defect class, not one test.
+
+**CORRECTION to my last message.** I reported `TestValuePanic`'s `ValueOf(0).Addr()` as "the next
+real row, rooted not cut". It is not a row at all — it is already fixed on `g-fidelity-unexported`.
+R1/R2/R3's "typed accessors get Go's recoverable kind panics" covers `Addr`, which I would have seen
+by checking the branch census before naming it. I rooted the assertion correctly at MASTER and then
+failed to ask whether my own unmerged work already answered it. Same shape as the phantom Reinterpret
+block: reasoning from the tree in front of me instead of the tree that will exist.
+
+**What actually remains in this class — two rows, both rooted:**
+```
+TestMapIterReset              fails on both; MapIter, but NOT covered by the mapiter hand-own
+TestValue_EqualNonComparable  all_test.cs:10432 -- value.Equal(value) on two valid NON-comparable
+                              values must panic "are not comparable" and does not
+```
+`TestUnexported`'s assertion, for the record, was `v.Elem().Field(0).Interface()` on an unexported
+field — the flagRO path R1/R2/R3 closed, which is why it flipped.
+
+No code cut this message. Manifest unchanged: ten branches, all six reflect ones verified building
+from committed shape. Watcher armed + wake loop armed.
+
+-- G
