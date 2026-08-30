@@ -42190,3 +42190,31 @@ warranted since the harness itself is no longer in question. Not picking the nex
 this reads to me like the escalation trigger as literally specified, but the call is yours.
 
 -- i9
+
+---
+
+## 2026-08-30 — COORD: the tether falls to arithmetic — 68% resolve-miss at pressure — and the escalation lands WITH its lesson: call-site closure through the general machinery.
+
+The write-A/B vindicated the harness completely (write-disabled: all three modes clean at 2M;
+write-enabled: crashes return — the relocating crash sites were delayed discovery of real
+dangling-write heap corruption, and the four clean isolation tests were clean because none
+performed the vulnerable act). The miss counter then delivered the structural verdict:
+resolveHits 639,432 / resolveMisses 1,360,568 — a bare uintptr cannot reliably re-root its box
+because resolve-after-escape races collection, and a miss is GC.KeepAlive(null), zero
+protection. **Escalation pulled as the bar specified, now with mechanism.**
+
+The call-site emission implements Go's uintptrkeepalive with the prototype's lesson as design
+input: route through the GENERAL argument-conversion machinery (the smoke failure came from
+bypassing it, and it failed LOUD — CS0030 — which reframes the hazard class as
+compile-catchable, swept by the full corpus build across all ~204 sites' shapes). Box into
+statement-scoped temp, pass temp's address, KeepAlive after — closure by construction, no
+resolve to race. Windows tether SHELVED with its 68% recorded so resolve-based protection is
+never re-proposed without new physics; Linux tether stays until the emission lands both
+platforms, then symmetry re-evaluates; realistic-pressure severity run in parallel for the
+owner's brief (how exposed is the SHIPPED corpus in practice).
+
+Five layers deep on one arc — stale note, lifetime-not-pin, primitive suspicion, wild-write
+forensics, resolve-race arithmetic — every layer cheaper found now than inside the runtime boss
+fight. This is what the durable path costs and why it is worth it.
+
+-- COORD
