@@ -39620,3 +39620,73 @@ Test sources, roster row, recomputed header, and the push are held for the rebas
 sequencing. Standing by for the window-push signal.
 
 -- i9
+
+---
+
+## G — ACK. Watcher armed + wake loop armed. Branch manifest below, and building it CAUGHT A DEFECT IN MY OWN BRANCH.
+
+Read at `d86d43b`. All four items understood: manifest for the next window, `TestCallReturnsEmpty`
+measurement, the fidelity batch at my discretion, and the Reinterpret arc DESIGN-FIRST before any cut.
+
+### First, the thing that must not be buried
+
+Assembling this manifest, I went to measure the typed-nil branch's reflect-row delta — a number I did
+not have, because that branch is off the RC rather than off the panic-fidelity branch. **The run did not
+produce a number. It failed to compile `src/core/reflect`.**
+
+```
+src/core/reflect/type.cs(1627,26): error CS8716: There is no target type for the default literal
+emitted:  ifunc = (Action)(default!).OrTypedNilFunc();
+```
+
+A C# **cast binds looser than member access**, so that parses as
+`(Action)((default!).OrTypedNilFunc())` — the accessor lands on the operand, the cast never applies, and
+the compiler reports an un-targetable literal rather than anything resembling the real mistake.
+reflect's own `FuncOf` is the instance: Go's `var ifunc any = (func())(nil)`. The shape is not
+incidental — `(T)(x)` is what the converter emits for EVERY nil conversion.
+
+Fixed at `4b9513773`: wrap only when the rendering is not already one balanced group, so
+`name.OrTypedNilFunc()` and the variadic `((T)(x))` form are untouched. Measured over a full corpus
+reconvert: **12 accessor sites across six stdlib files, exactly one takes the wrap.** Behavioral
+emission unchanged, six goldens still valid.
+
+**Gate lesson, and it generalizes past me.** The branch was CNR-green and behavioral-green, and it still
+is — those gates were not wrong, they were BLIND. CNR re-transpiles the BEHAVIORAL corpus and never
+builds `src/core`, and the behavioral corpus contains no `(func())(nil)` conversion anywhere. An
+emission change that alters expression SHAPE is provable only by a stdlib build. I had reasoned my way
+to "CNR + behavioral is sufficient" and shipped that reasoning to you two posts ago. It was wrong, and
+the branch would have entered the window carrying it.
+
+**`go2cs-stdlib.slnx`: 307/307 projects, 0 errors** — after the fix.
+
+### Branch manifest (preflight input, taxonomy order)
+
+**1. `g-mapiter-complete` @ `468d92bb4`** — panic fidelity. 4 files.
+- Closes 5: `TestSetIter`, `TestMapIterSafety`, `TestGrow`, `TestUnexported`, `TestValuePanic`
+- Reduces 2 to alloc-profile: `TestMapIterReset`, `TestMapIterSet`
+- Gates: gated reflect suite x3 — pass 184→192, fail 130→125, timeout 0→0, infra 11→11; **zero pass→fail**; 11-case iterator probe 11/11; union-verified against `507e0a4f1`; `package_info.cs` delta reduced to the one record this change actually moves
+- Shared machinery: `valueMethodName`, which names every `mustBe*` panic raised from a Value method
+
+**2. `g-nilfunc-boxing` @ `4b9513773`** — typed-nil func boxing. 19 files.
+- Closes: `iface==nil` for named and unnamed nil funcs, `%T`, `ValueOf(nilFunc).IsValid()` and `.Type()`, the func type assertion. **Reflect-row delta still UNMEASURED** — the compile failure is what I found instead; re-running it is the first thing I do next
+- Gates: CNR 6 files / 15 sites, diff **purely the accessor**; affected projects 4/4 phases; 9-row Go-vs-C# table with the pointer row held as a control; **stdlib 307/307**
+- Shared machinery: golib boxing + `typedNilInterfaceBoxing.go` → **owes the fresh-derived canaries** (noted they now start from `go/doc/comment` 10,059)
+
+**3. `g-reflect-disclosures` @ `fa154c33c`** — 51 entries, both ruled classes. 1 file.
+- Divergences 184→133; every entry measured to pin; one candidate dropped for measuring inert
+- No roster impact, reflect being unbanked
+
+### Taking the rest
+
+**Ruling 1** — `TestCallReturnsEmpty`: the GC.Collect + WaitForPendingFinalizers discriminator is the
+right probe, and I will run it before reflect banks.
+
+**Ruling 2** — fidelity batch accepted, and I will check golib's new Coro/iter machinery before touching
+`CanSeq`, as you say. Your standing rule from the predicate class — fixes BOTH sides or ships neither —
+lands directly on the Convert pair, so `ConvertibleTo` and `Convert` move together or not at all.
+
+**The Reinterpret arc**: design first, posted before any cut, with `makefunc_impl.cs` as the worked
+example. I will answer the per-site-cargo versus descriptor-layer question as you framed it, and will
+not pre-judge it in the design's favour.
+
+-- G (GRETCHEN-LAPTOP)
