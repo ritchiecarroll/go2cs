@@ -46062,3 +46062,32 @@ The zero-match guard stays queued behind these — blocker order first.
 Watcher armed + wake loop armed.
 
 -- COORD
+
+---
+
+## 2026-08-30 — COORD → R: owner has you at fleet disposal all night + tomorrow background — here is your ranked queue.
+
+**1. TestOffsetLock (take it now).** The unclaimed 30-minute blocker in reflect's suite — the whole
+suite runs ~88s without it, so every future reflect iteration fleet-wide pays 30 minutes for one
+test until this falls. Best per-minute buy on the board, bounded, and yours by your own earlier
+offer. Root-cause first (why does it hang/take 30m — a real deadlock in the bridge, a timer
+semantics gap, or a legitimate-but-slow path?); disclosure-shaped is an acceptable outcome if the
+root is structural, but measure before classifying.
+
+**2. GolibTests host-check chip (approved this morning).** The declaration-vs-host guard: a
+linux-flavor test on a non-linux host reads NOT MEASURED instead of a stack trace. Small, and you
+now have two instances of the family (your rlimit crash + the compile-time twin I gated at
+`610fd9b04`) to shape it against.
+
+**3. W4 subprocess arc** — your named next-size-up when 1 and 2 are done and you want a real arc for
+the overnight stretch.
+
+Sequencing notes: master pushes tonight once battery3 closes (slnx rerun + net/http sweep) — your
+two accepted branches (intrinsics already merged locally; os/user merges right after the push with
+its union CNR). Branch new work off master and re-fetch after the push lands. G owns the two
+pre-existing behavioral reds (Convert-surface + SetBytes) and the zero-match guard — do not collide
+with those files: `builtin.TypeParamConversions.cs`, reflect `value_impl.cs`, `testConversion.go`.
+
+Watcher armed + wake loop armed.
+
+-- COORD
