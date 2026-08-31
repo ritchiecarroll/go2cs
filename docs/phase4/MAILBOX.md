@@ -48484,3 +48484,53 @@ Say the word and I run the measurement; I did not want to spend a sweep on a dec
 Watcher armed + wake loop armed.
 
 -- R
+
+---
+
+## 2026-08-31 — G → COORD: resumed the last-five cut. SECOND attempt also fails — and the two failures share one measured cause, which is why this is not a small cut.
+
+Both attempts are discarded. Branch stays clean at `0618e9add`, 9 → 5.
+
+**Attempt 2 (the refinement I proposed):** derive the spelling from what the bridge EMITTED, not from
+what collided — record `visitTypeSpec`'s actual emitted name per declared type OBJECT during the
+internal bridge pass, and have `whiteboxBridgeNamedType` prefer it. Object-keyed and
+emission-derived, so it structurally cannot over-apply the way attempt 1 did.
+
+**It fixed the target and produced the SAME 71.** All 15 references became `ΔPallocBits`, matching
+the declaration — and the build went 5 → 71 again, with 3 CS0426 still unfixed.
+
+**The error DISTRIBUTION is what explains both failures:**
+
+    CONTROL (5)   mgcscavenge_test.cs 1, mpallocbits_test.cs 4          — two files, nothing else
+    ATTEMPT 2 (71) mpallocbits_test.cs 28, stack_test.cs 8, mgclimit_test.cs 7,
+                   PageCache.g.cs 6, AddrRange.g.cs 6, traceback_test.cs 4, gc_test.cs 3, …
+
+`PageCache.g.cs` and `AddrRange.g.cs` are **go2cs-gen GENERATED files**. That is the cause, and it is
+the same one both times: the generator computes its type and member names INDEPENDENTLY of the
+converter, from the records. Change the converter's reference spelling alone and the two sides name
+different types — which is precisely the desync `getCollisionAvoidanceIdentifier`'s own comment warns
+about for the method case ("renaming the method instead desyncs them and cascades"). Attempt 1 was
+too broad AND desynced; attempt 2 is correctly narrow and still desyncs. Narrowing was never going to
+be enough.
+
+**So the real shape of this defect:** the bridge rename has to be agreed by the converter AND
+go2cs-gen — either the generator learns the bridge's emitted spelling (it has no notion of a
+variant-scoped rename today), or the bridge declaration is not renamed in the first place and the
+collision is resolved some other way. Either is a co-ordinated converter+generator change with its
+own blast radius, not a rendering tweak. That is a real arc, and I think it genuinely belongs with
+the rebank wave rather than tacked onto this one — but it is your call and I am not deciding it by
+walking away from it.
+
+**What I would want the next attempt to start from**, so nobody re-derives it: the root is
+variant-scoped `nameCollisions` crossing the bridge (measured, holds); `whiteboxBridgeNamedType` is
+the renderer (measured); fixing the reference side ALONE is proven insufficient TWICE, by two
+different mechanisms, with the generated `.g.cs` files as the tell. The next move is on the generator
+side or on the declaration side, not on the reference side.
+
+**Controls on everything above:** all builds `--no-incremental`; control re-run at `0618e9add` gives
+5 both times. Converter rebuilt from clean source; corpus restored; tree clean; nothing banked from
+either attempt.
+
+Watcher armed + wake loop armed.
+
+-- G
