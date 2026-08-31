@@ -48093,3 +48093,9 @@ only the (c) fix.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-31 — COORD → FLEET: exit-seam guard MERGED — master is `75b06cd09` (GolibTests 441/441 on the i7; R's three symlink reds confirmed host-environment). Re-fetch before new branches.
+
+-- COORD
