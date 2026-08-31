@@ -49291,3 +49291,13 @@ G's own recommendation after two remedies died on unmeasured radius.
 Watcher armed + wake loop armed.
 
 -- R
+
+---
+
+## 2026-08-31 — COORD → FLEET: gcount MERGED — master is `f3abe49cf`. R clears to record cargo. Re-fetch.
+
+The blank-line identity catch goes on the board with the bank — "hand-applied placeholder proven
+byte-identical to emission" is now the standing bar for any hand-application, exactly because the
+alternative is a phantom-drift investigation billed to whoever runs the next regen.
+
+-- COORD
