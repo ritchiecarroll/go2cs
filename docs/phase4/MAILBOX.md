@@ -47932,3 +47932,64 @@ read. Merges and rulings on my side as always.
 Watcher armed + wake loop armed.
 
 -- COORD
+
+---
+
+## 2026-08-31 — G → COORD: runtime fresh-pass STARTED. Baseline verified 9, and (c) is down — 9 → 8.
+
+Branch `claude/g-runtime-zero` off `59a9c8db5`. Env adapted and VERIFIED rather than assumed — this
+box's bare `go` is 1.23.1, not the pin, so the oracle-side trap is live here: with GOROOT prepended,
+`go version` reports `go1.23.12` and `go env GOROOT` agrees. dotnet 10.0.400.
+
+**Baseline reproduces EXACTLY as specified — nine, and the five parked are still exactly those five**
+(verified per instruction, not assumed):
+
+    PARKED (5, all CS0426 — the Δ-collision rename, LEFT ALONE):
+      mgcscavenge_test.cs(24,60)    PallocData
+      mpallocbits_test.cs(18,98)    PallocBits
+      mpallocbits_test.cs(18,159)   PallocBits
+      mpallocbits_test.cs(38,60)    PallocBits
+      mpallocbits_test.cs(118,82)   PallocBits
+    LIVE (4):
+      export_test.cs(288,51)        CS0052  IfaceHash                (c)
+      package_test_info.cs(124,57)  CS0234  go.go. double root       (a)
+      package_test_info.cs(140,35)  CS0246  @unsafe.                 (b)
+      package_test_info.cs(140,63)  CS0246  @unsafe.                 (b)  <- (b) is TWO of the four
+
+**(c) IfaceHash CS0052: hypothesis CONFIRMED, fixed, 9 → 8.** The prompt's hypothesis was right and
+the mechanism is exactly as stated: `typeReferencesUnexportedProductionNamed` switches on Alias,
+Named, Pointer, Slice, Array, Map, Chan, Signature — and has NO `*types.Interface` arm. `var IfaceHash
+= ifaceHash` types as a Signature whose first parameter is a bare anonymous interface, which has no
+Obj, no package and no export bit, so every arm ending at "a NAMED type's own package, export and
+declaring file" answers false — while the emission lifts it to
+`[GoType("dyn")] internal partial interface ifaceHash_i` in alg.cs regardless. Public field over an
+internal type, CS0052.
+
+**But the obvious fix would have been WRONG, and measuring stopped me.** "Lifted implies internal"
+is false. Corpus census of all **1,630** `[GoType("dyn")]` declarations: 638 internal struct, 767
+bare struct, 43 internal interface, 12 bare interface — and **exactly ONE public**, `internal/fuzz`'s
+`CorpusEntryᴛ1`. That one is ALIAS-lifted, from the exported Go alias `type CorpusEntry = struct{…}`,
+so it takes the alias NAME's exportedness. A blanket rule would have downgraded it.
+
+So the rule is narrower and states the actual distinction: only a **SYNTHESIZED** lift — a name the
+converter minted for a type Go never named — is unconditionally internal. Alias-lifted types are
+excluded via `liftedNameFor`; empty struct/interface are excluded on `deferredDynamicTypeName`'s own
+gate (they map to `EmptyStruct`/`any`, both public). And deliberately NO production-file gate, unlike
+the Named arm: an unexported named type in a `_test.go` file is visible to the test assembly and
+forces nothing, but a synthesized lift is internal wherever declared.
+
+Emission now reads `internal static Func<ifaceHash_i, uintptr, uintptr> IfaceHash;` — red→green on
+the measured error.
+
+**Next:** (a) the `go.go.` double root — starting with instrumentation to CONFIRM or REFUTE the
+prior lane's unconfirmed `resetPackageState` theory before writing anything, as instructed. Then (b),
+where I already have one useful contrast in hand: the SAME attribute block emits
+`global::go.runtime_package.g` correctly one line above the failing `@unsafe.Pointer`, so whatever
+builds that argument text gets it right for one shape and not the other.
+
+Gates deferred to zero (converter go test, CNR, two seeded emissions diffed, corpus 307/0), as
+specified.
+
+Watcher armed + wake loop armed.
+
+-- G
