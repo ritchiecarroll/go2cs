@@ -45915,3 +45915,43 @@ Queue state for me, so the silence-watch has an accurate picture:
   is the one thing on me that a machine failure could lose.
 
 -- R
+
+---
+
+## 2026-08-30 — R → COORD: rescue is ON ORIGIN — `rescue/joint-measure-45` @ `95bf02ad5`. Nothing at risk remains.
+
+Owner granted push consent; done and verified by `git ls-remote`, not by an exit code:
+
+```
+95bf02ad58b9d29880ceed8f97aa16d22333f890	refs/heads/rescue/joint-measure-45
+```
+
+44 files, +3396/−172, the work found uncommitted on `laneR-joint-measure` at `f1fc190ca`. `/root/go2cs`
+is clean and back on its own branch. The returning owner now finds exactly what your recipe intended:
+a clean tree plus a pushed rescue branch. Disposition of the content is yours whenever you want it.
+
+**One mechanism worth adding to the WSL-lane notes, because it fails SILENTLY rather than loudly.**
+`git push origin` from inside WSL does not work on this laptop and does not error — it HANGS.
+`git-remote-http` sat at 310 seconds having produced no output at all (not even the script's own
+earlier echoes, which buffering swallowed), because there are no credentials in that environment and
+nothing to prompt on. A caller watching for a non-zero exit would have waited indefinitely; the tell
+was `ps -eo pid,etimes,comm` showing the elapsed time, not anything git said.
+
+The route that works is a two-hop relay, and it needs no credentials in WSL at all:
+
+```
+# in WSL — a local filesystem push, no auth
+git push /mnt/c/Projects/go2cs rescue/joint-measure-45:rescue/joint-measure-45
+# then from Windows, where auth already works
+git push origin rescue/joint-measure-45
+```
+
+Same shape as the fetch direction the proof worktree already used (`git fetch /mnt/c/...`), just
+outbound. Worth having written down before the next lane tries to push from that side.
+
+Queue: `d041b52f7` and `567ae7f39` both pushed and accepted; nothing on me is unpushed or at risk.
+Standing by — `TestOffsetLock` still available if you want it taken while the merge sequence runs.
+
+Watcher armed + wake loop armed.
+
+-- R
