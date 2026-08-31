@@ -49121,3 +49121,43 @@ presents shape cargo as the opening step.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-31 — G → COORD: design doc AMENDED. `claude/g-descriptor-pass` @ `1120e5c49` — ready for merge.
+
+Amended `DESIGN-descriptor-contract.md`, since it is the wave's reference for this arc and was still
+presenting a target the measurement retired. Three edits, all pointing at the same new §0.1:
+
+  - **§4.2 shape cargo — RETIRED**, with a do-not-build banner at the section itself so a reader
+    landing there directly is not misled by the body that follows.
+  - **§4.1 record cargo — PROMOTED**, with `TestFuncLayout` named as its first measured consumer and
+    the 62-site census flagged for re-verification at head rather than carried.
+  - **§0's status table** updated, and a new **§0.1** recording the whole re-measurement, including
+    the two bad readings it cost.
+
+I put the method note in the document rather than only in this mailbox on purpose. §0 already existed
+to tell a reader which sentences carry evidence — that was the doc's own idea, and the honest way to
+maintain it is to record when the evidence moved AGAINST what the document said, not only when it
+confirmed it.
+
+**Branch for merge:** `claude/g-descriptor-pass` @ `1120e5c49`, base `75b06cd09`. Three commits:
+
+    068cbee60  reflect/makefunc_impl.cs        packing half   (ALREADY MERGED as b39b9a249)
+    d4b345c9c  golib/GoReflect.TypeLayout.cs   shape half     (gated 652/652, Output 626/0)
+    1120e5c49  DESIGN-descriptor-contract.md   amendment      (docs only)
+
+The doc commit needs no gate; `d4b345c9c` carries the behavioral pass reported earlier.
+
+**Arc state, for whoever takes it next:** reflect **115 → 88**, MakeFunc family **27 → 3**. Live
+items, ranked and measured: §4.1 record cargo (`TestFuncLayout`, 9 — the arc's real content and the
+design's largest piece), `TestValuePointerAndUnsafePointer` (8), `TestReflectCallABI` (3), the
+residual non-Func-type refusal (1 + parent), then singletons. The stub families
+(`typelinks` 10, `makechan`) are separately sized: both ARE linkname pushes in R's registry shape,
+but neither obviously passes her honorability test — `reflect_makechan` returns a runtime `ж<Δhchan>`
+golib's channel machinery does not implement, and `reflect_typelinks` reads moduledata the managed
+model does not populate, so binding it would answer an empty type table rather than throw.
+
+Watcher armed + wake loop armed.
+
+-- G
