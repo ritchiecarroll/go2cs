@@ -48237,3 +48237,54 @@ refuted, which is the part that actually changes someone's next move.
 Watcher armed + wake loop armed.
 
 -- R
+
+---
+
+## 2026-08-31 — G → COORD: ALL FOUR LIVE ERRORS CLOSED. runtime `-tests` 9 → 5, and the five are exactly the parked set. One fork before the pipeline run.
+
+`claude/g-runtime-zero` @ `0618e9add` (base `59a9c8db5`). Two commits: `6f6b9af07` (c) and
+`0618e9add` (a)+(b).
+
+    9  baseline (verified: 4 live + 5 parked, the parked five confirmed as exactly those five)
+    8  (c) IfaceHash CS0052        -- accessibility rule had no *types.Interface arm
+    7  (a) go.go. double root      -- global:: escape re-rooted
+    5  (b) @unsafe. x2 unresolved  -- file-local alias leaked into an assembly attribute
+    ^  remaining 5 = the parked Δ-collision rename, untouched
+
+**(a) and (b) are ONE function failing in opposite directions**, which is why the brief's two separate
+framings both led into `rootQualifySubNamespaceTypeRefs`: it re-rooted what it must not, and failed
+to root what it must. (a)'s fix is the general rule — a `global::` reference is already absolutely
+qualified, so nothing may re-root it — rather than a special case for the bridge class. (b)'s is the
+existing file-local-alias rule extended from the Δ spelling to the `@` keyword-escape spelling, gated
+on the class being one the conversion actually imported.
+
+**Gates:** converter `go test -count=1 ./...` ok 161.9s ×2; gofmt + vet clean; **CNR NO REGRESSION,
+byte-identical ×684 behavioral packages** after each commit. That gate is load-bearing here — both
+fixes sit on a rooting path every package's records pass through, so byte-identical is what says the
+rules stayed as narrow as they read.
+
+**THE FORK, and it is yours because the terms conflict.** The arc says "nine to zero, then run the
+full pipeline and report the run-layer arithmetic". But the parked five are BUILD errors
+(`export_test.cs:809` declares `ΔPallocBits` while `mpallocbits_test.cs:18` still references
+`PallocBits` — the declaration took the collision-rename, the reference did not). The test host
+therefore does not build, and **no pipeline run and no run-layer arithmetic is obtainable while they
+remain parked.** Those two instructions cannot both hold.
+
+Options as I see them:
+  (a) I apply `24cd5ae46` LOCALLY and unbanked, purely to unblock the measurement, and report the
+      run-layer arithmetic flagged as "obtained over an unverified parked patch". Gets you the
+      campaign's last unknown tonight; the risk is that the headline number rests on a commit whose
+      own message says NOT verified, and a wrong number here is worse than no number.
+  (b) The rebank wave lands the rename first, and the pipeline run follows it. Slower, but the
+      arithmetic is then measured on a tree where nothing is provisional.
+  (c) Something you have in mind that I cannot see from here.
+
+I am not choosing this one myself — "do not unpark them" was explicit, and the difference between
+"unpark to clear errors" and "apply locally to obtain a measurement" is exactly the sort of
+reinterpretation that should come from you rather than from me. Say which and I will run it.
+
+Branch is pushed and mergeable as it stands; the four live fixes do not depend on the fork.
+
+Watcher armed + wake loop armed.
+
+-- G
