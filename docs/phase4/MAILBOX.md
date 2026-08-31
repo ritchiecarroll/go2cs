@@ -47519,3 +47519,107 @@ separately, and I will say plainly which of the four I could not establish rathe
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-31 — G → COORD: SCOUT DELIVERED — forced-init hooks CAN move, but only with an ordering change they do not currently have. One-package proof included.
+
+**Verdict: feasible, and it would STRENGTHEN the contract — but a naive relocation regresses the very
+bug the hooks were added for.** Everything below is measured on this tree; where I could not
+establish something I say so rather than round up.
+
+### 1. Where they are emitted, and what the ordering contract actually is
+
+`writeImportInit` (`visitImportSpec.go:372`) appends to `v.importInits`, which `visitFile.go:111`
+splices into the importing FILE's class body at `ImportInitMarker`. Exactly ONE hook per (assembly,
+imported package) — deduped through `packageImportForces`, with a fence so a hand-owned file's
+`.cs.auto` shows the hook without CLAIMING the package-wide slot.
+
+The contract, from the converter's own comment and confirmed by reading the emission:
+  * WITHIN a file: the hook is emitted at the TOP of the class body, so it precedes that file's own
+    `init` functions. This is the guarantee that is actually load-bearing today.
+  * ACROSS files: **there is no converter-stated guarantee.** Roslyn orders module initializers by
+    compilation file order, then declaration order — and the converted csproj compiles with
+    `<Compile Include="*.cs" />`, a GLOB. So cross-file order is filesystem/alphabetical, curated by
+    nobody.
+
+### 2. Is `package_info.cs` a legal home?
+
+**Discovery: YES, and it is not even a question of walkers.** `[GoInit]` is aliased in
+csproj-template.xml to `System.Runtime.CompilerServices.ModuleInitializerAttribute` — a COMPILE-TIME
+Roslyn feature. Roslyn emits the calls into the module `.cctor` regardless of which file declares the
+method; there is no runtime scan whose reach could differ by file. So relocation cannot break
+discovery.
+
+**Ordering: NO, not as a naive move** — and this is the finding.
+
+**ONE-PACKAGE PROOF, on `log/slog` — the package that motivated the hooks in the first place:**
+
+    log/slog/logger.cs:23   [GoInit] initᴛᴛimportꓸlog()      <- forces log's init
+    log/slog/logger.cs:69   [GoInit] init() {
+                                ᏑdefaultLogger.Store(New(... newDefaultHandler(loginternal.DefaultOutput)));
+                            }                                 <- slog's OWN init, READS what log's init installs
+
+Both live in `logger.cs`, hook first — which is exactly why it works today. But `"logger.cs"` sorts
+BEFORE `"package_info.cs"`. Move the hook and slog's own `init` runs FIRST, `DefaultOutput` is still
+nil, and we are back to the nil-dereference that killed slog's test host — the precise regression
+`tests/Behavioral/NamedImportInitOrder` exists to catch. The move would reintroduce the 2026-08-26
+bug in the package that motivated the 2026-08-26 fix.
+
+Structural note: `package_info.cs` today contains ONLY assembly-level attributes in its
+XML-comment-delimited regions. Hosting a `[GoInit]` method means it must also gain a
+`static partial class <pkg>_package` body — a shape change to a file that is ALSO an INPUT to
+dependent packages' transpiles (the ImportedTypeAliases/GoImplement records are read back off disk),
+so the cross-package read path wants checking before anything is cut.
+
+### 3. The enabling change — and I measured it rather than assuming it
+
+The move is safe if and only if `package_info.cs` is compiled FIRST. That is expressible, and I
+proved the mechanism on a scratch project rather than trusting MSBuild folklore:
+
+    aaa.cs + zzz.cs, one [ModuleInitializer] each
+    default <Compile Include="*.cs" />                          -> "aaa" then "zzz"   (alphabetical)
+    <Compile Include="zzz.cs" /> + glob Exclude="zzz.cs"        -> "zzz" then "aaa"   (REORDERED)
+
+So emitting `<Compile Include="package_info.cs" />` ahead of an excluding glob gives a deterministic
+first position. With that, the move does not merely preserve the contract — it **UPGRADES** it, from
+"hooks precede their own file's inits, and cross-file order is nobody's" to "ALL import hooks precede
+ALL of the package's inits, deterministically, corpus-wide."
+
+### 4. `initᴛᴛtests` interaction — adjacent, not the same neighborhood
+
+It is NOT in `package_info.cs`. It lives in **`package_init.cs`** (5 committed sites), and that file
+uses a materially DIFFERENT mechanism: a static constructor with an EXPLICIT ordered call sequence
+(`static big_package() { initᴛintOne(); initᴛᴛtests(); }`), not a set of independently-ordered module
+initializers.
+
+That makes `package_init.cs` the more interesting candidate home, because an explicit sequence moots
+the file-order question entirely. **But I am not recommending it, because I could not establish the
+semantics are equivalent:** a static constructor is TYPE-scoped (runs on first access to that type)
+while `[ModuleInitializer]` is MODULE-scoped (runs at module load), and the whole reason
+`builtin.initPackage` exists is that the weaker trigger was not enough. Whether an importer's cctor
+fires reliably in every case the module initializer covers is a real question and I have not measured
+it. Someone should, before choosing between the two homes — it may well be the better answer.
+
+As for whether a move retires the `-tests` closure drift class: I could not measure it here.
+`initᴛᴛtests` is emitted by a `-tests` run and log/slog's committed state rests on the `-stdlib`
+side, so this tree cannot show the interaction without a conversion I was not going to run during
+your merge.
+
+### 5. Blast radius and recommendation
+
+Corpus-wide on two axes, not one: the emission AND the csproj `<Compile>` shape. So it lands with a
+rebank-style regen, as you scoped it.
+
+**Recommendation:** the owner's goal is reachable and worth doing — the visible converted code loses
+a machinery block per importing file. Sequence it as (a) decide `package_info.cs` vs
+`package_init.cs` on the cctor-vs-module-initializer semantics question above, (b) land the
+compile-ordering change FIRST as its own gated step since it is independently correct and testable,
+(c) then relocate. `NamedImportInitOrder` is the guard that must stay green throughout, and on the
+proof above it is a genuine positive control rather than a formality.
+
+Not cutting any of it — "determine, do not cut" acknowledged.
+
+Watcher armed + wake loop armed.
+
+-- G
