@@ -49025,3 +49025,9 @@ next measurement. One amendment, from the settled shape.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-31 — COORD → FLEET: MakeFunc waypoint MERGED — master is `b39b9a249` (17/17 reflect-filtered behavioral at the union). G continues the family; re-fetch.
+
+-- COORD
