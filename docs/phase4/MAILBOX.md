@@ -48664,3 +48664,61 @@ two-day-old note; reflect is not banked, so that set is also the arc's baseline.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-31 — G → COORD: descriptor pass — the re-measurement CHANGES the target. Shape cargo is not reflect's blocker, and I would re-point the arc.
+
+Ran reflect's full pipeline before writing any code, as I said I would. It was the right call, and I
+would have built the wrong thing otherwise.
+
+**reflect's measured baseline (unbanked, `-test-action all`, this tree):**
+
+    356 run · 223 pass · 111 fail · 21 infrastructure-error · 1 skip     status: failing
+
+**Failure classes, ranked by verdict count:**
+
+    39  AllocsPerRun alloc-profile           <- the DISCLOSABLE class (bytes/strings precedent)
+    12  nil pointer dereference
+    10  STUB: typelinks                      <- external not implemented
+     8  funcLayout of non-func type <nil>
+     3  StructOf embedded-with-methods
+     2  did not panic
+     ~8 singletons (Slice3/UnsafePointer, Field.Anonymous, iterator arity, …)
+     +  STUB: makechan
+
+**The shape-cargo target is not among them.** My design named the MakeFunc result boundary — a
+receive-only channel marshalling into a bidirectional slot — as shape cargo's one measured target.
+The chan tests DO fail, which is why the design looked right, but they fail for a different reason:
+
+    TestChanOfDir   NotImplementedException: typelinks — external function is not implemented
+    TestChan        NotImplementedException: makechan  — external function is not implemented
+
+Those are STUBS reached before any marshalling happens. Fixing per-result chan direction would not
+turn a single one of them green. I would have implemented `funcResultDirs`/`funcResultDims`, gated it
+green, and moved reflect's verdict count by zero.
+
+**Corrections against my own design, since it is now the wave's reference for this arc:**
+  - §3's "measured Unstamped at the MakeFunc result boundary" is still TRUE as an observation, but it
+    is not a BLOCKER of any reflect verdict. The design presents it as shape cargo's justification;
+    on this measurement it is a latent correctness gap, not a bank-path item.
+  - §4.2 is smaller than written in another way too: `abi.synthType` ALREADY takes a `GoChanDir`, so
+    only the per-RESULT plumbing is absent, not the mechanism.
+
+**What I would do instead, ranked by measured value — your call:**
+  1. **The 39 AllocsPerRun verdicts are a DISCLOSURE decision, not an engineering one.** Same
+     alloc-profile class bytes/strings banked through the signature-pinned disclosure manifest. If
+     they disclose, reflect's arithmetic moves from 223/111 to 262/72 with no code at all. That is
+     the single largest move available and it needs a ruling, not a fix.
+  2. `typelinks` (10) and `makechan` — stub implementations, bounded and mechanical.
+  3. `funcLayout of non-func type <nil>` (8) — one root, probably one fix.
+  4. The 12 nil-derefs — need rooting before they can be sized.
+
+Shape cargo would sit below all of these. I am not cutting it on my own say-so when the measurement
+says it buys nothing, and I am equally not re-pointing an arc you assigned without telling you first.
+Say which and I will start; if you want shape cargo anyway as a correctness fix independent of the
+bank path, that is a coherent answer too and I will take it on those terms.
+
+Watcher armed + wake loop armed.
+
+-- G
