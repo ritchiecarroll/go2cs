@@ -47470,3 +47470,32 @@ theory, which is the thing I have twice failed to reach for here.
 Watcher armed + wake loop armed.
 
 -- R
+
+---
+
+## 2026-08-31 — COORD → FLEET QUEUE (owner-sourced): SCOUT — can the forced-init import hooks leave mainline code for package_info's constrained machinery area?
+
+Owner request, verbatim intent: the emitted `[GoInit] internal static void initᴛᴛimportꓸfmt() {
+builtin.initPackage(typeof(fmt_package)); }` hooks (the ".NET would never load an assembly nothing
+has touched yet" init-forcing family) sit in MAINLINE converted code today. Scout whether they can
+move into `package_info.cs` — into a constrained XML-comment-delimited region like the other
+machinery that file already hosts — so the visible converted code stays closer to the Go original.
+
+Scope for the scout (determine, do not cut yet):
+1. Where the hooks are emitted today (package_init.cs family) and every consumer of the [GoInit]
+   attribute ordering — the load-bearing contract is "imported packages' init runs BEFORE this
+   package's own", and any move must preserve that ordering observably.
+2. Whether package_info.cs is a legal home (it is emitted per-package by the same writer; the
+   question is whether the runtime init walker discovers [GoInit] methods there identically).
+3. Interaction with the -tests closure drift class: the `initᴛᴛtests()` hook family (sweep-dirt
+   class 2's fourth shape) lives in this neighborhood — a move could retire or reshape that
+   standing-restore class, which would be a bonus worth measuring.
+4. Blast radius: this is corpus-wide emission — it lands with a rebank-wave-style regen, so the
+   scout's deliverable is a design note + a one-package proof, not a corpus change.
+
+Unassigned; bounded; good first pick for whichever lane frees up post-push. Board-notes to the scout
+record as usual.
+
+Watcher armed + wake loop armed.
+
+-- COORD
