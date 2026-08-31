@@ -46729,3 +46729,63 @@ actually fires, gated by converter `go test -count=1 ./...`.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-31 — R → COORD: BOTH defects done. TestOffsetLock: unbounded hang → PASS in 6 seconds.
+
+Both branches pushed, both rebased on `610fd9b04`, one file each.
+
+| branch | HEAD | file |
+|---|---|---|
+| `claude/laneR-goroutine-fatal` | `1179f7000` | `src/core/testing/TestHost.cs` |
+| `claude/laneR-linkname-reflect` | `d48990a40` | `src/go2cs/linknameOperations.go` |
+
+**The arc, measured at each stage:**
+
+| stage | TestOffsetLock |
+|---|---|
+| before | unbounded hang; ate a 40-minute deadline; reflect truncated to 99/93/1 |
+| defect 2 alone | **exit 2 in 7s**, stack naming the stub, resolveReflectName, the test |
+| defect 1 | **PASS in 6s** |
+
+**The proof was built so it could not flatter itself:** defect 1 was proven in a worktree WITHOUT the
+host fix, so a surviving throw would have HUNG rather than passed. It passed.
+
+**Defect 1 turned out smaller and safer than the ruling assumed, in your favour.** The push registry
+is CURATED — `linknamePushTargets`, a hand-written map — and reflect's four bridges simply had no
+rows. runtime already writes correct `//go:linkname` pushes for all four. So there was no predicate
+to build: four rows, 44 lines, no new corpus surface, and `reflectOffs` stays exactly as shared as Go
+made it.
+
+**I applied the registry's own honorability test before adding anything**, because its `os.runtime_args`
+row demands it: a forwarder must not hand back "a plausible-looking wrong answer". All four pushed
+bodies are ordinary converted Go over the MANAGED `reflectOffs` map, and the resolvers walk
+`firstmoduledata` (empty here), fall back to that map — where addReflectOff put the entry — else
+throw Go-style. The minted round trip runs end to end through managed state; anything without a
+managed answer fails LOUDLY. Had they returned defaults instead, forwarding would have been WORSE
+than the throw and I would have come back rather than cut.
+
+**Emission proven, then deliberately reverted out of the commit.** A reconvert emits the four
+forwarders and flips runtime's pushed definitions internal→public (19+/20− across 8 files; reflect
+then builds clean, stubs gone). But the same reconvert picks up unrelated drift already on master
+(`NilSafeDelegateConversion` in `metrics.cs`), and the unit of work is the converter fix — so the
+emission belongs to your seeded-regen gate, not to my commit. Flagging it rather than quietly
+shipping a mixed diff.
+
+**Left alone on purpose:** internal/reflectlite's siblings. runtime pushes them too, but reflectlite
+answers those partials from a hand-written `type_impl.cs` whose placeholders `return default!` — the
+plausible-wrong-answer shape. Replacing them is a real improvement AND a hand-own removal: its own
+change, its own gates, yours to route.
+
+**Still owed on `laneR-linkname-reflect`:** CNR, the seeded reconvert (+ metadata regenerate if
+package_info shifts), both slnx builds, reflect-consumer canaries. Converter `go test -count=1` is
+green (`ok go2cs 236s`). Say the word and I run them; they are long and I did not want to start a CNR
+into G's in-flight 652-suite window without checking.
+
+**Also still open from earlier:** the host-path guard gap (defect 2 has no standing regression test —
+the flip is evidence, not a guard), and the `-test-filter` zero-match hazard G confirmed.
+
+Watcher armed + wake loop armed.
+
+-- R
