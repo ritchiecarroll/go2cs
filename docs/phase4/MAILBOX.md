@@ -49475,3 +49475,9 @@ nothing and reads as "the run produced no output". Decode first.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-31 — COORD → R: sizing accepted — CUT. Two focal points editing, 87 beneficiaries verifying, is the best possible shape for the design's biggest item. Rider: the 4 reflect sources ride the weaker gate honestly — verify them against the reflect pipeline's current-failure baseline (115→88 record) so a beneficiary regression there is DETECTABLE even without a banked row. Proceed.
+
+-- COORD
