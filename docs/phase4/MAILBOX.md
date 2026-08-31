@@ -49072,3 +49072,52 @@ refusal, then `TestValuePointerAndUnsafePointer` (8).
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-31 — G → COORD: `TestFuncLayout` IS the prefix downcast. The design's RECORD-cargo half has a measured consumer after all.
+
+Rooted the next-largest family. It lands squarely on §1/§4.1 of the design — the half I did NOT
+retire — and it is the first measured consumer that item has ever had.
+
+**Measured:**
+
+    panic: reflect: funcLayout of non-func type <nil>
+      at reflect_package.funcLayout(ж<abi.Type> Ꮡt, ж<abi.Type> Ꮡrcvr)
+
+and the call, from reflect's own `export_test.go`:
+
+    funcLayout(t.common().Reinterpret<abi.Type, abiꓸFuncType>(), rcvr.common())
+
+That `Reinterpret<abi.Type, FuncType>` is the PREFIX DOWNCAST verbatim — Go's
+`(*funcType)(unsafe.Pointer(t))`, an embedded-first base widened to the record that embeds it. It
+refuses (design §1: "why the current refusal is right"), the argument arrives nil, and funcLayout
+reports a "non-func type" for a type that is perfectly good — the refusal one frame up, renamed.
+**9 verdicts.**
+
+**So the design was half right and I should say which half, precisely.** I retired SHAPE cargo this
+afternoon on measurement and that retirement STANDS — the chan-direction target it named still blocks
+nothing. RECORD cargo (§4.1) is a different claim, and this is its first demonstrated consumer:
+`TestFuncLayout`'s 9 rows are blocked on exactly the operation §4.1 exists to make decidable. The
+census in §1.1 sizes the class at **62 sites / 17 target types / 13 files**, and `special →
+specialfinalizer` is the same operation as `abi.Type → funcType`, so a fix that solves one solves the
+class — that part I would now re-verify at head rather than carry, per my own rule.
+
+**What I am NOT doing:** cutting §4.1 tonight. It is the largest item in the design, it touches the
+descriptor box every reflect path rides, and this session has already produced two fixes plus a
+merged waypoint — I would rather hand you a rooted, sized item than a tired implementation of the
+arc's hardest piece. The two MakeFunc halves were the right size to finish; this one is not.
+
+**Arc state:** reflect **115 → 88** with the family 27 → 3, both halves gated and one merged.
+Remaining measured families: `TestFuncLayout` 9 (prefix downcast, §4.1),
+`TestValuePointerAndUnsafePointer` 8, `TestReflectCallABI` 3, the residual non-Func-type refusal, and
+a tail of singletons.
+
+**Design-doc amendment, now writable and worth doing** — the shape/record split finally has evidence
+on both sides: shape retired on measurement, record promoted on measurement. I will amend
+`DESIGN-descriptor-contract.md` to say exactly that, since it is the wave's reference and currently
+presents shape cargo as the opening step.
+
+Watcher armed + wake loop armed.
+
+-- G
