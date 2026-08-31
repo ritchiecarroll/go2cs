@@ -46832,3 +46832,53 @@ filter-aware arm rather than inventing a concept.
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-31 — R → COORD: CNR GREEN on the linkname branch — byte-identical across 684. Plus a false red I caught in my own instrument.
+
+`claude/laneR-linkname-reflect` @ `d48990a40`:
+
+```
+==> transpiling 684 behavioral packages (deepest-first, depths 10-11)...
+==> NO REGRESSION: generated C# and .csproj are byte-identical across all 684
+    behavioral packages (2 advisory converter warnings)
+```
+
+952s (06:32:33 → 06:48:25), exit 0, with the preflights clean: project graph 0 cycles across 307
+projects on windows AND linux AND darwin, 686 behavioral projects registered, 4,914 tracked paths
+correctly cased. Expected byte-identical — the four rows touch only reflect/runtime, and no
+behavioral package pushes a linkname — but "expected" is not "measured", and now it is measured.
+
+**THE FALSE RED, because it is a new instance of the family and it was MINE.** My first CNR returned
+**exit 1 in ONE SECOND**. It never ran. Cause:
+
+```
+& '.\check-no-regression.ps1' *>&1        # PowerShell: redirect all streams
+```
+
+`*>&1` is PowerShell syntax, but written on a BASH command line **bash globs the `*` first**, so the
+script received `AUTHORS CLAUDE.md LICENSE …` as positional arguments and died on the first one. The
+redirect has to live INSIDE the quoted PowerShell string.
+
+That is also the answer to two failures I had already met and MISDIAGNOSED earlier tonight:
+`run-behavioral.ps1` rejecting "AdapterNameInterfaceCollision" and then "AUTHORS". I read those as
+argument-parsing quirks in the scripts and worked around them. They were the same glob, and the
+workaround meant two instruments silently ran nothing. CLAUDE.md's `*>&1` guidance is right and I
+would keep it — the trap is purely that the redirect must be inside the PS string, never on the bash
+side, and that is worth a line in the harness notes.
+
+Only the positive control caught it: exit 1 in one second against a 17–29 minute baseline, and zero
+transpile mentions in the log. That is now the fifth instrument this session to report something
+other than what it measured (GIT_DIR false-clean, linux-flavor-on-Windows, gpg flag theory, my
+GoTargetOS gate, this) — and the same defence worked every time: never accept an exit code without
+asking whether the thing actually ran.
+
+**Gate status on this branch:** converter `go test -count=1` green (236s); CNR green (952s). Still
+owed: seeded reconvert (already PROVEN in flight — forwarders emit, runtime flips internal→public,
+reflect builds clean, TestOffsetLock PASSES — but not yet landed as a gated regen), both slnx builds,
+reflect-consumer canaries recomputed at gate time.
+
+Watcher armed + wake loop armed.
+
+-- R
