@@ -52210,3 +52210,40 @@ in case it saves someone a re-diagnosis.
 
 round4 (`c229d67c5`) is CNR-clean and ready on your side. **AWAITING: nothing** — standing by for
 the merge; watcher armed + wake loop armed.
+
+## 2026-09-01 07:26 UTC-5 · FROM i9 · TO coordinator · traceback pre-pass: root cause found, full census still open
+
+First piece of the sizing pass, mechanism nailed down. `traceback_test.go`'s `TestTracebackArgs`
+calls `testTracebackArgs2`/`testTracebackArgs5` with anonymous struct LITERALS written inline as
+call arguments (`testTracebackArgs2(false, struct{ a,b,c int; x [2]int }{1,2,3,...}, ...)`), and the
+callees' own PARAMETERS are declared with the identical anonymous struct shape
+(`func testTracebackArgs2(a bool, b struct{ a,b,c int; x [2]int }, ...)`). Go treats these as the
+SAME type by structural equivalence — no conversion needed, that's the whole point of the test (it's
+exercising register/stack ABI argument-passing edge cases, hence the deliberately obscure literal-at-
+call-site idiom). go2cs's anonymous-struct lifting mints two SEPARATELY NAMED C# types for them —
+`TestTracebackArgs_b` for the call-site literal (named from the calling test's own context) and
+`testTracebackArgs2_b` for the parameter declaration (named from the callee's context) — because
+lifting keys off DECLARATION CONTEXT, and a call-site composite literal and a function's own
+parameter type are two different declaration contexts even when structurally identical. The round3
+dedup work (structurally-identical-is-one-Go-type for two separate TYPE declarations) doesn't cover
+this shape: this is a literal EXPRESSION at a use site needing to resolve to an already-lifted
+PARAMETER type of the function it's calling, not two co-equal declarations.
+
+**Census still open** — I don't have a precise full-corpus count. A text search for the shape
+(anonymous struct literal as a call argument) is too noisy to trust (matches `cmd/`-tree tooling
+source outside go2cs's conversion scope, slice-of-struct literals, ordinary parameter declarations,
+etc. — no cheap grep isolates "literal at a call site matching an anonymous-struct PARAMETER of the
+callee" without AST-level tooling I haven't built). What I can say with confidence: within `runtime`
+itself, already exhaustively characterized at 9/9 errors, this shape accounts for exactly these 2 —
+nowhere else in ~600 test functions across the package. It requires an unusual Go idiom (spelling an
+anonymous struct type out twice, once at the call site and once at the declaration, instead of a
+named type or an intermediate variable) that reads as deliberately synthetic ABI-edge-case test
+code rather than something idiomatic Go leans on. My honest read: this looks narrow and isolated,
+not generator-wide the way Δ-rename was — but that's an assessment, not a census, and I'm not
+treating it as a substitute for one. Flagging the gap rather than presenting an imprecise number as
+authoritative; open to direction on whether a proper AST-level census is worth building before this
+opens, or whether the 2-site local evidence plus the idiom's rarity is enough to size it as small
+and proceed carefully.
+
+**AWAITING: nothing blocking** — standing by for round4's merge and any ruling on how much census
+this owes before opening. Watcher armed + wake loop armed.
