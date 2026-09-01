@@ -56350,3 +56350,50 @@ Battery: CNR still transpiling the 687 (started 14:55); sweep follows; landing p
 Watcher armed + wake loop armed.
 
 -- COORD
+
+---
+
+**i9 — non-ident-receiver census, positive control done first, built+run against real `go run` (not
+read from text). Four of five shapes confirmed broken; the fifth is accidentally safe, not fixed.**
+
+Go baseline established first (real `go run`, mutate/call-count AFTER method-value creation, before
+the call): field-chain and index-expr receivers read the PRE-mutation value; a call-expression
+receiver's function runs exactly ONCE, at creation. Then converted + BUILT + RAN the same shapes
+against the merged tree's converter (Bug A + G's `e723df85d`, no commit 2):
+
+    shape                          Go            C#            verdict
+    field-chain, assignment        1             1             correct (see caveat below)
+    field-chain, composite-literal 2             998            BROKEN — reads live, not snapshot
+    index-expr, assignment         10            888            BROKEN — snapshot fires, ineffective
+    call-expr, assignment          count=1,v=1000 count=0,v=1000 BROKEN — call deferred into lambda
+    call-expr, composite-literal   count=1,v=2000 count=0,v=2000 BROKEN — same, no snapshot attempt
+
+**Two mechanisms, not one:**
+1. **No snapshot attempted at all** (field-chain/call-expr in composite-literal context, call-expr in
+   assignment context) — `convSelectorExpr.go:1158`'s `isIdent` gate excludes them outright; the
+   receiver expression renders live inside the lambda, exactly the coordinator's hypothesis.
+2. **A snapshot fires but doesn't protect the right thing** (index-expr assignment): the OUTER slice
+   variable (`arr`) gets snapshotted (`arrʗ1 = arr`), but a slice snapshot copies the HEADER, not the
+   backing array — `arrʗ1[0]` and `arr[0]` alias the same storage, so the mutation is still visible
+   through the "snapshot". This isn't the ident-gate at all; it's a pre-existing, DIFFERENT mechanism
+   (visitAssignStmt's own method-value handling, not commit 1/2's territory) that happens to fire for
+   `arr[0].Get` because `arr` itself is a bare ident, and it's silently wrong for any slice/map-typed
+   base.
+
+**The one shape that reads correct is accidentally correct, not handled:** `h.inner.Get` in
+assignment context snapshots the OUTER struct variable (`hʗ1 = h`) via the same pre-existing
+mechanism as index-expr — but here it happens to work because `Holder` is a plain value type with no
+reference-typed fields, so the struct copy transitively copies `.inner` too. The same shape with a
+slice/map/pointer field, or a pointer-typed outer variable, would very likely reproduce the
+index-expr failure — I have not built that variant; flagging as untested rather than asserting.
+
+**This directly answers the census's core question before the corpus count**: non-ident receivers
+are NOT a narrow tail — every shape I tested except one is a confirmed, run-verified wrong answer,
+and the one exception is fragile-looking, not designed. Scaling to the full corpus census now
+(instrumenting at `convSelectorExpr.go:1130` and the two `visitAssignStmt` sites, per-site kind ×
+shape × safety, per the brief) — this positive control sets the expectation that the count will be
+meaningful, not a formality.
+
+Watcher armed + wake loop armed.
+
+-- i9
