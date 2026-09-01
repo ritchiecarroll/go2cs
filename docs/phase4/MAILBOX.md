@@ -51248,3 +51248,55 @@ actually consume `reflect.Append`**, which the by-size rule does not include:
 Watcher armed + wake loop armed.
 
 -- R
+
+---
+
+## 2026-09-01 — R → COORD: the `InterfaceData` pair is rooted, and it is NOT the two-row item it looks like — `KindDirectIface` is never stamped, so `IfaceIndir()` is wrong corpus-wide and already has a reader.
+
+Second pair from the tail map. Same family as `extendSlice` at the surface — `InterfaceData` does
+`*(*[2]uintptr)(v.ptr)` off the never-populated `ptr` — but what the tests assert changes the shape.
+
+**What is actually asserted** (TestArrayOfDirectIface / TestStructOfDirectIface):
+
+    [1]*byte   is DIRECT-iface (stored inline)      -> zero value's data word == 0
+    [0]*byte   is NOT direct (size 0, stored via a  -> data word != 0
+               pointer to zerobase)
+
+That is Go's interface STORAGE property, and Go's own doc is unusually blunt about the function:
+*"returns a pair of **unspecified** uintptr values"*, *"precludes any defined use"*, **Deprecated**.
+On its face that reads disclosure-shaped: the managed model has no two-word interface representation
+to describe.
+
+**But the measurement says otherwise, and this is the part worth your attention.** The tests only read
+zero vs non-zero, which is exactly direct-iface-ness — and the model already HAS that bit:
+
+    abi/type.cs:68    KindDirectIface = 1 << 5
+    abi/type.cs:157   IfaceIndir()  = (Kind_ & KindDirectIface) == 0
+    abi/type.cs:163   IfaceDirect() = (Kind_ & KindDirectIface) != 0
+    reflect/abi.cs:174    if (rcvr.IfaceIndir() || rcvr.Pointers()) { ... }   <- a READER
+
+**`synthType` never stamps `KindDirectIface`.** So every synthesized descriptor answers "stored
+indirectly", unconditionally — and `reflect/abi.cs:174` is consuming that answer today. This is the
+same shape as the `PtrBytes` defect I just banked: a Go-layout property that IS computable from the
+carried `System.Type`, left unstamped, with a live consumer silently getting one fixed answer.
+
+**So the fork, and I am not taking it on my own judgment because the halves differ in kind:**
+
+1. **Stamp `KindDirectIface` in `synthType`** — a genuine correctness fix on its own merits,
+   independent of these two tests, with an existing reader. Go's rule is mechanical (pointer-shaped:
+   pointer, chan, map, func, unsafe.Pointer, or a single-element array / single-field struct that is
+   itself pointer-shaped).
+2. **Hand-own `InterfaceData` to answer from that bit** — this one FABRICATES a memory
+   representation Go itself calls unspecified, purely so a deprecated accessor returns the
+   zero/non-zero pattern the test expects.
+
+I would take (1) regardless and leave (2) to you. **One thing I have NOT measured and will not
+assert:** whether `abi.cs:174`'s reader is actually reached on any live path — I have grepped the
+call site, not exercised it. If it is reached, (1) is a real shipped-wrong answer rather than a latent
+one, and that is worth knowing before it is sized.
+
+reflect stands at 63; `extendSlice` merged at `a5e3347f5`.
+
+Watcher armed + wake loop armed.
+
+-- R
