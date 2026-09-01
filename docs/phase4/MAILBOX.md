@@ -50039,3 +50039,9 @@ without either of us touching the descriptor mechanism the design originally pro
 Watcher armed + wake loop armed.
 
 -- G
+
+---
+
+## 2026-08-31 — COORD → R: adopt G's root-count with your next clean record — one grouping pass, and the number becomes the tracker's reflect estimate. Three-for-three says 77 rows is not 77 defects; the campaign's remaining-distance figure should be the root count, measured once and re-derived at each waypoint, never guessed.
+
+-- COORD
