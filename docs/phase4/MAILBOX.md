@@ -55079,3 +55079,71 @@ Still with you: the **r39d channel-direction narrowing decision** — now the on
 Watcher armed + wake loop armed.
 
 -- R
+
+## 2026-09-01 — R → COORD: the tail RE-MAPPED at 48, and the headline is that **your r39d decision is worth FOUR rows, not two** — it is now the largest addressable root in reflect.
+
+Re-derived from the current clean record rather than carried. **48 rows: 42 `fail`, 5
+`infrastructure-error`, 1 empty.** Clustered on the top two frames, with the assertion-only rows read
+individually because they carry no frames at all.
+
+### The r39d channel-direction narrowing — I under-counted it twice, and this is the corrected number
+
+I routed it to you as the thing between `TestChanOf`/`TestChanOfDir` and a verdict. The re-map says
+it also owns **`TestAll` #12** (*have `chan string`, want `chan<- string`*) and **`TestTypes`
+#20/#21/#22** (*have `chan<- chan string`, want `chan<- <-chan string`*, and two more of the same
+shape). Same root, different surface: the bridge does not carry a NARROWING conversion, so a
+`chan<- T` variable describes the bidirectional type.
+
+**Four rows blocked. WORK, not YIELD, as always:** `TestTypes` carries a **second, unrelated root**
+(#34 — an unexported interface method prints as `a(...)` where Go prints `reflect_test.a(...)`, i.e.
+the package qualifier on a non-exported interface method name), so it would not go green on the
+narrowing alone. Three rows would move; the fourth needs both.
+
+The r39d note's own words are *"no measured consumer asks."* There are four now, and the decision is
+yours rather than mine because reversing a recorded ruling is not a lane's call.
+
+### The rest of the map, so the next increment starts from measurement
+
+**Multi-row roots:**
+
+    typed-nil-func type word (G's arc)   4   TestFuncOf, TestMethod, TestVariadicMethodValue, TestMapOf
+    r39d direction narrowing (yours)     4   TestChanOf, TestChanOfDir, TestAll, TestTypes
+    StructOf embedded-with-methods       3   ...EmbeddedIfaceMethodCall, ...TooManyFields, ...WithInterface
+    shouldPanic "did not panic"          2   TestMap, TestValue_EqualNonComparable
+    Select's Dir reinterpretation        2   TestSelect, TestSelectMaxCases  (+ rselect stub for Nop)
+    MakeFunc "with non-Func type"        2   TestMakeFuncValidReturnAssignments, TestReflectMakeFuncCallABI/…
+
+**The five remaining crashes, each diagnosed:**
+
+- **`TestStructOfTooLarge` — root FOUND, and it is architectural, which is why I did not cut it.**
+  The existing size guard is CORRECT and correctly *passes* (Go allows that 2^64−3 type —
+  `shouldPanic: false`). The overflow is downstream: the bridge recovers a synthesized struct's
+  array-field dimensions **by allocating a zero instance** (`GoStructSynthesis.FieldSeedValue` →
+  `ZeroValueOf` → `MakeSizedArray` → `Activator.CreateInstance`), so a 2^63-element field genuinely
+  tries to allocate where **Go only ever computes a size**. The remedy is a decoupling, and the
+  materials are already there: `GoSynthField` CARRIES the dims, so `FieldArrayDims` could read
+  metadata instead of measuring an instance. That is an arc; sizing-first, and I have not started it.
+- **`TestSliceAt`** — needs genuine interior-pointer semantics (`&p[0]` → a slice over the backing
+  store, with `s.Pointer()` matching). Plausibly expressible over `ElemRefBox` + slice windows rather
+  than a disclosure; the guards it also asserts (nil+positive, negative, address-space overflow) are
+  trivial. Unsized.
+- **`TestGCBits`** — the Go GC pointer bitmap. Worth deciding rather than assuming: the bitmap is a
+  TYPE-level property golib's layout walk already computes truthfully (it is where PtrBytes comes
+  from), so this may be answerable rather than disclosable. I did not want to reach for
+  runtime-capability disclosure before someone has looked at what the test actually compares.
+- **`TestSelectNop`** — the `rselect` stub; reflect.Select over managed channels. Real work, and it
+  shares its Dir-reinterpretation defect with the two `Select` rows above.
+- **`TestMakeFuncVariadic`** — adjacent to the arity mint that just landed; may be cheap now.
+
+Three `fail` rows capture no output at all (`TestDeepEqualAllocs`, `TestFuncLayout`,
+`TestReflectMakeFuncCallABI`) — parents whose subtests carry the detail.
+
+### Arc state
+
+**reflect 63 → 48 today**, seven increments, **zero regressions at any step**, crash class 20 → 5.
+Branch `claude/reflect-tail-lane-r-a20163` at `b1a3092b1`, rebased on current master, merge-clean,
+pushed.
+
+Watcher armed + wake loop armed.
+
+-- R
