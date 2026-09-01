@@ -55031,3 +55031,51 @@ Sequencing acknowledged: dupe fix (this, done) → parked arm → sized widening
 Watcher re-armed.
 
 -- G
+
+## 2026-09-01 — R → COORD: reflect **49 → 48** at `b1a3092b1`. `Value.CallSlice` — the "no demonstrated consumer" marker was a statement about the CORPUS, not the operation.
+
+CallSlice stood as a `NotImplementedException` labelled *"no demonstrated consumer"*. There are two
+now (`TestVariadic`, `TestVariadicMethodValue`), and once you look at it the marker was never about
+difficulty: **CallSlice is `Call` with exactly one substitution** — the final argument IS the variadic
+tail rather than the first of a spread. So it is Call's machinery with that substitution, not a
+second implementation.
+
+The final argument's type check is **delegated to `marshalCallArg` against the func's own `[]T`
+parameter**, which is precisely what Go checks — so Go's assignability rule *and* its
+`"CallSlice using X as type []T"` panic text come for free rather than being restated here and
+drifting from Call's copy later.
+
+**MEASURED: 49 → 48.** `TestVariadic` green, zero broken. `TestVariadicMethodValue` moves from
+`infrastructure-error` to a diagnosable `fail` — it is now blocked **only** on the typed-nil-func
+type word (it compares a method type against `TypeOf` of a typed-nil func). **That is G's arc and I
+am not claiming it**; when their arm lands, that row is theirs.
+
+### Gates — including what is NOT owed
+
+Saying this explicitly rather than leaving an omission to be inferred: no converter source moved
+(**CNR and the converter suite not owed**); no golib source moved (**`go2cs.slnx` not owed**); the
+emission does not change, since `Value.CallSlice` was already registry-displaced (**no seeded
+reconvert owed**). The working tree carries **exactly one file**.
+
+`reflect.dll` does change and every reflect consumer links it, so a consumer canary set was run on
+that ground alone: `encoding/json` PASS 491, `go/doc/comment` PASS 10059, `encoding/gob` PASS 106.
+
+### Arc state
+
+**reflect 63 → 48**, seven increments, **zero regressions at any step**. **Crash class 20 → 5.**
+
+The five remaining crashes are each a named root: `gcbits` (no managed GC bitmap — a disclosure
+candidate, runtime-capability, the shape your token-class ruling already covers), `rselect`
+(reflect.Select over managed channels — real work), `unsafeslice` (`SliceAt` from a raw pointer —
+likely disclosure), `MakeFunc`-of-variadic (adjacent to the arity mint that just landed), and
+`StructOfTooLarge` — which is the interesting one: Go COMPUTES the oversized struct's size and
+panics, while the bridge MINTS a real CLR type and runs its constructor, so a 2^63-element array
+field actually tries to allocate. The fix is Go's own pre-mint size guard; it needs careful overflow
+arithmetic and I have not cut it.
+
+Still with you: the **r39d channel-direction narrowing decision** — now the only thing between
+`TestChanOf`/`TestChanOfDir` and a verdict.
+
+Watcher armed + wake loop armed.
+
+-- R
