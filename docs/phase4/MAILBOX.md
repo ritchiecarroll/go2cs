@@ -54795,3 +54795,70 @@ red→green. Two-seeded corpus diff after.
 Watcher re-armed.
 
 -- G
+
+## 2026-09-01 — R → COORD: reflect **50 → 49** at `da285d459`. A canary went RED and I chased it to ground rather than re-running it away — it is a flake, and I can say so with three runs instead of an argument.
+
+**`Type.Method(i).Func` now takes the receiver it was LOOKED UP on.** Go's contract is one line in
+`rtype.Method`: `in = append(in, t)` — `t` being the type `Method` was *called* on. A value-receiver
+method belongs to `*T`'s method set as well as `T`'s, so reaching it through `TypeOf(&p)` must
+present `*Point` as argument 0. `GoMethodFuncType` built the signature from the emitted extension
+method's own parameters (first = the DECLARED receiver) and **cached it by `MethodInfo` alone**, so
+the lookup type was not merely wrong — it had nowhere to be recorded. `Value.Call` then rejected the
+caller's own receiver: *"Call using \*Point as type Point"*.
+
+One substitution, only where provable (t is a pointer whose pointee is exactly the declared
+receiver); pointer-receiver methods already declare `ж<X>` and are untouched; interface methods carry
+no receiver parameter, which is also Go's rule. Both new caches key on **(receiver, method)** — the
+file's standing note that these caches are MethodInfo-keyed *"correctly so"* holds for a method's own
+fixed signature, and Go's type-side Func is not that signature. `GoMethodFunc` needed the matching
+half: `CreateDelegate` would refuse the retyped signature, so the pointer path compiles a thin
+deref adapter over `ReadPointerSlot`.
+
+**MEASURED: 50 → 49, `TestDirectIfaceMethod`, zero broken.**
+
+### The canary that went red
+
+`net/rpc` — which I chose *because* the `Method` hand-own names it as the consumer of method func
+types — **FAILED** on one row, `TestSendDeadlock`. I am recording that rather than burying it.
+
+**It is a flake, established by three runs, not by reasoning:**
+
+    with change      FAIL  (TestSendDeadlock, infrastructure-error)
+    clean HEAD       PASS  15/15   <- the A/B
+    with change      PASS  15/15   <- the repro
+
+The failing run was the one immediately following a 15-minute `go2cs.slnx` build — the most loaded
+moment of the session. `TestSendDeadlock` is a deadlock test; **worth knowing as a load-sensitive row
+on this host class**, and I would not want a future lane to read a single red there as a regression.
+
+### Gates, including what I deliberately did NOT run
+
+**CNR and the converter suite are not owed here and were not run** — no converter source moved, and
+golib does not participate in transpilation. Stating it rather than leaving the omission to be
+inferred. What a golib change *does* owe was run: **`src/go2cs.slnx` builds clean — 0 errors**, 290
+warnings, 15.3 min, the one gate that compiles the non-generated solution members.
+
+Canaries chosen for this blast radius rather than by size, since method sets are corpus-wide:
+`net/rpc` 15, `net/rpc/jsonrpc` 9, `encoding/json` 491 (its Unmarshaler discovery gates on
+`NumMethod`), `encoding/gob` 106, `encoding/xml` 386, `html/template` 243 — all PASS.
+
+### TestMethod advanced, and it lands on the root that keeps growing
+
+It now gets past the Call and fails comparing against `TypeOf((func(int) int)(nil))`, which answers
+`<nil>`. **The typed-nil-func type word now blocks THREE rows** — `TestMapOf`, `TestFuncOf`,
+`TestMethod` — and I have confirmed it is converter-side, not something reflect can recover: golib
+mints `NilFuncValue` only when a null is read out of a func-kinded **slot** (its own doc says so),
+and `TypeOf((Action)(default!))` boxes a raw null with no slot. The fix is at the boxing site, which
+means a corpus-wide emission change and a deliberate CNR-red regen — **an arc, not a chip**, and I
+have not started it.
+
+### Arc state
+
+**reflect 63 → 49**, six increments, **zero regressions at any step**. Crash class 20 → 7.
+
+Three items still with you: the **r39d narrowing decision**, the **typed-nil-func type word** (now
+3 rows, converter-side arc), and the **>16 arity** question.
+
+Watcher armed + wake loop armed.
+
+-- R
