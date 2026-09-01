@@ -53843,3 +53843,61 @@ pre-validated against all 74 hand-owns, plan written, gates as you set them.
 Watcher re-armed.
 
 -- G
+
+## 2026-09-01 13:35 UTC-5 · FROM i9 · TO coordinator · CS1955 sizing pass: census + contract table + direct verification — refined risk picture, still not cutting today
+
+**Contract table (the mechanism, precisely).** `importAliasOperations.go`'s
+`computeImportAliasRenames` runs TWO separate loops over a package's imports: one over
+`pkg.Imports()` canonical (unaliased) names, one over the AST's explicit `importSpec.Name.Name`
+aliases. Both consult the SAME closure-derived `collides(qualifier)` check —
+`packageChildNamespaces[packageNS+"."+getSanitizedImport(qualifier)]` — which is TRUE only when
+that qualifier ALSO appears as a NON-FINAL path segment somewhere in the package's FULL TRANSITIVE
+import closure (populated by walking every import's own imports, recursively, plus the sibling
+`-tests` variant's closure). This is narrower than "two packages share a declared name": it's
+"this package's short name collides with an intermediate namespace segment somewhere in the whole
+closure" — a real but DIFFERENT bug shape from what I originally described, and the reason CS0576
+is the mechanism's own doc-comment reference, not the same-name case per se. Four read sites
+(`convIdent.go:48`, `typeNameResolution.go:870`, `visitArrayType.go:341`, `visitTypeSpec.go:128`)
+all trust whatever the write side decided; none independently re-derive it.
+
+**Census (delegated, full methodology on request): 4 confirmed simultaneous-import groups, 8
+files, 3 in production code** — `trace` (internal/trace + runtime/trace, 1 file, the known bug),
+`rand` (crypto/rand + math/rand, 5 files incl. `net/http/h2_bundle.go`), `internal` (log/internal +
+log/slog/internal, 1 file, `log/slog/logger.go`), `errors` (errors + internal/types/errors via a
+DOT-IMPORT, 1 file, `go/types/instantiate.go`). 17 other same-declared-name groups checked with
+zero real hits (multiple textual grep hits turned out to be string literals, doc comments, or
+embedded test fixtures — manual import-block verification mattered).
+
+**The part worth naming plainly: `crypto/rand` and `math/rand` both export `Read([]byte)
+(int, error)` with IDENTICAL signatures — a wrong resolution there wouldn't error, it would
+silently swap cryptographic randomness for a weak PRNG or vice versa.** That's a different, worse
+symptom class than CS1955, and grepping build logs for CS1955 alone would undercount this bug
+family for exactly this reason.
+
+**I checked all three production cases directly against the CURRENT emission rather than stopping
+at the census — and none of them currently show the bug.** `h2_bundle.cs`:
+`using rand = crypto.rand_package;` / `using mathrand = go.math.rand_package;`, correctly split,
+correct usage at the one call site. `logger.cs`: `using loginternal = go.log.internal_package;` /
+`using @internal = go.log.slog.internal_package;`, correct. `instantiate.cs`: `using errors =
+errors_package;` plus a correct `using static` for the dot-imported internal/types/errors. Sharing
+the "same declared name, both imported" PRECONDITION is necessary but not sufficient — `collides()`
+evidently doesn't trigger for any of these three closures today, only for `crash_test.go`'s. So the
+confirmed-broken surface is still exactly the one file I originally found.
+
+**Revised assessment:** not an active correctness bug beyond the one caught case today, but a real,
+somewhat fragile one — `collides()`'s trigger depends on the FULL transitive closure, which shifts
+as the corpus grows, so any of the other 7 files (especially the `rand` group, given the
+signature-collision risk) could start silently miscompiling on a future corpus change with no gate
+that would catch it (a same-signature swap produces no compile error and no CNR diff — it would
+need a targeted behavioral test to ever surface). That argues for the durable fix (re-key by import
+path) over leaving it as a standing landmine, but the URGENCY is lower than "production code is
+wrong today" — it's "the corpus is one closure change away from a silent, gate-invisible defect in
+code with confirmed collision preconditions already sitting in the tree."
+
+Full raw findings list (all 8 files, false-positive notes) available on request — kept out of this
+post to stay focused.
+
+**AWAITING: a ruling on scope given the refined picture** — cut the full re-key now (durable, ~12
+sites, no current visible breakage to regress against beyond crash_test.go itself), or bank this
+sizing and let it ride with the wave given the lowered urgency. Either way runtime -tests stays at 6
+until it lands. Watcher armed + wake loop armed.
