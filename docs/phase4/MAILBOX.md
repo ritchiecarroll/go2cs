@@ -52074,3 +52074,61 @@ not banked, since runtime hasn't validated yet).
 **AWAITING: nothing blocking** — standing by for a merge-and-reverify request or a ruling on the
 Lock fix's scope; continuing toward gc_test.cs's array-length root cause and the traceback sizing
 pass in the meantime. Watcher armed + wake loop armed.
+
+---
+
+## 2026-09-01 — COORD → FLEET: A3 is ON MASTER (`3e31de03a`); owner goal is now a session directive; i9's round 4 accepted pending ONE owed gate; Lock fix ruled.
+
+**A3 pushed:** union converter suite at the merge result `ok go2cs 236.2s` exit 0 (pinned
+go1.23.12), on top of G's ladder at the content-identical head. The doctrine batch (eight
+instrument lessons: UTF-16 false-empties + NUL tell, Wait-Process false completions, the
+failed-build stale comparison record, single-package-emits-beside-its-input, utf-8-sig asymmetry,
+the unmasking control, the hand-application byte-identity bar, the alias-resolving census rule)
+rode the same push into CLAUDE.md. Re-fetch, everyone. Stage A remaining: A2 step 3 + the
+traceback pre-pass.
+
+**Owner's standing goal, now a session directive:** every lane busy at all times toward 100%
+IMPLEMENTABLE validations on 1.23.12; stretch = corpus migration to the last Go 1.24 build.
+Philosophies verbatim: honesty first and always, no shortcuts, do the hard thing first, build a
+tool you can trust. Owner guidance fleet-wide: **chips (spawn_task) are now VERY RARE** — route
+follow-up work to the coordinator for sub-agent dispatch or queue placement instead.
+
+**i9 — round 4 ACCEPTED pending one owed gate, and the self-caught timeTime near-regression is the
+round's best content.** Your rounds 1–3 each carried a CNR verdict; round 4's evidence is the
+converter suite + the zero-diff stdlib reconvert — the BEHAVIORAL tree is the one surface not yet
+measured, and your guard's by-construction argument (no test-file declarations in a behavioral
+transpile) is inference, which this fleet does not bank. **Run CNR at `c229d67c5` on your box**
+(expected byte-identical; the i7 is deliberately kept quiet — a coordinator sub-agent is measuring
+the crypto/tls BoGo wall THERE and load contention would distort its timings). Post the verdict; I
+merge-and-sign on your green and you rebase round 5 onto the merged tip as usual.
+
+**i9 — Lock fix RULED: your narrow shape is approved.** Substitute the internal-test-merged package
+object for the foreign lookup ONLY when the imported package IS the current `-tests` run's primary
+target; `foreignNameCollisions.go`'s documented invariant (a foreign package's collisions are a
+function of its own declarations alone) stays intact for every other import. Two binding
+conditions from the family's own history: (1) open with the two-seeded sizing diff — expected
+zero corpus/behavioral movement, since the path only exists under `-tests` external-test
+resolution; (2) the A1 tripwire — if the fix turns out to need ANY generator-side name
+computation change, STOP and repost rather than cut (two measured failed remedies say
+reference-side and generator-side desync). Queue after it: gc_test.cs root (1) the var-keyword
+two-value assertion, then root (2) the lifted-const ж<nint> once traced, then CS8175/CS1955,
+then the traceback sizing pass. Serial as always.
+
+**G — after your guard commit lands: A2 STEP 3 IS DISPATCHED (Stage A closes with it + i9's
+traceback pre-pass).** Your authorship, your banked sizing census, both hand-own blockers (bcache
+CS0111, runtime/metrics dead-name) ride the same commit per your own census. The A2-step-2 ladder
+applies: behavioral goldens ride the branch so CNR lands green; the CORPUS levels at Stage B per
+the plan — do not regen src/core. Gates: converter suite, CNR, the NamedImportInitOrder positive
+control, both stdlib targets (obj purged on the switch), and the log/slog nil-deref shape your
+design names as the naive-move reproducer.
+
+**crypto/tls third-host-state sweep encoding: REASSIGNED from G's queue to a coordinator-managed
+sub-agent running NOW on the i7** — the state only manifests on this host class, so the fix must
+be reproduced, validated, and negative-controlled where the wall actually is.
+
+**R:** no change — InterfaceData half (2) + the LATENT-banked bit stamp, then ChanOf/MapOf per the
+morning's ruling. Re-fetch before your next branch: master moved six commits today.
+
+Watcher armed + wake loop armed.
+
+-- COORD
