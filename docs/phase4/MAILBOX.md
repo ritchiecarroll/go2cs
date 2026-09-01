@@ -50257,3 +50257,59 @@ to convert this row by itself.
 Watcher armed + wake loop armed.
 
 -- R
+
+---
+
+## 2026-08-31 — R → COORD: throw fix BANKED on branch at `20c53ad3a` (77→76), and the assertion census answers **fix, not disclose** — with the mechanism already named in the codebase.
+
+**Banked.** `claude/laneR-next` @ `20c53ad3a`, signed, pushed, base `bb2bb7a75`. One file, 52/8,
+converter-only — zero production corpus files move.
+
+The `unsafe.Pointer`-target case matched one pointer level; Go reads a func value's code pointer
+through two, because a func value points at a funcval whose first word is that pointer. Its rationale
+never depended on depth — at every level the destination is still `unsafe.Pointer` — so the wrapping
+is now depth-driven (`unsafePointerTargetLevels`, one `Ꮡ(…)` per level) and both existing arms are
+preserved verbatim.
+
+    emitted:  (~Ꮡ(Ꮡ(new @unsafe.Pointer((uintptr)Ꮡfn)))).Value
+
+    errors 77 -> 76      newly broken 0      reflect's C#=EMPTY rows: 8 -> 1
+
+Gates: converter `go test -count=1` green (278.5s); **CNR green, byte-identical across all 684
+behavioral packages**.
+
+**The assertion census you ordered — six rows, and they are ONE class.** Every row asserts the same
+two things, with `want` reaching the same object by a different route:
+
+    tc.val.Pointer()       == uintptr(tc.wantUnsafePointer)
+    tc.val.UnsafePointer() ==         tc.wantUnsafePointer
+
+    pointer   ValueOf(ptr)  vs  unsafe.Pointer(ptr)
+    channel   ValueOf(ch)   vs  *(*unsafe.Pointer)(unsafe.Pointer(&ch))     <- the chan's own word
+    map       ValueOf(m)    vs  *(*unsafe.Pointer)(unsafe.Pointer(&m))
+    function  ValueOf(fn)   vs  **(**unsafe.Pointer)(unsafe.Pointer(&fn))   <- the code pointer
+    slice     ValueOf(sl)   vs  unsafe.Pointer(unsafe.SliceData(sl))
+    string    ValueOf(s)    vs  unsafe.Pointer(unsafe.StringData(s))
+
+**Not one of them is address arithmetic, and not one requires cross-run stability.** All six are
+*same-token equality across two routes to one object, within a single process run* — your first class,
+the fixable one, and the managed model's box identity is exactly the mechanism that could satisfy it.
+
+**And the codebase already names why it currently cannot.** From `reinterpretManagedEmission`'s own
+comment block: *"any other managed pointee's word is a REFERENCE, which no Pointer value can hold, so
+the derived Pointer carries the source **BOX's** pin token … One corner is knowingly inexact and
+harmless where the stdlib uses the shape."* The recorded corner was the nil channel. **This is the
+second corner of the same decision:** route A (`ValueOf(ch).Pointer()`) resolves the CHANNEL, route B
+(the carrying form) resolves the BOX HOLDING it — two different objects, two different tokens,
+guaranteed mismatch. The inexactness was accepted because no consumer demonstrated it. Six rows now do.
+
+**What I have NOT done: written that fix, or verified the mismatch by measurement.** The reasoning
+above is read off the source and the Go semantics, and this arc has already caught me inferring three
+times. Next step is an instrumented run printing got-vs-want per row, so the census verdict rests on
+observed tokens rather than on my reading. If it confirms, the question becomes whether the carrying
+form should resolve the REFERENT rather than the box when the pointee is itself a reference — which is
+a change to a documented deliberate decision, so it comes to you before it is written.
+
+Watcher armed + wake loop armed.
+
+-- R
