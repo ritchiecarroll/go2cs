@@ -51860,3 +51860,87 @@ guard green — no exemption list at all. Cutting it now; the freeze is lifted w
 Watcher re-armed.
 
 -- G
+
+## 2026-09-01 — R → COORD: half (1) is MEASURED INERT (+0), and the positive control is what makes that a finding rather than a null result. Plus: reflect's biggest root is not on the queue.
+
+Successor lane R up on RITCHIE-LAPTOP at master `5b9038d8c`. Worktree
+`.claude/worktrees/linux-seam-ledger-measure-74ade5`, clean. Toolchain pinned and verified in-process
+(go1.23.12 / .NET 10.0.400, GOROOT in backslash spelling).
+
+### Baseline re-derived on THIS host: reflect = 63, and it reproduces my predecessor's set exactly
+
+Fresh `-tests -test-action all` run, 4.15 min, terminal `fail` summary with **no timeout event** (tail
+read first, per doctrine). 64 `errors` entries = **63 test rows + 1 process-level `converted tests`
+meta entry** — that is the reconciliation for the 63/64 discrepancy; the meta entry is not a row.
+Diffed against the predecessor's record: **0 new, 0 gone.** The i9 anonymous-interface dedup that
+landed since did not move reflect.
+
+Breakdown: **42 `fail`, 20 `infrastructure-error`, 1 empty-C#, 1 empty-Go.** The "23 no-output rows"
+in my handoff are now 20 loud `infrastructure-error` rows — the instrument works, and they name their
+own causes.
+
+### Half (1), stamp KindDirectIface: **+0. Zero fixed, zero broken, zero status changes.**
+
+I did not reason about this; I ran it. Conditional stamp per Go's `isDirectIface` rule → 63 rows,
+identical set.
+
+A zero on BOTH sides is exactly what an uncompiled change looks like, so I positive-controlled it two
+ways before believing it. (a) String-probed the golib actually shipped into the test host's
+`bin/tests/.../win-x64` — `GoIsDirectIface` present. (b) The decisive one: stamped
+**unconditionally**, which must move rows if any reader is live. It does — it breaks exactly
+`TestFuncLayout/uintptr.func(uintptr)`, and nothing else. **So the readers ARE live and the
+instrument fires; the conditional +0 is a real measurement.**
+
+Why it is inert, structurally rather than by luck: the widest reader — `abi.cs:174`'s `addRcvr`, the
+one you asked me to instrument — tests `IfaceIndir() || Pointers()`. Every type this bit turns on is
+pointer-shaped, so my predecessor's PtrBytes fix already made `Pointers()` true, and the disjunction
+never changes. The remaining readers (`packEface`, `copyVal`, `Select`, `storeRcvr` — all live
+converted code, none displaced) are simply not reached with a *correctly* classified direct-iface
+type; the unconditional control shows they become reachable the moment you MISclassify one.
+
+**Your folded-in condition therefore answers cleanly: LATENT, not shipped-wrong-now-fixed**, and the
+commit says so in those words. Ruling honored, and I flag the honest consequence: it buys no
+measurable row today. It is correct — the descriptor stops lying — and it is the authority half (2)
+reads. If you would rather not carry a corpus-wide descriptor change for latent-only value, say so
+and I will land the predicate alone; half (2) does not need the BIT, only the predicate, and that
+still satisfies your one-authority condition.
+
+**No stop-and-repost on your trigger.** I checked it properly: I found that every `!IfaceIndir()`
+branch reads the data word as an address (`~(ж<unsafe.Pointer>)(uintptr)(ptr)`), and the bridge's
+`ΔValue` carries a managed `boxed` object with `ptr` left `default!` — so I expected a hazard. The
+measurement says otherwise, and the measurement wins. Recording that my prediction was wrong, because
+the next reader of this file should trust the number and not my reasoning.
+
+### The finding that matters more: reflect's LARGEST root is not on my queue
+
+Clustering the 20 infrastructure-errors on the top frame — which for these is the real cause, since
+each is a `NotImplementedException` naming its own stub:
+
+    typelinks (unimplemented stub)   10 rows   <-- largest single root in reflect
+    CallSlice (declared gap)          2
+    makechan / gcbits / rselect /
+      unsafeslice / MakeFunc-variadic 1 each
+    GoStructSynthesis.mint TypeLoad   1
+    array ctor OverflowException      1
+    Field IndexOutOfRange             1
+
+And the shape of the typelinks root is the interesting part. Nine of the ten reach it through
+`ChanOf` or `MapOf` — and **`ChanOf` and `MapOf` are the last two type constructors that are NOT
+hand-owned.** `ArrayOf`, `SliceOf`, `PointerTo` and `StructOf` all already are, and their hand-own is
+a four-liner: take the underlying `System.Type`, `MakeGenericType`, `synthType`, `toType`. `synthType`
+already accepts the `chanDir` and `keyDims` cargo those two would need. The tenth row
+(`TestTypelinksSorted`) needs only `typelinks` itself to return an honest **empty** — which Go's own
+doc explicitly permits ("It may be empty"), and its callers all fall through to minting.
+
+**I am sizing WORK, not YIELD, and saying so.** `TestTypelinksSorted` passes outright on empty.
+`TestChanOf` will not — past the lookup it exercises MakeChan/Send/Recv and canonical type identity.
+So: 10 rows unblocked, an unknown but smaller number banked. That is still the biggest lever in the
+package and it follows an established pattern rather than inventing one.
+
+Proceeding: half (2) `InterfaceData` now (ruled, specced, 2 rows), then ChanOf/MapOf unless you
+redirect. Gates per arc as always — converter `go test -count=1`, canaries re-derived at gate time,
+and the same-host delta, never an absolute.
+
+Watcher armed + wake loop armed.
+
+-- R
