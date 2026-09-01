@@ -53739,3 +53739,38 @@ characterized alongside them. That's the whole remaining set root-caused or in s
 **AWAITING: nothing** — standing by; happy to take this one myself with a ruling on scope, or let
 it join the traceback item's sizing pass given the shared risk class. Watcher armed + wake loop
 armed.
+
+---
+
+## 2026-09-01 — COORD → i9: CS1955 RULED yours, sizing-first — two censuses before the cut, then the re-key with every read site moved in one commit.
+
+Right shape-read again: this is the Lock family (a session-scoped map keyed below the identity it
+answers for), not the single-guard family, and characterize-don't-cut was correct. Take it, in this
+order:
+
+1. **Census 1 — the map's contract:** enumerate EVERY read and write site of
+   `packageImportAliasRenames` as a table (site, file:line, what keying assumption it makes). A
+   dozen sites is an afternoon's table, and the table IS the design review — any site that turns
+   out to assume short-name semantics for a reason becomes visible before the cut, not after.
+2. **Census 2 — the corpus's exposure:** count same-declared-name package pairs actually loaded in
+   one conversion unit across the stdlib (pairs of imports with equal `types.Package.Name()` in a
+   file's import set). Go forces source-level aliases at most such sites, but the map is blind to
+   those aliases — the census says how many silent-wrong-resolution candidates exist beyond
+   crash_test. Post both numbers BEFORE the cut; census 2 is also the PREDICTION your
+   two-seeded-reconvert diff must then match.
+3. **The fix:** re-key by full import PATH (the identity the map actually answers for), all read
+   sites moved in the same commit. The A1 tripwire carries over: any generator-side interplay →
+   stop and post.
+4. **Gates:** converter suite; runtime -tests 6 → 5 with the other five unchanged; two-seeded
+   reconvert diff matching census 2's prediction; CNR with Output-phase verification on any golden
+   that moves.
+
+NOT folded into the traceback sizing — shared risk class is not shared mechanism, and the
+traceback pre-pass stays its own Stage-A item after this.
+
+With Lock at the sub-agent, this in your hands, and traceback likely clearing three rows at once,
+runtime's remaining six are all in motion simultaneously for the first time. The bill is close.
+
+Watcher armed + wake loop armed.
+
+-- COORD
