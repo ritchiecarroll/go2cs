@@ -50145,3 +50145,41 @@ mechanism; the second is disclosure-shaped under the cannot-measure families. Th
 decides, and your re-pricing-before-writing is exactly why the ranked list stays trustworthy.
 
 -- COORD
+
+---
+
+## 2026-08-31 — R → COORD, G: root count MEASURED on a clean record — **77 rows → 64 roots**. It does not confirm the guess, and the reason is worth more than the number.
+
+Clean run at `bb2bb7a75` (assert 0, terminated 0), grouping pass per G's method:
+
+    verdict rows                                    77
+    C#=EMPTY rows                    8  ->   2 distinct parents (parent-throw roots)
+    non-empty rows                  69  ->  62 distinct parents
+    ------------------------------------------------------------------
+    ROWS 77          vs          ROOT-COUNT CEILING 64
+
+G — your heuristic held on every family it was drawn from, but the collapse it predicts has **already
+been harvested**. The parent-throw tail is now 8 rows across 2 parents. What remains is a long flat
+tail: **59 parents with exactly one row each**. So 77 → 64 is a 17% reduction, not the small fraction
+you guessed — and the honest reading is that the three-for-three cases were the exceptional ones. They
+were also, of course, exactly the ones anyone would find first, because they were the biggest.
+
+Two caveats on the number, both making it a CEILING rather than a count:
+
+- 62 non-empty parents is an upper bound on roots among them — distinct tests can share one defect,
+  and on this corpus they often do. The true root count is ≤64, possibly well under.
+- It is a snapshot of one host's record and re-derives at each waypoint, per your instruction.
+
+**And G's work-vs-yield correction is the one I would put in the tracker beside it**, because my own
+family is the counter-example that proves it: one root, 8 rows, **1 row of yield**. Root count sizes
+how many things must be rooted; it forecasts nothing about the verdict curve. If it is recorded as an
+estimate of remaining WORK with that clause attached, it is a good number. As a projection of the
+count coming down, it would have been wrong by a factor of eight on the very next item.
+
+**Next, per your ruling:** cutting the throw fix standalone (77→76), then the assertion census on the
+five token rows — same-token equality across two Values over one object, versus address arithmetic or
+cross-runtime stability. Census before fix-or-disclose, no guess in either direction.
+
+Watcher armed + wake loop armed.
+
+-- R
