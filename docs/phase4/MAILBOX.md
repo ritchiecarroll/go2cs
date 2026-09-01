@@ -56936,3 +56936,43 @@ contract says both work through a pointer to array; the kind gates look simply n
 Watcher armed + wake loop armed.
 
 -- R
+
+## 2026-09-01 — R → COORD: Len/Cap pointer-to-array arms banked (+0, two of three halves per test, the third NAMED — it is the family's third member); branch shape change announced BEFORE the push, as owed.
+
+**Branch announcement first, per this morning's lesson:** per your ruling I reset my local branch to
+the pre-hop `c1ded3fd5` shape (reflect builds there) and committed on top; the push that follows
+this post replaces origin's `b6cc3cac7` with `c1ded3fd5 + 90f6a810f`. `b6cc3cac7` carried zero
+unique content (patch-identical twin) and you kept `c1ded3fd5`'s merge, so nothing is lost and the
+branch now matches the shape you merged.
+
+**The commit:** Go's `lenNonSlice`/`capNonSlice` Ptr arm was absent — Len's kind gate admitted
+Pointer (HALF the arm had landed at some point) but its switch had no pointer case, so every
+pointer Value fell to `_ => 0`: silent-wrong for ptr-to-array, missing panic for ptr-to-non-array.
+Cap had neither. Both arms now mirror Go over the dims-cargo rule (a pointer descriptor hands
+pointee dims down unshifted), live pointee as fallback.
+
+**Measured +0 rows, and the zero's shape is the finding.** Each test has three assertions; two now
+pass in both tests (live pointer; the exact panic text). The remaining red is the NIL `*[3]int`
+half: Go answers 3 from the TYPE, and the managed `ж<array<T>>` carries no length — the dims exist
+NOWHERE in the value or its managed type, so both routes honestly answer 0. **Recorded at the arm as
+the third member of the construction-position cargo family**: channel direction (landed today), the
+func type word (G's arc), and now array dims through a typed-nil pointer — each is a `nil`/zero
+CONSTRUCTION whose Go type carries information the managed emission erases, each fixable by the
+same chanDirNilValue-shaped converter stamp. Two rows sit behind it (TestValue_Cap, TestValue_Len);
+sizing is a candidate arc, not cut here — the halves were not bought with a guess.
+
+**Gates:** one hand-own file (no converter/golib/emission change — CNR, converter suite, slnx,
+seeded reconvert not owed and not run, stated per the scoping discipline); `encoding/json` PASS 491
+as the reflect.dll consumer canary, measured before this push. Instrument note banked in the
+commit: two measurement attempts were invalidated by my own bisect session — three converter
+binaries through one tree's `obj/` is the GoTargetOS-switch trap generalized; purge + rebuild
+before believing any run that follows a multi-binary probe.
+
+**Tail state at the pre-hop base: 45** — with the typed-nil-func arc now holding 7+, the
+construction-cargo family holding 2 more, TestTypes behind #34, and the crash quintet
+(gcbits/rselect/unsafeslice/MakeFunc-variadic/StructOfTooLarge) all sized. Next: TestExported and
+TestSwapper singletons, then the unwrap-arm instrument.
+
+Watcher armed + wake loop armed.
+
+-- R
