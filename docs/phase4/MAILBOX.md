@@ -51062,3 +51062,30 @@ Watcher armed + wake loop armed.
 Continuing toward true zero. Watcher + dead-man re-armed.
 
 -- i9
+
+---
+
+## 2026-09-01 — i9: residual pass, round 2 -- the GoRecv/method-expression root closes clean, all 9 (21→12)
+
+**Branch `claude/i9-a1-residual-round2` @ `23bbe8427`, off round 1's merge tip `b85ee90f8`, pushed and verified** (`git ls-remote` matches local).
+
+Took the largest of round 1's six named roots. It split into two genuinely distinct gaps on inspection, not one:
+
+1. **A method expression on the POINTER type (`(*T).Method`) whose underlying declaration has a Go VALUE receiver** -- legal Go, since a value-receiver method is in `*T`'s method set too (`(*structWithMethod).caller` in stack_test.go). Neither existing form applied: not `[GoRecv]` (that's the pointer-receiver direction) and not direct-ж, so the method's only C# form is the plain-value primary, which can't bind the delegate's `ж<T>` first parameter. Wrapped in a lambda dereferencing the box: `(Func<ж<T>, R>)(p0 => Method(p0.Value))`.
+2. **An INTERFACE method expression** (`I.M`, stack_test.go's `I.M(nil)` and `reflect.ValueOf(I.M)`) has no static/extension form to reference at all -- Go's interface methods become genuine C# instance methods, callable only as `recv.M(...)`. Rendered as an instance-dispatch lambda instead (`(Action<I>)((p0) => p0.M())`), bypassing the qualifier logic entirely -- package qualification belongs to the delegate type, never to an instance-called method name.
+
+**A third fix, a latent C# grammar bug the immediately-invoked case of (2) surfaced.** `I.M(nil)` isn't just a method expression as a value, it's called immediately. A cast-expression is a unary-expression, not a postfix-expression, so `(T)(x)(args)` parses as `(T)(x(args))` -- invoking the uncast `x` first, CS0149 -- never as `((T)(x))(args)`. All three return sites in the method-expression branch (both new ones plus the pre-existing fallback) now wrap the cast in an outer paren pair. This was a real, latent bug in the ALREADY-WORKING fallback path too, for any other immediately-invoked method expression -- fixed on the same principle as round 1's general-purpose fixes, not scoped narrowly to the two new cases.
+
+**Result: runtime `-tests` 21 → 12, the full 9-error bucket closes, zero regressions** (crash_test.cs's already-present CS1955 stayed exactly where it was; confirmed by a clean stash-free A/B against the true pre-fix baseline, not just eyeballing the delta).
+
+**Blast-radius measurement needed a detour worth flagging for whoever reconverts next.** A naive `git diff` of a fresh `-stdlib` reconvert against the committed tree read 230 files / 612+/604- -- this worktree's own CLAUDE.md already names why (pre-existing unbanked position-map drift the committed tree carries, unrelated to any one change) and warns the committed-tree diff is the WRONG instrument. Redid it correctly: two clean seeded reconverts, pre-fix binary into seed A and post-fix binary into seed B, diffed directly against each other. True footprint: **14 real corpus files**, every one confirmed by direct inspection (not just line-count heuristics) to be the identical pure outer-paren wrap with zero semantic change -- `net/http/httputil/persist.cs`, `regexp/syntax/regexp.cs`, `runtime/time.cs`, `compress/flate/{deflate,inflate}.cs`, `compress/lzw/{reader,writer}.cs`, `internal/trace/{order,reader}.cs`, `internal/zstd/block.cs`, `log/slog/value.cs`, `net/windows/fd_posix.cs`, `os/windows/{exec,file_windows}.cs`.
+
+**Gates:** converter `go test ./...` + `go vet` clean. Full `go2cs-stdlib.slnx`: 307/307, 0 errors (one transient Roslyn compiler-server crash in `internal/fuzz` on the first attempt, isolated-project rebuild confirmed it was infra flake not a real diagnostic, full rebuild came back clean on retry). CNR flags exactly 5 behavioral goldens (`CrossPkgUser`, `FirstClassFunctions`, `FuncForPCName`, `MethodExprDotImport`, `MethodExpression`) -- same pure paren-wrap pattern as the stdlib footprint, each independently Output-phase-verified against `go run` before accepting, then reproduced byte-stable on a second transpile.
+
+**Process note, since it cost real time and might bite another lane on this machine:** CNR launched via `Start-Process` + a follow-up `Wait-Process -Id` (the documented detached-process survival pattern) gave a FALSE early-completion reading twice in a row -- the wait command reported the target exited while `Get-CimInstance Win32_Process` showed it very much alive with a live `go2cs.exe` child underneath. Cost one redundant concurrent CNR run into the same behavioral tree before caught and killed (the r41 overlapping-conversion hazard, avoided but only just). Root mechanism unconfirmed -- not the known Bash-can't-see-Windows-pids trap, this was PowerShell's own `Wait-Process` misreporting via a `run_in_background`-wrapped follow-up call. Switched to a plain polling loop (`while (Get-Process -Id $pid) { Start-Sleep 20 }`) for the retry and it read correctly. Flagging in case `Wait-Process`-in-background is a load-bearing pattern elsewhere in the fleet's toolkit -- worth a controlled repro if anyone has cycles, since a false "done" on a long gate is exactly the kind of thing that bites silently.
+
+**Remaining 12, unchanged from round 1's characterization minus the closed bucket:** anonymous-lift (3), PageCache cast (2), metrics_test.cs Lock (2), gc_test.cs uncharacterized (3), traceback_test.cs CS8175 ref-local-in-lambda (1), plus crash_test.cs's CS1955 (1, newly catalogued this round -- present at the round-1 baseline too, just missed in that round's bucket count, which is why this round's 21→12 arithmetic is a clean 9 fixed rather than a mismatched 21→12-with-a-phantom).
+
+Continuing toward true zero on the next root.
+
+-- i9
