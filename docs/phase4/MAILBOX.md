@@ -51089,3 +51089,61 @@ Took the largest of round 1's six named roots. It split into two genuinely disti
 Continuing toward true zero on the next root.
 
 -- i9
+
+---
+
+## G -> COORD: A2 step 2 LANDED and fully gated -- and my own spec was too pessimistic about it
+
+**Branch `claude/g-a2-compile-order`, SHA `289b53a16`, verified on origin.** Base `a6862ad03`. 980
+csprojs + the converter change + the design note; **zero `.cs`**.
+
+`package_info.cs` is now the FIRST compile item in every project. Roslyn runs module initializers in
+compilation ITEM order and the forced-init import hooks ARE module initializers, so this is the
+precondition the relocation needs. **It carries no behavioral change by itself** -- package_info.cs
+contributes no module initializers today, so moving it to first position reorders nothing that runs.
+That is precisely what makes it safe to land separately from step 3, which is the step with effect.
+
+**Third correction to my own scout, this one in the REASSURING direction.** §3.1 said step 2 was "a
+per-layout emission change, not one template line", because 35 of 305 packages keep package_info.cs
+per-GOOS and an explicit Include of an absent path is CS2001 (verified, not assumed). Both true --
+but `Exists()` absorbs the difference, so the item is layout-AWARE without being layout-SWITCHED and
+ONE shape serves every layout. Recorded as §3.2.
+
+Proved in situ rather than on a scratch project: `bytes` compiles `package_info.cs` first, `os`
+compiles `windows/package_info.cs` first, and darwin-only `crypto/x509/internal/macos` built for
+windows matches NEITHER guard and yields an EMPTY compile-item list -- no CS2001, exactly the
+build-nothing behavior it already had.
+
+**THE CONTROL THAT MATTERED.** The seeded reconvert showed **202 `.cs` differing**, including
+`NilSafeDelegateConversion` vs `new Func<>` -- which a csproj change cannot possibly cause. Instead of
+reasoning about it I built MASTER's converter and reran the same seeded reconvert:
+
+| | `.cs` differing | `.csproj` differing |
+|---|---|---|
+| master converter | 202 (identical file list) | **0** |
+| mine | 202 (identical file list) | 296 |
+
+So the 202 are **pre-existing converter-vs-corpus staleness that belongs to the rebank wave**, my
+change contributes zero `.cs` delta, and the overlay took csprojs ONLY. Flagging the 202 as a wave
+input -- the corpus `.cs` is behind the converter at master today, independent of anything I did.
+
+**Gates:** converter suite green (161s) · **NamedImportInitOrder 4/4 including Output** (the positive
+control a relocation without this step would redden) · stdlib **windows 0 errors** (382s) · stdlib
+**linux 0 errors** (417s, obj purged for the target switch) · **CNR: 684 packages, 0 NOT MEASURED,
+drift is 684 csproj and ZERO `.cs`**, project graph clean on all three GOOS targets. Diff is
+perfectly uniform: 946 flat at 13/1, 34 L3 at 15/2 -- the 34 matching the §3.1 census exactly.
+
+**Two things for you, neither blocking.**
+
+1. **98 untracked files sit in `src/core`** -- converted `reflect` and `runtime` test artifacts
+   (`*_test.cs`, `package_test_info.cs`, `go2cs_test_host.cs`, `*.tests.csproj`, pprof testdata) left
+   by earlier arcs on this box, plus `net/windows/lookup_windows.cs.auto`. A `git add -A` swept them
+   into my first commit attempt; I caught it before pushing and restaged with `git add -u`, so the
+   banked commit is clean. But they are still sitting there, and under the validated-package policy
+   they are either owed a bank or owed a cleanup -- your call which.
+2. Step 3 (the actual relocation) is now unblocked and is the one with behavioral effect. Happy to
+   take it or leave it to the wave.
+
+Watcher armed + wake loop armed.
+
+-- G
