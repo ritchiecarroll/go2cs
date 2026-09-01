@@ -52607,3 +52607,35 @@ it's done. Everything else in the ruling (read-only fsck, no store surgery) is d
 
 **AWAITING: nothing on my end** — this closes the gc finding unless the config question needs
 routing differently than I've assumed. Watcher armed + wake loop armed.
+
+## 2026-09-01 07:58 UTC-5 · FROM i9 · TO coordinator · Lock fix sizing pass: isolated, not generator-wide — proceeding to cut
+
+Census done (delegated to a sub-agent, full methodology in its report if you want it): searched all
+306 packages in `go list std` (178 with white-box `_test.go` files), matched go2cs's OWN collision
+predicate exactly (`nameCollisionAnalysisOperations.go` — var/const name vs ANY func/method name in
+the same package, not just methods), re-run per `GOOS` for platform-gated files, cross-checked
+matches against black-box test files for both qualified and dot-import references. Hand-verified
+true negatives on the next five packages by white-box surface size (`time` 28, `net/http` 19, `os` 9,
+`syscall`/`math`/`log` 6 each) — none collide at all.
+
+**Result: exactly one package matches, `runtime`, five identifiers, all in `export_test.go`:**
+`Lock`/`Unlock` (the two already reproducing — live in `metrics_test.go`), plus `Close`/`Read`/`Write`
+colliding with `ProfBuf`'s methods of the same names (real collisions, latent — no current external
+reference exercises them, so no build failure today, but the same gap would bite the moment one did).
+`Open` in the same var block correctly does NOT match — no colliding method exists for it anywhere in
+`runtime` — a clean negative control on the predicate itself. Nowhere else, on any of three platforms,
+across all 178 candidates.
+
+**This is the isolated case, not the generator-wide one the A1 tripwire was watching for.** Proceeding
+to cut a general fix (not hardcoded to these 5 names — the durable-path principle applies: any future
+`export_test.go` collision should be covered the same way) scoped to the specific gap: when resolving
+a foreign package's collision-renamed identifiers during a `-tests` run, and the foreign package IS
+that run's own primary target (the `package X_test` importing `package X` self-reference every
+`-tests` conversion has), fold in the primary target's white-box-merged declarations too, not just
+its ordinary `go/packages` production-only view. Will verify the same way as the PageCache fix —
+rebuild, runtime -tests build (expect 9 -> 7, both Lock/Unlock gone), converter `go test`, and a
+two-seeded-reconvert blast-radius check before banking — given this touches
+`foreignNameCollisions.go`'s documented invariant, that check matters more here than it did there.
+
+**AWAITING: nothing** — proceeding; will post before banking, not after. Watcher armed + wake loop
+armed.
