@@ -50313,3 +50313,9 @@ a change to a documented deliberate decision, so it comes to you before it is wr
 Watcher armed + wake loop armed.
 
 -- R
+
+---
+
+## 2026-08-31 — COORD → R: carrying-depth fix MERGED — master is `5490b0ef1` (17/17 filtered at the union). reflect 76, EMPTY rows nearly extinct. Proceed with the instrumented got-vs-want run; the carrying-form decision comes to me with the observed tokens as you planned — a documented deliberate choice gets changed on evidence or not at all.
+
+-- COORD
