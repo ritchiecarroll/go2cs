@@ -56686,3 +56686,21 @@ Sweep dirt: the five packages' production files carry the family's OWN emission 
 Watcher armed + wake loop armed.
 
 -- COORD
+
+---
+
+## 2026-09-01 — COORD → FLEET + Ritchie: **getg is ON MASTER (`65b6dd5ba`) — runtime's converted host now COMPILES CLEAN and SURVIVES MODULE INIT. i9: that is your bill's SHA.** Tracker updated — Ritchie, check the tracker: three trains tonight, the runtime row's shape has changed.
+
+**getg battery at the merge result, green:** converter suite ok 258s · union CNR NO REGRESSION, byte-identical across all 688 (0 NOT MEASURED). Master `9ddffc528 → 26f3aaa67 → 65b6dd5ba` tonight, each hop behind its own battery; the tracker commit rides on top (docs-only).
+
+**i9 — the FIRST BILL, now:** master tip (src identical to `65b6dd5ba`), `go2cs -tests -test-action all -test-timeout 40m` on runtime, results tail FIRST, then your classifier → `docs/phase4/CENSUS-runtime-semantic-bill.md`. Expected shape from the getg probe: the host builds, runs and executes; a contiguous empty tail from `TestCaller` (`moduledata.textAddr()`, symtab.go:663 — the pclntab/symtab family) as bucket one; every other bucket named by mechanism. Partial by construction; say so in the record. Name host-killers, size any that look hand-own-sized, chase none without a ruling. Land the classifier first if it is not landed yet — the bill should be printed by the committed tool.
+
+**Type-name carrier — A1 CANCELLED on measurement, A2a cutting.** The `Defined` flag was commissioned because the RECORD cannot separate a defined-over-interface type from a Go alias; the CONVERTER never needed the record — `foreignTypeAliases.go`'s `usingAliasTargetType` already implements the predicate, and re-instrumented with no hardcoded population it classifies **4,435 positions: 4,339 DEF-INLINE / 66 DEF-NAMED / 30 ALIAS / ZERO unanswerable**, the 66 reproducing the first census to the digit by an independent predicate and the 30 alias hits being exactly `os.FileInfo` ×14, `http2timer` ×11, `os.DirEntry` ×5 — the mis-stamp hazard, already declined. A field nothing reads is not a fix. The mechanism probe (both negative arms firing) re-sized the rest: FIELD recovers off `FieldInfo` (no descriptor change — the real dims-cargo precedent); PARAM and RESULT do NOT recover from the delegate TYPE, which is all `synthesizeFuncSide` holds, so both need descriptor cargo and `abi.Type` has no result slot at all (its own documented narrowing). `[return: …]` is expressible and readable. Carrier naming confirmed with ZERO golib change and Kind identical to `object`'s. Ruled: **A2a** (16 carrier declarations + 4 field marks + one `FieldInfo` read) cutting now with its guard; **A2b + A3** sized as ONE descriptor-cargo increment (param 23 + result 37, one slot, one key inclusion, one cost measurement); the nistec COST canary runs on a quiet box between batteries on my signal. Amendments on `claude/coord-type-name-carrier` (`913f515f2`) ride the next train.
+
+**Board:** roster 201/209 · reflect 48 (R cutting r39d A) · runtime 0 compile errors + init survives, first bill next (i9) · commit 3 (G cuts / i9 measures) · typed-nil unpark behind it · carrier A2a (sub-agent) · Stage B opens at commit 3's landing.
+
+**Batch 3, tonight's additions:** the netpoll ruling's scope gap as the named shape ("a settled ruling's SCOPE is a claim about who reaches the seam — re-measure it when a new consumer arrives"); a predicate the converter already holds beats a metadata field nothing reads; A1's cancellation as negative-result-banked-in-record.
+
+Watcher armed + wake loop armed.
+
+-- COORD
