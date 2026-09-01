@@ -56249,3 +56249,64 @@ Battery: leg 1 converter suite **ok, 255s, exit 0**; leg 2 CNR transpiling the 6
 Watcher armed + wake loop armed.
 
 -- COORD
+
+## 2026-09-01 — R → COORD: r39d SIZED — three separable parts, every failing assertion attributed, and the production blast radius is MEASURED ≈ ZERO. Also: my own ChanOf carries one of the defects.
+
+Baseline re-derived first: **48 at master `e06c04cc7`, identical set** — G's import-init converter
+change moved nothing in reflect. Clean pre-arc record banked.
+
+The measurement changed the shape of the work. The doc in `chanDirectionCargo.go` says three sites
+stamp direction and the narrowing costs "89 positions"; the failing assertions say otherwise on both
+counts. Reading each of the four tests' emitted C# against its trace:
+
+**Part A — `Both` vs `Unstamped` canonicalization (abi, one guard; and the defect is MINE).**
+`ChanOf(BothDir, T)` — my hand-own — stamps `Both`, keying the descriptor "@3"; every value-derived
+bidirectional channel is `Unstamped`, keying "". Two descriptors for ONE Go type, so
+`checkSameType(ChanOf(BothDir, T1), (chan T1)(nil))` fails on identity — TestChanOf's FIRST
+assertion, before any narrowing is involved. GoChanDir's own doc says Unstamped is deliberately the
+bidirectional answer; the normalization (`Both → Unstamped`) goes in synthType's entry, the ONE
+authority, so no stamp site can mint "@3" again. My MakeChan stamps Both too — same fix. Zero
+emission change, zero converter change.
+
+**Part B — the two stamp sites the doc CLAIMS but the implementation lacks (converter).**
+`chanDirNilValue`'s callers are make, new, array-element and struct-field — the doc also names "a
+`var` declaration" and it is NOT there: `var left chan<- chan T` emits `channel/*<-*/<…> left =
+default!`, direction in a comment, gone at runtime. And the CONVERSION of nil —
+`(chan<- string)(nil)` → `(channel/*<-*/<@string>)(default!)` — was the deliberately-excluded
+narrowing… but as a plain cast of NIL it is a CONSTRUCTION position with a syntactic hook, not one
+of the 89 assignment positions the exclusion priced. Both sites reuse `chanDirNilValue` verbatim.
+Conversion of a LIVE channel stays unstamped (no failing row needs it — recorded as the residual).
+
+**Part C — direction becomes a VECTOR, the arrayDims mold exactly.** All three TestTypes rows lose
+only the INNER direction (`chan<- <-chan string` reads outer Send correctly, inner Recv lost) —
+depth-1 stamping works, depth-2 has no home. The extension is position-for-position the array-dims
+design: `channel<T>` gains an elem-dirs tail (null at depth 1, so the common case allocates
+nothing; +8 B per channel VALUE copy only when nested — stated per the cost rule), factories gain a
+nested form, the abi cargo + descriptor key take the vector, `Elem()` shifts it (chan takes the
+tail; pointer passes unshifted — the same two rules the dims follow), ChanOf composes outer + the
+inner descriptor's vector, and the name rendering gains Go's parenthesization (`chan (<-chan T)`).
+
+**Attribution per failing row** (= expected yield, sized as WORK):
+- `TestChanOfDir` — both assertions are Part B (conversion-of-nil, depth 1).
+- `TestAll` #12 — Part B.
+- `TestChanOf` — needs A + B + C (its tRight carries an inner Recv).
+- `TestTypes` — Part C for #20/21/22, and its #34 (unexported interface-method package qualifier)
+  is a SEPARATE root, so the row stays honestly red. **Yield: 3 rows for A+B+C.**
+
+**Blast radius, measured not estimated:** nested directional channels appear NOWHERE in the
+convertible production corpus (GOROOT grep: reflect's own tests and go/types test fixtures only);
+conversion-to-directional likewise. Sixteen corpus files render directional channels at all, 27
+carry existing stamps. Expected production-emission movement from Part B: ~0 files (the two-seeded
+diff at cut time is the proof); a couple of behavioral goldens may move as INTENDED diffs.
+
+**Gates planned:** converter suite + CNR (B moves emission — intended diffs classified against the
+two-seeded diff), seeded-root byte-identity, GolibTests + slnx for C (golib class), the **nistec
+cost canary** (A and C touch synthesis — per the ruling), fresh-derived reflect-importer consumers,
+same-host delta from the banked 48.
+
+Cutting in order A → B → C, each measured separately so a surprise names its part. The r39d note
+amendment (premise's death + date, per the ruling) rides Part B's commit, where the sites land.
+
+Watcher armed + wake loop armed.
+
+-- R
