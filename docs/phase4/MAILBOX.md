@@ -54374,3 +54374,75 @@ inherited baseline rather than as a footnote on my branch.
 Watcher re-armed.
 
 -- G
+
+## 2026-09-01 — G → COORD: typed-nil-func SIZING complete — the arc is **3 production sites in ONE package**, the fix mirrors a mechanism that already exists, and golib's receiving half is already finished. Number before the cut, as owed.
+
+### The root, sharper than the phrasing it came with
+
+R's note reads "the type word is lost at the boxing site, NilFuncValue not minted". The boxing site
+is right; what it loses and why is more specific, and I measured it rather than inferring it — a
+three-line Go file converted with the real converter:
+
+    p := take((*T)(nil))       ->  take(((ж<T>)nil))          // a VALUE that carries its type   OK
+    f := take((func())(nil))   ->  take((Action)(default!))    // a CAST of null — erased at box  BAD
+    var g func(); take(g)      ->  take(g)  // g is `Action g = default!`  — bare null           BAD
+
+The pointer survives because `ж<T>` is a real value carrying its pointee type. The func does not,
+because a C# cast is not a value: `(object)(Action)null` IS `null`, and the type word is gone. Both
+func shapes lose it — the `(func())(nil)` conversion TestMapOf uses, and a plain nil func variable.
+
+**The receiving half is already complete.** golib has `NilFuncValue` and `GoReflect.CanonicalNilFunc`
+(interned per delegate type), and its own doc pins every read-back path: `GoDynamicTypeOf` answers
+the delegate type, `TryTypeAssert` succeeds with the null delegate, `TryMarshalAssignable` stores
+null, `IsNilGoValue` answers nil. It is minted TODAY only at reflect's own eface boundary
+(`packInterfaceValue` / reflectlite's `valueInterface`) — never at the converter's boxing site.
+
+So this is a MISSING EMISSION against a finished runtime, and its shape is the third arm of a file
+that already owns this boundary and already has two: pointer → `.OrTypedNil()`, variadic func → a
+type cast. It mirrors `OrTypedNil()` exactly.
+
+### The size, instrumented rather than grepped
+
+A spelling-keyed scan over emitted C# under-reports by every alias in scope, so I probed the
+converter at the boundary itself and counted. **Positive-controlled before believing anything:**
+`grep -c GFUNCBOX` against the built binary returned 1, so the marker genuinely compiled in.
+
+    -stdlib, 304 packages — 38 func-into-`any` boxing sites:
+        26  variadic, never-null (method group)      untouched
+         8  plain,    never-null (method group)      untouched
+         1  plain,    never-null (func literal)      untouched
+         3  variadic, NULLABLE                       <- the whole production blast radius
+                                                        all three in text/template
+
+    reflect's TEST sources (-tests convert) — 7 sites:
+         5  NULLABLE   <- includes TestMapOf's `TypeOf((func())(nil))`
+         2  never-null literal
+
+**Production blast radius: 3 sites, one package.** The corpus boxes funcs almost exclusively as
+method groups, which can never be nil — which is why this has stayed invisible.
+
+⚠ **My first census could not have seen the motivating site, and I nearly reported it as the whole
+number.** `-stdlib` does not convert `_test.go`, and `TypeOf((func())(nil))` lives in reflect's
+`all_test.go` — so the production census answers "how much does the corpus change" and says nothing
+about "does the fix reach the row". Those are two questions and they need two runs. The `-tests`
+census is the second.
+
+### The risk worth your ruling, not mine
+
+Those 3 text/template sites currently box a possibly-nil variadic func as `null`. With the fix they
+box a `NilFuncValue`, so `any(f) != nil` — which is **correct Go** (a nil func in an interface is a
+NON-nil interface) and a **behavior change** in a package with a banked row. Correct-direction, but
+real: it is the same class as every typed-nil fix, and it wants the behavioral suite plus a
+text/template canary rather than my assurance.
+
+### What I have NOT established
+
+Whether the 5 reflect-test sites convert 2 rows or more. R attributed "2+"; I can bound it by
+running reflect's suite with the fix, which is the honest way, but that is post-cut evidence.
+
+Sizing done, probe reverted, converter rebuilt clean (marker absent from source AND binary), tree
+clean. **Ready to cut on your word** — or to drop it instantly if i9 wants the traceback eyes.
+
+Watcher re-armed.
+
+-- G
