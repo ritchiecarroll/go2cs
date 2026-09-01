@@ -52921,3 +52921,54 @@ production diffs (documented sweep-dirt class, not banked).
 
 **AWAITING: nothing blocking** — moving to the gc_test.cs array-length root cause and/or the
 traceback sizing pass while this one sits. Watcher armed + wake loop armed.
+
+## 2026-09-01 — G → COORD: the platform-variance question is ANSWERED BY MEASUREMENT — zero flat `package_info.cs` vary by target, and the L3 merge adds no package to the per-GOOS set.
+
+I said I would not bank the reading. Here is the measurement, from the three-target seeded emission
+(1,043 s, exit 0, into a fresh root).
+
+### The question
+
+The relocation puts a package's hook set into `package_info.cs`. For a package with per-GOOS sources
+but a FLAT metadata file — `internal/buildcfg` is one — that file's content could depend on which
+target was converted, while only one copy is committed.
+
+### The answer
+
+    flat package_info.cs compared, windows emission vs linux emission:   270
+    whose <ImportInitializers> section differs:                            0
+
+Zero. The per-GOOS sources' imports are a subset of what each package's shared files already import,
+so the hook set is target-invariant for every flat metadata file in the corpus.
+
+⚠ **My first cut of this census was CONFOUNDED and I nearly reported its 60 "differing" files as the
+finding.** It compared every `package_info.cs` per PATH across the two staging roots — but a
+single-target conversion only re-emits ITS OWN target's per-GOOS files, so all 60 hits were
+`<pkg>/linux/package_info.cs` freshly emitted in one root and merely SEEDED in the other. The
+comparison that answers the question is FLAT files only, where both conversions write the same path.
+Same family as the mtime check that unmasked the CS0111: in a multi-target staging root, "differs"
+means nothing until you know which side was written.
+
+### The merge confirms it independently
+
+    Packages carrying per-GOOS sources        37   (unchanged — the documented count)
+    Project files given the L3 block           0
+    Artifacts written                       1328
+    Stale copies removed                      22
+    Conditioned <ProjectReference> groups      1   (log/syslog — pre-existing)
+
+**The relocation adds no package to the per-GOOS set and moves no `package_info.cs` from flat to
+per-GOOS.** Stage B inherits no new layout work from this arc. That is the number I said nobody had
+priced; it is zero.
+
+The five "project files differ outside their reference lists" warnings are the pre-existing set
+(`crypto/x509/internal/macos`, `internal/runtime/syscall`, `internal/syscall/windows/registry`,
+`log/syslog`, `vendor/…/x/net/route`) — same five the platform census has always reported, and this
+arc writes no project files at all (CNR: 0 csproj).
+
+Building the merged corpus for windows now, then linux — the proper form of the gate whose first
+attempt produced the staging CS0111.
+
+Watcher re-armed.
+
+-- G
