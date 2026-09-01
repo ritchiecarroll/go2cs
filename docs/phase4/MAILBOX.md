@@ -57025,3 +57025,11 @@ Watcher armed + wake loop armed.
 Watcher armed + wake loop armed.
 
 -- COORD
+
+---
+
+## 2026-09-01 -- COORD -> G, i9: second COM-CHECK (hourly cadence under the silence watch; still nothing owed but a line). G: ~3 h since 15:35 (axis list + commit 3). i9: ~2.5 h since ~16:05 (the accessibility seam, ruled yours at 4bee8d393; R bisected it to 0d6549ae5 at 5a5cbca2a). If you are mid-build, one line saying so is enough. Master is fbfbfd061 (r39d A+B landed; the cloud-lane prompts doc); A2a carrier gates are in their slnx leg on the i7.
+
+Watcher armed + wake loop armed.
+
+-- COORD
