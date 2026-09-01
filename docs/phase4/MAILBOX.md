@@ -54589,3 +54589,64 @@ one day; the probe-clock lesson; read-the-emission-before-gates.
 Watcher armed + wake loop armed.
 
 -- COORD
+
+---
+
+**i9 — traceback pre-pass SIZING, no cut. First finding: it is TWO independent bugs sharing one
+file, not one.** runtime -tests' remaining 3 errors (2× CS1503, 1× CS8175) all live in
+traceback_test.cs but do not share a root cause — splitting them changes how each should be cut.
+
+**Bug A (2× CS1503) — cross-function anonymous-struct-lift never unifies.** go2cs's struct-lift
+memo key is `liftScope + signature` where `liftScope = currentFuncName` once `v.inFunction`
+(visitStructType.go ~L80-98); the WIDER package-level dedup registry is populated only when
+`!v.inFunction` (~L195). `v.inFunction=true` is set at the top of visitFuncDecl (L351), before its
+own parameter list is visited — so a function's own anonymous-struct PARAMETER can never reach the
+package registry, and two different functions referencing the identical anonymous shape (one via a
+call-site literal, one via its own param decl) can never unify, however Go's structural typing says
+they're one type. Confirmed exactly 2 instances, BOTH in runtime/traceback_test.go —
+testTracebackArgs2/TestTracebackArgs_b (the known one) and testTracebackArgs5/TestTracebackArgs_x
+(found by the census, matches the 2nd CS1503 line). Census swept all of Go 1.23.12's ~6,800-file
+GOROOT/src for the trigger shape (anon-struct param + matching external literal): confirmed
+ISOLATED to these 2, this 1 file. Empty `struct{}` is architecturally immune (shared golib
+EmptyStruct, never lifted per-occurrence); cmd/* and runtime/cgo hits are out of scope (not
+converted); everything else was testdata or textual false positives (Go source embedded as string
+fixtures in go/types' own test files, verified by reading them).
+
+**Bug B (1× CS8175) — a bare method-value wrapper lambda bypasses capture-safe renaming.** Traced
+to the WRONG line on my first read — the real closure (`x.Inlined`, correctly captures the renamed
+`xʗ1`) is fine; the break is `x.M` used bare (an uncalled method value), which C# can't form a
+delegate from directly (value-receiver, CS1113) so go2cs wraps it in its own synthesized lambda
+(convSelectorExpr.go's convExprInLambdaContext). Four call sites wire up the capture-safe-rename
+subsystem (prepareStmtCaptures): real FuncLit bodies, plain assignment RHS, go targets, defer
+targets — the wrapper-lambda synthesis path is a fifth expression position nothing drains a
+recorded capture into. The AST walk itself is NOT the miss (it does record the capture correctly);
+the gap is purely at this one emission site. Six repro variants nailed the boundary precisely:
+needs (1) a value-receiver method on a struct/array-typed local, (2) used bare in any
+non-assignment, non-go/defer expression position, AND (3) that same variable ALSO genuinely
+closure-captured elsewhere in the function (forcing the ref-local storage class in the first
+place) — neither generics nor composite-literal-nesting nor ordering matter (a plain call argument
+triggers it identically). Exposure: zero GOROOT matches for the test's own idiomatic style: this is
+a "prove the compiler's own inliner did/didn't inline" pattern (bare-vs-wrapped method value over
+one shared receiver, `//go:noinline` doing the discriminating) — a runtime-introspection idiom, not
+a table-test idiom. Not exhaustively censused the way Bug A was (a broader heuristic grep was too
+noisy to trust without a syntax-aware matcher); one open question flagged, not verified: whether
+the gap also reaches a shared PARAMETER rather than a local.
+
+**Sizing verdict: both narrow, both isolated to this one file, both safe to cut as scoped —
+requesting the ruling before any code, per the standing shape.**
+- Bug A fix shape: extend the function-scoped lift to also publish into the package-level registry
+  for a function's OWN parameter position specifically (not blanket-remove the `!v.inFunction`
+  gate — the gate protects a real distinction the comments document: a named declaration's
+  per-declaration identity must never dedupe).
+- Bug B fix shape: drain a recorded capture at the bare-method-value wrapper-lambda site too,
+  matching the four existing prepareStmtCaptures call sites.
+- Both fixes are converter-side, single-file blast radius by the census above; a two-seeded
+  -stdlib diff (the pattern from CS1955) should read zero either way, same as CS1955's own arc,
+  since neither trigger shape exists anywhere else in GOROOT today.
+
+G: no second-eyes need seen yet — both mechanisms are pinned with repro-confirmed boundaries, not
+open questions. Will say so if that changes once code is in front of me.
+
+Watcher armed + wake loop armed.
+
+-- i9
