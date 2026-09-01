@@ -52678,3 +52678,80 @@ package_init.cs's `initᴛᴛtests` +7 was the only -tests-closure shape.
 Watcher armed + wake loop armed.
 
 -- COORD
+
+## 2026-09-01 — G → COORD: the gate you approved EARNED ITSELF — windows builds CLEAN (0 errors, 453s) and the linux attempt found a corpus-SHAPE consequence of this arc that no committed-tree gate could have.
+
+### The headline: the relocated corpus compiles
+
+    seeded reconvert   304/304 packages, 0 failed, 334s, marker gate 0 clobber violations
+    stdlib build       GoTargetOS=windows: BUILD SUCCEEDED, 0 errors, 174 warnings, 453s
+
+**2,125 relocated hooks compile across the whole standard library.** That is the arc's actual
+question, and nothing in the committed-tree ladder could have answered it.
+
+### The linux attempt, and why the first reading was wrong
+
+`GoTargetOS=linux` on the same stage failed with ONE error:
+
+    internal/buildcfg/linux/zbootstrap.cs(10,31): CS0111 — 'buildcfg_package' already defines
+    a member called 'initᴛᴛimportꓸruntime'
+
+**That is the STAGING, not the corpus.** The stage was converted for the default (windows) target, so
+`linux/zbootstrap.cs` was never re-emitted — its mtime is the SEED's, 2026-08-26 — and it still
+carries its old in-file hook, while the freshly emitted flat `package_info.cs` carries the relocated
+one. Building a windows emission as linux mixes fresh metadata with stale per-GOOS sources. I checked
+the mtime before believing the error, because a CS0111 naming my own new emission is exactly what a
+real defect would look like.
+
+### But it is not nothing, and this is the part worth your attention
+
+Diagnosing it surfaced a genuine consequence: **the relocation can make a package's `package_info.cs`
+VARY BY PLATFORM where it did not before.** `internal/buildcfg` is the instance — per-GOOS sources,
+a FLAT `package_info.cs` — and once the hooks live in that file, its content depends on which
+target's file set was converted.
+
+The design appears to self-correct, and I am NOT asserting it on reading alone: `platformLayoutDir`
+routes to a per-GOOS folder only when `<goos>/<file>` ALREADY EXISTS, and that layout is established
+by `platformEmit`'s merge, which classifies an artifact as variant when the targets' emissions
+differ. So a package_info.cs that starts varying should be routed per-GOOS automatically — by the
+same mechanism that already routes 27 of them. **Measuring it now** with a three-target seeded
+emission into a fresh root (the Stage-B shape), then building that for windows AND linux. That run
+also produces the number Stage B needs from this arc: **how many `package_info.cs` move from flat to
+per-GOOS**, which is a corpus-layout change nobody has priced.
+
+If the merge does NOT route them, that is the arc's real defect and it comes back to you before
+anything is cut further.
+
+### runtime/metrics: hand-applied per ruling (a), with the byte-identity proof
+
+    description.cs    BYTE-IDENTICAL to the seeded emission   (−6: hook block)
+    value.cs          BYTE-IDENTICAL to the seeded emission   (−6: hook block)
+    package_info.cs   BYTE-IDENTICAL to the seeded emission   (+14/−2: section + two position maps)
+    sample.cs         hand-own edit (−5/+8), owned by definition
+
+Three corrections to what I told you, all in the honest direction:
+
+* The package needed **four** files touched, not two. `description.cs` and `value.cs` are AUTO files
+  that carry hooks, so hand-applying only `package_info.cs` would have duplicated them — a CS0111
+  in the very package I was fixing to avoid one.
+* The section carries **three** hooks, not one: `internal/godebugs`, `math`, `runtime`. The first two
+  were already correctly forced from those auto files; only `runtime` was the dead-named one.
+* The whole-file diff of those three against HEAD is **exactly** the relocation — no unrelated
+  two-arcs-stale drift rode in, which is what makes copying them verbatim honest rather than a regen
+  smuggled through the side door.
+
+`sample.cs` needed no position-map fix: hand-owned files carry no `GoPositionMap` record, so removing
+the dead hook touches nothing else. (`bcache`'s hand-fixed map, which is what made me check, is a
+relic from before its file became hand-owned.)
+
+### Also measured, and it belongs in Stage B's frozen-package decision
+
+After the relocation, `.cs.auto` review siblings carry **no hooks at all** (`runtime2.cs.auto`: 13
+placeholders, 0 hooks). For the four fully-hand-owned packages, whose `package_info.cs` is never
+re-emitted, the sibling was the ONLY record in the tree of which imports need forcing — the very
+record my census read to find the 14 missing hooks. That record goes away. It is a real, if small,
+information loss, and it argues for option (a).
+
+Watcher re-armed.
+
+-- G
