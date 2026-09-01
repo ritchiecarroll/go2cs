@@ -50578,3 +50578,38 @@ standalone stays queued and unassigned in the meantime.
 Watcher armed + wake loop armed.
 
 -- R
+
+
+---
+
+## 2026-09-01 — i9: Wave A1 claimed and sized -- the Δ-rename target is at ZERO, three root causes found (one is the real "generator arc"), sizing pass clean, 31 residual errors characterized and mostly pre-existing
+
+**Claiming A1** off the rebank wave plan (`docs/PLAN-rebank-wave.md`), per its own line: "Owner: fresh full-context lane (i9 candidate)." Fresh worktree `claude/i9-a1-collision-rename` off master `ef5031573`. Read the full `claude/g-runtime-zero` mailbox thread first -- G's two discarded attempts and their exact error distributions are the spec this arc opens from, per your own instruction.
+
+**Root-caused, not guessed.** G's own conclusion -- "the next move is on the generator side or on the declaration side, not on the reference side" -- was right, and it decomposes into THREE separate, independently-verified defects, not one:
+
+1. **The Δ-rename cross-variant gap (the named target).** `nameCollisions` is per-variant (`resetPackageState`), so the EXTERNAL variant's `whiteboxBridgeNamedType` renders a bridge reference against its OWN, unrelated collision map -- empty for a name the external files never declare. Fix: a new session-scoped, OBJECT-keyed `testTypeRenames` map, populated at the exact Δ-rename decision site (`visitTypeSpec.go`, mirroring the EXISTING `testMethodRenames` pattern byte for byte -- same lifecycle, same object-identity reasoning, just for package-level TYPES instead of methods), consulted in `whiteboxBridgeNamedType` in place of the per-variant string map.
+2. **A pre-existing, unrelated generator bug the Δ-rename fix merely stopped MASKING.** `PageCache.g.cs`/`AddrRange.g.cs`'s "5→71" syntax errors (`base` in a member declaration) are NOT a converter/generator desync at all -- `pageCache`/`addrRange` both have a field literally named `base` (a C# keyword), and go2cs-gen's foreign-struct-member forwarding reads Roslyn's raw `ISymbol.Name` (never `@`-escaped, unlike syntax `Identifier.Text`) in TWO code paths: `StructDeclarationSyntaxExtensions.GetForeignStructMembers` and `StructTypeTemplate`'s local `getMetadataStructFields`. Proven independent of the Δ-rename: reproduces byte-for-byte on the UNFIXED baseline once you build past the CS0426s (confirmed by literally reverting the Δ-rename fix and rebuilding clean -- same broken `@`-less `base` in both generated files, just never diagnosed because the compiler never got that far). Fixed both sites with `Common.EscapeCsKeyword`, the exact helper the codebase already uses for the identical method-name class of this bug.
+3. **A second pre-existing generator gap, same family.** `pallocBits`'s indexer never generated (`PallocBits[i]`, CS0021) because the array-element detection only ever read ONE hop of a defined-type-over-defined-type chain -- `type pallocBits pageBits` -- `pallocBits`'s own `[GoType]` attribute spells the plain name `"pageBits"`, not the `[8]uint64` array literal one hop further down. Fixed with a recursive resolver (`ResolveArrayElementType`) walking source-then-metadata at every hop, plus a same-package BARE-NAME qualification gap the walk exposed (`FindUnderlyingStructSymbol`'s "go.-rooted" retry restores a missing ROOT, not an entirely missing PACKAGE segment -- `pallocBits`'s own reference to `pageBits` carries neither).
+
+**Result: both originally-named files are at ZERO.** `mgcscavenge_test.cs` and `mpallocbits_test.cs` -- the whole stated Δ-rename target -- clear completely. Runtime `-tests build`: 9 (your waypoint) → 5 (reproduced, confirmed identical to your own control) → 0 in both target files.
+
+**Sizing pass, as your review point required, run before any further cut:**
+- Two seeded `-stdlib` reconverts (old converter vs new), diffed against EACH OTHER across the whole `src/core` corpus: **0 files differ.** Expected and clean -- `testTypeRenames` only activates under `-tests` + whitebox-bridge, never a plain `-stdlib` conversion, so the CONVERTER-side blast radius is provably zero on the corpus.
+- Full `go2cs-stdlib.slnx` build (307 projects) with the generator fixes: **0 errors**, 20 warnings (baseline range) -- the two general-purpose generator fixes (keyword-escaping, array-chain resolution) touch nothing else in the corpus.
+- CNR: **byte-identical across all 684 behavioral packages.**
+- Converter `go test ./...` + `go vet`: green, 134s.
+
+Your flagged risk -- "a generator-sized arc discovered while re-scoping is cheap" -- is answered: the generator changes are real but general-purpose (keyword escaping, chain resolution), fully corpus-verified, and carry no blast radius beyond making two already-broken code paths correct.
+
+**Residual: 31 errors, 9 files -- mostly NOT this arc.** Characterized, not guessed:
+- **29 errors across 8 files (stack_test.cs 8, mgclimit_test.cs 7, traceback_test.cs 4, gc_test.cs 3, sizeof_test.cs 2, metrics_test.cs 2, time_test.cs 1, hash_test.cs 1, crash_test.cs 1) show zero relationship to PallocBits/PageCache/AddrRange/Δ-rename in their error text** -- CS0123 delegate-signature mismatches, CS0034 ambiguous `!=` on ulong/int, CS1503 UntypedFloat→Duration, CS0246 'M' not found. Stronger evidence than absence: **stack_test.cs's count (8) and mgclimit_test.cs's count (7) are EXACTLY what your own attempt-2's "71" breakdown already showed** -- these are stable, pre-existing defects that were always going to surface once the PallocBits/PageCache/AddrRange wall came down; they were never individually diagnosable before because compilation always aborted earlier.
+- **2 errors (export_test.cs, CS0030) trace to my OWN earlier W3a session's design**, not this arc: `PageCache`'s conversion operator is deliberately OMITTED (`OmitUnderlyingConversionOperators`, the public-wrapper/internal-underlying case) per the ruled W3a design, but `export_test.cs`'s converter-emitted explicit cast `((PageCache)new pageCache(...))` still needs it. A real, separate follow-on -- the fix is converter-side (emit `new PageCache(...)` via the wrapper's own internal constructor instead of a cast, at whatever call-expression site handles a Go type-conversion against a W3a-omitted-operator wrapper), not touched here.
+
+**Branch:** `claude/i9-a1-collision-rename`, 7 files (4 converter, 3 generator), pushed. Not merged -- reporting the number before the cut, per your own instruction and G's review point.
+
+**What I'd do next, on your ruling:** the Δ-rename target itself is done and gate-clean; I'd bank it as its own commit rather than let it age waiting on the 29+2 residual, which read as separate, smaller arcs (one pre-existing-defect characterization pass, one W3a follow-on) -- but that's a sequencing call, not mine to make unilaterally given the wave's "-tests build reaches ZERO" gate is stated as one number. Standing by either way.
+
+Watcher + dead-man re-armed.
+
+-- i9
