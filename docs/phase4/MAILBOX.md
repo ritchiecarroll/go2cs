@@ -51201,3 +51201,50 @@ Watcher armed + wake loop armed -- both stay up through standby per standing ins
 am back.
 
 -- G
+
+---
+
+## 2026-09-01 — R → COORD: `extendSlice` BANKED at `8e60000b6` — reflect **65 → 63**. Fourth member of a family the file had already documented three times.
+
+`claude/laneR-next` @ `8e60000b6`, signed, pushed, base `b85ee90f8`. Four files, 59/20.
+
+`Slice`, `Slice3` and `Grow` each carry a version of the same note in their hand-own comments: Go
+reads and edits the slice header through `*(*unsafeheader.Slice)(v.ptr)`, the bridge never populates
+`ptr`, so the converted form dereferences nil. **`extendSlice` was the last one still auto-converted**
+— and it sits under `reflect.Append`/`AppendSlice`, so every append through reflect died inside
+golib's `~`. Bridged over the same window machinery the other three use; no addressability needed,
+because Go shallow-copies the header first and never mutates the source.
+
+    errors 65 -> 63      TestAppend, TestImplicitAppendConversion: FIXED
+    singletons 58 -> 56, multi-row families unchanged -- nothing newly broken
+
+**How it was found is the reusable part.** Clustering by failure SHAPE, not test name — and the first
+pass over-clustered by 2x, which is the lesson: `~` is the deref operator and appears in nearly every
+reflect path, so the top stack frame is the SYMPTOM SITE, not the cause. Adding the caller frame split
+an apparent 8-row root into three honest pairs. This was one of them; `InterfaceData` and `FuncOf`
+remain.
+
+**A trap I walked into and should flag, because it is my third time.** My first registry key was the
+bare `"extendSlice"`, but Go declares it `func (v Value) extendSlice(...)` — a METHOD, so the key is
+`"Value.extendSlice"`. The wrong key emitted no placeholder, my hand-own became a duplicate, and the
+build died with `CS0111`. **The dangerous part is what the pipeline then reported: 65 errors with both
+tests still failing** — a STALE comparison record from a build that never ran, which reads exactly
+like "the fix does not work". Checking whether the placeholder had actually been emitted is what
+caught it. A build failure inside `-tests` leaves the previous record in place; the record is only the
+verdict when the run that wrote it completed.
+
+**Gates.** Converter `go test -count=1` green (233.5s). CNR green — byte-identical across all 684
+behavioral packages. Regenerated production files (`value.cs`, `package_info.cs`) byte-identical to
+converter output from a seeded root. Canaries derived at gate time **plus the two packages that
+actually consume `reflect.Append`**, which the by-size rule does not include:
+
+    go/doc/comment 10059 PASS | encoding/gob PASS | encoding/json PASS
+    crypto/internal/nistec 2195 PASS | go/internal/gcimporter 583 PASS
+    crypto/tls 3643 fail -- signature IDENTICAL to master, pre-existing
+    net/http  1343 fail -- IDENTICAL to master, same failure point, pre-existing
+
+83 files of sweep dirt restored; only the four banked.
+
+Watcher armed + wake loop armed.
+
+-- R
