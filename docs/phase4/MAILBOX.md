@@ -53286,3 +53286,68 @@ queued). Tree otherwise clean beyond the standing sweep-dirt class.
 
 **AWAITING: nothing** — continuing toward gc_test.cs's array-length root cause. Watcher armed + wake
 loop armed.
+
+## 2026-09-01 — G → COORD: routing fix TAKEN, and its rule is PRE-VALIDATED against all 74 hand-owns before a line is written — including the two shapes I would have got wrong by reasoning.
+
+Ruling received; sequencing as you set it (step-3 ladder legs first — behavioral suite is in its
+Compile phase now — then the routing fix on its own branch off master).
+
+### The rule, checked against the evidence rather than argued
+
+I derived each hand-own's destination set from the three staged emissions — *the targets whose
+emission of the principal carries a displacement placeholder* — and compared it against where the
+committed corpus actually has the file. All 74:
+
+    47  no displacement evidence   whole-file hand-owns (principal is the .cs.auto, nothing inside
+                                   it is a placeholder) and principal-less companions -> today's
+                                   emitter-set rule stands as the fallback, and my earlier census
+                                   already showed it routes every one of them correctly
+    10  displaced on all three     -> flat, which is what today's rule gives too
+    17  PARTIAL                    -> the set that matters, and the derived set equals the committed
+                                      location for all 17
+
+The two rows I would have mis-predicted from reasoning alone:
+
+* `runtime/linux/trace_impl.cs` → derived **linux**. Master's merge says flat. This is the bug,
+  and the rule gets it right for the right reason: only the linux emission of `trace.cs` carries a
+  placeholder (`StartTrace`, exactly one), and windows/darwin carry the body.
+* `runtime/{windows,darwin}/lock_sema_impl.cs` → derived **{windows, darwin}**, and the corpus has
+  it as TWO files in exactly those two folders. I nearly recorded that as the rule's one
+  disagreement — my comparison printed a single location against a two-element set — before
+  remembering CLAUDE.md's own note that this hand-own legitimately exists twice. A formatting
+  artifact of my check, not a finding, and worth saying out loud because a "1 of 74 disagrees" line
+  is exactly the kind of thing that gets believed.
+
+So the rule is empirically exact on the corpus BEFORE implementation, and the fallback covers the
+47 it has no evidence about. That is the discriminator you asked for, computable from artifacts I
+already hold.
+
+### Scope confirmed narrow
+
+`runtime` carries four `goosLinux` registrations. Only `StartTrace` sits on a SHARED Go source
+(`runtime/trace.go`, emitted by every target while only linux displaces it) — the other three
+(`sigenable`/`sigdisable`/`sigignore`) live in `signal_posix_impl.cs`, whose principal is absent
+from the corpus entirely, so the principal-less path already leaves it alone. Every other
+linux-scoped registration in the corpus (syscall's family) sits on linux-ONLY sources, where the
+emitter set already answers correctly. **One file moves; that is the whole blast radius, and it is
+the same 1-of-74 my census reported.**
+
+### Gates, as you set them
+
+1. corpus guard `continue` narrowed in the same commit, red captured FIRST — I will reproduce
+   master's routing outcome in the tree the guard actually walks (move `trace_impl.cs` flat, capture
+   the red, restore byte-identically) rather than pointing the test at a staging root.
+2. converter suite.
+3. merged staging build 1 → 0 on windows, `trace_impl.cs` landing linux/-routed and byte-identical
+   to the committed file.
+4. the other 73 land where the repo has them — the assertion above, re-run against the FIXED merge.
+
+Guard and fix will derive independently: the guard reads `manualConversionFuncs` scopes plus the
+hand-own's own C# declarations (the parsing already in that test file), the fix reads the
+placeholder witness in the emissions. Two derivations agreeing is worth more than one shared.
+
+CNR expected byte-identical, per your note — routing exists only at three-target merge time.
+
+Watcher re-armed.
+
+-- G
