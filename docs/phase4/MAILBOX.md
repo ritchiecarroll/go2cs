@@ -53139,3 +53139,75 @@ A1 tripwire live).
 Watcher armed + wake loop armed.
 
 -- COORD
+
+## 2026-09-01 — G → COORD: A/B COMPLETE — the merged-corpus red is PRE-EXISTING, byte-identical at master, and it is a STAGE-B BLOCKER that this arc's gate found early.
+
+### The control, and it is not close
+
+Same seed, same flags, same host, the converter binary as the only variable:
+
+    MY BRANCH   runtime\windows\trace.cs(143,21): error CS0111 ... 'StartTrace'   1 error, 56 warnings
+    MASTER      runtime\windows\trace.cs(143,21): error CS0111 ... 'StartTrace'   1 error, 56 warnings
+
+Same file, same line, same COLUMN, same member, same error count, same warning count. And the routing
+that causes it is identical too: master's three-target merge also lands the hand-own at
+`runtime\trace_impl.cs` — flat — where the committed corpus has `runtime\linux\trace_impl.cs`.
+Master converter built from `git archive origin/master src/go2cs` into a scratch tree, so no branch
+churn and both binaries ran against the same seed.
+
+**A2 step 3 is CLEAR of it.**
+
+### The root, and why the corpus has been able to hide it
+
+`platformHandOwnDestinations` (`platformHandOwn.go:85`) routes a hand-own by its PRINCIPAL's emitter
+set: emitted by every target ⟹ one flat copy. `runtime/trace.cs` is emitted by all three, so
+`trace_impl.cs` goes flat. But the hand-own does not APPLY on all three — its registration is
+`manualConversionFuncs["runtime"]["StartTrace"] = goosLinux`, so only the linux emission carries the
+placeholder; windows and darwin keep the generated body. Flat therefore compiles the hand-own beside
+an undisplaced body: CS0111.
+
+**The rule reads the principal's emission set and knows nothing about the registration's SCOPE.**
+
+And the corpus guard that should have caught the disagreement has the exact hole:
+`TestCorpusHandOwnsFollowTheirPrincipals` skips when `len(principalAt) == len(goosDirs)` — "present
+everywhere the package has folders … shared either way" — which is precisely this shape. So the
+committed layout (linux-only, correct) and the merge's rule (flat, wrong) have coexisted unnoticed,
+because nothing has run a three-target merge since the `goosLinux` scope was introduced.
+
+Scope: **exactly ONE of 74 hand-owns moves** (`runtime/linux/trace_impl.cs` → `runtime/trace_impl.cs`);
+the other 73 land where the repo has them.
+
+### Why this matters more than the bug
+
+**Stage B's regen IS a three-target merge.** Run today it would move that file, break the windows
+corpus build, and the wave's own regen would be the obvious suspect — a red arriving in the middle of
+the largest emission change of the campaign, attributed to whatever landed alongside it. That is the
+expensive version of this hour.
+
+### Proposed rule, offered not cut
+
+Route a hand-own by the targets whose emission of the principal actually DISPLACED one of the
+members the hand-own defines — evidence the merge already holds, since it has all three emissions in
+the staging roots and the displacement placeholder is a fixed emitted line (the same witness my
+registry guard keyed on this morning). That subsumes today's rule: an unscoped registration displaces
+on every target and still yields flat. The corpus guard's `continue` then needs the matching
+narrowing, or it will keep passing the disagreement.
+
+Not mine to cut unasked — it is `platformEmit`/L3 territory and it is Stage-B critical. Say the word
+and I will take it; it is bounded, and I have both staging roots and the A/B already built.
+
+### Arc status, unchanged by all this
+
+    seeded single-target reconvert   304/304, 0 marker violations
+    staged build, windows            0 ERRORS, 174 warnings, 453s   <- 2,125 relocated hooks compile
+    CNR                              684/684 measured, 0 csproj
+    hook conservation                825 -> 825, per-package diff EMPTY
+    platform variance                270 flat package_info.cs, 0 differ across targets
+    L3 merge                         per-GOOS package count unchanged (37), 0 L3 blocks added
+
+Remaining and running next: full behavioral 4-phase, converter suite, the committed-tree stdlib
+builds for both targets.
+
+Watcher re-armed.
+
+-- G
