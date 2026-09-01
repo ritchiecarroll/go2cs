@@ -52321,3 +52321,76 @@ Cutting next, on `claude/g-import-hook-relocation` off `3e31de03a`.
 Watcher re-armed.
 
 -- G
+
+## 2026-09-01 — G → COORD: A2 step 3 is BUILT and the positive control is GREEN — `NamedImportInitOrder` compiles and matches `go run` with every hook relocated. Full gate ladder running.
+
+Branch `claude/g-import-hook-relocation` off `3e31de03a`. Reporting the shape now because the control
+passing is the finding — that test exists to catch the exact nil-deref a naive move reproduces, and
+it is the first thing this arc could have failed on.
+
+    [Transpile] ok   [Compile] ok   [Output] 1 compared, 0 failed   [Target] 1 failed (stale golden)
+
+Compile passing is the second non-obvious result: the hooks now live in `package_info.cs`, whose
+`using go;` puts `builtin` and the root-qualified `<pkg>_package` targets in scope without any of the
+per-file import aliases they used to sit beside. Target fails only because the golden still holds the
+old shape — goldens ride the branch per your ladder.
+
+### What the emission looks like
+
+`main.cs` sheds twelve lines; `package_info.cs` gains a manifest:
+
+    // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸNamedImportInitOrderꓸreader() => builtin.initPackage(typeof(NamedImportInitOrder.reader_package));
+    [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    // </ImportInitializers>
+
+**One line per forced import, not five.** That was not the plan — the plan was to move the five-line
+block — but once the hooks are a per-package manifest rather than per-file machinery, the four-line
+comment belongs to the SECTION, not to each entry. It turns ~10,600 lines of production machinery
+into ~2,125 manifest lines, and the section reads as what it is: the list of packages this one forces.
+The block is inserted in the class body immediately after `</TypeAccessibility>`, in that section's own
+idiom (marker-delimited, prose inserted on demand, merge-on-`mergeExisting`, entries stored trimmed
+and re-indented so a merged entry cannot differ from a fresh one by whitespace).
+
+### The fence is gone, and that is the substantive half
+
+Both your named blockers came from the hand-own FENCE, and the relocation retires the fence rather
+than working around it: with no file to claim the slot, a package's import set is simply the union of
+every file's, hand-owned ones included. Hence the census I posted — 14 hooks that exist nowhere today.
+
+### Two decisions I want on record, both against my own first instinct
+
+1. **`forcingTargetShadowed` keeps comparing against the VISITING file's class, not the hook's new
+   home class.** They coincide for the production unit and the external test variant; they do not for
+   the internal test variant. I wrote a conservative-qualification fix and then removed it: qualifying
+   conservatively would make the production files' `-stdlib` and `-tests` emissions differ, which is
+   the exact property that check exists to preserve. The residual is a test-only import shadowed by a
+   test-declared type of the same leading segment — no instance in the corpus, guarded by
+   `ImportSegmentTypeShadow`, and it fails LOUDLY as CS0426. Stated in the code rather than papered over.
+2. **I added a `packageImportInitHomeClass` global for that fix and deleted it unused** — same
+   discipline as the csproj branch I deleted from the registry guard this morning. Twice in one day
+   is a pattern worth naming: the speculative branch is easy to write while the design is still warm.
+
+### Ladder in flight
+
+CNR (full 684-package re-transpile) running now; then goldens via `UpdateTestTargets`, the full
+behavioral 4-phase, the converter suite, and both committed stdlib targets per your ruling.
+
+**Adding one gate you did not name, because the ones you did cannot see it:** a SEEDED stdlib
+reconvert into a temp root, built. The committed corpus does not carry the relocation, so building it
+proves only that I did not break what already compiles — it cannot tell us whether 2,125 relocated
+hooks compile. A seeded temp root touches nothing under `src/core` (no overlay, Stage B keeps the
+corpus), and it is the only instrument that answers the question this arc actually raises.
+
+**And a sequencing question rather than a request.** `runtime/metrics`' dead-name hook cannot simply
+be deleted on this branch: the relocation's replacement only appears at Stage B's regen, so removing
+it now leaves `runtime` forced by nothing until then. The honest options are (a) hand-apply BOTH
+halves for that one package — delete the dead-named hook, add the correctly-named one to its
+`package_info.cs` — and prove byte-identity against the seeded emission, per the hand-application bar
+in today's doctrine batch; or (b) leave both and let Stage B's overlay retire the dead name. I lean
+(a) because it keeps the corpus correct at every commit, but it is a hand-edit of a generated file and
+that is your call.
+
+Watcher re-armed.
+
+-- G
