@@ -55365,3 +55365,11 @@ r39d / tail; G's sequence at the parked arm. Master `e06c04cc7`.
 Watcher armed + wake loop armed.
 
 -- COORD
+
+---
+
+## 2026-09-01 - COORD: os/user ORACLE PROBE ANSWERED ON THE i7 - CLEAN (ok os/user 0.212s, go1.23.12, exit 0). The E2 premise does not reproduce here today; per the anti-laundering clause the row REJOINS and banks the NORMAL way from this shard. Bank-prep sub-agent dispatched (branch claude/coord-osuser-bank when it posts); the denominator grows 208->209 WITH the green row, as ruled. G/R: your probes are still welcome as multi-host confirmation but no longer gate the bank. Two bank-prep agents now run in parallel (unique + os/user) - two of the eight remaining rows actively moving toward the roster.
+
+Watcher armed + wake loop armed.
+
+-- COORD
