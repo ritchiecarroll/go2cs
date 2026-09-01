@@ -52972,3 +52972,66 @@ attempt produced the staging CS0111.
 Watcher re-armed.
 
 -- G
+
+## 2026-09-01 — G → COORD: STOP-AND-REPORT — the merged three-target corpus fails to build, and I am running the master-converter A/B before I attribute it either way.
+
+Not hiding a red while a ladder is otherwise green. Here is exactly what is measured.
+
+### The failure
+
+    C:\Temp\g-a2s3-multi\src\core\runtime\windows\trace.cs(143,21): error CS0111
+    Type 'runtime_package' already defines a member called 'StartTrace'
+    BUILD FAILED — 1 error, 56 warnings, GoTargetOS=windows
+
+**Rooted, and it has nothing to do with import hooks.** `manualConversionFuncs["runtime"]["StartTrace"]`
+is scoped `goosLinux`, so the generated body is displaced on LINUX only and the hand-own
+`trace_impl.cs` supplies it there. That hand-own therefore belongs in `runtime/linux/`, and in the
+COMMITTED corpus that is exactly where it is:
+
+    repo                      src/core/runtime/linux/trace_impl.cs
+    single-target stage       .../runtime/linux/trace_impl.cs        <- built CLEAN, 0 errors
+    three-target MERGED stage .../runtime/trace_impl.cs              <- FLAT. windows now compiles it
+                                                                       beside the undisplaced body.
+
+The merge's own summary line is `Hand-owned files routed to their principal's platform set: runtime`
+— so the router computed that principal's set as "shared" and moved the hand-own to the package root.
+
+### What I have NOT established, and will not assert
+
+Whether my arc caused it. There is a plausible mechanism in both directions:
+
+* **Mine:** the relocation removes hooks from source files, which is a CONTENT change, and the merge
+  classifies shared-vs-variant by content. If removing hooks made a principal's three emissions agree
+  where they previously differed, its hand-own would be re-routed flat.
+* **Not mine:** `runtime/trace.cs` differs per target for a reason my arc does not touch — the
+  `goosLinux` scope means linux gets a placeholder where windows and darwin get a body — so the
+  classification that matters here should be unchanged, and this may be a standing behavior of the
+  merge that the corpus's committed layout predates.
+
+The committed layout was produced by an earlier three-target merge, so "the repo has it in linux/"
+does not by itself prove today's converter would put it there.
+
+### The control, running now
+
+The identical three-target emission driven by the **MASTER converter** — same seed, same flags, same
+host, the binary as the only variable — into a separate root, checking where `trace_impl.cs` lands.
+Master's `manualConversionFuncs` carries the identical `"StartTrace": goosLinux` entry, so the
+registration is not the variable either. If master routes it flat too, this is pre-existing and the
+arc is clear; if master routes it to `linux/`, it is mine and I root it before anything is cut.
+
+Built the control binary from `git archive origin/master src/go2cs` into a scratch tree rather than
+switching my worktree — no branch churn, and the two binaries can run against the same seed.
+
+### What the red does NOT touch
+
+The arc's own gate stands: the **single-target seeded stage built windows CLEAN, 0 errors, 453 s**,
+with all 2,125 hooks relocated. The failure is in the multi-platform MERGE's hand-own routing, a
+different subsystem, and it is a THREE-TARGET-only shape — Stage B territory, which is where the
+three-target merge actually runs.
+
+Reporting before the answer rather than after, because if it turns out to be mine the re-scope is
+yours and I would rather you heard it now than in an hour.
+
+Watcher re-armed.
+
+-- G
