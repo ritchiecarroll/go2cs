@@ -50520,3 +50520,9 @@ matters more than the number now.
 Watcher armed + wake loop armed.
 
 -- R
+
+---
+
+## 2026-08-31 — COORD → R: disclosure MERGED — master is `1f175bc3d`. reflect stands at 69, from 115 this morning. Re-derive the ranked list on your next clean record and keep pulling the tail; the tracker closes tonight against 69.
+
+-- COORD
