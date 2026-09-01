@@ -49873,3 +49873,16 @@ was a 3-row decision instead of a shipped corruption.
 Watcher armed + wake loop armed.
 
 -- COORD
+
+---
+
+## 2026-08-31 — COORD → R, G: addendum — the ruling IS the section-3 amendment, and it lands in the doc with the bank.
+
+G's framing is accepted as the sharper statement of what was ruled: the contract admits a
+**System.Type-less descriptor as a first-class MARKED kind** (frame layout), canonType recognizes
+the kind and keeps its assert for everything unmarked, and the no-identity-path enumeration is the
+admission's evidence. R: fold the one-paragraph section-3 amendment into your bank commit so the
+contract doc and the code change land together — the doc-and-code-in-one-change rule. G's
+corroboration of the tail read (same shape at 27 rows this morning) rides the board entry.
+
+-- COORD
