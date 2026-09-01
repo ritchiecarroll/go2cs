@@ -51029,3 +51029,36 @@ before code, as always.
 Watcher armed + wake loop armed.
 
 -- R
+
+
+---
+
+## 2026-09-01 — i9: residual pass, round 1 -- three more fixed (31→21), and the remaining 21 regroup into ~6 root causes, not 21
+
+**Branch `claude/i9-a1-residual-defects` @ `58aaf6ddf`, off the just-merged A1 tip, pushed and verified** (`git ls-remote` matches local exactly).
+
+**Three more distinct, independently-verified fixes:**
+
+1. **`UntypedFloat` never bridged to any integer-based defined type.** `const gcCPULimiterUpdatePeriod = 10e6` is UntypedFloat-kinded (Go classifies by literal SYNTAX, not value -- exponent notation is always a float literal even at a whole-number value), so a reference to it renders as the golib UntypedFloat wrapper -- which had conversions to every PRIMITIVE numeric type but, per the generator's own now-stale comment ("floats keep their existing routes"), none to a DEFINED type like `Duration`. Added the UntypedFloat twin of the existing UntypedInt bridge operator. Safe by construction: go/types only accepts this conversion at an integer-typed site when the constant is already exactly representable as one, so the generated bridge can never truncate a fraction Go itself would have rejected.
+2. **A comparison mixing two DIFFERENT untyped-wrapper kinds silently mis-resolved.** `l.Capacity() != procs * capacityPerProc` (ulong vs UntypedInt*UntypedFloat) has neither operand concrete, so the existing arithmetic-side cast logic (which keys off "one wrapper, one concrete") never fires, and the multiplication silently resolves through whichever primitive both wrappers share first (int32) -- comparing THAT against the real ulong is CS0034, ambiguous. Comparison operators now get the identical computed-operand cast treatment arithmetic operators already had; a bare named-const reference (which resolves fine alone) is untouched.
+3. **A `_test.go`-declared type alias bridge-qualified through a SECOND, uninstrumented renderer.** `type G = g` (export_test.go) emits as its own `global using` -- compilation-scoped, member of no class. `typeNameResolution.go`'s types.Type-based path already had the bare-alias rule for this (`testDeclaredAliasSpelledBare`), but `convIdent.go`'s sibling path (`whiteboxBridgeMember`, for a bare/dot-imported identifier) had no equivalent check and always qualified. Rendered bare there too.
+
+**A fourth, real fix that does NOT close its own motivating case.** While chasing (2) I found the identical bug one layer up: a package-level **var/const** can also collide with an unrelated method (`export_test.go`'s `var Lock = lock` collides with `RWMutex.Lock`, Δ-renaming the var) -- the exact cross-variant visibility gap A1 fixed for types, never extended past types. Extended `testTypeRenames` to register a renamed var/const at its declaration site, and `whiteboxBridgeMember` to consult it for `*types.Var`/`*types.Const`. **This did not fix `metrics_test.cs`'s own `Lock` call site** -- traced as far as confirming the fix's OWN registration path is correct in principle but not reached for this declaration (a different, not-yet-found code path also computes the bridge-qualified reference for a func-valued package var). Kept, not reverted: it's a genuine, verified-safe improvement for whatever construct DOES reach the ordinary package-level loop, just not a complete fix for this one caller.
+
+**Golden updates, both verified behaviorally correct before accepting:** `UntypedFloatConstExpr` and `IpAdapterAddresses` both changed emission (my fixes are general-purpose, not runtime-scoped) -- for both, ran the filtered Output-phase comparison FIRST (C# vs `go run` stdout, 0 failures) before treating the Target mismatch as an intended golden update rather than a regression, per CNR's own "inspect: intended new golden vs. regression" framing.
+
+**Gates:** converter `go test ./...` + `go vet` clean (109s). Full `go2cs-stdlib.slnx`: 307/307, 0 errors. CNR: exactly the 2 expected golden changes, reproduced identically across two runs (the second specifically to confirm no further drift after the golden update).
+
+**The regrouping, which is the most useful thing to come out of this round:** the remaining 21 errors are NOT 21 independent items -- they cluster into about six:
+- **9 errors, one root**: a `[GoRecv]`/method-expression gap. Go's `(*T).Method` on a VALUE-receiver method needs a pointer-receiver overload the generator never produces for a whitebox-bridge test type (`structWithMethod` in stack_test.go, `ttiWrapper` in traceback_test.go) -- all 8 of stack_test.cs's errors plus 1 in traceback_test.cs share this exact shape.
+- **3 errors, one root**: a separately-lifted anonymous-type identity gap. Two `_test.go` files independently lift STRUCTURALLY identical anonymous interface/struct shapes (hash_test.go's `IfaceKey.i` vs export_test.go's `ifaceHash`'s own parameter; traceback_test.go's `TestTracebackArgs_b`/`_x` vs `testTracebackArgs2_b`/`testTracebackArgs5_x`), and since C# has no structural interface typing, each lift becomes its own nominally-distinct type. hash_test.cs (1) + traceback_test.cs (2).
+- **2 errors, characterized, not yet fixed**: export_test.cs's `PageCache` cast -- the W3a-ruled omitted conversion operator (public wrapper, internal underlying) means the converter's OWN emitted explicit cast `((PageCache)new pageCache(...))` can't compile; needs the converter to emit `new PageCache(...)` through the wrapper's own constructor at that conversion site instead.
+- **2 errors, metrics_test.cs's Lock call site**: real cause not yet found (see above).
+- **3 errors, gc_test.cs, uncharacterized**: a `ж<nint>`-to-`int` argument mismatch (×2) and a two-value type-assertion (`y, ok := x.(error)`) whose RHS renders as a tuple but is assigned to a single-value LHS.
+- **1 error, traceback_test.cs, a real C# constraint**: CS8175, a `ref` local captured inside a lambda -- Go permits this, C# does not; needs a local-copy workaround at the capture site.
+
+**Sizing note for whoever takes the `[GoRecv]` root (9 of 21) or the anonymous-lift root (3 of 21):** both are GENERATOR-side gaps in mechanisms that already exist for the ordinary (non-whitebox) case -- worth checking whether they're narrow whitebox-specific holes or reveal something broader, the same way the UntypedFloat bridge and alias-bridge gaps in this round turned out to be general-purpose fixes rather than runtime-only patches.
+
+Continuing toward true zero. Watcher + dead-man re-armed.
+
+-- i9
