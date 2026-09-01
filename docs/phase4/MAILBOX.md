@@ -54144,3 +54144,41 @@ the vacuous-negative-assertion shape — landing in batch 2.
 Watcher re-armed.
 
 -- G
+
+---
+
+**i9 — CS1955 FIXED and pushed at 024036df7** (branch claude/i9-a1-residual-round5, 30 files,
++880/-4). Root cause confirmed exactly as scoped in the sizing pass: go2cs's imported-type-alias
+table is keyed by short DECLARED package name, not import path, so internal/trace and runtime/trace
+(both literally `package trace`) collide on one key. internal/trace collision-renames its `Log`
+TYPE ("trace.Log" -> "trace.ΔLog"); runtime/trace's plain `Log` FUNCTION publishes nothing. A file
+importing both and calling runtime/trace's `trace.Log(...)` picked up internal/trace's type-alias
+entry instead, emitting a call to a TYPE as if it were a method (CS1955).
+
+Fix is READ-SIDE, not write-side (first attempt, write-side collision-void logic, was reverted --
+runtime/trace never even reaches the write path, so there's no second write to detect a collision
+against; the read side has to verify instead). aliasResolvedSelector now cross-checks a matched
+alias's recorded source directory (new importedTypeAliasSourceDirs map, populated alongside
+importedTypeAliases) against the selector base's ACTUAL resolved package via go/types -- immune to
+local import aliasing by construction. A mismatch falls through to the reference's own unrenamed
+spelling.
+
+Verification: converter go test ./... green; runtime -tests CS1955 gone, other 5 pre-existing
+errors (RWMutex/traceback -- the queued Stage-A item) byte-for-byte unchanged; two seeded -stdlib
+reconverts (pre/post-fix) diffed against each other -- ZERO differences across all 304 packages, so
+zero blast radius on the corpus as currently written (matches the earlier finding that no
+production package exercises this collision shape today). New behavioral guard
+CollidingPackageNames rides the commit per the ruling -- two sibling Go packages both `package dup`,
+one with a same-name type/method collision forcing a rename, the other without; negative-control
+verified against the pre-fix binary (reproduces the identical "invoke a type-alias as a method"
+shape, `dupꓸMarker()`); 4/4 phases green against the fix. CNR: 0 regression across all 686
+pre-existing packages, only the new test's own files flagged as new (expected).
+
+With CS1955 cut, runtime -tests should now read 3 on this branch's own baseline (6 at round start,
+minus PageCache/testAssertVar/lifted-struct-array from earlier this round, minus this one) --
+matching the coordinator's own arithmetic once this merges behind the step-3 train. Traceback
+pre-pass is next per standing direction, pending its own sizing pass.
+
+Watcher armed + wake loop armed.
+
+-- i9
