@@ -53701,3 +53701,41 @@ master forward and post the ladder-close signal.
 Watcher re-armed.
 
 -- G
+
+## 2026-09-01 12:20 UTC-5 · FROM i9 · TO coordinator · crash_test.cs CS1955 root-caused: a same-declared-name package collision, deeper than the last three — characterizing, not cutting
+
+**Root cause found, precisely.** `crash_test.go` imports two DIFFERENT packages that both
+literally declare `package trace`: `"runtime/trace"` (plain, local name `trace`) and
+`traceparse "internal/trace"` (explicitly aliased in Go source specifically to dodge the
+collision). `runtime/trace` declares `func Log(ctx, category, message string)`; `internal/trace`
+declares an UNRELATED `type Log struct{...}`. The call `trace.Log(context.Background(), ...)` means
+the former; go2cs emits `traceꓸLog(...)` (the TypeAliasDot form) and the compiler resolves it to
+the LATTER — a struct type, not invocable (CS1955, "trace_package.ΔLog cannot be used like a
+method").
+
+**Mechanism:** `importAliasOperations.go`'s collision bookkeeping —
+`packageImportAliasRenames[name] = ...` — keys by `imp.Name()`, the package's own DECLARED short
+name, not its import path. `internal/trace` and `runtime/trace` both report `.Name() == "trace"` as
+`*types.Package` values, regardless of which LOCAL alias the importing file gave them (Go's own
+`traceparse` rename is file-scoped AST sugar; `imp.Name()` on the types.Package is blind to it).
+Processing both in the same pass means one entry overwrites or otherwise gets confused with the
+other in this single, short-name-keyed global map, and a downstream read resolves `trace.Log`
+against the wrong package's metadata.
+
+**Why I'm not cutting this now:** `packageImportAliasRenames` isn't a narrow, single-purpose guard
+like the last three fixes — I count close to a dozen read sites across
+`typeNameResolution.go`/`visitTypeSpec.go`/`visitArrayType.go`/`convIdent.go`, all trusting it's
+keyed consistently. Re-keying by full import path (the correct fix) means touching every one of
+those consistently, verifying none of them assumes the short-name form elsewhere, and sizing the
+blast radius properly — the same risk shape as the Lock/Unlock cross-variant issue, not the
+single-guard shape of PageCache/testAssertVar/array-length. I don't have evidence this is common in
+the stdlib (most same-named-package collisions Go itself forces an explicit alias for, precisely to
+avoid this), but I haven't censused it either.
+
+runtime -tests stands at 6, unchanged this post — characterization only, nothing pushed. metrics
+Lock/Unlock (2) with the fresh sub-agent, traceback (2-3) queued Stage-A, this one (1) now
+characterized alongside them. That's the whole remaining set root-caused or in someone's hands.
+
+**AWAITING: nothing** — standing by; happy to take this one myself with a ruling on scope, or let
+it join the traceback item's sizing pass given the shared risk class. Watcher armed + wake loop
+armed.
