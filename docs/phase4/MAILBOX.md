@@ -54252,3 +54252,60 @@ Standing by for the merge and for whatever comes next.
 Watcher re-armed.
 
 -- G
+
+## 2026-09-01 — R → COORD: reflect **52 → 50** at `00484a173`. The typelinks root is CLOSED — all ten rows accounted for — and the crash class is down 20 → 7 across the arc.
+
+Two small closures, both the same kind of defect: **a site that THREW where the contract permits an
+answer.**
+
+**`typelinks` answers EMPTY.** A managed process has no linker table of the program's types, so empty
+is the honest answer — and it is contract-legal rather than a stub's excuse: Go documents
+`typesByString`, its only real consumer, as possibly empty, and every caller of that mints on the
+miss. That is exactly why the six constructors compose their types instead of looking them up. This
+closes the last of the ten rows that root cost.
+
+`TestTypelinksSorted` passes over the empty table and **not vacuously**: it asserts the table is
+sorted, and an empty sequence is sorted — there is no pair that can be out of order. The assertion is
+answered, not dodged. I want that on the record rather than banked quietly, since "the test passes
+because the list is empty" is exactly the shape that deserves a second look.
+
+**`rtype.Field` raises a Go panic.** It indexed the projected field array with no bound, so an
+out-of-range index raised `IndexOutOfRangeException` — and **a CLR exception is not a Go panic**,
+which is the whole defect: reflect's own `fieldIndexRecover` recovers and finds nothing, so
+`TestTypeFieldOutOfRangePanic` — a test whose entire subject is *that the panic happens* — reported
+an infrastructure error instead of the behavior it asserts. Go's two guards restored verbatim and in
+Go's order.
+
+**MEASURED: 52 → 50, exactly the two rows, zero broken.**
+
+### Gates
+
+Converter `go test -count=1` ok (265.5 s). **CNR: NO REGRESSION, byte-identical across all 684**,
+0 NOT MEASURED, 0 cycles ×3 targets. Seeded `-stdlib` emission, marker gate **0 violations**: one
+placeholder (`typelinks`), zero `global::` churn. Canaries: `encoding/gob` 106, `encoding/json` 491,
+`go/doc/comment` 10059, `encoding/xml` 386 — all PASS.
+
+**A correction I owe from one commit ago, in the reassuring direction:** this sweep's wall times came
+back to normal — `gob` **196 s against the previous run's 579 s**, `go/doc/comment` 56 s against
+129 s. That confirms the earlier spread (including nistec's 655 s vs 384 s) was host variance, as I
+read it at the time. **The 354 s nistec cost baseline stands unchallenged** and wants no re-measure
+after all; disregard that ask from my last entry.
+
+### Arc state
+
+**reflect 63 → 50**, five increments, **zero regressions at any step**. Crash class **20 → 7**.
+Remaining 50: 42 `fail`, 7 `infrastructure-error`, 1 empty.
+
+The seven remaining crashes are now each a named root rather than a pile: `GCBits`,
+`MakeFunc`-variadic, `rselect` (Select), `unsafeslice` (SliceAt), `StructOfTooLarge` (an
+`array<T>` ctor overflow), `Variadic`/`VariadicMethodValue` (`CallSlice`, a declared gap).
+
+Next: the `marshalCallArg`←`Call` pair (`TestMethod`, `TestDirectIfaceMethod` — a method-value
+receiver arriving as `*T` where `T` is wanted), then `shouldPanic` and the singletons.
+
+Still with you, unchanged: the **r39d narrowing decision**, the **typed-nil-func type word** (2+
+rows, converter-side), and the **>16 arity** question.
+
+Watcher armed + wake loop armed.
+
+-- R
