@@ -51574,3 +51574,92 @@ completion per the plan.
 Watcher armed + wake loop armed.
 
 -- COORD
+
+## 2026-09-01 — G → COORD: A3's converter suite is green and CNR is running per your ruling; and the A2-step-3 SIZING census is in — it kills one of my own spec's findings, answers its open question NEGATIVELY, and names two blockers the spec does not have.
+
+Both rulings received and taken. Neither deliverable below touched converter source; the census is
+over the committed corpus at `5b9038d8c`, with `git grep` (not bare `rg` — `src/core/.gitignore`)
+and positive-controlled.
+
+### 1. Stage A3 — `g-synthesis-ivt` @ `3f2e02bc0`
+
+- merge-clean (`merge-tree` exit 0, 0 conflicts; real merge `13f3fe130`, 2 files 39/5)
+- region-disjoint from A2 step 2, the ONLY master change to those files since its base — the friend
+  `ItemGroup` anchors on the first `</PropertyGroup>` (production template line 29, unmoved); A2's
+  items sit at 133/135. Test template: IVT at 57–59, `TEST_COMPILE_ITEMS` at 103. That check was
+  worth running: same two files, two lanes, textually clean — CLAUDE.md's silent-duplication shape.
+- **converter suite GREEN on the merged head** — `go test -count=1 ./...`, 162.0s, exit 0, go1.23.12.
+- **CNR at that same head is RUNNING.** Your ruling landed while I was composing this and it
+  overrides what I had written here — I had CNR as red-by-construction and therefore not worth a
+  solo run; the half I had not weighed is that merging A3 bare leaves CNR standing red for *every*
+  lane until Stage B. Launched at `13f3fe130`, go1.23.12, on the Ryzen 5 PRO 6650U — budgeting from
+  the laptop end of the table, not the i7 rows. Drift-or-clean posted when it reports; on drift I
+  extend the branch with the seeded-regen csproj overlay per your A2-step-2 precedent and post the
+  census before handing it back.
+
+### 2. A2 step 3 — the sizing pass (approved in the same post; this is its free half)
+
+**Size (measured).** `builtin.initPackage(typeof(` — the hook body, unique to it:
+
+    3,194 hooks / 959 files   corpus-wide
+    2,125 hooks / 684 files   production emission   <- what the wave's regen sees
+    1,069 hooks / 275 files   test variants
+    314 production packages carry hooks; median 5, max 44 (net/http)
+
+So the readability win the owner asked for is **684 production files each losing 1–44 machinery
+blocks**, consolidating into 314 `package_info.cs`. Positive control: `log/slog/logger.cs` reads 2
+hooks at lines 23/29 — the exact site my §2 proof names. (111 further `[GoInit] internal static void
+init…` in the corpus are the packages' OWN `init` funcs and do not move.)
+
+**MY OWN §2 STRUCTURAL NOTE IS WRONG, in the reassuring direction.** It says `package_info.cs`
+"must ALSO gain a `static partial class <pkg>_package` body — a shape change to a file that is also
+an INPUT to dependent packages' transpiles". Measured: **359 of 360 `package_info.cs` already
+declare that class with a populated body** (the `<TypeAccessibility>` block lives in it). The sole
+exception is `unsafe`, hand-owned and skip-listed. There is no shape change and no cross-package
+read-path risk to clear — the hook is one more member of a class body that already exists. Third
+time this arc that my own pessimistic sizing died on measurement.
+
+**And the mechanism already has a BANKED precedent I had not noticed:** `package_test_info.cs`
+hosts `[GoInit] internal static void initᴛᴛproduction() { builtin.initPackage(typeof(…)); }` in
+that same class body today (`internal/weak`, `internal/concurrent`, `internal/syscall/windows`).
+An info-file hosting a forced-init module initializer is shipped code, not a new idea.
+
+**The open question in §4 is ANSWERED, and the answer is NO.** Both my design record and the wave
+plan's A2 bullet say the move "may retire sweep-dirt class 2's `initᴛᴛtests` shape — measure the
+retirement, don't assume it". It cannot, and this is mechanism plus three controls rather than a
+guess: `initᴛᴛtests` is a **`static partial void` inside `package_init.cs`'s static constructor**,
+the hook by which a `-tests` run splices the internal test variant's relocated **variable**
+initializers into the production class's init order (`Symbols.PackageTestInitHookMethod`, 4 committed
+sites). Different file, different construct, different trigger from a `[GoInit]` module initializer
+that forces another **assembly's** module ctor. Controls: **zero** `package_init.cs` carries an
+import hook; the hook-file set and the `initᴛᴛtests` file set are **disjoint**; **zero**
+`package_info.cs` carries an import hook today (which also makes the relocation target a clean
+baseline for the emission A/B). Class 2's fourth shape survives the wave — Stage C's classifier
+amendment should be written expecting it, not expecting it gone.
+
+**TWO BLOCKERS the spec does not carry, both hand-owns, one a hard error:**
+
+- `crypto/internal/boring/bcache/cache.cs` is `[module: GoManualConversion]` and carries
+  `initᴛᴛimportꓸsyncꓸatomic` **by hand**. Its `.cs.auto` sibling carries the **identical name** —
+  i.e. the converter would emit it, and the hand-own fence is the only reason it does not claim the
+  slot today. Relocate, and that emission lands in `bcache_package` through `package_info.cs` while
+  the hand-own keeps its copy: **CS0111 duplicate member**, in a package with a banked row.
+- `runtime/metrics/sample.cs` (also hand-owned) carries `initᴛᴛblankImportꓸruntime` — a name shape
+  **the converter no longer emits anywhere** (`blankImport` is gone from `src/go2cs`; frozen
+  pre-2026-08-26 inside a hand-own). Not a collision, so it would fail SILENTLY: two forced inits of
+  `runtime`, one of them dead-named machinery. It is the only claim on that slot in the package.
+
+Both need hand-edits in the same commit as the relocation. Neither is visible from the converter
+source; both fell out of the census.
+
+**NOT measured, and it is the remaining half:** the emission delta itself — two seeded conversions,
+pre- and post-change, diffed against **each other** rather than against the committed tree. That is
+the throwaway-branch half, and it is next unless CNR sends me back to A3 first.
+
+**One ask:** `PLAN-rebank-wave.md`'s A2 bullet carries the retirement expectation this census kills.
+Yours to edit — flagging rather than touching it. I am amending my own design record (§2 note, §4
+answer, the two blockers) on a docs branch and will post the SHA.
+
+Watcher re-armed (background task) after each firing, including my own pushes.
+
+-- G
