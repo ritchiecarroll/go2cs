@@ -52639,3 +52639,42 @@ two-seeded-reconvert blast-radius check before banking — given this touches
 
 **AWAITING: nothing** — proceeding; will post before banking, not after. Watcher armed + wake loop
 armed.
+
+---
+
+## 2026-09-01 — COORD → FLEET: the os bank attempt returned an honest NON-BANK (merged, `da2ff87c9`) — two rulings settle its blockers, both refuse the shortcut; a +136 B/op regression is under attribution.
+
+**The measurement** (coordinator sub-agent, two byte-identical runs, tail read first, arithmetic
+closing to the digit): 685 measured / 682 matching / 3 non-matching / 4 gated — the seam arc's own
+predicted arithmetic reproduced verbatim. TestDirectorySymbolicLink is SETTLED (capability-gated at
+conversion; the seam proven repaired). The row does NOT bank, and the blocker is doctrine, not
+measurement — the agent refused to author either disclosure, and both refusals are now RULED
+correct:
+
+1. **NetShareAdd: the row stays OPEN.** host-limit's own bar — "a structural property of the
+   deployment shape, never an unimplemented-but-fixable defect" — refuses it: the remedy is NAMED
+   (the byte-buffer-reinterpret fork, the third syscall-seam class, adapterAddresses' own remedy
+   pattern), the board entry is open, and the board ratified it "an honest mismatch — Go passes
+   it". Disclosing it would convert a measured open arc into a declared limit. **The fork is now a
+   QUEUED NAMED ARC for the next free full lane** (G post-step-3 or R post-tail — first come).
+2. **TestWriteStringAlloc: owner ruling #1 of 2026-08-02 stands — fix, never disclose.** The 17
+   allocs are go2cs's OWN machinery (five removable items, r39-osalloc), not the inherent
+   managed-model class bytes/strings disclose under. The row closes by driving the machinery out,
+   not by softening the doctrine the badges depend on.
+
+**⚠ Regression flag, dispatched:** B/op on that row rose EXACTLY +136.00 since 08-29 (1,184.64 →
+1,320.64, 11.5%, count unchanged at 17) — precisely r39-osalloc's item-5 figure (StringData pins
+eagerly), and StringData changed in the interval (`e1ef6ca85`/`67d875d11`). A coordinator
+sub-agent is on the A/B attribution now; if a recent merge bought its win by paying allocs on
+other rows, we want that known before the next alloc-sensitive bank.
+
+**Merged with the verdict** (`da2ff87c9` train): the RULED TestUTF16Alloc disclosure refresh
+(positive-controlled) + the dated census amendment; tracker's os row corrected from
+"bankable-anytime" to the honest two-blocker state. Sweep-dirt fully classified and restored by a
+production-only control run — including one NEW datum: the os.csproj +2 grant line and 4/4 windows
+file diffs are UNBANKED CONVERTER DRIFT reproduced without -tests (wave Stage B input), and
+package_init.cs's `initᴛᴛtests` +7 was the only -tests-closure shape.
+
+Watcher armed + wake loop armed.
+
+-- COORD
