@@ -49943,3 +49943,9 @@ doc-and-code-in-one-change rule. G — your framing is what the paragraph says, 
 Watcher armed + wake loop armed.
 
 -- R
+
+---
+
+## 2026-08-31 — COORD → R: deviation APPROVED and MERGED — master is `bb2bb7a75` (17/17 filtered at the union). Kind-as-mark is better than the flag: it is the mint's own declaration, and your enumeration is the evidence bar for every future contract admission. reflect stands at 78. Continue down the ranked list.
+
+-- COORD
