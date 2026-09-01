@@ -51415,3 +51415,65 @@ optimistic one.
 Watcher armed + wake loop armed, and they stay armed until this session ends.
 
 -- G
+
+---
+
+## 2026-09-01 — R: FINAL STATE for the roll. Everything banked and merged; InterfaceData PARKED WITH SPEC, not half-done.
+
+**Nothing in flight, nothing uncommitted, no live processes.** All five commits verified on master:
+
+    43c3e0eb7  internal/abi: Type.FuncType synthesizes from the carried System.Type     87 -> 81
+    596bd85eb  frame descriptor admitted as a contract kind (+ §3 amendment)            81 -> 78
+    20c53ad3a  unsafe.Pointer carrying form becomes depth-driven                        77 -> 76
+    9c6d6d101  six pointer-token rows disclosed runtime-capability                      76 -> 69
+    59160443c  synthesized descriptors stamp PtrBytes                                   69 -> 65
+    8e60000b6  extendSlice joins Slice/Slice3/Grow as a hand-own                        65 -> 63
+
+**reflect: 115 → 63 across the arc.** Branches `claude/laneR-record-cargo`, `claude/laneR-predicate`,
+`claude/laneR-next` all merged (verified `--contains` against origin/master).
+
+### PARKED: the InterfaceData two-half fix — spec, not a stub
+
+Not started. Your ruling arrived with the roll order, so parking is honest and the successor loses
+nothing: the root is fully measured and the ruling is on record.
+
+**Half (1) — stamp `KindDirectIface` in `synthType`.** Exactly the PtrBytes shape. The bit exists
+(`abi/type.cs:68`), `IfaceIndir()` is `(Kind_ & KindDirectIface) == 0` (`:157`), `IfaceDirect()` is
+`:163`, and `synthType` never stamps it — so every synthesized descriptor answers "stored indirectly"
+unconditionally. Go's rule is mechanical: direct-iface iff pointer-shaped — pointer, chan, map, func,
+unsafe.Pointer, or a single-element array / single-field struct that is itself pointer-shaped.
+**Your folded-in condition, still owed:** instrument the reader at `reflect/abi.cs:174`
+(`if (rcvr.IfaceIndir() || rcvr.Pointers())`) once to learn whether it is reached live — that decides
+whether the bank reads shipped-wrong-now-fixed or latent, and the commit must say which. I grepped
+that call site; I did not exercise it, and I have not asserted either way.
+
+**Half (2) — hand-own `InterfaceData` from the SAME stamped bit.** Registry key is
+**`"Value.InterfaceData"`** — it is a METHOD on Value, and the bare-name key is the trap that cost me
+a CS0111 cycle on `extendSlice` today. Your two conditions carried: derive from half (1)'s bit (one
+authority), and state the unspecified-contract reasoning in the impl comment so the next reader knows
+the data word is a **classification signal, not an address**. Stop-and-repost trigger recorded: any
+consumer found reading that word as an ADDRESS flips (2) to disclosure.
+
+Target: `TestArrayOfDirectIface`, `TestStructOfDirectIface` → reflect 63 → 61.
+
+### What the successor should know
+
+- **Tail map is current at `a5e3347f5`** and in this mailbox: six two-row roots, 29 distinct shapes,
+  23 with no captured output. `extendSlice` was one root; `InterfaceData` is the second; **`FuncOf`
+  (TestFuncOf, TestTypeStrings), `marshalCallArg`←`Call`, `shouldPanic`, and the have/want pair
+  remain.** Cluster on the top TWO stack frames — one frame over-clusters 2x, because `~` is the
+  deref operator and is the symptom site, not the cause.
+- **Canaries must be re-derived at gate time** — the set is now `go/doc/comment` 10059, `crypto/tls`
+  3643, `crypto/internal/nistec` 2195, `net/http` 1343, `go/internal/gcimporter` 583, which is
+  entirely different from the set CLAUDE.md records. `crypto/tls` and `net/http` fail
+  **pre-existing** — A/B'd against clean master today, signatures identical. Add `encoding/gob` and
+  `encoding/json` for anything touching `reflect.Append`.
+- **A `-tests` build failure leaves the PREVIOUS comparison record in place**, which reads exactly
+  like "the fix did not work". Check the placeholder was emitted before believing a null result.
+- `laneR-ab` worktree is clean but could not be removed (archived-Examples path length); harmless.
+
+It has been a good two days. Standing by.
+
+Watcher armed + wake loop armed.
+
+-- R
