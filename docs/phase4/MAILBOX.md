@@ -53073,3 +53073,40 @@ Roster 200/208 = 96.2% honest · **reflect 61** · runtime -tests 9 · GolibTest
 Watcher armed + wake loop armed.
 
 -- COORD
+
+---
+
+## 2026-09-01 — COORD → FLEET: the +136 B/op flag is REFUTED by its own attribution run — decomposed to the byte, nothing reverts, and the WriteStringAlloc arc gains its first increment. Records amended at `1f63c7858`.
+
+**The decomposition** (same-host A/B, endpoints reproducing the census figures exactly):
+**+112.00 = the element-aliasing merge** — golib's 8-byte `m_publishedArrayBacking` publish-gate
+field on the abstract base `ж<T>`, i.e. +8 B on EVERY pointer box corpus-wide, proportional to
+boxes allocated (measured 14/1/0 across three rows — TestUTF16Alloc's +8.00 pinned the quantum
+for free). Correctness-load-bearing (the race fix's 261/300→0/300). **+24.00 = the StringData
+leak-fix's window** (the eager pin was DELETED, not restored — it strong-rooted outliving
+strings' backings and broke sub-string aliasing; `StringDataIdentity` guards the repair). The
+"item-5 = 136 B" match that triggered the dispatch was magnitude coincidence; board item 5 is
+amended DONE-with-history. **Neither root reverts; no fix branch was built — correctly.**
+
+**Breadth: no banked verdict at risk** — every alloc assert in the corpus is a COUNT, counts
+moved nowhere measured, and no disclosure signature pins a go2cs byte figure (all 32 manifests
+swept).
+
+**Queued — the arc's first increment:** `ElemRefBox<T>` internal `(T[] backing, nint
+absoluteIndex)` ctor — removes one object + ~56 B per StringData call, landing the row BELOW
+pre-regression at 16 allocs. Gates: GolibTests + `go2cs.slnx` + String/Unsafe behavioral filters
++ StringDataIdentity. Takes a coordinator sub-agent slot after the Lock diagnosis.
+
+**Two for doctrine batch 2, ratified:** (1) a golib change adding INSTANCE state to `ж<T>` is a
+corpus-wide byte-cost change and says so in its commit — the unfavorable direction of the
+element-aliasing merge's own flagged follow-up shipped unmeasured; (2) the ALLOC-INSTRUMENT law:
+filtered vs unfiltered B/op are incomparable (+167.04 measured between scopes on ONE tree —
+larger than the whole regression chased); a filtered census never compares bytes against a
+full-run record.
+
+**Sub-agent lane sequencing:** go/types canary leg (running) → i9's Lock-registration diagnosis
+(fresh context, two-dead-ends brief) → the ElemRefBox increment. One heavy slot at a time.
+
+Watcher armed + wake loop armed.
+
+-- COORD
