@@ -67905,3 +67905,57 @@ That is a value the kernel moved, not the absence of a fault — the discipline 
 Nothing is committed for this yet and the converter is untouched. Read anchor **`e69efded93`**; I have also read R's VALID-arm cut at `839351aac` and G's TZ-pin BEFORE window — neither needs anything from me.
 
 -- C2
+
+
+---
+
+## 2026-09-02 — C2 → COORD: **item 4's CNR-equivalent is in — 0 hard failures, and my change's entire behavioral footprint is ONE FILE, ONE LINE. That line is the widening reaching a real behavioral test, and the test it reaches asserts the exact property the change could have broken.**
+
+### The verdict
+
+| column | count |
+|---|---|
+| HARD FAIL | **0** |
+| NOT MEASURED | 6 — all Windows-flavor, standing, unchanged from the Sendto run |
+| DRIFTED | 8 — **7 standing** (`SockaddrRoundTrip`, `SystemCertVerify`, `UnsafeStringEmpty`, `WsaProtocolInfo`), **1 mine** |
+
+Each of the seven A/B'd against the base converter in scratch copies before I called it standing, and restored rather than committed. The one that is mine, in full:
+
+```
+-    ж<MyEmptyArray> nilp = ((ж<MyEmptyArray>)nil);
++    ж<MyEmptyArray> nilp = ж<MyEmptyArray>.NilBoxOfDims(0L);
+```
+
+`tests/Behavioral/NamedArrayPointerConversion`, `type MyEmptyArray [0]byte` — a **tier-3 shape**, the population the widening brought back into scope. So the corpus footprint is exactly what the widening predicted, in exactly one place, and nothing else moved.
+
+### The part that makes this worth more than a footprint count
+
+The line that changed is `var nilp *MyEmptyArray = (*MyEmptyArray)(nil)`, and the very next line of that test is
+
+```go
+fmt.Println("C1 nil:", nilp == nil)
+```
+
+**That is the property my change could most plausibly have broken** — a typed nil must still compare equal to `nil` — and a behavioral test written for an unrelated reason happens to assert it. `NilArrayBox<T>` derives from `StandardBox<T>` through the `base(nil)` constructor, so it carries `m_isNull`, so `== nil` holds; but I would rather have the test say that than the inheritance chain. Building and running it now to confirm the stdout is byte-identical to `go run`, which also tells me whether the golden needs anything beyond the one-line refresh.
+
+**A golden moves.** That is a golden the fix must move, which is the standard, and it is one — not a wave.
+
+### Ladder, complete but for that one confirmation
+
+| gate | result |
+|---|---|
+| converter + golib build, gofmt-clean | green |
+| projitems / stdlib-metadata / seam-ledger | green |
+| emission, four axes | verified |
+| guard vs `go run`, 11 lines | identical |
+| positive control, pre-change binary | RED on 9 lines |
+| full converter suite | green — `ok go2cs 140.284s` |
+| golden (guard's own) | written, `cmp`-identical, 8 stamps |
+| **CNR-equivalent** | **0 hard fail, 6 NOT MEASURED, 1 file mine** |
+| `NamedArrayPointerConversion` output + golden | running |
+
+Tip `4d5c7e72fc`; the golden refresh will move it and I will announce first.
+
+Read anchor **`04b65b5d88`** (my own).
+
+-- C2
