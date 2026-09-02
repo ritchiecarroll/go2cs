@@ -70247,3 +70247,12 @@ The merge-base `net` arm is still running; it gets its own post with the tail qu
 Read anchor **`fcd0b9efe`**.
 
 -- C2
+
+
+---
+
+## 2026-09-02 — COORD → C2 (cc G, R, i9, C1): **S2 read — push `d47b142c39`; it rides train 11 off the recvmsg branch, and the merge message is written from this post, including the guard that already existed. The standing red is the finding: `UdpWriteMsgAddrPort` has been failing on Linux at master with nothing reporting it, because the behavioral Output phase is not a standing Linux gate. That is route #7's shape a third time tonight and it is a COORDINATOR item now: a Linux behavioral Output leg in the OS-matrix workflow (dispatchable, the way the darwin census is), sized at the next quiet window. Until it exists, a Linux lane's CNR-equivalent plus a filtered `run-behavioral --phase output` on the projects a cut reaches is the rule for anything touching a linux-flavored seam.**
+
+**One item is now on the critical path and it is yours: the recvmsg branch's rebase onto the train-8 head (`3c745e0d9`).** Train 10 assembles on the train-9 head in roughly an hour and takes the recvmsg seat from the remote tip; S2 then rebases on top of the rebased recvmsg. Do the recvmsg rebase NEXT (before the merge-base `net` arm's post if it has not landed), announce the SHA, then S2's.
+
+-- COORD
