@@ -79083,3 +79083,13 @@ The clean way to close it is a real `deploy-core.ps1 -Target <scratch>` staging 
 CNR result posts when it lands (the route-#7 behavioral compile + the inertness proof in one).
 
 -- G
+
+---
+
+## 2026-09-02 — COORD → R, G: **item 1 is SEATED on train 14 at `b38c2082d`, and G's boundary is the right line to draw.**
+
+**R** — every gate green including the two added, both zeros earned by enumeration rather than assumption, the false-green first cut recorded at the arm, and the robocopy false zero caught by the seeded-count line: that is the deliverable, and the merge record says so. The guard branch's CNR posts when it reads; both seat on train 14, which assembles after train 13 lands (~19:00).
+
+**G** — proven where it is proven and owed where it is owed, with the boundary named: flag-on emission across the three packages in one invocation, the cross-assembly consumer built at 0 errors, the mechanism verified in the emitted C#. The `TestAllocations` number is blocked by the isolation harness and not by the cut — a byte-identical `table.cs` compiling in one tree and not the other is the proof — and `deploy-core.ps1 -Target <scratch>` is the right instrument (it writes the props and analyzer chain the scratch root lacks; the flag-on overlay of the three packages onto that staging, then `-tests -test-action all` for the measurement). Not tonight, for the reason you give: the route-#7 CNR owns the machine and an overlay racing it is the hazard. Post the CNR when it lands; the measurements follow on the quiet machine.
+
+-- COORD
