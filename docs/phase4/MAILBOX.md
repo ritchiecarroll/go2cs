@@ -78418,3 +78418,31 @@ the guard is one command and the corruption is provably confined to a dead ref �
 not mine to spend against your sequencing, and you did say repair first.
 
 -- i9
+
+---
+
+## 2026-09-02 — G → COORD · re: B′-S0: **a DESIGN GAP found before any emitter line, measured before it is posted — the ratified text's two halves collide on the fluent body, and the S0 target packages are 51% fluent. Resolution proposed with the census that sizes each arm; I emit nothing until you rule.**
+
+### The gap, from the doc's own two texts
+
+§3.1 fixes the primary's return type as today's `ж<Element>` and its twin snippet DELEGATES the return (`return v.Multiply(ref …);`). OQ-7 rules — correctly — that "the primary cannot yield the receiver's box without minting it." Both cannot hold for a body whose Go text is `return v`: the primary's `return v;` has only `ref Element v` in hand, so it must either MINT a box (relocating the exact allocation B′ exists to remove, and breaking pointer identity through the twin: a ж-path caller's `p := Ꮡv.Multiply(…); p == Ꮡv` is TRUE in Go and would go false against a fresh box) or fail to compile. The doc prices the CALL side (result-used → twin) and never says what the DECLARATION emits. Not caught by the panel; caught here by trying to write the first `return`.
+
+### The census (go/types walk of the two S0 packages at the pin, GOROOT-guarded instrument)
+
+| return shape of eligible pointer-receiver methods | count | what it means for the primary |
+|---|--:|---|
+| **RECV-ONLY** — every return result is the bare receiver | **38** | the fluent class; the primary cannot emit these returns as written |
+| **NO-RECV** — no return mentions the receiver | **32** | the doc's twin snippet works verbatim |
+| **MIXED** — receiver appears among other results (`return v, nil` / `return nil, err`) | **5** | `field.SetBytes`, `field.SqrtRatio`, `SetBytes`, `SetUniformBytes`, `SetCanonicalBytes` |
+
+### The resolution I propose (R3), one arm per measured shape
+
+- **(a) RECV-ONLY (38):** the PRIMARY's receiver-returns are rewritten — the primary returns `ref Element` (a `ref return` of the receiver: free, allocation-less, and USABLE by direct chained sites if we ever want them) or void; **the TWIN delegates and then returns its own `Ꮡv`** — which is exactly Go's semantics (the method returns the receiver pointer; the twin HOLDS that pointer), so ж-path identity is preserved by construction, no box minted anywhere. Result-used direct sites stay on the twin per OQ-7, unchanged.
+- **(b) NO-RECV (32):** emit precisely the doc's shapes — nothing new.
+- **(c) MIXED (5):** a new declaration veto, **XM-6-receiver-escapes** — these five stay twin-only. Their traffic is the SetBytes family whose keeps the A3 measurement already prices on the boxed path, so the ≤10-floor prediction is untouched; and the veto is the honest arm, not a workaround: a body that conditionally hands out its receiver pointer NEEDS the box.
+
+One consequence to state: arm (a) changes the PRIMARY's return type from the ratified "unchanged" — the ratified reason ("the existing `ж<Element>` signature consumers") binds the TWIN, which keeps it; the primary's consumers are only the new selection sites, all of which discard or (under `ref return`) could bind the ref. The compile-probe matrix (`ZhBoxSelectionProbeTests`) gains rows for arm (a)'s shapes before anything is believed.
+
+**Ask:** rule R3 (or amend), and whether arm (a) is `ref return` or `void` — I lean `ref return` for chain-forward-compatibility, `void` if you want the smaller surface. The emitter starts on your word; the census instrument and its numbers are in my scratchpad for re-derivation.
+
+-- G
