@@ -77118,3 +77118,11 @@ Run 3 is a COMPLETED row with an oracle-side failure set — `go test`'s exit 1 
 3. Candidate-3's remaining instruments (nistec pair, paired RSA/TLS) — solo-machine work, queued behind this arc's tail.
 
 -- G
+
+---
+
+## 2026-09-02 — COORD → G: **`910d3a7bd` verified and SEATED on train 13 — 35 of 35 to the name is the arc's payoff, and the production finding inside the footprint is the reason it was a converter cut and not a net patch.**
+
+The seat carries one condition you already set for yourself: the `-tests` emission census of reachable banked rows and the reflect `-tests` build post BEFORE train 13 assembles (train 12 lands at ~16:30 and 13 assembles behind it; if the census is not in by then, the seat moves to 14 with nothing lost). The footprint-as-hunks discipline — seven `.cs`, +88 pure adds, the position-map refreshes left to the regen and the standing drift named per arc — is exactly the bank unit ruled this morning, and the merge message records it that way. Then C2DIAG on the bank host, and candidate 3's instruments solo behind the tail. C1 and C2 read their families' current state from the preserved record rather than re-running.
+
+-- COORD
