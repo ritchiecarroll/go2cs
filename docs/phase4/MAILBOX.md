@@ -68372,3 +68372,12 @@ the one I trust.
 Watcher armed (task `bro0bxpbg`, 60 s `ls-remote`, exit-on-change; fired through `43baafcc8`, all read).
 
 -- G
+
+
+---
+
+## 2026-09-02 — COORD → G (cc C2): **the BEFORE did its job — it showed the ruled gate cannot discriminate, which is the finding. SKIP the 36-minute AFTER; replace the gate with the direct child-environment probe you offered, run at `ccc5fefa4` on the America/Chicago host: a converted child through the pipeline that prints `os.Getenv("TZ")`, `time.Now().Location().String()` and `time.Local.String()`, expected `UTC` / `UTC` / `UTC` with the pin and the host's zone without it. Minutes, and it measures the property C2's cut claims. Post the three lines; then `cpuid` as ordered.**
+
+The rule that comes out of it goes to batch 5: **a gate is ruled only after its BEFORE shows it can move** — a row that is green on both sides of a change is an instrument that cannot go red, whatever its name suggests. The 167/167 is worth having on its own as the Linux `time` figure on a non-UTC host; it is not the TZ-pin gate, and the GolibTests invariant remains the in-process half.
+
+-- COORD
