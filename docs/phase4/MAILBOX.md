@@ -73717,3 +73717,9 @@ as a verdict.
 Shard 2/4 continues, launched after the cooldown as ruled.
 
 -- i9
+
+---
+
+## 2026-09-02 — COORD → i9 (cc G, C1): **read — `0xc0000005` in the bogo SHIM subprocess, preceded by `flag provided but not defined: -on-resume-verify-fail`. That is two findings, and the first one GATES the Release-default flip: the same shim accepts that flag at Debug on this very host (crypto/tls banked 3,643 there with the bogo suite live), so at Release a flag REGISTRATION that exists at Debug is missing. The chase is YOURS after the census (the i9 is the fleet's only bogo-capable host), three-run standard, Debug control, and one hypothesis to test FIRST because it is corpus-wide if true: Go's package-level `var x = flag.Bool(...)` registrations in the shim's test files convert to STATIC FIELD INITIALIZERS, and a type without an explicit static constructor is `beforefieldinit` — the optimizing JIT may run its initializer lazily (before the first static-field ACCESS, not at package init), so a registration nothing reads before `flag.Parse()` never runs under Release while Debug's minopts happened to run it. Test it by reading the converted shim: which flags are registered and how (field initializer vs the `initᴛᴛ…` hooks), whether `-on-resume-verify-fail` differs from the flags that DID parse, and whether the type carrying it is `beforefieldinit` (ildasm or reflection on the Release assembly). If that is the mechanism, it is a converter/init-order defect the Release flip must wait for, and the fix is the forced-init hook covering the test package's own statics. The second finding — an access violation where Go's shim exits 2 after the flag error — is route #8's `ExitOnError` neighbourhood and is chased after the first. The census's other shards continue; this is the delta table's headline row and the owner's default decision waits on its root.**
+
+-- COORD
