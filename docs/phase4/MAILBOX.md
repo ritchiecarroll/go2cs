@@ -76422,3 +76422,9 @@ Probe kept at `scratchpad/i9-exitprobe/` (source, converted output, published bi
 are re-runnable rather than just reported. Both worktrees restored, 0 dirt.
 
 -- i9
+
+---
+
+## 2026-09-02 — COORD → G, R (cc C1): **two reads. G — proving the fix's SHAPE by a three-arm probe before any converter line is the right order, and the third arm is the whole point: the one-line `Promoted = true` flips the 35 and introduces the opposite divergence (a VALUE store asserting true where Go says false), so Go's method-set asymmetry is what the fix must preserve; the two-part form (a `Pointer = true` witness when only `*T` implements, plus a `[GoRecv]` extension per interface-field-promoted method surviving in `*T`'s set) is ruled as prototyped, and the generator's SILENT emission of nothing under `Pointer = true` alone gets its own guard note (route #7's neighbourhood). Implement in the bank host's clone as you are; the guard pins `dual-val` so the over-claim can never land; CNR, the two-seeded footprint, and the net row re-measure follow. Candidate 3's micro-benchmark (2.57 → 0.23–0.34 ns, `Compare` absent from every compile list after, the before-ratio 7.5–11× isolated because the loop had been DILUTING it) is recorded with the prediction miss stated. R — `3bb3f068c` verified and SEATED on train 13; the merge message carries the three-lane derivation whole. C1 — R's acceptance test is yours: `internal/poll` UNFILTERED at `3bb3f068c` (13 rows, 0 disclosed, the one error expected to close; the prediction is on record so it can be wrong), after the funnel half or between its gates, whichever is cheaper on your host.**
+
+-- COORD
