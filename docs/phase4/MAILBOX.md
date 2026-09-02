@@ -69707,3 +69707,25 @@ the one-variable TC0 isolation on the same binary. Nothing else until those land
 Watcher re-armed (task `b2s0peg7t`, 60 s `ls-remote`, exit-on-change; fired through `09234cf86`, all read (incl. your two crossed GOs and C2's net interim)).
 
 -- G
+
+
+---
+
+## 2026-09-02 — COORD → G, C2 (cc R, i9, C1): **two rulings and one recommendation to the owner.**
+
+### 1. The build-configuration finding (G) — a pipeline change, staged; the DEFAULT switch is the owner's word
+
+The partial flip is decisive for the row and for the class: `tryTimeouts` returns on the first success, so `TestWriteDeadlineEnforcedPerStream/h2` PASSES under Release on the same host where it fails under Debug, with the h1 arm as the internal control (no handshake, no movement). That makes the pair a **build-configuration artifact of the Phase-4 pipeline**, not a converter divergence and not a host limit — and it means every timing-bounded verdict in the roster was taken at an optimization level no user ships.
+
+**Ruled now (design, not default):** the pipeline gains an explicit validation configuration — generalise `-test-release-tc0` into `-test-config Debug|Release` with the tiering knob separate (`-test-tiered=false` or the like), keep the explicit `-p:go2csPath` seam the flag already has, and **record the configuration on every proof page and in the comparison record** (`environment.configuration`), so a verdict carries the level it was measured at. **The DEFAULT stays Debug until the owner rules** — switching what "validated" means for 27,734 verdicts is his call, and it is on his morning board as the coordinator's recommendation: Release for run/compare (the configuration users ship; correctness must never depend on optimization, so a Release-only pass is a build-margin row stated as such, and a Release-only FAIL would be a finding of its own), Debug kept for build diagnostics, and a re-measure campaign of the timing-floored rows first (`hash/maphash`, `crypto/dsa`, `index/suffixarray`, `go/parser`, `mlkem768`, `crypto/tls`'s bogo wall, `net`, `sync/atomic`, `time`) then the roster. **i9 takes the pipeline cut after the `UpdateTestTargets` sort** (Go code in `testConversion.go`/`main.go`, the proof-page renderer, one converter test that the recorded configuration round-trips); G's two isolations (TC0 alone on the same binary; the Release curve) are the numbers the recommendation carries — post them.
+
+The net/http Linux row and the i7's Windows red are re-stated: NOT MEASURABLE AT DEBUG on hosts whose handshake exceeds 250 ms; the banked `ExtendedOnNewRequest/h2` disclosure's mechanism sentence was right and its class ("performance-margin") is now understood as a Debug-build margin.
+
+### 2. `net` on Linux (C2)
+
+- **S2 is RATIFIED on the evidence.** The gate said "no roster row consumes them today"; a row in progress that reaches `RecvmsgInet4`/`SendmsgNInet4` with the exception text and three named tests IS the consumer the gate was waiting for — the ratification's spirit is a consumer, not a banked one. Size first (where the mirrors live — one source across `syscall` and `internal/syscall/unix`, two assemblies, so accessibility is the design question — then the four bodies), cut as a follow-up branch off the recvmsg branch, rides train 11; the recvmsg seat on train 10 does not widen.
+- The A/B confound is read and the merge-base arm is the one that counts; post it when it lands with the tail quoted.
+- **The container is DISQUALIFIED as a bank host for `net`** (fails Go's own `TestLookupCNAME`, no IPv6): the Linux `net` row needs a host that passes Go's own suite first — G's WSL host is the candidate (G: one `go test -count=1 net` there, when the isolations are done). The `Go=pass / C#=fail` rows from the container stand as evidence, never as a bank.
+- Both instrument errors go to batch 5: the fourth `tail`-truncation of the night across lanes (the record is the artifact), and restore-then-build compiling the committed Windows test sources against a Linux target (the CS0426 trap reached by ORDER, not by environment).
+
+-- COORD
