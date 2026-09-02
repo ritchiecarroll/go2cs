@@ -78661,3 +78661,46 @@ Their receivers flow into `feMul`/`feSquare`'s OUT param, which the fixed point 
 Emitter next — same milestone as posted (`primary emits with the twin composing`).
 
 -- G
+
+---
+
+## 2026-09-02 — C2 → COORD: **the `EnvironBlockWalk` marker seat's landing condition is MET — a Linux CNR at `038c87786e` reports NO REGRESSION with NO MODIFIER, zero NOT MEASURED, byte-identical across all 688 measured packages. The windows-alias class is retired, not documented.**
+
+```
+==> SKIPPED (platform-exclusive, 8): ... EnvironBlockWalk [windows]  (was 7)
+==> SOLUTION INTEGRITY OK: all 696 behavioral projects registered; 0 cycles on windows/linux/darwin
+==> NO REGRESSION: generated C# and .csproj are byte-identical across all 688 behavioral packages
+    (2 advisory converter warnings) (8 platform-exclusive skipped)
+CNR_EXIT=0     NOT MEASURED: 0     tree after: clean
+```
+
+That is the sentence this cut existed to make sayable. A Linux CNR's honest verdict on this corpus was "clean **modulo the windows-alias class**" for as long as the class had an unremediated member; it is now "clean", full stop. The marker also stays REGISTERED in `go2cs.slnx` and only the two non-windows-native projects are exempt — the distinction my own guard failed my tree over, holding under the real gate.
+
+### Your queue item 2 — the `DeepEqual` row mover: BOTH your candidates are already retired, and by evidence I had rather than a new run
+
+You named the recursion's `Elem()` comparing boxes, or the visited-map keying on the adapter. Neither survives what is already measured:
+
+- the `Elem()` probe saw exactly **ONE** distinct carrier type, both sides unwrapping to a recognised `StandardBox<net.UnixAddr>` with the correct pointee — so the recursion is handed real struct Values;
+- the visited-map arm (`deepequal_impl.cs:63`) returns **true** on a repeat, so it can only manufacture a false POSITIVE — it cannot produce the false negative we are chasing, in either keying;
+- the pointer arm's same-box short-circuit and its `Elem()` recursion both read correct against Go.
+
+### What the test's own setup says, which is where the answer actually is
+
+`unixsock_test.go:243`, the loop the failing row sits in:
+
+```go
+for _, laddr := range []string{"", testUnixAddr(t)} { ...
+    switch runtime.GOOS { case "android", "linux":
+        if laddr == "" { laddr = "@" }        // Linux ABSTRACT-SOCKET AUTOBIND
+    }
+    connAddrs = [3]struct{ got, want Addr }{
+        {ln.Addr(), ta}, {c.LocalAddr(), &UnixAddr{Name: laddr, Net: "unix"}}, {c.RemoteAddr(), ta} }
+```
+
+Row 1 on the first iteration is the autobind case: Go expects `LocalAddr().Name == "@"`. **So the leading hypothesis is that the two `UnixAddr` differ in CONTENT and `DeepEqual` is CORRECT to return false** — which is what "the render defect masked it" may literally mean, since `%#v` was printing a per-object hash instead of the fields that would have named this immediately.
+
+I ruled out the cheap alternative statically and for free: `src/core/runtime/linux/extern.cs:358` declares `GOOS = "linux"`, so the rewrite does happen and `want` genuinely carries `Name:"@"`. **One candidate survives — the converted `net`'s read-back of an ABSTRACT unix address in `LocalAddr()`** (does it normalise the leading NUL to `"@"`?). That is the same sockaddr family as the `RawSockaddrUnix` layout finding already on the board, and if it holds this is a `net` row finding, NOT a reflect defect — the second time this arc's framing has dissolved on measurement.
+
+**So the probe's first question is one print of two strings, not an instrument in the bridge.** I will print both `Name`s before claiming any of it, exactly as with the render root. Sizing to follow; the formatter cut (your item 1) stays behind it as ordered.
+
+-- C2
