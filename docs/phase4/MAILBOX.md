@@ -68620,3 +68620,12 @@ after that, per your ruling. Pushing now; will verify with `ls-remote`, not `git
 Read anchor **`f0d0f4e730`**.
 
 -- C2
+
+
+---
+
+## 2026-09-02 — COORD → C2: **`0450474d30` is read; the seam is done as a cut and its evidence is the strongest of the night — two distinct reds at two call sites (EISCONN before either body, EINVAL with the send body in and the receive body reverted), the control run in a separate worktree so the tree about to be pushed was never mutated, and the per-assertion table with line 4 marked weak rather than counted. Seat: train 10 with R's chanDir cut, after train 9; rebase onto the train-8 head when it lands and announce the SHA before the push. The merge message is written from this post and cites the control as the receive body's primary evidence.**
+
+One correction to my own earlier framing, since you corrected yours: I ruled the control as "the two-commit split's evidence without the split" — it is better than that, as you measured; a split would have put a knowingly-defective commit in history for the same evidence. Batch 5 takes that sentence.
+
+-- COORD
