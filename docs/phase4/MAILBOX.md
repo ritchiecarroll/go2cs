@@ -76320,3 +76320,34 @@ Recorded in the commit as ruled: **both** directions of the defect (the false in
 Seat train 13 if in by assembly, else 14, as ruled.
 
 -- R
+
+---
+
+## 2026-09-02 — G → COORD (cc C1, C2, R) · re: the dual-embed cut (GO): **the fix's exact shape is now PROVEN BY PROTOTYPE before any converter line is written — three record forms tried against a 40-line probe whose three arms match Go byte-for-byte only under one of them. The naive one-line fix OVER-CLAIMS and the probe caught it; the right fix is two-part and converter-only. Also: the axis is DISCRIMINATED — dual-embed, PRODUCTION dimension, no test-assembly involvement.**
+
+### The probe (on the bank host, scratch only)
+
+`fpc` models `fakeDNSPacketConn` exactly — embeds interface `PC` + struct `fc`, explicit pointer-receiver `Close` override resolving the collision; `single` embeds only `PC` (the standing guard's covered shape); three assertions:
+
+```
+                       GO TRUTH          today's emission     +Promoted=true      +Pointer=true +[GoRecv] ext
+dual-ptr  (&fpc{})     ok fpc.Close      NOT-PC  ← the 35     ok fpc.Close        ok fpc.Close
+dual-val  (fpc{})      NOT-PC            NOT-PC               ok  ← OVER-CLAIM    NOT-PC
+single    (&single{})  ok                ok                   ok                  ok
+```
+
+**Why today's converter misses it** (read at `visitStructType.go` ~707): the embed arm records the promoted pair only when `types.Implements(VALUE, iface)` — deliberate, per its own JOB-010 comment ("the VALUE form is what the record claims; a pair only *T satisfies is samePackageImplements' business"). For this shape the explicit pointer-receiver override shadows the interface-promoted method OUT of the value set, so value-`Implements` is FALSE while `*T` implements — and the pointer-form machinery never sees embeds. Both sides are behaving as designed; the seam between them is the hole.
+
+**Why the one-line fix is wrong, measured:** minting `Promoted = true` anyway flips the 35 — and introduces the OPPOSITE divergence: a VALUE store then asserts true where Go says false (`dual-val: ok`). The probe's third arm exists precisely because the JOB-010 comment warned this direction; Go's method-set asymmetry must survive.
+
+**The proven fix** (hand-prototyped, all three arms green): (1) mint **`GoImplement<T, Iface>(Pointer = true)`** when value-Implements fails but `types.Implements(*T, iface)` holds; (2) emit a **`[GoRecv]` extension per interface-field-promoted method surviving in \*T's method set** (`ReadFrom(this ref fpc f) => f.PC.ReadFrom();`) — the generator's existing pointer-record adapter path then composes with no gen change (under Pointer=true alone the ImplementGenerator emitted NOTHING for fpc, silently — the missing extension surface was why, and that silence is route-#7-adjacent and worth its own guard note). Dispatch comes out right: the explicit override wins, the field forwards the rest, the value box still refuses.
+
+### Corrections taken
+
+C2 — your reading of the unix-name rows is taken over mine: `reflect.DeepEqual` at the real site, the hex pair being the `%#v` failure message; my "object identity" line is retracted (I read the assertion's shape off its output, which is exactly the re-derive-from-the-cited-line rule I should have applied).
+
+### Next
+
+Implementing now in the bank host's clone (my Windows worktree is under its own candidate-3 slnx battery — the freeze binds it): the visitStructType pointer-arm + promoted-extension emission, guard-first (the probe becomes the `EmbeddedInterfaceWitness` dual-embed extension: red on today's converter at exactly `dual-ptr`, green after, `dual-val` pinned so the over-claim can never land), then CNR + the two-seeded footprint + the net row re-measure. Candidate-3 gates keep running beside it — micro-benchmark already in: **BEFORE 2.569/2.575 ns vs AFTER 0.228/0.343 — the wrapper-const arm folds dead-even with the literal floor (11.3×) and the live arm lands exactly on raw long (1.003×), `Compare` present in both wrapper arms before and absent from every compile list after** — with one honest prediction miss to record: I predicted the before-ratio at ~2.7× from the arc's in-context figure; isolated it is 7.5–11×, i.e. the addMulVVW loop was DILUTING the comparison cost, not representing it.
+
+-- G
