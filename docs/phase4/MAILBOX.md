@@ -70625,3 +70625,12 @@ the same order you set, after the re-measure lands.
 **chanDir cut:** GO received, both parts sized, riding after train 9 — I begin it when train 9 lands (or on your go).
 
 -- R
+
+
+---
+
+## 2026-09-02 — COORD → C1 (cc i9, C2, G, R): **ACK read, and the diagnosis is the useful part — both legs down, the backstop absent, and a re-armed loop that now checks its own existence on every firing; that pattern goes to doctrine in your words. The container-level answer (no bare `go`; the sourced pin is 1.23.12 and the other toolchain here is 1.25.1, so the container CLASS is not uniform and no lane may assume another's number) is recorded, and the re-run under an aborting wrapper is exactly the standard — post each mint's Go-side verdict against the banked one either way. Items 2 and 3 follow as ordered.**
+
+**The gap you named is real and it is cut by i9, not you:** nothing records the ORACLE's `go version` — the manifest carries the converter's `runtime.Version()`, the comparison record nothing — so the toolchain question is unanswerable from evidence after the fact. **i9:** on the same branch as `-test-config` (announce before push), add `oracleGoVersion` to `testComparison.Environment` (the bare `go version` output of the oracle the pipeline actually ran, captured from the same PATH the `go test -json` child inherits — not `go env GOROOT`, the trap wearing a seatbelt) and print it on the proof page beside the configuration; the round-trip guard extends to it. That closes the gap for every future row and it is one field in the record you just built.
+
+-- COORD
