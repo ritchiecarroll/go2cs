@@ -37,15 +37,9 @@ public static nint LeadingZeros16(uint16 x) {
     return 16 - Len16(x);
 }
 
-// LeadingZeros32 returns the number of leading zero bits in x; the result is 32 for x == 0.
-public static nint LeadingZeros32(uint32 x) {
-    return 32 - Len32(x);
-}
+// go2cs generated this placeholder — func LeadingZeros32 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// LeadingZeros64 returns the number of leading zero bits in x; the result is 64 for x == 0.
-public static nint LeadingZeros64(uint64 x) {
-    return 64 - Len64(x);
-}
+// go2cs generated this placeholder — func LeadingZeros64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // --- TrailingZeros ---
 
@@ -88,34 +82,22 @@ public static nint TrailingZeros16(uint16 x) {
     return (nint)deBruijn32tab[(nint)(((uint32)((uint16)(x & ((uint16)0 - x))) * (uint32)deBruijn32 >> (int)((32 - 5))))];
 }
 
-// TrailingZeros32 returns the number of trailing zero bits in x; the result is 32 for x == 0.
-public static nint TrailingZeros32(uint32 x) {
-    if (x == 0) {
-        return 32;
-    }
-    // see comment in TrailingZeros64
-    return (nint)deBruijn32tab[(nint)((((uint32)(x & ((uint32)0 - x))) * (uint32)deBruijn32 >> (int)((32 - 5))))];
-}
+// go2cs generated this placeholder — func TrailingZeros32 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// TrailingZeros64 returns the number of trailing zero bits in x; the result is 64 for x == 0.
-public static nint TrailingZeros64(uint64 x) {
-    if (x == 0) {
-        return 64;
-    }
-    // If popcount is fast, replace code below with return popcount(^x & (x - 1)).
-    //
-    // x & -x leaves only the right-most bit set in the word. Let k be the
-    // index of that bit. Since only a single bit is set, the value is two
-    // to the power of k. Multiplying by a power of two is equivalent to
-    // left shifting, in this case by k bits. The de Bruijn (64 bit) constant
-    // is such that all six bit, consecutive substrings are distinct.
-    // Therefore, if we have a left shifted version of this constant we can
-    // find by how many bits it was shifted by looking at which six bit
-    // substring ended up at the top of the word.
-    // (Knuth, volume 4, section 7.3.1)
-    return (nint)deBruijn64tab[(nint)((((uint64)(x & ((uint64)0 - x))) * (uint64)deBruijn64 >> (int)((64 - 6))))];
-}
+// go2cs generated this placeholder — func TrailingZeros64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+// see comment in TrailingZeros64
+// If popcount is fast, replace code below with return popcount(^x & (x - 1)).
+//
+// x & -x leaves only the right-most bit set in the word. Let k be the
+// index of that bit. Since only a single bit is set, the value is two
+// to the power of k. Multiplying by a power of two is equivalent to
+// left shifting, in this case by k bits. The de Bruijn (64 bit) constant
+// is such that all six bit, consecutive substrings are distinct.
+// Therefore, if we have a left shifted version of this constant we can
+// find by how many bits it was shifted by looking at which six bit
+// substring ended up at the top of the word.
+// (Knuth, volume 4, section 7.3.1)
 // --- OnesCount ---
 internal static UntypedInt m0 => 0x5555555555555555; // 01010101 ...
 
@@ -145,41 +127,9 @@ public static nint OnesCount16(uint16 x) {
     return (nint)(pop8tab[(x >> (int)(8))] + pop8tab[(uint16)(x & 0xff)]);
 }
 
-// OnesCount32 returns the number of one bits ("population count") in x.
-public static nint OnesCount32(uint32 x) {
-    return (nint)(pop8tab[(int)((x >> (int)(24)))] + pop8tab[(int)((uint32)((x >> (int)(16)) & 0xff))] + pop8tab[(int)((uint32)((x >> (int)(8)) & 0xff))] + pop8tab[(int)((uint32)(x & 0xff))]);
-}
+// go2cs generated this placeholder — func OnesCount32 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// OnesCount64 returns the number of one bits ("population count") in x.
-public static nint OnesCount64(uint64 x) {
-    // Implementation: Parallel summing of adjacent bits.
-    // See "Hacker's Delight", Chap. 5: Counting Bits.
-    // The following pattern shows the general approach:
-    //
-    //   x = x>>1&(m0&m) + x&(m0&m)
-    //   x = x>>2&(m1&m) + x&(m1&m)
-    //   x = x>>4&(m2&m) + x&(m2&m)
-    //   x = x>>8&(m3&m) + x&(m3&m)
-    //   x = x>>16&(m4&m) + x&(m4&m)
-    //   x = x>>32&(m5&m) + x&(m5&m)
-    //   return int(x)
-    //
-    // Masking (& operations) can be left away when there's no
-    // danger that a field's sum will carry over into the next
-    // field: Since the result cannot be > 64, 8 bits is enough
-    // and we can ignore the masks for the shifts by 8 and up.
-    // Per "Hacker's Delight", the first line can be simplified
-    // more, but it saves at best one instruction, so we leave
-    // it alone for clarity.
-    UntypedInt m = /* 1<<64 - 1 */ 18446744073709551615;
-    x = (uint64)((x >> (int)(1)) & ((uint64)((uint64)m0 & (uint64)m))) + (uint64)(x & ((uint64)((uint64)m0 & (uint64)m)));
-    x = (uint64)((x >> (int)(2)) & ((uint64)((uint64)m1 & (uint64)m))) + (uint64)(x & ((uint64)((uint64)m1 & (uint64)m)));
-    x = (uint64)(((x >> (int)(4)) + x) & ((uint64)((uint64)m2 & (uint64)m)));
-    x += (x >> (int)(8));
-    x += (x >> (int)(16));
-    x += (x >> (int)(32));
-    return (nint)((nint)x & (nint)((1 << (int)(7)) - 1));
-}
+// go2cs generated this placeholder — func OnesCount64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // --- RotateLeft ---
 
@@ -214,25 +164,9 @@ public static uint16 RotateLeft16(uint16 x, nint k) {
     return (uint16)(x.Lsh(s) | x.Rsh(((nuint)n - s)));
 }
 
-// RotateLeft32 returns the value of x rotated left by (k mod 32) bits.
-// To rotate x right by k bits, call RotateLeft32(x, -k).
-//
-// This function's execution time does not depend on the inputs.
-public static uint32 RotateLeft32(uint32 x, nint k) {
-    UntypedInt n = 32;
-    nuint s = (nuint)((nuint)k & (nuint)(n - 1));
-    return (uint32)(x.Lsh(s) | x.Rsh(((nuint)n - s)));
-}
+// go2cs generated this placeholder — func RotateLeft32 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// RotateLeft64 returns the value of x rotated left by (k mod 64) bits.
-// To rotate x right by k bits, call RotateLeft64(x, -k).
-//
-// This function's execution time does not depend on the inputs.
-public static uint64 RotateLeft64(uint64 x, nint k) {
-    UntypedInt n = 64;
-    nuint s = (nuint)((nuint)k & (nuint)(n - 1));
-    return (uint64)(x.Lsh(s) | x.Rsh(((nuint)n - s)));
-}
+// go2cs generated this placeholder — func RotateLeft64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // --- Reverse ---
 
@@ -284,31 +218,11 @@ public static nuint ReverseBytes(nuint x) {
     return (nuint)ReverseBytes64((uint64)x);
 }
 
-// ReverseBytes16 returns the value of x with its bytes in reversed order.
-//
-// This function's execution time does not depend on the inputs.
-public static uint16 ReverseBytes16(uint16 x) {
-    return (uint16)((x >> (int)(8)) | (uint16)(x << (int)(8)));
-}
+// go2cs generated this placeholder — func ReverseBytes16 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// ReverseBytes32 returns the value of x with its bytes in reversed order.
-//
-// This function's execution time does not depend on the inputs.
-public static uint32 ReverseBytes32(uint32 x) {
-    UntypedInt m = /* 1<<32 - 1 */ 4294967295;
-    x = (uint32)((uint32)((x >> (int)(8)) & ((uint32)((uint32)m3 & (uint32)m))) | ((uint32)(x & ((uint32)((uint32)m3 & (uint32)m))) << (int)(8)));
-    return (uint32)((x >> (int)(16)) | (x << (int)(16)));
-}
+// go2cs generated this placeholder — func ReverseBytes32 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// ReverseBytes64 returns the value of x with its bytes in reversed order.
-//
-// This function's execution time does not depend on the inputs.
-public static uint64 ReverseBytes64(uint64 x) {
-    UntypedInt m = /* 1<<64 - 1 */ 18446744073709551615;
-    x = (uint64)((uint64)((x >> (int)(8)) & ((uint64)((uint64)m3 & (uint64)m))) | ((uint64)(x & ((uint64)((uint64)m3 & (uint64)m))) << (int)(8)));
-    x = (uint64)((uint64)((x >> (int)(16)) & ((uint64)((uint64)m4 & (uint64)m))) | ((uint64)(x & ((uint64)((uint64)m4 & (uint64)m))) << (int)(16)));
-    return (uint64)((x >> (int)(32)) | (x << (int)(32)));
-}
+// go2cs generated this placeholder — func ReverseBytes64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // --- Len ---
 
@@ -336,39 +250,9 @@ public static nint /*n*/ Len16(uint16 x) {
     return n + (nint)len8tab[x];
 }
 
-// Len32 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
-public static nint /*n*/ Len32(uint32 x) {
-    nint n = default!;
+// go2cs generated this placeholder — func Len32 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    if (x >= ((uint32)1 << (int)(16))) {
-        x >>= (int)(16);
-        n = 16;
-    }
-    if (x >= ((uint32)1 << (int)(8))) {
-        x >>= (int)(8);
-        n += 8;
-    }
-    return n + (nint)len8tab[(int)(x)];
-}
-
-// Len64 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
-public static nint /*n*/ Len64(uint64 x) {
-    nint n = default!;
-
-    if (x >= ((uint64)1 << (int)(32))) {
-        x >>= (int)(32);
-        n = 32;
-    }
-    if (x >= ((uint64)1 << (int)(16))) {
-        x >>= (int)(16);
-        n += 16;
-    }
-    if (x >= ((uint64)1 << (int)(8))) {
-        x >>= (int)(8);
-        n += 8;
-    }
-    return n + (nint)len8tab[(int)(x)];
-}
+// go2cs generated this placeholder — func Len64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // --- Add with carry ---
 
@@ -401,23 +285,11 @@ public static (uint32 sum, uint32 carryOut) Add32(uint32 x, uint32 y, uint32 car
     return (sum, carryOut);
 }
 
-// Add64 returns the sum with carry of x, y and carry: sum = x + y + carry.
-// The carry input must be 0 or 1; otherwise the behavior is undefined.
-// The carryOut output is guaranteed to be 0 or 1.
-//
-// This function's execution time does not depend on the inputs.
-public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry) {
-    uint64 sum = default!;
-    uint64 carryOut = default!;
+// go2cs generated this placeholder — func Add64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    sum = x + y + carry;
-    // The sum will overflow if both top bits are set (x & y) or if one of them
-    // is (x | y), and a carry from the lower place happened. If such a carry
-    // happens, the top bit will be 1 + 0 + 1 = 0 (&^ sum).
-    carryOut = (((uint64)(((uint64)(x & y)) | ((uint64)(((uint64)(x | y)) & ~sum)))) >> (int)(63));
-    return (sum, carryOut);
-}
-
+// The sum will overflow if both top bits are set (x & y) or if one of them
+// is (x | y), and a carry from the lower place happened. If such a carry
+// happens, the top bit will be 1 + 0 + 1 = 0 (&^ sum).
 // --- Subtract with borrow ---
 
 // Sub returns the difference of x, y and borrow: diff = x - y - borrow.
@@ -452,21 +324,9 @@ public static (uint32 diff, uint32 borrowOut) Sub32(uint32 x, uint32 y, uint32 b
     return (diff, borrowOut);
 }
 
-// Sub64 returns the difference of x, y and borrow: diff = x - y - borrow.
-// The borrow input must be 0 or 1; otherwise the behavior is undefined.
-// The borrowOut output is guaranteed to be 0 or 1.
-//
-// This function's execution time does not depend on the inputs.
-public static (uint64 diff, uint64 borrowOut) Sub64(uint64 x, uint64 y, uint64 borrow) {
-    uint64 diff = default!;
-    uint64 borrowOut = default!;
+// go2cs generated this placeholder — func Sub64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    diff = x - y - borrow;
-    // See Sub32 for the bit logic.
-    borrowOut = (((uint64)(((uint64)(~x & y)) | ((uint64)(~((uint64)(x ^ y)) & diff)))) >> (int)(63));
-    return (diff, borrowOut);
-}
-
+// See Sub32 for the bit logic.
 // --- Full-width multiply ---
 
 // Mul returns the full-width product of x and y: (hi, lo) = x * y
@@ -497,29 +357,7 @@ public static (uint32 hi, uint32 lo) Mul32(uint32 x, uint32 y) {
     return (hi, lo);
 }
 
-// Mul64 returns the 128-bit product of x and y: (hi, lo) = x * y
-// with the product bits' upper half returned in hi and the lower
-// half returned in lo.
-//
-// This function's execution time does not depend on the inputs.
-public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y) {
-    uint64 hi = default!;
-    uint64 lo = default!;
-
-    const uint64 mask32 = /* 1<<32 - 1 */ 4294967295;
-    var x0 = (uint64)(x & mask32);
-    var x1 = (x >> (int)(32));
-    var y0 = (uint64)(y & mask32);
-    var y1 = (y >> (int)(32));
-    var w0 = x0 * y0;
-    var t = x1 * y0 + (w0 >> (int)(32));
-    var w1 = (uint64)(t & mask32);
-    var w2 = (t >> (int)(32));
-    w1 += x0 * y1;
-    hi = x1 * y1 + w2 + (w1 >> (int)(32));
-    lo = x * y;
-    return (hi, lo);
-}
+// go2cs generated this placeholder — func Mul64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // --- Full-width divide ---
 

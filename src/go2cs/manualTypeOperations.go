@@ -679,17 +679,17 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// typesByString), which a synthesized descriptor has none of -- TestGCBits nil-dereferenced
 		// there once C2's gcbits reached the body. The hand-own takes *T from abi.synthType(ж<st>),
 		// exactly as New and PointerTo already do. See reflect/value_impl.cs.
-		"NewAt":             goosAny,
-		"MakeSlice":         goosAny,
+		"NewAt":     goosAny,
+		"MakeSlice": goosAny,
 		// SliceAt's auto body called `unsafeslice` (a //go:linkname runtime helper minted as a
 		// throwing PartialStub) and then reinterpreted a raw unsafeheader.Slice{Data,Len,Cap} as a
 		// slice Value, which the managed model has no representation for. The hand-own validates (Go
 		// runtime.unsafeslice's three panics -- len < 0, nil pointer with length, elemSize*len
 		// overflow) and builds the ALIASING slice<T> over the pointer's storage via (ж<T>)(uintptr)p
 		// + unsafe.Slice<T>. See reflect/value_impl.cs.
-		"SliceAt":           goosAny,
-		"MakeMap":           goosAny,
-		"MakeMapWithSize":   goosAny,
+		"SliceAt":         goosAny,
+		"MakeMap":         goosAny,
+		"MakeMapWithSize": goosAny,
 		// MakeFunc's auto body is runtime machinery end to end: it reinterprets the descriptor into
 		// a funcType sub-record no synthesized abi.Type has behind it (the box comes back zero, Kind
 		// 0), asks funcLayout for a stack map over that nothing ("reflect: funcLayout of non-func
@@ -1612,6 +1612,52 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// submission was never made, because the once-guarded lookup ahead of it had failed. Both
 		// directions need it, so fixing it here is what a future WSARecvMsg hand-own inherits.
 		"loadWSASendRecvMsg": goosWindows,
+	},
+	// math/bits is the one package whose portable Go bodies are never the code Go RUNS -- its own
+	// doc comment says the compiler may implement these directly and "the code in this package will
+	// not be used". On amd64 the whole family is intrinsified: Mul64 is one MULQ, OnesCount64 one
+	// POPCNT, LeadingZeros64 one LZCNT, RotateLeft64 one ROL, ReverseBytes64 one BSWAP. go2cs emits
+	// the fallbacks faithfully, which is exactly the problem -- correct code that Go itself never
+	// executes, sitting in the hottest inner loops the corpus has.
+	//
+	// Measured 2026-09-02 (Release, DOTNET_TieredCompilation=0, one host, sequential): an RSA-2048
+	// PSS signature costs 44.5 ms converted against Go's 0.834 ms -- 53x -- and that signature is
+	// 79% of the converted TLS 1.3 handshake's residual over Go, since a TLS 1.3 handshake performs
+	// exactly one server CertificateVerify signature. The path is crypto/rsa -> math/big expNN ->
+	// montgomery -> addMulVVW -> mulAddWWW_g -> bits.Mul -> Mul64. math/big compounds it: Go's
+	// arith_decl.go declares addMulVVW with NO body (hand-written assembly) and cmd/compile aliases
+	// math/big's own mulWW straight to the Mul64 intrinsic, so the corpus loses the assembly loop
+	// AND the intrinsic beneath it. These registrations recover the second; the first is a separate,
+	// later question, to be opened only if the measurement after this one still shows a gap.
+	//
+	// Alias-resolved census of the converted corpus, production only: Add64 2,105 call sites,
+	// Mul64 1,066, Sub64 193, RotateLeft64/32 208 -- concentrated in crypto/internal/nistec/fiat
+	// (3,061) and crypto/internal/edwards25519 (240), i.e. the P-256 field arithmetic and the
+	// X25519 ECDHE path. Bodies live in core/math/bits/bits_impl.cs.
+	//
+	// Div64 is deliberately NOT registered: .NET exposes no 128/64 divide primitive, so UInt128
+	// division is software either way; Go's Div64 carries panic-on-zero and panic-on-overflow
+	// semantics worth preserving exactly; and the corpus holds two bits.Div call sites. No
+	// measurement justifies the risk. Reverse8/16/32/64 (BIT reversal, not byte reversal) is not
+	// registered either -- .NET has no primitive for it, so a hand-own could only restate the same
+	// shift/mask chain the converter already emits.
+	"math/bits": {
+		"Add64":           goosAny,
+		"LeadingZeros32":  goosAny,
+		"LeadingZeros64":  goosAny,
+		"Len32":           goosAny,
+		"Len64":           goosAny,
+		"Mul64":           goosAny,
+		"OnesCount32":     goosAny,
+		"OnesCount64":     goosAny,
+		"ReverseBytes16":  goosAny,
+		"ReverseBytes32":  goosAny,
+		"ReverseBytes64":  goosAny,
+		"RotateLeft32":    goosAny,
+		"RotateLeft64":    goosAny,
+		"Sub64":           goosAny,
+		"TrailingZeros32": goosAny,
+		"TrailingZeros64": goosAny,
 	},
 }
 
