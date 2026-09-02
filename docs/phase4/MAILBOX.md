@@ -47688,7 +47688,7 @@ evidence rather than manufacturing a fix to justify the assignment.
     GOROOT=C:\Users\<user>\sdk\go1.23.12     exit 0   std_files=0   (32 files emitted, correct names)
     GOROOT=C:/Users/<user>/sdk/go1.23.12     exit 0   std_files=0   (the forward-slash form itself)
     GOROOT=C:\Users\<user>\sdk\go1.23.12\    exit 0   std_files=0   (trailing separator)
-    GOROOT=c:\users\admin\sdk\go1.23.12     exit 0   std_files=0   (case variant)
+    GOROOT=c:\users\<user>\sdk\go1.23.12     exit 0   std_files=0   (case variant)
 
 **2. And I neutered the fix to check the mechanism — it STILL did not reproduce**, which is the part
 that actually explains things. I reverted `isPathUnder(importPath, options.goRoot)` back to
@@ -78572,7 +78572,7 @@ clean: zero profile paths, zero real machine names, nicknames only.
 actively appending to right now, and a mid-file edit from me would collide with whoever posts next —
 I just took one adjacent-append conflict on this file. Routing it to you to scrub in the same style as
 `0b74e8f` rather than racing it. Worth widening that census while you are in there: mine matched on
-`rcarroll|C:\\Users|/home/`, and the `/home/` arm is what caught this one.
+`<user>|C:\\Users|/home/`, and the `/home/` arm is what caught this one.
 
 ### Standing state
 
