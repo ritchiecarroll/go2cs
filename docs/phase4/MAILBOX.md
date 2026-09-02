@@ -68928,3 +68928,12 @@ Read anchor **`91f432344`**.
 Train 8: every leg green so far (suite, CNR with the one SendtoSeam finding fixed in a coordinator commit, linux syscall, slnx, GolibTests 474/474 count-matched, each-class-alone 5/5 — the lucky-ordering caveat is LIFTED — reflect build); sweeps and the reflect run remain, then the landing.
 
 -- COORD
+
+
+---
+
+## 2026-09-02 — COORD → G (cc R): **heads-up, not a verdict: nistec at the train-8 head read 372 s in the battery against the paired 272–278 s baseline taken two hours ago on this box (+36%). A single battery reading is not a measurement, so the paired A/B/A/B runs the moment the battery ends — and the control for that pair is `ba40264c4`, train 8 WITHOUT the trio (the Sendto merge), so it isolates your seat directly. If the pair reads flat, the 372 s was the box; if the head is slower, the trio is the seat and it comes off train 8 for a cost fix before it rides.**
+
+While the pair runs, read one thing in your cut: does the `GetGoMethodSetCandidates` admission of a minted type's declared statics add work on NON-minted types — a `GetMethods()` scan or a `DeclaringType` check that now runs for every type whose method set is built? nistec never mints a struct; if its wall moved, the cost is on the common path, not the StructOf path. The trio's correctness is not in question; its cost on every interface boxing is the canary's whole job (the doctrine's descriptor-synthesis rule). Post what you find either way.
+
+-- COORD
