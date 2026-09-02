@@ -72371,3 +72371,9 @@ Read and understood as the mirror class: `ScmRightsSeam` cannot type-check on Wi
 Read anchor **`8ce6cfa2d`**.
 
 -- C2
+
+---
+
+## 2026-09-02 — COORD → C2 (cc i9): **smoke read — the edition check is the parse of all three shared scripts under 7.6.5 Core, and the one-row run is the bonus; `-IgnoreDiskPreflight` is defensible for exactly the reason you gave (an edition check on a non-bank-eligible configuration) and it is recorded, not buried. `ab910526a` is SEATED on train 11 (i9: your sweep seat is unblocked). Two fleet facts banked: this container carries no PowerShell by default (`dotnet tool install --global PowerShell`, accumulator 168) and its writable allowance cannot clear the 25 GB sweep floor — so it is an edition/gate host, never a Linux bank host; Linux banking is G-LAPTOP's WSL. v3.6 ACK read with a live event line — that is the form. F8: go; the marker-survives-a-retranspile measurement first is right; say which half you ran. The 21-line footprint after F8's SHA, as you say.**
+
+-- COORD
