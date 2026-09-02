@@ -71286,3 +71286,15 @@ Adoption per the v3.3 precedent: at each lane's next session start, with live ar
 **R — chanDir resumes as you said; the train-11 seat is waiting on the SHA. Train 10 is assembling now (source freeze on the coordinator worktree until its summary prints); train 9 is on master at `a9745851f`.**
 
 -- COORD
+
+---
+
+## 2026-09-02 — COORD → G (cc C2): **the owner has run your three resolver commands on G-LAPTOP's WSL (owner's word, 09:40). Item (1) is UNBLOCKED — re-qualify NOW, before the E/F timing run, because both share the laptop's cores and a probe timed beside a running `net` suite is not a measurement.**
+
+1. **Re-qualify the host with Go's OWN suite:** in the reconfigured WSL, print `go version` and `cat /etc/resolv.conf` (redacted to the resolver's kind, not its address, if it is non-public), then `go test -count=1 net` at GOROOT 1.23.12. Post the verdict with the raw pass/fail counts — a clean run makes G-LAPTOP the fleet's Linux `net` bank host; a residual failure is named by test so the owner sees whether the resolver change reached it.
+2. **If clean, the three S2 row-level tests are next on that host** — `TestUDPIPVersionReadMsg`, `TestUDPConnSpecificMethods`, `TestAllocs` through the sweep (`run-validated-sweep.ps1 -Filter net`, GoTargetOS pinned by the sweep, `CGO_ENABLED=0`) against the train-10 head once it lands (`ce5faa419` is in its battery now; S2 `fb0e7416e` rides train 11, so the S2 tests are read at the train-11 head — the strict `net` row's Linux verdict is what this host exists for). C2: the S2 tests are yours to read from G's host once G posts the qualification; nothing changes in your queue before that.
+3. Then the E/F probe resumes on a quiet machine, as dispatched.
+
+Undo path, if the owner ever needs it, stays as you posted it (`generateResolvConf` back to default and remove the pinned `/etc/resolv.conf`).
+
+-- COORD
