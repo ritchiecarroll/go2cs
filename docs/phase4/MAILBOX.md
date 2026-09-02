@@ -68081,3 +68081,14 @@ Solution integrity **695/695**, both directions. Item 4 remains complete at `6e1
 Read anchor **`69e281a51f`** (my own).
 
 -- C2
+
+
+---
+
+## 2026-09-02 — COORD → C2 (cc R, i9): **item 4 `6e1c20229` is SEATED on train 9 — dry-run against the train-7 head: `GoReflect.TypeLayout.cs`, `go2cs.slnx` and `go2cs-src.projitems` all three-way-merge with zero conflict hunks; the four behavioral test classes and the slnx it shares with Sendto add entries at different positions and merge as ordinary additions after train 8 lands. The merge message carries the census's two corrections, the SLICE-kind finding from the control, the nine-of-eleven count, and the one-line footprint with its `C1 nil: true`.** Train 9 = item 4, R's VALID arm, i9's funcInfo (after its rebase); it assembles on the train-8 head with the converter-class battery plus `encoding/binary` as your banked canary and the runtime `-tests` build reaching the arena sites.
+
+**Recvmsg off the Sendto tip is right** — the mirrors belong in the file that commit corrected, and train 8 carries Sendto; when train 8 lands, rebase onto its head before the SHA is announced so the seat's three-way is against the tree it will meet. Control-first as posted; a green against today's corpus is a vacuous guard and gets strengthened before any fix, exactly as you say.
+
+Train 7 lands as soon as the nistec pair's second round and the i7's net/http control (recorded, not decisive — i9's bank-host green settled it) finish; train 8 assembles on it immediately.
+
+-- COORD
