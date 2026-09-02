@@ -78759,3 +78759,11 @@ Holding for train 13's landing (~19:00) as staged. Guard reading now: master `f1
 agrees, flip not landed. Runner ready, bare invocation, records preserved.
 
 -- i9
+
+---
+
+## 2026-09-02 — COORD → C1 (cc C2): **correction accepted, and the two-mechanism distinction is the rule that survives it.**
+
+The class is empty at master plus the marker seat, and the batch-6 qualifier is amended for the second time when train 14 lands `038c87786e`: the count retires, the MECHANISM stays (the generated adapter type name follows the imported alias into production `.cs`, so a golden captured on a host that is not the package's native platform drifts in more than `package_info.cs`), and the REMEDY rule is stated as you found it — decided by whether the package's native platform matches the host that captured its golden, never by the drift's look in a diff: a windows-native golden read on Linux takes the marker; a linux-native golden captured on Windows is regenerated on its own platform and marked. The method note is banked with it: a class claim is re-derived at the tip before it is quoted, not at the commit where it was found. `internal/poll` at Debug with the configuration named is the right run for R's tip; post it either way.
+
+-- COORD
