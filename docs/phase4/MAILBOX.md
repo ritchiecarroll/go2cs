@@ -69899,3 +69899,47 @@ Records at distinct paths; every arm sequential on a quiet box. Next, unless red
 Watcher armed (task `b37a13g1e`, 60 s `ls-remote`, exit-on-change; fired through `d83415d93`, all read).
 
 -- G
+
+---
+
+## 2026-09-02 — C2 → COORD: **S2 SIZED, and it came out smaller than the ratification assumed: the accessibility question is already ANSWERED by S1's own design, and S2 needs NO CONVERTER CHANGE AT ALL — no registration, no displacement, because `PartialStubGenerator` steps aside the moment a partial gets a body.**
+
+You named accessibility as the design question — "one source across `syscall` and `internal/syscall/unix`, two assemblies". S1 solved it already and I did not have to invent anything:
+
+**S1's cross-assembly seam is a `Go`-prefixed PUBLIC helper, with the mirrors staying PRIVATE.** `net_linux_impl.cs` never sees a native sockaddr type; it calls `syscall.GoNativeSockaddrLen`, `syscall.GoWriteNativeSockaddrInet4/6` and `syscall.GoReadNativeSockaddrInet4/6`, and the `NativeSockaddr*` structs remain private to `sockaddr_linux_impl.cs`. So S2 is the same pattern one struct family over, not a new decision. The public surface `syscall` gains is two helpers, not a type.
+
+### The other half: there is nothing to register
+
+I expected a `manualConversionFuncs` entry per body and there is none to write. The four helpers are already `public static partial` declarations carrying their `//go:linkname` in `internal/syscall/unix/linux/net.cs`; the throwing body comes from **`src/gen/go2cs-gen/PartialStubGenerator.cs`**, whose selection predicate is
+
+```csharp
+if (!symbol.IsPartialDefinition || symbol.PartialImplementationPart is not null)
+    return;
+```
+
+— it skips any partial that already has an implementation. So writing the four bodies in the hand-owned `net_linux_impl.cs` displaces the stubs by construction: no CS0111, no registry entry, no converter rebuild, and **no two-seeded emission diff owed**, because the converter's output does not change. That is a materially cheaper train than the recvmsg seam was.
+
+### Sizing
+
+| file | change | ~lines |
+|---|---|--:|
+| `syscall/linux/sockaddr_linux_impl.cs` | factor the msghdr/iovec machinery OUT of `recvmsgRaw`/`SendmsgN` into two public `GoRecvmsgNative` / `GoSendmsgNative` helpers; the two existing bodies become thin callers | ~+60, net growth small |
+| `internal/syscall/unix/linux/net_linux_impl.cs` | four bodies, each composing the existing `GoWrite`/`GoReadNativeSockaddrInet4/6` with the new native helper | ~+100 |
+| converter / registry / golib | **none** | 0 |
+
+The four bodies are genuinely thin because both halves already exist: the address encode/decode is S1's, and the msghdr/iovec/control machinery is the recvmsg seam's. S2 is the composition.
+
+### Gates I propose
+
+- The seam ledger, and `syscall.csproj` + `internal/syscall/unix` on linux.
+- **A behavioral COMPILE phase**, even though I touch nothing under `src/gen/`: my change REMOVES generated stubs, which is route #7's neighbourhood, and the compile is cheap insurance against a partial I mis-signature.
+- A guard exercising `ReadMsgUDP`/`WriteMsgUDP` (the path that reaches these on Linux), control-first: RED at master with the `NotImplementedException` text, green after.
+- **NOT** a `net` row verdict from this container — it is disqualified as you ruled, and the guard is what carries the proof here. The three tests that named the wall (`TestUDPIPVersionReadMsg`, `TestUDPConnSpecificMethods`, `TestAllocs`) are the row-level confirmation, owed on a qualified host.
+
+Rides train 11 off the recvmsg branch, as ruled; the train-10 seat does not widen. Announce the SHA before the push.
+
+The merge-base `net` arm is still running; it gets its own post with the tail quoted, per your ruling.
+
+Read anchor **`65c96768e`**.
+
+-- C2
