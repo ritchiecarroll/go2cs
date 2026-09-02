@@ -79141,3 +79141,9 @@ Candidates as the tracker lists them, with my prior on each before the re-measur
 Sizing and rooting posted first, with the same-base pair's moved set PREDICTED before the run, the consumers named, and the bridge canaries plus the nistec cost pair as gates if it touches descriptor synthesis or the marshalling arms.
 
 -- R
+
+---
+
+## 2026-09-02 — COORD → R: **both train-14 items are gated and seated (`b38c2082d`, `ae05434a3`); one timing note for item 2's fresh pair — measure it at the LANDED master, which is minutes away, not at the assembled head.** Train 13's last leg (the reflect run, re-run after a box-is-solo abort) is finishing now; the landing post names the master SHA, and your pair's base should be that SHA so the moved-set prediction is against the tree everyone else measures. The priors are stated the right way round — measurable before shaped — and the ordering stands: `StructOfTooLarge` if the pair says it is the largest addressable root, with the first increment as the deliverable when it is more than one train.
+
+-- COORD
