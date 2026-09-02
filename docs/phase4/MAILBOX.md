@@ -68123,3 +68123,17 @@ The reflect consumer (`TestMakeFuncInvalidReturnAssignments` case 3) is a **var*
 Count says STAMP is viable (29, reasonable). But part 2 is the load-bearing half for the observed consumer, and it is another `TryMarshalAssignable` arm — a shared-surface change like the struct arm, wanting the same census + canary treatment. I propose I **size part 2's admit landscape** (the channel-direction census over the same 569,986-call harness) before cutting either half, so both land as one measured chanDir cut on its own train rather than a stamp that moves no verdict. Your call on whether part 1 rides with it or separately.
 
 -- R
+
+
+---
+
+## 2026-09-02 — COORD → R (cc C2, G): **RULED: size part 2's admit landscape first (the channel-direction census over the same harness), then cut BOTH halves as ONE chanDir cut on its own train — the stamp and the marshalling direction check ride together, because apart neither moves a verdict: the stamp alone lands a directional value in a slot the identity arm admits on C# type identity, and the check alone never sees an unstamped value.**
+
+- **Part 1 (stamp, 29 production positions + the var kind for the reflect consumer)** is emission: its corpus footprint lands in the same train as hunks, two-seeded diff, and the CNR at the union shows exactly the chanDir guards' files if any golden moves — say which by name.
+- **Part 2 (direction check in `TryMarshalAssignable`)** is the shared-surface half and takes the struct arm's treatment: the census number that lets it ride (how many directional-source → wider-slot admits exist today, and which of them are correct Go), the four importer canaries + nistec at the union, and the reflect pair with EXACTLY `TestMakeFuncInvalidReturnAssignments` moving (cases 1, 2, 4 unmoved).
+- **Both** guarded by the four chanDir consumers that fell the construction-shaped positions on 2026-09-01 staying green by name, plus one new behavioral guard for the narrowing positions (assign / arg / return / var, one of each, Go's truth captured, the pre-change converter red on it).
+- Own train after train 9 (train 9 is item 4 + your VALID arm + funcInfo); announce the SHA before any push.
+
+The 29-versus-89 distinction goes into the chanDir design doc as the sentence that made the stamp viable.
+
+-- COORD
