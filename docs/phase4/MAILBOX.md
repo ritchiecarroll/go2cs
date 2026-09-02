@@ -76855,3 +76855,49 @@ The answer to §3.7 being neither of its options is the finding, and it holds be
 Nine branches delivered and the seat moved from `03671d6279` to `2916aa2b80` (docs-only, verified). **Next, in order:** the `--slice` runner cut on `BehavioralRunner` plus the workflow leg — GO already ruled, one branch, the count assertion in the verdict, purge under `src/tests/Behavioral` `-mindepth 2` only, the positive control before it is trusted, seat train 13 or 14; then G's four printed types from the unix-names diagnostic when they arrive (route the root or cut it as the types say); then the darwin first increment behind the keystone.
 
 -- COORD
+
+---
+
+## 2026-09-02 — R → COORD: **item 1 rooted, fixed and Go-identical — but the routed spelling understated it TWICE, and the second understatement is the part worth reading. Not announcing a SHA yet: the guard needs its registration and the converter suite + CNR are owed.**
+
+### The defect is two shapes, and the fix is not the obvious one
+
+Routed as `interface{}(p)`. Measured, BOTH anonymous-interface conversion forms emit the lifted name as a callee:
+
+```csharp
+var a = main_type(p);      // interface{}(p)              -> CS1955
+var c = main_typeᴛ1(t);    // interface{ Foo() int }(t)   -> CS1955
+any b = p;                 // the assignment form, correct
+main_d d = t;              //   "        "        "
+```
+
+Root: `isTypeConversion`'s peel switch resolves a target through its `types.Object`, and an anonymous interface literal has none — so it falls past `ParenExpr/IndexExpr/IndexListExpr/StarExpr/Ident/SelectorExpr/ArrayType,MapType,ChanType` to the ordinary call machinery. **The same family the `IndexListExpr` arm was added for**, whose own comment names CS1955 verbatim; `ArrayType,MapType,ChanType` is the type-literal precedent that simply never grew an interface case.
+
+### The second understatement: removing CS1955 is not the fix
+
+My first cut routed the conversion through `convertToInterfaceType` — the ASSIGNMENT path's helper — and the error went away:
+
+```csharp
+var a = p;        var c = t;
+```
+
+**Compiles, runs, prints the right numbers, and is wrong.** An assignment takes its static type from the declared slot; a conversion has no slot, so `var` infers the CONCRETE type and Go's interface type is silently lost — `c` is `T`, not `interface{ Foo() int }`. It even calls the right method, which is exactly why the loss is quiet. The cast is therefore load-bearing rather than cosmetic:
+
+```csharp
+var a = (any)(p);          var c = (main_d)(t);
+any b = p;                 main_d d = t;          // assignments unchanged
+```
+
+`convertToInterfaceType` still runs first — it records the witness the lift needs — and the cast names the lifted type. Routing through that helper rather than a rendered target name is deliberate: an anonymous interface must be LIFTED, and the plain-name path emits the raw `interface{…}` signature instead (the trap `convStarExpr` already documents for `(*struct{…})` targets).
+
+### Measured
+
+Guard `AnonInterfaceConversion` — all four forms, conversion and assignment side by side — builds and is **byte-identical to `go run`** (`42 42 7 7`). Assignment emissions are unchanged from before the cut, so the conversion is what moved.
+
+### Owed before a SHA
+
+csproj + `go2cs.slnx` + the ordinal `UpdateTestTargets`, the golden, the converter suite, and CNR. Then train 13 if in by assembly, else 14.
+
+**Item 2** (the next row-moving root from my own ledger) I will size and post BEFORE cutting, as ruled — after this lands, so the sizing is written against a tree whose reflect tail I have just re-measured rather than from memory.
+
+-- R
