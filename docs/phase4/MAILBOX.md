@@ -78767,3 +78767,36 @@ agrees, flip not landed. Runner ready, bare invocation, records preserved.
 The class is empty at master plus the marker seat, and the batch-6 qualifier is amended for the second time when train 14 lands `038c87786e`: the count retires, the MECHANISM stays (the generated adapter type name follows the imported alias into production `.cs`, so a golden captured on a host that is not the package's native platform drifts in more than `package_info.cs`), and the REMEDY rule is stated as you found it — decided by whether the package's native platform matches the host that captured its golden, never by the drift's look in a diff: a windows-native golden read on Linux takes the marker; a linux-native golden captured on Windows is regenerated on its own platform and marked. The method note is banked with it: a class claim is re-derived at the tip before it is quoted, not at the commit where it was found. `internal/poll` at Debug with the configuration named is the right run for R's tip; post it either way.
 
 -- COORD
+
+---
+
+## 2026-09-02 — C2 → COORD (cc G): **the `DeepEqual` row mover is MEASURED and it is not a `DeepEqual` defect at all — `DeepEqual` is CORRECT. The converted `net` returns an EMPTY `LocalAddr().Name` for a Linux autobound ABSTRACT unix socket where Go returns `"@"`. The contents genuinely differ; the reflect bridge is exonerated.**
+
+Production-dimension probe, one print of the two strings as ruled, reproduced twice:
+
+```
+                     GO (reference)      C# (converted)
+local Net       =    "unix"              "unix"
+local name len  =    1                   0
+starts with @   =    true                false
+first byte code =    64                  -1
+equals "@"      =    true                false
+```
+
+`net.DialUnix("unix", nil, ta)` on Linux autobinds an ABSTRACT address; Go renders it `"@"`. The converted side hands back the empty string. That is exactly `unixsock_test.go:243` row 1 — `{c.LocalAddr(), &UnixAddr{Name: laddr, Net: "unix"}}` with the test's own `if laddr == "" { laddr = "@" }` Linux rewrite — so `want` carries `Name:"@"`, `got` carries `Name:""`, and **`reflect.DeepEqual` returning false is the right answer to the question it was asked.**
+
+### What this retires
+
+Your two candidates were already retired by evidence I held; this retires the third possibility — that some unmeasured mechanism in the bridge produced a false negative. There is no false negative. `Elem()` was measured perfect, the visited-map arm can only false-POSITIVE, the pointer arm reads correct, and now the inputs are shown to be genuinely unequal. **The unix-names rows were never a reflect finding in either half:** the render was the hand-owned test host's formatter, and the comparison is `net`'s Linux read-back.
+
+Both halves were invisible for the same reason and it is worth stating once: `%#v` printing a per-object hash instead of the fields meant the failing message could not name its own cause. Had it rendered, the line would have read `got &net.UnixAddr{Name:"", Net:"unix"}, expected &net.UnixAddr{Name:"@", Net:"unix"}` and this would have been a five-minute finding weeks ago. That is the concrete cost of a formatter with a smaller contract than the one its callers assume, and it is the strongest argument for your item-1 delegation ruling.
+
+### The cut, and why the guard is already written
+
+Root: the converted `net`'s sockaddr read-back does not normalise the leading NUL of an abstract address to `"@"` — the `RawSockaddrUnix` layout finding's neighbour, `sockaddr`-family, my lane. Acceptance rows as you named them: `TestUnixConnLocalAndRemoteNames` and `TestUnixgramConnLocalAndRemoteNames`.
+
+The probe is a PRODUCTION-dimension reproduction, so no `-tests` run is needed to exercise it — and because Go's answer is exactly `"@"` (length 1, not a kernel-assigned random name), **its output is deterministic and it can be registered as an ordinary behavioral guard rather than staying a scratch probe.** I ran it as scratch and removed it (tree clean, verified unfiltered); it comes back as a registered project with the fix, which is the guard the fix owes rather than one invented for it.
+
+Sizing next, then the cut, then the formatter delegation behind it as ordered. Nothing owed to you before that.
+
+-- C2
