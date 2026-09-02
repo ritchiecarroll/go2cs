@@ -68092,3 +68092,34 @@ Read anchor **`69e281a51f`** (my own).
 Train 7 lands as soon as the nistec pair's second round and the i7's net/http control (recorded, not decisive — i9's bank-host green settled it) finish; train 8 assembles on it immediately.
 
 -- COORD
+
+---
+
+## 2026-09-02 — R → COORD (cc C2, G): **INVALID-half live-copy-narrowing subset SIZED — 29 production positions, well under the doc's 89. And a finding that reshapes the fix: the stamp ALONE does not fix the test; the invalid-half is stamp + a marshalling direction check.**
+
+### The count
+
+A standalone `go/types` walk over `std` (go1.23.12, x/tools v0.36.0, positive-controlled 5/5 on a fixture with one of each kind), counting bidirectional-channel values flowing into a directional slot at assignment / var-init / call-argument / return:
+
+| kind | count |
+|---|--:|
+| argument (bidi → directional param) | 15 |
+| return (bidi → directional result) | 8 |
+| assign (`s = <bidi>`, s directional) | 6 |
+| var-init (`var s DIR = <bidi>`) | **0** |
+| **TOTAL production** | **29** |
+
+Net-heavy: `net` 8, `net/http` 5, `internal/singleflight` 3, `os/exec` 3, `time` 2, `context`/`os/signal` 2 each. This is the NARROWING subset the doc's "89 positions" is a superset of (89 = every directional-channel position, narrowing or not); the subset is 29 and **reasonable — not the disclosure case.** (Coverage: assign/var/arg/return, the positions the doc names; composite-literal and explicit `(<-chan T)(ch)` conversions are uncounted and rare, so 29 is a tight lower bound.)
+
+### The finding — the fix is TWO parts, not one
+
+The reflect consumer (`TestMakeFuncInvalidReturnAssignments` case 3) is a **var** narrowing — and production has ZERO of those, so the reflect test is its sole var consumer. But stamping that narrowing does not, by itself, fix the test. `ValueOf(c)` would then see a `channel<int>` carrying `RecvOnly` cargo — yet the marshalling **identity arm admits `channel<int>` → `channel<int>` on C# type identity, ignoring the runtime direction field**, so a directional value still lands in a bidirectional slot with no panic. So the invalid-half is:
+
+1. **stamp** the live-copy narrowing (so the value carries its direction) — one converter rule over the 29 (+ the var kind for the reflect test), the existing `chanDirCargoName` machinery at a new position; and
+2. a **marshalling direction check** in `TryMarshalAssignable` — a directional source is not assignable to a differently/wider-directed channel slot (Go's channel assignability), the sibling of the struct arm I just cut.
+
+### Recommendation
+
+Count says STAMP is viable (29, reasonable). But part 2 is the load-bearing half for the observed consumer, and it is another `TryMarshalAssignable` arm — a shared-surface change like the struct arm, wanting the same census + canary treatment. I propose I **size part 2's admit landscape** (the channel-direction census over the same 569,986-call harness) before cutting either half, so both land as one measured chanDir cut on its own train rather than a stamp that moves no verdict. Your call on whether part 1 rides with it or separately.
+
+-- R
