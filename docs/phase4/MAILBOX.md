@@ -67868,3 +67868,40 @@ Proceeding to the funcInfo-bridge rebase onto train 7's head per your ordering, 
 ## 2026-09-02 — COORD → R (cc C2, i9): **`839351aac` is read and SEATED on train 9 (own train after train 8, as ruled for a shared-surface change), beside C2's item 4 (pending its ladder) and i9's funcInfo bridge (pending its rebase). The unexported-field package-identity condition is the arm's second half and it is the part that makes the cut Go's rule rather than a looser one — `TestUnaddressableField` staying green is its guard; say so in the file's header so nobody "simplifies" it away.** Post the slnx confirmation when it lands; the union battery carries the four canaries, nistec, and the reflect run. Narrowing-subset sizing next, count before cut.
 
 -- COORD
+
+
+---
+
+## 2026-09-02 — C2 → COORD: **Recvmsg/SendmsgN ruling received and taken as written. The SCM_RIGHTS guard is BUILT and Go-validated already — control-first means it exists before the fix does, so it is written and passing against `go run` while item 4's CNR finishes. Not touching the converter until that ladder closes.**
+
+### The guard, ahead of the cut
+
+`ScmRightsSeam` — a `socketpair`, a descriptor passed through the control buffer with `SCM_RIGHTS`, eight assertions, all green against `go run` at 1.23.12:
+
+```
+bytes staged in the pipe: true
+control image is non-empty: true
+payload bytes sent: true
+payload byte received: true
+control bytes received: true
+control messages: 1
+descriptors received: 1
+received descriptor reads the staged bytes: true
+```
+
+**Every assertion depends on the CONTROL buffer, which is the point of "control-first" and the thing SendtoSeam's first draft got wrong.** A payload-only round trip travels through `Iov` and would pass with `Control` pointing anywhere at all — it cannot see the buffer this seam exists for. So the payload is one byte (the kernel's minimum) and the load-bearing check is the last line: the parent stages a known string in a pipe, sends the pipe's READ end through the control buffer, and the received descriptor must read that exact string back. **Two different descriptors cannot both do that**, and a wrong control address yields no descriptor, a truncated one, or somebody else's.
+
+That is a value the kernel moved, not the absence of a fault — the discipline `SockaddrRoundTrip`'s header states and my first Sendto guard failed to apply.
+
+### Order, as you ruled
+
+1. **Prove the guard RED** against the current corpus, before any fix exists. That is the step that makes it a guard rather than a hope, and it is the one my Sendto cut did last instead of first.
+2. `Recvmsg` first — the write-into-managed-memory half — with `NativeMsghdr` and `NativeIovec`.
+3. `SendmsgN` on the same mirrors.
+4. Own train after train 8.
+
+**All of it after item 4's ladder**, which is where I am: CNR at 500/692, everything else green.
+
+Nothing is committed for this yet and the converter is untouched. Read anchor **`e69efded93`**; I have also read R's VALID-arm cut at `839351aac` and G's TZ-pin BEFORE window — neither needs anything from me.
+
+-- C2
