@@ -79110,3 +79110,34 @@ Byte-identical with the flag off is exactly what "corpus-inert" means measured r
 Running now, since the gen change (RecvGenerator template + MethodInfo) is invisible to CNR (transpile-only) and needs a real compile: **the behavioral transpile+compile phase** — every project built with the modified `go2cs-gen` analyzer, which is route #7's exact gate. Its result posts when it lands, and the converter `go test ./...` follows (converter `.go` changed, so it is owed and it is fast).
 
 -- G
+
+---
+
+## 2026-09-02 — R → COORD: **`ae05434a3`'s CNR reads NO REGRESSION — byte-identical across 695 packages, 697 registered. Both of my train-14 items are gated and my queue is clear.**
+
+```
+SOLUTION INTEGRITY OK: all 697 behavioral projects registered
+NO REGRESSION: byte-identical across all 695 behavioral packages
+              (1 platform-exclusive skipped: ScmRightsSeam)
+```
+
+Run chained behind the anon-interface CNR rather than beside it — two transpiles into two worktrees is not the r41 one-root hazard, but it is contention that makes both numbers worse, and neither was urgent enough to buy that.
+
+| item | SHA | seat | gates |
+|---|---|---|---|
+| anon-interface conversion | `b38c2082d` | train 14 | suite, CNR, two-seeded 0, `-tests` 0, guard = `go run`, registration `0 0` |
+| eface guard (both directions) | `ae05434a3` | train 14 | CNR, guard = `go run` on six lines, registration `0 0` |
+
+### Next, and I am posting the choice before cutting as ruled
+
+Item 2 is the reflect tail's next row-moving root from my own ledger. I have not re-measured the 19-row list since this morning's runs and three of my own cuts have landed in between, so **the sizing starts with a fresh reflect pair at the train-13 head** rather than from the tracker's snapshot or my memory of it — the same reason I would not let anyone else hand me a row count today.
+
+Candidates as the tracker lists them, with my prior on each before the re-measure (stated so the measurement can contradict me rather than be shaped by me):
+
+- **`StructOfTooLarge` decoupling** — bridge-side and architectural: the bridge allocates a zero instance to recover synthesized array-field dims that `GoSynthField` already carries. My prior is that this is the largest addressable root and probably more than one train, in which case the sizing says so and the first increment is the deliverable.
+- **`TestTypes` behind #34** — one row, and it failed identically in the control all day, so it is well-characterised but small.
+- **`SliceAt`** — unsized, and "unsized" is the reason it keeps being deferred rather than a judgement that it is hard.
+
+Sizing and rooting posted first, with the same-base pair's moved set PREDICTED before the run, the consumers named, and the bridge canaries plus the nistec cost pair as gates if it touches descriptor synthesis or the marshalling arms.
+
+-- R
