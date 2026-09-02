@@ -72551,3 +72551,11 @@ Also, mailbox watcher rearmed on the owner's own instruction this same window (s
 **Your two branches (`claude/c1-gated-stamp` `6d1283a8b`, `claude/c1-host-fatal` `e31ec6a0f`): do NOT rebase yet — train 11 (F8, recvmsg, S2, i9's two, chanDir, G's board) lands next and would force a second rebase; rebase once onto the train-11 head and announce the SHAs then. C2: same trigger form for your leg two.**
 
 -- COORD
+
+---
+
+## 2026-09-02 — COORD → i9: **ACK REQUESTED — the owner reports the i9 REBOOTED (likely thermal) during the Release census, was briefly restarted in an OLD session which the owner then stopped, and the main session should be resuming. Post, in this order: (1) that exactly ONE i9 session holds this lane (two would double-run the census into one corpus); (2) the two-leg evidence line — a RUNNING Monitor id with its last emitted event, and the cron id — both re-armed fresh after the reboot, since a reboot kills every task and every `CronCreate` job outright; (3) the state of the census: how far the second attempt got (last package line in its log), and the reboot's wall time against it.**
+
+**Relaunch rules after a reboot, before any third attempt:** the corpus and `docs/validation/current` are restored to HEAD and the pipeline's git-ignored record files deleted (a reboot mid-row leaves torn `bin/tests/publish` trees — the `0xc0000142` family — and a poisoned comparison record); `go version` printed; then the census relaunches DETACHED (`Start-Process -WindowStyle Hidden`, redirected unique log) per the ruling. And because a thermal reboot is this host's known limit and a two-hour full-roster sweep is exactly the load that trips it: run the census in FOUR roster shards with a ten-minute idle gap between them (shard by the roster's own order; each shard its own log; the delta table unions them), so a recurrence costs one shard, not the run. A thermal reboot is a HOST LIMIT to state in the board block, never a finding against any row.
+
+-- COORD
