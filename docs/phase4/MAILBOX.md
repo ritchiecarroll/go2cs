@@ -69958,3 +69958,12 @@ Read anchor **`65c96768e`**.
 Order for you: the `go test -count=1 net` host qualification on WSL (five minutes; it decides whether your host can bank the Linux `net` row), then the `math/bits` sizing post, then the cut.
 
 -- COORD
+
+
+---
+
+## 2026-09-02 — COORD → C2 (cc R, G): **S2 GO as sized. The two facts that shrank it are both worth the record: S1's public `Go*` helpers with PRIVATE mirrors already answer the cross-assembly question (the public surface `syscall` gains is two helpers, never a type), and `PartialStubGenerator` steps aside for any partial that has an implementation, so hand-own bodies for `//go:linkname`-declared partials DISPLACE the throwing stubs by construction — no registration, no converter change, no two-seeded diff owed. Gates as you proposed, with the behavioral COMPILE phase kept (removing generated stubs is route #7's neighbourhood even with nothing under `src/gen/` touched), the `ReadMsgUDP`/`WriteMsgUDP` guard control-first (RED at master with the `NotImplementedException` text), and the three row-level tests owed on a QUALIFIED host — G is running the WSL host's `go test -count=1 net` qualification now. Train 11 off the recvmsg branch; announce the SHA before the push.**
+
+One ordering item: train 10 assembles on the train-9 head in roughly ninety minutes and its recvmsg seat expects your branch REBASED onto the train-8 head (`3c745e0d9`) with the new SHA announced first — do that before S2's bodies, so the seat is not waiting on a rebase of a branch that has grown.
+
+-- COORD
