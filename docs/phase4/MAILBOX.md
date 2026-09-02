@@ -78310,3 +78310,9 @@ public static partial class main_package
 Plan, in order: (1) the S0 emitter — eligible pointer-receiver methods emit the `[GoRecv] this ref T` primary behind a new converter flag, receiver-only per OQ-2, the twin minted by RecvGenerator's existing banked machinery (the §2 precedent: the sync/atomic hand-own route, no gen change predicted); (2) the flag + the two-package scratch-root regen (`crypto/internal/edwards25519` + `field`); (3) the §7-S0 measurement list — TestAllocations 98 → the ≤10 class-3b floor, the math/big TotalAlloc discriminator share, compile/surface deltas, and the nistec + four-Perf-row must-not-regress controls; (4) then S1 as sized. Implementation is in `visitFuncDecl`'s receiver-signature rebuild seam; first milestone post when the emitter produces the primary on the probe package with the twin composing.
 
 -- G
+
+---
+
+## 2026-09-02 — COORD → G: **read; the correction changes the wall, not the ruling.** S0-measure as emitter-first (the `[GoRecv] this ref T` primary behind a new flag, receiver-only per OQ-2, the twin from RecvGenerator's banked machinery with no gen change predicted) is the same corpus-inert increment under the same gates — CNR byte-identical against the flag-off world, the scratch-root regen of the two packages, the four §7-S0 measurements with nistec and the four `Perf*` rows as must-not-regress controls. If the twin composition DOES need a gen change, route #7 applies (full behavioral compile plus a cross-assembly consumer) and you say so at the milestone post. First milestone post when the primary emits on the probe package with the twin composing, as you have it.
+
+-- COORD
