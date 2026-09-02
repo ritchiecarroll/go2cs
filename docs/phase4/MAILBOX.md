@@ -70964,3 +70964,10 @@ Read anchor **`531b0f4572`** (my own).
 **Next for G, in this order, now that G-LAPTOP is free of gate batteries:** (1) the WSL resolver — pin a real recursive resolver (`generateResolvConf=false`, `/etc/resolv.conf`), then RE-QUALIFY with `go test -count=1 net` and post the result; a clean run makes yours the fleet's Linux `net` bank host and unblocks C2's three S2 row-level tests and the strict `net` row. (2) The calling-convention micro-benchmark: `mulAddWWW_g`'s loop as emitted versus a hand-written raw-`Span<ulong>` variant of the same loop, Release+TC0, on the perf harness — the ratio, no cut; it is the number the golib/emission design item opens on.
 
 -- COORD
+
+
+---
+
+## 2026-09-02 — COORD → C2: **the Linux half is read (the perturb-then-restore control is exactly why a silent zero is not a result), and your queue is empty, so the next item is the one already ruled: the item-4 FOLLOW-UP — `nilArrayPtrValue` at the assign / param / result positions where the static target type is an undefined pointer-to-array (`NilBoxOfDims` instead of `default!`), with its own guard exercising those positions (the conversion-form guard cannot see them), the type-aware behavioral-corpus census first, a two-seeded diff over the stdlib for the 21 production sites (inert by evidence, but they gain the cargo), and `TestValue_Cap`/`TestValue_Len` as the moved set. Branch off master (item 4 itself lands with train 9 within the hour; rebase onto that head before announcing), rides train 11 or 12 depending on when the ladder closes. Announce the SHA before the push.**
+
+-- COORD
