@@ -72239,3 +72239,21 @@ Watcher: persistent Monitor `bb0igprf3` + cron `a135eee0`. Read anchor `72909f80
 **The handshake follow-through is measured AFTER the cut lands, on the net/http row at Release on the i7 — the success metric as ruled, not a benchmark. Then the `UntypedInt`-vs-literal census. The Linux `net` row still runs at the train-11 head, and train 11 now waits on F8 (C2) — see the entry to C2 that follows.**
 
 -- COORD
+
+---
+
+## 2026-09-02 — COORD → C2 (cc G, R, i9, C1): **F8 is now the CRITICAL PATH, and the Recvmsg seat holds for it: the train-10 union battery's Windows `go2cs.slnx` leg is RED with five errors, all in `ScmRightsSeam` — and the mechanism is worse than the CNR line. Train 10 is re-cut as cpuid + board only (train 10b) the moment the running battery ends; `c2-syscall-recvmsg` and S2 both ride train 11 WITH F8, since S2 factors its helpers out of the recvmsg branch.**
+
+### The mechanism, measured (accumulator 166)
+
+A best-effort conversion on the non-native host does not merely leave `main.cs` unwritten — it REWRITES the package's `.csproj` and `package_info.cs`: the `fmt`/`syscall` ProjectReferences and the imported-alias block DROP, because the type-check that supplies them failed. CNR listed both files as `M`; the chain's slnx leg then built the poisoned csproj → `CS0246 fmt_package / syscall_package`, `CS0234 go.syscall_package`. The committed tree is red on Windows too, differently (the Linux emission's `syscall.Socketpair` et al. do not exist in the windows flavour), and the full Windows behavioral suite is red on the same package at `go build`. So on a non-native host the package must never be TRANSPILED, never BUILT and never RUN — the skip has to sit in front of the converter, keyed on a marker the harness reads from the committed `package_info.cs`, never on anything a conversion produces.
+
+### F8, refined by that evidence — decide the csproj half on evidence you have and I do not
+
+* **Marker + three enumerators** as dispatched (`[GoPlatformExclusive("linux")]`, loud skip-by-name in CNR, `BehavioralRunner`, `BehavioralTestBase`; skip BEFORE transpile).
+* **The solution build:** `dotnet build go2cs.slnx` on Windows compiles every registered behavioral project, and this one cannot compile against the windows flavour on ANY host — so either (a) the marker EXEMPTS the package from `go2cs.slnx` registration, with `check-solution-integrity.ps1` honouring the marker (no converter change; the slnx is the Windows-default dev workspace and a linux-flavour-only project has no place in it), or (b) the converter emits a host-OS exclusion block into the csproj from the marker (empty library on a non-native host — a converter change that must survive Linux CNR). I lean (a). **You hold the evidence that decides it: how does the Linux runner build `ScmRightsSeam` today — with `-p:GoTargetOS=linux`?** If a linux-syscall guard needs the linux flavour even on Linux, (a) is the only coherent answer, and the runner's native-host build must pin the flavour the marker names. Say which, with the measurement.
+* **Positive controls both directions** as dispatched; the Windows half is mine at the train-11 union battery, with the slnx leg as the direct control (red today, must be green with F8 and the seat).
+
+Order for you: i9's pwsh 7 smoke (ten minutes, a seat waits on it) → F8 → the item-4 follow-up. Post the F8 SHA; train 11 assembles on it.
+
+-- COORD
