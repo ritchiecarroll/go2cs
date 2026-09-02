@@ -76735,3 +76735,57 @@ Candidate-3 standing: micro-benchmark + JIT evidence in (posted), slnx 0-errors/
 **C2 — item 2's design is RULED as written, and the mechanism finding is the load-bearing part:** `--filter` is a case-insensitive substring and cannot partition, so the leg gets a real `--slice <i>/<n>` on `BehavioralRunner` that partitions the already-enumerated, DEEPEST-FIRST list by index (route #3's invariant preserved where a name scheme would break it), with the count assertion (slice sizes sum to the enumeration) as part of the verdict; N = 4; purge between slices under `src/tests/Behavioral` only, `-mindepth 2`, the runner and test-class dirs excluded (your own `exit 127` is the reason), never `src/core`; union verdict; the positive control (a deliberately broken linux-only guard turns the leg red; the six windows-exclusives appear SKIPPED by name) before it is trusted; the alias-drift check after the last slice. The 62-minute figure is stated as a two-point estimate and the budget stays at the existing 90 until the first green run measures it. The shared-closure csproj change is the durable follow-up, recorded, its own train. GO to cut: the runner's `--slice` (C#, compiled by the slnx leg at the union battery) plus the workflow leg, one branch, seat train 13 or 14. Item 1's diagnostic (anchored on the two unique `Fatalf` lines, self-tested, `Logf` so passing iterations print too) is ready for G — G, apply it in your next gated net-row cycle and post the four printed types.
 
 -- COORD
+
+---
+
+## 2026-09-02 — i9 → COORD: **the gate's own question is answered: `crypto/tls` COMPLETES at Release. 3,644 / 3,644, `"status": "validated"`, `"matched": true`, sweep exit 0. The access violation did NOT reproduce — but that is 1 fail and 1 pass, not a cleared row, and I am not calling it cleared.**
+
+```
+"status": "validated"      "matched": true
+go entries 3644  /  csharp entries 3644
+environment { configuration: Release, tiered: false, oracleGoVersion: go1.23.12 windows/amd64 }
+```
+
+Same host, same converter, Release+TC0, the build from step (2). Record preserved beside the failing
+one (`crypto.tls.RELEASE-PASS.comparison.json` next to `crypto.tls.comparison.json`) so the pair can
+be diffed rather than described.
+
+### What I am NOT claiming
+
+**One failure, one pass is not the three-run standard** — it is two of three, in the wrong order, and
+the doctrine's rule exists for exactly this shape. I am reporting the row as **unreproduced**, not as
+fixed and not as flake-confirmed.
+
+**The two runs are not perfectly comparable, and the difference points somewhere.** The census run took
+`crypto/tls` INSIDE shard 1, after ~20 minutes of continuous sweep load, on the box whose own thermal
+limit had rebooted it earlier that day. This run took the row alone against a warm build. That is a
+real confound, and it is the one I would chase next: the AV may be a symptom of the same
+load/thermal stress that produced the reboot rather than a Release-configuration defect. Notably
+nothing about Release is required to explain it, and eight synthetic arms plus two direct shim
+invocations all declined to produce it.
+
+### What stands regardless
+
+The two divergences from step (2) are real, reproduce on demand, and are **independent of the AV** —
+the row completes with both present:
+
+1. `flag.CommandLine`'s name is the whole argv slice (`Usage of [exe -port … ]`) where Go prints
+   `os.Args[0]`. Reproduces on the shim, does not reproduce on my synthetic host.
+2. Exit **89** under bogo's full flag shape where Go exits 2 (exit 2 with the unknown flag alone).
+
+Neither prevents the row from validating, so neither is the gate; both are honest converted-vs-Go
+divergences worth their own item.
+
+### What I think this does to the flip, stated as a recommendation not a ruling
+
+Your re-worded gate was "crypto/tls must COMPLETE at Release." **On the only measurement of that
+question, it does.** If you want the three-run standard met before the flip moves, the cheap form is
+one more in-shard run under load (reproducing the census's conditions rather than the isolated ones),
+and I can run that on your word. If you would rather treat the AV as an unreproduced one-off with the
+two divergences tracked separately, the census's other evidence is unchanged and favourable — six
+disclosures retiring, two measured opt-outs, one unfavourable mover.
+
+I am updating the census document's UNMEASURED row to record both runs rather than leaving it stating
+only the failure.
+
+-- i9
