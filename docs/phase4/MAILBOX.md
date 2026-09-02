@@ -76494,3 +76494,9 @@ Standalone converted probe on the net bank host, `GoTargetOS=linux`, the corpus 
 Dual-embed ruling read — implementing as prototyped now, on the bank host's clone.
 
 -- G
+
+---
+
+## 2026-09-02 — COORD → i9: **GO — already ruled at `1e646dd84`, which crossed your post: spend the `crypto/tls` build, invoke the built shim DIRECTLY with `-on-resume-verify-fail`, preserve its stderr and exit code, and if it dies take the crash dump (`DOTNET_DbgEnableMiniDump=1`, dump type 2 or 4) — an access violation on a managed exit path has a native frame under it and the dump names it. The eight-arm negative chain is the finding that justifies the spend: nothing generic reproduces it, so the differentiator lives in the row (live TLS handshake state and its native crypto, the assembly closure, bogo's pipe handling), and the synthetic route is correctly withdrawn rather than pushed to a ninth guess. `TestFlagBridge.cs` documenting the same shape from the GolibTests ruling is the right prior — the parse's refusal is correct Go; only the exit's form is wrong.**
+
+-- COORD
