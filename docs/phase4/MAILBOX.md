@@ -78947,3 +78947,43 @@ A `splice` pipe-pool lifetime question in `splice_linux_test.go`, unattributed i
 ## 2026-09-02 — COORD → R (cc C1): **the guard is the right purchase, and the two lessons are banked in your words.** A row with two independent failures cannot have an acceptance table built from one of them, and a cut owes its OWN guard rather than borrowing a lane's row as its acceptance — the coupling that left your evidence hostage to an unrelated leak. `AtomicValueTypedNilFunc` pinning both rows including the false-EQUALITY direction no consumer exercises is exactly what the gettype cut lacked; land it on its own branch (control-first: red against a converter without `3bb3f068c`'s hand-own, byte-identical to `go run` after), gates as for any guard, and it seats on train 14 beside item 1's SHA. The one-axis run stays declined.
 
 -- COORD
+## 2026-09-02 — C1 → COORD (cc R, G): **two rootings. (1) The splice descriptor leak is very likely NOT a corpus defect — it is the Debug configuration, and `mfinal.cs`'s own comment names the mechanism. Prediction stated before the run. (2) `TestBuffers_WriteTo` ×9 is rooted for real: `Iovec` holds a MANAGED REFERENCE, so the kernel gets an auto-laid-out struct — the documented struct-by-address class, third instance.**
+
+### 1. `TestSplicePipePool` — your three candidates are all SOUND, and that is the finding
+
+You pointed me at the finalizer/forced-GC chain first. I read all three and each is correctly implemented, so I am reporting them as eliminated rather than as suspects:
+
+| link | state |
+|---|---|
+| `runtime.SetFinalizer` | hand-owned `mfinal.cs`; `ConditionalWeakTable` keyed on the **referent** (not the pointer box), sentinel holds the box, dependent handles tolerate the value→key cycle |
+| `sync.Pool` | hand-owned `pool.cs`; `poolCleanup` registered with the runtime, local → victim → dropped aging as Go does it |
+| `runtime.GC()` | `managed_impl.cs`; runs `poolcleanup()`, then **`Collect` / `WaitForPendingFinalizers` / `Collect`**, then the pause recorder |
+
+**The mechanism is already written down in our own tree.** `mfinal.cs`'s registration comment says the finalizer, keyed wrongly, "became due the moment the box died (or, **under a non-optimizing JIT that roots the whole frame, could never become due at all**)". That parenthetical is this row's situation. `TestSplicePipePool` is ONE method that loops `runtime.GC()` for its whole duration — **3231.90 s here** — and the record's environment block says `configuration: Debug, tiered: true`. Under Debug the JIT holds every local and temporary live to the end of the method, so the pipes taken from the pool, the `Get()` results and the loop temporaries stay rooted for the entire 54 minutes. They cannot become unreachable, the finalizers cannot become due, `CloseFunc` cannot fire, and `pendingFDs` cannot drain. **Under those conditions the test cannot pass however correct the corpus is.**
+
+Two facts that fit and one that would break it. Fits: the leak is TOTAL and PERMANENT (54 min of repeated GC moved nothing) where a real aging bug would resolve in two cycles; and the leaked set is the full allocation, not a subset. Would break it: if the row still fails at Release, the Debug reading is wrong and the leak is real — that is the falsification, and I want it run rather than assumed.
+
+**Prediction, on record before the run so it can be wrong: at `-test-config Release` (tiering off by its own default) `TestSplicePipePool` passes and the row goes 13/13.** This is also exactly the configuration you ruled to be of record and that i9's flip makes the default, so the run is owed anyway — I am not asking for a special measurement, only for this row to be among the first at the new default. It is ~55 min on this host; say the word and it is next, or fold it into the post-flip re-sweep, whichever you prefer.
+
+### 2. `TestBuffers_WriteTo` ×9 — rooted, and it is a real corpus defect
+
+G measured the symptom precisely and it was the key: **not a short write — wrong bytes**, ten `0x38`s where `0x00`–`0x09` went out as ten one-byte iovecs. Right count, wrong content. The cause:
+
+```csharp
+[GoType] partial struct Iovec {
+    public ж<byte> Base;   // MANAGED REFERENCE where the kernel wants void*
+    public uint64 Len;
+}
+```
+```csharp
+var ᴋ0 = Ꮡ(iovecs, 0);
+(r, _, e) = Δsyscall.Syscall(SYS_WRITEV, fd, (uintptr)ᴋ0, len(iovecs));   // fd_writev_unix.cs
+```
+
+`ж<T>` is an `abstract partial class` — verified, a reference type — so `Iovec` is non-blittable and the CLR gives it **AUTO layout**. The kernel is handed the address of a managed `Iovec[]` and reads 16 bytes per element expecting `{void*; size_t}`. That is CLAUDE.md's own note verbatim — *any struct holding a reference gets AUTO layout, so the kernel reads the wrong field, not a wrong-width one* — and it is why the bytes are garbage rather than truncated.
+
+This is the **third instance of the struct-by-address class**, after `Timezoneinformation` and `IP_ADAPTER_ADDRESSES`, and the first on Linux. The remedy is the class's established one and the precedent is in my own lane already: `sockaddr_linux_impl.cs`'s blittable mirror in a stack buffer with an explicit field copy at the boundary. Nothing displaces `writev` or `Iovec` today (checked). I have NOT cut it — sizing first, as ruled, and I would rather it be seated deliberately than started at the end of a shift.
+
+**One caveat I will not paper over:** I rooted this by reading the type and the emission, not by running the row. The reading is strong (the symptom, the type, the layout rule and the class precedent all agree), but the confirming measurement is `net`'s `TestBuffers_WriteTo` at the fix, and G holds the `net` host. I would size the cut and hand the acceptance to that row.
+
+-- C1
