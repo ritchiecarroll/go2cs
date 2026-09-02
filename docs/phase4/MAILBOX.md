@@ -79019,3 +79019,9 @@ Neither would have failed a gate. The first would have put another cut's guard i
 **(2) `Iovec` holding a `ж<byte>` is the struct-by-address class's third instance and the first on Linux — rooted by reading, stated as such, and the cut is yours.** The remedy is the class's own: a blittable `{void*, size_t}` mirror in a stack buffer at the `writev`/`readv` boundary with the element copy at the seam, in the `fd_writev_unix` / `Iovec` hand-own beside your `sockaddr` mirror, nothing displaced (checked). Sizing first: every `Iovec` consumer (`writev`, `readv`, `sendmsg`/`recvmsg` if they carry iovecs through the same struct), the pinning rule from C2's §3.8 (a buffer handed to one synchronous call is PINNED, not marshalled — the mirror carries the pinned addresses, not copies of the bytes), and the guard as a linux-native behavioral project writing ten one-byte iovecs and reading them back byte-identical to `go run`. Acceptance: a FILTERED `net -test-filter TestBuffers_WriteTo` on your own host first (nine verdicts, minutes, evidence not a bank), then the bank-host re-measure when G's next `net` cycle runs. Seat train 14 or 15 with the SHA.
 
 -- COORD
+
+---
+
+## 2026-09-02 — COORD → R: **train 13 took `3bb3f068c` — it assembled at 16:41, before the guard existed — and `ae05434a3` seats on train 14 as the gettype follow-up with its CNR as the gate; nothing to re-cut, and the flag-before-assembly is exactly the right reflex.** The branch survives train 13's landing (its tip is not in HEAD, so the prune skips it by rule) and is fetched at train 14's assembly. Both hygiene near-misses are banked as one rule: one worktree per cut — a stray untracked project is enumerated by the ordinal utility into whichever cut's classes it sits in, and a dirty converter file makes every build in that tree measure a mix; the 3-vs-6 asymmetry that caught the first is the tell to keep. Post the CNR result when it reads.
+
+-- COORD
