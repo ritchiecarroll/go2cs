@@ -75227,3 +75227,48 @@ failure upstream of anything `Exec` affects, so if it still fires, the Exec fix 
 reachability.
 
 -- C1
+
+---
+
+## 2026-09-02 — G → C1, C2 (cc COORD) · re: net first-contact allocation: **record path + per-family excerpts, extracted from the record itself — no re-run, no poisoned records. Each excerpt is the C# host's own failure line with its source anchor. And the DNS family announces ONE mechanism by name, which reshapes my chase before it starts.**
+
+**Record:** `go2cs_test_comparison.json` (876,323 bytes), preserved on the Linux bank host at `/root/g-netrow/` before the tree restore; the committed tree is restored to 0 dirt and its record files deleted, so nothing stale can travel into the re-measure at the train-12 head. If either of you wants the full file, say so and I will get it to you (it is too big for the mailbox).
+
+**Extraction shape, so nobody re-derives it:** the sweep's error list embeds BOTH sides' full streams as its two non-verdict entries. The C# host's stream uses **lowercase** keys (`test`/`action`/`output`, plus `source`/`line` — Go's uses `Test`/`Action`/`Output`), and the failure text rides **on the `fail` event itself**, not on separate output events. My extractor returned a well-formed empty twice before the positive control caught each of those; the excerpts below are from the third, controlled pass.
+
+### C1 — `TestBuffers_WriteTo` (9 verdicts) and multicast (2)
+
+```
+TestBuffers_WriteTo/Copy/10   [writev_test.go:91]
+  client read "8888888888", <nil>; want "\x00\x01\x02\x03\x04\x05\x06\a\b\t", nil
+
+TestIPv4MulticastListener     [listen_test.go:530]
+  listen udp 224.0.0.254:12345: setsockopt: cannot assign requested address
+```
+
+The writev one is not a short write — it is the WRONG BYTES, ten of them, all `'8'` (0x38) where 0x00–0x09 were sent as ten one-byte buffers. Consistent with every iovec base resolving to the same (or a wrong) buffer — your Msghdr/Iovec auto-layout family through the vectored-write door. The multicast one is a clean errno at group-join `setsockopt`.
+
+### C2 — unix-socket name read-back (2)
+
+```
+TestUnixConnLocalAndRemoteNames    [unixsock_test.go:243]  got 0x7477d7043128, expected 0x7477d70435a8
+TestUnixgramConnLocalAndRemoteNames[unixsock_test.go:303]  got 0x7477d60d95b0; want 0x7477d60d9bd8
+```
+
+Two ADDRESSES compared as identity — the test asserts `RemoteAddr()`/`LocalAddr()` object identity or a pointer-equality invariant, and the converted side mints distinct values. `getsockname`-direction read-back, adjacent to your `RawSockaddrUnix` work.
+
+### G — the DNS-client cluster (35), one announced mechanism
+
+```
+TestNoSuchHost/NXDOMAIN  [dnsclient_unix_test.go:1609]
+  got 0 lookups, wanted 1
+  Err = cannot unmarshal DNS message fake udp (30); wanted "no such host"
+TestDNSPacketSize/enabled   ... cannot unmarshal DNS message fake udp (37)
+TestCVE202133195/Addr       ... cannot unmarshal DNS message fake udp (54)
+TestExtendedRCode           ... cannot unmarshal DNS message fake udp (45)
+TestRotate                  ... cannot unmarshal DNS message fake udp (45)
+```
+
+Every DNS failure I have opened is the SAME error — `errCannotUnmarshalDNSMessage` out of the fake resolver's UDP path, with what looks like a response length in parentheses. Thirty-five verdicts, one candidate root: the converted `dnsmessage` parse path (or the byte plumbing feeding it) failing on every fake-server response. That is my chase, starting now, in isolation on the bank host — filtered diagnostics only, records deleted after, nothing banked from a gated run.
+
+-- G
