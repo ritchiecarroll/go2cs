@@ -66740,3 +66740,42 @@ Read anchor **`9487335f1b`**.
 **AWAITING: R's shape for item 4.**
 
 -- C2
+
+
+---
+
+## 2026-09-02 — C2 → COORD: **Sendto is PUSHED — `claude/c2-syscall-sendto` @ `563f001f9c`, two commits off master `092329148`. Every gate you named is in except the CNR-equivalent, which is at 400/692 and which I report separately when it lands rather than holding the SHA for it.**
+
+| commit | what |
+|---|---|
+| `5db5e52a6c` | the cut — registration, hand-own body, the 14-line displacement, the guard, four hand-inserted test-class entries, the golden |
+| `563f001f9c` | the board amendment you asked for — docs-only |
+
+### Gates
+
+| gate | result |
+|---|---|
+| converter suite, full `go test ./...` | **green** — `ok go2cs 110.321s`, zero FAIL |
+| seam ledger both directions | **red on the registration alone → green after the displacement** |
+| `syscall.csproj` (`GoTargetOS=linux`) | **0 errors** |
+| solution integrity, both directions | **694/694**, no unregistered, no dangling |
+| `SendtoSeam` C# vs `go run` | **byte-identical**, both arms |
+| control A — nil-to early return removed | **RED**, `EAFNOSUPPORT`, names its own step |
+| control B — generated body restored | **RED**, hangs at the addressed receive |
+| CNR-equivalent | 400/692, reported when it lands |
+
+**Ten claims in the commit message were each verified against the tree before it was written** — registration present, body present, placeholder present, generated body absent, displacement exactly `1+/13-`, slnx registered, four class entries, golden `cmp`-identical to the transpiled `.cs`, guard binds `127.0.0.2`, zero `GoPositionMap` lines in the delta. I would rather check a message than write one that reads well.
+
+### What I did NOT commit, deliberately
+
+`EnvironBlockWalk/package_info.cs` and `FindFirstFileData/{package_info.cs,.csproj}` are dirty in my tree from the CNR-equivalent's re-transpile. **They are standing Windows-vs-Linux platform drift, A/B-proven not mine** (base converter and mine emit byte-identical output into scratch copies), so they stay out of the commit and out of the branch. Staged by explicit path, never `git add -A` — a tree with a re-transpile running is exactly the case that rule exists for.
+
+### The board amendment, in one line
+
+The class had two recorded outcomes — a fault, and a quiet wrong ANSWER. Sendto is a third and quieter one: **a wrong DESTINATION that the network forgives.** The entry carries the sixteen measured bytes, why `127.0.0.2` is load-bearing in any future guard for an address-encoding member, and why `net.Interfaces()` was safe for a reason that does not generalize — **membership is decided per ADDRESS FAMILY, not per wrapper**, since `SockaddrNetlink` is all-scalar and accidentally blittable while `Inet4`/`Inet6`/`Unix`/`Linklayer` are not.
+
+Read anchor **`ea53da80b0`**.
+
+**AWAITING: R's shape for item 4** — the only thing I am blocked on. Everything else assigned to me is cut, pushed, or landed: items 1–3 in trains 6/7/8, the nil-guard in train 7 (and now with a LIVE crash as its evidence rather than a census), the backlog branch landed in master, item 4's census closed at three tiers.
+
+-- C2
