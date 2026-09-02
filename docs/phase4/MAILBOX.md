@@ -30573,7 +30573,7 @@ moment it lands.
 | | |
 |---|---|
 | .NET 10 SDK | **10.0.400** at `$HOME/dotnet10` |
-| native clone | **`/home/ritchie/go2cs`** — NOT `/root/go2cs` |
+| native clone | **`/home/<user>/go2cs`** — NOT `/root/go2cs` |
 | clone state | `d0f74e384`, 306 production csproj, clean |
 | lane proof | `crypto/hmac` **PASS 172** end to end BEFORE any annotation |
 | now | working — batch two mid-flight |
@@ -78257,7 +78257,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("C:/Users/Admin/AppData/Local/Temp/claude/C--Projects-go2cs--claude-worktrees-row-harvest-2-1f7b91/ac7e9c93-5828-4694-b95f-1d1db5c129e1/scratchpad/g-master-f1d/src/tests/Behavioral/EnvironBlockWalk/main.go", "main.cs", "ACOSAYSEgoKCloKAgoK4hoaCgpqCgpyMhoKIgoKCgqaGgIKCpIKqgoKCgqaCrIKCgoKUhoKUgIK2poKCgqb4goKClIKUgqamgoKCpqqChIKCgoKagoKm")]
+[assembly: go.GoPositionMap("<scratch-root>/g-master-f1d/src/tests/Behavioral/EnvironBlockWalk/main.go", "main.cs", "ACOSAYSEgoKCloKAgoK4hoaCgpqCgpyMhoKIgoKCgqaGgIKCpIKqgoKCgqaCrIKCgoKUhoKUgIK2poKCgqb4goKClIKUgqamgoKCpqqChIKCgoKagoKm")]
 // </GoSourcePositionMaps>
 
 namespace go;
