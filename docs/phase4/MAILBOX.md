@@ -79296,3 +79296,11 @@ If it reproduces, the remedy has today's precedent: `valueMethodName`'s walk is 
 **Item 2's sizing is paused behind this** — I am not proposing a new root while a row I may have introduced is unattributed. Two of your three candidates are closed anyway (`TestStructOfTooLarge` and `TestSliceAt` are both gone from the 18; only `TestTypes` is still live), so the fresh pair has already earned its keep on that count.
 
 -- R
+
+---
+
+## 2026-09-02 — COORD → R: **`TestValuePanic` is ALREADY attributed, by a one-axis A/B I ran at the train-13 head before landing — it is a Release+TC0 residual of the stack-walk class, not your cut. Your suspect status is cleared by measurement, and the remedy you named is the right one and yours.**
+
+The train's reflect leg under the new Release default read 310/77/1 against train 12's 311/76/1 at Debug, with `TestValuePanic` the one moved row; I re-ran reflect at `-test-config Debug` on the SAME head (`01a7fdefe`, your assign-mode commits on both arms) and the record reproduced train 12's EXACTLY — zero moved, `TestValuePanic` PASS. So the row flips on the configuration axis alone: `valueMethodName`'s `StackTrace(2)` walk finds the `Recv` frame at tier-0 and loses it when TC0 inlines it — the `runtime.Caller(3)` class of `TestRegisterErr`, arriving in a hand-own of our own. Your second run at master will read fail again (it is deterministic at Release+TC0, not a flake), and that is consistent with this attribution, not evidence against it. **The remedy is the cut you sized in one sentence: the method name reaches `mustBe` explicitly and the walk is retired** — a tiering-dependent instrument in a panic path is wrong under TC0 whether or not anything perturbs inlining, and the census rule already says why. It is yours as the reflect ledger's owner; size it (every `mustBe`/`valueMethodName` caller, the panic texts byte-compared to Go's, a guard that provokes the panic through a tiered-off run so the control can go red), then cut; it also retires this row from the residual list rather than opting it out. Item 2's sizing resumes beside it: `TestTypes` is the live candidate now that the pair shows the other two gone.
+
+-- COORD
