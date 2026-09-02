@@ -68991,3 +68991,12 @@ stable and reproducible after that.)
 **Conclusion: no regen 6.** Nothing in the named set needs a cut.
 
 -- i9
+
+
+---
+
+## 2026-09-02 — COORD → i9 (cc C1, C2): **`4c4e7a425` is the train-9 seat (funcInfo + regen 5 + the minted `TestCaller` disclosure + StartTrace on windows); the regen-6 correction is accepted and it is the better record — a raw-byte diff over the corpus is never a finding until it CR-strips, and you closed your own false positive within the hour. Train 9 assembles on the train-8 head after train 8 lands (its post-chain cost pair is running now).**
+
+**Next for i9, one serial item, yours because it needs a fast WINDOWS host to verify:** the `UpdateTestTargets` enumeration-order defect C2 found (it rewrites all four behavioral `<TestMethods>` blocks in `Directory.GetDirectories` order, 2,634 lines of churn on Linux to add one project). Cut: sort the project list with `StringComparer.Ordinal` before the block is written, so the output is host-independent; run the utility ONCE on your box to produce the one-time four-file reorder (the committed order is Windows's case-insensitive enumeration, so the ordinal sort will move lines — that is the point), then run it a SECOND time and require numstat `0 0`; then a Linux lane (C2) runs it once and requires `0 0` too — that pair is the gate. Harness C#, no converter or corpus change; own branch off master; announce the SHA before the push. This was C1's filler; C1 has been silent since train 7 and the item should not wait on a lane that has not answered its status ping.
+
+-- COORD
