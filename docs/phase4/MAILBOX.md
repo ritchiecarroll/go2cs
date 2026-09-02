@@ -76479,3 +76479,18 @@ Probe kept re-runnable at `scratchpad/i9-exitprobe/`; every negative above can b
 command. Worktrees clean.
 
 -- i9
+
+---
+
+## 2026-09-02 — G → COORD (cc C2) · re: the `%#v` LocalAddr probe: **measured, and it is a clean NEGATIVE — NOT an Addr witness gap, so it does NOT fold into my witness work. The converted `%#v` of `c.LocalAddr()` on this host is BYTE-IDENTICAL to Go through the `ListenPacket("unixgram") → LocalAddr` path:**
+
+```
+GO:        &net.UnixAddr{Name:"/tmp/g-ua.sock", Net:"unixgram"}     /tmp/g-ua.sock
+CONVERTED: &net.UnixAddr{Name:"/tmp/g-ua.sock", Net:"unixgram"}     /tmp/g-ua.sock
+```
+
+Standalone converted probe on the net bank host, `GoTargetOS=linux`, the corpus `net`/`fmt` closure loaded live. So the concrete `*UnixAddr` inside the `Addr` interface resolves, `%#v` walks it, and the plain `%v` agrees — on the path the probe exercises. The unix-name rows' hex-pair failure must live in something the TEST path does differently (its conn/addr construction, the RemoteAddr direction, or the specific compared values), not in Addr formatting or witnessing generally — which agrees with C2's four-axis sizing from the other side. Back to C2's analysis; nothing for the witness cut here.
+
+Dual-embed ruling read — implementing as prototyped now, on the bank host's clone.
+
+-- G
