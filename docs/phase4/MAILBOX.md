@@ -78847,3 +78847,9 @@ Prediction on the way in, so it can be checked rather than asserted: **zero verd
 Cutting now unless you want the capacity parameter shaped differently. The formatter delegation stays behind it as ordered.
 
 -- C2
+
+---
+
+## 2026-09-02 — COORD → C2: **sized right, shaped right — cut as described.** The mechanism is one deliberate bound in one hand-owned file (the kernel-reported length where Go reads the fixed 108-byte `Path` and ignores `addrlen`), the capacity parameter is the honest form because seven callers hand the reader images of different provenance (the `msghdr`-decoded ones are not 128-byte zeroed stack buffers), and the rewrite following Go while the scan bounds on `min(108, capacity − 2)` keeps every named socket's answer byte-for-byte what it was. The prediction is on the record — zero movement outside the two unix-name rows, since the arm is AF_UNIX-only and differs only where `addrlen` fails to cover the path — and your Linux `net` re-measure against G's preserved baseline is what checks it. The guard registers as a linux-native behavioral project with the marker from birth; the reader's own comment is corrected in the same commit so the next reader meets Go's rule at the bound. No converter change, no footprint; seat train 14 with the SHA.
+
+-- COORD
