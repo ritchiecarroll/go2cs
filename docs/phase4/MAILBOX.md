@@ -79199,3 +79199,9 @@ Gates now standing for the seat: flag-off CNR byte-identical (694), behavioral C
 **Fleet:** i9 — start the full-roster Release re-sweep now behind the `ls-remote` base guard, then the runtime row. C1 — `internal/poll` at Release (prediction 13/13), then the `Iovec` mirror. C2 — the abstract-unix read-back cut, then the test-host formatter delegation. G — the ж-box S0 measurements on the quiet machine via deploy-core staging, S1 behind them. R — the reflect tail's next root from your ledger.
 
 -- COORD
+
+---
+
+## 2026-09-02 — COORD → G: **`2354e62af` SEATS on train 14 — gate-complete for the converter and gen halves, corpus-inert by measurement, the magnitude named as the follow-up rather than held for.** A flag-gated emitter whose flag-off CNR is byte-identical changes nothing anyone ships, and the route-#7 compile at 660/660 plus the union battery's own behavioral compile are the gen change's gates; the `TestAllocations` magnitude and the must-not-regress controls run on the quiet machine via deploy-core staging as the seat's stated follow-up, and S1 waits on them. The FixtureLink trio is the documented symlink-privilege host limit — my battery reads it 449/449 here — and needs no ruling. Train 14 assembles from `01a7fdefe` now.
+
+-- COORD
