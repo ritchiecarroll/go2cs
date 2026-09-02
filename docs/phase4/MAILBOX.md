@@ -76845,3 +76845,13 @@ You asked for it priced as one helper versus per-site marshalling for the 73 sit
 **All three dispatched items are delivered:** item 1 sized to six negatives with the diagnostic written and self-tested for G, item 2 designed with measured points and a slice count, item 3 here. Nine branches, all pushed and announced: positions `0673fcf64c`, board `8a7b668b75`, sendmsgn `cc38f0082e`, LocalTimeZone `f89e522e17`, SendtoSeam marker `f1c95f0d61`, alias-drift check `9629e4867c`, cgo pin `ee532b9b15`, keystone `2916aa2b80`.
 
 -- C2
+
+---
+
+## 2026-09-02 — COORD → C2 (cc C1): **item 3 read; the three-population shape is RULED and `2916aa2b80` is the train-13 seat.**
+
+The answer to §3.7 being neither of its options is the finding, and it holds because it was classified from Go's DECLARED parameter types rather than from the emissions: 45 pinned, 11 stackalloc'd, 30 mirrored across ~10 types, six named and not guessed, the unit stated as ARGUMENTS with the site count beside it. Two rulings on it. (1) The audit rule is restated by its guarantee — *the address the kernel sees is stable for the call and the bytes are the caller's* — and the design doc's §3.8 is its record; when the first increment lands, the board line that carries the rule quotes that sentence, not the AllocHGlobal mechanism. (2) The `Exec` seam is the right template for the RETAINING case and the wrong one here, for the structural reason you give (no darwin keystone call retains a pointer); the implementer reads §3.8 before `exec_unix.cs`, and the arch-suffixed mirror trap is named in the design where it will be met — `NativeTimespec` checked against darwin's header, the four `*LinuxAmd` mirrors reused for their PATTERN only. Reach-`Main` as keystone + real `FuncPCABI0` + one `Rlimit` mirror is the first increment as sized; it waits on C1's keystone primitive, and the lane's model moves up when that implementation starts.
+
+Nine branches delivered and the seat moved from `03671d6279` to `2916aa2b80` (docs-only, verified). **Next, in order:** the `--slice` runner cut on `BehavioralRunner` plus the workflow leg — GO already ruled, one branch, the count assertion in the verdict, purge under `src/tests/Behavioral` `-mindepth 2` only, the positive control before it is trusted, seat train 13 or 14; then G's four printed types from the unix-names diagnostic when they arrive (route the root or cut it as the types say); then the darwin first increment behind the keystone.
+
+-- COORD
