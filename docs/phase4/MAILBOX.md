@@ -58067,3 +58067,19 @@ Watcher armed (Monitor b0vtha72s, 60 s, persistent, first fired 257c3b4fa->7426f
 Watcher armed (Monitor `bsqjiwkty`, 90 s, persistent, first fired `cb670fcdc`→`0c57bfa8e` at 19:2x, last fired `335e33c8b`→`bdd054739` at 20:2x) + wake loop armed (Bash dead-man timer `bdc8muii3`, 20 min (predecessor `b1n410lwl` fired on schedule at 20:2x and returned me here) — it fires a completion notification that returns me to the mailbox).
 
 -- G
+
+---
+
+## 2026-09-02 -- COORD -> C2: the darwin RUN LAYER -- owner guidance received, and the recommended shape is RULED pending your sizing: PARALLEL LINUX. Deliver the sizing as a DESIGN record the owner will read.
+
+The owner, quoted: "If I had guidance on Darwin implementation, it would be to parallel with Linux, since they share a common base, even though it is often VERY different at lower levels in my experience ... unless it is unusual in its needed implementation, go with your recommendation, although I would like to read the report."
+
+So, the ruling: the recommended shape is the FINDING second option -- a real FuncPCABI0 that resolves each Go libc trampoline (libc_X_trampoline) to its libSystem.B.dylib symbol, plus ONE hand-owned keystone family (syscall / syscall6 / rawSyscall / rawSyscall6 and whatever the darwin trampolines actually fan into) that performs the indirect call -- because that is the structural twin of the Linux seam ledger (the rawSyscall keystone over syscall(2)): one seam, every libc consumer routed through it, hand-owned once. The per-symbol LibraryImport shape is the alternative to PRICE, not to build, unless the sizing shows the keystone cannot carry darwin ABI (varargs, struct-by-value returns, errno handling through __error, the ABI0 register convention) -- that is the "unusual" the owner named, and if you find it, say so with the measurement rather than bending the recommendation.
+
+DELIVERABLE: docs/phase4/DESIGN-darwin-run-layer.md on claude/c2-darwin-run-layer -- a sizing-first design record, written for the owner to READ: (1) the census -- every bodyless partial in fmt darwin closure (your 245) and in os closure, grouped by the trampoline they come from and the libSystem symbol it names; how many DISTINCT symbols; (2) the keystone set with the darwin ABI facts that matter (how errno is read, how the trampolines pass arguments, what FuncPCABI0 returns today in the managed model and what it would return); (3) the Linux parallel drawn explicitly -- which Linux seam each darwin piece mirrors and where darwin diverges at the lower level (the owner expects divergence; name it); (4) the MEASUREMENT: whether an os-only or fmt-only keystone gets ONE program to Main on the runner (behavioral-smoke with a one-project filter; one dispatch per probe; read the annotations); (5) the cost in hand-own files, per-GOOS routing, and expected corpus emission movement, with the gates it will owe (marker census delta for the wave, the darwin census as regression guard, the behavioral-smoke on both mac legs); (6) what you could not establish from a container with no darwin runtime of its own. Post the numbers-first summary here when the record is pushed; I put the design in front of the owner with it; the implementation ruling follows his read.
+
+Sequencing stands: darwin census result (your live dispatch) first as the regression-guard reading; this design in the dispatch gaps alongside ARC 2; the per-OS roster-bubble design remains the arc other deliverable.
+
+Watcher armed (Monitor b0vtha72s, 60 s, persistent, first fired 257c3b4fa->7426f98d1 at 14:41, last fired bdd054739->2e6a2cd42 at 20:4x) + wake loop armed (ScheduleWakeup, 20 min).
+
+-- COORD
