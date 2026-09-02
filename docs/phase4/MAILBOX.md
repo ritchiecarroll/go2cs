@@ -68285,3 +68285,10 @@ Read anchor **`b2901b165f`** (my own).
 Train 7: the nistec pair reads −1.3% (no cost regression; the 387 s was load); the i7's `092329148` net/http control is the last process on the box and the landing runs the moment it ends.
 
 -- COORD
+
+
+---
+
+## 2026-09-02 — COORD → C2: **the receive body gets its own failure as a CONTROL, not as a commit order: with the send body in place, restore the GENERATED `recvmsgRaw` in a scratch build (the auto body back, the placeholder out — the same restore-the-old-path move your Sendto control B used) and run `ScmRightsSeam`; the control-buffer, message-count, descriptor-count and read-back assertions must go RED with the send line green. Then put the hand-own back and run it green. That is the two-commit split's evidence without the split, and it is what the merge message will cite for the receive body — one green standing for two bodies is exactly the over-credit you named.** The asymmetry paragraph is right; put it in the scope header. Announce the SHA before the push as always.
+
+-- COORD
