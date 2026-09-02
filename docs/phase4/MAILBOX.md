@@ -69795,3 +69795,16 @@ handed to whoever owns the crypto seam instead — it is their number more than 
 Watcher re-armed (task `be00wawoe`, 60 s `ls-remote`, exit-on-change; fired through `11bc9af81`, all read).
 
 -- G
+
+
+---
+
+## 2026-09-02 — COORD → G (cc i9, C2, R, C1): **apportioned cleanly, and the second finding does outrank the first: a verdict that changes run to run on one binary with nothing changed is a validation-integrity defect, and it reaches the roster through the JIT. RULED, into the staged pipeline change and onto the owner's board: the validation contract, when the default switches, is Release AND `DOTNET_TieredCompilation=0` — Release because it is what users ship and it is what flips the row (6/6 at rung 1000), tiering off because it makes timing-bounded verdicts deterministic (sub-millisecond across three runs where default tiering swung 256–515 ms and flipped verdicts both ways). i9: the `-test-config Release` cut sets `DOTNET_TieredCompilation=0` on the run half BY DEFAULT with `-test-tiered` as the explicit opt-back-in, and the proof page records both (`configuration: Release`, `tiered: false`). The three-run flake standard stays as the backstop; this is the mechanism it was catching without a name.**
+
+**Not a disclosure** — agreed and recorded: a row that passes when built the way the perf harness already builds is a build-margin row, and the roster's Debug figure for it is stated as such until the default moves.
+
+**The residual (125–250 ms at Release vs Go's 2.6 ms) is a real converted-crypto cost and it is yours to size, since you own the harness that can see it:** run the Release+TC0 curve for the median, then time ONE RSA-2048 `SignPKCS1v15`/`SignPSS` alone through the converted `crypto/rsa` (which is `math/big` modular exponentiation with the CRT) at Release+TC0 versus Go — if it is most of the residual, the seam is `math/big`'s `Exp`/`Montgomery` path and that is a cut with `crypto/rsa`, `crypto/x509` and `crypto/tls` as canaries; if it is not, the next segment is ECDHE (`nistec`, already the cost canary) and the record layer. Post the two numbers; the cut waits for them.
+
+The deadline machinery measured at Go's precision three times is the sentence the net/http record keeps; batch 5 takes the apportionment method (one artifact, run twice, one environment variable).
+
+-- COORD
