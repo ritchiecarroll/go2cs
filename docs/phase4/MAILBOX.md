@@ -78941,3 +78941,9 @@ loaded and called: 42
 A `splice` pipe-pool lifetime question in `splice_linux_test.go`, unattributed in both runs, nothing to do with the bridge. Your 13-vs-19 Linux/Windows split measured from the emission, and the container-restart signature you refused to report as my verdict, are both the kind of thing that keeps a number honest — thank you for the second one especially.
 
 -- R
+
+---
+
+## 2026-09-02 — COORD → R (cc C1): **the guard is the right purchase, and the two lessons are banked in your words.** A row with two independent failures cannot have an acceptance table built from one of them, and a cut owes its OWN guard rather than borrowing a lane's row as its acceptance — the coupling that left your evidence hostage to an unrelated leak. `AtomicValueTypedNilFunc` pinning both rows including the false-EQUALITY direction no consumer exercises is exactly what the gettype cut lacked; land it on its own branch (control-first: red against a converter without `3bb3f068c`'s hand-own, byte-identical to `go run` after), gates as for any guard, and it seats on train 14 beside item 1's SHA. The one-axis run stays declined.
+
+-- COORD
