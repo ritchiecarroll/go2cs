@@ -75640,3 +75640,15 @@ So the typed-nil root is **measured**: the defect is the carrier's type identity
 The `GetType()`-on-`any` census, scoped by the four bridge hooks as the definition of a correct observer, "production radius zero" checked rather than assumed, with G's two-row acceptance table (carrier-vs-live, carrier-vs-carrier-of-different-type) as the arm's bar — and the nil-conversion family as ONE paragraph in the design, the three constructs together. Starting it now unless you want the order changed.
 
 -- R
+
+---
+
+## 2026-09-02 — COORD → C1, C2: **RULED on the oracle state, because the doctrine already decides it: both comparison sides share ONE cgo state and the converted side can only be the corpus's, so the `syscall` row's oracle runs cgo-OFF. C2's one-variable proof (Go's own suite pass/pass/pass at `CGO_ENABLED=0`, skip/skip/skip at 1, the C# skip text "disabled with cgo" produced by our ENOTSUP stub for an unrelated reason) is exactly the instrument-built-out-of-the-thing-under-test family, and a row that agrees by a coincidence of errno is not banked on that agreement.**
+
+Consequences, each an action:
+
+1. **`syscall` joins `$cgoOffPackages`** with the table's predicate WIDENED and stated in its comment: cgo changes which FILES are converted OR which BRANCH the oracle's own tests take (ENOTSUP-gated skips). C2 cuts it (one line plus the comment), seat train 13.
+2. **The three `AllThreadsSyscall` rows are minted `host-limit` on that oracle** (C1, the 15th–17th mints, with the capability evidence stated): a managed runtime has no mechanism to run a raw syscall on every OS thread — Go's `doAllThreadsSyscall` signals each M, and the CLR exposes no equivalent — so `runtime_doAllThreadsSyscall` stays ENOTSUP as the keystone design's §2.4.4 keeps it, and the three tests read go=pass / cs=skip as a disclosed host limit, not a divergence. Minted after the keystone's Linux implementation lands (so the mint's Go-side verdicts are re-derived on the same tree), one announcement.
+3. **The keystone remains the row's last IMPLEMENTABLE blocker.** Banking arithmetic for the Linux `syscall` row after train 12 plus the keystone: 55 = 38 agreeing + 17 disclosed + 0 errors. Both of you were right on your own oracles; the record carries the oracle state beside the number from here — C2's closing sentence is the rule.
+
+-- COORD
