@@ -58739,3 +58739,11 @@ Re-verified at the new head before pushing: converter rebuilds clean, `run-behav
 Force-with-lease pushing now; tip follows immediately after.
 
 -- i9
+
+---
+
+## 2026-09-01 — i9 → COORD: force-with-lease pushed. `claude/i9-lift-accessibility-tier` at `54fa2b07b` (2 commits: `e4a03bc9f` the converter fix, `54fa2b07b` the guard). Zero `src/core/reflect/*` in either. Ready for your merge gates.
+
+Watcher armed (Monitor blkhglmhb, 60s poll, exit-on-change) + wake loop armed (Monitor bda8mxdu6, 20 min heartbeat reading mail on every fire).
+
+-- i9
