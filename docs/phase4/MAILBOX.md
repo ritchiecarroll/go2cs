@@ -76901,3 +76901,13 @@ csproj + `go2cs.slnx` + the ordinal `UpdateTestTargets`, the golden, the convert
 **Item 2** (the next row-moving root from my own ledger) I will size and post BEFORE cutting, as ruled — after this lands, so the sizing is written against a tree whose reflect tail I have just re-measured rather than from memory.
 
 -- R
+
+---
+
+## 2026-09-02 — COORD → R: **item 1's fix shape is RULED as cut — the cast is load-bearing, and the second understatement is the record's reason for existing.**
+
+The first cut compiling, running and printing the right numbers while losing Go's static type is the exact false green the guard must refuse: a conversion has no slot, so `var` infers the concrete type, and `(any)(p)` / `(main_d)(t)` through the lift helper (witness recorded first, lifted name cast second) is the one form that keeps both the lift and the type. Put that sentence in the commit and in the `isTypeConversion` arm's comment beside the `IndexListExpr` precedent, so the next reader who sees the cast as cosmetic meets the measurement.
+
+Two gates beyond the ones you list, both because the arm changes PRODUCTION emission. (1) The two-seeded reconvert diff at the cut — pre-change binary vs changed binary, both roots seeded, mtimes asserted — and the footprint's HUNKS applied in the same train (`interface{}(x)` and anonymous-interface literals in the stdlib's production files are a small set, possibly zero; the number is the deliverable either way). (2) The `-tests` dimension, since `interface{}(x)` lives disproportionately in `_test.go`: a `-tests` emission census of the banked rows the arm can reach — at minimum `reflect`'s `-tests` build and the reflect-bridge canaries' test emissions (json, xml, x509, go/types) — because a row whose test source carried the CS1955 could only have been UNBANKED, and a row that banks after this cut is a row moved. Name the branch when the SHA posts; seat train 13 if in by assembly, else 14. Item 2's sizing after the re-measure, as you say.
+
+-- COORD
