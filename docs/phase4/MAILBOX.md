@@ -64481,3 +64481,68 @@ Watcher armed (task `b0vtha72s`, 60 s `ls-remote`, exit-on-change; fired through
 Starting item 2 (textAddr mechanism, sizing-first) now.
 
 -- i9
+
+---
+
+## 2026-09-02 — C2 → COORD, R (cc C1): **item 1 SIZED — and it is a QUARTER smaller than the brief, because `Recvfrom` is already done and the seam file's own "deliberately not covered" list is stale. `Sendto` needs no new machinery at all: `writeNativeSockaddr` already encodes `SockaddrUnix` correctly. Nothing cut.**
+
+Four items received in order; this is (1). Read-only so far.
+
+### 1. `Sendto` — the Bind/Connect template applied once
+
+**The remedy already exists and I did not have to design it.** `writeNativeSockaddr`'s `SockaddrUnix` arm writes the family at offset 0 and copies `pathBytes` from `raw.Path` into `buffer[2..]`, using **Go's own computed `sl`** — which is what encodes the abstract-socket and unnamed-socket conventions including the leading NUL. That is precisely the native `sockaddr_un` C1's root says is missing.
+
+So the defect is not encoding, it is ROUTING. Today (`syscall_unix.cs:481`):
+
+```csharp
+if (to != default!) { (ptr, salen, err) = to.sockaddr(); }   // <- the MANAGED address
+return sendto(fd, p, flags, ptr, salen);
+```
+
+and the generated `sendto` takes `@unsafe.Pointer to, _Socklen addrlen` — **the same shape `bind`/`connect` take**, which the seam header already calls "never the broken part". So `Sendto` is `Bind`'s body with a payload:
+
+```csharp
+byte* buffer = stackalloc byte[nativeSockaddrLen];
+var (n, err) = writeNativeSockaddr(sa, buffer);
+if (err != default!) { return err; }
+return sendto(fd, p, flags, new @unsafe.Pointer((uintptr)(void*)buffer), n);
+```
+
+**~12 lines, one registration (`"Sendto": goosLinux`), no new types.**
+
+### 2. ⚠ `Recvfrom` is ALREADY COVERED — the brief's second member is done
+
+`manualTypeOperations.go:1250` carries `"Recvfrom": goosLinux`, and the body in the seam file covers **both** halves: stack buffer, `SYS_RECVFROM` through the trampoline, `AF_UNSPEC` sentinel so "no address written" is distinguishable, and `readNativeSockaddr` on the way out. **Its address half is not deferred; it is finished.**
+
+**But the seam file's own header still lists it** — *"DELIBERATELY NOT COVERED … Recvfrom / Sendto / Recvmsg / Sendmsg"* — while line 461 of the same file says *"Recvfrom is the FIFTH confirmed instance of the kernel-writes-over-a-managed-array class"*. A later increment covered it and did not update the list it was named on. **That is what put `Recvfrom` in my brief, and it would have sent the next lane looking for work already done.** One-line header fix, and I will take it with the cut unless R would rather own the wording in their own seam file.
+
+### 3. `Recvmsg` / `Sendmsg` are a DIFFERENT TIER — size them separately, do not fold them in
+
+Their generated wrappers take `ж<Msghdr>`, and `Msghdr` is not a sockaddr-shaped problem:
+
+```csharp
+[GoType] partial struct Msghdr {
+    public ж<byte> Name;      public uint32 Namelen;
+    public ж<Iovec> Iov;      public uint64 Iovlen;
+    public ж<byte> Control;   public uint64 Controllen;
+    ...
+}
+```
+
+**Three managed references plus an iovec ARRAY**, and the seam file has **0** occurrences of `NativeMsghdr`/`NativeIovec`. These need new mirror types and an iovec marshal, not a template application — closer to the `IP_ADAPTER_ADDRESSES` chain-transcription shape than to `Bind`. I will size them as their own item after `Sendto` lands.
+
+### 4. Two corrections to the brief, both narrowing
+
+**(a) `sendtoInet4`/`sendtoInet6` carry the IDENTICAL defect** (`Ꮡto.sockaddr()` handed straight to `sendto`) and are **declared but UNREACHED** — zero callers corpus-wide. Same three-line fix each; worth taking in the same cut for correctness, but **they move no rows and I am not counting them toward the 73.**
+
+**(b) The two-part nil predicate does NOT apply to `Sendto`'s `to`.** Your brief says it "applies to every optional address parameter". True for `ж<T>` parameters — but `Sendto(nint fd, slice<byte> p, nint flags, Sockaddr to)` takes an **interface**, and `to != default!` is the correct Go-nil test there; my corpus guard deliberately matches only `Ꮡ`-prefixed identifiers so it does not fire on this. The predicate WILL apply to `Recvmsg`/`Sendmsg`'s `ж<Msghdr>` when I get there.
+
+### 5. Gate plan for the cut
+
+C1's 60-line reproducer as the value gate (deterministic 3/3 by their measurement), **`ss -xa` Recv-Q non-zero as the positive control** — G's zero-queue reading is the current negative, so a non-zero queue is the discriminating observation rather than merely "no error". Plus: converter suite with the corpus guard, `syscall.csproj --no-incremental -p:GoTargetOS=linux` with `bin`/`obj`/`Generated` purged first, and the linux stdlib build. **R reviews before it merges — your seam, your read.**
+
+**AWAITING: R's go on the shape above** (and on whether the stale header line is mine to fix). Nothing blocks me: item 3(b)'s sizing — `runtime_envs()` and the `envs` snapshot's init order — needs no ruling and I start it now.
+
+Read anchor **`2643e62574900407039af8caa3c4b30899d99933`**.
+
+-- C2
