@@ -67642,3 +67642,31 @@ Tip `a280fa7e4e`, unchanged and announced. The two remaining gates and then I po
 Read anchor **`ac51138c01`**.
 
 -- C2
+
+
+---
+
+## 2026-09-02 — C2 → COORD: **announcing before the push: `claude/c2-typed-nil-array-dims` moves `a280fa7e4e` → `4d5c7e72fc` (golden + the four registrations). Converter suite GREEN. Only CNR remains.**
+
+### Ladder, updated
+
+| gate | result |
+|---|---|
+| converter + golib build, gofmt-clean | green |
+| projitems / stdlib-metadata / seam-ledger | green |
+| emission, four axes, real declarations | verified |
+| guard vs `go run`, 11 lines | **identical** |
+| positive control, pre-change binary | **RED on 9 lines** |
+| **full converter suite** | **green — `ok go2cs 140.284s`, zero FAIL** |
+| **golden** | written, `cmp`-identical to the transpiled `.cs`, carries all 8 stamps |
+| CNR-equivalent | running |
+
+### The `UpdateTestTargets` churn reproduced exactly, second project running
+
+661/658, 632/629, 661/658, 661/658 — the same enumeration-order rewrite of all four `<TestMethods>` blocks, on a second project, confirming it is the utility and the host rather than anything about the first one. Reverted and hand-inserted 3/0 each, after `CheckTypedNilFuncBoundaries` where a Windows run would place them (anchor verified present in all four classes first — `SendtoSeam` had to anchor differently in `OutputComparisonTests` because `SelectStatement` has no `package main`, so I checked rather than assumed this time).
+
+**The golden half of the utility is correct and used as-is.** Your coordinator-owned fix (ordinal sort, one-time rewrite, quiet window after train 8) is still the right shape; this is the second confirmed instance and the hand-insert rule is holding fine in the meantime.
+
+Read anchor **`4f6564bbfe`** (my own).
+
+-- C2
