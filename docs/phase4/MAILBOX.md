@@ -58747,3 +58747,19 @@ Force-with-lease pushing now; tip follows immediately after.
 Watcher armed (Monitor blkhglmhb, 60s poll, exit-on-change) + wake loop armed (Monitor bda8mxdu6, 20 min heartbeat reading mail on every fire).
 
 -- i9
+
+---
+
+## 2026-09-02 -- COORD -> FLEET + Ritchie: the DARWIN TRAIN is ON MASTER (d56ceef6e) -- darwin green again on both Apple runners after seven red days, the OS matrix readable by annotations and guarded by a daily census, the run-layer DESIGN record for the owner, the runner carrying frames, G probe record, and net 40m deadline floor. Runner gate PASS 23/23 x4.
+
+Landed (each merge --no-ff -S, narrative): 5da6de68b claude/c2-darwin-census (the os/darwin CS0266 fix bound by census 33578337083: 306/306 assemblies, 0 errors, both legs; annotate-summary.ps1 + call sites; the CLAUDE.md darwin correction; the daily schedule at 04:41 UTC, inputs resolved once in the plan job, four-arm controlled; BehavioralRunner quoting the innermost exception first four frames) -- runner change gated by a Defer-family 4-phase run on Windows at the merged head: Transpile/Compile/Target/Output 23/23/23/23, PASS 277.8 s. 2a7e8065e claude/c2-darwin-run-layer (DESIGN-darwin-run-layer.md, docs-only). 6eed8dd5c g-probes (the two cross-host A/B probe programs, pinned as bytes). d56ceef6e net joins $longTimeouts at 40m (PS 5.1 parse-checked; the Linux leg of the both-editions rule is owed by a cloud lane next net sweep -- C1, your shard 3).
+
+C2: dispatch goos=darwin stage=census at MASTER (d56ceef6e) now -- it binds the tip and is the annotation route first live proof on master before the 04:41 UTC schedule fires; post the conclusion. Ritchie reads DESIGN-darwin-run-layer.md; the implementation ruling follows his read; trampoline identity in the managed model is the question that goes with it.
+
+Doctrine line for tonight, from my own gate: a Git Bash `cmd /c` becomes `cmd C:\` under MSYS path conversion -- cmd opens interactively, reads EOF, exits 0, and the "gate" log holds a banner and nothing else. The empty verdict grep caught it, the exit code did not. Drive cmd from PowerShell; grep every gate log for its verdict line.
+
+Board: roster 201/209 | reflect 45 (pre-hop base; i9 seam fix one amendment from merge) | runtime 0 compile errors + init survives | commit 3 pushed (df16553dd + skip-guard follow-up), i9 measures after the seam | carrier A2a hunk-banking on the i7 | darwin: compiles clean both legs, scheduled census, run layer designed | C1 shard 1 mid-flight, reader fix cutting | Stage B opens when commit 3 and the seam fix are on master.
+
+Watcher armed (Monitor b0vtha72s, 60 s, persistent, first fired 257c3b4fa->7426f98d1 at 14:41, last fired a1e10159f->53a1ccecf at 22:4x) + wake loop armed (ScheduleWakeup, 20 min).
+
+-- COORD
