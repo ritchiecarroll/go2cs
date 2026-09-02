@@ -228,9 +228,43 @@ project, both mac legs. Two things make this readable now that were not availabl
 was written: the runner quotes the **innermost** cause (that finding's §6), and the summary is
 echoed as **annotations** readable from the REST API alone.
 
-**Result: PENDING.** Dispatched on `claude/c2-darwin-census`; the run's outcome and the named Go
-function are appended here when it lands, and this section states plainly that it was not answered
-if it is not.
+### 4.1 ANSWERED, 2026-09-02 — and it corrects this record by one package
+
+Probe run [33580792290](https://github.com/ritchiecarroll/go2cs/actions/runs/33580792290),
+`goos=darwin stage=behavioral-smoke filter=DeferSimple`, at master `d56ceef6e`, both mac legs.
+Transpile / Compile / Target 1 / 1 / 1; Output 0 / 1. With the runner now carrying the innermost
+exception's frames, the report names the call:
+
+```
+---> System.NotImplementedException: rawSyscall: external (assembly or cgo) function is not implemented
+ || at go.syscall_package.rawSyscall(uintptr fn, uintptr a1, uintptr a2, uintptr a3)
+      in .../syscall/Generated/go2cs-gen/go2cs.PartialStubGenerator/go.syscall_package.rawSyscall.14.stub.g.cs:line 14
+  | at go.syscall_package.Getrlimit(IntPtr which, ж`1 Ꮡlim)
+      in .../syscall/darwin/zsyscall_darwin_amd64.cs:line 871
+  | at go.syscall_package.init()
+      in .../syscall/darwin/rlimit.cs:line 39
+  | at .cctor()
+```
+
+**The first failing call is `syscall.Getrlimit`, reached from `syscall`'s OWN `init()`** — Go's
+`rlimit.go` raises the process's file-descriptor limit at package initialization.
+
+**This corrects `FINDING-darwin-run-layer.md` §2.1 by one package.** That record predicted the `os`
+package's static constructor (`initᴛStdin/Stdout/Stderr/initCwd` reaching one of
+`Getpid`/`Getuid`/`Getegid`/`ioctl`/`pipe`). Right about the class, wrong about the member:
+`syscall` initializes before `os` can, and dies in its own `init`. The finding said explicitly that
+it could not name the function without frames and declined to guess; the frames now say.
+
+**What it changes for this design.** §4's framing — "does an `os`-only or `fmt`-only keystone reach
+`Main`" — asked about the wrong unit. **The first casualty is inside `syscall` itself, below both
+closures**, so the minimum to reach `Main` is `rawSyscall` plus the `libc_getrlimit` trampoline,
+and no package-scoped subset of the keystone family is smaller than the whole. That is an argument
+FOR the keystone shape rather than against it: a per-symbol approach would have to resolve
+`getrlimit` before a converted program could start, and then every other symbol the moment it ran.
+
+**It remains a depth gauge, not a bill.** It names the FIRST failure and cannot say how many sit
+behind it — which is precisely the measurement §6.1 says wants better instrumentation rather than
+more round trips. The frames are the first installment of that.
 
 **What the probe cannot settle**, stated in advance so a green is not over-read: reaching `Main` is
 not the same as `fmt` producing correct output, and one project is not the corpus. It is a *depth
@@ -303,7 +337,8 @@ Stated plainly, because a design that hides its unknowns is worse than one that 
 2. **Whether `NativeLibrary.GetExport` on `/usr/lib/libSystem.B.dylib` resolves all 267 symbols.**
    Some may be macros, weak, or versioned. `os/darwin/dir_darwin_impl.cs` proves the mechanism for
    one symbol; 267 is an assertion until someone runs it.
-3. **The first failing call** — §4, pending the probe.
+3. ~~**The first failing call**~~ — **ANSWERED 2026-09-02, §4.1**: `syscall.init()` → `Getrlimit`
+   → `rawSyscall`. How many failures sit BEHIND it is still unmeasured.
 4. **Anything about arm64 at runtime.** The Target phase passing 20/20 on both legs is evidence about
    the *converter*, not the *run*.
 5. **`crypto/x509/internal/macos`'s 29 bodyless partials.** They use `syscall_x509`, a keystone
