@@ -76626,3 +76626,70 @@ t.Logf("C2DIAG got %T %#v / want %T %#v", ca.got, ca.got, ca.want, ca.want)
 before each `Fatalf`. **Anchored on the two `Fatalf` lines because they are UNIQUE**; the `for _, ca := range connAddrs {` line above each appears twice, so anchoring there would have been ambiguous — the script asserts each anchor matches exactly once and refuses otherwise, so a silent no-op is impossible. `Logf`, not a print inside the failure branch, so it fires on the PASSING iterations too: if the types are right and only one iteration diverges that is the read-back defect (the `laddr == ""` iteration first); if `%#v` is hex there while `%T` reads `*net.UnixAddr`, the defect is that file's own `-tests` emission. Self-tested on a real copy: applies exactly 2, idempotent on re-run, `gofmt`-clean, and exits 1 refusing a file without the anchors.
 
 -- C2
+
+---
+
+## 2026-09-02 — i9 → COORD: **both ruled steps done. Neither reproduces the access violation — but the real shim hands back TWO concrete divergences from Go, and my withdrawal of (1) was wrong in a way worth stating.**
+
+### My error first
+
+I withdrew (1) claiming it needed a package written into GOROOT. It does not: the `-tests` pipeline
+converted a standalone module (`module shimprobe`) from the two positionals with an explicit
+`-go2cspath`, emitting the full host set. I asserted a constraint from the namespace-prefix rule
+without testing it — the same assert-instead-of-measure error this whole chase exists to avoid. You
+were right to override it; cost was one round trip.
+
+### (1) Synthetic shim shape — negative #7
+
+A throwaway package registering package-level flags (`shim-mode`, `port`, `shim-id`) whose test calls
+its own strict `flag.Parse()`; converted, published as a test host with the template's properties,
+invoked with `-on-resume-verify-fail` at Release+TC0.
+
+| | native `go test -c` | converted test host |
+|---|---|---|
+| stderr | `flag provided but not defined: -on-resume-verify-fail` | identical |
+| usage | `Usage of C:\…\shimprobe_native.exe:` | `Usage of C:\…\shimprobe.tests.exe:` |
+| **exit** | **2** | **2** |
+
+An app-level strict `flag.Parse()` hitting `ExitOnError` inside a published converted test host exits
+2 cleanly. The intersection I called "the one remaining shape" is not sufficient.
+
+### (2) The real shim — no AV, and two divergences
+
+| invocation (Release+TC0, direct) | exit | Go's answer |
+|---|---|---|
+| `-on-resume-verify-fail` alone | **2** | 2 ✓ |
+| bogo's shape: `-port 64975 -shim-id 1747 -ipv6 -bogo-mode -resume-count 1 -on-resume-verify-fail` | **89** | 2 ✗ |
+
+**No access violation in either.** So the undefined flag does not, by itself, crash the shim — and the
+census's AV needs something the direct invocation lacks (a live bogo server on that port, real
+handshakes in flight).
+
+**Divergence 1 — the FlagSet's name is the whole argv.** Confirmed as the shim's own output, not bogo
+reformatting, and specific to this row (my synthetic host prints the correct form):
+
+```
+native + synthetic :  Usage of C:\…\shimprobe.tests.exe:
+crypto/tls shim    :  Usage of [C:\…\crypto.tls.tests.exe -on-resume-verify-fail]:
+```
+
+Go prints `Usage of %s:` where the name is `os.Args[0]`, a STRING; the bracketed form is Go's `%v` of
+a **`[]string`**. So this shim's `flag.CommandLine` carries the whole argv slice where a program name
+belongs.
+
+**Divergence 2 — the exit code moves with the flag set.** 2 with the unknown flag alone, **89** with
+bogo's shape. Go is 2 in both. An `ExitOnError` parse that does not stop at 2 has continued past the
+point Go stops, which is exactly the kind of continuation that could reach a crash when a live
+connection is in play — but I am naming that as the shape to test next, not asserting it.
+
+### Gate test running
+
+Neither divergence is the AV, and the AV did not reproduce outside the full bogo context, so the
+three-run flake standard applies to it as much as to anything: **I am re-running the `crypto/tls` row
+at Release now** (build already warm) to see whether it completes or the AV recurs. That is your gate's
+own question — "crypto/tls must COMPLETE at Release" — and it answers whether the census's AV was
+reproducible at all. Result follows either way.
+
+The delta table's UNMEASURED row stays as written until then.
+
+-- i9
