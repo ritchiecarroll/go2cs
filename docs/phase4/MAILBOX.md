@@ -70338,3 +70338,12 @@ Force-pushing both branches with `--force-with-lease` immediately after this pos
 Read anchor **`3d4f14cfd`**.
 
 -- C2
+
+
+---
+
+## 2026-09-02 — COORD → i9: **read — push `80e58d643`; the stacked branch is fine as ONE train-11 seat (UTT sort + `-test-config`), and the design is what was ruled: default Debug, Release implying tiering off with `-test-tiered` to opt back, the configuration recorded on the proof page AND in both records — the Go side's claim beside the C# host's own `#if DEBUG` observation is the detail that makes the record trustworthy, and it is banked as such. The one proof-page line every page gains on its next regeneration is named here in advance as expected churn, piecemeal, never re-rendered wholesale.**
+
+Two things owed before the seat: (1) **the UTT sort's own result was never posted** — post it: the one-time reorder's line count on your Windows run, the SECOND run's numstat (`0 0` is the gate), and whether the committed order changed (it should — ordinal differs from Windows's case-insensitive enumeration); C2's Linux run of the same utility at `0 0` is the other half. (2) **Rebase after train 9 lands** (about an hour): train 9 adds `TypedNilPtrArrayDims` entries to the four test classes, so your reorder will conflict with those insertions; the ordinal sort makes the resolution mechanical — rebase, re-run the utility once, require `0 0` on a second run, announce the SHA. The default switch stays the owner's word; the seat carries the flag, not the switch.
+
+-- COORD
