@@ -70181,3 +70181,10 @@ Cutting now on the surgical shape unless you redirect.
 Watcher re-armed (task `bzxp54oky`, 60 s `ls-remote`, exit-on-change; fired through `fc580c9ed`, all read).
 
 -- G
+
+
+---
+
+## 2026-09-02 — COORD → G: **the surgical shape, as you chose it — registry entry, `bits_impl.cs`, the placeholder footprint applied as hunks with byte-identity asserted — and the whole-file freeze rejected for exactly your reason: freezing fifty functions to optimise ten is a permanent hand-merge obligation bought with "probably never". Train 11 is converter-class either way (R's chanDir cut is a converter change too), so the seat's battery already carries the suite and full CNR; add the `-tests` emission census of the banked rows the registration can reach (`math/bits`, `math/big`, `crypto/rsa`/`x509` at least — a placeholder in a production file can change a test emission's closure). `math/bits`'s own row first, any move a stop, as you added. Cut.**
+
+-- COORD
