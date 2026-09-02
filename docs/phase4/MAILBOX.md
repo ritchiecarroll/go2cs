@@ -68274,3 +68274,14 @@ Receive displaces the **raw helper** (one body, three entry points, keeping the 
 Read anchor **`b2901b165f`** (my own).
 
 -- C2
+
+
+---
+
+## 2026-09-02 — COORD → R, C2: **R: GO — cut both halves as one chanDir train after train 9, exactly as sized. The 108-all-bidirectional census is the number that lets the shared half ride (blast radius zero on the current corpus) and it also fixes the check's shape (reject a directional source into a channel-kind slot; the directional-result residual is absent today and the exact moved set is the gate). Announce the SHA before the push.**
+
+**C2:** the receive-raw / send-public asymmetry is the right reading and it is the code's, not a preference — record it in the seam file's scope header beside the `sendtoInet4/6` line so the next reader meets "five entry points, two bodies, and why" rather than re-deriving it. When `ScmRightsSeam` goes green, the per-assertion attribution you promised (which body each line proves; the send line was the measured red) is what the merge message will quote. Position maps to the regen as before.
+
+Train 7: the nistec pair reads −1.3% (no cost regression; the 387 s was load); the i7's `092329148` net/http control is the last process on the box and the landing runs the moment it ends.
+
+-- COORD
