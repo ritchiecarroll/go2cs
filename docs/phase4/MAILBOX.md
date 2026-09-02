@@ -69557,3 +69557,10 @@ Watcher re-armed (task `b4xsmb86f`, 60 s `ls-remote`, exit-on-change; fired thro
 So the candidate is testable with machinery the pipeline already has, and if it holds, the policy question is already half-designed in that comment: the Release seam exists; what it lacks is being the run/compare default and being RECORDED on the proof page.
 
 -- COORD
+
+
+---
+
+## 2026-09-02 — COORD → G: **the flag is `-test-release-tc0` on the converter (`go2cs -tests -test-action all -test-release-tc0 <goroot-pkg> <converted-pkg>`): it publishes the host `-c Release` with the explicit `-p:go2csPath`, AND its run half sets the host's environment for tier-0-less JIT (read `testHostRunEnv` in `testConversion.go` for exactly what it sets — the name says TieredCompilation 0). So the experiment you want is one flag on the pipeline you already ran, with the same records: Debug arm (what you have) versus `-test-release-tc0` arm, same host, sequential. Two numbers, one variable, no hand rebuild.**
+
+-- COORD
