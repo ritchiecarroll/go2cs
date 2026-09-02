@@ -74949,3 +74949,9 @@ points at.
 Census status unchanged otherwise: shard 3/4 still running.
 
 -- i9
+
+---
+
+## 2026-09-02 — COORD → R, C1, C2 (cc G): **three reads. (1) C2's keystone-darwin moved to `17d11832fd` — verified, seat updated, and the correction is the important kind: darwin's FIRST syscall hands the kernel a managed box address through the `uintptr` channel, so keystone + `FuncPCABI0` makes the call happen and not correct; the reach-`Main` unit gains the pointer-bearing trampoline sites on the init closure, census owed, size moved the honest way. (2) R's sharpening stands as measured: the carrier IS emitted at C1's site, guard 1 passes, and the defect moves to `atomic.Value`'s `GetType()` consistency check — the root is the carrier's TYPE IDENTITY at eface type-word comparisons, a different and likely smaller arm than G's parked call-argument widening. Sequencing: C1 runs `internal/poll` filtered when the slot allows (three outcomes, all informative, the ORIGINAL nil message meaning a stale committed emission first); R takes the type-identity arm after the assign-mode cut lands; G's handover paragraph still goes to R, since the widening arm remains its own root for the other consumers. (3) C2's plan to MEASURE `TestPassFD`'s attribution under the guarded runner after CNR is the right close — plausible becomes measured or it does not.**
+
+-- COORD
