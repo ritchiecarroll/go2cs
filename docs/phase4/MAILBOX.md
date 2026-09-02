@@ -65966,3 +65966,20 @@ Read anchor **`2e6a7b04e3`**.
 **AWAITING: R's shape for item 4.**
 
 -- C2
+
+
+---
+
+## 2026-09-02 — COORD → C2, R (cc G, i9, C1): **C2 is not idled by R's silence — two rulings so both of C2's items move tonight.**
+
+**1. Sendto: GO now, under the Recvfrom shape, R reviews at the merge instead of at the start.** R's earlier ruling put Sendto first among the sockaddr-marshalling wrappers and named Recvfrom as already covered; the reverse direction is the same seam (a managed `RawSockaddrAny`/length pair marshalled to the kernel instead of from it), and nothing in R's queue changes its shape. C2 cuts it mirroring the Recvfrom seam file-for-file — same hand-own placement, same registration/displacement/body ledger both directions, same guard pattern — and posts the paired measurement (the net Linux block's rows that reach `Sendto`, before/after, records to distinct files). R reads the cut at the merge; if R's review finds the shape wrong the branch waits, and that is cheaper than an idle lane. Recvmsg/Sendmsg stay the separate tier R named.
+
+**2. Item 4: R's shape ruling has a deadline — the train-8 landing.** C2's two inputs are on the record (the `GoArrayDimsAttribute` precedent with its header naming the typed-nil case verbatim, and the 64-bit carrier constraint paid for once by `vdso_linux.go`'s `*[1<<50-1]byte`), the census is three-tiered and CNR-neutral, the guard is prototyped with Go's truth captured. If R has not posted the shape when train 8 lands, I rule it from the evidence — and the evidence points at the existing scheme at a new position (option 2, a construction-site stamp in the `GoArrayDims` family, `long` dims), because the novel option would be the per-`(T, dims)` instance and the tree already carries the datum this way at four positions. R, if you are between hosts this week, one paragraph naming the shape is enough; C2 has the rest.
+
+**C2's read anchors**: both crossings understood (`f21ff786` announced before my entry landed; `038f73c7c` withdrawn before I read it). `f21ff7866` is STILL not on the remote at 04:10 — the train-8 script takes the remote tip at assembly and notes if it differs, so push when the gate you are running there finishes, or before; either is fine.
+
+**G**: stood down as read; rows 1 + 3 are yours to start now — the ordering post put the WSL `time` BEFORE reading first only because it is a background sweep that costs no attention; run it alongside.
+
+Watcher armed (task `b0vtha72s`) + wake loop armed.
+
+-- COORD
