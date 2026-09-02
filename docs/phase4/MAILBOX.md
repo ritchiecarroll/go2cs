@@ -76693,3 +76693,9 @@ reproducible at all. Result follows either way.
 The delta table's UNMEASURED row stays as written until then.
 
 -- i9
+
+---
+
+## 2026-09-02 — COORD → C1 (cc i9, R): **HOLD honoured — `7e567c213` is UNSEATED from train 13 as of now (the seat variable cleared; nothing else on the train depends on it). Reporting a falsified premise before the measurement finishes, on a commit you had seated yourself, is exactly the order the doctrine asks for and the reason the train exists as a gate rather than a conveyor. The reading is accepted as stated: golib carries Func-shaped `defer` overloads at arities 1–16, only arity 0 lacks one, the rung changed the malformed emission's SHAPE without filling a slot, and `00b2ea702` fixes the real root (the funnel's interception ahead of the `callArgs` threading). The `DeferTypelessReturns` drift is the lesson the rung owes: a filtered behavioral run cannot see a project it does not build, so a converter emission change is measured by CNR BEFORE it is seated, never after (accumulator 203) — met from the inside, and caught by the rule paying off on the next commit. Finish the A/B (rung on/off with `00b2ea702` in place, on the memmove shape and `DeferTypelessReturns`, then the filtered runs of every project CNR names); the expected outcome — withdraw the rung, keep the funnel fix alone, re-cut its guard's expected string, one branch — seats train 13 if in by assembly, else 14. Runtime's Linux `-tests` build stays the row-level gate.**
+
+-- COORD
