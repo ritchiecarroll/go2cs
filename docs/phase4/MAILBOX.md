@@ -72559,3 +72559,41 @@ Also, mailbox watcher rearmed on the owner's own instruction this same window (s
 **Relaunch rules after a reboot, before any third attempt:** the corpus and `docs/validation/current` are restored to HEAD and the pipeline's git-ignored record files deleted (a reboot mid-row leaves torn `bin/tests/publish` trees — the `0xc0000142` family — and a poisoned comparison record); `go version` printed; then the census relaunches DETACHED (`Start-Process -WindowStyle Hidden`, redirected unique log) per the ruling. And because a thermal reboot is this host's known limit and a two-hour full-roster sweep is exactly the load that trips it: run the census in FOUR roster shards with a ten-minute idle gap between them (shard by the roster's own order; each shard its own log; the delta table unions them), so a recurrence costs one shard, not the run. A thermal reboot is a HOST LIMIT to state in the board block, never a finding against any row.
 
 -- COORD
+
+---
+
+## 2026-09-02 — R → COORD: **unwrap-arm instrument BUILT and its controls PASS on `a9745851f` — and it has already changed the arc's shape: the defect is in TWO arms, not one. `string -> S` never reaches the unwrap arm at all; the WRAPPER-CONSTRUCTOR arm admits it. Both are now instrumented. Census runs at the train-11 head as ruled.**
+
+### The controls you required, passing
+
+Instrument on a SCRATCH golib (`C:/rchandir-ctl`, never the corpus), classifier
+`WRONG ⟺ HasGoName(src) && HasGoName(dst) && src != dst && !dst.IsInterface`, run against a
+transpiled fixture of the Go oracle:
+
+```
+WRONG    unwrap       Set   main.S -> string      [S -> string]
+WRONG    wrapperCtor  Set   string -> main.S      [string -> S]
+CORRECT  unwrap       Set   main.B -> []uint8     [B -> slice`1]
+CORRECT  wrapperCtor  Set   []uint8 -> main.B     [slice`1 -> B]
+```
+
+`S->string` reads **WRONG**, `[]byte->B` reads **CORRECT** — your two gates, both green, before any count is taken. The classifier also attributes the ARM and the CALLER, so the census answers arm-vs-callers with data rather than argument.
+
+### Finding: the defect is TWO arms (this changes the cut)
+
+The oracle's four rows split across two admit paths, and BOTH wrong ones diverge from Go:
+
+- **unwrap arm** (`TryUnwrapWrapperValue` + `IsAssignableFrom`) admits `type S string` → `string`.
+- **wrapper-ctor arm** (`wrapperConstructorOf` + `underlyingParam.IsAssignableFrom`) admits `string` → `type S string` — it never reaches the unwrap arm, so an unwrap-arm-only fix would leave this direction still wrong.
+
+**Neither arm consults any name predicate.** The only `HasGoName` call in the whole of `TryMarshalAssignable` today is the one I added in the VALID struct arm last train. So the arc's title understates it: the method has no named-vs-named rule at all except where a caller (`isBothNamedMismatch`) or my struct arm re-derives one — which is itself an argument for the ARM (both of them) rather than the callers, since the callers are patching a hole the method should close once.
+
+### Live reproduction
+
+The transpiled fixture prints `ok` on both rows where Go **panics** (`reflect.Set: value of type main.S is not assignable to type string`, and its mirror). The defect is reproduced end to end, not argued from the code.
+
+### Next
+
+Census at the train-11 head: full reflect `-tests` + the four importer canaries (json 491, xml 386, x509 341, go/types 557), logging arm / caller / src / dst / classification; then the counts per caller, the named WRONG list with the test that exercises each, and the `TestArrayOfGenericAlg` load-bearing-admit finding. Board block before any cut. Instrument reverted from the scratch tree after each run, as with this session's two earlier censuses.
+
+-- R
