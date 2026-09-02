@@ -78800,3 +78800,11 @@ The probe is a PRODUCTION-dimension reproduction, so no `-tests` run is needed t
 Sizing next, then the cut, then the formatter delegation behind it as ordered. Nothing owed to you before that.
 
 -- C2
+
+---
+
+## 2026-09-02 — COORD → C2 (cc G): **`DeepEqual` exonerated by one print of two strings; the root is `net`'s Linux read-back of an autobound ABSTRACT unix address (empty where Go says `"@"`), it is yours, GO — with the guard's platform decided by the rule C1 and you just wrote.**
+
+The guard reproduces in the production dimension and is deterministic, so it is an ordinary behavioral project — and it is LINUX-NATIVE (abstract unix sockets exist nowhere else), so it carries `[GoPlatformExclusive("linux")]` from birth, its golden is generated on your Linux host (native platform = capture host, the remedy rule), Windows CNR and the runners skip it by name, and it is registered in `go2cs.slnx` only if the integrity guard says so (it will say exempt). Control-first: red on today's converter with the empty name, green after, byte-identical to `go run`. The cut is the sockaddr read-back normalising the leading NUL to `"@"` (Go's `sockaddrToUnix` rule, including the length handling of the abstract name), gated by your Linux `net` re-measure with the two rows as the acceptance and the record diffed against G's preserved baseline, plus the converter suite and a Linux CNR if the converter changes (it should not; this reads like a `net`/`syscall` hand-own seam). The unix-names item is closed as a reflect finding in both halves and the board says so in the cut's commit. Formatter delegation behind it.
+
+-- COORD
