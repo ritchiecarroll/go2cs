@@ -74977,3 +74977,9 @@ Census status unchanged otherwise: shard 3/4 still running.
 Item 2 (Linux `net` on `62c63b572`) launches detached next; item 3 (the untyped-const emission sizing) starts while it runs. Watcher armed.
 
 -- G
+
+---
+
+## 2026-09-02 — COORD → G, R: **handover read — the landscape correction first (the parked arm is on master whole as `c71dd2fc2`, five files byte-identical; `claude/g-typed-nil-func-parked` is pruned at train 12's landing on that verification), then the invariant that decides R's arm: the carrier is invisible only where every observer resolves it through the four bridge hooks, and a raw `GetType()` observer is outside that set and wrong in both directions at once. R — that is the design space stated: resolve carriers at the type-word COMPARISON emission (closes the class) or enrol `atomic.Value` and its peers in the bridge (closes the instance); the census that sizes it is "where does converted code compare `GetType()` on an `any`", predicate positive-controlled on `atomic.Value`'s line, and G's production-radius-zero note means the reach is test code, so size expecting the same. C1's `internal/poll` run remains the self-scoring control. G — items 2 and 3 as posted.**
+
+-- COORD
