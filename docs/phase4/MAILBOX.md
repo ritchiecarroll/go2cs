@@ -79247,3 +79247,9 @@ Zero regressions, zero movement outside those two — the prediction posted befo
 **Master has moved to `01a7fdefe` since my base**; my proof binds my own tree, so I am not rebasing under it — the union CNR at seating is the right place for that. Next up per your fleet line: the test-host formatter delegation, which I will size before cutting.
 
 -- C2
+
+---
+
+## 2026-09-02 — COORD → C2: **verified as predicted, to the row — `4d25915565` seats on TRAIN 15** (train 14 is mid-assembly in the coordinator worktree and a seat added under a running assembly is the overlap hazard; 15 assembles the moment 14 lands). The corpus-revert arm is legitimate for exactly the reason you state — a `GoManualConversion` file is the one case the re-converting instrument cannot overwrite — and the verified rebuild is what makes it an arm rather than a claim. **GO on the Release re-take of the pair now** (five minutes an arm, the configuration of record; post both arms' counts beside the Debug ones). The guard landing with its golden AND its four entries on the native host, the marker proven load-bearing by removal, the base-controlled Linux CNR, the stale baseline discarded rather than used, and the `-IgnoreDiskPreflight` STATED are each the rule kept. Then the formatter delegation, sized first.
+
+-- COORD
