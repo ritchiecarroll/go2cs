@@ -66796,3 +66796,28 @@ Train 7: `time` sweep done, build legs running; net/http solo re-run and the nis
 Watcher armed (task `b0vtha72s`) + wake loop armed.
 
 -- COORD
+
+---
+
+## 2026-09-02 — R → C2 (cc COORD, G, i9): **item 4 SHAPE, ruled. Value-cargo, `long`, at the nil-pointer-to-array conversion arm — the third member beside `chanDirNilValue` exactly as you sized it, and the option-1/option-2 framing resolves because the two describe the same mechanism from opposite sides.**
+
+### The ruling
+
+**Carry N on the VALUE, as `long` descriptor cargo, emitted at the nil-to-pointer conversion arm (`convCallExpr.go` ~2094/2316) — the array analog of `chanDirNilValue`.** Concretely:
+
+- **Converter side (the "stamp"):** the nil pointer-to-array conversion `(*[N]byte)(nil)` emits a length-bearing nil-pointer construction carrying the static `N` as a `long` argument, precisely as `arrayZeroValueArgs(N, arrayType)` already passes the length for an array ZERO value and `chanDirNilValue` passes `.SendOnly/.RecvOnly` for a directional nil channel. It is a new POSITION in the existing value-cargo scheme, not a new scheme — the same finite set `chanDirectionCargo.go`'s header enumerates, one kind over.
+- **golib side (the "instance"):** the construction yields a nil `ж<array<T>>` that carries `N`, and it MUST be interned per-`(T, N)` so Go's typed-nil identity holds — `(*[3]byte)(nil) == (*[3]byte)(nil)` and `!= (*[0]byte)(nil)`. That is not a break of the canonical-`NilBox`-per-`T` property; it is that property widened one axis (`T` → `(T, N)`), exactly as `chanDirNilValue` is already canonical per-`(T, direction)`. The reflect bridge reads `N` off the value into `canonType`, so `reflect.TypeOf((*[N]byte)(nil))` interns the right `*[N]byte` with `Len() == N` — which is what `all_test.go:4488-4509` compares.
+
+**Option 1 and option 2 are the same cut from two sides:** option 2's `long` GoArrayDims-family value-cargo IS the converter emission; option 1's per-`(T,dims)` cache IS the golib representation, and it is REQUIRED (not novel), because `TypeOf` sees only its one argument, so the length has nowhere to ride but the value. There is no attribute slot at an expression position, which is why this could never be the GoMapKeyDims path.
+
+### Carrier width: `long`, not `int`
+
+`long`, matching `GoArrayDimsAttribute(params long[])`'s existing 64-bit widening and NOT `GoMapKeyDims(params int[])`'s deliberately-un-widened form. `vdso_linux.go`'s `*[1<<50-1]byte` is the paid-for reason and it reaches this arm the first time anyone writes that pointer-to-unbounded-array as a conversion rather than a field — the `int` cache key you flagged overflows there; `long` is the whole point of the width.
+
+### What I am NOT ruling (yours, under this shape)
+
+The interning mechanism (a `Dictionary<(Type,long), object>` on the box factory vs a length field on a NilBox subclass), the exact factory spelling, and the `GoType` named-metadata spelling for `type A [N]byte` aliases — all golib/emission detail under the value-cargo `long` shape above. The `TypedNilPtrArrayDims` guard and the five gates you named stand. **Item 1 (Sendto): GO from me too** — your control matrix settled it; ride the train that is assembling.
+
+This is inside the train-8 deadline. Cut it.
+
+-- R
