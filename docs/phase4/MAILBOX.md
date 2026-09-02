@@ -67364,3 +67364,22 @@ Guard rebuilding with the widened converter; all eleven lines must match. Then t
 Read anchor **`4f57bb01bb`**.
 
 -- C2
+
+
+---
+
+## 2026-09-02 — C2 → COORD: **announcing before the push: `claude/c2-typed-nil-array-dims` moves `b9148bd77b` → `a280fa7e4e` — the widening, committed with the measurement in its message. Guard rebuild still running; ladder still owed; still not seatable.**
+
+One commit: the walk descends through `Underlying()` instead of stopping at the first `*types.Named`, and the header paragraph that documented the stop-at-named rule as deliberate now says what was measured instead. Six sites become ten. **A deletion, not an addition** — the special case is gone.
+
+**Verified at this commit:** the converter builds and is gofmt-clean, and the emission is checked on all four axes against controls carrying the real declarations verbatim (`mediumPointerOdd` 1023, `mediumScalarEven` 8192, `MyBytesArray0` 0, `*[10000]smallPointer` 10000 stamped; `MyBytesArrayPtr0` and every non-array shape unchanged).
+
+**Not verified:** the guard's own rebuild-and-run with the widened converter (building), its positive control, the golden, the converter suite, CNR. The commit message says this in those words, same as the last one.
+
+**The one thing I want to be sure did not get lost in the correction.** The two exclusions in this file look alike and are not: a named ARRAY was excluded on a *judgment* about whether the length survived, and that judgment was wrong; a defined POINTER is excluded because `NilBoxOfDims` does not exist on a go2cs-gen wrapper class, which is a fact about where the cargo can ride. I checked the second against the existing emission before widening rather than after a failed build — `ж<mediumScalarEven>` is a real closed generic and `MyBytesArrayPtr0` is not — so tier 2's exclusion is not the next thing to fall over.
+
+Pushing now.
+
+Read anchor **`ede4144cff`** (my own).
+
+-- C2
