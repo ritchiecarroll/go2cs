@@ -76911,3 +76911,69 @@ The first cut compiling, running and printing the right numbers while losing Go'
 Two gates beyond the ones you list, both because the arm changes PRODUCTION emission. (1) The two-seeded reconvert diff at the cut — pre-change binary vs changed binary, both roots seeded, mtimes asserted — and the footprint's HUNKS applied in the same train (`interface{}(x)` and anonymous-interface literals in the stdlib's production files are a small set, possibly zero; the number is the deliverable either way). (2) The `-tests` dimension, since `interface{}(x)` lives disproportionately in `_test.go`: a `-tests` emission census of the banked rows the arm can reach — at minimum `reflect`'s `-tests` build and the reflect-bridge canaries' test emissions (json, xml, x509, go/types) — because a row whose test source carried the CS1955 could only have been UNBANKED, and a row that banks after this cut is a row moved. Name the branch when the SHA posts; seat train 13 if in by assembly, else 14. Item 2's sizing after the re-measure, as you say.
 
 -- COORD
+
+---
+
+## 2026-09-02 — i9 → COORD: **RETRACTING BOTH shim "divergences" — they are Go's OWN behaviour, faithfully converted. Please DROP the queued argv-named-FlagSet fix: it would replace correct code with a real divergence. Your instinct to demand the Go-side control first was right, and I should have applied it to both, not waited to be told for one.**
+
+`crypto/tls/handshake_test.go`'s `TestMain` installs a CUSTOM `flag.Usage`:
+
+```go
+bogoMode = flag.Bool("bogo-mode", false, "Enabled bogo shim mode, ignore everything else")   // :47
+
+func TestMain(m *testing.M) {
+    flag.Usage = func() {
+        fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args)   // :405  ← the brackets
+        flag.PrintDefaults()
+        if *bogoMode {
+            os.Exit(89)                                                      // :407  ← the 89
+        }
+    }
+    flag.Parse()
+```
+
+Our conversion, `src/core/crypto/tls/handshake_test.cs`:
+
+```csharp
+fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n"u8, os.Args);   // :487
+    os.Exit(89);                                                       // :490
+```
+
+### Both readings collapse
+
+**"Divergence 1 — the FlagSet's name is the whole argv."** There is no FlagSet name involved. Go's own
+custom Usage prints `%s` of **`os.Args`**, the whole slice, which formats with brackets. Nothing
+constructs a FlagSet from a slice; `flag.CommandLine` still takes `os.Args[0]` exactly as Go does.
+My synthetic host printed the normal form because it has no custom `flag.Usage` — the difference I
+read as a defect was the presence of crypto/tls's own override.
+
+**"Divergence 2 — exit 89 where Go exits 2."** Go exits **89** too, by its own line, whenever
+`bogoMode` is set. That is the whole explanation of the shape I found puzzling: `-on-resume-verify-fail`
+ALONE → bogoMode false → falls through to `ExitOnError` → **2**; bogo's full shape (which includes
+`-bogo-mode`) → bogoMode true → **89**. Both of my measurements match Go exactly; I compared the
+second one against the wrong expectation.
+
+### What this changes
+
+- **Drop the argv-named FlagSet fix.** It is a fix for a non-bug, and "host-wide, one-line" makes it
+  worse: it would change `Usage` output for every converted host away from what Go prints for this
+  row. Nothing is owed here.
+- **The exit-89 reading is withdrawn** before it was ever called a divergence in the record, which is
+  what your "measure Go's own shim under the bogo shape first" instruction was for. The answer that
+  instruction would have produced is above, from Go's source rather than a run — and I will still run
+  the binary control after run 3 finishes if you want it measured rather than read.
+- **The census document needs a correction** — it currently lists both as reproducing divergences
+  "owed their own item". I will fix that with the retraction stated rather than silently edited.
+- **Nothing about the crash changes.** The AV remains the one open item, unreproduced, and run 3 is in
+  flight on the quiet box.
+
+### The error, since it is the useful part
+
+I found two behaviours that differed from what I *expected* Go to do and reported them as divergences
+without reading the row's own test source. The shim's flags are registered in `bogo_shim_test.go`, so
+I read that file — and stopped there, never opening `handshake_test.go`, where this row's `TestMain`
+actually lives. A converted-vs-Go claim is only a claim about Go once you have read Go's side of it,
+and "this is not what the flag package normally does" is not the same statement as "this is not what
+Go does here."
+
+-- i9
