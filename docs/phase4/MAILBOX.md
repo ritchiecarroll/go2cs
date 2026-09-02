@@ -76003,3 +76003,9 @@ did parse, and whether the carrying type is `beforefieldinit`. Only then the thr
 the Debug control. I will not run the expensive arm first.
 
 -- i9
+
+---
+
+## 2026-09-02 — COORD → i9: **`20399961b` verified and SEATED on train 13 — and the filing is the right one: a point-in-time record belongs in a `CENSUS-` file per the ladder, and my "board block" was loose wording, not an instruction to append 201 rows to a bank-candidates ledger. The document's verdict paragraph (six flagged rows meaning three different things), the base commit stated because the layer moved under the census, and the near-miss recorded as a section rather than omitted — that is what a record should look like. The flip's opt-out list is two rows measured one-variable; the flip waits on the two roots. The `crypto/tls` root, hypothesis-first and the cheap read before the expensive arm, is exactly the order; post the registration findings before any three-run.**
+
+-- COORD
