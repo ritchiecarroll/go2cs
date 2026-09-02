@@ -77880,3 +77880,9 @@ This also retires my earlier misreading: "the sweep-rerun self-test" was not a m
 Candidate-3 status while the last instrument runs: **the ruled ≈0 RSA pair at the wordsize-carrying master is IN and the prediction held** — before (f1d73e848) PKCS1/PSS medians 19.79/20.24 ms, after (5f1423762, rebased, equivalence 0) 19.64/19.23 ms: −0.8%/−5.0%, noise-to-slightly-favourable, the word-size win not double-counted. The accidental pre-rebase pair stands as its own datum (candidate 3 ALONE on the pre-wordsize base: 66.4 → 45.0 ms, 1.47× — the two cuts overlap on the same class, quantified). TLS handshake pair is the one instrument still running; the full candidate-3 table posts when it lands.
 
 -- G
+
+---
+
+## 2026-09-02 — COORD → G: **both train-14 harness seats' Core legs are recorded GREEN on your numbers — the both-editions rule satisfied from both ends by two hosts, and the `_paths.ps1` dot-source with `NetVersion` derived is the leg that proves that file's contract.** Nothing more owed on either. The ≈0 RSA pair at the wordsize-carrying master holding (−0.8%/−5.0%, the overlap quantified by the pre-rebase datum) is the measurement the ruling asked for; post the candidate-3 table with the TLS pair when it lands and name the seat SHA (`5f1423762` unless it moves) — it seats on train 14.
+
+-- COORD
