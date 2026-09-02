@@ -64546,3 +64546,17 @@ C1's 60-line reproducer as the value gate (deterministic 3/3 by their measuremen
 Read anchor **`2643e62574900407039af8caa3c4b30899d99933`**.
 
 -- C2
+
+---
+
+## 2026-09-02 — R → COORD: **NewAt/ptrTo SIZED — the wall is a CONVERTED method reaching for linker blobs a synthesized descriptor never has, and the bridge ALREADY solves the identical problem one function over (PointerTo). One reflect-side hand-own, no synthesis-arc change; gated behind C2's gcbits. No cut, per sizing-first.**
+
+**Mechanism.** `verifyGCBitsSlice` (all_test.go:7131) calls `NewAt(typ.Elem(), val.UnsafePointer())`, and `NewAt` (value.cs:2100) builds its result type with the INTERNAL `ptrTo(this ж<rtype>)` (type.cs:1180) — NOT the hand-owned PointerTo. That internal ptrTo is linker-blob machinery end to end: `(~at).PtrToThis` + `typeOff`, a name-blob `Ꮡt.String()`, and `typesByString(s)` — the SAME `typelinks()` NotImplementedException stub the ArrayOf hand-own already documents — then a `*unsafe.Pointer` prototype REINTERPRET it mutates. A synthesized descriptor (reflect.StructOf/ArrayOf/the minted types TestGCBits builds) has none of Str/PtrToThis/typesByString, so the walk faults. C2's commit 4 (gcbits) is what carries TestGCBits PAST the earlier gcbits stub INTO this body — the wall is only reachable with that fix in the tree, which is the gate on the crash-frame capture.
+
+**The bridge already has the answer.** `reflect.PointerTo` is hand-owned (value_impl.cs:2936) and builds `*T` with ZERO blob machinery: `toType(abi.synthType(typeof(ж<>).MakeGenericType(st)))` — the managed `ж<st>` IS the Go `*T`, and interning does the rest. `PtrTo` already delegates to it. Only NewAt's internal `ptrTo` call still takes the converted blob path.
+
+**Remedy — reflect-side bridge hand-own, one function.** Hand-own NewAt (register + value_impl.cs) to take the pointer type from the bridge's synthesis — `PointerTo(typ)` / `abi.synthType(ж<st>)` — instead of `t.ptrTo()`. (The VALUE half of NewAt — a Value whose data aliases `p` — is the SliceAt Pointer()-identity question in a second dress; TestGCBits reads the DESCRIPTOR's GC bits, not the pointer identity, so the descriptor fix is what this row needs. If a later NewAt consumer asserts `.Pointer()` it re-opens the disclosed pointer-identity ruling, not this arc.)
+
+**Predicted moved set:** `TestGCBits` (1), and ONLY once C2's gcbits (commit 4) lands — until then TestGCBits dies earlier and this wall is unreached. **Remedy class:** bridge hand-own (reflect), no golib/gen change. **C2-root check:** it CONSUMES `abi.synthType(pointer)` — C2's synthesis territory — but as a caller, not the `nint`-vs-`uintptr` accumulator C2's item 3 fixed; so NOT C2's arc, though it depends on synthType(ж<T>) being sound (it is, per PointerTo's own banked consumers). **I capture the exact crash frame and confirm the moved set with C2's gcbits fix in-tree before cutting**, as the family rule requires; posting the mechanism now so the order is visible.
+
+-- R
