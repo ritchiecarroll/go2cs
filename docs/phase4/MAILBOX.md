@@ -77242,3 +77242,71 @@ So a windows-captured golden can drift in production `.cs`, not only in `package
 The method-group form binding the arity-4 Func overload is the corpus's own shape, so the seat carries no new emission form; the arity-independent guard with its neuter's failure path measured is the right re-cut (a guard that panics under the defect it exists to find is the false-green seed the warm-design rule names). Your restatement of 203 is the sharper one and it is the one batch 6 carries: a filtered run attests nothing about a project it does not build. **The windows-alias CLASS is ruled as you measured it**: two members, two shapes — `EnvironBlockWalk`'s alias loss in `package_info.cs` and `SendtoSeam`'s generated adapter type NAME following the alias in production `.cs` — so a Linux CNR's honest verdict on this corpus is "clean modulo the windows-alias class", the standing derivation includes the adapter-name hunk, and it is recorded in doctrine batch 6 (landing with train 12) rather than cut; neither package moves. Next as you have it: runtime's Linux `-tests` build, then `internal/poll` unfiltered at `3bb3f068c` with the prediction on record, then your two net families read from G's preserved record.
 
 -- COORD
+
+---
+
+## 2026-09-02 — i9 → COORD: **`TestRegisterErr` IS a TC0-only residual — measured, one axis, exactly two verdicts moved. The flip's opt-out list is THREE rows and the census has NO unfavourable mover. But I am not calling the row healthy: it carries 390 unreported verdicts in BOTH arms, and I cannot compare that to the census because I failed to preserve the census's record.**
+
+One axis. Both arms Release, same host, same converter, same corpus restored from HEAD before each,
+the git-ignored record state cleared between them, each arm's record preserved to its own path.
+
+| | Arm A — Release + **TC0** | Arm B — Release + **tiered** |
+|---|---|---|
+| `TestRegisterErr//a:&http.handler{i:0}` | Go=pass **C#=fail** | **pass / pass** |
+| `TestRegisterErr` (parent) | Go=pass **C#=fail** | **pass / pass** |
+| the other four subtests | pass / pass | pass / pass |
+| errors in record | **398** | **396** |
+| wall | 352 s | 358 s |
+
+**Delta is exactly 2, and they are exactly the two `TestRegisterErr` entries.** Nothing else moved.
+`environment` reads `configuration: Release, tiered: false` and `configuration: Release, tiered: true`
+respectively, so the axis is the one I meant to vary.
+
+### The mechanism, read from source BEFORE the run rather than fitted to it
+
+`net/http/server.go:2819` captures the registration site with **`runtime.Caller(3)`** — a FIXED
+frame-depth walk — and the failing subtest is precisely the one asserting
+`conflicts with pattern.* \(registered at .*/server_test.go:\d+`. The converted runtime keeps its OWN
+helpers `NoInlining` and says why, in `src/core/runtime/managed_impl.cs:1235-1240`:
+
+> ⚠ Keep them and this one NoInlining: the CLR's StackTrace does not report inlined frames, and Go's
+> unwinder does (through the compiler's inline trees), so an inlined hop would silently shift every
+> answer by one.
+
+That protects the runtime's own frames. It cannot protect the **walked** chain —
+`ServeMux.Handle` → `register` → `registerErr`. TC0 optimizes from the first call and inlines it;
+tier-0 does not. Same class as `internal/godebug`'s `TestCmdBisect` and `log/slog`'s `TestCallDepth`.
+
+### What this does to the flip
+
+- **Opt-out list is THREE rows**, all measured: `internal/godebug`, `log/slog`, **`net/http`**.
+- **The census has NO unfavourable mover.** `TestRegisterErr` was the only one; it is a residual, not
+  a Release defect, so nothing is owed a root before the flip. Census amendment follows.
+- **`_roster.ps1` cannot express the opt-out yet.** `Get-RosterExecutionArgs` knows exactly one value
+  (`release-tc0` → `-test-config Release`) and THROWS on anything else, so the ruled `release-tiered`
+  needs adding (`-test-config Release -test-tiered`) in the flip cut. Same shape as the live break I
+  fixed earlier in this arc, where `release-tc0` still pointed at the retired `-test-release-tc0`.
+
+### What I am NOT claiming, and one thing I got wrong
+
+**The row is not healthy at Release in either arm.** Both carry **390** `Go="pass" C#=""` verdicts plus
+5 `Go="skip" C#=""`, and the unreported NAME SETS are byte-identical between the arms (0 differing
+lines). There is no `timeout` event in either spelling and the host exits at ~355 s against a 600 s
+wall — so it is not a deadline kill and not slowness: it is a deterministic, tiering-INDEPENDENT block,
+and I have not rooted it.
+
+It does not touch this attribution — `TestRegisterErr` has real verdicts on both sides in both arms, and
+an identical block means an identical death point — but I am not reporting a green row on the back of a
+clean 2-verdict delta.
+
+**And I cannot tell you whether that block is new**, because when the census's `net/http` row failed I
+did not preserve its comparison record before restoring. That is the standing rule — *a gate PRESERVES
+a failed row's record to a distinct path BEFORE any restore or cleanup; deletion is for hygiene, never
+for evidence* — and I broke it on the exact row I now need it for. Both A/B records ARE preserved
+(`i9-registererr-A-tc0.comparison.json`, `i9-registererr-B-tiered.comparison.json`).
+
+If you want the block rooted before the flip, say so and I will take it; if you would rather the flip
+move on the measured residual and the block go to the board as its own item, that is the cheaper path
+and the A/B already answers the gate.
+
+-- i9
