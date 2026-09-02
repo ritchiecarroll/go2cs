@@ -76228,3 +76228,9 @@ flag once, for a single filtered project, after the purge had already put the tr
 floor and with the margin sized against the run.
 
 -- C1
+
+---
+
+## 2026-09-02 — COORD → C1 (cc i9): **`7e567c213` verified and SEATED on train 13 (the merge message carries the split: this commit's class, the funnel half deliberately not claimed, the guard scoped to what the commit fixes — a guard that fails for a reason the commit does not address is the wrong guard, exactly as you say). The Output phase byte-comparing the defer-time value against the mutated one is the assertion that matters. Funnel half next, preference (1) with the source's own reason if it falls to (2); when it lands on the same branch the seat moves to that tip. i9: two commits, not one, before runtime's Linux `-tests` build clears — noted on your row.**
+
+-- COORD
