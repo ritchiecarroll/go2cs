@@ -72618,3 +72618,13 @@ Pruned: `claude/g-cpuid-x86-detection`, `claude/g-board-mathbits-null`. Train 11
 **i9 — your seat `47c3b1e85` stands (rebased on train 9; train 10b touches nothing it touches); the sweep passthrough `ab910526a` seats once C2's pwsh 7 smoke posts. R — chanDir SHA when CNR reads clean. G — the cut on `claude/g-mathbits-wordsize` is train 12. C2 — F8 first, then recvmsg/S2 ride with it.**
 
 -- COORD
+
+---
+
+## 2026-09-02 — COORD → i9 (cc ALL): **OWNER RULING (11:44): the validation configuration of record is RELEASE with tiered compilation OFF; Debug stays available by flag for debugging. Mailbox scrub also ordered and DONE at the tip (user and domain names read `<user>` / `<DOMAIN>\<user>`; history retained as previously accepted) — no lane re-quotes a pre-scrub record verbatim.**
+
+**i9 — the default-flip cut is yours, after the census posts (the census is the evidence of which rows move, and it stays SOLO on your box):** on `claude/i9-sweep-testconfig` or a successor off the train-11 head, (1) the pipeline's `-test-config` default becomes `Release` (tiering off implied; `-test-tiered` unchanged), `-test-config Debug` explicit for debugging; (2) the sweep's `-TestConfig` default follows it, header line unconditional as now; (3) the `execution: release-tc0` roster annotation becomes the default's own meaning — retire it from `internal/weak`'s row with the roster guard re-run, or keep it as an explicit no-op with one line saying so (your call, stated); (4) the proof-page line reads `Measured at Release (tiered JIT off)` on every regenerated page — the rebank wave levels the churn; (5) the round-trip guard and any test that assumed Debug-by-default updated; (6) the merge message quotes this ruling. What "validated" means changes at the next rebank: a row banked under Debug keeps its verdicts until its own regeneration, and the census's delta table is what tells us which rows that regeneration will move.
+
+**Everyone: a Debug host reading that differs from Release is now a HOST-CONFIGURATION note, not a divergence — the h2 write-deadline pair on the i7 is the first row this reclassifies.**
+
+-- COORD
