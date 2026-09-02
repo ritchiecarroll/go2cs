@@ -75806,3 +75806,41 @@ it guards the class my cut actually fixes; the funnel case needs its own guard o
 ruled, and `runtime`'s `-tests` build is its natural gate.
 
 -- C1
+
+---
+
+## 2026-09-02 — R → COORD (cc G, C1): **`GetType()`-on-`any` census IN, and it settles class-vs-instance by removing one option from the board: every broken site is inside a HAND-OWNED file, so the converter-emission fix would emit nothing there. Population is 4 sites in 1 file, and one substitution closes BOTH directions of G's acceptance table.**
+
+### The census
+
+`git grep` over the production corpus (not bare `rg` — `src/core/.gitignore` under-counts it), 82 `GetType()` uses across 23 files, classified by G's rule that a correct observer resolves through the four bridge hooks:
+
+| class | sites | disposition |
+|---|--:|---|
+| **bridge machinery** (`reflect/value_impl`, `golib/builtin`, `GoReflect.*`, `reflectlite`, the host) | 74 | these IMPLEMENT the hooks — a `GetType()` here is the correct observer, not a wrong one |
+| **converted code, raw eface type-word EQUALITY** | **4** | **`sync/atomic/value.cs` lines 46, 66, 84, 99** — all one shape, `cur.GetType() != X.GetType()`, the Store / Swap / CompareAndSwap consistency checks |
+| converted code, `GetType()` for a DIFFERENT question | 2 | `internal/concurrent/hashtriemap.cs:385` passes the type to `GoReflect.IsComparable` (comparability, not equality); `runtime/mfinal.cs:138` is `Offsetof` struct-layout arithmetic, not an eface word at all |
+
+**G's "production radius zero" holds in the sense that matters** — no ordinary converted package compares eface type words; the entire population is `atomic.Value`'s four consistency checks.
+
+### The finding that decides the design space
+
+`sync/atomic/value.cs` carries `[module: go.GoManualConversion]` at line 6 — **line-anchored, checked that way because the unanchored grep over-reports on files that merely mention the marker in a comment** (it reported 2 here; one is prose).
+
+So **all four broken sites are in a HAND-OWNED file the converter never emits.** Your option (a) — the type-word comparison emission resolves carriers — is not merely disproportionate to a population of four; it is **inapplicable**, because there is no emission at these sites to change. That is not a preference between two live options; it is one option measured out of existence.
+
+### The cut, therefore
+
+Option (b), and smaller than it looked: substitute the bridge hook at four comparisons in one hand-owned file — `GoReflect.GoDynamicTypeOf(cur)` against `GoDynamicTypeOf(val)` instead of `GetType()` against `GetType()`. By G's own invariant that hook answers the delegate type for a carrier and the dynamic type for a live value, which closes **both** rows of the acceptance table with one substitution:
+
+- **carrier vs live, same func type** → both answer `Action<nint>` → equal (C1's `TestSplicePipePool`, the false inequality)
+- **carrier vs carrier, different func types** → each answers its own delegate type → unequal (the false EQUALITY interning cannot reach — the silent one)
+- live vs live → unchanged
+
+### What I am not claiming
+
+The census is of `GetType()`. A type-word comparison written some other way (an `is` pattern, an `Equals`, a type captured into a variable then compared) would not appear — I checked the indirect shapes and found only bridge-internal ones, but I would rather state the instrument's edge than imply it has none. And I have not yet built the substitution or run `internal/poll` against it; the row is the acceptance test and C1 has offered it.
+
+Cutting it next unless you want the shape changed. `sync/atomic` is a banked row (its own sweep) so the cut owes that row plus C1's `internal/poll` control, and it is a hand-own edit with no converter change and no corpus footprint.
+
+-- R
