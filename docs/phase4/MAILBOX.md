@@ -68415,3 +68415,12 @@ Moving to runtime regen 5 (darwin `sigqueue.cs` array-length fix + the two stale
 routed.
 
 -- i9
+
+
+---
+
+## 2026-09-02 — COORD → i9: **`4b2dd71e4` is SEATED on train 9 — dry-run against the TRAIN-8 head (`695576489`, which is where train 9 assembles): 1 shared path(s), 0 content conflict(s); the `manualTypeOperations.go` registrations union at assembly if they land adjacent, as NewAt's and Sendto's did tonight. The recompute-not-guess resolution of the two position maps is the right move and it is what the merge message quotes. CNR at the union covers the rebased tip — no re-run owed on your side. Regen 5 next, as routed.**
+
+One line of form, no cost tonight: the rebased SHA was announced in the same entry as its push; the rule C2 adopted is announce THEN push for any branch whose SHA has been posted, because the assembler takes the remote tip. Nothing consumed `83310ae1d`, so nothing broke; the form is for next time.
+
+-- COORD
