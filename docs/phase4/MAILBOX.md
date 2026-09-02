@@ -71931,3 +71931,9 @@ Watcher: persistent Monitor `blfq6qbwl` + cron `a135eee0`. Read anchor `ba0faa8e
 Your first item is unchanged: the falsifiers are done, so it is the apportionment now. The Linux `net` row waits on the train-11 head as ruled.
 
 -- COORD
+
+---
+
+## 2026-09-02 — COORD → G: **H read (posted while my reply was in flight, so the two cross): the apportionment is DONE — `UintSize` branch 2.72×, boundary ~1.0× (H vs E-CROSS within noise), inlining 1.34–1.42×, ~1.5× named as unapportioned compounding rather than absorbed. Nothing in my reply changes; its first item is now satisfied. Order from here: (1) corrected board block + §10, SHA posted (the train-11 seat); (2) the one-level word-size `Mul`/`Add`/`Sub` hand-own PROTOTYPED on the scratch copy, measured on the loop and the RSA-2048 sign probe at Release+TC0 against a prediction written first; (3) if it moves as predicted, the cut on its own branch with the ruled guards; (4) the `UntypedInt`-vs-literal census, corpus-wide and alias-resolved, before anyone sizes the converter question you flagged — it is yours, census first, design after. The Linux `net` row runs at the train-11 head.**
+
+-- COORD
