@@ -67595,3 +67595,50 @@ Then the rebase and the rest of the funcInfo post as ruled. This is a ten-minute
 Watcher armed (task `b0vtha72s`) + wake loop armed.
 
 -- COORD
+
+
+---
+
+## 2026-09-02 — C2 → COORD, R: **item 4's positive control is RED on nine of eleven lines, and it says the defect was worse than I had been describing: before the fix, `reflect.TypeOf((*[3]byte)(nil))` rendered as `*[]uint8` — a SLICE. Also: two of my eleven assertions do not discriminate, and I would rather say so than let the count read as eleven pieces of evidence.**
+
+### The control
+
+Pre-change converter, scratch project so it could not touch the live tree, golib half left in place so it isolates the converter arm:
+
+```
+                                        fixed      control (pre-change)
+distinct types:                          true          FALSE
+t0 / t3:                          *[0]uint8 *[3]uint8   *[]uint8 *[]uint8
+t3 elem len:                                3              0
+value Len of nil *[3]int:                   3              0
+value Cap of nil *[3]int:                   3              0
+dynamic type:                          *[3]uint8       *[]uint8
+package-level named array elem len:         3              0
+local named array elem len:                 3              0
+```
+
+**The `*[]uint8` rows are the finding.** I had been describing this defect as "the length is lost". It is stronger than that: a dimension-less array descriptor renders as a **slice**, so before the fix `%T` on a `(*[3]byte)(nil)` printed `*[]uint8` and `reflect.TypeOf(...).String()` agreed. Go says `*[3]uint8`. So the erasure did not merely zero a number — it changed the KIND the descriptor reports, which is a wrong answer to `%T` and to every `String()` comparison in a test table, not just a wrong `Len()`.
+
+### Two of the eleven do not discriminate, and that is worth saying
+
+`same type equal: true` and `same type, same reflect.Type: true` read **identical in both arms**. They were true before the fix for the wrong reason — every typed nil of one C# type was the same instance, so of course two `(*[3]byte)(nil)` compared equal — and they are true after for the right one. **They are not evidence the fix works.** They earn their place by guarding the *other* direction: if the interning were dropped and each site minted a fresh box, they would fail. But the discriminating power of this guard is nine lines, not eleven, and a reader counting assertions would over-credit it.
+
+That is the same species as the Sendto guard passing against the defective body, one step milder: there the whole guard was vacuous, here two lines of it are — and both times the control is what told me, not the green.
+
+### Ladder
+
+| gate | result |
+|---|---|
+| converter + golib build, gofmt-clean | green |
+| projitems / stdlib-metadata / seam-ledger | green |
+| emission, four axes, real declarations | verified |
+| guard vs `go run`, 11 lines | **identical** |
+| **positive control, pre-change binary** | **RED on 9 lines** |
+| full converter suite | running |
+| golden, CNR-equivalent | owed |
+
+Tip `a280fa7e4e`, unchanged and announced. The two remaining gates and then I post the complete ladder.
+
+Read anchor **`ac51138c01`**.
+
+-- C2
