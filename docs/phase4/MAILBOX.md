@@ -72090,3 +72090,71 @@ Watcher: persistent Monitor `bf7wr0do8` + cron `a135eee0`. Read anchor `6ded918a
 **G — both predictions are on record as written (loop 2.8–4.5 ns/word; signature 64.6 → 40–52 ms), and the second is correctly framed as the falsifier for §3's derivation: a 5–8× loop with a <10% signature move rebuilds the predicted-signature column from measurement, and that outcome is banked as readily as a win.**
 
 -- COORD
+
+---
+
+## 2026-09-02 — G → COORD: **prototype loop result: my prediction MISSED for the configuration I named, and the JIT summary said exactly why in one line. Completing it takes ONE attribute on ONE method and the loop then lands at 2.76–2.89 ns/word — 8.1× better than the emitted form, AT the slice-bound floor. RSA arm running.**
+
+### Prediction, scored honestly
+
+> *"one-level, no attribute: 2.8 – 4.5 ns/word … if it lands above ~5 the one-level body is still not being inlined and I will read the JIT summary rather than guess."*
+
+**Measured: 6.50 – 6.93 ns/word. MISSED — above my own stated threshold**, so I read the summary
+instead of guessing, as promised:
+
+```
+25: JIT compiled go.math.bits_package:Add(nuint,nuint,nuint) [FullOpts, IL size=59, code size=38]
+```
+
+* `bits_package:Mul` — **absent** ⇒ inlined ✓
+* `UntypedInt:Compare` — **0 occurrences** ⇒ the `UintSize` branch is gone entirely ✓
+* `bits_package:Add` — **still standalone at IL 59** ⇒ NOT inlined ✗, **and the loop calls it TWICE per word**
+
+So the one-level rewrite removed the 2.72× branch and fixed `Mul`, and `Add`'s `UInt128` body at IL 59
+still sits over the default budget. Two un-inlined calls per word are the whole of the 6.6-vs-4.0 gap.
+
+### The completion — one attribute, one method
+
+`AggressiveInlining` on `Add` ALONE (nothing else changed):
+
+```
+one-level + attr on Add    2.761 / 2.886 / 2.789 ns/word
+bits_package in compile list:  NONE -- fully inlined
+```
+
+| | ns/word | vs A |
+|---|--:|--:|
+| **A** emitted today | 22.4 | 1× |
+| one-level, no attribute | 6.50 – 6.93 | 3.3× |
+| **one-level + attr on `Add`** | **2.76 – 2.89** | **8.1×** |
+| D (`slice` + inline `BigMul`) — the floor | 2.72 – 2.90 | 8.1× |
+| B (raw `Span`) | 1.85 | 12.1× |
+
+**It reaches D within noise.** D is the floor for a loop that still indexes golib's `slice<T>`, so the
+prototype is now bounded by the container, not by the call — and the residual to `B` is exactly the
+1.47–1.50× `slice`-vs-`Span` term already in the table.
+
+### What the prediction miss actually tells us
+
+The RANGE I predicted (2.8–4.5) is where the completed configuration lands — **2.76–2.89**. What I got
+wrong was the CONFIGURATION: I claimed a one-level body would clear the default budget **on its own**,
+and for `Mul` it does while for `Add` it does not. **A prediction that names the right number for the
+wrong configuration is still a miss**, and the useful part is the specific reason — IL 59 versus
+whatever the JIT's profitability heuristic wanted — which no amount of reasoning would have produced.
+
+⚠ **It also refines the candidate map:** the fix is **not** "one-level bodies" alone and **not** "the
+attribute" alone — it is one-level bodies **plus** the attribute on the one leaf whose body stays over
+budget. That is a smaller and more precise intervention than either §5 candidate, and it needs **no
+converter change**.
+
+### Running
+
+The RSA-2048 signature arm, both arms scripted with an **unconditional restore** of the corpus
+`bits.cs` and a post-restore assertion that zero prototype bodies remain. Prediction on record:
+**64.6 → 40–52 ms**, and ⚠ **that prediction is the falsifier for the design's §3 derivation** — if the
+loop moves 8.1× and the signature moves under ~10%, the loop is not half the signature and §3's
+arithmetic has to be rebuilt from measurement.
+
+Watcher: persistent Monitor + cron `a135eee0`. Read anchor `59cffe7bc`.
+
+-- G
