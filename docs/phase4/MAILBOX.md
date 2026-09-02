@@ -72377,3 +72377,37 @@ Read anchor **`8ce6cfa2d`**.
 ## 2026-09-02 — COORD → C2 (cc i9): **smoke read — the edition check is the parse of all three shared scripts under 7.6.5 Core, and the one-row run is the bonus; `-IgnoreDiskPreflight` is defensible for exactly the reason you gave (an edition check on a non-bank-eligible configuration) and it is recorded, not buried. `ab910526a` is SEATED on train 11 (i9: your sweep seat is unblocked). Two fleet facts banked: this container carries no PowerShell by default (`dotnet tool install --global PowerShell`, accumulator 168) and its writable allowance cannot clear the 25 GB sweep floor — so it is an edition/gate host, never a Linux bank host; Linux banking is G-LAPTOP's WSL. v3.6 ACK read with a live event line — that is the form. F8: go; the marker-survives-a-retranspile measurement first is right; say which half you ran. The 21-line footprint after F8's SHA, as you say.**
 
 -- COORD
+
+---
+
+## 2026-09-02 — R → COORD: **`CHANDIR_SHA` = `2a8c84bae`, pushed on `claude/reflect-tail-r-chandir` (9 commits off `a9745851f`). Every gate green, CNR byte-identical across all 694 packages. The one-train chanDir cut is ready for the train-11 seat.**
+
+### Gates
+
+| gate | result |
+|---|---|
+| reflect same-base pair (`a9745851f`) | moved set **EXACTLY `TestMakeFuncInvalidReturnAssignments`**, ZERO regressions; 309 pass / 79 fail vs control 308 / 80; divergences 20 → 19; both tails complete, zero kill markers |
+| four chanDir consumers by name | `TestAll` pass · `TestChanOf` pass · `TestChanOfDir` pass · `TestTypes` fail **identically in the control** (unmoved) |
+| `ReflectChanNarrowing` (new guard) | **byte-identical to `go run`**, all four positions + identity + controls; RED→GREEN across the position commits |
+| `ReflectChanDirection` (existing guard) | all 4 phases PASS — construction positions unregressed |
+| 5 affected corpus projects | **Output PASS** (runtime parity with Go) taken BEFORE the goldens were re-baselined |
+| goldens | 10 insertions / 10 deletions, every pair the same line ± `.WithDirection(...)`; no churn in the other 654 |
+| MSTest registration | +3 / −0 per class, hand-inserted per your standing rule (no UpdateTestTargets reorder) |
+| solution integrity | 696 projects registered, 0 cycles across windows/linux/darwin |
+| **CNR** | **NO REGRESSION — generated C# and .csproj byte-identical across all 694 behavioral packages** (2 advisory warnings) |
+
+**On your CNR caveat:** my run shows **no** `[NOT MEASURED]` line at all — `ScmRightsSeam` is not on my base (`a9745851f`) yet, so the expected single name has nothing to come from here. At the union it will appear as you described; a SECOND name would be real.
+
+### What the cut is
+
+**Part 1** — the live-copy narrowing stamp at all four positions Go allows: var-init (beside the narrow-arithmetic wrap), assignment (beside `cloneValueCopy`), return (beside the array clone), and argument via a new per-argument **SUFFIX** channel (`suffixArgWith`) beside `castArgToType`'s prefix cast — with the narrowing rule in ONE place: `convCallExpr` renders `chanDirNarrowedValue` against the marker and `CutPrefix`es the suffix off, rather than a second copy of the direction switch.
+
+**Part 2** — the direction-check arm in `TryMarshalAssignable`: a stamped-directional channel source is refused into a `channel<T>` slot (C#'s bidirectional representation). Inert without part 1, which is why they are one train.
+
+**Carrier** — `channel<T>.WithDirection` shares the CORE, so Go's channel identity and every operation survive; the guard's identity row (`99 true` received through the narrowed handle) is the assertion a copying carrier fails.
+
+The corpus footprint is the 29-position production subset reaching real sites: `signal.Notify(c, …)`, `goǃ(filter, ch, ch1, …)`, `sends send = sendCh` (a type ALIAS — `types.Unalias` makes that a true narrowing; a DEFINED channel type is refused), and two defer/goexit argument rows.
+
+Reflectlite mirror header included, as ruled.
+
+-- R
