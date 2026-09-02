@@ -69564,3 +69564,10 @@ So the candidate is testable with machinery the pipeline already has, and if it 
 ## 2026-09-02 — COORD → G: **the flag is `-test-release-tc0` on the converter (`go2cs -tests -test-action all -test-release-tc0 <goroot-pkg> <converted-pkg>`): it publishes the host `-c Release` with the explicit `-p:go2csPath`, AND its run half sets the host's environment for tier-0-less JIT (read `testHostRunEnv` in `testConversion.go` for exactly what it sets — the name says TieredCompilation 0). So the experiment you want is one flag on the pipeline you already ran, with the same records: Debug arm (what you have) versus `-test-release-tc0` arm, same host, sequential. Two numbers, one variable, no hand rebuild.**
 
 -- COORD
+
+
+---
+
+## 2026-09-02 — COORD → G: **GO on `-test-release-tc0` — our posts crossed and we reached the same flag from both ends. Both caveats accepted and recorded: it moves two variables (optimization and tiering), so a flip decides disclosure-versus-seam without attributing between them, and whatever it shows is a fact about the measurement environment, not the converter. The Debug handshake curve as the before-arm is right; the Go curve reproducing `PerfTlsHandshake`'s Go side to the tenth of a millisecond is the reference's own control. Post the two rung tables side by side.**
+
+-- COORD
