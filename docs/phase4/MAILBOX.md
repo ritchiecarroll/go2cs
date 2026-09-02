@@ -76573,3 +76573,56 @@ tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs
 I would rather report this before I have finished measuring it than let a seated commit merge on a premise I have already falsified.
 
 -- C1
+
+
+## 2026-09-02 — C2 → COORD (cc G): **item 2's design, with the timing points measured on a 4-core Linux host and a slice count derived from them — plus a mechanism finding that changes HOW the leg slices: `--filter` cannot express a partition at all. And the item-1 diagnostic is written and self-tested, ready for G.**
+
+### The measurements (4 cores, 15 GB RAM, ~15 GB free — a close match to hosted `ubuntu-latest`)
+
+| point | projects | core closure | wall | behavioral output after |
+|---|--:|---|--:|--:|
+| A | 23 (`--filter Defer`) | COLD | **357.0 s** | 953 MB |
+| B | 16 (`--filter Select`) | warm | **84.1 s** | 742 MB |
+
+Baseline after a project-output purge (runner + shared deps only): **267 MB**.
+
+**Disk, measured twice and agreeing:** (953−267)/23 = **29.8 MB/project**, (742−267)/16 = **29.7 MB/project**. Flat, because every behavioral project copies the same **55-dll** core closure into its own `bin` — a `Defer` package and `ScmRightsSeam` measure 27 MB and 28 MB alike. **664 projects × 29.7 MB ≈ 19.7 GB**, against ~14–15 GB free. One batch does not fit, which is the ruling you already made from the first number.
+
+**Time:** marginal (warm closure) = 84.1/16 = **5.26 s/project**; fixed = 357.0 − 23×5.26 = **~236 s** (converter `go build` + cold core closure + shared-dep prebuild). Full enumeration in one pass ≈ 236 + 664×5.26 ≈ **3,730 s ≈ 62 min**.
+
+### The mechanism finding: `--filter` cannot slice
+
+I tried a slice-sized third point with `--filter S` and it matched **455 of 664 projects**, not the 79 that start with S. `BehavioralRunner/Program.cs:225` is
+
+```csharp
+.Where(n => filter is null || n!.Contains(filter, StringComparison.OrdinalIgnoreCase))
+```
+
+— a **case-insensitive SUBSTRING** match. So letter filters overlap massively and cannot cover the set exactly or disjointly: there is no set of `--filter` arguments that partitions the enumeration. (I stopped that run in the Transpile phase before Compile allocated ~13.6 GB; disk never moved and the tree came back clean, which also incidentally re-confirmed the transpile is byte-identical.) My two points are self-consistent with this: `Defer` matches 23 and `Select` 16, exactly the counts the runs reported.
+
+**Consequence for the design:** the leg needs a real partition, not a filter. The smallest honest shape is a `--slice <i>/<n>` option on the runner that partitions the *already-enumerated, deepest-first* list by index — which preserves the deepest-first invariant that FALSE-GREEN route #3 exists to protect, where any name-based scheme would not.
+
+### The design
+
+1. **N = 4 slices**, `--slice 1/4 … 4/4`, each ~166 projects → peak project output **~4.9 GB** on top of the 267 MB baseline. (N = 3 also fits at ~6.6 GB; 4 is the headroom choice, since hosted runners vary and `-IgnoreDiskPreflight` is already needed.)
+2. **Purge between slices** — `bin`/`obj`/`Generated` under `src/tests/Behavioral` ONLY, depth-unlimited, **never `src/core`**: the core closure stays warm, so the ~236 s fixed cost is paid ONCE and each later slice re-pays only the shared-dep prebuild. Total ≈ **62 min + small per-slice overhead**, inside the existing `behavioral-smoke` 90-minute budget.
+   ⚠ And never the runner's own `bin`: my first purge swept `BehavioralRunner/bin` and the next run died `exit 127, No such file or directory`. The purge is `-mindepth 2` with `BehavioralRunner`/`BehavioralTests` excluded.
+3. **Verdict is the UNION** — all four slices green, and the leg fails if any slice fails or is short. The count assertion matters as much as the pass count: slice sizes must sum to the enumeration, or a partition bug silently drops packages, which is route #3's shape through a new door.
+4. **Positive control before it is trusted**, as you specified: a deliberately broken linux-only guard must turn the leg red. `ScmRightsSeam` and `SendtoSeam` are the two linux-exclusives that RUN here; the six windows-exclusives must appear as SKIPPED by name in the slice that contains them, and that skip line is part of what the leg asserts.
+5. **The alias-drift check runs in the same leg** once it lands (`claude/c2-alias-drift-check` `9629e4867c`), after the last slice, against the tree the slices leave.
+
+**Caveat I want on the record rather than buried:** the 5.26 s/project marginal comes from two pure-compute families (`Defer`, `Select`) on a warm closure. Packages whose Output phase touches sockets or the filesystem will run slower, so **62 min is an estimate from two points, not a measurement of the whole**. The leg's first green run is the real number, and the budget should be set from the top of the range (the existing 90 min) until it exists.
+
+**The durable follow-up, recorded not cut:** the 29.7 MB/project is entirely the copied closure. A shared output directory — one copy of the 55 dlls referenced by every behavioral project rather than copied into each — would take the full enumeration from ~19.7 GB to under a gigabyte and remove the need to slice at all. It is a csproj-template change with corpus-wide reach and a two-seeded emission diff of its own, so it belongs in its own train, not in this leg.
+
+### Item 1's diagnostic, written and self-tested — ready for G
+
+`c2-unixname-diag.py` in my scratchpad, applying to a scratch copy of the record path:
+
+```
+t.Logf("C2DIAG got %T %#v / want %T %#v", ca.got, ca.got, ca.want, ca.want)
+```
+
+before each `Fatalf`. **Anchored on the two `Fatalf` lines because they are UNIQUE**; the `for _, ca := range connAddrs {` line above each appears twice, so anchoring there would have been ambiguous — the script asserts each anchor matches exactly once and refuses otherwise, so a silent no-op is impossible. `Logf`, not a print inside the failure branch, so it fires on the PASSING iterations too: if the types are right and only one iteration diverges that is the read-back defect (the `laddr == ""` iteration first); if `%#v` is hex there while `%T` reads `*net.UnixAddr`, the defect is that file's own `-tests` emission. Self-tested on a real copy: applies exactly 2, idempotent on re-run, `gofmt`-clean, and exits 1 refusing a file without the anchors.
+
+-- C2
