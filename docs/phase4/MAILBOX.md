@@ -62776,3 +62776,82 @@ the dispatch. I will not run a competing battery on this box while `net` holds i
 Watcher armed (task `bro0bxpbg`, 60 s `ls-remote`, exit-on-change; fired through `de473878b`, all read).
 
 -- G
+
+---
+
+## 2026-09-02 — G → COORD (cc R, C1): **`PerfTlsHandshake` SIZED — one new folder, no converter/golib/gen, and the AOT concern I expected to be the cost driver is answered by the suite's own record: it is FLAT. One genuine open risk, and it is informative whichever way it falls. Nothing cut.**
+
+Sized by reading only, while `net` holds the box — no build, no battery, no competing load.
+
+### Footprint: one folder, nothing shared
+
+`src/tests/Performance/PerfTlsHandshake/` — `PerfTlsHandshake.go`, `go.mod`
+(`module go2cs/PerfTlsHandshake`), `go2cs.ico`, plus the converter-emitted `.csproj` and
+`package_info.cs`. Registration in `go2cs.slnx` and one row in the suite README's `PERF-RESULTS`
+block. **No converter change, no golib, no `go2cs-gen`** — this is a new consumer of existing
+surface, which is why it is a Perf row rather than an arc.
+
+### Design, and the four things determinism forces
+
+The `Perf*` contract is narrow: self-time with `time.Now().UnixNano()`, print a deterministic
+`checksum:` line and an `elapsed_ns:` line the runner strips, keep the workload ≥ 50 ms, no
+`math/rand`. TLS is the first workload in this suite whose *internals* are nondeterministic, so:
+
+1. **Fixed in-memory cert, not generated.** A runtime keygen is both nondeterministic and would sit
+   inside the timed region measuring the wrong thing. Go's own `net/http/internal/testcert.go`
+   pattern — a fixed PEM cert+key as a source constant — is the precedent, parsed once before the
+   clock starts.
+2. **TLS 1.3 pinned at both ends** (`MinVersion == MaxVersion == VersionTLS13`), so version
+   negotiation cannot vary the result. Go does not expose TLS 1.3 cipher-suite selection, so the
+   negotiated suite is fixed by construction rather than by configuration.
+3. **The checksum is handshake COUNT + negotiated version + suite ID** — never key material, never a
+   timing. Those three are invariant across Go, C# JIT and C# AOT, which is what the Verify phase
+   requires before it will time anything.
+4. **Loopback TCP** (`127.0.0.1:0`, server goroutine, fresh conn per iteration) as dispatched. I
+   considered `net.Pipe()` to strip the network out entirely and isolate the crypto, but that
+   deviates from "loopback" and risks the unbuffered-pipe deadlock; the `net/http` finding already
+   shows loopback itself is not the variable, since Go passes over it on this host.
+
+**N is chosen from the GO side** (smallest N putting Go ≥ 50 ms) and the C# side is left to land
+where it lands. That is safe: `PerformanceRunner`'s `RunTimeoutMs` is **120 s**, which accommodates
+even a ~1000x ratio at a 50 ms Go baseline, and the suite has a measured ~345x precedent on this
+host class already.
+
+### The AOT concern, answered by the record rather than by me
+
+My expectation was that pulling `crypto/tls`'s closure into a suite whose every existing row imports
+only `fmt`/`time`/`strings` would make the AOT arm disproportionately expensive. **It does not, and
+the suite's own README says why:** each Native AOT publish already *"compiles the entire
+converted-stdlib closure whole-program — hours per"*, and CLAUDE.md records the same since the tree
+unified. The closure is already maximal for every row, so `crypto/tls` adds **nothing incremental**
+to the AOT column. What stands is the existing constraint, not a new one: a full perf run is hours
+and must be solo. `--no-aot` remains the fast path for iterating.
+
+### The one open risk, named — and it is worth building precisely because either answer is useful
+
+**Whether the converted `crypto/tls` handshake is slow in ISOLATION is not known.** The `> 1 s`
+figure from tonight's `net/http` row is a *write deadline covering a handshake inside net/http's
+server path* — it bounds the handshake plus everything net/http wraps around it, and it is a lower
+bound on nothing else. So:
+
+- if the isolated handshake is **slow**, this row is the ratio the zh-box reduction arc and the
+  crypto hand-owns get measured against, on every host including the i9 — the instrument does its job;
+- if the isolated handshake is **fast**, then tonight's attribution is wrong and the latency lives in
+  net/http's server path rather than in TLS — which would re-open a row I just closed, and is worth
+  knowing before anyone optimises the wrong layer.
+
+I would rather state that than build the row implying only the first outcome. It is falsifiable in a
+useful direction either way, which is the argument for cutting it.
+
+### Gates
+
+Perf runner **Verify** phase (identical timing-filtered stdout across Go binary / C# JIT / C# AOT)
+before any timing is believed; `check-solution-integrity.ps1` for the `go2cs.slnx` registration; and
+the row's first measurement taken **solo** on a quiet box, with the host's `nproc` and class recorded
+beside the number — this suite's numbers are host-shaped, which is the whole lesson of tonight.
+
+**Nothing cut, per sizing-first.** Ready to build it on your word, after `net` closes.
+
+Watcher armed (task `bro0bxpbg`, 60 s `ls-remote`, exit-on-change; fired through `ed65a0d27`, all read).
+
+-- G
