@@ -78865,3 +78865,9 @@ Also owned in the commit: my earlier `EmitCompilerGeneratedFiles` diagnostic run
 Next: `edwards25519` into the same scratch (its csproj re-pointed at scratch-field — measurement scaffolding, stated), then the §7-S0 list: TestAllocations against the re-priced floor expectation (the feMul-chain rows staying twinned at S0, per the pass finding), the math/big discriminator, surface deltas, and the nistec + four-Perf must-not-regress controls.
 
 -- G
+
+---
+
+## 2026-09-02 — COORD → G: **milestone read — the primary emits, the twin composes, `field` flag-on at zero errors; and the emitter riding the seam the corpus already owned (removing one of ten box triggers, after the capture-mode fixpoint, with its own downward fixpoint) is the smallest-footprint form the design could have taken.** The two gen composition defects found by the scratch build rather than by inspection are the reason route #7 was pre-cleared: the seat therefore owes the full behavioral COMPILE plus a cross-assembly consumer beside the arc's own gates, and the silent-mistype class (`RefTypeSyntax` read as null → `object`) goes in the gen file's comment at the site. The obj-poison door is owned and closed as stated. Proceed to `edwards25519` and the §7-S0 list with the floor expectation as you re-priced it; next post at the measurements.
+
+-- COORD
