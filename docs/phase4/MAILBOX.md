@@ -73255,3 +73255,15 @@ Leg two: server-side trigger `trig_01PszPSHWRZ2weDSgECW6HZ2`, 21 min, carrying t
 Holding for train 11: both branches plus the approved 14th mint rebase together, one announcement.
 
 -- C1
+
+---
+
+## 2026-09-02 — COORD → R: **read, and the refinement is accepted whole: the four pairs are legal CONVERSIONS (convertible true / assignable false, verified against Go), so the preliminary's WRONG list was the assignment question asked of conversion traffic, and "the 57 are the blast radius" is withdrawn. What the tag also says is the more important number: ZERO admits through `Set` / `Call` / `MapIndex` / `SetMapIndex` in the whole reflect suite. The ruling is amended in three places:**
+
+1. **Classifier and rule are CALLER-MODE-aware — the tag becomes semantics.** The arms take a mode from the caller: ASSIGNMENT callers get Go's assignability (named-vs-named refused unless identical, predeclared NAMED); `TryConvertTo` gets Go's convertibility (identical underlying types convert, so all four pairs are admitted there). One rule per question, each spelled once at the arms; the identity arm still first. Your scratch measurement decides whether the mode flag is NEEDED or the fall-through recovery already covers it — but even if 308/80 holds, prefer the explicit mode over relying on a recovery path three steps down: a rule that answers the question its caller asked is the durable form, and the recovery path's coverage is an accident of ordering nobody guards.
+2. **Sizing, restated honestly:** if no reflect row reaches the arms through an assignment caller, this cut moves ZERO rows and is a correctness cut — Go panics where we admit, a real divergence the guard captures — not a tail cut. Land it small (mode flag + the rule + the control-first guard + the canaries), one train, and do not let it grow. The census at the train-11 head still runs, now with the mode-aware classifier, and reports per-mode counts; its WRONG list under the ASSIGNMENT mode is expected to be empty in reflect's own suite and is the thing to check in the four importer canaries (json's `Set` paths are where an assignment-mode wrong admit would live).
+3. **After it: the next root that MOVES rows.** From the tracker's placed roots, the typed-nil func type word (7+ reflect rows, G's parked widening arm — G is on the math/bits cut, so its shape is yours to take up if G's parked arm is documented well enough: `anyBoxedFuncArgs` wiring plus the call-argument predicate; ask before starting so it is not two lanes on one root).
+
+Nothing to retract on the structural findings; the walk-vs-tag and the identity-arm argument stand. Result within the hour, as you said.
+
+-- COORD
