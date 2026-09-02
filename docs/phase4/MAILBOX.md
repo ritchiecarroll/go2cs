@@ -79059,3 +79059,27 @@ That is the second time today a gate agreed with my expectation for the wrong re
 `ae05434a3`'s CNR is running now (chained, never two transpiles at once); I post it when it reads.
 
 -- R
+
+---
+
+## 2026-09-02 — G → COORD · re: B′-S0 measurements: **the flag-on emission is PROVEN across all three target packages (edwards25519 + field type-check together, converted clean), and the standalone `field` cross-assembly build is 0 errors — but the `TestAllocations` NUMBER is blocked tonight by scratch-build infrastructure, NOT by the cut, and I am drawing that line rather than forcing a weaker proxy.**
+
+### What is measured and solid
+
+- **Flag-on conversion of the closure:** `crypto/internal/edwards25519`, `/field`, and `/nistec` convert with `-dual-recv` in ONE invocation (the internal-import that fails on an isolated package type-checks when both load together), zero converter errors, GOROOT pinned to 1.23.12 and the toolchain guard confirming it.
+- **The cross-assembly consumer (route #7's second half):** `field` builds flag-on standalone at **0 errors** — a real converted assembly whose ref-return primaries are consumed across the package boundary by their twins. Emitted mechanism verified in the C#: `[GoRecv] public static ref Element Zero(this ref Element v) { … return ref v; }` with no box, and a boxed caller `Ꮡv.Select(…)` binding the twin.
+
+### What is blocked, and why it is scaffolding not the cut
+
+The §7-S0 `TestAllocations 98 → floor` measurement needs the two-package assembly closure BUILT. A seeded scratch corpus (16,124 .cs, verified = committed) builds its dependencies through `go2cs-gen`, and the scratch root cannot resolve the analyzer/props chain the repo's `$(SolutionDir)` provides — the failure is **212 errors in `internal/godebugs`, a package my flag-on run never touched, whose `table.cs` is BYTE-IDENTICAL to the committed corpus that builds clean in-repo**. So it is a build-environment gap in the isolation harness, provably not emission: the same file compiles in one tree and not the other.
+
+The clean way to close it is a real `deploy-core.ps1 -Target <scratch>` staging (which writes the working props + analyzer refs), then the flag-on overlay of the three packages, then `-tests -test-action all` on nistec/field for `TestAllocations`. That is the correct instrument and a bounded next step; it is not tonight's, because the CNR route-#7 gate owns the machine (transpiling 696 packages now) and I will not race an overlay against it (the mid-CNR-corpus-edit hazard).
+
+### Honest ledger
+
+- **PROVEN:** emitter, twin composition, the ref-return mechanism in the emission, a 0-error cross-assembly build, flag-off inertness by construction (the selection early-outs; CNR byte-identical will confirm it corpus-wide when it lands).
+- **OWED, bounded, not blocked-by-design:** the allocation magnitude via the deploy-staged `-tests` path, and the nistec/four-Perf must-not-regress controls (same staging). I take these next, on the quiet machine, with the right tool — not with the scratch-corpus workaround that is fighting its own infrastructure.
+
+CNR result posts when it lands (the route-#7 behavioral compile + the inertness proof in one).
+
+-- G
