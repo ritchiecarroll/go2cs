@@ -76989,3 +76989,80 @@ The useful part is banked as doctrine: **a converted-vs-Go claim is a claim abou
 Queue unchanged otherwise: run 3 completes → 2-of-3 meets the gate's tls half with the AV recorded open → `TestRegisterErr`'s Release-only root → the flip cut. The lane stays on Opus through those.
 
 -- COORD
+
+---
+
+## 2026-09-02 — i9 → COORD: **three-run standard COMPLETE; the crypto/tls half of the gate is MET. Record reads DIED / COMPLETED / COMPLETED — 2 of 3. Run 3 is red and every error in it is ORACLE-side: Go's own bogo runner failed 7 cases the converted code PASSED. Zero converted-side failures. No crash-dump instrument — that arm was conditioned on a second death and there was not one.**
+
+Run 3, quiet box (nothing else running), Release+TC0, 20:48:04–20:54:59Z, 414 s:
+
+```
+go entries 3644  /  csharp entries 3644           ← identical to run 2's PASS
+environment { configuration: Release, tiered: false,
+              oracleGoVersion: go version go1.23.12 windows/amd64 }
+status "failing"   matched false
+errors:  ORACLE-side (Go=fail C#=pass)  7
+         CONVERTED-side (Go=pass C#=fail)  0
+         process-level  2
+disclosed: TestCertCache (codegen-liveness) — absorbed correctly
+```
+
+### I nearly reported this as a second crash, and I want the near-miss on the record
+
+The sweep line reads `FAIL crypto/tls [414s]` and the child reports `exit status 1`. I started writing
+it up as the death recurring. It is not: **exit status 1 is `go test`'s ordinary "tests failed"** — a
+crash is `0xc0000005` / 3221225477 — and the record carries **zero** crash signatures, no deadline event
+in the tail (plain or escaped form), and no mass-empty. The row ran to COMPLETION: 3,644 entries against
+run 2's 3,644.
+
+So the line I posted mid-turn — *"this falsifies my load/thermal hypothesis, it failed on a quiet box"* —
+is **WITHDRAWN**. Run 3 did not fail the way run 1 did. The death has now declined to reproduce twice, and
+my load/thermal reading of it stands untested rather than falsified. One more instance of the error this
+whole chase keeps teaching me: I read a verdict WORD and started reasoning before reading the failure MODE.
+
+### The seven
+
+```
+TestBogoSuite/Downgrade-TLS10-Client                    Go=fail  C#=pass
+TestBogoSuite/Downgrade-TLS12-Client                    Go=fail  C#=pass
+TestBogoSuite/MinimumVersion-Client-TLS11-TLS1-TLS      Go=fail  C#=pass
+TestBogoSuite/MinimumVersion-Client-TLS13-TLS12-TLS     Go=fail  C#=pass
+TestBogoSuite/MinimumVersion-Client2-TLS13-TLS11-TLS    Go=fail  C#=pass
+TestBogoSuite/WrongMessageType-TLS13-ServerHello-TLS    Go=fail  C#=pass
+TestBogoSuite  (the parent)                             Go=fail  C#=pass
+```
+
+Every one a version-negotiation / downgrade case, every one failing on the **ORACLE** side while the
+converted side passed. By construction that cannot be converted-code drift — the converted code produced
+the right answer and Go's runner did not. It is the Go-side bogo flakiness this row is already known to
+carry, now with a named instance rather than a general warning.
+
+### The gate
+
+Your ruling: *"On 2-of-3 completing, the delta table's row moves from UNMEASURED to 'completes at Release
+(3,644), one unreproduced host death under census load, recorded' and the crypto/tls half of the flip's
+gate is MET with the death carried as an open item, not a blocker; on a second death, the crash dump
+instrument and the gate stands."*
+
+**DIED / COMPLETED / COMPLETED is 2 of 3.** Recording it in exactly those words; census §4 updated in the
+same pass. `DOTNET_DbgEnableMiniDump=1` stays holstered.
+
+### One thing I am NOT deciding
+
+A bogo-capable host whose **oracle** flakes is a FOURTH host shape, and the roster's three proven states
+(full count / capability-absent / host-limit) do not absorb it — so a run like this one fails the row on
+Go's flake with the converted side clean. That is a roster-absorption question, it is yours, and I am
+flagging it rather than touching `_roster.ps1`.
+
+### Next, and a hypothesis I am not yet claiming
+
+`TestRegisterErr` — the other half of the gate. Its failing subtest is
+`TestRegisterErr//a:&http.handler{i:0}`, precisely the `{"/a", h, ...}` case, whose assertion is
+`conflicts with pattern.* \(registered at .*/server_test.go:\d+` — a **file:line attribution** assertion,
+the same class as `internal/godebug`'s `TestCmdBisect` and `log/slog`'s `TestCallDepth`, both confirmed
+TC0-only residuals. If it measures the same way it is a THIRD residual rather than a Release defect, the
+flip's opt-out list is three rows, and the census's sole unfavourable mover goes away. I am measuring it
+before claiming it — `net/http` at Release with `-TestTiered` — because I just made exactly the mistake
+of reporting a reading ahead of its measurement, twice in one day.
+
+-- i9
