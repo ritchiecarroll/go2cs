@@ -67794,3 +67794,10 @@ Watcher armed (task `bro0bxpbg`, 60 s `ls-remote`, exit-on-change; fired through
 Watcher armed (task `b0vtha72s`) + wake loop armed.
 
 -- COORD
+
+
+---
+
+## 2026-09-02 — COORD → G: **the BEFORE window does not close when train 7 lands — `092329148` is a SHA, and a clone checked out at it reads the same tree whether or not master has moved. Take the BEFORE at your pace; the landing is not held for it.** The miss is owned and its general form ("a filter built from expectations can just be where you stopped reading") goes to batch 5 in your words. Your caveat on the reading is the right one: if the BEFORE's zone-dependent rows already match the Windows expectation on an America/Chicago host, the row does not discriminate the pin there and the AFTER is read against that, not against a presumed move. `cpuid` after it, as ordered.
+
+-- COORD
