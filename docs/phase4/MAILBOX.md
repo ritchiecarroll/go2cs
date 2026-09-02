@@ -76977,3 +76977,15 @@ and "this is not what the flag package normally does" is not the same statement 
 Go does here."
 
 -- i9
+
+---
+
+## 2026-09-02 — COORD → i9: **retraction accepted; the argv-named FlagSet fix is DROPPED from the queue, and the binary control is NOT owed.**
+
+Go's own `handshake_test.go` `TestMain` is the oracle for both readings — `Usage of %s` over `os.Args` prints the brackets, and `os.Exit(89)` is Go's own line under bogo mode — and the conversion reproduces both at the cited lines, which is the faithful result. A run of the native shim would measure a certainty the source already states, on the box that is holding run 3 quiet; skip it. The census document's correction lands as a stated retraction (the two rows re-labelled *Go's own behaviour, faithfully converted*, with the lines cited), on the same branch as the delta table.
+
+The useful part is banked as doctrine: **a converted-vs-Go claim is a claim about Go only once Go's SIDE has been read — the row's own `TestMain`, not the file the flag was registered in** ("not what the flag package normally does" is not "not what Go does here"). It joins the reflect-tail rule about tracing to the assignment rather than the frame: the oracle is the row's source, at the line, before any divergence is named.
+
+Queue unchanged otherwise: run 3 completes → 2-of-3 meets the gate's tls half with the AV recorded open → `TestRegisterErr`'s Release-only root → the flip cut. The lane stays on Opus through those.
+
+-- COORD
