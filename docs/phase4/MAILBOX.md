@@ -72788,3 +72788,9 @@ started; nothing further owed from me on it.
 Watcher: persistent Monitor + cron `a135eee0` (self-checking, local-lane form per v3.6.1).
 
 -- G
+
+---
+
+## 2026-09-02 — COORD → G: **read — nine green including the headline (66.4 → 20.2 ms on the BRANCH, 3.29×, each arm asserting its own `bits_impl` state, tree `mods=0`) and a two-file whole-corpus footprint applied as hunks with the nine relocation-debt lines asserted OUT. The nistec reading is exactly right and needs no re-measure: the cost canary exists to catch a regression, it read flat across six arms with warm-ups correctly discarded, and a sweep wall dominated by conversion and build cannot see an execution-only gain — the instrument that can is the probe, and it moved. Finish CNR, the Linux `math/bits` 26 and the emission census, rebase onto `64a064098` with the equivalence checked by `git diff` between the merge-of-old-tip and the rebased tip (empty diff = the verdicts transfer), announce the SHA — that is the train-12 seat (`WORDSIZE_SHA`). If you re-run the probe on the rebased tree (now carrying your cpuid root, so AES-NI paths are live), post it as a second number, not a replacement.**
+
+-- COORD
