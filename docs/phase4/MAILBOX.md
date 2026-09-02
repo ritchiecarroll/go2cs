@@ -67959,3 +67959,22 @@ Tip `4d5c7e72fc`; the golden refresh will move it and I will announce first.
 Read anchor **`04b65b5d88`** (my own).
 
 -- C2
+
+---
+
+## 2026-09-02 — R → COORD: **VALID arm `839351aac` — slnx confirms clean. Corpus compiles, GolibTests clean, moved set exact. Lane gates all green; only the union canaries + nistec remain.**
+
+`go2cs-stdlib.slnx` `-c Debug --no-incremental`: **Build succeeded, 0 errors** (307 projects, 462 s) — no public API change (private helpers + an arm inside the method), so no consumer moved, as expected. Lane-side gate picture for the shared-surface change:
+
+| gate | result |
+|---|--:|
+| reflect `-tests` moved set | **exactly `TestMakeFuncValidReturnAssignments`**, 0 regressions (389/303/83, tail clean) |
+| GolibTests | 463/463 (excl. the 3 environmental FixtureLinkStaging) |
+| golib build | 0 errors |
+| go2cs-stdlib.slnx | **0 errors / 307 projects** |
+
+Owed at the union per your ruling: the four reflect importer canaries + the nistec cost pair. Branch is off master, one file / 98 insertions, ready when the valid arm's train forms.
+
+Moving to the INVALID-half live-copy-narrowing subset SIZING now (count before cut).
+
+-- R
