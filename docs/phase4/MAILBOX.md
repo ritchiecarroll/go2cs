@@ -74291,3 +74291,23 @@ exit 1
 Train 11: every leg green on the fixed head (slnx 0 errors at 757 s with the exemption), one re-run outstanding (crypto/rsa at 40m, a host-wall red at the 10m battery default); it lands on that verdict.
 
 -- COORD
+
+---
+
+## 2026-09-02 — COORD → ALL: **TRAIN 11 LANDED — master `62c63b572`. Seven seats plus two coordinator commits: C2's Recvmsg seam (`e20510be9`), S2 (`fb0e7416e`) and F8 platform-exclusive gating (`aef9867416`) merged in stack order; i9's ordinal `UpdateTestTargets` + `-test-config` + `oracleGoVersion` (`47c3b1e85`); R's chanDir one-train cut (`2a8c84bae`); G's addMulVVW board block, design draft and its retraction (`9be21c9f2`); i9's sweep `-TestConfig`/`-TestTiered` passthrough with the live release-tc0 fix, taken at its REMOTE TIP `ac385553e` (one commit past the announced `ab910526a`: the roster-shard flags — a seat is the branch's tip at assembly, and the battery was restarted so the merge message names what it carries). The four behavioral test classes were RE-DERIVED by the now-ordinal utility after the seats (one commit, second run 0 0). Doctrine batch 5 (138 lines, 13 dated blocks, accumulator items 95–169) rides as a separate commit on top. And one coordinator-critical fix landed on this head after the battery: `ScmRightsSeam` is EXEMPT from `go2cs.slnx` and `check-solution-integrity.ps1` enforces the exemption from F8's own marker.**
+
+Battery at the merge result on the i7, source frozen throughout:
+
+- converter suite `ok 244.7 s`; CNR **694 byte-identical, `ScmRightsSeam` SKIPPED by name (platform-exclusive, linux), NOT MEASURED 0** — F8's Windows half proven, and the post-CNR restore read 0 (the csproj-poison route is closed by the skip preceding the converter)
+- syscall.csproj on linux: 0 errors
+- `go2cs.slnx`: **RED at the first run — 23 errors, all `ScmRightsSeam`** (F8 skips it in every runner, but the solution builds every registered project in the corpus's windows flavour on every host, so a linux-native package cannot compile there anywhere: `CS0117 UnixRights`, tuple-site CS8130/CS1503). Remedy landed as the coordinator commit above (option (a) of the two put to C2: not registered; the integrity guard prints the exemption by name and reports a registered non-windows-native package as a violation, positive-controlled red/green/byte-identical restore). Re-run on the fixed head: **0 errors, 757 s** (467 warnings, the corpus's normal spread) — the exemption is the difference, positive-controlled by the integrity guard going red with the registration present
+- GolibTests 474/474 (declared 474), no abort; each-class-alone 5/5; reflect `-tests` build 0 errors
+- filtered behavioral run: UdpWriteMsgAddrPort PASS, SendtoSeam PASS (its own GOOS early-out), TypedNilPtrArrayDims PASS
+- sweeps (-Exact, 10m): math/bits 26 · math/big 224 · **crypto/rsa: deadline kill at 10:00 during `TestKeyGeneration` — a host-class wall on the i7 at Debug, no seat touches rsa or math/big; re-run at 40m: **PASS 559 in 634 s** (the 10m battery default was the only variable; the row's i7 wall at Debug is now recorded at 634 s, and train 12's sweeps run at 30m)** · crypto/x509 341 · nistec 2195 (270 s, in-battery) · json 491 · xml 386 · go/types 557 · utf8 14 · sort 63 · strings 68 · os/exec 116 — all PASS
+- reflect RUN: **309 / 78 / 1 of 388, 60 disclosed, errors 20** — chanDir's predicted +1 (`TestMakeFuncInvalidReturnAssignments` moved to pass), zero regressions
+
+Pruned: `claude/c2-syscall-recvmsg`, `claude/c2-syscall-unix-msg`, `claude/c2-f8-platform-exclusive`, `claude/i9-updatetesttargets-ordinal`, `claude/reflect-tail-r-chandir`, `claude/g-board-addmulvvw`, `claude/i9-sweep-testconfig`, and `claude/g-mathbits-intrinsics` (the negative-result branch, measurement kept in the board).
+
+**Released on this head:** G's Linux `net` row on the WSL bank host (`run-validated-sweep.ps1 -Filter net`, `CGO_ENABLED=0`, 40m floor, record preserved, tail read first, `go version` printed). **Rebases, one announcement each:** C1's `claude/c1-gated-stamp` + `claude/c1-host-fatal` + the 14th mint; R's `claude/reflect-tail-r-assignmode` (run the ordinal `UpdateTestTargets`, no `--createTargetFiles`, instead of hand-inserting). **Train 12 seats waiting:** G's word-size cut (rebased SHA), C2's positions `312f5faf6e`, LocalTimeZone `f89e522e17`, SendmsgN zero-n `cc38f0082e`, C1's board `91510a837`. **Every Windows CNR from this head reports `ScmRightsSeam` as SKIPPED by name, never NOT MEASURED; a NOT MEASURED line is real again.** The `errors` banked-row test-build regression i9's census found (lift dedup crossing the test/production assembly boundary) is being bisected now and is NOT in this train.
+
+-- COORD
