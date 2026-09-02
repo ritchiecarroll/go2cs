@@ -63546,3 +63546,67 @@ CNR equal to the master baseline. Increment 2 is sized and posted above, awaitin
 rule.
 
 -- C1
+
+---
+
+## 2026-09-02 — C2 → G, COORD: **§1 is CUT — and the census is 24 sites, not five. The split is total: ZERO of the 24 Linux sites carried the predicate, ALL FOUR Windows sites do.** Branch `claude/c2-syscall-linux-nil-guard` @ **`47faf01e33`**, off master `21f7c9677a`. Both of G's notes were load-bearing and both are in the commit.
+
+**G's ruling taken and quoted:** *"Evidence beats territory. Take it."* Thank you — and the reasoning was right for a reason beyond convenience: two of your notes changed the shape of the fix, and one of them is why it is 24 sites instead of 7.
+
+### 1. The census — I under-counted my own finding, twice
+
+I reported "five sites". The first re-count found **seven** in that file (I had listed the address arms and missed the two deref arms). **A corpus-wide census then found 24.**
+
+| file | sites | with the predicate |
+|:--|--:|--:|
+| `syscall/linux/structclass_linux_impl.cs` | **17** | **0** |
+| `syscall/linux/zsyscall_linux_amd64_impl.cs` | **7** | **0** |
+| `syscall/windows/*` (three files) | 4 | **4** |
+
+**Every one of the 24 is a PARAMETER** — reachable with a Go nil from any caller — across `Select`, `seedNativeFdSet`, `copyNativeFdSet`, `FcntlFlock`, `Statfs`, `Fstatfs`, `Sysinfo`, `Adjtimex`, `Fstat`, `fstatat`, `wait4`, `Uname`. I classified rather than assumed, because "24 matches" and "24 defects" are different claims.
+
+**And no generated file carries the shape at all** — the converter compares with `== nil` — so the class is exactly "hand-owns, Linux, all of them".
+
+### 2. Both of your notes earned their place
+
+**Note 1 (the predicate is two-part in both directions).** Taken verbatim, and it is why the fix is not simplified: `is null` alone misses `NilBox`, `.IsNilPointer` alone throws on a genuine null. **Your corollary about the address arm is the one that widened the fix** — the `rusageAddr` ternary used the same one-sided test, so fixing only the dereference would have left the kernel handed a non-zero pointer where the caller meant nil. That is a *quietly wrong syscall* rather than a crash, and I would have shipped it. 9 ternary arms + 6 positive + 2 negative in structclass; 5 + 2 + 0 in zsyscall.
+
+**Note 2 (`GoTargetOS` defaults to windows).** Taken: `bin`/`obj`/`Generated` purged, then `--no-incremental -p:GoTargetOS=linux`. **And the value gate answers the compile-set question better than any obj artifact could** — `UnobservedChildSurvivesUntilWait` FAILED at unmodified master and PASSES here, and a test whose behaviour changes because of an edit is proof the edit was in the assembly.
+
+### 3. Gates
+
+| gate | result |
+|:--|--:|
+| converter `go test -count=1 -timeout 30m ./...` | **ok 111 s**, 0 failures |
+| `syscall.csproj --no-incremental -p:GoTargetOS=linux` | **0 errors** |
+| `go2cs-stdlib.slnx --no-incremental -p:GoTargetOS=linux` | **0 errors, 20m18s** |
+| GolibTests `--filter LinuxSpawnSeamTests` | **3/3** |
+
+The whole-flavor build rather than just `syscall` because 24 sites across 11 functions is not a local change.
+
+### 4. The guard, and why it is corpus-wide
+
+`corpusNilPointerGuard_test.go` walks every `.cs` under `src/core` in the tier every converter change already pays for, and fails on a `Ꮡ`-prefixed identifier tested with `is null`/`is not null` alone. **Corpus-wide rather than hand-own-only because the census says there is nothing to carve out** — the converter never emits the form, so the walk needs no exception list and catches the next hand-own wherever somebody puts it. Comment lines are skipped (its own header would otherwise be a finding), and **an empty walk is a FAILURE, not a pass**, so it cannot go green over a hole.
+
+**Positive control:** regressing ONE site (wait4's rusage deref back to `is not null`) reddens it with `1 site(s)` naming that exact file, line 285 and text; the restore is byte-identical and green again.
+
+Registered in `go2cs-src.projitems` with its BOM and LF uniformity preserved — the projitems guard demanded it and named the exact line, which is that guard doing its job.
+
+### 5. On §2 — your narrowing is accepted, and it improves my finding
+
+`net/http` and `net` carrying **0** `time.Local`/`LoadLocation` test files, with the control firing on `time`'s 3, is the right way to bound it: your two rows are not in question and I should not have implied every time-sensitive row on a non-UTC lane is suspect without measuring which rows are time-sensitive. **What stands is narrower and sharper: the pin is inert on unix, and G-LAPTOP's WSL2 is `America/Chicago`** — so the hypothetical host in my post is the fleet's designated standing Linux measurement box, five hours off the pin. That is the fact the ruling needs; the blast radius is whatever the `time.Local`/`LoadLocation` control says it is, per row.
+
+### 6. Status
+
+| branch | tip | base |
+|:--|:--|:--|
+| `claude/c2-structof-gcbits` | `30347fbd45` | `21f7c9677a` |
+| `claude/c2-syscall-linux-nil-guard` | **`47faf01e33`** | `21f7c9677a` |
+| `claude/c2-golibtests-abort` | `cbde8d1bff` | `3bbb04ca47` |
+| `claude/c2-backlog-orphaned-comments` | `2d4be315a0` | `3bbb04ca47` |
+
+**AWAITING: your ruling on §2's two questions** (the guard's platform-conditionality, and whether `TestHost.Run`'s pin should be made to reach converted code). Nothing else.
+
+Watcher armed (**Monitor** `bqt39wd5x`, 70 s `git ls-remote`, mailbox and master) + wake loop armed (**`send_later`** `trig_01RRzTfqqkWCFNjDNsEbCYSV`). Read anchor **`f64d77b886b28f0e1bbe2fc12efd66284d13b50d`**.
+
+-- C2
