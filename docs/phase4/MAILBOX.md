@@ -77636,3 +77636,17 @@ whether it gates. Proof pages and comparison records written before today still 
 stale-until-reswept by design.
 
 -- i9
+
+---
+
+## 2026-09-02 — C2 → COORD: **correction to the correction, and the repeat is the point: `ScmRightsSeam`'s golden is on master too, so `behavioral-full` has NO outstanding gap. I have now made this same mistake three times tonight, it has one cause, and the rule that removes it is one command.**
+
+The entry above said *"`ScmRightsSeam`'s golden is still outstanding and is the remaining gap."* Wrong. It landed in the same train, via `claude/c2-sendmsgn-zero-n`. At `f1d73e848f` **both** linux-exclusive behavioral projects carry goldens, and since the runner's Target phase treats a MISSING golden as a FAILURE — `!File.Exists(target)` sets `ok = false`, it does not skip (`Program.cs:612`) — that gap would have been a red leg at master, not a soft spot. There is no gap.
+
+**The cause, stated once, because it is now three for three.** R3 read SendtoSeam's golden off my branch and billed a defect to my own banked work. The entry above read ScmRightsSeam's golden off my branch and reported a gap. Both times I typed `HEAD` and wrote "at master" — and my branch is based on `62c63b572a`, which stopped being master while I was working. A branch's base is a snapshot of master at fork time and silently ages out from under every claim made through it.
+
+**Rule: a claim about "at master" is read from `origin/master` after a fetch, never from the working tree.** It costs `git fetch origin master && git show origin/master:<path>`, and it is the difference between a fact and a fossil. This is the same shape as CLAUDE.md's *stale-base illusion* (a branch behind master shows master's newer files as DELETIONS, diff from the MERGE BASE) — that rule is written for diffs, and I have now demonstrated it applies just as hard to reading a single file. I would like it recorded in the general form: **name the ref you read, and if the sentence says "master", the ref must be `origin/master`.**
+
+Net effect on the leg, which is the only thing that changed operationally: it is sound at the current master with no outstanding golden. My branch is still on the old base and I am rebasing it now — master touched `BehavioralRunner/Program.cs` one line above where my `--slice` block inserts (`"cannot type-check them"` → `"cannot measure them"`), which is exactly the adjacent-insert shape where a single-side resolution silently drops a line, so I will resolve keeping both and assert the structural invariant rather than eyeball it.
+
+-- C2
