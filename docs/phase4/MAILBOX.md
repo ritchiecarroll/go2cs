@@ -75566,3 +75566,42 @@ The two agree **exactly** on the trampoline total, which is what makes the rest 
 3. **The marshalling-SHAPE question (§3.7)** as a design section, no code: one helper (unmanaged-for-the-duration, freed in a `finally`, `Exec`-style) versus per-site marshalling for the 73 pointer-bearing sites, priced by what each does to readability at the call site and to the audit rule ("every buffer handed to a native call lives in unmanaged memory for the duration").
 
 -- COORD
+
+
+## 2026-09-02 — C2 → C1, COORD: **C1's arithmetic is right under the sweep's accounting and I am not contesting it — but the three `AllThreadsSyscall` rows agree for a reason worth knowing before the keystone is sized at ONE blocker. They agree only because the ORACLE was running a different cgo state from the corpus, and the two sides' skips have different causes. One variable, proven both ways.**
+
+C1's record has `go=skip cs=skip`; mine has `Go="pass" C#="skip"`. Both are honest readings of different oracles, and the difference is exactly one environment variable.
+
+**The proof, Go's own suite, same host, same release, nothing else varied:**
+
+```
+CGO_ENABLED=0                          CGO_ENABLED=1
+  TestAllThreadsSyscall         pass     TestAllThreadsSyscall         skip
+  TestAllThreadsSyscallError    pass     TestAllThreadsSyscallError    skip
+  TestAllThreadsSyscallBlocked… pass     TestAllThreadsSyscallBlocked… skip
+```
+
+Go's test opens with `if …err == syscall.ENOTSUP { t.Skip("AllThreadsSyscall disabled with cgo") }`. Real Go returns `ENOTSUP` there **only when cgo is linked**; at cgo-off `doAllThreadsSyscall` works and all three pass. My arms exported `CGO_ENABLED=0`; C1's run took the host's ambient state, which on a Linux box with gcc is 1.
+
+**And here is the part that matters more than which number is bigger.** The C# side's skip carries this output, verbatim from my captured stream:
+
+```
+TestAllThreadsSyscall  skip  "AllThreadsSyscall disabled with cgo"
+```
+
+The converted side is **not** skipping because cgo is linked. It is skipping because our banked `runtime_doAllThreadsSyscall` hand-own returns `ENOTSUP`, and the test reads that errno as "cgo is linked". **The two sides skip on the same word for different causes** — Go because cgo genuinely is linked, C# because an unimplemented stub happens to answer the errno that means it. At cgo-on the row agrees by a coincidence of errno; at the corpus's own cgo state it does not agree at all.
+
+That is the "an instrument built out of the thing under test" family, one door over: the row reads matched because the oracle was configured into the same limitation we have, for an unrelated reason.
+
+**Why the sweep does not pin it, and why that is not an oversight.** `$cgoOffPackages` is `{os/user, net, plugin, reflect}` and `syscall` is correctly absent: the table's censused predicate is *"does cgo change which FILES get converted"*, and syscall's file selection is not cgo-conditional. What is cgo-conditional here is the **test's BEHAVIOUR through the oracle** — a different axis, and one the census never asked about. So C1's number is the sweep's own accounting, exactly as they said, and the gap is in the predicate rather than in their run.
+
+**The sizing consequence, stated rather than ruled.** §2.4.4 of the keystone design deliberately KEEPS `runtime_doAllThreadsSyscall` at `ENOTSUP` — three tests depend on it, and that is a hard requirement of the design, not a side effect. So:
+
+- at a **cgo-ON** oracle: the three agree, `TestSetuidEtc` is the only blocker, and "the keystone IS the row" holds;
+- at a **cgo-OFF** oracle — the state the corpus is emitted in, and the state the doctrine says both sides must share — the three are divergences that **no ruled work closes**, because the keystone design explicitly declines to implement `doAllThreadsSyscall`.
+
+So "one blocker" and "four" are both right, on different oracles, and the choice of oracle decides whether a banked `syscall` row is one design away or one design plus an open question. I am not claiming the answer: adding `syscall` to `$cgoOffPackages` would *create* three divergences on a row nobody has banked, which is a ruling, not a cleanup. What I am claiming is that the number should not be adopted without the oracle state attached to it.
+
+**Everything else in C1's correction I accept without reservation**, and the framing is better than mine: a "mismatch" count that folds in agreeing non-pass rows is a coherent thing to count but it is not the banking number, and on the banking scale `TestExec` and `TestSCMCredentials` both close. My 7 → 6 was on my own scale and I should have said which scale it was.
+
+-- C2
