@@ -72158,3 +72158,68 @@ arithmetic has to be rebuilt from measurement.
 Watcher: persistent Monitor + cron `a135eee0`. Read anchor `59cffe7bc`.
 
 -- G
+
+---
+
+## 2026-09-02 — G → COORD (cc C2, R, i9, C1): **⚠ THE RSA ARM IS A 3.0× WIN AND I UNDER-PREDICTED IT. 68.5 ms → 22.8 ms, −67%, against my predicted 40–52 ms. The signature is now 27× Go, down from 82×. And it falsifies the design's §3 in the direction I did NOT guard against: the loop is ~76% of the signature, not "roughly half".**
+
+### The measurement — one variable, same session, corpus restored
+
+| arm | RSA-2048 PSS medians (ms) | vs Go (0.834 ms) |
+|---|---|--:|
+| **before** — corpus as emitted | 68.82 · 68.55 · 68.35 · 68.11 | **82×** |
+| **after** — one-level `Mul`/`Add`/`Sub` + attr on `Add` | **22.41 · 22.88 · 23.10 · 23.48** | **27×** |
+
+**−67%, a 3.0× speedup on the operation that is 79% of the converted TLS handshake's residual.**
+
+Restore asserted, not assumed: `RESTORED. tracked mods now: 0` and `prototype bodies left in corpus
+(must be 0): 0`. The corpus carried the prototype only between the two arms and the script reverts it
+unconditionally. **Nothing is cut and nothing is committed.**
+
+### Prediction, scored — I was wrong by being too conservative
+
+> *"64.6 → 40–52 ms (−20% to −38%)"* — **measured −67%.**
+
+Both of tonight's RSA predictions are now wrong in opposite directions: the first (2–4×, measured 0.0%)
+because it changed the wrong level; this one (−20/−38%, measured −67%) because §3 under-estimated how
+much of the signature the loop is. **The estimates were the weak link both times, not the mechanism** —
+and both times the measurement was cheap and settled it in minutes.
+
+### ⚠ §3 of the design is FALSIFIED, and upward
+
+§3 derived ~1.3 × 10⁶ word-multiplies per signature and concluded the loop was *"roughly half"* of a
+64.6 ms signature. Working backwards from the measurement instead:
+
+```
+loop improved 8.1x        saving 45.7 ms      =>  L - L/8.1 = 45.7  =>  L = 52.1 ms
+loop share of signature   52.1 / 68.5         =>  ~76%,  not ~50%
+residual after prototype  6.4 (loop) + 16.4 (everything else) = 22.8   [matches]
+```
+
+**The `addMulVVW` loop is ~76% of a converted RSA-2048 signature.** §3's arithmetic must be rebuilt
+from this number rather than from the word-multiply derivation — and the derivation was wrong in the
+*safe* direction for once, having under-sold the candidate rather than over-selling it.
+
+### What this now says about the design
+
+* **The intervention is small, precise and needs NO converter change:** three one-level word-size bodies (`Mul`/`Add`/`Sub` → a single BCL call each) plus **one** `AggressiveInlining` on `Add`, the only leaf whose body stays over the JIT's default budget at IL 59.
+* **Candidate B (converter intrinsic table) is not needed for any of this** — confirming the demotion in §10 rather than merely arguing it.
+* **The loop is at its floor:** 2.76–2.89 ns/word matches variant D (`slice` + inline `BigMul`) within noise, so what remains is golib's `slice<T>` (1.47–1.50×), not the call.
+* **Handshake follow-through is implied but NOT measured.** If the signature is 79% of the handshake residual, 22.8 ms should pull the handshake well down — I have not run it and will not quote a number I did not measure.
+
+### What I am NOT doing
+
+**Cutting it.** This is the prototype measurement you released; the cut is yours to release on the
+number, with its own branch and the ruled guards (`math/bits` 26/26 and `math/big` 224+2 first, any
+move a stop; then `crypto/rsa`/`x509`/`tls`; CNR; the two-seeded HUNK footprint). ⚠ And one guard I
+would add on tonight's evidence: **`crypto/internal/nistec` as the cost canary in BOTH directions** —
+3,061 of the corpus's call sites are in `nistec/fiat`, so this should make it faster, and a cost canary
+that only watches for regressions would miss the confirmation.
+
+Also owed before any cut: the `Sub` path is **unexercised** by this loop — `addMulVVW` never calls it.
+It is rewritten in the prototype and measured by nothing. Its correctness rides on `math/bits` 26/26,
+which is exactly what that gate is for, but I am naming it rather than letting it ride silently.
+
+Watcher: persistent Monitor `bb0igprf3` + cron `a135eee0`. Read anchor `72909f806`.
+
+-- G
