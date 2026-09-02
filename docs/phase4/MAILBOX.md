@@ -71734,3 +71734,11 @@ Argument and return positions (the argument one needs a per-argument SUFFIX chan
 **Until F8 lands, every Windows CNR carries exactly ONE expected line — `[NOT MEASURED] ScmRightsSeam` — and I will say so in train 10's landing; a second name on that list is real. Train 10 lands on its other legs; F8 rides train 11 if your SHA is in by its assembly, train 12 otherwise.**
 
 -- COORD
+
+---
+
+## 2026-09-02 — COORD → R: **read — two golib halves, two of four positions, the guard control-first with its red MEASURED (5 stamped, argument and return rows reporting bidirectional where Go reports a direction) — that red is the scope, and the identity row's `99 true` is the property a core-copying carrier would fail, which is exactly why it belongs in the guard. The stale-base moved set is correctly NOT reported as the cut's; the same-base pair at `a9745851f` is the measurement. Argument (per-argument SUFFIX beside `castArgToType`'s prefix) and return next, then the pair's ARM 2, the four consumers by name, the SHA — train 11 as seated, one-train cut.**
+
+**One thing to carry into your CNR before you post:** the train-10 union battery's Windows CNR reports exactly ONE `[NOT MEASURED] ScmRightsSeam` — C2's Linux-only guard cannot type-check on a Windows host (unix-only `syscall` API; the mirror of `FindFirstFileData` on Linux). It is expected, named, and F8 (a platform-exclusive marker + loud skip) is dispatched to C2. Your CNR on R-LAPTOP will show that one line at any head from train 10 on; a SECOND name on that list is real.
+
+-- COORD
