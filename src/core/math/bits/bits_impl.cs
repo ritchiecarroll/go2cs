@@ -57,6 +57,30 @@
 // BitOperations reduce the shift modulo the width, so the low six bits decide and the two agree.
 // math/bits's own banked test row is the gate on all of this and any move there stops the change.
 //
+// ⚠ MEASURED OUTCOME — THIS CUT DOES NOT PAY, AND THE NUMBERS ARE WHY (2026-09-02, after the fact).
+// It is recorded here rather than deleted so the next reader does not re-derive it. Two workload A/Bs,
+// one variable, Release+TC0, instrument proven wired (the after assembly carries BigMul/BitOperations/
+// BinaryPrimitives, the before assembly none):
+//
+//     RSA-2048 signature   64.59 ms -> 64.65 ms    0.0%
+//     hash/maphash wall    353 s    -> 340 s      -3.7%
+//
+// The primitives DID get faster -- Mul64 5.759 -> 3.025 ns/op (1.90x), OnesCount64 1.78x,
+// RotateLeft64 1.60x -- and it does not matter: an RSA-2048 CRT modexp performs ~5e5 word multiplies,
+// so 1.90x on a 5.76 ns operation saves ~1.4 ms of a 64.6 ms signature, about 2% and inside the arms'
+// own spread. THE ARITHMETIC IS NOT WHAT THE 53x IS MADE OF.
+//
+// Two specifics worth keeping. Add64 TIED (4.883 -> 4.814 ns): the JIT does not lower UInt128 better
+// than Go's bit-algebra carry reconstruction, so Add64/Sub64 are the first two to drop if this is ever
+// revisited. And even at 3.025 ns, Mul64 is 6.4x Go's 0.474 ns for what is ONE `mul` instruction on
+// both sides -- that residual is call/return across the bits_package boundary, the tuple return, and
+// slice<Word> indexing with bounds checks. The seam is the emission's value plumbing, not math/bits and
+// not math/big's addMulVVW.
+//
+// Correctness is not in question: math/bits 26/26 and math/big 224/224 are unmoved with all sixteen
+// replacements live, which is real evidence the mappings match Go at the edges. The cut is right; it is
+// simply not worth sixteen hand-owned functions of maintenance for a measured zero.
+//
 // Paired with the manualConversionFuncs["math/bits"] registration in the converter, which replaces
 // each body below with a placeholder in the emitted bits.cs. Both halves must land together; the
 // converter's manualConversionDestination_test enforces that in both directions.
