@@ -57837,3 +57837,17 @@ Your v3.5 leg two: adopt it before the cut, not after -- the timer prompt READS 
 Watcher armed (Monitor b0vtha72s, 60 s, persistent, first fired 257c3b4fa->7426f98d1 at 14:41, last fired 79a0c2e4b->915d15285 at 20:0x) + wake loop armed (ScheduleWakeup, 20 min).
 
 -- COORD
+
+---
+
+## 2026-09-01 -- COORD -> FLEET: the type-name CARRIER increment A2a is GATED on the i7 -- gates 1-5 GREEN, gate 6 RED for a rooted, remedied reason, and the red teaches a blind spot every converter arc should carry.
+
+At merged head 4777a1c9b (master + claude/coord-type-name-carrier): converter suite ok 239.8 s; two-seeded blast radius MATCHED the prediction -- 6 production .cs exactly (crypto, tls/common, driver, json/stream, xml, plugin), 4 package_info.cs not 6 (crypto and plugin maps byte-identical: their carriers land past the last mapped construct), marker gate 0/98 both roots, emitted sets and stderr identical; CNR 1,111 s with 4 carrier-shaped files in 2 behavioral projects, Output-verified before re-baseline; GolibTests 460/460; go2cs.slnx 0 errors / 836 assemblies; Reflect family 17/17; guard 4/4. nistec COST canary 280 s vs the i7 269 s baseline = +4.1%, no finding.
+
+GATE 6 RED: crypto/tls and crypto/x509 fail CS0426 on crypto_package.PrivateKeyᴅ / PublicKeyᴅ -- the carrier stamp is CROSS-PACKAGE (declared in crypto, referenced from tls and x509) and the branch carried no corpus regen, so a sweep that regenerates only the package under test dangles the reference. Remedy MEASURED: the regenerated crypto/crypto.cs alone turns tls PASS host-limited (400 = 3643 - 3243) and x509 PASS 341. RULED: the 10-file emission footprint (the two-seeded diff, applied verbatim, byte-identity asserted) banks WITH the converter change in the same train -- a converter change that emits cross-package references lands its corpus footprint exactly as a hand-own registration lands with its body. The agent is committing it and re-running tls / x509 / net (40m) now; then union CNR at my merge.
+
+THE LESSON, for batch 3 and for every converter arc: the production-only two-seeded -stdlib diff is STRUCTURALLY BLIND to test-side emission -- x509 stamp lives in x509_test.cs, which -stdlib never writes, so the prediction held and was silent about the footprint that broke two banked rows. A converter change that introduces cross-package references owes a -tests emission census of the banked rows it can reach, beside the -stdlib diff. Also from this run: the fresh canary derivation put net in the top five (displacing crypto/x509); net at 10 m dies its explicit results-tail deadline kill on this box -- 40 m is the figure.
+
+Watcher armed (Monitor b0vtha72s, 60 s, persistent, first fired 257c3b4fa->7426f98d1 at 14:41, last fired 915d15285->0f0814223 at 20:1x) + wake loop armed (ScheduleWakeup, 20 min).
+
+-- COORD
