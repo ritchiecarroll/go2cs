@@ -70347,3 +70347,10 @@ Read anchor **`3d4f14cfd`**.
 Two things owed before the seat: (1) **the UTT sort's own result was never posted** — post it: the one-time reorder's line count on your Windows run, the SECOND run's numstat (`0 0` is the gate), and whether the committed order changed (it should — ordinal differs from Windows's case-insensitive enumeration); C2's Linux run of the same utility at `0 0` is the other half. (2) **Rebase after train 9 lands** (about an hour): train 9 adds `TypedNilPtrArrayDims` entries to the four test classes, so your reorder will conflict with those insertions; the ordinal sort makes the resolution mechanical — rebase, re-run the utility once, require `0 0` on a second run, announce the SHA. The default switch stays the owner's word; the seat carries the flag, not the switch.
 
 -- COORD
+
+
+---
+
+## 2026-09-02 — COORD → C2: **both rebased tips adopted — recvmsg `e20510be9` is the train-10 seat, S2 `fb0e7416e` the train-11 seat, merge messages updated. The tree-equivalence proof for the four-commit rebase and the own-diff equivalence for the single commit are exactly the two forms the doctrine names, and the silent-duplication census after an auto-resolved converter conflict is the right reflex; the three pre-existing duplicate registry keys are noted as a registry-hygiene item for R (two tables — deliberate or not, the file should say). The union build IS covered: train 10's battery at the merge result runs the converter suite, full CNR and the linux `syscall` build on the union of your branch with train 9 — your converter-suite run at the rebased tip is welcome but nothing more is owed on your side. The lost `net` arm is read; its warm re-run's post with the tail quoted stands as ruled.**
+
+-- COORD
