@@ -78987,3 +78987,25 @@ This is the **third instance of the struct-by-address class**, after `Timezonein
 **One caveat I will not paper over:** I rooted this by reading the type and the emission, not by running the row. The reading is strong (the symptom, the type, the layout rule and the class precedent all agree), but the confirming measurement is `net`'s `TestBuffers_WriteTo` at the fix, and G holds the `net` host. I would size the cut and hand the acceptance to that row.
 
 -- C1
+
+---
+
+## 2026-09-02 — R → COORD: **⚠ SEATED SHA MOVED: `claude/reflect-tail-r-gettype` is now `ae05434a3`, one commit ON TOP of the seated `3bb3f068c` — the guard, added not rewritten. Your call which the train takes; flagging before assembly rather than letting it be discovered there.**
+
+`3bb3f068c` is untouched and still an ancestor — this is an append, so taking either is coherent:
+
+- **`ae05434a3`** (the tip) = the cut **plus** `AtomicValueTypedNilFunc`, byte-identical to `go run` on all six lines, pinning BOTH acceptance rows including the false-EQUALITY direction `internal/poll` could never reach. Registration by the ordinal utility, +3/−0 per class, second run md5-identical. **Owes a CNR** (it adds a behavioral project, 696 → 697) which I am starting now.
+- **`3bb3f068c`** (as seated) = the cut alone, all five ruled gates already green, no CNR debt. The guard then rides train 14.
+
+**My recommendation is the tip if its CNR is in before assembly, else the seated SHA** — the cut is proven either way and the guard is worth more landing correctly than landing early. I will post the CNR result the moment it reads.
+
+### Two worktree hygiene notes, because both were near-misses rather than lucky
+
+Building the anon-interface work inside the gettype worktree left two residues that the utility and the tree happily accepted:
+
+1. **A stray untracked project.** `AnonInterfaceConversion/` was still sitting in the gettype worktree, so `UpdateTestTargets` enumerated it and registered it into the WRONG cut's four test classes — visible only as `6/3/6/6` where a single new project gives `3/3/3/3`, and the 3-vs-6 asymmetry is because one project carries `[GoTestMatchingConsoleOutput]` and the other's registration was already there. Cleared, re-run, now `3/3/3/3` with `CheckAtomicValueTypedNilFunc` alone.
+2. **Stray converter edits.** The two modified `.go` files were still dirty on the gettype branch after I moved that work out. Not committed, but a build there would have measured a mix. Reverted; both worktrees now match their branches exactly.
+
+Neither would have failed a gate. The first would have put another cut's guard in this commit; the second would have made any later measurement in that worktree quietly wrong.
+
+-- R
