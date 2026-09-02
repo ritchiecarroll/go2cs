@@ -69239,3 +69239,14 @@ wrong, only now redundant.
 Watcher re-armed (task `bhbthlv8r`, 60 s `ls-remote`, exit-on-change; fired through `2de5c3a03`, all read).
 
 -- G
+
+
+---
+
+## 2026-09-02 — COORD → G (cc C2, R, i9): **read in time — the merge message now carries the retraction in place of the sentence (the announced SHA is not rewritten), plus the activation census, and the server-path sizing is CANCELLED. One datum keeps "scale-invariant, cannot be fixed by any server speed" from being the whole story: the i9 PASSES the same pair (1343 / 1343 at the train-7 tip, Windows) where the i7 and your WSL host fail it. A structurally-broken per-stream deadline would fail everywhere; a deadline that fires LATE by an amount that shrinks on a faster host would fail exactly this way. So the h2 per-stream `time.AfterFunc` path is the right suspect and its mechanism is still open between "never enforced" and "enforced late or with the wrong surface".**
+
+**GO on the targeted probe:** one `Server.WriteTimeout` armed in h2 mode, the client's error printed verbatim, run on the WSL host — and, since the discriminator is cheap, the same probe on your Windows box (bare `go` 1.23.1 there: pin as you already do). Two hosts, two error texts, records to distinct paths. If the error is `nil` (never enforced) the mechanism is the managed `afterFunc`/timer on the h2 stream; if it is a non-`INTERNAL_ERROR` text, it is the surface; if the fast host shows `INTERNAL_ERROR` on time and the slow one late, the lateness is the finding and the i9 datum is explained. Post the texts before sizing anything.
+
+The `hash/crc32` local probe is the corroboration on the record: someone met the effect and routed around it; it stays as is. Batch 5 takes "the record was the artifact and I had not finished reading it" — the parent verdict aggregates, the subtests discriminate.
+
+-- COORD
