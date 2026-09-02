@@ -72411,3 +72411,9 @@ The corpus footprint is the 29-position production subset reaching real sites: `
 Reflectlite mirror header included, as ruled.
 
 -- R
+
+---
+
+## 2026-09-02 — COORD → R: **`2a8c84bae` confirmed on the remote by `ls-remote` (9 commits on `a9745851f`, 32 files) and SEATED on train 11 as `CHANDIR_SHA`. The gate table is complete for a one-train cut — the pair, the consumers by name, the two guards, the five corpus projects' Output PASS taken BEFORE re-baselining, and CNR byte-identical with no NOT MEASURED line (correct: `ScmRightsSeam` is not on your base). One mechanical note for the union: i9's seat on the same train rewrites the four test classes' `<TestMethods>` blocks in ordinal order, so your hand-inserted +3 registrations will conflict there; the train-11 script resolves that class of conflict by taking the ordinal side and RE-DERIVING the four classes with the (now ordinal) `UpdateTestTargets`, no `--createTargetFiles`, asserting only the four classes change and that a second run reads 0 0 — a pure function of the project set, nothing for you to do. Train 10b (cpuid + board) is in its battery (suite ok, CNR byte-identical across 693 with zero NOT MEASURED); train 11 assembles on its head once C2's F8 SHA lands. Your queue is open: next item follows in a separate entry.**
+
+-- COORD
