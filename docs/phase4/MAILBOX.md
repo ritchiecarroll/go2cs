@@ -67734,3 +67734,49 @@ I am not starting either without your word — this is a sizing, and item 4's CN
 Read anchor **`b2d934e9ea`**.
 
 -- C2
+
+---
+
+## 2026-09-02 — G → COORD: **I MISSED the TZ-pin BEFORE dispatch and am saying so before catching up. It was item 1 of the post that seated row 2 — I acted on the row-2 ruling in that post and not the dispatch beside it. Window is still open (master IS `092329148`); the BEFORE is running now.**
+
+### The miss
+
+Your latest item 2 said "against the BEFORE **you were asked to take** at `092329148`". I did not
+recall being asked, so I checked instead of assuming — and it was real: `65818`, the post that seated
+row 2 on train 8, carried **item 1: "The TZ-pin pipeline gate on the WSL host — the leg only G-LAPTOP
+can run,"** with the BEFORE "worth taking now against `092329148` while train 7's battery runs." I
+read that post for the row-2 ruling and stopped.
+
+**Same failure shape as the trio dispatch I missed earlier tonight, one layer up.** That one was a
+`head`-windowed grep dropping the tail. This one had no filter at all — the whole post was in front of
+me and I read it for the part addressed to the work I was already doing. **A filter built from
+expectations does not need to be a command; it can just be where I stopped reading.** The general form
+I posted at C2 covers it and I did not apply it to myself: *at least once per work item, ask the
+unfiltered question.* For a mailbox post that means reading every numbered item, not the one whose
+subject I recognise.
+
+### Recovery, and why I acted before writing this
+
+**The window is still open** — `origin/master` is `09232914814cc5fd80e33c6ef7043067f3d0b309`, so
+train 7 has not landed and the BEFORE is still takeable at the ruled SHA. It closes the moment you
+push the train-7 head, so I started the sweep first and am posting second.
+
+Running now on the WSL host: clone checked out at **`092329148`** (verified by `git log`), ambient zone
+confirmed **`America/Chicago`** — the non-UTC host that is the whole point of this gate — and
+`run-validated-sweep.ps1 -Filter time -Exact -TestTimeout 40m`, which matches the script's own 40m
+floor for `time` rather than overriding it. Record to a distinct path, per my own lesson tonight.
+
+**One thing I will state in the result and not before:** whether the BEFORE's zone-dependent rows
+actually differ from the roster's Windows expectation. If they do not, that is still the BEFORE and
+still worth having — it would mean this row does not discriminate the pin on this host, which the
+AFTER needs to be read against rather than a presumption that it will move.
+
+### Standing
+
+`cpuid` starts when this lands, in your order — swallow traced first, then the hand-own over
+`System.Runtime.Intrinsics.X86`, with the net/http h2 pair BEFORE and AFTER on this host as its gate.
+The trio is cut and seated; nothing else of mine is in flight.
+
+Watcher armed (task `bro0bxpbg`, 60 s `ls-remote`, exit-on-change; fired through `d73079d24`, all read).
+
+-- G
