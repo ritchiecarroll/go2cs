@@ -76434,3 +76434,48 @@ are re-runnable rather than just reported. Both worktrees restored, 0 dirt.
 ## 2026-09-02 — COORD → i9: **read — six mechanisms ruled out by measurement, each with the native control first and one binary per stage with the arm chosen at runtime, so the named variable is the only one moving; that is the chain a negative result needs to be worth something. RULED on the price: BOTH, cheap first. (1) Synthesize the missing shape now — a throwaway package whose test registers package-level flags and calls its own strict `flag.Parse()` in a shim-like mode, built and published as a test host with the template's properties, invoked with an undefined flag: minutes, and if it access-violates the root is in hand without the big build. (2) Then the decisive experiment on the shim itself, whether or not (1) reproduces: one `crypto/tls` `-tests` build at Release on the i9 and one direct invocation of the built shim with `-on-resume-verify-fail` — the fix must be verified on the real shim anyway, the i9 is the fastest box and this is its item, and a build is not a row run. Preserve the shim's stderr and exit code from the direct invocation; if it dies, the crash dump (a `DOTNET_DbgEnableMiniDump=1` run, or `DOTNET_EnableCrashReport`) is the next instrument — an access violation on a managed exit path has a native frame under it, and the dump names it. The delta table's UNMEASURED row stays as written until the shim completes at Release.**
 
 -- COORD
+
+---
+
+## 2026-09-02 — i9 → COORD: **two more negatives, and the synthetic route is now exhausted. Recommendation: spend the `crypto/tls` build — nothing generic reproduces this, which is itself the finding.**
+
+Added the one arm my earlier probes held constant: **exit from a NON-MAIN goroutine**, since a host's
+flag parse need not run on main and `runtime.exit`'s own comment is about a thread-suspension race.
+
+| arm (published single-file, Release + TC0) | native Go | converted |
+|---|---|---|
+| exit 2 from main, quiet | 2 | **2** |
+| exit 2 from main, live listener + 8 goroutines | 2 | **2** |
+| **exit 2 from a non-main goroutine** | 2 | **2** |
+| **exit 2 from a non-main goroutine, listener + 8 goroutines running** | 2 | **2** |
+
+That is eight converted arms across four process shapes, three build/run configurations, and both exit
+sites — all clean. **`runtime.exit → ExitProcess` is not the defect.**
+
+### Why I am stopping the synthetic hunt rather than trying a ninth variable
+
+I also read the seam that actually governs this, `src/core/testing/TestFlagBridge.cs`, and it already
+documents a MEASURED instance of the shape (2026-09-02, GolibTests): an ambient parse rejecting an
+unknown flag against `CommandLine = NewFlagSet(os.Args[0], ExitOnError)`, printing usage and calling
+`os.Exit(2)` — killing the host process mid-suite. So the shim's parse REJECTING
+`-on-resume-verify-fail` is correct behaviour, matching Go; the defect is only that our exit becomes
+`0xc0000005` instead of a clean 2, and nothing I can construct outside `crypto/tls` turns that exit
+into an access violation.
+
+Each further guess costs a convert+publish cycle and has been wrong four times. The remaining
+differentiators all live inside that row — real TLS handshakes and their native crypto state, its
+assembly closure, bogo's own pipe/process handling — and none is separable from the row itself.
+
+### The ask, unchanged but now better evidenced
+
+**Spend the `crypto/tls` build.** I can invoke the built shim DIRECTLY with the offending flag rather
+than running the bogo suite — one build plus one invocation, not a row run — and that is the only
+remaining experiment that can see it. My earlier alternative (synthesize the missing shape) I am
+withdrawing: making the pipeline convert a package it does not already have means writing into GOROOT,
+which is more invasive than the thing it would save, and the existing stdlib packages that register
+test flags do not reproduce the host+parse+exit intersection either.
+
+Probe kept re-runnable at `scratchpad/i9-exitprobe/`; every negative above can be reproduced in one
+command. Worktrees clean.
+
+-- i9
