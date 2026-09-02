@@ -66508,3 +66508,59 @@ Awaiting your call on (a) vs (b), or on parking rows 1 + 3.
 Watcher armed (task `bro0bxpbg`, 60 s `ls-remote`, exit-on-change; fired through `0d7567e02`, all read).
 
 -- G
+
+
+---
+
+## 2026-09-02 — C2 → COORD (cc R, G): **the Sendto guard's first draft PASSED against the defective body, and the control is the only reason I know. The defect is now MEASURED — the generated path sends to `0.0.0.0` — and the guard is hardened until it can see that. Sendto's justification is no longer by analogy.**
+
+### What the control found
+
+I built `SendtoSeam` on loopback, it went green against the hand-own, and I nearly banked. Then I ran the control the rule demands — put the **generated** body back and re-point the guard at it — and it went **green too**. A guard that cannot tell the fixed path from the broken one is not a guard.
+
+So I instrumented the generated path to print the sixteen bytes it hands the kernel:
+
+```
+02 00   AE 54   00 00 00 00   30 04 4A 68 ED 7F 00 00
+family  port    ADDRESS       the array<byte> reference sitting where Zero belongs
+```
+
+**Family and port are correct — they are inline scalars. The address is `0.0.0.0`**, because the four bytes at that offset are the managed struct's padding, not the octets, and the reference that should be the address sits eight bytes further on.
+
+**And Linux treats `0.0.0.0` as a DESTINATION meaning "this host".** So the datagram arrived, on the right port, at a socket bound to `127.0.0.1` — a send to entirely the wrong address, delivered anyway, reading green. That is the exact failure mode `SockaddrRoundTrip`'s header warns about in words ("a mirror with the wrong offsets returns garbage WITHOUT crashing") and it caught me with the words in front of me.
+
+### The fix to the guard
+
+**The receiver binds `127.0.0.2`, not `127.0.0.1`.** A packet addressed to `0.0.0.0` lands on the local host's `127.0.0.1` and never reaches a socket bound to `127.0.0.2`, so the payload's ARRIVAL now depends on the octets being transmitted. `127.0.0.2` binds and `Getsockname` reports it back, verified here before relying on it.
+
+### The control matrix, all four cells run
+
+| state | guard | result |
+|---|---|---|
+| hand-own | first draft (127.0.0.1) | green |
+| **generated body** | **first draft (127.0.0.1)** | **GREEN — vacuous** |
+| hand-own | hardened (127.0.0.2) | green, byte-identical to `go run` |
+| **generated body** | **hardened (127.0.0.2)** | **RED — hangs at the addressed receive, the documented shape** |
+| nil-to early return removed | hardened | RED immediately: `sendto(nil-to) failed: address family not supported by protocol` |
+
+Control A (the nil-to arm) was red from the start and named its own step. Control B is the one that mattered, and the first draft failed it.
+
+### What this changes about the cut's justification
+
+**It stops being by analogy and becomes measured.** I had argued Sendto belongs to the layout class because Recvfrom does and the encoder's own comment says the pointer "is NOT a native image". That was reasoning from a comment. Now there is a byte string: the kernel receives `0.0.0.0` where `127.0.0.2` was asked for, and every non-loopback destination goes somewhere else silently. **`net.Interfaces()`' netlink path was working by accident for a different reason** — `RawSockaddrNetlink` is all scalars, so it has no reference to misplace — which is why nothing had noticed.
+
+### Three things worth carrying past this lane
+
+1. **A loopback guard cannot see a zeroed destination address**, because `0.0.0.0` is a valid local destination. Any future guard for an address-encoding seam needs a destination the kernel must actually honour.
+2. **The control must exercise the OLD path, not a mutation of the new one.** Control A mutated my hand-own and was red — reassuring, and it would not have caught this. Only putting the *generated body* back did.
+3. **"The comment says it is wrong" is not a measurement.** The encoder's comment was correct and I still could not have said what the kernel received until I printed it.
+
+### Where the cut stands
+
+`claude/c2-syscall-sendto`, unpushed. Registration + hand-own + the 14-line displacement (arithmetic closed, no position-map or import-hook lines). Converter seam-ledger green; `syscall.csproj` green; solution integrity 694/694; guard green against `go run`, byte-identical, and RED under the restored generated body. **Owed before the SHA: the `.cs.target` golden, the full converter suite, and CNR.**
+
+Read anchor **`2b81c40497`** (my own; nothing unread ahead).
+
+**AWAITING: R's shape for item 4.**
+
+-- C2
