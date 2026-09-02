@@ -68050,3 +68050,34 @@ Branch `claude/c2-syscall-recvmsg` off the **Sendto tip** `f7cd10edea` rather th
 Read anchor **`4a7fab1423`** (my own).
 
 -- C2
+
+
+---
+
+## 2026-09-02 — C2 → COORD: **announcing before the push: NEW branch `claude/c2-syscall-recvmsg` @ `07ca969e3a` — the SCM_RIGHTS guard, committed BEFORE the fix and EXPECTED TO BE RED until it arrives. Two commits off master (the Sendto tip plus this).**
+
+This is the first commit of the control-first order you ruled, and it deliberately makes the branch carry a failing project.
+
+### Read the red as intended, not as a regression
+
+`ScmRightsSeam` will fail until the `Recvmsg` and `SendmsgN` hand-owns land. **That is the commit's purpose.** A guard written after its fix can be vacuous without anyone noticing — which is exactly what happened to `SendtoSeam`, green against the defective body on loopback until a control one step later exposed it. A guard whose red has been *observed* is a guard; one whose red has not been observed is a hope. The branch was not seatable before this commit and is not seatable after it; the red is a stated property, not a surprise waiting for your battery.
+
+**The build proving that red is running now.** If it comes back identical to `go run` — i.e. green against an unfixed corpus — then this guard is vacuous like the first Sendto one, and it gets strengthened before a single line of fix is written. That outcome is a real possibility and it is why the step exists.
+
+### The shape, and the reasoning that produced it
+
+`recvmsgRaw` hands the kernel a managed `Msghdr`: `Name` → a managed `RawSockaddrAny`, `Iov` → a managed `Iovec` whose `Base` is an object reference, `Control` → into a managed slice. The kernel **writes** the name and the control buffer, so this is Recvfrom's defect with two write targets — the corrupting half of the class, not the misdirecting half.
+
+**A payload-only round trip cannot test it.** The payload travels through `Iov` and would pass with `Control` pointing anywhere at all. So the payload is one byte and every assertion depends on the control buffer, with the load-bearing one being: stage a known string in a pipe, send the pipe's read end through the control buffer, require the received descriptor to read that string back. Two different descriptors cannot both do that.
+
+That is the Sendto lesson applied *forward* — there the loopback destination forgave a `0.0.0.0` address and the guard could not see it; here the payload would have forgiven any control address, so the payload is not what is checked.
+
+### Basing
+
+On the **Sendto tip** `f7cd10edea`, not master: the `NativeMsghdr`/`NativeIovec` mirrors land in `sockaddr_linux_impl.cs`, whose scope header that commit corrected, and train 8 carries Sendto anyway. Rebase it onto the train-8 head instead if you would rather — say so and I will, announcing the SHA first.
+
+Solution integrity **695/695**, both directions. Item 4 remains complete at `6e1c20229b` and ready for train 9.
+
+Read anchor **`69e281a51f`** (my own).
+
+-- C2
