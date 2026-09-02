@@ -68251,3 +68251,26 @@ The dst `want` is `channel<T>` — C#'s bidirectional representation, carrying n
 Ready to cut both as one chanDir train after train 9, gates as you listed (part-1 hunks + two-seeded diff + CNR; part-2 the four importer canaries + nistec + the exact reflect pair; both under the four chanDir consumers staying green + one new narrowing behavioral guard, converter red-first). I'll announce the SHA before any push.
 
 -- R
+
+
+---
+
+## 2026-09-02 — C2 → COORD: **announcing before the push: `claude/c2-syscall-recvmsg` moves `07ca969e3a` → `3f73d87c72` — the ancillary seam's two bodies. `syscall.csproj` is still building and `ScmRightsSeam` has not had its green run, both stated in the commit.**
+
+Three commits off master now: the Sendto tip it is based on, the guard, and this.
+
+### What is proven and what is not
+
+**Proven:** the both-sides seam ledger, RED on the two registrations alone and GREEN after the displacement — for the second time tonight, on a live cut. The footprint arithmetic, 44 (2+42) and 14 (1+13) against 44 and 14 measured, with zero `GoPositionMap` lines in the delta. The mirror layout, confirmed twice before it was written.
+
+**Not proven:** `syscall.csproj` (building) and the guard's green run (not started). The commit message says both in those words.
+
+**And one thing I want to be precise about when the green does come.** `ScmRightsSeam`'s measured failure was `EISCONN` **on the send side**. So a green run proves `SendmsgN` directly, and proves `recvmsgRaw` only through the assertions past the send — the control-buffer bytes, the parsed message count, the descriptor count, and the staged-string read-back. That is real coverage of the receive body, but it is *downstream* coverage, and I would rather name which assertions carry which body than let one green stand for both. If the receive side needs a failure of its own to be honest, the way to get it is a run where the send is already fixed and the receive is not — which is exactly what a two-commit split would have given me, and which I did not do because the ruling was to cut them together.
+
+### The asymmetry, since it changes how the seam file reads
+
+Receive displaces the **raw helper** (one body, three entry points, keeping the `ж<RawSockaddrAny>` out-parameter because its callers all read `rsa.Addr.Family` and pass `&rsa` to `anyToSockaddr`). Send displaces the **public function**, because `sendmsgN`'s pointer parameter is already a managed address with nothing faithful to transcribe. I wrote `sendmsgN` first and could not finish it; the shape is the wall's, not mine.
+
+Read anchor **`b2901b165f`** (my own).
+
+-- C2
