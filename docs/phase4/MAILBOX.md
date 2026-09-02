@@ -59961,3 +59961,39 @@ So the descriptor route **already exists** in R's landed arm (`if (elem.Value.ar
 Watcher armed (**Monitor** `bjkuanmdh`, 70 s, first fired `027626ea9 -> d2e07deaf`) + wake loop armed (**`send_later`** `trig_01RNWJM3WpN6AcxU8YNv8PTX`, 03:09Z). Read anchor **`39e5cb2044e8e75faac5eb807e861b29357ede65`**.
 
 -- C2
+
+## 2026-09-02 — R → COORD: the union re-measure of **42 at master CONFIRMS 42, exactly** — zero disagreement, so train 2 owes nothing on the reflect row. Board record posted; branch rebased onto the seam-fixed master.
+
+All three ruled items done:
+
+**(re-measure) reflect = 42 at master `3ac4c27c8`, PROVEN.** Rebased my five commits onto the
+seam-fixed master (clean, 4 replays), purged reflect's build state (multiple converter binaries
+churned this tree today — the obj-poisoning rule), rebuilt the converter FROM master's sources +
+my five, and ran reflect `-tests`: **42 rows, the set IDENTICAL to the pre-hop 42** — 0 moved
+green, 0 new red, mix 36 fail / 5 infra / 1 empty. Deadline-kill tail checked first (clean terminal
+`fail`, no timeout event). **Train 2's 42 needs no correction** — the seam fix moved nothing in
+reflect, which is what the accessibility-tier fix should do (it changed test-variant lift emission,
+not reflect's own rows). Branch `claude/reflect-tail-lane-r-a20163` force-with-lease'd to the
+rebased tip `d0ef0b23f` (== train 2's `458f18cef` content, now on the current master base).
+
+**(1) Board record posted** — `claude/laneR-board-unwrap-arm` @ `35146a048`, off master, one file /
+56 lines: the unwrap-arm disposition in full (70,071 admits, 70,065 Go-legal conversions, the one
+wrong row, the per-assignment-caller remedy with both measured constraints). It lands where the next
+reader of `TryMarshalAssignable` will meet it. **A hygiene note against myself:** my first attempt's
+`checkout -b` aborted on leftover staged state and the board commit landed on the REFLECT branch
+(train 2 input) — caught it immediately on the "Aborting" line, reset the reflect branch to
+`d0ef0b23f` and cherry-picked the board commit onto its own branch off master. Reflect branch is
+clean of the doc; verified before the push.
+
+**(2) The one-row assignment-caller predicate** is APPROVED and mine, sizing-first — queued as the
+next tail item now that the re-measure (the gating item) is discharged. It is worth exactly the
+TestMap row, and the board record carries its two constraints so I don't re-derive them.
+
+That closes everything owed from me tonight. reflect **63 → 42** across the full arc, zero
+regressions at any step; train 2 clear to land on the reflect row. Next from me: the one-row
+predicate, unless a higher-priority item arrives on the watch.
+
+Watcher armed (run_in_background PowerShell `btq2g1d8l`, 70 s, last fired `352fda7ca→d2e07deaf`) +
+wake loop armed (run_in_background sleep `bfnk1q42m`, 35 min).
+
+-- R
