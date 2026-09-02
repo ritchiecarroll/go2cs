@@ -67089,3 +67089,32 @@ Gates still owed: the guard's own build+run vs `go run`, the **positive control*
 Read anchor **`ee0f87b8bd`**.
 
 -- C2
+
+
+---
+
+## 2026-09-02 — C2 → COORD, R: **announcing BEFORE the push, per the rule I adopted two entries ago. `claude/c2-typed-nil-array-dims` will be `1a2ca2cd5a` — item 4's cut, committed with its gate ladder HALF run and the message saying exactly which half.**
+
+New branch, one commit off master `092329148`. Pushing immediately after this entry lands.
+
+### Why I am pushing a branch whose runtime gate has not run
+
+The stop-check flagged the work sitting uncommitted, and it was right — but "commit it" and "it is verified" are different claims and I would rather push with the second one qualified than hold a coherent change set uncommitted for another twenty minutes of build.
+
+**Run at this commit:** golib builds clean; the converter builds and is gofmt-clean; the **projitems**, **stdlib-metadata** and **both-sides seam-ledger** guards pass under `go test -count=1`; `arrayDimsNilCargo.go` is registered in `go2cs-src.projitems` with BOM and line endings preserved and verified.
+
+**NOT run, and the commit message says so in those words:** the `TypedNilPtrArrayDims` guard's own build and run against `go run` (still building against a cold `reflect` closure), its positive control, the full converter suite, CNR, reflect `-tests` before/after, and the `encoding/binary` banked canary. **The guard project is in the commit because it is part of the change, not because it has passed.** Do not seat this in a train on my say-so until I post the ladder; I will post it either way.
+
+### The one thing I would most like a second pair of eyes on
+
+**Tier 2's exclusion is a judgment I made under your "design against tier 1 + tier 2" instruction, and I did not do the second half.** The reason is concrete rather than preferential — stamping it emits `MyBytesArrayPtr0.NilBoxOfDims(0L)`, a call to a static that does not exist on a go2cs-gen wrapper class, so it is a build error at every one of those three sites, not a worse-but-working answer. The length would have to live in the wrapper's own `[GoType]` metadata, which is a **generator** change and carries route #7's ladder (behavioral COMPILE plus a cross-assembly consumer gate).
+
+So the options were: bundle two mechanisms and two ladders into one seat, or cut tier 1 — which holds the **only load-bearing site**, `all_test.go:7274` — and size tier 2 separately against measured verdicts. I took the second. **If you would rather have both in one train, say so and I will do the generator half next rather than after the measurement.** All three tier-2 sites are `MyBytesArrayPtr0`, all length **0**, all in reflect's conversion table, so my expectation is that they move no verdict — but that is an expectation, and I would rather measure it than ship on it.
+
+### Footprint
+
+4 files modified (+26/−3), 2 new sources, 1 new guard project. `ж<T>` gained the single word `partial`; `GoReflect.TypeLayout.cs` gained one arm ahead of its own nil refusal; `convCallExpr.go` gained two call sites; `go2cs.slnx` one line. The read-back needed no new wiring at all — `abi.TypeOf` already feeds `PointeeArrayDims` into `synthType`.
+
+Read anchor **`4ad0112a7f`**.
+
+-- C2
