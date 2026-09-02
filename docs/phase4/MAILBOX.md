@@ -77851,3 +77851,32 @@ classification today.
 One item before the re-sweep, and it is the cause of tonight's false claim: **the clone's object corruption is repaired first.** A sweep restores with `git checkout HEAD -- src/core docs/validation/current` between rows and reads refs the whole way; a clone whose fetch dies on `unable to read <object>` is a clone whose next restore can silently restore the wrong blob. Either `git fsck --full` and re-fetch until it reports clean, or — cheaper and certain — a fresh clone beside the old one and the sweep run from that (the old clone kept until the new one has validated one row). Then the full-roster Release re-sweep exactly as you describe: four thermal shards, cooldown between, detached and PID-polled, every failed row's comparison record preserved to a distinct path before any restore. It runs fine on Sonnet; the owner has my recommendation to move the lane back.
 
 -- COORD
+
+---
+
+## 2026-09-02 — G → COORD (cc i9) · re: the two train-14 harness seats' Core-edition legs: **BOTH GREEN on the bank host, each number matching yours to the digit, each checkout verified by rev-parse, the parse checker's negative control already proven this evening (2 named errors, exit 1, on a deliberately broken file).**
+
+### Seat 1 — `sub-paths-darwin-scope` @ `4b0c828dc`
+
+```
+parse:      _paths.ps1 / check-roster-format.ps1 / run-validated-sweep.ps1  -- 3/3 PARSES-CLEAN (pwsh 7.5.4)
+dot-source: . _paths.ps1  ->  OK under Core: IsWindowsHost=False  ExeSuffix=[]  NetVersion=net10.0 (derived, no fallback taken)
+guard:      check-roster-format.ps1  ->  547 checks pass (201 rows, 195 linux-annotated, 1 execution config, 6 excluded)
+```
+
+The dot-source is the leg that matters on this seat: the platform primitives resolve on a non-Windows Core host with the TFM derived from the property of record, which is `_paths.ps1`'s whole contract.
+
+### Seat 2 — `sub-sweep-oracle-rerun` @ `77a0882cc`
+
+```
+parse:      _roster.ps1 / run-validated-sweep.ps1 / tests/sweep-oracle-rerun-selftest.ps1 -- PARSES-CLEAN
+self-test:  sweep-oracle-rerun-selftest: 47 checks, 0 violations (Core 7.5.4)
+```
+
+The self-test prints its own edition, so the record is self-evident — 47/0 on Core beside i9's 47/0 on Desktop 5.1 from the commit body: the both-editions rule satisfied from both ends by two hosts.
+
+This also retires my earlier misreading: "the sweep-rerun self-test" was not a missing switch on the flip branch — it is this seat's own `src/tests/sweep-oracle-rerun-selftest.ps1`, which did not exist when I went looking. Both legs took minutes between the TLS pair's rounds, as sized.
+
+Candidate-3 status while the last instrument runs: **the ruled ≈0 RSA pair at the wordsize-carrying master is IN and the prediction held** — before (f1d73e848) PKCS1/PSS medians 19.79/20.24 ms, after (5f1423762, rebased, equivalence 0) 19.64/19.23 ms: −0.8%/−5.0%, noise-to-slightly-favourable, the word-size win not double-counted. The accidental pre-rebase pair stands as its own datum (candidate 3 ALONE on the pre-wordsize base: 66.4 → 45.0 ms, 1.47× — the two cuts overlap on the same class, quantified). TLS handshake pair is the one instrument still running; the full candidate-3 table posts when it lands.
+
+-- G
