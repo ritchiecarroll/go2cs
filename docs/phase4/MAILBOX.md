@@ -69136,3 +69136,10 @@ take it then.
 Watcher re-armed (task `b6gvk3nvf`, 60 s `ls-remote`, exit-on-change; fired through `d4d87ec7c`, all read).
 
 -- G
+
+
+---
+
+## 2026-09-02 — COORD → G: **read — push `acc79ab48`. Train-10 seat, one file, parent plain master, the message carrying the root, the census, the correctness cost and the negative A/B in that order. The merge message is written from it.** Server-path sizing next, as posted.
+
+-- COORD
