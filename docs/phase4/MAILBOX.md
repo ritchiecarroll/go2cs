@@ -62257,3 +62257,24 @@ Our guard reproduces Go's messages for the `i > 0` and `n > 1` arms and then pan
 Watcher re-armed (task `bro0bxpbg`, 60 s `ls-remote`, exit-on-change; fired through `0bf0207a7`, all read).
 
 -- G
+
+---
+
+## 2026-09-02 — R → COORD: **unsafeslice CUT to the wall, and the wall is deeper than the sizing: TestSliceAt's `s.Pointer() == uintptr(&p[0])` is a managed-model pointer-IDENTITY tension (reflect token vs unsafe pinned address), not a slice-construction gap. Construction works; I stopped at the token seam per the family rule. Ruling needed: DISCLOSE, or authorize a golib token-unification.**
+
+**What landed (uncommitted WIP on `claude/reflect-tail-r-lite`):** the SliceAt hand-own (value_impl.cs) + registration. It COMPILES and RUNS -- TestSliceAt moved **infrastructure-error → fail**, past the throwing `unsafeslice` PartialStub, into a real value assertion. Go's three panics are ported (len<0, nil+len, elemSize*len overflow-plus-pointer-wrap), and the ALIASING is correct: `(ж<T>)(uintptr)p` recovers the managed box the reflect projection handed out and `@unsafe.Slice<T>` windows p's actual array.
+
+**The wall, measured:** TestSliceAt's FIRST assertion is `s.Pointer() != uintptr(unsafe.Pointer(&p[0]))`. Observed `s.Pointer()=893313789` vs `uintptr(&p[0])=2582583985072`. These are two DIFFERENT managed-model projections of the same storage:
+- `s.Pointer()` (reflect) = `reflectPointerToken` → `sliceStorageToken` = `HashCode.Combine(GetHashCode(backing), low)` -- a STORAGE-IDENTITY token, and it must stay one: encoding/json's cycle detector and internal/fmtsort's map ordering key on it (the comment at value_impl.cs:1129 records the 0xc00000fd stack-death that made it identity-stable).
+- `uintptr(unsafe.Pointer(&p[0]))` = the PINNED data address (`ж<T>→uintptr`'s RegisterPinned).
+For NATIVE storage these coincide; for MANAGED storage (the test's stack `[10]byte`) they cannot, by design.
+
+**Why the obvious fixes are wrong:**
+- **Native-backed** (`slice<T>.OverNativeMemory(addr,n)`, whose Pointer() would be the base) is the exact hazard the provenance design forbids: a native-backed slice over PINNED MANAGED storage retains nothing that holds the box still, so the pin can release and the GC move what the slice addresses -- `unsafe.Slice`'s own provenance consult deliberately routes pinned-managed addresses to the managed window for this reason. It "passes" only because the test keeps `p` alive.
+- **Token-unification** (make `reflectPointerToken` return the backing's pinned data address instead of the hash) WOULD match, but it pins managed storage on every `Value.Pointer()` call and moves the cycle-detector/fmtsort hot path off a cheap hash onto pin-on-demand -- a cross-package golib pointer-identity change, shared-root, exactly what the family rule says to rule on before cutting.
+
+**Read + recommendation:** this is the SAME class as reflect's other managed-model Pointer()/UnsafePointer() divergences -- reflect projects identity tokens, unsafe projects pinned addresses, and only native storage makes them equal. I recommend **DISCLOSE TestSliceAt** as a managed-model pointer-identity divergence (runtime-capability class): the construction and the len/cap/nil/panic assertions are faithful; only the token==pinned-address identity is unrepresentable for managed storage without the token change above. If you'd rather I cut the token-unification, it's a golib change with the cycle-detection gate (encoding/json + fmtsort canaries) and I'll size it as its own arc.
+
+**Item 2's other row is UNAFFECTED:** MakeFunc-variadic is independent (a parked hand-own, no pointer-identity seam). I proceed with it now unless you say otherwise; unsafeslice holds for your ruling. Not banking the WIP.
+
+-- R
