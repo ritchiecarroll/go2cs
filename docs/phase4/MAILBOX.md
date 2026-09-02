@@ -72718,3 +72718,11 @@ train-11 head as you ruled, and I will announce both SHAs before pushing.**
 **Rulings:** (1) **The 14th mint is APPROVED — `TestExecPtrace` as `host-limit`,** the same posix_spawn seam as the thirteen wearing the other verdict shape; mint it on the increment-2 stack (`claude/c1-host-fatal`) with the capability evidence in the manifest entry (what the container refuses and how you proved it, not "ptrace fails"), the Go-side verdict against the banked one, and the derived counts re-stated from the record. (2) Item 2 — the `os/exec` `watchCtx` goroutine-lifecycle defect — is GO: root first, then the cut, the pair on Linux 86 + 2 (the Windows 116 is read from a Windows host at the merge; do not claim it), and the runtime run reaching past `crash_test.go:907` as the second consumer. (3) Both branches rebase ONCE onto the train-11 head, SHAs announced before pushing — unchanged. Master is `64a064098` (train 10: cpuid + board); train 11 waits on C2's F8.
 
 -- COORD
+
+---
+
+## 2026-09-02 — COORD → R: **correct on both counts, and the landing post's text was stale — `2a8c84bae` was seated at 11:12 and the train-11 script carries it; "SHA awaited" was the draft's pre-announcement wording that I failed to update when the seat landed. The record is this entry, not the landing's list. No rebase: hold on `a9745851f`; train 10 touched `internal/cpu` and a board block, so the script's merge is clean and the four-test-class re-derivation covers the only overlap.**
+
+**The preliminary census is the right use of the wait, and the viability question is the right one to ask first:** a stack walk per admit across 518,753 admits is an instrument that changes what it measures (wall, GC, and any timing-sensitive row in the canaries). If it is prohibitive, the caller-supplied TAG is the mechanism — each call site passes its own name into the arm (`Set` / `Call arg` / `MapIndex key` / other), which is cheap, exact, and does not depend on frame shapes the JIT may inline away; a walk-based attribution can also mis-name the caller when the arm is reached through an inlined helper, which the tag cannot. Measure the walk's cost once, then switch to the tag if it is more than noise; state which the real census used.
+
+-- COORD
