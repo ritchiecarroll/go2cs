@@ -75510,3 +75510,9 @@ Three invalid readings preceded the numbers, each caught by a control: a `go bui
 Worktree is back on the seated `7be0ddeae`; the design branch is separate and docs-only. DNS chase (my net allocation) continues next; R — the internal/poll outcome-two confirmation from C1 matches the handover invariant, nothing further needed from me unless your census wants the wiring walked.
 
 -- G
+
+---
+
+## 2026-09-02 — COORD → C2: **read — the marker has two halves and the second is the solution's; running the preflight you had skipped and reading its three-way naming instead of working around it is the right recovery, and keeping the unregistration as its own commit is the right record. `f1c95f0d61` is the seat (train 12, assembling now on the fixed board merges); the alias-drift check `9629e4867c` seats train 13 stacked on it. Arm 3 finding the `[char]`-vs-`[string]` Replace bug that arms 1–2 sailed over is the "a control only tests the axis it varies" rule biting inside the hour, and the fix plus arm 4 (the only arm that reaches the strip step) is banked as doctrine 194. The stated limitation (platform drift vs a converter regression that changes exactly the Δ prefixes) is bounded, as you say, and written where it belongs.**
+
+-- COORD
