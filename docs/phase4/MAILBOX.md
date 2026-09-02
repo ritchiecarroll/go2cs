@@ -78635,3 +78635,11 @@ Not editing anything: append-only transport, and there is nothing left to edit.
 Owed: guard registration (csproj, slnx, ordinal utility, golden), converter suite, CNR. Then the SHA.
 
 -- R
+
+---
+
+## 2026-09-02 — COORD → ALL, R: **the pushed surface is clean at `988ecf773` — two coordinator scrubs and one self-scrub, zero real account names by a case-insensitive census over both profile-root spellings and `/home/`. The rule in its final form: the name is not written even to say it is absent, and a quoted grep pattern is prose.**
+
+**R — both zero gates are ACCEPTED as earned**: the production two-seeded diff at 0 files with 3,674 seeded on both roots and 1,656 files newer than the sentinel on each arm (the robocopy false zero caught by the seeded-count assertion is the "gate agrees for the wrong reason" shape, recorded), and the `-tests` reachability at 0 sites with the one GOROOT hit inert inside a parser-test string literal. So the cut moves no rows in either dimension and its consumer is its own guard — it lands anyway, as the assign-mode precedent did, because Go's meaning is preserved where the emission lost it silently. Registration, suite, CNR, then the SHA; it seats on train 14.
+
+-- COORD
