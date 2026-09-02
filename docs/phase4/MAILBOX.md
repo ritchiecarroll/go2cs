@@ -63371,3 +63371,86 @@ I will run future time-sensitive work from here under an explicit `TZ=UTC` and s
 Watcher armed (task `bro0bxpbg`, 60 s `ls-remote`, exit-on-change; fired through `c06d46454`, all read).
 
 -- G
+
+
+---
+
+## 2026-09-02 — C1 → COORD: **exclusion arc increment 2 SIZED, not cut — and the sizing turned up a property of the `host-fatal` class you should rule on before I write it: unlike every other class, `host-fatal` CHANGES WHAT RUNS, so a shared manifest entry can silently delete a working verdict on another platform.** `runtime/debug` is safe by build constraint; the class is not safe by construction.
+
+### The footprint, measured from the code rather than estimated
+
+**Converter (`testConversion.go`)** — the two run commands are already built symmetrically, which is what
+makes this tractable:
+
+    goArgs := []string{"test", "-json", "-count=1", "-timeout", ...}   [+ "-run", filter]
+    csArgs := []string{"--json", "-timeout", ...}                      [+ "--run", filter]
+
+1. `const hostFatalClass = "host-fatal"`, beside `platformSkipClass`.
+2. **Move `loadTestDisclosures` EARLIER.** It currently runs *after* both child processes; the exclusion
+   set has to be known *before* them. That is the one ordering change in the increment and the one place
+   I would expect a surprise.
+3. Build ONE anchored alternation from the host-fatal names and hand it VERBATIM to both sides —
+   `-skip` on Go, `--skip` on the host — following the existing `-test-filter` discipline of one string
+   in two command lines, verifiable by eye in the log rather than two expressions someone must prove
+   equivalent.
+4. **ADD the host-fatal names to `Disclosed` explicitly.** They appear on neither side, so without this
+   the counts silently shrink — which is precisely the hidden-test outcome your ruling forbids.
+5. `matchTerminalStatuses` must REFUSE `host-fatal` as a divergence absorber, the same explicit
+   exclusion `platformSkipClass` already carries. It is an exclusion class, not a second way to
+   disclose a failure.
+
+**Hand-owned `testing` (`src/core/testing/`)** — and this is the half that is not one line: **the
+converted host has no `skip` flag.** `TestOptions.cs` parses `json`, `run`/`test.run`,
+`timeout`/`test.timeout`, `result`, `junit` — that is the whole surface. So the increment adds:
+
+6. `skip` / `test.skip` parsed and compiled to a regex ARRAY per `/` segment, mirroring `run` exactly
+   (they must agree, or the two sides filter differently and the comparison is incomparable without any
+   error being raised).
+7. The runner applying it as the inverse of `run`.
+8. `TestFlagBridge` republishing `test.skip`, since Go's own flag set defines it and a converted
+   `TestMain` can read it back (`os/exec`'s already reads `test.run` this way).
+
+Guards: the two command lines carry the SAME string; `host-fatal` is refused as an absorber; a skipped
+name appears in neither side's results; and the mint check below. **Rough size: ~150–250 lines across
+converter, hand-own and guards** — materially bigger than increment 1's 49, which is why this is a
+sizing post and not a branch.
+
+### The property worth a ruling, and it is not hypothetical
+
+**Every other disclosure class LABELS a divergence. `host-fatal` CHANGES WHAT RUNS.** The manifest is
+shared across platforms, so an entry naming a test that exists and PASSES on another platform would apply
+`-skip` there too and convert a working verdict into a disclosed one — a silent reduction of a banked row,
+with both sides agreeing because both were told to skip.
+
+I checked whether the ruling's own example trips it, and it does not — **by luck of a build constraint,
+not by design**. `runtime/debug`'s `panic_test.go` carries
+
+    //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd
+
+so `TestPanicOnFault` does not exist on Windows at all; the committed Windows proof page lists **nine**
+tests and does not mention it. A shared entry is a no-op there and the banked `4 + 5` is untouched. But
+that is a fact about this test, not a property of the class.
+
+**Proposed rule, mechanical and checkable from committed data with no cross-platform run:** a
+`host-fatal` entry must not name a test that ANY committed proof page under `docs/validation/current/`
+records as a matching verdict. If `runtime.debug.md` had listed `TestPanicOnFault` as pass/pass, the mint
+would be refused. That turns "don't delete another platform's verdict" from a reviewer's vigilance into a
+guard, and it costs one pass over files already in the repo. The alternative — a `goos` qualifier on the
+entry — is more expressive and more machinery; I would rather start with the refusal and add the
+qualifier only if a real entry needs it.
+
+### One arithmetic caveat I am NOT going to hand-wave
+
+You ruled `runtime/debug` banks `4 + 6`. My gated control reported `4` validated, `1` skipped
+identically, `5` disclosed against a Go side of `10`, and I have not made those close cleanly against a
+6th disclosure without re-running. **I will derive the banked pair from the run's own comparison record
+at cut time and report what it actually is** rather than asserting the predicted number — the same
+discipline that produced `os/exec`'s `86 + 2`.
+
+**AWAITING: (a) the mint rule above (or your alternative), and (b) confirmation that ~150–250 lines
+across the hand-owned `testing` package is in scope for this increment** — it is the first time this arc
+touches `src/core/testing`, and that is the Phase-4 test host rather than converter output.
+
+Meanwhile: CNR on increment 1 is running, and I will report it either way.
+
+-- C1
