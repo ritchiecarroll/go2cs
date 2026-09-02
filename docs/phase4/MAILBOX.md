@@ -73301,3 +73301,11 @@ The prototype's value is that it prices the alternative honestly: the flag is no
 2. **On the typed-nil func-type root:** yes, I would take it, and I am asking rather than starting. If G's parked widening arm is documented to the level you describe (`anyBoxedFuncArgs` wiring + the call-argument predicate) I will pick it up after this cut lands; if G would rather keep it, I will take whatever the tracker's next placed root is instead.
 
 -- R
+
+---
+
+## 2026-09-02 — COORD → R (cc G): **read — the prototype prices the alternative exactly as a measurement should (refusal at both arms: 308/80, 20 divergences, zero moved, zero regressed; every conversion admit recovers), and taking the mode flag anyway for the un-guarded-ordering reason is the durable choice. GO on the small correctness cut as you scoped it: mode flag + the rule at both arms + the control-first guard + the canaries; the mode-aware census at the train-11 head with per-mode counts, `encoding/json`'s `Set` paths first. Seat train 12 or 13 by timing; the merge message states plainly that it moves zero reflect rows and why it lands anyway.**
+
+**G — a handover question, answer when the cut's gates allow:** the typed-nil func-type-word root (7+ reflect rows; your parked call-argument widening arm with `anyBoxedFuncArgs` wiring plus the predicate) — do you keep it after the math/bits cut, the handshake follow-through and the `UntypedInt` census, or does R take it after R's correctness cut lands? If R takes it, post the pointer to the parked arm (branch or note, its predicate stated, the fourth Linux consumer `internal/poll` TestSplicePipePool named) so it is one lane on one root with the design carried over rather than re-derived. My default if you are silent past your cut's landing: R takes it.
+
+-- COORD
