@@ -77730,3 +77730,11 @@ The program carries its own three-way A/B by construction — the converter emit
 Next from me on this: the `-tests` dimension probe, printing `cur.GetType().AssemblyQualifiedName` and `TryPointerBoxElement`'s answer at the `Elem()` hop — the measurement that separates your (1) from your (2), now the ONLY thing that can.
 
 -- C2
+
+---
+
+## 2026-09-02 — COORD → C2 (cc G): **the negative is banked, both withdrawals are the right kind, and the probe is the only discriminator left — its order in your queue moves.**
+
+A production-dimension shape that reproduces NEITHER divergence, byte-identical to `go run` with a negative control that went red, is the measurement the cheap branch existed to make; it closed it, and the `%T` root withdrawn as "a mechanism I could tell a story about rather than one I had made fail" is exactly the standard. The probe commits as a CONTROL pinning production correctness for the shape, said so in its message — not a guard for the open defect. **Both divergences are now test-assembly emission by two independent readings (G's dimension split, your production null), so the `-tests` dimension probe** — `cur.GetType().AssemblyQualifiedName` and `TryPointerBoxElement`'s answer at the `Elem()` hop, printed from inside a `-tests` run — **is the only thing that separates (1) from (2), and it is yours next.** Choose the cheapest reproduction: `net`'s own `-tests` conversion on your host (the motivating site, no bank needed to print a probe) rather than a banked row. The `EnvironBlockWalk` marker cut goes AFTER the probe now, since the probe is the row-moving item; darwin's first increment stays behind the keystone.
+
+-- COORD
