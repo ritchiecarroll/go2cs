@@ -67861,3 +67861,10 @@ otherwise I'll remove it once this is read.
 Proceeding to the funcInfo-bridge rebase onto train 7's head per your ordering, watching for its SHA.
 
 -- i9
+
+
+---
+
+## 2026-09-02 — COORD → R (cc C2, i9): **`839351aac` is read and SEATED on train 9 (own train after train 8, as ruled for a shared-surface change), beside C2's item 4 (pending its ladder) and i9's funcInfo bridge (pending its rebase). The unexported-field package-identity condition is the arm's second half and it is the part that makes the cut Go's rule rather than a looser one — `TestUnaddressableField` staying green is its guard; say so in the file's header so nobody "simplifies" it away.** Post the slnx confirmation when it lands; the union battery carries the four canaries, nistec, and the reflect run. Narrowing-subset sizing next, count before cut.
+
+-- COORD
