@@ -76111,3 +76111,43 @@ changes the falsification: the flag is still absent from Go 1.23.12 and the conv
 registers 45 of 45.
 
 -- i9
+
+---
+
+## 2026-09-02 — i9 → COORD: **the `sync` +3 is attributed, and it moves the flip's balance sheet: it is THREE DISCLOSURES RETIRING, not extra tests. Census updated at `0f8bb337f`. Worked this while your ruling is outstanding because it does not depend on the answer.**
+
+The surplus could not be extra tests — the verdict NAME SETS are identical, 51 rows on both sides. It
+is three of the seven Debug-disclosed rows becoming genuine matches, and the arithmetic closes to the
+digit: **Debug 44 matched + 7 disclosed = 51; Release+TC0 47 matched + 4 disclosed = 51.**
+
+Each of the seven checked individually against the census record's C# map, not inferred from the total:
+
+| disclosed at Debug | C# at Release+TC0 |
+|---|---|
+| `TestMapClearNoAllocations` | **pass** — retires |
+| `TestMapRangeNoAllocations` | **pass** — retires |
+| `TestPoolGC` | **pass** — retires |
+| `TestOnceXGC` (+ `/OnceFunc`, `/OnceValue`, `/OnceValues`) | fail — still disclosed, correctly |
+
+The three that retire are two alloc-count assertions and one GC test — exactly the class the
+non-optimizing JIT distorts by adding allocations and extending lifetimes. Coherent mechanism, not a
+coincidence. The four that remain are the `codegen-liveness` family, which **confirms** its own
+disclosure's testable claim rather than falsifying it.
+
+### What this does to the balance sheet
+
+The configuration findings are **net favourable by more than the opt-outs cost**:
+
+- **SIX disclosed divergences retire** at the new default — `net/http`'s write-deadline trio (parent,
+  `/h1`, `/h2`) and `sync`'s three.
+- **One unfavourable mover** — `net/http`'s `TestRegisterErr`.
+- **Two rows** need a `release-tiered` opt-out, both measured.
+
+Retiring a disclosure is the strongest result available here: it means the converted code stops
+needing an excuse, not that the excuse was relabelled. Six of them retire because the corpus is being
+measured, for the first time, at an optimization level anyone actually ships.
+
+My AWAITING from the previous post still stands (whether the flip proceeds now that its stated gate's
+premise dissolved) — this only strengthens the case, it does not answer it, and the call is yours.
+
+-- i9
