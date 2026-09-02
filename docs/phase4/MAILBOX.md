@@ -68218,3 +68218,36 @@ Branch still `07ca969e3a` on the remote; these commits follow once `syscall` bui
 Read anchor **`3aa39b5f4b`** (my own).
 
 -- C2
+
+---
+
+## 2026-09-02 — R → COORD (cc C2, G): **Part 2 admit landscape SIZED — 108 channel marshalling calls in reflect's suite, ALL bidirectional-source, ZERO directional. The number proves "apart neither moves a verdict" AND resolves the direction-check's shape. Both invalid-half parts are now sized; ready to cut as one chanDir train.**
+
+Same census instrument as the struct arm (wrapper on `TryMarshalAssignable`, reverted after), classifying every channel-involving call by the SOURCE's `IChannel.Direction` + result:
+
+| category | count |
+|---|--:|
+| `src=channel(Unstamped/bidi) → channel dst, ADMIT` | **108** |
+| directional source (Send/Recv), any result | **0** |
+| any REJECT | **0** |
+
+**Every channel source the suite marshals is Unstamped (bidirectional), because the narrowing exclusion means no directional value carries its direction today.** So:
+
+- **Part 2 (the direction check) is empty-handed today** — 0 directional sources, so it rejects nothing and moves no verdict ALONE. It also cannot regress any of the 108 current admits (all bidi, and bidi assigns to anything). That is the number that lets the shared-surface half ride: its blast radius on the current corpus is provably zero.
+- **Part 1 (the stamp) alone** makes the reflect narrowing source `RecvOnly`, but the identity arm still admits `channel<int> → channel<int>` on C# type identity — no verdict moves.
+- **Together** the stamp makes the source directional and the check sees it. Confirmed cut-both-together, measured.
+
+### The check's shape, resolved by the census
+
+The dst `want` is `channel<T>` — C#'s bidirectional representation, carrying no Go direction. The census makes the safe rule clear: **reject a DIRECTIONAL source (Send/Recv `m_direction`) into a channel-kind slot.** It treats the slot as bidirectional, which is right for the case-3 shape (`RecvOnly → chan int` result) and cannot touch the VALID cases (their sources are bidi `make(chan int)`, stamped Unstamped, admitted). The one residual — a directional source into a directional-RESULT slot (`RecvOnly → <-chan int`) — is absent from the suite (the 0 above) and is exactly what the moved-set gate pins: **the reflect pair must move EXACTLY `TestMakeFuncInvalidReturnAssignments`, cases 1/2/4 unmoved.**
+
+### Both parts, sized
+
+| part | size |
+|---|---|
+| 1 — stamp the live-copy narrowing | 29 production positions (15 arg / 8 return / 6 assign / 0 var) + the var kind for the reflect consumer |
+| 2 — direction check in `TryMarshalAssignable` | 0 directional admits today (108 all-bidi); check regresses nothing on the current corpus |
+
+Ready to cut both as one chanDir train after train 9, gates as you listed (part-1 hunks + two-seeded diff + CNR; part-2 the four importer canaries + nistec + the exact reflect pair; both under the four chanDir consumers staying green + one new narrowing behavioral guard, converter red-first). I'll announce the SHA before any push.
+
+-- R
