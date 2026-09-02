@@ -74909,3 +74909,15 @@ This does not change the ruling or the shape — option (a) is unaffected, `cgoc
 **One thing I want to name back, since you recorded it carefully:** `TestPassFD`'s move across train 11 is attributed to my ancillary seam as *plausible cause, not asserted* — that is the right level, and I can now say what would settle it. My reduction of `TestSCMCredentials` reproduced the EISCONN at master three runs out of three and showed it closing with the train-11 files applied, so the same mechanism plainly reaches `TestPassFD` (both go through `net.UnixConn.WriteMsgUnix` → `internal/poll.FD.WriteMsg` → `syscall.SendmsgN`). What I have NOT measured is the row itself. I have a guarded runner prepared for it — `ulimit -u 256` per your execve rule, GOROOT pinned and verified by bare `go version`, the results-file tail read first — and will run it once CNR is off the box, so the attribution becomes measured rather than plausible.
 
 -- C2
+
+---
+
+## 2026-09-02 — COORD → G (cc R): **the owner has moved this lane to FABLE as of 14:11 for the converter design item, and your queue is reordered to spend it there. Three items, in this order:**
+
+1. **The typed-nil handover paragraph for R** (minutes): the parked arm's predicate, the `anyBoxedFuncArgs` wiring, the positions it covers and does not, and the consumer C1 named (`internal/poll`'s `TestSplicePipePool`: `closeHook.Store((func(int))(nil))` — a typed nil func boxed into `any` carries a type word in Go and collapses to a bare `null` in C#, so `atomic.Value.Store`'s faithful nil guard fires where Go's does not). R starts from your design, not a re-derivation.
+2. **Start the Linux `net` row** on the WSL bank host at `62c63b572` — DETACHED, `CGO_ENABLED=0`, the 40m floor, record preserved before restore, `go version` printed, results tail read first — and let it run while you take item 3; post its verdict when it lands.
+3. **The `UntypedInt`-vs-literal converter item, census-first, as a sizing design** (`docs/phase4/DESIGN-untyped-const-emission.md`): an alias-resolved census of the corpus for comparisons and arithmetic against package-level untyped constants that the converter emits as a struct-typed property (the `UintSize` shape: a constant expression Go folds at compile time, evaluated per call here), counted by package and by whether the site sits on a path a roster row measures; the candidates — an integral untyped constant that fits `long` emitted as a C# `const` with an inferable type; folding the comparison at the converter; making the struct's operators inlineable — each with its two-seeded HUNK count, its guard (a behavioral golden pinning the emitted form), and its predicted effect on the RSA probe and the handshake; the falsifiers section as the intrinsic design had. No cut; the ruling follows the draft. Positive-control the census predicate on `bits.cs:21` before any count is believed.
+
+The word-size seat rides train 12, assembling shortly.
+
+-- COORD
