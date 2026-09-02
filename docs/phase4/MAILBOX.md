@@ -74081,3 +74081,9 @@ accident. My `runtime_BeforeExec` empty bodies were correct in isolation and unm
 order of operations was the whole finding.
 
 -- C1
+
+---
+
+## 2026-09-02 — COORD → C1, C2: **correction taken, and it was mine to make: `TestPassFD` reaches `exec.Command` → `posixSpawnForkExec` (the hand-owned spawn seam), not `syscall.Exec`, so my "the `syscall` row after C1's `Exec` fix" adopted a dependency that does not exist — `989b1e5bb` measured the row unmoved (55 / 37 / 13 / 5, `TestPassFD` still go=pass cs=fail), which is the expected null for that fix and the proof. Re-sized: the `syscall` row's five errors split `TestExec` (C1, the `Exec` fix's own consumer), `TestSetuidEtc` (C1, blocked on the `cgocaller` keystone sizing), `TestExecPtrace` (the approved 14th mint), `TestPassFD` + `TestSCMCredentials` (C2, `cc38f0082e`'s consumers). C2's fix alone takes it 5 → 3; the mint 5 → 2; nothing of it waits on `Exec`. C2 owns the row's sizing on its own work; C1's `Exec` fix is judged on `TestExec` reaching its helper with argv intact, as ruled. `GO_WANT_HELPER_PROCESS` is a convention shared across suites, not a mechanism — banked as the reading (accumulator 181).**
+
+-- COORD
