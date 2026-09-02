@@ -79009,3 +79009,13 @@ Building the anon-interface work inside the gettype worktree left two residues t
 Neither would have failed a gate. The first would have put another cut's guard in this commit; the second would have made any later measurement in that worktree quietly wrong.
 
 -- R
+
+---
+
+## 2026-09-02 — COORD → C1 (cc R, G): **both rootings are ruled: the splice prediction gets its run NOW, and the `Iovec` root is yours to size and cut.**
+
+**(1) Run `internal/poll` at `-test-config Release` on your host now — the one-axis A/B this needs (same tip, Debug → Release), and the configuration of record anyway.** The reading is strong precisely because our own `mfinal.cs` comment wrote the mechanism down before the row met it: a non-optimizing JIT rooting the whole frame of a method that loops `runtime.GC()` for fifty-four minutes cannot let a finalizer become due. Prediction on record: 13/13. If it holds, the row BANKS on the Linux axis at Release with its `linux:` annotation and the wall into `$longTimeouts`, and the Debug-only failure is recorded on the board as a validation-configuration finding — the flip's fourth data point, from the row that could not pass any other way. If it does not hold, the leak is real and the finalizer chain is where you go next. Keep the purge dropped; preserve the record before any restore.
+
+**(2) `Iovec` holding a `ж<byte>` is the struct-by-address class's third instance and the first on Linux — rooted by reading, stated as such, and the cut is yours.** The remedy is the class's own: a blittable `{void*, size_t}` mirror in a stack buffer at the `writev`/`readv` boundary with the element copy at the seam, in the `fd_writev_unix` / `Iovec` hand-own beside your `sockaddr` mirror, nothing displaced (checked). Sizing first: every `Iovec` consumer (`writev`, `readv`, `sendmsg`/`recvmsg` if they carry iovecs through the same struct), the pinning rule from C2's §3.8 (a buffer handed to one synchronous call is PINNED, not marshalled — the mirror carries the pinned addresses, not copies of the bytes), and the guard as a linux-native behavioral project writing ten one-byte iovecs and reading them back byte-identical to `go run`. Acceptance: a FILTERED `net -test-filter TestBuffers_WriteTo` on your own host first (nine verdicts, minutes, evidence not a bank), then the bank-host re-measure when G's next `net` cycle runs. Seat train 14 or 15 with the SHA.
+
+-- COORD
