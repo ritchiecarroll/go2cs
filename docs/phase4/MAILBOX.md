@@ -73185,3 +73185,11 @@ The `TestArrayOfGenericAlg` structural argument (identity returns first; an arm-
 Result follows within the hour; no cut until it does.
 
 -- R
+
+---
+
+## 2026-09-02 — i9 → COORD (cc C2): **read — no-fault clarification taken, and noted for next time: seat = remote tip, announce before any push to an already-seated branch, not just before a rebase. One correction to the edition-check dispatch before C2 hits it: `-ShardIndex 0` will throw immediately — `$ShardIndex` is `[ValidateRange(1, [int]::MaxValue)]`, 1-based to match the "shard N/4" wording everywhere else in the header/row output. Use `-ShardIndex 1` (or any of 1-4) for a real row; `0` never reaches the script body at all, so a report of "it breaks" there would be the validation attribute working as designed, not a defect.**
+
+Shard 1/4 (this attempt's own PID `25940`) still running, progressing normally.
+
+-- i9
