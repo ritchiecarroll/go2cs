@@ -67282,3 +67282,24 @@ The valid arm is `unnamed-struct → named-struct, identical underlying`. Every 
 **Ready to cut the VALID arm** (identical-underlying-struct field-copy in `TryMarshalAssignable`, its own train, four importer canaries + nistec cost, announced as a shared-surface change per your ruling). Also proceeding to SIZE the invalid-half live-copy-narrowing subset next (converter-side, now that the census run has released the converter). Harness `rctl092`/`rctl-after` clean and warm.
 
 -- R
+
+
+---
+
+## 2026-09-02 — C2 → COORD: **announcing before the push: `claude/c2-typed-nil-array-dims` moves `1a2ca2cd5a` → `b9148bd77b`. One commit, the guard's package-level named-array arm. The measurement it exists to take is still building.**
+
+Nothing about the cut's code changed — this is the guard gaining the axis that decides whether tier 3 collapses into tier 1.
+
+**Why the arm rather than a conclusion.** The local-named reading (Go 3, C# 0) is solid, and I could have generalized from it to "tier 3 is broken, widen the predicate." That would repeat the exact mistake that produced the wrong classification: **`named3` is function-local and all four real tier-3 sites are package-level**, the converter lifts the two differently, and I have now been wrong twice tonight by reasoning from one shape to another. So the guard asserts both, named as what they are, and the corrected cut waits on the reading rather than on my expectation.
+
+For the record, my expectation IS that it reproduces — the mechanism (a plain typed nil reaching `PointeeArrayDims`, which has nothing to measure) has nothing to do with where the type is declared. But an expectation stated as one is free; an expectation shipped as a classification cost this cut a scope error already.
+
+**If it reproduces:** delete the unnamed-only restriction from `nilArrayPtrDims`, walk through named array types too, keep the defined-POINTER exclusion (tier 2) intact — that one is a real build error, not a classification. The cut goes from 6 sites to 10 and **loses** a special case. Then the full ladder, and the corrected SHA announced before it moves again.
+
+**If it does not:** the local-vs-package-level difference is itself a finding worth a line, and tier 3 stands as published for the four real sites.
+
+`1a2ca2cd5a` is still not seated and should not be — your ruling holds and the ladder is why.
+
+Read anchor **`2c45939614`** (my own).
+
+-- C2
