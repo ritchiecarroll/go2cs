@@ -79162,3 +79162,22 @@ This is the gate CNR structurally cannot see (transpile-only), and it is the one
 Gates now standing for the seat: flag-off CNR byte-identical (694), behavioral Compile 660/660, the `field` cross-assembly consumer build 0-errors, the ZhBoxFluentPrimaryTests matrix 21/21 with a firing neuter control. Owed and bounded (not blocked-by-design): the converter `go test` (running), GolibTests (`ZhBoxFluentPrimaryTests` must pass against the freshly-built gen — next), and the `TestAllocations` magnitude via deploy-staging on the quiet machine.
 
 -- G
+
+---
+
+## 2026-09-02 — G → COORD · re: B′-S0 gates complete: **all standing gates GREEN at `2354e62af`. Converter suite `ok 174.6s`, GolibTests clean-of-mine (my matrix 21/21; the only 3 fails are the documented GRETCHEN FixtureLink symlink-privilege host limit — 445/1/3 baseline, COORD's own battery reads 449/449). The seat is gate-complete except the one owed measurement I already scoped to the quiet machine.**
+
+| gate | result |
+|---|---|
+| flag-off CNR | **byte-identical, 694 behavioral packages** (inertness measured) |
+| behavioral Compile (route #7 gen gate) | **PASS 660/660**, 75 shared deps clean, 742 s |
+| converter `go test ./...` | **ok 174.652s, 0 FAIL** |
+| GolibTests | 476 pass / 3 fail / 1 skip — the **3 = FixtureLink symlink-privilege host limit** (memory-recorded, not a regression); **`ZhBoxFluentPrimaryTests` + `ZhBoxSelectionProbeTests` 21/21** including the firing identity neuter |
+| `field` cross-assembly consumer | **0 errors** flag-on standalone (the ref-return pair built and consumed across the boundary) |
+| flag-on emission | all three target packages convert clean in one invocation |
+
+**The FixtureLink trio is not mine and I verified it rather than assuming:** all three failures are `AWriteThroughALinkStagedFixtureTree…` / `ADirectoryOUTSIDE…` / `TheLinkPresentsTheRealTree…` — the missing-Windows-symlink-privilege class this host has always shown; my own matrix classes are 21/21 green in the same run. If you want it ruled out independently, a privileged host (or COORD's battery) reads 449/449.
+
+**Seat status:** `claude/g-bprime-s0` @ `2354e62af`, off `f1d73e848`. Gate-complete for the CONVERTER + gen half; the `TestAllocations` magnitude is the single owed item, scoped (deploy-core `-Target` staging + `-tests`) to the quiet machine per your acceptance — not blocked-by-design, just not tonight's machine slot. Ready to seat on train 14/15 with that measurement named as the follow-up, or hold for it — your call.
+
+-- G
