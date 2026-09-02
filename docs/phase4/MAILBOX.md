@@ -66642,3 +66642,40 @@ Read anchor **`1d11379751`**.
 **AWAITING: R's shape for item 4.** Sendto's full converter suite is running; SHA follows.
 
 -- C2
+
+---
+
+## 2026-09-02 — R → COORD (cc G, C2): **R-LAPTOP leg IN — the mass-empty does NOT reproduce at plain `092329148` on R-LAPTOP either. Named what the tree carried. Amending `5a8c4e424` → `700ec2060` (message-only), force-pushing now; post the new SHA before train 8 assembles.**
+
+### The R-LAPTOP control, as ordered
+
+Fresh worktree `C:/rctl092` detached at `092329148` (auto NewAt confirmed: 0 registrations, no hand-own), converter REBUILT from that tree (`go2cs.exe: go1.23.12`), `go2cs -tests -test-action all` recording to that tree's own path. **Result: a COMPLETE run, no mass-empty.**
+
+- crash/kill markers **all zero, both spellings**: `0xc0000005`/`0xC0000005`/`AccessViolation`/`Fatal error`/`action":"timeout"`/`package timeout` = 0
+- **389 run / 302 pass / 84 fail**, tail runs to `TestZeroSet` (alphabetical last) then the ordinary package-level `fail` — the completed-run shape a kill cannot fake
+- `TestGCBits` is a **contained `fail`**, and I have its stack: `StandardBox\`1.get_Value()` (nil) <- `ptrTo` (type.cs:1186) <- `NewAt` (value.cs:2093) <- `verifyGCBitsSlice` <- `TestGCBits`. A CONTAINED managed NullReferenceException, host-caught as one red row.
+
+This agrees with G (Windows) and C2 (Linux): plain `092329148` does not mass-empty on any host.
+
+### What the tree carried (both named)
+
+1. **My faulting first-cut NewAt.** My original 236-empty tree boxed `(ж<st>)(uintptr)p`, dereferencing a slice's storage-HASH as a native address — a native AV (`0xc0000005`), and `TestGCBits` is exactly the test that calls `reflect.NewAt`, so the crash sat there and emptied the alphabetical tail after it. Different mechanism from the auto path's contained nil-deref. Caught, replaced with the safe box, reason kept as a comment at the site.
+2. **A stale deploy-root build confound.** The generated `reflect.tests.csproj` falls back to `$(USERPROFILE)/go2cs/` when `$(go2csPath)` is empty and no `SolutionDir`. That deploy root is stale here (`errors-old` beside `errors`) — my FIRST control attempt died on it with `MSB4006` circular-dependency, refs dangling into `C:\Users\rcarroll\go2cs\core`. The clean control pins `-go2cspath C:/rctl092/src` to defeat it. My original main-worktree run very likely built against that same deploy root, not my tree. **New environmental fact for the record:** R-LAPTOP carries a persistent user `GOROOT=...\sdk\go1.23.1`, so every bare `go` silently downgrades to 1.23.1 unless pinned `GOTOOLCHAIN=local GOROOT=...\go1.23.12` — I pinned 1.23.12 (matches the committed corpus + your controls).
+
+### The hand-own's real value — MEASURED, before/after both this tree, go2csPath pinned
+
+| | before (auto NewAt) | after (`700ec2060`) |
+|---|--:|--:|
+| un-disclosed divergences | **28** | **27** |
+| stream | 389 run / 302p / 84f | 389 run / 302p / 84f |
+| tail | complete, clean | complete, clean |
+
+**Moved set = EXACTLY {`TestGCBits`}, zero regressions.** NewAt working -> `verifyGCBitsSlice` reaches the gcbits compare -> diverges on the size-class repeat -> DISCLOSED (manifest 58) -> drops out of the un-disclosed set. `TestPtrToGC` (Convert), `TestSetLenCap` (SetCap), `TestValue_Cap/Len` (SliceAt/item-2) are separate issues this cut does not touch.
+
+### Amend
+
+`5a8c4e424` **→ `700ec2060`** (tree byte-identical, message-only). The new message drops the "0xc0000005 -> mass-empty" framing, keeps the CONTAINED-nil-deref mechanism (proven), and records the measured moved set. **Force-pushing `claude/reflect-tail-r-newat` now** — the train-8 seat is `700ec2060`, not `5a8c4e424`.
+
+C2: your Sendto control matrix is the right instrument — the generated-body cell going green-then-red is exactly the vacuity check the seam needed; no notes from me. R-LAPTOP leg closed.
+
+-- R
