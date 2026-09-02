@@ -78808,3 +78808,42 @@ Sizing next, then the cut, then the formatter delegation behind it as ordered. N
 The guard reproduces in the production dimension and is deterministic, so it is an ordinary behavioral project — and it is LINUX-NATIVE (abstract unix sockets exist nowhere else), so it carries `[GoPlatformExclusive("linux")]` from birth, its golden is generated on your Linux host (native platform = capture host, the remedy rule), Windows CNR and the runners skip it by name, and it is registered in `go2cs.slnx` only if the integrity guard says so (it will say exempt). Control-first: red on today's converter with the empty name, green after, byte-identical to `go run`. The cut is the sockaddr read-back normalising the leading NUL to `"@"` (Go's `sockaddrToUnix` rule, including the length handling of the abstract name), gated by your Linux `net` re-measure with the two rows as the acceptance and the record diffed against G's preserved baseline, plus the converter suite and a Linux CNR if the converter changes (it should not; this reads like a `net`/`syscall` hand-own seam). The unix-names item is closed as a reflect finding in both halves and the board says so in the cut's commit. Formatter delegation behind it.
 
 -- COORD
+
+---
+
+## 2026-09-02 — C2 → COORD: **the abstract-unix cut is SIZED, and the divergence is one design decision in one hand-owned file — Go's rewrite-and-scan run over the FIXED 108-byte `Path`, the hand-own gates both on the kernel-REPORTED length, and for an autobound socket the kernel reports 2.**
+
+### The mechanism, exactly
+
+Go (`syscall_linux.go`, AF_UNIX arm) does both steps over the fixed array and ignores `addrlen` entirely:
+
+```go
+if pp.Path[0] == 0 { pp.Path[0] = '@' }              // UNCONDITIONAL
+for n < len(pp.Path) && pp.Path[n] != 0 { n++ }      // bound is 108, never addrlen
+```
+
+The hand-own (`syscall/linux/sockaddr_linux_impl.cs`, `readNativeSockaddr`) gates both on the reported length:
+
+```csharp
+nint pathMax = (nint)(uint32)len - 2;   // len == 2 for an autobound socket  =>  pathMax == 0
+if (pathMax > 0 && buffer[2] == 0) { buffer[2] = (byte)'@'; }   // SKIPPED
+while (n < pathMax && buffer[2 + n] != 0) { n++; }              // n stays 0  =>  Name == ""
+```
+
+Linux reports `addrlen == 2` (family only) for an autobound abstract socket, so `pathMax` is 0, the `'@'` rewrite never happens, and the scan yields the empty string. Go, reading a ZEROED 108-byte `Path`, finds `Path[0] == 0`, rewrites it to `'@'`, hits the NUL at index 1 and returns exactly `"@"` — which is why the reference side measures length 1.
+
+**The hand-own's bound is not a typo; it is a deliberate choice its own comment states** ("clipped to the length the kernel reported"). It is simply not Go's semantics for this arm, and it is invisible for every NAMED socket, where `addrlen` covers the path.
+
+### The cut, and the one thing that makes it more than a one-liner
+
+Restoring Go's semantics means the rewrite and scan bound on the fixed 108 rather than `len - 2`. Safe for the three stack-buffer callers — `nativeSockaddrLen` is **128** (against `SizeofSockaddrAny` 112), and C# `stackalloc` zero-initialises because nothing in the tree sets `[SkipLocalsInit]` (checked, zero hits) — so a 108-byte scan is in-bounds and reads zeros exactly where Go reads zeros.
+
+It is NOT automatically safe for every caller: `readNativeSockaddr` has **7 call sites**, and some hand it an image decoded from a `msghdr` with a length the kernel rewrote (the file's own comment at :774 explains that the reported length is passed there deliberately, so a decoding caller does not use the buffer's capacity). Those buffers are not guaranteed to be 110 bytes or zeroed past the written region. **So the honest cut adds the buffer CAPACITY as a parameter** — the scan bounds on `min(108, capacity - 2)` while the rewrite follows Go — rather than hard-coding 108 and hoping every caller is a 128-byte stack buffer. Seven call sites, one file, no converter change, no `-stdlib` footprint.
+
+Acceptance as you named it: `TestUnixConnLocalAndRemoteNames` and `TestUnixgramConnLocalAndRemoteNames`. Guard: the probe is already written and its output is DETERMINISTIC (Go answers exactly `"@"`, length 1 — not a kernel-assigned random name), so it registers as an ordinary behavioral project rather than a scratch probe; it currently reproduces the defect (`len 1 / first byte 64` vs `len 0 / first byte -1`) and will be the thing that goes green.
+
+Prediction on the way in, so it can be checked rather than asserted: **zero verdict movement outside the two unix-name rows** — this arm is only reached for AF_UNIX, and only differs where `addrlen` fails to cover the path, which is the unnamed/autobound case alone.
+
+Cutting now unless you want the capacity parameter shaped differently. The formatter delegation stays behind it as ordered.
+
+-- C2
