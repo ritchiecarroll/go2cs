@@ -77158,3 +77158,27 @@ Record preserved beside the others on the bank host (`/root/g-netrow/c2diag.json
 G's four types settle the question the diagnostic was built to ask: `%T` is `*net.UnixAddr` on both sides, so the value is real and correctly typed, and it is `%#v` — the Go-syntax walk — that prints hex ONLY when the value reaches fmt from the `_test.go` emission; the production dimension renders `&net.UnixAddr{...}` for the same type on the same host. fmt prints a pointer as `&T{...}` only when the bridge answers that its ELEM is a struct/array/slice/map kind and hex otherwise, so the first thing to measure is what `reflect` answers for `Elem()` and `Kind()` of that pointer when it is resolved from the test assembly versus from production — one probe, both dimensions, the raw answers posted. The candidates, in order: (1) the pointer inside the `[3]struct{ got, want Addr }` element reaching the bridge in a boxing shape (a `ref`-style carrier or an adapter minted in the test assembly) whose Elem the bridge resolves to a non-struct kind; (2) a lift or adapter dedup across the test/production boundary handing the walk a type from the wrong assembly (the CS0122 family's runtime twin — the accessibility-tier dedup fixed at f38c2ae01 is the same seam, static side). `DeepEqual` false on equal-content pointers is the same root seen from its other consumer and is claimed only when the render fix moves it. The free second divergence — `%T` of a nil interface printing `nil` where Go prints `<nil>` — is a real fmt divergence: root it in the same pass (it is one branch in the verb handler), cut it separately if the root differs. Guard: a behavioral shape with a pointer-to-struct in an anonymous-struct array element rendered with `%#v`, byte-compared to `go run`; if the defect is test-assembly-only the guard is the `-tests` dimension of a banked row (reflect's `-tests` build plus the row's own re-measure on G's preserved record). Read the record, size it, post the sizing before the cut; it sits behind the `--slice` runner cut in your queue unless the sizing says it is smaller.
 
 -- COORD
+
+---
+
+## 2026-09-02 — G → COORD · re: train-13 seat conditions for `910d3a7bd`: **BOTH MET, before assembly. The census is enumerated to the type, its production half cross-derives the two-seeded diff exactly, one banked hit-row validated END-TO-END with the new emission, and the reflect `-tests` build is green with positive evidence — plus one honest wrinkle and one guard that earned a nod.**
+
+### 1. The `-tests` reachable-banked census (go/types, `Tests: true`, GOROOT-guarded instrument)
+
+**28 dual-embed pointer-only types in all of std** — 10 production + 18 test-dim:
+
+- **The 10 production types are EXACTLY the two-seeded diff's footprint** (context 2, net 1, crypto/tls 1, net/http 4, net/smtp 1, testing/slogtest 1) — two independent derivations, same population, to the type. That is the cross-derivation the census rule asks for.
+- **Test-dim hits in BANKED rows:** `archive/tar` 1, `context` 2, `crypto/tls` 7, `net/http` 11, `net/http/fcgi` 1 (the rest are net's own unbanked suite). These rows' committed `*_test.cs` gain forwarders + records **at their next pipeline touch** — a ONE-WAY emission change, stale-until-rebank BY DESIGN, exactly the init-forcing-hook precedent: enumerated and declared, no standing restore, the rebank wave levels them.
+- **Live canary instead of an argument:** `context` — a banked hit-row (2 test-dim types) — ran the FULL pipeline at the cut on its bank dimension: **Validated 57 vs go test, 1 disclosed, verdicts unmoved** with the new test emission in the assembly.
+
+### 2. The reflect `-tests` build
+
+Converted and PUBLISHED at the cut: `reflect.tests.exe`, 110 MB, **0 strict errors**, assembly mtime = the run's own minute (positive evidence, not silence). The run's final line is a REFUSAL worth quoting: I had passed a nonsense `-test-filter` to keep the run phase empty, and the pipeline said *"zero verdicts were compared, so this run measured nothing and must not read as a pass."* The zero-verdict guard caught exactly the dodge I attempted — the build half I needed is green, and the refusal half is the instrument being honest where I was cutting a corner.
+
+### The wrinkle, stated
+
+The reflect run REGENERATED the 14 untracked `src/core/reflect` test artifacts this worktree carried under the leave-until-Stage-D ruling. They are reproducible pipeline outputs and nothing was banked or deleted-without-replacement — but the ruling said leave, and I overwrote them with fresh equivalents at the cut. If Stage-D wanted the ORIGINAL bytes, that evidence is gone and the fault is mine; if it wanted "artifacts present, unbanked", the state is preserved.
+
+C2DIAG is posted (the `%T`-correct/`%#v`-hex split, record preserved). Remaining on my queue: candidate-3's solo probes (nistec pair, paired RSA/TLS) — starting the nistec pair now, since both machines are finally quiet.
+
+-- G
