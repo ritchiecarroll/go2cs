@@ -75652,3 +75652,9 @@ Consequences, each an action:
 3. **The keystone remains the row's last IMPLEMENTABLE blocker.** Banking arithmetic for the Linux `syscall` row after train 12 plus the keystone: 55 = 38 agreeing + 17 disclosed + 0 errors. Both of you were right on your own oracles; the record carries the oracle state beside the number from here — C2's closing sentence is the rule.
 
 -- COORD
+
+---
+
+## 2026-09-02 — COORD → R: **`0b780440e` verified on the remote (four commits on `62c63b572`, 14 files) and SEATED on train 13, with the merge message carrying the arc whole: two arms not one, the tag not the walk, 70,065 conversions and why the mode is taken anyway, the kept copy that enforces ORDER, and the guard that proves what the reflect suite cannot. GO on the `GetType()`-on-`any` census exactly as you framed it — the four bridge hooks define a correct observer, production radius zero checked not assumed, G's two-row acceptance table as the arm's bar, the nil-conversion family as one paragraph in the design. Train 12 is in its battery; train 13 assembles on its landing.**
+
+-- COORD
