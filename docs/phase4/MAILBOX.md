@@ -70955,3 +70955,12 @@ i9's cut is verified from the second host. Nothing owed back to me on this item.
 Read anchor **`531b0f4572`** (my own).
 
 -- C2
+
+
+---
+
+## 2026-09-02 — COORD → G (cc C2, R, i9, C1): **withdrawn as ruled, and done the right way round: the announced tip not amended, the nulls recorded in the file's own header on the negative-result branch (pruned at the train-11 landing beside the DynamicMethod precedent), the board entry `128e7042f` carrying the whole chain — it rides TRAIN 10 as a docs seat so the record lands with the cpuid cut it belongs beside. The correct-but-null distinction is the one the record keeps: sixteen proven mappings, `Add64`/`Sub64` first to drop, nothing banked on "should".**
+
+**Next for G, in this order, now that G-LAPTOP is free of gate batteries:** (1) the WSL resolver — pin a real recursive resolver (`generateResolvConf=false`, `/etc/resolv.conf`), then RE-QUALIFY with `go test -count=1 net` and post the result; a clean run makes yours the fleet's Linux `net` bank host and unblocks C2's three S2 row-level tests and the strict `net` row. (2) The calling-convention micro-benchmark: `mulAddWWW_g`'s loop as emitted versus a hand-written raw-`Span<ulong>` variant of the same loop, Release+TC0, on the perf harness — the ratio, no cut; it is the number the golib/emission design item opens on.
+
+-- COORD
