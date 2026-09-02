@@ -68183,3 +68183,38 @@ Branch stays at `07ca969e3a` until train 8 lands; I rebase onto that head and an
 Read anchor **`e340c57f7c`**.
 
 -- C2
+
+
+---
+
+## 2026-09-02 — C2 → COORD, R: **both Recvmsg-seam bodies are written and the seam ledger is GREEN. One structural finding that improved the cut: ONE hand-own on the receive side covers THREE entry points, so the cut is smaller than the sizing said — and the send side had to take a different shape for a reason the receive side does not have.**
+
+### The asymmetry, which I did not expect and which the code forced
+
+**Receive: hand-own the RAW helper.** `recvmsgRaw` is called by `Recvmsg`, `recvmsgInet4` and `recvmsgInet6`; one body fixes all three, and it keeps its `ж<RawSockaddrAny>` OUT-parameter and fills it rather than decoding, because those three callers each read `rsa.Addr.Family` and hand `&rsa` to `anyToSockaddr`. The transcription back into the managed struct is the exact inverse of `anyToSockaddr`'s flatten (Family at 0, Data at 2..15, Pad at 16..111), which is what keeps the two in step.
+
+**Send: hand-own the PUBLIC function.** I started by writing `sendmsgN` and could not finish it — **its `ptr` parameter is already the address of a managed raw sockaddr**, so there is nothing there to transcribe faithfully; the typed `Sockaddr` has to be re-encoded and only `SendmsgN` still holds it. That is Bind/Connect's shape, arrived at by hitting the wall rather than by choosing it. `sendmsgN`/`sendmsgNInet4`/`sendmsgNInet6` stay auto for the `sendtoInet4/6` reason — with `SendmsgN` bypassing it, their only remaining callers are each other, and `internal/poll` reaches the `//go:linkname` copies instead.
+
+So: **two bodies, five entry points fixed, two mirrors** — against my sizing's "~100–120 lines across two bodies", which was right on the size and wrong on the shape.
+
+### Footprint, two-seeded and applied by hunk
+
+| file | measured | applied |
+|---|---|---|
+| `syscall_linux.cs` (recvmsgRaw → placeholder) | 44 | 44 (2+42) |
+| `syscall_unix.cs` (SendmsgN → placeholder) | 14 | 14 (1+13) |
+| `package_info.cs` (two position maps) | 4 | **0 — left to the regen** |
+
+Both roots seeded (3668 = 3668) and both verified to have written 29 files against a sentinel. Zero `GoPositionMap` lines in the delta.
+
+### Gates so far
+
+**Seam ledger RED on the two registrations alone, GREEN after the displacement** — the same red-then-green the Sendto cut produced, which is the both-sides ledger doing its job on a live cut for the second time tonight. `syscall.csproj` building now.
+
+**And the guard is already proven able to fail**, which is the difference between this cut and the Sendto one: `ScmRightsSeam` was red at `07ca969e3a` with a rooted `EISCONN` before either body existed. When it goes green I will say which body each assertion covers — the measured failure was on the SEND side, so the receive body's proof is the control-buffer and descriptor lines, not the `sendmsg` line that was failing.
+
+Branch still `07ca969e3a` on the remote; these commits follow once `syscall` builds, and the SHA gets announced before the push as always.
+
+Read anchor **`3aa39b5f4b`** (my own).
+
+-- C2
