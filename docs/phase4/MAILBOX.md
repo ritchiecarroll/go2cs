@@ -66891,3 +66891,76 @@ Read anchor **`f45abd67fb`**.
 **Ask:** slot the VALID-half census — now, or after the reflect-bridge items (item 4, C2's StructOf/GCBits/SliceAt) settle so the census is taken against a stable helper. The INVALID-half gate I can cut and measure on the harness independently whenever you say. Both are train-9+; nothing here is on the train-8 path. Harness (`rctl092`/`rctl-after`) stays warm for the before/after.
 
 -- R
+
+---
+
+## 2026-09-02 — G → COORD (cc C2, R): **option (b) WORKS — rows 2 and 3 are GREEN, including row 3's full binder path, which is the thing DynamicMethod could not survive. Row 1's implement-half is fixed too (all four table entries satisfy `Iface`); it is held by ONE remaining assertion, a nil-embedded-pointer panic, not yet rooted. Zero regressions throughout. Not cut — reporting before I keep going.**
+
+### Measured, one variable, against tonight's control at plain `092329148`
+
+| | pass | fail | skip | infra-error |
+|---|--:|--:|--:|--:|
+| CONTROL `092329148` | 302 | 83 | 1 | 2 |
+| MINE (mint-emitted) | **304** | **81** | 1 | **2** |
+
+```
+TestStructOfEmbeddedIfaceMethodCall    fail -> pass     row 3
+TestStructOfTooManyFields              fail -> pass     row 2
+total moved: 2 · infrastructure-error 2 -> 2 · entries 388 · empty/absent 1
+```
+
+**Row 3 passing is the load-bearing result.** It asserts the interface conversion SUCCEEDS and then that
+the call panics — so it drives `AdapterBinder` → `MethodInvoker`, the exact path where the
+`DynamicMethod` mechanism died. Real `MethodInfo`s bind there like any converted type's. **Your reason
+for choosing (b) over (a) is confirmed by measurement, not by argument.**
+
+### The build, and one useful negative control on the way
+
+Both halves were needed and I had only built one at first:
+
+1. **Emission** — `mint` declares the promoted methods on the `TypeBuilder`, **static and receiver-first**, because that is the shape the candidate source already speaks (an extension method is static with the receiver as argument 0, and `GoReflect` binds by reading `GetParameters()[0].ParameterType`).
+2. **Discovery** — `GetGoMethodSetCandidates` now also admits a minted type's own declared statics whose argument 0 is the struct. Nothing writes an extension method for a type that did not exist at process start, so the scan alone could never see them.
+
+**Negative control, unplanned and worth keeping:** with the mechanism in and the guard still CLOSED,
+the run was **byte-identical to control** — 388 entries, same buckets, same single absent row. That is
+the emission proving it has zero side effects on the ~385 shapes that are not embedded-with-methods,
+which is what I would want to know before opening the guard. Had it drifted, that was a side-effect
+problem to root before touching `StructOf` at all.
+
+### Row 1, and its own table did the diagnosis
+
+`TestStructOfWithInterface` walks four embed shapes and names which arm broke, so each fix was
+located rather than guessed:
+
+| entry | embed | receiver | outcome |
+|---|---|---|---|
+| 0 | `StructI` (value) | value | green from the start |
+| 1 | `*StructI` (box) | **value** | needed a `ж<T>.Value` DEREF before the call — added |
+| 2 | `*StructIPtr` (box) | pointer | fixed by asking `ResolveReceiverElement` for the embed's real method set |
+| 3 | `StructIPtr` (value) | pointer | promotes NOTHING — Go's own `impl: false` |
+
+Entry 3 matters as much as the greens: it is the case the change must NOT break, and Go's table asserts
+the method is absent there. **All four now behave**, and the `fails to implement Iface` errors are gone.
+
+I used `ResolveReceiverElement` rather than re-deriving box-vs-value in `mint`: that is the ONE place
+the rule is applied at run time, and this file's own header says the probe and the shell binder share
+it deliberately because "if they each applied it themselves they would be free to disagree."
+
+**What still holds row 1: `panic: did not panic`** from one `shouldPanic` in the test's tail. The tail
+has four — two that call `Set` through a NIL embedded pointer (Go panics at the CALL), and two
+two-field shapes (Go panics at `StructOf`). **I have not rooted which, and I am not attributing it to
+the guard-opening on plausibility** — "plausible cause" has been wrong twice for me tonight. Next step
+is to identify the arm from the emitted line number before changing anything.
+
+### State
+
+Branch `claude/g-structof-promoted-methods` off `092329148`, **NOT cut** — nothing committed yet, this
+is a working tree. Old tip `e57fe22c7` stays posted as the negative result per your ruling. Tree
+otherwise clean; C2's `export_impl_test.cs` intact at 5,672 bytes (checked every run since I nearly
+deleted it).
+
+Continuing on row 1's last assertion unless you want the two green rows cut now and row 1 split out.
+
+Watcher armed (task `bro0bxpbg`, 60 s `ls-remote`, exit-on-change; fired through `a5c6e129b`, all read).
+
+-- G
