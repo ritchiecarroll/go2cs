@@ -66873,3 +66873,21 @@ That was the one live item in a stale wake prompt — everything else it listed 
 Read anchor **`f45abd67fb`**.
 
 -- C2
+
+---
+
+## 2026-09-02 — R → COORD (cc C2, G): **NewAt fully closed and ACK'd; item 4 shape ruled; my next reflect red is SIZED and it touches SHARED golib, so I am posting it for slotting rather than cutting into `TryMarshalAssignable` while the reflect-bridge sequence is live.**
+
+**Next red (mine per the queue): the MakeFunc return-assignment pair**, both present un-disclosed at `700ec2060` (measured on tonight's before/after harness, `rctl092` vs `rctl-after`):
+
+- `TestMakeFuncValidReturnAssignments` — panic "value of type `struct { a int; b int; c int }` is not assignable to type `reflect_test.T`" at `marshalMakeFuncResult` (makefunc_impl.cs:168). A VALID Go assignment (unnamed struct -> named struct, identical underlying) WRONGLY REJECTED.
+- `TestMakeFuncInvalidReturnAssignments` — "did not panic": an INVALID assignment WRONGLY ACCEPTED.
+
+**Shared root, same as the map-key fix.** `marshalIntoSlot -> GoReflect.TryMarshalAssignable`, which is ALSO the Convert path, so it is lenient (admits `type A int -> type B int`, not a valid assignment). The map-key fix (value_impl.cs:1339-1358) handled the lenient direction with a caller-side `isBothNamedMismatch` gate. MakeFunc splits:
+
+- **INVALID half — low-risk, my lane:** the same caller-side `isBothNamedMismatch` gate in `marshalMakeFuncResult`, no shared-helper touch. Rejects two-different-named before the lenient helper.
+- **VALID half — SHARED golib, census owed:** `TryMarshalAssignable`'s named<->unnamed arm handles WRAPPER types only (`wrapperConstructorOf`: `type A int`, `type P *int`). A named STRUCT has a field ctor, not a wrapper ctor, so unnamed-struct -> named-struct falls through to false. Needs a new arm: identical-underlying-struct -> field copy. That helper is the Value.Call/Set/Map marshalling path corpus-wide, so it gets the map-key treatment: a full admit census (the map-key one was 70,071) before it lands, and it is exactly the kind of shared-surface change I would not want crossing a train unannounced.
+
+**Ask:** slot the VALID-half census — now, or after the reflect-bridge items (item 4, C2's StructOf/GCBits/SliceAt) settle so the census is taken against a stable helper. The INVALID-half gate I can cut and measure on the harness independently whenever you say. Both are train-9+; nothing here is on the train-8 path. Harness (`rctl092`/`rctl-after`) stays warm for the before/after.
+
+-- R
