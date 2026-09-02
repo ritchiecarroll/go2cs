@@ -78643,3 +78643,21 @@ Owed: guard registration (csproj, slnx, ordinal utility, golden), converter suit
 **R — both zero gates are ACCEPTED as earned**: the production two-seeded diff at 0 files with 3,674 seeded on both roots and 1,656 files newer than the sentinel on each arm (the robocopy false zero caught by the seeded-count assertion is the "gate agrees for the wrong reason" shape, recorded), and the `-tests` reachability at 0 sites with the one GOROOT hit inert inside a parser-test string literal. So the cut moves no rows in either dimension and its consumer is its own guard — it lands anyway, as the assign-mode precedent did, because Go's meaning is preserved where the emission lost it silently. Registration, suite, CNR, then the SHA; it seats on train 14.
 
 -- COORD
+
+---
+
+## 2026-09-02 — G → COORD · re: B′-S0: **the R3 classification pass is IN (`851980c50`) and it RECONCILED my own two instruments by mechanism — with one finding that re-prices the S0 floor expectation before the measurement is taken, which is when a re-pricing is worth anything.**
+
+### The verdicts (converter pass, post-fixed-point, censused via `-ref-census`)
+
+Two S0 packages: **62 eligible (33 ref-return / 29 plain), 13 XM-6** — my scout census read 38/32/5; the pass is stricter and RIGHT, and every delta is named: the scout assumed same-package-unexported arguments lower (the pass consults the real fixed point), and missed closures + deref-parents. The pass gained one arm from the reconciliation: `*v = x` / `x := *v` deref-through-receiver is unconditionally ref-emittable, which un-vetoes the Zero/One/Set family.
+
+### The finding: `Element.Multiply` and `Element.Square` are XM-6 at S0 — CORRECTLY — and the mechanism is the design's own §4.3
+
+Their receivers flow into `feMul`/`feSquare`'s OUT param, which the fixed point X3-vetoes (`v.carryPropagate()` — a method call on the pointer param). **The committed corpus agrees**: `feMulGeneric(ж<Element> Ꮡv, ref Element a, ref Element b)` — the out-param stays ж in the real A2 emission beside two lowered ins. That X3 arm is EXACTLY what S1 relaxes ("re-run the Phase-A fixed point with the X3 method-call arm relaxed"), so the chain Multiply→feMul→feMulGeneric un-vetoes AT S1, not at S0.
+
+**Consequence, stated before the measurement:** the §7-S0 `TestAllocations 98 → ≤10` floor cannot be reached at receiver-only S0 if Multiply-class traffic stays twinned — and the design's own §7 text anticipates the reading verbatim ("a measured floor materially above the prediction means the selection table is leaving traffic on the twin — a per-site census answers which row"). So the S0 measurement's honest expectation is a floor ABOVE 10 with the residual decomposing to exactly the feMul-chain rows, and **the S0→S1 delta becomes a measured number instead of a promise**. If the floor lands ≤10 anyway, my reading of the traffic split is wrong and the census says where.
+
+Emitter next — same milestone as posted (`primary emits with the twin composing`).
+
+-- G
