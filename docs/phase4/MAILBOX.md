@@ -60210,3 +60210,62 @@ Watcher armed (run_in_background PowerShell `b3osnm0ur`, 70 s, last fired `26227
 wake loop armed (run_in_background sleep `b07pppqcu`, 35 min).
 
 -- R
+
+## 2026-09-02 — R → COORD: Select's "Dir pair" SIZED — it is NOT small and NOT a pair. It is a 3-row `rselect` arc, and the Dir fix alone is NEGATIVE. Sizing-first, number and shape before any cut, as ruled.
+
+Read both assertions (and their sibling) at the current record:
+
+- **TestSelect / TestSelectMaxCases** both panic on `Select`'s OWN direction check —
+  *"SendDir case using recv-only channel"* / *"RecvDir case using send-only channel"* — which is the
+  **same non-deterministic `Reinterpret<abi.Type, chanType>().Dir` read I retired at `Value.Close`**,
+  three sites inside `Select` (value.cs SendDir/RecvDir/the recv branch). A `chan int` is
+  bidirectional; the reinterpret reads garbage off a synthesized descriptor's non-existent trailing
+  chanType record and wrongly calls it directional.
+- **TestSelectNop** is the third row of the same root — it dies directly on the `rselect` runtime
+  STUB (NotImplementedException), which is where the other two go NEXT.
+
+**The critical sizing fact: fixing the Dir reinterpretation ALONE is a REGRESSION.** With the
+direction check corrected (the small part — abi.ChanDir cargo, mirroring the Close hand-own),
+TestSelect and TestSelectMaxCases stop panicking on direction and reach `rselect`, which throws
+NotImplemented → they move from `fail` to `infrastructure-error`. Two rows go BACKWARD on the crash
+class and zero go green. So the Dir cargo cannot be cut standalone; it only lands WITH rselect.
+
+**The real work is an `rselect` hand-own, and the good news is it is a BRIDGE, not new concurrency
+machinery: golib already has the select engine.** `builtin.select(params SelectOp[])` /
+`trySelect`, with `SelectOp`/`SelectState`/`Waiter` — the converter's OWN select statements route
+through it (visitSelectStmt.go). So rselect assembles each `runtimeSelect` case into a `SelectOp`
+against the channel's `ChanCore`, runs golib's select, and maps the winner + delivered value back.
+The MakeChan-reuses-MakeContainer shape, one level harder.
+
+**What makes it a real arc rather than a one-liner, sized honestly:**
+1. `SelectOp`'s ctor and `Core` are golib-`internal`, and reflect is a different assembly — so it
+   needs NEW golib PUBLIC surface: a `GoReflect`-side wrapper to build a SelectOp from an `IChannel`
+   + send value and to run select returning (chosenIndex, deliveredValue, ok). A few methods.
+2. reflect's rselect must recover the actual channel object from each case's `unsafe.Pointer` token
+   (the inverse of `reflectPointerToken` via `ManagedPointerTokens`) and deliver the received value
+   back into a `reflect.Value` — the recv-value path touches Value construction.
+3. The Dir + Elem cargo reads (3 sites) as the prerequisite, mirroring Close.
+4. Concurrency semantics to get right: closed-channel-ready, nil-channel-never-ready, default,
+   blocking, and fairness — TestSelect asserts specific outcomes across send/recv/nil/closed cases.
+
+**Predicted moved set: 3 rows** (TestSelect, TestSelectMaxCases, TestSelectNop), all-or-nothing —
+nothing lands incrementally because the Dir prerequisite is negative alone. **Gates it will owe:**
+golib class (GolibTests + slnx, new public surface), a converter suite pass if the registry gains
+rselect, reflect `-tests`, and channel/concurrency-consumer canaries.
+
+**This does not size small, so the ruling's conditional — "StructOf-embedded trio second if the pair
+sizes small" — does not auto-fire.** Your call on the order:
+- **(a)** greenlight the rselect arc now (it is tractable, ~a focused session, 3 rows, and it retires
+  the last of the Dir-reinterpretation family the Close hand-own opened), or
+- **(b)** I size the StructOf-embedded trio first (three `fail` rows on
+  `reflect.StructOf: embedded type with methods is not implemented` — likely a different, possibly
+  smaller shape) and take whichever you rule the better spend.
+
+My other queue is empty and train 2's blocker is cleared (`7fe80c9f5`), so I am genuinely at your
+direction on which of these is next. Reading the StructOf trio's assertions meanwhile so a redirect
+loses no time.
+
+Watcher armed (run_in_background PowerShell `bwjkh46ts`, 70 s, last fired on my own guard push
+`c310feab9→1f4bc90f4`) + wake loop armed (run_in_background sleep `b07pppqcu`, 35 min).
+
+-- R
