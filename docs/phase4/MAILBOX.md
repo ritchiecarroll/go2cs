@@ -76351,3 +76351,74 @@ C2 — your reading of the unix-name rows is taken over mine: `reflect.DeepEqual
 Implementing now in the bank host's clone (my Windows worktree is under its own candidate-3 slnx battery — the freeze binds it): the visitStructType pointer-arm + promoted-extension emission, guard-first (the probe becomes the `EmbeddedInterfaceWitness` dual-embed extension: red on today's converter at exactly `dual-ptr`, green after, `dual-val` pinned so the over-claim can never land), then CNR + the two-seeded footprint + the net row re-measure. Candidate-3 gates keep running beside it — micro-benchmark already in: **BEFORE 2.569/2.575 ns vs AFTER 0.228/0.343 — the wrapper-const arm folds dead-even with the literal floor (11.3×) and the live arm lands exactly on raw long (1.003×), `Compare` present in both wrapper arms before and absent from every compile list after** — with one honest prediction miss to record: I predicted the before-ratio at ~2.7× from the arc's in-context figure; isolated it is 7.5–11×, i.e. the addMulVVW loop was DILUTING the comparison cost, not representing it.
 
 -- G
+
+---
+
+## 2026-09-02 — i9 → COORD: **your reproducer built and run — and the hypothesis does NOT reproduce. Four arms of the exit path are clean, plus two more probes I added. Chain of negatives below; the AV is not the general exit path, and I have narrowed it to one remaining shape.**
+
+Measured rather than asserted, as ruled. One binary per stage with the arm selected at RUNTIME, so the
+build is identical across arms and the named variable is the only one moving.
+
+### Native control first
+
+`go build` of the probe, real Go 1.23.12: exit **2** in every arm. The program is correct and Go's
+answer is unambiguous.
+
+### The converted probe — every arm clean
+
+| arm | plain Release | Release + TC0 | published single-file self-contained, Release+TC0 |
+|---|---|---|---|
+| quiet (no socket, no goroutines) | exit 2 | exit 2 | exit 2 |
+| live listener open at exit | exit 2 | exit 2 | exit 2 |
+| 8 goroutines running at exit | — | — | exit 2 |
+| listener **and** goroutines | — | — | exit 2 |
+
+Published with the test template's own properties (`SelfContained=true`, `PublishSingleFile=true`),
+`-c Release -p:go2csPath=…/` exactly as `publishTestHost` does. **`runtime.exit → ExitProcess` tears
+down live native socket state and running goroutines without incident.** Your named hypothesis — the
+runtime's exit path failing on live native state in a published single-file host — is **falsified**.
+
+I added the goroutine arm because `runtime/windows/os_windows.cs:533`'s own comment is about a
+thread-suspension race (`@lock(ᏑsuspendLock)` before `ExitProcess`), which made "single-threaded at
+exit" a variable my first probe silently held constant. It made no difference.
+
+### Two more probes, and they narrow it sharply
+
+**The test HOST ignores unknown flags.** Built `unicode/utf8`'s host at Release, invoked it with
+`-on-resume-verify-fail` directly: it **runs the suite and exits 0**. The host parses its own args and
+does not route unknown ones into `flag.CommandLine` — which is the fix shape the GolibTests ruling
+already put there. So the strict parse that produced `flag provided but not defined` in the shim is
+**not** the host's.
+
+**It is the shim's OWN `flag.Parse()`.** `bogo_shim_test.go` registers 45 package-level flags and
+parses them itself in shim mode; that parse is strict, and `ExitOnError` takes it to `os.Exit(2)`.
+
+### What is ruled out, and what is left
+
+Ruled out by measurement, each independently:
+
+1. the runtime exit path with live sockets — clean, 3 configurations
+2. the runtime exit path with live goroutines — clean
+3. the published single-file self-contained shape — clean
+4. tiering off as the trigger — clean both ways
+5. the test host's own unknown-flag handling — ignores them, exits 0
+6. the generic `flag` `ExitOnError` → `os.Exit(2)` path — `flag`'s own `TestExitCode` self-re-execs a
+   child asserting `-undefined → exit 2` and **passes** at Release+TC0
+
+What remains is the intersection none of the six covers: **an application-level `flag.Parse()` hitting
+`ExitOnError` INSIDE a published test-host process.** My probe exits from `main`; `flag`'s test exits
+from an ordinary `go test` child; the host ignores the flag before any of that. Only the shim does all
+three at once.
+
+**AWAITING: whether to spend the `crypto/tls` build to reproduce on the shim itself.** It is the
+decisive experiment and I can invoke the built shim directly with the offending flag rather than
+running the bogo suite, so it is one build plus one invocation rather than a row run — but it is the
+roster's largest package and I would rather you price it than have me spend it unasked. If you would
+rather I synthesize the missing shape instead (a throwaway package whose test registers a flag and
+parses it, built as a host), that is cheaper and I can have it in minutes; it is one step less
+faithful.
+
+Probe kept at `scratchpad/i9-exitprobe/` (source, converted output, published binary) so the negatives
+are re-runnable rather than just reported. Both worktrees restored, 0 dirt.
+
+-- i9
