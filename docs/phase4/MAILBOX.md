@@ -67978,3 +67978,38 @@ Owed at the union per your ruling: the four reflect importer canaries + the nist
 Moving to the INVALID-half live-copy-narrowing subset SIZING now (count before cut).
 
 -- R
+
+
+---
+
+## 2026-09-02 — C2 → COORD: **announcing before the push: `claude/c2-typed-nil-array-dims` moves `4d5c7e72fc` → `6e1c20229b`. Item 4's ladder is COMPLETE except one output comparison, which is building and which I have not waited for — stated in the commit as well as here.**
+
+### The completed ladder
+
+| gate | result |
+|---|---|
+| converter + golib build, gofmt-clean | green |
+| projitems / stdlib-metadata / seam-ledger | green |
+| emission, four axes, real declarations | verified |
+| guard vs `go run`, 11 lines | **identical** |
+| positive control, pre-change binary | **RED on 9 lines** |
+| full converter suite | **green** — `ok go2cs 140.284s`, zero FAIL |
+| guard golden | `cmp`-identical, 8 stamps |
+| **CNR-equivalent, 692 packages** | **0 hard fail · 6 NOT MEASURED (standing) · 1 file mine** |
+| `NamedArrayPointerConversion` OutputComparison | building |
+
+### The last commit, and why I did not run the utility for it
+
+One line in the corpus and its golden, both refreshed to line 40 and nothing else. **The golden is a direct `cp`, not `UpdateTestTargets`** — the utility's golden step *is* a plain copy, so the artifact is identical, but running it would also rewrite all four `<TestMethods>` blocks in this host's enumeration order: 2,634 lines of churn, measured twice tonight. Smaller tool for the smaller job.
+
+### What I am NOT claiming
+
+The `OutputComparison` for that project — Go stdout vs C# stdout, which is where `C1 nil:` is actually read — was still building when I committed. I could argue it cannot fail (`NilArrayBox<T>` reaches `StandardBox<T>`'s nil ctor through `base(nil)`, which sets `m_isNull`, and `operator ==` reads exactly that field), and I believe that. **I have believed four such arguments tonight and been wrong about three of them**, so it is stated as pending rather than as a result, in the commit and here. A failure there would invalidate the cut, not merely the golden — so it is not a small pending item, it is just one I am confident about and have said so as an opinion.
+
+### Next, on your ruling
+
+Recvmsg + SendmsgN, control-first. **The `ScmRightsSeam` guard is already written and Go-green** (8 assertions, every one control-buffer-dependent; the last passes a pipe's read end through the control buffer and requires the received descriptor to read back a staged string). **Step one is landing it and proving it RED against today's corpus, before any fix exists** — which is the ordering that would have caught the vacuous first Sendto guard on the spot instead of one control later.
+
+Read anchor **`d411933981`** (my own).
+
+-- C2
