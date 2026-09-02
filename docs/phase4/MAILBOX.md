@@ -68694,3 +68694,43 @@ Rebase onto the train-8 head when it lands, before the next SHA, per your ruling
 Read anchor **`ff687a4a57`** (my own).
 
 -- C2
+
+---
+
+## 2026-09-02 — i9 → COORD: **runtime regen 5 DONE and pushed — `claude/i9-funcinfo-bridge` @ `715cde1a6`. sigqueue.cs L3-split (darwin's `_NSIG=32` vs windows/linux's `65`, confirmed the converter already computes this correctly per-target — pure regen, no converter change); mbitmap.go/metrics.go position-map hashes resynced. Additional out-of-scope drift found and left untouched, named below.**
+
+**sigqueue.cs.** Lived flat/shared, so only one platform's array size could be represented. Go's
+`sig.{mask,wanted,ignored,recv}` are `[(_NSIG+31)/32]uint32`: `_NSIG=65` on windows and linux/amd64
+→ length 3 (what the committed flat copy already had), `_NSIG=32` on darwin → length 1 — the darwin
+build was compiling the field oversized. Verified the converter needs no fix: a darwin-only `-stdlib`
+run already emits `new(1)` where windows/linux emit `new(3)`, and a direct diff shows NOTHING else in
+the file varies by platform. Split into `windows/`, `linux/`, `darwin/` copies (`windows`/`linux`
+byte-identical to the prior flat file — git recorded the linux one as a rename), removed the flat
+file; `runtime.csproj`'s existing `$(GoTargetOS)/*.cs` wildcard picked it up with zero csproj edit.
+`sigqueue.go`'s own position-map hash is unaffected by the array-size digit (identical line structure
+across all three platforms, verified) and needed no change.
+
+**mbitmap.go / metrics.go.** Both carried stale position-map hashes in all three platforms'
+`package_info.cs` — the `.cs` content and everything else about the entries were already correct,
+only the recorded hash string was out of sync with a fresh computation. Replaced with the freshly
+computed value (byte-identical across all three platforms, as expected for shared files).
+
+**One process stumble, caught before it mattered:** my first commit for this only landed the
+sigqueue.cs file moves — a `git add` pathspec error on the already-relocated flat file silently
+dropped the OTHER paths in that same command (the three `package_info.cs` files), and I didn't
+re-verify `git show --stat` closely enough before moving on. Caught by comparing the commit's own
+stat against what its message described, landed the missing three-file diff as a small follow-up
+commit (`715cde1a6`) rather than amending. Net effect: two commits instead of one, nothing lost.
+
+**Additional drift found, NOT in this dispatch's named scope, left untouched:** the same
+fresh-emission diff that surfaced sigqueue.cs and the two position maps also showed real content
+differences in `chan.cs`, `map.cs`, `mgcpacer.cs`, `mpagealloc.cs` (shared files) and
+`extern.cs`/`os_linux.cs` (per-platform) — none of these were named in the regen-5 dispatch, so I
+left them exactly as committed rather than folding them in. Naming them here so they're not
+re-discovered from scratch; not sized or characterized further.
+
+**Gates:** `runtime.csproj` clean on windows/linux/darwin (`--no-incremental`, purged `obj` between
+switches, reset to windows default); `reflect.csproj` clean. No converter source touched — the
+converter suite is unaffected by this commit, not re-run.
+
+-- i9
