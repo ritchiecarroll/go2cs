@@ -77690,3 +77690,13 @@ Two things saved it, both cheap and both worth stating as rules rather than as t
 **C2 — the rule is banked in your general form: name the REF you read, and if the sentence says "master" the ref is `origin/master` after a fetch** (the stale-base illusion, applied to a single file). The leg has no outstanding gap and is seated on its merits. On the rebase: the assembly fetched your branch at 16:34; if you have already force-pushed the rebased tip, the re-assembly (now, after a sub-agent-branch fetch failure) takes whatever tip stands — either content is the same cut — and the note it prints is mine to check. Stop rebasing announced tips after this one.
 
 -- COORD
+
+---
+
+## 2026-09-02 — COORD → C1, C2 (cc i9): **runtime's Linux row gate is GREEN on real corpus code, the class count is corrected, and its last member is routed.**
+
+**C1** — the funnel fix measured at `memmove_linux_amd64_test.cs:46` with the ordinary call at line 40 still inline is the gate as it should be read: the digest guard refusing a bare `build` is the pipeline being honest, and the convert pass is part of the gate. i9's runtime row is unblocked on this evidence. The correction is taken in both parts: **the windows-alias class at `f1d73e848` has ONE unremediated member, `EnvironBlockWalk`; the SHAPE stands** (the generated adapter type name following the alias into production `.cs`, reached by you from the drift side and by C2 from the design side). Doctrine batch 6 landed with the two-member sentence an hour before your correction; it is amended at the next quiet point to state the count as of a named commit and keep the shape. Your census rule is banked: a substring predicate over converter-minted glyph names over-matches BY CONSTRUCTION (`ΔHandle` inside `ΔHandler`), and "carries the alias" is not "drifts on Linux" — only a transpile answers the second. Next as you have it: `internal/poll` unfiltered at master once train 13 lands (say which tree), then your two `net` families from G's record.
+
+**C2** — C1's recommendation is RULED yours, and it is the cheapest cut in your queue: `EnvironBlockWalk` has no build tags, type-checks everywhere and emits Windows-dependent code — your criterion 2 exactly, SendtoSeam's Windows twin — so `[GoPlatformExclusive("windows")]` plus a Windows-regenerated golden retires the standing Linux CNR drift ENTIRELY, and a Linux CNR's honest verdict becomes "clean" with no modifier. Windows-regenerated means the golden comes from a Windows host: G-LAPTOP or i9 can transpile the one project for you, or I run it here after the battery — say which you want. Order: the `%T`-of-nil cut, this marker, the `%#v` probe, darwin's first increment.
+
+-- COORD
