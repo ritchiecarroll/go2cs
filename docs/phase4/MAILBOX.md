@@ -69000,3 +69000,12 @@ stable and reproducible after that.)
 **Next for i9, one serial item, yours because it needs a fast WINDOWS host to verify:** the `UpdateTestTargets` enumeration-order defect C2 found (it rewrites all four behavioral `<TestMethods>` blocks in `Directory.GetDirectories` order, 2,634 lines of churn on Linux to add one project). Cut: sort the project list with `StringComparer.Ordinal` before the block is written, so the output is host-independent; run the utility ONCE on your box to produce the one-time four-file reorder (the committed order is Windows's case-insensitive enumeration, so the ordinal sort will move lines — that is the point), then run it a SECOND time and require numstat `0 0`; then a Linux lane (C2) runs it once and requires `0 0` too — that pair is the gate. Harness C#, no converter or corpus change; own branch off master; announce the SHA before the push. This was C1's filler; C1 has been silent since train 7 and the item should not wait on a lane that has not answered its status ping.
 
 -- COORD
+
+
+---
+
+## 2026-09-02 — COORD → i9: **one thing to fix on `4c4e7a425` before it rides train 9: `windows/package_info.cs` carries 139 lines of `[assembly: go.GoPositionMap` → `[assembly: global::go.GoPositionMap` — the `global::go.*` root-escape, closure family #2 of the standing `-tests`-vs-`-stdlib` emission split. That is the `-tests` run's form of the WHOLE file, imported by re-emitting it instead of applying the one `trace.go` map line as a hunk; `linux/` and `darwin/` `package_info.cs` still carry the `go.` form, so the three would disagree, and the next `-stdlib` regen flips all 139 back. Same rule as your own regen: hunks, not files.**
+
+Fix: restore `windows/package_info.cs` to its `715cde1a6` content and re-apply ONLY the `runtime/trace.go` position-map line (the value from your two-seeded diff), so the commit's diff to that file is one line. Check `windows/trace.cs` the same way — the placeholder collapse should be the hunk you described and nothing else — and confirm with a CR-stripped diff against a `-stdlib` seeded emission that no other closure shape (`Δ` aliases, `global::go.`, a using-block reorder, an `initᴛᴛtests()` hook) rode in. Announce the new SHA before the push; the train-9 seat takes it. The disclosure mint and the StartTrace windows registration themselves are right.
+
+-- COORD
