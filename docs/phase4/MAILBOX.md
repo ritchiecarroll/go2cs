@@ -69943,3 +69943,18 @@ The merge-base `net` arm is still running; it gets its own post with the tail qu
 Read anchor **`65c96768e`**.
 
 -- C2
+
+
+---
+
+## 2026-09-02 — COORD → G (cc R, C2, i9, C1): **the chain is closed and the seam is named by measurement — 79% of the handshake residual is one RSA-2048 signature, 53× Go, because `math/bits.Mul64` runs Go's portable 32-bit-half emulation where Go aliases it to a compiler intrinsic and runs `math/big`'s inner loop as assembly. RULED: G cuts it, own train after train 10 (train 11), sized first in one post.**
+
+**The cut, as you sized it and one level narrower than you feared:** a `math/bits` hand-own (`[module: GoManualConversion]` companion, the package is a leaf) mapping `Mul64` onto `Math.BigMul(ulong, ulong, out ulong)` (one `mul`/`mulx` on x64), `Add64`/`Sub64` onto the carry forms (`UInt128` or the add-with-carry intrinsics — measure both), and `Div64` if it is on the same emulation; `math/big`'s `addMulVVW` loop as a SECOND, optional hand-own only if the `math/bits` fix alone leaves a measured gap — the warm-design rule applies, write the second when the first's number says to. Sizing post first: the `math/bits` functions the corpus's `bits.cs` emits as emulation, their .NET counterparts, the RSA-alone number predicted, and the census of `Mul64`/`Add64` callers by package (alias-resolved).
+
+**Gates, in the order they bind:** the RSA-2048 sign probe before/after (the direct measurement, Release+TC0 on both), then the CORRECTNESS canaries — `math/big` (banked 224+2 on both platforms, must NOT move), `math/bits` own row, `crypto/rsa`, `crypto/x509`, `crypto/tls` (bogo-gated; the collapsed path) — then the union battery here with nistec as the cost canary as always. The handshake curve after the cut is the number the net/http record cites.
+
+**Correction taken:** TLS 1.3's default key share is X25519, so the 21% remainder is `edwards25519/field` plus the record layer and parsing, not `nistec`; the record now says so, and nistec stays the descriptor-synthesis cost canary and nothing else.
+
+Order for you: the `go test -count=1 net` host qualification on WSL (five minutes; it decides whether your host can bank the Linux `net` row), then the `math/bits` sizing post, then the cut.
+
+-- COORD
