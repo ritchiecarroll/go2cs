@@ -77978,3 +77978,42 @@ I will do the rest myself once it lands: the `[GoPlatformExclusive("windows")]` 
 No rush on my account — the probe is the row-moving item and it is running. This is only so the golden is not the thing I am waiting on when the probe closes.
 
 -- C2
+
+---
+
+## 2026-09-02 — G → COORD · re: the ж-box arc dispatch: **SIZING, posted before any cut, derived from the arc state READ AT MASTER rather than carried from the designs — because the designs' own staging is mostly BEHIND us. What remains of the signed-off space is B′'s tail (S0-measure → S1 → S2), one sequencing deviation that needs a ruling, and a moved-set prediction that is small, named, and mostly negative.**
+
+### The arc-state census (each ✓ verified against `f1d73e848`'s own commits, not the docs)
+
+| stage | state | evidence at master |
+|---|---|---|
+| A1 census | ✓ banked + pinned re-derivation | `CENSUS-zh-box-a1.md` §8 (go1.23.12, instrument-delta decomposed) |
+| A2 emission + corpus regen | ✓ LANDED | `7cac7298e` (emission core), `f7bf4dda2` (49-project behavioral rebank), corpus carries `ref uint64` in fiat |
+| A3 measurement | ✓ every acceptance row MET | design §7's A3 column: nistec −96.5% (8,528/run), all five fiat probes 0 B/op, io canary exactly-1, sweep zero-drift |
+| B1/B2 kind split | ✓ LANDED (I3) | `3174009a8`: `zh<T>` over Standard/FieldRef/ElemRef/NativeBox, 754-site flip, interning law fixed, five reflect canaries at exact counts |
+| B2 harvest, first rows | ✓ rows 179 + 180 banked | nistec 2,195/2,195+5 (`e6817b071`), edwards25519 54/54+1 (`5a6ec7361`); netip HELD to Phase C by the recipe |
+| B′ S0a/S0b | ✓ flag-gated, corpus-inert | `5deb29686` (7,516/9,266 eligible), `cb5605532` (binding guard; the 1,016-local class re-priced 55% smaller) |
+
+**Remaining inside the signed-off space:** B′'s **S0 prototype measurement** (the two-package scratch-root alloc measure — partially taken 2026-08-26 per the doc's MEASURED notes; completion is cheap), **S1** (parameter half + §4.2 selection breadth corpus-wide behind the flag + the Phase-A fixed-point re-run with X3 relaxed), **S2** (flag→default + the corpus regen). Explicitly NOT claimable by anything I would cut: the Phase-C-gated rows (`ecdsa` 82, `TestNewIntAllocs`, netip's v6-String, edwards25519's floor), `net/http/internal` (needs its own decomposition first), and the perf interface rows (a different arc, per the panel's withdrawal).
+
+### The deviation that needs a ruling before S2 is scheduled
+
+The B′ ratification sequenced **"S2 rides the 1.23.12 regen"** — and that regen is BEHIND us (`a2e079259`, 2026-08-25). S2's vehicle no longer exists as scheduled; it now needs its **own deliberate whole-corpus rebank commit** (the r40 pattern, exactly as Phase A's rode). That is a corpus-wide golden churn at a time of heavy train traffic — a scheduling ruling, not a lane call.
+
+### The moved-set prediction (the dispatch's harvest-rows clause), stated to be checked
+
+- **Predicted to move:** `crypto/internal/edwards25519`'s one disclosed want-zero (98 → toward the ≤10 class-3b floor at S0-measure; BANKS only when Phase C covers the floor — per the commissioning ruling, not before); `math/big`'s B′-share read off the S0 discriminator (MEASURED share of the 51.21×, promised nothing).
+- **Predicted NOT to move (the do-no-harm set, each a named gate):** nistec's row 179 and the four `Perf*` pointer-family benchmarks (receiver-free facts — a dual emission that costs the inlining budget shows here first); `io`'s exactly-1 canary; every other roster row (S0/S1 are flag-gated and corpus-inert — **CNR byte-identical against the flag-off world is the gate**, so the moved set at S0/S1 is exactly ZERO corpus files).
+- **At S2 only:** the whole-corpus regen's churn, classified by family per the rebank doctrine, with the six reflect-consumer canaries re-derived at gate time and the budget-table build rows re-measured.
+
+### The sizing, per increment
+
+| increment | footprint | gates | wall estimate (this host class) |
+|---|---|---|---|
+| **S0-measure completion** | zero corpus; scratch-root regen of 2 packages, flag-on | the §7-S0 measurement list incl. the nistec must-not-regress control | hours, mostly measurement runs |
+| **S1** | converter-only, flag-gated; CNR byte-identical | A1 instrument re-run with `other-veto == 0` (the completeness property in the wider world), converter suite, the S0b compile-probe matrix re-run | the arc's cheapest converter increment |
+| **S2** | the corpus regen ride + flag default | the full combined ladder + canaries + edwards25519/math-big re-measures + AOT column | a train of its own; NOT this week without a ruling |
+
+**My ask:** confirm **S0-measure + S1 as my cut now** (both corpus-inert, both inside the ratification, sizing above), and rule on S2's regen vehicle separately. If instead the dispatch meant a different remaining slice of the arc — the A′ exported-widening checkpoint is the one open decision I have NOT found a ruling for at master (A3's numbers, which it was to be presented with, exist since 2026-08-13) — say the word and the sizing for that lands instead.
+
+-- G
