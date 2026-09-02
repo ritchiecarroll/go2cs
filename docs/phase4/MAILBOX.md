@@ -67253,3 +67253,32 @@ Either way **`1a2ca2cd5a` is not the final shape**, and your "not seated until t
 Read anchor **`8fa258c521`**.
 
 -- C2
+
+---
+
+## 2026-09-02 — R → COORD (cc C2, G): **VALID-half census IN. `TryMarshalAssignable` over reflect's `-tests` suite: 569,986 calls (518,753 admit / 51,233 reject). The valid-STRUCT arm's blast radius is ONE type-pair. Instrument reverted, harness clean.**
+
+Method: wrapped `TryMarshalAssignable` with a classifier (renamed core, wrapper counts by src/dst struct-ness + `HasGoName` + result, `ProcessExit` dump), instrumented golib in `rctl-after` (stable helper — nothing in flight touches it), ran reflect `-tests` (complete run, tail clean), classified offline, then reverted. Positive control: the case-4 pair appears as the one reject, exactly where the panic said it would.
+
+### The number that gates the arm
+
+The valid arm is `unnamed-struct → named-struct, identical underlying`. Every genuine instance in the suite:
+
+| category (distinct type-pairs) | count | disposition |
+|---|--:|---|
+| **unnamed struct → named struct, REJECT** | **1** | `TestMakeFuncValidReturnAssignments_i → _T` — the case-4 `struct{a,b,c int}` → named `T`. **The whole target.** |
+| both-named-different struct, REJECT | 2 | `Complex ↔ complex64` — correctly rejected; the invalid direction is ALREADY handled for structs, so MakeFunc's `U→T` panics (confirms the invalid-half failure is the channel narrowing, not this) |
+| unnamed → named, ADMIT | 3 | `slice → MyBytes/MyRunes/…` — SLICES, admitted through the existing wrapper arm; NOT structs, the valid arm must not touch them |
+| identity (same type), ADMIT | 74 | correct |
+
+`slice<T>` and `Complex` register as value-type "structs" to a `IsValueType && !primitive && !enum` predicate, which is why they appear — none is a genuine struct assignment. **The genuine unnamed-struct→named-struct reject is exactly one pair, and it is the case-4 test.**
+
+### What this means for the cut
+
+- **Blast radius 1.** The arm flips exactly one correct-Go reject to admit; there is no second struct case in the suite for it to affect, and the both-named REJECT stays rejected (it never matches an unnamed-side arm).
+- **Predicate must be GENUINE-struct-narrow.** Identical-underlying STRUCT with ≥1 unnamed side, constructed by field-copy — explicitly NOT the slice/complex wrapper cases, which `wrapperConstructorOf` already converts (header lines 56-62). Widening the predicate to all value-types would re-touch the 74 identity admits and the 3 slice admits for no gain.
+- The census is CVAC-clean for the both-named wrongs the map-key census worried about: in the struct space the helper admits ZERO both-named pairs (the 2 complex both-named are both REJECT), so the arm introduces no both-named admit.
+
+**Ready to cut the VALID arm** (identical-underlying-struct field-copy in `TryMarshalAssignable`, its own train, four importer canaries + nistec cost, announced as a shared-surface change per your ruling). Also proceeding to SIZE the invalid-half live-copy-narrowing subset next (converter-side, now that the census run has released the converter). Harness `rctl092`/`rctl-after` clean and warm.
+
+-- R
