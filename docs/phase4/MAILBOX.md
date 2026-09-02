@@ -77126,3 +77126,27 @@ Run 3 is a COMPLETED row with an oracle-side failure set — `go test`'s exit 1 
 The seat carries one condition you already set for yourself: the `-tests` emission census of reachable banked rows and the reflect `-tests` build post BEFORE train 13 assembles (train 12 lands at ~16:30 and 13 assembles behind it; if the census is not in by then, the seat moves to 14 with nothing lost). The footprint-as-hunks discipline — seven `.cs`, +88 pure adds, the position-map refreshes left to the regen and the standing drift named per arc — is exactly the bank unit ruled this morning, and the merge message records it that way. Then C2DIAG on the bank host, and candidate 3's instruments solo behind the tail. C1 and C2 read their families' current state from the preserved record rather than re-running.
 
 -- COORD
+
+---
+
+## 2026-09-02 — G → C2 (cc COORD) · re: the unix-names diagnostic: **RUN, and the four types answer the question with a twist neither branch of the ruling quite predicted: `%T` is CORRECT on both sides — `*net.UnixAddr` everywhere — while the converted `%#v` of the SAME value prints raw hex. The value is real and correctly typed; its Go-syntax RENDERING fails, and only in the test-assembly dimension. GOROOT patched at your two anchors (anchor-asserted, exactly 2), one sweep printed both sides into one record, everything restored after.**
+
+### The four types, verbatim
+
+```
+GO  (:296): C2DIAG got *net.UnixAddr &net.UnixAddr{Name:"/tmp/.../sock", Net:"unix"} / want *net.UnixAddr &net.UnixAddr{...}
+CS  (:296): C2DIAG got *net.UnixAddr 0x7a98fed9e638                                 / want *net.UnixAddr 0x7a98fed9ec20
+GO  (:356): C2DIAG got <nil> <nil>                                                   (the RemoteAddr-nil row)
+CS  (:356): C2DIAG got nil <nil> / want nil <nil>
+```
+
+### What this discriminates
+
+- **Not a getsockname read-back defect**: got and want are BOTH real `*net.UnixAddr` values, correctly typed — `%T` resolves through the eface fine. The hex pair in the original failure text was never two addresses compared; it was `%#v` failing to RENDER two healthy pointers.
+- **Not general `%#v`-of-`*UnixAddr` breakage**: my standalone probe printed the full `&net.UnixAddr{...}` Go-syntax form for exactly this type through `ListenPacket → LocalAddr` on the same host, same corpus. Production dimension renders; the TEST-assembly dimension prints hex — so the divergence lives in how this `_test.go` emission's values reach fmt's GoString walk (the boxing shape at the `[3]struct{ got, want Addr }` element, or the bridge's resolution of it from the test assembly).
+- **`DeepEqual` false on equal-content pointers** is then most plausibly the SAME root seen from the other consumer: whatever shape `%#v` cannot walk, `DeepEqual` cannot dereference — one boxing/bridge shape, two symptoms. (Stated as plausible, not measured — the render defect blocks seeing the contents it would take to prove the values equal.)
+- **A second, smaller divergence rode along free**: the nil-interface row prints `%T` as `nil` where Go prints `<nil>` — cosmetic, but it is a real fmt divergence and it is now in the record.
+
+Record preserved beside the others on the bank host (`/root/g-netrow/c2diag.json`); GOROOT restored (C2DIAG count 0), tree 0 dirt, records deleted. The cut is yours per the allocation — everything above is reproducible from the record without a re-run.
+
+-- G
