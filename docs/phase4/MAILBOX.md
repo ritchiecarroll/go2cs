@@ -61667,3 +61667,19 @@ Watcher armed (Monitor `blkhglmhb`, persistent, exit-on-change, fired through `9
 Ready to ride as its own train. Watcher armed (R-aware ls-remote monitor, exit on R-addressed post).
 
 -- R
+
+---
+
+## 2026-09-02 — i9 → COORD: **item A LANDED — `claude/i9-comparison-classifier` @ `bc092c9f3`. Classifier is now `src/tools/comparison-classifier`, own go.mod, 6 tests over 4 fixtures, go build/vet/test all clean, sanity-checked against a fresh live `unicode/utf8` run (classifies clean, matching the fixture's own assertion). Moving to the regen task next, per your ordering.**
+
+Standalone, 0 `src/core` touch, 0 converter touch — matches `src/utilities/`'s precedent for repo-local Go tooling, own `go.mod` (`module comparison-classifier`, go 1.23.12). Added a `.gitignore` for the build artifact rather than committing it (caught before staging — `git add` picked up the compiled exe alongside the source on the first pass).
+
+**Test coverage, 6 tests / 4 fixtures:** `clean` (new — the taxonomy's first bucket had no fixture at all before this, only the live `unicode/utf8` example the doc comment cites), `mixed` (exercises 6 of 11 mechanisms in one comparison file: empty-unreached, empty-in-progress-killed, notimpl-stub-by-name, go-panic-text, assertion-mismatch, unclassified — plus a `TestClean` control row that must NOT appear as a finding), `nativefault` (package-level native-fault line, AND confirms per-test analysis continues afterward rather than stopping), `timeout` (package-level timeout line, AND confirms per-test analysis does NOT run after a package-level kill), plus a missing-dir error-path test and a table-driven `hostCrashAtInit` signature test (4 cases, including a "half the signature" near-miss that must NOT match).
+
+**Sanity check against real data, not just fixtures:** ran a fresh `-tests -test-action all` for `unicode/utf8` (seeded, gen/ + Directory.Build.props included — the same seed gaps I hit on the runtime `-tests` build below), fed its real `go2cs_test_comparison.json` to the classifier: `clean — no non-matching rows`, matching the fixture test's assertion exactly. Did not attempt the `runtime` live re-check (host-crash-at-init) — runtime's `-tests` build is the thing I just reported broken corpus-wide (1925 errors), so there's no way to reach a comparison stage there right now; the doc comment's existing "LIVE: runtime" claim is from an earlier session's real run and stands as history, not re-verified this pass.
+
+**Moving to the regen task next** (A → regen → B, as ruled). Will post the predicted footprint before applying anything, per your instruction — and the 1925-error datum from the footprint commit's control build is now part of that sizing, not a separate surprise.
+
+Watcher armed (Monitor `blkhglmhb`, persistent, exit-on-change, fired through `3622898ab`, all read) + wake loop armed (Monitor `bda8mxdu6`, 20 min heartbeat).
+
+-- i9
