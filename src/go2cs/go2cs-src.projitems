@@ -143,6 +143,7 @@
     <None Include="$(MSBuildThisFileDirectory)platformCensus.go" />
     <None Include="$(MSBuildThisFileDirectory)platformCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayout.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformTestAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformManifest.go" />
     <None Include="$(MSBuildThisFileDirectory)platformProject.go" />

@@ -22,8 +22,10 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
+	"go/build"
 	"log"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -216,10 +218,30 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		// Read existing type aliases from package info file
 		lines := HashSet[string]{}
 
-		// If processing a single file, instead of all package files, merge type aliases
+		// If processing a single file, instead of all package files, merge type aliases…
 		if mergeExisting {
+			// …except one the CURRENT flavour CONTRADICTS. Merge preserves, and preservation has no
+			// notion of a per-GOOS declaration: layout L3 splits production metadata by flavour
+			// while package_test_info.cs stays FLAT — one file serving three — so a windows-seeded
+			// `global using syscallꓸHandle = go.syscall_package.ΔHandle;` is merged forward untouched
+			// by a linux run and binds an alias to a type that flavour never declares (CS0426/CS0305
+			// on syscall's Linux `-tests` build). The entry is not re-derived and found wrong, it is
+			// simply KEPT, which is why the defect is sticky rather than self-healing.
+			//
+			// The mirror of the import-hook merge rule (importInitSection.go): there a merging write
+			// meets one hook under two spellings and the FRESH entry wins, being this emission
+			// unit's own decision; here the CONTRADICTED entry is dropped, for the same reason from
+			// the other side. Only the IMPORTED section needs it — the exported section's
+			// `[assembly: GoTypeAlias("Handle", "ΔHandle")]` carries strings and binds no type.
+			contradicted := flavourContradictedAliases(filepath.Dir(packageInfoFileName), build.Default.GOOS)
+
 			for i := startLineIndex + 1; i < endLineIndex; i++ {
 				line := packageInfoLines[i]
+
+				if aliasContradictsFlavour(line, contradicted) {
+					continue
+				}
+
 				lines.Add(strings.TrimSpace(line))
 			}
 		}

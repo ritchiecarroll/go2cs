@@ -50,6 +50,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -258,4 +259,116 @@ func applyPlatformLayoutBlocks(projectFileContents string, projectFileName strin
 		contents[packageInfoAt+len(platformPackageInfoAnchor):]
 
 	return contents[:propertyAt] + platformPropertyBlock + contents[propertyAt:]
+}
+
+// aliasTargetPattern matches the TARGET of a merged-forward `global using` alias — the type name
+// after the last dot. `global using syscallꓸHandle = go.syscall_package.ΔHandle;` yields `ΔHandle`.
+var aliasTargetPattern = regexp.MustCompile(`^global using [^=]+=\s*[A-Za-z0-9_ꓸ.@]*\.([A-Za-z0-9_Δꓸ]+);\s*$`)
+
+// declaredTypePattern matches a type DECLARATION in a production package_info.cs.
+//
+// The trailing negative lookahead is spelled out because Go's regexp has none: the package's own
+// container (`partial class syscall_package`) matches this shape too, and while it is harmless here
+// — every flavour declares it, so it can never be CONTRADICTED — a predicate that reports the
+// container as a "declared type" is the kind of looseness that reads as a finding later. Excluded by
+// name suffix rather than by position, since the container is the one `*_package` declaration a
+// package_info.cs ever carries.
+var declaredTypePattern = regexp.MustCompile(`partial (?:struct|class|interface) ([A-Za-z0-9_Δꓸ]+)`)
+
+// isPackageContainerName reports whether a captured declaration name is the package's own container
+// class rather than one of its types.
+func isPackageContainerName(name string) bool {
+	return strings.HasSuffix(name, PackageSuffix)
+}
+
+// flavourContradictedAliases returns the alias TARGET names that some per-GOOS production
+// package_info.cs in this package declares and the CURRENT flavour's does not.
+//
+// It exists for one shape, and the shape is a consequence of two correct decisions meeting. The
+// `-tests` write MERGES (mergeExisting=true at all six call sites in testConversion.go) because it
+// seeds package_test_info.cs from the production package_info.cs and then accumulates each test
+// variant's additions across several writes — so preservation is exactly right for its purpose. And
+// layout L3 splits a package's production metadata per GOOS while leaving package_test_info.cs
+// FLAT: one file serving three flavours. Preservation has no notion of a flavour CONTRADICTING an
+// entry, so a windows-seeded `global using syscallꓸHandle = go.syscall_package.ΔHandle;` is merged
+// forward untouched by a linux run — not re-derived and found wrong, simply kept — and binds an
+// alias to a type that flavour does not declare (CS0426/CS0305 on syscall's Linux `-tests` build).
+//
+// This is the mirror of the import-hook merge rule (importInitSection.go): there a merging write met
+// the same hook under two spellings and the FRESH entry wins, because it is this emission unit's own
+// decision; here the CONTRADICTED entry is dropped, for the same reason from the other side.
+//
+// Deliberately keyed on what the OTHER flavours declare rather than on "not declared here": a type
+// this package never declares in any flavour is somebody else's (an imported package's alias target,
+// which is none of this predicate's business), while a type declared in some flavours and not this
+// one is precisely the platform-varying declaration the flat file cannot serve. Censused across the
+// L3 population at the cut: 19 packages carry a flat package_test_info.cs, and exactly ONE has a
+// contradicted alias — syscall, with ΔHandle and ΔSockaddr, each declared in 1 of 3 flavours.
+func flavourContradictedAliases(packageDir string, goos string) HashSet[string] {
+	contradicted := HashSet[string]{}
+
+	if len(goos) == 0 || !packageCarriesPlatformLayout(packageDir) {
+		return contradicted
+	}
+
+	entries, err := os.ReadDir(packageDir)
+
+	if err != nil {
+		return contradicted
+	}
+
+	here := declaredTypesIn(platformPackageInfoPath(packageDir, goos))
+
+	for _, entry := range entries {
+		if !entry.IsDir() || !isPlatformSourceFolder(packageDir, entry.Name()) || entry.Name() == goos {
+			continue
+		}
+
+		for name := range declaredTypesIn(filepath.Join(packageDir, entry.Name(), PackageInfoFileName)) {
+			if !here.Contains(name) {
+				contradicted.Add(name)
+			}
+		}
+	}
+
+	return contradicted
+}
+
+// declaredTypesIn collects the type names a production package_info.cs declares. A missing file
+// yields an empty set, which is the right answer for a flavour that emits no metadata at all.
+func declaredTypesIn(packageInfoPath string) HashSet[string] {
+	declared := HashSet[string]{}
+
+	contents, err := os.ReadFile(packageInfoPath)
+
+	if err != nil {
+		return declared
+	}
+
+	for _, match := range declaredTypePattern.FindAllStringSubmatch(string(contents), -1) {
+		if isPackageContainerName(match[1]) {
+			continue
+		}
+
+		declared.Add(match[1])
+	}
+
+	return declared
+}
+
+// aliasContradictsFlavour reports whether a merged-forward alias line names one of the contradicted
+// targets. A line this function does not recognize is KEPT — the merge's default is preservation and
+// this predicate only ever subtracts what it can positively identify.
+func aliasContradictsFlavour(line string, contradicted HashSet[string]) bool {
+	if len(contradicted) == 0 {
+		return false
+	}
+
+	match := aliasTargetPattern.FindStringSubmatch(strings.TrimSpace(line))
+
+	if match == nil {
+		return false
+	}
+
+	return contradicted.Contains(match[1])
 }
