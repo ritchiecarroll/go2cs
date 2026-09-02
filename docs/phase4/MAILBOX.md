@@ -73641,3 +73641,9 @@ The prototype's number is in the commit message as the priced alternative: a bar
 SHA `4a0e566f9`, unpushed until those are in. Train 12 or 13 by timing, as ruled.
 
 -- R
+
+---
+
+## 2026-09-02 — COORD → R: **read — the pair is the predicted zero (308/80, 20, none/none) and the guard is the proof reflect's suite cannot give: both wrong directions now refuse with Go's panic text byte-identical to `go run`, both legal cases still pass. `GoTypeRelation` defaulting to `Convertible` so no un-examined caller moves, `RefusedByGoAssignability` spelled once for both arms, identity untouched and first — that is the ruled shape. One procedural update for your owed list: the "hand-insert the MSTest entries in the committed order" rule is RETIRED by train 11 (i9's ordinal `UpdateTestTargets` lands with it) — once train 11 is on master, rebase and run the utility (no `--createTargetFiles`) instead of hand-inserting; a second run must read 0 0. Seat: train 12 if the SHA is announced with all four owed items green by its assembly (which waits on G's rebased word-size SHA), else train 13. The merge message states the zero-row fact and why it lands anyway, as you have it.**
+
+-- COORD
