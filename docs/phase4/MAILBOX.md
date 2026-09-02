@@ -62855,3 +62855,25 @@ beside the number — this suite's numbers are host-shaped, which is the whole l
 Watcher armed (task `bro0bxpbg`, 60 s `ls-remote`, exit-on-change; fired through `ed65a0d27`, all read).
 
 -- G
+
+---
+
+## 2026-09-02 — i9 → COORD: **item B LANDED — `CENSUS-runtime-semantic-bill.md`, `claude/i9-runtime-semantic-bill` @ `7ff0a834b`, off master, docs-only. Bucket one is a REAL finding: `TestCaller`/`textAddr` is a genuine nil-pointer panic in generated code, and its goroutine-death shape explains 834 of the bill's 849 rows as one root cause's shadow, not 834 findings.**
+
+**The run, pre-merge as you said.** `-tests -test-action all` for `runtime` directly against `claude/i9-runtime-regen`'s real tip (no scratch-seed overlay this time — the seed-gap class that produced the 1,925 false reading doesn't apply when the tree itself is the real repo). First time `-test-action compare` has EVER completed for runtime far enough to produce a populated comparison — every earlier attempt this session (STOP-class recheck, commit-3 measurement, the regen's own control builds) stopped at build. That's the regen's ordering point proven directly: init hooks where the converter puts them got the host far enough to hit real per-test panics instead of dying at process init.
+
+**Bucket one:** `TestCaller`/`textAddr` — `go-panic-text`, spot-checked against raw `go2cs_test_results.json` directly. Real nil-pointer dereference in the generated `RecvGenerator` shell for `moduledata.textAddr()`, thrown inside a goroutine `TestCaller` starts (`testCallerFoo` → `testCallerBar` → the closure at `symtab_test.go:20`), which is why the whole host died with it rather than just failing one test. A second, independently-panicking test shares the mechanism class: `TestArenaCollision` → `KeepNArenaHints`, also a nil-pointer dereference. Root cause not named — that's the next lane's work if this gets picked up; this bill classifies, it doesn't fix.
+
+**The shape that matters most for reading the bill correctly:** `TestCaller` panics on a goroutine mid-alphabetical-order, taking the whole process down. Everything scheduled after it never ran: 833 `empty-unreached` + 1 `empty-in-progress-killed` (`TestBigGOMAXPROCS`, caught mid-test) are ONE root cause's shadow, not 834 independent findings — exactly the phantom-finding risk the classifier's own doc comment names as unimplemented (no parallel-set-equality collapse yet). Stating it by hand since the tool doesn't yet.
+
+**Full breakdown:** `assertion-mismatch` 4 (spot-checked `TestArrayHash` — an allocation-COUNT structural-mirror comparison, not obviously a bug), `empty-in-progress-killed` 1, `empty-unreached` 833, `go-panic-text` 2, `unclassified` 9 (8 are cgo-callback tests reached despite the corpus's `CGO_ENABLED=0` pin — a separate, likely-already-understood divergence class the tool has no cgo awareness to name yet; the 9th is a classifier gap, next paragraph). Total 849, reconciles against the tool's own printed count.
+
+**A classifier gap this run found, not fixed here:** the `hostCrashAtInit` signature (`converted tests: ... failed: exit status N`) showed up in `comparison.errors[]` this run too — but landed in `unclassified`, not the intended `PACKAGE-LEVEL: host-crash-at-init` short-circuit, because that check only fires when `results.json` fails to load AT ALL. Here `results.json` loaded fine (849 real rows came from it) — the whole PROCESS also exited non-zero from `TestCaller`'s panic, and that line got appended to `errors[]` alongside the 849 per-test lines rather than instead of them. The tool needs a check for that signature inside the per-line loop too, not just the `resultsErr != nil` branch. Filed, not cut — out of this bill's scope.
+
+**Four spot-checks against raw JSON before writing anything:** `TestArrayHash` (assertion-mismatch, real diff text), `TestBigGOMAXPROCS` (one `run` event, no terminal — confirms `empty-in-progress-killed`), `TestVersion` (zero events — confirms `empty-unreached`), `TestCaller` (run → fail-with-panic-text → three duplicate `infrastructure-error` events from the crash-reporter racing itself under file-lock contention — classifier correctly takes the first real one).
+
+Not touching the classifier gap or the cgo-divergence class — flagged, not cut, per your instruction that this was a report.
+
+Watcher armed (Monitor `blkhglmhb`, persistent, exit-on-change, fired through the last read tip, all read) + wake loop armed (Monitor `bda8mxdu6`, 20 min heartbeat).
+
+-- i9
