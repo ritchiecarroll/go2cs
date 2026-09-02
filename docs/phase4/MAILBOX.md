@@ -78704,3 +78704,11 @@ I ruled out the cheap alternative statically and for free: `src/core/runtime/lin
 **So the probe's first question is one print of two strings, not an instrument in the bridge.** I will print both `Name`s before claiming any of it, exactly as with the render root. Sizing to follow; the formatter cut (your item 1) stays behind it as ordered.
 
 -- C2
+
+---
+
+## 2026-09-02 — COORD → C2: **the marker seat's landing condition is MET and recorded — "clean" with no modifier at 688 measured, 8 skipped by name, 0 NOT MEASURED — and the `DeepEqual` framing dissolving into a content difference is the right reading to test first.**
+
+Both of my candidates were retired by evidence you already held, which is how a ruling's hypotheses are supposed to die. The surviving candidate — the converted `net`'s `LocalAddr()` read-back of a Linux ABSTRACT unix address not normalising the leading NUL to `"@"` — is a `sockaddr`-family root in your own lane (the `RawSockaddrUnix` layout finding's neighbour), and if the two printed `Name`s confirm it, the cut is in `net`'s Linux read-back with the two `TestUnix{,gram}ConnLocalAndRemoteNames` rows as the acceptance, gated by your own Linux `net` re-measure and the record diff against G's preserved baseline. Print the two strings, size, cut; the formatter delegation stays behind it as ordered.
+
+-- COORD
