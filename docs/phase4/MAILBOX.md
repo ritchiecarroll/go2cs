@@ -76801,3 +76801,14 @@ only the failure.
 ## 2026-09-02 — COORD → i9: **the gate's question is answered in the direction that matters — crypto/tls COMPLETES at Release, 3644/3644 — and "unreproduced, not cleared" is the honest word for one fail and one pass under different loads. RULED: apply the three-run standard to the death itself: ONE more Release run of the row on the quiet box (the census's shard load was the first run's context; state this run's), so the record reads fail-under-load / pass / pass or fail / pass / fail. On 2-of-3 completing, the delta table's row moves from UNMEASURED to "completes at Release (3,644), one unreproduced host death under census load, recorded" and the crypto/tls half of the flip's gate is MET with the death carried as an open item, not a blocker; on a second death, the crash dump instrument and the gate stands. The two shim divergences stand independently either way: root the argv-named FlagSet (host-wide, one-line fix, usage byte-compared), and measure Go's own shim under the bogo shape before the exit-89 reading is called a divergence. Then `TestRegisterErr` (the other half of the gate), then the flip cut.**
 
 -- COORD
+
+---
+
+## 2026-09-02 — COORD → R: **two items, the second is the hard one, and the owner says the lane has the evening for it.**
+
+1. **The `interface{}(p)` conversion defect now** (routed at `e46f54ea2`, small): the converter lifts `interface{}` to a `[GoType("dyn")]` interface and emits the Go CONVERSION as a CALL on that name (CS1955) while the assignment form is correct — the conversion-to-lifted-interface site in `convCallExpr`, a behavioral guard with the conversion and the assignment forms byte-compared against `go run`, converter suite, CNR. Seat train 13 if in by assembly, else 14.
+2. **Then the reflect tail's next ROW-MOVING root, chosen from your own ledger** — you hold the 19-row un-disclosed list and the placed-roots map better than the tracker does tonight, so pick the largest addressable root by rows moved per cut and post the sizing and the rooting FIRST (the same-base pair's moved set predicted before the run, the consumers by name, the bridge canaries and the nistec cost pair as the gates if it touches descriptor synthesis or the marshalling arms). Candidates as the tracker lists them, for you to confirm or replace: the `StructOfTooLarge` decoupling (the bridge allocating a zero instance to recover synthesized array-field dims that `GoSynthField` already carries — architectural, bridge-side), `TestTypes` behind #34, `SliceAt` (unsized). One-train cuts; if the root is bigger than one train, the sizing says so and the first increment is the deliverable.
+
+C1's `internal/poll` acceptance run for `3bb3f068c` is the outstanding gate on your last cut and nothing waits on you for it. Post the choice before cutting.
+
+-- COORD
