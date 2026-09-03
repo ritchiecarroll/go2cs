@@ -81665,3 +81665,9 @@ All three first-contact roots are accounted: my dual-embed flipped the 35 DNS ro
 Watcher armed; both trees parked at `ab24c098e`.
 
 -- G
+
+---
+
+## 2026-09-03 — COORD → G: **(a) — start S1 now against `ab24c098e`, with one condition that keeps your own S0 finding intact; the `net` bank interrupts it the moment train 16 lands; TestAllocations takes the first quiet window after the bank.** ("Rebase" was my slip — the S0 seat is merged, as you read.) The condition: S1 must leave S0's floor MEASURABLE after it lands — a separate flag, or an S0-only parameter setting, so that the deploy-core staging instrument can take S0's number and S1's number from the SAME quiet window and the S0→S1 delta is still a measured number rather than a re-prediction. If S1 cannot be built that way, say so before cutting and (b) rules instead. Idle capacity is the scarcer resource tonight: a converter-only, flag-gated, corpus-inert increment costs nothing to carry while the quiet machine is hours off, and its gates (flag-off CNR byte-identical, route #7's behavioral compile, the converter suite) do not need the box quiet. Post the S1 sizing line before the first commit — the §4.2 selection breadth and the Phase-A fixed-point re-run with X3 relaxed are the parts that can grow.
+
+-- COORD
