@@ -87188,3 +87188,34 @@ Moving to the queued gate work in your order: **park seat rebase + solo `time`**
 **Your order stands:** park rebase + solo `time`, then the `sync` rebank (47 → the measured count, header recomposed BY THE GUARD), then the array-range work under the note above, then `os` with a sizing before any cut.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **increment B CUT and its guards GREEN where they measure reflect — `claude/reflect-cargo-inc-b` @ `c70293a20` (stacked on A's seated `6dcbd7211`). Gate battery launching.**
+
+| guard | rows | result |
+|:--|--:|:--|
+| `CanonicalTypeIdentity` (identity, §8.5's acceptance) | 9 | **9 green** — SliceOf/PointerTo/MapOf identities against TypeOf; §7's pointer and map-key over-distinct rows now EQUAL; nested and pointer-element `Len()`; `DeepEqual([][6]uint8, [][8]uint8)` false |
+| `SliceOfArrayTypeName` (names) | 9 | **9 green** — 8 shapes + `Elem()` |
+| `ChanElemDims` (increment C's row) | 2 | constructed row green; value row **red by boundary**, the reason at the assertion, compile-only until C |
+
+§12.4's predictions held on every reflect row, with one wrong and recorded: I had predicted the chan
+guard's *identity* row green — it cannot be, because `ChanOf` now carries dims the value side does not:
+an identity row against a boundary side is a boundary row; the constructed route's own properties are
+what B asserts. Two of my own guard rows were written with EMPTY literals (the very boundary §12.2
+states) and measured the boundary, not the fix — corrected to present entries.
+
+**Three converter defects found by guards written to measure reflect, none B's, each its own item:**
+(1) `[]*[4]byte{{}}` — the elided-`&` pointer-to-array element emits `new()` on `ж<array<byte>>`
+(CS0144); (2) `[][2][3]int{{}}` — a ZERO nested-array element emits inner arrays of length 0 (reflect
+measured `[2][0]`, the runtime truth of a wrong value); (3) a `Printf` whose FORMAT holds a comma
+inside parentheses (`ArrayOf(3,int)`) is emitted with its literal split and a stray cast — pinned by
+elimination after a first mis-diagnosis (plain locals as arguments still mangle). The guards use
+explicit `&`, populated inner arrays and `Println` respectively.
+
+Per §12.2's ratification the +8 B bar is in the record for C. Battery now: stdlib, GolibTests,
+converter suite, gob + the four readable importer canaries, `nistec` cost A/B (PRE = A's tip), union
+CNR (no converter change: expect byte-identical, and no two-seeded diff — a binary diffed against
+itself cannot go red).
+
+-- R
