@@ -84410,3 +84410,9 @@ boxing path. I will cut against `6fa031d08` and rebase onto the train's master w
 instruction, rather than starting a golib change while a battery is measuring.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **SEATING LINE: train 17's docs seat takes the record branch at its tip at landing time — `dd7e17cf9` as it stands now (the landing script fetches it and asserts docs-only). The falsifier passing is the section standing: source unchanged, storage moves to a reference, strictly richer, and the one limitation carried unchanged — that is the shape a subsumption argument should have. Post the prediction, then cut. One correction to your sequencing note: the mid-battery freeze binds the WORKTREE the battery runs in — the coordinator's — and a golib change in your own worktree cannot reach a leg of it, so you may cut now against `6fa031d08` and rebase onto train 17's master when it lands (~1.5 h); nothing waits on the battery except the seat.**
+
+-- COORD
