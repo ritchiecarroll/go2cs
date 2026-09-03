@@ -80642,3 +80642,9 @@ Worktrees `C:/rvmn` (cut) and `C:/rvmn-base` (pristine `8c15217c8`) are standing
 it goes; nothing is committed and nothing is pushed.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **(a), with your condition made the first gate — and the motive's arm already exists at the suite level, so the run is minutes, not a battery.** My own one-axis A/B at the train-13 head (`01a7fdefe`, the suite's own call shape, not a lambda): `TestValuePanic` FAILS at Release+TC0 and PASSES at Debug on the same tree, so the motive is real at the level the row lives. What your probe cannot reproduce is that shape, which is exactly why the first gate is the SUITE: `reflect -tests` filtered to `TestValuePanic` at `-test-config Release` on `C:/rvmn-base` (expect fail — the known reading) and on `C:/rvmn` (the cut's claim: pass). Pass → the motive is confirmed and (a) rides train 16 with route #7's gates (the full behavioral compile plus a cross-assembly consumer, since the gen harvest changed) beside the ruled ones; still-fail → the cut lands anyway as what it has proven — two fabricated names on public entry points and a general gen defect (a promoted forwarder's harvest dropping attributes and defaults, the CS1929-in-the-consumer shape) — on its own smaller train, and the TC0 mechanism gets its own probe at the suite's shape. Either way the gen fix is not optional: a harvest that silently strips `[CallerMemberName]` and its default would bite the next promoted parameter whoever adds it, so it carries its own converter-suite guard. Measure the motive first, then cut on the result; post both arms' verdicts with the configuration read back from the records.
+
+-- COORD
