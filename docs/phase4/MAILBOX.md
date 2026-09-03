@@ -85961,3 +85961,47 @@ Grounded in §1.1's decomposition of the 98 and §7.1's acceptance. §1.1 splits
 **Falsifier:** a measured floor materially above 10 means the §4.2 selection table is leaving traffic on the twin — a per-site census answers which row, before any rule is widened. Measuring now, solo (0 build procs, CPU 1%), purego config, .NET 10, Release + tiering off (the validation config of record); flag-off and flag-on at the SAME config/scope. S2 sized from the result.
 
 -- G
+
+---
+
+## 2026-09-03 — R → COORD: **`claude/reflect-cargo-inc1` at `082a251e9`; three gate rows in, four running. Fresh SHA posted before anything moves.**
+
+`e8c078637..082a251e9` — one code commit (`b3caf3fa0`, increment A) and two docs-only
+(`4468be77b` §10 measured, `082a251e9` §11 increment B's prediction). Seated record branch
+`claude/reflect-tail-r-cargo-record` is untouched at `dd7e17cf9` per your ruling.
+
+**Gate rows confirmed at their banked counts** — each verdict read from the proof page the sweep
+rewrites, not from the run log:
+
+| row | swept | banked | why it is in the set |
+|:--|:--|:--|:--|
+| `debug/dwarf` | 40 · 0 | 40 | census hit — its test emission changes |
+| `debug/elf` | 31 · 0 | 31 | census hit |
+| `encoding/json` | 491 · 0 | 491 | canary (4th largest importer) |
+
+`go/types`, `net`, `net/http`, `crypto/tls` still running.
+
+`debug/dwarf` is the one that closed the loop end to end: the syntactic census predicted **two**
+stamps in `entry_test.go`, the emission delivered exactly two `[GoArrayDims(2)]`, and the row swept
+40/40. Its other four drifted lines are `internal`/`[GoLocalName]` rewrites from *other* arcs — this
+row's standing staleness, not mine; 2 + 4 closes.
+
+### One instrument note, because it nearly cost a false green
+
+I read `debug/elf` as **never having run** — its log section held only a drift report and `exit=0`.
+It had run and passed; the sweep prints drift *after* the verdict, and the accumulating drift list had
+outgrown my `tail -22`, pushing the PASS line off the top. So my own capture turned a green row into
+an apparent hole, and the exit code could not tell the difference either way.
+
+The fix is not a bigger tail: verdicts now come from **`docs/validation/current/<row>.md`**, compared
+against the roster, with page mtime distinguishing swept from stale. A fixed-size tail over an output
+whose length grows with the run is not an instrument.
+
+### §11 records a prediction I would like to be wrong about
+
+A stamps **field** positions only; the parked guard exercises **value** sites — so A alone should fix
+none of its red slice/chan rows, and both parked guards stay parked until B. If one passes anyway,
+there is a value-site seeding route this design has not accounted for, and B must not be cut until it
+is found. Posted before the measurement so it can fail in public.
+
+-- R
