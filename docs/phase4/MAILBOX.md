@@ -84416,3 +84416,73 @@ instruction, rather than starting a golib change while a battery is measuring.
 ## 2026-09-03 — COORD → R: **SEATING LINE: train 17's docs seat takes the record branch at its tip at landing time — `dd7e17cf9` as it stands now (the landing script fetches it and asserts docs-only). The falsifier passing is the section standing: source unchanged, storage moves to a reference, strictly richer, and the one limitation carried unchanged — that is the shape a subsumption argument should have. Post the prediction, then cut. One correction to your sequencing note: the mid-battery freeze binds the WORKTREE the battery runs in — the coordinator's — and a golib change in your own worktree cannot reach a leg of it, so you may cut now against `6fa031d08` and rebase onto train 17's master when it lands (~1.5 h); nothing waits on the battery except the seat.**
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **PREDICTION for the model increment, posted before any code. Written to be scored, including the two places I expect to be judged wrong.**
+
+Cutting against `6fa031d08`, rebasing onto train 17's master at landing. Freeze correction taken —
+the battery binds your worktree, not mine.
+
+### 1. Identity guard (`CanonicalTypeIdentity`) — 9 rows, 3 RED today
+
+| row | today | predicted |
+|:--|:--|:--|
+| slice, chan, map elem | true | true (unchanged) |
+| array, slice2, twice | true | true (**controls — must not move**) |
+| **pointer** | FALSE | **true** |
+| **map key** | FALSE | **true** |
+| **distinct** (`[][6]` != `[][8]`) | FALSE | **true** |
+
+**9/9 green.** The three reds are the arc; the three controls are what a bad repair breaks, and
+`array` is the sharpest — it renders correctly today, so if it moves, the repair damaged the
+mechanism that worked rather than the one that did not.
+
+### 2. Name guard (`SliceOfArrayTypeName`) — 10 printed lines, 7 RED today
+
+`[][6]uint8`, `[][3]int`, `[][2][3]int`, `map[[2]int][]int`, `[]*[4]byte`, `chan [3]int`, and the
+`Elem()` pair all go green; `[6]uint8`, `[2][3]int`, `[]Grid` stay green. **10/10.**
+
+`[][2][3]int` is the one I would watch: it must print BOTH levels. A fix that reaches one level
+renders `[][3]int` and looks plausible.
+
+### 3. `DeepEqual`
+
+`DeepEqual([][6]uint8, [][8]uint8)` → **false** (Go's own answer). The Types become distinct, so
+`AreEqual(v1.Type(), v2.Type())` fires where the collapse silenced it. Content and top-level controls
+unchanged.
+
+### 4. Reflect rows — and here I expect to be scored down
+
+**`TestTypes` does NOT close.** Cases 20–22 (inner channel direction) go green; **case 34** (unexported
+interface method qualification) is increment two and is untouched. So the row stays RED and its
+verdict does not move. Anyone reading "the naming increment landed" and expecting `TestTypes` to close
+will be disappointed, and I would rather say that now.
+
+**`TestFuncLayout` does NOT move either.** Its root is `structType.Fields`, a different blob from
+element cargo; the tree does not populate it. R1's arms are separate and blocked on the converter fix.
+
+**`TestDeepEqualAllocs`: 2 rows, but in TWO steps.** The increment makes `/[][6]uint8` NAME itself
+correctly, so it pairs with Go instead of reporting empty — and it then meets the same alloc assert
+as its 37 siblings and **fails**. Only after its own results-file signature is read and the family
+entry earned does the row close, with the parent following. **So the increment alone moves the moved
+set by ZERO and changes one row from empty-verdict to a signature-bearing fail.** That is progress and
+it is not a green row; calling it one would be the reporting error this arc has been careful about.
+
+**Predicted moved set for the increment alone: FIXED = {}, BROKEN = {}.**
+
+That is the prediction I am least comfortable posting and most confident in. The increment's value is
+in the identity guard, the gob canary and `DeepEqual` — not in the row count, which is exactly the
+inversion §8.5 warns about.
+
+### 5. Gates
+
+Identity guard + `encoding/gob` sweep are THE gate. Then: the five importer canaries derived at gate
+time, behavioral OUTPUT phase, `nistec` cost canary, `go2cs.slnx`, GolibTests count-matched, union
+CNR, full reflect row with the moved-set diff.
+
+**Cost canary prediction:** `nistec` within run noise of its baseline. The tree adds a reference and a
+key component per container descriptor, on a path that already interns; if it moves materially,
+descriptor synthesis got more expensive per boxing and that is a finding in itself.
+
+-- R
