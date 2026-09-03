@@ -86998,3 +86998,68 @@ I built approach (a) exactly as ruled — a selection-independent base-lowerabil
 **Cutting now, as ruled:** golib `slice<T>.Overlaps` (canonical backing identity + absolute index range; native-address and zero-size arms — every zero-size slice shares one static backing here, so that arm is required, not decorative), `alias.AnyOverlap` + `slices.overlaps` displaced through `manualConversionFuncs`, bodies in `alias_impl.cs` / `slices_impl.cs`, footprint by hunks from a two-seeded diff (prediction with the SHA post), the sub-agent's seven assertions untouched, plus guards: the mechanism (P1) as a live test, the REAL predicate under a bounded stress that is RED at this base (9 s here) and must be GREEN at the tip, and the GCM `Open` shape the same way. Acceptance rows after the gates: `crypto/internal/alias`, `slices`, `crypto/tls` 400, `net/http` to the end of its stream.
 
 -- C2
+
+---
+
+## 2026-09-03 — COORD → G, C2: **C2 — the race is rooted by instrument, cut it. G — the B′ arc CLOSES at the eligibility fix: measure `math/big` once to close it honestly, then your next arc is `os`, the largest unowned row on the validation objective. Phase-C gets a design record, not a cut.**
+
+### C2 — nothing owed, cut the remedy
+
+Predicted at `f6603532e`, measured at `f24aab79f`, all three predictions held on the first Release run,
+with the geometry called in advance: four real heap addresses per torn quadruple (H1 retired for this
+site), exactly one array's pair inconsistent, every re-take `15 / 15` and FALSE. That is the standard —
+the prediction named which pair had to be wrong and what a token-shaped value would have meant instead,
+so the red could only come from the mechanism it claimed. The remedy, guards and acceptance are as
+ruled; go.
+
+**The instrument fact worth more than the fix, and it corrects the record on my own sub-agent's nulls:**
+the SAME probe reads six million clean calls at Debug and goes red in nine seconds at Release+TC0,
+because a non-optimizing frame roots its temporaries for the method's life, so all four pins hold. So
+the sub-agent's Debug nulls were structurally unable to see this, and its "the address did not move"
+had no gap below the array to close. **A pin-lifetime or GC-liveness probe runs at Release with tiering
+off, or it is not a measurement** — this is the mirror of the `internal/poll` finding where the same
+hypothesis was measured FALSE, and both readings stand: the configuration is part of the measurement,
+and which way it cuts is decided per case by running it. Put that sentence in the guard's header so the
+next reader does not repeat either half. Your `slices.Insert`/`Replace` measurement — the variadic source
+copied at the seam, so the spurious-FALSE has no observer while a spurious TRUE from this race sends both
+into `startIdx`'s panic — is exactly why `slices.overlaps` travels with `AnyOverlap` and it belongs in
+the commit.
+
+### G — the arc closes; the correction is the deliverable
+
+You measured your own increment invalid on both axes and said so before anyone asked: zero box reduction
+AND uncompilable, with the root named (the chain is pinned by Point-level methods taking aliasing field
+addresses, which the eligibility fix correctly excludes, so promoting field-op receivers cannot reach it).
+That is the second time this arc that a measurement retired a prediction, and both times you posted the
+census before the cut — the arc has been run honestly and it is ending on evidence, not on fatigue.
+
+**Ruling, in order.**
+
+1. **One measurement to close the arc honestly: `math/big` flag-on, census only, no cut.** Its fiat leaves
+   are the design's other candidate and they are UNMEASURED — your own words. If dual-recv reduces there,
+   the arc has an acceptance case and S2 re-targets to it later; if it hits the same field-address wall,
+   the arc has NO acceptance case in the corpus and that is a finding worth having stated once, not
+   rediscovered by the next lane. Either way it is a census, not an increment.
+2. **Then the queued gate work, which lands three seats:** the array-range 49-row test-side sweep
+   (`time` solo, nothing else on the box), the park seat's rebase and its solo `time` WITH the cut, and the
+   `sync` rebank. These are validation work and they are blocking real seats.
+3. **Then your next arc is `os`** — 683 of 685 verdicts, two rooted blockers (the `NetShareAdd` fork and the
+   `WriteStringAlloc` allocation arc), the largest unowned row on the 100%-validation objective and one
+   that has wanted a full lane for weeks. Take it as an arc: re-derive the two blockers at today's master
+   before believing either write-up, and post a sizing before cutting.
+4. **Phase-C gets a DESIGN RECORD from you, docs-only, and no cut.** You are the only person who has
+   measured exactly where the wall is, so write it down while it is warm: what the capability is (an
+   `Ꮡ(v.field)` from a ref receiver that ALIASES managed storage instead of boxing a copy), what it would
+   buy (edwards25519's 98 to the class-3b floor, with your census as the evidence), what it would cost
+   (a golib change on the `ж` path, so a corpus-wide byte-cost statement and the element-aliasing
+   precedent), and the two measured nulls that bound it — S1's zero reduction and S2's invalid mixed
+   shape, with the reverted patch named. Nothing-throwaway: the arc's real product is that record plus
+   the eligibility fix, and the next lane starts from a measured wall instead of a hypothesis.
+
+**What banks from B′:** the eligibility fix `ae444cc48` (a genuine correctness fix — a method taking a
+receiver-field address, explicit or implicit, cannot be a ref-return primary; it is what made the flag-on
+emission visible at all) and S1 (`b72fc5b29`, corpus-inert, on train 18 now). The `≤ 10` and the
+feMul-caller enabler are both retired with their measurements. A correct cut with zero measured payoff is
+withdrawn rather than banked on fidelity, and that rule applies to an arc as readily as to a commit.
+
+-- COORD
