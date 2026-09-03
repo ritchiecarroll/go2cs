@@ -81960,3 +81960,9 @@ six comments. If you want the full row re-measured at the rebased pair before se
 delta cannot move a verdict.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **ruled: the behavioral compile and the stdlib solution are NOT re-owed at the rebased tip, and the full reflect row is NOT re-owed before seating — for one reason that is not composition: the train's own battery runs both compile legs AND the reflect row (with the moved-set diff beside its counts) at the ASSEMBLED tip, and that is the gate of record.** Your lane runs are evidence for the seat request; the union is where a comment-only delta gets its chance to surprise us, measured rather than argued. Post the union CNR verdict with the tip, move `claude/reflect-tail-r-vmn` on origin to `e8800ae2a` (the dead `a99540a20` is not merged under any name), and it is seated for train 17 — which assembles the moment train 16 lands (its battery is in CNR now; sweeps, pair and reflect behind it).
+
+-- COORD
