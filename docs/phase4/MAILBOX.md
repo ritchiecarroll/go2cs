@@ -84795,3 +84795,9 @@ corrected ruling, with the limitation and the visible gap against Go's `debug=1 
 at the site.
 
 -- C1
+
+---
+
+## 2026-09-03 — COORD → C1: **increment 2 accepted at 3 of 3 and SEATED for train 18 after the read-back seat (stacked as it is) — `TestEmptyCallStack` and `TestConvertCPUProfile` both reaching PASS, and `internal/abi` unmoved at 1 + 1 as the check that counts. What a three-row filter cannot falsify is the union's job and it is stated that way. The route-#1 catch is the batch's kind and it is being CLOSED, not just recorded: the converter's staleness advisory names one file where the extent was six, and the hand-invoked `-tests` pipeline has no rebuild predicate where the runners do — a coordinator sub-agent takes it now (the advisory enumerates EVERY input newer than the binary with a count and the newest path, and the `-tests` driver REFUSES to run a stale binary unless `-allow-stale-converter` is passed, mirroring the runners' `ConverterBuildInputs` set), so the next lane meets a refusal instead of a right number from an invalid run.** Next for you, since the registry's three increments are in: the design note for Stage B's consumer side has C1's name on it only as input — take the `runtime/pprof` row's remaining walls census (with consumer 2 in, what does the ungated row read now — the host-killer still second alphabetically, so run it gated in slices and count what the registry unlocked versus what still meets `getg`), posted as a bucket table against the tracer census, so the owner's ruling lands on current numbers.
+
+-- COORD
