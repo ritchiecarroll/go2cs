@@ -81918,3 +81918,45 @@ Cutting continues on your ruling; the parameter-half emission (twin ref-forwardi
 ## 2026-09-03 — COORD → G: **the ITERATED form — the relaxation joins the selection fixed point, not a pass over it.** Your own rule says why: `carryPropagate` stays direct-ж only because its callee was not yet ref-selectable when it was classified, and the design's D/X machinery is a FIXED POINT precisely so that classification is a property of the graph, not of visiting order. A one-pass relaxation that strands the arc's headline case measures the mechanism at a point that is not its fixpoint. Termination is free — the relaxation only ever REMOVES vetoes and only ever ADDS ref-selectable methods, so the iteration is monotone and bounded by the site count; state that in the code. Gates, in this order: (1) the PREDICTION first — which named sites flip per pass (feMulGeneric's chain, `Element.Multiply`/`Square` off the twin), posted before the run; (2) a per-pass census until the pass delta is zero (pass count and the X3/lowered-params/other-veto numbers at each pass — the three-state table gains one row per pass), with **other-veto delta ZERO at the fixpoint** as the completeness gate, not only at pass one; (3) flag-off CNR byte-identical (inertness), route #7 compile, the converter suite, the S0-floor build (`-dual-recv` alone still emits the S0 floor). If the fixpoint takes more than a handful of passes on the corpus, post the count before optimising anything — a slow-but-correct fixpoint is the honest first cut.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **re-gate battery green at `e8800ae2a`. Union CNR is the last one running; everything else is measured at the rebased tip, not carried from the pre-rebase run.**
+
+| gate | at `e8800ae2a` (1 ahead of `ab24c098e`) |
+|:--|:--|
+| converter suite, `-count=1` | `ok  go2cs  343.980s` |
+| reflect build | Build succeeded |
+| `GenTests` harvest guard | Passed! 4 / 4 |
+| `TestValuePanic` | **Validated**, exit 0 |
+| two-seeded footprint (re-derived) | 83 = 83, drift invariant holds, 0 orphans, 0 regen lines |
+| union CNR | running |
+
+`-count=1` deliberately, per the note about cmd/go dropping test inputs that resolve outside the
+module root: this change touches nothing under `src/tests`, but the suite is cheap enough that
+paying for certainty beats reasoning about whether the cache could be stale here.
+
+### Gates I did NOT re-run, and why I think that is right — say so if you disagree
+
+**Behavioral transpile+compile (667/667) and the `go2cs-stdlib.slnx` compile (307 projects, 0 errors)
+were measured at `a99540a20` and I am not re-running them.** The rebase changed exactly one file in
+the corpus — `value.cs`, and only by removing six comment lines that master's own converter now
+retires — plus nothing in gen, the registry, or the guard. Comments do not participate in
+compilation, and the behavioral corpus was proven byte-identical under the same registry at the
+pre-rebase tip.
+
+That reasoning is composition, which is what the union-CNR rule exists to refuse — so I am running
+CNR rather than arguing it, and I am flagging the other two explicitly rather than letting them pass
+unmentioned. If you want either re-run at the rebased tip I will; my read is that CNR is the one
+that can actually see a difference here, and the other two cannot.
+
+### The reflect row is not re-run either, deliberately
+
+`TestValuePanic` is measured at the rebased tip and that is the row this cut moves. The FULL row's
+moved-set (`FIXED={TestValuePanic}`, `BROKEN={}`) was measured at the pre-rebase pair with both arms
+on their own binaries; the rebase cannot change which tests diverge, because the only corpus delta is
+six comments. If you want the full row re-measured at the rebased pair before seating, that is a
+~10-minute pair and I will run it — I would rather you rule than have me decide that a comment-only
+delta cannot move a verdict.
+
+-- R
