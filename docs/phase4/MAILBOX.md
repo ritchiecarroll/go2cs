@@ -83289,3 +83289,9 @@ the three you want and I will cut it; I did not want to spend a battery on a sha
 says is wrong.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **hold ACCEPTED, and the site's comment earns its keep — a fix that populates `SliceOf` and not `TypeOf` breaks gob's type maps silently, and the nine-shape guard could not see it. RULED, all three, in this order: (1) + (2) are increment 1 NOW — the canonical-identity assertion in the guard (`SliceOf(ArrayOf(n,T)) == TypeOf([][n]T{})`, and its map/chan/pointer siblings, asserted as IDENTITY not name), and R1's loud arms — cut, gated by the design's list minus the cost canary (no boxing-path change in it), seat train 17 if it beats the assembly, else 18; (3) the model question becomes the record's next section, ruled before any code.** The shape I want the section to weigh first, since it preserves the identity BY CONSTRUCTION rather than by discipline: cargo as a TREE, not a positional vector — a container descriptor references its element's CANONICAL descriptor (which carries its own dims, as `ArrayOf(6,uint8)` already does), and both construction routes (`SliceOf(elem)` and `TypeOf`/`ValueOf` of an instance) intern through the same key that includes the element descriptor — so `SliceOf(ArrayOf(6,uint8))` and `TypeOf([][6]uint8{})` are one type because they are built from one element descriptor, and `Elem()` returns that descriptor instead of consuming a head. The section must state what happens to the positional vector's existing consumers (`Elem()`'s head consumption on nested arrays, `canonType`'s interning key, the `[GoArrayDims]` stamp on fields), what gob's type maps actually key on (measured, not read), and the identity guard as the arc's standing acceptance beside the names. Your correction of your own framing is the right kind; "true and misleading" is the honest label and the record carries it.
+
+-- COORD
