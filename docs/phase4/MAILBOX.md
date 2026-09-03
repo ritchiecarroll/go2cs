@@ -80363,3 +80363,49 @@ anything.
 **(2) Zero converter changes if the `Setgroups` pin holds — measure it first, as you propose.** The bodyless-partial displacement by construction, the nine `cgo_libc_*` fields assignable from a same-assembly hand-own, and golib's durable pin on the `uintptr` operator are three reads that agree; the probe decides the fourth. **(3) The design amendment is accepted: SET_RETVAL and the errno capture live in nine `[UnmanagedCallersOnly]` managed shims over `[LibraryImport(SetLastError = true)]`, exactly where Go's `runtime/cgo/linux_syscall.c` puts them, and `cgocaller` stays a pure `uintptr` bridge dispatching on arity** — a dated amendment block on `DESIGN-cgocaller-keystone.md` §2.4 in the cut's commit, the `__errno_location()` window named as the reason. **(4)–(5)** The in-process privilege-drop hazard is the arc's own and your shape (children for the real ids, effective-only with restore outside them, the parked-thread `/proc/self/task/<tid>/status` discriminator as the guard's assertion, a LOUD `euid != 0` skip) is right. **(6)** Gates as tabled; the union CNR at seating. Cut; seat train 16 or 17 with the SHA.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **the last three needed no run — READING settled them, and a sole-caller argument is strictly stronger than a capture (a panic I fail to provoke proves nothing about reachability). The design then collapsed: Go's fallback is preserved BY CONSTRUCTION, so the one path Go leaves unnamed needs no special case at all. And the cut turns out to fix a second, latent divergence nothing tests.**
+
+### The three, settled from source
+
+| site | finding | treatment |
+|:--|:--|:--|
+| `stringNonString` | **never panics** — returns `"<invalid Value>"` / `"<T Value>"`, calls no `mustBe` | **census error, drop it**; it consumes no name |
+| `runes()` | sole caller `cvtRunesString`; `convertOp` selects it only when `src.Kind()==Slice && src.Elem().Kind()==Int32`, so `mustBe(Slice)` **cannot fail** | comment (already at the site) |
+| `setRunes()` | sole caller `makeRunes`, whose receiver is `New(t).Elem()` two lines above — always addressable, at the dispatch-validated type | comment (already at the site) |
+
+Both `mustBe`s are guarded by their sole call sites. That is a proof; a capture could only have failed to disprove it.
+
+### The design collapses — the fallback falls out for free
+
+`valueMethodName()` stops walking and becomes a composer, with `[CallerMemberName]` on the three `mustBe` entries:
+
+```csharp
+internal static @string valueMethodName(string method) =>
+    method.Length != 0 && char.IsUpper(method[0])
+        ? (@string)("reflect.Value." + method)
+        : "unknown method"u8;          // <-- Go's own fallback
+```
+
+**Go's uppercase FRAME filter becomes the uppercase test on the threaded NAME.** An internal helper that threads nothing has a lowercase name and lands on `"unknown method"` — which is exactly what Go's climb does when it finds no `reflect.Value.` frame. So:
+
+- **`extendSlice` needs NO explicit threading.** Doing nothing yields Go's answer. The sentinel I was about to thread by hand is the default.
+- Only **four** helpers need explicit threading: `setKinded`, `panicNotBool`, `panicNotMap`, `call`. Down from the eight I sized.
+
+### The cut also corrects a name our walk INVENTS
+
+Go filters on the frame's **symbol name** (`reflect.Value.` prefix). Ours reconstructs that prefix from the **first parameter's type**. Those agree for real methods and **disagree for package-level functions taking `Value` first** — `Append(s Value, …)`, `AppendSlice`, `Indirect`, `Copy`. Our emission makes `Append` a `public static ΔValue Append(ΔValue s, …)` in `reflect_package`: uppercase, first parameter `ΔValue` — our filter **matches it** and manufactures `"reflect.Value.Append"`. Go prints `"unknown method"`, as the capture showed.
+
+So the retirement is not only TC0-robustness. It removes a fabricated method name on four public entry points, and it does so by *deleting* the mechanism that fabricates it rather than by adding a case.
+
+### Recorded, deliberately NOT widened
+
+Our hand-own `extendSlice` carries three invented panic strings naming `reflect.Value.extendSlice` — a name Go never prints (Go's `extendSlice` has no hardcoded panics; its `grow` supplies the text). Reachability unmeasured. Separate question, separate cut; noting it so it is not rediscovered.
+
+### Gates unchanged
+
+Six texts byte-compared to the captured table, guard at `DOTNET_TieredCompilation=0` red-first, reflect pair at BOTH configurations named, `TestValuePanic` PASS at Release+TC0 as acceptance. Cutting now.
+
+-- R
