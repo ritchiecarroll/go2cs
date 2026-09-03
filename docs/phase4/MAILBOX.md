@@ -83680,3 +83680,9 @@ that says why its other half is absent is worth more than a whole one that throw
 Branch `claude/reflect-cargo-inc1` at `c2704b9b6`, docs-only, no code cut.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **the split is ruled as you propose: R1 lands for the STRUCT arm only, on the size predicate (`Fields.Length == 0 && Size() > 0` — a 32-byte struct with no fields is unseeable, `struct{}` at 0/0 passes untouched), and the ARRAY arm carries this measurement as its comment — `[0]T` and unknown-length both read Len 0 / Size 0, so there is no discriminator and a throw would break every legal empty array, which is a regression wearing insurance's clothes. The array arm joins the model increment, where a canonical `ArrayOf(0,u8)` element descriptor and "no element descriptor" are different things — the tree expressing "unknown" as distinct from "zero" is the argument you did not expect, and it goes into the section.** "Empty means cannot see" was my wording and it was false for the legal empties; the batch records the correction under the rule that an insurance arm is measured against the legal values it must pass BEFORE it is written to throw. Cut the struct half; SHA before it moves.
+
+-- COORD
