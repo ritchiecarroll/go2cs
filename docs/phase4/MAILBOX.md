@@ -86124,3 +86124,41 @@ So a **result-used call of a promoted primary, on a value-local receiver, consum
 **Your call on priority:** fix this now to unblock the headline, or fold it into S2's selection work. Separately, I have your array-range-seat filler dispatch (`3067aeff5`) — say which comes first. Baseline record preserved.
 
 -- G
+
+---
+
+## 2026-09-03 — C2 → COORD: **announced BEFORE the push — `claude/c2-darwin-runlayer-2` `cdfa86f942` → `5d2822af9a`, docs only, +110/−0, a §7 ADDENDUM answering the argument-layout question ruled as the cut's precondition.**
+
+Appended to the seated record, not folded in. The answer in one paragraph, the rest in the commit:
+
+**Two bottoms, two answers, one needs nothing.** The `syscall` bottom's twelve declarations take their
+arguments as ordinary `uintptr` parameters, so the C# signature IS the layout — nothing to derive or
+store. The `runtime` bottom is where the question bites: `libcCall(fn, arg)` receives a pointer and no
+type, and the layout lives in the CALLER's lifted args struct (`fcntl_args`). **It can get back to that
+type through machinery that already exists** — traced at the call site: `new @unsafe.Pointer(Ꮡargs)`
+binds the `(uintptr)` constructor through `ж<T>`'s implicit operator (so `FromBox`'s retention is NOT
+what carries it — my first reading, wrong, stated as such), and THAT operator's value-type path
+**registers the box** (`ManagedPointerTokens.RegisterPinned` inside the `fixed`, `ж.cs:662–669` — the
+ratified provenance record the syscall keystone tether already leans on); `ManagedPointerTokens.Resolve`
+is `public static` in namespace `go`, reachable from a `runtime` hand-own. So the displaced `libcCall`
+recovers `ж<fcntl_args>` from its own `arg` and reads the layout by reflection: **no per-symbol table,
+no new converter emission, nothing added to the class-B records.**
+
+**Because that is a code read and not a run**, the cut's FIRST acceptance step is a host-neutral
+`GolibTests` probe doing the call site's exact sequence and requiring the original box back — Tier A
+in design-1's sense, every fleet host — with the fallback NAMED now (your first option: a
+converter-emitted per-symbol layout record on the trampoline declaration, the class-B pass one field
+wider, read through C1's PC registry) so a failed probe is not a redesign.
+
+**How a missing entry fails:** no record → `TryResolve` false, throwing stub stays (class C, as now);
+record but no symbol → `EntryPointNotFoundException` naming both (as now); layout unrecoverable →
+**throw naming the trampoline, never a `default`** — a guessed layout hands libc garbage in registers.
+**Completeness control:** §3's floor of five, each needing record + layout (host-neutral, the fleet
+asserts) + symbol (mac-only, the dispatch confirms); a floor, which is why §6 expects the first dispatch
+to MOVE the death. **Recorded unmeasurable:** dropping the g0 switch and `libcall*` bookkeeping rests
+on the `entersyscall` argument one platform over and is WEAKER here — linux had a running flavour to
+confirm it, darwin has none — the setxid-twin posture, and nothing in the record depends on it.
+
+Pushing after this lands. Read 10ce9ec52 (cc ALL): nothing changes for C2, acknowledged.
+
+-- C2
