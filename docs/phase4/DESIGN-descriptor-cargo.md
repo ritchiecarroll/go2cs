@@ -251,12 +251,72 @@ construction rather than by discipline:
   `SliceOf(elem) == TypeOf([]T{})` holds **without** each kind choosing a side.
 
 The positional vector is not wrong; it is per-kind, and a per-kind mechanism is exactly what produced
-three different local answers. What the section must still settle before code: what happens to the
-vector's existing consumers — `Elem()`'s head-consumption on nested arrays (measured working:
-`[2][3]int` → `[3]int`, `Len()`=3), `canonType`'s key, and the `[GoArrayDims]` field stamp — and what
-gob's type maps actually key on, **measured, not read**.
+three different local answers.
 
-## 8. Increments and gates
+## 8. The tree model
+
+### 8.1 The rule, in one sentence
+
+**A container descriptor references its ELEMENT'S CANONICAL DESCRIPTOR, and interns on it.**
+
+That is the whole change. Everything below is consequence.
+
+### 8.2 Why both properties fall out, rather than being maintained
+
+| property | how the tree gets it |
+|:--|:--|
+| `[][6]` != `[][8]` | `ArrayOf(6,u8)` and `ArrayOf(8,u8)` are **already** distinct descriptors (measured: distinct, named right, `Len()` 4/8). A container keyed on its element inherits that distinctness with no per-kind rule. |
+| `SliceOf(elem) == TypeOf([]T{})` | Both routes reach **one** element descriptor, so both produce one container descriptor. No kind has to choose a side. |
+| "unknown" != "zero" | A container referencing a canonical `ArrayOf(0,u8)` and one referencing NO element descriptor are different objects. The positional vector **cannot express this** (both read `Len 0 / Size 0`), which is why `regAssign`'s array arm cannot be made honest inside it. |
+
+The third row is the one that was not in the original sizing. It arrived from R1: the reason the
+array arm cannot throw today is not caution, it is that the model has no way to say "I could not
+see". The tree gives that for free, because absence of a reference is representable and a zero-length
+descriptor is not the same value.
+
+### 8.3 What happens to the positional vector's existing consumers
+
+The vector does not have to be removed, and the section deliberately does not propose removing it.
+
+**`Elem()`'s head-consumption.** Today `Elem()` on a non-pointer, non-map descriptor consumes the
+head of `arrayDims` and hands the tail down — measured working: `ArrayOf(2, ArrayOf(3,int))` renders
+`[2][3]int`, `.Elem()` gives `[3]int` with `Len()` 3. Under the tree, `Elem()` **returns the element
+descriptor** instead of deriving one, so the head-consumption becomes dead for kinds that carry an
+element reference. It must remain for any kind that does not, and the increment must state which
+those are rather than assuming none.
+
+**`canonType`'s key.** Today `(System.Type, dimsKey)` over four slots. The tree adds the element
+descriptor's identity to the key for container kinds. Note this REPLACES rather than supplements the
+per-kind slots for those kinds — keeping both would let a container intern two ways and reintroduce
+the split that `pointer` and `map key` show today.
+
+**The `[GoArrayDims]` field stamp.** Unaffected and still required. It answers "what is the length of
+THIS struct field's array type", which is a question about a field, not about a container's element,
+and no element reference exists to carry it.
+
+**`funcParamDims`.** The precedent, and the migration's best test case: it is the one slot already
+shaped like per-element cargo. If the tree subsumes it cleanly, the model is right; if it cannot,
+the tree is incomplete and the section is wrong.
+
+### 8.4 What must be measured before the increment cuts
+
+- **What gob keys on** — measured (§7): `reflect.Type` identity directly, and gob is banked at 106
+  green WITH the collapse, so it is a canary against damage and not a detector.
+- **Whether `DeepEqual`'s descriptor compare consumes the element reference**, which §6 listed as
+  probably-not and which is now more interesting, since `DeepEqual` is the measured victim of the
+  collapse.
+- **The `pointer` and `map key` OVER-distinct rows**: the tree must make them equal, and they are the
+  two rows that would silently stay broken if the increment only addressed the collapse.
+
+### 8.5 The risk this section is most wary of
+
+The tree changes type IDENTITY, and identity has a banked consumer that **cannot detect the current
+bug but can be broken by the repair** (gob, §7). So the increment's acceptance is not "the names are
+right" — the name guard would pass a repair that split the canonical type in two. It is the
+**identity guard** (`CanonicalTypeIdentity`, written, currently RED on 3 of 9 rows) plus the gob
+sweep. Names are the symptom and must not be the gate.
+
+## 9. Increments and gates
 
 **Increment 1 — cargo to element positions** (array dims, channel direction, map key and value),
 R1's loud arms, R2's probe.
