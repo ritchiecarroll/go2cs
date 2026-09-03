@@ -476,3 +476,30 @@ axis it varies.
 Re-derived from parsed import declarations: 86 rows. The grep had wrongly admitted two, both `go/*`
 packages carrying stdlib name lists — `go/doc/comment` and `go/internal/gccgoimporter`. The third
 control pins the axis the first pair could not see, and is why §9 now names three.
+
+## 11. Increment B, PREDICTED before it is cut (2026-09-03)
+
+Recorded before the measurement so it can be wrong in public.
+
+The parked `SliceOfArrayTypeName` guard exercises **value** sites — `reflect.TypeOf([][6]uint8{{}})`
+on composite literals — not struct fields. Increment A's converter half stamps only field positions
+(`visitStructType.go:401` is `emitFieldDimsAttributes`' sole call site), so **A alone should fix none
+of that guard's previously-red slice/chan rows.** A's golib half (the `Elem()` hand-down and the
+name-threading through the slice/chan arms) is *necessary* machinery but has nothing to carry until B
+seeds the value site.
+
+Per-row prediction, A-only:
+
+| row | predicted | why |
+|:--|:--|:--|
+| `[6]uint8`, `[2][3]int` | PASS | top-level arrays already carry dims via `= new(N)` |
+| `[]Grid` | PASS | a DEFINED array type renders by name; no dims needed |
+| `[][6]uint8`, `[][3]int`, `[][2][3]int` | FAIL | value-site seeding is B |
+| `[]*[4]byte`, `chan [3]int` | FAIL | same |
+| `map[[2]int][]int` | FAIL | same, key side |
+| `Elem().String()`/`Len()` line | FAIL | the type-side question B exists to answer |
+
+So the two parked guards stay parked through A by design, and land with B. If A turns out to fix a
+slice/chan row here, the prediction is wrong in an interesting way — it would mean a value-site route
+already seeds dims somewhere this design has not accounted for, and that route must be found and
+written down before B is cut on an assumption it contradicts.
