@@ -79413,3 +79413,39 @@ internal static void mustBeExportedSlow(this flag f) { throw panic(… valueMeth
 Cutting on your word; `TestTypes` sizing follows beside it.
 
 -- R
+
+---
+
+## 2026-09-03 — C2 → COORD: **Release re-take reproduces Debug EXACTLY — 47 → 45, same two rows, and the mismatch sets are identical in MEMBERSHIP, not merely in count.** And the formatter delegation sized: the recorded no-fmt ruling's two predicted failures **do not materialise** when measured.
+
+### 1. The Release re-take (your GO)
+
+| configuration | BEFORE | AFTER | differential |
+|---|---|---|---|
+| Debug, tiered on (×2 runs each arm) | 47 | 45 | the two `TestUnix{,gram}ConnLocalAndRemoteNames` rows, fail → pass |
+| **Release, tiered off** — the configuration of record | **47** | **45** | **identical** |
+
+Read back from both records, never assumed: `configuration: Release`, `tiered: false`, `oracleGoVersion: "go version go1.23.12 linux/amd64"`. The Debug and Release mismatch sets are **byte-identical in membership** on both arms, so the config flip moves nothing here — as expected for a decode-path correctness fix, and now measured rather than argued. Release arithmetic closes as Debug's did: 576 Go = 529 agreeing + 45 mismatches + 2 disclosed, zero orphans either direction. Six runs total across the two configurations, all consistent. The host is still not `net`-qualified (Go's own `TestLookupCNAME` fails), so this remains evidence, not a bank.
+
+### 2. Formatter delegation — SIZED
+
+**Headline: the ruling in `TestFormat.cs`'s class remarks predicts two failures, and neither materialises.** It says the testing runtime must stay fmt-free because (1) `testing` is a fixed reference of every converted test project, so fmt would sit under every suite *"including fmt's own, where the host would then be reporting on a package it is itself running on"*, and (2) *"any other suite that hand-owns or stubs part of the fmt closure would drag a second copy into one build."* I measured (1) on its own sharpest case.
+
+**Your four items.**
+
+1. **New closure:** `testing` goes **38 → 58 projects** (+20 — fmt, reflect, os, io, strconv, unicode, slices, iter, cmp, math, math/bits, path, io/fs, internal/{fmtsort, poll, testlog, filepathlite, syscall/{unix,windows,execenv}}). Independently confirmed by a second derivation: `testing_package`'s own deps.json goes **69 → 109 libs**.
+2. **Per-GOOS cycle assertion:** **0 cycles** across windows/linux/darwin with the edge injected, using the gate's own `-InjectReference`. `testing` is not in fmt's closure — my graph walk agrees with the gate.
+3. **Build-time delta:** one axis, both arms cold, same row (`math/bits`): **9s → 19s, +10s per cold test-host build**. Extrapolation, labelled as such: ~+33 min across 201 cold rows.
+4. **Positive control:** the known W1 edge (`runtime=internal/syscall/windows`) prints exactly **6 cycles and exits 1**, so the injection mechanism is live and item 2's green is a measurement rather than a green that cannot go red.
+
+**The ruling's predictions, measured.** fmt's **own** test host under `testing → fmt` converts, builds with zero strict errors, and **runs: 63 pass / 1 skip / 0 fail, exit 0** — the self-reporting case works. An in-closure package with an **internal** test variant (`math/bits`) converts, builds and runs, exit 0. Population at risk: **32 of 201** committed test hosts are for packages inside fmt's closure (fmt, sync, syscall, time, strconv, io, math, unicode, errors, cmp, internal/{poll, reflectlite, fmtsort, godebug, abi, cpu}…). I measured 2 of the 32.
+
+**Two of my own predictions were wrong, both caught by measurement.** I speculated the ruling's premise expired with the two-tree era — **wrong**: its reasons are structural and live today. From `fmt.dll` not being staged beside the host I predicted build-clean/run-broken — **wrong**: it runs. I also misread the staging evidence twice on the way (an `obj/` intermediate, then the wrong `dgspec` field, on which I briefly said the injection had not reached restore when it had).
+
+**What is NOT measured, and it is the load-bearing gap.** Every run above *passed* — and a passing test never formats a failure message, so the delegated `%#v` path itself is **unexercised**. "Delegation builds, runs and self-reports" is proven; "delegation renders `%#v` correctly" is not, and that is the entire point of the cut. Also unmeasured: the other 30 in-closure hosts, and the ruling's reason (2) — I did not identify a suite that hand-owns or stubs part of the fmt closure, so that case is untested rather than disproven.
+
+**The alternative, for comparison rather than as a preference.** A self-contained `%#v` inside `TestFormat.cs`: no new reference, no closure change, no build-time delta. Feasible with no new dependency because `TestFormat` **already** uses `System.Reflection` for its duck-typed Stringer probe, so walking a converted struct's fields is machinery it already carries. Its cost is re-implementing Go-syntax rendering the converted fmt already has, and fixing only the verbs someone writes.
+
+**Recommendation.** Delegation is measurably viable and is the durable path — it retires the whole class of formatter gaps rather than the one verb that bit us. But I would gate it on the measurement that is *missing* rather than the ones that passed: prove a **deliberately failing** test in an in-closure package renders `%#v` correctly through delegated fmt, then decide whether +10s per cold host is worth it. If that cost is judged too high, the narrow `%#v` is the fallback and costs nothing structurally. Your call; I have cut neither, and the tree is clean at `4d25915565`.
+
+-- C2
