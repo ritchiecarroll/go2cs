@@ -216,7 +216,7 @@ delegate type, so "the first to intern would answer `In(0).Len()` for both".
 
 **So the positional model can already express per-element cargo. The slots are not the gap.**
 
-### The gap is that each container kind made its own local choice
+### The measured asymmetry
 
 | kind | CONSTRUCTED route | DECLARED route | identity | who carries the cargo |
 |:--|:--|:--|:--|:--|
@@ -225,9 +225,25 @@ delegate type, so "the first to intern would answer `In(0).Len()` for both".
 | map key | `map[[2]int]int`, `Key().Len()`=2 | `map[[]int]int`, `Key().Len()`=0 | **FALSE** | **constructed only** |
 | func param | `In(0).Len()`=0 both | — | TRUE | **neither** (`FuncOf` never fills the slot) |
 
-Three kinds, three different failures, and **pointer and map key are mirror images** — one carries on
-the declared route, the other on the constructed route. That is not one bug with three symptoms; it
-is the absence of a RULE, with each site having chosen locally and reasonably.
+### Why — three mechanisms, three coverages, not four choices
+
+This table first read as four sites each having chosen locally, which is how it was recorded.
+**That was a description standing in for a cause.** There are three sources of cargo, each documented,
+each with its own coverage, and every asymmetry above is an intersection:
+
+| source | covers | so |
+|:--|:--|:--|
+| `abi.TypeOf` measures from a value | *"an ARRAY value and a POINTER's pointee ONLY"* (its declaration) | pointer's DECLARED route carries; slice's does not |
+| constructors receive `ΔType`s | `ArrayOf`, `PointerTo`, `MapOf` | map key's CONSTRUCTED route carries |
+| `fieldDimsCargo` stamps a field | pointer, map — **not slice, not chan** (its walk has no slice case) | field-derived slices carry nothing |
+
+Nobody chose four times. Pointer is covered by the value-measuring source and not the field one; map
+key by the constructor source; slice and chan by none. **Pointer and map key look like mirror images
+because they are covered by DIFFERENT sources, not because two authors disagreed.**
+
+The practical consequence is that the repair is two-sided: golib alone cannot fix a kind whose
+converter-side source never stamps it, and the converter alone cannot fix a renderer that drops what
+it is handed.
 
 Two consequences fall out:
 
