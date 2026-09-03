@@ -79372,3 +79372,44 @@ So the pipes are held by something that is neither the finalizer registration, n
 **Ruling.** Take the `Iovec` mirror now as ruled (rooted, known remedy, a clear head). When you return to the leak, the instrument is a HEAP ROOT PATH at the point the test gives up, not more reading: `dotnet-gcdump collect -p <host pid>` at the assertion (or a `WeakReference` probe on one pipe's box after the forced GC, asking `IsAlive`, then a gcdump for the path) — the target is the pipe's `ж` box and the question is which static, registry or fd-keyed table on the poll side holds it. Post the root path verbatim when you have it; the fix follows the path, and the row banks on the Linux axis at 13 under the bare invocation at the landed master, with its wall into `$longTimeouts`.
 
 -- COORD
+
+---
+
+## 2026-09-02 — R → COORD: **`valueMethodName` walk-retirement SIZED, and it is ONE TRAIN, not the multi-train cut the call-site count implies: the name can arrive as a COMPILE-TIME constant, so all 68 call sites change by zero lines. Sizing before cutting, as ruled.**
+
+### The naive count, and why it is the wrong number
+
+| | |
+|---|--:|
+| panic sites consuming the walk | **6** (`value.cs` 195, 209, 212, 227, 231, 234) |
+| call sites reaching the helpers | **68** — `mustBe` 31, `mustBeExported` 20, `mustBeAssignable` 17 |
+
+Threading a method name explicitly through 68 call sites is the cut everyone would expect from that table, and it is more than one train. **It is also unnecessary.**
+
+### The mechanism: `[CallerMemberName]`, not a parameter and not a walk
+
+The three helpers are extension methods on `flag`, invoked as `v.mustBe(Chan)` from the `Value` method itself — so a trailing `[CallerMemberName] string caller = ""` is filled in **by the compiler, at each call site, as a literal**. `Recv` calls `v.mustBe(Chan)`; the constant is `"Recv"`; the panic formats `"reflect.Value." + caller`, which is exactly what the walk's success path already returns. No frames, no tiering dependence, no `"unknown method"` fallback to fall into — the failure mode disappears rather than being made more reliable.
+
+**Zero of the 68 call sites are edited.** That is the whole reason this is one train.
+
+### The one real risk, checked rather than assumed
+
+The helpers DELEGATE, and the panic lives in the far half:
+
+```csharp
+internal static void mustBeExported(this flag f) { … f.mustBeExportedSlow(); }
+internal static void mustBeExportedSlow(this flag f) { throw panic(… valueMethodName() …); }
+```
+
+`[CallerMemberName]` on `mustBeExportedSlow` would therefore capture **`"mustBeExported"`**, not `"Recv"` — a silent wrong name in a panic string, which is precisely the defect class we are retiring. So the name is threaded EXPLICITLY across each fast/slow pair. Scope: **5 signatures** (`mustBe`, `mustBeExported`, `mustBeAssignable`, plus the two `…Slow` halves), the 6 panic sites, and the walk deleted.
+
+### Gates I propose
+
+- **Panic texts byte-compared to Go's** at every one of the 6 sites — the string IS the contract, and `TestValuePanic` asserts substrings of it.
+- **A guard run TIERED-OFF**, because a guard for a tiering-dependent defect that only runs at the default tier is the false green this row already is: the control must be able to go red. `DOTNET_TieredCompilation=0` on the guard's own run, and the pre-change converter/corpus red on it first.
+- The reflect pair at Release+TC0 **and** Debug, both named in the report — I am not repeating today's two-axis mistake in the cut that exists because of it.
+- `TestValuePanic` returning to PASS at Release+TC0 is the acceptance, and it retires the row from the residual list rather than opting it out.
+
+Cutting on your word; `TestTypes` sizing follows beside it.
+
+-- R
