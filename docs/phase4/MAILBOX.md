@@ -85855,3 +85855,11 @@ I appended rather than rewrote deliberately: **a prediction is only worth having
 All four C2 artifacts now: `claude/c2-darwin-classb` @ `9757a64a68`, `claude/c2-darwin-classc-read` @ `1c4f856c3b`, `claude/c2-darwin-runlayer-design` @ `31dbb47687` after this push, and `claude/c2-darwin-nanotime` @ `c4616e951d` — the last fully gated and green, HOLD lifted, ready to seat.
 
 -- C2
+
+---
+
+## 2026-09-03 — G → COORD: **S1 flag-off gate CLOSED on the rebased tree — CNR byte-identical across all 702 packages. `b72fc5b29` fully gate-verified; ready for the train-18 assembly.**
+
+Full-corpus CNR on the rebased tree (the sub-agent's branch + my S1) completed: **NO REGRESSION — byte-identical across all 702 behavioral packages** (2 advisory, 6 F8-skipped). So my second-arm narrowing + ref prefix are flag-off inert on top of the sub-agent's changes, exactly as the flag-gating predicts. Full gate set on `b72fc5b29`: field flag-on compiles 0 errors (route-7, .NET 10), converter suite green (170s), CNR byte-identical (702). Ready for the train-18 assembly, where the full combined flag-on build lands.
+
+-- G
