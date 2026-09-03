@@ -546,3 +546,119 @@ A/B, PRE (`e8c078637`) PASS 2195 at 174 s cold / 145 s warm vs A PASS 2195 at 90
 > gap, so the "A faster on both readings" sentence above was the fast tail of run-to-run variance, not
 > merit. Corrected characterization: **A is within noise of PRE; no cost regression** — the gate's
 > verdict is unchanged, its wording was over-read. Three readings, one host, all warm but the first PRE.
+
+> **§11 MEASURED 2026-09-03 at the seated tip `6dcbd7211`** — the parked `SliceOfArrayTypeName` guard,
+> Go and C# binaries run directly and diffed row by row (positive control: the outputs differ):
+> PASS `[6]uint8`, `[2][3]int`, `[]Grid`; FAIL `[][6]uint8` → `[][]uint8`, `[][3]int` → `[][]int`,
+> `[][2][3]int` → `[][][]int`, `map[[2]int][]int` → `map[[]int][]int`, `[]*[4]byte` → `[]*[]uint8`,
+> `chan [3]int` → `chan []int`, and `Elem()` of `[][6]uint8` → `[]uint8` with `Len()` 0. **Ten of ten as
+> predicted.** A alone fixes no value-site row, and no unaccounted seeding route exists — the premise B
+> cuts on. `Len()` answering 0 for an unknown is the `null = unknown` model read at its consumer.
+
+## 12. Increment B — the value site and the constructors, designed before it is cut (2026-09-03)
+
+### 12.1 What the source says the two routes are
+
+`abi.TypeOf(any)` (`internal/abi/type_impl.cs:242`) is the VALUE route: it classifies the boxed
+value's dynamic type and measures what it can — `ArrayDimsOfValue` for an array, `PointeeArrayDims`
+for a pointer, `ChanDirOfValue` for a channel — then interns through `synthType(dyn, dims,
+paramDims, chanDir)`, the four-argument overload, so a value never carries `keyDims`. A slice, map or
+channel value therefore reaches the descriptor with NO element cargo at all, and `[][6]uint8{{}}`
+interns as `slice<array<byte>>` with nothing to distinguish it from `[][8]uint8{{}}`.
+
+The CONSTRUCTED route drops cargo the other way: `SliceOf(t)` is
+`synthType(typeof(slice<>).MakeGenericType(st))` — the element's descriptor is consulted only for its
+System.Type, its `arrayDims`/`chanDir`/`keyDims` discarded; `ChanOf` passes `null` dims; `PointerTo`
+passes nothing (§7's pointer row: constructed `*[]uint8`, declared `*[6]uint8`); `MapOf` already
+carries the KEY's dims (`arrayDimsOfReflectType(key)` as `keyDims`) and drops the element's. `ArrayOf`
+is the one constructor that passes dims, which is why top-level arrays were never wrong.
+
+Both routes intern on the same key — `descriptorDimsKey` = `join(arrayDims) + "@dir" + "#keyDims"` —
+so identity between them falls out of feeding the SAME cargo in, exactly as §8.1 states.
+
+### 12.2 The fork, and the arm taken
+
+Two ways to seed a value-site slice/map descriptor: **(a) carry the cargo on the value** — a dims slot
+on `slice<T>`/`map<K,V>` stamped by the converter at every literal and `make`; **(b) measure a present
+element or key**, the way `ArrayDimsOfValue` already measures a nested array through its first element
+(and already states `null` for an empty outer: "nested dims unknowable from an empty outer").
+
+(a) is complete but costs +8 B on every slice header corpus-wide for a shape that is rare, and needs a
+converter arm at every construction site. (b) is the arm `abi.TypeOf` already uses one kind over, costs
+nothing, needs no converter change, and fixes every measured consumer — the `TestDeepEqualAllocs`,
+`TestFuncLayout` and `TestTypes` rows all name NON-EMPTY literals. **B takes (b)** and states two
+boundaries rather than working around them:
+
+- **An EMPTY slice or map of unnamed arrays still collapses** (`[][6]uint8{}` with no element has
+  nothing to measure). Recorded here; closed by increment C = arm (a) with its cost stated.
+- **The number increment C must justify: +8 B on every slice header in the corpus** (the golib
+  instance-state rule's exact shape), against two boundaries no measured consumer reaches. Ratified
+  2026-09-03 (COORD): C inherits that measured cost, not a premise.
+- **A channel VALUE's element length cannot be measured** (its buffer is not peekable), so `chan [3]int`
+  by value stays `chan []int` until C carries it on the channel the way direction already rides
+  (`channel<T>.m_direction`, stamped by the converter's `chanDirectionCargo` seam). The `ChanElemDims`
+  guard holds that row, parked red by design. `ChanOf`'s CONSTRUCTED route is fixed in B.
+
+### 12.3 The cut
+
+1. golib `GoReflect`: `SliceElemArrayDims(value)` — first element's dims through `ArrayDimsOfValue` /
+   `PointeeArrayDims`; `MapKeyArrayDims(value)` / `MapElemArrayDims(value)` — first entry's key/value
+   dims; all `null` when empty or nil. The map's first entry is reached through its non-generic
+   enumerator and one reflection read of the boxed pair — `IMap` has more than one implementer, and a
+   path only `TypeOf` of a map-of-arrays value takes does not justify widening the interface
+   (amended at the cut, 2026-09-03; the design above said "gains a first-entry accessor").
+2. `abi.TypeOf(any)`: the switch gains the Slice and Map arms and calls the five-argument `synthType`
+   with `keyDims`.
+3. reflect constructors: `SliceOf`, `ChanOf`, `PointerTo` pass the element's `arrayDims`/`chanDir`/
+   `keyDims` unshifted (the same rule A's `Elem()` hands them down by); `MapOf` adds the element's
+   `arrayDims` beside the key dims it already carries.
+
+### 12.4 Predictions, per row, before the cut
+
+- `CanonicalTypeIdentity` (9 rows, all non-empty): **9 of 9 green** after B; today rows 1–9 are red
+  except where both routes happen to collapse alike.
+- `SliceOfArrayTypeName` (8 shapes + the `Elem()` line, chan row moved out, `[]*[4]byte` made present):
+  **all green** after B.
+- `ChanElemDims`: constructed row green, value row **red by boundary** — the increment-C marker.
+- The `pointer` and `map key` over-distinct rows of §7 become **equal** (rows 3 and 4/5 above).
+
+### 12.5 Acceptance
+
+The identity guard, `encoding/gob` at 106 (a Type-identity consumer banked green WITH the collapse — a
+canary against damage), the five importer canaries derived at gate time, the `nistec` cost canary as a
+same-host A/B (golib on the boxing path), a two-seeded reconvert diff (expected: ZERO corpus footprint —
+B changes no emission), union CNR, and the standard converter-suite / stdlib / GolibTests / behavioral
+OUTPUT battery. Names are the symptom; identity is the gate.
+
+> **§12.4 amended at the first guard run, 2026-09-03 — one prediction WRONG, and instructively.**
+> The `ChanElemDims` "constructed row green" prediction asserted `ChanOf(BothDir, ArrayOf(3,int)) ==
+> TypeOf(chan [3]int)`. It cannot be green in B: `ChanOf` now carries the element's dims while the
+> VALUE side is the stated boundary, so the two descriptors differ *because* the constructed one is
+> right. **An identity row against a boundary side is a boundary row.** The constructed route's own
+> property — `String()` `chan [3]int`, `Elem().Len()` 3 — is what B asserts; the identity is C's row.
+> Also at that run: two guards failed to COMPILE on `[]*[4]byte{{}}`, Go's elided-`&` literal for a
+> pointer-to-array element, which the converter emits as an uninstantiable type (CS0144) — a
+> converter gap outside B, routed as its own item; the guards use the explicit `&[4]byte{}` form.
+
+> **§12.4 amended again at the second and third guard runs, 2026-09-03.** Two of the name guard's red
+> rows were MINE, not B's: `map[[2]int][]int{}` and the `Elem()` line's `[][6]uint8{}` were written
+> with EMPTY literals — the very boundary §12.2 states — so they measured the boundary, not the fix;
+> both now use a present entry/element. The nested `[][2][3]int{{}}` row read `[2][0]` because the
+> converter emits a ZERO nested-array element with inner arrays of length 0 (runtime truth of a wrong
+> value, `new array<nint>[]{}.array(2)`); the rows use populated inner arrays and the emission gap is
+> routed with its sibling, the elided-`&` pointer element. A third detour, also routed: a `Printf` whose
+> FORMAT STRING holds a comma inside parentheses (`ArrayOf(3,int)`) is emitted with its literal split
+> and a stray cast (CS1003/CS1010) — first mis-diagnosed as the `.String()` first argument, then pinned
+> by elimination (plain locals still mangle; `Println` with the same text converts); the chan guard
+> prints that row with `Println`. **Three converter defects found by
+> guards written to measure reflect; none is B's, all three have their own item.**
+
+> **§12 amended, B.1 (2026-09-03): a slice element contributes no dims.** B's `elemArrayDims` handed a
+> map's first value or a slice's first element to `ArrayDimsOfValue`, which accepts any `IArray` — and
+> `ISlice : IArray` — so a `[]string` value's runtime LENGTH became an array dimension on the container's
+> descriptor. `TypeOf(map[string][]string)` then depended on the first enumerated entry's length, and
+> `DeepEqual` of one map inserted in two orders read false — `net/http`'s `http.Header` failure at the
+> train-20 head, predicted from the code and confirmed by rows 10–12 before the fix. The guard's nine
+> rows all had ARRAY elements: they tested the axis B changed, not the axis its predicate could reach.
+> Fix: `elemArrayDims` returns null for an `ISlice`; `ArrayDimsOfValue` refuses one at its door — the
+> same `ISlice : IArray` predicate trap the array-range `Clone` defect hit in `array.cs` this week.

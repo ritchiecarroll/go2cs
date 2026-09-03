@@ -7,6 +7,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -599,7 +600,9 @@ public static partial class GoReflect
     /// </summary>
     public static nint[]? ArrayDimsOfValue(object? value)
     {
-        if (value is not IArray arr)
+        // An ISlice is an IArray but its Length is not a dimension: refuse it here so no caller can reach
+        // the hole (defense in depth beside elemArrayDims).
+        if (value is ISlice || value is not IArray arr)
             return null;
 
         nint length = arr.Length;
@@ -631,6 +634,63 @@ public static partial class GoReflect
     /// mirror, so <c>reflect.DeepEqual(new([3]int), reflect.New(typ).Interface())</c> is false, which
     /// is the precondition encoding/json's whole TestUnmarshal table checks before every subtest.
     /// </remarks>
+    // A CONTAINER value's element cargo, measured off a PRESENT element or entry -- the arm abi.TypeOf
+    // already uses one kind over (ArrayDimsOfValue reads a nested array through its first element).
+    // null when the container is nil or empty: an empty [][6]uint8 has nothing to measure, and that
+    // is increment B's stated boundary (DESIGN-descriptor-cargo.md section 12.2), not a value to invent.
+    public static nint[]? SliceElemArrayDims(object? value)
+    {
+        object? box = unwrapAdapters(value);
+        return box is ISlice { Length: > 0 } s ? elemArrayDims(((IArray)s)[0]) : null;
+    }
+
+    public static nint[]? MapKeyArrayDims(object? value)
+    {
+        return firstMapEntry(unwrapAdapters(value), out object? key, out _) ? elemArrayDims(key) : null;
+    }
+
+    public static nint[]? MapElemArrayDims(object? value)
+    {
+        return firstMapEntry(unwrapAdapters(value), out _, out object? elem) ? elemArrayDims(elem) : null;
+    }
+
+    // The element's own dims: an array measures itself, a pointer measures its pointee (any depth).
+    private static nint[]? elemArrayDims(object? element)
+    {
+        // A SLICE contributes no dims: its length is a property of the VALUE, not of the type -- stamping
+        // it made TypeOf(map[string][]string) depend on the first enumerated entry's length (net/http's
+        // http.Header DeepEqual regression, 2026-09-03). Only an array<T> measures itself; ISlice : IArray,
+        // so the slice test comes first -- the same predicate trap the array-range Clone defect hit in
+        // array.cs this week.
+        if (element is ISlice)
+            return null;
+        return element is IArray ? ArrayDimsOfValue(element) : PointeeArrayDims(element);
+    }
+
+    // First entry of a map through its non-generic enumerator; the boxed KeyValuePair is read by
+    // reflection so IMap (more than one implementer) need not widen for a path only TypeOf takes.
+    private static bool firstMapEntry(object? map, out object? key, out object? value)
+    {
+        key = null;
+        value = null;
+
+        if (map is not IMap { Length: > 0 } || map is not IEnumerable entries)
+            return false;
+
+        foreach (object? entry in entries)
+        {
+            if (entry is null)
+                continue;
+
+            Type pair = entry.GetType();
+            key = pair.GetProperty("Key")?.GetValue(entry);
+            value = pair.GetProperty("Value")?.GetValue(entry);
+            return true;
+        }
+
+        return false;
+    }
+
     public static nint[]? PointeeArrayDims(object? value)
     {
         object? box = unwrapAdapters(value);

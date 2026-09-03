@@ -309,6 +309,7 @@
     <Project Path="tests/Behavioral/AtomicFieldThroughPointer/AtomicFieldThroughPointer.csproj" />
     <Project Path="tests/Behavioral/AtomicPointerToNil/AtomicPointerToNil.csproj" />
     <Project Path="tests/Behavioral/AtomicValues/AtomicValues.csproj" />
+    <Project Path="tests/Behavioral/CanonicalTypeIdentity/CanonicalTypeIdentity.csproj" />
     <Project Path="tests/Behavioral/CaptureHoistThroughConversion/CaptureHoistThroughConversion.csproj" />
     <Project Path="tests/Behavioral/CaptureModeFieldAddress/CaptureModeFieldAddress.csproj" />
     <Project Path="tests/Behavioral/CaptureModeFuncLitParam/CaptureModeFuncLitParam.csproj" />
@@ -317,6 +318,7 @@
     <Project Path="tests/Behavioral/CaptureModeValueParamLib/CaptureModeValueParamLib.csproj" />
     <Project Path="tests/Behavioral/CaptureModeValueParamUser/CaptureModeValueParamUser.csproj" />
     <Project Path="tests/Behavioral/CastNegativeNamedType/CastNegativeNamedType.csproj" />
+    <Project Path="tests/Behavioral/ChanElemDims/ChanElemDims.csproj" />
     <Project Path="tests/Behavioral/ChannelCapLen/ChannelCapLen.csproj" />
     <Project Path="tests/Behavioral/ChannelReceiveFromClosed/ChannelReceiveFromClosed.csproj" />
     <Project Path="tests/Behavioral/ChannelReceiveFromNil/ChannelReceiveFromNil.csproj" />
@@ -842,6 +844,7 @@
     <Project Path="tests/Behavioral/SliceElementFieldAddress/SliceElementFieldAddress.csproj" />
     <Project Path="tests/Behavioral/SliceFieldElementAddress/SliceFieldElementAddress.csproj" />
     <Project Path="tests/Behavioral/SliceNilVsEmpty/SliceNilVsEmpty.csproj" />
+    <Project Path="tests/Behavioral/SliceOfArrayTypeName/SliceOfArrayTypeName.csproj" />
     <Project Path="tests/Behavioral/SlicePointerIdentity/SlicePointerIdentity.csproj" />
     <Project Path="tests/Behavioral/SliceToArrayPointerAlias/SliceToArrayPointerAlias.csproj" />
     <Project Path="tests/Behavioral/SockaddrRoundTrip/SockaddrRoundTrip.csproj" />

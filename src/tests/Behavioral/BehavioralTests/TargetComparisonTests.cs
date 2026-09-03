@@ -169,6 +169,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckByteTableStringVar() => CheckTarget("ByteTableStringVar");
 
     [TestMethod]
+    public void CheckCanonicalTypeIdentity() => CheckTarget("CanonicalTypeIdentity");
+
+    [TestMethod]
     public void CheckCaptureHoistThroughConversion() => CheckTarget("CaptureHoistThroughConversion");
 
     [TestMethod]
@@ -191,6 +194,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckCastNegativeNamedType() => CheckTarget("CastNegativeNamedType");
+
+    [TestMethod]
+    public void CheckChanElemDims() => CheckTarget("ChanElemDims");
 
     [TestMethod]
     public void CheckChannelCapLen() => CheckTarget("ChannelCapLen");
@@ -1685,6 +1691,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSliceNilVsEmpty() => CheckTarget("SliceNilVsEmpty");
+
+    [TestMethod]
+    public void CheckSliceOfArrayTypeName() => CheckTarget("SliceOfArrayTypeName");
 
     [TestMethod]
     public void CheckSlicePointerIdentity() => CheckTarget("SlicePointerIdentity");

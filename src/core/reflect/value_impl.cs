@@ -3083,7 +3083,7 @@ public static ΔType PointerTo(ΔType t) {
     if (st is null) {
         throw panic("reflect: PointerTo of non-synthesized type");
     }
-    return toType(abi.synthType(typeof(ж<>).MakeGenericType(st)));
+    return toType(abi.synthType(typeof(ж<>).MakeGenericType(st), arrayDimsOfReflectType(t), null, chanDirOfReflectType(t), keyDimsOfReflectType(t)));
 }
 
 // PtrTo is the deprecated spelling of PointerTo. (The auto form already delegates; kept auto.)
@@ -3160,7 +3160,7 @@ public static ΔType SliceOf(ΔType t) {
     if (st is null) {
         throw panic("reflect: SliceOf of non-synthesized type");
     }
-    return toType(abi.synthType(typeof(slice<>).MakeGenericType(st)));
+    return toType(abi.synthType(typeof(slice<>).MakeGenericType(st), arrayDimsOfReflectType(t), null, chanDirOfReflectType(t), keyDimsOfReflectType(t)));
 }
 
 // ChanOf and MapOf are the LAST TWO type constructors still on the typelinks path, and they die
@@ -3293,7 +3293,7 @@ public static ΔType ChanOf(ΔChanDir dir, ΔType t) {
     }
     // The direction rides the descriptor as cargo — GoChanDir maps onto abi's ChanDir with no
     // translation (Recv 1, Send 2, Both 3) — which is what rtype.ChanDir reads back out.
-    return toType(abi.synthType(typeof(channel<>).MakeGenericType(st), null, null, ((GoChanDir)(byte)(nint)dir)));
+    return toType(abi.synthType(typeof(channel<>).MakeGenericType(st), arrayDimsOfReflectType(t), null, ((GoChanDir)(byte)(nint)dir), keyDimsOfReflectType(t)));
 }
 
 // MapOf returns the map type with the given key and element types.
@@ -3326,7 +3326,7 @@ public static ΔType MapOf(ΔType key, ΔType elem) {
     }
     // An ARRAY key carries its dimensions as keyDims — the cargo slot a map descriptor already
     // keeps, and what rtype.Key() hands back down.
-    return toType(abi.synthType(typeof(map<,>).MakeGenericType(kst, est), null, null,
+    return toType(abi.synthType(typeof(map<,>).MakeGenericType(kst, est), arrayDimsOfReflectType(elem), null,
         GoChanDir.Unstamped, arrayDimsOfReflectType(key)));
 }
 

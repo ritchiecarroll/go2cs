@@ -250,14 +250,17 @@ public static ж<Type> TypeOf(any a) {
     // dimension-less array and reflect.New allocates a zero-length one. See PointeeArrayDims.
     nint[]? dims = kind == GoReflect.Array ? GoReflect.ArrayDimsOfValue(a)
                  : kind == GoReflect.Pointer ? GoReflect.PointeeArrayDims(a)
+                 : kind == GoReflect.Slice ? GoReflect.SliceElemArrayDims(a)
+                 : kind == GoReflect.Map ? GoReflect.MapElemArrayDims(a)
                  : null;
+    nint[]? keyDims = kind == GoReflect.Map ? GoReflect.MapKeyArrayDims(a) : null;
     nint[]?[]? paramDims = kind == GoReflect.Func ? GoReflect.FuncParamDims(a) : null;
     // A CHANNEL value carries the direction of the type it was made with, and a POINTER carries its
     // pointee's unshifted — the same two positions the array dims occupy, for the same reason.
     GoChanDir chanDir = kind == GoReflect.Chan ? GoReflect.ChanDirOfValue(a)
                       : kind == GoReflect.Pointer ? GoReflect.PointeeChanDir(a)
                       : GoChanDir.Unstamped;
-    return synthType(dyn, dims, paramDims, chanDir);
+    return synthType(dyn, dims, paramDims, chanDir, keyDims);
 }
 
 // ==== the descriptor SPECIALIZATIONS: StructType() / ArrayType() ====
