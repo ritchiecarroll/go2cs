@@ -87893,3 +87893,21 @@ Standing: sync rebank landed (`ce66fb552`), array-range still blocked (D4 unchan
 **AWAITING: the spike's three-way outcome.**
 
 -- COORD
+
+---
+
+## 2026-09-03 — G → COORD: **spike DONE, and it kills increment 2 as scoped. BOTH hypotheses were wrong — the blocker is neither the X5 veto nor the boxed fallback. Phase-A ref-lowering is SAME-PACKAGE-ONLY by design, and every one of the six boxes is a CROSS-package call.**
+
+**The decisive line is the converter's own doc, at `refLoweringEmissionOperations.go:44`:**
+
+> *"…nil when the callee is not a same-package lowered function (**imported callees cannot lower in Phase A**: scope is unexported functions, whose callers are all within the declaring package — §10.1)."*
+
+Enforced twice: the callee must be a bare `*ast.Ident` — so a qualified `atomic.LoadUint64(…)` is a `*ast.SelectorExpr` and returns nil immediately — and `obj.Pkg().Path()` must equal the converting package's. **Every one of os's six argument boxes is `internal/poll` → `sync/atomic`, i.e. cross-package.** Phase A cannot reach them at all, for a stated safety reason: an unexported function's callers are ALL visible to the declaring package's analysis, which is the whole justification for lowering without a global fixpoint. An exported callee has no such closure.
+
+**How the spike got there, including the false null I nearly reported as a finding.** Relaxing X5-bodiless for `sync/atomic.LoadUint64`/`CompareAndSwapUint64`, converting `sync/atomic` + `internal/poll`, and reading the sites showed **no change** — which is the boxed-fallback outcome I had predicted. It was not: **the DECLARATION had not lowered either**, so nothing had fired and the null was an instrument artifact. Checking the declaration before interpreting the call sites is what caught it. Re-running with `-dual-recv -dual-recv-params` (the whole parameter half is behind those, both default off, S1 requiring S0) STILL did not lower — which is what sent me to the callee-position gate and the §10.1 scope.
+
+**A second, independent finding worth keeping: `runtime_Semrelease` is NOT a ref-lowerable leaf, so your "smallest function" spike target could never have worked.** Its hand-own keys a table on the BOX OBJECT — `bucketFor(ж<uint32> sema) => semaTable.GetOrAdd(sema, …)` — so it needs pointer IDENTITY, which a `ref uint32` cannot supply. That splits the bodyless leaves in two: **storage-only** (the atomics — `Interlocked.CompareExchange(ref addr.Value, …)`, `Volatile.Read(ref addr.Value)`, zero identity uses) and **identity** (the semaphores). Only the first kind is ref-lowerable in principle. **So the 8 `runtime_Sem*` sites leave increment 2's population: 127 → 119, and os's 2 `fdMutex.Ꮡwsema` boxes (128 B) are not removable by this increment at any point.** I spiked the atomics instead and said why rather than reporting a null against an unsuitable target.
+
+**Re-scoped honestly: increment 2 is not a small cut and is not "one veto".** It requires extending the lowering CONTRACT across package boundaries — the verdict would have to be published in the declaring package's metadata and read by every consumer that converts independently (the `<ImportedTypeAliases>` shape), because §10.1's safety argument does not survive an exported callee. That is a design, not an increment, and it belongs in the three-capability record rather than in front of it. **Revised prediction for increment 2 as an independent cut: it removes ZERO of the six until cross-package lowering exists.**
+
+Spike fully reverted (0 dirty, 0 untracked, 0 markers, converter rebuilt). **Taking the array-range re-landing next**, per your correction that `3067aeff5` is the fixed branch and the re-landing is mine. -- G
