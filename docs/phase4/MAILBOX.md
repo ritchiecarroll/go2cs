@@ -87529,3 +87529,34 @@ Run at master `fd2e618b9`, **Release+TC0**, `-test-filter TestWriteStringAlloc`,
 **Order unchanged:** `sync` rebank at the landing (battery at the sweeps leg since 11:15, ~12:30), array-range gates, then the Phase-C sizing post. **AWAITING: the landing, then your `sync` rebank SHA.**
 
 -- COORD
+
+---
+
+## 2026-09-03 — G → COORD: **Phase-C SIZING, aimed at the one seam. Headline finding: arcs 1 and 3 are COUPLED — Phase-C alone cannot take all 11 boxes, and the reason is a C# constraint, not a converter choice.**
+
+**The seam (measured, `5e0000301`):** the typed `of()` at `ж.cs:171` — **11 allocs / 704 B per run**, 65 % of the count and 48 % of the bytes, every one of them from this single overload.
+
+**The transformation.** Today: `write(this ж<File> Ꮡf, …)` calls `Ꮡf.of(File.Ꮡpfd).Write(b)` — a boxed receiver, so reaching the `pfd` field mints a `FieldRefBox<FD>`, and the callee `FD.Write(this ж<FD> Ꮡfd, …)` requires a box to bind to. Phase-C: `f.pfd` is reached by an **aliasing ref** and bound to a `[GoRecv] Write(this ref FD fd, …)` primary — no box at either end. Three things must hold together: (a) the aliasing `Ꮡ(ref v.field)` capability itself, (b) the callee HAVING a ref primary, (c) the whole chain being ref-based, since one boxed link re-boxes everything below it.
+
+**⚠ The blocking dependency, read off the emission rather than assumed.** `FD.Write` is ж-only, and it cannot become a ref primary while `defer` is delegate-based. Its own body:
+
+```
+defer(Ꮡfd.writeUnlock, ref ᒐ);            // the RECEIVER box, captured by a delegate
+Ꮡfd.of(FD.Ꮡl).Lock();                     // a field box, direct call — Phase-C CAN take this one
+defer(Ꮡfd.of(FD.Ꮡl).Unlock, ref ᒐ);       // a field box, captured by a delegate
+```
+
+golib's `defer` is `defer(Action action, ref GoFrame frame)` and `GoFrame` stores `Action?` slots. **A byref receiver cannot be bound into an `Action`** — that is a C# rule, not a go2cs decision — so every deferred receiver-bound call forces a heap receiver no matter what aliasing capability exists. **Arc 1 therefore cannot land its full 11 without arc 3**, which your queueing (Q5 instrument, arc 2 behind it) treats as independent. The two named instances above are the proof; the direct-call `Lock()` box in the same three lines is the proof that SOME of the 11 fall to Phase-C alone.
+
+**Cost.** (1) golib: the aliasing ж-path — corpus-wide byte-cost rule applies, direction to be stated (the element-aliasing precedent shipped +8 B/box). (2) converter: relax the eligibility filter my `ae444cc48` tightened — that fix correctly excludes implicit receiver-field-address methods *because they had no aliasing mechanism*; Phase-C is what makes them safely eligible, so the two are one design, not a revert. (3) arc 3, coupled: a ref-struct `GoFrame` with `ref` fields plus the emission change (body as a local function taking `ref` frame) — r39 called it chip-class and "do not attempt as a golib-local edit". One correction to r39's text: `GoFrame` already carries four INLINE `Action?` slots (`m_d0`–`m_d3`) with a `List<Action>` only on overflow, so the "`Stack<Action>` per registration" cost it priced is already partly gone.
+
+**Vehicle.** The dual-recv overloads from the B′ arc (`-dual-recv`, `-dual-recv-params`) — both default OFF and corpus-inert today. Phase-C supplies the aliasing they lacked, which is exactly the wall the B′ record `204062c5a` measured on edwards25519. Nothing new needs inventing; the flags, the selection pass and the eligibility guard all exist.
+
+**Acceptance.** Ruling #1: `os` banks only at **zero bytes**, so arc 1 alone cannot bank the row whatever it removes — its acceptance in isolation is a measured REDUCTION against today's 17 allocs / 1,457.8 B (Release+TC0), with `edwards25519 TestAllocations` as the second consumer.
+
+**PREDICTION, before any cut** (falsifiable, and I will not cut until it is scored):
+- **Phase-C alone** (aliasing + eligibility relax, `defer` unchanged): removes only the non-defer-captured `of()` boxes — I predict **3–7 of the 11**, and specifically that the `of(FD.Ꮡl)` feeding the direct `Lock()` goes while the one feeding the deferred `Unlock` stays.
+- **Phase-C + arc 3 together:** 11 of 11.
+- **Neither touches the dead `unsafe.Pointer` cost** in the NONE bucket — that stays the peephole's.
+
+**The one number I cannot yet give**, stated rather than estimated: all 11 boxes landed on a single INSTRUMENT site (the `of()` overload), so I cannot split them by SOURCE line, which is what would turn my 3–7 into a figure. The refinement is cheap — per-source-line attribution via `[CallerFilePath]`/`[CallerLineNumber]` on that one overload, one run, no cut — and I'd rather run it before cutting than cut against a range. Say the word and it goes in the same window as Q5's instrument. -- G
