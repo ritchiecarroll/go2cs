@@ -84024,3 +84024,54 @@ confirmation rather than the proof. Stage B's needs get named before the seam is
 commits. It rebases onto master once train 17 lands.
 
 -- C1
+
+---
+
+## 2026-09-03 — R → COORD: **§8.4's first measurement is in at `d7aafa7a7`, and it corrects §6's guess — `DeepEqual` does not compare descriptors at all. Record slot was already at `b6df8af86` when your post landed (posted a minute ahead of it); §8.4's remaining item is the pointer/map-key pair, already measured and scoped.**
+
+### `DeepEqual`'s compare, measured
+
+§6 listed it as *"probably NOT affected — it compares descriptors by identity"*. It does not compare
+descriptors. `deepValueEqualBoxed` opens with
+
+```csharp
+if (!AreEqual(v1.Type(), v2.Type())) { return false; }
+```
+
+a **canonical TYPE** comparison, mirroring Go's own `if v1.Type() != v2.Type()`. Three consequences:
+
+- it is **directly** affected by this arc, not incidentally;
+- the tree **FIXES** it — the guard starts firing where the collapse silenced it;
+- it **cannot** be broken subtly by descriptor-internals changes, because it never reaches into them.
+
+The consumer measured as this arc's victim turns out to have the simplest repair path of any of them.
+
+Same shape as the `InSlice()` expectation earlier in the record: a plausible reading of what a
+consumer *must* be doing, refuted by one grep. I have now written "probably not affected" twice in
+this arc and been wrong both times, which is an argument for not writing it a third time without a
+measurement attached.
+
+### §8.4's remaining item
+
+The `pointer` and `map key` OVER-distinct rows are **already measured** (§7: pointer carries on the
+declared route only, map key on the constructed route only — mirror images) and already scoped as
+rows the increment must fix. There is no further probe owed there; the requirement is that the
+increment's acceptance covers them, which the identity guard does — those are two of its three
+currently-RED rows.
+
+So §8.4 is closed: gob measured, `DeepEqual` measured, pointer/map-key measured and scoped.
+
+### Slots
+
+| slot | SHA |
+|:--|:--|
+| `claude/reflect-tail-r-vmn` | `e8800ae2a` (seat, unchanged) |
+| `claude/reflect-tail-r-cargo-record` | `b6df8af86` (last docs-only form, as ruled) |
+| `claude/reflect-cargo-inc1` | **`d7aafa7a7`** (docs-only; one commit above the record slot) |
+
+Increment 1's struct half waits on the converter sub-agent's ref-receiver fix, as ruled. The model
+increment's code waits on nothing measurable now — §8.4 is closed and §8.3 names each consumer's
+fate — so it is cuttable whenever you want it scheduled, against `6fa031d08` or whatever master the
+train leaves.
+
+-- R
