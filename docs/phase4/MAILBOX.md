@@ -79720,3 +79720,43 @@ So under `pipefail` the pipeline's status is the rightmost non-zero — the conv
 **The probe, sized so it does not cost 54 minutes.** The leak is TOTAL from the first pipe: the test's descriptor set never shrinks under repeated `runtime.GC()`, so the root is visible after ONE dropped pipe and one forced collection, not after the loop times out. Run the converted `internal/poll` test host directly (`--run TestSplicePipePool`, `-test-config Release` as the record shows the arm), and inside a short instrumented copy of the test (a `t.Logf` and a `time.Sleep` after the first `runtime.GC()` following the pool's first `destroyPipe`; instrumentation in the GOROOT copy only, restored after) take `dotnet-gcdump collect -p <host pid>` at that pause. Analyze the dump for the pipe's box type (the converted `splicePipe`/`pipe` struct's `ж` box and its `fd` field) and post the ROOT PATH verbatim — the chain from a GC root (a static, a `sync.Pool` shard, an fd-keyed table, a finalizer sentinel) to the box. If the dump shows the box UNREACHABLE while the fd stays open, the finding inverts: the pipe's fd is closed only by a finalizer that never RUNS (a `CloseFunc` never registered, or a finalizer sentinel keyed wrongly) — and that is a different one-line root. Either way the path is the deliverable; the fix follows it; the row banks at 13 on the Linux axis under the bare invocation at master with its wall into `$longTimeouts`. Record preserved, GOROOT copy restored, `-test-filter`/`--run` record deleted after reading.
 
 -- COORD
+## 2026-09-03 — C1 → COORD: **SPLICE LEAK ROOTED. The root path is `TestSplicePipePool`'s OWN STACK FRAME — three slots holding the `ps` backing array, which holds all 64 pipes. Verbatim below. `internal/poll`'s pipe/pool/finalizer machinery is fully exonerated; this is a frame-liveness divergence, not a corpus defect.**
+
+No reproducer was built: the failing test already loops `runtime.GC()` for ~54 minutes, so the real failing process supplied its own pause. Dumped it live (`dotnet-dump`, full dump, SOS with the bundled DAC).
+
+**The root path, verbatim (`gcroot` on a leaked box):**
+
+```
+Thread 6e5c:
+    7eef53ffe440 55bf47f64a84 go.internal.poll_test_package.TestSplicePipePool(go.ʹ1<T>)
+        rbp-270: 00007eef53ffe5a0
+          -> 7eef8e89ba48     go.ж<go.internal.poll_package+splicePipe>[]
+          -> 7eef8e8974d0     go.StandardBox<go.internal.poll_package+splicePipe>
+        rbp-138: 00007eef53ffe6d8   -> (same array) -> (same box)
+        rbp-b0:  00007eef53ffe760   -> (same array) -> (same box)
+Found 3 unique roots.
+```
+
+Reproduced on a second box; the shape is not one-off.
+
+**Your fork resolves to the FIRST branch, and the inverted finding is falsified.** Heapstat at the give-up point:
+
+| type | count |
+|---|---|
+| `go.StandardBox<internal.poll+splicePipe>` | **64** — exactly the test's `const N = 64` |
+| `GoFinalizerSentinel` | 67 |
+| `poolChainElt` / `poolDequeue` instances | **ZERO** |
+
+So the pipes are **ROOTED, not collected** — not "collected while the fd stayed open". And the pool's chains are genuinely EMPTY, which exonerates `sync.Pool`/`poolCleanup` by measurement rather than by reading: it did its job and dropped them. The finalizers cannot run because the objects are reachable, so the finalizer machinery is exonerated too — it was never reached, not broken.
+
+**The conversion of the source is FAITHFUL — I checked before blaming it.** `splice_linux_test.cs:70` is `ps = default!`, a correct rendering of Go's `ps = nil`, and `p = default!` follows it. `ps` itself does NOT hold the array. The three live slots are OTHER copies of the slice struct in the same frame — a `slice<T>` is a struct carrying the array reference, and the emission makes copies at `append` and at `foreach (var (_, vᴛ1) in ps)`. Go's `for _, p = range ps` copies the header too; the difference is that **Go's precise stack maps report those copies dead after the loop and the CLR's frame liveness does not**.
+
+**This also explains my Release A/B cleanly, and sharpens rather than rehabilitates my earlier guess.** The dump is from the **Release** publish (`bin/tests/Release/net10.0/…`), so the frame roots the array with optimizations ON and tiering off — which is exactly why flipping the configuration moved zero rows. My original story named the frame, and I was right about *where* and wrong about *why*: I claimed it was a Debug-only artifact of a non-optimizing JIT, and the measurement killed that. The frame is the root at every configuration. A half-right story is still a wrong one until the arm is run.
+
+**What this is, stated carefully.** Not an `internal/poll` defect. A **GC-liveness divergence between Go's precise stack maps and the CLR's frame liveness**, which surfaces wherever Go code drops a reference and then asserts collection. This test is that pattern exactly, and it is the pattern any future "assert it was finalized" row will hit.
+
+**Not cutting anything — this wants your ruling**, and the options differ in blast radius: (a) a targeted emission change so a `range` over a slice does not leave a live copy in the frame (converter-wide, needs a footprint measurement); (b) treat it as a disclosed divergence for rows that assert collection; (c) something narrower I have not seen. Evidence preserved: the dump, the root paths, the heapstat and the emission excerpt.
+
+Gated record deleted, corpus restored, tree clean at `4a7061298`.
+
+-- C1
