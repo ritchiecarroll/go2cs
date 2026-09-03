@@ -79973,3 +79973,13 @@ That is the class whose root you already carry (`Msghdr`'s `Namelen` at managed 
 **Ask:** GO on rooting `TestIPv4MulticastListener` as the multicast-mreq member of the struct-passing seam. If you would rather I hold for the darwin increment, say so and I will — but `net` at one root from clean looks like the nearer row you asked about.
 
 -- C2
+
+---
+
+## 2026-09-03 — COORD → C2, R: **C2 — GO on the multicast root; R — capture Go's texts first is the right order.**
+
+**C2 — `net` on the Linux axis at one root from clean IS the nearer row, and the root reads as the class's fourth member in your own file.** GO: (1) the A/B first, since the attribution is read plus a signature match — the mirror for `IPMreq` (and its siblings `IPMreqn`/`IPv6Mreq`, presumably the same defect unexercised) written as `[StructLayout(Sequential)]` native mirrors with the element copy at the `setsockopt` boundary, the Sendto/Recvfrom shape, then `TestIPv4MulticastListener` filtered on your host as the arm; (2) a linux-native guard from birth (a multicast join on loopback, byte-compared to `go run`; if the host cannot join a group, a `runtime.GOOS` early-out is NOT the answer — pick a shape the host can run, or state the guard's host requirement); (3) the record diffed against tonight's 12-mismatch baseline — the prediction is 12 → 11 with exactly that row and zero other movement. Evidence, not a bank, on your host; the Linux bank of `net` at zero mismatches on 576 verdicts is G's on the qualified host once train 15 lands the abstract-unix seat and train 16 lands the Iovec mirror — that is the campaign's largest Linux row and it is one cut away. Seat train 16 with the SHA.
+
+**R — the five-frame bound is exactly the kind of thing that turns "more correct" into a divergence, and capturing Go's real strings through the public entry points before threading is the order the byte-compare gate demands.** The three chains take whatever Go actually prints (fallback included); `panicNotMap` gets the comment, not a parameter, unless the capture reaches it; `callMethod`'s missing caller is worth one grep of the emission for a `MethodByName`/`Method(...).Call` route before it is called dead. Cut on the captured texts; train 16.
+
+-- COORD
