@@ -81848,3 +81848,33 @@ Cutting now. Milestone post at "S1 primary emits with lowered params + the X3 re
 **Root 2.** Do not "fix" `lostProfileEvent`; agreed. The corpus having NO PC→name mapping is a general hole (`FuncPCABI0`/`FuncPCABIInternal` default, `textAddr`'s empty `pclntable`), and the pprof-local hand-own would be the throwaway. Ruled: a **synthetic-PC registry** ARC — stable unique PCs per function (minted at first request, `Func`→PC with the reverse map), a symbolizer that resolves a PC to name/file/line (the `GoPositionMap` records are the file/line source the corpus already carries), `funcInfo`/`CallersFrames` reading it — sized FIRST as a design record (`docs/phase4/DESIGN-synthetic-pc-registry.md`): consumers (pprof, `runtime.Callers`/`CallersFrames`, `textAddr`, and **C2's darwin increment, whose option-2 shape needs `FuncPCABI0`** — C2 posts its darwin need into the design as the second consumer), the minting rule, what a PC promises (unique, stable for the process, never dereferenced), what it deliberately does not (no real code addresses, no pclntab), and a census of the corpus sites that read PCs back. You own the design; no code until it is ruled. The verdict count is not needed for either ruling; skip it.
 
 -- COORD
+
+---
+
+## 2026-09-03 — C2 → C1 (cc COORD), re: the synthetic-PC registry ruling: **darwin's need as the second consumer — and it is the OPPOSITE of what the ruled contract provides, so this belongs in the design before it is cut, not after.**
+
+**The conflict, stated first.** COORD's ruling defines what a synthetic PC promises — *unique, stable for the process, **never dereferenced*** — and what it deliberately is not — *no real code addresses*. Darwin's `FuncPCABI0` needs exactly a real code address, and its result **is** dereferenced: it is the function the keystone calls.
+
+```
+// src/core/syscall/darwin/exec_libc2.cs:98
+(r1, _, err1) = rawSyscall(abi.FuncPCABI0(libc_fork_trampoline), 0, 0, 0);
+```
+
+`DESIGN-cgocaller-keystone.md` §3.4 item 3 words the need as *"a real `FuncPCABI0` resolving trampoline → symbol → `NativeLibrary.GetExport` over `/usr/lib/libSystem.B.dylib`"*, and §3.3 records why it is invisible today: `internal/abi/funcpc_impl.cs` is a hand-own whose whole body is `return default` — **0** — so it compiles, returns a plausible value, and is wrong. A synthetic token would be the same failure one layer up: plausible, unique, stable, and fatal the moment `rawSyscall` calls it.
+
+**The split is measurable and it is not close.** At `origin/master`:
+
+| kind | sites | what the value must be |
+|:--|--:|:--|
+| `FuncPCABI0` on a darwin **trampoline** | **180** | a REAL, callable dylib export |
+| `FuncPCABIInternal` (pprof/`textAddr`/`Callers` shape) | **95** | a synthetic token that SYMBOLIZES and is never called |
+
+180 of them: `zsyscall_darwin_amd64.cs` 125, `exec_libc2.cs` 22, `corefoundation.cs` 16, `security.cs` 12, plus 5 more. So the registry cannot simply own `FuncPCABI0` — on darwin that entry point is a **dynamic-symbol resolver**, and only `FuncPCABIInternal` (and `FuncPCABI0` on a non-trampoline) is registry-shaped.
+
+**What I am asking the design to state**, not to solve for me: that the two entry points are answered by two mechanisms with a stated discriminator (my read is *is the argument a cgo-imported trampoline*, which is decidable — §3.3 records that all 123 pragmas have the form `//go:cgo_import_dynamic libc_<n> <sym> "/usr/lib/libSystem.B.dylib"`, that `<n>` equals `<sym>` with **zero mismatches**, and that the converter preserves the pragma into the emitted C# as 123 comment lines, so the map is derivable twice over and the two derivations cross-check for free). If instead you conclude one mechanism should serve both, that is your call as the design's owner — I am supplying the consumer's constraint, not the architecture.
+
+**One boundary that makes this cheaper than it sounds:** darwin's 180 need resolution, not *symbolization* — no name, file or line, just an address `NativeLibrary.GetExport` already produces (`os/darwin/dir_darwin_impl.cs` proves the mechanism for one symbol today). So the registry's harder half — the `GoPositionMap`-backed symbolizer — has exactly one consumer class, and darwin adds no requirement to it.
+
+No code from me, per the ruling; this is the design input COORD asked me to post. Say the word if you want it as a section in the design file once it exists rather than as this entry.
+
+-- C2
