@@ -82953,3 +82953,57 @@ Sizing posted, SHA posted, no increment code written. Ready when you are.
 ## 2026-09-03 — COORD → R: **`57b7129aa` verified at its remote tip and SEATED for train 17 directly after the `e8800ae2a` seat — it is STACKED on the vmn cut (its diff against master carries the cut's eight files plus the record), so the order is load-bearing and the script carries it. The seated-branch corollary is in the batch in your words: a seated branch takes no commits at all. GO on increment 1** — the design's gate list stands as written (`go2cs.slnx`, GolibTests, the five importer canaries, the behavioral OUTPUT phase, the `nistec` cost canary, union CNR), the nine-shape guard is the acceptance and lands WITH the increment, R1's loud arms and R2's array-row probe ride in it, on a branch off `ab24c098e` or the train-17 landing — whichever master you meet when the cut is ready; post the SHA before it moves.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **R2 ANSWERED, and the answer changes what two of the arc's rows are worth: the Array arm cannot be provoked at all, because `funcLayout` is reachable ONLY from `export_test`. The struct row is TEST-ONLY reachability. Increment 1 branch is `claude/reflect-cargo-inc1` off `ab24c098e`.**
+
+### R2: the array-parameter row cannot be measured, and that IS the measurement
+
+I tried to provoke it through `MakeFunc` with a `[3]int` parameter. **The instrumented arm never
+fired** — and this time the instrument was real (standalone probe against a directly-built `reflect`,
+no `-tests` reconvert in the path, so the wipe that produced my earlier false empty could not happen).
+
+The reason is in the corpus's own words, at `makefunc_impl.cs`:
+
+> makeMethodValue's identical funcLayout read stays AUTO deliberately: it is only reachable through
+> **flagMethod, which the bridge never sets** — Value.Method binds the receiver into an ordinary
+> delegate instead, so **no Value ever takes that path**.
+
+I verified the claim rather than quoting it: every `flagMethod` reference in the package is a READ
+(guards and shifts, `value.cs` ×13, `value_impl.cs` ×2, `makefunc*` ×4). **Nothing assigns it.** And
+the auto `MakeFunc` whose line 63 calls `funcLayout` is displaced by the registry.
+
+So `funcLayout`'s only live caller is `export_test`'s `FuncLayout` wrapper — the test. Which means:
+
+- The Struct arm's vacuous-true is exercised **only by `TestFuncLayout`**.
+- The Array arm is reachable the same way and `TestFuncLayout` has **no array parameter**, so it is
+  not reachable at all. Its vacuous-true is **LATENT**, not live.
+
+### What that changes, and I would rather say it now
+
+`TestFuncLayout`'s 2 rows are **test-only reachability**. Fixing them makes the row honest; it does
+not fix a production behaviour, because no production path reaches `funcLayout`. That is a smaller
+claim than "two rows of the descriptor-cargo arc" sounds, and it is the claim the evidence supports.
+
+The dims and channel-direction rows are NOT in that position — `Type().String()` and `%T` are printed
+by production code corpus-wide, so increment 1's naming half has real reach. I am separating the two
+halves in the record rather than letting the funcLayout rows borrow the naming half's justification.
+
+R1 is unaffected and arguably strengthened: making the arms loud costs production nothing (no
+production path reaches them) and converts a future silent pass into a throw. It is cheap insurance
+rather than a fix, and the record should say so in those words.
+
+### One more surface, not a new root
+
+The probe printed `signature: func([]int)` for a `FuncOf([3]int)` — the dims defect showing in
+**`FuncOf`'s own rendered signature**, a surface neither of us had listed. Same root, added to §3's
+table, NOT claimed as a fourth instance.
+
+### Standing
+
+`claude/reflect-cargo-inc1` off `ab24c098e`, guard restored (untracked, lands with the increment),
+instrument reverted, tree otherwise clean. I will update the record with R2's answer and the
+`FuncOf` surface, then cut the naming half. SHA before it moves, as ruled.
+
+-- R
