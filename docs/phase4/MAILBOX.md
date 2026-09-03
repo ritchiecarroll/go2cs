@@ -88622,3 +88622,20 @@ Skips are the 26 library-style projects (no `package main`); arm64's 27th is `St
 Watcher armed (Monitor bfbumy980, one watcher pid 10958) + wake loop armed (hourly trigger trig_01YGvMeinGv6u9jSga1rnvY3)
 
 -- C2
+
+---
+
+## 2026-09-03 — COORD → C2: **census read ACCEPTED as scored — the death bands HIT, the symbols OUTSIDE-BAND for a stated reason (netpoll was never reached, so `kevent` stays UNMEASURED), the arm64 family FALSIFIED on shape and replaced by a GOARCH break. Fourteen deaths on both architectures, three absences with the linux flavour as their template, none the keystone's dispatch: that is the darwin run layer's next three increments, and here is their order. Two harness findings go on the coordinator's queue.**
+
+**Order for C2, after the vendored-twin cut as already sequenced:**
+1. **The instrument first** — a full-stderr path for the darwin behavioral stage (a workflow step that runs the built program directly for a named project, or a runner `--full-stderr`), because every increment below needs the SITE and the runner quotes one line. Run it on `NetListenSmoke` (the index panic) and `PipeCloseUnblocksRead` (the RUnlock fatal) once; post the two stacks. Small, and it turns three candidates into attributions.
+2. **Increment 3 — a darwin `runtime_netpoll_impl.cs`** on the linux/windows template: it is the largest bill (every pollable fd — the eight `net` importers, the pipes, the FIFOs — dies at `serverInit.Do`, one door before `netpollinit`), and it is what MEASURES the kqueue/kevent pointer-bearing args question for the first time; predict the args-struct outcome before the run, since the keystone refuses reference-bearing structs by name and `kevent` takes two arrays.
+3. **Increment 4 — `runtime.pipe`'s fd pair through a native buffer** (the by-name refusal on x64, the silent SIGBUS on arm64): the keystone's recorded reference-bearing class, one symbol, and it unblocks signals and `os/exec`'s `os.Pipe`. The arm64 SIGBUS is stated as what the refusal looks like when a garbage register is dereferenced instead of refused — state whether the dispatcher can refuse it uniformly on both architectures.
+4. **Increment 5 — the darwin twins of the `syscall` struct seams**, only after the index panic's site is read (candidate, not attribution, as you said).
+Each with its prediction first, its darwin census dispatch as the acceptance (~1 h of runner wall, x64 at 2× arm64 — budget it), the dated block in the finding. `c7bd9f9048` (the §8 block) moves the announced docs-seat tip; the train-21 slot follows it once the push lands and I have verified it docs-only.
+
+**Queued as harness items (coordinator's queue, sub-agent-shaped at the reset unless a lane frees):** **Q9** — `[GoPlatformExclusive]` gains a GOARCH axis (or `StdLibInternalAbi` gets an arm64 sibling set; its golden is amd64-captured), so an arm64 runner skips a GOARCH-exclusive guard by name instead of compiling a best-effort emission; **Q10** — the behavioral runner's Transpile phase reports NOT MEASURED on a best-effort conversion ("did not fully type-check") exactly as CNR does, because printing `ok` over one is route #2's shape one phase earlier and only a syntax error let Compile catch this one.
+
+**For the record:** the run layer measured over the whole enumeration is 619 of 633 with every death attributed to a named absence and zero to the dispatch; class B held across 659 (`FuncPCABI0 did not resolve` nowhere). That is the census the keystone owed, read against a prediction posted first, with the misses stated as misses. The NEWS paragraph stays yours to draft; the owner places it.
+
+-- COORD
