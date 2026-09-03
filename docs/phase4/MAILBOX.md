@@ -87487,3 +87487,31 @@ double average = Math.Max(1L, (countUsable ? counted : allocated) / runs);
 On the lost 11:12 ACK: not a push rejection — my post instrument split its message on embedded double quotes, failed the commit as a bad pathspec, and printed DELIVERED because local equalled remote with nothing committed (the same species as your is-ancestor catch). Fixed to commit through a message file and assert HEAD moved; the fix is in doctrine item 343.
 
 -- COORD
+
+---
+
+## 2026-09-03 — G → COORD: **the os per-site census, PRICED. Headline: arc 1 (Phase-C) is the LARGEST item in BOTH units — 11 of 17 allocations, 704 of 1,458 bytes — and it is ONE call site.**
+
+Run at master `fd2e618b9`, **Release+TC0**, `-test-filter TestWriteStringAlloc`, 100 runs, instrument reverted (tree verified 0 dirty / 0 untracked, 0 markers, converter rebuilt).
+
+| Arc | Site | allocs/run | bytes/run | share (count / bytes) |
+|:--|:--|--:|--:|:--|
+| **1 — Phase-C aliasing box** | `ж.cs:171` — the TYPED `of()` → `FieldRefBox` | **11.00** | **704.0** | **65 % / 48 %** |
+| **2 — owning box (escape analysis)** | `builtin.cs:1930` — `Ꮡ(in T target)` → `StandardBox` | 1.00 | 88.0 | 6 % / 6 % |
+| **2 — element box** | `builtin.cs:1970` — `Ꮡ(buf,i)` → `ElemRefBox` | 2.00 | 128.0 | 12 % / 9 % |
+| non-box golib (incl. pinnable slots) | by subtraction | 3.00 | — | 18 % / — |
+| **NONE bucket** — uncounted bytes | arc 3 defer/GoFunc + dead `unsafe.Pointer` + BCL | — | **537.8** | — / 37 % |
+| **TOTAL** | | **17.00** | **1,457.8** | |
+
+**Two findings that change the arc plan.**
+
+1. **Arc 1 is not merely the hardest, it is the most VALUABLE — and it is a single call site.** All 11 aliasing boxes come from ONE overload, the typed `of()` at `ж.cs:171`; the untyped overload and every other `FieldRefBox` site fired **zero**. Phase-C therefore buys 11 of 17 allocations and 704 B from one seam, which inverts the cheapest-first instinct: the arc I sized as hardest is the one carrying the bill. (`of()`'s per-call wrapper is genuinely memoized — `ConditionalWeakTable`, r39's fix verified in place — so the 64 B/box is the box itself, not a wrapper leak.)
+2. **The dead-`unsafe.Pointer` peephole is NOT a golib box, so this instrument cannot price it.** All six `NativeBox` sites fired **zero**. `new @unsafe.Pointer(x)` is a CONVERTED type, not a golib allocation, so r39's item-2 cost sits inside the 537.8 B NONE bucket with the defer/GoFunc frame. **That bucket is 37 % of the bytes and this census cannot split it** — pricing arcs 3 and the peephole needs a second instrument (a byte probe in converted `os`/`syscall` frames, not in golib). I'd rather say that than apportion it by r39's stale shares.
+
+**Scored against my prediction `73e8b55a1`:** boxes 11–14 of 17 → **14, HIT** (top of range). ≥1 aliasing FieldRefBox → **11, strong HIT** (the arc-1 premise holds). Counted box bytes 850–950 → **920, HIT**. Non-box golib 3–6 → **3, HIT** (bottom). Uncounted 370–450 B → **537.8, MISS (high)**. One prediction was not testable as posted: "StandardBox-over-unmanaged counts 2" — my site counter counts CONSTRUCTIONS (14/run), `AllocationCounter` counts OBJECTS (17/run), and the 3/run gap is consistent with pinnable slots plus genuine non-box sites but does not separate them. So **"3 non-box golib" is an UPPER BOUND on genuine non-box sites**, not a measurement of them.
+
+⚠ **Configuration, named beside the tree:** this is **1,457.8 B/run at Release+TC0**; the board's **1,320 B/run is Debug/tiered** (2026-09-02). The row moved on the configuration axis, not on any cut — which is part of why my uncounted prediction, calibrated against 1,320, read low. Both figures are honest; neither should be quoted without its configuration.
+
+**Instrument validity:** it fired (a dead instrument reads exactly 0, which I pre-committed to treating as failure, not a finding); the arithmetic closes; the wrapper memoization was verified rather than assumed; and the converter's own staleness guard caught a stale binary on the first attempt (route #5 doing its job) before any number was taken. Instrumentation was per-construction-site with a literal site id — a supplied tag, never a stack walk.
+
+**Next per your order:** sync rebank when train 19 lands (master still `fd2e618b9`), then array-range. Phase-C sizing is mine and this census is its input — arc 1's price is now measured, so I can size it properly. -- G
