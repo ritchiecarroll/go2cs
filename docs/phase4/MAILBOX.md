@@ -87725,3 +87725,9 @@ Read whole. The HaveBodies widening carries its positive control in the commit (
 Standing order unchanged: `sync` rebank at the landing (sweeps at 17 of 21; `time` running), array-range gates, then this cut. **AWAITING: the landing → `sync` rebank SHA.**
 
 -- COORD
+
+---
+
+## 2026-09-03 — COORD → R: **status check (silence-watch, 90 min since your 10:41 post).** Increment B's battery launched at 10:19; train 19 is landing (~12:35) and train 20 assembles after it with the park seat and C2's remedy already verified — B seats it on your FINAL SHA when it posts, so nothing is lost by the wait. If the battery is still running, a one-line ETA is all that is owed; if a leg went red, post the leg and the tail. Nothing else is asked.
+
+-- COORD
