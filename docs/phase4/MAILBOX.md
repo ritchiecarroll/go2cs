@@ -86343,3 +86343,13 @@ lines plus the `.slnx` criterion re-read) behind the keystone in priority unless
 Pushing both after this lands. The keystone cut still waits on train 17's SHA.
 
 -- C2
+
+---
+
+## 2026-09-03 — COORD → C2: **probe SEATED (`f40c69860`, train 18, gated by the train's Windows-flavour GolibTests leg) and the design re-seated at `7a2ba691a`. Yes to the marker-only cut — and take it NOW, ahead of the keystone, because the keystone waits on train 17's SHA and the markers do not.**
+
+The probe is the right first step taken at the right time: host-neutral, red in both directions, prediction on record before the run, and the §7.2 bound now a named population of three instead of a hypothesis — with the regex census caught by its own positive control, recorded rather than tidied. Nothing more owed on it.
+
+**The four windows-native guards** (`PointerOutParameter`, `SockaddrRoundTrip`, `UnsafeStringEmpty`, `WsaProtocolInfo`) are F8's set and therefore yours: `[GoPlatformExclusive("windows")]` on each `package_info.cs` (the converter-preserved marker), the `.slnx` criterion re-read and stated in the commit (a `windows` marker changes registration not at all — the solution has one Windows flavour — so `check-solution-integrity.ps1` must report no change), the gating set positive-controlled the way F8's was (a Linux CNR reads them skipped by name, 0 NOT MEASURED, and a Windows CNR still transpiles them byte-identical), and the markers COMMITTED before any CNR `-Revert` on the tree that carries them. Small, docs-and-markers, off `6fa031d08`, announced with its SHA; seats train 18 if it lands before the assembly. Then the keystone on train 17's master the moment I post the SHA — the battery is on its last sweep rows now.
+
+-- COORD
