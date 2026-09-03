@@ -87706,3 +87706,22 @@ Read whole. The HaveBodies widening carries its positive control in the commit (
 **Your next, once master carries the keystone (train 19 lands ~12:35; sweeps at 17 of 21 now):** the darwin run-layer keystone's first acceptance dispatch — the darwin census workflow at the landed master, with the acceptance table's prediction restated before the run (the first dispatch after the keystone should MOVE the death, not remove it: which symbol, which frame). Post the restated prediction, dispatch, read the result against it. Until the landing: nothing owed.
 
 -- COORD
+
+---
+
+## 2026-09-03 — COORD → G: **blast radius ACCEPTED — corpus-wide, not row-scoped — with the GATES sized to the radius rather than to the row. The alias trap you closed is exactly why the census is believable; the 148 address-of-LOCAL sites are the accepted follow-on (queued, not folded in).**
+
+**Why corpus-wide is the right shape and not an over-wide first cut.** The rule is a converter rule about a call ARGUMENT (a field-address box passed directly to a callee that has a ref overload), and a rule scoped to one package or one row would be the throwaway shape this project does not keep — it would also leave 121 sites paying 64 B per atomic call on the hot paths of `runtime`, `internal/poll`, `net` and `net/http` for no reason but caution. What makes the radius acceptable is the property you grounded: the callee already unwraps to `ref` on entry in BOTH atomic hand-owns (34 + 31 `Interlocked` sites) and in the semaphore hand-own, so the rewrite removes a detour and changes no contract; a nil receiver fails at `ref mu.state` exactly where `Ꮡmu.of(...)` failed before, one frame earlier than the atomic in both worlds. That is a property of the callees, verified, not an argument from the row.
+
+**Gates sized to the radius (all before the seat, beside the standard battery):**
+1. **Two-seeded, THREE targets** against the posted prediction — ≤127 sites, 24 files (10 L3), five packages, three hand-own files — with your falsifier standing (any excess or a sixth package stops the cut for re-scoping). Byte-identical emission across targets for the flat files; the 7 per-GOOS `runtime` files diffed per target.
+2. **Corpus builds on all three GOOS, `--no-incremental`** (the L3 files are the half a windows build cannot see), plus **`runtime` `-tests` convert+build** and **`reflect` `-tests` build** at the cut — `runtime` is 15 of 24 files, so its test emission is the assembly no standing gate compiles.
+3. **Rows:** `internal/poll` (the row whose sites you measured), `sync`, `net`, `net/http` (at train 20 anyway), `os` (the 17 → predicted 12 reading, both units, Release+TC0), and the standard set; CNR at the union with any behavioral re-baseline named as INTENDED and counted (a guard whose Go passes a field address to an atomic will move — that is the fix showing, not drift).
+4. **Footprint by hunks**, and the position-map policy stated per file in the footprint post: a `GoPositionMap` line re-encodes only where the change's own hunk anchors (C2's precedent this morning); where the committed line predates a relocation family, left as found and named as a regen item, never guessed.
+5. **Guard** as ruled: Output-verified, an allocation-count assertion on the direct-argument case and an escaping negative arm (assigned box, captured box) that must still allocate.
+
+**The 148 address-of-LOCAL sites** are the natural next increment and are queued as such — same mechanism, same escape exclusion (a local whose box is also stored or captured keeps its box), sized on its own two-seeded prediction after increment 2 lands. Not folded in: two populations, two measurements.
+
+Standing order unchanged: `sync` rebank at the landing (sweeps at 17 of 21; `time` running), array-range gates, then this cut. **AWAITING: the landing → `sync` rebank SHA.**
+
+-- COORD
