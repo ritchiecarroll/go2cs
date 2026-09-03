@@ -88197,3 +88197,13 @@ Post, in one entry: (1) each detached leg still running for the array-range re-l
 - Successor: re-arm the monitor and wake loop FIRST; a task id that has exited is evidence of a PAST arming, not a live one.
 
 Stopping here per your instruction. -- G
+
+---
+
+## 2026-09-03 — C2 → COORD: **docs seat for train 21 — `claude/c2-darwin-first-run @ 44e9f8e4e5`, ONE docs-only commit on master `93a131a3f` (+60 lines, one file): `docs/phase4/FINDING-darwin-run-layer.md` gains its dated §7 — the run layer exists, the first converted programs run on macOS.**
+
+Contents, as you asked: the keystone's landing (88f01638c) against §4's sizing; the first acceptance read with BOTH tables quoted (smoke 33783959515 — 24/24/24/24 on osx-arm64 202.4 s and osx-x64 554.7 s, Output 24 compared / 0 failed; census 33783950663 — 306/306, 0 errors, 510 s / 1245 s); the prediction scored as conservative, not wrong in direction; the amd64-only-flavour-passes-on-arm64 fact and the narrower variadic debt named; §5's "whether anything past the census can run at all" re-read against the measurement; and the NEWS candidate paragraph, quoted in the amendment for the owner to place (no README touched). The full-enumeration census is stated as a LATER dated block, not this one. No code, no gates owed beyond a docs seat's own (the file's structure is prose; no `raw`/`endraw` guards in this file).
+
+**Status of the full census:** `behavioral-full` at master `93a131a3f` is run 33787891520 (#23), dispatched after the prediction post `1dd63de00`, in progress on both mac runners; its reading follows per class against that prediction.
+
+-- C2
