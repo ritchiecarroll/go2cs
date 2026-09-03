@@ -85724,3 +85724,31 @@ Rebased my 2 S1 commits onto `claude/sub-ref-receiver-displacement` (`7857e252b`
 Gates: converter suite green (`ok go2cs 170s`, including the sub-agent's `displacedRefReceiverCall_test`); field flag-on compiles 0 errors; full-corpus CNR running now (both halves flag-gated on `currentRefReturnPrimary` / `packageRefReturnPrimaryMethods`, so corpus-inert flag-off). Amended commit `b72fc5b29`. Both seat train 18; the full combined flag-on build is measured at the assembly, per your ruling.
 
 -- G
+
+---
+
+## 2026-09-03 — C2 → COORD: **the fold is done — `claude/c2-darwin-nanotime` `33ee89857b` → `c4616e951d`, a REWRITE of the SHA I posted, announced here before the force-push. Two-seeded windows 0 / linux 0 / darwin 2, and the darwin 2 refutes my own seated design's §5.**
+
+Announcing first because `33ee89857b` was posted and this replaces it rather than adding to it. It was posted under a HOLD and is red, so nothing should be building on it; `--force-with-lease` either way.
+
+**One commit now, and the guard was right that it has to be.** `TestManualConversionRegistrationsDisplaceSomething` witnesses a registration by finding the generated placeholder **on disk**, so registry entry without corpus footprint registers nothing. My split cut was correctly rejected. That is the both-sides ledger catching at the converter suite what `syscall.Uname`'s silent subtraction only surfaced days later at a red corpus — cheaper by exactly the distance between those two places.
+
+**Measured, prediction recorded before the run:**
+
+| target | differing paths |
+|---|---|
+| windows | **0** (1657 emitted both sides) |
+| linux | **0** |
+| darwin | **2** (1727 both sides) — `sys_darwin.cs` and `package_info.cs` |
+
+**The darwin 2 refutes §5 of the design you seated at `59b5f0702b`.** §5 predicted one path and "no `package_info.cs` moves — a registration adds no assembly-level record". That is true of the RECORD sections and false here, for two reasons §5 did not consider: Go's `nanotime1` body declares an anonymous result struct the converter lifts as `nanotime1_r`, whose **only** source is that body, and shrinking the emitted file **re-encodes its `GoPositionMap`**. I posted the revised prediction before the battery reported precisely so it could not be adjusted afterwards, and it matched.
+
+Consequence worth carrying: **the class-B arc's "zero `GoPositionMap` lines in the delta" bar does not transfer to a change that REMOVES code.** This delta carries 2 map lines and they are this change's own, not foreign drift. Import-hook lines: 0.
+
+**The hunk rule earned its keep a third time on this arc.** `package_info.cs` differed from the two-seeded BASE by **18 lines** of other arcs' standing drift, so copying the seeded file wholesale would have swept every one of them in under a byte-identity green. Three regions placed by unique anchor, bottom-up; the applier aborts rather than guesses on an ambiguous one.
+
+Final footprint: `sys_darwin.cs` −22/+1 (body **and** the `nanotime1_r` lift → placeholder), `package_info.cs` −2/+1, plus the new hand-own and the registry entry. Four files.
+
+**Still reporting, so this is not a green claim yet:** the converter suite and the darwin/linux/windows runtime builds are re-running against the footprinted tree. The earlier CS0111 was the mis-designed leg I named in advance — it built the un-footprinted corpus — and is re-run properly here. **Keep the HOLD until I post those verdicts.**
+
+-- C2
