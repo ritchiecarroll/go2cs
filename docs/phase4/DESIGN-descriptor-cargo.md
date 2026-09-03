@@ -411,10 +411,68 @@ landing.
 
 Gates, because this is golib on the boxing path: `go2cs.slnx`, GolibTests, the five
 largest-reflect-importer canaries derived at gate time (`crypto/tls`, `net/http`, `go/types`,
-`encoding/json`, `net` — derived 2026-09-03, control `encoding/json` IN / `cmp` OUT), the behavioral
+`encoding/json`, `net` — derived 2026-09-03 from PARSED IMPORTS, controls `encoding/json` IN / `cmp` OUT /
+`go/doc/comment` OUT -- the third is load-bearing, see §10.3), the behavioral
 **Output** phase (not only Compile — a `%T` change shows first in the stdout comparisons against
 `go run`), the `nistec` **cost canary** against its recorded wall, and union CNR.
 
 Rows: `TestDeepEqualAllocs` (2 — fix-then-disclose, the family entry earned from its OWN
 results-file signature, never from resemblance), `TestFuncLayout` (2), `TestTypes` (1, gated on BOTH
 increments).
+
+## 10. Increment A, measured (2026-09-03)
+
+Increment A is the `Elem()` hand-down fix: slices and channels leave the *consuming* arm and pass
+their dims down unshifted beside pointers and maps, and the converter stamps a slice's and a
+channel's element dims at struct-field positions.
+
+### 10.1 The corpus footprint is one stamp, on a real production shape
+
+A two-seeded diff — both roots seeded at 3679 `.cs`, both emissions writing 1656 fresh files, PRE
+built from `e8c078637` and CUT from `b3caf3fa0` — differs in **two paths**:
+
+```
+internal/trace/internal/oldtrace/parser.cs        + [GoArrayDims(524288)]
+internal/trace/internal/oldtrace/package_info.cs  (its position-map consequence)
+```
+
+The stamped field is `buckets []*[eventsBucketSize]Event` — a slice of pointer to array, the shape
+`elementArrayDims` unwraps. Every hunk is the predicted class and there is no hunk outside it.
+
+The part worth recording is not the size but the **location**: every prior instance of this defect
+was in a probe or guard written to find it. `internal/trace`'s event buckets are production corpus
+code, so the collapse was reachable outside the shapes built to provoke it.
+
+### 10.2 The production diff is structurally blind to three banked rows
+
+`-stdlib` never writes test emission, so the two-seeded diff cannot see a stamp that lands in a
+`_test.go`-derived file. A syntactic census (`go/parser`, struct-field positions only —
+`visitStructType.go:401` is the sole call site of `emitFieldDimsAttributes`) over all 202 banked rows
+finds four test-side sites in three of them:
+
+| row | file | field | type |
+|:--|:--|:--|:--|
+| `debug/dwarf` | `entry_test.go:45`, `:135` | `ranges` | `[][2]uint64` |
+| `debug/elf` | `file_test.go:550` | `pcRanges` | `[][2]uint64` |
+| `net` | `iprawsock_test.go:132` | `argLists` | `[][2]string` |
+
+The census is a deliberately **independent derivation** — syntax, not the converter's `go/types`
+predicate — and over production files it reproduces §10.1's single site exactly, at the line the
+emission stamped. Positive control fires on that site; negative control (`unicode/utf8`) silent.
+
+`debug/dwarf` then closed the loop end to end: the census predicted two stamps, the emission
+delivered exactly two `[GoArrayDims(2)]`, and the row swept **40/40**, its banked count.
+
+### 10.3 The importer derivation must parse imports, not match text
+
+The canary set in §9 was first derived by a line-anchored grep for `"reflect"`. It returned 88 banked
+importers **topped by `go/doc/comment` at 10059 verdicts** — a package whose `std.go:35` carries
+`"reflect",` as a *list element*, and which CLAUDE.md names as exactly this over-match.
+
+Both controls in place at the time — `encoding/json` IN, `cmp` OUT — **passed**, because both vary
+the axis "imports it or doesn't" and neither varies "mentions it as data". A control only tests the
+axis it varies.
+
+Re-derived from parsed import declarations: 86 rows. The grep had wrongly admitted two, both `go/*`
+packages carrying stdlib name lists — `go/doc/comment` and `go/internal/gccgoimporter`. The third
+control pins the axis the first pair could not see, and is why §9 now names three.
