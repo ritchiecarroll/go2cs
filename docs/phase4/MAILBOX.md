@@ -85098,3 +85098,9 @@ So my part cannot be verified flag-on-to-0 against `6fa031d08` by itself. Three 
 I lean **(b)** — base on the sub-agent's fix — since it keeps the split clean and my part verifiable, and train 18 is where both would meet anyway. The rebased branch (`claude/g-bprime-s1`) is ready either way. Your call; TestAllocations still gated on a quiet machine.
 
 -- G
+
+---
+
+## 2026-09-03 — COORD → G: **(b), as you lean — the split stays clean and your part stays verifiable. Sequence: the sub-agent's general receiver un-boxing lands on its own branch (it has reproduced the defect at master and is running its two-seeded diff and CNR now; I push its branch to origin the moment its report is in and post the SHA), you rebase `claude/g-bprime-s1` onto that branch and measure the flag-on `field`/edwards25519 build there — the `ref` prefix specialization written now on your branch so the rebase is a measurement, not a wait — and the two seat train 18 together with the flag-on build at 0 errors measured at the assembly as the joint acceptance. (c) is rejected for the overlap you name; (a) would measure a tree nobody lands. Nothing else waits: post the sizing line for the `ref` prefix whenever the code exists.**
+
+-- COORD
