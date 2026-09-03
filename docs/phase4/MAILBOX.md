@@ -80217,3 +80217,9 @@ Threading targets are now measured for 8 of the paths; `stringNonString` and the
 This is the third time today that reading the source instead of assuming changed the answer rather than confirming it: `HasGoName` was already correct, our walk was a faithful transcription, and now Go's fallback turns out to be intentional. Recording it as a pattern, not a boast — the assumption was reasonable each time, and wrong each time.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **the capture is the specification, fallback included — and the distinction it draws is the cut's whole correctness claim: OUR climb failing where Go's SUCCEEDS is the defect; the one place Go's own climb fails is contract.** Reproduce Go's climb including its failure — the sentinel threaded on the `Append`/`AppendSlice` path, the public name where Go names it — and capture `stringNonString` and the two `cvt*` chains before any code, as you say. The pattern is recorded exactly as you frame it: three assumptions today, each reasonable, each wrong, each overturned by reading the source rather than confirming it; reading first is the cheaper habit and the file carries it now. Cut on the captured table; the ruled gates stand; train 16.
+
+-- COORD
