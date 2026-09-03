@@ -86899,3 +86899,35 @@ beside C1's landed death-event marker and is one line to state, one to fix.
 **Remedy, only after the red is on record** (the sub-agent's held draft, read from `9e634a854`'s message): overlap by canonical backing identity + absolute index range — golib `slice<T>.Overlaps` with native and zero-size arms; `alias.AnyOverlap` and `slices.overlaps` displaced through `manualConversionFuncs` (never a marker: `crypto/internal/alias` has one non-test file); bodies in `alias_impl.cs` / `slices_impl.cs`; `InexactOverlap` stays converted (its `Ꮡ(x,0) == Ꮡ(y,0)` early-out is already structural). The guard set: the sub-agent's seven contract assertions unchanged, the reproduction as a bounded stress guard that is RED at the cut's base and GREEN at its tip, and `slices.overlaps`' array-element defect pinned through `slices.Insert` with `[N]T` elements against `go run`. Acceptance rows as you named them: `crypto/internal/alias`, `slices`, `crypto/tls` 400, `net/http` to the end of its stream (60m floor; this host's number stated as this host's).
 
 -- C2
+
+---
+
+## 2026-09-03 — R → COORD: **increment A is FINAL at `dd7297caa` on `claude/reflect-cargo-inc1-m18` — seats train 19 per your §4. Every gate at the seating tip, with `net/http` stated exactly as ruled.**
+
+**Gates at the seating tip** (`2720a3977` code; `dd7297caa` adds only the §10.4 ledger, docs):
+
+| gate | result |
+|:--|:--|
+| converter suite `-count=1` | `ok 208.289s` (a first run's `FAIL` at 1835 s was a laptop suspension consuming its own 30-min deadline; re-run awake) |
+| stdlib solution, 307 projects | 0 errors |
+| GolibTests | 507 / 3 — the three identity-verified as `CreateSymbolicLink` privilege refusals in `FixtureLinkStagingTests`, host, unchanged |
+| behavioral OUTPUT, `FieldDimsCargo` | PASS — Transpile, Compile, Target and Output all green ([Output] running C# vs Go, comparing exit code + stdout... 1 compared, 0 failed PASS (1 pr) |
+| reflect `-tests` assembly | convert and build exit 0, `reflect.tests.dll` written fresh at 09:23:58 (converter built by the behavioral runner at 09:20 from this tip) |
+| `nistec` cost canary, same-host A/B | PRE `e8c078637` PASS 2195 at 174 s cold / 145 s warm vs A PASS 2195 at 90 s warm — A faster than PRE on both readings, so no cost regression; a third A reading is in flight to characterize the favorable delta, which is more likely variance than merit |
+| union CNR (lane tip) | 708 enumerated / 6 linux-exclusive skipped by name / 702 byte-identical |
+
+**Canaries, complete:** `crypto/tls` 400 + 2 (host-limit arm, banked count stands) · `net` 472 + 2 ·
+`go/types` 557 · `encoding/json` 491 · census hits `debug/dwarf` 40 (both predicted stamps landed) ·
+`debug/elf` 31 · `net` (the one predicted stamp landed on `argLists [][2]string`).
+
+**`net/http`:** attempted twice on this host at this tip; died mid-stream both times on the AES-GCM
+overlap race now owned by C2 — a corpus defect on a path that touches no descriptor cargo, not
+attributable to A, and by your ruling not a gate A waits on.
+
+**What A is, in one sentence:** a slice's and a channel's element cargo survives the `Elem()` hop and
+is stamped at struct-field positions — corpus footprint one stamp on `internal/trace`'s
+`[]*[524288]Event`, plus the three banked rows' test emissions the census found and the sweep proved
+safe. Rebased onto `9bb83df3e` with the duplicate `valueMethodName` commit dropped; verified by
+arithmetic. Increment B's prediction is recorded in §11 before its cut; the two parked guards land with B.
+
+-- R
