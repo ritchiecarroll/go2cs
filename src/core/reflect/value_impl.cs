@@ -8,6 +8,9 @@ using System.Reflection;
 using abi = go.@internal.abi_package;
 using strconv = go.strconv_package;
 using @unsafe = go.unsafe_package;
+// value.cs declares this alias file-scoped, so a member MOVED here for hand-owning cannot see it.
+// Spelled identically to the emission so the displaced signature matches the generated one exactly.
+using ꓸꓸꓸValue = System.Span<go.reflect_package.ΔValue>;
 
 // Hand-finished conversion (the reflection bridge — Phase 4, value side). Go's reflect.Value reads the
 // value through v.ptr as flat memory at computed field/element offsets — reinterpreting an interface's
@@ -446,9 +449,11 @@ public static nint Copy(ΔValue dst, ΔValue src) {
         throw panic(Ꮡ(new ValueError("reflect.Copy"u8, dk)));
     }
     if (dk == Array) {
-        dst.flag.mustBeAssignable();
+        // Go's Copy is a package-level func, so its climb finds `reflect.Copy` (no `reflect.Value.`
+        // prefix) and answers "unknown method" -- measured. Threading "" reproduces that.
+        dst.flag.mustBeAssignable("");
     }
-    dst.flag.mustBeExported();
+    dst.flag.mustBeExported("");
     System.Type? dstElem = GoReflect.ElementType(dst.typ_ == nil ? null : dst.typ_.Value.sysType);
     ΔKind sk = src.kind();
     bool stringCopy = false;
@@ -458,7 +463,7 @@ public static nint Copy(ΔValue dst, ΔValue src) {
             throw panic(Ꮡ(new ValueError("reflect.Copy"u8, sk)));
         }
     }
-    src.flag.mustBeExported();
+    src.flag.mustBeExported("");
     if (!stringCopy) {
         System.Type? srcElem = GoReflect.ElementType(src.typ_ == nil ? null : src.typ_.Value.sysType);
         if (dstElem is null || srcElem is null || dstElem != srcElem) {
@@ -1680,7 +1685,7 @@ public static void SetMapIndex(this ΔValue v, ΔValue key, ΔValue elem) {
 // writes through the aliased box's slot ref; a structurally nil box panics Go-style (Q1a).
 
 private static void setKinded(ΔValue v, object wide, @string op) {
-    v.flag.mustBeAssignable();
+    v.flag.mustBeAssignable(op);
     System.Type? slotType = v.typ_ == nil ? null : v.typ_.Value.sysType;
     if (slotType is null || v.addrBox is null) {
         throw panic("reflect: " + op + " using unaddressable value");
@@ -2114,30 +2119,114 @@ private static readonly System.Collections.Concurrent.ConcurrentDictionary<(Syst
 // first rune's case), which is what walks past the unexported mustBe*/…Slow helpers between the
 // panic and the method the caller actually named; and it keeps walking rather than failing, so a
 // frame that is not a Value method is skipped, never guessed at.
-internal static @string valueMethodName() {
-    var trace = new System.Diagnostics.StackTrace(2, false);
-    for (int i = 0; i < trace.FrameCount; i++) {
-        var method = trace.GetFrame(i)?.GetMethod();
-        System.Type? decl = method?.DeclaringType;
-        if (method is null || decl is null || !decl.Name.EndsWith("_package")) {
-            continue;
-        }
-        if (method.Name.Length == 0 || !char.IsUpper(method.Name[0])) {
-            continue;
-        }
-        var parameters = method.GetParameters();
-        if (parameters.Length == 0) {
-            continue;
-        }
-        System.Type receiver = parameters[0].ParameterType;
-        if (receiver.IsByRef) {
-            receiver = receiver.GetElementType()!;
-        }
-        if (receiver == typeof(ΔValue)) {
-            return (@string)("reflect.Value." + method.Name);
-        }
+// The mustBe* family is hand-owned for ONE reason: the [CallerMemberName] attribute has to sit on
+// THEIR parameters. Go resolves the panic's method name by CLIMBING the stack (runtime.Callers,
+// five frames, filtered to a `reflect.Value.` symbol with an exported initial). A managed
+// transcription of that climb works in Debug and FAILS under Release, because the JIT inlines the
+// exported Value method into its caller and the frame the walk is looking for is simply not there
+// -- measured as reflect's own TestValuePanic, Go="pass" C#="fail", the stack showing mustBe
+// invoked straight from the test's closure with no Recv frame between them. A [CallerMemberName]
+// argument is a compile-time constant, so no tiering or inlining decision can move it.
+//
+// Bodies are otherwise Go's, unchanged. The threading is the whole delta.
+internal static void mustBe(this flag f, ΔKind expected,
+    [System.Runtime.CompilerServices.CallerMemberName] string method = "") {
+    // TODO(mvdan): use f.kind() again once mid-stack inlining gets better
+    if (((ΔKind)(nuint)((uintptr)((flag)(f & flagKindMask)))) != expected) {
+        throw panic(Ꮡ(new ValueError(valueMethodName(method), f.kind())));
     }
-    return "unknown method"u8;
+}
+
+internal static void mustBeExported(this flag f,
+    [System.Runtime.CompilerServices.CallerMemberName] string method = "") {
+    if (f == 0 || (flag)(f & flagRO) != 0) {
+        f.mustBeExportedSlow(method);
+    }
+}
+
+// The Slow halves take the name EXPLICITLY: they are only ever reached from the entry points above,
+// so a [CallerMemberName] here would capture `mustBeExported` and not the public method.
+internal static void mustBeExportedSlow(this flag f, string method) {
+    if (f == 0) {
+        throw panic(Ꮡ(new ValueError(valueMethodName(method), Invalid)));
+    }
+    if ((flag)(f & flagRO) != 0) {
+        throw panic("reflect: " + valueMethodName(method) + " using value obtained using unexported field");
+    }
+}
+
+internal static void mustBeAssignable(this flag f,
+    [System.Runtime.CompilerServices.CallerMemberName] string method = "") {
+    if ((flag)(f & flagRO) != 0 || (flag)(f & flagAddr) == 0) {
+        f.mustBeAssignableSlow(method);
+    }
+}
+
+internal static void mustBeAssignableSlow(this flag f, string method) {
+    if (f == 0) {
+        throw panic(Ꮡ(new ValueError(valueMethodName(method), Invalid)));
+    }
+    // Assignable if addressable and not read-only.
+    if ((flag)(f & flagRO) != 0) {
+        throw panic("reflect: " + valueMethodName(method) + " using value obtained using unexported field");
+    }
+    if ((flag)(f & flagAddr) == 0) {
+        throw panic("reflect: " + valueMethodName(method) + " using unaddressable value");
+    }
+}
+
+// Append and AppendSlice are package-level FUNCTIONS in Go, so Go's climb finds a `reflect.Append`
+// frame, never `reflect.Value.Append`, and prints "unknown method" -- measured against go1.23.12,
+// both of them. They are hand-owned only to thread that sentinel: the emission gives them a ΔValue
+// FIRST PARAMETER, which is what let the retired walk match them and manufacture
+// "reflect.Value.Append" -- a name Go never prints, on two public entry points, covered by no test.
+// Passing "" reaches the composer's uppercase test and lands on Go's own fallback.
+// Bodies are Go's, unchanged.
+public static ΔValue Append(ΔValue s, params ꓸꓸꓸValue xʗp) {
+    var x = xʗp.sslice();
+
+    s.mustBe(ΔSlice, "");
+    nint n = s.Len();
+    s = s.extendSlice(len(x));
+    foreach (var (i, v) in x) {
+        s.Index(n + i).Set(v);
+    }
+    return s;
+}
+
+// The converter hoists this literal WITH AppendSlice (Go keeps it in RODATA), so displacing the
+// function took the declaration with it -- it is declared nowhere in the emission now. Restored
+// here verbatim rather than inlined, so a future regen of value.cs cannot end up declaring it twice.
+internal static readonly @string reflectAppendSliceˢ = "reflect.AppendSlice"u8;
+
+public static ΔValue AppendSlice(ΔValue s, ΔValue t) {
+    s.mustBe(ΔSlice, "");
+    t.mustBe(ΔSlice, "");
+    typesMustMatch(reflectAppendSliceˢ, s.Type().Elem(), t.Type().Elem());
+    nint ns = s.Len();
+    nint nt = t.Len();
+    s = s.extendSlice(nt);
+    Copy(s.Slice(ns, ns + nt), t);
+    return s;
+}
+
+internal static @string valueMethodName(string method) {
+    // Go CLIMBS the stack here (runtime.Callers, five frames, filtered to a `reflect.Value.` symbol
+    // with an EXPORTED initial). We thread the name instead -- the caller is a compile-time constant
+    // via [CallerMemberName], so no amount of inlining or tiering can move it. The uppercase test
+    // that follows is Go's frame filter, relocated: an internal helper that threads nothing arrives
+    // here with its own lowercase name and lands on Go's OWN fallback, which is exactly what Go's
+    // climb produces when it finds no Value method. Measured against go1.23.12, three package-level
+    // functions rely on that: reflect.Append, reflect.AppendSlice and reflect.Select all print
+    // "unknown method", because their frames are `reflect.X`, not `reflect.Value.X`.
+    //
+    // The retired walk was wrong in the other direction too, and nothing tested it: it rebuilt the
+    // `reflect.Value.` prefix from the FIRST PARAMETER'S TYPE, so `Append(ΔValue s, ...)` -- a package
+    // function the emission gives a ΔValue first parameter -- matched, and it manufactured
+    // "reflect.Value.Append" where Go says "unknown method".
+    return method.Length != 0 && char.IsUpper(method[0])
+        ? (@string)("reflect.Value." + method)
+        : "unknown method"u8;
 }
 
 // canonType returns the canonical reflect.Type wrapper for the underlying type of Ꮡt, keyed by
@@ -2645,8 +2734,9 @@ public static (nint chosen, ΔValue recv, bool recvOK) Select(slice<SelectCase> 
                 channels.Add(null); isSend.Add(true); sendValues.Add(null); recvElem.Add(null); opToCase.Add(i);
                 continue;
             }
-            ch.mustBe(Chan);
-            ch.mustBeExported();
+            // package-level reflect.Select: Go's climb answers "unknown method" (measured).
+            ch.mustBe(Chan, "");
+            ch.mustBeExported("");
             if ((ΔChanDir)(((ΔChanDir)(nint)abi.ChanDir(ch.typ())) & SendDir) == 0) {
                 throw panic("reflect.Select: SendDir case using recv-only channel");
             }
@@ -2654,7 +2744,7 @@ public static (nint chosen, ΔValue recv, bool recvOK) Select(slice<SelectCase> 
             if (!v.IsValid()) {
                 throw panic("reflect.Select: SendDir case missing Send value");
             }
-            v.mustBeExported();
+            v.mustBeExported("");
             System.Type? elem = GoReflect.ElementType(sysTypeOfReflectType(toType(ch.typ())));
             if (ch.live is not IChannel sch || elem is null) {
                 throw panic(Ꮡ(new ValueError("reflect.Select", ch.kind())));
@@ -2673,8 +2763,9 @@ public static (nint chosen, ΔValue recv, bool recvOK) Select(slice<SelectCase> 
                 channels.Add(null); isSend.Add(false); sendValues.Add(null); recvElem.Add(null); opToCase.Add(i);
                 continue;
             }
-            ch.mustBe(Chan);
-            ch.mustBeExported();
+            // package-level reflect.Select: Go's climb answers "unknown method" (measured).
+            ch.mustBe(Chan, "");
+            ch.mustBeExported("");
             if ((ΔChanDir)(((ΔChanDir)(nint)abi.ChanDir(ch.typ())) & RecvDir) == 0) {
                 throw panic("reflect.Select: RecvDir case using send-only channel");
             }
@@ -2734,7 +2825,7 @@ internal static bool /*selected*/ send(this ΔValue v, ΔValue xʗp, bool nb) {
         throw panic("reflect: send on recv-only channel");
     }
     ΔValue x = xʗp;
-    x.mustBeExported();
+    x.mustBeExported(nb ? "TrySend" : "Send");
     System.Type? elem = GoReflect.ElementType(v.typ_ == nil ? null : v.typ_.Value.sysType);
     if (v.live is not IChannel ch || elem is null) {
         throw panic(Ꮡ(new ValueError("reflect.Value.Send", v.kind())));

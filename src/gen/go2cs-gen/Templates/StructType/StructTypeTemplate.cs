@@ -864,7 +864,7 @@ internal class StructTypeTemplate : TemplateBase
                         }
 
                         result.Append($") => {AddressPrefix}target.of({StructName}.{AddressPrefix}{embedBox}).{method.Name}(");
-                        result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => param.name)));
+                        result.Append(string.Join(", ", method.Parameters.Skip(1).Select(ArgumentName)));
                         result.Append(");");
                     }
 
@@ -890,7 +890,7 @@ internal class StructTypeTemplate : TemplateBase
                 }
 
                 result.Append($") => target.{embedAccess}.{method.Name}(");
-                result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => param.name)));
+                result.Append(string.Join(", ", method.Parameters.Skip(1).Select(ArgumentName)));
                 result.Append(");");
 
                 // Add pointer extension method
@@ -906,7 +906,7 @@ internal class StructTypeTemplate : TemplateBase
                 result.AppendLine("    {");
                 result.AppendLine($"        ref var target = ref {AddressPrefix}target.Value;");
                 result.Append($"        {(method.ReturnType == "void" ? "" : "return ")}target.{method.Name}(");
-                result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => param.name)));
+                result.Append(string.Join(", ", method.Parameters.Skip(1).Select(ArgumentName)));
                 result.AppendLine(");");
                 result.Append("    }");
             }
@@ -1066,11 +1066,67 @@ internal class StructTypeTemplate : TemplateBase
             if (method.Parameters[^1].IsParams && info.Parameters.Length > 0)
                 info.Parameters[^1] = ($"params {info.Parameters[^1].type}", info.Parameters[^1].name);
 
+            // ToParameterInfos also drops a parameter's DEFAULT VALUE and its caller-info
+            // ATTRIBUTES, and both are load-bearing for exactly the reason `params` is above.
+            // A dropped default turns an N-argument call into an (N+1)-argument one, so the
+            // promoted forwarder stops binding and every ΔValue-receiver call site fails CS1929
+            // -- the forwarder is generated, so the break surfaces in the CONSUMER, pointing away
+            // from the embed. A dropped [CallerMemberName] is worse because it is SILENT: the
+            // forwarder still compiles and still captures a name, but it captures the FORWARDER's
+            // caller correctly only when the attribute rides along; without it the parameter falls
+            // back to its default and the captured name is lost with no diagnostic anywhere.
+            for (int i = 1; i < info.Parameters.Length && i < method.Parameters.Length; i++)
+            {
+                IParameterSymbol p = method.Parameters[i];
+                string type = info.Parameters[i].type;
+
+                foreach (AttributeData attr in p.GetAttributes())
+                {
+                    string? attrName = attr.AttributeClass?.ToDisplayString();
+                    if (attrName is "System.Runtime.CompilerServices.CallerMemberNameAttribute" or
+                                    "System.Runtime.CompilerServices.CallerFilePathAttribute" or
+                                    "System.Runtime.CompilerServices.CallerLineNumberAttribute" or
+                                    "System.Runtime.CompilerServices.CallerArgumentExpressionAttribute")
+                    {
+                        type = $"[global::{attrName}] {type}";
+                    }
+                }
+
+                string name = info.Parameters[i].name;
+
+                if (p.HasExplicitDefaultValue)
+                {
+                    object? dv = p.ExplicitDefaultValue;
+                    string literal = dv switch
+                    {
+                        null => p.Type.IsValueType ? "default" : "null",
+                        // Escaped by hand: Roslyn's SymbolDisplay does not resolve here (the name binds
+                        // as a namespace under this file's usings), and the cases a promoted default
+                        // can take are few and closed.
+                        string sv => "@\"" + sv.Replace("\"", "\"\"") + "\"",
+                        char cv => "(char)" + ((int)cv).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        bool bv => bv ? "true" : "false",
+                        _ => System.Convert.ToString(dv, System.Globalization.CultureInfo.InvariantCulture) ?? "default"
+                    };
+                    name = $"{name} = {literal}";
+                }
+
+                info.Parameters[i] = (type, name);
+            }
+
             (isBoxReceiver ? boxMethods : valueMethods).Add(info);
         }
 
         return (valueMethods, boxMethods);
     }
+
+    // A recorded parameter carries its DEFAULT in the name slot (see the harvest below), because the
+    // declaration emit is `$"{type} {name}"` and a default only has a legal position after the name.
+    // The three CALL emits want the bare identifier, so they strip it here rather than each re-deriving
+    // the split -- passing `method = ""` as an argument is a syntax error, and it would be produced at
+    // three sites independently.
+    private static string ArgumentName((string type, string name) parameter) =>
+        MethodInfo.ParameterIdentifier(parameter.name);
 
     // The POINTED-TO type of a pointer embed, or null when the re-rooted form cannot be emitted for
     // it. It is what a promoted field-reference accessor must re-root at: the embed's declared type

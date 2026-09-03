@@ -662,3 +662,81 @@ Each renders as a cast of a null/default — the shape that carries nothing — 
 the nil-conversion interception in `convCallExpr` putting the cargo back. A NON-nil value of the
 same type needs no arm: it carries its own type. If a fourth construct appears, it joins this table
 rather than earning a fourth independent derivation.
+
+## Fix — Go's panic-name climb is threaded, not walked (2026-09-03)
+
+`Value`'s `mustBe*` family names the method a panic came from. Go resolves that name by **climbing
+the stack**: `runtime.Callers` over `var pc [5]uintptr`, filtered to a frame whose symbol starts
+`reflect.Value.` with an EXPORTED initial. The bridge transcribed that climb faithfully over a
+managed `StackTrace`, reconstructing the `reflect.Value.` prefix from the frame's **first parameter
+type** (a Go method on `Value` is emitted as a static extension, so the receiver is a parameter and
+`DeclaringType` is the package, not `Value`).
+
+**The transcription is correct in Debug and cannot work in Release.** The JIT inlines the exported
+`Value` method into its caller, so the frame the walk looks for is not on the stack at all.
+Measured as reflect's own `TestValuePanic` at `-test-config Release`: `Go="pass" C#="fail"`, the
+stack showing `mustBe` invoked directly from the test's closure with no `Recv` frame between them,
+and the panic reading `call of unknown method on string Value` where Go names the method. No amount
+of care in the walk fixes this — it is asking the runtime for something the runtime has discarded.
+
+The name is threaded instead, via `[CallerMemberName]` on the `mustBe*` parameters. That argument is
+a **compile-time constant**, so no tiering or inlining decision can move it. `valueMethodName`
+becomes a composer:
+
+```csharp
+return method.Length != 0 && char.IsUpper(method[0])
+    ? (@string)("reflect.Value." + method)
+    : "unknown method"u8;
+```
+
+**Go's frame filter survives as the uppercase test on the threaded name**, and that is what makes the
+design self-correcting: an internal helper that threads nothing arrives with its own lowercase name
+and lands on Go's OWN fallback — which is exactly what Go's climb produces when it finds no `Value`
+method. Two helpers rely on that and need no code: `extendSlice`, and any future helper like it.
+
+### The direction nothing was testing
+
+The retired walk was also wrong the OTHER way, and no test covered it. Its receiver-type filter
+matched **package-level functions that take a `Value` first**, which Go's symbol filter does not:
+
+| construct | Go 1.23.12 prints | the walk printed |
+|:--|:--|:--|
+| `reflect.Append(nonSlice, …)` | `call of unknown method on int Value` | `call of reflect.Value.Append …` |
+| `reflect.AppendSlice(nonSlice, …)` | `call of unknown method on int Value` | `call of reflect.Value.AppendSlice …` |
+| `reflect.Select` (`mustBe*` arm) | `call of unknown method on string Value` | — (its first parameter is not a `Value`) |
+| `reflect.Copy` (`mustBeExported` arm) | `unknown method using value obtained using unexported field` | `reflect.Value.Copy …` |
+
+Go's frames there are `reflect.X`, never `reflect.Value.X`. `Append`, `AppendSlice`, `Copy` and
+`Select` therefore thread the sentinel explicitly; `Copy`'s and `Select`'s own kind-arm `ValueError`s
+already hardcode `reflect.Copy`/`reflect.Select` and match Go unchanged.
+
+### Why five members are hand-owned
+
+`value.cs` is generated and every `-tests` run regenerates it, so the attribute cannot live there:
+the prototype was silently reverted mid-measurement. `flag.mustBe`, `flag.mustBeExported{,Slow}` and
+`flag.mustBeAssignable{,Slow}` are registered displacements whose bodies are otherwise Go's,
+unchanged — the threading is the whole delta. `Append`/`AppendSlice` join them only to carry the
+sentinel.
+
+Two consequences of moving a member out of `value.cs`, neither guessable: a **file-scoped `using`
+alias** (`ꓸꓸꓸValue`) does not follow it, and a **hoisted string literal** the converter emits WITH a
+function (`reflectAppendSliceˢ`) leaves the emission entirely. Both are re-declared in the hand-own.
+
+### Not threaded, and why
+
+`runes`/`setRunes`'s `mustBe*` are **unreachable**: each has exactly one caller
+(`cvtRunesString`/`makeRunes`) reached only after `convertOp` validated the kind, and `makeRunes`
+builds its receiver with `New(t).Elem()` two lines above. `panicNotBool`/`panicNotMap` are declared
+and **never called** in this corpus — `Bool` and the map methods are hand-owned and check kinds
+directly. `Value.call` (293 lines) has **zero callers**: `Call`/`CallSlice` are hand-owned and reach
+`mustBe` from the exported frame. Reachability retired all four; none needed a parameter.
+
+### The generator defect this exposed
+
+`ΔValue` gets `mustBe` by **promotion** from the embedded `flag`, and `go2cs-gen`'s parameter harvest
+dropped attributes and defaults — so the forwarder emitted `mustBe(this ΔValue, ΔKind, string)` with
+no default and every `v.mustBe(Chan)` stopped binding, raising CS1929 in the CONSUMER. Both harvests
+(syntax and symbol) now carry them, with the default stripped centrally in `GetCallParameters`
+(`f(method = "")` is a syntax error). Guarded by `GenTests/PromotedParameterDefaultTests`. A dropped
+default is loud; a dropped `[CallerMemberName]` would have been **silent** — the forwarder still
+compiles and still has a name parameter, it just can no longer capture its caller.

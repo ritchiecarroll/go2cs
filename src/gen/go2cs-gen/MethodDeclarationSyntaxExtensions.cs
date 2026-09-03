@@ -111,14 +111,25 @@ public record MethodInfo
 
     public string CallParameters => GetCallParameters(true);
     
+    // A recorded parameter may carry its DEFAULT in the name slot (the declaration emit is
+    // `{type} {name}` and a default has no other legal position), so every CALL emit strips it:
+    // passing `method = ""` as an argument is a syntax error.
+    public static string ParameterIdentifier(string name)
+    {
+        int assign = name.IndexOf(" = ", System.StringComparison.Ordinal);
+        return assign < 0 ? name : name.Substring(0, assign);
+    }
+
     public string GetCallParameters(bool allowDiscarded)
     {
         return string.Join(", ", Parameters.Select((param, index) =>
         {
-            if (param.name == "_")
+            string name = ParameterIdentifier(param.name);
+
+            if (name == "_")
                 return allowDiscarded ? "_" : $"p{TempVarMarker}{index}";
 
-            return param.name;
+            return name;
         }));
     }
 
@@ -128,7 +139,7 @@ public record MethodInfo
     {
         return string.Join(", ", Parameters.Select((param, index) =>
         {
-            if (param.name == "_")
+            if (ParameterIdentifier(param.name) == "_")
                 return allowDiscarded ? $"{param.type} _" : $"{param.type} p{TempVarMarker}{index}";
             
             return $"{param.type} {param.name}";
@@ -364,7 +375,37 @@ public static class MethodSyntaxExtensions
                 if (param.Modifiers.Any(SyntaxKind.ParamsKeyword))
                     fullyQualifiedTypeName = $"params {fullyQualifiedTypeName}";
 
-                return (type: fullyQualifiedTypeName, name: param.Identifier.Text);
+                // Caller-info ATTRIBUTES and a parameter DEFAULT are dropped by the (type, name)
+                // shape unless carried here, and both are load-bearing on a promoted forwarder for
+                // the same reason `params` is above. A dropped default turns an N-argument call
+                // into an (N+1)-argument one, so every promoted call site stops binding -- CS1929
+                // raised in the CONSUMER, pointing away from the embed that caused it. A dropped
+                // [CallerMemberName] is worse because it is SILENT: the forwarder still compiles
+                // and still carries a name parameter, but it can no longer capture its own caller,
+                // so the value quietly falls back to the default with no diagnostic anywhere.
+                foreach (AttributeListSyntax attributeList in param.AttributeLists)
+                {
+                    foreach (AttributeSyntax attribute in attributeList.Attributes)
+                    {
+                        string? attributeName = semanticModel.GetSymbolInfo(attribute).Symbol?
+                            .ContainingType?.ToDisplayString();
+
+                        if (attributeName is "System.Runtime.CompilerServices.CallerMemberNameAttribute" or
+                                             "System.Runtime.CompilerServices.CallerFilePathAttribute" or
+                                             "System.Runtime.CompilerServices.CallerLineNumberAttribute" or
+                                             "System.Runtime.CompilerServices.CallerArgumentExpressionAttribute")
+                        {
+                            fullyQualifiedTypeName = $"[global::{attributeName}] {fullyQualifiedTypeName}";
+                        }
+                    }
+                }
+
+                string parameterName = param.Identifier.Text;
+
+                if (param.Default is not null)
+                    parameterName = $"{parameterName} = {param.Default.Value}";
+
+                return (type: fullyQualifiedTypeName, name: parameterName);
             }).ToArray(),
 
             IsRefRecv = methodDeclaration.ParameterList.Parameters.Any(param =>

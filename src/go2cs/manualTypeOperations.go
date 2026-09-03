@@ -742,8 +742,27 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// Bridged element-wise over the same golib container interfaces every other container
 		// method uses, so a window slice writes the backing store it shares with its parent.
 		"Copy": goosAny,
-		// valueMethodName is runtime.Callers-based (getcallersp) — managed stack walk instead.
-		"valueMethodName":  goosAny,
+		// valueMethodName is runtime.Callers-based (getcallersp) — managed stack walk instead. The walk
+		// is RETIRED: Release inlines an exported Value method into its caller, so the frame the walk
+		// climbs for is not there and every mustBe* panic degraded to Go's "unknown method" fallback
+		// (measured: reflect's own TestValuePanic, Go="pass" C#="fail" at -test-config Release, the
+		// stack showing `mustBe` called straight from TestValuePanic's closure with no Recv frame).
+		// It is a name COMPOSER now, fed by [CallerMemberName] — a compile-time constant no JIT can
+		// remove — which is why the five mustBe* members below join it: the attribute has to sit on
+		// THEIR parameters, and they are emitted into value.cs, which every -tests run regenerates.
+		"valueMethodName":       goosAny,
+		"flag.mustBe":           goosAny,
+		"flag.mustBeExported":   goosAny,
+		"flag.mustBeExportedSlow": goosAny,
+		"flag.mustBeAssignable": goosAny,
+		"flag.mustBeAssignableSlow": goosAny,
+		// Append/AppendSlice are package-level FUNCTIONS in Go, so Go's own climb sees a `reflect.X`
+		// frame, never `reflect.Value.X`, and prints "unknown method" — measured against go1.23.12.
+		// The emission gives them a ΔValue first parameter, which is exactly what made the retired
+		// walk match them and MANUFACTURE "reflect.Value.Append": a name Go never prints, on two
+		// public entry points, tested by nothing. They are hand-owned to thread the sentinel.
+		"Append":      goosAny,
+		"AppendSlice": goosAny,
 		"rtype.Key":        goosAny,
 		"rtype.Len":        goosAny,
 		"rtype.NumIn":      goosAny,

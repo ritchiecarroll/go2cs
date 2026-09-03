@@ -13,7 +13,6 @@ using Δruntime = runtime_package;
 using @unsafe = unsafe_package;
 using @internal;
 using Δsync = sync_package;
-using ꓸꓸꓸValue = Span<reflect_package.ΔValue>;
 
 partial class reflect_package {
 
@@ -199,57 +198,15 @@ internal static any packEface(ΔValue v) {
     internal @unsafe.Pointer word;
 }
 
-// mustBe panics if f's kind is not expected.
-// Making this a method on flag instead of on Value
-// (and embedding flag in Value) means that we can write
-// the very clear v.mustBe(Bool) and have it compile into
-// v.flag.mustBe(Bool), which will only bother to copy the
-// single important word for the receiver.
-internal static void mustBe(this flag f, ΔKind expected) {
-    // TODO(mvdan): use f.kind() again once mid-stack inlining gets better
-    if (((ΔKind)(nuint)((uintptr)((flag)(f & flagKindMask)))) != expected) {
-        throw panic(Ꮡ(new ValueError(valueMethodName(), f.kind())));
-    }
-}
+// go2cs generated this placeholder — func mustBe is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// mustBeExported panics if f records that the value was obtained using
-// an unexported field.
-internal static void mustBeExported(this flag f) {
-    if (f == 0 || (flag)(f & flagRO) != 0) {
-        f.mustBeExportedSlow();
-    }
-}
+// go2cs generated this placeholder — func mustBeExported is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static void mustBeExportedSlow(this flag f) {
-    if (f == 0) {
-        throw panic(Ꮡ(new ValueError(valueMethodName(), Invalid)));
-    }
-    if ((flag)(f & flagRO) != 0) {
-        throw panic("reflect: " + valueMethodName() + " using value obtained using unexported field");
-    }
-}
+// go2cs generated this placeholder — func mustBeExportedSlow is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// mustBeAssignable panics if f records that the value is not assignable,
-// which is to say that either it was obtained using an unexported field
-// or it is not addressable.
-internal static void mustBeAssignable(this flag f) {
-    if ((flag)(f & flagRO) != 0 || (flag)(f & flagAddr) == 0) {
-        f.mustBeAssignableSlow();
-    }
-}
+// go2cs generated this placeholder — func mustBeAssignable is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static void mustBeAssignableSlow(this flag f) {
-    if (f == 0) {
-        throw panic(Ꮡ(new ValueError(valueMethodName(), Invalid)));
-    }
-    // Assignable if addressable and not read-only.
-    if ((flag)(f & flagRO) != 0) {
-        throw panic("reflect: " + valueMethodName() + " using value obtained using unexported field");
-    }
-    if ((flag)(f & flagAddr) == 0) {
-        throw panic("reflect: " + valueMethodName() + " using unaddressable value");
-    }
-}
+// go2cs generated this placeholder — func mustBeAssignableSlow is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func Addr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -1835,35 +1792,9 @@ internal static void grow(this ΔValue v, nint n) {
 
 // go2cs generated this placeholder — func Clear is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// Append appends the values x to a slice s and returns the resulting slice.
-// As in Go, each x's value must be assignable to the slice's element type.
-public static ΔValue Append(ΔValue s, params ꓸꓸꓸValue xʗp) {
-    var x = xʗp.sslice();
+// go2cs generated this placeholder — func Append is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    s.mustBe(ΔSlice);
-    nint n = s.Len();
-    s = s.extendSlice(len(x));
-    foreach (var (i, v) in x) {
-        s.Index(n + i).Set(v);
-    }
-    return s;
-}
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string reflectAppendSliceˢ = "reflect.AppendSlice"u8;
-
-// AppendSlice appends a slice t to a slice s and returns the resulting slice.
-// The slices s and t must have the same element type.
-public static ΔValue AppendSlice(ΔValue s, ΔValue t) {
-    s.mustBe(ΔSlice);
-    t.mustBe(ΔSlice);
-    typesMustMatch(reflectAppendSliceˢ, s.Type().Elem(), t.Type().Elem());
-    nint ns = s.Len();
-    nint nt = t.Len();
-    s = s.extendSlice(nt);
-    Copy(s.Slice(ns, ns + nt), t);
-    return s;
-}
+// go2cs generated this placeholder — func AppendSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func Copy is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
