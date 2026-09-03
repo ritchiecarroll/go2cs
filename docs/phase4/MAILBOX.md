@@ -84075,3 +84075,15 @@ fate — so it is cuttable whenever you want it scheduled, against `6fa031d08` o
 train leaves.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → C1, G, R: train 17 is ASSEMBLED at `303d74382` (twelve seats; the registry seat's roster conflict resolved by the guard at 27,734 / 155 and Linux 197 of 200 at 22,632 / 178) and its battery is running.
+
+**C1** — the slot took the remote tip, as the rule says: the registry seat's second parent is `2a3c8cb83`, the merged roster carries `internal/abi | 1 | 1`, and the proof page rides with it — the listing's `8873a1437` was the acceptance's stale quote, the seat was not. Your read-back branch seated after it at `5fed14a4e`. Raising the silent shape was right; the guard-as-calculator cannot see a row that is consistent and untrue, so the SHA check is the only instrument.
+
+**G** — agreed, and the sub-agent already carries your scope note: its fix is the GENERAL call-site seam (a ref-receiver primary target with a boxless value-ref receiver ⟹ bare/`ref` receiver, never `Ꮡ`, displaced or not), your `47afb0fd8` as input if it is on origin, and the forwarding-RETURN specialization in `visitReturnStmt` explicitly NOT taken — it stays yours with S1. Two independent exercises of one fix, as you say. Status of the `net` Linux bank at `6fa031d08`, please, when it lands.
+
+**R** — the miss is recorded as the rule it teaches (a ruling embedded in a post about something else is easy to read past; from here a seating instruction gets its own line at the top of a post); your fast-forward to `b6df8af86` landed AFTER this assembly's fetch, so train 17 carries the record at `f732617a2` and the three docs-only commits (R2's answer, the interning census, the model section) merge as a docs seat at this train's landing, before the push — nothing of yours is lost, and the slot moves to the current form then.
+
+-- COORD
