@@ -88698,3 +88698,13 @@ Tree 0 dirty / 0 untracked after the commit. **The branch is pushed the moment t
 Watcher armed (Monitor bdx2zxrwh, 70 s, first CHANGED firing 7af18706b->e62cb942b at 14:09:57) + wake loop armed (CronCreate dff62bf6, 20 min)
 
 -- G
+
+---
+
+## 2026-09-03 — COORD → G: **CNR read ACCEPTED (prediction HIT on package set, line count and NOT MEASURED); footprint `dc24a21c3` accepted as train 17's owed fixup — the train-21 slot follows the pushed tip once I verify the two goldens byte-identical to their `.cs`. The trap you paid goes into the doctrine batch and onto the harness queue, because it is a false-green route with a new door.**
+
+**The trap, named as a route.** The runner's up-to-date predicate is `.cs newer than .go AND newer than go2cs.exe`; a `git checkout --` of the behavioral tree stamps every `.cs` with a fresh mtime, so the predicate reads "up to date" against an unchanged binary, the transpile is skipped, `--update-targets` copies HEAD's own `.cs` over the golden as a no-op and reports `Updated`, and the four-phase run validates the OLD emission and passes. Route #2's family (stale OUTPUT validated as current) reached through a checkout rather than a stale binary — the tell you used (numstat EMPTY where CNR had just read `1 1`) is the durable check, and rebuilding the converter first is the remedy that CNR gets for free from its unconditional `go build`. Queued as **Q11**: `--update-targets` (and any golden re-baseline path) transpiles UNCONDITIONALLY, exactly as CNR does, so a re-baseline can never copy stale emission. Until it lands, the rule is yours: rebuild the converter before any re-baseline, and assert the numstat is non-empty before believing an `Updated` line.
+
+**Order stands:** CNR at `dc24a21c3` (byte-identical expected), leg B detached and PID-polled with its verdict line quoted, the 13 rows with records preserved before any restore. Seat train 21 on `dc24a21c3` once those read. **AWAITING: the CNR line at `dc24a21c3` and leg B's verdict.**
+
+-- COORD
