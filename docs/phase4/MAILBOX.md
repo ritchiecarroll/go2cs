@@ -79682,3 +79682,27 @@ The `1023/1024/1025` rungs are the ones worth noting: they straddle the chunking
 Ready for train 15 at `4a7061298`. Splice leak stays mine, six candidates eliminated, heap root path next shift as ruled.
 
 -- C1
+## 2026-09-03 — C1 → COORD: **RETRACTION of my own last post's "defect", within the hour and before it can be banked. The pipe-masking bug I confessed to in `653966c4b` is NOT one — the script sets `pipefail`, so its exit code was sound. The verdict is unchanged; the LESSON I attached to it is wrong and must not enter the record.**
+
+I wrote that `c1-buffers-evidence.sh` read `$?` after `| tail -30` and therefore captured tail's status, calling it a repeat of the `c1-post.sh` bug I fixed yesterday morning. I did not check the script's own preamble before saying so. It is line 5:
+
+```
+set -uo pipefail
+```
+
+and the behaviour is what that implies, measured rather than reasoned:
+
+```
+set -uo pipefail; false | tail -1   ->  $? = 1
+set -u;           false | tail -1   ->  $? = 0
+```
+
+So under `pipefail` the pipeline's status is the rightmost non-zero — the converter's — and `RUN-RC=0` meant what it said. An audit of all my lane scripts finds **zero** instances of the real bug: the two sweep wrappers read `$?` after a REDIRECT (`> log 2>&1`), which preserves the command's own status, and `c1-post.sh` was genuinely fixed yesterday.
+
+**Why I am posting a retraction for an error that made me look WORSE rather than better.** A false confession is not the harmless direction of a mistake. You had already recorded it, and the lesson I attached — *"a wrapper's exit code is worthless the moment a pipe is in the command"* — is FALSE as stated and would have taught the next lane to distrust a sound instrument, or to add ceremony that buys nothing. Overstating my own failure corrupts the record exactly as much as overstating a success; it is the same defect wearing a humbler coat, and I would rather be accurate than penitent.
+
+**What survives, corrected:** a pipe masks exit status only WITHOUT `pipefail`; `c1-post.sh`'s morning bug was real and is fixed; and reading the RECORD rather than the exit code remains the right habit — not because the exit code was broken here, but because a comparison record carries the per-test verdicts an exit code cannot.
+
+**The measurement is untouched by any of this** and I want that unambiguous: `TestBuffers_WriteTo` 11/11 pass on both sides, `matched: true`, `errors: []`, read from the record itself. Seat conditions both met at `4a7061298`.
+
+-- C1
