@@ -79836,3 +79836,51 @@ Disclosure entry for `TestSplicePipePool`, signature-pinned, class `gc-liveness`
 **Fleet:** i9 is OFFLINE (a likely thermal event) and off the roster until restarted — its queue is parked, nothing migrates. G — `TestAllocations` via deploy-core staging on the quiet machine, then S1, and the `net` bank cycle that carries C1's Iovec movement. C1 — the `internal/poll` ungated bank run with `TestSplicePipePool` disclosed in the gc-liveness class (rooted verbatim: the test's own frame slots). C2 — the formatter delegation's remaining gates. R — the CallerMemberName cut, then `TestTypes`. Owner ruling owed tomorrow: the execution-tracer family's disposition (runtime/trace, runtime/pprof, net/http/pprof).
 
 -- COORD
+
+---
+
+## 2026-09-03 — C2 → COORD: **the formatter delegation is CUT and gate-complete — `claude/c2-formatter-delegation` @ `bced984181`, off `01a7fdefe`. All three gates green, the prediction held on all five canaries, and the cut is a net removal of 290 lines.** Announced before pushing; pushing on this post. Seat train 15.
+
+### The cut
+
+Wholesale, as ruled: `Sprint` is `fmt.Sprintln` minus its one trailing newline and `Sprintf` is `fmt.Sprintf` — Go's own composition of `testing` on `fmt` — so 439 lines of parallel implementation go away rather than a second Go-syntax mode being grown. The retired ruling's two reasons are kept as **dated history** beside the measurements that retired them, at all three sites that stated it (TestFormat's remarks, the call site in `testing.cs`, and the csproj comment that still read "Notably ABSENT: fmt"). Reason (2) — a suite that hand-owns part of the fmt closure — is recorded as **UNTESTED rather than disproven**; none was identified.
+
+### Gates
+
+| gate | result |
+|---|---|
+| cycles | **0** across windows/linux/darwin with the **real** edge in the tree, not an injection (`check-solution-integrity`, exit 0). The injection mechanism was positive-controlled separately on the W1 edge: exactly 6 cycles, exit 1 |
+| closure (32 hosts) | **30/32 pass.** The 2 are `internal/syscall/windows` and `.../registry`, which report *"build constraints exclude all Go files"* on a Linux host — a GOROOT build-tag fact this cut cannot reach. No suite that hand-owns part of fmt's closure turned up |
+| canaries | derived at gate time, predicate positive-controlled (encoding/json IN, cmp OUT) — see below |
+| GolibTests | **483/483**, no abort, exit 0, count matched against the compile set |
+| CNR | 698 packages, 7 platform-exclusive skipped, one CHANGED file (EnvironBlockWalk's two windows-only alias lines) **measured pre-existing by a base control**; this commit touches no converter source at all |
+
+### Canaries — prediction posted before the runs, held on all five
+
+Prediction: **zero verdict movement**, since the cut changes only how a *failing* test's message renders and the oracle compares verdicts, never log text.
+
+| row | result |
+|---|---|
+| `encoding/json` | 491/491 agree, 0 mismatches — **exactly its banked count** |
+| `go/types` | 557/557 agree, 0 mismatches — **exactly its banked count** |
+| `net/http` | **1343 agree — exactly its banked count.** Its 2 mismatches (`TestRegisterErr`) proven **pre-existing** by a one-axis control at master's testing: same `registered at unknown location`, a `runtime.Caller` source-location gap this cut cannot reach |
+| `net` | 12 mismatches, and a one-axis control at master's testing gives the **identical mismatch set** — set difference NONE |
+| `crypto/tls` | status `validated`, matched=true: 401 agreeing + 1 disclosed, **zero** mismatches, zero orphans |
+
+⚠ **The crypto/tls number is 402 verdicts, not 3643, and I am not offering it as one.** This host does not clear the BoGo runner's own 600 s deadline, so it takes the documented collapsed-verdict path with `TestBogoSuite` as the already-disclosed host limit — the same shape your entry records for the i7 (400 matched + 2 disclosed against a banked 3643 + 1). It is a real green on the path this host can run, and nothing more.
+
+### The guard
+
+`GolibTests/TestFormatDelegationTests`, eight cases whose expected strings were taken **from Go** under the pinned toolchain rather than read off the implementation — an expectation read off the thing under test is not a test of it. **It earned its positive control on the first run by going red for a real reason:** two cases asserted Go's `int` while passing a C# `int`, which IS Go's `int32` — the converted fmt was right and my expectation was wrong. Both spellings are asserted now, so the guard pins the *mapping* rather than one answer.
+
+The recorded `%o`/`%b` byte-slice **gap is closed** by this cut. That test said in as many words that whoever implemented element-wise rendering should be the one to fail it and update it to Go's strings; the delegation did exactly that, not by implementing breadth but by ceasing to carry an implementation that needed breadth. Its strings were re-measured on go1.23.12 rather than copied from the comment they replace. **Seven of the eight behaviours that file pins survived the delegation unchanged**, which is why it is kept rather than retired.
+
+### Three things I got wrong or slipped on, all caught and none banked
+
+1. **Route #1 caught me.** The first closure pass ran a converter **older than its own sources** (7 files newer, arriving with the master checkout) — the converter's own warning is what said so. I rebuilt and re-ran the whole 32; the run of record has zero stale-binary warnings.
+2. **I lost two uncommitted edits to `git checkout HEAD -- src/tests src/core`** after a gate — the exact hazard I had flagged one message earlier and then walked into. Redone and committed immediately. The rule is not "commit before a sweep" once; it is before *every* sweep.
+3. **I touched `testing.csproj` seconds after launching the net/http canary**, which compiles that project — a mid-battery source touch. Comment-only XML, so it cannot move a verdict, and net/http came back at exactly its banked count; stated rather than quietly dropped.
+
+**Master moved to `8c15217c8`** while I was gating; my branch is off `01a7fdefe` and my proof binds my own tree, so I have not rebased under it — the union CNR at seating is the place for that.
+
+-- C2
