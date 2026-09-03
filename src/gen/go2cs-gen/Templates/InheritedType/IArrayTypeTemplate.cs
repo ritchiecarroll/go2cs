@@ -50,6 +50,11 @@ internal static class IArrayTypeTemplate
 
                 global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => ((global::System.Collections.IEnumerable)Value).GetEnumerator();
 
+                // Go's range-expression copy (see array<T>.{{RangeSnapshotMethod}}): a `for i, v := range r`
+                // over a named array VALUE iterates a snapshot, and the snapshot is pooled rather than
+                // allocated because it cannot outlive the loop.
+                public global::go.array<{{targetTypeName}}>.RangeSnapshot {{RangeSnapshotMethod}}() => Value.{{RangeSnapshotMethod}}();
+
                 public bool Equals(IArray<{{targetTypeName}}>? other) => Value.Equals(other);
 
                 public {{structName}} Clone() => new {{structName}}(Value.Clone());

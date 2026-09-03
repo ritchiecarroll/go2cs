@@ -74,6 +74,9 @@ internal static class IArrayViewTypeTemplate
 
                 global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => ((global::System.Collections.IEnumerable)view).GetEnumerator();
 
+                // Go's range-expression copy — see IArrayTypeTemplate.
+                public global::go.array<{{targetTypeName}}>.RangeSnapshot {{RangeSnapshotMethod}}() => view.{{RangeSnapshotMethod}}();
+
                 public {{objectName}} Clone() => new {{objectName}}(view.Clone());
 
                 // Uniform value-copy member name a generated struct clone calls on every

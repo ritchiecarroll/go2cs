@@ -95,4 +95,16 @@ public static class Symbols
     // the same collision-avoidance marker the promoted-accessor rename uses. Arrays keep golib's own
     // `Clone()` — see valueCloneSuffix.
     public const string ValueCloneMethod = "ΔClone";
+
+    // RangeSnapshotMethod is the COPY a `for i, v := range a` over an array VALUE iterates. Go
+    // evaluates a range expression once, so the loop reads a snapshot and a write to the container
+    // inside the body is invisible to later iterations; the emitted array is a struct over a shared
+    // T[], so the operand has to be copied. It is deliberately NOT the `Clone()` every other Go array
+    // value-copy site takes: a copy that cannot outlive the loop is Go's INLINE, stack-resident copy,
+    // which costs zero mallocs and zero TotalAlloc, and charging it through golib's allocation counter
+    // would make the counter disagree with the runtime.MemStats.Mallocs it mirrors. golib's
+    // array<T>.ΔRangeSnapshot() therefore rents a pooled buffer and returns it when the loop ends. The
+    // Δ prefix is the same collision-avoidance marker ValueCloneMethod carries, and for the same
+    // reason — a Go type may declare a method of any name.
+    public const string RangeSnapshotMethod = "ΔRangeSnapshot";
 }

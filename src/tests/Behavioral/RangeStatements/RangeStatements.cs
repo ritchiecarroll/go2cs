@@ -104,7 +104,7 @@ internal static void Main() {
         fmt.Println(i1, c1);
     }
     var arr = new array<nint>(5){[2] = 42, [4] = 100};
-    foreach (var (iΔ4, vΔ4) in arr.Clone()) {
+    foreach (var (iΔ4, vΔ4) in arr.ΔRangeSnapshot()) {
         fmt.Println(iΔ4, vΔ4);
     }
     var Δslice = new slice<nint>(5){[2] = 42, [4] = 100};
@@ -119,7 +119,7 @@ internal static void Main() {
         fmt.Println(i1, v1);
     }
     var farr = new float32[]{1.1F, 2.2F, 3.3F}.array();
-    foreach (var (iΔ6, vΔ6) in farr.Clone()) {
+    foreach (var (iΔ6, vΔ6) in farr.ΔRangeSnapshot()) {
         fmt.Println(iΔ6, vΔ6);
     }
     for (nint iΔ7 = 0; iΔ7 < 10; iΔ7++) {

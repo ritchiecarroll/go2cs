@@ -38,7 +38,7 @@ internal static void Main() {
     fmt.Println(ᐸꟷ<nint>(stream));
     var triple = new main_Triple(new nint[]{10, 20, 30}.array());
     nint sum = 0;
-    foreach (var (_, n) in triple.Clone()) {
+    foreach (var (_, n) in triple.ΔRangeSnapshot()) {
         sum += n;
     }
     main_NodePtr np = Ꮡ(new main_Node(V: 9));

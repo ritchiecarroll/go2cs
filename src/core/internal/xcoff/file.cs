@@ -561,7 +561,7 @@ internal static readonly @string unexpectedReadFromˢ = "unexpected read from se
     // Don't bother loading others.
     array<uint32> subtypes = new uint32[]{SSUBTYP_DWABREV, SSUBTYP_DWINFO, SSUBTYP_DWLINE, SSUBTYP_DWRNGES, SSUBTYP_DWSTR}.array();
     array<slice<byte>> dat = new(5); /* len(subtypes) */
-    foreach (var (i, subtype) in subtypes.Clone()) {
+    foreach (var (i, subtype) in subtypes.ΔRangeSnapshot()) {
         var s = f.SectionByType((uint32)((uint32)STYP_DWARF | subtype));
         if (s != nil) {
             var (b, err) = s.Data();

@@ -56,7 +56,7 @@ partial class main_package {
     {
         ref var deep = ref heap(new array<byte>(4), out var Ꮡdeep);
         d.deep.acc.inner.Store(Ꮡdeep);
-        foreach (var (i, b) in deep.Clone()) {
+        foreach (var (i, b) in deep.ΔRangeSnapshot()) {
             if (i < len(expected) && b == expected[i]) {
                 acc++;
             }

@@ -65,7 +65,7 @@ private static readonly object rangeDeepˢ = (@string)"rangeDeep:"u8;
 
 internal static void rangeValues() {
     var m = new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array();
-    foreach (var (_, vᴛ1) in m.Clone()) {
+    foreach (var (_, vᴛ1) in m.ΔRangeSnapshot()) {
         var row = vᴛ1.Clone();
 
         row[0] = 99;
@@ -79,7 +79,7 @@ internal static void rangeValues() {
     }
     fmt.Println(rangeSliceˢ, s);
     var deep = new array<array<nint>>[]{new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array(), new array<nint>[]{new nint[]{7, 8, 9}.array(), new nint[]{10, 11, 12}.array()}.array()}.array();
-    foreach (var (_, vᴛ3) in deep.Clone()) {
+    foreach (var (_, vᴛ3) in deep.ΔRangeSnapshot()) {
         var plane = vᴛ3.Clone();
 
         plane[0][0] = 99;
@@ -105,7 +105,7 @@ private static readonly object rangeHeapBoxedˢ = (@string)"rangeHeapBoxed:"u8;
 
 internal static void rangeHeapBoxed() {
     var m = new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array();
-    foreach (var (_, vᴛ1) in m.Clone()) {
+    foreach (var (_, vᴛ1) in m.ΔRangeSnapshot()) {
         ref var row = ref heap(new array<nint>(3), out var Ꮡrow);
         row = vᴛ1.Clone();
 
@@ -122,7 +122,7 @@ internal static void rangeAssignExisting() {
     var m = new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array();
     array<nint> row = new(3);
     nint i = default!;
-    foreach (var (iᴛ1, vᴛ1) in m.Clone()) {
+    foreach (var (iᴛ1, vᴛ1) in m.ΔRangeSnapshot()) {
         i = iᴛ1;
         row = vᴛ1.Clone();
 

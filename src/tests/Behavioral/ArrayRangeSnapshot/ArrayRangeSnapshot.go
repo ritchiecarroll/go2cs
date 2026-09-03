@@ -4,6 +4,8 @@ import "fmt"
 
 type Row [4]int
 
+type Digits []int
+
 type holder struct {
 	arr [4]int
 }
@@ -164,6 +166,25 @@ func aliasedElement() {
 	fmt.Println("aliasedElement after:", a)
 }
 
+// arrayOfNamedSlices: the shape math/big's `var bitsList = [...]Bits{...}` has -- an ARRAY whose
+// element is a NAMED SLICE type. Go copies the array of slice HEADERS, so the snapshot shares every
+// backing store with the original: appending through the loop variable cannot be seen (a fresh
+// header), but writing an ELEMENT through it must be, in both the original and later iterations.
+func arrayOfNamedSlices() {
+	rows := [3]Digits{{1, 2}, {3, 4}, {5, 6}}
+
+	for i, r := range rows {
+		if i == 0 {
+			rows[1] = Digits{91, 92}
+			rows[2][0] = 93
+		}
+
+		fmt.Println("arrayOfNamedSlices", i, r)
+	}
+
+	fmt.Println("arrayOfNamedSlices after:", rows)
+}
+
 func main() {
 	arrayValue()
 	namedArrayValue()
@@ -175,4 +196,5 @@ func main() {
 	assignVars()
 	mutableRangeVar()
 	aliasedElement()
+	arrayOfNamedSlices()
 }

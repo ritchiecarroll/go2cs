@@ -202,11 +202,11 @@ internal static void buildDateLayouts() {
     var seconds = new @string[]{":05"u8, ""u8}.array(); // second
     // "-0700 (MST)" is not in RFC 5322, but is common.
     var zones = new @string[]{"-0700"u8, "MST"u8, "UT"u8}.array(); // zone = (("+" / "-") 4DIGIT) / "UT" / "GMT" / ...
-    foreach (var (_, dow) in dows.Clone()) {
-        foreach (var (_, day) in days.Clone()) {
-            foreach (var (_, year) in years.Clone()) {
-                foreach (var (_, second) in seconds.Clone()) {
-                    foreach (var (_, zone) in zones.Clone()) {
+    foreach (var (_, dow) in dows.ΔRangeSnapshot()) {
+        foreach (var (_, day) in days.ΔRangeSnapshot()) {
+            foreach (var (_, year) in years.ΔRangeSnapshot()) {
+                foreach (var (_, second) in seconds.ΔRangeSnapshot()) {
+                    foreach (var (_, zone) in zones.ΔRangeSnapshot()) {
                         @string s = dow + day + " Jan "u8 + year + " 15:04"u8 + second + " "u8 + zone;
                         dateLayouts = append(dateLayouts, s);
                     }

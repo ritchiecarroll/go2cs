@@ -42,7 +42,7 @@ internal static void Main() {
     useAndRelease();
     Animal a = default!;
     fmt.Printf("%T\n"u8, a);
-    foreach (var (_, aΔ1) in zoo.Clone()) {
+    foreach (var (_, aΔ1) in zoo.ΔRangeSnapshot()) {
         fmt.Println(aΔ1.Type(), canˢ, aΔ1.Swim());
     }
     fmt.Printf("%T\n"u8, a);
@@ -123,7 +123,7 @@ public static void ShowZoo([GoArrayDims(2)] ж<array<Animal>> Ꮡzoo) {
     ref var zoo = ref Ꮡzoo.DerefOrNull();
 
     Animal a = default!;
-    foreach (var (_, vᴛ1) in zoo.Clone()) {
+    foreach (var (_, vᴛ1) in zoo.ΔRangeSnapshot()) {
         a = vᴛ1;
 
         fmt.Println(a.Type(), canˢ, a.Swim());

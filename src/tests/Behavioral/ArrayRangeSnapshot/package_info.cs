@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("ArrayRangeSnapshot.go", "ArrayRangeSnapshot.cs", "ABAagoSCgpaW6IKEgoKWluiChIKClpbqgoSigpaW6oKShIKClpbqgoSCgpaW2oKEgoKW6oKClLKCluyChKKCloT8gpKEgoKWlqaCgoKCgoKCgoKC")]
+[assembly: go.GoPositionMap("ArrayRangeSnapshot.go", "ArrayRangeSnapshot.cs", "ABIegoSCgpaW6IKEgoKWluiChIKClpbqgoSigpaW6oKShIKClpbqgoSCgpaW2oKEgoKW6oKClLKCluyChKKCloT8gpKEgoKWlu6ChIKCgpaWpoKCgoKCgoKCgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -66,6 +66,7 @@ public static partial class main_package
 
     // <TypeAccessibility>
     [GoValueClone("arr")] internal partial struct holder {}
+    public partial struct Digits {}
     public partial struct Row {}
     // </TypeAccessibility>
 

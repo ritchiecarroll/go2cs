@@ -30,7 +30,7 @@ private static readonly object sumˢ = (@string)"sum:"u8;
 internal static void Main() {
     f(100);
     nint sum = 0;
-    foreach (var (_, v) in sink.Clone()) {
+    foreach (var (_, v) in sink.ΔRangeSnapshot()) {
         sum += v;
     }
     fmt.Println(sumˢ, sum);

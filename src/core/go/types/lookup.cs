@@ -305,7 +305,7 @@ internal static (nint, bool) lookupType(map<ΔType, nint> m, ΔType typ) {
 }
 
 [GoRecv] internal static ж<Named> lookup(this ref instanceLookup l, ж<Named> Ꮡinst) {
-    foreach (var (_, t) in l.buf.Clone()) {
+    foreach (var (_, t) in l.buf.ΔRangeSnapshot()) {
         if (t != nil && Identical(new NamedжΔType(Ꮡinst), new NamedжΔType(t))) {
             return t;
         }
@@ -319,7 +319,7 @@ internal static (nint, bool) lookupType(map<ΔType, nint> m, ΔType typ) {
 }
 
 [GoRecv] internal static void add(this ref instanceLookup l, ж<Named> Ꮡinst) {
-    foreach (var (i, t) in l.buf.Clone()) {
+    foreach (var (i, t) in l.buf.ΔRangeSnapshot()) {
         if (t == nil) {
             l.buf[i] = Ꮡinst;
             return;

@@ -217,6 +217,28 @@ func appendValueClone(rendered string, valueType types.Type) string {
 	return rendered + suffix
 }
 
+// appendRangeSnapshot appends the array RANGE-EXPRESSION copy (RangeSnapshotMethod) to an
+// already-rendered array-valued expression, under the same precedence guard appendValueClone
+// applies — C# postfix binds tighter than the unary deref operator, so a naked suffix on a
+// `~`-prefixed rendering would re-bind onto the operand instead of the dereferenced array.
+//
+// This is deliberately NOT valueCloneSuffix's `.Clone()`, though the copy is the same one Go takes.
+// A range snapshot cannot outlive its loop, which is what makes it Go's INLINE, stack-resident copy
+// — zero mallocs, zero TotalAlloc — while `Clone()` mints a counted managed array because every
+// OTHER array copy site (assignment, return, field, channel send) produces a value that does
+// outlive the statement. golib's counter is the structural mirror of runtime.MemStats.Mallocs, so
+// charging the range copy there would make it disagree with Go by construction; golib answers
+// RangeSnapshotMethod out of a pooled buffer released when the loop ends.
+func appendRangeSnapshot(rendered string) string {
+	suffix := fmt.Sprintf(".%s()", RangeSnapshotMethod)
+
+	if strings.HasPrefix(rendered, PointerDerefOp) {
+		return fmt.Sprintf("(%s)%s", rendered, suffix)
+	}
+
+	return rendered + suffix
+}
+
 // withValueCloneArgs flags every POSITIONAL composite-literal element that reads a CLONE-NEEDING
 // value out of existing storage for the `.Clone()` suffix (CallExprContext.cloneArrayArg — Go
 // copies the value into the composite's slot, and the emitted struct copy would alias its

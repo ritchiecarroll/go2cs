@@ -26,7 +26,7 @@ internal static void Main() {
         z.tbl[i] = i * i;
     }
     nint sum = 0;
-    foreach (var (_, v) in z.tbl.Clone()) {
+    foreach (var (_, v) in z.tbl.ΔRangeSnapshot()) {
         sum += v;
     }
     fmt.Println(sum, z.tbl[7]);

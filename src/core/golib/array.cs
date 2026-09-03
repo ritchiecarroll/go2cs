@@ -9,9 +9,11 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using go.golib;
 
 namespace go;
@@ -354,6 +356,16 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
         return new Span<T>(Backing, m_low, m_length);
     }
 
+    // Whether a by-value copy of this array must RE-COPY each element, decided once per T. An
+    // element that is itself an array wrapper, or a struct carrying array fields, is a struct over a
+    // shared T[] backing that a shallow element copy would leave aliased; a SLICE element is not —
+    // see the reasoning at the use site in Clone below, which is the definition of record. Shared by
+    // Clone and the range snapshot so the two can never drift into disagreeing about what a Go array
+    // copy copies.
+    private static readonly bool s_elementNeedsDeepCopy =
+        (typeof(IArray).IsAssignableFrom(typeof(T)) && !typeof(ISlice).IsAssignableFrom(typeof(T))) ||
+        typeof(IGoValueClone).IsAssignableFrom(typeof(T));
+
     public array<T> Clone()
     {
         // ToSpan().ToArray() rather than Backing.Clone(): a Go array copy is of the ARRAY, and an
@@ -374,7 +386,18 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
         // exactly the same problem one level down: Go's `[2]digest` copy copies both digests'
         // arrays inline, while the shallow element copy shares their backing. It clones through
         // the same ICloneable surface.
-        if (typeof(IArray).IsAssignableFrom(typeof(T)) || typeof(IGoValueClone).IsAssignableFrom(typeof(T)))
+        //
+        // A SLICE element is excluded, and the exclusion is load-bearing in BOTH directions.
+        // Semantically: Go's `[8]Bits` copy (math/big's bitsList, `type Bits []int`) copies eight
+        // slice HEADERS and leaves the backing shared — exactly what the shallow element copy above
+        // already did — so re-cloning would be wrong even if it worked. Mechanically it does NOT
+        // work: `ISlice<T>` derives from `IArray<T>`, so a named-slice wrapper passes the IArray
+        // test, while its generated `Clone()` forwards to the UNDERLYING `slice<T>`'s
+        // `ICloneable.Clone()`, which hands back a boxed `slice<T>` — and the `(T)` cast below is
+        // then `slice<int>` to `ΔBits`: InvalidCastException. Latent until something first cloned
+        // an array whose element is a slice; the range-expression snapshot is that first caller,
+        // and math/big's TestFloatAdd/TestFloatMul are the rows that met it.
+        if (s_elementNeedsDeepCopy)
         {
             for (int i = 0; i < copy.Length; i++)
                 copy[i] = (T)((ICloneable)copy[i]!).Clone();
@@ -498,6 +521,155 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
         public readonly void Dispose()
         {
+        }
+    }
+
+    /// <summary>
+    /// Go's range-expression COPY of this array — the snapshot a <c>for i, v := range a</c> over an
+    /// array VALUE iterates — as an enumerable that allocates NOTHING on the managed heap.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Why this is not <see cref="Clone"/>.</b> Both take Go's copy, and semantically the range
+    /// site could have used <c>Clone()</c> — it did first. But a Go array copy lives INLINE, on the
+    /// stack when the destination is a local, so Go charges it zero mallocs and zero
+    /// <c>TotalAlloc</c>; <c>Clone()</c> charges a real managed array through
+    /// <see cref="AllocationCounter"/>, which is the correct accounting for a copy that OUTLIVES the
+    /// statement (an assignment, a return, a field) and the wrong accounting for one that cannot.
+    /// Emitting the counted form at the range site would have made every allocation assertion around
+    /// a range over an array value disagree with Go's own numbers — golib's counter is documented as
+    /// the structural MIRROR of <c>runtime.MemStats.Mallocs</c>, and a mirror that charges what Go
+    /// does not is wrong by construction, whether or not a row observes it today.
+    /// </para>
+    /// <para>
+    /// <b>How the copy is free.</b> The snapshot's lifetime is exactly the loop — the tuple yields
+    /// elements BY VALUE, so nothing the body keeps can point into it — which is the one shape a
+    /// pooled buffer fits. <see cref="SnapshotEnumerator"/> rents from
+    /// <see cref="ArrayPool{T}.Shared"/> and returns the buffer in <c>Dispose</c>, which C#'s
+    /// <c>foreach</c> calls in a <c>finally</c>, so <c>break</c>, <c>return</c> and an exception all
+    /// release it. Steady state is zero managed allocations, so BOTH instruments stay quiet: the
+    /// object counter has nothing to charge, and <c>GC.GetTotalAllocatedBytes</c> — which the
+    /// converted <c>runtime.ReadMemStats</c> reads and which no counter could hide from — sees no
+    /// bytes. The instruments are untouched; the allocation simply stops happening.
+    /// </para>
+    /// <para>
+    /// <b>Stated cost, three residuals.</b> (1) The FIRST rent of a given size class allocates, once
+    /// per pool bucket per process — invisible to a warmed <c>AllocsPerRun</c>, visible once in a
+    /// cumulative byte total. (2) An array longer than <see cref="ArrayPool{T}.Shared"/>'s largest
+    /// bucket allocates per rent and is dropped on return; that is Go's behaviour too, which moves
+    /// an array of that size off the stack. (3) An element type that needs a DEEP copy
+    /// (<c>s_elementNeedsDeepCopy</c> — a nested array, or a struct carrying one) still allocates per
+    /// element, because a nested <c>array&lt;T&gt;</c>'s own backing is a heap object in this model
+    /// and Go's inline copy has no managed equivalent. That residual is unreachable from the corpus's
+    /// allocation-asserting rows and is named rather than hidden.
+    /// </para>
+    /// </remarks>
+    public RangeSnapshot ΔRangeSnapshot()
+    {
+        return new RangeSnapshot(this);
+    }
+
+    /// <summary>
+    /// The enumerable half of <see cref="ΔRangeSnapshot"/> — it holds only the SOURCE window, so
+    /// producing it is free and the buffer is rented no earlier than the loop that consumes it.
+    /// </summary>
+    public readonly struct RangeSnapshot
+    {
+        private readonly T[] m_backing;
+        private readonly int m_low;
+        private readonly int m_length;
+
+        internal RangeSnapshot(array<T> array)
+        {
+            m_backing = array.Backing;
+            m_low = array.m_low;
+            m_length = array.m_length;
+        }
+
+        public SnapshotEnumerator GetEnumerator()
+        {
+            return new SnapshotEnumerator(m_backing, m_low, m_length);
+        }
+    }
+
+    /// <summary>
+    /// Allocation-free (index, value) enumerator over a POOLED copy of an array's elements.
+    /// </summary>
+    /// <remarks>
+    /// The rented buffer is owned by exactly one enumerator instance and released by its
+    /// <c>Dispose</c>. C#'s <c>foreach</c> creates one copy of this struct and disposes that copy, so
+    /// the ownership is single by construction on the only path the converter emits; a caller that
+    /// copies the struct and disposes both halves would return one buffer twice, which is why nothing
+    /// but <c>foreach</c> should drive it. Disposing twice is harmless (the field is cleared first);
+    /// disposing two COPIES is not.
+    /// </remarks>
+    public struct SnapshotEnumerator : IEnumerator<(nint, T)>
+    {
+        private T[]? m_buffer;
+        private readonly nint m_length;
+        private nint m_current;
+
+        internal SnapshotEnumerator(T[] backing, int low, int length)
+        {
+            m_length = length;
+            m_current = -1;
+
+            if (length == 0)
+            {
+                // Nothing to snapshot, so nothing to rent — `for range` over a zero-length or
+                // zero-VALUE array is a zero-iteration loop and must not touch the pool.
+                m_buffer = null;
+                return;
+            }
+
+            T[] buffer = ArrayPool<T>.Shared.Rent(length);
+
+            new ReadOnlySpan<T>(backing, low, length).CopyTo(buffer);
+
+            // The same deep element copy Clone takes, for the same reason and under the same
+            // per-T decision: a nested array element is a struct over shared backing, so a shallow
+            // element copy would let a write through the loop variable reach the source array.
+            if (s_elementNeedsDeepCopy)
+            {
+                for (int i = 0; i < length; i++)
+                    buffer[i] = (T)((ICloneable)buffer[i]!).Clone();
+            }
+
+            m_buffer = buffer;
+        }
+
+        public readonly (nint, T) Current => (m_current, m_buffer![m_current]);
+
+        readonly object? IEnumerator.Current => Current;
+
+        public bool MoveNext()
+        {
+            if (m_current >= m_length)
+                return false;
+
+            m_current++;
+            return m_current < m_length;
+        }
+
+        void IEnumerator.Reset()
+        {
+            m_current = -1;
+        }
+
+        public void Dispose()
+        {
+            T[]? buffer = m_buffer;
+
+            if (buffer is null)
+                return;
+
+            // Cleared first, so a second Dispose on THIS instance is a no-op rather than a second
+            // Return of the same buffer.
+            m_buffer = null;
+
+            // A reference-bearing element type must not keep its objects alive through the pool;
+            // an unmanaged one skips the clear, which is the whole point of the discriminant.
+            ArrayPool<T>.Shared.Return(buffer, RuntimeHelpers.IsReferenceOrContainsReferences<T>());
         }
     }
 

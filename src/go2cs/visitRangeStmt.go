@@ -425,8 +425,13 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	// COPY: a write to the container inside the body is invisible to every later iteration. The
 	// emitted `array<T>` (and the generated named-array wrapper) is a struct over a shared T[]
 	// backing, so the plain operand aliases the container and the loop reads the writes — the same
-	// aliasing every other Go by-value array transfer answers with an explicit `.Clone()`, and the
-	// range expression is simply the copy site nobody had emitted yet.
+	// aliasing every other Go by-value array transfer answers with a copy, and the range expression
+	// is simply the copy site nobody had emitted yet.
+	//
+	// The copy is RangeSnapshotMethod, not the `.Clone()` the other transfer sites take: a snapshot
+	// cannot outlive its loop, which makes it Go's inline stack copy — zero mallocs, zero TotalAlloc
+	// — and golib's counter mirrors runtime.MemStats.Mallocs, so charging it would disagree with Go
+	// wherever an allocation assertion surrounds such a loop. See appendRangeSnapshot.
 	//
 	// Scoped exactly as gc's own rule is (cmd/compile/internal/walk/order.go's rangeStmt): the copy
 	// is taken only when a VALUE iteration variable is present and not blank — with at most one
@@ -437,7 +442,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	// EXISTING storage (ident, selector, index, deref) can alias — a composite literal, call result
 	// or conversion is freshly constructed and reachable by no other name.
 	if isArray && !rangedThroughPointer && rangeStmt.Value != nil && len(valExpr) > 0 && valExpr != "_" && v.exprReadsValueNeedingClone(rangeStmt.X) {
-		rangeExpr = appendValueClone(rangeExpr, v.getExprType(rangeStmt.X))
+		rangeExpr = appendRangeSnapshot(rangeExpr)
 	}
 
 	// A newly-DEFINED range var that is reassigned in the body — or that receives a pointer-

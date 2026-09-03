@@ -237,7 +237,7 @@ internal static UntypedInt huffmanValueShift => 4;
         // Above we've sanity checked that we never overwrote
         // an existing entry. Here we additionally check that
         // we filled the tables completely.
-        foreach (var (i, chunk) in h.chunks.Clone()) {
+        foreach (var (i, chunk) in h.chunks.ΔRangeSnapshot()) {
             if (chunk == 0) {
                 // As an exception, in the degenerate
                 // single-code case, we allow odd

@@ -38,7 +38,7 @@ internal static uint64 rangeSum([GoArrayDims(4)] words w) {
     w = w.Clone();
 
     uint64 s = default!;
-    foreach (var (_, e) in w.Clone()) {
+    foreach (var (_, e) in w.ΔRangeSnapshot()) {
         s += e;
     }
     return s;

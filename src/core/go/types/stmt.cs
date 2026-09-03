@@ -1031,7 +1031,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
         if (isDef){
             // short variable declaration
             slice<ж<Var>> vars = default!;
-            foreach (var (i, lhsΔ1) in lhs.Clone()) {
+            foreach (var (i, lhsΔ1) in lhs.ΔRangeSnapshot()) {
                 if (lhsΔ1 == default!) {
                     continue;
                 }
@@ -1087,7 +1087,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
         if (sKey != default!){
             /* lhs[0] != nil */
             // ordinary assignment
-            foreach (var (i, lhsΔ2) in lhs.Clone()) {
+            foreach (var (i, lhsΔ2) in lhs.ΔRangeSnapshot()) {
                 if (lhsΔ2 == default!) {
                     continue;
                 }

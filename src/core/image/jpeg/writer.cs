@@ -200,7 +200,7 @@ internal static ж<array<huffmanLUT>> ᏑtheHuffmanLUT = new StandardBox<array<h
 internal static ref array<huffmanLUT> theHuffmanLUT => ref ᏑtheHuffmanLUT.Value;
 
 [GoInit] internal static void initΔ1() {
-    foreach (var (i, vᴛ1) in theHuffmanSpec.Clone()) {
+    foreach (var (i, vᴛ1) in theHuffmanSpec.ΔRangeSnapshot()) {
         var s = vᴛ1.ΔClone();
 
         theHuffmanLUT[i].init(s);

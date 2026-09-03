@@ -140,7 +140,7 @@ private static readonly object rangeˢ = (@string)"range:      "u8;
 internal static void rangeCopy() {
     var d = newDigest();
     var arr = new digest[]{d.ΔClone(), d.ΔClone()}.array();
-    foreach (var (_, vᴛ1) in arr.Clone()) {
+    foreach (var (_, vᴛ1) in arr.ΔRangeSnapshot()) {
         var g = vᴛ1.ΔClone();
 
         g.bump();

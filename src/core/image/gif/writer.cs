@@ -46,7 +46,7 @@ internal static UntypedInt gcBlockSize => 0x04;
 internal static array<nint> log2Lookup = new nint[]{2, 4, 8, 16, 32, 64, 128, 256}.array();
 
 internal static nint log2(nint x) {
-    foreach (var (i, v) in log2Lookup.Clone()) {
+    foreach (var (i, v) in log2Lookup.ΔRangeSnapshot()) {
         if (x <= v) {
             return i;
         }

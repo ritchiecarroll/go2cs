@@ -911,7 +911,7 @@ internal static void mutexevent(int64 cycles, nint skip) {
 // Stack returns the stack trace associated with the record,
 // a prefix of r.Stack0.
 [GoRecv] public static slice<uintptr> Stack(this ref StackRecord r) {
-    foreach (var (i, v) in r.Stack0.Clone()) {
+    foreach (var (i, v) in r.Stack0.ΔRangeSnapshot()) {
         if (v == 0) {
             return r.Stack0[0..(int)(i)];
         }
@@ -962,7 +962,7 @@ internal static bool disableMemoryProfiling;
 // Stack returns the stack trace associated with the record,
 // a prefix of r.Stack0.
 [GoRecv] public static slice<uintptr> Stack(this ref MemProfileRecord r) {
-    foreach (var (i, v) in r.Stack0.Clone()) {
+    foreach (var (i, v) in r.Stack0.ΔRangeSnapshot()) {
         if (v == 0) {
             return r.Stack0[0..(int)(i)];
         }

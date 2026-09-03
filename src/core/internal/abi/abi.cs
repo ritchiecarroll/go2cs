@@ -44,17 +44,17 @@ partial class abi_package {
 
 [GoRecv] public static void Dump(this ref RegArgs r) {
     print((@string)"Ints:"u8);
-    foreach (var (_, x) in r.Ints.Clone()) {
+    foreach (var (_, x) in r.Ints.ΔRangeSnapshot()) {
         print((@string)" "u8, x);
     }
     println();
     print((@string)"Floats:"u8);
-    foreach (var (_, x) in r.Floats.Clone()) {
+    foreach (var (_, x) in r.Floats.ΔRangeSnapshot()) {
         print((@string)" "u8, x);
     }
     println();
     print((@string)"Ptrs:"u8);
-    foreach (var (_, x) in r.Ptrs.Clone()) {
+    foreach (var (_, x) in r.Ptrs.ΔRangeSnapshot()) {
         print((@string)" "u8, x);
     }
     println();

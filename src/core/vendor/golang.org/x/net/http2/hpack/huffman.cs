@@ -162,7 +162,7 @@ internal static void buildRootHuffmanNode() {
     lazyRootHuffmanNode = newInternalNode();
     // allocate a leaf node for each of the 256 symbols
     var leaves = Ꮡ(new array<node>(256));
-    foreach (var (sym, code) in huffmanCodes.Clone()) {
+    foreach (var (sym, code) in huffmanCodes.ΔRangeSnapshot()) {
         var codeLen = huffmanCodeLen[sym];
         var cur = lazyRootHuffmanNode;
         while (codeLen > 8) {

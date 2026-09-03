@@ -115,7 +115,7 @@ internal static void moveMakeFuncArgPtrs(ж<makeFuncCtxt> Ꮡctxt, ж<abi.RegArg
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
     ref var args = ref Ꮡargs.DerefOrNull();
 
-    foreach (var (i, arg) in args.Ints.Clone()) {
+    foreach (var (i, arg) in args.Ints.ΔRangeSnapshot()) {
         // Avoid write barriers! Because our write barrier enqueues what
         // was there before, we might enqueue garbage.
         if (ctxt.regPtrs.Get(i)){

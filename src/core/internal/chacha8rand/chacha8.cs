@@ -137,7 +137,7 @@ public static slice<byte> Marshal(ж<State> Ꮡs) {
     copy(data, "chacha8:"u8);
     var used = (s.c / (uint32)ctrInc) * (uint32)chunk + s.i;
     byteorder.BePutUint64(data[(int)(1 * 8)..], (uint64)used);
-    foreach (var (i, seed) in s.seed.Clone()) {
+    foreach (var (i, seed) in s.seed.ΔRangeSnapshot()) {
         byteorder.LePutUint64(data[(int)((2 + i) * 8)..], seed);
     }
     return data;

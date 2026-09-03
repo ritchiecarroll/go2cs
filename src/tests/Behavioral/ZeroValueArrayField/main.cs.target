@@ -28,7 +28,7 @@ private static readonly @string abcˢ = "abc"u8;
 internal static void Main() {
     var h = makeHolder(abcˢ);
     nint sum = 0;
-    foreach (var (i, v) in (~h).tbl.Clone()) {
+    foreach (var (i, v) in (~h).tbl.ΔRangeSnapshot()) {
         sum += i * v;
     }
     fmt.Println((~h).name, len((~h).tbl), sum, (~h).tbl[3], len((~h).tail));

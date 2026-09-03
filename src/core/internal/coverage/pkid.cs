@@ -72,7 +72,7 @@ public static UntypedInt NotHardCoded => -1;
 // path, or -1 if we don't use a hard-coded ID. Hard-coded IDs start
 // at -2 and decrease as we go down the list.
 public static nint HardCodedPkgID(@string pkgpath) {
-    foreach (var (k, p) in rtPkgs.Clone()) {
+    foreach (var (k, p) in rtPkgs.ΔRangeSnapshot()) {
         if (p == pkgpath) {
             return (0 - k) - 2;
         }

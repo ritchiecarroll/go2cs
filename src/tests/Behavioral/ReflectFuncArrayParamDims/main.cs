@@ -19,7 +19,7 @@ internal static nint SumArray(this filler _, [GoArrayDims(4)] array<nint> @in) {
     @in = @in.Clone();
 
     nint total = 0;
-    foreach (var (_, v) in @in.Clone()) {
+    foreach (var (_, v) in @in.ΔRangeSnapshot()) {
         total += v;
     }
     return total;

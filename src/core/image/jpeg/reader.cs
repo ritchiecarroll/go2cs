@@ -812,7 +812,7 @@ internal static readonly @string unknownColorModel4ˢ = "unknown color model: 4-
         new((~d.img3).Cr, (~d.img3).CStride),
         new(d.blackPix, d.blackStride)
     }.array();
-    foreach (var (t, translation) in translations.Clone()) {
+    foreach (var (t, translation) in translations.ΔRangeSnapshot()) {
         var subsample = d.comp[t].h != d.comp[0].h || d.comp[t].v != d.comp[0].v;
         for ((nint iBase, nint y) = (0, bounds.Min.Y); y < bounds.Max.Y; (iBase, y) = (iBase + (~img).Stride, y + 1)) {
             nint sy = y - bounds.Min.Y;

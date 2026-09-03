@@ -612,7 +612,7 @@ internal static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
                 }
             }
             buf.Write(blkʗ1[..]);
-            foreach (var (_, c) in blkʗ1.Clone()) {
+            foreach (var (_, c) in blkʗ1.ΔRangeSnapshot()) {
                 if (c == (rune)'\n') {
                     cntNewline++;
                 }

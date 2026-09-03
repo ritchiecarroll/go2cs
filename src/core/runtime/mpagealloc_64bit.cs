@@ -62,7 +62,7 @@ internal static readonly @string failedToReservePageˢ = "failed to reserve page
 [GoRecv] internal static void sysInit(this ref pageAlloc Δp, bool test) {
     // Reserve memory for each level. This will get mapped in
     // as R/W by setArenas.
-    foreach (var (l, shift) in levelShift.Clone()) {
+    foreach (var (l, shift) in levelShift.ΔRangeSnapshot()) {
         nint entries = ((nint)1).Lsh(((nuint)heapAddrBits - shift));
         // Reserve b bytes of memory anywhere in the address space.
         var b = alignUp((uintptr)entries * pallocSumBytes, physPageSize);

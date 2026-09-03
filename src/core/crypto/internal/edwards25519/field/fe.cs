@@ -272,7 +272,7 @@ public static (ж<Element>, error) SetBytes(this ж<Element> Ꮡv, slice<byte> x
     foreach (var (i, l) in new uint64[]{t.l0, t.l1, t.l2, t.l3, t.l4}.array()) {
         nint bitsOffset = i * 51;
         byteorder.LePutUint64(buf[..], l.Lsh((nuint)(bitsOffset % 8)));
-        foreach (var (iΔ1, bb) in buf.Clone()) {
+        foreach (var (iΔ1, bb) in buf.ΔRangeSnapshot()) {
             nint off = bitsOffset / 8 + iΔ1;
             if (off >= len(@out)) {
                 break;

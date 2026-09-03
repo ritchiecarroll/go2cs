@@ -6,6 +6,8 @@ partial class main_package {
 
 [GoType("[4]nint")] partial struct Row;
 
+[GoType("[]nint")] partial struct Digits;
+
 [GoType] partial struct holder {
     internal array<nint> arr = new(4);
 }
@@ -16,7 +18,7 @@ private static readonly object arrayValueAfterˢ = (@string)"arrayValue after:"u
 
 internal static void arrayValue() {
     var a = new nint[]{1, 2, 3, 4}.array();
-    foreach (var (i, v) in a.Clone()) {
+    foreach (var (i, v) in a.ΔRangeSnapshot()) {
         if (i == 0) {
             (a[1], a[2], a[3]) = (91, 92, 93);
         }
@@ -31,7 +33,7 @@ private static readonly object namedArrayValueAfterˢ = (@string)"namedArrayValu
 
 internal static void namedArrayValue() {
     var r = new Row(new nint[]{1, 2, 3, 4}.array());
-    foreach (var (i, v) in r.Clone()) {
+    foreach (var (i, v) in r.ΔRangeSnapshot()) {
         if (i == 0) {
             (r[1], r[2], r[3]) = (91, 92, 93);
         }
@@ -46,7 +48,7 @@ private static readonly object arrayFieldAfterˢ = (@string)"arrayField after:"u
 
 internal static void arrayField() {
     var h = new holder(arr: new nint[]{1, 2, 3, 4}.array());
-    foreach (var (i, v) in h.arr.Clone()) {
+    foreach (var (i, v) in h.arr.ΔRangeSnapshot()) {
         if (i == 0) {
             (h.arr[1], h.arr[2], h.arr[3]) = (91, 92, 93);
         }
@@ -61,7 +63,7 @@ private static readonly object arrayOfArraysAfterˢ = (@string)"arrayOfArrays af
 
 internal static void arrayOfArrays() {
     var m = new array<nint>[]{new nint[]{1, 2}.array(), new nint[]{3, 4}.array(), new nint[]{5, 6}.array()}.array();
-    foreach (var (i, vᴛ1) in m.Clone()) {
+    foreach (var (i, vᴛ1) in m.ΔRangeSnapshot()) {
         var row = vᴛ1.Clone();
 
         if (i == 0) {
@@ -124,7 +126,7 @@ internal static void assignVars() {
     var a = new nint[]{1, 2, 3, 4}.array();
     nint i = default!;
     nint v = default!;
-    foreach (var (iᴛ1, vᴛ1) in a.Clone()) {
+    foreach (var (iᴛ1, vᴛ1) in a.ΔRangeSnapshot()) {
         i = iᴛ1;
         v = vᴛ1;
 
@@ -140,7 +142,7 @@ private static readonly object mutableRangeVarˢ = (@string)"mutableRangeVar"u8;
 
 internal static void mutableRangeVar() {
     var a = new nint[]{1, 2, 3, 4}.array();
-    foreach (var (i, vᴛ1) in a.Clone()) {
+    foreach (var (i, vᴛ1) in a.ΔRangeSnapshot()) {
         var v = vᴛ1;
 
         if (i == 0) {
@@ -159,13 +161,29 @@ internal static void aliasedElement() {
     ref var a = ref heap<array<nint>>(out var Ꮡa);
     a = new nint[]{1, 2, 3, 4}.array();
     var q = Ꮡa.at<nint>(2);
-    foreach (var (i, v) in a.Clone()) {
+    foreach (var (i, v) in a.ΔRangeSnapshot()) {
         if (i == 0) {
             q.Value = 90;
         }
         fmt.Println(aliasedElementˢ, i, v);
     }
     fmt.Println(aliasedElementAfterˢ, a);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly object arrayOfNamedSlicesˢ = (@string)"arrayOfNamedSlices"u8;
+private static readonly object arrayOfNamedSlicesAfterˢ = (@string)"arrayOfNamedSlices after:"u8;
+
+internal static void arrayOfNamedSlices() {
+    var rows = new Digits[]{new nint[]{1, 2}.slice(), new nint[]{3, 4}.slice(), new nint[]{5, 6}.slice()}.array();
+    foreach (var (i, r) in rows.ΔRangeSnapshot()) {
+        if (i == 0) {
+            rows[1] = new Digits(new nint[]{91, 92}.slice());
+            rows[2][0] = 93;
+        }
+        fmt.Println(arrayOfNamedSlicesˢ, i, r);
+    }
+    fmt.Println(arrayOfNamedSlicesAfterˢ, rows);
 }
 
 internal static void Main() {
@@ -179,6 +197,7 @@ internal static void Main() {
     assignVars();
     mutableRangeVar();
     aliasedElement();
+    arrayOfNamedSlices();
 }
 
 } // end main_package

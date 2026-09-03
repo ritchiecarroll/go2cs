@@ -218,7 +218,7 @@ public static (@string filename, @string id, error err) FindPkg(@string path, @s
         }
     }
     // try extensions
-    foreach (var (_, ext) in pkgExts.Clone()) {
+    foreach (var (_, ext) in pkgExts.ΔRangeSnapshot()) {
         filename = noext + ext;
         var (f, statErr) = os.Stat(filename);
         if (statErr == default! && !f.IsDir()) {

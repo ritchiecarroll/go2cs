@@ -16786,13 +16786,43 @@ for i, v := range a {
 }
 ```
 
-The range expression is simply the array value-copy site nobody had emitted (see *Array VALUE-COPY at every transfer site* above — `range` was listed there for the iteration VARIABLE, never for the operand). It now takes the same strongly-typed suffix every other such transfer takes:
+The range expression is simply the array value-copy site nobody had emitted (see *Array VALUE-COPY at every transfer site* above — `range` was listed there for the iteration VARIABLE, never for the operand). It now takes a copy of its own:
 
 ```csharp
-foreach (var (i, v) in a.Clone()) { … }        // array value    — snapshot, Go's copy
-foreach (var (i, v) in h.arr.Clone()) { … }    // struct field   — likewise a value
-foreach (var (i, v) in r.Clone()) { … }        // named array    — the wrapper's own Clone()
+foreach (var (i, v) in a.ΔRangeSnapshot()) { … }        // array value  — snapshot, Go's copy
+foreach (var (i, v) in h.arr.ΔRangeSnapshot()) { … }    // struct field — likewise a value
+foreach (var (i, v) in r.ΔRangeSnapshot()) { … }        // named array  — the wrapper forwards it
 ```
+
+**Why it is not the `.Clone()` every other transfer site takes, and this is the load-bearing part.**
+Semantically it could be, and it was first. But a Go array copy lives INLINE — on the stack when the
+destination is a local — so Go charges it **zero mallocs and zero `TotalAlloc`**, and a range snapshot
+is the one array copy that provably cannot outlive its statement. `Clone()` mints a counted managed
+array through `AllocationCounter`, which is right for a copy that DOES outlive the statement (an
+assignment, a return, a field, a channel send) and wrong for one that cannot: golib's counter is
+documented as the structural mirror of `runtime.MemStats.Mallocs`, so charging what Go does not
+makes the mirror wrong by construction, and every `testing.AllocsPerRun` assertion around a range
+over an array value would disagree with Go's own number. The byte meter is stricter still —
+`runtime.ReadMemStats`'s `TotalAlloc` maps to `GC.GetTotalAllocatedBytes`, which no counter can hide
+from — so the copy has to genuinely not allocate. `array<T>.ΔRangeSnapshot()` returns a `RangeSnapshot`
+struct whose enumerator rents from `ArrayPool<T>.Shared` and returns the buffer in `Dispose`, which
+C#'s `foreach` calls in a `finally`; steady state is zero managed allocations on both meters. Three
+residuals are named rather than hidden: the first rent of a size class allocates once per process, an
+array beyond the pool's largest bucket allocates per rent (as it would in Go, which also moves an
+array that size off the stack), and an element type needing a DEEP copy still allocates per element,
+because a nested `array<T>`'s backing is a heap object in this model.
+
+**A SLICE element is never re-copied, and getting that wrong was a real crash.** `array<T>.Clone()`
+re-clones elements that are themselves array wrappers, and `ISlice<T>` derives from `IArray<T>` — so a
+named-slice element passed that test, while the generated wrapper's `Clone()` forwards to the
+underlying `slice<T>`'s `ICloneable.Clone()`, which hands back a boxed `slice<T>`: the element cast is
+then `slice<int>` → `ΔBits` and throws `InvalidCastException`. Latent until something first cloned an
+array whose element is a slice; the range snapshot was that first caller, and math/big's
+`bitsList` (`[...]Bits`, `type Bits []int`) is the corpus site — `TestFloatAdd` and `TestFloatMul` died
+on it. Semantically the exclusion is required anyway: Go's array-of-slices copy copies HEADERS and
+shares every backing store, which the shallow element copy already did. The `ArrayRangeSnapshot`
+guard pins both halves — replacing a whole element through the original is invisible to the loop
+(a fresh header), while a write THROUGH a shared backing is visible.
 
 Scoped exactly as gc's own rule is (`cmd/compile/internal/walk/order.go`'s `rangeStmt`), so three shapes stay UNCOPIED because Go copies nothing there either — and each is a control in the guard:
 
@@ -16804,7 +16834,7 @@ Scoped exactly as gc's own rule is (`cmd/compile/internal/walk/order.go`'s `rang
 
 With the operand snapshotted, `array<T>`'s enumerator reads LIVE storage and needs no capture point of its own, which is what finally let it shed the iterator method: `GetEnumerator()` returns the nested `array<T>.Enumerator` STRUCT, and go2cs-gen's `IArrayTypeTemplate` / `IArrayViewTypeTemplate` forward that struct (with the explicit `IEnumerable<(nint, T)>` member beside it) so named array types range as cheaply. Measured with `GC.GetAllocatedBytesForCurrentThread` over 1,000 loops: **72 B/loop → 0 B/loop** on the pattern path, and 103 → 79 B/loop on the boxing interface path, which now boxes a struct instead of driving a state machine. Snapshotting inside the enumerator instead would have been wrong in both directions — it would allocate on every loop AND copy for the two shapes above where Go shares.
 
-Guarded two ways: `ArrayRangeSnapshot` (behavioral, output-compared against `go run`) mutates the container mid-loop across the array value, named-array, struct-field, nested-array, `=`-form, mutable-range-var and aliased-element shapes, with the pointer, slice and index-only arms as controls that must NOT copy; `ArrayRangeAllocationTests` (`GolibTests`) asserts the zero bytes, with the boxing interface path as the nonzero control that makes the zero mean something.
+Guarded two ways: `ArrayRangeSnapshot` (behavioral, output-compared against `go run`) mutates the container mid-loop across the array value, named-array, struct-field, nested-array, array-of-named-slices, `=`-form, mutable-range-var and aliased-element shapes, with the pointer, slice and index-only arms as controls that must NOT copy; `ArrayRangeAllocationTests` (`GolibTests`) asserts the enumerator's zero bytes with the boxing interface path as its nonzero control, the snapshot's zero on BOTH meters (object count and CLR bytes) with `Clone()` as the counted control that makes those zeros mean something, and the array-of-slices copy that must share its backing rather than throw.
 
 ## The `go.golib` support namespace
 

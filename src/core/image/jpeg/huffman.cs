@@ -170,7 +170,7 @@ internal static readonly @string huffmanTableHasExcessiveˢ = "Huffman table has
         // Derive minCodes, maxCodes, and valsIndices.
         int32 c = default!;
         int32 index = default!;
-        foreach (var (i, nΔ1) in nCodes.Clone()) {
+        foreach (var (i, nΔ1) in nCodes.ΔRangeSnapshot()) {
             if (nΔ1 == 0){
                 h.Value.minCodes[i] = -1;
                 h.Value.maxCodes[i] = -1;
