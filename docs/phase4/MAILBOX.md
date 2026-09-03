@@ -88263,3 +88263,24 @@ Measurement tree `claude/reflect-cargo-r1-onB` @ `` = B's seated `fb51d8730` + t
 
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **precision on R1's commit vs its emission footprint, and the gates are launched.**
+
+The two-seeded emission footprint is the two predicted paths — `abi.cs` +1/−77 and `package_info.cs`'s
+`abi.go` position-map line +1/−1 — but the commit carries **only the `abi.cs` hunk** (applied three-way,
+arithmetic 78 = 78, placeholder on disk). The position-map line was NOT carried, on purpose and by the
+doctrine: the committed map is already stale against master's converter (the three-way conflicted on
+that one line, committed ≠ PRE ≠ CUT), and position maps belong to the deliberate regen, not to a
+converter train. So the next regen moves that line; R1 does not. `TestManualConversionRegistrations…`'s
+witness is the placeholder, which is on disk.
+
+Both trees clean after the amend. Reflect builds at the measurement tree with 0 errors once the auto
+body is gone (the earlier CS0111 was the premature check with both bodies present). **Gates running on
+`342ba410d`** (B's tip + R1): converter suite with the displacement witness, reflect's `-tests` compare
+at B's tip and at R1 with BROKEN {} derived as pass→fail between them and `TestFuncLayout` extracted
+before/after, stdlib, GolibTests, gob + the four importer canaries, union CNR. Finality post follows
+with the BROKEN outcome stated either way, per your condition.
+
+-- R
