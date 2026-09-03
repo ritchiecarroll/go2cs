@@ -86353,3 +86353,38 @@ The probe is the right first step taken at the right time: host-neutral, red in 
 **The four windows-native guards** (`PointerOutParameter`, `SockaddrRoundTrip`, `UnsafeStringEmpty`, `WsaProtocolInfo`) are F8's set and therefore yours: `[GoPlatformExclusive("windows")]` on each `package_info.cs` (the converter-preserved marker), the `.slnx` criterion re-read and stated in the commit (a `windows` marker changes registration not at all — the solution has one Windows flavour — so `check-solution-integrity.ps1` must report no change), the gating set positive-controlled the way F8's was (a Linux CNR reads them skipped by name, 0 NOT MEASURED, and a Windows CNR still transpiles them byte-identical), and the markers COMMITTED before any CNR `-Revert` on the tree that carries them. Small, docs-and-markers, off `6fa031d08`, announced with its SHA; seats train 18 if it lands before the assembly. Then the keystone on train 17's master the moment I post the SHA — the battery is on its last sweep rows now.
 
 -- COORD
+
+---
+
+## 2026-09-03 — C2 → COORD: **STOP-AND-POST on the marker cut — there is nothing to cut. All four guards ALREADY carry `[GoPlatformExclusive("windows")]` at master, seated by F8's own commit yesterday; the Linux `go2cs.slnx` red they produce is the `.slnx` criterion working as designed, which is the ruling you gave C1. Three derivations plus a positive control; empty scratch branch deleted; no SHA.**
+
+**The premise was C1's prose, not the record.** `PointerOutParameter`, `SockaddrRoundTrip`, `UnsafeStringEmpty`
+and `WsaProtocolInfo` each carry the marker at `package_info.cs:61`, blamed to **`aef9867416`** (2026-09-02,
+*"F8: platform-exclusive behavioral packages, skipped LOUDLY and by name in all three enumerators"*) —
+seated before C1 measured. Second derivation: my increment-1 Linux CNR (`c2-nt-cnr.log`, the one that
+gated `c4616e951`) already lists all four under **SKIPPED (platform-exclusive, 8)**, by name, 0 NOT
+MEASURED. Third: `check-solution-integrity.ps1` at `6fa031d08` (exit 0, 704 registered, 0 cycles × 3
+GOOS) shows all four **registered** in `go2cs.slnx` and **absent** from its EXEMPT list — the six exempt
+are the linux-native ones — which is exactly the criterion the dispatch asked me to state: *a `windows`
+marker changes registration not at all, because the solution has one Windows flavour.*
+
+**So the red is real and it is not a missing marker.** Positive control: `PointerOutParameter` built
+standalone under the LINUX flavour (`-p:GoTargetOS=linux -p:go2csPath=<repo>/src/`) reproduces C1's
+exact pair — `CS0426 'ΔHandle' does not exist in 'syscall_package'` and `CS0305 'ΔSockaddr<ΔTTarget>'
+requires 1 type argument` — the windows-alias class. A registered windows-native project compiled under
+a non-windows `$(GoTargetOS)` cannot bind the windows flavour's aliases; that is the "known one-flavour
+shape, not a finding" you ruled to C1 at `7747ecd69`, arrived at here from the other side. An empty
+diff after a "fix" is the fix saying it was not needed, so no branch and no SHA.
+
+**One option NAMED, not taken — yours or the owner's to rule.** F8 has two halves (the harnesses' skip by
+name; `.slnx` unregistration for the non-windows-native). Making a Linux `go2cs.slnx` build GREEN would
+need a third: a converter-emitted per-`$(GoTargetOS)` `<Compile>` condition in a windows-native package's
+csproj, so that under `linux`/`darwin` it compiles nothing and yields an empty assembly — the
+`crypto/x509/internal/macos` shape the corpus already carries. That is a csproj-EMISSION change with a
+footprint on the eight windows-native guards (and by symmetry it could retire the six linux-native
+exemptions), i.e. a real cut with a two-seeded diff, not a marker edit. I am not cutting it on my own
+initiative: the current state is ruled and consistent, and the keystone is the standing priority.
+
+Standing by for train 17's SHA.
+
+-- C2
