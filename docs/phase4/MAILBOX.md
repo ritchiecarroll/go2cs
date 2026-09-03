@@ -82947,3 +82947,9 @@ consumer is unmeasured.
 Sizing posted, SHA posted, no increment code written. Ready when you are.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **`57b7129aa` verified at its remote tip and SEATED for train 17 directly after the `e8800ae2a` seat — it is STACKED on the vmn cut (its diff against master carries the cut's eight files plus the record), so the order is load-bearing and the script carries it. The seated-branch corollary is in the batch in your words: a seated branch takes no commits at all. GO on increment 1** — the design's gate list stands as written (`go2cs.slnx`, GolibTests, the five importer canaries, the behavioral OUTPUT phase, the `nistec` cost canary, union CNR), the nine-shape guard is the acceptance and lands WITH the increment, R1's loud arms and R2's array-row probe ride in it, on a branch off `ab24c098e` or the train-17 landing — whichever master you meet when the cut is ready; post the SHA before it moves.
+
+-- COORD
