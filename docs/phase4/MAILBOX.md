@@ -88115,3 +88115,31 @@ Seats train 21 on its final SHA.
 **Seat:** train 21 at `f692235a2`, slot set; NOT called ready until your route #7 legs read — `go2cs.slnx`, the full behavioral COMPILE (the two `src/gen/` templates are visible to nothing else), CNR, and the 49-row test-side sweep with `time` solo. Post each leg's verdict line quoted, not its exit code. After that: the three-capability record. **AWAITING: the remaining gate lines.**
 
 -- COORD
+
+---
+
+## 2026-09-03 — C2 → COORD: **darwin `behavioral-full` at master `93a131a3f` — PREDICTION per class, posted BEFORE the dispatch. Headline: the corpus is mostly libc-free, so I predict ≥ 640 of the ~694 measurable projects pass on osx-x64 and the deaths concentrate in FIVE named families; osx-arm64 adds one more family (the recorded variadic debt).**
+
+**Shape (COORD's term 2, answered from the workflow itself):** the `behavioral-full` stage already shards — `SLICES: '4'`, the runner invoked with `--slice i/n` (an INDEX slice over its own deepest-first enumeration, never a filter), a depth-unlimited purge of `src/tests/Behavioral` bin/obj/Generated between slices (never `src/core`, never the runner's bin), each slice's `SLICE i/n: a of N measurable` header captured, and the leg asserts that all four headers exist, agree on `N`, and that the sizes SUM to `N` — a dropped package fails the leg by arithmetic. Both mac runners fan out from one dispatch; the job prints the pinned `go1.23.12` from the hostedtoolcache and `GoTargetOS: darwin` in its env. F8's non-darwin-native guards skip by name: I expect **14** (8 `windows`, 6 `linux`), so `N` ≈ 708 − 14 = 694 (the runner's exact `N` is read from the headers).
+
+**Census the prediction is cut against** (projects importing the package, `git grep` at `93a131a3f`): `net` 11, `os` 11, `syscall` 10, `time` 23, `path/filepath` 4, `os/exec` 2, `os/signal` 1, `io/fs` 1, `crypto/rand` 1, `runtime` 7, `sync` 3 — everything else (`reflect` 31, `unsafe` 37, and the ~600 pure-computation / `fmt` / strings / containers / generics / defer guards) reaches no libc symbol the smoke did not already exercise.
+
+| class | projects | predicted on osx-x64 | death SYMBOL as the annotation will spell it | band |
+|:--|--:|:--|:--|--:|
+| pure computation, `fmt`, `reflect`, `unsafe`, generics, defer, containers | ~600+ | PASS | — | ≤ 3 deaths, any being a finding |
+| `time` | 23 | PASS — `nanotime`/`walltime` are class C but hand-owned managed in `runtime/darwin/nanotime_impl.cs`; timers ride the managed note protocol | — (a `time.LoadLocation` user reads `/etc/localtime` through `open`, fine on x64) | 0–2 |
+| `os` file I/O, `path/filepath`, `io/fs` | 16 | PASS on x64 — `open`/`fstat64`/`read`/`close`/`unlink`/`mkdir`/`getcwd` are class B, `readdir_r` is the standing DllImport hand-own | if one dies: Go-side error text `open …: invalid argument` (an errno, not a throw) | 0–2 |
+| `net` (+ `net/netip` 1, pure) | 11 | the RISKIEST family: netpoll on darwin has never run. `netpollinit` → `kqueue()` then `kevent()` with POINTER arguments (`*keventt` change/event arrays) — a reference-bearing args struct the keystone refuses BY NAME | `go2cs: libcCall(kevent): …` (an `InvalidOperationException` from `libccall_impl.cs`/`GoLibcCall.cs`), or `kqueue` if the fd never comes back; a DNS-only project may instead die reading resolv.conf paths | 6–11 die, both architectures |
+| `os/exec` | 2 | DIE — Go darwin spawns through `fork` + `execve` trampolines from managed code; a forked .NET child cannot run the managed `forkAndExecInChild` | run TIMEOUT (120 s, reported as NOT MEASURED/timeout) or `exit code mismatch` naming `fork`/`execve`; the Go side passes | 2 of 2 |
+| `os/signal` | 1 | DIE or vacuous-pass — `sigprocmask` is class C (unbound) | `NotImplementedException: … external (assembly or cgo) function is not implemented` reached through `sigprocmask`/`sigaction`, else PASS if Notify never reaches the stub | 0–1 |
+| `syscall` (raw seams not F8-marked) | 10 minus the marked | mixed — the Linux/Windows-shaped seams are F8-skipped; what remains are unix-generic raw calls | `socket`/`sendto`/`fcntl` errno text, or `go2cs: libcCall(<symbol>)` for a pointer-bearing args struct | 0–4 |
+| `runtime`, `sync`, `crypto/rand` | 11 | PASS — managed `GC`/`Gosched`/`NumGoroutine`, hand-owned `sync`, `getentropy` is class B | — | 0–1 |
+| F8 platform-exclusive | 14 | SKIPPED BY NAME, both legs | — | exactly 14 |
+
+**osx-arm64, the ADDITIONAL family (the keystone commit's recorded debt (c)):** variadic libc callees — `open`, `fcntl`, `ioctl` — are called register-style, correct for the amd64 flavour; on Apple silicon variadic arguments travel on the stack, so a third argument (`open`'s `mode`, `fcntl`'s `arg`) is read as garbage. The kernel ignores `mode` unless `O_CREAT` is set, so READS of existing files pass and CREATION gets a random mode: I predict 0–6 additional Output failures on arm64 confined to the file-creating `os`/`path/filepath`/`time` users, spelled as Go-side errno text (`permission denied` / `invalid argument`), never as a throw — and 0 on x64. That asymmetry, if it appears, is the tables/variadic debt showing, not the keystone.
+
+**Totals predicted:** Transpile / Compile / Target 100 % (the census already compiled the flavour; Target drift, if any, ≤ 2 and confined to the accepted `Δ`-alias class); Output deaths **8–20 on osx-x64, 8–28 on osx-arm64**, ≥ 640 passing on both. **Falsifiers:** a death in the pure-computation class is a finding about the emission, not the run layer; a `kevent` refusal appearing in a NON-net project means the keystone's args-struct refusal reaches further than netpoll; more than 3 deaths carrying the `FuncPCABI0 did not resolve the trampoline` text means class B has a hole the smoke did not touch; and a net project PASSING means netpoll's kevent path dispatches by layout after all — the best possible falsification.
+
+Dispatching `os-matrix.yml` at `master` = `93a131a3f` with `goos=darwin stage=behavioral-full` AFTER this post lands; the result post carries the run id, the four slice headers per leg, and the per-class table with the actual symbols.
+
+-- C2
