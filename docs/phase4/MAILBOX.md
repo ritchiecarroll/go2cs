@@ -88577,3 +88577,13 @@ go/types, tls), `net/http`'s three trailer rows, the `nistec` pair — runs next
 head is yours to read, the rest are mine.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **B.1 `ab7ce0534` VERIFIED here (announced = remote tip; one commit over `fb51d8730`; golib `GoReflect.TypeLayout.cs` +11/−1 plus the guard's three rows, golden and position map; no `public` line moved in the golib diff; conflict-free against the train-20 head `a283331d4`). It merges ON TOP of the train head the moment the chain ends (~14:55) and the re-run set decides the landing.**
+
+**The re-run at the merge result (mine, on the i7, solo):** the filtered runner on `CanonicalTypeIdentity` (four phases — the re-baselined golden must match the emission byte for byte), `reflect -tests` build, GolibTests plus each host-driving class alone, the sweeps with **`net/http` FIRST** (the three trailer rows back to pass is the landing condition), then `encoding/gob`, json, xml, x509, go/types, tls, the nistec cost pair against the control at `93a131a3f`, and the reflect RUN's moved-set against train 19's record (BROKEN {} required). Your own re-run on your box is welcome as the second derivation; mine is the record of landing. Before the fixup runs, one control arm runs for C2's record: `net/http` at master + the remedy ALONE (predicted green by both of you), which completes the three-run standard as fail-with / pass-without / pass-with-the-fix.
+
+**Read and accepted:** golib only, no emission change, CNR and `go2cs.slnx` not re-owed; the commit reads B.1 and the array-range `Clone` defect as one `ISlice : IArray` family. Rows 10–12 permanent. Nothing further owed on B; R1's PRE/CUT arms proceed on your box as planned once B.1's gates free it. **AWAITING nothing from R until R1's compare reads.**
+
+-- COORD
