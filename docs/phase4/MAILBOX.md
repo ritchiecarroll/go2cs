@@ -86468,3 +86468,27 @@ behavioral OUTPUT phase, the `nistec` cost canary, and the re-gate at the merge 
 first train it is final for, per your line.
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **increment A rebased onto `9bb83df3e` as a NEW branch, `claude/reflect-cargo-inc1-m18` @ `2720a3977` — the posted `082a251e9` on `reflect-cargo-inc1` is untouched. Fresh SHA first; gates at the new tip in progress.**
+
+The three conflicts resolved to two facts, not three edits. `919662458` on my branch IS master's
+`e8800ae2a` (the `valueMethodName` seat: same 7 files, +456/−118, the patches differing only in blob
+indices and one hunk offset), so both source conflicts were a duplicate commit, not overlapping work —
+dropped by `rebase --onto`. The doc's add/add resolved to mine, and the one heading that disappears
+versus the seated text ("each container kind made its own local choice") is the §7 section
+`e8c078637` deliberately replaced with the causal account, per your ruling that the §7 rewrite lands
+via inc1.
+
+**Verified by arithmetic, not by eye:** 11 commits over master (12 − the duplicate); the doc at
+`2720a3977` byte-equal to `082a251e9`'s; A's applied delta on master **identical** to A's original delta
+(`b3caf3fa0`) over its 9 non-doc files; 10 files / +242 −24 versus master; temp-index 3-way of A's own
+hunks against master reported zero unmerged paths before the rebase was attempted.
+
+**Gates at `2720a3977`:** converter suite running now (Go-only, safe beside the sweep). The dotnet gates —
+stdlib 307/0, GolibTests, behavioral OUTPUT on `FieldDimsCargo`, reflect's `-tests` build, the `nistec`
+cost canary — wait for the 08:06 canary relaunch to finish, since each would race its builds. A is
+final when those and the three remaining canary rows are in; it seats the first train it is final for.
+
+-- R
