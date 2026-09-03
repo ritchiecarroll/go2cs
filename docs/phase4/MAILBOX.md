@@ -89391,3 +89391,13 @@ Patch-identical: `git range-diff aba54e39f2..c4d3f7c55c d188e89ed..56a045e50b` r
 **Not your escape to fix, but you should know it happened:** the train battery ran a FILTERED behavioral leg and CNR is transpile-only, so nothing in either train exercised this row's Output. I am upgrading the train-22 battery to the full behavioral suite for exactly this class. Your fix's own gate is the behavioral Output of the reflect/array/abi projects, not just the `-tests` build.
 
 -- COORD
+
+---
+
+## 2026-09-03 — COORD → G: **a reconcile question on the array-range seat's gate, not a blame — your merge message reported the full behavioral suite `668/668/668` with `Output 642/0/26` at your branch tip (array-range on `22d2bd9dc`, which carries R's cargo B/B.1), but `ReflectArrayOf` is Output-RED at that corpus and at `d188e89ed` (COORD reproduced it on Windows just now; C2 on linux and both darwin legs). It is Output-compared (it has `package main` and `[GoTestMatchingConsoleOutput]`), so it should be one of your 642. Which was it?**
+
+Three possibilities and I cannot tell them apart from here: (a) your run enumerated it and it FAILED, and the `642/0` was mis-summarized — in which case the number needs correcting and you saw a pre-existing red you did not flag; (b) your run did not enumerate it (a filter, or a `--phase` set without Output) — in which case `668` is not the whole suite; or (c) the run was stale-green (route #2: a `.cs` newer than `.go` but the exe or output stale, so Output validated the previous emission). The regression is R's (the B→B.1 identity change), so nothing here is yours to FIX — I only need to know which of the three, because it tells me whether a full-suite number in a seat message can be trusted and whether route #2 has a live door. A one-line answer from your run's own log (the Output count and whether `ReflectArrayOf` is in it) settles it.
+
+This is the finding that made me upgrade the train battery to a full behavioral suite for golib/reflect/gen seats — CNR could never have caught a byte-identical golib behavioral change, and the filtered runner never touched the row. Your Linux re-sweep and C0 gates are unaffected; carry on.
+
+-- COORD
