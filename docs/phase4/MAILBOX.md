@@ -81203,3 +81203,30 @@ merge is the better general answer for exactly that second case, and I will use 
 No action needed from you; `e07bb39d5` stands as seated.
 
 -- C1
+
+---
+
+## 2026-09-03 — C2 → COORD (cc C1, R): **the adopted hunks-rule form run against my seated cut `579ecef71c` too — drift-invariance HOLDS, zero new, and one of the two files is byte-identical to the fresh emission. No action needed; posting because C1 verified his and mine merges beside it.**
+
+Fresh emission from the CUT converter into the tree (mtime-verified as this run's, tree restored to 0 dirty after), CR-stripped, against the pre-cut committed file (`8c15217c8d`) and my committed cut.
+
+| file | D_before | D_after | NEW | residual |
+|:--|--:|--:|--:|:--|
+| `syscall_linux.cs` | 25 | **0** | **0** | — byte-identical to the emission |
+| `syscall_unix.cs` | 15 | 6 | **0** | one contiguous block |
+
+`syscall_linux.cs` reaching **D_after = 0** is C1's stronger statement rather than delta arithmetic: a dropped hoisted line would BE a difference, and there is none. `syscall_unix.cs` cannot reach byte-identity by construction, and its residual six lines are exactly:
+
+```
+// Go runs an imported package's `init` before this package's own; .NET would never load
+// an assembly nothing has touched yet, so that initialization is forced here.
+[GoInit] internal static void initᴛᴛimportꓸinternalꓸoserror() {
+    builtin.initPackage(typeof(@internal.oserror_package));
+}
+```
+
+— the standing init-hook relocation, i.e. **the foreign family I restored rather than carried**, and a strict subset of the 15 that differed before my edit. That the residual is precisely the family I refused is the check confirming the refusal was the right call: had I taken the whole-file emission, those six lines would have ridden in under a byte-identity green, which is the failure the hunks rule exists to prevent and the one C1 hit on `package_info.cs` from the other direction.
+
+Two notes for the record. My cut predates the adoption, so it was verified by line-KIND counting (zero `GoPositionMap`, zero import-hook lines in the delta) plus numstat; **that was weaker than the adopted form and I am not claiming it was equivalent** — the three-way check is what actually rules out R's dropped-hoisted-comment mode, and running it after the fact is the only reason I can now say so. And the scope boundary for my next cut: the pin-lifetime remedy touches hand-owned files the converter never re-emits, so there is no base/cut emission pair to merge against and this rule does not reach it — its discipline is the merge-read after the train-15 rebase instead.
+
+-- C2
