@@ -181,7 +181,60 @@ not a fix** — and worth landing on exactly that basis, stated so nobody later 
   already interns on dims, so it is probably NOT affected. Unmeasured; increment one confirms or
   refutes rather than assuming.
 
-## 7. Increments and gates
+## 7. The interning key, censused (2026-09-03)
+
+`canonType`'s key is **`(System.Type, dimsKey)`**, where
+
+    dimsKey = abi.descriptorDimsKey(arrayDims, funcParamDims, chanDir, keyDims)
+
+Four cargo slots, and the comment beside them already states this arc's problem in another kind's
+words: `funcParamDims` exists because `func([32]byte) bool` and `func([64]byte) bool` are ONE managed
+delegate type, so "the first to intern would answer `In(0).Len()` for both".
+
+**So the positional model can already express per-element cargo. The slots are not the gap.**
+
+### The gap is that each container kind made its own local choice
+
+| kind | CONSTRUCTED route | DECLARED route | identity | who carries the cargo |
+|:--|:--|:--|:--|:--|
+| slice | `[][]uint8`, no dims | `[][]uint8`, no dims | TRUE | **neither** |
+| pointer | `*[]uint8`, `Elem().Len()`=0 | `*[6]uint8`, `Elem().Len()`=6 | **FALSE** | **declared only** |
+| map key | `map[[2]int]int`, `Key().Len()`=2 | `map[[]int]int`, `Key().Len()`=0 | **FALSE** | **constructed only** |
+| func param | `In(0).Len()`=0 both | — | TRUE | **neither** (`FuncOf` never fills the slot) |
+
+Three kinds, three different failures, and **pointer and map key are mirror images** — one carries on
+the declared route, the other on the constructed route. That is not one bug with three symptoms; it
+is the absence of a RULE, with each site having chosen locally and reasonably.
+
+Two consequences fall out:
+
+**Identity fails in BOTH directions.** Slice and func param are UNDER-distinct — `[][6]uint8` and
+`[][8]uint8` intern as one Type (§2.4), which is what defeats `DeepEqual`'s type guard. Pointer and
+map key are OVER-distinct — the constructed and declared forms of the SAME Go type are two Types,
+which breaks the property `SliceOf`'s comment is protecting, on kinds that comment does not cover.
+
+**`SliceOf`'s "record none" is internally consistent and locally right.** It chose symmetry
+(both routes carry nothing) over asymmetry, which is why slice identity holds where pointer's and map
+key's do not. The residual it names is real; what the census adds is that the OTHER kinds did not
+make the same choice, so no global invariant exists to appeal to.
+
+### Why this argues for the tree-shaped model
+
+A container descriptor referencing its element's CANONICAL descriptor gets both properties by
+construction rather than by discipline:
+
+- `ArrayOf(6,u8)` and `ArrayOf(8,u8)` are already distinct descriptors, so any container keyed on its
+  element inherits that distinctness — `[][6]` != `[][8]` **without** a per-kind rule.
+- Both construction routes reach the same element descriptor, so
+  `SliceOf(elem) == TypeOf([]T{})` holds **without** each kind choosing a side.
+
+The positional vector is not wrong; it is per-kind, and a per-kind mechanism is exactly what produced
+three different local answers. What the section must still settle before code: what happens to the
+vector's existing consumers — `Elem()`'s head-consumption on nested arrays (measured working:
+`[2][3]int` → `[3]int`, `Len()`=3), `canonType`'s key, and the `[GoArrayDims]` field stamp — and what
+gob's type maps actually key on, **measured, not read**.
+
+## 8. Increments and gates
 
 **Increment 1 — cargo to element positions** (array dims, channel direction, map key and value),
 R1's loud arms, R2's probe.
