@@ -87985,3 +87985,22 @@ gate row stands as posted (stdlib 0, GolibTests 507/3 host trio, suite ok, gob 1
 `nistec` within noise). I am starting the full CNR at `fb51d8730` regardless, so the answer exists either way.
 
 -- R
+
+---
+
+## 2026-09-03 — C2 → COORD: **darwin keystone, first acceptance dispatch READ — the prediction (`f8cd28677`) said the death would MOVE; it VANISHED for the smoke set. Both mac architectures run the `Defer` behavioral smoke to Go-identical output: 24 / 24 / 24 / 24, Output 24 compared, 0 failed. Scored: beyond HIT — the "reach Main" arm, and then the Output phase passed too.**
+
+**Run 33783959515** (`os-matrix.yml`, goos=darwin, stage=behavioral-smoke, blank filter = the runner's default `Defer` smoke, 24 projects at this corpus; master `93a131a3f`, dispatched 17:20:21Z after the prediction post): https://github.com/ritchiecarroll/go2cs/actions/runs/33783959515
+
+| leg | runner | summary (quoted from the step's own tail) | wall |
+|:--|:--|:--|--:|
+| osx-arm64 | macos-15 | `Transpile pass 24 · Compile pass 24 · Target pass 24 · Output pass 24, fail 0 · PASS (24 projects, 202.4s)` — `[Output] running C# vs Go, comparing exit code + stdout... 24 compared, 0 failed` | 3 m 50 s |
+| osx-x64 | macos-15-intel | `Transpile pass 24 · Compile pass 24 · Target pass 24 · Output pass 24, fail 0 · PASS (24 projects, 554.7s)` — same Output line, `24 compared, 0 failed` | 10 m 10 s |
+
+Before the keystone the same stage died on every project at Output with `exit code mismatch: C# 2 vs Go 0` — the module-initializer death in `syscall.init() → Getrlimit → rawSyscall` (runs 32852477992 / 32863205314, both architectures). After it, no program on either architecture died at all: `getrlimit` dispatched, so did everything else the 24 programs' init and `fmt` paths reach, and the stdout + exit-code comparison against `go run` passed 24/24. The prediction's three named candidates (`sysctl`, `setrlimit`, `fcntl`) were never reached as a death because they resolved and dispatched like the rest — the census-of-symbols question the prediction posed is answered "none died", which is a stronger statement than the one predicted and is scored honestly as such: the prediction was conservative, not wrong in direction. Read as a census, not a wall: the smoke set is `Defer`-filtered (24 of ~700), so the run layer is measured on the init path + `fmt` + defer/panic/recover, not on the corpus.
+
+**Census run 33783950663** (goos=darwin, stage=census, both mac runners, the compile regression guard at the keystone): https://github.com/ritchiecarroll/go2cs/actions/runs/33783950663 — osx-arm64 `Build succeeded. 0 Error(s)`, 306 projects under src/core / 306 assemblies produced / 0 with no assembly / 0 error lines, exit 0, 510 s; osx-x64 `Build succeeded. 0 Error(s)`, 306 / 306 / 0 / 0, exit 0, 1245 s (the intel runner; both legs the same command, `dotnet build src/go2cs-stdlib.slnx -c Debug -m --no-incremental -p:GoTargetOS=darwin`). Read as the regression guard it is: the keystone's darwin footprint (runtime/darwin `libccall_impl.cs`, the 36-record `CgoDynamicImports` section, golib `GoLibcCall`) compiles on both mac architectures with the whole flavour, so nothing in this dispatch is a wall.
+
+Two facts for the record: the committed darwin flavour is amd64-only and osx-arm64 passed identically, so the arm64 tables debt is not on this path; and both legs ran the pinned toolchain (`go1.23.12` from the runner's hostedtoolcache, `GoTargetOS: darwin` in the job env). Nothing local was built for this. Next for C2 as ruled: nothing owed until the next order; the obvious follow-on is a darwin `behavioral-full` dispatch (the whole enumeration in slices) to size what the run layer covers beyond the 24, which I am NOT dispatching without a word.
+
+-- C2
