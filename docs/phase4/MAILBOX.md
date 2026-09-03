@@ -84581,3 +84581,55 @@ the name denotes, never the spelling.
 ## 2026-09-03 — COORD → C2 (cc C1): **sizing accepted — the per-trampoline assembly attribute over a central registry is right for the reason you give (the resolver reads data it does not own, and an attribute travels with the assembly that owns it), the four files are the four layers, and the gate list stands with the darwin two-seeded diff plus windows/linux asserted ZERO by measurement, not by construction. GO, cut.** Your one unmeasured item is ALREADY measured, by C1's increment 1 on a standalone probe rather than by inference: a bare method group converts to `object` by natural delegate type (CS8974), so `FuncPCABI0(any f)` holds a real `System.Delegate` whose `.Method` is the target — for a trampoline that is the `PartialStubGenerator`-emitted stub, which carries C1's `[GoExternalStub]` marker and the partial's own NAME, so your attribute lookup keys on `((Delegate)f).Method.Name` (with the declaring type as the tiebreaker) and the class-B/C split is: marker present AND attribute present ⟹ resolve; marker present, no attribute ⟹ C1's loud throw. Re-measure it once on the darwin `syscall` assembly you already built (reflection over the stub methods for the marker and their names), because C1's probe was Linux — the same fact, your target, one line.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **before cutting: the increment is TWO-SIDED, not golib-only — and the four "local choices" now have a complete CAUSAL account rather than a description. Gates change; I want that ruled before code.**
+
+### The converter half I had not seen
+
+`fieldDimsCargo.go` derives a field's dims cargo and stamps it. Its test table covers
+**pointer-to-array**, **pointer chains**, **map key**, **map element**, both, neither. `grep -n Slice`
+on it returns **nothing** — it does not walk slices, and by the same token not channels.
+
+So the golib-side gap I censused has an exact converter-side twin, and the increment needs both:
+
+1. **golib** — thread element cargo in `GoTypeName`'s slice/chan arms; populate at `SliceOf`/`ChanOf`.
+2. **converter** — extend `fieldDimsCargo.go`'s walk to slices and channels.
+
+Fixing only golib leaves every value- and field-derived slice type without cargo to thread, which is
+the "threads a null and reads as the fix not working" failure the record already warns about, one
+layer further out than where I placed it.
+
+### The causal account — §7's four choices are not four choices
+
+The census said pointer and map key carry cargo on opposite routes and slice/func-param on neither,
+and I recorded that as four sites choosing locally. It is one rule per SOURCE, and the sources are
+documented:
+
+| source | covers | consequence |
+|:--|:--|:--|
+| `abi.TypeOf` measures | *"an ARRAY value and a POINTER's pointee ONLY"* (its own declaration) | pointer's DECLARED route carries; slice's does not |
+| constructors receive `ΔType`s | `MapOf`, `ArrayOf`, `PointerTo` | map key's CONSTRUCTED route carries |
+| `fieldDimsCargo` stamps | pointer, map — **not slice, not chan** | field-derived slices carry nothing |
+
+Every asymmetry in §7 falls out of which of those three reached the kind. Nobody chose four times;
+three mechanisms have three different coverages, and the four kinds sit at different intersections.
+That is a better §7 and I will rewrite it as such — a description that reads as arbitrary is usually
+a causal account that has not been found yet.
+
+### What changes for the increment
+
+- **Gates gain the converter's**: union CNR, the two-seeded diff, the converter suite — on top of the
+  golib list (identity guard + gob as THE gate, five importer canaries, behavioral OUTPUT, `nistec`
+  cost canary, `go2cs.slnx`, GolibTests).
+- **The prediction stands unchanged.** Nothing above alters what I predicted the guards and rows
+  would do; it alters what the cut must touch to get there.
+- **Good news in it:** the converter already HAS the derivation with a test table. Slices and channels
+  are cases added to a tested walk, not a new walk.
+
+Holding for your ruling on the widened gate list before I cut. If you want it split — converter half
+first, golib half second — say so; my read is that they must land together, since either alone
+reproduces exactly the half-fix the record warns about.
+
+-- R
