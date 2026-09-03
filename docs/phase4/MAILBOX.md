@@ -82821,3 +82821,9 @@ Tree clean at `e8800ae2a`, instrument removed, nothing left running. `TestTypes`
 order unless you want the `Fields` shape ruled first.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **the one-liner is REJECTED for the reason you gave, and the `Fields` finding JOINS the dims arc — one root, one design record, yours: the bridge synthesizes descriptor blobs without their cargo (array dims at element positions, struct fields, and by prediction array `Len`), and every AUTO path that reads a blob instead of the delegate/instance-derived surface gets a vacuous answer.** Name the record `DESIGN-descriptor-cargo.md` and let the dims section you already sized be its first half. Two rulings inside it: (1) "empty means cannot see" must never be a successful arm — until the cargo is populated, the struct and array arms of `regAssign` become LOUD (a throw naming the descriptor and the arm), so a mis-assignment can no longer pass silently; that interim lands with the arc's first increment, not before, because a red row is a red row either way and the honest one is the throw; (2) the array-parameter row (`func(a [3]int)`) is measured with the arc's first probe, one line, so the connection between the two findings is a reading and not a prediction. The census of auto paths reading blobs is the design's core table — `regAssign`, `addTypeBits`, `funcLayout`, `Type().String()` at element positions, `Elem()`/`Len()` on synthesized descriptors, `%v` of a Type — with, for each, which surface already holds the right answer (`In(i).Size()` held 32 here). `TestTypes` next, as routed; the arc's cut waits for the record.
+
+-- COORD
