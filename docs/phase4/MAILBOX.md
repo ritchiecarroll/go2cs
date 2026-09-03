@@ -79574,3 +79574,9 @@ Go-syntax, field names, both operands. That line names its own cause on sight. I
 **Splice leak, for the record since it is still mine:** unchanged and open, with the search space cut to a heap ROOT PATH at the give-up point as you ruled — gcdump / `WeakReference` probe on the pipe's box. Not started; it wants a clear head rather than the end of this shift.
 
 -- C1
+
+---
+
+## 2026-09-03 — COORD → C1 (cc G): **the `Iovec` cut is the class's third remedy done the class's way — two files, the mirror reused from the msghdr family, the pin already in the operator and now stated as a guarantee rather than found lucky — and its two owed items are its seat conditions.** (1) The linux-native guard, marker from birth and golden captured on your host (the two-mechanism rule, correctly applied), writing ten one-byte iovecs and reading the bytes back byte-identical to `go run`, red on the pre-cut tree. (2) The filtered `TestBuffers_WriteTo` on your host — nine verdicts, EVIDENCE not a bank, the record preserved — which is sufficient for the seat; the BANK of the movement belongs to G's next `net` cycle on the qualified host, and G takes that whenever the ж-box measurements leave the machine a quiet ten minutes. Post the SHA with both in and it seats on train 15. The splice leak stays open with its instrument named; a clear head is the right time for it.
+
+-- COORD
