@@ -144,4 +144,63 @@ partial class reflect_package {
     throw panic("unhandled register assignment path");
 }
 
+// ==== addTypeBits — the same defect as regAssign, one call over ================================
+//
+// Both of funcLayout's pointer bitmaps come through here: newAbiDesc fills abid.stackPtrs with
+// addTypeBits(stackPtrs, stkStep.stkOff, arg) for every stack-assigned argument and result, and the
+// frame type's GCData is that same bitvector (funcLayout aliases x.GCData = &abid.stackPtrs.data[0]).
+// The auto body's Array and Struct arms raw-reinterpret the descriptor — Reinterpret<abi.Type, arrayType>
+// / structType — and on a synthesized descriptor the reinterpreted record reads Len 0 and no Fields,
+// so no bit is ever appended. Measured after R1 fixed regAssign's sizes: TestFuncLayout/func(reflect_test.S)
+// still reported stack=[] and gc=[] where Go wants [0 0 1 1]. Same remedy as regAssign: read the
+// descriptor through the abi accessors, which synthesize the record from the managed type, and fail
+// LOUD when a descriptor cannot be read rather than hand back an empty bitmap that looks like "no
+// pointers". The scalar arms are the auto emission verbatim.
+internal static void addTypeBits(ж<bitVector> Ꮡbv, uintptr offset, ж<abi.Type> Ꮡt) {
+    ref var bv = ref Ꮡbv.DerefOrNull();
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    if (!t.Pointers()) {
+        return;
+    }
+    var exprᴛ1 = ((ΔKind)(nuint)((uint8)((abiꓸKind)(t.Kind_ & abi.KindMask))));
+    if (exprᴛ1 == Chan || exprᴛ1 == Func || exprᴛ1 == Map || exprᴛ1 == ΔPointer || exprᴛ1 == ΔSlice || exprᴛ1 == ΔString || exprᴛ1 == ΔUnsafePointer) {
+        while (bv.n < (uint32)(offset / (uintptr)goarch.PtrSize)) {
+            // 1 pointer at start of representation
+            bv.append(0);
+        }
+        bv.append(1);
+    }
+    else if (exprᴛ1 == ΔInterface) {
+        while (bv.n < (uint32)(offset / (uintptr)goarch.PtrSize)) {
+            // 2 pointers
+            bv.append(0);
+        }
+        bv.append(1);
+        bv.append(1);
+    }
+    else if (exprᴛ1 == Array) {
+        var tt = Ꮡt.ArrayType();
+        if (tt == nil) {
+            throw panic("reflect: addTypeBits cannot read the array descriptor " + stringFor(Ꮡt));
+        }
+        for (nint i = 0; i < (nint)(~tt).Len; i++) {
+            // repeat inner type
+            addTypeBits(Ꮡbv, offset + (uintptr)i * (~(~tt).Elem).Size_, (~tt).Elem);
+        }
+    }
+    else if (exprᴛ1 == Struct) {
+        var st = Ꮡt.StructType();
+        if (st == nil) {
+            throw panic("reflect: addTypeBits cannot read the fields of struct descriptor " + stringFor(Ꮡt));
+        }
+        foreach (var (i, _) in (~st).Fields) {
+            // apply fields
+            var f = Ꮡ((~st).Fields, i);
+            addTypeBits(Ꮡbv, offset + (~f).Offset, (~f).Typ);
+        }
+    }
+
+}
+
 }

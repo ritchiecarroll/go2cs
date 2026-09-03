@@ -780,6 +780,11 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// ARRAY arm deliberately does NOT join it; see the comment at the arm for the measurement.
 		// See docs/phase4/DESIGN-descriptor-cargo.md.
 		"abiSeq.regAssign": goosAny,
+		// addTypeBits is the SAME defect one call over: its Array and Struct arms raw-reinterpret the
+		// descriptor as arrayType/structType, which on a synthesized descriptor reads Len 0 / no Fields,
+		// so funcLayout's stack and GC bitmaps stay empty (TestFuncLayout/func(reflect_test.S): stack=[] and
+		// gc=[] want [0 0 1 1] after R1 fixed the sizes). The companion reads through the abi accessors.
+		"addTypeBits": goosAny,
 		// valueMethodName is runtime.Callers-based (getcallersp) — managed stack walk instead. The walk
 		// is RETIRED: Release inlines an exported Value method into its caller, so the frame the walk
 		// climbs for is not there and every mustBe* panic degraded to Go's "unknown method" fallback

@@ -1936,46 +1936,7 @@ internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid
     bv.n++;
 }
 
-internal static void addTypeBits(ж<bitVector> Ꮡbv, uintptr offset, ж<abi.Type> Ꮡt) {
-    ref var bv = ref Ꮡbv.DerefOrNull();
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    if (!t.Pointers()) {
-        return;
-    }
-    var exprᴛ1 = ((ΔKind)(nuint)((uint8)((abiꓸKind)(t.Kind_ & abi.KindMask))));
-    if (exprᴛ1 == Chan || exprᴛ1 == Func || exprᴛ1 == Map || exprᴛ1 == ΔPointer || exprᴛ1 == ΔSlice || exprᴛ1 == ΔString || exprᴛ1 == ΔUnsafePointer) {
-        while (bv.n < (uint32)(offset / (uintptr)goarch.PtrSize)) {
-            // 1 pointer at start of representation
-            bv.append(0);
-        }
-        bv.append(1);
-    }
-    else if (exprᴛ1 == ΔInterface) {
-        while (bv.n < (uint32)(offset / (uintptr)goarch.PtrSize)) {
-            // 2 pointers
-            bv.append(0);
-        }
-        bv.append(1);
-        bv.append(1);
-    }
-    else if (exprᴛ1 == Array) {
-        var tt = Ꮡt.Reinterpret<abi.Type, arrayType>();
-        for (nint i = 0; i < (nint)(~tt).Len; i++) {
-            // repeat inner type
-            addTypeBits(Ꮡbv, offset + (uintptr)i * (~(~tt).Elem).Size_, (~tt).Elem);
-        }
-    }
-    else if (exprᴛ1 == Struct) {
-        var tt = Ꮡt.Reinterpret<abi.Type, structType>();
-        foreach (var (i, _) in (~tt).Fields) {
-            // apply fields
-            var f = Ꮡ((~tt).Fields, i);
-            addTypeBits(Ꮡbv, offset + (~f).Offset, (~f).Typ);
-        }
-    }
-
-}
+// go2cs generated this placeholder — func addTypeBits is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // TypeFor returns the [Type] that represents the type argument T.
 public static ΔType TypeFor<T>() {
