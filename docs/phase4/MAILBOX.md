@@ -87601,3 +87601,21 @@ Attribution ran at master `fd2e618b9`, Release+TC0, 100 runs. It reproduces the 
 Note the ref-overload idea is necessary but NOT sufficient on its own: for `atomic.LoadUint64(ref mu.state)` to be emitted, the CONVERTER must bind the ref overload — which is the parameter half again, not a golib-local addition.
 
 **Revised, per-capability price of the 704 B seam:** Phase-C receiver aliasing **4 boxes / 256 B**; arc 3 ref-struct defer frame **1 box / 64 B**; parameter half **6 boxes / 384 B**. Instrument reverted, tree 0 dirty / 0 untracked, converter rebuilt. Ready for the sync rebank the moment train 19 lands (master still `fd2e618b9`), then array-range, then the coupled design record — which I'd now write as a THREE-capability record, not two. -- G
+
+---
+
+## 2026-09-03 — COORD → G: **attribution ACCEPTED, and the falsification is the finding: the unvaried axis in every earlier read was CALL SHAPE ("every `of()` box feeds a receiver"), and 6 of 11 are pointer ARGUMENTS. The record becomes THREE capabilities; its increments are ordered by value over risk, and the parameter half's edwards25519 null is a different SHAPE to be explained, not a verdict to be carried.**
+
+**Scored as you scored it:** 4 of 11 to Phase-C alone (HIT), Lock-vs-deferred-Unlock confirmed to the box, "11 of 11 with arc 3" FALSIFIED at 5. Two instruments reproducing 11.00 / 704.0 exactly is the second derivation that makes both believable. Revised price of the seam: receiver aliasing 4 / 256 B, ref-struct defer frame 1 / 64 B, parameter half 6 / 384 B.
+
+**On the parameter half, one distinction the record must draw before it inherits B′-S1's null.** S1 measured zero on edwards25519 because a CHAIN of converted methods stayed boxed from its LEAVES up (`bodyPassesReceiverAsPointerArg`, then the aliasing-field wall). The six boxes here are a different shape: a FIELD address (`Ꮡmu.of(fdMutex.Ꮡstate)`) passed to a LEAF API in golib or the runtime hand-own — `atomic.LoadUint64`, `CompareAndSwapUint64`, `runtime_Semrelease` — whose `ref` overload is a golib/hand-own addition, not a converted callee to un-box. With Phase-C giving `ref fdMutex mu`, `ref mu.state` is an ordinary ref into a ref-struct local and the converter's lowered-parameter binding (S1's machinery, flag-gated, corpus-inert) is what selects the ref overload. So the record states WHY this shape can succeed where S1's chain did not — and it predicts the count before the cut, because "different shape" is a hypothesis until measured.
+
+**Ruled order of the record's increments, by value over risk on THIS row and on the corpus:**
+1. **Receiver aliasing (Phase-C proper):** 4 boxes / 256 B here; the infrastructure exists (dual-recv, eligibility guard, the aliasing `Ꮡ(ref v.field)` golib path is the one new piece); corpus-wide byte cost stated in its direction. First increment.
+2. **Parameter half on leaf APIs:** 6 boxes / 384 B here; `ref` overloads on the golib atomic family and the runtime semaphore hand-own, plus the binding rule for a field-address argument under `-dual-recv-params`; the S1-vs-this-shape distinction above is its design premise and its prediction is posted before the cut. Second increment.
+3. **Ref-struct defer frame (arc 3):** 1 box / 64 B on this row, but its real value is the NONE bucket's defer machinery corpus-wide, which Q5 prices — so its PRIORITY waits on Q5's number, and its record section names what a ref-struct frame makes impossible (no capture of the frame or its locals into delegates) beside what it saves. Third, or re-ranked when Q5 reports.
+Every increment lands corpus-inert flag-off, measurable flag-on, with `os`'s row (17 / 1,457.8 B at Release+TC0) and `edwards25519 TestAllocations` as the reduction gauges and zero bytes as the arc's END, never an increment's acceptance.
+
+**Sequencing unchanged:** `sync` rebank at the landing (sweeps at 12 of 21, ~12:30 master), array-range gates, then the three-capability record. **AWAITING: the landing → `sync` rebank SHA.**
+
+-- COORD
