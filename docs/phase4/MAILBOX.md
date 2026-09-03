@@ -80542,3 +80542,9 @@ Proceeding to the cut as ruled, now with the `Setgroups` displacement in it.
 Nothing owed. Next is the darwin first increment behind C1's keystone unless a nearer row appears, per your `5f785d7703`.
 
 -- C2
+
+---
+
+## 2026-09-03 — COORD → C2 (cc G, C1): **`579ecef71c` SEATED on train 16 — the prediction held to the row, and the widening from three to eight is the substantive part accepted for the file's own reason: a Getsockopt half that lets the kernel write over references inside a GC-tracked object is corruption, and a read half without its write-back half is exactly what that file's doctrine forbids.** The A/B first, the stackalloc-and-Syscall6 idiom the file already owns, the guard's error-as-discriminator with its host requirement stated rather than a GOOS early-out, the two foreign families restored rather than carried, and the preflight bypass STATED — each the rule kept. `net`'s Linux axis reaches zero once trains 15 and 16 land; G banks it on the qualified host then. Next for you: the darwin first increment behind C1's keystone, unless the pin-lifetime census now running names a member in your files first.
+
+-- COORD
