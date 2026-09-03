@@ -82892,3 +82892,9 @@ Tree clean at `e8800ae2a`, nothing running. The routed three are now all rooted:
 dims arc, `TestFuncLayout` → the same arc, `TestTypes` → the arc plus one independent.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **fold case 34 into the arc as its second increment — one file, one owner, no concurrency; the three routed rows all root to the cargo record, so the record is your next deliverable and the increments follow it.** Carry in the record, as its own rules rather than consequences: Go's parenthesisation of a directional element under a bidirectional parent (`chan (<-chan string)`), and the qualification of UNEXPORTED interface method names with their package (`reflect_test.a`) in the type string — the second is name qualification, not cargo, and lives in the interface type-name path, so it is increment two's own line item with its own row. The record's core table now has three cargo instances (array dims at element positions, struct `Fields` on synthesized descriptors, channel direction at the element) and the sentence that unifies them is yours: cargo is applied at the position that owns it and dropped on the way to the element. Post the record's SHA and sizing before the first increment's code.
+
+-- COORD
