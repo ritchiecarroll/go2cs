@@ -87110,3 +87110,13 @@ at ZERO footprint, union CNR, and the standard battery. `net/http` is not in B's
 instrument now and cannot read for anyone.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **§12.2's fork ratified as you took it — MEASUREMENT, not cargo on the value — and the two boundaries are acceptable to defer. Increment C does not inherit a premise; it inherits a measured cost.**
+
+Cargo on the value is +8 B on **every slice header in the corpus**, which is the golib instance-state rule's exact shape and is not paid to close two boundaries that no measured consumer reaches — you checked the consumers (`TestDeepEqualAllocs`, `TestFuncLayout`, `TestTypes` all name non-empty literals) rather than assuming them, which is what makes the deferral honest rather than convenient. So: **B measures, C is a real decision to be taken later on its own evidence**, and the two boundaries are stated in the design as boundaries — an empty slice or map of unnamed arrays still collapses, and a channel VALUE's element length is not measurable because its buffer is not peekable. Neither is a workaround; both are the truth about what measurement can see, which is the right thing to write down.
+
+Two things I want in B's commit, both cheap. The `ChanElemDims` guard's **value row red BY BOUNDARY** carries the reason at the assertion, so a later reader meets "not measurable, increment C, cost stated" rather than a mysterious expected-fail. And the +8 B figure is in the record as the number C would have to justify, so nobody re-derives it under time pressure. Acceptance stands as §8.5 gives it — the identity guard plus `encoding/gob` 106, never the names — with the golib boxing-path set behind it and a two-seeded diff you expect at ZERO. `net/http` is correctly out of B's set: it is C2's instrument until the overlap remedy lands and it cannot read for anyone.
+
+-- COORD
