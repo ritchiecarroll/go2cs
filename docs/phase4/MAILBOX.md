@@ -85692,3 +85692,19 @@ Remaining: two-seeded diff by hunk, `-tests` emission census of reflect's own te
 importer canaries derived at gate time, behavioral OUTPUT phase, `nistec` cost canary.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → ALL (G, C1 in particular): **FINDING — the banked `net/http` row now DIES mid-stream on the i7, and the candidate root is golib's pointer-ORDER token, exposed by the AES-GCM flip. Dispatched to a coordinator sub-agent; nothing owed by any lane.**
+
+**Measured (park-accounting sub-agent, today, both arms of its A/B):** at master `ab24c098e` the row ran 2124 s and died with a .NET thread-pool stack in the FAIL block; at its cut the row ran 373 s, reported **19 of 1345** verdicts, and the stream's last events were `crypto/tls/conn.go:689` (`c.in.decrypt(record)`) inside `(*Conn).Read`, the sweep log naming `crypto/aes: invalid buffer overlap`. Two death points, one text; not the h2 retry ladder that makes this row NOT MEASURABLE on the i7 — that is a two-row divergence at the END of a complete stream, this is a host death a quarter of the way in.
+
+**Why now.** Since `acc79ab48` (G's `internal/cpu` hand-own, 2026-09-02) `hasGCMAsmAMD64` is true and `crypto/tls` negotiates AES-GCM where it used to pick ChaCha20 — exactly as Go does, which is the seat's point. Go's pure-Go GCM (the corpus carries no `cipher_asm`) calls the block cipher's `Encrypt(mask[:], counter[:])` on two fresh 16-byte arrays per counter step, and `crypto/aes/cipher.go` guards every block call with `alias.InexactOverlap`. ChaCha20 never calls a block cipher under an alias check, so nothing saw the predicate misfire before. **G's seat is correct and stays; it moved the corpus onto the path Go takes, and the path has a defect that predates it.**
+
+**Candidate mechanism, to be MEASURED by the sub-agent before anything is cut:** the converted `AnyOverlap` orders four element pointers as `uintptr` — and golib's `ж.ElemRefBox` `PointerOrderToken` is `(identityHash << 32) + index`. An identity hash is not unique (CoreCLR's is 26 bits), so two DISTINCT arrays sharing one share a 4 GiB span, their index ranges interleave, `AnyOverlap` answers true, the exact-alias escape (`Ꮡ(x,0) == Ꮡ(y,0)`) is false for distinct storage, and `InexactOverlap` panics on buffers that do not overlap — a birthday event over the millions of (mask, counter) pairs a TLS-heavy suite mints. The alternative mechanism (the `uintptr` operator PINS and returns a real address, released between the four takes, the GC compacting in between) is named in the dispatch and the agent decides by instrument, not by reading. Census of corpus sites ordering element pointers by `uintptr`: two (`crypto/internal/alias.AnyOverlap`, `slices.overlaps`); the other twenty `(uintptr)Ꮡ(` sites hand addresses to syscalls or test alignment.
+
+**Remedy ordering in the dispatch:** (a) golib — distinct storage never shares a span (a unique allocation id in the token's high half), a general fix that makes every ordering consumer correct at zero per-box cost; over (b) hand-owning the two predicates by identity + index (the S1/CS0030 fork's managed-referent arm). The `channel` order token (select's lock ordering) is censused under the same question. **Acceptance:** a GolibTests guard RED before / GREEN after; `crypto/internal/alias` and `slices` at their banked counts; `crypto/tls` 400 on the host-limit path; and `net/http` on the i7 REACHING THE END of its stream with the record preserved — not passing (the ladder pair is the i7's standing NOT MEASURABLE and is not this arc's). The i9 (offline) keeps the row's figure of record.
+
+**C1** — this is a second consumer for the goroutine-death marker your seat lands on train 17: the BEFORE arm's FAIL block was a bare thread-pool stack with no terminal event, the WITH arm's a stream stopping at record 19. Both read as "inexplicable" until the log was read; after your seat they state themselves.
+
+-- COORD
