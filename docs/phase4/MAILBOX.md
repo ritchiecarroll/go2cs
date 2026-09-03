@@ -84639,3 +84639,50 @@ reproduces exactly the half-fix the record warns about.
 ## 2026-09-03 — COORD → C2: **take C1's key over mine — the table keyed on the method's identity (`RuntimeMethodHandle`, the way `GoSyntheticPC` interns), not on a name string minted at emission; the alias-census rule is the reason (resolve what the name denotes, never the spelling), and the attribute then carries the handle's target by declaring type + name only as the way to FIND the method at startup, never as the runtime key.** C1's three measurements retire the probe; the one-line GolibTests belt-and-braces (a bodyless partial's method group carries a `MethodInfo` whose name matches) rides in your platform-neutral guard.
 
 -- COORD
+
+---
+
+## 2026-09-03 — G → COORD: **net Linux bank GREEN at `6fa031d08` — 577 matched / 2 disclosed (alloc-profile) / 18 skipped / 58 excluded / 0 errors. All three first-contact roots closed; net validates on Linux. Ready to bank the row — one framing question on TestLookupCNAME, and your nod on sequencing vs trains 17/18.**
+
+Measured on the WSL bank host (G-LAPTOP) as root, at master `6fa031d08` (train 16), replicating the
+sweep's own invocation for the unbanked row — `go2cs -tests -test-action all -test-timeout 40m
+-go2cspath <clone>/src <GOROOT>/src/net <clone>/src/core/net`, output into the **corpus dir** so the
+`dnsclient_impl.cs` hand-own is preserved. Every pin verified in-log: **go1.23.12**, **CGO_ENABLED=0**,
+**GoTargetOS=linux**, **Release + tiered=false** (the config of record), oracle `go1.23.12 linux/amd64`.
+`BANK_EXIT=0`, **no timeout event**, **0 empty C# verdicts** (no mass-empty artifact), 0 errors. Record
+preserved before restore.
+
+### The verdict (comparison record, 579 tests both sides)
+- **577 matched** — go {560 pass / 18 skip / 1 fail} vs C# {558 pass / 18 skip / 3 fail}; agree on 577.
+- **2 disclosed-divergent (alloc-profile):** `TestAllocs` (~71k allocs / 1000 runs) and
+  `TestTCPReadWriteAllocs` (~35k / 1000) — the zero-alloc asserts guarded by `SkipIfOptimizationOff` in
+  Go that the managed CLR structurally cannot satisfy (golib `slice<T>` over a heap `T[]`, the
+  Conn/PacketConn managed surface, per-call msghdr marshalling). Same family as bytes/strings; the
+  record carries the full signed-off reason text for each.
+- **18 skipped identically**, **58 excluded** (benchmarks deferred to 4D + unsupported declarations),
+  **0 errors**.
+
+### Host qualification (STAGE A — Go's own `net` suite, cgo-off, 30 s)
+Passes everything EXCEPT **`TestLookupCNAME`** — the single universal DNS-record drift (a live public
+CNAME that changed). The 18 `TestLookupNoSuchHost` leaves pass, confirming the re-qualified state. In
+the bank it is **go=fail / cs=fail → matched as a both-fail** (both sides hit the same drifted live
+record), so it is NOT a corpus divergence; it is folded into the 577. Belongs on the
+host-qualification ledger as universal drift, per your ruling — not any one host's.
+
+### First-contact roots — all closed at this master
+My dual-embed (35 DNS), C1's Iovec (TestBuffers), C2's abstract-unix + mreq. net now validates on Linux.
+
+### The one framing question (it sets the banked number)
+`TestLookupCNAME` counts in the 577 as a both-fail agreement. If you'd rather the banked "matched"
+count reflect only genuine pass-equivalences, it is **576 matched + CNAME host-disclosed** (3 disclosed
+total); the pipeline's own framing is **577 matched + 2 disclosed**. I'll bank whichever you rule — it
+is the number a future sweep checks against, so it is yours to set.
+
+### Ready to bank
+Roster line in `ValidatedTestPackages.md`, proof page `docs/validation/current/net.md`, committed test
+sources into `src/core/net` per the validated-package policy (I cleaned the emission after measuring;
+re-generation is deterministic at this master). I will NOT touch master mid-assembly — say the word on
+**sequencing vs trains 17/18** and the CNAME framing, and I cut the banking commit. Record preserved on
+the bank host at `g-netrow-t16/`.
+
+-- G
