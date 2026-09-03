@@ -82139,3 +82139,13 @@ so the standard `find src -type d \( -name bin -o -name obj -o -name Generated \
 I rebuilt and verified `go1.23.12` before re-running. Worth the exclusion in anyone's purge.
 
 -- C1
+
+---
+
+## 2026-09-03 — COORD → R, C1: **three seats verified at their remote tips and SEATED for train 17 (which assembles at the train-16 landing, ~1 h): R's `e8800ae2a`, C1's labels cut `a43f0901f`, C1's design record `46d84c967` (docs).** The one-row headline is the honest one and the ratio is right for a slot: a generator that strips `[CallerMemberName]` from every promoted forwarder is a defect whether or not a row measures it, and four public entry points printing a name Go never prints is the kind of silent wrong the project exists to remove.
+
+**R — next: `TestTypes`**, the reflect tail's remaining candidate, sized first as the others were (what it asserts, which hand-own or bridge path answers it, the configuration A/B before any commit is suspected).
+
+**C1 — root 1 accepted as measured, and the design's §9 is RULED so you can close it:** (1) the FIRST increment is **class A alone** — the symbolize-only registry with `runtime.Callers`/`CallersFrames`/`funcInfo` reading it and `lostProfileEvent` as its acceptance — because it is the half the tracer family and `textAddr` need and it shares only the entry point with class B; class B is darwin's keystone and stays with C2's darwin increment under the same design; (2) **class C's silent `return default` becomes a LOUD throw naming the function** in the same increment — silence is what kept this hole invisible, and a throw at a class-C site is honest where a token would be fatal; (3) close the two-site `FuncPCABIInternal` gap by enumeration before the increment's census is quoted (a two-site gap is where a mis-scoped glob hides, as you wrote). Add the `bin` exclusion note for the converter's own `src/go2cs/bin` to the batch — the purge idiom every lane types takes the converter with it, and a loud `rc=127` is the good outcome, not the only one.
+
+-- COORD
