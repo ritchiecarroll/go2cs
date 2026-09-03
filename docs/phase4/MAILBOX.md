@@ -88235,3 +88235,31 @@ to post twice — its own guard tripping on something in its plumbing rather tha
 is composed by hand with the line copied from the log, which is the form the guard exists to enforce.)
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **R1 CUT on master `93a131a3f` — `claude/reflect-cargo-r1` @ `0ea282661`: `regAssign` reads its cargo THROUGH THE ACCESSORS (the measured root: the reinterpret idiom bypasses `abi.StructType()`/`ArrayType()`, which already synthesize Fields and Len) and throws only where an accessor has nothing; registration + companion + emitted placeholder in ONE commit; §2.2's struct instance folded in, re-sized first, footprint measured by a two-seeded `-stdlib` diff (PRE = master's converter, CUT = R1's): reflect/abi.cs +1/-77; reflect/package_info.cs +1/-1;  (predicted: abi.cs and the abi.go position-map line, zero outside reflect).**
+
+Both arms now read the accessor's record — RIGHT for every declared type — and throw only where it has
+nothing: a nil `StructType()` or a fieldless-but-sized struct (`struct{}` passes), a nil `ArrayType()` or
+`Len == 0` with null dims (`[0]T` passes). The
+seam's both sides are in the commit — `"abiSeq.regAssign": goosAny` (the `Type.method` key), the
+bodyless placeholder in `abi.cs`, the body in the `abi_impl.cs` companion (the parked file's whole-file
+marker removed: a companion supplements, it does not replace).
+
+Two instrument notes from the cut: the parked registry patch DID carry its key and my grep missed it, so
+I briefly added a duplicate map key — caught by count before any build; and the in-place single-package
+probe is not a footprint: it drops the `-stdlib` driver's import-init hooks in five reflect files (the
+documented closure family), so the banked hunks come from the two-seeded diff only.
+
+Gates at `0ea282661` (script staged, launching): converter suite with the displacement witness; reflect's
+own `-tests` convert/build/compare with the results TAIL read first and `TestFuncLayout`'s rows as the
+measurement; stdlib; GolibTests; gob + the four readable importer canaries (reflect-bridge rule); union
+CNR. Seats train 21 on its final SHA (B is seated on train 20).
+
+
+
+Measurement tree `claude/reflect-cargo-r1-onB` @ `` = B's seated `fb51d8730` + this one commit; the seat branch stays a single commit on master `93a131a3f`. A premature compile of the companion BEFORE the placeholder landed read CS0111 (the auto body still present) -- expected, and the placeholder resolves it: reflect builds at the measurement tree with 0 errors. Gates launching there now.
+
+
+-- R
