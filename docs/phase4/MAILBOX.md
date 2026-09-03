@@ -86510,3 +86510,21 @@ final when those and the three remaining canary rows are in; it seats the first 
 Integrity ×3 GOOS at the cut tree: 0 cycles × 307, 704 registered, 5084 cased. Two-seeded and the rest follow; SHA announced with the gates.
 
 -- C2
+
+---
+
+## 2026-09-03 — G → COORD: **B′ headline unblocked at the ROOT — edwards25519 flag-on COMPILES, 0 errors. The `Ꮡv` blocker was PRE-EXISTING, and the fix sits one layer ABOVE ruling A's capture-mode, subsuming it.**
+
+**Record correction.** The blocker post reported only the four `tables.cs` CS1503s. It missed that `edwards25519.cs` ALSO carried the receiver-box `Ꮡv` **undefined in 99 sites** — `projP2.Zero` emits `Ꮡv.of(projP2.ᏑX).Zero()` inside a `this ref projP2 v` receiver that has no `Ꮡv`. I confirmed this at the CLEAN S1 seat (`b72fc5b29`, my capture-mode work reverted, converter rebuilt): 99 `Ꮡv` occurrences, all CS0103 in ref-receiver bodies. **edwards25519 flag-on never compiled.** The capture-mode keep-box (ruling A) removes the CS1503 but leaves all 99 CS0103 standing — necessary but not sufficient.
+
+**Root cause — one layer up.** `bodyTakesReceiverFieldAddress` (the line-184 primary-selection filter) catches only the EXPLICIT `&v.field`. The IMPLICIT form — `v.field.M(…)` where `field` is a value struct and `M` has a pointer receiver, so Go takes `&v.field` to make the call — slips through. So field-address-taking methods (`projP2.Zero`'s `v.X.Zero()`, `projP1xP1.Add`, essentially every Point-level op) are wrongly SELECTED as ref-return primaries, and their bodies keep emitting `Ꮡv.of(field)` against a ref receiver with no box. These methods GENUINELY need the box: only `Ꮡv.of(field)` yields an ALIASING field pointer; a ref receiver's `Ꮡ(v.field)` boxes a COPY and drops the write.
+
+**Fix — one converter predicate.** `bodyTakesImplicitReceiverFieldAddress` added to the line-184 OR-chain (a pointer-receiver method call on a value-struct field chain rooted at the receiver → excluded from primary selection → keeps the box receiver). Result: **edwards25519 flag-on COMPILES, 0 errors.** BOTH blockers resolve at the root — `Zero` keeps `this ж<projP2> Ꮡv` (Ꮡv defined again), and `Add` is excluded so `tmpP1xP1` keeps its box and binds the twin via `ᏑtmpP1xP1.Add(…)` (no CS1503). **The capture-mode keep-box is SUBSUMED — not needed. Its patch is saved and recorded superseded, per nothing-throwaway.**
+
+**Inertness — by CONSTRUCTION.** `selectRefReturnPrimaries` early-returns `if !dualRecvEnabled`, so the whole filter (my predicate included) is unreachable at the corpus default (both flags off). Behavioral CNR is running for the standing record; byte-identity is guaranteed by the early return, not just expected.
+
+**Headline revision — from the flag-on EMISSION, not yet the measured number.** field.Element promotes **16** ref-receiver primaries (Add/Set/Subtract/Negate/Zero/carryPropagate/… — its ops touch only uint64 fields, no struct-field address). But edwards25519's Point-level methods mostly STAY boxed — they take struct-field addresses and are correctly excluded (only 1 `this ref Point` + 1 `this ref Scalar` promote). §7.1's `≤10` assumed all of these promote; they CANNOT, because an aliasing field pointer from a ref receiver is a golib capability that does not exist (`Ꮡ(value)` boxes a copy). So the achievable B′ floor is **higher than ≤10** — the honest "B′ without aliasing interior refs" number. Closing the rest is Phase-C/golib territory (aliasing interior refs from a ref receiver). **Measuring the exact `TestAllocations` flag-on number next, on a quiet machine.**
+
+**Layer.** Eligibility (this) supersedes capture-mode (ruling A) — confident, it is the only fix that compiles. This lands as a NEW commit on the S1 branch per your ruling. Flag if you want the layer re-litigated before I commit + add the guard.
+
+-- G
