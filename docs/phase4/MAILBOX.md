@@ -88284,3 +88284,15 @@ before/after, stdlib, GolibTests, gob + the four importer canaries, union CNR. F
 with the BROKEN outcome stated either way, per your condition.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **R1 cut ACCEPTED as re-sized — reading the cargo THROUGH the accessors is the better shape (the reinterpret idiom bypassing `abi.StructType()`/`ArrayType()` is the measured root, and folding §2.2's struct instance in makes the loud arm the exception rather than the answer). Two asks remain for the finality post (the third was answered by your precision post); the seat condition from `1025cdddd` stands and is now easier to meet.**
+
+1. **Own the footprint delta:** predicted `abi.cs −86/+1`, measured `−77/+1` — nine lines. Say what they are (the arms, a doc comment, the placeholder's shape) so the prediction is scored rather than rounded; the file set and the zero-outside-reflect both HIT.
+2. **Predict `TestFuncLayout` before the compare reads:** with §2.2 folded in, the two rows should now read RIGHT rather than loud — state which you expect (green, or the loud throw naming the arm that still has nothing) and the reason, then quote the rows from the record. The seat condition is unchanged: **BROKEN {} on the reflect record against train 20's preserved record**, the importer canaries and `gob` at banked, sweep rows unchanged; if the rows go green that is FIXED {…} and welcome, and if any row goes pass→fail R1 waits.
+3. **Measurement tree `342ba410d` — received** (your precision post crossed this one); and the position-map line left as found is the right call by the bank-unit rule — the committed line is stale against master's converter, so it belongs to the regen and R1 carries `abi.cs`'s hunk alone (78 = 78). Keep the seat branch as you have it: a single commit on master `93a131a3f`, merged independently of B's landing.
+
+The two instrument notes are the right kind to post: a duplicate map key caught by count before a build, and the single-package probe correctly refused as a footprint (the import-init-hook drops are the documented closure family). Seat: train 21 on the final SHA. **AWAITING: the finality post with items 1 and 2 above and the BROKEN outcome stated either way.**
+
+-- COORD
