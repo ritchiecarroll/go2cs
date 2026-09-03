@@ -81111,3 +81111,61 @@ families. Running those next.
 ## 2026-09-03 — COORD → R: **the moved-set is the verdict and it is accepted: FIXED = {`TestValuePanic`}, BROKEN = {}, both arms on their own binaries with fresh records. The currency mismatch is mine to name too: `310/77/1` was the train-13 reflect leg's own tally (matching / diverging / rows moved against the Debug record — the third figure was never "disclosed"), so you added one to a triple whose third term was not the term you thought; neither of us derived it before quoting it. From here the reflect leg reports the SET diff against the previous record beside its counts, so a seat's prediction has one accounting to land in.** The baseline confound you killed is the sweep A/B rule's mirror and goes in the batch under that name. Remaining gates as you listed; post the tip when they are green and it seats train 16 or 17, whichever is open.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **footprint applied and verified — and the hunks rule needed an INSTRUMENT, not just a discipline. My first application obeyed the rule and was still wrong; a 3-way merge against the two seeded emissions is what made it right, and it is checkable.**
+
+### The two-seeded diff
+
+Both roots seeded (3675 `.cs` each, asserted before converting), `-stdlib -comments` with the BASE
+binary into A and the CUT binary into B. **Footprint: 2 files** — `reflect/value.cs` and
+`reflect/package_info.cs`.
+
+`package_info.cs`'s only change is the `value.go` **GoPositionMap** hash, which moves because
+`value.cs`'s line positions moved. Per the standing rule — *position maps and relocation hooks belong
+to the deliberate regen, not to a converter train* — it is **excluded**. So the banked footprint is
+`value.cs` alone.
+
+### The control failed, exactly as the rule predicts
+
+`diff(base emission, committed tree)` is **not empty**: 23 lines in `value.cs`, 30 in
+`package_info.cs` — the documented pre-existing families (`-tests` init-forcing hooks the committed
+tree carries, position-map staleness, `GoImplicitConv` records). None mine. That non-empty control is
+precisely why whole-file application is forbidden, and it is worth stating that the control FAILING is
+the expected, healthy reading here — a green control would have meant the corpus was freshly regenned.
+
+### Where the discipline alone was not enough
+
+I applied the change the obvious way: find each displaced function's declaration, replace through its
+closing brace with the converter's placeholder line. That obeys "apply the change's own lines". It was
+**wrong**: the converter also HOISTS comments that lived inside a displaced body — `// TODO(mvdan): use
+f.kind() again…`, `// Assignable if addressable and not read-only.`, three more — and re-emits them as
+standalone lines. My span replacement deleted them. Nothing about the resulting file looks wrong; it
+compiles; the placeholders are all present; a path-set assertion passes.
+
+**The tell was arithmetic, the same one that caught the 279-vs-32 case: emission delta 93 lines,
+applied delta 65.** Six lines the converter keeps and I had dropped.
+
+### The instrument
+
+`git merge-file -p <committed> <base-emission> <cut-emission>` — a 3-way merge with the BASE emission
+as the merge base. Clean, no conflicts, and it produces the only file that satisfies all three checks:
+
+- **applied delta == emission delta**, 93 = 93 (line-for-line, CR-normalised)
+- **drift invariant holds**: the residual drift against the emission is the IDENTICAL SET before and
+  after, so my change neither absorbed nor introduced any pre-existing family
+- **0 `GoPositionMap` and 0 `initᴛᴛimport` lines** in the delta
+
+I would offer this as the standing form of the hunks rule: the rule says apply the change's own lines;
+the 3-way merge against the two seeded roots *computes* them, and the delta-equality plus
+drift-invariant pair *proves* it, where "I applied the right hunks" is otherwise an assertion.
+
+### Banked-form gates so far
+
+reflect builds; `go generate` produces **no** `stdlib-metadata.txt` change (the registry moved no
+`GoImplement` record, only displacement keys), and `StdLibMetadata`/`ManualConversion` pass;
+`TestValuePanic` validated on the banked tree, exit 0. Behavioral transpile+compile (route #7) is
+running now, union CNR after it.
+
+-- R
