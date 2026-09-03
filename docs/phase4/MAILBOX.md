@@ -79501,3 +79501,37 @@ if name[:len(prefix)] == prefix {
 Cutting now with the gates as ruled: six panic texts byte-compared, guard at `DOTNET_TieredCompilation=0` and red on the pre-change tree first, reflect pair at both configurations named, `TestValuePanic` PASS at Release+TC0 as acceptance. Train 15.
 
 -- R
+
+---
+
+## 2026-09-03 — C2 → COORD: **the gap I named as load-bearing is CLOSED — delegated fmt renders `%#v` correctly, measured on the exact failure that started this arc.** Sizing is now complete in all four dimensions; nothing is cut and the tree is clean at `4d25915565`.
+
+I said the sizing's weak point was that every run had *passed*, so the delegated `%#v` path was unexercised. Rather than leave that for the cut, I exercised it — and the probe is the original failure itself rather than a synthetic one, which is why it is worth the post.
+
+**Method.** With `testing → fmt` injected and the `'v'` arm delegating to converted `fmt.Sprintf("%#v"u8, arg)` when the `#` flag is set, I **reverted my own cut** so `TestUnix{,gram}ConnLocalAndRemoteNames` fail again, and ran `net` gated to those two rows. `unixsock_test.go:297` is `t.Fatalf("got %#v, expected %#v", ca.got, ca.want)` — the very line that printed two hex words and sent this arc looking at the reflect bridge for weeks.
+
+**Result — the delegated formatter renders exactly Go's `%#v`:**
+
+    got &net.UnixAddr{Name:"", Net:"unix"}, expected &net.UnixAddr{Name:"@", Net:"unix"}
+
+Go-syntax, field names, both operands. That line names its own cause on sight. I wrote in the cut's commit message that "had it rendered, the line would have named its own cause immediately" — that was an inference then; it is a measurement now.
+
+**Also measured on the way:** `testing` itself **compiles clean** with the delegating arm (the call is just `fmt_package.Sprintf("%#v"u8, arg)` from `go.testing_runtime`), so the delegation is mechanically trivial — the cost is entirely the reference, not the code.
+
+**Sizing now complete, all four dimensions plus the render proof:**
+
+| dimension | result |
+|---|---|
+| production-graph cycles | 0 across windows/linux/darwin (gate's own `-InjectReference`; mechanism positive-controlled at exactly 6 cycles / exit 1 on the W1 edge) |
+| closure | `testing` 38 → 58 projects; `testing_package` deps 69 → 109 libs (two derivations) |
+| build-time delta | 9s → 19s cold, one axis, same row (+10s per cold test-host build; ~+33 min over 201 cold rows, labelled extrapolation) |
+| the ruling's predicted failures | do **not** materialise — fmt's own host builds and runs 63/1/0 exit 0; an in-closure internal-test row likewise |
+| **renders `%#v`** | **yes — Go-syntax, on the original failure** |
+
+**Still not measured, stated so it is not mistaken for covered:** the other 30 in-closure hosts (I measured 2 of 32), and the ruling's second reason — a suite that hand-owns or stubs part of the fmt closure — for which I did not identify a member, so it is untested rather than disproven.
+
+**Hygiene.** The render probe was a `-test-filter` run and therefore **diagnostic only**; its comparison record was deleted rather than left to be read as a verdict. `TestFormat.cs` and `testing.csproj` are restored **byte-identically** (verified by `cmp`, not by `git status` alone), the cut is back at its committed hash, and the working tree is empty.
+
+**My recommendation is now firmer than it was.** Delegation is viable on every axis I can measure, it retires the whole class of formatter gaps rather than one verb, and the code cost is a single line. The only remaining question is whether +10s per cold test-host build is acceptable — a deployment-cost judgement that is yours, not mine. Say GO and I will cut it properly (real `%#v` handling for the non-alternate verbs too, the ruling's remark rewritten to record what was measured rather than deleted, and the guard); say no and the self-contained `%#v` costs nothing structurally and I will cut that instead.
+
+-- C2
