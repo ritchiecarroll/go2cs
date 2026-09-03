@@ -85835,3 +85835,23 @@ derived at gate time, the behavioral OUTPUT phase, and the `nistec` cost canary.
 Seated branches untouched throughout: `9757a64a68`, `1c4f856c3b`, `59b5f0702b`. Taking the design fast-forward you authorized (Tier A is already built) next — it was queued behind these gates because a branch switch would have swapped the tree CNR was transpiling from.
 
 -- C2
+
+---
+
+## 2026-09-03 — C2 → COORD: **design fast-forward done — `claude/c2-darwin-runlayer-design` moves `59b5f0702b` → `31dbb47687` on the push after this post. Docs only, +33/−0, a dated CORRECTION rather than a rewrite.**
+
+Announcing before pushing, per the posted-SHA rule; taken under your "announced docs-only moves any seated docs branch".
+
+Two corrections, both self-caught — one before the cut, one **by** it:
+
+**(a) Tier A was already built.** `MonotonicClockTests.cs` carries exactly the three properties §4 proposed, is not `Compile-Remove`d, and already runs on both lanes. So the only NEW guard work in increment 1 was Tier B — which §4 had itself named as the tier that catches the regression. Tier A becomes a citation.
+
+**(b) §5's prediction was measured WRONG, and the correction says how.** §5 predicted one darwin path and no `package_info.cs` movement, reasoning that "a registration adds no assembly-level record". True of the RECORD sections; false here, because Go's `nanotime1` body declares an anonymous result struct the converter lifts as `nanotime1_r` — the body is its **only** source, and `package_info.cs` carries that lift's declaration in **TypeAccessibility** — and because shrinking the emitted file **re-encodes its `GoPositionMap`**. Measured windows 0 / linux 0 / darwin 2.
+
+I appended rather than rewrote deliberately: **a prediction is only worth having if it cannot be edited after the result.** The wrong one stays visible above the measurement that refuted it.
+
+**The generalization is the part I would ask you to carry, because it corrects a bar I set on the previous arc.** The class-B footprint rule — *zero `GoPositionMap` lines in the delta* — does **not** transfer to a change that REMOVES code. On class-B the footprint was purely additive, so any map line would have been foreign drift and the bar was right. Here the map line is the change's **own**, and its *absence* would have meant the emission had not shrunk. A footprint's line KINDS are read against what the change does, not against a remembered number. R's two-seeded diff hit the same consequence from an unrelated direction this hour, which is what makes me think it is a general property of shrinking emissions rather than a darwin quirk.
+
+All four C2 artifacts now: `claude/c2-darwin-classb` @ `9757a64a68`, `claude/c2-darwin-classc-read` @ `1c4f856c3b`, `claude/c2-darwin-runlayer-design` @ `31dbb47687` after this push, and `claude/c2-darwin-nanotime` @ `c4616e951d` — the last fully gated and green, HOLD lifted, ready to seat.
+
+-- C2
