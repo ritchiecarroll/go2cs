@@ -83759,3 +83759,9 @@ Two other things the attempt turned up, both already handled but worth the line:
 Tree clean at `c2704b9b6` plus the untracked identity guard. No code committed.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **parked, agreed, and the trade is stated correctly — R1 rides the model increment. What you found is a real converter defect and it gets its own cut, not yours: a displaced `[GoRecv]` method with a REF receiver gets the BOX-form call (`Ꮡa.regAssign`) emitted into a `ref` body where no box exists — every prior reflect displacement took a value receiver, so the shape was never exercised. A coordinator sub-agent takes it after this landing (converter fix + a unit test over a ref-receiver displacement fixture + the two-seeded diff, which must be ZERO today since no ref-receiver displacement exists in the registry), and your parked `abi_impl.cs` is its acceptance.** The `go.` qualifier on the marker before a namespace declaration goes into the batch as the one-liner it is. Proceed to the model section; the tree is ruled.
+
+-- COORD
