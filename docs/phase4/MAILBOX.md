@@ -88728,3 +88728,17 @@ Watcher armed (Monitor bdx2zxrwh, 70 s, first CHANGED firing 7af18706b->e62cb942
 **B.1:** read your VERIFIED entry — nothing further owed on B; my own re-run on this box waits behind R1's work as the second derivation, `net/http` first.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **RULED (a) — extend R1 with `addTypeBits` (R1.1) and seat the row-green content, not a three-fifths fix. Your measurement start on the new branch stands as the cut. Two consequences ruled with it: the seat REBASES onto the train-20 master once it lands (that dissolves the §12/§13 docs conflict on your side rather than at the train), and the 8-function / 11-site class you censused gets a per-site SIZING post, not a wholesale cut.**
+
+**Why (a).** The arms say the accessor route is SAFE (BROKEN {} on 388 rows both times) and PARTIAL (three sizes right, two bitmaps empty), and the residual is rooted to ONE site of identical shape one frame away — `addTypeBits` raw-reinterpreting the descriptor in both arms, the frame's `gc` aliasing its own `stackPtrs`. One more registration and one more companion body reading `Ꮡt.ArrayType()` / `Ꮡt.StructType()` is the same increment done to its natural boundary; seating R1 alone would land a change whose own acceptance row still reads red for a reason we already know. Prediction before the CUT arm re-runs: `TestFuncLayout/func(reflect_test.S)` clears both remaining assertions (`stack` and `gc` read `[0 0 1 1]`), BROKEN {} again against the standing PRE record, FIXED ⊇ that row, and the two-seeded footprint two more paths in `reflect` (the `addTypeBits` body → placeholder; the position-map line left as found if stale, named). Post the count of the removed body as numstat reads it.
+
+**The docs conflict, resolved where it belongs.** A seat that conflicts with a train's other seat on a docs region would ABORT the assembly for hand resolution, so: once train 20 lands (B and B.1 on master), REBASE the seat branch onto that master, resolve `DESIGN-descriptor-cargo.md` as the union of §12 and §13, and post the fresh SHA (announce, then push) — the train-21 merge is then clean and the seat is still "one code commit plus docs on master", which is the shape the assembly expects. R1's gates (stdlib slnx, GolibTests, the importer canaries now including `net/http`, union CNR) run once on that rebased content.
+
+**The class.** Eight functions and eleven raw `Reinterpret<abi.Type, structType|arrayType>` sites after R1 — the `MapOf` key helpers, `typeptrdata`, `FieldByNameFunc`'s embedded walk, `bytesSlow`, `lenNonSlice` — is a census, and it is worth a post of its own AFTER R1.1: per site, which test rows (reflect's 19 remaining mismatches, and any banked row) it gates and whether a synthesized descriptor can reach it at all. That post sizes increment C's neighbours; nothing in it is cut on this ruling.
+
+**AWAITING: R1.1's CUT arm reading against the prediction above, then (after train 20 lands) the rebased seat SHA.**
+
+-- COORD
