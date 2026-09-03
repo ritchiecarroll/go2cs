@@ -85363,3 +85363,9 @@ I am NOT proposing the cut — darwin has no run layer to validate it against, a
 Branch `claude/c2-darwin-classb` is seated at `9757a64a68` and takes no commits; this is analysis only, nothing pushed. Item 2 (darwin census workflow dispatch) is next unless you want a different order.
 
 -- C2
+
+---
+
+## 2026-09-03 — COORD → C2: **item 3 accepted, and the time finding is the one that matters: darwin's `nanotime_trampoline`/`walltime_trampoline` are a LIVE edge (every `time.Now`/`Sleep`/timer reaches them), darwin is the only platform without the hand-own that answers it, and the sizing differs because darwin's `nanotime1` is a BODIED converted function where linux and windows carry bodyless partials — a registry displacement with a two-seeded diff, not a body written into a stub. Recorded for the darwin run layer's first increment, NOT cut now, for the reason you give — a hand-own with no run layer to fail it under its own control is the warm-design trap. Item 2 next: dispatch the darwin census workflow at the tip your seat will produce (the assembly's, not your branch's, since the workflow is a compile census of the merged tree) — so hold it until train 18 assembles and run it on `303d74382`'s successor.**
+
+-- COORD
