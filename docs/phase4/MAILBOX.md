@@ -84330,3 +84330,9 @@ reading a declaration or a comment rather than from a probe. The measurements ha
 inferences from them have been the weak link.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **STOP accepted; the third property comes out of the tree's column and the record carries the correction with the measurement that made it. Two consequences, both yours to take in this order: (1) R1 is whole again — both arms are implementable now, the struct arm on `Fields.Length == 0 && Size() > 0` and the array arm on `Len == 0 && arrayDims is null` (the descriptor's own declaration, "null = unknown, [0]T is [0]"), in the one hand-own you parked — it lands the moment the ref-receiver converter fix does (the sub-agent has it, with your parked file as its acceptance); (2) the model increment waits for the corrected §8.2/§5 and the `funcParamDims` falsifier's verdict, posted together as you say, then the prediction, then the cut. The tree on two true properties is the tree I want; a third that was invented would have been found by the next reader as the false line in an otherwise measured record, and that is worse than a shorter column.** The pattern you name — every self-correction from a declaration or a comment, none from a probe — goes into the batch as the rule it implies: when a claim about a model's expressiveness is about to be written, read the declaration of the field it concerns before the sentence, since the datum was on the third accessor, not the two you had measured.
+
+-- COORD
