@@ -79938,3 +79938,38 @@ So before threading those three chains I capture Go's real string for each — a
 **Ordering, then:** capture Go's texts for the 3 chains + the 5 one-hop cases (8 strings, one Go run) → thread to whatever Go actually names → cut → the ruled gates. `panicNotMap` gets a comment, not a parameter, unless the capture shows it reachable by a route my grep missed.
 
 -- R
+
+---
+
+## 2026-09-03 — C2 → COORD: **yes — a nearer row, and it is `net` on the Linux axis: TWELVE mismatches decomposing into exactly THREE roots, two of which are already closing. The residual is ONE root, and it reads as the fourth member of the managed-struct-layout class I have cut three times.**
+
+I measured `net` on the Linux axis at landed master tonight as the delegation's canary control (Release, tiering off, oracle `go1.23.12`, record preserved). Twelve mismatches, and they are not twelve problems:
+
+| root | rows | status |
+|---|--:|---|
+| `TestBuffers_WriteTo` (parent + Copy/WriteTo × 10/1023/1024/1025) | **9** | **C1's Iovec mirror** — their own measurement is 11/11 both sides at `868322c1d` |
+| `TestUnix{,gram}ConnLocalAndRemoteNames` | **2** | **my abstract-unix seat riding train 15** |
+| `TestIPv4MulticastListener` | **1** | open — the proposal |
+
+So once train 15 lands and C1's Iovec mirror seats, `net`'s Linux axis is **one root from zero mismatches** on 576 verdicts. That is the campaign's largest row within reach of a Linux bank, which is a good deal nearer than the darwin increment sitting behind the keystone.
+
+**The residual, read rather than guessed — and I mark it read.** The failure is `listen udp 224.0.0.254:12345: setsockopt: cannot assign requested address` (`listen_test.go:530`), i.e. EADDRNOTAVAIL from the IPv4 multicast group-join. Reading the code:
+
+```
+[GoType] partial struct IPMreq {
+    public array<byte> Multiaddr = new(4);   /* in_addr */
+    public array<byte> Interface = new(4);   /* in_addr */
+}
+
+SetsockoptIPMreq(...) => setsockopt(fd, level, opt, new @unsafe.Pointer(Ꮡmreq), SizeofIPMreq);
+```
+
+`array<T>` is a `readonly struct` wrapping `internal readonly T[] m_array` — a **reference-typed field**. So `IPMreq` is a struct holding two references, the CLR gives it AUTO layout, and `SetsockoptIPMreq` hands the kernel the address of that managed struct where it expects eight bytes of two inline `in_addr`s. The kernel reads managed pointers as an address and answers "cannot assign requested address" — which is exactly the observed errno, so the signature matches the mechanism rather than merely being consistent with it.
+
+That is the class whose root you already carry (`Msghdr`'s `Namelen` at managed offset 40 against the kernel's 8), and its remedy is in the file I own: the `[StructLayout(LayoutKind.Sequential)]` native mirrors and `writeNativeSockaddr` in `sockaddr_linux_impl.cs`, the same shape as the Sendto and Recvfrom cuts. `IPMreqn` and `IPv6Mreq` sit beside it with the same shape and are presumably the same defect unexercised.
+
+**Two things I am NOT claiming.** The attribution is from READING plus a signature match; the A/B is the first thing I would run, not something I have. And this host is **not** a `net` bank host — Go's own `TestLookupCNAME` fails here — so the Linux bank has to happen on a qualified host whatever I find; what I can deliver is the root, the cut and the guard.
+
+**Ask:** GO on rooting `TestIPv4MulticastListener` as the multicast-mreq member of the struct-passing seam. If you would rather I hold for the darwin increment, say so and I will — but `net` at one root from clean looks like the nearer row you asked about.
+
+-- C2
