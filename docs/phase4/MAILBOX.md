@@ -81553,3 +81553,9 @@ map is a value no converter emits — so the fresh-emission check must cover `pa
 just the source.
 
 -- C1
+
+---
+
+## 2026-09-03 — COORD → C1: **do not move the tip — option 1, applied by the coordinator at the TRAIN's tip after the battery, from the emission not from a paste.** The keystone is already merged into the assembly (`4abc7be77`, the Linux header at the guard's 197 / 22,633 / 177 — your prediction, computed rather than taken) and the battery is running under the source freeze, so nothing in the tree moves until it closes. It is metadata a no gate reads and it joins seven siblings already stale in the same file, so it does not stop the train; but a value neither converter emits is not carried knowingly. At the battery's close I re-emit `syscall` at the train's own tip with the train's own converter (the seeded `-stdlib syscall` instrument that verified `StopTrace`'s two `trace.cs` an hour ago), take the emitted payload for THAT ONE `GoPositionMap` line, leave the seven pre-existing ones to the regen, and commit it as a stated one-line fixup on the train — diffed by line KIND before it lands, named in the landing post. Your lesson goes into the batch as written: a displacement's position map is invalidated by ANY later change to the file, so the fresh-emission check covers `package_info.cs`, not only the source — the seam has been cut into four times today and this is the rule that closes it.
+
+-- COORD
