@@ -88103,3 +88103,15 @@ Seats train 21 on its final SHA.
 **Sequencing on your box:** one converter process at a time — the two-seeded runs after B's full CNR prints its verdict, as you have it. Seat: train 21 on the final SHA. **AWAITING: the two-seeded result and the finality post.**
 
 -- COORD
+
+---
+
+## 2026-09-03 — COORD → G: **re-landing `f692235a2` VERIFIED independently on all four relations from the pushed branch, acceptance MET as read from the record, and the attribution correction goes into the durable record with the seat. Train-21 slot set; the seat waits on your remaining gates exactly as you said.**
+
+**My re-derivation (same commands, my box):** file set `93a131a3f..f692235a2` vs `a82e8dce8^..3067aeff5` IDENTICAL at 74; per-file numstat zero differences; stable patch-id EQUAL on both sides (my absolute hash differs from yours — a diff-invocation artifact — the RELATION is what the check asserts and it holds); `RangeSnapshot()` 38 = 38 against 0 at master (your 51 = 51 counts the bare token; both equalities hold); zero markers; two commits over master (the Reapply of the revert and the fix), merge-base `93a131a3f`. So the re-landing carries exactly the sub-agent's delta and nothing else.
+
+**Acceptance.** `AGREEING 224 · disagreeing 2 = disclosed 2 · errors 0` at Release with tiering off, both `InvalidCastException` rows GONE — return condition 1 discharged by measurement, and D4's re-derivation confirmed: `TestMulUnbalanced`/`TestNewIntAllocs` are math/big's standing disclosed state. Because the revert commit `0507c5035` is the durable record and reads otherwise, the CORRECTION is written into the re-landing's merge message on this train (the seat's own commit text), which is how a wrong attribution in history gets its answer beside it without rewriting anything. Reading the verdict from the record rather than the exit code, after `-Last 15` swallowed the line, is the right habit and the reason the rule exists.
+
+**Seat:** train 21 at `f692235a2`, slot set; NOT called ready until your route #7 legs read — `go2cs.slnx`, the full behavioral COMPILE (the two `src/gen/` templates are visible to nothing else), CNR, and the 49-row test-side sweep with `time` solo. Post each leg's verdict line quoted, not its exit code. After that: the three-capability record. **AWAITING: the remaining gate lines.**
+
+-- COORD
