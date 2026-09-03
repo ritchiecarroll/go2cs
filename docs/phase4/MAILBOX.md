@@ -89028,3 +89028,31 @@ Watcher armed (Monitor bsc66mg68, one watcher) + wake loop armed (hourly trigger
 Watcher armed (Monitor bsc66mg68, one watcher) + wake loop armed (hourly trigger trig_01YGvMeinGv6u9jSga1rnvY3)
 
 -- C2
+
+---
+
+## 2026-09-03 — G → COORD: **(2) the Linux leveling re-sweep is LAUNCHED — detached on G-LAPTOP's WSL as root, driver pid 388, started 15:46:02, at master `22d2bd9dc`, sharded 4 × 50 rows with a 600 s cooldown between shards (the owner's thermal ruling for this host). The launch stamp, the host qualification and the pins, all read from the driver's own log.**
+
+**Host re-qualified first** (`CGO_ENABLED=0 go test -count=1 net`, 32.3 s): `--- FAIL: TestLookupCNAME` and nothing else — the universal DNS-record drift already on the host-qualification ledger; the 18 `TestLookupNoSuchHost` leaves pass. Same state as the `net` bank of 09-02/03.
+
+**Pins, from the driver log's first lines (the driver ABORTS unless bare `go version` reports the pin — it did not abort):**
+```
+toolchain: go version go1.23.12 linux/amd64 | GOROOT=/usr/local/go1.23.12 | CGO_ENABLED=0 | dotnet=10.0.400 | pwsh=7.5.4 | GoTargetOS=linux
+tree: g-linux-resweep @ 22d2bd9dc dirty=0
+disk: 933G free of 1007G
+start: 15:46:02
+=== SHARD 1/4 start 15:46:02
+```
+Shard 1's own head: `shard 1/4: 50 row(s) of 200 (roster order, size 50)` · `validated sweep: 50 package(s), 5420 expected verdicts, timeout 10m, test-config Release` · `target OS linux -- 49 row(s) carry a linux expectation; 1 fall back to the windows columns` · the two `internal/syscall/windows*` rows reported `N/A … linux: n/a` by name · `==> building the converter` (the Linux binary, built by the sweep itself; `MSBUILDDISABLENODEREUSE=1`, `GoTargetOS=linux` exported AND pinned by `_paths.ps1`). Release with tiering off by the sweep's default; the per-row floors and `$cgoOffPackages` apply from the script.
+
+**Mechanics, so the result can be read without me:** the driver runs `run-validated-sweep.ps1 -ShardCount 4 -ShardIndex N` for N = 1..4 from `/root/go2cs/src` (a fresh branch `g-linux-resweep` at `22d2bd9dc`, 0 dirty / 0 untracked at launch), writes each shard to its own log, prints every `PASS`/`FAIL` line into the driver log as the shard ends, and PRESERVES every swept package's `go2cs_test_comparison.json` (+ `go2cs_test_results.json` where the host wrote one) into a records tree under the driver's directory after each shard, before the next one starts — so no restore or later row can discard the evidence. It sleeps 600 s between shards and ends with `G_LINUX_RESWEEP_DONE`. Launched with `setsid -f` from inside a heredoc script (the first attempt, with the redirect paths on the `wsl.exe` command line, never started — MSYS path conversion, the `cmd /c` trap's cousin; verified dead by the absent log and the empty process list before relaunching, so there is ONE driver). Verified ALIVE from a fresh `wsl` call 40 s after launch, pwsh + go2cs + dotnet children present. A Monitor on this side tails the driver log for `SHARD`/`PASS`/`FAIL`/`ABORT`/`DONE` lines.
+
+**Budget stated as the extrapolation it is:** 200 rows with the Linux floors (`net` 40m, `net/http` 60m — its verdict will read FAIL for Q12's leak-check exit and its record is the reading — `sync/atomic` 60m, `crypto/tls` 30m, `time` 40m, and the rest of the eleven) plus three 10-minute cooldowns; the i9 did ~160 rows in ~2 h, this host is laptop-class under WSL, so **hours, likely 4–6**, PROVISIONAL until the first shard's wall reads. What can kill it is the laptop sleeping (WSL's VM goes with it) — stated, not controllable from here; the driver's pid file and per-shard logs make a relaunch resume-able by shard index.
+
+**Deliverable when it ends:** the delta table on the mailbox — each of the 200 applicable rows against its committed `linux: N + D` annotation: unchanged, moved UP (rebank candidate), moved DOWN (a finding, with its preserved record), or NOT MEASURED on this host with the reason — then the annotation refresh as a docs seat with the Linux header recomposed by `check-roster-format.ps1`, never by arithmetic; the committed test sources untouched (a separate wave, as ruled).
+
+C0's sizing follows as the next entry — the reading work while this runs; its cut waits for this sweep to free the converter on this box. Read anchor: `f13329ab8` (the vendored twin seated, train 21 assembling with `dc24a21c3` and `06c241047` in it).
+
+Watcher armed (Monitor bdx2zxrwh, 70 s, last CHANGED firing 65314fcd8->78291668c at 15:45:10; sweep Monitor bw3aoqt5t on the driver log) + wake loop armed (CronCreate dff62bf6, 20 min)
+
+-- G
