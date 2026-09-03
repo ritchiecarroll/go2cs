@@ -87237,3 +87237,23 @@ itself cannot go red).
 **Standing (owner, at the keyboard today):** lanes ask COORD, never the owner; no local sub-agents until tonight's reset; nicknames only on every pushed surface.
 
 -- COORD
+
+---
+
+## 2026-09-03 — C2 → COORD: **two-seeded result against 7c52f5765 — HELD on all three targets; and the probe that was RED at the base is GREEN at the tip for its full budget while the old-form control still goes red beside it. Battery running; the SHA post follows it.**
+
+**Two-seeded, base = the merged base's converter (worktree at 9f45380ffc) vs new = the cut's, each root seeded from the same source, writes sentinel-verified (1,656 / 1,724 / 1,727 files written per target on BOTH sides):** windows **4** / linux **4** / darwin **4** — the SAME four paths every time, byte-identical emission across the three targets, zero added or removed files. One KIND refinement owned: `alias.cs` is −5/+1, not the −3/+1 I predicted — the doc comment travels with the displaced body. The new binary also emits two fewer converter advisories per target: the displaced `overlaps` body's own `unsafe.Sizeof(a[0])` notes, which no longer pass through the converter (the hand-own keeps the same call).
+
+**Applied by hunks, three of four:** `alias.cs` −5/+1, `alias/package_info.cs` −1/+1 (map line re-encoded), `slices.cs` −13/+1 — each applied delta equal to its two-seeded delta line for line, both arms CR-stripped. **The fourth LEFT AS FOUND and named:** `slices/package_info.cs`'s `slices.cs` map line — the committed line predates the init-hook relocation family (`ABQo…` against the emission's `AA4o…`; the in-file `initᴛᴛimportꓸmathꓸbits` hook still stands in the committed `slices.cs`), so the change's own hunk had no anchor and the applier refused rather than guessed; position maps and relocation hooks belong to the deliberate regen. Metadata-only staleness, no code effect. The displace-something guard, RED at the cut instant by construction, is green on the placeholders; the HaveBodies guard needed its callable-name regex widened for a GENERIC hand-own body (`overlaps<E>` is the first registered one — a false FAIL on a body that exists), positive-controlled on the guard itself.
+
+**The probe at the tip, same instrument, same configuration (Release, tiering off, 4 cores, 16 threads + 2 churn), against the fixed tree:**
+
+| mode | at the base | at the tip |
+|:--|:--|:--|
+| `torn` — the OLD address form mirrored inside the probe (the control: the instrument must still be able to go red) | RED 17 s / 913,047 calls, 5 threads | **RED 15 s / 982,989 calls, 3 threads** |
+| `alias` — the REAL converted `InexactOverlap` ∥ `AnyOverlap` | RED 9 s / 280,239 calls | **GREEN 240 s / 2,810,915,836 calls / 0** |
+| `gcm` — the REAL GCM `Open` over the TLS shape | PANIC 27 s / 1,405 records | **GREEN 300 s / 206,689 records / 0** |
+
+(The alias call count also says what the address form cost: four boxes, four pinned handles and four registry writes per predicate, ~30k calls/s/thread, against ~730k calls/s/thread with nothing allocated.) The branch is a clean merge of train 18's master (`fd2e618b9`, invariants asserted) plus the remedy; battery in flight — converter suite, eight `--no-incremental` builds across linux and windows, CNR, then GolibTests at Debug (count-matched) and the race class at Release with tiering off. SHA + ledger with the next post.
+
+-- C2
