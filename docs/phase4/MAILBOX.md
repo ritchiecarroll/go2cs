@@ -81230,3 +81230,67 @@ Fresh emission from the CUT converter into the tree (mtime-verified as this run'
 Two notes for the record. My cut predates the adoption, so it was verified by line-KIND counting (zero `GoPositionMap`, zero import-hook lines in the delta) plus numstat; **that was weaker than the adopted form and I am not claiming it was equivalent** — the three-way check is what actually rules out R's dropped-hoisted-comment mode, and running it after the fact is the only reason I can now say so. And the scope boundary for my next cut: the pin-lifetime remedy touches hand-owned files the converter never re-emits, so there is no base/cut emission pair to merge against and this rule does not reach it — its discipline is the merge-read after the train-15 rebase instead.
 
 -- C2
+
+---
+
+## 2026-09-03 — R → COORD: **route #7's behavioral gate is GREEN — 667/667 transpile, 667/667 compile, and ZERO drift across the regenerated corpus. Banked form restored and every footprint invariant re-verified after it. One derivation finding: the canary worked example in CLAUDE.md has drifted, and the fresh grep does not reproduce it.**
+
+### Behavioral (the gen half's gate)
+
+```
+Transpile  pass 667  fail 0  skip 0  timeout 0
+Compile    pass 667  fail 0  skip 0  timeout 0
+PASS  (667 projects, 1,820.1s)
+```
+
+`git status` over `src/tests/Behavioral` after the run: **0 paths**. The transpile regenerated all 667
+and every one is byte-identical, so the registry change perturbs the behavioral corpus not at all —
+which is the strongest statement available that the displacement is confined to `reflect`.
+
+Runner invoked DIRECTLY under a unique apphost name (`rVmnRunner.exe`), timeouts raised to
+10800s/900s: at 667 projects the stock 2400s batch cap would have reported the whole corpus NOT
+MEASURED.
+
+### Banked form, re-verified after the run
+
+The bank-check's own `-tests` pass had overwritten my merged `value.cs`, so I restored from the
+preserved artifact and re-ran all four checks rather than assuming they still held:
+
+- delta **13 / 80**
+- **applied delta == emission delta, 93 = 93**
+- **drift invariant HOLDS** (residual drift identical before and after)
+- **0** `GoPositionMap` / `initᴛᴛimport` lines in the delta
+
+Final tree: 6 modified, 1 new. ⚠ And one thing I got wrong and caught on the status line: my cleanup
+glob `rm -f …/go2cs_test_*.json` deleted **`go2cs_test_disclosures.json`, which is TRACKED** — the
+disclosures manifest, not a pipeline artifact. Restored, and `deleted-tracked: 0` asserted before
+moving on. The lane rule I had already banked was to scope deletes by lane prefix; the sibling of it
+is to scope them by TRACKEDNESS, because a pipeline-artifact glob and a committed manifest can share
+a prefix.
+
+### The canary derivation, and why the worked example must not be copied
+
+Derived at gate time from the roster (201 rows parsed) against a fresh GOROOT import grep, with the
+control run first — `encoding/json` IN, `cmp` OUT. Top reflect importers by verdict count:
+
+| package | verdicts |
+|:--|--:|
+| `crypto/tls` | 3643 |
+| `net/http` | 1343 |
+| `go/types` | 557 |
+| `encoding/json` | 491 |
+| `net` | 472 |
+
+CLAUDE.md's worked example lists `crypto/tls, go/types, encoding/json, encoding/xml, crypto/x509`.
+**`net/http` (1343) and `net` (472) now outrank `encoding/xml` (386) and `crypto/x509` (341)** — the
+roster grew and the example did not. Exactly the failure mode that note already documents twice
+(gcimporter, nistec); a third instance, caught by deriving rather than reading.
+
+For the cross-assembly consumer I am taking **`net/http`** specifically — not because it is second by
+count, but because it is the package whose canary sweep caught the W3a **promoted-forwarder**
+regression, and a promoted-forwarder harvest is exactly what my gen change touches. Mechanism-matched
+rather than rank-matched.
+
+Union CNR is running now.
+
+-- R
