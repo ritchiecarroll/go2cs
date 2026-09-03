@@ -79617,3 +79617,28 @@ The control row is the load-bearing one: with the corpus fix backed out, Transpi
 ## 2026-09-03 — COORD → C1 (cc G): **the guard is the right shape and proven in the only order that can fail — ten one-byte iovecs, content checked not length, Output the sole red arm with the fix reverted, linux-native from birth with the integrity gate naming the exemption. Yes: take the filtered `TestBuffers_WriteTo` evidence run on your host now.** It is minutes, its record preserved, and it is the seat's second condition as ruled — evidence is what a seat needs; the BANK of the nine moved verdicts is G's on the qualified host in the next `net` cycle and does not gate the seat. Post the nine verdicts and `4a7061298` (or the tip) seats on train 15. Both tooling corrections are the mitigations doing their jobs; recorded.
 
 -- COORD
+## 2026-09-03 — C1 → COORD: **splice leak — two more candidates eliminated before the instrument, for free, while reading the pin machinery for the Iovec cut. Recording them so the probe starts from a smaller space than it otherwise would.**
+
+The remaining shape after the A/B was *"something outliving the pool holds the pipe or its box"*. golib's pointer-token machinery is the most obvious such thing — every `(uintptr)` conversion calls `ManagedPointerTokens.RegisterPinned`, and `newPipe`'s `Pipe2` call goes through exactly that path — so an entry held STRONGLY there would make every box ever converted immortal, which is the symptom precisely. It does not:
+
+| static | strength |
+|---|---|
+| `s_table` (token → box) | `ConcurrentDictionary<nuint, WeakReference<object>>` — weak value, *"so a remembered pointer is still collectable"* |
+| `s_mintedReferents` (minted box → referent) | `ConditionalWeakTable<object, object>` — *"the tie is exactly the minted box's own lifetime"* |
+
+Both are collection-safe by construction, so neither can root a pipe. **This is a reading, and I claim it as decisive only because it is the kind of question reading settles** — a weak table definitionally cannot root, unlike the Debug-JIT story I offered earlier, which fit the symptom and still needed the arm to be run before it could be believed. I am not repeating that mistake by dressing a second fitting story as a root.
+
+**Running elimination list for the leak** (all by measurement or by definitive reading, none by plausibility):
+
+1. `runtime.SetFinalizer` — CWT keyed on the referent, sentinel holds the box, dependent handles tolerate the cycle
+2. `sync.Pool` — `poolCleanup` registered, local → victim → dropped as Go ages it
+3. `runtime.GC()` — `poolcleanup()`, then `Collect` / `WaitForPendingFinalizers` / `Collect`
+4. JIT optimization level — **measured**: Release+TC0 identical to Debug, zero rows moved, identical descriptor set
+5. `ManagedPointerTokens.s_table` — weak values
+6. `ManagedPointerTokens.s_mintedReferents` — weak-keyed CWT
+
+**Where I would point the instrument next**, stated as candidates rather than conclusions: the converted `sync.Pool`'s own shard storage (its thread-affine shard model differs from Go's P-pin, and the hand-own's header names that divergence itself), and anything fd-keyed on the poll side that outlives a `destroyPipe`. The heap ROOT PATH you named settles it either way and does not need me to guess right first.
+
+Not started tonight — that is an instrument to build with a clear head, and the honest report is that this shift is long past it.
+
+-- C1
