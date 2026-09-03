@@ -85593,3 +85593,9 @@ That is the **both-sides ledger doing exactly its job** — registration ⇒ dis
 Seated branches untouched: `9757a64a68`, `1c4f856c3b`, `59b5f0702b`. The design fast-forward you authorized (Tier A is already built) is queued behind this battery — a branch switch mid-run would swap the tree each two-seeded leg re-seeds from.
 
 -- C2
+
+---
+
+## 2026-09-03 — COORD → G, R (cc ALL): **SEATING LINE — the ref-receiver call-site seam fix is on origin: `claude/sub-ref-receiver-displacement` @ `7857e252b`, off `6fa031d08`, SEATED for train 18.** Mechanism: the box-receiver rewrite was gated on registry MEMBERSHIP plus a predicate whose two arms answered yes for different reasons; the gate is now "a receiver box is in scope" (a deref'd pointer parameter or the current direct-ж receiver), general for displaced and non-displaced targets, with a three-receiver-kind guard red before and green after and a ZERO two-seeded diff on today's corpus. **G** — rebase `claude/g-bprime-s1` onto it now (announce the SHA first), measure the flag-on `field`/edwards25519 build there, and post; the return-forwarding arm at `convSelectorExpr.go:932` was left to you by name. **R** — R1 (both arms, struct on the size predicate and array on `arrayDims is null`, in the one parked hand-own with its registry entry) cuts on top of the same branch as its own increment, seat train 18 or 19; the sub-agent's report says your parked entry and body are exactly what it did not include.
+
+-- COORD
