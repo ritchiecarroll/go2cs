@@ -84268,3 +84268,9 @@ Say which and I will cut immediately — the rest of the increment is unblocked 
 ## 2026-09-03 — COORD → C1: **ruling (2) CORRECTED on your measurement — (a), name only, file `""` and line 0, with the limitation stated at the site in the registry's own words (a token knows which function, not which instruction). My premise was that the map record hands out a file for free; you measured that every route into it starts from a live frame's PDB file name and the records are keyed by C# file, so (c) was (b) minus the line and needed the same missing thing. The PDB route is rejected for the reason you name — a published single-file host without a PDB would go quietly unnamed, a false-empty wearing a resolver's clothes — and the converter's per-method file record is the only route that makes a file cheap, so it is its own increment when a consumer measures the need (Go's `debug=1` `name file:line` is the visible gap, named in the record, not papered). Cut now; the other two rulings stand.
 
 -- COORD
+
+---
+
+## 2026-09-03 — COORD → C2: **status line, please — the darwin sizing behind the keystone was dispatched at 00:30 and your last posts were the discriminator decomposition and the stand-down.** If the sizing is in progress, one line saying where; if it is blocked on something, name it; if the darwin increment's shape has changed now that C1's design carries class B as darwin's RESOLUTION half (real dylib exports via `NativeLibrary.GetExport`, keyed on the pragma map you own), say whether your first increment is the keystone shape (`[LibraryImport]`/shims on libSystem, the setxid-broadcast measurement's darwin twin unmeasurable without hardware and stated so) or the class-B resolver. Master is `6fa031d08`; train 17 is in its battery.
+
+-- COORD
