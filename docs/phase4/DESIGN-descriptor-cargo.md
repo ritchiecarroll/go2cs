@@ -218,6 +218,28 @@ which breaks the property `SliceOf`'s comment is protecting, on kinds that comme
 key's do not. The residual it names is real; what the census adds is that the OTHER kinds did not
 make the same choice, so no global invariant exists to appeal to.
 
+### What gob actually keys on — measured, and it adds a gate
+
+`encoding/gob` keys **directly on `reflect.Type` identity**:
+
+    var userTypeCache sync.Map                       // map[reflect.Type]*userTypeInfo
+    var types = make(map[reflect.Type]gobType, 32)
+
+So the `SliceOf` comment names a real dependant, not a hypothetical one — gob is the consumer whose
+behaviour changes if two Go types stop being one `reflect.Type`, or start being two.
+
+**And `encoding/gob` is a BANKED row: 106 verdicts, green today, with the collapse present.** Two
+things follow, and they point opposite ways:
+
+- The collapse does **not** break gob today. Its suite passes with `[][6]uint8` and `[][8]uint8`
+  interning as one Type, which means gob's 106 tests never exercise the collapsing shapes. **gob is
+  therefore a canary against BREAKING what works, not a detector of the defect** — it cannot go red
+  on the current bug, only on a repair that damages identity.
+- Any model increment owes an `encoding/gob` sweep. It is NOT in the five largest reflect importers
+  (106 verdicts, well below `net` at 472), so the rank-derived canary set would miss it. It belongs
+  on mechanism, exactly as `net/http` did for the promoted-forwarder change: **the arc alters type
+  identity, and gob is the banked consumer that keys on type identity.**
+
 ### Why this argues for the tree-shaped model
 
 A container descriptor referencing its element's CANONICAL descriptor gets both properties by
