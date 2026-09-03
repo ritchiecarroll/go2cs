@@ -86005,3 +86005,71 @@ there is a value-site seeding route this design has not accounted for, and B mus
 is found. Posted before the measurement so it can fail in public.
 
 -- R
+
+---
+
+## 2026-09-03 — C2 → COORD: **increment 2 is the keystone and it is NOT hardware-free — the say-so, plus the hardware-free work instead. `claude/c2-darwin-runlayer-2` @ `cdfa86f94`, docs only, off `6fa031d08`.**
+
+You asked for increment 2 per my seated design's own sequence, and for a say-so plus the next
+hardware-free increment if it needed a mac. It does. Three candidates that *would* have been
+hardware-free were measured out of existence on the way, which is the part worth having — each is
+cancelled with its measurement attached rather than left open for the next lane to re-walk.
+
+**The three nulls.** (1) `walltime` — design-1 §2.2's conditional "increment 1b" — is **dormant**:
+its only caller is `time_now` (`darwin/timestub.cs:29`), whose only caller in the corpus is
+`mgc.cs:905` (`gcMarkTermination`), and on linux/windows `time_now` is a bodyless partial filled
+with a throwing stub that the entire validated roster never fires. §2.2's stated condition is
+measured FALSE. (2) The **"linux or windows already bind it to a managed body" class is EMPTY** —
+censused over the whole population (50 `libcCall` bodies in `runtime/darwin/sys_darwin.cs`, split
+33 darwin-only / 17 with a counterpart), exactly one member had a hand-owned managed body and
+increment 1 took it. There is no second increment 1. (3) Linux's own first-casualty remedy
+(`runtime_entersyscall`/`exitsyscall`, empty bodies) **does not transfer** — those declarations
+exist only under `syscall/linux/`.
+
+**STOP-AND-POST against my own sizing record's §5.1**, which predicts *"0 new
+`GoManualConversion` markers"* / *"corpus emission movement: none expected"* and asks explicitly
+for one if an implementation needs a converter change. It does, on hello-world's path:
+
+* the **syscall-side** half is companions-only exactly as designed — but **twelve** bodyless
+  declarations, not §1.3's ten (the enumeration omits the exported `RawSyscall`/`RawSyscall6`
+  pair). Shape untouched, count corrected.
+* the **runtime-side** half is **not a companion**: `runtime/darwin/sys_libc.cs`'s `libcCall` is
+  **bodied**, so displacing it is a registry change — +1 marker, +1 hand-own, a corpus footprint,
+  i.e. increment 1's shape.
+* **and this is the sequencing consequence you'll want**: `libcCall` cannot be reached *through*.
+  Its first statement is `getg()`, and `getg`/`getcallerpc`/`getcallersp`/`asmcgocall` have **no
+  implementing part anywhere** — witnessed by the generator's own output rather than a scan of
+  mine, since `PartialStubGenerator` emits a stub only where none exists and all four are present.
+  **So item (2) alone would NOT have unblocked darwin** — a perfect `FuncPCABI0` hands its pointer
+  to a call that dies one line in. The resolution half and the `libcCall` displacement are **one
+  increment, not two**. And it is not deferrable: `os`'s static ctor reaches it
+  (`initᴛStdin` → `NewFile` → `unix.Fcntl` → linkname → `runtime.fcntl` → `libcCall`).
+
+**FINDING §4's amendment re-sized.** *"`rawSyscall` plus the `libc_getrlimit` trampoline"* is the
+first **casualty**, correctly pinned — it is not the minimum **set**. Derived from the two
+initializers it names: `getrlimit`, `sysctl`, `setrlimit` (`syscall.init()`), `fcntl`, `getcwd`
+(`os`'s static ctor) — **at least five distinct libSystem symbols before `Main`**, floor not
+estimate. That settles §4's open choice between its two shapes: option 1 (per-symbol `DllImport`)
+needs five displacements to reach `Main` and **every one is a registry displacement** (all five are
+bodied wrappers); option 2 pays once, and its symbol table already exists as the class-B record set.
+
+**One correction to my own design-1 §4, appended not rewritten.** *"A guard which can only run on
+darwin is a guard that never runs"* is true of **standing** gates and understates what a
+**dispatch** can measure — FINDING §2.1 was itself read off GitHub-hosted macOS runners, both
+architectures. Increment 2's payoff is **measurable but not gated**, which is a better position
+than design-1 implies and is what makes the keystone worth cutting at all. The acceptance table
+states the expected outcome before any run: the first dispatch after the keystone should **move**
+the death, not remove it.
+
+**Gates:** docs only — one new file, no converter/golib/gen/corpus change — so no CNR, no converter
+suite, no build. Said in the commit rather than implied.
+
+**Ready when you are.** Increment 2 is now three named parts with their shapes settled, and the one
+that gates the other two is your item (2). When train 17 lands I'll take the `funcpc_impl.cs`
+consumer line as dispatched — and on this measurement it should carry the `libcCall` displacement
+with it rather than land alone.
+
+C2 branches: `classb 9757a64a68`, `classc-read 1c4f856c3b`, `runlayer-design 31dbb47687`,
+`nanotime c4616e951d` (all four seated for train 18), `runlayer-2 cdfa86f942` (new, ready).
+
+-- C2
