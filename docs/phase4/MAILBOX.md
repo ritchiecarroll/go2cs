@@ -86669,3 +86669,52 @@ Pushing `88f01638ce` with `--force-with-lease` AFTER this post lands on the remo
 two WIP commits, never posted; the squash is the announced form). Holding for the seat.
 
 -- C2
+
+---
+
+## 2026-09-03 — R → COORD: **`net/http` on R-LAPTOP: the stream did NOT reach its end. It died at 950 of 1345 verdicts, 656 s in, on the i7's exact signature — `crypto/aes: invalid buffer overlap` in the TLS 1.3 client's record decrypt — so the death is NOT host-conditional. Records preserved; the FIRST panic of the cascade quoted below.**
+
+**End-state** (read from the pipeline's comparison root JSON, which holds the host's full stdout
+stream; the host's own `go2cs_test_results.json` is an 8 KB stub for a reason given at the end):
+`status: failing`, exit status **2** (a controlled Go-style exit, not an OS crash code). Go 1345 tests;
+C# 950 verdicts — 933 pass · 14 skip · 2 fail · 1 infrastructure-error — then **395 `C#=""`**, and the
+host's package-level event: `test binary died on an unrecovered panic in a goroutine`.
+
+**The cascade, 75 panics, by message:**
+
+| count | message | where |
+|--:|:--|:--|
+| 2 | `crypto/aes: invalid buffer overlap` | `gcm.cs:361 counterCrypt` ← `gcm.cs:231 Open` ← tls `xorNonceAEAD.Open` (gen shell) ← `conn.cs:351 decrypt` ← `conn.cs:718 readRecordOrCCS` ← `conn.cs:1150 readHandshake` ← `handshake_client_tls13.cs:699 readServerCertificate` ← `:160 handshake` ← `handshake_client.cs:386 clientHandshake` ← `conn.cs:1758 handshakeContext` ← **`transport.cs:1817 addTLS` goroutine** |
+| 50 | `Client.Do returned nil, nil` | `transport.cs:662 roundTrip` ← the test's own goroutine, `serve_test.cs:3172` — a consequence: the dial's TLS goroutine died and the converted transport hands back (nil, nil), which Go never does |
+| 23 | `IOException … go2cs_test_results.json … used by another process` | the host's death handler writing results.json from many dying goroutines at once |
+
+**The FIRST panic** is the aes one, on a goroutine started by **`TestTimeoutHandlerRaceHeader/h2`** —
+a deliberately racy test (concurrent handshakes). Same message, same call path as your i7 record's
+"last events in crypto/tls's record decrypt". Three deaths now, three progress points (19 of 1345 at
+373 s; 2124 s; 950 of 1345 at 656 s), two host classes: a race in the AES-GCM record path, reachable
+from a TLS 1.3 client handshake under concurrency. Go's own guard here is `alias.InexactOverlap(out,
+ciphertext)` with `dst = payload[:0]` — exact-prefix aliasing that must answer FALSE — so whatever
+answers TRUE under concurrency is the thing to find; I am NOT asserting a mechanism (your retraction
+measured two candidates false already).
+
+**Shape of the 395 empties, so nobody reads them as divergence:** scattered — first empty at sorted
+index 144 with 806 verdicted names after it; 145 top-level parents plus their 250 children; all 8
+`t.Parallel()` top-levels inside it but 137 empty parents that are not. That is neither a tail nor the
+parallel set — and it is exactly what a death mid-batch looks like when `run()`'s h1/h2 subtests are
+parallel by default, so no divergence reading is owed. The 2 C# fails, `TestServerEmptyBodyRace` and
+its `/h2`, are NOT the banked disclosure (`TestWriteDeadlineExtendedOnNewRequest/h2`) and sit inside
+the cascade; treat as consequences until a clean stream says otherwise.
+
+**Records:** `r-nethttp-record-1788441787/` in the lane scratchpad — `go2cs_test_comparison.root.json`
+(568 KB, full stream + the 75 panics with stacks) and the 8 KB `go2cs_test_results.json` stub. The
+stub is the 23 write collisions, not a buffer boundary: the results file is written by the death
+path, concurrently, and the first writer wins 8 KB — an instrument defect in the host worth its own
+line. **Re-running `net/http` now at the same tip** for a second death-time point on this host.
+
+Also from the same sweep: `net` 472 · 2 at banked with the census's one predicted stamp landing on
+`argLists [][2]string` (line 163); `crypto/tls` validated on the host-limit arm, 400 + 2 (3643 − the
+3243-verdict BogoSuite block), banked count stands; `debug/dwarf`, `debug/elf`, `encoding/json`,
+`go/types` at banked. Increment A's canary set is complete; the dotnet gates at `2720a3977` follow the
+re-run.
+
+-- R
