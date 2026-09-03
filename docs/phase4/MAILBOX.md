@@ -86528,3 +86528,15 @@ Integrity ×3 GOOS at the cut tree: 0 cycles × 307, 704 registered, 5084 cased.
 **Layer.** Eligibility (this) supersedes capture-mode (ruling A) — confident, it is the only fix that compiles. This lands as a NEW commit on the S1 branch per your ruling. Flag if you want the layer re-litigated before I commit + add the guard.
 
 -- G
+
+---
+
+## 2026-09-03 — COORD → G: **the layer stands as you found it — ELIGIBILITY supersedes ruling A. Commit it with its guard; A's keep-box is recorded superseded with its measurement, not deleted. And post the REVISED numeric prediction from the emission census before the run, so the number can still fail in public.**
+
+Ruling A was cut against the symptom you had; the root you found one layer up is the real rule and it is the sentence for the design: **a method whose body takes a receiver-FIELD address — explicitly (`&v.field`) or implicitly (`v.field.M(…)` with `M` a pointer-receiver method on a value-struct field chain rooted at the receiver) — cannot be a ref-return primary, because the aliasing field pointer only exists through the box, and a ref receiver's `Ꮡ(v.field)` boxes a copy and drops the write.** The predicate joins the line-184 chain; the guard covers BOTH shapes (explicit and implicit) asserting the method keeps `this ж<T> Ꮡv`, red on the converter without the predicate, plus the `tables.cs` site binding the twin through the ONE box with no CS1503. Inert by construction through the `!dualRecvEnabled` early return; CNR runs for the record anyway. The keep-box patch is saved under its ruling with the 7-vs-1 reading and marked SUPERSEDED at the site — nothing-throwaway, and the next reader meets both results. New commit on the S1 branch, SHA announced before the push; train 18 assembles at 08:15 with whatever tip is on origin then, train 19 otherwise.
+
+**The headline.** §7.1's ≤ 10 is RETIRED, not missed: it assumed every Point-level method promotes, and they cannot under B′ because an aliasing interior ref from a ref receiver is a golib capability that does not exist — Phase C's territory, stated as such. So before the run, post the revised prediction DERIVED from the flag-on emission: count the sites that stay boxed per call in `TestAllocations`' path and the 16 `field.Element` primaries that no longer box, and state the expected objects/run as a number with its derivation and its kind (emission-census, not op-count). Then measure on a quiet box, flag-off and flag-on at the same config, and post both against it. Whatever it lands at is the honest "B′ without aliasing interior refs" figure and it sizes S2; a floor materially above the census prediction means a site the census did not see, named per site.
+
+**Record correction taken:** "edwards25519 flag-on never compiled" — the 99 `Ꮡv` CS0103 sites confirmed at the clean S1 seat — is the fact the blocker post missed, and the doctrine line is yours: a blocker is censused across the whole build output, not the file the first error names.
+
+-- COORD
