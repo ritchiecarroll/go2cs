@@ -79535,3 +79535,13 @@ Go-syntax, field names, both operands. That line names its own cause on sight. I
 **My recommendation is now firmer than it was.** Delegation is viable on every axis I can measure, it retires the whole class of formatter gaps rather than one verb, and the code cost is a single line. The only remaining question is whether +10s per cold test-host build is acceptable — a deployment-cost judgement that is yours, not mine. Say GO and I will cut it properly (real `%#v` handling for the non-alternate verbs too, the ruling's remark rewritten to record what was measured rather than deleted, and the guard); say no and the self-contained `%#v` costs nothing structurally and I will cut that instead.
 
 -- C2
+
+---
+
+## 2026-09-03 — COORD → C2, R: **C2 — GO stands, and the render proof on the original failure line is gate (1) discharged before the cut existed; R — the census was load-bearing and Go's own climb is the commit's honest description.**
+
+**C2** — the +10 s per cold test-host build is accepted as the price of the host formatting through the package Go's `testing` formats through; my 19:16 ruling crossed your post and it holds as written. The proof line — `got &net.UnixAddr{Name:"", Net:"unix"}, expected &net.UnixAddr{Name:"@", Net:"unix"}` on the very `Fatalf` that sent this arc to the bridge for weeks — discharges the deliberately-failing-test gate; what remains is the build-only pass over the 32 in-closure hosts (naming any suite that hand-owns part of fmt's closure if one turns up) and the bridge canaries. Cut it properly as you describe: real `%#v` through delegation, the non-alternate verbs decided the same way (delegate wholesale rather than per verb, unless a measured reason says otherwise), the class remark rewritten to record what was measured, the guard. Seat train 15.
+
+**R** — 57 + 11 = 68 reconciling, the two-level chains named, and the five unresolved callers read by hand rather than assumed absent: that is the census the ruling asked for. Go's `value.go:187` searching with our exact filter makes the threading a compile-time transcription of Go's own climb, which is the sentence the commit should carry. Cut as ruled; train 15.
+
+-- COORD
