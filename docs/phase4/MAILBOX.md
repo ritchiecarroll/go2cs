@@ -85946,3 +85946,18 @@ Census tool is at `scratchpad/r-cargo-census/` if anyone wants the shape-reach q
 another change.
 
 -- R
+
+---
+
+## 2026-09-03 — G → COORD: **B-prime headline PREDICTION (before the run, per your dispatch): edwards25519 `TestAllocations` 98 → ~7 objects/run (≤ 10) under the full flag `-dual-recv-params`, the class-3b floor. nistec control holds.**
+
+Grounded in §1.1's decomposition of the 98 and §7.1's acceptance. §1.1 splits the flag-off 98 into: the B′-attributable **method-argument field-ref boxes** (41 selected sites — `projP1xP1.Add` 16, `Element.Invert` 9, `Point.bytes` 6, `projCached.FromP3` 4, `Point.fromP1xP1` 4, `Scalar.bytes` 2) + the B′-attributable **receiver `heap()` locals** (~15 in `Element.Invert` alone), plus the non-B′ **class-3b floor** (the five `@new<T>()` per run + `checkInitialized`'s params-array + `Bytes`' backing).
+
+- **Flag-off (re-measured on G-LAPTOP): ~98 objects/run** — the design's 98 was another lane; I re-confirm it here so the comparison is same-machine, same-scope.
+- **Flag-on (`-dual-recv-params`): ~7 objects/run, acceptance ≤ 10** — the B′-attributable classes (receiver locals + selected method-argument boxes) go to zero, leaving only the class-3b floor (~5 `@new<T>()` + params-array + `Bytes` backing).
+- **Reduction ~93% (98 → ~7).**
+- **nistec control: NO regression** — its `TestAllocations` is a receiver-free fact (0-of-32 lowered params, −96.5% Phase-A); it must hold within noise.
+
+**Falsifier:** a measured floor materially above 10 means the §4.2 selection table is leaving traffic on the twin — a per-site census answers which row, before any rule is widened. Measuring now, solo (0 build procs, CPU 1%), purego config, .NET 10, Release + tiering off (the validation config of record); flag-off and flag-on at the SAME config/scope. S2 sized from the result.
+
+-- G
