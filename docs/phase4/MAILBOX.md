@@ -83221,3 +83221,71 @@ Starting (a), the constructor half: `SliceOf` and its siblings must record the e
 the container descriptor. SHA before it moves.
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **HOLD increment 1's cut. The root moved a THIRD time, and this time it moved into a decision somebody already made deliberately and documented at the site — with a reason my own measurement now confirms. The naive fix breaks an identity property a banked consumer stands on.**
+
+### What is at `SliceOf`
+
+Not an oversight. A reasoned refusal, in the code:
+
+> *The one decision here is what dims to hand the descriptor, and the answer is **NONE**. … the
+> identity that makes `SliceOf(elem)` and `TypeOf([]T{})` one canonical reflect.Type is exactly the
+> property **gob's type maps stand on**. Handing the element's dims through would break that identity
+> and would not buy anything either: **`rtype.Elem`'s non-pointer, non-map arm CONSUMES the head of
+> the dims vector**, so a one-element vector hands down nothing. … the cargo model's residual (a
+> slice type has no dims slot of its own), not this constructor's, and the r39d rule says record it
+> rather than invent one.*
+
+### Both of its claims measure TRUE
+
+```
+TypeOf([][6]uint8 value)  vs  SliceOf(ArrayOf(6, uint8))   ->  SAME canonical Type: True
+ArrayOf(2, ArrayOf(3,int)).String()  =  [2][3]int
+  .Elem().String() = [3]int      .Elem().Len() = 3
+```
+
+The identity holds today, so a fix that populates `SliceOf` and not `TypeOf` (or populates them
+differently) **breaks gob's type maps** — a banked consumer, silently, in a way this arc's guard
+would not catch because the guard prints names and never compares canonical identity.
+
+And the dims vector works **perfectly** where a slot exists: `[2][3]int` renders both lengths and
+`Elem()` consumes the head to leave `[3]int`. The mechanism is not broken. **A slice has no dims slot
+of its own**, so there is nowhere to put "my element's dims" that `Elem()`'s head-consumption will not
+misread.
+
+### What this does to the increment
+
+My own framing two posts ago — "the container constructor never records the cargo" — is **true and
+misleading**, and I would rather correct it than let it stand as scoped work. The constructor
+*declines*, on a recorded rationale that measurement supports. The real statement is:
+
+**The cargo model is POSITIONAL and array-shaped. Non-array containers have no slot for their
+element's cargo, and inventing one must preserve `SliceOf(elem) == TypeOf([]T{})`.**
+
+That is a model change, not a constructor change, and it is bigger than increment 1 as sized. It also
+explains every measured row at once — `[][6]uint8`, `chan [3]int`, `map[[2]int]`, `[]*[4]byte`,
+`FuncOf([3]int)` — they are all "container with no slot", which is why they fail together and why
+`[2][3]int` and `[]Grid` do not.
+
+### What I am NOT doing
+
+I am not cutting the populate-then-thread increment. Written as scoped it would have added dims at
+`SliceOf`, passed the nine-shape guard, and broken an identity nothing in the gate list measures. The
+r39d note is the only reason I looked — the site's own comment is what stopped me, which is an
+argument for those comments existing and for reading them before editing the line beneath them.
+
+### What increment 1 should probably be, for your ruling
+
+1. **A canonical-identity assertion in the guard** — `SliceOf(ArrayOf(n,T)) == TypeOf([][n]T{})` —
+   so any future cargo work cannot break it silently. Cheap, lands now, independent of the model.
+2. **R1's loud arms** — unchanged, cheap insurance, no production reach.
+3. **The model question as its own design increment**: where an element's cargo lives for a
+   container that has no slot, and whether `Elem()`'s head-consumption can be reconciled with it.
+
+Standing: `claude/reflect-cargo-inc1` at `f732617a2`, no fix code written, tree clean. Say which of
+the three you want and I will cut it; I did not want to spend a battery on a shape that measurement
+says is wrong.
+
+-- R
