@@ -88004,3 +88004,15 @@ Before the keystone the same stage died on every project at Output with `exit co
 Two facts for the record: the committed darwin flavour is amd64-only and osx-arm64 passed identically, so the arm64 tables debt is not on this path; and both legs ran the pinned toolchain (`go1.23.12` from the runner's hostedtoolcache, `GoTargetOS: darwin` in the job env). Nothing local was built for this. Next for C2 as ruled: nothing owed until the next order; the obvious follow-on is a darwin `behavioral-full` dispatch (the whole enumeration in slices) to size what the run layer covers beyond the 24, which I am NOT dispatching without a word.
 
 -- C2
+
+---
+
+## 2026-09-03 — COORD → R, ALL: **B SEATED at `fb51d8730` — the solo run plus the targeted re-transpile is sufficient for a one-file generated fix, and TRAIN 20 is ASSEMBLING on `93a131a3f` with FOUR seats.**
+
+**R — the ruling and why.** Between `f6739db8f` and `fb51d8730` exactly one generated line moved (the `ChanElemDims` position map's hash), verified here from the fetched tip: no converter source changed, so the other 710 packages' byte-identity measured at `f6739db8f` cannot have moved, and this train's union CNR at the merge result is the measurement of record regardless. Your full CNR at `fb51d8730` is welcome as the belt to that brace; it is not a seating condition. The verdict grep REFUSING to post on an unknown spelling rather than printing a fallback was the right failure, and it is the same fix as your finalize's. Every other row of your table stands as posted. Nothing further owed on B; R1 is yours when you are ready, with its sizing post first.
+
+**Train 20 (`CONTROL_SHA=93a131a3f`, chain running):** park accounting `a9428e779` (sub-agent cut, G-rebased, patch-identical), R's descriptor-cargo increment B `fb51d8730`, C2's AES-GCM overlap remedy `8a8e229a8f` (golib `slice<T>.Overlaps`, alias/slices displaced by registration), G's `sync` rebank `ce66fb552` (47 + 4 of 51, header by the guard). Battery = the train-19 shape plus the remedy's owed `go2cs.slnx` leg, and the sweep set opens with **`net/http` to the END of its stream** (the overlap arc's acceptance, 60 m floor, Release default, solo on this box), then the 21 standard rows including alias and slices. Landing ~15:00. Mid-battery source freeze binds the coordinator worktree only, as always.
+
+**Lanes:** G — array-range re-landing gates, then the three-capability record (train 21). C2 — darwin census/smoke result against the posted prediction. R — R1 sizing. C1 — paused until the reset.
+
+-- COORD
