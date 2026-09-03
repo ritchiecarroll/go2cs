@@ -88353,3 +88353,40 @@ carried and `-stdlib` keeps (six lines, minus the one I misrounded). File set an
 hit. The apply script now counts with numstat, and the lesson is banked.
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **R1 WAITS — the seat condition is UNMEASURABLE at this tip: reflect's `-tests` assembly does not build at `342ba410d`, on the blocker the record said was closed, surfacing on the TEST-side emission path the two-seeded `-stdlib` diff is blind to by construction.**
+
+**The one error:** `core\reflect\abi.cs:145 error CS0103: The name 'Ꮡa' does not exist in the current context`
+(the test-assembly publish; reflect's PRODUCTION assembly builds clean at the same tip). The `-tests`
+pipeline re-emits `abi.cs`, and in THAT emission the three call sites of the now-displaced ref-receiver
+method `abiSeq.regAssign` come out in BOX form — `Ꮡa.regAssign(…)` inside `addArg`/`addRcvr`, `ref` bodies
+that hold no box — while the `-stdlib` emission keeps them in VALUE form `a.regAssign(…)`. The two-seeded
+`-stdlib` diff measured exactly the body removal (+1/−81) and nothing at the call sites, which is
+consistent: `-stdlib`'s form is right, `-tests`'s is not.
+
+**This is the record's own blocker, one path over.** DESIGN-descriptor-cargo.md, "Blocked, not by
+design": *displacing `regAssign` — a `[GoRecv]` method with a REF receiver — makes the converter emit a
+box-form call (`Ꮡa.regAssign`) into a `ref` body where no box exists (CS0103)… dispatched separately.* That
+dispatch — `claude/sub-ref-receiver-displacement` `7857e252b`, in master since train 18 — fixed the
+`-stdlib` path; the `-tests` conversion of the same package still emits the box form. Same family as
+the x509 lesson in CLAUDE.md: a production-only diff cannot see a test-side emission.
+
+**Consequences, stated either way as you asked:** no CUT record → no BROKEN {} → R1 cannot be measured
+against its condition and does not seat train 21. It waits for the test-side twin of `7857e252b`, which
+is a **suggestion to you** (owner rule; self-contained prompt below), not a cut in R1's seat. R1's
+commit stands as cut (`0ea282661` on master; measurement `342ba410d`), and its converter suite is green
+(`ok 277 s`, the displacement witness inside). The PRE record — reflect at B's tip, train 20's state —
+is preserved (`r1-reflect-PRE.json`) so the BROKEN derivation runs the moment a CUT record exists.
+
+**Suggestion (self-contained):** *In the `-tests` conversion path, a displaced `[GoRecv]` method with a
+REF receiver has its call sites inside other ref-receiver bodies emitted in box form (`Ꮡa.m(...)`) — CS0103
+`Ꮡa` — where the `-stdlib` path emits value form (`a.m(...)`) since `7857e252b`. Repro: register
+`"abiSeq.regAssign": goosAny` in `manualConversionFuncs` (branch `claude/reflect-cargo-r1-onB` @
+`342ba410d` has it with the companion and placeholder), run `go2cs -tests -test-action build` on
+`reflect`, read `core/reflect/abi.cs:145`. Find where the `-tests` driver decides a call's receiver form for a
+displaced method and make it read the same predicate the `-stdlib` path reads since `7857e252b`; add a
+`-tests` emission census of `abi.cs` to that seam's guard so the two paths cannot diverge again.*
+
+-- R
