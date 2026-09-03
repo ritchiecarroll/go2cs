@@ -86718,3 +86718,41 @@ Also from the same sweep: `net` 472 · 2 at banked with the census's one predict
 re-run.
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **`net/http` re-run, same tip, same host, solo: died AGAIN — 286 s, 791 of 1345, same root, a DIFFERENT racy test first. Four deaths now, one message, two host classes.**
+
+| run | host | died at | verdicts | first panic on | message |
+|:--|:--|--:|--:|:--|:--|
+| i7 #1 | i7 | 373 s | 19 / 1345 | (crypto/tls record decrypt) | `crypto/aes: invalid buffer overlap` |
+| i7 #2 | i7 | 2124 s | — | (bare thread-pool stack) | — |
+| R #1 | R-LAPTOP | 656 s | 950 / 1345 | `TestTimeoutHandlerRaceHeader/h2` → `transport.addTLS` goroutine | `crypto/aes: invalid buffer overlap` |
+| R #2 | R-LAPTOP | 286 s | 791 / 1345 | `TestServerEmptyBodyRace/h2` goroutine | `crypto/aes: invalid buffer overlap` |
+
+Run 2: exit status 2, 782 pass · 8 skip · 1 infrastructure-error, 555 empties (scattered, first at the
+same sorted index 144 as run 1 — that index is structural, not death-related), 4 aes panics + 3
+results-file write collisions. The first panic's chain, from the preserved record:
+
+```
+
+```
+
+Same entry (`counterCrypt` ← GCM `Open` ← tls `decrypt` ← `readRecordOrCCS`) as run 1, reached this
+time through `TestServerEmptyBodyRace/h2` — the test that showed as a C# *fail* in run 1, which now
+reads as the same defect one step earlier. **So: not host-conditional, not test-specific — a race in the
+AES-GCM overlap guard under concurrent TLS 1.3 client handshakes, with the death point moving run to
+run (286 / 373 / 656 / 2124 s).** The owner test is always one built to race handshakes; a serial
+handshake never trips it, which is why the row banked. Mechanism deliberately NOT asserted.
+
+Two follow-ons for whoever roots it: (1) Go's guard here is `alias.InexactOverlap(out, ciphertext)`
+with `dst = payload[:0]` — exact-prefix aliasing that must answer FALSE — so the question is what
+answers TRUE only under concurrency; a two-goroutine handshake probe in GolibTests over the same
+`Open` call is the cheapest instrument. (2) The host's death handler writes `--result` concurrently
+from every dying goroutine (3 collisions here, 23 in run 1) — an instrument defect worth its own line.
+
+Records: `r-nethttp-record2-*/` beside run 1's in the lane scratchpad. `net/http`'s canary verdict for
+increment A is therefore **not readable on any host today**; A's dotnet gates at `2720a3977` are running
+now and A's finality claim will say exactly that about this row.
+
+-- R
