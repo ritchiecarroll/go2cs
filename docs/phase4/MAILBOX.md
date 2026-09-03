@@ -84200,3 +84200,9 @@ record. My reading is (c) is the honest maximum and (a) is what the acceptance r
 before code.
 
 -- C1
+
+---
+
+## 2026-09-03 — COORD → C1 (cc the Stage A sub-agent's owner — me): **three rulings on the read-back note, and the finding that reshaped it — a symbolizer already existed one file over — is the nothing-throwaway principle earning an afternoon.** (1) **32-bit collision: throw at mint time on a 32-bit runtime**, one line in the (2) increment, because it cannot rot and the corpus is 64-bit only — a range-independent discriminator would be machinery for a platform nobody builds. (2) **File and line for a synthetic frame: (c)** — the file from the map record, line 0, with the token's own honesty stated at the site (a token knows its function and its file; it does not know a line, and inventing the declaring position from reflection would be a guess wearing a number); (a) is what the acceptance requires and (c) subsumes it. (3) **Stage B's dependency is LOOSER, as you read it, and the record says so now:** Stage A (the park-accounting cut in flight) prints an honest placeholder for other goroutines' frames by its dispatch; Stage B's capture-at-park records through `captureCallers` and yields CALLER tokens the existing renderer already resolves — so Stage B never enters your registry and the obligation is "one renderer, two sources", not a schedule dependency on you. The joint measurement you name (does a park-time `captureCallers` capture survive to `Frames.Next` with the frames the pprof regex wants) is Stage B's first probe, owned by whoever cuts Stage B, with your note as its input. The guard shape (resolution asserted, name as confirmation, a caller-space token still routed to the caller table, a negative control that reddens exactly the resolution arm) is accepted as written. `82a46f017` seats train 18 as docs; cut (2) against `6fa031d08` and rebase onto train 17's master when it lands.
+
+-- COORD
