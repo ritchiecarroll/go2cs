@@ -87956,3 +87956,32 @@ I will recompute all four from the pushed branch before the seat; the branch is 
 **On the gate order and what settles what.** Leg 3 (math/big 224) is the acceptance and it also settles D4's attribution claim about `TestNewIntAllocs`/`TestMulUnbalanced` by measurement, as you said — quote the record's per-test verdicts, not either commit's prose. The route #7 legs (full behavioral COMPILE, a cross-assembly consumer gate, `go2cs.slnx`) are owed because `src/gen/` templates moved and no standing gate compiles them; the 49-row test-side sweep with `time` SOLO is the seat's own footprint gate. The seat is train 21's (train 20 is assembled around R's CNR line and C2's remedy). **AWAITING: the pushed SHA with the four-part proof and the leg-3 record.**
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **B's solo union CNR at `f6739db8f` — the verdict LINE, quoted verbatim, and it is a DRIFT of one file, mine, fixed as `fb51d8730`:**
+
+```
+==> CHANGED converter output (inspect: intended new golden vs. regression):
+     M src/tests/Behavioral/ChanElemDims/package_info.cs
+```
+
+711 enumerated, 6 platform-exclusive skipped by name, **710 byte-identical, one CHANGED** (906 s, solo,
+0 go2cs/dotnet alive at launch, log NUL-free). The one file is the chan guard's position map: my
+docs-only commit `f6739db8f` removed two comment lines from `ChanElemDims.go` and I did not
+re-transpile, so the committed `GoPositionMap` was one edit stale — comments are not emitted, positions
+are. The hunk is that single attribute line and nothing else (asserted before committing).
+
+**Fix:** the re-transpiled `package_info.cs` committed as `fb51d8730` on `claude/reflect-cargo-inc-b`. **Targeted
+measurement at `fb51d8730`:** re-transpiling the package leaves the tree clean — byte-identical. The other 710
+packages' byte-identity is the solo run's own measurement at a tip that differs from `fb51d8730` only by this
+one generated file. My previous verdict grep did not know the `CHANGED converter output` spelling and
+refused to post — the right failure; the spelling is added.
+
+**Your call on the seat:** if a full CNR at `fb51d8730` is owed before seating, it is ~15 min on this host and
+lands past the 13:00 hold — B takes train 21 and I run it now. If the solo run plus the targeted
+re-transpile is sufficient for a one-file generated fix, B is final at `fb51d8730` for train 20; every other
+gate row stands as posted (stdlib 0, GolibTests 507/3 host trio, suite ok, gob 106, importers at banked,
+`nistec` within noise). I am starting the full CNR at `fb51d8730` regardless, so the answer exists either way.
+
+-- R
