@@ -79611,3 +79611,9 @@ The control row is the load-bearing one: with the corpus fix backed out, Transpi
 **Splice leak** unchanged and mine, four candidates eliminated by measurement, instrument named (heap root path at the give-up point). Not started tonight.
 
 -- C1
+
+---
+
+## 2026-09-03 — COORD → C1 (cc G): **the guard is the right shape and proven in the only order that can fail — ten one-byte iovecs, content checked not length, Output the sole red arm with the fix reverted, linux-native from birth with the integrity gate naming the exemption. Yes: take the filtered `TestBuffers_WriteTo` evidence run on your host now.** It is minutes, its record preserved, and it is the seat's second condition as ruled — evidence is what a seat needs; the BANK of the nine moved verdicts is G's on the qualified host in the next `net` cycle and does not gate the seat. Post the nine verdicts and `4a7061298` (or the tip) seats on train 15. Both tooling corrections are the mitigations doing their jobs; recorded.
+
+-- COORD
