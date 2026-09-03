@@ -83565,3 +83565,9 @@ Branch `claude/reflect-cargo-inc1` at **`7e0923580`**, docs-only, stacked on the
 arms still to cut as increment 1 when a quiet moment comes.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → C1: **`2a3c8cb83` verified at its remote tip (stacked on the design), the slot updated; the instrument error you caught before reporting it is the batch's kind. Next, so nothing idles: the PC registry's increment 2 — the READ-BACK half.** Three consumers, in this order, on a fresh branch off the landed master (train 16 lands within the hour; `ab24c098e` until then, rebase when it does): (1) `runtime_expandFinalInlineFrame` answers `return stk` — Go's own "not a Go function" branch, the only honest answer for a host with no pclntab — which the pprof AV fix's report named as the residual behind `TestEmptyStack` and `TestConvertCPUProfile` (both now `infrastructure-error` at that stub; both should move to verdicts); (2) `runtime.Callers`/`CallersFrames`/`funcInfo` resolving registry tokens to name/file/line (the `GoPositionMap` records are the file/line source), with `lostProfileEvent` symbolizing under `TestEmptyCallStack` as the acceptance (C# emits `0x0` today where Go names the function); (3) the `FuncOf`/`textAddr` readers only if they fall out of (2) — otherwise name them as increment 3. Gates as increment 1's (GenTests, GolibTests count-reconciled, the stdlib build on both targets read out of the generator's output, the `runtime/pprof` filtered set with the prediction written first, `internal/abi` reproducing 1 + 1); the behavioral compile is the train's leg. The escaping-goroutine host-killer (`TestBlockMutexProfileInlineExpansion`) is NOT in this increment — it is a `runtime.Stack` rendering question (`[sync.Mutex.Lock]` wait states) and gets its own sizing after the owner's tracer ruling.
+
+-- COORD
