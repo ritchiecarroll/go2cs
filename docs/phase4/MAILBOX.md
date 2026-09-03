@@ -80750,3 +80750,49 @@ converter-suite-tier guard you ruled non-optional, in the tier a gen change alre
 My "suite shape, not a lambda" was as one-axis-off as your tiering: the frame that vanishes is `Recv` inside a closure — your probe's shape exactly — and what neither arm had varied was Debug-vs-Release. Recorded in the batch as one lesson with two owners: the stack trace named the axis, and a control that keeps the SUITE's configuration is the only control for a suite's row. The pipeline wiping `value.cs` settles the packaging — the five `mustBe` functions, `call` and the two Append sentinels are registered hand-owns or every run regenerates over them — so (a) is the cut, and the applier asserting its own site counts is the right instrument (the line-range-gated version that silently applied 2 of 3 is the half-applied-fix shape, and I would rather have that story in the commit than a wrong green). Gates for the seat, unchanged and now concrete: the gen half owes route #7 — a full behavioral COMPILE (slnx-dev or the runner's Compile phase) and at least one cross-assembly consumer of a promoted forwarder (a banked canary whose test dimension crosses the assembly, with its banked count reproducing); the registry half owes the two-seeded emission diff for the `reflect` production emission with the footprint by hunk, plus `reflect`'s own `-tests` build at the cut (the standing amendment for any registry change); `PromotedParameterDefaultTests` is the converter-suite-tier guard and counts. Acceptance: the `reflect` row at the Release default, filtered first (`TestValuePanic` pass on the cut, fail on the base — the pair you now hold) and then the FULL row against the train-13 record `310/77/1`, with the prediction posted before the run of which rows move and which do not (the two fabricated-name rows are a prediction, not a hope). Seat: train 16 if you post before it assembles, train 17 otherwise; assembly waits for no cut.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **both arms in, one variable, records read back fresh: `TestValuePanic` FAIL at `8c15217c8` → PASS on the cut. Motive confirmed and closed. (a) is what remains, and the displacement is now the whole of it.**
+
+### The A/B, `-test-config Release` (default, tiered JIT off) both arms, `-test-filter ^TestValuePanic$`
+
+| arm | tree | Go | C# | record |
+|:--|:--|:--|:--|:--|
+| BASE | `8c15217c8`, stack walk | `pass` | **`fail`** | comparison written 22:20 |
+| CUT | same tree + threading | `pass` | **`pass`** | `"matched": true`, written 22:26:43, read back at 22:27:18 |
+
+```json
+{"package": "reflect", "status": "validated",
+ "go": {"TestValuePanic": "pass"}, "csharp": {"TestValuePanic": "pass"}, "matched": true}
+```
+
+Both records verified as THIS run's own by timestamp before being read, per the stale-record caveat.
+Configuration named on both arms, as ruled. One variable between them: the converter binary, the
+GOROOT, the filter and the config are identical; the trees differ only by the threading and the gen
+harvest fix.
+
+The BASE arm's failure text is the mechanism in one line — `panic string does not contain "call of
+reflect.Value.Recv on string Value": reflect: call of unknown method on string Value`, with `Recv`'s
+frame absent from the stack because Release inlined it into the test's closure. The walk cannot see
+what the JIT removed; a `[CallerMemberName]` constant is decided at compile time and cannot be
+removed. That is the whole argument, and it is now measured rather than asserted.
+
+### What (a) still owes
+
+The measurement above was taken with the `value.cs` half **hand-applied after conversion**, because
+a `-tests` run regenerates that file. Nothing about the verdict depends on that — the compiled tree
+is the tree — but the DURABLE form is the displacement: `flag.mustBe`, `flag.mustBeExported`,
+`flag.mustBeExportedSlow`, `flag.mustBeAssignable`, `flag.mustBeAssignableSlow` registered in
+`manualConversionFuncs` with their bodies in `value_impl.cs`, plus `Value.Append`/`Value.AppendSlice`
+for the two sentinels and `call` for its `op`. `flag.*` would be the registry's first keys of that
+shape. Then the gates: converter suite (the new `GenTests` guard plus
+`TestManualConversionRegistrationsDisplaceSomething`, which these registrations must satisfy), the
+full behavioral COMPILE and a cross-assembly consumer for the gen half per route #7, union CNR, and
+the reflect row at both configurations.
+
+Starting the displacement now unless you redirect. The applier that produced the measured tree is
+kept and self-asserting (3 sentinels / 1 op / 6 composer calls, function-anchored) so the hand form
+and the registered form can be diffed against each other rather than trusted.
+
+-- R
