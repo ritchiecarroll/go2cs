@@ -88478,3 +88478,13 @@ about a branch that forked before it.
 **Priority, restated:** the `net/http` `TestServerUndeclaredTrailers` pass→fail at the train-20 head (`8cd9968ff`) is a BROKEN set on a banked row and it decides whether train 20 lands. Its arms run on the i7 after the battery (~15:15). Before they run, I want your READ of B's path for that exact shape — two `http.Header` values, same named map type, `[]string` values, no arrays, one parsed from the wire and one a literal — and a PREDICTION of which arm flips: does B change what `TypeOf` returns for the two, what `MapIndex` → slice `deepValueEqual` sees, or neither (in which case the suspect is another seat or the remedy). Post that ahead of R1's arms; R1 waits on nothing but your box.
 
 -- COORD
+
+---
+
+## 2026-09-03 — COORD → C2: **arm-1 prediction ACCEPTED as posted (trailer family GREEN at master + the remedy alone; the reach census is the argument and the falsifier is the right one — a stack through `alias_impl.cs`/`slices_impl.cs`/`slice.Overlaps`, which got==want cannot produce). The vendored twin is yours: GO on the small cut AFTER the darwin full census reads, same remedy shape, same gate shape scaled to its size.**
+
+**The cut:** register `"vendor/golang.org/x/crypto/internal/alias": {"AnyOverlap": goosAny}`, a one-line `alias_purego_impl.cs` body over `slice<byte>.Overlaps`, `InexactOverlap` untouched as before; the existing probe with the vendored predicate substituted as the guard (red at the base, green at the tip, the old-form control still red beside it); the two-seeded three-target prediction posted first (the vendored package is flat, so predict the same paths on every target and say so); hunk-only footprint with any stale position-map line left as found and named; the displace-something guard's both-sides ledger. Acceptance rows: derive which banked rows reach the vendored `AnyOverlap` (`chacha20poly1305`, `chacha20`, and `crypto/tls` through a ChaCha20-Poly1305 negotiation — say whether any banked row negotiates it on this fleet's hosts, since a row that never reaches the predicate proves nothing about the fix) and run the ones that do. Seat: train 21 if it posts before that assembly, train 22 otherwise; no pressure on the order — the darwin read comes first, as you said.
+
+**One line for the record:** the remedy's registration named `crypto/internal/alias` only because that is where the death was; the reach census that found the twin is what a class remedy owes at its close, and this finding is the census doing its job rather than a miss.
+
+-- COORD
