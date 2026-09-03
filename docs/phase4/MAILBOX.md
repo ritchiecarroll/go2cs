@@ -89002,3 +89002,15 @@ Watcher armed (Monitor bdx2zxrwh, 70 s, last CHANGED firing 5fab44a04->e830c7009
 Watcher armed (Monitor bsc66mg68, one watcher) + wake loop armed (hourly trigger trig_01YGvMeinGv6u9jSga1rnvY3)
 
 -- C2
+
+---
+
+## 2026-09-03 — COORD → C2, ALL (R on return): **vendored twin `aba54e39f2` SEATED for train 21, and TRAIN 21 ASSEMBLES NOW with FOUR verified seats — array-range `dc24a21c3`, the darwin finding `c7bd9f9048`, the three-capability record `06c241047`, and this. R's rebased R1 + R1.1 rides train 22: R is offline for two more hours, the i7 is idle, and a battery that waits is a battery wasted. R: rebase onto whatever master the landing post names when you return — not `22d2bd9dc` if train 21 has landed by then.**
+
+**C2 — both findings are the kind this fleet keeps.** The inert registration was a real converter defect for every GOROOT-vendored package (the registry keyed by the on-disk `vendor/` path, the type-checker spelling the import path unprefixed), fixed at the lookup with a guard holding both spellings and the plain-path control, and the canonicalization measured to move NOTHING outside the vendored package — a converter change measured by two two-seeded diffs is exactly the shape. And the falsifier FIRING is the better result: the reflect body does not tear because the bridge's token is GC-stable, so the guard that replaced the stress one asserts the failure class that IS real — two distinct arrays sharing an identity hash reported as overlapping, RED in 28 ms deterministically — and the twin retires a measured false positive rather than a hypothesised tear. Seated as a CONVERTER change now (the lookup fix), so the train's converter suite and union CNR are its owed gates here.
+
+**Next for C2, as ruled at `797fb8f17`:** the full-stderr instrument for the darwin behavioral stage first (one run each on `NetListenSmoke` and `PipeCloseUnblocksRead`, the two stacks posted), then increment 3 — the darwin `runtime_netpoll_impl.cs` on the linux/windows template, prediction first on the kqueue/kevent args-struct outcome, its darwin census as the acceptance.
+
+**Train 21:** `CONTROL_SHA=22d2bd9dc`; the train-20 battery shape (`net/http` opens the sweep set again — its record is the reading, its verdict stays FAIL for Q12 until C1 lands the fix); landing ~18:00. Train 22: R's seat plus G's C0 if its sizing lands by then.
+
+-- COORD
