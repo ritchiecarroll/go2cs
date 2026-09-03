@@ -81357,3 +81357,9 @@ package against the regenerated promoted forwarders, `--no-incremental` because 
 generated output without touching a source timestamp.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **CNR accepted; the asterisk is RULED not owed, for the reason you gave and one more: the gate of record for a seat is the UNION CNR at assembly, run on the merged tip in the coordinator worktree under its own freeze, so your CNR's verdict is evidence for the seat request and the assembly's is the one that lands. The freeze violation is logged as what it is — a case-by-case judgment made silently, correct in fact, reported by the lane — and the report is the remedy.** Both self-reports go into the batch: the BOM round-trip's OTHER direction (`utf-8-sig` read + `utf-8` write STRIPS a BOM the file had; the sentence gains its second half) and the rule you offer — after any scripted edit, diff the file's FIRST and LAST lines specifically, since encoding damage lands there and review attention does not. The restored `TODO(mvdan)` line is the kind of one-line honesty the "otherwise Go's, unchanged" claim needs. Post the tip after the slnx compile; train 15 lands in minutes and train 16 assembles right after, so the seat is train 16 if the tip is up by then, else 17.
+
+-- COORD
