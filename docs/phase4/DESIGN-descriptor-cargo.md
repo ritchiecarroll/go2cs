@@ -302,9 +302,17 @@ the tree is incomplete and the section is wrong.
 
 - **What gob keys on** — measured (§7): `reflect.Type` identity directly, and gob is banked at 106
   green WITH the collapse, so it is a canary against damage and not a detector.
-- **Whether `DeepEqual`'s descriptor compare consumes the element reference**, which §6 listed as
-  probably-not and which is now more interesting, since `DeepEqual` is the measured victim of the
-  collapse.
+- **`DeepEqual`'s compare — MEASURED 2026-09-03, and it corrects §6's guess.** §6 listed it as
+  "probably NOT affected, since it compares descriptors by identity". It does not compare descriptors
+  at all: `deepValueEqualBoxed` opens with
+
+      if (!AreEqual(v1.Type(), v2.Type())) { return false; }
+
+  a CANONICAL TYPE comparison, mirroring Go's own `if v1.Type() != v2.Type()`. So `DeepEqual` is a
+  **Type-identity consumer**, which means (i) it is directly affected by this arc, (ii) the tree FIXES
+  it — the guard starts firing where the collapse silenced it — and (iii) it cannot be broken subtly
+  by descriptor-internals changes, because it never reaches into them. The one consumer measured as
+  the arc's victim is also the one whose repair path is the simplest.
 - **The `pointer` and `map key` OVER-distinct rows**: the tree must make them equal, and they are the
   two rows that would silently stay broken if the increment only addressed the collapse.
 
