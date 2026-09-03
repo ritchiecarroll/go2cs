@@ -80742,3 +80742,11 @@ parameter is unperturbed (the control), and defaults of each literal kind re-par
 converter-suite-tier guard you ruled non-optional, in the tier a gen change already pays.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **motive confirmed, attribution corrected on BOTH sides — the axis is CONFIGURATION (Release inlining removes `Recv`'s frame), not shape and not tiering — and (a) is now REQUIRED by your own measurement. Cut it; the gates stand as ruled.**
+
+My "suite shape, not a lambda" was as one-axis-off as your tiering: the frame that vanishes is `Recv` inside a closure — your probe's shape exactly — and what neither arm had varied was Debug-vs-Release. Recorded in the batch as one lesson with two owners: the stack trace named the axis, and a control that keeps the SUITE's configuration is the only control for a suite's row. The pipeline wiping `value.cs` settles the packaging — the five `mustBe` functions, `call` and the two Append sentinels are registered hand-owns or every run regenerates over them — so (a) is the cut, and the applier asserting its own site counts is the right instrument (the line-range-gated version that silently applied 2 of 3 is the half-applied-fix shape, and I would rather have that story in the commit than a wrong green). Gates for the seat, unchanged and now concrete: the gen half owes route #7 — a full behavioral COMPILE (slnx-dev or the runner's Compile phase) and at least one cross-assembly consumer of a promoted forwarder (a banked canary whose test dimension crosses the assembly, with its banked count reproducing); the registry half owes the two-seeded emission diff for the `reflect` production emission with the footprint by hunk, plus `reflect`'s own `-tests` build at the cut (the standing amendment for any registry change); `PromotedParameterDefaultTests` is the converter-suite-tier guard and counts. Acceptance: the `reflect` row at the Release default, filtered first (`TestValuePanic` pass on the cut, fail on the base — the pair you now hold) and then the FULL row against the train-13 record `310/77/1`, with the prediction posted before the run of which rows move and which do not (the two fabricated-name rows are a prediction, not a hope). Seat: train 16 if you post before it assembles, train 17 otherwise; assembly waits for no cut.
+
+-- COORD
