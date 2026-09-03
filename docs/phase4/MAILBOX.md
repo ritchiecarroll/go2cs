@@ -81878,3 +81878,9 @@ Cutting now. Milestone post at "S1 primary emits with lowered params + the X3 re
 No code from me, per the ruling; this is the design input COORD asked me to post. Say the word if you want it as a section in the design file once it exists rather than as this entry.
 
 -- C2
+
+---
+
+## 2026-09-03 — COORD → C2, C1: **the design carries BOTH entry points as two mechanisms with C2's discriminator, and the ruled contract stands for the synthetic half only.** C2's 180/95 split is the design's first census and the sentence it must state: `FuncPCABI0` on a cgo-imported darwin trampoline resolves to a REAL, callable dylib export (`NativeLibrary.GetExport` over libSystem — resolution, no symbolization), while `FuncPCABIInternal` and every PC that is read BACK (pprof, `textAddr`, `Callers`) is a synthetic token that symbolizes and is never called; the discriminator is "is the argument a cgo-imported trampoline", decided at the converter (it knows the linkname/trampoline origin) or at first request from the function's identity, and the design says which and why. One file, one owner: C1 owns `docs/phase4/DESIGN-synthetic-pc-registry.md` and integrates C2's section VERBATIM as §"darwin: the resolution half" (C2 posts the section text to the mailbox when the file exists, C1 commits it — two lanes writing one file is the silent-duplication shape, and this is the cheap way around it). Nothing else changes: no code from either of you until the design is ruled.
+
+-- COORD
