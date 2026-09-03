@@ -139,10 +139,33 @@ This is name qualification, not cargo, and lives in the interface type-name path
 
 ## 5. Rulings
 
-**R1 — "empty means cannot see" must never be a successful arm.** Until the cargo is populated, the
-struct and array arms of `regAssign` throw, naming the descriptor and the arm, so a mis-assignment
-cannot pass silently. This lands with increment one, not before: a red row is red either way and the
-honest one is the throw.
+**R1 — an arm that cannot read its cargo must say so, not succeed.** Both arms of `regAssign` throw,
+naming the descriptor and the arm, so a mis-assignment cannot pass silently.
+
+The original wording was *"empty means cannot see"*, and it was **false for the legal empties**:
+`struct{}` is ubiquitous and legitimately has no fields, `[0]T` is legal Go, and Go's own comment on
+the array arm says its vacuous `true` is correct for that case. A throw on emptiness alone is a
+regression wearing insurance's clothes. The predicates are therefore narrow, and each was measured
+against the legal value it must pass BEFORE it was written to throw:
+
+| arm | predicate | passes untouched | throws |
+|:--|:--|:--|:--|
+| Struct | `Fields.Length == 0 && Size() > 0` | `struct{}` (0 fields, 0 size) | `reflect_test.S` (0 fields, **32** bytes) |
+| Array | `Len == 0 && arrayDims is null` | `[0]T` (`arrayDims [0]`) | unknown-length element (`arrayDims null`) |
+
+The array arm was briefly deferred on the belief that no discriminator existed — `Len` and `Size` are
+both 0 on both shapes. That was an arm-level reading, not a model-level one: the datum is on
+`arrayDims`, whose declaration states the rule (*"Null = unknown ([0]T is [0])"*). The deferral is
+withdrawn; see the retraction in §8.2.
+
+**Reachability, so this is not read as a production fix:** R2 shows `funcLayout` is reached only from
+`export_test`, so neither arm is on a live path. This is insurance against a future silent pass.
+
+**Blocked, not by design:** displacing `regAssign` — a `[GoRecv]` method with a REF receiver — makes
+the converter emit a box-form call (`Ꮡa.regAssign`) into a `ref` body where no box exists (CS0103).
+Every prior reflect displacement took a value receiver, so the shape was unexercised. A converter fix
+is dispatched separately; the parked `abi_impl.cs` carrying both arms is its acceptance, and R1 lands
+when it does.
 
 **R2 — ANSWERED 2026-09-03: the array-parameter row CANNOT be provoked, and that IS the result.**
 The Array arm has the identical `if (Len == 0) return true;` shape, so it was predicted to fail as
@@ -267,13 +290,23 @@ That is the whole change. Everything below is consequence.
 |:--|:--|
 | `[][6]` != `[][8]` | `ArrayOf(6,u8)` and `ArrayOf(8,u8)` are **already** distinct descriptors (measured: distinct, named right, `Len()` 4/8). A container keyed on its element inherits that distinctness with no per-kind rule. |
 | `SliceOf(elem) == TypeOf([]T{})` | Both routes reach **one** element descriptor, so both produce one container descriptor. No kind has to choose a side. |
-| "unknown" != "zero" | A container referencing a canonical `ArrayOf(0,u8)` and one referencing NO element descriptor are different objects. The positional vector **cannot express this** (both read `Len 0 / Size 0`), which is why `regAssign`'s array arm cannot be made honest inside it. |
 
-The third row is the one that was not in the original sizing. It arrived from R1: the reason the
-array arm cannot throw today is not caution, it is that the model has no way to say "I could not
-see". The tree gives that for free, because absence of a reference is representable and a zero-length
-descriptor is not the same value.
+**RETRACTED 2026-09-03 — a third row stood here and it was invented.** It claimed that
+"unknown" != "zero" is something the tree buys and the positional model cannot express.
+**The positional model expresses it today.** `arrayDims` distinguishes them by its own
+declaration -- *"Null = unknown ([0]T is [0])"* -- and the two measure as DISTINCT reflect.Types:
 
+    ArrayOf(0, uint8)                   Len 0 / Size 0 / arrayDims [0]     String "[0]uint8"
+    SliceOf(ArrayOf(6,uint8)).Elem()    Len 0 / Size 0 / arrayDims null    String "[]uint8"
+    equal?  FALSE
+
+What could not tell them apart was `regAssign`'s ARRAY ARM, which reads `Len` and `Size` and never
+`arrayDims` -- an arm consulting two accessors when the datum is on a third, not a limit of the
+model. The tree is carried by the two properties above and no others.
+
+**Consequence for R1 (§5):** its array arm is implementable now, on `Len == 0 && arrayDims is null`,
+beside the struct arm's `Fields.Length == 0 && Size() > 0`. Its deferral to this increment rested on
+the retracted claim and is withdrawn.
 ### 8.3 What happens to the positional vector's existing consumers
 
 The vector does not have to be removed, and the section deliberately does not propose removing it.
@@ -294,9 +327,33 @@ the split that `pointer` and `map key` show today.
 THIS struct field's array type", which is a question about a field, not about a container's element,
 and no element reference exists to carry it.
 
-**`funcParamDims`.** The precedent, and the migration's best test case: it is the one slot already
-shaped like per-element cargo. If the tree subsumes it cleanly, the model is right; if it cannot,
-the tree is incomplete and the section is wrong.
+**`funcParamDims` — the falsifier, ANSWERED 2026-09-03: the tree subsumes it. PASSES.**
+
+It is the one slot already shaped like per-element cargo, so it is the model's sharpest test. Its
+declaration states why it exists: *"the parameter position is the one place no other dims source
+reaches — a `[32]byte` parameter has no value to measure and no field initializer to read, and the
+emitted delegate type is a bare `Func<array<byte>, bool>` that `func([32]byte) bool` and
+`func([64]byte) bool` share — so the converter stamps `[GoArrayDims]` on the parameter and
+`GoReflect.FuncParamDims` reads it back off the delegate INSTANCE."*
+
+Under the tree the **SOURCE is unchanged** — still the `[GoArrayDims]` stamp read off the delegate —
+and only the **STORAGE** changes, from a positional `nint[]?[]?` to a reference to each parameter's
+canonical descriptor. Three checks:
+
+- **Expressiveness.** A per-parameter dims VECTOR (`[2,3]` for a `[2][3]int` parameter) is subsumed by
+  a reference to `ArrayOf(2, ArrayOf(3,int))`, which carries the same lengths and more (kind, size,
+  element type). Strictly richer, never poorer.
+- **The descriptors exist.** `ArrayOf(32,u8)` and `ArrayOf(64,u8)` are measured distinct, so the
+  references the tree needs are already constructible and already distinguishing.
+- **`FuncOf` gets easier, not harder.** It receives its parameters AS `ΔType`s, so referencing them is
+  natural — where today it does not populate `funcParamDims` at all (measured:
+  `FuncOf([32]byte)bool == FuncOf([64]byte)bool`, `In(0).Len()` 0 on both).
+
+**The one limitation carries over unchanged and is not made worse:** RESULT dims are unavailable
+under either model, because a multi-result Go func returns a `ValueTuple` with no per-element
+attribute position. The tree does not fix that; it also does not introduce it.
+
+So the section survives its own falsifier. Had it not, this line would say so instead.
 
 ### 8.4 What must be measured before the increment cuts
 
