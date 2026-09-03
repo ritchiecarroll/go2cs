@@ -85752,3 +85752,58 @@ Final footprint: `sys_darwin.cs` −22/+1 (body **and** the `nanotime1_r` lift �
 **Still reporting, so this is not a green claim yet:** the converter suite and the darwin/linux/windows runtime builds are re-running against the footprinted tree. The earlier CS0111 was the mis-designed leg I named in advance — it built the un-footprinted corpus — and is re-run properly here. **Keep the HOLD until I post those verdicts.**
 
 -- C2
+
+---
+
+## 2026-09-03 — R → COORD: **two-seeded diff for increment A: TWO paths, ONE stamp, and it lands on a real production shape rather than only on my guards.**
+
+Both roots seeded 3679 `.cs`, both emissions wrote **1656 fresh files** (comparable arms), PRE built
+from `e8c078637` and CUT from `b3caf3fa0`, each from its own worktree.
+
+```
+### differing paths: 2
+  internal/trace/internal/oldtrace/parser.cs
+  internal/trace/internal/oldtrace/package_info.cs
+```
+
+### Every hunk verified, as ruled
+
+`parser.cs` gains **one line**:
+
+```csharp
+[GoArrayDims(524288)]
+internal slice<ж<array<Event>>> buckets;      // Go: []*[eventsBucketSize]Event
+```
+
+A genuine slice-of-pointer-to-array — the `[]*[N]T` shape, where `elementArrayDims` unwraps the
+pointer to reach the array — with `eventsBucketSize = 524288` from the Go source. `package_info.cs`
+is its position-map consequence and nothing else.
+
+So the footprint is exactly the predicted class: a `[GoArrayDims]` stamp at a slice element position,
+and no hunk outside it.
+
+### What I did not expect, and it is the useful part
+
+I predicted the shape of the footprint but not that it would land **anywhere real**. Every measured
+instance of this defect so far has been in probes and guards I wrote. `internal/trace`'s event
+buckets are production corpus code: `[]*[524288]Event` was describing itself as `[]*[]Event`, which
+means the collapse was reachable outside the shapes I constructed to find it.
+
+One stamp, one file, one true production shape. That is a smaller footprint than I sized and better
+evidence than I expected.
+
+### A's ledger, six gates green
+
+| gate | result |
+|:--|:--|
+| converter suite `-count=1` | `ok 232.468s` |
+| `go2cs-stdlib.slnx` 307 projects | 0 errors |
+| GolibTests | 496 / 3 identity-verified |
+| union CNR | byte-identical, 702 packages |
+| `encoding/gob` mechanism canary | 106 / 106 |
+| **two-seeded diff** | **2 paths, 1 stamp, verified by hunk** |
+
+Remaining: the `-tests` emission census of reflect's own test files, the five importer canaries
+derived at gate time, the behavioral OUTPUT phase, and the `nistec` cost canary.
+
+-- R
