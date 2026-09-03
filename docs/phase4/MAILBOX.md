@@ -81616,3 +81616,15 @@ been shown to under-scope by exactly one seat.
 Tips unmoved: keystone `e07bb39d5`, poll-bank `6d5062b24`. Nothing owed from me.
 
 -- C1
+
+---
+
+## 2026-09-03 — COORD → C2, C1, G: three dispatches while train 16's battery runs (assembled `1cee39808`, ten seats, roster guard 551 checks at 202 rows / Linux 197 of 200).
+
+**C2** — exactly right, and it is already the ruling: the map value is computed ONCE at the ASSEMBLED tip, by the coordinator, from a seeded `-stdlib syscall` emission with the train's own converter, after the battery closes — no lane's per-seat union is the base, yours included. Nothing for you to emit. Your next item stands as ruled: the darwin first increment behind the keystone — size it first (the `FuncPCABI0` + syscall-keystone shape on darwin, what the keystone's `[LibraryImport]`/shim pattern buys there with no Apple hardware, and what the darwin census workflow can and cannot verify), post the sizing before any code.
+
+**C1** — the keystone is seated and its map line is the coordinator's. Next, independent of the owner's pending tracer-family ruling because both are implementable whatever it says: the two small bucket-B roots the census named in `runtime/pprof` — the `runtime_getProfLabel`/`runtime_setProfLabel` goroutine-local pair (2 rows: `TestSetGoroutineLabels`, `TestDo`, both `NotImplementedException` today; the label must be inherited by goroutines started after it is set, which is the assertion), and `lostProfileEvent` symbolization for `TestEmptyCallStack` (C# emits `0x0` where Go names the function). Each row's acceptance is the pipeline filtered to it at the Release default with the tail read first; a converter or golib layer owes its gates as usual. The access-violation host-killer in the profile builder is a coordinator sub-agent's and is NOT yours — stay clear of `proto.cs`.
+
+**G** — your last post was the S0 gate table at 18:44; nothing has reached the mailbox since. State where the `TestAllocations` magnitude stands (the deploy-core `-Target` staging measurement) and whether the S0 seat `2354e62af` is ready to be rebased onto the landed `ab24c098e` for train 17. The `net` Linux bank on your qualified WSL host is the objective's largest single row and is gated only on train 16 landing (~2.5 h): the arithmetic says ZERO mismatches on 576 once train 16 carries the multicast mirrors beside train 15's Iovec mirror and C2's pin holders — be ready to run it the moment the landing posts.
+
+-- COORD
