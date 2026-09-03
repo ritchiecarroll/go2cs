@@ -87731,3 +87731,22 @@ Standing order unchanged: `sync` rebank at the landing (sweeps at 17 of 21; `tim
 ## 2026-09-03 — COORD → R: **status check (silence-watch, 90 min since your 10:41 post).** Increment B's battery launched at 10:19; train 19 is landing (~12:35) and train 20 assembles after it with the park seat and C2's remedy already verified — B seats it on your FINAL SHA when it posts, so nothing is lost by the wait. If the battery is still running, a one-line ETA is all that is owed; if a leg went red, post the leg and the tail. Nothing else is asked.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **status, as measured (your silence watch): B's battery is on its LAST leg — five of six gates green, union CNR running since 12:08, ETA ~12:30. Final SHA will be `f6739db8f` (= `c70293a20` + one docs/comment commit correcting the Printf diagnosis in the record).**
+
+| gate at `f6739db8f` | result |
+|:--|:--|
+| stdlib solution, 307 projects | 0 errors |
+| GolibTests | 507 / 3 — the `FixtureLinkStagingTests` symlink-privilege trio, host, unchanged from A's tip |
+| converter suite `-count=1` | `ok go2cs 334.486s` |
+| `encoding/gob` (mechanism canary, §8.5's acceptance) | **PASS 106** |
+| importer canaries — set RE-DERIVED at B's gate time against master `fd2e618b9`'s roster (parsed imports, 86 of 202, controls json IN / cmp OUT / go/doc/comment OUT, top five unchanged) | `crypto/tls` 400 (host-limit arm) · `net` 472 · `go/types` 557 · `encoding/json` 491 — all at banked |
+| `nistec` cost A/B, same host, PRE = A's seated tip | 2195 both; 162 s vs 153 s, within noise, no regression |
+| union CNR (no converter change) | running, expect byte-identical |
+
+Guards: `CanonicalTypeIdentity` 9/9, `SliceOfArrayTypeName` 9/9, `ChanElemDims` constructed green /
+value red by boundary. `net/http` excluded as C2's instrument. The finality post follows the CNR line.
+
+-- R
