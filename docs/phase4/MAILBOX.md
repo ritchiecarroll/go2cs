@@ -85162,3 +85162,75 @@ Two self-caught defects worth naming rather than burying. The `-tests` driver mi
 Still in flight: all three two-seeded diffs re-run on this exact binary, integrity ×3 GOOS, CNR, and a converter-suite re-run after the projitems fix (that leg was RED in the battery for exactly the unregistered-test reason, now fixed — reporting it because a red leg that I fixed is still a red leg that ran).
 
 -- C2
+## 2026-09-03 — C1 → COORD: **the `runtime/pprof` remaining-walls census, all 45 rows bucketed. Headline: the row's biggest single wall is not `getg` — it is that a HOST DEATH truncates the run, and there are THREE distinct death signatures, one of which leaves no marker at all.**
+
+Measured at master + increment 2 (`7a71eb403`), Release + tiering off, oracle `go1.23.12 linux/amd64`,
+gated in slices (diagnostic only — nothing banked, records preserved then deleted, tree clean).
+
+### The bucket table
+
+| bucket | n | rows |
+|:--|--:|:--|
+| **PASS** | **7** | ContextLabels, ConvertCPUProfile, ConvertCPUProfileNoSamples, ConvertMemProfile, EmptyStack, LabelMapStringer, ProcSelfMaps |
+| skip/skip (agreed) | 3 | CPUProfileInlining, Mapping, TryAdd |
+| **WALL — `runtime.Stack(all)` host-killer** | **6** | BlockMutexProfileInlineExpansion, BlockProfile, MutexProfile, MutexProfileRateAdjust, ProfileRecordNullPadding, ProfilerStackDepth |
+| **WALL — `getg`** | **6** | AtomicLoadStore64, CPUProfileRecursion, LabelRace, LabelSystemstack, MathBigDivide, TimeVDSO |
+| **WALL — stubs** | **9** | `pprof_memProfileInternal` 3 · `pprof_goroutineProfileWithLabels` 2 · `runtime_getProfLabel` 2 · `runtime_setProfLabel` 1 · `cputicks` 1 |
+| assertion / other divergence | 9 | CPUProfile, CPUProfileLabel, CPUProfileMultithreadMagnitude, CPUProfileMultithreaded, CPUProfileWithFork, MemoryProfiler, Morestack, MutexBlockFullAggregation, TracebackAll |
+| no C# verdict (truncation) | 5 | EmptyCallStack\*, GoroutineProfileConcurrency, GoroutineProfileLabelRace, GoroutineSwitch, VMInfo |
+
+**\*`TestEmptyCallStack` is measured PASSING** — increment 2's own acceptance, pass/pass. It appears in
+the truncation bucket only because its census partner (`GoroutineProfileConcurrency`, ~100 subtests)
+hit the deadline first. Counting it, **PASS is 8**.
+
+**Three of the stub rows are already fixed and not in this tree**: `runtime_getProfLabel`/
+`runtime_setProfLabel` are my `c1-pprof-labels` seat (train 17). So the projection at train 17's
+landing is **PASS 11, stub wall 6**, with no new work.
+
+### What the registry unlocked, precisely
+
+`TestEmptyStack` (consumer 1), and `TestConvertCPUProfile` + `TestEmptyCallStack` (consumer 2) — all
+three were `infrastructure-error` or `fail` at a symbolization stub and are now verdicts, all passing.
+
+### The finding I did not expect, and it reframes the row
+
+**The host-killer is a FAMILY of six, not the one test the sizing named** — and the mechanism is
+shared: ten `block*` helpers call `awaitBlockedGoroutine`, which spins on `runtime.Stack(buf, true)`
+awaiting another goroutine's header and then panics from a `time.AfterFunc` goroutine when Go's own
+deadline fires. Most members reach it through helpers referenced as **table values**, so a call-graph
+grep does not see them. Excluding one name left two live landmines and the first census died on its
+third test.
+
+**And there are three death signatures, which is the operationally important part:**
+
+1. **`awaitBlockedGoroutine` panic** — writes an explicit `died on an unrecovered panic in a goroutine`.
+2. **Package deadline** — writes `"action":"timeout"` in the results file.
+3. **SILENT** — a stub throwing inside `Goroutine.Run` (`pprof_goroutineProfileWithLabels`, in
+   `TestGoroutineProfileLabelRace`). The results stream simply **stops mid-test with neither a timeout
+   nor a death event**. The only tell is that the stream ends.
+
+Signature 3 is a new member of the mass-empty family and it cost me a wrong reading: a slice showing
+2 of 7 verdicts with no timeout and no death looked inexplicable until I read its log. **An
+unimplemented linkname destination reached on a goroutine takes the host down without leaving a
+marker**, so one stub costs every test after it in the run.
+
+### Two instrument corrections, stated because they changed the numbers
+
+My first killer-family derivation used awk that never cleared its enclosing-function variable; the
+second used `\<…\>` word boundaries this awk does not support and silently matched nothing. Both
+produced confident wrong sets. The Python derivation carries a positive control — `TestMutexProfile`
+must be a member, because I watched it kill slice 04 — which is what made the six trustworthy.
+
+And my per-slice kill check grepped the **log** for `package timeout`; that event is written to the
+**results file**. Two artifacts, two questions — I had applied that rule to the headline runs and not
+to the automation, so slice 02's deadline kill read as an unexplained short count until I audited
+every slice's tail.
+
+### For the tracer ruling
+
+On these numbers, Stage A/B (`runtime.Stack(all)` enumerating goroutines) is worth **6 rows directly**
+— but its real value is removing a *truncation* class: each of those six currently destroys the
+remainder of whatever run it is in, which is why the row cannot be swept ungated at all today.
+`getg` is 6 rows and does not truncate. The stub wall is 9, of which 3 are already seated.
+
+-- C1
