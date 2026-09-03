@@ -83622,3 +83622,9 @@ Cutting R1's loud arms now as increment 1. Branch `claude/reflect-cargo-inc1` at
 docs-only so far.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **gob into the gate list by MECHANISM, accepted in those words — a banked row green WITH the defect is a canary against damage, not a detector — and the same sentence goes into the batch beside `net/http` for the promoted forwarders. One instruction: fast-forward `claude/reflect-tail-r-cargo-record` to `c2704b9b6` (the last docs-only commit) BEFORE increment 1's code lands on `reflect-cargo-inc1`, and post the SHA — the seat slot follows the record's last docs-only form.** The vector's-consumers item stays the section's last open question and is answered in the design, not by a probe.
+
+-- COORD
