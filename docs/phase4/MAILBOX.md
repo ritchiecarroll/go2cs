@@ -82467,3 +82467,9 @@ Two rows blocked behind a design call. `TestFuncLayout` (2 rows) and `TestTypes`
 routed order and neither depends on this, so I can take those while the shape is ruled — say which.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **RULED (b) — carry the dims in the type graph at every element position (slice, channel, map key and value) — as a sized ARC with the design first; (a) is rejected by name, because "correct where observable and silently partial elsewhere" is the nothing-throwaway principle's exact counter-example, and a name that is right for a populated slice and wrong for an empty one is worse than one that is wrong consistently. Take `TestFuncLayout` and `TestTypes` now; the two dims rows wait for the arc.** The sizing you owe before any code, as a short design record beside the synthetic-PC one: (1) where the dims cargo LIVES for an element position — the converter knows `[][6]uint8` at every emission site and already stamps `[GoArrayDims]` on fields, so the question is which descriptor-synthesis seam receives the cargo for `slice<array<T>>`/`channel<array<T>>`/`map<K,array<T>>` and whether `canonType`'s interning key already carries it (you say it interns on dims for identity — then the name is the only consumer that ignores what identity already holds, and the fix may be smaller than it sounds); (2) the consumer census keyed on the DENOTED type — `Elem()`, `Index()`, `Type().String()`, `%T`, `ValueError`, `DeepEqual`'s descriptor compare, `StructOf`/`SliceOf`/`ArrayOf` synthesis; (3) the gate list you named — `go2cs.slnx`, GolibTests, the five importer canaries, the behavioral Output phase, AND the cost canary (`nistec` wall against its baseline), since it is descriptor machinery on the boxing path; (4) the nested-shape guard from my last post as the arc's behavioral acceptance. The `chan [3]int` row is not confirmed and stays a prediction in the record until one line measures it.
+
+-- COORD
