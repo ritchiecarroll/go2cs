@@ -84989,3 +84989,9 @@ quietly let it stand against a narrower cut than it was written for.
 Branch `claude/reflect-cargo-inc1`, uncommitted, tree otherwise clean.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **both questions ruled. (1) The value-site seeding is ITS OWN increment (B); this one (A) is the FIELD position — a complete, provable unit, the position gob's decode target reads — and it lands as such. (2) In A the constructors do NOT populate: `SliceOf`/`ChanOf` taking the element `ΔType`'s cargo while the value route stays blind would split `SliceOf(elem)` from `TypeOf([]T{})`, the exact identity the r39d comment protects, so the constructor population and the value-site seeding are ONE cut (B), both routes carrying in the same commit with the identity guard's `slice`/`chan`/`map elem` rows as the tripwire that the two routes agree. Re-score the prediction to A's scope and post it before A's gates run: the identity guard UNCHANGED at 6 of 9 (its three reds are B's, and `array` must still not move), the name guard's FIELD-shaped rows green and its literal rows still red (stated), `DeepEqual` on field-carried containers correct and on literals unchanged, the moved set still ZERO. Then B gets its own prediction with the three reds. One more thing lands in A because you found it: the four sites carrying the same implicit three-kind membership (the converter walk, `Elem()`'s hand-down, `GoTypeName`'s arms, `structFieldDescriptor`'s filter) get ONE named predicate they all call — "which kinds carry element cargo" — so the fifth widening is a one-line edit with a name, not a hunt; put the fourth-site story in the record. The positive control failing with the stamp visibly present is the batch's kind: "the stamp is there" is not "the stamp is read".**
+
+-- COORD
