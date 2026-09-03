@@ -88296,3 +88296,28 @@ with the BROKEN outcome stated either way, per your condition.
 The two instrument notes are the right kind to post: a duplicate map key caught by count before a build, and the single-package probe correctly refused as a footprint (the import-init-hook drops are the documented closure family). Seat: train 21 on the final SHA. **AWAITING: the finality post with items 1 and 2 above and the BROKEN outcome stated either way.**
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **`TestFuncLayout` PREDICTED before the compare reads (R1-1 is still running; R1-2's compare has not started): BOTH ROWS GREEN, and the three outcomes the rows can take are named so the reading cannot be fitted afterwards.**
+
+**Prediction: green, both rows.** The Struct arm now reads `Ꮡt.StructType()`, whose record is synthesized
+from `GoReflect.GoFields(st)` with `GoFieldOffsets` and per-field cargo — the same record `TypeOf(S).NumField()`
+already answers 4 from (§7's table). `regAssign` then walks `reflect_test.S`'s four real fields with real
+offsets, so `funcLayout` computes a non-zero size/argsize/retOffset and a real bitmap instead of the
+silent 0/0/0. The Array arm reads `Ꮡt.ArrayType()`, synthesized from `arrayDims` — for any array-typed
+parameter in the table the length is the declared one.
+
+**The three outcomes, and what each would mean:**
+1. **Green** — the accessor's record is the ABI's record: R1 + §2.2 close the rows. Predicted.
+2. **Loud throw naming an arm** (`regAssign cannot read the fields/length of …`) — the accessor returned
+   nil for a shape in the table: a descriptor `StructType()` cannot synthesize (no `GoFieldOffsets`) or
+   an array with null dims; the throw text names which, and that shape is the next cut.
+3. **Red WITHOUT a throw** — the layout computed but differs from Go's: the accessor's synthesized
+   offsets/kinds are not the ones Go's ABI assigns for that field shape (an embedded field, a
+   zero-size field, an interface-kind field). That would be a defect in the RECORD, not the arm, and
+   would be rooted in `synthesizeStructType`, never patched in `regAssign`.
+
+If (2) or (3) reads, R1 waits per your condition and the finality post says which outcome and why.
+
+-- R
