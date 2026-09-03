@@ -73,9 +73,25 @@ func TestFieldDimsCargo(t *testing.T) {
 		{"array field", array3, ""},
 		{"nested array field", nested, ""},
 
-		// A second nesting level has nowhere to live in a two-slot cargo.
-		{"slice of arrays", types.NewSlice(array3), ""},
+		// A slice's element DOES have somewhere to live -- the elemDims slot, the one a map's element
+		// already uses. This row emitted "" while `Elem()` CONSUMED the head of the dims vector for
+		// non-pointer, non-map kinds, which made a one-element vector hand the element nothing:
+		// stamping it would have been inventing cargo no accessor could read, and the "" was right
+		// FOR THAT REASON. `Elem()` now passes a slice's and a channel's dims down UNSHIFTED, beside
+		// a pointer's and a map's, so the stamp reaches the element and the premise is gone.
+		{"slice of arrays", types.NewSlice(array3), "[GoArrayDims(3)]"},
+		{"chan of arrays", types.NewChan(types.SendRecv, array3), "[GoArrayDims(3)]"},
+		{"slice of pointers to arrays", types.NewSlice(types.NewPointer(array3)), "[GoArrayDims(3)]"},
+		{"slice of nested arrays", types.NewSlice(nested), "[GoArrayDims(2, 3)]"},
+
+		// A second nesting level still has nowhere to live, and this row keeps its original
+		// rationale unchanged: the key-dims slot is taken by the OUTER map's key, and the inner
+		// map's key has no second slot.
 		{"map of maps with an array key", types.NewMap(stringType, types.NewMap(array2, intType)), ""},
+
+		// The same shape one kind over: the outer slice's single elemDims slot would have to hold
+		// the INNER slice's element dims.
+		{"slice of slices of arrays", types.NewSlice(types.NewSlice(array3)), ""},
 
 		// Everything else is untouched, which is what keeps the corpus footprint to the shapes above.
 		{"scalar", intType, ""},

@@ -67,6 +67,23 @@ public static partial class GoReflect
     public const int Array = 17, Chan = 18, Func = 19, Interface = 20, Map = 21, Pointer = 22;
     public const int Slice = 23, String = 24, Struct = 25, UnsafePointer = 26;
 
+    /// <summary>
+    /// True for a kind whose descriptor's <c>arrayDims</c> describe its ELEMENT and therefore pass
+    /// down UNSHIFTED — a pointer, a map, a slice or a channel. An ARRAY is deliberately absent: its
+    /// dims lead with its OWN length, so it consumes the head and passes the tail.
+    /// </summary>
+    /// <remarks>
+    /// This membership was written out four separate times — the converter's field-cargo walk,
+    /// <c>Elem()</c>'s hand-down arm, <c>GoTypeName</c>'s container arms, and
+    /// <c>structFieldDescriptor</c>'s filter — so adding slices and channels to the cargo model meant
+    /// widening each one independently. The fourth was found only because a positive control STILL
+    /// failed with the stamp visibly present in the emitted C#: "the stamp is there" is not "the
+    /// stamp is read". Naming the rule makes the next kind a one-line edit at a name instead of a
+    /// hunt for a list nothing calls. See docs/phase4/DESIGN-descriptor-cargo.md.
+    /// </remarks>
+    public static bool KindCarriesElementCargo(int kind) =>
+        kind is Pointer or UnsafePointer or Map or Slice or Chan;
+
     // Maps each synthetic abi.Type descriptor box to the managed Type it stands for, so the hand-owned
     // reflect Type/Value methods (String/Name/Elem/Field/...) can recover Go type info from System.Type.
     // Keyed on the box object identity; weak so descriptors are not pinned.

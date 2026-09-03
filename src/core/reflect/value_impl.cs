@@ -2351,7 +2351,18 @@ internal static ΔType Elem(this ж<rtype> Ꮡt) {
     bool throughPointer = kind == GoReflect.Pointer || kind == GoReflect.UnsafePointer;
     // A MAP's carried dims are its ELEMENT's, so they pass unshifted exactly as a pointer's do —
     // the slot means "what Elem() hands down" for every kind but an array, which consumes its head.
-    nint[]? elemDims = throughPointer || kind == GoReflect.Map ? dims : dims is { Length: > 1 } ? dims[1..] : null;
+    //
+    // A SLICE's and a CHANNEL's are the same: neither has a length of its own, so their carried dims
+    // can only describe the element and there is no head to consume. They sat in the consuming arm
+    // by omission rather than by decision, and the omission was self-concealing — with nothing ever
+    // stamping a slice's dims, consuming the head of an EMPTY vector is a no-op, so the arm looked
+    // right because it was never fed. `[][6]uint8` and `[][8]uint8` then keyed identically and
+    // interned as ONE canonical reflect.Type, which defeated DeepEqual's own
+    // `if v1.Type() != v2.Type()` guard and made it answer true for two different Go types.
+    // See docs/phase4/DESIGN-descriptor-cargo.md.
+    nint[]? elemDims = GoReflect.KindCarriesElementCargo((int)kind)
+        ? dims
+        : dims is { Length: > 1 } ? dims[1..] : null;
     // A pointer hands its POINTEE's channel direction down the same unshifted way — the hop
     // `new(chan<- string)` takes to reach Elem().String(). A channel's own direction describes the
     // channel and stops here. A map's KEY dims describe the key, so they stop at a map and descend
@@ -3037,10 +3048,17 @@ private static @string structTypePkgPath(System.Type st, GoReflect.GoFieldInfo[]
 private static ж<abi.Type> structFieldDescriptor(GoReflect.GoFieldInfo f) {
     nint kind = GoReflect.KindOf(f.Type);
     // An ARRAY field's dims come off the initializer the converter emitted, read from the declaring
-    // struct's zero instance; a POINTER's and a MAP's come off the [GoArrayDims] stamp, because a
-    // nil pointee and an absent map entry reveal nothing — and both hops are ordinary at a DECODE
-    // target, which is a struct nothing has populated yet.
-    nint[]? dims = kind == GoReflect.Array || kind == GoReflect.Pointer || kind == GoReflect.Map ? f.ArrayDims : null;
+    // struct's zero instance; a POINTER's, a MAP's, a SLICE's and a CHANNEL's come off the
+    // [GoArrayDims] stamp, because a nil pointee, an absent map entry, an empty slice and an empty
+    // channel all reveal nothing — and every one of those hops is ordinary at a DECODE target,
+    // which is a struct nothing has populated yet.
+    //
+    // Slice and chan joined this list with the converter case that stamps them: without both, a
+    // `[][6]uint8` field reached the bridge with no dims, keyed identically to `[][8]uint8`, and the
+    // two interned as ONE canonical reflect.Type. See docs/phase4/DESIGN-descriptor-cargo.md.
+    nint[]? dims = kind == GoReflect.Array || GoReflect.KindCarriesElementCargo((int)kind)
+        ? f.ArrayDims
+        : null;
     nint[]? keyDims = kind == GoReflect.Map || kind == GoReflect.Pointer ? f.KeyDims : null;
     // A channel field carries its DIRECTION the same way an array field carries its length: off
     // the initializer the converter emitted, read from the declaring struct's zero instance.

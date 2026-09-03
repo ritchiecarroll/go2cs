@@ -46,14 +46,22 @@ type Target struct {
 func main() {
 	t := reflect.TypeOf(Target{})
 
-	// Every field but the last, whose type STRING is the one recorded boundary this cargo does not
-	// close: `SlcArr [][2]int` renders `[][]int`, because a slice element is a SECOND nesting level
-	// and the cargo has exactly one Elem() slot and one Key() slot. That is a pre-existing managed
-	// limitation, not a divergence this guard may assert away, so only its kind facts are compared
-	// (below) — the emission decision itself is pinned by the converter's TestFieldDimsCargo.
+	// EVERY field, SlcArr included. This loop ran to NumField()-1 while `SlcArr [][2]int` rendered
+	// `[][]int` — the one boundary this cargo did not close. The reason recorded here was that a
+	// slice element is a "second nesting level" with nowhere to live in a one-Elem()-slot cargo,
+	// and it was RIGHT while `Elem()` CONSUMED the head of the dims vector for non-pointer,
+	// non-map kinds: a one-element vector handed the element nothing, so stamping a slice would
+	// have been inventing cargo no accessor could read.
+	//
+	// A slice has no length of its own, so its dims can only ever describe its ELEMENT. `Elem()`
+	// now hands a slice's and a channel's down UNSHIFTED, beside a pointer's and a map's, and the
+	// converter stamps them — so the boundary is closed and the field joins the comparison.
+	//
+	// A genuine second nesting level (`[][][2]int`, `map[K]map[[2]string]V`) still has nowhere to
+	// live, and those rows keep the original rationale in the converter's TestFieldDimsCargo.
 	fmt.Println("-- field types --")
 
-	for i := 0; i < t.NumField()-1; i++ {
+	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		fmt.Printf("%-8s %s\n", f.Name, f.Type)
 	}

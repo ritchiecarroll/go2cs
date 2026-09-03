@@ -111,7 +111,10 @@ public static partial class GoReflect
         if (chanDir is GoChanDir.Recv or GoChanDir.Send && t.IsGenericType &&
             t.GetGenericTypeDefinition() == typeof(channel<>))
         {
-            string elem = GoTypeName(t.GetGenericArguments()[0]);
+            // The DIRECTION belongs to this channel and stops here; the DIMS are the element's and
+            // pass unshifted, exactly as the bidirectional arm below hands them on. `chan<- [3]int`
+            // needs both — the arrow from this frame, the length from the element's.
+            string elem = GoTypeName(t.GetGenericArguments()[0], arrayDims);
             return chanDir == GoChanDir.Recv ? "<-chan " + elem : "chan<- " + elem;
         }
 
@@ -149,13 +152,22 @@ public static partial class GoReflect
             Type gd = t.GetGenericTypeDefinition();
             Type[] a = t.GetGenericArguments();
 
-            if (gd == typeof(slice<>)) return "[]" + GoTypeName(a[0]);
+            // A SLICE's dims are its ELEMENT's and pass UNSHIFTED — the rule the map arm below and
+            // the pointer arm further down already follow, and the one Elem() hands them down by.
+            // Rendered with the cargo-less overload, `[][6]uint8` printed `[][]uint8`: the element's
+            // length was applied at the position that owned it and dropped on the way in.
+            // See docs/phase4/DESIGN-descriptor-cargo.md.
+            if (gd == typeof(slice<>)) return "[]" + GoTypeName(a[0], arrayDims, chanDir, keyDims);
             if (gd == typeof(array<>)) return "[]" + GoTypeName(a[0]);   // length is not carried on the managed type
             // A MAP descriptor's positional dims are its ELEMENT's and its key dims are its KEY's —
             // the two accessors, each fed from the slot that reaches it, so
             // `map[[2]string][2]*float64` renders both lengths instead of neither.
             if (gd == typeof(map<,>)) return "map[" + GoTypeName(a[0], keyDims) + "]" + GoTypeName(a[1], arrayDims);
-            if (gd == typeof(channel<>)) return "chan " + GoTypeName(a[0]);
+            // A CHANNEL's are its element's too, for the same reason a slice's are: no length of its
+            // own to consume. The direction has already been applied by the arm at the top of this
+            // method (which handles Recv/Send); reaching here means bidirectional, so the element
+            // takes the dims and its own direction, never this channel's.
+            if (gd == typeof(channel<>)) return "chan " + GoTypeName(a[0], arrayDims);
         }
 
         // A pointer descriptor's dims are the POINTEE's, unshifted (the same rule Elem() hands the

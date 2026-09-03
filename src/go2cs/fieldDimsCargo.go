@@ -90,9 +90,53 @@ func fieldCargoDims(t types.Type) (elemDims []int64, keyDims []int64) {
 	case *types.Map:
 		elemDims = goArrayDims(core.Elem())
 		keyDims = goArrayDims(core.Key())
+	case *types.Slice:
+		// The map ELEMENT's case again, for the same reason and with the same remedy: a slice's
+		// element is a TYPE-only position. An empty or nil `[][6]uint8` has no element to measure,
+		// and a populated one does not help -- Elem() answers for the TYPE, not for whichever
+		// element happened to be present. So the length has to be in the emitted C#.
+		//
+		// Without this case `[][6]uint8` and `[][8]uint8` reach the bridge carrying no dims, key
+		// identically, and intern as ONE canonical reflect.Type. That defeats DeepEqual's own
+		// `if v1.Type() != v2.Type()` guard and makes it answer TRUE for two values of different Go
+		// types -- a wrong answer, not a wrong name. See docs/phase4/DESIGN-descriptor-cargo.md.
+		elemDims = elementArrayDims(core.Elem())
+	case *types.Chan:
+		// And once more, one accessor over: a channel's element is a type-only position too, so
+		// `chan [3]int` loses its element's length exactly as the slice field did.
+		elemDims = elementArrayDims(core.Elem())
 	}
 
 	return elemDims, keyDims
+}
+
+// elementArrayDims returns the dims a CONTAINER's element position must carry -- the array the
+// element is, or the array a pointer chain from it reaches. A pointer hands its cargo down
+// unshifted at every hop, so `[]*[3]int` and `[][3]int` carry the identical stamp and each accessor
+// takes back its own share on the way out.
+//
+// It deliberately stops at one container: a `[][]  [3]int` would need the outer slice's single
+// elemDims slot to hold the inner slice's element dims, and there is one slot. That is the same
+// second-nesting-level limit the map-of-maps row records, and it is left recorded rather than
+// worked around (the r39d rule: never invent what no source knows).
+func elementArrayDims(elem types.Type) []int64 {
+	resolved := types.Unalias(elem)
+
+	for {
+		pointer, isPointer := resolved.(*types.Pointer)
+
+		if !isPointer {
+			break
+		}
+
+		resolved = types.Unalias(pointer.Elem())
+	}
+
+	if array, isArray := resolved.(*types.Array); isArray {
+		return goArrayDims(array)
+	}
+
+	return nil
 }
 
 // emitFieldDimsAttributes renders the descriptor-cargo attribute line a struct field declaration

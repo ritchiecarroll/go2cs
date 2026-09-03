@@ -21,6 +21,7 @@ partial class main_package {
     public array<byte> Plain = new(4);
     public array<array<nint>> Nested = new(2, () => new(3));
     public ж<Row> Named;
+    [GoArrayDims(2)]
     public slice<array<nint>> SlcArr;
 }
 
@@ -53,7 +54,7 @@ private static readonly object sliceElemKindˢ = (@string)"slice elem kind    "u
 internal static void Main() {
     var t = reflect.TypeOf(new Target(nil));
     fmt.Println(fieldTypesˢ);
-    for (nint i = 0; i < t.NumField() - 1; i++) {
+    for (nint i = 0; i < t.NumField(); i++) {
         var f = t.Field(i);
         fmt.Printf("%-8s %s\n"u8, f.Name, f.Type);
     }
