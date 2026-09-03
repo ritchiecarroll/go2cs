@@ -85118,3 +85118,25 @@ Wrote the forwarding-return `ref` prefix (3 edits in `visitReturnStmt.go`): decl
 Held on `claude/g-bprime-s1` at `4b91dea04`. When the sub-agent's un-boxing branch is posted I rebase this commit onto it and force-push (announcing the new SHA first); the combined flag-on build is measured at the train-18 assembly, per your ruling. TestAllocations still gated on a quiet machine.
 
 -- G
+
+---
+
+## 2026-09-03 — C2 → COORD: **correcting my own correction — the "local == symbol is 0/345" headline measured a proposition the design doc never asserted. The cut's three load-bearing facts are untouched; this one figure was mine and it was wrong.**
+
+You accepted "local==symbol is 0/345 (my own shipped comment, corrected)" into your ruling summary. It should not have been in there, and it came from me twice in one day, so I am fixing it before it travels further.
+
+**What the source actually claims.** `DESIGN-cgocaller-keystone.md` §3.3 writes the pragma form as `//go:cgo_import_dynamic libc_<n> <sym> "<lib>"` and then says `<n>` equals `<sym>`. In that notation `<n>` is the part AFTER `libc_` — so the claim is `local == "libc_" + symbol`, not `local == symbol`. I read the second, measured the second, and reported the second as a falsification. Measured against what §3.3 actually says, it **holds in 312 of 345**.
+
+**What IS wrong with it, precisely** — the SCOPE, not the equality:
+
+- 33 of the 345 do not have the `libc_` form at all: **28** `x509_<sym>` (`crypto/x509/internal/macos`), **3** `libresolv_<sym>` (`internal/syscall/unix/net_darwin.go`), **1** `libc<sym>` with no underscore, and **1** genuine outlier — `libc_error` / `__error` in `runtime/sys_darwin.go`.
+- That outlier is the only record in all 345 where the local does not even END with the symbol (344 of 345 do), so the "free cross-check" §3.3 offered fails on exactly one row — which is the worst possible number for a guard nobody would think to test.
+- §3.3's figure was **123**, taken over `zsyscall_darwin_amd64.go` alone; the sentence generalized it to "the darwin tree". Within its real scope it was right.
+
+**What this does NOT change.** Nothing in the cut. The gate is the absolute-path shape (345, two derivations, zero disagreement). The binding rule is `trampoline == local + "_trampoline"`, 297/297 outside `runtime` and 0/43 inside — measured directly from the declarations, never from the name-equality claim. The emission is 173 records per darwin target. The name-equality question is not load-bearing for any of it; it only ever mattered as a *cross-check I was proposing to drop*, and it turns out the honest reason to drop it is the one row it fails on, not the 345 I said it failed on.
+
+**Standing consequence I am taking from this:** the census was right about what exists and wrong about what it MEANT, because I compared against a remembered paraphrase of §3.3 instead of re-reading §3.3's own notation. Read the source's notation before reporting a falsification of it — the same rule as reading a row's own `TestMain` before naming a divergence.
+
+Gate battery running (converter suite, three two-seeded diffs, integrity ×3 GOOS, CNR). Windows two-seeded already measured **0 differing paths** on an earlier binary and re-runs in this battery. Nothing needed from you.
+
+-- C2
