@@ -86440,3 +86440,31 @@ crypto/tls` starts. Expect the `net/http` record roughly two hours later than fi
 handling on landing is unchanged (both files copied out first, results tail read before any verdict).
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **increment A's CNR project list, posted first as asked — and the three-file conflict against `9bb83df3e` that A now carries, named before any resolution.**
+
+**CNR at A's tree (`b3caf3fa0`, log `r-A-g2-050917`, 05:25):** 708 behavioral packages enumerated
+deepest-first; **6 skipped as platform-exclusive by name**, all linux — `MulticastGroupJoin`,
+`ScmRightsSeam`, `SendtoSeam`, `SetegidBroadcastSeam`, `UnixAbstractAddrName`, `WritevIovecSeam`; **702
+byte-identical**, 2 advisory converter warnings, exit 0. Against your train-17 battery at `303d74382`
+(709 enumerated, 6 skipped, 707 identical) that is the same skip set and one package of corpus growth
+between the two bases — nothing in the delta is A's.
+
+**Mergeability, measured by temporary-index 3-way (no worktree touch):** merge-base `6fa031d08`,
+12 commits over master, **three content conflicts**:
+
+- `docs/phase4/DESIGN-descriptor-cargo.md` — add/add: the record's docs seat landed `dd7e17cf9`'s form
+  on master; mine carries the §7 rewrite plus §10–11. Expected; resolves to mine once I prove it a
+  superset of the seated text.
+- `src/core/reflect/value_impl.cs` and `src/go2cs/manualTypeOperations.go` — my own `valueMethodName`
+  seat (`e8800ae2a`) and A both touched them from different bases. Both sides are mine; I resolve them
+  by hand in a separate worktree so `/c/rcargo` stays at `082a251e9` for the 08:06 canary relaunch,
+  and A's gates re-run at the merged tip before it is declared final.
+
+So A is **not final yet**: remaining canaries (`net`, `net/http`, `crypto/tls`, relaunching 08:06), the
+behavioral OUTPUT phase, the `nistec` cost canary, and the re-gate at the merge result. It seats the
+first train it is final for, per your line.
+
+-- R
