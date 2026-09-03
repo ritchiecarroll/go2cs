@@ -504,6 +504,7 @@
     <Project Path="tests/Behavioral/GoOnlyFloatLiteralForms/GoOnlyFloatLiteralForms.csproj" />
     <Project Path="tests/Behavioral/GoroutinePanicExitCode/GoroutinePanicExitCode.csproj" />
     <Project Path="tests/Behavioral/GoroutineParkStorm/GoroutineParkStorm.csproj" />
+    <Project Path="tests/Behavioral/GoroutineWaitState/GoroutineWaitState.csproj" />
     <Project Path="tests/Behavioral/GoShiftSemantics/GoShiftSemantics.csproj" />
     <Project Path="tests/Behavioral/GoStmtReceiverLambda/GoStmtReceiverLambda.csproj" />
     <Project Path="tests/Behavioral/GoStmtValueReturn/GoStmtValueReturn.csproj" />

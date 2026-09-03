@@ -23,6 +23,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+// Aliased rather than imported wholesale: this file needs exactly two golib types, and a blanket
+// `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
+// beside converted code.
+using Goroutine = go.golib.Goroutine;
+using WaitReason = go.golib.WaitReason;
 
 // Hand-owned (no runtime_sema.go exists, so a reconvert never regenerates it); marked for
 // consistency with the other hand-owned operational files.
@@ -67,7 +72,12 @@ partial class poll_package
                 bucket.Waiters.Enqueue(waiter);
             }
 
-            waiter.Signal.Wait();
+            // `semacquire`, which is what Go's poll_runtime_Semacquire passes (sema.go:75-77). NOT
+            // `IO wait` — that is netpollblock's reason and belongs to runtime_netpoll_impl.cs's
+            // pollBlock, one layer up. Both live in internal/poll and they are different waits: this
+            // one is the fdMutex's reference/lock counter, that one is the completion itself.
+            using (Goroutine.Park(WaitReason.Semacquire))
+                waiter.Signal.Wait();
 
             // Woken: re-compete for the count (no direct handoff in internal/poll's contract).
         }

@@ -455,7 +455,9 @@ internal sealed class ChanCore<T> : ChanCore
         Waiter parked = new(isSend: true) { Elem = value };
         Sendq.Enqueue(parked);
         Monitor.Exit(SyncRoot);
-        parked.Park.Wait();
+
+        using (Goroutine.Park(WaitReason.ChanSend))
+            parked.Park.Wait();
 
         if (!parked.Ok)
             throw new PanicException("send on closed channel");
@@ -538,7 +540,10 @@ internal sealed class ChanCore<T> : ChanCore
         Waiter parked = new(isSend: false);
         Recvq.Enqueue(parked);
         Monitor.Exit(SyncRoot);
-        parked.Park.Wait();
+
+        using (Goroutine.Park(WaitReason.ChanReceive))
+            parked.Park.Wait();
+
         value = parked.Elem is null ? default! : (T)parked.Elem;
         ok = parked.Ok;
         return true;
@@ -818,7 +823,7 @@ internal static class SelectRuntime
         {
             // select{} or every case on a nil channel: blocks forever — the standing
             // nil-channel deadlock-grace path (matches plain send/receive on nil).
-            if (!channel.Wait(CancellationToken.None))
+            if (!channel.Wait(CancellationToken.None, reason: WaitReason.SelectNoCases))
                 fatal(FatalError.DeadLock());
 
             return -1; // unreachable
@@ -868,7 +873,8 @@ internal static class SelectRuntime
 
         // Park = unlock THEN wait. A waker that claimed us between the unlock and this wait has
         // already released the semaphore, so the wait returns immediately — no lost wakeup.
-        sel.Park.Wait();
+        using (Goroutine.Park(WaitReason.Select))
+            sel.Park.Wait();
 
         int winner = Volatile.Read(ref sel.Winner);
 
@@ -1283,7 +1289,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
         // Sending to a nil channel blocks forever
         if (m_core is null)
         {
-            if (channel.Wait(CancellationToken.None))
+            if (channel.Wait(CancellationToken.None, reason: WaitReason.ChanSendNilChan))
                 return;
 
             fatal(FatalError.DeadLock());
@@ -1419,7 +1425,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
         // Receiving from a nil channel blocks forever
         if (m_core is null)
         {
-            if (channel.Wait(CancellationToken.None))
+            if (channel.Wait(CancellationToken.None, reason: WaitReason.ChanReceiveNilChan))
                 return default!;
 
             fatal(FatalError.DeadLock());
@@ -1454,7 +1460,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
         // Receiving from a nil channel blocks forever
         if (m_core is null)
         {
-            if (channel.Wait(CancellationToken.None))
+            if (channel.Wait(CancellationToken.None, reason: WaitReason.ChanReceiveNilChan))
                 return (default!, false);
 
             fatal(FatalError.DeadLock());
@@ -1621,7 +1627,7 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
         // Ranging over a nil channel blocks forever
         if (m_core is null)
         {
-            if (channel.Wait(CancellationToken.None))
+            if (channel.Wait(CancellationToken.None, reason: WaitReason.ChanReceiveNilChan))
                 yield break;
 
             fatal(FatalError.DeadLock());
@@ -1714,16 +1720,27 @@ public static class channel
     /// channel, returning <c>true</c> only if <paramref name="token"/> was canceled first —
     /// <c>false</c> means the timeout elapsed (the caller reports the deadlock).
     /// </summary>
-    public static bool Wait(CancellationToken token, int timeout = DeadLockDetectionTimeout)
+    /// <remarks>
+    /// <paramref name="reason"/> is the park accounting a traceback reads while the grace elapses.
+    /// Go has a distinct wait reason for each of these shapes — <c>chan receive (nil chan)</c>,
+    /// <c>chan send (nil chan)</c>, <c>select (no cases)</c> — and a goroutine that is about to be
+    /// declared deadlocked is exactly the one a dump is being taken to diagnose, so the caller names
+    /// which. It is optional only so the parameter can be added without disturbing the existing
+    /// <paramref name="timeout"/> default; every in-tree caller passes one.
+    /// </remarks>
+    public static bool Wait(CancellationToken token, int timeout = DeadLockDetectionTimeout, WaitReason reason = WaitReason.Zero)
     {
-        // Plain timed wait — every nil-channel op funnels here, so no per-call throwaway
-        // SemaphoreSlim. An uncancelable token (the in-tree callers all pass None) is a sleep.
-        if (!token.CanBeCanceled)
+        using (Goroutine.Park(reason))
         {
-            Thread.Sleep(timeout);
-            return false;
-        }
+            // Plain timed wait — every nil-channel op funnels here, so no per-call throwaway
+            // SemaphoreSlim. An uncancelable token (the in-tree callers all pass None) is a sleep.
+            if (!token.CanBeCanceled)
+            {
+                Thread.Sleep(timeout);
+                return false;
+            }
 
-        return token.WaitHandle.WaitOne(timeout);
+            return token.WaitHandle.WaitOne(timeout);
+        }
     }
 }

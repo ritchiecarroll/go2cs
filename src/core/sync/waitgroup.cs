@@ -8,6 +8,11 @@
 // Reimplemented natively: a guarded counter plus a latch event that is set whenever the counter is
 // zero. Wait blocks on the latch; the Add that drives the counter to zero releases every waiter.
 using System.Threading;
+// Aliased rather than imported wholesale: this file needs exactly two golib types, and a blanket
+// `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
+// beside converted code.
+using Goroutine = go.golib.Goroutine;
+using WaitReason = go.golib.WaitReason;
 
 // Hand-owned native replacement of the converted waitgroup.go output — the marker makes a -stdlib
 // reconvert skip regenerating this file (see containsManualConversionMarker).
@@ -71,6 +76,15 @@ public static void Add(this ж<WaitGroup> Ꮡwg, nint delta) {
 public static void Done(this ж<WaitGroup> Ꮡwg) => Ꮡwg.Add(-1);
 
 // Wait blocks until the WaitGroup counter is zero.
-public static void Wait(this ж<WaitGroup> Ꮡwg) => wgStateOf(Ꮡwg).Idle.Wait();
+//
+// `semacquire`, not `sync.WaitGroup.Wait`: Go has no wait reason of the latter name. WaitGroup.Wait
+// calls runtime_Semacquire, which is sema.go's sync_runtime_Semacquire, which parks with
+// waitReasonSemacquire — so `semacquire` is what a Go traceback prints for a blocked Wait, and this
+// reports the same word for the same wait.
+public static void Wait(this ж<WaitGroup> Ꮡwg) {
+    using (Goroutine.Park(WaitReason.Semacquire)) {
+        wgStateOf(Ꮡwg).Idle.Wait();
+    }
+}
 
 } // end sync_package

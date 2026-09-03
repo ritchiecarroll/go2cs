@@ -27,6 +27,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+// Aliased rather than imported wholesale: this file needs exactly two golib types, and a blanket
+// `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
+// beside converted code.
+using Goroutine = go.golib.Goroutine;
+using WaitReason = go.golib.WaitReason;
 using Stopwatch = System.Diagnostics.Stopwatch;
 
 // Hand-owned (no runtime_impl.go exists, so a reconvert never regenerates it); marked for consistency
@@ -60,7 +65,13 @@ partial class sync_package
 
     private static SemaBucket bucketFor(ж<uint32> s) => semaTable.GetOrAdd(s, static _ => new SemaBucket());
 
-    private static void semacquire(ж<uint32> s)
+    // `reason` is park ACCOUNTING only — it never reaches the protocol, exactly as in Go, where
+    // semacquire1's own `reason waitReason` parameter is handed straight to goparkunlock and
+    // nothing else reads it. It is a PARAMETER rather than a constant for the same reason Go makes
+    // it one: ONE semaphore serves four different Go-level waits, and a traceback has to name which
+    // (sema.go's sync_runtime_Semacquire / SemacquireMutex / SemacquireRWMutexR / SemacquireRWMutex
+    // pass waitReasonSemacquire, SyncMutexLock, SyncRWMutexRLock and SyncRWMutexLock respectively).
+    private static void semacquire(ж<uint32> s, WaitReason reason)
     {
         SemaBucket b = bucketFor(s);
 
@@ -80,7 +91,8 @@ partial class sync_package
                 b.Waiters.Enqueue(w);
             }
 
-            w.Signal.Wait();
+            using (Goroutine.Park(reason))
+                w.Signal.Wait();
 
             if (w.HandedOff)
                 return; // ownership was handed to us directly (starvation mode)
@@ -113,13 +125,13 @@ partial class sync_package
         w?.Signal.Set();
     }
 
-    internal static partial void runtime_Semacquire(ж<uint32> s) => semacquire(s);
+    internal static partial void runtime_Semacquire(ж<uint32> s) => semacquire(s, WaitReason.Semacquire);
 
-    internal static partial void runtime_SemacquireMutex(ж<uint32> s, bool lifo, nint skipframes) => semacquire(s);
+    internal static partial void runtime_SemacquireMutex(ж<uint32> s, bool lifo, nint skipframes) => semacquire(s, WaitReason.SyncMutexLock);
 
-    internal static partial void runtime_SemacquireRWMutex(ж<uint32> s, bool lifo, nint skipframes) => semacquire(s);
+    internal static partial void runtime_SemacquireRWMutex(ж<uint32> s, bool lifo, nint skipframes) => semacquire(s, WaitReason.SyncRWMutexLock);
 
-    internal static partial void runtime_SemacquireRWMutexR(ж<uint32> s, bool lifo, nint skipframes) => semacquire(s);
+    internal static partial void runtime_SemacquireRWMutexR(ж<uint32> s, bool lifo, nint skipframes) => semacquire(s, WaitReason.SyncRWMutexRLock);
 
     internal static partial void runtime_Semrelease(ж<uint32> s, bool handoff, nint skipframes) => semrelease(s, handoff);
 
@@ -185,7 +197,10 @@ partial class sync_package
             n.Waiters.AddLast(w);
         }
 
-        w.Signal.Wait();
+        // Go's notifyListWait parks with waitReasonSyncCondWait (sema.go:587), which is what makes a
+        // traceback distinguish a Cond waiter from a mutex waiter on the same lock.
+        using (Goroutine.Park(WaitReason.SyncCondWait))
+            w.Signal.Wait();
     }
 
     internal static partial void runtime_notifyListNotifyOne(ж<notifyList> l)

@@ -10,6 +10,11 @@
 // and it is not goroutine-affine (any goroutine may release what another acquired). The RLocker/rlocker
 // interface witness is unchanged — it simply forwards to RLock/RUnlock.
 using System.Threading;
+// Aliased rather than imported wholesale: this file needs exactly two golib types, and a blanket
+// `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
+// beside converted code.
+using Goroutine = go.golib.Goroutine;
+using WaitReason = go.golib.WaitReason;
 
 // Hand-owned native replacement of the converted rwmutex.go output — the marker makes a -stdlib
 // reconvert skip regenerating this file (see containsManualConversionMarker).
@@ -58,7 +63,13 @@ public static void RLock(this ж<RWMutex> Ꮡrw) {
     lock (s.Gate) {
         while (s.Writer || s.WritersWaiting > 0) {
             s.ReadersWaiting++;
-            Monitor.Wait(s.Gate);
+
+            // Park accounting only — Monitor.Wait still owns the release-and-reacquire (Go's
+            // sync_runtime_SemacquireRWMutexR carries the same reason to the same effect).
+            using (Goroutine.Park(WaitReason.SyncRWMutexRLock)) {
+                Monitor.Wait(s.Gate);
+            }
+
             s.ReadersWaiting--;
         }
 
@@ -106,7 +117,9 @@ public static void Lock(this ж<RWMutex> Ꮡrw) {
         s.WritersWaiting++;
 
         while (s.Writer || s.Readers > 0) {
-            Monitor.Wait(s.Gate);
+            using (Goroutine.Park(WaitReason.SyncRWMutexLock)) {
+                Monitor.Wait(s.Gate);
+            }
         }
 
         s.WritersWaiting--;

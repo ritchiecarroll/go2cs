@@ -19,6 +19,11 @@
 // (Go allows unlock on a different goroutine), and non-reentrant (a second Lock on the same thread
 // blocks, matching Go's self-deadlock). See runtime_impl.cs for the shared rationale.
 using System.Threading;
+// Aliased rather than imported wholesale: this file needs exactly two golib types, and a blanket
+// `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
+// beside converted code.
+using Goroutine = go.golib.Goroutine;
+using WaitReason = go.golib.WaitReason;
 
 // Hand-owned native replacement of the converted mutex.go output — the converter skips regenerating a
 // file that carries this marker, so a -stdlib reconvert preserves it (see containsManualConversionMarker).
@@ -73,7 +78,18 @@ private static SemaphoreSlim gateOf(ж<Mutex> Ꮡm) {
 
 // Lock locks m.
 // If the lock is already in use, the calling goroutine blocks until the mutex is available.
-public static void Lock(this ж<Mutex> Ꮡm) => gateOf(Ꮡm).Wait();
+//
+// The park scope is ACCOUNTING ONLY (DESIGN-cooperative-scheduler.md §5.3): it names the wait for a
+// traceback and touches neither the gate nor the order in which waiters reach it. It wraps the whole
+// Wait rather than only a contended one BECAUSE the fast path would have to be a Wait(0), and that
+// is a protocol change — a newcomer barging ahead of the queue — where this cut is required to
+// change no protocol at all. The cost is therefore two volatile stores on every Lock, contended or
+// not, measured by the cost canary named in this arc's commit.
+public static void Lock(this ж<Mutex> Ꮡm) {
+    using (Goroutine.Park(WaitReason.SyncMutexLock)) {
+        gateOf(Ꮡm).Wait();
+    }
+}
 
 // TryLock tries to lock m and reports whether it succeeded.
 public static bool TryLock(this ж<Mutex> Ꮡm) => gateOf(Ꮡm).Wait(0);

@@ -715,6 +715,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGoroutineParkStorm() => CheckTarget("GoroutineParkStorm");
 
     [TestMethod]
+    public void CheckGoroutineWaitState() => CheckTarget("GoroutineWaitState");
+
+    [TestMethod]
     public void CheckGuardedNilPointerParamDeref() => CheckTarget("GuardedNilPointerParamDeref");
 
     [TestMethod]

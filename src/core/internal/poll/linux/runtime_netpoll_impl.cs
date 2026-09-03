@@ -72,6 +72,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Threading;
+// Aliased rather than imported wholesale: this file needs exactly two golib types, and a blanket
+// `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
+// beside converted code.
+using Goroutine = go.golib.Goroutine;
+using WaitReason = go.golib.WaitReason;
 using Stopwatch = System.Diagnostics.Stopwatch;
 
 // Hand-owned (no runtime_netpoll_impl.go exists, so a reconvert never regenerates this file);
@@ -477,7 +482,13 @@ partial class poll_package
                 // superseded the one that woke us -- Go's comment for the same retry: "Can happen if
                 // timeout has fired and unblocked us, but before we had a chance to run, timeout has
                 // been reset. Pretend it has not happened and retry."
-                Monitor.Wait(desc.Gate);
+                //
+                // Park accounting only -- Go's netpollblock parks with waitReasonIOWait, which is
+                // what a traceback prints as [IO wait] for a goroutine blocked in the poller. §6
+                // row 9 of DESIGN-cooperative-scheduler.md left this adoption to the netpoll arc's
+                // option; taken here because the reason has a real park site and a real reader.
+                using (Goroutine.Park(WaitReason.IOWait))
+                    Monitor.Wait(desc.Gate);
             }
         }
     }

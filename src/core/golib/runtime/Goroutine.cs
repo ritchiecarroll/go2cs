@@ -96,6 +96,21 @@ public sealed class Goroutine
         IsMain = isMain;
     }
 
+    // Why this goroutine is parked, or WaitReason.Zero when it is not — Go's gp.waitreason, and the
+    // WHOLE of this goroutine's park accounting. Held as an int because Volatile has no enum
+    // overload; written only by this goroutine's own thread (inside Park/ParkScope.Dispose) and read
+    // by any thread rendering a traceback, which is why both sides go through Volatile: a stale
+    // reason would read as a goroutine parked for something it has already finished waiting on.
+    //
+    // ONE field, not two. The obvious shape — a State enum plus a reason beside it — can represent
+    // "parked, no reason" and "running, reason chan receive", neither of which is a thing, and it
+    // doubles the writes on a path that is taken every time any Go program blocks. Encoding the
+    // state IN the reason (Zero means running) makes the two facts one fact, costs exactly one store
+    // to park and one to unpark, and is what Go's own traceback does at the printing site:
+    // goroutineheader prints the status word and OVERRIDES it with gp.waitreason.String() whenever
+    // the status is _Gwaiting (runtime/traceback.go).
+    private int m_waitReason;
+
     // Monotonic, and deliberately INTERNAL: Go hides goroutine ids from programs precisely so that
     // nothing builds goroutine-local storage on them, and a converted program must inherit that
     // constraint. It exists for the thread name and the debugger.
@@ -106,11 +121,21 @@ public sealed class Goroutine
     // distinguishes them: runtime.Goexit means something different there (see OnGoroutine).
     internal bool IsMain { get; }
 
-    // Running until a park-accounting scope says otherwise. Written only by this goroutine's own
-    // thread. The Parked side arrives with the gopark/goready accounting contract that wraps the
-    // existing wait primitives (DESIGN-cooperative-scheduler.md §5.3) — until then every live
-    // goroutine is Running by construction.
-    internal GoroutineState State { get; set; } = GoroutineState.Running;
+    // Running until a park-accounting scope says otherwise — DERIVED, never stored, so it cannot
+    // disagree with the reason (see m_waitReason). This is the gopark/goready accounting contract of
+    // DESIGN-cooperative-scheduler.md §5.3, which wraps the existing wait primitives rather than
+    // relocating any of them.
+    //
+    // There is no _Grunnable here and there cannot be: Go distinguishes a goroutine QUEUED on a P
+    // from one executing, and under the CLR a goroutine is a thread the OS schedules — a thread
+    // waiting for a core is indistinguishable from one running on it, with no P, no run queue and
+    // nothing to ask. Every not-parked goroutine therefore reads Running, which is what a traceback
+    // prints as [running].
+    internal GoroutineState State =>
+        Volatile.Read(ref m_waitReason) == (int)WaitReason.Zero ? GoroutineState.Running : GoroutineState.Parked;
+
+    // Go's gp.waitreason. WaitReason.Zero on a running goroutine, exactly as in Go.
+    internal WaitReason Reason => (WaitReason)Volatile.Read(ref m_waitReason);
 
     /// <summary>
     /// The stack size, in bytes, reserved for each goroutine's thread.
@@ -186,6 +211,74 @@ public sealed class Goroutine
         Thread.CurrentThread.Name ??= $"goroutine-{goroutine.Id.ToString(CultureInfo.InvariantCulture)}";
 
         return new Scope(goroutine);
+    }
+
+    /// <summary>
+    /// Accounts for the calling goroutine being parked on <paramref name="reason"/> until the
+    /// returned scope is disposed — Go's <c>gopark(reason)</c>, minus the parts that do not exist
+    /// here.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Go's <c>gopark</c> does three jobs: publish "parked, for this reason", switch the g off its M,
+    /// and run a commit callback under the publication protocol. Under a thread-affine executor the
+    /// middle job does not exist, and the third stays inside each primitive's own — already
+    /// adversarially hardened — park/claim discipline. What remains is the first, and it is the fact
+    /// every consumer of this contract needs: how many goroutines are parked, and why. So this is
+    /// deliberately ACCOUNTING ONLY. It relocates no wait, re-opens no protocol, and owes no
+    /// lost-wakeup re-verification; the caller still blocks on exactly the primitive it blocked on
+    /// before:
+    /// </para>
+    /// <code>
+    /// using (Goroutine.Park(WaitReason.ChanReceive))
+    ///     parked.Park.Wait();
+    /// </code>
+    /// <para>
+    /// There is deliberately no <c>goready</c> side. The waker already signals the primitive, and the
+    /// woken thread un-marks ITSELF when its scope disposes — which is also why the write is only ever
+    /// made by the goroutine's own thread.
+    /// </para>
+    /// <para>
+    /// <b>Cost:</b> one volatile store to park, one to unpark, and no allocation — the scope is a
+    /// <c>readonly struct</c> the <c>using</c> disposes without boxing. Both stores land on a path
+    /// that has already decided to block on a kernel wait primitive, so they sit far beneath that
+    /// path's own noise floor. Nothing per-<c>ж</c> and nothing per-object changes, so there is no
+    /// corpus-wide byte cost.
+    /// </para>
+    /// <para>
+    /// A thread with no goroutine identity — the timer service thread, a BCL callback, the finalizer —
+    /// gets an inert scope and writes nothing. Nesting restores the ENCLOSING reason rather than
+    /// clearing to <see cref="WaitReason.Zero"/>, so an inner park cannot report an outer one as
+    /// having woken.
+    /// </para>
+    /// </remarks>
+    public static ParkScope Park(WaitReason reason)
+    {
+        if (t_current is not { } goroutine)
+            return default;
+
+        int previous = Volatile.Read(ref goroutine.m_waitReason);
+        Volatile.Write(ref goroutine.m_waitReason, (int)reason);
+
+        return new ParkScope(goroutine, previous);
+    }
+
+    /// <summary>
+    /// Every live goroutine, ordered by the sequence in which they were created.
+    /// </summary>
+    /// <remarks>
+    /// The order is Go's: a traceback dumps goroutines by <c>goid</c>, and the registry's ids are
+    /// minted monotonically, so sorting by id reproduces creation order. Internal for the same reason
+    /// <see cref="Id"/> is — Go hides goroutine identity from programs — and reachable from the
+    /// hand-owned <c>runtime</c> package through golib's <c>InternalsVisibleTo</c>.
+    /// </remarks>
+    internal static Goroutine[] Snapshot()
+    {
+        Goroutine[] live = [.. s_live.Values];
+
+        Array.Sort(live, static (left, right) => left.Id.CompareTo(right.Id));
+
+        return live;
     }
 
     /// <summary>
@@ -432,6 +525,30 @@ public sealed class Goroutine
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Restores the wait reason a matching <see cref="Park"/> replaced.
+    /// </summary>
+    public readonly struct ParkScope : IDisposable
+    {
+        private readonly Goroutine? m_goroutine;
+        private readonly int m_previous;
+
+        internal ParkScope(Goroutine goroutine, int previous)
+        {
+            m_goroutine = goroutine;
+            m_previous = previous;
+        }
+
+        public void Dispose()
+        {
+            // Inert when Park found no identity: a thread that is not a goroutine parks nothing.
+            if (m_goroutine is null)
+                return;
+
+            Volatile.Write(ref m_goroutine.m_waitReason, m_previous);
+        }
     }
 
     /// <summary>

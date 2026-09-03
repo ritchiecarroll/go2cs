@@ -3,7 +3,21 @@
 > **STATUS: RATIFIED AND LANDED (coordinator; chartered 2026-08-13 at `0b8287f07` — all seventeen
 > OQs ruled, recommendations ratified — formerly PROPOSED 2026-08-12, lane scheduler-design).
 > SCHED-S1 LANDED at `4f06d78ae` (2026-08-13): goroutines get their own threads — the runtime owns
-> capacity, and the pool floor retires.** Consequence for reading this document (dated amendment
+> capacity, and the pool floor retires.
+> **SCHED-S3 LANDED 2026-09-03 (dated amendment): park ACCOUNTING, §5.3 adopted verbatim.** golib's
+> `Goroutine` carries a `WaitReason` (Go's own `waitReasonStrings`, only the members a go2cs park site
+> can set), `Goroutine.Park(reason)` is the §5.3 scope, and §6 rows 1-7 plus **row 9** (the netpoll
+> `Monitor.Wait`, whose `IO wait` the netpoll arc was left to adopt at its option) wrap it — protocols
+> untouched, one volatile store each way, no allocation. `runtime.Stack(all: true)` stops ignoring
+> `all`: it enumerates the registry in goid order with a truthful `goroutine N [<reason>]:` header per
+> goroutine. What did NOT land, and is still Stage B: any OTHER goroutine's FRAMES — those blocks
+> carry a one-line placeholder, because the CLR has no supported cross-thread stack walk and the
+> capture-at-park-time route needs the ruled synthetic-PC registry to symbolize it. Also not adopted:
+> §6 row 10 (the testing parallel gate — accounting on a host gate with no consumer), and rows 11-12,
+> which the table already rules `never`. `GoroutineState` becomes DERIVED from the reason rather than
+> stored, so "parked with no reason" and "running with a reason" cease to be representable. The
+> `NumGoroutine` half of the S3 row landed earlier, with the Coro arc.
+> Guards: behavioral `GoroutineWaitState`, `GolibTests.GoroutineParkAccountingTests`.** Consequence for reading this document (dated amendment
 > 2026-08-29, from the owner's staleness report): §1 and §2 describe the PRE-LANDING launch path —
 > `ThreadPool.QueueUserWorkItem` and the `max(4×cores, 256)` min-thread floor — as the measured
 > bill this design was written against; both are RETIRED. The current source is

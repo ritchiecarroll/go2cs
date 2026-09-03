@@ -20395,6 +20395,74 @@ which is where Go's traceback puts them too, since the deferred call runs on top
 the non-panicking path is zero: the CLR fills the trace at throw time anyway, and nothing is
 snapshotted unless a panic is actually caught.
 
+### `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
+
+The `all` flag was **read and ignored**: the header was a literal `goroutine 1 [running]:` and the dump
+carried the calling thread alone. Both halves were untrue for any program with more than one
+goroutine, and the second was a *contract* violation rather than a cosmetic one — the bracketed word
+in a header is Go's **wait reason**, the runtime publishes it at every `gopark`, and Go's own tests
+grep it (`runtime/pprof`'s `awaitBlockedGoroutine` builds a regex around
+`^goroutine \d+ \[sync\.Mutex\.Lock\]:`; `runtime`'s `TestNumGoroutine` counts headers and requires the
+total to equal `NumGoroutine()`).
+
+**Park accounting** is what makes the word answerable. golib's `Goroutine` carries ONE field — a
+`WaitReason`, whose `Zero` value *is* "running", so the state and the reason cannot disagree — and
+every blocking primitive names its wait around the wait it already performs
+(`docs/phase4/DESIGN-cooperative-scheduler.md` §5.3):
+
+```csharp
+using (Goroutine.Park(WaitReason.ChanReceive))
+    parked.Park.Wait();                       // the EXISTING primitive, untouched
+```
+
+The scope is **accounting only**. It relocates no wait, re-opens no park/claim protocol, and adds no
+`goready` side: the waker already signals the primitive and the woken thread un-marks itself when the
+scope disposes. Cost is one volatile store to park and one to unpark, no allocation (`ParkScope` is a
+`readonly struct`), and nothing per-`ж` or per-object — so there is no corpus-wide byte cost. A thread
+with no goroutine identity (a BCL callback, `time`'s timer service thread, the finalizer) gets an
+inert scope and writes nothing; a nested park restores the enclosing reason rather than clearing it.
+
+The reasons are Go's own strings, copied verbatim from `runtime2.go`'s `waitReasonStrings`, and the
+enum carries only the ones a go2cs park site actually sets — a reason nothing can set is a word no
+dump can print. Adopted sites and the reason each names:
+
+| Wait | Reason | Go's counterpart |
+|---|---|---|
+| channel send / receive | `chan send`, `chan receive` | `gopark(chanparkcommit)` |
+| blocked `select` | `select` | `gopark(selparkcommit)` |
+| nil-channel op, `select{}` | `chan send (nil chan)`, `chan receive (nil chan)`, `select (no cases)` | same reasons |
+| `sync.Mutex.Lock` | `sync.Mutex.Lock` | `sync_runtime_SemacquireMutex` |
+| `sync.RWMutex.RLock` / `.Lock` | `sync.RWMutex.RLock`, `sync.RWMutex.Lock` | `sync_runtime_SemacquireRWMutexR` / `RWMutex` |
+| `sync.WaitGroup.Wait` | `semacquire` | `sync_runtime_Semacquire` — Go has no `sync.WaitGroup.Wait` reason |
+| `sync.Cond.Wait` | `sync.Cond.Wait` | `notifyListWait` → `goparkunlock` |
+| `internal/poll` fdMutex | `semacquire` | `poll_runtime_Semacquire` |
+| `internal/poll` netpoller | `IO wait` | `netpollblock` |
+| `time.Sleep` | `sleep` | `gopark(resetForSleep)` |
+
+**What the dump renders.** The calling goroutine first, with real frames, exactly as before; then one
+blank-line-separated block per other live goroutine, in goid order, each with a truthful header — the
+id golib's registry minted and the reason its park recorded. Where Go prints the other goroutine's
+frames, go2cs prints ONE line, `[stack unavailable: go2cs does not capture another goroutine's
+frames]`, deliberately shaped so nothing could mistake it for a frame (no tab-indented position line,
+no package-qualified name). **The CLR has no supported cross-thread stack walk** — `Thread.Suspend` is
+gone, and ClrMD or EventPipe would mean a process snapshot per call inside what is typically a spin
+loop — so the honest answer is a sentence, and fabricating plausible frames for a stack that was never
+walked is the one thing a traceback must never do. Capturing a goroutine's OWN stack at park time is
+Stage B of the scheduler design, held behind the synthetic-PC registry that would symbolize it.
+
+Three further limits are stated rather than approximated: `running` covers Go's `_Grunnable` as well
+as `_Grunning` (there is no P and no run queue, so a thread waiting for a core is indistinguishable
+from one on it); Go's ` (scan)`, `, N minutes` and `, locked to thread` header decorations are omitted
+(no GC of ours, no park timestamp, and `LockOSThread` is a no-op here because every goroutine already
+owns its thread); and `NumGoroutine()` and the enumeration are two reads of one registry, so they agree
+at rest and can differ while a goroutine is registering or retiring — the same direction as the count's
+already-documented early-climb/late-decay. (Guarded by the `GoroutineWaitState` behavioral test — four
+goroutines parked on a mutex, a channel receive, a select and a WaitGroup, read back through a
+*normalized* reading compared against `go run`, with a negative arm for a reason no goroutine has and a
+release arm proving every reason clears; plus `GolibTests`'
+`GoroutineParkAccountingTests` for the strings, the nesting, the inert host-thread park, and the
+header-count-versus-`NumGoroutine` agreement.)
+
 ### EVERY reader of a panic's trace gets the origin — not just `runtime.Stack`
 
 The snapshot above served exactly one consumer. Every *other* reader — the Phase-4 test host, an

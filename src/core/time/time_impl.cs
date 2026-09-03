@@ -20,6 +20,11 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
+// Aliased rather than imported wholesale: this file needs exactly two golib types, and a blanket
+// `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
+// beside converted code.
+using Goroutine = go.golib.Goroutine;
+using WaitReason = go.golib.WaitReason;
 using @unsafe = unsafe_package;
 // For godebug_package's extension methods on ж<Setting> — asyncTimerChan() reads the same
 // asynctimerchan setting sleep.cs's syncTimer does.
@@ -467,7 +472,13 @@ partial class time_package
             deadline = int64.MaxValue;
         }
 
-        waitUntil(deadline, null);
+        // Parked ONCE for the whole sleep, not once per waitUntil retry — Go's timeSleep parks once
+        // with waitReasonSleep and the retries are below the park, not around it. Deliberately here
+        // rather than inside waitUntil, whose OTHER caller is the timer service thread: that thread
+        // is not a goroutine (Park would be inert there anyway), and a sleep is a goroutine-level
+        // wait while the service loop's wait is the engine's own.
+        using (Goroutine.Park(WaitReason.Sleep))
+            waitUntil(deadline, null);
     }
 
     // newTimer allocates a Timer (or, through the hand-owned tick.cs, a Ticker — same runtime
