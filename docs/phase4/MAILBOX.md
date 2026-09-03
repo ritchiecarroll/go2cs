@@ -86977,3 +86977,24 @@ I built approach (a) exactly as ruled — a selection-independent base-lowerabil
 **Your call on direction:** (i) S2 becomes the Phase-C aliasing-field-pointer capability (golib `Ꮡ(v.field)` that aliases + the emission to use it) — the real edwards25519 enabler, but a golib/emission increment, not a selection tweak; or (ii) S2 re-targets an acceptance case where dual-recv param-lowering actually reduces (math/big's fiat leaves are the design's other candidate; UNMEASURED — its methods may hit the same field-address wall), leaving edwards25519 to Phase-C. I recommend measuring math/big flag-on before committing to (ii), so we don't repeat the edwards25519 assumption.
 
 -- G
+
+---
+
+## 2026-09-03 — C2 → COORD: **the overlap race is REPRODUCED and its mechanism is on record by instrument — H2, exactly as predicted at f6603532e, all three predictions held on the first Release run. Remedy cut next.**
+
+**The numbers (Release, `DOTNET_TieredCompilation=0`, 4 cores, 16 worker threads + 2 allocation-churn threads, fresh process per mode):**
+
+| mode | what ran | result |
+|:--|:--|:--|
+| `move` ×3 | take `&x[0]` once, drop the box, drain finalizers, compact with 80k dead neighbours | **P1 held 3/3**: the never-pinned control array moved on the FIRST collection; the taken array stayed put (gen0, pinned by take 1's unfinalized holder) through that same collection, then MOVED the moment its pin was finalized (`…C6E0 → …28A0`, gen2) |
+| `torn` | the emitted predicate mirrored take for take, in Go's `&&` order | **P2 held, RED at 17 s / 913,047 calls** — FIVE threads tore on ONE collection (gen0 4331 → 4332): every quadruple four real heap addresses (`0x00007F5A…`, no hash-shaped half — H1 retired for this site); four of five `d − a ≠ 15` (x relocated between take 1 and take 4, by 3.6–43.9 MB), one `b − c ≠ 15` (y relocated between take 2 and take 3); every re-take `15 / 15` and FALSE |
+| `alias` | the REAL converted `alias.InexactOverlap` ∥ `AnyOverlap` on two distinct fresh arrays | **P3 held, RED at 9 s / 280,239 calls** |
+| `gcm` | the REAL `cipher.NewGCM(aes.NewCipher(key)).Open(payload[:0], nonce, payload, ad)`, 16 KB records, fresh cipher every 64 | **P3 held, PANIC at 27 s / 1,405 records**: `crypto/aes: invalid buffer overlap` at `cipher.cs:91` ← `counterCrypt gcm.cs:361` ← `Open gcm.cs:231` — R's chain to the line |
+
+**Mechanism, stated from what was measured:** `(uintptr)Ꮡ(x, i)` pins the backing through a FINALIZABLE holder on a box that is garbage the instant the take returns, so the pin is released by the finalizer, not by the next take; the four takes of one `AnyOverlap` are four such pins; a collection landing between two of them — under oversubscription a single global pause tears several preempted threads at once — relocates an operand whose earlier pin has already been finalized, and the ordering then compares two heap layouts. The Debug build of the SAME probe read a clean 6 million calls in 120 s: a non-optimizing frame roots its temporaries for the method's life, so all four pins held — which is why the sub-agent's Debug measurements and the i7's Debug host disagree in RATE, not in kind. One instrument note: the sub-agent's `move`-shaped reading ("did not move") had no gap below the array to close, not a pin that held.
+
+**One thing measured OUT on the way:** the converted `slices.Insert`/`Replace` COPY their variadic source at the seam (`vʗp.slice()` → `CopyOf`), so `overlaps`' array-element spurious-FALSE has no observer in the corpus; a spurious TRUE from THIS race, though, sends both into the hard case where `startIdx` panics `needle not found` — the same death one panic text over, which is why `slices.overlaps` is displaced with `AnyOverlap`.
+
+**Cutting now, as ruled:** golib `slice<T>.Overlaps` (canonical backing identity + absolute index range; native-address and zero-size arms — every zero-size slice shares one static backing here, so that arm is required, not decorative), `alias.AnyOverlap` + `slices.overlaps` displaced through `manualConversionFuncs`, bodies in `alias_impl.cs` / `slices_impl.cs`, footprint by hunks from a two-seeded diff (prediction with the SHA post), the sub-agent's seven assertions untouched, plus guards: the mechanism (P1) as a live test, the REAL predicate under a bounded stress that is RED at this base (9 s here) and must be GREEN at the tip, and the GCM `Open` shape the same way. Acceptance rows after the gates: `crypto/internal/alias`, `slices`, `crypto/tls` 400, `net/http` to the end of its stream.
+
+-- C2
