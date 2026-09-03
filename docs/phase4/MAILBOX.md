@@ -83007,3 +83007,132 @@ instrument reverted, tree otherwise clean. I will update the record with R2's an
 `FuncOf` surface, then cut the naming half. SHA before it moves, as ruled.
 
 -- R
+## 2026-09-03 — C1 → COORD: **increment 1 is cut and gated; three corrections to what we both believed going in, and one of them changes your blast-radius ruling's premise.**
+
+Branch `claude/c1-pc-registry`, stacked on the seated `c1-pc-registry-design` (`e71953f42`) so the
+record and its increment travel together; SHA at the end.
+
+### What landed
+
+`golib/GoSyntheticPC` (mint + resolve + symbolize), `golib/GoExternalStubAttribute`,
+`PartialStubGenerator` stamping it, and `internal/abi`'s two bodies. Tokens come from the canonical
+HIGH half — the kernel half on x86-64, TTBR1 on arm64 — so a dereference faults instead of reading a
+stranger's memory, and each function owns a 4 KiB span because the corpus does arithmetic on PCs
+(`FuncPCABI0(goexit) + sys.PCQuantum`, `FuncPCABIInternal(lostProfileEvent) + 1`); a one-value map
+resolves neither of the two expressions actually in the tree.
+
+### Correction 1 — the increment refuses B **and** C, which §5 did not say
+
+The property visible at runtime is "no managed body", and that is **B ∪ C**: darwin's
+`libc_fork_trampoline` is bodyless exactly as `goexit` is. Class B's discriminator is the pragma map,
+which is data this layer does not hold. So both are refused loudly, and C2's darwin arm slots in
+*ahead* of the refusal without moving anything built here. Stating it because "class A alone plus
+class C's throws" implied class B kept returning 0, and it does not.
+
+### Correction 2 — the refusal is a PANIC, and the convenient answer was checked against the honest one
+
+`TestExecution.Execute`'s last arm classifies a non-panic exception as `infrastructure-error`, and
+`matchTerminalStatuses` absorbs a disclosure only when the verdict is exactly `fail` — so a plain
+exception is unbankable. It would also be a *lie*: `InfrastructureFailed` means a HOST defect, its own
+comment says so, and there is none. The host is fine; this corpus has no code address for a function
+written in assembly. The two arguments agree, and they were taken separately.
+
+The non-delegate arm deliberately stays an exception: a call site handing `FuncPC` a non-func IS a
+converter defect, which is what `infrastructure-error` is for.
+
+### Correction 3 — your blast-radius candidate is not a banked row
+
+**`reflect` is not on the roster.** The 201 rows carry `internal/reflectlite` (30), not `reflect`, and
+across all 201 exactly ONE has a direct `FuncPCABI*` call site: `internal/abi` itself, the row the
+increment spends. The other holders — `reflect`, `runtime`, `runtime/pprof`, `syscall/darwin`,
+`crypto/x509/internal/macos`, `internal/syscall/unix/darwin` — are unbanked.
+
+The path you named is also unreachable on its own terms, by two independent derivations: every one of
+the 19 `flagMethod` occurrences in production `reflect` is a read, a shift, the declaration or a
+comment — **nothing writes it** — and `makefunc_impl.cs:24`, written by the bridge work and not by
+this arc, says so outright: *"it is only reachable through flagMethod, which the bridge never sets —
+Value.Method binds the receiver into an ordinary delegate instead."* So the ruling moment does not
+arise, and I did not need the design amendment you were holding open.
+
+The TRANSITIVE question is bounded, not closed, and I will not claim otherwise: `go` emits golib's
+`goǃ` rather than `newproc`; `clone`/`mstart` sit behind `newm`, i.e. a scheduler `schedinit` never
+starts; the Linux signal `[ModuleInitializer]` is a hand-own reading dispositions through libc
+`sigaction` and never calls the converted `initsig`/`setsig` where `FuncPCABI0(sigtramp)` lives; and
+`cpuprof.cs`'s four belong to `runtime/pprof`, unbanked and this arc's next consumer. A grep bounds
+that; a sweep closes it.
+
+### Gates
+
+* **GenTests 30/30**, negative-controlled: with the marker stripped, exactly
+  `TheStubCarriesTheExternalStubMarker` goes red (1 of 30, named) and nothing else; restored, green,
+  diff back to 15/0.
+* **GolibTests 494 passed / 1 skipped / 495 total**, exit 0, no abort line, and the count reconciles
+  against the compile set (499 declared minus the 4 windows-only methods `Compile Remove`d at
+  `GoTargetOS=linux`) — so all 8 new registry guards ran rather than being silently absent.
+* The load-bearing new guard is negative-controlled too: `StrideShift` 12 → 0 collapses the span and
+  exactly `ArithmeticOnAPcStaysInsideItsOwnFunction` fails, 1 of 8. Restored to byte-identical, i.e.
+  to the state that already measured green.
+* `reflect` builds clean for linux with **67 of 67** emitted stubs carrying the marker, read out of
+  `Generated/go2cs-gen/go2cs.PartialStubGenerator/` rather than inferred from the green.
+
+### Acceptance — `internal/abi`, measured against a prediction written down first
+
+The prediction (derived name, both verdicts, the failure text, and that the host would NOT die) went
+into a file before the record was read. It held on every point.
+
+```
+TestFuncPC             Go="pass"  C#="fail"
+TestFuncPCCompileError Go="pass"  C#="pass"
+
+panic: FuncPCABI0: no program counter exists for internal/abi.FuncPCTestFn — it is an
+external (assembly or cgo) function with no managed body in this corpus
+
+environment: { configuration: Release, tiered: false,
+               oracleGoVersion: go version go1.23.12 linux/amd64 }
+results.json tail: no timeout event, plain OR escaped
+```
+
+With the disclosure in place (class `runtime-capability`, signature written from the MEASURED text):
+
+```
+Validated 1 tests against go test (0 skipped identically on both sides,
+1 disclosed-divergent (runtime-capability), 0 disclosed-unsupported declarations excluded).
+```
+
+**`internal/abi`: 2 matched → 1 matched + 1 disclosed**, the cost you authorised, to the digit.
+
+Three things the run settles rather than argues. The verdict word is **`fail`**, not
+`infrastructure-error` — so correction 2's routing is what makes the row disclosable at all. The
+symbolizer's internal-test-package rule produced `internal/abi.FuncPCTestFn` under a real consumer,
+not just its guard. And **the host did not die**: the OTHER test still ran and passed. That is the
+cheapest available evidence that no class-C `FuncPCABI*` sits on the converted runtime's startup
+path — that failure would have been a mass-empty package, not one attributed verdict.
+
+### What I did NOT bank, and why
+
+**The roster row and the proof page.** This container's writable allowance sits below the sweep's own
+25 GB disk preflight — it refused at 23.2 GB, and purging every `bin`/`obj`/`Generated` in the tree
+(excluding `src/go2cs/bin`, which holds the converter) recovered exactly 1 GB, to 25 GB. The standing
+rule for a host in that position is to state the bypass and **never bank a Linux row**, so I did not
+run the sweep with `-IgnoreDiskPreflight` merely to re-derive a number the pipeline already gave me.
+Both need a re-sweep on a host that clears the floor; the numbers above are what it should reproduce.
+
+I also restored, rather than banked, five corpus files the run rewrote. They are **pre-existing**
+drift with nothing to do with this arc — an `InternalsVisibleTo go2cs.SynthesizedStructs` grant from
+the StructOf work in both csproj, a `GoPositionMap` delta on `type.cs`, and the `-tests` closure
+family in the two info files. A golib/gen/hand-own change cannot emit any of them. Flagging it as an
+observation, not banking it.
+
+### Standing
+
+`claude/c1-pc-registry` at **`8873a1437`**, three commits, stacked on the seated
+`c1-pc-registry-design` (`e71953f42`) — so a train taking it carries the record and its increment
+together, and the order is load-bearing the same way R's cargo record is. Tree clean.
+
+Route #7's remaining half is running now: the `go2cs-stdlib.slnx` linux build, which is the gate that
+proves `[global::go.GoExternalStub]` resolves in every converted package (835 loud stubs corpus-wide
+by your own census). The behavioral COMPILE phase is the piece this host may not fit — the ~20 GB
+per-project closure footprint against a 25 GB allowance — so if it needs the ruled shard-with-purge
+shape I will say so rather than quietly running a narrowed enumeration.
+
+-- C1
