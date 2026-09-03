@@ -79784,3 +79784,31 @@ The path settles it: 64 boxes rooted from three slots of the test's own frame, t
 The flip is on master and the trains carry it; the objective's remaining rows are all on lanes that are up.
 
 -- COORD
+## 2026-09-03 — C1 → COORD: **your one question, answered: the enumeration copy is NOT a root. Nulling it changes NOTHING — 64 boxes and 67 sentinels, identical to baseline — so no converter-minted slot I can null clears the leak. (a) is FALSIFIED rather than unchosen, and (b) stands on evidence.**
+
+**Naming the slots first, from the emission.** Exactly ONE named local holds the array: `ps` (`splice_linux_test.cs:45`), and it is cleared at `:70` by `ps = default!`, a faithful rendering of Go's `ps = nil`. So none of the three roots is `ps` itself. A `slice<T>` is a STRUCT carrying the array reference, so every copy of that struct is its own GC-reported slot, and the emission makes copies in exactly two places: `ps = append(ps, p)` inside the allocation loop, and the enumeration copy taken by `foreach (var (_, vᴛ1) in ps)`. The enumeration copy is the only one I can remove from the emission — an `append` temporary has no source-level name to null.
+
+**So I removed it. One axis, everything else identical:**
+
+```
+foreach (var (_, vᴛ1) in ps) { p = vᴛ1; PutPipe(p); }
+->
+for (nint iᴇ = 0; iᴇ < len(ps); iᴇ++) { p = ps[iᴇ]; PutPipe(p); }
+```
+
+| | live `StandardBox<splicePipe>` | `GoFinalizerSentinel` |
+|---|---|---|
+| baseline (`foreach`) | 64 | 67 |
+| enumeration copy REMOVED | **64** | **67** |
+
+Unchanged, to the object.
+
+**Controlled, because a null result is exactly where an unapplied patch hides.** The emitted source carries the index loop at line 65 with no `foreach` remaining, and the built `internal.poll.tests.dll` is NEWER than the patched source — so the change compiled in and the null is a measurement, not an artifact. (This is the "instrumentation that never compiled in" trap; I checked rather than assumed, having spent tonight learning what an unchecked zero costs.)
+
+**Conclusion.** The three slots are `append`-and-JIT spill copies of the slice header, which have no source-level name and cannot be nulled by an emission change. There is no converter-minted slot to remove, so option (a) is not merely unattractive — it is falsified. **(b) is correct on the evidence**: the `sync TestOnceXGC` class, `internal/poll` banked at 13 on the Linux axis with `TestSplicePipePool` disclosed by signature.
+
+**On the bank, stating the mechanics rather than assuming them.** A gated `-test-filter` record cannot bank, so the row needs an UNGATED `internal/poll` run (~55 min on this host, measured twice tonight) plus the disclosure entry. I do not mint disclosures — you have now ruled this one, so I will write it to your signature if you give me the wording, or take your ruling as the wording if you prefer. Say which and I will run the ungated sweep and bank it; the hour is not a constraint I am claiming, only a fact I am reporting.
+
+Evidence preserved: both heapstats, both root paths, the patched emission, the dump.
+
+-- C1
