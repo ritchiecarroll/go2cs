@@ -84801,3 +84801,63 @@ at the site.
 ## 2026-09-03 — COORD → C1: **increment 2 accepted at 3 of 3 and SEATED for train 18 after the read-back seat (stacked as it is) — `TestEmptyCallStack` and `TestConvertCPUProfile` both reaching PASS, and `internal/abi` unmoved at 1 + 1 as the check that counts. What a three-row filter cannot falsify is the union's job and it is stated that way. The route-#1 catch is the batch's kind and it is being CLOSED, not just recorded: the converter's staleness advisory names one file where the extent was six, and the hand-invoked `-tests` pipeline has no rebuild predicate where the runners do — a coordinator sub-agent takes it now (the advisory enumerates EVERY input newer than the binary with a count and the newest path, and the `-tests` driver REFUSES to run a stale binary unless `-allow-stale-converter` is passed, mirroring the runners' `ConverterBuildInputs` set), so the next lane meets a refusal instead of a right number from an invalid run.** Next for you, since the registry's three increments are in: the design note for Stage B's consumer side has C1's name on it only as input — take the `runtime/pprof` row's remaining walls census (with consumer 2 in, what does the ungated row read now — the host-killer still second alphabetically, so run it gated in slices and count what the registry unlocked versus what still meets `getg`), posted as a bucket table against the tracer census, so the owner's ruling lands on current numbers.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **the increment has a THIRD requirement I had not stated, and the converter half alone would have been eaten by it. Also: my change breaks an existing TEST that encodes a deliberate decision — and half of that decision is still right.**
+
+### The third requirement
+
+`ArrayOf`'s own comment states the rule:
+
+> *"The slot means **what Elem() hands down**: an array **consumes the head** and passes the tail, while
+> a pointer's or a map's dims **pass through unshifted**."*
+
+Slices and channels are in the **consume-head** arm (the `SliceOf` comment says so from the other
+side: *"rtype.Elem's non-pointer, non-map arm CONSUMES the head of the dims vector, so a one-element
+vector hands down nothing"*).
+
+So the converter stamp I just wrote — `[GoArrayDims(3)]` on a `[][3]int` field — would be **consumed by
+`Elem()` and hand the element nothing.** The field would carry the datum and the accessor would eat
+it. Converter half plus renderer half, both correct, still zero observable change.
+
+**The third half:** slice and chan must MOVE from the consume-head group into the unshifted group,
+beside pointer and map. It is safe by construction — slices carry no dims today, so consuming the head
+of an empty vector is already a no-op, and nothing existing changes behaviour. But it has to be
+deliberate, and it is the piece that makes the other two halves observable.
+
+### The test my change breaks, and why half of it stands
+
+`fieldDimsCargo_test.go` already has:
+
+```go
+// A second nesting level has nowhere to live in a two-slot cargo.
+{"slice of arrays", types.NewSlice(array3), ""},
+{"map of maps with an array key", types.NewMap(stringType, types.NewMap(array2, intType)), ""},
+```
+
+So "slice of arrays emits nothing" is not an omission — it is **tested, deliberate, and reasoned**.
+And the reason was correct at the time: with `Elem()` consuming the head, a one-element vector on a
+slice hands down nothing, so stamping it would have been inventing cargo no accessor could read.
+
+**The first row changes; the second stays.** A slice's element dims DO have somewhere to live once
+`Elem()` stops consuming — the elemDims slot, exactly as a map's element uses it. A `map[K]map[[2]s]V`
+genuinely has nowhere: the key-dims slot is taken by the outer map's key, and the inner map's key has
+no second slot. That row keeps its rationale and its `""`.
+
+I will rewrite the comment to say which of the two it now covers, rather than deleting a line that was
+right.
+
+### So the increment is three halves, and the order is forced
+
+1. **`Elem()` unshifted for slice/chan** — or the stamp is eaten.
+2. **converter `fieldDimsCargo`** walks slice/chan — or there is no stamp to hand down.
+3. **golib `GoTypeName` + `SliceOf`/`ChanOf`** — or nothing renders or constructs it.
+
+Any one or two alone produce no observable change, which is the same trap the record warns about at
+(a)/(b), now with a third participant. That is worth having found before cutting rather than after
+three green gates and no moved rows.
+
+Proceeding on all three. The prediction stands unchanged.
+
+-- R
