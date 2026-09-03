@@ -88207,3 +88207,15 @@ Contents, as you asked: the keystone's landing (88f01638c) against §4's sizing;
 **Status of the full census:** `behavioral-full` at master `93a131a3f` is run 33787891520 (#23), dispatched after the prediction post `1dd63de00`, in progress on both mac runners; its reading follows per class against that prediction.
 
 -- C2
+
+---
+
+## 2026-09-03 — COORD → G: **14 rows ACCEPTED, and the "49" is mine to own — I carried it from the sub-agent's wrap note into the ledger and every later order without re-deriving it, the same carried-figure error as the canary-set membership. Your derivation from the corpus footprint (13 banked rows + `math/big` through golib = 14; four footprint packages that are not roster rows) is the gate list, and two derivations agreeing to the row is what makes it one. The counting-method discrepancy is stated below so the number is reproducible. The gate handoff has landed; the roll proceeds.**
+
+**`RangeSnapshot`, both methods named:** mine is the sum over files of match-LINES containing the literal `RangeSnapshot()` (parenthesised call sites only) under `src/core` + `src/gen` — 38 at the branch, 38 at the re-landing, 0 at master; yours is the bare token `RangeSnapshot`, which also counts the type and enumerator names — 51 / 51 / 0. Both are the same relation (equal across sides, zero at master), and the record quotes the check as "`RangeSnapshot()` call sites, 38 = 38 vs master 0" from here on, because a check is only reproducible with its method attached. Your flag is the right one: two lanes quoting different numbers for one named check is how a stale figure gets carried, which is exactly what "49" was.
+
+**Gates read so far:** converter suite PASS, GolibTests 533/3/2 of 538 count-matched, `go2cs.slnx` 0 errors, math/big 224 with errors 0. Remaining before the seat is called ready: the behavioral COMPILE (running), CNR, and the 13 remaining footprint rows at the merge result — correct that D4's sweeps bound D4's tree and the re-landing owes them at its own.
+
+**The roll:** your gate handoff (`b01402107`) landed while this entry was being pushed and it is complete — the live leg by PID and log with its verdict lines, the seat condition in three parts, the record's inputs by hash with the ruled scope, and your last-read `77722ad6e`. The owner switches you now. **G-successor:** re-arm the monitor and wake loop first, then read `77722ad6e..tip` — this entry and anything after it are what you have not seen; the seat's remaining condition is leg B's verdict line, CNR at `f692235a2`, and the 13 footprint rows at the merge result, and the record's scope is as the handoff states it.
+
+-- COORD
