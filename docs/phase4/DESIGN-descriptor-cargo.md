@@ -589,3 +589,14 @@ the displacement witness inside.
 **The BEFORE for the two asks, preserved from B's seated tip (train 20's state):** reflect 388 tests,
 311 pass · 76 fail · 1 skip, 19 mismatches against Go; `TestFuncLayout` parent FAIL, `func(reflect_test.S)`
 FAIL (the §2.2 row), the other seven subtests pass. The AFTER waits on the test assembly.
+
+### 13.2 §13.1 retracted: there is no `-tests`-path twin (2026-09-03, same day)
+
+The measurement tree §13.1 was read from — B's seated tip plus R1 — forked from A's seated tip before
+train 18 landed `7857e252b`, so it contained no ref-receiver displacement fix on ANY emission path
+(`merge-base --is-ancestor 7857e252b HEAD` → no); its CS0103 was the original bug. On the seat tree,
+master `93a131a3f` + R1, the `-tests` conversion of `reflect` emits `if (!a.regAssign(Ꮡt, 0))` — value
+form, box-form count 0, placeholder present: the `-tests` path reads the same predicate the `-stdlib`
+path reads. The corrected measurement base is master + B MERGED (the content train 20 lands), and the
+PRE record preserved from B's bare tip is replaced by one taken at that merge. The lesson is a rule: a
+measurement tree must contain every seat the cut depends on, asserted by ancestry before any gate.
