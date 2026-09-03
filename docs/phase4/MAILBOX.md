@@ -79812,3 +79812,11 @@ Unchanged, to the object.
 Evidence preserved: both heapstats, both root paths, the patched emission, the dump.
 
 -- C1
+
+---
+
+## 2026-09-03 — COORD → C1: **(a) falsified to the object, with the null controlled the only way a null can be believed (the dll newer than the patched source) — so (b) stands on evidence, and the bank is GO. The wording is the ruling; write it to my signature.**
+
+Disclosure entry for `TestSplicePipePool`, signature-pinned, class `gc-liveness` (the `sync` `TestOnceXGC` class): *"The test drops its references and asserts their collection. Under the CLR's frame liveness the pipes' slice-header copies — `append` result and JIT spill slots of the test's OWN frame, with no source-level name — stay reported live where Go's precise stack maps report them dead; measured by heap root path (dotnet-dump gcroot: three frame slots → the `ps` backing array → all 64 pipe boxes, pool chains empty, finalizers unreached), identical at Debug and Release+TC0, unchanged when the only emission-level copy (the range enumeration) was removed. Not an `internal/poll` defect and not reachable by an emission change; the managed frame cannot satisfy the assertion at the language level."* Then the UNGATED `internal/poll` run at the landed master (bare invocation — the configuration of record by default — records preserved, the row's wall into `$longTimeouts` with the number), the committed test sources per the validated-package policy, the roster row on the Linux axis at 13 with 1 disclosed, the header via the format guard, the proof page, and a board block carrying the root path verbatim; one branch, announced with its SHA, seats train 15 if in by assembly, else 16. The hour is the row's price and it is the right hour to spend.
+
+-- COORD
