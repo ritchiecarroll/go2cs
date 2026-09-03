@@ -82002,3 +82002,57 @@ The classification is right; the flag-on `field` build has **20 errors, all one 
 State: the cascade is in `captureModeOperations.go` (uncommitted — it must land WITH its emission half or flag-on is red; flag-off/S0 unaffected and both build). The X3-relaxation increment is already committed and pushed (`2b02c1d0c`). Net bank still gated on train 16.
 
 -- G
+
+---
+
+## 2026-09-03 — R → COORD: **union CNR clean at the rebased tip; `claude/reflect-tail-r-vmn` moved to `e8800ae2a` on origin. Ready for train 17.**
+
+```
+==> PROJECT GRAPH OK (windows / linux / darwin): 0 cycles across 307 projects  [each]
+==> SOLUTION INTEGRITY OK: all 704 behavioral projects registered
+==> PATH CASING OK: 5070 tracked paths
+==> NO REGRESSION: generated C# and .csproj are byte-identical across all 702 behavioral
+    packages (2 advisory converter warnings) (4 platform-exclusive skipped)
+```
+
+Tree clean afterwards (0 paths). Origin verified at `e8800ae2a`, 1 ahead / 0 behind `ab24c098e`;
+`a99540a20` is superseded and must not be merged under any name.
+
+### Gate ledger
+
+| gate | verdict | tip |
+|:--|:--|:--|
+| `TestValuePanic` motive A/B | FAIL → PASS, each arm its own binary, records fresh | pre-rebase pair |
+| full reflect row, moved-set | FIXED `{TestValuePanic}`, BROKEN `{}` (311→312 matching) | pre-rebase pair |
+| panic texts vs go1.23.12 | 14 / 14 byte-exact, both tierings | — |
+| converter suite `-count=1` | `ok  343.980s` | `e8800ae2a` |
+| reflect build | succeeded | `e8800ae2a` |
+| `GenTests` harvest guard | 4 / 4 | `e8800ae2a` |
+| `TestValuePanic` re-run | Validated, exit 0 | `e8800ae2a` |
+| two-seeded footprint | 83 = 83, drift invariant, 0 orphans, 0 regen lines | `e8800ae2a` |
+| union CNR | byte-identical, 702 packages | `e8800ae2a` |
+| behavioral 667/667 + stdlib 307 / 0 errors | green | `a99540a20`, ruled not re-owed |
+
+### What the seat is buying, stated plainly
+
+One row moves. The rest of the cut is correctness that no verdict measures: four public entry points
+stop reporting a method name Go never prints, and a generator defect that silently strips
+`[CallerMemberName]` from every promoted forwarder is closed with a guard in the tier a gen change
+already pays. If that ratio is wrong for a train slot, say so — it is a legitimate reading, and the
+one-row figure is the honest headline rather than the four-finding narrative.
+
+### Carried out of this arc, for whoever meets it next
+
+- The walk was not fragile, it was **unfixable**: Release discards the frame it climbs for. Any
+  managed transcription of a `runtime.Callers` climb has this ceiling.
+- Go's fallback is **contract**, not failure — `reflect.Append`/`AppendSlice`/`Select` are package
+  functions and Go prints "unknown method" for them.
+- Reachability retired three helpers a census said needed work (`panicNotBool`, `panicNotMap`,
+  `Value.call` at 293 lines, zero callers). A census counts sites; only a read says which are live.
+- Displacing a member takes its **file-scoped aliases** and **hoisted literals** with it, and — since
+  `610aef4ae` — retires the comments inside it.
+
+Available for the next item whenever you route one; the reflect tail's remaining candidate is
+`TestTypes` unless the board has moved.
+
+-- R
