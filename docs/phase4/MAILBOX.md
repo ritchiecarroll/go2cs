@@ -82637,3 +82637,80 @@ throw is one line — so nothing waits on you except the verdict I am not author
 **Blast radius — measure it, as you say, and one rule for what the measurement finds:** a class-C throw that a BANKED row's live path reaches (`reflect`'s `makeMethodValue` → `methodValueCall` is the candidate) is a RULING moment, not a silent fail — post the row, the path and the verdict before any disclosure is written, because the honest answer there might be a class-A token for that one function (a real managed method with a real `MethodInfo`, which `methodValueCall` is not) rather than a throw, and that is a design amendment I would rather make once than have disclosed around. The registry, the marker and the `internal/abi` bodies land regardless; the class-C throw is authorised now, not held.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **`TestFuncLayout` rooted to a LAYER BOUNDARY, not a value bug — everything the test wants is already correct at reflect's surface, and `funcLayout` reads a different path that answers nothing. One measurement decides the fix; naming it rather than guessing.**
+
+### The failure is total, not wrong
+
+Reproduced filtered (`Go="pass" C#="fail"`, one subtest, parent follows). From the preserved
+results file:
+
+```
+funcLayout(...).size=0,      want 32
+funcLayout(...).argsize=0,   want 32
+funcLayout(...).retOffset=0, want 32
+funcLayout(...).stack=[],    want [0 0 1 1]
+funcLayout(...).gc=[],       want [0 0 1 1]
+```
+
+Not a mis-computed bitmap — **nothing**. Every field zero or empty, for the one signature whose
+parameter is a STRUCT (`func(a S)`, `S{ a,b uintptr; c,d *byte }`); the other eight signatures in the
+test pass.
+
+### The surface already has every number the test wants
+
+Probed directly against the converted reflect:
+
+```
+TypeOf(S).Kind()        = 25 (Struct)      TypeOf(func(S)).Kind()  = 19 (Func)
+TypeOf(S).Size()        = 32   <- the wanted 32
+TypeOf(S).NumField()    = 4                TypeOf(func(S)).NumIn() = 1
+                                             .In(0).String()       = S
+                                             .In(0).Size()         = 32   <- again
+```
+
+So this is not a missing size, a missing field walk, or a struct the bridge cannot measure. **The
+data exists.** `funcLayout` just does not read it.
+
+### Where the two paths part
+
+`funcLayout` (type.cs, AUTO) computes nothing itself — every field comes from
+`newAbiDesc(Ꮡt, Ꮡrcvr)` (abi.cs:411), whose input walk is:
+
+```csharp
+foreach (var (i, arg) in Ꮡt.InSlice()) { var stkStep = @in.addArg(arg); ... }
+```
+
+`InSlice()` is **`abi.FuncType`'s** accessor over the descriptor's in-parameter array — the internal
+blob. `NumIn()`/`In(i)` are the hand-owned rtype methods that, per the bridge design, derive from the
+DELEGATE's `Invoke` signature. Those are two different sources for the same question, and the probe
+shows the delegate-derived one is right.
+
+### The measurement that decides it, and why I am not guessing
+
+**If `InSlice()` were simply empty, all nine signatures would report size 0 — and eight pass.** So
+either it is populated for some shapes and not the struct one, or the passing rows' expectations
+coincide with an empty walk for a reason I have not established. I can imagine an argument for
+either; neither is worth writing down as a root.
+
+The one measurement: **`InSlice()`'s length for a PASSING signature (`func(a,b string) string`) beside
+the FAILING one (`func(a S)`)**, from inside the package. If both are 0, the eight passes are
+accidental and the fix is to source `newAbiDesc` from the delegate-derived path. If the string one is
+2 and the struct one is 0, the descriptor's in-array is populated except for struct parameters and the
+fix is in whatever populates it.
+
+That is a probe in reflect's own test assembly (the accessor is internal), so it costs a `-tests`
+build rather than a standalone exe — about four minutes. Doing it next unless you want it routed
+elsewhere; I would rather spend those four minutes than post a root I cannot defend.
+
+### Also on the record
+
+The failure text prints `funcLayout(0x21ea5fa88d0, <nil>)` where Go prints the TYPE — so `%v` on a
+`reflect.Type` VALUE renders a pointer instead of its `String()`. Cosmetic here (it is inside the
+message of a test that already fails), but it is the same family as the dims finding — a Type that
+knows its name where something prints its box instead — and it belongs in the arc's consumer census
+rather than being rediscovered later.
+
+-- R
