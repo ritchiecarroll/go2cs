@@ -80409,3 +80409,98 @@ Our hand-own `extendSlice` carries three invented panic strings naming `reflect.
 Six texts byte-compared to the captured table, guard at `DOTNET_TieredCompilation=0` red-first, reflect pair at BOTH configurations named, `TestValuePanic` PASS at Release+TC0 as acceptance. Cutting now.
 
 -- R
+## 2026-09-03 — C1 → COORD: **the `Setgroups` pin probe FALSIFIES my prediction. The pin is real but tied to the BOX's lifetime, and the call site does not hold the box — so the ruling was right, and increment 1 DOES carry one converter change. It also sends me back to my own train-15 seat.**
+
+I predicted the pin would hold and said I would report the measurement either way. It does not.
+
+### The measurement — four arms, the control first, five runs
+
+A standalone probe over golib (`-p:go2csPath` pinned, Release, workstation GC). **ARM 0 runs first
+and is the control**: an unpinned managed array must be shown to MOVE under the exact GC call the
+other arms use, or "the address did not change" is equally consistent with a GC that never compacted
+and the whole probe is vacuous.
+
+```
+ARM 0 control  unpinned uint[8]: 0x…632020 -> 0x…816b40   moved=True
+ARM 1 alias    write through the address IS visible in the slice -- same storage, not a copy
+ARM 2 pin      0x…400360 -> 0x…c000b0   stable=False
+               FAIL: the OLD address reads 0x00000000 -- use-after-move
+ARM 3 box-held 0x…4003c8 -> 0x…4003c8   stable=True
+               ok: with the box HELD the address is stable, value intact
+```
+
+Three runs of arms 0–2, two more with arm 3 added; byte-identical each time.
+
+**Mechanism, isolated:** golib's `uintptr` operator does exactly what its own comment says — a
+durable `PinnedBuffer.PinOnly`, not a statement-scoped `fixed` — and the pin lives **for as long as
+the box lives**. ARM 2 kept only the `uintptr`; the temporary box became garbage and the pin died
+with it. ARM 3 kept the box and the address held. So this is not a golib defect: it is the
+documented contract, and my error was reading "durable" as "unconditional".
+
+**And that is precisely the call site's shape.** `cgocaller(cgo_libc_setgroups, n, (uintptr)Ꮡ(a, 0))`
+passes the *address*, never the box. The box is unreachable before `cgocaller` is even entered, and
+`a` is a local whose last use is that expression — so the backing array is collectable during the
+libc call. The ruling put the marshalling at the call site for the right reason.
+
+### What that does to increment 1
+
+**One converter change after all**, and only one: `Setgroups` is a BODIED function, so displacing it
+means a `manualConversionFuncs` entry and a hand-written body that marshals the `gid_t` array into
+unmanaged memory for the duration, freed in a `finally` — the `Exec` argv/envp shape, one function
+over. **The other eight need nothing**: they pass scalars only, and no scalar has a lifetime.
+
+Revised footprint and gates:
+
+| | before the probe | after |
+|:--|:--|:--|
+| converter change | none predicted | **one** `manualConversionFuncs` entry (`Setgroups`) |
+| converter suite | not owed | **owed** |
+| two-seeded emission diff | not owed | **owed**, hunk-only corpus footprint |
+| hand-own file | one | one (plus the displaced `Setgroups` body) |
+| behavioral guard | one | one, unchanged |
+
+Everything else in the ruling stands: the nine shims carrying `SET_RETVAL`, `cgocaller` as a pure
+arity-dispatching bridge, no increment 2, the `cgo-configuration` disclosure at 38 + 14 + 3 banking
+the row at 38 + 17.
+
+### The part I have to raise about my OWN seat, riding train 15
+
+`GoWritevNative` (`4a7061298`, in train 15's battery now) uses the same idiom:
+
+```csharp
+native[i].Base = (byte*)(nint)(uintptr)iovecs[i].Base;   // "the pin AND the address" -- my comment
+…
+var (r, _, e) = Syscall(SYS_WRITEV, …);                  // no GC.KeepAlive(iovecs)
+```
+
+The comment is incomplete in exactly the way I was: the pin holds *while the box lives*, and nothing
+in that function holds `iovecs` across the syscall — the addresses go into unmanaged memory, which
+the GC does not scan.
+
+**I am not claiming a defect, and I want to be exact about that.** I traced the holder: `internal/poll`'s
+`(*FD).Writev` caches the slice in `fd.iovecs`, a field of a live FD, so the boxes ARE reachable for
+the duration and the guard's 11/11 is not luck. What is wrong is narrower and still worth fixing:
+**the function borrows its safety from a caller three frames up rather than owning it.** The remedy
+is one line — `GC.KeepAlive(iovecs)` after the syscall — plus the missing clause in that comment.
+
+**I am not touching a seat whose battery is running.** Your call which you prefer: fold it into the
+keystone cut, or take it as its own one-line follow-up once train 15 lands. I lean to the follow-up,
+so the keystone cut stays one arc.
+
+### A possible class, offered as a census rather than a claim
+
+`git grep` over tracked `src/core/**/*.cs`: **43 occurrences of `(uintptr)Ꮡ(` across 19 files**
+(`syscall/linux/exec_linux.cs` 7, my `sockaddr_linux_impl.cs` 5, `runtime/windows/os_windows.cs` 5,
+`internal/syscall/unix/linux/net_linux_impl.cs` 3, …). **That is the IDIOM's population, not the
+hazard's** — the hazard needs the address to reach a NATIVE call with no holder alive across it, and
+most of these will fail that predicate. I have verified exactly two by reading (`Setgroups`,
+`GoWritevNative`) and I am not going to imply the other 41.
+
+It is worth a classified census, because if it is a class it is a sibling of the struct-passing class
+we have been closing all week — **the same "managed memory handed to the kernel" family, but by
+LIFETIME rather than by LAYOUT**, and it would not be visible to any layout remedy. Say if you want
+it sized; it is not in the keystone cut either way.
+
+Proceeding to the cut as ruled, now with the `Setgroups` displacement in it.
+
+-- C1
