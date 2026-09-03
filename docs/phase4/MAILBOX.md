@@ -82770,3 +82770,54 @@ LF-anchored patch that built an uninstrumented binary — the marker in the SOUR
 in the BINARY, and on this pipeline the gap between them is a reconvert.
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **`TestFuncLayout` ROOTED, four layers down, a measurement at each. It is a VACUOUS TRUE: `regAssign`'s struct arm iterates an EMPTY field list and reports success, so the struct is "assigned to registers" with zero steps and all five assertions read zero at once.**
+
+### The chain, each step measured rather than reasoned
+
+| layer | measurement | verdict |
+|:--|:--|:--|
+| `funcLayout` | every field derives from `newAbiDesc` | not the root |
+| `InSlice()` | `len=1` for `func(reflect_test.S)` | **refuted my hypothesis** |
+| `addArg` | struct → `regs`; every other arg of every other signature → `STACK` | narrowed |
+| `regAssign` Struct arm | `size=32` (correct) but **`Fields.Length = 0`** | **root** |
+
+```csharp
+else if (exprᴛ1 == Struct) {
+    var st = Ꮡt.Reinterpret<abi.Type, structType>();
+    foreach (var (i, _) in (~st).Fields) { ... }   // empty -> body never runs
+    return true;                                   // -> "all fields in registers", zero steps
+}
+```
+
+`@in.stackBytes` stays 0, so `argsize` is 0, `retOffset = align(0, …)` is 0, and both bitmaps are
+empty — five assertions failing from one vacuous success. The descriptor knows the struct's SIZE
+(32, right) and not its FIELDS, which is the same auto-path-reads-a-blob-the-bridge-never-populates
+boundary as the dims finding, one blob over.
+
+### Two shapes, and the cheap one is the trap
+
+**One line:** make the struct arm `return false` when `Fields` is empty — assignment "fails", the
+caller stack-assigns, and Go's expected `argsize=32 / stack=[0 0 1 1]` falls out of `addTypeBits`.
+It would very likely turn the row green today.
+
+**It is the same trap you rejected for the dims arc**: right where observable, silently wrong
+elsewhere. An empty `Fields` is not "this struct belongs on the stack" — it is "this layer cannot see
+the struct", and a struct that genuinely *should* go in registers would then be mis-assigned with no
+signal. The honest fix populates `structType.Fields` for a synthesized descriptor (or makes the
+emptiness explicit rather than successful), and I would not cut the one-liner without you ruling it.
+
+### The prediction I am NOT claiming
+
+The **Array** arm has the identical shape — `if (Len == 0) return true;` — and the dims finding says
+array descriptors routinely have no `Len`. So `func(a [3]int)` should fail the same way. My probe
+instrumented that arm too and **it never fired**, because this test has no array parameter: the
+connection between the two findings stays a prediction, unmeasured, until one line provokes it. It is
+one line and I will take it with the arc rather than assert it now.
+
+Tree clean at `e8800ae2a`, instrument removed, nothing left running. `TestTypes` is next in the routed
+order unless you want the `Fields` shape ruled first.
+
+-- R
