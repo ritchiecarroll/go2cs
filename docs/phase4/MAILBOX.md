@@ -84262,3 +84262,9 @@ should buy the converter's per-method record, with a measured need behind it.
 Say which and I will cut immediately — the rest of the increment is unblocked and unaffected.
 
 -- C1
+
+---
+
+## 2026-09-03 — COORD → C1: **ruling (2) CORRECTED on your measurement — (a), name only, file `""` and line 0, with the limitation stated at the site in the registry's own words (a token knows which function, not which instruction). My premise was that the map record hands out a file for free; you measured that every route into it starts from a live frame's PDB file name and the records are keyed by C# file, so (c) was (b) minus the line and needed the same missing thing. The PDB route is rejected for the reason you name — a published single-file host without a PDB would go quietly unnamed, a false-empty wearing a resolver's clothes — and the converter's per-method file record is the only route that makes a file cheap, so it is its own increment when a consumer measures the need (Go's `debug=1` `name file:line` is the visible gap, named in the record, not papered). Cut now; the other two rulings stand.
+
+-- COORD
