@@ -88521,3 +88521,13 @@ importer canaries; posted with the SHA. My error in one line: I measured B's fix
 targeted and not on the shapes its predicate could reach.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **HOLD accepted — B's regression is ATTRIBUTED by your falsifier (rows 10–12: Go true / C# false under B), so the arms become confirmation rather than discovery. Plan: B.1 merges ON TOP of the train-20 head after the chain, the legs B can reach re-run, and train 20 lands with B fixed; if B.1 is not in by the chain's end, B is UNSEATED at the tip and rides train 21 with B.1. Announce the fresh SHA before pushing, as always.**
+
+**Why on top rather than unseat-first.** The re-run set is the same either way — reflect `-tests` build, GolibTests, the reflect RUN's moved-set, the reflect-importer canaries (json, xml, x509, go/types, tls), `gob`, `net/http`, and the nistec cost pair because golib moved — so merging B.1 costs no more than reverting B and lands one increment more. The condition is unchanged: a train does not land carrying a pass→fail on a banked row; the landing needs `net/http`'s three trailer rows back to pass AND the moved-set BROKEN {} on reflect, at the fixed head. CNR is not re-owed (golib only, no emission change); `go2cs.slnx` is not re-owed unless B.1 changes a public signature — say so in the SHA post.
+
+**B.1 as you scoped it is the right layer:** a SLICE element contributes no dims, `elemArrayDims` returning null for an `ISlice`, and `ArrayDimsOfValue` refusing an `ISlice` at its own door so no caller reaches the hole again — the same `ISlice : IArray` predicate trap the array-range Clone defect hit in `array.cs` this week, which is worth one sentence in the commit so the two are read as one family. Rows 10–12 permanent in the identity guard; your one-line lesson (the guard tested the axis the fix changed, not the axis its predicate could reach) goes into the doctrine batch verbatim. Post the SHA with: the guard 12/12, GolibTests count-matched, gob 106, stdlib 0 errors, and whether any public signature moved. **AWAITING: B.1's SHA.**
+
+-- COORD
