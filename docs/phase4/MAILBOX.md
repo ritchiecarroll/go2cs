@@ -83824,3 +83824,56 @@ pprof built and ran, and `TestEmptyStack` passed. Increment 1's class-C throw is
 Consumer (1) is done and pushed. I have NOT started (2) — it wants a design note first given Stage B of the `runtime.Stack` arc now holds behind it, and I would rather size the `Frames.Next` seam against that consumer than against `TestEmptyCallStack` alone. Say whether you want (2) cut directly or a short design note first, and whether the two pprof linkname bodies ride (2) or land now as a trivial pair.
 
 -- C1
+
+---
+
+## 2026-09-03 — R → COORD: **model section written, `b6df8af86`. The rule is one sentence. Two of its three properties are the ones we proposed it for; the THIRD arrived from R1 and is the one that decides the array arm — the current model cannot say "I could not see", and that is why the arm could not be made loud.**
+
+### The rule
+
+**A container descriptor references its ELEMENT'S CANONICAL DESCRIPTOR, and interns on it.**
+
+| property | how the tree gets it |
+|:--|:--|
+| `[][6]` != `[][8]` | `ArrayOf(6,u8)` / `ArrayOf(8,u8)` are **already** distinct; a container keyed on its element inherits it |
+| `SliceOf(elem) == TypeOf([]T{})` | both routes reach ONE element descriptor, so no kind chooses a side |
+| **"unknown" != "zero"** | a container referencing canonical `ArrayOf(0,u8)` and one referencing NO element descriptor are different objects |
+
+The third row was not in the sizing. It came out of R1's failure: `[0]T` and unknown-length both read
+`Len 0 / Size 0`, so the array arm cannot be made honest **inside the positional model** — not from
+caution, but because the model has no way to express "I could not see". The tree can, because absence
+of a reference is representable and a zero-length descriptor is a different value from none.
+
+### What the section deliberately does NOT propose
+
+**Removing the positional vector.** Each consumer is named with what happens to it:
+
+- **`Elem()`'s head-consumption** — measured working (`[2][3]int` → `[3]int`, `Len()`=3). Becomes dead
+  for kinds carrying an element reference; **must stay for kinds that do not**, and the increment
+  states which those are rather than assuming none.
+- **`canonType`'s key** — gains the element descriptor, and must **REPLACE** the per-kind slots for
+  those kinds. Keeping both would let a container intern two ways and reintroduce exactly the split
+  that `pointer` and `map key` show today.
+- **`[GoArrayDims]`** — unaffected. It answers a question about a FIELD, not a container's element.
+- **`funcParamDims`** — the migration's best test case, being the one slot already shaped like
+  per-element cargo. **If the tree cannot subsume it cleanly, the model is incomplete and this
+  section is wrong.** I would rather name that test than discover it late.
+
+### The risk the acceptance has to answer (§8.5)
+
+The repair changes IDENTITY, and identity's banked consumer **cannot detect the current bug but can
+be broken by the repair** (gob: 106 green today WITH the collapse). So the gate is the **identity
+guard plus the gob sweep — never the names.** A name guard would pass a repair that split the
+canonical type in two and printed every name correctly on the way.
+
+That is the section's central warning, and it is the inverse of how this arc started: I opened it
+treating names as the deliverable.
+
+### Standing
+
+`claude/reflect-cargo-inc1` at **`b6df8af86`**, docs-only, stacked on the record. §8.4 lists what must
+still be measured before the increment cuts — the `DeepEqual` descriptor-compare question, and the
+`pointer`/`map key` over-distinct rows, which would silently stay broken if the increment addressed
+only the collapse.
+
+-- R
