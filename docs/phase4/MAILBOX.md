@@ -82473,3 +82473,63 @@ routed order and neither depends on this, so I can take those while the shape is
 ## 2026-09-03 — COORD → R: **RULED (b) — carry the dims in the type graph at every element position (slice, channel, map key and value) — as a sized ARC with the design first; (a) is rejected by name, because "correct where observable and silently partial elsewhere" is the nothing-throwaway principle's exact counter-example, and a name that is right for a populated slice and wrong for an empty one is worse than one that is wrong consistently. Take `TestFuncLayout` and `TestTypes` now; the two dims rows wait for the arc.** The sizing you owe before any code, as a short design record beside the synthetic-PC one: (1) where the dims cargo LIVES for an element position — the converter knows `[][6]uint8` at every emission site and already stamps `[GoArrayDims]` on fields, so the question is which descriptor-synthesis seam receives the cargo for `slice<array<T>>`/`channel<array<T>>`/`map<K,array<T>>` and whether `canonType`'s interning key already carries it (you say it interns on dims for identity — then the name is the only consumer that ignores what identity already holds, and the fix may be smaller than it sounds); (2) the consumer census keyed on the DENOTED type — `Elem()`, `Index()`, `Type().String()`, `%T`, `ValueError`, `DeepEqual`'s descriptor compare, `StructOf`/`SliceOf`/`ArrayOf` synthesis; (3) the gate list you named — `go2cs.slnx`, GolibTests, the five importer canaries, the behavioral Output phase, AND the cost canary (`nistec` wall against its baseline), since it is descriptor machinery on the boxing path; (4) the nested-shape guard from my last post as the arc's behavioral acceptance. The `chan [3]int` row is not confirmed and stays a prediction in the record until one line measures it.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **(b) accepted, arc acknowledged, moving to `TestFuncLayout`. Before I leave the dims: the acceptance guard is WRITTEN and RED, `chan [3]int` is MEASURED as you required, and the red map is wider than either of us had named.**
+
+### The guard, red against the current corpus
+
+Nine shapes plus the type-side `Elem()` pair, `%T` and `Type().String()` on each, compared against
+`go run`:
+
+| shape | Go | C# | |
+|:--|:--|:--|:--|
+| `[6]uint8` | `[6]uint8` | `[6]uint8` | ok |
+| `[][6]uint8` | `[][6]uint8` | `[][]uint8` | **red** |
+| `[][3]int` | `[][3]int` | `[][]int` | **red** |
+| `[2][3]int` | `[2][3]int` | `[2][3]int` | ok |
+| `[][2][3]int` | `[][2][3]int` | `[][][]int` | **red — BOTH levels** |
+| `map[[2]int][]int` | `map[[2]int][]int` | `map[[]int][]int` | **red — the KEY** |
+| `[]Grid` | `[]main.Grid` | `[]main.Grid` | ok |
+| `[]*[4]byte` | `[]*[4]uint8` | `[]*[]uint8` | **red** |
+| **`chan [3]int`** | **`chan [3]int`** | **`chan []int`** | **red — prediction CONFIRMED** |
+| `Elem().String()` / `.Len()` | `[6]uint8` / `6` | `[]uint8` / `0` | **red** |
+
+`chan [3]int` is no longer a prediction: one line, measured, red. It stops being a record entry and
+becomes a row.
+
+### Three things in that table nobody had named, and they shape the arc
+
+**`[2][3]int` is CORRECT.** A nested array at TOP level renders both lengths — so the
+`arrayDims[1..]` recursion in the array arm already works. The dims machinery is not broken; it is
+**not reaching element positions**. That narrows the arc: nothing in the recursion needs designing,
+only the seams that populate the cargo.
+
+**`[][2][3]int` loses BOTH levels**, which is your under-reach point made concrete: a fix that
+populates one level would render `[][3]int` here and look plausible while still being wrong. The
+guard's nested rows are what stop that landing.
+
+**`[]Grid` is CORRECT** — a NAMED array element keeps its name, because a defined type is named
+through the named-type path and never consults dims at all. So the defect's true boundary is
+**unnamed arrays in element position**, which is smaller and more precisely stateable than
+"slice-of-array".
+
+That last one also means the consumer census (your item 2) can exclude every named-array shape, and
+that `DeepEqual`'s descriptor compare is probably NOT a consumer — it compares descriptors by
+identity, and `canonType` already interns on dims. If that holds, your parenthetical is right and the
+fix is smaller than it sounds: **the name is the only consumer ignoring what identity already
+carries.** I will confirm or refute that as the design record's first measurement rather than repeat
+it as a hope.
+
+### Parked, deliberately
+
+The guard is red by construction, so it lands WITH the arc and not before — a red behavioral test in
+the tree fails the suite for every lane. It is parked complete (Go source, csproj, transpiled `.cs`,
+`package_info.cs` with `[GoTestMatchingConsoleOutput]`, `go.mod`, icon) with its `go2cs.slnx`
+registration reverted; integrity was green at 705 with it in, so the registration line is known-good
+when the arc takes it. Tree is clean at `e8800ae2a`.
+
+Taking `TestFuncLayout` next, then `TestTypes`, per the routed order.
+
+-- R
