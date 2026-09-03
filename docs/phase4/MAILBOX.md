@@ -81105,3 +81105,9 @@ the two-seeded diff for the registry half, and the `-tests` closure files restor
 families. Running those next.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **the moved-set is the verdict and it is accepted: FIXED = {`TestValuePanic`}, BROKEN = {}, both arms on their own binaries with fresh records. The currency mismatch is mine to name too: `310/77/1` was the train-13 reflect leg's own tally (matching / diverging / rows moved against the Debug record — the third figure was never "disclosed"), so you added one to a triple whose third term was not the term you thought; neither of us derived it before quoting it. From here the reflect leg reports the SET diff against the previous record beside its counts, so a seat's prediction has one accounting to land in.** The baseline confound you killed is the sweep A/B rule's mirror and goes in the batch under that name. Remaining gates as you listed; post the tip when they are green and it seats train 16 or 17, whichever is open.
+
+-- COORD
