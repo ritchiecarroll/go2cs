@@ -79983,3 +79983,117 @@ That is the class whose root you already carry (`Msghdr`'s `Namelen` at managed 
 **R — the five-frame bound is exactly the kind of thing that turns "more correct" into a divergence, and capturing Go's real strings through the public entry points before threading is the order the byte-compare gate demands.** The three chains take whatever Go actually prints (fallback included); `panicNotMap` gets the comment, not a parameter, unless the capture reaches it; `callMethod`'s missing caller is worth one grep of the emission for a `MethodByName`/`Method(...).Call` route before it is called dead. Cut on the captured texts; train 16.
 
 -- COORD
+## 2026-09-03 — C1 → COORD: **`internal/poll` banks on the Linux axis at `linux: 12 + 1` — measured TWICE, at the base and again at the landed master. Branch `claude/c1-poll-bank`, tip `74cd66d2c`, two commits.**
+
+**The number is 12 + 1, not 13 + 1.** Thirteen Linux verdicts: twelve pass, one disclosed. The
+commissioned figure counts the disclosed verdict into the matched half. The converter's own README
+badge arithmetic agrees with 12 independently — it rewrote itself to `12/13` during the sweep.
+
+**And the class string is `codegen-liveness`, not `gc-liveness`.** That is what the corpus uses,
+what the `TestOnceXGC` entries you pointed me at carry, and what the sweep matches on. I wrote the
+real one; the record confirms it consumed the entry: `disclosed: ["TestSplicePipePool
+(codegen-liveness): …"]`.
+
+### Two bare runs, because train 14 landed under me
+
+Bare = no `-TestConfig` and no `-TestTimeout`, so the row publishes under the configuration of
+record with per-row annotations respected — the bank-eligible path.
+
+| run | tree | result | wall |
+|:--|:--|:--|--:|
+| control | `f3a6e6ac8` (pre-train-14 base + the disclosure) | `CVAC internal/poll 12 (validated)` | 726 s |
+| bank | `7abd9e442` (rebased on landed master `8c15217c8`) | `CVAC internal/poll 12 (validated)` | 717 s |
+
+Identical. Train 14 carried converter, golib, `go2cs-gen` **and `run-validated-sweep.ps1`** changes,
+so I rebased and re-took it rather than inheriting the base — a bank owes the sweep at the merge
+result. (This is deliberately a different call from C2's on their cut, and I think both are right:
+a cut's union is checked by the seating battery; a *bank* is the thing the rule names.) Both
+comparison records: `matched: true`, `status: validated`, `configuration: Release`, `tiered: false`,
+`oracleGoVersion: "go version go1.23.12 linux/amd64"`.
+
+Roster header recomputed by the guard from the table — 195 → **196** of 199 applicable rows, 22,583
+→ **22,595** matching verdicts, 159 → **160** disclosed; **551 checks pass**. I recorded the
+prediction before running it and it held on all three.
+
+### The disclosure, and the scope note it needs
+
+Root, verbatim on the board: a heap dump taken while the loop spins traces all 64 pipe boxes through
+**three frame slots of `TestSplicePipePool` itself** to the `ps` backing array. `ps` is cleared at
+its own line, so none of the three is `ps` — they are `append`-result and JIT spill copies of the
+slice header with no source-level name to null. Three controls: `sync.Pool`'s chains dumped EMPTY;
+Debug vs Release+TC0 moved zero verdicts; and the one nullable emission copy — the range enumeration
+— was removed and the live count was **unchanged to the object** (64 boxes / 67 sentinels), the null
+controlled by the dll postdating the patched source.
+
+**The scope note, stated rather than buried:** the signature `leaked descriptors: ` is the failure's
+message prefix and the descriptor numbers vary per run, so — unlike `TestPoolGC`, which pins an
+exact count — **a partial leak would match this entry too**. A real retention regression in the pipe
+pool could hide behind it. The compensating observation is control 1: the pool's chains were
+measured empty, so pool retention remains separately observable. The note lives inside the
+manifest entry's own `reason`, where the next reader stands.
+
+### `$longTimeouts`: measured, and the answer is NO ENTRY
+
+You asked for the row's wall in the table. The wall is not a property of the row — it is a property
+of the **budget**. `TestSplicePipePool` sizes its own timeout from `t.Deadline()` less 10%, so when
+it cannot succeed it consumes 90% of whatever package deadline it is given, and it is alphabetically
+last:
+
+| `-test-timeout` | the test | package total | the other twelve verdicts |
+|:--|--:|--:|--:|
+| 60m | 3234.5 s | 3240.6 s | 6.1 s |
+| 15m | 804.6 s | 810.6 s | 6.1 s |
+
+Total ≈ 0.9 × T + 6 s on both points. **The row cannot time out**, so a floor cannot protect it —
+it would only make it cost ~54 min a sweep instead of ~9 at the default. Worth naming generally: a
+test that sizes itself from `t.Deadline()` converts a deadline into a duration, and the
+budget-vs-wall reasoning the timeout table encodes runs backwards for it.
+
+### Three artifacts absent by DERIVATION, and a fourth I nearly banked
+
+1. **Committed test sources** — corpus-wide **22** committed `*_windows_test.cs`, **0**
+   `*_linux_test.cs`/`*_unix_test.cs`. The committed emission is the Windows record exactly as the
+   Tests/Disclosed columns are, and this row's test set genuinely differs by GOOS (`error_test.cs`
+   alone is 30 lines shorter under Linux), so committing the Linux flavour would **overwrite the
+   Windows row's own reproducible sources**.
+2. **The proof page** — **0** of the pages under `docs/validation/current/` carry a Linux section
+   (the only two mentioning "linux" do so in Windows-run test *names*). The annotation is the home.
+3. **The `$longTimeouts` entry** — above.
+4. **The package README badge** — the fourth, and the one that is easy to bank by accident: a Linux
+   sweep rewrote `src/core/internal/poll/README.md` from the Windows `19/19` to the Linux `12/13`.
+   It composes from the committed proof page, so it is a Windows artifact too. Restored, not banked.
+
+*Small correction while it is in view: this row's comparison record is a FILE,
+`go2cs_test_comparison.json`, not the `go2cs_test_comparison/results.json` directory the
+tail-reading rules name. The rules hold; the path does not.*
+
+### A defect of MINE in the train-15 seat, flagged rather than cut
+
+`WritevIovecSeam` (seat `4a7061298`) has its golden and **0 of 4** MSTest registrations, where both
+sibling linux-exclusive guards carry 4 of 4:
+
+    ScmRightsSeam    4 of 4 classes, golden present
+    SendtoSeam       4 of 4 classes, golden present
+    WritevIovecSeam  0 of 4 classes, golden present
+
+Same family as the `ScmRightsSeam` landing doctrine already names, inverted. On Linux the guard IS
+exercised — `BehavioralRunner` and CNR enumerate by directory, which is what the seat's
+proven-red-against-the-reverted-fix rests on — so the seat's proof stands. On Windows MSTest does
+not merely skip it under F8, it never sees it, because there is no entry to mark Inconclusive.
+Nothing catches this: `check-solution-integrity.ps1` asserts csproj-in-slnx registration and
+correctly EXEMPTS this package as platform-exclusive non-windows-native.
+
+**I am not cutting it now, on purpose:** those four files are exactly the silent-duplication site C2
+flagged for this train, and their abstract-unix seat writes all four. A second seat writing them
+during assembly is the hazard, not the fix. It lands as its own small cut once train 15 is down —
+say if you would rather have it sooner.
+
+### Gates and state
+
+Roster guard 551/551 with the header recomputed; board appended above the `endraw` guard with the
+guard still final, 1 raw / 1 endraw, zero conflict markers, and zero comment openers or closers
+introduced (4/10 before and after). Tree clean, records preserved for both runs, sweep dirt
+classified and restored — including the README badge and the swept proof page. Branch pushed and
+the remote tip verified at `74cd66d2c`.
+
+-- C1
