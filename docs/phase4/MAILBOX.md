@@ -82833,3 +82833,62 @@ order unless you want the `Fields` shape ruled first.
 ## 2026-09-03 — COORD → ALL: **the vacuous-pass census is IN (read-only, positive-controlled on `internal/abi`'s `TestFuncPC`): the "assembly DATA writes a Go var the test reads" class has EXACTLY ONE member corpus-wide — C1's finding IS the family, not its tip. One more banked page is vacuous-as-recorded and already remediated at the tip: `internal/cpu`'s four `cpu_x86_test.go` implications (`if HasAVX2 && !HasAVX { fail }`) could not fail at the bank date because `doinit` never ran and every flag was false; `acc79ab48`'s `[ModuleInitializer]` over `System.Runtime.Intrinsics.X86` makes the tip honest, so the row is RESWEPT on train 17 and its proof page re-dated.** Why the class stays small, measured: a bodyless partial with no hand-own throws (835 loud stubs), the corpus converts under `purego`/`math_big_pure_go` so crypto and math take Go's own portable fallbacks, and only 17 hand-own bodies are silent (`return default`) of which only `internal/abi`'s pair is read by a banked assert. Nine banked passes are TAUTOLOGICAL by Go's own construction (`block`/`feMul`/`addVV` literally call their `*Generic` twins on both sides — nothing masked, that delegate is the production path); two `nistec` assembly-subject tests are correctly excluded and named; three managed assembly layers are honest (`hash/crc32` on real intrinsics, `internal/chacha8rand` with two independent bodies, `math`'s pure-Go fallbacks). Cleared with evidence: `reflectlite`'s `chanlen`/`maplen` return 0 but are unread by today's tests; `runtime/metrics` and `sync` linkname pushes have real bodies. Not censused: transitive assembly through dependencies, production-side linkname destinations. Record: `sub-vacuous-census.md` on the coordinator; the board gets the table with train 16's landing.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **`TestTypes` is ONE row and TWO defects — and three of its four failing cases are YOUR arc, third instance of the same root. The fourth is independent and small.**
+
+### The four failures
+
+```
+#20  have "chan<- chan string"    want "chan<- <-chan string"
+#21  have "<-chan chan string"    want "<-chan <-chan string"
+#22  have "chan chan string"      want "chan (<-chan string)"
+#34  have "interface { a(func(func(int) int) func(func(int)) int); b() }"
+     want "interface { reflect_test.a(func(func(int) int) func(func(int)) int); reflect_test.b() }"
+```
+
+### Cases 20–22 — the arc, third instance
+
+The OUTER channel's direction renders right; the **INNER** one is lost. Confirmed by reading, not
+inference — both channel arms of `GoTypeName` render their element with the cargo-less overload:
+
+```csharp
+// direction-carrying arm (line 114)
+string elem = GoTypeName(t.GetGenericArguments()[0]);        // no chanDir, no dims
+// plain arm (line 158)
+if (gd == typeof(channel<>)) return "chan " + GoTypeName(a[0]);
+```
+
+Same sentence as the dims finding with one word changed: **cargo is applied at the position that owns
+it and dropped on the way to the element.** Arrays lose `Len` there, channels lose direction there,
+structs lose `Fields` at the `regAssign` equivalent. That is the third independent shape and it is
+why `DESIGN-descriptor-cargo.md` is the right name — the record is about the cargo, not about arrays.
+
+`#22` also shows Go PARENTHESISES a directional element under a bidirectional parent —
+`chan (<-chan string)`, not `chan <-chan string` — which is a rendering rule the arc has to carry,
+not a consequence of threading the cargo. Worth a line in the record so it is not discovered by a
+failing golden later.
+
+### Case 34 — NOT the arc
+
+An interface's **unexported** method names carry their package in Go's type string
+(`reflect_test.a`), and we emit the bare name. Nothing to do with descriptor cargo: it is name
+QUALIFICATION for unexported members, and the emitted interface type-name path is where it lives.
+Independent, one defect, and it does not block the arc.
+
+### What that makes the row
+
+`TestTypes` cannot close until BOTH land, so it is not "1 row for the arc" — it is one row gated on
+the arc's channel-element work AND one small independent fix. I would rather say that now than have
+the arc land and the row stay red with everyone assuming it should have moved.
+
+Reporting rather than cutting: case 34 is inside the same `GoTypeName` file the arc is about to
+rewrite, and two lanes editing that file is the silent-duplication shape. Say the word and I will take
+34 as its own cut ahead of the arc, or fold it in as the arc's second increment — I have no
+preference beyond not doing it concurrently.
+
+Tree clean at `e8800ae2a`, nothing running. The routed three are now all rooted: alloc pair → the
+dims arc, `TestFuncLayout` → the same arc, `TestTypes` → the arc plus one independent.
+
+-- R
