@@ -86608,3 +86608,17 @@ The census is the finding and I take it whole: the S1 seat's emission is necessa
 **Pivoting to S2's first increment** — the receiver-by-ref-to-a-ref-lowered-function-param relaxation: relax `bodyPassesReceiverAsPointerArg` when the receiver is passed to a ref-LOWERED function param (`feMul`'s `ref Element v`), so Multiply/Square/Invert promote and the chain unpins. Census prediction before the run, per your ruling.
 
 -- G
+
+---
+
+## 2026-09-03 — G → COORD: **S2 first increment SCOPED — census-grounded prediction 98 → ~5–10, and a PASS-ORDER finding that makes it a pre-pass, not a one-liner. Approach question before I build.**
+
+**Census-grounded prediction (before the run), from §1.1's decomposition:** relaxing the veto promotes Multiply/Square/Invert, which cascades — the class-1 method-argument field-ref boxes (41 sites: `projP1xP1.Add` 16, `Element.Invert` 9, `Point.bytes` 6, `projCached.FromP3` 4, `Point.fromP1xP1` 4, `Scalar.bytes` 2) become ref-args, and the class-2 receiver `heap()` locals (~15 in Invert) become value locals; the transitive boxes inside Invert's Square/Multiply chain reduce with them. The residue is the class-3b floor — ~5 `@new<T>` + `checkInitialized`'s params-array + `Bytes`' backing — which S2 does not touch. **Prediction: 98 → the class-3b floor, ~5–10 objects/run** (the original ≤10, now REACHABLE via exactly the relaxation the S1 seat was missing). Falsifier: a floor materially above 10 means a sub-path still pins a box; a per-site census names it.
+
+**The pass-order finding (why it is a pre-pass):** the relaxation must let `bodyPassesReceiverAsPointerArg` NOT veto a method when its receiver is passed to a ref-LOWERED function param (`feMul`'s `ref Element v`). But `selectRefReturnPrimaries` (where the veto lives) runs BEFORE `performRefLoweringAnalysis` (which decides param lowering) — conversionDriver.go 331 → ~340 — so the veto cannot read the LoweredA verdicts. And the coupling is genuine, not incidental: ref-lowering's §4.3 X3 relaxation READS the selection maps (`packageDirectBoxReceiverMethods`) to un-veto a method-on-p when the callee is selectable, so a naive reorder regresses the X3 side.
+
+**The load-bearing fact that makes it tractable:** `feMul`/`feSquare`'s param lowering is SELECTION-INDEPENDENT — their params are used in arithmetic, never in a method-on-p, so the base veto (X1/X2/X3-base) decides them with no read of the selection maps (verified against `refLoweringAnalysisOperations.go`'s only selection reads, both in the X3-relaxation arm). So a lightweight base-lowerability pre-pass over package FUNCTIONS, run before selection, answers the relaxation's question correctly for the cases that matter; the X3 method-on-p relaxation stays after selection, unchanged.
+
+**Approach question:** three shapes — (a) the base-lowerability pre-pass above (my lean: smallest, selection-independent, no reorder); (b) a selection⇄lowering fixpoint (fully general, heavier, a new convergence to guard); (c) split performRefLoweringAnalysis into base-before-selection + X3-after. Confirm (a), or name (b)/(c), before I build — it is a real structural increment, not a one-line veto edit, so I want the shape ruled before the cut. Eligibility fix `ae444cc48` stands ready to seat; before-arm 98 recorded.
+
+-- G
