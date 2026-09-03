@@ -82337,3 +82337,62 @@ Pushing `e71953f42` immediately after this. Next: the increment itself — class
 symbolizer plus class C's loud throws, on its own branch off `ab24c098e`.
 
 -- C1
+
+---
+
+## 2026-09-03 — R → COORD: **`[][6]uint8` is a FINDING, exactly as the ruling anticipated — and it is not an alloc row at all. `Type().String()` drops an array's LENGTH when the array is a slice's ELEMENT. The disclosure I declined to write would have papered over a general type-naming defect.**
+
+### What the filtered run actually said
+
+```
+TestDeepEqualAllocs/[][6]uint8     Go="pass"  C#=""       <- C# reported NOTHING
+TestDeepEqualAllocs/[][]uint8#01   Go=""      C#="fail"   <- a name Go never produced
+TestDeepEqualAllocs                Go="pass"  C#="fail"
+```
+
+Not `") allocated "`. Not a signature that differs "by a word". A **name mismatch**: Go's subtest name
+is `ValueOf(tt.x).Type().String()`, so the two sides were running different-named subtests and the
+comparison could not pair them. The C# host emitted `[][]uint8` TWICE — the second deduped to `#01` by
+`t.Run` — because two distinct Go types rendered to one string.
+
+### Root, by direct A/B rather than inference
+
+| shape | Go 1.23.12 | converted |
+|:--|:--|:--|
+| `[6]uint8` | `[6]uint8` | `[6]uint8` |
+| `[]uint8` | `[]uint8` | `[]uint8` |
+| **`[][6]uint8`** | **`[][6]uint8`** | **`[][]uint8`** |
+| `[][]uint8` | `[][]uint8` | `[][]uint8` |
+| `[3]int` | `[3]int` | `[3]int` |
+| **`[][3]int`** | **`[][3]int`** | **`[][]int`** |
+
+**A top-level array renders its length correctly; an array used as a slice's ELEMENT does not.** So the
+dimension is present on the descriptor and is dropped by the element-rendering path — consistent with
+the array-dims cargo `canonType` already interns on (`[4]byte` and `[8]byte` must intern separately),
+carried for identity but not consulted for the name. Not uint8-specific: `[][3]int` fails identically.
+
+### What this changes about the item
+
+The two rows are **fix-then-disclose, not disclose**:
+
+1. Fix the element-rendering path so `[][6]uint8` names itself.
+2. The subtest then RUNS, meets its 37 siblings' alloc assert, and earns the family's
+   `alloc-profile` entry on the family's own signature — verified from the results file, not assumed.
+3. The parent follows.
+
+Blast radius is wider than two rows and I will size it before cutting: `Type().String()` feeds `%T`,
+`ValueError` text, and every message naming a slice-of-array, so this is a corpus-visible name and not
+a reflect-local one. The census keys on the DENOTED type, not the spelling — the alias trap in
+CLAUDE.md is exactly this shape.
+
+### The part worth keeping
+
+Disclosing on family resemblance would have taken thirty seconds, matched every visible pattern (37
+siblings, same parent, same class), and permanently hidden a defect in a name that thousands of
+messages can print. What stopped it was one line of the ruling — *if the signature differs by a word
+it is a finding* — and the fact that the results file was preserved this time instead of cleaned up.
+The signature did not differ by a word; it was not there at all.
+
+Sizing the fix next.
+
+-- R
