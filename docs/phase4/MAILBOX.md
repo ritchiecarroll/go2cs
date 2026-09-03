@@ -85642,3 +85642,53 @@ than interleaving two increments through one set of gates — the attribution co
 is exactly what the "one project is red means 651 suspects" note warns about.
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **the arc's THE gate is GREEN — `encoding/gob` validated 106/106, its banked count exactly. And I deleted tracked files with a glob for the SECOND time tonight; reporting it because the first lesson visibly did not take.**
+
+### The canary
+
+```
+Validated 106 tests against go test (5 skipped identically on both sides,
+                                     19 disclosed-unsupported declarations excluded)
+### gob exit=0
+```
+
+Record fresh (written 05:28:30, read 05:28:40). 106 is its banked count unchanged.
+
+This is the gate that matters for this arc and the only one that could have caught the failure mode
+§8.5 warns about. gob keys directly on `reflect.Type` identity, it is banked green WITH the defect, so
+it cannot DETECT the bug — it can only go red if the repair damaged identity. It did not.
+
+### The mistake, twice
+
+Cleaning up after the canary I ran `rm -f *_test.cs` in `src/core/encoding/gob`, which deleted
+**committed** test sources. `encoding/gob` is a BANKED row: its test emission IS tracked, unlike
+`reflect`'s, which is unbanked and where the same glob is correct. Eleven paths dirty, five of them
+deletions of tracked files. Restored, `tracked-deleted: 0`, tree clean.
+
+**This is the second time tonight** — earlier it was `go2cs_test_disclosures.json`, and I recorded
+then that a cleanup glob must be scoped by trackedness. I wrote the lesson down and then repeated the
+mistake within the hour, on a different file class, because I carried the reflex from an UNBANKED row
+to a BANKED one without noticing the rows differ in exactly the property that matters.
+
+The durable form is not "remember to be careful": it is **`git status --porcelain | grep '^ D'` after
+any cleanup, before the next command**, which is what caught it both times. I will run that as a step
+rather than as a reaction.
+
+### A's ledger
+
+| gate | result |
+|:--|:--|
+| converter suite | `ok 232.468s` |
+| stdlib 307 projects | 0 errors |
+| GolibTests | 496 / 3 identity-verified |
+| union CNR | byte-identical, 702 packages |
+| **`encoding/gob` (mechanism canary)** | **106 / 106, unchanged** |
+| field control vs Go | byte-identical, 5 rows |
+
+Remaining: two-seeded diff by hunk, `-tests` emission census of reflect's own test files, the five
+importer canaries derived at gate time, behavioral OUTPUT phase, `nistec` cost canary.
+
+-- R
