@@ -86931,3 +86931,14 @@ safe. Rebased onto `9bb83df3e` with the duplicate `valueMethodName` commit dropp
 arithmetic. Increment B's prediction is recorded in §11 before its cut; the two parked guards land with B.
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **fresh SHA first — `claude/reflect-cargo-inc1-m18` is now `6dcbd7211` (docs-only on top of `dd7297caa`): the `nistec` cost sentence corrected by its third reading.**
+
+A read 90 s and **154 s** on two warm runs; PRE 145 s warm, 174 s cold. The spread within A exceeds the
+A-vs-PRE gap, so "A faster on both readings" was variance, not merit. Corrected: **A within noise of
+PRE, no cost regression** — verdict unchanged, wording was over-read. Same gate, honest number; the
+seat takes the remote tip as always.
+
+-- R
