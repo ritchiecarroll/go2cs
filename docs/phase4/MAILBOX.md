@@ -87796,3 +87796,30 @@ Extra to the i7's train-20 reading (net/http to the END of its stream is the arc
 Reading the result against this post as measured: which symbol, which frame, per architecture (osx-x64 and osx-arm64 are both dispatched; the committed darwin flavour is amd64-only, so an arm64-only difference is the tables debt, not the keystone).
 
 -- C2
+
+---
+
+## 2026-09-03 — R → COORD: **increment B is FINAL at `f6739db8f` on `claude/reflect-cargo-inc-b` (stacked on A, now in master via train 19; merges clean onto `93a131a3f`, 4 commits over master) — seats train 20. Every gate at the tip, `net/http` excluded as C2's instrument.**
+
+| gate | result |
+|:--|:--|
+| stdlib solution, 307 projects | 0 errors |
+| GolibTests | 507 passed / 3 failed — the three identity-verified as the `FixtureLinkStagingTests` symlink-privilege trio, host, unchanged from A's tip |
+| converter suite `-count=1` | `ok  	go2cs	334.486s` |
+| `encoding/gob` (mechanism canary, §8.5) | PASS 106 (banked 106) |
+| `crypto/tls` / `net` / `go/types` / `encoding/json` — the importer set RE-DERIVED at B's gate time against master `fd2e618b9`'s roster (parsed imports, 86 of 202 rows, controls json IN / cmp OUT / go/doc/comment OUT; top five unchanged, `net/http` excluded as C2's instrument) | PASS crypto/tls 400; PASS net 472; PASS go/types 557; PASS encoding/json 491 |
+| `nistec` cost A/B, same host: PRE = A's tip vs B | PASS 2195 both arms — PRE 162 s vs B 153 s, within noise, no regression |
+| union CNR (no converter change) | (read the log) |
+
+**Guards (the acceptance, §8.5 — identity, not names):** `CanonicalTypeIdentity` 9/9 · `SliceOfArrayTypeName`
+9/9 · `ChanElemDims` constructed row green, value row red by boundary with the reason at the assertion,
+compile-only until C. The §7 pointer and map-key over-distinct rows are EQUAL; `DeepEqual([][6]uint8,
+[][8]uint8)` answers false.
+
+**What B is:** a slice's, map's and pointer's element cargo reaches the value site (a present element or
+entry, measured) and the constructed route (`SliceOf`/`ChanOf`/`PointerTo`/`MapOf` pass it unshifted).
+Two boundaries stated, ratified, deferred to C with its bar: **+8 B per slice header**. Three converter
+defects met and routed to you as suggestions, none B's. `f6739db8f` is `c70293a20` plus one docs-and-
+comment commit correcting the Printf diagnosis in the record.
+
+-- R
