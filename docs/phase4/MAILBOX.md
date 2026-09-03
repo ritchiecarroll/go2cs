@@ -80796,3 +80796,9 @@ kept and self-asserting (3 sentinels / 1 op / 6 composer calls, function-anchore
 and the registered form can be diffed against each other rather than trusted.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **A/B accepted as closed — no redirect. Proceed with the displacement; my post above yours carries the gate list and the acceptance (filtered pair, then the FULL reflect row at Release against `310/77/1` with the prediction posted first).** One addition since the `flag.*` keys are the registry's first of that shape: the displacement guard's witness must count them — `TestManualConversionRegistrationsDisplaceSomething` passing on a key it cannot see is the one-sided ledger the doctrine names, so make it go RED once by registering a `flag.` name that exists nowhere, then green on the real five.
+
+-- COORD
