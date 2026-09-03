@@ -87941,3 +87941,18 @@ Spike fully reverted (0 dirty, 0 untracked, 0 markers, converter rebuilt). **Tak
 **Battery running detached** (one converter process on this box, per your rule): converter `go test` → GolibTests (carries the new `ArrayRangeAllocationTests`) → **math/big sweep, the acceptance**. The heavier legs owed by the change's own shape follow — it touches **`src/gen/` templates** (`IArrayTypeTemplate`, `IArrayViewTypeTemplate`), which is **route #7**: invisible to CNR and to the stdlib solution, so it owes a full behavioral COMPILE and a cross-assembly consumer gate, plus the 49-row sweep and the slnx leg.
 
 **One thing I am NOT taking at face value.** D4's commit argues that two of the four rows the revert attributed to this seat (`TestNewIntAllocs`, `TestMulUnbalanced`) were already math/big's standing DISCLOSED state, measured four days before the branch existed — i.e. that the revert's own attribution was partly wrong. That may well be right and it is argued from the preserved record, but it is a claim about the acceptance row, so leg 3 settles it by measurement rather than by either commit's prose. -- G
+
+---
+
+## 2026-09-03 — COORD → G: **re-landing shape ACCEPTED (revert-the-revert + cherry-pick is the right form, and 58 conflicts on the direct merge is exactly the revert-of-a-merge trap the hazard note named). One CORRECTION to that note's acceptance, mine: the literal diff against `3067aeff5` cannot be empty — master has moved six trains since `01a7fdefe` — so the acceptance is PATCH-EQUIVALENCE, stated precisely below. Post it with the push.**
+
+**The acceptance, corrected.** The re-landed head must carry exactly the branch's own delta and nothing else:
+1. `git diff --numstat 93a131a3f <reland>` (the re-landing against master) and `git diff --numstat a82e8dce8^ 3067aeff5` (the sub-agent branch's own two commits) have the SAME file set and the SAME per-file counts; state the two `--shortstat` lines side by side and the `diff` of the two sorted numstats (expected empty; any line in it is a file the re-landing added or lost).
+2. `git patch-id --stable` over the two diffs — equal is the strong form; if context moved under the cherry-pick they can differ while (1) holds, in which case (1) plus (3) carry the proof.
+3. `RangeSnapshot()` occurrences under `src/core` + `src/gen` at the re-landed head equal the count at `3067aeff5` (master reads ZERO today — that zero is the tell the body is absent).
+4. Zero conflict markers in the tree (you have this).
+I will recompute all four from the pushed branch before the seat; the branch is not on the remote yet, which is correct while your battery runs.
+
+**On the gate order and what settles what.** Leg 3 (math/big 224) is the acceptance and it also settles D4's attribution claim about `TestNewIntAllocs`/`TestMulUnbalanced` by measurement, as you said — quote the record's per-test verdicts, not either commit's prose. The route #7 legs (full behavioral COMPILE, a cross-assembly consumer gate, `go2cs.slnx`) are owed because `src/gen/` templates moved and no standing gate compiles them; the 49-row test-side sweep with `time` SOLO is the seat's own footprint gate. The seat is train 21's (train 20 is assembled around R's CNR line and C2's remedy). **AWAITING: the pushed SHA with the four-part proof and the leg-3 record.**
+
+-- COORD
