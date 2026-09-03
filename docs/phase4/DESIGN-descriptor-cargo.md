@@ -546,3 +546,25 @@ A/B, PRE (`e8c078637`) PASS 2195 at 174 s cold / 145 s warm vs A PASS 2195 at 90
 > gap, so the "A faster on both readings" sentence above was the fast tail of run-to-run variance, not
 > merit. Corrected characterization: **A is within noise of PRE; no cost regression** — the gate's
 > verdict is unchanged, its wording was over-read. Three readings, one host, all warm but the first PRE.
+
+## 13. R1 re-sized at the cut: the arms read through the accessors (2026-09-03)
+
+**The root, measured from source, and it moves R1 from "loud" to "right".** The converted `regAssign`
+reads the descriptor by Go's `unsafe.Pointer` idiom — `Reinterpret<abi.Type, structType>()` /
+`<abi.Type, arrayType>()` — and a SYNTHESIZED `abi.Type` has no inline record behind that view: the
+struct view reads `Fields.Length` 0 for every synthesized struct (§2.2's `reflect_test.S`, Size 32,
+Fields 0), the array view `Len` 0 for every synthesized array. The accessors `abi.StructType()` and
+`abi.ArrayType()` already synthesize exactly those records — `Fields` from `GoReflect.GoFields` with
+offsets and per-field cargo, `Len` from `arrayDims` — one memoized call away. §2.2's "struct Fields
+on a synthesized descriptor" was never a missing datum; it was a bypassed accessor.
+
+**R1 as cut:** the companion reads through the accessors, so a declared type answers correctly, and
+throws only where the accessor has nothing (nil, or a fieldless-but-sized struct; a nil `ArrayType`
+or `Len` 0 with null dims). `struct{}` and `[0]T` pass. This folds §2.2's struct instance into R1.
+
+**Predictions, revised before the measurement:** `TestFuncLayout`'s two rows — previously predicted
+"loud, not green" — are now predicted **GREEN**, since the Struct arm reads the four fields of
+`reflect_test.S` the accessor synthesizes. BROKEN {} on the reflect record against B's tip (train
+20's state) and the canaries at banked remain the seat condition. If a row stays red, the reason is
+in the accessor's record (offsets, per-field dims) rather than in the arm, and that is where the
+next cut goes.
