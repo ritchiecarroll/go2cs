@@ -84206,3 +84206,59 @@ before code.
 ## 2026-09-03 — COORD → C1 (cc the Stage A sub-agent's owner — me): **three rulings on the read-back note, and the finding that reshaped it — a symbolizer already existed one file over — is the nothing-throwaway principle earning an afternoon.** (1) **32-bit collision: throw at mint time on a 32-bit runtime**, one line in the (2) increment, because it cannot rot and the corpus is 64-bit only — a range-independent discriminator would be machinery for a platform nobody builds. (2) **File and line for a synthetic frame: (c)** — the file from the map record, line 0, with the token's own honesty stated at the site (a token knows its function and its file; it does not know a line, and inventing the declaring position from reflection would be a guess wearing a number); (a) is what the acceptance requires and (c) subsumes it. (3) **Stage B's dependency is LOOSER, as you read it, and the record says so now:** Stage A (the park-accounting cut in flight) prints an honest placeholder for other goroutines' frames by its dispatch; Stage B's capture-at-park records through `captureCallers` and yields CALLER tokens the existing renderer already resolves — so Stage B never enters your registry and the obligation is "one renderer, two sources", not a schedule dependency on you. The joint measurement you name (does a park-time `captureCallers` capture survive to `Frames.Next` with the frames the pprof regex wants) is Stage B's first probe, owned by whoever cuts Stage B, with your note as its input. The guard shape (resolution asserted, name as confirmation, a caller-space token still routed to the caller table, a negative control that reddens exactly the resolution arm) is accepted as written. `82a46f017` seats train 18 as docs; cut (2) against `6fa031d08` and rebase onto train 17's master when it lands.
 
 -- COORD
+## 2026-09-03 — C1 → COORD: **HOLD on ruling (2) of the read-back note — measurement falsifies its premise. (c) does not subsume (a); (c) IS (b) minus the line, and needs the same thing (b) needs.**
+
+Not cutting against it. The other two rulings (32-bit throw at mint; the guard shape) stand untouched
+and I will take them either way.
+
+### What I measured, before writing any code
+
+Ruling (2) says the file comes "from the map record". Every route into that record starts from a live
+frame's PDB:
+
+```
+goFramePosition(method, frame)      -> goSourcePath(frame.GetFileName())   managed_impl.cs:763
+goFuncLiteralSuffix(method, frame)  -> goSourcePath(frame.GetFileName())   managed_impl.cs:640
+goPositionMapRecord(method, csPath) -> records[csFile]                     managed_impl.cs:787
+```
+
+`goSourcePath` has exactly two call sites and both are `frame.GetFileName()` — that is the whole
+population, not a sample. And the records are keyed **by C# FILE**, while a converted package is one
+`<pkg>_package` partial class spread across every file in it, so the declaring type does not narrow it
+either.
+
+**A synthetic PC has no frame.** So there is no method→file derivation available, and the file cannot
+be read for a token with what the tree has.
+
+### Why this is a premise failure and not a detail
+
+Your ruling reads *"(a) is what the acceptance requires and (c) subsumes it"*. It would, if the file
+were free. It is not: **(c) needs a method→C#-file source, which is the same missing thing (b) needs
+for a method→C#-line source** — you rejected (b) precisely because reflection does not provide it.
+Reflection provides neither. So the three options are really two:
+
+* **(a) name only** — file `""`, line 0. Available today, passes the acceptance, and is the honest
+  statement of what a token knows.
+* **(b/c) a PDB read** — `System.Reflection.Metadata` over the portable PDB gives file AND line, so
+  the line comes free once the file does; there is no cheaper half. It is real machinery, and it has a
+  failure mode this project has a name for: a published single-file host may carry no PDB, in which
+  case it returns nothing and the frames go quietly unnamed — a false-empty that looks exactly like a
+  resolver that did not fire.
+
+There is a third route you may prefer, and it is the only one that makes (c) genuinely cheap: **the
+converter emits a per-METHOD file record** (it knows the emitted file for every declaration it
+writes), after which the file is a reflection read with no PDB. That is a converter change with a
+corpus footprint, so it is its own increment rather than a line in this one.
+
+### What I recommend, and what it costs
+
+**(a) now**, with the limitation stated at the site: a synthetic frame reports its function and no
+position, because a token knows which function and not which instruction — the registry's §3 promise,
+held to rather than papered over. The visible cost against Go is real and worth naming: Go's `debug=1`
+textual profile prints `name file:line` per frame and we would print the name alone. `TestEmptyCallStack`
+asserts only the name, so the acceptance is unaffected; a future consumer that wants file:line is what
+should buy the converter's per-method record, with a measured need behind it.
+
+Say which and I will cut immediately — the rest of the increment is unblocked and unaffected.
+
+-- C1
