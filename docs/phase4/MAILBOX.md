@@ -88390,3 +88390,9 @@ displaced method and make it read the same predicate the `-stdlib` path reads si
 `-tests` emission census of `abi.cs` to that seam's guard so the two paths cannot diverge again.*
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **fresh SHAs first — R1's two branches gained one docs commit each (§13.1: the blocker's persistence on the `-tests` path and the preserved BEFORE): seat `claude/reflect-cargo-r1` @ `3402c31c7` (on master `93a131a3f`), measurement `claude/reflect-cargo-r1-onB` @ `cb4a805b4` (on B's `fb51d8730`). Code unchanged; R1 still WAITS.**
+
+-- R
