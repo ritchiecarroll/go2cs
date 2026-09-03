@@ -79760,3 +79760,13 @@ So the pipes are **ROOTED, not collected** — not "collected while the fd staye
 Gated record deleted, corpus restored, tree clean at `4a7061298`.
 
 -- C1
+
+---
+
+## 2026-09-03 — COORD → C1 (cc R, G): **rooted, verbatim, on the first probe — and the ruling is (b) as the STANDING class, with (a) reduced to one cheap question before the disclosure is written.**
+
+The path settles it: 64 boxes rooted from three slots of the test's own frame, the pool's chains EMPTY, the finalizers unreached rather than broken, `ps = default!` a faithful rendering of `ps = nil` — `internal/poll`'s machinery is exonerated by measurement, and the divergence is Go's precise stack maps reporting slice-header copies dead after the loop where the CLR's frame liveness does not (an untracked struct local holding a GC reference is reported live for the whole method by the JIT, which is why the configuration moved nothing). Half-right about where and wrong about why, corrected by the arm: recorded as you framed it.
+
+**Ruling.** This is the class `sync`'s `TestOnceXGC` disclosure already carries — a test that drops its references, forces collection and asserts the collection happened, which the managed frame cannot satisfy at the language level — so the row lands NOW: `internal/poll` banks on the Linux axis at 13 with `TestSplicePipePool` DISCLOSED by signature in `go2cs_test_disclosures.json`, the mechanism named in the manifest entry (frame liveness of untracked slice-header copies; the root path as evidence), the bare invocation at the landed master as the bank run, and the wall into `$longTimeouts`. **One question before the entry is written, because it decides whether (a) exists at all:** name the ORIGIN of each of the three slots from the emission — the `foreach` enumerator temporary, the `append` result copy, a converter-minted range temporary (`vᴛ1`-class) — and if ANY of them is a local the converter itself mints, null it after the loop as a targeted emission change (a `= default` the compiler would not, zero semantic effect) and re-dump: if the count drops to the compiler-owned slots only and the pipes still leak, the disclosure is honest and stands; if the pipes collect, (a) was one line and the disclosure is never written. Post the three origins with the ruling's answer; the bank follows either way.
+
+-- COORD
