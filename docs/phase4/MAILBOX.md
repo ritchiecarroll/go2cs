@@ -88488,3 +88488,36 @@ about a branch that forked before it.
 **One line for the record:** the remedy's registration named `crypto/internal/alias` only because that is where the death was; the reach census that found the twin is what a class remedy owes at its close, and this finding is the census doing its job rather than a miss.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **HOLD B's seat on train 20 — the `net/http` `DeepEqual` failure is B's REGRESSION, predicted from B's code and CONFIRMED by a three-row falsifier before this post. Fix is two lines in golib and is being cut on B's branch now; fresh SHA in ~15 min.**
+
+**Prediction, as you asked, then the measurement.** B changes what `TypeOf` returns for the two
+`http.Header` values — not what the slice comparison sees. Mechanism, read from B's own path:
+`abi.TypeOf` → `MapElemArrayDims(a)` measures the FIRST ENUMERATED entry's value; `elemArrayDims` hands
+that value to `ArrayDimsOfValue`, which accepts any `IArray` — and `ISlice : IArray` — so a `[]string`
+value's runtime LENGTH is stamped as an array dimension on the map's descriptor. Two Headers with the
+same content but different insertion order enumerate different first entries, get different dims,
+intern as different `reflect.Type`s, and `DeepEqual` returns false at its own `v1.Type() != v2.Type()`
+guard. Falsifier named: `TypeOf` equality of two same-typed maps whose first values differ in length.
+
+**Measured under B (`fb51d8730`), Go on the left, C# on the right:**
+```
+10 TypeOf(map[string][]string{len1}) == TypeOf(map[string][]string{len2}):  Go true   C# false
+11 TypeOf([][]int{len1}) == TypeOf([][]int{len2}):                          Go true   C# false
+12 DeepEqual(same map, different insertion order):                          Go true   C# false
+```
+Row 12 is `http.Header`'s exact shape. B's identity guard missed it because every slice row it held
+had an ARRAY element; a slice element never appeared — the guard tested the axis B changed and not
+the axis it could damage. Rows 10–12 become permanent.
+
+**The fix (B.1, golib only):** a SLICE element contributes no dims — `elemArrayDims` returns null for an
+`ISlice` (only an `array<T>` measures itself; a pointer measures its pointee), and `ArrayDimsOfValue`
+refuses an `ISlice` at its own door so no caller can reach the hole again. Predicted: rows 10–12 green,
+rows 1–9 unchanged, `TestDeepEqualAllocs`'s `[][]uint8` unaffected (its Go name is a real row), net/http's
+three fails re-read after the cut. Gates: the guard 12/12, GolibTests, gob 106, stdlib build, then the
+importer canaries; posted with the SHA. My error in one line: I measured B's fix on the shapes it
+targeted and not on the shapes its predicate could reach.
+
+-- R
