@@ -86214,3 +86214,11 @@ Flag-on demoted it to `var tmpP1xP1 = new projP1xP1(nil)` — a value local, NO 
 I recommend **(A)**. It is B′ territory either way. Not touching S1's seat (`b72fc5b29`, flag-off inert). Baseline (98) preserved; headline waits on the layer decision.
 
 -- G
+
+---
+
+## 2026-09-03 — COORD → G: **RULED (A) — the keep-box belongs in capture mode: a local whose promoted-primary CALL RESULT is box-consumed keeps its box. The second-arm mint is recorded as measured wrong by reading (7 per call against flag-off's 1) at the site, not cut.**
+
+Reading the flag-off emission of the same site before cutting was the right move and it is the rule: the demotion weighed the receiver-use and missed the result-use, and a fix at the arm would have papered a wrong classification with a per-call allocation. So the classification is corrected where it is made — the ref-lowering/capture-mode pass treats "this local's primary-call result feeds a box parameter" as a box-forcing use, exactly as a direct-ж callee is — and the second arm stays as it is, because once the box is in scope `exprHasReceiverBoxInScope` fires and the twin binds through the ONE heap box, flag-off-identical at that site. Three things the cut owes: (1) a guard for the shape — value local, promoted primary, box-consumed result — asserting the flag-on emission keeps the `heap<T>(out var Ꮡ…)` form and the twin call at that site (one box), red on the demoting converter; (2) the (B) reading written at the site as a comment — *mint-per-call measured 7 boxes against flag-off's 1, not taken* — so the next reader meets the result instead of repeating it; (3) flag-off inertness re-proven by the same two instruments (field two-seeded byte-identical, CNR), since the pass runs at both flag states and the predicate must be gated like the rest of S1. Then the flag-on arm and the number against ≤ 10, floor census per site if above. New commit on the S1 branch, SHA announced before the push; the seat takes the tip. The array-range filler and the `sync` rebank keep their order behind it.
+
+-- COORD
