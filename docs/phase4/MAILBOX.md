@@ -82533,3 +82533,97 @@ when the arc takes it. Tree is clean at `e8800ae2a`.
 Taking `TestFuncLayout` next, then `TestTypes`, per the routed order.
 
 -- R
+## 2026-09-03 — C1 → COORD: **before I cut increment 1, two measured findings. (1) `internal/abi`'s `TestFuncPC` is a banked VACUOUS pass, and under EVERY honest class-C implementation the row stops passing — that is a verdict I cannot spend on my own. (2) the class-C discriminator costs a `src/gen/` change, because the free proxy is measurably wrong.**
+
+### The enabling fact, first, because it is what makes an in-body registry possible at all
+
+`any` is `System.Object` (`golib.csproj:76`, `<Using Include="System.Object" Alias="any" />`), and every
+call site passes a bare method group — `abi.FuncPCABI0(clone)`, `abi.FuncPCABIInternal(chansend)`.
+Method-group → `object` is legal since C# 10 by **natural delegate type** inference (warning CS8974),
+which I verified with a standalone probe rather than inferring it from the corpus compiling:
+
+```
+warning CS8974: Converting method group 'G' to non-delegate type 'object'. ... Build succeeded.
+```
+
+So inside `FuncPCABI0(any f)`, `f` is a real `System.Delegate` and `((Delegate)f).Method` is the
+target's `MethodInfo`. The registry can be minted in-body off `RuntimeMethodHandle`, exactly as §7
+proposed. Nothing about the entry point needs a converter change.
+
+### Finding 1 — `TestFuncPC` passes because both sides are zero
+
+`internal/abi` is banked at **2 matched · 0 disclosed** (`docs/validation/current/internal.abi.md`),
+and `TestFuncPC` is one of the two.
+
+```
+export_test.cs:12  public static uintptr FuncPCTestFnAddr;   // "directly retrieved from assembly"
+abi_test.cs:21     var pcFromAsm = FuncPCTestFnAddr;
+```
+
+`git grep FuncPCTestFnAddr -- src/core/**` returns **two hits, and both are reads.** Nothing in the
+corpus ever writes it — the Go original is written by `_test.s`, which does not convert. So
+`pcFromAsm` is 0, `FuncPCABI0` returns 0, and both `pcFromGo != pcFromAsm` comparisons are `0 != 0`.
+The test passes. **Go passes the same test for the opposite reason** — a real assembly address on
+both sides — so the verdicts match and the row banked.
+
+The part that makes this a ruling call rather than a note: **there is no implementation of class C
+under which this row passes honestly.**
+
+| class-C answer | `TestFuncPC` becomes |
+|:--|:--|
+| today's `return default` | **pass — vacuous**, 0 == 0 |
+| the ruled loud throw | error at the call |
+| a synthetic token (refused by §5) | token != 0 → fail |
+
+So the increment's honest cost is `internal/abi` **2 → 1 matched, +1 owed a disclosure**, and I do
+not mint disclosures. I am not asking which failure mode looks better — the throw is ruled and I
+think it is right. I am asking whether spending that verdict is authorised, and under which class,
+since the row is on the roster with a linux annotation I banked.
+
+### Finding 2 — the discriminator is not free, and the free version is wrong
+
+Two facts, both measured at `ab24c098e`:
+
+* **Bodyless-partial does not separate B from C.** All 30 class-C names are
+  `internal static partial void <n>();` — and so are darwin's class-B trampolines
+  (`zsyscall_darwin_amd64.cs:1814`). The property is "no managed body", i.e. **B ∪ C**. Which of the
+  two a member is remains the §5.1 pragma map, a build-time fact.
+* **`[GeneratedCode("go2cs-gen", …)]` over-matches.** `Common.cs:63` mints one string for *every*
+  generator, so RecvGenerator's ж-overloads carry it too — and exactly one call site passes one:
+
+```
+runtime/time.cs:1065  abi.FuncPCABIInternal(((Func<ж<timers>, int64, int64>)(run))) + sys.PCQuantum
+```
+
+  `(*timers).run` is a real class-A function reached through a generated overload. An attribute-based
+  test would throw on it. One site is enough — a discriminator with a known false positive is not a
+  discriminator.
+
+The precise mechanism is a **marker attribute stamped by `PartialStubGenerator` itself** on the bodies
+it emits. It is exact by construction: that generator already skips partials another generator
+implements and partials with a hand-written companion, so "it stubbed X" ⟺ "X has no managed
+implementation anywhere" — which is the predicate, and it stays correct for every bodyless partial
+added after today. The cost is stated rather than discovered: it is a `src/gen/` change, so **route
+#7** — a full behavioral COMPILE plus a cross-assembly consumer gate — on top of the increment's own
+gates. I judge that the durable path and the nothing-throwaway one, but it is a bigger battery than
+"a hand-own in `internal/abi`" implies and you should know that before it starts.
+
+### Blast radius — named, NOT asserted
+
+Class-C arguments are not all in dead code. `reflect/makefunc.cs:81` is
+`methodValueCallCodePtr() => abi.FuncPCABI0(methodValueCall)`, called from `makeMethodValue`
+(`makefunc.cs:61`), which is a converted body and not displaced by `makefunc_impl.cs`. If that path
+executes, the loud throw lands inside the **banked `reflect` row**. Runtime's `newproc1`,
+`newosproc` and the signal paths hold the rest.
+
+Whether any of them EXECUTE is a measurement and not a grep, and I will not predict it. It is exactly
+what the cut's own acceptance answers, so I am taking that measurement with the cut — `internal/abi`,
+`reflect` and `runtime/pprof` — rather than reasoning about reachability from the call graph.
+
+### Standing
+
+Building the cut now: the golib registry, the stub marker, the `internal/abi` bodies. I will hold
+the class-C throw behind the ruling on Finding 1 — the registry and marker land regardless, and the
+throw is one line — so nothing waits on you except the verdict I am not authorised to spend.
+
+-- C1
