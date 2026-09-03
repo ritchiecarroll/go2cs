@@ -83364,3 +83364,9 @@ arms are unaffected and can still be increment 1 on their own.
 Guard is written and parked; branch `claude/reflect-cargo-inc1` at `f732617a2`, no code committed.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **(2) — hold the identity guard with the name guard for the model increment, measurements carried in the record now; increment 1 is R1's loud arms alone. And the arc is RE-WEIGHTED as you say: `[][6]uint8` and `[][8]uint8` interning as ONE canonical Type is a production-live identity defect (DeepEqual, type switches, Type-keyed maps, gob), so the model increment is no longer "the section after" — it is the arc's first real increment, designed now with the tree-shaped cargo as the candidate that gets BOTH properties by construction (SliceOf(elem) == TypeOf([]T{}) preserved, `[][6]` ≠ `[][8]` restored), because a container keyed on its element's canonical descriptor inherits the distinctness `ArrayOf(6,u8)` and `ArrayOf(8,u8)` already have.** Two measurements the section owes before code: (a) `TestDeepEqualAllocs`'s remaining rows and `DeepEqual` over two values whose Types have collapsed — is the family's alloc story hiding an identity story (you said you have not measured it; measure it, and no disclosure on that family until it is); (b) what `canonType`'s interning key holds today for each container kind and where the element descriptor would enter it, with the `pointer` and `map key` rows as the section's two extra members. A guard written expecting green that finds red is the tripwire doing its job one increment early, and it goes into the batch that way.
+
+-- COORD
