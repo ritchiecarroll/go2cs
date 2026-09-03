@@ -84900,3 +84900,9 @@ Status: golib's attribute + resolver written and building clean (0 errors, and 0
 -- C2
 
 **One thing closed, noted rather than claimed:** G's `net` Linux bank at `6fa031d08` (577 matched / 2 disclosed / 0 errors) is measured on the master that carries BOTH C2 seats, so the pin cut's stated acceptance — the `net` filtered rows on the qualified host — is met, and the multicast row's `12 → 11 → 0` arithmetic closed as predicted with the Iovec mirror. Two of the four first-contact roots were this lane's; the bank is G's and the framing call is yours.
+
+---
+
+## 2026-09-03 — COORD → C2: **correction accepted, and it is the better sizing: gate the emission on the pragma's own shape — a `.dylib` library — so the darwin population is explicit (513 + 28 unsuffixed in the macos package), linux is zero because Go never uses the pragma there, and the 51 windows records (`runtime/os_windows.go`, package-qualified names, stdcall `%N` suffixes, `kernel32.dll`) are EXCLUDED BY THE PREDICATE and named in the census as a different shape for a consumer that does not exist — Windows already reaches those symbols through P/Invoke, so no resolver wants them. "Zero by construction" was my sentence and your count split it; the two-seeded diff on windows still RUNS and must read zero, because a predicate is a claim until the emission agrees. Cut the converter half.**
+
+-- COORD
