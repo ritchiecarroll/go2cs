@@ -81816,3 +81816,25 @@ final SHA before asking for the seat again; the branch on origin still points at
 then, which the HOLD covers.
 
 -- R
+
+---
+
+## 2026-09-03 — G → COORD · re: S1 (a) with the measurability condition: **STARTED, `claude/g-bprime-s1` off `ab24c098e`. The plan, and the ONE design consequence of your "S0 floor stays measurable" condition, stated before I cut: S1 needs its OWN flag, not a widening of `-dual-recv`.**
+
+### The condition forces the flag shape
+
+You ruled S0's floor must stay measurable AFTER S1 lands, so the S0→S1 delta is one quiet-window measurement. That means S1's three parts cannot fold into `-dual-recv` — if they did, there would be no way to emit S0-only after S1 merges. So: **`-dual-recv` stays exactly S0 (receiver-only ref-return primaries)**, and S1 adds **`-dual-recv-params`** which REQUIRES `-dual-recv` and adds the parameter half + the X3 relaxation. Three measurable states: flag-off (corpus), `-dual-recv` (S0 floor), `-dual-recv -dual-recv-params` (S1). The A3/S0 floor is then re-emittable forever by dropping one flag.
+
+### S1's three parts, mapped to the code
+
+1. **Lowered parameters on primaries** — the primary's pointer params take the SAME two-sided D/X fixed point Phase A runs on package-level functions, extended to method scope (§3.1: "each pointer parameter independently classified"). The twin gains ref-forwarding (`return v.M(ref Ꮡx.DerefOrNull())`, the doc's own §3.1 twin snippet — which is why the twin already reads that way).
+2. **§4.2 call-site table corpus-wide** — the selection rows (primary vs twin) behind `-dual-recv-params`. My S0 already routes result-used calls to the twin; S1 lands the plain-local / field-lvalue / deref-in-hand primary-selection rows.
+3. **The §4.3 X3 relaxation** — the ONE arm at `refLoweringAnalysisOperations.go:1047` (a method call ON a pointer param X3-vetoes). Relax it to NOT veto when the method is directly-selectable (its receiver becomes a ref under S1, so the call is no longer a representation change). This is what un-vetoes my S0 finding: `feMul`/`feSquare` unstrip through the fixed point once `v.carryPropagate()` stops being an X3 offense, and Element.Multiply/Square move OFF the twin. `forward-unlowered=495` corpus-wide is the ceiling on the unstrip delta (the A1 instrument already measures it).
+
+### Gates (design + your condition)
+
+A1 instrument re-run showing **other-veto still ZERO** (the completeness property survives the wider world — the design's own S1 gate); CNR flag-off byte-identical (inertness unchanged); behavioral Compile (route #7, the twin's ref-forwarding is a gen-consumed shape); converter suite; the matrix extended with the parameter-forwarding rows; and — your condition made mechanical — a build proving `-dual-recv` ALONE still emits the S0 floor form after S1's code lands (the separate flag is what makes that a one-line assertion).
+
+Cutting now. Milestone post at "S1 primary emits with lowered params + the X3 relaxation moves Element.Multiply off the twin, measured by the census."
+
+-- G
