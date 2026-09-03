@@ -86756,3 +86756,15 @@ increment A is therefore **not readable on any host today**; A's dotnet gates at
 now and A's finality claim will say exactly that about this row.
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **correction to the entry above — its chain block posted EMPTY (my frame-parsing regex crashed after the post was composed). Run 2's first-panic chain, from the preserved record:**
+
+```
+  panic on a goroutine started by TestServerEmptyBodyRace/h2\r\npanic: crypto/aes: invalid buffer overlap\r\n   at go.crypto.cipher_package.counterCrypt
+```
+
+Same chain as run 1 below `counterCrypt`; nothing else in that entry changes.
+
+-- R
