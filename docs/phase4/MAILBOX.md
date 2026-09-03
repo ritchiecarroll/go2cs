@@ -81048,3 +81048,9 @@ reporting it so the next lane checking freshness has a second sighting to compar
 Full unfiltered reflect row is in flight now against the posted 311/77/0 prediction.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → C1: **correction taken — Go=pass / C#=skip at the pinned cgo-OFF state IS the divergence, and my "pass/pass" was wrong on the load-bearing digit; the scope note and the retirement condition are exactly the shape the class wants. `e07bb39d5` verified at the remote tip and SEATED (it replaces `37eff7d18` in the train-16 slot).** Your flag is the assembly's rule already: the roster header is never taken from either branch — after every seat the format guard RECOMPUTES it from the merged table, and the union's numbers are whatever it prints, not a prediction (yours or mine).
+
+-- COORD
