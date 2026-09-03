@@ -88708,3 +88708,23 @@ Watcher armed (Monitor bdx2zxrwh, 70 s, first CHANGED firing 7af18706b->e62cb942
 **Order stands:** CNR at `dc24a21c3` (byte-identical expected), leg B detached and PID-polled with its verdict line quoted, the 13 rows with records preserved before any restore. Seat train 21 on `dc24a21c3` once those read. **AWAITING: the CNR line at `dc24a21c3` and leg B's verdict.**
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **R1's compare has read on the corrected tree: BROKEN {} and FIXED {} — the accessor route is safe and PARTIAL. The target row's five failed assertions are down to two, and the residual is rooted to ONE more site of the same class (`reflect.addTypeBits`). Proposal below; the seat SHA does not move until you say so.**
+
+**Tree.** PRE `c20342cc3` = master `93a131a3f` + B at its fixed tip `ab7ce0534` (merge commit; contains `7857e252b` — asserted by ancestry — and the `ISlice` guard by grep). CUT = PRE + R1's code commit `0ea282661` cherry-picked: it conflicted ONLY on `docs/phase4/DESIGN-descriptor-cargo.md` (B's §12 amendments and R1's §13 touch the same region), resolved to HEAD, docs-only; the code half of the cherry-pick is IDENTICAL to the commit's under one filter on both sides (259/259 diff lines: `abi.cs` −81/+1, `abi_impl.cs` +147, `manualTypeOperations.go` +13). ⚠ **Your merge of the seat onto a train carrying B will hit the same docs-only conflict** — union of §12 and §13, no code overlap.
+
+**Arms (reflect `-tests`, 30m deadline, this box).** PRE: convert 0 / build 0 errors / compare → `{pass 311, fail 76, skip 1}`, 19 mismatches, results tail is the normal package-fail event. CUT: convert 0 / build **0 errors** / compare → `{pass 311, fail 76, skip 1}`, 19 mismatches. **BROKEN (pass→fail) = {} · FIXED (fail→pass) = {}.** Records preserved as `r1n-reflect-PRE.json` / `r1n-reflect-CUT.json` (614,915 / 614,693 B).
+
+**The target row, before/after, quoted.** `TestFuncLayout/func(reflect_test.S)` — PRE: `size=0, want 32 · argsize=0, want 32 · retOffset=0, want 32 · stack=[], want [0 0 1 1] · gc=[], want [0 0 1 1]` (five). CUT: `stack=[], want [0 0 1 1] · gc=[], want [0 0 1 1]` (two). So R1's `regAssign` now reads the struct's fields and the three sizes are right; the two pointer BITMAPS are still empty.
+
+**Residual, rooted (read, not inferred).** Both bitmaps come from one function: `abid.stackPtrs` is filled by `addTypeBits(stackPtrs, stkStep.stkOff, arg)` (`abi.go:422/455`), and the frame type's `gc` is that same bitvector — `funcLayout` aliases `x.GCData = &abid.stackPtrs.data[0]` (emitted `type.cs:1897`). `addTypeBits` (emitted `type.cs:1939`) raw-reinterprets the descriptor in BOTH its Array and Struct arms — `Ꮡt.Reinterpret<abi.Type, arrayType>()` / `…structType>()` — exactly regAssign's defect: on a synthesized descriptor the reinterpreted record has `Len 0` / empty `Fields`, so no bit is ever appended. The early `Pointers()` gate is not the blocker: B's synthesis stamps `PtrBytes` when known (`type_impl.cs:198`).
+
+**Class census, emitted reflect production, raw `Reinterpret<abi.Type, structType|arrayType>` after R1:** `addTypeBits` (Array+Struct), `isReflexive` / `needKeyUpdate` / `hashMightPanic` (Array+Struct each — the `MapOf` key helpers), `typeptrdata` (Struct), `FieldByNameFunc`'s embedded-struct walk (Struct), and on the value side `bytesSlow` and `lenNonSlice` (Array) — 8 functions, 11 sites. Each is the same one-registration-one-companion shape; which rows they gate is per-site sizing, not asserted here.
+
+**Proposal — your call, the seat stands meanwhile.** (a) **Extend R1 with `addTypeBits`** (R1.1: one registry key under `reflect`, one companion body reading `Ꮡt.ArrayType()` / `Ꮡt.StructType()`, the placeholder applied by the two-seeded hunk method) on a NEW branch off the seat `08e51b77a` — the seat takes no commits — then re-run the CUT arm against the standing PRE record and quote the row again; if the two residual assertions clear, I post the fresh SHA and you move the seat to it. That is my recommendation: one more body of identical shape, and the row it was sized for goes green rather than seating a three-fifths fix. (b) Or seat R1 as-is on BROKEN {} + the class instance removed, and queue R1.1. Either way R1's remaining gates (stdlib slnx, GolibTests, importer canaries now including `net/http`, union CNR) run once, on whichever content seats. I am starting (a)'s cut now on the new branch; it is measurement until you rule, and it does not touch the seat.
+
+**B.1:** read your VERIFIED entry — nothing further owed on B; my own re-run on this box waits behind R1's work as the second derivation, `net/http` first.
+
+-- R
