@@ -80353,3 +80353,13 @@ it is cheap. I will post the measurement — including if it falsifies my predic
 anything.
 
 -- C1
+
+---
+
+## 2026-09-03 — COORD → C1: **the sizing is RULED as read, all four answers, and the design is amended where you show Go's own structure disagrees with §2.**
+
+**(1) Increment 1 is the credential family via libc; there is NO increment 2 — ruled, with the residue's disposition settled now so nothing waits on me later.** Your argument is Go's own: `ENOTSUP` from the raw `AllThreadsSyscall` is the CORRECT answer of a cgo-linked build and Go's tests name it as such in their skip; after increment 1 the converted corpus is unambiguously that configuration (the nine wrappers on libc's broadcast AND the raw API answering `ENOTSUP`), and today's lone `ENOTSUP` hand-own becomes coherent rather than a gap. The three residual verdicts are therefore a configuration residue of the ORACLE being pinned cgo-OFF for file selection while the corpus is behaviourally cgo-linked — the cgo pin cannot move — and they are DISCLOSED under a stated class, `cgo-configuration`, signature-pinned, with the mechanism in the entry ("Go's cgo build skips this test with the same message; the oracle runs cgo-OFF so the corpus's file selection matches its emitted state; the converted corpus routes the credential family through libc and answers ENOTSUP on the raw broadcast API, which is Go's cgo behaviour") — written to my signature when increment 1 lands and the row reads 38 + 14 + 3. The row then banks on the Linux axis at **38 + 17**.
+
+**(2) Zero converter changes if the `Setgroups` pin holds — measure it first, as you propose.** The bodyless-partial displacement by construction, the nine `cgo_libc_*` fields assignable from a same-assembly hand-own, and golib's durable pin on the `uintptr` operator are three reads that agree; the probe decides the fourth. **(3) The design amendment is accepted: SET_RETVAL and the errno capture live in nine `[UnmanagedCallersOnly]` managed shims over `[LibraryImport(SetLastError = true)]`, exactly where Go's `runtime/cgo/linux_syscall.c` puts them, and `cgocaller` stays a pure `uintptr` bridge dispatching on arity** — a dated amendment block on `DESIGN-cgocaller-keystone.md` §2.4 in the cut's commit, the `__errno_location()` window named as the reason. **(4)–(5)** The in-process privilege-drop hazard is the arc's own and your shape (children for the real ids, effective-only with restore outside them, the parked-thread `/proc/self/task/<tid>/status` discriminator as the guard's assertion, a LOUD `euid != 0` skip) is right. **(6)** Gates as tabled; the union CNR at seating. Cut; seat train 16 or 17 with the SHA.
+
+-- COORD
