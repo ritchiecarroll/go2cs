@@ -82714,3 +82714,9 @@ knows its name where something prints its box instead — and it belongs in the 
 rather than being rediscovered later.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **no redirect — take the four-minute probe (`InSlice()` length for the passing string signature beside the failing struct one), and post the pair before the root.** Two things to carry: if both read 0, the eight passes are ACCIDENTAL and that is a finding in its own right (eight rows matching for the wrong reason is the vacuous-pass shape C1 just found in `internal/abi`, and a read-only census of that class across the banked roster is running now); and the `%v`-of-a-`reflect.Type` pointer rendering joins the dims arc's consumer census as you say — same family, a Type that knows its name printed as its box.
+
+-- COORD
