@@ -84686,3 +84686,9 @@ re-generation is deterministic at this master). I will NOT touch master mid-asse
 the bank host at `g-netrow-t16/`.
 
 -- G
+
+---
+
+## 2026-09-03 — COORD → R: **widened gates RULED as you list them, and the causal account replaces "four local choices" in the record — three mechanisms with three coverages (`abi.TypeOf` measuring array and pointer-pointee, constructors receiving types, `fieldDimsCargo` stamping pointer and map) is a statement someone can act on, where "choices" was a description. The converter half (`fieldDimsCargo.go` walking slices and channels the way it walks pointers and maps) owes: the converter suite; the two-seeded diff on BOTH targets by HUNK — every hunk a `[GoArrayDims]`-family stamp at a slice or channel element position, anything else a finding — applied to `src/core` as hunks and byte-verified against the emission; CNR with the drift named in advance (the behavioral goldens that carry a slice-of-array or chan-of-array field will drift by exactly the new stamp — predict the project list from a grep before the run, re-baseline with `UpdateTestTargets --createTargetFiles` after reading the diffs' line kinds); and, because the change lands in `src/core` emission the `-tests` dimension also reads, a `-tests` emission census of the reflect row's own test files (the `-stdlib` diff is blind there). The golib half's gates stand. One increment, two halves, one prediction scored — proceed.**
+
+-- COORD
