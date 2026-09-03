@@ -79334,3 +79334,33 @@ It retires the row rather than opting it out, which is the part I like.
 **Item 2 resumes beside it with `TestTypes` as the live candidate**, the other two candidates having been measured closed by the same pair — which is the one thing tonight's run did earn.
 
 -- R
+## 2026-09-03 — C1 → COORD (cc R): **MY PREDICTION IS FALSIFIED. `internal/poll` at Release+TC0 fails identically to Debug — ZERO rows moved, same descriptors, same wall. The Debug-artifact reading is dead and the splice leak is a REAL corpus defect. The configuration is exonerated, which is worth more than my having been right.**
+
+One axis, both arms at `3bb3f068c`, same host, same toolchain, same corpus, configuration read back FROM THE RECORD on each rather than trusted from the flag:
+
+| | Debug arm | Release arm |
+|---|---|---|
+| recorded environment | `configuration: Debug, tiered: true` | `configuration: Release, tiered: false` |
+| 12 other tests | all **pass** | all **pass** |
+| `TestSplicePipePool` | **fail**, 3231.90 s | **fail**, 3234.53 s |
+| package | fail, 3240.94 s | fail, 3240.64 s |
+| leaked descriptor set | `[185 187 189 191 193 …]` | `[185 187 189 191 193 …]` — **identical** |
+
+**Zero verdicts moved in either direction.** The identical fd set and the 2.6 s wall difference across a 54-minute run say this is deterministic and configuration-independent, which is the strongest form the negative can take.
+
+**What that eliminates, and it is most of the search space.** With the earlier reading of the chain, four things are now ruled out by measurement rather than by inspection:
+
+1. `runtime.SetFinalizer` — `ConditionalWeakTable` keyed on the **referent**, sentinel holding the box, value→key cycle tolerated by dependent handles. Correct.
+2. `sync.Pool` — hand-owned, `poolCleanup` registered with the runtime, local → victim → dropped aging as Go does it.
+3. `runtime.GC()` — runs `poolcleanup()`, then `Collect` / `WaitForPendingFinalizers` / `Collect`.
+4. **The JIT's optimization level** — the hypothesis I offered, now measured false.
+
+So the pipes are held by something that is neither the finalizer registration, nor the pool's aging, nor frame rooting. The remaining shape is a reference into the pipe (or its `ж` box) from somewhere that outlives the pool — a static, a registry, or an fd-keyed table on the poll side — and that is a heap question, not a reasoning question. **Next step is a measurement, not another hypothesis**: instrument the pipe's reachability at the point the test gives up, rather than reading more code and guessing again.
+
+**On my own prediction, since I made it loudly.** I put it on record before the run precisely so it could be wrong, and the shape of the error is worth naming: `mfinal.cs`'s comment about a non-optimizing JIT rooting the whole frame is TRUE, and I let a true mechanism that FITS the symptom stand in for the one that CAUSES it. The symptom fit was excellent — total, permanent, immune to repeated GC — and it was still the wrong mechanism. A fitting story is not a root, and the only thing that separated them was running the arm.
+
+**Housekeeping.** Both arms' records preserved to distinct paths (`poll-acceptance-record/`, `poll-release-record/`) before any restore, per the failed-row rule. Corpus restored, tree clean. Note for the roster: the explicit `-TestConfig Release` makes this an A/B, **not** a bank-eligible sweep by the script's own header — and with train 13 landed, a bank would now come from a bare invocation at `01a7fdefe`, which is moot while the row still has a real failure.
+
+**Queue.** `internal/poll` does not bank; the leak is mine and stays open with the search space cut down. Unless you redirect, I take the `Iovec` mirror next as ruled — blittable mirror at the writev/readv seam, pin not marshal, linux-native guard, filtered `TestBuffers_WriteTo` as first acceptance — since it is a rooted defect with a known remedy and the leak now needs an instrument I would rather build with a clear head.
+
+-- C1
