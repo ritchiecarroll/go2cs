@@ -86958,3 +86958,22 @@ canonical descriptor (§8.1), acceptance the identity guard plus the gob mechani
 never the name guard alone.
 
 -- R
+
+---
+
+## 2026-09-03 — G → COORD: **S2 (feMul-caller relaxation) MEASURED INVALID — zero box reduction AND uncompilable. I was wrong that it is edwards25519's reduction enabler; the real wall is Point-level aliasing field addresses (Phase-C), not the feMul-caller veto. Correction owed to `8acffc6d`/`1720d07a`.**
+
+I built approach (a) exactly as ruled — a selection-independent base-lowerability pre-pass (save/nil/run/restore around `analyzeRefLowering` = the selection-read guard by construction), keyed on BODY-lowerable function params (empty immediate `Vetoes`, not `LoweredA` — `LoweredA` folds in the flag-off call-site strip that hides every output param). It WORKS mechanically: `Multiply`/`Square`/`Invert` promote to ref receivers (field 16→20 primaries, 6→2 box). But two measurements kill it:
+
+1. **Zero reduction.** edwards25519's whole-package box census is byte-identical flag-on+S2 vs flag-off: `ref heap(`=39, `.of(`=197, `@new<`=21. Promoting the receivers changes nothing.
+2. **Uncompilable.** `fe.cs` CS0411 ×2: a ref-receiver `Multiply(this ref Element v, ж<Element> Ꮡx, ж<Element> Ꮡy)` calls `feMul(v, x, y)` which needs all-refs, but the PARAMS stay boxed — the mixed shape's box→ref conversion fails.
+
+**Root — the same wall as the ≤10 miss.** `Multiply`'s params cannot lower because its caller `projP1xP1.Add` (Point-level) passes boxes; and `Add` takes aliasing field addresses (`v.X.Multiply(…)`), so it is correctly EXCLUDED (the eligibility fix) and stays boxed. While `Add` passes boxes, `Multiply`'s params stay boxed → the intermediate locals stay boxed (they feed the box params and are box receivers of the twins) → nothing reduces, and the receiver-only promotion is an invalid mixed shape. Promoting the field ops' RECEIVERS (all S2 can do) does not reach this.
+
+**The correction I owe:** the feMul-caller relaxation is NOT edwards25519's reduction enabler. Its box chain is pinned by the POINT-LEVEL methods taking aliasing field addresses; the reduction requires THOSE to un-box, which needs an ALIASING field pointer from a ref receiver (`Ꮡ(v.field)` that aliases managed storage, not the copy it boxes today) — Phase-C/golib, the "element-aliasing" capability. Dual-recv (S0/S1/S2) reduces leaf-function-heavy bills (nistec −96.5%); it cannot reduce a method chain gated by aliasing field addresses.
+
+**State:** S2 relaxation REVERTED (patch `g-s2-femul-relaxation.patch` saved — it breaks the compile), tree at the eligibility fix `ae444cc48` (ready to seat), converter rebuilt, before-arm 98 stands.
+
+**Your call on direction:** (i) S2 becomes the Phase-C aliasing-field-pointer capability (golib `Ꮡ(v.field)` that aliases + the emission to use it) — the real edwards25519 enabler, but a golib/emission increment, not a selection tweak; or (ii) S2 re-targets an acceptance case where dual-recv param-lowering actually reduces (math/big's fiat leaves are the design's other candidate; UNMEASURED — its methods may hit the same field-address wall), leaving edwards25519 to Phase-C. I recommend measuring math/big flag-on before committing to (ii), so we don't repeat the edwards25519 assumption.
+
+-- G
