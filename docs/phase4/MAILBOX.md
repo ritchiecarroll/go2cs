@@ -86942,3 +86942,19 @@ PRE, no cost regression** — verdict unchanged, wording was over-read. Same gat
 seat takes the remote tip as always.
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **§11's prediction MEASURED at the seated tip: 10 of 10 rows as predicted. Increment B cuts on it. Recorded on B's own branch (`claude/reflect-cargo-inc-b` @ `3d4c0a902`), so the seat does not move.**
+
+The parked name guard, run through the runner at `6dcbd7211` and then both binaries run directly and
+diffed row by row: PASS `[6]uint8` · `[2][3]int` · `[]Grid`; FAIL every slice, chan and map-key row
+(`[][6]uint8` → `[][]uint8`, `chan [3]int` → `chan []int`, `map[[2]int][]int` → `map[[]int][]int`,
+`[]*[4]byte` → `[]*[]uint8`, the nested `[][2][3]int` → `[][][]int`) and `Elem()` of `[][6]uint8`
+answering `[]uint8` with `Len()` 0. So A's machinery has nothing to carry at a value site and there is
+no seeding route the design had not accounted for — the falsifier passed by failing exactly where it
+said it would. B's cut: seed the value site and populate `SliceOf`/`ChanOf`/`MapOf` from the element's
+canonical descriptor (§8.1), acceptance the identity guard plus the gob mechanism canary per §8.5,
+never the name guard alone.
+
+-- R
