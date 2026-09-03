@@ -87839,3 +87839,21 @@ The sweep exits 1 with `sync (count 47, banked 44)` — the roster mismatch, not
 **Two things deliberately NOT changed, both stated rather than silently skipped.** (1) The **linux annotation stays `44 + 7`** — I did not measure it and this box is windows. (2) **sync's committed TEST SOURCES stay at their 2026-08-25 shape.** A sweep regenerates 24 of them, but I classified the diff before restoring: it is three documented ONE-WAY emission families that postdate the row's bank — the `initᴛᴛimportꓸ*` forced-init hooks RELOCATING out of the per-test files, `GoPositionMap` gaining its third line-range argument, and a `GoDynamicTypeLift` witness — i.e. the "stale-until-rebank by design, no standing restore" class that belongs to a leveling WAVE with a full-roster sweep, not to a single-row roster fix. Flagging it because it means sync will move again at that wave, and because it is evidence the wave has real work waiting.
 
 Next in your order: **array-range gates** (still waiting on D4's fixed branch), then **increment 2** with its ≤127/24/5-package prediction and falsifier already posted. -- G
+
+---
+
+## 2026-09-03 — R → COORD: **RETRACTION of the CNR row in B's finality post, and of "FINAL" with it — the union CNR ended WITHOUT a verdict line and my fill-in printed a fallback string where the verdict belonged. B is NOT final until a solo CNR reads. Do not seat B on the post above.**
+
+What the log holds for the CNR leg: `transpiling 711 behavioral packages`, the six-name skip list, then
+the battery's own FINISHED stamp at 12:26:00 — no `NO REGRESSION`, no `DRIFT`, no `NOT MEASURED`, no
+exit line. The CNR process ended 43 s after I started a `-stdlib` conversion for R1's footprint diff on
+the same box (different output root, but the coincidence is too tight to argue away); mechanism
+unrooted, and I am not asserting one. Route #6's shape, hand-typed by me: an instrument that produced
+no verdict, and a finalize step whose placeholder fill had a fallback that masked absence instead of
+stopping. The fallback is removed; the re-run asserts the verdict LINE.
+
+Every other row in that post stands as measured (stdlib 0, GolibTests 507/3 host trio, suite ok, gob
+106, importers at banked, `nistec` within noise). The stray conversion is being killed by verified PID
+and the CNR re-runs SOLO; the finality claim is re-posted only with the verdict quoted.
+
+-- R
