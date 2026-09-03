@@ -80180,3 +80180,40 @@ No cut, no bank, no manifest touched.
 One root read out of Go's source (`Setuid` routing through `AllThreadsSyscall` at cgo-OFF) turns the row from an open FAIL into a known quantity: `linux: 37 + 14` the moment the all-threads seam exists, with nothing minted. That seam is `docs/phase4/DESIGN-cgocaller-keystone.md`'s Linux credential-wrapper half — yours, ruled, with the Setgroups pointer marshalled at its call site and the keystone kept pointer-agnostic. **GO on the first Linux increment, sized before cut:** (1) which of the two capabilities the increment lands — the libc setxid route for the credential family (the measured fact that glibc's broadcast reaches an already-parked .NET thread where the raw syscall does not, which closes `TestSetuidEtc`) versus the general `AllThreadsSyscall` broadcast the three direct tests exercise (the harder half; if it is a second increment, say so and predict the row at 38 + 14 after the first); (2) the process-ceiling discipline from the fork-bomb kept on every run; (3) the guard shape (a linux-native behavioral probe with a privilege check and a LOUD unprivileged skip, per the control-design rule); (4) the gates (converter suite if the registry moves, the two-seeded diff for the displaced wrapper, the syscall row itself under the cgo pin as the acceptance, the union CNR at seating). Post the sizing; the owner has my recommendation that the keystone implementation is where the lane's model moves up, and I put it to him tomorrow. Nothing else owed tonight.
 
 -- COORD
+
+---
+
+## 2026-09-02 — R → COORD: **the capture ran, and it overturns the obvious design: GO ITSELF prints `"unknown method"` on one of these paths. Threading the public name everywhere would have made us DIVERGE from Go while looking like a correctness improvement. The fallback is part of the contract, not a failure to fix.**
+
+### Go's actual strings, go1.23.12, recovered verbatim
+
+```
+Bool/panicNotBool      reflect: call of reflect.Value.Bool on string Value
+Append/extendSlice     reflect: call of unknown method on int Value        <-- GO'S OWN FALLBACK
+SetInt/setKinded       reflect: reflect.Value.SetInt using unaddressable value
+MapIndex/panicNotMap   reflect: call of reflect.Value.MapIndex on string Value
+Recv (mustBe)          reflect: call of reflect.Value.Recv on string Value
+Call (call chain)      reflect: call of reflect.Value.Call on string Value
+Convert runes chain    reflect.Value.Convert: value of type string cannot be converted to type int
+String on int          "<int Value>"   (no panic at all)
+```
+
+**`reflect.Append` is a package-level FUNCTION, not a `Value` method**, so Go's climb — bounded at five frames and filtered to `reflect.Value.<Uppercase>` — finds no qualifying frame and returns its fallback. Go ships `"unknown method"` as the correct answer there.
+
+So the cut is **not** "thread the public name". It is **"reproduce Go's climb, including where Go's climb fails"** — and `TestValuePanic`'s failure at Release+TC0 is our climb failing where Go's *succeeds*, which is a different thing from the one case where Go's fails too. Had I threaded uniformly, I would have "fixed" a string Go deliberately prints and broken a byte-compare I was using as the gate.
+
+### What this changes
+
+- The 8 captured strings ARE the specification; each threading decision is now read off this table rather than argued.
+- `Append`/`AppendSlice` → `extendSlice` keeps the **fallback**, threaded as the sentinel rather than the enclosing name.
+- `Convert` does not route through `valueMethodName` at all — different message shape entirely; out of scope, and I would have discovered that only by breaking it.
+- `String` does not panic (`"<int Value>"`), so `stringNonString`'s `mustBe` use is a formatting path; its text needs its own capture before I touch it.
+- `panicNotMap` is UNCALLED in our emission yet Go's `MapIndex` path names the method correctly — so our route reaches the same text by a different helper. The name still has to come out right through whatever our route is, which the byte-compare will show.
+
+### Standing
+
+Threading targets are now measured for 8 of the paths; `stringNonString` and the two deep `cvt*` chains get the same treatment before any code. Then the cut with the ruled gates — six texts byte-compared, guard at `DOTNET_TieredCompilation=0` red-first, both configurations named, `TestValuePanic` PASS at Release+TC0 as acceptance.
+
+This is the third time today that reading the source instead of assuming changed the answer rather than confirming it: `HasGoName` was already correct, our walk was a faithful transcription, and now Go's fallback turns out to be intentional. Recording it as a pattern, not a boast — the assumption was reasonable each time, and wrong each time.
+
+-- R
