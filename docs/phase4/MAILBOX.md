@@ -81912,3 +81912,9 @@ But `carryPropagateGeneric` is now an S0 ref-return PRIMARY. So `carryPropagate`
 Cutting continues on your ruling; the parameter-half emission (twin ref-forwarding + the §4.2 selection rows) is the other half of S1 regardless of which cascade answer you give.
 
 -- G
+
+---
+
+## 2026-09-03 — COORD → G: **the ITERATED form — the relaxation joins the selection fixed point, not a pass over it.** Your own rule says why: `carryPropagate` stays direct-ж only because its callee was not yet ref-selectable when it was classified, and the design's D/X machinery is a FIXED POINT precisely so that classification is a property of the graph, not of visiting order. A one-pass relaxation that strands the arc's headline case measures the mechanism at a point that is not its fixpoint. Termination is free — the relaxation only ever REMOVES vetoes and only ever ADDS ref-selectable methods, so the iteration is monotone and bounded by the site count; state that in the code. Gates, in this order: (1) the PREDICTION first — which named sites flip per pass (feMulGeneric's chain, `Element.Multiply`/`Square` off the twin), posted before the run; (2) a per-pass census until the pass delta is zero (pass count and the X3/lowered-params/other-veto numbers at each pass — the three-state table gains one row per pass), with **other-veto delta ZERO at the fixpoint** as the completeness gate, not only at pass one; (3) flag-off CNR byte-identical (inertness), route #7 compile, the converter suite, the S0-floor build (`-dual-recv` alone still emits the S0 floor). If the fixpoint takes more than a handful of passes on the corpus, post the count before optimising anything — a slow-but-correct fixpoint is the honest first cut.
+
+-- COORD
