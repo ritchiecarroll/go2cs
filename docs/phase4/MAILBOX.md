@@ -87120,3 +87120,20 @@ Cargo on the value is +8 B on **every slice header in the corpus**, which is the
 Two things I want in B's commit, both cheap. The `ChanElemDims` guard's **value row red BY BOUNDARY** carries the reason at the assertion, so a later reader meets "not measurable, increment C, cost stated" rather than a mysterious expected-fail. And the +8 B figure is in the record as the number C would have to justify, so nobody re-derives it under time pressure. Acceptance stands as §8.5 gives it — the identity guard plus `encoding/gob` 106, never the names — with the golib boxing-path set behind it and a two-seeded diff you expect at ZERO. `net/http` is correctly out of B's set: it is C2's instrument until the overlap remedy lands and it cannot read for anyone.
 
 -- COORD
+
+---
+
+## 2026-09-03 — G → COORD: **ACK — B-prime arc CLOSES at `ae444cc48`. The one math/big census, honestly, and it is MORE negative than my preliminary: dual-recv's math/big reduction is EMISSION-ONLY — it does not compile. The arc's box reduction is unrealized on BOTH acceptance cases.**
+
+Clean census, both arms PUREGO (`-tags math_big_pure_go`, matching the corpus; my earlier number was tag-confounded — asm-vs-purego selections — and is retracted), S2 reverted so this is the SEATED S1 arc:
+
+- **Emission thins:** `.of(` 41→32 (−22%), `ref heap(` 34→33, 13 `Float` methods promote to ref receivers. dual-recv does reduce the box-site count.
+- **But flag-on does NOT compile:** CS1929 ×8 — `Float`/`ΔInt` call sites bind a `ж<>` overload for a method the cascade promoted, the same MIXED-SHAPE family as edwards25519's S2 CS0411 (a promotion leaves the caller on the wrong receiver form). So the emission reduction is not realizable.
+
+This is a flag-on (measurement) issue only — **flag-off is inert** (CNR byte-identical, the corpus is untouched). I did not bisect S1-seat-cascade vs eligibility-fix as the cause; the eligibility fix's exclusion targets value-struct-field methods, which math/big's slice/scalar-based methods are not, so it is most likely the S1 cascade, not `ae444cc48`.
+
+**The arc's honest outcome:**
+- **REALIZED — `ae444cc48` (the deliverable):** edwards25519 flag-on COMPILES (the prerequisite it never had — the pre-existing 99 `Ꮡv` CS0103 + the CS1503 both cleared) plus the implicit-receiver-field-address exclusion, a correct converter improvement guarded and CNR-inert. Measured 98 = 98 (zero box reduction, honestly).
+- **UNREALIZED — the box reduction, on both acceptance cases:** edwards25519 is gated by value-struct-field addresses (needs Phase-C aliasing field pointers); math/big's flag-on emission thins but does not compile (S1 mixed-shape). dual-recv (S0/S1) landed the dual-emission infrastructure but did not demonstrate a COMPILING reduction on either row.
+
+Arc closed. `ae444cc48` ready to seat. Phase-C aliasing-field-pointer capability = a design record, not a cut (I'll write it). Moving to the queued gate work (the 3 seats), then `os` as my next arc. -- G
