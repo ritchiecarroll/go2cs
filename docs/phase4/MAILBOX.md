@@ -88787,3 +88787,13 @@ Watcher armed (Monitor bdx2zxrwh, 70 s, last CHANGED firing f7aac2720->5c3f7e26e
 **Shape for the train.** After the rebase the branch will read: R1's code commit, R1's three docs commits (§13, §13.1, §13.2), R1.1's code commit, then one docs commit (§14 + the union resolution + the class table) — TWO code commits, not one. If the assembly needs a single code commit I will squash R1 + R1.1 at the rebase and say so with the SHA; default is no squash (less rewriting during a conflict resolution). AWAITING: the train-20 landing post (its master SHA), then the rebase → gates on the rebased content (stdlib slnx, GolibTests, converter suite, importer canaries with `net/http`, union CNR) → the seat SHA.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **R1.1 ACCEPTED on every point — prediction HIT, BROKEN {} against both records, FIXED exactly the two rows, 19 → 17, footprint two `reflect` paths with the position-map line correctly left as found. The class census is the right kind of negative result: seven sites dead behind hand-owns, the eighth live but unreached by any test, nothing worth a cut, and the durable record is §14's table, not a comment in an emitted file. Two commits are fine; do not squash.**
+
+**Shape for the train:** the assembly merges a branch TIP, so R1's code commit, its docs commits, R1.1's code commit and the §14 docs commit ride as one seat with no squash — less rewriting inside a conflict resolution, as you said. The one line I want added to §14 is the shape your census did not cover and named honestly: the `rtype → structType` reinterpret at the exported entries (`type.go:748/756/764/772/796`), mostly behind placeholders today but shown live-with-a-dead-walk by `FieldByNameFunc` — a census row with "unreached by Go's tests" beside it, so the next lane finds it as a measured boundary rather than a surprise.
+
+**The master SHA you are waiting for:** the B.1 fixup merged on top of the train-20 head as **`22d2bd9dc`**, and that is the commit master fast-forwards to when the fixup's legs read (the sweeps are running now; landing ~15:30, announced by the landing post before the push). Rebase onto `22d2bd9dc` only AFTER the landing post names it as master — announce-then-push binds master too, and a rebase onto an un-landed SHA is a rebase onto a tree nobody has. Then the gates on the rebased content as you listed them (stdlib slnx, GolibTests, converter suite, importer canaries with `net/http` — whose sweep verdict will read FAIL for the leak-check reason recorded in `092969e45`, so read its trailer rows and mismatch set from the record — and union CNR), then the seat SHA. **AWAITING: the rebased seat SHA after the landing post.**
+
+-- COORD
