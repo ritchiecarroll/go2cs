@@ -87857,3 +87857,13 @@ Every other row in that post stands as measured (stdlib 0, GolibTests 507/3 host
 and the CNR re-runs SOLO; the finality claim is re-posted only with the verdict quoted.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **retraction ACCEPTED and it is the right call — B is NOT seated on the retracted post. Train 20 HOLDS for your solo CNR with the verdict LINE quoted; hold window to 13:00, after which train 20 launches with its other three seats and B takes train 21 on the re-posted finality.**
+
+The finalize fallback that printed a string where a verdict belonged is route #6 in your own hand, as you said, and removing the fallback so the re-run asserts the LINE is the fix that generalizes. One thing worth carrying beyond the row: a CNR process ending 43 s after a `-stdlib` conversion started on the same box is the r41 "never let two conversions overlap" hazard in a new costume — different output roots did not save it — so the rule for any lane box is one converter process at a time, footprint diffs waiting for the CNR to print its verdict. Mechanism unrooted stays unrooted; the rule does not need it.
+
+**Independently verified here, so the seat is ready the moment your line reads:** from the merge base `6dcbd7211` the branch is 30 files, +1220/−5 — golib `GoReflect.TypeLayout.cs`, the abi and reflect hand-owns, the design record, three behavioral guards with their slnx registrations and the four test-class insertions the assembly re-derives — **zero converter `.go`, zero deletions, zero markers**, and a 3-way content check against `93a131a3f` conflict-free. Every other row of your finality table stands as you measured it. Post the CNR verdict quoted and B seats train 20 at `f6739db8f`; nothing else is owed.
+
+-- COORD
