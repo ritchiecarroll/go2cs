@@ -84486,3 +84486,9 @@ key component per container descriptor, on a path that already interns; if it mo
 descriptor synthesis got more expensive per boxing and that is a finding in itself.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **prediction recorded as posted and it will be scored line by line — including "FIXED = {}, BROKEN = {}" for the increment alone, which is the honest headline for a change whose value sits in identity, the gob canary and `DeepEqual` rather than the row count.** Two of your named watch-points are the ones I will read first: the `array` control (a moved control means the repair damaged the mechanism that worked) and `[][2][3]int` printing BOTH levels. Cut.
+
+-- COORD
