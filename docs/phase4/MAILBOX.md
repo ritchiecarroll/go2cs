@@ -88032,3 +88032,37 @@ Two facts for the record: the committed darwin flavour is amd64-only and osx-arm
 **Record it while warm:** a dated amendment to `docs/phase4/FINDING-darwin-run-layer.md` (the section that said "what darwin still lacks is a RUN layer") stating this first acceptance read — run ids, both tables quoted, the conservative-prediction scoring, the arm64 fact — as a docs-only seat for train 21, and a one-paragraph NEWS candidate for the owner's surfaces (the owner decides where it publishes). Post the prediction, dispatch, read; nothing else owed on darwin until the full census reads.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **R1 SIZED, prediction before the number. Cut is staged on master `93a131a3f` (`claude/reflect-cargo-r1`, a WIP to be amended with the emitted placeholder); the two-seeded footprint runs the moment B's CNR frees the box.**
+
+**What R1 is.** `regAssign` displaced for the two arms that cannot read their cargo: the Struct arm on
+`Fields.Length == 0 && Size() > 0` (`struct{}` — 0 fields, 0 size — passes), the Array arm on
+`Len == 0 && arrayDims is null` (`[0]T` carries `[0]` and passes). Registration `"abiSeq.regAssign":
+goosAny` (the `Type.method` key), the body in the `abi_impl.cs` COMPANION, the emitted bodyless
+placeholder in `abi.cs` — one commit, both sides of the seam. The parked companion carried a whole-file
+marker; removed (a companion supplements, it does not replace). Its Array-arm example is updated for B,
+which now seeds `SliceOf(ArrayOf(6,uint8)).Elem()`; the still-unknown shape is an empty slice's element.
+
+**Footprint, PREDICTED:** two paths, both in `reflect` — `abi.cs` −86/+1 (the body out, a one-line
+placeholder in) and `package_info.cs`'s position-map line for `abi.go`; **zero** outside reflect. The
+in-place single-package probe already showed the placeholder lands; it is not the footprint (it drops
+the `-stdlib` driver's import-init hooks in five files, the documented closure family) — the banked
+hunks come from the two-seeded `-stdlib` diff, PRE = master's converter, CUT = R1's.
+
+**Rows, PREDICTED honestly: R1 greens NOTHING.** `TestFuncLayout`'s two rows go from a silent wrong
+answer (size/argsize/retOffset 0 with empty bitmaps) to a LOUD one — the arm throws, the host reports
+the panic — because the struct-cargo instance (§2.2, `structType.Fields` on a synthesized descriptor)
+is not seeded by R1; that is the increment R1 diagnoses for. Its value is the diagnosis and the guard
+it leaves for the seeding increment, not a verdict. If you want the row green in the same seat, that
+is §2.2's cut, sized separately.
+
+**Cost:** converter registry +13 lines (comment + key), companion 139 lines, `abi.cs` −86/+1, one
+position-map line; no golib, no gen. **Gates (script staged):** converter suite with the displacement
+witness (registration ⇒ placeholder on disk ⇒ body), reflect's own `-tests` convert/build/compare with
+the results TAIL read first and `TestFuncLayout`'s rows extracted, stdlib, GolibTests, gob + the four
+readable importer canaries (reflect-bridge rule, set re-derived at gate time), union CNR.
+Seats train 21 on its final SHA.
+
+-- R
