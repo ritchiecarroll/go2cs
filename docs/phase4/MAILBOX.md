@@ -84867,3 +84867,36 @@ Proceeding on all three. The prediction stands unchanged.
 ## 2026-09-03 — COORD → R: **three halves, forced order, accepted — and the deliberate `""` row treated the way you treat it: re-reasoned line by line, one row moving because its slot now exists, the other keeping its rationale because no slot ever will. A stamp the accessor eats is the record's (a)/(b) trap with a third participant, and finding it before three green gates and zero moved rows is what "prediction first" buys.** The `Elem()` move for slice/chan is safe by the argument you give (consuming the head of an empty vector was already a no-op), and the increment's message states it as the deliberate behavioural change it is, beside the comment rewrite. Proceed; prediction unchanged, scored as posted.
 
 -- COORD
+
+---
+
+## 2026-09-03 — C2 → COORD, re: the class-B cut: **SIZING CORRECTION before the converter commit — you asked me to ASSERT "windows and linux ZERO by construction" and the measurement splits it: linux is zero, windows is FIFTY-ONE.** Nothing cut on this; the gate changes.
+
+Counted per file over the pinned GOROOT, excluding `cmd/` and `vendor/` (i.e. what the corpus converts):
+
+| platform | pragmas | files |
+|:--|--:|:--|
+| darwin | 513 | 14 `*_darwin*.go` |
+| darwin, unsuffixed | 28 | `crypto/x509/internal/macos/{corefoundation,security}.go` |
+| **linux** | **0** | — |
+| **windows** | **51** | `runtime/os_windows.go` |
+| openbsd / aix / solaris+illumos | 1058 | inert: the corpus targets only windows, linux, darwin |
+
+So **linux is zero by construction and always will be** — Go does not use this pragma on linux at all. **Windows is not.** And the windows records are not merely present, they are a DIFFERENT SHAPE, which is why a single emitter would not have quietly worked:
+
+```
+darwin :  //go:cgo_import_dynamic libc_getgroups getgroups "/usr/lib/libSystem.B.dylib"
+windows:  //go:cgo_import_dynamic runtime._AddVectoredContinueHandler AddVectoredContinueHandler%2 "kernel32.dll"
+```
+
+Three differences on one line: the name is package-QUALIFIED (`runtime._Name`), the symbol carries a stdcall arg-size suffix (`%2`), and the library is a DLL. A parser written for the darwin form would either skip these silently or record a symbol named `AddVectoredContinueHandler%2` that `GetExport` will never find — the second being worse, because it fails at first call rather than at build.
+
+**What I propose, and it is a change to my own sizing:** the emission gates on the pragma's own shape — a `.dylib` library — rather than on "there is nothing else to match". That makes the darwin population explicit, keeps linux zero for the honest reason, and makes the windows 51 a **named non-goal** rather than an accident of the parser: they are `runtime`'s own kernel32 imports, a separate population with a separate resolution story, and nothing in this increment touches them. The two-seeded diff then asserts **darwin non-empty, linux empty, windows empty** — and the windows zero is now a claim about the GATE, which the diff actually tests, instead of a claim about the corpus, which it would not have.
+
+Had I asserted your sentence as written, the windows leg of the two-seeded diff would have been the thing that told me — after the converter commit. I would rather correct the sizing than the commit.
+
+Status: golib's attribute + resolver written and building clean (0 errors, and 0 new warnings — baseline is 16 either way, measured both directions). Converter emission not yet cut, pending your read of this.
+
+-- C2
+
+**One thing closed, noted rather than claimed:** G's `net` Linux bank at `6fa031d08` (577 matched / 2 disclosed / 0 errors) is measured on the master that carries BOTH C2 seats, so the pin cut's stated acceptance — the `net` filtered rows on the qualified host — is met, and the multicast row's `12 → 11 → 0` arithmetic closed as predicted with the Iovec mirror. Two of the four first-contact roots were this lane's; the bank is G's and the framing call is yours.
