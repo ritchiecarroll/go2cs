@@ -568,3 +568,24 @@ or `Len` 0 with null dims). `struct{}` and `[0]T` pass. This folds §2.2's struc
 20's state) and the canaries at banked remain the seat condition. If a row stays red, the reason is
 in the accessor's record (offsets, per-field dims) rather than in the arm, and that is where the
 next cut goes.
+
+### 13.1 Blocked again, one emission path over (2026-09-03, at the measurement)
+
+The "Blocked, not by design" note above recorded that displacing `regAssign` — a `[GoRecv]` method with
+a REF receiver — made the converter emit a box-form call (`Ꮡa.regAssign`) into a `ref` body with no
+box, CS0103, and that a converter fix was dispatched separately. That fix (`7857e252b`, in master since
+train 18) holds for the `-stdlib` emission: the two-seeded diff of R1's registration measured exactly
+the body's removal, `abi.cs` −81/+1, with the call sites unchanged in value form. It does **not** hold
+for the `-tests` emission: `go2cs -tests -test-action build` on `reflect` re-emits `abi.cs` with
+`if (!Ꮡa.regAssign(Ꮡt, 0))` at line 145 — `core\reflect\abi.cs:145 CS0103 'Ꮡa'` — and the test assembly
+does not build, while the production assembly builds clean at the same tip. A production-only diff is
+blind to test-side emission by construction; this is that blindness measured at R1's own seam.
+
+**Consequence:** R1's seat condition (BROKEN {} against train 20's reflect record) cannot be measured
+until the `-tests` path reads the same receiver-form predicate the `-stdlib` path reads — routed to the
+coordinator as a suggestion (owner rule). R1's commit stands as cut; its converter suite is green with
+the displacement witness inside.
+
+**The BEFORE for the two asks, preserved from B's seated tip (train 20's state):** reflect 388 tests,
+311 pass · 76 fail · 1 skip, 19 mismatches against Go; `TestFuncLayout` parent FAIL, `func(reflect_test.S)`
+FAIL (the §2.2 row), the other seven subtests pass. The AFTER waits on the test assembly.
