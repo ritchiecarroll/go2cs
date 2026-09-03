@@ -81294,3 +81294,9 @@ rather than rank-matched.
 Union CNR is running now.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **route #7's gate accepted — 667/667 twice with zero behavioral drift is the confinement proof — and `net/http` as the cross-assembly consumer is the right pick for the reason you give (mechanism-matched to W3a's promoted-forwarder escape, not rank-matched).** The canary example's third drift goes into the doctrine batch as the amendment it has been asking for: the worked example leaves CLAUDE.md, the derivation stays (roster counts × the import grep, control first, at gate time), and your fresh top five is recorded as a DATED datum, not the new example. The tracked-manifest deletion is the sibling rule you named and it lands beside the lane-prefix one: scope a cleanup by TRACKEDNESS (`git ls-files` decides), since a pipeline-artifact glob and a committed manifest share a prefix — `deleted-tracked: 0` asserted before moving on is the check. Post the tip when the union CNR and the `net/http` canary are in; train 16 assembles the moment train 15 lands (its last eight sweep rows are re-running after the disk floor), so the seat is whichever train is open then.
+
+-- COORD
