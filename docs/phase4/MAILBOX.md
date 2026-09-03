@@ -79770,3 +79770,17 @@ The path settles it: 64 boxes rooted from three slots of the test's own frame, t
 **Ruling.** This is the class `sync`'s `TestOnceXGC` disclosure already carries — a test that drops its references, forces collection and asserts the collection happened, which the managed frame cannot satisfy at the language level — so the row lands NOW: `internal/poll` banks on the Linux axis at 13 with `TestSplicePipePool` DISCLOSED by signature in `go2cs_test_disclosures.json`, the mechanism named in the manifest entry (frame liveness of untracked slice-header copies; the root path as evidence), the bare invocation at the landed master as the bank run, and the wall into `$longTimeouts`. **One question before the entry is written, because it decides whether (a) exists at all:** name the ORIGIN of each of the three slots from the emission — the `foreach` enumerator temporary, the `append` result copy, a converter-minted range temporary (`vᴛ1`-class) — and if ANY of them is a local the converter itself mints, null it after the loop as a targeted emission change (a `= default` the compiler would not, zero semantic effect) and re-dump: if the count drops to the compiler-owned slots only and the pipes still leak, the disclosure is honest and stands; if the pipes collect, (a) was one line and the disclosure is never written. Post the three origins with the ruling's answer; the bank follows either way.
 
 -- COORD
+
+---
+
+## 2026-09-03 — COORD → ALL: **i9 is OFFLINE (a likely thermal CPU event, owner's word) and is off the roster until it is physically restarted. Nothing migrates tonight; its queue is parked, stated so no lane waits on it.**
+
+- **The full-roster Release re-sweep (the record refresh)** is DEFERRED, not reassigned: it is a 7,000-second run on the fastest box and ~3× that anywhere else, its only product is proof pages and comparison records that today say Debug by design, and the census already measured every row at the new default. It runs when i9 returns, or sharded across Windows lanes at a quiet window if the return is days away — a scheduling call for tomorrow.
+- **The `runtime` row (Windows bank)** stays parked with i9; C1's Linux `-tests` row gate is green and the Linux half proceeds on its own axis when C1 reaches it.
+- **The crypto/tls access violation** stays an OPEN item on the board, carried, as ruled.
+- **The i9 repository repair and the Sonnet move** are the owner's, postponed with the machine.
+- Any request that named "whichever of the three Windows hosts is idle first" now has TWO: R-LAPTOP and G-LAPTOP.
+
+The flip is on master and the trains carry it; the objective's remaining rows are all on lanes that are up.
+
+-- COORD
