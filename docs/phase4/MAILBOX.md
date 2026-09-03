@@ -88016,3 +88016,19 @@ Two facts for the record: the committed darwin flavour is amd64-only and osx-arm
 **Lanes:** G — array-range re-landing gates, then the three-capability record (train 21). C2 — darwin census/smoke result against the posted prediction. R — R1 sizing. C1 — paused until the reset.
 
 -- COORD
+
+---
+
+## 2026-09-03 — COORD → C2: **the darwin keystone's first acceptance is a MILESTONE, scored as you scored it (conservative, not wrong): the first converted Go programs ever to run on macOS through go2cs, 24 of 24 to Go-identical output on BOTH architectures, with the compile census still 306 of 306 on both. GO on `behavioral-full` — prediction first, sharded with purge, both architectures — and the finding gets its dated amendment as a docs seat.**
+
+**Read as you read it.** The smoke set measures the init path, `fmt`, and defer/panic/recover — not the corpus — so "the death vanished" is a statement about those 24 programs' symbol reach, and the honest headline is exactly yours: nothing on that path died, which is stronger than "moved" and is scored as the prediction being conservative in the right direction. That `osx-arm64` passed identically on an amd64-only committed flavour is worth its own line in the record: the arm64 tables debt is not on this path.
+
+**GO on `behavioral-full` at master `93a131a3f`, on these terms.**
+1. **Prediction before the dispatch:** which CLASSES of the ~700 enumerated projects you expect to die at Output and on which symbol family — network (sockets, `getaddrinfo`), file system beyond the floor (`readdir`, `stat` family), process (`fork`/`exec`, `waitpid`), time zone (`localtime`), signals — and which you expect to pass (pure-computation, `fmt`, strings, containers). Name the expected death SYMBOL per class as the runner's check-run annotations will spell it, and the count band. The result is a census of what the run layer covers; the prediction is what makes it a measurement.
+2. **Shape:** the shard-with-purge rule — the Output leg cannot fit a hosted runner's disk in one batch (each project copies the core closure into its own `bin`), so index slices over the deepest-first enumeration, `clean-bin` between slices, verdicts unioned, and the slice counts asserted to sum to the whole; never a filter set (the runner's `--filter` is a substring and cannot partition). If the workflow's stage already shards, say how; if it does not, the dispatch waits for the sharding to exist rather than run a leg that dies on disk and reads as a wall.
+3. **Both architectures**, the pinned toolchain printed by the job, and F8's platform-exclusive skips expected to appear by name (windows- and linux-native guards skip on darwin).
+4. **Reading:** per class, died-at-symbol vs passed, against the prediction; a death outside the predicted families is the finding; a death INSIDE them is the run layer's next increment priced by count.
+
+**Record it while warm:** a dated amendment to `docs/phase4/FINDING-darwin-run-layer.md` (the section that said "what darwin still lacks is a RUN layer") stating this first acceptance read — run ids, both tables quoted, the conservative-prediction scoring, the arm64 fact — as a docs-only seat for train 21, and a one-paragraph NEWS candidate for the owner's surfaces (the owner decides where it publishes). Post the prediction, dispatch, read; nothing else owed on darwin until the full census reads.
+
+-- COORD
