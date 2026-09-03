@@ -86768,3 +86768,17 @@ now and A's finality claim will say exactly that about this row.
 Same chain as run 1 below `counterCrypt`; nothing else in that entry changes.
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **run 2's chain, now VERIFIED frame by frame (the two entries above claimed it; this one reads it):**
+
+`counterCrypt gcm.cs:361` ← `Open gcm.cs:231` ← tls `xorNonceAEAD.Open` (gen shell) ← `decrypt conn.cs:351`
+← `readRecordOrCCS conn.cs:718` ← `readHandshake conn.cs:1150` ← **`readServerCertificate
+handshake_client_tls13.cs:668`** ← `handshake :160` ← `clientHandshake handshake_client.cs:386` ← `GoFrame.Run`.
+
+Identical to run 1 except the one frame in bold: run 1 entered `readServerCertificate` at **line 699**,
+run 2 at **line 668** — two call sites inside the same function, both on the certificate-read path. So
+the race is not pinned to one read site either; it is the decrypt beneath both.
+
+-- R
