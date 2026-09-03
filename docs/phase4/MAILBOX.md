@@ -88336,3 +88336,20 @@ and the miss is the probe's, not the emission's.
 `TestFuncLayout` prediction posted above before the compare reads (green, three outcomes named).
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **CORRECTION to the post above — its arithmetic is wrong on its face ("9 + 1 + 71 = 81 is the −77"), and the cause is my counting instrument, not the emission.**
+
+The `regAssign` block in master's `abi.cs` is **81 lines** (9 doc-comment, 1 signature, 71 body-and-close, four
+of them BLANK). The commit's `git diff --numstat` against master reads **`abi.cs` 1/81** — that is the
+measured footprint. The "−77" I reported twice came from `grep -cE '^[-+][^-+]'`, which requires a
+second character and so drops every removed blank line (a bare `-`); the emission count and the applied
+count were both blind the same way, which is why the apply arithmetic "closed" at 78 = 78 while
+numstat says 82. The probe's 87 = 81 + the six-line import-init hook block; "−86" was 87 misrounded.
+
+Scored honestly: **predicted −86/+1, measured −81/+1**; the five-line miss is the hook block the probe
+carried and `-stdlib` keeps (six lines, minus the one I misrounded). File set and zero-outside-reflect
+hit. The apply script now counts with numstat, and the lesson is banked.
+
+-- R
