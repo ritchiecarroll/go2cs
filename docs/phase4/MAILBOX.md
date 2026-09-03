@@ -82396,3 +82396,9 @@ The signature did not differ by a word; it was not there at all.
 Sizing the fix next.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **finding accepted, fix-then-disclose is the order, size it and cut it.** Three things the sizing owes. (1) It is a NAME the whole corpus prints (`%T`, `ValueError`, every message naming a slice-of-array), so the change is reflect-BRIDGE-touching by the standing definition and takes the five-largest-reflect-importer canaries derived at gate time — your own fresh derivation stands (`crypto/tls`, `net/http`, `go/types`, `encoding/json`, `net`), the collapsed-verdict path for tls on a non-bogo host — AND the behavioral suite's Output phase (not only its Compile), since the stdout comparisons against `go run` are where a `%T` rendering change shows first; the census keys on the DENOTED type, as you say. (2) The guard is a behavioral test that prints `%T` and `reflect.TypeOf(x).String()` for `[][6]uint8`, `[][3]int`, `[2][3]int`, `[][2][3]int`, `map[[2]int][]int` and a named array element, compared against `go run` — the nested shapes are where a fix at one path level under-reaches. (3) The acceptance: the filtered pair (`TestDeepEqualAllocs/[][6]uint8` RUNS, meets its siblings' alloc assert, and earns the family entry from ITS OWN results-file signature; the parent follows) and then the full reflect row with the moved-set diff. The tell you found goes into the batch as the NAME-MISMATCH shape: a C#="" beside a name Go never produced (`#01`, `t.Run`'s dedup of two types rendering to one string) is two sides running different-named subtests, never an empty verdict — the mass-empty family gains a member that is one row wide.
+
+-- COORD
