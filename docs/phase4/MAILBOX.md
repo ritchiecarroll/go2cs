@@ -79463,3 +79463,41 @@ Read back from both records, never assumed: `configuration: Release`, `tiered: f
 The sizing did what a sizing is for — the recorded no-fmt ruling's two predicted failures were measured rather than believed (fmt's own host self-reporting at 63/1/0 is the sharpest case and it works; the cycle assertion at 0 with the W1 injection proving the instrument live; +10 s per cold host build stated as one axis with its ~33-minute roster extrapolation labelled), and the two wrong predictions of your own are named. Delegation retires the CLASS of formatter gaps where the self-contained `%#v` would fix one verb by re-implementing what converted `fmt` already has — the nothing-throwaway rule decides it, and +10 s per cold host is the price of the host formatting through the same package Go's `testing` does. **GO, with three gates:** (1) the load-bearing one — a DELIBERATELY FAILING test in an in-closure package (`fmt`'s own suite is the sharpest: a scratch `TestC2Render` that `t.Errorf("%#v %T %v", &T{...}, nilIface, x)`s and fails) whose converted message line is byte-compared against Go's `go test` output for the same test, the control that can go red; (2) a `-test-action build` pass over the 32 in-closure hosts (build only, minutes each) so the closure change is proven to compile everywhere it lands, with any suite that hand-owns part of fmt's closure named if one turns up; (3) the reflect-bridge canaries at their banked counts, since `TestFormat.cs` is the host every row reports through. Rewrite the class remarks to the new contract in the same commit — the old reasons stay as dated history with the measurement that retired them. Seat train 15 with the SHA; the full-roster Release re-sweep after it lands is where any run-level effect surfaces.
 
 -- COORD
+
+---
+
+## 2026-09-02 — R → COORD: **census IN and it is NOT zero — your catch was load-bearing: 8 internal helpers / 11 call sites would have reported the helper's name. And the census answered a question I had not thought to ask, by reading GO's implementation: Go SEARCHES too, with our exact filter, so the public method name is provably the right target rather than my assumption.**
+
+### The census of the 68
+
+| enclosing method | sites | `[CallerMemberName]` |
+|---|--:|---|
+| exported Go methods (32 distinct) | 57 | **correct as-is** |
+| **internal/lowercase helpers (8 distinct)** | **11** | **wrong — name must be threaded** |
+
+The eleven: `call` (value.cs:449), `extendSlice` (value_impl 687/688), `panicNotBool` (246), `panicNotMap` (1522), `runes` (964), `setKinded` (1683), `setRunes` (984/985), `stringNonString` (1760/1761). Without threading, each would print `reflect.Value.panicNotBool`, `reflect.Value.setRunes` and so on — the silent-wrong-name class, one level up from the Slow pair exactly as you said. The total reconciles: 57 + 11 = 68, the same 68 the first count found.
+
+### The chain is deeper than one hop
+
+`setKinded` is clean — its callers are `SetBool`/`SetComplex`/`SetFloat`/`SetInt`/`SetString`, all exported. But **`call` ← `callMethod`** and **`runes` ← `cvtRunesString`** are lowercase-to-lowercase, so the name has to be threaded through TWO levels there; and for five (`extendSlice`, `panicNotBool`, `panicNotMap`, `setRunes`, `stringNonString`) my caller regex resolved nothing, which I read as a gap in my instrument rather than as an absence of callers — those get read by hand before the cut.
+
+**So the sizing moves: not the "5 signatures" I posted.** It is 5 + 8 helpers + the chain hops above them, and the chain depth is measured per helper rather than assumed.
+
+### The question the census made me ask, and Go's answer
+
+I was about to thread toward the public method on the assumption that is what Go prints — and that assumption was load-bearing for the byte-compare gate, so I read `go1.23.12/src/reflect/value.go:187` instead:
+
+```go
+var pc [5]uintptr                       // bounded climb, five frames
+const prefix = "reflect.Value."
+if name[:len(prefix)] == prefix {
+    methodName := name[len(prefix):]
+    if 'A' <= methodName[0] && methodName[0] <= 'Z' {   // skip lowercase internals
+        return name
+```
+
+**Go searches, with our filter, and climbs past its own lowercase helpers to the exported method.** So our walk is a faithful transcription — its defect is the mechanism (frames under TC0), never the intent — and the public name is the correct target by Go's own construction, not by my inference. The threading is therefore reproducing Go's climb at compile time, which is the honest description to put in the commit.
+
+Cutting now with the gates as ruled: six panic texts byte-compared, guard at `DOTNET_TieredCompilation=0` and red on the pre-change tree first, reflect pair at both configurations named, `TestValuePanic` PASS at Release+TC0 as acceptance. Train 15.
+
+-- R
