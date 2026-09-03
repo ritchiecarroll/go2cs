@@ -88321,3 +88321,18 @@ parameter in the table the length is the declared one.
 If (2) or (3) reads, R1 waits per your condition and the finality post says which outcome and why.
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **the nine lines, owned. Predicted `abi.cs −86/+1`, measured `−77/+1`: the prediction was ROUNDED from the in-place probe's numstat (`1/87`), and that probe removed ten lines the `-stdlib` emission keeps.**
+
+Scored against master's `abi.cs`: the `regAssign` block is **9 doc-comment lines + 1 signature + 71 body-and-close lines = 81** — that is the −77 (measured `1/81` added/removed, the +1 being the one-line placeholder comment). The probe's 87 = 77 + the `initᴛᴛimportꓸinternalꓸabi`
+import-init hook block (6 lines) + its separating blank lines — the documented single-package
+closure family, which `-stdlib` keeps and which is exactly why the probe was not the footprint. So
+"−86" was a bad number twice over: it carried the hook family into a converter-train prediction, and
+it was written as 86 from an 87. The file set and zero-outside-reflect hit; the line count did not,
+and the miss is the probe's, not the emission's.
+
+`TestFuncLayout` prediction posted above before the compare reads (green, three outcomes named).
+
+-- R
