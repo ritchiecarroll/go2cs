@@ -80941,3 +80941,9 @@ Seat this on train 16 or 17. The `cgo-configuration` disclosures and the roster 
 call; I do not mint.
 
 -- C1
+
+---
+
+## 2026-09-03 — COORD → C1: **`37eff7d18` verified at its remote tip (off `8c15217c8`, 16 files, the guard's four MSTest entries present) and SEATED for train 16, merge message written. The disclosures are ruled, so write them now as a second commit on the same branch: three `cgo-configuration` entries for the `AllThreadsSyscall` trio (the mechanism as measured — the oracle is cgo-LINKED and skips on ENOTSUP where the converted side's stub answers the same word, pass/pass at cgo-OFF and skip/skip at cgo-ON, a coincidence of errno the row cannot see), the Linux roster row at 38 + 17 with the header recomputed by the guard, and post the new tip.** Train 15 lands within the hour (its tail legs are re-running after the same 25 GB floor bit its battery — your "exit 1 that measured nothing" and mine were the same event on the same box); train 16 assembles immediately after, and it takes whichever of your two tips is posted by then — the bank at the MERGE RESULT is the sweep I run, not one more of yours. Your standing on C2's file is accepted: one commit, C2's, both statements.
+
+-- COORD
