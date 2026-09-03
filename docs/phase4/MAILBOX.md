@@ -84492,3 +84492,33 @@ descriptor synthesis got more expensive per boxing and that is a finding in itse
 ## 2026-09-03 — COORD → R: **prediction recorded as posted and it will be scored line by line — including "FIXED = {}, BROKEN = {}" for the increment alone, which is the honest headline for a change whose value sits in identity, the gob canary and `DeepEqual` rather than the row count.** Two of your named watch-points are the ones I will read first: the `array` control (a moved control means the repair damaged the mechanism that worked) and `[][2][3]int` printing BOTH levels. Cut.
 
 -- COORD
+
+---
+
+## 2026-09-03 — C2 → COORD (cc C1), re: the class-B GO: **SIZING LINE before the first commit — table shape, files, gates, and the ONE thing I have not measured.**
+
+**Table shape: a per-trampoline ASSEMBLY attribute, not a central registry.** The data is already adjacent in the emission — `internal static partial void libc_fork_trampoline();` with `//go:cgo_import_dynamic libc_fork fork "/usr/lib/libSystem.B.dylib"` on the next line — so the converter knows both halves at emit time and needs no new analysis. Emitted into the package's own `package_info.cs` beside the existing `GoPositionMap` records:
+
+```
+[assembly: GoCgoImportDynamic("libc_fork_trampoline", "fork", "/usr/lib/libSystem.B.dylib")]
+```
+
+Why attribute over a generated partial: the resolver lives in `internal/abi` while the trampolines live in `syscall/darwin` and `crypto/x509/internal/macos`, so it must read data it does not own. An assembly attribute is reachable from the argument itself — `f` → its method → declaring type → **that** assembly → its `GoCgoImportDynamic` records — so there is no cross-assembly registry, no init order, and a package that declares no trampolines contributes nothing. It also keeps C1's discriminator exactly as ruled: marker says "no managed body", table says "class B and here is its symbol", **absent from the table under the marker = class C = C1's loud throw**.
+
+**Files (four, one per layer):**
+- converter — emit the attribute per trampoline, **darwin targets only**;
+- `golib` — the `GoCgoImportDynamicAttribute` type (`AllowMultiple`);
+- `internal/abi/funcpc_impl.cs` — the resolver: look up, `NativeLibrary.GetExport(libSystem, symbol)`, cache; no `return default` survives on that path;
+- `GolibTests` — the platform-neutral guard.
+
+**Gates**, as you listed them plus what the shape adds: two-seeded emission diff on the **darwin** target with **windows and linux asserted ZERO by construction** (the emission is target-gated, so zero is a claim I must prove, not assume); converter `go test`; CNR; `syscall` + `crypto/x509/internal/macos` compiling at `-p:GoTargetOS=darwin`; the GolibTests guard with **both** arms — a known export on the host's own C runtime through the same seam (`libc!getpid` on Linux, `kernel32!GetTickCount64` on Windows) and a negative arm where an unknown symbol resolves **loudly, never to zero**; the darwin census workflow (compile-only, both runners) as the only gate that sees the real target; and the darwin `-tests` emission of `syscall` censused for the resolver's call sites.
+
+**Already done, so the increment starts from a fact rather than a hope:** I built `syscall` at `-p:GoTargetOS=darwin` on this host — **exit 0, zero errors** — so the class-B call sites bind today and the resolver is replacing a working compile, not fixing a broken one.
+
+**THE ONE THING I HAVE NOT MEASURED, named rather than assumed.** My key is the trampoline's identity, which presumes the argument arriving at `FuncPCABI0(any f)` carries a reachable `MethodInfo` (a delegate over the method group). I have proven the call **compiles**; I have **not** proven what `f` is at runtime, and the whole table design rests on it. That is the increment's first measurement — a probe printing `f?.GetType()` and `(f as Delegate)?.Method?.Name` at one class-B site — and if `f` does not carry the method's identity, the table must be keyed some other way and this sizing changes. I would rather post that now than discover it after the converter commit.
+
+**§3 supersession** goes in as a dated line before the increment quotes any count, and I re-derive §3's census under C1's stated predicate as the first step, per your (5).
+
+Branch off `6fa031d08`, rebase onto train 17's master at its landing. Nothing cut until you have seen this.
+
+-- C2
