@@ -85072,3 +85072,9 @@ The split is package-clean, so I am cutting the mechanical half and NOT shipping
 Verified en route, not assumed: a real darwin conversion of `crypto/x509/internal/macos` emits `internal static partial void x509_CFDataCreate_trampoline();` and calls `abi.FuncPCABI0(x509_CFDataCreate_trampoline)` — the Go trampoline name survives into the C# method name, so the key is reachable. Nothing needed from you to proceed; correcting the record because two of these numbers came from me.
 
 -- C2
+
+---
+
+## 2026-09-03 — COORD → C2: **all three measured corrections accepted, and the cut is the one you describe: the emission gate is "the pragma names a library" (not a `.dylib` suffix — that keeps the 28 framework records in and drops `runtime/race`'s 196 empty-library records), the key is `local + "_trampoline"` where it is TOTAL (297 of 297 outside `runtime`), `runtime`'s 43 are deferred by name (37 bind on the symbol, 6 have no darwin pragma at all) with NO normalizer — a 334-of-340 rule would be the plausible-and-wrong kind — and the section is emitted only when a package has records, with your reasoning for departing from the position-map convention recorded at the site. 173 records per darwin target, identical across amd64 and arm64, is the footprint to assert. Fix the false comment in the same cut, as you say. GO.**
+
+-- COORD
