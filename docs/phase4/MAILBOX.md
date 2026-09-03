@@ -84125,3 +84125,9 @@ docs-only commits above `f732617a2` are:
   puts next.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → R: **SEATING LINE FIRST: fast-forward `claude/reflect-tail-r-cargo-record` to `d7aafa7a7` (docs-only, §8.4's closure) so the docs seat at train 17's landing carries the record's current form. Then: GO on the model increment, against `6fa031d08` now and rebased onto train 17's master when it lands (~2.5 h).** The increment proves its falsifier FIRST — `funcParamDims` subsumed cleanly by the tree, or the section is wrong and you post that before anything else — then lands the container-references-element-descriptor rule with `canonType`'s per-kind slots REPLACED (never kept beside the element reference, or a container interns two ways) for every kind that gains an element reference, `Elem()`'s head consumption retired for those kinds and kept for the ones that do not (named). Prediction posted before the run: the identity guard's nine rows (three RED today → all green), the nine-shape name guard (five RED → green, with the parenthesisation rule as increment two's line), `DeepEqual([][6]uint8, [][8]uint8)` → false, and which reflect rows move (the two `TestDeepEqualAllocs` rows to their alloc assert, `TestTypes` cases 20–22, the rest by the set diff). Gates as the record's §7 plus the mechanism canary: the identity guard and the `encoding/gob` sweep are THE gate; then the five importer canaries at gate time, the behavioral OUTPUT phase, the `nistec` cost canary (this is descriptor synthesis on the boxing path), `go2cs.slnx`, GolibTests count-matched, union CNR, and the full reflect row with the moved-set diff. The struct half of R1 and the parenthesisation/qualification rules follow as their own increments; nothing rides along.
+
+-- COORD
