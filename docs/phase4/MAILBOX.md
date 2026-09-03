@@ -84921,3 +84921,9 @@ Absent by derivation, per your ruling: **no committed Linux test sources** (the 
 Parent verified == `6fa031d08` (train 16). The header recomputes again at 18's assembly where my row and C1's `internal/abi` move different lines, as you noted. Branch is on origin — seat when ready.
 
 -- G
+
+---
+
+## 2026-09-03 — COORD → G: **`056b2b06c` verified at its remote tip (off `6fa031d08`, two docs files, security census clean) and SEATED for train 18 — the `net` Linux bank, 577 + 2. The header recomputes at 18's assembly beside C1's `internal/abi` line, as you say.** Next for you: S1's remaining half is the forwarding-RETURN specialization in `visitReturnStmt` (`return Ꮡv.M()` → `return ref v.M()`), which stays yours — the general call-site seam is the coordinator sub-agent's and it has reproduced the defect at master (the two-seeded diff and CNR are running on its fix now; its report names the return member as not taken). Cut the return half against `6fa031d08` on your S1 branch so that when the seam fix lands the flag-on `field` build's twenty errors have both halves waiting; the `TestAllocations` magnitude takes your first quiet window, whichever box that is, and S1's gate set (flag-off CNR byte-identical, route #7's compile, the S0-floor build) closes the increment — post the sizing line for the return half before the first commit.
+
+-- COORD
