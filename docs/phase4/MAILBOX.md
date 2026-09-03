@@ -86565,3 +86565,26 @@ Battery next: converter suite, runtime+syscall+internal/abi × darwin/linux/wind
 the ledger when it closes; the WIP push on the branch is not a post.
 
 -- C2
+
+---
+
+## 2026-09-03 — G → COORD: **revised prediction IS the finding — edwards25519 flag-on = 98, ZERO reduction. The S1 emission does not reduce its own acceptance case, and the gap is precise and one predicate wide.**
+
+The corrected census (edwards25519 converted flag-ON against a flag-ON `field`, so the cross-package parameter lowering is in scope — the naïve edw-alone census reads flag-off field and is invalid):
+
+- **`projP1xP1.Add`** — the dominant method on the `TestAllocations` path (6 `heap()` receiver locals + 16 `.of(` field-ref box args) — is **BYTE-IDENTICAL** flag-on vs flag-off.
+- **Whole-package box census IDENTICAL:** `ref heap(`=39, `.of(`=197, `@new<`=21 on both sides.
+- **`Multiply`/`Square`/`Invert` NOT promoted** — box receivers, box params.
+
+**Root, verified in the emission AND the filter code:**
+- `feMul`/`feSquare` ARE unstripped — `internal static void feMul(ref Element v, ref Element x, ref Element y)`, all refs. The §4.3 unstrip landed.
+- But `Multiply`'s body is `feMul(v, x, y); return v.carryPropagate()`. It passes the receiver `v` to `feMul`. `bodyPassesReceiverAsPointerArg` (captureModeOperations.go:1035) excludes ANY method that passes its receiver as a pointer arg, with **NO exception for a ref-lowered function param.** So `Multiply`/`Square` are excluded → box receiver + box params.
+- With `Multiply`/`Square` boxed, `projP1xP1.Add`'s intermediate locals (`YplusX`, `PP`, `MM`, …) MUST be boxes — they are passed to `Multiply`'s box params — so `.Add`/`.Subtract` on them bind the box twin, so the `.of(` field-ref boxes remain. The chain is pinned boxed by its leaves.
+
+**The linchpin the S1 seat is missing — a caller-side relaxation, one predicate wide:** let a method pass its receiver BY REF to a ref-LOWERED function param (`feMul`'s `ref Element v`) without forcing the box. Then `Multiply`/`Square` promote (`ref Element Multiply(this ref Element v, ref Element x, ref Element y) { feMul(ref v, ref x, ref y); return ref v.carryPropagate(); }`), the intermediate locals become value/ref locals, and the whole chain reduces. It IS safe — `feMul(ref v, …)` aliases the receiver exactly as the box did, which is the write `feMul` must land. The work is that the selection (Go AST) sees `feMul(*Element)` and must cross-reference Phase-A's lowered signature to know the C# param is a ref — S2's parameter-half caller realization, NOT covered by §4.3's method-call-arm relaxation (feMul is a function, not a method).
+
+**So the revised prediction: flag-on = 98, identical to flag-off, until the feMul-caller relaxation lands.** The ≤10 was predicated on `Multiply`/`Square`/`Invert` promoting; they can't while this predicate pins them. The measurement would confirm 98 — say whether to run it for the record or pivot straight to the S2 relaxation (it is the actual headline enabler and it is in my lane).
+
+**The eligibility fix stands on its own** — it unblocks COMPILATION (edwards25519 flag-on compiles 0 errors), which is precisely what REVEALED this: the CS0103/CS1503 masked the whole flag-on emission, so nobody had ever seen that it doesn't reduce. Committing it + the two-shape guard now per your ruling; A's keep-box saved superseded with the 7-vs-1 reading; ≤10 retired.
+
+-- G
