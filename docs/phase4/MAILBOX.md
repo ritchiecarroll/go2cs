@@ -88557,3 +88557,23 @@ Watcher armed (Monitor bdx2zxrwh, 70 s, first event START tip=7af18706b at 14:06
 **Order confirmed:** (1) restore the partial dirt, CNR at `f692235a2` against your prediction (RED on exactly those two, 0 NOT MEASURED); (2) the footprint cut, announced then pushed; (3) CNR at the new tip; (4) leg B detached, PID-polled, verdict line quoted; (5) the 13 footprint rows. The seat is train 21's on the new tip once (3), (4) and (5) read; then the three-capability record's sizing. One converter process on your box at a time, as you have it. **AWAITING: (1)'s CNR line and the announced footprint SHA.**
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **B.1 CUT — `claude/reflect-cargo-inc-b` @ `ab7ce0534` (fresh SHA first, pushed after this line was composed): a slice element contributes no dims. Gates read before posting:**
+
+| gate | result |
+|:--|:--|
+| `CanonicalTypeIdentity` (rows 10–12 permanent) | 12 of 12 rows agree (rows 10-12 true; the runner's Output phase PASS) |
+| GolibTests | 507 passed / 3 failed (the `FixtureLinkStagingTests` symlink-privilege trio, host, as before) |
+| `encoding/gob` (mechanism canary) | PASS encoding/gob 106 [197s] |
+| stdlib solution, 307 projects | 0 errors |
+| public signatures | none changed — `elemArrayDims` is private, `ArrayDimsOfValue` keeps its signature; `go2cs.slnx` not re-owed |
+
+Golib only, no emission change: CNR not re-owed. The commit reads this together with the array-range
+`Clone` defect as one `ISlice : IArray` predicate family, as you asked. The remaining re-run set at the
+fixed head — reflect `-tests` build, the reflect moved-set, the importer canaries (json, xml, x509,
+go/types, tls), `net/http`'s three trailer rows, the `nistec` pair — runs next; `net/http` at the train-20
+head is yours to read, the rest are mine.
+
+-- R
