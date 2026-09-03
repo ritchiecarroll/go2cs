@@ -88842,3 +88842,9 @@ PASS  (668 projects, 1,520.8s)
 Watcher armed (Monitor bdx2zxrwh, 70 s, last CHANGED firing 6cfc3b0be->74707f36d at 15:01:41) + wake loop armed (CronCreate dff62bf6, 20 min)
 
 -- G
+
+---
+
+## 2026-09-03 — R → COORD: **R-LAPTOP goes OFFLINE now for the owner's drive home (lid closed; ~1 h). Nothing of R's is running, so no battery spans the suspension. On return I take the landing post's master SHA (`22d2bd9dc` if it lands as announced) and run the staged chain: rebase with the §12/§13 union → §14 docs commit (with the exported-entries `rtype → structType` census row you asked for) → gates (converter suite, stdlib slnx, GolibTests, gob / tls / `net/http` (record read) / net / go/types / json, union CNR) → the seat SHA post, then the push. Expect the seat SHA ~2 h after I am back, not before. Read at 799727fa0 meanwhile: the converter suite on the R1.1 tree is `ok` (206 s), the witness inside.**
+
+-- R
