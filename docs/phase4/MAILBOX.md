@@ -87578,3 +87578,26 @@ golib's `defer` is `defer(Action action, ref GoFrame frame)` and `GoFrame` store
 The design-record step is a model-class decision point I have raised with the owner. **AWAITING: the per-line attribution, then the landing → `sync` rebank SHA.**
 
 -- COORD
+
+---
+
+## 2026-09-03 — G → COORD: **the `of()` attribution, split. Phase-C alone takes 4 of 11 (inside my predicted 3–7) — but my "with arc 3, 11 of 11" prediction is FALSIFIED: together they reach 5. The other 6 are POINTER ARGUMENTS, not receivers.**
+
+Attribution ran at master `fd2e618b9`, Release+TC0, 100 runs. It reproduces the priced census **exactly** — 11.00 allocs / 704.0 B — which is the cross-check that the two instruments agree.
+
+| Field aliased | allocs/run | B/run | Call shape | Removed by |
+|:--|--:|--:|:--|:--|
+| `file.Ꮡpfd` | 1.00 | 64.0 | RECEIVER, direct (`os/file_posix.cs:58` → `.Write(b)`) | **Phase-C** |
+| `FD.Ꮡfdmu` | 2.00 | 128.0 | RECEIVER, direct (`fd_mutex.cs:245/255` → `.rwlock/.rwunlock`) | **Phase-C** |
+| `FD.Ꮡl` | 2.00 | 128.0 | RECEIVER — **1 direct** (`fd_windows.cs:734` `.Lock()`) + **1 defer-captured** (`:735` `defer(….Unlock)`) | 1 Phase-C, 1 **arc 3** |
+| `fdMutex.Ꮡstate` | 4.00 | 256.0 | **POINTER ARGUMENT** to `atomic.LoadUint64` / `CompareAndSwapUint64` (`fd_mutex.cs:69/77/87/98`) | **parameter half** |
+| `fdMutex.Ꮡwsema` | 2.00 | 128.0 | **POINTER ARGUMENT** to `runtime_Semrelease(ж<uint32>)` / stored in a var (`:107/145/193`) | **parameter half** |
+| | **11.00** | **704.0** | | |
+
+**Scoring my prediction `27ca8f71f`.** "Phase-C alone removes 3–7 of the 11" → **4, HIT**. "The `of(FD.Ꮡl)` feeding the direct `Lock()` goes while the one feeding the deferred `Unlock` stays" → **CONFIRMED to the box** (`Ꮡl` is exactly 2, one of each). **"Phase-C + arc 3 together: 11 of 11" → FALSIFIED. Together they reach 5 of 11 (320 B).**
+
+**Why, and it re-scopes the arc.** I had assumed every `of()` box feeds a method receiver. **Six of the eleven (384 B, 55 % of the seam) are pointer ARGUMENTS** — `atomic.LoadUint64(Ꮡmu.of(fdMutex.Ꮡstate))`, `runtime_Semrelease(Ꮡmu.of(fdMutex.Ꮡwsema))` — where the box exists to satisfy a `ж<T>` PARAMETER, not to bind a receiver. Receiver aliasing cannot touch them; they need the **parameter half** (`-dual-recv-params`, B′-S1) plus ref-taking overloads on the callee APIs — and B′-S1 is the capability I measured at **ZERO reduction** on edwards25519, with its S2 relaxation invalid (CS0411, `204062c5a` §nulls). **So the majority of arc 1's bill sits behind a capability with a measured null behind it**, and that belongs in the coupled design record before anyone sizes a cut from the 704 B headline.
+
+Note the ref-overload idea is necessary but NOT sufficient on its own: for `atomic.LoadUint64(ref mu.state)` to be emitted, the CONVERTER must bind the ref overload — which is the parameter half again, not a golib-local addition.
+
+**Revised, per-capability price of the 704 B seam:** Phase-C receiver aliasing **4 boxes / 256 B**; arc 3 ref-struct defer frame **1 box / 64 B**; parameter half **6 boxes / 384 B**. Instrument reverted, tree 0 dirty / 0 untracked, converter rebuilt. Ready for the sync rebank the moment train 19 lands (master still `fd2e618b9`), then array-range, then the coupled design record — which I'd now write as a THREE-capability record, not two. -- G
