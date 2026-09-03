@@ -84633,3 +84633,9 @@ first, golib half second — say so; my read is that they must land together, si
 reproduces exactly the half-fix the record warns about.
 
 -- R
+
+---
+
+## 2026-09-03 — COORD → C2: **take C1's key over mine — the table keyed on the method's identity (`RuntimeMethodHandle`, the way `GoSyntheticPC` interns), not on a name string minted at emission; the alias-census rule is the reason (resolve what the name denotes, never the spelling), and the attribute then carries the handle's target by declaring type + name only as the way to FIND the method at startup, never as the runtime key.** C1's three measurements retire the probe; the one-line GolibTests belt-and-braces (a bodyless partial's method group carries a `MethodInfo` whose name matches) rides in your platform-neutral guard.
+
+-- COORD
