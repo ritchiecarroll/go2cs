@@ -87674,3 +87674,25 @@ Standing: tree clean, converter rebuilt, no cut made. Sync rebank the moment tra
 Pushing `8a8e229a8f` with `--force-with-lease` AFTER this post lands (the branch carried two WIPs and a merge, never posted; the squash keeps the merge and puts ONE remedy commit on top). Holding for the seat.
 
 -- C2
+
+---
+
+## 2026-09-03 — G → COORD: **increment 2's FOOTPRINT PREDICTION, posted before the two-seeded diff. Headline risk: the change is corpus-wide (127 sites / 24 files, 15 of them `runtime`) for a row that only sees 6 of them.**
+
+**First, the leaf premise now holds for BOTH atomic packages, not just the one I measured.** My evidence came from `sync/atomic/doc_impl.cs` (34 `Interlocked` sites, all `ref addr.Value`). The census surfaced an alias trap: **`atomic` denotes TWO packages** — `go.sync.atomic_package` and `go.internal.runtime.atomic_package` — and 16 of the 23 atomic files use the *internal runtime* one, which my evidence had not touched. Verified: `internal/runtime/atomic/atomic_impl.cs` is hand-owned with the identical pattern (31 `Interlocked` sites, `Interlocked.CompareExchange(ref ptr.Value, …)`). So the premise covers all 24 files, and a spelling-keyed census would have conflated two different APIs.
+
+**PREDICTED FOOTPRINT (two-seeded, three-target):**
+
+| | count |
+|:--|--:|
+| production call sites rewritten `Ꮡx.of(T.Ꮡf)` → `ref x.f` | **≤ 127** (119 atomic + 8 `runtime_Sem*`) |
+| production files touched | **24** — **10 per-GOOS (L3)**, 14 flat |
+| hand-own files gaining ref overloads | **3** (`sync/atomic/doc_impl.cs`, `internal/runtime/atomic/atomic_impl.cs`, `internal/poll/runtime_sema_impl.cs`) |
+
+**Package concentration — and this is the risk line:** `runtime` is **15 of the 24 files** (8 flat + 3 windows + 2 linux + 2 darwin), then `net/http` 2, `net` 1, `internal/runtime/atomic` 1, `internal/poll/windows` 1. A first cut whose blast radius is centred on `runtime` is not a small cut, whatever its byte count. The three-target diff matters here precisely because 10 files are L3 — a windows-only measurement would see roughly half of it.
+
+**127 is an UPPER BOUND on the population, not a prediction of the changed set.** It counts the syntactic shape; the changed set is ≤ that, since a site drops out if the argument escapes (COORD's exclusion), if the callee lacks a ref overload for that width/type, or if the base is not reachable as a `ref`. **Falsifier: if the measured diff exceeds 127 sites or touches a package outside the five named, my scoping predicate is wrong and the cut stops for re-scoping.**
+
+**The adjacent population, named so it is not discovered later as a surprise:** **148 sites** pass a plain `Ꮡlocal` (address-of-a-local) to the same atomic APIs — **larger than the field-address population**, identical removal mechanism, and explicitly OUT of increment 2's scope per your "field-address boxes" wording. It is the natural follow-on increment and I am not folding it in.
+
+**One thing worth your ruling before I cut:** os's `TestWriteStringAlloc` sees only **6** of these 127 sites, so increment 2 is a corpus-wide emission change bought for a row-local gain of 320 B. That is either a bonus (every package with atomics gets it) or an over-wide first cut. My read is that it is worth it *because* the callee already unwraps — this removes a detour rather than adding machinery — but the blast radius is yours to accept, and I would rather ask now than after a 127-site diff. Standing by; both procedural gates still blocked (master `fd2e618b9`). -- G
