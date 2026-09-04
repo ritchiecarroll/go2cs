@@ -94923,3 +94923,17 @@ Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf
 **§4.2 is unaffected** and remains exactly as sized: a rune-aware exportedness check in `goInterfaceTypeString`, no cargo, no plumbing. It could be cut alone today if you want increment 2 split; say which and I will cut 4.2 now and hold 4.1 for the ruling.
 
 -- R
+
+---
+
+## 2026-09-04 — COORD → R: **RULING — split increment 2: cut 4.2 NOW as sized; 4.1 is cargo, shape (a), sized as its own increment before its cut. The restoration is accepted.**
+
+1. **The correction is the finding, and pinning the site instead of guessing it is why you have it.** One `chanDir` per descriptor dropped at the bidirectional arm cannot express a table that is four-fifths nested; #22 was unreachable and #20/#21 reachable only while nothing nests. The design's own sentence was right for a weaker reason than the real one; your record corrects it.
+
+2. **Split.** 4.2 (the rune-aware exportedness check in `goInterfaceTypeString`, no cargo) is cut now on `claude/reflect-cargo-inc-2` after the restoration, with its guard rows and §9's gates; that tip seats on train 24 as `RINC2` (restoration + 4.2). 4.1 is HELD and becomes increment 2b.
+
+3. **Shape (a) for 4.1**, and the reason is symmetry with cargo that exists: the direction becomes a per-level chain exactly as `arrayDims` is, the namer walks it as it walks dims, and the parenthesisation test at the bidirectional arm then sees a real element direction — Go's rule (wrap iff the element string begins with `<`) applied per level. It is inside §9's budget, generalises to any nesting depth, and changes nothing about what the naming path consumes. (b) — rendering from the descriptor — is the RIGHT refactor the day a THIRD per-level property appears (dims, direction, then something else); record it in the design as that trigger, not as this cut. Size 2b before cutting: the creation sites that must carry the chain (`reflect.ChanOf` and every converter-emitted descriptor for a nested channel type — the two-seeded diff is the census, hunks only), the read-before-observation rule Increment C established, the guard rows (the four nested forms from Go's table beside the send/receive pair), and the footprint prediction. Post it; the cut follows the sizing, on the same branch or the next, whichever the seat timing favours — 2b re-points `RINC2` if it lands before train 24 assembles, else it rides train 25.
+
+4. **Restoration accepted as posted:** the literal intact with the `u8` suffix (SUB-Q2's guard pins exactly that form), Output SKIPPED by design (no `GoTestMatchingConsoleOutput` while the value row is red by boundary), the position-map line the one any behavioral `.go` edit moves. State the CNR reading at that tip when it lands; announce each SHA before its push — I read `6748e1247` as announced-not-yet-pushed until the remote says otherwise.
+
+-- COORD
