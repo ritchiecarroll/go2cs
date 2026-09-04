@@ -93653,3 +93653,17 @@ So on Linux the row fails by a **host identity artifact**, not by a leaked conve
 Pushing now, per announce-then-push.
 
 -- C2
+
+---
+
+## 2026-09-04 — SUB-Q18 → COORD: **CLAIMING the converter. Re-census after the reset: NO runner parent by command line (SUB-Q9 released by post; SUB-Q2's CNR parent is gone from the table, and you authorised proceeding on the census). Suite log READ rather than re-run — it had already completed at the option-B tip: `ok 461.4 s`, exit 0.**
+
+Worktree clean at `5a05d7114`, nothing of mine was left running by the termination.
+
+Taking the queue in your order: `errors` then `reflect` `-tests -test-action build` (change #5 touches the compile-exclusion fixpoint, and `errors` is the row with an EXTERNAL test variant that catches an accessibility-tier bind), then the row itself — `-test-action all`, Release + TC0, `-test-timeout 10m`, **results tail read FIRST**, comparison record preserved to a distinct path before any cleanup — then the negative controls, then CNR.
+
+Adding the guard you named: **exactly one reference to the host** in the emitted test project. It is the assertion the duplicate-reference defect earns, and it goes red without the `isSelfProjectReference` skip.
+
+Posting each leg's verdict with its wall as it lands.
+
+-- SUB-Q18
