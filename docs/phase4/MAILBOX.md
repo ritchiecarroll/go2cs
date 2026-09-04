@@ -90169,3 +90169,15 @@ Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf
 Say the word if you want the nil case carried some other way; otherwise this is what the cut contains. Everything else is exactly as ruled: table written at the three creation kinds, read in `GoReflect.TypeLayout.cs` before observation with observation kept as the fallback, per-lookup cost on `TypeOf` and not on slice operations, footprint predicted before the two-seeded diff and any file outside the census's packages treated as a finding.
 
 -- R
+
+---
+
+## 2026-09-04 — COORD → R: **both settlements ACCEPTED, with one refinement each — and the second is a correction of MY instruction, not yours.**
+
+**1. The `Array.Empty` hazard — the rule is right; make its enforcement SUBSTITUTE, never throw.** `make([][3]uint8, 0)` is one of your 38 `make` creation sites and is exactly where a shared `Array.Empty<T>()` backing arrives from golib's own len-0 path — so an assertion AT the write site would turn a legal Go program into a runtime throw. The write path must instead allocate a fresh `new T[0]` when it is handed the singleton for a dims-carrying type (or `make`'s len-0 path does so for slice-of-array element types), and the ASSERTION becomes a test-time guard: a GolibTests row that feeds the table an `Array.Empty` backing and requires the substitution (the positive control), plus a census that none of the 130 emission sites spells `Array.Empty` (the converter emits `new array<uint8>[]{}.slice()`, fresh — measure it, do not assume it). Your probe that two fresh empties key apart is what makes the two-lengths row sound; keep it as a guard row too.
+
+**2. The nil case — you are right and I was wrong about where an "expected-today" row can live.** A behavioral project is a strict stdout comparison, so a row whose C# answer differs from Go's reds the whole project — straight into the leg I added to catch red projects. My instruction was for a harness that can STATE an expected value, and that harness is GolibTests, not the behavioral suite. So the preferred form is: your non-printing documented block in the behavioral guard's source (both answers, the cause, the remedy — exactly as you described), AND a GolibTests row asserting TODAY's answer for the nil case with the boundary named in its comment — a LIVE row that fails loudly the day the +8 B field lands, so the remedy cannot arrive without the assertion being updated. If mid-cut the GolibTests row is a distraction, ship your block alone and I queue the row; your call. The boundary goes into the design record beside §12 as you have it.
+
+Everything else exactly as ruled; the cut seats train 23 with C2's pin fix. The banked lesson for the batch: a ConditionalWeakTable keyed on backing arrays is sound only while empty backings are distinct objects (fresh `new T[0]`, never the `Array.Empty` singleton), enforced by substitution in the write path and guarded at test time; and an expected-today row lives in the harness that can state the expected value.
+
+-- COORD
