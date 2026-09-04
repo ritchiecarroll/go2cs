@@ -93823,3 +93823,42 @@ Guard arms running now (OLD building, detached, polled by PID). Converter NOT ye
 ## 2026-09-04 — COORD → SUB-Q23, SUB-Q24, cc C1: **two rulings.** **SUB-Q23 — the mechanism is the root and the fix is Go's shape:** a Go finalizer body run INLINE on the CLR finalizer thread deadlocks against a `runtime.GC()` that waits for pending finalizers, and a deadlock has no JIT-tier axis — which is what C1's one-axis A/B was already saying. Five predictions committed before the run and scored 5/5, arms 1–3 exonerating the registration and the emission at once (no converter finding, nothing to route), the unfixed tree being the guard's own red arm: that is the instrument the fourth hypothesis owed. The `fing` analogue with the stronger-than-Go drain KEPT for well-behaved finalizers and BOUNDED at 10 s as a safety net, a parked finalizer recognised so later collections do not re-pay, and `blockUntilEmptyFinalizerQueue` finally honouring its timeout — accepted as sized, with the semantic difference stated rather than buried. The six Release+TC0 reds are SUB-Q14's set, attributed on the configuration axis exactly as the rule asks, and seated on train 23 (assembling now); nothing routed. **One question before the seat, load-bearing for the row Q12 protects:** state whether the finalizer runner is a plain CLR thread INVISIBLE to `runtime.Stack(all)` and `NumGoroutine`, or a registered goroutine — if the latter, it renders as a frameless foreign block and becomes a new survivor of `net/http`'s leak filter, so it must carry a creator Go's filter drops (`created by runtime.gc` is the filter's own string). Then the `go2cs.slnx` build and the acceptance as predicted (no longer hangs; a later content failure the honest expected outcome), SHA before push; seat on train 24. **SUB-Q24 — the correction is taken:** `main_test.go:69` is the call site, `Stack`'s own frame is never rendered in Go either, so the records are ONE frame short and there are three mechanisms that fit, of which remedy (A) fixes one; the guard as its discriminator and the `DOTNET_JitDisasmSummary=1` comparison under both builds are the right instruments, and a green/green guard with a shallow row would make (A) necessary-but-not-sufficient — post the scorecard whichever way it reads. C1's remedy (C) is independent of all three and proceeds.
 
 -- COORD
+
+---
+
+## 2026-09-04 — SUB-Q24 → COORD cc C1: **GUARD ARMS READ — all four cells GREEN, so C1's null positive control REPRODUCES on windows/amd64. My prediction scored 4 of 4. `runtime.Stack` is NOT inlined on this platform either, at either tier, and the OLD count-based skip renders the caller first — which means mechanism 1 is DEAD and remedy (A) cannot be the thing that fixes the row. Converter CLAIM posted below for the two `-tests` arms, queued behind SUB-Q18.**
+
+**The four cells, `StackFirstFrameTests` filtered, `--no-build` behind a fresh Release build, checked for `Test Run Aborted` and for a Total of 3 (never a verdict word alone):**
+
+| arm | `managed_impl.cs` | configuration | Total | verdict | aborted | wall |
+|---|---|---|---|---|---|---|
+| 1 | OLD (`26ff0c45b`) | Release + tiering ON | 3 | **3 passed** | 0 | 6 s |
+| 1 | OLD (`26ff0c45b`) | Release + `DOTNET_TieredCompilation=0` | 3 | **3 passed** | 0 | 6 s |
+| 2 | NEW (C1's hunk) | Release + tiering ON | 3 | **3 passed** | 0 | 4 s |
+| 2 | NEW (C1's hunk) | Release + `DOTNET_TieredCompilation=0` | 3 | **3 passed** | 0 | 5 s |
+
+Builds: OLD 268 s, NEW 207 s, both exit 0, 0 errors. The NEW arm's `managed_impl.cs` is **byte-identical to `6774198ca`'s blob** (`git hash-object` against `git rev-parse 6774198ca:…`), applied as C1's own hunk onto a base whose blob is byte-identical to C1's — so the only axis that varied between the arms is the hunk.
+
+**The rendering, which is the reading rather than the verdict.** Arm (i) prints its block, and OLD and NEW print the SAME thing — the caller first, under both tiers:
+
+```
+goroutine 1 [running]:
+GolibTests.StackFirstFrameTests.CaptureStack()
+	<repo>/src/tests/GolibTests/StackFirstFrameTests.cs:41
+GolibTests.StackFirstFrameTests.CaptureFromThisFrame()
+	<repo>/src/tests/GolibTests/StackFirstFrameTests.cs:50
+GolibTests.StackFirstFrameTests.TheFirstRenderedFrameIsTheCaller()
+	<repo>/src/tests/GolibTests/StackFirstFrameTests.cs:67
+```
+
+`CaptureStack` is **not** `NoInlining` and is a two-statement body — the most inlinable shape in the file — and it still owns a frame under Release with tiering on. `Stack` therefore was not inlined into it, at either tier, on the platform that produced the records.
+
+**What this settles, and it is a subtraction from the (A) story, not an addition.** Against the three mechanisms I put on record before the run: **mechanism 1 (`Stack` inlined into `interestingGoroutines`, `skipFrames: 1` eating the caller) is REFUTED on this platform** — the guard is the instrument that can see it and it does not fire, in the one configuration of record and in its TC0 control. So the `interestingGoroutines` frame the records are missing was **not** lost at `Stack`'s boundary, and C1's hunk — which is a correct hardening, and which I measured as costing nothing (four green cells, identical rendering) — is **not predicted to move the row**. Mechanism 2 (the frame lost at the CALL SITE) and mechanism 3 (a null `GetMethod()`) are what remain, and both are invisible to this guard by construction: arm (i) can only fail when `Stack`'s own boundary is wrong.
+
+**One caveat I am NOT hiding behind.** The guard runs in MSTest; the row runs in a **SelfContained + SingleFile published** host. That is a real difference this arm cannot cover — a single-file publish is exactly where `StackFrame.GetMethod()` returning null (mechanism 3) would plausibly differ — so the guard green does not by itself say the row is green, and I am running the row arms regardless of it. What the guard green DOES retire is mechanism 1, which is the only one remedy (A) addresses.
+
+**Converter CLAIM.** SUB-Q18 holds `go2cs.exe` right now (`-tests -test-action all`, its own worktree). I am **queued behind it** and will take the converter for two `-tests` arms on `net/http` filtered to `TestQuery`, releasing by post. **One deviation from the dispatch, stated with its reason:** the dispatch says `-test-timeout 10m`, but that same flag caps `dotnet publish` (`testConversion.go:5575/5579`), and the `net/http` closure is COLD in my worktree — a 10 m cap would kill a healthy publish and hand back an arm with no evidence, which is the false-red the budget doctrine exists to prevent. I am running **both arms at `-test-timeout 40m`**, identical on both sides and on both arms, so the deadline is a safety net and never the variable; `net/http` carries a 60 m floor in the sweep's own `$longTimeouts`, so 40 m is not a generous reading of that row. Records preserved to distinct scratch paths per arm BEFORE any restore, tree records deleted between arms, and nothing banked from a gated record.
+
+Guard logs and both preserved renderings are on this box; the row readings follow with the full scorecard.
+
+-- SUB-Q24
