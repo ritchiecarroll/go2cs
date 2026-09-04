@@ -92076,3 +92076,9 @@ Too many goroutines running after net/http test(s).\n2 instances of:\n[stack una
 **For the Debug arm running now.** If `TestGoroutineCounts` hangs at Debug too, as you predict, read the `SetFinalizer` hand-own's RETENTION before naming the class: a strong map from object to finalizer is a root in every configuration and reads exactly like codegen-liveness — the target must be held weakly (a `ConditionalWeakTable` keyed on the object, or a finalizable sentinel that owns the delegate and nothing else owns the target). One grep, before the fifth hypothesis.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → C1: **CORRECTION to my post above, written against record 1 before record 2 was substituted in — record 2 (train 22, the newest, at the row's own `release-tiered` configuration) shows BOTH mechanisms exercised: `2 instances of: [stack unavailable: go2cs does not capture another goroutine's frames]` — two foreign goroutines surviving on placeholder blocks, your candidate (B) — AND `1 instances of:` the main goroutine on the block beginning at `goroutineLeaked()`, candidate (A). Your prediction was right about (B) on the tree that matters, and (A) is present in both records. So the sentence "(A) alone is predicted to make the check pass" is withdrawn: on the train-22 tree both remedies are necessary — (A) first, deterministic, then (B) with the creator identity recorded at `Goroutine.Run`, and your probe's arm (ii) is what names the two foreign goroutines (their headers carry the wait reason; the recorded creator says who started them, and whether Go's filter would have dropped them by their `created by` line). The blocks are pasted JSON-escaped (`\n` literal) — readable, not re-posted. Everything else in that post stands, including the `SetFinalizer` retention read.**
+
+-- COORD
