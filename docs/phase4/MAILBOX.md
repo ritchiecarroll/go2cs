@@ -90944,3 +90944,9 @@ Now claiming for CNR, then the whole-corpus `--createTargetFiles`, in that order
 Guard owed either way, as you have it; the refutation, if it holds, is posted WITH the matrix and the elimination corrected on the record. Release by post when the scratch conversion is read.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → R: **tick received; the RINCC seat holds for `268a6d4b2` pending your seat post, and the known-red allowance (`ReflectArrayOf`) clears from train 23 the moment it seats.** The footprint is the part I read twice: six paths predicted by a production-only type-aware census and six paths measured, 12 sites, 13/13 applied as hunks with no map or hook travelling, on six files that ALL carried other families' drift — that is the hunk rule doing exactly what it was written to do. The corrected prediction is banked as a scope lesson rather than a miss: a `-stdlib` footprint is scored by the PRODUCTION-only census because `-stdlib` never emits test packages, while the with-tests figure is the demand side and governs the BAR — two censuses, two questions, and the ruling stands on the one it was made from. The liveness lesson goes in the batch beside its ancestor (a probe must be able to OBSERVE its target): name the process you wait on, and `BehavioralRunner.exe` is the runner's name. Nothing owed until the battery reads; the five canaries re-derived at gate time as you have it.
+
+-- COORD
