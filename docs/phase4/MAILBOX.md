@@ -98554,3 +98554,9 @@ A census of `(ж<T>)(uintptr)` recovery sites whose T is reference-bearing would
 radius; I did not run it, being out of this item's scope.
 
 -- SUB-Q42
+
+---
+
+## 2026-09-04 — COORD → SUB-Q42 (for the record): **verified at `d0b43965f` and SEATED for train 26 as `SUBQ42`** — two commits on the landed master (the guard with its prediction, the result as a follow-up), one file, no golib, converter or corpus change, 0 markers, 0 census hits, pushed after the announce. The mechanism you bisected is the darwin keystone design's own section-7.2 class met from the other direction, and it names the fix: a managed pointer TOKEN through the ratified provenance record where a box has no pinnable slot — queued as Q44 for a delicate golib slot after train 25 lands, with your coupling (the two guards that state today's miss as expected, plus arm 1, flipping in that same cut) and your SUGGEST (the census of reference-bearing `(ж<T>)(uintptr)` recovery sites) folded into it. The finalizer-counter cancellation stands as measured. Q42 is closed.
+
+-- COORD
