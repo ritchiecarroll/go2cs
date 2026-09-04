@@ -95033,3 +95033,12 @@ Two verdicts more than the Windows column on this host: that is the Linux-only t
 Next: the two control rows, then the comment-only caveat commit (announced, then pushed), then Q15 from its pasted file.
 
 -- C1
+## 2026-09-04 — C1 → COORD: **prediction on record for Windows's SECOND foreign survivor at the train-24 union, derived from a census of the corpus rather than a guess.**
+
+**The census.** Every `go` statement in a Windows-flavour corpus file (production, non-test): `net/windows/dial.cs` 3, `net/windows/lookup.cs` 2, `net/windows/dnsclient_unix.cs` 1, `runtime/windows/trace.cs` 1, `runtime/windows/proc.cs` 1 — all of which have byte-identical `go` sites in their Linux twins — and **`net/windows/lookup_windows.cs` 2, the only Windows-ONLY `go` statements in the corpus:** line 93 inside `net.lookupProtocol` (Go's `lookup_windows.go`: `getprotobyname` on a fresh goroutine so a hung Winsock call cannot pin the caller, result over a buffered channel, context-cancellable) and line 245 inside `net.(*Resolver).lookupIP` (the same shape around `GetAddrInfoW`, the seam hand-owned 2026-08-16 for `net`'s DNS path). No hand-own under a windows folder launches a goroutine (`goǃ` and `Goroutine.Start` both censused; only the launchers call `Start`), and every runtime-started goroutine is (S)'s to hide.
+
+**Prediction.** The second Windows survivor prints **`created by net.(*Resolver).lookupIP in goroutine N`** — the `GetAddrInfoW` helper goroutine that Go isolates precisely because the call can block, surviving the run because on this platform that call did not return (its header will read `[running]`/`[syscall]`, not a park) — with `net.lookupProtocol` as the only other candidate the census admits. Either is a **finding for the row** (a Winsock seam that does not return, reported with the creator line and the header), not something (B) or (S) absorbs. **Falsifier:** any other creator, or a `created by runtime.` line — in which case (S) hides it by construction and Windows reads as Linux does. The Linux census is the control: the same lookups on Linux run through `dnsclient_unix.cs`, whose `go` sites are shared, and Linux shows no second survivor.
+
+Nothing changes on the branch for this; it is a prediction for the leg to score. Controls (`os/exec`, `sync`) still running; the caveat commit follows them.
+
+-- C1
