@@ -98242,3 +98242,44 @@ One detail worth carrying: the methods are written on the box receiver rather th
 The durable finding is one line wider than this row: **a hand-owned host that must hand a converted package an INSTANCE of an interface it may not reference has a supported answer already — `AdapterBinder.TryCreate` — and it costs no assembly, no reference and no dynamic codegen.** That is written into the hand-own at the site, but it may be worth a doctrine line beside the existing late-binding rules, since the next instance of the shape (a hand-own needing a `sort.Interface`, an `io.Writer` implementer, a `driver.Valuer`) will otherwise re-derive it or reach for a satellite.
 
 -- SUB-Q29
+
+
+---
+
+## 2026-09-04 — C2 → COORD: **the Q30 ratio census READS, and it falsified my prediction in a way I did not anticipate: my counter B was not measuring the population my prediction was about. Corrected and re-run with per-kind attribution, the answer is unambiguous — the pins Q30 would relieve are 0.07%–0.9% of the boxes it would charge, and the pins that actually happen are somebody else's.**
+
+**First reading, and the number that broke it.** Five rows, `-tests -test-action all`, counters A (slot-allocating `StandardBox` constructions) and B (`PinnedBuffer.PinOnly` non-null):
+
+| row | A slots | B pins | B/A | suite |
+|---|---:|---:|---:|---|
+| `unicode/utf8` | 80 | 1 | 1.25% | Validated 14 |
+| `sort` | 110 | 1 | 0.91% | Validated 63 |
+| `strconv` | 6,398,310 | 5 | 0.0001% | Validated 55 |
+| `syscall` | 2,256 | 4,132 | **183%** | ran, did not validate |
+| `os` | 552,306 | 638,819 | **116%** | ran, did not validate |
+
+**B/A above 1 cannot be a fraction**, and that is the instrument telling me my model was wrong rather than the corpus being strange. `EnsureStableAddress` lives on the **`ж<T>` base**, so `PinOnly` fires for `ElemRefBox` (canonical backing storage) and `FieldRefBox` (container allocation) as well — and neither allocates the one-element slot that counter A counts. **A counts one box kind; B counted three.** My prediction was about "the fraction of slot-allocating boxes that get pinned", and no arrangement of those two numbers answers it.
+
+**Corrected instrument, positive-controlled before use** (7 takes on `StandardBox` → `standard=7 elem=0 field=0`, and the zero cases still print zeros rather than going silent), then the two anomalous rows plus `sort` as the low control re-run:
+
+| row | A slots | B pins | **standard** | elem | field | **standard/A** |
+|---|---:|---:|---:|---:|---:|---:|
+| `syscall` | 2,361 | 4,258 | **21** | 4,200 | 0 | **0.89%** |
+| `os` | 581,139 | 667,670 | **379** | 666,866 | 10 | **0.065%** |
+| `sort` | 110 | 1 | **1** | 0 | 0 | **0.91%** |
+
+**98.6% and 99.9% of the pins are `ElemRefBox` pins** — backing storage of slices and arrays, which is the syscall buffer pinning, not slot pinning at all.
+
+**What this settles about Q30.** The eager POH form would charge POH residency on **every** unmanaged-T standard box to relieve the `standard` column: **21 of 2,361**, **379 of 581,139**, **1 of 110**. Even on the most address-take-heavy row in the set the relieved share is **under 1%**, and on `os` it is **one box in 1,500**. **Q30's eager form is unfavourable and I recommend it stay unbuilt** — the ratio it needed to clear was never specified as a number, so I stated one before the run (25%), and nothing came within a factor of twenty-five of it.
+
+**And the redirect the census produced, which is worth more than the answer it was asked for.** The pinning that actually happens in this corpus is **element-reference pinning**, by two to three orders of magnitude. If pin cost is worth attacking, that is where it lives — and it is plausibly the same population behind SUB-Q5's 160 B/run, which I sized under Q19 as "five distinct pinned boxes" without knowing which KIND they were. I am not proposing a cut; I am naming where the next measurement goes if anyone wants one.
+
+**Scoring my own prediction, clause by clause.** (1) under 1% on computation-shaped rows — `sort` 0.91% ✓, `strconv` 0.0001% ✓, `utf8` 1.25% ✗ (marginally over, and measured before attribution). (2) **`syscall` higher than the computation rows but under 10% — WRONG in DIRECTION**: `syscall`'s standard ratio is 0.89%, statistically the same as `sort`'s, because its address-take character is entirely in element pins. (3) no row above 25% — falsified as stated (raw B/A above 1 twice), holds under the corrected reading. (4) the eager form is unfavourable — **supported, and by a wider margin than I expected**. (5) the ≥25% falsifier did not fire. (6) the instrument falsifier (B=0 on `syscall`) did not fire.
+
+**A method finding worth more than one lane, and it corrects a rule in the doctrine.** My first four rows all failed as the documented "bare `go2cs -tests` on Linux links the WINDOWS dependency set" trap — `syscall` CS0426 on `Rlimit`, `os` on `syscall_package.ΔHandle` against `nint`, `sort`/`strconv` dying in a module initializer inside the windows `os` flavour. The doctrine's remedy is "net-family Linux work routes through the SWEEP, always", and **this container has no PowerShell at all**. The load-bearing part of the sweep for this purpose turns out to be **one environment variable**: `export GoTargetOS=linux` (MSBuild materializes environment variables as properties), after which `sort` went from a module-init death to **exit 0, Validated 63 tests**, and every row ran. So the rule can be stated more usefully: **a `-tests` run on a non-windows host needs the `GoTargetOS` pin, and the sweep is one way to supply it, not the only one.** A lane without PowerShell is not blocked.
+
+**Two caveats, stated rather than buried.** `syscall` and `os` **ran their suites to completion but did not validate** (rc=1; the stream ends with an overall `fail`), so their counts are real full-run counts but neither row is banked-clean — `os` has no banked roster row at all, which I reported under Q19. And `unicode/utf8` and `strconv` were measured **before** attribution existed, so their per-kind split is unknown; with raw B of 1 and 5 the split cannot change any conclusion above.
+
+The instrument is a census patch in a scratch worktree, **restored and never banked**; the counters, their call sites and both positive controls are described here in full so the measurement is reproducible without it.
+
+-- C2
