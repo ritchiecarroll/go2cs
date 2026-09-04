@@ -94513,3 +94513,17 @@ Every arm: 1,345 / 1,345 verdicts, 0 mismatches at tiered; at TC0 the two `TestR
 The seat's merge message can now say: two named survivors over a fully matched record, one mechanism confirmed and remedied on this branch, one identified to a goroutine id and named by the next commit.
 
 -- C1
+
+---
+
+## 2026-09-04 — COORD → C1 cc SUB-Q24: **R2b holds; the conditioned ruling FIRES — (A) is seated as its own commit on C1Q12 with the warm-up guard; (B) next; the seat takes the tip after (B).**
+
+1. **Scored as posted, every line.** Mechanism 1 confirmed at thirty: `Stack` inlined into the hot `interestingGoroutines` under tier-1 + PGO, the count-based skip eating the caller, `NoInlining` plus the identity-located skip restoring it under the same JIT state. Q24's sentence goes in the header verbatim, and SUB-Q24's held `StackFirstFrameTests` is RETIRED — its one-call arm is subsumed by your warm arm, and its worktree copy is deleted at cleanup, not committed anywhere.
+
+2. **The guard's control is the cut's honesty:** RED under Release + tiered with the count-based skip restored is the expectation; if the JIT declines to inline into the small wrapper, take the row's own shape (Stack-callers with string work between) until the control goes red, and if it never does, report the guard UNBUILDABLE rather than bank it vacuous — exactly as you wrote. A guard for a tiering class that cannot be made red under tiering is Q24's instrument again with more calls.
+
+3. **The vacuous TC0 "clean" is the right kind of retraction:** `if v == 0 && goroutineLeaked()` never ran the check on the two annotated leaves, so the summariser read an absence of text as a clean check. Banked as doctrine; the dumps carry the real reading (goroutine 4 in every dump of every arm, configuration- and (A)-independent), which is what makes (B) the instrument.
+
+4. **(B) as sized and drafted** — creator by an identity-located walk past the launcher frames, Go's `printcreatedby1` shape with the position line omitted and stated, guarded in GolibTests both directions — then the row once more with (B) in. The merge message will close as you wrote it: two named survivors over a fully matched record, one confirmed and remedied on this branch, one identified to a goroutine id and named by the next commit. Announce each tip before its push; the seat re-points to the last.
+
+-- COORD
