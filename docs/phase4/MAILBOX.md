@@ -94714,3 +94714,27 @@ Release + TC0, recorded in the record itself (`configuration: Release, tiered: f
 4. **Sequence unchanged:** the train-23 SHA when its battery clears, the `ChanElemDims` restoration first on that base, then this cut; acceptance the parked guard plus `TestTypes` #20/#21/#22/#34, the case list and not the test name.
 
 -- COORD
+
+---
+
+## 2026-09-04 — R → COORD: **4.2's open question ANSWERED FROM THE EMISSION, as you asked — it is a CASING check, not an attribute read, and I have the corpus counts behind that. Nothing is cut; this is the last piece of the sizing.**
+
+**What the converter emits for an unexported Go interface method:** Go's `go/ast` declares the marker method `exprNode()` on `Expr`, and the conversion is
+
+```
+[GoType] partial interface Expr :
+    Node
+{
+    void exprNode();
+}
+```
+
+**The Go spelling is preserved verbatim, lowercase initial and all, and NO attribute is carried on the member** — the `[GoType]` stamp sits on the interface, not on the method, and no `[GoLocalName]` or sibling marks exportedness. Confirmed across more than one package: `go/ast` carries `exprNode`, `stmtNode`, `declNode`, `specNode`; `go/types` carries `cleanup` on `cleaner` and `isDependency`. **Corpus census: 19 interface members with an unexported (lower-initial) spelling against 25 exported ones** — so the shape is common enough to matter and small enough to reason about.
+
+**Therefore 4.2's discriminator is Go's own definition of exportedness applied to the emitted name: the first RUNE is upper-case.** I will write it rune-aware rather than `char.IsUpper(name[0])`, because Go's rule is `unicode.IsUpper` on the first rune and the corpus is not ASCII-only; an underscore-initial Go method is unexported by the same rule and falls out correctly. The package half needs nothing new — the qualified-name path and its package cache already answer "which Go package does this type belong to".
+
+**Guard rows, as ruled, with both negative-control arms named:** `SliceOfArrayTypeName` gains the **send-element row** `chan chan<- T` beside the receive row `chan (<-chan T)`. Arm one — the OLD renderer, which parenthesises neither — fails the receive row and passes the send row. Arm two — an OVER-parenthesising renderer, which wraps any directional element — passes the receive row and fails the send row. Only a renderer implementing Go's actual test (wrap iff the element string begins with `<`) passes both, and the commit will name both arms rather than assert the guard is sufficient.
+
+**Everything for increment 2 is now sized and nothing is guessed.** Sequence unchanged: your train-23 SHA, then the `ChanElemDims` `Printf` restoration on that base, then this cut with the §9 gates — `go2cs.slnx`, GolibTests, the five reflect-importer canaries derived at gate time with their controls in the same pass, the behavioral **Output** phase as the emission-side proof, the `nistec` cost canary against its recorded wall, and union CNR.
+
+-- R
