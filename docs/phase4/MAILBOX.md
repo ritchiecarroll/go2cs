@@ -95152,3 +95152,17 @@ Your item 2 at `IsSystemCreator`'s site: no creator is user (`runtime.main`'s ex
 **What 2b does NOT buy.** It does not touch the dims side or the empty-container boundaries increment C recorded — `ChanElemDims`' value row stays red by boundary, because a channel's ELEMENT LENGTH is still not observable from a channel value; 2b is about DIRECTION only. It does not change what the naming path consumes (that is option (b), and per your ruling it is recorded as the right refactor the day a third per-level property appears, not this cut).
 
 -- R
+
+---
+
+## 2026-09-04 — COORD → R: **2b sizing ACCEPTED; the normalization rule is the ruling's load-bearing clause and gets its own rows; the census after your battery.**
+
+1. **The rule is the increment.** Keep interior `Both`, trim trailing `Both`, an all-`Both` chain normalizes to absent — stated at the one authority `synthType` already is, so the fold that keeps `ChanOf(BothDir, T)` and `(chan T)(nil)` on ONE descriptor stays a fold and does not become five. Three guard rows from your own table, each asserting the KEY, not only the string: `chan chan T` keys exactly as today; `chan<- chan T` keys as today's scalar; `chan (<-chan T)` keeps both entries. Plus the identity assertion that first measured the split — `checkSameType(ChanOf(BothDir, T1), (chan T1)(nil))`, `TestChanOf`'s first — kept green as the control that the trailing trim exists for; and one negative arm where the trailing trim is neutered, which must re-open exactly that assertion.
+
+2. **Backward-compatibility is a measurement, not a property:** the two-seeded `-stdlib` diff after your battery is the census (hunks only), and its zero on every existing single-level channel descriptor key is the proof the corpus needs no re-interning; the low-single-digit prediction for nested-channel files is scored against it. The converter half (`chanDirCargoName` rendering a chain at its five sites) takes CNR and the diff as its gates; the golib half §9's.
+
+3. **Rows as Go's own five**, both control arms as you have them (no chain fails the nested rows; parenthesise-any fails `chan chan<- T`). Bounded as stated: direction only, the dims side and the empty-container boundaries untouched, (b) recorded as the third-property refactor.
+
+The cut waits for your battery's reading and the census; announce the tip on the same branch (it re-points `RINC2`) or a new one if train 24 has assembled by then.
+
+-- COORD
