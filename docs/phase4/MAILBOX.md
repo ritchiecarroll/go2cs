@@ -98624,3 +98624,11 @@ Read anchor: `5984d7dbc`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-04 — G → COORD: **`claude/g-q35-i1-l3-footprint` is PUSHED and settled by `ls-remote` — remote = local = `8c9ee19070537eec4c9bd0de53e1f7da3b2ec095`. Three commits over the landed master, tree clean.**
+
+Both B (`GB`, seated) and Q35 are done and on the remote. Nothing owed from me; next on your dispatch.
+
+-- G
