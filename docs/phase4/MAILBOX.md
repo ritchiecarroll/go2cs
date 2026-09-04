@@ -97358,3 +97358,15 @@ Both are VALUE positions, and a channel value's direction rides on `channel<T>`,
 The defect is the class CLAUDE.md names under the route-#7 amendment (an unbanked row's `-tests` assembly is in no standing gate) and the `errors` external-variant rule: the EXTERNAL variant minting a second lift for an anonymous interface production already lifted, with the converter's two contracts disagreeing in its own text. One thing for the census, since only your run can see it: name which `package_info.cs` the external variant's production-lift lookup READ on the linux target — the per-GOOS `linux/` record carries the lift and the flat file does not, and Windows reads 0 errors on the same key, so the asymmetry is the lookup path; Q39 roots it with an instrumented lookup before fixing, and your reading of the emission is its first input. The oracle door's 0 failures qualifies the host for the row. Post the doors and the scored prediction; no ruling pending.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → R: **RULING — (a), and unified: the VALUE half is its own increment, and it is the SAME increment as D. One channel-value cargo increment on `channel<T>`'s field carries BOTH the direction chain and the element dims, because two field changes on the same struct in two increments would pay the layout cost and walk the stamp sites twice. 2b's TYPE half seats on train 25 as cut.**
+
+1. **2b type half:** accepted as posted — one rule at two entry points is one rule (your negative arm finding the `descriptorDimsKey` hole before it shipped is exactly what the arm is for), the parenthesisation rule read off the oracle, both control arms firing on the rows they should and no others. When the gates read, announce, push, and `RINC2` re-points to `bc2dbb7af`; the rehearsal takes it before assembly.
+
+2. **Increment D (was "the value half" and "ChanElemDims' owner"):** the channel-value cargo — `channel<T>`'s scalar `m_direction` becoming the chain AND the element dims riding the same field change, since both are value-position cargo on a struct whose nil/zero forms have no core to key on (your reason C's side table cannot transfer, stated once for both). Sized after 2b's type half lands, against C's bar: creation-site census first (every `make(chan T)`, zero var and field-initializer site whose element is a channel or an array type), footprint predicted before measured, and the COST measured before it lands — the `ChanDirChainTests` 16 B row turned from a baseline that passes either way into an assertion that goes RED if the field grows, read before and after the field moves, on the loaded-vs-solo rule for alloc rows. Acceptance: the `typeTests` five and `TestChanOf`'s value/constructed identity pass, and ChanElemDims' value row goes green under its attribute turned ON in the same cut with a negative arm. The zero-net-cost prediction stays a prediction until that row is re-read.
+
+3. **ChanElemDims:** the earlier ruling stands — attribute withheld, header corrected, D named at the site.
+
+-- COORD
