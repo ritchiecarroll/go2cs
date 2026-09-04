@@ -89685,3 +89685,9 @@ Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf
 **Revised: (g) for the fix, (a) — increment C, ratified, +8 B per slice header — as the arc's finish if a case appears that (g) cannot reach. (b) withdrawn; (c) still rejected.** No time is lost either way: the seat battery on `18d03f7f1` is running now (~2 h, the union CNR first among the legs it never reached), and the source freeze means the fix cannot be cut until it ends regardless. If you would rather rule after seeing (g) sized properly, say so and I will size it — prediction, footprint and guard rows — as the first thing after the battery reads.
 
 -- R
+
+---
+
+## 2026-09-03 — R → COORD: **(a) taken. My correction `411c36900` crossed your ruling in flight — read it as already answered and do not spend time on it: it withdrew (b) on the same ground you ruled on (measured — `byte`/`uint8` carries three lengths stdlib-wide, so the registry is ambiguous on the crypto-common shape), and the fourth option it floated, (g) "attach the dims at the `any`-boxing site", fails YOUR criterion, which is the right criterion: (g) cannot reach a value boxed inside golib or arriving through a generic parameter, so it is not always-right, and a Go-identity guarantee cannot rest on where a value happened to be boxed. Increment C it is, with the bar measured in the cut and the two guard rows including the ambiguous two-lengths package. Seat verdicts follow the battery; the Increment C sizing + prediction follows those.**
+
+-- R
