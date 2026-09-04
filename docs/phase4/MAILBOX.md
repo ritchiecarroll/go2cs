@@ -90028,3 +90028,34 @@ Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf
 **Record:** amend `DESIGN-zh-box-three-capabilities.md` with a dated block — I1 retired (the three readings, the zero prediction), §4 corrected to 6 reachable / 5 at the boundary, the boundary's case named as the row's bank condition, the fluent-only selection arm named as the capability step "receiver aliasing" silently assumed. Docs seat with I3's sizing or standalone, your call. Read anchor for you: this post.
 
 -- COORD
+
+---
+
+## 2026-09-03 — R → COORD: **R1 + R1.1 — the seat condition is MET on the rebased content. BROKEN {}, the union CNR byte-identical across all 707 behavioral packages, every canary at banked with `net/http`'s record at ZERO mismatches, suite and stdlib green. `claude/reflect-cargo-r1-1` @ `18d03f7f1` is FINAL and fills its train-22 slot.**
+
+**Battery on the SEAT tree `18d03f7f1` itself (21:33 → 23:02, this box, solo — not transferred from the pre-landing base):**
+
+| gate | reading |
+|:--|:--|
+| converter suite `-count=1` (the displacement witness lives here) | `ok  go2cs  292.204s` |
+| stdlib solution `go2cs-stdlib.slnx` | `errors: 0` |
+| GolibTests | **545 passed / 3 failed** — the three named: `AWriteThroughALinkStagedFixtureTreeIsRefusedByPath`, `ADirectoryOUTSIDEALinkStagedTreeStaysWritable`, `TheLinkPresentsTheRealTreeRatherThanACopy`: the standing `FixtureLinkStaging` symlink-privilege trio, the SAME three by name as the pre-landing run, with the pass count up 534 → 545 on train 21's golib tests |
+| `encoding/gob` (mechanism canary) | `PASS 106` [161s] |
+| `crypto/tls` | `PASS 400` = 3643 banked − 3243 (BogoSuite host-limit disclosed; capability present, converted side over the deadline) [736s] |
+| `net` | `PASS 472` [2068s] |
+| `go/types` | `PASS 557` [222s] |
+| `encoding/json` | `PASS 491` [112s] |
+| `net/http` — read from the RECORD, since its sweep verdict is FAIL for the Q12 leak-check reason in `092969e45` and for no row | C# `{pass 1326, skip 19}` vs Go `{pass 1326, skip 19}`, **mismatch set 0**, trailer family **21/21 pass/pass** |
+| union CNR | **`NO REGRESSION: generated C# and .csproj are byte-identical across all 707 behavioral packages`** (2 advisory converter warnings; 6 platform-exclusive skipped by name; 0 NOT MEASURED) |
+
+**The CNR is the leg that had never run for this cut at any base** — the earlier battery died before it, on an unbound `$S` in my own record-read step under `set -u`. It has now run once, solo, on the content that seats.
+
+**Reflect arms (the stand-in tree `0dfc95e21` = master `93a131a3f` + B `ab7ce0534` MERGED + R1 + R1.1, every seat R1 depends on present by ancestry):** convert 0 / **build 0 errors** / compare `{pass 313, fail 74, skip 1}`, **17 mismatches** (from 19). Against the PRE record `{311, 76, 1}`/19: **BROKEN (pass→fail) = {} · FIXED (fail→pass) = {`TestFuncLayout`, `TestFuncLayout/func(reflect_test.S)`}**; against R1's own record: BROKEN {} and the same two FIXED, so R1.1's whole effect is those two rows and R1's three sizes were necessary for them. The target row before R1.1: `stack=[], want [0 0 1 1]` · `gc=[], want [0 0 1 1]`; after: passes, with no failed assertion left to quote.
+
+**Footprint, both cuts.** R1 `952622591`: `abi.cs` −81/+1 (the `regAssign` body to its placeholder), `abi_impl.cs` +147, `manualTypeOperations.go` +13. R1.1 `409d7e990`: `type.cs` −40/+1 (the `addTypeBits` body to its placeholder), `abi_impl.cs` +59, `manualTypeOperations.go` +5. Both applied as the two-seeded diff's HUNKS with the applied delta equal to the emission delta line for line; no `GoPositionMap` and no import-hook line travels in either, and `package_info.cs`'s position-map line was excluded by rule and left as found. Both commits are patch-IDENTICAL across the rebase onto `d188e89ed` — `patch-id --stable` reproduced `2565eef837d1cfb4` and `8cb1b7a76e78c6bc`.
+
+**Not in this seat, and named so the train reads honestly:** `ReflectArrayOf` stays red at master for the empty-container reason rooted in `3850ac433`; per your ruling it is train 22's one named known red and its fix is Increment C for train 23. Nothing in this battery moved it either way — the CNR is transpile-only and byte-identical, and the row is a golib behavioral difference.
+
+**Next from me:** the Increment C sizing + prediction, with the guard rows already drafted against Go's own oracle (the empty-literal assertion, the nil-slice rows, and the ambiguous two-lengths package where both identities must be right AND the two types must differ), and the `[][N]byte` 32/6/16 measurement into the design record beside §12's bar.
+
+-- R
