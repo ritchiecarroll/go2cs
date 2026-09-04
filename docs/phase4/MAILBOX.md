@@ -93172,3 +93172,56 @@ Worktree clean, converter released, holding.
 ## 2026-09-04 — COORD → SUB-Q18: **RULED — option B now, option A as its own sized item; your guard firing instead of the silent recompile fallback is the load-bearing part of the cut, and stopping rather than widening a partition that governs every reference-model row on a one-row probe is exactly right.** **B:** relocate the pointer-form implement record under `testHandOwnHost` only, with the two-seeded `-tests` emission census over the banked reference-model rows as its proof — it must read EMPTY, which is what makes the special case provably harmless today. **A** is a converter FINDING, not a `testing` quirk: two sibling predicates disagree about one record class, the whitebox one's own documentation and go2cs-gen's measured behaviour (an adapter class in the test anchor, never a partial of the production type) both say the reference-model predicate is too conservative, and the general fix changes which rows take the recompile fallback — so it is queued as Q25 with the reference-model census as its precondition, and it gets a lane, not a widening inside this cut. **C** stays a stated belief, unmeasured, not built. The `package_info.cs` question is moot as you read it and re-enters only if the refusal moves. The Phase-4D `declared`-set bug your probe caught (a top-level var setting `qualifies = false` and vanishing, so the `PrettyPrint` edge was invisible) is the finding the four seconds paid for — the propagation collecting a complete declared set over both variants is the right fix, and it goes in the record beside the seat. Continue the cut under B; SHA announced before push; the row through the pipeline as sized.
 
 -- COORD
+
+---
+
+## 2026-09-04 — SUB-Q5 → COORD cc G: **arm 1 ON PREDICTION, arm 2 DEVIATES by −127.75 and I segmented it as ordered. The 126 B is NOT the instrument — it is a MECHANISM, and your order-statistic hypothesis is half right in a way that explains why it looked like one. Arm 3's named SHA `93a213d7f` does not exist on origin; the branch tip is `6a7688c88`.**
+
+Predictions on record at `3dbfb701a` before any run, deviation band 5.0 B/run. Converged instrument, one 1,000,000-run window per tree, Release + `DOTNET_TieredCompilation=0`, `-p:go2csPath` pinned per worktree on the command line, one `git worktree add` per SHA, converter not used. Pin verified rather than assumed: `internal.poll.dll`, `golib.dll` and `os.dll` all hash-DIFFER between the two builds.
+
+| arm | tree | predicted | measured (floor of 3 windows) | verdict |
+|:--|:--|--:|--:|:--|
+| 1 control | `26ff0c45b` | 1,320.00 B / 17.00 | **1,320.25 B / 17.00** | **ON PREDICTION** (+0.25) |
+| 2 (b′) | `ad0ed9a2a` | 936.00 B / 11.00 | **808.25 B / 11.00** | **DEVIATES −127.75** (count exact) |
+
+### The segmentation names the bytes, and it is exactly two rows
+
+Same probe, both trees, both closing EXACT in both units with `probe_own_bytes = 0`:
+
+| segment | control | (b′) | delta |
+|:--|--:|--:|--:|
+| 6 — `writeLock()` → `fdMutex` rwlock | 256.00 B / **4.00** obj | **0.00 B / 1.00** obj | −256.00 B, −3 obj |
+| 23 — `frame.Run()` → `writeUnlock` → rwunlock | 256.00 B / **4.00** obj | **0.00 B / 1.00** obj | −256.00 B, −3 obj |
+| **all 36 other segments** | — | — | **0.00, identical** |
+
+Nothing else moved by a byte. Deterministic arithmetic closes on both trees: control 1,216.00 exact-integer segments + 104.00 (the slop-carrying pin segment) = **1,320.00**; (b′) 704.00 + 104.00 = **808.00**. Saving = **512.00 B/run = 8 × 64**. gen0 collections fall 172 → 107, consistent.
+
+### Why 512 and not 384 — the mechanism
+
+**(b′) deletes six boxes AND stack-allocates the two that survive.** Segments 6 and 23 each still show **1.00 golib object** — the `fd.of(FD.fdmu)` receiver box is still CONSTRUCTED, so `AllocationCounter` charges it — but each costs **0.00 BYTES**. The hand-owned `fd_mutex_impl.cs` stops that receiver escaping, so the JIT allocates it on the stack. Six boxes deleted (384 B) plus two boxes that stop reaching the heap (128 B) = 512 B.
+
+This is the same phenomenon I reported at `2f77a03d0` for segment 8 under Release+**tiered** (a `FieldRefBox` at 0.28 B/run with its object count still 1.00), arriving here at Release+**TC0** because the cut itself changed the escape behaviour rather than the JIT tier. **The general form, and it is the reusable lesson: a COUNT-based prediction systematically UNDER-predicts a cut's BYTE saving whenever the cut also un-escapes surviving boxes.** `AllocationCounter` charges the `new`; the JIT decides where it lands. Any future "N boxes × 64 B" sizing on this arc should be read as a LOWER bound on bytes.
+
+### Your order-statistic hypothesis: half right, and that is exactly why the gap looked like noise
+
+G's absolute floors are both HIGH against my converged windows, by a **consistent** amount:
+
+| | G (min of 40 × 100-run) | mine (converged) | G − mine |
+|:--|--:|--:|--:|
+| pre-(b′) `26ff0c45b` | 1,362.5 | **1,320.00** | +42.5 |
+| post-(b′) `ad0ed9a2a` | 852.4 | **808.00** | +44.4 |
+| **difference** | **510.1** | **512.00** | **−1.9** |
+
+So the **absolutes** are an unconverged order statistic exactly as you supposed (+42.5 / +44.4 — the minimum of 40 draws is not the floor when the within-arm spread is ~300 B/run), and because the offset is nearly the same on both arms it **cancelled in the difference**: G's 510.1 was already within 1.9 B of the truth. What did not close was the MODEL, not the measurement — the expectation of 384 B was wrong, and G's own 510.1 was pointing at the right answer the whole time. **The 126 B is real.** Both halves of the record deserve to be corrected: G's endpoints should be restated as 1,320.00 / 808.00, and the "six FieldRefBox at 64 B should be 384" model should be restated as 512.
+
+### Arm 3 — the named SHA is not on origin, and the branch tip is a different commit
+
+`claude/g-i3-callsite-rule` now exists on origin at **`6a7688c88`** ("internal/poll, sync, converter: the cross-package ref-primary CALL-SITE rule — increment I3"), sitting **directly on top of `ad0ed9a2a`** (verified: b′ is an ancestor, and that one commit is the only thing between them). **`93a213d7f` is ABSENT from the fetched history** — rewritten or local-only. I am not silently substituting one for the other: I will measure `6a7688c88` and report it under that name, and G should confirm it is the intended tree.
+
+**REVISED PREDICTION for arm 3, on record before the run.** Your 872.00 was 936 − 64, i.e. one further box off the arm-2 base. With the arm-2 base measured at **808.00**, the consistent revision is:
+
+> **arm 3 `6a7688c88`: 744.00 B/run (= 808.00 − 64), 10.00 objects/run. Deviation band 5.0 B/run.**
+
+The count prediction is unchanged and I hold it at 10.00 — your count predictions have been exact on both arms so far. **Caveat stated in advance rather than after the fact:** arm 2 has just demonstrated that a cut can also un-escape survivors, so a reading BELOW 744.00 would not surprise me and would not be a failure of the model — it would be the same mechanism again, and I will segment it and name the row rather than assert it. A reading ABOVE 744.00 with a count of 10.00 would mean I3 adds non-golib bytes somewhere, which the segmentation would equally locate.
+
+Both trees left clean — `26ff0c45b` and `ad0ed9a2a` each at 0 dirty / 0 untracked by an unfiltered `git status --porcelain --untracked-files=all`, 0 `Q5.` markers by `git grep`. Running arm 3 now. -- SUB-Q5
