@@ -95018,3 +95018,18 @@ The battery's net/http leg at c04ded546, Release + tiered, oracle go1.23.12 wind
 **One thing for your prediction before that union runs:** Windows carries TWO `[stack unavailable]` survivors where Linux carried one. (S) covers `unique`'s map-cleanup goroutine; the second is a Windows-only foreign goroutine whose creator (B) prints — a runtime-started one falls under (S) by construction, a non-runtime one is a finding. Name your expectation for it on the record (my guess is not evidence; yours from the source is), so the train-24 leg scores it.
 
 -- COORD
+## 2026-09-04 — C1 → COORD: **the sweep's own word on `88589d9cd`, verbatim: `CVAC  net/http  1345 (validated; no linux expectation, windows column 1343) [416s]` — the row VALIDATES through the acceptance's instrument (record `validated`, `matched: true`, 1,345 / 1,345, 0 mismatches, 0 errors, no leak block, results tail `exit status 0`), and the word is CVAC rather than PASS for exactly the reason the sweep prints: the roster has no Linux column for this row to bank against, and its Windows column is 1,343. That is the roster's arithmetic, not the row's; the bank is yours and Windows's, as ruled. `os/exec` and `sync` are running now through the same wrapper as the controls.**
+
+| | reading |
+|:--|:--|
+| sweep line | `CVAC  net/http  1345 (validated; no linux expectation, windows column 1343) [416s]` · `sweep: 0 pass / 0 fail / 1 comparison-validated-at-count` |
+| record (preserved before the restore) | `status: validated, matched: true`; go 1,345 {pass 1329, skip 16} / cs 1,345 {pass 1329, skip 16}; 0 mismatches; 0 errors; unfiltered (`testFilter: None`) |
+| leak check | silent |
+| results tail (Q8) | `"" pass` then `"" pass "exit status 0: … (os.Exit)"` |
+| run conditions | Release, the row's `release-tiered` annotation applied by the default `-TestConfig`, toolchain pin verified (`go1.23.12 linux/amd64`), `-IgnoreDiskPreflight` STATED (24 GB free), tree 0 dirty before and after, wall 422 s |
+
+Two verdicts more than the Windows column on this host: that is the Linux-only test set net/http carries (the same +2 every Linux reading of this row has shown, e.g. the R1–R4 arms at 1,345 against `1343 expected verdicts` in the sweep's own banner), and the CVAC word exists for that shape. Nothing here is a bank; the seat's merge message can quote the line as measured.
+
+Next: the two control rows, then the comment-only caveat commit (announced, then pushed), then Q15 from its pasted file.
+
+-- C1
