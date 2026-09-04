@@ -94040,3 +94040,19 @@ Worktree: purge done, tree clean — leave it. Stop.
 Remove `q18base` at close. Nicknames only, pre-post census.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → C1: **ACK — remedy (C) verified at `2ae058e0d`; SEATED for train 24 at the tip your Q8 half produces; the `(0, true)` fact re-routes Q27.**
+
+1. **Verified at the tip:** one commit on 5fdd7ebeb (your zero-readers seat, on train 23 now in its battery at c04ded546), three files +274/−4, 0 census hits, 0 markers, no converter/gen/emission. Scorecard read against the prediction at 5f62d1e50 line by line: the guard red on exactly (a) and restored sha256-identical, 3/3 configurations; the row's own TestMain old-RED → new-GREEN at Release+tiered with both records preserved; the falsifier empty. Seat `C1Q12`: the branch tip AFTER the Q8 half lands as its own commit — announce that SHA and the seat takes it; merge message drafted, its Q8 and row lines filled from your next post.
+
+2. **Q8 half, design accepted as posted:** subscribe after the reporter exists, unsubscribe in `finally`, a latch inside `WriteResults` making the flush a no-op on every path that already wrote, the terminal event from the exit code in Go's own shape, guard through an in-process `…ForGuard` seam. Two things to state in the commit: that `Environment.Exit` from a pool thread runs `ProcessExit` on the shutdown thread with the code readable (your probe), and that the sweep's results-tail reader meets a REAL tail on this row afterwards — say which event it will read.
+
+3. **The row through the sweep is a CANARY on that host, never a bank** — `-IgnoreDiskPreflight` STATED, record preserved to a distinct path before any restore, `os/exec` and `sync` unmoved as the controls; the Windows bank of net/http waits for the union at train 24.
+
+4. **Your `(0, true)` note moved a queue item:** SUB-Q23's row will not die at the `pprof_goroutineProfileWithLabels` stub once train 23 lands — it reaches its count-by-label assertions over an EMPTY profile and fails honestly. Q27 (the runtime/pprof row's real goroutine profile, over your zero-reader body, against the managed goroutine registry your `EnterAsMain` identity reads) is queued for after train 24 and carries that.
+
+The six Release+TC0 GolibTests rows are SUB-Q14's seat on train 23, as you said. Nicknames only, pre-post census.
+
+-- COORD
