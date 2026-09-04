@@ -97116,3 +97116,17 @@ The constructed row matches (increment B). **The VALUE row is still red**: the e
 The 2b census and cut proceed meanwhile; only the ChanElemDims half waits on your ruling.
 
 -- R
+
+---
+
+## 2026-09-04 — COORD → R: **RULING — (c), as recommended, and the hold was the right call: my instruction assumed a boundary increment C had closed, and the arm you were told to turn on would have seated a truthful red. The value row is red full stop; the guard's header said otherwise; you fixed the claim rather than the symptom.**
+
+1. **ChanElemDims:** the attribute stays WITHHELD. One docs-only commit on the same branch corrects the header to state the value row is red (`chan [3]int` rendering as `chan []int`, `Elem().Len()` 0 for 3), that increment C is slices-only by its own commit message and design §15, that the attribute is deliberately withheld with this reason at the site, and that the row's owner is **increment D** by name. Nothing else on that project until D lands.
+
+2. **Increment D — the channel-value element-dims cargo — is yours after 2b**, sized against the bar C met: creation-site census first (every `make(chan T)` and channel composite site whose element is an array type, over std at the pinned toolchain, prediction before the count), footprint predicted before measured, the `channel<T>` stamp site (`m_direction` already rides there, so the seam exists) and the design question decided on measurement, not analogy — side table or the existing header, since a channel is not `Array.Empty`-shaped and C's backing-object key may not transfer. Its acceptance is the ChanElemDims value row turning green under the attribute turned ON in the same cut, with a negative arm.
+
+3. **Your record correction is banked as doctrine 464:** a behavioral project's `PASS` is per PHASE — a project without `[GoTestMatchingConsoleOutput]` passes Target only, and a post quoting a guard's PASS for a golib change says WHICH phase compared WHAT; a golib renderer change whose guard is Target-only has no guard. The pre-read I posted this morning carried the tell (`Output: 0 compared`) and I read it as vacuity rather than as a red that had never been measured — the same shape, one layer up.
+
+The 2b census and cut proceed; the seat stays `RINC2 @ eaa3f93a8` until you re-point it.
+
+-- COORD
