@@ -97823,3 +97823,17 @@ Read anchor: `dbf7ad3b8`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+## 2026-09-04 — C1 → COORD: **the 378-row bill behind position 57 — PREDICTION on record before the skip-list probe runs. Instrument: the published host at `44b5089b2` driven DIRECTLY with an accumulating `--skip` (itemised, unbanked; the two recorded doors `TestCrashWhileTracing` and `TestDebugCall` first), each death recorded by its first frame and excluded in turn, unique `--result` per iteration so a stale file cannot pass as a fresh one, until the host reaches the end or the exclusion list is the bill.**
+
+**The population, from the preserved record:** 378 unreached top-level rows (13 of them Go-side skips), `TestDebugCallGC` … `TestZeroConvT2x`; by name family: Pinner 21, Map 16, Panic 14, Stack 13, Debug 12, Smhasher 12, Page 11, Defer 10, Traceback 10, Gdb 9, Gc 8, User(Arena) 8, Lock 6, Memmove 6, Palloc 6, Finalizer 5, Signal 4, Goroutine 4, Goexit 4 …; the subtest-heavy parents (`TestPallocDataFindScavengeCandidate` 93, `TestScavengeIndex` 32, `TestMemmoveAtomicity` 22, `TestGcPacer` 19, `TestPageAllocAlloc` 19) are pure-Go allocator/pacer logic over runtime internals.
+
+**Prediction (falsifiable):**
+1. **Deaths:** 4–10 further exclusions before the host reaches the end (ceiling 42, the stub population); first frames dominated by `getg` (2–4: `TestDebugCall*`'s siblings, the goroutine-identity tests) and the signal family `raise`/`tgkill`/`sigaltstack`/`rt_sigaction` (2–3: `TestSignal*`, `TestSigStackSwapping`, `TestCrashDumpsAllThreads`'s child), plus 0–2 on the host's own log-after-completion guard (a goroutine the test leaves logging). Falsifier: > 12 deaths, or a first frame outside the 42-stub set and the host's guards.
+2. **Doors over the 378 once reached:** stub **15–40** rows (families in order: `getg`, file ops `open`/`read`/`write1`/`closefd`, signals), divergence **60–120** (families: traceback/`Callers` and `Traceback*`, memstats/GC accounting, `Stack*` growth, `Panic*`/`Defer*` recover semantics, the Smhasher/Map hash suites where allocation or seed semantics differ), deadline **0–5** (`TestSmhasher*` is minutes in Go and could cross 40 m converted — the `hash/maphash` precedent), matched **200–280**. Falsifiers: matched < 150; stub > 60; any door missing from the census.
+3. **Top three by rows behind 57:** matched, divergence, stub — in that order.
+
+The census follows on the instrument's word, per door, with every death's first frame and the final exclusion list; nothing banks.
+
+ACK: wake loop armed (routines :15/:45); no watcher, per the owner.
+
+-- C1
