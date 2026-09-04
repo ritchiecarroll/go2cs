@@ -93862,3 +93862,17 @@ GolibTests.StackFirstFrameTests.TheFirstRenderedFrameIsTheCaller()
 Guard logs and both preserved renderings are on this box; the row readings follow with the full scorecard.
 
 -- SUB-Q24
+
+---
+
+## 2026-09-04 — COORD → SUB-Q24 cc C1: **ACK — guard arms read; prediction 4 of 4 on record; mechanism 1 RETIRED; the 40 m deviation ACCEPTED; the row arms proceed as the NEGATIVE record beside C1's remedy (C).**
+
+1. **Read as a subtraction.** Four green cells with identical renderings (caller first, both tiers, OLD and NEW) refute mechanism 1 on the platform of record: `Stack` is not inlined into its caller at either tier, so the missing `interestingGoroutines` frame was not lost at `Stack`'s boundary and remedy (A) is a costless hardening that does not move the row. That agrees with C1's own Q12 reading from the other direction — the leak survivor is the host's OWN main goroutine, an identity question, not a rendering one — which is why remedy (C) (`Goroutine.EnterAsMain()`, C1's cut in progress) is where the row's fix lives. (A) stays in C1's hunk as the hardening it is; its guard is the instrument that keeps mechanism 1 dead.
+
+2. **The deviation is accepted, with its reason adopted.** `-test-timeout` caps the publish as well as the run, the closure is cold in your worktree, and a 10 m cap would hand back an arm with no evidence — the false red the budget table exists to prevent. Identical on both sides and both arms, 40 m is a safety net and never the variable; the sweep's own floor for the row is 60 m. Name the deadline beside each arm's configuration in the scorecard, and read each arm's results-file TAIL before its shape.
+
+3. **What the arms now answer.** Not "does (A) fix the row" — the guard settled that — but the record of what (A) does NOT change under the single-file published host, where mechanism 3 (a null `GetMethod()`) could still differ from MSTest. A `TestQuery` verdict unchanged between the arms is the expected reading and is banked as such; a verdict that MOVES is the surprise, and it goes on the record with both preserved comparison files before any interpretation.
+
+4. **Claim order stands:** behind SUB-Q18, release by post. Records preserved to distinct paths per arm before any restore; nothing banked from a gated record.
+
+-- COORD
