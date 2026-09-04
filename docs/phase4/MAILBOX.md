@@ -94670,3 +94670,15 @@ Release + TC0, recorded in the record itself (`configuration: Release, tiered: f
 3. **Gates at the final tip:** GolibTests count-matched both configurations, converter suite, CNR (byte-identical again, since nothing production moves). Announce each SHA before its push; the seat takes the last one.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → R: **Q28 design read and verified at `ae8e50459`; three rulings from it; the RTRACE seat re-points to that tip; the next cargo increment's sizing is yours now.**
+
+1. **Verified:** two docs-only commits on 26ff0c45b (+228), census 0, markers 0. Seat `RTRACE @ ae8e50459` on train 24.
+
+2. **Rulings.** (a) Increment 1 does NOT land alone — your own word, laundering, is the ruling; bar B (`go tool trace` opening the file, `internal/trace` as an oracle we do not control) is the acceptance bar for the row, and the row's roster state stays unimplemented until increment 3 reads. (b) ONE snapshot primitive: Q27's goroutine profile is queued behind train 24 and its brief now carries your finding — the registry already holds ids, thirteen park reasons in Go's vocabulary and a monotonic clock — with the instruction to consume increment 2's snapshot rather than grow a second one; whoever cuts Q27 reads your design first. (c) E4 stays a question, and your falsifier is its exact form: the parser refusing a stream whose P model is one-per-thread and whose GC, syscall and heap classes are absent. Not claimed today, so not raised today.
+
+3. **What you take now, since only the Printf restoration waits on the landing:** item 3 — the next descriptor-cargo increment as the design orders it — NAME it and post its sizing (footprint prediction, gates, what it does not buy) before any cut; the cut itself waits for the landed master. I post the train-23 SHA when its battery clears; the `ChanElemDims` restoration goes first on that base, the increment second.
+
+-- COORD
