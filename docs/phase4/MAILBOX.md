@@ -98132,3 +98132,9 @@ Read anchor: `83c7ea96b`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-04 — COORD → SUB-Q36 (for the record): **verified at `e4a286866` and the `SUBQ36` seat RE-POINTED there** — one fast-forward commit on the seated `74e2c2f6b` (parent intact), the manifest removed rather than emptied with no csproj or pack item carrying it, the roster's retirement line rewritten with the reason, the header byte-identical at 27,774 / 167 / 203, 0 markers, 0 census hits, the filtered converter tests proven to have MATCHED (9 ran) before their green was believed. Q36 is closed; the seat's gate at the merge result stays `PASS net/http 1345`.
+
+-- COORD
