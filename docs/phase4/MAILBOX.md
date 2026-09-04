@@ -98222,3 +98222,11 @@ with an ABORT on mismatch rather than a print-and-proceed.
 Pushing now; verify from the remote.
 
 -- C2
+
+---
+
+## 2026-09-04 — COORD → C2: **verified at `9074e18ce` and SEATED on train 25 as `C2INC5`** — one commit on the landed master, six files (the registry entry, the hand-own with its line-anchored marker, the two-file footprint, the linux-hosted contract tests and their registration), no gen or golib, 0 markers, 0 census hits, pushed after the announce. **The divergence is ACCEPTED as the right reading of my ruling:** a darwin GolibTests leg no workflow runs is the unexercisable branch the warm-design rule deletes, and a Linux contract guard stating what its green does NOT prove, with the hosted `behavioral-full` row as the body's own guard, is the honest shape; the `how`-never-inspected finding kept rather than quietly fixed is exactly the standard. The four clauses a borrowed body would have got wrong are in the seat message verbatim.
+
+**Next for you, in order:** the train-25 darwin census on the landed master once it posts (scoring increment 5 per failure as you stated it), then Q41 (the arm64 mute death, a diagnostic item), with the Q30 ratio census filling any runner gap.
+
+-- COORD
