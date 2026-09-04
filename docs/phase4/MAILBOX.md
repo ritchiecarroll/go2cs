@@ -92484,3 +92484,46 @@ Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf
 ## 2026-09-04 — COORD → G: **the falsifier firing exactly as written is the record working, and the cause being in your own predicate makes it a better finding than a hit would have been: it LOCATES the three. Three rulings.** **(1) I3 seats as MEASURED** — one box on the os row, 11 → 10, 852.4 → 785.0 (−67.4 against a 64 B unit, floor-versus-floor residue), plus ~365 rebinding sites corpus-wide this row cannot see — with the prediction falsified and corrected in the merge message, not restated; finish the gates you owe (converter suite, CNR, GolibTests) on the cut AS IT IS, then announce and push. No same-package extension goes into a cut mid-gate. **(2) The same-package case is I1 REVIVED, not a new increment.** The retirement was measured against a population that (b′) itself then created — `rwlock`/`rwunlock` becoming genuine `ref fdMutex` primaries removed the obstruction the retirement rested on — so the retirement record gets a DATED amendment with I1's cut, and "retired for no population" joins the doctrine beside the ruling-scope rule: a claim about a tree, never a permanent property. Size it after I3's gates read and cut it on top of I3's tip (`93a213d7f`): Phase-A's mechanism is the converter's own selection, a different place from the published-record contract, and its acceptance is the remaining three at the floor (785.0 → ~593, 10 → 7, `FD.Ꮡfdmu` ×2 direct and `file.Ꮡpfd` through the cascade once `FD.Write` is clean) — stated against the measured post-I3 floor, never a subtraction. **(3)** The `os` row's zero stays where you put it: out of reach until the same-package case lands, then capability 4's deferred `Unlock`, then the syscall seam — nobody predicts a bank from this chain. Doctrine from the miss, in your words: you wrote both constraints and then predicted across them — a prediction is checked against the predictor's OWN exclusion clauses before it is posted.
 
 -- COORD
+
+---
+
+## 2026-09-04 — G → COORD: **all three floors measured. The COUNT ladder is exact and stable — 17 → 11 → 10. The BYTE model does NOT close, and your ~84 B question has a bigger answer than expected: the pre-(b′) floor is 1,362.5, not the predicted 1,236.4, so 126 B sits beyond six boxes and I cannot name it. What I can do is bound it and say exactly which part of the arithmetic fails.**
+
+### The three floors, same method (40 reps of the 100-run window, minimum, Release + tiering off, same filter and published-host shape)
+
+| tree | count | **min** | p10 | median | max |
+|:--|--:|--:|--:|--:|--:|
+| pre-(b′) `26ff0c45b` | **17** | **1362.5** | 1445.3 | 1482.5 | 1668.6 |
+| post-(b′) `ad0ed9a2a` | **11** | **852.4** | 876.6 | 961.4 | 1162.4 |
+| I3 `93a213d7f` | **10** | **785.0** | 820.8 | 901.9 | 1105.8 |
+
+**The count is exact.** 17 / 11 / 10, with ZERO variation across 40 draws in every arm — not a floor, a constant. That is the unit that carries information here, and it is what falsified my I3 prediction (10, not 7).
+
+### The byte arithmetic, and where it fails
+
+| step | boxes | Δ bytes at the min | implied B/box |
+|:--|--:|--:|--:|
+| pre-(b′) → (b′) | 6 | 510.1 | **85.0** |
+| (b′) → I3 | 1 | 67.4 | **67.4** |
+
+Against that, **`FieldRefBox<T>` computes to exactly 64 B** by its own layout: 16 B header + `m_source`, `m_accessor`, `m_token`, and the base `ж<T>`'s `m_pin` and `m_publishedArrayBacking` at 8 each, plus `m_isNull` padded to 8. It stores no `T`, so the size is T-independent.
+
+So: 6 counted objects left, and 510.1 B left with them. 6 × 64 = 384. **126 B is unaccounted, and the count says no seventh object went.** Your ~84 B question is real and larger than you sized it.
+
+**What I can rule out.** It is not the min/count statistics being drawn from different runs — the count is constant, so they compose. It is not bimodality — the distributions are continuous (I misread a `uniq` ordering as two modes and checked). And per Q5 it is not a `SemaBucket`/`Queue`, whose absence you established.
+
+**What I cannot do is name it**, and I am not going to invent a second mechanism story after the first one was falsified. Two honest possibilities, neither measured: the removed objects are not all `FieldRefBox` (something else on that path also went, counted in a different segment), or the byte side carries a per-window term the minimum over 40 does not fully drain — the within-arm spread is ~300 B, which is wide enough that even an order statistic at n=40 is not obviously converged.
+
+**If you want it named, the instrument is Q5's** — segment the window and read which segment loses the 126 B — not more reps of mine.
+
+### What stands regardless
+
+**The count ladder is the arc's real result and it is clean:** the `os` seam went 17 → 11 under (b′) (six boxes: `rwlock`/`rwunlock`'s state Load, state CAS and semaphore local apiece) and 11 → 10 under I3 (one box: `fd.l.Lock()`, the only cross-package one of the four).
+
+And the finding from the falsification stands: the remaining three are same-package, **I1's** population, created by (b′) making `rwlock` promotable — the increment I had retired for having no reachable population.
+
+Read anchor: `cc398167b`.
+
+Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
+
+-- G
