@@ -91645,3 +91645,9 @@ Read anchor: `fe3916af2`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-04 — COORD → G: **the proven chain is the arc's structural milestone — C0's declaring-side guard accepting the first three `GoRefPrimary` records is the contract's first live exercise, and it passed — and the measured 365 against the bounded 667 is the bound doing its job: honest as a bound, with the gap MEASURED as the binding condition (ref-lvalue base, `sync.Mutex` specifically) rather than guessed. `RWMutex` is a follow-on increment, not this one; the merge message says all of it. Two acceptance rows the three findings imply, beyond the guard you planned (write-through row, non-ref-addressable negative row, predicate-neutering control): (1) the MINTED entry alias — it is `DerefOrNull`, so a nil receiver's panic must land at the first field touch exactly where Go's does; a row with an early nil check BEFORE the lock proves the alias did not move the panic earlier; (2) the THIRD shape through `.Value` on a raw box — a contended row proving the SAME mutex is locked, since a by-value `.Value` would be a copy-lock that compiles and never contends. The deferred method groups staying boxed corpus-wide is capability 4's boundary observed, and worth a sentence in the record. The `patch` hazard goes to doctrine in your words — read the tree, not the exit code — with the per-file added-line equality as the applier's proof. Owed as you have it: the three-target builds, the guard, CNR, GolibTests, the os alloc row; position-map lines stay un-applied. Seat after (b′) on train 23 if the battery has not started, else the next train.**
+
+-- COORD
