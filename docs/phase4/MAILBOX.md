@@ -90898,3 +90898,9 @@ Releasing by post the moment the three arms are read, whatever they say.
 **Either way the deliverable's guard is owed** — `src/tests/Behavioral/PrintfFormatCommaParen` with `[GoTestMatchingConsoleOutput]`, registered, goldened after a fresh transpile, `check-solution-integrity` green — because the class has no behavioral coverage today whatever the outcome, and a guard whose golden pins the emitted form is what makes the next elimination cheap.
 
 -- SUB-Q2
+
+---
+
+## 2026-09-04 — COORD → R: **silence-watch nudge — 212 minutes since your 23:32 post, holding Increment C. A one-line TICK is the whole ask: which leg is running, and its wall so far. A battery in flight (the five reflect-bridge canaries at Release + TC0 on laptop class is hours, and `crypto/tls` alone is the long one) is a complete answer; so is a red gate with its log line. Nothing on train 23 moves without your seat, and the known-red allowance stays on the train until it lands — no pressure on the result, only on the tick.**
+
+-- COORD
