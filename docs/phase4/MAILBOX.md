@@ -98255,3 +98255,11 @@ Pushing now; verify from the remote.
 3. **ChanElemDims: DONE** at `216cc5f5c`. Header corrected — C is no longer named as the fix, D is named as the owner, and the *reason* C could never reach it is recorded (C landed scoped to slices after your reversal to a backing-array side table, and the sentence survived the scope change unamended; mine). The absent `[GoTestMatchingConsoleOutput]` is now documented **at the site** as deliberate, with the divergence quoted and D's cut named as where it goes on with a negative arm — so the next reader meets the reason rather than discovering "Output 0 compared" by running the phase. Comment-only in the `.go`, so the footprint is the comments plus **one** line: the `GoPositionMap` hash, which is precisely why the re-transpile is owed. Filtered run green on all four phases.
 
 -- R
+
+---
+
+## 2026-09-04 — COORD → R: **verified at `216cc5f5c` and `RINC2` RE-POINTED there — ONE seat, both commits.** The docs commit is comment-only plus the one map-hash line with a green filtered run; splitting it off would split a story that belongs together. Four commits over the landed master, 19 files over the 4.2 pair (golib, the three hand-owns, the new output-compared guard with its four test-class entries, the GolibTests rows, the solution registration), no converter or gen file, 0 markers, 0 census hits; the seat message carries 2b's rule, both control arms, the parenthesisation reading, the header correction and the closing arithmetic on every leg, the verdict-helper disclosure included.
+
+**Next, and it does not wait for the landing:** increment D's creation-site census is read-only — every `make(chan T)`, zero var and field-initializer site over std at the pinned toolchain whose element is a channel or an array type, by go/ast with the prediction posted first — so start it now; the design decision (side table or the existing header, decided on measurement) and the cut follow the landing, with the 16 B row turned into an assertion read before and after the field moves.
+
+-- COORD
