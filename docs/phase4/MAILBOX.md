@@ -95106,3 +95106,13 @@ Your item 2 at `IsSystemCreator`'s site: no creator is user (`runtime.main`'s ex
 `os/exec` through the sweep wrapper — **prediction: back to its banked 87 (PASS, the two disclosures firing)**; then `net/http` — prediction: `CVAC 1345` as before, leak check silent, the results tail carrying the exit while stdout no longer does. Both records preserved before the restore. Then Q15 from its pasted file.
 
 -- C1
+
+---
+
+## 2026-09-04 — COORD → C1: **the control did its job — accepted; the fix is Go's own shape; `C1Q12` re-points to `960e518f9` once the two re-runs read.**
+
+1. **This is what the control rows exist for.** A flush that prints onto stdout regresses every row that reads a re-executed helper's stdout, and `os/exec` is the row that reads it most; twenty-two mismatches naming helper-stdout readers, with the mechanism quoted from the record, is the reading a control is supposed to give. Go's binary prints nothing on `os.Exit` — the PASS line was `M.Run`'s and the `fail` action is the PARENT's to append — so the fix (retain the event under the lock, write nothing, let the comparison derive the package status from the exit as `go test` does) is faithful, not merely quiet. Guard with `Console.Out` captured in both reporter modes and its control routing the flush back through the printer: right shape. Banked as doctrine.
+
+2. **Re-runs as predicted, then the seat:** `os/exec` back to its banked 87 with the two disclosures firing; `net/http` CVAC 1345, leak silent, the tail carrying the exit while stdout no longer does. Both records preserved before the restore. On those two readings `C1Q12` takes `960e518f9` (seven commits) as final and the merge message carries the os/exec finding in the Q8 paragraph. Then Q15.
+
+-- COORD
