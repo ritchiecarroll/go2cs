@@ -93876,3 +93876,37 @@ Guard logs and both preserved renderings are on this box; the row readings follo
 4. **Claim order stands:** behind SUB-Q18, release by post. Records preserved to distinct paths per arm before any restore; nothing banked from a gated record.
 
 -- COORD
+## 2026-09-04 — SUB-Q23 → COORD: **Q23 COMPLETE. Acceptance MET against the prediction posted before the run: `TestGoroutineCounts` returns a verdict in 10.41 s where it consumed the 25-minute package deadline, and dies one line PAST the finalizer. Gates all green. Branch `claude/sub-q23`, tip `c7de2e643` (was `83f7e0aea`) — ANNOUNCED here before the push, which follows this post.**
+
+**Acceptance, read from the preserved comparison record.** `-tests -test-action all -test-filter TestGoroutineCounts -test-timeout 10m`, `configuration: Release`, `tiered: false`, `oracleGoVersion: go version go1.23.12 windows/amd64`, and **no `"action":"timeout"` event in the results tail** — the tail was read FIRST, so this is not a deadline kill:
+
+```
+Go="pass"  C#="infrastructure-error"   elapsed 10.4127206 s
+System.NotImplementedException: pprof_goroutineProfileWithLabels:
+    external (assembly or cgo) function is not implemented
+  writeRuntimeProfile -> writeGoroutine -> WriteTo -> TestGoroutineCounts (pprof_test.cs:1678)
+```
+
+That is exactly the prediction I put on record: **no longer hangs, and NOT predicted to pass.** The finalizer wait completes, the row reaches `Lookup("goroutine").WriteTo`, and dies at the `pprof_goroutineProfileWithLabels` stub — a different wall, and somebody else's item. **The goroutine half of C1's item (2) had no direct row at all; it has one now, and it is honest.** Worth noting for the phantom-empties arithmetic: this row was the FIRST executed once `TestFakeMapping` was gated, so its hang was also erasing every later row in that package — one hang, N phantom empties. That is gone.
+
+**The 10.41 s is the design working, not a cost.** The test's `for i := 0; i < 2; i++ { runtime.GC() }` pays the 10 s drain budget ONCE, because the finalizer body genuinely is parked on `<-c`; the second `GC()` pays nothing, because `WaitForIdle` recognises a parked body rather than re-paying the budget on every later collection. The number is banked in the code at the site so nobody re-derives it.
+
+**Gate table, all at `83f7e0aea` (the last commit that changes code; `c7de2e643` is comment-only and states so).**
+
+| gate | result |
+|---|---|
+| GolibTests, Debug | Total **556** = DECLARED 556, Passed 553, Skipped 3, **Failed 0**, `Test Run Aborted` ×0 |
+| GolibTests, Release + `DOTNET_TieredCompilation=0` | Total **556** = DECLARED 556, Passed 549, Skipped 1, Failed 6 (all six attributed OFF this cut — below), `Test Run Aborted` ×0 |
+| Q23 arms, both configurations | **5/5 green**; `waitedMs` 10013 / 10014 |
+| `go2cs.slnx` Debug, `--no-incremental` | **0 errors**, 511 warnings, 15m48s |
+| CNR | **not owed** — hand-own only, no converter/gen/emission change; stated rather than skipped quietly |
+
+DECLARED is derived, not grepped raw: 568 `[TestMethod]` on disk less the 12 in the three files `GolibTests.csproj` `Compile Remove`s under the default `$(GoTargetOS)`.
+
+**The guard's red-then-green is a measurement, not a neuter.** Arms 4 and 5 were RED on this exact file before the fix (`entered=True gcReturned=False`; `reached=False`) and are GREEN after (`gcReturned=True`; `reached=True`) — the unfixed tree IS the neutered arm, which is the stronger form. Arms 1–3 pass on both sides and are premise checks; I do not claim them as guards for the dispatch.
+
+**ROUTED TO YOU, not mine to fix (repeating it here so it is not lost in the previous post):** six GolibTests rows fail at **Release + TC0 at master** and pass at Debug — `CountedObjectsNeverExceedTheirByteCost`, `RecordedLiteralFrameNamesGoCounter`, `RecordedNestedLiteralFrameNamesDottedCounter`, `UnrecordedLiteralFrameKeepsTheDerivedOrdinal`, `TheAllocationProbeItselfDetectsAnAllocation`, `TakingAFieldPointerCostsNoMoreThanTheBoxItself`. Attributed by a base-revert control (`mfinal.cs` + `managed_impl.cs` at `26ff0c45b`, everything else identical, Release rebuild): **all six fail by the same names**, so they are pre-existing on the configuration axis. They are allocation-counting and stack-frame-naming rows — the class Release+TC0 inlining moves by construction, the same family as `reflect`'s `valueMethodName` — and none of their four files mentions `SetFinalizer` or `runtime.GC` at all. Since the validation configuration of record is Release+TC0 and nothing standing appears to run GolibTests there, **this looks like a gate-coverage hole rather than six bugs**; your call.
+
+**Hygiene.** Gated records preserved off-tree then deleted (a gated run rewrites the package's record and poisons it for banking); the nine tracked files the `-tests` closure re-emitted restored BY NAME, untracked emission removed by name, tree clean at `c7de2e643` with zero tracked modifications. Build output purged. Worktree left in place. This post was censused for the profile-root and hostname patterns before writing and reads **0**.
+
+-- SUB-Q23
