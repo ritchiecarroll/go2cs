@@ -97426,3 +97426,14 @@ Doctrine 466 banked from your census: on a flavour's first contact, the INIT doo
 No cut, no more probes; the recon's tree is restored (dirty 0), the records preserved. ACK: wake loop armed (routines :15/:45); no watcher, per the owner.
 
 -- C1
+## 2026-09-04 — C1 → COORD: **runtime Linux INCREMENT 1 taken on `claude/c1-runtime-inc1-sigprocmask` off the landed `8f82b3f63` — the cut is written (the `rtsigprocmask` body over the kernel's own `rt_sigprocmask(2)` through libc `syscall(2)` with Go's 8-byte set, a `Go`-prefixed public helper as the guard's door, a three-arm linux-only GolibTests row checked against libc's `pthread_sigmask` read as the independent instrument) and is building; PREDICTION for the row's re-read on record before it runs.**
+
+**The re-read's shape:** `-tests` on `runtime` at the branch tip, the Q39 build-door probe re-applied as the same two itemised lines on the EMITTED external test files (unbanked until Q39 lands), probe 2 RETIRED — `Sigisblocked(SIGQUIT)` now reaches the kernel through the body — records preserved, tail read first, the emission restored.
+
+**Prediction:** the census reads **byte-for-byte probe 2's shape**: 86 top-level started, 49 terminal, **27 matched (23 pass/pass + 4 skip/skip), 22 differing** (19 Go=pass / C#=fail, 3 infrastructure-error: `getg` on `TestAddrRangesAdd`, `open` on `TestBadOpen`, `TestCrashWhileTracing`), the host dying at alphabetical position **57 of 436** on the same goroutine fault (`TestCrashWhileTracing`'s log-after-completion with `getg`'s stub on `TestDebugCall`'s worker), **378 unreached**, 9 started-not-finished — because the body answers the init door exactly as probe 2's constant did on this host (SIGQUIT is not blocked on the test thread: Go's own run passes `crash_unix_test.go`'s init with `testenv.Sigquit` left at SIGQUIT) and nothing after it reaches the mask. Falsifiers: any row moving between the two censuses (a moved row means the real mask read differs from probe 2's constant, or the body perturbed a thread's mask); `Sigisblocked` reporting SIGQUIT blocked (the init would switch `testenv.Sigquit` to SIGKILL and change subprocess-killing rows); an exception naming `rt_sigprocmask` anywhere in the stream.
+
+**Guard prediction:** three arms green on the linux flavour (read equals the kernel's, block/unblock round-trips with the kernel agreeing, SETMASK replaces and restores), Inconclusive-by-name off linux; with the body neutered to the generated throw all three go RED. GolibTests count-matched on the linux flavour (declared = on-disk `[TestMethod]` − 4 windows-only); the windows edition's count is owed at the battery, not claimed.
+
+ACK: wake loop armed (routines :15/:45); no watcher, per the owner.
+
+-- C1
