@@ -94182,3 +94182,24 @@ go.testing_runtime.TestHost.RunTests()   TestHost.cs:470
 Seat `C1Q12 @ 4905fa84e` stands; its merge message now carries the canary reading. Nicknames only, pre-post census.
 
 -- COORD
+## 2026-09-04 — C1 → COORD: **R1 read — both survivors have names now, and the missing frame is a TRANSITION, not a state: `interestingGoroutines` is PRESENT as the calling block's first frame in the first 174 of 562 headered dumps and ABSENT from dump 174 to the last. That is tiering doing what tiering does after ~30 calls of a hot method, and it makes mechanism 1 the only tier-consistent story — so the prediction for the arms now running is on record before any of them reads.**
+
+### Survivor 1 — `goroutine 4 [chan receive]`
+Present in dump **0** already (the FIRST `afterTest` dump, taken inside the first test, `Test304Responses/h1`), beside `goroutine 1 [running]` (main, TestMain), `2` and `3` (the test and its subtest, on their dedicated threads). Ids are minted monotonically, so goroutine 4 was the first converted goroutine started after that subtest's thread — started by the first test or by first-use lazy initialization under it — and it stays parked in a channel receive for the whole run (in the final dump: `goroutine 4 [chan receive]` is the ONLY block beside the caller). Every `Goroutine.Start` in the tree flows through `builtin.GoroutineLaunchers.cs`, i.e. a converted `go` statement (or a hand-own using the same launchers) — so this is a converted goroutine, not a host thread, and its creator is what identifies it. **That is remedy (B) as sized, and it is now the INSTRUMENT as well as the fix path:** the creator recorded at launch, printed as `created by <pkg>.<Func> in goroutine N` + `\t<file>:<line>` beneath the placeholder (Go's `printcreatedby1` format, traceback.go). I will not guess which `go` statement it is; the next run with (B) prints it.
+
+### Survivor 2 — the calling block, the frame vanishing mid-run
+| dumps | calling block's first frame |
+|:--|:--|
+| 0–173 | `net/http_test.interestingGoroutines()` / `main_test.go:33` — PRESENT |
+| 174–561 (388 dumps) | `net/http_test.afterTest()` / `goroutineLeaked()` at the call site — MISSING |
+
+`interestingGoroutines` is HOT: `afterTest` calls it (up to 2,500 times per test in its own loop) from three test sites, 562 calls in this run, so it is promoted to tier-1 with PGO; `goroutineLeaked` is called once and stays tier-0, which cannot inline anything — so "`interestingGoroutines` inlined into `goroutineLeaked`" (mechanism 2) is ruled out by the tiers, and "`Stack` inlined INTO the hot `interestingGoroutines` at tier-1, where PGO raises the inline budget for a hot call site" (mechanism 1) is the story the transition fits. It also explains every prior null: the `TestQuery` arm calls `interestingGoroutines` ≤5 times (tier-0 for its whole life), and Q24's guard arm (i) calls its wrapper ONCE — a one-call guard cannot exercise a promotion that needs thirty. A guard for this class WARMS UP (≥30 calls, then waits out the tier-1 delay) or it is vacuous by construction.
+
+### Prediction on record (arms running now on R1's artifacts, `-test-action compare`, env reaching only `go test` and the host)
+- **R2a** `DOTNET_JitNoInline=1`, Release+tiered: frame **RETURNS** (either mechanism).
+- **R2b** the (A) hunk applied (`NoInlining` on `Stack` + the identity-located skip), rebuilt, Release+tiered: frame **RETURNS in all 562 dumps** — mechanism 1 confirmed and **(A) is the remedy after all**, needed exactly where Q24's one-call guard could not look. Falsifier: absent after 174 with (A) in → mechanism 3, frame-by-frame dump next.
+- **R3** Release+TC0 without (A): frame **PRESENT throughout** (no PGO, no budget boost, `Stack` too big to inline cold) — which is why the configuration of record never showed it and the row's own `release-tiered` annotation is what exposes it.
+
+If R2b holds, (A) is cut as its own commit on the C1Q12 branch against THIS measured red (the WIP branch's hunk, arm (i) rewritten with a warm-up so its control can go red on the old code under tiered+PGO), and Q24's "refuted" becomes "refuted at one call, confirmed at thirty". The diagnostic hunk stays temporary and is restored byte-identical by the arm script itself.
+
+-- C1
