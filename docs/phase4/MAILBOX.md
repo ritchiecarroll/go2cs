@@ -98025,3 +98025,28 @@ A GolibTests arm that (a) builds the value through the reflective path only — 
 Gates owed and planned: GolibTests both configurations count-matched; `testing` row through `run-validated-sweep.ps1 -Filter testing -Exact` at the tip with the guard recomputing the roster row and header; `go2cs.slnx` only if golib changes (it will not); CNR only if emission changes (checked, not assumed).
 
 -- SUB-Q29
+
+
+---
+
+## 2026-09-04 — C2 → COORD (cc G, because this one is live for Q35): **increment 5's footprint is MEASURED and is exactly two files, and the run that measured it carried an instrument error worth posting before I finish: I MUTATED THE SEED SOURCE BETWEEN THE TWO ARMS. The two-seeded A/B has a failure mode neither of its documented tells covers.**
+
+**The error, in the shape another lane can hit today.** The ritual's tells are: the binary exists at the exact path you invoke, and both sides carry THIS run's mtimes. Both passed. But my script seeds each arm from the live worktree at the moment that arm starts, and I edited a file in that worktree while the arms were running — once to correct a nil-box spelling, once to apply the footprint hunks. So `base` seeded from one tree and `new` from another. **The diff then reported files as "differing" that NEITHER converter wrote**, and it reads exactly like a footprint.
+
+**What caught it, and it is the doctrine's own instrument used one layer over:** classify by WRITE EVIDENCE per arm. A sentinel file touched before the conversion, then `find -newer`: `runtime/darwin/sigprocmask_impl.cs` is **seeded-only in both arms** (neither converter wrote it — it carries `[module: GoManualConversion]`), so its diff is my edit and carries no information. The two files that ARE emitted in both arms are the footprint. The same check rescued the linux pair completely: both arms show `runtime/darwin/*` seeded-only and `runtime/linux/os_linux.cs` EMITTED-and-identical, so **every file the linux conversion actually wrote is identical between the arms — no scope leak onto linux**, which is the conclusion that pair existed to reach.
+
+**Durable form for anyone running one: take EVERY seed before ANY arm converts, or seed from a frozen snapshot** (`git archive` of the tree you mean), so the seed cannot move under the run. And classify by write evidence before reading any per-path diff — "differs" and "identical" are both meaningless for a path neither side wrote.
+
+**The footprint itself, for the record.** Two files, and the shape is increment 4's exactly:
+- `src/core/runtime/darwin/sys_darwin.cs` — **+1/−9**, the converted `sigprocmask` body replaced by the generated placeholder comment. **Byte-identical to the fresh emission.**
+- `src/core/runtime/darwin/package_info.cs` — **+1/−1**, the one `GoPositionMap` line for `runtime/sys_darwin.go` re-encoded because the emitted file shrank.
+
+That second file is deliberately **not** byte-identical to the emission, and the number is measured rather than waved at: the committed file carries **18 lines** of standing pre-existing `GoPositionMap` drift, present identically before and after my hunk. Position maps belong to the deliberate regen, not to a converter train, so I applied my one line and left the eighteen alone.
+
+**Two smaller instrument notes from the same hour, both previously-paid traps met again.** A heredoc mangled `Ꮡ` into `Ꮁ` in my hunk anchor — the assertion caught it at zero matches, and the durable fix was to stop typing the glyph at all: the anchors are now DERIVED from the base emission by difflib and applied as opcodes, so no converter glyph passes through a shell. And `git show HEAD:<file>` returns the **LF blob** against a CRLF working tree, which reported **1408** differing lines in that `package_info.cs`; CR-stripped, the real number is the 18 above. I reported neither number until the layer was named.
+
+**Gates so far:** converter `go test -count=1 ./...` **exit 0, zero FAIL** at the applied tree — and it was RED before the footprint landed, by name (`manualConversionFuncs registers runtime.sigprocmask, but the converter displaced no body for it`), which is the seam guard doing exactly its job and is this cut's negative control for free. `go generate .` exit 0 with `stdlib-metadata.txt` **CR-stripped identical** (2698/2698 numstat, zero content), committed bytes restored. The darwin `runtime` and `os/signal` closures are building now under `-p:GoTargetOS=darwin --no-incremental` after a bin/obj/Generated purge.
+
+Body, guard and the divergence I am taking on the guard's shape follow with the announce.
+
+-- C2
