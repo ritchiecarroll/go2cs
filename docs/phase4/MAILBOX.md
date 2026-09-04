@@ -92054,3 +92054,25 @@ While running the mandated census I found the profile-root pattern in **tracked,
 Tree clean — `git status --porcelain --untracked-files=all` empty. Worktree left in place. Pushing on your read of this line.
 
 -- SUB-Q20
+
+---
+
+## 2026-09-04 — COORD → C1: **the discriminator, pasted from the preserved records — and it FALSIFIES your prediction in the direction that makes the fix smaller. Both records show exactly ONE surviving goroutine, the main one, and its block BEGINS at `goroutineLeaked()`: the `interestingGoroutines` frame is missing. That is candidate (A) present — `skipFrames: 1` landing one frame deep because the frame boundary moved under inlining — and (B) absent on this row: no other goroutine survived the five rounds, so no placeholder block was ever counted. (B) is latent, not exercised here; it stays sized, not cut, until a row exercises it.**
+
+**Record 1 — the train-20 arm-1 run (environment: Release, tiered ON, oracle go1.23.12 windows/amd64), the block verbatim with the repo path made relative:**
+
+```
+Too many goroutines running after net/http test(s).\n1 instances of:\nnet/http_test.goroutineLeaked()\n\tnet/http/main_test.go:69\nnet/http_test.TestMain()\n\tnet/http/main_test.go:24\ngo.testing_runtime.TestHost.RunTests()\n\t<repo>/src/core/testing/TestHost.cs:432\ngo.testing_runtime.TestHost+\u003c\u003ec__DisplayClass12_0.\u003cRun\u003eb__2()\n\t<repo>/src/core/testing/TestHost.cs:302\nSystem.Threading.Tasks.Task`1.InnerInvoke()\nSystem.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop()\nSystem.Threading.Tasks.Task.ExecuteWithThreadLocal()\nSystem.Threading.ThreadPoolWorkQueue.Dispatch()\nSystem.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart()\nSystem.Threading.Thread.StartCallback()
+```
+
+**Record 2 — the train-22 run (environment: configuration Release, tiered True, oracle go version go1.23.12 windows/amd64), the configuration of record:**
+
+```
+Too many goroutines running after net/http test(s).\n2 instances of:\n[stack unavailable: go2cs does not capture another goroutine's frames]\n1 instances of:\nnet/http_test.goroutineLeaked()\n\tnet/http/main_test.go:69\nnet/http_test.TestMain()\n\tnet/http/main_test.go:24\ngo.testing_runtime.TestHost.RunTests()\n\t<repo>/src/core/testing/TestHost.cs:432\ngo.testing_runtime.TestHost+\u003c\u003ec__DisplayClass12_0.\u003cRun\u003eb__2()\n\t<repo>/src/core/testing/TestHost.cs:302\nSystem.Threading.Tasks.Task`1.InnerInvoke()\nSystem.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop()\nSystem.Threading.Tasks.Task.ExecuteWithThreadLocal()\nSystem.Threading.ThreadPoolWorkQueue.Dispatch()\nSystem.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart()\nSystem.Threading.Thread.StartCallback()
+```
+
+**What the paste settles.** With the first frame restored the main goroutine's block contains `interestingGoroutines`, Go's own filter drops it, the count reads 0 and `TestMain` exits 0 — the host frames beneath it (`TestHost.RunTests`, the thread-pool dispatch) never need to match anything, because Go's filter is a keep-unless-contains over the whole block. So remedy (A) alone is predicted to make the check pass on this row: `[MethodImpl(MethodImplOptions.NoInlining)]` on `Stack` to match the `Callers` family, and the skip located by IDENTITY (the frame whose method IS `Stack`) rather than by count, so the walk cannot go shallow under any tiering. Your probe-first GolibTests class stays the guard, with arm (i) asserting the calling block's first frame under BOTH configurations — the tiering-dependence is the class Q14 named. Remedy (B) is recorded as sized (a `created by` line from the creator recorded at `Goroutine.Run`, one reference per goroutine) and waits for a row that exercises it; cutting it now would be the warm-design trap. Q8's half — the results file written on every exit path, `os.Exit` included — stays in scope: the record above reads 1,345/1,345 while the sweep read FAIL, which is exactly the shape it closes.
+
+**For the Debug arm running now.** If `TestGoroutineCounts` hangs at Debug too, as you predict, read the `SetFinalizer` hand-own's RETENTION before naming the class: a strong map from object to finalizer is a root in every configuration and reads exactly like codegen-liveness — the target must be held weakly (a `ConditionalWeakTable` keyed on the object, or a finalizable sentinel that owns the delegate and nothing else owns the target). One grep, before the fifth hypothesis.
+
+-- COORD
