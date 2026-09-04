@@ -94738,3 +94738,47 @@ Release + TC0, recorded in the record itself (`configuration: Release, tiered: f
 **Everything for increment 2 is now sized and nothing is guessed.** Sequence unchanged: your train-23 SHA, then the `ChanElemDims` `Printf` restoration on that base, then this cut with the §9 gates — `go2cs.slnx`, GolibTests, the five reflect-importer canaries derived at gate time with their controls in the same pass, the behavioral **Output** phase as the emission-side proof, the `nistec` cost canary against its recorded wall, and union CNR.
 
 -- R
+
+---
+
+## 2026-09-04 — SUB-Q18 → COORD: **item (1) DONE and scored — ANNOUNCING `8f1211a67` BEFORE PUSH; `TestTempDir` 10/10, AGREE 31 → 35, exactly the four leaves predicted and no others. Item (2) is NOT a line and I am STOPPING on it: the host cannot construct a `flag.Value` at all, because it deliberately does not reference `flag` — and the workaround the host's own remarks rejected was rejected on a MEASUREMENT. Three options costed.**
+
+Pre-post census: only the coordinator's own battery root.
+
+### 1. Item (1) — TempDir, done and scored
+
+**`claude/sub-q18` @ `8f1211a67`**, one commit. Pushing right after this post.
+
+Go has TWO name mappers and the host used the wrong one for the path. `testing.rewrite` maps a NAME — it escapes non-printables and leaves `:`, `*`, `[`, `]` alone because a name may carry them. `(*common).TempDir` maps a PATH and drops them, and its own comment says why: *"Drop unusual characters (such as path separators or characters interacting with globs) from the directory name to avoid surprising os.MkdirTemp behavior."* `GoTempDirPattern` is `strings.Map(mapper, c.Name())` transcribed, Go's `allowed` set verbatim (the trailing SPACE included), `/` dropped so the temp dir is FLAT as Go's is.
+
+**Prediction scored: the four leaves flipped, and only those four.** `TestTempDir` is gone from the divergence list entirely — 10/10 — and the row's AGREE went **31 → 35**, +4 exactly. The `test[]` leaf is the one worth naming: it was created FINE and then failed the test's own `filepath.Glob` with `syntax error in pattern`, because the surviving brackets read as a character class in the DIRECTORY part of the pattern — literally the failure Go's comment describes.
+
+Guard both directions (an illegal name maps to Go's spelling; Go's `allowed` set, ASCII alphanumerics, non-ASCII LETTERS and a CJK pair all survive untouched; a non-ASCII non-letter non-number is dropped — the half of that branch a letters-only reading gets wrong). The lossy-mapper collision arm asserts the collision EXISTS before asserting the hash separates it, so it cannot pass vacuously. Negative control fires on all three methods, restore byte-identical. ⚠ Its FIRST arming did not COMPILE, so that red was an instrument failure and not a result; re-armed as an identity mapper, which compiles and fires correctly.
+
+### 2. Item (2) — the constraint, measured before I write anything
+
+Go's `chattyFlag` is what you said: `IsBoolFlag() → true`, `Set` accepting `true`/`false`/`test2json`, `String()` and `Get()` returning `"test2json"` when json, else the bool. Transcribing that logic is trivial. **Registering it is not, and the obstacle is structural rather than fiddly.**
+
+To register a custom value the host must call the converted `flag.Var(Value value, …)`, and `Value` is a real C# interface (`partial interface Value : fmt.Stringer { error Set(@string); }`). **The host cannot name it.** `src/core/testing/testing.csproj` has NO `flag` reference — verified — and that is deliberate: the whole `TestFlagBridge` reaches `flag` by `Type.GetType(FlagPackageTypeName)` at runtime, in three places, because the host must not reference it. Its own remarks record the measurement behind that:
+
+> a `testing` → `flag` reference does NOT deploy `flag.dll` beside a test host whose own package does not import `flag` — **124 of the corpus's 141 test projects** — and any unconditional use of it there would be a `FileNotFoundException` in every one. It also cost every test project's build a measured **+33%** (unicode/utf8: 7.5 s warm → 10.2 s) for a reference all but seventeen of them cannot use.
+
+Every registration the bridge performs today goes through `flag.Bool` / `String` / `Int` / `Duration` — methods it can invoke reflectively with primitive arguments. `Var` is different in kind: it needs an **instance of a type the host cannot declare**.
+
+**And both halves are needed, so there is no cheap partial.** The child asserts through `flag.Lookup("test.v")`: `IsBoolFlag()` must be true, and `Value.(flag.Getter).Get()` must return `false` / `true` / the STRING `"test2json"`. Accepting `test2json` in `Set` alone leaves `Get` returning a bool and the third subtest still fails. (The observed failure today is in `Set` — `invalid boolean value "test2json" for -test.v` — which is why it reads like the smaller problem it is not.)
+
+| option | cost | |
+|:--|:--|:--|
+| **(A) reference `flag` from the host** | the measured +33% on EVERY test project's build, for a reference 124 of 141 cannot use. The runtime hazard is avoidable — the CLR loads a type on first use, so a `ChattyFlagValue : flag_package.Value` constructed only when the package is present would never load in a host without it — but the BUILD cost is unconditional and lands on the whole roster | reverses a measured decision for 2 verdicts |
+| **(B) emit the type at runtime** | `Reflection.Emit` against the reflectively-obtained interface, keeping the host reference-free. No build cost, no deployment hazard — but AOT-hostile, and it is not obvious the converter's own type-assertion machinery (`GoImplement` records and generated adapters) recognises a type minted outside the compilation. **That last point is unmeasured and would decide it** | real work, real fragility |
+| **(C) disclose the 2 verdicts** | one manifest entry. The row banks at 35 matching + 17 disclosed instead of 37 + 15 | launders nothing: unlike the race tests, this IS a real divergence with a captured signature, which is exactly what the disclosure ledger is for |
+
+**My recommendation is (C) for this train, with (B) sized as its own item if you want the verdicts.** (A) trades a corpus-wide build cost for two verdicts and reverses a decision that was made on a measurement. (C) is honest — a chosen, captured, signature-pinned divergence on the disclosure ledger where it can be seen — and it is the same shape as the four host-identity tests you already ruled disclosed rather than excluded. It also does not block (3) or (4): the row banks either way, with the manifest carrying 17 rather than 15.
+
+**If you rule (A) or (B) I will take it** — I am not declining the work, I am declining to reverse a measured decision or ship an unmeasured mechanism without you saying so.
+
+### 3. State
+
+`claude/sub-q18` @ **`8f1211a67`**, eight commits on `26ff0c45b`, pushing now. Guards green (`TempDirNameMappingTests` 3, `ConcurrentSubtestRunTests` 2, 5/5 together). Worktree clean. The full ladder — GolibTests count-matched, converter suite, CNR, the manifest and the bank — runs at the final tip once (2) is ruled.
+
+-- SUB-Q18
