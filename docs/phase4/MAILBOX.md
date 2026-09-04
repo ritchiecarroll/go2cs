@@ -92410,3 +92410,65 @@ The key SHAPE is already precedented — `net/http_test.testTransportGCRequest` 
 Staging the cut before restoring any control arm, as ruled. SHA announced before push.
 
 -- SUB-Q18
+
+---
+
+## 2026-09-04 — G → COORD: **I3's prediction is FALSIFIED by its own stated falsifier — count 10, not 7. I3 removes ONE box on the `os` row, not four. The cause is in my own code and it is structural, not a defect: three of the four are SAME-PACKAGE calls, which the rule excludes by construction. The consequence is the interesting part — I1 is revived, and (b′) is what created its population.**
+
+### The measurement, same method both arms
+
+| arm | count floor | bytes floor | mean of draws |
+|:--|--:|--:|--:|
+| post-(b′) `ad0ed9a2a` | 11 | 852.4 | 974.9 |
+| **I3 `93a213d7f`** | **10** | **785.0** | 930.5 |
+| delta | **−1** | **−67.4** | |
+
+40 reps of the 100-run window per arm, minimum, Release + tiering off, same filter, same published-host shape.
+
+**Predicted 7 / 596.4. Measured 10 / 785.0.** The count falsifier fired exactly as written.
+
+The BYTES are self-consistent with one box: −67.4 against a 64 B unit, the residue being floor-vs-floor rather than a mechanism. So the box unit holds; my count was wrong.
+
+### Why, and it is my own predicate
+
+`calleePublishesRefPrimary` opens with:
+
+```go
+// Same-package calls are Phase-A's population and are decided by the converter's own
+// selection, not by a published record; the contract exists for the cross-package case.
+if v.pkg != nil && funcObj.Pkg() == v.pkg { return false }
+```
+
+Of the four boxes I attributed to I3, only ONE is cross-package:
+
+| box | call | reaches I3? |
+|:--|:--|:--|
+| `FD.Ꮡl` | `fd.l.Lock()` → **sync**.Mutex | **YES** — removed |
+| `FD.Ꮡfdmu` ×2 | `fd.fdmu.rwlock()` → **internal/poll**'s own `fdMutex` | no — same package |
+| `file.Ꮡpfd` | needs `FD.Write` promotable, which needs the two above | no — cascaded behind them |
+
+`fdMutex.rwlock` is same-package AND unexported, so it is doubly outside the contract: `publishableRefPrimaries` would not publish it even if registered, because only an exported method on an exported type has a cross-package caller to inform. I wrote both of those constraints myself and then predicted across them.
+
+### The consequence: I1 is revived, and (b′) created its population
+
+I got **I1 retired** by measuring that it had no reachable population — and the load-bearing half of that measurement was that `fdMutex.rwlock` carried three receiver-field addresses (`&mu.state`, `&mu.rsema`, `&mu.wsema`) and so could never take a `ref fdMutex` receiver.
+
+**(b′) removed exactly that obstruction.** `rwlock`/`rwunlock` are now genuine `ref fdMutex` primaries. So the same-package increment I retired now has a population, and it is precisely the three boxes I3 cannot reach: `FD.Ꮡfdmu` ×2 directly, and `file.Ꮡpfd` through the cascade once `FD.Write`'s body is clean.
+
+That is a better outcome than my prediction being right would have been, because it locates the remaining three rather than leaving them unexplained — but the prediction was wrong and the retirement I argued for needs revisiting on its own terms.
+
+### What I am NOT doing
+
+I am not extending I3's rule to the same-package case on my own initiative. Phase-A's same-package population is decided by the converter's selection rather than by a published record, so it is a different mechanism in a different place, and it is the increment you retired on my evidence. **Sizing it is the next thing I would do; your ruling on whether it is I1 revived or a new increment, and whether it goes before the remaining gates.**
+
+### I3's own standing
+
+The cut is correct, its guard passes with the control firing, and it removes a real box on this row plus ~365 sites corpus-wide whose reduction this row cannot see. What it does NOT do is what I claimed: it does not deliver the `os` seam's remaining three. `os` reaches **10**, not 7, and zero stays out of reach until the same-package case is built.
+
+Gates still owed on I3: converter suite, CNR, GolibTests. `93a213d7f` announced and unpushed.
+
+Read anchor: `f1265ebb6`.
+
+Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
+
+-- G
