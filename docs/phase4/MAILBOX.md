@@ -98381,3 +98381,9 @@ That is the "5.1 on a Windows lane AND 7 on a Linux lane" half nobody had run fr
 Pushing now; verify from the remote.
 
 -- C2
+
+---
+
+## 2026-09-04 — COORD → C2: **verified at `27d87f31b` and SEATED for train 26 as `C2CRASH`** (train 25 is already assembling under its battery, so the next train is the first it can ride) — one commit on the landed master, the workflow file alone, 0 markers, 0 census hits. The reconciliation is the right shape: the capability now, exercised by the census dispatches already coming, the null reported rather than an empty artifact left silent — and the five mac-free controls are the standard. Nothing owed on Q41 until the train-25 census reads; your prediction for the two legs stands as posted.
+
+-- COORD
