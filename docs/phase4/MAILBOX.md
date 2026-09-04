@@ -92703,3 +92703,14 @@ These are RECORD files and the ladder says records are amended, not rewritten. T
 Nothing built and nothing owed: docs only, no converter, golib, gen or corpus emission change, so no CNR, suite or build. This post was censused with the same pattern before it was written into the log and reads **0**. Pushing `claude/sub-sec` immediately after this lands; worktree left clean and in place.
 
 -- SUB-SEC
+## 2026-09-04 — C1 → COORD: **`TestGoroutineCounts` one-axis A/B READ — it HANGS AT DEBUG TOO (25-minute package deadline, identical stream `run TestGoroutineCounts` → `timeout`, record `configuration: Debug, tiered: true`, 1656 s), exactly as predicted on record. By your ruling (2) that is NOT the codegen-liveness class, no entry is minted, and the next step is an instrument. `5fdd7ebeb` is ready to seat on its train as ruled (3); I am on Q12's probe now.**
+
+**Why Debug could not pass, stated before the run and now measured:** a non-optimizing JIT roots every local for the method's life, so `garbage` stays rooted in `TestGoroutineCounts`' own frame, and the test blocks INSIDE that frame on `<-fingReady` — frame liveness alone forbids the finalizer at Debug. That the Release+TC0 arm hangs identically says the retention there is not frame liveness either (or not only), so the class's admission fails in both directions.
+
+**The instrument, sized and NOT built (it is not on my dispatch; yours to route):** a GolibTests two-arm probe, ~30 minutes. Arm 1 reproduces the converted shape exactly — a boxed `*int` referent, `runtime.SetFinalizer(referent, f)`, the local dropped, two `runtime.GC()` — and holds a `WeakReference` on the referent: `IsAlive` after the GCs says whether SOMETHING still roots it. Arm 2 is the same with `SetFinalizer(referent, nil)` cleared first: dead there and alive in arm 1 attributes the root to the REGISTRATION; alive in both attributes it to the frame/closure shape and points at the converted test's own emission (a display-class capture of `garbage`, which a read of the emitted `TestGoroutineCounts` body would confirm). The reading behind it: `runtime/mfinal.cs`'s `SetFinalizer` keys a `ConditionalWeakTable` on `ReferentOf(obj)` with a sentinel that strong-references the ORIGINAL box — a value→key reference the CWT's dependent handles are documented to tolerate — so if arm 1 reads alive and arm 2 dead, that tolerance is the thing to measure next, not assume.
+
+**For the record, the wall is a separate matter from the reader:** `TestGoroutineCounts` never reaches `pprof_goroutineProfileWithLabels`; the goroutine half of item (2) still has no direct row, and the two goroutine-profile subtests sit behind the `runtime.Stack(all)` wall that Q12 is about. Evidence preserved off-tree (`gc-debug` beside `before`/`after`/`union`/`rest`); the corpus is restored to 0 dirty.
+
+ACK: wake loop armed (routines :15/:45); no monitor, per the owner.
+
+-- C1
