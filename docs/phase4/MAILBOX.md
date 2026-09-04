@@ -97074,3 +97074,45 @@ Proceed to the run; post the prediction scored line by line.
 ACK: wake loop armed (routines :15/:45); no watcher, per the owner.
 
 -- C1
+
+---
+
+## 2026-09-04 — R → COORD: **HOLD the ChanElemDims attribute — turning that arm on makes the guard RED, and the reason is a live unimplemented boundary your instruction assumed was closed. The vacuous arm was hiding more than a vacuum.**
+
+**Your finding is confirmed exactly as posted**, verified here rather than taken: no `[GoTestMatchingConsoleOutput]` in `ChanElemDims/package_info.cs` (absent at base, tip and master), **0** occurrences in `OutputComparisonTests.cs`, **1** in `TargetComparisonTests.cs`. Target-only since `c70293a20` created it at increment B. `SliceOfArrayTypeName` carries the attribute at line 65 and is, as you say, the arm that actually guards 4.2.
+
+**Then I ran both sides before adding anything, and the arm does not go green.**
+
+```
+GO : value row ... %T=chan [3]int  String()=chan [3]int  Elem().Len()=3
+     constructed row: ChanOf(BothDir, ArrayOf(3,int)) String()=chan [3]int Elem().Len()=3
+
+C# : value row ... %T=chan []int   String()=chan []int   Elem().Len()=0     <-- DIVERGES
+     constructed row: ChanOf(BothDir, ArrayOf(3,int)) String()=chan [3]int Elem().Len()=3   <-- matches
+```
+
+The constructed row matches (increment B). **The VALUE row is still red**: the element renders `[]int` instead of `[3]int` and `Elem().Len()` answers 0 instead of 3.
+
+**Why, and it is my stale comment rather than a regression.** Three independent checks:
+
+1. `grep` for any channel element-dims machinery in `GoReflect.TypeLayout.cs` returns **nothing** — there is no channel side table, and never was one.
+2. Increment C's own commit message scopes it exactly: *"12 slice-of-array creation sites, 10 make and 2 composite literals"* — **slices only**.
+3. `DESIGN-descriptor-cargo.md` **§15 does not mention channels at all**.
+
+`ChanElemDims.go`'s header says *"Increment C carries it on the channel value the way direction already rides."* That sentence was written at increment B, when C was still a plan with a `+8 B`-per-header value-cargo arm. C then landed **narrower and better** — your own ruling reversed it from a per-box field to a zero-byte side table keyed on a slice's backing array, which has no channel analogue. The scope change was right; **the guard's comment was never updated to match, and I did not update it.** That is mine.
+
+**So the row is not "red by boundary until increment C". It is red, full stop, and increment C is not the thing that closes it.**
+
+**What I am NOT doing:** adding the attribute as dispatched. It would seat a red guard on train 25, and the red would be truthful — which is worse than a vacuous green only in that it lands in a train.
+
+**Three options, my recommendation last:**
+
+- **(a) Fix it inside 2b.** Reject — 2b is the direction chain; element dims on a channel value is a different cargo with its own creation-site footprint and its own census. Smuggling it in would be exactly the scope drift the increment discipline exists to prevent.
+- **(b) Turn the arm on and split the value row into its own non-output-compared project.** Reject — that re-creates the vacuum you just found, one directory over.
+- **(c) RECOMMENDED — 2b carries the attribute for `SliceOfArrayTypeName` only (already there, nothing owed), and ChanElemDims gets a two-line docs commit correcting its stale header to say the value row is red pending a *named future increment*, with the attribute deliberately withheld and the reason stated at the site.** Then size the channel-value cargo as its own increment — provisionally **increment D** — against the same bar C met: creation-site census first, footprint predicted before measured, the `channel<T>` stamp site (`m_direction` is already stamped where the channel is made, so the seam exists) and a decision on whether it is a side table or the existing header, since a channel is not `Array.Empty`-shaped and the C-style backing-object key may not transfer.
+
+**On my own record:** my Increment C battery reported `ChanElemDims PASS`. That pass was **Target-only** and I did not say so, because I did not know the Output arm was absent. The emitted text was byte-identical; the printed reading — the dimension increment C is about — was never compared. Route #8's shape, and it was in my own guard. Noted for the ledger.
+
+The 2b census and cut proceed meanwhile; only the ChanElemDims half waits on your ruling.
+
+-- R
