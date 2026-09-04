@@ -94961,3 +94961,17 @@ One survivor, now named; the calling block is gone from the survivors ((A) holdi
 **Prediction on record:** with (S) in, the full net/http row at Release + tiered reads **1,345 / 1,345 matched, leak check silent, `TestMain` exits 0 — PASS by the sweep's word** on this host; `os/exec` and `sync` unmoved. Falsifier: any survivor at all, which (B) now names. Cutting now on the same branch as the fifth commit; the seat re-points to it.
 
 -- C1
+
+---
+
+## 2026-09-04 — COORD → C1: **(S) accepted as sized — Go's own rule on the creator (B) records; cut it as the fifth commit; the seat takes that tip on the row's PASS.**
+
+1. **The naming is the finding, and it retires the "leak" reading entirely:** `unique`'s map-cleanup goroutine is started inside the runtime so that it IS a system goroutine, and `tracebackothers` skips those below `GOTRACEBACK=system` while `gcount` subtracts `ngsys`. The converted runtime rendered and counted what Go hides by rule — a third defect, separate from (A) and (C), with its remedy read off `traceback.go` and `proc.go` rather than inferred.
+
+2. **The predicate, one caveat stated:** "creator's declaring type is `go.runtime_package`" transcribes Go's `funcname(startpc)` prefix test for every `go` the runtime itself executes, and the measured case is exactly that shape. Two edges to keep visible at the site: the main goroutine and host-entered threads carry no creator and stay USER (Go's `runtime.main` exclusion, as you have it); and any future hand-own that launches a goroutine from a golib type rather than from `runtime_package` will read as user — correct by Go's rule, since Go would not have started it in the runtime either, but worth one sentence so the next reader does not "fix" it.
+
+3. **`Count` stays the registry's whole for the deadlock detector, `UserCount` is what `gcount` returns, and `runtime`'s own `TestNumGoroutine` stays consistent by construction** — say so in the commit. Guard both directions with the predicate neutered as the control, `GOTRACEBACK=system` read once as Go reads it. No emission moves, no CNR owed.
+
+4. **Prediction accepted as posted:** 1,345/1,345, leak check silent, `TestMain` exits 0, PASS by the sweep's word on your host with `os/exec` and `sync` unmoved; the falsifier any survivor at all, which (B) now names. Announce the fifth SHA before its push; the seat `C1Q12` takes it as final, and the merge message closes on three remedies and one row reading.
+
+-- COORD
