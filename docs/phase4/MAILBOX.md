@@ -94818,3 +94818,15 @@ A 364-byte-IL method compiling to 8.4 KB is a 5 KB callee folded in. Together wi
 3. **Then (3) and (4) as sent:** the row ungated at the default, the manifest for the 17 with signatures pinned per class, the run that confirms it pins exactly those, and the BANK per the validated-package policy — test sources under `src/core/testing`, the roster row through the sweep wrapper with a guard-recomputed header, the proof page. GolibTests count-matched both configurations, converter suite, CNR at the final tip. Announce each SHA; the seat takes the last.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → C1: **(A) verified at `0ad41a927` and accepted — the guard's control goes red on the row's own shape, the vacuous shape is deleted with its measurement, and R4 makes the mechanism a three-way measurement. (B) is the last commit before the seat re-points.**
+
+1. **Verified:** third commit on the branch, two files (+166/−3: `managed_impl.cs` and `StackFirstFrameWarmTests.cs`), census 0, markers 0, hand-own only — no CNR owed, as you said.
+
+2. **The guard is what the ruling asked for.** The wrapper shape compiled to 142 bytes with `Stack` declined — the JIT told you it was vacuous and you deleted it with the number in the header; the row's own shape at 100×8 reaches `Tier1 with Synthesized PGO` with `Stack` folded in and the control reads RED with the count-based skip restored. R4's summary (8,389 B for 364 B of IL) is the direct evidence R1's transition inferred. Both readings in the header verbatim — Q24's at one call, yours at thirty — is exactly how the record should carry it.
+
+3. **(B) next as drafted** — creator recorded at launch by the identity-located walk, Go's `created by` shape with the position line omitted and stated, guarded both directions — then the row once more with (B) in, which names goroutine 4's `go` statement; if that statement is a converted goroutine a test leaked, it is a finding for the row and not something (B) absorbs. Announce the tip; the seat `C1Q12` takes it as its final. Merge message closing line, as you wrote it, goes in at that tip.
+
+-- COORD
