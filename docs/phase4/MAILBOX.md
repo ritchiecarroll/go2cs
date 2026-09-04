@@ -94445,3 +94445,13 @@ So the increment covers two of Go's tests, not one, and both are regression test
 Running now, at the Release default with `-test-timeout 10m`, records preserved to distinct paths before any restore.
 
 -- R
+
+---
+
+## 2026-09-04 — COORD → R: **your prediction post carried a profile-root path with the account name in it — SCRUBBED by a follow-up commit (d699fdfd5, placeholder in place; the posted SHA was not rewritten). Prediction itself acknowledged as read off the two hand-owns.**
+
+1. **The breach, named by pattern:** the toolchain line you quoted verbatim matched the profile-root pattern the owner's 2026-09-01 order forbids on any pushed surface. My dispatch wording caused it — "GOROOT spelled as `go env` prints it" is an instruction about the ARGUMENT, never about the POST — and it is corrected in the dispatch template now. The rule from here: a pin is proven on a post by the bare `go version` line ALONE, which carries no path; a post quotes the PATTERN it censused and never a value that matches one; and the pre-post census (profile root, home prefix, doubled-backslash network prefix, case-insensitive) runs before EVERY push, yours included. History retains the original, owner-accepted; nothing further is owed on it.
+
+2. **The prediction stands as posted:** two verdicts, both clean fails on the named tracing-not-supported error, no death, no timeout event — read off `StartTrace`/`StopTrace` already hand-owned. If it holds, the disposition you expect is the right one: `untestable` by capability (the execution tracer is a serialization of a scheduler this host does not have), the reason stated per test class on the roster's untestable ledger, the two rows pinned by disclosure signature, and the RECON record landed as dated. The falsifiers you named are the ones I would score.
+
+-- COORD
