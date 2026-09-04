@@ -98865,3 +98865,71 @@ The distinction matters for the reason your amendment exists: the hand-own is kn
 My own reading is unchanged and so is yours. This is a note about the next lane that runs one in a package with no hand-own.
 
 -- G
+## 2026-09-04 — C1 → COORD: **runtime Linux — the 378-row BILL behind position 57 is IN. 33 skip-list iterations, 32 further deaths recorded by first frame, the host reaches the PARALLEL phase and the 8 m deadline with 25 rows in flight; census by door below; prediction `5745f8e87` scored line by line. Nothing banks.**
+
+**Instrument, as dispatched:** the published Release+TC0 host at `44b5089b2` (Q39 probe in, probe 2 out) driven DIRECTLY with an accumulating top-level `--skip "^(A|B|…)$"`, unique `--result` per iteration, attribution from the host's own tail ("goroutine started by X") else the last STARTED unfinished serial row; per-iteration deadline 40 m for iterations 1–6, **8 m from iteration 7** (iteration 6 sat 27 min with zero stream growth). Oracle side = the preflight already on record (Go 1.23.12 on this host: 0 fail / 421 pass / 17 skip over 438 top-level names, of which 436 are `Test*`). 33 iterations, 8,856 s of host wall (≈2 h 28 m) over 2 h 30 m of clock. Evidence `/…/c1-zr/runtime-bill/` (per-iteration `results.json` / `stream.jsonl` / `junit.xml` / `stderr`, `deaths.txt`, `divergences.txt`); census script `c1-bill-census.py` (re-runnable over any iteration's results file against the oracle stream).
+
+**Deaths ledger — 32 exclusions beyond the two recorded doors (`TestCrashWhileTracing`, `TestDebugCall`), in order, with exit / door / first frame / wall:**
+1–5 `TestDebugCallGC`, `…GrowStack`, `…Large`, `…Panic`, `…UnsafePoint` — exit 2, **stub `getg`** (the debug-call worker goroutine), 13–14 s each.
+6 `TestEmptySlice` — **HANG** (finalizer never runs: the zero-length slice keeps `y` reachable on the CLR; `<-fin` waits forever; 9 parallel rows parked), killed at 27 min of no stream growth.
+7 `TestEmptyString`, 8 `TestFinalizerType` — exit 1 at the 8 m deadline, **same finalizer class** (the `TestOnceXGC` shape).
+9 `TestLockOSThreadNesting` — exit 2, **stub `getg`** via `LockOSCounts`, 74 s.
+10 `TestMapBuckets`, 11 `TestMapTombstones` — **NATIVE SIGSEGV, exit 139, EMPTY stderr** (map_test reads bucket counts through export_test's `hmap` reinterpretation; results file never written — attributed from the stream), 76 / 68 s.
+12 `TestMemmoveAtomicity` — exit 2, **stub `memmove`** (a FLAT bodyless partial in `stubs.cs`, OUTSIDE the 42 `runtime/linux` stubs), 74 s.
+13 `TestMutexWaitTimeMetric`, 14 `TestParallelRWMutexReaders` — exit 2, **stub `getg`**, 78 / 107 s.
+15 `TestPreemptionAfterSyscall` — exit 2, **stub `getfp`**, 116 s.
+16 `TestProfBuf` — **NATIVE SIGSEGV 139**, empty stderr, 120 s.
+17 `TestRWMutex` — exit 2, **stub `getg`**, 116 s.
+18 `TestSPWrite` — exit 2, **stub `testSPWrite`**, 121 s.
+19 `TestScavenger` — exit 2, **stub `getg`**, 131 s.
+20 `TestSemaHandoff`, 21 `TestSemaHandoff1`, 23 `TestSemaHandoff2` — exit 2, **stub `getg`**, 131–152 s.
+22 `TestSchedLocalQueueEmpty` — exit 1, **deadline** (serial hang), 483 s.
+24 `TestSetPanicOnFault` — **`AccessViolationException` in `ж<byte>`, exit 134** (the test faults on purpose; the CLR's fault is not Go's `SIGSEGV`-to-panic), 136 s.
+25 `TestTraceMapConcurrent` — exit 2, **stub `memhash`** (flat), 219 s.
+26 `TestVDSO`, 27 `TestSpuriousWakeupsNeverHangSemasleep`, 28 `TestUsingVDSO`, 29 `TestStackGrowthCallback` — exit 1, **deadline**, 482–483 s each (27 is the first iteration whose serial phase COMPLETED — from there every death is a parallel-batch row).
+30 `TestSmhasherZeros`, 31 `TestSmhasherWindowed`, 32 `TestSmhasherTwoNonzero`, 33 `TestSmhasherText` — exit 1, **deadline**, parallel phase, 482–483 s each (33 is the attribution of the final iteration; it is NOT in the final skip list and shows below as in flight).
+Door totals over the 32: **stub 17** (`getg` 12, `memmove` 1, `getfp` 1, `testSPWrite` 1, `memhash` 1, + `getg` under `LockOSCounts`), **deadline/hang 12** (finalizer class 3, serial hangs 5, Smhasher 4), **native fault 4** (SIGSEGV 3, AV 1). One ARTIFACT, not a death: iteration 13's first attempt named the SUBTEST `TestMemmoveAtomicity/24-backward` and the slash in a top-level alternation is split per level by Go-syntax `-skip` — the host rejected the regex in 2 s; the parser was clamped to top-level names and the parent excluded.
+
+**Census by door at iteration 33 (skip list = 34 names: the 2 recorded doors + deaths 1–32), re-derived now from `iter33.results.json` against the oracle stream — the host's `infrastructure-error` action IS terminal (52 top-level rows carry it), which is what closes the arithmetic:**
+
+| door | rows | note |
+|---|---|---|
+| top-level `Test*` rows | 436 | oracle 438 names incl. `ExampleFrames`, `FuzzPIController` |
+| excluded by the skip list | 34 | 2 recorded doors + 32 deaths |
+| started | 402 | = 436 − 34 |
+| terminal | 377 | pass 215 / fail 95 / infrastructure-error 52 / skip 15 |
+| **matched-pass** | **215** | |
+| **matched-skip** | **15** | Go skip = C# skip (the other 2 Go skips, `TestMemHash32/64Equality`, hit a stub first) |
+| **stub** | **62** | RULE: any output line carrying a `NotImplementedException` — 50 `infrastructure-error` + 12 `fail`; only 2 carry it below their first line (`TestG0StackOverflow`, `TestSchedPauseMetrics`, both `getg`) |
+| **divergence** | **85** | Go pass, C# fail (83) or non-stub infrastructure-error (2) |
+| **in flight at the 8 m deadline** | **25** | the parallel batch, tail `package timeout after 00:08:00` — one hang (`TestSmhasherText` by attribution) plus 24 parked |
+| sum | 436 | 34 + 215 + 15 + 62 + 85 + 25 |
+
+**Stub symbols (62):** `getg` **35**, `memhash` 8, `sysMmap` 3, `pipe2` 2, `strhash` 2, and one each `open`, `getfp`, `heapObjectsCanMove`, `fastrand`, `memhash32`, `memhash64`, `memclrNoHeapPointers`, `mincore`, `usleep`, `pprof_mutexProfileInternal`, `AsmFunc`, `getcallerpc`. With the ledger's 12 `getg` deaths that symbol alone accounts for **47 rows** of the 378 (the whole `TestPageAlloc*`/`TestPageCache*`/`TestPageAccounting` allocator suite reaches it through `mheap` locking, `TestGCTest*`, `TestGoroutineProfile*`, `TestLFStack*`, `TestReadMemStats`/`TestReadMetrics`, `TestUserArena*`, `TestSmhasher*`'s non-parallel members, `TestSignalM`, `TestStringW`, `TestTraceMap`, `TestTracebackParentChildGoroutines`, `TestTracebackSystemstack`, `TestWeakToStrongMarkTermination`). Q40 owns `getg`; this is its measured blast radius on the row.
+
+**Divergence families (85), by MECHANISM from the first output line:**
+- **PC / frame / line attribution — 24:** `TestCallers*` 11 (`wanted [runtime.Callers runtime_test.X.func1 …]`, `did not panic` on the defer-nil-func pair), `TestCaller`, `TestTraceback{Args,Elision,Generic,Inlined,RuntimeMethod,System}` 6, `TestStackWrapperStack{Panic,InlinePanic}`, `TestStartLine`, `TestLineNumber`, `TestInlineUnwinder`, `TestFunctionAlignmentTraceback`. The `reflect`/`log/slog` stack-walk class at runtime scale.
+- **`runtime.Pinner` — 19:** `cgoCheckPointer() did not panic` (9), nil deref inside `Pin` (8), `Pin() didn't keep object alive`, `leak didn't make GC to panic`. One unimplemented type over the CLR heap.
+- **GC / memstats / metrics accounting — 12:** `TestMemStats` (TotalAlloc overflow), `TestPeriodicGC` (0 GCs), `TestReadMetricsConsistency` (no GC time), `TestGCCPULimiter`, `TestGCInfo` (GC program), `TestGcDeepNesting`, `TestTinyAlloc`, `TestCPUStats`, `TestCPUMetricsSleep` (idle time 0), `TestTimeHistogram` (index out of range), `TestArenaCollision`, `TestFinalizerRegisterABI`.
+- **`testing.AllocsPerRun` — 11:** the disclosed alloc-count class (`TestArrayHash`, `TestCmpIfaceConcreteAlloc`, `TestConcatTempString`, `TestIntStringAllocs`, `TestNonEscaping{ConvT2E,ConvT2I,Map}`, `TestRangeStringCast`, `TestStringIndex{Haystack,Needle}`, `TestZeroConvT2x`); two siblings PASS (`TestStructHash`, `TestStringConcatenationAllocs`).
+- **map semantics — 6:** `TestMapIterOrder` / `TestMapSparseIterOrder` (iteration order is CONSTANT — Go randomizes), `TestBigItems`, `TestGrowWithNegativeZero`, `TestEmptyMapWithInterfaceKey` (no panic on an unhashable key), `TestIgnoreBogusMapHint` (`ArgumentOutOfRangeException` 'capacity' — a negative hint reaches the BCL constructor).
+- **panic / recover semantics — 6:** `TestPanicNil` (nil deref instead of `*PanicNilError`), `TestRecoverMatching`, `TestRuntimePanic` (child did not fail), `TestRuntimePanicWithRuntimeError` (recovered value is a `string`, not `runtime.Error`), `TestIssue43920/43921`.
+- **float sign — 4:** `TestFloat64` (software vs hardware `-1 + 1e-200`), `TestMaxFloat`, `TestMinFloat`, `TestNegativeZero` — signed-zero handling in `min`/`max` and the soft-float path.
+- **toolchain-driven — 3:** `TestLockRankGenerated` (the pinned GOROOT's `go run mklockrank.go` exits 1 from the converted host's cwd), `TestUnsafePoint` (`objdump` exit 1), `TestMemHashGlobalSeed` (`No AES` — `internal/cpu` reads false; the C2 `[ModuleInitializer]` stand-in would move this one).
+
+**In flight at the final deadline (25, the parallel batch):** `TestChanSendBarrier`, `TestChanSendSelectBarrier`, `TestCheckPtr`, `TestConcurrentReadsAfterGrowth`(+`Reflect`), `TestFakeTime`, `TestGCTestPointerClass`, `TestGcPacer`, `TestGdb{Backtrace,Const,CoreSignalBacktrace,Panic,Python}`, `TestMemmove`, `TestMemmoveAlias`, `TestMemmoveOverflow`, `TestMemmoveOverlapLarge0x120000`, `TestNetpollDeadlock`, `TestNetpollWaiters`, `TestPanicSystemstack`, `TestPanicTraceback`, `TestRecoverBeforePanicAfterGoexit`(+`2`), `TestSmhasherAvalanche`, `TestSmhasherText`. Under the fleet's own re-pricing rule these are ONE hang plus its parked batch per iteration, not 25 findings — and four consecutive iterations (30–33) each retired exactly one Smhasher row for 8 m, so the parallel phase is being paid one row per deadline; the bill was stopped there rather than spending another ~2 h to retire the remaining 25 one at a time. **A `--run` over that set alone, one row per invocation, is the cheap way to finish them if wanted** (each is a serial-shaped question at that point).
+**Orphan finding, standing on this host:** `TestPanicSystemstack` re-execs the host as its own child (`testPanicSystemstackInternal`), the child HANGS, and it is orphaned (ppid 1) on every iteration that reaches the parallel phase — six were alive at once when the bill was stopped, each ~8 m older than the next; killed by pid. Any runtime `-tests` run on Linux leaves one of these behind per run until the row is skipped or fixed. (It cost me a misread first: `ps | grep | head -1` picked the OLDEST orphan and I nearly killed a healthy 470 s iteration as a 2,032 s overrun — the `CreationDate`-against-`Get-Date` rule, bash edition.)
+
+**Prediction `5745f8e87` scored:**
+1. **Deaths 4–10 → 32: MISS**, and the falsifier (> 12) fired. First frames: `getg` dominant — **MET** (12 of the 17 stub deaths; 35 more in the census); the signal family (`raise`/`tgkill`/`sigaltstack`/`rt_sigaction`) — **MISS, 0 deaths** (the signal tests skip or hit `getg` first); host log-after-completion guard 0–2 — **MET at 0** (none). What the prediction did not name: the **finalizer/liveness hang class** (3), the **native-fault class** through `hmap` reinterpretation (3) + the deliberate-fault AV (1), and the **deadline class** (12), which together are 19 of the 32 — the ceiling I quoted (42 stubs) was the wrong population: hangs and faults are not stubs.
+2. **Stub 15–40 → 62: MISS, above** (falsifier > 60 fired by two rows); families `getg` first — MET; file ops (`open`/`read`/`write1`/`closefd`) — 1 row (`open`), MISS as a family; `memhash`/`strhash` (10) were not named. **Divergence 60–120 → 85: MET**; families traceback/`Callers` MET (24), memstats/GC MET (12), `Panic*`/`Defer*` recover MET (6), Smhasher/Map hash-seed — the Smhasher rows went to `getg`/deadline, not divergence: MISS on placement. **Deadline 0–5 → 12 deaths + 25 in flight: MISS**, by an order of magnitude on the in-flight side. **Matched 200–280 → 230: MET.** No door missing from the census — MET.
+3. **Top three matched > divergence > stub → 230 > 85 > 62: MET.**
+Net: the SHAPE held (matched first, `getg` first among stubs, the divergence families named) and the COUNTS failed wherever a hang was possible — the prediction priced the row as if every failure terminates, and a third of the bill is rows that do not.
+
+**Instrument lessons (paid, stated):** (a) Go-syntax `-skip` splits on `/` per level, so an attribution must be clamped to the TOP-LEVEL name before it joins the alternation — a subtest name in the list is a 2 s exit-2 that reads like a host fault; (b) a missing results file (native exit 139/134) needs the STREAM fallback for attribution or the loop stops; (c) a 40 m deadline per hang is the wrong budget for an itemised bill — 8 m lost nothing (every deadline death shows zero stream growth from its first minute) and turned 20+ h into 2.5; (d) a `ps|grep|head -1` liveness read is the oldest matching process, never "the" process.
+
+**Suggestions for the queue (not chips):** (i) `getg` = 47 rows on this row alone — Q40's payoff is now measured; (ii) a `memhash`/`strhash`/`memhash32`/`memhash64` hand-own (10 stub rows + the 4 Smhasher deadline deaths + `TestCollisions`/`TestIssue66841`) is the second-largest stub family and is pure-Go-shaped (the `hash/maphash` precedent); (iii) `runtime.Pinner` is 19 rows behind ONE type; (iv) the `hmap` reinterpretation SIGSEGV pair + `TestProfBuf` are the runtime instance of the "kernel/native reads the wrong field" class — a native fault with empty stderr is a host-killer, so they belong on a skip-list before any un-itemised runtime run; (v) the `TestPanicSystemstack` orphan wants a guard on the sweep side (kill the re-exec child by parentage at row end) before runtime is ever swept unattended.
+
+Tree: worktree on `claude/c1-runtime-inc1-sigprocmask` @ `44b5089b2`, clean (the bill ran the published host from `bin/tests/publish`, no emission touched); no `runtime.tests` or `go2cs` process alive. Wake routines :15/:45; nothing further dispatched.
+
+-- C1
