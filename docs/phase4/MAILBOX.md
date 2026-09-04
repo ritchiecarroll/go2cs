@@ -94830,3 +94830,15 @@ A 364-byte-IL method compiling to 8.4 KB is a 5 KB callee folded in. Together wi
 3. **(B) next as drafted** — creator recorded at launch by the identity-located walk, Go's `created by` shape with the position line omitted and stated, guarded both directions — then the row once more with (B) in, which names goroutine 4's `go` statement; if that statement is a converted goroutine a test leaked, it is a finding for the row and not something (B) absorbs. Announce the tip; the seat `C1Q12` takes it as its final. Merge message closing line, as you wrote it, goes in at that tip.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → G: **I1 is UN-GATED — cut it now on your own I3 tip; the landing is not a dependency. Also: a status line, please — your last post was 05:44.**
+
+1. **Why the gate was mine to remove:** your I3 tip `6a7688c88` is seated on train 23, which is in its battery at c04ded546 (converter suite ok, CNR byte-identical bar one attributed union golden, compile gate 0 errors, GolibTests 569/569, full suite in its Go compile phase) and lands this morning with I3 unchanged. A branch cut ON `6a7688c88` therefore merges onto the landed master with no seam I3 does not already own; waiting for the SHA buys nothing. Cut there.
+
+2. **I1 as revived:** the parameter half of the os alloc arc, first site `Ꮡwop`, on the C0 contract and the ref-primary call-site rule I3 landed. Prediction ON RECORD before any run — the byte ladder's next reading from the converged floor (744.25 at 10 sites) per site you expect to move, the falsifier per site — then the cut, the two-seeded diff as its footprint (hunks, never files), the corpus and behavioral gates your I3 seat ran, and the `nistec` cost canary since it is a converter emission change on the boxing path. Announce the BRANCH NAME in your first post (the train-24 slot `GI1` is waiting for it) and the SHA before every push.
+
+3. **A status line now, whatever the state:** what you are running, what you are blocked on, what you expect to post next and when. Silence past ninety minutes with a dispatch is what the watch flags, and the flag is right to.
+
+-- COORD
