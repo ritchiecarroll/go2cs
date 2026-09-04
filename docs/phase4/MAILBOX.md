@@ -98772,3 +98772,63 @@ Read anchor: `cb22447b8`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-04 — G → COORD: **B2's converter change is WRITTEN and its guard is green at 10 rows with both widenings. `writeShape` — `FD.Write`'s exact shape — lowers BOTH defers, which is the acceptance proof the census only predicted. Census corrected to 225 (from 226), and the correction's method is the durable part: the converter's gate is now ported INTO the census verbatim, so the two cannot drift.**
+
+### The census-vs-converter divergence, closed at the root
+
+B's arc ended with the census over-counting by a class the converter refused — 166 against 129 reached — and I reported that as a divergence to live with. It is not. **The converter's `provablyBefore` / `provablyBeforeInCases` are now copied verbatim into the census**, so the two run the same code and the only remaining difference is scope (`-stdlib` vs the emission), which is a different question and a stated one.
+
+Doing that moved the number: **226 → 225 qualify, conditional 11 → 10**, all-or-nothing exclusion 53 → 64. Not a bug fix in either direction — a different (correct) predicate, and the number the A/B will be measured against is now the converter's own.
+
+    B2 (converter's own gate)   332 shape · 225 qualify · 10 conditional · 60 receiver-method · 57 files
+    B control (unchanged)       859 sites · 220 receiver-field · 166 qualify · 31 conditional
+
+### Two more gates that were stricter than correctness required
+
+The first (`if`-INIT) I posted. Writing the emission found a second, and the guard is what caught it:
+
+**`mixed()` did not lower.** Its witness `x.b.touch()` sits at BODY level, before the `if` that holds the defer — and my gate scanned only the defer's own block. An outer statement preceding the enclosing construct runs before the inner block is entered, so it is a perfectly good witness. The gate now walks OUT through the ancestor chain, collecting each level's earlier siblings plus every enclosing `if`/`switch` INIT and CONDITION.
+
+That is the same mistake three times in one arc — B's `top-level`, B2's `if`-body, B2's own-block-only — each a proxy for "unconditional" that was narrower than the real thing. I have stopped calling that a coincidence: **when a gate's justification is "this provably ran before", the gate must compute that relation, not approximate it with syntax.**
+
+### The cut, green
+
+`claude/g-b2-widenings` off B's tip (B has not landed; train 25 is under battery, so B2 stacks on it).
+
+    guard   10 rows, byte-identical to `go run`
+    new     methodShape  — a receiver-METHOD defer, B2's second widening
+            writeShape   — FD.Write's shape: a method defer whose witness is an `if` INIT,
+                           paired with a CONDITIONAL field defer whose witness is its sibling
+
+`writeShape`'s emission, the thing the whole increment is for:
+
+```csharp
+bool ᒐd1 = false;
+bool ᒐd2 = false;
+…    ᒐd1 = true;          // defer x.finish()      — receiver-METHOD, unconditional
+…        ᒐd2 = true;      // defer x.b.done()      — receiver-FIELD, inside `if isFile`
+finally { if (ᒐd2) Ꮡx.DerefOrNull().b.done(); if (ᒐd1) Ꮡx.DerefOrNull().finish(); ᒐ.Run(); }
+```
+
+Both lower; reverse source order; Go prints `done b` then `finish a` for the taken branch and `finish a` alone for the untaken one, and the C# matches exactly.
+
+**Positive control on B2's core claim** — the reached-flag neutered so a lowered call runs unguarded: the guard goes RED on **`writeShape(false)` gaining a spurious `done b`** (plus B's own early-return row). That is the conditional widening's correctness resting on the flag, demonstrated rather than argued. Restore byte-identical, green again.
+
+### Footprint prediction, before the A/B
+
+**57 files carry the 225 sites; three are `testing`'s own (hand-owned, never re-emitted), so the windows arm should touch exactly 54 production `.cs`.** Falsifier: any windows path outside those 54. Linux and darwin measured, not predicted.
+
+Heaviest: `internal/poll/fd_windows.go` **26** (3 under B), `database/sql/sql.go` 25, `net/http/h2_bundle.go` 21, `transport.go` 14, `server.go` 12, `crypto/tls/conn.go` 10.
+
+### Owed
+
+Converter suite running. Then the three-target A/B, hunks with counts + foreign-line grep + positional check, CNR, three-target build, and the `os` row at **744.25 → 616.25 B / 8 → 7 objects** or the falsifier.
+
+Read anchor: `c25db3e21`.
+
+Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
+
+-- G
