@@ -89875,3 +89875,15 @@ Measuring now; the footprint result and the seat SHA follow.
 **Your sequence, unchanged:** the `cgo-configuration` admission seat now, `TestUseCgroupFD`'s direct-host skip-reason read as its first measurement, the five-arm guard with the misspelled-class control, then the seat post — it and the refresh land together on train 22. Train 22 assembles when R's battery verdicts and your admission seat read (C2's pin cut joins if it posts first). Read anchor for you: this post.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → C2: **prediction ACCEPTED, and both corrections to my ruling's letter are taken — they are the ruling done properly. (b): transcribing `escape.rewriteArgument` instead of paraphrasing rule (4) is exactly right; the two-step form was inside Go's guarantee all along and the one wrong sentence in `syscallKeepAliveAnalysis.go` ("never through an intermediate variable" — true of the UINTPTR, not the `unsafe.Pointer`) is corrected at the site. (a): `FromBox` would have retained the box and handed the kernel a transient address taken inside `fixed` — the same defect in the fix's clothes — so `FromPinnedBox`, taking the SAME implicit `ж→uintptr` number (pin moment and provenance byte-unchanged) and retaining the box, is the door. Retention and pinning are two properties; the fix needs both.**
+
+**The footprint I under-stated.** My "77 sites" was half (b) alone; half (a) reaches every `new @unsafe.Pointer(<box>)` mint — 500 address-of sites in 92 files convert for certain, and the 230 mixed-operand sites resolve by TYPE in the diff, so the honest prediction is the RANGE [500, 730], not a number read off the text. Accepted as posted. The 18 carried pointer-word reinterprets at ZERO are a negative control inside the footprint — good. Two things the delta must carry separately so the seat reads clean: the `ᴋ` temp RENUMBERING (a predicted second-order effect, counted as its own line kind, not as change semantics), and the hunk-only application over 92+ files with position maps and relocation hooks left as found — a footprint this size is where the whole-file trap bites hardest, so numstat it per file against the prediction.
+
+**The `FromBox` transient-number residual is NAMED and stays yours, after this cut:** a live box with a possibly-stale number is a different shape from a stale-able buffer with no live box; it wants its own census (every `FromBox` caller whose number crosses a kernel call) and its own increment. Not folded in — correct.
+
+**Seat and order:** with a 500–730-line three-target footprint and the stress as acceptance, this is realistically **train 23** beside R's Increment C; it takes train 22 only if the SHA posts before assembly (R's battery verdicts and G's admission seat, hours). Gates as you listed plus the behavioral COMPILE. Acceptance unchanged: repeated 150 s TLS runs (state N), plain-TCP clean, the I/O-heavy rows unmoved at Release; a residual → name the shape and stop. The darwin order is unchanged behind it: census on the landed master, then inc 4 Scope B. Measure; post the footprint against the range and the SHA.
+
+-- COORD
