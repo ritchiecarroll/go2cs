@@ -98076,3 +98076,59 @@ Fast-forward confirmed both ways: `git merge-base --is-ancestor 74e2c2f6b HEAD` 
 Final state: worktree clean (0 entries); `src/core/net/http/go2cs_test_disclosures.json` gone; the other **44** package manifests untouched (the count was 45 with net/http's); roster row `| 1345 | |` with the header still `27,774 matching test verdicts · 167 disclosed`. Nothing further owed on Q36 — the seat's gate remains the filtered sweep at the merge result, expecting `PASS net/http 1345` against a byte-identical proof page.
 
 -- SUB-Q36
+
+---
+
+## 2026-09-04 — G → COORD, cc C2: **Q35's I1 half is MEASURED and APPLIED — the prediction was met on all three arms and the falsifier did not fire. The applicable debt is exactly TWO files, both applied byte-identical to the emission, NOTHING routed. And C2's seed-mutation trap: I ran their check against my own run rather than assuming immunity — the seed held.**
+
+### The measurement
+
+    TWOSEED_SUMMARY  windows=6  linux=6  darwin=6
+
+Negative control fired first (7 with an injected blank line), restore byte-identical. Both binaries from `git archive` (`6a7688c88` pre-I1 against `0571e71cb` I1), both arms seeded from today's master corpus, all six seeds count-matched at 3,711.
+
+Six per arm, and the same six shape on every target:
+
+| | windows | linux | darwin |
+|:--|:--|:--|:--|
+| flat, already applied | `internal/poll/fd_mutex.cs`, `sync/map.cs` | same | same |
+| per-GOOS | `windows/fd_windows.cs` **(applied)** | **`linux/fd_unix.cs`** | **`darwin/fd_unix.cs`** |
+| excluded classes | `windows/package_info.cs` + 2 `.cs.auto` | same shape | same shape |
+
+**Prediction met exactly**: windows reproduces I1's landed footprint and nothing else — the control arm's whole purpose — and linux/darwin add precisely the per-GOOS twin of `fd_windows.cs`. **Falsifier did not fire**: no production path outside I1's three landed files on windows.
+
+### Applied
+
+Both stale by exactly ONE line, the same line, and nothing else differs in either file:
+
+    committed:  if (!Ꮡfd.of(FD.Ꮡfdmu).increfAndClose()) {
+    emission:   if (!fd.fdmu.increfAndClose()) {
+
+    src/core/internal/poll/darwin/fd_unix.cs   +1 −1
+    src/core/internal/poll/linux/fd_unix.cs    +1 −1
+
+Applied as hunks at full context (no reduction needed), zero foreign lines, and **each result is byte-identical to the fresh emission** — which is what proves no other arc rode along, since these two files carry no other drift. **Nothing routed.** The two-file answer is the exact mirror of I1's landed `fd_windows.cs` +1/−1, which is what "measured on one target" cost.
+
+### C2's seed-mutation trap, checked rather than assumed
+
+C2's cc was live for me: my script also seeds each arm from the live worktree when that arm starts. And `find -newermt` showed **179 `src/core` files with mtimes inside my run's window** — which is exactly what their failure looks like.
+
+It was not that. The mtimes are my branch switch completing before the first seed; `git status` was clean at master throughout and no commit happened during the run. The decisive check is C2's own instrument: a file **neither converter writes** must be identical across every seed. `internal/poll/fd_mutex_impl.cs` (a `GoManualConversion` hand-own) hashes `e7a6ce39…` in all four roots checked, while the two files both converters DO write differ between arms as they must.
+
+Recording it because the mtime evidence pointed the wrong way and only the write-evidence check settled it — the same asymmetry C2 names: "differs" and "identical" are both meaningless for a path neither side wrote, and a timestamp is not write evidence.
+
+### The I3 half, which my correction made necessary
+
+`6a7688c88` (I3, the cross-package rule) landed a footprint spanning **many** packages — `archive/zip`, `context`, `crypto/tls`, `database/sql`, `debug/gosym`, `encoding/gob`, `go/constant` and more — and by the same single-target measurement. Its per-GOOS debt is therefore likely much larger than I1's two files, and it is what owns `net/{linux,darwin}/pipe.cs`, two of B's four routed files.
+
+Running the identical instrument on the I3 pair (`ad0ed9a2a` → `6a7688c88`) next, after this build clears. I will land both halves in ONE Q35 seat rather than two, with the board block and the `PLAN-rebank-wave.md` line naming I1, I3 and B's routed remainder together.
+
+No prediction for I3's counts yet — the census that would ground one is the thing being run.
+
+Three-target build on the applied I1 pair running now.
+
+Read anchor: `83c7ea96b`.
+
+Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
+
+-- G
