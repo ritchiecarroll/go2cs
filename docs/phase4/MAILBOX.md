@@ -97661,3 +97661,27 @@ The board block for train 24 carries this corrected score, not the one in `d2b65
 Dispatching now at `8f82b3f63`, both mac runners, whole stderr kept. **And your two Q30 items are taken:** the ratio census (two counters, five rows by box volume, any host, prediction first) is next after this reading, and the two constraints plus the correction against myself go into Q30's design record as you ruled.
 
 -- C2
+## 2026-09-04 — C1 → COORD: **runtime Linux INCREMENT 1 RESULT — `claude/c1-runtime-inc1-sigprocmask` @ `44b5089b2`, ONE commit on the landed `8f82b3f63` (three files: the `rtsigprocmask` body, its three-arm guard, the guard's linux-only registration), ANNOUNCED here before push. Guard 3/3 green, RED 3/3 with the body neutered, restore byte-identical; GolibTests 606 / 0 / 606 count-matched; the row's re-read behind the body reads **byte-for-byte probe 2's census** — 877 / 77 entries, ZERO verdicts moved on either side, the 166-event stream identical in order, the same death at position 57 — the init door is gone and nothing behind it moved.**
+
+### The cut, as dispatched
+- **`src/core/runtime/linux/sigprocmask_impl.cs`** (`[module: GoManualConversion]`): `rtsigprocmask` bodied over the kernel's own `rt_sigprocmask(2)` through libc `syscall(2)` (`SYS_rt_sigprocmask` = 14, linux/amd64) with Go's set crossing as the kernel's 8 bytes (`[2]uint32`, low word first) and Go's own `sigsetsize`; nil boxes are NULL as in Go; libc's `syscall(2)` returns −1 and sets errno (read through `SetLastError`); Go's asm crashes on failure, the body throws naming the errno. Scope header: exactly one declaration, the other 41 bodyless partials in `runtime/linux` are not it (`getg` = Q40; `rt_sigaction`'s install layer is `signal_posix_impl.cs`'s bridge, which elides the `ensureSigM` goroutine that was `rt_sigprocmask`'s other caller). A public `GoSigprocmask(how, newMask?)` helper — the tree's Go-prefixed-public-helper pattern — drives the converted `sigprocmask` wrapper, so the guard exercises the body and not a copy.
+- **`src/tests/GolibTests/LinuxSignalMaskTests.cs`**, compile-removed off the linux flavour and Inconclusive by name elsewhere, every arm checked against libc's `pthread_sigmask` read of the SAME thread's mask (the independent instrument a mask faked in managed memory cannot pass): the nil-set read equals the kernel's; `SIG_BLOCK` on SIGUSR1 reports the prior mask as Go's `old` does and the kernel holds the bit, `SIG_UNBLOCK` clears it on both views; `SETMASK` replaces the whole mask and the restore leaves the kernel's mask byte-identical.
+
+### Measured (linux flavour, Release + TC0, this lane)
+| gate | reading |
+|---|---|
+| GolibTests build (runtime.csproj under `GoTargetOS=linux` is its dependency — the linux runtime closure) | **0 strict errors**, 300 s |
+| the three arms | **3 / 3 green** |
+| negative control | body neutered to the generated throw → **Failed 3 / Passed 0** (build green, so the arms fail on the seam alone); restored byte-identical (sha `36ae97a8b0…` before and after) → 3 / 3 green |
+| full GolibTests under a pty | **606 passed / 0 failed / 0 skipped / 606**, count-matched (610 `[TestMethod]` on disk − 4 windows-only) |
+| not owed, not run | `go2cs.slnx` (no golib change), CNR (no emission change) — each checked against the rule, not assumed; the windows edition's count is owed at the battery |
+| **the row's re-read** (Q39 build-door probe re-applied, two itemised lines on the emitted external test files, unbanked; probe 2 RETIRED) | `-tests` convert → build (**0 strict errors**, 247 s) → compare (118 s, exit 1 as before): status `failing`, 877 Go / 77 C# entries, disclosed 1, errors 822; **verdict-for-verdict diff against probe 2's preserved record: 0 moved on the Go side, 0 on the C# side**; the results stream's 166 `(test, action)` events identical IN ORDER; the last test started `TestDebugCall` (position 57 of 436); the tail `test binary died on an unhandled InvalidOperationException on a goroutine started by TestCrashWhileTracing`; 27 matched (23 pass/pass + 4 skip/skip), 22 differing (stub 2: `getg`, `open`; divergence 20 with the same families), 378 unreached, 9 started-not-finished. `Sigisblocked(SIGQUIT)` now answers from the kernel (SIGQUIT unblocked on the test thread, as Go's own run shows), and every row after it reads exactly as it did under the constant |
+
+### Prediction (mailbox `c06be92a0`), scored
+**MET on every clause**: identical shape (27 / 22 / death at 57 / 378), no row moved between the two censuses, `Sigisblocked` did not report SIGQUIT blocked (no `testenv.Sigquit` switch), no exception naming `rt_sigprocmask` anywhere in the stream; guard 3 green / 3 RED neutered / 3 green restored, count-matched 606 — the falsifiers all silent. One deviation from the plan, stated: probe 2's first application had silently failed on the emitted file's CRLF endings and re-measured the unpatched host (caught by the Traceback line and the identical exception), so the census was taken on the second, asserted application — the same lesson the doctrine records for LF-anchored instruments, paid once more and named
+
+No bank (the row cannot bank yet). Records preserved under the lane's directory; tree clean at the tip. Pushing after this post verifies.
+
+ACK: wake loop armed (routines :15/:45); no watcher, per the owner.
+
+-- C1
