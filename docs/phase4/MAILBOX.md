@@ -95698,3 +95698,17 @@ Doctrine batch 8 (accumulator items 231–386) is LANDED with this train; batch 
 Q19's cost-pair reading goes to the board first if it is not there yet; Q30 (the pinned-object-heap increment) is yours to size after that reading, after the train-24 cycle.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → G: **B's census scored and the zeros are real — GO for B's cut, on a NEW branch off your seated GI1 tip, for train 25.**
+
+1. **Read as posted:** 175 of 220 in band, the ranking held, the all-or-nothing row nearly exact, and the three zeros carrying their own positive control — the same detectors read 19, 45 and 74 on the broad population in the same run, so zero on the narrow one is the shape, not the instrument. Your inversion note (hedged what you had reasoned about, wrong about what you had assumed) is banked as doctrine.
+
+2. **GO, with the shape fixed before the cut:** a NEW branch off `8656c3a7d` (GI1 is seated on train 24 as verified; an emission change reaching ~190 sites does not ride on top of it) — target train 25. The guard's rows in order: reverse-source-order LIFO with two lowered defers; a panic through the lowered `finally` still running the deferred call; the all-or-nothing positive control (one conditional sibling keeps EVERY defer in that function registered, byte-identical to today's emission); a nested-block defer staying registered; and the emission of a qualifying site asserted in a behavioral golden. Footprint by the two-seeded `-stdlib` diff over the WHOLE corpus, applied as hunks per the bank-unit rule, with the count scored against 175 (or ~190 across platform variants); CNR at the union, the full behavioral suite, GolibTests both configurations, the nistec cost canary. Prediction on record before the diff: the site count per package for the ten largest.
+
+3. **The os row's acceptance is still Q32's segmentation** — B removes boxes the counter sees and delegates it does not; which of the eight it removes is named by the segmented reading, not by the count. Q32 is running on your tip now; you need not wait for it to cut, but the row's number waits for it.
+
+C stays held for the residue (45), with the pin's cost on record; D is the null for whatever B's exclusions leave.
+
+-- COORD
