@@ -89837,3 +89837,27 @@ So C0 is innocent on both axes, and the six extra failures are the CONFIGURATION
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+---
+
+## 2026-09-04 — C2 → COORD: **pin cut PREDICTION, before the run (ruling `32a7d9232`).** Branch `claude/c2-syscall-pin` off `d188e89ed`, both halves written, all four converter guards and both golib guards green with each half's negative control naming its own assertion. One correction to the ruling's letter, stated below, and the footprint is larger than the ruling's "77 sites" — that number is half (b) alone.
+
+**Half (b) is the Go compiler's own predicate, transcribed.** I checked `cmd/compile` rather than paraphrasing rule (4): `escape.rewriteArgument` (`cmd/compile/internal/escape/call.go`) keeps an argument alive when it is an `OCONVNOP` whose OPERAND TYPE `IsUnsafePtr()` and whose own type `IsUintptr()` — a test on the type, with no requirement that the operand be a literal `unsafe.Pointer(X)`. So the two-step form IS inside Go's guarantee, and `syscallKeepAliveAnalysis.go`'s standing comment ("never through an intermediate variable") was the one wrong sentence: what may not travel through a variable is the UINTPTR, not the unsafe.Pointer. Go's own generated wrappers use the two-step form 16 times in `syscall/zsyscall_linux_amd64.go` and 13 in the darwin twin. The predicate now matches the compiler's, which subsumes the inline form it matched before.
+
+**Half (a) is one correction to the ruling's letter.** "Mint through the RETAINING door" cannot be `FromBox`: that door retains its box but takes the address inside a `fixed`, so its number is transient by construction — retention without a durable pin would have left the kernel a stale address, which is the same defect wearing the fix's clothes. The new door `@unsafe.Pointer.FromPinnedBox` takes the address from the SAME implicit `ж→uintptr` conversion the bare mint used (so the pin moment and the provenance record are byte-unchanged) and retains the box. `FromBox`'s own transient-number shape is a DIFFERENT residual and I am NAMING it rather than folding it in, per your "name the second shape" instruction: it is a live box with a possibly-stale number, not a stale-able buffer with no live box, and it wants its own increment.
+
+**Predicted two-seeded three-target footprint.** The rule is mechanical: a `new @unsafe.Pointer(X)` whose operand's GO TYPE is a pointer becomes `@unsafe.Pointer.FromPinnedBox(X)`; a `uintptr`/`unsafe.Pointer` operand is a number, not a box, and is untouched. Static census of the committed corpus:
+
+| shape | count | prediction |
+|---|---|---|
+| `new @unsafe.Pointer(Ꮡ…)` — address-of, always a pointer type | **500** (92 files; linux 112, darwin 139, windows 62) | ALL convert |
+| `new @unsafe.Pointer(<other operand>)` — identifiers and member expressions, mixed pointer and numeric types | 230 | the pointer-typed subset converts; I do not predict the split by text and the diff resolves it, so the total lands in **[500, 730]** |
+| `new @unsafe.Pointer((uintptr)…)` / `(~…)` — the carried pointer-word reinterpret | 18 | ZERO change (a deliberate token-carrying form with its own rationale; not this cut) |
+| funnel args `(uintptr)_pN` — half (b) | **77** in 9 files (darwin 46, linux 22, windows 9) | each call gains a `var ᴋN = _pN;` hoist and a `System.GC.KeepAlive(ᴋN);` after the statement |
+
+Two second-order effects predicted with it: **`ᴋ` temps RENUMBER** inside any function that already had one (a two-step call ahead of an inline one shifts the inline call's index — measured on the probe, `ᴋ0` → `ᴋ1`), and **no `.cs.auto` sibling moves**. No production `.csproj` should change. Nothing in `golib` moves except the new door; **no byte bar is owed** — `m_retainedSource` already exists and the pin was already being created, so the change is one reference stored and one pin no longer freed early.
+
+**Gates, as ruled:** converter suite, CNR, `go2cs-stdlib.slnx` (windows + linux), `go2cs.slnx` (golib changed), GolibTests count-matched at Release/TC0, and a behavioral COMPILE. **Acceptance:** the TLS stress at 16 workers surviving repeated 150 s runs, the plain-TCP arm clean, and the banked I/O-heavy rows unmoved at Release. If a residual failure survives, I name the shape and stop rather than widening.
+
+Measuring now; the footprint result and the seat SHA follow.
+
+-- C2
