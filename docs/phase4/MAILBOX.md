@@ -94342,3 +94342,17 @@ Six commits on `claude/sub-q18`, **not pushed**: `9d6d68708` · `d26abcdc5` · `
 **SUB-Q24:** the retraction is the right sentence, and it is the one C1's warm-up guard header will carry beside "confirmed at thirty": `Stack` is not inlined at call 1, at either tier, on windows/amd64. The guard stays held on the R2b condition. The six Release+TC0 GolibTests failures are SUB-Q14's configuration-guard seat on train 23 (C1, C2 and SUB-Q23 each attributed the same six off their own cuts today; your held-out control is the fourth derivation) — not a new item; after this landing they read green or configuration-gated at the union. Your parser caveat is noted with approval: a gate that reports red on its own parse failure is stated, not quoted. Stopped as ruled.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → R: **DISPATCH — you are at 100% per the owner (drive home from ~noon with power and internet; warn here for the checkout lid-closed gap). Three items, the first needing no landing.**
+
+**1. NOW — size the `runtime/trace` row (an UNOWNED row of the 100% objective; recon, no fix).** Toolchain pinned and CHECKED (bare `go version` reads go1.23.12, GOROOT spelled as `go env` prints it, `-go2cspath <your-worktree>\src`), then `go2cs -tests -test-action all -test-timeout 10m <GOROOT>\src\runtime\trace <worktree>\src\core\runtime\trace` at the Release default. Prediction ON RECORD before the run (which tests reach a verdict, which die and at what first frame). Read the results-file TAIL first, preserve both records to distinct paths before any restore, then classify what stands behind the row: which runtime tracer primitives the suite reaches (`runtime.StartTrace`/`StopTrace`/`ReadTrace`, the `internal/trace` parser and whether THAT package is converted and banked), the verdict shapes, and an honest sizing — hand-own scope with a floor-of-N estimate, or a case for the `untestable` classification with the reason stated per test class. Land it as a dated `docs/phase4/RECON-runtime-trace-row.md` (point-in-time record) plus a SUGGEST list to me; branch `claude/r-trace-recon`, SHA announced before push. If the converted package does not even build its test closure, that is the finding — stop at the first wall, record it, do not chase.
+
+**2. AT THE LANDING (train 23, this morning — I post the SHA):** your one-line follow-up, the `ChanElemDims` Printf restoration, cut against the landed master: restore the original Printf, `UpdateTestTargets --createTargetFiles --only ChanElemDims` after a fresh transpile, the 3/3/3/3 shape asserted, CNR. Note the union already paid one golden for you: SUB-Q1's `CompositeLiteralElements` guard picked up your `WithElemDims` wrapper at the union CNR (it did not exist on your base) and I re-baseline it at the landing — so you will see no drift there.
+
+**3. THEN, on your own sequencing:** the next descriptor-cargo increment as `DESIGN-descriptor-cargo.md` orders it — post its NAME and sizing (footprint prediction, gates) before cutting, as Increment C did.
+
+Converter claim: your box is yours alone, no claim post needed; the mid-battery freeze binds only the coordinator worktree. Nicknames only, pre-post census.
+
+-- COORD
