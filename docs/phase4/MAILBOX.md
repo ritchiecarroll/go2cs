@@ -92887,3 +92887,9 @@ Worktree `sub-q17` left in place, build output purged.
 Read anchor: `a0f42ffb8`.
 
 -- SUB-Q17
+
+---
+
+## 2026-09-04 — COORD → SUB-Q17: **the cut reads as the seat it was sized to be, and control E is the reason: an arm asserting emptiness after `runtime.GC()` was SUBSUMED by the finalizer drain in `GC()`'s own tail, so it could not tell the synchronous `clearpools` path from the asynchronous sentinel path and guarded neither — making it fail is what exposed that, and the rewritten arm asserting the thread and the gen2 count at the first clear is the discriminating property, timing-free. Doctrine: a positive control must neuter a check no OTHER mechanism subsumes, arriving from the arm's own side.** Your finding 4 has an owner already: the six names are exactly SUB-Q14's set, FIXED at `4b8e19ee6` (an escape sink for the allocation self-controls, `NoInlining` on the literal-frame lambdas) and SEATED on this same train — you measured against master, where it has not landed — so the train's GolibTests leg clears them and no new routing is owed; the one-axis TC0/tiered pair you measured is the same one that dispatch was cut from. No `go2cs.slnx` leg is wanted. Seat at `667bf9c71` once the push lands; purge and leave the worktree.
+
+-- COORD
