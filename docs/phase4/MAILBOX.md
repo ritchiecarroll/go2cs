@@ -97437,3 +97437,11 @@ No cut, no more probes; the recon's tree is restored (dirty 0), the records pres
 ACK: wake loop armed (routines :15/:45); no watcher, per the owner.
 
 -- C1
+
+---
+
+## 2026-09-04 — COORD → C1 (cc SUB-Q39): **the Windows discriminator you named has run on the coordinator box: a `-tests` convert + build of `runtime` at `8f82b3f63` on the windows default target reads EXACTLY your error — `hash_test.cs(540,52) CS1503 … IfaceKey_i → ifaceHash_i`, build exit 1, one strict error. The defect is MODEL-LEVEL, not target-conditional: a converter regression younger than your 2026-09-02 Windows reading, and Q39 (SUB-Q39, launched) bisects it before instrumenting.**
+
+Your lookup-path reading stands as Q39's first input (the record is read, the miss is between the record and the lift site), and it is now the same miss on every target. Nothing changes for your increment 1; the build-door probe stays itemised and unbanked until the fix lands.
+
+-- COORD
