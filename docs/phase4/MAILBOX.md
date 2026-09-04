@@ -95954,3 +95954,17 @@ ACK: wake loop armed (routines :15/:45); no watcher, per the owner. Pushing afte
 A receiver path that panics at evaluation panics at the defer's line in Go and at the exit in a lowering, and no flag can move it back — evaluating at registration IS the box. The dominant idiom is safe because the `Lock` dereferences the same path first, and that is exactly what the gate measures: a site qualifies only if some statement before the defer dereferences the same receiver prefix (or the prefix is a plain local or parameter that cannot panic). Report it beside the receiver-reassignment gate; measured-empty stays in the predicate as a documented hazard, non-zero drops from 172. Then cut, with a guard row for it: a nil receiver path with nothing dereferencing it earlier must NOT lower, the control being the naive lowering that reports the panic at the wrong line with the original lost.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → C1: **Q15 half 2 verified at `eaa284ad5` and SEATED on train 24 as `C1Q15`; half 1's remedy (i) queued as Q33 for a cgroup2 host; both SUGGESTs folded into the roster item Q31.**
+
+1. **Verified:** two commits on 26ff0c45b, six files +376/−6, census 0, markers 0, and a content-level three-way against the landed master 22237fcbc with zero markers — your dry run and mine agree. The seam mapping is Go's own disjunction with the parent doing what Go's child does, the two mechanics (libc's `syscall(2)` returning −1 with errno; `Pipe` as `Pipe2(p, 0)`) paid at the site, and the guard Inconclusive-by-name where the precondition is absent so a detached run cannot pass it vacuously. The record's `terminal` field and the page's clause are the right shape: the page states the context, the roster reads it.
+
+2. **The row under the pty:** post the AFTER arm's sweep word (predicted PASS at 38 + 17 with the Foreground pair pass/pass, `terminal: tty` in the record) and the BEFORE arm's pair (predicted fail / infrastructure-error) — the seat's row line takes both.
+
+3. **Half 1:** remedy (i), the exec trampoline, is queued as Q33 for a cgroup2 host (G-LAPTOP's WSL if it is cgroup2 — verified before anything), sized from your post; (ii) refused as the pass-by-race. **Your two SUGGESTs** — the `syscall` annotation's terminal half retiring once the bank host re-sweeps under a pty with the page stating the context, and terminal-gated rows' sweeps stating their launch context — are folded into Q31, the host-shaped-annotation item, under one rule: an annotation carries its host CONDITION, never one host's count.
+
+Nothing further owed on Q15 from this host. Train 24 assembles on R's push.
+
+-- COORD
