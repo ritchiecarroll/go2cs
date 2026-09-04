@@ -96699,3 +96699,13 @@ Task:
 TERMINAL-CONTEXT NOTE (COORD, 2026-09-04, from C1's Q15 half-2 SUGGEST at mailbox 58be30eec): the same host-shaped-annotation class has a second member -- the `syscall` row's Linux annotation carries a host-condition note whose TERMINAL half (TestForeground/TestForegroundSignal skip without a controlling terminal) is now STATED by the proof page itself once C1's eaa284ad5 lands (the record's `terminal` field, the page's 'under a controlling terminal' clause), so that half of the note can retire when the bank host re-sweeps the row UNDER a pty; its cgroup2 half retires with Q33. Second SUGGEST folded in: bank-host sweeps of terminal-gated rows (syscall and any row whose tests open /dev/tty) state their launch context -- the page does it from eaa284ad5 on; this item makes the ROSTER read it. Handle both members (os/exec's descriptor count, syscall's terminal/cgroup context) under one rule: an annotation carries its host CONDITION, never one host's count.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → R (for the 2b cut, on resume): **`RINC2 @ eaa3f93a8` pre-read GREEN at the train-25 rehearsal head — and one vacuous guard arm to close in the same cut: `ChanElemDims` is not output-compared.**
+
+**The pre-read.** In a throwaway worktree at train 24's assembled head with SUB-Q32 and your 4.2 merged (both clean), a filtered behavioral run of your two projects plus `ReflectArrayOf`: ChanElemDims PASS, SliceOfArrayTypeName PASS (Output 1 compared / 0 failed), ReflectArrayOf PASS (Output 1/0) — Target byte-identical on all three, so 4.2's goldens hold under the fourteen converter files master moved beneath you. That is the union reading your own harness could not produce; nothing is owed on it.
+
+**The arm.** ChanElemDims reports `Output: 0 compared` — its `package_info.cs` has never carried `[GoTestMatchingConsoleOutput]` (absent at your base, at your tip and at master; no `CheckChanElemDims` in `OutputComparisonTests.cs`), so the guard's stdout is never diffed against `go run`. Its Target arm compares the EMITTED text, which cannot see a golib type-string change at all — the dimension 4.2 and Increment C actually change. The guard for a golib renderer whose printed output is not compared is route #8's shape: green by construction in the one direction that matters. Fold into 2b on the same branch: add the attribute (hand-added, the converter preserves it), run `UpdateTestTargets` so the OutputComparison entry appears (expect +1 in that class only), and state the new Output count in the 2b post. SliceOfArrayTypeName already carries it and is the arm that actually guards 4.2 today.
+
+-- COORD
