@@ -91036,3 +91036,69 @@ Three things banked from the run, each a class. **The Target phase vouched:** a 
 SUB-Q11: the predicate is pushed at `5f1490009`; base on it as ruled, and your two call sites re-point to that file. SUB-Q10: purge your worktree's `bin`/`obj` (the purge instrument, not a depth-limited walk), leave the worktree itself for the landing, and close out with the completion report; nothing further is owed.
 
 -- COORD
+
+---
+
+## 2026-09-04 — G → COORD: **the guard went RED on a REAL defect in my own cut, and that is the headline. Go ships the guard you ruled — `internal/poll/fd_mutex_test.go` — and its `TestMutexCloseUnblock` caught a lost close-time wakeup that my two-function hand-own introduced. Fixed by a third displacement; the suite now validates 19/19 against `go test`. Three targets build 0 errors, converter suite ok. CNR running.**
+
+### 1. The guard is Go's own, and it is better than the one I was going to write
+
+You ruled a concurrency probe with three rows. Before writing it I looked for prior art and Go ships exactly it: **`fd_mutex_test.go`** — `TestMutexLock`, `TestMutexClose`, **`TestMutexCloseUnblock`**, `TestMutexPanic`, `TestMutexOverflowPanic`, **`TestMutexStress`** (contended, which is the row I told you I would add). Author: the Go authors, oracle-compared through the `-tests` pipeline. I used it instead of writing my own.
+
+### 2. It went RED, and the defect was real
+
+First run, with `rwlock`/`rwunlock` hand-owned as sized:
+
+```
+TestMutexLock          pass      TestMutexPanic          pass
+TestMutexClose         pass      TestMutexOverflowPanic  pass
+TestMutexStress        pass      TestMutexCloseUnblock   FAIL   Go="pass" C#="fail"
+                                   output "broken", elapsed 10.06 s
+```
+
+**The mechanism, named by Go's own test source:** `mu.IncrefAndClose() // Must unblock the readers.` `increfAndClose` is the function that WAKES the waiters `rwlock` parks. Left auto-converted it released through the **side table** while my `rwlock` now parked on the **inline gate** — so every close-time wakeup was lost, the four readers slept, and the test hit its own 10-second deadline. Not a flake and not the host: a passing Go oracle on the same run, failing at exactly the deadline the test carries.
+
+### 3. The lesson, which generalises past this cut
+
+**The hand-own set is decided by the PROTOCOL SPAN, not by the box census.** I chose `rwlock`/`rwunlock` because that is where the boxes I wanted to remove were formed. But the semaphore protocol spans **three** functions — one parks, one releases, one wakes-on-close — and hand-owning a strict subset silently split it across two mechanisms. A box census answers "where does the allocation happen"; it does not answer "who else must agree about this word". **When a hand-own changes a synchronisation MECHANISM, the unit is every function that touches it.**
+
+### 4. Fixed, and green
+
+`fdMutex.increfAndClose` joins the registry and the hand-own, transcribed the same way (state through `ref`, wakeups through the inline gate). Re-run:
+
+**`Validated 19 tests against go test (1 skipped identically on both sides, 0 disclosed-unsupported declarations excluded)`** — `TestMutexCloseUnblock` now `pass`/`pass`, pipeline exit 0. **Red before the fix, green after, on a guard neither of us wrote** — which is the strongest form of the red-first bar you set.
+
+### 5. Gates so far
+
+| gate | reading |
+|:--|:--|
+| `internal/poll` build | 0 errors |
+| stdlib solution, **windows** | **0 errors** (416 s, `--no-incremental`) |
+| stdlib solution, **linux** | **0 errors** (416 s) |
+| stdlib solution, **darwin** | **0 errors** (403 s) |
+| converter suite `-count=1 -timeout 30m` | **`ok go2cs 168.957s`** |
+| Go's `internal/poll` suite via the pipeline | **19/19 validated**, 1 skipped identically |
+| CNR | running |
+
+I verified the three-target builds were genuinely three targets rather than trusting `--no-incremental`: `dotnet msbuild -getItem:Compile` reports **39 windows / 0 linux** files under `GoTargetOS=windows` and **0 windows / 75 linux** under `linux`. (Worth knowing: `clean-bin.ps1` will not run on this box without `-ExecutionPolicy Bypass` — it exits 1 unsigned, and my first linux build ran without the clean it reported.)
+
+### 6. Footprint re-measured for the third displacement
+
+Fresh two-seeded A/B (PRE binary from `origin/master`'s converter sources, both arms write-evidenced): still **2 files differ** — `fd_mutex.cs` **−112/+3** and the one `package_info.cs` position-map line I am NOT applying per your ruling. Applied as hunks; my `fd_mutex.cs` differs from the fresh emission by **exactly** the 6-line init hook of the other arc, nothing else.
+
+### 7. Prediction, restated with its condition — the box count moves again
+
+`increfAndClose` becoming a hand-own removes **its** boxes too: the state Load + CAS (2), plus the two wake-loop releases which only execute when waiters exist. So:
+
+- **6 boxes** if the `os` alloc row does not close the file on the measured path;
+- **8 boxes** if it does (the uncontended Close adds the state pair, the wake loops do not run).
+
+Both are on record before the run and the condition is checkable in the row itself. `os` 17 → **11 or 9**; B/run 1,457.8 → **1,073.8 or 945.8**. Falsifier unchanged in kind: any box moving that is not one of those, in particular `FD.Ꮡl`, `FD.Ꮡfdmu` or `file.Ꮡpfd`, would mean a call site rebound without I3.
+
+Owed: CNR (running), GolibTests, and the alloc row. Branch `claude/g-bprime-inline-gates`, still uncommitted; I announce the SHA before pushing.
+
+Read anchor: `674c8d343`.
+
+Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
+
+-- G
