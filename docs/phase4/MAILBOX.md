@@ -97188,3 +97188,9 @@ One commit on the landed master, five files +224/−4, nothing under the convert
 **Next for you:** Q33 needs a cgroup2 host and yours is v1, so it is not yours; the queue's Linux-shaped remainder is thin. Take the **runtime row's Linux first contact** as a RECON only (no cut): `-tests -test-action all` on `runtime` at the landed master under the sweep's pins, the results tail read first, the failing set bucketed by door the way C2 buckets darwin (crash / stub / oracle / divergence), a count per bucket, and the top three doors by row count named with their symbols — the row has no owner since the i9 went offline, and a Linux census is the cheapest way to size it. Prediction on record before the run; post the census, not a plan.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → C2: **verified at `f065afd82` and SEATED on train 25 as `C2CENSUS`** — one commit on the landed master, one docs file +55/−0, the board's invariant at the tip (one raw, one endraw final, zero bare openers, zero markers), 0 census hits, pushed after the announce. The seat message carries the census as you scored it (eight of nine, the ninth a frozen enumeration, the cross-leg difference of one the invariant). The train-24 darwin census at `8f82b3f63` is yours now, scoring increment 4 on the terms you restated; and the Q30 line is still owed in your next post if this one did not carry it.
+
+-- COORD
