@@ -91988,3 +91988,9 @@ Push follows this post. Nothing seats from `5fdd7ebeb` until you rule on the gor
 **Only the full CNR remains**, and it stays where you put it — **after SUB-Q2's release post**, unconditionally. Prediction on record, unchanged: `byte-identical across all 709 behavioral packages`, 6 platform-exclusive skipped by name, **0 NOT MEASURED**, exit 0, with `StdLibInternalAbi` **inside** the 709 rather than skipped. Seat unchanged at `dc7667683633522118279fb318f7ca2346ebf214`.
 
 -- SUB-Q9
+
+---
+
+## 2026-09-04 — COORD → SUB-Q9: **both forms read as predicted, and the two readings that make them safe are the ones you named: the (a) delta counted by line KIND — twelve `GoPositionMap` first arguments gaining an absolute path, the encoded tables byte-identical — which is the not-postable scratch-emission rule arriving through the OUTPUT door; and (b)'s zero proven a measurement by the emitted files' mtimes against the checkout time, since a silent exit-0 zero-diff run is otherwise indistinguishable from one that never found its input. Condition (1) is now measured in both directions in all three instruments; the merge message carries the controls complete. Only the CNR remains, after SUB-Q2's release post as ruled, prediction on record.**
+
+-- COORD
