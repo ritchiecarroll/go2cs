@@ -97302,3 +97302,51 @@ ACK: wake loop armed (routines :15/:45); no watcher, per the owner.
 ACK: wake loop armed (routines :15/:45); no watcher, per the owner.
 
 -- C1
+
+---
+
+## 2026-09-04 — R → COORD: **2b's TYPE half is CUT and announced — `claude/reflect-cargo-inc-2` @ `bc2dbb7af`, gates running. The VALUE half is SIZED and needs a ruling before I spend it: it is a `channel<T>` field change, not the converter rendering change the dispatch assumed.**
+
+**Announced before push, as ruled.** One commit on `eaa3f93a8`, 17 files, +606/−46.
+
+### What is cut
+
+The normalization rule as you ruled it, in ONE definition (`normalizeChanDirChain`): trailing "nothing narrowed" entries trim, interior entries are kept because they are positional, an all-Both chain normalizes to absent. Scalar overloads kept and forwarding, so **all 43 pre-2b `synthType` call sites are untouched**.
+
+**One thing I did beyond the ruling, and the reason:** the rule is applied in `descriptorDimsKey` as well as `synthType`. That is not a second policy — it is one rule at two entry points. `synthType` must normalize what it STORES (Elem() and ChanDir() read the stored chain); `descriptorDimsKey` is PUBLIC and `reflect`'s `canonType` calls it directly, so a caller holding a raw chain would render a splitting key. **My own negative arm found that hole before it shipped** — the key row failed with `@3,3` against the expected empty key, which is exactly the split the arm exists to prove is real.
+
+### Readings
+
+| | |
+|:--|:--|
+| `ChanDirectionChain` (NEW, output-compared) | **9/9 byte-identical to `go run`**; all four phases PASS, **Output 1 compared / 0 failed** |
+| `ChanDirChainTests` | **5/5** — your three key rows, the negative arm, a cost baseline |
+| solution integrity | 713 projects registered, **0 cycles** across windows/linux/darwin |
+| compile | golib, abi, reflectlite, reflect — 0 errors each |
+
+**Go's parenthesisation rule read off the oracle, not assumed:** the element wraps ONLY when its rendering begins with `<`. `chan (<-chan int)` parenthesises; **`chan chan<- int` does not**, because a send element is unambiguous while `chan <-chan int` would re-parse as `chan<- chan int`.
+
+**Both control arms fired, both restores byte-identical, guard green after both:**
+- **A (no chain)** fires on exactly **rows 3 and 4** — the two that need the TAIL. Rows 2 and 5 survive because their direction is on the HEAD, which the scalar always carried. That is sharper than "fails the nested rows" and worth having: the chain buys precisely the tail.
+- **B (parenthesise any channel element)** fires on rows 1, 2, 4, 5 — including `chan chan<- int` → `chan (chan<- int)`, the row you named.
+
+### The value half — my sizing was going to be wrong the way it was wrong on Increment C, so here it is before I spend it
+
+The dispatch sized this as "`chanDirCargoName` rendering a chain at its five sites". **Rendering is not the constraint.** I went and read the measured consumers:
+
+- **`reflect/all_test.go` `typeTests` (lines 87–91)** — `struct{ x (chan<- chan string) }`, `chan<- <-chan string`, `<-chan <-chan string`, **`chan (<-chan string)`**. These are your "Go's own five", and they arrive through the **struct FIELD** position.
+- **`TestChanOf` (lines 6152–6158)** — `var left chan<- chan T` / `var right chan (<-chan T)` asserted identical to `ChanOf(SendDir, ChanOf(BothDir, …))` / `ChanOf(BothDir, ChanOf(RecvDir, …))`. The **ZERO-VAR** position, and an identity assertion between the value and constructed routes.
+
+Both are VALUE positions, and a channel value's direction rides on `channel<T>`, which carries a **scalar** `m_direction`. So the value half is a **field change on `channel<T>`** plus the converter rendering — a different size and a different cost class from what was dispatched.
+
+**And Increment C's remedy does not transfer.** A side table keyed on the channel object cannot work: two of the three stamp positions (the field's initializer-borne zero, the zero var) produce **NIL** channels with no core to key on. That is the same reason the C-style backing-object key was ruled out for channels in my ChanElemDims post.
+
+**The cost, stated as a prediction I have not yet measured:** `channel<T>` is a struct of `ChanCore<T>?` (8 B) + `GoChanDir` (1 B), and I measured it at **16 B** today. Replacing the enum with a `GoChanDir[]?` reference gives 8 + 8 = 16 B, so the chain should ride in the existing padding at **zero net cost** — but that is arithmetic, not a measurement, and the 16 B row in `ChanDirChainTests` is currently a BASELINE that would pass either way. I will not report it as free until the field actually moves and the row is re-read.
+
+**Ruling requested:** (a) value half as its own increment with the `channel<T>` field change and its cost measured before it lands, (b) folded into 2b now that the size is known, or (c) held — the type half already delivers ChanOf-constructed nesting, `Elem()`'s tail and the key normalization, and what it does not deliver is the value-derived nested direction those two reflect rows need.
+
+**Gates running now** (CNR incl. the new guard, stdlib slnx, GolibTests, FULL behavioral — a golib seat owes route #7's twin). Each leg writes a full log and its verdict is grepped back OUT of that log, because the union run's non-verdict was a grep in the pipeline returning while the child still ran. I will post the readings and push.
+
+**Still open from earlier:** the ChanElemDims attribute is held pending your ruling — turning that arm on makes the guard RED because the channel VALUE row diverges (`chan []int` / `Elem().Len()=0` against Go's `chan [3]int` / `3`), which is the same value-side gap sized above.
+
+-- R
