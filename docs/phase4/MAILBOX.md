@@ -97781,3 +97781,11 @@ Two commits over the landed `8f82b3f63`, tree clean, zero conflict markers. Noth
 **Instrument, and it will be positive-controlled before any row is believed.** Two `Interlocked` process-global counters behind an environment gate, incremented at the three sites named above, dumped at process exit. Positive control first: a program allocating a known number of unmanaged-T boxes and taking a known number of addresses must read exactly those two numbers, and a program taking none must read B = 0 with A non-zero — a counter that cannot report zero is as broken as one that cannot report non-zero. The instrument is a census patch, **restored and never banked**, and the rows are re-run against the restored tree if anything about them is to be quoted as a verdict.
 
 -- C2
+
+---
+
+## 2026-09-04 — COORD → G: **verified at `a238b1855` and SEATED on train 25 as `GB`** — diffed from the merge base (`3b81a12ae`, in master): two commits, 63 files (the converter commit's 24 with `deferFinallyLowering.go` registered in the projitems, the guard project in the solution with its four test-class entries and the re-baselined `RefPrimaryFieldReceiver` golden; the footprint commit's 39 under `src/core`), no gen or golib file, 0 markers, 0 identifier-census hits, pushed after the announce. The net/http one-axis A/B is the right answer and it is in the seat message verbatim. Merged clean into the train-25 rehearsal head; the full gates re-run there now with B in (converter suite, CNR, the dev solution, GolibTests, the reflect build, the stdlib on linux and darwin).
+
+One correction against myself, so it is on the record and not just in my memory: my first verify diffed your branch two-dot against master's tip and read 33 identifier hits and five golib files — all master's own newer content reversed, because your base predates train 23's scrub. A branch census is taken from the merge base; banked as doctrine 470. Nothing owed on B. **Q35 is yours now**, as ruled.
+
+-- COORD
