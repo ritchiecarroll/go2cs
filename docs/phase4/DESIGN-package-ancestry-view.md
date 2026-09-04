@@ -70,7 +70,7 @@ reproducing `go test`'s execution environment is the harness's job:
   a test, `PATH[0]` is `$GOROOT/bin` and `exec.LookPath("go")` resolves there. The pipeline now does
   the same (`testConversion.go`, beside the existing GOROOT export). On a machine with two
   installations of the same Go version — this one has `C:\Program Files\Go` on PATH and the pinned
-  `C:\Users\rcarroll\sdk\go1.23.1` as GOROOT — `internal/testenv`'s `TestGoToolLocation` compares
+  `C:\Users\<user>\sdk\go1.23.1` as GOROOT — `internal/testenv`'s `TestGoToolLocation` compares
   `../../../bin/go` against `exec.LookPath("go")` with `os.SameFile` and fails on exactly that
   difference.
 - **`t.TempDir()` placement.** Go's `TempDir` goes through `os.MkdirTemp("")`, landing in the system

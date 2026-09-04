@@ -851,7 +851,7 @@ that predates it rather than argued from the diff.**
    Full `go test ./...` is **`ok`, exit 0** — the container's 7 "failures" were Linux-path artifacts, as
    it predicted. *Additionally measured*, because the committed guard pins `goModCache` directly and so
    never exercises the real Windows resolution: `goModCacheDir()` resolves through `go env` to
-   `C:\Users\rcarroll\go\pkg\mod` (the `GOMODCACHE` env var is unset here, so the second fallback is the
+   `C:\Users\<user>\go\pkg\mod` (the `GOMODCACHE` env var is unset here, so the second fallback is the
    live path), and `isPathUnder` classifies correctly against a real cache path — case-insensitive in
    both directions, separator-agnostic, root-inclusive, and **not** fooled by the sibling-prefix trap
    `…\pkg\mod-notthecache`. The gate fires on Windows.

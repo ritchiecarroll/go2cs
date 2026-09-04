@@ -530,7 +530,7 @@ forward-slashed, zero backslashes in the file**. The only backslash anywhere in 
 one in `'\uA4F8'`, inside a `package_info.cs` comment — a C# escape in prose, not a path.
 
 **F7's `-WhatIf` is inert on Linux, proven two ways rather than asserted.** `go env GOPATH` resolves
-to `/home/rcarroll/go`, so the target is `/home/rcarroll/go/src/go2cs` — a path that **does not
+to `/home/<user>/go`, so the target is `/home/<user>/go/src/go2cs` — a path that **does not
 exist**. The dry run plans the whole deploy correctly (43 files / 9 directories of analyzer, **3,927
 files / 365 directories** of core, **304** projects, plus `version.props`, the root
 `Directory.Build.props` and `go2cs-core.slnx`) and then: the target **still does not exist**
@@ -1496,12 +1496,12 @@ Every command below is read-only. Run from the repository root unless noted.
 | P2 | `wsl -e uname -a` | `Linux … 6.18.33.2-microsoft-standard-WSL2 … x86_64 GNU/Linux` |
 | P3 | `wsl -d Ubuntu-22.04 -e bash -lc 'command -v pwsh dotnet go git make'` | only `/usr/bin/git`; **pwsh, dotnet, go, make all missing** |
 | P4 | `wsl … 'mount \| grep -E "9p\|drvfs\|virtiofs"'` | `C:\ on /mnt/c type 9p (rw,noatime,aname=drvfs;path=C:\;uid=1000;gid=1000;…;msize=65536)` — **9p, no `metadata`** |
-| P5 | `wsl … 'ls -la /mnt/c/Projects/go2cs/src/*.ps1'` | all `-rwxrwxrwx ritchie ritchie` |
+| P5 | `wsl … 'ls -la /mnt/c/Projects/go2cs/src/*.ps1'` | all `-rwxrwxrwx <user> <user>` |
 | P6 | `wsl … 'ls /mnt/c/Projects/go2cs/src/tests'` | resolves (disk then had `src/Tests`; probed pre-rename) → **`/mnt/c` is case-insensitive from Linux** |
 | P7 | `wsl … 'cat /etc/wsl.conf'` | `[boot]\nsystemd=true` — no `[automount] options` |
 | P8 | `git config --get core.autocrlf / core.filemode / core.ignorecase` | `true` / `false` / `true` (the Windows-clone triple) |
 | P9 | `git ls-files --eol src/core/fmt/print.cs src/core/fmt/fmt.csproj src/go2cs/csproj-template.xml src/core/compress/testdata/*` | `i/lf w/crlf attr/` for the first two; `i/lf w/crlf attr/text eol=crlf` for the template; `i/crlf w/crlf attr/-text` for the testdata files |
-| P10 | `go env GOOS GOARCH GOROOT GOPATH GOVERSION` | `windows` `amd64` `C:\Program Files\Go` `C:\Users\rcarroll\go` `go1.23.2` |
+| P10 | `go env GOOS GOARCH GOROOT GOPATH GOVERSION` | `windows` `amd64` `C:\Program Files\Go` `C:\Users\<user>\go` `go1.23.2` |
 | P11 | `dotnet --info` | SDK 9.0.316, MSBuild 17.14.43, RID `win-x64` |
 | P12 | `find src/core -name '*_windows*.cs' \| wc -l` | **87** |
 | P13 | `find src/core -name '*_linux*.cs' \| wc -l` | **0** |
