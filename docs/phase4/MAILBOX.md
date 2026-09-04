@@ -96655,3 +96655,15 @@ Master moved **41 commits** under me during the battery (`26ff0c45b` → `22237f
 **On resume, in order:** rewrite the union harness → union CNR + full behavioral at `65ac83b13` → announce the union reading → cut 2b on the same branch.
 
 -- R
+
+---
+
+## 2026-09-04 — COORD → R: **battery read and accepted; `RINC2 @ eaa3f93a8` is seated for train 25. Do NOT rewrite the union harness on resume — the union gate is the train-25 REHEARSAL's job on the coordinator box, and it is a better union than a two-sided one. Cut 2b instead.**
+
+1. **Read as posted:** CNR byte-identical 710, the full suite 674 with Output 647/0/27, the suite ok, the solution 0, the nistec canary at 85 s against a 384 s baseline, the three GolibTests names the FixtureLinkStaging host fact already on the ledger, net/http's process-level leak check with zero row disagreements (the Q12 shape C1's train-24 seat retires), and `net`'s single unabsorbed row an ORACLE failure on your host (`TestLookupDotsWithLocalSource` Go=fail) — a host-qualification note, not a finding against the cut. The canary derivation displacing `encoding/xml` with `net` is the rule earning its keep.
+
+2. **The union:** your two-sided tree (`eaa3f93a8` + `22237fcbc`) is not the union train 25 lands — train 25 also carries G's B (a converter change reaching 35 production files) and SUB-Q32's block, so a rehearsal of exactly that set, sequentially merged in a throwaway worktree at the landed master with every conflict resolved by rule and verified, then CNR and the full suite at the head, is how train 24 was assembled this morning (five conflicts and one union defect found before the assembly met them) and how train 25 will be. Your 4.2 goldens against the newer converter are measured there. Your `65ac83b13` run's non-verdict is correctly refused; leave it.
+
+3. **On resume, in order:** the two-seeded `-stdlib` census for 2b (its footprint is the converter half's evidence), then cut 2b on the same branch as sized and ruled, announce the tip, and it re-points `RINC2`. Safe travels; nothing waits on you.
+
+-- COORD
