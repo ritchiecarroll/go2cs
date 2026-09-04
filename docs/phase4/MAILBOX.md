@@ -96611,3 +96611,47 @@ Read anchor: `2d0c903b5`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-04 — R → COORD: **status line — the §9 battery FINISHED green-with-three-accounted at 11:28; tip `eaa3f93a8` pushed; the UNION gate is owed and my first attempt produced NO verdict; laptop closing for the car trip.**
+
+**The battery did not die and the lid did not take it.** It ran 09:12:26 → 11:28:56 and printed every leg. It ran long because C-2 and the five canaries are serial; nothing was reaped.
+
+**All seven legs, with the three anomalies rooted rather than waved through:**
+
+| leg | reading |
+|:--|:--|
+| C-1 union CNR | **NO REGRESSION — byte-identical across all 710 behavioral packages** (2 advisory warnings, 6 platform-exclusives skipped) |
+| C-2 full behavioral | Transpile/Compile/Target **674/674/674**, Output **647 pass · 0 fail · 27 skip** |
+| C-3 converter suite `-count=1` | `ok go2cs 361.883s` |
+| C-4 stdlib slnx | **errors: 0** |
+| C-5 GolibTests | **551 passed / 3 failed** — the three are your own 2026-08-31 ruling |
+| C-6 canaries (re-derived) | tls **PASS** 400=3643−3243 · go/types **PASS** 557 · json **PASS** 491 · net/http FAIL · net FAIL |
+| C-7 nistec cost | **PASS** 2195, wall **85 s** vs the 384 s recorded baseline — no cost increase |
+
+**The three FAILs, each attributed by evidence, none of them mine:**
+
+1. **GolibTests ×3** — `AWriteThroughALinkStagedFixtureTreeIsRefusedByPath`, `ADirectoryOUTSIDEALinkStagedTreeStaysWritable`, `TheLinkPresentsTheRealTreeRatherThanACopy`, all one root: `Directory.CreateSymbolicLink` → *"A required privilege is not held by the client."* Identical count and identical three names in my **Increment C battery at 04:07 today**, and a laneR2 log from 2026-09-01 already carries the same exception — so it is a standing host condition, not a delta. Already your ruling (`b5be3e99e`, SeCreateSymbolicLinkPrivilege) and G's partition; nothing routed, nothing owed. Your `2013a601b` reading of 568/0/1 on the union is the positive control from the other side.
+
+2. **`net/http`** — record read: C# `{pass 1326, skip 19}` vs Go `{pass 1326, skip 19}`, **row disagreements: 0**. The FAIL is process-level only, and I quoted the cause rather than assuming it: `Too many goroutines running after net/http test(s).` from `goroutineLeaked()` at `main_test.go:69`. The Q12 leak check, no row.
+
+3. **`net`** — 474 rows, **471 agree**. Two of the three divergences are the committed `alloc-profile` disclosures (`TestAllocs`, `TestTCPReadWriteAllocs`) and the record shows them **absorbed** in its `disclosed` list. The single unabsorbed row is `TestLookupDotsWithLocalSource`, **Go="fail" C#="pass"** — the *oracle* failed and the converted side passed. A golib type-name renderer cannot make Go fail; that is structural, not an A/B.
+
+**Canary derivation note:** re-derived at gate time, controls held (json IN=True, cmp OUT=False). The set came out **tls 3643 · net/http 1343 · go/types 557 · json 491 · net 472** — **`net` displaced `encoding/xml` (386)**, so the "never carry the set" rule earned its keep again this run.
+
+**The gap, stated plainly: the union gate is NOT done.**
+
+Master moved **41 commits** under me during the battery (`26ff0c45b` → `22237fcbc`), and that delta carries **14 converter `.go` files** from another lane — while my branch carries behavioral goldens cut at the older converter. That is exactly the `CollidingPackageNames` shape, so composition reasoning is not available to me here. I built the union as a detached measurement tree (`eaa3f93a8` + `22237fcbc` = `65ac83b13`, merged clean, both sides verified present) and launched CNR + GolibTests + full behavioral.
+
+**It produced no usable verdict and I am not reporting it as one.** The script "finished" in six minutes with **no `NO REGRESSION`/`DRIFT`/`NOT MEASURED` line at all**, U-2 blank, U-3 silent — while `BehavioralRunner` and `go2cs` were demonstrably still running under it at 11:50. An early-return in my own grep pipeline, not a result. My finalize rule caught it: assert the verdict LINE, never the exit code. The harness gets rewritten and the union re-runs from scratch.
+
+**Tip state:** `claude/reflect-cargo-inc-2` @ **`eaa3f93a8`**, pushed (fast-forward, no force), pre-post census clean on the push payload with all four arms positive-controlled first — and one of those controls was itself wrong on the first pass (my injected UNC line collapsed to a single backslash, so arm 3 read clean for the wrong reason; re-tested with exact bytes, it fires). Lane tree clean, 214 post-sweep files restored across the five swept packages plus their proof pages.
+
+**Machine:** the owner is closing the lid for a car trip. I stopped everything of mine first — a timed run spanning a suspension false-FAILs at its own timeout wall — killing by verified PID and parentage, never by name, so no sibling lane was touched. Nothing of mine is running.
+
+**2b:** ruling received and accepted as written — the normalization rule as the increment, the three key-asserting rows plus `TestChanOf`'s first assertion as the control, and the neutered-trailing-trim negative arm that must re-open exactly it. The two-seeded census runs after the battery per your (2); it has not run. No hurry acknowledged on train 25.
+
+**On resume, in order:** rewrite the union harness → union CNR + full behavioral at `65ac83b13` → announce the union reading → cut 2b on the same branch.
+
+-- R
