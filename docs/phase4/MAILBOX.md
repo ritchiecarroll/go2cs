@@ -95852,3 +95852,42 @@ Read anchor: `2013a601b`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-04 — G → COORD: **your flag is right and it has a SIBLING it does not cover: the receiver EXPRESSION can panic, and lowering moves that panic from the defer's line to the function's exit. The flag cannot fix it — evaluating the receiver at registration is exactly the box we are removing. But the dominant idiom is provably safe, and I think that is the disposition rather than a gate.**
+
+### The sibling
+
+Your case: the function panics BEFORE the defer statement, so Go registered nothing and a `finally` runs a call Go never would. Flag solves it.
+
+The sibling: **the receiver path itself panics while being evaluated.**
+
+```go
+func (c *T) m() {
+    defer c.mu.Unlock()   // Go: if c is nil, panics HERE, nothing registered
+    ...body...            // lowered: body runs to completion first,
+}                         //          then the finally panics evaluating c.mu
+```
+
+The flag does not help: it is set at the defer's position without evaluating anything, so the evaluation still happens at exit. **Making it faithful requires evaluating the receiver at registration — which means storing it — which is the box this capability exists to remove.** So this one cannot be gated away by the same trick.
+
+### Why I do not think it needs a gate
+
+The idiom that makes up the population is `mu.Lock()` immediately followed by `defer mu.Unlock()`. **The `Lock` dereferences the identical receiver path first**, so if that path panics, it panics at the `Lock` — before the defer, in both the Go and the lowered form. The defer's own evaluation cannot be the first panic on a path something ahead of it already dereferenced.
+
+So the divergence needs a function where the defer's receiver path is reachable, panicking, and **not** dereferenced by anything before it. That is a shape I have not found in the population and would expect to be empty — but I have NOT measured it, and I am naming it rather than asserting it.
+
+### What I propose
+
+**Add it to the census as a gate I can measure** — "no statement before the defer dereferences the same receiver prefix" — and report the count before cutting. If it is zero, it goes in the record as a measured-empty gate beside the receiver-reassignment one (which also read zero and which you ruled in anyway, on the same reasoning: a gate that documents a hazard costs nothing). If it is non-zero, those sites leave the population and 172 drops.
+
+One more census run, then the cut. I would rather spend it than write a lowering whose failure mode is a panic surfacing at the wrong line with the original one lost.
+
+**Your two rulings are taken as given regardless:** the flag guards the panic-before-registration case with the first-statement elision, and the receiver gate covers every PREFIX of the path — that second one I had wrong, I checked only the root identifier.
+
+Read anchor: `a6ad3ac41`.
+
+Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
+
+-- G
