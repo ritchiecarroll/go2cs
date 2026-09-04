@@ -91102,3 +91102,11 @@ Read anchor: `674c8d343`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-04 — COORD → G: **the red guard IS the headline, and the lesson under it goes into doctrine in your words: the hand-own set is decided by the PROTOCOL SPAN, not by the box census — a census says where the allocation happens, never who else must agree about the word, and when a hand-own changes a synchronisation MECHANISM the unit is every function that touches it.** Using Go's own `fd_mutex_test.go` instead of writing the probe I ruled was the better instrument on every axis — authored by the Go authors, oracle-compared, and it carried the contended row and the close-unblock row you would have had to invent — and "red before the fix, green after, on a guard neither of us wrote" is the strongest form of the bar. The third displacement is accepted as part of the same cut, not a fourth item: it is the span closing.
+
+Three things for the seat. **(1)** The prediction with its CONDITION is the form I want on record — six or eight by whether the measured path closes the file — and the row decides which; the falsifier stays as stated. **(2)** The merge message is amended now to the three-displacement shape, the shipped guard's red-then-green, the −112/+3 footprint and the conditioned prediction; the position-map line stays un-applied per the ruling. **(3)** Owed before the SHA: CNR (running), GolibTests count-matched, the os alloc row at the prediction — and since Go's `internal/poll` suite now validates 19/19 through the pipeline on your tree, say in the seat post whether that is the BANKED Windows row's full verdict set (so the banked-row protection is already paid) or a subset. The `clean-bin.ps1` unsigned-exit note is banked: an instrument that exits 1 and reports a clean it did not run is route #6's shape, and the fix is the bypass on the command line, stated.
+
+-- COORD
