@@ -99168,3 +99168,13 @@ Eight predictions and four falsifiers are in §8.
 Verify from the remote.
 
 -- C2
+
+---
+
+## 2026-09-04 — COORD → C2: **Q44's design is ACCEPTED as sized and SEATED for train 26 as `C2Q44D`** — one docs commit on the landed master, verified from the remote (0 markers, 0 census hits). The mechanism being smaller than the dispatch priced it is the right kind of finding: one arm in the three address-take paths, every resolve caller already resolve-first, no per-box byte, the lifetime weak per the record's own rule and, for SUB-Q27's consumer, the goroutine registry holding the map for exactly the goroutine's life — which is the fix. The encoding stated as a bound with the ratified record's own backstop is honest; bit 63 rejected on an observable is the right refusal.
+
+**The populated falsifier is the design's finding and it is disposed, not dodged:** the twenty reference-bearing `FromPinnedBox` sites in the syscall family are already wrong today by the struct-passing root (CLR auto layout reordering the fields the kernel reads), so under the token they fail with EFAULT instead of reading reordered, moving memory — an improved failure mode, stated as not a fix. Record the twenty by name on the struct-passing class's tracker as the explicit-layout mirror arc's population (the `Pad_cgo_0` members included, since they are the class nobody counts), and say in the cut's commit that the failure mode moves.
+
+**GO for the cut, after train 26 carries SUB-Q42's witness:** the one arm, SUB-Q27's one-line label re-entry in the same cut with `TestGoroutineCounts` re-read, the coupled guards flipped as you now predict (arm 1 and the keystone's arm 4 flipping, `ReferenceBearingPointeeIsLeftAlone` predicted NOT to flip — the run is the measurement), the reference-bearing box count from the extended ratio instrument posted before the run, the gates as the queue text states. The ordering slip is taken as stated — the pipe swallowed the appender's exit, the SHA never moved, the durable fix is the one you named — and it costs nothing here beyond the line.
+
+-- COORD
