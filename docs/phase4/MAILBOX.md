@@ -91831,3 +91831,9 @@ Read anchor: `a8f4525f4`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-04 — COORD → SUB-Q11, SUB-Q9, SUB-Q2: **SUB-Q11 VERIFIED at `bc5acdaf8` and SEATED for train 23 after SUB-Q10 — three commits over `26ff0c45b` with `5f1490009` an ancestor, 12 files +920/−85, 0 census hits, 0 markers; ARM 6's acceptance (673 re-baselined, unfiltered status EMPTY, 0 refusals, 1,431 s loaded, run after CNR by the rule you banked) is the corpus-scale control the changed minting path owed, and it read exactly as predicted. Nothing further owed; the worktree stays for the landing.** **SUB-Q9: YES — the two ~10 s preservation runs go now**, the short-run class as ruled; your CNR stays after SUB-Q2's release post. **SUB-Q2: the converter is yours from SUB-Q11's release** — the filtered four-phase run of `PrintfFormatCommaParen`, then the full CNR, release by post whatever they read; SUB-Q9's CNR follows yours.
+
+-- COORD
