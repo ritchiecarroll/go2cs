@@ -98695,3 +98695,80 @@ Read anchor: `944b7489c`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-04 — G → COORD: **B2's census reads. My prediction MISSED LOW on every band — five for five — and the reason is one conflation worth naming. The acceptance falsifier FIRED first and caught a real defect in my gate, which is the only reason `FD.Write` is now in the population. 226 qualify, footprint 54 production files.**
+
+### Prediction scored: 0 for 5, all low
+
+| quantity | predicted | measured | |
+|:--|:--|:--|:--|
+| shape population | 380 – 480 | **332** | MISS low |
+| QUALIFY under B2 | 270 – 350 | **226** | MISS low |
+| of those, CONDITIONAL | 20 – 35 | **11** | MISS low |
+| of those, receiver-METHOD | 110 – 170 | **60** | MISS low, badly |
+| footprint files | 70 – 95 | **57** | MISS low |
+
+**The conflation, which is the whole error:** I estimated the receiver-method population as "deferred method calls in Go", which are everywhere — `defer f.Close()`, `defer resp.Body.Close()`. But B2's shape is a method on **the enclosing method's own receiver**, and most deferred method calls are on LOCALS, not on `fd`/`c`/`x` itself. I predicted a population I had a strong intuition about and measured a different, much narrower one. The band was wide and still nowhere near.
+
+The conditional band failed for a plainer reason: B's 31 conditional receiver-field sites are mostly *also* failing the argument, prefix or all-or-nothing gates, so widening one gate frees only 11 of them.
+
+### The falsifier fired, and it was my gate
+
+I named it as not-a-count: **`FD.Write` MUST appear in the qualifying population.** On the first run it did NOT — `internal/poll` was absent entirely. That was not a real absence:
+
+```go
+if err := fd.writeLock(); err != nil { return 0, err }
+defer fd.writeUnlock()
+```
+
+`fd.writeLock()` sits in the **if's INIT statement**, which always executes when the `if` is reached — but my gate skipped the whole `IfStmt` as "may not execute". It conflated the *body* (conditional) with the *init and condition* (unconditional). Corrected to scan an `IfStmt`'s Init and Cond, a `SwitchStmt`'s Init and Tag, and a `TypeSwitchStmt`'s Init, while still refusing bodies, `select`, loops and labels.
+
+The correction moved: qualify **182 → 226**, receiver-method **25 → 60**, footprint **49 → 57**. So a third of B2's population was hidden behind a gate that was stricter than correctness requires — the same mistake as B's `top-level` gate, in a new place, caught this time by a falsifier I had written down instead of by a compile error.
+
+**Confirmed by position, not inferred from a file count:**
+
+    fd_windows.go:659:2   field=false method=true  cond=false   ← defer fd.writeUnlock()
+    fd_windows.go:662:3   field=true  method=false cond=true    ← defer fd.l.Unlock()
+    fd_windows.go:409:2 / 419:3                                 ← FD.Read's pair, same shape
+
+Both of `FD.Write`'s defers qualify, which is exactly what all-or-nothing needs.
+
+### Where the population actually goes
+
+    shape population (field OR method)     332
+    QUALIFY under B2                       226
+      of those CONDITIONAL (B refused)      11
+      of those receiver-METHOD              60
+    exclusions (first reason only, so they sum)
+      prefix not deref'd unconditionally    67   ← still the largest by far
+      ONLY by all-or-nothing                53
+      call has ARGUMENTS                    31
+      inside a func literal                  7
+      in a loop                              1
+      function has goto/label                0
+      receiver reassigned / recover / exit    0
+
+`goto`/label measured at **zero** — the exclusion the LIFO proof needs is free on this corpus, which is worth knowing before anyone argues about widening it.
+
+**B's control reproduces exactly** (859 sites, 220 receiver-field, 166 qualifying, 31 conditional), so the widening did not disturb the proven predicate.
+
+### Footprint prediction, from the file list, before the A/B
+
+**57 files carry the 226 sites; three are `testing`'s own (hand-owned, never re-emitted), so the windows arm should touch exactly 54 production `.cs`.** Falsifier: any windows path outside those 54. Linux and darwin are MEASURED, not predicted — the census is windows-tagged, as always.
+
+Heaviest: `internal/poll/fd_windows.go` **26** (was 3 under B), `database/sql/sql.go` 25, `net/http/h2_bundle.go` 21, `transport.go` 14, `server.go` 12, `crypto/tls/conn.go` 10.
+
+### Two instrument defects, both caught before they produced a number
+
+- **`siteDefer` declared and read but never assigned** — a perl edit that missed on indentation. Go does not diagnose that for a map, so every B2 prefix check would have received `nil`. Found by grepping for the assignment rather than trusting the build's exit code.
+- The **block-aware prefix gate** itself: B's gate scans the function body, but a conditional defer's witness is its sibling inside the branch. Fixed before the first run, so it never produced a wrong count — unlike the if-init defect, which did.
+
+Cutting the converter change next, against B's own bar: counts, foreign-line grep, positional check, three-target A/B, then the `os` row at **744.25 → 616.25 B and 8 → 7 objects** or the falsifier.
+
+Read anchor: `cb22447b8`.
+
+Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
+
+-- G
