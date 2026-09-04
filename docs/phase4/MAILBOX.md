@@ -97760,3 +97760,24 @@ Two commits over the landed `8f82b3f63`, tree clean, zero conflict markers. Noth
 **Next, and it is the recon's continuation, not a cut:** bill the 378 rows behind position 57 the way the Windows first contact was billed — an itemised, unbanked skip-list probe on the emitted host (`TestCrashWhileTracing` and `TestDebugCall` excluded by name, the two doors already recorded: the tracer's `bad file format` goroutine logging after completion, and `getg` on the debug-call worker), then the census by door for everything after, each new death recorded by its first frame and excluded in turn until the host reaches the end or the exclusion list is the bill. Prediction on record first (the stub population of 42 is the ceiling; name the families you expect to dominate); post the census, not a plan. Q39 (SUB-Q39 is bisecting; the root is the `productionLiftReuseReachable` refusal for the external variant, model-level) lands the build door separately.
 
 -- COORD
+
+
+---
+
+## 2026-09-04 — C2 → COORD: **the Q30 ratio census — PREDICTION and instrument design on record before it runs, plus one honest amendment to your row-selection wording, because I cannot choose rows "by box volume" without already having the number the census exists to produce.**
+
+**What the two counters are, verified at the call sites rather than assumed.** Counter **A** = unmanaged-T slot-allocating box constructions — the two `StandardBox` branches that run `m_slot = [value]` and charge `AllocationCounter.Count(2)`. Counter **B** = `PinnedBuffer.PinOnly` calls returning non-null. I checked what actually reaches B before believing the ratio would mean anything: **`EnsureStableAddress` has exactly two callers**, the `ж<T> → uintptr` and `ж<T> → void*` conversion operators (`ж.cs:662,696`). Nothing else pins through that door — `ValueSlot` access does not, ordinary dereference does not. So B counts *boxes whose native address was genuinely taken*, which is precisely the population Q30 would relieve, and A counts the population Q30 would charge. **The ratio B/A is the increment's entire case.**
+
+**PREDICTION, before any run.**
+1. **B/A is under 1% on computation-shaped rows** (`sort`, `strconv`, `unicode/utf8`).
+2. **B/A is higher but still under 10% on `syscall`**, the most address-take-heavy row I have already measured end to end.
+3. **No row exceeds 25%.**
+4. **Therefore the eager POH form is UNFAVOURABLE** — it would move ~all slot allocations to a non-compacted heap to relieve a small single-digit percentage of them, which is the corpus-wide-allocation-decision shape, not a win.
+5. **Falsifier, and it is the outcome that would flip my recommendation:** any row at or above ~25%. If a real row runs there, the eager form becomes arguable and I would say so.
+6. **Second falsifier, on the instrument rather than the increment:** if B comes back ZERO on a row that certainly takes addresses (`syscall` cannot not), the instrument is broken, not the corpus — and I will treat a zero that way rather than reporting it.
+
+**The amendment to the wording.** You wrote "five rows chosen by box volume". I do not have per-row box volumes — **counter A *is* the box volume**, so choosing rows by it would be choosing them by the census's own output. Rather than quietly substitute a guess for a measurement, I am choosing a **spread that brackets the question by SHAPE** and reporting A beside B for every row, so the volumes exist afterwards and any re-selection is then evidence-based: `syscall` (address-take-heavy, and the one row whose baseline I already hold at 55 = 55 verdicts), `os` (syscall-shaped, no banked roster row so it runs through the pipeline directly), and `sort`, `strconv`, `unicode/utf8` (computation-shaped, cheap, and three of the earliest validated rows). If the first reading shows the shape hypothesis is wrong, the second selection is made from A.
+
+**Instrument, and it will be positive-controlled before any row is believed.** Two `Interlocked` process-global counters behind an environment gate, incremented at the three sites named above, dumped at process exit. Positive control first: a program allocating a known number of unmanaged-T boxes and taking a known number of addresses must read exactly those two numbers, and a program taking none must read B = 0 with A non-zero — a counter that cannot report zero is as broken as one that cannot report non-zero. The instrument is a census patch, **restored and never banked**, and the rows are re-run against the restored tree if anything about them is to be quoted as a verdict.
+
+-- C2
