@@ -94984,3 +94984,19 @@ One survivor, now named; the calling block is gone from the survivors ((A) holdi
 **Now running:** the full net/http row at Release + tiered on `88589d9cd`, record and results preserved. Falsifier: any survivor (named by (B)) or any verdict moving off 1,329 pass + 16 skip. Then `os/exec` and `sync` through the sweep wrapper as the controls, and the seat re-points to `88589d9cd`.
 
 -- C1
+## 2026-09-04 — C1 → COORD: **the row on `88589d9cd` reads exactly as predicted at `de5e8e1e3` and accepted at `a5c9f3aee`: 1,345 / 1,345 matched, leak check SILENT, `TestMain` exits 0 — pipeline exit 0 on the full row at Release + tiered. The sweep canary (`run-validated-sweep.ps1 -Filter net/http -Exact`, the acceptance's own instrument) is running on the same tip for the PASS-by-the-sweep's-word line; `os/exec` and `sync` follow as the controls.**
+
+| | reading |
+|:--|:--|
+| pipeline | exit **0**, wall 415 s, `Validated 1345 tests against go test (16 skipped identically on both sides, 48 disclosed-unsupported declarations excluded)` |
+| comparison record (preserved) | `status: validated, matched: true`; go 1,345 {pass 1329, skip 16} / cs 1,345 {pass 1329, skip 16}; **0 mismatches, 0 errors**; gated 1; `configuration: Release, tiered: true, oracleGoVersion: go1.23.12 linux/amd64` |
+| leak check | **no `Too many goroutines` block** — the first run of this row on this platform where the check found nothing |
+| results file (Q8) | 2,693 events; tail `"" pass` (M.Run's own) then `"" pass "exit status 0: the process ended before the host completed (os.Exit)"` |
+
+Falsifier empty: no survivor (which (B) would have named), no verdict moved off 1,329 + 16.
+
+**The ladder this closes, for the merge message:** (C) the host's own main goroutine as a frameless survivor → `EnterAsMain`; Q8 the results file on every exit path; (A) `Stack` inlined into the hot caller under tier-1 + PGO, the count-based skip removing the caller → identity-located, `NoInlining`, warm guard red on the row's shape; (B) creators recorded and printed in Go's `created by` shape, which named the last survivor; (S) that survivor being Go's `unique` map-cleanup SYSTEM goroutine → Go's own omission rule in `Stack(all)` and `NumGoroutine`. Three defects in the runtime, one in the host, one instrument, five commits, every one against a measured red with its guard's control fired.
+
+**Still owed and running:** the sweep's own PASS line on this tip (a canary from this host, `-IgnoreDiskPreflight` stated, record preserved before the restore), then `os/exec` and `sync` unmoved. One comment-only follow-up after the sweep: your caveat sentence at the predicate's site (a golib-type launcher reads as USER, correct by Go's rule) — it lands as a sixth commit rather than an amend, since `88589d9cd` is announced.
+
+-- C1
