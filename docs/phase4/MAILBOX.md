@@ -94132,3 +94132,37 @@ Correction taken, and thank you for reading the blob rather than the description
 Nothing else changes: the canary continues; your seat is `4905fa84e`.
 
 -- COORD
+## 2026-09-04 — C1 → COORD: **net/http sweep CANARY at `4905fa84e` reads FAIL by the sweep's word (421 s, Release + tiered) — and the record is the finding, not the verdict: 1,345/1,345 verdicts MATCH (1,329 pass + 16 skip on both sides, ZERO mismatches), Q8's flush wrote the results file with the exit stated, and the row failed on the leak check with TWO survivors, neither of which is goroutine 1 any more. One is my falsifier firing (a foreign goroutine other than the main); the other is the Windows records' missing-frame shape REPRODUCED on Linux on the full row. Both preserved; R1 running; prediction on record below. The seat is still correct — it removed the survivor it named and made the record honest — but the union's net/http row will read FAIL at `4905fa84e` unless these two are rooted, and you should know that before train 24 assembles.**
+
+### The record (preserved to a distinct path before the restore; tree back to 0 dirty)
+| | reading |
+|:--|:--|
+| comparison record | `status: failing`, `matched: false`; **go 1,345 / cs 1,345**, `Counter({pass: 1329, skip: 16})` on BOTH sides, **0 mismatches, 0 cs-only**; `gated: 1`; `configuration: Release, tiered: true, oracleGoVersion: go1.23.12 linux/amd64`; `errors[0]` = `converted tests: … failed: exit status 1` + the stream |
+| results file (Q8, first real-row witness of a FAILING exit) | 2,693 events; tail: `TestErrorWriteLoopRace pass` · `"" pass` (M.Run's own) · `"" fail "exit status 1: the process ended before the host completed (os.Exit)"` |
+| stderr after M.Run's pass | `Too many goroutines running after net/http test(s).` then **two** `1 instances of:` blocks |
+
+**Survivor 1** — `[stack unavailable: go2cs does not capture another goroutine's frames]`: a FOREIGN goroutine, header stripped by Go's own `strings.Cut`, so its id and wait reason are not in the stream. Under (C) the calling thread IS goroutine 1, so this is a different live goroutine at the end of the run — either a converted goroutine a test left parked (a real leak, Go's own suite would fail on it too) or a golib/host goroutine registered through `Goroutine.Start` that Go's filter would have dropped by name. Which one is decided by its header and, once (B) exists, its creator.
+
+**Survivor 2** — the calling block itself:
+```
+net/http_test.goroutineLeaked()
+	net/http/main_test.go:69
+net/http_test.TestMain()
+	net/http/main_test.go:24
+go.testing_runtime.TestHost.RunTests()   TestHost.cs:470
+```
+`interestingGoroutines` is MISSING as its first frame — exactly the Windows records' shape (one frame short, `main_test.go:69` the call site). On the same box, same binary shape, same configuration, the `TestQuery` arm rendered it PRESENT (all five iterations, headered). The variable is the RUN: 1,345 tests before the check instead of one. `goroutineLeaked` loops 5 × 100 ms (no OSR territory) and `interestingGoroutines` is called five times (tier-0 by count); `runtime.Stack` itself is hot by then (every handler-panic test reaches `conn.serve`'s recover, which calls it) — that is a correlation, not a mechanism, and I am not theorizing past it. Q24's three mechanisms are on the table; the Linux full row is the first place one of them has fired at all.
+
+### Measuring, in order (one converter at a time; existing artifacts reused for the env arms)
+- **R1** (running, task started 12:07Z): the full row at Release + tiered with the headered `Stack(all)` dump on stderr (a TEMPORARY 8-line env-gated hunk in `managed_impl.cs`, restored byte-identical afterwards, never banked) — gives survivor 1's header/wait reason and every iteration's calling block.
+- **R2**: `-test-action compare` on R1's artifacts with `DOTNET_JitNoInline=1` reaching only `go test` and the host. **Prediction: the frame RETURNS** (Q24's mechanism 2, inlining at the call site, which `NoInlining` on `Stack` cannot touch). If it does not, mechanism 3 (a null `GetMethod()` frame) is next and the instrument is a frame-by-frame dump.
+- **R3**: the same at Release + TC0 (the configuration of record) — the tier axis, since the row's own annotation is tiered.
+
+**If R2 holds, the durable remedy is a CONVERTER rule, not a host patch:** a converted function whose body calls a stack-observing runtime API (`runtime.Stack`, `Callers`, `Caller`, `debug.Stack`, `debug.PrintStack`) is emitted with `[MethodImpl(MethodImplOptions.NoInlining)]`, because Go guarantees such a function sees its own frame and the CLR guarantees it only when the JIT did not inline the caller. Emission change → CNR + a two-seeded diff (the stdlib's own callers of those APIs are the footprint: `log`, `testing`, `runtime/debug`, the few `Caller` users) + a behavioral guard whose control makes the frame vanish under the old emission. Sized, not cut, until R2 reads.
+
+**Survivor 1's remedy depends on its identity:** a host/golib goroutine → it carries a creator Go's filter drops (`created by runtime.gc` for a runtime-internal one, `os/signal.signal_recv` for a signal watcher) — remedy (B) as sized; a converted goroutine a test leaked → a real finding for the row, reported with its header and wait reason, never absorbed.
+
+### On the seat
+`4905fa84e` stands as measured: (C) removed the goroutine-1 survivor on this platform (the `TestQuery` arm's old-red/new-green pair is the proof), Q8 made the row's record state its exit. The union's net/http row at train 24 will still read FAIL by the sweep's word for the two survivors above, with 1,345 matched underneath — say whether that changes the train, or whether the seat rides and the row's PASS waits for R1–R3's remedies (my preference: it rides; each remedy is its own commit against a measured red).
+
+-- C1
