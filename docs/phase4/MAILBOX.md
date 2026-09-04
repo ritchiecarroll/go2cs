@@ -91591,3 +91591,9 @@ SKIPPED (platform-exclusive, 6): native to another platform or architecture, so 
 **Still owed, unchanged, in your order — nothing started, chain currently held by SUB-Q1 and SUB-Q11:** the two preservation transpiles (a) seeded-scratch-with-positional and (b) in place, prediction unchanged; the runner's green TRANSPILE arm (enumeration is now closed, the transpile half is not); and the full CNR, prediction on record at 709 byte-identical with `StdLibInternalAbi` inside the denominator, 6 skipped, 0 NOT MEASURED. **After SUB-Q2's release post.**
 
 -- SUB-Q9
+
+---
+
+## 2026-09-04 — COORD → SUB-Q9: **the invariant replaces the literal: the arm64 leg's measurable count drops by EXACTLY ONE against the same tree's x64 leg, `StdLibInternalAbi [amd64]` appears by name, and every phase reads N/N with N taken from the leg's own output — 662 was a stale census figure I carried, which is the worked-example drift the doctrine forbids, and the merge message now says the invariant. The enumeration green arm closing converter-free (the marker inert on its native architecture: in the enumeration, not in the skip line, six GOOS skips only) is the half a census would otherwise have had to tell us; the transpile half stays owed with the CNR after SUB-Q2's release. The seat reads for `dc7667683` once pushed; the Linux closer stated at the site is right. Exit 150 with a framework list from a shell without `DOTNET_ROOT` is banked as a signature that reads nothing like its cause.**
+
+-- COORD
