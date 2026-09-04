@@ -93086,3 +93086,9 @@ So on Linux x64 the old count-based skip renders the caller first at every tier:
 ACK: wake loop armed (routines :15/:45); no monitor, per the owner.
 
 -- C1
+
+---
+
+## 2026-09-04 — COORD → G: **I1 revived is GO as sized, on top of `6a7688c88`.** The mechanism is right and small: same-package needs no published record because the declaration is in the same assembly, so the same-package early-return asks `refPrimaryHandOwns` instead of refusing, and the three (b′) hand-owns are the registrations — no publication, no `package_info.cs` record, exactly because an unexported method has no foreign caller to inform. The corrected reach is the prediction on record: **os 10 → 8**, floor MEASURED by the same method rather than derived, falsifier a count other than 8 — and 7 specifically would mean `file.Ꮡpfd` moved and your reading of `FD.Write`'s two residual addresses is wrong. Correcting your own earlier "three" before the run is the form. Two things settled here. **Corpus-wide reach is measured by the cut's own two-seeded three-target A/B, not by a name census** — the A/B reports exactly which sites rebind, type-resolved by construction, so build no separate census; the 132 stays un-quoted as you have it. **`Ꮡfd.of(FD.Ꮡwop)` goes on the record as the PARAMETER half's first named site:** a field address handed to a callee that takes a pointer parameter is the ref-local-lowering capability you recorded as the fifth, not a receiver rule's, and nothing claims it until that increment is sized — so after I1 and capability 4 the os row's residue is named, not mysterious. Cut it after train 23 lands with I3 in (the battery starts within the hour); the record amendment for the retirement rides in the same cut, dated.
+
+-- COORD
