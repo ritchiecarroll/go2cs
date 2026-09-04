@@ -473,6 +473,24 @@ partial class runtime_package
 
     // Stack formats a stack trace of the calling goroutine into buf and returns the number of
     // bytes written to buf.
+    //
+    // NoInlining, for the reason the Callers family three hundred lines below already states: the
+    // CLR's StackTrace does not report inlined frames. Until 2026-09-04 this method was the ONE
+    // traceback entry point without the attribute, and it walked with `skipFrames: 1` — a COUNT that
+    // assumes this method owns frame 0. When the JIT inlined it into its caller, frame 0 was the
+    // caller and the skip removed THAT, so the rendered block began one frame deep. Measured on the
+    // banked net/http row at its configuration of record (Release, tiered on; two preserved records,
+    // trains 20 and 22): the main goroutine's block began at `net/http_test.goroutineLeaked()`, the
+    // `interestingGoroutines()` frame above it missing — which is the one frame Go's own
+    // goroutine-leak filter (main_test.go's interestingGoroutines: keep-unless-contains over the
+    // whole block) reads to drop the main goroutine, so the host counted itself as a leaked
+    // goroutine and TestMain exited 1 while the comparison record read 1,345/1,345 both sides.
+    //
+    // Two halves, because the attribute alone would leave the count: the attribute guarantees this
+    // method HAS a frame, and callerFrames locates that frame by IDENTITY (the frame whose method is
+    // this one) and starts the walk one above it — so the boundary is where this method's frame is,
+    // never where a count assumed it to be.
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static nint Stack(slice<byte> buf, bool all)
     {
         StringBuilder trace = new();
@@ -482,7 +500,7 @@ partial class runtime_package
         Goroutine? current = Goroutine.Current;
 
         appendGoroutineHeader(trace, current);
-        appendGoFrames(trace, new StackTrace(skipFrames: 1, fNeedFileInfo: true));
+        appendGoFrames(trace, callerFrames());
 
         // Go keeps a panicking goroutine's frames on the stack until the panic completes, so a
         // debug.Stack() taken inside a deferred function shows the PANIC SITE. A CLR exception has
@@ -562,9 +580,44 @@ partial class runtime_package
     // <file>:line <n>`. This is observable output: Go programs (and Go's own tests) grep a traceback
     // for `<pkg>.<Func>`, which the CLR form never contains because a converted package's frames
     // live on a `<pkg>_package` class inside namespace `go`.
-    private static void appendGoFrames(StringBuilder trace, StackTrace stack)
+    // The calling goroutine's frames ABOVE Stack itself, located by identity. Stack is NoInlining, so
+    // its frame is always present; if the search ever fails anyway, the fallback keeps the OLD
+    // count-based boundary (skip frame 0) rather than rendering Stack's own frame — a frame too many
+    // is the shape Go's readers tolerate, a frame too few is the shape that broke net/http.
+    private static readonly RuntimeMethodHandle s_stackMethodHandle =
+        typeof(runtime_package).GetMethod(nameof(Stack), [typeof(slice<byte>), typeof(bool)])!.MethodHandle;
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static IEnumerable<StackFrame> callerFrames()
     {
-        foreach (StackFrame frame in stack.GetFrames())
+        StackFrame[] frames = new StackTrace(skipFrames: 0, fNeedFileInfo: true).GetFrames();
+        int boundary = -1;
+
+        for (int i = 0; i < frames.Length; i++)
+        {
+            System.Reflection.MethodBase? method = frames[i].GetMethod();
+
+            if (method is not null && method.MethodHandle == s_stackMethodHandle)
+            {
+                boundary = i;
+                break;
+            }
+        }
+
+        // boundary == -1 cannot happen while Stack is NoInlining (its frame is on this stack, one
+        // above callerFrames' own); the fallback skips exactly the frames a count of 1 used to.
+        int first = boundary >= 0 ? boundary + 1 : 1;
+
+        for (int i = first; i < frames.Length; i++)
+            yield return frames[i];
+    }
+
+    private static void appendGoFrames(StringBuilder trace, StackTrace stack) =>
+        appendGoFrames(trace, stack.GetFrames());
+
+    private static void appendGoFrames(StringBuilder trace, IEnumerable<StackFrame> frames)
+    {
+        foreach (StackFrame frame in frames)
         {
             System.Reflection.MethodBase? method = frame.GetMethod();
 
