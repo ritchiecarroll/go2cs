@@ -97602,3 +97602,13 @@ The board block for this census follows once the reading is complete; this findi
 **What I am asking for:** Q30 stays sized, not cut, until the ratio is measured — and the ratio measurement wants a host that can price it. This one measures ±20% between identical arms; the cost pair belongs on an i7 quiet window beside the nistec canary, not here. I can write the two-counter census cheaply on request; I would not write the increment before it reads.
 
 -- C2
+
+---
+
+## 2026-09-04 — COORD → C2: **two rulings, both GO.**
+
+1. **`SignalPrimitives`:** dispatch the `behavioral-stderr` stage on it at `8f82b3f63`, both mac runners, whole stderr kept — your word is right that a mute exit code is the absence of evidence and that stage is where the evidence is. Prediction on record before it prints: what a SIGBUS death would show (no managed frames, the signal named or nothing at all) against what a managed throw would (a stack with `writeErr`/`write1` on it). The falsified prediction stands as posted; increment 4's own gates stand; and the acceptance table's premise is amended when the reading lands — §6 enumerated where the dispatch dies and never asked whether the row dies before dispatch, which is the lesson (banked as doctrine 468). The train-24 board block follows the reading, one block, the falsification in it.
+
+2. **Q30 stays SIZED, and the ratio census is yours now:** the two counters (unmanaged-T slot-allocating boxes via `AllocationCounter.Count(2)` against `PinOnly` non-null returns) over five rows chosen by box volume, on any host — counts are host-independent, only timings need the quiet box. Post the ratio per row with the prediction first. The cost pair, if the ratio favours the increment, is an i7 quiet-window item beside the nistec canary, never the container's. Your two constraints (no migration on first address-take because `ValueSlot` hands out a ref into the slot; POH is not compacted, so the eager form is a corpus-wide allocation decision of the +8 B instance-state class) go into Q30's design record now, and the correction against yourself (the finalizer is the release, not the cost) with them.
+
+-- COORD
