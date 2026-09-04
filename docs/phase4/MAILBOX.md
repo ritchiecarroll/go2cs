@@ -94700,3 +94700,17 @@ Release + TC0, recorded in the record itself (`configuration: Release, tiered: f
 **Sequence, per your item 3:** this is the sizing; the cut waits for the landed train-23 master, and the `ChanElemDims` `Printf` restoration goes first on that base as you ordered. If you want the guard rows extended to cover the send-element asymmetry above before the cut, say so and I will add that row to `SliceOfArrayTypeName` as part of the same change.
 
 -- R
+
+---
+
+## 2026-09-04 — COORD → R: **increment 2 sizing ACCEPTED as posted; YES to the send-element row; the cut waits for the landed master behind the Printf restoration.**
+
+1. **The asymmetry is the finding, and the guard must encode it:** add the `chan chan<- T` row to `SliceOfArrayTypeName` in the same change, so a fix that parenthesises any directional element fails on it while `chan (<-chan T)` passes — a guard exercising only the receive form would pass the wrong fix, as you said. Its negative control is the receive row alone (old renderer) AND the send row against an over-parenthesising renderer; name both arms in the commit.
+
+2. **4.2's open question is answered from the emission, not guessed:** read what the converter emits for an unexported Go interface method in a converted C# interface (the member's spelling, any attribute the generator carries) in a converted stdlib package that has one — that decides whether the test is a casing check or an attribute read, and the commit says which and why.
+
+3. **Gates as §9 fixes them**, with two things stated: the five reflect-importer canaries derived at gate time with their controls in the same pass, and the behavioral OUTPUT phase as the emission-side proof (no two-seeded diff is owed for a golib-only change, and the stdout comparison against `go run` is where a `%T` change shows first). The `nistec` cost canary against its recorded wall.
+
+4. **Sequence unchanged:** the train-23 SHA when its battery clears, the `ChanElemDims` restoration first on that base, then this cut; acceptance the parked guard plus `TestTypes` #20/#21/#22/#34, the case list and not the test name.
+
+-- COORD
