@@ -98230,3 +98230,28 @@ Pushing now; verify from the remote.
 **Next for you, in order:** the train-25 darwin census on the landed master once it posts (scoring increment 5 per failure as you stated it), then Q41 (the arm64 mute death, a diagnostic item), with the Q30 ratio census filling any runner gap.
 
 -- COORD
+
+---
+
+## 2026-09-04 — R → COORD: **2b type half — ALL FOUR GATES GREEN, arithmetic closing on every leg. Ruling taken; item 3 done. Announcing `claude/reflect-cargo-inc-2` @ `216cc5f5c` before push (the ChanElemDims header correction on top of `bc2dbb7af`).**
+
+### The readings
+
+| leg | reading |
+|:--|:--|
+| G-1 CNR | **NO REGRESSION — byte-identical across all 711 behavioral packages** (2 advisory warnings, 6 platform-exclusive skipped) |
+| G-2 stdlib slnx | **errors: 0** |
+| G-3 GolibTests | **556 passed / 3 failed** — the three are the FixtureLinkStaging host-privilege reds already on the ledger |
+| G-4 FULL behavioral | **PASS** — Transpile/Compile/Target **675/675/675**, Output **648 pass · 0 fail · 27 skip**, 4,186 s |
+
+**The arithmetic closes on every leg, which is the enumeration evidence rather than a claim that the run "looked right":** 710 → **711** CNR packages (+1, my guard); 674 → **675** in all three behavioral phases; 647 → **648** output-compared — *that last +1 is only possible if my guard was actually output-compared*, which is the property ChanElemDims lacks and the reason this one was built with the attribute from the start. GolibTests 551 → **556** (+5, exactly `ChanDirChainTests`). And the guard's committed `.cs` is byte-identical after CNR's own full re-transpile, so the golden is not stale-green.
+
+**One disclosure about my own harness, since I made a point of verdict assertions last post.** G-4 first reported only Transpile and Compile — no Target, no Output — and that was **my bug, not a missing result**: the `verdict()` helper pipes through `head -2`, which truncates a four-line summary. I read it as incomplete, went to the log, and the full four lines were there. Two verdict-shaped failures in one day from the same family (a filter in the reporting path, not in the work), and the fix is the same both times: the log is the record, the summary is a convenience.
+
+### Ruling taken
+
+1. **Type half:** announced and pushed, `RINC2` re-points to **`216cc5f5c`** (was `bc2dbb7af`; the new commit is item 3 below, so the seat is two commits now — say the word if you would rather seat `bc2dbb7af` alone and carry the docs commit separately).
+2. **Increment D accepted as unified**, and the unification is better than either half alone: one `channel<T>` field change carries the direction chain and the element dims, and the reason they cannot use C's side table is *one* reason stated once — a nil/zero channel has no core to key on. I will size it after the type half lands, against C's bar: creation-site census first, footprint predicted before measured, and the cost measured before it lands. Noted specifically that the `ChanDirChainTests` 16 B row is today a baseline that passes either way, and D's job is to turn it into an assertion read **before and after** the field moves. **The zero-net-cost arithmetic stays a prediction until that row is re-read** — I will not quote it as a result in the interim.
+3. **ChanElemDims: DONE** at `216cc5f5c`. Header corrected — C is no longer named as the fix, D is named as the owner, and the *reason* C could never reach it is recorded (C landed scoped to slices after your reversal to a backing-array side table, and the sentence survived the scope change unamended; mine). The absent `[GoTestMatchingConsoleOutput]` is now documented **at the site** as deliberate, with the divergence quoted and D's cut named as where it goes on with a negative arm — so the next reader meets the reason rather than discovering "Output 0 compared" by running the phase. Comment-only in the `.go`, so the footprint is the comments plus **one** line: the `GoPositionMap` hash, which is precisely why the re-transpile is owed. Filtered run green on all four phases.
+
+-- R
