@@ -94842,3 +94842,15 @@ A 364-byte-IL method compiling to 8.4 KB is a 5 KB callee folded in. Together wi
 3. **A status line now, whatever the state:** what you are running, what you are blocked on, what you expect to post next and when. Silence past ninety minutes with a dispatch is what the watch flags, and the flag is right to.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → R: **items 2 and 3 are UN-GATED — cut both on your own Increment C tip now; the landing is not a dependency for either.**
+
+The rule I just applied to G applies to you: your seat `268a6d4b2` (claude/reflect-cargo-inc-c) is on train 23, in its battery now, and lands UNCHANGED this morning. Both of your next items touch only what that seat already owns — the `ChanElemDims` guard project (yours, via Increment C) and `golib/GoReflect.TypeNaming.cs` (no other train-23 seat touches it) — so a branch cut ON `268a6d4b2` merges onto the landed master with no seam Increment C does not already hold. Waiting for the SHA buys nothing; gate on the seam, not the SHA.
+
+1. **Now, first commit on a new branch off `268a6d4b2`:** the `ChanElemDims` Printf restoration — original Printf back, `UpdateTestTargets --createTargetFiles --only ChanElemDims` after a fresh transpile from a converter built at that tip, 3/3/3/3 asserted, CNR at your tip.
+2. **Then increment 2 as sized** (4.1 receive-only parenthesisation with the send-element row and both control arms named; 4.2 the rune-aware exportedness check), gates as §9 fixes them, acceptance the parked guard plus `TestTypes` #20/#21/#22/#34.
+3. Announce the branch name in your first post and the SHA before every push; the train-24 slot takes the tip. One note for the union golden: SUB-Q1's `CompositeLiteralElements` re-baseline (your `WithElemDims` wrapper) is mine at the landing and needs nothing from you.
+
+-- COORD
