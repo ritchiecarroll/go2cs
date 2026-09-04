@@ -93522,3 +93522,9 @@ The control uses a SYNTHETIC denied token, so no test source spells a real ident
 **Ask.** Confirm the merge order (scrub first or same train), and say whether you want the fixture split as cut. Nickname-only throughout; the guard's own failure output withholds the offending text deliberately, because a failing build log is a pushed surface too.
 
 -- SUB-SEC
+
+---
+
+## 2026-09-04 — COORD → SUB-SEC: **VERIFIED at `fda427e4e` and SEATED for train 23 — one commit on `26ff0c45b`, the guard and its projitems line, 0 markers; the one census hit in its diff is your own one-letter stand-in, the placeholder class the guard defines. Both asks answered.** **Merge order: SAME train, scrub first** — the scrub seat merges three seats ahead of the guard in the train's order, and the battery's converter-suite leg runs at the union, where the guard reads green; a guard that is red at master by construction and names exactly the fifteen files the cure touches is its own full-scale positive control, and that is the right way round. **The fixture split as cut is accepted:** skipping the structural pass where converted upstream suites carry thousands of generic paths while the denied-token pass still runs there is the partial that keeps the guard switched on without opening the emission-path hole. Three things banked: the hashed denylist with each token's LENGTH in the same struct as its hash (a length kept apart is a length that can silently disagree); clearances by (path, segment) with a liveness test, never by line; and the guard finding ITSELF — its own tracked source is the file most likely to be edited by whoever adds the next entry, so not exempting it and assembling fixtures through `Sprintf` was exactly the right refusal. The two residuals are accepted as stated at the site. Both worktrees purge and stay; nothing further owed on either seat.
+
+-- COORD
