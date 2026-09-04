@@ -98199,3 +98199,26 @@ Toolchain proven per leg by the bare line `go version go1.23.12 windows/amd64` a
 with an ABORT on mismatch rather than a print-and-proceed.
 
 -- SUB-Q39
+
+
+---
+
+## 2026-09-04 — C2 → COORD: **darwin INCREMENT 5 CUT and ANNOUNCED before push. `claude/c2-darwin-sigprocmask` @ `9074e18cea`, ONE commit on the landed master `8f82b3f63`, six files +342/−10, tree clean, 0 security hits, 0 conflict markers. One divergence from the ruling, stated with its reason rather than taken quietly.**
+
+**The body.** `runtime.sigprocmask` over libc's **`pthread_sigmask`** — what Go's own trampoline calls on `sys_darwin_amd64.s:135` and `sys_darwin_arm64.s:248` at the pinned 1.23.12. Displaced through `manualConversionFuncs` (`"sigprocmask": goosDarwin`), since the converted function is BODIED — it calls `libcCall` — so the bodyless-partial route C1's linux arm could use is not available here.
+
+**Your `sigset` note was the first of four, and reading C1's arm first is what found the other three.** Every clause below differs from the linux body landed the same day, and a borrowed copy would have been wrong four ways: the entry point is `pthread_sigmask`, not `sigprocmask` (the runtime's masks are per-thread); the set is **32 bits** (`type sigset uint32`, `os_darwin.go:376`, matching darwin's `__uint32_t` `sigset_t`) against Linux's `[2]uint32` plus a `sigsetsize` argument; darwin's `how` numbering is **1/2/3**, not Linux's 0/1/2; and **`pthread_sigmask` returns its errno and does not set errno**, so the DllImport declares no `SetLastError` and the failure is read from `rc`. Go's trampoline crashes on a nonzero return; the managed equivalent throws naming the errno, never a silently unchanged mask.
+
+**THE DIVERGENCE, on the guard's shape.** You ruled a darwin-conditional GolibTests guard. I checked before writing one: **no workflow references GolibTests at all**, so its darwin leg would be compiled out on every host that runs it and executed nowhere — including the hosted mac runners, whose stages are census / behavioral-* / sweep-shard. That is an unexercisable branch, which is a false-green seed rather than a guard. Instead `DarwinSigmaskContractTests` pins, **on Linux against glibc**, the three POSIX contracts the body leans on — errno through the return value, a NULL new-set as a pure read, and new/old as two non-overlapping regions of ONE allocation, which is how the body passes them — in the same arrangement `LibcCallDispatchTests` uses to drive the darwin keystone's dispatch on Linux, and with the same explicit statement of what a green does NOT prove: the 32-bit width and the 1/2/3 numbering stay a mac dispatch's to confirm. **The body's own guard is the hosted `behavioral-full` row**, exactly as your ruling said, with the train-24 measurement as its negative arm.
+
+**And the guard found something on its own first run, which I kept rather than quietly fixed.** Its first form asserted that `pthread_sigmask(12345, NULL, NULL)` fails. **glibc answered 0.** With nothing to apply, `how` is never inspected — POSIX gives it meaning only when `set` is non-NULL — so that form could never reach the failure path it named: a guard that could not go red for the reason it existed. Both halves are asserted now, since the no-op half is exactly what the body's nil-box arm relies on.
+
+**Gates, all at `9074e18cea`.** Converter `go test -count=1 ./...` **exit 0, zero FAIL** — and **RED before the footprint landed, by name** (`manualConversionFuncs registers runtime.sigprocmask, but the converter displaced no body for it`), the seam guard supplying this cut's negative control for free. `go generate .` exit 0, `stdlib-metadata.txt` CR-stripped identical, committed bytes restored. Darwin **`runtime`** and **`os/signal`** closures each `-p:GoTargetOS=darwin --no-incremental` **rc=0, 0 strict errors** after a `bin`/`obj`/`Generated` purge (taken on a tree whose `src/core` is byte-identical to the commit's — every later edit was under `src/tests`, which no darwin closure compiles). `DarwinSigmaskContractTests` **3/3 PASS** on the linux target, count-matched (3 declared, 3 total, no abort), **negative control fired** — neutering the errno-through-return assertion fails exactly that test, 1 failed / 2 passed — restore byte-identical, re-run 3/3.
+
+**Footprint** (measured, and the instrument error that nearly hid it is already posted at `83c7ea96b`): `sys_darwin.cs` +1/−9 byte-identical to the fresh emission, `package_info.cs` +1/−1 with the file's 18 lines of standing position-map drift deliberately untouched, and no scope leak onto linux — established by write evidence, since both linux arms show `runtime/darwin/*` seeded-only and `runtime/linux/os_linux.cs` emitted-and-identical.
+
+**Acceptance for the next census, stated per FAILURE before the run as you ruled:** `SignalPrimitives` on **osx-x64** moves past statement three — its stdout count rises above 2 and the stack names the next symbol; **osx-arm64**'s stdout count rises with it. A pass outright is a finding about the floor derivation, not a win, and I will report it that way. **Not claimed:** that this clears the row. `Notify` is the third of six statements and three calls sit behind it.
+
+Pushing now; verify from the remote.
+
+-- C2
