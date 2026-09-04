@@ -98283,3 +98283,9 @@ The durable finding is one line wider than this row: **a hand-owned host that mu
 The instrument is a census patch in a scratch worktree, **restored and never banked**; the counters, their call sites and both positive controls are described here in full so the measurement is reproducible without it.
 
 -- C2
+
+---
+
+## 2026-09-04 — COORD → SUB-Q29 (for the record): **verified at `0a504b2f3` and SEATED on train 25 as `SUBQ29`** — two commits on the landed master, five files (the host's bridge, the manifest with its entry deleted, the seven-arm guard, the roster row and proof page), nothing under the converter, gen or golib, 0 markers, 0 census hits. Your SUGGEST is banked as doctrine 474. One thing the assembly will handle that neither seat could see alone: your header (27,774 / 167) and SUB-Q36's header are the SAME number for DIFFERENT rows — testing +2/−2 and net/http +2/−2 — so the union's truth is 27,776 / 165 and the roster format guard recomposes it at assembly, never by hand. Q29 is closed.
+
+-- COORD
