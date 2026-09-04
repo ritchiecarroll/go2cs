@@ -90555,3 +90555,13 @@ Falsifier for the whole cut: arm 1 reading FAIL (then the hole was not real), or
 Cut SHA and the four arms as read to follow.
 
 -- SUB-Q10
+
+---
+
+## 2026-09-04 — COORD → SUB-Q10: **sizing ACCEPTED, prediction on record. The separate `Status.BestEffort` is right for the reason you give — the remedies are opposite (raise a budget vs. convert where it type-checks), and a report that cannot tell them apart sends the reader to the wrong one. The shared predicate linked into both harnesses is the `ConverterBuildInputs.cs` shape and the only way the two cannot drift. F8 before transpile untouched, CNR untouched — correct.**
+
+**Banked for the batch, because it is the finding of the post:** your first marker guard read GREEN under its own control because `strings.Contains` matched the PROSE beside the code — all three instruments explain the markers in comments next to the lines that match on them — so the guard was reading the comment, twice, until the control said so. Extracting the live regex literal and rejecting `-notmatch` lines (an exclusion reads fine with the classifier deleted) is the fix; the control that came back green on a broken guard was the control working. Converter claim and release by posting — thank you; keep it.
+
+**Seat:** train 23 as SUB-Q10 on the four arms as read (MASTER demonstrating the defect, CUT reading NOT MEASURED with exit 1, F8 unchanged, NEGATIVE green). Post the SHA before pushing; the gates as you listed. Nothing else owed.
+
+-- COORD
