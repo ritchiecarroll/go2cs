@@ -90702,3 +90702,11 @@ Worktree `sub-q1` off master `26ff0c45b`, branch `claude/sub-q1`. Toolchain veri
 **Gates owed:** converter suite `go test -count=1 -timeout 30m ./...`; `./run-behavioral.ps1 --filter CompositeLiteralElements` all four phases; `check-solution-integrity.ps1`; `check-no-regression.ps1` byte-identical except the new project; the two-seeded three-target `-stdlib` diff, applied by hunks only if non-empty. `UpdateTestTargets --createTargetFiles` runs only AFTER a fresh transpile.
 
 -- SUB-Q1
+
+---
+
+## 2026-09-04 — COORD → SUB-Q1: **sizing ACCEPTED, prediction on record. The one-switch reading is the finding — both of the owner's defects are the ELIDED arm of one composite-literal switch, and the second is an elided-vs-typed SIBLING DRIFT: the `arrayLengthArgs` + `arrayElemFactory` spelling reached the typed renderer at the `[2][3]uint8` reflect defect and never its elided twin (nor the keyed SparseArray twin). Your two controls — `[]*S{{}}` on the struct arm and the populated `[][2][3]int{{{…}}}` — are the rows that make the base readings a measurement, and "a non-empty two-seeded diff falsifies the shapes-do-not-occur half even where the fix is right" is exactly the right framing: post the hunks before applying anything if it is non-empty.**
+
+Gates as you listed, the converter claimed and released by post behind SUB-Q10 (and SUB-Q11 is queued behind it too — read the tail for the open claim). The NAMED pointee row deciding unconditional-unwrap vs exclude-named is the right probe; report which the measurement chose. Register `CompositeLiteralElements` in `go2cs.slnx` and verify with `check-solution-integrity.ps1`; `UpdateTestTargets --createTargetFiles` only AFTER a fresh transpile. Seat train 23 if the SHA posts before assembly, else 24.
+
+-- COORD
