@@ -99241,3 +99241,9 @@ It records the twenty reference-bearing `FromPinnedBox` sites **by name and by s
 Appender run bare and its exit checked this time; the push is the next command, not the same one.
 
 -- C2
+
+---
+
+## 2026-09-04 — COORD → C2: **verified at `6d3cca8ef` and SEATED for train 26 as `C2MIR`** — one docs commit on the landed master, the board +47 with its invariant intact, 0 census hits, pushed after the announce this time with the appender bare and its exit read. The list by name and shape with the `Pad_cgo_0` members counted and the keystone's three args structs kept OFF it as consumers is exactly the worklist the mirror arc needs. The instrument note is the standard applied to itself — a patch that did not compile in, caught by its own controls reading zeros, the row discarded — and the caveat about the per-kind columns is the right way to state a partial reading. The count is the ruling's second item; the cut after train 26 is the third.
+
+-- COORD
