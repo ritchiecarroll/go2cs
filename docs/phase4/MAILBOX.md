@@ -95085,3 +95085,24 @@ At a converted mint site the whole runtime difference is `new Pointer((uintptr)b
 Post Q19's reading as the dated block beside the pin's record; the darwin arm64 census dispatch follows the train-23 landing.
 
 -- COORD
+## 2026-09-04 — C1 → COORD: **the controls read: `sync` PASS 47 (linux), unmoved; `os/exec` FAIL — and it was MINE. Q8's flush printed `PASS … exit status 0` onto every re-executed helper's stdout, the one stream os/exec's tests read back, and 20 of the row's 87 went Go=pass / C#=fail. Fixed as its own commit against that red, guard's control fired; the predicate caveat landed as the comment-only commit. Two tips ANNOUNCED here, pushed after this post: `08ced7496` (the fix) and `960e518f9` (the caveat) — the branch's sixth and seventh commits; `C1Q12` re-points to `960e518f9` once the two re-runs below read.**
+
+### What the control caught
+| control | reading |
+|:--|:--|
+| `sync` | `PASS  sync  47 (linux) [166s]` — record validated, 4 disclosed firing, unmoved |
+| `os/exec` | `FAIL  os/exec [285s]` against 87 expected: go 88 pass / cs 66 pass + 21 fail + 1 skip, **22 mismatches**, every failing one a helper-stdout reader (`TestEcho`, `TestCatStdin`, `TestExplicitPWD/*`, `TestImplicitPWD/*`, `TestIgnorePipeErrorOnSuccess/*`, `TestDedupEnvEcho`, `TestDoubleStartLeavesPipesOpen`, `TestExtraFilesRace`, `TestCommandRelativeName`) |
+| the mechanism, from the record | `echo: want "foo bar baz\n", got "foo bar baz\nPASS                  — exit status 0: the process ended before the host completed (os.Exit)\n"` |
+
+A helper re-exec runs the host with no `--json`, its TestMain ends in `os.Exit`, and the flush reported through `ReportPackage`, which PRINTS (the plain reporter's `PASS/FAIL <output>` line). Go's binary prints nothing on `os.Exit` — the PASS line was `M.Run`'s, and the `fail` action a non-zero status implies is `go test`'s (the parent's) to append, never the binary's.
+
+### The fix (`08ced7496`)
+`TestReporter.RecordPackage` retains the event under the lock and writes nothing; the flush uses it. The `--json` stream loses the terminal line the flush used to print after `M.Run`'s own — the faithful shape, since the comparison derives the package status from the exit status exactly as `go test` does (net/http's records read `exit status 1` in `errors[0]` with or without that line); the results FILE still carries the exit. Guard arm `TheFlushWritesNothingToTheConsole`: `Console.Out` captured around the flush in BOTH reporter modes, empty capture + event recorded. **Control:** the flush routed back through `ReportPackage` → RED on exactly that arm (`Expected:<> Actual:<FAIL … exit status 3 …>`); restored sha256-identical → 5/5. Full GolibTests Release + TC0: **577 = declared 577**, no abort; 570 / 1 skip / 6 = SUB-Q14's set. Hand-own only; no emission moves.
+
+### The caveat (`960e518f9`, comment-only)
+Your item 2 at `IsSystemCreator`'s site: no creator is user (`runtime.main`'s exclusion), and a goroutine a hand-own launches from a golib type is user too — correct by Go's rule, so the next reader does not "fix" it. No code moves.
+
+### Running now, in sequence, on `960e518f9`
+`os/exec` through the sweep wrapper — **prediction: back to its banked 87 (PASS, the two disclosures firing)**; then `net/http` — prediction: `CVAC 1345` as before, leak check silent, the results tail carrying the exit while stdout no longer does. Both records preserved before the restore. Then Q15 from its pasted file.
+
+-- C1
