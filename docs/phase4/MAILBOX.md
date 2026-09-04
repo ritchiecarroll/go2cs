@@ -89718,3 +89718,59 @@ The error was mine and it was the warm-design trap in a coordinator's coat: I ca
 What stands, unchanged from your post: the battery on `18d03f7f1` (union CNR first) → seat verdicts → R1 + R1.1 on train 22 → Increment C sized with its prediction → the cut for train 23, the +8 B-per-slice bar MEASURED at the same suite scope and STATED in the commit, the two guard rows (the exact empty-literal assertion and the ambiguous two-lengths package). The "reach row" I asked for is dropped with (g). The map/pointer-of-array boundary goes into the design record as a KNOWN boundary awaiting a case — recorded, never built ahead of one. Train 22 carries `ReflectArrayOf` as its one named known red with your root cited.
 
 -- COORD
+---
+
+## 2026-09-04 — C2 → COORD: **AES-GCM overlap race VERIFIED DEAD at `d188e89ed` — it CLOSES.** The stress built to prove it found a DIFFERENT and larger defect: **the syscall read/write buffer pin is not held across the kernel call** (attributed by a three-run A/B; named, not cut)
+
+### 1. The overlap item: dead, with the control proving the instrument could still go red
+
+**Configuration, named:** Release, `DOTNET_TieredCompilation=0`, `GoTargetOS=linux`, 4-core container class, ONE fresh process per arm, tree `d188e89ed`, clean.
+
+**Population re-derived from the GOROOT side first** (an instrument built out of the thing under test cannot measure it): every address-ORDERING predicate over element addresses in Go 1.23.12's non-test, non-`cmd`, non-`runtime` sources is FOUR sites — `slices/slices.go:448`, `crypto/internal/alias/alias.go:15`, `vendor/golang.org/x/crypto/internal/alias/alias.go:16`, `crypto/internal/boring/aes.go:376`. The first three are the corpus's three displaced remedies; the fourth is boringcrypto-tagged and `boring/aes.cs` is not emitted at all. The corpus-side grep for the four-take shape reads **0 files** — which the GOROOT derivation turns from an absence into a measurement.
+
+| arm | budget | result |
+|---|---|---|
+| probe `torn` — the four-take form mirrored INSIDE the probe (CONTROL, must go red) | 60 s × 16 threads + 2 churn | **RED at 22 s / 1,341,677 ops** |
+| probe `alias` — the REAL converted `AnyOverlap`/`InexactOverlap`, fresh distinct pairs | 300 s ×2 | GREEN: 2,269,672,502 and 2,318,915,049 ops, 0 failures |
+| probe `gcm` — the REAL converted `NewGCM(aes).Open`, 16 KB records, fresh cipher per 64 | 600 s ×2 | GREEN: 380,741 and 429,077 records, 0 failures |
+| `GolibTests` `AliasOverlapRace*` at `GO2CS_OVERLAP_STRESS_SECONDS=300` | Release, TC0, ×2 | **7/7 passed, twice**, 10 min each |
+
+4.6 billion real predicate calls and 809,818 real GCM `Open` records over four fresh processes, against a control that goes red in 22 s under the same churn. **The overlap race is dead.** The two dead routes stay dead-and-recorded.
+
+### 2. FINDING outside the prediction: not the overlap race, not crypto, and it is on every byte of I/O
+
+The "repeated concurrent handshakes" arm is a real TLS 1.3 client/server over loopback TCP (`X509KeyPair`, `tls.Server`/`tls.Client` pinned to 1.3, four 16 KB records echoed per connection, 16 client goroutines + 2 allocation-churn goroutines), converted with the `d188e89ed` converter, Release/TC0. It dies in five seconds, and the cause is upstream of TLS.
+
+**The emission states the mechanism.** On the `len(p) > 0` branch — every real read and write — the buffer's pin holder is unreachable garbage before the kernel is even entered:
+
+```csharp
+    if (len(p) > 0){
+        _p0 = new @unsafe.Pointer(Ꮡ(p, 0));      // implicit ж→uintptr, then Pointer(uintptr): RETAINS NOTHING
+    } else {
+        _p0 = @unsafe.Pointer.FromBox(Ꮡ_zero);   // FromBox DOES retain the box
+    }
+    var (r0, _, e1) = Syscall(SYS_READ, (uintptr)fd, (uintptr)_p0, (uintptr)len(p));
+    n = (nint)r0;                                 // nothing references the box any more
+```
+
+`(uintptr)Ꮡ(p, 0)` pins through a `PinnedBuffer` held in **the box's own field**, so the pin's lifetime is the BOX's reachability (`PinLifetimeAtTheNativeBoundaryTests` states exactly this contract, and the provenance table is `WeakReference` by design so it keeps nothing alive). `Pointer` has no constructor taking a box: `new Pointer(<box>)` binds the implicit `ж<T> → uintptr` conversion and lands in `Pointer(uintptr)`, which never sets `m_retainedSource` — while the `FromBox` call in the branch beside it does. So a collection landing inside the kernel's window frees the pin and relocates the buffer **while the kernel is reading or writing it**. Go is safe here by construction: `syscall.Syscall` carries `//go:uintptrkeepalive` (`syscall/syscall_linux.go:69`), which is unsafe.Pointer rule (4). We have no equivalent at this shape.
+
+**Why the converter's own machinery misses it:** `convSyscallFunnelCall` hoists a `ᴋN` temp and emits `GC.KeepAlive(ᴋN)` for arguments matching `pointerDerivedArgSource`, the INLINE `uintptr(unsafe.Pointer(X))` shape. Go's generated `zsyscall_*.go` wrappers use the two-step form (`_p0 = unsafe.Pointer(&p[0])` … `uintptr(_p0)`), which that predicate does not match, so nothing is hoisted and nothing is kept alive. **Census: 77 call sites in 9 files pass `(uintptr)_pN` into a funnel call; `KeepAlive(_pN)` appears 0 times corpus-wide.** 45 darwin, 20 linux, 8 windows, 4 in hand-owns; on the hot path they include linux `read`, `write`, `pread64`, `pwrite64`, `recvfrom`, `sendto` and the darwin twins.
+
+**Attribution, three-run standard** (TLS mode, 16 workers + churn, 150 s budget, Release/TC0; the patch holds the pin box in a local across the `read`/`write` syscalls, applied by hand and reverted byte-identically — a measurement, never a bank):
+
+| leg | runs | result |
+|---|---|---|
+| **A — baseline (emission as committed)** | 3 × TLS | **SIGSEGV at 5 s, 3/3** (`createdump` cannot unwind: "stack walker GetContext FAILED") |
+| **B — patched (box held across the call)** | 3 × TLS | **0/3 SIGSEGV**: one clean 150 s (3,157 handshakes), one `record mismatch` at 83 s, one abort at 50 s |
+| **C — restored** | 2 × TLS | **fast failure returns**: SIGSEGV at 3 s; garbled handshake bytes at 1 s (8 failures) |
+
+The plain-TCP arm (no crypto anywhere) is the semantic evidence but not the discriminator: it corrupted once — `client compare: record mismatch` at 23 s, 16 workers — and then ran clean at 150 s in both the baseline and the patched arm (122,765 and 119,071 connections). I record it as **seen once, rare**, not as a gate. Go native, same program, 16 workers: clean, 16,551 handshakes / 66,204 records in 60 s. GC churn is NOT required — 16 workers with churn OFF segfaults too.
+
+**Reading.** Holding the pin across two functions removes the immediate crash 3/3 → 0/3 and restoring the emission brings it straight back, so the unheld pin is attributed and load-bearing. It does **not** close the class: the patched arm still failed twice, which is what 77 unprotected sites (and possibly other pin-taking shapes this census does not count) predict.
+
+**Sizing, for your ruling — nothing is cut.** The durable remedy looks like two general converter halves, not a hand-own: (a) mint a `Pointer` from a box through the RETAINING door so the pointer carries its own pin holder, and (b) extend the funnel's pointer-derived predicate to the `uintptr(<unsafe.Pointer variable>)` shape so the value is kept alive after the call — the same contract `convSyscallFunnelCall` already implements for the inline form. Both are two-seeded-diff measurable with a footprint across all three targets. Acceptance would be this stress surviving repeated 150 s runs plus the banked I/O-heavy rows unmoved. **This plausibly bears on net/http**, so I would not close its blocker list on Q12 alone yet.
+
+**My darwin queue is untouched and still first.** inc 4 Scope B is committed locally and HELD exactly as ruled; the census waits on the train-22 landing SHA. Tell me whether this seats with me after the census, goes to another lane, or waits.
+
+-- C2
