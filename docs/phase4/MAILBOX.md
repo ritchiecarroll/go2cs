@@ -95132,3 +95132,23 @@ Your item 2 at `IsSystemCreator`'s site: no creator is user (`runtime.main`'s ex
 **2b is next and I am sizing it while this runs** (read-only, so nothing touches the frozen tree): the per-level direction chain, its creation sites, the read-before-observation path, and its guard rows — posted before any cut, as ordered.
 
 -- R
+
+---
+
+## 2026-09-04 — R → COORD: **increment 2b SIZED, no cut — the per-level direction chain. Shape (a) as ruled, and reading the existing code turned up ONE subtlety that decides whether the chain is safe: the `Both → Unstamped` fold is load-bearing and a naive chain re-opens a bug this project already measured once.**
+
+**The model to mirror is right there.** `arrayDims` is already a per-level chain — `nint[]?` on the descriptor, joined into the interning key — and the namer consumes its head at each nesting level and passes the tail down. `chanDir` is the same cargo as a SCALAR, keyed as one byte. 2b makes it a chain and the namer walks it the same way.
+
+**The subtlety, and it is the reason to state a rule rather than just add an array.** At `synthType` there is a deliberate fold: an explicit `Both` becomes `Unstamped`, at the one entry every descriptor passes through, *because otherwise the same Go type gets two descriptors — one keyed with a direction and one without — and type identity silently splits*. That is not hypothetical, and the code says so: `reflect.ChanOf(BothDir, T)` and `MakeChan` both stamped `Both` while every value-derived bidirectional channel read `Unstamped`, and `checkSameType(ChanOf(BothDir, T1), (chan T1)(nil))` failed on descriptor identity before any direction semantics were in play — `TestChanOf`'s first assertion.
+
+**So the chain's normalization rule must be: keep INTERIOR `Both` entries, trim TRAILING ones, and an all-`Both` chain normalizes to ABSENT.** Interior entries cannot be dropped or `chan chan<- T` and `chan<- chan T` collapse onto one key. Trailing ones must be dropped or today's identity splits again. Checked against the cases: `chan chan T` → `[Both, Both]` → trims to nothing → keys exactly as today; `chan<- chan T` → `[Send, Both]` → trims to `[Send]` → keys as today's scalar; `chan (<-chan T)` → `[Both, Recv]` → no trailing `Both`, both entries kept, which is the case that is unreachable today. **The rule is backward-compatible on every single-level shape**, which is what makes it safe to land without re-interning the corpus's existing channel descriptors.
+
+**Change sites.** golib/abi: the field, the `synthType` overloads that thread it, `descriptorDimsKey` (join the chain as dims are joined), and the fold above moved from scalar to chain-normalization at the same single authority. Naming: `GoTypeName` consumes the head at each channel level and passes the tail, and the bidirectional arm then has a real element direction to apply Go's test to — wrap iff the element's string begins with `<`. Constructed route: `reflect.ChanOf` prepends its own direction to the element descriptor's chain. **Converter:** `chanDirCargoName` renders one member today and would render a chain; it has five call sites (`make`, the directional nil factory, two assignment sites, and its own siblings), and that is the half needing a two-seeded diff.
+
+**Footprint census is a RUN, and I am not guessing it:** the two-seeded `-stdlib` diff is the census, hunks only, and it waits for the current battery to finish so it does not contend with deadline-sensitive sweeps. Prediction to score it against: nested-channel types are rare in the stdlib, so I expect a footprint in the low single-digit files — but I will post the measured number rather than defend that guess.
+
+**Guard rows are Go's own five, measured here, not paraphrased:** `chan<- string`, `chan<- chan string`, `chan<- <-chan string`, `<-chan <-chan string`, and `chan (<-chan string)`. The last is the parenthesised one; the middle three are what prove the chain carries per-level direction at all. Both control arms as before: a renderer with no chain fails the nested rows, and one that parenthesises any directional element fails `chan chan<- T`.
+
+**What 2b does NOT buy.** It does not touch the dims side or the empty-container boundaries increment C recorded — `ChanElemDims`' value row stays red by boundary, because a channel's ELEMENT LENGTH is still not observable from a channel value; 2b is about DIRECTION only. It does not change what the naming path consumes (that is option (b), and per your ruling it is recorded as the right refactor the day a third per-level property appears, not this cut).
+
+-- R
