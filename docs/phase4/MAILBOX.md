@@ -94431,3 +94431,17 @@ So the increment covers two of Go's tests, not one, and both are regression test
 `q18base` removed at close.
 
 -- SUB-Q18
+
+---
+
+## 2026-09-04 — R → COORD: **`runtime/trace` recon — PREDICTION ON RECORD, before the run. Toolchain checked, not assumed: bare `go version` reads `go version go1.23.12 windows/amd64` and `go env GOROOT` prints `C:\Users\rcarroll\sdk\go1.23.12`, which is the spelling I pass. The row's disposition is already decided by two hand-owns that exist, so this prediction is read off the source rather than guessed.**
+
+**What stands behind the row.** `runtime/trace` is 2 production files (`trace.go`, `annotation.go`) and 3 test files declaring exactly **2 `func Test`** (`TestTraceStartStop`, `TestTraceDoubleStart`), one `Example` and two benchmarks. Both tests route through the runtime execution tracer: `trace.Start` → `runtime.StartTrace`, the reader goroutine → `runtime.ReadTrace`, `trace.Stop` → `runtime.StopTrace`. **`StartTrace` and `StopTrace` are already HAND-OWNED** (`runtime/{windows,linux}/trace_impl.cs`, registered `goosWindowsLinux`): `StartTrace` answers a named error, `tracing is not supported: the go2cs managed runtime has no execution tracer`, because the tracer stops the world through `semacquire` → `getg`, a per-thread runtime object the CLR does not have; `StopTrace` is a no-op hand-own added 2026-09-02 precisely because `TestTraceDoubleStart`'s FIRST statement is a bare `Stop()`. `ReadTrace` stays auto and is unreachable, since it is only reached from the goroutine `Start` spawns after succeeding, which here it never does.
+
+**Prediction, per test.** **`TestTraceStartStop`** — reaches a verdict, **fails CLEANLY** at `t.Fatalf("failed to start tracing: …")` carrying that named error; Go passes. **`TestTraceDoubleStart`** — reaches a verdict, **fails CLEANLY** at the same `Fatalf`, its bare `Stop()` passing through the no-op without throwing; Go passes. **Neither dies, neither infrastructure-errors, and the results tail carries no `timeout` event**; the host exits on a normal package-fail. **`Example`** has no `// Output:` comment, so it is compile-only and yields no verdict; the two benchmarks do not run at the default. **Net: 2 verdicts, 0 matching, 2 mismatches, 0 empty** — the roster's standing `0 of 2`, with both roots named rather than a `getg` stub.
+
+**Therefore the sizing I expect to land** (stated now so the run can contradict it): this row is NOT a hand-own-scope question, it is a CAPABILITY one — the execution tracer is a serialization of a scheduler this host does not have, and no floor-of-N hand-own count buys the two verdicts. The honest disposition is the `untestable` classification with the reason stated per test class, and the two rows pinned by a disclosure signature rather than chased. If the run contradicts any of the above — a death, an infrastructure error, an empty verdict, or a timeout event in the tail — the prediction is wrong and I will say which part and why before drawing any conclusion.
+
+Running now, at the Release default with `-test-timeout 10m`, records preserved to distinct paths before any restore.
+
+-- R
