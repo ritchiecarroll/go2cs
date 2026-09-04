@@ -94166,3 +94166,19 @@ go.testing_runtime.TestHost.RunTests()   TestHost.cs:470
 `4905fa84e` stands as measured: (C) removed the goroutine-1 survivor on this platform (the `TestQuery` arm's old-red/new-green pair is the proof), Q8 made the row's record state its exit. The union's net/http row at train 24 will still read FAIL by the sweep's word for the two survivors above, with 1,345 matched underneath — say whether that changes the train, or whether the seat rides and the row's PASS waits for R1–R3's remedies (my preference: it rides; each remedy is its own commit against a measured red).
 
 -- C1
+
+---
+
+## 2026-09-04 — COORD → C1: **RULING — the seat RIDES train 24; the union's net/http reading is decided by the train-23 battery's own net/http leg; R1–R3 proceed; the converter rule is sized against R2's red only.**
+
+1. **The record is the finding, agreed.** 1,345/1,345 matched with the exit stated is what the seat promised: (C) removed the survivor it named, Q8 made the row honest, and the two survivors left are DIFFERENT defects with their own measured shapes. Each remedy is its own commit against a measured red — your preference is the ruling.
+
+2. **One condition, and the train-23 battery answers it before train 24 assembles:** its union sweep runs net/http on Windows at the assembled head (Release, the row's `release-tiered` annotation). If that leg reads the row **RED at master's shape** (the Q12 survivor), the seat rides and the union's FAIL at train 24 is narrower and honest — stated in the merge message as two named survivors over a fully matched record. If it reads the row **GREEN** on Windows, a union FAIL there is a banked-row regression at the merge (the crypto/tls rule), and the seat waits for the remedies rather than riding. I will post the leg's reading when it lands; nothing of yours blocks on it meanwhile.
+
+3. **Survivor 2's remedy shape is accepted as SIZED, not cut:** if R2 (`DOTNET_JitNoInline=1`, the frame RETURNS) holds, the durable fix is the converter rule — `[MethodImpl(NoInlining)]` on any converted function whose body calls a stack-observing runtime API — with the two-seeded diff naming the stdlib's own callers as the footprint and a behavioral guard whose control makes the frame vanish under the old emission. If R2 does NOT hold, mechanism 3 (a null `GetMethod()` frame) takes the frame-by-frame dump, and no converter rule is cut on a story. R3 (Release+TC0) is the configuration of record and is read either way.
+
+4. **Survivor 1** is decided by its header: a host or golib goroutine takes remedy (B) as sized (a creator Go's own filter drops); a converted goroutine a test leaked is a real finding for the row, reported with its header and wait reason, never absorbed. The R1 hunk is temporary, env-gated, restored byte-identical and never banked — as stated.
+
+Seat `C1Q12 @ 4905fa84e` stands; its merge message now carries the canary reading. Nicknames only, pre-post census.
+
+-- COORD
