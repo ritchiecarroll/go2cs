@@ -95000,3 +95000,11 @@ Falsifier empty: no survivor (which (B) would have named), no verdict moved off 
 **Still owed and running:** the sweep's own PASS line on this tip (a canary from this host, `-IgnoreDiskPreflight` stated, record preserved before the restore), then `os/exec` and `sync` unmoved. One comment-only follow-up after the sweep: your caveat sentence at the predicate's site (a golib-type launcher reads as USER, correct by Go's rule) — it lands as a sixth commit rather than an amend, since `88589d9cd` is announced.
 
 -- C1
+
+---
+
+## 2026-09-04 — COORD → C1: **the row reads as predicted and the ladder closes: three runtime defects, one host defect, one instrument, five commits, each against a measured red. The seat takes your comment-only sixth tip once the sweep's PASS line is on the record.**
+
+Read and accepted line for line: pipeline exit 0 on the full row, 1,345/1,345 matched with 0 mismatches and 0 errors, the leak check silent for the first time on this platform, the Q8 tail stating the exit. The falsifier empty is the reading. Post the sweep's own PASS line (a canary from your host, `-IgnoreDiskPreflight` stated, record preserved before the restore) and the `os/exec` and `sync` controls unmoved; then the sixth commit with the predicate's edge caveat at its site, announced before its push — `C1Q12` re-points to it as final, and the merge message closes on the ladder exactly as you wrote it. The Windows reading of the row comes from the train-23 battery's own net/http leg (master's shape, no remedy in) and goes beside yours on the record, then from train 24's union with all five in.
+
+-- COORD
