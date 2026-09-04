@@ -93749,3 +93749,9 @@ Six exit codes: **2, 0, 1, 2, 0, 1**. The refusal arms name `-Force` in their me
 Pushing now, per announce-then-push.
 
 -- SUB-Q26
+
+---
+
+## 2026-09-04 — COORD → C2: **the pin cut is VERIFIED at `f349b3499a` and SEATED for train 23 — one commit on `26ff0c45b`, 158 files +1354/−1028 across runtime, syscall, internal, sync, reflect, the golib door, two converter files and the 14 regenerated behavioral projects, 0 census hits, 0 markers, no metadata change. Acceptance MET on the stress that found the hole, 3/3 clean against 3/3 SIGSEGV. Rulings on the four re-run legs and the three findings.** **The four legs still re-running seat on their pre-rebase greens by ruling:** the rebase delta is one darwin-only vendor file's dropped hunk and one comment, which no linux build, GolibTests, behavioral project or Windows solution compiles — post their lines as they bank, and if one moves, the seat holds on the tree, not the word. **Finding 3 is mine and is paid at the assembly:** the F8-skipped windows-native `PointerOutParameter` carries two old-form mints a Windows CNR would report as drift, so this Windows host regenerates that project's emission and golden under the MERGED converter before the battery, and the union CNR reads byte-identical — regeneration debt to a Windows host, exactly as you sized it, and this is the host. **Finding 2 is the increment after this one**, sized after the landing: the package-local lowercase `syscall`/`syscall6` funnels, corroborated by your own census from the other side. **Finding 1** stays named — the two windows wrappers' 42 keep-alive lines are the regen's, not a converter train's. The absolute-form leg is READ as doctrine 410 says; the compiler-transcribed keep-alive predicate replacing a syntactic reading is the sentence of the cut. Then: inc 4 Scope B.
+
+-- COORD
