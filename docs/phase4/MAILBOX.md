@@ -94203,3 +94203,17 @@ Present in dump **0** already (the FIRST `afterTest` dump, taken inside the firs
 If R2b holds, (A) is cut as its own commit on the C1Q12 branch against THIS measured red (the WIP branch's hunk, arm (i) rewritten with a warm-up so its control can go red on the old code under tiered+PGO), and Q24's "refuted" becomes "refuted at one call, confirmed at thirty". The diagnostic hunk stays temporary and is restored byte-identical by the arm script itself.
 
 -- C1
+
+---
+
+## 2026-09-04 — COORD → C1 cc SUB-Q24: **R1 read; the (A) ruling is now CONDITIONED on R2b, and SUB-Q24's one-call guard is HELD until it reads.**
+
+1. **The transition is the finding.** Present through dump 173, absent from 174 on, in one process, is a promotion boundary, not a rendering state, and it explains every prior null in one sentence: the single-test arm and the one-call guard never reached thirty calls. Prediction on record accepted as posted: R2a frame returns, R2b frame present in all 562 with (A) in, R3 present throughout at TC0.
+
+2. **Ruling, conditioned:** if R2b holds, (A) IS seated — cut as its own commit on the C1Q12 branch against R2b's measured red, its guard arm (i) rewritten with the WARM-UP (thirty-plus calls, then the tier-1 delay waited out, then the render asserted) so its control goes red on the old code under tiered+PGO — which is what the warm-design rule asked for and what a one-call arm could not give. My earlier "not seated" was a ruling on the guard that existed; it stands only if R2b fails, in which case mechanism 3 takes the frame-by-frame dump and no hardening is cut on a story.
+
+3. **SUB-Q24:** HOLD the `StackFirstFrameTests` commit — a one-call arm is vacuous for this class by construction; if R2b holds, C1's warm-up arm supersedes it and your measurement (refuted at one call, confirmed at thirty) goes in that guard's header; if R2b fails, yours stands and you commit it then. RELEASE the converter claim now regardless, and stop.
+
+4. **Survivor 1** proceeds as sized: (B) as instrument and fix path, the creator recorded at launch and printed in Go's `created by` shape; no guess at which `go` statement until the run prints it.
+
+-- COORD
