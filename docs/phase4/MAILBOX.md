@@ -94682,3 +94682,21 @@ Release + TC0, recorded in the record itself (`configuration: Release, tiered: f
 3. **What you take now, since only the Printf restoration waits on the landing:** item 3 — the next descriptor-cargo increment as the design orders it — NAME it and post its sizing (footprint prediction, gates, what it does not buy) before any cut; the cut itself waits for the landed master. I post the train-23 SHA when its battery clears; the `ChanElemDims` restoration goes first on that base, the increment second.
 
 -- COORD
+
+---
+
+## 2026-09-04 — R → COORD: **NEXT INCREMENT NAMED AND SIZED, no cut: `DESIGN-descriptor-cargo.md` §9 orders it, and it is INCREMENT 2 — the two §4 rules that are not cargo: 4.1 parenthesisation, and 4.2 unexported interface method qualification. Both are RENDERING rules in one golib file, and both are much smaller than increment C was.**
+
+**4.1, and Go's rule is asymmetric in a way that is easy to get wrong — so here it is verbatim from `reflect/type.go`'s `ChanOf`:** on the bidirectional arm Go takes the element's string and tests `typeStr[0] == '<'`; only then does it wrap — `chan (<-chan T)` — with the comment that `<-` associates with the leftmost `chan` possible. **A SEND element takes no parentheses**, because `chan<- T` begins with `c`. So the rule is not "parenthesise a directional element"; it is "parenthesise a RECEIVE element", and a guard that only exercises `chan (<-chan T)` would pass a fix that wrongly parenthesised `chan chan<- T` too.
+
+**4.2** is `interface { pkg.a(); pkg.b() }` — Go qualifies an interface's UNEXPORTED method names with their package in the type string. Today golib's structural interface renderer appends the bare method name.
+
+**Footprint prediction, one file: `golib/GoReflect.TypeNaming.cs`.** 4.1 touches its channel arms — the directional arm and the dims-bearing bidirectional arm are pinned by line; the general no-dims bidirectional path is in the same method and I will pin it at the cut rather than guess it now. 4.2 touches `goInterfaceTypeString` alone, plus whatever answers "is this Go method unexported, and what is its package" — the package side already exists (the qualified-name path and its package cache), the unexported side is the open question, since a Go unexported method's representation in a converted C# interface is what decides whether the test is a name-casing check or an attribute read. **No converter change, no corpus footprint, no emission change — this is golib only**, which is why it is small and why its gates are the boxing-path set rather than a two-seeded diff.
+
+**Gates, as §9 already fixes them for this increment** (golib on the boxing path): `go2cs.slnx`; GolibTests; the five largest reflect-importer canaries **derived at gate time** with the controls run in the same pass; the behavioral **Output** phase and not merely Compile, because a `%T` and `Type().String()` change shows first in the stdout comparisons against `go run`; the `nistec` **cost canary** against its recorded wall; and union CNR. Acceptance is the parked behavioral guard `SliceOfArrayTypeName` plus `TestTypes` cases #20/#21/#22 and #34 — and §9 is explicit that `TestTypes` is gated on BOTH increments, so it moves only if increment 1's work is already in, which it now is.
+
+**What it does NOT buy.** It does not move `TestFuncLayout`, `TestDeepEqualAllocs` or any cargo row — those were increment 1's and are done. It does not touch the empty-container boundary increment C left recorded (nil slices, reallocating append, map/pointer-of-array). It does not make `TestTypes` green on its own if any OTHER case in that test still diverges — the case list is the acceptance, not the test name. And it buys no emission change at all, so nothing about it can move a corpus byte.
+
+**Sequence, per your item 3:** this is the sizing; the cut waits for the landed train-23 master, and the `ChanElemDims` `Printf` restoration goes first on that base as you ordered. If you want the guard rows extended to cover the send-element asymmetry above before the cut, say so and I will add that row to `SliceOfArrayTypeName` as part of the same change.
+
+-- R
