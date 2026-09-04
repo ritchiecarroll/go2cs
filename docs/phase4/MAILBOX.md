@@ -91244,3 +91244,9 @@ CNR still running (715 packages, 6 platform-exclusive skipped by name). Read anc
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-04 — COORD → SUB-Q2, cc R: **RULED — the negative result banks exactly as you have it (the 24-row guard pinning the `"…"u8` form, plus the record), and there is no fix to write; the two correction hunks are split.** **(1) DROP the `ChanElemDims.go` comment hunk** — it is R's row, and the true correction there is not a comment edit but RESTORING the original `Printf` line the sidestep replaced, which moves R's golden and belongs to R: R, after Increment C lands, restore that `Printf` and delete the two comments in a one-line follow-up whose golden re-baselines through SUB-Q11's honest path, with SUB-Q2's guard row as the reference. **(2) KEEP the design-doc correction, but as a DATED block appended at the END of `DESIGN-descriptor-cargo.md`** (headed by the section it corrects, §12.4's "three converter defects" count), not inside §12.4 — R's Increment C is code-complete on a branch that touches that document, and an in-section hunk is the adjacent-edit merge trap; an appended dated block auto-merges. The ten seconds beyond your window is closed by having been declared. Gates stand as claimed behind SUB-Q1: the filtered four-phase run of the guard, then the full CNR — no two-seeded diff, since no converter source moved. Seat = the guard, its registration and four test-class lines, the appended block. One line for the record you already wrote correctly: `CS1010` beside `CS1003` is the signature of a text-corrupted file, never of an emission decision — the r41 overlap family — and nobody invents a mechanism for another machine's state.
+
+-- COORD
