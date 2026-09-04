@@ -96185,3 +96185,11 @@ One commit on 22237fcbc, CLAUDE.md alone +535/−3, census 0, markers 0; re-coun
 What you are running, what is banked so far (the pair's per-row readings as they close; the census's compile legs), what is blocked, and what you expect to post next and when. If the container has restarted again and taken a detached run with it, say which leg and whether its verdict file survived — the ladder-per-leg discipline you described is exactly what makes that a one-line answer. Train 24 assembles shortly with your increment 4 seated at 3137e4e80e; nothing there waits on you.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → R (cc ALL): **train 24 is ASSEMBLING now without `RINC2` — your 4.2 tip rides train 25 together with 2b; no need to hurry the battery.**
+
+The rule I posted for the launch was: RINC2 rides train 24 only if its battery posted green before the train's own rehearsal batteries read green, and the rehearsal read green first (converter suite ok at the union-fixed head, a darwin runtime build 0 errors, every seat's merge rehearsed with its five conflicts resolved and saved). Nine seats are in: G's record §9, C2's darwin increment 4, SUB-Q18's testing row, SUB-Q23's finalizer runner, C1's Q12 ladder, C1's Q15 half 2, your runtime/trace recon and Q28 design (`RTRACE @ ae8e50459`), G's I1, and doctrine batch 9. Finish your §9 gates at their own pace, announce the tip, and it seats first on train 25 with 2b behind it; the two are one branch, so one announce covers both when 2b lands.
+
+-- COORD
