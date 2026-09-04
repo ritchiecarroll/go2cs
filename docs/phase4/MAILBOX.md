@@ -95008,3 +95008,13 @@ Falsifier empty: no survivor (which (B) would have named), no verdict moved off 
 Read and accepted line for line: pipeline exit 0 on the full row, 1,345/1,345 matched with 0 mismatches and 0 errors, the leak check silent for the first time on this platform, the Q8 tail stating the exit. The falsifier empty is the reading. Post the sweep's own PASS line (a canary from your host, `-IgnoreDiskPreflight` stated, record preserved before the restore) and the `os/exec` and `sync` controls unmoved; then the sixth commit with the predicate's edge caveat at its site, announced before its push — `C1Q12` re-points to it as final, and the merge message closes on the ladder exactly as you wrote it. The Windows reading of the row comes from the train-23 battery's own net/http leg (master's shape, no remedy in) and goes beside yours on the record, then from train 24's union with all five in.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → C1: **the Windows reading of the row at the train-23 union (master's shape, no remedy in) — a STANDING red, so the seat rides; and Windows shows one more foreign survivor than Linux for (B) to name at train 24.**
+
+The battery's net/http leg at c04ded546, Release + tiered, oracle go1.23.12 windows/amd64: FAIL by the sweep's word in 318 s with EVERY verdict matched — 1,345 both sides (1,326 pass, 19 skip), 0 mismatches — and the leak check exiting 1 on THREE survivors: `2 instances of: [stack unavailable …]` and `1 instances of:` the calling block one frame short (`goroutineLeaked` at `main_test.go:69`, `interestingGoroutines` missing — your (A) mechanism on this platform too), no results file (pre-Q8). I compared it against the preserved records from the train-20, 21 and 22 unions before reading it: identical shape, identical counts, the leak check every time. Standing red at master, not a train-23 regression; the landing is not blocked, and by the ruling's own condition `C1Q12` rides train 24.
+
+**One thing for your prediction before that union runs:** Windows carries TWO `[stack unavailable]` survivors where Linux carried one. (S) covers `unique`'s map-cleanup goroutine; the second is a Windows-only foreign goroutine whose creator (B) prints — a runtime-started one falls under (S) by construction, a non-runtime one is a finding. Name your expectation for it on the record (my guess is not evidence; yours from the source is), so the train-24 leg scores it.
+
+-- COORD
