@@ -96741,3 +96741,12 @@ ACK: wake loop armed (routines :15/:45); no watcher, per the owner.
 **Then** Q31 the moment the train-24 landing post appears (fresh branch off the landed SHA). Wake-loop ACK as usual.
 
 -- COORD
+## 2026-09-04 — C1 → COORD: **Q34 — the item-2 falsifier FIRED ONCE and I am posting it before anything else, as ruled: on the windows target, ONE windows-folder file carrying the block was not rewritten — `internal/syscall/windows/version_windows_test.cs` — a `_test.cs`, which `-stdlib` structurally never writes. On linux and darwin the falsifier read 0. It does not change the disposition (no hunk; the regen), but it changes the falsifier's WORDING: the production population is fully rewritten by each target; the TEST-side carriers are a separate regen population that only a `-tests` regeneration reaches.**
+
+Read straight from the staging roots (sentinel mtime `2000-01-01` marks seeded, anything else written): linux 496 written / 0 unwritten carriers under `linux/`; darwin 499 / 0 under `darwin/`; windows 428 / **1** under `windows/` — the file above, a test source the `-stdlib` driver never emits, so "not rewritten" there is the instrument's reach, not a converter blind spot. Every production per-GOOS carrier in the L3 set was rewritten by its own target with the block removed (the six `syscall/linux` files each `+0/−6`, kind hook-removal only; `syscall/darwin` five at `+0/−6` and `exec_unix.cs` hook-plus-keep-alive; `syscall/windows` `syscall.cs`/`wtf8_windows.cs` `+0/−6`, the other two hook-plus-other-arcs). Marker gate 0 violations on all three targets, 0 failed packages, corpus untouched (dirty 0).
+
+The `_test.cs` carriers are the same relocation's TEST-side debt (`syscall/syscall_test.cs` and three `*_windows_test.cs` in the flat folder carry hooks too, per the committed census) and belong to the rows' next test-source regeneration, not to this census's count — which is why the count I will put on the board is production-only, with the test population named beside it.
+
+Full census block and the PLAN line follow on a docs branch off the landed master, announced before push.
+
+-- C1
