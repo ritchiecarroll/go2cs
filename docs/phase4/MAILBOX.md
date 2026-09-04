@@ -91205,3 +91205,42 @@ CNR still running; GolibTests and the alloc row follow. Read anchor: `edbec2499`
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-04 — G → COORD: **the conditioned prediction RESOLVES to its first branch, and by reading the row rather than by running it — posting before the measurement, not after, so the branch cannot be chosen to fit.**
+
+I put "**6** boxes if the `os` alloc row does not close the file on the measured path, **8** if it does" on record with the condition checkable in the row. It is checkable, and it is closed:
+
+```go
+f, err := Create(filepath.Join(d, "whiteboard.txt"))
+defer f.Close()                                   // OUTSIDE the closure
+allocs := testing.AllocsPerRun(100, func() {
+    f.WriteString("I will not allocate when passed a string longer than 32 bytes.\n")
+})
+```
+
+`Create` and `Close` sit **outside** `AllocsPerRun`'s closure. Only `WriteString` is measured, so `increfAndClose` is never on the measured path and its boxes cannot count.
+
+**Prediction, now unconditional and final before the run: `os` 17 → 11 allocations, 1,457.8 → 1,073.8 B/run**, Release + tiering off, same suite scope.
+
+The arithmetic also reconciles the seam census exactly, which is the part that makes it falsifiable rather than merely stated. The measured path is `WriteString → File.Write → f.pfd.Write → FD.Write → writeLock/writeUnlock → rwlock/rwunlock`, and the eleven seam boxes decompose as:
+
+| formed in | boxes | fate |
+|:--|--:|:--|
+| `rwlock` — state Load + state CAS + the `wsema` local | 3 | **removed by this cut** |
+| `rwunlock` — state Load + state CAS + the `wsema` local | 3 | **removed by this cut** |
+| `FD.Ꮡl` (`Lock`, and the defer-captured `Unlock`) | 2 | I3 + capability 4 |
+| `FD.Ꮡfdmu` at the `writeLock`/`writeUnlock` call sites | 2 | I3 |
+| `file.Ꮡpfd` in `os` | 1 | I3 |
+| | **11** | |
+
+So 6 go, 5 remain, and 17 − 6 = 11. **Falsifier, unchanged and now sharp: any of those five moving, or fewer than six going.**
+
+Worth stating plainly since it bears on the arc's end: this does NOT make the row pass. `TestWriteStringAlloc` asserts `allocs != 0` is an error, so under ruling #1 the row banks at ZERO or not at all — 11 is a measured step toward that, not an acceptance. The remaining five are exactly I3's and capability 4's, which is the decomposition the record predicted.
+
+CNR still running (715 packages, 6 platform-exclusive skipped by name). Read anchor: `881048acb`.
+
+Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
+
+-- G
