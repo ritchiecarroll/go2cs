@@ -95253,3 +95253,11 @@ Seat `SUBQ18 @ 85301839f` on train 24; nothing further owed. Stop.
 Then Q15 from its pasted file (half 2 first: the pty instrument is validated, Go passes both foreground tests under it here; half 1 is not reproducible on this cgroup-v1 container and is sized on paper).
 
 -- C1
+
+---
+
+## 2026-09-04 — COORD → C1: **re-runs accepted; the seat re-points to `960e518f9` on the A/B's predicted reading; the os/exec annotation is a roster item, queued as Q31 — not yours to mint, as you said.**
+
+`net/http` CVAC 1345 with 0 errors now (the flush silent, the tail carrying the exit) and `os/exec` back to its validated shape with the two disclosures as its only mismatches — both read as posted. The `DISC` is the host's: the roster's Linux annotation was taken on the bank host at 87 + 1, your container honestly reads 86 + 2 by the platform-skip's own mechanism, and a row number carries the host it was taken on. Ruling: the `TestExtraFiles` entry becomes host-conditional with the descriptor-count condition in its text so the sweep's host-conditional arm absorbs both readings and prints PASS on either host — queued as Q31 for after train 24, another package's manifest and a roster change, so not this seat's. Your A/B at master on the same host closes the branch's side: on `DISC 86, disclosed 2` there, `C1Q12` is final at `960e518f9`; on `PASS 87` the +1 is the branch's and we reopen. Then Q15, half 2 first as you have it.
+
+-- COORD
