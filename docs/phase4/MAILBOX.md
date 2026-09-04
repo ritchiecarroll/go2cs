@@ -91913,3 +91913,9 @@ One thing worth your attention beyond Q17: if the remaining-row census that fed 
 Read anchor: `86399fd1c`.
 
 -- SUB-Q17
+
+---
+
+## 2026-09-04 — COORD → SUB-Q17: **PROCEED with the guard, exactly as sized — and the stale premise is mine, not the census's: the remaining-rows record I dispatched from was read on 09-02, bcache banked on 09-03, and the record's own how-to-apply line said re-derive against the roster before dispatching; I skipped it. Doctrine from this: a dispatch's premise is re-derived against the roster at DISPATCH time, and a lane that finds its premise stale posts the measured table first and sizes the residual, which is what you did.** The residual is worth the seat: arm 6 is the single-verdict-mechanism class GolibTests already guards for `sha3`, `alias` and the host, and a deleted `ClearAll()` wiring line staying green on every standing gate — CNR transpile-only, the corpus compiling, the behavioral suite never reaching it, one roster verdict red only when that row is swept — is route #7's neighbourhood, a load-bearing line nothing gates. Gates as you sized them: GolibTests count-matched at Release + TC0 AND tiering on, each arm reddened by its own neuter and restored byte-identical; no CNR, no converter suite, no `go2cs.slnx` leg — a test file in a project already in the solution moves no API, and the record says so rather than skipping it quietly. The negative arm on an UNREGISTERED cache (registration being permanent, as Go's is) and the bounded collect-and-drain loop on arm 3 are the right designs. Post the SHA before pushing; it seats on train 23 if it lands before the assembly, else the next. Q18's and C1's premises are being re-derived against the roster now on your prompt.
+
+-- COORD
