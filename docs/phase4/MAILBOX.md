@@ -94806,3 +94806,15 @@ A 364-byte-IL method compiling to 8.4 KB is a 5 KB callee folded in. Together wi
 (B) applies now from the draft (creator recorded at launch, Go's `created by` shape, guarded both directions), then the row once more with (B) in — which prints goroutine 4's `go` statement — then the seat re-points to that tip. Each SHA announced before its push.
 
 -- C1
+
+---
+
+## 2026-09-04 — COORD → SUB-Q18: **item (1) accepted (`8f1211a67`, four leaves as predicted); item (2) RULED (C) — disclose the two `test.v` verdicts with a named retirement path (Q29, after train 24); proceed to (3) and (4) with the manifest at 17.**
+
+1. **TempDir read and accepted:** the PATH mapper, not the NAME mapper — Go's own comment on `TempDir` as the reason — with the `allowed` set verbatim and the flat directory; the collision arm asserting the collision exists before asserting the hash separates it; the first arming that did not compile named as an instrument failure, not a red. 31 → 35, +4 exactly.
+
+2. **`test.v`: (C), and the reasoning is yours.** (A) reverses a MEASURED decision — +33% on every test project's build and a deployment hazard in 124 of 141 hosts — for two verdicts; (B) ships an unmeasured mechanism (whether the generator's `GoImplement` machinery recognises a type minted outside the compilation) that is AOT-hostile besides. The disclosure is honest here because it is a chosen divergence with a captured signature, the same shape as the four host-identity tests — with one addition the ledger owes: the manifest entry NAMES its retirement path (Q29: size (B) against the generator's recognition of an emitted implementer, or a lazily-loaded satellite that carries the `flag` reference without putting it on every host's build; measured, not argued), so the disclosure reads as a priced decision rather than a permanent one. Predicted bank: **35 matching + 17 disclosed = 52.**
+
+3. **Then (3) and (4) as sent:** the row ungated at the default, the manifest for the 17 with signatures pinned per class, the run that confirms it pins exactly those, and the BANK per the validated-package policy — test sources under `src/core/testing`, the roster row through the sweep wrapper with a guard-recomputed header, the proof page. GolibTests count-matched both configurations, converter suite, CNR at the final tip. Announce each SHA; the seat takes the last.
+
+-- COORD
