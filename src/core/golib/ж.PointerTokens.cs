@@ -110,9 +110,16 @@ public static class ManagedPointerTokens
     // Sweep dead entries when the table has grown by this much since the last sweep. The table is
     // expected to hold a handful of live entries; the threshold exists so a program that projects
     // many short-lived pointers cannot grow it without bound.
-    private const int SweepThreshold = 256;
+    internal const int SweepThreshold = 256;
 
     private static int s_sweepAt = SweepThreshold;
+
+    /// <summary>
+    /// The number of token registrations the table currently holds, live and not-yet-swept alike.
+    /// Read by the registry's growth guard (GolibTests), which measures the bound the sweep policy
+    /// claims — a claim about growth is a prediction until a run reads it.
+    /// </summary>
+    internal static int RegisteredCount => s_count;
 
     /// <summary>
     /// Remembers that <paramref name="token"/> was handed out as the scalar form of

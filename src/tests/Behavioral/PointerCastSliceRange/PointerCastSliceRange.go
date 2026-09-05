@@ -39,10 +39,19 @@ func main() {
 	// inner `~`-form deref before appending .Value, or the postfix binds into the cast
 	// chain and reads the inner unsafe.Pointer slot (CS0029). The target element type
 	// DIFFERS from the source (`**[2]int64` over a `**[4]int`) so it stays a genuine
-	// reinterpret — an identical type would collapse to the box. Compile-shape only.
+	// reinterpret — an identical type would collapse to the box. Compile-shape only,
+	// and since Q44 (2026-09-05) the `never` guard is what makes that true at run time:
+	// the source pointee is a POINTER (reference-bearing storage the collector may move),
+	// so the reinterpret is unrepresentable in the managed model -- `[4]int` read as
+	// `[2]int64` through array wrappers has no alias -- and its dereference is the
+	// design's loud fault (a native box over the pointer's order token) where it used to
+	// be a pun through a transient slot address that happened to survive the Clone().
+	// The emitted shape is still the golden's; the program never executes it.
 	ip := &arr
-	back := **(**[2]int64)(unsafe.Pointer(&ip))
-	_ = back
+	if never {
+		back := **(**[2]int64)(unsafe.Pointer(&ip))
+		_ = back
+	}
 
 	// census F14: a literal with an unsafe.Pointer result whose arms return different
 	// C#-typed expressions defeats lambda return inference (CS8917, reflect deepEqual
@@ -65,3 +74,6 @@ func main() {
 // opaque mirrors syscall.Pointer: a named type whose underlying is a pointer.
 type opaque *[4]int
 
+// never gates the compile-shape-only F13 line: a package var (not a constant), so the
+// branch is emitted and type-checked but never taken.
+var never bool

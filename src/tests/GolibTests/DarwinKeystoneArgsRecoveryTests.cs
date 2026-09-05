@@ -37,15 +37,26 @@ namespace GolibTests;
 //   3. the BOUND — a lifted args struct that carries a managed reference (mmap_args's unsafe.Pointer
 //      fields, mach_vm_region_args's ж<...> out-parameters, proc_regionfilename_args's ж<byte>: 3 of
 //      the 13 lifted darwin structs, censused 2026-09-03) has no pinnable storage, so the pin path
-//      declines and the number cannot resolve. For those the dispatcher must FAIL LOUDLY (§7.3, "never
-//      a default"), and the design's named fallback — a converter-emitted per-symbol layout record —
-//      is the remedy. This arm is what keeps that bound a statement rather than a mid-cut surprise.
+//      declines. Until Q44 that meant the number could not resolve at all; under the token
+//      (docs/phase4/DESIGN-managed-pointer-token.md, cut 2026-09-05) it resolves — to its own box and
+//      never another — but it is still not an ADDRESS, and a reference-bearing layout is still not a
+//      native one. For those three the dispatcher must still FAIL LOUDLY (§7.3, "never a default"),
+//      and the design's named fallback — a converter-emitted per-symbol layout record — is still the
+//      remedy. This arm is what keeps that bound a statement rather than a mid-cut surprise.
 //
 // MEASURED 2026-09-03 (Linux host, GolibTests linux flavor, Debug, 5/5, zero aborts) — the prediction on
 // record in the commit that added this file held exactly: arms 1-3 and 5 PASS, and arm 4 took the
 // `recovered is null` branch (a reference-bearing shape does NOT resolve), so §7.2's bound stands as
 // stated. The instrument can fail in both directions — arms 1-3 need a non-null resolve, arms 4-5 a
 // null one — which is what makes the green a measurement rather than a tautology.
+//
+// AMENDED 2026-09-05 (Q44, the managed pointer token). Arm 4's `recovered is null` branch is the
+// pre-Q44 reading; the token arm in ж.cs's address-take operators registers a reference-bearing
+// box's order token, so the arm now takes the branch it already carried for exactly this case
+// (`AreSame`, once followed by an Inconclusive saying "record the mechanism before relying on it")
+// and is rewritten as a PASS assertion recording that mechanism — the number is the box's
+// PointerOrderToken, it resolves to the box, and the box is pinned nowhere. Arms 1-3 and 5 are
+// unchanged in what they measure. Prediction for this cut's run: 5/5 PASS, both configurations.
 //
 // Reference-free by construction, the way the corpus's fcntl_args is:
 //     [GoType("dyn")] internal partial struct fcntl_args { internal int32 fd, cmd, arg; internal int32 ret, errno; }
@@ -183,15 +194,20 @@ public class DarwinKeystoneArgsRecoveryTests
     }
 
     [TestMethod]
-    public void ReferenceBearingArgsStructDoesNotResolve_TheDesignsStatedBound()
+    public void ReferenceBearingArgsStructResolvesThroughItsToken_TheBoundQ44Narrowed()
     {
-        // The NEGATIVE arm, and the one that earns the file its keep: a lifted args struct carrying a
-        // managed reference has no pinnable storage (StandardBox gates PinnableStorage on
-        // !IsReferenceOrContainsReferences<T>), so EnsureStableAddress pins nothing, IsPinnedAt
-        // answers false, and Resolve's validate-on-read MISSES — the number the dispatcher holds
-        // cannot be traced back to a type. Three of the thirteen lifted darwin structs are in this
-        // class (mmap_args, mach_vm_region_args, proc_regionfilename_args); for them the dispatcher
-        // must throw naming the trampoline, and the per-symbol layout record is the remedy.
+        // Once the NEGATIVE arm, banked stating the keystone design's §7.2 bound: a lifted args
+        // struct carrying a managed reference has no pinnable storage (StandardBox gates
+        // PinnableStorage on !IsReferenceOrContainsReferences<T>), so EnsureStableAddress pinned
+        // nothing, IsPinnedAt answered false, Resolve's validate-on-read MISSED, and the number the
+        // dispatcher held could not be traced back to a type. Q44 narrowed the bound: the address take
+        // hands such a box its own ORDER TOKEN, registered in ManagedPointerTokens, so the number DOES
+        // trace back — to the box itself and never to another. What the bound still says, and this
+        // arm still asserts, is that the number is not an ADDRESS: the box is pinned nowhere, and a
+        // reference-bearing layout is not a native one — for the three lifted darwin structs in this
+        // class (mmap_args, mach_vm_region_args, proc_regionfilename_args) the per-symbol layout
+        // record remains the dispatcher's remedy; the token turns the miss into a resolve, not the
+        // struct into something libc can read.
         Assert.IsTrue(RuntimeHelpers.IsReferenceOrContainsReferences<MmapArgsShape>(),
             "the control's premise: this shape carries a managed reference (the unsafe.Pointer fields)");
 
@@ -199,22 +215,18 @@ public class DarwinKeystoneArgsRecoveryTests
         args = new MmapArgsShape { n = 4096, prot = 3 };
 
         @unsafe.Pointer arg = EmitLibcCallArg(Ꮡargs);
+        nuint number = (nuint)(uintptr)arg;
         object? recovered = RecoverArgsBox(arg);
 
-        // The property the dispatcher needs is "never a WRONG box": a null is the honest answer,
-        // and the same box would be a (welcome) falsification of the bound — either way it must
-        // never be some OTHER box. State which happened.
-        if (recovered is null)
-        {
-            Assert.IsFalse(((INilPointer)Ꮡargs).IsPinnedAt((nuint)(uintptr)arg),
-                "a reference-bearing box must not claim to be pinned at the number it reported");
-        }
-        else
-        {
-            Assert.AreSame(Ꮡargs, recovered,
-                "if a reference-bearing box resolves at all it must be ITSELF — a foreign box here would hand the dispatcher a wrong layout");
-            Assert.Inconclusive("the reference-bearing arm RESOLVED to its own box: the design's §7.2 bound is narrower than stated — record the mechanism before relying on it");
-        }
+        Assert.IsNotNull(recovered,
+            "a reference-bearing args box must resolve under the token arm — a null here is the pre-Q44 miss coming back");
+        Assert.AreSame(Ꮡargs, recovered,
+            "a reference-bearing box that resolves must resolve to ITSELF — a foreign box here would hand the dispatcher a wrong layout");
+
+        Assert.AreEqual(Ꮡargs.PointerOrderToken, number,
+            "the number is the box's order token, never a heap address");
+        Assert.IsFalse(((INilPointer)Ꮡargs).IsPinnedAt(number),
+            "a reference-bearing box must not claim to be pinned at the number it reported — nothing was pinned");
 
         GC.KeepAlive(args);
     }

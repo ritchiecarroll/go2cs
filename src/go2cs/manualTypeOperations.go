@@ -2012,6 +2012,20 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"Mul": goosAny,
 		"Sub": goosAny,
 	},
+	"time": {
+		// syncTimer -- Go 1.23's `*(*unsafe.Pointer)(unsafe.Pointer(&c))`, the channel handed to the
+		// runtime's timer as a raw pointer so a synchronous timer channel can be told apart from an
+		// asynchronous one (asynctimerchan). Its ONLY reader here is the hand-owned newTimer in
+		// time/time_impl.cs, which by its own line never reads that argument (`_ = cp;` -- the channel
+		// comes from `arg`, and the sync bit is recomputed from the GODEBUG setting), so the take was
+		// a DEAD reference-bearing address take -- and the corpus's dominant one: 176 of the 283 the
+		// Q44 census read in os (one per time.NewTimer/After/Ticker), the single one in syscall. Under
+		// the managed pointer token (docs/phase4/DESIGN-managed-pointer-token.md) every such take
+		// would register a weak token nobody resolves; displaced (2026-09-05, COORD's ruling on the
+		// item-2 reading) to a one-line body returning nil, the value syncTimer itself returns under
+		// asynctimerchan=1. time/time_impl.cs holds the body beside its consumer.
+		"syncTimer": goosAny,
+	},
 }
 
 // isManualType reports whether the named type (raw Go name) is hand-converted in this package.

@@ -19,6 +19,13 @@ public class ReinterpretSourceRetentionTests
     // shi2_path, and the process dies with 0xC0000005. The hand-owned wrapper transcribes the record
     // into a blittable mirror instead — which it can only do if it can reach the record, which is
     // what these tests hold.
+    //
+    // AMENDED 2026-09-05 (Q44, the managed pointer token — docs/phase4/DESIGN-managed-pointer-token.md).
+    // The address route SERVES this class now: an unpinnable box hands out its ORDER TOKEN instead of
+    // a movable field's address, registered so the registry resolves the number to the source box.
+    // The first arm below records that flip (it was the arm asserting the miss). The retention
+    // STAYS — a wrapper handed a Pointer reads its retained source first and asks the registry only
+    // for a bare number — and the two recoveries must agree.
 
     // The shape of internal/syscall/windows.SHARE_INFO_2 as the converter emits it. What is
     // load-bearing is only that it CONTAINS MANAGED REFERENCES, so the CLR lays it out itself.
@@ -45,16 +52,29 @@ public class ReinterpretSourceRetentionTests
 
         ж<ReferenceBearingRecord> source = new StandardBox<ReferenceBearingRecord>(record);
 
-        // The premise, asserted rather than assumed: this really is the class the provenance record
-        // cannot serve. If a future change gives such a box pinnable storage, this assertion fails
-        // FIRST and says so, instead of the retention quietly becoming redundant.
+        // The premise, asserted rather than assumed: this really is the class the PINNED provenance
+        // record cannot serve. If a future change gives such a box pinnable storage, this assertion
+        // fails FIRST and says so, instead of the retention quietly becoming redundant.
         Assert.IsNull(source.PinnableStorage,
-            "a reference-bearing pointee must have no pinnable storage — that is why its address cannot be a provenance key");
+            "a reference-bearing pointee must have no pinnable storage — that is why its address cannot be a pinned provenance key");
 
         ж<byte> derived = source.Reinterpret<ReferenceBearingRecord, byte>();
 
-        Assert.IsNull(ManagedPointerTokens.Resolve((nuint)(uintptr)derived),
-            "the ADDRESS route must still answer null for this class — validate-on-read has nothing pinned to validate; if this ever resolves, the retention below is no longer the only recovery and the wrapper should prefer the address key");
+        // Q44: the number an unpinnable box hands out is its ORDER TOKEN, not an address, so the
+        // derived view is a native box over the token, and the ADDRESS route resolves that number
+        // to the SOURCE through the token registry — the branch this arm's old message anticipated
+        // ("if this ever resolves, the retention below is no longer the only recovery"). A native
+        // reader of the view faults at a non-canonical address instead of reading a stale copy,
+        // which is the loud failure the design chose; a boundary wrapper never reads it, it
+        // recovers the record.
+        nuint number = (nuint)(uintptr)derived;
+
+        Assert.IsTrue(derived.IsNative,
+            "a reference-bearing source cannot alias as bytes; the derived view names the source by number");
+        Assert.AreEqual(source.PointerOrderToken, number,
+            "the number is the source's order token — never a heap address the collector was not asked to hold still");
+        Assert.AreSame(source, ManagedPointerTokens.Resolve(number),
+            "the ADDRESS route resolves the token to the record's own box (Q44); a null here is the pre-Q44 miss coming back");
 
         Assert.AreSame(source, ManagedPointerTokens.ReinterpretSource(derived),
             "a hand-owned boundary wrapper must be able to recover the record it was handed as a *byte — without it the only remaining move is to read managed references out of a raw address, which is a CLR type-safety break");

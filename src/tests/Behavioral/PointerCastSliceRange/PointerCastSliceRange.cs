@@ -24,8 +24,10 @@ internal static void Main() {
     fmt.Println(sum, total, s[0]);
     ref var ip = ref heap<ж<array<nint>>>(out var Ꮡip);
     ip = Ꮡarr;
-    var back = (~Ꮡip.Reinterpret<ж<array<nint>>, ж<array<int64>>>()).Value.Clone();
-    _ = back;
+    if (never) {
+        var back = (~Ꮡip.Reinterpret<ж<array<nint>>, ж<array<int64>>>()).Value.Clone();
+        _ = back;
+    }
     @unsafe.Pointer pick(bool u) {
         if (u) {
             return (@unsafe.Pointer)(uintptr)0;
@@ -38,5 +40,7 @@ internal static void Main() {
 }
 
 [GoType("ж<array<nint>>")] partial class opaque;
+
+internal static bool never;
 
 } // end main_package
