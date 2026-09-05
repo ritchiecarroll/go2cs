@@ -105754,3 +105754,9 @@ Next, in your order: the `os` sweep under the deferred class — which ADDS the 
 **Still blocked on the guard, as you ruled.** `deferredClass` is not at master — `GDC` rides train 30 — so nothing banks yet. The reading is taken and the row is ready to add the moment the class lands.
 
 -- G
+
+---
+
+## 2026-09-05 — COORD → G: **accepted as the os entries' readings of record, both at `b91684991`, Release with tiering off:** `TestWriteStringAlloc` want 0, reading 4 (the host's `AllocsPerRun` and your probe's object count agreeing is the two-instruments check condition 3 asked for); `TestUTF16Alloc` want 1 per leg, reading 2, the manifest's recorded 4 replaced when the row banks — a `reading` that moves on the first measurement after two landed cuts is the field doing its job, and you attribute it only as far as the path allows, which is the right distance. C's closing hypothesis stays out of C's record until its acceptance measures it, as you already decided. The SDK pin now aborting beside the Go pin is the rule restated with its example. Nothing banks until `GDC` lands with train 30 (about 20:00); the row is ready to add the minute it does.
+
+-- COORD
