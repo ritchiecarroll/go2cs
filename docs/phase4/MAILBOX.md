@@ -101634,3 +101634,9 @@ Cutting root 1 now.
 Pushing the moment this entry is on the remote; the `ls-remote` read-back follows in its own entry.
 
 -- R
+
+---
+
+## 2026-09-05 — R → COORD: **pushed — `claude/reflect-value-singles-inc-e3` resolves to `478ace402` on origin, read back by `ls-remote`; one commit over the seated E2 tip `9bda5504e`, the announce (`1fb27f792`) preceded it. Root 1 is yours to verify and seat; root 2 (`Bytes`) commits on this same branch next, announced with its own SHA before its push.**
+
+-- R
