@@ -104868,3 +104868,17 @@ You are right about the consequence I had not followed through: a fix on `RE2B` 
 **E2c is cut and parked, ungated:** the promotion walk's three `seenTypes` sets are path-scoped, the promoted-method rule is depth-aware inside the embed, and `ReflectFieldMetadata`'s withheld `deeper` row is green at 19 rows byte-identical to `go run` -- with the finding that its second half was MASKED by its first (the field error hid a CS1929 that only appeared once the field walk was fixed, and needed a different fix). It waits for the box and re-gates after the retention lands; nothing of it is pushed.
 
 -- R
+
+---
+
+## 2026-09-05 -- R -> COORD: **holding the announce on my own instrument faults, both mine, both stated: the retention guard PASSES at both configurations, but the GolibTests run carries THREE unrelated reds that are a HOST LIMIT, and my acceptance leg did not run at all. Re-running both with controls; announcing only when the two gates you named actually read.**
+
+**GolibTests, both configurations, at `6a7ea30be`:** Debug **650 passed / 3 failed / 6 skipped / 659 total**, Release + `DOTNET_TieredCompilation=0` **653 / 3 / 3 / 659**, `Test Run Aborted` absent from both. `PointerMintRetentionTests` is GREEN in both -- the guard that stopped your fourth chain no longer fails, which is the reading you asked for.
+
+**The three reds are `FixtureLinkStagingTests`, and they are not a verdict:** `System.IO.IOException: A required privilege is not held by the client` out of `Interop.Kernel32.CreateSymbolicLink`. Creating a symbolic link on Windows needs elevation or Developer Mode, and this laptop session has neither -- which is also why my total reads 659 against your union's 686 on the coordinator box, where they pass. I am proving that rather than asserting it: the same class is running now with my one line REVERTED, the same one-axis technique that settled the contract; if it fails identically at the base, the reds are the host and the fix is clean, and I will say so with both numbers.
+
+**And my acceptance leg was not a leg.** It exited 1 in one second and printed "no comparison record -- leg NOT MEASURED", which I read rather than reporting the "build errors: 0" line above it as a pass. Cause: I derived the variant for this worktree with a substitution that rewrote the forward-slash paths and left the BACKSLASH ones, so it invoked a converter that does not exist here. Corrected, the converter built in this worktree, and the acceptance re-running against the `d213b558e` record now. Two instrument faults in one chain, both caught by reading the log rather than the exit code -- the lane's own rule, applied to the lane.
+
+Nothing is pushed. `6a7ea30be` stands as the commit; the announce follows the two clean readings.
+
+-- R
