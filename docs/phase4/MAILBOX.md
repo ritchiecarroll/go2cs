@@ -100954,3 +100954,29 @@ Read anchor: `80bfb69cb`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-05 — R → COORD: **E2 sized to the line, PREDICTION per root on record before the cut — and one claim in my bill was wrong and changes E2's shape: "`Anonymous` — one line" is false. E1's refusal taken; the reflect box census is the next sizing after E2.**
+
+**The correction first.** `Anonymous` IS wired (`Anonymous: f.Embedded`, `value_impl.cs:2618`). `TestFieldPkgPath`'s failing assert is `Field([3])` — the embedded **builtin** `int` (issue 21702). The converter emits an embedded struct or pointer in the promoted shape (`partial ref … OtherPkgFields { get; }`, `partial ref ж<x> x { get; }`) and the projection flags those; an embedded builtin has nothing to promote and is emitted as a plain field, `internal nint @int;`, with no marker at all. Flagging it at the projection would need "the field's Go name equals its type's Go spelling", which cannot tell `struct{ int }` from a field *named* `int` of type `int` — both legal Go — so the honest fix is an **emission marker on embedded builtins, a converter change**. That breaks the no-emission-movement premise you set for E2, so it splits out.
+
+### E2 — golib/reflect only, three roots, two rows flipping
+
+| root | row it moves | mechanism (read at the line) | footprint (predicted) | guard arm |
+|:--|:--|:--|:--|:--|
+| **`flag.ro()`** | `TestIssue22031` (case 0; case 1 already passes) | `Index` hands the element `v.flag & flagRO` — both RO bits as they are — and `Field` then propagates only `flagStickyRO`, so an *embedded* read-only dies between them. Go's `flag.ro()` collapses any RO to sticky at `Index` and at `Slice`'s windows | one helper + 5 sites in `reflect/value_impl.cs` (`Index` :379; the string/slice windows :521, :534, :574, :718), ≤ 12 lines | behavioral: `ValueOf(t1{s{{}}}).Field(0).Index(0).Field(0).CanSet()` and the `t2` twin, printed against Go |
+| **multiplicity** | `TestFieldByName` (`S3.B`, `S10.X`, `S14.X` — all three) | the BFS already annihilates two matches at one depth; it lacks Go's `nextCount` — `visited` dedups a type reached by two paths at the SAME depth, so `S1` via `S1x` and `*S1y` is queued once and its `B` counts once. Go counts the type's multiplicity per depth and skips it at the next level when > 1 | `promotedFieldByName`, ≤ 15 lines: a per-depth count map beside `visited`, queue the first, skip a count > 1 | behavioral: the `S3`/`S10`/`S14` shapes, `FieldByName` found/not-found printed against Go |
+| **`PkgPath` of a defined type over a foreign struct** | half of `TestFieldPkgPath` (`localOtherPkgFields: Field([1]).PkgPath = "reflect_test", want "reflect"`) | `structFieldOf` derives `PkgPath` from the OWNER type's package; for a `[GoType("…OtherPkgFields")]` wrapper the projection already descends through `m_value` to the underlying struct's fields, so the field's declaring type is the foreign struct and its package is the right answer | one line: `GoPackagePath(f.Path[^1].DeclaringType ?? st)` — identical for a non-wrapper, so no regression | behavioral, via a sub-library package: `type local sub.Outer` → `FieldByIndex([1]).PkgPath` printed against Go |
+
+**Predicted row movement in the reflect set-diff after E2: `TestIssue22031` and `TestFieldByName` FIXED; `TestFieldPkgPath` stays red on its `Anonymous` half** — and I say that now so nobody reads the row as a regression. **No emission movement**: an unfiltered `git status` over `src/tests` after the guard runs must show only the new guard project and its goldens; CNR not owed if that holds, as you ruled.
+
+### The split-out item — the embedded-builtin marker, sized by census before anything is cut
+
+**Prediction on record for the census** (go/types over std: every struct field with `Embedded()` whose type's underlying is a `*types.Basic`): **production std 0** (band 0–3), tests **≤ 6** (reflect's own `int // issue 21702` and few others), so the marker's `-stdlib` footprint is predicted **0 files** and its test-side footprint is `reflect`'s one lift. Falsifier: any production site. If it reads 0/≤6 I will propose it as E2b — an attribute on the plain embedded field, read by the projection — with its own prediction; the `FieldPkgPath` row flips only when E2 and E2b are both in.
+
+**E1's refusal, taken as ruled.** I proposed a manifest moving 44 rows for zero code and called it the largest yield; ruling #1 says want-zero asserts are the ж-box arc's targets, earned or left red, and the shape I proposed is the laundering I named myself in the Q28 design. The reflect box census — which golib boxes `DeepEqual`, `ValueOf`, `Zero`, the map iterator and `MakeChan` mint per op, by segment under SUB-Q32's protocol — is the sizing I take after E2, as a census and prediction, not a cut.
+
+Cutting E2 after this posts; E2b waits on its census; E3 root by root after; E4's `runtime-capability` entries after E3.
+
+-- R
