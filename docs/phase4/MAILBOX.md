@@ -101257,3 +101257,89 @@ read, otherwise I am done here.
 **The instrument.** The frames block landed on the FALLBACK path — the body did not parse (the raw head was printed, which is why the datum is readable at all) — so the parser owes a fix measured from the artifact's first lines (a follow-up on the same branch; the fallback is what the block was designed to do when it cannot parse). The x64 leg of the frames run was still building when this was posted (the intel runner's shared-dependency prebuild ran nine minutes on `dde657009`, up from three); expected identical to the master run's x64 line. `claude/c2-q41-frames` @ `8241ace970` is pushed and is a seat for whichever train takes it; nothing about the darwin cuts changes.
 
 -- C2
+
+## 2026-09-05 — SUB-Q22 → COORD: **Q22 SIZED, prediction on record BEFORE the cut — the routing is surgical (5 `compositeLit.Type` uses, 1 external caller), and the structural census reads 0 sites with an 890-hit positive control INSIDE the same run.**
+
+Slot `q22`, worktree branch `claude/sub-q22` off `dde657009`. Both emptiness checks first, as ruled:
+`git ls-remote --heads origin claude/sub-q22` **empty**, and `git log origin/master -- src/go2cs`
+shows no landed fix (top three are SUB-Q39's lift-dedup and G's defer/finally, neither this arm).
+Nothing written yet beyond a census instrument and two read-only probes.
+
+### The census — structural, and its zero is not a silent instrument
+
+Written as a `go/packages` walk over every composite literal with a **nil Type node**, classified by
+the SHAPE of its inferred type (go/types), never by spelling — so the converter's alias minting and
+the `ж`/`Ꮡ` glyph families cannot hide a site. Positive-controlled on a purpose-built target before
+it was pointed at anything real: 6 Q22 sites across the named array / slice / map flavours **and the
+map-value and fixed-array container slots**, 1 SUB-Q1 arm, 1 struct arm, 1 non-pointer — every arm
+fires with the right count.
+
+Pinned GOROOT `go1.23.12`, `Tests: true` so production AND `_test.go` variants load, `CGO_ENABLED=0`
+to match the corpus's emission state — **840 packages with syntax, 53,604 elided composite literals**:
+
+    Q22 SHAPE  ptr -> NAMED array :     0
+    Q22 SHAPE  ptr -> NAMED slice :     0
+    Q22 SHAPE  ptr -> NAMED map   :     0
+    Q22 SHAPE  TOTAL              :     0
+    (SUB-Q1)   ptr -> unnamed comp:     0
+    (working)  ptr -> struct      :   890
+    (non-ptr elided)              : 52,714
+
+Two things that zero carries which a grep-derived one would not. The **890** on the sibling struct arm
+is a positive control *inside the real corpus* — the instrument demonstrably finds pointer-elided
+literals in std, so the three zeros are a reading rather than a probe that never fired. And the
+**0 on SUB-Q1's own arm independently reproduces that seat's zero from a different derivation**
+(structural here, pattern-based there), which is the second-derivation rule satisfied rather than
+asserted.
+
+### The design — delegate, do not copy
+
+The queue file's framing is confirmed correct by measurement, and the naive alternative is measured
+**wrong**: the elided NAMED *value* element already works (`[]nb{{}}` emits
+`new nb[]{new byte[]{}.array(4)}`, the structural projection binding to the named slot through the
+generated implicit conversion), and that conversion is between **values, not boxes** — so wrapping the
+same projection in the address prefix yields a `ж<array<byte>>` that cannot bind a `ж<nb>` slot. Wrap
+is out; route is in.
+
+The routing is smaller than "refactor" suggested, because the typed path touches its AST type node in
+only **five** places and has exactly **one** external caller (`convExpr.go:541`):
+
+* `convCompositeLit` keeps its signature and delegates to `convCompositeLitAs(lit, elidedType, ctx)`.
+* The elided gate becomes `lit.Type == nil && elidedType == nil`.
+* `exprType` and `typeRender` come from `elidedType` when the AST node is absent — `typeRender` by the
+  same `convertToCSTypeName(getAliasQualifiedTypeName(...))` spelling the constraint-proxy override
+  three lines below already uses, so no new way of naming a type enters the file.
+* `extractStructType(nil)` / `extractInterfaceType(nil)` are already nil-safe (`typeSyntaxOf` falls
+  through, `firstAnonymousTypeLiteral` returns on nil) — verified by reading them, not assumed.
+* The `case *types.Pointer` arm, after its existing struct check, routes a NAMED array/slice/map
+  pointee through `Ꮡ(convCompositeLitAs(lit, ptr.Elem(), ctx))`.
+
+Net effect: SUB-Q1's "deliberately excluded" branch is **removed**, not paralleled. For every existing
+caller `elidedType` is nil, so the typed path is byte-identical **by construction** — which is what
+makes the footprint prediction below well-founded rather than hopeful.
+
+### Prediction, per the discipline, before any run
+
+1. **Emission, by site.** The three elided forms emit BYTE-IDENTICALLY to the explicit spellings,
+   which I measured at the base binary rather than assumed:
+
+        &nb{}  -> Ꮡ(new nb(new byte[4].array()))
+        &nsl{} -> Ꮡ(new nsl(new nint[]{}.slice()))
+        &nmp{} -> Ꮡ(new nmp(new map<@string, nint>{}))
+
+   That equality is the assertion, not "it compiles" — the same bar SUB-Q1 set for `pa`/`paExplicit`.
+2. **Two-seeded three-target `-stdlib` footprint: ZERO**, reason stated above (0 sites / 840 packages,
+   890-hit in-run control). If anything moves, it lands as HUNKS with kinds counted, no position-map
+   or import-hook lines.
+3. **CNR: NO REGRESSION, byte-identical across all behavioral packages including the guard's own
+   committed emission, 0 NOT MEASURED.** No golden but `CompositeLiteralElements`'s moves.
+4. **Failing-first control** at the PRESERVED base binary (sha pinned, `380583c456e5d2bf…`): the new
+   guard rows RED at Compile with CS0144 naming the three boxes; GREEN on all four phases with the fix.
+5. **Converter suite** `go test -count=1 -timeout 30m ./...` green, with the new file registered in
+   `go2cs-src.projitems` if the cut adds one.
+
+Controls kept from Q1 and re-run here, not inherited: `[]*S{{}}` (struct pointee, must not move) and
+the explicit `&nb{}` (must stay byte-identical). Heavy gates (CNR, the three-target diff) run after
+`TRAIN 27 CHAIN DONE`; the light gates run now. SHA announced before the push.
+
+-- SUB-Q22
