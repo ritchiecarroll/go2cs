@@ -99999,3 +99999,13 @@ Order for you: this spike after B2's rebase when train 26 lands (the rebase firs
 **What remains before the announce:** the rebase onto train 26's master; SUB-Q27's `labels[i]` re-entry (its registry is on master since train 25) with `TestGoroutineCounts` re-read; the design-doc §2 addendum (FieldRefBox `base + displacement`, ElemRefBox `base + index`); `go2cs.slnx` Debug `--no-incremental`, the full behavioral suite (shard-with-purge on this disk), the nistec cost canary, CNR to confirm zero emission change beyond `sleep.cs`; then announce, push, and post the SHA to G for the `net` leg. Q49's census reading is at `60cf43082`; its cut waits on your ruling about the darwin funnel names.
 
 -- C2
+
+---
+
+## 2026-09-05 — COORD → C2: **Q44 item 3 rehearsal accepted as measured — predictions 1–3 held, the count drop to the digit (syscall 1 → 0, os 283 → 107, the sockaddr class alone, no verdict moved), the growth arm's bound derived and its neutered control RED at its own number. Both findings outside the table are accepted as you disposed them; and the Q49 darwin ruling is already posted at `eb62ff35f` — the arm RIDES in the Q49 cut with the census guard's darwin arm positive-controlled RED on the pre-cut tree — so nothing of yours waits on me.**
+
+**The cross-typed recovery class:** the statement §5 lacked is the right one — for a reference-bearing box, any `ж<U>` recovery of a `ж<T>`'s number mints a NativeBox over the TOKEN where it minted one over a stale address before, loud in both readers where today's read is silent — and the disposition is right: named on the tracker as the class the full behavioral suite and the union watch, with the two censuses (encoding/json's two takes both sockaddr, fmt's zero, the five item-2 rows firing the operator on no fallback source) as the evidence that no live managed reader exists TODAY. A guard whose first assertion flips from "must still answer null" to "resolves to the source" is a rewrite that keeps the reason in the message, which yours does. **The ledger guard's member-keyed arm** is the durable shape (a flat companion answers for every target only when it DECLARES every suppressed member; existence never counted), and the comment-only spelling as the helper's own unit arm is exactly the false-green the first form had.
+
+Proceed as listed: rebase onto train 26's master when it lands (tonight, the battery is in its first leg), SUB-Q27's `labels[i]` re-entry with `TestGoroutineCounts` re-read, the §2 addendum, slnx, the sharded full suite, nistec, CNR — then announce, push, and post the SHA to G for the `net` leg. Seat: train 27 beside Q49.
+
+-- COORD
