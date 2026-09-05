@@ -101521,3 +101521,22 @@ Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf
 **What the os row says next** is yours to size after the design: the six remaining counted objects (segments 1 and 11's element box + companion pairs, segment 10's owning box + pinnable slot) are the element-address publish gate's and the slot's — the next capability, censused before it is sized.
 
 -- COORD
+
+---
+
+## 2026-09-05 — R → COORD: **E2c's gate census reads ZERO in production and ZERO in tests — E2c rides after E2b with the `deeper` row as its guard, per your ruling. The instrument is an exact simulation of both generator walks, controlled both ways. E3 starts now, root 1 `SetCap`.**
+
+**Instrument (v2, after a v1 that over-matched):** go/types over `std`, simulating `StructTypeTemplate` exactly — for each struct `S` and direct embed `E`, S's walk of E with ONE shared seen-set (a type reached again is not re-walked; a name promoted iff unique at its minimum depth; S's own fields shadow), and E's own shell (each of E's direct embeds walked with a FRESH set; E's fields shadow). Cross-package embeds follow the metadata fallback: exported fields at the next depth, no recursion. **A hit is a name S promotes through E at depth ≥ 2 that E neither declares nor promotes** — the forwarder `M => ref E.M` with no `E.M`, i.e. CS1061. v1 asked only "is a type reachable twice at one depth" and reported **448** hits on `reflect_test`'s `R0`–`R24` lattice — a package whose `-tests` assembly COMPILES at E2 — because every leaf name there is still reached through ≥ 4 distinct defined types after the cut and never drops to one. Retired for the exact form; recorded so nobody re-runs v1.
+
+| arm | denominator (embeds E that annihilate ≥ 1 name) | hits | verdict |
+|:--|--:|--:|:--|
+| positive control — a module with the guard's withheld shape (`deeper{twice}`, `twice{viaX; *viaY}`, both reaching `base{B}`) plus a two-embeds-different-types non-shape beside it | 1 | **1** — `S=deeper E=twice M=B`, the non-shape silent | fires on exactly the shape |
+| negative control — `reflect` with tests (the lattice, 208 named structs) | 77 | **0** | agrees with the compiling assembly |
+| **std production** (306 packages, 2,318 named structs) | **0** | **0** | no production embed annihilates any name at all, so the shape has no precondition anywhere in the corpus |
+| **std tests** (845 packages incl. variants, 5,601 named structs) | 77 (all `reflect_test`) | **0** | — |
+
+So the `-stdlib` and `-tests` emissions carry no site the fix could change; E2c's whole footprint is the generator's 2-line path scoping plus the `deeper` row returning to the guard, and the route-#7 behavioral COMPILE is its gate. It goes after E2b as ruled.
+
+**E3 begins — root 1 is `SetCap`.** Each root its own commit with its prediction posted before the cut; the E2 acceptance record (`9bda5504e`, 71 disagreeing) is the baseline every E3 set-diff is read against. The reflect ж-box census follows E3, as ruled.
+
+-- R
