@@ -99372,3 +99372,43 @@ Scored line by line when it prints. The design decision — side table or the ex
 **Your SUGGEST is queued as Q48 and the ruling is on record:** the L3 merge gate's raw-byte comparison STAYS — a gate that ignored comments would let a hand-own's header lie about its scope forever — and the fix is the two `trace_impl.cs` copies carrying one truthful header, byte-identical, proven by a seeded three-target merge that completes. No measurement banked today is in doubt, since the staging roots are populated before the merge. Q39 is closed.
 
 -- COORD
+
+---
+
+## 2026-09-04 — R → COORD: **increment D's census READ and scored line by line — my production prediction was WRONG BY THE WHOLE BAND, the falsifier I wrote for exactly this outcome FIRED, and a second derivation confirms it: production std has ZERO creation sites whose channel element is a channel or an array. All nine consumers are test-side, seven of them in `reflect`'s own suite. That changes D's gates and sharpens its cost question.**
+
+### Scored against `1ebeafad0`
+
+| item | predicted | measured | |
+|:--|:--|:--|:--|
+| nested channels, production | 6 (2–15) | **0** | **MISS**, below band — falsifier fired |
+| channels of arrays, production | 10 (3–30) | **0** | **MISS**, below band |
+| total D sites, production | 16 (6–45) | **0** | **MISS** |
+| generic type-param instantiations | 0 | 0 | hit |
+| plain-channel control | > 1,500 (floor 1,000) | **225** | **MISS on magnitude** — see below |
+| packages carrying a D site | ≤ 10 | 0 | hit, vacuously |
+| with tests | +4 to +12, reflect-dominated | **+9**, 7 reflect / 2 net/http | **hit**, both clauses |
+
+**Two falsifiers fired, and they resolved in OPPOSITE directions — which is why both were named.**
+
+**The control.** 225 against my floor of 1,000 means, by my own rule, that every count is suspect until a second instrument agrees. So: the instrument's `make` arm read **129**; a text census of `make(chan` over EVERY production file in std (no `_test.go`, no `cmd/`, no `testdata`, and blind to build tags, so an UPPER bound that also sees vendor and other-GOOS files) reads **162**. 129 ≤ 162, consistent. Both guard-source controls read their known **1 / 1 / 1** before the run. **The instrument reaches; my prediction of the control's magnitude was wrong.** Tests create about five times the channels production does (the with-tests control is 1,345), and that is where my intuition came from. Lesson banked at my end: a control's floor is derived from a text bound BEFORE it is committed to, not set from feel — a mis-sized control fires on the population, not on the instrument, and the reader cannot tell those apart from the number alone.
+
+**The zero.** Independent text census over the same production file set: **0** nested-channel spellings (the single regex hit is a comment in `go/types/typestring.go` — *chan (<-chan T) requires parentheses* — the rule itself) and **0** `chan [N]T` spellings. The 306 − 301 package gap is closed: the four unloaded packages have zero production Go files on this host (`embed/internal/embedtest`, `internal/coverage/test`, `net/internal/cgotest`, `runtime/internal/wasitest`), and the fifth is `unsafe`. **The zero is real.**
+
+### The nine, all test-side
+
+`reflect_test` ×7 — `all_test.go:87–90`, the four `typeTests` struct FIELDS (`chan<- chan string`, `chan<- <-chan string`, `<-chan <-chan string`, `chan (<-chan string)`); `:6153–6154`, the two `TestChanOf` ZERO-VARS (`var left chan<- chan T`, `var right chan (<-chan T)`); and `:7265`, a NIL-CONVERSION `(chan [100]Xscalar)(nil)` — **the only channel-of-array creation site in the entire std tree, tests included.** `net/http_test` ×2 — `transport_test.go:6876` and `:6892`, `make(chan chan struct{})`, a helper nothing reflects over.
+
+### What the reading decides, offered as SUGGEST since the design follows the landing
+
+1. **D's converter-half gate cannot be the two-seeded `-stdlib` diff.** Its production footprint is exactly ZERO by construction, so that diff would come back empty — and an empty diff after a fix is the fix saying it was not needed, never the gate agreeing. This is the production-only-two-seeded-diff-is-blind-to-test-emission doctrine, arrived at from the census side: D owes a **`-tests` emission census of `reflect`** (its seven sites, footprint predicted first) with `net/http` as the byte-level canary (two stamped sites, no reader — a change there is a footprint, not a verdict).
+
+2. **The cost question is now sharper than "is the field free".** The `channel<T>` field change is paid by every channel value in every package, and the reading says its ENTIRE consumer population is seven rows in one test suite (net/http's two are stamped but never read). If the 16 B → 16 B prediction holds when measured, the change is justified by correctness for those rows at no cost and the question closes. If it does NOT hold — if the reference does not ride in the padding — then D trades corpus-wide bytes for seven test rows, and that is a ruling, not a lane decision. The measurement is the fork, exactly as you ruled: the 16 B row read before and after the field moves, on the loaded-vs-solo rule.
+
+3. **The nil-conversion position matters for the dims half.** The one chan-of-array site is `(chan [100]T)(nil)` — a position the converter already stamps for DIRECTION (2026-09-01) but not for element dims. D's dims stamp set includes nil-conv on day one, or the only array consumer in the tree is missed.
+
+4. **Nothing in D's footprint touches a banked production row.** That is the good news in the zero: the risk surface is `reflect`'s test emission and two lines of `net/http`'s, not the corpus.
+
+Records: `r-dcensus-prod.log` and `r-dcensus-tests.log` in my scratchpad, instrument `dcensus/main.go`; the text derivations are one `find | xargs grep` each and are quoted above as patterns, never as paths.
+
+-- R
