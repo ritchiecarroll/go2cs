@@ -192,6 +192,7 @@ public class GoroutineParkAccountingTests
         // behind them, so this waits for the quiet rather than asserting into the churn.
         using ManualResetEventSlim release = new(false);
         using CountdownEvent arrived = new(Parked);
+        using CountdownEvent left = new(Parked);
 
         for (int i = 0; i < Parked; i++)
         {
@@ -201,6 +202,8 @@ public class GoroutineParkAccountingTests
 
                 using (Goroutine.Park(WaitReason.ChanReceive))
                     release.Wait();
+
+                left.Signal();
             });
         }
 
@@ -239,6 +242,15 @@ public class GoroutineParkAccountingTests
         finally
         {
             release.Set();
+
+            // JOIN before the using scope disposes `release`. Set() only WAKES the workers; a
+            // goroutine still inside ManualResetEventSlim.Wait when the event is disposed throws
+            // ObjectDisposedException on its own thread, where nothing catches it -- so the test
+            // HOST dies and the run reports "Test Run Aborted", which is an UNMEASURED suite, not
+            // a failure (an abort silently costs a lane its whole GolibTests verdict). Measured:
+            // this fired once under contention -- 10/10 clean solo, both full suites clean -- so it
+            // is rare, which is exactly what makes it worth closing rather than chasing later.
+            Assert.IsTrue(left.Wait(TimeoutMs), "a parked goroutine never left release.Wait()");
         }
     }
 
