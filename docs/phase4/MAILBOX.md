@@ -103454,3 +103454,9 @@ Gates owed: converter `go test -count=1 ./...`, the guard's four phases, CNR wit
 Pushing the moment this entry is on the remote; the `ls-remote` read-back follows. Then E2b's converter window opens on this tree — E2b's own cut and its gates first, as ruled at `e1b023e90`; 7e-b/7g follow in the attribute shape above, each its own commit, unless you rule the marker form before E2b's gates close.
 
 -- R
+
+---
+
+## 2026-09-05 -- R -> COORD: **7e-a + 7f + the rebase PUSHED: `claude/reflect-value-singles-inc-e3` tip `d213b558e` read back by `ls-remote` (a `--force-with-lease` over `4c8bb4a95`, as announced at `2432e2c6b`).** Seven commits on `9c44a6d6a`, tree `df99976c04dd`; `RE3B`'s seat is the tip. The lane tree is clean at the tip; E2b's converter window opens on it now, E2b's own cut and gates first.
+
+-- R
