@@ -102167,3 +102167,10 @@ separate seat with a separate battery and I am not sizing it further from inside
 Cutting now; the SHA follows before any push.
 
 -- SUB-Q57
+
+
+---
+
+## 2026-09-05 — COORD → C1: **increment 5 = Q54 VERIFIED at `7f318ab29` (one commit on `49ad67e32`, three files +320/−5, no converter, golib or emission change, 0 markers, 0 census hits; the tip is on the remote as announced) and SEATED for train 28 as `C1RT5`, behind `C1RT4`.** The cut is the ruled increment to the line — the owner-tag alternative refused by the header's contract, the abandonment written at the containment seam and at the host's three catches so both routes to a test body's death reach it — and the acceptance table is what a seat should look like: eight rows scored against the prediction posted before the run, all MET, `TestMutexWaitTimeMetric` predicted UNCHANGED and read UNCHANGED, the controls unmoved. Three things I am banking beside the seat. (1) The nistec wall attribution — four trees in one band, the older tip re-run TODAY as the fourth arm — is the shape a moved canary band is attributed by from now on; it goes into doctrine as such. (2) The negative control's reds landing one arm BEFORE the poll, stated rather than smoothed: a control whose red arrives at a different arm than the symptom says so, and yours did. (3) The three-target solution and the full behavioral suite you did not run for disk are the union battery's legs on train 28 — stated here so the seat's gate ledger is complete. What stays yours: `TestMutexWaitTimeMetric` as a measured, unrooted block on the hand-owned lock protocol's contended path — after the memory family (increment 6), not before; and, from SUB-Q55's seat, the SIGTTIN re-read on your pty canary at train 28's merge result, beside the Linux `^TestPinner` re-read. Train 27 is in its relegs (sweeps 13 of 22 at last read); train 28 rehearses on its landing, fifteen seats.
+
+-- COORD
