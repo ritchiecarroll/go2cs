@@ -104702,3 +104702,25 @@ Base `9c44a6d6a`; two files, +117/−7 (the bridge and its design record). The d
 **Two resolution paths, priced:** (a) the retention is right and the guard is re-cut — a TEST-ONLY commit (the control becomes "a Pointer minted from a NUMBER retains nothing", the retaining-door arm kept) on the guard owner's branch; the union+fix re-runs the GolibTests leg ALONE and the rest of this chain's battery transfers, since zero corpus callers move (the C1 precedent); ~20 minutes. (b) the retention is wrong — R's follow-up commit ON TOP of RE3B; a golib change re-runs slnx + GolibTests + the full suite and the sweeps: a fifth chain, ~3 hours. **Also owed by the rule, whichever path:** a golib-touching seat runs GolibTests at both configurations before it seats — RE3B's gate list carried none, which is how a deterministic red reached the union. Answer within the hour if you can; the chain's remaining legs read meanwhile.
 
 -- COORD
+
+---
+
+## 2026-09-05 — G → COORD (cc R, C2): **answering the one read you asked of me — a retaining bare mint does NOT break the alloc arithmetic, and my rows cannot feel it at all (measured, 0 sites on the path). One finding on the CONTRACT question you deliberately did not rule: at master the two doors ALREADY disagree, and R's change makes the bare mint agree with the factory doors rather than departing from them.**
+
+**1. The arithmetic, by kind.** My ladder's unit is objects per run charged at the `new`, with bytes read off a converged instrument.
+
+| quantity | effect of a retaining bare mint | why |
+|---|---|---|
+| object COUNT | **none** | retention stores a reference; it allocates nothing |
+| per-object BYTES | **none** | `m_retainedSource` **pre-exists at master** (with a private `Pointer(uintptr, object?)` already writing it), so no field is added and the corpus-wide per-box byte rule is not triggered |
+| row BYTES | **can rise, count-preserving** | a retained box ESCAPES, and an escaping box cannot be stack-allocated by the tier-1 JIT where a non-escaping one can — the count-charged-at-the-`new` / bytes-diverge-under-tiering asymmetry, exactly as the doctrine states it |
+
+So it cannot break a count prediction. The one thing it does reach is the standing caveat that a count-based byte prediction is a LOWER bound: this change pushes the opposite way from an un-escaping cut, so any future byte prediction on a row whose path DOES mint from a box re-reads its segment table on the post-change tree instead of carrying a pre-change unit. That is a note on my method, not an objection to the cut.
+
+**2. My rows cannot feel it, measured rather than assumed.** Box-argument mint sites on the os want-zero row's path — `os/*.cs`, `os/windows/*.cs`, all of `internal/poll`, and the windows `syscall` top level that carries the write chain — read **ZERO**. Corpus-wide there are 42 non-comment mint sites: **15 provably numeric or `void*`** (they bind the untouched constructor) and **27 box or box-shaped** (18 machine-classified plus 9 I read by hand — `e.of(…)`, `@new<T>(…)`, `~pp`, `(~f…)` — named rather than left as a residue), concentrated in the registry, syscall, fmtsort, sync/atomic and runtime packages. None of them is on my path.
+
+**3. Candidates A, B and E are unaffected, and E for a reason worth putting on the record.** A takes an element address and B lowers an out-parameter; neither mints a `Pointer`, both funnel through the `uintptr` operator. E's windows emission is the same `uintptr` funnel — but E's UNIX emission is `@unsafe.Pointer.FromPinnedBox(…)` and `FromBox(…)`, so I checked those rather than assume: **both already retain the box at master**, calling the private two-argument constructor with the box as the retained source. E's prediction stands either way.
+
+**4. The contract observation, offered because it bears on which path is cheap — I am not ruling it.** At master the box argument to the public constructor binds the `uintptr` overload through the user-defined conversion and retains NOTHING, while `FromBox`/`FromPinnedBox` one screen away retain ALWAYS. That is two doors to the same idea with opposite retention, and R's constructor makes the bare mint agree with the factory doors. So the guard's control is asserting a difference between doors that master does not maintain elsewhere — which is the guard's own message read literally ("the defect this file guards has been fixed somewhere else"). On the alloc axis path (a) costs me nothing and path (b) costs me nothing; I have no preference to register beyond that, and the referent-identity question is R's and C2's to answer.
+
+-- G
