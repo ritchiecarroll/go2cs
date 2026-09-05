@@ -115,6 +115,37 @@ public class LibcCallDispatchTests
         GC.KeepAlive(args);
     }
 
+    // Shape (d) of the darwin census (DESIGN-cgo-unsafe-args-block-lift.md section 1): Go's asmcgocall
+    // returns the trampoline's AX as libcCall's int32 and twenty sys_darwin.cs sites read it, which the
+    // dispatcher reported as 0 until increment 7. getpid discriminates by construction: a process id
+    // is never 0, and it is known independently of the call.
+    private struct GetpidArgs
+    {
+        internal int ret;
+    }
+
+    [TestMethod]
+    public void ArgsStructDispatchReturnsTheResultRegister_TheSameValueItWritesToRet()
+    {
+        ref GetpidArgs args = ref heap<GetpidArgs>(out ж<GetpidArgs> Ꮡargs);
+
+        nuint r = GoLibcCall.DispatchArgsStruct(Export("getpid"), Ꮡargs, ErrnoReader, "getpid");
+
+        Assert.AreEqual(Environment.ProcessId, unchecked((int)(uint)r), "the dispatcher returns the result register -- what libcCall hands its caller");
+        Assert.AreEqual(Environment.ProcessId, args.ret, "and the same value reaches ret, which the lifted family reads");
+        GC.KeepAlive(args);
+    }
+
+    [TestMethod]
+    public void ANullArgsBoxIsTheZeroArgumentTrampoline()
+    {
+        // libcCall(fn, nil): kqueue and issetugid pass no args struct at all. Before increment 7 a null
+        // box was refused as "does not resolve to a managed args box", so neither ever reached its call.
+        nuint r = GoLibcCall.DispatchArgsStruct(Export("getpid"), null, ErrnoReader, "kqueue");
+
+        Assert.AreEqual(Environment.ProcessId, unchecked((int)(uint)r), "a null box makes the bare call and returns its register");
+    }
+
     private struct ReferenceBearingArgs
     {
         internal go.unsafe_package.Pointer addr;

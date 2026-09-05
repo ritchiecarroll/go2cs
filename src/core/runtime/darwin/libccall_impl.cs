@@ -46,6 +46,22 @@
 // sigaction_impl.cs is the first remedy (the seam marshals both pointers natively); the class is
 // a separate ruling, recorded on the board.
 //
+// SHAPE (d), THE DISCARDED RESULT (increment 7, 2026-09-05, the Q56 census). Go's asmcgocall hands
+// the trampoline's AX back as libcCall's int32, and TWENTY converted sites read it -- `var ret =
+// libcCall(...)` / `return libcCall(...)`: pthread_attr_init, pthread_attr_getstacksize,
+// pthread_attr_setdetachstate, pthread_create, closefd, open, sysctl, sysctlbyname, kqueue, kevent,
+// pthread_mutex_init/lock/unlock, pthread_cond_init/wait/timedwait_relative_np/signal, issetugid,
+// mach_vm_region, proc_regionfilename. This file returned 0 for all of them on the belief, stated
+// in its own old comment, that no caller read the result. What that cost TODAY, read against the
+// shapes above: closefd reported success unconditionally and kevent answered 0 events (the two
+// reading sites that dispatch at master); the two sites that pass a NIL args pointer -- kqueue and
+// issetugid, the zero-argument trampolines -- never reached their call at all, refused here as
+// "does not resolve to a managed args box"; the other sixteen are refused by type (shape (c)) or
+// misplaced (shape (a)) before the result matters, and become real readers only under the lift.
+// Both fixed below: the dispatcher returns the register and takes a null box as the bare call;
+// libcCall returns the low 32 bits. Guarded on glibc by LibcCallDispatchTests -- getpid
+// discriminates by construction.
+//
 // WHAT IS REFUSED, LOUDLY AND BY NAME, NEVER WITH A DEFAULT. An argument whose number resolves to
 // no box (a reference-bearing args struct — mmap_args, mach_vm_region_args, proc_regionfilename_args
 // carry managed pointers and have no pinnable storage, so they never register), a field the
@@ -79,9 +95,11 @@ internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
 
     string symbol = GoCgoDynamicImports.SymbolOf(entryPoint) ?? $"0x{entryPoint:x}";
 
+    // A nil args pointer is Go's zero-argument trampoline (kqueue, issetugid): nothing to resolve;
+    // the dispatcher makes the bare call and the register is the whole outcome (increment 7).
     object? argsBox = arg == nil ? null : ManagedPointerTokens.Resolve((nuint)(uintptr)arg);
 
-    if (argsBox is null) {
+    if (arg != nil && argsBox is null) {
         throw new InvalidOperationException(
             $"go2cs: libcCall({symbol}): the argument pointer does not resolve to a managed args box — " +
             "a reference-bearing args struct has no pinnable storage and cannot be dispatched by layout; " +
@@ -92,11 +110,13 @@ internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
         s_libcCallErrnoReader = GoCgoDynamicImports.Resolve("__error", libSystemPath);
     }
 
-    GoLibcCall.DispatchArgsStruct(entryPoint, argsBox, s_libcCallErrnoReader, symbol);
+    nuint r = GoLibcCall.DispatchArgsStruct(entryPoint, argsBox, s_libcCallErrnoReader, symbol);
 
-    // Go's asmcgocall returns the trampoline's AX; no caller in sys_darwin.cs reads libcCall's result
-    // (each reads its args struct instead), so 0 is what the converted callers already discard.
-    return 0;
+    // Go's asmcgocall returns the trampoline's AX as libcCall's int32 -- its low 32 bits, the MOVL
+    // rule -- and twenty callers in sys_darwin.cs read it (the header's shape (d)); the lifted
+    // family reads args.ret as well, which the dispatcher has already filled. Until increment 7 this
+    // returned 0 on the belief that no caller read it.
+    return unchecked((int32)(uint32)r);
 }
 
 } // end runtime_package
