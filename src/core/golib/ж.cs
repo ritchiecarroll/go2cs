@@ -657,6 +657,21 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
             return dataAddr;
         }
 
+        // A REFERENCE-BEARING pointee has no pinnable slot (StandardBox keeps it in m_val, a field of
+        // this box object), so there is no storage to hold still and `fixed` would hand out the
+        // address of a movable heap object — the number SUB-Q42's witness measured going stale. Its
+        // stable, resolvable number is the box's own order token, the same value reflect projects for
+        // `%p` (value_impl.cs) and MintOpaque registers: registered here, `(ж<T>)(uintptr)` recovers
+        // this very box through ManagedPointerTokens.Resolve's order-token arm (ж.cs:612–622,
+        // ж.PointerTokens.cs:327) for exactly as long as something else keeps the box alive — the
+        // record's own weak-lifetime rule. docs/phase4/DESIGN-managed-pointer-token.md (Q44).
+        if (value.PinnableStorage is null)
+        {
+            nuint token = value.PointerOrderToken;
+            ManagedPointerTokens.Register(token, value);
+            return (uintptr)token;
+        }
+
         // Hold the storage still BEFORE reading its address: `fixed` pins only for its own
         // statement, and the address outlives that statement by definition.
         value.EnsureStableAddress();
@@ -691,6 +706,15 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
             void* dataAddr = value.pinnedArrayData(arr);
             ManagedPointerTokens.RegisterPinned((nuint)dataAddr, value);
             return dataAddr;
+        }
+
+        // The same reference-bearing arm as the uintptr operator above (Q44): the token, not a
+        // field address, is what a native call could later hand back to `(ж<T>)(void*)`.
+        if (value.PinnableStorage is null)
+        {
+            nuint token = value.PointerOrderToken;
+            ManagedPointerTokens.Register(token, value);
+            return (void*)token;
         }
 
         value.EnsureStableAddress();

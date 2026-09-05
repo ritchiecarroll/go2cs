@@ -21,36 +21,7 @@ public static partial void Sleep(Duration d);
 
 internal static ж<godebug.Setting> asynctimerchan = godebug.New("asynctimerchan"u8);
 
-// syncTimer returns c as an unsafe.Pointer, for passing to newTimer.
-// If the GODEBUG asynctimerchan has disabled the async timer chan
-// code, then syncTimer always returns nil, to disable the special
-// channel code paths in the runtime.
-internal static @unsafe.Pointer syncTimer(channel<Time> cʗp) {
-    ref var c = ref heap(cʗp, out var Ꮡc);
-
-    // If asynctimerchan=1, we don't even tell the runtime
-    // about channel timers, so that we get the pre-Go 1.23 code paths.
-    if (asynctimerchan.Value() == "1"u8) {
-        asynctimerchan.IncNonDefault();
-        return default!;
-    }
-    // Otherwise pass to runtime.
-    // This handles asynctimerchan=0, which is the default Go 1.23 behavior,
-    // as well as asynctimerchan=2, which is like asynctimerchan=1
-    // but implemented entirely by the runtime.
-    // The only reason to use asynctimerchan=2 is for debugging
-    // a problem fixed by asynctimerchan=1: it enables the new
-    // GC-able timer channels (#61542) but not the sync channels (#37196).
-    //
-    // If we decide to roll back the sync channels, we will still have
-    // a fully tested async runtime implementation (asynctimerchan=2)
-    // and can make this function always return c.
-    //
-    // If we decide to keep the sync channels, we can delete all the
-    // handling of asynctimerchan in the runtime and keep just this
-    // function to handle asynctimerchan=1.
-    return ~Ꮡ(new @unsafe.Pointer((uintptr)Ꮡc));
-}
+// go2cs generated this placeholder — func syncTimer is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // when is a helper function for setting the 'when' field of a runtimeTimer.
 // It returns what the time will be, in nanoseconds, Duration d in the future.
