@@ -235,4 +235,29 @@ func main() {
 	slot.Interface().(chan<- int) <- 8
 	fmt.Println("send-only slot value type:", reflect.TypeOf(slot.Interface()), " received on the original:", <-live)
 
+	// --- 7e-b: a DEFINED channel type's descriptor carries the direction its marker cannot spell (the wrapper's
+	// [GoChanDir] stamp, read by synthType ahead of its interning key): ChanDir answers, ConvertibleTo/AssignableTo
+	// answer Go's matrix, and the same type minted through the VALUE route, a SLOT route and Elem() is ONE
+	// descriptor -- the stamp decides on every route (COORD's condition at 27c307e3d) ---
+	fmt.Println("IntChanRecv dir:", reflect.TypeOf(IntChanRecv(nil)).ChanDir(), " IntChanSend dir:", reflect.TypeOf(IntChanSend(nil)).ChanDir(), " IntChan dir:", reflect.TypeOf(IntChan(nil)).ChanDir())
+	canRow := func(x, y any) {
+		fmt.Printf("%-14v -> %-14v convertible=%v assignable=%v\n", reflect.TypeOf(x), reflect.TypeOf(y), reflect.TypeOf(x).ConvertibleTo(reflect.TypeOf(y)), reflect.TypeOf(x).AssignableTo(reflect.TypeOf(y)))
+	}
+	canRow((<-chan int)(nil), IntChanRecv(nil))
+	canRow((chan<- int)(nil), IntChanSend(nil))
+	canRow(IntChan(nil), IntChanRecv(nil))
+	canRow(IntChanRecv(nil), IntChan(nil))
+	canRow(IntChanRecv(nil), (chan<- int)(nil))
+	canRow(IntChanRecv(nil), (chan int)(nil))
+	canRow(IntChanSend(nil), (<-chan int)(nil))
+	canRow(IntChanRecv(nil), IntChanSend(nil))
+	type chanSlots struct {
+		R IntChanRecv
+		S IntChanSend
+	}
+	cst := reflect.TypeOf(chanSlots{})
+	fmt.Println("IntChanRecv identity value/slot/elem:", reflect.TypeOf(IntChanRecv(nil)) == cst.Field(0).Type, reflect.TypeOf(IntChanRecv(nil)) == reflect.TypeOf((*IntChanRecv)(nil)).Elem(), cst.Field(0).Type.ChanDir())
+	fmt.Println("IntChanSend identity value/slot/elem:", reflect.TypeOf(IntChanSend(nil)) == cst.Field(1).Type, reflect.TypeOf(IntChanSend(nil)) == reflect.TypeOf((*IntChanSend)(nil)).Elem(), cst.Field(1).Type.ChanDir())
+	fmt.Println("chan slot zero re-describes:", reflect.TypeOf(reflect.Zero(cst.Field(0).Type).Interface()), reflect.Zero(cst.Field(0).Type).Type().ChanDir())
+
 }

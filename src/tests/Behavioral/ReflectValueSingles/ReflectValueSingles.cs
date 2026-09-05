@@ -62,9 +62,9 @@ internal static void convRow(@string label, any x, any want) {
 
 [GoType("chan nint")] partial struct IntChan;
 
-[GoType("chan nint")] partial struct IntChanRecv;
+[GoType("chan nint")] [GoChanDir(GoChanDir.Recv)] partial struct IntChanRecv;
 
-[GoType("chan nint")] partial struct IntChanSend;
+[GoType("chan nint")] [GoChanDir(GoChanDir.Send)] partial struct IntChanSend;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string setLen10ˢ = "SetLen(10)"u8;
@@ -159,6 +159,12 @@ private static readonly @string chanIntChanIntNilˢ2 = "<-chan int <- chan<- int
 private static readonly @string chanIntChanIntNilˢ3 = "chan<- int <- chan int(nil)"u8;
 private static readonly @string chanIntLiveIntChanˢ = "chan<- int <- live IntChan.Convert"u8;
 private static readonly object sendOnlySlotValueTypeˢ = (@string)"send-only slot value type:"u8;
+private static readonly object intChanRecvDirˢ = (@string)"IntChanRecv dir:"u8;
+private static readonly object intChanSendDirˢ = (@string)" IntChanSend dir:"u8;
+private static readonly object intChanDirˢ = (@string)" IntChan dir:"u8;
+private static readonly object intChanRecvIdentityValueˢ = (@string)"IntChanRecv identity value/slot/elem:"u8;
+private static readonly object intChanSendIdentityValueˢ = (@string)"IntChanSend identity value/slot/elem:"u8;
+private static readonly object chanSlotZeroReDescribesˢ = (@string)"chan slot zero re-describes:"u8;
 
 [GoLocalName("S")] [GoType("[]byte")] internal partial struct main_S;
 
@@ -174,6 +180,11 @@ private static readonly object sendOnlySlotValueTypeˢ = (@string)"send-only slo
 
 [GoType("dyn")] internal partial struct main_holder {
     internal ж<nint> p;
+}
+
+[GoType("dyn")] internal partial struct main_chanSlots {
+    public IntChanRecv R;
+    public IntChanSend S;
 }
 
 internal static void Main() {
@@ -368,6 +379,22 @@ internal static void Main() {
     slot.Set(reflect.ValueOf(live));
     slot.Interface()._<channel/*<-*/<nint>>().ᐸꟷ(8);
     fmt.Println(sendOnlySlotValueTypeˢ, reflect.TypeOf(slot.Interface()), receivedOnTheOriginalˢ, ᐸꟷ<nint>(live));
+    fmt.Println(intChanRecvDirˢ, reflect.TypeOf(((IntChanRecv)default!)).ChanDir(), intChanSendDirˢ, reflect.TypeOf(((IntChanSend)default!)).ChanDir(), intChanDirˢ, reflect.TypeOf(((IntChan)default!)).ChanDir());
+    void canRow(any xΔ2, any yΔ1) {
+        fmt.Printf("%-14v -> %-14v convertible=%v assignable=%v\n"u8, reflect.TypeOf(xΔ2), reflect.TypeOf(yΔ1), reflect.TypeOf(xΔ2).ConvertibleTo(reflect.TypeOf(yΔ1)), reflect.TypeOf(xΔ2).AssignableTo(reflect.TypeOf(yΔ1)));
+    }
+    canRow(/*<-*/channel<nint>.RecvOnly, ((IntChanRecv)default!));
+    canRow(channel/*<-*/<nint>.SendOnly, ((IntChanSend)default!));
+    canRow(((IntChan)default!), ((IntChanRecv)default!));
+    canRow(((IntChanRecv)default!), ((IntChan)default!));
+    canRow(((IntChanRecv)default!), channel/*<-*/<nint>.SendOnly);
+    canRow(((IntChanRecv)default!), (channel<nint>)(default!));
+    canRow(((IntChanSend)default!), /*<-*/channel<nint>.RecvOnly);
+    canRow(((IntChanRecv)default!), ((IntChanSend)default!));
+    var cst = reflect.TypeOf(new main_chanSlots(nil));
+    fmt.Println(intChanRecvIdentityValueˢ, AreEqual(reflect.TypeOf(((IntChanRecv)default!)), cst.Field(0).Type), AreEqual(reflect.TypeOf(((IntChanRecv)default!)), reflect.TypeOf(((ж<IntChanRecv>)nil)).Elem()), cst.Field(0).Type.ChanDir());
+    fmt.Println(intChanSendIdentityValueˢ, AreEqual(reflect.TypeOf(((IntChanSend)default!)), cst.Field(1).Type), AreEqual(reflect.TypeOf(((IntChanSend)default!)), reflect.TypeOf(((ж<IntChanSend>)nil)).Elem()), cst.Field(1).Type.ChanDir());
+    fmt.Println(chanSlotZeroReDescribesˢ, reflect.TypeOf(reflect.Zero(cst.Field(0).Type).Interface()), reflect.Zero(cst.Field(0).Type).Type().ChanDir());
 }
 
 } // end main_package
