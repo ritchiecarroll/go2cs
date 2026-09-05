@@ -151,3 +151,48 @@ same row at the base. It is not obviously free and should not be described as fr
 - Whether the seam should refuse (loudly) a native view whose requested index exceeds the minted
   length, or fall through. A refusal is the safer direction and matches the corpus's habit of failing
   by name rather than reading a stranger's memory.
+
+---
+
+## Amendment, 2026-09-05 (same day, before the cut): the write half CANNOT be golib-side
+
+The record above left the write half as "must MINT a native-backed box into the slot" without saying
+*where* that happens, and named it the first thing the cut must settle. Settled here, by reading the
+three pieces rather than by running anything — so it is a **structural** finding, not a measurement,
+and it is recorded as such.
+
+**The store is a `ref` write, and a `ref` write is invisible to golib.**
+
+1. The Go LHS `*(*uintptr)(unsafe.Pointer(&p.chunks[c.l1()]))` is a star-expr, and the converter's
+   deref path emits `.Value` for it (`convStarExpr.go:26`, `derefAccessor := ".Value"`).
+2. `ж<T>.Value` is a `ref T` property. The assignment therefore writes **through the ref**, directly
+   into whatever storage the ref names.
+3. `Reinterpret<ж<array<T>>, uintptr>()` takes its aliasing arm and returns a `FieldRefBox<uintptr>`
+   over the *same managed storage* (`ж.PointerExtensions.cs`, the `ReinterpretAliasesStorage` branch)
+   — so the ref names the chunk-table slot itself, and `= (uintptr)r` overwrites a managed reference
+   with a raw address.
+
+There is no hook in between. A box cannot observe a write performed through a `ref` it handed out, so
+**no golib change can convert this store into a box mint**. The tempting shape — have the reinterpret
+seam notice that the destination slot is pointer-typed and mint a native box instead of aliasing —
+fails on the same fact: the seam runs when the *view* is taken, not when the value is *stored*, and
+by then it has already surrendered a `ref`.
+
+**Consequence for increment 8, and it is a scope statement, not a detail.** The write half is a
+**converter emission change** (W1's form, extended to a pointer-typed destination), not a golib one.
+So increment 8 spans both sides of the tree:
+
+- converter: recognize this store shape and emit a box-minting assignment to the element instead of a
+  `uintptr` ref-write — which means the increment owes the converter's own gates (converter suite,
+  CNR, and a two-seeded three-target `-stdlib` diff for the emission footprint);
+- golib: the option-(B) read seam and the native-backed array box, which owe the full behavioral suite
+  and GolibTests per route #7's twin.
+
+That is a materially larger increment than the read half alone, and the halves still land together —
+a converter that mints a box the read seam cannot serve, or a read seam over a slot still holding a
+raw address, are both the same exit 139 one frame over.
+
+**What this does NOT settle**, and the cut still owns: where the minted box's **length** comes from
+(the write site knows it — Go's `l2Size` is right there — but whether that generalises to every
+`*[N]T` over native memory is unanswered), and whether an over-length index refuses loudly or falls
+through.
