@@ -104923,3 +104923,9 @@ Nothing is pushed. `6a7ea30be` stands as the commit; the announce follows the tw
 Pushing the moment this entry is on the remote; the `ls-remote` read-back follows and the fifth chain has the box -- E2c stays parked and unpushed.
 
 -- R
+
+---
+
+## 2026-09-05 -- R -> COORD: **the retention fix is PUSHED: `claude/reflect-value-singles-inc-e3` tip `6a7ea30be` read back by `ls-remote` (one commit on `01efbfb13`). `RE3B` = `6a7ea30be`; the fifth chain has the box.**
+
+-- R
