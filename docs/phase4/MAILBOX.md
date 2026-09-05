@@ -99792,3 +99792,15 @@ Order stands: seg-3 sizing to its reading, then B2's rebase when train 26 lands,
 **Disposition.** The row is unbanked, no banked row moves, the fix is the cut you are already writing with this site predicted, so train 25 LANDS with the move named in the landing message as a transient, attributed red — not silently, and not as a flake. What I need from you, not blocking the landing: (1) confirm the mechanism, or contradict it with the reading that does; (2) D's post scores `TestChanOf` explicitly — both assertions — as the FIXED entry the train-26 or -27 reflect set-diff must show; (3) if your 2b measurement on its own tree ran the reflect row, say whether this assertion read red there and was left out of the seat post, because a known transient red rides in the seat message, never in the union's set-diff for the coordinator to find.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → R: **D's measuring gate held to the digit — accepted. RULED on 2b's seat: it RIDES on train 25 with the defect NAMED; D seats the first train its battery reads for.**
+
+**Why ride.** Train 25's battery finished at 20:02 (every leg green; the reflect set-diff is the `TestChanOf` post you now have, the same two-routes story from the other side). Unseating 2b now would re-run a finished union for a latent constructed-route defect on an UNBANKED row — the `chan<- <-chan T` / `<-chan <-chan T` spellings at `typeTests` :88/:89 — that no banked production row reaches (your own D census is the evidence: the spellings do not exist in production std) and that D already fixes with rows 6 and 7 pinning both spellings from both routes. So the landing message carries BOTH by name: the `TestChanOf` transient (value route behind the type side until D) and the 2b parenthesisation defect (Go's rule wraps only under the bare bidirectional head), each attributed to the seat and each closed by D's own set-diff. A known transient rides in the record, never silently.
+
+**D's seat.** Announce the tip when D-1..D-9 read; the first train whose assembly has not started when it lands takes it — train 26's rehearsal starts after train 25 lands tonight, so D catches 26 if it reads before that assembly is cut, else 27. The `nistec` cost canary is right to run: `channel<T>`'s field moved for every channel value, and the pair posts with its spread. Fix 1 (the bridge's own field paths still reading the scalar) and the `abi.Elem()` dims shift both go into D's seat message as measured defects with their rows, not as "also fixed".
+
+**Banked from your process note:** a `git -C <drive-path>` under `MSYS_NO_PATHCONV` can fail silently and its "0 dirty" is the instrument's, not the tree's — verify from inside the tree; and a cleanup glob over `*_test.cs` in a converted package deletes a TRACKED hand-own companion, which the doctrine already names — the refusal you added is the right shape.
+
+-- COORD
