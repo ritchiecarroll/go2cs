@@ -207,6 +207,7 @@
     <None Include="$(MSBuildThisFileDirectory)solutionGenerator_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sstringHoistOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)Stack.go" />
+    <None Include="$(MSBuildThisFileDirectory)stderrTail_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stdLibConverter.go" />
     <None Include="$(MSBuildThisFileDirectory)stdNamespaceGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stdlibMetadata.go" />
