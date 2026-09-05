@@ -226,13 +226,30 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
 
     // The mint the converter emits for `unsafe.Pointer(p)` over a managed Go pointer (`new
     // @unsafe.Pointer(p)`): the number is the box's stable address exactly as the uintptr overload
-    // minted it, and the BOX rides along as the retained source, so identity (Equals/GetHashCode by
-    // referent) holds for every pointee -- including one that carries managed references and so has
-    // no pinnable storage, whose registered address can never validate on read (the *bytes.Buffer
-    // of reflect's TestImplicitMapConversion). Overload resolution prefers this constructor for any
-    // box argument (a reference conversion to the interface beats the user-defined uintptr one);
-    // an explicit uintptr or void* argument still takes its own path, numbers unchanged.
-    public Pointer(INilPointer box) : this(box is null || box.IsNilPointer ? (uintptr)0 : (uintptr)box.StableAddress(), box is null || box.IsNilPointer ? null : box)
+    // minted it. Identity (Equals/GetHashCode) holds for every pointee -- including one that carries
+    // managed references and so has no pinnable storage, whose registered address can never validate
+    // on read (the *bytes.Buffer of reflect's TestImplicitMapConversion) -- through the ORDER TOKEN
+    // captured here, which two mints from one box share; it does NOT need the box retained, and the
+    // paragraph below says what happened when this constructor briefly kept one. Overload resolution
+    // prefers this constructor for any box argument (a reference conversion to the interface beats
+    // the user-defined uintptr one); an explicit uintptr or void* argument still takes its own path,
+    // numbers unchanged.
+    // This constructor takes the ADDRESS from the box and RETAINS NOTHING, and the second half is as
+    // load-bearing as the first. It is an exact match for `new @unsafe.Pointer(box)`, so it captures
+    // every bare mint that previously bound the implicit `ж<T> -> uintptr` conversion -- and the bare
+    // mint's contract is that it retains nothing (PointerMintRetentionTests' positive control; the
+    // RETAINING door is `FromPinnedBox`, which the converter emits and which the syscall pin fix
+    // depends on). Increment E3 root 4 passed the box here to give referent identity something to
+    // compare for a pointee nothing pins; the root-4 AMENDMENT made identity the ORDER TOKEN instead,
+    // which two mints from one box share whether or not either retains it, so the reason expired with
+    // that commit and the argument is `null`. Measured one-axis, both directions: with the box the
+    // control fails and with null it passes, while the ReflectValueSingles identity rows are
+    // byte-identical to `go run` either way.
+    //
+    // What the constructor still earns its place for: a WRAPPER box reaches its address through
+    // StableAddress (the plain `(uintptr)` conversion is not defined on a generated named-pointer
+    // wrapper), and a structurally nil box mints the zero address rather than pinning anything.
+    public Pointer(INilPointer box) : this(box is null || box.IsNilPointer ? (uintptr)0 : (uintptr)box.StableAddress(), null)
     {
     }
 
