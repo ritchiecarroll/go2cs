@@ -37,6 +37,18 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+  <!-- SPIKE (ж.Views.cs, COORD b7e37ab7c): the seg-3 field-view cache's three arms, selected by
+       `-p:GoViews=slot|cwt|gated`. Absent, nothing is defined and of() is the pre-spike path. -->
+  <PropertyGroup Condition="'$(GoViews)'=='slot'">
+    <DefineConstants>$(DefineConstants);VIEWS_SLOT</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GoViews)'=='cwt'">
+    <DefineConstants>$(DefineConstants);VIEWS_CWT</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GoViews)'=='gated'">
+    <DefineConstants>$(DefineConstants);VIEWS_GATED</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(OutDir)'==''">
     <OutDir>bin/$(Configuration)/$(TargetFramework)/</OutDir>
   </PropertyGroup>

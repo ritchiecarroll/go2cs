@@ -1927,6 +1927,11 @@ public static partial class builtin
     /// <returns>Pointer to heap allocated copy of <paramref name="target"/> value.</returns>
     public static ж<T> Ꮡ<T>(in T target)
     {
+#if VIEWS_GATED
+        // SPIKE arm 3 (ж.Views.cs): a consumer type's box carries the field-view slot
+        if (BoxShape<T>.Slotted)
+            return new SlottedStandardBox<T>(target);
+#endif
         return new StandardBox<T>(target);
     }
 

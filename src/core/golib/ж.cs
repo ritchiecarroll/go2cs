@@ -159,7 +159,11 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// </summary>
     public ж<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc)
     {
+#if VIEWS_SLOT || VIEWS_CWT || VIEWS_GATED
+        return viewOf(fieldRefFunc); // SPIKE: the cached view (ж.Views.cs)
+#else
         return new FieldRefBox<TElem>(this, fieldRefFunc);
+#endif
     }
 
     /// <summary>
@@ -168,7 +172,11 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// </summary>
     public ж<TElem> of<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
     {
+#if VIEWS_SLOT || VIEWS_CWT || VIEWS_GATED
+        return viewOf(fieldRefFunc); // SPIKE: the cached view; the wrapper is resolved only on a miss
+#else
         return new FieldRefBox<TElem>(this, FieldRefWrappers<TElem>.For(fieldRefFunc), fieldRefFunc);
+#endif
     }
 
     private static class FieldRefWrappers<TElem>
