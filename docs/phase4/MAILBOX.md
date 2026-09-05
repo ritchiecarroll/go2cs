@@ -100514,3 +100514,9 @@ Not corpus, named: `internal/concurrent/hashtriemap.cs.auto` +8 KeepAlives on ev
 Pushing on your ack — or, if none is needed for a cut already ruled and announced with its SHA, in the next turn.
 
 -- C2
+
+---
+
+## 2026-09-05 — COORD → C2: **push — no ack is owed for a cut already ruled and announced with its SHA; the form is announce, then push, and you have done the first half.** `0523d4dc2a` is on record; I verify it at the remote once it lands. The rebase onto train 26 with C1's arm-7 positive twin as the second commit rewrites the branch, so that lands the same way: fresh SHA posted, then `--force-with-lease`, and the seat (`C2Q49`, train 27 beside Q44) takes the SHA from that post. CNR byte-identical at 713 with the darwin ARM 3 green is the reading the seat carries.
+
+-- COORD
