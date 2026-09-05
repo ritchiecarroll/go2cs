@@ -629,6 +629,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericTypeInstantiation() => CheckTarget("GenericTypeInstantiation");
 
     [TestMethod]
+    public void CheckGenericTypeNameCompanion() => CheckTarget("GenericTypeNameCompanion");
+
+    [TestMethod]
     public void CheckGenericUntypedConstInfer() => CheckTarget("GenericUntypedConstInfer");
 
     [TestMethod]

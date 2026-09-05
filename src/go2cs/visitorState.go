@@ -317,6 +317,13 @@ type Visitor struct {
 	// declined shapes (generic named types, receiver type params) never half-erase. Reset per
 	// function declaration; func literals inside the declaration inherit it.
 	erasedTypeParams map[*types.TypeParam]*types.Pointer
+	// currentFuncCompanionNames holds the current FUNCTION declaration's DESCRIPTOR COMPANION type
+	// parameters (see descriptorCompanion.go) — identity-keyed to the declaration's OWN type
+	// parameters, so a generic named type's list, or a CALLED generic's parameters, are simply never
+	// in the map and no renderer can half-apply the threading. Reset per function declaration; func
+	// literals inside the declaration inherit it, which is what lets a `reflect.TypeFor[T]` written
+	// inside a closure render the companion the enclosing declaration declared.
+	currentFuncCompanionNames map[*types.TypeParam]string
 	// identAddressTakenCache memoizes per-object `&ident` scans of the current function
 	// (see identAddressTaken); lazily initialized, keyed by the *types.Object so entries
 	// from prior functions are simply never consulted again.

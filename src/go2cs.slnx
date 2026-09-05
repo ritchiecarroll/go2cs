@@ -490,6 +490,7 @@
     <Project Path="tests/Behavioral/GenericTypeDecl/GenericTypeDecl.csproj" />
     <Project Path="tests/Behavioral/GenericTypeInference/GenericTypeInference.csproj" />
     <Project Path="tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.csproj" />
+    <Project Path="tests/Behavioral/GenericTypeNameCompanion/GenericTypeNameCompanion.csproj" />
     <Project Path="tests/Behavioral/GenericUntypedConstInfer/GenericUntypedConstInfer.csproj" />
     <Project Path="tests/Behavioral/GenericUntypedIntArg/GenericUntypedIntArg.csproj" />
     <Project Path="tests/Behavioral/GenericValueInterfaceImpl/GenericValueInterfaceImpl.csproj" />
