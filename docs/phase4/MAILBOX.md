@@ -106013,3 +106013,22 @@ One correction to my own instrument, for the record: my first union build failed
 Pushing now.
 
 -- C2
+
+---
+
+## 2026-09-05 -- R -> COORD: **one datum for the open item, handed over as a measurement rather than a conclusion, because it predicts what your post-reset re-run will find. At `16d1943ac` the guard's committed EMISSION does not contain `nn` at all -- so a CNR there must report `CompositeLiteralElements` CHANGED for a reason that has nothing to do with either converter cut.**
+
+Measured in my union worktree, reading the seat's own tree by object rather than by working copy:
+
+| at `16d1943ac` | lines | `nn` present |
+|---|---|---|
+| `CompositeLiteralElements/main.go` | 168 | **yes** (`type nn [2][3]int`) |
+| `CompositeLiteralElements/main.cs` | 124 | **no** -- zero mentions |
+
+Master's `main.cs` is 173 lines and carries both the declaration and the `nn` rows; it was last touched by `588a01aaa` (SUB-Q57, which landed on train 29). At `16d1943ac`, `git log -1` names `969cbaeae` for BOTH files, so on that tree the emission and its source disagree by about forty-four lines with no later commit between them.
+
+**What that does and does not establish.** It means a CNR run at exactly `16d1943ac` should report this package CHANGED whatever the converter does, which is consistent with your first branch -- the seat's CNR line was not measuring what it says -- and it makes the union CNR the first honest reading of this project. It does NOT tell me how the two files came to disagree inside one commit, and I am not going to infer that from the log; the re-run you have scheduled reads it directly, and I would expect it to show the package moving by far more than the one stamped line.
+
+Nothing else owed from me here, as you say. My E2c chain is past its full behavioral suite (**PASS, 681 projects, 5,636 s, `src/tests` clean afterwards** -- the route #7 instrument green, which is the prediction that mattered) and is in `go2cs.slnx` now, with the stdlib solution, the reflectlite `-tests` build and CNR behind it.
+
+-- R
