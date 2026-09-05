@@ -21454,6 +21454,72 @@ itself**: build the single-file host and these 25 rows start passing, the disclo
 matching, and the sweep fails until the entries are removed. `os`'s gate entry predates the ruling
 and `os` is not yet on the roster; its disposition is decided when it banks.
 
+### `deferred` and `structural` — the two labels every allocation-count disclosure resolves into
+
+Ruled 2026-09-05 (coordinator, owner-ratified the same day) and landed in the schema and the roster
+guard together. They exist because `alloc-profile` had come to carry two different claims under one
+word. An `AllocsPerRun`-style assertion measures **Go's escape analysis** — a compiler optimization
+the CLR JIT does not perform — rather than a behavioural property: the value written, read or
+returned is identical on both sides. So such an assertion is **never disclosed as CLR-structural
+merely because it fails today**, which is ruling #1 of 2026-08-02 restated; but it may be **deferred
+against a named plan to reach it**, which is the amendment.
+
+| label | the claim | what the entry must carry |
+|---|---|---|
+| `deferred` | the CLR **can** meet the assertion in principle | `want`, `reading`, `plan` — all three, or the entry is refused |
+| `structural` | **no** managed implementation can meet it, proved in the reason with the object Go keeps off the heap NAMED | no `plan` — naming one contradicts the claim |
+
+**`deferred` is a commitment, not a quieter disclosure.** The owner's strengthening makes the plan a
+hard requirement: an entry with no executable plan is refused by the guard, and a plan whose design
+record is retired without a replacement fails the row at its next sweep exactly as a regression would.
+One plan may serve **many** entries by **mechanism family** — a box minted per address-take, an
+element take, an out-parameter, an intermediate buffer in a string conversion — so the requirement is
+met by family rather than by a bespoke design per entry.
+
+**The three fields, and why each is required.** `want` is the assertion's own bound, readable without
+opening the test. `reading` is the measured current value **with the configuration named**, because a
+reading taken at another configuration is not comparable (Release with tiering off is the measurement
+of record) and one with no tree named cannot be re-checked — the sweep prints it beside the want, so a
+reading moving **away** from the want fails the row exactly as a matched verdict flipping would.
+`plan` is the design record and increment that closes it.
+
+**Which instrument's number goes in `reading`.** The converted host's own `AllocsPerRun` value, not a
+lane's probe: that is what the assertion measures and what a regression must be measured in. A probe
+over golib's own allocation sites counts a **different population** — a defer's delegate, a params
+array and an interface box sit outside it — so a design record's ladder and the roster's printed
+reading are two numbers, and an entry names both rather than letting either stand for the other.
+
+
+**A structural FLOOR under a deferrable excess (ruled 2026-09-05, from the reflect census).** An
+entry can have both at once, and neither label alone is honest about it: `reflect`'s
+`TestDeepEqualAllocs` rows want 0 at a signature where boxing a value type into `object` allocates by
+construction — a floor of two per run — while the readings run to 53 objects, an excess of ordinary
+reducible bridge work. `structural` would bury 51 reducible objects; `deferred` would name a want no
+plan can reach. So a **deferred** entry may carry a `floor`: an object count greater than its want,
+with a `proof` sketch beside it. Its retirement condition becomes *the host's reading equals the
+floor*, and at that point the entry **re-labels `structural`** with the proof already attached and its
+plan discharged. The plan requirement is unchanged — the excess is what the plan retires — and a floor
+is a CLAIM the census can falsify: a segment reading zero where a floor was predicted retires the
+floor, not the entry. Refused: a floor on a `structural` entry (that label claims nothing is
+reducible), a floor with no proof, a floor that does not exceed its want (nothing is deferred, so the
+entry is simply structural), and a floor beside a want that does not LEAD with its number — refusing
+an uncheckable pairing beats guessing which number in a sentence was meant. `floor: 0` means absent,
+which is sound because a legal floor is always at least 1.
+
+**And a THIRD label stays, for a different reason.** `alloc-count-semantics` (8 entries) names an
+assertion whose UNIT cannot be measured on the host — `reflect`'s `TestChanAlloc` wants 1 where our
+counter is silent and the figure is bytes. That is not a bigger number, it is a different unit, so it
+is neither deferrable nor structural. The three live labels are therefore `deferred` (measurable, can
+be met, plan), `structural` (measurable, cannot be met, proof) and `alloc-count-semantics` (the unit
+cannot be measured, stated). Only the bare `alloc-profile` label retires.
+
+**Enforcement, in two places on purpose.** `loadTestDisclosures` refuses a malformed entry at compare
+time, so a broken entry fails the sweep of the row that carries it; `check-roster-format.ps1` reads
+**every** committed manifest in one pass, so a mislabelled entry is caught the day it lands rather
+than at that row's next rebank. Both refusals name the missing field. The bare `alloc-profile` label
+is **legacy**: it still loads, because rows re-classify at their own next rebank and never wholesale,
+and an over-eager guard would take every unswept row down.
+
 ### The process ROOTS a converted program never gets from a Go bootstrap: `runtime.envs`, `os.runtime_rand`
 
 Two of Go's cheapest facts about a running process arrive through machinery conversion cannot carry:
