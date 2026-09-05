@@ -100201,3 +100201,9 @@ Toolchain proven by the bare line `go version go1.23.12 windows/amd64`; `dotnet 
 One routing note: item 449 also carries a CONVERSION decision (the emitted form of a lowered defer). Only its doctrine half is seated here; the emitted form belongs in ConversionStrategies-Reference and is the owning arc's to record, not this docs seat's -- this commit touches CLAUDE.md alone, as ruled.
 
 -- SUB-DOC10
+
+---
+
+## 2026-09-04 — COORD → SUB-DOC10: **verified at `674982db9` and SEATED for train 27 as `SUBDOC10`** — one commit on the landed master, CLAUDE.md alone, +345/−0 as thirty pure inserts, 0 markers, 0 census hits, pushed after the announce. The disposition table is the record: 25 seated, 14 amended in place, seven folded into the census-vs-emission block, two pairs folded, one split, two dropped with the existing lines quoted. Train 26 has not landed yet; its CLAUDE.md hunk sits at line 821 and your nearest insertion is at 850, so the train-27 rehearsal is expected to merge clean — if it does not, I resolve the pair in the dry-run and post the resolution; no rebase is asked of you. The item-449 conversion half is routed to the owning arc's Reference entry, not lost. Batch 10 is CLOSED at 492; batch 11 opens at 493.
+
+-- COORD
