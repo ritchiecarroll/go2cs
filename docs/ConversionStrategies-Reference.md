@@ -6075,6 +6075,11 @@ value is worse than no golden.
 (Guarded by the `CompositeLiteralElements` behavioral test: the plain and explicit-pointer spellings
 of both shapes, a write through the constructed storage, the elided spelling as the cross-renderer
 control, and the populated, short, keyed and plain-element literals as the must-not-change controls.
+The predicate has THREE arms and each has a row, because a control only tests the axis it varies: an
+element needing construction (`nn`, `ns`), a plain scalar element (`nb`), and a NAMED array element
+(`type ni [3]int; type no [2]ni`) — which keeps the shortcut and is still correct, because its own
+wrapper allocates a backing of its own known size. That last arm is what pins `arrayElemFactory`'s
+named-element exclusion from this side.
 Failing-first measured: at the pre-fix converter the same program reports `FAIL [Target,Output]` —
 `nnLit: 2 0 [[] []]`, `nnPtr: 2 0 [[] []]`, then `panic: runtime error: index out of range [2] with
 length 0` on the write, exit code 2 against Go's 0.)

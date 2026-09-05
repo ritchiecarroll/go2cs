@@ -28,6 +28,13 @@ type nn [2][3]int
 // fixed-array field initializer runs only inside a declared constructor.
 type ns [2]withArray
 
+// ni/no are the THIRD arm of the element predicate, and the one neither `nb` nor `ns`
+// reaches: a NAMED array element keeps its own zero-value handling (its wrapper
+// allocates a backing of its own known size), so it must be left on the plain
+// shortcut — the same exclusion `arrayElemFactory` documents.
+type ni [3]int
+type no [2]ni
+
 // nsl and nmp are the NAMED SLICE and NAMED MAP flavours of the same shape. Each lowers to a
 // different generated wrapper ctor, so each pins its own arm of the named-composite renderer.
 type nsl []int
@@ -204,6 +211,13 @@ func main() {
 	// a PLAIN element keeps the `new T[N]` shortcut — the negative control for the fix.
 	nbLit := nb{}
 	fmt.Println("nbLit:", len(nbLit), nbLit)
+
+	// a NAMED array element also keeps the shortcut, and is still right: its own wrapper
+	// allocates a backing of its own known size. The third arm of the predicate.
+	noLit := no{}
+	fmt.Println("noLit:", len(noLit), len(noLit[0]), noLit)
+	noLit[1][2] = 7
+	fmt.Printf("noWrite: %v\n", noLit)
 
 	// a POPULATED named nested literal (the elements are written, nothing is padded).
 	nnPop := nn{{1, 2, 3}, {4, 5, 6}}

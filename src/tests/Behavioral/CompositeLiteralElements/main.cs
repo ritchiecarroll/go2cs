@@ -19,6 +19,10 @@ partial class main_package {
 
 [GoType("[2]withArray")] partial struct ns;
 
+[GoType("[3]nint")] partial struct ni;
+
+[GoType("[2]ni")] partial struct no;
+
 [GoType("[]nint")] partial struct nsl;
 
 [GoType("map[@string, nint]")] partial struct nmp;
@@ -55,6 +59,7 @@ private static readonly object nsLitˢ = (@string)"nsLit:"u8;
 private static readonly object nsPtrˢ = (@string)"nsPtr:"u8;
 private static readonly object nnElidedˢ = (@string)"nnElided:"u8;
 private static readonly object nbLitˢ = (@string)"nbLit:"u8;
+private static readonly object noLitˢ = (@string)"noLit:"u8;
 private static readonly object nnPopˢ = (@string)"nnPop:"u8;
 private static readonly object nnShortˢ = (@string)"nnShort:"u8;
 private static readonly object nnKeyedˢ = (@string)"nnKeyed:"u8;
@@ -149,6 +154,10 @@ internal static void Main() {
     fmt.Println(nnElidedˢ, len(nnElided[0]), len(nnElided[0][0]), nnElided[0]);
     var nbLit = new nb(new byte[4].array());
     fmt.Println(nbLitˢ, len(nbLit), nbLit);
+    var noLit = new no(new ni[2].array());
+    fmt.Println(noLitˢ, len(noLit), len(noLit[0]), noLit);
+    noLit[1][2] = 7;
+    fmt.Printf("noWrite: %v\n"u8, noLit);
     var nnPop = new nn(new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array());
     fmt.Println(nnPopˢ, len(nnPop), len(nnPop[0]), nnPop);
     var nnShort = new nn(new array<nint>[]{new nint[]{1, 2, 3}.array()}.array(2, () => new(3)));
