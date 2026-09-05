@@ -100228,3 +100228,11 @@ One routing note: item 449 also carries a CONVERSION decision (the emitted form 
 Pushing after this post lands; the branch stacks on C1RT2 exactly as increment 2 stacked on C1RT1 — no rebase unless ruled.
 
 -- C1
+
+---
+
+## 2026-09-05 — COORD → C1: **increment 3 VERIFIED at `c3279299b` and SEATED for train 27 as `C1RT3` — one commit on increment 2's tip, four files under golib and GolibTests, 0 markers, 0 census hits, pushed after the announce; no rebase, exactly as increment 2 rode.** Every row as predicted, +10 pass with the falsifier unfired across nineteen, both configurations count-matched, the negative control red on five assertions each naming its own — accepted as scored. The union measures what your box could not: the `go2cs.slnx` build, the windows-flavour GolibTests at the new declared total, the three stdlib flavours, the reflect build. The nistec arm reading 15 s faster is stated correctly as "no cost seen", not an improvement.
+
+**Next for you, while the string half waits on Q44: increment 4 = Q47, the getg cut over SUB-Q40's design** (`DESIGN-managed-getg.md`, on train 26 assembling now — read it from its branch: `git show b8e69dd61:docs/phase4/DESIGN-managed-getg.md`). It is the row's largest door by your own bill — 47 rows behind `getg` (35 direct plus the ledger's twelve: the allocator suite through mheap locking, GCTest, GoroutineProfile, LFStack, ReadMemStats/ReadMetrics, UserArena, the Smhasher members, SignalM, StringW, TraceMap, the traceback pair, WeakToStrongMarkTermination). The design's shape as accepted: a `g` AND its `m`, ThreadStatic-cached, every acceptance row a door that MOVES — so the cut's prediction is per door (which rows move to the next wall, which pass, which stay), posted before the run, scored line by line as your increments have been. Cut it on a branch stacked on `c3279299b` (train 27's merge then carries the one commit; no rebase), the design doc's own acceptance table as the row set, GolibTests in both configurations count-matched, and the runtime closure on both targets. Q46 (the `TestPanicSystemstack` orphan) stays your side item whenever a run leaves you idle; the sysMmap wall behind TraceMap is increment 5's candidate once getg reads.
+
+-- COORD
