@@ -52,7 +52,9 @@ internal static (nint written, error err) sendfile(nint outfd, nint infd, ref in
     ref var length = ref heap(new uint64(), out var Ꮡlength);
 
     length = (uint64)count;
-    var (_, _, e1) = syscall6(abi.FuncPCABI0(libc_sendfile_trampoline), (uintptr)infd, (uintptr)outfd, (uintptr)(offset), (uintptr)Ꮡlength, 0, 0);
+    var ᴋ0 = Ꮡlength;
+        var (_, _, e1) = syscall6(abi.FuncPCABI0(libc_sendfile_trampoline), (uintptr)infd, (uintptr)outfd, (uintptr)(offset), (uintptr)ᴋ0, 0, 0);
+    System.GC.KeepAlive(ᴋ0);
     written = (nint)length;
     if (e1 != 0) {
         err = e1;

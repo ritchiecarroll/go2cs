@@ -666,6 +666,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 		bodyStart := v.outputBuilder.Len()
 		v.visitBlockStmt(funcDecl.Body, blockContext)
+		v.assertNoPendingKeepAlive("func " + funcDecl.Name.Name)
 		bodyText = v.outputBuilder.String()[bodyStart:]
 
 		if bodyInBlockForm {

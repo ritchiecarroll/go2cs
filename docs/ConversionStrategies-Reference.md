@@ -15442,6 +15442,73 @@ The caller writes the `WSABUF` bytes into the staged memory itself, exactly as i
 **The RECEIVE is the same family and a DIFFERENT remedy, and the distinction is worth carrying.** With the send working, `ReadFromInet4` panics `index out of range [0] with length 0` inside `rawToSockaddrInet4`. Do not attribute that to the `(ж<array<byte>>)(uintptr)(new @unsafe.Pointer(...))` round-trip it panics in: the WRITE direction (`sockaddrInet4ToRaw`) runs the identical round-trip and works, and TCP exercises it. The fault is the box — `@new<syscall.RawSockaddrAny>()`, managed arrays inside, handed to `WSARecvFrom` by address. Per the AV-vs-panic triage rule (golib's `array<T>` indexer is bounds-checked), a clean bounds panic means the array is EMPTY: nothing was materialised at that address. Because a received address arrives *asynchronously*, the stack-buffer remedy does not apply — the native staging buffer must be decoded at HARVEST time, which is the decode-side problem `AcceptEx`'s output buffer also has. Send and receive are therefore separate increments, and the guard (`UdpLoopbackRoundTrip`, Linux-proven) waits for the second.
 
 
+### Pointer-derived funnel arguments and bridged `unsafe.Pointer` arguments keep their box alive across the call — the statement-scoped `GC.KeepAlive` drain
+
+Go's `//go:uintptrkeepalive` contract (cmd/compile's `escape.rewriteArgument`, `cmd/compile/internal/escape/call.go`): an argument that is a `uintptr(<operand of type unsafe.Pointer>)` conversion to a syscall funnel keeps the pointed-to object alive for the duration of the call — the inline `uintptr(unsafe.Pointer(&x))`, the two-step `_p0 = unsafe.Pointer(&p[0]) … uintptr(_p0)` that mksyscall emits for every `[]byte` argument, and a pointer-typed variable passed as `uintptr(unsafe.Pointer(p))` alike. The funnel set is package-qualified through go/types (`syscallFunnelCall`, `syscallKeepAliveAnalysis.go`): `syscall.Syscall/Syscall6/9/12/15/18/SyscallN/RawSyscall/RawSyscall6`, `internal/runtime/syscall.Syscall6`, darwin's lowercase libc trampolines `syscall`, `syscall6`, `syscall6X`, `syscallX`, `syscallPtr`, `rawSyscall`, `rawSyscall6` (runtime linknames declared by package `syscall`), and `crypto/x509/internal/macos`'s own `syscall` (corefoundation.go). In C# the argument is a NUMBER over a pinned box, and nothing references the box once the argument is evaluated, so a collection during the call retires the pin the kernel is reading through. Emitted form: each pointer-derived argument is captured into a `ᴋN` temp declared before the statement, the call takes `(uintptr)ᴋN`, and `System.GC.KeepAlive(ᴋN);` follows the statement (`convSyscallFunnelCall`, drained by `visitStmt`):
+
+```go
+func recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Socklen) (n int, err error) {
+	var _p0 unsafe.Pointer
+	if len(p) > 0 {
+		_p0 = unsafe.Pointer(&p[0])
+	} else {
+		_p0 = unsafe.Pointer(&_zero)
+	}
+	r0, _, e1 := syscall6(abi.FuncPCABI0(libc_recvfrom_trampoline), uintptr(fd), uintptr(_p0), uintptr(len(p)), uintptr(flags), uintptr(unsafe.Pointer(from)), uintptr(unsafe.Pointer(fromlen)))
+	n = int(r0)
+	if e1 != 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+```
+
+```csharp
+internal static (nint n, error err) recvfrom(nint fd, slice<byte> p, nint flags, ж<RawSockaddrAny> Ꮡfrom, ж<_Socklen> Ꮡfromlen) {
+    nint n = default!;
+    error err = default!;
+
+    @unsafe.Pointer _p0 = default!;
+    if (len(p) > 0){
+        _p0 = @unsafe.Pointer.FromPinnedBox(Ꮡ(p, 0));
+    } else {
+        _p0 = @unsafe.Pointer.FromBox(Ꮡ_zero);
+    }
+    var ᴋ16 = _p0;
+    var ᴋ17 = Ꮡfrom;
+    var ᴋ18 = Ꮡfromlen;
+        var (r0, _, e1) = syscall6(abi.FuncPCABI0(libc_recvfrom_trampoline), (uintptr)fd, (uintptr)ᴋ16, (uintptr)len(p), (uintptr)flags, (uintptr)ᴋ17, (uintptr)ᴋ18);
+    System.GC.KeepAlive(ᴋ16);
+    System.GC.KeepAlive(ᴋ17);
+    System.GC.KeepAlive(ᴋ18);
+    n = (nint)r0;
+    if (e1 != 0) {
+        err = errnoErr(e1);
+    }
+    return (n, err);
+}
+```
+
+The MANAGED-callee member of the same class (measured 2026-09-05 on runtime's `TestSmhasherWindowed`): the converter bridges every value-consumed call whose RESULT is `unsafe.Pointer` with `(uintptr)` (`convCallExpr`), so `memhash32(noescape(unsafe.Pointer(&i)), seed)` hands the callee a number with the Pointer's retained source stripped, and the frame-minted box `Ꮡi` has no reference left after `FromPinnedBox` returns. A bridged `unsafe.Pointer`-returning CALL argument (not a conversion, not a builtin) over `unsafe.Pointer(&x)` of a frame-minted local — a parameter re-minted as a box included — names `Ꮡx` for a `System.GC.KeepAlive(Ꮡx)` after the statement (`bridgedWrapperKeepAliveBoxes`); a `return f(…)` hoists the call into a `ᴛN` temp so the KeepAlive sits between the call and the return:
+
+```go
+func int32Hash(i uint32, seed uintptr) uintptr {
+	return memhash32(noescape(unsafe.Pointer(&i)), seed)
+}
+```
+
+```csharp
+internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
+    ref var i = ref heap(iʗp, out var Ꮡi);
+
+    var ᴛ2 = memhash32((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
+    System.GC.KeepAlive(Ꮡi);
+    return ᴛ2;
+}
+```
+
+Boundaries, each guarded in `syscallFunnelSet_test.go`: a BARE `f(unsafe.Pointer(&x))` argument is not bridged (the Pointer retains its box through the call) and records nothing; a package-level variable's box is a static field and records nothing; an outer CONVERSION (`n := uintptr(noescape(unsafe.Pointer(&i)))`, runtime's `stdcallN` / `mstart0` shape) records nothing, because a stored number is outside the class — a KeepAlive after the store would hold the box exactly as far as the store. The drain is per STATEMENT: a box named inside an `if` condition is kept alive by the first statement after the call (inside the body or after the `if` — a use on any path after the call keeps the local live at it); a `for` INIT/POST clause, emitted inside the C# header where no statement can follow, is refused by name (`rejectForClauseKeepAlive`), as a deferred or spawned call is (the contract is statement-scoped and a `defer` runs at unwind); a function literal converts its body against an EMPTY pending list and restores the enclosing statement's afterwards, so a box the enclosing call named before its literal argument was converted is never drained inside the lambda. `src/syscall-keepalive-census.ps1` walks the converted emission: every captured temp has exactly one KeepAlive (arm 1), hand-own pointer arguments are held across their call (arm 2), and no raw pointer-derived funnel argument remains (arm 3 — RED 104 on the pre-cut darwin emission, which had never been through the funnel path).
+
 ### The pointer-word read — `*(*unsafe.Pointer)(unsafe.Pointer(&x))` emits a CARRYING pointer, never a byte pun
 
 Go's idiom for reading the pointer word stored at some location — `time.syncTimer`'s

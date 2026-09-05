@@ -82,6 +82,7 @@ internal static @unsafe.Pointer mapaccess1_faststr(ж<maptype> Ꮡt, ж<hmap> �
     }
 dohash:
     var hash = t.Hasher((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡky)), (uintptr)h.hash0);
+    System.GC.KeepAlive(Ꮡky);
     var m = bucketMask(h.B);
     var b = (ж<bmap>)(uintptr)(add(h.buckets, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
     {
@@ -192,6 +193,7 @@ internal static (@unsafe.Pointer, bool) mapaccess2_faststr(ж<maptype> Ꮡt, ж<
     }
 dohash:
     var hash = t.Hasher((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡky)), (uintptr)h.hash0);
+    System.GC.KeepAlive(Ꮡky);
     var m = bucketMask(h.B);
     var b = (ж<bmap>)(uintptr)(add(h.buckets, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
     {
@@ -249,6 +251,7 @@ internal static @unsafe.Pointer mapassign_faststr(ж<maptype> Ꮡt, ж<hmap> Ꮡ
     }
     var key = stringStructOf(Ꮡs);
     var hash = t.Hasher((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡs)), (uintptr)h.hash0);
+    System.GC.KeepAlive(Ꮡs);
     // Set hashWriting after calling t.hasher for consistency with mapassign.
     h.flags ^= (uint8)(hashWriting);
     if (h.buckets == nil) {
@@ -343,6 +346,7 @@ internal static void mapdelete_faststr(ж<maptype> Ꮡt, ж<hmap> Ꮡh, @string 
     }
     var key = stringStructOf(Ꮡky);
     var hash = t.Hasher((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡky)), (uintptr)h.hash0);
+    System.GC.KeepAlive(Ꮡky);
     // Set hashWriting after calling t.hasher for consistency with mapdelete
     h.flags ^= (uint8)(hashWriting);
     var bucket = (uintptr)(hash & bucketMask(h.B));

@@ -1622,6 +1622,7 @@ internal static void cgoContextPCs(uintptr ctxt, slice<uintptr> buf) {
         asanwrite(@unsafe.Pointer.FromPinnedBox(Ꮡarg), /* unsafe.Sizeof(arg) */ (uintptr)32);
     }
     call(cgoTraceback, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡarg)));
+    System.GC.KeepAlive(Ꮡarg);
 }
 
 } // end runtime_package

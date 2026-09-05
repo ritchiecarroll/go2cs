@@ -116,7 +116,6 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 	case *ast.AssignStmt:
 		format := getStmtContext[FormattingContext](contexts)
 		v.visitAssignStmt(stmtType, format)
-		v.drainSyscallKeepAlive()
 	case *ast.BlockStmt:
 		context := getStmtContext[BlockStmtContext](contexts)
 		v.visitBlockStmt(stmtType, context)
@@ -131,7 +130,6 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 	case *ast.ExprStmt:
 		format := getStmtContext[FormattingContext](contexts)
 		v.visitExprStmt(stmtType, format)
-		v.drainSyscallKeepAlive()
 	case *ast.ForStmt:
 		target := getStmtContext[LabeledStmtContext](contexts)
 		v.visitForStmt(stmtType, target)
@@ -168,5 +166,19 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 		// Nothing to do
 	default:
 		panic(fmt.Sprintf("@visitStmt - Unexpected Stmt type: %#v", v.getPrintedNode(stmtType)))
+	}
+
+	// Every statement drains the KeepAlives its own calls named (a funnel's ᴋ temps, a
+	// bridged-wrapper argument's box — syscallKeepAliveAnalysis.go). Assign and Expr statements
+	// were the only drain points until 2026-09-05, which left a box named inside an `if` condition
+	// to be drained by whatever statement was converted NEXT — inside the body or after it
+	// (measured in internal/concurrent's emission: still correct by liveness, since a use on any
+	// path after the call keeps the local live at it, but placed by accident, and a body with no
+	// draining statement would have carried the box into the next function). A `for` INIT or POST
+	// clause is emitted inside the header, where nothing can follow it: refuse loudly instead.
+	if format := getStmtContext[FormattingContext](contexts); v.inForPost || format.forInit {
+		v.rejectForClauseKeepAlive(stmt)
+	} else {
+		v.drainSyscallKeepAlive()
 	}
 }

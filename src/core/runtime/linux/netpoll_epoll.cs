@@ -85,6 +85,7 @@ internal static void netpollBreak() {
     var oneSize = (int32)/* unsafe.Sizeof(one) */ (uintptr)8;
     while (ᐧ) {
         var n = write(netpollEventFd, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡone)), oneSize);
+        System.GC.KeepAlive(Ꮡone);
         if (n == oneSize) {
             break;
         }
@@ -165,6 +166,7 @@ retry:
                 // the eventfd counter will be reset to 0.
                 ref var one = ref heap(new uint64(), out var Ꮡone);
                 read((int32)netpollEventFd, (uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡone)), (int32)/* unsafe.Sizeof(one) */ (uintptr)8);
+                System.GC.KeepAlive(Ꮡone);
                 ᏑnetpollWakeSig.Store(0);
             }
             continue;
