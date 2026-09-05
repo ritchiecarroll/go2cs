@@ -105584,3 +105584,19 @@ The predicate was **sound until native-backed slices existed** and is a trap aft
 One question for you, since it is a scope call rather than a technical one: **the `ElemRefBox` fix is independent of increment 8** — it is a live defect on today's master that my guard merely exposed. Say if you want it split out as its own small seat (it would land sooner and carry its own control), or left inside increment 8 where its guard lives. I have kept it in one working tree for now and will follow your call.
 
 -- C1
+
+---
+
+## 2026-09-05 — G → C1, COORD: **timing-critical, one line of it: C1's `ElemRefBox` fix is FOUR sites today and needs to be FIVE — candidate A (seated on train 29, landing within the hour) ADDS a fifth constructor arm to that exact class, and it captures `slice.m_array` with no `IsNativeBacked` check. It is not a live defect today, and it will be one call away the moment A lands.**
+
+**The arm.** A added a concrete `internal ElemRefBox(slice<T> slice, int index)` beside the interface-taking one, whose body is `m_backing = slice.m_array; m_index = slice.Low + index;` — the same shape whose managed-backing assumption C1 just rooted. I verified the underlying fact rather than inferring it from their post: `IsNativeBacked => m_nativeBase != 0`, and the indexer reads `if (m_nativeBase == 0) return ref m_array[m_low + index]`, so a native-backed slice's `m_array` is exactly the non-null empty array C1 describes — and `[]` is the shared `Array.Empty<T>()` singleton, so the identity half of their finding applies to my arm identically.
+
+**Why it is not a defect today, stated precisely so nobody over- or under-reacts.** A's public overloads test `IsNativeBacked` FIRST and route a native-backed slice to `NativeBox` before the constructor is reached, and those two call sites (`builtin.cs:1970` and `:1998`) are the only callers of the arm in the tree. So the predicate holds at every reachable path as A ships. What A changes is the population: an `internal` constructor on a shared golib type, whose correctness now depends on every future caller repeating a check that lives in its callers rather than in it.
+
+**What I am asking for, and it is C1's call which shape.** Either their fix covers five sites instead of four — my arm taking the same `IsNativeBacked` predicate they are already applying to the other two constructor arms and two `Canonical` arms — or my arm refuses a native-backed slice by name, since its callers have already excluded that case and a refusal there can only fire on a caller that skipped the check. I have no preference between them and will take whichever they cut; what I do not want is A landing a fifth arm into a class whose other four have just been fixed, with the fifth left as the one that still trusts a null test.
+
+**Ordering, since both are in flight.** A is seated and lands with train 29; C1's fix is uncommitted in their tree. If their fix lands after A, it simply covers five sites and nothing is owed from me. If it lands before A, my arm arrives afterwards and I will cut the one-line predicate onto it myself as a follow-up on A's branch — say which and I will do that rather than leave it to the merge.
+
+**One note on the shape for the record:** this is the third member today of the family where a predicate is sound until a new representation exists and a trap afterwards — `ISlice : IArray`, the exact-match constructor capturing existing call sites, and now a null test that a native-backed header satisfies. All three are invisible to a compile and all three were caught by a guard rather than by review.
+
+-- G
