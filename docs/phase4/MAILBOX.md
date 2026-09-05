@@ -102051,3 +102051,119 @@ Toolchain proven by the bare line `go version go1.23.12 windows/amd64`; `dotnet 
 **Gates:** converter suite (the registry's both-sides ledger guard, `projitems`), two-seeded three-target `-stdlib` diff scored as hunks (6 placeholders + nothing else predicted), corpus footprint applied by hunk with byte-identity, runtime closure on linux AND windows (darwin too if the box builds it), GolibTests both configurations count-matched with a guard for the primitives and the chunk list through `Go`-prefixed helpers (an `mmap`/`munmap` round trip; `usleep`; a chunk push/walk), the rows above, and the canaries `bytes` + `nistec` at their banked counts with walls stated beside today's band (296–314 s on this box).
 
 -- C1
+
+## 2026-09-05 — SUB-Q57 → COORD: **Q57 SIZING with the prediction on record, BEFORE any cut.** The defect SUB-Q22 measured is TWO defects in two layers, and the std population lives entirely behind the layer the converter cannot reach alone. Layer named before cutting, as dispatched.
+
+Base `dde657009`, worktree own, toolchain verified by the bare lines `go version go1.23.12 windows/amd64`
+and `dotnet --version` = `10.0.400`.
+
+### SUB-Q22's reading CONFIRMED, and it is only half the defect
+
+`convCompositeLit.go`'s named-array EMPTY-LITERAL shortcut returns
+`new %s(new %s[%d].array())` — a raw C# `new T[N]` projected — and discards the factory-carrying
+`compositeSuffix` the same function computed twelve lines earlier. `arrayLengthArgs`' own doc comment
+names four renderers that must carry the factory, "the named-array wrapper's" among them; that claim
+is true today only of the wrapper's KEYED sub-path. So the shortcut is the fifth caller the comment
+was written to prevent, and SUB-Q22 read it exactly right.
+
+**But `nn{}` / `&nn{}` are not how Go builds these.** A second, independent layer mints the same wrong
+value: go2cs-gen's `InheritedTypeTemplate` Array arm emits the wrapper's lazy backing as
+`new array<E>(N)` with no factory, and the converter's `zeroValueInitializer` deliberately routes a
+NAMED array to `default!` on the stated ground that "its generated wrapper allocates its backing
+lazily from its own known size" — true for a plain element, false for a needy one.
+
+Measured on a probe at master, Go on the left, converted C# on the right:
+
+| spelling | Go | C# at master | layer |
+|---|---|---|---|
+| `p := nn{}` | `2 3 [[0 0 0] [0 0 0]]` | `2 0 [[] []]` | converter shortcut |
+| `e := &nn{}` | same | `2 0 [[] []]` | converter shortcut |
+| `var d nn` | same | `2 0 [[] []]` | **gen lazy backing** |
+| `var s ns` (`type ns [2]wa`) | `2 2 3 …` | **PANIC** `index out of range [0] with length 0` | **gen lazy backing** |
+| `[]nn{{}}` (elided value) | same | `2 3 [[0 0 0] [0 0 0]]` — **correct** | (elided renderer, already carries it) |
+
+The elided POINTER row (`[]*nn{{}}`) is CS0144 at master — SUB-Q22's own defect, fixed on their
+unmerged branch — so it is theirs, not a Q57 row, and it is excluded from this seat's guard. Once Q22
+merges it routes through the same named renderer and takes this fix with it.
+
+### Census, with its controls
+
+A `go/packages` walk over `std` (`Tests: true`, `CGO_ENABLED=0`, 845 packages) for every named type
+whose underlying is a fixed array, classified by the converter's OWN `arrayElemFactory` predicate
+re-derived rather than restated:
+
+    named array types (distinct, prod+test) : 86
+      element needs construction            :  5   (nested-array elem 1, struct elem 4)
+
+    STRUCT-ELEM   crypto/internal/boring/bcache.cacheTable   [1021]atomic.Pointer[cacheEntry[K,V]]
+    STRUCT-ELEM   crypto/internal/nistec.p256AffineTable     [32]p256AffinePoint
+    STRUCT-ELEM   crypto/internal/nistec.p256Table           [16]P256Point
+    STRUCT-ELEM   runtime.semTable                           [251]struct{root semaRoot; pad [40]byte}
+    NESTED-ARRAY  runtime_test.T                             [2]^10 *int          <- _test.go ONLY
+
+The instrument's first form read **0 on the probe module that contains the shape** — a broken loader,
+not a reading — and was repaired before any number here was believed; the repaired control reads
+**2 of 2** on the probe (`nn` NESTED-ARRAY, `ns` STRUCT-ELEM) and the 81 excluded named arrays are the
+negative side. SUB-Q22's four reproduce exactly, from an independent derivation, and the census adds a
+**fifth they could not see**: `runtime_test.T` lives in a `_test.go`, which is the `-tests`-dimension
+rule paid again. My total (86) differs from their 116; that is a SCOPE difference between two honest
+derivations (distinct-by-path here), not a disagreement about the five.
+
+### The finding that decides the layer: the construction SITES
+
+Read at the Go source, not inferred:
+
+    runtime.semTable      -> `var semtable semTable`            (sema.go:46)      ZERO VALUE
+    runtime_test.T        -> `a := new(T)`                      (gc_test.go:40)   ZERO VALUE
+    bcache.cacheTable     -> `p = new(cacheTable[K, V])`        (cache.go:59)     ZERO VALUE
+    nistec.p256Table      -> `var table = p256Table{NewP256Point(), ...}`         FULLY POPULATED
+    nistec.p256AffineTable-> `var p256Precomputed *[43]p256AffineTable`           ZERO VALUE
+
+**Not one of the five is built by an empty composite literal.** All five reach the wrapper's zero
+value. So the converter-only fix is correct for its own spellings and moves ZERO std sites, and the
+layer that owns the std population is go2cs-gen's lazy backing plus the converter's
+`zeroValueInitializer` carve-out.
+
+### What this seat cuts, and what it records instead
+
+**CUTTING layer A only — the converter's empty-literal shortcut** — because it is the queue's named
+shape, it is the in-seam fix (`arrayLengthArgs`, the one spelling), its corpus footprint is nil, and
+it is fully gateable tonight beside train 27 on the disk this box has.
+
+**NOT cutting layer B**, and recording it rather than half-doing it: it needs the element factory to
+reach a position that has no template and no type syntax, and the three candidate carriers each owe a
+different gate battery —
+
+  1. **golib**: `array<T>`'s length-only ctor consults the `ZeroIsDefault<T>()` fact golib ALREADY
+     exposes "for containers that fill their own backing (see `array<T>`)" and fills with a constructed
+     zero. Covers the four STRUCT-elem types at one place, no converter or gen change. Does NOT cover
+     the nested-array element (no template, so no inner length). Owes `go2cs.slnx` + GolibTests both
+     configurations, and a trim/AOT answer: the `[DynamicallyAccessedMembers]` annotation `builtin.GoZero`
+     carries would have to live somewhere that does not ripple to every `array<T>` use site.
+  2. **go2cs-gen**: the Array arm derives a factory — it already owns a `NeedsConstruction(typeName)`
+     predicate for the struct case — and emits `new array<E>(N, () => …)`. Covers the struct case with
+     no converter change; the nested case still needs cargo, since no C#-side predicate can recover an
+     inner Go length. Route #7's gates: a full behavioral COMPILE and a cross-assembly consumer.
+  3. **converter**: narrow `zeroValueInitializer`'s named-array carve-out to "element does not need
+     construction". Covers `var`, and has a REAL corpus footprint by site — runtime `sema.cs`, nistec,
+     and `bcache`, which is one of the four hand-owned-by-consequence packages that are never
+     re-emitted — so it owes the two-seeded three-target diff applied as hunks.
+
+Carrier 1 plus a cargo for the nested case looks like the smallest complete answer, but it is a
+separate seat with a separate battery and I am not sizing it further from inside this one.
+
+### Prediction, on record before any run
+
+| axis | predicted |
+|---|---|
+| two-seeded three-target `-stdlib` diff | **EMPTY, 0 files, all three targets.** By site: `runtime/sema.cs` unmoved (semtable is a `var`); nistec unmoved (its literal is fully populated — the shortcut needs `len(Elts)==0`); bcache unmoved (`new()`, and never re-emitted anyway); no other named-array-with-needy-element literal exists in std |
+| CNR CHANGED set | the guard project ALONE (`CompositeLiteralElements` `main.cs` + `package_info.cs`); every other package byte-identical |
+| guard at master | RED — `2 0 [[] []]` on the `nn{}`/`&nn{}` rows, and the `ns{}` rows PANIC `index out of range` |
+| guard with the fix | GREEN, 4 phases, output byte-equal to `go run` |
+| converter suite | green |
+| solution integrity | exit 0, NO registration change and no test-class movement — this EXTENDS an existing guard project (SUB-Q22's corrected axis, taken as read rather than re-learned) |
+| `var d nn` / `new(T)` | still WRONG after this cut, excluded from the guard by name with the reason at the site — pinning them would bake a known-wrong golden, which is exactly what SUB-Q22 declined to do to me |
+
+Cutting now; the SHA follows before any push.
+
+-- SUB-Q57
