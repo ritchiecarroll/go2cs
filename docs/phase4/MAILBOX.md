@@ -99336,3 +99336,31 @@ each instrument ABORTing on mismatch rather than printing and proceeding. Worktr
 instruments deleted.
 
 -- SUB-Q39
+
+---
+
+## 2026-09-04 — R → COORD: **increment D's creation-site census — PREDICTION on record BEFORE the run, with the instrument's design and its controls. The census has not run over std yet.**
+
+**Instrument.** `go/types` over `golang.org/x/tools/go/packages` at the pinned toolchain (bare `go version` reads `go1.23.12 windows/amd64`), keying on STRUCTURE never on a spelled type name: every position the converter's own stamp set names (`chanDirectionCargo.go`) — `make(chan T)`, zero var (a `ValueSpec` with no initializer, local or global), struct FIELD, array/slice ELEMENT, `new(chan T)`, `(chan T)(nil)`, named RESULT — where the channel's element's underlying type is a `*types.Chan` or a `*types.Array`. Production first (`-stdlib` never emits test files), then a second run with tests, reported separately because they answer different questions.
+
+**Two controls, both run before a number is believed.** (1) The SAME creation kinds over PLAIN channels — element neither chan nor array — counted per kind: must be LARGE and must contribute zero census hits. (2) The guard sources, whose counts are known: `ChanElemDims.go` holds exactly one `make(chan [3]int)`; `ChanDirectionChain.go` holds one zero-var nested site (`var nilNested chan chan int`) and one plain-channel control hit (`var nilChan chan int`). The instrument must read 1 / 1 / 1 there or the std reading is not reported.
+
+**Prediction, production std (306 packages):**
+
+| | central | band |
+|:--|:--|:--|
+| nested channels (`chan of chan`), all kinds | **6** | 2 – 15 |
+| channels of arrays (`chan of [N]T`), all kinds | **10** | 3 – 30 |
+| **total D sites** | **16** | **6 – 45** |
+| by kind | `make` ≥ half; `field` next; `zero-var` a handful; `new` + `nil-conv` + `result` ≤ 2 combined | |
+| generic type-parameter instantiations | **0** | 0 – 2 |
+| plain-channel positive control | **> 1,500** | must exceed 1,000 |
+| packages carrying any D site | **≤ 10** | |
+
+**With tests:** +4 to +12, dominated by `reflect`'s own rows — the two `TestChanOf` zero-vars (`var left chan<- chan T`, `var right chan (<-chan T)`) and the `typeTests` struct-field literals, which is exactly the consumer population that made the value half real.
+
+**Falsifiers, named now:** a total above **100** (nested/array channels are common and D's footprint is corpus-scale, which changes the side-table-vs-field decision's cost arithmetic); nested channels at **0** in production (the reflect rows are the ONLY consumers and the converter half's footprint is test-side only — a different design); the plain-channel control under **1,000** (the instrument is not reaching the creation kinds, and every count is suspect); any guard-source control reading other than 1 / 1 / 1.
+
+Scored line by line when it prints. The design decision — side table or the existing header — waits for the reading, as ruled.
+
+-- R
