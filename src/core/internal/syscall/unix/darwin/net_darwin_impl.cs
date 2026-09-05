@@ -19,7 +19,10 @@
 // Inet4/6). No native type and no trampoline crosses the assembly line, and there stays exactly ONE
 // definition of what a Go Sockaddr, a msghdr and an iovec look like to the kernel.
 //
-// SCOPE. All eight: RecvfromInet4/6, SendtoInet4/6, RecvmsgInet4/6, SendmsgNInet4/6 -- S1 and S2
+// SCOPE. All eight datagram helpers, plus -- since darwin increment 10 (a), 2026-09-05 -- the five
+// //go:linkname PULLS net_darwin.go makes of syscall's keystone family (syscall_syscall,
+// syscall_syscallPtr, syscall_syscall6, syscall_syscall6X, syscall_syscall9), at the bottom of the
+// file. The eight: RecvfromInet4/6, SendtoInet4/6, RecvmsgInet4/6, SendmsgNInet4/6 -- S1 and S2
 // together, on the evidence linux already measured for S2 (net's TestUDPIPVersionReadMsg,
 // TestUDPConnSpecificMethods and TestAllocs dying on PartialStubGenerator's body) and on the five
 // darwin behavioral rows whose paths are known (UdpLoopbackRoundTrip -> ReadFrom/WriteTo ->
@@ -197,5 +200,41 @@ partial class unix_package
 
             return syscall.GoSendmsgNative(fd, p, oob, buffer, (uint32)nameLen, flags);
         }
+    }
+
+    // ---- syscall's keystone family, pulled by //go:linkname (net_darwin.go) --------------------
+
+    // Go: `//go:linkname syscall_syscall6 syscall.syscall6` and four siblings -- two-argument PULLS
+    // of the syscall package's runtime-provided family (syscall/darwin/syscall_darwin_impl.cs, the
+    // keystone hand-own). Their targets are unexported in that assembly and carry no one-arg handle,
+    // so no forwarding property can reach them across the assembly boundary: the converter emits
+    // each as a bodyless partial and PartialStubGenerator's throw filled it -- the wall the
+    // SigIgnoreDisposition probe found on both mac legs (2026-09-05): exec.Command by bare name ->
+    // os/exec.LookPath -> unix.Eaccess -> faccessat -> syscall_syscall6 -> NotImplementedException,
+    // with os/user, the pty family and net's resolver path behind the same five names. Same shape
+    // as the eight above: a body here displaces the stub by construction, no registration and no
+    // converter change. The bodies stand on the syscall assembly's PUBLIC family -- Syscall,
+    // Syscall6 and Syscall9 carry the same Int32MinusOne failure test as their lowercase twins (the
+    // keystone hand-own: raw and cooked are the same call there) -- and on the two Go-prefixed doors
+    // added beside them for the rules that have no exported twin: syscall6X (all 64 bits == -1) and
+    // syscallPtr (NULL is the error). Darwin increment 10 (a).
+    internal static partial (uintptr r1, uintptr r2, syscall.Errno err) syscall_syscall(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
+        return syscall.Syscall(fn, a1, a2, a3);
+    }
+
+    internal static partial (uintptr r1, uintptr r2, syscall.Errno err) syscall_syscallPtr(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
+        return syscall.GoSyscallPtr(fn, a1, a2, a3);
+    }
+
+    internal static partial (uintptr r1, uintptr r2, syscall.Errno err) syscall_syscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
+        return syscall.Syscall6(fn, a1, a2, a3, a4, a5, a6);
+    }
+
+    internal static partial (uintptr r1, uintptr r2, syscall.Errno err) syscall_syscall6X(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
+        return syscall.GoSyscall6X(fn, a1, a2, a3, a4, a5, a6);
+    }
+
+    internal static partial (uintptr r1, uintptr r2, syscall.Errno err) syscall_syscall9(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6, uintptr a7, uintptr a8, uintptr a9) {
+        return syscall.Syscall9(fn, a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 }

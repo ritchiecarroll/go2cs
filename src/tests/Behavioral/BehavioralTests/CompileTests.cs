@@ -1852,6 +1852,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSynthesizedDelegateCrossPkg() => CheckTarget("SynthesizedDelegateCrossPkg");
 
     [TestMethod]
+    public void CheckSyscallKeystonePulls() => CheckTarget("SyscallKeystonePulls");
+
+    [TestMethod]
     public void CheckSystemCertVerify() => CheckTarget("SystemCertVerify");
 
     [TestMethod]
