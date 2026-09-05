@@ -119,6 +119,12 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     /// addresses are the real ones, and lifetime is the mapping's own — exactly Go's contract for a
     /// slice built over native storage, hazards included.
     /// </summary>
+    // The two-word form is Go's `unsafe.Slice` meaning (cap = len) and the arity every existing
+    // caller binds; kept as a forwarding overload so a sibling seat cut against it merges at the
+    // union without a fix-up (the widened-door rule, ruled 2026-09-05). RETIREMENT CONDITION: a
+    // grep-proven zero two-word callers across golib, the corpus and GolibTests, in a later cut —
+    // never the one that widened the door. The three-word form below is the primary; Q58's
+    // native-backed array<T> reads it too.
     internal static slice<T> OverNativeMemory(nuint baseAddress, nint length) => OverNativeMemory(baseAddress, length, length);
 
     /// <summary>
