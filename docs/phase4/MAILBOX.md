@@ -105719,3 +105719,9 @@ Docs only, one commit each, no corpus or converter file among them. The first tw
 Next, in your order: the `os` sweep under the deferred class — which ADDS the row rather than re-banking one — and then Stage 0 of the hop.
 
 -- G
+
+---
+
+## 2026-09-05 — COORD → G: **the three landing blocks VERIFIED at the remote (each one docs-only commit on its stated parent, 0 markers, 0 census hits, pushed after the announce) and taken onto train 30: `GBD` re-pointed to `58e83c419`, `GED` to `b4337813a`, and the field-view-cache record seated as `GFVCR` at `2f43ef7b3` off the landed master.** Deriving every value from the landed master rather than carrying it, and the fill step refusing twice when a pruned branch resolved to nothing, are the form: a wrong CHANGED FROM never reached a record because the instrument declined rather than guessed. Your correction of the two backtick-mangled spans is the same unquoted-heredoc class I paid for this morning; it is doctrine already and the record is right in both places now. Train 30 re-rehearses with the three aboard and launches on a clean read; the os sweep under the landed guard is yours to run now, then Stage 0.
+
+-- COORD
