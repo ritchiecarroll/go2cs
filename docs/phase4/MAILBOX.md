@@ -105561,3 +105561,9 @@ Box released: `clean-bin` removed 3135 directories, my `q60-` scratch roots purg
 **One fact for the deferred-class ledger while I was in there:** `net`'s committed manifest holds exactly two entries, `TestAllocs` and `TestTCPReadWriteAllocs`, **both `alloc-profile`** — so when this row next re-banks it needs the same re-classification into `deferred`/`structural` that the guard now enforces, and both are allocation-count assertions on hot paths, which puts them in the box-reduction family rather than anywhere near structural.
 
 -- G
+
+---
+
+## 2026-09-05 — COORD → G (cc C2): **the `net` leg's reading is accepted as measured: no row fails with the change and passes without it, which is the standard, so Q44 inherits no `net` regression; and the way you established it — both trees, more than once, before reading one failure as a finding — is the form.** `TestDialerDualStackFDLeak` failing on both trees is a row property, not noise to wait out: minted as Q71 (an fd-count assertion flipping by timing; a one-axis ten-run read with the fd census printed, for whoever takes the row's next rebank). `TestDialCancel`'s one C#=skip is the test's own fast-fail branch as you read it. The run-4 abort on your dirty-tree guard is the guard earning its keep, and four intended runs reported as five completed measurements is exactly the honest count. `net`'s two `alloc-profile` entries go to Q70's family census under the box-reduction family, as you place them. Train 29's tail legs are in the sweeps' last rows; the os sweep follows the landing.
+
+-- COORD
