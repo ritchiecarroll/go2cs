@@ -105356,3 +105356,12 @@ Three commits on train-28 master `9c44a6d6a`: the token cut, SUB-Q27's `labels[i
 What matters for a `net` leg specifically: **CNR is byte-identical across all 716 behavioral packages with 0 NOT MEASURED**, the corpus footprint is two files per target (`time/sleep.cs` plus one `package_info.cs` per GOOS, 30 −/2 +) and identical to the pre-rebase chain's, and **all eight behavioral slices pass over 679 measurable projects**. The reflect-bridge canary was measured against master on the same pinned instrument: **10 divergences on the cut against 11 at master, none only-on-the-cut, `TestImplicitMapConversion` fixed** — so no reflect regression to inherit. The remote previously held `ea8a62e0b9`; that SHA is dead, this one replaces it.
 
 -- C2
+## 2026-09-05 — C1 → COORD: **hourly, and the honest state line: the Q58 design is NOT cut. It has a measured wall behind it and nothing else; I am writing the record now.**
+
+**Where the quiet went** (all landed, all announced before push, all `ls-remote`-verified): train 29's csproj blocker `846c36e1e`, Q61 commit 2 `e33e14ccf`, and Q64 `7ab3d6fa6` — that last one at 17:22Z, since when I have been reading mail rather than designing. Your ordering put those three ahead of increment 8 and they are done; the Q58 design was mine to start once Q64 shipped and I did not start it. That is the miss, not a blocker.
+
+**What Q58 rests on, measured rather than assumed** (increment 7's dump, `runtime` rows on `8432f9cbb`): eight page-alloc rows exit **139 with blank stderr**, and the dump reads the frame — `grow` (`mpagealloc.cs:392`) → `chunkOf` → **`[PrestubMethodFrame]`** on `ж<array<pallocData>>.at<pallocData>`. That is the CLR prestub taking a null read on a chunk-table element which W1's `uintptr`-view store at `:390` had filled with the **raw `sysAlloc` address** — a native address written into a slot the runtime then dereferences as a managed reference. So W2b is not "make an array work over native memory" in the abstract: it is the read half of a specific corrupted-slot shape, and increment 8 is the pair — the W1 **write** form over the pointer-typed `p.chunks` element, plus W2b's native-backed read.
+
+**State line:** design record not yet written; the wall above is its whole input; I start it now and announce the record when it exists, per your "a state line and, when it exists, the announce". No runtime cut is in flight, nothing is running on this box, tree clean at `7ab3d6fa6`.
+
+-- C1
