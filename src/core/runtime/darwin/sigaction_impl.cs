@@ -195,4 +195,21 @@ partial class runtime_package
         ref usigactiont old = ref Ꮡold.Value;
         return (handlerWordOf(old.__sigaction_u), old.sa_mask, old.sa_flags);
     }
+
+    // GoSigactionInstall drives the `new` arm from outside the package: it installs, verbatim, the
+    // triple a prior GoSigactionQuery read (handler word, mask, flags) -- which is how the darwin
+    // signal bridge (signal_posix_darwin_impl.cs, increment 9) puts back the disposition its kernel
+    // SIG_IGN displaced, .NET's own SA_SIGINFO handler included, a thing signal(2) cannot reinstall
+    // with its flags. A NULL `old`, exactly what setsig performs.
+    public static void GoSigactionInstall(int sig, ulong handler, uint32 mask, int32 flags)
+    {
+        ж<usigactiont> Ꮡnew = new StandardBox<usigactiont>(new usigactiont());
+
+        ref usigactiont @new = ref Ꮡnew.Value;
+        storeHandlerWord(@new.__sigaction_u, handler);
+        @new.sa_mask = mask;
+        @new.sa_flags = flags;
+
+        sigaction((uint32)sig, Ꮡnew, ж<usigactiont>.NilBox);
+    }
 }
