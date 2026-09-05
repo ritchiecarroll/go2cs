@@ -57,12 +57,18 @@ public sealed class ElemRefBox<T> : ж<T>
     {
         switch (array)
         {
-            case slice<T> slice when slice.m_array is not null:
+            // ⚠ NOT `m_array is not null` alone. A NATIVE-backed slice carries `m_array = []` as its
+            // sentinel -- non-null AND empty, and `[]` is the shared Array.Empty<T>() singleton -- so
+            // this arm captured that empty array as the backing: every element read threw
+            // IndexOutOfRange, and every native block canonicalized onto the SAME object, giving
+            // unrelated blocks one storage identity. Sound until native-backed slices existed; a trap
+            // after, in the family of the ISlice : IArray one. Q58.
+            case slice<T> slice when !slice.IsNativeBacked && slice.m_array is not null:
                 m_backing = slice.m_array;
                 m_index = slice.Low + index;
                 break;
 
-            case ISlice<T> view when view.Slice((nint)0, view.Length) is slice<T> shared && shared.m_array is not null:
+            case ISlice<T> view when view.Slice((nint)0, view.Length) is slice<T> shared && !shared.IsNativeBacked && shared.m_array is not null:
                 m_backing = shared.m_array;
                 m_index = shared.Low + index;
                 break;
@@ -91,8 +97,22 @@ public sealed class ElemRefBox<T> : ж<T>
     // null (a zero-valued array header) keeps the foreign arm through its boxed self, as before.
     internal ElemRefBox(slice<T> slice, int index)
     {
-        m_backing = slice.m_array;
-        m_index = slice.Low + index;
+        // "A slice's backing is never null" (above) holds for MANAGED slices and is exactly the
+        // assumption a NATIVE-backed one breaks: its backing is the shared Array.Empty<T>(), so
+        // capturing it would read an empty array and hand every native block one identity. The
+        // concrete Ꮡ overloads route native slices to a NativeBox before they reach here, so this is
+        // defence at the predicate rather than a live path -- but a future caller is one call away,
+        // and the foreign arm is already the right answer for storage the GC does not own. Q58.
+        if (slice.IsNativeBacked)
+        {
+            m_foreign = slice;
+            m_index = index;
+        }
+        else
+        {
+            m_backing = slice.m_array;
+            m_index = slice.Low + index;
+        }
 
         AllocationCounter.Count();
     }
@@ -143,6 +163,18 @@ public sealed class ElemRefBox<T> : ж<T>
         }
     }
 
+    // A NATIVE-backed element's identity is its ADDRESS, exactly as NativeBox's is. The canonical
+    // (object, index) pair cannot serve here: the foreign source is a boxed slice HEADER, and a
+    // fresh box is a fresh object, so two pointers to ONE element would compare unequal — Go says
+    // `&a[i] == &a[i]`. Zero for every managed element, which keeps the canonical path unchanged.
+    private nuint nativeElementIdentity()
+    {
+        unsafe
+        {
+            return m_foreign is slice<T> ns && ns.IsNativeBacked ? ns.NativeElementAddress(m_index) : 0;
+        }
+    }
+
     /// <inheritdoc/>
     // Canonical backing identity in the high bits with the ABSOLUTE element index below, so
     // same-storage element pointers order by index exactly like Go addresses.
@@ -150,6 +182,9 @@ public sealed class ElemRefBox<T> : ж<T>
     {
         get
         {
+            if (nativeElementIdentity() is var addr and not 0)
+                return addr;
+
             (object storage, nint element) = CanonicalPair();
             return unchecked(AllocationBase(RuntimeHelpers.GetHashCode(storage)) + (nuint)(uint)element);
         }
@@ -167,6 +202,15 @@ public sealed class ElemRefBox<T> : ж<T>
         if (other is not ElemRefBox<T> er)
             return false;
 
+        // Address identity for native-backed elements (see nativeElementIdentity): two boxes over
+        // one address are one pointer, and a native element is never the same pointer as a managed
+        // one.
+        nuint thisAddr = nativeElementIdentity();
+        nuint otherAddr = er.nativeElementIdentity();
+
+        if (thisAddr != 0 || otherAddr != 0)
+            return thisAddr == otherAddr;
+
         (object storage1, nint element1) = CanonicalPair();
         (object storage2, nint element2) = er.CanonicalPair();
 
@@ -176,6 +220,9 @@ public sealed class ElemRefBox<T> : ж<T>
     /// <inheritdoc/>
     public override int GetHashCode()
     {
+        if (nativeElementIdentity() is var addr and not 0)
+            return addr.GetHashCode();
+
         (object storage, nint element) = CanonicalPair();
         return System.HashCode.Combine(RuntimeHelpers.GetHashCode(storage), element);
     }
@@ -292,11 +339,14 @@ public sealed class ElemRefBox<T> : ж<T>
                 return (pinned.PinnedTarget ?? array, index);
 
             case slice<T> slice:
-                return slice.m_array is null ? (array, index) : (slice.m_array, slice.Low + index);
+                // A native-backed slice has no managed backing to canonicalize onto, and its
+                // `m_array = []` is the SHARED Array.Empty<T>() -- canonicalizing onto that would make
+                // two element pointers into DIFFERENT native blocks compare EQUAL. Q58.
+                return slice.IsNativeBacked || slice.m_array is null ? (array, index) : (slice.m_array, slice.Low + index);
 
             // A NAMED slice type wraps a slice<T> window it does not expose directly; its
             // full-window interface sub-slice hands back the shared header.
-            case ISlice<T> view when view.Slice((nint)0, view.Length) is slice<T> shared && shared.m_array is not null:
+            case ISlice<T> view when view.Slice((nint)0, view.Length) is slice<T> shared && !shared.IsNativeBacked && shared.m_array is not null:
                 return (shared.m_array, shared.Low + index);
 
             // An array<T> is a struct over a shared T[] — normally the WHOLE of it, but Go's
