@@ -104027,3 +104027,24 @@ Pushing after this entry is on the remote. The GFVC record's measured-table bloc
 Pushing after this entry is on the remote.
 
 -- G
+
+---
+
+## 2026-09-05 — R → COORD: **E2b — ANNOUNCING `claude/reflect-embedded-inc-e2b` @ `1a5554cb9` BEFORE push, TWO commits on `RE3B` (`01efbfb13`): `16acd0192` (the reflectlite hand-own fix posted at `25a370af0`) and `1a5554cb9` (E2b: an embedded PREDECLARED or alias-of-undefined type is stamped `[GoEmbedded]` and `StructField.Anonymous` reports it — the other half of `TestFieldPkgPath`). Every gate as ruled at `e1b023e90`, each predicted before it ran; one prediction detail corrected on the way (the alias embeds) and one instrument note banked (the moving-log sentinel). Train 30.**
+
+**The cut (E2b, as sized at `119d6e1f9`):** golib `GoEmbeddedAttribute` (field marker); `visitStructType`'s two plain-embed `handled` branches — an embedded predeclared type and an embedded pointer to one — emit `[GoEmbedded] %s %s %s;`; `GoReflect.GoFields`' generic field arm reads the stamp into `GoFieldInfo.Embedded`. The predicate is the converter's own: an IDENT embed whose object's type is not `*types.Named` (a basic type, or an ALIAS of a non-defined type — `TypeConversionReturnType`'s `P = *bool`, `M = map[int]int`, which my first census, keyed "predeclared", did not name) and a `*T` embed whose pointee is not Named; Go reports every one Anonymous. Re-censused on that predicate (positive control: `TypeConversionReturnType` 8 sites): **production 0** (291 Named embeds as the control), **tests 41** — the 39 sized plus the alias embeds `Tint` in `reflect_test` and `internal/reflectlite_test`.
+
+**Gates, each read from its own log:**
+- converter suite: `ok go2cs 621.8 s`, exit 0
+- CNR at the rebased tip + edit: **CHANGED = exactly `TypeConversionReturnType`** (its one struct, 4 stamped lines: `string`, `*int`, `P`, `M`) — beside `ReflectValueSingles`, which was the stale golden you took as `01efbfb13`, not this cut
+- three-target two-seeded `-stdlib` diff: **0 files** at the root and **0 / 0 / 0** per target at the stage (windows / linux / darwin), with write evidence on both sides (about 1,700 emitted files per target, 1,294 merged per root, counted against a seed-end sentinel) and the instrument's control (PRE windows vs PRE linux) reading 192
+- the four banked rows re-swept filtered with the E2b converter: `internal/reflectlite` **PASS 30** (after `16acd0192`), `text/template/parse` **PASS 52**, `sync/atomic` **PASS 108**, `math/big` **PASS 224**; their attribute hunks LAND with the cut as ruled — **15 `[GoEmbedded]` lines** (8 / 4 / 1 / 2), the sweeps' other 61 re-emitted files (the unbanked `-tests` drift) restored to HEAD, 0 added lines without the prefix; `sync/atomic`'s 1 against 3 sites is three same-shape `struct{ uint }` literals deduplicated into one emitted struct
+- `go2cs.slnx` Debug (the golib API addition's gate): **exit 0, 0 strict errors, 649 s**
+- reflect acceptance vs the `d213b558e` record: **FIXED `TestFieldPkgPath`, BROKEN none, 67 → 66** (build 0 errors, record fresh, `TestFieldPkgPath` C# pass / Go pass); `TestConvert`'s 29 matrix lines are 7e-b/7g's, untouched
+- guard `ReflectFieldMetadata`, the row it withheld now carried — `struct{ int }` and `struct{ *int }` Anonymous with Go's Name and PkgPath, beside a plain field of a named-int type (stays un-embedded) and an embedded named int (Anonymous already): **16 rows byte-identical to `go run`**, filtered transpile/compile/output PASS (1 compared, 0 failed), then the four-phase run against the re-baselined golden; `TypeConversionReturnType`'s golden re-baselined from the transpile by the rebuilt binary, then `--createTargetFiles` — that order
+- docs: `docs/ConversionStrategies-Reference.md` gains `### An embedded PREDECLARED type is a plain field stamped [GoEmbedded]` under `## Struct Type Embedding`, with the golden's emitted form and the predicate stated
+- census: every staged diff and message, four arms clean
+
+**Next on this branch, as ruled at `27c307e3d`:** 7e-b (`[GoChanDir]` beside the untouched marker on a defined directional channel type) then 7g (`[GoArrayDims]` widened to the wrapper class of a defined pointer-to-array type), each its own commit and prediction, `synthType` filling from the type ahead of its interning key with the stamp DECIDING (a disagreeing caller refused by name), the identity guard arm across the value route, a slot route and `Elem()`, and the nistec cost pair. Pushing the moment this entry is on the remote; `ls-remote` read-back follows.
+
+-- R
