@@ -23,6 +23,25 @@ internal class InheritedTypeTemplate : TemplateBase
     public string? TargetTypeSize = null;
     public required string TypeClass;
 
+    // For the "Array" TypeClass: the construction expression for ONE element of the lazy backing, or
+    // null when `default(element)` is already the element's Go zero value — which is nearly always.
+    //
+    // `new array<E>(N)` fills its backing with `default(E)`, and that is NOT the Go zero value for an
+    // element that has to be built: a nested unnamed array (`type nn [2][3]int` — the inner length
+    // lives only in the Go type, so every element keeps a length-ZERO backing) or a struct whose own
+    // zero value needs construction (`type semTable [251]struct{ root semaRoot; pad [40]byte }` —
+    // `default` skips the generated constructor that runs the `pad = new(40)` initializer). Measured
+    // against `go run` before the fix: `var d nn` printed `2 0 [[] []]` where Go prints
+    // `2 3 [[0 0 0] [0 0 0]]`, and the first indexed write PANICKED.
+    //
+    // This is the ONE place every such zero value converges. The wrapper's backing is allocated
+    // lazily, so `default(nn)` — a `var`, a `new(T)`, a struct field, a named result, an element of
+    // an `array<nn>`/`slice<nn>`, a map read — all reach the Go zero value THROUGH this property;
+    // that is why the outer dimensions of `[2]nn` were already correct while only the innermost was
+    // wrong, and why fixing it here fixes all of them at once rather than one declaration site at a
+    // time. See TypeGenerator's Array arm for where the expression comes from.
+    public string? ElementZeroFactory = null;
+
     // W3a wrapper-scaffolding (docs/phase4/DESIGN-w3a-wrapper-scaffolding.md). True (the existing,
     // unconditional-public behavior) unless the caller knows the wrapped type (TypeName) is itself
     // not effectively public — set only by the test-file-declared defined-type-over-struct case
@@ -248,6 +267,16 @@ internal class InheritedTypeTemplate : TemplateBase
     // gate in `ж<T>.at()` structurally cannot see. It does NOT close a materialization that happens on a
     // by-value COPY of the wrapper (the copy's field is the one published) — that is the mpallocbits
     // operator-copy door, tracked separately.
+    // The lazy backing's constructor arguments: the length alone when `default(element)` is already
+    // the element's Go zero value, and the length plus a construction lambda when it is not. golib's
+    // `array<T>(nint length, Func<T> elementFactory)` overload is the same one the CONVERTER's
+    // arrayLengthArgs renders for every zero-value site it can spell; this is that argument list
+    // reached from the generator side, so a named array's zero value is built the same way whichever
+    // half of the toolchain gets there first.
+    private string LazyBackingArguments => ElementZeroFactory is { Length: > 0 } factory ?
+        $"{TargetTypeSize ?? "0"}, static () => {factory}" :
+        TargetTypeSize ?? "0";
+
     private string ValueProperty => TypeClass switch
     {
         "Pointer" => "",
@@ -261,7 +290,7 @@ internal class InheritedTypeTemplate : TemplateBase
 
                               if (value is null)
                               {
-                                  {{ValueFieldType}} created = new {{ValueFieldType}}(new {{TypeName}}({{TargetTypeSize ?? "0"}}));
+                                  {{ValueFieldType}} created = new {{ValueFieldType}}(new {{TypeName}}({{LazyBackingArguments}}));
                                   value = global::System.Threading.Interlocked.CompareExchange(ref m_value, created, null) ?? created;
                               }
 

@@ -142,7 +142,7 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 	typeParams, constraints := v.getGenericDefinition(identType)
 
 	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), typeParams, access, "")
-	v.writeString(target, "%spartial struct %s%s%s;", access, getSanitizedIdentifier(name), typeParams, constraints)
+	v.writeString(target, "%s%spartial struct %s%s%s;", namedArrayElemDimsAttr(identType), access, getSanitizedIdentifier(name), typeParams, constraints)
 	v.writeCommentString(target, comment, arrayType.Elt.End()+typeLenDeviation)
 	target.WriteString(v.newline)
 	finish()
@@ -193,6 +193,37 @@ func constArrayLength(value constant.Value) (string, bool) {
 	}
 
 	return strconv.FormatInt(length, 10), true
+}
+
+// namedArrayElemDimsAttr renders the `[GoArrayDims(...)]` stamp a NAMED fixed-array type needs when
+// its ELEMENT is itself an unnamed fixed array (`type nn [2][3]int`), or "" for every other shape.
+//
+// It is the one fact about such a type that reaches C# nowhere else. The wrapper's descriptor is
+// `[2]array<nint>` — the inner 3 is gone — and go2cs-gen builds the wrapper's backing lazily as
+// `new array<array<nint>>(2)`, i.e. two elements of `default(array<nint>)`: a LENGTH-ZERO array
+// where Go has three zeroed ints. Nothing downstream can repair that, because an `array<T>`'s length
+// is INSTANCE state and the lazy backing has no instance to read it from — which is exactly why this
+// is a converter stamp rather than a golib or generator inference. Measured before the fix, against
+// `go run`: `var d nn` printed `2 0 [[] []]` where Go prints `2 3 [[0 0 0] [0 0 0]]`, and the first
+// indexed write panicked.
+//
+// Emitted ONLY for a nested-array element, and the discriminator is exact rather than approximate:
+// goArrayDims walks unnamed arrays only, so it returns 2+ dimensions precisely when the element is
+// one — one dimension for `[4]byte`, for `[2]wa` over a struct, and for `[2]ni` over a NAMED array
+// (whose own wrapper allocates its own backing, so it needs nothing). The corpus census at this cut
+// puts that population at ZERO of 59 named array wrappers, so the stamp costs the emission nothing
+// today; a struct element needs no cargo at all, because go2cs-gen already owns that predicate and
+// owns the cross-ASSEMBLY half of it the converter could not supply.
+func namedArrayElemDimsAttr(namedType types.Type) string {
+	if namedType == nil {
+		return ""
+	}
+
+	if dims := goArrayDims(namedType.Underlying()); len(dims) > 1 {
+		return emitGoArrayDimsAttribute(namedType.Underlying())
+	}
+
+	return ""
 }
 
 // arrayZeroValueArgs renders the constructor arguments for a fixed-size array's zero value: the
