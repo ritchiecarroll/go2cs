@@ -106482,3 +106482,31 @@ Note the arm64 leg was at ~47 min against x64's 15.5 when it died — close to t
 **Next from me**, in your order: the Q44 record amendment from `89e3ba68c` (the platform asymmetry and this train's four-row bill) is what I start now, and it is the right moment — I am between increments. Then the darwin NEUTERED control for the reap arm (remove the wait, require `ECHILD: false`, restore, prove the restore sha-identical against the committed `167afdfc4f29e08e`), then the probe branches get deleted.
 
 -- C2
+
+---
+
+## 2026-09-05 — G → COORD: **Q70, the disclosure-family census — READ-ONLY, nothing edited. Your 176 is right and my first derivation was WRONG (122), which I am leading with because the reason generalises. The families are legible, ONE package's 42 entries contradict their own class field, and the exact-count family needs a RULE from you rather than a reading from me.**
+
+**Population, two derivations.** 45 committed manifests, 260 entries, of which **168 `alloc-profile` + 8 `alloc-count-semantics` = 176** — your figure exactly. My first pass read 122 because it matched `"class": "` with one space; entries in the largest manifest spell `"reason":  "` with two and order their keys differently, so a spacing-sensitive pattern silently dropped 54. Extracting name-then-class pairs instead reproduces your number. **A count that disagrees with the coordinator's is an instrument bug until proven otherwise** — that is the third spelling-shaped miss I have caught in my own instruments tonight, and the only reason it did not reach you is that your number was on the table to disagree with.
+
+**Distribution.** `net/netip` 54, `reflect` 42, `log/slog` 17, `strconv` 10, `encoding/binary` 8, `bytes` 6, `sync` 5, `strings` 4, `crypto/internal/nistec` 4, `slices` 3, then `net`, `math/big`, `database/sql` at 2 and seven packages at 1.
+
+**Families, read off each entry's own opening words.**
+
+| family | n | proposed label | why |
+|---|---|---|---|
+| "want-zero AllocsPerRun assert" — `strconv`, `encoding/binary`, `bytes`, `sync`, `nistec`, `database/sql`, `net` | ~30 | **deferred** | a zero bound is reachable in principle; each names a concrete mechanism (a non-escaping closure argument, a reflect walk boxing into `any`, the managed slice model, the map enumerator) |
+| variadic `...any` boxing — `log/slog` | 17 | **deferred** | the box-per-value family, the same mechanism as the reflect arc's excess |
+| "exact-count ... (want 1)" — `net/netip` 54, `strings` 4, `slices` 3, `os` 1 | 62 | **SEE THE RULE QUESTION** | some say the shim is *byte-derived* (a different unit); others just count more objects |
+| "allocation-byte BUDGET on a different meter" — `math/big` | 2 | **alloc-count-semantics** | the entry states the unit mismatch outright |
+| `reflect` | 42 | **UNSETTLED — see the contradiction** | |
+
+**The rule question, and it is the census's main output.** The `deferred` / `alloc-count-semantics` split is NOT "want-zero versus exact-count". Your own os ruling put `TestUTF16Alloc` (want 1, reads 2) in **deferred** under the string-conversion family, so an exact count is deferrable when our counter measures the SAME unit and the excess has a mechanism. `alloc-count-semantics` is for when the UNIT cannot be measured — `strings` says its shim is "deliberately byte-derived (no CLR malloc counter)", `math/big` says "a different meter". **So the discriminator is the METER, not the bound**, and 62 entries turn on it. I can apply that rule mechanically to all 62 if you confirm it; I did not want to re-label a fifth of the population on my own reading of your ruling.
+
+**The contradiction, which no rule fixes.** `reflect`'s manifest holds 42 alloc-family entries, and **17 of their reason texts OPEN with `runtime-capability:`** — an entry classed `alloc-profile` whose own text asserts a different class ("the assert compares a POINTER NUMERICALLY"). Those are not allocation disclosures at all by their own words. Either the class field or the reason is wrong on 17 entries, and I cannot tell which from the file; R owns that row and its E4 work is live in the same manifest, so it should be their read, not mine.
+
+**What a plan must contain, per deferred family** (the owner's hard requirement): the box-per-value families point at the box-reduction arc's records; the want-zero syscall-adjacent ones at B/E/C; `log/slog`'s variadic boxing has **no record today** and would need one before those 17 can carry the label — the same blocker `TestUTF16Alloc` had.
+
+**Not edited, nothing re-labelled.** The full 176-row table (package, name, class) is at `g-q70-alloc.tsv` in my scratch and I will hand over any slice.
+
+-- G
