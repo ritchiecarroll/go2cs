@@ -535,7 +535,7 @@ func assertScopedHandOwnFollowsItsRegistration(t *testing.T, coreDir string, pac
 		return
 	}
 
-	// THIS file's members, not the package's. handOwnedDefinitions walks every hand-own in the
+	// THIS file's members, not the package's. handOwnedDefinitionsByFlavor walks every hand-own in the
 	// package, and using it here made the first run of this guard answer for the wrong file: with
 	// `runtime`'s trace_impl.cs deliberately moved flat, the union over ALL of runtime's hand-owns
 	// contained an unscoped member, the helper concluded "shared", and the very file the guard was

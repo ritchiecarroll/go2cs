@@ -28,6 +28,17 @@
 // their principal's platform set — platformHandOwn_test.go owns that invariant). A cheap, mechanical
 // yes/no is what the merge seam needs; anything richer would duplicate the compiler, which the corpus
 // build already runs.
+//
+// AMENDED 2026-09-05 (Q62): that scope sentence was the guard's own blind spot, and it was measured.
+// The witness folded EVERY per-GOOS folder under `src/core/<pkg>/` into ONE name set, so a
+// registration widened to a flavour whose folder holds no body passed whenever ANY other flavour's
+// folder held one — a C# project compiles exactly one `<goos>/` folder, so one flavour's body cannot
+// answer for another's. C2 measured it on the darwin signal bridge: with `runtime/darwin`'s bridge
+// file moved aside the guard stayed GREEN, because `runtime/linux/signal_posix_impl.cs` declares the
+// same three members. The registry has carried the flavour axis since the goosScope arc; the witness
+// had not. Both arms of the ledger are now asked per FLAVOUR (see the arm comments below), and the
+// witness reads exactly the folders a build of that flavour compiles: the package's own directory
+// (flat, compiled everywhere) plus `<pkg>/<goos>/` (compiled there alone).
 
 package main
 
@@ -46,7 +57,34 @@ import (
 )
 
 // TestManualConversionRegistrationsHaveBodies is the forward direction: registration => a hand-owned
-// definition exists. This is the direction the Uname subtraction broke.
+// definition exists ON EVERY FLAVOUR THE SCOPE NAMES. This is the direction the Uname subtraction
+// broke, and the flavour axis is the Q62 amendment in the file header.
+//
+// Two arms, and they fail apart:
+//
+//   - FORWARD (scope ⇒ body): for each flavour the entry is scoped to, a hand-own compiled by that
+//     flavour's build must declare the member — flat in `<pkg>/`, or in `<pkg>/<goos>/`. A scope
+//     widened past its bodies is the standing shape of the two-flavour hand-own families (the signal
+//     bridge, the sockaddr twin, nanotime, sigprocmask): the widening merges, the body does not, and
+//     every gate on every other flavour stays green.
+//   - REVERSE (body ⇒ scope): a NON-partial hand-own in `<pkg>/<goos>/` declaring a member the entry
+//     does NOT displace on that flavour. The generated body survives beside it — CS0111 on that
+//     flavour alone. The `partial` exemption is not a softening: a bodyless `public static partial`
+//     is displaced simply by WRITING a body (PartialStubGenerator's predicate is
+//     `IsPartialDefinition && PartialImplementationPart is null`), which is the OTHER displacement
+//     mechanism and needs no registry entry at all. It is the whole measured population of this arm
+//     at master — runtime's nanotime1, registered darwin-only, whose windows and linux hand-owns are
+//     `partial` completions of the bodyless declaration in each flavour's stubs3.cs.
+//
+// The relationship with TestScopedSuppressionsHaveCompanions (suppressionCompanion_test.go) is
+// deliberate, not duplication. That guard asks the same question per (package, GOOS) at FILE
+// granularity — is there any marked companion at all — and is therefore blind to a companion that
+// exists but declares something else, which is exactly the darwin-bridge false green. This arm is
+// member-granular and sees it. In the other direction that guard is blind to nothing this one relies
+// on: its witness is the marker, so it cannot be fooled by the declaration regex below, whose
+// deliberate over-collection can hand THIS arm a false pass on a member some other declaration line
+// happens to name (measured: `runtime.read` is answered flat by `consistentHeapStats.read` in
+// managed_impl.cs — a different member, same bare name). Two witnesses, two failure modes; keep both.
 func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 	coreDir := filepath.Join("..", "core")
 
@@ -54,12 +92,24 @@ func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 		t.Skip("src/core is not beside the converter; nothing to walk")
 	}
 
-	var missing []string
+	type finding struct {
+		entry, goos, detail string
+	}
+
+	var missing []finding
+	var stranded []finding
 
 	for pkg, funcs := range manualConversionFuncs {
-		bodies := handOwnedDefinitions(t, filepath.Join(coreDir, filepath.FromSlash(pkg)))
+		packageDir := filepath.Join(coreDir, filepath.FromSlash(pkg))
+		bodies := handOwnedDefinitionsByFlavor(t, packageDir)
 
-		for name := range funcs {
+		// A package the corpus does not carry at all is not this guard's business (a scope naming
+		// something unconverted), matching TestScopedSuppressionsHaveCompanions' own skip.
+		if _, err := os.Stat(packageDir); err != nil {
+			continue
+		}
+
+		for name, scope := range funcs {
 			// A method registration ("g.guintptr", "SockaddrInet4.sockaddr") names the RECEIVER
 			// type and the member; the member is what a hand-own defines, so match on the tail.
 			member := name
@@ -67,47 +117,193 @@ func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 				member = member[dot+1:]
 			}
 
-			if !bodies[member] {
-				missing = append(missing, pkg+"."+name)
+			entry := pkg + "." + name
+			checked := 0
+
+			for _, goos := range knownTargetGOOS {
+				// A package that this target does not build cannot owe a body for it. Reuses the
+				// same reading suppressionCompanion_test.go arrived at: no folder of its own AND no
+				// flat sources means the target simply has no such package.
+				if !packageBuildsOn(t, packageDir, goos) {
+					continue
+				}
+
+				inScope := scope.includes(goos)
+
+				if inScope {
+					checked++
+
+					if !bodies.compiledOn(member, goos) {
+						where := bodies.locations(member)
+						detail := "no hand-own in that flavour's build declares it"
+
+						if where != "" {
+							detail = "the only hand-own declaring it is in " + where + ", which this flavour's build does not compile"
+						}
+
+						missing = append(missing, finding{entry: entry, goos: goos, detail: detail})
+					}
+
+					continue
+				}
+
+				// REVERSE: a body this flavour compiles that nothing displaces there.
+				if bodies.strandedOn(member, goos) {
+					stranded = append(stranded, finding{entry: entry, goos: goos})
+				}
+			}
+
+			// Every scoped flavour was skipped as "not built there" — fall back to the pre-Q62
+			// question so no entry goes unasserted.
+			if checked == 0 && !bodies.anywhere(member) {
+				missing = append(missing, finding{entry: entry, goos: "(any target)",
+					detail: "no hand-owned file in that package defines it"})
 			}
 		}
 	}
 
-	sort.Strings(missing)
+	sortFindings := func(list []finding) {
+		sort.Slice(list, func(i, j int) bool {
+			if list[i].entry != list[j].entry {
+				return list[i].entry < list[j].entry
+			}
 
-	for _, entry := range missing {
-		t.Errorf("manualConversionFuncs registers %s, but no hand-owned file in that package defines it — "+
-			"the generated body is displaced and the displacement has no destination, which is a build "+
-			"failure on the scoped platform (CS0117 at the first consumer), not a converter warning", entry)
+			return list[i].goos < list[j].goos
+		})
+	}
+
+	sortFindings(missing)
+	sortFindings(stranded)
+
+	for _, f := range missing {
+		t.Errorf("manualConversionFuncs registers %s and displaces it on %s, but %s — the generated body "+
+			"is gone and the displacement has no destination there, which is a build failure on that "+
+			"platform alone (CS0117 at the first consumer) while every other flavour's gate stays green. "+
+			"Either author the body under src/core/<pkg>/%s/, or narrow the entry's goosScope to the "+
+			"flavours that carry one", f.entry, f.goos, f.detail, f.goos)
+	}
+
+	for _, f := range stranded {
+		t.Errorf("a hand-own under src/core/%s/ declares %s, but the registration does NOT displace it on "+
+			"%s — the generated body survives beside the hand-owned one and the package fails CS0111 on "+
+			"that platform alone. Either widen the entry's goosScope to %s, or retire the stranded body. "+
+			"(A `partial` body is exempt: writing into a bodyless partial is the other displacement "+
+			"mechanism and needs no registration.)",
+			strings.SplitN(f.entry, ".", 2)[0]+"/"+f.goos, f.entry, f.goos, f.goos)
 	}
 }
 
-// handOwnedDefinitions returns the member names DEFINED by the hand-owned files of one package —
-// every `*_impl.cs` plus every file carrying the whole-file `[module: GoManualConversion]` marker,
-// which are the two shapes a hand-own takes (platformHandOwn_test.go's own framing). Walks nested
-// per-GOOS folders, because layout L3 routes hand-owns into them.
-func handOwnedDefinitions(t *testing.T, packageDir string) map[string]bool {
-	t.Helper()
+// handOwnBodies is one package's hand-own witness, split by which builds compile it: `flat` is the
+// package's own directory (every target), `perGOOS` is one set per platform folder (that target
+// alone). `perGOOSPartial` narrows a per-GOOS set to declarations carrying `partial` — the bodyless
+// partial completion, which displaces without a registration.
+type handOwnBodies struct {
+	flat           map[string]bool
+	perGOOS        map[string]map[string]bool
+	perGOOSPartial map[string]map[string]bool
+}
 
-	defined := map[string]bool{}
+// compiledOn is the FORWARD arm's whole rule: is a hand-own declaring this member in the set of
+// files a build of `goos` compiles? A flat hand-own is in every flavour's build; a per-GOOS one is
+// in its own alone, and in no other's — which is the fact the pre-Q62 union witness lost.
+func (b handOwnBodies) compiledOn(member string, goos string) bool {
+	return b.flat[member] || b.perGOOS[goos][member]
+}
 
-	if _, err := os.Stat(packageDir); err != nil {
-		return defined
+// strandedOn is the REVERSE arm's whole rule: a body this flavour compiles that no registration
+// displaces there. `partial` is exempt because writing into a bodyless partial IS a displacement —
+// the mechanism that needs no registry entry (see the test's arm comment).
+func (b handOwnBodies) strandedOn(member string, goos string) bool {
+	return b.perGOOS[goos][member] && !b.perGOOSPartial[goos][member]
+}
+
+// anywhere is the pre-Q62 question, kept for the fallback: does SOME hand-own of this package
+// declare the member, wherever it sits?
+func (b handOwnBodies) anywhere(member string) bool {
+	if b.flat[member] {
+		return true
 	}
 
-	err := filepath.Walk(packageDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() || !strings.HasSuffix(path, ".cs") {
-			return nil
+	for _, names := range b.perGOOS {
+		if names[member] {
+			return true
 		}
+	}
+
+	return false
+}
+
+// locations names the folders that DO declare a member, so a forward failure says where the body
+// went rather than only that it is not here. Empty when nothing declares it anywhere.
+func (b handOwnBodies) locations(member string) string {
+	var where []string
+
+	if b.flat[member] {
+		where = append(where, "the package's own directory")
+	}
+
+	for _, goos := range knownTargetGOOS {
+		if b.perGOOS[goos][member] {
+			where = append(where, goos+"/")
+		}
+	}
+
+	return strings.Join(where, ", ")
+}
+
+// handOwnedDefinitionsByFlavor reads one package's hand-owns the way a BUILD reads them: the
+// package's own directory plus each `<goos>/` folder, never a sibling's and never a child package's.
+//
+// Two scope rules, both of them the reason this replaced a recursive walk:
+//
+//   - Depth. The walk it replaced descended into subdirectories, and a converted package's
+//     subdirectories are usually OTHER packages (net/http holds cgi, httptest, …) — the same false
+//     PASS generatedFuncPlaceholders below already refuses by stopping at depth 1. Measured at the
+//     Q62 census: zero registrations at master were witnessed only by a child package, so closing
+//     it costs nothing and removes the hole.
+//   - Flavour. One flavour's folder cannot answer for another's, which is the amendment itself.
+func handOwnedDefinitionsByFlavor(t *testing.T, packageDir string) handOwnBodies {
+	t.Helper()
+
+	bodies := handOwnBodies{
+		flat:           map[string]bool{},
+		perGOOS:        map[string]map[string]bool{},
+		perGOOSPartial: map[string]map[string]bool{},
+	}
+
+	bodies.flat, _ = handOwnedDefinitionsIn(packageDir)
+
+	for _, goos := range knownTargetGOOS {
+		bodies.perGOOS[goos], bodies.perGOOSPartial[goos] = handOwnedDefinitionsIn(filepath.Join(packageDir, goos))
+	}
+
+	return bodies
+}
+
+// handOwnedDefinitionsIn returns the member names declared by the hand-owned files sitting DIRECTLY
+// in one directory — every `*_impl.cs` plus every file carrying the whole-file
+// `[module: GoManualConversion]` marker, which are the two shapes a hand-own takes
+// (platformHandOwn_test.go's own framing) — and, separately, the subset declared on a `partial` line.
+func handOwnedDefinitionsIn(dir string) (map[string]bool, map[string]bool) {
+	defined := map[string]bool{}
+	partial := map[string]bool{}
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return defined, partial
+	}
+
+	for _, entry := range entries {
+		name := entry.Name()
 
 		// `.cs.auto` review siblings are the converter's own output, never a hand-own.
-		if strings.HasSuffix(path, ".cs.auto") {
-			return nil
+		if entry.IsDir() || !strings.HasSuffix(name, ".cs") || strings.HasSuffix(name, ".cs.auto") {
+			continue
 		}
 
-		content, readErr := os.ReadFile(path)
+		content, readErr := os.ReadFile(filepath.Join(dir, name))
 		if readErr != nil {
-			return nil
+			continue
 		}
 
 		text := string(content)
@@ -116,25 +312,142 @@ func handOwnedDefinitions(t *testing.T, packageDir string) map[string]bool {
 		// uses `<name>_impl_test.cs` (internal/reflectlite's export_impl_test.cs defines Field,
 		// TField and Zero, all three registered). Calibrated against the corpus rather than
 		// assumed — a `_impl.cs`-only suffix check reported those three as missing bodies.
-		isImpl := strings.Contains(filepath.Base(path), "_impl")
+		isImpl := strings.Contains(name, "_impl")
 
 		if !isImpl && !manualConversionMarker.MatchString(text) {
-			return nil
+			continue
 		}
 
 		for _, line := range csharpDeclarationLine.FindAllString(text, -1) {
+			isPartial := csharpPartialDeclaration.MatchString(line)
+
 			for _, match := range csharpCallableName.FindAllStringSubmatch(line, -1) {
 				defined[match[1]] = true
+
+				if isPartial {
+					partial[match[1]] = true
+				}
 			}
 		}
-
-		return nil
-	})
-	if err != nil {
-		t.Fatalf("walking %s: %v", packageDir, err)
 	}
 
-	return defined
+	return defined, partial
+}
+
+// csharpPartialDeclaration marks a declaration line as the implementing half of a bodyless partial —
+// the displacement mechanism that needs no registry entry, and therefore the reverse arm's exemption.
+var csharpPartialDeclaration = regexp.MustCompile(`\bpartial\b`)
+
+// packageBuildsOn reports whether a target's build of this package compiles anything: its own
+// `<goos>/` folder, or flat sources every target shares. A package with neither is simply not built
+// there (crypto/x509/internal/macos on windows), and cannot owe a body for it. The same reading
+// suppressionCompanion_test.go arrived at, reached through its own helpers so there is one
+// definition of the fact rather than two that merge without a conflict.
+func packageBuildsOn(t *testing.T, packageDir string, goos string) bool {
+	t.Helper()
+
+	if info, err := os.Stat(filepath.Join(packageDir, goos)); err == nil && info.IsDir() {
+		return true
+	}
+
+	return hasFlatSources(t, packageDir)
+}
+
+// TestPerFlavorWitnessCannotAnswerAcrossFlavors is the standing control for the Q62 amendment, and it
+// is synthetic on purpose: the four controls that measured the amendment on the real corpus all
+// MUTATE it (a body moved aside, a scope widened, a scope narrowed, a `partial` stripped), which is
+// fine for a one-off measurement and impossible for a test that must run in every clone. This one
+// builds the four shapes in a temp directory instead, so both arms of the ledger keep a control that
+// can go RED with no corpus to disturb.
+//
+// The four shapes, each pinning one clause the corpus measurement exercised:
+//
+//	linux/only_impl.cs      a per-GOOS body — visible to linux, INVISIBLE to windows and darwin.
+//	                        This is the whole amendment: the union witness it replaced answered
+//	                        "defined" for all three, which is how a darwin scope widened past its
+//	                        body stayed green while runtime/linux carried the twin.
+//	shared_impl.cs          a flat body — visible to EVERY flavour, which is why the forward arm
+//	                        accepts it as a witness for a scope naming any of them.
+//	darwin/partial_impl.cs  a `partial` body — the other displacement mechanism, exempt from the
+//	                        reverse arm; without the exemption every bodyless-partial completion in
+//	                        the corpus reads as a stranded body (nanotime1 is the live instance).
+//	child/deep_impl.cs      a CHILD package's body — never a witness for its parent, the depth rule
+//	                        generatedFuncPlaceholders already states and the replaced walk did not.
+func TestPerFlavorWitnessCannotAnswerAcrossFlavors(t *testing.T) {
+	packageDir := t.TempDir()
+
+	write := func(rel string, decl string) {
+		full := filepath.Join(packageDir, filepath.FromSlash(rel))
+
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		source := "namespace go;\n\npartial class fixture_package {\n\n" + decl + " {\n}\n\n}\n"
+
+		if err := os.WriteFile(full, []byte(source), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	write("linux/only_impl.cs", "internal static error perFlavorOnly(nint fd)")
+	write("shared_impl.cs", "internal static error flatEverywhere(nint fd)")
+	write("darwin/partial_impl.cs", "internal static partial int64 partialCompletion()")
+	write("child/deep_impl.cs", "internal static error childPackageOnly(nint fd)")
+
+	if err := os.MkdirAll(filepath.Join(packageDir, "windows"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	bodies := handOwnedDefinitionsByFlavor(t, packageDir)
+
+	// The witness must collect what it was pointed at, or every assertion below is vacuous.
+	if !bodies.perGOOS["linux"]["perFlavorOnly"] || !bodies.flat["flatEverywhere"] || !bodies.perGOOS["darwin"]["partialCompletion"] {
+		t.Fatalf("the witness did not collect the fixture bodies (linux=%v flat=%v darwin=%v); the control measures nothing",
+			bodies.perGOOS["linux"], bodies.flat, bodies.perGOOS["darwin"])
+	}
+
+	// FORWARD: a per-GOOS body answers for its own flavour and for no other.
+	for _, goos := range knownTargetGOOS {
+		want := goos == "linux"
+
+		if got := bodies.compiledOn("perFlavorOnly", goos); got != want {
+			t.Errorf("compiledOn(perFlavorOnly, %s) = %v, want %v — a body under <pkg>/linux/ is compiled by the linux build alone", goos, got, want)
+		}
+
+		// FORWARD: a flat body answers for every flavour.
+		if !bodies.compiledOn("flatEverywhere", goos) {
+			t.Errorf("compiledOn(flatEverywhere, %s) = false — a flat hand-own is in every flavour's build", goos)
+		}
+
+		// A child package is never a witness for its parent, on any flavour.
+		if bodies.compiledOn("childPackageOnly", goos) {
+			t.Errorf("compiledOn(childPackageOnly, %s) = true — a subdirectory that is not a GOOS folder is another PACKAGE, and its bodies cannot answer for this one", goos)
+		}
+	}
+
+	// The pre-Q62 union question still answers TRUE for the per-GOOS body, which is precisely why it
+	// could not see the defect: the amendment is the difference between these two lines.
+	if !bodies.anywhere("perFlavorOnly") {
+		t.Error("anywhere(perFlavorOnly) = false; the pre-Q62 witness is mis-modelled and the contrast this control draws is not the real one")
+	}
+
+	// REVERSE: a non-partial per-GOOS body is stranded on its own flavour and nowhere else.
+	for _, goos := range knownTargetGOOS {
+		if got, want := bodies.strandedOn("perFlavorOnly", goos), goos == "linux"; got != want {
+			t.Errorf("strandedOn(perFlavorOnly, %s) = %v, want %v", goos, got, want)
+		}
+
+		// REVERSE: a `partial` completion is never stranded — it displaces by being written.
+		if bodies.strandedOn("partialCompletion", goos) {
+			t.Errorf("strandedOn(partialCompletion, %s) = true — writing a body into a bodyless partial is the other displacement mechanism and needs no registration", goos)
+		}
+
+		// REVERSE: a flat body is not a per-GOOS stranding; the flat/per-GOOS split is the point.
+		if bodies.strandedOn("flatEverywhere", goos) {
+			t.Errorf("strandedOn(flatEverywhere, %s) = true — a flat body is not routed to any one flavour", goos)
+		}
+	}
 }
 
 // manualConversionMarker moved to testConversion.go (2026-09-04), where handOwnHostTestTarget needs
@@ -202,7 +515,7 @@ var csharpCallableName = regexp.MustCompile(`\b([A-Za-z_][A-Za-z0-9_]*)\s*(?:<[^
 // witness and displacement cannot disagree. What survives is the narrow case of editing an ALREADY
 // CORRECT key down to its bare form without regenerating, where the stale placeholder answers for
 // the new key until the next regen — and the CS0111 that follows is caught by the corpus build, one
-// layer out, exactly as the over-collection in handOwnedDefinitions above is.
+// layer out, exactly as the over-collection in handOwnedDefinitionsIn above is.
 //
 // NO EXEMPTION LIST, and that was measured rather than assumed. The three `runtime` entries declared
 // in runtime2.go look structurally unwitnessable — `runtime/runtime2.cs` is a whole-file hand-own, so
@@ -210,7 +523,7 @@ var csharpCallableName = regexp.MustCompile(`\b([A-Za-z_][A-Za-z0-9_]*)\s*(?:<[^
 // review sibling it writes for exactly that case, and searching the siblings takes the residual set
 // to zero. The sibling is the right place to look, not a loophole: it is the converter's own record
 // of what it WOULD emit, which is precisely this test's question. Note the asymmetry with
-// handOwnedDefinitions above, which SKIPS `.cs.auto` — its question is "does a HAND-OWN define
+// handOwnedDefinitionsIn above, which SKIPS `.cs.auto` — its question is "does a HAND-OWN define
 // this?", and a sibling is not a hand-own. Same files, opposite treatment, both correct; do not
 // "unify" them.
 //
@@ -351,7 +664,7 @@ func testDeclaredFuncs(goRoot, pkg string) map[string]bool {
 // generatedFuncPlaceholders returns the member names the converter displaced a func body for in ONE
 // package: the generated `.cs` at the package root, the per-GOOS folders layout L3 routes a
 // platform-scoped declaration into, and the `.cs.auto` review siblings (see the caller's note on why
-// the siblings count here and not in handOwnedDefinitions).
+// the siblings count here and not in handOwnedDefinitionsIn).
 //
 // Scope is the package's OWN files — root plus GOOS folders — not a full recursive walk. A converted
 // package's subdirectories are usually OTHER packages (net/http holds cgi, httptest, …), and counting
