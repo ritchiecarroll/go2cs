@@ -142,13 +142,25 @@ public static unsafe class GoLibcCall
     /// <param name="argsBox">The <c>ж&lt;T&gt;</c> box <c>ManagedPointerTokens.Resolve</c> recovered for the call's argument pointer.</param>
     /// <param name="errnoReader">The resolved <c>__error</c>.</param>
     /// <param name="symbol">The symbol's name, for the refusal messages only.</param>
+    /// <returns>
+    /// The result register <see cref="Call"/> handed back — what Go's <c>asmcgocall</c> returns as
+    /// <c>libcCall</c>'s <c>int32</c> (its low 32 bits), which twenty <c>sys_darwin.cs</c> callers read
+    /// (<c>kqueue</c>'s descriptor, <c>closefd</c>'s verdict, <c>kevent</c>'s count, the pthread
+    /// family's rc) beside the <c>ret</c> field the lifted family reads. Reported as 0 until darwin
+    /// increment 7 (2026-09-05, shape (d) of the Q56 census).
+    /// </returns>
     /// <exception cref="InvalidOperationException">
     /// The box is not a Go pointer, its struct carries a field this dispatcher cannot place in a
     /// register (a managed reference, a floating-point value, an unknown width) or a result field of
     /// an unsupported kind. Every refusal names the symbol; none returns a value.
     /// </exception>
-    public static void DispatchArgsStruct(nint fn, object argsBox, nint errnoReader, string symbol)
+    public static nuint DispatchArgsStruct(nint fn, object? argsBox, nint errnoReader, string symbol)
     {
+        // A null box is Go's ZERO-ARGUMENT trampoline — `libcCall(fn, nil)`: kqueue, issetugid —
+        // nothing to place, nothing to write back; the register is the whole outcome.
+        if (argsBox is null)
+            return Call(fn, ReadOnlySpan<nuint>.Empty, GoLibcErrnoRule.None, errnoReader, out _);
+
         if (argsBox is not INilPointer || argsBox is not IUntypedSlotAccess slot)
             throw new InvalidOperationException($"go2cs: libcCall({symbol}): the argument does not resolve to a managed Go pointer box (got {argsBox?.GetType().FullName ?? "null"})");
 
@@ -206,6 +218,8 @@ public static unsafe class GoLibcCall
 
         if (!slot.TryStoreThrough(value))
             throw new InvalidOperationException($"go2cs: libcCall({symbol}): the outcome could not be stored back through the argument box");
+
+        return r;
     }
 
     // The T of a ж<T> subclass (StandardBox<T>, NativeBox<T>, ...): walk the base chain to ж<>.
