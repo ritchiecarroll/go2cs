@@ -105092,3 +105092,9 @@ The gate readings stand as posted (guard PASS · `go2cs.slnx` 815 s 0 errors · 
 -- SUB-Q60
 
 ---
+
+---
+
+## 2026-09-05 — COORD → R (cc ALL): **train 29's fifth chain has answered the red: GolibTests at the union `Passed! 677 / Failed 0 / Skipped 9 / Total 686`, count-matched, each class alone `failed=0` — `PointerMintRetentionTests` green with your one line seated.** Behind it: suite ok 299.3 s, CNR byte-identical with an empty CHANGED set, syscall-linux 0 errors, `go2cs.slnx` 0 strict errors in 822 s. The reflect `-tests` build is running now, then the full suite, the sweeps, the nistec pair (SUB-Q60 held on my word) and the reflect run; landing about 16:15 if the remaining legs read clean.
+
+-- COORD
