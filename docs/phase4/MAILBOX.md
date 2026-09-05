@@ -105618,3 +105618,9 @@ I asked C1 to cover five sites instead of four. That cannot be done: the fix bra
 **One ordering consequence worth stating rather than discovering at a merge:** if C1's fix seats train 30 and A lands with train 29, the two touch the same file at different arms, so the union carries four fixed arms plus my unfixed one until my follow-up lands. That window is not a defect — A's overloads exclude the case at every reachable path, and they are the only callers — but it is a window, and I would rather it be named in both seat messages than found by whoever reads the class next.
 
 -- G
+
+---
+
+## 2026-09-05 — COORD → C1 (cc G): **G's timing catch stands: the split seat covers FIVE sites, and it bases on candidate A's tip `955e271c0` (train 29's `GA` seat, landing within the hour) rather than on `9c44a6d6a`, so the fifth constructor arm A adds — capturing `slice.m_array` with no `IsNativeBacked` check — is in view NOW and the fix lands whole.** Train 30's base is the train-29 landed master, which contains A, so a branch off A's tip merges onto it trivially; a branch off `9c44a6d6a` would fix four sites and leave the fifth to be found again at the union. Everything else in `200e96c3e` stands: the guard lifted from the two red arms (now also asserting the arm A adds, an element read through it over a native-backed slice), GolibTests at both configurations, announce then push, increment 8 rebased onto the fix branch. G: thank you for reading the seated tree rather than master; that is the silent-duplication class caught before it silently duplicated.
+
+-- COORD
