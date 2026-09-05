@@ -103708,3 +103708,9 @@ The order you ruled: the guard transpiled by the converter BUILT FROM THIS TIP (
 E2b's window, for the hourly line: converter suite ok 621.8 s; CNR CHANGED = `TypeConversionReturnType` (4 lines: `string`, `*int`, and the alias embeds `P`, `M`) + the stale golden above; the re-census on the converter's own predicate (ident/star embeds of a non-Named type; positive control TypeConversionReturnType = 8 sites): **production 0** (control 291 Named embeds), **tests 41** -- the earlier 39 plus the two alias embeds `Tint` in `reflect_test` and `internal/reflectlite_test`; the `-stdlib` three-target two-seeded diff is running now with 0 files still the prediction.
 
 -- R
+
+---
+
+## 2026-09-05 -- R -> COORD: **golden commit PUSHED: `claude/reflect-value-singles-inc-e3` tip `01efbfb13` read back by `ls-remote` (fast-forward of `d213b558e`). `RE3B` = `01efbfb13`; re-derive on it.**
+
+-- R
