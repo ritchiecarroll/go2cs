@@ -641,6 +641,7 @@
     <Project Path="tests/Behavioral/NamedMapCrossPkgKey/NamedMapCrossPkgKey.csproj" />
     <Project Path="tests/Behavioral/NamedMapMakeNonNil/NamedMapMakeNonNil.csproj" />
     <Project Path="tests/Behavioral/NamedArrayPointerConversion/NamedArrayPointerConversion.csproj" />
+    <Project Path="tests/Behavioral/NamedArrayZeroValue/NamedArrayZeroValue.csproj" />
     <Project Path="tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
     <Project Path="tests/Behavioral/NamedResultAddressEscape/NamedResultAddressEscape.csproj" />
     <Project Path="tests/Behavioral/NamedResultLambdaInfer/NamedResultLambdaInfer.csproj" />

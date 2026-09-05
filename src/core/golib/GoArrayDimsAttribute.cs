@@ -42,6 +42,19 @@ namespace go;
 /// the element's for a map. A map's KEY is the one accessor with no slot in that rule and carries
 /// <see cref="GoMapKeyDimsAttribute"/> instead.
 /// </para>
+/// <para>
+/// A named fixed-array TYPE is the third position, and it is the only one whose reader is the source
+/// GENERATOR rather than the reflection bridge. <c>type nn [2][3]int</c> emits
+/// <c>[GoType("[2]array&lt;nint&gt;")] partial struct nn;</c>, and go2cs-gen builds that wrapper's
+/// backing lazily as <c>new array&lt;array&lt;nint&gt;&gt;(2)</c> — two elements of
+/// <c>default(array&lt;nint&gt;)</c>, which is a LENGTH-ZERO array where Go has three zeroed ints.
+/// The 3 is absent from the descriptor and cannot be recovered downstream from anything, because an
+/// <see cref="array{T}"/>'s length is instance state and this site has no instance; so the converter
+/// stamps the whole chain here, outermost first, and the generator builds an element factory from
+/// everything after the first dimension. Same meaning as the other positions — the dims of what
+/// <c>Elem()</c> hands down — reached one hop earlier, at construction rather than at description.
+/// A NAMED element needs no stamp: its own wrapper allocates its own backing by this same route.
+/// </para>
 /// </remarks>
 /// <para>
 /// The dimensions are <b>64-bit</b>, because a Go array length is Go's <c>int</c> — 64-bit on a
@@ -60,7 +73,7 @@ namespace go;
 /// idiom reaches the bridge only through a POINTER, which is this attribute's position, not that
 /// one.
 /// </para>
-[AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+[AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
 public sealed class GoArrayDimsAttribute(params long[] dims) : Attribute
 {
     /// <summary>The Go array dimensions, outermost first.</summary>

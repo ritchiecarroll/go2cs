@@ -6116,6 +6116,96 @@ reads an array field at length 0. (Guarded by the `NestedFixedArrays` behavioral
 writes read back through inner arrays, per-element storage independence, three-level nesting,
 struct/named-array elements, and the global paths, all compared against `go run`.)
 
+### A NAMED array's ZERO VALUE constructs its elements through the wrapper's lazy backing
+
+The section above closes every site the CONVERTER can spell. A named array type has a whole class of
+sites it cannot: the wrapper allocates its backing lazily, so `default(nn)` — with no declaration for
+the converter to rewrite — is a complete Go zero value that go2cs-gen materializes on first touch as
+`new array<E>(N)`. That is the same `default(E)` fill one layer down, and it was wrong for the same
+two element shapes.
+
+Measured against `go run`, `type nn [2][3]int` and `type ns [2]wa` (`wa` carrying a fixed-array
+field — runtime's `semTable` shape) diverged at **seven distinct site kinds**, and the arithmetic is
+what identifies the single cause:
+
+| site | Go | before |
+|---|---|---|
+| `var d nn` · `new(nn)` · a struct FIELD · a named RESULT · a map read | `2 3 [[0 0 0] [0 0 0]]` | `2 0 [[] []]` |
+| `var aa [2]nn` · `make([]nn, 2)` | `2 2 3 …` | `2 2 0 …` |
+| `d[1][2] = 9` | `[[0 0 0] [0 0 9]]` | `panic: index out of range [2] with length 0` |
+
+The `2 2 0` rows are the diagnosis, not a detail: in an `array<nn>` the outer and middle dimensions
+were **already correct**, because the wrapper heals its own length on first touch. Only the innermost
+— the one the lazy backing fills — was wrong. So all of these funnel through ONE emission, and
+narrowing `zeroValueInitializer`'s named-array carve-out would have reached only the two sites that
+have a declaration statement (`var` and the named-result prologue), leaving five.
+
+The fix is therefore at that one emission, and it is split across the two halves by **which half
+holds the fact**:
+
+- **go2cs-gen** answers for a STRUCT element, reusing the `NeedsConstruction` predicate it already
+  applies to a struct FIELD (now `static`, taking its context and cache explicitly, so there is one
+  definition rather than a second copy). It owns the half the converter could not supply anyway: a
+  cross-ASSEMBLY element resolves by metadata symbol rather than syntax. The rendering is the same
+  NilType construction a needy field takes — `new array<wa>(2, static () => new wa(nil))`.
+
+  The element name has to be asked in **both spellings it can arrive in**, and this cost a measured
+  defect before it was found. A struct FIELD reaches the predicate already `global::go.`-rooted,
+  because `GetStructMembers` produces rooted names; a `[GoType("[N]E")]` descriptor's element is
+  *package-alias-qualified* (`sync.atomic_package.Pointer<…>`), which is not a CLR name at all —
+  every converted package class lives under the `go` namespace. Asked in that spelling alone, every
+  cross-assembly element answered false, and answered it **silently**: the wrapper simply kept the
+  bare-length backing this change exists to remove. `FindUnderlyingStructSymbol` already documents
+  and performs the retry for the same reason one hop over, so the lookup goes through it. The
+  corpus's own control says the symbol path was never at fault — `math/rand/v2`'s `ChaCha8`
+  constructs its cross-package `chacha8rand.State` field today, from a rooted name — and a
+  three-arm probe (cross-package non-generic, cross-package generic closed over a concrete type, and
+  a generic named array whose element closes over its OWN type parameters) is what pinned the axis
+  as *cross-assembly* rather than *generic*: all three declined before, all three construct now, all
+  three byte-identical to `go run`.
+- **The converter** answers for a nested UNNAMED array element, because nothing downstream can. The
+  descriptor is `[2]array<nint>` — the inner `3` is gone — and an `array<T>`'s length is INSTANCE
+  state, so a site with no instance cannot recover it. It stamps
+  `[GoType("[2]array<nint>")] [GoArrayDims(2, 3)] partial struct nn;` and gen builds the factory from
+  everything after the first dimension: `new array<array<nint>>(2, static () => new(3))`. This is the
+  existing `GoArrayDims` cargo (same attribute, same outermost-first meaning as on a parameter or a
+  field) reached one hop earlier — at construction rather than at description — with its
+  `AttributeUsage` widened to `Struct`.
+
+The discriminator is exact rather than approximate: `goArrayDims` walks unnamed arrays only, so it
+returns 2+ dimensions **precisely** when the element is one. A plain element (`[4]byte`), a struct
+element (`[2]wa`) and a NAMED element (`[2]ni` over `type ni [3]int`) each return one dimension and
+take no stamp — and the named element must not, since its own wrapper allocates its own backing by
+this very route. A dimension exceeding `int` yields no factory rather than a wrong one: Go's
+pointer-to-unbounded-array idiom (`*[1<<50 - 1]byte`) puts such a length in the type system
+deliberately and no such array is allocatable.
+
+Corpus footprint at the cut: **zero**. A census of the emitted corpus (not a GOROOT `go/packages`
+walk — `-stdlib` defaults to `-tags purego`, so the asm-path types such a walk counts are absent from
+the emission) finds **59** named fixed-array wrappers, **none** with a nested-array element, and
+exactly **one** with a needy element: `runtime.semTable`, whose lifted anonymous-struct element
+carries `pad = new(40)`. It is answered by gen, needs no stamp, and its generated backing is now
+`new array<semTableᴛ1>(251, static () => new semTableᴛ1(nil))`.
+
+`bcache.cacheTable` looks like a second and is **not** one, which is worth stating because a
+text-keyed census says otherwise: its element `atomic.Pointer<T>` carries exactly one fixed-array
+field and that field is Go's **blank identifier** (`internal array<ж<T>> _ = new(0)`, the
+"mention `*T` to disallow conversion" trick). A `_` field is unreadable in Go, so its zero value can
+never be observed, and go2cs-gen's predicate skips it on both its syntax and its symbol path.
+Declining to construct there is correct, not a gap — and the value would have been identical anyway,
+since the initializer is `new(0)`.
+
+So the stamp changes no emitted file today and the gen half moves exactly one corpus site. This is an
+end-user-Go correctness fix reached through `-recurse`, plus the guarantee that the next such type
+converts correctly.
+
+(Guarded by the `NamedArrayZeroValue` behavioral test: both shapes × both spellings (`var`, `new(T)`)
+× the seven site kinds, the write arm, and the two controls that pin the boundary from the other side
+— a plain element and a NAMED element, both already correct and both required to stay on the bare
+`new array<E>(N)` backing. The sibling `CompositeLiteralElements` guards the same element predicate
+reached through a composite LITERAL; this one guards the zero value, which is where every one of the
+standard library's needy named arrays is actually built.)
+
 ### `make([]E, n)` constructs its ELEMENTS by the same rule
 
 `slice<T>`'s length constructor fills its backing with `default(T)` exactly as `array<T>`'s does, so

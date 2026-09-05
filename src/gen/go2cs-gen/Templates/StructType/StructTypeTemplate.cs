@@ -1452,19 +1452,33 @@ internal class StructTypeTemplate : TemplateBase
     // the public `T(NilType)` constructor `new T(nil)` needs, and a cross-package/golib type
     // (unresolvable here) returns false so no bare `new T(nil)` is emitted for it — its own package
     // constructs it, and its default (nil slice/map/@string) is correct anyway.
-    private bool StructTypeNeedsConstruction(string typeName)
+    private bool StructTypeNeedsConstruction(string typeName) =>
+        NeedsConstruction(Context, typeName, m_needsConstructionCache);
+
+    // The predicate is STATIC and takes its context and cache explicitly so the ONE definition can
+    // also answer for a named fixed-size ARRAY's element (TypeGenerator's Array arm — the wrapper's
+    // lazy backing must construct a needy element's zero value exactly as a needy FIELD is
+    // constructed here). It stays in this file because it is one rule with one set of reasons, and a
+    // second copy beside InheritedTypeTemplate is the shape this repo's array work keeps paying for
+    // (the converter's own arrayLengthArgs comment names the same hazard from the other side).
+    //
+    // The cache is a PARAMETER rather than a static field: a bare type NAME is not unique across
+    // compilations (`Pointer` names a different type in half a dozen assemblies), so a process-wide
+    // cache keyed on it would answer one assembly's question with another's answer. Each caller owns
+    // a cache whose lifetime is one compilation.
+    internal static bool NeedsConstruction(GeneratorExecutionContext context, string typeName, Dictionary<string, bool> cache)
     {
-        if (m_needsConstructionCache.TryGetValue(typeName, out bool cached))
+        if (cache.TryGetValue(typeName, out bool cached))
             return cached;
 
-        bool result = NeedsConstruction(typeName, []);
-        m_needsConstructionCache[typeName] = result;
+        bool result = NeedsConstruction(context, typeName, [], cache);
+        cache[typeName] = result;
         return result;
     }
 
-    private bool NeedsConstruction(string typeName, HashSet<string> seen)
+    private static bool NeedsConstruction(GeneratorExecutionContext context, string typeName, HashSet<string> seen, Dictionary<string, bool> cache)
     {
-        if (m_needsConstructionCache.TryGetValue(typeName, out bool cached))
+        if (cache.TryGetValue(typeName, out bool cached))
             return cached;
 
         // Go forbids value-type embedding cycles (infinite size), and reference fields are skipped
@@ -1472,7 +1486,7 @@ internal class StructTypeTemplate : TemplateBase
         if (!seen.Add(typeName))
             return false;
 
-        (StructDeclarationSyntax? structDecl, Compilation? compilation) = Context.GetStructDeclaration(typeName);
+        (StructDeclarationSyntax? structDecl, Compilation? compilation) = context.GetStructDeclaration(typeName);
 
         // A type whose SOURCE this compilation cannot see — the normal shape of a cross-package
         // field in a real MSBuild build, where a <ProjectReference> arrives as compiled METADATA —
@@ -1482,8 +1496,8 @@ internal class StructTypeTemplate : TemplateBase
         // from GCHandle.AddrOfPinnedObject (math/rand/v2's ChaCha8, whose cross-package
         // chacha8rand.State holds `buf = new(32)`). Go's `new(ChaCha8)` yields 32 real zeroed words.
         if (structDecl is null)
-            return Context.Compilation.FindTypeSymbol(typeName) is { TypeKind: TypeKind.Struct } typeSymbol &&
-                   NeedsConstruction(typeSymbol, seen);
+            return context.Compilation.FindTypeSymbol(typeName) is { TypeKind: TypeKind.Struct } typeSymbol &&
+                   NeedsConstruction(typeSymbol, seen, cache);
 
         foreach ((string memberType, string memberName, bool isReferenceType, bool isProperty, _) in structDecl.GetStructMembers(compilation!, true))
         {
@@ -1508,7 +1522,7 @@ internal class StructTypeTemplate : TemplateBase
             if (memberType.Contains("go.array<"))
                 return true;
 
-            if (NeedsConstruction(memberType, seen))
+            if (NeedsConstruction(context, memberType, seen, cache))
                 return true;
         }
 
@@ -1518,7 +1532,7 @@ internal class StructTypeTemplate : TemplateBase
     // Symbol-based counterpart of the syntax walk above, for a type that reached us as compiled
     // METADATA. Same rule, same three triggers (promoted-embed box, fixed array, needy nested
     // value struct); only the member enumeration differs.
-    private bool NeedsConstruction(INamedTypeSymbol structType, HashSet<string> seen)
+    private static bool NeedsConstruction(INamedTypeSymbol structType, HashSet<string> seen, Dictionary<string, bool> cache)
     {
         // `new T(nil)` is only emittable when the type actually exposes the public NilType
         // constructor the generator gives converter-produced structs — a hand-written golib struct
@@ -1557,7 +1571,7 @@ internal class StructTypeTemplate : TemplateBase
 
                     if (fieldType is INamedTypeSymbol { TypeKind: TypeKind.Struct } nestedType &&
                         seen.Add(nestedType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)) &&
-                        NeedsConstruction(nestedType, seen))
+                        NeedsConstruction(nestedType, seen, cache))
                         return true;
 
                     break;
