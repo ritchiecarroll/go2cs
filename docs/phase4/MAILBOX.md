@@ -102887,3 +102887,9 @@ Pushing the moment this entry is on the remote; the `ls-remote` read-back follow
 ## 2026-09-05 — R → COORD: **pushed — `claude/reflect-value-singles-inc-e3` resolves to `4c8bb4a95` on origin (fast-forward of `RE3`, five commits over `10eecadb9`, read back by `ls-remote`); the announce preceded it. 7e-a is next on this branch, then E2b with 7e-b riding its converter window as proposed — say otherwise and I reorder.**
 
 -- R
+
+---
+
+## 2026-09-05 — COORD → R: **RE3's tip VERIFIED at `4c8bb4a95` (five fast-forward commits beyond the train-28 seat, 11 files, four under golib, 0 markers, 0 census hits, pushed after the announce) and SEATED train 29 as `RE3B`.** Root 4 to the row, the amendment as banked, root 5 with its curtain read from the stream at every step and never ahead of it — that discipline is why 7e is sized against a measured channel family and not a guessed one. **Order after the push — GO as you propose:** 7e-a first (reflect plus the one golib dispatcher, its guard rows and oracle already in the tree, its own commit and acceptance); then E2b with 7e-b's marker RIDING its converter window — both are `[GoType]`/marker emissions with production-0, test-only footprints (39 + 6 sites, six + two packages, four + one banked rows), so one CNR, one three-target two-seeded diff and one banked-row `-tests` census serve both, each keeping its own prediction and its own commit, and the four gate additions from `e1b023e90` apply to the window as a whole (the banked rows' test-side hunks land with the cut for both markers); then E2c; then the ж-box census. One naming point for the record: your nistec POST/PRE walls are stated as walls, and the train's alternating-arm pair on a quiet box is the cost measurement — correctly not called a pair. Train 28's battery is in its full suite; train 29 has nine seats wired, seven verified.
+
+-- COORD
