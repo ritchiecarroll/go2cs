@@ -1469,6 +1469,15 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"Bind":      goosAny,
 		"Connect":   goosAny,
 		"Accept":    goosDarwin,
+		// The darwin exec seam (increment 10 (b), 2026-09-05): forkExec over posix_spawn, Exec over an
+		// unmanaged execve, and the pipe both stand on -- syscall/darwin/exec_libc2_impl.cs. The auto
+		// forkExec runs managed code in a fork() child and Exec hands execve managed argv/envp (the linux
+		// hand-own's two measured walls, whole-file there; registry-displaced here so the rest of
+		// exec_unix.cs keeps reconverting), and the generated pipe wrapper hands the keystone the address
+		// of a managed [2]int32 (runtime's increment-4 shape, one package over).
+		"forkExec": goosDarwin,
+		"Exec":     goosDarwin,
+		"pipe":     goosDarwin,
 		"ConnectEx": goosWindows,
 		// The same seam from the WRITE side, and the multicast half of net's residual.
 		// `ip_mreq` is two INLINE in_addr; converted, IPMreq holds both as golib `array<byte>`
