@@ -170,23 +170,28 @@ public class RuntimeHashFamilyTests
         PanicException past = Assert.ThrowsException<PanicException>(() => GoMemhashPointer(@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 36)), 0, 8));
         StringAssert.Contains(past.Message, "past its end");
 
-        // The HEADER class as rule (0) meets it TODAY: the STRING header. (The SLICE header was this
+        // The HEADER class as rule (0) met the STRING header here until Q44. (The SLICE header was this
         // witness until increment 3's SliceHeaderBox began serving it — its case now lives in the recovery
-        // arm above as a positive property.) Reinterpret of a @string box onto the runtime's stringStruct
-        // shape still takes the address route: a NativeBox over the pinned managed string whose `str`
-        // field is the byte[] reference read as a Pointer. Measured 2026-09-04: its runtime type is
-        // System.Byte[], and a field read through it is a native SIGSEGV. The body must refuse it by name
-        // without touching a field. EXPECTED TODAY: this witness moves again when the string half of the
-        // seam is admitted (Q44 first).
+        // arm above as a positive property.) Before the token, the reinterpret of a @string box onto the
+        // runtime's stringStruct shape took the address route: a NativeBox over the PINNED managed string
+        // whose `str` field read back the byte[] reference as a Pointer (measured 2026-09-04: runtime type
+        // System.Byte[], a field read through it a native SIGSEGV), which the seam refused by name. That
+        // route no longer exists to be refused — the witness moved with Q44 (2026-09-05), as it said it
+        // would: a reference-bearing box hands out its ORDER TOKEN, the reinterpret to another pointee
+        // type is a native box OVER THE TOKEN (the design's loud form; its fields are not touched here — a
+        // dereference is the row-level fault the design chose, never a number), and the STRING HALF of
+        // the seam is admitted through the token: the string box's own number resolves to the box, memhash
+        // over it is refused as a HEADER by name, strhash over it hashes the content.
         @string text = "hello, header"u8;
         ref @string sv = ref heap(text, out ж<@string> Ꮡtext);
         ж<StringHeaderShape> stringHeader = Ꮡtext.Reinterpret<@string, StringHeaderShape>();
-        @unsafe.Pointer confused = (~stringHeader).str;
-        Assert.AreEqual(typeof(byte[]), ((object)confused).GetType(), "the premise: the string header's str field is a type-confused reference (expected today)");
+        Assert.IsTrue(stringHeader.IsNative, "the string-header reinterpret is the loud form: a native box over the token, never a pun through the pinned string");
+        Assert.AreEqual(Ꮡtext.PointerOrderToken, stringHeader.NativeAddress, "whose address IS the string box's order token");
 
-        PanicException headerPanic = Assert.ThrowsException<PanicException>(() => GoMemhashPointer(confused, 0, 8));
-        StringAssert.Contains(headerPanic.Message, "not an unsafe.Pointer");
-        StringAssert.Contains(headerPanic.Message, "System.Byte[]");
+        @unsafe.Pointer stringBox = new @unsafe.Pointer((uintptr)Ꮡtext);
+        PanicException headerPanic = Assert.ThrowsException<PanicException>(() => GoMemhashPointer(stringBox, 0, 8));
+        StringAssert.Contains(headerPanic.Message, "string HEADER");
+        Assert.AreEqual(GoMemhash("hello, header"u8, 0), GoStrhashPointer(stringBox, 0), "and strhash over the same number hashes the string's CONTENT -- the string half of the seam, admitted by the token");
 
         ref slice<byte> sb = ref heap(b, out ж<slice<byte>> Ꮡb);
 

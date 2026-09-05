@@ -687,7 +687,11 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
     public static unsafe implicit operator ж<T>(void* value)
     {
-        return new NativeBox<T>((nuint)value);
+        // The same resolve as the uintptr operator: a token this family handed out through
+        // `operator void*` (the Q44 reference-bearing arm) comes back as its box, never as a
+        // native box over the token — the in-operator was the one door the token arm left
+        // asymmetric (found 2026-09-05 while rooting the PointerCastSliceRange row).
+        return (ж<T>)(uintptr)(nuint)value;
     }
 
     public static unsafe implicit operator void*(ж<T> value)
