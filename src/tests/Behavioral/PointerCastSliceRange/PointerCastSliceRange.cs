@@ -37,6 +37,6 @@ internal static void Main() {
     _ = op;
 }
 
-[GoType("ж<array<nint>>")] partial class opaque;
+[GoType("ж<array<nint>>")] [GoArrayDims(4)] partial class opaque;
 
 } // end main_package

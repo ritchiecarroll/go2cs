@@ -260,4 +260,21 @@ func main() {
 	fmt.Println("IntChanSend identity value/slot/elem:", reflect.TypeOf(IntChanSend(nil)) == cst.Field(1).Type, reflect.TypeOf(IntChanSend(nil)) == reflect.TypeOf((*IntChanSend)(nil)).Elem(), cst.Field(1).Type.ChanDir())
 	fmt.Println("chan slot zero re-describes:", reflect.TypeOf(reflect.Zero(cst.Field(0).Type).Interface()), reflect.Zero(cst.Field(0).Type).Type().ChanDir())
 
+	// --- 7g: a DEFINED pointer-to-array type's descriptor carries the array LENGTH its marker cannot spell (the
+	// wrapper's [GoArrayDims] stamp): a nil and a live value are ONE descriptor, Elem().Len() answers, and the
+	// value route, a slot route and Elem() agree -- the stamp decides ---
+	fmt.Println("named ptr-to-array one descriptor:", reflect.TypeOf(MyBytesArrayPtr0(nil)) == reflect.TypeOf(MyBytesArrayPtr0(new([0]byte))), reflect.TypeOf(MyBytesArrayPtr(nil)) == reflect.TypeOf(MyBytesArrayPtr(new([4]byte))), " elem:", reflect.TypeOf(MyBytesArrayPtr(nil)).Elem(), reflect.TypeOf(MyBytesArrayPtr0(nil)).Elem().Len())
+	canRow(MyBytes(nil), MyBytesArrayPtr0(nil))
+	canRow(MyBytesArrayPtr0(nil), (*[0]byte)(nil))
+	canRow(MyBytesArrayPtr(nil), (*[4]byte)(nil))
+	canRow(MyBytesArrayPtr(nil), MyBytesArrayPtr0(nil))
+	type ptrSlots struct {
+		P MyBytesArrayPtr
+		Z MyBytesArrayPtr0
+	}
+	pst := reflect.TypeOf(ptrSlots{})
+	fmt.Println("MyBytesArrayPtr identity value/slot/elem:", reflect.TypeOf(MyBytesArrayPtr(new([4]byte))) == pst.Field(0).Type, reflect.TypeOf(MyBytesArrayPtr(nil)) == reflect.TypeOf((*MyBytesArrayPtr)(nil)).Elem(), pst.Field(0).Type.Elem().Len())
+	fmt.Println("MyBytesArrayPtr0 identity value/slot/elem:", reflect.TypeOf(MyBytesArrayPtr0(new([0]byte))) == pst.Field(1).Type, reflect.TypeOf(MyBytesArrayPtr0(nil)) == reflect.TypeOf((*MyBytesArrayPtr0)(nil)).Elem(), pst.Field(1).Type.Elem().Len())
+	fmt.Println("ptr slot New re-describes:", reflect.TypeOf(reflect.New(pst.Field(1).Type).Elem().Interface()), reflect.New(pst.Field(0).Type).Elem().Type().Elem().Len())
+
 }

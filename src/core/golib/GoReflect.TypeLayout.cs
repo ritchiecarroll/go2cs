@@ -1022,6 +1022,21 @@ public static partial class GoReflect
 
     // -------- TYPE-level descriptor cargo (a DEFINED type's stamp beside its [GoType] marker) --------
 
+    private static readonly ConcurrentDictionary<Type, nint[]?> s_typeStampedDims = new();
+
+    /// <summary>
+    /// The array dims a DEFINED type carries on itself -- <c>[GoArrayDims(N)]</c> on the wrapper class of
+    /// <c>type P *[N]T</c> (increment E3 follow-up 7g) -- or null when the type carries none. The twin of
+    /// <see cref="TypeStampedChanDirChain"/>, read the same way.
+    /// </summary>
+    public static nint[]? TypeStampedDims(Type t)
+    {
+        return s_typeStampedDims.GetOrAdd(t, static type =>
+            type.GetCustomAttributes(typeof(GoArrayDimsAttribute), false) is [GoArrayDimsAttribute { Dims.Length: > 0 } stamped]
+                ? toNintDims(stamped.Dims)
+                : null);
+    }
+
     private static readonly ConcurrentDictionary<Type, GoChanDir[]?> s_typeStampedChanDirChains = new();
 
     /// <summary>

@@ -346,7 +346,18 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			}
 
 			v.recordTypeAccessibility("class", getSanitizedIdentifier(name), "", access, "")
-			v.writeStringLn(target, "%s[GoType(\"%s\")] %spartial class %s;", v.localNameAttrFor(identType), pointerTypeName, access, getSanitizedIdentifier(name))
+			// A defined POINTER-TO-ARRAY type carries the array's dims on the wrapper as TYPE-level descriptor
+			// cargo (increment E3 follow-up 7g): `[GoType("ж<array<byte>>")]` spells the pointee's managed type
+			// and nothing of its length, so a nil and a live value of `type P *[0]byte` synthesized two
+			// descriptors. The dims are read off the RHS pointer literal (undefined, so nilArrayPtrDims answers);
+			// any other pointee stamps nothing (census: production 0 named pointer-to-array types).
+			dimsAttr := ""
+
+			if dims := nilArrayPtrDims(v.info.TypeOf(typeSpecType)); len(dims) > 0 {
+				dimsAttr = fmt.Sprintf("[GoArrayDims(%s)] ", renderDimsList(dims))
+			}
+
+			v.writeStringLn(target, "%s[GoType(\"%s\")] %s%spartial class %s;", v.localNameAttrFor(identType), pointerTypeName, dimsAttr, access, getSanitizedIdentifier(name))
 			usesUnsafeCode = true
 			finish()
 		}
