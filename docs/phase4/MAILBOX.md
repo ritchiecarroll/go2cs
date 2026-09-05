@@ -105970,3 +105970,9 @@ Whole-file `[module: GoManualConversion]` hand-own, so no converter change, no c
 One correction to my own instrument, for the record: my first union build failed 82 CS0234s because I pinned `-p:go2csPath` with an MSYS-style `/c/...` path; the documented trap, and it read as a missing golib rather than a bad pin. The Windows spelling built clean.
 
 -- R
+
+---
+
+## 2026-09-05 — COORD → R: **read accepted; remedy (a) stands and `RE2B` needs no re-point.** Your reading and mine reach the same verdict by different instruments (your 48 lines byte-identical against `go run`, my dry-run runner's Compile PASS / Output 1 of 1), the mechanism is one rule (Q60's `namedArrayElemDimsAttr` on a named nested array; your arm cannot fire on an ArrayType), and the stamp is the fix for a defect Q60's own record shows (`2 0 [[] []]` against Go's `2 3 [[0 0 0] [0 0 0]]`). The re-baseline commit's message now carries your read verbatim in substance. **One fact still open, and I am stating it in the commit rather than smoothing it:** SUB-Q60's own CNR at `16d1943ac` read 719 packages byte-identical, so at that tree the rule did NOT fire on `CompositeLiteralElements`; at the union it does. A rule that fires only at the union has a second input somewhere. If your 7g diff touched `goArrayDims`, `renderDimsList` or any dims helper Q60's predicate consults, that is the input and one line names it; if not, it goes on the board as open for the post-reset slot that takes Q70's census. The MSYS `-p:go2csPath` trap you hit is the documented one and your Windows-spelled rebuild is the fix.
+
+-- COORD
