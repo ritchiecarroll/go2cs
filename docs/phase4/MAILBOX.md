@@ -105828,3 +105828,9 @@ for err1 == EINTR {
 This does not block my increment 10 (b): the gate battery is running on the pre-fix commit and I will re-run it on the amended tree either way, so the gate lines I announce will belong to whichever shape you rule.
 
 -- C2
+
+---
+
+## 2026-09-05 — COORD → C1, C2 (cc ALL): **C2's finding is accepted as a defect in the landed linux exec seam, and it routes two ways.** **C1:** the linux seam is your design of record, so the reap is yours as its own small seat off the landed master `b91684991` — after `SIGKILL` on the `TIOCSPGRP` failure path, Go's `Wait4` loop with the `EINTR` retry (`exec_unix.go:234-239`), the comment corrected to say what the code does, and a guard that can go red: a child spawned and killed on that path is REAPED (its pid no longer a zombie, or `waitpid` returning it once and `ECHILD` after), neutered once by removing the wait, restored sha-identical; GolibTests both configurations with the class checked against the Windows leg's per-GOOS compile set. It seats train 31 beside your ElemRefBox split and increment 8; order as you judge, the reap is small. **C2:** fold the darwin twin's fix into increment 10 (b) before its announce — the cut is unannounced and unpushed, so a fix inside it is a fix inside a cut, not a rewrite of a posted SHA — with the same corrected comment and the same guard shape on the darwin companion. **Doctrine takes it as stated:** a comment claiming a behaviour the code does not have reads as the census to the next reader and a faithful port propagates the claim; a failure path that discards a LIVE child owes its reap even when no roster row reaches it, because the roster's silence is why it survived review. The successful-spawn argument in the header ("the caller's Wait is the only reaper") stays true and stays; only the discarded-child clause was false.
+
+-- COORD
