@@ -29,6 +29,37 @@ internal static void expectPanic(@string label, @string want, Action f) {
 [GoType] partial struct gB<T> {
 }
 
+[GoType("num:nint")] partial struct integer;
+
+[GoType("[]byte")] partial struct MyBytes;
+
+[GoType("[0]byte")] partial struct MyBytesArray0;
+
+[GoType("[4]byte")] partial struct MyBytesArray;
+
+[GoType("ж<array<byte>>")] partial class MyBytesArrayPtr0;
+
+[GoType("ж<array<byte>>")] partial class MyBytesArrayPtr;
+
+[GoType("bytes_package.Buffer")] partial struct MyBuffer;
+
+internal static void convRow(@string label, any x, any want) {
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            {
+                var r = recover(); if (r != default!) {
+                    fmt.Printf("%-34s PANIC: %v\n"u8, label, r);
+                }
+            }
+        }, ref ᒐ);
+        var v = reflect.ValueOf(x).Convert(reflect.TypeOf(want));
+        fmt.Printf("%-34s type==%v deepEqual=%v nil=%v\n"u8, label, AreEqual(v.Type(), reflect.TypeOf(want)), reflect.DeepEqual(v.Interface(), want), v.Kind() == reflect.Ptr && v.IsNil());
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string setLen10ˢ = "SetLen(10)"u8;
 private static readonly @string setLenˢ = "SetLen"u8;
@@ -82,6 +113,24 @@ private static readonly object baseBaseˢ = (@string)" base == base:"u8;
 private static readonly object mapSameBoxTwiceFoundˢ = (@string)"map: same box twice found:"u8;
 private static readonly object sameNumberTwiceFoundˢ = (@string)" same number twice found:"u8;
 private static readonly object otherBoxFoundˢ = (@string)" other box found:"u8;
+private static readonly @string byteNil0Byteˢ = "[]byte(nil) -> *[0]byte"u8;
+private static readonly @string byte0Byteˢ = "[]byte{} -> *[0]byte"u8;
+private static readonly @string byte71Byteˢ = "[]byte{7} -> *[1]byte"u8;
+private static readonly @string myBytes91Byteˢ = "MyBytes{9} -> *[1]byte"u8;
+private static readonly @string byte1234MyBytesArrayPtrˢ = "[]byte{1,2,3,4} -> MyBytesArrayPtr"u8;
+private static readonly @string byteNilMyBytesArrayPtr0ˢ = "[]byte(nil) -> MyBytesArrayPtr0"u8;
+private static readonly @string byte1234MyBytesArrayˢ = "[]byte{1,2,3,4} -> *MyBytesArray"u8;
+private static readonly @string byteNilMyBytesArray0ˢ = "[]byte(nil) -> *MyBytesArray0"u8;
+private static readonly @string new0ByteMyBytesArray0ˢ = "new([0]byte) -> *MyBytesArray0"u8;
+private static readonly @string newMyBytesArray00Byteˢ = "new(MyBytesArray0) -> *[0]byte"u8;
+private static readonly @string myBytesArrayPtr0Nil0Byteˢ = "MyBytesArrayPtr0(nil) -> *[0]byte"u8;
+private static readonly @string byteNilMyBytesArrayPtr0ˢ2 = "(*[0]byte)(nil) -> MyBytesArrayPtr0"u8;
+private static readonly @string newIntIntegerˢ = "new(int) -> *integer"u8;
+private static readonly @string newIntegerIntˢ = "new(integer) -> *int"u8;
+private static readonly @string myBufferBytesBufferˢ = "*MyBuffer -> *bytes.Buffer"u8;
+private static readonly object arrayPointerAliasesTheˢ = (@string)"array pointer aliases the slice:"u8;
+private static readonly @string convertShortSliceˢ = "Convert short slice"u8;
+private static readonly @string cannotConvertSliceWithˢ = "cannot convert slice with length 4 to pointer to array with length 8"u8;
 
 [GoLocalName("S")] [GoType("[]byte")] internal partial struct main_S;
 
@@ -216,6 +265,31 @@ internal static void Main() {
     var (_, foundNumber) = interior[(uintptr)@unsafe.Add(new @unsafe.Pointer(Ꮡarr), 8), ꟷ];
     var (_, missOther) = keyed[new @unsafe.Pointer(n2), ꟷ];
     fmt.Println(mapSameBoxTwiceFoundˢ, foundBox, sameNumberTwiceFoundˢ, foundNumber, otherBoxFoundˢ, missOther);
+    convRow(byteNil0Byteˢ, slice<byte>(default!), ж<array<byte>>.NilBoxOfDims(0L));
+    convRow(byte0Byteˢ, new byte[]{}.slice(), Ꮡ(new array<byte>(0)));
+    convRow(byte71Byteˢ, new byte[]{7}.slice(), Ꮡ(new byte[]{7}.array()));
+    convRow(myBytes91Byteˢ, ((MyBytes)new byte[]{9}.slice()), Ꮡ(new byte[]{9}.array()));
+    convRow(byte1234MyBytesArrayPtrˢ, new byte[]{1, 2, 3, 4}.slice(), new MyBytesArrayPtr(Ꮡ(new byte[]{1, 2, 3, 4}.array())));
+    convRow(byteNilMyBytesArrayPtr0ˢ, slice<byte>(default!), ((MyBytesArrayPtr0)nil));
+    convRow(byte1234MyBytesArrayˢ, new byte[]{1, 2, 3, 4}.slice(), Ꮡ(new MyBytesArray(new byte[]{1, 2, 3, 4}.array())));
+    convRow(byteNilMyBytesArray0ˢ, slice<byte>(default!), ж<MyBytesArray0>.NilBoxOfDims(0L));
+    convRow(new0ByteMyBytesArray0ˢ, Ꮡ(new array<byte>(0)), @new<MyBytesArray0>());
+    convRow(newMyBytesArray00Byteˢ, @new<MyBytesArray0>(), Ꮡ(new array<byte>(0)));
+    convRow(myBytesArrayPtr0Nil0Byteˢ, ((MyBytesArrayPtr0)nil), ж<array<byte>>.NilBoxOfDims(0L));
+    convRow(byteNilMyBytesArrayPtr0ˢ2, ж<array<byte>>.NilBoxOfDims(0L), ((MyBytesArrayPtr0)nil));
+    convRow(newIntIntegerˢ, @new<nint>(), @new<integer>());
+    convRow(newIntegerIntˢ, @new<integer>(), @new<nint>());
+    convRow(myBufferBytesBufferˢ, @new<main_MyBuffer>(), @new<bytes.Buffer>());
+    var src = new byte[]{1, 2, 3, 4}.slice();
+    var ap = reflect.ValueOf(src).Convert(reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(4L))).Interface()._<ж<array<byte>>>();
+    ap.Value[2] = 99;
+    fmt.Println(arrayPointerAliasesTheˢ, src[2] == 99);
+    ref var sh = ref heap<reflectꓸValue>(out var Ꮡsh);
+    sh = reflect.ValueOf(new byte[]{1, 2, 3, 4}.slice());
+    var shʗ1 = sh;
+    expectPanic(convertShortSliceˢ, cannotConvertSliceWithˢ, () => {
+        shʗ1.Convert(reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(8L)));
+    });
 }
 
 } // end main_package

@@ -55,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("ReflectValueSingles.go", "ReflectValueSingles.cs", "AAs2ooKCgpQATQyEkpKSkJKQkpCSkJKQkoKCgoKCgpCSkJKSkJKQlIKChICSgJKEgoKClICSgJKCgoSIgoKCkoCSgoKCgJaCgoKGgoKCgoKCgoKEgoKCgoSCkoSCgoiCgoKCgg==", "28-32:1;44-44:1;45-45:2;46-46:3;47-47:4;48-48:5;55-55:6;56-56:7;58-58:8;59-59:9;65-65:10;66-66:11;74-74:12;75-75:13;88-88:14;92-92:15")]
+[assembly: go.GoPositionMap("ReflectValueSingles.go", "ReflectValueSingles.cs", "AAs8ooKCgpQAGSCigoCCtoIAWQaEkpKSkJKQkpCSkJKQkoKCgoKCgpCSkJKSkJKQlIKChICSgJKEgoKClICSgJKCgoSIgoKCkoCSgoKCgJaCgoKGgoKCgoKCgoKEgoKCgoSCkoSCgoiCgoKCgoaCgoKCgoKCgoKCgoKCgoSCgoKCkpA=", "31-35:1;53-57:1;67-67:1;68-68:2;69-69:3;70-70:4;71-71:5;78-78:6;79-79:7;81-81:8;82-82:9;88-88:10;89-89:11;97-97:12;98-98:13;111-111:14;115-115:15;179-179:16")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -73,12 +73,19 @@ public static partial class main_package
     // <TypeAccessibility>
     internal partial struct gA {}
     internal partial struct gB<T> {}
+    internal partial struct integer {}
     internal partial struct main_A {}
     internal partial struct main_AB {}
     internal partial struct main_B {}
     internal partial struct main_MyBuffer {}
     internal partial struct main_S {}
     internal partial struct main_SB {}
+    public partial class MyBytesArrayPtr {}
+    public partial class MyBytesArrayPtr0 {}
+    public partial struct MyBuffer {}
+    public partial struct MyBytes {}
+    public partial struct MyBytesArray {}
+    public partial struct MyBytesArray0 {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

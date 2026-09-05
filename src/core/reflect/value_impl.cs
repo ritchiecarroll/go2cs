@@ -3733,19 +3733,38 @@ private static bool tryConvertOnlyShape(ΔValue v, ΔType t, System.Type dstType
             throw panic("reflect: cannot convert slice with length " + strconv.Itoa(v.Len()) +
                         " to pointer to array with length " + strconv.Itoa(want));
         }
-        // The LENGTH panic above is this arm's whole contribution for now. The SUCCESS path falls
-        // through deliberately rather than being answered here, and the distinction is the point:
-        // `(*[N]T)(s)` must ALIAS s's backing array. golib already has the machinery for it —
-        // `array<T>.Alias(source, length)`, whose own doc names a copy behind this pointer "a silent
-        // wrong answer" with image/png's TestWriteRGBA as the corpus witness — but reaching it from
-        // here needs a non-generic bridge (element-typed MakeGenericMethod plus the named-wrapper
-        // step, the shape TryByteSliceAs already uses) that does not exist yet, and the result then
-        // has to be boxed as a POINTER that preserves the alias.
-        //
-        // Falling through leaves this case behaving exactly as it did before this change rather than
-        // introducing a new failure mode; what it must never do is return a pointer to a copy, which
-        // would pass reflect's own convertTests — those compare VALUES — while breaking the
-        // guarantee callers actually rely on.
+        // The SUCCESS path (increment E3 root 5): `(*[N]T)(s)` ALIASES s's backing array -- the
+        // bridge the arm's first author named as missing is GoReflect.AliasSliceAsArrayPointer, the
+        // element-typed `array<T>.Alias` window (whose doc names a copy behind this pointer "a silent
+        // wrong answer", image/png's TestWriteRGBA the witness) boxed as the pointer, with a defined
+        // array pointee wrapping the aliased header and a defined pointer type wrapping the box. A
+        // nil slice converts to the destination's nil (Go: `(*[0]byte)([]byte(nil)) == nil`); a
+        // longer-than-nil source already passed the length rule above.
+        if (v.IsNil()) {
+            result = Zero(t);
+            return true;
+        }
+        object arrayPointer = GoReflect.AliasSliceAsArrayPointer(v.live!, dstType, want);
+        result = makeTypedValue(arrayPointer, dstType, arrayDimsOfReflectType(t), v.flag.ro());
+        return true;
+    }
+
+    // `(*B)(p)` between pointer types (increment E3 root 5): only the relations the managed model can
+    // ALIAS -- the identity-preserving reinterpret for pointees with one representation (`*int` as
+    // `*integer`, `*MyBuffer` as `*bytes.Buffer`), a defined pointer type's wrap or unwrap of the same
+    // box, and an array pointee re-typed through its header (elements shared). Nil converts to the
+    // destination's nil. A pointee the model cannot alias -- a defined pointer TYPE as the pointee,
+    // `**uintptr` as `*T` -- is refused below with Go's own text rather than answered with a copy
+    // (TestPtrToGC stays on that boundary, recorded in the mailbox).
+    if (srcKind == ΔPointer && dstKind == ΔPointer) {
+        if (v.IsNil()) {
+            result = Zero(t);
+            return true;
+        }
+        if (GoReflect.TryConvertPointer(v.live, dstType, out object? convertedPointer) && convertedPointer is not null) {
+            result = makeTypedValue(convertedPointer, dstType, arrayDimsOfReflectType(t), v.flag.ro());
+            return true;
+        }
     }
 
     return false;

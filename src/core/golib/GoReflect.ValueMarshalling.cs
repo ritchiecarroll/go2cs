@@ -99,6 +99,23 @@ public static partial class GoReflect
     private static readonly ConcurrentDictionary<Type, object?> s_canonicalNils = new();
 
     /// <summary>
+    /// The canonical typed nil for a pointer type whose POINTEE is an array of the given dims -- the
+    /// dims-carrying nil the language mints for <c>(*[N]T)(nil)</c> (<see cref="ж{T}.NilBoxOfDims"/>),
+    /// so a reflect-made nil re-describes with its length. Falls back to the plain canonical nil
+    /// when there are no dims or the type is not a plain <c>ж&lt;T&gt;</c> box.
+    /// </summary>
+    public static object? CanonicalNilPointer(Type pointerType, nint[]? arrayDims)
+    {
+        if (arrayDims is not { Length: > 0 } || typeof(IUnsafePointer).IsAssignableFrom(pointerType) || !TryBoxPointee(pointerType, out Type? pointee))
+            return CanonicalNilPointer(pointerType);
+        long[] dims = new long[arrayDims.Length];
+        for (int i = 0; i < dims.Length; i++)
+            dims[i] = arrayDims[i];
+        MethodInfo? mint = typeof(ж<>).MakeGenericType(pointee).GetMethod(nameof(ж<int>.NilBoxOfDims), BindingFlags.Public | BindingFlags.Static);
+        return mint is null ? CanonicalNilPointer(pointerType) : mint.Invoke(null, [dims]);
+    }
+
+    /// <summary>
     /// The canonical typed nil for a FUNC type — the second shape of the one-nil-encoding rule
     /// <see cref="CanonicalNilPointer"/> established for pointers. A Go func emits as a managed
     /// delegate, whose nil IS <c>null</c>: correct in every func-typed slot, and type-erasing the
@@ -515,7 +532,10 @@ public static partial class GoReflect
         {
             case Pointer:
             case UnsafePointer:
-                return CanonicalNilPointer(t);
+                // A pointer-to-ARRAY zero carries the descriptor's dims on its nil, exactly as the
+                // language's typed nil does (`(*[0]byte)(nil)` is NilBoxOfDims(0)): reflect.Zero's
+                // Interface() then re-describes as *[0]uint8, not *[]uint8 (increment E3 root 5).
+                return CanonicalNilPointer(t, arrayDims);
             case Interface:
             case Func:
                 return null;

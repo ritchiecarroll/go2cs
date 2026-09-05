@@ -11,6 +11,9 @@
 //  4. unsafe.Pointer identity across the two address models: a Pointer reflect mints (the identity
 //     token) and one the converter mints from the same box (its address) are the SAME pointer
 //     (TestImplicitMapConversion #5/#7).
+//  5. Convert's pointer family: (*[N]T)(s) ALIASES the slice's backing; (*B)(p) between pointers whose
+//     pointees have one representation aliases the same storage; nil converts to the destination's
+//     typed nil, dims and all (TestConvert).
 package main
 
 import (
@@ -35,6 +38,26 @@ func expectPanic(label, want string, f func()) {
 
 type gA struct{}
 type gB[T any] struct{}
+
+type integer int
+type MyBytes []byte
+type MyBytesArray0 [0]byte
+type MyBytesArray [4]byte
+type MyBytesArrayPtr0 *[0]byte
+type MyBytesArrayPtr *[4]byte
+type MyBuffer bytes.Buffer
+
+// convRow converts x to want's type and reports kind, DeepEqual against want, and nil-ness -- TestConvert's
+// own comparison (type identity, then DeepEqual of the interfaces) restated per row.
+func convRow(label string, x, want any) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("%-34s PANIC: %v\n", label, r)
+		}
+	}()
+	v := reflect.ValueOf(x).Convert(reflect.TypeOf(want))
+	fmt.Printf("%-34s type==%v deepEqual=%v nil=%v\n", label, v.Type() == reflect.TypeOf(want), reflect.DeepEqual(v.Interface(), want), v.Kind() == reflect.Ptr && v.IsNil())
+}
 
 func main() {
 	// --- root 1: SetLen / SetCap ---
@@ -130,5 +153,29 @@ func main() {
 	_, foundNumber := interior[unsafe.Add(unsafe.Pointer(&arr), 8)]
 	_, missOther := keyed[unsafe.Pointer(n2)]
 	fmt.Println("map: same box twice found:", foundBox, " same number twice found:", foundNumber, " other box found:", missOther)
+
+	// --- root 5: Convert's pointer family ---
+	convRow("[]byte(nil) -> *[0]byte", []byte(nil), (*[0]byte)(nil))
+	convRow("[]byte{} -> *[0]byte", []byte{}, new([0]byte))
+	convRow("[]byte{7} -> *[1]byte", []byte{7}, &[1]byte{7})
+	convRow("MyBytes{9} -> *[1]byte", MyBytes([]byte{9}), &[1]byte{9})
+	convRow("[]byte{1,2,3,4} -> MyBytesArrayPtr", []byte{1, 2, 3, 4}, MyBytesArrayPtr(&[4]byte{1, 2, 3, 4}))
+	convRow("[]byte(nil) -> MyBytesArrayPtr0", []byte(nil), MyBytesArrayPtr0(nil))
+	convRow("[]byte{1,2,3,4} -> *MyBytesArray", []byte{1, 2, 3, 4}, &MyBytesArray{1, 2, 3, 4})
+	convRow("[]byte(nil) -> *MyBytesArray0", []byte(nil), (*MyBytesArray0)(nil))
+	convRow("new([0]byte) -> *MyBytesArray0", new([0]byte), new(MyBytesArray0))
+	convRow("new(MyBytesArray0) -> *[0]byte", new(MyBytesArray0), new([0]byte))
+	convRow("MyBytesArrayPtr0(nil) -> *[0]byte", MyBytesArrayPtr0(nil), (*[0]byte)(nil))
+	convRow("(*[0]byte)(nil) -> MyBytesArrayPtr0", (*[0]byte)(nil), MyBytesArrayPtr0(nil))
+	convRow("new(int) -> *integer", new(int), new(integer))
+	convRow("new(integer) -> *int", new(integer), new(int))
+	convRow("*MyBuffer -> *bytes.Buffer", new(MyBuffer), new(bytes.Buffer))
+	// the converted array pointer ALIASES the slice: a write through it lands in the slice
+	src := []byte{1, 2, 3, 4}
+	ap := reflect.ValueOf(src).Convert(reflect.TypeOf((*[4]byte)(nil))).Interface().(*[4]byte)
+	ap[2] = 99
+	fmt.Println("array pointer aliases the slice:", src[2] == 99)
+	sh := reflect.ValueOf([]byte{1, 2, 3, 4})
+	expectPanic("Convert short slice", "cannot convert slice with length 4 to pointer to array with length 8", func() { sh.Convert(reflect.TypeOf((*[8]byte)(nil))) })
 
 }
