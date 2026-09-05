@@ -277,7 +277,7 @@ func TestSockaddrFamilyIsScopedToEachHandOwningFlavor(t *testing.T) {
 	darwinOnly := []string{"Accept"}
 
 	flavors := []string{"windows", "linux", "darwin"}
-	handOwns := sockaddrHandOwnSources(t)
+	handOwns := handOwnSourcesByFlavor(t, "syscall")
 
 	check := func(name string, want map[string]bool) {
 		scope, listed := manualConversionFuncs["syscall"][name]
@@ -343,20 +343,24 @@ func TestSockaddrFamilyIsScopedToEachHandOwningFlavor(t *testing.T) {
 	}
 }
 
-// sockaddrHandOwnSources concatenates, per flavor, the text of every marked hand-own under
-// src/core/syscall/<goos>/ — the witness the family guard checks each scope against. A clone without
-// src/core beside the converter has nothing to witness and skips.
-func sockaddrHandOwnSources(t *testing.T) map[string]string {
+// handOwnSourcesByFlavor concatenates, per flavor, the text of every marked hand-own under
+// src/core/<pkg>/<goos>/ — the witness a per-flavor scope guard checks each scope against. It is
+// deliberately PER FLAVOR where the seam guard (manualConversionDestination_test.go) witnesses per
+// NAME across the whole package: with a linux body on disk, that guard cannot see that a darwin
+// scope has no darwin body (measured 2026-09-05, the Q52 negative control: the darwin bridge file
+// moved aside and the seam guards stayed green). A clone without src/core beside the converter has
+// nothing to witness and skips.
+func handOwnSourcesByFlavor(t *testing.T, pkg string) map[string]string {
 	t.Helper()
 
 	sources := map[string]string{}
 
 	for _, goos := range []string{"windows", "linux", "darwin"} {
-		dir := filepath.Join("..", "core", "syscall", goos)
+		dir := filepath.Join("..", "core", filepath.FromSlash(pkg), goos)
 		entries, err := os.ReadDir(dir)
 
 		if err != nil {
-			t.Skipf("src/core/syscall/%s is not beside the converter; nothing to witness: %v", goos, err)
+			t.Skipf("src/core/%s/%s is not beside the converter; nothing to witness: %v", pkg, goos, err)
 		}
 
 		var text strings.Builder
@@ -461,6 +465,45 @@ func TestRecvfromIsScopedToTheUnixHandOwningFlavors(t *testing.T) {
 	if entry.includes("windows") {
 		t.Error("syscall.Recvfrom must NOT be displaced on windows: no hand-own exists there, so the " +
 			"placeholder would leave the function unimplemented")
+	}
+}
+
+// The os/signal INSTALL layer — sigenable/sigdisable/sigignore — is hand-owned on the two unix
+// flavors over .NET PosixSignalRegistration: linux (runtime/linux/signal_posix_impl.cs, 2026-08-27)
+// and darwin (runtime/darwin/signal_posix_darwin_impl.cs, Q52, 2026-09-05 — a DISTINCT basename by
+// the L3 rule). Windows has no such layer in Go's sources (its os/signal bridge is the console
+// control handler) and is NOT displaced. Checked per flavor against the marked hand-own under
+// runtime/<goos>/ both ways, for the reason handOwnSourcesByFlavor states.
+func TestSignalInstallLayerIsScopedToEachHandOwningFlavor(t *testing.T) {
+	handOwns := handOwnSourcesByFlavor(t, "runtime")
+	want := map[string]bool{"linux": true, "darwin": true, "windows": false}
+
+	for _, name := range []string{"sigenable", "sigdisable", "sigignore"} {
+		scope, listed := manualConversionFuncs["runtime"][name]
+
+		if !listed {
+			t.Errorf("runtime.%s is no longer registered", name)
+			continue
+		}
+
+		witness := "void " + name + "(uint32 sig)"
+
+		for _, goos := range []string{"windows", "linux", "darwin"} {
+			inScope := scope.includes(goos)
+			bodied := strings.Contains(handOwns[goos], witness)
+
+			if inScope != want[goos] {
+				t.Errorf("runtime.%s: applies on %s = %v, want %v", name, goos, inScope, want[goos])
+			}
+
+			if inScope && !bodied {
+				t.Errorf("runtime.%s is displaced on %s but no marked hand-own under src/core/runtime/%s/ declares %q: the placeholder would leave it unimplemented", name, goos, goos, witness)
+			}
+
+			if !inScope && bodied {
+				t.Errorf("runtime.%s has a hand-own body under src/core/runtime/%s/ but is NOT displaced there: the generated body survives beside it (CS0111)", name, goos)
+			}
+		}
 	}
 }
 
