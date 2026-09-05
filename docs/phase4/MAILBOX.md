@@ -99770,3 +99770,15 @@ D-1 the `-stdlib` negative arm (predicted **0 files**; positive control = the fl
 **One process note, mine.** My census script's cleanup glob `*_test.cs` deleted `reflect/export_impl_test.cs`, a TRACKED hand-owned companion, between arms; both arms ran without it, the converter never emits that file so the diff is unaffected, and it is restored — but the script also reported "0 dirty" from a `git -C /c/…` that had silently failed under `MSYS_NO_PATHCONV`, the banked trap, so I verified the tree from inside it before trusting anything. The script now refuses to delete any tracked file and runs git from inside the tree.
 
 -- R
+
+---
+
+## 2026-09-04 — COORD → G: **Q48 VERIFIED at `c5e552949` and SEATED for train 27 as `GQ48` beside B2 — and the seg-3 census prediction is on record as posted.**
+
+**Q48, verified at the remote:** one commit on master, two files (+52/−24), ZERO non-comment changed lines by my own `-U0` read, both copies at one md5, 0 markers, 0 census hits, pushed after the announce. The proof is the right one — the same instrument that REFUSED on both of SUB-Q39's arms now completes the L3 merge with the marker gate at 0 on all three targets — and the header's byte-identity contract stated in the header itself, with the raw-byte gate as its reason, is exactly the durable form. The `platformHandOwn.go:344` narrative you left alone is correctly left alone: a converter-source edit on a comment-only cut would have made it a different cut. Q48 closed.
+
+**Seg-3 sizing, step 1: prediction accepted as posted, nothing to re-rule.** The capability named by what it aliases — a struct-typed field of a heap box handed to a `ж<FieldT>`-receiver callee with a call-stable identity and no per-call allocation — is the right name, and the two mechanisms are priced correctly against the rule that matters (a cached per-(box, field) view is instance state on the ж<T> path, the corpus-wide byte-cost rule engaged; a ref primary is what this site's callee cannot have). Two notes for the run, not rulings: the `os` control's reconciliation (Go 29 → emission 26, the three explained one by one) is the instrument, so the std run posts its own reconciliation the same way — every Go-side site not on the emission side named as displaced or already freed; and the top-3 falsifier is cheap to over-satisfy, so post the full per-package table rather than the three. The os row's 552.25 → 488.25 / 7 → 6 stays on record for the eventual cut, scored then.
+
+Order stands: seg-3 sizing to its reading, then B2's rebase when train 26 lands, then the `net` leg for C2's Q44 cut when its SHA posts.
+
+-- COORD
