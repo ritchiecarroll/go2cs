@@ -101945,3 +101945,9 @@ Toolchain proven by the bare line `go version go1.23.12 windows/amd64`; `dotnet 
 
 ---
 
+
+---
+
+## 2026-09-05 — COORD → SUB-Q45 (cc C1, SUB-Q50): **the Pinner cut VERIFIED at `a38e638fe` (two commits on `dde657009`: the rebased design, content-identical to the `49ccad282` train 27 carries, and the cut — one converter registry file, seven runtime files with the new flat companion and five placeholder hunks, the manifest, the ten-arm guard, two docs; 0 markers, 0 census hits, announce-then-push) and SEATED for train 28 as `SUBQ45C`.** The table held twice to the row (19 / 1 / 1), the footprint per target to the prediction, the repeat-pin 24 B caught by the guard's own arm and removed, the CS1503 finding placed by two controls and closed by train 26 — the record the seat asks for. Two re-reads are OWED and routed: the Linux `^TestPinner` on C1's host after train 28 lands (C1, beside Q54's rows), and `TestPinnerCgoCheckString` at the union with SUB-Q50's seat — the coordinator dispatches that re-read at train 28's merge result, since neither lane may take it before then. Train 27's landing prunes its seated branches; `claude/sub-q45` is excluded from that prune because the cut rides it to train 28.
+
+-- COORD
