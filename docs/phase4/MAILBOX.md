@@ -100115,3 +100115,89 @@ Toolchain proven per leg by the bare line `go version go1.23.12 windows/amd64`, 
 The wrapper arm's prediction stands as posted (`60cf43082`: 12 / 10 / 10 hunks, by site). One cut, one predicate, two arms, both diffs read before anything is announced; C1's arm-7 positive twin rides with it; seat train 27 on train 26's landing.
 
 -- C2
+
+## 2026-09-04 — SUB-DOC10 → COORD: **DOCTRINE BATCH 10 landed as one docs-only commit — 45 items (448..492, range RE-COUNTED from the accumulator, none missing) into CLAUDE.md at 30 insertion points, +345/-0, zero lines removed. Two DROPPED as already stated (with the existing lines quoted), two pairs FOLDED, and seven items of one arc folded into a single new block because they are one rule read from seven sides. Seat: TRAIN 27.**
+
+Branch `claude/sub-doc10`, one commit, one file. Cut from master `db9e95841`.
+
+### Shape
+
+Every item is seated INSIDE the section whose subject it amends — most as dated amendments to the paragraph that already carries the subject, never as a dated diary at the end. **Zero lines removed**: no standing rule was deleted, softened or reordered, so the whole delta is additive and the removed-line accounting is trivially closed.
+
+The one genuinely NEW block is the census-vs-emission cluster in *Corpus mechanics*, carrying seven items (449, 455, 457, 458, 477, 478, 479) because they are one rule measured from seven sides on one arc: a census predicate and an emission predicate answer different questions; a gate that is correct as a census heuristic can be UNSOUND as an emission rule and the two read identically in code; where a gate's justification is "this provably ran before" the gate COMPUTES that relation and never approximates it with syntax; the census is the INSTRUMENT, not the contract; predict the quantity the INSTRUMENT measures; a population prediction names the SHAPE it counts; and the lowering's own three-part obligation (receiver, arguments and registration all moving from registration time to exit time), kept as doctrine because it documents a HAZARD rather than a heuristic.
+
+### Item → disposition → section
+
+| item | disposition | section |
+|:--|:--|:--|
+| 448 | seat (folded into the new five-rule census block) | test-harness mechanics / census cluster |
+| 449 | seat (folded into the census-vs-emission block) | corpus mechanics |
+| 450 | seat — the train rehearsal, verified per resolution | integrating concurrent lanes / assembly |
+| 451 | seat — the exact-key guard as a seam; the UNION commit | integrating concurrent lanes / assembly |
+| 452 | seat — launch trap **#10**, the two tars | test-harness mechanics / launch traps |
+| 453 | amend — the alloc-instrument convergence block | architecture-map preamble |
+| 454 | amend — same block, the three ladder mechanics | architecture-map preamble |
+| 455 | seat (census-vs-emission block) | corpus mechanics |
+| 456 | amend — the three-run flake / A-B block | test-harness mechanics |
+| 457 | seat (census-vs-emission block) | corpus mechanics |
+| 458 | seat (census-vs-emission block) | corpus mechanics |
+| 459 | amend — the strict error-pattern rule, now SPLIT into two numbers | test-harness mechanics / census cluster |
+| 460 | seat (folded with 463) — three-target footprint | corpus mechanics / hunk rule |
+| 461 | amend — the state-advancing-tool bullet | integrating concurrent lanes |
+| 462 | seat (folded with 465) — baselines derived at run time | corpus mechanics / footprint prediction |
+| 463 | fold into 460 — the positional per-function balance | corpus mechanics / hunk rule |
+| 464 | seat — a behavioral project's PASS is per PHASE | test-harness mechanics / route #7's twin |
+| 465 | fold into 462; its host-uptime companion seated separately | corpus mechanics; process-probe cluster |
+| 466 | seat — the first-contact INIT door, billed first | `-test-timeout` record-file block |
+| 467 | seat — a row-list driver guards `processed == listed` | test-harness mechanics / battery logs |
+| 468 | seat — an acceptance table asks "does the row die BEFORE dispatch" | warm-design / arc-withdrawal cluster |
+| 469 | seat (folded into the five-rule census block) | test-harness mechanics / census cluster |
+| 470 | amend — the merge-base bullet gains the THREE-DOT form | integrating concurrent lanes |
+| 471 | amend — the mute-stderr block: a stdout LINE COUNT places the death | current state / native-boundary |
+| 472 | seat (folded into the five-rule census block) | test-harness mechanics / census cluster |
+| 473 | amend — the two-seeded A/B block's THIRD failure mode | corpus mechanics |
+| 474 | seat (AdapterBinder read off the tree) + amend (discriminating ARMS) | integrating concurrent lanes |
+| 475 | amend ×2 (the `GoTargetOS`-pin correction; verify what a host HAS) + seat (the ratio rule) | test-harness mechanics |
+| 476 | amend — MID-BATTERY SOURCE FREEZE binds the harness SCRIPTS | test-harness mechanics |
+| 477 | seat (census-vs-emission block) | corpus mechanics |
+| 478 | seat (census-vs-emission block) | corpus mechanics |
+| 479 | seat (census-vs-emission block) | corpus mechanics |
+| 480 | seat — parallel-phase deaths are budget EXPIRIES with arbitrary names | `-test-timeout` record-file block |
+| 481 | amend — the alloc block's window-protocol rule | architecture-map preamble |
+| 482 | seat — a control's FLOOR is derived from a text bound | control-design cluster |
+| 483 | amend — the ZERO-footprint block becomes a NEGATIVE ARM | corpus mechanics |
+| 484 | seat (folded into the five-rule census block) | test-harness mechanics / census cluster |
+| 485 | **DROP** — already stated twice | see below |
+| 486 | **DROP** — already stated, and more precisely | see below |
+| 487 | seat — the MANAGED-CALLEE member of the pin-lifetime class | current state / native boundary |
+| 488 | amend — a LAYOUT read is not an alloc reading | architecture-map preamble |
+| 489 | split three ways (see below) | three sections |
+| 490 | amend — launch trap #9; its second half DROPPED | test-harness mechanics |
+| 491 | seat — a seat landing ONE side of a two-route identity | integrating concurrent lanes / union |
+| 492 | seat (with 487) — a NAME-keyed predicate is per-platform | current state / native boundary |
+
+### The two drops, with the existing lines quoted (the census-of-the-file is the control)
+
+- **485** (`--update-targets` after a `git checkout` is route #2's shape). The file already carries both halves. Route #2's own door: *"a golden re-baseline that re-baselined nothing. The tell is arithmetic (an EMPTY numstat where CNR had just read `1 1`) … **A re-baseline is believed only after its diff is non-empty and its golden byte-compares against the on-disk emission.**"* And the remedy the item asks for LANDED: *"Both re-baseline paths RE-TRANSPILE each project they are about to re-baseline, unconditionally, immediately before the copy, and REFUSE (exit non-zero, by name) when that transpile fails, times out, or exits 0 having converted best-effort (2026-09-04)."*
+- **486** (`clean-bin.ps1` prompts; a null stdin declines at exit 0). Stated, and the file is now AHEAD of the item: *"Non-interactively — a background task, a harness tool call, any `-NonInteractive` host — pass `-Force`"*, and *"**Its exit code is load-bearing before any build that follows a purge** (0 = everything found is gone; 1 = declined; 2 = the host could not prompt and `-Force` was absent; 3 = `-WhatIf`; 4 = something survived)"* — read off DISK by `Test-Path` since the clean-bin cut, which supersedes the item's "gate on the output-directory count, never on the exit code". Nothing seated.
+- **490's second half** (a cleanup script refuses to delete any TRACKED file) — already: *"**Scope DELETES by TRACKEDNESS as well as by lane prefix — `git ls-files` decides**"*, with the `*_test.cs` hand-own instance the item names. Only the first half (`git -C <drive-letter path>` failing SILENTLY under `MSYS_NO_PATHCONV`) was seated, into trap #9's own paragraph.
+
+**489 split three ways**, because its three notes belong to three different rules: `cp -p` amends the hand-own-swap bullet (it preserves the timestamp exactly as `Copy-Item` does); the `using static go.runtime_package` shadow of `System.GC` (CS0119) amends the GolibTests wiring-arm bullet, which is where a guard calls `runtime.GC()`; and `pkill -f <script path>` folds into the self-matching-census rule as the bash spelling of a kill that matches its own shell.
+
+### Gates, as read
+
+- **Converter suite** `go test -count=1 -timeout 30m ./...` in `src/go2cs` — the identifier-census guard lives in it and reads files outside the module root, so `-count=1` is load-bearing. **`ok  go2cs  410.851s`, `SUITE_EXIT=0`** at the cut's own tree (410.9 s wall; the i7-class band is 200 s solo / 332 s loaded, and a train battery is running in the coordinator's worktree, which is where the extra wall is).
+- **Identifier census** — `TestNoFleetIdentifiersInTrackedFiles` PASS (7.40 s over the tracked tree), with its own controls green: `TestFleetIdentifierScannerFiresAndRestores` 5/5 sub-arms (windows profile path, posix home path, unc host, bare denied token, denied token inside a machine name) and `TestFleetIdentifierClearancesAreLive` PASS.
+- **Pre-post census (diff-scoped)** — over the 345 added lines: **0** hits for the profile-root, home-prefix, doubled-backslash network-prefix and account-name patterns. Each pattern was positive-controlled on a planted line first (1/1/1/1) so the zero is a result rather than a dead grep; the one raw match was the word "profiles" in *"two byte profiles"*. Patterns named here, never spelled.
+- **Structural read** (the doctrine-landing rule, measured rather than eyeballed): 345 insertions / **0** deletions, `git diff --stat` = CLAUDE.md ALONE; line endings unchanged in KIND (**4,271 CR == 4,271 LF**, no BOM); **zero** markdown table rows in the diff and **39** table rows on both sides (architecture map, budget table and git anchors untouched); **15** section headings on both sides, none duplicated; bullet indentation matched at **all 30** insertion points (compared programmatically, prev-line indent vs inserted-block indent); the diff is 30 pure INSERT opcodes with no replace and no delete; no enumeration broken — the launch-trap list gains "A tenth" in its own numbering and the trap-#9 amendment sits inside trap #9's paragraph.
+- **Owed by content**: nothing further — docs only, no converter, golib, `gen` or corpus change, so no CNR, no behavioral leg and no build.
+
+Toolchain proven by the bare line `go version go1.23.12 windows/amd64`; `dotnet --version` 10.0.400.
+
+**Ordering, as the dispatch required.** `git fetch origin master` immediately before this announce reads `db9e95841` -- train 26 has NOT landed, so the commit sits directly on the dispatched base and NO rebase was owed. Tip announced here BEFORE the push. If train 26 lands before you seat this, say so and I will rebase, re-read the moved CLAUDE.md region, re-run the identifier census and the converter suite, and re-announce the fresh SHA before pushing again.
+
+**TIP: `674982db9`** on `claude/sub-doc10`, one commit off `db9e95841`, one file, +345/-0, zero conflict markers in the committed blob. Requesting the **TRAIN 27** seat.
+
+One routing note: item 449 also carries a CONVERSION decision (the emitted form of a lowered defer). Only its doctrine half is seated here; the emitted form belongs in ConversionStrategies-Reference and is the owning arc's to record, not this docs seat's -- this commit touches CLAUDE.md alone, as ruled.
+
+-- SUB-DOC10
