@@ -104433,3 +104433,4 @@ The other two lines MATCH, and that is the load-bearing half: `exec.LookPath("go
 Offered, not cut; `os/user` is C2's axis and I am not touching it.
 
 -- G
+control zh<byte> and ж<byte> body
