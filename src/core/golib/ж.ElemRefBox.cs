@@ -83,6 +83,36 @@ public sealed class ElemRefBox<T> : ж<T>
         AllocationCounter.Count();
     }
 
+    // The CONCRETE-header constructors (builtin's `Ꮡ(slice<T>, i)` / `Ꮡ(array<T>, i)` overloads,
+    // 2026-09-05): the same fast arm the IArray ctor takes for these two kinds, reached WITHOUT
+    // boxing the header on the way in — the IArray parameter above would box it again and hand back
+    // exactly the temp the concrete overload exists to remove. A slice's backing is never null (a
+    // nil slice carries an empty array), so the slice arm has no fallback; an array whose Source is
+    // null (a zero-valued array header) keeps the foreign arm through its boxed self, as before.
+    internal ElemRefBox(slice<T> slice, int index)
+    {
+        m_backing = slice.m_array;
+        m_index = slice.Low + index;
+
+        AllocationCounter.Count();
+    }
+
+    internal ElemRefBox(array<T> array, int index)
+    {
+        if (array.Source is not null)
+        {
+            m_backing = array.Source;
+            m_index = array.Low + index;
+        }
+        else
+        {
+            m_foreign = array;
+            m_index = index;
+        }
+
+        AllocationCounter.Count();
+    }
+
     /// <inheritdoc/>
     public override ref T Value
     {

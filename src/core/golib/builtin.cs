@@ -2002,6 +2002,87 @@ public static partial class builtin
         return new ElemRefBox<T>(target, (int)index);
     }
 
+    // ---- the CONCRETE-header element takes (the os want-zero residue's candidate A, 2026-09-05) ----
+    //
+    // A slice<T>/array<T> header is a readonly struct, so the IArray<T> overloads above cost the
+    // caller a boxing temp (56 B, one counted object) beside the 64 B ElemRefBox on EVERY `&s[i]`:
+    // the os row's two element sites read 120 B / 2 objects each (SUB-Q5's per-frame probe). These
+    // overloads take the header itself, so nothing boxes: overload resolution prefers the identity
+    // conversion over the boxing one, every existing `Ꮡ(s, i)` site binds here with no emission
+    // change, and the take charges ONE object — the box — through ElemRefBox's own ctor.
+    //
+    // BY VALUE, not `in`, for the reason the interface overload's remark records: an
+    // address-exposed header is reported live for the whole caller and pinned its backing array
+    // to the frame; a 32-byte struct copy is the price and it is not an allocation. The
+    // native-backed slice arm is unchanged. A NAMED slice/array type (a go2cs-gen struct wrapper
+    // implementing ISlice<T>/IArray<T>) still binds the interface overloads and keeps its temp —
+    // a constrained generic form cannot infer T from the wrapper — stated as the residual.
+
+    /// <summary>
+    /// Gets a pointer to slice element at <paramref name="index"/> without boxing the header.
+    /// </summary>
+    /// <typeparam name="T">Target type of reference.</typeparam>
+    /// <param name="target">Target slice.</param>
+    /// <param name="index">Index of element.</param>
+    /// <returns>Pointer to slice element at <paramref name="index"/>.</returns>
+    public static ж<T> Ꮡ<T>(slice<T> target, int index)
+    {
+        if (target.IsNativeBacked)
+        {
+            unsafe
+            {
+                return new NativeBox<T>(target.NativeElementAddress(index));
+            }
+        }
+
+        // ONE object: the box (charged in its ctor). No header temp exists to charge.
+        return new ElemRefBox<T>(target, index);
+    }
+
+    /// <summary>
+    /// Gets a pointer to slice element at <paramref name="index"/> without boxing the header.
+    /// </summary>
+    /// <typeparam name="T">Target type of reference.</typeparam>
+    /// <param name="target">Target slice.</param>
+    /// <param name="index">Index of element.</param>
+    /// <returns>Pointer to slice element at <paramref name="index"/>.</returns>
+    public static ж<T> Ꮡ<T>(slice<T> target, nint index)
+    {
+        if (target.IsNativeBacked)
+        {
+            unsafe
+            {
+                return new NativeBox<T>(target.NativeElementAddress(index));
+            }
+        }
+
+        return new ElemRefBox<T>(target, (int)index);
+    }
+
+    /// <summary>
+    /// Gets a pointer to array element at <paramref name="index"/> without boxing the header.
+    /// </summary>
+    /// <typeparam name="T">Target type of reference.</typeparam>
+    /// <param name="target">Target array.</param>
+    /// <param name="index">Index of element.</param>
+    /// <returns>Pointer to array element at <paramref name="index"/>.</returns>
+    public static ж<T> Ꮡ<T>(array<T> target, int index)
+    {
+        return new ElemRefBox<T>(target, index);
+    }
+
+    /// <summary>
+    /// Gets a pointer to array element at <paramref name="index"/> without boxing the header.
+    /// </summary>
+    /// <typeparam name="T">Target type of reference.</typeparam>
+    /// <param name="target">Target array.</param>
+    /// <param name="index">Index of element.</param>
+    /// <returns>Pointer to array element at <paramref name="index"/>.</returns>
+    public static ж<T> Ꮡ<T>(array<T> target, nint index)
+    {
+        return new ElemRefBox<T>(target, (int)index);
+    }
+
     /// <summary>
     /// Creates a new heap allocated instance of the zero value for type <typeparamref name="T"/>.
     /// </summary>
