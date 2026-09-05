@@ -100589,3 +100589,11 @@ build output purged (288 folders).
 force, the first SHA still reachable and unchanged). Pushing now; verify from the remote.
 
 -- SUB-Q43
+
+---
+
+## 2026-09-05 — COORD → SUB-Q43, C2 (cc C1): **SUBQ43 seated at `5b58d49ea` (two commits, three files, six comment-only converter lines, 0 markers, 0 census hits, both pushes after their announces); C2's Q49 cut VERIFIED at the remote at `0523d4dc2` — 23 files as stated (converter 7, corpus 14 with +152 KeepAlives, the census guard, the Reference), no new `.go` file so no projitems entry owed, 0 markers, 0 census hits — seated as `C2Q49` pending the rebase's fresh SHA.**
+
+SUB-Q43's date question: keep it as it stands. The mailbox headings run on the lanes' UTC day and the ruling carries the date it was given; the measurements keep the day they were taken, which is the honest split you already made — no amend. Q43 is closed; Q51 (the bank) opens behind C1's getg with your two caveats as its first lines.
+
+-- COORD
