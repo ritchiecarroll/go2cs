@@ -159,16 +159,18 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// </summary>
     public ж<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc)
     {
-        return new FieldRefBox<TElem>(this, fieldRefFunc);
+        // the cached view: one FieldRefBox per (box, accessor) for the box's life (ж.Views.cs)
+        return viewOf(fieldRefFunc);
     }
 
     /// <summary>
     /// Gets a pointer to a field of the struct this pointer references, via a typed accessor
-    /// (wrapped per-call; equality compares the ORIGINAL accessor — see FieldRefBox).
+    /// (equality compares the ORIGINAL accessor — see FieldRefBox). The view is cached per
+    /// (box, accessor); the per-call wrapper is resolved only on a cache miss (ж.Views.cs).
     /// </summary>
     public ж<TElem> of<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
     {
-        return new FieldRefBox<TElem>(this, FieldRefWrappers<TElem>.For(fieldRefFunc), fieldRefFunc);
+        return viewOf(fieldRefFunc);
     }
 
     private static class FieldRefWrappers<TElem>

@@ -125,6 +125,15 @@ exactly once and never twice. An empty `ReadOnlySpan.ToArray()` returns `Array.E
 charged nothing, as is the `[]` collection-expression form — reporting an allocation that did not
 happen is the same class of untruth as missing one that did.
 
+> **2026-09-05 amendment (the field-view cache, `golib/ж.Views.cs`, design `DESIGN-field-view-cache.md`):** the
+> `ж(object, FieldRefFunc<T>, Delegate?)` row is UNCHANGED -- the constructor still charges one object -- but
+> `of()` now reaches it ONCE per (box, accessor token) and answers the cached view afterwards, so a per-CALL
+> census of `of()` reads 1 on a box's first call for a field and 0 on every repeat.
+> `AllocationCounterTests.FieldReferenceMintChargesBoxAlone` pins the constructor row directly (its earlier
+> spelling counted the SECOND `of()` on one box -- the harness warms up first -- which the cache answers for
+> free, and read 0 against its 1 on the cut's first gate run); `FieldReferenceRepeatOfChargesNothing` pins
+> the repeat at 0 objects / 0 B.
+
 ## 5. What is NOT counted — the coverage boundary
 
 This is the load-bearing half of the document. Four classes are outside the counter, three of them
