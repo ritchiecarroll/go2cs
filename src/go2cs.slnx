@@ -896,6 +896,7 @@
     <Project Path="tests/Behavioral/SwitchFallthroughDefault/SwitchFallthroughDefault.csproj" />
     <Project Path="tests/Behavioral/SwitchFallthroughDefaultReturn/SwitchFallthroughDefaultReturn.csproj" />
     <Project Path="tests/Behavioral/SwitchNonConstCaseLabel/SwitchNonConstCaseLabel.csproj" />
+    <Project Path="tests/Behavioral/SyscallKeystonePulls/SyscallKeystonePulls.csproj" />
     <Project Path="tests/Behavioral/SystemCertVerify/SystemCertVerify.csproj" />
     <Project Path="tests/Behavioral/SystemCollidingTypeName/SystemCollidingTypeName.csproj" />
     <Project Path="tests/Behavioral/TcpLoopbackRoundTrip/TcpLoopbackRoundTrip.csproj" />
