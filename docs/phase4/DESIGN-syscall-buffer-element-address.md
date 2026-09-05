@@ -58,3 +58,9 @@ Retention and boundary, per B's predicate: the element take is admitted when its
 ## 4. Gates (if ruled) and order
 
 The converter suite with the predicate's guard (a `_pN` wrapper lowered; a stored or compared take refused; the empty-window case); golib's two `GetPinnableReference` members with a GolibTests arm (the probe's three cases as assertions) and therefore the golib gate list (`go2cs.slnx` once, GolibTests both configurations count-matched, the FULL behavioral suite as the cross-assembly consumer); the two-seeded three-target diff applied by hunk; the syscall closure on three flavours; the alloc-assert sweeps and the banked syscall-family rows; the os-row A/B on this box against the table above; C2's keep-alive census guard at the union. Order: after B (the wrapper's `ref` parameters and its `fixed` scopes are one emission change, and B's scope is the same statement), both priced against Q49 AS LANDED; then C.
+
+## 5. Re-read at train 29's landing (2026-09-05, master `b91684991`)
+
+- **Q49 landed** (`08b232e9b`): the funnel set section 2's predicate admits a take into is, at master, Go's four `//go:uintptrkeepalive` declarations plus the Windows `Syscall9/12/15/18/N` funnels, over `syscall`, `internal/runtime/syscall` and `crypto/x509/internal/macos` (`syscallKeepAliveAnalysis.go` at master is byte-identical to the branch read for the draft). The `_pN` idiom's only consumer is a conversion feeding that set by construction of `mksyscall`, so the 4 / 20 / 14 and the census's 41 / 26 / 28 stand as measured; the keep-alive census guard's landed arm is the shape the sibling arm in section 2 follows.
+- **GA landed** (`27c3129e0`): `Ꮡ(buf, 0)` is one `ElemRefBox` at master as read on the seat (segment 32 = 64 B / 1); the row's before-arm is **376.25 / 4** and the prediction in section 3 stands: after B **184.25 / 2 -> 64.25 / 1**, before B 376.25 / 4 -> 256.25 / 3, falsifiers as written.
+- Nothing above this block is rewritten.
