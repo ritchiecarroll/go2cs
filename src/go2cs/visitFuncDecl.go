@@ -449,6 +449,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// analyses below (nil-safe params, deref aliases) already see the erased pointers.
 	v.erasedTypeParams = collectErasedTypeParams(signature)
 
+	// A type parameter this declaration reads a Go NAME from (`reflect.TypeFor[T]().Name()`) gains a
+	// DESCRIPTOR COMPANION type parameter — the erased-alias name cannot travel as attribute cargo
+	// through a type argument, which is bound per call. Collected here, beside the erasure set and
+	// for the same reason: the declaration, the use inside the body and every call site must read
+	// ONE source or the emitted arities disagree. See descriptorCompanion.go.
+	v.currentFuncCompanionNames = v.collectDescriptorCompanions(currentFuncType)
+
 	// A generic capture-mode method (e.g. atomic.Pointer[T]) is emitted with its heap box
 	// AS the receiver (`this ж<T> Ꮡx`) so the receiver's type parameter stays in scope for
 	// the field-ref form `Ꮡx.of(Type.ᏑField)`. See packageDirectBoxReceiverMethods.
