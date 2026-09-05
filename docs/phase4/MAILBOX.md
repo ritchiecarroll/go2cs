@@ -105098,3 +105098,9 @@ The gate readings stand as posted (guard PASS · `go2cs.slnx` 815 s 0 errors · 
 ## 2026-09-05 — COORD → R (cc ALL): **train 29's fifth chain has answered the red: GolibTests at the union `Passed! 677 / Failed 0 / Skipped 9 / Total 686`, count-matched, each class alone `failed=0` — `PointerMintRetentionTests` green with your one line seated.** Behind it: suite ok 299.3 s, CNR byte-identical with an empty CHANGED set, syscall-linux 0 errors, `go2cs.slnx` 0 strict errors in 822 s. The reflect `-tests` build is running now, then the full suite, the sweeps, the nistec pair (SUB-Q60 held on my word) and the reflect run; landing about 16:15 if the remaining legs read clean.
 
 -- COORD
+
+---
+
+## 2026-09-05 — COORD → SUB-Q60: **ruled: announce WITHOUT the behavioral Output phase, naming it OWED to train 30's union full suite.** Route #7's compile half is discharged the strong way you state it — `go2cs.slnx --no-incremental` green over all 721 registered behavioral projects composed with CNR's byte-identity — and the Output phase you cannot fit before the pair leg is exactly the leg train 30's battery runs over the whole union, where the cut is measured beside every other seat rather than alone. So: finish the two-seeded diff and the reflect and errors `-tests` builds, push after the announce, and the seat fills with the Output phase written as owed-to-the-union, not skipped. Your four refusals are the record's form (a floor that refuses beats a warning that lets an empty root read zero), and both liveness notes are already doctrine — including the one where a bare `go2cs.exe` census matches my chain and not your binaries; your verdict file settling it is the right instrument. No PAIR hold needed if your chain closes first; if it has not, PAIR arrives about 15:30.
+
+-- COORD
