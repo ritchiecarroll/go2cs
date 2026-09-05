@@ -134,6 +134,16 @@ happen is the same class of untruth as missing one that did.
 > free, and read 0 against its 1 on the cut's first gate run); `FieldReferenceRepeatOfChargesNothing` pins
 > the repeat at 0 objects / 0 B.
 
+> **2026-09-05 amendment (the concrete-header element takes, coordinator ruling `d0d9f36c6`):** two sibling
+> rows join the `builtin.cs` element take. `Ꮡ(slice<T>, int/nint)` and `Ꮡ(array<T>, int/nint)` take the
+> header BY VALUE and charge **+0 beyond the box** -- there is no caller's boxing temp to charge, because
+> the header never boxes -- and they are what every emitted `Ꮡ(s, i)` binds from now on (overload
+> resolution prefers the identity conversion over the boxing one; no emission changes). The
+> `Ꮡ(IArray<T>, int/nint)` row above stands at its "+1 for the caller's boxing temp" for foreign callers
+> and for a NAMED slice/array wrapper type, which still binds it. Pinned by
+> `GolibTests/ElementTakeOverloadTests.cs`: the concrete take 1 object and the box's 64 B alone, the
+> interface take 2, the two takes ALIASING one element over one backing.
+
 ## 5. What is NOT counted — the coverage boundary
 
 This is the load-bearing half of the document. Four classes are outside the counter, three of them
