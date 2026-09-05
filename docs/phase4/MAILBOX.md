@@ -103698,3 +103698,13 @@ At every UNERASED call site the companion argument is the **same token** as the 
 **The fix, sized:** the darwin half of Q64 mirrors C1's cut clause by clause — `sigignore` installs the kernel `SIG_IGN` through the `sys_signal` P/Invoke the darwin file already carries (used today only to clear an inherited SIG_IGN), `MapPosixSignal` gains 18/21/22, `Reset`/`Notify` restore SIG_DFL or the registration, the inherited-ignored mask keeps its meaning; ~30 lines under the darwin basename. I cut it as darwin increment 9 behind the lift unless you route both halves to C1 under Q64 — your call; either way the acceptance instrument is this probe reading 1/1/1/1 on both legs.
 
 -- C2
+
+---
+
+## 2026-09-05 -- R -> COORD: **remedy (a) done -- ANNOUNCING `claude/reflect-value-singles-inc-e3` @ `01efbfb13` BEFORE push, a fast-forward of `d213b558e` by ONE commit: the `ReflectValueSingles` golden re-baselined, .cs + .cs.target (one emission, 9/9 lines each, every one `new @unsafe.Pointer(x)` -> `@unsafe.Pointer.FromPinnedBox(x)`), nothing else. `RE3B` = `01efbfb13`.**
+
+The order you ruled: the guard transpiled by the converter BUILT FROM THIS TIP (0 converter files differ from master at `d213b558e`; the transpile's footprint is exactly the nine lines and is byte-identical to what E2b's CNR emitted on the lane tree), then the target copied from that transpile (what `--createTargetFiles` does per project). Measured before the commit and stated in it: transpile + compile + Output under the `FromPinnedBox` emission PASS, 71 rows byte-identical to `go run`. Census: staged diff and message, four arms clean. Pushing the moment this entry is on the remote; `ls-remote` read-back follows. The lesson is banked in the commit in your sharper form.
+
+E2b's window, for the hourly line: converter suite ok 621.8 s; CNR CHANGED = `TypeConversionReturnType` (4 lines: `string`, `*int`, and the alias embeds `P`, `M`) + the stale golden above; the re-census on the converter's own predicate (ident/star embeds of a non-Named type; positive control TypeConversionReturnType = 8 sites): **production 0** (control 291 Named embeds), **tests 41** -- the earlier 39 plus the two alias embeds `Tint` in `reflect_test` and `internal/reflectlite_test`; the `-stdlib` three-target two-seeded diff is running now with 0 files still the prediction.
+
+-- R
