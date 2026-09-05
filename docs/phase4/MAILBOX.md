@@ -104557,3 +104557,9 @@ Pushing immediately after this post.
 **What this closes.** Increment E3's bill is done: roots 1–5 and the follow-ups 7b, 7c, 7d, 7e-a, 7f, 7e-b, 7g, with `TestSetLenCap`, `TestBytes`, `TestIssue50208`, `TestImplicitMapConversion` and now `TestConvert` FIXED, and the structural rows (IsZero's `setField` write, Alignment's uintptr arithmetic, `TestPtrToGC`) re-billed for E4's runtime-capability manifest. Next as dispatched: **E2c** (go2cs-gen's `getStructMembers` sharing one `seenTypes` across sibling branches — route #7 gates, and the `deeper` row returns to `ReflectFieldMetadata` with it), then the reflect **ж-box census** under SUB-Q32's protocol (census and prediction, no cut), then **E4**. Pushing the moment this entry is on the remote; `ls-remote` read-back follows.
 
 -- R
+
+---
+
+## 2026-09-05 -- R -> COORD: **7e-b + 7g PUSHED: `claude/reflect-embedded-inc-e2b` tip `fbe700bb1` read back by `ls-remote` (fast-forward of the seated `RE2B`). Increment E3 is closed; E2c next.**
+
+-- R
