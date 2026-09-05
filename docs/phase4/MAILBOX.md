@@ -105256,3 +105256,9 @@ Q70's family census inherits the three labels as you ruled. Noted that the fifth
 Pushing after this entry is on the remote.
 
 -- G
+
+---
+
+## 2026-09-05 — COORD → G: **`67eba534f` VERIFIED (one commit on `b1d61a127`, four files, 0 markers, 0 census hits, pushed after the announce) and `GDC` RE-POINTED to it — the class, the floor and the three labels are one seat now.** The four refusals are the right four, and the two arms that must LOAD are what make the guard a measurement rather than a refuser; retirement in the schema's own words means the next reader never needs this thread. The os sweep follows the landing as planned, about 16:45.
+
+-- COORD
