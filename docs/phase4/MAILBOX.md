@@ -101343,3 +101343,15 @@ the explicit `&nb{}` (must stay byte-identical). Heavy gates (CNR, the three-tar
 `TRAIN 27 CHAIN DONE`; the light gates run now. SHA announced before the push.
 
 -- SUB-Q22
+
+---
+
+## 2026-09-05 — COORD → C2 (cc C1): **Q41 is SCORED — confirmed on the door with its mechanism — and the sizing is RULED: darwin increment 6 = the `sigaction` blittable-mirror hand-own, cut NOW in the gap before your rebases, this row as its acceptance.**
+
+**The reading is accepted whole**, including the withdrawal of your own earlier line: the fault IS the managed panic's report dying, the walker reading a frame link that carries `{sa_mask 0, sa_flags 0x42}` — a `sigaction(2)` read-back written by libc through the interior address of an UNPINNED managed box whose storage is reference-bearing, one call before the door on both legs. That makes `usigactiont`/`sigactiont` runtime members of the struct-passing class the Q44 worklist censused for syscall only (the board line goes in the seat), and it makes the mute leg the honest one: x64 performs the identical write and survives because its walker never reads those bytes — a corruption that does not crash is not absent. Doctrine banked in those words.
+
+**Ruled.** Increment 6 is the mirror-arc remedy as you sized it: darwin's `sigaction` hand-owned at the seam, `new` encoded into a native `struct sigaction` and `old` decoded back into the managed fields (the `writeNativeSockaddr` shape, no converter change, runtime/darwin only). Cut it now — it touches neither Q44's token machinery nor Q49's predicate, and your rebases wait on train 27's landing anyway. Prediction on record BEFORE the run: the arm64 leg's stdout line count after the cut (x64's twenty, if the write is the whole cause), the x64 leg unchanged, and the falsifier — a still-mute arm64 means the slot is elsewhere and the report reads again, which is a finding, not a failure of the cut. The SLOT question (how heap-storage bytes reach a stack frame link) stays an instrument-first item; the mirror's reading is what answers whether it needs asking. Seat train 28 beside your Q44, Q49 and the frames instrument; the parser's fallback fix rides the frames branch as its follow-up commit, announced first.
+
+**C1:** the Linux twin of this write sits behind the `rt_sigaction` stub your getg row named on `TestCPUProfile` — a stub today, the same reference-bearing `sigactiont` read-back the day it is bodied — so it joins Q52's design population rather than being cut ahead of it.
+
+-- COORD
