@@ -100873,3 +100873,50 @@ The bill prints next, every row by its first output line and the code path behin
 R's bill prediction is on record as posted; the bill prints against it.
 
 -- COORD
+
+---
+
+## 2026-09-05 — R → COORD: **the reflect BILL, scored against `c274654c3` — 73 rows / 29 parents by first line and code path. DISCLOSABLE 44 · STRUCTURAL 15 · IMPLEMENTABLE 13 (+ `GCBits` already disclosed). The alloc prediction HELD to the parent, four class calls MISSED and are named. The next increment, sized by yield, is a MANIFEST, not code — posted as a design step.**
+
+### Scored
+
+| class | predicted | measured | verdict |
+|:--|:--|:--|:--|
+| alloc-count | 43 (40–45), 6 parents incl. `SmallZero`/`MapIterReset`/`MapIterSet` on the COUNT | **44 / 6** — all three re-filed parents fail on the count; every first line is an `AllocsPerRun` line | **HELD** (band, parents, one root) |
+| row split | 37 `DeepEqualAllocs` + 7 `ValuePointer` subtests | **38 + 6** — all 38 table entries fail; `ValuePointer/unsafe.Pointer` is the one that passes | arithmetic held at 73; the split missed by one each way |
+| layout / GC | 3 structural | `GCBits` structural; **`Alignment` IMPLEMENTABLE** (every `StructField.Offset` reads 0 — offsets are never synthesized, though Go sizes/aligns are); **`PtrToGC` fails on a `Convert` gap**, not GC | 2 MISSES |
+| method / code pointer | 3 structural + `MethodValue` implementable | **4 structural** — `MethodValue`'s failing line is `methodValueCall mismatched: 0x… - 0x…`, a code-pointer compare | 1 MISS |
+| slice header | `SetLenCap` implementable, 3 structural, SliceHeaderBox 0 | as predicted; `SetLenCap` NREs in the AUTO `value.cs` `SetCap` (the hand-own covers `SetLen`) | HELD |
+| `StructOf` | implementable, one root | *did not find preexisting type for … (vs struct { Y uint64 })* — interning against the converter-lifted anonymous type, both rows | HELD |
+| the rest | ~7 implementable, `ValuePointer` 8 structural | 8 implementable (`Bytes`, `Convert`, `FieldByName`, `FieldPkgPath`, `ImplicitMapConversion`, `IsZero`, `Issue22031`, `Issue50208`); **`CallReturnsEmpty` is "finalizer did not run"** — GC timing, structural; `ValuePointer` 7 | 1 MISS |
+
+### The bill
+
+**DISCLOSABLE — 44 rows / 6 parents, one root: managed boxes and slice/map headers where Go stays stack-resident.** Two signature FORMS under one prefix: *"testing.AllocsPerRun counted N go2cs-runtime object allocations"* (the runtime counter charged the path — `DeepEqualAllocs`' 38, `MapIterSet`) and *"testing.AllocsPerRun measured N allocated BYTES … the counter charged none of it"* (the allocation is entirely in BCL paths — `ChanAlloc` 216/run, `MapAlloc` 80 and 1,502/run, `MapIterReset` 1,256/run, `SmallZero` 176/run). The second line of each carries Go's own assert text. Plus `GCBits`' existing entry.
+
+**STRUCTURALLY-UNTESTABLE — 15 rows / 12 parents, three classes for the ledger:** *code-pointer identity* (4: `MethodCallValueCodePtr` — `FuncPCABI0` of the assembly trampoline `methodValueCall`; `MethodValue`, `NestedMethods`, `EmbeddedMethods` — method-table addresses); *raw-address identity* (10: `Slice`, `Slice3` — `UnsafePointer()` of a re-sliced backing; `SliceAt` — an underlying-array address; `ValuePointerAndUnsafePointer` ×7 — `Pointer()` against `unsafe.Pointer` for channel/function/map/pointer/slice/string); *finalizer timing* (1: `CallReturnsEmpty`).
+
+**IMPLEMENTABLE — 13 rows / 13 parents, 10 roots, each ≤ one file:**
+- `FieldPkgPath` — `Field([3]).Anonymous = false, want true`: the `Anonymous` flag is never set, though `GoFieldInfo.Embedded` already carries it. **One line.**
+- `FieldByName` — `S3.B found`: Go's ambiguity rule (two embedded fields at equal depth → not found) is missing.
+- `Issue22031` — `CanSet: got true, want false`: `flagRO` not propagated through an unexported embedded field.
+- `Alignment` — offsets 0 vs 8, 16: synthesize `StructField.Offset` from the Go sizes/aligns the descriptors already stamp, by Go's layout rule.
+- `SetLenCap` — `SetCap` in the auto `value.cs` dereferences a nil header pointer (`ж.op_OnesComplement`, `value.cs:1565`); hand-own it beside `SetLen` with the `reflect:` panics the test expects.
+- `Bytes` — `panic: … of non-byte slice`, expected *unaddressable*: the kind check runs before the addressability check; an addressable `[N]byte` array must succeed and an unaddressable one must panic *unaddressable*.
+- `IsZero` — NRE in `array.get_Item` via `reflect.Index` from `IsZero` (`value_impl.cs:761/771`): an array `Value` with no backing is zero, not a dereference.
+- `ImplicitMapConversion` — `#5 MapIndex(b1) = 0x… want 0x…`, EQUAL text, unequal values: `MapIndex` returns a fresh box for a pointer-valued entry; pointer equality is box equality (the 2026-09-01 rule), so the stored box must come back.
+- `Convert` + `PtrToGC` — one root, `Value.Convert` coverage: `[]uint8 → *[0]uint8` (slice-to-array-pointer, Go ≥ 1.17) and `**uintptr → *T` (pointer-to-pointer).
+- `Issue50208` — `want:B[reflect_test.A], got:A]`: `Name()` of an instantiated generic type is cut at the bracket.
+- `StructOf` + `StructOfAnonymous` — one root: intern a `StructOf` result against the pre-existing (converter-lifted) type with the same shape by a structural key, as `synthType` already interns by `(System.Type, dimsKey)`. `DESIGN-reflect-structof.md` is in the tree; I have not re-read it and size this from the bill alone.
+
+### Next increment by yield — DESIGN STEP, not a cut
+
+**E1 — the reflect `alloc-profile` MANIFEST: 44 rows, zero code.** `src/core/reflect/go2cs_test_disclosures.json` with six parents' entries (the 38 `DeepEqualAllocs` subtests under their parent's signature, if the manifest matches subtests by parent — I will read the schema before writing one), signature the common prefix *"testing.AllocsPerRun "* so both forms pin, reason per parent naming the mechanism and the measured per-run figure. It moves 44 rows from mismatch to disclosed with no risk to any banked row, and it is the largest single move on the bill by a factor of three.
+
+**E2 — the field-metadata cluster: 3 rows, one file (`GoReflect.FieldAccess.cs` / the field route), three roots** — `Anonymous` (one line), the equal-depth ambiguity in `FieldByName`, `flagRO` through unexported embedded. Predicted footprint ≤ 40 lines, no converter change, no emission movement.
+
+**E3 — the `Value` singles: 8 rows, 7 roots**, each independently gateable (`SetCap` hand-own, `Bytes` order, `IsZero` null-backed array, `MapIndex` box identity, `Alignment` offsets, `Issue50208` name, `Convert` two conversions). Predicted ≤ 150 lines across `reflect/value_impl.cs` and one golib file; no emission movement.
+
+**After E1–E3 the row reads 315 + 44 disclosed + 11 = 370 of 388**, leaving 18: 15 structural for the owner-ruled ledger (three classes above), `GCBits`, and `StructOf`'s 2 behind its design. **Recommendation:** rule E1 now (a manifest, the schema read first, its signatures positive-controlled the way net's were), and E2 as the first code increment — the smallest footprint per row on the bill; E3 after, root by root, each with its own prediction. I cut nothing until you rule.
+
+-- R
