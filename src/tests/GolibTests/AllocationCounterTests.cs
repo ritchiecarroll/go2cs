@@ -214,11 +214,32 @@ public class AllocationCounterTests
     public void FieldReferenceMintChargesBoxAlone()
     {
         // Go's `&x.field` — the accessor delegate is compiler-cached at real call sites, so the
-        // mint itself is one object: the FieldRefBox.
+        // mint itself is one object: the FieldRefBox. This pins the CONSTRUCTOR row of the census
+        // (as the elem-ref, native and nil arms beside it do), constructed directly: since the
+        // field-view cache (ж.Views.cs) `of()` reaches this ctor once per (box, field) and answers
+        // the cached view afterwards, so an `of()` inside Charge's window — which follows Charge's
+        // own warm-up call on the same box — measures the cache, not the mint (the arm below does).
         ж<FieldHost> host = new StandardBox<FieldHost>(default(FieldHost));
 
-        AssertCharge(1L, () => { ж<long> _ = host.of(s_hostField); },
-            "of(...) — the field-ref box only");
+        AssertCharge(1L, () => { ж<long> _ = new FieldRefBox<long>(host, s_hostField); },
+            "FieldRefBox ctor — the field-ref box only");
+    }
+
+    [TestMethod]
+    public void FieldReferenceRepeatOfChargesNothing()
+    {
+        // The field-view cache's contract in the counting suite: a repeat `of()` on the same box for
+        // the same field returns the cached view, charging no object and allocating no bytes. Charge's
+        // warm-up call is the first `of()` (the mint, charged 1 by the ctor row above); the window sees
+        // the hit. Both numbers are asserted, because the cut's whole yield is this row reading 0 / 0.
+        ж<FieldHost> host = new StandardBox<FieldHost>(default(FieldHost));
+
+        (long objects, long bytes) = Charge(() => { ж<long> _ = host.of(s_hostField); });
+
+        Assert.AreEqual(0L, objects,
+            $"a repeat of(...) charged {objects} object(s) — the field-view cache must answer it ({bytes} B measured)");
+        Assert.AreEqual(0L, bytes,
+            $"a repeat of(...) allocated {bytes} B — the cached view must cost nothing per call");
     }
 
     private struct FieldHost

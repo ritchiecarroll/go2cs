@@ -1927,6 +1927,10 @@ public static partial class builtin
     /// <returns>Pointer to heap allocated copy of <paramref name="target"/> value.</returns>
     public static ж<T> Ꮡ<T>(in T target)
     {
+        // a consumer type's box carries the field-view slot (ж.Views.cs)
+        if (BoxShape<T>.Slotted)
+            return new SlottedStandardBox<T>(target);
+
         return new StandardBox<T>(target);
     }
 
@@ -2091,6 +2095,11 @@ public static partial class builtin
         // any field initializers, e.g. fixed-size array fields); a reference/delegate type is null — with
         // the one kind-family where running that ctor is NOT Go's zero carved out by GoNewZero.
         T value = GoNewZero<T>.UseDefault ? default! : Activator.CreateInstance<T>();
+
+        // the same type gate as Ꮡ<T>(): a consumer type's box carries the field-view slot
+        if (BoxShape<T>.Slotted)
+            return new SlottedStandardBox<T>(value);
+
         return new StandardBox<T>(value);
     }
 

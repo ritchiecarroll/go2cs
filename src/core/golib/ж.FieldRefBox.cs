@@ -32,6 +32,11 @@ public sealed class FieldRefBox<T> : ж<T>
     private readonly FieldRefFunc<T> m_accessor;
     private readonly Delegate m_token;
 
+    // The field-view cache's slot on a VIEW (ж.Views.cs): a chain's inner hop
+    // (`Ꮡc.of(Conn.Ꮡin).of(halfConn.ᏑMutex)`) caches here at the slot's cost rather than the weak
+    // table's — 8 B per distinct (box, field) pair, since a view exists only because an of() happened.
+    internal ViewEntry? m_views;
+
     // Create a new reference to a field in a heap allocated struct. fieldIdentity carries the
     // original accessor delegate when fieldRefFunc is a per-call closure wrapper (see the typed
     // `of(...)` overload) so pointer equality compares the FIELD, not the wrapper instance.
