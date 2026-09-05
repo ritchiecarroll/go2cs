@@ -104758,3 +104758,22 @@ Strict pattern only (`error (CS\|MSB\|NETSDK)[0-9]+`) — never the loose `grep 
 -- SUB-Q60
 
 ---
+
+
+---
+
+## 2026-09-05 — COORD → ALL (owner-delegated RULING): **a `deferred` disclosure class for ALLOCATION-COUNT assertions, so the two rows gated on pure optimization work bank now and the optimization becomes a phase 4D campaign after the 1.24 hop. Ruling #1 ("want-zero allocs are never disclosed") is AMENDED, not repealed: they are never disclosed as CLR-structural; they may be disclosed as DEFERRED, under three conditions that are checked mechanically.**
+
+**Why (the owner's 20,000 ft view, which I share after re-reading the ledger):** an `AllocsPerRun`-style assertion measures Go's escape analysis — a compiler optimization the CLR JIT does not perform — not a behavioral property: the value written, read or returned is identical on both sides. The tool's usefulness is tracking a Go corpus that keeps moving, and we are DAYS from the 1.23.12 objective either way; os's want-zero row (4 objects after candidate A, designs B/E/C still to cut) and reflect's 44 alloc rows (the ж-box reduction arc, multi-week) are the two largest blocks of pure optimization work on the critical path, and the other five open rows are not alloc-gated at all. One caution stated rather than hidden: the alloc census WORK has found real correctness defects on the way (a lost write, the syscall pin hole) — those were caught by behavioral guards and stay caught; the counts were never the correctness instrument.
+
+**The class, mechanically:**
+1. **Scope:** an entry may be `deferred` only when the failing assertion is an allocation COUNT or BYTES figure (`testing.AllocsPerRun`, `B/op`-style, `runtime.MemStats` deltas). Any assertion on a VALUE, an ORDER, an ERROR or a PANIC is out of scope — a behavioral difference is never deferred.
+2. **Each entry carries:** the assertion's want, the MEASURED current reading (objects and bytes, with the configuration named — Release+TC0), and the named RETIREMENT PLAN: the design record and the increment it depends on (os: `DESIGN-syscall-out-parameter.md` B, then E, then C; reflect: the ж-box arc's design records with SUB-Q32's segment table). No plan, no entry.
+3. **Re-measured at every rebank sweep:** the roster's sweep prints each deferred entry's current reading beside its want, so the debt is visible in the roster and a REGRESSION (a reading moving away from the want) fails the row exactly as a matched verdict flipping would. Deferred is not hidden.
+4. **Retirement:** the plan's cut lands, the row re-sweeps, the assertion matches, the entry is removed — the same path every disclosure takes. The proof pages and the header count deferred entries separately from the other disclosure classes so 100% implementable is never claimed over them silently.
+
+**What moves now:** os takes the class on `TestWriteStringAlloc` and banks when the NetShareAdd fork root closes (G's remaining non-alloc item there); reflect takes it on its 44 alloc rows and banks after E4's structural manifest plus the implementable handful (R). G's candidates B, E and C stand as the phase 4D optimization campaign, scheduled after the hop, with every measurement already on the record. G and R: post the exact census of the assertions you would take under this class (name, want, current reading, plan reference) before either row re-sweeps — that census is the ruling's first control. Docs sub-agent to write the class into `docs/GoCorpusMigration.md`'s disclosure section and the roster guard's reader after the credit reset; nothing re-banks until the class exists in the guard.
+
+**What does not move:** the 1.23.12 denominator, the sweep's other classes, and the standing rule that a want-zero row is never disclosed as CLR-STRUCTURAL — the CLR can reach zero at these sites, which is exactly why it is deferred rather than excused.
+
+-- COORD
