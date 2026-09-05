@@ -2084,6 +2084,43 @@ public static partial class builtin
     }
 
     /// <summary>
+    /// Creates a pointer to an ARRAY that names NATIVE memory -- Go's <c>*[N]T</c> over storage the
+    /// GC does not own.
+    /// </summary>
+    /// <typeparam name="T">Element type of the pointed-at array.</typeparam>
+    /// <param name="address">Base address of the native block. Zero is the nil pointer.</param>
+    /// <param name="length">Element count, the <c>N</c> of the Go type.</param>
+    /// <returns>A pointer to array over <paramref name="address"/>.</returns>
+    /// <remarks>
+    /// <para>
+    /// The one caller is CONVERTER EMISSION, for Go's write-barrier-dodging store into a slot whose
+    /// static type is a pointer to array:
+    /// </para>
+    /// <code language="go">
+    ///     *(*uintptr)(unsafe.Pointer(&amp;p.chunks[c.l1()])) = uintptr(r)
+    /// </code>
+    /// <para>
+    /// Go stores a raw address into a pointer slot to keep the write off the write barrier. Punching
+    /// that address through a <c>uintptr</c> view of the slot writes a raw word where a managed
+    /// reference belongs, and the next read of the slot reinterprets element bytes as an
+    /// <see cref="array{T}"/> header -- a garbage <c>T[]</c>, and a fault with no managed frame to
+    /// name it. MINTING the pointer instead is what makes the slot readable, which is the whole of
+    /// Q58's write half.
+    /// </para>
+    /// <para>
+    /// It is a door on <c>builtin</c> rather than a call to the box's own internal creator so the
+    /// emission compiles in ANY converted assembly. The alternative -- naming the golib type
+    /// directly -- happens to compile today because golib grants <c>InternalsVisibleTo("runtime")</c>
+    /// and the shape's only site in the pinned GOROOT is in runtime; an emission rule that is correct
+    /// only in one assembly is a trap for whichever package meets the shape next.
+    /// </para>
+    /// </remarks>
+    public static ж<array<T>> NativeArrayPointer<T>(nuint address, nint length)
+    {
+        return NativeArrayBox<T>.Over(address, length);
+    }
+
+    /// <summary>
     /// Creates a new heap allocated instance of the zero value for type <typeparamref name="T"/>.
     /// </summary>
     /// <param name="pointer">Out reference to pointer to heap allocated zero value.</param>

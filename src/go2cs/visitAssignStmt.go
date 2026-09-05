@@ -462,6 +462,90 @@ func (v *Visitor) nativeIntConstCastType(lhs, rhs ast.Expr, alreadyCast string) 
 //
 // Roughly three quarters of this file is this one function. It is planned for decomposition, and
 // the natural seams are those shapes — the branches on assignStmt.Tok and on the arity of Lhs/Rhs.
+// nativeBackedArrayPointerStore recognizes Go's write-barrier-dodging store into a slot whose
+// static type is a POINTER TO ARRAY, and emits a box MINT rather than a raw-address write:
+//
+//	*(*uintptr)(unsafe.Pointer(&p.chunks[c.l1()])) = uintptr(r)   // runtime/mpagealloc.go:420
+//
+// Go writes the raw address straight into the pointer slot to keep the store off the write barrier
+// ("grow is used in call chains that disallow write barriers"). The faithful conversion of that is
+// `(Ꮡ(...).Reinterpret<ж<array<T>>, uintptr>()).Value = (uintptr)r`, which takes Reinterpret's
+// ALIASING arm and hands back a ref naming the slot ITSELF -- so the raw word lands exactly where a
+// managed reference belongs. Nothing fails at the store. The next READ of the slot reinterprets
+// element bytes as an array<T> header, the T[] it finds is garbage, and the process dies inside the
+// prestub with no managed frame to name it: Q58's measured wall, eight page-allocator rows exiting
+// 139 with a blank stderr.
+//
+// A managed slot cannot hold a bare address, so the honest answer is to MINT a pointer that NAMES
+// the native block. This is a converter change and not a golib one because the store writes THROUGH
+// A REF: `ж<T>.Value` is a `ref T` property, and a box cannot observe a write performed through a
+// ref it has already surrendered (DESIGN-native-backed-array-pointer.md, the 2026-09-05 amendment).
+//
+// SCOPE, censused rather than assumed. The assignment shape appears 20 times in the pinned GOROOT
+// (go1.23.12, production and _test.go), and the destination is a pointer to ARRAY at exactly ONE of
+// them -- the site above. The other 19 store into pointer-to-struct, pointer-to-byte and
+// unsafe.Pointer slots; 12 of those reach the same aliasing reinterpret in today's emission and are
+// latent in the same way, one type-kind over. They are deliberately NOT served here: none of them
+// has a measured failing row, and a native box for those kinds is a separate question with its own
+// evidence to gather. Widening this gate is a change of SCOPE, not a tweak of the predicate -- so it
+// tests the destination type and refuses everything else, rather than matching on the syntax alone.
+func (v *Visitor) nativeBackedArrayPointerStore(lhs ast.Expr, rhs ast.Expr) (string, bool) {
+	star, isStar := ast.Unparen(lhs).(*ast.StarExpr)
+
+	if !isStar {
+		return "", false
+	}
+
+	// The deref target is the dodge's own cast -- `*uintptr` and nothing else.
+	castPtr, isCastPtr := types.Unalias(v.info.TypeOf(star.X)).(*types.Pointer)
+
+	if !isCastPtr {
+		return "", false
+	}
+
+	if castBasic, isBasic := types.Unalias(castPtr.Elem()).(*types.Basic); !isBasic || castBasic.Kind() != types.Uintptr {
+		return "", false
+	}
+
+	cast, isCast := ast.Unparen(star.X).(*ast.CallExpr)
+
+	if !isCast || len(cast.Args) != 1 || !v.callExprIsTypeConversion(cast) {
+		return "", false
+	}
+
+	addressed := v.unwrapUnsafePointerConversion(cast.Args[0])
+
+	if addressed == nil {
+		return "", false
+	}
+
+	unary, isUnary := ast.Unparen(addressed).(*ast.UnaryExpr)
+
+	if !isUnary || unary.Op != token.AND {
+		return "", false
+	}
+
+	// The DESTINATION's own static type is what decides, never the shape around it.
+	destPtr, destIsPtr := types.Unalias(v.info.TypeOf(unary.X)).(*types.Pointer)
+
+	if !destIsPtr {
+		return "", false
+	}
+
+	destArray, destIsArray := types.Unalias(destPtr.Elem()).(*types.Array)
+
+	if !destIsArray {
+		return "", false
+	}
+
+	// The length is Go's own N, read from the destination type rather than from the store site: the
+	// write site happens to know it here (l2Size is one line up), but the TYPE knows it everywhere.
+	elemType := convertToCSTypeName(v.getAliasQualifiedTypeName(destArray.Elem(), false))
+
+	return fmt.Sprintf("%s.Value = NativeArrayPointer<%s>((nuint)(%s), %d);",
+		v.convExpr(unary, nil), elemType, v.convExpr(rhs, nil), destArray.Len()), true
+}
+
 func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingContext) {
 	result := &strings.Builder{}
 
@@ -515,6 +599,28 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					}
 				}
 			}
+		}
+	}
+
+	// Go's write-barrier-dodging store into a POINTER-TO-ARRAY slot mints a native-backed pointer
+	// instead of punching a raw address through a uintptr view of the slot -- see
+	// nativeBackedArrayPointerStore for the wall this answers and the census that bounds it.
+	if lhsLen == 1 && rhsLen == 1 && assignStmt.Tok == token.ASSIGN {
+		if mint, isMint := v.nativeBackedArrayPointerStore(lhsExprs[0], rhsExprs[0]); isMint {
+			result.WriteString(mint)
+
+			if hoistBuf != nil && hoistBuf.Len() > 0 {
+				v.outputBuilder.WriteString(hoistBuf.String())
+			} else if format.useNewLine {
+				v.outputBuilder.WriteString(v.newline)
+			}
+
+			if format.useIndent {
+				v.outputBuilder.WriteString(v.indent(v.indentLevel))
+			}
+
+			v.outputBuilder.WriteString(result.String())
+			return
 		}
 	}
 
