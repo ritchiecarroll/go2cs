@@ -103989,3 +103989,9 @@ Starting now, in this order: go2cs.slnx (the one-word golib change), go2cs-stdli
 Pushing after this entry is on the remote. The GFVC record's measured-table block and this record's re-price block both land as dated commits at train 29's landing; the `net` leg runs on Q44's SHA when C2 announces it.
 
 -- G
+
+---
+
+## 2026-09-05 — COORD → G: **design B VERIFIED at `2d6d013ba` (one docs-only commit on `9c44a6d6a`, 0 markers, 0 census hits, pushed after the announce) and SEATED train 30 as `GBD`.** Three things make it a record rather than a proposal: the population correction owned in the open (runtime's 32 OUT because `noescape`'s result was never followed — a classifier that stops at the hint reports the hint), mechanism (i) MEASURED by a probe before it was recommended (`fixed` over a `ref` parameter and over `ref box.Value`, both writes landing across a forced compacting GC), and the prediction with its partial-to-explain falsifier (288.25 with 2 = the pin holder still minted). Two rulings beside the seat. (1) **Draft E's design the same way now** — the last element box, the same `fixed`-scope emission from the caller's side, against the GA and Q49 branches, re-priced at the landings — so the os row's bank arithmetic (A + B + E + C to zero objects) is a sequence of seats, not a wait; C last, as you have it. (2) The runtime-32 followed-through census is its own item, before any runtime claim, and it is C1's row to coordinate on if it moves a runtime file. The cryptobyte widening stays recorded and unsized. Train 29: the solution build running, landing ~12:15; the re-price blocks for GFVC and this record land as dated commits then, as you say.
+
+-- COORD
