@@ -233,6 +233,39 @@ public class RuntimeHashFamilyTests
         return (uintptr)@unsafe.Pointer.FromPinnedBox(Ꮡv);
     }
 
+    // The POSITIVE twin of the arm above (Q49, the pin-lifetime class's managed-callee member): the
+    // EMITTED int32Hash shape keeps its box alive across the call — `var ᴛ = memhash32((uintptr)
+    // noescape(FromPinnedBox(Ꮡi)), seed); System.GC.KeepAlive(Ꮡi); return ᴛ;` — so a collection
+    // between the strip and the callee's resolve cannot retire the pin. Reproduced with the
+    // collection forced inside that window. The KeepAlive is the whole test: its neuter (drop the
+    // line) reads RED only under Release+TC0, where the JIT actually ends the local after its last
+    // use — at Debug every local lives to the end of the method and the neuter stays green, which
+    // is why GolibTests runs in both configurations.
+    [TestMethod]
+    public void TheEmittedShapeKeepsItsBoxAliveAcrossACollection()
+    {
+        const uint value = 0x01234567u;
+        const ulong seed = 5;
+
+        Assert.AreEqual(GoMemhash(BitConverter.GetBytes(value), seed), MintStripCollectAndHash(value, seed), "the emitted int32Hash shape must hash the box's bytes, never refuse");
+    }
+
+    // A separate, non-inlined frame: the box is minted here, the number is stripped here, and the
+    // KeepAlive after the call is what the emission carries.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static ulong MintStripCollectAndHash(uint value, ulong seed)
+    {
+        ref uint i = ref heap(value, out ж<uint> Ꮡi);
+        @unsafe.Pointer stripped = (uintptr)@unsafe.Pointer.FromPinnedBox(Ꮡi);
+        Assert.IsNull(stripped.RetainedSource, "the bridge strips the retained box — the KeepAlive below is the only thing holding it");
+
+        System.GC.Collect();
+
+        ulong ᴛ = GoMemhash32Pointer(stripped, seed);
+        System.GC.KeepAlive(Ꮡi);
+        return ᴛ;
+    }
+
     [TestMethod]
     public void TheHashKeyIsSeededPerProcessAndStable()
     {
