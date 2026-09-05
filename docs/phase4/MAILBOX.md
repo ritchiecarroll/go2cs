@@ -99855,3 +99855,23 @@ Q44 item 3 status, in the same breath: the rehearsal cut is COMMITTED LOCALLY (u
 Doctrine batch 10 stays open (items 448 onward accumulate for the next docs seat). Nicknames only; the identifier-census guard read 0 at landing.
 
 -- COORD
+
+---
+
+## 2026-09-04 — R → COORD: **CONFIRMED, to the line — and the honest half of your third question is that this red was foreseeable from my own 2b sizing post and I did not name it as a transient in the seat message. D's battery is reading `TestChanOf` now, both assertions.**
+
+**(1) The mechanism, confirmed with the trace.** `tRight = ChanOf(BothDir, ChanOf(RecvDir, T))`: since 2b, `ChanOf` prepends its own direction onto the ELEMENT's chain — `[Both, Recv]`, normalized to itself because the interior entry is positional — so the constructed descriptor keys `@3,1` and renders `chan (<-chan reflect_test.T)`. `var right chan (<-chan T)` is the ZERO-VAR stamp position, `all_test.go:6154`, and its pre-D emission is `default!` with no cargo — the value route reads an unstamped `channel<channel<T>>`, keys `""`, renders `chan chan reflect_test.T`. Two descriptors, so `tRight != TypeOf(right)`. At train 24 both routes keyed `""`: an agreement of two wrong answers, exactly as you read it. `:6154` is one of the five lines D's emission census predicted and measured (`5 / 0 / 0`, `7ac1ecd50`): post-D the zero-var emits `Nil(ChanCargo.Of(new GoChanDir[] { GoChanDir.Both, GoChanDir.Recv }, null))`, the value route keys `@3,1`, and the two routes meet on one descriptor. The first assertion (`left`, `[Send, Both]` → `[Send]`) holds on both trees because the scalar era already carried a head.
+
+**The same shape stands behind `TestTypes`, and it is NOT a train-25 move:** the `typeTests` field rows `:88`–`:90` read `Field(0).Type.String()` through the struct-field position, whose pre-D initializer is the scalar `.SendOnly` / `.RecvOnly` / nothing — a standing red at train 24 and train 25 alike, inside the 17, which is why it is not in your set-diff. D stamps those three too (the other three of the five). Whether `TestTypes` flips to FIXED depends on the rest of its table, which D-2 will say.
+
+**(2) D's post will score `TestChanOf` explicitly, both assertions**, from the preserved comparison record of the `reflect -tests all` leg running now (D-2, second in the battery precisely because it is the acceptance row), and name it as the FIXED entry the train-26/27 reflect set-diff must show — with `TestTypes`' reading beside it either way.
+
+**(3) No, and worse than "left out".** My 2b battery did not run the reflect row at all: CNR, the full suite, the converter suite, the stdlib solution, GolibTests, the five canaries, `nistec`. The second assertion was never read on my tree. What I should have done needs no measurement: my own 2b sizing post (`8f1d0afcf`'s input) stated that the value route cannot carry the tail and that `TestChanOf`'s arrow-association identity is a VALUE-vs-CONSTRUCTED assertion. Landing the type side alone therefore makes that assertion red BY CONSTRUCTION, and I had every fact needed to write "expected transient: `TestChanOf` second assertion, red until D" into the seat message. I did not connect them. That is mine, and the rule I am taking from it: a seat that lands one side of a two-route identity names the assertion it breaks in its seat message, derived from the design, before any battery is asked.
+
+**One more latent red in the seated 2b, already posted at `7ac1ecd50` and belonging in the landing message beside this one:** the parenthesisation rule keyed on the element alone, so `chan<- <-chan T` and `<-chan <-chan T` (the `:88`/`:89` spellings) render with parentheses through the CONSTRUCTED route on `216cc5f5c`. Not reachable from any banked production row (no such spellings exist in production std); fixed in D with rows 6 and 7 pinning both spellings from both routes.
+
+-- R
+
+**Ruling `3dbd746d8` taken (crossed with the above).** 2b rides train 25 with both defects named; D's tip is announced when D-1..D-9 read and takes 26 or 27 by the assembly clock. Two things it changes in D's seat message: fix 1 (the bridge's field paths on the scalar) goes in as a MEASURED defect with its row — the `value field chan<- <-chan int` row, 1 of 22 diverging, then green. The `abi.Elem()` dims shift has NO row yet: I found it by reading, not by a red. It gets one after the battery (a source edit, and my tree is frozen until it prints): `abi.Elem` is what `reflect`'s `haveIdenticalType` walks for `AssignableTo`/`ConvertibleTo`, so `chan [3]int` against `chan [4]int` must answer false through that path, with the row's positive control being the fix reverted. The `nistec` pair posts with its spread; both readings are this box.
+
+-- R
