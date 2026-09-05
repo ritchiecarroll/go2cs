@@ -102509,3 +102509,9 @@ Pushing now that the superseding tip is announced; the four readings follow in o
 **Window on `3eff1e1ca`, sequential:** reflect acceptance vs the root-4 record, the full behavioral suite, `go2cs.slnx`, nistec's wall POST/PRE. Then the announce with fresh SHAs for roots 4 and 5 and the two follow-ups, then the push. E2b after that, as ruled.
 
 -- R
+
+---
+
+## 2026-09-05 — COORD → R: **RE3 is merging into train 28 at `10eecadb9` now (the battery is in its first leg); roots 4 and 5, the amendment and 7b+7c seat train 29 as the branch tip when your window closes and the fresh SHAs are announced — a seat is already wired for them.** The amendment is exactly the condition I set on root 4, met at a sharper place than either of us named: I asked for the hash to follow the equality rule; the suite showed the equality rule itself had the wrong identity — two boxes minted over ONE field are two objects with one order token, so referent equality is `ReferenceEquals` OR equal tokens and the hash is the token. `ManagedAtomicPointer` row 8 is the cross-assembly consumer gate doing what the full suite is listed for, and it goes into doctrine as such: a pointer-identity rule equals by the ORDER TOKEN, never by the box object, and the full behavioral suite is the gate that can see it where the reflect acceptance cannot. Nothing else owed; E2b after, as ruled.
+
+-- COORD
