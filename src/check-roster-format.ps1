@@ -844,6 +844,61 @@ foreach ($row in $rows) {
     Assert-Equal "disclosed count is backed by a committed go2cs_test_disclosures.json: $($row.Package)" $true (Test-Path -LiteralPath $manifest)
 }
 
+
+# ---- 2c. every committed manifest's ENTRIES obey the deferred/structural contract ------------------
+# The check above asks whether the FILE exists; this asks whether what is in it is legal, which is a
+# different question and the one the deferred class needs (coordinator ruling 2026-09-05,
+# owner-ratified). The converter's loader enforces the same contract at compare time, so a broken
+# entry fails a sweep -- but only for the row being swept, and only once someone sweeps it. This is
+# the arm that reads all 168-odd committed entries across every row at once, so a mislabelled entry
+# is caught the day it lands rather than at that row's next rebank.
+#
+# Read with ConvertFrom-Json rather than the ordinal readers _roster.ps1 uses for a COMPARISON
+# record: those exist because a comparison record keys maps by TEST NAME, where two names differing
+# only in case are distinct and a case-folding reader silently merges them. A manifest has no such
+# map -- its entries are an array and the field names are fixed -- so the plain reader is correct on
+# both editions here, and this comment is why the two differ rather than one having drifted.
+$deferredClass = 'deferred'
+$structuralClass = 'structural'
+$manifestsChecked = 0
+$entriesChecked = 0
+
+foreach ($row in $rows) {
+    $manifest = Join-Path (Join-Path $PSScriptRoot 'core') ($row.Package + '/go2cs_test_disclosures.json')
+    if (-not (Test-Path -LiteralPath $manifest)) { continue }
+
+    $parsed = $null
+    try { $parsed = [System.IO.File]::ReadAllText($manifest) | ConvertFrom-Json }
+    catch { Assert-Equal "go2cs_test_disclosures.json parses: $($row.Package)" $true $false; continue }
+
+    $manifestsChecked++
+
+    foreach ($entry in @($parsed.disclosures)) {
+        if ($null -eq $entry) { continue }
+        $entriesChecked++
+        $name = [string]$entry.name
+        $class = [string]$entry.class
+
+        if ($class -eq $deferredClass) {
+            # Each field separately, so the failure NAMES the missing one.
+            foreach ($field in 'want', 'reading', 'plan') {
+                $value = [string]$entry.$field
+                Assert-Equal "deferred entry names its $($field): $($row.Package)/$name" $true (-not [string]::IsNullOrWhiteSpace($value))
+            }
+        }
+
+        if ($class -eq $structuralClass) {
+            Assert-Equal "structural entry names NO retirement plan (its claim is the assertion cannot be met): $($row.Package)/$name" $true ([string]::IsNullOrWhiteSpace([string]$entry.plan))
+        }
+    }
+}
+
+# Vacuity guard: this arm is worthless if it silently checks nothing, which is exactly what a wrong
+# path or a changed schema would produce. The corpus has committed manifests today, so a zero here is
+# an instrument fault rather than a clean bill.
+Assert-Equal "the manifest-entry arm actually read manifests (a zero would mean it checked nothing)" $true ($manifestsChecked -gt 0)
+Assert-Equal "the manifest-entry arm actually read entries" $true ($entriesChecked -gt 0)
+
 # ---- 3. the RENDERED table's column integrity -----------------------------------------------------
 # Everything above guards what the roster MEANS to the parser. This guards what it LOOKS LIKE to a
 # reader, which nothing else does -- and the two can disagree silently.

@@ -363,6 +363,76 @@ func TestPlatformSkipDisclosureOracle(t *testing.T) {
 	}
 }
 
+
+// The DEFERRED class's own loader guards (coordinator ruling 2026-09-05, owner-ratified). Each arm
+// is a POSITIVE control: the entry differs from a valid one by exactly the field under test, so a
+// refusal names that field and nothing else can be satisfying it. The legacy arm is here for the
+// opposite reason -- the class retires per row as rows re-sweep, so a manifest that has not
+// re-classified yet must keep loading, and an over-eager guard would take every unswept row down.
+func TestDeferredDisclosureRequiresItsPlan(t *testing.T) {
+	dir := t.TempDir()
+	writeManifest := func(content string) {
+		if err := os.WriteFile(filepath.Join(dir, testDisclosureFileName), []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	const valid = `{"schemaVersion": 1, "disclosures": [
+		{"name": "TestWriteStringAlloc", "class": "deferred", "signature": " allocs for File.WriteString", "reason": "r",
+		 "want": "0 allocations", "reading": "4 objects / 376.25 B per run, Release + tiering off, at <tree>",
+		 "plan": "DESIGN-syscall-out-parameter.md (B), then the buffer-element record (E), then C"}]}`
+
+	writeManifest(valid)
+	disclosures, _, err := loadTestDisclosures(dir)
+	if err != nil || len(disclosures) != 1 || disclosures["TestWriteStringAlloc"].Plan == "" {
+		t.Fatalf("a complete deferred entry must load — got %#v, %v", disclosures, err)
+	}
+
+	for _, field := range []string{"want", "reading", "plan"} {
+		// Blank exactly one field; the other two stay valid, so a refusal can only be this one's.
+		body := strings.Replace(valid, `"`+field+`": "`, `"`+field+`": "`, 1)
+		switch field {
+		case "want":
+			body = strings.Replace(valid, `"want": "0 allocations"`, `"want": "   "`, 1)
+		case "reading":
+			body = strings.Replace(valid, `"reading": "4 objects / 376.25 B per run, Release + tiering off, at <tree>"`, `"reading": ""`, 1)
+		case "plan":
+			body = strings.Replace(valid, `"plan": "DESIGN-syscall-out-parameter.md (B), then the buffer-element record (E), then C"`, `"plan": ""`, 1)
+		}
+		writeManifest(body)
+		_, _, err := loadTestDisclosures(dir)
+		if err == nil {
+			t.Fatalf("a deferred entry missing %s must be refused: a deferred entry is a commitment, not a quieter disclosure", field)
+		}
+		if !strings.Contains(err.Error(), field) {
+			t.Fatalf("the refusal for a missing %s must NAME it, so the next reader is not left guessing — got %v", field, err)
+		}
+	}
+
+	// A structural entry carries a proof that the assertion cannot be met; a plan to meet it is the
+	// contradiction the loader refuses.
+	writeManifest(`{"schemaVersion": 1, "disclosures": [
+		{"name": "TestX", "class": "structural", "signature": "s", "reason": "the array literal Go keeps in the caller's frame has no managed equivalent",
+		 "plan": "some-record.md"}]}`)
+	if _, _, err := loadTestDisclosures(dir); err == nil {
+		t.Fatal("a structural entry naming a retirement plan must be refused — the two labels would blur back together")
+	}
+
+	writeManifest(`{"schemaVersion": 1, "disclosures": [
+		{"name": "TestX", "class": "structural", "signature": "s", "reason": "the array literal Go keeps in the caller's frame has no managed equivalent"}]}`)
+	if _, _, err := loadTestDisclosures(dir); err != nil {
+		t.Fatalf("a structural entry without a plan must load — got %v", err)
+	}
+
+	// LEGACY: an alloc-profile entry re-classifies at its row's next rebank, never wholesale, so it
+	// must still load with none of the deferred fields.
+	writeManifest(`{"schemaVersion": 1, "disclosures": [
+		{"name": "TestUTF16Alloc", "class": "alloc-profile", "signature": " allocs, want ", "reason": "r"}]}`)
+	if _, _, err := loadTestDisclosures(dir); err != nil {
+		t.Fatalf("a legacy alloc-profile entry must keep loading until its row re-sweeps — got %v", err)
+	}
+}
+
 // Loader guards: an absent manifest is the normal no-disclosure case; a present manifest must be
 // complete — an empty signature would substring-match ANY failure and defeat the integrity pin,
 // and duplicate names would make the pin ambiguous.

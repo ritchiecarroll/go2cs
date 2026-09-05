@@ -6396,6 +6396,35 @@ const platformSkipClass = "platform-skip"
 // (coordinator ruling, mailbox 82ec6654c).
 const cgoConfigurationClass = "cgo-configuration"
 
+
+// deferredClass and structuralClass are the TWO labels every allocation-count disclosure resolves
+// into (coordinator ruling 2026-09-05, owner-ratified the same day, mailbox bd08f67c6 / 7c2d7ee44 /
+// 6087c58c7). They exist because `alloc-profile` had come to carry two different claims under one
+// word, and the amendment to ruling #1 forced them apart: an AllocsPerRun-style assertion measures
+// Go's escape analysis -- a compiler optimization the CLR JIT does not perform -- rather than a
+// behavioural property, so such an assertion is never disclosed as CLR-STRUCTURAL merely because it
+// fails today, but it MAY be deferred against a named plan to reach it.
+//
+//   deferred   -- the CLR CAN meet the assertion in principle; the entry names the retirement plan
+//                 that will. One plan may cover MANY entries by MECHANISM FAMILY (a box minted per
+//                 address-take, an element take, an out-parameter, an intermediate buffer in a
+//                 string conversion), so the requirement is met by family rather than by a bespoke
+//                 design per entry. It is a COMMITMENT, not an excuse: the owner's strengthening
+//                 makes the plan a hard requirement, and a plan whose design record is retired
+//                 without a replacement fails the row at its next sweep exactly as a regression
+//                 would.
+//   structural -- the entry carries a PROOF, stated in its reason, that no managed implementation
+//                 can meet the assertion, with the object Go keeps off the heap NAMED. Expected to
+//                 be rare, and each one is a claim the next reader may falsify.
+//
+// The bare `alloc-profile` label is LEGACY and retires per row as rows re-sweep; it is still
+// accepted here so a row that has not re-swept keeps comparing, and its entries re-classify at
+// that row's next rebank rather than wholesale.
+const (
+	deferredClass   = "deferred"
+	structuralClass = "structural"
+)
+
 // classAdmitsSkipShape reports whether a disclosure class may absorb a Go=pass / C#=skip pair.
 // ONE predicate, read by BOTH arms below -- the skip arm's admission and the generic arm's
 // exclusion -- so the two can never drift apart again. Drift is exactly what let cgo-configuration
@@ -6575,6 +6604,27 @@ type testDisclosure struct {
 	// while the converted side could not is a real divergence, and pinning it is exactly what
 	// this field must never launder. Empty for every disclosure that is not host-conditional.
 	HostConditionalSignature string `json:"hostConditionalSignature,omitempty"`
+
+	// Want, Reading and Plan carry the DEFERRED class's contract (see deferredClass below). They
+	// are what makes a deferred entry a commitment rather than an excuse, and the loader refuses a
+	// deferred entry missing any of them:
+	//
+	//   Want    -- the assertion's own bound, verbatim enough to read without opening the test
+	//              ("0 allocations"; "1 allocation per leg").
+	//   Reading -- the MEASURED current value with the CONFIGURATION named, because a reading taken
+	//              at another configuration is not comparable (Release + tiering off is the
+	//              measurement of record) and a reading with no tree named cannot be re-checked.
+	//   Plan    -- the retirement plan: the design record and the increment that closes it. One
+	//              plan may serve MANY entries by mechanism family, so this names the family's
+	//              record rather than demanding a bespoke design per entry.
+	//
+	// Empty on every entry that is not deferred. A structural entry must NOT carry a Plan: its
+	// claim is that no managed implementation can meet the assertion, and naming a plan to meet it
+	// contradicts that in the same breath -- the loader refuses that combination too, which is the
+	// cheap mechanical guard against an entry mislabelled by copy-paste.
+	Want    string `json:"want,omitempty"`
+	Reading string `json:"reading,omitempty"`
+	Plan    string `json:"plan,omitempty"`
 }
 
 // hostConditionalFailureMatches reports whether a C# failure text is one of the environmental
@@ -6633,6 +6683,36 @@ func loadTestDisclosures(outputPath string) (map[string]testDisclosure, []string
 		}
 		if disclosure.Signature == "" && disclosure.Class != hostFatalClass {
 			return nil, nil, fmt.Errorf("disclosure entries require a signature except for %s: %+v", hostFatalClass, disclosure)
+		}
+
+		// The DEFERRED class's contract, enforced where every other required field is (coordinator
+		// ruling 2026-09-05, owner-ratified): a deferred entry is a COMMITMENT to reach the
+		// assertion, so an entry that names no plan is refused outright rather than accepted as a
+		// quieter disclosure. Want and Reading are required with it because a plan with no bound
+		// and no measured starting point cannot be scored at the next sweep -- the sweep prints the
+		// reading beside the want, and a reading moving AWAY from the want fails the row exactly as
+		// a matched verdict flipping would.
+		if disclosure.Class == deferredClass {
+			missing := []string{}
+			if strings.TrimSpace(disclosure.Want) == "" {
+				missing = append(missing, "want")
+			}
+			if strings.TrimSpace(disclosure.Reading) == "" {
+				missing = append(missing, "reading")
+			}
+			if strings.TrimSpace(disclosure.Plan) == "" {
+				missing = append(missing, "plan")
+			}
+			if len(missing) > 0 {
+				return nil, nil, fmt.Errorf("deferred disclosure %s requires %s: a deferred entry is a commitment to reach the assertion, and one that names no plan is refused", disclosure.Name, strings.Join(missing, ", "))
+			}
+		}
+
+		// A structural entry claims no managed implementation can meet the assertion; naming a plan
+		// to meet it contradicts that claim in the same entry, and the pairing is the shape a
+		// mislabelled copy-paste takes. Refused so the two labels cannot blur back together.
+		if disclosure.Class == structuralClass && strings.TrimSpace(disclosure.Plan) != "" {
+			return nil, nil, fmt.Errorf("structural disclosure %s must not name a retirement plan: its claim is that the assertion cannot be met, so a plan to meet it belongs to the deferred class", disclosure.Name)
 		}
 		if _, exists := disclosures[disclosure.Name]; exists {
 			return nil, nil, fmt.Errorf("duplicate disclosure for %s", disclosure.Name)
