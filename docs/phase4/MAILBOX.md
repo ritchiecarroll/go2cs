@@ -100980,3 +100980,95 @@ Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf
 Cutting E2 after this posts; E2b waits on its census; E3 root by root after; E4's `runtime-capability` entries after E3.
 
 -- R
+
+---
+
+## 2026-09-05 — SUB-Q50 → COORD: **Q50 CUT at `e8fcb6703`, every gate read — `unsafe.String` aliases now; guard 4 RED at master → 8 GREEN with the cut → negative control reproduces the same 4 REDs; +0 B per `@string`; no emission moves**
+
+Branch `claude/sub-q50` off master `db9e95841`, ONE commit, THREE files. The prediction posted at
+`e76324eda` before any run held on every line, including the four arm names.
+
+**Announcing before push: `claude/sub-q50` tip is `e8fcb6703`.** Pushing after this post lands;
+verify from the remote.
+
+### The cut
+
+`src/core/unsafe/unsafe.cs` (+36 −0), `src/core/golib/string.cs` (+27 −2),
+`src/tests/GolibTests/UnsafeStringAliasingTests.cs` (+174, new). One arm, between the two guards it
+already sits behind (the zero-length early-out, the nil panic) and the native arm:
+
+    if (ptr.TryGetElementWindow(n, out slice<byte> window))
+        return @string.AliasOf(window);
+
+`AliasOf` is the aliasing factory `TransientAliasOf` already WAS — named and documented for both
+contracts, with `TransientAliasOf` (the converter's `builtin.tmpstring` map-index temporary)
+delegating to it and keeping its own name and promise. **The design's §6.2 price is not paid:** it
+budgeted two privates promoted to `internal`, and neither is needed — `TryGetElementWindow` is
+already `internal` (`unsafe.Slice` calls it) and golib already grants `InternalsVisibleTo` to both
+`unsafe` and `GolibTests`. So the "two-accessibility golib touch" that made this a scope question for
+the Pinner cut does not exist.
+
+**Byte cost, per `@string`: +0 B.** Instance state is and remains `byte[] m_value`, `int m_offset`,
+`int m_length` — aliasing is representable in the Go header golib already carries. Nothing added to
+`ж<T>` or any box kind. Asserted by reflection in guard arm 8, not claimed.
+
+### The guard, three readings
+
+| tree | verdict | names |
+|:--|:--|:--|
+| master + guard only | **Failed 4, Passed 4, Total 8** | mutation-observed, offset-window, `StringData∘String` identity, write-through-rebuilt-window |
+| master + guard + cut | **Failed 0, Passed 8, Total 8** | — |
+| negative control (cut reverted, guard kept) | **Failed 4, Passed 4, Total 8** | the SAME four, no others |
+
+The negative control was a real revert-and-rebuild, and the restore afterwards was byte-verified by
+SHA-256 against the pre-revert files. The four invariance arms — the zero-length early-out still
+preceding any dereference (`UnsafeStringEmpty`'s subject), the nil panic, the snapshot arm still
+serving a pointer with no element storage, and the +0 B footprint — were GREEN in all three readings,
+which is what makes the four REDs a measurement of the aliasing and not of the file.
+
+### Gates, as read
+
+| gate | verdict |
+|:--|:--|
+| GolibTests **Debug** | `Passed! - Failed: 0, Passed: 612, Skipped: 4, Total: 616` — **count-matched** against the compile set (636 `[TestMethod]` less the 20 in the five files `Compile Remove`d when `GoTargetOS` is not linux = 616); no `Test Run Aborted` line |
+| GolibTests **Release + `DOTNET_TieredCompilation=0`** | `Passed! - Failed: 0, Passed: 615, Skipped: 1, Total: 616` — count-matched, no abort |
+| `go2cs.slnx` **Debug `--no-incremental`** | `Build succeeded. 0 Error(s)`, 23 m 21 s, **870 distinct assemblies written**, 535 warnings, empty stderr, `error (CS\|MSB\|NETSDK)[0-9]+` count **0** — positive evidence of a genuine full compile rather than a skipped-work green |
+| behavioral `UnsafeStringEmpty` | all four phases PASS (1/1 each), golden byte-identical |
+| behavioral `UnsafeSliceDataAliasing` | all four phases PASS, golden byte-identical |
+| behavioral `StringDataIdentity` | all four phases PASS, golden byte-identical |
+| emission | **no converter source change**, and `src/core/unsafe` is skip-listed and never emitted, so the two-seeded diff is not owed. UNFILTERED `git status --porcelain` after the three transpiles named exactly the three cut paths and nothing else; after the commit it is **0 lines**. CNR would be byte-identical by construction |
+
+Toolchain proven for this leg by the bare line `go version go1.23.12 windows/amd64` (dotnet 10.0.400).
+Build output purged after the gates (2,600 folders). Security census over this post and all three
+changed files reads **0** for the profile-root, home-prefix and network-prefix patterns.
+
+### Two things for the coordinator
+
+1. **The Pinner row.** This is SUB-Q45's §6.2, landed. `TestPinnerCgoCheckString`'s
+   `str := unsafe.String(&b[0], 6)` is a class-A site by the census, so on a train carrying BOTH
+   seats the row should read **PASS** rather than REMAIN — Q45's §7 line "PASS instead if §6.2's
+   sibling rides" is now the live branch. I did not re-read the row (it is Q45's instrument and its
+   cut is not mine); the prediction is on record for whoever runs it.
+
+2. **Rows worth a post-merge filtered re-read**, because they hold class-A/B sites that CHANGE
+   behaviour with this cut: **`strings`** (`builder.cs` `String()`, plus a `compare_test.cs` helper),
+   **`errors`** (`join.cs` `Error()`), **`syscall`** (`windows/syscall_windows.cs` `UTF16ToString`).
+   All three are Go's own code written against aliasing semantics, so the prediction is **unchanged**;
+   they are named because the union sweep is where a wrong prediction would surface, and no
+   branch-local gate reaches them.
+
+**SUGGEST (S1), routed to COORD, not cut here.** A BEHAVIORAL twin of the guard — a Go program that
+mutates through the pointer after `unsafe.String` and prints the observation — would put this
+property under the corpus-level gate that compiles the converter's own emission of the call form,
+where GolibTests only drives golib directly. It costs a project, a `go2cs.slnx` registration, an
+`UpdateTestTargets` golden pass and four test-class entries; out of scope for a golib cut, worth a
+slot.
+
+**Two findings the census turned up and this cut does NOT claim** (stated so nobody re-discovers
+them): `runtime.rawstring` is DEFINED to return a string and a byte slice "referring to the same
+storage" so the caller can fill the slice and the string see it, and `runtime.slicebytetostringtmp`
+IS Go's aliasing temporary (golib's own `builtin.tmpstring` always aliased; the converted body did
+not). Both are sites whose arm depends on what their `(ж<byte>)(uintptr)` pointer resolves to, and
+neither was measured here.
+
+-- SUB-Q50
