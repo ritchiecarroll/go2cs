@@ -1,8 +1,11 @@
 namespace go;
 
+using bytes = bytes_package;
 using fmt = fmt_package;
+using Δio = io_package;
 using reflect = reflect_package;
 using strings = strings_package;
+using @unsafe = unsafe_package;
 
 partial class main_package {
 
@@ -68,6 +71,17 @@ private static readonly object nameGBGAˢ = (@string)"Name gB[gA]:"u8;
 private static readonly object nameGBGBGAˢ = (@string)"Name gB[gB[gA]]:"u8;
 private static readonly object stringGBGAˢ = (@string)"String gB[gA]:"u8;
 private static readonly object namePlainGAˢ = (@string)"Name plain gA:"u8;
+private static readonly object entryIsB2ˢ = (@string)"#5 entry is b2:"u8;
+private static readonly object mapIndexB1Elemˢ = (@string)"#5 MapIndex(b1).Elem().UnsafePointer() == unsafe.Pointer(b2):"u8;
+private static readonly object mapIndexB1UnsafePointerˢ = (@string)"#7 MapIndex(b1).UnsafePointer() == unsafe.Pointer(b2):"u8;
+private static readonly object reflectTwiceˢ = (@string)"reflect twice:"u8;
+private static readonly object reflectVsUnsafePointerNˢ = (@string)" reflect vs unsafe.Pointer(n):"u8;
+private static readonly object differentBoxesˢ = (@string)"different boxes:"u8;
+private static readonly object interiorBaseˢ = (@string)" interior != base:"u8;
+private static readonly object baseBaseˢ = (@string)" base == base:"u8;
+private static readonly object mapSameBoxTwiceFoundˢ = (@string)"map: same box twice found:"u8;
+private static readonly object sameNumberTwiceFoundˢ = (@string)" same number twice found:"u8;
+private static readonly object otherBoxFoundˢ = (@string)" other box found:"u8;
 
 [GoLocalName("S")] [GoType("[]byte")] internal partial struct main_S;
 
@@ -78,6 +92,8 @@ private static readonly object namePlainGAˢ = (@string)"Name plain gA:"u8;
 [GoLocalName("SB")] [GoType("[]main_B")] internal partial struct main_SB;
 
 [GoLocalName("AB")] [GoType("[4]main_B")] internal partial struct main_AB;
+
+[GoLocalName("MyBuffer")] [GoType("bytes_package.Buffer")] internal partial struct main_MyBuffer;
 
 internal static void Main() {
     ref var xs = ref heap<slice<nint>>(out var Ꮡxs);
@@ -173,6 +189,33 @@ internal static void Main() {
     fmt.Println(nameGBGBGAˢ, reflect.TypeOf(@new<gB<gB<gA>>>()).Elem().Name());
     fmt.Println(stringGBGAˢ, reflect.TypeOf(new gB<gA>(nil)).String());
     fmt.Println(namePlainGAˢ, reflect.TypeOf(new gA(nil)).Name());
+    var m5 = new map<Δio.Reader, Δio.Writer>();
+    var mv5 = reflect.ValueOf(m5);
+    var (b1, b2) = (@new<bytes.Buffer>(), @new<bytes.Buffer>());
+    mv5.SetMapIndex(reflect.ValueOf(b1.OrTypedNil()), reflect.ValueOf(b2.OrTypedNil()));
+    var (x5, ok5) = m5[new bytes_BufferжReader(b1), ꟷ];
+    fmt.Println(entryIsB2ˢ, AreEqual(x5, b2), ok5);
+    @unsafe.Pointer p5 = (uintptr)mv5.MapIndex(reflect.ValueOf(b1.OrTypedNil())).Elem().UnsafePointer();
+    fmt.Println(mapIndexB1Elemˢ, p5 == new @unsafe.Pointer(b2));
+    var m7 = new map<ж<main_MyBuffer>, ж<bytes.Buffer>>();
+    var mv7 = reflect.ValueOf(m7);
+    var (k7, v7) = (@new<main_MyBuffer>(), @new<bytes.Buffer>());
+    mv7.SetMapIndex(reflect.ValueOf(k7.OrTypedNil()), reflect.ValueOf(v7.OrTypedNil()));
+    @unsafe.Pointer p7 = (uintptr)mv7.MapIndex(reflect.ValueOf(k7.OrTypedNil())).UnsafePointer();
+    fmt.Println(mapIndexB1UnsafePointerˢ, p7 == new @unsafe.Pointer(v7));
+    var n = @new<nint>();
+    @unsafe.Pointer pn1 = (uintptr)reflect.ValueOf(n.OrTypedNil()).UnsafePointer();
+    @unsafe.Pointer pn2 = (uintptr)reflect.ValueOf(n.OrTypedNil()).UnsafePointer();
+    fmt.Println(reflectTwiceˢ, pn1 == pn2, reflectVsUnsafePointerNˢ, pn1 == new @unsafe.Pointer(n));
+    var n2 = @new<nint>();
+    ref var arr = ref heap(new array<int64>(4), out var Ꮡarr);
+    fmt.Println(differentBoxesˢ, pn1 == new @unsafe.Pointer(n2), interiorBaseˢ, (uintptr)@unsafe.Add(new @unsafe.Pointer(Ꮡarr), 8) != new @unsafe.Pointer(Ꮡarr), baseBaseˢ, new @unsafe.Pointer(Ꮡarr) == new @unsafe.Pointer(Ꮡarr));
+    var keyed = new map<@unsafe.Pointer, nint>{[(uintptr)reflect.ValueOf(n.OrTypedNil()).UnsafePointer()] = 1};
+    var (_, foundBox) = keyed[new @unsafe.Pointer(n), ꟷ];
+    var interior = new map<@unsafe.Pointer, nint>{[(uintptr)@unsafe.Add(new @unsafe.Pointer(Ꮡarr), 8)] = 2};
+    var (_, foundNumber) = interior[(uintptr)@unsafe.Add(new @unsafe.Pointer(Ꮡarr), 8), ꟷ];
+    var (_, missOther) = keyed[new @unsafe.Pointer(n2), ꟷ];
+    fmt.Println(mapSameBoxTwiceFoundˢ, foundBox, sameNumberTwiceFoundˢ, foundNumber, otherBoxFoundˢ, missOther);
 }
 
 } // end main_package

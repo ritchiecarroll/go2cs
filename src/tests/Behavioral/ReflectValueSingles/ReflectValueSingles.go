@@ -8,12 +8,18 @@
 //     addressability, then an ALIAS of the array's own backing (TestBytes).
 //  3. Name of an instantiated generic type keeps its type arguments: the package qualifier ends
 //     before the first '[', not at the last '.' of the whole spelling (TestIssue50208).
+//  4. unsafe.Pointer identity across the two address models: a Pointer reflect mints (the identity
+//     token) and one the converter mints from the same box (its address) are the SAME pointer
+//     (TestImplicitMapConversion #5/#7).
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
+	"unsafe"
 )
 
 // expectPanic runs f and reports whether it panicked and whether the panic text mentions want --
@@ -90,5 +96,39 @@ func main() {
 	fmt.Println("Name gB[gB[gA]]:", reflect.TypeOf(new(gB[gB[gA]])).Elem().Name())
 	fmt.Println("String gB[gA]:", reflect.TypeOf(gB[gA]{}).String())
 	fmt.Println("Name plain gA:", reflect.TypeOf(gA{}).Name())
+
+	// --- root 4: unsafe.Pointer identity across address models ---
+	m5 := make(map[io.Reader]io.Writer)
+	mv5 := reflect.ValueOf(m5)
+	b1, b2 := new(bytes.Buffer), new(bytes.Buffer)
+	mv5.SetMapIndex(reflect.ValueOf(b1), reflect.ValueOf(b2))
+	x5, ok5 := m5[b1]
+	fmt.Println("#5 entry is b2:", x5 == b2, ok5)
+	p5 := mv5.MapIndex(reflect.ValueOf(b1)).Elem().UnsafePointer() // a LOCAL, as the test holds it: the comparison is then pointer identity
+	fmt.Println("#5 MapIndex(b1).Elem().UnsafePointer() == unsafe.Pointer(b2):", p5 == unsafe.Pointer(b2))
+	type MyBuffer bytes.Buffer
+	m7 := make(map[*MyBuffer]*bytes.Buffer)
+	mv7 := reflect.ValueOf(m7)
+	k7, v7 := new(MyBuffer), new(bytes.Buffer)
+	mv7.SetMapIndex(reflect.ValueOf(k7), reflect.ValueOf(v7))
+	p7 := mv7.MapIndex(reflect.ValueOf(k7)).UnsafePointer()
+	fmt.Println("#7 MapIndex(b1).UnsafePointer() == unsafe.Pointer(b2):", p7 == unsafe.Pointer(v7))
+	// the same box minted twice by reflect, and by reflect vs the language, are one pointer
+	n := new(int)
+	pn1, pn2 := reflect.ValueOf(n).UnsafePointer(), reflect.ValueOf(n).UnsafePointer()
+	fmt.Println("reflect twice:", pn1 == pn2, " reflect vs unsafe.Pointer(n):", pn1 == unsafe.Pointer(n))
+	// different boxes stay different; an interior offset is not the base
+	n2 := new(int)
+	var arr [4]int64
+	fmt.Println("different boxes:", pn1 == unsafe.Pointer(n2), " interior != base:", unsafe.Add(unsafe.Pointer(&arr), 8) != unsafe.Pointer(&arr), " base == base:", unsafe.Pointer(&arr) == unsafe.Pointer(&arr))
+
+	// the Equals/GetHashCode contract, observed through a map keyed by unsafe.Pointer: a key minted by
+	// reflect is found by the language's pointer to the same box, and a numeric key by its equal number
+	keyed := map[unsafe.Pointer]int{reflect.ValueOf(n).UnsafePointer(): 1}
+	_, foundBox := keyed[unsafe.Pointer(n)]
+	interior := map[unsafe.Pointer]int{unsafe.Add(unsafe.Pointer(&arr), 8): 2}
+	_, foundNumber := interior[unsafe.Add(unsafe.Pointer(&arr), 8)]
+	_, missOther := keyed[unsafe.Pointer(n2)]
+	fmt.Println("map: same box twice found:", foundBox, " same number twice found:", foundNumber, " other box found:", missOther)
 
 }

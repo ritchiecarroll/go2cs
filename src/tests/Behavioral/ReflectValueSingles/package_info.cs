@@ -41,6 +41,7 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -54,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("ReflectValueSingles.go", "ReflectValueSingles.cs", "AAgqooKCgpQAQAyEkpKSkJKQkpCSkJKQkoKCgoKCgpCSkJKSkJKQlIKChICSgJKEgoKClICSgJKCgoSIgoKCkoCSgoKCgJaCgoI=", "22-26:1;38-38:1;39-39:2;40-40:3;41-41:4;42-42:5;49-49:6;50-50:7;52-52:8;53-53:9;59-59:10;60-60:11;68-68:12;69-69:13;82-82:14;86-86:15")]
+[assembly: go.GoPositionMap("ReflectValueSingles.go", "ReflectValueSingles.cs", "AAs2ooKCgpQATQyEkpKSkJKQkpCSkJKQkoKCgoKCgpCSkJKSkJKQlIKChICSgJKEgoKClICSgJKCgoSIgoKCkoCSgoKCgJaCgoKGgoKCgoKCgoKEgoKCgoSCkoSCgoiCgoKCgg==", "28-32:1;44-44:1;45-45:2;46-46:3;47-47:4;48-48:5;55-55:6;56-56:7;58-58:8;59-59:9;65-65:10;66-66:11;74-74:12;75-75:13;88-88:14;92-92:15")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -75,6 +76,7 @@ public static partial class main_package
     internal partial struct main_A {}
     internal partial struct main_AB {}
     internal partial struct main_B {}
+    internal partial struct main_MyBuffer {}
     internal partial struct main_S {}
     internal partial struct main_SB {}
     // </TypeAccessibility>
@@ -86,7 +88,9 @@ public static partial class main_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>

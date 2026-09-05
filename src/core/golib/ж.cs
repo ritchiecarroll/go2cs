@@ -428,6 +428,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// </remarks>
     public virtual object ReferentObject => this;
 
+    // The address this box converts to, minted by the same operator every `uintptr(p)` uses (nil -> 0,
+    // native -> its address, fixed array -> its pinned data, value slot -> its stable address, all
+    // registered) -- exposed non-generically so unsafe.Pointer's box-retaining constructor can hold
+    // the box it names beside that number (increment E3 root 4).
+    nuint INilPointer.StableAddress() => (nuint)(uintptr)this;
+
     // ---- pinning (base-resident over the one virtual storage answer) ----
 
     /// <inheritdoc/>
