@@ -152,6 +152,19 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // The pinned-reinterpret arm of the Reinterpret fallback (element storage only).
     internal virtual ж<TDst>? TryPinnedReinterpret<TDst>() => null;
 
+    // The element view of a pointer-to-array that names NATIVE memory (Go's *[N]T over off-heap
+    // storage), or null for every other kind — which is every kind but one, so the default is the
+    // whole answer for the corpus. Consulted by arrayView BEFORE it touches Value, because such a
+    // box HAS no materializable Value: Go's *[N]T points at bare contiguous elements with no
+    // header, so reading an array<T> from that address would reinterpret element bytes AS the
+    // header and hand back a garbage T[] (Q58; the measured prestub null read this seam exists to
+    // prevent).
+    //
+    // A METHOD returning null, never a field: this base is per-BOX, so instance state added here
+    // is a corpus-wide byte cost on every pointer in the corpus. The address and the length live
+    // on the one kind that has them.
+    internal virtual IArray<Telem>? TryGetNativeArrayView<Telem>() => null;
+
     // ---- minting (the of()/at() surface — unchanged signatures, kind ctors behind them) ----
 
     /// <summary>
@@ -291,6 +304,12 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// </remarks>
     private IArray<Telem> arrayView<Telem>()
     {
+        // A pointer-to-array over NATIVE memory supplies its own view, and must be asked FIRST:
+        // every path below reads Value, which for such a box would read element bytes as an
+        // array<T> header. Null for every other kind, so nothing else changes shape here.
+        if (TryGetNativeArrayView<Telem>() is { } nativeView)
+            return nativeView;
+
         if (!s_publishArrayBacking)
         {
             // Nothing behind this T is lazy (see computePublishArrayBacking), so the view IS the
