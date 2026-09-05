@@ -887,6 +887,27 @@ foreach ($row in $rows) {
             }
         }
 
+
+        # The FLOOR (ruling 2026-09-05): a deferred entry may carry an object count GREATER than its
+        # want, with its own proof sketch, naming the part of the reading no plan can remove. Same
+        # three refusals as the loader, mirrored here so the whole tree is checked in one pass.
+        $floor = 0
+        if ($null -ne $entry.floor) { $floor = [int]$entry.floor }
+
+        if ($floor -ne 0) {
+            Assert-Equal "a floor belongs to a deferred entry, never a structural one: $($row.Package)/$name" $false ($class -eq $structuralClass)
+            Assert-Equal "floor is a positive object count: $($row.Package)/$name" $true ($floor -gt 0)
+            Assert-Equal "a floor names its proof (a claim the census can falsify): $($row.Package)/$name" $true (-not [string]::IsNullOrWhiteSpace([string]$entry.proof))
+
+            # The want must LEAD with the number the floor is compared against; refusing an
+            # uncheckable pairing is the difference between a guard and a decoration.
+            $wantText = ([string]$entry.want).Trim()
+            $wantMatch = [regex]::Match($wantText, '^\d+')
+            Assert-Equal "a floored entry's want leads with its number: $($row.Package)/$name" $true $wantMatch.Success
+            if ($wantMatch.Success) {
+                Assert-Equal "floor exceeds the want (else nothing is deferred and the entry is structural): $($row.Package)/$name" $true ($floor -gt [int]$wantMatch.Value)
+            }
+        }
         if ($class -eq $structuralClass) {
             Assert-Equal "structural entry names NO retirement plan (its claim is the assertion cannot be met): $($row.Package)/$name" $true ([string]::IsNullOrWhiteSpace([string]$entry.plan))
         }

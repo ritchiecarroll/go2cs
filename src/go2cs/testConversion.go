@@ -27,6 +27,7 @@ import (
 	"runtime"
 	"runtime/debug"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -6625,6 +6626,51 @@ type testDisclosure struct {
 	Want    string `json:"want,omitempty"`
 	Reading string `json:"reading,omitempty"`
 	Plan    string `json:"plan,omitempty"`
+
+	// Floor and Proof carry the ruling of 2026-09-05 (mailbox 310d2f6f9), which the reflect census
+	// forced: an entry can have BOTH a structural floor and a deferrable excess above it, and
+	// neither label alone is honest about that shape. `DeepEqual(any, any)` boxes a value type into
+	// `object` -- an allocation the CLR's object model requires, a floor of two per run with a proof
+	// -- while the measured readings run to 53 objects, an excess that is ordinary reducible bridge
+	// work. Labelling it structural would bury 51 reducible objects; labelling it deferred would
+	// name a want (0) that no plan can reach.
+	//
+	// So a DEFERRED entry may carry a floor: an object count GREATER than its want, with its own
+	// proof sketch beside it. Its retirement condition becomes "the host's reading equals the
+	// floor" rather than "equals the want", and at that point the entry RE-LABELS structural with
+	// the proof already attached and its plan discharged. The plan requirement is unchanged -- the
+	// excess is what the plan retires. A floor is a CLAIM the census can falsify: a segment reading
+	// zero where a floor was predicted retires the floor, not the entry.
+	//
+	// Zero means ABSENT, which is sound because a floor must exceed a want and a want is never
+	// negative, so a legal floor is always at least 1. A floor on a STRUCTURAL entry is refused:
+	// that label's whole claim is that the reading cannot be reduced, so a floor beneath an excess
+	// contradicts it exactly as a plan does.
+	Floor int    `json:"floor,omitempty"`
+	Proof string `json:"proof,omitempty"`
+}
+
+
+// leadingInteger reads the integer a disclosure's `want` leads with ("0 allocations" -> 0), which is
+// what a floor is compared against. Deliberately strict: it does not hunt for a number anywhere in
+// the string, because a want like "at most 1 per leg, 2 on darwin" has no single number a floor can
+// exceed, and guessing which one was meant is worse than refusing the pairing.
+func leadingInteger(text string) (int, bool) {
+	trimmed := strings.TrimSpace(text)
+	end := 0
+	for end < len(trimmed) && trimmed[end] >= '0' && trimmed[end] <= '9' {
+		end++
+	}
+	if end == 0 {
+		return 0, false
+	}
+
+	value, err := strconv.Atoi(trimmed[:end])
+	if err != nil {
+		return 0, false
+	}
+
+	return value, true
 }
 
 // hostConditionalFailureMatches reports whether a C# failure text is one of the environmental
@@ -6708,6 +6754,30 @@ func loadTestDisclosures(outputPath string) (map[string]testDisclosure, []string
 			}
 		}
 
+
+		// The FLOOR's own contract (ruling 2026-09-05). A floor is only meaningful where the want is
+		// a number the reading can be compared against, so the want must LEAD with its integer for
+		// the relation to be checkable at all -- refusing an uncheckable pairing is the difference
+		// between a guard and a decoration.
+		if disclosure.Floor != 0 {
+			if disclosure.Class == structuralClass {
+				return nil, nil, fmt.Errorf("structural disclosure %s must not name a floor: that label claims the reading cannot be reduced, so an excess above a floor belongs to the deferred class", disclosure.Name)
+			}
+			if disclosure.Floor < 0 {
+				return nil, nil, fmt.Errorf("disclosure %s has a negative floor (%d): a floor is an object count", disclosure.Name, disclosure.Floor)
+			}
+			if strings.TrimSpace(disclosure.Proof) == "" {
+				return nil, nil, fmt.Errorf("disclosure %s names a floor but no proof: a floor is a CLAIM the census can falsify, and one with no sketch cannot be", disclosure.Name)
+			}
+
+			wantValue, ok := leadingInteger(disclosure.Want)
+			if !ok {
+				return nil, nil, fmt.Errorf("disclosure %s names a floor, so its want must LEAD with the number the floor is compared against (got %q)", disclosure.Name, disclosure.Want)
+			}
+			if disclosure.Floor <= wantValue {
+				return nil, nil, fmt.Errorf("disclosure %s has a floor (%d) that does not exceed its want (%d): a floor names the part of the reading no plan can remove, so an entry whose floor equals its want has nothing deferred and is simply structural", disclosure.Name, disclosure.Floor, wantValue)
+			}
+		}
 		// A structural entry claims no managed implementation can meet the assertion; naming a plan
 		// to meet it contradicts that claim in the same entry, and the pairing is the shape a
 		// mislabelled copy-paste takes. Refused so the two labels cannot blur back together.

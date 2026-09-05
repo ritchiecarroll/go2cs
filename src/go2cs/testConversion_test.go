@@ -364,6 +364,64 @@ func TestPlatformSkipDisclosureOracle(t *testing.T) {
 }
 
 
+
+// The FLOOR's guards (ruling 2026-09-05). A floor lets one entry carry a structural part and a
+// deferrable excess at once, so its arms test the pairings that would let either half hide: a floor
+// on the label that claims nothing is reducible, a floor with no falsifiable sketch, a floor that
+// does not actually exceed the want, and a want a floor cannot be compared against at all.
+func TestDeferredDisclosureFloor(t *testing.T) {
+	dir := t.TempDir()
+	writeManifest := func(content string) {
+		if err := os.WriteFile(filepath.Join(dir, testDisclosureFileName), []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	const valid = `{"schemaVersion": 1, "disclosures": [
+		{"name": "TestDeepEqualAllocs", "class": "deferred", "signature": " allocs, want ", "reason": "r",
+		 "want": "0 allocations", "reading": "53 objects / 12,504 B per run, Release + tiering off, at <tree>",
+		 "plan": "the box-reduction arc's records", "floor": 2,
+		 "proof": "DeepEqual(any, any) boxes a value type into object, which the CLR's object model allocates: two per run"}]}`
+
+	writeManifest(valid)
+	disclosures, _, err := loadTestDisclosures(dir)
+	if err != nil || disclosures["TestDeepEqualAllocs"].Floor != 2 {
+		t.Fatalf("a complete floored entry must load — got %#v, %v", disclosures, err)
+	}
+
+	// A floor on a structural entry: that label claims the reading cannot be reduced, so an excess
+	// above a floor contradicts it exactly as a plan does.
+	writeManifest(`{"schemaVersion": 1, "disclosures": [
+		{"name": "TestX", "class": "structural", "signature": "s", "reason": "the box the object model requires",
+		 "floor": 2, "proof": "p"}]}`)
+	if _, _, err := loadTestDisclosures(dir); err == nil {
+		t.Fatal("a structural entry naming a floor must be refused")
+	}
+
+	// A floor with no proof sketch is not falsifiable, which is the one property a floor must have.
+	writeManifest(strings.Replace(valid, `"proof": "DeepEqual(any, any) boxes a value type into object, which the CLR's object model allocates: two per run"`, `"proof": "  "`, 1))
+	if _, _, err := loadTestDisclosures(dir); err == nil {
+		t.Fatal("a floor with no proof must be refused — a claim the census cannot falsify is not a floor")
+	}
+
+	// A floor that does not exceed the want leaves nothing deferred: the entry is simply structural.
+	writeManifest(strings.Replace(valid, `"floor": 2`, `"floor": 0`, 1))
+	if _, _, err := loadTestDisclosures(dir); err != nil {
+		t.Fatalf("floor 0 means ABSENT (a legal floor is at least 1), so this must load — got %v", err)
+	}
+	writeManifest(strings.Replace(strings.Replace(valid, `"want": "0 allocations"`, `"want": "2 allocations"`, 1), `"floor": 2`, `"floor": 2`, 1))
+	if _, _, err := loadTestDisclosures(dir); err == nil {
+		t.Fatal("a floor equal to the want must be refused — nothing is deferred, so the entry is structural")
+	}
+
+	// A want a floor cannot be compared against: refusing the pairing beats guessing which number
+	// in the sentence was meant.
+	writeManifest(strings.Replace(valid, `"want": "0 allocations"`, `"want": "at most one per leg"`, 1))
+	if _, _, err := loadTestDisclosures(dir); err == nil {
+		t.Fatal("a floor beside a want that does not lead with its number must be refused")
+	}
+}
+
 // The DEFERRED class's own loader guards (coordinator ruling 2026-09-05, owner-ratified). Each arm
 // is a POSITIVE control: the entry differs from a valid one by exactly the field under test, so a
 // refusal names that field and nothing else can be satisfying it. The legacy arm is here for the

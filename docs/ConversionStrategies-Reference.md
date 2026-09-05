@@ -21188,6 +21188,30 @@ over golib's own allocation sites counts a **different population** — a defer'
 array and an interface box sit outside it — so a design record's ladder and the roster's printed
 reading are two numbers, and an entry names both rather than letting either stand for the other.
 
+
+**A structural FLOOR under a deferrable excess (ruled 2026-09-05, from the reflect census).** An
+entry can have both at once, and neither label alone is honest about it: `reflect`'s
+`TestDeepEqualAllocs` rows want 0 at a signature where boxing a value type into `object` allocates by
+construction — a floor of two per run — while the readings run to 53 objects, an excess of ordinary
+reducible bridge work. `structural` would bury 51 reducible objects; `deferred` would name a want no
+plan can reach. So a **deferred** entry may carry a `floor`: an object count greater than its want,
+with a `proof` sketch beside it. Its retirement condition becomes *the host's reading equals the
+floor*, and at that point the entry **re-labels `structural`** with the proof already attached and its
+plan discharged. The plan requirement is unchanged — the excess is what the plan retires — and a floor
+is a CLAIM the census can falsify: a segment reading zero where a floor was predicted retires the
+floor, not the entry. Refused: a floor on a `structural` entry (that label claims nothing is
+reducible), a floor with no proof, a floor that does not exceed its want (nothing is deferred, so the
+entry is simply structural), and a floor beside a want that does not LEAD with its number — refusing
+an uncheckable pairing beats guessing which number in a sentence was meant. `floor: 0` means absent,
+which is sound because a legal floor is always at least 1.
+
+**And a THIRD label stays, for a different reason.** `alloc-count-semantics` (8 entries) names an
+assertion whose UNIT cannot be measured on the host — `reflect`'s `TestChanAlloc` wants 1 where our
+counter is silent and the figure is bytes. That is not a bigger number, it is a different unit, so it
+is neither deferrable nor structural. The three live labels are therefore `deferred` (measurable, can
+be met, plan), `structural` (measurable, cannot be met, proof) and `alloc-count-semantics` (the unit
+cannot be measured, stated). Only the bare `alloc-profile` label retires.
+
 **Enforcement, in two places on purpose.** `loadTestDisclosures` refuses a malformed entry at compare
 time, so a broken entry fails the sweep of the row that carries it; `check-roster-format.ps1` reads
 **every** committed manifest in one pass, so a mislabelled entry is caught the day it lands rather
