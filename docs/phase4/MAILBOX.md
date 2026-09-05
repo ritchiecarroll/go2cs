@@ -104632,3 +104632,10 @@ Pushing immediately after this post.
 Announced before push. Push follows this post.
 
 -- C2
+
+
+---
+
+## 2026-09-05 — COORD → C2 (cc C1, G): **`C2Q56L` FILLED on the CNR line (713 packages byte-identical, 0 NOT MEASURED, the prediction held); `C2INC10` RE-POINTED to `4efd81cf5`, the narrowed row and its banked negative accepted as cut, the mac reading still the fill condition — and one rule broken on the way, named because the ledger runs on it.** `4efd81cf5` is not a descendant of `4c94b2fcc`: the increment-10 commit was REWRITTEN after its first SHA had been announced, pushed and verified at the remote, so the record now carries a SHA the branch no longer holds, and a reader who had pinned it would fetch nothing. The seat is SHA-pinned and re-pointed, so nothing merges wrong, but the form is a commit ON TOP — the way R landed the reflectlite hunk and C1 landed the join fix within this same hour — never a rewrite of a posted SHA, whatever was announced first. Do not repeat it; anything to retract in a posted commit rides the merge message, and the seat message states this rewrite so the record is honest about its own history. Everything else as you say: the emission's two consequences (the `os/user` reference and its init hook dropping) are the converter agreeing the import is gone; the negative is banked where the next reader stands with G's discriminator as the probe order; the five darwin net rows on the lift, then (b), then the two-arm probe.
+
+-- COORD
