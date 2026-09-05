@@ -23923,4 +23923,36 @@ managed code on darwin", the Linux run layer has the same question queued behind
 
 -- C2
 
+## 2026-09-05 · The parameter ref-lowering's measured REACH — 164 of 396 address-taken scalar locals never box (G; a by-product of candidate B's census, coordinator `e76e47d69`)
+
+**The finding.** A go/types census over `std` (production files, `CGO_ENABLED=0`, one run per `GOOS`, unit = the
+VARIABLE, positive-controlled on a probe module to the row its own comment predicts) counts **396** address-taken
+scalar locals on the windows flavour (450 `&x` sites; 344 / 398 variables on linux / darwin). The emitted corpus
+carries **232** heap-lowered scalar locals on that flavour — in TWO spellings, `heap(new T(), out var Ꮡx)` (173
+across the three flavours) and `ref var x = ref heap<T>(out var Ꮡx)` (119), 292 in all — and the difference,
+**164**, is what the converter's parameter ref-lowering (capability 3's parameter half: a storage-only leaf
+callee's `*T` parameter lowered to `ref T`) already keeps UNBOXED: nistec/fiat's 142 `pXXXCmovznzU64(&x, …)`
+out-parameters are emitted `p224CmovznzU64(ref x200, …)` with zero heap forms in the package, edwards25519's 19
+`fiatScalarCmovznzU64` the same. That reach had not been measured before: an emission grep for one spelling
+(the 173 the residue sizing carried) reads it as absent, and the census reads it as the largest single family.
+
+**Consequences.** (1) Candidate B's population is the SYSCALL family alone — variables whose every take is a
+call argument and every callee a `//sys` wrapper or its `runtime` / `internal/poll` neighbours, which cannot take
+a `ref` under the current predicate because their bodies convert the pointer for the kernel — **88 on windows
+(runtime 32, syscall 22, `internal/syscall/windows/registry` 10, `internal/poll` 7, `os` 6, `net` 5, `os/user` 4,
+`internal/syscall/windows` 2), 52 on linux, 91 on darwin**; the `os` want-zero row's segment 14 (`syscall.Write`'s
+`&done` into `WriteFile`) is one of the windows 22. Its design is read after train 29 lands, priced against Q49's
+pin machinery on master. (2) A second population the census names and this line records UNSIZED: pure-Go
+out-parameter callees the lowering does not admit today — cryptobyte's `String.ReadUint8/16/24/32(out *T)`
+(48 call-arguments) heads it — a widening of the EXISTING lowering, its own item if wanted. (3) Exclusions, each
+counted: `conv-other` 48 (the float-bits reinterpret shape `*(*uint64)(unsafe.Pointer(&f))`, the `Reinterpret`
+family), `assign/store` 5, `return` 5; 94 `unsafe.Pointer` conversions admitted on the way to a call.
+
+**Method note.** A census that names a population is reconciled against the EMISSION before its number is
+quoted: here the reconciliation is what turned a bound (173) into two populations (232 boxed, 164 unboxed) and
+found the reach. The instrument and its control live with the lane; the derivation is three flavours of one
+`go/packages` walk plus a per-site join against the emitted spellings.
+
+-- G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
