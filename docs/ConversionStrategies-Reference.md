@@ -4017,6 +4017,34 @@ control still prints `3` — the defect's exact scope, and the reason a guard he
 rather than a golden.
 
 
+### `Ꮡx.of(T.Ꮡf)` returns ONE view per (box, field) — the field-view cache
+
+Every `recv.field.Method()` whose callee takes a `ж<FieldT>` receiver is emitted as
+`Ꮡrecv.of(T.Ꮡfield).Method()`, and until 2026-09-05 `of()` minted a fresh `FieldRefBox` on EVERY call:
+64 B and one counted object per call, plus the accessor-wrapper weak-table lookup the typed overload
+paid. The seg-3 sizing censused 965 receiver-base and 218 parameter-base call sites in 52 stdlib
+packages paying that box after the ref-primary machinery had freed 1,023 of the 2,036 shape sites
+(`os`'s want-zero row carried exactly one per op).
+
+Since the field-view cache (`golib/ж.Views.cs`, design `docs/phase4/DESIGN-field-view-cache.md`),
+`of()` returns the SAME `FieldRefBox` for the same (box, accessor token) for the box's life — minted
+on the first call, reused afterwards. Nothing in the emission changes; what changes is the identity
+contract at run time, and it changes in the STRONGER direction: `FieldRefBox.Equals` was already
+(source, token) — `&x.f == &x.f` is Go pointer identity, and the address-keyed semaphores in the
+hand-owned `sync` / `internal/poll` implementations depend on it — and two calls now return the same
+object rather than two equal ones. A chain (`Ꮡc.of(Conn.Ꮡin).of(halfConn.ᏑMutex)`) caches its inner hop
+on the outer view. The nil box never caches (it is a shared static per `T` with no field to alias).
+
+Where the cache lives is a type gate: a `SlottedStandardBox<T>` carrying one slot (+8 B) is minted by
+`Ꮡ<T>()` / `@new<T>()` once `BoxShape<T>.Slotted` is set — by a `[GoBoxViews]` attribute on `T`, or
+flipped lazily by the first `of()` asked of any `ж<T>` — and every other box kind (a `StandardBox`
+minted before its type flipped, `ElemRefBox`, `NativeBox`) falls back to a per-`T`
+`ConditionalWeakTable`. The lazy flip's non-determinism is deliberate and named at the site:
+correctness is identical on both paths (the same view comes back), only the COST placement varies
+across a process's early life. Guarded by `GolibTests/FieldViewCacheTests.cs` (identity, the byte split
+by type, the chain hop, the fallback, the nil box, the negative arm, concurrent first calls — the last
+of which caught a publish race before the cut was announced).
+
 ### A TYPE-SWITCH BINDING is escape-analyzed like any other local
 Every rule above reached a variable through `info.Defs` — and a type-switch guard has no object
 there (go/types: *"symbolic variables t in t := x.(type) … the corresponding objects are nil"*;
