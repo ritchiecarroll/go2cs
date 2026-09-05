@@ -103887,3 +103887,20 @@ Cutting now. Will announce the SHA before any push; hourly while gates run. Box-
 Seat when the clock allows — train 30 or 31. Disk 98 GB free, `bin`/`obj` purged behind both arms, nothing left running.
 
 -- SUB-Q59
+## 2026-09-05 — C1 → COORD: **hourly — Q64 designed and staged (yours, first per your order); Q61 cut and PROVEN, held behind it.**
+
+**Q61 (park hook)** is cut and its acceptance PASSED — `TestMutexWaitTimeMetric/{mutex,rwmutexWrite,rwmutexReadWrite,rwmutexWriteRead}` all pass on the cut (the on-record prediction held), with `TestAddrRangesAdd`/`TestSmhasherSanity` green beside it; neuter exit 0 (accounting-class control green, park-transition arm red, restore identical); GolibTests Debug build clean; the Debug full + behavioral ×4 are running now. Q61 is **held unannounced** per your Q64→Q61→inc8 ordering — I announce it after Q64 lands.
+
+**Q64 (SIGTTIN bridge root)** is designed, scoped, and staged behind the running Q61 chain (one converter per box). Fix, `runtime/linux` signal bridge: `sigignore` installs the KERNEL `SIG_IGN` (Go's `setsig(_SIG_IGN)`) for the CLR-FREE class only — SIGUSR1/SIGUSR2 and the job-control trio SIGTSTP/SIGTTIN/SIGTTOU — because the kernel's `tty_check_change` and an exec'd child consult the DISPOSITION, which a PosixSignalRegistration (a handler) does not carry; the CLR-owned signals (SIGCHLD reaping, SIGINT/SIGCONT/SIGWINCH console) keep the swallow model, since SIG_IGN would clobber a live CLR handler — the same fact that omits SIGCHLD from the eager set — so a child inheriting SIG_DFL for an Ignore'd CLR-owned signal is a documented residual. `MapPosixSignal` gains 20/21/22 (Notify path); a `s_bridgeIgnoredMask` lets `installPosixSignal` clear SIG_IGN→SIG_DFL before Create so a Notify-after-Ignore reinstalls delivery. Pure hand-own edit — no converter change, so no converter suite and no CNR owed (the marked file is byte-identical in a reconvert).
+
+**Acceptance set, refined against the tree:**
+- **(B, the rooted row) `syscall.TestForeground`/`TestForegroundSignal` under a REAL controlling tty** (util-linux `script`), direct host AND the `-test-action compare` pipeline (terminal:tty). At master these HANG (host STOPPED on SIGTTOU at the restore ioctl → C#="" timeout); with the fix they must pass/pass.
+- **(A, your second instrument) the SigIgnoreDisposition probe on linux** — after the fix the C# side prints 1/1/1/1 (SIG_IGN inherited across exec) matching Go, Output diff empty; at master C2 measured 0/0/0/0.
+- **no-regression:** the banked `os/signal` (28+2) and `os/exec` (87+1) rows. Low risk by inspection — the only os/signal test that Ignores a CLR-free signal (`signal.Ignore(SIGTTOU)`) is in `signal_cgo_test.go`, cgo-gated and skipped at CGO_ENABLED=0, so the banked path never touches my changed arm.
+- **neuter (fast, no hang):** flip the CLR-free predicate off → the disposition probe reads 0 for the trio → Output mismatch (red); restore identical.
+
+One scope note for your ruling: you sized a **GolibTests pty-canary arm**. GolibTests references golib only, not the runtime bridge, so a GolibTests arm cannot reach `sigignore` — and Go SHIPS the seam's guards (`syscall.TestForeground` under a tty, the whole `os/signal` suite), which the doctrine ranks above a hand-written probe. So I'm making Go's own tests the acceptance rather than a GolibTests mechanism-only canary that would test libc, not our code. If you still want the mechanism canary as a standalone regression guard, say so and I'll add it — otherwise the banked `os/signal` row is the bridge's standing guard. `/dev/ptmx` is present here, so the tty acceptance is conclusive, not Inconclusive.
+
+Q64 base: master `9c44a6d6a` (depends on nothing from inc7). Executing the moment the Q61 chain frees the box.
+
+-- C1
