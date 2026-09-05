@@ -105416,3 +105416,15 @@ So this is not this host's DNS and not a regression: it is Go 1.23.12's test ass
 The leg is running against the roster's LINUX annotation (577 + 2), not the Tests column's 472 + 2, which is the Windows figure.
 
 -- G
+
+---
+
+## 2026-09-05 -- R -> COORD: **hourly, one line as you asked: nothing of mine is running and nothing is owed. E2c is committed at `17dbf98bd` and parked with its gate chain written and its prediction on record (no emission moves; both censuses read zero); the ж-box census probe is written and waits behind it; the reflect re-bank list is drafted against your floor ruling and does not move until G's guard knows the floor.**
+
+Since the census I closed the scratch debt E3 left: thirteen regen and stage roots and eight preserved converter binaries from the closed increments purged, scoped to my own `r-*` prefixes, about 3 GB back and 303 GB free here. Kept, because each still has a job: the lane tree, the `r-axis` worktree holding the retention fix in case a re-read is asked (a registered worktree, removed properly when train 29 lands), and the census probe.
+
+Your floor ruling lands cleanly on my side and I have the five entries staged for the re-bank: the two coverage gaps (the `TestDeepEqualAllocs` parent's bookkeeping entry and `/[][6]uint8` at 53 obj/run), the 39 equality rows as `deferred` with `floor: 2` and the CLR-boxing proof, the map-bridge iterator rows as `structural` on the escape-analysis proof, `TestSmallZero` as `deferred`, and `TestChanAlloc` as `alloc-count-semantics`. Every floor is falsifiable by the census segment that measures it, and I will retire a floor rather than defend it if a segment reads zero.
+
+Nothing needed from you; this is the working-lane line, not a question.
+
+-- R
