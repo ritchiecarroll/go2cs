@@ -251,8 +251,14 @@ public static partial class GoReflect
     /// Defaults to <see cref="GoTypeRelation.Convertible"/> so an un-examined caller keeps exactly
     /// today's behaviour; the assignment entry points pass <see cref="GoTypeRelation.Assignable"/>.
     /// </param>
+    /// <param name="dstChanDir">
+    /// The destination slot's channel DIRECTION when the caller holds a descriptor that carries one
+    /// (<c>reflect.Value.Set</c> passes its slot's); the managed <c>channel&lt;T&gt;</c> erases it.
+    /// Defaults to bidirectional, which keeps every un-examined boundary exactly as it was.
+    /// </param>
     public static bool TryMarshalAssignable(object? src, Type dstType, out object? marshalled,
-                                            GoTypeRelation relation = GoTypeRelation.Convertible)
+                                            GoTypeRelation relation = GoTypeRelation.Convertible,
+                                            GoChanDir dstChanDir = GoChanDir.Unstamped)
     {
         marshalled = null;
 
@@ -291,22 +297,26 @@ public static partial class GoReflect
             return dstType == nilFunc.Type;
         }
 
-        // A DIRECTIONAL channel value is not assignable to a channel slot the C# type erases to the
-        // bidirectional `channel<T>`: Go refuses a `<-chan T`/`chan<- T` SOURCE flowing into a
-        // `chan T` result (a directional channel cannot widen). The slot carries no direction here
-        // (`channel<T>` IS the bidirectional representation), so a stamped-directional source is
-        // rejected treating the slot as bidirectional — the case reflect's
-        // TestMakeFuncInvalidReturnAssignments asserts (a `RecvOnly` channel returned into a
-        // `chan int` result must panic). A BIDIRECTIONAL source (Unstamped) never trips this and
-        // narrows into a directional slot freely (the valid direction — the identity arm below
-        // admits it). This arm is INERT until the converter's live-copy narrowing stamp makes a
-        // source directional at all: the two halves of one cut, and a census found ZERO directional
-        // channel sources marshalled today, so it can regress none of the 108 current admits.
-        if (src is IChannel { Direction: not GoChanDir.Unstamped } &&
-            typeof(IChannel).IsAssignableFrom(dstType))
+        // A DIRECTIONAL channel value is assignable only to a channel slot of the SAME direction -- Go's
+        // identical-types rule (`<-chan T` into `<-chan T`); a bidirectional slot or the opposite direction
+        // refuses, since a directional channel cannot widen. The managed `channel<T>` erases the slot's
+        // direction, so it arrives from whichever DESCRIPTOR the caller holds (dstChanDir: reflect.Set
+        // passes its slot's -- TestConvert's channel rows Set a converted `chan<- int` into
+        // New(chan<- int).Elem(), refused here while the slot read as bidirectional) and defaults to
+        // bidirectional, which keeps every un-examined boundary as it was: reflect's
+        // TestMakeFuncInvalidReturnAssignments (a `RecvOnly` channel returned into a `chan int` result
+        // must panic) still does. A BIDIRECTIONAL source (Unstamped/Both) never trips this and narrows
+        // into a directional slot freely -- the identity arm below admits it.
+        if (src is IChannel channelSrc && typeof(IChannel).IsAssignableFrom(dstType))
         {
-            marshalled = null;
-            return false;
+            GoChanDir srcDir = channelSrc.Direction is GoChanDir.Send or GoChanDir.Recv ? channelSrc.Direction : GoChanDir.Unstamped;
+            GoChanDir slotDir = dstChanDir is GoChanDir.Send or GoChanDir.Recv ? dstChanDir : GoChanDir.Unstamped;
+
+            if (srcDir != GoChanDir.Unstamped && srcDir != slotDir)
+            {
+                marshalled = null;
+                return false;
+            }
         }
 
         // Identity — including a pointer-sourced interface value unwrapping to its receiver box

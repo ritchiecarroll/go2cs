@@ -1448,9 +1448,22 @@ public static void Set(this ΔValue v, ΔValue x) {
     if (dstType is null || v.addrBox is null) {
         throw panic("reflect: Set using unaddressable value");
     }
-    if (!GoReflect.TryMarshalAssignable(x.live, dstType, out object? marshalled, GoReflect.GoTypeRelation.Assignable)) {
-        throw panic("reflect.Set: value of type " + GoReflect.GoTypeName(x.live?.GetType()) +
-                    " is not assignable to type " + GoReflect.GoTypeName(dstType));
+    // The slot's channel DIRECTION rides on its descriptor, not its managed type (channel<T> erases it):
+    // a directional source is assignable to a slot of the same direction and refused by a bidirectional
+    // one (7f -- TestConvert's channel rows Set a converted `chan<- int` into New(chan<- int).Elem()). The
+    // panic names both DESCRIPTORS, as Go's v.typ().String() does; the live managed type spells neither
+    // a direction nor a defined type's name.
+    ΔType dstReflectType = v.Type();
+    GoChanDir dstDir = chanDirOfReflectType(dstReflectType);
+    if (!GoReflect.TryMarshalAssignable(x.live, dstType, out object? marshalled, GoReflect.GoTypeRelation.Assignable, dstDir)) {
+        throw panic("reflect.Set: value of type " + x.Type().String() +
+                    " is not assignable to type " + dstReflectType.String());
+    }
+    // A bidirectional source NARROWING into a directional slot takes the slot's cargo: in Go the stored
+    // value has the slot's static type, and Interface() here re-describes the VALUE.
+    if (dstDir is GoChanDir.Send or GoChanDir.Recv && marshalled is IChannel { Direction: GoChanDir.Unstamped } narrowed) {
+        marshalled = GoReflect.WithChanCargo(marshalled, ChanCargo.Of(chanDirChainOfReflectType(dstReflectType),
+                                                                       arrayDimsOfReflectType(dstReflectType) ?? narrowed.Cargo?.ElemDims));
     }
     GoReflect.WritePointerSlot(v.addrBox, marshalled);
 }

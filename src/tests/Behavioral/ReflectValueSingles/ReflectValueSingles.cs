@@ -152,6 +152,13 @@ private static readonly @string intChanNilChanIntˢ3 = "IntChan(nil) -> chan int
 private static readonly object convertedSendOnlyViewˢ = (@string)"converted send-only view type:"u8;
 private static readonly object interfaceTypeˢ = (@string)" interface type:"u8;
 private static readonly object receivedOnTheOriginalˢ = (@string)" received on the original:"u8;
+private static readonly @string chanIntIntChanNilConvertˢ = "chan<- int <- IntChan(nil).Convert"u8;
+private static readonly @string chanIntChanIntNilConvertˢ = "<-chan int <- chan int(nil).Convert"u8;
+private static readonly @string chanIntChanIntNilˢ = "chan int <- chan<- int(nil)"u8;
+private static readonly @string chanIntChanIntNilˢ2 = "<-chan int <- chan<- int(nil)"u8;
+private static readonly @string chanIntChanIntNilˢ3 = "chan<- int <- chan int(nil)"u8;
+private static readonly @string chanIntLiveIntChanˢ = "chan<- int <- live IntChan.Convert"u8;
+private static readonly object sendOnlySlotValueTypeˢ = (@string)"send-only slot value type:"u8;
 
 [GoLocalName("S")] [GoType("[]byte")] internal partial struct main_S;
 
@@ -333,6 +340,34 @@ internal static void Main() {
     var sendOnly = reflect.ValueOf(live).Convert(reflect.TypeOf(channel/*<-*/<nint>.SendOnly));
     sendOnly.Interface()._<channel/*<-*/<nint>>().ᐸꟷ(7);
     fmt.Println(convertedSendOnlyViewˢ, sendOnly.Type(), interfaceTypeˢ, reflect.TypeOf(sendOnly.Interface()), receivedOnTheOriginalˢ, ᐸꟷ<nint>(live));
+    void setRow(@string label, reflectꓸType slotΔ1, reflectꓸValue xΔ1) {
+        GoFrame ᒐ = default;
+        try {
+            defer(() => {
+                {
+                    var r = recover(); if (r != default!) {
+                        fmt.Printf("%-38s PANIC: %v\n"u8, label, r);
+                    }
+                }
+            }, ref ᒐ);
+            var v = reflect.New(slotΔ1).Elem();
+            v.Set(xΔ1);
+            fmt.Printf("%-38s slot=%v value=%v nil=%v\n"u8, label, v.Type(), reflect.TypeOf(v.Interface()), v.IsNil());
+        }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+        finally { ᒐ.Run(); }
+    }
+    var (sendT, recvT, bidiT) = (reflect.TypeOf(channel/*<-*/<nint>.SendOnly), reflect.TypeOf(/*<-*/channel<nint>.RecvOnly), reflect.TypeOf((channel<nint>)(default!)));
+    setRow(chanIntIntChanNilConvertˢ, sendT, reflect.ValueOf(((IntChan)default!)).Convert(sendT));
+    setRow(chanIntChanIntNilConvertˢ, recvT, reflect.ValueOf((channel<nint>)(default!)).Convert(recvT));
+    setRow(chanIntChanIntNilˢ, bidiT, reflect.ValueOf(channel/*<-*/<nint>.SendOnly));
+    setRow(chanIntChanIntNilˢ2, recvT, reflect.ValueOf(channel/*<-*/<nint>.SendOnly));
+    setRow(chanIntChanIntNilˢ3, sendT, reflect.ValueOf((channel<nint>)(default!)));
+    setRow(chanIntLiveIntChanˢ, sendT, reflect.ValueOf(live).Convert(sendT));
+    var slot = reflect.New(sendT).Elem();
+    slot.Set(reflect.ValueOf(live));
+    slot.Interface()._<channel/*<-*/<nint>>().ᐸꟷ(8);
+    fmt.Println(sendOnlySlotValueTypeˢ, reflect.TypeOf(slot.Interface()), receivedOnTheOriginalˢ, ᐸꟷ<nint>(live));
 }
 
 } // end main_package

@@ -208,4 +208,31 @@ func main() {
 	sendOnly.Interface().(chan<- int) <- 7
 	fmt.Println("converted send-only view type:", sendOnly.Type(), " interface type:", reflect.TypeOf(sendOnly.Interface()), " received on the original:", <-live)
 
+	// --- 7f: Set honours the slot's channel direction -- a directional value into a slot of the SAME
+	// direction is identity, a bidirectional value narrows and takes the slot's type, and a directional
+	// value into a bidirectional slot or the opposite direction is refused (TestConvert's Set rows) ---
+	setRow := func(label string, slot reflect.Type, x reflect.Value) {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("%-38s PANIC: %v\n", label, r)
+			}
+		}()
+		v := reflect.New(slot).Elem()
+		v.Set(x)
+		fmt.Printf("%-38s slot=%v value=%v nil=%v\n", label, v.Type(), reflect.TypeOf(v.Interface()), v.IsNil())
+	}
+	sendT, recvT, bidiT := reflect.TypeOf((chan<- int)(nil)), reflect.TypeOf((<-chan int)(nil)), reflect.TypeOf((chan int)(nil))
+	setRow("chan<- int <- IntChan(nil).Convert", sendT, reflect.ValueOf(IntChan(nil)).Convert(sendT))
+	setRow("<-chan int <- chan int(nil).Convert", recvT, reflect.ValueOf((chan int)(nil)).Convert(recvT))
+	setRow("chan int <- chan<- int(nil)", bidiT, reflect.ValueOf((chan<- int)(nil)))
+	setRow("<-chan int <- chan<- int(nil)", recvT, reflect.ValueOf((chan<- int)(nil)))
+	setRow("chan<- int <- chan int(nil)", sendT, reflect.ValueOf((chan int)(nil)))
+	setRow("chan<- int <- live IntChan.Convert", sendT, reflect.ValueOf(live).Convert(sendT))
+	// a live bidirectional channel Set into a send-only slot is the same channel: a send through the
+	// slot's value is received on the original
+	slot := reflect.New(sendT).Elem()
+	slot.Set(reflect.ValueOf(live))
+	slot.Interface().(chan<- int) <- 8
+	fmt.Println("send-only slot value type:", reflect.TypeOf(slot.Interface()), " received on the original:", <-live)
+
 }
