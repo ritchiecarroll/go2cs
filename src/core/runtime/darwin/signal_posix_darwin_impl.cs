@@ -37,15 +37,38 @@ using go;
 //     otherwise              -> ctx.Cancel = true   (_SigNotify-only: swallow, like Go)
 //
 // WHAT DIFFERS FROM LINUX, clause by clause (the design's §3 table): the NUMBER MAP is darwin's
-// (USR1 30, USR2 31, CHLD 20, CONT 19, WINCH 28, INFO 29 — defs_darwin_amd64.cs; HUP/INT/QUIT/TERM
-// share the classic numbers); the _SigKill/_SigThrow SETS are read from signal_darwin.go's sigtable
+// (USR1 30, USR2 31, CHLD 20, CONT 19, WINCH 28, INFO 29, and since increment 9 the job-control trio
+// TSTP 18, TTIN 21, TTOU 22 — defs_darwin_amd64.cs; HUP/INT/QUIT/TERM share the classic numbers);
+// the _SigKill/_SigThrow SETS are read from signal_darwin.go's sigtable
 // (kill = HUP, INT, TERM; throw = QUIT, ABRT — ABRT stays the CLR's); the INHERITED-DISPOSITION SEED
 // is read through increment 6's real sigaction body (GoSigactionQuery — the 16-byte darwin mirror,
 // the handler word 1 == SIG_IGN) instead of a raw 160-byte glibc P/Invoke; and ensureSigM /
 // pthread_sigmask (increment 5) are elided the same way, because the registration owns its own
-// thread and mask. The install side of increment 6's sigaction is never used by the bridge and
-// stays the truth for dieFromSignal's setsig(sig, _SIG_DFL) — the SIGPIPE death path, where darwin
-// is AHEAD of linux (§3.4).
+// thread and mask. The install side of increment 6's sigaction serves the bridge since increment 9
+// (the restore after an Ignore, below) and stays the truth for dieFromSignal's setsig(sig, _SIG_DFL)
+// — the SIGPIPE death path, where darwin is AHEAD of linux (§3.4).
+//
+// INCREMENT 9 (Q64's darwin half, 2026-09-05 — ONE RULE with the linux flavour, C1's Q64): Go's
+// Ignore is a KERNEL disposition. sigignore's first form only guaranteed the registration and let
+// the handler swallow — a managed cancel that the kernel never consults at tcsetpgrp (the
+// job-control mute-hang class) and that no exec'd child inherits, where Go's setsig(sig, _SIG_IGN)
+// is both. It now installs the kernel SIG_IGN through the signal(2) P/Invoke below FOR THE
+// CLR-FREE CLASS ONLY — the mapped signals no CLR handler owns (sigIsKernelIgnorable: SIGUSR2 and
+// the job-control trio here; USR1/USR2 and the trio on linux, darwin's class differing by the one
+// member SIGUSR1, the CLR's activation-injection signal on this platform) — because a kernel
+// SIG_IGN on a CLR-owned signal would clobber a live CLR handler, the same fact that keeps SIGCHLD
+// out of the eager set. The CLR-owned set keeps the swallow model, and its RESIDUAL is stated
+// rather than left implicit: a child exec'd while such a signal is Ignore'd inherits SIG_DFL,
+// where Go's child inherits SIG_IGN. For the class, the SIG_IGN is installed after SAVING the
+// sigaction it displaces (.NET's own SA_SIGINFO handler for a registered signal; SIG_DFL or the
+// inherited disposition for one not yet registered), and sigenable — Go's Notify, the ONLY call
+// that undoes an Ignore: Reset does not, sigdisable reaches the kernel solely in its
+// !sigInstallGoHandler arm — puts that sigaction back verbatim through increment 6's install arm
+// before the registration is guaranteed, so .NET's handler is live again with its flags (the
+// linux flavour reinstalls through its ignored-mask and a SIG_DFL clear before Create: the same
+// contract, one mechanism per flavour, stated). The map gains the job-control trio (SIGTSTP 18,
+// SIGTTIN 21, SIGTTOU 22), which Go's initsig deliberately skips (_SigDefault) and Notify installs
+// on demand — the on-demand path sigenable already is. The unmapped residual is unchanged.
 //
 // THE RESIDUAL, per flavor: the synchronous faults the CLR owns (SIGILL/SIGTRAP/SIGBUS/SIGFPE/SIGSEGV
 // — Go never delivers them to Notify either, so a no-op is Go-compatible by construction), SIGABRT
@@ -82,9 +105,11 @@ partial class runtime_package
     private static readonly object s_sigPosixLock = new object();
     private static readonly Dictionary<int, PosixSignalRegistration> s_sigPosixRegs = new Dictionary<int, PosixSignalRegistration>();
 
-    // libc signal(2), used only to clear an inherited SIG_IGN so .NET will install its handler.
-    // SIG_DFL is the null handler on darwin as on linux.
+    // libc signal(2), used to clear an inherited SIG_IGN so .NET will install its handler and — since
+    // increment 9 — to install Go's Ignore as the KERNEL disposition. SIG_DFL is the null handler on
+    // darwin as on linux; SIG_IGN is 1.
     private static readonly IntPtr SIG_DFL = IntPtr.Zero;
+    private static readonly IntPtr SIG_IGN = (IntPtr)1;
     [DllImport("libc", EntryPoint = "signal", SetLastError = true)]
     private static extern IntPtr sys_signal(int signum, IntPtr handler);
 
@@ -95,12 +120,43 @@ partial class runtime_package
     // (signal_enable clears the bit, correctly), so the handler's die decision consults the snapshot.
     private static uint s_inheritedIgnoredMask;
 
+    // The signals whose KERNEL disposition this bridge set to SIG_IGN on Go's behalf (sigignore), and
+    // the sigaction each displaced, put back verbatim by sigenable — Go's fwdSig discipline applied
+    // to the one handler the bridge cannot reinstall by itself, .NET's own. Both under s_sigPosixLock.
+    private static uint s_kernelIgnoredMask;
+    private static readonly (ulong handler, uint32 mask, int32 flags)[] s_displacedActions = new (ulong, uint32, int32)[32];
+
     // Darwin's signal numbers (defs_darwin_amd64.cs), the classic asynchronous range this bridge maps.
     // Named .NET members are translated by the runtime; a POSITIVE value rides .NET's raw-number
     // pass-through (the linux bridge's measured residual note: the enum members are NEGATIVE, a
     // positive value is the platform number).
-    private const int sigHUP = 1, sigINT = 2, sigQUIT = 3, sigTERM = 15, sigCONT = 19, sigCHLD = 20,
-                      sigWINCH = 28, sigINFO = 29, sigUSR1 = 30, sigUSR2 = 31;
+    private const int sigHUP = 1, sigINT = 2, sigQUIT = 3, sigTERM = 15, sigTSTP = 18, sigCONT = 19,
+                      sigCHLD = 20, sigTTIN = 21, sigTTOU = 22, sigWINCH = 28, sigINFO = 29,
+                      sigUSR1 = 30, sigUSR2 = 31;
+
+    // The CLR-FREE class — the mapped signals no CLR handler owns, so Go's kernel SIG_IGN can be
+    // installed without clobbering a live CLR handler (the same fact that keeps SIGCHLD out of the
+    // eager set): SIGUSR2 and the job-control trio. The linux flavour's class is USR1/USR2 + the
+    // trio; darwin's differs by ONE member, because SIGUSR1 is the CLR's activation-injection signal
+    // here (coreclr pal/src/exception/signal.cpp: INJECT_ACTIVATION_SIGNAL is SIGRTMIN where defined
+    // and SIGUSR1 where not, and darwin defines no SIGRTMIN; installed at PAL init, accepting the
+    // process's own activations) — a kernel SIG_IGN there would discard the runtime's GC-suspension
+    // activations. Everything else mapped — HUP/INT/QUIT/TERM (the PAL's console and exit handlers),
+    // CHLD (reaping), CONT/WINCH (terminal), INFO (default-ignore, so the swallow is exact) and
+    // USR1 — keeps the swallow model, with the residual stated in the header.
+    private static bool sigIsKernelIgnorable(uint32 sig)
+    {
+        switch ((int)sig)
+        {
+            case sigUSR2:
+            case sigTSTP:
+            case sigTTIN:
+            case sigTTOU:
+                return true;
+            default:
+                return false;
+        }
+    }
 
     // MapPosixSignal maps a darwin signal number to the .NET PosixSignal value that carries it, or
     // null for the residual.
@@ -112,8 +168,11 @@ partial class runtime_package
             case sigINT:   return PosixSignal.SIGINT;
             case sigQUIT:  return PosixSignal.SIGQUIT;
             case sigTERM:  return PosixSignal.SIGTERM;
+            case sigTSTP:  return PosixSignal.SIGTSTP;   // job-control trio: on demand only (Go's _SigDefault)
             case sigCONT:  return PosixSignal.SIGCONT;
             case sigCHLD:  return PosixSignal.SIGCHLD;
+            case sigTTIN:  return PosixSignal.SIGTTIN;
+            case sigTTOU:  return PosixSignal.SIGTTOU;
             case sigWINCH: return PosixSignal.SIGWINCH;
             case sigINFO:  return (PosixSignal)sigINFO;  // darwin-only, raw platform number
             case sigUSR1:  return (PosixSignal)sigUSR1;  // raw platform number
@@ -123,8 +182,12 @@ partial class runtime_package
     }
 
     // Whether an UNWANTED, un-ignored delivery of sig kills the process — Go's _SigKill, read from
-    // signal_darwin.go's sigtable: HUP/INT/TERM die; USR1/USR2/CHLD/CONT/WINCH/INFO are
-    // _SigNotify(+_SigIgn/_SigDefault) and are swallowed.
+    // signal_darwin.go's sigtable: HUP/INT/TERM die; USR1/USR2/CHLD/CONT/WINCH/INFO and the
+    // job-control trio TSTP/TTIN/TTOU are _SigNotify(+_SigIgn/_SigDefault) and are swallowed — for
+    // the trio exactly Go's installed handler, which returns on an unwanted delivery: initsig never
+    // installs it (so before a Notify the kernel default, stop, applies — and so it does here, the
+    // trio being absent from the eager set), and after a Notify Go keeps it, as the registration
+    // is kept.
     private static bool sigDiesByDefault(uint32 sig)
     {
         switch ((int)sig)
@@ -330,6 +393,11 @@ partial class runtime_package
             }
             lock (s_sigPosixLock)
             {
+                // Notify undoes an Ignore (Go's sigenable installs over the SIG_IGN sigignore left):
+                // put back the sigaction the kernel SIG_IGN displaced — .NET's own handler, flags
+                // and all, which signal(2) could not reinstall — BEFORE the registration is
+                // guaranteed, so a first-time Create sees SIG_DFL rather than our SIG_IGN.
+                restoreDisplacedDisposition(sig);
                 atomic.Cas(ᏑhandlingSig.at<uint32>((nint)(sig)), 0, 1);
                 installPosixSignal(sig, ps.Value);
             }
@@ -342,6 +410,9 @@ partial class runtime_package
     // never uninstalls its runtime handler either — Stop/Reset semantics live entirely in the
     // wanted-bit the caller just cleared, which routes the next delivery to the handler's default
     // decision (die for the _SigKill set, swallow otherwise), Go's default-handling-after-Reset.
+    // An Ignore is not undone here either: Go's Reset leaves sigignore's SIG_IGN in the kernel
+    // (sigdisable reaches the kernel only in its !sigInstallGoHandler arm), and only a Notify
+    // reinstalls — sigenable's restore.
     internal static void sigdisable(uint32 sig)
     {
         if (sig >= (uint32)len(sigtable))
@@ -365,9 +436,12 @@ partial class runtime_package
     // sigignore ignores the signal sig.
     // It is only called while holding the os/signal.handlers lock,
     // via os/signal.ignoreSignal and signal_ignore. The caller has already set sig.ignored and
-    // cleared sig.wanted, which is the whole observable: the persistent handler swallows the next
-    // delivery via signal_ignored. Guaranteeing the registration here (idempotent) is what makes
-    // Ignore suppress a signal whose default would kill.
+    // cleared sig.wanted; Go then makes the KERNEL ignore the signal (setsig(sig, _SIG_IGN)) and,
+    // since increment 9, so does the bridge: the disposition the SIG_IGN displaces is saved for the
+    // Notify that undoes it, and the persistent registration — if one exists — simply stops being
+    // reached, exactly as Go's sighandler stops being reached. The kernel's answer is what tcsetpgrp
+    // consults and what an exec'd child inherits; the managed swallow was neither. The CLR-owned
+    // set keeps the managed swallow (sigIsKernelIgnorable), its residual stated in the header.
     internal static void sigignore(uint32 sig)
     {
         if (sig >= (uint32)len(sigtable))
@@ -389,8 +463,48 @@ partial class runtime_package
             lock (s_sigPosixLock)
             {
                 atomic.Store(ᏑhandlingSig.at<uint32>((nint)(sig)), 0);
-                installPosixSignal(sig, ps.Value);
+                if (!sigIsKernelIgnorable(sig))
+                {
+                    // The CLR-owned set keeps the managed swallow: the registration is guaranteed
+                    // and the handler cancels via signal_ignored; kernel-side the CLR keeps its own
+                    // handler, and the residual (a child inheriting SIG_DFL) is the header's.
+                    installPosixSignal(sig, ps.Value);
+                    return;
+                }
+                ignoreAtKernel(sig);
             }
         }
+    }
+
+    // ignoreAtKernel (called under s_sigPosixLock) installs SIG_IGN for sig as the KERNEL
+    // disposition, saving what it displaces ONCE — Go's setsig(sig, _SIG_IGN) with the fwdSig
+    // discipline the restore needs. Idempotent: a second Ignore keeps the first save, which is the
+    // disposition that predates both.
+    private static void ignoreAtKernel(uint32 sig)
+    {
+        uint bit = 1u << (int)sig;
+        if ((s_kernelIgnoredMask & bit) != 0)
+        {
+            return;
+        }
+        s_displacedActions[(int)sig] = GoSigactionQuery((int)sig);
+        sys_signal((int)sig, SIG_IGN);
+        s_kernelIgnoredMask |= bit;
+    }
+
+    // restoreDisplacedDisposition (called under s_sigPosixLock) puts back, verbatim, the sigaction
+    // an earlier ignoreAtKernel displaced — .NET's SA_SIGINFO handler for a registered signal, or
+    // SIG_DFL / the inherited disposition for one that was not — through increment 6's install arm
+    // (GoSigactionInstall, sigaction_impl.cs). A no-op when the kernel holds no SIG_IGN of ours.
+    private static void restoreDisplacedDisposition(uint32 sig)
+    {
+        uint bit = 1u << (int)sig;
+        if ((s_kernelIgnoredMask & bit) == 0)
+        {
+            return;
+        }
+        (ulong handler, uint32 mask, int32 flags) = s_displacedActions[(int)sig];
+        GoSigactionInstall((int)sig, handler, mask, flags);
+        s_kernelIgnoredMask &= ~bit;
     }
 }
