@@ -304,12 +304,17 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// wanted/ignored bookkeeping and the delivery path auto; only the kernel-install layer is
 		// displaced, and ensureSigM's sigprocmask handshake is elided with it. Scoped goosLinux — the
 		// linux flavor of signal_unix.go — since PosixSignalRegistration is the linux target's bridge;
-		// darwin's copy stays auto until its own arc. Signals outside .NET's PosixSignal enum
+		// darwin joined 2026-09-05 (below). Signals outside .NET's PosixSignal enum
 		// (SIGUSR*, SIGPIPE, the real-time signals) have no registration and stay the honest
 		// rt_sigaction residual. See docs/phase4/DESIGN-signal-posix-bridge.md.
-		"sigenable":  goosLinux,
-		"sigdisable": goosLinux,
-		"sigignore":  goosLinux,
+		// DARWIN joins 2026-09-05 (Q52, runtime/darwin/signal_posix_darwin_impl.cs -- a DISTINCT basename
+		// by the L3 rule): both mac legs of SignalPrimitives died at setsig's FuncPCABI0(sigtramp), the
+		// kernel-into-managed door no libc body can open; the darwin flavor of the same bridge, over
+		// darwin's numbers and sigtable, seeded through increment 6's sigaction. Each flavor's file the
+		// authority on its own body, so the scope is the two unix flavors.
+		"sigenable":  goosLinuxDarwin,
+		"sigdisable": goosLinuxDarwin,
+		"sigignore":  goosLinuxDarwin,
 		// runtime.StartTrace (trace.go, build-tag-free — selected on every platform): the execution
 		// tracer is a serialization of the scheduler the managed host does not have — the converted
 		// body's first step is semacquire → getg, an unimplemented g-model intrinsic, so every

@@ -177,72 +177,11 @@ internal static bool sigInstallGoHandler(uint32 sig) {
     return true;
 }
 
-// sigenable enables the Go signal handler to catch the signal sig.
-// It is only called while holding the os/signal.handlers lock,
-// via os/signal.enableSignal and signal_enable.
-internal static void sigenable(uint32 sig) {
-    if (sig >= (uint32)len(sigtable)) {
-        return;
-    }
-    // SIGPROF is handled specially for profiling.
-    if (sig == _SIGPROF) {
-        return;
-    }
-    var t = Ꮡsigtable.at<sigTabT>((nint)(sig));
-    if ((int32)((~t).flags & (int32)_SigNotify) != 0) {
-        ensureSigM();
-        enableSigChan.ᐸꟷ(sig);
-        ᐸꟷ(maskUpdatedChan);
-        if (atomic.Cas(ᏑhandlingSig.at<uint32>((nint)(sig)), 0, 1)) {
-            atomic.Storeuintptr(ᏑfwdSig.at<uintptr>((nint)(sig)), getsig(sig));
-            setsig(sig, abi.FuncPCABIInternal(sighandler));
-        }
-    }
-}
+// go2cs generated this placeholder — func sigenable is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// sigdisable disables the Go signal handler for the signal sig.
-// It is only called while holding the os/signal.handlers lock,
-// via os/signal.disableSignal and signal_disable.
-internal static void sigdisable(uint32 sig) {
-    if (sig >= (uint32)len(sigtable)) {
-        return;
-    }
-    // SIGPROF is handled specially for profiling.
-    if (sig == _SIGPROF) {
-        return;
-    }
-    var t = Ꮡsigtable.at<sigTabT>((nint)(sig));
-    if ((int32)((~t).flags & (int32)_SigNotify) != 0) {
-        ensureSigM();
-        disableSigChan.ᐸꟷ(sig);
-        ᐸꟷ(maskUpdatedChan);
-        // If initsig does not install a signal handler for a
-        // signal, then to go back to the state before Notify
-        // we should remove the one we installed.
-        if (!sigInstallGoHandler(sig)) {
-            atomic.Store(ᏑhandlingSig.at<uint32>((nint)(sig)), 0);
-            setsig(sig, atomic.Loaduintptr(ᏑfwdSig.at<uintptr>((nint)(sig))));
-        }
-    }
-}
+// go2cs generated this placeholder — func sigdisable is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// sigignore ignores the signal sig.
-// It is only called while holding the os/signal.handlers lock,
-// via os/signal.ignoreSignal and signal_ignore.
-internal static void sigignore(uint32 sig) {
-    if (sig >= (uint32)len(sigtable)) {
-        return;
-    }
-    // SIGPROF is handled specially for profiling.
-    if (sig == _SIGPROF) {
-        return;
-    }
-    var t = Ꮡsigtable.at<sigTabT>((nint)(sig));
-    if ((int32)((~t).flags & (int32)_SigNotify) != 0) {
-        atomic.Store(ᏑhandlingSig.at<uint32>((nint)(sig)), 0);
-        setsig(sig, _SIG_IGN);
-    }
-}
+// go2cs generated this placeholder — func sigignore is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // clearSignalHandlers clears all signal handlers that are not ignored
 // back to the default. This is called by the child after a fork, so that
