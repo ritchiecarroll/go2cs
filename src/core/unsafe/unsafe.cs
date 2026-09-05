@@ -324,13 +324,25 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
         if (other is not Pointer pointer)
             return base.Equals(other);
         if (Referent is { } mine && pointer.Referent is { } theirs)
-            return ReferenceEquals(mine, theirs);
+            return ReferenceEquals(mine, theirs) || ReferentToken(mine) == ReferentToken(theirs);
         return PointerOrderToken == pointer.PointerOrderToken;
     }
 
     public override int GetHashCode()
     {
-        return Referent is { } referent ? RuntimeHelpers.GetHashCode(referent) : PointerOrderToken.GetHashCode();
+        return Referent is { } referent ? ReferentToken(referent).GetHashCode() : PointerOrderToken.GetHashCode();
+    }
+
+    // A referent's identity is its ORDER TOKEN, never the box OBJECT: a field or element reference is
+    // minted afresh at every `&l.p` / `&a[i]`, so two boxes over ONE field are two objects with one
+    // token (allocation base + Go field offset -- "equal pointers always produce equal tokens", the
+    // contract PointerOrderToken documents), while a heap box's token is its own allocation base.
+    // Comparing the objects said `unsafe.Pointer(&l.p) != unsafe.Pointer(&l.p)` where Go and the
+    // numeric rule both say equal (the ManagedAtomicPointer behavioral guard, full-suite run of the
+    // referent cut). Hashing by the same token keeps Equals and GetHashCode one fact.
+    private static nuint ReferentToken(object referent)
+    {
+        return referent is INilPointer box ? box.PointerOrderToken : (nuint)(uint)RuntimeHelpers.GetHashCode(referent);
     }
 
     /// <summary>

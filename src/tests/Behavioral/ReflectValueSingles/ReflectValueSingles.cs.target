@@ -113,6 +113,9 @@ private static readonly object baseBaseˢ = (@string)" base == base:"u8;
 private static readonly object mapSameBoxTwiceFoundˢ = (@string)"map: same box twice found:"u8;
 private static readonly object sameNumberTwiceFoundˢ = (@string)" same number twice found:"u8;
 private static readonly object otherBoxFoundˢ = (@string)" other box found:"u8;
+private static readonly object sameFieldTwiceˢ = (@string)"same field twice:"u8;
+private static readonly object fieldVsOtherBoxˢ = (@string)" field vs other box:"u8;
+private static readonly object mapSameFieldTwiceFoundˢ = (@string)" map: same field twice found:"u8;
 private static readonly @string byteNil0Byteˢ = "[]byte(nil) -> *[0]byte"u8;
 private static readonly @string byte0Byteˢ = "[]byte{} -> *[0]byte"u8;
 private static readonly @string byte71Byteˢ = "[]byte{7} -> *[1]byte"u8;
@@ -143,6 +146,10 @@ private static readonly @string cannotConvertSliceWithˢ = "cannot convert slice
 [GoLocalName("AB")] [GoType("[4]main_B")] internal partial struct main_AB;
 
 [GoLocalName("MyBuffer")] [GoType("bytes_package.Buffer")] internal partial struct main_MyBuffer;
+
+[GoType("dyn")] internal partial struct main_holder {
+    internal ж<nint> p;
+}
 
 internal static void Main() {
     ref var xs = ref heap<slice<nint>>(out var Ꮡxs);
@@ -265,6 +272,11 @@ internal static void Main() {
     var (_, foundNumber) = interior[(uintptr)@unsafe.Add(new @unsafe.Pointer(Ꮡarr), 8), ꟷ];
     var (_, missOther) = keyed[new @unsafe.Pointer(n2), ꟷ];
     fmt.Println(mapSameBoxTwiceFoundˢ, foundBox, sameNumberTwiceFoundˢ, foundNumber, otherBoxFoundˢ, missOther);
+    ref var h = ref heap(new main_holder(), out var Ꮡh);
+    @unsafe.Pointer fp = @unsafe.Pointer.FromBox(Ꮡh.of(main_holder.Ꮡp));
+    var fieldKeyed = new map<@unsafe.Pointer, nint>{[fp] = 3};
+    var (_, foundField) = fieldKeyed[@unsafe.Pointer.FromBox(Ꮡh.of(main_holder.Ꮡp)), ꟷ];
+    fmt.Println(sameFieldTwiceˢ, fp == @unsafe.Pointer.FromBox(Ꮡh.of(main_holder.Ꮡp)), fieldVsOtherBoxˢ, fp == new @unsafe.Pointer(n), mapSameFieldTwiceFoundˢ, foundField);
     convRow(byteNil0Byteˢ, slice<byte>(default!), ж<array<byte>>.NilBoxOfDims(0L));
     convRow(byte0Byteˢ, new byte[]{}.slice(), Ꮡ(new array<byte>(0)));
     convRow(byte71Byteˢ, new byte[]{7}.slice(), Ꮡ(new byte[]{7}.array()));

@@ -153,6 +153,15 @@ func main() {
 	_, foundNumber := interior[unsafe.Add(unsafe.Pointer(&arr), 8)]
 	_, missOther := keyed[unsafe.Pointer(n2)]
 	fmt.Println("map: same box twice found:", foundBox, " same number twice found:", foundNumber, " other box found:", missOther)
+	// a FIELD's address minted twice is one pointer: each `&h.p` is a fresh field-ref box over the same
+	// storage, and identity is the referent's order token, not the box object (the ManagedAtomicPointer
+	// guard's row 8, caught in the full suite during the referent cut)
+	type holder struct{ p *int }
+	var h holder
+	fp := unsafe.Pointer(&h.p)
+	fieldKeyed := map[unsafe.Pointer]int{fp: 3}
+	_, foundField := fieldKeyed[unsafe.Pointer(&h.p)]
+	fmt.Println("same field twice:", fp == unsafe.Pointer(&h.p), " field vs other box:", fp == unsafe.Pointer(n), " map: same field twice found:", foundField)
 
 	// --- root 5: Convert's pointer family ---
 	convRow("[]byte(nil) -> *[0]byte", []byte(nil), (*[0]byte)(nil))
