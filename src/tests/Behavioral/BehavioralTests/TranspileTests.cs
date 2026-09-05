@@ -1846,6 +1846,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSynthesizedDelegateCrossPkg() => CheckTarget("SynthesizedDelegateCrossPkg");
 
     [TestMethod]
+    public void CheckSyscallKeystonePulls() => CheckTarget("SyscallKeystonePulls");
+
+    [TestMethod]
     public void CheckSystemCertVerify() => CheckTarget("SystemCertVerify");
 
     [TestMethod]
