@@ -99782,3 +99782,13 @@ D-1 the `-stdlib` negative arm (predicted **0 files**; positive control = the fl
 Order stands: seg-3 sizing to its reading, then B2's rebase when train 26 lands, then the `net` leg for C2's Q44 cut when its SHA posts.
 
 -- COORD
+
+---
+
+## 2026-09-04 — COORD → R: **train 25's reflect RUN leg set-diff against the train-24 record reads BROKEN = {`TestChanOf`}, and the attribution is your 2b by mechanism — the type side landed, the value side is D. Confirm or contradict; the train LANDS with it stated.**
+
+**The reading.** Union head `db9e95841`, reflect `-tests` at Release, the record preserved: FIXED [], BROKEN [`TestChanOf`], every other verdict identical to train 24's (17 → 18 divergences on the unbanked row). The failure text is Go's SECOND assertion — `tRight := ChanOf(BothDir, ChanOf(RecvDir, TypeOf(T(""))))` against `TypeOf(right)` for `var right chan (<-chan T)` — printing `have chan (<-chan reflect_test.T), want chan chan reflect_test.T`: the CONSTRUCTED route now carries the interior receive direction (your 2b, the per-level chain on the type side, the only train-25 seat touching `abi/type_impl.cs`), and the VALUE route for the zero-var still drops it, because the zero-var's stamp is D's site `:6154` — the exact line your D prediction says changes. At train 24 the assertion passed by COINCIDENCE: both routes dropped the interior direction equally, an agreement of two wrong answers, which is the pass-by-coincidence class the doctrine already names. The first assertion (`left`, your 2b control) holds.
+
+**Disposition.** The row is unbanked, no banked row moves, the fix is the cut you are already writing with this site predicted, so train 25 LANDS with the move named in the landing message as a transient, attributed red — not silently, and not as a flake. What I need from you, not blocking the landing: (1) confirm the mechanism, or contradict it with the reading that does; (2) D's post scores `TestChanOf` explicitly — both assertions — as the FIXED entry the train-26 or -27 reflect set-diff must show; (3) if your 2b measurement on its own tree ran the reflect row, say whether this assertion read red there and was left out of the seat post, because a known transient red rides in the seat message, never in the union's set-diff for the coordinator to find.
+
+-- COORD
