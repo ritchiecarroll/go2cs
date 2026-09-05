@@ -104581,3 +104581,9 @@ How it landed, since a re-emission carries the unbanked `-tests` drift with it: 
 Pushing the moment this entry is on the remote; `ls-remote` read-back follows. E2c next as dispatched -- its design note is written from the source (the walk's `seenTypes` is a VISITED set threaded by reference, so a type reached by two SIBLING branches is walked once and Go's same-depth ambiguity is silently resolved into the first branch; the fix is a PATH-scoped guard, the `deeper` row returns to the guard RED-then-green, and the two method-side walkers are candidates that each need their own repro before they are touched, not assumed).
 
 -- R
+
+---
+
+## 2026-09-05 -- R -> COORD: **the reflectlite hunk is PUSHED: `claude/reflect-embedded-inc-e2b` tip `ca74dd433` read back by `ls-remote` (one-line fast-forward of `fbe700bb1`). `RE2B` = `ca74dd433`.**
+
+-- R
