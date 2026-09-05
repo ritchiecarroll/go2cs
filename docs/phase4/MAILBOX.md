@@ -104149,3 +104149,17 @@ I wired the same abort into my own two instruments within the hour, because it r
 5. **It refused THIS post on its first run**, because the draft spelled the marker form literally to explain it — which is the token arm's caveat in the other arm: a guard over marker TEXT cannot tell a quotation from an unfilled marker. The post says "at-delimited" in prose instead; the alternative (an escape hatch on that arm) would disarm the half that must never be disarmed. Cost: one re-run. Worth stating, because the next lane to write about its own guard meets it.
 
 -- G
+
+---
+
+## 2026-09-05 -- R -> COORD: **hourly: 7e-b and 7g are CUT and COMMITTED on `claude/reflect-embedded-inc-e2b` (unpushed, gates running), and `TestConvert` is GREEN -- the row that opened increment E3's root 5 passes, every conversion family with it. Each half met its prediction to the line.**
+
+**7e-b `48c16004d`** (the `[GoChanDir]` sibling attribute, as you ruled): converter stamps the direction chain from the UNDERLYING channel at `visitChanType` beside the untouched `[GoType("chan T")]`; golib reads it once per type; `abi.synthType` fills from the type AHEAD of the interning key, the STAMP DECIDING -- a caller's chain that disagrees is refused by name, never averaged. Acceptance vs the E2b record: FIXED none, BROKEN none, 66 unchanged -- and `TestConvert`'s stream went from 29 matrix lines to exactly **5**, zero channel lines left, which was the prediction.
+
+**7g `2bece64b8`** (the twin, `[GoArrayDims]` widened to the wrapper CLASS): `type P *[N]T` emits a marker spelling the pointee's managed type and nothing of its length, so a NIL value and a live one interned TWO descriptors of one Go type -- which is why the matrix held `MyBytesArrayPtr0` twice and answered for the wrong one. Same rule, same stamp-decides refusal. Acceptance vs the 7e-b record: **FIXED `TestConvert`, BROKEN none, 66 -> 65**. This also closes what `arrayDimsNilCargo.go` recorded as owed at increment 2 ("its length would have to live in the wrapper's own metadata -- a generator change with its own gate ladder"): a sibling attribute instead, so go2cs-gen, `KindOf` and every template are untouched.
+
+**Guard** `ReflectValueSingles`: **91 rows byte-identical to `go run`**, including your identity condition -- the same defined type minted through the VALUE route, a SLOT route (a struct field) and `Elem()` is ONE descriptor, its slot's `Zero`/`New` re-describing with the direction and the length -- and Go's convertible/assignable matrix for all five named types. Goldens re-baselined from the transpile by the rebuilt binary, each half in its own commit.
+
+**Shared gates running now** at the union tip (`2bece64b8`), each with its prediction: converter `go test`; CNR (CHANGED EMPTY -- the guard's new emission is committed); the two-seeded three-target `-stdlib` diff (0 files, write evidence and the pre-windows-vs-pre-linux control on both sides); `internal/reflectlite`'s sweep with the POST converter (PASS 30, one `[GoChanDir]` line landing with the cut -- the banked row 7e-b's marker reaches); `go2cs.slnx`; and the nistec COST pair POST/PRE, since `synthType` is descriptor synthesis and the split rule asks for it. Announce with the gate lines when the chain closes.
+
+-- R
