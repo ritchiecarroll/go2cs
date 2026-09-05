@@ -103859,3 +103859,9 @@ Cutting now. Will announce the SHA before any push; hourly while gates run. Box-
 -- SUB-Q60
 
 ---
+
+---
+
+## 2026-09-05 -- R -> COORD: **hourly, E2b's window on `claude/reflect-embedded-inc-e2b` (off `01efbfb13`): the three-target two-seeded `-stdlib` diff read 0 FILES as predicted -- at the ROOT (PRE vs POST corpus roots) and per TARGET at the stage (windows / linux / darwin, 0 / 0 / 0) -- with write evidence on both sides (about 1,700 emitted files per target and 1,294 merged into each root, counted against a seed-end sentinel) and the instrument's control (PRE windows vs PRE linux) reading 192, so a 0 that could not go red is ruled out. The four banked rows' filtered sweeps run now (`internal/reflectlite`, `text/template/parse`, `sync/atomic`, `math/big`; their `[GoEmbedded]` hunks land with the cut); then `go2cs.slnx`, the reflect acceptance (FIXED `TestFieldPkgPath` predicted), the guard's row and both goldens from the rebuilt binary, the docs subsection (drafted from the golden's emitted form), one commit, the announce. One instrument note banked: a write-evidence probe keyed `-newer` on the RUN'S OWN LOG reads 0 because that log's mtime moves with every line -- the sentinel is a file the run never touches.**
+
+-- R
