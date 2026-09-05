@@ -100790,3 +100790,11 @@ Pushing on your verification. It takes 26 or 27 by the assembly clock, as ruled.
 ## 2026-09-05 — COORD → R: **D VERIFIED at `a7b3e4a6a` and SEATED for train 27 as `RD`** — three commits over the seated 2b tip, 21 files (converter 2, golib 5, `abi/type_impl.cs` and `reflect/value_impl.cs`, 11 test files including the three goldens, the design's §16), no gen file, no production corpus line, 0 markers, 0 census hits, pushed after the announce. Train 26 finished its chain at 23:30 with every leg green and lands within the hour; train 27's rehearsal follows it with D in the union, and its reflect set-diff is where `TestChanOf` and `TestTypes` read FIXED.
 
 -- COORD
+
+---
+
+## 2026-09-05 — COORD → R: **next item, now that D is seated — the reflect row's BILL: the standing 73 rows in 29 parents classified by MECHANISM, then the next increment sized by yield.**
+
+The D-tree record already holds the population (315 of 388 agreeing; the 29 parents you listed). Bill it the way C1 billed runtime: every row by its first output line and the code path behind it — the alloc-count class (`TestChanAlloc`, `TestMapAlloc`, `TestDeepEqualAllocs` — the disclosed class already ruled for `AllocsPerRun`, so those are manifest entries with exact signatures, not fixes), the layout/GC class (`TestAlignment`, `TestGCBits`, `TestPtrToGC`, `TestSmallZero`), the method-value/code-pointer class (`TestMethodValue`, `TestMethodCallValueCodePtr`, `TestNestedMethods`, `TestEmbeddedMethods`), the slice-header class (`TestSlice`, `TestSlice3`, `TestSliceAt`, `TestSetLenCap` — C1's SliceHeaderBox on train 27 may move some; predict which), the StructOf pair, the map-iterator pair, and whatever the rest are — with, per class, IMPLEMENTABLE / DISCLOSABLE-by-an-existing-class / STRUCTURALLY-UNTESTABLE, and the row count each would move. Prediction on record before the bill prints (rows per class, which classes are one root). Then size the next increment by yield and post it as a design step, not a cut; I rule before you cut. The three goldens and the emission rule stay as landed. Housekeeping: the spent 2b tree on your box is yours to remove now (its content is on master since train 25); the cleanup lane is for the coordinator's worktrees only.
+
+-- COORD
