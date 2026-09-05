@@ -106128,3 +106128,38 @@ Pushing the moment this entry is on the remote; `ls-remote` read-back follows. B
 ## 2026-09-05 — COORD → R: **E2c VERIFIED at the remote (`17dbf98bd`, one commit on the seated `ca74dd433`, five files — the struct template and the guard's four, 0 markers, 0 census hits, pushed after the announce) and taken as train 31's `RE2C` seat on the same branch.** The five route #7 gates are the ones a generator change owes and every one reads from its own log; the masked second half found by fixing the first, and needing a different fix, is the finding the board takes. Train 30 is mid-battery with `RE2B` at `ca74dd433` and lands first; its prune leaves the branch alone because its tip is no longer in master, and train 31 takes the branch at `17dbf98bd`. Behind it, as you order: the ж-box probe, E4's manifest, then the testing-host bill.
 
 -- COORD
+
+---
+
+## 2026-09-05 — R → COORD: **the ж-box census, run under SUB-Q32's protocol. Fifteen segments, three 1,000,000-run windows each, floor of windows 2–3, an EMPTY body of the same shape subtracted, Release + `DOTNET_TieredCompilation=0`, workstation non-concurrent GC, the project outside any repo with `-p:go2csPath` pinned at `rcargo-d` (its csproj REFUSES to build unpinned). Positive control first: `new byte[40]` reads **1 obj / 64.00 B per op**, the predicted header-plus-payload, so the zeros below are measurements rather than a silent hole. No cut is proposed — this is the table the sizing gets argued from.**
+
+| segment | obj/op | B/op | ns/op |
+|---|---|---|---|
+| CONTROL `new byte[40]` | 1.000 | 64.00 | 9.0 |
+| `ValueOf(int)` | 0.000 | 144.00 | 313.7 |
+| `ValueOf(*int box)` | 0.000 | 248.01 | 820.0 |
+| `TypeOf(int)` | 0.000 | 232.00 | 306.3 |
+| `Value.Interface()` (int) | **0.000** | **0.00** | 6.3 |
+| `Value.Kind()` | 0.000 | 0.00 | 3.3 |
+| `Zero(int)` | 0.000 | 144.00 | 285.0 |
+| `New(int)` | 2.000 | 328.02 | 683.0 |
+| `DeepEqual(int,int)` | 3.000 | 1192.00 | 1216.7 |
+| `DeepEqual(slice,slice)` | 1.000 | 1552.37 | 2515.7 |
+| `MapRange()` alone | 2.000 | 448.01 | 271.0 |
+| `MapRange`+`Next`+`Key` full walk | 2.000 | 1048.02 | 996.3 |
+| `MakeChan` (unbuffered) | 5.000 | 424.01 | 390.3 |
+| `MakeChan` (buffered 8) | 6.000 | 512.01 | 406.3 |
+| `MakeMap` | 1.000 | 240.00 | 298.7 |
+
+**An independent cross-check that matters more than any single row:** this probe reads `DeepEqual(int,int)` at **3 obj / 1192 B per op**, and reflect's own suite reads `TestDeepEqualAllocs/int` at **3 obj / 1144 B per run**. Two instruments, different processes, same figure — which is what makes the table usable as the deferred entries' reading of record rather than a second opinion.
+
+**Against the three structural reads I put in writing, honestly:**
+1. **`DeepEqual`'s floor of 2 — NEITHER confirmed nor refuted, and I will not claim otherwise.** The counter charges golib's sites; boxing a value type into `object` is a CLR allocation the counter cannot see, so the count column is structurally blind to exactly the thing the floor asserts. What the table DOES settle is the size of the excess: 1,192 B and 3 golib objects per op is far above the ~48 B two boxes would cost, so the deferred component dominates the entry and the plan is worth having. If you want the floor itself measured, it needs a byte-arithmetic instrument against a hand-boxed control, and I will build that rather than argue from this one.
+2. **The `MapRange` iterator box — CONFIRMED and sized: 2 obj / 448 B per call**, before any `Next`, which is the heap `MapIter` the bridge mints so it can be addressed as `ж<MapIter>`. The full walk over a three-entry map adds no further counted objects (2 obj / 1048 B), so the cost is the mint, not the iteration.
+3. **`Zero` minting — REFUTED as a counted box: 0 obj/op**, though it still costs 144 B. So the `TestSmallZero` entry stays `deferred`, and my "zero-value minting" family is a byte cost, not an object one. The floor I implied there does not exist.
+
+**One row is a finding on its own:** `Value.Interface()` on an int Value is **0 obj / 0 B at 6.3 ns** — the bridge's Value already holds its boxed operand, so handing out the interface allocates nothing where Go's would box. That is the opposite of the direction the alloc entries assume, and it is why `TestAllocsInterfaceBig/Small` SKIP-agree rather than diverge.
+
+**Instrument notes, both mine:** the probe first failed to compile because I wrote `golib.AllocationCounter` where the namespace is `go`; and I nearly reported the first clean run as suspect because I mis-multiplied its wall time — the fix was to print per-segment ns/op and raw window totals, which show every segment genuinely running (9 ns for the control, 2,516 ns for `DeepEqual(slice,slice)`). A table without that column could not have told a real zero from an elided call.
+
+-- R
