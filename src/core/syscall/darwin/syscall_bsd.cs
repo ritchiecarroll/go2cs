@@ -163,36 +163,9 @@ public static (nint wpid, error err) Wait4(nint pid, ж<WaitStatus> Ꮡwstatus, 
 //sysnb	getpeername(fd int, rsa *RawSockaddrAny, addrlen *_Socklen) (err error)
 //sysnb	getsockname(fd int, rsa *RawSockaddrAny, addrlen *_Socklen) (err error)
 //sys	Shutdown(s int, how int) (err error)
-internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrInet4> Ꮡsa) {
-    ref var sa = ref Ꮡsa.DerefOrNull();
+// go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    if (sa.Port < 0 || sa.Port > 0xFFFF) {
-        return (default!, 0, EINVAL);
-    }
-    sa.raw.Len = SizeofSockaddrInet4;
-    sa.raw.Family = AF_INET;
-    var p = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrInet4.Ꮡraw).of(RawSockaddrInet4.ᏑPort)));
-    p.Value[0] = (byte)((sa.Port >> (int)(8)));
-    p.Value[1] = (byte)sa.Port;
-    sa.raw.Addr = sa.Addr.Clone();
-    return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrInet4.Ꮡraw)), ((_Socklen)(uint32)sa.raw.Len), default!);
-}
-
-internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrInet6> Ꮡsa) {
-    ref var sa = ref Ꮡsa.DerefOrNull();
-
-    if (sa.Port < 0 || sa.Port > 0xFFFF) {
-        return (default!, 0, EINVAL);
-    }
-    sa.raw.Len = SizeofSockaddrInet6;
-    sa.raw.Family = AF_INET6;
-    var p = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrInet6.Ꮡraw).of(RawSockaddrInet6.ᏑPort)));
-    p.Value[0] = (byte)((sa.Port >> (int)(8)));
-    p.Value[1] = (byte)sa.Port;
-    sa.raw.Scope_id = sa.ZoneId;
-    sa.raw.Addr = sa.Addr.Clone();
-    return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrInet6.Ꮡraw)), ((_Socklen)(uint32)sa.raw.Len), default!);
-}
+// go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
@@ -227,114 +200,11 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrData
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrDatalink.Ꮡraw)), SizeofSockaddrDatalink, default!);
 }
 
-internal static (Sockaddr, error) anyToSockaddr(ж<RawSockaddrAny> Ꮡrsa) {
-    ref var rsa = ref Ꮡrsa.DerefOrNull();
+// go2cs generated this placeholder — func anyToSockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    var exprᴛ1 = rsa.Addr.Family;
-    if (exprᴛ1 == AF_LINK) {
-        var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrDatalink>();
-        var sa = @new<SockaddrDatalink>();
-        sa.Value.Len = pp.Value.Len;
-        sa.Value.Family = pp.Value.Family;
-        sa.Value.Index = pp.Value.Index;
-        sa.Value.Type = pp.Value.Type;
-        sa.Value.Nlen = pp.Value.Nlen;
-        sa.Value.Alen = pp.Value.Alen;
-        sa.Value.Slen = pp.Value.Slen;
-        sa.Value.Data = pp.Value.Data.Clone();
-        return (new SockaddrDatalinkжSockaddr(sa), default!);
-    }
-    if (exprᴛ1 == AF_UNIX) {
-        var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrUnix>();
-        if ((~pp).Len < 2 || (~pp).Len > SizeofSockaddrUnix) {
-            return (default!, EINVAL);
-        }
-        var sa = @new<SockaddrUnix>();
-        nint n = (nint)(~pp).Len - 2; // subtract leading Family, Len
-        for (nint i = 0; i < n; i++) {
-            // Some BSDs include the trailing NUL in the length, whereas
-            // others do not. Work around this by subtracting the leading
-            // family and len. The path is then scanned to see if a NUL
-            // terminator still exists within the length.
-            if ((~pp).Path[i] == 0) {
-                // found early NUL; assume Len included the NUL
-                // or was overestimating.
-                n = i;
-                break;
-            }
-        }
-        sa.Value.Name = ((@string)@unsafe.Slice(pp.at(RawSockaddrUnix.ᏑPath, 0).Reinterpret<int8, byte>(), n));
-        return (new SockaddrUnixжSockaddr(sa), default!);
-    }
-    if (exprᴛ1 == AF_INET) {
-        var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet4>();
-        var sa = @new<SockaddrInet4>();
-        var p = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(pp.of(RawSockaddrInet4.ᏑPort)));
-        sa.Value.Port = ((nint)p.Value[0] << (int)(8)) + (nint)p.Value[1];
-        sa.Value.Addr = pp.Value.Addr.Clone();
-        return (new SockaddrInet4жSockaddr(sa), default!);
-    }
-    if (exprᴛ1 == AF_INET6) {
-        var pp = Ꮡrsa.Reinterpret<RawSockaddrAny, RawSockaddrInet6>();
-        var sa = @new<SockaddrInet6>();
-        var p = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(pp.of(RawSockaddrInet6.ᏑPort)));
-        sa.Value.Port = ((nint)p.Value[0] << (int)(8)) + (nint)p.Value[1];
-        sa.Value.ZoneId = pp.Value.Scope_id;
-        sa.Value.Addr = pp.Value.Addr.Clone();
-        return (new SockaddrInet6жSockaddr(sa), default!);
-    }
+// go2cs generated this placeholder — func Accept is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    return (default!, EAFNOSUPPORT);
-}
-
-public static (nint nfd, Sockaddr sa, error err) Accept(nint fd) {
-    nint nfd = default!;
-    Sockaddr sa = default!;
-    error err = default!;
-
-    ref var rsa = ref heap(new RawSockaddrAny(), out var Ꮡrsa);
-    ref var len = ref heap(new _Socklen(), out var Ꮡlen);
-    len = SizeofSockaddrAny;
-    (nfd, err) = accept(fd, Ꮡrsa, Ꮡlen);
-    if (err != default!) {
-        return (nfd, sa, err);
-    }
-    if ((Δruntime.GOOS == "darwin"u8 || Δruntime.GOOS == "ios"u8) && len == 0) {
-        // Accepted socket has no address.
-        // This is likely due to a bug in xnu kernels,
-        // where instead of ECONNABORTED error socket
-        // is accepted, but has no address.
-        Close(nfd);
-        return (0, default!, ECONNABORTED);
-    }
-    (sa, err) = anyToSockaddr(Ꮡrsa);
-    if (err != default!) {
-        Close(nfd);
-        nfd = 0;
-    }
-    return (nfd, sa, err);
-}
-
-public static (Sockaddr sa, error err) Getsockname(nint fd) {
-    Sockaddr sa = default!;
-    error err = default!;
-
-    ref var rsa = ref heap(new RawSockaddrAny(), out var Ꮡrsa);
-    ref var len = ref heap(new _Socklen(), out var Ꮡlen);
-    len = SizeofSockaddrAny;
-    {
-        err = getsockname(fd, Ꮡrsa, Ꮡlen); if (err != default!) {
-            return (sa, err);
-        }
-    }
-    // TODO(jsing): DragonFly has a "bug" (see issue 3349), which should be
-    // reported upstream.
-    if (Δruntime.GOOS == "dragonfly"u8 && rsa.Addr.Family == AF_UNSPEC && rsa.Addr.Len == 0) {
-        rsa.Addr.Family = AF_UNIX;
-        rsa.Addr.Len = SizeofSockaddrUnix;
-    }
-    return anyToSockaddr(Ꮡrsa);
-}
+// go2cs generated this placeholder — func Getsockname is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //sysnb socketpair(domain int, typ int, proto int, fd *[2]int32) (err error)
 public static (byte value, error err) GetsockoptByte(nint fd, nint level, nint opt) {
@@ -392,41 +262,7 @@ public static (ж<ICMPv6Filter>, error) GetsockoptICMPv6Filter(nint fd, nint lev
 //sys   recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Socklen) (n int, err error)
 //sys   sendto(s int, buf []byte, flags int, to unsafe.Pointer, addrlen _Socklen) (err error)
 //sys	recvmsg(s int, msg *Msghdr, flags int) (n int, err error)
-internal static (nint n, nint oobn, nint recvflags, error err) recvmsgRaw(nint fd, slice<byte> p, slice<byte> oob, nint flags, ж<RawSockaddrAny> Ꮡrsa) {
-    nint n = default!;
-    nint oobn = default!;
-    nint recvflags = default!;
-    error err = default!;
-
-    ref var msg = ref heap(new Msghdr(), out var Ꮡmsg);
-    msg.Name = Ꮡrsa.Reinterpret<RawSockaddrAny, byte>();
-    msg.Namelen = (uint32)SizeofSockaddrAny;
-    ref var iov = ref heap(new Iovec(), out var Ꮡiov);
-    if (len(p) > 0) {
-        iov.Base = Ꮡ(p, 0);
-        iov.SetLen(len(p));
-    }
-    ref var dummy = ref heap(new byte(), out var Ꮡdummy);
-    if (len(oob) > 0) {
-        // receive at least one normal byte
-        if (len(p) == 0) {
-            iov.Base = Ꮡdummy;
-            iov.SetLen(1);
-        }
-        msg.Control = Ꮡ(oob, 0);
-        msg.SetControllen(len(oob));
-    }
-    msg.Iov = Ꮡiov;
-    msg.Iovlen = 1;
-    {
-        (n, err) = recvmsg(fd, Ꮡmsg, flags); if (err != default!) {
-            return (n, oobn, recvflags, err);
-        }
-    }
-    oobn = (nint)msg.Controllen;
-    recvflags = (nint)msg.Flags;
-    return (n, oobn, recvflags, err);
-}
+// go2cs generated this placeholder — func recvmsgRaw is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //sys	sendmsg(s int, msg *Msghdr, flags int) (n int, err error)
 internal static (nint n, error err) sendmsgN(nint fd, slice<byte> p, slice<byte> oob, @unsafe.Pointer ptr, _Socklen salen, nint flags) {

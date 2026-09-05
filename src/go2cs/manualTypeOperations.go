@@ -94,6 +94,14 @@ var goosWindowsLinux = goosScope{"windows", "linux"}
 // memory to a Go struct — the raw-metal-on-non-native-types fork — where the third does not.
 var goosWindowsDarwin = goosScope{"windows", "darwin"}
 
+// goosLinuxDarwin scopes an entry to the two unix flavors that each hand-own the SAME declaration in
+// their own per-GOOS file -- the free-function half of the sockaddr family (anyToSockaddr, Recvfrom,
+// Sendto, recvmsgRaw, SendmsgN): Linux in syscall/linux/sockaddr_linux_impl.cs, darwin in
+// syscall/darwin/sockaddr_darwin_impl.cs (increment 8, 2026-09-05). Windows declares none of them
+// under these names (its decode is RawSockaddrAny.Sockaddr, its senders WSASendto), so the scope is
+// the two that do.
+var goosLinuxDarwin = goosScope{"linux", "darwin"}
+
 // includes reports whether the scope covers the named target operating system.
 func (scope goosScope) includes(goos string) bool {
 	if len(scope) == 0 {
@@ -1418,8 +1426,13 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// sockaddr_linux_impl.cs carries the Linux bodies; the scope says BOTH flavors, each file its
 		// own authority. RawSockaddrAny.Sockaddr is Windows-only in Go; Linux's decode is the free
 		// function anyToSockaddr, registered separately below.
-		"SockaddrInet4.sockaddr":  goosWindowsLinux,
-		"SockaddrInet6.sockaddr":  goosWindowsLinux,
+		// DARWIN joins 2026-09-05 (increment 8, syscall/darwin/sockaddr_darwin_impl.cs): the five
+		// behavioral net rows died on both mac legs in SockaddrInet4.sockaddr() <- Bind before any
+		// socket call -- the same port alias and the same struct-passing seam, over the BSD layout
+		// (a one-byte sa_len ahead of a one-byte family). All three flavors now hand-own these, each
+		// file the authority on its own body, so the scope is goosAny.
+		"SockaddrInet4.sockaddr":  goosAny,
+		"SockaddrInet6.sockaddr":  goosAny,
 		"RawSockaddrAny.Sockaddr": goosWindows,
 		// Then the seam itself. RawSockaddrInet4's `Addr [4]byte` / `Zero [8]uint8` are golib
 		// `array<byte>` MANAGED REFERENCES, so `unsafe.Pointer(&sa.raw)` names a ~24-byte object
@@ -1442,8 +1455,15 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// ONE native decode (readNativeSockaddr), which anyToSockaddr — Linux's decode, reached from
 		// Accept4/Getsockname/Getpeername and the UDP receive path — also becomes. ConnectEx is
 		// Windows-only in Go. Accept4 and anyToSockaddr are declared only in Go's Linux sources.
-		"Bind":      goosWindowsLinux,
-		"Connect":   goosWindowsLinux,
+		// Darwin joins Bind/Connect/Getsockname/Getpeername 2026-09-05 (increment 8): its generated
+		// `bind`/`connect` take an address (reused with a stack mirror exactly as linux's), and its
+		// `getsockname`/`getpeername`/`accept`/`recvfrom` take a typed `ж<RawSockaddrAny>` that the
+		// kernel would fill by address -- so those call the libc trampolines directly with a stack
+		// buffer and ONE native decode. Accept is Go's darwin body (syscall_bsd.go) and is darwin's
+		// alone: linux's Accept is pure Go over Accept4 and stays auto.
+		"Bind":      goosAny,
+		"Connect":   goosAny,
+		"Accept":    goosDarwin,
 		"ConnectEx": goosWindows,
 		// The same seam from the WRITE side, and the multicast half of net's residual.
 		// `ip_mreq` is two INLINE in_addr; converted, IPMreq holds both as golib `array<byte>`
@@ -1480,15 +1500,15 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"GetsockoptIPMreqn":      goosLinux,
 		"GetsockoptIPv6Mreq":     goosLinux,
 		"GetsockoptICMPv6Filter": goosLinux,
-		"Getsockname":            goosWindowsLinux,
-		"Getpeername":            goosWindowsLinux,
+		"Getsockname":            goosAny,
+		"Getpeername":            goosAny,
 		"Accept4":                goosLinux,
-		"anyToSockaddr":          goosLinux,
+		"anyToSockaddr":          goosLinuxDarwin,
 		// Recvfrom hands the kernel a MANAGED RawSockaddrAny by address in its generated form, which
 		// the kernel overwrites -- the fifth instance of the kernel-writes-over-managed-array class,
 		// and the first that kills the process (net.Interfaces() -> NetlinkRIB -> AccessViolation).
 		// syscall/linux/sockaddr_linux_impl.cs answers it with the mirror's native image + typed decode.
-		"Recvfrom": goosLinux,
+		"Recvfrom": goosLinuxDarwin,
 		// Sendto is Recvfrom's own direction reversed, and the same seam: `to.sockaddr()` hands back
 		// the address of a MANAGED raw struct (`box.Value.raw`, whose `Addr`/`Zero` fields are
 		// `array<byte>` object references, not inline bytes) and the generated body passes that
@@ -1504,7 +1524,7 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		//
 		// goosLinux like the rest of this file's set: writeNativeSockaddr is the linux flavor's
 		// helper, and darwin/windows declare their own Sendto over their own layouts.
-		"Sendto": goosLinux,
+		"Sendto": goosLinuxDarwin,
 		// The ANCILLARY pair, and the one member of this class whose defect announces itself with a
 		// specific errno rather than as a fault or a wrong answer. Both hand the kernel a MANAGED
 		// Msghdr whose Name/Iov/Control are `ж<T>` OBJECT REFERENCES, and recvmsgRaw is the
@@ -1522,8 +1542,8 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// transcribe -- only SendmsgN still holds the typed Sockaddr that writeNativeSockaddr can
 		// re-encode. sendmsgN / sendmsgNInet4 / sendmsgNInet6 stay auto for the sendtoInet4/6
 		// reason: internal/poll reaches the //go:linkname copies, not these.
-		"recvmsgRaw": goosLinux,
-		"SendmsgN":   goosLinux,
+		"recvmsgRaw": goosLinuxDarwin,
+		"SendmsgN":   goosLinuxDarwin,
 		// The class's remaining LINUX members, closed PROACTIVELY on 2026-08-28 rather than when
 		// reached — the one place this table's per-member-when-reached rule was deliberately not
 		// followed, and the reason is measured. verifyheap on a crashed os/exec host found the
