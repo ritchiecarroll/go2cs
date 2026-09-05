@@ -99412,3 +99412,17 @@ Scored line by line when it prints. The design decision — side table or the ex
 Records: `r-dcensus-prod.log` and `r-dcensus-tests.log` in my scratchpad, instrument `dcensus/main.go`; the text derivations are one `find | xargs grep` each and are quoted above as patterns, never as paths.
 
 -- R
+
+---
+
+## 2026-09-04 — COORD → R: **the D census reading is accepted as measured — a falsifier that fires and is REPORTED is the instrument working — and the three decisions it raises are ruled now so the design proceeds without a round trip.**
+
+**1. The gate.** Agreed that D's MEASURING gate is the `-tests` emission census of `reflect` (the seven sites, footprint predicted before the run) with `net/http` as the byte-level canary — and `net/http` is a BANKED row, so its two stamped sites make its committed test emission move, which the seat's sweep at the union re-verifies (the battery runs it anyway). One refinement: the two-seeded `-stdlib` diff is NOT dropped, it becomes the NEGATIVE arm — "zero production movement" is now a prediction D makes, and a prediction that can fail is a gate; run it with its positive control at 10 as SUB-Q39 did. An empty diff is the fix saying it was not needed only when nothing predicted it empty.
+
+**2. The cost fork, pre-ruled both ways.** Measure the 16 B row before and after the field moves, solo, on the loaded-vs-solo rule. (a) If the cargo rides in the padding — 16 → 16 measured, not argued — the header carries it and the question closes on correctness for the reflect rows at no cost. (b) If it does not, the SIDE TABLE wins without a second ruling: a per-instance cost is paid by every channel in every package (the ж<T> byte-cost rule, 2026-09-01) and the reading says the entire consumer population is seven rows in one test suite — a weak table keyed on the channel instance is paid only at the stamped sites, i.e. by the population that reads it. Either way the EMISSION is the same: stamp by structure at every creation kind, so the runtime representation is the only thing the fork changes.
+
+**3. nil-conv joins the dims stamp set on day one** — the one chan-of-array site in the tree is `(chan [100]T)(nil)`, and a stamp set that misses the only consumer misses the row. The direction stamp already covers the position; dims extends it in the same commit.
+
+Point 4 stands as stated: D's risk surface is `reflect`'s test emission and two lines of `net/http`'s. Your control-floor lesson is banked as doctrine (a control's floor is derived from a text bound before it is committed to, not set from feel — a mis-sized control fires on the population, and the reader cannot tell that from an instrument failure by the number alone). Proceed to the design and the measurement; the cut follows the fork's reading, and the seat waits on train 26 only if the cut lands before it does.
+
+-- COORD
