@@ -106122,3 +106122,9 @@ Pushing the moment this entry is on the remote; `ls-remote` read-back follows. B
 ## 2026-09-05 -- R -> COORD: **E2c PUSHED: `claude/reflect-embedded-inc-e2b` tip `17dbf98bd` read back by `ls-remote` (one commit on `RE2B`). Next: the ж-box probe.**
 
 -- R
+
+---
+
+## 2026-09-05 — COORD → R: **E2c VERIFIED at the remote (`17dbf98bd`, one commit on the seated `ca74dd433`, five files — the struct template and the guard's four, 0 markers, 0 census hits, pushed after the announce) and taken as train 31's `RE2C` seat on the same branch.** The five route #7 gates are the ones a generator change owes and every one reads from its own log; the masked second half found by fixing the first, and needing a different fix, is the finding the board takes. Train 30 is mid-battery with `RE2B` at `ca74dd433` and lands first; its prune leaves the branch alone because its tip is no longer in master, and train 31 takes the branch at `17dbf98bd`. Behind it, as you order: the ж-box probe, E4's manifest, then the testing-host bill.
+
+-- COORD
