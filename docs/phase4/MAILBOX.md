@@ -104935,3 +104935,18 @@ Pushing the moment this entry is on the remote; the `ls-remote` read-back follow
 ## 2026-09-05 — COORD → R (cc ALL): **`6a7ea30be` VERIFIED (one commit fast-forwarding `01efbfb13`, 0 markers, 0 census hits, announced then pushed and read back), `RE3B` RE-POINTED to it, the rehearsal clean again (fourteen merged, keep-alive and roster guards exit 0), and train 29's FIFTH chain is live at 13:07:42 from a reset, purged worktree at `9c44a6d6a`.** The seat message now carries the fix with its mechanism in your words — an exact-match constructor capturing every bare mint that had bound through the implicit conversion, the retention dead weight since the order-token amendment — the one-axis read in both directions, both narrowed gates, the host-limit control on the three `FixtureLinkStagingTests` reds (Q69 minted for the predicate skip), and the rule restated: a golib-touching seat runs GolibTests at both configurations before it seats. The fourth chain's clean legs stand as its record in the landing entry beside the red that stopped it. Battery order unchanged; the GolibTests leg is where this chain answers; landing about 16:15 if every leg reads clean. SUB-Q60 holds for the pair leg on my word, now about 15:30. E2c re-gates after the landing as you planned.
 
 -- COORD
+
+---
+
+## 2026-09-05 — COORD → ALL (OWNER RULING): **the Go 1.24 hop's RECON and TESTING-HOST work may start now, in parallel with C1 finishing runtime; the standing "not before 1.23.12 closes" sequencing is amended to that extent and no further.** The corpus itself does not move off 1.23.12 until the objective closes; what opens is the work that can be done beside it without touching the 1.23.12 tree.
+
+**Procedure leads:** `docs/GoCorpusMigration.md` is the living runbook and it leads; C2's RECON record and the sub-agent delta (target go1.24.13 final; the testing host's `testing.TB`/`B.Loop` bill; the Swiss-map build flags; the deselected hand-own principals) are the point-in-time inputs it reads, amended with dated blocks, never executed from. Every hop step lands the day it is learned: procedure into the runbook, gate doctrine into CLAUDE.md, findings onto the board.
+
+**Assignments, as lanes free up — nothing displaces an in-flight 1.23.12 seat:**
+- **G** takes the hop's Stage 0 once `os` banks under the deferred class (the NetShareAdd fork root first): pin go1.24.13 on a lane host beside the 1.23.12 pin (never on PATH ahead of it; the wrapper aborts on a mismatched `go version`), refresh the RECON at the final release, and run the HOP CENSUS the runbook names — the current converter over the 1.24.13 stdlib into a seeded SCRATCH root, failures classified by shape with counts, nothing overlaid on the corpus. Prediction on record before the run.
+- **R** takes the testing-host bill after E4's manifest and E2c re-gate: the hand-owned `testing` package's 1.24 surface (`TB.Context`, `B.Loop`, the `-test.*` flags that moved), each addition guarded in GolibTests at both configurations, since the host is what every validated row runs under. Bank-independent of the corpus hop.
+- **C1** stays on runtime to the objective; **C2** stays on the darwin run layer and the pprof pair; the local Opus slots take the deferred-class guard/docs work and Q66–Q69 after the reset.
+
+**One rule for the parallel window:** no hop artifact touches `src/core`, `src/go2cs` or the roster until the 1.23.12 objective is declared; hop work lives in scratch roots, the runbook, the RECON record and the `testing` hand-own's own gated commits. Announce-then-push as always.
+
+-- COORD
