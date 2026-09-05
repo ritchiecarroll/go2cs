@@ -3759,7 +3759,10 @@ private static bool tryConvertOnlyShape(ΔValue v, ΔType t, System.Type dstType
     // ConvertibleTo already says yes through convertOp's tag-blind identity, and the value conversion is
     // a COPY, so a layout-compatible reinterpret of a copy is exactly Go's answer. Two lifted anonymous
     // structs differing only in tags are two C# types of one shape (TestConvert's `some:\"foo\"` rows).
-    if (srcKind == Struct && dstKind == Struct && v.live is not null && haveIdenticalType(t.common(), v.typ(), false)) {
+    // Go's convertOp rule for struct -> struct is haveIdenticalUNDERLYINGType with cmpTags=false: a
+    // DEFINED struct converts to the anonymous struct of its own shape (`MyStruct` to
+    // `struct { x int "some:\"foo\"" }`), which haveIdenticalType -- names first -- refuses (7d).
+    if (srcKind == Struct && dstKind == Struct && v.live is not null && haveIdenticalUnderlyingType(t.common(), v.typ(), false)) {
         if (GoReflect.TryReinterpretValue(v.live, dstType, out object? retyped) && retyped is not null) {
             result = makeTypedValue(retyped, dstType, arrayDimsOfReflectType(t), v.flag.ro());
             return true;
