@@ -174,4 +174,121 @@ public class LibcCallDispatchTests
 
         StringAssert.Contains(ex.Message, "never resolved");
     }
+
+    // ---- the BLOCK LIFT's dispatcher arms (DESIGN-cgo-unsafe-args-block-lift.md section 7), on glibc ----
+    //
+    // The converter now synthesizes the whole parameter block for darwin's `&first` libcCall sites
+    // (cgoUnsafeArgsLift.go), so the dispatcher's register placement is what those sites stand on.
+    // Each arm discriminates BY CONSTRUCTION: kill(getpid(), 0) is 0 only if both registers were
+    // placed; clock_gettime fills a timespec only through the address the block carried; the two
+    // per-symbol FORMS (walltime's block-by-address, pthread_self's result-into-block) are measured
+    // against glibc's own clock_gettime and pthread_self. Neutered once each before being believed
+    // (the fields placed in reverse; a uintptr field placed as 0; the leading register dropped; the
+    // store skipped) -- every neuter RED by name.
+
+    private const int CLOCK_REALTIME = 0;
+
+    private struct KillArgs
+    {
+        internal int pid;
+        internal int sig;
+    }
+
+    [TestMethod]
+    public void ATwoFieldBlockPlacesEveryRegister_KillOfSelfWithSignalZero()
+    {
+        ref KillArgs args = ref heap(new KillArgs { pid = Environment.ProcessId, sig = 0 }, out ж<KillArgs> Ꮡargs);
+
+        nuint r = GoLibcCall.DispatchArgsStruct(Export("kill"), Ꮡargs, ErrnoReader, "kill");
+
+        Assert.AreEqual(0, unchecked((int)(uint)r), "kill(getpid(), 0) succeeds only when the SECOND register carried the 0 (a stale one is EINVAL/ESRCH)");
+        GC.KeepAlive(args);
+    }
+
+    private struct Timespec
+    {
+        internal long tv_sec;
+        internal long tv_nsec;
+    }
+
+    private struct ClockGettimeArgs
+    {
+        internal int clk;
+        internal uintptr ts;
+    }
+
+    [TestMethod]
+    public void APointerFieldRidesAsThePinnedAddress_ClockGettimeFillsTheBoxedTimespec()
+    {
+        ref Timespec ts = ref heap(new Timespec(), out ж<Timespec> Ꮡts);
+        ref ClockGettimeArgs args = ref heap(new ClockGettimeArgs { clk = CLOCK_REALTIME, ts = (uintptr)Ꮡts }, out ж<ClockGettimeArgs> Ꮡargs);
+
+        nuint r = GoLibcCall.DispatchArgsStruct(Export("clock_gettime"), Ꮡargs, ErrnoReader, "clock_gettime");
+
+        Assert.AreEqual(0, unchecked((int)(uint)r), "clock_gettime(CLOCK_REALTIME, &ts) succeeds");
+        Assert.IsTrue(ts.tv_sec > 1_600_000_000L, $"tv_sec read back THROUGH THE BOX must be the wall clock, got {ts.tv_sec} -- the address libc wrote was the pinned box");
+        GC.KeepAlive(ts);
+        GC.KeepAlive(args);
+    }
+
+    [TestMethod]
+    public void TheBlockAddressForm_ClockGettimeWritesTheBlockItself()
+    {
+        ref Timespec ts = ref heap(new Timespec(), out ж<Timespec> Ꮡts);
+
+        nuint r = GoLibcCall.CallWithBlockAddress(Export("clock_gettime"), (nuint)(uintptr)Ꮡts, [(nuint)CLOCK_REALTIME], ErrnoReader, "clock_gettime");
+
+        Assert.AreEqual(0, unchecked((int)(uint)r), "the block passed by address behind the leading constant");
+        Assert.IsTrue(ts.tv_sec > 1_600_000_000L, $"and filled in place, got {ts.tv_sec}");
+        GC.KeepAlive(ts);
+    }
+
+    [TestMethod]
+    public void TheBlockAddressFormRefusesReferenceBearingStorageByName()
+    {
+        // Q44: a reference-bearing block hands out its ORDER TOKEN, never an address -- libc must not be
+        // handed it (the vDSO would write through it). The refusal is the whole test: its negative is a
+        // native fault of the host, which is why this arm carries no neuter.
+        //
+        // The PREMISE is Q44's token arm (claude/c2-q44-cut, train 30). On a tree without it a
+        // reference-bearing box's number is not its order token, the refusal-by-name cannot fire, and
+        // handing that number to clock_gettime would write 16 bytes through whatever it denotes -- so
+        // the arm is INCONCLUSIVE there by name, never run: measured 2026-09-05 on the lift's own base
+        // (5546202355, the Q52 bridge; the number read 140455141593320 against a token of
+        // 104361395985842176) and green on the Q44 tree, where the premise holds.
+        ref ReferenceBearingArgs block = ref heap<ReferenceBearingArgs>(out ж<ReferenceBearingArgs> Ꮡblock);
+        nuint token = (nuint)(uintptr)Ꮡblock;
+        if (token != Ꮡblock.PointerOrderToken)
+        {
+            GC.KeepAlive(block);
+            Assert.Inconclusive("the token arm (Q44) is not on this tree: a reference-bearing box's number is not its order token here, so the refusal-by-name cannot be exercised");
+        }
+
+        var ex = Assert.ThrowsException<InvalidOperationException>(() =>
+            GoLibcCall.CallWithBlockAddress(Export("clock_gettime"), token, [(nuint)CLOCK_REALTIME], ErrnoReader, "clock_gettime"));
+
+        StringAssert.Contains(ex.Message, "clock_gettime", "the refusal names the symbol");
+        StringAssert.Contains(ex.Message, "order token", "and the reason");
+        GC.KeepAlive(block);
+    }
+
+    private struct PthreadWord
+    {
+        internal nuint id;
+    }
+
+    [TestMethod]
+    public void TheResultIntoBlockForm_PthreadSelfLandsInTheFirstWord()
+    {
+        nint pthreadSelf = Export("pthread_self");
+        nuint direct = GoLibcCall.Call(pthreadSelf, ReadOnlySpan<nuint>.Empty, GoLibcErrnoRule.None, 0, out _);
+
+        ref PthreadWord t = ref heap(new PthreadWord(), out ж<PthreadWord> Ꮡt);
+        nuint r = GoLibcCall.CallStoringResultIntoBlock(pthreadSelf, Ꮡt, ErrnoReader, "pthread_self");
+
+        Assert.AreNotEqual((nuint)0, direct, "a thread id is never 0");
+        Assert.AreEqual(direct, r, "the form returns the register");
+        Assert.AreEqual(direct, t.id, "and stores it into the block's first word, read back through the box");
+        GC.KeepAlive(t);
+    }
 }

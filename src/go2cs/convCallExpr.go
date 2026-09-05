@@ -119,6 +119,15 @@ func (v *Visitor) callFunIsUniversePrint(callExpr *ast.CallExpr) bool {
 // Phases 1a-1c and 4 RETURN directly; the rest fall through and contribute to the final rendering.
 // Splitting this along those seams is planned work — the banners exist so that starts from a map.
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) string {
+	// The //go:cgo_unsafe_args block lift (cgoUnsafeArgsLift.go): the ONE `unsafe.Pointer(&first)` the
+	// current declaration's lift consumes renders as the synthesized block's pinned box. Intercepted
+	// ahead of every arm because the conversion reaches two of them -- the type-conversion arm for a
+	// boxed operand and the `new @unsafe.Pointer(...)` constructor path for a plain one -- and either
+	// would otherwise render the consumed address-of on its own (a copy box, `Ꮡ(kq)`).
+	if lift := v.currentCgoLift; lift != nil && callExpr == lift.conversion {
+		return cgoUnsafeArgsBlockPointer(lift)
+	}
+
 	// A call into the syscall funnel (Syscall/Syscall6/…/SyscallN) — see
 	// syscallKeepAliveAnalysis.go for why this reproduces Go's own uintptrkeepalive contract
 	// rather than every other call's ordinary argument rendering. Intercepted before anything
