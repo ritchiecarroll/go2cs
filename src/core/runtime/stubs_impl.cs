@@ -186,4 +186,239 @@ partial class runtime_package
     //   getcallerpc / getcallersp / getclosureptr / getfp — read the caller's machine registers;
     //                   the managed equivalent (a StackTrace walk) answers a different question
     //                   and would make Go's PC arithmetic silently wrong.
+
+    // ---- Q61: the park hook — gopark's accounting half over golib's Park scope (2026-09-05) ----
+    //
+    // WHY. Every converted wait (sync's semaphore seam, the hand-owned Mutex/RWMutex/WaitGroup, chan
+    // send/receive/select, time.Sleep) passes through golib's Goroutine.Park(reason), which published
+    // the reason for traceback rendering and touched nothing else — so the managed g increment 4 mints
+    // stayed _Grunning for its whole life, and TestMutexWaitTimeMetric spun forever in Go's own
+    //   for { if runtime.GIsWaitingOnMutex(gp) { break }; runtime.Gosched() }
+    // (readgstatus(gp) == _Gwaiting && gp.waitreason.isMutexWait(), export_test.go), while the metric
+    // it then asserts, sched.totalMutexWaitTime, is accumulated by casgstatus and read 0. Go's sync
+    // reaches semacquire1 -> gopark(..., waitReasonSyncMutexLock) -> casgstatus(gp, _Grunning, _Gwaiting);
+    // this hook is that transition and its inverse, installed into golib's slot at module init.
+    //
+    // WHAT MOVES. Entering: gp.waitreason = the mapped reason; casgstatus(gp, _Grunning, _Gwaiting) —
+    // whose tracking arm stamps trackingStamp when casgstatusAlwaysTrack (or every gTrackingPeriod-th
+    // transition) and the reason is a mutex wait. Leaving: casgstatus(gp, _Gwaiting, _Grunning) — Go's
+    // ready (_Gwaiting -> _Grunnable, where the mutex wait time is added) and execute (_Grunnable ->
+    // _Grunning) collapsed into one step, since the managed model has no runnable interval; the
+    // accounting arm keys on oldval == _Gwaiting, so the sum is the same. Then waitreason = zero.
+    // The g is minted on demand (getg) — mint-before-park is the order the CAS needs, since a fresh g
+    // is _Grunning and casgstatus spins until it reads its oldval. That spin is the one hazard: a g
+    // whose status is not what the boundary expects would spin forever, so the hook READS the status
+    // first and PANICS by name on a mismatch (a bookkeeping bug is loud, never a hang). Only the
+    // outermost golib scope reaches here (nesting is filtered in golib), and only goroutine threads
+    // (a thread with no golib identity gets an inert scope, as before; getg still answers for it).
+    //
+    // WHAT DOES NOT. No scheduler, no M/P hand-off, no _Grunnable, no sudog, no semaphore table — the
+    // box's status word and its reason are the whole model. GC-side readers of _Gwaiting (the
+    // managed runtime has no GC of its own) see nothing new.
+
+    [ModuleInitializer]
+    internal static void ᴛInstallParkTransition()
+    {
+        Goroutine.ParkTransition = parkTransition;
+    }
+
+    private static void parkTransition(WaitReason reason, bool entering)
+    {
+        ж<g> gp = getg();
+        uint32 status = readgstatus(gp);
+
+        if (entering)
+        {
+            if (status != (uint32)_Grunning)
+                throw new PanicException($"runtime: park transition entering {WaitReasons.Text(reason)} on goroutine {gp.Value.goid} whose status is {status}, not _Grunning ({(uint32)_Grunning})");
+
+            gp.Value.waitreason = mapWaitReason(reason);
+            casgstatus(gp, (uint32)_Grunning, (uint32)_Gwaiting);
+        }
+        else
+        {
+            if (status != (uint32)_Gwaiting)
+                throw new PanicException($"runtime: park transition leaving {WaitReasons.Text(reason)} on goroutine {gp.Value.goid} whose status is {status}, not _Gwaiting ({(uint32)_Gwaiting})");
+
+            // Go's ready: _Gwaiting -> _Grunnable, where casgstatus adds the mutex wait time
+            // ((now - trackingStamp) * gTrackingPeriod) to sched.totalMutexWaitTime and stamps the
+            // runnable interval.
+            casgstatus(gp, (uint32)_Gwaiting, (uint32)_Grunnable);
+
+            // Go's execute: _Grunnable -> _Grunning, done HERE rather than through casgstatus, because
+            // that arm also records sched.timeToRun (the /sched/latencies histogram), whose inline
+            // counts array is UNALLOCATED in the managed zero-value `sched` (a package-level struct
+            // var's [N]T field the converter never constructs -- index out of range [0] with length
+            // 0, measured 2026-09-05). The histogram was unreached before this hook and stays zero;
+            // the two fields execute clears are cleared the same way.
+            if (!gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Grunnable, (uint32)_Grunning))
+                throw new PanicException($"runtime: park transition leaving {WaitReasons.Text(reason)} on goroutine {gp.Value.goid}: the g moved off _Grunnable under the hook");
+
+            gp.Value.tracking = false;
+            gp.Value.runnableTime = 0;
+            gp.Value.waitreason = waitReasonZero;
+        }
+    }
+
+    // golib's WaitReason is NOT numbered as Go's waitReason (golib carries only the reasons its model
+    // parks with; Go's table has the GC and trace reasons between them), so the map is by NAME, and the
+    // guard derives its correctness from the two STRING tables agreeing (WaitReasons.Text against
+    // waitReasonStrings), never from these numbers.
+    private static waitReason mapWaitReason(WaitReason reason) => reason switch
+    {
+        WaitReason.IOWait => waitReasonIOWait,
+        WaitReason.ChanReceiveNilChan => waitReasonChanReceiveNilChan,
+        WaitReason.ChanSendNilChan => waitReasonChanSendNilChan,
+        WaitReason.Select => waitReasonSelect,
+        WaitReason.SelectNoCases => waitReasonSelectNoCases,
+        WaitReason.ChanReceive => waitReasonChanReceive,
+        WaitReason.ChanSend => waitReasonChanSend,
+        WaitReason.Semacquire => waitReasonSemacquire,
+        WaitReason.Sleep => waitReasonSleep,
+        WaitReason.SyncCondWait => waitReasonSyncCondWait,
+        WaitReason.SyncMutexLock => waitReasonSyncMutexLock,
+        WaitReason.SyncRWMutexRLock => waitReasonSyncRWMutexRLock,
+        WaitReason.SyncRWMutexLock => waitReasonSyncRWMutexLock,
+        _ => waitReasonZero,
+    };
+
+    // ---- the guard's view (RuntimeParkTransitionTests) ----
+
+    /// <summary>Every golib park reason beside the Go string the runtime's own table gives the mapped value.</summary>
+    public static (string golibText, string runtimeText, bool isMutexWait)[] GoWaitReasonMapProbe()
+    {
+        WaitReason[] reasons = WaitReasons.Parked();
+        var rows = new (string, string, bool)[reasons.Length];
+
+        for (int i = 0; i < reasons.Length; i++)
+        {
+            waitReason mapped = mapWaitReason(reasons[i]);
+            rows[i] = (WaitReasons.Text(reasons[i]), mapped.String().ToString(), mapped.isMutexWait());
+        }
+
+        return rows;
+    }
+
+    /// <summary>
+    /// A goroutine publishes its own g, parks under <paramref name="reason"/> on a gate this thread
+    /// holds, and the caller reads that g's status and reason WHILE it is parked (Go's
+    /// GIsWaitingOnMutex shape), then releases it and reads them again; with
+    /// casgstatusAlwaysTrack set for the window, the mutex-wait metric's growth is returned too.
+    /// </summary>
+    public static (uint statusParked, string reasonParked, bool isMutexWaitParked, uint statusAfter, string reasonAfter, long mutexWaitDeltaNs) GoParkTransitionProbe(WaitReason reason, int blockMs)
+    {
+        using ManualResetEventSlim published = new(false);
+        using ManualResetEventSlim gate = new(false);
+        using ManualResetEventSlim released = new(false);
+        ж<g>? parkedG = null;
+        bool previousTrack = casgstatusAlwaysTrack;
+        casgstatusAlwaysTrack = true;
+
+        try
+        {
+            long before = Ꮡsched.of(schedt.ᏑtotalMutexWaitTime).Load();
+
+            Goroutine.Start(() =>
+            {
+                parkedG = getg();
+                published.Set();
+
+                using (Goroutine.Park(reason))
+                    gate.Wait();
+
+                released.Set();
+            });
+
+            awaitProbeEvent(published, "published");
+            ж<g> gp = parkedG!;
+
+            // Wait for the goroutine to actually park (the status is written by its own thread after Set).
+            awaitProbeStatus(gp, (uint32)_Gwaiting, "park");
+
+            uint statusParked = readgstatus(gp);
+            string reasonParked = gp.Value.waitreason.String().ToString();
+            bool isMutexWaitParked = gp.Value.waitreason.isMutexWait();
+
+            Thread.Sleep(blockMs);
+            gate.Set();
+            awaitProbeEvent(released, "released");
+
+            awaitProbeStatus(gp, (uint32)_Grunning, "release");
+
+            long after = Ꮡsched.of(schedt.ᏑtotalMutexWaitTime).Load();
+
+            return (statusParked, reasonParked, isMutexWaitParked, readgstatus(gp), gp.Value.waitreason.String().ToString(), after - before);
+        }
+        finally
+        {
+            casgstatusAlwaysTrack = previousTrack;
+        }
+    }
+
+    // The probe's waits are BOUNDED, and each names what did not happen. Without the module
+    // initializer's installer a parked g's status never moves, so an UNBOUNDED spin here would burn
+    // the whole test deadline and report as a timeout -- a hang reads as a mass-empty and says
+    // nothing about WHICH transition failed, which is exactly what the negative control needs it to
+    // say. Measured before this bound existed: the neutered arm exited 124, killed at 300 s.
+    private const int ProbeWaitMs = 10_000;
+
+    private static void awaitProbeStatus(ж<g> gp, uint32 want, string what)
+    {
+        SpinWait spinner = default;
+        long deadline = System.Environment.TickCount64 + ProbeWaitMs;
+
+        while (readgstatus(gp) != want)
+        {
+            if (System.Environment.TickCount64 > deadline)
+            {
+                throw new PanicException($"runtime: the probe's goroutine did not reach status {want} on {what} within {ProbeWaitMs} ms (it is {readgstatus(gp)}) -- the park transition is not installed");
+            }
+
+            spinner.SpinOnce();
+        }
+    }
+
+    private static void awaitProbeEvent(ManualResetEventSlim signal, string what)
+    {
+        if (!signal.Wait(ProbeWaitMs))
+        {
+            throw new PanicException($"runtime: the probe's {what} did not signal within {ProbeWaitMs} ms");
+        }
+    }
+
+    /// <summary>
+    /// A goroutine nests two park scopes and reads its own status at each boundary: outer enter,
+    /// inner enter, inner leave, outer leave — the inner pair must move nothing (Go's parked
+    /// goroutine cannot park again) and the outer pair must move _Grunning -> _Gwaiting -> _Grunning.
+    /// </summary>
+    public static uint[] GoNestedParkProbe()
+    {
+        uint[] statuses = new uint[5];
+        using ManualResetEventSlim done = new(false);
+
+        Goroutine.Start(() =>
+        {
+            ж<g> gp = getg();
+            statuses[0] = readgstatus(gp);
+
+            using (Goroutine.Park(WaitReason.Select))
+            {
+                statuses[1] = readgstatus(gp);
+
+                using (Goroutine.Park(WaitReason.ChanReceive))
+                    statuses[2] = readgstatus(gp);
+
+                statuses[3] = readgstatus(gp);
+            }
+
+            statuses[4] = readgstatus(gp);
+            done.Set();
+        });
+
+        done.Wait();
+        return statuses;
+    }
+
+    /// <summary>The status word constants the probes compare against, so the arms need no runtime internals.</summary>
+    public static (uint running, uint waiting) GoGStatusWords() => ((uint)_Grunning, (uint)_Gwaiting);
 }

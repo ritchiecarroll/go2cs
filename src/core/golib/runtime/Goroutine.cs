@@ -438,8 +438,28 @@ public sealed class Goroutine
         int previous = Volatile.Read(ref goroutine.m_waitReason);
         Volatile.Write(ref goroutine.m_waitReason, (int)reason);
 
+        // Go's gopark, accounting half: the runtime's g moves _Grunning -> _Gwaiting with this reason,
+        // at the OUTERMOST boundary only (an inner scope is a golib artifact around code that is not
+        // blocked; Go's parked goroutine cannot park again). See ParkTransition.
+        if (previous == (int)WaitReason.Zero)
+            ParkTransition?.Invoke(reason, true);
+
         return new ParkScope(goroutine, previous);
     }
+
+    /// <summary>
+    /// The runtime's park transition — Go's <c>gopark</c>/<c>ready</c> accounting half, installed
+    /// by the runtime assembly at module init (golib cannot name it). Invoked with
+    /// (<paramref name="reason"/>, <c>true</c>) when a goroutine's OUTERMOST <see cref="Park"/>
+    /// begins and (reason, <c>false</c>) when that scope is disposed — never for a nested scope,
+    /// never on a thread with no goroutine identity. The runtime moves its <c>g</c> between
+    /// <c>_Grunning</c> and <c>_Gwaiting</c> with the mapped <c>waitreason</c>, which is what
+    /// <c>readgstatus</c>, <c>GIsWaitingOnMutex</c> and the <c>/sync/mutex/wait/total:seconds</c>
+    /// metric read (Q61, 2026-09-05: <c>TestMutexWaitTimeMetric</c> spun forever on a g that never
+    /// left <c>_Grunning</c>). A <c>null</c> slot is the pre-Q61 behaviour: the reason is published,
+    /// nothing else moves.
+    /// </summary>
+    public static Action<WaitReason, bool>? ParkTransition { get; set; }
 
     /// <summary>
     /// Sets the calling goroutine's profile labels — Go's <c>getg().labels = labels</c>.
@@ -876,6 +896,12 @@ public sealed class Goroutine
             // Inert when Park found no identity: a thread that is not a goroutine parks nothing.
             if (m_goroutine is null)
                 return;
+
+            // The outermost scope ends: the runtime's g returns to _Grunning (Go's ready + execute,
+            // collapsed — the managed model has no _Grunnable interval) BEFORE the reason clears, so
+            // an observer that reads the reason as Zero never sees the status still waiting.
+            if (m_previous == (int)WaitReason.Zero)
+                ParkTransition?.Invoke((WaitReason)Volatile.Read(ref m_goroutine.m_waitReason), false);
 
             Volatile.Write(ref m_goroutine.m_waitReason, m_previous);
         }
