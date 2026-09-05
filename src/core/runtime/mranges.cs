@@ -250,17 +250,7 @@ internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
     internal ж<sysMemStat> sysStat;
 }
 
-internal static void init(this ж<addrRanges> Ꮡa, ж<sysMemStat> ᏑsysStat) {
-    ref var a = ref Ꮡa.DerefOrNull();
-    ref var sysStat = ref ᏑsysStat.DerefOrNull();
-
-    var ranges = Ꮡa.of(addrRanges.Ꮡranges).Reinterpret<slice<addrRange>, notInHeapSlice>();
-    ranges.Value.len = 0;
-    ranges.Value.cap = 16;
-    ranges.Value.Δarray = (ж<notInHeap>)(uintptr)(persistentalloc(/* unsafe.Sizeof(addrRange{}) */ (uintptr)16 * (uintptr)(~ranges).cap, goarch.PtrSize, ᏑsysStat));
-    a.sysStat = ᏑsysStat;
-    a.totalBytes = 0;
-}
+// go2cs generated this placeholder — func init is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // findSucc returns the first index in a such that addr is
 // less than the base of the addrRange at that index.
@@ -332,75 +322,7 @@ internal static void init(this ж<addrRanges> Ꮡa, ж<sysMemStat> ᏑsysStat) {
     return a.ranges[i - 1].contains(addr);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string attemptedToAddZeroSizedˢ = "attempted to add zero-sized address range"u8;
-
-// add inserts a new address range to a.
-//
-// r must not overlap with any address range in a and r.size() must be > 0.
-internal static void add(this ж<addrRanges> Ꮡa, addrRange r) {
-    ref var a = ref Ꮡa.DerefOrNull();
-
-    // The copies in this function are potentially expensive, but this data
-    // structure is meant to represent the Go heap. At worst, copying this
-    // would take ~160µs assuming a conservative copying rate of 25 GiB/s (the
-    // copy will almost never trigger a page fault) for a 1 TiB heap with 4 MiB
-    // arenas which is completely discontiguous. ~160µs is still a lot, but in
-    // practice most platforms have 64 MiB arenas (which cuts this by a factor
-    // of 16) and Go heaps are usually mostly contiguous, so the chance that
-    // an addrRanges even grows to that size is extremely low.
-    // An empty range has no effect on the set of addresses represented
-    // by a, but passing a zero-sized range is almost always a bug.
-    if (r.size() == 0) {
-        print((@string)"runtime: range = {"u8, ((Δhex)(uint64)r.@base.addr()), (@string)", "u8, ((Δhex)(uint64)r.limit.addr()), (@string)"}\n"u8);
-        @throw(attemptedToAddZeroSizedˢ);
-    }
-    // Because we assume r is not currently represented in a,
-    // findSucc gives us our insertion index.
-    nint i = a.findSucc(r.@base.addr());
-    var coalescesDown = i > 0 && a.ranges[i - 1].limit.equal(r.@base);
-    var coalescesUp = i < len(a.ranges) && r.limit.equal(a.ranges[i].@base);
-    if (coalescesUp && coalescesDown){
-        // We have neighbors and they both border us.
-        // Merge a.ranges[i-1], r, and a.ranges[i] together into a.ranges[i-1].
-        a.ranges[i - 1].limit = a.ranges[i].limit;
-        // Delete a.ranges[i].
-        copy(a.ranges[(int)(i)..], a.ranges[(int)(i + 1)..]);
-        a.ranges = a.ranges[..(int)(len(a.ranges) - 1)];
-    } else 
-    if (coalescesDown){
-        // We have a neighbor at a lower address only and it borders us.
-        // Merge the new space into a.ranges[i-1].
-        a.ranges[i - 1].limit = r.limit;
-    } else 
-    if (coalescesUp){
-        // We have a neighbor at a higher address only and it borders us.
-        // Merge the new space into a.ranges[i].
-        a.ranges[i].@base = r.@base;
-    } else {
-        // We may or may not have neighbors which don't border us.
-        // Add the new range.
-        if (len(a.ranges) + 1 > cap(a.ranges)){
-            // Grow the array. Note that this leaks the old array, but since
-            // we're doubling we have at most 2x waste. For a 1 TiB heap and
-            // 4 MiB arenas which are all discontiguous (both very conservative
-            // assumptions), this would waste at most 4 MiB of memory.
-            var oldRanges = a.ranges;
-            var ranges = Ꮡa.of(addrRanges.Ꮡranges).Reinterpret<slice<addrRange>, notInHeapSlice>();
-            ranges.Value.len = len(oldRanges) + 1;
-            ranges.Value.cap = cap(oldRanges) * 2;
-            ranges.Value.Δarray = (ж<notInHeap>)(uintptr)(persistentalloc(/* unsafe.Sizeof(addrRange{}) */ (uintptr)16 * (uintptr)(~ranges).cap, goarch.PtrSize, a.sysStat));
-            // Copy in the old array, but make space for the new range.
-            copy(a.ranges[..(int)(i)], oldRanges[..(int)(i)]);
-            copy(a.ranges[(int)(i + 1)..], oldRanges[(int)(i)..]);
-        } else {
-            a.ranges = a.ranges[..(int)(len(a.ranges) + 1)];
-            copy(a.ranges[(int)(i + 1)..], a.ranges[(int)(i)..]);
-        }
-        a.ranges[i] = r;
-    }
-    a.totalBytes += r.size();
-}
+// go2cs generated this placeholder — func add is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // removeLast removes and returns the highest-addressed contiguous range
 // of a, or the last nBytes of that range, whichever is smaller. If a is
@@ -452,21 +374,6 @@ internal static void add(this ж<addrRanges> Ꮡa, addrRange r) {
     a.totalBytes -= removed;
 }
 
-// cloneInto makes a deep clone of a's state into b, re-using
-// b's ranges if able.
-[GoRecv] internal static void cloneInto(this ref addrRanges a, ж<addrRanges> Ꮡb) {
-    ref var b = ref Ꮡb.DerefOrNull();
-
-    if (len(a.ranges) > cap(b.ranges)) {
-        // Grow the array.
-        var ranges = Ꮡb.of(addrRanges.Ꮡranges).Reinterpret<slice<addrRange>, notInHeapSlice>();
-        ranges.Value.len = 0;
-        ranges.Value.cap = cap(a.ranges);
-        ranges.Value.Δarray = (ж<notInHeap>)(uintptr)(persistentalloc(/* unsafe.Sizeof(addrRange{}) */ (uintptr)16 * (uintptr)(~ranges).cap, goarch.PtrSize, b.sysStat));
-    }
-    b.ranges = b.ranges[..(int)(len(a.ranges))];
-    b.totalBytes = a.totalBytes;
-    copy(b.ranges, a.ranges);
-}
+// go2cs generated this placeholder — func cloneInto is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 } // end runtime_package

@@ -119,7 +119,17 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     /// addresses are the real ones, and lifetime is the mapping's own — exactly Go's contract for a
     /// slice built over native storage, hazards included.
     /// </summary>
-    internal static slice<T> OverNativeMemory(nuint baseAddress, nint length)
+    internal static slice<T> OverNativeMemory(nuint baseAddress, nint length) => OverNativeMemory(baseAddress, length, length);
+
+    /// <summary>
+    /// The same door with Go's third word: a window of <paramref name="length"/> elements over a
+    /// backing that extends to <paramref name="capacity"/> elements — the (array, len, cap) a runtime
+    /// slice header carries, so a slice re-based over reserved memory keeps room to grow in place
+    /// exactly as Go's <c>append</c> within capacity does (increment 7 of the runtime row, 2026-09-05:
+    /// <c>addrRanges</c> grows its native array by doubling and the page allocator's summary levels
+    /// are minted at their full extent).
+    /// </summary>
+    internal static slice<T> OverNativeMemory(nuint baseAddress, nint length, nint capacity)
     {
         if (System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             throw new PanicException($"native-backed slice: element type {typeof(T).Name} contains managed references and cannot alias native memory");
@@ -127,7 +137,10 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         if (baseAddress == 0 || length < 0)
             throw new PanicException("native-backed slice: nil base or negative length");
 
-        return new slice<T>(baseAddress, 0, length, length);
+        if (capacity < length)
+            throw new PanicException($"native-backed slice: capacity {capacity} is smaller than length {length}");
+
+        return new slice<T>(baseAddress, 0, length, capacity);
     }
 
     public slice()

@@ -167,6 +167,21 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// pointer-slot view is recorded for a second reaching site, not built here.
 		"persistentalloc1":  goosAny,
 		"inPersistentAlloc": goosAny,
+		// addrRanges.init / add / cloneInto (increment 7 of the runtime row, W2a, 2026-09-05): the three
+		// writers that build a notInHeapSlice header FIELD BY FIELD over the managed a.ranges --
+		// `ranges := (*notInHeapSlice)(unsafe.Pointer(&a.ranges)); ranges.len = …; ranges.cap = …;
+		// ranges.array = (*notInHeap)(persistentalloc(…))`. golib's SliceHeaderBox materializes the
+		// header from the live slice, but a header handed out as a C# `ref` cannot observe its LAST
+		// store (nothing accesses the box after `array` is assigned, and between the `cap` and `array`
+		// stores the header is a nil array with a non-zero capacity, which no earlier commit could
+		// re-base), so the slice is re-based AT the write instead: runtime/mranges_impl.cs keeps each
+		// body line for line and turns the three header stores into one native-backed slice over the
+		// persistentalloc'd block (golib's single creation door, with Go's cap as the third word). The
+		// whole-header writers of the same view (traceMap, mheap.allspans, allArenas) sit behind
+		// sysAlloc/mheap.init and are not displaced.
+		"addrRanges.init":      goosAny,
+		"addrRanges.add":       goosAny,
+		"addrRanges.cloneInto": goosAny,
 		// runtime.nanotime1 — darwin's monotonic clock. The other two flavors reach the same golib
 		// clock (MonotonicClock.Nanoseconds()) by writing a body into a bodyless partial and need no
 		// entry here; darwin's converted body calls libcCall(FuncPCABI0(nanotime_trampoline), …) into a

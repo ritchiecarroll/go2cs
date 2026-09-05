@@ -79,6 +79,7 @@
     <None Include="$(MSBuildThisFileDirectory)directiveOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)disclosedParentAggregation_test.go" />
     <None Include="$(MSBuildThisFileDirectory)displacedCommentDrain_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)displacedPromotedCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)displacedRefReceiverCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicStructOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicTypeGate_test.go" />
