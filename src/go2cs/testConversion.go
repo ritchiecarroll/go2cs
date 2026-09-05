@@ -6358,7 +6358,71 @@ type testComparison struct {
 	// testEnvironmentRecord. Present on every comparison record (not omitempty): a reader must never
 	// have to assume Debug by absence, since the whole point is that a verdict states its own level.
 	Environment testEnvironmentRecord `json:"environment"`
+
+	// Stderr is the bounded diagnostic TAIL each side wrote outside its event stream — see
+	// comparisonStderrTails. Last key in the record and omitted entirely on a clean run, so a
+	// passing row's record is byte-for-byte what it was before this field existed.
+	Stderr *comparisonStderrTails `json:"stderr,omitempty"`
 }
+
+// comparisonStderrTails carries, per comparison side, the last few lines that side wrote OUTSIDE
+// its JSON event stream — in practice its fd 2 — so a run that died with its explanation on stderr
+// is readable from the RECORD without re-running the row.
+//
+// The reading it adds. A converted host that meets a Go `throw` PRINTS `fatal error: ...` before it
+// dies, and that text never enters the results stream: the stream carries the TEST's captured
+// output, not the process's raw fd-2 writes. Three rows were read as "getcallerpc" — the stub name
+// in the verdict — while the host's own stderr already said `mallocgc called without a P or outside
+// bootstrapping`, `missing stack in shrinkstack`, `runtime: internal error`. The pipeline HELD that
+// text the whole time; nothing addressable published it.
+//
+// What was there before, stated exactly, because the defect is narrower than "the text is lost":
+//   - A hard-fail exit already put the WHOLE combined stream into one errors[] entry, untruncated —
+//     measured on this project's own preserved records at 130 KB to 567 KB carrying 778 to 2,692
+//     event lines, several of them ending on a raw .NET stack trace. There the reading was not
+//     absent, it was UNADDRESSABLE: half a megabyte of one string with no field to key on.
+//   - A package-deadline kill returned the output to a caller that reads only err.Error(), so the
+//     record got `... timed out after 30m0s` and nothing else. Genuinely absent.
+//   - A forgiven nonzero exit (the disclosed and agreed-failure arms) nils the error before it can
+//     become an errors[] entry, taking its attached output with it. Genuinely absent — and this is
+//     the shape the getg rows were read through.
+//
+// Why it is DERIVED rather than captured separately. runCommandWithTimeoutEnv gives the child ONE
+// pipe for both descriptors (os/exec's Stdout==Stderr special case), which is what makes its buffer
+// race-free and its interleaving the child's own write order. Splitting them to capture fd 2 alone
+// would give two pipes and two copy goroutines — an unsynchronised write to a shared buffer, or a
+// changed interleaving of the very stream the verdicts are parsed from. The record must gain a COPY
+// of the reading, never move its source, so the tail is computed from the combined string both call
+// sites already hold: under `-json`/`--json` each side's fd 1 is nothing but one JSON object per
+// line, so every line that does not decode as a normalizedTestEvent object is diagnostic output.
+//
+// The imprecision that derivation carries, stated rather than hidden: a non-event line printed on
+// fd 1 is included, and so is a JSON line an interleaved fd-2 write corrupted. Both are the RIGHT
+// outcome — a corrupt event line is precisely what a reader needs to see — but the field is named
+// for where this text comes from in practice, not for a guarantee the derivation cannot make.
+type comparisonStderrTails struct {
+	Go     *stderrTail `json:"go,omitempty"`
+	CSharp *stderrTail `json:"csharp,omitempty"`
+}
+
+// stderrTail is one side's bounded tail. Truncation is SAID rather than left to be inferred from a
+// suspiciously round length: a tail that silently dropped the first half of a stack would read as a
+// complete one, which is the same quiet dishonesty as a gated record that reads as a full run.
+type stderrTail struct {
+	Text         string `json:"text"`
+	Truncated    bool   `json:"truncated,omitempty"`
+	OmittedLines int    `json:"omittedLines,omitempty"`
+	OmittedBytes int    `json:"omittedBytes,omitempty"`
+}
+
+// The tail's bounds. Sized for the reading it exists to carry — a Go `fatal error:` line with its
+// goroutine header, or a .NET exception with a dozen frames — and NOT for a transcript: the whole
+// stream is still in errors[] on the paths that put it there, so this field is a pointer into the
+// evidence rather than a second copy of it.
+const (
+	stderrTailMaxLines = 40
+	stderrTailMaxBytes = 4096
+)
 
 // capabilityGatedDeclaration records one test declaration the converted host provably cannot run,
 // the capability it would need, and every verdict row `go test` reports underneath it.
@@ -7221,6 +7285,13 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 		"--result", filepath.Join(outputPath, "go2cs_test_results.json"), "--junit", filepath.Join(outputPath, "go2cs_test_results.xml"))
 	csOutput, csErr := runCommandWithTimeoutEnv(testChildTimeout(options), outputPath, options, testHostRunEnv(options), publishedTestHostPath(outputPath, testProject), csArgs...)
 
+	// The RAW command errors, snapshotted here because the two forgiveness arms far below nil them
+	// out — and the record's diagnostic tail (comparisonStderrTails) is attached on exactly the
+	// condition those arms erase. A forgiven nonzero exit is not a quiet outcome: it is a host that
+	// died or failed, whose exit code the disclosed signature accounts for and whose stderr is often
+	// the only place the reason survives. Reading goErr/csErr at the attach point would lose it.
+	rawGoErr, rawCSErr := goErr, csErr
+
 	goResults := terminalTestResults(goOutput)
 	csResults := terminalTestResults(csOutput)
 	csOutputs := terminalTestOutputs(csOutput)
@@ -7414,6 +7485,15 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	if !result.Matched && result.Status == "validated" {
 		result.Status = "failing"
 	}
+
+	// Attached LAST, after every arm that can clear Matched, so the attach rule reads the final
+	// verdict rather than an intermediate one. The outputs are the ones the helper RETURNED, which
+	// is what makes the package-deadline case work at all: on a deadline kill the helper hands back
+	// everything the child had written and puts none of it in the error, so the record's only
+	// account of a killed run was `... timed out after 30m0s` — the returned output was reaching
+	// this function and being dropped on the floor.
+	result.Stderr = comparisonStderrTailsFor(goOutput, csOutput, rawGoErr, rawCSErr, result.Matched)
+
 	if err := writeComparisonRecord(outputPath, &result, options.testFilter); err != nil {
 		return err
 	}
@@ -7488,6 +7568,103 @@ func terminalTestOutputs(output string) map[string]string {
 		}
 	}
 	return result
+}
+
+// isTestEventLine reports whether one captured line is a member of the side's JSON event stream.
+//
+// Deliberately NARROWER than the `json.Unmarshal` succeeds test the two readers above use: the
+// leading `{` requires a JSON OBJECT, so bare `null` — which unmarshals into a struct without
+// error and produces no verdict — is treated as diagnostic output rather than silently dropped.
+// Erring toward SHOWING a line is the safe direction for this predicate, because a line wrongly
+// kept is noise a reader skips while a line wrongly dropped is the reading itself going missing.
+func isTestEventLine(line string) bool {
+	trimmed := strings.TrimSpace(line)
+	if !strings.HasPrefix(trimmed, "{") {
+		return false
+	}
+	var event normalizedTestEvent
+	return json.Unmarshal([]byte(trimmed), &event) == nil
+}
+
+// diagnosticOutputTail extracts one side's bounded diagnostic tail from its captured combined
+// output — see comparisonStderrTails for why this is derived rather than captured. Returns nil
+// when the side wrote nothing outside its event stream, so an absent tail is an omitted key
+// rather than an empty object claiming there was nothing to say.
+//
+// Blank lines are dropped before the bound is applied. Without that, a host that writes one fatal
+// line followed by trailing newlines would spend its whole 40-line budget on nothing and publish an
+// empty-looking tail — a bound that measures whitespace is a bound that hides the reading.
+func diagnosticOutputTail(output string) *stderrTail {
+	var diagnostics []string
+	for _, line := range strings.Split(output, "\n") {
+		line = strings.TrimRight(line, "\r")
+		if strings.TrimSpace(line) == "" || isTestEventLine(line) {
+			continue
+		}
+		diagnostics = append(diagnostics, line)
+	}
+	if len(diagnostics) == 0 {
+		return nil
+	}
+
+	tail := &stderrTail{}
+	if len(diagnostics) > stderrTailMaxLines {
+		dropped := diagnostics[:len(diagnostics)-stderrTailMaxLines]
+		for _, line := range dropped {
+			tail.OmittedBytes += len(line) + 1
+		}
+		tail.OmittedLines = len(dropped)
+		tail.Truncated = true
+		diagnostics = diagnostics[len(dropped):]
+	}
+
+	text := strings.Join(diagnostics, "\n")
+	for len(text) > stderrTailMaxBytes && len(diagnostics) > 1 {
+		tail.OmittedBytes += len(diagnostics[0]) + 1
+		tail.OmittedLines++
+		tail.Truncated = true
+		diagnostics = diagnostics[1:]
+		text = strings.Join(diagnostics, "\n")
+	}
+
+	// One line longer than the whole budget — a host that printed a megabyte without a newline is
+	// exactly the case a line-based bound cannot hold. Cut from the FRONT (the end is where a death
+	// says why), and snap forward to a rune boundary: a tail cut mid-rune is invalid UTF-8, which
+	// json.Marshal replaces with U+FFFD, so the record would carry bytes the process never wrote.
+	if len(text) > stderrTailMaxBytes {
+		cut := len(text) - stderrTailMaxBytes
+		for cut < len(text) && !utf8.RuneStart(text[cut]) {
+			cut++
+		}
+		tail.OmittedBytes += cut
+		tail.Truncated = true
+		text = text[cut:]
+	}
+
+	tail.Text = text
+	return tail
+}
+
+// comparisonStderrTails is attached per side, and only where there is something to explain: the
+// side's own command errored, or the comparison did not match. A clean validated row carries no
+// tail at all, so its record is byte-for-byte what it was before this field existed.
+//
+// The errors are the RAW ones, snapshotted before the disclosed and agreed-failure arms nil them
+// out. Reading the post-forgiveness values here would lose precisely the case that most needs the
+// tail — a host that exited nonzero, whose exit was forgiven as part of a disclosed outcome, and
+// whose stderr is the only place the reason survives.
+func comparisonStderrTailsFor(goOutput, csOutput string, rawGoErr, rawCSErr error, matched bool) *comparisonStderrTails {
+	tails := &comparisonStderrTails{}
+	if rawGoErr != nil || !matched {
+		tails.Go = diagnosticOutputTail(goOutput)
+	}
+	if rawCSErr != nil || !matched {
+		tails.CSharp = diagnosticOutputTail(csOutput)
+	}
+	if tails.Go == nil && tails.CSharp == nil {
+		return nil
+	}
+	return tails
 }
 
 // capabilityGatedDeclarations enumerates, per capability-gated declaration, the verdict rows the
