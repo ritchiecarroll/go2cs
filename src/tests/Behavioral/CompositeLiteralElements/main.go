@@ -18,6 +18,23 @@ type withArray struct {
 // wrapper, not through the structural array projection.
 type nb [4]byte
 
+// nn is a NAMED type over a NESTED fixed array. Its EMPTY composite literal is the
+// type's zero value, and building one has to construct each inner row: the wrapper's
+// backing is an array<array<int>> whose element length lives only in the Go type.
+type nn [2][3]int
+
+// ns is a NAMED array whose ELEMENT is a struct needing construction — runtime's
+// `semTable` shape (`[251]struct{root semaRoot; pad [40]byte}`), where the element's
+// fixed-array field initializer runs only inside a declared constructor.
+type ns [2]withArray
+
+// ni/no are the THIRD arm of the element predicate, and the one neither `nb` nor `ns`
+// reaches: a NAMED array element keeps its own zero-value handling (its wrapper
+// allocates a backing of its own known size), so it must be left on the plain
+// shortcut — the same exclusion `arrayElemFactory` documents.
+type ni [3]int
+type no [2]ni
+
 // nsl and nmp are the NAMED SLICE and NAMED MAP flavours of the same shape. Each lowers to a
 // different generated wrapper ctor, so each pins its own arm of the named-composite renderer.
 type nsl []int
@@ -77,15 +94,17 @@ func main() {
 	pnaPop := []*nb{{1, 2, 3, 4}}
 	fmt.Println("pnaPop:", len(*pnaPop[0]), *pnaPop[0])
 
-	// A named pointee over a NESTED fixed array (`type nn [2][3]int; []*nn{{}}`) is deliberately
-	// NOT pinned here, and the reason is measured rather than assumed: all THREE spellings —
-	// elided, explicit `&nn{}`, and the plain declared `nn{}` — print `2 0 [[] []]` against Go's
-	// `2 3 [[0 0 0] [0 0 0]]`, i.e. the named-array WRAPPER's empty-literal shortcut emits
-	// `new nn(new array<nint>[2].array())` with no element factory, so every row is `default(T)`
-	// and length 0. That is the defect-2 family (a `default(T)` that is not usable storage) inside
-	// the named wrapper, it is PRE-EXISTING and independent of this routing, and the routing's own
-	// property still holds over it: the elided spelling agrees with the explicit one exactly.
-	// Pinning it here would bake a known-wrong golden; it is reported separately instead.
+	// A named pointee over a NESTED fixed array. This row was deliberately NOT pinned when the
+	// elided routing landed, because all three spellings then printed `2 0 [[] []]` against Go's
+	// `2 3 [[0 0 0] [0 0 0]]` -- the named wrapper's empty-literal shortcut carried no element
+	// factory -- and pinning it would have baked a known-wrong golden. That shortcut now carries
+	// the factory, so the row is pinned here: it is the UNION's own property, correct only
+	// because the elided spelling is routed to the typed renderer AND that renderer constructs
+	// the element. Neither change alone makes this line right.
+	pnn := []*nn{{}}
+	fmt.Println("pnn:", len(*pnn[0]), len((*pnn[0])[0]), *pnn[0])
+	pnnExplicit := []*nn{&nn{}}
+	fmt.Println("pnnExplicit:", len(*pnnExplicit[0]), len((*pnnExplicit[0])[0]), *pnnExplicit[0])
 
 	// The named pointee in the MAP-VALUE and fixed-ARRAY container slots, which reach the arm by
 	// a different route than the slice-element rows above.
@@ -157,6 +176,71 @@ func main() {
 
 	san := []withArray{{}}
 	fmt.Println("san:", len(san[0].A), len(san[0].A[0]), san[0])
+
+	// --- Defect 2 family, one level up: a NAMED type over the same shapes. An EMPTY
+	// composite of a named array is its ZERO VALUE, and the wrapper's shortcut for that
+	// case emitted a plain `new T[N]` projection — sized, but N copies of `default(T)` —
+	// so a needy element arrived as unusable storage exactly as the unnamed case did.
+
+	nnLit := nn{}
+	fmt.Println("nnLit:", len(nnLit), len(nnLit[0]), nnLit)
+
+	// the same value through the EXPLICIT pointer spelling.
+	nnPtr := &nn{}
+	fmt.Println("nnPtr:", len(*nnPtr), len((*nnPtr)[0]), *nnPtr)
+
+	// a write into the zero value's inner row must land, which is what "usable storage" means.
+	nnWrite := nn{}
+	nnWrite[1][2] = 9
+	fmt.Printf("nnWrite: %v\n", nnWrite)
+
+	// the NAMED array whose element is a struct needing construction (semTable's shape).
+	nsLit := ns{}
+	fmt.Println("nsLit:", len(nsLit), len(nsLit[0].A), len(nsLit[0].A[0]), nsLit)
+
+	nsPtr := &ns{}
+	fmt.Println("nsPtr:", len(*nsPtr), len((*nsPtr)[0].A), len((*nsPtr)[0].A[0]), *nsPtr)
+
+	// an elided named-array element inside a slice literal — a DIFFERENT renderer that
+	// already carried the factory, kept so the two spellings stay pinned together.
+	nnElided := []nn{{}}
+	fmt.Println("nnElided:", len(nnElided[0]), len(nnElided[0][0]), nnElided[0])
+
+	// --- Named-array controls: the shapes that must NOT change.
+
+	// a PLAIN element keeps the `new T[N]` shortcut — the negative control for the fix.
+	nbLit := nb{}
+	fmt.Println("nbLit:", len(nbLit), nbLit)
+
+	// a NAMED array element also keeps the shortcut, and is still right: its own wrapper
+	// allocates a backing of its own known size. The third arm of the predicate.
+	noLit := no{}
+	fmt.Println("noLit:", len(noLit), len(noLit[0]), noLit)
+	noLit[1][2] = 7
+	fmt.Printf("noWrite: %v\n", noLit)
+
+	// a POPULATED named nested literal (the elements are written, nothing is padded).
+	nnPop := nn{{1, 2, 3}, {4, 5, 6}}
+	fmt.Println("nnPop:", len(nnPop), len(nnPop[0]), nnPop)
+
+	// a SHORT named nested literal: the written row plus a constructed one.
+	nnShort := nn{{1, 2, 3}}
+	fmt.Println("nnShort:", len(nnShort), len(nnShort[1]), nnShort)
+
+	// a KEYED (sparse) named nested literal: the unset row still needs its length.
+	nnKeyed := nn{1: {7, 8, 9}}
+	fmt.Println("nnKeyed:", len(nnKeyed), len(nnKeyed[0]), nnKeyed)
+
+	// A NAMED array's ZERO VALUE reached WITHOUT a composite literal — `var x nn`, `new(nn)`,
+	// `default(nn)` — is deliberately NOT in this guard. It is the same wrong value from a
+	// DIFFERENT layer: the converter routes a named array's declaration to `default!` and the
+	// generated wrapper allocates its backing lazily as `new array<E>(N)`, with no element
+	// factory and no way to know an inner Go length. That is where every one of the five
+	// standard-library named array types with a needy element is actually built
+	// (runtime's `var semtable semTable`, `new(cacheTable)`, `new(T)` in runtime's own GC
+	// test), so it is worth fixing — but it needs the factory to reach a position that has no
+	// template and no type syntax, which is a go2cs-gen/golib change with its own gates.
+	// Pinning it here would bake a known-wrong golden.
 
 	// --- Controls: the DECLARED spellings of the same shapes were already correct.
 

@@ -5997,15 +5997,18 @@ exists: the same pointee *without* the `&` (`[]nb{{}}`) already emits the struct
 conversion — but that conversion is between **values**, not between **boxes**, so
 `Ꮡ(new byte[]{}.array(4))` is a `ж<array<byte>>` and cannot bind a `ж<nb>` slot.
 
-One neighbouring shape is **not** closed by this, and is recorded here so it is not mistaken for
-it: a named type over a *nested* fixed array (`type nn [2][3]int`) is wrong in **all three**
-spellings — elided, explicit `&nn{}`, and the plain declared `nn{}` all print `2 0 [[] []]` against
-Go's `2 3 [[0 0 0] [0 0 0]]` — because the named-array wrapper's empty-literal shortcut emits
-`new nn(new array<nint>[2].array())` with no element factory. That is the
-`default(T)`-is-not-usable-storage family inside the wrapper; it predates this routing, is
-independent of it, and the routing's own property still holds over it (the elided spelling agrees
-with the explicit one exactly). It is tracked separately rather than pinned in the guard, which
-would bake a known-wrong golden.
+One neighbouring shape was **not** closed by this routing, and it is worth keeping the pairing
+visible because neither change is sufficient alone: a named type over a *nested* fixed array
+(`type nn [2][3]int`) was wrong in **all three** spellings — elided, explicit `&nn{}`, and the
+plain declared `nn{}` all printed `2 0 [[] []]` against Go's `2 3 [[0 0 0] [0 0 0]]` — because
+the named-array wrapper's empty-literal shortcut emitted `new nn(new array<nint>[2].array())`
+with no element factory. That is the `default(T)`-is-not-usable-storage family inside the
+wrapper; it predated this routing and was independent of it, and the routing's own property held
+over it throughout (the elided spelling agreed with the explicit one exactly, both being wrong).
+It was recorded rather than pinned at the time, because a golden for a known-wrong value is worse
+than none. **It is closed now** — see *A NAMED array type's EMPTY literal is its zero value* below
+— and the guard pins `[]*nn{{}}` beside `&nn{}` as the row that requires BOTH changes: the elided
+spelling must be routed to the typed renderer, and that renderer must construct the element.
 
 **An elided fixed-array element whose own element must be constructed.** The elided array arm
 carried the declared length for a short literal but not the element factory beside it — the same
@@ -6042,6 +6045,72 @@ Failing-first measured separately, because neither defect's control subsumes the
 pointer half is nine `CS0144`s at the Compile phase, and the array half **compiles clean** and
 fails only at Output — `nested: 1 2 0 [[] []]` against Go's `1 2 3 [[0 0 0] [0 0 0]]`, then
 `panic: runtime error: index out of range [2] with length 0` on the write.)
+
+### A NAMED array type's EMPTY literal is its zero value — and its element may need constructing
+
+A named type over a fixed array (`type nn [2][3]int`) lowers to a go2cs-gen wrapper around
+`array<E>`, and an EMPTY composite of it (`nn{}`) is the type's zero value rather than a length-0
+literal. The wrapper's renderer has a shortcut for exactly that case — `new nn(new array<nint>[2].array())`
+— because `new T[N]` is already the zero-filled declared length and restating it would merely emit
+`new byte[6].array(6)`. That reasoning holds for every element whose `default(T)` is already the Go
+zero value, and fails for the two shapes that must be CONSTRUCTED: `new T[N]` is N copies of
+`default(T)`, which is *sized but unusable storage* — the same
+`default(T)`-is-not-usable-storage defect the two sections above close, one level up and reached
+through the wrapper instead of the projection.
+
+So `nn{}` produced an outer length of 2 whose rows were **length zero** — `2 0 [[] []]` against Go's
+`2 3 [[0 0 0] [0 0 0]]` — and a named array over a struct carrying a fixed-array field (runtime's
+`semTable` shape, `[251]struct{root semaRoot; pad [40]byte}`) panicked on the first inner index. The
+empty shortcut now consults `arrayElemFactory` and, when the element needs one, backs the wrapper
+with the element-factory `array<T>` constructor — the same form the wrapper's own KEYED branch
+already used, through `arrayLengthArgs`, the one place that argument list is spelled:
+
+```go
+nnLit := nn{}                 // type nn [2][3]int
+nnPtr := &nn{}
+nsLit := ns{}                 // type ns [2]withArray — withArray has a [2][3]int field
+nbLit := nb{}                 // type nb [4]byte — element needs nothing
+```
+
+```csharp
+var nnLit = new nn(new array<array<nint>>(2, () => new(3)));
+var nnPtr = Ꮡ(new nn(new array<array<nint>>(2, () => new(3))));
+var nsLit = new ns(new array<withArray>(2, () => new()));
+var nbLit = new nb(new byte[4].array());          // shortcut PRESERVED — nothing to construct
+```
+
+`arrayLengthArgs`' own comment names four renderers that must carry the factory, "the named-array
+wrapper's" among them; before this that was true only of the wrapper's keyed path, so the empty
+shortcut was precisely the fifth caller the comment was written to prevent. The wrapper's short and
+keyed literals already carried it and are unchanged, as is every named array whose element is a
+scalar or another named type.
+
+**The zero value reached WITHOUT a literal is a DIFFERENT layer and is deliberately still wrong.**
+`var x nn`, `new(nn)` and `default(nn)` never call the wrapper's constructor: the converter's
+`zeroValueInitializer` routes a named array to `default!` on the stated ground that the wrapper
+allocates its backing lazily from its own known size (the same exclusion `arrayElemFactory`
+documents), and go2cs-gen's lazy backing is `new array<E>(N)` with no factory and no way to recover
+an inner Go length. That is where the standard library actually builds these — of **86** named array
+types (production and `_test.go`), **5** have an element whose zero value needs construction, and all
+five are reached that way: `runtime.semTable` (`var semtable semTable`),
+`crypto/internal/boring/bcache.cacheTable` (`new(cacheTable[K, V])`), `crypto/internal/nistec`'s
+`p256Table` and `p256AffineTable`, and a ten-deep `[2]^10 *int` in runtime's own GC test (`new(T)`),
+which only a `-tests`-dimension census can see. Closing it needs the factory to reach a position with
+no template and no type syntax — a golib, go2cs-gen or `zeroValueInitializer` change with its own
+gates — so it is recorded here and at the guard rather than pinned, since a golden for a known-wrong
+value is worse than no golden.
+
+(Guarded by the `CompositeLiteralElements` behavioral test: the plain and explicit-pointer spellings
+of both shapes, a write through the constructed storage, the elided spelling as the cross-renderer
+control, and the populated, short, keyed and plain-element literals as the must-not-change controls.
+The predicate has THREE arms and each has a row, because a control only tests the axis it varies: an
+element needing construction (`nn`, `ns`), a plain scalar element (`nb`), and a NAMED array element
+(`type ni [3]int; type no [2]ni`) — which keeps the shortcut and is still correct, because its own
+wrapper allocates a backing of its own known size. That last arm is what pins `arrayElemFactory`'s
+named-element exclusion from this side.
+Failing-first measured: at the pre-fix converter the same program reports `FAIL [Target,Output]` —
+`nnLit: 2 0 [[] []]`, `nnPtr: 2 0 [[] []]`, then `panic: runtime error: index out of range [2] with
+length 0` on the write, exit code 2 against Go's 0.)
 
 ### An array or slice literal may MIX positional and keyed elements
 

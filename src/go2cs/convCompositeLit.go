@@ -1079,9 +1079,25 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 		// and an empty non-nil backing for a slice wrapper.
 		if len(compositeLit.Elts) == 0 {
 			if definedLen > 0 {
+				// When the ELEMENT's own zero value must be CONSTRUCTED, `new T[N]` is N copies of
+				// `default(T)` — sized, but unusable storage — which is the same defect the short-literal
+				// padding above closes, one level down and reached through the wrapper: `nn{}` over
+				// `type nn [2][3]int` gave two length-ZERO inner arrays (`2 0 [[] []]` against Go's
+				// `2 3 [[0 0 0] [0 0 0]]`), and a named array over a struct carrying a fixed-array field
+				// (runtime's `semTable` shape) PANICKED on the first inner index. Back it with the
+				// element-factory `array<T>` ctor — the same form the KEYED branch below already uses,
+				// and the same one argument-list renderer, so the literal and the declaration cannot
+				// drift apart. This is the fourth caller `arrayLengthArgs` documents; until now the
+				// wrapper carried the factory only on its keyed path.
+				if factory := v.arrayElemFactory(elementType); factory != "" {
+					return fmt.Sprintf("new %s(new array<%s>(%s))", typeRender, csElementType,
+						arrayLengthArgs(strconv.Itoa(definedLen), factory))
+				}
+
 				// `new T[N]` is ALREADY the zero-filled declared length, so this form keeps the
 				// plain projection rather than the padding suffix computed above — the length
-				// would merely be restated (`new byte[6].array(6)`).
+				// would merely be restated (`new byte[6].array(6)`). Unchanged for every element
+				// whose `default(T)` is already the Go zero value, which is nearly all of them.
 				return fmt.Sprintf("new %s(new %s[%d].array())", typeRender, csElementType, definedLen)
 			}
 
