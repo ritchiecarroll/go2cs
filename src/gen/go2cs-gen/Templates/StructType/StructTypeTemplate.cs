@@ -371,9 +371,33 @@ internal class StructTypeTemplate : TemplateBase
 
                 return collected;
 
+                // seenTypes is the current PATH, not the set of everything visited: it is COPIED at each
+                // recursion, so a type reached by two SIBLING branches is walked on BOTH. That is what the
+                // header above requires -- every occurrence collected, the caller applying Go's depth-aware
+                // rule -- and a shared set silently performed the dedupe the header forbids, one level up:
+                // `twice` embeds viaX and *viaY, both embedding `base`, so with one set `base.B` was collected
+                // ONCE and promotes() saw a unique member at min depth. `twice`'s own shell was right (the
+                // caller walks each direct embed with a fresh set) while a type EMBEDDING twice emitted
+                // `B => ref twice.B`, a hop that does not exist -- CS1061, the `deeper` row of the
+                // ReflectFieldMetadata guard, which is red before this line and green after. Go's clause is
+                // that an ambiguity at one depth INHIBITS every deeper match; it does not resolve into
+                // whichever branch reached the type first (increment E2c).
+                //
+                // The two METHOD walks below (countPromotedMethods, collectPromotedMethods) thread their set
+                // the same way and take the SAME fix. The measurement that says so is worth keeping, because it
+                // read the other way first: with a METHOD on `base`, the guard at the unfixed generator reported
+                // only the FIELD error, which reads as `the method half is fine` -- and is wrong. Fixing the
+                // field walk UNMASKED CS1929 on the same row (`deeper` forwarding to `twice.M`, which twice
+                // correctly promotes no more than it promotes B). Errors behind a blocker are invisible until
+                // the blocker moves, so a clean second half is only believable once the first half is fixed.
+                //
+                // Cost: one HashSet copy per embedded field per level. Embedding chains are shallow (the
+                // corpus census below found no shape where the two walks even differ), and correctness is not
+                // negotiable against it.
                 void collect(string typeName, HashSet<string> seenTypes, int depth)
                 {
-                    // Go forbids embedding cycles, but guard anyway so a malformed input can't loop.
+                    // Go forbids embedding cycles, but guard anyway so a malformed input can't loop. A cycle
+                    // repeats a type ON THE PATH, so a path-scoped set still catches it.
                     if (!seenTypes.Add(typeName))
                         return;
 
@@ -408,7 +432,7 @@ internal class StructTypeTemplate : TemplateBase
                         // name (`RCode RCode` in dnsmessage.Header) is a plain FIELD and must not
                         // contribute nested promotions.
                         if (isEmbedded)
-                            collect(memberType, seenTypes, depth + 1);
+                            collect(memberType, [.. seenTypes], depth + 1);
                     }
                 }
 
@@ -544,9 +568,17 @@ internal class StructTypeTemplate : TemplateBase
         // qualified rw.Reader.Size(); both generated wrappers were CS0111).
         Dictionary<string, int> promotedMethodCounts = new(StringComparer.Ordinal);
 
+        // Go's ambiguity rule has a SECOND clause the cross-embed count above cannot see: a name the
+        // embed annihilates WITHIN ITS OWN subtree (reached through two of ITS embeds at one depth) is
+        // not a member of the embed at all, so the enclosing type cannot promote it either -- and the
+        // forwarder it would emit, `target.<embed>.M()`, does not bind (CS1929). Names collected here are
+        // suppressed at the emission filter below; their ABSENCE from promotedMethodCounts would not be
+        // enough, since that filter only skips names it finds with a count > 1 (increment E2c).
+        HashSet<string> annihilatedWithinEmbed = new(StringComparer.Ordinal);
+
         foreach ((string promotedStructType, _, _, _, _) in promotedStructs)
         {
-            HashSet<string> embedMethodNames = new(StringComparer.Ordinal);
+            List<(string name, int depth)> embedMethodOccurrences = [];
 
             // A DIRECT (depth-1) NON-GENERIC VALUE embed also promotes its box-receiver (direct-ж)
             // primaries through a descent shim (see IsValueEmbedBoxRecv). Count them for the same
@@ -557,12 +589,29 @@ internal class StructTypeTemplate : TemplateBase
             // membership test (whose `@`-keyword-escaped names, e.g. os.File's `ж<@file>`, mismatch).
             bool directEmbedIsValue = !promotedStructType.Contains("<");
 
-            countPromotedMethods(promotedStructType, []);
+            countPromotedMethods(promotedStructType, [], 1);
 
-            foreach (string name in embedMethodNames)
-                promotedMethodCounts[name] = promotedMethodCounts.TryGetValue(name, out int count) ? count + 1 : 1;
+            // Go's rule INSIDE the embed, the same one promotes() applies to fields: a name is a member of
+            // the embed iff it occurs exactly once at its MINIMUM depth. Occurring twice there means the
+            // embed annihilates it, so it contributes nothing to the cross-embed count and is suppressed.
+            foreach (IGrouping<string, (string name, int depth)> occurrences in embedMethodOccurrences.GroupBy(o => o.name, StringComparer.Ordinal))
+            {
+                int minDepth = occurrences.Min(o => o.depth);
 
-            void countPromotedMethods(string typeName, HashSet<string> seenTypes)
+                if (occurrences.Count(o => o.depth == minDepth) > 1)
+                {
+                    annihilatedWithinEmbed.Add(occurrences.Key);
+                    continue;
+                }
+
+                promotedMethodCounts[occurrences.Key] = promotedMethodCounts.TryGetValue(occurrences.Key, out int count) ? count + 1 : 1;
+            }
+
+            // seenTypes is the PATH, copied at each recursion -- see collect() in getStructMembers for the rule
+            // and the measurement (increment E2c). A shared set counts a method reached through two SIBLING
+            // embeds once, so Go's same-depth annihilation never fires and an enclosing type promotes what the
+            // embed itself does not have.
+            void countPromotedMethods(string typeName, HashSet<string> seenTypes, int depth)
             {
                 if (!seenTypes.Add(typeName))
                     return;
@@ -577,19 +626,19 @@ internal class StructTypeTemplate : TemplateBase
                     (List<MethodInfo> metadataValueMethods, List<MethodInfo> metadataBoxMethods) = GetMetadataPromotedMethods(typeName);
 
                     foreach (MethodInfo m in metadataValueMethods)
-                        embedMethodNames.Add(m.Name);
+                        embedMethodOccurrences.Add((m.Name, depth));
 
                     if (pointerEmbedTypeNames.Contains(embedKey(typeName)) || (typeName == promotedStructType && directEmbedIsValue))
                     {
                         foreach (MethodInfo m in metadataBoxMethods)
-                            embedMethodNames.Add(m.Name);
+                            embedMethodOccurrences.Add((m.Name, depth));
                     }
 
                     return;
                 }
 
                 foreach (MethodInfo m in decl.GetExtensionMethods(comp!) ?? [])
-                    embedMethodNames.Add(m.Name);
+                    embedMethodOccurrences.Add((m.Name, depth));
 
                 // A POINTER embed's box-receiver primaries promote too (see below) — count them for
                 // the same cross-embed ambiguity rule. A direct VALUE embed likewise promotes its
@@ -597,13 +646,13 @@ internal class StructTypeTemplate : TemplateBase
                 if (pointerEmbedTypeNames.Contains(embedKey(typeName)) || (typeName == promotedStructType && directEmbedIsValue))
                 {
                     foreach (MethodInfo m in decl.GetBoxReceiverExtensionMethods(comp!))
-                        embedMethodNames.Add(m.Name);
+                        embedMethodOccurrences.Add((m.Name, depth));
                 }
 
                 foreach ((string memberType, _, _, bool isEmbedded, _) in decl.GetStructMembers(comp!, true))
                 {
                     if (isEmbedded)
-                        countPromotedMethods(memberType, seenTypes);
+                        countPromotedMethods(memberType, [.. seenTypes], depth + 1);
                 }
             }
         }
@@ -635,6 +684,7 @@ internal class StructTypeTemplate : TemplateBase
 
             collectPromotedMethods(promotedStructType, []);
 
+            // PATH-scoped for the same reason as countPromotedMethods above (increment E2c).
             void collectPromotedMethods(string typeName, HashSet<string> seenTypes)
             {
                 // Go forbids embedding cycles, but guard anyway.
@@ -718,7 +768,7 @@ internal class StructTypeTemplate : TemplateBase
                 foreach ((string memberType, _, _, bool isEmbedded, _) in decl.GetStructMembers(comp!, true))
                 {
                     if (isEmbedded)
-                        collectPromotedMethods(memberType, seenTypes);
+                        collectPromotedMethods(memberType, [.. seenTypes]);
                 }
             }
 
@@ -727,6 +777,12 @@ internal class StructTypeTemplate : TemplateBase
                 if (structMethodNames.Contains(method.Name))
                 {
                     result.Append($"\r\n    // '{GetSimpleName(promotedStructType)}.{method.Name}' method mapped to overridden '{NonGenericStructName}' receiver method");
+                    continue;
+                }
+
+                if (annihilatedWithinEmbed.Contains(method.Name))
+                {
+                    result.Append($"\r\n    // '{GetSimpleName(promotedStructType)}.{method.Name}' is AMBIGUOUS inside the embed itself (Go promotes it to neither) - not promoted");
                     continue;
                 }
 

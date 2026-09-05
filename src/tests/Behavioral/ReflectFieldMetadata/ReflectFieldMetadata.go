@@ -13,15 +13,14 @@
 //      the controls that must NOT read embedded (a plain field of a named-int type) and the embedded
 //      NAMED int the struct-wrapper route already reported.
 //
-// A second shape withheld for a different reason: a struct EMBEDDING `twice` (`type deeper struct{ twice }`,
-// the clause that an annihilation at one depth inhibits every deeper match) does not compile through
-// go2cs-gen today. TypeGenerator's transitive promotion walk (StructTypeTemplate.getStructMembers) guards
-// against cycles with ONE `seenTypes` set shared across sibling branches, so `base` -- reached through
-// `viaX` AND `*viaY` at the same depth -- is walked once and its `B` counted once: `deeper` promotes
-// `B => ref twice.B` while `twice`'s own shell (each embed walked afresh) correctly promotes no `B`, and
-// the forwarder binds a nonexistent hop (CS1061 x2 in go.main_package.deeper.g.cs). It is the same
-// visited-vs-multiplicity error E2 fixes in reflect's promotedFieldByName, on the generator's side; the
-// shape returns here when the walk's guard is scoped to the current PATH (its own increment, route #7 gates).
+//   5. The clause that an annihilation at one depth inhibits every DEEPER match: a struct EMBEDDING
+//      `twice` (`type deeper struct{ twice }`). This is the same visited-vs-multiplicity error E2 fixed
+//      in reflect's promotedFieldByName, on the GENERATOR's side -- StructTypeTemplate's promotion walk
+//      threaded ONE `seenTypes` set across sibling branches, so `base`, reached through `viaX` AND
+//      `*viaY` at the same depth, was walked once and its `B` counted once: `deeper` promoted
+//      `B => ref twice.B` (a hop that does not exist, CS1061 x2) while `twice`'s own shell correctly
+//      promoted no `B`. Fixed in increment E2c by scoping the walk's guard to the current PATH; this
+//      row is what showed it RED before the cut and green after.
 package main
 
 import (
@@ -38,6 +37,11 @@ type holds struct{ f sElem }  // a plain unexported field: flagStickyRO
 
 // --- root 2: multiplicity ---
 type base struct{ B int }
+// base carries a METHOD as well as a field: the generator has THREE walks with the same shared-set
+// shape (the field walk and two method walks), so the same lattice measures whether the method half
+// promotes what Go annihilates -- a fix is owed only where a control can be made to fail.
+func (b base) M() int { return b.B }
+
 type viaX struct{ base }
 type viaY struct{ base }
 type twice struct { // base is reached through viaX AND *viaY at depth 2: B annihilates
@@ -49,6 +53,11 @@ type once struct { // base reached ONCE: B is found at depth 2
 	viaX
 	D int
 }
+
+// deeper embeds the AMBIGUOUS type: Go's rule is that the annihilation at twice's depth inhibits
+// every deeper match, so `deeper.B` is not found either -- and `deeper.D`, unambiguous inside twice,
+// still promotes through it (the control that keeps the fix from simply refusing everything).
+type deeper struct{ twice }
 
 // --- root 3: PkgPath through a defined type over a foreign struct ---
 type local fieldlib.Outer
@@ -76,6 +85,19 @@ func main() {
 	fmt.Println("twice.D  found:", foundD, "index:", fD.Index)
 	// the Value side agrees with the Type side
 	fmt.Println("twice.B  value valid:", reflect.ValueOf(twice{}).FieldByName("B").IsValid())
+	// 2b (E2c). The annihilation is INHERITED: deeper embeds twice, so B is not found through it either,
+	// while D -- unambiguous inside twice -- still promotes one level further out.
+	_, foundDeeperB := reflect.TypeOf(deeper{}).FieldByName("B")
+	fDeeperD, foundDeeperD := reflect.TypeOf(deeper{}).FieldByName("D")
+	fmt.Println("deeper.B found:", foundDeeperB, " value valid:", reflect.ValueOf(deeper{}).FieldByName("B").IsValid())
+	fmt.Println("deeper.D found:", foundDeeperD, "index:", fDeeperD.Index, " value:", reflect.ValueOf(deeper{}).FieldByName("D").IsValid())
+
+	// 2c (E2c). The METHOD half of the same rule: base.M is reached twice through twice, so it is
+	// promoted onto neither twice nor deeper; once (base reached ONCE) does promote it.
+	_, mTwice := reflect.TypeOf(twice{}).MethodByName("M")
+	_, mDeeper := reflect.TypeOf(deeper{}).MethodByName("M")
+	_, mOnce := reflect.TypeOf(once{}).MethodByName("M")
+	fmt.Println("M promoted -- twice:", mTwice, " deeper:", mDeeper, " once:", mOnce)
 
 	// 3. PkgPath of a field declared in another package, reached through a defined local type. The
 	// rows compare PATHS rather than print them, so the guard measures E2's root -- the declaring
