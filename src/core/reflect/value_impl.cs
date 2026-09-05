@@ -1492,8 +1492,11 @@ public static ΔValue New(ΔType typ) {
     nint[]? dims = arrayDimsOfReflectType(typ);
     GoChanDir chanDir = chanDirOfReflectType(typ);
     object box = GoReflect.NewPointerBox(st, GoReflect.ZeroValueOf(st, dims, chanDir));
-    // The POINTER descriptor carries its pointee's direction unshifted, so Elem() hands it back.
-    return makeTypedValue(box, typeof(ж<>).MakeGenericType(st), null, default, chanDir);
+    // The POINTER descriptor carries its pointee's direction AND dims unshifted, so Elem() hands
+    // them back: New(t).Elem().Type() is t for a pointer-to-array t (TestConvert's Set rows read
+    // `New(t2).Elem().Type() != tt.out.Type()` -- true with a dims-less pointer, the descriptor
+    // spelled *[]uint8 beside the box's own *[0]uint8).
+    return makeTypedValue(box, typeof(ж<>).MakeGenericType(st), dims, default, chanDir);
 }
 
 // NewAt returns a Value representing a pointer to a value of the specified type, using p as that
@@ -3741,12 +3744,26 @@ private static bool tryConvertOnlyShape(ΔValue v, ΔType t, System.Type dstType
         // nil slice converts to the destination's nil (Go: `(*[0]byte)([]byte(nil)) == nil`); a
         // longer-than-nil source already passed the length rule above.
         if (v.IsNil()) {
+            // Go's typed nil, carrying the SOURCE's read-only bit exactly as every other result does
+            // (`MakeRO(v).Convert(t)` must be read-only: TestConvert's RO rows).
             result = Zero(t);
+            result.flag |= v.flag.ro();
             return true;
         }
         object arrayPointer = GoReflect.AliasSliceAsArrayPointer(v.live!, dstType, want);
         result = makeTypedValue(arrayPointer, dstType, arrayDimsOfReflectType(t), v.flag.ro());
         return true;
+    }
+
+    // Struct -> struct whose underlying types are identical IGNORING TAGS (Go >= 1.8; increment E3 root 5):
+    // ConvertibleTo already says yes through convertOp's tag-blind identity, and the value conversion is
+    // a COPY, so a layout-compatible reinterpret of a copy is exactly Go's answer. Two lifted anonymous
+    // structs differing only in tags are two C# types of one shape (TestConvert's `some:\"foo\"` rows).
+    if (srcKind == Struct && dstKind == Struct && v.live is not null && haveIdenticalType(t.common(), v.typ(), false)) {
+        if (GoReflect.TryReinterpretValue(v.live, dstType, out object? retyped) && retyped is not null) {
+            result = makeTypedValue(retyped, dstType, arrayDimsOfReflectType(t), v.flag.ro());
+            return true;
+        }
     }
 
     // `(*B)(p)` between pointer types (increment E3 root 5): only the relations the managed model can
@@ -3759,6 +3776,7 @@ private static bool tryConvertOnlyShape(ΔValue v, ΔType t, System.Type dstType
     if (srcKind == ΔPointer && dstKind == ΔPointer) {
         if (v.IsNil()) {
             result = Zero(t);
+            result.flag |= v.flag.ro();
             return true;
         }
         if (GoReflect.TryConvertPointer(v.live, dstType, out object? convertedPointer) && convertedPointer is not null) {

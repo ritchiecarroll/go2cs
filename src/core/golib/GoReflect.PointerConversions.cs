@@ -172,6 +172,48 @@ public static partial class GoReflect
         return true;
     }
 
+    private static readonly ConcurrentDictionary<(Type, Type), Func<object, object>?> s_valueReinterpreters = new();
+
+    /// <summary>
+    /// A COPY of <paramref name="src"/> re-typed as <paramref name="dstType"/> when the two value types have
+    /// ONE representation (the same gate the pointer reinterpret uses: value types, the destination no
+    /// larger, layout-compatible) -- Go's value conversion between struct types identical up to their
+    /// tags (`struct{ x int "a" }` to `struct{ x int "b" }`, two lifted C# structs of one shape).
+    /// False for anything else; the caller refuses rather than guessing.
+    /// </summary>
+    public static bool TryReinterpretValue(object src, Type dstType, out object? result)
+    {
+        result = null;
+        Type srcType = src.GetType();
+        if (srcType == dstType)
+        {
+            result = src;
+            return true;
+        }
+        Func<object, object>? reinterpreter = s_valueReinterpreters.GetOrAdd((srcType, dstType), static key =>
+        {
+            (Type from, Type to) = key;
+            if (!from.IsValueType || !to.IsValueType)
+                return null;
+            bool representable = (bool)typeof(PointerExtensions.ReinterpretAliasesStorage<,>)
+                .MakeGenericType(from, to).GetField("Value", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!;
+            if (!representable)
+                return null;
+            MethodInfo copy = typeof(GoReflect).GetMethod(nameof(reinterpretCopy), BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(from, to);
+            return b => copy.Invoke(null, [b])!;
+        });
+        if (reinterpreter is null)
+            return false;
+        result = reinterpreter(src);
+        return true;
+    }
+
+    private static object reinterpretCopy<T, TDst>(object boxed)
+    {
+        T copy = (T)boxed;
+        return System.Runtime.CompilerServices.Unsafe.As<T, TDst>(ref copy)!;
+    }
+
     // The ж<X> a defined pointer type wraps (its generated single-argument constructor's parameter),
     // or the type itself for a plain ж<X>.
     private static Type underlyingPointerType(Type pointerType)
