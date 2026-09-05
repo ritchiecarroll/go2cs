@@ -100,6 +100,47 @@ arm64 by construction. It costs the identity in §1.1 — the address-take value
 stated. If a collision is ever *measured*, bit 63 is the remedy and this section is where it is
 priced.
 
+### 2.1 Addendum (2026-09-05, as built and rebased onto train 27): the token FORMS per box kind
+
+The paragraph above states the token for a `StandardBox`; the cut hands out `value.PointerOrderToken`
+for EVERY box kind that reaches the address-take arm, and the forms differ by kind — read from golib at
+the cut, cited so the §2 window argument is checked against each:
+
+| box kind | `PointerOrderToken` | source |
+|---|---|---|
+| `StandardBox<T>` | `AllocationBase(RuntimeHelpers.GetHashCode(box))` — the identity hash in the high word, low 32 bits zero | `ж.StandardBox.cs:137` |
+| `ElemRefBox<T>` (`&s[i]`) | `AllocationBase(hash(canonical backing)) + absolute element index` — the backing's identity in the high word, the ABSOLUTE index in the low word, so same-storage element pointers order by index exactly like Go addresses | `ж.ElemRefBox.cs:119` |
+| `FieldRefBox<T>` (`&x.f`, `of()` chains) | `AllocationBase(SourceIdentityHash(source)) + GoFieldDisplacement(source, field)` — the source identity resolved through the `of()` chain (SameSource), the displacement that of the field within its IMMEDIATE parent, so nested chains compose | `ж.FieldRefBox.cs:64` |
+| `SliceHeaderBox<T>` | its source's token | `ж.SliceHeaderBox.cs:195` |
+| `NativeBox<T>` | the native address it aliases; nil 0 | `ж.NativeBox.cs:85` |
+| a channel | `hash(core)`, nil 0 | `channel.cs:1207` |
+
+**What this does to the window.** Only the `StandardBox` form is 4 GiB-aligned. An element or field token
+carries its index or displacement in the LOW word, so it is a 4 GiB-aligned base PLUS a small offset — the
+same 4 GiB window as the base, one object's worth of offsets inside it. The disjointness argument of §2
+therefore reads: a native address collides with a token only if it falls inside a live box's 4 GiB window
+at exactly that box's offset for that field or element — the same window, the same backstop (the box must
+be alive and its CURRENT token equal the number), no new window. The bit-63 fallback prices identically
+for every form.
+
+**The measured member this addendum exists for, and its measurement.** `runtime/pprof`'s label round
+trip is the `StandardBox` form: `SetGoroutineLabels` takes `unsafe.Pointer(&labels)` on a heap-escaped
+`labelMap` — a struct wrapping a map, so a reference-bearing box with no pinnable slot — and the profile
+reads it back as `(*labelMap)(p.labels[i])`. Before the cut `(uintptr)box` was the `fixed` address of the
+box's own value field, a movable heap object, and `(ж<T>)(uintptr)` handed back a `NativeBox` over that raw
+address; after a collection the round trip read a `labelMap` length of 1885431144 (SUB-Q27's witness,
+2026-09-04), which is why the goroutine profile WITHHELD labels and why `TestGoroutineProfileLabelRace`
+— whose `/reset` loop waits for a label to appear in the profile text — sat in
+`runtime/pprof/go2cs_test_disclosures.json` as the host-fatal class's first HANG (Q43). With this token the
+number is the box's registered order token and resolves to the box for as long as the goroutine's slot
+holds the pointer, so the second commit of this series fills `labels[i]` from the registry's slot
+(`pprof_impl.cs`, under Go's own length guard) and re-measures the row at that union, gated
+`^(TestGoroutineCounts|TestGoroutineProfileLabelRace)$`, Release, tiering off, oracle go1.23.12 on linux:
+`TestGoroutineProfileLabelRace` PASS in 58 ms (`/reset` 42 ms, `/churn` 6 ms) where it consumed the 182 s
+deadline the day before, and `TestGoroutineCounts` PASS in 10.7 s with its label half reached — 4/4
+matching. The disclosure entry is retired by that measurement (the file's last note keeps the record),
+not by the reasoning.
+
 ## 3. Lifetime and release — weak, and what "weak" means for the consumer
 
 `Register` stores a `WeakReference` and sweeps dead entries as the table grows
