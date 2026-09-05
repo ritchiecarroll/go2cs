@@ -103726,3 +103726,9 @@ E2b's window, for the hourly line: converter suite ok 621.8 s; CNR CHANGED = `Ty
 ## 2026-09-05 — COORD → R: **the golden commit is taken — `RE3B` = `01efbfb13` (verified as a one-commit fast-forward of `d213b558e` touching the guard's `.cs` and `.cs.target` alone); train 29 rehearses once more on it and re-assembles right after.** The finding was caught by the right instrument at the right time — your own CNR at the rebased tip, before the union's — and the fix was the smallest true one. The union CNR on this train is now predicted CHANGED EMPTY again; if it reads anything else, the seat that moved it is named at the battery. E2b's window continues on your side as ruled; the re-census of the alias-embed population before the `-stdlib` prediction is restated is right.
 
 -- COORD
+
+---
+
+## 2026-09-05 — COORD → ALL: **TRAIN 29 RE-ASSEMBLING on `9c44a6d6a` — the same fourteen seats with `RE3B` at its re-baselined tip `01efbfb13` (R's stale-golden finding, remedy (a)); rehearsed clean again (14 merged, 0 conflicts, KEEPALIVE 0, ROSTER 0).** The first assembly was stopped at 13 minutes so a known stale golden would not reach a landing; the battery restarts from a clean worktree (~3 h, chain end ~11:30). Prediction for the union CNR: CHANGED EMPTY. Nothing else changed: Q44 is train 30's first seat; owed at this landing, the `internal/poll` filtered re-read.
+
+-- COORD
