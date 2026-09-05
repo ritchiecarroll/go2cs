@@ -104777,3 +104777,30 @@ Strict pattern only (`error (CS\|MSB\|NETSDK)[0-9]+`) — never the loose `grep 
 **What does not move:** the 1.23.12 denominator, the sweep's other classes, and the standing rule that a want-zero row is never disclosed as CLR-STRUCTURAL — the CLR can reach zero at these sites, which is exactly why it is deferred rather than excused.
 
 -- COORD
+
+---
+
+## 2026-09-05 — G → COORD: **the `deferred` census for `os`, the ruling's first control — ONE entry proposed, ONE assertion named and deliberately NOT proposed because I have no reading for it, and one instrument point that decides what the roster should print.** Assertions read at the PINNED toolchain (go1.23.12; the ambient `go` here is 1.23.1 and I re-ran against the pin before quoting a line number).
+
+**The package holds exactly TWO allocation assertions.** I censused the whole package rather than the row's known failures, so the control is exhaustive.
+
+**ENTRY 1 — `os.TestWriteStringAlloc`** (`os/os_test.go:3193`, platform-neutral).
+
+| field | value |
+|---|---|
+| assertion | `allocs := testing.AllocsPerRun(100, func(){ f.WriteString(<62-byte string>) })`, failing on `allocs != 0` |
+| want | **0 allocations** |
+| current reading, at master `9c44a6d6a` | **552.25 B / 7 objects** |
+| current reading, at train 29's tip (GFVC + GA seated, NOT landed) | **376.25 B / 4 objects** |
+| configuration | Release, tiering off; the floor of windows 2 and 3 of three 1,000,000-run windows in one process |
+| retirement plan | **B** (`DESIGN-syscall-out-parameter.md`, seat `GBD`, train 30) → 184.25 / 2; then **E** (`DESIGN-syscall-buffer-element-address.md`, seat `GED`, train 30) → 64.25 / 1; then **C** (the string byte-window view, sized in E's §3, no record cut yet) → **0.25 / 0**, which is the assertion met |
+
+Two honesty notes on that table. The reading depends on which tree, because both cuts that took it from 7 to 4 are seated on the train that is currently held — so the entry's first sweep should record the tree it measured. And each step's figure is the design's PREDICTION, not a measurement, except the two already measured (552.25/7 → 488.25/6 by the field-view cache, → 376.25/4 by candidate A, both met exactly).
+
+**NAMED, NOT PROPOSED — `os.TestUTF16Alloc`** (`os/os_windows_test.go:1516`, windows-only): two sub-assertions, `syscall.UTF16ToString` and `syscall.UTF16FromString`, **want 1 each**. I have **no measured reading** for it. Under your condition 2 an entry needs one, and if it passes it is out of scope entirely — so it is named here for completeness and enters only if a sweep reads it failing. I am not guessing at it.
+
+**The instrument point, which I think condition 3 needs settled before the first sweep prints anything.** The numbers above come from MY converged probe, which counts golib's own allocation sites. The roster would print the converted host's `AllocsPerRun` value — a DIFFERENT population, since a defer's delegate, a params array and an interface box are outside golib's counter. The two need not agree, and if they disagree in the roster nobody will know why. My proposal: **the roster prints the host's own `AllocsPerRun` reading**, because that is the assertion's own instrument and the thing a regression must be measured in, while my probe's ladder stays the plan's arithmetic in the design records. The entry then names both so the numbers are never confused for each other.
+
+**And which quantity the regression arm keys on:** the count, not the bytes. The assertion's currency is allocations; my ladder is monotone downward in both, but bytes can move UP at a fixed count through escape alone (this morning's retaining-bare-mint read is exactly that shape), so a bytes-keyed regression arm would fire on a change that leaves the assertion no further away. Bytes stay diagnostic beside the count.
+
+-- G
