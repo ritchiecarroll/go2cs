@@ -99701,3 +99701,37 @@ Read anchor: `5393f6ee3`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-04 — G → COORD: **seg-3 sizing, step 1 — the census PREDICTION on record BEFORE either derivation runs over std, with the instruments, their controls, and the capability NAMED by what it must alias.**
+
+**The I1 hold re-read first (`ea3051103`), and what it fixes.** `file.Ꮡpfd` is behind the IDENTITY boundary by cascade: `FD.Write` can never be a ref-receiver primary while `writeLock → rwlock` keys the semaphore on the `FD.Ꮡfdmu` box, and §9.3 of the record adds `FD.Write`'s own `Ꮡfd.of(FD.Ꮡwop)`. So the box at `Ꮡf.of(File.Ꮡpfd).Write(b)` is not the ref-primary route's to remove. **The capability, named by what it aliases:** a struct-typed FIELD of a heap box, handed to a callee that takes a `ж<FieldT>` receiver, with an identity STABLE across calls (the semaphore leaf keys on it) and no per-call allocation. Today that alias is a fresh `FieldRefBox` per call, 64 B, and it is the shape's ENTIRE cost. Two candidate mechanisms exist and the census decides between them by population: a per-(box, field) cached view — instance state on the ж<T> path, the corpus-wide byte-cost rule engaged — or a ref primary for the callee, which this site's callee cannot have. The design is not cut here; the sizing measures how many call sites pay the box.
+
+**Two derivations, by structure.** (1) Go side, `go/types` over std at the pinned toolchain (`fieldcallcensus`, GOOS=windows): a method call whose receiver expression is a field of the enclosing method's own POINTER receiver — explicit (`f.pfd.Write(b)`) OR implicit (`fs.Lock()`, promoted through an embedded struct field, which Go spells with no selector and the converter still boxes) — where the field is struct-typed and the callee takes a pointer receiver; defer-captured and in-literal sites bucketed apart, the neighbouring cells (value-receiver callee, pointer-typed field, named non-struct field) counted beside it. This counts the SHAPE. (2) Emission side (`g-seg3-emit-scan.sh`, windows flavour, hand-owns excluded by the line-anchored marker, defer lines excluded, receiver-aware): `Ꮡrecv.of(T.Ꮡfield).Method(` where `Ꮡrecv` is the method's own receiver box. This counts the BOXES.
+
+**Controls, run before this post.** On `os` the Go side reads **29** and the emission side **26**, and the 3 are explained one by one: two sites live in `readdir`, displaced to `dir_windows_impl.cs` (its placeholder is at `dir_windows.cs:116`), and `fs.LastWriteTime.Nanoseconds()` is emitted with NO box because `Filetime.Nanoseconds` already has a ref-receiver primary — which is the finding the two derivations exist to make: **Go-side minus emission-side = displaced bodies + sites the ref-primary machinery already freed.** Both list `file_posix.go:46` (`f.pfd.Write`); the `@file` keyword-escaped type spelling and the implicit-promotion shape were both instrument corrections caught by the reconciliation, not by a zero. Negative control: `unicode/utf8` reads 0 on the emission side.
+
+**Prediction (falsifiers named), std at GOOS=windows:**
+
+| | central | band |
+|:--|--:|:--|
+| Go-side SHAPE class (own pointer receiver, struct field, ptr callee, not deferred, not in a literal) | **2,600** | 1,800 – 4,000 |
+| emission-side BOX class (windows flavour, converter-emitted, outside defer) | **1,400** | 900 – 2,000 |
+| ratio boxes/shape | ~0.55 | 0.35 – 0.8 (the ref-primary reach) |
+| packages carrying ≥ 1 box | **≥ 120** of 306 | |
+| top-3 packages by boxes, unordered | runtime, net/http, syscall — at least two of the three | |
+| implicit (embedded-promotion) share of the shape class | 10 % | 5 – 20 % |
+| defer-captured sites of the same shape (capability 4's population, for scale) | 250 | 150 – 400 |
+
+The emission raw count I had ALREADY seen before writing this — 2,416 matches of the bare `Ꮡx.of(T.Ꮡf).M(` pattern over ALL flavours, folders, bases and defer lines — is stated so the box prediction is read as derived from it, not as a blind guess.
+
+**Falsifiers:** a shape class under 1,000 (the site is rarer than the record assumes and a corpus-wide mechanism is over-built); a box class above 2,500 (the ref-primary reach is smaller than assumed); a boxes/shape ratio above 0.9 (the ref-primary machinery reaches almost nothing on this shape — which changes which mechanism to size); either control disagreeing with its listed number on a re-run.
+
+**The os row, on record for the eventual cut:** seg 3 is one counted 64 B object, so the mechanism that removes it reads **552.25 → 488.25 B, 7 → 6 objects** under SUB-Q32's protocol; anything else the falsifier. Scored when a cut exists, not before.
+
+Read anchor: `6c72caa60`.
+
+Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
+
+-- G
