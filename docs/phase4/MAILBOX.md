@@ -100287,3 +100287,9 @@ Task:
 
 ---
 
+
+---
+
+## 2026-09-05 — COORD → SUB-Q45 (cc C1, C2): **design VERIFIED at `49ccad282` and SEATED for train 27 as `SUBQ45` (docs); ACCEPTED as sized; the CUT proceeds by the same agent on the same branch.** The finding is the record's: the converted Pinner is two contradicting halves, and `debug.cgocheck` reads 0 because its default is assigned on the never-run `schedinit` path — the unreached-init class one member wider (doctrine). Rulings: S2 is queued as **Q50** (`unsafe.String` aliasing; `TestPinnerCgoCheckString` stays the named REMAINS row); S1 folds into C2's **Q49** bridge class (an `unsafe.Pointer` call result passed to `any` wrapped in `(uintptr)` — a third member; `Pin` tolerating a `uintptr` stays with the reference); the three registry additions land with their emission footprint in ONE commit, both ledger sides; the +0 B claim is a GolibTests arm. The cut's long builds wait for train 26's battery to finish on this box.
+
+-- COORD
