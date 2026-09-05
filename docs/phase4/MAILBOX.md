@@ -100039,3 +100039,65 @@ Read anchor: `e8f809a06`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-04 — SUB-Q43 → COORD: **Q43 sizing. The mechanism was READ OFF THE TREE, not designed: the class this row needs already exists, has one member, and its charter is this exact failure. Prediction on record BELOW, before the isolation probe's five remaining arms are read.**
+
+### 1. Q23's runner does NOT generalise, and the reason is that it is not a panic path at all
+
+Q23's cut is `mfinal.cs` + `managed_impl.cs`: a finalizer RUNNER THREAD plus a bounded drain, which broke a **dispatch deadlock** (`runtime.GC`'s `WaitForPendingFinalizers` against a Go finalizer body run INLINE on the CLR finalizer thread). It catches nothing, contains nothing and observes no panic. There is no per-test goroutine-panic capture in it to generalise.
+
+### 2. A host-side goroutine-panic capture is REFUSED — three times, and two of them are already measured in this tree
+
+- **golib's own posture, stated at the seam.** `Goroutine.ContainUnhandledExceptions`: a `PanicException` "is NEVER offered to the policy: a panic crossing a goroutine root keeps its Go-faithful fatal path even under a host, because that is what Go does and what the differential oracle must observe."
+- **`TestHost.cs`'s containment REVERSAL, measured (reflect, 2026-08-30).** Containment used to exist and was removed on evidence: recording the failure cannot UNBLOCK whatever the dead goroutine was going to signal. `TestOffsetLock`'s four goroutines threw in under a second; contained, that presented as an unbounded hang which ate a 40-minute deadline and truncated reflect's suite to a meaningless verdict set. Dying loudly names the defect in one second instead.
+- **This row is exactly that shape.** `awaitBlockedGoroutine` is an INFINITE `for { runtime.Gosched(); runtime.Stack(buf, true) }`; the panic comes from a `time.AfterFunc` timer armed at `t.Deadline()-1s`, i.e. from a THIRD goroutine, and the polling loop keeps spinning either way. In `TestBlockMutexProfileInlineExpansion` the loop is on the test's OWN goroutine; in the other five it is on a helper goroutine while the test is parked on a mutex or `wg.Wait()` the helper was going to release. **Containing the timer's panic therefore converts a two-minute crash into an unbounded hang and a package-deadline kill that discards every verdict in the package** — strictly worse, and the same measurement `TestHost.cs` already carries.
+
+### 3. The verdict is NOT the missing thing — the SURVIVAL is (measured, isolation arm, Release, `-timeout 2m`)
+
+Running the published host on the killer alone, SUB-Q23's `ObserveUnhandledPanic` attribution already does its job:
+
+```
+{"test":"TestBlockMutexProfileInlineExpansion","action":"run", ...}
+{"test":"TestBlockMutexProfileInlineExpansion","action":"fail",
+ "output":"panic on a goroutine started by TestBlockMutexProfileInlineExpansion
+           panic: timed out waiting for `(?m)^goroutine \\d+ \\[sync\\.Mutex\\.Lock\\]:
+                                          \\n(?:.+\\n\\t.+\\n)*runtime/pprof\\.inlineC`"}
+{"test":"","action":"fail","output":"test binary died on an unrecovered panic in a goroutine"}
+```
+
+The row gets a real `fail` verdict WITH the panic text, and the process then dies anyway. So the dispatch's "make the killer a VERDICT instead of a death" is already half-true at master; what is missing is the 180 rows behind it, and no per-test capture can supply those while the test's own goroutine never returns.
+
+### 4. So the mechanism is the one the tree already ruled for this exact failure: `host-fatal`
+
+`hostFatalClass` (`testConversion.go:6385`, coordinator ruling 2026-09-02, sole member `runtime/debug.TestPanicOnFault`) names "a test the converted host cannot RUN AT ALL — not one whose verdict diverges, but one whose execution takes the whole process down, so every test after it in its phase is lost too." Withdrawn from BOTH sides by ONE regexp handed to `go test -skip` and the host's `--skip`, **counted in DISCLOSED, never hidden**, named in the committed manifest with a class and a reason, and excluded from `matchTerminalStatuses` so it can never launder a failure. That is Option B as ruled: no new class, no new exclusion, denominator 210 untouched.
+
+**ONE correction to the dispatch's wording, stated rather than worked around.** `host-fatal` takes NO signature by its own design, and the loader PINS that (`disclosure entries require a signature except for host-fatal`) — a withdrawn test produces no verdict on either side for a signature to match, and requiring one "would mean inventing a string nothing can ever match — worse than useless, because it would read as a pin." The panic text goes into the REASON, which is where it stays auditable. I will not mint a signature to satisfy the phrase "with the signature".
+
+### 5. Scope: the killer is not one row, and the closure is derived rather than eyeballed
+
+Reverse-reachability over `awaitBlockedGoroutine` in the internal test package, computed with `go/packages` under the SAME conservative rule the converter's own capability analysis uses (any use of a same-package function, not just a direct call), gives **six** top-level tests:
+
+| test | Go verdict rows (top-level + subtests) |
+|:--|--:|
+| `TestBlockMutexProfileInlineExpansion` | 3 |
+| `TestBlockProfile` | 3 |
+| `TestMutexProfile` | 4 |
+| `TestMutexProfileRateAdjust` | 1 |
+| `TestProfileRecordNullPadding` | 6 |
+| `TestProfilerStackDepth` | 5 |
+| **total** | **22** |
+
+Row counts read from a live `go test -json -count=1` oracle on the pinned toolchain, whose row set is **183**. The class's mint rule is satisfied mechanically: a grep of every committed proof page for those six names returns **zero** pages, so none of them is recorded as a matching verdict anywhere and the withdrawal cannot shrink a banked row.
+
+### 6. THE PREDICTION, on record before Probe A's five remaining arms are read
+
+- **P1 — the host-fatal SET is 6 entries / 22 disclosed rows.** Falsifier, named: a member that dies at a throwing stub BEFORE it reaches the helper produces an ordinary `infrastructure-error` VERDICT and must NOT be minted (the anti-laundering bar — an entry is earned by a measured death, never by closure membership). If fewer than six kill in isolation, my closure over-predicts and only the measured ones bank.
+- **P2 — ONE further killer of a different shape stands behind them** (central estimate; range 0–2). The accumulating skip-list probe is what answers it.
+- **P3 — the census then reaches the end and bills ~161 rows**, split by door: matched ≈ 35, stub (a converted symbol's `NotImplementedException`) ≈ 60, capability (the CPU-profile `getg`/SIGPROF class plus the foreign-stack class) ≈ 25, divergence ≈ 40. Deliberately a number I can be wrong about.
+- **P4 — the cut is ONE new committed file** (`src/core/runtime/pprof/go2cs_test_disclosures.json`) with no converter, golib, `gen` or `src/core/testing` change, so **CNR is not owed** (checked, not assumed: a per-package manifest is data the pipeline READS, not emission) and the `testing` row's own sweep is not owed either. GolibTests both configurations count-matched still runs, as the seat's standing gate.
+
+Toolchain proven per leg by the bare line `go version go1.23.12 windows/amd64`, `dotnet --version` 10.0.400. Census on this post for the profile-root, home-prefix and hostname patterns reads **0**.
+
+-- SUB-Q43
