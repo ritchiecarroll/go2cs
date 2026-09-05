@@ -373,6 +373,7 @@ public static partial class runtime_package
     [GoValueClone("b")] internal partial struct checkmarksMap {}
     internal partial struct childInfo {}
     internal partial struct chunkIdx {}
+    internal partial struct closefd_args {}
     [GoValueClone("stats")] internal partial struct consistentHeapStats {}
     internal partial struct coro {}
     [GoValueClone("extra")] internal partial struct cpuProfile {}
@@ -393,6 +394,7 @@ public static partial class runtime_package
     internal partial struct evacDst {}
     internal partial struct exceptionstate32 {}
     internal partial struct exceptionstate64 {}
+    internal partial struct exit_args {}
     internal partial struct fcntl_args {}
     internal partial struct find_firstFree {}
     [GoValueClone("subbuckets")] internal partial struct findfuncbucket {}
@@ -442,6 +444,7 @@ public static partial class runtime_package
     internal partial struct inlinedCall {}
     [GoValueClone("entries")] internal partial struct itabTableType {}
     [GoValueClone("it_interval", "it_value")] internal partial struct itimerval {}
+    internal partial struct kevent_args {}
     internal partial struct keventt {}
     internal partial struct lfstack {}
     internal partial struct limiterEvent {}
@@ -467,6 +470,7 @@ public static partial class runtime_package
     internal partial struct machVMRegionFlavour {}
     internal partial struct machVMSize {}
     internal partial struct mach_vm_region_args {}
+    internal partial struct madvise_args {}
     internal partial struct mapextra {}
     internal partial struct markBits {}
     [GoValueClone("alloc", "stackcache")] internal partial struct mcache {}
@@ -486,17 +490,20 @@ public static partial class runtime_package
     internal partial struct mheap_curArena {}
     internal partial struct mheap_userArena {}
     internal partial struct mlink {}
+    internal partial struct mlock_args {}
     internal partial struct mmap_args {}
     internal partial struct moduledata {}
     internal partial struct modulehash {}
     internal partial struct mspan {}
     [GoValueClone("heapStats", "pause_ns", "pause_end")] internal partial struct mstats {}
+    internal partial struct munmap_args {}
     internal partial struct neverCallThisFunction {}
     internal partial struct newmHandoffᴛ1 {}
     internal partial struct notInHeap {}
     internal partial struct notInHeapSlice {}
     internal partial struct notifyList {}
     internal partial struct offAddr {}
+    internal partial struct open_args {}
     internal partial struct pMask {}
     internal partial struct pTraceState {}
     [GoValueClone("summary", "chunks")] internal partial struct pageAlloc {}
@@ -528,11 +535,25 @@ public static partial class runtime_package
     internal partial struct profᴛ1 {}
     internal partial struct ptabEntry {}
     internal partial struct pthread {}
+    internal partial struct pthread_attr_getstacksize_args {}
+    internal partial struct pthread_attr_init_args {}
+    internal partial struct pthread_attr_setdetachstate_args {}
+    internal partial struct pthread_cond_init_args {}
+    internal partial struct pthread_cond_signal_args {}
+    internal partial struct pthread_cond_timedwait_relative_np_args {}
+    internal partial struct pthread_cond_wait_args {}
+    internal partial struct pthread_create_args {}
+    internal partial struct pthread_kill_args {}
+    internal partial struct pthread_mutex_init_args {}
+    internal partial struct pthread_mutex_lock_args {}
+    internal partial struct pthread_mutex_unlock_args {}
     [GoValueClone("X__opaque")] internal partial struct pthreadattr {}
     [GoValueClone("X__opaque")] internal partial struct pthreadcond {}
     [GoValueClone("X__opaque")] internal partial struct pthreadcondattr {}
     [GoValueClone("X__opaque")] internal partial struct pthreadmutex {}
     [GoValueClone("X__opaque")] internal partial struct pthreadmutexattr {}
+    internal partial struct raise_args {}
+    internal partial struct raiseproc_args {}
     internal partial struct randomEnum {}
     internal partial struct randomOrder {}
     internal partial struct reflectMethodValue {}
@@ -553,8 +574,10 @@ public static partial class runtime_package
     [GoValueClone("pad")] internal partial struct semTableᴛ1 {}
     internal partial struct semaProfileFlags {}
     internal partial struct semaRoot {}
+    internal partial struct setitimer_args {}
     internal partial struct sigTabT {}
     [GoValueClone("__sigaction_u")] internal partial struct sigactiont {}
+    internal partial struct sigaltstack_args {}
     internal partial struct sigctxt {}
     [GoValueClone("si_value", "__pad")] internal partial struct siginfo {}
     internal partial struct sigset {}
@@ -605,9 +628,12 @@ public static partial class runtime_package
     internal partial struct syscall_rawSyscall_args {}
     internal partial struct syscall_syscall6X_args {}
     internal partial struct syscall_syscall6_args {}
+    internal partial struct syscall_syscall9_args {}
     internal partial struct syscall_syscallPtr_args {}
     internal partial struct syscall_syscallX_args {}
     internal partial struct syscall_syscall_args {}
+    internal partial struct sysctl_args {}
+    internal partial struct sysctlbyname_args {}
     internal partial struct sysmontick {}
     internal partial struct taggedPointer {}
     internal partial struct textsect {}
@@ -660,6 +686,7 @@ public static partial class runtime_package
     internal partial struct userArena {}
     internal partial struct userArenaStateᴛ1 {}
     [GoValueClone("__sigaction_u")] internal partial struct usigactiont {}
+    internal partial struct usleep_args {}
     internal partial struct waitq {}
     internal partial struct wakeableSleep {}
     [GoValueClone("buf")] internal partial struct wbBuf {}

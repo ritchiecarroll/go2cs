@@ -27,6 +27,8 @@
     <None Include="$(MSBuildThisFileDirectory)captureModeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoConfigurationClass_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoUnsafeArgsLift.go" />
+    <None Include="$(MSBuildThisFileDirectory)cgoUnsafeArgsLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports_test.go" />
     <None Include="$(MSBuildThisFileDirectory)chainedCallScaling_test.go" />
     <None Include="$(MSBuildThisFileDirectory)chanDirectionCargo.go" />

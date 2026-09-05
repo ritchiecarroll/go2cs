@@ -42,6 +42,11 @@ import (
 // stack-kept set beyond what a single function's view can prove.
 
 func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Package, info *types.Info) {
+	// The //go:cgo_unsafe_args block lift is decided once per package, ahead of every per-file
+	// visitor below: its consumed `&first` must not heap-box the parameter (objectAddressTaken
+	// consults the mark), and the emission visitors read the same verdict. See cgoUnsafeArgsLift.go.
+	collectCgoUnsafeArgsLifts(files, info)
+
 	var concurrentTasks sync.WaitGroup
 
 	// A panic raised on THIS side of the `go` statement below cannot be recovered by the caller:
@@ -648,6 +653,13 @@ func (v *Visitor) objectAddressTaken(obj types.Object, body ast.Node, directOnly
 		unary, ok := n.(*ast.UnaryExpr)
 
 		if !ok || unary.Op != token.AND {
+			return true
+		}
+
+		// The `&first` a //go:cgo_unsafe_args block lift CONSUMES (cgoUnsafeArgsLift.go): the lift
+		// reads the parameter's VALUE into its synthesized block, so this address-of hands nobody a
+		// pointer into the parameter's storage and must not box it.
+		if packageLiftConsumedAddressOf[unary] {
 			return true
 		}
 

@@ -222,6 +222,93 @@ public static unsafe class GoLibcCall
         return r;
     }
 
+    /// <summary>
+    /// The BLOCK-ADDRESS-AS-ARGUMENT form of the per-symbol table (docs/phase4/DESIGN-cgo-unsafe-args-block-lift.md
+    /// §3.3, <c>walltime</c>): the trampoline passes the block ITSELF by address, behind
+    /// <paramref name="leading"/> constant registers — <c>clock_gettime(CLOCK_REALTIME, &amp;t)</c> — and libc
+    /// writes the result into that storage, so nothing is read back here.
+    /// </summary>
+    /// <param name="blockAddress">
+    /// The block's number: the pinned address of reference-free storage. A number that is a box's ORDER
+    /// TOKEN (reference-bearing storage, Q44) is refused by name — libc would write into an address that
+    /// names nothing; a native mirror at the seam is that pointee's remedy.
+    /// </param>
+    public static nuint CallWithBlockAddress(nint fn, nuint blockAddress, ReadOnlySpan<nuint> leading, nint errnoReader, string symbol)
+    {
+        if (blockAddress == 0)
+            throw new InvalidOperationException($"go2cs: libcCall({symbol}): the block passed by address is nil");
+
+        if (ManagedPointerTokens.Resolve(blockAddress) is INilPointer box && box.PointerOrderToken == blockAddress)
+            throw new InvalidOperationException($"go2cs: libcCall({symbol}): the block passed by address is reference-bearing managed storage — its number is an order token, not an address, and libc cannot write into it; a native mirror at the seam is the remedy");
+
+        if (leading.Length >= MaxArgs)
+            throw new ArgumentException($"go2cs: libcCall({symbol}): {leading.Length} leading registers leave no room for the block address", nameof(leading));
+
+        Span<nuint> args = stackalloc nuint[leading.Length + 1];
+        leading.CopyTo(args);
+        args[leading.Length] = blockAddress;
+
+        return Call(fn, args, GoLibcErrnoRule.None, errnoReader, out _);
+    }
+
+    /// <summary>
+    /// The RESULT-STORED-INTO-BLOCK form (§3.3, <c>pthread_self</c>): the trampoline calls with no
+    /// arguments and stores the result register into the block's FIRST WORD — <c>MOVQ AX, 0(BX)</c>. The
+    /// block is a named-integer wrapper (<c>pthread</c>: one field) or a scalar box; the first field, or
+    /// the scalar itself, receives the register at its own width and is stored back through the box.
+    /// </summary>
+    public static nuint CallStoringResultIntoBlock(nint fn, object? argsBox, nint errnoReader, string symbol)
+    {
+        if (argsBox is not INilPointer || argsBox is not IUntypedSlotAccess slot)
+            throw new InvalidOperationException($"go2cs: libcCall({symbol}): the result block does not resolve to a managed Go pointer box (got {argsBox?.GetType().FullName ?? "null"})");
+
+        Type? blockType = PointeeTypeOf(argsBox.GetType());
+
+        if (blockType is null)
+            throw new InvalidOperationException($"go2cs: libcCall({symbol}): the result block's box has no pointee type ({argsBox.GetType().FullName})");
+
+        if (!slot.TryLoadThrough(out object? value) || value is null)
+            throw new InvalidOperationException($"go2cs: libcCall({symbol}): the result block box is nil");
+
+        nuint r = Call(fn, ReadOnlySpan<nuint>.Empty, GoLibcErrnoRule.None, errnoReader, out _);
+        object? stored = RegisterAs(r, blockType);
+
+        if (stored is null)
+        {
+            FieldInfo[] fields = blockType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+            if (fields.Length == 0)
+                throw new InvalidOperationException($"go2cs: libcCall({symbol}): the result block {blockType.Name} has no first word to store into");
+
+            Array.Sort(fields, static (x, y) => x.MetadataToken.CompareTo(y.MetadataToken));
+            FieldInfo first = fields[0];
+
+            first.SetValue(value, RegisterAs(r, first.FieldType) ?? throw new InvalidOperationException(
+                $"go2cs: libcCall({symbol}): the result block's first word '{first.Name}' of {blockType.Name} is a {first.FieldType.Name}, which this dispatcher cannot fill from an integer register"));
+
+            stored = value;
+        }
+
+        if (!slot.TryStoreThrough(stored))
+            throw new InvalidOperationException($"go2cs: libcCall({symbol}): the result could not be stored back through the block's box");
+
+        return r;
+    }
+
+    // A register read at a scalar type's own width, or null when the type is not a register type.
+    private static object? RegisterAs(nuint r, Type type)
+    {
+        if (type == typeof(int)) return unchecked((int)(uint)r);
+        if (type == typeof(uint)) return unchecked((uint)r);
+        if (type == typeof(long)) return unchecked((long)(ulong)r);
+        if (type == typeof(ulong)) return unchecked((ulong)r);
+        if (type == typeof(nint)) return unchecked((nint)r);
+        if (type == typeof(nuint)) return r;
+        if (type == typeof(uintptr)) return (uintptr)r;
+
+        return null;
+    }
+
     // The T of a ж<T> subclass (StandardBox<T>, NativeBox<T>, ...): walk the base chain to ж<>.
     private static Type? PointeeTypeOf(Type boxType)
     {

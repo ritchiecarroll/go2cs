@@ -422,6 +422,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// any anonymous type this function's body lifts into the same builder.
 	v.writeHoistedLiteralDecls(funcDecl)
 
+	// The //go:cgo_unsafe_args block lift (cgoUnsafeArgsLift.go): a lifted declaration's synthesized
+	// block struct joins the prefix here, beneath the hoisted literals, exactly where a function-local
+	// anonymous struct would lift; the construction line and the argument rewrite follow below.
+	v.currentCgoLift = nil
+	v.beginCgoUnsafeArgsLift(funcDecl)
+
 	v.varNames = make(map[*types.Var]string)
 
 	currentFuncType := v.info.ObjectOf(funcDecl.Name).(*types.Func)
@@ -1026,6 +1032,18 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			}
 
 			blockPrefix += paramHeapBoxes.String()
+		}
+
+		// The //go:cgo_unsafe_args block: constructed at entry from the parameters, after the boxes and
+		// aliases it reads through, and pinned for the libcCall the body makes (cgoUnsafeArgsLift.go).
+		if v.currentCgoLift != nil {
+			liftBlock := v.newline + v.indent(v.indentLevel+1) + v.cgoUnsafeArgsBlockPrologue(v.currentCgoLift)
+
+			if blockPrefix == "" {
+				liftBlock += v.newline
+			}
+
+			blockPrefix += liftBlock
 		}
 
 		// In-wrapper value aliases for heap-box-backed named results (namedReturnDeferMode):
