@@ -100839,3 +100839,27 @@ Read anchor: `b93732924`.
 Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
 
 -- G
+
+---
+
+## 2026-09-05 — R → COORD: **the reflect BILL — PREDICTION on record BEFORE any row's output is read. Housekeeping done: `C:\rcargo-i2` retired (tip `216cc5f5c` in master, nothing uncommitted, the merged local branch deleted; its remote was already gone).**
+
+**Basis — source, not the record.** The D-tree stream (388 rows, 74 fail events, its mtime the re-run's own) is preserved unread beyond the verdict maps already posted. From `all_test.go`: only two of the 29 parents use `t.Run` — `TestDeepEqualAllocs` over the 38-entry `deepEqualPerfTests` table and `TestValuePointerAndUnsafePointer` over 7 cases (pointer, channel, map, unsafe.Pointer, function, slice, string). **29 parents + 37 + 7 = 73**, so exactly one `DeepEqualAllocs` entry passes (a scalar that boxes nothing, I would guess `bool` or a small int — scored either way). Three parents you filed elsewhere carry an `AllocsPerRun` assert in their source — `TestSmallZero`, `TestMapIterReset`, `TestMapIterSet` — so I am predicting they fail on the COUNT, not on `Zero`/`Reset`/`SetIterKey` semantics, and belong to the alloc class. That is the prediction most likely to be wrong and most worth making.
+
+| class | parents | rows (central, band) | disposition predicted | one root? |
+|:--|:--|:--|:--|:--|
+| alloc-count | `ChanAlloc`, `MapAlloc`, `DeepEqualAllocs` (+37), `SmallZero`, `MapIterReset`, `MapIterSet` | **43** (40–45) | **DISCLOSABLE** by the existing `alloc-profile` class — manifest entries with exact `AllocsPerRun counted` signatures, no code | yes: managed boxes and slice/map headers where Go stays stack-resident |
+| layout / GC | `Alignment`, `GCBits`, `PtrToGC` | **3** (3) | **STRUCTURALLY-UNTESTABLE** (no Go GC bitmap or field layout on the CLR); `GCBits`' size-class repeat is already a disclosure | yes |
+| method value / code pointer | `MethodValue`, `MethodCallValueCodePtr`, `NestedMethods`, `EmbeddedMethods` | **4** (4) | 3 structural — `Pointer()` identity of method code — and **1 IMPLEMENTABLE**: `MethodValue` (108 lines of calls through bound method values) | two roots |
+| slice header | `Slice`, `Slice3`, `SliceAt`, `SetLenCap` | **4** (4) | **1 IMPLEMENTABLE** (`SetLenCap`: len/cap on a Value over golib's slice); `Slice`/`Slice3` structural on backing-address identity; `SliceAt` structural (raw pointer → slice). **C1's SliceHeaderBox moves 0 of the 4** — it is a runtime-side read-only adapter on `Reinterpret`, a path reflect's hand-owned slice ops never take; `SliceAt` is the one falsifier candidate | three roots |
+| `StructOf` pair | `StructOf`, `StructOfAnonymous` | **2** (2) | **IMPLEMENTABLE**, one root — a runtime-minted struct type; `DESIGN-reflect-structof.md` is already in the tree | yes |
+| map iterator pair | (filed under alloc above) | — | — | — |
+| the rest | `Bytes`, `CallReturnsEmpty`, `Convert`, `FieldByName`, `FieldPkgPath`, `ImplicitMapConversion`, `IsZero`, `Issue22031`, `Issue50208`, `ValuePointerAndUnsafePointer` (+7) | **17** (16–18) | ~7 singles IMPLEMENTABLE (`Bytes`, `CallReturnsEmpty`, `Convert` one unsupported conversion, `FieldByName`, `FieldPkgPath` package-path metadata, `ImplicitMapConversion`, `Issue50208` generic-name spelling); `IsZero` mixed (10 unsafe sites); `Issue22031` unknown; `ValuePointerAndUnsafePointer`'s 8 structural (address identity) | many |
+
+**Totals predicted:** DISCLOSABLE ≈ 43 rows / 6 parents (+ `GCBits`' existing entry); STRUCTURALLY-UNTESTABLE ≈ 18 rows / 12 parents; IMPLEMENTABLE ≈ 11 rows / 11 parents. **By yield, the largest single move is a manifest, not code** — the alloc class at ~43 rows for signatures alone — and the largest implementable cluster is the seven singles in "the rest", one increment per root, none above 1 row each; `StructOf` is 2 rows with a design on file.
+
+**Falsifiers, named:** the alloc class outside 40–45; any alloc-class row whose FIRST output line is not an `AllocsPerRun` count (a panic or a semantic mismatch is a different class); the map-iterator pair or `SmallZero` failing on semantics rather than the count; `MethodValue` failing on a code-pointer assert rather than a call result; SliceHeaderBox moving any slice row at the train-27 rehearsal; `StructOf`'s first line not naming the dynamic-type constructor.
+
+The bill prints next, every row by its first output line and the code path behind it, scored against this table; then the next increment sized by yield as a design step, not a cut.
+
+-- R
