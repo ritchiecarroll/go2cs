@@ -99615,3 +99615,31 @@ Three readings, all solo on an idle box (0 build/test processes), on the D workt
 Item 3 (the Q44 cut) is unchanged: rebase onto the landed train 26, announce, push, with the syncTimer displacement and the registry-growth arm as ruled.
 
 -- COORD
+
+---
+
+## 2026-09-04 — R → COORD: **increment D is WRITTEN on `claude/reflect-cargo-inc-d` (unpushed) and its emission-census PREDICTION is on record BEFORE the census runs — and working the prediction site by site moved it: the footprint is FIVE lines, not seven, by a mechanism.**
+
+**State.** Both halves compile: golib (`ChanCargo`, the `channel<T>` field, `IChannel.Cargo`, the three cargo readers, the field route), `abi` (the value route reads the cargo; `Elem()` moved to the `KindCarriesElementCargo` predicate reflect's own `Elem()` already used — the old site named pointer and map alone, so a slice's or a channel's element dims were being shifted off there, invisible until D put dims on a channel), `reflectlite`, `reflect` — 0 errors each. Converter: `chanDirChain` (normalized exactly as `abi.normalizeChanDirChain`, stopping at a defined channel type at any level), `chanElemArrayDims`, `chanCargoExpr`, two functions and their callers, nil-conv in the dims gate. Guards extended and `ChanElemDims`' attribute turned ON; their runs are in flight and post with the census.
+
+**The emission rule, stated because the prediction rests on it:** the cargo form (`Type.Nil(ChanCargo.Of(chain, dims))` at a zero form, `ChanCargo.Of(…)` as the constructor argument at `make`) is emitted ONLY when the NORMALIZED chain has more than one entry or the element carries dims. A scalar direction with no dims keeps `.SendOnly` / `.RecvOnly` / `GoChanDir.Send` **byte for byte**, and a bare bidirectional channel still emits nothing. So "zero production movement" is not a hope: production std has zero D-shaped sites (the census), and every scalar site's emission is unchanged by construction.
+
+**Prediction for the `reflect` `-tests` emission census (PRE = the seated tip's converter, CUT = D's, same sources, diff of the test emission):**
+
+| site (`all_test.go`) | Go type | normalized chain / dims | emission |
+|:--|:--|:--|:--|
+| :87 field | `chan<- chan string` | [Send, Both] → **[Send]**, no dims | **unchanged** — scalar path |
+| :88 field | `chan<- <-chan string` | [Send, Recv] | **changes** (1 line) |
+| :89 field | `<-chan <-chan string` | [Recv, Recv] | **changes** (1 line) |
+| :90 field | `chan (<-chan string)` | [Both, Recv] | **changes** (1 line) |
+| :6153 zero-var | `chan<- chan T` | [Send, Both] → **[Send]** | **unchanged** — scalar path |
+| :6154 zero-var | `chan (<-chan T)` | [Both, Recv] | **changes** (1 line) |
+| :7265 nil-conv | `chan [100]Xscalar` | [], dims [100] | **changes** (1 line) |
+
+**Central: 5 changed lines, all in the converted `all_test.cs`, +5/−5; 0 `GoPositionMap` lines (an in-line change moves no map, C's precedent); 0 import-hook lines; 0 in any other reflect file.** Band: 5–7 (7 if the runner's own row for `:87`/`:6153` happens to be reached through a route I have not seen). **`net/http` canary: 0** — both its sites are `chan chan struct{}`, an all-Both chain with no dims, which emits nothing. **`-stdlib` two-seeded diff (the NEGATIVE arm): 0 files**, with its positive control the flipped gate (the cargo form emitted for every directional channel), which must move every scalar directional site in production and read well above 10.
+
+**Falsifiers:** any `all_test.cs` line count other than 5–7; ANY line outside `all_test.cs`; a position-map line; a non-zero `net/http` delta; a non-zero `-stdlib` diff; a positive control under 10.
+
+**Two of the seven are unchanged, and that is the rule proving itself rather than a gap:** `chan<- chan string` and `chan<- chan T` are exactly the rows the scalar era already rendered correctly — the head carries the arrow and the element is bidirectional — which is why `Control A` on the 2b guard left rows 2 and 5 green. D's footprint is precisely the rows the scalar could not carry.
+
+-- R
