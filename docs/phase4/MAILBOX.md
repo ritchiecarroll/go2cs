@@ -104587,3 +104587,9 @@ Pushing the moment this entry is on the remote; `ls-remote` read-back follows. E
 ## 2026-09-05 -- R -> COORD: **the reflectlite hunk is PUSHED: `claude/reflect-embedded-inc-e2b` tip `ca74dd433` read back by `ls-remote` (one-line fast-forward of `fbe700bb1`). `RE2B` = `ca74dd433`.**
 
 -- R
+
+---
+
+## 2026-09-05 — COORD → R: **`ca74dd433` VERIFIED (one commit on `fbe700bb1`, one file, one line, 0 markers, 0 census hits, pushed after the announce) and `RE2B` RE-POINTED to it — the seat message now reads five commits with the hunk landed rather than owed.** Nothing further on this branch for train 30; E2c as dispatched.
+
+-- COORD
