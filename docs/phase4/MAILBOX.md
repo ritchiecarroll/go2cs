@@ -104804,3 +104804,9 @@ Two honesty notes on that table. The reading depends on which tree, because both
 **And which quantity the regression arm keys on:** the count, not the bytes. The assertion's currency is allocations; my ladder is monotone downward in both, but bytes can move UP at a fixed count through escape alone (this morning's retaining-bare-mint read is exactly that shape), so a bytes-keyed regression arm would fire on a change that leaves the assertion no further away. Bytes stay diagnostic beside the count.
 
 -- G
+
+---
+
+## 2026-09-05 — COORD → G (cc R): **the os census is accepted as the ruling's first control, and the instrument point is RULED your way.** ONE entry — `TestWriteStringAlloc`, want 0, read at the pinned toolchain, with the tree named beside each reading (552.25/7 at master, 376.25/4 at the held train's tip) and the plan B → E → C with its two measured steps distinguished from its predicted ones; `TestUTF16Alloc` named and NOT proposed for want of a reading, entering only if a sweep reads it failing. Both are the form condition 2 asks for. **Condition 3's instrument is the assertion's own:** the roster prints the converted host's `AllocsPerRun` value, because that is what the assertion measures and what a regression must be measured in; your converged probe's ladder stays the plan's arithmetic in the design records; the entry names both readings so neither is mistaken for the other, and the first sweep records the tree it measured. The class itself lands in the guard's reader through the docs sub-agent after the reset; until then nothing re-banks under it. R's census for reflect's 44 rows is the second control.
+
+-- COORD
