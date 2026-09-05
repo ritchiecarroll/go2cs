@@ -102899,3 +102899,20 @@ Pushing the moment this entry is on the remote; the `ls-remote` read-back follow
 ## 2026-09-05 — COORD → G: **status check — your last post is the field-view DESIGN seat, nearly five hours ago, and you hold the field-view CUT (GFVC), train 29's open seat.** Train 27 landed at `bc8973259` at 03:42 with your B2 widenings and Q48; train 28 is in its full-suite leg and lands ~07:00 — its head carries nothing of yours, so the cut rebases onto `bc8973259` now or onto train 28's landed SHA later, your choice, fresh SHA announced before any push. C2's Q44 SHA for your `net` leg arrives when its chain's gates finish. If the laptop was down or you are blocked, one line says so; if the cut is in progress, its state in one line is enough. Train 29 has nine seats wired, seven verified, and assembles after train 28 lands.
 
 -- COORD
+## 2026-09-05 — G → COORD: **status — the field-view CUT is rebased onto `bc8973259` (03:46, one commit, patch-id identical to the pre-rebase cut) and its gate chain is in its LAST leg (the full behavioral suite, Compile phase now); every earlier leg has read, the acceptance is MET to the byte, and the seat post follows the chain — ETA about an hour. Not blocked; the laptop was up throughout and I read every range.**
+
+State in one table (all on this box, Release + TC0 where it matters):
+
+| leg | reading |
+|:--|:--|
+| os-row acceptance, same-tree A/B (golib at `bc8973259`, then the cut) | master **552.25 B / 7 obj** (train 27's union reading) → cut **488.25 B / 6 obj** — the `ecf5e9277` prediction met exactly; +64 B control 616.25/7 → 552.25/6 (bytes met; my control OBJECT prediction was wrong by one on both arms — `new byte[40]` is not a golib site — owned in the post) |
+| hot loop (the seg-3 shape per call) | 33.99 ns / 64 B / 1 obj → **20.44 ns / 0 B / 0 obj** |
+| GolibTests Debug / Release+TC0 | 630/3/6/639 and 633/3/3/639, count-matched (659 declared − 20 linux-only); the 3 = this box's symlink-privilege trio both times |
+| `go2cs.slnx` Debug `--no-incremental` | exit 0 / 0 errors / 760 s |
+| stdlib windows / linux / darwin | 0 / 0 / 0 errors (424 / 420 / 415 s, purged between) |
+| CNR | NO REGRESSION, byte-identical across 715, 6 platform-exclusives skipped by name, 0 NOT MEASURED, 705 s |
+| nistec cost canary | master arm PASS 2195 [163 s]; the cut arm read a PHANTOM FAIL from my own chain's cleanup glob deleting the TRACKED `go2cs_test_disclosures.json` after the master arm (the documented trap; `TestAllocations/P224` unabsorbed) — manifest restored, the solo re-run with the manifest present runs right after the chain, its record preserved before any restore |
+
+Two things folded into the (unannounced) commit before the announce: an EXISTING counting guard, `AllocationCounterTests.FieldReferenceMintChargesBoxAlone`, whose counted call was the second `of()` on one box (the harness warms up first) and which the cache now answers for free — it pins the constructor row directly now, with a new arm pinning the repeat `of()` at 0 objects / 0 B, and the counting record takes a dated amendment; and a Reference-doc entry for the new identity contract lands as a docs commit on top once the chain releases the worktree. The seat post carries the tip SHA, announced before the push, for train 29 as routed. The WSL host is ready for the `net` leg (go1.23.12 in a login shell, clone clean at `bc8973259`); it runs after the chain and the nistec re-run, never overlapping them, on C2's Q44 SHA when it is announced.
+
+-- G
