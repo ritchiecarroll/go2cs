@@ -284,8 +284,8 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
     }
 
     [GoType("dyn")] partial struct typeᴛ29_x {
-        internal int32 int32;
-        internal int64 int64;
+        [GoEmbedded] internal int32 int32;
+        [GoEmbedded] internal int64 int64;
     }
 
     [GoType("dyn")] partial struct Δtypeᴛ29 {
@@ -1462,16 +1462,16 @@ public static void TestUnaddressableField(ж<testing.T> Ꮡt) {
 [GoType("num:nint")] partial struct Tint;
 
 [GoType] partial struct Talias1 {
-    internal byte @byte;
-    internal uint8 uint8;
-    internal nint @int;
-    internal int32 int32;
-    internal rune rune;
+    [GoEmbedded] internal byte @byte;
+    [GoEmbedded] internal uint8 uint8;
+    [GoEmbedded] internal nint @int;
+    [GoEmbedded] internal int32 int32;
+    [GoEmbedded] internal rune rune;
 }
 
 [GoType] partial struct Talias2 {
     public partial ref Tint Tint { get; }
-    public Tint2 Tint2;
+    [GoEmbedded] public Tint2 Tint2;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

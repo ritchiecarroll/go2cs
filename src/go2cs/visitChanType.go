@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
+	"strings"
 )
 
 // Handles channel types in context of a TypeSpec
@@ -47,7 +48,25 @@ func (v *Visitor) visitChanType(chanType *ast.ChanType, identType types.Type, na
 	}
 
 	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), "", access, "")
-	v.writeStringLn(target, "%s[GoType(\"chan %s\")] %spartial struct %s;", v.localNameAttrFor(identType), elemType, access, getSanitizedIdentifier(name))
+	// A DIRECTIONAL defined channel type carries its direction chain on the wrapper as TYPE-level descriptor
+	// cargo (increment E3 follow-up 7e-b): the marker stays `chan T` -- go2cs-gen dispatches the Channel
+	// template on that prefix -- and `[GoChanDir(...)]` beside it is what reflect's descriptor reads back,
+	// so `type R <-chan T` answers ChanDir() RecvDir and ConvertibleTo refuses what Go refuses. The chain
+	// walks the UNDERLYING channel (chanDirChain refuses a Named type by design); a bidirectional type
+	// stamps nothing, so no existing emission moves (census: production 0 named directional channel types).
+	dirAttr := ""
+
+	if chain := chanDirChain(identType.Underlying()); len(chain) > 0 {
+		members := make([]string, len(chain))
+
+		for i, dir := range chain {
+			members[i] = goChanDirMember(dir)
+		}
+
+		dirAttr = "[GoChanDir(" + strings.Join(members, ", ") + ")] "
+	}
+
+	v.writeStringLn(target, "%s[GoType(\"chan %s\")] %s%spartial struct %s;", v.localNameAttrFor(identType), elemType, dirAttr, access, getSanitizedIdentifier(name))
 	finish()
 }
 

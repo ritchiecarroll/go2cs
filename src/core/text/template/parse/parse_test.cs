@@ -31,10 +31,10 @@ internal static ж<bool> debug = flag.Bool("debug"u8, false, "show the errors pr
     internal bool isUint;
     internal bool isFloat;
     internal bool isComplex;
-    internal int64 int64;
-    internal uint64 uint64;
-    internal float64 float64;
-    internal complex128 complex128;
+    [GoEmbedded] internal int64 int64;
+    [GoEmbedded] internal uint64 uint64;
+    [GoEmbedded] internal float64 float64;
+    [GoEmbedded] internal complex128 complex128;
 }
 
 // basics

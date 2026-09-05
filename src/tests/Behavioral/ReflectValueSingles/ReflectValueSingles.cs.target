@@ -37,9 +37,9 @@ internal static void expectPanic(@string label, @string want, Action f) {
 
 [GoType("[4]byte")] partial struct MyBytesArray;
 
-[GoType("ж<array<byte>>")] partial class MyBytesArrayPtr0;
+[GoType("ж<array<byte>>")] [GoArrayDims(0)] partial class MyBytesArrayPtr0;
 
-[GoType("ж<array<byte>>")] partial class MyBytesArrayPtr;
+[GoType("ж<array<byte>>")] [GoArrayDims(4)] partial class MyBytesArrayPtr;
 
 [GoType("bytes_package.Buffer")] partial struct MyBuffer;
 
@@ -62,9 +62,9 @@ internal static void convRow(@string label, any x, any want) {
 
 [GoType("chan nint")] partial struct IntChan;
 
-[GoType("chan nint")] partial struct IntChanRecv;
+[GoType("chan nint")] [GoChanDir(GoChanDir.Recv)] partial struct IntChanRecv;
 
-[GoType("chan nint")] partial struct IntChanSend;
+[GoType("chan nint")] [GoChanDir(GoChanDir.Send)] partial struct IntChanSend;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string setLen10ˢ = "SetLen(10)"u8;
@@ -159,6 +159,17 @@ private static readonly @string chanIntChanIntNilˢ2 = "<-chan int <- chan<- int
 private static readonly @string chanIntChanIntNilˢ3 = "chan<- int <- chan int(nil)"u8;
 private static readonly @string chanIntLiveIntChanˢ = "chan<- int <- live IntChan.Convert"u8;
 private static readonly object sendOnlySlotValueTypeˢ = (@string)"send-only slot value type:"u8;
+private static readonly object intChanRecvDirˢ = (@string)"IntChanRecv dir:"u8;
+private static readonly object intChanSendDirˢ = (@string)" IntChanSend dir:"u8;
+private static readonly object intChanDirˢ = (@string)" IntChan dir:"u8;
+private static readonly object intChanRecvIdentityValueˢ = (@string)"IntChanRecv identity value/slot/elem:"u8;
+private static readonly object intChanSendIdentityValueˢ = (@string)"IntChanSend identity value/slot/elem:"u8;
+private static readonly object chanSlotZeroReDescribesˢ = (@string)"chan slot zero re-describes:"u8;
+private static readonly object namedPtrToArrayOneˢ = (@string)"named ptr-to-array one descriptor:"u8;
+private static readonly object elemˢ = (@string)" elem:"u8;
+private static readonly object myBytesArrayPtrIdentityˢ = (@string)"MyBytesArrayPtr identity value/slot/elem:"u8;
+private static readonly object myBytesArrayPtr0Identityˢ = (@string)"MyBytesArrayPtr0 identity value/slot/elem:"u8;
+private static readonly object ptrSlotNewReDescribesˢ = (@string)"ptr slot New re-describes:"u8;
 
 [GoLocalName("S")] [GoType("[]byte")] internal partial struct main_S;
 
@@ -174,6 +185,16 @@ private static readonly object sendOnlySlotValueTypeˢ = (@string)"send-only slo
 
 [GoType("dyn")] internal partial struct main_holder {
     internal ж<nint> p;
+}
+
+[GoType("dyn")] internal partial struct main_chanSlots {
+    public IntChanRecv R;
+    public IntChanSend S;
+}
+
+[GoType("dyn")] internal partial struct main_ptrSlots {
+    public MyBytesArrayPtr P;
+    public MyBytesArrayPtr0 Z;
 }
 
 internal static void Main() {
@@ -368,6 +389,31 @@ internal static void Main() {
     slot.Set(reflect.ValueOf(live));
     slot.Interface()._<channel/*<-*/<nint>>().ᐸꟷ(8);
     fmt.Println(sendOnlySlotValueTypeˢ, reflect.TypeOf(slot.Interface()), receivedOnTheOriginalˢ, ᐸꟷ<nint>(live));
+    fmt.Println(intChanRecvDirˢ, reflect.TypeOf(((IntChanRecv)default!)).ChanDir(), intChanSendDirˢ, reflect.TypeOf(((IntChanSend)default!)).ChanDir(), intChanDirˢ, reflect.TypeOf(((IntChan)default!)).ChanDir());
+    void canRow(any xΔ2, any yΔ1) {
+        fmt.Printf("%-14v -> %-14v convertible=%v assignable=%v\n"u8, reflect.TypeOf(xΔ2), reflect.TypeOf(yΔ1), reflect.TypeOf(xΔ2).ConvertibleTo(reflect.TypeOf(yΔ1)), reflect.TypeOf(xΔ2).AssignableTo(reflect.TypeOf(yΔ1)));
+    }
+    canRow(/*<-*/channel<nint>.RecvOnly, ((IntChanRecv)default!));
+    canRow(channel/*<-*/<nint>.SendOnly, ((IntChanSend)default!));
+    canRow(((IntChan)default!), ((IntChanRecv)default!));
+    canRow(((IntChanRecv)default!), ((IntChan)default!));
+    canRow(((IntChanRecv)default!), channel/*<-*/<nint>.SendOnly);
+    canRow(((IntChanRecv)default!), (channel<nint>)(default!));
+    canRow(((IntChanSend)default!), /*<-*/channel<nint>.RecvOnly);
+    canRow(((IntChanRecv)default!), ((IntChanSend)default!));
+    var cst = reflect.TypeOf(new main_chanSlots(nil));
+    fmt.Println(intChanRecvIdentityValueˢ, AreEqual(reflect.TypeOf(((IntChanRecv)default!)), cst.Field(0).Type), AreEqual(reflect.TypeOf(((IntChanRecv)default!)), reflect.TypeOf(((ж<IntChanRecv>)nil)).Elem()), cst.Field(0).Type.ChanDir());
+    fmt.Println(intChanSendIdentityValueˢ, AreEqual(reflect.TypeOf(((IntChanSend)default!)), cst.Field(1).Type), AreEqual(reflect.TypeOf(((IntChanSend)default!)), reflect.TypeOf(((ж<IntChanSend>)nil)).Elem()), cst.Field(1).Type.ChanDir());
+    fmt.Println(chanSlotZeroReDescribesˢ, reflect.TypeOf(reflect.Zero(cst.Field(0).Type).Interface()), reflect.Zero(cst.Field(0).Type).Type().ChanDir());
+    fmt.Println(namedPtrToArrayOneˢ, AreEqual(reflect.TypeOf(((MyBytesArrayPtr0)nil)), reflect.TypeOf(new MyBytesArrayPtr0(Ꮡ(new array<byte>(0))))), AreEqual(reflect.TypeOf(((MyBytesArrayPtr)nil)), reflect.TypeOf(new MyBytesArrayPtr(Ꮡ(new array<byte>(4))))), elemˢ, reflect.TypeOf(((MyBytesArrayPtr)nil)).Elem(), reflect.TypeOf(((MyBytesArrayPtr0)nil)).Elem().Len());
+    canRow(((MyBytes)default!), ((MyBytesArrayPtr0)nil));
+    canRow(((MyBytesArrayPtr0)nil), ж<array<byte>>.NilBoxOfDims(0L));
+    canRow(((MyBytesArrayPtr)nil), ж<array<byte>>.NilBoxOfDims(4L));
+    canRow(((MyBytesArrayPtr)nil), ((MyBytesArrayPtr0)nil));
+    var pst = reflect.TypeOf(new main_ptrSlots(nil));
+    fmt.Println(myBytesArrayPtrIdentityˢ, AreEqual(reflect.TypeOf(new MyBytesArrayPtr(Ꮡ(new array<byte>(4)))), pst.Field(0).Type), AreEqual(reflect.TypeOf(((MyBytesArrayPtr)nil)), reflect.TypeOf(((ж<MyBytesArrayPtr>)nil)).Elem()), pst.Field(0).Type.Elem().Len());
+    fmt.Println(myBytesArrayPtr0Identityˢ, AreEqual(reflect.TypeOf(new MyBytesArrayPtr0(Ꮡ(new array<byte>(0)))), pst.Field(1).Type), AreEqual(reflect.TypeOf(((MyBytesArrayPtr0)nil)), reflect.TypeOf(((ж<MyBytesArrayPtr0>)nil)).Elem()), pst.Field(1).Type.Elem().Len());
+    fmt.Println(ptrSlotNewReDescribesˢ, reflect.TypeOf(reflect.New(pst.Field(1).Type).Elem().Interface()), reflect.New(pst.Field(0).Type).Elem().Type().Elem().Len());
 }
 
 } // end main_package

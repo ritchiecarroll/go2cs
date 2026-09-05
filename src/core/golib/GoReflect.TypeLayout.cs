@@ -1020,6 +1020,39 @@ public static partial class GoReflect
             : null;
     }
 
+    // -------- TYPE-level descriptor cargo (a DEFINED type's stamp beside its [GoType] marker) --------
+
+    private static readonly ConcurrentDictionary<Type, nint[]?> s_typeStampedDims = new();
+
+    /// <summary>
+    /// The array dims a DEFINED type carries on itself -- <c>[GoArrayDims(N)]</c> on the wrapper class of
+    /// <c>type P *[N]T</c> (increment E3 follow-up 7g) -- or null when the type carries none. The twin of
+    /// <see cref="TypeStampedChanDirChain"/>, read the same way.
+    /// </summary>
+    public static nint[]? TypeStampedDims(Type t)
+    {
+        return s_typeStampedDims.GetOrAdd(t, static type =>
+            type.GetCustomAttributes(typeof(GoArrayDimsAttribute), false) is [GoArrayDimsAttribute { Dims.Length: > 0 } stamped]
+                ? toNintDims(stamped.Dims)
+                : null);
+    }
+
+    private static readonly ConcurrentDictionary<Type, GoChanDir[]?> s_typeStampedChanDirChains = new();
+
+    /// <summary>
+    /// The channel direction chain a DEFINED channel type carries on itself -- <c>[GoChanDir(...)]</c> on the
+    /// wrapper struct of <c>type R &lt;-chan T</c> (increment E3 follow-up 7e-b) -- or null when the type
+    /// carries none. Memoized per type like <c>goTypeMarkerOf</c>, for the same reason: <c>abi.synthType</c>
+    /// asks on every descriptor, and a type's attributes are an immutable fact.
+    /// </summary>
+    public static GoChanDir[]? TypeStampedChanDirChain(Type t)
+    {
+        return s_typeStampedChanDirChains.GetOrAdd(t, static type =>
+            type.GetCustomAttributes(typeof(GoChanDirAttribute), false) is [GoChanDirAttribute { DirChain.Length: > 0 } stamped]
+                ? stamped.DirChain
+                : null);
+    }
+
     /// <summary>
     /// The DESCRIPTOR CARRIER a struct FIELD carries as a converter stamp — the uninhabited
     /// interface that holds the Go name of a defined-over-interface type the emission erased to a

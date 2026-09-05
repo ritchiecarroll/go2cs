@@ -120,7 +120,7 @@ internal static reflectꓸValue Generate(this prime _, ж<rand.Rand> Ꮡr, nint 
 }
 
 [GoType] partial struct zeroOrOne {
-    internal nuint @uint;
+    [GoEmbedded] internal nuint @uint;
 }
 
 internal static reflectꓸValue Generate(this zeroOrOne _, ж<rand.Rand> Ꮡrand, nint size) {
@@ -130,7 +130,7 @@ internal static reflectꓸValue Generate(this zeroOrOne _, ж<rand.Rand> Ꮡrand
 }
 
 [GoType] partial struct smallUint {
-    internal nuint @uint;
+    [GoEmbedded] internal nuint @uint;
 }
 
 internal static reflectꓸValue Generate(this smallUint _, ж<rand.Rand> Ꮡrand, nint size) {

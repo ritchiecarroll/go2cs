@@ -73,7 +73,17 @@ namespace go;
 /// idiom reaches the bridge only through a POINTER, which is this attribute's position, not that
 /// one.
 /// </para>
-[AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+/// <para>
+/// A DEFINED pointer-to-array type is the third position (increment E3 follow-up 7g): `type P *[0]byte`
+/// emits as a go2cs-gen wrapper CLASS whose <c>[GoType("ж&lt;array&lt;byte&gt;&gt;")]</c> marker
+/// spells the pointee's managed type and nothing of its length, so a NIL value (no pointee to
+/// measure) and a live one (<c>[0]</c> read off the pointee) synthesized TWO descriptors of one Go
+/// type -- reflect's TestConvert matrix saw <c>MyBytesArrayPtr0</c> twice. The converter stamps the
+/// dims on the class itself and <c>abi.synthType</c> fills from the TYPE, the stamp DECIDING (a caller's
+/// disagreeing dims are refused by name; <see cref="GoReflect.TypeStampedDims"/>);
+/// <see cref="GoChanDirAttribute"/> is the twin for a defined channel type's direction.
+/// </para>
+[AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
 public sealed class GoArrayDimsAttribute(params long[] dims) : Attribute
 {
     /// <summary>The Go array dimensions, outermost first.</summary>

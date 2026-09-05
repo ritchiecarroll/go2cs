@@ -13022,6 +13022,53 @@ type (
 
 ⚠ Related but distinct, and still open: `%T` of a lifted function-local **non-struct** named type still prints the hoisted identifier, because only lifted STRUCT types carry the `[GoLocalName]` stamp that the reflection bridge reads.
 
+### An embedded PREDECLARED type is a plain field stamped `[GoEmbedded]` (2026-09-05)
+
+Go lets a struct embed a predeclared type — `struct{ int }`, `struct{ *int }` — and the embed has
+nothing to promote: no methods, no fields, only a name (`int`) and the **Anonymous** bit
+`reflect.StructField` reports for it. The converter had always emitted such an embed as a PLAIN
+field named after its type, which is the right managed shape (there is no `partial ref` accessor to
+generate for a type with no members) and the wrong reflection surface: on the managed side a field
+named `int` of type `nint` is indistinguishable from a field somebody *declared* as `int nint`, so
+the projection keyed embeddedness on the promotion shape and answered `Anonymous == false` — the
+other half of reflect's `TestFieldPkgPath`, red since increment E2 landed the first half.
+
+The datum is stamped where it is lost, exactly as `[GoArrayDims]` stamps a parameter's array length
+and `[GoMapKeyDims]` a map field's key dims: the two `handled` branches of `visitStructType` that
+render an embedded predeclared type (and an embedded POINTER to one) emit the field with golib's
+`[GoEmbedded]` marker, and `GoReflect.GoFields` reads it into `GoFieldInfo.Embedded` for the
+plain-field arm. Nothing else moves — every embed of a NAMED type keeps its generated
+promotion shape, which already reports Anonymous:
+
+```go
+func test() struct { string; *int; P; M } {   // TypeConversionReturnType: P = *bool, M = map[int]int
+```
+```csharp
+[GoType("dyn")] internal partial struct test_R0 {
+    [GoEmbedded] internal @string @string;
+    [GoEmbedded] internal ж<nint> @int;
+    [GoEmbedded] public P P;
+    [GoEmbedded] public M M;
+}
+```
+
+The stamp's predicate is the converter's, not "predeclared": the two branches fire for an embed
+written as an identifier whose object's type is not a `*types.Named` — a basic type, or an ALIAS of
+a non-defined type (`P`, `M` above; an alias is not `Named` at those branches) — and for a `*T` embed
+whose pointee is not `Named`. Go reports every one of them `Anonymous`, so the stamp is right for the
+whole set; the census that sized the cut is keyed on exactly that predicate (positive control:
+`TypeConversionReturnType` reads 8 sites, four per textual occurrence of its struct).
+
+Blast radius, measured before the cut: **zero** embedded-builtin fields in production std (positive
+control: 269 embedded struct fields, not counted), 39 sites in six TEST packages (`reflect_test` 22,
+`internal/reflectlite_test` 7, `text/template/parse` 4, `sync/atomic_test` 3, `math/big_test` 2,
+`runtime_test` 1) — so the `-stdlib` two-seeded diff is empty on all three targets, the four banked
+rows' test sources take their attribute hunks with the cut, and CNR moves exactly one behavioral
+golden (`TypeConversionReturnType`, whose structs embed `string` and `*int` — four sites). Guarded by
+`ReflectFieldMetadata`'s root-4 rows: `struct{ int }` and `struct{ *int }` report Go's `Name`,
+`Anonymous` and `PkgPath`, beside a plain field of a named-int type (must NOT read embedded) and an
+embedded named int (Anonymous through the promotion shape already).
+
 ### An EMBEDDED field whose derived name equals the enclosing type is Δ-renamed
 
 The sibling of the case above, one layer earlier: an **embedded** field's member name is the

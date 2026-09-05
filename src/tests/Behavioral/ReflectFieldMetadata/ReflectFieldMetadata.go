@@ -8,9 +8,10 @@
 //   3. StructField.PkgPath is the package that DECLARED the field, even when the struct is a defined
 //      type over another package's struct (TestFieldPkgPath's localOtherPkgFields row).
 //
-// The row this guard deliberately does NOT carry: Anonymous for an embedded BUILTIN (`struct{ int }`),
-// which needs an emission marker the converter does not yet place (E2b, sized by census). That half of
-// TestFieldPkgPath stays red until it lands; adding its row here now would seat a red guard.
+//   4. StructField.Anonymous for an embedded BUILTIN (`struct{ int }`, `struct{ *int }`): a plain field
+//      the converter stamps [GoEmbedded] (increment E2b -- the other half of TestFieldPkgPath), beside
+//      the controls that must NOT read embedded (a plain field of a named-int type) and the embedded
+//      NAMED int the struct-wrapper route already reported.
 //
 // A second shape withheld for a different reason: a struct EMBEDDING `twice` (`type deeper struct{ twice }`,
 // the clause that an annihilation at one depth inhibits every deeper match) does not compile through
@@ -52,6 +53,13 @@ type once struct { // base reached ONCE: B is found at depth 2
 // --- root 3: PkgPath through a defined type over a foreign struct ---
 type local fieldlib.Outer
 
+// --- root 4 (E2b): Anonymous for an embedded builtin ---
+type myInt int
+type embedsInt struct{ int }        // embedded PREDECLARED type: Anonymous, named "int"
+type embedsIntPtr struct{ *int }    // embedded POINTER to a predeclared type: Anonymous, named "int"
+type holdsNamed struct{ n myInt }   // a plain field of a named-int type: NOT embedded (control)
+type embedsNamed struct{ myInt }    // an embedded NAMED int: Anonymous through the struct-wrapper route (control)
+
 func main() {
 	// 1. CanSet through an embedded read-only slice's element's field.
 	fmt.Println("CanSet via embedded  :", reflect.ValueOf(embeds{sElem{{}}}).Field(0).Index(0).Field(0).CanSet())
@@ -80,4 +88,14 @@ func main() {
 	fmt.Println("local.Field(1) PkgPath == Outer.Field(1) PkgPath:", lt.Field(1).PkgPath == ot.Field(1).PkgPath)
 	fmt.Println("local.Field(1) PkgPath is foreign (not this package, not empty):", lt.Field(1).PkgPath != mine, lt.Field(1).PkgPath != "")
 	fmt.Println("anon unexported PkgPath is this package:", mine == "main")
+
+	// 4. Anonymous for an embedded builtin, with its controls.
+	anon := func(label string, t reflect.Type) {
+		f := t.Field(0)
+		fmt.Printf("%-14s name=%-5s anonymous=%-5v type=%-6v pkgPath=%q\n", label, f.Name, f.Anonymous, f.Type, f.PkgPath)
+	}
+	anon("struct{ int }", reflect.TypeOf(embedsInt{}))
+	anon("struct{ *int }", reflect.TypeOf(embedsIntPtr{}))
+	anon("struct{ n T }", reflect.TypeOf(holdsNamed{}))
+	anon("struct{ myInt }", reflect.TypeOf(embedsNamed{}))
 }
