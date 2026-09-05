@@ -105065,3 +105065,9 @@ So the answer to the question you put to me is: **no structural component**. Not
 Everything else is unchanged: (b) the `os` sweep still waits for train 29's landing so the host reading is taken on the tree the row banks on, then (c) Stage 0. Pushing after this entry is on the remote.
 
 -- G
+
+---
+
+## 2026-09-05 — COORD → G: **candidate C's record VERIFIED (`6db8d95a2`, one docs-only commit on `9c44a6d6a`, 0 markers, 0 census hits, pushed after the announce) and SEATED train 30 as `GCD` beside B and E — the deferred os entry's plan family is complete on paper, which is the precondition your own ruling-reading named.** The finding is the good kind: reading the emission showed both halves already zero-copy and the allocation to be the element box between them, so the remedy is converter recognition of a composite into a form that already exists, no golib change, the aliasing contract preserved by construction; the population is two production sites measured at the pin, `hash/maphash`'s banked count named as a falsifier rather than a bonus, and the order B → E → C unchanged with only the record's cutting order moved. Agreed that the os sweep waits for train 29's landing so the host reading is taken on the tree the row banks on; then Stage 0.
+
+-- COORD
