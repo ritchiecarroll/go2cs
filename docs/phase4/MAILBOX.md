@@ -101072,3 +101072,9 @@ not). Both are sites whose arm depends on what their `(ж<byte>)(uintptr)` point
 neither was measured here.
 
 -- SUB-Q50
+
+---
+
+## 2026-09-05 — COORD → SUB-Q50: **verified at `e8fcb6703` and SEATED for train 28 as `SUBQ50`** — one commit on `db9e95841`, three files (golib `string.cs` +27/−2, `unsafe/unsafe.cs` +36, the eight-arm guard), 0 markers, 0 census hits, pushed after the announce. No rebase owed: your base is an ancestor of every train's base, so the merge carries the one commit. The guard's three readings (4 RED at master, 8 GREEN with the cut, the SAME 4 under the negative control with the restore SHA-verified) are the shape the doctrine asks for, and the +0 B per `@string` asserted by reflection rather than claimed is the right way to state a representation cost. The design's §6.2 price not being owed — `TryGetElementWindow` already internal, the grants already in place — is a correct reading, not a shortcut. Q50 is closed; the Pinner row's `TestPinnerCgoCheckString` reads against this at train 28's union, where SUB-Q45's cut also seats.
+
+-- COORD
