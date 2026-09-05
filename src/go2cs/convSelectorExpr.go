@@ -915,7 +915,18 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// `Ꮡa.regAssign(Ꮡt, 0)` (CS0103) the moment `abiSeq.regAssign` was registered. Where the box is
 	// genuinely in scope both forms bind (RecvGenerator mints the ж twin beside a `ref` primary),
 	// so keeping the box route there is what makes this narrowing corpus-inert.
-	if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodVal {
+	//
+	// DIRECT selections only (len(sel.Index()) == 1). A registered method reached THROUGH an
+	// embedded field — `a.add(r)` on `AddrRanges{addrRanges}` with `addrRanges.add` displaced — is a
+	// PROMOTED selection whose receiver is the EMBED, not `selectorExpr.X`: spelling `Ꮡa.add(…)`
+	// names the embedding type's box, which the hand-own's receiver (`ж<addrRanges>` or
+	// `ref addrRanges`) cannot bind, and the promoted forwarder the generators would otherwise mint
+	// is refused whenever the name collides with a package-level function (runtime's `add`) — a
+	// CS1929 in the `-tests` host that no production build reaches (measured 2026-09-05, runtime
+	// increment 7). The hop machinery below already answers the promoted shape from the Go body
+	// (the box hop `Ꮡa.of(AddrRanges.ᏑaddrRanges).add(…)` for a direct-ж callee), displaced or not,
+	// so a promoted selection falls through to it exactly as an unregistered method's does.
+	if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodVal && len(sel.Index()) == 1 {
 		if obj := sel.Obj(); obj != nil && v.isManualBoxReceiverMethod(obj) && v.exprHasReceiverBoxInScope(selectorExpr.X) {
 			if ident, ok := selectorExpr.X.(*ast.Ident); ok {
 				return fmt.Sprintf("%s%s.%s", AddressPrefix, v.getIdentName(ident), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))

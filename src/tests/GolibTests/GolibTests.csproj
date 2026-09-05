@@ -48,6 +48,14 @@
     <Compile Remove="LibcCallDispatchTests.cs" />
     <Compile Remove="DarwinSigmaskContractTests.cs" />
     <Compile Remove="DarwinSigactionContractTests.cs" />
+
+    <!-- A per-GOOS hand-own's Go-prefixed test helpers exist only under that flavour, so the GolibTests
+         classes that drive them are linux-only FILES by construction. These two reference
+         GoBootstrapConstants/GoParseHugePageSize (runtime/linux/os_linux_impl.cs) and
+         GoUsleepProbe/GoSysMmapProbe/GoSysMmapErrnoProbe (runtime/linux/mem_linux_impl.cs); compiled on
+         the windows flavour they are 22 strict CS0103 and they took train 29 red at the union gate. -->
+    <Compile Remove="RuntimeMemoryFamilyTests.cs" />
+    <Compile Remove="RuntimeBootstrapConstantsTests.cs" />
   </ItemGroup>
 
   <!-- The netapi32 ptrout gate is the mirror image: it drives windows-flavor-only syscall surface

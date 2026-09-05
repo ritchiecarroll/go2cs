@@ -66,9 +66,17 @@ namespace go;
 /// second access, and leaves a single whole-header assignment silent on the copy. Both are stated
 /// rather than hidden: before this box every such write corrupted the pinned managed slice struct's
 /// own bytes, so "silent on a detached copy" is strictly safer and "loud on the next access" is new.
-/// Honouring the write direction needs a commit step the pointer model cannot express here; the
-/// runtime's writers are all behind <c>mallocgc</c>/<c>sysAlloc</c>/<c>persistentalloc</c>, which the
-/// managed runtime does not have, so none is reachable today.
+/// Honouring the write direction needs a commit step a <c>ref</c> cannot express: the header's LAST
+/// store (<c>ranges.array = persistentalloc(…)</c>, after <c>len</c> and <c>cap</c>) is followed by no
+/// access of the box at all, so there is no point at which a materializing box can observe the
+/// completed header and re-base the slice — and committing EARLIER is impossible, because between the
+/// <c>cap</c> store and the <c>array</c> store the header names a nil array with a non-zero capacity
+/// (read on <c>addrRanges.init</c>'s own sequence, increment 7 of the runtime row, 2026-09-05). The
+/// corpus's field-by-field writers — <c>addrRanges.init</c>/<c>add</c>/<c>cloneInto</c> — are therefore
+/// hand-owned AT the write (<c>runtime/mranges_impl.cs</c>, re-basing over
+/// <see cref="slice{T}.OverNativeMemory(nuint, nint, nint)"/>); the whole-header writers
+/// (<c>traceMap</c>, <c>mheap.allspans</c>, <c>allArenas</c>) sit behind <c>sysAlloc</c>/<c>mheap.init</c>
+/// and stay unreached. The header→slice direction is the mirror box, <see cref="HeaderSliceBox{T, TDst}"/>.
 /// </para>
 /// <para>
 /// SCOPE. <typeparamref name="T"/> is exactly <c>slice&lt;X&gt;</c>; <typeparamref name="TDst"/> is a
@@ -76,7 +84,8 @@ namespace go;
 /// <see cref="IUnsafePointer"/> (the <c>unsafe.Pointer</c> class; golib cannot name that assembly, so
 /// the factory is resolved by reflection once per pair and pinned by a guard), then two <c>nint</c>s.
 /// A header whose first field is a typed <c>ж&lt;…&gt;</c> (<c>notInHeapSlice</c>) is NOT admitted —
-/// its sites are the <c>persistentalloc</c>/<c>sysAlloc</c> writers. The STRING header
+/// every corpus site that takes that view of a managed slice is a WRITER (the field-by-field family,
+/// hand-owned; the whole-header family, unreached), so there is no reaching READ for it to serve. The STRING header
 /// (<c>@string</c> → <c>stringStruct</c>, two fields) is one predicate line away and deliberately
 /// not switched on: its live route is the <c>(uintptr)</c> token bridge, which resolves a
 /// reference-bearing box only once Q44's token registry lands.
@@ -207,7 +216,7 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
     private void Materialize()
     {
         if (m_materialized && !EqualityComparer<TDst>.Default.Equals(m_value, m_handedOut))
-            throw new PanicException($"slice header written through a reinterpretation: a {typeof(TDst).Name} built over a {typeof(T).Name} was assigned through the header and the managed slice cannot be rebuilt from Go's (array, len, cap) words — the write landed on a detached copy (the runtime's own writers of this shape sit behind mallocgc/sysAlloc/persistentalloc)");
+            throw new PanicException($"slice header written through a reinterpretation: a {typeof(TDst).Name} built over a {typeof(T).Name} was assigned through the header and the managed slice cannot be rebuilt from Go's (array, len, cap) words — the write landed on a detached copy (the runtime's field-by-field writers, addrRanges.init/add/cloneInto, are hand-owned at the write for exactly this reason; its whole-header writers sit behind sysAlloc/mheap.init)");
 
         (object? backing, nint low, nint len, nint cap) = s_describe!((IArray)(object)m_source.Value);
 

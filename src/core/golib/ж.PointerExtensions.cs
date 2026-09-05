@@ -164,6 +164,16 @@ public static class PointerExtensions
         if (SliceHeaderBox<T, TDst>.Applies)
             return SliceHeaderBox<T, TDst>.Mint(box);
 
+        // The MIRROR: a Go slice built FROM a header — `*(*[]T)(unsafe.Pointer(&sl))` over a
+        // notInHeapSlice the runtime has just filled with a NATIVE base and (len, cap), emitted as
+        // Reinterpret<notInHeapSlice, slice<X>>(). The address route below would read a golib slice<X>
+        // struct out of a three-word header (the same type confusion the other way round); the box
+        // minted here re-bases a native-backed slice<X> over the header's address instead. Its sites
+        // are the page allocator's summary levels and chunk index and a span's heap-bits window
+        // (increment 7 of the runtime row, 2026-09-05); see its remarks for the two shapes it refuses.
+        if (HeaderSliceBox<T, TDst>.Applies)
+            return HeaderSliceBox<T, TDst>.Mint(box);
+
         // Not representable as an alias, so the derived pointer has to name the source's storage by
         // ADDRESS — which is only a pointer at all while that storage is held still. Pin it for the
         // derived box's lifetime where it can be pinned (see TryPinnedReinterpret, which also says why
