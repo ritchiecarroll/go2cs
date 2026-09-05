@@ -1,0 +1,155 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
+    <RootNamespace>go</RootNamespace>
+    <AssemblyName>SigIgnoreDisposition</AssemblyName>
+    <Product>go2cs</Product>
+    <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
+    <AssemblyTitle>$(Description)</AssemblyTitle>
+    <Authors>$(Product) Authors</Authors>
+    <Company>The $(Authors)</Company>
+    <Copyright>Copyright © 2018-2026 $(Company)</Copyright>
+    <RepositoryUrl>https://github.com/ritchiecarroll/go2cs</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <ApplicationIcon>go2cs.ico</ApplicationIcon>
+    <!-- `annotations`, not `enable`: Go has no non-nullable pointer, interface, map, slice, channel
+         or func, so nullable flow analysis asks a question the source language cannot pose, and
+         would warn across the whole conversion. This keeps `?` meaningful (golib's `ж<T>?`) with
+         the analysis itself off. -->
+    <Nullable>annotations</Nullable>
+    <!-- Diagnostics that are structural to the Go emission model, not defects: Go type names
+         (CS8981/CS8860), split partial structs (CS0282), Go comparison operators on value types
+         (CS0660/CS0661), Go zero values (CS8618), generated unreachable code and labels
+         (CS0162/CS0164), generated self-assignment (CS1717), the NaN idiom (CS1718), function
+         values in a `map[string]any` (CS8974), and `init()` as a module initializer (CA2255). -->
+    <NoWarn>CS0162;CS0164;CS0282;CS0660;CS0661;CS1717;CS1718;CS8618;CS8860;CS8974;CS8981;IDE0060;IDE1006;CA2255</NoWarn>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!-- Build outputs are copied to $(OutDir), so this default must also defer to an explicit
+       $(BaseOutputPath); otherwise that redirection silently never takes effect. -->
+  <PropertyGroup Condition="'$(OutDir)'=='' AND '$(BaseOutputPath)'==''">
+    <OutDir>bin/$(Configuration)/$(TargetFramework)/</OutDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(USERPROFILE)'==''">
+    <USERPROFILE>$(HOME)</USERPROFILE>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(go2csPath)'==''">
+    <go2csPath Condition="'$(Configuration)'!='Debug'">$(USERPROFILE)/go2cs/</go2csPath>
+    <go2csPath Condition="'$(Configuration)'=='Debug'">$(SolutionDir)</go2csPath>
+  </PropertyGroup>
+
+  <!-- Enable native compiled output optimizations. Publishing is an APPLICATION operation, so these
+       are scoped off Library: the SDK turns PublishTrimmed into EnableTrimAnalyzer at BUILD time, so
+       on a library it buys nothing but IL#### trim warnings the app publish recomputes over the whole
+       closure anyway. AllowUnsafeBlocks is a compile setting and stays unconditional. -->
+  <PropertyGroup Condition="'$(OutputType)'!='Library'">
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishTrimmed>True</PublishTrimmed>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <!-- NuGet packaging metadata for library projects; packing itself is explicit ('dotnet pack' via push-nuget.ps1), so plain builds emit no .nupkg -->
+  <PropertyGroup Condition="'$(OutputType)'=='Library'">
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageId>go.$(AssemblyName)</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageDescription>$(Description) -- C# project converted from Go source</PackageDescription>
+    <PackageProjectUrl>https://github.com/ritchiecarroll/go2cs</PackageProjectUrl>
+    <PackageIcon>go2cs.png</PackageIcon>
+    <PackageTags>$(AssemblyName);go2cs;Golang;go</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(OutputType)'=='Library'">
+    <None Include="go2cs.png" Pack="true" PackagePath="" Visible="false" />
+    <None Include="go2cs.ico" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+
+  <!-- Include the per-package README (emitted by the converter) in the NuGet package -->
+  <PropertyGroup Condition="'$(OutputType)'=='Library' AND Exists('$(MSBuildProjectDirectory)/README.md')">
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(OutputType)'=='Library' AND Exists('$(MSBuildProjectDirectory)/README.md')">
+    <None Include="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <!-- Expose output of source generators as local files -->
+  <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+    <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
+  </ItemGroup>
+
+  <!-- Define Go type aliases -->
+  <ItemGroup>
+    <Using Include="go.builtin" Static="True" />
+    <Using Include="System" />
+    <Using Include="System.Numerics" />
+    <Using Include="System.Object" Alias="any" />
+    <Using Include="System.Byte" Alias="uint8" />
+    <Using Include="System.UInt16" Alias="uint16" />
+    <Using Include="System.UInt32" Alias="uint32" />
+    <Using Include="System.UInt64" Alias="uint64" />
+    <Using Include="System.SByte" Alias="int8" />
+    <Using Include="System.Int16" Alias="int16" />
+    <Using Include="System.Int32" Alias="int32" />
+    <Using Include="System.Int64" Alias="int64" />
+    <Using Include="System.Single" Alias="float32" />
+    <Using Include="System.Double" Alias="float64" />
+    <Using Include="System.Numerics.Complex" Alias="complex128" />
+    <Using Include="System.Int32" Alias="rune" />
+    <Using Include="System.Numerics.BigInteger" Alias="GoBigConst" />
+    <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
+    <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Remove all .cs files, including those in sub-folders -->
+    <Compile Remove="**/*.cs" />
+    <!-- package_info.cs is compiled FIRST, ahead of the globs below. Roslyn orders module
+         initializers by compilation ITEM order, and the forced-init import hooks are module
+         initializers, so this is what makes "every import hook precedes every one of the package's
+         own inits" a deterministic guarantee rather than the alphabetical accident a bare glob
+         leaves it as (docs/phase4/DESIGN-import-hook-relocation.md S3).
+
+         Exists()-guarded because ONE shape has to serve every layout: a flat package holds the file
+         at its root, an L3 package holds it in the per-GOOS folder (the companion item is added
+         beside this one), and a platform-exclusive package built for another target has neither and
+         correctly contributes nothing. An unguarded item naming an absent file is not a no-op; it
+         is CS2001. -->
+    <Compile Include="package_info.cs" Condition="Exists('package_info.cs')" />
+    <!-- Include only .cs files from current folder -->
+    <Compile Include="*.cs" Exclude="package_info.cs" />
+    <!-- Converted test artifacts share this folder but belong to the colocated
+         <name>.tests.csproj, which compiles them. A Go test file is `*_test.go`, so its
+         conversion is `*_test.cs`. -->
+    <Compile Remove="*_test.cs;package_test_info.cs;go2cs_test_host.cs" />
+    <!--Remove all sub-folders -->
+    <None Remove="*/**/*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
+
+    <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
+    <ProjectReference Include="$(go2csPath)core/os/signal/os.signal.csproj" />
+    <ProjectReference Include="$(go2csPath)core/os/exec/os.exec.csproj" />
+    <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
+    <ProjectReference Include="$(go2csPath)core/syscall/syscall.csproj" />
+  </ItemGroup>
+
+</Project>
