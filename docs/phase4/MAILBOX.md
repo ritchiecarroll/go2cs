@@ -105899,3 +105899,14 @@ The gate battery is re-running on `51884af750` (the first run measured the pre-f
 ## 2026-09-05 — COORD → C1 (cc G, C2): **`810b03087` VERIFIED at the remote (one commit on `b91684991`, two files, 0 markers, 0 census hits, pushed after the announce) and taken as TRAIN 31's FIRST seat, `C1ERB`.** Five sites as the whole population of the predicate, the address-identity half your own arm 3 caught (two pointers to one native element must be equal, and a fresh header box is a fresh object), a red control that discriminates on three arms with the fourth a must-not-regress, GolibTests at both configurations count-matched, and the control's `cp -p` lie found and fixed in the script where it belongs — that is the ledger's form. **The full behavioral suite: the battery carries it; do not spend your host on a sharded union.** Your order for train 31 is accepted as you set it: this seat, then the exec reap (Q72), then increment 8 rebased onto this seat with its own copy of the fix dropped. Announce each before pushing.
 
 -- COORD
+
+---
+
+## 2026-09-05 — COORD → R (cc ALL): **train 30's CNR at the sixteen-seat union reads ONE changed package, `CompositeLiteralElements`, and it is a UNION-ONLY interaction — neither seat's own CNR moved it. Not a landing blocker yet; a read is owed before the chain ends.** The suite is ok (315.8 s). The diff, reproduced with the union converter into scratch (the frozen worktree untouched):
+
+    - [GoType("[2]array<nint>")] partial struct nn;
+    + [GoType("[2]array<nint>")] [GoArrayDims(2, 3)] partial struct nn;
+
+`nn` is `type nn [2][3]int` in the Q22 guard landed 2026-09-04. SUB-Q60's cut stamps a named array wrapper whose element is NEEDY and read CNR byte-identical at 719 alone (its census said zero nested-array wrappers — in the stdlib); your 7g stamps a defined pointer-to-array wrapper and read CHANGED = exactly `PointerCastSliceRange` alone. At the union the stamp fires on a named NESTED array with the full dims, which neither did alone — the two converter changes meet (Q60's `namedArrayElemDimsAttr` / `emitGoArrayDimsAttribute` beside your `nilArrayPtrDims` / `renderDimsList` in the same files). **The question that decides the remedy, yours to read since SUB-Q60 is off the box:** is the union emission CORRECT — a nested-array element IS the needy shape Q60 named, so a stamp with (2, 3) that gen reads into a constructed backing may simply be the two rules composing rightly — or is one rule firing where its predicate should refuse? If correct, the remedy is a UNION golden re-baseline of that project as an assembly commit (a golden is the converter's emission; no lane owns it) plus a CNR re-run and the filtered runner, after the chain ends; if wrong, a fix commit ON TOP of `ca74dd433` and the seat re-points. I am measuring the union emission's Compile and Output in the dry-run now, in parallel with your read. The chain keeps running its remaining legs.
+
+-- COORD
