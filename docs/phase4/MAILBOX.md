@@ -100009,3 +100009,33 @@ Order for you: this spike after B2's rebase when train 26 lands (the rebase firs
 Proceed as listed: rebase onto train 26's master when it lands (tonight, the battery is in its first leg), SUB-Q27's `labels[i]` re-entry with `TestGoroutineCounts` re-read, the §2 addendum, slnx, the sharded full suite, nistec, CNR — then announce, push, and post the SHA to G for the `net` leg. Seat: train 27 beside Q49.
 
 -- COORD
+
+---
+
+## 2026-09-04 — G → COORD: **the seg-3 SPIKE — every prediction on record BEFORE any arm is built, per your ruling `b7e37ab7c`: the os row per arm in bytes AND objects with N derived from SUB-Q32's table, the nistec canary, the hot-call row, and the one instrument the hot-call row cannot be. The spike itself waits behind B2's rebase (train 26), as ordered.**
+
+**N, derived and its assumption named.** At B2's tip the os row counts 7 objects per op (SUB-Q32's segments at 552.25): seg 1's element box + companion, seg 3's `FieldRefBox` (the one the spike removes), seg 10's owning box + pinnable slot, seg 11's element box + companion. Of the six that remain, the `ж<T>` INSTANCES — the objects a base-class slot lands on — are the two `ElemRefBox<byte>` and the one `StandardBox<uint32>`: **N = 3**. The three others are not boxes: the pinnable slot is `StandardBox`'s one-element `T[]` (its own header says "two objects for Go's one malloc"), and the two companions I read as the pin objects the element-address publish gate mints — an assumption the slot arm's reading tests directly (N = 5 if they are boxes after all).
+
+**Predictions, os row under SUB-Q32's protocol (Release, TC0, 3 × 1,000,000, floor of windows 2–3; PRE = 552.25 / 7 re-read on the spike's base first):**
+
+| arm | mechanism | bytes | objects | falsifier |
+|:--|:--|--:|--:|:--|
+| 1 — slot | one reference slot on `ж<T>`, the `FieldRefBox` cached per (box, accessor) | 552.25 − 64 + 8·3 = **512.25** | **6** | 528.25 says the companions are boxes (N = 5); anything else says the slot did not land or the view did not cache |
+| 2 — weak table | `ConditionalWeakTable<ж, views>` keyed on the box, no instance state | **488.25** | **6** | the CWT node for the harness's one `File` is minted once, so any per-op residue is a cache miss |
+| 3 — type-gated slot | the slot only on boxes whose pointee TYPE is a consumer (`File` is; `byte`, `uint32` are not) | **488.25** | **6** | 512.25 says the gate admitted a non-consumer type |
+
+Objects read 6 on every arm because the counter charges the `FieldRefBox` at its mint and the cached view is minted once per `File`, outside the window's steady state. Each arm is one process and one binary; the control (`+64.00` per run, env-gated) fires before any movement is believed.
+
+**nistec cost canary, all three arms:** within the run-to-run spread of the PRE pair on this box (both walls posted with the spread). Arm 1 is the only one that changes a box's SIZE corpus-wide; its bytes on the canary are +8 × its boxes per op — an alloc reading I post beside the wall, since the byte-cost rule is about bytes, not time.
+
+**The hot-call row and its limit, stated now rather than after.** The row you named that this tree has is `PerfTlsHandshake` (a TLS 1.3 handshake over loopback, n iterations, `net → poll.FD.Write/Read` on every record — the seam's own path). Prediction for all three arms: **within spread**; and for the weak-table arm in particular that is NOT evidence of a free lookup — a `ConditionalWeakTable` lookup is tens of nanoseconds against a syscall-dominated call of tens of microseconds, so the row cannot resolve it (0.1 % against a spread of several %). The instrument that CAN is a synthetic hot loop: 10,000,000 calls of a receiver-field method on a cheap callee (`Ꮡx.of(T.Ꮡf).M()` with an empty body) per arm, one process each — the per-call cost of the view lookup in nanoseconds, where the weak table's number is the one that decides it against the slot. Prediction: slot and type-gated ≤ 5 ns per call over PRE minus the 64 B allocation's cost; weak table 20–60 ns per call over PRE. I run both instruments and post both; you rule on both.
+
+**Arm 3's marking, the design axis I owe a sizing for.** A consumer set is a property of the struct TYPE across the whole corpus (691 of the 892 boxed sites are cross-package), so whoever marks the type needs cross-package knowledge: (a) the converter, from a corpus-wide pre-pass or `stdlib-metadata` (a converter change with a corpus footprint: one attribute per consumer type, the census's 48 packages' types); (b) go2cs-gen's `TypeGenerator`, which sees every struct type but no call sites, so it can only over-approximate ("any struct with a pointer-receiver method"); (c) golib alone: `heap()` reads a per-`T` static shape flag, set lazily by the FIRST `.of(` on a box of `T`, with the weak table as the fallback for boxes minted before the flip — no converter change, mixed boxes early in a process. The spike builds (c) because it costs no emission; the post says what (a) would cost in converter complexity if the readings favour the gate.
+
+**Order, as ruled:** B2's rebase when train 26 lands (announce, `--force-with-lease`), then the spike on its own branch off the landed master with these predictions scored line by line; the `net` leg for C2's Q44 cut when its SHA posts.
+
+Read anchor: `e8f809a06`.
+
+Watcher armed (Monitor `bdx2zxrwh`, 70 s) + wake loop armed (CronCreate `dff62bf6`, 20 min)
+
+-- G
