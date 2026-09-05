@@ -8,12 +8,21 @@
 //     addressability, then an ALIAS of the array's own backing (TestBytes).
 //  3. Name of an instantiated generic type keeps its type arguments: the package qualifier ends
 //     before the first '[', not at the last '.' of the whole spelling (TestIssue50208).
+//  4. unsafe.Pointer identity across the two address models: a Pointer reflect mints (the identity
+//     token) and one the converter mints from the same box (its address) are the SAME pointer
+//     (TestImplicitMapConversion #5/#7).
+//  5. Convert's pointer family: (*[N]T)(s) ALIASES the slice's backing; (*B)(p) between pointers whose
+//     pointees have one representation aliases the same storage; nil converts to the destination's
+//     typed nil, dims and all (TestConvert).
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
+	"unsafe"
 )
 
 // expectPanic runs f and reports whether it panicked and whether the panic text mentions want --
@@ -29,6 +38,30 @@ func expectPanic(label, want string, f func()) {
 
 type gA struct{}
 type gB[T any] struct{}
+
+type integer int
+type MyBytes []byte
+type MyBytesArray0 [0]byte
+type MyBytesArray [4]byte
+type MyBytesArrayPtr0 *[0]byte
+type MyBytesArrayPtr *[4]byte
+type MyBuffer bytes.Buffer
+
+// convRow converts x to want's type and reports kind, DeepEqual against want, and nil-ness -- TestConvert's
+// own comparison (type identity, then DeepEqual of the interfaces) restated per row.
+func convRow(label string, x, want any) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("%-34s PANIC: %v\n", label, r)
+		}
+	}()
+	v := reflect.ValueOf(x).Convert(reflect.TypeOf(want))
+	fmt.Printf("%-34s type==%v deepEqual=%v nil=%v\n", label, v.Type() == reflect.TypeOf(want), reflect.DeepEqual(v.Interface(), want), v.Kind() == reflect.Ptr && v.IsNil())
+}
+
+type IntChan chan int
+type IntChanRecv <-chan int
+type IntChanSend chan<- int
 
 func main() {
 	// --- root 1: SetLen / SetCap ---
@@ -90,5 +123,116 @@ func main() {
 	fmt.Println("Name gB[gB[gA]]:", reflect.TypeOf(new(gB[gB[gA]])).Elem().Name())
 	fmt.Println("String gB[gA]:", reflect.TypeOf(gB[gA]{}).String())
 	fmt.Println("Name plain gA:", reflect.TypeOf(gA{}).Name())
+
+	// --- root 4: unsafe.Pointer identity across address models ---
+	m5 := make(map[io.Reader]io.Writer)
+	mv5 := reflect.ValueOf(m5)
+	b1, b2 := new(bytes.Buffer), new(bytes.Buffer)
+	mv5.SetMapIndex(reflect.ValueOf(b1), reflect.ValueOf(b2))
+	x5, ok5 := m5[b1]
+	fmt.Println("#5 entry is b2:", x5 == b2, ok5)
+	p5 := mv5.MapIndex(reflect.ValueOf(b1)).Elem().UnsafePointer() // a LOCAL, as the test holds it: the comparison is then pointer identity
+	fmt.Println("#5 MapIndex(b1).Elem().UnsafePointer() == unsafe.Pointer(b2):", p5 == unsafe.Pointer(b2))
+	type MyBuffer bytes.Buffer
+	m7 := make(map[*MyBuffer]*bytes.Buffer)
+	mv7 := reflect.ValueOf(m7)
+	k7, v7 := new(MyBuffer), new(bytes.Buffer)
+	mv7.SetMapIndex(reflect.ValueOf(k7), reflect.ValueOf(v7))
+	p7 := mv7.MapIndex(reflect.ValueOf(k7)).UnsafePointer()
+	fmt.Println("#7 MapIndex(b1).UnsafePointer() == unsafe.Pointer(b2):", p7 == unsafe.Pointer(v7))
+	// the same box minted twice by reflect, and by reflect vs the language, are one pointer
+	n := new(int)
+	pn1, pn2 := reflect.ValueOf(n).UnsafePointer(), reflect.ValueOf(n).UnsafePointer()
+	fmt.Println("reflect twice:", pn1 == pn2, " reflect vs unsafe.Pointer(n):", pn1 == unsafe.Pointer(n))
+	// different boxes stay different; an interior offset is not the base
+	n2 := new(int)
+	var arr [4]int64
+	fmt.Println("different boxes:", pn1 == unsafe.Pointer(n2), " interior != base:", unsafe.Add(unsafe.Pointer(&arr), 8) != unsafe.Pointer(&arr), " base == base:", unsafe.Pointer(&arr) == unsafe.Pointer(&arr))
+
+	// the Equals/GetHashCode contract, observed through a map keyed by unsafe.Pointer: a key minted by
+	// reflect is found by the language's pointer to the same box, and a numeric key by its equal number
+	keyed := map[unsafe.Pointer]int{reflect.ValueOf(n).UnsafePointer(): 1}
+	_, foundBox := keyed[unsafe.Pointer(n)]
+	interior := map[unsafe.Pointer]int{unsafe.Add(unsafe.Pointer(&arr), 8): 2}
+	_, foundNumber := interior[unsafe.Add(unsafe.Pointer(&arr), 8)]
+	_, missOther := keyed[unsafe.Pointer(n2)]
+	fmt.Println("map: same box twice found:", foundBox, " same number twice found:", foundNumber, " other box found:", missOther)
+	// a FIELD's address minted twice is one pointer: each `&h.p` is a fresh field-ref box over the same
+	// storage, and identity is the referent's order token, not the box object (the ManagedAtomicPointer
+	// guard's row 8, caught in the full suite during the referent cut)
+	type holder struct{ p *int }
+	var h holder
+	fp := unsafe.Pointer(&h.p)
+	fieldKeyed := map[unsafe.Pointer]int{fp: 3}
+	_, foundField := fieldKeyed[unsafe.Pointer(&h.p)]
+	fmt.Println("same field twice:", fp == unsafe.Pointer(&h.p), " field vs other box:", fp == unsafe.Pointer(n), " map: same field twice found:", foundField)
+
+	// --- root 5: Convert's pointer family ---
+	convRow("[]byte(nil) -> *[0]byte", []byte(nil), (*[0]byte)(nil))
+	convRow("[]byte{} -> *[0]byte", []byte{}, new([0]byte))
+	convRow("[]byte{7} -> *[1]byte", []byte{7}, &[1]byte{7})
+	convRow("MyBytes{9} -> *[1]byte", MyBytes([]byte{9}), &[1]byte{9})
+	convRow("[]byte{1,2,3,4} -> MyBytesArrayPtr", []byte{1, 2, 3, 4}, MyBytesArrayPtr(&[4]byte{1, 2, 3, 4}))
+	convRow("[]byte(nil) -> MyBytesArrayPtr0", []byte(nil), MyBytesArrayPtr0(nil))
+	convRow("[]byte{1,2,3,4} -> *MyBytesArray", []byte{1, 2, 3, 4}, &MyBytesArray{1, 2, 3, 4})
+	convRow("[]byte(nil) -> *MyBytesArray0", []byte(nil), (*MyBytesArray0)(nil))
+	convRow("new([0]byte) -> *MyBytesArray0", new([0]byte), new(MyBytesArray0))
+	convRow("new(MyBytesArray0) -> *[0]byte", new(MyBytesArray0), new([0]byte))
+	convRow("MyBytesArrayPtr0(nil) -> *[0]byte", MyBytesArrayPtr0(nil), (*[0]byte)(nil))
+	convRow("(*[0]byte)(nil) -> MyBytesArrayPtr0", (*[0]byte)(nil), MyBytesArrayPtr0(nil))
+	convRow("new(int) -> *integer", new(int), new(integer))
+	convRow("new(integer) -> *int", new(integer), new(int))
+	convRow("*MyBuffer -> *bytes.Buffer", new(MyBuffer), new(bytes.Buffer))
+	// the converted array pointer ALIASES the slice: a write through it lands in the slice
+	src := []byte{1, 2, 3, 4}
+	ap := reflect.ValueOf(src).Convert(reflect.TypeOf((*[4]byte)(nil))).Interface().(*[4]byte)
+	ap[2] = 99
+	fmt.Println("array pointer aliases the slice:", src[2] == 99)
+	sh := reflect.ValueOf([]byte{1, 2, 3, 4})
+	expectPanic("Convert short slice", "cannot convert slice with length 4 to pointer to array with length 8", func() { sh.Convert(reflect.TypeOf((*[8]byte)(nil))) })
+
+	// --- root 5 follow-up 7e: Convert between channel types carries the destination's direction ---
+	convRow("IntChan(nil) -> chan<- int", IntChan(nil), (chan<- int)(nil))
+	convRow("IntChan(nil) -> <-chan int", IntChan(nil), (<-chan int)(nil))
+	convRow("chan int(nil) -> IntChanRecv", (chan int)(nil), IntChanRecv(nil))
+	convRow("chan int(nil) -> IntChanSend", (chan int)(nil), IntChanSend(nil))
+	convRow("IntChanRecv(nil) -> <-chan int", IntChanRecv(nil), (<-chan int)(nil))
+	convRow("<-chan int(nil) -> IntChanRecv", (<-chan int)(nil), IntChanRecv(nil))
+	convRow("IntChanSend(nil) -> chan<- int", IntChanSend(nil), (chan<- int)(nil))
+	convRow("chan<- int(nil) -> IntChanSend", (chan<- int)(nil), IntChanSend(nil))
+	convRow("IntChan(nil) -> chan int", IntChan(nil), (chan int)(nil))
+	// a LIVE channel converted to a directional type is the same channel: a send through the
+	// converted send-only view is received on the original
+	live := make(IntChan, 1)
+	sendOnly := reflect.ValueOf(live).Convert(reflect.TypeOf((chan<- int)(nil)))
+	sendOnly.Interface().(chan<- int) <- 7
+	fmt.Println("converted send-only view type:", sendOnly.Type(), " interface type:", reflect.TypeOf(sendOnly.Interface()), " received on the original:", <-live)
+
+	// --- 7f: Set honours the slot's channel direction -- a directional value into a slot of the SAME
+	// direction is identity, a bidirectional value narrows and takes the slot's type, and a directional
+	// value into a bidirectional slot or the opposite direction is refused (TestConvert's Set rows) ---
+	setRow := func(label string, slot reflect.Type, x reflect.Value) {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("%-38s PANIC: %v\n", label, r)
+			}
+		}()
+		v := reflect.New(slot).Elem()
+		v.Set(x)
+		fmt.Printf("%-38s slot=%v value=%v nil=%v\n", label, v.Type(), reflect.TypeOf(v.Interface()), v.IsNil())
+	}
+	sendT, recvT, bidiT := reflect.TypeOf((chan<- int)(nil)), reflect.TypeOf((<-chan int)(nil)), reflect.TypeOf((chan int)(nil))
+	setRow("chan<- int <- IntChan(nil).Convert", sendT, reflect.ValueOf(IntChan(nil)).Convert(sendT))
+	setRow("<-chan int <- chan int(nil).Convert", recvT, reflect.ValueOf((chan int)(nil)).Convert(recvT))
+	setRow("chan int <- chan<- int(nil)", bidiT, reflect.ValueOf((chan<- int)(nil)))
+	setRow("<-chan int <- chan<- int(nil)", recvT, reflect.ValueOf((chan<- int)(nil)))
+	setRow("chan<- int <- chan int(nil)", sendT, reflect.ValueOf((chan int)(nil)))
+	setRow("chan<- int <- live IntChan.Convert", sendT, reflect.ValueOf(live).Convert(sendT))
+	// a live bidirectional channel Set into a send-only slot is the same channel: a send through the
+	// slot's value is received on the original
+	slot := reflect.New(sendT).Elem()
+	slot.Set(reflect.ValueOf(live))
+	slot.Interface().(chan<- int) <- 8
+	fmt.Println("send-only slot value type:", reflect.TypeOf(slot.Interface()), " received on the original:", <-live)
 
 }

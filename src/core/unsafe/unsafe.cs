@@ -12,6 +12,7 @@ Go 1 compatibility guidelines.
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using go.golib;
 using go;
 
@@ -211,11 +212,44 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     // holding the address keeps that round-trip EXACT in both directions. Without it a reloaded
     // nil pointer came back non-nil, and sync's poolDequeue read every empty ring slot as
     // occupied — pushHead returned false forever and TestPoolDequeue/TestPoolChain spun.
-    public Pointer(uintptr value) : base(value, value == 0)
+    // `in`: for a non-`in` argument C# prefers a by-value candidate over an `in` one, which is what
+    // lets a BOX argument bind the retaining constructor below while an explicit uintptr still binds
+    // here -- a plain by-value pair is ambiguous (CS0121), a reference conversion to the interface
+    // and a user-defined conversion to uintptr ranking as equal targets.
+    public Pointer(in uintptr value) : base(value, value == 0)
     {
     }
 
     public Pointer(NilType _) : base(nil)
+    {
+    }
+
+    // The mint the converter emits for `unsafe.Pointer(p)` over a managed Go pointer (`new
+    // @unsafe.Pointer(p)`): the number is the box's stable address exactly as the uintptr overload
+    // minted it. Identity (Equals/GetHashCode) holds for every pointee -- including one that carries
+    // managed references and so has no pinnable storage, whose registered address can never validate
+    // on read (the *bytes.Buffer of reflect's TestImplicitMapConversion) -- through the ORDER TOKEN
+    // captured here, which two mints from one box share; it does NOT need the box retained, and the
+    // paragraph below says what happened when this constructor briefly kept one. Overload resolution
+    // prefers this constructor for any box argument (a reference conversion to the interface beats
+    // the user-defined uintptr one); an explicit uintptr or void* argument still takes its own path,
+    // numbers unchanged.
+    // This constructor takes the ADDRESS from the box and RETAINS NOTHING, and the second half is as
+    // load-bearing as the first. It is an exact match for `new @unsafe.Pointer(box)`, so it captures
+    // every bare mint that previously bound the implicit `ж<T> -> uintptr` conversion -- and the bare
+    // mint's contract is that it retains nothing (PointerMintRetentionTests' positive control; the
+    // RETAINING door is `FromPinnedBox`, which the converter emits and which the syscall pin fix
+    // depends on). Increment E3 root 4 passed the box here to give referent identity something to
+    // compare for a pointee nothing pins; the root-4 AMENDMENT made identity the ORDER TOKEN instead,
+    // which two mints from one box share whether or not either retains it, so the reason expired with
+    // that commit and the argument is `null`. Measured one-axis, both directions: with the box the
+    // control fails and with null it passes, while the ReflectValueSingles identity rows are
+    // byte-identical to `go run` either way.
+    //
+    // What the constructor still earns its place for: a WRAPPER box reaches its address through
+    // StableAddress (the plain `(uintptr)` conversion is not defined on a generated named-pointer
+    // wrapper), and a structurally nil box mints the zero address rather than pinning anything.
+    public Pointer(INilPointer box) : this(box is null || box.IsNilPointer ? (uintptr)0 : (uintptr)box.StableAddress(), null)
     {
     }
 
@@ -279,15 +313,62 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
     // `uintptr == unsafe.Pointer` comparison AMBIGUOUS (both operands convert to both sides —
     // measured as CS0034 in runtime's map.cs and mfinal.cs), so the operator route is not merely
     // redundant, it is unavailable.
+    // IDENTITY IS THE REFERENT (increment E3 root 4, 2026-09-05). Two Pointers over ONE box can carry
+    // two different NUMBERS: reflect's Value.UnsafePointer() mints the box's stable identity token
+    // (what %p prints, what Value.Pointer() orders by, what ManagedPointerTokens resolves back to the
+    // box for the (*T)(unsafe.Pointer(v.UnsafePointer())) round trip), while the converter's mint for
+    // `unsafe.Pointer(p)` is FromBox -- the transient address of the box's value slot, the box retained.
+    // Comparing the numbers made `mv.MapIndex(k).Elem().UnsafePointer() != unsafe.Pointer(b2)` true for
+    // the very box the map returned (reflect's TestImplicitMapConversion #5/#7). So when BOTH sides
+    // resolve a referent -- the retained box, or the box a registered token or pinned base address
+    // names -- equality is ReferenceEquals of the referents; otherwise it is the number, exactly as
+    // before. An interior address (unsafe.Add, the indexers) is never registered and never resolves,
+    // so it keeps the numeric rule. Two FromBox mints of one box are now equal even across a GC move;
+    // two different boxes whose transient addresses ever coincide are now unequal. The probes run
+    // only while reflect has registered a token (ManagedPointerTokens' fast path is unchanged for
+    // every program that never projected a pointer), and never for the nil operators above.
+    //
+    // THE HASH CONTRACT, and the hole it accepts (COORD's condition on the cut). A pointer hashes by
+    // its OWN referent when it resolves one, by the number otherwise. Both-resolve and neither-resolve
+    // pairs therefore hash alike whenever they are equal. The ASYMMETRIC pair -- exactly one side
+    // resolves and the two numbers are equal -- is equal by the number while the hashes come from
+    // different sources, and is accepted deliberately: it needs a wild number that coincides with a
+    // live box's token or pinned address, which is the shape the resolution seam exists to refuse,
+    // and it shrinks further once every reference-bearing box registers (Q44's token). A map keyed
+    // on such a pair is the population the corpus census posted with this cut measures.
     public override bool Equals(ж<uintptr>? other)
     {
-        return other is Pointer pointer ? PointerOrderToken == pointer.PointerOrderToken : base.Equals(other);
+        if (other is not Pointer pointer)
+            return base.Equals(other);
+        if (Referent is { } mine && pointer.Referent is { } theirs)
+            return ReferenceEquals(mine, theirs) || ReferentToken(mine) == ReferentToken(theirs);
+        return PointerOrderToken == pointer.PointerOrderToken;
     }
 
     public override int GetHashCode()
     {
-        return PointerOrderToken.GetHashCode();
+        return Referent is { } referent ? ReferentToken(referent).GetHashCode() : PointerOrderToken.GetHashCode();
     }
+
+    // A referent's identity is its ORDER TOKEN, never the box OBJECT: a field or element reference is
+    // minted afresh at every `&l.p` / `&a[i]`, so two boxes over ONE field are two objects with one
+    // token (allocation base + Go field offset -- "equal pointers always produce equal tokens", the
+    // contract PointerOrderToken documents), while a heap box's token is its own allocation base.
+    // Comparing the objects said `unsafe.Pointer(&l.p) != unsafe.Pointer(&l.p)` where Go and the
+    // numeric rule both say equal (the ManagedAtomicPointer behavioral guard, full-suite run of the
+    // referent cut). Hashing by the same token keeps Equals and GetHashCode one fact.
+    private static nuint ReferentToken(object referent)
+    {
+        return referent is INilPointer box ? box.PointerOrderToken : (nuint)(uint)RuntimeHelpers.GetHashCode(referent);
+    }
+
+    /// <summary>
+    /// The managed box this pointer names, when one can be recovered: the retained source of a
+    /// <see cref="FromBox"/> mint, else the box a registered identity token or pinned base address
+    /// resolves to (validate-on-read, so a stale or reused number never answers). Null for a purely
+    /// numeric or native pointer and for every interior address.
+    /// </summary>
+    public object? Referent => IsNull ? null : ResolveReferent();
 
     public Pointer this[int index] => Value + (uintptr)index;
 

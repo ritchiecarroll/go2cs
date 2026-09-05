@@ -1448,9 +1448,22 @@ public static void Set(this ΔValue v, ΔValue x) {
     if (dstType is null || v.addrBox is null) {
         throw panic("reflect: Set using unaddressable value");
     }
-    if (!GoReflect.TryMarshalAssignable(x.live, dstType, out object? marshalled, GoReflect.GoTypeRelation.Assignable)) {
-        throw panic("reflect.Set: value of type " + GoReflect.GoTypeName(x.live?.GetType()) +
-                    " is not assignable to type " + GoReflect.GoTypeName(dstType));
+    // The slot's channel DIRECTION rides on its descriptor, not its managed type (channel<T> erases it):
+    // a directional source is assignable to a slot of the same direction and refused by a bidirectional
+    // one (7f -- TestConvert's channel rows Set a converted `chan<- int` into New(chan<- int).Elem()). The
+    // panic names both DESCRIPTORS, as Go's v.typ().String() does; the live managed type spells neither
+    // a direction nor a defined type's name.
+    ΔType dstReflectType = v.Type();
+    GoChanDir dstDir = chanDirOfReflectType(dstReflectType);
+    if (!GoReflect.TryMarshalAssignable(x.live, dstType, out object? marshalled, GoReflect.GoTypeRelation.Assignable, dstDir)) {
+        throw panic("reflect.Set: value of type " + x.Type().String() +
+                    " is not assignable to type " + dstReflectType.String());
+    }
+    // A bidirectional source NARROWING into a directional slot takes the slot's cargo: in Go the stored
+    // value has the slot's static type, and Interface() here re-describes the VALUE.
+    if (dstDir is GoChanDir.Send or GoChanDir.Recv && marshalled is IChannel { Direction: GoChanDir.Unstamped } narrowed) {
+        marshalled = GoReflect.WithChanCargo(marshalled, ChanCargo.Of(chanDirChainOfReflectType(dstReflectType),
+                                                                       arrayDimsOfReflectType(dstReflectType) ?? narrowed.Cargo?.ElemDims));
     }
     GoReflect.WritePointerSlot(v.addrBox, marshalled);
 }
@@ -1492,8 +1505,11 @@ public static ΔValue New(ΔType typ) {
     nint[]? dims = arrayDimsOfReflectType(typ);
     GoChanDir chanDir = chanDirOfReflectType(typ);
     object box = GoReflect.NewPointerBox(st, GoReflect.ZeroValueOf(st, dims, chanDir));
-    // The POINTER descriptor carries its pointee's direction unshifted, so Elem() hands it back.
-    return makeTypedValue(box, typeof(ж<>).MakeGenericType(st), null, default, chanDir);
+    // The POINTER descriptor carries its pointee's direction AND dims unshifted, so Elem() hands
+    // them back: New(t).Elem().Type() is t for a pointer-to-array t (TestConvert's Set rows read
+    // `New(t2).Elem().Type() != tt.out.Type()` -- true with a dims-less pointer, the descriptor
+    // spelled *[]uint8 beside the box's own *[0]uint8).
+    return makeTypedValue(box, typeof(ж<>).MakeGenericType(st), dims, default, chanDir);
 }
 
 // NewAt returns a Value representing a pointer to a value of the specified type, using p as that
@@ -3733,19 +3749,84 @@ private static bool tryConvertOnlyShape(ΔValue v, ΔType t, System.Type dstType
             throw panic("reflect: cannot convert slice with length " + strconv.Itoa(v.Len()) +
                         " to pointer to array with length " + strconv.Itoa(want));
         }
-        // The LENGTH panic above is this arm's whole contribution for now. The SUCCESS path falls
-        // through deliberately rather than being answered here, and the distinction is the point:
-        // `(*[N]T)(s)` must ALIAS s's backing array. golib already has the machinery for it —
-        // `array<T>.Alias(source, length)`, whose own doc names a copy behind this pointer "a silent
-        // wrong answer" with image/png's TestWriteRGBA as the corpus witness — but reaching it from
-        // here needs a non-generic bridge (element-typed MakeGenericMethod plus the named-wrapper
-        // step, the shape TryByteSliceAs already uses) that does not exist yet, and the result then
-        // has to be boxed as a POINTER that preserves the alias.
-        //
-        // Falling through leaves this case behaving exactly as it did before this change rather than
-        // introducing a new failure mode; what it must never do is return a pointer to a copy, which
-        // would pass reflect's own convertTests — those compare VALUES — while breaking the
-        // guarantee callers actually rely on.
+        // The SUCCESS path (increment E3 root 5): `(*[N]T)(s)` ALIASES s's backing array -- the
+        // bridge the arm's first author named as missing is GoReflect.AliasSliceAsArrayPointer, the
+        // element-typed `array<T>.Alias` window (whose doc names a copy behind this pointer "a silent
+        // wrong answer", image/png's TestWriteRGBA the witness) boxed as the pointer, with a defined
+        // array pointee wrapping the aliased header and a defined pointer type wrapping the box. A
+        // nil slice converts to the destination's nil (Go: `(*[0]byte)([]byte(nil)) == nil`); a
+        // longer-than-nil source already passed the length rule above.
+        if (v.IsNil()) {
+            // Go's typed nil, carrying the SOURCE's read-only bit exactly as every other result does
+            // (`MakeRO(v).Convert(t)` must be read-only: TestConvert's RO rows).
+            result = Zero(t);
+            result.flag |= v.flag.ro();
+            return true;
+        }
+        object arrayPointer = GoReflect.AliasSliceAsArrayPointer(v.live!, dstType, want);
+        result = makeTypedValue(arrayPointer, dstType, arrayDimsOfReflectType(t), v.flag.ro());
+        return true;
+    }
+
+    // Struct -> struct whose underlying types are identical IGNORING TAGS (Go >= 1.8; increment E3 root 5):
+    // ConvertibleTo already says yes through convertOp's tag-blind identity, and the value conversion is
+    // a COPY, so a layout-compatible reinterpret of a copy is exactly Go's answer. Two lifted anonymous
+    // structs differing only in tags are two C# types of one shape (TestConvert's `some:\"foo\"` rows).
+    // Channel -> channel (increment E3 follow-up 7e): Go's result carries the DESTINATION's direction
+    // (`IntChan` to `chan<- int` describes itself as `chan<- int`). On this bridge the direction is cargo
+    // on the channel VALUE (increment D), so the live channel is re-stamped -- same core, new cargo --
+    // and the descriptor takes the direction through makeTypedValue. A defined channel type on either
+    // side is its generated wrapper: unwrapped on the way in, constructed on the way out. Nil converts
+    // to the destination's typed nil with the source's read-only bit (TestConvert's channel rows).
+    if (srcKind == Chan && dstKind == Chan) {
+        if (v.IsNil()) {
+            result = Zero(t);
+            result.flag |= v.flag.ro();
+            return true;
+        }
+        object liveChan = v.live!;
+        if (GoReflect.TryUnwrapWrapperValue(liveChan, out object? innerChan)) {
+            liveChan = innerChan;
+        }
+        GoChanDir dstDir = chanDirOfReflectType(t);
+        object restamped = GoReflect.WithChanCargo(liveChan, ChanCargo.Of(dstDir));
+        object? convertedChan = restamped;
+        if (!dstType.IsInstanceOfType(restamped) && !GoReflect.TryConvertTo(restamped, dstType, out convertedChan)) {
+            convertedChan = null;
+        }
+        if (convertedChan is not null) {
+            result = makeTypedValue(convertedChan, dstType, arrayDimsOfReflectType(t), v.flag.ro(), dstDir);
+            return true;
+        }
+    }
+
+    // Go's convertOp rule for struct -> struct is haveIdenticalUNDERLYINGType with cmpTags=false: a
+    // DEFINED struct converts to the anonymous struct of its own shape (`MyStruct` to
+    // `struct { x int "some:\"foo\"" }`), which haveIdenticalType -- names first -- refuses (7d).
+    if (srcKind == Struct && dstKind == Struct && v.live is not null && haveIdenticalUnderlyingType(t.common(), v.typ(), false)) {
+        if (GoReflect.TryReinterpretValue(v.live, dstType, out object? retyped) && retyped is not null) {
+            result = makeTypedValue(retyped, dstType, arrayDimsOfReflectType(t), v.flag.ro());
+            return true;
+        }
+    }
+
+    // `(*B)(p)` between pointer types (increment E3 root 5): only the relations the managed model can
+    // ALIAS -- the identity-preserving reinterpret for pointees with one representation (`*int` as
+    // `*integer`, `*MyBuffer` as `*bytes.Buffer`), a defined pointer type's wrap or unwrap of the same
+    // box, and an array pointee re-typed through its header (elements shared). Nil converts to the
+    // destination's nil. A pointee the model cannot alias -- a defined pointer TYPE as the pointee,
+    // `**uintptr` as `*T` -- is refused below with Go's own text rather than answered with a copy
+    // (TestPtrToGC stays on that boundary, recorded in the mailbox).
+    if (srcKind == ΔPointer && dstKind == ΔPointer) {
+        if (v.IsNil()) {
+            result = Zero(t);
+            result.flag |= v.flag.ro();
+            return true;
+        }
+        if (GoReflect.TryConvertPointer(v.live, dstType, out object? convertedPointer) && convertedPointer is not null) {
+            result = makeTypedValue(convertedPointer, dstType, arrayDimsOfReflectType(t), v.flag.ro());
+            return true;
+        }
     }
 
     return false;

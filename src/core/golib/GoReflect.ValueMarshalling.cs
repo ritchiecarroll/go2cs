@@ -99,6 +99,23 @@ public static partial class GoReflect
     private static readonly ConcurrentDictionary<Type, object?> s_canonicalNils = new();
 
     /// <summary>
+    /// The canonical typed nil for a pointer type whose POINTEE is an array of the given dims -- the
+    /// dims-carrying nil the language mints for <c>(*[N]T)(nil)</c> (<see cref="ж{T}.NilBoxOfDims"/>),
+    /// so a reflect-made nil re-describes with its length. Falls back to the plain canonical nil
+    /// when there are no dims or the type is not a plain <c>ж&lt;T&gt;</c> box.
+    /// </summary>
+    public static object? CanonicalNilPointer(Type pointerType, nint[]? arrayDims)
+    {
+        if (arrayDims is not { Length: > 0 } || typeof(IUnsafePointer).IsAssignableFrom(pointerType) || !TryBoxPointee(pointerType, out Type? pointee))
+            return CanonicalNilPointer(pointerType);
+        long[] dims = new long[arrayDims.Length];
+        for (int i = 0; i < dims.Length; i++)
+            dims[i] = arrayDims[i];
+        MethodInfo? mint = typeof(ж<>).MakeGenericType(pointee).GetMethod(nameof(ж<int>.NilBoxOfDims), BindingFlags.Public | BindingFlags.Static);
+        return mint is null ? CanonicalNilPointer(pointerType) : mint.Invoke(null, [dims]);
+    }
+
+    /// <summary>
     /// The canonical typed nil for a FUNC type — the second shape of the one-nil-encoding rule
     /// <see cref="CanonicalNilPointer"/> established for pointers. A Go func emits as a managed
     /// delegate, whose nil IS <c>null</c>: correct in every func-typed slot, and type-erasing the
@@ -234,8 +251,14 @@ public static partial class GoReflect
     /// Defaults to <see cref="GoTypeRelation.Convertible"/> so an un-examined caller keeps exactly
     /// today's behaviour; the assignment entry points pass <see cref="GoTypeRelation.Assignable"/>.
     /// </param>
+    /// <param name="dstChanDir">
+    /// The destination slot's channel DIRECTION when the caller holds a descriptor that carries one
+    /// (<c>reflect.Value.Set</c> passes its slot's); the managed <c>channel&lt;T&gt;</c> erases it.
+    /// Defaults to bidirectional, which keeps every un-examined boundary exactly as it was.
+    /// </param>
     public static bool TryMarshalAssignable(object? src, Type dstType, out object? marshalled,
-                                            GoTypeRelation relation = GoTypeRelation.Convertible)
+                                            GoTypeRelation relation = GoTypeRelation.Convertible,
+                                            GoChanDir dstChanDir = GoChanDir.Unstamped)
     {
         marshalled = null;
 
@@ -274,22 +297,26 @@ public static partial class GoReflect
             return dstType == nilFunc.Type;
         }
 
-        // A DIRECTIONAL channel value is not assignable to a channel slot the C# type erases to the
-        // bidirectional `channel<T>`: Go refuses a `<-chan T`/`chan<- T` SOURCE flowing into a
-        // `chan T` result (a directional channel cannot widen). The slot carries no direction here
-        // (`channel<T>` IS the bidirectional representation), so a stamped-directional source is
-        // rejected treating the slot as bidirectional — the case reflect's
-        // TestMakeFuncInvalidReturnAssignments asserts (a `RecvOnly` channel returned into a
-        // `chan int` result must panic). A BIDIRECTIONAL source (Unstamped) never trips this and
-        // narrows into a directional slot freely (the valid direction — the identity arm below
-        // admits it). This arm is INERT until the converter's live-copy narrowing stamp makes a
-        // source directional at all: the two halves of one cut, and a census found ZERO directional
-        // channel sources marshalled today, so it can regress none of the 108 current admits.
-        if (src is IChannel { Direction: not GoChanDir.Unstamped } &&
-            typeof(IChannel).IsAssignableFrom(dstType))
+        // A DIRECTIONAL channel value is assignable only to a channel slot of the SAME direction -- Go's
+        // identical-types rule (`<-chan T` into `<-chan T`); a bidirectional slot or the opposite direction
+        // refuses, since a directional channel cannot widen. The managed `channel<T>` erases the slot's
+        // direction, so it arrives from whichever DESCRIPTOR the caller holds (dstChanDir: reflect.Set
+        // passes its slot's -- TestConvert's channel rows Set a converted `chan<- int` into
+        // New(chan<- int).Elem(), refused here while the slot read as bidirectional) and defaults to
+        // bidirectional, which keeps every un-examined boundary as it was: reflect's
+        // TestMakeFuncInvalidReturnAssignments (a `RecvOnly` channel returned into a `chan int` result
+        // must panic) still does. A BIDIRECTIONAL source (Unstamped/Both) never trips this and narrows
+        // into a directional slot freely -- the identity arm below admits it.
+        if (src is IChannel channelSrc && typeof(IChannel).IsAssignableFrom(dstType))
         {
-            marshalled = null;
-            return false;
+            GoChanDir srcDir = channelSrc.Direction is GoChanDir.Send or GoChanDir.Recv ? channelSrc.Direction : GoChanDir.Unstamped;
+            GoChanDir slotDir = dstChanDir is GoChanDir.Send or GoChanDir.Recv ? dstChanDir : GoChanDir.Unstamped;
+
+            if (srcDir != GoChanDir.Unstamped && srcDir != slotDir)
+            {
+                marshalled = null;
+                return false;
+            }
         }
 
         // Identity — including a pointer-sourced interface value unwrapping to its receiver box
@@ -515,7 +542,10 @@ public static partial class GoReflect
         {
             case Pointer:
             case UnsafePointer:
-                return CanonicalNilPointer(t);
+                // A pointer-to-ARRAY zero carries the descriptor's dims on its nil, exactly as the
+                // language's typed nil does (`(*[0]byte)(nil)` is NilBoxOfDims(0)): reflect.Zero's
+                // Interface() then re-describes as *[0]uint8, not *[]uint8 (increment E3 root 5).
+                return CanonicalNilPointer(t, arrayDims);
             case Interface:
             case Func:
                 return null;

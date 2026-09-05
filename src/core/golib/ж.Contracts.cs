@@ -219,6 +219,18 @@ public interface INilPointer
     object ReferentObject => this;
 
     /// <summary>
+    /// The number this pointer converts to as a <c>uintptr</c> -- the SAME stable address the box's
+    /// own <c>uintptr</c> operator yields (pinned where the storage is pinnable, registered either
+    /// way) -- reachable without the pointee type, so a non-generic caller such as
+    /// <c>unsafe.Pointer</c>'s box-retaining constructor can mint the address AND keep the box.
+    /// A generated named-pointer class reaches its wrapped box's answer through the wrapper unwrap;
+    /// anything else answers its order token, which is never a real address and never resolves.
+    /// </summary>
+    nuint StableAddress() => GoReflect.TryUnwrapWrapperValue(this, out object? inner) && inner is INilPointer wrapped
+        ? wrapped.StableAddress()
+        : PointerOrderToken;
+
+    /// <summary>
     /// Gets the managed object that must be held still for this pointer's ADDRESS to stay valid — the
     /// root storage behind it — or <c>null</c> when there is none that can be pinned. Distinct from
     /// <see cref="ReferentObject"/>, which answers a LIFETIME question: a standard heap box IS its own

@@ -55,7 +55,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <!-- NuGet packaging metadata for library projects; packing itself is explicit ('dotnet pack' via push-nuget.ps1), so plain builds emit no .nupkg -->
@@ -144,9 +144,12 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
+    <ProjectReference Include="$(go2csPath)core/bytes/bytes.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
+    <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
   </ItemGroup>
 
 </Project>

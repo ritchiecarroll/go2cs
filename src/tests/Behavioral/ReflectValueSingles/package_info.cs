@@ -41,6 +41,7 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<bytes_package.Buffer, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -54,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("ReflectValueSingles.go", "ReflectValueSingles.cs", "AAgqooKCgpQAQAyEkpKSkJKQkpCSkJKQkoKCgoKCgpCSkJKSkJKQlIKChICSgJKEgoKClICSgJKCgoSIgoKCkoCSgoKCgJaCgoI=", "22-26:1;38-38:1;39-39:2;40-40:3;41-41:4;42-42:5;49-49:6;50-50:7;52-52:8;53-53:9;59-59:10;60-60:11;68-68:12;69-69:13;82-82:14;86-86:15")]
+[assembly: go.GoPositionMap("ReflectValueSingles.go", "ReflectValueSingles.cs", "AAs8ooKCgpQAGSCigoCCtoIAeQ6EkpKSkJKQkpCSkJKQkoKCgoKCgpCSkJKSkJKQlIKChICSgJKEgoKClICSgJKCgoSIgoKCkoCSgoKCgJaCgoKGgoKCgoKCgoKEgoKCgoSCkoSCgoiCgoKCgoiEgoKChoKCgoKCgoKCgoKCgoKChIKCgoKSkJaCgoKCgoKCgoaCgoKKooKAgraCgsSCgoKCgoKGgoKC", "31-35:1;53-57:1;71-71:1;72-72:2;73-73:3;74-74:4;75-75:5;82-82:6;83-83:7;85-85:8;86-86:9;92-92:10;93-93:11;101-101:12;102-102:13;115-115:14;119-119:15;192-192:16;214-223:17;215-219:17.1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -72,11 +73,23 @@ public static partial class main_package
     // <TypeAccessibility>
     internal partial struct gA {}
     internal partial struct gB<T> {}
+    internal partial struct integer {}
     internal partial struct main_A {}
     internal partial struct main_AB {}
     internal partial struct main_B {}
+    internal partial struct main_MyBuffer {}
     internal partial struct main_S {}
     internal partial struct main_SB {}
+    [GoLocalName("holder")] internal partial struct main_holder {}
+    public partial class MyBytesArrayPtr {}
+    public partial class MyBytesArrayPtr0 {}
+    public partial struct IntChan {}
+    public partial struct IntChanRecv {}
+    public partial struct IntChanSend {}
+    public partial struct MyBuffer {}
+    public partial struct MyBytes {}
+    public partial struct MyBytesArray {}
+    public partial struct MyBytesArray0 {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -86,7 +99,9 @@ public static partial class main_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     // </ImportInitializers>
