@@ -119,3 +119,50 @@ Three companion findings, all probe- or measure-backed:
 - **The test HOST owed `m.Run`'s `flag.Parse()`** (TestFlagBridge.Parse, testing package): a custom
   test flag registered but its value never landed for a TestMain-less package, so TestDetectNohup's
   child re-exec recursed unboundedly. Host-side fix, measured first.
+
+## Q64 amendment (2026-09-05, the job-control trio) — `sigignore` installs the KERNEL `SIG_IGN` for the CLR-free class
+
+**The gap.** Go's `sigignore` is `setsig(sig, _SIG_IGN)` for every `_SigNotify` signal — a KERNEL
+disposition. The v2 bridge modelled Ignore as a swallow **in the handler** (`signal_ignored(s)` →
+`ctx.Cancel = true`) and `MapPosixSignal` had no entry for SIGTSTP 20 / SIGTTIN 21 / SIGTTOU 22, so
+`signal.Ignore(SIGTTOU)` installed **nothing** and the disposition stayed `SIG_DFL`. Two things read
+the disposition and neither can see a .NET handler:
+
+- the kernel's `tty_check_change`, which lets a process in a **background** process group run
+  `tcsetpgrp`/`TIOCSPGRP` only if SIGTTOU is ignored or blocked, and otherwise delivers SIGTTOU to
+  that group — default action **STOP**;
+- **exec**, which inherits `SIG_IGN` into a child but resets a handler to `SIG_DFL`.
+
+So `syscall.TestForeground` (`signal.Ignore(SIGTTIN, SIGTTOU)` … `Tcsetpgrp(ttyFD, fpgrp)` after the
+child has taken the foreground) STOPPED the converted host under a controlling tty: the mute class in
+a `T`-state costume — no handler, no deadline, no results file, the row reading `C#=""`. Q55's
+`Setpgid` is correct and merely **exposed** a latent gap (it puts the host in a background group);
+GNU `timeout` without `--foreground` exposes the same one. No fleet sweep runs under a tty, which is
+why the roster never saw it.
+
+**The fix, and why it is NARROWED.** `sigignore` now installs the real kernel `SIG_IGN` through the
+`sys_signal` P/Invoke the file already carried — but only for the **CLR-FREE class**: SIGUSR1 (10),
+SIGUSR2 (12) and the job-control trio (20/21/22). The CLR installs handlers of its own for SIGCHLD
+(reaping) and SIGINT/SIGCONT/SIGWINCH/SIGTERM (console, shutdown); writing `SIG_IGN` over those would
+clobber a live CLR install — the same fact that keeps SIGCHLD out of the eager registration set. For
+them the swallow model stays, since it is the correct **delivery** observable that `os/signal`'s own
+suite asserts. `MapPosixSignal` gains 20/21/22 for the Notify path, and a new `s_bridgeIgnoredMask`
+lets `installPosixSignal` clear a bridge-set `SIG_IGN` back to `SIG_DFL` before `Create` (which is a
+no-op over a live `SIG_IGN`), so a **Notify after an Ignore** reinstalls delivery as Go's does; only
+the bridge bit is cleared, because the inherited bit feeds the handler's die decision.
+
+**RESIDUAL (stated, not implicit).** A child of this process inherits `SIG_DFL`, not `SIG_IGN`, for an
+Ignore'd **CLR-owned** signal. No banked test exercises it, and closing it would mean taking the
+signal away from the CLR. Recorded here and at `sigignore`'s else branch.
+
+**Acceptance.** Go ships this seam's own guards, so they are the acceptance rather than a
+hand-written probe: `syscall.TestForeground`/`TestForegroundSignal` under a real controlling tty
+(direct **and** through the `-test-action compare` pipeline), the exec'd-child disposition probe
+reading `1/1/1/1` on linux with an empty Output diff, and the banked `os/signal` (28 + 2) and
+`os/exec` (87 + 1) rows as no-regression. The negative control flips
+`sigIgnoreInstallsKernelDisposition` off and the probe reads `0` for the trio. A GolibTests arm was
+considered and DROPPED: GolibTests references golib only and cannot reach the runtime bridge, so such
+an arm would test libc rather than this code.
+
+**The darwin flavour is the same rule** (C2's increment 9), with darwin's 18/21/22 and the same
+CLR-free boundary and residual, so the two read as one rule.
