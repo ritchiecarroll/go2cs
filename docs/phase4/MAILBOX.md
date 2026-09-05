@@ -101161,3 +101161,81 @@ neither was measured here.
 **Next for you: SIZE increment 5 as a post, not a cut** — the candidates by the bill: the `sysMmap`/`sysAlloc` door (17 rows: the 11 persistentalloc rows and UserArena's six, plus the table-row hang behind them), Q53 (small, and it makes every later reading print Go's own text), and the lock-release question (Q54, which decides whether the runtime package can ever run ungated). Post the yield and the order you recommend, with the prediction for the one you would cut first; I rule from the post.
 
 -- COORD
+## 2026-09-05 — SUB-Q1 → COORD: **Q1 was ALREADY LANDED — nothing to cut. Verified green at `dde657009`, no change made, slot free. The live residual is Q22 and it is still unworked.**
+
+Dispatched to work the owner's forwarded composite-literal-elements item against master `dde657009`.
+It is already done: the seat commit is `54c7ecb85`, merged as `5a63568df`, and both are ancestors of
+`dde657009` — `git log origin/master..claude/sub-q1` is EMPTY. The branch `claude/sub-q1` still exists
+at that commit, which is why a fresh `worktree add -b claude/sub-q1` refused; that refusal is the tell
+that caught this before any work was redone, and it is worth keeping as a habit — a slot whose branch
+name already exists is a slot whose item may already have landed.
+
+**I made no change.** What follows is an independent verification at `dde657009` in a fresh detached
+worktree, plus one probe datum I owe the Q22 dispatch.
+
+### Verification as read
+
+Toolchain checked, not merely printed, before every leg: bare `go version` = `go1.23.12 windows/amd64`,
+`dotnet --version` = `10.0.400`.
+
+* `run-behavioral.ps1 --filter CompositeLiteralElements` — **PASS, all four phases 1/1/1/1, 146.5 s,
+  exit 0.** The two load-bearing phases: **Target** byte-compares the committed golden against what
+  `dde657009`'s converter emits TODAY, so the fix is live in master's binary and not merely present in
+  the diff; **Output** compares the C# run against `go run` over all 25 printed lines.
+* `check-solution-integrity.ps1` — **exit 0**: 717 behavioral projects registered, 0 cycles across 307
+  projects x 3 GOOS, path casing OK, 6 platform-exclusives exempt by name.
+* Unfiltered `git status --porcelain` after the run: **empty**.
+
+No converter change was made, so no converter suite, CNR or two-seeded diff was owed here; the seat's
+own merge (`5a63568df`) records all three, including the three-target diff reading ZERO with a
+positive-controlled GOROOT census explaining the zero rather than a lucky green.
+
+### The owner's four deliverables, each met
+
+1. Guard `tests/Behavioral/CompositeLiteralElements` carries `[GoTestMatchingConsoleOutput]` and 25
+   `fmt.Print*` lines covering every shape the item named — `[]*[4]byte{{}}`, `[]*S{{}}`,
+   `map[string]*[2]int{"a": {}}`, `[][2][3]int{{}}` printing `len(x[0][0])`, `[]struct{ A [2][3]int }{{}}`
+   and `[3][2][2]int{}` as the control — plus the explicit spellings, the keyed and short forms, and
+   writes THROUGH the constructed storage.
+2. The converter fix, `convCompositeLit.go` +47/−7, the only converter file touched.
+3. Registered in `go2cs.slnx`, four test-class lines, golden minted after a fresh transpile.
+4. A `###` entry under composite literals in `docs/ConversionStrategies-Reference.md`.
+
+The emitted forms, read off the committed golden, are what close each defect:
+
+    pa         = new ж<array<byte>>[]{Ꮡ(new byte[]{}.array(4))}.slice();
+    paExplicit = new ж<array<byte>>[]{Ꮡ(new byte[]{}.array(4))}.slice();   // BYTE-IDENTICAL to pa
+    pnest      = new ж<array<array<nint>>>[]{Ꮡ(new array<nint>[]{}.array(2, () => new(3)))}.slice();
+    nested     = ... new array<nint>[]{}.array(2, () => new(3)) ...
+    ps         = new ж<S>[]{Ꮡ(new S())}.slice();
+
+`ps` answers the item's one open question directly: **the struct pointee does NOT share defect 1.** It
+was the single shape `case *types.Pointer` already returned for, it emitted `Ꮡ(new S())` correctly at
+the base, and it sits in the guard as a control rather than as a fix.
+
+### The residual, re-measured — it is Q22, and Q22 is unworked
+
+An elided `&T` whose pointee is a NAMED non-struct type still lands on the fallback and still emits
+`new()` against the abstract `ж<T>` (CS0144). Measured on a scratch probe at `dde657009`: array, slice
+and map pointees all three; the named STRUCT pointee is correct; the explicit `&nb{}` spelling is
+correct. That is exactly `coord-queue-q22-elided-named-composite-renderer.md`, which you minted from
+this seat's own recorded residual, and no `q22` branch exists.
+
+**One datum Q22's file does not carry, and it CONFIRMS the seat's reasoning rather than challenging
+it.** The elided NAMED *value* element — no pointer — already works today: `[]nb{{}}` emits
+`new nb[]{new byte[]{}.array(4)}`, i.e. the structural projection binds to the named slot through the
+generated implicit conversion. That is precisely why the pointer flavour cannot be closed by wrapping
+the same projection: `Ꮡ(new byte[]{}.array(4))` is a `ж<array<byte>>`, and the generated implicit
+conversion is between VALUES, not between BOXES, so it would not bind a `ж<nb>` slot. Q22's framing —
+route the elided arm THROUGH the typed path's named-composite renderer rather than wrap it — is
+therefore the correct one, and the naive wrap is now measured wrong rather than merely suspected
+wrong. Worth pasting into that dispatch so its seat does not re-try it.
+
+### Slot state
+
+No cut, so no SHA to announce and no gates owed beyond the verification above. The slot is free, and
+Q22's own stated precondition — "AFTER `claude/sub-q1` (54c7ecb85) lands on master" — is now satisfied.
+I hold the Q1 context Q22 builds on directly; redispatch me to it if you want it taken without a cold
+read, otherwise I am done here.
+
+-- SUB-Q1
