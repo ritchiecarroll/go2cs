@@ -307,40 +307,11 @@ public static bool SocketDisableIPv6;
     internal RawSockaddrUnix raw;
 }
 
-public static error /*err*/ Bind(nint fd, Sockaddr sa) {
-    error err = default!;
+// go2cs generated this placeholder — func Bind is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    (var ptr, var n, err) = sa.sockaddr();
-    if (err != default!) {
-        return err;
-    }
-    return bind(fd, ptr, n);
-}
+// go2cs generated this placeholder — func Connect is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-public static error /*err*/ Connect(nint fd, Sockaddr sa) {
-    error err = default!;
-
-    (var ptr, var n, err) = sa.sockaddr();
-    if (err != default!) {
-        return err;
-    }
-    return connect(fd, ptr, n);
-}
-
-public static (Sockaddr sa, error err) Getpeername(nint fd) {
-    Sockaddr sa = default!;
-    error err = default!;
-
-    ref var rsa = ref heap(new RawSockaddrAny(), out var Ꮡrsa);
-    ref var len = ref heap(new _Socklen(), out var Ꮡlen);
-    len = SizeofSockaddrAny;
-    {
-        err = getpeername(fd, Ꮡrsa, Ꮡlen); if (err != default!) {
-            return (sa, err);
-        }
-    }
-    return anyToSockaddr(Ꮡrsa);
-}
+// go2cs generated this placeholder — func Getpeername is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static (nint value, error err) GetsockoptInt(nint fd, nint level, nint opt) {
     error err = default!;
@@ -352,24 +323,7 @@ public static (nint value, error err) GetsockoptInt(nint fd, nint level, nint op
     return ((nint)n, err);
 }
 
-public static (nint n, Sockaddr from, error err) Recvfrom(nint fd, slice<byte> p, nint flags) {
-    nint n = default!;
-    Sockaddr from = default!;
-    error err = default!;
-
-    ref var rsa = ref heap(new RawSockaddrAny(), out var Ꮡrsa);
-    ref var len = ref heap(new _Socklen(), out var Ꮡlen);
-    len = SizeofSockaddrAny;
-    {
-        (n, err) = recvfrom(fd, p, flags, Ꮡrsa, Ꮡlen); if (err != default!) {
-            return (n, from, err);
-        }
-    }
-    if (rsa.Addr.Family != AF_UNSPEC) {
-        (from, err) = anyToSockaddr(Ꮡrsa);
-    }
-    return (n, from, err);
-}
+// go2cs generated this placeholder — func Recvfrom is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static (nint n, error err) recvfromInet4(nint fd, slice<byte> p, nint flags, ref SockaddrInet4 from) {
     nint n = default!;
@@ -470,19 +424,7 @@ public static error /*err*/ Sendmsg(nint fd, slice<byte> p, slice<byte> oob, Soc
     return err;
 }
 
-public static (nint n, error err) SendmsgN(nint fd, slice<byte> p, slice<byte> oob, Sockaddr to, nint flags) {
-    error err = default!;
-
-    @unsafe.Pointer ptr = default!;
-    _Socklen salen = default!;
-    if (to != default!) {
-        (ptr, salen, err) = to.sockaddr();
-        if (err != default!) {
-            return (0, err);
-        }
-    }
-    return sendmsgN(fd, p, oob, ptr, salen, flags);
-}
+// go2cs generated this placeholder — func SendmsgN is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static (nint n, error err) sendmsgNInet4(nint fd, slice<byte> p, slice<byte> oob, ж<SockaddrInet4> Ꮡto, nint flags) {
     error err = default!;
@@ -524,19 +466,7 @@ internal static error /*err*/ sendtoInet6(nint fd, slice<byte> p, nint flags, ж
     return sendto(fd, p, flags, ptr, n);
 }
 
-public static error /*err*/ Sendto(nint fd, slice<byte> p, nint flags, Sockaddr to) {
-    error err = default!;
-
-    @unsafe.Pointer ptr = default!;
-    _Socklen salen = default!;
-    if (to != default!) {
-        (ptr, salen, err) = to.sockaddr();
-        if (err != default!) {
-            return err;
-        }
-    }
-    return sendto(fd, p, flags, ptr, salen);
-}
+// go2cs generated this placeholder — func Sendto is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static error /*err*/ SetsockoptByte(nint fd, nint level, nint opt, byte valueʗp) {
     ref var value = ref heap(valueʗp, out var Ꮡvalue);

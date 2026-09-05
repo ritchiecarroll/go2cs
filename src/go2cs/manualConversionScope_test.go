@@ -29,6 +29,9 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -251,18 +254,32 @@ func TestLinuxOnlyEntriesAreScopedToLinux(t *testing.T) {
 	}
 }
 
-// TestSockaddrFamilyIsScopedToEachHandOwningFlavor pins the two-flavor shape the sockaddr family
-// took on 2026-08-22: the INET encoders and Bind/Connect/Getsockname/Getpeername are hand-owned on
-// BOTH windows (syscall_windows_impl.cs, L10) and linux (sockaddr_linux_impl.cs) — one entry, each
-// flavor's file the authority on its own body, the lock_sema/lock_futex precedent — while darwin
-// keeps its auto bodies until a darwin lane measures them. ConnectEx and RawSockaddrAny.Sockaddr
-// exist only in Go's Windows sources; Accept4 and anyToSockaddr only in its Linux sources.
+// TestSockaddrFamilyIsScopedToEachHandOwningFlavor pins the shape the sockaddr family has taken in
+// three steps: windows on 2026-08-22 (syscall_windows_impl.cs, L10), linux the same day
+// (sockaddr_linux_impl.cs, the mirror), and darwin on 2026-09-05 (sockaddr_darwin_impl.cs, the twin —
+// increment 8, the five behavioral net rows dying in SockaddrInet4.sockaddr() <- Bind on both mac
+// legs). One entry, each flavor's file the authority on its own body — the lock_sema/lock_futex
+// precedent — so the INET encoders and Bind/Connect/Getsockname/Getpeername apply EVERYWHERE, and the
+// free-function half Go declares only in its unix sources (anyToSockaddr, Recvfrom, Sendto,
+// recvmsgRaw, SendmsgN) applies on the two unix flavors. ConnectEx and RawSockaddrAny.Sockaddr exist
+// only in Go's Windows sources; Accept4 only in its Linux sources; Accept as a BODIED function only
+// in its BSD sources (linux's Accept is pure Go over Accept4 and stays auto).
+//
+// The scope is checked against the FILE that hand-owns it, both ways: a flavor is in scope exactly
+// when a marked hand-own under src/core/syscall/<goos>/ declares the member. Widening a scope
+// without its body, or dropping a body while the scope stands, reads RED here by name — the
+// two-sided seam ledger CLAUDE.md asks of every registration.
 func TestSockaddrFamilyIsScopedToEachHandOwningFlavor(t *testing.T) {
-	both := []string{"SockaddrInet4.sockaddr", "SockaddrInet6.sockaddr", "Bind", "Connect", "Getsockname", "Getpeername"}
+	everywhere := []string{"SockaddrInet4.sockaddr", "SockaddrInet6.sockaddr", "Bind", "Connect", "Getsockname", "Getpeername"}
 	windowsOnly := []string{"ConnectEx", "RawSockaddrAny.Sockaddr"}
-	linuxOnly := []string{"Accept4", "anyToSockaddr"}
+	linuxOnly := []string{"Accept4"}
+	unixOnly := []string{"anyToSockaddr", "Recvfrom", "Sendto", "recvmsgRaw", "SendmsgN"}
+	darwinOnly := []string{"Accept"}
 
-	check := func(name string, wantWindows, wantLinux bool) {
+	flavors := []string{"windows", "linux", "darwin"}
+	handOwns := sockaddrHandOwnSources(t)
+
+	check := func(name string, want map[string]bool) {
 		scope, listed := manualConversionFuncs["syscall"][name]
 
 		if !listed {
@@ -270,27 +287,102 @@ func TestSockaddrFamilyIsScopedToEachHandOwningFlavor(t *testing.T) {
 			return
 		}
 
-		if scope.includes("windows") != wantWindows || scope.includes("linux") != wantLinux {
-			t.Errorf("syscall.%s: windows=%v linux=%v, want windows=%v linux=%v", name,
-				scope.includes("windows"), scope.includes("linux"), wantWindows, wantLinux)
+		// The receiver-qualified keys name the member the hand-own spells: `sockaddr(this ж<SockaddrInet4>`
+		// for the encoders, `Sockaddr(this ж<RawSockaddrAny>` for the windows decode.
+		witness := name
+		if dot := strings.LastIndex(name, "."); dot >= 0 {
+			witness = name[dot+1:] + "(this ж<" + name[:dot] + ">"
+		} else {
+			witness = " " + name + "("
 		}
 
-		if scope.includes("darwin") {
-			t.Errorf("syscall.%s must not apply on darwin: its libc-backed body is not the defective one and no darwin file hand-owns it", name)
+		for _, goos := range flavors {
+			inScope := scope.includes(goos)
+			bodied := strings.Contains(handOwns[goos], witness)
+
+			if inScope != want[goos] {
+				t.Errorf("syscall.%s: applies on %s = %v, want %v", name, goos, inScope, want[goos])
+			}
+
+			if inScope && !bodied {
+				t.Errorf("syscall.%s is displaced on %s but no marked hand-own under src/core/syscall/%s/ declares %q: the placeholder would leave it unimplemented", name, goos, goos, strings.TrimSpace(witness))
+			}
+
+			if !inScope && bodied {
+				t.Errorf("syscall.%s has a hand-own body under src/core/syscall/%s/ but is NOT displaced there: the generated body survives beside it (CS0111)", name, goos)
+			}
 		}
 	}
 
-	for _, name := range both {
-		check(name, true, true)
+	scopes := func(goos ...string) map[string]bool {
+		want := map[string]bool{}
+		for _, g := range goos {
+			want[g] = true
+		}
+		return want
+	}
+
+	for _, name := range everywhere {
+		check(name, scopes("windows", "linux", "darwin"))
 	}
 
 	for _, name := range windowsOnly {
-		check(name, true, false)
+		check(name, scopes("windows"))
 	}
 
 	for _, name := range linuxOnly {
-		check(name, false, true)
+		check(name, scopes("linux"))
 	}
+
+	for _, name := range unixOnly {
+		check(name, scopes("linux", "darwin"))
+	}
+
+	for _, name := range darwinOnly {
+		check(name, scopes("darwin"))
+	}
+}
+
+// sockaddrHandOwnSources concatenates, per flavor, the text of every marked hand-own under
+// src/core/syscall/<goos>/ — the witness the family guard checks each scope against. A clone without
+// src/core beside the converter has nothing to witness and skips.
+func sockaddrHandOwnSources(t *testing.T) map[string]string {
+	t.Helper()
+
+	sources := map[string]string{}
+
+	for _, goos := range []string{"windows", "linux", "darwin"} {
+		dir := filepath.Join("..", "core", "syscall", goos)
+		entries, err := os.ReadDir(dir)
+
+		if err != nil {
+			t.Skipf("src/core/syscall/%s is not beside the converter; nothing to witness: %v", goos, err)
+		}
+
+		var text strings.Builder
+
+		for _, entry := range entries {
+			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".cs") {
+				continue
+			}
+
+			body, err := os.ReadFile(filepath.Join(dir, entry.Name()))
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// The converter's own line-anchored marker (testConversion.go), never a comment's mention of it.
+			if manualConversionMarker.Match(body) {
+				text.Write(body)
+				text.WriteByte('\n')
+			}
+		}
+
+		sources[goos] = text.String()
+	}
+
+	return sources
 }
 
 // TestEveryManualConversionScopeNamesAKnownGOOS is the typo guard. A scope naming "win" or "macos"
@@ -348,27 +440,27 @@ func (c *copyChecker) check() {}
 	}
 }
 
-// Recvfrom is hand-owned on LINUX only, and the scope matters more than most: its generated body
-// hands the kernel a managed RawSockaddrAny by address, which the kernel overwrites -- the class
-// that kills net.Interfaces() with an AccessViolation. Windows has its own Recvfrom surface and is
-// NOT displaced by the linux hand-own; darwin has no measured corpus and keeps its converted body.
-func TestRecvfromIsScopedToLinuxOnly(t *testing.T) {
+// Recvfrom is hand-owned on the two UNIX flavors — linux (sockaddr_linux_impl.cs, 2026-08-30) and
+// darwin (sockaddr_darwin_impl.cs, 2026-09-05) — because the generated body hands the kernel a managed
+// RawSockaddrAny by address, which the kernel overwrites: the class that kills net.Interfaces() with an
+// AccessViolation on linux. Windows has its own Recvfrom surface (WSARecvFrom) and is NOT displaced.
+func TestRecvfromIsScopedToTheUnixHandOwningFlavors(t *testing.T) {
 	entry, ok := manualConversionFuncs["syscall"]["Recvfrom"]
 
 	if !ok {
-		t.Fatal("syscall.Recvfrom is not registered as a manual conversion; the linux hand-own in " +
-			"sockaddr_linux_impl.cs would be shadowed by the generated body that causes the AV")
+		t.Fatal("syscall.Recvfrom is not registered as a manual conversion; the unix hand-owns in " +
+			"sockaddr_linux_impl.cs / sockaddr_darwin_impl.cs would be shadowed by the generated body that causes the AV")
 	}
 
-	if !entry.includes("linux") {
-		t.Error("syscall.Recvfrom must be displaced on linux -- that is where the hand-own lives")
-	}
-
-	for _, goos := range []string{"windows", "darwin"} {
-		if entry.includes(goos) {
-			t.Errorf("syscall.Recvfrom must NOT be displaced on %s: no hand-own exists there, so the "+
-				"placeholder would leave the function unimplemented", goos)
+	for _, goos := range []string{"linux", "darwin"} {
+		if !entry.includes(goos) {
+			t.Errorf("syscall.Recvfrom must be displaced on %s -- that is where a hand-own lives", goos)
 		}
+	}
+
+	if entry.includes("windows") {
+		t.Error("syscall.Recvfrom must NOT be displaced on windows: no hand-own exists there, so the " +
+			"placeholder would leave the function unimplemented")
 	}
 }
 
