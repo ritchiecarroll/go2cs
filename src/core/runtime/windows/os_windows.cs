@@ -944,6 +944,7 @@ internal static uintptr stdcall_no_g(stdFunction fn, nint n, uintptr args) {
         args: args
     );
     asmstdcall_trampoline((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡlibcall)));
+    System.GC.KeepAlive(Ꮡlibcall);
     return libcall.r1;
 }
 

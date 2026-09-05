@@ -115,7 +115,9 @@ public static (nint n, error err) Getfsstat(slice<Statfs_t> buf, nint flags) {
         _p0 = @unsafe.Pointer.FromPinnedBox(Ꮡ(buf, 0));
         bufsize = /* unsafe.Sizeof(Statfs_t{}) */ (uintptr)2168 * (uintptr)len(buf);
     }
-    var (r0, _, e1) = syscall(abi.FuncPCABI0(libc_getfsstat_trampoline), (uintptr)_p0, bufsize, (uintptr)flags);
+    var ᴋ0 = _p0;
+        var (r0, _, e1) = syscall(abi.FuncPCABI0(libc_getfsstat_trampoline), (uintptr)ᴋ0, bufsize, (uintptr)flags);
+    System.GC.KeepAlive(ᴋ0);
     n = (nint)r0;
     if (e1 != 0) {
         err = e1;
@@ -260,7 +262,9 @@ internal static (nint n, error err) readlen(nint fd, ж<byte> Ꮡbuf, nint nbuf)
     nint n = default!;
     error err = default!;
 
-    var (r0, _, e1) = syscall(abi.FuncPCABI0(libc_read_trampoline), (uintptr)fd, (uintptr)Ꮡbuf, (uintptr)nbuf);
+    var ᴋ1 = Ꮡbuf;
+        var (r0, _, e1) = syscall(abi.FuncPCABI0(libc_read_trampoline), (uintptr)fd, (uintptr)ᴋ1, (uintptr)nbuf);
+    System.GC.KeepAlive(ᴋ1);
     n = (nint)r0;
     if (e1 != 0) {
         err = errnoErr(e1);

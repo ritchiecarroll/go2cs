@@ -31,6 +31,7 @@ internal static uint64 put(this ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
     }
     // Insert the pointer to the type itself.
     var (id, _) = Ꮡt.of(traceTypeTable.Ꮡtab).put((uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(typ))), goarch.PtrSize);
+    System.GC.KeepAlive(Ꮡtyp);
     return id;
 }
 

@@ -481,7 +481,9 @@ internal static bool ifaceeq(ж<itab> Ꮡtab, @unsafe.Pointer x, @unsafe.Pointer
 internal static uintptr stringHash(@string sʗp, uintptr seed) {
     ref var s = ref heap(sʗp, out var Ꮡs);
 
-    return strhash((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡs)), seed);
+    var ᴛ1 = strhash((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡs)), seed);
+    System.GC.KeepAlive(Ꮡs);
+    return ᴛ1;
 }
 
 internal static uintptr bytesHash(slice<byte> bʗp, uintptr seed) {
@@ -494,19 +496,25 @@ internal static uintptr bytesHash(slice<byte> bʗp, uintptr seed) {
 internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
     ref var i = ref heap(iʗp, out var Ꮡi);
 
-    return memhash32((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
+    var ᴛ2 = memhash32((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
+    System.GC.KeepAlive(Ꮡi);
+    return ᴛ2;
 }
 
 internal static uintptr int64Hash(uint64 iʗp, uintptr seed) {
     ref var i = ref heap(iʗp, out var Ꮡi);
 
-    return memhash64((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
+    var ᴛ3 = memhash64((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
+    System.GC.KeepAlive(Ꮡi);
+    return ᴛ3;
 }
 
 internal static uintptr efaceHash(any iʗp, uintptr seed) {
     ref var i = ref heap(iʗp, out var Ꮡi);
 
-    return nilinterhash((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
+    var ᴛ4 = nilinterhash((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
+    System.GC.KeepAlive(Ꮡi);
+    return ᴛ4;
 }
 
 [GoType("dyn")] internal partial interface ifaceHash_i {
@@ -516,7 +524,9 @@ internal static uintptr efaceHash(any iʗp, uintptr seed) {
 internal static uintptr ifaceHash(ifaceHash_i iʗp, uintptr seed) {
     ref var i = ref heap(iʗp, out var Ꮡi);
 
-    return interhash((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
+    var ᴛ5 = interhash((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed);
+    System.GC.KeepAlive(Ꮡi);
+    return ᴛ5;
 }
 
 internal static UntypedInt hashRandomBytes => /* goarch.PtrSize / 4 * 64 */ 128;

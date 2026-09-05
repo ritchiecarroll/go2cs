@@ -81,7 +81,28 @@ $keepAlivePattern = [regex]'System\.GC\.KeepAlive\((ᴋ\d+)\);'
 # kernel at all), and a name-substring match would pull them in. Over-matching costs nothing here
 # -- a scanned file with no temps and no KeepAlives passes trivially -- while under-matching is
 # exactly the defect above, so the pattern errs wide on the qualifier and narrow on the name.
-$funnelCallPattern = [regex]'(?:^|[^\w])(?:\w+\.)?(RawSyscall6?|SyscallN|Syscall(?:6|9|12|15|18)?)\('
+# darwin's funnels joined on 2026-09-05 (Q49): the lowercase libc trampoline funnels `syscall`,
+# `syscall6`, `syscall6X`, `syscallX`, `syscallPtr`, `rawSyscall`, `rawSyscall6` (syscall_darwin.go),
+# which the uppercase-only set above never named -- so syscall\darwin read GREEN at ZERO protected
+# sites on every train (a file with no temps and no KeepAlives passes arm 1 trivially) while its
+# 75 funnel call lines carried 101 pointer-derived arguments unheld. The `[^\w]` anchor keeps
+# `syscall_syscall(` (internal/syscall/unix's linkname family, integer/handle arguments) apart from
+# `syscall(`, exactly as it keeps AllThreadsSyscall apart from Syscall.
+$funnelCallPattern = [regex]'(?:^|[^\w])(?:\w+\.)?(RawSyscall6?|SyscallN|Syscall(?:6|9|12|15|18)?|rawSyscall6?|syscall(?:6X?|X|Ptr)?)\('
+
+# ARM 3 (2026-09-05, Q49): a pointer-derived argument INSIDE a funnel call's argument list that is
+# not a captured `ᴛN` temp -- `(uintptr)Ꮡbox`, `(uintptr)_pN`, `(uintptr)@unsafe.Pointer.FromPinnedBox(`
+# -- is the pre-fix emission shape: the kernel is handed a managed address nothing holds still.
+# A `_pN` counts only when its nearest declaration is `@unsafe.Pointer _pN` or a `ж<…> _pN` box;
+# mksyscall spells a bool through the same name (`uint32 _p0 = default!; … _p0 = 1;`) and that
+# integer is not an address -- seven Windows sites read as raw by this arm's first form.
+# Arm 1 cannot see it (it pairs temps with KeepAlives and a file with neither passes), which is the
+# route-#8 shape one target over: darwin sat at zero temps, zero KeepAlives and zero findings while
+# every one of its pointer-derived funnel arguments was raw. Positive-controlled at its landing: RED
+# on the pre-cut tree's syscall\darwin (75 lines), green on windows and linux pre-cut, green on
+# darwin after the cut. The glyphs are written as escapes, never literally (the PS 5.1 codepage trap).
+$rawFunnelArgPattern = [regex]'\(uintptr\)(\u13D1[A-Za-z_][A-Za-z0-9_]*|_p\d+|@unsafe\.Pointer\.FromPinnedBox\()'
+
 
 # A COMMENT is not an emission, and this is LOAD-BEARING for the widening rather than defensive.
 # syscall\windows\dll_windows.cs documents the contract in its header by quoting the emission
@@ -165,6 +186,7 @@ $totalTemps = 0
 $totalKeepAlives = 0
 $totalFunnelCalls = 0
 $mismatchFiles = @()
+$rawFunnelArgs = @()
 
 $csFiles = Get-ChildItem -LiteralPath $CorpusRoot -Recurse -Filter '*.cs' -File |
     Where-Object { $_.FullName -notmatch '[\\/](bin|obj|Generated)[\\/]' }
@@ -179,6 +201,51 @@ foreach ($file in $csFiles) {
     }
 
     $totalFunnelCalls += $funnelMatches.Count
+
+    # ARM 3: every funnel call's argument list, paren-matched from the name's `(`, scanned for a raw
+    # pointer-derived argument. Hand-own files are arm 2's (their raw box arguments are paired with
+    # their own KeepAlives there); this arm reads CONVERTED emission only.
+    if ($file.Name -notlike '*_impl.cs' -and $content -notmatch '\[module:\s*(go\.)?GoManualConversion\]') {
+        foreach ($funnelMatch in $funnelMatches) {
+            $open = $funnelMatch.Index + $funnelMatch.Length - 1
+            $depth = 0
+            $close = -1
+
+            for ($k = $open; $k -lt $content.Length; $k++) {
+                $ch = $content[$k]
+
+                if ($ch -eq '(') { $depth++ }
+                elseif ($ch -eq ')') { $depth--; if ($depth -eq 0) { $close = $k; break } }
+            }
+
+            if ($close -lt 0) { continue }
+
+            $argText = $content.Substring($open, $close - $open + 1)
+
+            foreach ($raw in $rawFunnelArgPattern.Matches($argText)) {
+                # A `_pN` temp is pointer-derived only when its nearest preceding declaration in the
+                # file is `@unsafe.Pointer _pN` -- mksyscall spells a bool argument through the same
+                # `_p0` name (`var _p0 uint32; if inheritHandle { _p0 = 1 }`), and `(uintptr)_p0`
+                # over that integer is not an address (seven such sites on Windows, first form of
+                # this arm, all false positives).
+                if ($raw.Groups[1].Value -match '^_p\d+$') {
+                    $before = $content.Substring(0, $funnelMatch.Index)
+                    $decls = [regex]::Matches($before, '(?m)^\s*(\S+)\s+' + [regex]::Escape($raw.Groups[1].Value) + '\s*=\s*default!;')
+
+                    # Pointer-derived when the temp is a Pointer OR a box (`ж<byte> _p0` from
+                    # BytePtrFromString, whose `(uintptr)_p0` is the box's pinned address).
+                    $declType = if ($decls.Count -gt 0) { $decls[$decls.Count - 1].Groups[1].Value } else { '' }
+
+                    if ($declType -ne '@unsafe.Pointer' -and -not $declType.StartsWith("`u{0436}<")) {
+                        continue
+                    }
+                }
+
+                $lineNumber = ($content.Substring(0, $funnelMatch.Index) -split "`n").Count
+                $rawFunnelArgs += "$(Get-RelativeDisplayPath -Path $file.FullName -Root $CorpusRoot):$lineNumber  $($funnelMatch.Groups[1].Value)(... $($raw.Value) ...)  -- raw pointer-derived argument, not a captured temp"
+            }
+        }
+    }
 
     $tempMatches = $tempPattern.Matches($content)
     $keepAliveMatches = $keepAlivePattern.Matches($content)
@@ -255,6 +322,8 @@ Write-Host "  ARM 1 -- converter emission"
 Write-Host "    funnel call occurrences (informational -- includes non-pointer-arg calls): $totalFunnelCalls"
 Write-Host "    captured temps (var kN = ...;):   $totalTemps"
 Write-Host "    matching KeepAlive calls:         $totalKeepAlives"
+Write-Host "  ARM 3 -- raw pointer-derived funnel arguments in converted emission"
+Write-Host "    UNHELD:                           $($rawFunnelArgs.Count)"
 Write-Host "  ARM 2 -- hand-own pin holders ($($handOwnPinFiles.Count) listed file(s))"
 Write-Host "    (uintptr)<box> argument sites:    $handOwnSites"
 Write-Host "    held across the call:             $handOwnHeld"
@@ -266,6 +335,13 @@ foreach ($finding in $handOwnUnheld) {
 
 if ($handOwnMissingFiles.Count -gt 0) {
     Write-Error "HAND-OWN ARM: $($handOwnMissingFiles.Count) listed file(s) not found under $CorpusRoot -- the list is stale, and a missing file silently removes its sites from the census:`n$($handOwnMissingFiles -join "`n")"
+    exit 1
+}
+
+if ($rawFunnelArgs.Count -gt 0) {
+    Write-Host ""
+    Write-Host "CENSUS RED (arm 3): $($rawFunnelArgs.Count) raw pointer-derived funnel argument(s) -- the kernel is handed a managed address nothing holds still:"
+    $rawFunnelArgs | ForEach-Object { Write-Host "    $_" }
     exit 1
 }
 
@@ -294,5 +370,5 @@ if ($handOwnSites -eq 0) {
     exit 1
 }
 
-Write-Host "CENSUS CLEAN: arm 1 -- every captured temp has exactly one matching KeepAlive, $totalTemps site(s) protected; arm 2 -- all $handOwnSites hand-own pointer argument(s) held across their call."
+Write-Host "CENSUS CLEAN: arm 3 -- no raw pointer-derived funnel argument in converted emission; arm 1 -- every captured temp has exactly one matching KeepAlive, $totalTemps site(s) protected; arm 2 -- all $handOwnSites hand-own pointer argument(s) held across their call."
 exit 0

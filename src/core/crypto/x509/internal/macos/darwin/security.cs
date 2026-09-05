@@ -86,8 +86,9 @@ internal static UntypedInt errSecNoTrustSettings => -25263;
 public static (CFRef certArray, error err) SecTrustSettingsCopyCertificates(SecTrustSettingsDomain domain) {
     ref var certArray = ref heap(new CFRef(), out var ᏑcertArray);
 
-    var ret = syscall(abi.FuncPCABI0(x509_SecTrustSettingsCopyCertificates_trampoline), (uintptr)(int32)domain,
-        (uintptr)@unsafe.Pointer.FromBox(ᏑcertArray), 0, 0, 0, 0D);
+    var ᴋ0 = @unsafe.Pointer.FromBox(ᏑcertArray);
+        var ret = syscall(abi.FuncPCABI0(x509_SecTrustSettingsCopyCertificates_trampoline), (uintptr)(int32)domain, (uintptr)ᴋ0, 0, 0, 0, 0D);
+    System.GC.KeepAlive(ᴋ0);
     if ((int32)ret == errSecNoTrustSettings){
         return (0, ErrNoTrustSettings);
     } else 
@@ -105,8 +106,9 @@ internal static UntypedInt errSecItemNotFound => -25300;
 public static (CFRef trustSettings, error err) SecTrustSettingsCopyTrustSettings(CFRef cert, SecTrustSettingsDomain domain) {
     ref var trustSettings = ref heap(new CFRef(), out var ᏑtrustSettings);
 
-    var ret = syscall(abi.FuncPCABI0(x509_SecTrustSettingsCopyTrustSettings_trampoline), (uintptr)cert, (uintptr)(int32)domain,
-        (uintptr)@unsafe.Pointer.FromBox(ᏑtrustSettings), 0, 0, 0D);
+    var ᴋ1 = @unsafe.Pointer.FromBox(ᏑtrustSettings);
+        var ret = syscall(abi.FuncPCABI0(x509_SecTrustSettingsCopyTrustSettings_trampoline), (uintptr)cert, (uintptr)(int32)domain, (uintptr)ᴋ1, 0, 0, 0D);
+    System.GC.KeepAlive(ᴋ1);
     if ((int32)ret == errSecItemNotFound){
         return (0, ErrNoTrustSettings);
     } else 
@@ -121,8 +123,9 @@ internal static partial void x509_SecTrustSettingsCopyTrustSettings_trampoline()
 //go:cgo_import_dynamic x509_SecTrustCreateWithCertificates SecTrustCreateWithCertificates "/System/Library/Frameworks/Security.framework/Versions/A/Security"
 public static (CFRef, error) SecTrustCreateWithCertificates(CFRef certs, CFRef policies) {
     ref var trustObj = ref heap(new CFRef(), out var ᏑtrustObj);
-    var ret = syscall(abi.FuncPCABI0(x509_SecTrustCreateWithCertificates_trampoline), (uintptr)certs, (uintptr)policies,
-        (uintptr)@unsafe.Pointer.FromBox(ᏑtrustObj), 0, 0, 0D);
+    var ᴋ2 = @unsafe.Pointer.FromBox(ᏑtrustObj);
+        var ret = syscall(abi.FuncPCABI0(x509_SecTrustCreateWithCertificates_trampoline), (uintptr)certs, (uintptr)policies, (uintptr)ᴋ2, 0, 0, 0D);
+    System.GC.KeepAlive(ᴋ2);
     if ((int32)ret != 0) {
         return (0, new OSStatus("SecTrustCreateWithCertificates"u8, (int32)ret));
     }
@@ -160,8 +163,8 @@ public static (CFRef, error) SecPolicyCreateSSL(@string name) {
             hostname = StringToCFString(name);
             defer(CFRelease, ((CFRef)(uintptr)hostname), ref ᒐ);
         }
-        var ret = syscall(abi.FuncPCABI0(x509_SecPolicyCreateSSL_trampoline), 1, /* true */
- (uintptr)hostname, 0, 0, 0, 0D);
+        var ret = syscall(abi.FuncPCABI0(x509_SecPolicyCreateSSL_trampoline), 1, (uintptr)hostname, 0, 0, 0, 0D);
+        /* true */
         if (ret == 0) {
             return (0, new OSStatus("SecPolicyCreateSSL"u8, (int32)ret));
         }
@@ -187,7 +190,9 @@ internal static partial void x509_SecTrustSetVerifyDate_trampoline();
 //go:cgo_import_dynamic x509_SecTrustEvaluate SecTrustEvaluate "/System/Library/Frameworks/Security.framework/Versions/A/Security"
 public static (CFRef, error) SecTrustEvaluate(CFRef trustObj) {
     ref var result = ref heap(new CFRef(), out var Ꮡresult);
-    var ret = syscall(abi.FuncPCABI0(x509_SecTrustEvaluate_trampoline), (uintptr)trustObj, (uintptr)@unsafe.Pointer.FromBox(Ꮡresult), 0, 0, 0, 0D);
+    var ᴋ3 = @unsafe.Pointer.FromBox(Ꮡresult);
+        var ret = syscall(abi.FuncPCABI0(x509_SecTrustEvaluate_trampoline), (uintptr)trustObj, (uintptr)ᴋ3, 0, 0, 0, 0D);
+    System.GC.KeepAlive(ᴋ3);
     if ((int32)ret != 0) {
         return (0, new OSStatus("SecTrustEvaluate"u8, (int32)ret));
     }
@@ -202,8 +207,13 @@ public static (CFRef, CFRef, error) SecTrustGetResult(CFRef trustObj, CFRef resu
 
     ref var chain = ref heap(new CFRef(), out var Ꮡchain);
     ref var info = ref heap(new CFRef(), out var Ꮡinfo);
-    var ret = syscall(abi.FuncPCABI0(x509_SecTrustGetResult_trampoline), (uintptr)trustObj, (uintptr)@unsafe.Pointer.FromBox(Ꮡresult),
-        (uintptr)@unsafe.Pointer.FromBox(Ꮡchain), (uintptr)@unsafe.Pointer.FromBox(Ꮡinfo), 0, 0D);
+    var ᴋ4 = @unsafe.Pointer.FromBox(Ꮡresult);
+    var ᴋ5 = @unsafe.Pointer.FromBox(Ꮡchain);
+    var ᴋ6 = @unsafe.Pointer.FromBox(Ꮡinfo);
+        var ret = syscall(abi.FuncPCABI0(x509_SecTrustGetResult_trampoline), (uintptr)trustObj, (uintptr)ᴋ4, (uintptr)ᴋ5, (uintptr)ᴋ6, 0, 0D);
+    System.GC.KeepAlive(ᴋ4);
+    System.GC.KeepAlive(ᴋ5);
+    System.GC.KeepAlive(ᴋ6);
     if ((int32)ret != 0) {
         return (0, 0, new OSStatus("SecTrustGetResult"u8, (int32)ret));
     }
@@ -215,7 +225,9 @@ internal static partial void x509_SecTrustGetResult_trampoline();
 //go:cgo_import_dynamic x509_SecTrustEvaluateWithError SecTrustEvaluateWithError "/System/Library/Frameworks/Security.framework/Versions/A/Security"
 public static (nint, error) SecTrustEvaluateWithError(CFRef trustObj) {
     ref var errRef = ref heap(new CFRef(), out var ᏑerrRef);
-    var ret = syscall(abi.FuncPCABI0(x509_SecTrustEvaluateWithError_trampoline), (uintptr)trustObj, (uintptr)@unsafe.Pointer.FromBox(ᏑerrRef), 0, 0, 0, 0D);
+    var ᴋ7 = @unsafe.Pointer.FromBox(ᏑerrRef);
+        var ret = syscall(abi.FuncPCABI0(x509_SecTrustEvaluateWithError_trampoline), (uintptr)trustObj, (uintptr)ᴋ7, 0, 0, 0, 0D);
+    System.GC.KeepAlive(ᴋ7);
     if ((int32)ret != 1) {
         var errStr = CFErrorCopyDescription(errRef);
         var err = errors.New(CFStringToString(errStr));

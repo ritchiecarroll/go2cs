@@ -31,6 +31,7 @@ internal static @unsafe.Pointer mapaccess1_fast64(ж<maptype> Ꮡt, ж<hmap> Ꮡ
         b = (ж<bmap>)(uintptr)(h.buckets);
     } else {
         var hash = t.Hasher((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), (uintptr)h.hash0);
+        System.GC.KeepAlive(Ꮡkey);
         var m = bucketMask(h.B);
         b = (ж<bmap>)(uintptr)(add(h.buckets, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
         {
@@ -86,6 +87,7 @@ internal static (@unsafe.Pointer, bool) mapaccess2_fast64(ж<maptype> Ꮡt, ж<h
         b = (ж<bmap>)(uintptr)(h.buckets);
     } else {
         var hash = t.Hasher((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), (uintptr)h.hash0);
+        System.GC.KeepAlive(Ꮡkey);
         var m = bucketMask(h.B);
         b = (ж<bmap>)(uintptr)(add(h.buckets, ((uintptr)(hash & m)) * (uintptr)t.BucketSize));
         {
@@ -138,6 +140,7 @@ internal static @unsafe.Pointer mapassign_fast64(ж<maptype> Ꮡt, ж<hmap> Ꮡh
         fatal(concurrentMapWritesˢ);
     }
     var hash = t.Hasher((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), (uintptr)h.hash0);
+    System.GC.KeepAlive(Ꮡkey);
     // Set hashWriting after calling t.hasher for consistency with mapassign.
     h.flags ^= (uint8)(hashWriting);
     if (h.buckets == nil) {
@@ -234,6 +237,7 @@ internal static @unsafe.Pointer mapassign_fast64ptr(ж<maptype> Ꮡt, ж<hmap> �
         fatal(concurrentMapWritesˢ);
     }
     var hash = t.Hasher((uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡkey)), (uintptr)h.hash0);
+    System.GC.KeepAlive(Ꮡkey);
     // Set hashWriting after calling t.hasher for consistency with mapassign.
     h.flags ^= (uint8)(hashWriting);
     if (h.buckets == nil) {
@@ -319,6 +323,7 @@ internal static void mapdelete_fast64(ж<maptype> Ꮡt, ж<hmap> Ꮡh, uint64 ke
         fatal(concurrentMapWritesˢ);
     }
     var hash = t.Hasher((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡkey)), (uintptr)h.hash0);
+    System.GC.KeepAlive(Ꮡkey);
     // Set hashWriting after calling t.hasher for consistency with mapdelete
     h.flags ^= (uint8)(hashWriting);
     var bucket = (uintptr)(hash & bucketMask(h.B));

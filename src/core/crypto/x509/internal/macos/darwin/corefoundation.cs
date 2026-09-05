@@ -91,7 +91,9 @@ internal static UntypedInt kCFStringEncodingUTF8 => 0x08000100;
 //go:cgo_import_dynamic x509_CFDataCreate CFDataCreate "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
 public static CFRef BytesToCFData(slice<byte> b) {
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(@unsafe.SliceData(b));
-    var ret = syscall(abi.FuncPCABI0(x509_CFDataCreate_trampoline), kCFAllocatorDefault, (uintptr)p, (uintptr)len(b), 0, 0, 0D);
+    var ᴋ0 = p;
+        var ret = syscall(abi.FuncPCABI0(x509_CFDataCreate_trampoline), kCFAllocatorDefault, (uintptr)ᴋ0, (uintptr)len(b), 0, 0, 0D);
+    System.GC.KeepAlive(ᴋ0);
     runtime.KeepAlive(p);
     return ((CFRef)ret);
 }
@@ -103,9 +105,10 @@ internal static partial void x509_CFDataCreate_trampoline();
 // StringToCFString returns a copy of the UTF-8 contents of s as a new CFString.
 public static CFString StringToCFString(@string s) {
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(@unsafe.StringData(s));
-    var ret = syscall(abi.FuncPCABI0(x509_CFStringCreateWithBytes_trampoline), kCFAllocatorDefault, (uintptr)p,
-        (uintptr)len(s), (uintptr)kCFStringEncodingUTF8, 0, /* isExternalRepresentation */
- 0D);
+    var ᴋ1 = p;
+        var ret = syscall(abi.FuncPCABI0(x509_CFStringCreateWithBytes_trampoline), kCFAllocatorDefault, (uintptr)ᴋ1, (uintptr)len(s), (uintptr)kCFStringEncodingUTF8, 0, 0D);
+    System.GC.KeepAlive(ᴋ1);
+    /* isExternalRepresentation */
     runtime.KeepAlive(p);
     return ((CFString)ret);
 }
@@ -116,8 +119,9 @@ internal static partial void x509_CFStringCreateWithBytes_trampoline();
 public static (CFRef value, bool ok) CFDictionaryGetValueIfPresent(CFRef dict, CFString key) {
     ref var value = ref heap(new CFRef(), out var Ꮡvalue);
 
-    var ret = syscall(abi.FuncPCABI0(x509_CFDictionaryGetValueIfPresent_trampoline), (uintptr)dict, (uintptr)key,
-        (uintptr)@unsafe.Pointer.FromBox(Ꮡvalue), 0, 0, 0D);
+    var ᴋ2 = @unsafe.Pointer.FromBox(Ꮡvalue);
+        var ret = syscall(abi.FuncPCABI0(x509_CFDictionaryGetValueIfPresent_trampoline), (uintptr)dict, (uintptr)key, (uintptr)ᴋ2, 0, 0, 0D);
+    System.GC.KeepAlive(ᴋ2);
     if (ret == 0) {
         return (0, false);
     }
@@ -134,8 +138,9 @@ private static readonly @string cfNumberGetValueCallˢ = "CFNumberGetValue call 
 //go:cgo_import_dynamic x509_CFNumberGetValue CFNumberGetValue "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
 public static (int32, error) CFNumberGetValue(CFRef num) {
     ref var value = ref heap(new int32(), out var Ꮡvalue);
-    var ret = syscall(abi.FuncPCABI0(x509_CFNumberGetValue_trampoline), (uintptr)num, (uintptr)kCFNumberSInt32Type,
-        (uintptr)Ꮡvalue, 0, 0, 0D);
+    var ᴋ3 = Ꮡvalue;
+        var ret = syscall(abi.FuncPCABI0(x509_CFNumberGetValue_trampoline), (uintptr)num, (uintptr)kCFNumberSInt32Type, (uintptr)ᴋ3, 0, 0, 0D);
+    System.GC.KeepAlive(ᴋ3);
     if (ret == 0) {
         return (0, errors.New(cfNumberGetValueCallˢ));
     }
@@ -193,8 +198,8 @@ internal static partial void x509_CFRelease_trampoline();
 
 //go:cgo_import_dynamic x509_CFArrayCreateMutable CFArrayCreateMutable "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
 public static CFRef CFArrayCreateMutable() {
-    var ret = syscall(abi.FuncPCABI0(x509_CFArrayCreateMutable_trampoline), kCFAllocatorDefault, 0, 0, /* kCFTypeArrayCallBacks */
- 0, 0, 0D);
+    var ret = syscall(abi.FuncPCABI0(x509_CFArrayCreateMutable_trampoline), kCFAllocatorDefault, 0, 0, 0, 0, 0D);
+    /* kCFTypeArrayCallBacks */
     return ((CFRef)ret);
 }
 

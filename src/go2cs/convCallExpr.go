@@ -152,6 +152,19 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		v.rejectDeferredSyscallKeepAlive(callExpr)
 	}
 
+	// The pin-lifetime class's MANAGED-callee member (Q49): an argument that is a bridged
+	// unsafe.Pointer-returning call over a frame-minted box — `memhash32(noescape(unsafe.Pointer(
+	// &i)), seed)` — renders through the general path unchanged, and the box is named for a
+	// KeepAlive drained after the statement, so it outlives the call the way Go's liveness keeps
+	// it. See bridgedWrapperKeepAliveBoxes for the shape, the measurement and the census.
+	if boxes := v.bridgedWrapperKeepAliveBoxes(callExpr); len(boxes) > 0 {
+		if context.callArgs != nil {
+			v.rejectDeferredBridgedWrapper(callExpr, boxes)
+		}
+
+		v.pendingSyscallKeepAlive = append(v.pendingSyscallKeepAlive, boxes...)
+	}
+
 	// ---- Phase 1a: shapes intercepted before the general call path ----
 	//
 	// Each of these is a Go idiom whose faithful rendering the general path below gets wrong, so

@@ -142,7 +142,9 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             pgrp = ((_C_int)(int32)r1);
         }
         // Place process group in foreground.
-        (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_ioctl_trampoline), (uintptr)sys.Ctty, (uintptr)TIOCSPGRP, (uintptr)Ꮡpgrp);
+        var ᴋ0 = Ꮡpgrp;
+                (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_ioctl_trampoline), (uintptr)sys.Ctty, (uintptr)TIOCSPGRP, (uintptr)ᴋ0);
+        System.GC.KeepAlive(ᴋ0);
         if (err1 != 0) {
             goto childerror;
         }
@@ -152,7 +154,9 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     runtime_AfterForkInChild();
     // Chroot
     if (Ꮡchroot != nil) {
-        (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_chroot_trampoline), (uintptr)Ꮡchroot, 0, 0);
+        var ᴋ1 = Ꮡchroot;
+                (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_chroot_trampoline), (uintptr)ᴋ1, 0, 0);
+        System.GC.KeepAlive(ᴋ1);
         if (err1 != 0) {
             goto childerror;
         }
@@ -183,7 +187,9 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     }
     // Chdir
     if (Ꮡdir != nil) {
-        (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_chdir_trampoline), (uintptr)Ꮡdir, 0, 0);
+        var ᴋ2 = Ꮡdir;
+                (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_chdir_trampoline), (uintptr)ᴋ2, 0, 0);
+        System.GC.KeepAlive(ᴋ2);
         if (err1 != 0) {
             goto childerror;
         }
@@ -273,16 +279,23 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     }
     // Restore original rlimit.
     if (rlim != nil) {
-        rawSyscall(abi.FuncPCABI0(libc_setrlimit_trampoline), (uintptr)RLIMIT_NOFILE, (uintptr)rlim, 0);
+        var ᴋ3 = rlim;
+                rawSyscall(abi.FuncPCABI0(libc_setrlimit_trampoline), (uintptr)RLIMIT_NOFILE, (uintptr)ᴋ3, 0);
+        System.GC.KeepAlive(ᴋ3);
     }
     // Time to exec.
-    (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_execve_trampoline),
-        (uintptr)Ꮡargv0,
-        (uintptr)@unsafe.Pointer.FromBox(Ꮡ(argv, 0)),
-        (uintptr)@unsafe.Pointer.FromBox(Ꮡ(envv, 0)));
+    var ᴋ4 = Ꮡargv0;
+    var ᴋ5 = @unsafe.Pointer.FromBox(Ꮡ(argv, 0));
+    var ᴋ6 = @unsafe.Pointer.FromBox(Ꮡ(envv, 0));
+        (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_execve_trampoline), (uintptr)ᴋ4, (uintptr)ᴋ5, (uintptr)ᴋ6);
+    System.GC.KeepAlive(ᴋ4);
+    System.GC.KeepAlive(ᴋ5);
+    System.GC.KeepAlive(ᴋ6);
 childerror:
-    rawSyscall(abi.FuncPCABI0(libc_write_trampoline), // send error code on pipe
- (uintptr)pipe, (uintptr)@unsafe.Pointer.FromBox(Ꮡerr1), /* unsafe.Sizeof(err1) */ (uintptr)8);
+    var ᴋ7 = @unsafe.Pointer.FromBox(Ꮡerr1);
+        rawSyscall(abi.FuncPCABI0(libc_write_trampoline), (uintptr)pipe, (uintptr)ᴋ7, /* unsafe.Sizeof(err1) */ (uintptr)8);
+    System.GC.KeepAlive(ᴋ7);
+    // send error code on pipe
     while (ᐧ) {
         rawSyscall(abi.FuncPCABI0(libc_exit_trampoline), 253, 0, 0);
     }

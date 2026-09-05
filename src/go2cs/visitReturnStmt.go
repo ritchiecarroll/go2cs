@@ -86,6 +86,7 @@ func (v *Visitor) lambdaConstReturnCastType(targetType types.Type, expr ast.Expr
 //   - only when the declared result is a NAMED func type, whose emitted C# delegate name is exactly
 //     what a cast needs. An UNNAMED `func() bool` result has no corpus site today; it would need the
 //     synthesized `Func<…>`/`Action` spelling and is deliberately left until one appears.
+//
 // resultRendersAsBareLambda reports whether a return result renders as a C# lambda with no natural
 // type — a Go function literal, through any number of parentheses. It lived beside the retired
 // execution-context inference rules (a lambda contributed nothing to the wrapper's `T`); the frame
@@ -659,7 +660,11 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				// PLAIN operands are read after it, as gc reads them. Every call-bearing operand at
 				// or below the hazard index spills, keeping the calls in their own lexical order —
 				// the one ordering Go's spec does fix.
-				if i <= hoistThrough && v.exprEvaluatesCall(expr) {
+				// A result that recorded a keep-alive (a bridged-wrapper argument, Q49) is hoisted
+				// into a temp exactly like a multi-value operand, so the KeepAlive lines below land
+				// between the call and the `return` — a `return f(noescape(unsafe.Pointer(&x)))`
+				// becomes `var ᴛN = f(…); System.GC.KeepAlive(Ꮡx); return ᴛN;`.
+				if (i <= hoistThrough || len(v.pendingSyscallKeepAlive) > 0) && v.exprEvaluatesCall(expr) {
 					v.tupleTempIndex++
 					temp := fmt.Sprintf("%s%d", TempVarMarker, v.tupleTempIndex)
 
@@ -683,6 +688,33 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 			if len(returnStmt.Results) > 1 {
 				result.WriteRune(')')
 			}
+		}
+
+		// The return-statement drain (Q49): every keep-alive recorded while converting the results
+		// is written after their hoisted temps and before the `return`. Shapes whose result is not
+		// a plain expression the hoist above can capture — a receiver return, a ref-return
+		// forwarding, the named-return defer protocol — refuse loudly rather than emit a KeepAlive
+		// that fires after the return; Go 1.23.12 has no such site (the census found the class in
+		// plain returns only).
+		if len(v.pendingSyscallKeepAlive) > 0 {
+			if namedDefer || recvIndex != -1 || refReturnForwardIndex != -1 {
+				panic(fmt.Sprintf(
+					"@visitReturnStmt - a keep-alive was recorded inside a return statement the hoist cannot carry (namedDefer=%v recv=%v refForward=%v): %s -- names: %v",
+					namedDefer, recvIndex != -1, refReturnForwardIndex != -1, v.getPrintedNode(returnStmt), v.pendingSyscallKeepAlive,
+				))
+			}
+
+			for _, name := range dedupeKeepAliveNames(v.pendingSyscallKeepAlive) {
+				if pending := deferredDecls.String(); pending == "" || !strings.HasSuffix(pending, v.newline) {
+					deferredDecls.WriteString(v.newline)
+				}
+
+				deferredDecls.WriteString(v.indent(v.indentLevel))
+				deferredDecls.WriteString("System.GC.KeepAlive(" + name + ");")
+				deferredDecls.WriteString(v.newline)
+			}
+
+			v.pendingSyscallKeepAlive = nil
 		}
 	}
 

@@ -9,6 +9,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strings"
 )
@@ -47,6 +48,21 @@ var syscallFunnelFuncNames = map[string]bool{
 	"Syscall": true, "Syscall6": true, "Syscall9": true,
 	"Syscall12": true, "Syscall15": true, "Syscall18": true,
 	"SyscallN": true,
+
+	// darwin's funnels (Q49, 2026-09-05). On darwin the syscall package reaches libc through the
+	// lowercase trampoline funnels — `syscall`, `syscall6`, `syscall6X`, `syscallX`, `syscallPtr`,
+	// `rawSyscall`, `rawSyscall6` (syscall/syscall_darwin.go:327-332, bodies provided by the runtime
+	// through //go:linkname) — and the set above, written per Linux's and Windows's spelling, named
+	// none of them. Measured before the widening, at master db9e95841: the emitted syscall/darwin
+	// folder carried 75 funnel call lines with 101 pointer-derived arguments (51 inline
+	// `(uintptr)Ꮡbox`, 50 two-step `(uintptr)_pN`) and ZERO System.GC.KeepAlive — the pin hole the
+	// fix closed on Windows (281 protected sites) and Linux (138) was open on darwin at 0, and the
+	// census guard read green there because a file with no temps and no KeepAlives passed
+	// trivially. The names are matched by go/types identity in package `syscall` exactly like the
+	// others; no other platform's syscall package declares them, so the widening is darwin-only by
+	// construction (the two-seeded three-target diff predicts 0 Windows and 0 Linux files).
+	"syscall": true, "syscall6": true, "syscall6X": true, "syscallX": true,
+	"syscallPtr": true, "rawSyscall": true, "rawSyscall6": true,
 }
 
 // syscallFunnelPackagePaths names the packages whose members syscallFunnelFuncNames applies to.
@@ -54,9 +70,16 @@ var syscallFunnelFuncNames = map[string]bool{
 // unrelated package from false-matching; both paths declare only funnels of this shape among these
 // names (internal/runtime/syscall declares Syscall6 and nothing else the map names), so one shared
 // name set covers both without a per-package table.
+//
+// crypto/x509/internal/macos is the third path (2026-09-05): it declares its OWN `syscall` funnel
+// (corefoundation.go: `func syscall(fn, a1, a2, a3, a4, a5 uintptr, f1 float64) uintptr`, a libc
+// trampoline over abi.FuncPCABI0 exactly like package syscall's darwin ones) and no other function
+// among these names — measured as the one raw pointer-derived funnel argument outside package
+// syscall on darwin, CFNumberGetValue's `uintptr(unsafe.Pointer(&value))`.
 var syscallFunnelPackagePaths = map[string]bool{
-	"syscall":                  true,
-	"internal/runtime/syscall": true,
+	"syscall":                    true,
+	"internal/runtime/syscall":   true,
+	"crypto/x509/internal/macos": true,
 }
 
 // syscallFunnelCall reports whether callExpr calls one of the funnel functions — resolved via
@@ -279,6 +302,130 @@ func (v *Visitor) rejectDeferredSyscallKeepAlive(callExpr *ast.CallExpr) {
 	}
 }
 
+// bridgedWrapperKeepAliveBoxes — the pin-lifetime class's MANAGED-callee member (Q49, 2026-09-05).
+//
+// The shape is `f(g(unsafe.Pointer(&x)))` where g RETURNS unsafe.Pointer — in std, g is
+// runtime.noescape or internal/abi.NoEscape and nothing else — and x is minted in the calling
+// frame. The converter renders every value-consumed call whose result type is unsafe.Pointer with a
+// `(uintptr)` prefix (convCallExpr: `constructType = "(uintptr)"`), so the Pointer g returns is
+// flattened to its number and re-wrapped by f's `@unsafe.Pointer` parameter with NO retained
+// source: `memhash32((uintptr)noescape(@unsafe.Pointer.FromPinnedBox(Ꮡi)), seed)`. Nothing
+// references Ꮡi past the mint, the provenance record validates on read, and a collection between
+// the mint and the callee's resolve retires the entry — runtime's int32Hash refused by name inside
+// TestSmhasherWindowed (C1's guard arm 7 reproduces it every run). A BARE `f(unsafe.Pointer(&x))`
+// argument carries no bridge (the Pointer flows into the parameter retaining its box) and is
+// outside the class.
+//
+// The remedy is the syscall funnel's, one callee kind over: the frame-minted box is named for a
+// System.GC.KeepAlive after the statement (drainSyscallKeepAlive, or visitReturnStmt's hoist when
+// the call is a `return`), so the box outlives the call exactly as Go's own liveness keeps `&x`
+// alive through it. Censused by structure over the emitted corpus before the cut: 12 members on
+// Linux (runtime/alg.cs 5, map_faststr.cs 4, traceback.cs 1, linux/netpoll_epoll.cs 2), 10 on
+// Windows and darwin — dead sites included, because the emission is structural.
+//
+// Returns the box names (`Ꮡx`) of every frame-minted local whose address feeds a bridged
+// unsafe.Pointer-returning call in callExpr's argument list; nil for every other call.
+func (v *Visitor) bridgedWrapperKeepAliveBoxes(callExpr *ast.CallExpr) []string {
+	var boxes []string
+
+	// A CONVERSION is not a call: `mp.libcall.args = uintptr(noescape(unsafe.Pointer(&a0)))`
+	// STORES the number, and a KeepAlive drained after the store would hold the box exactly as
+	// far as the store — the stored-number shape is outside the class (nothing statement-scoped
+	// can hold it) and the arm must not claim it. Measured 2026-09-05 on the Windows target: the
+	// arm without this exclusion reached nine such sites (the eight stdcallN wrappers in
+	// runtime/os_windows.go, mstart0 in runtime/proc.go) that the prediction had named OUT.
+	if tv, ok := v.info.Types[callExpr.Fun]; ok && tv.IsType() {
+		return nil
+	}
+
+	for _, arg := range callExpr.Args {
+		if inner, ok := arg.(*ast.CallExpr); ok && isBridgedUnsafePointerCall(v.info, inner) {
+			v.collectFrameMintedUnsafePointerBoxes(inner, &boxes)
+		}
+	}
+
+	return boxes
+}
+
+// isBridgedUnsafePointerCall reports whether expr is a CALL (not a conversion, not a builtin)
+// whose result type is unsafe.Pointer — the exact class convCallExpr renders with the `(uintptr)`
+// bridge that strips a Pointer's retained source.
+func isBridgedUnsafePointerCall(info *types.Info, expr ast.Expr) bool {
+	call, ok := expr.(*ast.CallExpr)
+
+	if !ok {
+		return false
+	}
+
+	if tv, ok := info.Types[call.Fun]; ok && (tv.IsType() || tv.IsBuiltin()) {
+		return false
+	}
+
+	resultType := info.TypeOf(call)
+
+	if resultType == nil {
+		return false
+	}
+
+	basic, ok := resultType.Underlying().(*types.Basic)
+
+	return ok && basic.Kind() == types.UnsafePointer
+}
+
+// collectFrameMintedUnsafePointerBoxes walks a bridged call's arguments for `unsafe.Pointer(&x)`
+// conversions of frame-minted locals (parameters included — a parameter whose address is taken is
+// re-minted as a heap box in the prologue), recursing through nested bridged calls
+// (`f(g(h(unsafe.Pointer(&x))))`). The box name is spelled the way convUnaryExpr spells `&x`.
+func (v *Visitor) collectFrameMintedUnsafePointerBoxes(call *ast.CallExpr, boxes *[]string) {
+	for _, arg := range call.Args {
+		inner, ok := arg.(*ast.CallExpr)
+
+		if !ok {
+			continue
+		}
+
+		if exprNamesType(v.info, inner.Fun, "unsafe", "Pointer") && len(inner.Args) == 1 {
+			if unary, ok := inner.Args[0].(*ast.UnaryExpr); ok && unary.Op == token.AND {
+				if ident, ok := unary.X.(*ast.Ident); ok && v.isFrameMintedVar(ident) {
+					*boxes = append(*boxes, AddressPrefix+v.boxBaseName(ident))
+				}
+			}
+
+			continue
+		}
+
+		if isBridgedUnsafePointerCall(v.info, inner) {
+			v.collectFrameMintedUnsafePointerBoxes(inner, boxes)
+		}
+	}
+}
+
+// isFrameMintedVar reports whether ident names a variable declared inside a function — a local
+// or a parameter — as opposed to a package-level variable (a static field, alive for the process)
+// or a struct field (whose box is its container's). Only a frame-minted box can die under the call
+// that holds its number.
+func (v *Visitor) isFrameMintedVar(ident *ast.Ident) bool {
+	obj, ok := v.info.ObjectOf(ident).(*types.Var)
+
+	if !ok || obj.IsField() || obj.Pkg() == nil || obj.Parent() == nil {
+		return false
+	}
+
+	return obj.Parent() != obj.Pkg().Scope()
+}
+
+// rejectDeferredBridgedWrapper mirrors rejectDeferredSyscallKeepAlive for the wrapper class: a
+// DEFERRED or SPAWNED call carrying a bridged-wrapper argument would drain its KeepAlive at the
+// defer/go statement, before the call runs. Go 1.23.12 has no such site (the structural census
+// found the class only in plain returns, assignments and expression statements); it is refused by
+// name rather than emitted with a keepalive that keeps nothing alive.
+func (v *Visitor) rejectDeferredBridgedWrapper(callExpr *ast.CallExpr, boxes []string) {
+	panic(fmt.Sprintf(
+		"@rejectDeferredBridgedWrapper - deferred/spawned call %s carries a bridged unsafe.Pointer-returning argument over frame-minted %v: the keep-alive contract is statement-scoped and a defer/go statement is not the call — a thunk-captured retention is a design, not a patch",
+		v.getPrintedNode(callExpr), boxes,
+	))
+}
+
 // drainSyscallKeepAlive emits `GC.KeepAlive(temp);` for every temp convSyscallFunnelCall recorded
 // while converting the statement visitStmt just finished, and clears the pending list — called
 // unconditionally after both visitAssignStmt and visitExprStmt so a syscall-funnel call reached
@@ -289,9 +436,51 @@ func (v *Visitor) drainSyscallKeepAlive() {
 		return
 	}
 
-	for _, tempName := range v.pendingSyscallKeepAlive {
-		v.outputBuilder.WriteString(fmt.Sprintf("%s%sSystem.GC.KeepAlive(%s);", v.newline, v.indent(v.indentLevel), tempName))
+	for _, name := range dedupeKeepAliveNames(v.pendingSyscallKeepAlive) {
+		v.outputBuilder.WriteString(fmt.Sprintf("%s%sSystem.GC.KeepAlive(%s);", v.newline, v.indent(v.indentLevel), name))
 	}
 
 	v.pendingSyscallKeepAlive = nil
+}
+
+// assertNoPendingKeepAlive is the FRAME-boundary contract: visitStmt drains every statement's own
+// pending KeepAlives after the statement, and convFuncLit converts a literal's body against an
+// EMPTY list and restores the enclosing statement's afterwards, so a box named in one frame can
+// never be drained in another. No statement shape reaches it — its job is to make a future
+// producer that names a box OUTSIDE any statement loud rather than misattributed; the unit arm in
+// syscallFunnelSet_test.go is what proves it fires.
+func (v *Visitor) assertNoPendingKeepAlive(where string) {
+	if len(v.pendingSyscallKeepAlive) > 0 {
+		panic(fmt.Sprintf("@assertNoPendingKeepAlive - %s ends with undrained KeepAlive boxes %v: a frame-minted box was named by a call no statement drained", where, v.pendingSyscallKeepAlive))
+	}
+}
+
+// rejectForClauseKeepAlive panics when a `for` INIT or POST clause names a box for a KeepAlive.
+// Both clauses are emitted INSIDE the C# `for (…; …; …)` header, where no statement can follow
+// them, so the drain visitStmt runs after every other statement has nowhere to land there. The
+// shape has no member in the corpus (measured 2026-09-05, three targets); a loud refusal beats a
+// KeepAlive spliced into the header.
+func (v *Visitor) rejectForClauseKeepAlive(stmt ast.Stmt) {
+	if len(v.pendingSyscallKeepAlive) > 0 {
+		panic(fmt.Sprintf("@rejectForClauseKeepAlive - for-clause statement %s names boxes %v for a KeepAlive that has no statement to follow", v.getPrintedNode(stmt), v.pendingSyscallKeepAlive))
+	}
+}
+
+// dedupeKeepAliveNames keeps one KeepAlive per name in first-seen order: the wrapper class names a
+// frame-minted BOX rather than a fresh temp, so a statement whose call takes the same box twice
+// (`f(noescape(unsafe.Pointer(&x)), noescape(unsafe.Pointer(&x)))`) records it twice.
+func dedupeKeepAliveNames(names []string) []string {
+	seen := make(map[string]bool, len(names))
+	unique := names[:0:0]
+
+	for _, name := range names {
+		if seen[name] {
+			continue
+		}
+
+		seen[name] = true
+		unique = append(unique, name)
+	}
+
+	return unique
 }

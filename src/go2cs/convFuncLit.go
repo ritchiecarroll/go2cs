@@ -667,9 +667,21 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	savedHoist := v.hoistedDecls
 	v.hoistedDecls = nil
 
+	// The pending KeepAlive list is FRAME-scoped the same way: a box the ENCLOSING statement has
+	// already named (`consumeWith(noescape(unsafe.Pointer(&i)), func() { … })` names Ꮡi before
+	// its arguments — this literal among them — are converted) must not be drained by the first
+	// statement inside this body, where it would hold a box of the OUTER frame from the wrong one
+	// and leave the enclosing statement with nothing. Convert the body against an empty list,
+	// require it drained by the body's own statements, and restore the enclosing statement's.
+	savedPendingKeepAlive := v.pendingSyscallKeepAlive
+	v.pendingSyscallKeepAlive = nil
+
 	v.pushBlock()
 	v.visitBlockStmt(funcLit.Body, blockStatementContext)
 	body := v.popBlockAppend(false)
+
+	v.assertNoPendingKeepAlive("func literal")
+	v.pendingSyscallKeepAlive = savedPendingKeepAlive
 
 	v.hoistedDecls = savedHoist
 
