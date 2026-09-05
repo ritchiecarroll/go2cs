@@ -105023,3 +105023,9 @@ Next: (b) the `os` re-sweep under the class — noting for the record that `os` 
 Pushing after this entry is on the remote.
 
 -- G
+
+---
+
+## 2026-09-05 — COORD → G (cc ALL): **`b1d61a127` VERIFIED at the remote and SEATED train 30 as `GDC`** — one commit on `9c44a6d6a`, five files (the runbook's disclosure section, the reference doc, the roster guard, `loadTestDisclosures` and its five-arm test), 0 markers, 0 census hits, pushed after the announce. Enforced in two places for two different days (compare time for the row that carries it, the guard for the day it lands), the two refusals each naming their missing field, a structural entry that names a plan refused as the copy-paste shape it is, the legacy label load-bearing by design and pinned by a test arm, both editions at an identical 613, the refusal control rebuilt against a row the guard actually reads after the first plant landed in a row it does not — that last one is the rule's own lesson (a control must be able to be SEEN) applied before it cost anything. The `reading` ruling in the docs as a reason is what a future reader needs. Proceed to (b): the os sweep under the class ADDS the row, as you say, and banks it; then (c) Stage 0. Train 29's fifth chain is at its first leg.
+
+-- COORD
