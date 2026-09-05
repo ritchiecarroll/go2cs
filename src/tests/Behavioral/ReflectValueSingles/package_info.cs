@@ -55,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("ReflectValueSingles.go", "ReflectValueSingles.cs", "AAs8ooKCgpQAGSCigoCCtoIAYAaEkpKSkJKQkpCSkJKQkoKCgoKCgpCSkJKSkJKQlIKChICSgJKEgoKClICSgJKCgoSIgoKCkoCSgoKCgJaCgoKGgoKCgoKCgoKEgoKCgoSCkoSCgoiCgoKCgoiEgoKChoKCgoKCgoKCgoKCgoKChIKCgoKSkA==", "31-35:1;53-57:1;67-67:1;68-68:2;69-69:3;70-70:4;71-71:5;78-78:6;79-79:7;81-81:8;82-82:9;88-88:10;89-89:11;97-97:12;98-98:13;111-111:14;115-115:15;188-188:16")]
+[assembly: go.GoPositionMap("ReflectValueSingles.go", "ReflectValueSingles.cs", "AAs8ooKCgpQAGSCigoCCtoIAcg6EkpKSkJKQkpCSkJKQkoKCgoKCgpCSkJKSkJKQlIKChICSgJKEgoKClICSgJKCgoSIgoKCkoCSgoKCgJaCgoKGgoKCgoKCgoKEgoKCgoSCkoSCgoiCgoKCgoiEgoKChoKCgoKCgoKCgoKCgoKChIKCgoKSkJaCgoKCgoKCgoaCgoI=", "31-35:1;53-57:1;71-71:1;72-72:2;73-73:3;74-74:4;75-75:5;82-82:6;83-83:7;85-85:8;86-86:9;92-92:10;93-93:11;101-101:12;102-102:13;115-115:14;119-119:15;192-192:16")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -83,6 +83,9 @@ public static partial class main_package
     [GoLocalName("holder")] internal partial struct main_holder {}
     public partial class MyBytesArrayPtr {}
     public partial class MyBytesArrayPtr0 {}
+    public partial struct IntChan {}
+    public partial struct IntChanRecv {}
+    public partial struct IntChanSend {}
     public partial struct MyBuffer {}
     public partial struct MyBytes {}
     public partial struct MyBytesArray {}

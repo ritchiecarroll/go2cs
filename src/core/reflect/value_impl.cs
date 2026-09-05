@@ -3759,6 +3759,34 @@ private static bool tryConvertOnlyShape(ΔValue v, ΔType t, System.Type dstType
     // ConvertibleTo already says yes through convertOp's tag-blind identity, and the value conversion is
     // a COPY, so a layout-compatible reinterpret of a copy is exactly Go's answer. Two lifted anonymous
     // structs differing only in tags are two C# types of one shape (TestConvert's `some:\"foo\"` rows).
+    // Channel -> channel (increment E3 follow-up 7e): Go's result carries the DESTINATION's direction
+    // (`IntChan` to `chan<- int` describes itself as `chan<- int`). On this bridge the direction is cargo
+    // on the channel VALUE (increment D), so the live channel is re-stamped -- same core, new cargo --
+    // and the descriptor takes the direction through makeTypedValue. A defined channel type on either
+    // side is its generated wrapper: unwrapped on the way in, constructed on the way out. Nil converts
+    // to the destination's typed nil with the source's read-only bit (TestConvert's channel rows).
+    if (srcKind == Chan && dstKind == Chan) {
+        if (v.IsNil()) {
+            result = Zero(t);
+            result.flag |= v.flag.ro();
+            return true;
+        }
+        object liveChan = v.live!;
+        if (GoReflect.TryUnwrapWrapperValue(liveChan, out object? innerChan)) {
+            liveChan = innerChan;
+        }
+        GoChanDir dstDir = chanDirOfReflectType(t);
+        object restamped = GoReflect.WithChanCargo(liveChan, ChanCargo.Of(dstDir));
+        object? convertedChan = restamped;
+        if (!dstType.IsInstanceOfType(restamped) && !GoReflect.TryConvertTo(restamped, dstType, out convertedChan)) {
+            convertedChan = null;
+        }
+        if (convertedChan is not null) {
+            result = makeTypedValue(convertedChan, dstType, arrayDimsOfReflectType(t), v.flag.ro(), dstDir);
+            return true;
+        }
+    }
+
     // Go's convertOp rule for struct -> struct is haveIdenticalUNDERLYINGType with cmpTags=false: a
     // DEFINED struct converts to the anonymous struct of its own shape (`MyStruct` to
     // `struct { x int "some:\"foo\"" }`), which haveIdenticalType -- names first -- refuses (7d).

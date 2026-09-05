@@ -60,6 +60,12 @@ internal static void convRow(@string label, any x, any want) {
     finally { ᒐ.Run(); }
 }
 
+[GoType("chan nint")] partial struct IntChan;
+
+[GoType("chan nint")] partial struct IntChanRecv;
+
+[GoType("chan nint")] partial struct IntChanSend;
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string setLen10ˢ = "SetLen(10)"u8;
 private static readonly @string setLenˢ = "SetLen"u8;
@@ -134,6 +140,18 @@ private static readonly @string myBufferBytesBufferˢ = "*MyBuffer -> *bytes.Buf
 private static readonly object arrayPointerAliasesTheˢ = (@string)"array pointer aliases the slice:"u8;
 private static readonly @string convertShortSliceˢ = "Convert short slice"u8;
 private static readonly @string cannotConvertSliceWithˢ = "cannot convert slice with length 4 to pointer to array with length 8"u8;
+private static readonly @string intChanNilChanIntˢ = "IntChan(nil) -> chan<- int"u8;
+private static readonly @string intChanNilChanIntˢ2 = "IntChan(nil) -> <-chan int"u8;
+private static readonly @string chanIntNilIntChanRecvˢ = "chan int(nil) -> IntChanRecv"u8;
+private static readonly @string chanIntNilIntChanSendˢ = "chan int(nil) -> IntChanSend"u8;
+private static readonly @string intChanRecvNilChanIntˢ = "IntChanRecv(nil) -> <-chan int"u8;
+private static readonly @string chanIntNilIntChanRecvˢ2 = "<-chan int(nil) -> IntChanRecv"u8;
+private static readonly @string intChanSendNilChanIntˢ = "IntChanSend(nil) -> chan<- int"u8;
+private static readonly @string chanIntNilIntChanSendˢ2 = "chan<- int(nil) -> IntChanSend"u8;
+private static readonly @string intChanNilChanIntˢ3 = "IntChan(nil) -> chan int"u8;
+private static readonly object convertedSendOnlyViewˢ = (@string)"converted send-only view type:"u8;
+private static readonly object interfaceTypeˢ = (@string)" interface type:"u8;
+private static readonly object receivedOnTheOriginalˢ = (@string)" received on the original:"u8;
 
 [GoLocalName("S")] [GoType("[]byte")] internal partial struct main_S;
 
@@ -302,6 +320,19 @@ internal static void Main() {
     expectPanic(convertShortSliceˢ, cannotConvertSliceWithˢ, () => {
         shʗ1.Convert(reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(8L)));
     });
+    convRow(intChanNilChanIntˢ, ((IntChan)default!), channel/*<-*/<nint>.SendOnly);
+    convRow(intChanNilChanIntˢ2, ((IntChan)default!), /*<-*/channel<nint>.RecvOnly);
+    convRow(chanIntNilIntChanRecvˢ, (channel<nint>)(default!), ((IntChanRecv)default!));
+    convRow(chanIntNilIntChanSendˢ, (channel<nint>)(default!), ((IntChanSend)default!));
+    convRow(intChanRecvNilChanIntˢ, ((IntChanRecv)default!), /*<-*/channel<nint>.RecvOnly);
+    convRow(chanIntNilIntChanRecvˢ2, /*<-*/channel<nint>.RecvOnly, ((IntChanRecv)default!));
+    convRow(intChanSendNilChanIntˢ, ((IntChanSend)default!), channel/*<-*/<nint>.SendOnly);
+    convRow(chanIntNilIntChanSendˢ2, channel/*<-*/<nint>.SendOnly, ((IntChanSend)default!));
+    convRow(intChanNilChanIntˢ3, ((IntChan)default!), (channel<nint>)(default!));
+    var live = new IntChan(1);
+    var sendOnly = reflect.ValueOf(live).Convert(reflect.TypeOf(channel/*<-*/<nint>.SendOnly));
+    sendOnly.Interface()._<channel/*<-*/<nint>>().ᐸꟷ(7);
+    fmt.Println(convertedSendOnlyViewˢ, sendOnly.Type(), interfaceTypeˢ, reflect.TypeOf(sendOnly.Interface()), receivedOnTheOriginalˢ, ᐸꟷ<nint>(live));
 }
 
 } // end main_package

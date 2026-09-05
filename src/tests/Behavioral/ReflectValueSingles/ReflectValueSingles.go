@@ -59,6 +59,10 @@ func convRow(label string, x, want any) {
 	fmt.Printf("%-34s type==%v deepEqual=%v nil=%v\n", label, v.Type() == reflect.TypeOf(want), reflect.DeepEqual(v.Interface(), want), v.Kind() == reflect.Ptr && v.IsNil())
 }
 
+type IntChan chan int
+type IntChanRecv <-chan int
+type IntChanSend chan<- int
+
 func main() {
 	// --- root 1: SetLen / SetCap ---
 	xs := []int{1, 2, 3, 4, 5, 6, 7, 8}
@@ -186,5 +190,22 @@ func main() {
 	fmt.Println("array pointer aliases the slice:", src[2] == 99)
 	sh := reflect.ValueOf([]byte{1, 2, 3, 4})
 	expectPanic("Convert short slice", "cannot convert slice with length 4 to pointer to array with length 8", func() { sh.Convert(reflect.TypeOf((*[8]byte)(nil))) })
+
+	// --- root 5 follow-up 7e: Convert between channel types carries the destination's direction ---
+	convRow("IntChan(nil) -> chan<- int", IntChan(nil), (chan<- int)(nil))
+	convRow("IntChan(nil) -> <-chan int", IntChan(nil), (<-chan int)(nil))
+	convRow("chan int(nil) -> IntChanRecv", (chan int)(nil), IntChanRecv(nil))
+	convRow("chan int(nil) -> IntChanSend", (chan int)(nil), IntChanSend(nil))
+	convRow("IntChanRecv(nil) -> <-chan int", IntChanRecv(nil), (<-chan int)(nil))
+	convRow("<-chan int(nil) -> IntChanRecv", (<-chan int)(nil), IntChanRecv(nil))
+	convRow("IntChanSend(nil) -> chan<- int", IntChanSend(nil), (chan<- int)(nil))
+	convRow("chan<- int(nil) -> IntChanSend", (chan<- int)(nil), IntChanSend(nil))
+	convRow("IntChan(nil) -> chan int", IntChan(nil), (chan int)(nil))
+	// a LIVE channel converted to a directional type is the same channel: a send through the
+	// converted send-only view is received on the original
+	live := make(IntChan, 1)
+	sendOnly := reflect.ValueOf(live).Convert(reflect.TypeOf((chan<- int)(nil)))
+	sendOnly.Interface().(chan<- int) <- 7
+	fmt.Println("converted send-only view type:", sendOnly.Type(), " interface type:", reflect.TypeOf(sendOnly.Interface()), " received on the original:", <-live)
 
 }

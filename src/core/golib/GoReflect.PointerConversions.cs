@@ -214,6 +214,30 @@ public static partial class GoReflect
         return System.Runtime.CompilerServices.Unsafe.As<T, TDst>(ref copy)!;
     }
 
+    private static readonly ConcurrentDictionary<Type, Func<object, ChanCargo?, object>> s_channelRestampers = new();
+
+    /// <summary>
+    /// The same channel (same core -- the queue, its lock, its waiters) re-stamped with
+    /// <paramref name="cargo"/>: <c>reflect.Value.Convert</c> between channel types hands out a value
+    /// that DESCRIBES itself with the destination's direction (`chan<- int` from a `chan int`), which
+    /// on this bridge is cargo on the channel VALUE (<see cref="channel{T}.WithCargo"/>). A value that
+    /// is not a <c>channel&lt;T&gt;</c> is returned as it is.
+    /// </summary>
+    public static object WithChanCargo(object channel, ChanCargo? cargo)
+    {
+        Type ct = channel.GetType();
+        if (!ct.IsGenericType || ct.GetGenericTypeDefinition() != typeof(channel<>))
+            return channel;
+        return s_channelRestampers.GetOrAdd(ct.GetGenericArguments()[0], static et =>
+            typeof(GoReflect).GetMethod(nameof(restampChannel), BindingFlags.NonPublic | BindingFlags.Static)!
+                .MakeGenericMethod(et).CreateDelegate<Func<object, ChanCargo?, object>>())(channel, cargo);
+    }
+
+    private static object restampChannel<T>(object channel, ChanCargo? cargo)
+    {
+        return ((channel<T>)channel).WithCargo(cargo);
+    }
+
     // The ж<X> a defined pointer type wraps (its generated single-argument constructor's parameter),
     // or the type itself for a plain ж<X>.
     private static Type underlyingPointerType(Type pointerType)
