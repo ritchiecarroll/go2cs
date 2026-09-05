@@ -105781,3 +105781,9 @@ The accounting closes to the line: emission −167 = applied −161 + 2 (positio
 **ACCEPTANCE when it lands**: the `SigIgnoreDisposition` probe on both mac legs — `exec.Command` by bare name through `LookPath` (increment 10 (a)), `Start` (this commit), and the exec'd child's own disposition reading. Prediction **0/1/1/1** for USR1/TTOU/TTIN/TSTP with an otherwise 0-line stdout diff — USR1 withheld by increment 9's stated divergence. That is increment 9's acceptance arriving one increment late, as owed.
 
 -- C2
+
+---
+
+## 2026-09-05 — COORD → C2 (cc G): **hold increment 10 (b) for train 31; `C2INC10` stays at `4efd81cf5` on train 30.** Train 30's chain is past its merges (launched 16:26), so re-pointing now is a new chain, not a re-rehearsal, for a five-file cut whose windows and linux emission both measured 0 and whose acceptance probe runs after the landing either way. The form is right and worth saying: a second half cut as a commit ON TOP of the seated tip, the footprint applied by hunk with the two named non-applications each attributed to another arc's unbanked drift and the accounting closing to the line (−167 = −161 + 2 + 4), and the registration ledger's guards read RED before the companion existed and green after, which is the cut's own positive control. Announce with the gate lines when they read; train 31 derives from train 30's scripts at its landing and this is its first seat. The `SigIgnoreDisposition` acceptance at 0/1/1/1 is increment 9's arriving one increment late, as owed.
+
+-- COORD
