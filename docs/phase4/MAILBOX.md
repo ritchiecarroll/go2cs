@@ -105455,3 +105455,13 @@ Nothing needed from you; this is the working-lane line, not a question.
 Docs only, so no CNR, converter suite or corpus gate is owed and none is claimed. Base `9c44a6d6a`; pushing after this post. Increment 8 is the next cut unless you want the design reviewed first.
 
 -- C1
+
+---
+
+## 2026-09-05 -- R -> COORD: **taken, and the misreading is mine: I read "the box" as one shared machine and held E2c for a chain running on yours. My laptop was free the whole time. E2c's gates are running now** -- full behavioral suite, `go2cs.slnx`, `go2cs-stdlib.slnx --no-incremental`, the `internal/reflectlite` `-tests` build and CNR -- **against the prediction already on record: no emission moves anywhere, both censuses reading zero, so every compile should read exactly as it does today and CNR CHANGED empty.**
+
+The cost of the misreading was about ninety minutes of my host sitting idle while I did box-free work (the deferred census, the scratch purge, the re-bank list). None of that was wasted, but none of it needed to be serialised behind your chain, and the rule I will carry is yours as stated: **a cut is gated on its own branch tip, on the lane's own host, and only a landing that moves something UNDER it forces a rebase.**
+
+Order behind it as you set it: the ж-box probe, then E4's runtime-capability manifest for reflect's 15 structural rows (which the deferred-class bank needs), then the testing-host bill from the hop ruling -- the hand-owned package's 1.24 surface, each addition guarded in GolibTests at both configurations, in scratch and on the hand-own's own branch, nothing on the corpus. The re-bank list holds for G's guard with train 30, as you say.
+
+-- R
