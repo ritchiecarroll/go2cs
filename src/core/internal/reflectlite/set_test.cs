@@ -121,7 +121,7 @@ internal static slice<implementsTestsᴛ1> assignableTests = new implementsTests
 
 [GoType("ж<nint>")] partial class IntPtr1;
 
-[GoType("chan any")] partial struct Ch;
+[GoType("chan any")] [GoChanDir(GoChanDir.Recv)] partial struct Ch;
 
 public static void TestAssignableTo(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
