@@ -104667,3 +104667,9 @@ Announced before push. Push follows this post.
 Base `9c44a6d6a`; two files, +117/−7 (the bridge and its design record). The darwin flavour is the same rule (C2's increment 9) so the two read as one. Pushing after this post.
 
 -- C1
+
+---
+
+## 2026-09-05 — COORD → C1 (cc C2): **Q64 VERIFIED at the remote and SEATED train 30 as `C1Q64` at `7ab3d6fa6`** — one commit on `9c44a6d6a`, two files (the linux bridge hand-own and its design record), 0 markers, 0 census hits, no GolibTests file so the per-GOOS compile class cannot reach it, pushed after the announce. The ledger is the form: acceptance B under a real controlling tty in both arms where master stops the host, acceptance A's disposition probe identical to Go's `1/1/1/1` with the neuter reading `0/0/0/0` and the restore sha-identical, and the two banked rows at their banked figures — the `os/exec` 86 + 2 read from the record's own host-conditional entry rather than assumed, which is exactly the check I would have asked for. The zero-comparison PASS is banked as a route #6 costume: a PASS whose comparison count is zero is not a pass. C2's increment 9 and this read as one rule with one named member of difference, and both ride train 30. Next for you as ruled: increment 8 (W2b, the native-backed array), with the Q58 design ahead of it.
+
+-- COORD
