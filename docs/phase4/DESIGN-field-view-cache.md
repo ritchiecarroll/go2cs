@@ -198,3 +198,21 @@ arm's logs.
 
 The cut is the spike's arm 3 with the other two arms and their symbols deleted, the slot added to
 `FieldRefBox`, and the guard of §5; the spike branch is the measurement and stays as such.
+
+## 9. AMENDMENT 2026-09-05 — the cut MEASURED (seated train 29 as `GFVC`, `a5d40fdfc`), and the residue it leaves
+
+**Nothing above is rewritten.** The cut landed as §3's arm 3 with the type gate (`golib/ж.Views.cs`; a `SlottedStandardBox<T>` minted by `Ꮡ<T>()` / `@new<T>()` once `BoxShape<T>.Slotted`, the slot also on `FieldRefBox<T>` for chain hops, the per-T weak table for every other kind, the nil box never caching, immutable list nodes published by compare-exchange). What was measured on this box (Release, `DOTNET_TieredCompilation=0`, 3 × 1,000,000 runs, floor of windows), scored against §4's prediction:
+
+| row | base (golib at `bc8973259`, train 27's master) | cut | prediction |
+|:--|:--|:--|:--|
+| `os` want-zero row (`TestWriteStringAlloc` shape) | 552.25 B / 7 obj | **488.25 B / 6 obj** | **MET to the byte and the object** (−64 B / −1 obj, the per-op `FieldRefBox`) |
+| +64 B positive control (`new byte[40]`) | 616.25 / 7 | 552.25 / 6 | bytes MET; the OBJECT prediction (8 / 7) was WRONG on both arms — `new byte[40]` is not a golib site, so the counter never charges it — owned, not smoothed |
+| hot loop (`Ꮡrecv.of(f).M()` per call, the seg-3 shape) | 33.99 ns / 64 B / 1 obj | **20.44 ns / 0 B / 0 obj** | MET (§7's arm 3 read 20.2) |
+| `crypto/internal/nistec` cost canary | PASS 2195 [163 s cold] | PASS 2195 [85 s warm re-run; 140 s like-for-like] | count MET; walls stated as walls, the train's alternating-arm pair on a quiet box is the cost measurement of record |
+
+Gates at the seat: GolibTests 630/3/6/639 Debug and 633/3/3/639 Release+TC0, count-matched, the three the box's identity-matched symlink-privilege trio; `go2cs.slnx` 0 errors / 760 s; stdlib windows / linux / darwin 0 errors; CNR byte-identical across 715, 0 NOT MEASURED; the full behavioral suite PASS 679 (Output 653 / 26 skip). Two things the guard caught before the announce: a real publish-by-CAS race (the first `publishView` scanned for a racer's entry only AFTER a failed CAS; fixed to read the head once, scan that list, CAS against that same head), and an EXISTING counting arm whose counted call was the second `of()` on one box, which the cache answers for free — re-pinned on the constructor row, a repeat-`of()` arm added at 0 objects / 0 B (see `DESIGN-allocation-counting.md`'s dated amendment). One instrument breach, mine, stated: the chain's cleanup glob deleted nistec's tracked disclosure manifest after the master arm, so the cut arm swept without it and read a phantom red on a disclosed want-zero row; restored, re-run solo with the manifest present.
+
+**The residue, located by arithmetic and confirmed by the next cut.** SUB-Q5's per-frame table at the pre-B base and the cut's reading agree to the byte: the six remaining objects are segments 1 and 32 (the two element-address sites, an `ElemRefBox` plus the caller's `IArray<T>` boxing temp each, 120 B / 2 obj) and segment 14 (`heap(new uint32(), out var Ꮡdone)`, the owning box plus its eager pinnable slot, 88 B / 2 obj); the two PIN segments (56 + 104 B) carry bytes and no counted object. Candidate A — the concrete-header element takes `Ꮡ<T>(slice<T>, int)` / `Ꮡ<T>(array<T>, int)` and their `nint` twins, no boxing temp — was cut and measured the same night: **488.25 / 6 → 376.25 / 4, exactly as predicted** (seated train 29 as `GA`, behind this seat). What remains after A is segment 14 (candidate B, the syscall family: 88 / 52 / 91 variables by flavour, its design priced against Q49's pin machinery) and the two element boxes themselves (E, a pinned element address for a syscall argument without a box, after Q49; C, the `unsafe.Slice(unsafe.StringData(s), n)` idiom, population two, last). The bank condition needs all of them; each step's number is on the mailbox beside its prediction.
+
+**The lazy-flip non-determinism §3 named** was not observed to matter on any measured row; the converter-emitted `[GoBoxViews]` attribute stays unbuilt until a row shows early-minted boxes paying the weak-table lookup.
+
