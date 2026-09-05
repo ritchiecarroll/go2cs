@@ -629,10 +629,33 @@ internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@s
                     pthread_sigmask(SIG_SETMASK, savedSet, IntPtr.Zero);
                 }
                 if (rcIoctl < 0) {
-                    // Go's child reports the ioctl failure as the spawn's error (childerror); the child
-                    // here already exists, so it is killed before the error is returned, as Go's
-                    // parent reaps a child whose setup failed.
+                    // Go's child reports the ioctl failure as the spawn's error (childerror), and its
+                    // PARENT then WAITS for that child before returning the error -- Wait4 in an EINTR
+                    // retry loop, "to make sure the zombies don't accumulate" (exec_unix.go:234-239).
+                    // The child HERE already exists and is past exec, so it is killed first and then
+                    // reaped in the same loop.
+                    //
+                    // The comment this replaces CLAIMED that reap while the code only killed, which is
+                    // the worse half of the defect: a comment asserting a behaviour the code does not
+                    // have reads as the census to the next reader. The discarded child stayed a zombie
+                    // for the life of the process and nothing else absorbed it -- no Process is ever
+                    // built on this path, so the caller has no Wait to reach it. Narrow to reach (an
+                    // ioctl failure under Foreground, e.g. a non-tty Ctty giving ENOTTY) and unreached
+                    // by any roster row, which is why it survived review; found by C2 in the darwin
+                    // twin of this seam, 2026-09-05.
+                    //
+                    // The successful-spawn argument in this file's header -- the caller's Wait is the
+                    // only reaper, so the post-spawn pidfd_open is race-free -- is about the path that
+                    // RETURNS a pid and stays true. This path returns none.
                     syscallʟ(SYS_kill, childPid, SIGKILL_NUMBER, 0);
+                    error waitErr = default!;
+                    while (ᐧ) {
+                        ref var wstatus = ref heap(new WaitStatus(), out var Ꮡwstatus);
+                        (_, waitErr) = Wait4((nint)childPid, Ꮡwstatus, 0, nil);
+                        if (!AreEqual(waitErr, EINTR)) {
+                            break;
+                        }
+                    }
                     return (0, (Errno)(uintptr)errnoIoctl);
                 }
             }

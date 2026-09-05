@@ -312,4 +312,134 @@ public class LinuxSpawnSeamTests
             syscall.Close(tty);
         }
     }
+    // The Foreground FAILURE path owes a reap, and until this guard it did not perform one.
+    //
+    // The seam spawns the child, then transfers the terminal's foreground group from the PARENT;
+    // when that ioctl fails it SIGKILLs the child it just created and returns the errno. Go's
+    // parent, on its own child-setup failure, Wait4s the pid in an EINTR retry loop first -- "to
+    // make sure the zombies don't accumulate" (exec_unix.go:234-239) -- and the comment on this
+    // path CLAIMED that reap while the code only killed. Nothing else absorbs the child:
+    // StartProcess returns pid 0 here, so no os.Process is ever built and the caller has no Wait
+    // that could reach it. The zombie would live as long as this process does.
+    //
+    // Found by C2 in the darwin twin of this seam, 2026-09-05.
+    //
+    // The gate needs NO controlling terminal, which is what lets it run on every linux host where
+    // the sibling Foreground transfer test goes Inconclusive: a NON-tty Ctty (/dev/null) makes the
+    // kernel answer ENOTTY, and that IS the failure path.
+    //
+    // Vacuity: asserting ENOTTY is what proves a child existed to be reaped. That errno can only
+    // come from the ioctl, which runs only after posix_spawn has RETURNED A CHILD -- so a spawn
+    // that failed earlier (a missing binary, a refused SysProcAttr) cannot satisfy this test with
+    // no child in play. Without that assertion the whole gate would be green on an empty path.
+    [TestMethod]
+    public void AChildKilledOnTheForegroundFailurePathIsReaped()
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            Assert.Inconclusive("the posix_spawn seam is the linux flavor");
+            return;
+        }
+
+        var (devnull, oerr) = syscall.Open("/dev/null"u8, (nint)(syscall.O_RDWR | syscall.O_CLOEXEC), 0);
+        Assert.IsNull(oerr, $"opening /dev/null: {oerr}");
+
+        try
+        {
+            // Only children this call creates may be blamed, so the ones already ours are excluded.
+            System.Collections.Generic.HashSet<int> before = OwnChildPids();
+
+            var sys = new go.syscall_package.SysProcAttr { Foreground = true, Ctty = devnull };
+            var attr = new go.syscall_package.ProcAttr
+            {
+                Files = new slice<uintptr>(new uintptr[] { 0, 1, 2 }),
+                Sys = new StandardBox<go.syscall_package.SysProcAttr>(sys),
+            };
+
+            // A child that STAYS ALIVE until it is killed: if it exited on its own the reap would
+            // be untested, because a self-exited child is still a zombie nobody waited for.
+            var (pid, _, err) = syscall.StartProcess(
+                "/bin/sleep"u8,
+                new slice<@string>(new @string[] { "/bin/sleep"u8, "30"u8 }),
+                new StandardBox<go.syscall_package.ProcAttr>(attr));
+
+            Assert.AreEqual((nint)0, pid, "the failure path must not report a pid");
+            Assert.IsNotNull(err, "a non-tty Ctty under Foreground must fail");
+            Assert.IsTrue(AreEqual(err, syscall.ENOTTY),
+                $"expected ENOTTY from the TIOCSPGRP transfer (which proves a child was spawned), got: {err}");
+
+            // The reap is synchronous inside StartProcess, so this is true on the first look with
+            // the wait in place. Polling is for the neutered direction: without it the SIGKILLed
+            // child is a zombie that NEVER leaves, and no amount of waiting clears it.
+            System.Collections.Generic.HashSet<int> leaked = new();
+
+            for (int i = 0; i < 100; i++)
+            {
+                leaked = OwnChildPids();
+                leaked.ExceptWith(before);
+
+                if (leaked.Count == 0)
+                    break;
+
+                System.Threading.Thread.Sleep(50);
+            }
+
+            Assert.AreEqual(0, leaked.Count,
+                "the killed child was never reaped -- still our child(ren): " +
+                string.Join(", ", System.Linq.Enumerable.Select(leaked, k => $"{k} (state {ProcState(k)})")));
+        }
+        finally
+        {
+            syscall.Close(devnull);
+        }
+    }
+
+    // Every pid whose PPID is this process. /proc/<pid>/stat's second field is the comm in
+    // parentheses and CAN contain spaces and parentheses, so the fields are read after the LAST
+    // ')' -- state first, PPID second. A pid that exits between the enumeration and the read is
+    // simply not ours to count.
+    private static System.Collections.Generic.HashSet<int> OwnChildPids()
+    {
+        int self = Environment.ProcessId;
+        System.Collections.Generic.HashSet<int> kids = new();
+
+        foreach (string dir in System.IO.Directory.EnumerateDirectories("/proc"))
+        {
+            if (!int.TryParse(System.IO.Path.GetFileName(dir), out int pid))
+                continue;
+
+            string[] fields = StatFieldsAfterComm(pid);
+
+            if (fields.Length > 1 && int.TryParse(fields[1], out int ppid) && ppid == self)
+                kids.Add(pid);
+        }
+
+        return kids;
+    }
+
+    private static string ProcState(int pid)
+    {
+        string[] fields = StatFieldsAfterComm(pid);
+        return fields.Length > 0 ? fields[0] : "gone";
+    }
+
+    private static string[] StatFieldsAfterComm(int pid)
+    {
+        string stat;
+
+        try
+        {
+            stat = System.IO.File.ReadAllText($"/proc/{pid}/stat");
+        }
+        catch
+        {
+            return Array.Empty<string>();
+        }
+
+        int close = stat.LastIndexOf(')');
+
+        return close < 0
+            ? Array.Empty<string>()
+            : stat[(close + 1)..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    }
 }
