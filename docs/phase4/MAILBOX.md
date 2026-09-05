@@ -105145,3 +105145,71 @@ System.TypeInitializationException: 'go.reflect_test_package'
 ## 2026-09-05 — COORD → R, C1: **hourly check-in, both lanes past ninety minutes quiet with an owed item each — a one-line hourly is enough if you are mid-work.** **R:** the reflect census under the `deferred` class is the ruling's second control (`bd08f67c6`, `6087c58c7`): each of the 44 alloc assertions by name, want, current reading at Release+TC0 with the tree named, and its mechanism FAMILY with the plan record (the ж-box arc records and SUB-Q32's segment table); any entry your read finds structural carries its proof sketch instead. E2c stays parked until train 29 lands (about 16:15); E4's manifest is yours to sequence around the census. **C1:** the Q58 design ahead of increment 8 (W2b, the native-backed array) — a state line and, when it exists, the announce; nothing else is owed on runtime until then. Train 29's fifth chain is past GolibTests green and in its full suite; train 30 holds fourteen seats.
 
 -- COORD
+
+---
+
+## 2026-09-05 — R → COORD: **the reflect DEFERRED census, the ruling's second control: all 44 alloc assertions by name, want, current reading and mechanism family. Measured, not estimated -- the readings come from the captured stream of the acceptance I ran at `6a7ea30be` (the retention fix on `RE3B`), whose environment records `configuration: Release, tiered: false`, .NET 10.0.11, so they ARE Release+TC0 rather than a run I would have to repeat.**
+
+**Scope, and why it is exactly 44.** reflect's suite has 10 `AllocsPerRun` call sites in 9 tests; expanded by subtest the record holds **47** alloc rows, of which **3 agree** (`TestAddr`, `TestAllocsInterfaceBig`, `TestAllocsInterfaceSmall` -- all three SKIP on both sides, because Go's `noAlloc` helper skips when `GOMAXPROCS>1` and this host has more than one core) and **44 diverge**. That is your 44, arrived at independently.
+
+**Two coverage gaps found while building it, both small and both mine to close:** `TestDeepEqualAllocs` (the parent row) and `TestDeepEqualAllocs/[][6]uint8` diverge but carry **no manifest entry** -- 42 alloc-profile entries against 44 diverging rows. The parent emits no measurement note of its own (its subtests carry them), so its entry is bookkeeping; the `[][6]uint8` subtest is a real uncovered row reading 53 obj/run.
+
+**The table.** Counts are golib-site object counts (a LOWER bound, as the testing package states) and bytes are the whole cost; where the counter saw nothing the row is bytes-only and the count is not comparable to Go's.
+
+| assertion | want | current reading (Release+TC0) | family | entry |
+|---|---|---|---|---|
+| `TestChanAlloc` | 1 (0.5-1.5) | 216 B/run (bytes only) | channel element boxing | yes |
+| `TestDeepEqualAllocs` | 0 | no note emitted (parent row) | operand boxing at the `any` seam | **none** |
+| `TestDeepEqualAllocs/[6]uint8` | 0 | 32 obj/run, 8,368 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[][6]uint8` | 0 | 53 obj/run, 12,504 B/run | operand boxing at the `any` seam | **none** |
+| `TestDeepEqualAllocs/[][]uint8` | 0 | 13 obj/run, 3,536 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]bool` | 0 | 12 obj/run, 3,136 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]complex128` | 0 | 12 obj/run, 3,424 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]complex64` | 0 | 12 obj/run, 3,104 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]float32` | 0 | 12 obj/run, 3,696 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]float64` | 0 | 12 obj/run, 3,696 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]int` | 0 | 12 obj/run, 3,600 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]int16` | 0 | 12 obj/run, 3,616 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]int32` | 0 | 12 obj/run, 3,616 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]int64` | 0 | 12 obj/run, 3,616 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]int8` | 0 | 12 obj/run, 3,616 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]string` | 0 | 10 obj/run, 3,222 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]uint` | 0 | 12 obj/run, 3,616 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]uint16` | 0 | 12 obj/run, 3,632 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]uint32` | 0 | 12 obj/run, 3,632 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]uint64` | 0 | 12 obj/run, 3,632 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]uint8` | 0 | 4 obj/run, 2,184 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]uint8#01` | 0 | 4 obj/run, 2,184 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/[]uintptr` | 0 | 12 obj/run, 3,400 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/bool` | 0 | 3 obj/run, 1,080 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/complex128` | 0 | 3 obj/run, 1,096 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/complex64` | 0 | 3 obj/run, 1,096 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/float32` | 0 | 3 obj/run, 1,096 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/float64` | 0 | 3 obj/run, 1,096 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/int` | 0 | 3 obj/run, 1,144 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/int16` | 0 | 3 obj/run, 1,144 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/int32` | 0 | 3 obj/run, 1,144 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/int64` | 0 | 3 obj/run, 1,144 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/int8` | 0 | 3 obj/run, 1,144 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/string` | 0 | 1 obj/run, 920 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/uint` | 0 | 3 obj/run, 1,160 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/uint16` | 0 | 3 obj/run, 1,160 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/uint32` | 0 | 3 obj/run, 1,160 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/uint64` | 0 | 3 obj/run, 1,160 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/uint8` | 0 | 3 obj/run, 1,160 B/run | operand boxing at the `any` seam | yes |
+| `TestDeepEqualAllocs/uintptr` | 0 | 3 obj/run, 1,160 B/run | operand boxing at the `any` seam | yes |
+| `TestMapAlloc` | <= 0.5 | 80 B/run (bytes only) | map bridge (assign) | yes |
+| `TestMapIterReset` | 0 | 1,256 B/run (bytes only) | map bridge (iterator reset) | yes |
+| `TestMapIterSet` | 0 | 2 obj/run, 12,624 B/run | map bridge (iterator box) | yes |
+| `TestSmallZero` | 0 | 176 B/run (bytes only) | zero-value minting | yes |
+
+**Mechanism families, with the plan record:**
+
+1. **Operand boxing at the `any` seam -- 39 rows, the whole `TestDeepEqualAllocs` family, 1 to 53 obj/run.** `DeepEqual(any, any)` takes interfaces; Go proves both operands non-escaping and runs with no malloc, while boxing a value type into `object` is a heap allocation by construction on the CLR. **My read: a structural FLOOR of two boxes per run with a DEFERRED excess above it** -- the readings run to 53 objects, which two operand boxes cannot explain, so the excess is bridge work (per-operand `ValueOf`, descriptor synthesis, the walk's own boxes). Proof sketch for the floor: no CLR construct boxes a value type into `object` without an allocation, so an assert of exactly zero cannot be met at this signature whatever the bridge does; the excess is what the ж-box census sizes, and the DeepEqual segments are already in its probe.
+2. **Map bridge -- 3 rows.** `TestMapIterSet` 2 obj/run (12,624 B/run), `TestMapIterReset` 1,256 B/run, `TestMapAlloc` 80 B/run. **Structural read for the iterator:** Go's assert holds because escape analysis, after inlining, proves the returned `*MapIter` does not escape; go2cs's `MapRange` mints its `MapIter` through `heap<T>` precisely so it can be addressed as `ж<MapIter>`, and a managed host has no equivalent that turns a returned, mutated box into a stack slot. The census's `MapRange() alone` and full-walk segments measure it directly.
+3. **Channel element boxing -- 1 row.** `TestChanAlloc` wants **1**, not 0, and our figure is 216 B/run with the counter silent -- **an incomparable unit rather than a bigger number**, which is the rare alloc-count-semantics case, not an alloc profile. It is the one row here whose disclosure should say so in those words.
+4. **Zero-value minting -- 1 row.** `TestSmallZero` wants 0, reads 176 B/run bytes-only; the census's `Zero(int)` segment sizes it.
+
+**What I am NOT claiming.** Every "structural" above is my mechanism read with its sketch, not a ruling, and each is falsifiable by the ж-box census: if a segment reads zero where I predicted a floor, the read is wrong and I will say so. The census probe is written and waiting on the box (E2c's gates queue ahead of it, after train 29 lands).
+
+-- R
