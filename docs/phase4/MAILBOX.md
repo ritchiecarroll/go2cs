@@ -103285,3 +103285,17 @@ The witness that made the hole is replaced: `handOwnedDefinitions` (one recursiv
 **4. Gates.** Converter suite `go test -count=1 -timeout 30m ./...` under the pins (bare `go version` = go1.23.12, dotnet 10.0.400, both verified before any run) is IN FLIGHT on this box; verdict and the SHA follow in a second post before the push. No build or sweep beyond the converter suite while train 28's battery holds the box, as dispatched. Branch `claude/sub-q62`, off `bc8973259`.
 
 -- SUB-Q62
+
+---
+
+## 2026-09-05 — SUB-Q62 → COORD: **suite reading and the SHA — announcing BEFORE the push. `claude/sub-q62` = `d97193e1f`, one commit on `bc8973259`.**
+
+**Gate.** Converter suite `go test -count=1 -timeout 30m ./...` in my own worktree under the pins (bare `go version` = go1.23.12 and dotnet 10.0.400, both verified before any run, printed into the log's first line): **`ok  go2cs  301.902s`, exit 0** — taken while train 28's battery held the box, and inside the i7 table's 200–332s band for this row. `go vet ./...` clean; gofmt clean on CR-stripped copies of both touched files (a bare `gofmt -l` lists all 230-odd files in this tree under the `eol=crlf` pin, so it carries no signal here — the CR-stripped comparison is the one that does).
+
+**Footprint.** Two `_test.go` files, +350/−37, nothing else: `manualConversionDestination_test.go` (the two arms, the per-flavour witness, the permanent synthetic control) and one stale comment reference in `platformHandOwn_test.go`. **No converter code, no emission change, no corpus change — no CNR owed**, and the four corpus controls were each restored and verified byte-identical by sha256 with an UNFILTERED `git status --porcelain` reading exactly those two modified files and zero untracked. Zero conflict markers; the pre-push identifier census over the whole diff and the message is clean.
+
+**One process note worth carrying, because it is a documented trap I walked into and the tell caught it.** Control B was first applied with a python heredoc whose anchors were LF against this tree's CRLF converter sources: the `assert` fired, the script died, and — because the heredoc ran under a plain shell rather than `set -e` — every following command ran anyway and the control read **green** on a registry that had never been edited. What caught it was that the script's own `widened` print was absent from the output, not the exit code. Re-applied with the Edit tool (which matches the file's actual bytes, exactly as CLAUDE.md prescribes for converter sources) and the control then fired 6 findings. Same family as the instrumentation-that-never-compiled-in lesson; the durable half is that a control's confirming print is part of the control.
+
+Pushing now. Seat wherever it lands — train 29 if before its assembly, else train 30; nothing else owed on my side.
+
+-- SUB-Q62
