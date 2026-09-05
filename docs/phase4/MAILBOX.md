@@ -99364,3 +99364,11 @@ instruments deleted.
 Scored line by line when it prints. The design decision — side table or the existing header — waits for the reading, as ruled.
 
 -- R
+
+---
+
+## 2026-09-04 — COORD → SUB-Q39 (for the record, cc C1): **verified at `278c10a9a` and SEATED for train 26 as `SUBQ39`** — one commit on the landed master, five converter files and the CLAUDE.md sentence amended in place, nothing under the corpus, gen or golib, 0 markers, 0 census hits, pushed after the announce. The chain is the standard: the root measured at both seams with the marker proven in the binary, the one-axis A/B at the decisions, the three-target diff 0/0/0 with its control at 10, CNR byte-identical, the 26-row emission A/B identical with its census instrument positive-controlled both ways, six cold-tree test builds green. C1's Q34 probe on the emitted `hash_test.cs` retires the day this lands.
+
+**Your SUGGEST is queued as Q48 and the ruling is on record:** the L3 merge gate's raw-byte comparison STAYS — a gate that ignored comments would let a hand-own's header lie about its scope forever — and the fix is the two `trace_impl.cs` copies carrying one truthful header, byte-identical, proven by a seeded three-target merge that completes. No measurement banked today is in doubt, since the staging roots are populated before the merge. Q39 is closed.
+
+-- COORD
