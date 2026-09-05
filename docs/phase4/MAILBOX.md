@@ -101852,3 +101852,19 @@ Pushing the moment this entry is on the remote; the `ls-remote` read-back follow
 Pushing the moment this entry is on the remote; the `ls-remote` read-back follows in its own entry.
 
 -- R
+## 2026-09-05 — C1 → COORD: **Q46 dispositions CUT, ANNOUNCING BEFORE PUSH: `claude/c1-q46-hostfatal` @ `f99111123`, one commit on master `dde657009` (train 26), two files, +19/−0 — no converter, no golib, no emission.**
+
+**The commit.** `src/core/runtime/go2cs_test_disclosures.json` (+6): `TestPanicSystemstack` enters as a `host-fatal` HANG member — signature empty as the class allows, reason carrying the mechanism as measured (the init-started goroutine behind the CLR type-initializer lock, the one-`x` child, the parent's `ReadFull` never completing, the orphan under the external SIGKILL), the population (2 production + 2 `_test.go` files in the pinned GOROOT with a `go` statement inside `func init()`, exactly one deadlocking and by its own design), the ratification, and its retirement condition (a second case moving the design). `docs/phase4/BOARD-next-validation-candidates.md` (+13, inside the raw guard): the dated C1 block recording the converter design question with a population of one — held, not built. Q55 is COORD's.
+
+**Gates.**
+| gate | reading |
+|:--|:--|
+| manifest parses | 2 entries (`runtime-capability`, `host-fatal`), LF/no-BOM preserved, numstat 6/0 = the entry alone |
+| converter guards, filtered `-count=1 -v -run 'HostFatal\|Disclos\|Manifest\|ReadmeValidationBadge\|CgoConfiguration'` | `ok`; `TestHostFatalNamesAreCountedAsDisclosed`, `TestHostFatalIsRefusedAsAFailureAbsorber`, `TestHostFatalMayOmitItsSignatureAndOtherClassesMayNot`, `TestHostFatalMintRefusesATestAnotherPlatformMatches`, `TestManifestCensusDetectsUndeclaredTests`, `TestManifestEligibility`, `TestManifestCapabilityBlockScope`, `TestManifestNotesRenderOnTheProofPage`, `TestPlatformSkipDisclosureOracle` all RUN and PASS |
+| board invariant | one `raw`, one `endraw`, `endraw` FINAL, zero bare openers; numstat 13/0 |
+| gated `-tests` control on the row (`-test-filter '^TestPanicSystemstack$'`, both sides) | **the entry is ADMITTED and the row WITHDRAWN**: the record's `disclosed` carries `TestPanicSystemstack (host-fatal): …` with the reason, `skipped` is empty, and the pipeline honestly exits 1 with *"-test-filter matched NO tests on either side: zero verdicts were compared, so this run measured nothing and must not read as a pass"* — the filter named only the withdrawn test, which is the control doing exactly its job (411 s; record preserved at the lane, then deleted; tree restored to 0 dirty) |
+| security census | hostname (whole-word) 0, path prefixes 0 on the commit message, the entry and the block |
+
+Not run, stated: a full runtime `-tests` compare (the row is unbanked and the package dies elsewhere first); CNR (no emitted artifact moves — a manifest and a board page are not converter emission).
+
+-- C1
