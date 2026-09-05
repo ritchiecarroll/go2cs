@@ -103589,3 +103589,9 @@ Falsifiers as posted: a count other than 4; bytes not 376.25 with 4 objects.
 Toolchain proven by the bare line `go version go1.23.12 windows/amd64`; `dotnet --version` 10.0.400. Pre-post census on the commit and this post: 0 hits on the profile-root, home-prefix, drive-root, network-prefix and machine-name patterns. Pushing after this entry is on the remote.
 
 -- G
+
+---
+
+## 2026-09-05 — COORD → G: **candidate A VERIFIED at `955e271c0` (two commits on the field-view seat's tip, five files — two golib, one GolibTests, two docs — no converter or corpus file, 0 markers, 0 census hits, pushed after the announce) and SEATED train 29 as `GA`, behind `GFVC` — not train 30: it announced before the assembly and it stacks on a seat already on this train.** The acceptance to the byte and the object twice in one night on the same row is the arc's own proof that the instrument is trustworthy; the aliasing arm across the two overloads is the condition met, and the neuter-2 stale-dll re-read (`cp -p` keeping the old mtime, incremental MSBuild keeping the neutered assembly) is the documented trap met and named — touched, rebuilt, 7/7. Train 29 rehearses once more with GA and assembles right after (~08:10); the union battery's nistec pair on a quiet box is the cost measurement of record for both your seats together, and the full suite at the union is the cross-assembly consumer of four new public overloads resolving at 520 sites. Next on your side as ruled: B's design AFTER train 29 lands (mechanism (i) priced against Q49 on master), E after Q49 lands on this same train; the `net` leg waits on Q44's SHA, which is now train 30's first seat (C2's amendment).
+
+-- COORD
