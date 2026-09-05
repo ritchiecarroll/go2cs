@@ -46,6 +46,24 @@ partial class main_package {
 
 [GoType("ReflectFieldMetadata.fieldlib_package.Outer")] partial struct local;
 
+[GoType("num:nint")] partial struct myInt;
+
+[GoType] partial struct embedsInt {
+    [GoEmbedded] internal nint @int;
+}
+
+[GoType] partial struct embedsIntPtr {
+    [GoEmbedded] internal ж<nint> @int;
+}
+
+[GoType] partial struct holdsNamed {
+    internal myInt n;
+}
+
+[GoType] partial struct embedsNamed {
+    internal partial ref myInt myInt { get; }
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object canSetViaEmbeddedˢ = (@string)"CanSet via embedded  :"u8;
 private static readonly object canSetViaUnexportedˢ = (@string)"CanSet via unexported:"u8;
@@ -60,6 +78,10 @@ private static readonly object localField1Exportedˢ = (@string)"local.Field(1) 
 private static readonly object localField1PkgPathOuterˢ = (@string)"local.Field(1) PkgPath == Outer.Field(1) PkgPath:"u8;
 private static readonly object localField1PkgPathIsˢ = (@string)"local.Field(1) PkgPath is foreign (not this package, not empty):"u8;
 private static readonly object anonUnexportedPkgPathIsˢ = (@string)"anon unexported PkgPath is this package:"u8;
+private static readonly @string structIntˢ = "struct{ int }"u8;
+private static readonly @string structIntˢ2 = "struct{ *int }"u8;
+private static readonly @string structNTˢ = "struct{ n T }"u8;
+private static readonly @string structMyIntˢ = "struct{ myInt }"u8;
 
 [GoType("dyn")] internal partial struct main_i {
     internal nint u;
@@ -84,6 +106,14 @@ internal static void Main() {
     fmt.Println(localField1PkgPathOuterˢ, lt.Field(1).PkgPath == ot.Field(1).PkgPath);
     fmt.Println(localField1PkgPathIsˢ, lt.Field(1).PkgPath != mine, lt.Field(1).PkgPath != ""u8);
     fmt.Println(anonUnexportedPkgPathIsˢ, mine == "main"u8);
+    void anon(@string label, reflectꓸType t) {
+        var f = t.Field(0);
+        fmt.Printf("%-14s name=%-5s anonymous=%-5v type=%-6v pkgPath=%q\n"u8, label, f.Name, f.Anonymous, f.Type, f.PkgPath);
+    }
+    anon(structIntˢ, reflect.TypeOf(new embedsInt(nil)));
+    anon(structIntˢ2, reflect.TypeOf(new embedsIntPtr(nil)));
+    anon(structNTˢ, reflect.TypeOf(new holdsNamed(nil)));
+    anon(structMyIntˢ, reflect.TypeOf(new embedsNamed(nil)));
 }
 
 } // end main_package

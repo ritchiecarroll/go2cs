@@ -837,12 +837,16 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				if _, ok := identObj.(*types.PkgName); !ok {
 					if ptrType, ok := identType.(*types.Pointer); ok {
 						if _, ok = ptrType.Elem().(*types.Named); !ok {
-							v.writeString(target, "%s %s %s;", getAccess(goTypeName), csEmitTypeName, embedName)
+							// An embedded pointer to a PREDECLARED type has nothing to promote and is a plain field;
+							// the [GoEmbedded] stamp is what lets the reflection projection report it Anonymous
+							// (a field named after its type is otherwise indistinguishable from an embed).
+							v.writeString(target, "[GoEmbedded] %s %s %s;", getAccess(goTypeName), csEmitTypeName, embedName)
 							handled = true
 						}
 					} else if _, ok = identType.(*types.Struct); !ok {
 						if _, ok := identObj.Type().(*types.Named); !ok {
-							v.writeString(target, "%s %s %s;", getAccess(goTypeName), csEmitTypeName, embedName)
+							// An embedded PREDECLARED type (`struct{ int }`): the same plain-field emission, stamped.
+							v.writeString(target, "[GoEmbedded] %s %s %s;", getAccess(goTypeName), csEmitTypeName, embedName)
 							handled = true
 						}
 					}
