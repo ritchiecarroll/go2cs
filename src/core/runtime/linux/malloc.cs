@@ -1419,89 +1419,9 @@ internal static @unsafe.Pointer persistentalloc(uintptr size, uintptr align, ж<
     return @unsafe.Pointer.FromPinnedBox(Δp);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string persistentallocSize0ˢ = "persistentalloc: size == 0"u8;
-internal static readonly @string persistentallocAlignIsˢ = "persistentalloc: align is not a power of 2"u8;
-internal static readonly @string persistentallocAlignIsˢ2 = "persistentalloc: align is too large"u8;
-internal static readonly @string runtimeCannotAllocateˢ = "runtime: cannot allocate memory"u8;
+// go2cs generated this placeholder — func persistentalloc1 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// Must run on system stack because stack growth can (re)invoke it.
-// See issue 9174.
-//
-//go:systemstack
-internal static ж<notInHeap> persistentalloc1(uintptr size, uintptr align, ж<sysMemStat> ᏑsysStat) {
-    uintptr maxBlock = /* 64 << 10 */ 65536; // VM reservation granularity is 64K on windows
-    if (size == 0) {
-        @throw(persistentallocSize0ˢ);
-    }
-    if (align != 0){
-        if ((uintptr)(align & (align - 1)) != 0) {
-            @throw(persistentallocAlignIsˢ);
-        }
-        if (align > _PageSize) {
-            @throw(persistentallocAlignIsˢ2);
-        }
-    } else {
-        align = 8;
-    }
-    if (size >= maxBlock) {
-        return (ж<notInHeap>)(uintptr)(sysAlloc(size, ᏑsysStat));
-    }
-    var mp = acquirem();
-    ж<persistentAlloc> persistent = default!;
-    if (mp != nil && (~mp).p != 0){
-        persistent = (~mp).p.ptr().of(runtime_package.Δp.Ꮡpalloc);
-    } else {
-        @lock(ᏑglobalAlloc.of(globalAllocᴛ1.Ꮡmutex));
-        persistent = ᏑglobalAlloc.of(globalAllocᴛ1.ᏑpersistentAlloc);
-    }
-    persistent.Value.off = alignUp((~persistent).off, align);
-    if ((~persistent).off + size > persistentChunkSize || (~persistent).@base == nil) {
-        persistent.Value.@base = (ж<notInHeap>)(uintptr)(sysAlloc(persistentChunkSize, Ꮡmemstats.of(mstats.Ꮡother_sys)));
-        if ((~persistent).@base == nil) {
-            if (persistent == ᏑglobalAlloc.of(globalAllocᴛ1.ᏑpersistentAlloc)) {
-                unlock(ᏑglobalAlloc.of(globalAllocᴛ1.Ꮡmutex));
-            }
-            @throw(runtimeCannotAllocateˢ);
-        }
-        // Add the new chunk to the persistentChunks list.
-        while (ᐧ) {
-            var chunks = (uintptr)persistentChunks;
-            ((~persistent).@base.Reinterpret<notInHeap, uintptr>()).Value = chunks;
-            if (atomic.Casuintptr(ᏑpersistentChunks.Reinterpret<ж<notInHeap>, uintptr>(), chunks, (uintptr)(~persistent).@base)) {
-                break;
-            }
-        }
-        persistent.Value.off = alignUp(goarch.PtrSize, align);
-    }
-    var Δp = (~persistent).@base.add((~persistent).off);
-    persistent.Value.off += size;
-    releasem(ref (mp).DerefOrNull());
-    if (persistent == ᏑglobalAlloc.of(globalAllocᴛ1.ᏑpersistentAlloc)) {
-        unlock(ᏑglobalAlloc.of(globalAllocᴛ1.Ꮡmutex));
-    }
-    if (ᏑsysStat != Ꮡmemstats.of(mstats.Ꮡother_sys)) {
-        ᏑsysStat.add((int64)size);
-        Ꮡmemstats.of(mstats.Ꮡother_sys).add(-(int64)size);
-    }
-    return Δp;
-}
-
-// inPersistentAlloc reports whether p points to memory allocated by
-// persistentalloc. This must be nosplit because it is called by the
-// cgo checker code, which is called by the write barrier code.
-//
-//go:nosplit
-internal static bool inPersistentAlloc(uintptr Δp) {
-    var chunk = atomic.Loaduintptr(ᏑpersistentChunks.Reinterpret<ж<notInHeap>, uintptr>());
-    while (chunk != 0) {
-        if (Δp >= chunk && Δp < chunk + (uintptr)persistentChunkSize) {
-            return true;
-        }
-        chunk = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)chunk);
-    }
-    return false;
-}
+// go2cs generated this placeholder — func inPersistentAlloc is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // linearAlloc is a simple linear allocator that pre-reserves a region
 // of memory and then optionally maps that region into the Ready state

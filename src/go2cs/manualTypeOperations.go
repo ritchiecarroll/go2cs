@@ -153,6 +153,20 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"overlaps": goosAny,
 	},
 	"runtime": {
+		// persistentalloc1 / inPersistentAlloc (increment 6 of the runtime row, 2026-09-05): Go keeps
+		// persistentChunks as a lock-free push through `atomic.Casuintptr((*uintptr)(unsafe.Pointer(&persistentChunks)), …)`
+		// and reads it with Loaduintptr over the same view -- a POINTER-typed global reinterpreted as the
+		// integer it holds. golib has no arm for a managed reference slot viewed as uintptr (nothing aliases
+		// a GC reference as an integer), so the address route mints a nil box and the CAS dereferences it:
+		// the nil dereference every persistentalloc row died on once sysMmap answered (the increment-5
+		// sizing probe). Displaced onto runtime/mem_persistent_impl.cs, which keeps the emission line for
+		// line and turns only those two lines into an Interlocked exchange of boxes on the slot (compared
+		// by native address) and a volatile read. The S1/CS0030 fork's native-pointer side: the chunks are
+		// mmap'd memory outside the CLR heap. Corpus census 2026-09-05: 21 emitted sites in 12 runtime
+		// files (7 Go sites) carry this view; these two are the only ones any row reaches -- the general
+		// pointer-slot view is recorded for a second reaching site, not built here.
+		"persistentalloc1":  goosAny,
+		"inPersistentAlloc": goosAny,
 		// runtime.nanotime1 — darwin's monotonic clock. The other two flavors reach the same golib
 		// clock (MonotonicClock.Nanoseconds()) by writing a body into a bodyless partial and need no
 		// entry here; darwin's converted body calls libcCall(FuncPCABI0(nanotime_trampoline), …) into a

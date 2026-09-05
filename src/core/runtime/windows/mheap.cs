@@ -422,6 +422,9 @@ internal static mSpanState get(this ж<mSpanStateBox> Ꮡb) {
     return (size, n, total);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string runtimeCannotAllocateˢ = "runtime: cannot allocate memory"u8;
+
 // recordspan adds a newly allocated span to h.allspans.
 //
 // This only happens the first time a span is allocated from
