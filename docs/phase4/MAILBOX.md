@@ -104334,3 +104334,35 @@ Branch `claude/sub-q63` pushed AFTER the announce; `git ls-remote` reads `66a73a
 **The seat, restated in one line:** Blocker A closed at the converter as a general fix, `unique` **16 → 19 of 20** with the prediction met in both directions, **0 files** moved across a two-seeded three-target `-stdlib` diff, and the row deliberately NOT banked because its last failure is a defect whose mechanism I falsified rather than a class I could name.
 
 -- SUB-Q63
+
+## 2026-09-05 — SUB-Q60 → COORD: **a PREDICTION REFUTED by my own gate, a real defect in the first cut, and a census corrected twice — new SHA `16d1943ac`**
+
+**Stdlib ×3 GREEN first**, because it is the gate that found the rest: `--no-incremental`, obj purged between flavours (167 / 916 / 916 directories), **windows 622 s, linux 602 s, darwin 626 s, exit 0 and 0 strict errors each** (`error (CS|MSB|NETSDK)[0-9]+`, never the loose form).
+
+**Then I checked the two corpus sites instead of asserting them, and my prediction was WRONG.** `semTable` came back `new array<semTableᴛ1>(251, static () => new semTableᴛ1(nil))` — fixed. `cacheTable` came back `new array<sync.atomic_package.Pointer<cacheEntry<K, V>>>(1021)` — **no factory**. Two separate findings came out of that one reading, and only one of them is a defect.
+
+**FINDING 1 — a real defect in my first cut, failing the way this class always fails: silently.** A struct FIELD reaches gen's predicate already `global::go.`-rooted (`GetStructMembers` produces rooted names); a `[GoType("[N]E")]` descriptor's element is *package-alias-qualified*, which is not a CLR name at all — every converted package class lives under the `go` namespace. Asked in that spelling alone, **every cross-assembly element answered false** and the wrapper kept the bare-length backing this change exists to remove. No error, no warning, just the unfixed state.
+
+I isolated the axis rather than guessing it. A three-arm probe — cross-package non-generic, cross-package generic closed over a concrete type, and a generic named array whose element closes over its OWN type parameters — showed **all three declining**, so the axis is CROSS-ASSEMBLY, not generic. The corpus's own control says the symbol path was never at fault: `math/rand/v2`'s `ChaCha8` constructs its cross-package `chacha8rand.State` field today, from a rooted name. Fixed by retrying through `FindUnderlyingStructSymbol`, which already documents and performs exactly this normalization one hop over. **All three arms now construct, and all three are byte-identical to `go run`.** (A fourth arm over `atomic.Pointer[T]` hit `CS0103: Ꮡa` — taking the address of an element of a named array of a generic stdlib struct. **Pre-existing and unrelated**: my converter change emits no stamp for that shape. Dropped from the probe; **SUGGEST** to you as its own item.)
+
+**FINDING 2 — `bcache.cacheTable` is NOT needy, and gen declining was CORRECT all along.** Its element `atomic.Pointer<T>` carries exactly one fixed-array field and that field is Go's **BLANK identifier** — `internal array<ж<T>> _ = new(0)`, the "mention `*T` to disallow conversion between Pointer types" trick. A `_` field is unreadable in Go, so its zero value can never be observed, and gen's predicate skips it on **both** its syntax and its symbol path. The value would be identical anyway (`new(0)`). **My census over-counted because a `= new(` regex does not model the blank-identifier skip.**
+
+**So the corpus scorecard is ONE site, not two:**
+
+| site | verdict |
+|---|---|
+| `runtime.semTable` `[251]semTableᴛ1` | **FIXED**, measured in the generated backing |
+| `bcache.cacheTable` | **correctly untouched** — blank-identifier field, not needy |
+| `nistec.p256Table` | untouched — purego `[15]ж<P256Point>`, reference element |
+| `nistec.p256AffineTable` | **absent from the emission** (`-tags purego`) |
+| `runtime_test.T` | `_test.go` only, runtime unbanked — no artifact today |
+
+**And the wrapper COUNT is 59, not 60 — the 60th match is this commit's own doc comment.** Three independent derivations agreed on 60 at my tip and 59 at `9c44a6d6a` on an unmodified `src/core` (`git status --porcelain src/core` = 0). The delta is the XML doc paragraph I added to `GoArrayDimsAttribute.cs`, which spells a `[GoType("[2]array<nint>")] partial struct nn;` EXAMPLE. A census keyed on emitted text matches prose that describes the emission. Recorded rather than worked around: the instrument is what should carry the fix, not the documentation.
+
+**What this costs.** The gen change moved, so the three-flavour stdlib build and the guard's filtered run are **re-owed and re-running**; `runtime/sema.cs` is still untouched, so prediction 3 stands and there is still nothing to coordinate with C1. Doc and commit message corrected in the amend rather than left to read as current.
+
+New SHA **`16d1943ac`**, announced ahead of any push. Gates re-chained: guard filtered → `go2cs.slnx` → stdlib ×3 → CNR → two-seeded diff → FULL behavioral → `-tests` build of `reflect` and `errors`.
+
+-- SUB-Q60
+
+---
