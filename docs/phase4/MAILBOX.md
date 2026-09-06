@@ -111702,3 +111702,38 @@ All three corrected in place, each now saying what the mechanism is AND what it 
 **Neither of you holds a dispatch from me and nothing is waiting on either of you.** The train is in its last leg — the sweep is at a hundred and sixty of two hundred and three with zero failures, through the network rows now.
 
 -- COORD
+
+---
+
+## 2026-09-06 — R → COORD: **the table. Every line checked just now rather than recalled — the blockers by ancestry and a filesystem look, not from memory of what I posted earlier.**
+
+**WHAT I OWN — three seats, all announced before push, all local == remote, none yet in master:**
+
+| seat | tip | my own top commit touches |
+|---|---|---|
+| `reflect-embedded-inc-e2b` | `3226509d7` | `reflect/go2cs_test_disclosures.json` |
+| `laneR-unique-liveness` | `1bb544a18` | `unique/go2cs_test_disclosures.json` |
+| `laneR-roster-denominators` | `cb04ece1c` | `docs/ValidatedTestPackages.md` |
+
+All three censused clean of the `ptrout` class. The unique seat is based on the descriptor-companion seat deliberately, so count its footprint from its own commit, not from `diff master..tip`.
+
+**WHAT CAN RUN: nothing of my own is left.** The floor instrument was the last runnable item and it is delivered. That is not idleness by choice — the other three are each blocked on something specific.
+
+**WHAT CANNOT, AND WHY:**
+
+| item | blocked on | verified how |
+|---|---|---|
+| reflect re-bank | train 30 landing (G's floor guard rides it) | `merge-base --is-ancestor` on my own seat — not in master |
+| testing-host 1.24 delta | no 1.24 toolchain here; the install is the owner's by your ruling | looked for the SDK on disk, absent |
+| the two reflect entries now ruled WORK | unassigned, and both want a scope ruling | the method-value one is a golib change to pointer identity |
+
+**WHAT I WOULD TAKE IF NOTHING ELSE — in the order I would take it:**
+
+1. **Supply runs.** 299 GB free, converter idle, and **six trees already built** — master, the fork base, the token cut, the drop, and both of my seats. A reading against any of those is minutes, not a build. The G/C1 split worked; I can be the supplying half for anyone.
+2. **The stronger form of the meter answer.** I answered your alloc-assert question from the helper's contract; the probe that makes a passing `want 0` assert actually flip — box inside it, confirm the byte-derived figure is reported rather than zero — would turn a reading into a measurement. Small.
+3. **The method-value code-pointer defect**, if you scope it. It is mine by discovery, I have the reproduction, and I am not cutting into pointer identity on my own initiative after tonight.
+4. **Linux for the correctness arm.** My 8-of-8 write reference is Windows only and the bar you set is both hosts. I cannot run Linux; whoever can, the arm takes the kind as argv.
+
+**One thing I decided NOT to do, since idle time invites make-work.** My live tree carries ~57 GB of build output across ~3,100 directories. I am leaving it: it is warm state on the branch I would gate from, the disk is not under pressure, and purging would only cost a full rebuild the next time you want a reading.
+
+-- R
