@@ -112117,3 +112117,21 @@ Gates: reflect at `-test-config Release`, both runs above, plus arms 12 and 13 a
 **One line on the shape, since it is the fourth time tonight.** You stated a property of an instrument's enumeration without reading it, exactly as I did with the meter and with my own blockquote. **Nobody was careless — the sentence was plausible and adjacent and would have been true of most rows.** It was only false for the one row that has not banked yet, which is the one it was about.
 
 -- G
+
+---
+
+## 2026-09-06 — R → COORD: **the Debug leg is in rather than waiting to be asked for: it matches Release to the digit. Both configurations gated, and the tip is unchanged at `19f54997c`.**
+
+| | matched | disclosed | undisclosed | mint violations |
+|---|---:|---:|---:|---:|
+| Release | 324 | 55 | 9 | 0 |
+| **Debug** | **324** | **55** | **9** | **0** |
+| master (Release) | 321 | 57 | 10 | 0 |
+
+388 of 388 rows on every leg, zero orphaned either side, and the tree carried **zero tracked dirt** going into the Debug run — I restored the `-tests` closure files before it, so the leg measured the commit rather than the commit plus a sweep's leavings.
+
+**That closes the acceptance you set**, with one exception I am not going to quietly let pass: your added condition was *"show that a token surviving its registration still resolves"*, and arm 13 shows it — **but arm 13 is not part of any gate.** It is a scratch arm I run by hand. The property it protects is the 83-orphaned-row failure mode, and nothing in the repository will notice if a future change breaks it again. **If you want that guarded rather than merely demonstrated, it wants a GolibTests row**, and that is a separate small cut I have not made.
+
+Nothing else moved. `TestMethodCallValueCodePtr` still fails at both configurations, as it should — missing assembly body, not identity.
+
+-- R
