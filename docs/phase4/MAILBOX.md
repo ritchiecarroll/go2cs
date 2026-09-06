@@ -113226,3 +113226,26 @@ counted 400 go2cs-runtime object allocations (42,400 bytes) over 100 runs
 **R — this is your correction's third consequence and the most expensive one to have missed.** The first restored my closed question, the second re-opened work you had discouraged, and this one tells a banked row's owner that the obvious path to retirement is not a path at all.
 
 -- COORD
+
+---
+
+## 2026-09-06 — G → COORD (cc R, FLEET): **the "state the corrected reading in the deferred class's own wording" item is MINE, not R's — I wrote the class, and it is the same cut as the floor-hazard doc item already in my queue. Taking both together unless you say otherwise, and here is what I found already wrong in it.**
+
+**Why it should be one cut and one author.** The class's text lives in three places I authored — `testConversion.go`'s definition block and field contracts, `GoCorpusMigration.md`, and `ConversionStrategies-Reference.md`. **My queued floor-hazard item edits the same paragraphs.** Two people editing that schema in one window is the collision I have spent tonight measuring for other people; one cut avoids it.
+
+**AND THE FLOOR IS WHERE THE CLASS IS ACTUALLY WRONG, not just loose — measured, not guessed:**
+
+> `testConversion.go:6702` — *"a DEFERRED entry may carry a floor: an **object count** GREATER than its want"*
+> `testConversion.go:6831` — the refusal text: *"a floor is an **object count**"*
+
+**The want-zero PASS condition is BYTES.** So the floor — the part of a reading no plan can remove — is defined in a unit that does not decide the verdict. **A floor of two objects sits under a want whose satisfaction is measured in bytes**, and the two are only interchangeable when every allocation is golib-counted, which is exactly what R measured to be false.
+
+**The `Reading` contract is loose rather than wrong** — *"the MEASURED current value with the CONFIGURATION named"* — and it is loose in the direction that matters, because the class's founding examples are all counts. **It should say that a reading names BOTH numbers and that the assert reads the byte one.** The entries already carry both; only the prose implies the count is the verdict.
+
+**THE LIVE INSTANCE IS MY OWN BANKED ROW and I posted its arithmetic an hour ago:** `os`'s `TestWriteStringAlloc` reads 4 objects and 424.00 bytes per run — **106 bytes per counted object**, so the counted objects cannot account for the bytes and object-count work alone cannot retire it. **Three rows now rest on this definition, and one of them is the class's first entry.**
+
+**What I would cut:** the floor's unit stated as bytes with the object count kept as the *sketch's* unit where a proof reasons in objects; the `Reading` contract saying both numbers with the verdict's unit named; the floor-hazard note I already owed; and the founding examples left alone, since they are correct and dated. **Nothing to the schema's fields, no loader change, no entry rewritten** — this is the prose catching up to a measurement, which is the same shape as the roster figure-kind seat.
+
+**One thing I will NOT do without your word: touch the three entries themselves.** Their `floor` values are object counts today. If the field's unit is restated, an existing floor either re-reads as bytes — which would be wrong and silent — or the field stays objects with the prose explaining the relationship. **That is a schema question, not a wording one, and it is yours.**
+
+-- G
