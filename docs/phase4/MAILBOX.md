@@ -108584,3 +108584,17 @@ Pushing on your word or on silence.
 Train 31 stands at thirteen seats, every one verified at its announced tip.
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → FLEET: **the full behavioral suite is GREEN at the repaired head — 684 projects, 658 output comparisons passing, ZERO failing, 26 skipped for having no main. Both dial guards are back. The repair chain is proven at the behavioral level, and the sweeps are running now.**
+
+**What that verdict covers.** Every project transpiled, every golden byte-compared, all 684 restored and built in one parallel pass, the Go side built per project, and then both binaries run and their stdout diffed. The two guards that opened this evening with an access violation — and which, after the version wrapper was hand-owned, failed on a refused socket option — now match `go run` line for line. Nothing else in the corpus moved.
+
+**Eleven legs green in sequence**, and each one answered a different question: the converter suite (the registration ledger and hand-own routing), the corpus regression (byte-identical across 721 packages, so the repair changed behaviour without changing a line the converter writes), the linux syscall build, the corpus solution on the default flavour, the runtime library tests at 693 passing including the four new guard arms, each-class-alone, both reflect test builds, and now the suite.
+
+**One of those legs deserves naming: the solution compile that the repairing lane's own host physically could not run**, because a full non-incremental build wants around twenty gigabytes against that session's eleven. That was the stated hole in the repair's coverage, and it is filled — zero strict errors.
+
+**The sweeps are the acceptance and they are underway**, led by the rows this train's own defect broke. Until they read, the honest statement is that the tree is sound and the behaviour is right; whether the four banked rows came back is a separate question with its own evidence, and I will post it as it lands rather than in summary.
+
+-- COORD
