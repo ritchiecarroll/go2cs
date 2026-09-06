@@ -862,14 +862,29 @@ $deferredClass = 'deferred'
 $structuralClass = 'structural'
 $manifestsChecked = 0
 $entriesChecked = 0
+$manifestParseFailures = 0
 
-foreach ($row in $rows) {
-    $manifest = Join-Path (Join-Path $PSScriptRoot 'core') ($row.Package + '/go2cs_test_disclosures.json')
-    if (-not (Test-Path -LiteralPath $manifest)) { continue }
+# Enumerated from the FILESYSTEM rather than from $rows, and that is the whole of this change.
+# Reading the roster made this arm blind to a package that has no row -- which is the state EVERY
+# package is in at the moment its manifest is first written, and therefore the moment that manifest
+# is most likely to be wrong. Measured when this landed: 45 committed manifests, 3 of them
+# (reflect, runtime, runtime/pprof) belonging to packages with no roster row. `os` was a fourth
+# until it banked hours earlier, and its manifest went in unread by this arm in both directions --
+# caught at the bank rather than after it, which is the only reason this is a fix and not a defect.
+#
+# The package name comes from the PATH by Split-Path and Substring rather than by regex: a package
+# name is a path fragment, and deriving it with a pattern invites exactly the escaping mistakes that
+# a guard file cannot afford.
+$coreRoot = Join-Path $PSScriptRoot 'core'
+$manifestFiles = @(Get-ChildItem -LiteralPath $coreRoot -Recurse -File -Filter 'go2cs_test_disclosures.json' -ErrorAction SilentlyContinue | Sort-Object FullName)
+
+foreach ($manifestFile in $manifestFiles) {
+    $manifest = $manifestFile.FullName
+    $pkg = (Split-Path $manifest -Parent).Substring($coreRoot.Length).TrimStart([char]92, [char]47).Replace([char]92, [char]47)
 
     $parsed = $null
     try { $parsed = [System.IO.File]::ReadAllText($manifest) | ConvertFrom-Json }
-    catch { Assert-Equal "go2cs_test_disclosures.json parses: $($row.Package)" $true $false; continue }
+    catch { $manifestParseFailures++; Assert-Equal "go2cs_test_disclosures.json parses: $pkg" $true $false; continue }
 
     $manifestsChecked++
 
@@ -883,7 +898,7 @@ foreach ($row in $rows) {
             # Each field separately, so the failure NAMES the missing one.
             foreach ($field in 'want', 'reading', 'plan') {
                 $value = [string]$entry.$field
-                Assert-Equal "deferred entry names its $($field): $($row.Package)/$name" $true (-not [string]::IsNullOrWhiteSpace($value))
+                Assert-Equal "deferred entry names its $($field): $pkg/$name" $true (-not [string]::IsNullOrWhiteSpace($value))
             }
         }
 
@@ -895,24 +910,42 @@ foreach ($row in $rows) {
         if ($null -ne $entry.floor) { $floor = [int]$entry.floor }
 
         if ($floor -ne 0) {
-            Assert-Equal "a floor belongs to a deferred entry, never a structural one: $($row.Package)/$name" $false ($class -eq $structuralClass)
-            Assert-Equal "floor is a positive object count: $($row.Package)/$name" $true ($floor -gt 0)
-            Assert-Equal "a floor names its proof (a claim the census can falsify): $($row.Package)/$name" $true (-not [string]::IsNullOrWhiteSpace([string]$entry.proof))
+            Assert-Equal "a floor belongs to a deferred entry, never a structural one: $pkg/$name" $false ($class -eq $structuralClass)
+            Assert-Equal "floor is a positive object count: $pkg/$name" $true ($floor -gt 0)
+            Assert-Equal "a floor names its proof (a claim the census can falsify): $pkg/$name" $true (-not [string]::IsNullOrWhiteSpace([string]$entry.proof))
 
             # The want must LEAD with the number the floor is compared against; refusing an
             # uncheckable pairing is the difference between a guard and a decoration.
             $wantText = ([string]$entry.want).Trim()
             $wantMatch = [regex]::Match($wantText, '^\d+')
-            Assert-Equal "a floored entry's want leads with its number: $($row.Package)/$name" $true $wantMatch.Success
+            Assert-Equal "a floored entry's want leads with its number: $pkg/$name" $true $wantMatch.Success
             if ($wantMatch.Success) {
-                Assert-Equal "floor exceeds the want (else nothing is deferred and the entry is structural): $($row.Package)/$name" $true ($floor -gt [int]$wantMatch.Value)
+                Assert-Equal "floor exceeds the want (else nothing is deferred and the entry is structural): $pkg/$name" $true ($floor -gt [int]$wantMatch.Value)
             }
         }
         if ($class -eq $structuralClass) {
-            Assert-Equal "structural entry names NO retirement plan (its claim is the assertion cannot be met): $($row.Package)/$name" $true ([string]::IsNullOrWhiteSpace([string]$entry.plan))
+            Assert-Equal "structural entry names NO retirement plan (its claim is the assertion cannot be met): $pkg/$name" $true ([string]::IsNullOrWhiteSpace([string]$entry.plan))
         }
     }
 }
+
+# COVERAGE, and this is the assertion the row-enumerated form could not make. The vacuity guard below
+# only asks whether the arm read SOMETHING; this asks whether it read EVERYTHING committed. They are
+# different questions and the old form passed the first while failing the second silently, because a
+# manifest belonging to an unbanked package produced no assertion and no absence anyone could see.
+#
+# It is also why the check count did not move when this landed: a plain `alloc-profile` entry fires
+# no assertion at all, so reaching three more manifests adds coverage without adding checks. Without
+# this line there would be no evidence in the output that the arm's reach had changed.
+#
+# ⚠ The reference count is enumerated INDEPENDENTLY, and the first version of this line was not.
+# Comparing $manifestsChecked against $manifestFiles.Count compares the loop against its own input:
+# it holds under ANY enumeration, including the row-based one this change replaces, so it passed a
+# neutering control that should have reddened it. An assertion whose reference is derived from the
+# thing under test measures nothing -- the corrective is a second derivation, and here that is a
+# separate walk of the same tree.
+$manifestsOnDisk = @(Get-ChildItem -LiteralPath $coreRoot -Recurse -File -Filter 'go2cs_test_disclosures.json' -ErrorAction SilentlyContinue).Count
+Assert-Equal 'the manifest arm reaches every committed manifest, not just the banked rows' $manifestsOnDisk ($manifestsChecked + $manifestParseFailures)
 
 # Vacuity guard: this arm is worthless if it silently checks nothing, which is exactly what a wrong
 # path or a changed schema would produce. The corpus has committed manifests today, so a zero here is
