@@ -24022,8 +24022,17 @@ problem, which is why the hit branch remembers an address instead of rebuilding 
 
 Buildable today with no golib change — `ж<T>.IsNative` is public — so the predicate is *not null, not
 native-backed, not nil-valued, and not in the table*, which is exactly "a managed view somebody built
-without remembering". Today it fires zero times; the day a sixth producer appears it converts a
-silent wrong answer into a loud one naming the seam.
+without remembering". Were it built it would fire zero times today; the day a sixth producer
+appears it would convert a silent wrong answer into a loud one naming the seam.
+
+⚠ **THE ZERO IS UNENFORCED, and that is this entry's own limitation rather than a detail.** The
+guard above is a SHAPE, not a thing that runs. The population was censused BY HAND on
+2026-09-06 and **nothing watches it**: a sixth producer of those two pointee types re-opens the
+exposure with no gate going red, because no gate reads producer kinds -- not the roster guard,
+not the converter suite, not CNR. So this entry's ZERO is a measurement with a date on it,
+exactly like a disclosure's reading, and it decays the same way: true of the tree it was taken
+on, silent about the next one. Whoever cuts the guard closes that; until then the census is a
+RECORD rather than a GATE, and it is labelled so here rather than left to read as enforced.
 
 ⚠ **THE CONTROL REQUIREMENT, and it is the part a later lane should not skip.** An `IsNative` test was
 measured MISLEADING elsewhere on 2026-09-04, where it was used as evidence of staleness and dropped
