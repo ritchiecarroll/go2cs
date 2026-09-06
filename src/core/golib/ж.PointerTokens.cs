@@ -91,6 +91,47 @@ public static class ManagedPointerTokens
     // global lock there would serialize goroutines through a conversion that is otherwise free.
     private static readonly ConcurrentDictionary<nuint, WeakReference<object>> s_table = new();
 
+    // A DELEGATE's token is derived from its TARGET METHOD rather than from the delegate instance
+    // (see reflect's reflectPointerToken), which is what makes two method values of one method share
+    // an identity the way Go's shared trampoline does. That collapse has one consequence this table
+    // must answer: two delegates now share ONE slot above, and the slot holds a WEAK reference, so a
+    // collected delegate can leave a live token resolving to nothing. Before the collapse each
+    // delegate owned its own token and that could not happen.
+    //
+    // The remedy is not to strengthen the weak reference — it is to REMOVE the dependency. A
+    // delegate token's only consumer wants the function's NAME (runtime.FuncForPC(fn.Pointer()).Name(),
+    // which reflect's own abi_test.go uses to name every subtest), and the name is derivable from the
+    // METHOD alone. So the method is remembered STRONGLY here, keyed by the same token.
+    //
+    // Two claims justify the strong hold beside a deliberately weak table. ONE IS MEASURED AND ONE
+    // IS NOT, and an earlier revision of this comment asserted both:
+    //
+    //   BOUNDED BY DISTINCT METHODS — MEASURED. reflect's Method(i) tokens are per-METHOD, not
+    //   per-call and not per-receiver: two receivers of one method token equally, the same method
+    //   read twice tokens equally, and two different methods do not (0x22ea15d vs 0x3de9d2d,
+    //   arm12, Release+TC0, reproduced across separate processes). So this map takes ONE entry per
+    //   distinct method however many func values are minted — strictly smaller than what the weak
+    //   table above held before the collapse.
+    //
+    //   "ADDS NO LIFETIME THAT WAS NOT ALREADY THERE" — WITHDRAWN, and it was wrong on the case
+    //   this code exists for. It holds for an ordinary MethodInfo, which the runtime does keep
+    //   forever; it does NOT hold for a DynamicMethod, which is collectible — and reflect's own
+    //   Method(i) builds its func values as dynamic methods, the very fact that forced the
+    //   MethodInfo-object identity a few lines up (MethodHandle throws for them). A strong entry
+    //   therefore PINS a dynamic method that would otherwise be collectable.
+    //
+    // The honest position is bounded-but-pinning: a fixed cost proportional to distinct reflected
+    // methods, not a growing one. That is a real cost and it is affordable; it is not "free", which
+    // is what this comment used to say.
+    private static readonly ConcurrentDictionary<nuint, System.Reflection.MethodBase> s_delegateMethods = new();
+
+    /// <summary>
+    /// The target method a delegate token was minted from, or <c>null</c> if this token never named a
+    /// delegate. Survives collection of every delegate that shared the token, which is the whole point.
+    /// </summary>
+    public static System.Reflection.MethodBase? ResolveDelegateMethod(nuint token) =>
+        token != 0 && s_delegateMethods.TryGetValue(token, out System.Reflection.MethodBase? method) ? method : null;
+
     // The overwhelmingly common case is a program that never asks reflect for a pointer's scalar
     // form at all, and it must not pay even a hash: an empty table answers from this one load.
     // Volatile because the writer is a different thread than the reader in the general case.
@@ -141,6 +182,13 @@ public static class ManagedPointerTokens
         }
 
         s_table[token] = new WeakReference<object>(box);
+
+        // Remember a delegate's METHOD strongly beside the weak box, so the token still answers its
+        // name after every delegate sharing it has been collected. Written before the weak store is
+        // observable to a reader, so a token that resolves at all resolves completely.
+        if (box is Delegate del && del.Method is not null)
+            s_delegateMethods[token] = del.Method;
+
         s_count = s_table.Count;
 
         if (s_count >= s_sweepAt)

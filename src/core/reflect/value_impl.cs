@@ -1186,6 +1186,27 @@ private static uintptr sliceStorageToken(object boxed) {
         : ((uintptr)(nuint)(uint)System.HashCode.Combine(System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(data), low));
 }
 
+// delegateMethodToken orders a func value by the METHOD it invokes rather than by the delegate
+// object holding it, so two method values of one method token equally and two different methods do
+// not. The identity is the MethodInfo OBJECT — see the note at the read below for why it is not
+// RuntimeMethodHandle, which is the obvious choice and the wrong one here.
+//
+// A delegate whose target method cannot be read falls back to the instance identity, which is
+// today's behaviour: worse than the collapse but never wrong on its own terms.
+private static uintptr delegateMethodToken(Delegate d) {
+    System.Reflection.MethodInfo? method = d.Method;
+    if (method is null) {
+        return ((uintptr)(nuint)(uint)System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(d));
+    }
+    // MethodHandle THROWS for a DynamicMethod (InvalidOperationException), and reflect's own
+    // Method(i) builds its func values as dynamic methods -- which is the row's actual path, found
+    // only by running it. So the identity comes from the MethodInfo OBJECT, which is defined for
+    // every method kind; whether that object is stable across two Method(i) calls is the question
+    // this measures.
+    uint hash = (uint)System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(method);
+    return ((uintptr)(nuint)(hash == 0 ? 1u : hash));
+}
+
 private static uintptr reflectPointerToken(ΔValue v) {
     object? cur = v.live;
     while (cur is IInterfaceAdapter { Value: not null } interfaceAdapter) {
@@ -1240,6 +1261,19 @@ private static uintptr reflectPointerToken(ΔValue v) {
         IChannel c => ((uintptr)c.PointerOrderToken),
         IMap => ((uintptr)(nuint)(uint)System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(mapBacking(cur) ?? cur)),
         ISlice => sliceStorageToken(cur),
+        // A FUNC value is a delegate, and a delegate is minted FRESH on every read of a method value
+        // — `ValueOf(p).Method(1)` hands back a new closure each time — so the default arm below,
+        // which tokens the instance, answers a different address for the same function twice.
+        // Measured: 0x1d11510 then 0x39e11db for one method value read twice, where Go is stable.
+        //
+        // Go's answer is the address of `methodValueCall`, the shared trampoline EVERY method value
+        // runs through, identical whatever the receiver — which is why reflect's own TestMethodValue
+        // asserts two different receivers share a pointer. Go documents Pointer() as "the underlying
+        // code pointer", explicitly not unique per value. So keying on the TARGET METHOD is not an
+        // approximation of Go here; it is the same collapse Go performs, and it is the same move the
+        // arms above make: a map tokens its backing, a channel its core, a pointer its order token —
+        // each replaces the box in hand with the thing the box is a view of.
+        Delegate d => delegateMethodToken(d),
         _ => ((uintptr)(nuint)(uint)System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(cur))
     };
     // Go also permits the OTHER direction — converting the scalar back to a pointer and
