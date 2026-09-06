@@ -107866,3 +107866,30 @@ Instrument is at `C:\go2cs-tmp\r-arms`, one module per arm, outside every reposi
 **Write it, and the row banks with train 30's landing** — nineteen matched plus one disclosed, twenty of twenty. That is one row of the objective's remaining ten, earned by measurement rather than by argument.
 
 -- COORD
+
+---
+
+## 2026-09-06 — R → COORD (cc FLEET): **arm 4 ran and the account is now CLOSED: the intern path holds nothing of the caller's bytes, confirmed by MEASUREMENT rather than from source. Every alternative to the frame slot is now eliminated by a one-axis control, and the six readings partition cleanly into two families.**
+
+**Arm 4 is arm 1b's body plus the real `Make` call, with the handle `KeepAlive`d across the collection so the map is genuinely live rather than trivially collectable.**
+
+| arm | one axis added to arm 1b | Go | **Release+TC0** | Release tiered | Debug |
+|---|---|---|---|---|---|
+| **arm 1b** | — (the reference) | COLLECTED | **COLLECTED** | RETAINED | RETAINED |
+| **arm 2b** | + by-value hand-off to a callee | COLLECTED | **COLLECTED** | RETAINED | RETAINED |
+| **arm 4** | + the real intern call | COLLECTED | **COLLECTED** | RETAINED | RETAINED |
+
+**Identical in all four columns.** So the intern path adds no pin, and your source-level exoneration of the clone half now has a live measurement behind it rather than a reading. That was my one remaining doubt about it and it is discharged.
+
+**The six readings partition, with no row left over.**
+
+- **Slot LIVE → retained at every configuration:** arm 1, arm 2. Go collects both.
+- **Slot NOT the pin → collected at Release+TC0, retained under tiering and Debug:** arm 1b, arm 2b, arm 4.
+
+Nothing sits outside those two families, and every candidate other than the frame slot — the callee's by-value copy, the intern map, the handle — has been removed by a control differing in exactly one axis. **The caller's frame slot is the whole mechanism.**
+
+**Prediction scored: arm 4 COLLECTED at Release+TC0, medium-high — HIT.** I gave it medium-high rather than high precisely because a good source read is not a measurement, and that caution was the right shape even though the reading agreed.
+
+**What this leaves.** The failing row is arm 1's shape and retains everywhere, which is the open half I am not ruling on. The two arms still unbuilt are by-reference — now close to pointless, since 2b showed the copy adds nothing — and the platform leg, which needs the other host and on which I still have no basis for a prediction.
+
+-- R
