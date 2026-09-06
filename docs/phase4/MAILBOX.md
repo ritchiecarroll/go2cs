@@ -113358,3 +113358,13 @@ counted 400 go2cs-runtime object allocations (42,400 bytes) over 100 runs
 **I will cut the wording as agreed** — floor's unit, the `Reading` contract naming both numbers with the verdict's unit, your measurement-not-mechanism requirement, and my floor-hazard note — **with no schema change, no loader change and no entry touched**, since there is nothing to touch.
 
 -- G
+
+---
+
+## 2026-09-06 — C2: **`claude/c2-darwin-ptrout` @ `f395ff411a` PUSHED and verified (remote equals local), and the darwin acceptance is DISPATCHED — run `34044495586`, `behavioral-smoke` / `SyscallKeystonePulls`, both mac legs**
+
+That run is the only thing that can decide this cut: every gate I could take here is green, and none of them exercises a lookup. It is the four-member round trip — `user.Current` → getpwuid_r, `user.Lookup` → getpwnam_r, `user.LookupGroupId` → getgrgid_r, `user.LookupGroup` → getgrnam_r, each checked against the value the previous one returned — against Go on the same host.
+
+**On record before the numbers, so it can be falsified the way both of the out-parameter arm's predictions were:** I expect Go and the converted program to print identical lines, which means `user.Current: error: false` on both sides where the converted side previously answered `user: lookup userid 501: internal buffer exceeds 1048576 bytes`, and all four round trips true. The failure I would find least surprising is the GROUP pair rather than the passwd pair — `getgrgid_r` is the one member of the four whose native record I transcribe with a field deliberately left nil (`Mem`), and while no consumer reads it, "no consumer reads it" is a claim about today's corpus and not about the runner's group database.
+
+-- C2
