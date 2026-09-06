@@ -1497,10 +1497,10 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		//
 		// Getsockname/Getpeername are here for the same reason a level down: their generated
 		// wrappers take a typed `ж<RawSockaddrAny>` instead of an address, so the hand-owned
-		// forms call the Syscall trampoline directly. The UDP senders (WSASendto and its Inet4/
-		// Inet6 variants) are deliberately NOT listed — nothing on the TCP listen/dial/accept
-		// path reaches them, and the board's ruling is to fix a censused wrapper when a suite
-		// reaches it rather than speculatively.
+		// forms call the Syscall trampoline directly. The UDP SENDER (WSASendto) joined the
+		// OVERLAPPED block below on 2026-09-06 — it is an overlapped submit, so it belongs with
+		// that family rather than here; its Inet4/Inet6 variants stay unlisted because they are
+		// measured DEAD, which is the reason recorded at that entry.
 		// Bind/Connect/Getsockname/Getpeername are hand-owned on Linux too (2026-08-22): the Linux
 		// generated `bind`/`connect` take an address (reused with a stack mirror exactly as here),
 		// and `getsockname`/`getpeername`/`accept4` take a typed `ж<RawSockaddrAny>` that the kernel
@@ -1677,11 +1677,38 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// member that READS the overlapped -- SendFile publishes the file offset in Offset/OffsetHigh
 		// -- so the hand-own carries those onto the record's own control block.
 		"TransmitFile": goosWindows,
-		// WSASendto and its Inet4/Inet6 variants are the same machinery with more staging and remain
-		// absent for the reason WSARecvFrom and TransmitFile no longer are: nothing on the TCP
-		// listen/dial/accept/read/write path reaches them, and the board's ruling is to fix a
-		// censused wrapper when a suite REACHES it. (The Inet4/Inet6 SENDERS are hand-owned in
-		// internal/syscall/windows, where their linkname declarations live.)
+		// WSASendto joined on 2026-09-06, and it is the DATAGRAM SEND twin of WSARecvFrom above --
+		// the same machinery with the staging carved the other way. The generated body carries FOUR
+		// defects in one statement, not the two a static census sees
+		// (docs/phase4/DESIGN-windows-udp-send.md sizes them): the WSABuf descriptor, whose `Buf` is
+		// a `ж<byte>` MANAGED REFERENCE where native WSABUF wants a raw CHAR*; the address returned
+		// by `sockaddr()`, which that displaced method's OWN body says is not a native image and
+		// that "every in-package caller that actually reaches the kernel builds one with
+		// writeNativeSockaddr instead of consuming this"; and -- because this is an overlapped
+		// submit -- the bytes-sent slot and the OVERLAPPED itself, both interior field addresses
+		// inside a reference-bearing `operation` that golib cannot hold still. Three of the four
+		// fall to machinery already in zsyscall_windows_wsa_impl.cs (WSASend's record/rearm/
+		// stageBuffers plus WSARecvFrom's carve) and the fourth to writeNativeSockaddr, which is
+		// PRIVATE to `syscall` and reachable because this body lives there too -- so the public
+		// GoWriteNativeSockaddrInet4/6 seam the Linux and internal/syscall/windows halves consume is
+		// not involved at all.
+		//
+		// WHY IT JOINED WITHOUT A SUITE REACHING IT, which is a departure from the rule the note
+		// above states and is therefore stated rather than assumed: NO suite CAN reach it on
+		// Windows. Its sole consumer is internal/poll.FD.WriteTo, whose net-side callers are IPConn
+		// and UnixConn, and net's own testableNetwork returns false for unix/unixgram on windows
+		// outright and requires Getuid()==0 for ip/ip4/ip6 -- so Go's suite is structurally unable to
+		// arrive. UDPConn never reaches it either (UDPConn.writeTo switches on fd.family into
+		// writeToInet4/6, the pair hand-owned in internal/syscall/windows). The acceptance is
+		// therefore a behavioral guard, WsaSendtoRoundTrip, which drives the function directly.
+		//
+		// The Inet4/Inet6 variants are NOT registered, and that is a measurement rather than a
+		// deferral: they are DEAD in this corpus by two derivations -- no call site anywhere,
+		// production or test emission, and Go's own callers of them are the linkname PULL that this
+		// corpus answers at the DECLARATION site in internal/syscall/windows. Displacing them would
+		// cost a registration, a placeholder and a body apiece to change the behaviour of code with
+		// no caller. wsaSendtoNoCallers_test.go is the guard for the day that stops being true.
+		"WSASendto": goosWindows,
 		//
 		// LoadConnectEx is NOT overlapped at all, and is here because the netpoll design recorded the
 		// extension-pointer lookup as "synchronous and already working" and the crypto/tls census

@@ -79,10 +79,13 @@
 // completion callback. Freeing at the next Rearm (and at teardown) also covers the skipSyncNotif
 // path, where a synchronously-successful submit posts NO completion packet and no callback ever runs.
 //
-// WHAT IS NOT HERE, per the board's do-it-when-a-suite-reaches-it ruling: the UDP family
-// (WSARecvFrom, WSASendto and the internal/syscall/windows WSASendtoInet4/6, WSARecvMsg, WSASendMsg)
-// and TransmitFile. They are the same machinery with more staging; nothing on the TCP
-// listen/dial/accept/read/write path touches them. WSAGetOverlappedResult lives in
+// WHAT IS NOT HERE. This list is now down to WSARecvMsg and WSASendMsg, and it has shrunk one
+// member at a time by the board's do-it-when-a-suite-reaches-it ruling: WSARecvFrom joined
+// 2026-08-23 (UdpLoopbackRoundTrip's read), TransmitFile 2026-08-28 (net's sendfile family), and
+// WSASendto 2026-09-06 -- the last of those by a DEPARTURE from that ruling, stated at its own
+// declaration below, because no suite CAN reach it on Windows and the acceptance had to be a guard
+// written for it. The internal/syscall/windows WSASendtoInet4/6 are hand-owned in that package,
+// where their linkname declarations live. WSAGetOverlappedResult lives in
 // internal/syscall/windows and has its own companion file there; it needs exactly ONE property from
 // this one -- the operation's native address -- which it reads through GoAsyncIO.
 
@@ -364,6 +367,18 @@ partial class syscall_package
         nuint bytes = (nuint)bufcnt * (nuint)sizeof(NativeWSABuf);
         NativeWSABuf* native = (NativeWSABuf*)operation.Staging(bytes == 0 ? (nuint)sizeof(NativeWSABuf) : bytes);
 
+        writeWSABufs(Ꮡbufs, bufcnt, native, operation);
+        return native;
+    }
+
+    // The transcription half of stageBuffers, split out so the SYNCHRONOUS arm of WSASendto can
+    // reuse it over a `stackalloc` array. `operation` is the record that must outlive the flight and
+    // is NULL for that arm alone: a synchronous call cannot return before the kernel is done with
+    // these pointers, so the caller keeping `Ꮡbufs` reachable across the call keeps every `ж<byte>`
+    // it names -- and therefore every pin those boxes hold -- alive for exactly as long as they are
+    // read. That is the same lifetime argument the sockaddr mirror makes for its stack buffers, and
+    // it is why the record is not needed there; every OVERLAPPED caller passes one.
+    private static unsafe void writeWSABufs(ж<WSABuf> Ꮡbufs, uint32 bufcnt, NativeWSABuf* native, OverlappedOp? operation) {
         for (uint32 i = 0; i < bufcnt; i++) {
             // Index 0 is the common case and the only one a struct-FIELD reference (`&o.buf`) can
             // answer; a multi-buffer submit always names a slice element (`&o.bufs[0]`), which
@@ -377,11 +392,9 @@ partial class syscall_package
                 native[i].Buf = null;
             } else {
                 native[i].Buf = (byte*)(void*)buf.Buf;
-                operation.Pin(buf.Buf);
+                operation?.Pin(buf.Buf);
             }
         }
-
-        return native;
     }
 
     public static unsafe error /*err*/ WSARecv(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡrecvd, ж<uint32> Ꮡflags, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
@@ -1098,6 +1111,142 @@ partial class syscall_package
         // of the same operation cannot decode twice.
         golib.GoAsyncIO.CompleteOperation(Ꮡoverlapped, (nint)recvd);
         return default!;
+    }
+
+    // ---- WSASendto: the DATAGRAM SEND, and WSARecvFrom's twin with the staging carved the other way
+
+    // Go: WSASendto(s, bufs, bufcnt, sent, flags, to, overlapped, croutine).
+    //
+    // WHY HAND-OWNED -- FOUR defects in one statement, where the struct-passing census sees two.
+    // docs/phase4/DESIGN-windows-udp-send.md sizes them; the generated body
+    // (syscall_windows.cs, before its placeholder) hands the kernel:
+    //
+    //  1. `(uintptr)Ꮡbufs` -- a MANAGED WSABuf, whose `Buf` is a `ж<byte>` reference where native
+    //     WSABUF wants a raw CHAR*. The file header's defect (1), same as WSARecv/WSASend.
+    //  2. `(uintptr)rsa` -- whatever `to.sockaddr()` returned, which is the address of a managed
+    //     `sa.raw`. That method's own body says so: "It is NOT a native image... which is why every
+    //     in-package caller that actually reaches the kernel builds one with writeNativeSockaddr
+    //     instead of consuming this." This was the caller that contradicted it.
+    //  3. `(uintptr)Ꮡsent` and 4. `(uintptr)Ꮡoverlapped` -- interior field addresses inside
+    //     internal/poll's reference-bearing `operation`, which golib's address model cannot hold
+    //     still, and the OVERLAPPED is additionally the operation's kernel-side IDENTITY. The file
+    //     header's defect (2), and the reason this member lives here rather than beside the sockaddr
+    //     mirror: three of its four defects are the async family this file owns.
+    //
+    // NOTHING NEW IS BUILT. Defects 1, 3 and 4 fall to WSASend's record/rearm/stageBuffers plus
+    // WSARecvFrom's carve; defect 2 falls to `writeNativeSockaddr`, which is PRIVATE to `syscall`
+    // and reachable because this body is too -- so the public GoWriteNativeSockaddrInet4/6 seam that
+    // the Linux and internal/syscall/windows halves consume is not involved, and needs no widening.
+    // The shape set it must cover is CLOSED, not merely sufficient: Go declares `Sockaddr` with an
+    // unexported method ("lowercase; only we can define Sockaddrs"), so no package outside `syscall`
+    // can implement it, the windows sources define exactly three `sockaddr()` methods, and
+    // package_info.cs independently records exactly three ΔSockaddr implementations.
+    //
+    // NO SUITE CAN REACH THIS ON WINDOWS, which is why the acceptance is a behavioral guard
+    // (WsaSendtoRoundTrip) rather than a roster row. The sole consumer is internal/poll.FD.WriteTo,
+    // whose net-side callers are IPConn and UnixConn -- and net's own testableNetwork returns false
+    // for unix/unixgram on windows outright and requires Getuid()==0 for ip/ip4/ip6. UDPConn never
+    // arrives either: UDPConn.writeTo switches on fd.family into writeToInet4/6, the pair hand-owned
+    // in internal/syscall/windows.
+    //
+    // THE SYNCHRONOUS ARM, and why it is here at all. `operationFor` keys a record off the
+    // OVERLAPPED, so a NIL one has no key; every corpus caller passes `&o.o`, but Go's contract
+    // accepts nil and a socket created outside internal/poll is bound to no completion port, which
+    // is exactly what a guard driving this function directly must do. That arm stages into
+    // `stackalloc`, and the ⟨OQ-G⟩ ruling that forbids a stack buffer for `lpTo` on the OVERLAPPED
+    // path does not reach it: that ruling turns on Winsock's silence about when it captures `lpTo`,
+    // which can only matter if the call returns before the send completes. A synchronous send cannot,
+    // so the established rule applies unchanged -- "a LOCAL at the call site, trivially stable for
+    // exactly that long" (syscall_windows_impl.cs).
+    public static unsafe error /*err*/ WSASendto(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ΔSockaddr to, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
+        // SEEDED from the caller's own slot rather than from zero, so the unconditional write-back
+        // below is a no-op on any path where the kernel did not write. Go hands the kernel the
+        // caller's pointer directly, so a failed call leaves that slot exactly as it was; starting
+        // at zero would deposit a zero there instead. (WSASend above starts at zero and is left
+        // alone: its slot is meaningless on failure to its one caller, and changing a sibling's
+        // behaviour is not this cut's business.)
+        uint32 sent = Ꮡsent != nil ? Ꮡsent.Value : 0;
+        int32 addrlen = 0;
+        uintptr r1;
+        Errno e1;
+
+        if (Ꮡoverlapped == nil) {
+            // Synchronous: everything the kernel reads is consumed before this returns.
+            NativeWSABuf* stackBufs = stackalloc NativeWSABuf[(int)(bufcnt == 0 ? 1 : bufcnt)];
+            byte* stackAddr = stackalloc byte[nativeSockaddrLen];
+
+            writeWSABufs(Ꮡbufs, bufcnt, stackBufs, null);
+
+            // `to` is legitimately nil (Go's own `if to != nil` guard), and then lpTo/iTolen are
+            // both zero -- so the pointer starts null and only the encode gives it a value.
+            byte* toPtr = null;
+
+            if (to != default!) {
+                error encodeErr;
+                (addrlen, encodeErr) = writeNativeSockaddr(to, stackAddr);
+
+                if (encodeErr != default!) {
+                    return encodeErr;
+                }
+
+                toPtr = stackAddr;
+            }
+
+            (r1, _, e1) = Syscall9(procWSASendTo.Addr(), 9, (uintptr)s, (uintptr)(void*)stackBufs, (uintptr)bufcnt,
+                                   (uintptr)(void*)(&sent), (uintptr)flags,
+                                   (uintptr)(void*)toPtr, (uintptr)addrlen,
+                                   0, (uintptr)Ꮡcroutine);
+
+            // The pins live on the `ж<byte>` boxes `Ꮡbufs` names, so keeping the descriptor array
+            // reachable keeps every buffer pinned for exactly the span the kernel reads them.
+            System.GC.KeepAlive(Ꮡbufs);
+        } else {
+            OverlappedOp operation = operationFor(s, Ꮡoverlapped, wsaModeWrite);
+            NativeOverlapped* native = operation.Rearm();
+
+            // ONE staging block carved into two regions, and ⚠ THE ORDER IS LOAD-BEARING for the
+            // reason WSARecvFrom states: this oversized request must run BEFORE stageBuffers, whose
+            // own smaller Staging() call then returns this same block untouched. Reversing the two
+            // would reallocate under the address pointer.
+            nuint bufBytes = (nuint)(bufcnt == 0 ? 1 : bufcnt) * (nuint)sizeof(NativeWSABuf);
+            byte* block = (byte*)operation.Staging(bufBytes + (nuint)nativeSockaddrLen);
+
+            NativeWSABuf* buffers = stageBuffers(operation, Ꮡbufs, bufcnt);
+            byte* addr = block + bufBytes;
+            byte* toPtr = null;
+
+            if (to != default!) {
+                error encodeErr;
+                (addrlen, encodeErr) = writeNativeSockaddr(to, addr);
+
+                if (encodeErr != default!) {
+                    // No submit was issued, so the operation owes nothing -- drop the pending work
+                    // rather than leave it for the next submit on this waiter to inherit.
+                    golib.GoAsyncIO.CompleteOperation(Ꮡoverlapped, 0);
+                    return encodeErr;
+                }
+
+                toPtr = addr;
+            }
+
+            (r1, _, e1) = Syscall9(procWSASendTo.Addr(), 9, (uintptr)s, (uintptr)(void*)buffers, (uintptr)bufcnt,
+                                   (uintptr)(void*)(&sent), (uintptr)flags,
+                                   (uintptr)(void*)toPtr, (uintptr)addrlen,
+                                   (uintptr)native, (uintptr)Ꮡcroutine);
+        }
+
+        if (Ꮡsent != nil) {
+            Ꮡsent.Value = sent;
+        }
+
+        if (r1 != socket_error) {
+            return default!;
+        }
+
+        // The generated body's mapping, kept verbatim: a socket_error with NO errno is EINVAL, not
+        // success. WSASendTo reports failure through the return value and the error through
+        // WSAGetLastError, and a lost errno must not read as "sent".
+        return e1 != 0 ? errnoErr(e1) : EINVAL;
     }
 
     // ---- TransmitFile: the SENDFILE submit, and the one member that reads the OVERLAPPED ----------

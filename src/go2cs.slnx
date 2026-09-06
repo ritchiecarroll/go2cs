@@ -974,6 +974,7 @@
     <Project Path="tests/Behavioral/VersionedImport/vlib/vlib.v2.csproj" />
     <Project Path="tests/Behavioral/WrittenCaptureParam/WrittenCaptureParam.csproj" />
     <Project Path="tests/Behavioral/WsaProtocolInfo/WsaProtocolInfo.csproj" />
+    <Project Path="tests/Behavioral/WsaSendtoRoundTrip/WsaSendtoRoundTrip.csproj" />
     <Project Path="tests/Behavioral/ZeroSizeFieldLayout/ZeroSizeFieldLayout.csproj" />
     <Project Path="tests/Behavioral/ZeroValueArrayField/ZeroValueArrayField.csproj" />
     <Project Path="tests/Behavioral/ZeroValueArrayNamedResult/ZeroValueArrayNamedResult.csproj" />

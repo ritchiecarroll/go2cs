@@ -2003,6 +2003,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckWsaProtocolInfo() => CheckTarget("WsaProtocolInfo");
 
     [TestMethod]
+    public void CheckWsaSendtoRoundTrip() => CheckTarget("WsaSendtoRoundTrip");
+
+    [TestMethod]
     public void CheckZeroSizeFieldLayout() => CheckTarget("ZeroSizeFieldLayout");
 
     [TestMethod]
