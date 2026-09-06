@@ -434,6 +434,9 @@ public static partial class GoReflect
 
     private static readonly ConcurrentDictionary<Type, GoTypeAttribute?> s_goTypeMarkers = new();
 
+    private static readonly ConcurrentDictionary<Type, Type?> s_elementTypes = new();
+    private static readonly ConcurrentDictionary<Type, Type?> s_keyTypes = new();
+
     /// <summary>The type's own <c>[GoType]</c> marker, or <c>null</c> when it carries none.</summary>
     /// <remarks>
     /// Memoized per type, like <c>s_dynamicTypes</c> in <c>runtime/TypeExtensions</c> and for the
@@ -459,10 +462,34 @@ public static partial class GoReflect
     /// <c>array&lt;T&gt;</c>/<c>channel&lt;T&gt;</c>/<c>ж&lt;T&gt;</c> → <c>T</c>, <c>map&lt;K,V&gt;</c> → <c>V</c>
     /// — for <c>reflect.Type.Elem()</c>; <c>null</c> if <paramref name="t"/> has no element type.
     /// </summary>
-    public static Type? ElementType(Type? t)
-    {
-        if (t is null) return null;
+    /// <remarks>
+    /// Memoized per type, like <c>s_goTypeMarkers</c> above and for the same reason: a type's
+    /// generic arguments and its implemented interfaces are an IMMUTABLE fact about it, while the
+    /// uncached answer throws away a <c>Type[]</c> from <c>GetGenericArguments()</c> on every call.
+    /// That array is 40 bytes (24 header + 2 × 8), measured, and this lookup sits on every map,
+    /// slice, array and channel path through the bridge.
+    /// <para>
+    /// It is the WHOLE of one row's cost. reflect's <c>TestMapAlloc</c> asserts zero allocation for
+    /// <c>SetMapIndex</c>, which measured 80.00 B/op at ZERO golib objects — and the pair
+    /// <c>KeyType</c> + <c>ElementType</c>, measured TOGETHER, is 80.00 B/op exactly, with the key
+    /// check and the assignability marshal both at zero. <c>testing.AllocsPerRun</c> returns 0.0
+    /// only when allocated BYTES are zero, so nothing short of removing these two arrays moves that
+    /// assert; halving it would change nothing.
+    /// </para>
+    /// <para>
+    /// Safe to cache strongly: only COMPLETE types reach here — <c>GoStructSynthesis</c> publishes
+    /// <c>tb.CreateType()</c> results and lets no <c>TypeBuilder</c> escape, so the immutability
+    /// above holds for everything that can key this table — and the dynamic assembly is
+    /// <c>AssemblyBuilderAccess.Run</c> rather than <c>RunAndCollect</c> precisely because a
+    /// dozen-plus Type-keyed caches here already root every synthesized type for the life of the
+    /// process. This is one more instance of that pattern, not a new lifetime.
+    /// </para>
+    /// </remarks>
+    public static Type? ElementType(Type? t) =>
+        t is null ? null : s_elementTypes.GetOrAdd(t, static type => elementTypeUncached(type));
 
+    private static Type? elementTypeUncached(Type t)
+    {
         // A pointer-sourced adapter class stands for *T — its element type is T (R10), matching
         // the KindOf/GoTypeName unwrap.
         if (TryAdapterWrappedType(t, out Type? adapterWrapped, out bool adapterPointerSourced) && adapterPointerSourced)
@@ -492,10 +519,13 @@ public static partial class GoReflect
     /// The Go KEY type of a map — <c>map&lt;K,V&gt;</c> (or a named map wrapper) → <c>K</c>;
     /// <c>null</c> if <paramref name="t"/> is not a map type. For <c>reflect.Type.Key()</c>.
     /// </summary>
-    public static Type? KeyType(Type? t)
-    {
-        if (t is null) return null;
+    /// <remarks>Memoized per type for the reason given on <see cref="ElementType"/>; this is the
+    /// other half of the 80 bytes <c>SetMapIndex</c> spends.</remarks>
+    public static Type? KeyType(Type? t) =>
+        t is null ? null : s_keyTypes.GetOrAdd(t, static type => keyTypeUncached(type));
 
+    private static Type? keyTypeUncached(Type t)
+    {
         if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(map<,>))
             return t.GetGenericArguments()[0];
 
