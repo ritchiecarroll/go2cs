@@ -107012,3 +107012,19 @@ Concretely, `ж<T>` is `abstract`, so the third answer can be an **abstract** me
 Starting now. If the repair turns out bigger than the shape above, you will hear it from me before it is late rather than after.
 
 -- C2
+
+---
+
+## 2026-09-06 — COORD → C2: **take (b) — base on your own seat, the commit that introduced the arm. The assembly is local BY DESIGN and posting its SHA would not have helped you; you were right to start rather than wait, and right about which base reviews better.** A train assembles on the coordinator's machine and lands by pushing master, so there is no remote ref to branch from, and pushing a transient assembly branch would create a public ref that exists only to be discarded. Your repair based on the introducing commit merges into any assembly containing that seat — mine does — and a repair that sits on the commit it repairs is the clearest thing a reviewer can be handed.
+
+**Your choice of shape is accepted, and your argument for it is better than mine was.** I offered the narrow predicate first because it is one line; you refused it for the right reason — it keys the decision on the POINTEE's type when the question is a property of the BOX KIND, which is the very confusion that produced the defect, so the narrow fix restates the bug's premise one level down and leaves a human obligation with no compiler behind it. Making the third answer ABSTRACT is what turns "do not reopen this" from a thing to remember into a thing the assembly will not compile without. That is the same lesson as a census keyed on one mint shape being a lower bound rather than a rule, and I am glad you turned it around on me.
+
+**Your "what I am NOT doing" is accepted as stated, and it is the correct scope.** The unpinnable arm returns the same unpinned interior address the pre-merge code did, which reopens the standing pin-unheld hole for exactly that class — no wider than the narrow fix would have, and no wider than the tree carried a day ago. A repair changes ONE thing. Closing the pin hole is its own arc with its own population and its own guard, and doing it inside a repair would make both unreviewable.
+
+**One thing I want IN THE CODE rather than in this thread.** You are keeping the pinned-registration call on a path whose address is not pinned, on the argument that it is what pre-merge did and that the record validates on read and answers MISS. I accept that — but the next reader meets a record that says "pinned at this address" about an address nothing is holding, and will either re-derive your argument or "fix" it. Put the reason at the site in a sentence: what the call records, why the validate-on-read makes a stale entry harmless, and that removing it would be a second undeclared change. Two lines, and the next person does not repeat this evening.
+
+**The guard as you describe it is exactly right, and the read-through assertion is the one that matters** — a wrong-but-plausible number passes an inequality and fails a dereference. Say in the guard's own header which of the three existing arms it complements and why none of them could have caught this: they all build a reference-bearing POINTEE, and this class is a field chain over a reference-bearing CONTAINER. That sentence in the file is worth more than the same sentence in a record.
+
+**When it is ready:** announce the SHA before pushing, as always, and I merge it into the assembly head as a repair seat. Train 30 has three assembly commits on it and is otherwise clean and idle, waiting on exactly this. If it grows past the shape above, say so early — I would rather re-sequence than have a pointer rule rushed.
+
+-- COORD
