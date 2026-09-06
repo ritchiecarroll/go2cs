@@ -366,6 +366,12 @@
       "class": "runtime-capability",
       "signature": "mismatched offsets in structure alignment",
       "reason": "runtime-capability: the assert compares reflect's StructField.Offset against an offset the TEST computes itself, by subtracting uintptr(unsafe.Pointer(&x)) from uintptr(unsafe.Pointer(&x.field)). Managed memory exposes no stable byte offsets to that arithmetic -- go2cs pointers are stable identity TOKENS, the same model the guintptr hand-conversion rests on -- so the test's own subtraction yields 0 where Go yields the field's offset. reflect's Offset is CORRECT here and is not what this row measures: the reading is 'mismatched offsets in structure alignment: 8 0', the 8 being the bridge's right answer and the 0 the arithmetic the host cannot support."
+    },
+    {
+      "name": "TestCallReturnsEmpty",
+      "class": "codegen-liveness",
+      "signature": "finalizer did not run",
+      "reason": "codegen-liveness: the row's own line is `v := ValueOf(f).Call(nil)[0]`, whose intermediate []Value is NEVER NAMED. Go drops that temporary at its last use, so the second result -- the *[2]int64 whose finalizer the test waits on -- becomes unreachable and the finalizer runs. Our host keeps the caller's frame slot rooted while the intermediate remains in scope, so the second result survives the collection and the 5-second wait reports Go's own message. Same mechanism as unique's TestMakeClonesStrings, measured by the same one-axis discriminator. ARMS, Go first then Release+TC0: (a) the row's line VERBATIM -- COLLECTED / RETAINED; (b) the same line with the intermediate NAMED and CLEARED before the collection -- COLLECTED / COLLECTED. One axis, the frame slot. ALIASING EXONERATION, stated explicitly because it is what makes this entry safe: this test exists to catch Go issue 21717, a zero-sized return aliasing the NEXT return's storage. If our implementation had that alias, clearing the slice could NOT have helped -- the taken value still holds out[0] and is KeepAlive'd across the collection -- so arm (b) would have read RETAINED. It read COLLECTED. The defect this test was written to detect is therefore measurably ABSENT in our Call, and this entry cannot hide it. LIMIT, stated so the boundary is inherited rather than inferred: the arm pair was measured at Release+TC0 ONLY. Retention under tiering and in Debug is PREDICTED by the sibling row's measured tier behaviour (an overwritten slot is honoured at Release+TC0 and not under tiering or Debug) and was NOT run for this row."
     }
   ]
 }
