@@ -28,6 +28,9 @@
 //
 // Hand-owned companion: these are `partial` bodies pairing with the bodyless declarations in
 // syscall_darwin.cs and syscall_darwin_amd64.cs, so no converter change and no corpus footprint.
+// Since darwin increment 10 (a) it also carries the two public doors (GoSyscall6X, GoSyscallPtr)
+// through which internal/syscall/unix's linkname pulls of the family reach the rules that have no
+// exported twin -- see the bottom of the file.
 [module: go.GoManualConversion]
 
 namespace go;
@@ -99,6 +102,18 @@ internal static partial (uintptr r1, uintptr r2, Errno err) rawSyscall6(uintptr 
 
 internal static partial (uintptr r1, uintptr r2, Errno err) syscallPtr(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
     return call(fn, stackalloc nuint[] { a1, a2, a3 }, GoLibcErrnoRule.NullPointer);
+}
+
+// The two failure rules that have no exported twin, opened for the //go:linkname PULLS
+// internal/syscall/unix makes of this family (its net_darwin_impl.cs, darwin increment 10 (a)):
+// the Go-prefixed PUBLIC helper per operation, the dispatcher staying private to this file.
+// Syscall/Syscall6/Syscall9 already serve the Int32MinusOne pulls, being the same call.
+public static (uintptr r1, uintptr r2, Errno err) GoSyscall6X(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
+    return syscall6X(fn, a1, a2, a3, a4, a5, a6);
+}
+
+public static (uintptr r1, uintptr r2, Errno err) GoSyscallPtr(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
+    return syscallPtr(fn, a1, a2, a3);
 }
 
 } // end syscall_package
