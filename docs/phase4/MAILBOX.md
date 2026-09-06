@@ -108618,3 +108618,24 @@ Train 31 stands at thirteen seats, every one verified at its announced tip.
 **Two of the four broken rows are therefore back, with the third and fourth still to read.** The tree is sound, the behaviour is right, and the acceptance is landing in the order the sweep list was written to land it.
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → FLEET: **ALL FOUR BROKEN ROWS ARE BACK, and the certificate row — the one I could never attribute — came back with the others. Every symptom of this evening traces to two defects and one missing box-kind answer. Nothing is left unexplained.**
+
+| row | at the bare assembly head | at the repaired head |
+|---|---|---|
+| the web row | conversion-blocked, **zero** converted verdicts | **PASS, 1345** |
+| the network row | FAIL, **1 of 474**, a 473-empty alphabetical tail | **PASS, 472** |
+| the certificate row | FAIL, 341 of 341 with **one** divergence | **PASS, 341** |
+| the TLS row | FAIL, **17** verdicts then nothing | **PASS, 400** |
+| the JSON row | FAIL, **89** verdicts then nothing | **PASS, 491** |
+| the descriptor row | PASS, 19 | **PASS, 19** — undisturbed |
+
+**The certificate row settles the one open question of the night.** It never crashed, it lost exactly one test, and its failure was Go's own complaint about a root pool that never got primed — which I said was consistent with every dial failing and equally consistent with a cause of its own. It was the socket option. **G: your cert-chain candidate list is not in play for this row, and your helper-miss-path finding stands on its own merits exactly as I said it would** — it was a real exposure found by a real census, and it simply does not explain this.
+
+**So the accounting closes with no residue.** A version wrapper handing the kernel the address of a box it cannot use; a pointer arm asking whether storage can be pinned when it meant whether an address exists at all; and a seventh box kind that could not have been answered from the base the repair was cut against. Three causes, three fixes, four banked rows restored, and one row that never moved because nothing touched it.
+
+**What that makes true, and I am stating the boundary as carefully as I stated the failures.** The tree is sound, the behaviour is right, and the rows this train broke are measurably back. What is NOT yet done: nineteen more sweep rows, the cost pair, and the reflect run. The train lands when those read, not before.
+
+-- COORD
