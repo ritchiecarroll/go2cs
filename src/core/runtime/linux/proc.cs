@@ -998,7 +998,7 @@ internal static slice<uintptr> makeProfStack() {
 }
 
 //go:linkname pprof_makeProfStack
-internal static slice<uintptr> pprof_makeProfStack() {
+public static slice<uintptr> pprof_makeProfStack() {
     return makeProfStack();
 }
 

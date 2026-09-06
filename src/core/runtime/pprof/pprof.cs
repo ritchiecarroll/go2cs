@@ -1109,18 +1109,31 @@ internal static partial int64 pprof_cyclesPerSecond();
 internal static partial (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.MemProfileRecord> p, bool inuseZero);
 
 //go:linkname pprof_blockProfileInternal runtime.pprof_blockProfileInternal
-internal static partial (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.BlockProfileRecord> p);
+internal static (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
+    var (ᴛ1, ᴛ2) = runtime.pprof_blockProfileInternal(p);
+    return (ᴛ1, ᴛ2);
+}
 
 //go:linkname pprof_mutexProfileInternal runtime.pprof_mutexProfileInternal
-internal static partial (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.BlockProfileRecord> p);
+internal static (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
+    var (ᴛ1, ᴛ2) = runtime.pprof_mutexProfileInternal(p);
+    return (ᴛ1, ᴛ2);
+}
 
 //go:linkname pprof_threadCreateInternal runtime.pprof_threadCreateInternal
-internal static partial (nint n, bool ok) pprof_threadCreateInternal(slice<profilerecord.StackRecord> p);
+internal static (nint n, bool ok) pprof_threadCreateInternal(slice<profilerecord.StackRecord> p) {
+    var (ᴛ1, ᴛ2) = runtime.pprof_threadCreateInternal(p);
+    return (ᴛ1, ᴛ2);
+}
 
 //go:linkname pprof_fpunwindExpand runtime.pprof_fpunwindExpand
-internal static partial nint pprof_fpunwindExpand(slice<uintptr> dst, slice<uintptr> src);
+internal static nint pprof_fpunwindExpand(slice<uintptr> dst, slice<uintptr> src) {
+    return runtime.pprof_fpunwindExpand(dst, src);
+}
 
 //go:linkname pprof_makeProfStack runtime.pprof_makeProfStack
-internal static partial slice<uintptr> pprof_makeProfStack();
+internal static slice<uintptr> pprof_makeProfStack() {
+    return runtime.pprof_makeProfStack();
+}
 
 } // end pprof_package

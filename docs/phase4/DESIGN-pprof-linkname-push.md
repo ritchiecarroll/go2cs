@@ -124,3 +124,91 @@ only member with one) is unverified — the registry's existing members are flat
 question for the cut's first conversion, not an argument against the shape.
 
 -- C1, 2026-09-06
+
+---
+
+## Amendment, 2026-09-06 (at the cut): FIVE, not eight — the cut met three things this record did not know, and one of them inverts a claim above
+
+Nothing above is rewritten. Every prediction stays visible beside what it was worth.
+
+### 1. §7's sentence is INVERTED, and its arithmetic was wrong too
+
+§7 says the per-GOOS composition is unverified *"since every existing member is a flat file."* The
+registry has **EIGHT** members (I counted six from a grep window, not from the map), and **FIVE of the
+eight emit PER-GOOS**, every one `public`:
+
+| member | emitted body | shape |
+|---|---|---|
+| `syscall.loadlibrary` / `loadsystemlibrary` / `getprocaddress` | `syscall/windows/dll_windows.cs:154,158,172` | per-GOOS |
+| `time.registerLoadFromEmbeddedTZData` | `time/{darwin,linux}/zoneinfo_read.cs:29` | per-GOOS |
+| `runtime.fcntl` | `runtime/darwin/sys_darwin.cs:589`, `runtime/linux/os_linux.cs:482` | per-GOOS |
+| `runtime.blockUntilEmptyFinalizerQueue` | `runtime/mfinal.cs:326` | flat |
+| `net/textproto.readMIMEHeader` | `net/textproto/reader.cs:579` | flat |
+| `go/types.srcimporter_setUsesCgo` | `go/types/api.cs:211` | flat |
+
+**The composition question is CLOSED and needed no probe run:** `runtime.fcntl` is the exact analogue
+of `pprof_makeProfStack` — same package, same per-GOOS shape, two platform bodies, both carrying the
+`public` flip. The answer was in the corpus and §7 asserted "unverified" without opening a file.
+
+### 2. `pprof_cyclesPerSecond` is a THIRD shape that NEITHER registry serves
+
+§3 called it a push and §4 costed it as one `linknamePushTargets` entry. Measured: the entry **emits
+nothing**, twice — first because I keyed the linkname SYMBOL where `funcLinknamePush` keys the
+consumer's DECLARED NAME (`currentPackagePath+"."+funcDecl.Name.Name`; for `unique` the two coincide,
+so the precedent does not disambiguate), and then, with the key corrected, because
+`linknamePushDeclMatches` **rejects a consumer carrying a two-arg directive by design** — its own
+comment says *"that is a PULL, a different mechanism entirely."*
+
+And it is right to. Go's shape here is a push whose consumer then pulls the pushed symbol locally:
+`runtime` defines `runtime/pprof.runtime_cyclesPerSecond`, and `runtime/pprof` declares
+`pprof_cyclesPerSecond` under a two-arg directive naming that symbol. **The registry entry is removed
+rather than left dead.** Serving this shape is a converter widening, not a curated row — so §4's "eight
+curated entries and no new machinery" is false for the eighth.
+
+### 3. THE CUT IS FIVE, because two of the seven are already hand-owned — and forwarding them would be a REGRESSION
+
+`runtime/pprof/pprof_impl.cs` is a `[module: GoManualConversion]` companion answering
+`pprof_memProfileInternal` and `pprof_goroutineProfileWithLabels`. The compiler said so first: CS0111
+and CS0759 against the forwarders. Reading it changes the design rather than just the count.
+
+- **The goroutine body deliberately WITHHOLDS the label slice.** A label pointer goes stale under GC,
+  `printCountProfile` then sizes a slice from a corrupt map, and the process dies with
+  `OutOfMemoryException` — the row becomes an `infrastructure-error`, i.e. **not a verdict at all**.
+  The file records a refuted first attempt (filtering on `IsNative`, which dropped all 91 labels
+  because native is the NORMAL state for a `FromPinnedBox` pointer) and concludes there is no cheap
+  consumer-side test. Forwarding to runtime's real body would trade a measurable wrong answer for an
+  unmeasurable one.
+- **The memory body returns an honest `(0, true)`** and its header states that a row which STARTS
+  PASSING there has laundered a false green, naming that as the assertion to re-run before believing
+  any increment in the file.
+
+Both are judgements a curated pull registry cannot make. **They stay hand-owned; the five that were
+throwing become forwarders.**
+
+### 4. …and that companion's stated premise is FALSE, measured
+
+Its header says the push *"is an edge runtime -> runtime/pprof … so the forwarder would close a
+project-reference CYCLE … no forwarder can exist, and the destination has to answer for itself."*
+**The forwarder is on the CONSUMER side**, across the `runtime/pprof → runtime` edge that already
+exists: injected, it reads **0 cycles on all three targets**. Only the other direction costs 38/36/36.
+So five destinations were hand-waved as impossible when they were merely unperformed — the same class
+COORD ruled on the same night: a comment claiming a behaviour the code does not have reads as the
+census to the next reader.
+
+### 5. The measured footprint, for five
+
+5 files per target, **11 removed / 24 added**, 0 only-in, 0 project-reference lines. Applied: the three
+runtime files wholesale (each byte-identical to the base emission, so the new emission IS committed +
+this change), `pprof/pprof.cs` by 3-way merge (applied delta 23 = emission delta 23, zero standing-drift
+lines carried), and **the two `GoPositionMap` lines deliberately NOT applied**: the committed
+`pprof.cs` carries unbanked forced-init drift, so the fresh map would describe neither tree. That
+belongs to the deliberate regen, per the standing rule.
+
+### 6. What §5's acceptance becomes
+
+Unchanged in kind and narrower in reach: five destinations move, not eight. `pprof_cyclesPerSecond`
+still throws, so the CPU-profile paths are untouched; the memory and goroutine profiles keep their
+hand-owned answers, so any movement there would be a REGRESSION and the companion's own
+laundering assertion is the check.
+
+-- C1, 2026-09-06

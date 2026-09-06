@@ -1989,6 +1989,45 @@ var linknameForwardTargets = map[string]bool{
 	// import bottomed out in the announcing stub — three of the package's seven verdicts, and
 	// go/types' TestStdFixed through the same path.
 	"go/types.srcimporter_setUsesCgo": true,
+	// runtime/pprof's PROFILE COLLECTION, seven symbols pulled by runtime/pprof/pprof.go over bodyless
+	// declarations, each authorized by the matching one-arg handle in runtime (mprof.go, tracestack.go,
+	// proc.go). Like the tzdata, fcntl, textproto and go/types entries the implementations are ORDINARY
+	// CONVERTED Go -- pprof_memProfileInternal delegates to memProfileInternal with a record-copying
+	// closure exactly as Go's does -- so each forwarder is an ordinary cross-assembly call to something
+	// that genuinely works. The pull needs no new project reference: runtime/pprof already imports
+	// runtime, which is why the graph cost is zero (measured: baseline 0 cycles across 307 projects on
+	// all three targets, and the pull direction still 0; the OTHER direction is what would have been
+	// fatal -- see the eighth symbol in linknamePushTargets).
+	//
+	// What the stubs were costing, measured 2026-09-06 at b91684991: the board carried this since
+	// 2026-08-14 as "profile collection has no managed body", which is false -- every body exists in
+	// runtime and is unreachable across the assembly boundary, so PartialStubGenerator threw on every
+	// collection call. net/http/pprof measured 5 of 15 with seven subtests infrastructure-error
+	// (/debug/pprof/{heap,mutex,trace,profile,block,goroutine}), and runtime/pprof is blocked directly
+	// with net/http/pprof downstream of it. See docs/phase4/DESIGN-pprof-linkname-push.md.
+	//
+	// pprof_makeProfStack is the per-GOOS member ({linux,windows,darwin}/proc.cs); runtime.fcntl above
+	// is its exact analogue and already proves the gate composes with a per-GOOS body.
+	// FIVE, not seven. pprof_memProfileInternal and pprof_goroutineProfileWithLabels are NOT here:
+	// runtime/pprof/pprof_impl.cs is a hand-owned companion that already answers both, and forwarding
+	// them would be a REGRESSION, not a completion. Its goroutine body deliberately WITHHOLDS the label
+	// slice, because a label pointer goes stale under GC and printCountProfile then sizes a slice from a
+	// corrupt map -- an OutOfMemoryException that kills the host and turns the row into an
+	// infrastructure-error rather than a verdict. Its memory body returns an honest (0, true) and its
+	// header states that a row which STARTS PASSING there has laundered a false green. Both are
+	// judgements this registry cannot make, so both stay hand-owned; the compiler said so first, with
+	// CS0111 against the forwarders.
+	//
+	// That companion's header also records the belief that motivated it -- that the push needs a
+	// runtime -> runtime/pprof edge, so "no forwarder can exist". That premise is FALSE and measured
+	// so: the forwarder is on the CONSUMER side, across the runtime/pprof -> runtime edge that already
+	// exists, and injecting it reads 0 cycles on all three targets. It is the OTHER direction that
+	// costs 38/36/36. The five below are the ones that belief was wrongly blocking.
+	"runtime.pprof_blockProfileInternal": true,
+	"runtime.pprof_mutexProfileInternal": true,
+	"runtime.pprof_threadCreateInternal": true,
+	"runtime.pprof_fpunwindExpand":       true,
+	"runtime.pprof_makeProfStack":        true,
 }
 
 // linknameForwardBuiltins is the whitelist of cross-package //go:linkname PULL targets whose

@@ -1219,7 +1219,7 @@ internal static void copyBlockProfileRecord(ж<BlockProfileRecord> Ꮡdst, profi
 }
 
 //go:linkname pprof_blockProfileInternal
-internal static (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.BlockProfileRecord> Δp) {
+public static (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.BlockProfileRecord> Δp) {
     return blockProfileInternal(len(Δp), (profilerecord.BlockProfileRecord r) => {
         Δp[0] = r;
         Δp = Δp[1..];
@@ -1277,7 +1277,7 @@ internal static (nint n, bool ok) mutexProfileInternal(nint size, Action<profile
 }
 
 //go:linkname pprof_mutexProfileInternal
-internal static (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.BlockProfileRecord> Δp) {
+public static (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.BlockProfileRecord> Δp) {
     return mutexProfileInternal(len(Δp), (profilerecord.BlockProfileRecord r) => {
         Δp[0] = r;
         Δp = Δp[1..];
@@ -1320,7 +1320,7 @@ internal static (nint n, bool ok) threadCreateProfileInternal(nint size, Action<
 }
 
 //go:linkname pprof_threadCreateInternal
-internal static (nint n, bool ok) pprof_threadCreateInternal(slice<profilerecord.StackRecord> Δp) {
+public static (nint n, bool ok) pprof_threadCreateInternal(slice<profilerecord.StackRecord> Δp) {
     return threadCreateProfileInternal(len(Δp), (profilerecord.StackRecord r) => {
         Δp[0] = r;
         Δp = Δp[1..];

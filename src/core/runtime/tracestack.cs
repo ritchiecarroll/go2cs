@@ -263,7 +263,7 @@ internal static nint /*i*/ fpTracebackPCs(@unsafe.Pointer fp, slice<uintptr> pcB
 }
 
 //go:linkname pprof_fpunwindExpand
-internal static nint pprof_fpunwindExpand(slice<uintptr> dst, slice<uintptr> src) {
+public static nint pprof_fpunwindExpand(slice<uintptr> dst, slice<uintptr> src) {
     return fpunwindExpand(dst, src);
 }
 
