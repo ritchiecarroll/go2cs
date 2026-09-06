@@ -165,6 +165,14 @@ public class StandardBox<T> : ж<T>
     // The pinnable value slot, when T admits one — what EnsureStableAddress pins on address-take.
     public override object? PinnableStorage => m_slot;
 
+    /// <inheritdoc/>
+    // The slot is both the address and the pin: with one, the value lives in a pinnable
+    // buffer; without one, it lives in m_val, a field of this box object, and its address is
+    // a movable heap interior that SUB-Q42's witness measured going stale. That absence is a
+    // genuine None — this is the kind the token arm was written for and it is unchanged.
+    public override PointerStorage StorageKind =>
+        m_slot is null ? PointerStorage.None : PointerStorage.Pinnable;
+
     // FieldInfo access for the contracts IL builder (ж.Contracts.cs) — the fields the split moved
     // here from the old single-class box; the builder targets THIS type now.
 }

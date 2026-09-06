@@ -89,6 +89,16 @@ public sealed class FieldRefBox<T> : ж<T>
         m_source is INilPointer parent ? parent.PinnableStorage : m_source as Array;
 
     /// <inheritdoc/>
+    // THE REPAIR. A field reference ALWAYS names a real interior address — that is what it is —
+    // and only its PINNABILITY depends on the root. PinnableStorage recurses to the parent, so a
+    // root with no pinnable slot answers null all the way down; reading that null as "no address"
+    // tokenised `жfd.of(жpfd).of(жSysfd)` and the kernel refused it on every Windows TCP dial.
+    // The pointee there is reference-FREE and its address was correct before the merge; the root
+    // being reference-bearing is a fact about the container, not about whether an address exists.
+    public override PointerStorage StorageKind =>
+        PinnableStorage is null ? PointerStorage.Unpinnable : PointerStorage.Pinnable;
+
+    /// <inheritdoc/>
     // Recurse: the source of a nested field ref is a per-call intermediate box, never an
     // allocation of its own. The chain is finite — each `of` wraps a strictly outer pointer.
     public override object ReferentObject =>
