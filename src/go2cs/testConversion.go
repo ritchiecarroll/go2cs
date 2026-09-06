@@ -6551,13 +6551,40 @@ func hostFatalSkipExpression(disclosures map[string]testDisclosure) string {
 //
 // Checked from COMMITTED DATA rather than a cross-platform run: docs/validation/current/*.md is
 // the corpus's own record of what agreed where, it is in the repository already, and one pass over
-// it costs nothing. runtime/debug's TestPanicOnFault passes the rule only because panic_test.go is
-// //go:build unix -- the Windows page lists nine tests and never mentions it -- which is a fact
-// about that test rather than a property of the class, and precisely why the rule is mechanical.
+// it costs nothing.
 //
-// A `goos` qualifier on the entry would be more expressive; it is deliberately NOT built until a
-// real entry needs one. Refusing is enough while the answer is always "no such row".
-func hostFatalMintViolations(outputPath string, disclosures map[string]testDisclosure) []string {
+// ⚠ SCOPE, AND IT IS NARROWER THAN THE RULE'S PURPOSE (measured 2026-09-06, G). The proof pages
+// are the WINDOWS record -- 195 of the 203 committed pages say `windows/amd64`, exactly one says
+// `linux/amd64`, and a Linux-axis bank lives in the roster ANNOTATION, which this function does
+// not read. So the rule is correctly scoped for the Windows axis and IT CANNOT SEE THE LINUX ONE.
+// It refuses on positive evidence of agreement and there is a whole flavour it has no evidence
+// from. That is why the "unchecked" return exists: a name absent from every page is NOT cleared,
+// it is unexamined, and the caller says so rather than letting silence read as a pass.
+//
+// The worked example is runtime/debug's TestPanicOnFault, and it is recorded here as the SHAPE OF
+// THE GAP rather than as reassurance -- an earlier version of this comment offered it as evidence
+// the rule was sound, which is backwards and survived three separate readings on 2026-09-06
+// because a comment that presents a blind spot as care reads like care. panic_test.go is
+// //go:build unix, so the test does not exist on Windows and appears on ZERO of the 203 committed
+// pages; the mint therefore cleared a UNIX-ONLY test by consulting the WINDOWS record, and
+// runtime/debug is banked on both axes (`· linux: 4 + 5`). This is NOT a claimed regression --
+// TestPanicOnFault is a fault test and is plausibly host-fatal on Linux too, in which case the
+// withdrawal is right on both flavours. The point is that THE RULE DID NOT ESTABLISH THAT, and
+// until this change its silence was indistinguishable from having established it.
+//
+// A `goos` qualifier on the entry would be more expressive and is deliberately still NOT built
+// here -- but its stated deferral premise ("refusing is enough while the answer is always 'no such
+// row'") has EXPIRED: runtime/debug is banked on both axes now, so the answer is no longer always
+// that. The qualifier is a schema change and belongs in its own cut; making the vacuity visible is
+// what surfaces whether it is needed and how often, which is why it comes first.
+// The second return names what the rule could NOT decide, and it exists because until 2026-09-06
+// all three of the early returns below produced a bare nil: "I checked and found no agreement" and
+// "I could not check" were the same value, and only one of the three carried a comment saying which
+// it was. A guard that goes vacuous silently is the route-#8 shape, and this one goes vacuous in
+// the ordinary case rather than the exotic one -- every unix-only test is absent from a Windows-only
+// evidence base. Violations are FATAL at the call site; unchecked names are a WARNING there, because
+// "no evidence" is a reason to look, never a reason to refuse a legal entry.
+func hostFatalMintViolations(outputPath string, disclosures map[string]testDisclosure) (violations []string, unchecked []string) {
 	fatal := map[string]bool{}
 	for name, d := range disclosures {
 		if d.Class == hostFatalClass {
@@ -6565,21 +6592,41 @@ func hostFatalMintViolations(outputPath string, disclosures map[string]testDiscl
 		}
 	}
 	if len(fatal) == 0 {
-		return nil
+		// Nothing to check rather than nothing found: no entry of this class exists, so there is
+		// no claim to report as unexamined either. This is the one silent return that is honest.
+		return nil, nil
 	}
+
+	names := make([]string, 0, len(fatal))
+	for name := range fatal {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	// Undocumented until 2026-09-06, and the same shape as the pages-empty return below: an output
+	// path with no go2cs root above it (a scratch output root, the shape CLAUDE.md warns about) has
+	// no docs tree to read, so the rule can decide nothing about ANY entry.
 	root := findGo2CSRootAbove(outputPath)
 	if root == "" {
-		return nil
+		for _, name := range names {
+			unchecked = append(unchecked, fmt.Sprintf(
+				"%s: no go2cs root above %s, so no committed proof pages were read", name, outputPath))
+		}
+		return nil, unchecked
 	}
 	dir := filepath.Join(filepath.Dir(root), "docs", validationDocsDirName, validationCurrentDirName)
 	pages, err := filepath.Glob(filepath.Join(dir, "*.md"))
 	if err != nil || len(pages) == 0 {
 		// No committed pages to check against is not a violation -- a fresh clone or a staging
 		// root legitimately has none. The rule can only refuse on POSITIVE evidence of agreement.
-		return nil
+		for _, name := range names {
+			unchecked = append(unchecked, fmt.Sprintf(
+				"%s: no committed proof pages under %s, so nothing was compared against", name, dir))
+		}
+		return nil, unchecked
 	}
 	row := regexp.MustCompile("^\\|\\s*`([^`]+)`\\s*\\|([^|]*)\\|([^|]*)\\|")
-	var violations []string
+	seen := map[string]bool{}
 	for _, page := range pages {
 		data, err := os.ReadFile(page)
 		if err != nil {
@@ -6590,6 +6637,9 @@ func hostFatalMintViolations(outputPath string, disclosures map[string]testDiscl
 			if m == nil || !fatal[m[1]] {
 				continue
 			}
+			// The name reached the evidence base: whatever the verdict pair says, the rule has
+			// something to decide on and this entry is no longer unexamined.
+			seen[m[1]] = true
 			if strings.TrimSpace(m[2]) == strings.TrimSpace(m[3]) {
 				violations = append(violations, fmt.Sprintf(
 					"%s is disclosed %s, but %s records it as a MATCHING verdict (%s/%s): excluding it "+
@@ -6598,8 +6648,17 @@ func hostFatalMintViolations(outputPath string, disclosures map[string]testDiscl
 			}
 		}
 	}
+	for _, name := range names {
+		if !seen[name] {
+			unchecked = append(unchecked, fmt.Sprintf(
+				"%s: named by no committed proof page, so its exclusion was NOT cleared against any "+
+					"platform -- the pages are the Windows record and a unix-only test is absent from "+
+					"them by construction", name))
+		}
+	}
 	sort.Strings(violations)
-	return violations
+	sort.Strings(unchecked)
+	return violations, unchecked
 }
 
 // hostFatalNames lists the excluded tests for the DISCLOSED column, sorted. They appear in
@@ -7387,11 +7446,21 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	// withdraw its test from BOTH command lines rather than be reclassified after the fact. Every
 	// other class labels a verdict a run produced; this one decides what the run contains.
 	disclosures, disclosureNotes, disclosureErr := loadTestDisclosures(outputPath)
-	if violations := hostFatalMintViolations(outputPath, disclosures); len(violations) > 0 {
+	mintViolations, mintUnchecked := hostFatalMintViolations(outputPath, disclosures)
+	if len(mintViolations) > 0 {
 		// Refused BEFORE either child runs, so a bad entry cannot quietly withdraw a row that some
 		// platform passes. Fatal rather than a warning: the whole point of the class is that it
 		// changes what runs, and a warning would let the withdrawal happen anyway.
-		return fmt.Errorf("host-fatal disclosure refused at mint:\n  %s", strings.Join(violations, "\n  "))
+		return fmt.Errorf("host-fatal disclosure refused at mint:\n  %s", strings.Join(mintViolations, "\n  "))
+	}
+	if len(mintUnchecked) > 0 {
+		// NOT a refusal: the rule can only refuse on positive evidence, and these entries produced
+		// none. Printed so a reviewer reads UNCHECKED where a bare pass used to read as cleared --
+		// the whole content of the 2026-09-06 fix. It goes to stderr beside the converter's other
+		// warnings rather than into the comparison record, because it describes what the MINT could
+		// not establish about the manifest, not anything about the run that follows.
+		fmt.Fprintf(os.Stderr, "WARNING: host-fatal disclosure UNCHECKED at mint (no evidence either way, not a refusal):\n  %s\n",
+			strings.Join(mintUnchecked, "\n  "))
 	}
 	hostFatalSkip := hostFatalSkipExpression(disclosures)
 
