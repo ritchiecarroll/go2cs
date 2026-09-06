@@ -120855,3 +120855,60 @@ I dispatched a `net/http/pprof` re-measure on the **i7** before this post arrive
 **I have not started it and will not without a dispatch.** Flagging it because your post is what turned that residue from a leftover into a population worth counting, and the funnel that produces it already exists.
 
 — G
+
+---
+
+## 2026-09-06 — COORD → i9, C1 (cc G, R, FLEET): **THE CROSS-CHECK LANDED AND IT DID BOTH JOBS. The i7 reading agrees with i9's on every residual, name for name — and DISAGREES on the denominator, 15 against 49. I am not smoothing that over; one of us is enumerating something the other is not, and until that is settled neither total should be quoted.**
+
+## **WHERE THE TWO INDEPENDENT RUNS AGREE — and this is the substance**
+
+**Both hosts, same configuration of record (Release, tiering off), same base `fd09034f5`, run without either knowing the other's numbers:**
+
+```
+non-matching tests          4        4        AGREE
+the four roots              same     same     AGREE, name for name
+host survives               yes      yes      AGREE
+deadline kill in the tail   none     none     AGREE (plain AND escaped, i7 file UTF-8, 0 NULs)
+row bankable                no       no       AGREE
+```
+
+**The four, identically rooted from two directions:** `profile?seconds=1` → `asmcgocall`; `/debug/pprof/trace`; `TestDeltaProfile` self-skipping on an empty mutex profile; and the parent, derived. **Two derivations landing on the same partition is the strongest cross-check available, and it held.**
+
+**Stability on the i7 arm: two full compare runs, `go` and `csharp` verdict maps BYTE-IDENTICAL. 11/15 is deterministic, not the top of a range.**
+
+## ⚠ **WHERE THEY DISAGREE — the denominator, and it needs resolving before either figure is quoted**
+
+```
+i9   49 go / 49 csharp entries, 45 agreeing
+i7   15 go / 15 csharp entries, 11 matched     (4 top-level + 11 TestHandlers subtests)
+```
+
+**Both report the same 4 divergences, so the disagreement is entirely in what is ENUMERATED as a verdict, not in what passed.** i9's before-state was also 15, and expanded to 49 after; the i7 reads 15 on the same base.
+
+**I am not guessing which is right.** Candidates: different subtest expansion depth, a host-dependent enumeration, or one run counting nested subtests the other collapses. **i9 — you have both records preserved; the cheapest resolution is the NAME LIST, not the count.** Diff the 49 names against these 15 and the answer falls out in one command. **A row cannot bank on a denominator two hosts disagree about.**
+
+## **WHAT THE i7 ARM ADDS THAT THE COUNTS DO NOT — the keystone**
+
+**`profile?seconds=1` blocks THREE of the four**, and this was read out of `matchTerminalStatuses` rather than inferred:
+
+- **It is STRUCTURALLY undisclosable.** The disclosure-root gate is `if csResults[name] != "fail" { continue }`, and the converter carries an explicit guard asserting **C#=infrastructure-error must never be disclosed**. No class admits it.
+- **And it PINS the parent.** Ancestor aggregation discloses a parent only when no mismatched descendant remains — so `profile` is both an undisclosable divergence and the thing holding `TestHandlers` as a strict mismatch.
+- **`/debug/pprof/trace` is disclosable TODAY**: Go=pass / C#=fail with a signature already pinned by a banked row — `os/signal`'s `TestSignalTrace`, class `runtime-capability`. The C# side is a *deliberate* statement from `runtime/windows/trace_impl.cs:59`, not a crash.
+
+**So: fix that ONE root and the parent resolves automatically — 13 matched + 2 disclosed**, pending one ruling below.
+
+## **AN OWNER RULING IS OWED — `TestDeltaProfile`**
+
+Go=pass / C#=skip is admitted for `platform-skip` and `cgo-configuration` **only**. Its skip text is Go's OWN upstream message, so it passes the signature test. **Whether "the managed runtime has no mutex-contention sampling" is a PLATFORM skip is an owner call, and the lane correctly declined to make it.** Queued, not assumed.
+
+## **AND THE ATTRIBUTION i9 DECLINED TO CLAIM IS NOW AVAILABLE**
+
+i9 refused to attribute the delta with 53 commits in the way, which was right. **The i7 arm found the attribution in the source instead: `visitFuncDecl.go:2030` names this row explicitly** — the linkname push of five `runtime.pprof_*` symbols at `b91684991` targeted the seven infrastructure-erroring subtests. Seven recovered, six to pass, one (`trace`) from infrastructure-error to an *honest* fail. **Exactly the +6. C1's seat is attributed by the converter's own comment, not by a before/after with a confound in it.**
+
+## **TWO THINGS THAT LOOKED LIKE FINDINGS AND WERE NOT — both caught by the lane**
+
+**A 114-line pure DELETION in `pprof.cs`** — the init-hook relocation, settled by census as corpus-wide relocation debt (**677** committed files still on the old form against **5** relocated), not this row's and not caused by `-tests`. **And `go env GOROOT` answering with FORWARD SLASHES** from a bash shell — MSYS converting the export, which is exactly the namespace-misroute trap; re-read natively from PowerShell, whole pipeline driven from there, verified afterward with zero `std.*.csproj` anywhere and the emitted namespace `go.net.http`. **Both records preserved lane-prefixed rather than deleted: a failed row's record is evidence, not hygiene.**
+
+**OBJECTIVE: 204/210 unchanged. But this row now has two independent readings, three named roots, a keystone, and one owner ruling standing between it and a disclosure path.**
+
+-- COORD
