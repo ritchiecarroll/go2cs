@@ -7,6 +7,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 // Move up from the working directory this is run from -- "go2cs/src/utilities/UpdateTestTargets/
 // bin/Debug/net9.0" -- to "go2cs/src". Built from Path.Combine SEGMENTS rather than an embedded
@@ -219,6 +220,59 @@ if (args.Contains("--createTargetFiles"))
     // both golden paths. Safety nets against a hung child, never performance assumptions.
     int transpileTimeoutMs = SecondsFromEnv("GO2CS_TRANSPILE_TIMEOUT", 60);
     int buildTimeoutMs = SecondsFromEnv("GO2CS_BUILD_ONE_TIMEOUT", 300);
+
+    // ------------------------------------------------------------------------------------------
+    // TOOLCHAIN PIN -- checked BEFORE the staleness predicate, and that ordering is the whole point.
+    // IsConverterStale compares the binary's embedded release against the live `go env GOVERSION`
+    // (false-green route #4), so on a host whose bare `go` is NOT the pinned release it reports
+    // STALE and this utility rebuilds go2cs.exe with the WRONG toolchain -- then re-baselines every
+    // golden from that binary's emission. The run exits 0, prints no warning and refuses nothing;
+    // the wrong goldens simply become the new definition of correct, and every later comparison is
+    // measured against them. That is the one defect this instrument must never commit, because it
+    // rewrites the RECORD rather than a result. (Measured 2026-09-06 on a container whose bare `go`
+    // was go1.24.7 against a corpus pinned to 1.23.12: eight rows' goldens affected, no signal.)
+    //
+    // The pin is DERIVED from version.props -- the property of record -- not spelled here, so a
+    // corpus hop moves it in one place. Printing the release is deliberately NOT enough: this repo
+    // has already paid for an instrument that printed its pin and carried on.
+    string versionProps = Path.Combine(srcRoot, "version.props");
+    string? pinnedGo = null;
+
+    if (File.Exists(versionProps))
+    {
+        Match match = Regex.Match(File.ReadAllText(versionProps), @"<GoStdLibVersion>\s*([^<\s]+)\s*</GoStdLibVersion>");
+
+        if (match.Success)
+        {
+            pinnedGo = "go" + match.Groups[1].Value;
+        }
+    }
+
+    if (pinnedGo is null)
+    {
+        Console.Error.WriteLine($"Cannot determine the pinned Go release: no <GoStdLibVersion> in \"{versionProps}\".");
+        Console.Error.WriteLine("No goldens were written: an instrument that cannot know its pin must not mint a record.");
+        return 1;
+    }
+
+    (int versionExit, string versionOut, _, _) = Run("go", "env GOVERSION", converterSrc, buildTimeoutMs);
+    string liveGo = versionOut.Trim();
+
+    if (versionExit != 0 || liveGo.Length == 0)
+    {
+        Console.Error.WriteLine("Cannot determine the live Go release (`go env GOVERSION` did not answer).");
+        Console.Error.WriteLine("No goldens were written: an unverifiable toolchain must not mint a record.");
+        return 1;
+    }
+
+    if (!string.Equals(liveGo, pinnedGo, StringComparison.Ordinal))
+    {
+        Console.Error.WriteLine($"TOOLCHAIN MISMATCH -- live `go` is {liveGo}, the corpus pins {pinnedGo}.");
+        Console.Error.WriteLine("No goldens were written: a golden minted by the wrong toolchain becomes the new");
+        Console.Error.WriteLine("definition of correct, and every later comparison is measured against it.");
+        Console.Error.WriteLine($"Put the pinned toolchain first on PATH (its GOROOT's bin) and re-run.");
+        return 1;
+    }
 
     // "With the CURRENT go2cs.exe" is not the same question as "with the go2cs.exe on disk". The
     // staleness answer comes from the SHARED ConverterBuildInputs -- the same predicate the three
