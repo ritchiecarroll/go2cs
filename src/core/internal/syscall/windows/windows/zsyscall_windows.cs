@@ -513,12 +513,7 @@ public static error /*neterr*/ NetShareDel(ж<uint16> ᏑserverName, ж<uint16> 
 
 // go2cs generated this placeholder — func NetUserGetLocalGroups is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static void rtlGetVersion(ж<_OSVERSIONINFOW> Ꮡinfo) {
-    var ᴋ47 = Ꮡinfo;
-        syscall.Syscall(procRtlGetVersion.Addr(), 1, (uintptr)ᴋ47, 0, 0);
-    System.GC.KeepAlive(ᴋ47);
-    return;
-}
+// go2cs generated this placeholder — func rtlGetVersion is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static error /*err*/ GetProcessMemoryInfo(syscallꓸHandle handle, ж<PROCESS_MEMORY_COUNTERS> ᏑmemCounters, uint32 cb) {
     error err = default!;
