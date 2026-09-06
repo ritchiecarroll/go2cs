@@ -22,6 +22,27 @@ public static class RuntimeErrorPanic
         return new PanicException(NilPointerDereferenceMessage);
     }
 
+    private const string TokenArithmeticMessage =
+        $"{RuntimeErrorMessage}unsafe pointer arithmetic on a managed pointer with no address "
+        + "(a Go-layout byte offset into CLR-laid-out storage cannot be honoured)";
+    /// <summary>
+    /// The REFUSAL: a number derived by arithmetic from a pointer that has no machine address.
+    /// </summary>
+    /// <remarks>
+    /// Refusing BY NAME, catchably, is the whole point. The alternative is not "it works" — it is a
+    /// native box over a number that is not an address, and the first write through it takes the
+    /// process down uncatchably, so a package reports nothing instead of reporting a failure.
+    /// This says what happened, at the point it happened, and lets recover() see it.
+    ///
+    /// The underlying model question — a Go-layout offset landing on a managed reference slot in a
+    /// CLR-auto-laid-out struct — is NOT answered here and is not meant to be: it stays open, and
+    /// this makes it loud instead of fatal.
+    /// </remarks>
+    public static PanicException UnsafePointerArithmeticWithoutAddress()
+    {
+        return new PanicException(TokenArithmeticMessage);
+    }
+
     private const string IndexOutOfRangeMessage = $"{RuntimeErrorMessage}index out of range [{{0}}] with length {{1}}";
     public static PanicException IndexOutOfRange(int64 index, int64 length)
     {

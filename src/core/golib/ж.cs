@@ -673,6 +673,18 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         if (ManagedPointerTokens.Resolve((nuint)value.Value) is ж<T> aliased)
             return aliased;
 
+        // THE REFUSAL. A number inside a LIVE token's own 4 GiB block, that is not that token, is
+        // a token somebody did arithmetic on — `unsafe.Add(unsafe.Pointer(&v), offset)` over storage
+        // that has no address. Answering a native box over it is not "best effort": the write that
+        // follows lands on an unmapped page and takes the process down UNCATCHABLY, which is how
+        // reflect's TestIsZero went from 388 verdicts to 167 — not more broken, just no longer alive
+        // to report. Refusing by name restores the failure MODE the tree had before the token arm
+        // existed (a caught panic the arm recovers from) without pretending the underlying model
+        // question is answered: a Go-layout byte offset into CLR-auto-laid-out storage still has no
+        // meaning, and now says so out loud instead of corrupting memory.
+        if (ManagedPointerTokens.IsTokenArithmetic((nuint)value.Value))
+            throw RuntimeErrorPanic.UnsafePointerArithmeticWithoutAddress();
+
         return new NativeBox<T>((nuint)value.Value);
     }
 
