@@ -101,10 +101,28 @@ public static class ManagedPointerTokens
     // The remedy is not to strengthen the weak reference — it is to REMOVE the dependency. A
     // delegate token's only consumer wants the function's NAME (runtime.FuncForPC(fn.Pointer()).Name(),
     // which reflect's own abi_test.go uses to name every subtest), and the name is derivable from the
-    // METHOD alone. So the method is remembered STRONGLY here, keyed by the same token: methods are
-    // process-lifetime metadata that the runtime already holds forever, so this adds no lifetime that
-    // was not already there, and the map is bounded by DISTINCT METHODS rather than by delegate
-    // instances — strictly smaller than what the weak table above held before the collapse.
+    // METHOD alone. So the method is remembered STRONGLY here, keyed by the same token.
+    //
+    // Two claims justify the strong hold beside a deliberately weak table. ONE IS MEASURED AND ONE
+    // IS NOT, and an earlier revision of this comment asserted both:
+    //
+    //   BOUNDED BY DISTINCT METHODS — MEASURED. reflect's Method(i) tokens are per-METHOD, not
+    //   per-call and not per-receiver: two receivers of one method token equally, the same method
+    //   read twice tokens equally, and two different methods do not (0x22ea15d vs 0x3de9d2d,
+    //   arm12, Release+TC0, reproduced across separate processes). So this map takes ONE entry per
+    //   distinct method however many func values are minted — strictly smaller than what the weak
+    //   table above held before the collapse.
+    //
+    //   "ADDS NO LIFETIME THAT WAS NOT ALREADY THERE" — WITHDRAWN, and it was wrong on the case
+    //   this code exists for. It holds for an ordinary MethodInfo, which the runtime does keep
+    //   forever; it does NOT hold for a DynamicMethod, which is collectible — and reflect's own
+    //   Method(i) builds its func values as dynamic methods, the very fact that forced the
+    //   MethodInfo-object identity a few lines up (MethodHandle throws for them). A strong entry
+    //   therefore PINS a dynamic method that would otherwise be collectable.
+    //
+    // The honest position is bounded-but-pinning: a fixed cost proportional to distinct reflected
+    // methods, not a growing one. That is a real cost and it is affordable; it is not "free", which
+    // is what this comment used to say.
     private static readonly ConcurrentDictionary<nuint, System.Reflection.MethodBase> s_delegateMethods = new();
 
     /// <summary>

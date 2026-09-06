@@ -1187,9 +1187,9 @@ private static uintptr sliceStorageToken(object boxed) {
 }
 
 // delegateMethodToken orders a func value by the METHOD it invokes rather than by the delegate
-// object holding it. RuntimeMethodHandle is the stable per-method identity — one value for the
-// life of the process, whatever closure or receiver wraps it — so two method values of one method
-// token equally and two different methods do not.
+// object holding it, so two method values of one method token equally and two different methods do
+// not. The identity is the MethodInfo OBJECT — see the note at the read below for why it is not
+// RuntimeMethodHandle, which is the obvious choice and the wrong one here.
 //
 // A delegate whose target method cannot be read falls back to the instance identity, which is
 // today's behaviour: worse than the collapse but never wrong on its own terms.
