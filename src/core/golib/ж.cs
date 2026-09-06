@@ -49,6 +49,39 @@ namespace go;
 /// wrong-kind box.
 /// </para>
 /// </remarks>
+/// <summary>
+/// What a box's pointer value IS — the three-way answer the pointer-to-scalar operators need,
+/// which a pinnability question cannot give them.
+/// </summary>
+/// <remarks>
+/// Two answers were conflated before this existed: "no pinnable storage" was read as "no address",
+/// which is true of a standard box over a reference-bearing pointee and of the header kinds, and
+/// FALSE of a field or element reference whose root merely happens to be reference-bearing. The
+/// middle answer below is that class, and it is the one the merged Q44 arm turned into a token.
+/// </remarks>
+public enum PointerStorage
+{
+    /// <summary>
+    /// No storage whose address means anything: the value is an order token, never an address.
+    /// A standard box over a reference-bearing pointee, and the header kinds, whose value is
+    /// materialized rather than resident.
+    /// </summary>
+    None,
+
+    /// <summary>
+    /// A real machine address that CANNOT be held still — an interior reference into an
+    /// allocation with no pinnable slot. The address is correct the moment it is taken and may
+    /// move afterwards; that is the standing pin-unheld hole, older than this enum and not
+    /// closed by it, and it is still strictly better than handing the kernel a non-address.
+    /// </summary>
+    Unpinnable,
+
+    /// <summary>
+    /// A real machine address that can be pinned, and is, before it is handed out.
+    /// </summary>
+    Pinnable
+}
+
 public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess
 {
     // The ONE storage fact every kind shares: whether this box IS the nil pointer. STRUCTURAL —
@@ -447,6 +480,28 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// </remarks>
     public virtual object? PinnableStorage => null;
 
+    /// <summary>
+    /// Whether this box's pointer VALUE is a machine address at all, and if so whether that
+    /// address can be held still — the question the pointer-to-scalar operators actually ask.
+    /// </summary>
+    /// <remarks>
+    /// DELIBERATELY ABSTRACT, and that is the repair. Both operators used to ask
+    /// <see cref="PinnableStorage"/> — "can this be held still?" — and read the answer as "is
+    /// there an address here?". Those are different questions and the difference is a whole class:
+    /// a field or element reference rooted in a REFERENCE-BEARING allocation answers null to the
+    /// first (its root has no pinnable slot, and the answer recurses) while naming a perfectly real
+    /// interior address. Under the merged Q44 arm every such pointer became an order token, and the
+    /// kernel refused it: WSAEFAULT on every Windows TCP dial, through
+    /// `жfd.of(netФD.жpfd).of(poll.FD.жSysfd).Reinterpret&lt;ΔHandle, byte&gt;()` at the
+    /// SO_UPDATE_CONNECT_CONTEXT that ends netFD.connect — a reference-free pointee whose address
+    /// was correct before the merge. A silent one rode with it in the Windows `os` layer.
+    ///
+    /// Abstract rather than virtual so a NEW box kind cannot inherit an answer to the wrong
+    /// question the way the header boxes did: it must state its own, or the assembly does not
+    /// compile. That is the difference between a rule and a reminder.
+    /// </remarks>
+    public abstract PointerStorage StorageKind { get; }
+
     // Hold the storage still for as long as this box lives — the address-take contract: whatever
     // receives the address may still be using it after the statement that produced it returns.
     private void EnsureStableAddress()
@@ -673,7 +728,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // this very box through ManagedPointerTokens.Resolve's order-token arm (ж.cs:612–622,
         // ж.PointerTokens.cs:327) for exactly as long as something else keeps the box alive — the
         // record's own weak-lifetime rule. docs/phase4/DESIGN-managed-pointer-token.md (Q44).
-        if (value.PinnableStorage is null)
+        if (value.StorageKind is PointerStorage.None)
         {
             nuint token = value.PointerOrderToken;
             ManagedPointerTokens.Register(token, value);
@@ -688,6 +743,15 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         {
             // The PROVENANCE record (DESIGN-pointer-provenance.md, RATIFIED): the pin is the one
             // guarantee the resolve-side validate-on-read leans on.
+            //
+            // AND IT IS REACHED ON THE UNPINNABLE PATH TOO, deliberately. EnsureStableAddress
+            // pins only when PinnableStorage is non-null, so for PointerStorage.Unpinnable this
+            // records "the box was at this address" about an address nothing is holding. That is
+            // harmless rather than sloppy: Resolve validates on READ (alive AND still pinned
+            // there), so a stale entry answers MISS, which is the same answer the caller got
+            // before this record existed. It is also exactly what the code did before the token
+            // arm was added — removing it here would be a SECOND undeclared change inside a
+            // repair, and the pin-unheld hole it hints at is its own arc with its own guard.
             ManagedPointerTokens.RegisterPinned((nuint)ptr, value);
             return (uintptr)ptr;
         }
@@ -722,7 +786,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
         // The same reference-bearing arm as the uintptr operator above (Q44): the token, not a
         // field address, is what a native call could later hand back to `(ж<T>)(void*)`.
-        if (value.PinnableStorage is null)
+        if (value.StorageKind is PointerStorage.None)
         {
             nuint token = value.PointerOrderToken;
             ManagedPointerTokens.Register(token, value);
@@ -733,6 +797,9 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
         fixed (T* ptr = &value.Value)
         {
+            // Reached on the UNPINNABLE path too, for the reason spelled at the uintptr twin:
+            // the entry is stale by construction there, Resolve validates on read and answers
+            // MISS, and dropping it would be a second undeclared change inside a repair.
             ManagedPointerTokens.RegisterPinned((nuint)ptr, value);
             return ptr;
         }

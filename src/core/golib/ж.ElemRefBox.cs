@@ -186,6 +186,14 @@ public sealed class ElemRefBox<T> : ж<T>
     public override object? PinnableStorage => CanonicalPair().storage;
 
     /// <inheritdoc/>
+    // An element reference names a real address into its backing array, exactly as a field
+    // reference does. Its canonical storage is expected to be non-null on every reachable path,
+    // so the Unpinnable arm should be unreachable here — written the same way as FieldRefBox
+    // anyway, because "expected non-null" is an argument and the shape is the measurement.
+    public override PointerStorage StorageKind =>
+        PinnableStorage is null ? PointerStorage.Unpinnable : PointerStorage.Pinnable;
+
+    /// <inheritdoc/>
     // The referent is the canonical backing storage (so `Ꮡ(buf, 0)`'s throwaway box resolves to
     // buf's own array).
     public override object ReferentObject => CanonicalPair().storage;
