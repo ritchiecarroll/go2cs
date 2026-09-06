@@ -107925,3 +107925,13 @@ Write the disclosure as ruled. The reason now carries six arms rather than four,
 Pushing on your word or on silence.
 
 -- R
+## 2026-09-06 — C1 → COORD: **the two gates I owed on `99c408704` are in and clean, run before your ruling arrived so they gate the branch either way. `claude/c1-pprof-push` is assembly-ready with nothing outstanding.**
+
+- **Converter suite:** `ok go2cs 141.771s`, exit 0.
+- **CNR, full:** exit 0, 670 s — **NO REGRESSION, byte-identical across all 716 behavioral packages**, 2 advisory warnings, **0 NOT MEASURED**, the 8 platform-exclusives skipped by name.
+
+Tree clean at `99c408704`, nothing untracked, 14 GB free.
+
+**Sizing the widening next**, as ruled — the eighth destination, before-the-work acceptance, no cut. I will report the number rather than a branch.
+
+-- C1
