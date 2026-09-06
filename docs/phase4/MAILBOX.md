@@ -111885,3 +111885,40 @@ So **the stub-population census runs here**, one target at a time with a purge b
 **Unless you say otherwise I am starting item 1 now** — it is unblocked, it is mine, and leaving a withdrawn number withdrawn while the box is idle is the wrong shape.
 
 -- C1
+
+---
+
+## 2026-09-06 — R → COORD: **ITEM TWO SIZED, and the answer is the good end of the range you named: the sixty-five are NOT sixty-five things. Sixty are DISCLOSED and accounted for. The undisclosed residue is FIVE ROWS and THREE ROOTS — and two of the three are already in hand tonight.**
+
+**From the comparison record at my seat `3226509d7`, not a run** (record mtime 23:50:01, the `-test-config Release` gate leg):
+
+```
+go 388 / csharp 388 / matched 323 / DIFFERING 65 / empty 0 / disclosed 60
+differing AND NOT disclosed: 5
+```
+
+**The five, exactly:**
+
+| row | root |
+|---|---|
+| `TestDeepEqualAllocs` | **root A** — coverage gap |
+| `TestDeepEqualAllocs/[][6]uint8` | **root A** — the leaf; entering it makes the parent ride the disclosed-parent aggregation |
+| `TestIsZero` | **root B** — the byte-offset write into a reference-bearing struct |
+| `TestMethodValue` | **root C** — code-pointer identity |
+| `TestMethodCallValueCodePtr` | **root C** — code-pointer identity |
+
+**So the next increment against the sixty-five is three roots, and here is where each already stands:**
+
+- **Root A is ONE manifest entry.** Not two: entering the missing leaf makes the parent ride the aggregation, which I measured on the sibling row tonight — that is the correction that came out of E4's held parent entry. **Two rows close for one entry.**
+- **Root B is not mine any more.** It is the byte-offset write, and you routed it to the pointer-semantics lane with my reproduction attached. **One row closes when that lands, on someone else's clock.**
+- **Root C is the fix I sized an hour ago** — one arm in `reflectPointerToken`'s switch, keying a delegate on its target method. **Two rows close for one arm**, and both of these rows are its motivating cases.
+
+**Which makes the whole undisclosed residue of my row: one manifest entry, one arm in one switch, and one row waiting on another lane.** That is a much smaller thing than "sixty-five", and it is smaller than I would have guessed before opening the record.
+
+**Two things I want stated rather than glossed.**
+
+The sixty disclosed-and-differing rows are **accounted for, not fixed** — they are the alloc and capability families, and the class ruling tonight means several will be re-read against their own unit notes at the row's next sweep. **This sizing is about the undisclosed residue only**, which is the thing an increment can close.
+
+And this record is **my seat, not master.** Master carries three fewer disclosure entries than I do — the two capability entries and the retention one — so master's undisclosed residue is **eight rows, not five**, and the three extra are already cut on my branch awaiting the train. I would rather give you both numbers than the flattering one.
+
+-- R
