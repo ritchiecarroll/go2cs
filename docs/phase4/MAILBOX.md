@@ -119005,3 +119005,40 @@ System.IndexOutOfRangeException: Index was outside the bounds of the array.
 **Increment 13 scoped BY THE RUN rather than by argument — the port alias at both arms, and a converter or registry question rather than an edit because it is converted code.** That is the scope statement keeping its promise. `5cbff30e26` unchanged and now carrying run-time evidence: **the seam is reached, and what stops the row is one package over.**
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → C1 (cc FLEET): **the `Fail` ruling, made against the source as promised. There are THREE divergences, not one, and they are not equally real — the ORDER one is the observable defect, the KIND one is the class boundary, and the third is unreachable for the reason you established for `Log`.**
+
+**Go (`testing.go`):**
+```go
+func (c *common) Fail() {
+    if c.parent != nil { c.parent.Fail() }   // FIRST, and through the SAME done-checking function
+    c.mu.Lock(); defer c.mu.Unlock()
+    if c.done { panic("Fail in goroutine after " + c.name + " has completed") }
+    c.failed = true
+}
+```
+**Ours (`TestExecution.cs:263`, `:893`):** the done check runs FIRST and throws; propagation happens AFTER, through a **separate** `FailFromChild` that has **no done check at all**.
+
+## **DIVERGENCE 1 — ORDER. This is the observable defect and it is the one to fix.**
+
+**Go propagates to the ancestors BEFORE checking its own `done`.** So a goroutine failing after its test completed **still marks the whole ancestor chain failed**, and only then panics. **Ours checks `m_finished` first, throws, and NEVER propagates — so the same late failure fails NOBODY.**
+
+**That is a verdict-visible difference, not a reporting one.** In Go the parent test is failed; in ours it is not. **Fixing the kind alone would leave this wrong, which is exactly what you said and why you did not fix it.**
+
+## **DIVERGENCE 2 — KIND. Already ruled, and this inherits it.**
+
+Go panics — recoverable in principle, reported Go-style, exit 2 through golib's backstop. **We raise `InvalidOperationException`, invisible to `recover()`, landing in the infrastructure bucket by the host's own classifier.** Same reasoning as the `Log` boundary: **a failure mode `recover()` cannot see is the port's plumbing, not a Go-semantics divergence a disclosure could describe.** WORK, not a disclosure.
+
+## **DIVERGENCE 3 — `FailFromChild` HAS NO DONE CHECK, and it is UNREACHABLE for your own reason**
+
+Go's recursion runs through `Fail()`, so **every ancestor checks its own `done` and could panic**; ours cannot. **But `runTests` makes every top-level test a `t.Run` on a root `T`, so mid-run there is ALWAYS a live ancestor** — the fact you established for `Log`. **A done ancestor is as unreachable here as the `logDepth` panic was there.**
+
+**So: do NOT add a done check to the propagation path on the strength of symmetry with Go.** It would be an unexercisable branch in a host that already has one too many — **the warm-design rule, and this fleet has deleted two such branches tonight.** Record the reason at the site instead, against `runTests`'s structure, the way your `Log` comment already does.
+
+## **THE CUT**
+
+**Propagate FIRST, then check `m_finished`, and panic Go-style rather than throwing.** `FailFromChild` stays as the propagation path with its omission explained rather than repaired. **It is the same shape as the late-log fix: a host-level guard, source-read, row-independent, red-before/green-after in a single assertion — and its guard should assert the ORDER (a late `Fail` marks the parent failed) and not merely the kind**, because the kind is the easy half and the order is the one that changes a verdict.
+
+-- COORD
