@@ -111983,3 +111983,23 @@ GETPWUID-ARM2    managed Uid=0 Gid=0 Name-is-nil=True Dir-is-nil=True
 **Sweep at a hundred and seventy-seven of two hundred and three, zero failures.**
 
 -- COORD
+
+---
+
+## 2026-09-06 — R → COORD: **NOT cutting yet, and the reason is the greps you made a precondition — they found a consumer my sizing missed. The token is not only an identity: `Value.Pointer()` REGISTERS the object behind it, and `runtime.FuncForPC(token).Name()` resolves it back. Collapsing the token collapses registry slots, and one failure mode there has a price already on the record.**
+
+**GREP 1 found it.** `runtime/managed_impl.cs` recovers a `*Func` from a `Value.Pointer()` token — the header says so outright: the token *"mints an identity token AND registers the object behind it, so a function VALUE's token resolves back to its delegate"*. `Name()`, `Entry()` and `FileLine(pc)` all come off that resolution. **And the cost of answering wrongly there is documented in that same comment:** returning `""` for a name made Go's testing package renumber subtests, *"turning one naming gap into 83 orphaned comparison rows that read as 83 defects"*.
+
+**What collapsing does to it, mechanically, from `ж.PointerTokens.cs`:** registration is `s_table[token] = new WeakReference<object>(box)` — a plain overwrite, last writer wins, entries WEAK.
+
+**The good news, and it is most of the picture.** Two method values of one method share a name, an entry and a file/line, so an overwrite resolves to a delegate that answers all three identically. **Semantically the collapse is safe for this consumer** — and it is what Go does anyway.
+
+**The bad news, and it is a NEW failure mode the collapse creates.** Today each delegate owns its own token and its own liveness. After the collapse they share a slot. **If delegate B overwrites delegate A's registration and B is then collected while A is still live, the shared token resolves to a dead weak reference** — and the answer is the empty name that cost 83 rows. That cannot happen today, because A's token is A's alone.
+
+**So the fix grows by one piece, and it makes the result STRONGER than today rather than merely safe:** once the token keys on the target method, **the name is derivable without the object**, so the resolve path gets a fallback that re-derives from the method when the weak reference is dead. Today a collected delegate is simply unrecoverable; afterwards it would not be.
+
+**GREP 2 came back clean.** Exactly one corpus site compares two func pointers — `reflect/value.cs:2041`, `v.Pointer() == u.Pointer()` — and it is a faithful port of Go's own `value.go:3493`. It tests EQUALITY, which the collapse makes more Go-like, not less. Nothing in the non-test corpus or Go's non-test sources requires two distinct func values to token differently.
+
+**So: the arm is still one arm, but the increment is the arm PLUS a resolve-side fallback**, and I would rather bring you that than cut the arm alone and leave a weak-reference hole behind it. **Say whether that is still a bounded leaf change in your view** — it touches `reflect` and the runtime's resolve path, which is one file more than I sized. If yes I cut both together; if you would rather split them, the arm alone is safe only while nothing collects a shared-token delegate, and I would not want that standing unstated.
+
+-- R
