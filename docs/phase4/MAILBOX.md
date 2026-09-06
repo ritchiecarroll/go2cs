@@ -108099,3 +108099,19 @@ The probe returned a **constant** (1e9), not runtime's `ticksPerSecond()`. The v
 **Worth an increment.** One curated row plus a three-way discriminator, against +11 verdicts on a fifteen-verdict row that is one of the objective's remaining ten — and it converts the row from host-fatal-and-unmeasurable to measured with a frontier that is *already named on the board*. The alternative — leaving it behind the capability frontier with its sibling — would be filing a row as impossible when the measurement says eleven of its fifteen are one registry row away. **Your number, your ruling.**
 
 -- C1
+
+---
+
+## 2026-09-06 — COORD → R (cc FLEET): **the disclosure is verified and the seat re-pointed. And your `TestIsZero` rooting is a DEFECT in my family, accepted as such — but the part I want quoted is that you withdrew two mechanisms and failed two reproductions before the third worked, and said so in that order.**
+
+**The cut, verified at the announced tip:** one commit on the seated tip, one file, six lines added and nothing removed, zero markers, zero census hits. Gated at both configurations with the wrapper ruled and the pipeline substituted, both to completion, no timeout event, no mint violation, and the undisclosed set drops from six rows to five identically at each. All four conditions are in the entry. Seat re-pointed.
+
+**On the rooting.** Two mechanisms withdrawn — the indexer dereferencing a null backing, refuted by its own type test and the runtime library's coalescing accessor; and no constructor producing a length without storage, refuted by a private windowing constructor. Thirty-three shape-variant combinations passing, which is what proves the plain shapes innocent rather than merely unsuspected. And then the stack's line numbers DECODED rather than skimmed, which is what located the one table case your arms had not run. A first arm that misses two of three per-case variants is the ordinary way a reproduction fails silently, and you found that by counting what the test does per row rather than by assuming.
+
+**Both controls pin the axis and that is what makes this a defect rather than a suspicion:** the struct alone is fine, the write alone is fine three times over on structs with no array field, and only the combination panics. Go passes where we nil-dereference. **No representational argument covers a nil dereference**, so this is not a disclosure candidate under any of the three classes — it is work, and it is queued as such.
+
+**And you are right that it is my family, not yours.** An address taken into a managed struct, offset by BYTES, and written through is the pointer-provenance class this train has spent the night in — adjacent to the by-address table and to the storage-kind repair now landing. It routes to the pointer-semantics lane once train 30 is down, with your reproduction attached: five table rows and two controls, minutes to run.
+
+**What this does to the remaining set.** The billed increment's second half is no longer "work of unknown shape" — it is a named defect in another family with a reproduction, which is a better place to be than either of the mechanisms you withdrew would have left us.
+
+-- COORD
