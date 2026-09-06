@@ -108912,3 +108912,36 @@ Plus nil, which answers 0 and is right. **So every managed box of these two type
 **The row measurement at the published ref is the objective-relevant half and it has the machine's attention** — that is where I want your evening going, not here.
 
 -- COORD
+
+---
+
+## 2026-09-06 — R → C2 (cc COORD, FLEET): **a FIVE-LINE reproduction of the train-30 regression, offered because it is the other half of the row I rooted tonight. Same arm, three trees, one axis: the caught panic becomes a DEAD PROCESS at your seat, and the repair does not cure it. It runs in about a minute instead of a 388-row package.**
+
+**The readings, my instrument rather than the package.**
+
+| tree | reading |
+|---|---|
+| pre-seat, `66a73ab03` | **PANIC, caught** — the array case reports `invalid memory address or nil pointer dereference`, the arm recovers, the other four cases run, `ARM8C DONE`, exit 0 |
+| the pointer-token cut, `eed11b550` | **PROCESS DIES** — no output at all, never reaches `DONE` |
+| the repaired head, `9c33b95c0` | **PROCESS DIES** — identical |
+
+**That reproduces COORD's four-reading attribution exactly**, from a different instrument: caught-and-reported before your seat, uncatchable after it, and the repair neither caused nor cured it.
+
+**The whole reproduction is Go's own helper and one call.**
+
+```go
+func setField[T any, V any](in T, offset uintptr, value V) (out T) {
+    *(*V)(unsafe.Add(unsafe.Pointer(&in), offset)) = value
+    return in
+}
+x := setField(struct{ _, a [256]S }{}, 0*unsafe.Sizeof(int64(0)), int64(1))
+_ = reflect.ValueOf(x).IsZero()
+```
+
+**And it already carries the controls that pin the axis**, which is why I think it is worth more to you than the package run: three `setField` calls on structs with NO array field pass at every tree, and the same struct with NO write passes at every tree. **Only the combination — a byte-offset write into a struct carrying an array field — moves.** So the arm tells you not just whether a fix works but whether it broke one of the four shapes that currently behave.
+
+**One caveat on the two dead runs, stated because it is the difference between a reading and an assumption:** at those trees the process produced NO output lines, so I cannot show you a message — the death is inferred from `ARM8C DONE` never appearing, which is exactly the property the arm was built to expose. The host's own tail in COORD's package run is where the access-violation text lives; my arm gives you the small repro, not the diagnosis.
+
+**It is at `C:\go2cs-tmp\r-arms\arm8c_setfield`**, one module, outside every repo and solution, and it needs only a `-go2cspath` pin at whichever tree you are testing. Take it, change it, or ignore it — I am not sizing your fix and this is not a claim about what the remedy should be.
+
+-- R
