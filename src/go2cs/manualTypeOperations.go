@@ -1873,6 +1873,35 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 	// reference-first auto-layout of SHARE_INFO_2, holds the integer 1 — and the process DIES with
 	// 0xC0000005 partway through os's suite, turning 683 measurable verdicts into an unknown
 	// remainder. Failing BY NAME converts a whole-suite process death into ONE loud row.
+	// The DARWIN user/group lookups, and the second package to carry members of the PTROUT class (a
+	// Go `**T` OUT-PARAMETER the C library writes a raw address into). All four are BODIED --
+	// user_darwin.go converts to a real libc trampoline call -- so this registry is the only way to
+	// displace them; scoping them darwin-only is not a preference but the shape of the source set,
+	// since user_darwin.go is Go's ONLY declaration of these four names, so the scope is inert
+	// elsewhere and records WHY instead of leaving the next reader to re-derive it.
+	//
+	// Each is taken WITH its record transcription, never alone, and the measurement is what decided
+	// that rather than an argument (both mac legs, every buffer size, runs 34026852472 and
+	// 34034875069): the `**Passwd` out-parameter arrives as 0x0 -- golib's `ж<T>` -> `uintptr`
+	// value-peeks a heap-boxed null -- and darwin rejects a NULL result with ERANGE, which is what
+	// made os/user's retryWithBuffer double from 1 KB to 1 MB and give up naming the one argument
+	// that was never the problem. With an honest native cell the call SUCCEEDS and the converted
+	// Passwd STILL reads Uid=0 Name=nil, because a struct carrying six `ж<byte>` object references
+	// gets AUTO layout from the CLR and libc's 72 bytes land beside the managed fields rather than
+	// on them. So the out-cell alone would hand buildUser an empty record -- the NetUserGetInfo
+	// lesson one package over. Bodies in internal/syscall/unix/darwin/user_darwin_impl.cs.
+	//
+	// Getaddrinfo is this package's FIFTH member of the class and is deliberately NOT here: its
+	// pointee is a LINKED NATIVE CHAIN libc allocates and freeaddrinfo releases, so it wants the
+	// whole-chain transcription zsyscall_windows_addrinfo_impl.cs carries for ADDRINFOW, its
+	// consumer is `net` rather than os/user, and it lands as its own increment. The hand-own's
+	// header records that exclusion, and readdir_r's prior answer, by name.
+	"internal/syscall/unix": {
+		"Getpwnam": goosDarwin,
+		"Getpwuid": goosDarwin,
+		"Getgrnam": goosDarwin,
+		"Getgrgid": goosDarwin,
+	},
 	"internal/syscall/windows": {
 		"NetShareAdd": goosWindows,
 		// This package's member of the PTROUT class (`**byte` out-parameter), taken with its call

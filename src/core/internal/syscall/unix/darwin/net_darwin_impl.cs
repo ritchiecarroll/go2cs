@@ -237,4 +237,57 @@ partial class unix_package
     internal static partial (uintptr r1, uintptr r2, syscall.Errno err) syscall_syscall9(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6, uintptr a7, uintptr a8, uintptr a9) {
         return syscall.Syscall9(fn, a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
+
+    // gostring is the SECOND member of that family and the one nothing had ever CALLED, which is why
+    // it outlived increment 10 (a) as a live throw. This package's darwin flavour declares it
+    // BODYLESS (net_darwin.cs) as the destination of runtime's
+    // `//go:linkname internal_syscall_gostring internal/syscall/unix.gostring`, and that push cannot
+    // be emitted: this package already references `runtime` in its own csproj, so the edge the push
+    // would add closes a two-project cycle. That is W1's boundary, where the remedy is a body at the
+    // DESTINATION rather than an edge the graph cannot carry
+    // (docs/phase4/DESIGN-linkname-push-cycles.md); a body displaces the stub by construction, with
+    // no registration and no converter change.
+    //
+    // Nothing reached it until darwin increment 11. `unix.GoString` has exactly two darwin consumers
+    // -- GaiStrerror's error path, and os/user's `_C_GoString` -- and the second sat behind the
+    // getpwuid_r ERANGE that increment answered, so the first caller ever to arrive was buildUser,
+    // one frame past the fix. The acceptance run read it as `C# 2 vs Go 0` with
+    // "gostring: external (assembly or cgo) function is not implemented" on stderr.
+    //
+    // The body is runtime's own two steps (string.cs: findnull, then copy), reached through the
+    // pointer's ADDRESS rather than through runtime's helper, which is `internal` and invisible to
+    // this assembly. `(uintptr)Ꮡp` is the operator both pointer kinds answer correctly here: `byte`
+    // is reference-free, so a managed element box has pinnable storage and is pinned for the box's
+    // life, and a native box already carries an address -- there is no token case to consider at
+    // this element type. The KeepAlive holds that pin across the scan and the copy, which is the
+    // whole window the address is read in.
+    internal static partial @string gostring(ж<byte> Ꮡp) {
+        if (Ꮡp == nil) {
+            return ""u8;
+        }
+
+        unsafe {
+            byte* q = (byte*)(void*)(uintptr)Ꮡp;
+
+            if (q == null) {
+                return ""u8;
+            }
+
+            nint n = 0;
+
+            while (q[n] != 0) {
+                n++;
+            }
+
+            var b = new slice<byte>(n);
+
+            for (nint i = 0; i < n; i++) {
+                b[i] = q[i];
+            }
+
+            System.GC.KeepAlive(Ꮡp);
+
+            return ((@string)b);
+        }
+    }
 }

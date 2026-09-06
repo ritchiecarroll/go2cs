@@ -146,7 +146,9 @@
 
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/exec/os.exec.csproj" />
+    <ProjectReference Include="$(go2csPath)core/os/user/os.user.csproj" />
     <ProjectReference Include="$(go2csPath)core/path/filepath/path.filepath.csproj" />
+    <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
   </ItemGroup>
 

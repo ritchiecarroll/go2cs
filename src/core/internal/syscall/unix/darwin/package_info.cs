@@ -69,7 +69,7 @@ using static go.@internal.syscall.unix_package;
 [assembly: go.GoPositionMap("internal/syscall/unix/nonblocking_unix.go", "nonblocking_unix.cs", "AAoWgoKClKaC")]
 [assembly: go.GoPositionMap("internal/syscall/unix/pty_darwin.go", "pty_darwin.cs", "AAwapIKCgpSopIKCgpSopIKCyoKUgoKCpqikgoKClA==")]
 [assembly: go.GoPositionMap("internal/syscall/unix/tcsetpgrp_bsd.go", "tcsetpgrp_bsd.cs", "AAseqsI=")]
-[assembly: go.GoPositionMap("internal/syscall/unix/user_darwin.go", "user_darwin.cs", "AAwcpIKmgpQAGTqktO6opLTuqKS07qiktO6opIKUgpQ=")]
+[assembly: go.GoPositionMap("internal/syscall/unix/user_darwin.go", "user_darwin.cs", "AAwcpIKmgpQAGToABB4ABB4ABB4ABB6kgpSClA==")]
 // </GoSourcePositionMaps>
 
 // Dynamically imported C entry points are recorded here, one `GoCgoImportDynamic` attribute
