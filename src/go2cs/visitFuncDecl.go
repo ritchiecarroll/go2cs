@@ -2142,7 +2142,7 @@ func (v *Visitor) funcLinknamePush(funcDecl *ast.FuncDecl) (alias string, target
 	}
 
 	// The declaration's own syntax must match the consumer shape the registry row records.
-	if !linknamePushDeclMatches(funcDecl, push.bareDecl) {
+	if !v.linknamePushDeclMatches(funcDecl, push) {
 		return "", "", "", false
 	}
 
@@ -2156,7 +2156,7 @@ func (v *Visitor) funcLinknamePush(funcDecl *ast.FuncDecl) (alias string, target
 }
 
 // linknamePushDeclMatches reports whether a bodyless declaration's own syntax is the consumer shape
-// its registry row records — Go's standard library pushes into TWO shapes and they are distinguished
+// its registry row records — Go's standard library pushes into THREE shapes and they are distinguished
 // only by what the consumer writes above itself:
 //
 //   - the HANDLE shape (bareDecl false): a one-arg `//go:linkname <thisFunc>` directive, Go 1.23's
@@ -2164,13 +2164,19 @@ func (v *Visitor) funcLinknamePush(funcDecl *ast.FuncDecl) (alias string, target
 //   - the BARE shape (bareDecl true): no `//go:linkname` directive at all, just a bodyless func and
 //     usually a prose comment saying where the body lives (`func runtime_envs() []string // in
 //     package runtime`). It predates the handle convention and is what syscall and os still use.
+//   - the SELF-SYMBOL shape (selfSymbolPull true): a TWO-arg `//go:linkname <thisFunc>
+//     <ownPkg>.<symbol>` whose target names the consumer's OWN package, for a symbol nothing in that
+//     package defines — a local pull of a name another package pushes in. ONE member today
+//     (runtime/pprof.pprof_cyclesPerSecond); a narrow extension, not general machinery.
 //
 // Requiring each row to match its recorded shape is what keeps this fail-closed: a mis-keyed row
 // cannot quietly forward some unrelated bodyless declaration that happens to share the name, and a
-// consumer carrying a two-arg directive — which is a PULL, a different mechanism entirely — is
-// rejected by both arms rather than being mistaken for an unadorned bare declaration.
-func linknamePushDeclMatches(funcDecl *ast.FuncDecl, bareDecl bool) bool {
-	hasHandle, hasDirective := false, false
+// consumer carrying a two-arg directive naming ANOTHER package — which is a PULL, a different
+// mechanism entirely — is rejected by all three arms. The self-symbol arm admits a two-arg directive
+// ONLY when its target is the consumer's own package, which is precisely what a cross-package pull
+// never is, so the widening cannot reach the mechanism it is distinguished from.
+func (v *Visitor) linknamePushDeclMatches(funcDecl *ast.FuncDecl, push linknamePush) bool {
+	hasHandle, hasDirective, hasSelfSymbol := false, false, false
 
 	if funcDecl.Doc != nil {
 		for _, comment := range funcDecl.Doc.List {
@@ -2186,10 +2192,23 @@ func linknamePushDeclMatches(funcDecl *ast.FuncDecl, bareDecl bool) bool {
 			if len(fields) == 2 && fields[1] == funcDecl.Name.Name {
 				hasHandle = true
 			}
+
+			// //go:linkname <thisFunc> <ownPkg>.<symbol> — the SELF-SYMBOL shape: a two-arg directive whose
+			// target names the consumer's OWN package. The own-package test is what keeps this from reaching
+			// an ordinary cross-package PULL, which stays refused by every arm.
+			if len(fields) == 3 && fields[1] == funcDecl.Name.Name {
+				if dot := strings.LastIndex(fields[2], "."); dot > 0 && fields[2][:dot] == currentPackagePath {
+					hasSelfSymbol = true
+				}
+			}
 		}
 	}
 
-	if bareDecl {
+	if push.selfSymbolPull {
+		return hasSelfSymbol
+	}
+
+	if push.bareDecl {
 		return !hasDirective
 	}
 

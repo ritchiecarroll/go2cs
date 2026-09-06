@@ -1103,7 +1103,9 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
 internal static partial (nint n, bool ok) pprof_goroutineProfileWithLabels(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels);
 
 //go:linkname pprof_cyclesPerSecond runtime/pprof.runtime_cyclesPerSecond
-internal static partial int64 pprof_cyclesPerSecond();
+internal static int64 pprof_cyclesPerSecond() {
+    return runtime.pprof_cyclesPerSecond();
+}
 
 //go:linkname pprof_memProfileInternal runtime.pprof_memProfileInternal
 internal static partial (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.MemProfileRecord> p, bool inuseZero);

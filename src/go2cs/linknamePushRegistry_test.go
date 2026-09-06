@@ -11,6 +11,7 @@ import (
 	"go/build"
 	"go/parser"
 	"go/token"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -36,9 +37,14 @@ import (
 //
 //   - the consumer's declaration EXISTS and is BODYLESS (a row naming a symbol Go has since given a
 //     body, renamed, or deleted would otherwise sit in the registry doing nothing, silently);
-//   - its SHAPE matches the row's bareDecl flag (the defect above, in both directions);
-//   - the pushing side really does carry `//go:linkname <pusherFunc> <consumerPkg>.<symbol>` (the
-//     authorization the converter is taking the row's word for).
+//   - its SHAPE matches the one the row records (the defect above, in every direction) — one arm
+//     per arm of linknamePushDeclMatches, because a row whose shape the matcher rejects forwards
+//     nothing while looking entirely healthy in the registry;
+//   - the pushing side really does carry `//go:linkname <pusherFunc> <target>` (the authorization
+//     the converter is taking the row's word for). For the handle and bare shapes the target IS the
+//     row's key; for the SELF-SYMBOL shape it is the symbol the consumer's own two-arg directive
+//     names, which is a different name in the same package — so that symbol is read out of Go's
+//     source here and both sides are required to agree on it, rather than either being assumed.
 //
 // Build constraints are deliberately ignored — every .go file in the package directory is scanned,
 // so a unix-only or windows-only declaration is found whatever host the test runs on. That is the
@@ -86,14 +92,56 @@ func TestLinknamePushRegistryMatchesGoSource(t *testing.T) {
 			continue
 		}
 
-		if got := !declHasLinknameDirective(decl); got != push.bareDecl {
-			t.Errorf("registry row %q records bareDecl=%v but %s.%s %s a //go:linkname directive of its own — the shape is half the judgment and the matcher fails closed on a mismatch, so this row silently forwards nothing",
-				key, push.bareDecl, consumerPkg, symbol, directivePhrase(!got))
+		// The shape, asked of Go's source one arm per arm of linknamePushDeclMatches — and, for the
+		// self-symbol shape, the symbol the pushing side has to name. It is NOT the key there: the
+		// consumer's directive binds its declaration to a DIFFERENT name in its own package, and that
+		// name is what runtime pushes into, so taking the key would assert a directive Go never wrote.
+		pushTarget := key
+
+		switch {
+		case push.bareDecl && push.selfSymbolPull:
+			// Nothing in Go's source can make both true, and the matcher answers selfSymbolPull first,
+			// so a row recording both is a judgment that has silently lost half of itself.
+			t.Errorf("registry row %q records BOTH bareDecl and selfSymbolPull; they are mutually exclusive consumer shapes and the matcher would honor only selfSymbolPull", key)
+			continue
+
+		case push.selfSymbolPull:
+			linkSymbol, hasSelfSymbol := declLinknameSelfSymbol(decl, consumerPkg)
+
+			if !hasSelfSymbol {
+				t.Errorf("registry row %q records selfSymbolPull, but %s.%s carries no two-arg //go:linkname naming its OWN package — the matcher fails closed on the shape, so this row silently forwards nothing (a two-arg directive naming ANOTHER package is a cross-package PULL, a different mechanism, and belongs in linknameForwardTargets)",
+					key, consumerPkg, symbol)
+				continue
+			}
+
+			// The premise of the shape: the pulled name is one the consumer's own package never
+			// defines. If it ever gains a definition the directive becomes an ordinary local alias,
+			// the forward is wrong rather than merely unnecessary, and this arm says so first.
+			if _, localName, ok := splitLastDot(linkSymbol); ok {
+				if own := findGoFuncDecl(t, goRoot, consumerPkg, localName); own != nil {
+					t.Errorf("registry row %q: %s now declares %s itself, so %s.%s's directive is a local alias and not a pull of another package's push — the forward this row emits would shadow a real declaration",
+						key, consumerPkg, localName, consumerPkg, symbol)
+				}
+			}
+
+			pushTarget = linkSymbol
+
+		case push.bareDecl:
+			if declHasLinknameDirective(decl) {
+				t.Errorf("registry row %q records bareDecl=true but %s.%s DOES carry a //go:linkname directive of its own — the shape is half the judgment and the matcher fails closed on a mismatch, so this row silently forwards nothing",
+					key, consumerPkg, symbol)
+			}
+
+		default:
+			if !declHasLinknameHandle(decl) {
+				t.Errorf("registry row %q records the HANDLE shape but %s.%s carries no one-arg `//go:linkname %s` of its own — the matcher requires the handle exactly, so this row silently forwards nothing (a bodyless declaration with no directive is bareDecl; one with a two-arg directive naming its own package is selfSymbolPull)",
+					key, consumerPkg, symbol, symbol)
+			}
 		}
 
 		// The pushing side's two-arg directive — the authorization the row is vouching for.
-		if !pkgHasLinknamePush(t, goRoot, pusherPkg, pusherFunc, key) {
-			t.Errorf("registry row %q: %s does not carry `//go:linkname %s %s` — the push this row claims authorizes the forward does not exist in Go's source", key, pusherPkg, pusherFunc, key)
+		if !pkgHasLinknamePush(t, goRoot, pusherPkg, pusherFunc, pushTarget) {
+			t.Errorf("registry row %q: %s does not carry `//go:linkname %s %s` — the push this row claims authorizes the forward does not exist in Go's source", key, pusherPkg, pusherFunc, pushTarget)
 		}
 	}
 }
@@ -178,6 +226,106 @@ func TestLinknamePushRoutesNetNewUnixFile(t *testing.T) {
 
 	if access := packageFuncAccess(pusherFunc, true); access != "public" {
 		t.Errorf("packageFuncAccess(%q) = %q, want \"public\": net's forwarder calls it across an assembly boundary and an unexported Go name is otherwise emitted internal", pusherFunc, access)
+	}
+}
+
+// TestSelfSymbolPullDiscriminationOnSyntheticSource pins the SELF-SYMBOL arm's three questions on
+// source this test writes, because Go's own source cannot be made to answer them the other way and a
+// gate that has never been made to fail proves nothing.
+//
+// The arm above asks: does the consumer carry a two-arg //go:linkname naming its OWN package (and
+// only its own), and is the name it pulls one that package does not itself declare? The first half
+// is exercised against Go's source by flipping the registry row's shape flags; the second cannot be,
+// since making it fire would mean editing GOROOT — the oracle every measurement on this tree is read
+// against. So it is exercised here, through the same helpers in the same order the arm calls them.
+//
+// It is deliberately not a set of assertions that could all pass on a helper stuck at one answer:
+// arm 1 requires TRUE, arms 3 through 5 require FALSE for three different reasons, and arm 2 is the
+// composition that must find a local declaration where arm 1 must not.
+func TestSelfSymbolPullDiscriminationOnSyntheticSource(t *testing.T) {
+	root := t.TempDir()
+
+	write := func(pkg string, body string) {
+		t.Helper()
+
+		dir := filepath.Join(root, "src", pkg)
+
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatalf("MkdirAll(%s): %v", dir, err)
+		}
+
+		if err := os.WriteFile(filepath.Join(dir, "a.go"), []byte("package "+pkg+"\n\n"+body), 0o644); err != nil {
+			t.Fatalf("WriteFile(%s): %v", dir, err)
+		}
+	}
+
+	// 1. The healthy self-symbol shape: the directive names this package, and the name it pulls is
+	//    declared nowhere in it. This is runtime/pprof's shape, and the arm must stay silent on it.
+	write("pulled", "//go:linkname localPull pulled.pushedIn\nfunc localPull() int64\n")
+
+	decl := findGoFuncDecl(t, root, "pulled", "localPull")
+
+	if decl == nil {
+		t.Fatal("synthetic package pulled does not parse: the rest of this test would be vacuous")
+	}
+
+	target, ok := declLinknameSelfSymbol(decl, "pulled")
+
+	if !ok || target != "pulled.pushedIn" {
+		t.Fatalf("declLinknameSelfSymbol = (%q, %v), want (\"pulled.pushedIn\", true)", target, ok)
+	}
+
+	if _, localName, split := splitLastDot(target); !split || findGoFuncDecl(t, root, "pulled", localName) != nil {
+		t.Errorf("pulled declares %q itself; the healthy shape is one where it does not, so the arm would fire on Go's shape too", target)
+	}
+
+	// 2. The rot the arm exists to catch: the pulled name gains a local declaration, which turns the
+	//    directive into an ordinary alias and makes the forward a shadow rather than a completion.
+	write("shadowed", "//go:linkname localPull shadowed.pushedIn\nfunc localPull() int64\n\nfunc pushedIn() int64 { return 0 }\n")
+
+	decl = findGoFuncDecl(t, root, "shadowed", "localPull")
+	target, ok = declLinknameSelfSymbol(decl, "shadowed")
+
+	if !ok {
+		t.Fatal("declLinknameSelfSymbol rejected the shadowed package's directive; the composition below cannot be reached")
+	}
+
+	if _, localName, split := splitLastDot(target); !split || findGoFuncDecl(t, root, "shadowed", localName) == nil {
+		t.Error("the arm cannot see a local declaration of the pulled name, so it would never fire on the rot it exists to catch")
+	}
+
+	// 3. A two-arg directive naming ANOTHER package is a cross-package PULL — the mechanism the
+	//    self-symbol arm is distinguished from, and the one it must never admit.
+	write("crosspkg", "//go:linkname localPull elsewhere.pushedIn\nfunc localPull() int64\n")
+
+	if target, ok = declLinknameSelfSymbol(findGoFuncDecl(t, root, "crosspkg", "localPull"), "crosspkg"); ok {
+		t.Errorf("declLinknameSelfSymbol admitted %q, a directive naming another package: that is a PULL and belongs in linknameForwardTargets, not a push row", target)
+	}
+
+	// 4. The one-arg handle is a different shape and must answer the other helper, not this one.
+	write("handled", "//go:linkname localPull\nfunc localPull() int64\n")
+
+	decl = findGoFuncDecl(t, root, "handled", "localPull")
+
+	if _, ok = declLinknameSelfSymbol(decl, "handled"); ok {
+		t.Error("declLinknameSelfSymbol admitted a one-arg handle: the two shapes would be interchangeable and the registry's judgment meaningless")
+	}
+
+	if !declHasLinknameHandle(decl) {
+		t.Error("declHasLinknameHandle rejected a one-arg handle naming its own declaration")
+	}
+
+	// 5. The bare shape answers no directive question at all.
+	write("bare", "func localPull() int64\n")
+
+	decl = findGoFuncDecl(t, root, "bare", "localPull")
+
+	if _, ok = declLinknameSelfSymbol(decl, "bare"); ok {
+		t.Error("declLinknameSelfSymbol admitted a declaration carrying no directive")
+	}
+
+	if declHasLinknameHandle(decl) || declHasLinknameDirective(decl) {
+		t.Error("a bodyless declaration with no directive is reported as carrying one; the bare arm would fail closed on every row")
 	}
 }
 
@@ -278,8 +426,11 @@ func findGoFuncDecl(t *testing.T, goRoot string, pkgPath string, symbol string) 
 }
 
 // declHasLinknameDirective reports whether the declaration carries ANY //go:linkname directive of
-// its own — the same question linknamePushDeclMatches asks, asked here of Go's source rather than of
-// the converter's input so the two can never drift apart.
+// its own — the question linknamePushDeclMatches's BARE arm asks (`!hasDirective`), asked here of
+// Go's source rather than of the converter's input so the two can never drift apart. The other two
+// arms are narrower than "any directive" and have helpers of their own below; asking this one of a
+// handle or self-symbol row would pass a declaration the matcher rejects, which is the whole class
+// this guard exists to catch.
 func declHasLinknameDirective(funcDecl *ast.FuncDecl) bool {
 	if funcDecl.Doc == nil {
 		return false
@@ -292,6 +443,49 @@ func declHasLinknameDirective(funcDecl *ast.FuncDecl) bool {
 	}
 
 	return false
+}
+
+// declHasLinknameHandle reports whether the declaration carries the ONE-ARG `//go:linkname <thisFunc>`
+// handle — linknamePushDeclMatches's `hasHandle`, and the thing "carries a directive" is not: a
+// declaration under a two-arg directive carries one and has no handle at all.
+func declHasLinknameHandle(funcDecl *ast.FuncDecl) bool {
+	if funcDecl.Doc == nil {
+		return false
+	}
+
+	for _, comment := range funcDecl.Doc.List {
+		fields := strings.Fields(comment.Text)
+
+		if len(fields) == 2 && fields[0] == "//go:linkname" && fields[1] == funcDecl.Name.Name {
+			return true
+		}
+	}
+
+	return false
+}
+
+// declLinknameSelfSymbol returns the target of the declaration's two-arg `//go:linkname <thisFunc>
+// <ownPkg>.<symbol>` directive — linknamePushDeclMatches's `hasSelfSymbol`, and the symbol the
+// pushing side must name. The own-package test is the whole discrimination: the SAME syntax naming
+// another package is a cross-package pull, which this must never admit.
+func declLinknameSelfSymbol(funcDecl *ast.FuncDecl, consumerPkg string) (target string, ok bool) {
+	if funcDecl.Doc == nil {
+		return "", false
+	}
+
+	for _, comment := range funcDecl.Doc.List {
+		fields := strings.Fields(comment.Text)
+
+		if len(fields) != 3 || fields[0] != "//go:linkname" || fields[1] != funcDecl.Name.Name {
+			continue
+		}
+
+		if pkgPath, _, split := splitLastDot(fields[2]); split && pkgPath == consumerPkg {
+			return fields[2], true
+		}
+	}
+
+	return "", false
 }
 
 // pkgHasLinknamePush reports whether pkgPath carries `//go:linkname <pusherFunc> <target>` anywhere
