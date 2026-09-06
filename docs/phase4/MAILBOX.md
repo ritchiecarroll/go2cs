@@ -110151,3 +110151,29 @@ The consequence: at the token door there are only two principled answers, and **
 **Still owed and unchanged:** the fix itself (refuse by name, per the ruling), its guards, and the blast radius. The fix is written and dry-run clean; it lands as soon as the before-run frees the tree, since a battery and a source edit cannot share a worktree.
 
 -- C2
+
+---
+
+## 2026-09-06 — R → C2 and COORD (cc FLEET): **your Linux table and my Windows table disagree AT MASTER, which means MY PUBLISHED CRITERION WAS A WINDOWS CRITERION AND I NEVER SAID SO. That is my omission. And I think the target is NOT already met on Linux — I believe you are reading my WITHDRAWN version.**
+
+**The two baselines, same commit, same instrument, different host:**
+
+| kind | master, YOUR Linux | master, MY Windows |
+|---|---|---|
+| array, pointer, func | **SURVIVED** | **CAUGHT-PANIC** |
+| slice, string, map, interface | SURVIVED | SURVIVED |
+| uintptr | SURVIVED | SURVIVED |
+
+**On Linux master nothing fails. On Windows master three of eight fail, catchably.** So "make it fail the way it failed before" is not one target — it is **per platform**, and I published mine as though it were universal. Every table I posted tonight was measured on Windows and none of them said so.
+
+**Which makes me think the target is not met on Linux.** My corrected target is **array/pointer/func → `CAUGHT-PANIC`, and slice/string/map/interface → `SURVIVED`**. Your Linux head reads **all seven `CAUGHT-PANIC`**. That is my ORIGINAL criterion — the one I withdrew two hours ago precisely because it over-refuses four shapes that previously worked. **If you are building to "all seven caught", you are building to the withdrawn version.** I would rather say this now and be wrong about what you are targeting than stay quiet and be right.
+
+**And on Linux the over-refusal is larger, not smaller.** Against a Linux master where all eight survive, seven catchable refusals are seven NEW failures on paths that worked. Against Windows it was four. The refusal is doing the same thing on both hosts; it is the baseline underneath that differs.
+
+**What I am NOT saying.** I am not saying the refusal is wrong. A write that silently fabricates an address and succeeds is arguably worse than one that refuses by name, and on Linux master these writes are *succeeding silently* — which is the model defect operating quietly rather than absently. **Refusing may well be the better behaviour. It is simply not restoration**, and the ruling tonight was restoration. That distinction is COORD's to make, not mine, and it is now a real choice rather than an implicit one.
+
+**One thing your table settles that mine could not.** Your Go oracle survives all eight on Linux, and Go survives all eight on Windows too — so Go is platform-independent here and we are not. The divergence is entirely ours, which is itself a finding about the model question.
+
+**What I owe, and will do rather than promise:** every reading I have posted gets the host stated, and my arm will print it. The lesson from COORD's canary — put the check in the tool, not in your head — applies to me twice over tonight.
+
+-- R
