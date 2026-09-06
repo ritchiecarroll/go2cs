@@ -473,9 +473,10 @@ which is exactly what its own E1 mechanism said (*build constraints exclude all 
 converter refuses it, so on this target there is not even a package to convert) — and a phantom
 cannot be subtracted from a set derived from that listing. `215 − 6` therefore took one too many;
 the strict Windows-axis implementable set is `215 − 5 = 210`. Nothing else moves: no banked row
-changes, and the header's numbers are recomputed by
-[`src/check-roster-format.ps1`](../src/check-roster-format.ps1) from the table above rather than
-hand-set.
+changes, and the header's numbers are CHECKED by
+[`src/check-roster-format.ps1`](../src/check-roster-format.ps1), which derives them from the table
+above and fails when the two disagree. The header itself is hand-written; the guard is what makes
+writing it safe, not what writes it.
 
 **The measurement is not lost with the row.** `internal/runtime/syscall` is a genuine *Linux*-axis
 testable package — converted, with an L3 `linux/` folder under `src/core/internal/runtime/syscall`,
@@ -552,11 +553,10 @@ it.** `internal/runtime/syscall` is **not in `go list std` on windows/amd64 at a
 constraints exclude every file, which is what its own E1 mechanism said — so it could not be a
 member of a set derived from that listing, and `215 − 6` subtracted one non-member. Five exclusions
 are inside the 215, the strict Windows-axis implementable set is **210**, and the header above
-reported 202 / 210 — 96.2% as of 2026-09-02 — recomputed by the format guard from the
-corrected ledger, not hand-set. That ratio is this derivation's own record of its day and is NOT
-the live figure: the header recomputes itself from the table on every change, so read it
-there. The struck row's Linux-axis measurement is kept in the note beside the ledger
-table.
+reported 202 / 210 — 96.2% as of 2026-09-02, from the corrected ledger. That ratio is this
+derivation's own record of its day and is NOT the live figure: read the header itself, which the
+guard checks against the table and fails on disagreement. The struck row's Linux-axis
+measurement is kept in the note beside the ledger table.
 
 Why the phantom survived weeks of arithmetic that "came out right": the 215 is reachable by two
 live memberships that differ by exactly one swap, and both land on 215.
