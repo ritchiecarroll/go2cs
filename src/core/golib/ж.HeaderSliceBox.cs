@@ -166,6 +166,14 @@ internal sealed class HeaderSliceBox<T, TDst> : ж<TDst>
 
     public override object? PinnableStorage => null;
 
+    /// <inheritdoc/>
+    // NEVER an address, for the same reason its sibling states in its own file: the value handed out
+    // through Value is MATERIALIZED on demand, so `fixed` would give the address of a temporary that the
+    // next materialization replaces, and the address route over a header box has a recorded native crash
+    // behind it. This kind must stay tokenised, and it says so here rather than inheriting the answer from
+    // a pinnability question -- which is the distinction the storage kind exists to draw.
+    public override PointerStorage StorageKind => PointerStorage.None;
+
     /// <summary>The slice is the header variable seen through another type, so it orders and compares as that variable's box.</summary>
     public override nuint PointerOrderToken => m_source.PointerOrderToken;
 
