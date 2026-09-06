@@ -354,6 +354,18 @@
       "class": "runtime-capability",
       "signature": "heapBits incorrect",
       "reason": "runtime-capability: the verifyGCBitsSlice path compares a slice's HEAP-ALLOCATION GC bitmap. Go's gcbits(*E) reads the heap object at the pointer and returns the element's pointer bits REPEATED by the allocation's size class -- have [1] want [1 1], have [1] want [1 1 ...x10000], have [0 1] want [0 1 0 1]. The managed gcbits answers from the POINTEE TYPE's layout (GoReflect.GoGCMaskOf) -- the element's bits ONCE -- because the managed model has no allocation size class to repeat by, and reflect.NewAt's *E carries no cap it was never given. The non-slice verifyGCBits path (New(typ).Interface()) is unaffected. Same managed-model class as the alloc-count and pointer-identity disclosures (coordinator ruling 2026-09-02; C2's gcbits authority, R mints the reflect manifest entry)."
+    },
+    {
+      "name": "TestPtrToGC",
+      "class": "runtime-capability",
+      "signature": "cannot be converted to type *reflect_test.T",
+      "reason": "runtime-capability: the row converts **uintptr to a DEFINED pointer type. A defined pointer type emits as a go2cs-gen wrapper CLASS rather than as the box the outer slot holds, so no aliasing view of that slot exists to hand out and the conversion cannot be performed at all -- increment E3 refused it BY NAME rather than approximating it, which is why the panic names both types. Go performs it because its pointer is an address and the conversion reinterprets one word; a managed host has no word to reinterpret. Measured at E3 root 5 and again at the 7g tree."
+    },
+    {
+      "name": "TestAlignment",
+      "class": "runtime-capability",
+      "signature": "mismatched offsets in structure alignment",
+      "reason": "runtime-capability: the assert compares reflect's StructField.Offset against an offset the TEST computes itself, by subtracting uintptr(unsafe.Pointer(&x)) from uintptr(unsafe.Pointer(&x.field)). Managed memory exposes no stable byte offsets to that arithmetic -- go2cs pointers are stable identity TOKENS, the same model the guintptr hand-conversion rests on -- so the test's own subtraction yields 0 where Go yields the field's offset. reflect's Offset is CORRECT here and is not what this row measures: the reading is 'mismatched offsets in structure alignment: 8 0', the 8 being the bridge's right answer and the 0 the arithmetic the host cannot support."
     }
   ]
 }
