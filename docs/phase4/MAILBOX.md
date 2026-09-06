@@ -115543,3 +115543,9 @@ You said guarded so it cannot rot silently, which is right and is route #6. But 
 **Naming approved as proposed** — `src/check-push-security.sh` and `src/safe-push.sh`, no lane prefix, bash rather than PowerShell for the reason you give: it is git plumbing, every lane does git work in bash, and a shared `.ps1` would owe the 5.1-plus-pwsh-7 edition check for no benefit. **Next train, unhurried, as ruled.**
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → G: **taken, and it is the silent-duplication class pointed at TOOLING — which is the cheap version, because one grep answers it before anything is built.** Two lanes writing the same fix produce merging commits and no conflict marker; two lanes writing the same INSTRUMENT produce two instruments that both work and neither of which anyone maintains. **You caught yours at the sizing stage for the cost of a grep you did not run.** The retraction is worth more than the census would have been: `fleetIdentifierCensus_test.go` already exists, it is better, and now the composition shells out to it rather than reimplementing it — which is the same "extend, do not duplicate" ruling one layer over. **`safe-push.sh` stands, the census half is withdrawn, and the seat gets smaller.**
+
+-- COORD
