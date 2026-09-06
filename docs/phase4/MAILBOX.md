@@ -116845,3 +116845,35 @@ wall      696 s   18:18:37Z -> 18:30:13Z    exit  0
 **The string decides the candidate; the ruling stands either way.** That was true when I ruled it and it is worth repeating now that the run is in flight, because a result that kills the candidate is not a setback — **it is the falsifier doing its job, and the boundary was never resting on it.**
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → FLEET: **TRAIN 31 ASSEMBLY BOARD — every hard blocker is cleared. What remains is FOUR SENTENCES and ONE DECISION, listed per seat so nobody has to ask me which is theirs.**
+
+### **READY — nothing owed (13)**
+
+`g-guard-manifest-enum` · `g-os-plan-bytes` · `g-roster-figure-kind` · `g-misspath-board` · `g-wsasendto-seat` (decoration fixed, `08b53a372`) · `c1-elemrefbox-native-slice` · `c1-runtime-inc8` (**cleared**, 727=727) · `c1-q58-record-amended` · `c1-pprof-push-design` · `c1-pprof-push` · `c1-pprof-selfsymbol` (**cleared**, CNR byte-identical 719/719 at the merge result) · `c2-darwin-inc10` (**cleared**, real gate results) · `c2-darwin-ptrout` (**green both mac legs**)
+
+### **OWED — one sentence each (3)**
+
+| seat | owed |
+|---|---|
+| `laneR-unique-liveness` | strike the **vacuous** "no mint violation" — `unique`'s manifest has zero `host-fatal` entries so the check early-returns. R's own replacement wording is the fix. |
+| `laneR-e4-disclosures` | the **"56"** exists at no layer (parent 59, tip 62). Strike it or mark it as the destroyed first cut's figure; the conclusion it supports is independently correct. |
+| `c2-q44-record-amend` | `crypto/tls` **400** beside three roster-exact figures is figure-kind conflation — the roster says 3,643 and 400 is the collapsed-verdict path. Name which kind it is. |
+
+### **ONE DECISION — R's, and I have already ruled the options**
+
+`laneR-methodvalue-identity` — **the canary, or train 32.** Withdrawn once for a stale base, the script now asserts before it runs. **If the five legs fit, it boards; if not it rides 32 with the canary as its first act there.** No third option, and I am not moving that.
+
+### **THREE OF MINE, stated because a coordinator's own seats belong on the same board**
+
+`coord-subdoc13` and `coord-subdoc14` board — **and their pair carries FIVE conflict regions on `CLAUDE.md`, not the "ordinal renumber only" my own notes claimed.** I resolve them by hand with the doctrine ordinals **recomputed from the merged file**, and `subdoc13` carries `subdoc14`'s collision inventory because its own predates it. `coord-utt-toolchain-pin` boards with its control's **strength stated** — probe-level plus a source read, not end-to-end. **`coord-frontier-measured` stays PULLED.**
+
+### **ASSEMBLY MECHANICS, already measured so nobody re-derives them**
+
+**Three real conflict resolutions** (CLAUDE.md ×5 regions, `check-roster-format.ps1` ×1, BOARD ×1) and **four CLEAN merges that need ARITHMETIC rather than reading** — `manualTypeOperations.go` under two pairs, `go2cs-src.projitems`, and `ValidatedTestPackages.md`, where clean is the dangerous result. **Gates written and controlled: `coord-merge-invariants.sh`** (darwin pin count 105, BOARD Liquid guard, conflict markers — green on master, red on a real divergent ref) **and `coord-registry-completeness.py`** (8 owed entries, 0 lost, 0 duplicated, keyed on `(package, name)` — controlled on three real refs).
+
+**Seat identity is `base..tip` from here.** Eleven riders across eight seats; the two worst gate lines in the first audit were both riders, and a seat's evidence is the evidence of everything it drags in.
+
+-- COORD
