@@ -57,6 +57,14 @@ using go;
 // so a Linux -stdlib emission drops the auto bodies to placeholders and this file supplies them; the
 // other ~1,440 lines of signal_unix.cs keep reconverting. Darwin's copy stays auto until its own arc.
 // Design: docs/phase4/DESIGN-signal-posix-bridge.md (v2 amendment dated 2026-08-27).
+//
+// Q64 amendment (2026-09-05): sigignore installs the KERNEL SIG_IGN -- Go's setsig(sig, _SIG_IGN) --
+// for the CLR-FREE class (SIGUSR1/SIGUSR2 and the job-control trio SIGTSTP/SIGTTIN/SIGTTOU), because
+// the kernel's tty layer and an exec'd child consult the DISPOSITION, which a PosixSignalRegistration
+// does not carry. Without it a background-pgrp host under a controlling tty was STOPPED by SIGTTOU at
+// syscall.TestForeground's restore ioctl -- the mute class in a T-state costume: no handler, no
+// deadline, no results file. The CLR-owned signals keep the swallow model; the residual that leaves
+// (a child inheriting SIG_DFL for an Ignore'd CLR-owned signal) is stated at sigignore's else branch.
 [module: GoManualConversion]
 
 namespace go;
@@ -101,6 +109,13 @@ partial class runtime_package
     // signal the process was born ignoring.
     private static uint s_inheritedIgnoredMask;
 
+    // The signals this bridge itself set to the kernel SIG_IGN in sigignore (the CLR-FREE class
+    // below). Consulted by installPosixSignal, which clears the disposition back to SIG_DFL before
+    // .NET Creates a handler -- Create is a no-op over a live SIG_IGN -- so a Notify AFTER an Ignore
+    // reinstalls delivery, as Go's does. Distinct from s_inheritedIgnoredMask, whose bits feed the
+    // handler's die decision and are never cleared.
+    private static uint s_bridgeIgnoredMask;
+
     // MapPosixSignal maps a Linux/amd64 signal number to the .NET PosixSignal value that carries it,
     // or null for the residual. Numbers are the stable Linux ABI values mirrored by
     // defs_linux_amd64.cs. Positive values ride .NET's raw-number pass-through (see THE RESIDUAL in
@@ -117,6 +132,9 @@ partial class runtime_package
             case 15: return PosixSignal.SIGTERM;
             case 17: return PosixSignal.SIGCHLD;
             case 18: return PosixSignal.SIGCONT;
+            case 20: return (PosixSignal)20;  // SIGTSTP, raw platform number
+            case 21: return (PosixSignal)21;  // SIGTTIN, raw platform number
+            case 22: return (PosixSignal)22;  // SIGTTOU, raw platform number
             case 28: return PosixSignal.SIGWINCH;
             default: return null;
         }
@@ -230,10 +248,14 @@ partial class runtime_package
             return;
         }
         uint32 s = sig;
-        if (((s_inheritedIgnoredMask >> (int)sig) & 1) != 0)
+        if ((((s_inheritedIgnoredMask | s_bridgeIgnoredMask) >> (int)sig) & 1) != 0)
         {
             sys_signal((int)sig, SIG_DFL);
         }
+
+        // No longer ignored once a delivery handler exists. Only the BRIDGE bit is cleared: the
+        // inherited bit is what the handler's die decision consults and must survive.
+        s_bridgeIgnoredMask &= ~(1u << (int)sig);
         s_sigPosixRegs[key] = PosixSignalRegistration.Create(ps, ctx =>
         {
             if (sigsend(s))
@@ -410,16 +432,57 @@ partial class runtime_package
         var t = Ꮡsigtable.at<sigTabT>((nint)(sig));
         if ((int32)((~t).flags & (int32)_SigNotify) != 0)
         {
-            PosixSignal? ps = MapPosixSignal(sig);
-            if (ps is null)
-            {
-                return;
-            }
             lock (s_sigPosixLock)
             {
                 atomic.Store(ᏑhandlingSig.at<uint32>((nint)(sig)), 0);
-                installPosixSignal(sig, ps.Value);
+
+                if (sigIgnoreInstallsKernelDisposition(sig))
+                {
+                    // Go's sigignore IS setsig(sig, _SIG_IGN) -- a KERNEL disposition, and the kernel is
+                    // what consults it: tty_check_change lets a process in a BACKGROUND process group
+                    // run tcsetpgrp/TIOCSPGRP only if SIGTTOU is ignored (SIG_IGN) or blocked, else it
+                    // delivers SIGTTOU to that group, whose default action is STOP. exec inherits the
+                    // disposition too. A .NET PosixSignalRegistration is a HANDLER, not SIG_IGN: the
+                    // kernel does not treat it as ignored and exec resets it to SIG_DFL -- so the
+                    // swallow-in-handler model left this class at SIG_DFL and syscall.TestForeground's
+                    // restore ioctl STOPPED a background-pgrp host under a controlling tty (Q64; Q55's
+                    // Setpgid is correct and merely EXPOSED the latent gap). Drop any live registration
+                    // first -- the eager SIGUSR1 one -- so a later sigenable can re-Create a handler.
+                    if (s_sigPosixRegs.TryGetValue((int)sig, out PosixSignalRegistration existing))
+                    {
+                        existing.Dispose();
+                        s_sigPosixRegs.Remove((int)sig);
+                    }
+
+                    sys_signal((int)sig, SIG_IGN_HANDLER);
+                    s_bridgeIgnoredMask |= 1u << (int)sig;
+                }
+                else
+                {
+                    // A CLR-OWNED signal. Setting the kernel SIG_IGN here would clobber a live CLR
+                    // handler -- the same fact that keeps SIGCHLD out of the eager set -- so keep the
+                    // swallow model, which is the DELIVERY observable os/signal's own suite asserts.
+                    // RESIDUAL, stated rather than left implicit: a child of this process inherits
+                    // SIG_DFL, not SIG_IGN, for such a signal after an Ignore. No banked test exercises
+                    // it, and closing it would mean taking the signal away from the CLR.
+                    PosixSignal? ps = MapPosixSignal(sig);
+                    if (ps is not null)
+                    {
+                        installPosixSignal(sig, ps.Value);
+                    }
+                }
             }
         }
     }
+
+    // The signals whose Ignore installs the KERNEL SIG_IGN rather than the swallow-in-handler model:
+    // the user signals a child reads back across exec (SIGUSR1 10, SIGUSR2 12) and the job-control
+    // trio the tty layer consults at tcsetpgrp (SIGTSTP 20, SIGTTIN 21, SIGTTOU 22). Every one is
+    // CLR-FREE -- the CLR installs no handler of its own on them -- so SIG_IGN cannot clobber a live
+    // CLR install, unlike SIGCHLD (reaping) or SIGINT/SIGCONT/SIGWINCH (console). Go's Ignore is
+    // SIG_IGN for EVERY _SigNotify signal; the bridge narrows the kernel-disposition install to the
+    // class it can serve without taking a signal away from the CLR, and states the residual for the
+    // rest at sigignore's else branch.
+    private static bool sigIgnoreInstallsKernelDisposition(uint32 sig)
+        => sig == 10 || sig == 12 || sig == 20 || sig == 21 || sig == 22;
 }
