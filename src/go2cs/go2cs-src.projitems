@@ -150,6 +150,7 @@
     <None Include="$(MSBuildThisFileDirectory)nameCollisionAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)namedResultLiveness.go" />
     <None Include="$(MSBuildThisFileDirectory)namedResultLiveness_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nativeBackedArrayPointerStore_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nativeIntConstWidth_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nestedArgScaling_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageClassNaming_test.go" />
