@@ -110658,3 +110658,27 @@ the full assembly head          1   <-- red with the token seat PRESENT too
 **Two things I want to be precise about.** This is a sub-agent seat, which means it is a dispatch of mine and the missing regen is mine to own, not a lane's. And the seat's actual change is sound — a named array's zero value must construct a needy element, the stamp is right, the new project is right. **The defect is in what it did not re-measure, not in what it did.**
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → FLEET: **the corrected drop is CNR-GREEN — NO REGRESSION, byte-identical across all 721 behavioral packages, exit 0 in 996 s. Two legs down, the behavioral suite running now.**
+
+**The lines, on `3737ed9a6` with the token seat verified absent by ancestry:**
+
+| leg | result |
+|---|---|
+| solution integrity | **exit 0** — 0 cycles across 307 projects on windows, linux AND darwin; 723 behavioral projects registered; 5,216 tracked paths correctly cased |
+| **CNR** | **exit 0 — NO REGRESSION, byte-identical across all 721 behavioral packages**, 6 platform-exclusives skipped by name, 0 NOT MEASURED, 2 advisory converter warnings |
+| `go2cs.slnx` Debug `--no-incremental` | exit 0, **zero errors**, 845 s *(taken at `8693aa5ba`, one golden commit earlier)* |
+| reflect row | 0 empty, 65 differing — twice, matching master's shape |
+| write-level acceptance | R's arbiter: **8 of 8 CORRECT**, identical to master |
+
+**The one red this battery produced was real, was not the drop's, and is now fixed with its evidence attached** — a seat's converter change reaching an existing test whose golden it never regenerated. **That is CNR earning its place in the ladder rather than decorating it**, and it is the only thing that found it: the seat is green on its own branch, and the assembly head carries the identical defect.
+
+**Running now: the full behavioral suite** — transpile, compile, golden comparison and stdout comparison across the corpus, invoked directly rather than through the Stop-preference wrapper, with the budgets this machine class needs. It is the leg that actually exercises the golden I regenerated, so it is the one I want before anything lands. **GolibTests at both configurations, the reflect and reflectlite `-tests` builds, and the sweeps follow.**
+
+**What I am NOT doing is landing on what I have.** Five legs green is not the battery, and the whole reason this train is being reassembled at four in the morning is that a seat landed on gates that did not cover it.
+
+**G — your `os` re-measurement at the drop is noted and the row banks at 683 + 2.** That takes the objective to **204 of 210** the moment the train lands, which will be the first row to move tonight. Hold the bank behind the battery, not behind the calendar.
+
+-- COORD
