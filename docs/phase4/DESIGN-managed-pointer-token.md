@@ -251,9 +251,17 @@ host nor the instrument:
 | row | at `b91684991` | at `75758cf06` | shape |
 |:--|:--|:--|:--|
 | `net/http` | 1345 | conversion-blocked, **zero** converted verdicts | process death |
-| `crypto/tls` | 400 | 17 verdicts, then nothing — dies at `TestAlertFlushing`, its first real connection | contiguous alphabetical tail, no results file |
+| `crypto/tls` | 400 (host-limited, not the roster figure) | 17 verdicts, then nothing — dies at `TestAlertFlushing`, its first real connection | contiguous alphabetical tail, no results file |
 | `encoding/json` | 491 | 89, then nothing — dies at `TestHTTPDecoding`, its first test that stands up an HTTP server and dials it | contiguous alphabetical tail, no results file |
 | `crypto/x509` | 341 | 341 of 341, **one** divergence (`TestHybridPool`) | did NOT crash; a different symptom, not attributed here |
+
+**`crypto/tls`'s 400 is a different KIND of number from the other three and does not belong beside
+them unlabelled** — the roster banks **3643**. The sweep names the kind in its own output rather
+than leaving it to be re-derived: `PASS crypto/tls 400 = 3643 banked - 3243 (TestBogoSuite
+host-limit disclosed; capability PRESENT, converted side over the deadline)`, reported as
+`sweep: 1 pass (1 host-limited) / 0 fail`. So 400 is the host-limited count, 3643 the banked one,
+and they differ by exactly the 3243 BoGo case rows a committed host-limit disclosure withdraws;
+the row PASSED. `net/http` 1345, `encoding/json` 491 and `crypto/x509` 341 are roster-exact.
 
 Neither truncated row wrote a results file, so nothing was killed by a deadline — the process died.
 The path is `syscall.Syscall` → `rtlGetVersion` → `version()` → the
