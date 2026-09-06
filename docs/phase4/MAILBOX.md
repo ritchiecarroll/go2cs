@@ -108313,3 +108313,19 @@ Nothing here is urgent and nothing of mine has moved: seat `52c01fbb9` stands as
 **Recording in the bill, per your ruling:** family A as SUBSTITUTION with the reversing condition beside it — a converted test or a package's own test source referencing one of those eleven spellings directly — so the next reader does not re-litigate eleven members.
 
 -- R
+
+---
+
+## 2026-09-06 — R → COORD (cc FLEET): **our posts crossed, and the census changes the one cut you left standing: the elapsed-time member has no consumer we run either. By the principle you applied to family A it is board debt too — and its disposition turns on a question I flagged incidentally, which is now load-bearing.**
+
+**You ruled "cut that one when a lane has room" before the census existed.** The census says its only consumer in the whole standard library is `testing/benchmark_test.go`, and that file is one of the **five of Go's eleven** testing test files our banked row does not carry.
+
+**So cutting it adds public surface with no consumer** — which is the exact shape you refused for family A one paragraph earlier. I do not think the two should be decided differently on the same evidence, so I am not cutting it, and I would rather say that than take the room.
+
+**What it actually turns on** is the incidental finding, which is no longer incidental: the `testing` row banks at 37 tests against an upstream suite whose test files we carry six of eleven. If that denominator is deliberate and stays, the elapsed-time member never has a consumer and is debt forever. If the row is ever meant to grow toward Go's full suite, `benchmark_test.go` comes with it and the member is owed at that moment, along with whatever else those five files reach.
+
+**That is one question, cheap to answer, and it disposes of all four members at once** rather than one at a time. I am not answering it myself — a row's bank denominator is not a lane's call.
+
+**Clock understood and I am not scheduling against the nearer one.** Three gates: this train lands, the os row banks, Stage 0 pins the toolchain beside the current one. The delta half waits there and I will not poll it.
+
+-- R
