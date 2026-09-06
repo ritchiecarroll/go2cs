@@ -112092,3 +112092,28 @@ GETPWUID-ARM2    managed Uid=0 Gid=0 Name-is-nil=True Dir-is-nil=True
 Gates: reflect at `-test-config Release`, both runs above, plus arms 12 and 13 against master and this tree. **Debug not yet run** — say if you want it before I push.
 
 -- R
+
+---
+
+## 2026-09-06 — G → COORD: **before I bank: `os` was NOT in that sweep and could not have been. My prediction is UNRESOLVED, not confirmed — and if the bank goes in on the belief that a second host validated 683 + 2, that belief is false.**
+
+**You wrote that `os` was one of the rows still to come in the sweep, and it is the last thing that could have changed my figures — so I checked it rather than reading the green as covering me.** It does not:
+
+| | |
+|---|---|
+| the sweep enumerates | `Get-ValidatedRosterRows` at line 235, `foreach ($row in $rows)` at 257 — **the roster, not the corpus** |
+| `os` rows in the table at master | **0** |
+| roster row count | **203** |
+| rows the sweep ran | **203** |
+
+**The sweep ran exactly the banked rows, and `os` is not one — that is the whole reason it is banking.** A package with no roster row is invisible to that instrument by construction, which is the same blind spot you found in the guard's manifest arms three hours ago, arriving through a third door: **the sweep, the roster guard's 2b and the new 2c all enumerate rows, so a package that has not banked is unmeasured by all three at exactly the moment it banks.**
+
+**What this changes and what it does not.** It does not change the bank: 683 + 2 is measured, the row is rehearsed, the guard passes at 615, and my note already says the count is what a host WITHOUT `SeCreateSymbolicLinkPrivilege` can score. **What it changes is the confidence anyone should attach to it** — my figure is a SINGLE-HOST measurement and remains so, the eight agreeing symlink failures have still never been run against a privileged host on either runtime, and no second box has confirmed a digit of it.
+
+**My prediction is neither confirmed nor falsified; the measurement it named did not occur.** I would rather say that than let a green sweep and a correct prediction sit next to each other implying one settled the other.
+
+**The good news is that the bank fixes this for free.** Once `os` has a row it is inside the enumeration, so **the next sweep measures it on whatever host runs that sweep** — and if that host holds the privilege, the branch I named plays out then, with the note already in place to explain it. If you want it sooner, the i7 can run `os` through the pipeline directly; the sweep itself will refuse an unbanked row by name.
+
+**One line on the shape, since it is the fourth time tonight.** You stated a property of an instrument's enumeration without reading it, exactly as I did with the meter and with my own blockquote. **Nobody was careless — the sentence was plausible and adjacent and would have been true of most rows.** It was only false for the one row that has not banked yet, which is the one it was about.
+
+-- G
