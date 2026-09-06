@@ -1982,6 +1982,41 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// zsyscall_windows_module_impl.cs.
 		"Module32First": goosWindows,
 		"Module32Next":  goosWindows,
+		// The VERSION member of the struct-passing class, and the first one a POINTER-MODEL change
+		// unmasked rather than a new caller reached. Body in zsyscall_windows_version_impl.cs.
+		//
+		// The layout, in numbers. `_OSVERSIONINFOW` (version_windows.go) is 276 bytes: five uint32 --
+		// osVersionInfoSize, majorVersion, minorVersion, buildNumber, platformId -- then
+		// `csdVersion [128]uint16`, 256 bytes INLINE. The converted struct holds csdVersion as a golib
+		// `array<uint16>` MANAGED REFERENCE, so the CLR auto-layouts the record at roughly 32 bytes
+		// with the reference grouped ahead of the scalars, and the generated wrapper hands ntdll
+		// `(uintptr)Ꮡinfo`. RtlGetVersion then writes a full 276-byte native record over that object.
+		//
+		// WHY IT IS LOUD NOW, and why the noise is the fix working. Before the pointer-token cut,
+		// `(uintptr)` of a box PINNED it and published a real managed address, so the class took its
+		// quiet shape: ntdll wrote 276 bytes over a ~32-byte object, `version()` read
+		// majorVersion/minorVersion/buildNumber from offsets the kernel had not written as those
+		// fields, and the function answered ZEROS with no error -- the Process32First shape, a wrong
+		// answer nothing announces. The cut makes `(uintptr)` of a box whose pointee carries managed
+		// references mint an opaque TOKEN instead (golib ж.PointerTokens.cs; such a pointee has no
+		// pinnable storage, so there is no address to publish and inventing one is the CLR
+		// type-safety break ж.PointerExtensions.cs names). ntdll therefore writes through a token
+		// value and the process dies with 0xC0000005. The cut is right; this wrapper was always
+		// wrong, and the fault merely stopped hiding.
+		//
+		// WHO REACHES IT: `version()` is called by initTCPKeepAlive and by
+		// initSupportTCPInitialRTONoSYNRetransmissions, which net.connect runs on EVERY Windows TCP
+		// dial -- so the behavioral guards TcpLoopbackRoundTrip and NetDeadlineMatrix both died in
+		// their Output phase with `exit code mismatch: C# -1073741819 vs Go 0`, and no converted
+		// program could open a TCP connection on Windows.
+		//
+		// Remedy: the ordinary blittable mirror this class has now taken five times
+		// (GetTimeZoneInformation, findFirstFile1, Process32First, adjustTokenPrivileges,
+		// Module32First) -- a `fixed`-buffer native image on the stack, the SAME LazyProc call, and a
+		// field-for-field copy back. It applies here, where it could not apply to NetShareAdd, because
+		// this wrapper receives the record as a TYPED `ж<_OSVERSIONINFOW>`. Only this one declaration
+		// is hand-owned; everything else in the generated file passes scalars and handles.
+		"rtlGetVersion": goosWindows,
 	},
 	// The three WORD-SIZE leaves of math/bits, and only those three. math/big calls Mul and Add from
 	// the innermost loop of Montgomery multiplication -- every RSA private-key operation -- and the
