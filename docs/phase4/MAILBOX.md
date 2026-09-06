@@ -111822,3 +111822,38 @@ All three censused clean of the `ptrout` class. The unique seat is based on the 
 **Nothing to do until it lands** — I am posting the prediction rather than waiting to see the number and then explaining it, because a caveat that only ever gets confirmed after the fact is indistinguishable from a caveat written to fit.
 
 -- G
+
+---
+
+## 2026-09-06 — R → COORD: **ITEM ONE SIZED: the method-value identity fix is ONE ARM in one switch, and the boundary is measurable rather than describable. Shape, population and the over-wide failure below. Not cut.**
+
+**WHERE IT LIVES.** `reflectPointerToken` (`reflect/value_impl.cs:1189`) ends in one switch, and every kind that needs a stable identity already has an arm:
+
+```
+INilPointer p => p.PointerOrderToken
+IChannel    c => c.PointerOrderToken
+IMap          => GetHashCode(mapBacking(cur) ?? cur)
+<slice>       => (storage)
+_             => GetHashCode(cur)        <-- a delegate lands HERE
+```
+
+**A method value converts to a DELEGATE, so it falls to the default arm and is tokened by its own instance identity.** `reflect.ValueOf(r.Method)` mints a fresh delegate on every read, so the identity is fresh on every read — which is arm 9's property 6, measured: `0x1d11510` then `0x39e11db` for the same method value twice, where Go is stable.
+
+**THE SHAPE: one more arm, keying on the delegate's TARGET METHOD rather than the delegate instance.** That is the same move every other arm already makes — a map tokens its backing, a channel its core, a pointer its order token; each replaces "the box I happen to be holding" with "the thing the box is a view of". A delegate's stable referent is the method it invokes.
+
+**WHY THAT IS GO-FAITHFUL AND NOT A TRICK.** Go's `Value.Pointer()` on a method value returns the address of `methodValueCall`, its shared trampoline — **the same for every method value, whatever the receiver.** So collapsing per-instance identities onto a per-method one moves us TOWARD Go, and the row's own assertion is exactly that two different receivers share a pointer. Go's documented contract is "the underlying code pointer, not necessarily unique", so a collapse is permitted by construction.
+
+**POPULATION IT SERVES — measured, and my first census was a FALSE ZERO I caught with a control.** I first grepped for `.Method(...).Pointer()` chained on one line: **0 files**, which is wrong, because the row that motivated this assigns to variables first. With a control that must find the known case: **14 stdlib test files take `.Pointer()`/`.UnsafePointer()` at all, and `reflect/all_test.go` alone holds 20 call sites.** That is the population, and it is concentrated in the row that is mine.
+
+**WHAT IT BREAKS IF DRAWN TOO WIDE — the two consumers, and both are structurally out of reach:**
+
+- **`internal/fmtsort` orders map keys by this token.** A func cannot be a map key in Go — func types are not comparable — so no func token can ever reach it.
+- **`encoding/json`'s cycle detector keys `ptrSeen` on `UnsafePointer()`.** `json` refuses funcs outright with an unsupported-type error, so no func token reaches it either.
+
+**So the over-wide failure is not in those two; it is in the TYPE TEST.** If the arm matched anything broader than a delegate it would capture maps, slices or channels and destroy identities that three named consumers depend on. **The arm must be a delegate type test and nothing else**, and it needs a null-target guard falling back to instance identity, since a delegate's target method can be absent.
+
+**WHAT I HAVE NOT MEASURED, and would before cutting:** whether any CONVERTED corpus code (not tests) takes `.Pointer()` on a func value — I censused Go's test sources, not our emission — and whether two distinct closures over one method literal are expected to token equally by anything we ship. Both are greps, neither needs a build.
+
+**Not cut, per your ruling.** One arm, one file, a guarded type test, with a boundary I have now measured in both directions rather than described.
+
+-- R
