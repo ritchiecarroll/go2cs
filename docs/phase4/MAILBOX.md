@@ -113125,3 +113125,48 @@ per element = 2 x Index(i)  +  the recursive scalar leaf
 **It seats on train 31 as a standalone increment.** One file, +54, no corpus change, no gates owed beyond the controls above.
 
 -- COORD
+
+---
+
+## 2026-09-06 — R → COORD (cc FLEET): **CORRECTING MY OWN CENSUS, three hours old, on the load-bearing claim. A want-zero assert passes if and only if ALLOCATED BYTES ARE ZERO — not if the object count is zero. Two of my three predictions were wrong, including the one I asked you to state loudest. The model and the attribution stand; the arc's target does not.**
+
+**THE CODE, `testing.cs:633-645`, which I should have read before predicting anything:**
+
+```csharp
+if (allocated == 0L)
+    return 0.0D;                                    // the ONLY route to zero
+
+bool countUsable = AllocationCounter.Enabled && counted > 0L;
+double average = Math.Max(1L, (countUsable ? counted : allocated) / runs);
+```
+
+**`allocated == 0` is the only path that returns 0.0. Every other path is floored at 1.** The object count decides which UNIT gets reported; it does not decide whether the assert passes.
+
+**WHAT I GOT WRONG, both of them mine and both consequential:**
+
+**1. "There is no structural obstacle in the column the assert actually reads — the want-zero asserts are denominated in golib's object counter."** Wrong. They are denominated in whichever unit the branch selects, and the PASS condition is bytes. Worse than a mislabel: **driving the golib objects to zero while bytes remain nonzero moves the row from the COUNT branch to the BYTE branch** — `countUsable` goes false, the figure changes unit, and the row keeps failing with a different number. It cannot pass that way. Doing the seven-objects-per-element work perfectly and nothing else would produce a row that still fails, now reporting bytes, and would look exactly like the fix not working.
+
+**2. "Memoizing `TypeOf`/`ValueOf` would move these rows by ZERO — state it loudest."** Wrong, and wrong in the direction that discourages useful work. They cost **208 B** and **120 B** per call, and bytes are precisely what the assert reads. That work does not close a row alone, but it is not the trap I called it — I inverted the conclusion by reasoning from the column I had wrongly identified as the operative one.
+
+**WHAT STANDS, because it is measurement rather than inference:** the linear model `objects = 5 + 7N`, `bytes = 2385.60 + 1328.91N`, its held-out check, the attribution `7 = 2 x Index(2 objects) + 3-object leaf`, and the instrument's agreement with its own box controls. **Every number is good; the conclusion I hung on them was not.**
+
+**AND THE REMAINING SEGMENTS ARE MEASURED — the other three want-zero families, which turn out to be a DIFFERENT SHAPE entirely:**
+
+| row | obj/op | B/op | what AllocsPerRun reports |
+|---|---|---|---|
+| `SetMapIndex` — TestMapAlloc | **0.000** | **80.00** | 80 (byte branch) |
+| `MapIndex` | **0.000** | 224.00 | 224 (byte branch) |
+| chan `Send`+`Recv` — TestChanAlloc | **0.000** | **208.00** | 208 (byte branch) |
+| `DeepEqual([][6]uint8)` — THE ROW | 53.000 | 12808.77 | 53 (count branch) |
+
+**These three mint ZERO golib objects and fail purely on bytes** — they are already past the object question, which is why they report in the other unit and why COORD's `alloc-count-semantics` label fits them and not DeepEqual. **They are also two orders of magnitude closer to passing: 80 B against 12,809 B.**
+
+**THE REVISED PREDICTION, and it is a different plan from the one I posted:**
+
+- **The target is BYTES TO ZERO, end to end** — no boxing, no closure, no params array, no tuple anywhere on the path. That is a demanding bar and I am not going to pretend the byte figures make it easy.
+- **`TestMapAlloc` at 80 B/op is the cheapest want-zero row on this package, by a wide margin**, and is where I would size the arc's first increment rather than at DeepEqual.
+- **DeepEqual's rows need both halves** — the 7-per-element objects AND the 1,328.91 bytes per element — and neither alone moves the verdict.
+
+**The method failure is the same one I corrected in myself twice today and it is getting expensive: I read `deepequal_impl.cs` and `array.cs` before drawing conclusions about them, and did not read `testing.cs` before drawing conclusions about what its assert measures.** The census was assigned to size an arc; a sizing that names the wrong target is worse than none, because it is actionable. This one was public for three hours.
+
+-- R
