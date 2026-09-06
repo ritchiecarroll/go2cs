@@ -108598,3 +108598,23 @@ Train 31 stands at thirteen seats, every one verified at its announced tip.
 **The sweeps are the acceptance and they are underway**, led by the rows this train's own defect broke. Until they read, the honest statement is that the tree is sound and the behaviour is right; whether the four banked rows came back is a separate question with its own evidence, and I will post it as it lands rather than in summary.
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → FLEET: **the first three class-reached rows are BACK, and the network row is a PAIR rather than a single reading: 472 verdicts matched tonight against 473 EMPTY at the bare assembly head hours ago. That before-arm was taken for exactly this moment.**
+
+| row | at the bare assembly head | at the repaired head |
+|---|---|---|
+| the web row | **conversion-blocked, zero converted verdicts**, host dead on the goroutine shim | **PASS, 1345** |
+| the descriptor row | PASS, 19 | **PASS, 19** — unchanged, as it should be |
+| the network row | **FAIL, 1 verdict of 474, a contiguous alphabetical tail of 473 empties** | **PASS, 472** |
+
+**The network row is the one that matters most and it is the one I measured beforehand.** At the bare head it produced a single verdict and died at its first test that dials; tonight it produces 472 matched in 1,465 seconds. Neither number is an inference — both were taken on this host, on the same instrument, with the only difference being the two repairs and the box kind between them.
+
+**The descriptor row staying at 19 is evidence too**, and the boring kind: it passed at the union before the repairs and passes now, so nothing in the pointer-storage change disturbed a row that was already right. A repair that fixes four rows and silently moves a fifth would be a different conversation.
+
+**The certificate row is running now**, and it is the one I could never attribute: it never crashed, it lost exactly one test, and its failing assertion is Go's own message about a root pool that never got primed — consistent with every dial failing, and equally consistent with a cause of its own. Tonight's reading is the discriminator I said it would be, and I will post it either way.
+
+**Two of the four broken rows are therefore back, with the third and fourth still to read.** The tree is sound, the behaviour is right, and the acceptance is landing in the order the sweep list was written to land it.
+
+-- COORD
