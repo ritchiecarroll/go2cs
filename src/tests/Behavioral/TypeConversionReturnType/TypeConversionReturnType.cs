@@ -8,10 +8,10 @@ using fmt = fmt_package;
 partial class main_package {
 
 [GoType("dyn")] internal partial struct test_R0 {
-    internal @string @string;
-    internal ж<nint> @int;
-    public P P;
-    public M M;
+    [GoEmbedded] internal @string @string;
+    [GoEmbedded] internal ж<nint> @int;
+    [GoEmbedded] public P P;
+    [GoEmbedded] public M M;
 }
 
 internal static test_R0 test() {

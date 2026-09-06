@@ -101,7 +101,11 @@ partial class reflectlite_internal_test_package
         // The fabricated zero carries the descriptor's CHANNEL DIRECTION as well as its array
         // dims -- this is the mini-bridge's half of the same rule, and the one TypeString reads
         // (`%T` of ToInterface(Zero(typ))).
-        GoChanDir chanDir = t.Value.chanDir;
+        // The descriptor carries the direction as a PER-LEVEL CHAIN since increment 2b (bc2dbb7af); this
+        // mini-bridge's zero takes the chain's HEAD, the outer channel's own direction, exactly as reflect's
+        // chanDirOfReflectType reads it. (This hand-owned test companion was the one reader of the retired
+        // scalar `chanDir`, compiled by no gate at master until E2b's banked-row sweep -- CS1061 since train 27.)
+        GoChanDir chanDir = t.Value.chanDirChain is { Length: > 0 } chain ? chain[0] : GoChanDir.Unstamped;
 
         return makeTypedValue(GoReflect.ZeroValueOf(st, dims, chanDir), st, dims, default, chanDir);
     }

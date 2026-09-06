@@ -278,7 +278,7 @@ public static void TestValueSwapConcurrent(ж<testing.T> Ꮡt) {
 
 
 [GoType("dyn")] partial struct heapAᴛ1 {
-    internal nuint @uint;
+    [GoEmbedded] internal nuint @uint;
 }
 internal static heapAᴛ1 heapA = new heapAᴛ1(0);
 internal static heapAᴛ1 heapB = new heapAᴛ1(0);

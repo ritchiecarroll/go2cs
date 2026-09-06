@@ -414,7 +414,9 @@ public static partial class GoReflect
             nint[]? dims = KindOf(field.FieldType) == Array ? FieldArrayDims(t, field) : FieldStampedDims(field);
             GoChanDir fieldDir = KindOf(field.FieldType) == Chan ? FieldChanDir(t, field) : GoChanDir.Unstamped;
             ChanCargo? fieldCargo = KindOf(field.FieldType) == Chan ? FieldChanCargo(t, field) : null;
-            result.Add(new GoFieldInfo(projected, field.FieldType, dims, [.. prefixPath, field], [.. prefixHops, false], goTagOf(field), chanDir: fieldDir, keyDims: FieldMapKeyDims(field), descriptorSelf: FieldDescriptorType(field), chanCargo: fieldCargo));
+            // A plain field the converter stamped [GoEmbedded] is a Go EMBEDDED field of a predeclared
+            // type (`struct{ int }`): nothing to promote, so no `partial ref` shape to key on (E2b).
+            result.Add(new GoFieldInfo(projected, field.FieldType, dims, [.. prefixPath, field], [.. prefixHops, false], goTagOf(field), embedded: field.IsDefined(typeof(GoEmbeddedAttribute), false), chanDir: fieldDir, keyDims: FieldMapKeyDims(field), descriptorSelf: FieldDescriptorType(field), chanCargo: fieldCargo));
         }
 
         reorderToGoDeclarationOrder(t, result, first);

@@ -56,7 +56,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("ReflectFieldMetadata.go", "ReflectFieldMetadata.cs", "AENuhIKEhoKCgoKChIqCgoKCgoKC")]
+[assembly: go.GoPositionMap("ReflectFieldMetadata.go", "ReflectFieldMetadata.cs", "AFl+hIKEhoKCgoKChIqCgoKCgoKChoKClIKCgg==", "93-96:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -74,9 +74,14 @@ public static partial class main_package
     // <TypeAccessibility>
     internal partial struct @base {}
     internal partial struct embeds {}
+    internal partial struct embedsInt {}
+    internal partial struct embedsIntPtr {}
+    internal partial struct embedsNamed {}
     internal partial struct holds {}
+    internal partial struct holdsNamed {}
     internal partial struct local {}
     internal partial struct main_i {}
+    internal partial struct myInt {}
     internal partial struct once {}
     internal partial struct sElem {}
     internal partial struct sElemᴛ1 {}

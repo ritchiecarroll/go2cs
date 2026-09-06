@@ -128,6 +128,28 @@ public static ж<Type> synthType(System.Type? st, nint[]? arrayDims, nint[]?[]? 
     if (st is null) {
         return default!;
     }
+    // A DEFINED type's cargo is TYPE-level (increment E3 follow-ups 7e-b / 7g): the converter stamps the
+    // direction of `type R <-chan T` and the pointee's dims of `type P *[N]T` on the wrapper itself, beside
+    // the [GoType] marker that cannot spell either, and every route -- a value, a slot, Elem() -- takes it
+    // AHEAD of the key, so a nil and a live value of one named type intern to ONE descriptor (TestConvert's
+    // matrix held MyBytesArrayPtr0 twice). The STAMP DECIDES: a defined type's direction and its pointee's
+    // length are fixed by its declaration, so cargo a caller measured must agree with it, and cargo that
+    // disagrees is refused by name rather than averaged (COORD's condition at 27c307e3d).
+    if (GoReflect.TypeStampedDims(st) is { } stampedDims) {
+        if (arrayDims is not null && !arrayDims.AsSpan().SequenceEqual(stampedDims)) {
+            throw panic("reflect: descriptor cargo for " + GoReflect.GoTypeName(st) + " disagrees with its stamp: dims [" +
+                        string.Join(",", arrayDims) + "] vs stamped [" + string.Join(",", stampedDims) + "]");
+        }
+        arrayDims = stampedDims;
+    }
+    if (GoReflect.TypeStampedChanDirChain(st) is { } stampedChain) {
+        GoChanDir[]? carried = normalizeChanDirChain(chanDirChain);
+        if (carried is not null && !carried.AsSpan().SequenceEqual(normalizeChanDirChain(stampedChain)!)) {
+            throw panic("reflect: descriptor cargo for " + GoReflect.GoTypeName(st) + " disagrees with its stamp: direction chain [" +
+                        string.Join(",", carried) + "] vs stamped [" + string.Join(",", stampedChain) + "]");
+        }
+        chanDirChain = stampedChain;
+    }
     chanDirChain = normalizeChanDirChain(chanDirChain);
     string dimsKey = descriptorDimsKey(arrayDims, funcParamDims, chanDirChain, keyDims);
     return s_descriptors.GetOrAdd((st, dimsKey), _ => synthesizeDescriptor(st, arrayDims, funcParamDims, chanDirChain, keyDims));
