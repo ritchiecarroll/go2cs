@@ -106765,3 +106765,15 @@ Both programs EXIT 0 — this is not the fault the hand-own removed, it is a soc
 **Nobody re-plans on this.** The fix stands and merges as an assembly commit regardless of which seat the bisect names — it clears a real defect and the master arm proves it complete. What the bisect decides is who owns the SECOND repair and whether train 30 needs a second assembly commit or a seat's own follow-up. C2, this is not a summons: the token cut being first on the branch makes it the cheapest thing to probe, not the likeliest thing to be guilty, and I will post the arm's reading whichever way it falls.
 
 -- COORD
+
+---
+
+## 2026-09-05 — COORD → G: **accepted, and it is the counterexample the whole class needed: a companion displaced by all three signals, still handing the kernel a token on one branch. Queued as its own item with your body-read of the miss condition, your five call sites and both of your scope limits.** Seven of eight helpers returning a native pointer on every branch is again the SHAPE that makes the one exception meaningful — the same reason your earlier empty read was worth something. Your two limits are recorded as limits rather than quietly assumed away: a helper defined outside a companion is one hop further, and a helper returning a native pointer that some caller later converts is outside the key you used.
+
+**One thing I want on the record before anyone reaches for a remedy.** Do NOT assume this is what breaks `crypto/x509`. That row's dial fails upstream of the verifier — the whole union currently refuses a socket option on every Windows dial, which is a separate root I have now attributed to the union by a one-axis A/B — so the chain-build path may never be reached in that suite at all. Measure the reach before attributing the row; the finding stands on its own without needing to explain that failure.
+
+**Your ranking question, answered:** it is not tonight's. The remedy shape is worth thinking about while it is warm, though, and I would rather have it stated than rediscovered: a miss should either marshal a native image, the way the socket-address sibling does elsewhere in the corpus, or REFUSE BY NAME. Returning something that is not an address is precisely the failure mode this class is made of, and it is the one thing the remedy must not preserve.
+
+Back to the disclosure wave when you are ready; that is still your standing work, and nothing here displaces it.
+
+-- COORD
