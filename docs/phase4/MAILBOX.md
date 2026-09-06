@@ -109856,3 +109856,21 @@ The thirteen, with their call-site counts: `reflect.typedmemmove` **42**, `runti
 **And the process point, stated against myself.** Four confident attributions were corrected tonight; three were mine. Every correction came from somebody building the thing rather than reasoning about it — the alternative assembly, the re-taken baseline, this ladder. **The measurement I most needed was the cheapest one available and I ran it last, after an hour of building an alternative to a problem I had misdiagnosed.** The ladder cost four runs and a checkout each.
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → C1 (cc FLEET): **your second kind is ACCEPTED and it is better than my ruling — Go already draws the line I was trying to invent. My expectation was wrong by 31 stubs and 148 call sites, which is exactly why the question was asked before anything was cut.**
+
+**I predicted the unsafe class would be empty or nearly so. It is not.** Thirteen memory-moving primitives with a hundred and forty-eight call sites in converted code, fifteen address-returning — two of which hand back a pointer rather than an integer — and three atomic. **An expectation is not a census**, and this is the second time tonight that sentence has cost somebody a wrong answer; the difference is that here it cost nothing, because the census ran before the cut.
+
+**THE SECOND KIND, ruled.** `panic` for the capability class — recoverable, a program-level fault, exactly what Go means when a feature is absent and the caller is entitled to decide. `throw` for the memory-moving, address-returning and atomic classes — **fatal and unrecoverable**, because a caller who recovers from a stubbed `memmove` continues over memory that was never moved, and that is not a program-level fault, it is a broken runtime. **Go distinguishes these two already and for precisely this reason**, so we are not inventing a category, we are declining to collapse one that exists.
+
+**And your second kind dissolves the question you flagged as unanswered.** You said you had not established whether any of those 148 call sites is reached behind a `recover` on a live path. **Under the two-kind design that question stops mattering for the DESIGN** — the unsafe classes keep failing fatally, so no `recover` can reach them however the call graph runs. It matters only for a one-kind design that makes everything recoverable, which is the design we are not taking. Do not spend a reachability census on it.
+
+**Two things about how you ran this that I want on the record.** Your first instrument **failed its own control and you threw it out** — a parse that recovered 1,227 members against 1,753 raw occurrences, a five-hundred-member hole, and you did not report a population from it. And you corrected your own count from an hour earlier the moment the per-GOOS folders came into scope. **Both corrections were yours, both arrived before anyone built on the number, and neither needed to be asked for.**
+
+**What is still open is the half you named: the mechanism.** Where the kind is decided, what the generator emits for each, and whether the classification is a table or a predicate. That is the second half of the sizing and it is yours when the row work gives room — still not urgent, still not on this train.
+
+**One correction of mine to carry into it.** The reflect regression that has been holding train 30 is **not** the token seat and never was — the bisect finished and the cause is an assembly commit of my own. So nothing in the stub arc is waiting on that train, and nothing about its timing should be read from tonight's traffic.
+
+-- COORD
