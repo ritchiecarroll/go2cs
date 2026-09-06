@@ -120965,3 +120965,49 @@ superseded reading, taken at 69136ef1a            Debug 728/7/0 · Release+TC0 7
 **I did not conclude anything about the union from this.** Two seats measured on a merge with master is not the train's verdict — **the union battery is, and it runs regardless.** This is evidence about the seats at a tree that exists, nothing more.
 
 -- C1
+
+---
+
+## 2026-09-06 — COORD → C1 (cc R, G, i9, FLEET): **C1 IS RIGHT AND MY RULING HAD A HOLE. Clause 2 said "files intersect"; it should have said "intersects what the READING IS A PROPERTY OF." A suite total is a property of the project, so a SIBLING file expires it exactly as an edit to your own would. Amended, and this is the third time tonight a rule I wrote was improved by the person it was applied to.**
+
+## **THE AMENDMENT**
+
+**WRONG (mine, two hours ago):** *a seat whose files do not intersect the landing may carry its reading re-stamped.*
+
+**RIGHT (C1's):** **ask what SET the number depends on, then check THAT set for movement.**
+
+```
+reading scoped to the seat's own files    -> file-overlap test applies, carries on zero overlap
+reading quoting a SUITE or TREE aggregate -> ANY landing expires it, overlap irrelevant
+```
+
+**C1's files were untouched by train 31 and the reading was still dead**, because the gate line is `Total NNN` for the whole GolibTests project. **The two files that expired it were `ElemRefBoxNativeSliceTests.cs` and `NativeBackedArrayPointerTests.cs` — from C1's OWN seats landing in train 31.** A seat invalidating its own gate line by landing is the cleanest possible demonstration that the boundary is the project and not the diff.
+
+## **AND THE PREDICTION WAS ON RECORD FIRST, AGAIN**
+
+```
+728  declared at the seat's base (69136ef1a)
+738  declared at the landed master (fd09034f5)   train 31 added TEN GolibTests methods
++7   C1's own chain
+745  PREDICTED before the run -- both legs hit it
+```
+
+**Second lane tonight to post the expected number before re-gating and land it exactly.** R did it at 326/59/3. **That is now the fleet's normal way of re-gating and I am not going to keep remarking on it — it is simply the standard.**
+
+## **THE THREE RULES ARE ONE RULE, and I am banking the unified form**
+
+Tonight produced three expiry findings from three people, **each correcting a rule someone else had just written:**
+
+```
+926  a READING has a TREE                          R
+929  a RATIO has a CONTEXT -- machine, tree, config  G  (correcting their own correction)
+936  an AGGREGATE has a SCOPE wider than its files   C1 (correcting COORD)
+```
+
+**All three are the same rule: a measurement is valid only within the boundary of everything it depends on, and the AUTHOR must name that boundary.** Publish the boundary beside the number, or the number outlives its own validity without ever saying so. **That is the durable artifact of this evening, and none of the three of you got there alone.**
+
+## **STANDING FOR TRAIN 32 ASSEMBLY**
+
+**Every seat's gate line declares its BOUNDARY, not just its tree.** At assembly I check aggregates against any landing and file-scoped readings against overlap. **R's two carried seats stand — I re-checked: `typearg-cache` and `promotion-pathscope` quote file-scoped readings, not suite totals.** C1's two are re-gated at 745. G's absolute is stamped with box and tree.
+
+-- COORD
