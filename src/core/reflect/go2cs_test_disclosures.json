@@ -354,6 +354,24 @@
       "class": "runtime-capability",
       "signature": "heapBits incorrect",
       "reason": "runtime-capability: the verifyGCBitsSlice path compares a slice's HEAP-ALLOCATION GC bitmap. Go's gcbits(*E) reads the heap object at the pointer and returns the element's pointer bits REPEATED by the allocation's size class -- have [1] want [1 1], have [1] want [1 1 ...x10000], have [0 1] want [0 1 0 1]. The managed gcbits answers from the POINTEE TYPE's layout (GoReflect.GoGCMaskOf) -- the element's bits ONCE -- because the managed model has no allocation size class to repeat by, and reflect.NewAt's *E carries no cap it was never given. The non-slice verifyGCBits path (New(typ).Interface()) is unaffected. Same managed-model class as the alloc-count and pointer-identity disclosures (coordinator ruling 2026-09-02; C2's gcbits authority, R mints the reflect manifest entry)."
+    },
+    {
+      "name": "TestPtrToGC",
+      "class": "runtime-capability",
+      "signature": "value of type **uintptr cannot be converted to type *reflect_test.T",
+      "reason": "runtime-capability: the test converts a **uintptr to a DEFINED pointer type. A defined pointer type emits as a go2cs-gen wrapper CLASS, so there is no aliasing view of the outer slot to hand out and the conversion cannot be performed at all -- which is why increment E3 refused it BY NAME rather than approximating it. The refusal is the honest answer: an approximation would hand back a wrapper over a COPY, and this test's whole point is that the collector must see the pointer through the conversion. reflect's own Convert is correct for every shape where an aliasing view exists; this is the one where the object model does not admit one."
+    },
+    {
+      "name": "TestAlignment",
+      "class": "runtime-capability",
+      "signature": "mismatched offsets in structure alignment:",
+      "reason": "runtime-capability: the assert computes field offsets by uintptr ARITHMETIC over the receiver's own address and compares them against reflect's answers. Managed memory exposes no stable byte offsets to arithmetic -- the runtime is free to lay out and to move objects -- so the test's arithmetic yields 0 where Go's yields a real offset, and the printed pair (8 0, then 16 0) is the test's OWN number against the bridge's. reflect's own Offset is CORRECT here and is not what fails: the divergence is in the measuring instrument the test builds, not in the operation under test. Pinned on the stable prefix because the two occurrences print different offsets."
+    },
+    {
+      "name": "TestCallReturnsEmpty",
+      "class": "codegen-liveness",
+      "signature": "finalizer did not run",
+      "reason": "codegen-liveness: Go's liveness maps drop a local at its LAST USE. The test writes v := ValueOf(f).Call(nil)[0] and NEVER NAMES the intermediate []Value, so Go frees it before runtime.GC() and the finalizer on out[1] -- the *[2]int64 the test waits for -- runs inside the wait. The converted host keeps a caller frame slot rooted for that intermediate while it stays in scope, so out[1] survives the collection and the wait times out with Go's own message. runtime.SetFinalizer is FULLY WIRED here (a ConditionalWeakTable keyed on the referent, with a sentinel that resurrects the box for the call), so a finalizer that does not run means retention rather than a missing feature. MEASURED as a one-axis pair, each arm also run under Go as its own oracle -- (7a) the row's line verbatim: Go COLLECTED / Release+TC0 RETAINED; (7b) the intermediate NAMED and CLEARED, the only axis varied: Go COLLECTED / Release+TC0 COLLECTED. 7a retains and 7b collects, so the pin is SOLELY the frame slot holding the intermediate. That same pair is the anti-laundering control, and it is why this is a disclosure and not a defect: Go issue 21717, which this test exists to catch, is about out[0] ALIASING out[1]'s storage -- if that alias existed here, clearing the slice could not help, because v still holds out[0] and is kept alive across the collection, so 7b would have read RETAINED. It reads COLLECTED. Call does not alias its zero-sized return over the next one; the defect this test guards is measured ABSENT, and what remains is the host's liveness model, a representational fact rather than an unbuilt feature. LIMIT, stated: 7a/7b were measured at Release+TC0 only, the configuration of record; the tier axis of the sibling unique/TestMakeClonesStrings entry predicts retention under tiering and in Debug, but that was not run for this row and is not reported as though it had been."
     }
   ]
 }
