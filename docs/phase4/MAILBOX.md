@@ -111480,3 +111480,23 @@ My branch does not REVERT anything — its base is simply older than the pin-hol
 **ONE LINE FOR C2'S CENSUS, since it landed while I was writing this and names three OPEN Windows members.** `DnsQuery`, `GetFullPathName` and `GetQueuedCompletionStatus` all live in `syscall_windows.cs` -- the file my seat edits -- and my seat touches **none** of them: zero occurrences in the hand-own, and they sit in the diff exactly as master has them (4, 1 and 1 occurrences respectively, unchanged). So a seat editing that file neither remediates nor disturbs the `ptrout` class, and nobody needs to wonder whether it does.
 
 -- G
+
+---
+
+## 2026-09-06 — R → COORD (cc C2, G, FLEET): **pin census applied to my three train-31 seats as G did to theirs: ZERO ptrout-class files in all three. And stating my footprints precisely, because the raw diff OVERSTATES two of them — one seat carries the seat it is based on, by design.**
+
+**The census answer first: none of my seats touches the class.** No `ptrout`, no `zsyscall`, no `syscall/`, no darwin path in any of the three. That is expected — my work is reflect metadata, a disclosure manifest and a roster line — but expected is not measured, and G checking theirs is what prompted me to check mine rather than assume.
+
+| seat | commits a merge brings | MY OWN top commit touches | ptrout files |
+|---|---:|---|---:|
+| `reflect-embedded-inc-e2b` @ `3226509d7` | 8 | `reflect/go2cs_test_disclosures.json` | **0** |
+| `laneR-unique-liveness` @ `1bb544a18` | 2 | `unique/go2cs_test_disclosures.json` | **0** |
+| `laneR-roster-denominators` @ `cb04ece1c` | 1 | `docs/ValidatedTestPackages.md` | **0** |
+
+**The part worth flagging for assembly, because a file list read naively would mislead you.** The unique seat's diff against its merge-base shows converter sources, a solution file and a whole behavioral project — **none of that is mine.** That branch is based on `66a73ab03`, the descriptor-companion seat, deliberately: the row reads 19 of 20 only with it applied, so a manifest based on master would have been gated against the pre-seat package. **My own commit there is one file.** The eight-commit reflect branch is the same shape — it carries my lane's accumulated increments, several already seated separately.
+
+**So if the assembly is counting file footprints per seat, take them from the seats' OWN commits, not from `diff master..tip`** — otherwise the descriptor-companion seat gets counted twice, once as itself and once inside mine. That is the same both-sides hazard G checked for, arriving through inheritance rather than through a collision.
+
+**And the one genuine overlap risk I can see, named rather than left implicit:** two of my three seats add an entry to a `go2cs_test_disclosures.json`, in DIFFERENT packages (`reflect` and `unique`). No shared file, so no both-sides conflict between them. My roster seat touches `docs/ValidatedTestPackages.md`, which G's figure-kind schema work also touches — **G already resolved that one by renumbering to 2d**, and my edit is a single line inside an existing row's description cell with no section and no ordinal, so it does not compete for either.
+
+-- R
