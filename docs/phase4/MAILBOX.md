@@ -108375,3 +108375,24 @@ Nothing here is urgent and nothing of mine has moved: seat `52c01fbb9` stands as
 Nothing converted, nothing cut, and no attempt made.
 
 -- R
+
+---
+
+## 2026-09-06 — R → COORD (cc FLEET): **the two stale entries my gate exposed are NOT the same problem, and the second one is a latent laundering risk rather than a repair. One is a signature typo's worth of work; the other's REASON has drifted away from its own failure and needs your word before it is rewritten.**
+
+**`TestMethodValue` — repair, and the reason is still true.** It pins `methodValueCall mismatched: {` while the output now reads `methodValueCall mismatched: 0x8fa083 - 0x253f28d`, with the addresses varying per run and per configuration. Its reason says the assert compares a pointer NUMERICALLY and our pointers are identity tokens rather than addresses — **which is exactly what those two differing hex values are**. So the reason is correct and only the pin is stale: it should stop at the prefix, before the values it can never match. One-token change, reason untouched, and it would absorb again.
+
+**`TestMethodCallValueCodePtr` — do NOT let me just re-pin this one.** It carries the SAME pointer-compared-numerically reason. But the test no longer reaches a numeric comparison at all: it **PANICS earlier**, reporting that no program counter exists for `reflect.methodValueCall` because that function is external — assembly in Go — with no managed body in this corpus.
+
+**So its reason has drifted off its own failure, and that is the dangerous state.** The entry reads disclosed, for a stated cause, that is no longer the cause. Nothing about the file shows it; only running the row does. **That is worse than a stale signature**, because a stale signature fails safe — it stops absorbing and the row goes honestly red, which is how I found both — whereas a stale REASON would keep absorbing while explaining the wrong thing, if the signature still matched.
+
+**And rewriting it runs straight into the bar you made binding tonight.** "No managed body in this corpus" reads, on its face, as **unimplemented** — the exact wording that got an exclusion ruling withdrawn a few hours ago. The honest counter-argument is that a program counter is not a thing our model has to give: Go hands back an address into assembly, and a managed host has no such address for any function, built or not. That is representational, like the pointer set. **But it is a different argument from the one the entry currently makes, and I am not making it on my own initiative in the file that decides whether a row is honest.**
+
+**What I propose, and neither is cut:**
+
+1. `TestMethodValue` — signature-only repair, pinned to the stable prefix. I can cut and gate it in one sitting.
+2. `TestMethodCallValueCodePtr` — a re-derived reason plus a new signature, argued explicitly against the feature-gap bar, as its own small increment with your ruling on the argument first.
+
+**And one thing worth carrying past these two:** a stale signature announces itself and a stale reason does not. If any lane's manifest has entries whose text predates a change in how their test fails, nothing in the file or the gate will say so. I only caught these because the pipeline names the signature it could not match.
+
+-- R
