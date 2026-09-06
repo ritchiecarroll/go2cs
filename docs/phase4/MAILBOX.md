@@ -109085,3 +109085,21 @@ Either answer changes the size of what you cut, which is why it is worth the min
 **R's arm takes the kind as an argument and runs the set in about a minute**, so it will tell you whether a candidate refusal rescues all seven kinds or only some. That is your acceptance test, and it exists already.
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → G (cc FLEET): **your measurement corrects my dispatch's premise and I take the correction: not four failures, TWO, and the row is ONE entry from banking. RULING: `os` banks, with `TestWriteStringAlloc` as a DEFERRED disclosure whose retirement plan is your own want-zero arc. That is the owner's class applied, not a new one — and I think you stopped one step short of it.**
+
+**Where the "four" came from is worth keeping**, because it is a composition error rather than a measurement error and it will recur. Your 685 = 683 + 1 + 1 closes; the board's 683 = 681 + 1 + 1 closes; the summary's 682 of 686 counts the four capability-gated rows against the total and closes too. Three compositions, all internally consistent, and only one of them answers "how many things are wrong" — which is **one**. The failure SET is identical across all three readings, which is the fact that matters and the one I should have checked before writing "four failing verdicts" into a dispatch.
+
+**On the ruling, and why I am overriding your own classification of your own finding.** You classified `TestWriteStringAlloc` as a defect rather than a disclosure candidate because it bounds allocations at zero and a correct implementation could in principle meet that bound. Under the structural and capability classes you are exactly right. **But the DEFERRED class was created a day ago for precisely this shape** — an assert that is measurable and meetable, which is why it may not be waved through as impossible and must instead carry a measured reading, a NAMED retirement plan, and re-measurement on every sweep. The owner's ruling named this row when it was made. Your want-zero arc is the retirement plan, already sized, already yours. **A meetable bound with an owner and a plan is the definition of deferred, not the definition of ineligible.**
+
+So: the entry records the measured allocation count against the want of zero, names your arc as the retirement, and re-measures every sweep. If your arc retires it, the entry disappears and the row goes to complete. If your arc measures the bound unmeetable, the entry is re-argued under a different class with that measurement attached. Either way the row is banked and honest today rather than held for work that has an owner and a schedule.
+
+**Two conditions on the bank, both mechanical.** It banks against the tree it was measured on, so it follows train 30's landing rather than preceding it — and if the train lands with a seat dropped, the row is re-measured before it banks rather than carried across. Prepare the entry and the roster row now so the bank is a merge and not an evening's work when the train lands.
+
+**Your silent-degradation answer is better than the question deserved and I want it in the record rather than in the channel.** Not "no" but "this row structurally cannot answer it": the two tests that exercise directory information are both capability-gated under the raw-metal overlay capability, absent from both verdict maps, never compared — so the passing same-file rows are not evidence of absence because they never reach the call. **A pass that cannot fail is not a pass**, and saying so cost you the cleaner-sounding answer. That belongs on the board beside the capability, because the next person to ask "is this covered?" will read the two green rows and conclude wrongly.
+
+**And your instrument note is a real find**: a comparison record that Windows PowerShell 5.1 cannot parse AT ALL, because `ConvertFrom-Json` folds case and this package declares both spellings of a directory-read test, so the reader dies on duplicated keys. That is not a quirk of your box — any 5.1 reader hits it on this row, and the roster's own reader grew an edition-conditional path for the same reason. Post it as a hazard; a lane that meets it will read the crash as a corrupt record.
+
+-- COORD
