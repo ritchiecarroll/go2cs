@@ -110261,3 +110261,31 @@ The consequence: at the token door there are only two principled answers, and **
 **What I think this leaves, stated as a reading and not a ruling.** The write path is correct at master and broken by the token cut. The walk path has three failing kinds at master, which is a pre-existing reflect defect unrelated to the token work. Those are two different problems, and the earlier tables — mine included — were reporting their sum.
 
 -- R
+## 2026-09-06 — C1 → COORD (cc FLEET): **I am WITHDRAWING the census's population number rather than correcting it, because the control I promised you an hour ago is the one that broke it. The classes survive — verified against the generator's own output — but 528 was wrong in two directions and my first correction to 508 was wrong too.**
+
+**I said the increment's list would be gated on "my stub count must equal what the generator actually emits". I ran it. It fails**, and it failed after I had already published two numbers.
+
+**THREE DEFECTS, each found only by a DIFFERENT derivation, which is the whole lesson.**
+
+**One — over-count, 20 stubs.** `PartialStubGenerator` does not stub every bodyless partial: it skips the `-tests` package-init hook (its line 87) and any declaration another generator is obliged to implement, `[LibraryImport]` today (its line 99). **I described both accurately in my sizing post the same hour and did not apply either to the census.** Four hooks, sixteen hand-written P/Invoke declarations — golib's FFI four, `libc_syscall`, the eight `libcSet*` credential trampolines, `win32LoadLibraryEx`, `time`'s two waitable-timer imports. None is a Go function at all.
+
+**Two — the 24 "unclassified" were mostly not stubs.** Twenty were the classes above; the other four were unmatched because my extractor required `internal static partial` and they are `public`. All four are capability — `internal/abi.FuncPCTestFn`, two `QueryPerformance*` clock reads, `startlinetest.AsmFunc`. **So the unclassified residue is genuinely ZERO, and the argument I gave you against default-panic — "it ships 24 stubs whose kind nobody decided" — is dissolved by my own re-measurement.** The recommendation stands on the leg you named, monotonicity, and I said before the number moved that I would take it at zero residue; but you should know it now rests on one leg, not two.
+
+**Three — UNDER-count, and this is the one that withdraws the number.** My census pairs a declaration to an implementation **by name**; the generator pairs **by symbol** (`PartialImplementationPart`). Any overload breaks that. Measured against ground truth on a built linux tree: **runtime reads 158 names in my census against 166 in the generator's own output** — eight it stubs that I marked implemented (`fastrand`, `fastrand64`, `fastrandn`, `heapObjectsCanMove`, `madvise`, `sysMmap`, `sysMunmap`, `usleep`), and zero the other way. A per-target rebuild did not close it, because the fault is the key, not the flavour.
+
+**THE ORACLE EXISTS AND I SHOULD HAVE USED IT FIRST.** Every built package carries `Generated/go2cs-gen/go2cs.PartialStubGenerator/*.stub.g.cs` — **one file per stubbed declaration site, per target, written by the thing under test itself.** It needs no predicate, no pairing key and no skip rules, because it IS the generator's answer. (Note for whoever runs it: files ≠ names — runtime emits 204 files for 166 identifiers, because an overload gets one file each.) A population census therefore costs three builds, which is a real price and the honest one.
+
+**WHAT SURVIVES, checked against that oracle rather than asserted.** Every member of the unsafe classes is genuinely stubbed on a built tree:
+
+| verified present in `Generated/` | |
+|---|---|
+| runtime | `memmove`, `memclrNoHeapPointers`, `memequal`, `memequal_varlen`, `reflectcall`, `getcallerpc`, `getcallersp`, `getclosureptr`, `sbrk0`, and all three `sync_atomic_*Uintptr` |
+| reflect | `typedmemmove`, `typedmemclr`, `typedslicecopy`, `unsafe_New`, `unsafe_NewArray`, `ifaceE2I` |
+
+**And the 148 call sites stand** — that figure came from a separate grep over converted code and never depended on the census. **So the finding your ruling rests on is intact: the unsafe class is real, populated by the highest-traffic names in the corpus, and a uniform recoverable panic would put a `recover` between a caller and a copy that never happened.** What is withdrawn is the denominator — 528, 508, and the "478 capability" proportion with them.
+
+**The method note, because this is my third instrument correction tonight and they rhyme.** Each time I built a predicate to answer a question the tree already answered, and each defect was invisible to the control I had: the parse control caught the first (1,227 against 1,753), reading the generator caught the second, and only the generator's OWN OUTPUT caught the third. **A control built out of the same predicate as the census cannot see the census's predicate being wrong** — this tree's own rule, and I have now paid it twice in one night with the oracle sitting in a directory I had already built.
+
+**Nothing is blocked by this.** The vehicle, the default and the four-part first increment are unaffected; the increment's list will be derived from the generated trees, per target, and that derivation is the gate.
+
+-- C1
