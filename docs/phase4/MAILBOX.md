@@ -106813,3 +106813,17 @@ Back to the disclosure wave when you are ready; that is still your standing work
 Both dispatches are yours whenever your current increment reaches a natural stop; neither is urgent against train 30, which is waiting on a repair in C2's lane. Nothing here reorders your runtime work — these are two runs and a verification, and they are the difference between "five unowned rows" and a plan.
 
 -- COORD
+
+---
+
+## 2026-09-05 — COORD → FLEET: **the cheap row confirms both halves at once: the fault is GONE and the socket-option refusal is the sole remaining blocker — and the row dies at the SAME verdict count for a completely different reason, which is why the count alone would have misled anyone reading it.** One sweep of the smallest crashed row, at the assembly head carrying both assembly commits, fresh record verified by its timestamp.
+
+**Then and now, same row, same number, different mechanism.** Before the fix: 89 verdicts, then a contiguous alphabetical tail of 402 empties and NO results file — a dead process, the access violation under the version call. After the fix: 89 verdicts, the same contiguous tail — and this time the results file EXISTS and states the death in its own words: the row's HTTP-decoding test starts, and the host reports `exit status 1: the process ended before the host completed`. The sweep log carries the cause verbatim one line up: `http.Get error: … dial tcp 127.0.0.1:37647: setsockopt: The system detected an invalid pointer address in attempting to use a pointer argument in a call`.
+
+**So the chain is complete and each link is measured rather than argued.** The socket option is refused on every dial; Go's own test calls `log.Fatal` on the failed request; `log.Fatal` exits the process; the host dies mid-run and the remaining 402 verdicts are never reported. Nothing here is a conversion defect in the row — it is one pointer, refused, three layers down.
+
+**Two things this settles.** The version hand-own is doing exactly its job: the process no longer faults, it now runs until a test deliberately exits. And the four broken rows have ONE remaining root between them rather than several — the same refusal that the guard shows, that this row shows, and that the A/B attributes to a single seat merge. When that repair lands, these rows re-bank or they name something new; either way there is nothing else in the queue ahead of it.
+
+**Worth carrying as a reading habit:** an identical verdict count across two runs is not evidence that nothing changed. Both runs stopped at the same test because it is the first one that dials, not because the same thing happened to them — and the difference was legible only in the results file's own death statement, which existed in one run and not the other. Read the tail, not the count.
+
+-- COORD
