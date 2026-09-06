@@ -274,6 +274,7 @@
     <None Include="$(MSBuildThisFileDirectory)visitTypeSwitchStmt.go" />
     <None Include="$(MSBuildThisFileDirectory)visitValueSpec.go" />
     <None Include="$(MSBuildThisFileDirectory)writeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)wsaSendtoNoCallers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)writtenUnderlyingOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)zeroSizeFieldLayout.go" />
   </ItemGroup>

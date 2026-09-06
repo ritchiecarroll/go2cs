@@ -69,11 +69,16 @@
 //     three records are sourced from types.Implements(*T, Sockaddr) and survive the body's
 //     suppression. Re-measured on this lane's own build before the decode was taken (see the method
 //     below): records present, `net` still referencing syscall's adapters.
-//   - WSASendto / wsaSendtoInet4 / wsaSendtoInet6 -- the UDP send path -- still pass the address
-//     returned by `sockaddr()`, which for the reasons above is not a native image. They are out of
-//     this lane's scope (the board's ruling is to fix a censused wrapper when a suite REACHES it,
-//     never speculatively), and nothing in the TCP listen/dial/accept path touches them. They are
-//     named here rather than left to be rediscovered: writeNativeSockaddr is what they would need.
+//   - WSASendto / wsaSendtoInet4 / wsaSendtoInet6 -- the UDP send path -- passed the address
+//     returned by `sockaddr()`, which for the reasons above is not a native image. All three are
+//     ANSWERED now, and by three different routes, which is why this entry stays rather than being
+//     deleted: the Inet4/Inet6 pair are hand-owned in internal/syscall/windows (where their
+//     linkname declarations live) and `syscall`'s own copies of them are MEASURED DEAD -- no call
+//     site anywhere in the corpus, guarded by wsaSendtoNoCallers_test.go; WSASendto itself is
+//     hand-owned in the sibling zsyscall_windows_wsa_impl.cs, because it is an overlapped submit and
+//     three of its four defects belong to that file's async family. All three consume
+//     writeNativeSockaddr below, which is what this note predicted they would need
+//     (docs/phase4/DESIGN-windows-udp-send.md).
 
 using System;
 using System.Runtime.InteropServices;

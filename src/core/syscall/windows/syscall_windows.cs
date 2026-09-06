@@ -984,16 +984,14 @@ public static error /*err*/ Shutdown(ΔHandle fd, nint how) {
     return shutdown(fd, (int32)how);
 }
 
-public static error /*err*/ WSASendto(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ΔSockaddr to, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
+// go2cs generated this placeholder — func WSASendto is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+internal static error /*err*/ wsaSendtoInet4(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ж<SockaddrInet4> Ꮡto, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
     error err = default!;
 
-    @unsafe.Pointer rsa = default!;
-    int32 len = default!;
-    if (to != default!) {
-        (rsa, len, err) = to.sockaddr();
-        if (err != default!) {
-            return err;
-        }
+    (var rsa, var len, err) = Ꮡto.sockaddr();
+    if (err != default!) {
+        return err;
     }
     var ᴋ3 = Ꮡbufs;
     var ᴋ4 = Ꮡsent;
@@ -1016,7 +1014,7 @@ public static error /*err*/ WSASendto(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 buf
     return err;
 }
 
-internal static error /*err*/ wsaSendtoInet4(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ж<SockaddrInet4> Ꮡto, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
+internal static error /*err*/ wsaSendtoInet6(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ж<SockaddrInet6> Ꮡto, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
     error err = default!;
 
     (var rsa, var len, err) = Ꮡto.sockaddr();
@@ -1034,34 +1032,6 @@ internal static error /*err*/ wsaSendtoInet4(ΔHandle s, ж<WSABuf> Ꮡbufs, uin
     System.GC.KeepAlive(ᴋ10);
     System.GC.KeepAlive(ᴋ11);
     System.GC.KeepAlive(ᴋ12);
-    if (r1 == socket_error) {
-        if (e1 != 0){
-            err = errnoErr(e1);
-        } else {
-            err = EINVAL;
-        }
-    }
-    return err;
-}
-
-internal static error /*err*/ wsaSendtoInet6(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ж<SockaddrInet6> Ꮡto, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
-    error err = default!;
-
-    (var rsa, var len, err) = Ꮡto.sockaddr();
-    if (err != default!) {
-        return err;
-    }
-    var ᴋ13 = Ꮡbufs;
-    var ᴋ14 = Ꮡsent;
-    var ᴋ15 = (@unsafe.Pointer)rsa;
-    var ᴋ16 = Ꮡoverlapped;
-    var ᴋ17 = Ꮡcroutine;
-        var (r1, _, e1) = Syscall9(procWSASendTo.Addr(), 9, (uintptr)s, (uintptr)ᴋ13, (uintptr)bufcnt, (uintptr)ᴋ14, (uintptr)flags, (uintptr)ᴋ15, (uintptr)len, (uintptr)ᴋ16, (uintptr)ᴋ17);
-    System.GC.KeepAlive(ᴋ13);
-    System.GC.KeepAlive(ᴋ14);
-    System.GC.KeepAlive(ᴋ15);
-    System.GC.KeepAlive(ᴋ16);
-    System.GC.KeepAlive(ᴋ17);
     if (r1 == socket_error) {
         if (e1 != 0){
             err = errnoErr(e1);
@@ -1090,15 +1060,15 @@ internal static ref connectExFuncᴛ1 connectExFunc => ref ᏑconnectExFunc.Valu
 internal static error /*err*/ connectEx(ΔHandle s, @unsafe.Pointer name, int32 namelen, ж<byte> ᏑsendBuf, uint32 sendDataLen, ж<uint32> ᏑbytesSent, ж<Overlapped> Ꮡoverlapped) {
     error err = default!;
 
-    var ᴋ18 = name;
-    var ᴋ19 = ᏑsendBuf;
-    var ᴋ20 = ᏑbytesSent;
-    var ᴋ21 = Ꮡoverlapped;
-        var (r1, _, e1) = Syscall9(connectExFunc.addr, 7, (uintptr)s, (uintptr)ᴋ18, (uintptr)namelen, (uintptr)ᴋ19, (uintptr)sendDataLen, (uintptr)ᴋ20, (uintptr)ᴋ21, 0, 0);
-    System.GC.KeepAlive(ᴋ18);
-    System.GC.KeepAlive(ᴋ19);
-    System.GC.KeepAlive(ᴋ20);
-    System.GC.KeepAlive(ᴋ21);
+    var ᴋ13 = name;
+    var ᴋ14 = ᏑsendBuf;
+    var ᴋ15 = ᏑbytesSent;
+    var ᴋ16 = Ꮡoverlapped;
+        var (r1, _, e1) = Syscall9(connectExFunc.addr, 7, (uintptr)s, (uintptr)ᴋ13, (uintptr)namelen, (uintptr)ᴋ14, (uintptr)sendDataLen, (uintptr)ᴋ15, (uintptr)ᴋ16, 0, 0);
+    System.GC.KeepAlive(ᴋ13);
+    System.GC.KeepAlive(ᴋ14);
+    System.GC.KeepAlive(ᴋ15);
+    System.GC.KeepAlive(ᴋ16);
     if (r1 == 0) {
         if (e1 != 0){
             err = ((error)e1);

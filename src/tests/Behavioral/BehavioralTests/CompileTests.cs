@@ -2068,6 +2068,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckWsaProtocolInfo() => CheckTarget("WsaProtocolInfo");
 
     [TestMethod]
+    public void CheckWsaSendtoRoundTrip() => CheckTarget("WsaSendtoRoundTrip");
+
+    [TestMethod]
     public void CheckZeroSizeFieldLayout() => CheckTarget("ZeroSizeFieldLayout");
 
     [TestMethod]

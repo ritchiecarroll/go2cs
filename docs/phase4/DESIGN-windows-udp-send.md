@@ -305,3 +305,115 @@ the file the body will live in, and the fourth to a private function in the same
 that is genuinely new is the nil-overlapped synchronous arm, and it exists only because the
 acceptance guard needs a shape the corpus never issues — a fair price for having an acceptance at
 all, given §5.
+
+---
+
+## 9. MEASURED at the cut (2026-09-06) — the sizing scored against what the run said
+
+Appended, not rewritten: §6's prediction stands above exactly as it was posted, and this block scores
+it. Everything here is a reading, and the two places the sizing was WRONG are marked ✗.
+
+### The two-seeded three-target A/B
+
+Both roots seeded from ONE frozen snapshot (`git archive` at `bb020ef35`) before either arm ran;
+each arm a full `-stdlib -comments` emission over `windows/amd64,linux/amd64,darwin/amd64`; the base
+arm on a converter built from the same commit with only the registration absent. Base wall 1,217 s,
+cut wall 986 s. Write-evidence was a CONTENT test, not a timestamp: a `[module: GoManualConversion]`
+file inside the package this arc touches (`syscall/windows/syscall_windows_impl.cs`) hashes equal
+across both seeds and is unchanged by either emission.
+
+**The footprint is TWO files, both under `syscall/windows`, zero on linux and zero on darwin — the
+path set exactly as predicted.**
+
+| target | files |
+|---|---|
+| windows | `syscall/windows/syscall_windows.cs`, `syscall/windows/package_info.cs` |
+| linux | none |
+| darwin | none |
+
+### ✗ The line counts were wrong, and the reason is a mechanism the sizing did not model
+
+§6 predicted `syscall_windows.cs` at **−31 / +1**. Measured: **−46 / +16** (`git diff --numstat`;
+a `grep -cE '^[-+][^-+]'` reads 44/15 because it drops removed BLANK lines, which is why the numstat
+is the figure of record). The body-to-placeholder part is exactly what was predicted. The rest is a
+**RENUMBERING**: the converter's `ᴋ` temporaries are numbered sequentially per FILE, so removing
+`WSASendto`'s five (`ᴋ3`–`ᴋ7`) shifts every later one in the file — `wsaSendtoInet4`'s `ᴋ8`–`ᴋ12`
+become `ᴋ3`–`ᴋ7`, `connectEx`'s `ᴋ18`–`ᴋ21` become `ᴋ13`–`ᴋ16`, and so on to the end. Classified:
+9 of the 15 added and 20 of the 44 removed lines are pure `ᴋ` renumbering.
+
+**The rule that falls out: a displacement's footprint in a file that carries `ᴋ` temporaries is not
+bounded by the displaced body.** It reaches every later temporary in that file, and a sizing that
+predicts only the body will under-predict by that tail.
+
+### ✗ The position-map line MOVES but is NOT APPLIED, and the sizing should have said so
+
+§6 predicted `package_info.cs` at +1/−1 with the `syscall_windows.cs` `GoPositionMap` line
+re-encoded. The emission delta is exactly that — one line, one kind, as predicted. **It was not
+applied, and applying it would have been wrong.** The 3-way merge CONFLICTED, which is the
+instrument refusing correctly, and the reason is the standing rule: an unbanked relocation sits
+between the committed tree and a fresh emission, so the emission's value describes NEITHER. Measured
+here: the committed map line already differs from the BASE emission's, and the committed
+`syscall_windows.cs` is 1,559 lines against the base emission's 1,565 and the cut's 1,535. The
+deliberate regen levels the map and the relocation together; a converter train does not.
+
+**So the APPLIED footprint is ONE file.** The sizing said two, and the second is a line the ruling
+forbids a train to touch.
+
+### The application's proof pair
+
+- **applied delta == emission delta**, per file: +15/−44 on both sides under one CR-normalised
+  instrument, `git diff --numstat` reading 16/46 for the same change.
+- **the residual against the emission is the IDENTICAL SET before and after**: 28 content lines,
+  compared as sorted sets, byte-equal. So the application carried nothing the change does not own.
+- **line KINDS**: 0 `GoPositionMap` lines and 0 import-hook lines in the applied delta.
+
+That residual is standing corpus drift and is named rather than absorbed: four forced-init hooks
+(`initᴛᴛimportꓸerrors`, `…internalꓸoserror`, `…runtime`, `…sync`) that the committed file carries and
+a fresh `-stdlib` emission does not, plus two `case {}` parenthesisation lines from a converter
+change that landed without its regen.
+
+### Measured in passing, and not this cut's to fix
+
+A fresh three-target emission classifies SEVEN packages' per-GOOS trios as SHARED and writes them
+flat: `crypto/rand/util.cs`, `internal/poll/fd_poll_runtime.cs`, `net/dnsclient.cs`, `os/exec.cs`,
+`os/user/user.cs`, `path/filepath/symlink.cs`, `time/zoneinfo_read.cs`. The arithmetic closes
+exactly — 3,728 seeded − 21 per-GOOS removed + 7 flat added = 3,714 emitted — it is identical in
+both arms so it cancels in the diff, and it belongs to a deliberate regen.
+
+### The acceptance, both directions
+
+`WsaSendtoRoundTrip` passes all four phases (Transpile, Compile, Target, Output), the Output phase
+being a byte comparison of the converted program's stdout against `go run`: ten lines, all `true`.
+
+**The red control fires where it must and nowhere else.** Neutering the mechanism — the synchronous
+arm patched to hand the kernel the generated body's own arguments, the managed `WSABuf` by address
+and the managed image `sockaddr()` returns — leaves Transpile, Compile and Target GREEN and turns
+**Output** red with `stdout mismatch C# vs Go`. The converted side under that control prints:
+
+```
+roundtrip: send reported no error: false
+roundtrip: byte count equals payload: false
+roundtrip: readfrom failed
+zerolen: send reported no error: false
+...
+```
+
+exit code 0, no fault — **the refused-call signature §5 predicted, and the reason a fault-asserting
+control would have asserted something false.** The restore is byte-identical to the pre-control file
+by hash.
+
+One durability note on that control: it was measured on a tree that does not yet carry the
+pointer-token storage repair. Once that lands, three of the four arguments go back to being wrong
+ADDRESSES rather than unmapped tokens, and the pre-fix failure mode may change shape. The guard
+asserts VALUES — a byte count, arriving bytes, an address compared field for field — so it goes red
+either way, which is the property that made value-assertions the right choice rather than a stylistic
+one.
+
+### Gates at the cut
+
+Converter suite `go test ./...` ok, 196 s, at the tip — including
+`TestManualConversionRegistrationsDisplaceSomething`, which was RED between the registration and the
+footprint landing and is the guard that makes "registration and footprint are ONE commit" mechanical.
+`check-solution-integrity.ps1`: 0 cycles on windows, linux and darwin; 721 behavioral projects
+registered; path casing clean. The four `*Tests.cs` classes moved 3/3/3/3, the symmetric shape one
+new project makes.
