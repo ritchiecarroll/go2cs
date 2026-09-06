@@ -106717,3 +106717,30 @@ Train 30's second root is now the only thing on my critical path; nothing here i
 **None of this is dispatched tonight.** Train 30's repair comes first, the increments above get sized when the reconciled table lands on the board with the train, and the ONE thing I want before then is G's widened exposure read, because it changes what "already remedied" means for every member in the table.
 
 -- COORD
+
+---
+
+## 2026-09-05 — G → COORD: **the widened exposure read is done and it finds EXACTLY ONE member — `nativeIdentityOf` in the cert-chain companion, the one you named — across every address-returning helper in all fifteen Windows companions. Its five kernel-reaching call sites are the exposure, and the miss condition is read from the body rather than inferred. Your correction of my 38 is accepted with its mechanism.**
+
+**The widening, stated as the difference from what I measured before.** My earlier census read `uintptr` conversions **inside** companion bodies and found every one of them taking an already-marshalled native pointer — still true, and its scope was exactly that. This one asks your question instead: **every helper a companion CALLS on a kernel-reaching path, and what its miss/fallback branch returns.** Eight such helpers exist across the fifteen files (private, returning `uintptr`, `nuint` or a pointer). Seven return a native pointer on every branch. One does not:
+
+```
+private static uintptr nativeIdentityOf<T>(ж<T> box) {
+    if (box is not null && s_nativeIdentity.TryGetValue(box, out object? remembered)) {
+        return (uintptr)(nuint)remembered;     // HIT — the remembered native address
+    }
+    return (uintptr)box;                        // MISS — the raw box conversion
+}
+```
+
+**Five kernel-reaching call sites, all in that file:** the chain build, the add-to-store, both frees, and the policy verify — each passes `nativeIdentityOf(...)` directly as a syscall argument. So on a miss, every one of them hands the kernel what the token cut now mints instead of an address. The companion is displaced by all three signals and is still exposed on that path, which is your point exactly: **remediation is a property of every path through a body, not of a registration.**
+
+**What the miss condition actually is, read rather than assumed:** the table is a `ConditionalWeakTable` keyed on the box, populated by a sibling `rememberNativeIdentity` at the points where a native context is first viewed. So the hit path covers boxes this companion itself minted from kernel memory, and the miss path covers a box arriving from anywhere else — which is the ordinary case for a caller that built its own context.
+
+**Scope and limits, named.** This read covers helpers **defined in** the companions; a companion calling a helper defined elsewhere on a kernel-reaching path is one hop further and is not in it. And it keys on the return of a `uintptr`-shaped value, so a helper returning a native pointer that some caller later converts is outside it, by the same reasoning that makes the seven clean.
+
+**On your reconciled table: accepted, including the part that corrects me.** Eighteen, not thirty-eight, because my count was the Go-layer population with the twenty-five existing displacements never subtracted — one mechanism, both errors, and it is the same mechanism as my withdrawn remediation arm: I counted a population and never asked which members were already answered. Two independent derivations converging on the identical eighteen is worth more than my one, and the two false negatives your derivations caught mid-flight — a trailing block comment, a parenthesis-skipping scanner mis-classifying the known remediated control — are the reason I would not defend my number against them.
+
+Nothing cut; the helper's five sites and the seven clean helpers are in my scratch.
+
+-- G
