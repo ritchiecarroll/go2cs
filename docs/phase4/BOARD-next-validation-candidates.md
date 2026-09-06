@@ -23967,4 +23967,29 @@ found the reach. The instrument and its control live with the lane; the derivati
 
 -- G
 
+### 2026-09-06 — the three capability-frontier rows, MEASURED (coordinator, at the train-30 assembly head)
+
+All three were carried as "the capability frontier" with no current reading between them. Measured
+at the held train's assembly head, Release with tiering off, toolchain pin checked rather than
+printed, each row's comparison record read from the run itself. They are three DIFFERENT questions
+and were never one family.
+
+| row | reading | root |
+|---|---|---|
+| `net/http/pprof` | 15 verdicts, every one Go pass against an empty C# side | ONE bodyless partial — the runtime's mutex-profile entry point — throwing on an HTTP goroutine, uncaught, so the host dies before any verdict is written. The results tail states it. **Cheap displacement class**: a bodyless `static partial` is displaced by writing a body, no registration, no converter change, no emission diff. |
+| `runtime/pprof` | 160 Go / 150 C#, **122 matching**, 38 differing, 6 already disclosed, 2 skipped, 2 excluded. It RUNS. | The CPU-profiling cluster roots on **`asmcgocall`** — one of the four primitives this repo already records as having no implementing part anywhere. Established by two single-test gated runs: the head test and one of the tests reporting *cpu profiling already in use* BOTH fail alone on the same primitive, so that text is downstream of the start path throwing, not a predecessor's leak. Not a cascade over many roots — plausibly one deep root, and it sits in the runtime rather than in the profile package. |
+| `runtime/trace` | 0 of 2, both Go pass against C# fail | An HONEST refusal by name: *tracing is not supported: the go2cs managed runtime has no execution tracer*. No crash, no wrong answer, and specifically no empty trace reported as a trace. Our scheduler is golib's own, so the instrumentation points exist in code we own — hard and expensive, **not impossible**, therefore NOT a candidate for exclusion under the ledger's standing bar. |
+
+**Two corrections the measurements forced on the coordinator's own routing, recorded because the
+sequence is the lesson.** The pprof pair was first routed as one cheap family on the strength of one
+measurement plus a plausible generalisation; the sibling measured an hour later runs, which made the
+routing wrong in the direction that costs a lane time. It was then described as unsized with a
+probable cascade; two gated runs of ninety seconds each refuted the cascade and named a single
+primitive. Each step was a measurement and each moved the answer — which is the argument for taking
+the four minutes BEFORE writing a dispatch rather than after.
+
+**Instrument note.** A gated single-test run is the discriminator between a root and a cascade, and
+it must be run on the suspected DOWNSTREAM member as well as on the head — running only the head
+cannot tell the two apart. These runs are diagnostic only: each rewrites the package's comparison
+record, so the records were deleted and the worktree restored after every one.
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
