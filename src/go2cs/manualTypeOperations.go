@@ -1901,6 +1901,19 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"Getpwuid": goosDarwin,
 		"Getgrnam": goosDarwin,
 		"Getgrgid": goosDarwin,
+		// Increment 12 (2026-09-06), the class's FIFTH member here and the one increment 11's
+		// header deferred by name. Getaddrinfo carries both halves at once -- a managed `Addrinfo`
+		// hints record under CLR AUTO layout AND the `**Addrinfo` out-parameter -- and its output is
+		// a LINKED NATIVE CHAIN, so the pair is taken together: Freeaddrinfo must release the memory
+		// the transcribed records still alias, which is the one place this differs from the windows
+		// twin (there every record is a complete managed copy, so FreeAddrInfoW is a no-op). Why the
+		// copy cannot be complete here is measured rather than preferred: net's darwin consumer
+		// reinterprets `ж<RawSockaddr>` to the LARGER RawSockaddrInet6, which golib's
+		// ReinterpretAliasesStorage refuses on field count, so `Addr` has to be a native-backed box
+		// and the native chain has to outlive the call. Bodies in
+		// internal/syscall/unix/darwin/net_darwin_impl.cs.
+		"Getaddrinfo":  goosDarwin,
+		"Freeaddrinfo": goosDarwin,
 	},
 	"internal/syscall/windows": {
 		"NetShareAdd": goosWindows,

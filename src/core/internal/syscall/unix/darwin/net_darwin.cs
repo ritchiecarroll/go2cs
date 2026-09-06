@@ -38,29 +38,12 @@ public static UntypedInt NI_NAMEREQD => 4;
 //go:cgo_import_dynamic libc_getaddrinfo getaddrinfo "/usr/lib/libSystem.B.dylib"
 internal static partial void libc_getaddrinfo_trampoline();
 
-public static (nint, error) Getaddrinfo(ж<byte> Ꮡhostname, ж<byte> Ꮡservname, ж<Addrinfo> Ꮡhints, ж<ж<Addrinfo>> Ꮡres) {
-    var (gerrno, _, errno) = syscall_syscall6(abi.FuncPCABI0(libc_getaddrinfo_trampoline),
-        (uintptr)Ꮡhostname,
-        (uintptr)Ꮡservname,
-        (uintptr)Ꮡhints,
-        (uintptr)Ꮡres,
-        0,
-        0);
-    error err = default!;
-    if (errno != 0) {
-        err = errno;
-    }
-    return ((nint)gerrno, err);
-}
+// go2cs generated this placeholder — func Getaddrinfo is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:cgo_import_dynamic libc_freeaddrinfo freeaddrinfo "/usr/lib/libSystem.B.dylib"
 internal static partial void libc_freeaddrinfo_trampoline();
 
-public static void Freeaddrinfo(ж<Addrinfo> Ꮡai) {
-    syscall_syscall6(abi.FuncPCABI0(libc_freeaddrinfo_trampoline),
-        (uintptr)Ꮡai,
-        0, 0, 0, 0, 0);
-}
+// go2cs generated this placeholder — func Freeaddrinfo is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:cgo_import_dynamic libc_getnameinfo getnameinfo "/usr/lib/libSystem.B.dylib"
 internal static partial void libc_getnameinfo_trampoline();

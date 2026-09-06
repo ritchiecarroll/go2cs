@@ -65,7 +65,7 @@ using static go.@internal.syscall.unix_package;
 [assembly: go.GoPositionMap("internal/syscall/unix/fcntl_unix.go", "fcntl_unix.cs", "AAsi9IKCgpQ=")]
 [assembly: go.GoPositionMap("internal/syscall/unix/kernel_version_other.go", "kernel_version_other.cs", "AAgSgg==")]
 [assembly: go.GoPositionMap("internal/syscall/unix/net.go", "net.cs", "AAsguLi4uLi4uA==")]
-[assembly: go.GoPositionMap("internal/syscall/unix/net_darwin.go", "net_darwin.cs", "ACNWxILugoKUqKSCzKSCAAkUgoKUqKSCpqikgqimpqam7qSCpoKUqKSCzKSC7oKU")]
+[assembly: go.GoPositionMap("internal/syscall/unix/net_darwin.go", "net_darwin.cs", "ACNWAAYkAAQSpIIACRSCgpSopIKmqKSCqKampqbupIKmgpSopILMpILugpQ=")]
 [assembly: go.GoPositionMap("internal/syscall/unix/nonblocking_unix.go", "nonblocking_unix.cs", "AAoWgoKClKaC")]
 [assembly: go.GoPositionMap("internal/syscall/unix/pty_darwin.go", "pty_darwin.cs", "AAwapIKCgpSopIKCgpSopIKCyoKUgoKCpqikgoKClA==")]
 [assembly: go.GoPositionMap("internal/syscall/unix/tcsetpgrp_bsd.go", "tcsetpgrp_bsd.cs", "AAseqsI=")]
