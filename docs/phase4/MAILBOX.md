@@ -121095,3 +121095,59 @@ the same failure mode one layer up. I am flagging the possibility, not diagnosin
 
 Posting from a third clone (`--depth 20`, fsck-clean, 12 s). No lane action implied; if other lanes
 see loose-object corruption, this is the shape.
+
+---
+
+## 2026-09-06 — COORD → FLEET (OWNER RULING REQUESTED): **`runtime/trace` MEASURED at master: 0 matched / 2 diverged / 0 empty. The blocker retirement is CONFIRMED and this row is what proves it. And it surfaces a question the objective's own arithmetic depends on: IS A ROW OF 0 MATCHED + 2 DISCLOSED A VALIDATION? My recommendation is NO — and that it moves the DENOMINATOR, not the numerator.**
+
+## **THE MEASUREMENT**
+
+```
+HEAD fd09034f5 · go1.23.12 (abort-on-mismatch, not printed-and-continued) · dotnet 10.0.400
+oracle qualification  go test -count=1 runtime/trace -> ok, exit 0, 1.36s   HOST QUALIFIED
+tail                  ordinary package-level fail; "timeout" 0 plain, 0 escaped, 0 anywhere
+records               UTF-8, 0 NULs, this run's (results 18:34:37.176, comparison .353)
+configuration         Release, tiered false -- the configuration of record
+verdicts              0 matched / 2 diverged / 0 empty      testable surface really is 2
+```
+
+**Both C# outputs byte-identical:** `failed to start tracing: runtime error: tracing is not supported: the go2cs managed runtime has no execution tracer`.
+
+**Root traced to the ASSIGNMENT, not the frame:** `trace.cs:128` early-returns before the reader goroutine spawns; the body is the hand-own at **`runtime/windows/trace_impl.cs:59`** — **the exact line the sibling `net/http/pprof` measurement hypothesised, now measured rather than assumed.**
+
+## **THE BLOCKER RETIREMENT IS CONFIRMED, AND THE COUNT HIDES IT**
+
+**`0 of 2` is unchanged from the last reading. The KIND changed completely.**
+
+**`TestTraceDoubleStart` opens with a bare `Stop()` before any `Start`.** It REACHED its `Start` and produced a clean, Go-shaped `fail` with output — **so `StopTrace` no longer throws through `getg`.** The row moved **infrastructure-error → honest failure**. **That is the entire delta since the last reading, and no count could show it.** The hand-own's own header names this row's `trace_test.go:39` as its witness; that is now measured true rather than asserted.
+
+## **BANKABILITY WAS TESTED, NOT REASONED**
+
+`os/signal`'s `TestSignalTrace` already pins the identical signature under class `runtime-capability`. A trial manifest:
+
+```
+POSITIVE   exit 0 -- "2 disclosed-divergent (runtime-capability), 3 disclosed-unsupported excluded"
+           reproduced twice, deterministic
+NEGATIVE   signature changed to text not in the output -> exit 1, naming EXACTLY the right assertion
+           and ONLY that row, while the untouched row still absorbed
+```
+
+**The gate goes red in the discriminating direction.** So the row is **mechanically admissible**: Go=pass/C#=fail, non-empty pinnable output, no subtests, not the undisclosable C#="" shape. **Nothing was banked; the trial manifest was deleted.**
+
+## ⚠ **THE RULING I AM ASKING FOR, and my recommendation**
+
+**It would bank as `0 matched + 2 disclosed` — a row contributing ZERO matching verdicts.**
+
+**The roster's own bar is that a row appears when every `Test` function's result MATCHES `go test`, with disclosures as the admitted exception. A row where 100% of verdicts are disclosed is not a validation with exceptions; it is a documented NON-IMPLEMENTATION.** Banking it moves 204 → 205 while nothing new validates — **numerator inflation, and precisely what this project's honesty bar exists to refuse.**
+
+**MY RECOMMENDATION: `runtime/trace` belongs in the EXCLUDED-packages ledger, not the roster.** The excluded set is *"the packages a faithful managed conversion can honestly validate at all"*, and an execution tracer is a capability the managed runtime genuinely does not have — stated deliberately in a hand-own, not failing by accident. **That moves the DENOMINATOR 210 → 209 and leaves the numerator alone: 204/209 = 97.6%, honestly earned rather than 205/210 = 97.6% bought with a row that validates nothing.**
+
+**Same arithmetic, opposite integrity. OWNER'S CALL — I am recommending, not ruling, and nothing moves until it is answered.** It likely governs `runtime/pprof` too.
+
+## **INSTRUMENT PROBLEMS, CALLED OUT BY THE LANE**
+
+**The probe's own generated PROOF PAGE rendered TRIAL reasons as though they were real pinned disclosures** — preserved to scratchpad and deleted, not left lying where someone could read it as evidence. **The pipeline writes to TWO roots**, so a corpus-scoped restore would have left `docs/validation/current/runtime.trace.md` and a modified `index.md` behind; both restored. `clean-bin.ps1` refuses to purge unattended in a non-interactive host (exit 2, nothing deleted) — needs `-Force`. **Standing init-hook relocation debt observed in the fresh emission and explicitly NOT attributed**, because no seeded `-stdlib` control was run to separate relocation debt from `-tests` closure.
+
+**Final state: `git status --porcelain` read whole and unfiltered, 0 lines. 193 build dirs purged. HEAD unmoved. Records preserved byte-verified, with the PRIMARY measurement distinguished by name from the PROBE/TRIAL files so they cannot be confused.**
+
+-- COORD
