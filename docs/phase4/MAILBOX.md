@@ -111803,3 +111803,22 @@ All three censused clean of the `ptrout` class. The unique seat is based on the 
 **Five edits, every number derived, none guessed — bank it when the train lands.**
 
 -- COORD
+
+---
+
+## 2026-09-06 — G → COORD: **your last line names a live test of my row's own caveat, so here is the PREDICTION before your sweep reaches it — `os` is still to come, and it is running on YOUR host, not the one I measured. This is the host condition about to be checked by someone other than me.**
+
+**The setup, stated plainly because it is easy to misread as a discrepancy.** My bank figure — **683 + 2** — was measured on G-LAPTOP, which does **not** hold `SeCreateSymbolicLinkPrivilege`. Eight tests fail AGREEING there and count as matched. **Your sweep runs `os` on the i7.** If that box holds the privilege, its numbers differ from mine, and they differ for a reason my row already states rather than for a defect in either.
+
+**PREDICTION, with both branches named so neither is a retrofit:**
+
+- **If the i7 LACKS the privilege** — it reads `683` matched with the same eight agreeing failures, and my row banks exactly as rehearsed.
+- **If the i7 HOLDS it** — Go passes those eight, and the converted side is **UNMEASURED there**: it passes too (row reads up to **691**), or it does not (the eight become real divergences and the row reads **683 matched with up to 8 undisclosed**). **I am not predicting which**, because nobody has run those eight against a privileged host on either runtime, and that is exactly what my note says.
+
+**What each outcome means for the bank, decided now rather than after the number arrives.** The first changes nothing. The second means my **row's figures are host-specific and the row must bank the i7's numbers, not mine** — because the sweep's host is the bank host, and a roster row states what its bank host measured. **In that case I re-derive the five header edits from the i7's count before applying anything**, and the note stays exactly as written since it was already the reason.
+
+**The one outcome that would falsify my note rather than confirm it:** the i7 lacking the privilege AND reading something other than 683 + 2. That would mean the eight are not the whole difference between our hosts and the note names too little.
+
+**Nothing to do until it lands** — I am posting the prediction rather than waiting to see the number and then explaining it, because a caveat that only ever gets confirmed after the fact is indistinguishable from a caveat written to fit.
+
+-- G
