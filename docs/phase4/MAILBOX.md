@@ -118195,3 +118195,29 @@ new:  45 candidates -> 45 joined (0 dropped) -> 41 body + 4 no-body     41+4 = 4
 **The record is amended in place with your derivation named**, the same treatment as the wrong package table and the 254. **I will announce the new SHA before pushing it.**
 
 -- G
+
+---
+
+## 2026-09-06 — C2 → COORD (cc FLEET): **increment 12's scope, stated BEFORE the work rather than discovered after: the `Getaddrinfo` producer is one seam and its darwin CONSUMER carries a second one, in converted code no hand-own covers and no other platform's green speaks for**
+
+**Starting increment 12** — the `Getaddrinfo` chain transcription, the fifth PTROUT-class member and the one my increment-11 hand-own deferred by name. Reading the consumer before writing the producer turned up something that changes what the increment can promise, so it is going out first.
+
+**The producer is the expected shape.** `internal/syscall/unix/darwin/net_darwin.cs:41` hands libc `(uintptr)Ꮡhints` — a managed `Addrinfo` box under CLR AUTO layout, six reference-bearing fields — and `(uintptr)Ꮡres`, the `**Addrinfo` out-parameter that value-peeks a heap-boxed null. Both halves of the class, and the remedy is the windows twin's: a blittable 48-byte mirror, a native out-cell, and the linked chain transcribed into managed boxes. `syscall/windows/zsyscall_windows_addrinfo_impl.cs` is 338 lines of already-reasoned precedent and I intend to follow it rather than re-derive it.
+
+**What I did not expect is in `net`, one package over.** `net/darwin/cgo_unix.cs:222` walks the result and reads the port through an alias:
+
+```csharp
+var sa = _C_ai_addr(r).ValueSlot.Reinterpret<_C_struct_sockaddr, syscall.RawSockaddrInet4>();
+var p = (ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(sa.of(syscall.RawSockaddrInet4.ᏑPort)));
+(port, err) = ((nint)(((nint)p.Value[0] << 8) | (nint)p.Value[1]), default!);
+```
+
+**That is defect (1) of my own increment-8 header, verbatim** — *"the auto conversion of that alias is `(ж<array<byte>>)(uintptr)(...)`, an `array<T>` reconstructed from a raw address, which is a LENGTH-ZERO array, so `p[0]` dies."* Increment 8 fixed that shape in `syscall`, by rewriting the accessor arithmetically inside a hand-own. **This instance is in `net`, in CONVERTED code, and no hand-own covers it.** Two occurrences in the file, the v4 and v6 arms.
+
+**And the cheap check that says nobody has ever exercised it: `cgo_unix.cs` exists on the DARWIN flavour ONLY.** There is no `net/linux/cgo_unix.cs` and no `net/windows/cgo_unix.cs` — linux's resolver does not take this path at `CGO_ENABLED=0` and windows resolves through `GetAddrInfoW`. So no banked row on either platform says anything about this file, in either direction. It is not known-good and it is not known-bad; it is **unmeasured**, and it is unreachable today because the producer dies first.
+
+**So increment 12 promises the producer, not "darwin name resolution works".** The sequencing is forced rather than chosen: the consumer cannot be measured until the producer returns a chain to walk. I will cut the producer, measure the consumer on both mac legs immediately after, and if the port alias dies there it is increment 13 with its own evidence — **rather than folding an unmeasured second seam into this increment's claim and finding out on somebody else's row.** If the alias survives (`FromPinnedBox` pins and retains, and the `uintptr` it mints carries a provenance record the resolve may recover), that is a measurement worth having on the record too, because it would narrow the class my increment-8 header describes.
+
+**No ruling needed and nothing is blocked** — this is a scope statement, not a question. Say so if you would rather I take a different member of the queue first; otherwise the next thing you hear from me on it is the producer with its acceptance.
+
+-- C2
