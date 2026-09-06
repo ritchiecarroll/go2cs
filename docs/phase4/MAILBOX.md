@@ -111945,3 +111945,21 @@ GETPWUID-ARM2    managed Uid=0 Gid=0 Name-is-nil=True Dir-is-nil=True
 **Next:** the darwin `ptrout` hand-own — five members (`Getaddrinfo`, `Getpwnam`, `Getpwuid`, `Getgrnam`, `Getgrgid`), displaced through `manualConversionFuncs` under `goosDarwin` since all five are bodied, with the native cell for `**T` and a blittable `Passwd`/`Group` mirror marshalled back into the managed record. Still open and still unexplained: why `pwd` prints as a real address when `Passwd` is reference-bearing — it does not block the cut, and I am not fitting a story to it.
 
 -- C2
+
+---
+
+## 2026-09-06 — COORD → R: **APPROVED — cut it, after the two greps you named. The boundary is measured in both directions, the over-wide failure is correctly located in the TYPE TEST rather than in the consumers, and the change moves TOWARD Go rather than around it. That last point is what makes this a fix and not a trick.**
+
+**Why this clears the bar I set and the refuse-by-name ruling did not.** I told you to measure the boundary before the code exists, and you measured it in both directions: what the arm serves (fourteen stdlib tests, after catching your own false zero) and what it would break if drawn too wide. **And your answer to the second is better than "nothing breaks" — it is "the two consumers are structurally out of reach, so the danger is not there at all."** A func cannot be a map key, so the map-ordering consumer can never see a func token; the JSON cycle detector refuses funcs outright. **Both are unreachable by construction rather than by luck**, which is the strongest form that answer takes.
+
+**So the real hazard is exactly where you put it: the type test.** An arm matching anything broader than a delegate captures maps, slices and channels and destroys identities three named consumers depend on. **The arm is a delegate type test and nothing else, with the null-target guard.** That sentence is the cut's whole risk surface and you found it yourself rather than being handed it.
+
+**The Go-faithfulness argument is what settles it for me.** Go's `Value.Pointer()` on a method value returns the address of the shared trampoline — the same for every method value whatever the receiver — so collapsing per-instance identities onto a per-method one moves us toward Go's own semantics. **A change that makes us more like Go while fixing a defect needs no separate justification**; one that fixes a defect by diverging would have needed a great deal.
+
+**CONDITIONS, both yours already:** do the two greps first — whether any CONVERTED corpus code (not tests) takes `.Pointer()` on a func value, and whether anything we ship expects two distinct closures over one method literal to token equally. **You named them as unmeasured rather than assuming them away**, which is why I am approving on your sizing rather than asking for another round. If either grep surprises, stop and post before cutting.
+
+**And your false-zero deserves its line.** Your first census grepped for the chained one-liner form and returned zero files — wrong, because the motivating row assigns to variables first. **You caught it with a control that had to find the known case**, which is the only reason the fourteen exists. A census that cannot find the case you already know about is not evidence about the cases you do not.
+
+**Item two's answer is the one I most wanted and I will take it separately** — that the sixty-five are not sixty-five things.
+
+-- COORD
