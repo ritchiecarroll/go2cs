@@ -952,6 +952,64 @@ Assert-Equal 'the manifest arm reaches every committed manifest, not just the ba
 # an instrument fault rather than a clean bill.
 Assert-Equal "the manifest-entry arm actually read manifests (a zero would mean it checked nothing)" $true ($manifestsChecked -gt 0)
 Assert-Equal "the manifest-entry arm actually read entries" $true ($entriesChecked -gt 0)
+# ---- 2d. a prose figure never silently claims to be the live one --------------------------------
+# COORD ruling 2026-09-06, made from its own misreading. This roster carried BOTH 202 and 203 in
+# different voices -- the guard-recomputed header, and a dated derivation that was correct on the
+# day it was written -- and nothing on the page said which was which. The stale one was quoted twice
+# in rulings, and it is easy to see why: the sentence carrying it ended "recomputed by the format
+# guard ... not hand-set", which is the most authoritative-sounding claim in the file, and it was
+# false.
+#
+# The rule COORD asked for is a CHECK rather than a label, because a rule that lives in a mailbox
+# post is one the next reader has to find first. A line stating a RATIO -- `N / M` with a percentage
+# on the same line -- must EITHER match one of the two live figures computed above, OR carry an
+# explicit `as of YYYY-MM-DD` on that same line. Nothing else about the line matters. A dated record
+# therefore keeps its numbers at their own date, which is the whole point of a record: rewriting
+# them to agree with today would destroy it rather than repair it. A figure that means to be live is
+# recomputed like every other figure in the header, and cannot go stale in silence.
+#
+# Why the marker sits on the RATIO'S OWN LINE and not on its section heading: COORD reached the
+# stale figure by SEARCH, not by reading downward, so a heading three paragraphs above it was never
+# in the frame. A reader who lands on the number reads its date in the same sentence, or it is live.
+#
+# The escape is deliberately cheap -- four words -- because the alternative to a cheap escape is a
+# guard that gets routed around. What it will not let you do is state a stale figure with no date.
+$naiveLivePct = if ($testable -gt 0) { '{0:0.0}' -f [math]::Round(($rows.Count / [double]$testable) * 100, 1, [MidpointRounding]::AwayFromZero) } else { '' }
+$honestLivePct = if ($implementable -gt 0) { '{0:0.0}' -f [math]::Round(($rows.Count / [double]$implementable) * 100, 1, [MidpointRounding]::AwayFromZero) } else { '' }
+$liveRatios = @(
+    @{ Num = $rows.Count; Den = $testable;      Pct = $naiveLivePct }
+    @{ Num = $rows.Count; Den = $implementable; Pct = $honestLivePct }
+)
+
+$undatedStaleRatios = New-Object System.Collections.Generic.List[string]
+$liveRatioLines = 0
+foreach ($line in $lines) {
+    if ($line -notmatch '(\d+)\s*/\s*(\d+)') { continue }
+    $rNum = [int]$Matches[1]
+    $rDen = [int]$Matches[2]
+    if ($line -notmatch '([\d.]+)\s*%') { continue }
+    $rPct = $Matches[1]
+
+    $isLive = $false
+    foreach ($live in $liveRatios) {
+        if ($rNum -eq $live.Num -and $rDen -eq $live.Den -and $rPct -eq $live.Pct) { $isLive = $true; break }
+    }
+    if ($isLive) { $liveRatioLines++; continue }
+
+    # The dated-record escape. A real ISO date is required rather than any prose carrying the words,
+    # so "as of the last bank" buys no exemption.
+    if ($line -match 'as of \d{4}-\d{2}-\d{2}') { continue }
+
+    [void]$undatedStaleRatios.Add("$rNum / $rDen -- $($rPct)% :: $($line.Trim())")
+}
+
+Assert-Equal 'every prose ratio is either the live figure or carries `as of YYYY-MM-DD`' '' ($undatedStaleRatios -join '  |  ')
+
+# Vacuity control, and it is the load-bearing half. A scan whose pattern stopped matching would
+# report a clean sweep over a file it never read -- the false-empty census this project keeps paying
+# for. The header states BOTH denominators, on two separate lines, so two live hits is the floor: if
+# this ever reads under two, the check above proved nothing regardless of what it printed.
+Assert-Equal 'ratio scan reached the header (vacuity control: both live figures found)' $true ($liveRatioLines -ge 2)
 
 # ---- 3. the RENDERED table's column integrity -----------------------------------------------------
 # Everything above guards what the roster MEANS to the parser. This guards what it LOOKS LIKE to a

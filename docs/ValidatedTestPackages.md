@@ -474,9 +474,10 @@ which is exactly what its own E1 mechanism said (*build constraints exclude all 
 converter refuses it, so on this target there is not even a package to convert) — and a phantom
 cannot be subtracted from a set derived from that listing. `215 − 6` therefore took one too many;
 the strict Windows-axis implementable set is `215 − 5 = 210`. Nothing else moves: no banked row
-changes, and the header's numbers are recomputed by
-[`src/check-roster-format.ps1`](../src/check-roster-format.ps1) from the table above rather than
-hand-set.
+changes, and the header's numbers are CHECKED by
+[`src/check-roster-format.ps1`](../src/check-roster-format.ps1), which derives them from the table
+above and fails when the two disagree. The header itself is hand-written; the guard is what makes
+writing it safe, not what writes it.
 
 **The measurement is not lost with the row.** `internal/runtime/syscall` is a genuine *Linux*-axis
 testable package — converted, with an L3 `linux/` folder under `src/core/internal/runtime/syscall`,
@@ -496,6 +497,14 @@ what the naive denominator is for, and it is worth noticing that every candidate
 reached a measurement has come back implementable.
 
 ### The 215, derived — and the thirteen rows that are not yet banked
+
+> **A dated record, not a live count.** Every figure in this section is the derivation as it
+> stood on **2026-09-02**, kept at its own date because rewriting it would destroy the record
+> rather than repair it. The live figures are the **Phase 4 progress** header above. That header
+> is HAND-WRITTEN: the format guard derives its value from the table and FAILS when the two
+> disagree, so it cannot go stale silently -- but banking a row means editing it, and the guard
+> is what makes editing it safe rather than what does the editing. A figure here that disagrees
+> with that header is this block being a record, working as intended.
 
 The naive denominator was a number the ledger asserted and no reader could reproduce. It is derived
 here instead, so the subtraction above has something to subtract *from*. Re-derived 2026-09-02 on
@@ -517,7 +526,7 @@ own build stamp, not the root it resolves, so the pin is stated rather than assu
   `.go` files, so no production package is converted and there is nothing for a host to reference:
   `embed/internal/embedtest`, `internal/coverage/test`, `net/internal/cgotest`,
   `runtime/internal/wasitest`. Only `embedtest` carries a ruling today (board, 2026-08-11).
-- **202** banked · **13** remaining. The thirteen, by disposition:
+- **202** banked · **13** remaining, as of 2026-09-02. The thirteen, by disposition:
   - **5 are the ledger rows above**, all of them inside the 215 — `internal/syscall/unix`,
     `net/internal/socktest`, `log/syslog`, `runtime/race`, `internal/unsafeheader`.
   - **3 are lane-owned** — `reflect`, `runtime`, `unique`.
@@ -544,9 +553,11 @@ tracker carried; `bcache` banking the same day brought it back to eight, by the 
 it.** `internal/runtime/syscall` is **not in `go list std` on windows/amd64 at all** — Go's build
 constraints exclude every file, which is what its own E1 mechanism said — so it could not be a
 member of a set derived from that listing, and `215 − 6` subtracted one non-member. Five exclusions
-are inside the 215, the strict Windows-axis implementable set is **210**, and the header above now
-reports 202 / 210 — 96.2% — recomputed by the format guard from the corrected ledger, not
-hand-set. The struck row's Linux-axis measurement is kept in the note beside the ledger table.
+are inside the 215, the strict Windows-axis implementable set is **210**, and the header above
+reported 202 / 210 — 96.2% as of 2026-09-02, from the corrected ledger. That ratio is this
+derivation's own record of its day and is NOT the live figure: read the header itself, which the
+guard checks against the table and fails on disagreement. The struck row's Linux-axis
+measurement is kept in the note beside the ledger table.
 
 Why the phantom survived weeks of arithmetic that "came out right": the 215 is reachable by two
 live memberships that differ by exactly one swap, and both land on 215.
