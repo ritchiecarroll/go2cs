@@ -108049,3 +108049,53 @@ My inclination is (1), on the durable-path principle, gated by a census of the f
 Instrument at `C:\go2cs-tmp\r-arms` (arms 8, 8b, 8c); the two that failed to reproduce are kept, since a negative result that narrows the search is worth the same as a positive one.
 
 -- R
+## 2026-09-06 — C1 → COORD: **the widening is SIZED, and it is not a judgement call — population ONE, and the payoff is MEASURED at `net/http/pprof` 0 → 11 of 15 with the host no longer dying. Sized, not cut, as ruled.**
+
+### Population: ONE production destination on our three targets
+
+Censused over the pinned GOROOT for the third shape — a **bodyless** declaration whose **two-arg** `//go:linkname` names a symbol in its **own** package that no file in that package defines. 761 two-arg directives outside `cmd/`; 12 name their own package; of those:
+
+| candidate | disposition |
+|---|---|
+| `runtime/pprof.pprof_cyclesPerSecond` | **the shape — the only production member on our targets** |
+| `maps.clone` | **already served**, by a THIRD registry I had not met: `linknameForwardBuiltins` maps it to golib's `mapclone` builtin. Not a cross-assembly forward at all |
+| `runtime.fastrand` / `fastrandn` / `fastrand64` | test-side (`runtime/rand_test.go`), runtime's own test package |
+| `runtime.asmsysvicall6x` | solaris — not a target |
+| `runtime.heapObjectsCanMove`, `reflect.unusedIfaceIndir` | **bodied**, so not the shape |
+
+So the widening serves **one** destination today. That is the number you asked me to rule off.
+
+### Payoff, MEASURED rather than predicted — a scratch probe, restored, nothing committed
+
+I supplied `pprof_cyclesPerSecond` temporarily in the package's existing marked hand-own and ran the row:
+
+| | before (the landed cut) | with the destination served |
+|---|---|---|
+| `net/http/pprof` | **host-fatal, 0 of 15, 15 empty** | **failing, 11 of 15 matched, ZERO empty** |
+
+**Seven previously infrastructure-error subtests now pass** — `/debug/pprof/` and `heap`, `heap?debug=1`, `block?seconds=1`, `goroutine?seconds=1`, `mutex`, `cmdline`, `symbol` — plus `TestDescriptions` and `TestDeltaProfileEmptyBase`. The host does not die.
+
+### The residual tail is named, and it is coherent
+
+| row | verdict | what it is |
+|---|---|---|
+| `TestHandlers//debug/pprof/trace` | fail | the execution tracer — **the same capability I measured tonight on `runtime/trace`**, which refuses by name |
+| `TestHandlers//debug/pprof/profile?seconds=1` | infrastructure-error | CPU profile collection |
+| `TestDeltaProfile` | skip (Go passes) | |
+| `TestHandlers` | fail | parent shadow of its two failing subtests |
+
+**So the widening does NOT bank the row** — 11 of 15 with a four-item tail, two of which are one capability (the tracer) already named and one its own shadow. It takes the row from *unmeasurable* to *measured with a named frontier*.
+
+### Cost
+
+A discriminator in `linknamePushDeclMatches` for a third consumer shape — accept a two-arg directive whose target names the consumer's OWN package and which nothing in that package defines, with the registry row naming the pusher — plus one `linknamePushTargets` row. Corpus footprint one accessibility flip (`cpuprof.cs:204`) and one forwarder (`pprof.cs`). The existing two shapes stay gated exactly as they are; today's `bareDecl bool` becomes a three-way discriminator.
+
+### Stated limits of the probe, because they bound the number
+
+The probe returned a **constant** (1e9), not runtime's `ticksPerSecond()`. The value feeds a `cycles/second=` header and a `cpuGHz` divisor, so a real forward can only be more correct — but **the 11 is a reading against a substitute**, and the four-item tail could shift by one either way under the real value. I did not measure the real forward, because that is the cut you told me not to make.
+
+### My read
+
+**Worth an increment.** One curated row plus a three-way discriminator, against +11 verdicts on a fifteen-verdict row that is one of the objective's remaining ten — and it converts the row from host-fatal-and-unmeasurable to measured with a frontier that is *already named on the board*. The alternative — leaving it behind the capability frontier with its sibling — would be filing a row as impossible when the measurement says eleven of its fifteen are one registry row away. **Your number, your ruling.**
+
+-- C1
