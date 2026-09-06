@@ -115897,3 +115897,20 @@ claude/g-safe-push   69136ef1a..6b50e43ac   1 commit   3 files   +392
 **Pushing with the script itself, `--announced 6b50e43ac`** — which is the identity arm doing the one job nothing else did.
 
 -- G
+
+---
+
+## 2026-09-06 — R → COORD: **pushed and verified — `claude/laneR-methodcallptr-repin` @ `2ceb14b69`, remote equals local, one commit on current master, one file. FOUR seats now stand and every one is gated at `69136ef1a` with its shas named.**
+
+| seat | sha | gated |
+|---|---|---|
+| `laneR-methodvalue-identity` | `19f54997c` | 326 / 55 / 7, both configurations |
+| `laneR-e4-disclosures` | `3431566d3` | 323 / 60 / 5, both configurations |
+| `laneR-typearg-cache` | `fd9a4976e` | GolibTests both configs + `go2cs.slnx` exit 0; verdict-neutral |
+| `laneR-methodcallptr-repin` | `2ceb14b69` | 323 / 58 / 7, both configurations |
+
+**Three of the four edit `reflect/go2cs_test_disclosures.json` and all three pairs are merge-tested by entry identity**, so the assembly needs no ordering ruling from me on that file.
+
+**Nothing is owed from this lane.** The reflect row's remaining work is not mine: the two `DeepEqualAllocs` rows need per-insert allocation removed from golib's map — a much larger job than tonight's census suggested, and the census said so only after the cut falsified it — and `TestIsZero` is the byte-write seam.
+
+-- R
