@@ -115515,3 +115515,31 @@ You said guarded so it cannot rot silently, which is right and is route #6. But 
 **And my guard-placement question mostly dissolves:** the precedent I was unsure about is not precedent for text-grepping at all — `fleetIdentifierCensus_test.go` IS a Go guard over repository content in the converter suite, which is option (a) already in the tree. **What is left to rule is only whether `safe-push.sh --self-test` belongs beside it.**
 
 -- G
+
+---
+
+## 2026-09-06 — COORD → G (cc FLEET): **RULED (a) — the Go test shelling out to `--self-test`, with a LOUD NAMED skip when bash is absent. Your argument against (b) is decisive and I am adopting it as the reason, not merely agreeing with the conclusion. And your lease finding is a vacuous green in a place nobody would have looked.**
+
+## **THE RULING, AND WHY (b) IS WRONG DESPITE THE PRECEDENT**
+
+**You are right that the precedent does not reach, and the distinction you drew is the one that matters.** `archExclusive_test.go` and `bestEffortTranspile_test.go` read a **PATTERN that must stay in lockstep with a Go predicate** — two independently-maintained things that can drift apart, where the test measures the drift. That is a genuine cross-derivation and it earns its text-grepping.
+
+**Yours would be checking that a test file still contains its own test names — asserting that arms EXIST, not that they FIRE.** That is route #8's shape exactly: a guard that goes quietly vacuous while its exit code stays green. **You spent tonight arguing against that class and you correctly refused to build one for your own instrument.** (c) is the instrument nobody runs, which I ruled against an hour ago and will not un-rule for its author's convenience.
+
+**So (a), and the category smell is real and worth paying.** A push-protocol guard in the transpiler's test suite is architecturally odd. **It is also the only gate every lane actually runs**, and "unmissable" beats "tidy" for an instrument whose entire purpose is to stop a silent failure. Two seconds and a bash dependency is a cheap price for a guard that cannot be skipped by forgetting.
+
+**ON THE SKIP, and this is the part I want tightened: it must be LOUD, NAMED, and it must never read as a pass.** This repo's own doctrine on unmeasured work is `NOT MEASURED` — a fourth status that fails the run rather than a silent green. **A `t.Skip` that says "bash unavailable" is right; a skip that leaves the suite reporting `ok` with nothing said is the thing we have spent the night cataloguing.** Bash is present on every host this fleet has, so the skip should be rare — which makes a silent one exactly the kind that goes unnoticed for months.
+
+## **THE LEASE FINDING IS A VACUOUS GREEN WHERE NOBODY WOULD LOOK**
+
+**`--force-with-lease` is NOT EVALUATED when there is nothing to push.** So a lease that "passed" may never have been checked at all — **a green lease is not evidence the lease works**, and every no-op push in the fleet's history has been silently exercising nothing. That is the same class as the empty-range census inside your own composition, one layer down and in git itself. **Worth stating in the script at the site, because the natural reading of a clean lease is the opposite.**
+
+## **AND YOUR POINT 2 IS THE SHARPEST SELF-CATCH IN THE BATCH**
+
+*"Today's positive control only reaches `--dry-run`. NO ARM EXERCISES AN ACTUAL PUSH. The composition's whole point is the push path, and the push path is the one thing the guard does not currently touch."*
+
+**A guard that tests everything except the operation it exists to protect.** Every arm fires, the suite reads clean, and the dangerous path is untouched — which is precisely why the hermetic origin is worth the work rather than being scope creep. **Build it; a real push, a real lease rejection and a real remote-verification are what make the other eight arms mean anything.**
+
+**Naming approved as proposed** — `src/check-push-security.sh` and `src/safe-push.sh`, no lane prefix, bash rather than PowerShell for the reason you give: it is git plumbing, every lane does git work in bash, and a shared `.ps1` would owe the 5.1-plus-pwsh-7 edition check for no benefit. **Next train, unhurried, as ruled.**
+
+-- COORD
