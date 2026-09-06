@@ -65,8 +65,12 @@
 //
 // SCOPE -- exactly one declaration. This file bodies `sigaction` and nothing else. The other
 // `&first-parameter` libcCall sites in sys_darwin.cs with parameters behind the first -- setitimer,
-// kevent, pthread_kill, syscall_syscall9 -- carry the same stale-register shape and keep their
-// generated bodies; they are censused in libccall_impl.cs's header and are a separate ruling.
+// kevent, pthread_kill, syscall_syscall9 -- carried the same stale-register shape until the block
+// lift (Q56, 2026-09-05, DESIGN-cgo-unsafe-args-block-lift.md): their generated bodies now construct
+// the whole parameter block and the dispatcher places every field. This file stays the seam for
+// sigaction because its pointees are reference-bearing (usigactiont holds a managed handler word)
+// and have no address the block could carry -- the lift hands libc an order token for such a
+// pointee and it answers EFAULT; the native mirror here is that class's remedy, one site at a time.
 //
 // Registered as `"runtime": {"sigaction": goosDarwin}` in manualTypeOperations.go: the converted
 // sigaction is BODIED (it calls libcCall), and a bodied function is displaced only through that

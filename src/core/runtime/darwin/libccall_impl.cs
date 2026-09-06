@@ -46,6 +46,15 @@
 // sigaction_impl.cs is the first remedy (the seam marshals both pointers natively); the class is
 // a separate ruling, recorded on the board.
 //
+// THE RULING LANDED AS THE BLOCK LIFT (Q56, 2026-09-05, DESIGN-cgo-unsafe-args-block-lift.md): the
+// converter synthesizes the WHOLE parameter block for every `&first` site under //go:cgo_unsafe_args
+// (31 in sys_darwin.cs; read/write1/sigprocmask/sigaction stay displaced), so shape (a)'s stale
+// registers and shape (c)'s refusals end at the dispatcher, which places the block's fields; shape
+// (b)'s two members take the per-symbol form table in the body below. What stays this file's
+// refusal is narrower than before: a pointer field whose pointee is reference-bearing arrives as an
+// order token (Q44) and libc answers EFAULT -- an improved failure, whose remedy per site is
+// increment 6's native mirror (usigactiont done; itimerval, keventt, stackt, pthreadattr pending).
+//
 // SHAPE (d), THE DISCARDED RESULT (increment 7, 2026-09-05, the Q56 census). Go's asmcgocall hands
 // the trampoline's AX back as libcCall's int32, and TWENTY converted sites read it -- `var ret =
 // libcCall(...)` / `return libcCall(...)`: pthread_attr_init, pthread_attr_getstacksize,
@@ -108,6 +117,22 @@ internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
 
     if (s_libcCallErrnoReader == 0) {
         s_libcCallErrnoReader = GoCgoDynamicImports.Resolve("__error", libSystemPath);
+    }
+
+    // THE PER-SYMBOL FORM TABLE (Q56, DESIGN-cgo-unsafe-args-block-lift.md section 3.3): the two
+    // `&local` sites whose trampolines use the pointer in a way no fields-to-registers layout can
+    // express, read BEFORE the default dispatch. Both are unreached at master (walltime_trampoline
+    // carries no import record to resolve through; pthread_self's callers are hand-owned), so the
+    // table is correctness for the day they are, at the cost of two arms.
+    switch (symbol) {
+    case "clock_gettime":
+        // walltime_trampoline: MOVQ DI, SI; MOVL $CLOCK_REALTIME, DI; CALL libc_clock_gettime -- the
+        // block (a timespec: reference-free, pinned) is the SECOND argument, by address; libc fills it.
+        return unchecked((int32)(uint32)GoLibcCall.CallWithBlockAddress(entryPoint, (nuint)(uintptr)arg, [0], s_libcCallErrnoReader, symbol));
+    case "pthread_self":
+        // pthread_self_trampoline: CALL libc_pthread_self; MOVQ AX, 0(BX) -- the result lands in the
+        // block's first word (the pthread wrapper's value).
+        return unchecked((int32)(uint32)GoLibcCall.CallStoringResultIntoBlock(entryPoint, argsBox, s_libcCallErrnoReader, symbol));
     }
 
     nuint r = GoLibcCall.DispatchArgsStruct(entryPoint, argsBox, s_libcCallErrnoReader, symbol);

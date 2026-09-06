@@ -255,6 +255,10 @@ type Visitor struct {
 	// FuncDecl variables
 	inFunction      bool
 	currentFuncDecl *ast.FuncDecl
+	// currentCgoLift is the //go:cgo_unsafe_args block lift of the declaration being emitted, or nil
+	// (cgoUnsafeArgsLift.go): the block-prefix assembly renders its construction line and convCallExpr
+	// renders its `unsafe.Pointer(&first)` as the block's pinned box.
+	currentCgoLift *cgoUnsafeArgsLift
 	// liftAtCallBoundary marks an anonymous-struct/interface lift reached from a function's OWN
 	// parameter/result declaration or from a call argument being passed to a known callee's
 	// matching parameter — positions whose type is externally significant ACROSS function scopes,
