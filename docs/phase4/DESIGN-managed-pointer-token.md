@@ -218,3 +218,86 @@ supposed to be done; (c) a measured collision (§2) — bit 63 becomes the encod
 outside noise — something touched the constructor after all.
 
 -- C2
+
+## 9. AMENDMENT 2026-09-05 — the consequence is PLATFORM-ASYMMETRIC, and prediction 7 came true larger than it was written
+
+Ordered by COORD (`89e3ba68c`) after train 30's union battery. Appended, not rewritten: §5 and §8
+stand as they were written and are wrong only in scope, which is the point of recording this.
+
+### 9.1 What §5 says, and what was measured
+
+§5 states the consequence as: *the kernel answers **EFAULT** (or the syscall's own EINVAL) instead of
+reading reordered, moving memory. A silent wrong becomes a loud errno.* That is a POSIX reading of a
+kernel **read**, and it is the only shape the section imagined. Measured on Windows, the same class
+has **two** consequences and neither is an errno:
+
+| the kernel's access | POSIX (as §5 stated) | Windows (measured 2026-09-05) |
+|:--|:--|:--|
+| **reads** through the pointer | `EFAULT` / the call's own `EINVAL` | the call **returns an empty result** — no errno, no fault; the caller reads zeros and carries on |
+| **writes** through the pointer | `EFAULT` | the process **FAULTS**: access violation, `0xC0000005`, surfacing as `exit code mismatch: C# -1073741819 vs Go 0` |
+
+The write case is what train 30 hit. `internal/syscall/windows.rtlGetVersion` hands ntdll's
+`RtlGetVersion` the token; ntdll writes the version block through it and the process dies. The read
+case is the quieter half and it is the one that was already happening at master, before this cut:
+ntdll rejected a mis-laid-out managed address, `version()` read zeros, and the socket option above it
+was silently skipped — every row on that path stayed green **on a wrong answer**.
+
+### 9.2 The bill, measured on one host, one day, one instrument
+
+Train 29's sweep at the landed master `b91684991` against the same rows at train 30's assembly head
+`75758cf06` — eighteen other rows, several heavy, passed on **both** sides, so this is neither the
+host nor the instrument:
+
+| row | at `b91684991` | at `75758cf06` | shape |
+|:--|:--|:--|:--|
+| `net/http` | 1345 | conversion-blocked, **zero** converted verdicts | process death |
+| `crypto/tls` | 400 | 17 verdicts, then nothing — dies at `TestAlertFlushing`, its first real connection | contiguous alphabetical tail, no results file |
+| `encoding/json` | 491 | 89, then nothing — dies at `TestHTTPDecoding`, its first test that stands up an HTTP server and dials it | contiguous alphabetical tail, no results file |
+| `crypto/x509` | 341 | 341 of 341, **one** divergence (`TestHybridPool`) | did NOT crash; a different symptom, not attributed here |
+
+Neither truncated row wrote a results file, so nothing was killed by a deadline — the process died.
+The path is `syscall.Syscall` → `rtlGetVersion` → `version()` → the
+`SupportTCPInitialRTONoSYNRetransmissions` once → `net.connect`: **every Windows TCP dial**.
+
+### 9.3 Prediction 7, scored honestly
+
+§8's prediction 7 reads: *of the twenty falsifier sites, the ones a banked row reaches (`syscall`'s
+socket-option tests are the likeliest) move from a silent wrong to an errno, named in the cut's
+report.* The direction was right and the three specifics were wrong. It was not one of the twenty; it
+was not `syscall`'s socket-option tests; and on Windows it is not an errno. **A prediction can be
+correct in mechanism and wrong in every particular, and saying which half held is the point of
+having written it down.**
+
+### 9.4 Why §5's census could not see it — a scope gap, named
+
+§5's twenty were found by resolving every **`FromPinnedBox(Ꮡx)`** in the syscall family. The measured
+root does not use that mint. `zsyscall_windows.cs` emits:
+
+```
+internal static void rtlGetVersion(ж<_OSVERSIONINFOW> Ꮡinfo) {
+    var ᴋ47 = Ꮡinfo;
+        syscall.Syscall(procRtlGetVersion.Addr(), 1, (uintptr)ᴋ47, 0, 0);
+```
+
+— a **plain `(uintptr)` conversion of a box**, a second door into the same class that a
+`FromPinnedBox`-keyed census is structurally blind to. So §5's twenty is a *lower bound on one mint
+shape*, never the population; the record should not be read as if it were.
+
+`_OSVERSIONINFOW` is five `uint32` then an inline `[128]uint16`, converted as an `array<uint16>` — a
+managed reference — and the converter marks it as such itself: `package_info.cs` carries
+**`[GoValueClone("csdVersion")]`** on the struct. That attribute is an independent derivation of the
+same property, and it is the corpus-wide census handle COORD's `92a17d625` names. **The class
+population is G's census, not restated here**, so this amendment does not enumerate it.
+
+### 9.5 Disposition — unchanged, and this is the finding
+
+Q44 stands and is not on trial. §5 already said the twenty are *already wrong today* and that the
+token is **an improvement in failure mode, not a fix**; the four rows are the bill for a class that
+was always broken, presented for the first time in a form that cannot be ignored. What this
+amendment changes is the record's honesty about *how* the class announces itself: not one errno, but
+a fault on write and a silent empty on read, with the second indistinguishable from working code
+until something above it depends on the answer. The remedy is unchanged — the explicit-layout native
+mirror the struct-passing ruling names, already proven by the timezone hand-own — and
+`rtlGetVersion` is being cut assembly-side by COORD, not by this lane.
+
+-- C2
