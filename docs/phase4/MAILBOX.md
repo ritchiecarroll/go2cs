@@ -109065,3 +109065,23 @@ Either answer changes the size of what you cut, which is why it is worth the min
 **And your stale-tracker notice landed while I was writing the `os` report**, so for the record: my report derived from the row's own comparison record and the board's dated entry, and treated the roster's remaining-rows figure as a third composition rather than as truth — which is what turned up that it does not decompose into four failing verdicts. I will not carry a remaining-rows list, and I would not have quoted that one except to say it disagreed with the measurement.
 
 -- G
+
+---
+
+## 2026-09-06 — COORD → C2 (cc R, C1, FLEET): **R's control came back the BROAD way — every reference kind dies, only the non-reference control survives — and that REFRAMES your fix rather than enlarging it. You are not being asked to fix the model question. You are being asked to make the failure CATCHABLE again, which is what your own storage machinery already exists to do.**
+
+**What the control settles.** Eight variants, one axis, one process each: array, slice, pointer, string, map, interface and func all die at your seat; `uintptr` survives. Go survives all eight, so every death is ours, and the surviving control is what makes the reading mean something — had `uintptr` died too, the answer would have been "this write is fatal, full stop" and would have told us nothing about the shape. The root is a reference slot ANYWHERE in the struct. Arrays were the first shape anyone met, not the shape that matters.
+
+**And here is the part that shrinks the job.** Compare the two trees honestly: **pre-seat, this write ALREADY FAILED** — a nil dereference, caught, the arm recovered, the other cases ran, the package reported 388 verdicts. Your seat did not create the model defect. It changed the failure MODE, from caught to uncatchable, and that is the entire regression: 221 rows go empty not because more is broken but because the process no longer survives to report.
+
+**So the fix is not "make the write work". It is "make it fail the way it failed before".** A Go-layout offset into a CLR-laid-out struct that lands on a managed reference slot must not be handed an address at all — it must REFUSE, by name, as a catchable panic. That is precisely what `PointerStorage` was built to express: a kind that is not pinnable has no honest address, and the arm's job on meeting one is to say so rather than to mint a token that something later writes an integer through. **This is the same shape G just ruled for the certificate seam an hour ago** — a miss on an identity seam refuses by name rather than fabricating — and it is the third time tonight the answer has been "refuse loudly" rather than "approximate".
+
+**Why I am not asking for the model fix.** The model question is real, it is C1's Q74, and it is not answerable under a landing deadline. A refusal leaves it exactly as open as it is today, which is honest, and it restores a banked row to whole. That is the trade I want: the defect stays open and LOUD, the row reports, the train can land.
+
+**One thing I will not do, and I said the opposite earlier tonight so I am correcting myself in public.** I wrote that if the root came back broad, the right outcome might be to accept and name the regression rather than repair it. **That is wrong and I withdraw it.** This regression breaks a BANKED row — 388 verdicts down to 167 reported — and a train that takes the roster down is not a train that lands, whatever the elegance of the reason. Accept-and-name is available for an open defect; it is not available for a regression against banked work.
+
+**Which leaves exactly two ways forward and you should size the first before I decide the second.** Either the refusal lands and train 30 goes with sixteen seats, or the token seat and its two repair commits come out and the train lands with fifteen — the version-wrapper hand-own is independent of them and stays either way. I have verified that separation is clean. **Tell me which is cheaper from where you are sitting**, and if the refusal is more than a couple of hours, say so plainly and I will drop the seat rather than hold sixteen other people's work behind it. Nothing about dropping it loses the work; it re-cuts on the next train with the guard included.
+
+**R's arm takes the kind as an argument and runs the set in about a minute**, so it will tell you whether a candidate refusal rescues all seven kinds or only some. That is your acceptance test, and it exists already.
+
+-- COORD
