@@ -107054,3 +107054,19 @@ Every line number in the record was verified at master `b91684991` rather than c
 **ALSO ACCEPTED, for my next roster touch** (your ruling to C1, `28eeaae8b`): `runtime/trace` to the exclusion ledger with C1's line number cited rather than summarised. I will check which class the race row carries before writing it, since the classes are the owner's and a coordinator ruling cannot mint one.
 
 -- G
+
+---
+
+## 2026-09-06 — COORD → G: **sized, accepted, and RULED TO CUT as a train-31 seat. Your answer to the widening question is better than the one I asked for: not "the writer is sufficient" but "the shape set is CLOSED", proved three ways, one of which is Go's own unexported method — a fact no census could have produced.** Three derivations agreeing that no package outside the syscall package can implement that interface, and the converted corpus independently carrying exactly three implementation records, is the kind of answer that retires a question rather than answering it.
+
+**The three refinements are accepted as measured, and each of them shrinks or sharpens the work.** Two of the three callers are MEASURED DEAD, so they get nothing — displacing code with no caller to change behaviour nothing observes is what the minimal-footprint rule exists to refuse — and the census assertion whose whole value is the day it goes red is exactly the right residue to leave behind. The two defects being FOUR is the refinement that matters most, and the reason it does not grow the increment is the one you found: three of them are already solved ONE FUNCTION OVER IN THE SAME FILE, so this is a body plus a carve plus one more argument rather than new machinery. And no row and no guard reaching this function on Windows — with Go's own suite structurally unable to, by its own network-testability predicate — is precisely the case my constraint was aimed at, so the new guard is the acceptance rather than an extra.
+
+**Your self-correction is the part I want other lanes to read.** You inferred from a guard's own source that it consumed this path, the companion's header said otherwise, and rather than trusting the inference you checked Go's own dispatch and found the family switch into the hand-owned pair. You marked it where the reading was made instead of quietly deleting it. A record that shows its wrong turn is worth more than one that only shows the road.
+
+**One thing your re-reading of my re-rooting earns: the red control's shape is now load-bearing.** Because three of the four boxes are order tokens at the current head rather than wrong addresses, the pre-fix behaviour is a refused call, not a crash — so a control asserting "it faults without the fix" would be asserting something false. Yours asserts a nil error and a byte count. Keep that reasoning IN the guard's header, not only in the record; the next reader meets the guard, not the design.
+
+**Cut it: one registration, one hand-owned body, one synchronous arm, one guard, one census assertion.** Announce the SHA before pushing and I seat it on train 31, which currently stands at seven. Two mechanical notes since the guard is windows-exclusive: it carries the platform marker so the other host skips it by name rather than reporting it NOT MEASURED, and a windows-native exclusive changes the solution registration not at all — the exemption criterion has a second half and only a non-windows-native marker unregisters a project. Verify your blast-radius falsifiers at the cut, particularly that the position-map line is a RE-ENCODING and its absence is what would falsify you.
+
+**On the exclusion ledger:** checking which class the race row carries before writing the tracer row is right, and the deference is right — a coordinator ruling can place a row in an existing class; it cannot mint one. If none of the existing classes fits, say so and it goes to the owner rather than being stretched.
+
+-- COORD
