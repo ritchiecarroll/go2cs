@@ -94,20 +94,76 @@ func TestHostFatalMintRefusesATestAnotherPlatformMatches(t *testing.T) {
 	}
 
 	// REFUSED: another platform records it matching.
-	v := hostFatalMintViolations(pkg, hostFatal("TestMatchesElsewhere"))
+	v, u := hostFatalMintViolations(pkg, hostFatal("TestMatchesElsewhere"))
 	if len(v) != 1 || !strings.Contains(v[0], "TestMatchesElsewhere") {
 		t.Fatalf("the mint must refuse a name a proof page records as matching; got %#v", v)
 	}
-
-	// ALLOWED: the page records it diverging, so excluding it withdraws nothing that works.
-	if v := hostFatalMintViolations(pkg, hostFatal("TestDivergesElsewhere")); len(v) != 0 {
-		t.Fatalf("a name no page records as matching must mint cleanly; got %#v", v)
+	if len(u) != 0 {
+		t.Fatalf("a name the rule DECIDED on is not unchecked; got %#v", u)
 	}
 
-	// ALLOWED: absent from every page entirely -- runtime/debug's real case, where
-	// panic_test.go's //go:build excludes windows so that page never lists it.
-	if v := hostFatalMintViolations(pkg, hostFatal("TestNotOnAnyPage")); len(v) != 0 {
+	// ALLOWED, AND POSITIVELY CLEARED: the page records it diverging, so excluding it withdraws
+	// nothing that works -- and because the name reached the evidence base, it is not unchecked.
+	// This arm is the one that makes the pair discriminating: without it, "cleared" and "no
+	// evidence" would both be len(v)==0 and the fix would assert nothing.
+	if v, u := hostFatalMintViolations(pkg, hostFatal("TestDivergesElsewhere")); len(v) != 0 || len(u) != 0 {
+		t.Fatalf("a name a page records as DIVERGING must mint cleanly and be positively cleared; got v=%#v u=%#v", v, u)
+	}
+
+	// ALLOWED BUT UNCHECKED, and this is runtime/debug's real case: panic_test.go is //go:build
+	// unix, so TestPanicOnFault appears on ZERO committed pages -- the pages are the Windows record.
+	// It must still mint (the rule refuses only on positive evidence) while SAYING it decided
+	// nothing. Before 2026-09-06 this returned a bare nil, identical to the arm above, and the
+	// silence read as clearance.
+	v, u = hostFatalMintViolations(pkg, hostFatal("TestNotOnAnyPage"))
+	if len(v) != 0 {
 		t.Fatalf("a name absent from every page must mint cleanly; got %#v", v)
+	}
+	if len(u) != 1 || !strings.Contains(u[0], "TestNotOnAnyPage") {
+		t.Fatalf("a name absent from every page must be reported UNCHECKED, not silently cleared; got %#v", u)
+	}
+}
+
+// The two OTHER silent returns, which carried no comment and no signal until 2026-09-06. Neither is
+// a violation -- a scratch output root and a fresh clone are both legitimate -- but both decide
+// nothing about the entry, and a reviewer must be able to tell that from a run that decided
+// something. Positive control: each arm was made to fail by restoring the bare `return nil`.
+func TestHostFatalMintReportsWhenItCannotCheckAtAll(t *testing.T) {
+	// No go2cs root above the output path: nothing to read, so every entry is unexamined.
+	stray := t.TempDir()
+	v, u := hostFatalMintViolations(stray, hostFatal("TestA", "TestB"))
+	if len(v) != 0 {
+		t.Fatalf("no evidence is not a violation; got %#v", v)
+	}
+	if len(u) != 2 {
+		t.Fatalf("with no go2cs root every host-fatal entry is unchecked; got %#v", u)
+	}
+
+	// A root with NO committed pages -- a fresh clone or a staging root.
+	root := t.TempDir()
+	pkg := filepath.Join(root, "src", "core", "some", "pkg")
+	if err := os.MkdirAll(pkg, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, "src", "core", "golib"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "src", "core", "golib", "golib.csproj"), []byte("<Project/>"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	v, u = hostFatalMintViolations(pkg, hostFatal("TestA"))
+	if len(v) != 0 {
+		t.Fatalf("an empty evidence base is not a violation; got %#v", v)
+	}
+	if len(u) != 1 || !strings.Contains(u[0], "TestA") {
+		t.Fatalf("an empty evidence base must report the entry as unchecked; got %#v", u)
+	}
+
+	// And the honest silent return: no entry of the class at all, so there is no claim to report.
+	if v, u := hostFatalMintViolations(pkg, map[string]testDisclosure{
+		"TestX": {Name: "TestX", Class: platformSkipClass},
+	}); len(v) != 0 || len(u) != 0 {
+		t.Fatalf("a manifest with no host-fatal entry decides nothing and reports nothing; got v=%#v u=%#v", v, u)
 	}
 }
 
