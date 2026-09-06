@@ -118477,3 +118477,32 @@ error. `fsck --full` finds no pack corruption and only these two defects, so the
 fix — but I have not pinned the inflate to a specific object, and I am not going to assert a mechanism I
 did not measure. If a fetch still fails after the repair, the fallback is a fresh `repo` clone (13
 worktrees to re-add, which is why it is the fallback and not the first move).
+
+---
+
+## 2026-09-06 — C2 → COORD (cc FLEET): **increment 12's acceptance is DISPATCHED as a one-axis pair — BEFORE run `34059622044`, AFTER run `34059627065`, both mac legs — and the reading rule is on the record before either finishes**
+
+**Two probe branches, never to merge, pushed and dispatched:**
+
+| arm | branch | tip | run |
+|---|---|---|---|
+| BEFORE (no increment 12) | `claude/c2-getaddrinfo-probe-before` | `9ecce1839c` | [34059622044](https://github.com/ritchiecarroll/go2cs/actions/runs/34059622044) |
+| AFTER (increment 12) | `claude/c2-getaddrinfo-probe` | `83385dad6c` | [34059627065](https://github.com/ritchiecarroll/go2cs/actions/runs/34059627065) |
+
+Both `goos=darwin stage=behavioral-smoke filter=DarwinResolverProbe`, identical inputs, differing only in ref.
+
+**ONE AXIS, asserted rather than intended.** The BEFORE arm is the AFTER arm's probe commit *cherry-picked* onto the ptrout base, and I checked the three probe files are byte-identical across the two branches by blob hash — `main.go`, `go.mod`, `DarwinResolverProbe.csproj` all IDENTICAL. `git diff` between the two arms is **exactly increment 12's four files**: `net_darwin.cs` 21 lines, `net_darwin_impl.cs` +200, `package_info.cs` 1, `manualTypeOperations.go` +13. Nothing else varies.
+
+**THE READING RULE, stated now so it cannot be adjusted to fit the result.** `net/lookup_unix.go:72` tries `cgoLookupPort` first and swallows its error into `goLookupPort`, which reads `/etc/services` — present on every macOS runner with `http 80`. So:
+
+- **An identical pair is DID NOT MEASURE, not a pass.** Two green arms are the *expected* output of a probe that never reached the seam.
+- **A BEFORE that dies and an AFTER that prints is the pass**, and it is the likely shape: an AUTO-layout record and a value-peeked out-cell handed to libc kill the process rather than returning an errno the fallback could absorb. That is exactly how increment 11's pair read — BEFORE failing on both legs with one message and no variance, AFTER 1/1/1/1.
+- **The `LookupHost` arm is the one with nothing to hide behind** (`lookup_unix.go:63` calls `cgoLookupIP` outright when `hostLookupOrder` answers cgo), at the cost of depending on `conf.go`'s ordering on the runner — which is why it is the second arm and not the only one.
+
+Every printed line is a boolean or a fixed number: no address, no host name, no resolver-dependent count, so Go and C# compare byte for byte and no account detail reaches a CI transcript. Non-darwin hosts print a skip and the program still runs — verified here on Linux, `not darwin: probe skipped` / `done`.
+
+**The same run measures the second seam increment 12 deliberately did not claim** — `net/darwin/cgo_unix.cs`'s port alias, the shape increment 8's header names as fatal, in converted code no hand-own covers on a darwin-only file. If it dies, that is increment 13 with its own evidence rather than a retro-fitted claim on this one.
+
+Reading both when they land.
+
+-- C2
