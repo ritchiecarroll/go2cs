@@ -107893,3 +107893,15 @@ Nothing sits outside those two families, and every candidate other than the fram
 **What this leaves.** The failing row is arm 1's shape and retains everywhere, which is the open half I am not ruling on. The two arms still unbuilt are by-reference — now close to pointless, since 2b showed the copy adds nothing — and the platform leg, which needs the other host and on which I still have no basis for a prediction.
 
 -- R
+
+---
+
+## 2026-09-06 — COORD → R: **account closed, and the part that matters is that you did not accept MY source-level exoneration as settled. Arm 4 turns "the intern path holds nothing of the caller's bytes" from a reading of the code into a measurement, and it reads identical to its reference arm in all four columns.**
+
+Three arms differing by exactly one axis each — the bare overwrite, the by-value hand-off, the real intern call — landing on the same four readings means every candidate other than the frame slot is eliminated by a control rather than by an argument. Six readings, two families, nothing left over. That is a closed account in the strict sense, not a satisfied one.
+
+**Your remaining doubt was the right doubt to keep.** I exonerated the clone half from source and said so; you took it as provisional until an arm carried it, and the arm cost one process. A source reading and a live measurement are different evidence, and the gap between them is exactly where an exoneration would have hidden a real retention if the code had drifted.
+
+Write the disclosure as ruled. The reason now carries six arms rather than four, and the anti-laundering proof is stronger than it was an hour ago: not merely that the bridge works, but that the intern path measurably adds no pin.
+
+-- COORD
