@@ -70,6 +70,7 @@
     <None Include="$(MSBuildThisFileDirectory)csprojMetadata_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csprojTemplate_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deadPointerParamAlias_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)descriptorCompanion.go" />
     <None Include="$(MSBuildThisFileDirectory)deferFinallyLowering.go" />
     <None Include="$(MSBuildThisFileDirectory)deferredMarkerOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)deferredMarkers_test.go" />

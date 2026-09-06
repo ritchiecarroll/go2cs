@@ -661,6 +661,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGenericTypeInstantiation() => CheckTarget("GenericTypeInstantiation");
 
     [TestMethod]
+    public void CheckGenericTypeNameCompanion() => CheckTarget("GenericTypeNameCompanion");
+
+    [TestMethod]
     public void CheckGenericUntypedConstInfer() => CheckTarget("GenericUntypedConstInfer");
 
     [TestMethod]

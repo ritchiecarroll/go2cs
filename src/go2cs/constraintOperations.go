@@ -949,6 +949,20 @@ func (v *Visitor) explicitTypeArgsAfterErasure(x ast.Expr, indices []ast.Expr) (
 func (v *Visitor) renderedTypeArgs(funIdent *ast.Ident, typeArgs *types.TypeList) []string {
 	typeParams := v.signatureTypeParams(funIdent)
 
+	// THE COMPANION'S USE. `reflect.TypeFor[T]()` inside a generic declaration that threads T reads
+	// the COMPANION, never T: T is the value's type and stays exactly what it was (`object` for an
+	// erased alias), while the companion is the carrier the call site bound. This is the only
+	// substitution the arc makes to an existing rendering, and it is confined to the one callee that
+	// reads a Go NAME out of a static type — see descriptorCompanion.go on why the identity surface
+	// (`abi.TypeFor`) is deliberately not touched.
+	if len(v.currentFuncCompanionNames) > 0 && typeArgs.Len() == 1 && isReflectTypeForSelector(v.info, funIdent) {
+		if typeParam, isTypeParam := typeArgs.At(0).(*types.TypeParam); isTypeParam {
+			if companion, hasCompanion := v.currentFuncCompanionNames[typeParam]; hasCompanion {
+				return []string{companion}
+			}
+		}
+	}
+
 	names := make([]string, 0, typeArgs.Len())
 
 	for i := range typeArgs.Len() {
@@ -967,6 +981,36 @@ func (v *Visitor) renderedTypeArgs(funIdent *ast.Ident, typeArgs *types.TypeList
 		}
 
 		names = append(names, v.getCSharpTypeName(typeArgs.At(i)))
+	}
+
+	// THE COMPANION'S SUPPLY. A callee that threads gains one argument per name-reading parameter,
+	// appended in declared order after every real argument — the DESCRIPTOR CARRIER when the Go type
+	// argument is a defined-over-interface type the emission erased to a `using` alias, and the
+	// argument's OWN rendering otherwise. The second half is what keeps an unerased instantiation
+	// byte-identical in meaning to before the thread: `testHandle<testString>` becomes
+	// `testHandle<testString, testString>`, and `reflect.TypeFor` inside answers exactly what it
+	// answered when it read T.
+	if funcObj, isFunc := v.info.ObjectOf(funIdent).(*types.Func); isFunc {
+		for _, index := range v.descriptorCompanionParams(funcObj) {
+			if index >= typeArgs.Len() {
+				continue
+			}
+
+			if typeParams != nil && index < typeParams.Len() {
+				if _, erased := pointerCoreConstraint(typeParams.At(index)); erased {
+					continue
+				}
+			}
+
+			typeArg := typeArgs.At(index)
+
+			if carrier := v.descriptorCarrierFor(typeArg); carrier != "" {
+				names = append(names, carrier)
+				continue
+			}
+
+			names = append(names, v.getCSharpTypeName(typeArg))
+		}
 	}
 
 	return names
@@ -1355,6 +1399,26 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 	for i, name := range typeParamNames {
 		if !erasedParams[i] {
 			emittedNames = append(emittedNames, name)
+		}
+	}
+
+	// DESCRIPTOR COMPANIONS ride at the END of the list, after every declared parameter, so a call
+	// site appends its extra arguments without disturbing the positions Go itself wrote — and so an
+	// EXPLICIT partial instantiation (completedInstantiationTypeArgs) still counts the declared
+	// positions the way Go does. Ascending by declared index (descriptorCompanionParams sorts), and
+	// UNCONSTRAINED by construction: the companion is only ever bound to an uninhabited carrier
+	// interface or to the type argument itself, and any `where` clause naming the real parameter's
+	// constraint would reject one or the other. The map is keyed by this declaration's OWN type
+	// parameter objects, so a generic named type's list reaching here finds nothing.
+	if len(v.currentFuncCompanionNames) > 0 {
+		for i := range typeParams.Len() {
+			if erasedParams[i] {
+				continue
+			}
+
+			if companion, hasCompanion := v.currentFuncCompanionNames[typeParams.At(i)]; hasCompanion {
+				emittedNames = append(emittedNames, companion)
+			}
 		}
 	}
 
