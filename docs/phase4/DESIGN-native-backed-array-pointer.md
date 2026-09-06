@@ -196,3 +196,98 @@ raw address, are both the same exit 139 one frame over.
 (the write site knows it — Go's `l2Size` is right there — but whether that generalises to every
 `*[N]T` over native memory is unanswered), and whether an over-length index refuses loudly or falls
 through.
+
+---
+
+## Amendment, 2026-09-05 (after the cut): both halves landed, the acceptance MET, and a WALL ONE LAYER DEEPER named
+
+Increment 8 is cut as two commits on one branch — the read half (option (B)'s virtual seam plus
+`NativeArrayBox`) and the write half (the converter's recognition of the write-barrier-dodging store
+plus the `builtin.NativeArrayPointer` door) — with the ElemRefBox native-slice predicate split out
+ahead of them as its own seat, because the read half's guard exposed it and it is golib's own defect
+rather than this increment's.
+
+### The emission, measured on all three targets
+
+A two-seeded three-target `-stdlib` A/B (both arms built from frozen `git archive` snapshots, every
+seed taken from one frozen snapshot BEFORE any arm converted, each arm's write-evidence recorded):
+
+| target | differing files | only-in | removed / added lines | `GoPositionMap` lines |
+|---|---|---|---|---|
+| windows | 1 (`runtime/mpagealloc.cs`) | 0 | 1 / 1 | 0 |
+| linux | 1 (`runtime/mpagealloc.cs`) | 0 | 1 / 1 | 0 |
+| darwin | 1 (`runtime/mpagealloc.cs`) | 0 | 1 / 1 | 0 |
+
+The content witness — a hand-owned file neither converter writes — is byte-identical in all six
+roots, so no arm seeded from a tree the other had moved. Zero position-map lines is the right
+reading for a change that replaces one line with one line.
+
+### The acceptance, measured as a before/after ON ONE BOX
+
+The design's acceptance was "the eight page-alloc rows that today exit 139 with a blank stderr
+produce verdicts". Measured with the same gated filter, deadline and configuration on both arms,
+rather than quoted from an earlier host's record:
+
+| arm | rows | EMPTY C# verdicts | record status | results file |
+|---|---|---|---|---|
+| BASE (the split seat, increment 8 absent) | 88 | **88** | `conversion-blocked` | **none written** |
+| HEAD (both halves) | 88 | **0** | `failing` | written |
+
+**The acceptance is MET**, and over a wider family than the eight the design named: the gated set
+`^Test(PageAlloc|PageCache)` is 88 rows, every one of which now produces a verdict where every one
+was previously mute. Twelve of them (the `TestPageCacheAlloc` family) pass on both sides.
+
+### THE ROWS STILL FAIL, and the reason is now VISIBLE — which is the finding
+
+The remaining rows read `Go="pass" C#="fail"`, and the failure names itself:
+
+```
+panic: native-backed slice: element type pallocData contains managed references
+       and cannot alias native memory
+    at go.slice`1.OverNativeMemory(...)
+```
+
+That refusal is CORRECT and golib is right to make it. `pallocData` embeds `pallocBits` and holds
+`scavenged pageBits`, and `pageBits` converts as `[GoType("[8]uint64")] partial struct pageBits` —
+whose managed representation is an `array<uint64>`, i.e. **a managed `uint64[]` reference**. So the
+converted `pallocData` is not layout-compatible with the native block at all, and no native view of
+a `*[1 << pallocChunksL2Bits]pallocData` can be sound however the pointer is minted.
+
+**So increment 8 converts a MUTE crash into a NAMED refusal on 88 rows. It does not, and cannot,
+make them pass.** The design separated those two claims ("passing is a separate question") and this
+is exactly that separation being cashed — but the residual is not an unrelated failure, it is the
+same seam one layer down, and it is recorded here rather than left for the next reader to rediscover.
+
+### Falsifiers, scored
+
+1. *"A row that still exits 139 with a blank stderr"* — **did not fire**. No row is empty and the
+   results file was written on the HEAD arm; it is the BASE arm that has no results file.
+2. *"A row that reaches a verdict but dies inside `arrayView` on a different frame — the native view
+   is mis-sized (`len` wrong)"* — **half right, and the half it got wrong is the interesting half**.
+   The rows do die under `arrayView`, in its callee `OverNativeMemory`; the length is NOT wrong (the
+   mint carries Go's own `N`, 8192, read from the destination type). The cause is the element type,
+   which the falsifier did not anticipate.
+3. *"`runtime`'s other rows moving at all"* — **NOT MEASURED**. The run was gated to the page family,
+   which is diagnostic only and cannot answer a question about rows it did not run.
+4. *"Any measurable byte movement on an alloc-assert row"* — **NOT MEASURED here**.
+
+### The two OPEN questions above are now settled
+
+- **Where the native view's length comes from.** From the **destination type**, not the store site.
+  The write site happens to know it (`l2Size` is one line up), but the type knows it everywhere, so
+  the rule is general for every `*[N]T` rather than a transcription of this one call.
+- **Whether an over-length index refuses or falls through.** It **refuses by name**, and the read
+  half's guard holds an arm for it.
+
+### What is NOT built, and why
+
+The 20 occurrences of the dodging store in the pinned GOROOT have a pointer-to-**array**
+destination at exactly one — this seam. The other 19 store into pointer-to-struct, pointer-to-byte
+and `unsafe.Pointer` slots, and 12 of those reach the same aliasing reinterpret in today's emission:
+the same class, one type kind over, latent in the same way. None has a measured failing row, so none
+is served, and the converter's predicate keys on the DESTINATION TYPE so that widening it is a
+change of scope rather than a tweak.
+
+The wall this amendment names — the converted representation of a fixed-size array VALUE field, and
+therefore of every struct that holds one — is a golib and emission MODEL question far larger than
+this increment, with its own evidence still to gather. It is recorded, not built.
