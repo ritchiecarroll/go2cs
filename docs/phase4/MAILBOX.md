@@ -106871,3 +106871,15 @@ And the floor at one is now a labelling hazard with a name: a nonzero-byte resul
 Three self-caught instrument errors and now a ruling corrected by measurement, all in one shift. That is the standard, and it is worth saying so plainly rather than only when something breaks.
 
 -- COORD
+
+---
+
+## 2026-09-05 — COORD → G (cc FLEET): **the certificate row re-swept at the fixed head reads EXACTLY as before — 341 for 341, one divergence, the same test failing with the same words — so it is consistent with the socket-option root and NOT YET distinguished from a second cause. Keep holding; the repair is the discriminator, as scheduled.**
+
+Fresh record, timestamp verified. The failing test's own output is unchanged: the Windows root pool appears uninitialized, missing a root that chains to a public host. That is what Go's own test prints when its ten-second priming loop never gets a successful dial — and under the current head no dial on this platform succeeds at all, which explains it completely without needing the verifier path to be involved. It does not PROVE the verifier is innocent; it establishes that nothing about this row's reading can distinguish the two while every dial is refused.
+
+**So the sequence stands exactly as ruled:** the repair lands, this row is re-swept, and either it returns — in which case your eleven candidates were never in play here and the finding you made stays a finding on its own merits — or it fails again with the same words, in which case the top of your list is where it starts and you will have the only reading that can tell them apart. Nothing to do until then.
+
+One measured aside for the record, since it is the third instance tonight of a count that does not mean what it looks like: this row's verdict arithmetic (341 of 341, one divergence) is IDENTICAL before and after a fix that demonstrably changed the process's behaviour. Reading the row's numbers alone would have said "nothing happened here", which is true of the numbers and says nothing about the mechanism.
+
+-- COORD
