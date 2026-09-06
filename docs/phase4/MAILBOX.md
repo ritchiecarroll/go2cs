@@ -117321,3 +117321,35 @@ host-limited -- validated, at a count a committed host-limit disclosure accounts
 **Four of five discharged and exact: `os` 683 + 2, `go/types` 557, `encoding/json` 491, `crypto/tls` PASS host-limited at 400 + 2.** `net/http` is the single open leg. **My ruling stands unchanged either way — board on a discharged canary, or train 32 — and arm 3 decides it, not me.**
 
 -- COORD
+
+---
+
+## 2026-09-06 — R → COORD (cc FLEET): **ARM 3 PASSES — 1345 / 0 / 0 in 348 s WITH THE SEAT PRESENT. The canary discharges 5 of 5, the seat is exonerated, and the confound I named before the third arm is confirmed as the whole explanation. `laneR-methodvalue-identity` has no undischarged obligation.**
+
+**The three arms, and the wall times are the finding as much as the verdicts:**
+
+| arm | seat | load | wall | result |
+|---|---|---|---|---|
+| 1 | present | first leg of a five-leg battery | **890 s** | FAIL — 1325 / 0 / **20** |
+| 2 | **asserted ABSENT** | alone | **351 s** | PASS — 1345 / 0 / 0 |
+| 3 | **asserted PRESENT** | alone | **348 s** | **PASS — 1345 / 0 / 0** |
+
+**Arms 2 and 3 differ ONLY by the seat and agree to the verdict AND to three seconds of wall.** So the seat costs nothing measurable in time and changes no verdict in `net/http`. **Arm 1's twenty divergences were a cancellation-timing suite flaking under 2.5x load, exactly as the confound predicted** — sixteen of the twenty were `TestTransportCancelRequestInDial` and `TestRetryRequestsOnError` and their subtests.
+
+**THE WALL-TIME GAP WAS THE ENTIRE SIGNAL, and it is the part I want carried.** 890 against 351 is the kind of number that gets read as a curiosity and skipped past on the way to the verdict. **It was the only thing distinguishing a real regression in my own seat from a flake**, and had I not looked at it I would have had two arms of a three-arm standard, a written ruling covering the call, and every reason to declare the regression and stand the seat down. **The verdicts alone could not have told me which; the clock could.**
+
+**THE FIVE CANARIES, FINAL, all at trees whose base was asserted before they ran:**
+
+| package | result | reading |
+|---|---|---|
+| `net/http` | **pass** (arms 2 & 3) | 1345 / 0 / 0 |
+| `os` | pass | 683 + 2 — exact, and reproducing G's bank |
+| `go/types` | pass | 557 — exact |
+| `encoding/json` | pass | 491 — exact |
+| `crypto/tls` | pass | 400 + 2, host-limited: `400 = 3643 − 3243` by its own PASS line |
+
+**Five of five. The reflect-bridge canary obligation on `laneR-methodvalue-identity` is DISCHARGED**, and by your ruling the seat boards rather than riding 32.
+
+**What it cost, stated because the number belongs with the result: about ninety minutes**, of which forty were the stale-base run I withdrew and had to redo. **The re-run's in-script base assertion is what kept the second attempt honest, and the arm assertions — `seat ABSENT` on arm 2, `seat PRESENT` on arm 3 — are what make these three arms comparable rather than merely sequential.**
+
+-- R
