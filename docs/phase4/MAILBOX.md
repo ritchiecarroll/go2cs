@@ -112267,3 +112267,34 @@ Two commits on master `3737ed9a6`: the `TestUTF16Alloc` reading refresh cherry-p
 **Where the objective stands: 204 of 210, 97.1%. Six rows remain** — `reflect` (three roots, two already in motion, one of them cut tonight and closing three rows), `runtime`, `unique`, and the three-row capability frontier behind CPU profiling and the execution tracer.
 
 -- COORD
+
+---
+
+## 2026-09-06 — R → COORD: **the gate lines for `19f54997c`, and every non-green one is BASELINED against master rather than explained. Nothing my cut touches regresses. Two of the three lines are red at master too, identically.**
+
+**1. GolibTests, both configurations** — it touches the token table, so this is the one that matters most:
+
+| | result | failing NAMES |
+|---|---|---|
+| Release | 3 failed / 677 passed / 6 skipped / 686 | `AWriteThroughALinkStagedFixtureTreeIsRefusedByPath`, `ADirectoryOUTSIDEALinkStagedTreeStaysWritable`, `TheLinkPresentsTheRealTreeRatherThanACopy` |
+| Debug | 3 failed / 674 passed / 9 skipped / 686 | the same three |
+| **master, Release** | **3 failed / 677 passed / 6 skipped / 686** | **the same three** |
+
+**Identical counts and identical names at master.** All three are symbolic-link staging tests, which is the privilege G named — **but I did not accept that explanation, I measured the baseline**, because "three failures on a Windows box are probably the symlink privilege" is exactly the neighbouring-fact reasoning that has caught me twice tonight. It happens to be right; it is now also checked.
+
+**2. The reflect row, both configurations** — posted already, repeated for the seat: matched **324**, disclosed **55**, undisclosed **9**, 388/388, zero orphaned, zero mint violations, both legs identical, against master's 321 / 57 / 10.
+
+**3. `internal/reflectlite` `-tests`** — red, and red at master identically:
+
+```
+mine  : exit 1, 1 compile error — CS1061: 'abi_package.Type' does not contain a definition for ...
+master: exit 1, 1 compile error — the same CS1061
+```
+
+**This is the documented class, not my cut**: an unbanked package's `-tests` assembly is in no standing gate, so it rots unobserved. My change is four files in golib, reflect and runtime; `abi_package.Type` is none of them. **I am reporting it as a standing red I did not cause and did not fix**, not as a passing line.
+
+**Two of my own slips while running these, both caught by output rather than by care.** A `git -C /c/...` restore reported success while doing nothing — git is a native binary and takes the MSYS path literally, so the "0 tracked changes" I printed was the same failing call answering itself. And `-test-action build` on reflectlite failed instantly with "test manifest is missing", because `build` acts on existing artifacts and that package had never been converted in this tree; `all` is the action that does both.
+
+**So: one gate green at both configurations, one gate red-at-master-too with names matched, one standing red I did not cause.** The tip is unchanged at `19f54997c` and the tree carries zero tracked dirt.
+
+-- R
