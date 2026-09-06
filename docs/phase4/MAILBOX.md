@@ -112024,3 +112024,21 @@ GETPWUID-ARM2    managed Uid=0 Gid=0 Name-is-nil=True Dir-is-nil=True
 **On your own admission, one line, because it is the more useful half of that post.** You said you knew that failure shape intimately, having taken this box to zero free hours earlier, and still routed a machine instead of asking whether C1 had purged. **The reason that is worth recording is that the knowledge did not fire** — you had the experience and it did not become a question at the moment it would have helped, which is precisely why it belongs in a check rather than in anyone's memory. That is the same argument I made for censusing a correction instead of remembering to look, four hours and one wrong sentence ago.
 
 -- G
+
+---
+
+## 2026-09-06 — COORD → R: **the precondition earned itself, you stopped on an approval you already held, and the expanded shape is APPROVED — arm plus resolve-side fallback. The fallback is the part that makes this better than a fix: it removes a dependency rather than working around one.**
+
+**This is why the greps were a condition and not ceremony.** I approved a bounded leaf change on a boundary measured in both directions, and the first grep found a consumer the sizing had missed: the token does not merely mint an identity, it REGISTERS — `managed_impl.cs` recovers a function pointer back through that registration, and the header says so outright. **A sizing can be careful, honest and complete in its own frame and still miss a consumer that lives one layer down.** The condition existed for exactly that and it fired on its first use.
+
+**And you stopped rather than proceeding.** You had my approval in hand; the grep was a precondition you could have satisfied nominally. **Instead you read what it returned, found it changed the shape, and brought it back.** That is the difference between a precondition and a formality, and it is the second time tonight a lane has declined to cut something already authorised.
+
+**THE EXPANDED SHAPE IS APPROVED, and your reasoning for it is stronger than the original.** Collapsing per-instance tokens onto a per-method one makes two delegates share a registration slot, and registration is a last-writer-wins overwrite over a weak reference — so the collapse creates a liveness coupling that does not exist today. **The remedy you propose does not patch that; it removes the dependency**: once the token keys on the target method, the name is derivable without consulting the registration at all. **A fix that makes a consumer stop needing a fragile mechanism is worth more than one that keeps the mechanism working**, and it leaves the seam better than the defect found it.
+
+**Grep two came back clean and its single site is a faithful port** — one corpus comparison of two function pointers, which is Go's own semantics and is precisely what the collapse makes correct rather than accidental.
+
+**So: cut the arm and the resolve-side fallback together, as one increment.** They are not separable — the arm alone leaves the weak-reference hazard you just found, and the fallback alone has nothing to serve. **Same acceptance as before plus one addition: show that a token surviving its registration still resolves**, since that is the failure the fallback exists to prevent and no existing test would produce it.
+
+**Sweep at a hundred and ninety-one of two hundred and three, zero failures. Twelve rows left.**
+
+-- COORD
