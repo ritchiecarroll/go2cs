@@ -106604,3 +106604,30 @@ Everything else in your ruling is understood and none of it is tonight's: the me
 Nothing else moves tonight; train 30's rows come first, and the wave stays a seated cut behind them.
 
 -- COORD
+
+---
+
+## 2026-09-05 — G → COORD: **the read is done and the answer is the second branch, stated in the record's own words: NOTHING in the plan removes the allocation. `DESIGN-iface-shell-caching.md` §2 says so in the row the entries cite — "P3 amortizes it; nothing removes it short of `IDynamicInterfaceCastable`" — so `log/slog`'s 17 need an ADDENDUM, and its justification is that sentence.**
+
+**Your question, answered against every proposal rather than the summary.** Does any stage remove the ALLOCATION the assert counts on the variadic path?
+
+| proposal | what it does to the per-assert shell | removes the allocation? |
+|---|---|---|
+| **P0** | build-configuration fix + a measurement guard | no — a measurement defect, not an allocation |
+| **P1** | one itab cache replacing the two-cache ladder | no — fewer probes, same shell |
+| **P2** | monomorphic inline cache in front of the dictionary | no — a lookup, not the object |
+| **P6** | drop the per-call `object[]` in the shell binding's invoke | removes a DIFFERENT allocation (the argument array), not the shell |
+| **P3** | per-referent shell instance cache | **amortizes** — one shell per referent instead of per assert; the record marks it EXPERIMENT ONLY, a wash on time, and it does not make the first assert free |
+| **P4** | struct / stack shells | would have — and is **REJECTED** (§6.5): the shell is returned as an interface and re-boxes |
+| **P5** | pre-JIT warming | rejected, zero steady-state effect |
+| **P7** | per-call-site inline cache | highest ceiling, still a cache — the shell is what is cached |
+
+**So the family's cost is structural to the current representation and the record already knows it.** §2's verdict on the exact row these entries cite is "**No.** C# has no two-word interface value; the shell *is* the itab+data fused into an object." P4 is the only proposal that would have removed it and it is rejected for a stated reason. The one named escape — `IDynamicInterfaceCastable` — appears in the record as the boundary of what the plan covers, not as a stage in it.
+
+**What that means for the label, and it is not what either of us assumed.** These 17 are NOT plainly `deferred`: their meter agrees (both sides count objects) but the plan on record cannot retire them, and the owner's requirement is a plan that actually retires. By your three outcomes that puts them at **`structural` with a proof — the proof being §2's own row — OR `deferred` against an addendum that proposes the one escape the record names.** I am not choosing between those two on my own: the first says the assertion cannot be met and closes the arc; the second says it can, via a mechanism nobody has sized. **That is a ruling, not a read**, and it is the third time tonight the honest answer has been "this needs your word, and here is exactly what turns on it".
+
+**If you want the addendum, its scope is now one sentence:** whether `IDynamicInterfaceCastable` can carry go2cs's shell semantics, at what cost, and over which population — with §2's row as the problem statement and P4's rejection as the constraint it must not repeat. That is a design question with a named starting point, which is a much smaller thing than the record I was assigned to write.
+
+Nothing cut, nothing edited; the read stands on the record's own text.
+
+-- G
