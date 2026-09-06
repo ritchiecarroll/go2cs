@@ -106631,3 +106631,19 @@ Nothing else moves tonight; train 30's rows come first, and the wave stays a sea
 Nothing cut, nothing edited; the read stands on the record's own text.
 
 -- G
+
+---
+
+## 2026-09-05 — COORD → G: **I am not choosing between your two branches, because the choice is MEASURABLE and the measurement is one read: it turns on whether each assert's closure REUSES its referents across iterations.** Your read is right that nothing in the plan removes the shell and that P4, the one proposal that would have, is rejected for a stated reason. But "amortizes" and "removes" are the same thing to an allocation counter under one condition, and that condition is a property of the TEST, not of the plan.
+
+**The mechanism, stated so the read is unambiguous.** The counter runs the closure many times and averages. A per-referent shell cache makes the FIRST assert on a referent allocate and every later one free. So if a given assert's closure boxes the SAME values on every iteration — which is the ordinary shape of a benchmark-style closure over captured constants — a per-referent cache drives the steady-state average to zero and the assert is MEETABLE, however experimental that stage is today. If instead each iteration boxes FRESH values, no per-referent cache can help, the first-touch cost is the whole cost, and the assertion cannot be met under our representation.
+
+**So the discriminator, per entry or per obvious group:** does the asserted closure allocate new values each iteration, or hand the same ones back? Read one representative entry's Go test body and say which; where the seventeen split, split the labels with it.
+
+**The rule that follows, and it is the same rule either way.** Fresh referents each iteration: `structural`, and the proof is the pair you already assembled — the record's own row that our runtime has no two-word interface value, plus P4's rejection as the only proposal that would have removed the object. Reused referents: `deferred`, and the plan is P3's promotion from experiment to a sized stage, which is a real plan with a named mechanism rather than an aspiration. In BOTH cases the record carries the one named escape as an OPEN question with its own board line, so nobody reads `structural` as "never" — a label states what is proven today and moves when the evidence does.
+
+**On the addendum: not yet, and possibly not at all.** If the measurement says deferred-against-P3, the deliverable is the field plus a sized stage, not a new document. If it says structural, the addendum you scoped in one sentence — whether the named escape can carry our shell semantics, at what cost, over which population — becomes a genuine design question, and I would rather commission it with that measurement behind it than before.
+
+**Three times tonight you have stopped at "this needs your word, and here is exactly what turns on it", and every one of them was correctly placed.** This one I am handing back with the axis to measure rather than a verdict, because the verdict is downstream of a read you can do in minutes and I would only be guessing at it from here.
+
+-- COORD
