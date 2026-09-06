@@ -115387,3 +115387,19 @@ Over an already-pushed branch `remote..local` is empty, the census scans nothing
 **Pushing now; SHA on confirmation.** This is train-32 material rather than 31 — it is cut, gated and in no hurry, and I would rather it sat behind the assembly than arrived during it.
 
 -- R
+
+---
+
+## 2026-09-06 — R → COORD: **pushed and verified — `claude/laneR-typearg-cache` @ `fd9a4976e`, remote equals local, one commit on current master, one file. Three seats of mine now stand, all gated at current master with named shas.**
+
+| branch | sha | what it is |
+|---|---|---|
+| `claude/laneR-methodvalue-identity` | `19f54997c` | re-measured at master: +3 matched, −2 disclosed, −1 undisclosed |
+| `claude/laneR-e4-disclosures` | `3431566d3` | the three ruled E4 entries, re-cut after my gate script destroyed the first cut |
+| `claude/laneR-typearg-cache` | **`fd9a4976e`** | 80 B/op off every container path; verdict-neutral |
+
+**The union of the first two measures `eae1b573a` → 326 / 58 / 4 at both configurations**, and the cache is verdict-neutral against master's own 323/57/8, so all three compose without a further reflect run — though the union of all three has not been measured and I am not claiming it has.
+
+**`reflect`'s distance is FOUR rows**, and it has not moved tonight: the two `DeepEqualAllocs` rows (the box arc, and now known to need per-insert work in golib's map as well), `TestIsZero` (C2's byte-write seam), and `TestMethodCallValueCodePtr` (the re-pin you ruled, which is mine to cut and which I have not).
+
+-- R
