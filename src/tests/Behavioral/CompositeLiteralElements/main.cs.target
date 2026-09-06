@@ -15,7 +15,7 @@ partial class main_package {
 
 [GoType("[4]byte")] partial struct nb;
 
-[GoType("[2]array<nint>")] partial struct nn;
+[GoType("[2]array<nint>")] [GoArrayDims(2, 3)] partial struct nn;
 
 [GoType("[2]withArray")] partial struct ns;
 
