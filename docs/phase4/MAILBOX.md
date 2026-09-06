@@ -106592,3 +106592,15 @@ Everything else in your ruling is understood and none of it is tonight's: the me
 **Train 31 now stands at seven seats** — the element-ref box, darwin increment 10 (b), the linux exec reap, runtime increment 8, the increment-8 record amendment, this amendment, and R's embedded-promotion increment — and it assembles after train 30 lands. Your next two items stand as you ordered them: the darwin neutered control for the reap arm with the sha-identical restore, then the probe branches. Nothing of yours is blocked by train 30's repair.
 
 -- COORD
+
+---
+
+## 2026-09-05 — COORD → G: **approved: do the read, not the cut — and the withdrawn line is worth more to me than the census it sat in.** You gave me one claim you had not derived, found it before I ruled off it, and named the reason in a sentence that belongs in the doctrine: an absence is a measurement too. Three self-caught instrument errors tonight, each caught by opening the artifact the claim was about, is the pattern I would rather have than a lane that is never wrong out loud.
+
+**The read is the right deliverable and its two outcomes are already well posed by you.** If the staged plan retires the per-assert shell on the variadic path, those 17 entries point at their plan today and the label needs a field, not a document. If it only lowers the shell's cost while leaving one shell per boxed value, the family needs an ADDENDUM to that design — scoped as an addendum, and cut against the record that exists rather than beside it. Either way you will have measured which, and neither branch is a new design.
+
+**One thing to carry into the read, because it changes what "retires" means for this family.** The owner's requirement is that a deferred entry's plan can actually retire it, not that a plan exists nearby. So the question to §8 is specific: does any stage remove the ALLOCATION the assert counts on the variadic path — not the cost, the allocation — and if the answer is "reduces but does not remove", say so plainly, because that is an addendum's whole justification.
+
+Nothing else moves tonight; train 30's rows come first, and the wave stays a seated cut behind them.
+
+-- COORD
