@@ -260,34 +260,60 @@ public sealed class TestExecution
 
     internal void ReleaseParallel() => m_parallelGate.Set();
 
+    /// <summary>
+    /// Go's <c>common.Fail</c> (testing.go): mark this test failed, propagating to the ancestors
+    /// FIRST and only then refusing a call that arrives after this test has finished.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Go's text, and the ORDER in it is the observable half:
+    /// </para>
+    /// <code>
+    /// func (c *common) Fail() {
+    ///     if c.parent != nil { c.parent.Fail() }   // propagate FIRST, unconditionally
+    ///     c.mu.Lock()
+    ///     defer c.mu.Unlock()
+    ///     if c.done { panic("Fail in goroutine after " + c.name + " has completed") }
+    ///     c.failed = true
+    /// }
+    /// </code>
+    /// <para>
+    /// ORDER. Until 2026-09-06 this checked <c>m_finished</c> first, threw, and NEVER propagated — so
+    /// a goroutine failing after its test completed failed NOBODY, while in Go the whole ancestor
+    /// chain is marked failed before the panic. That is a VERDICT-visible difference: in Go the parent
+    /// test fails, here it did not.
+    /// </para>
+    /// <para>
+    /// KIND. Go PANICS, so a converted <c>recover()</c> can see it and golib's backstop reports it
+    /// Go-style. A raw <see cref="InvalidOperationException"/> is invisible to <c>recover()</c> and
+    /// lands in the host's INFRASTRUCTURE bucket, which by TestRunner's own definition means "the host
+    /// could not run the test" — the opposite of what happened. Same reasoning as <see cref="Log"/>'s.
+    /// </para>
+    /// <para>
+    /// The propagation runs OUTSIDE this execution's lock, as it did before, because
+    /// <see cref="FailFromChild"/> takes each ancestor's own lock as it walks — child-then-ancestor,
+    /// the one order every path here uses.
+    /// </para>
+    /// </remarks>
     public void Fail()
     {
+        m_parent?.FailFromChild();
+
         lock (m_syncRoot)
         {
-            // RESIDUAL, deliberately NOT changed with Log's fix above and recorded here rather than
-            // left to be rediscovered. Go's Fail diverges from this in TWO ways and only ONE of them
-            // is the same defect Log had:
-            //
-            //   func (c *common) Fail() {
-            //       if c.parent != nil { c.parent.Fail() }        // propagate FIRST, unconditionally
-            //       ...
-            //       if c.done { panic("Fail in goroutine after " + c.name + " has completed") }
-            //       c.failed = true
-            //   }
-            //
-            // The KIND is the same divergence Log carried -- Go panics, this throws a .NET exception
-            // that a converted recover() cannot see. The ORDER is not: Go marks the whole ancestor
-            // chain failed BEFORE it can panic, and its recursive parent.Fail() would itself panic on
-            // a done ancestor, where FailFromChild never does. Fixing the kind alone would leave the
-            // order wrong; fixing the order needs FailFromChild's semantics decided against Go's
-            // recursion, which is a separate question from the one Log's fix answers. Neither is
-            // reached by the late-log path this cut is for.
             if (m_finished)
-                throw new InvalidOperationException($"Fail called after {Name} completed");
+                throw builtin.panic(FailAfterCompleteText(Name));
             m_failed = true;
         }
-        m_parent?.FailFromChild();
     }
+
+    /// <summary>
+    /// Go's panic text for a late <c>Fail</c>, composed exactly as testing.go composes it:
+    /// <c>"Fail in goroutine after " + c.name + " has completed"</c> — no record appended, unlike
+    /// <see cref="LogAfterCompleteText"/>.
+    /// </summary>
+    internal static string FailAfterCompleteText(string name) =>
+        $"Fail in goroutine after {name} has completed";
 
     public void FailNow()
     {
@@ -986,6 +1012,28 @@ public sealed class TestExecution
         }
     }
 
+    /// <summary>
+    /// The ancestor-propagation path <see cref="Fail"/> and the infrastructure paths walk.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// IT HAS NO <c>m_finished</c> CHECK AND DELIBERATELY DOES NOT GET ONE, which is a difference from
+    /// Go worth stating rather than repairing. Go propagates by RECURSING THROUGH <c>Fail()</c>
+    /// itself, so every ancestor tests its own <c>done</c> and could panic; this walk cannot.
+    /// </para>
+    /// <para>
+    /// The branch would be UNREACHABLE. <c>runTests</c> runs every top-level test as <c>t.Run</c> on a
+    /// root <c>T</c> (testing.go:2155-2169, the child's parent set at :1724), so mid-run there is
+    /// always a live ancestor — the same structural fact that makes <c>logDepth</c>'s panic
+    /// effectively unreachable and that <see cref="Log"/>'s walk is written against. Adding the check
+    /// on the strength of symmetry with Go would put a branch in this host that nothing can exercise,
+    /// which is the one thing a host with a hand-written test runner least needs.
+    /// </para>
+    /// <para>
+    /// Coordinator ruling, 2026-09-06, on exactly this question: fix the ORDER in <see cref="Fail"/>,
+    /// leave the propagation path's omission explained here.
+    /// </para>
+    /// </remarks>
     private void FailFromChild()
     {
         lock (m_syncRoot)
