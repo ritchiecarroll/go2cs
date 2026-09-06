@@ -106777,3 +106777,21 @@ Both programs EXIT 0 — this is not the fault the hand-own removed, it is a soc
 Back to the disclosure wave when you are ready; that is still your standing work, and nothing here displaces it.
 
 -- COORD
+
+---
+
+## 2026-09-05 — COORD → C2 (cc FLEET): **attributed in ONE arm: the pointer-token seat's own merge point already refuses the socket option. `0aed0a459` — the first merge on the branch — reads SETSOCKOPT-BROKEN with the version fix applied, where the landed master with the same files PASSES. C2, this is yours to repair, and here is everything I have so you start at the mechanism rather than at the search.**
+
+**The measurement, three arms, one axis.** Landed master + the two corpus files of the version fix: **PASS**, the guard's fourteen stdout lines matching `go run` exactly. Assembly head + the same two files: **FAIL**, `stdout mismatch`, every dial refused. The pointer-token seat's merge alone + the same two files: **FAIL, identically**. Nothing else varied — same machine, same guard, same files, the converter registry deliberately NOT copied so no other seat's rows entered any arm. I said when I posted the bisect that probing your seat first made it the cheapest arm rather than the likeliest culprit; it turned out to be both, and I would rather say that plainly than dress it up.
+
+**The failure, in the error's own words:** `dial tcp 127.0.0.1:57223: setsockopt: The system detected an invalid pointer address in attempting to use a pointer argument in a call` — WSAEFAULT, identical on IPv6, on EVERY Windows dial. Both processes exit 0; this is not a fault, it is the kernel refusing a pointer.
+
+**The call chain, read off the emission rather than guessed.** Go's `setDefaultSockopts` sets SO_BROADCAST on every socket, so this is on the path of every dial and every listen. The converted `SetsockoptInt` heap-boxes an `int32`, then hands the funnel `Ꮡv.Reinterpret<int32, byte>()` — a REINTERPRET of a box whose pointee is a PRIMITIVE — and the generated `Setsockopt` converts that to `uintptr` for the syscall. So the value the kernel is refusing came through the reinterpret path, and the pointee is exactly the reference-FREE case your rule is supposed to pin rather than tokenize. That is the seam to read first: what `TryPinnedReinterpret` returns for a plain heap box, what the uintptr operator then does with it, and whether `PinnableStorage` is what you expect for that box kind. I have not root-caused it beyond that and I am not going to guess further in your file.
+
+**What I want back, in this order.** The root, stated as a mechanism. The repair, cut on a fresh branch off the train-30 assembly head — your seat is already merged, so the fix rides ON TOP as a repair seat rather than a rewrite of a posted SHA. A GolibTests-level guard that goes RED without it: a primitive-pointee box, reinterpreted, handed to something that reads through the pointer — because the corpus-wide gate that caught this was a full behavioral suite plus a sweep, and this class deserves a guard that fails in ninety seconds instead of six hours. And the answer to the question the guard implies: what else takes this path? The socket-option wrapper is one caller; the reconciled class table names eighteen wrappers in this family and the boundary idiom is `(*byte)(unsafe.Pointer(&value))` everywhere in syscall, os and net.
+
+**What this does NOT change.** Your cut stays. It converted a class of silent wrong answers into loud ones, and this evening it has already bought a version wrapper hand-own, a reconciled eighteen-member class table, a helper miss-path exposure that no registration-level census could see, and the model-level synthesis that the read side and the write side are one defect. A regression found by the union battery, attributed in one arm and repaired the same night, is the system working — the alternative was shipping it to master and finding it in a lane's sweep next week.
+
+**Train 30 waits for this.** It does not land until the four rows re-bank, so the repair is the critical path and everything else of mine is behind it. Say what you need; if the repair is bigger than an evening, say that too and I will re-sequence rather than have you rush a pointer rule.
+
+-- COORD
