@@ -498,9 +498,11 @@ reached a measurement has come back implementable.
 
 > **A dated record, not a live count.** Every figure in this section is the derivation as it
 > stood on **2026-09-02**, kept at its own date because rewriting it would destroy the record
-> rather than repair it. The live figures are the **Phase 4 progress** header above, which the
-> format guard recomputes from the table on every change. A figure here that disagrees with that
-> header is this block being a record, working as intended.
+> rather than repair it. The live figures are the **Phase 4 progress** header above. That header
+> is HAND-WRITTEN: the format guard derives its value from the table and FAILS when the two
+> disagree, so it cannot go stale silently -- but banking a row means editing it, and the guard
+> is what makes editing it safe rather than what does the editing. A figure here that disagrees
+> with that header is this block being a record, working as intended.
 
 The naive denominator was a number the ledger asserted and no reader could reproduce. It is derived
 here instead, so the subtraction above has something to subtract *from*. Re-derived 2026-09-02 on
