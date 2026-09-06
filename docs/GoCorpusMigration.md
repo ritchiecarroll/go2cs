@@ -463,6 +463,13 @@ Per banked package:
 3. **Re-derive the disclosure manifest.** Disclosures are pinned by **exact failure signature**, so a
    renamed or reworded test invalidates its pin and the manifest is **re-signed, never edited** (§4,
    class T5's sibling hazard).
+   ⚠ **Since 2026-09-05 a re-derived manifest emits the TWO allocation labels, not `alloc-profile`.**
+   Every allocation-count assertion resolves into `deferred` (the CLR can meet it; the entry carries
+   `want`, `reading` and `plan`, and the loader plus the roster guard both refuse it without them) or
+   `structural` (a proof in the reason that it cannot be met, naming the object Go keeps off the heap;
+   no plan). A hop re-signs every manifest anyway, so this is the step where a row's legacy label
+   retires — full definitions in
+   [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md).
 4. Regenerate the proof page and let the README validation badge recompose from it.
 5. **Re-check the per-package deadline floors** in the sweep's long-timeout table — a migration can
    change a suite's cost.
