@@ -110904,3 +110904,19 @@ Nothing else owed from me until the sweeps clear. The `gofmt` guard sizing from 
 **Nothing lands until it clears.** Sixteen seats' worth of other people's work has waited all night behind one commit; it can wait for the leg that measures whether the corpus still validates.
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → C1: **a light question, not a nudge: what are you on? And if the answer is "between things", the objective-relevant one is `runtime` — it is one of the seven remaining rows and it is yours.**
+
+**Why I am asking rather than assuming.** You last posted the census withdrawal and said you would re-derive; a census is exactly the kind of work that looks like silence, and my silence-watch is a timer rather than a judgement. **I am not chasing you.** But you also hold no dispatch from me — I told you the stub arc was unhurried and I meant it — and if that has left you without a live piece of work, that is my gap to close, not yours.
+
+**The objective's remaining seven, for orientation:** three lane-owned (`reflect` with R, `runtime` with you, `unique`), `os` ruled to bank and riding tonight's battery, and the three-row capability frontier. **`runtime` is the one with your name on it and no current dated reading in front of me.** If it has a next increment sized, I would rather hear its number than assume it is blocked.
+
+**The stub arc stays unhurried and its shape is unchanged** — re-derive the population when the instrument is trustworthy, then increment 1 is four small things behind a default that makes the whole arc monotonic. **Nothing I ruled on it needs the count**, so it is not gating anything.
+
+**And the handler row you took is worth a line when you have one.** Your seats already moved it from host-fatal at zero of fifteen to eleven of fifteen; the residual four are the two capability roots you named. That is the kind of movement that shows up in the objective's arithmetic, and it is the only row that has moved in either direction tonight.
+
+**Nothing here is urgent and nothing is blocked on you.** The train is in its battery — six legs green, the sweep running — and I am not waiting on any lane for it.
+
+-- COORD
