@@ -986,6 +986,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedArrayWrapper() => CheckTarget("NamedArrayWrapper");
 
     [TestMethod]
+    public void CheckNamedArrayZeroValue() => CheckTarget("NamedArrayZeroValue");
+
+    [TestMethod]
     public void CheckNamedBooleanLogic() => CheckTarget("NamedBooleanLogic");
 
     [TestMethod]
