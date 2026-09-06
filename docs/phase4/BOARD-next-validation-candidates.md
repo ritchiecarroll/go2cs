@@ -23967,4 +23967,89 @@ found the reach. The instrument and its control live with the lane; the derivati
 
 -- G
 
+
+---
+
+## 📋 BOARD DEBT (2026-09-06, lane G, coordinator-ruled) — the cert-chain **miss path**: an exposure with a measured population of ZERO, kept here with its census so a later lane inherits the measurement rather than the title
+
+`syscall/windows/zsyscall_windows_certchain_impl.cs` keeps a weak side table mapping each managed
+*view* of a crypt32 record to the address it was transcribed from, and `nativeIdentityOf<T>` answers
+from that table with a fallback to the box's own address:
+
+```csharp
+private static uintptr nativeIdentityOf<T>(ж<T> box) {
+    if (box is not null && s_nativeIdentity.TryGetValue(box, out object? remembered)) {
+        return (uintptr)(nuint)remembered;
+    }
+
+    return (uintptr)box;                       // <- the MISS path
+}
+```
+
+Five call sites hand that number to crypt32: `CertGetCertificateChain`,
+`CertAddCertificateContextToStore`, `CertFreeCertificateContext`, `CertFreeCertificateChain` and
+`CertVerifyCertificateChainPolicy`. Both pointee types are reference-bearing — `CertContext` carries
+`ж<byte> EncodedCert` and `ж<CertInfo> CertInfo`; `CertChainContext` carries `ж<ж<CertSimpleChain>>
+Chains` and `ж<ж<CertChainContext>> LowerQualityChains` — so a MANAGED box of either has no pinnable
+storage, and the fallback would hand crypt32 a pointer-order token rather than an address.
+
+### The population is ZERO, and it is enumerated rather than sampled
+
+| producer | what it yields | miss path |
+|:--|:--|:--|
+| `CertCreateCertificateContext` (generated) | `(ж<CertContext>)(uintptr)((@unsafe.Pointer)r0)` — **native** | **correct** — answers its real address |
+| `CertEnumCertificatesInStore` (generated) | same shape — **native** | **correct** |
+| `publishPointerOut` (`zsyscall_windows_ptrout_impl.cs`) | `(ж<T>)(uintptr)written` — **native** | **correct** |
+| `viewCertContext` | a managed transcription, and it **remembers** | hit path — never reaches the fallback |
+| `viewCertChainContext` | same | hit path |
+
+Plus `nil`, which answers 0 and is right. **Every managed box of these two types comes from the two
+view functions and both remember; every other producer is native-backed, for which the fallback is
+exactly the right answer.** The exposure is real and its reaching set is empty.
+
+### Marshal-on-miss is not merely unnecessary — it is WRONG for this seam
+
+The obvious remedy (build a native image for the box and hand back its address) cannot be right here,
+and the reason is worth carrying because it is not a layout question. **These five sites hand crypt32
+back a pointer it ISSUED and REFERENCE-COUNTS** — two of them are the `CertFree*` routines that
+release memory crypt32 owns. The address must be *the one crypt32 gave us*. A marshalled image of a
+managed view is an address crypt32 never issued: passing it to the free routines is wrong at best and
+a corruption at worst, and passing it to the chain and policy calls hands them a copy whose lifetime
+nothing on the native side owns. Marshalling answers a LAYOUT problem; this is an **IDENTITY**
+problem, which is why the hit branch remembers an address instead of rebuilding one.
+
+### The shape if a lane ever cuts it: refuse by name
+
+Buildable today with no golib change — `ж<T>.IsNative` is public — so the predicate is *not null, not
+native-backed, not nil-valued, and not in the table*, which is exactly "a managed view somebody built
+without remembering". Were it built it would fire zero times today; the day a sixth producer
+appears it would convert a silent wrong answer into a loud one naming the seam.
+
+⚠ **THE ZERO IS UNENFORCED, and that is this entry's own limitation rather than a detail.** The
+guard above is a SHAPE, not a thing that runs. The population was censused BY HAND on
+2026-09-06 and **nothing watches it**: a sixth producer of those two pointee types re-opens the
+exposure with no gate going red, because no gate reads producer kinds -- not the roster guard,
+not the converter suite, not CNR. So this entry's ZERO is a measurement with a date on it,
+exactly like a disclosure's reading, and it decays the same way: true of the tree it was taken
+on, silent about the next one. Whoever cuts the guard closes that; until then the census is a
+RECORD rather than a GATE, and it is labelled so here rather than left to read as enforced.
+
+⚠ **THE CONTROL REQUIREMENT, and it is the part a later lane should not skip.** An `IsNative` test was
+measured MISLEADING elsewhere on 2026-09-04, where it was used as evidence of staleness and dropped
+all ninety-one of a population because native is that number's normal state. This use is
+structurally different — it asks what KIND of storage a box has, not whether a number is stale — but
+the lesson transfers as a bar: **the guard must be shown to FIRE on a planted managed-unremembered
+box AND to stay SILENT across all five real producers, or it is asserting the population rather than
+measuring it.**
+
+### Why it is debt rather than work
+
+An exposure with no demonstrated consumer, which is the same disposition family B took on the same
+date. **Its acceptance is that no roster row moves in either direction** — that is the prediction,
+not a hedge, and if a row did move the producer census above is wrong and that is the finding. The
+certificate row came back clean at the repaired head, so this was never that row's cause; the
+coordinator's ruling when it was posted was that the finding stands on its own merits, which is what
+this entry preserves.
+
+-- G
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
