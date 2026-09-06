@@ -2,12 +2,6 @@
   "schemaVersion": 1,
   "disclosures": [
     {
-      "name": "TestEmbeddedMethods",
-      "class": "runtime-capability",
-      "signature": "Wrong method table for OuterInt: (m=",
-      "reason": "runtime-capability: the assert compares a POINTER NUMERICALLY. go2cs pointers are stable identity TOKENS, not addresses -- the same deliberate model the guintptr manual conversion rests on -- so a managed host can report a consistent, comparable identity for a value but never the address Go prints. Go itself documents these as implementation details; the divergence is the architecture showing through, not a defect in the operation under test."
-    },
-    {
       "name": "TestImplicitMapConversion",
       "class": "runtime-capability",
       "signature": "MapIndex(b1) = %!x(unsafe.Pointer=",
@@ -17,18 +11,6 @@
       "name": "TestMethodCallValueCodePtr",
       "class": "runtime-capability",
       "signature": "methodValueCall code pointer mismatched, want: 0, got: ",
-      "reason": "runtime-capability: the assert compares a POINTER NUMERICALLY. go2cs pointers are stable identity TOKENS, not addresses -- the same deliberate model the guintptr manual conversion rests on -- so a managed host can report a consistent, comparable identity for a value but never the address Go prints. Go itself documents these as implementation details; the divergence is the architecture showing through, not a defect in the operation under test."
-    },
-    {
-      "name": "TestMethodValue",
-      "class": "runtime-capability",
-      "signature": "methodValueCall mismatched: {",
-      "reason": "runtime-capability: the assert compares a POINTER NUMERICALLY. go2cs pointers are stable identity TOKENS, not addresses -- the same deliberate model the guintptr manual conversion rests on -- so a managed host can report a consistent, comparable identity for a value but never the address Go prints. Go itself documents these as implementation details; the divergence is the architecture showing through, not a defect in the operation under test."
-    },
-    {
-      "name": "TestNestedMethods",
-      "class": "runtime-capability",
-      "signature": "Wrong method table for outer: (M=",
       "reason": "runtime-capability: the assert compares a POINTER NUMERICALLY. go2cs pointers are stable identity TOKENS, not addresses -- the same deliberate model the guintptr manual conversion rests on -- so a managed host can report a consistent, comparable identity for a value but never the address Go prints. Go itself documents these as implementation details; the divergence is the architecture showing through, not a defect in the operation under test."
     },
     {

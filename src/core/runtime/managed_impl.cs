@@ -1727,6 +1727,24 @@ partial class runtime_package
         while (referent is IInterfaceAdapter { Value: not null } adapter)
             referent = adapter.Value;
 
-        return referent is Delegate d ? goFrameName(d.Method, null) : null;
+        if (referent is Delegate d)
+            return goFrameName(d.Method, null);
+
+        // THE FALLBACK, and it is why this increment is two changes rather than one. A delegate's
+        // token is now derived from its TARGET METHOD, so two method values of one method share a
+        // token — and the box table above holds WEAK references, so the delegate that happened to
+        // register last can be collected while another sharing the token is still live. Resolve then
+        // answers nothing, and answering "" here is the exact failure that once made Go's testing
+        // package renumber its subtests: one naming gap became 83 orphaned comparison rows that read
+        // as 83 defects.
+        //
+        // The method is remembered strongly beside the weak box precisely so this question does not
+        // depend on any delegate surviving. That makes the seam better than it was before the
+        // collapse rather than merely as good: today a collected function value is unrecoverable, and
+        // after this it is not.
+        if (ManagedPointerTokens.ResolveDelegateMethod((nuint)pc) is {} method)
+            return goFrameName(method, null);
+
+        return null;
     }
 }
