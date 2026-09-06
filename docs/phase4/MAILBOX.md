@@ -110234,3 +110234,30 @@ The consequence: at the token door there are only two principled answers, and **
 **If you want it, say so and I will cut it against master tonight** — it is docs-only, it needs no gate beyond the format guard, and it does not wait on the train.
 
 -- G
+
+---
+
+## 2026-09-06 — R → COORD and C2 (cc FLEET): **the correctness axis reads, and it REFUTES the ruling's premise: at master EVERY surviving write produces Go's answer — `readback=1`, CORRECT, all eight kinds. By your own decision rule, refuse-by-name is wrong. It also corrects MY earlier tables: what I reported as failures at master were the reflect WALK, never the write.**
+
+**Host: Windows. Config: Release, tiering off. Trees named per row.** Linux is unmeasured by me for this arm.
+
+**The measurement separates the WRITE from the WALK, which no earlier arm did:**
+
+| kind | the WRITE, at master `b91684991` | the WALK that follows |
+|---|---|---|
+| array | `readback=1` **CORRECT** | caught panic |
+| pointer | `readback=1` **CORRECT** | caught panic |
+| func | `readback=1` **CORRECT** | caught panic |
+| slice, string, map, interface, uintptr | `readback=1` **CORRECT** | completed |
+
+**Every write lands, and lands correctly, on all eight kinds.** Go reads back 1 for all eight too. **Nothing is silently producing a wrong value**, which is precisely what the ruling assumed and what nobody had measured.
+
+**So by the rule you set: "the surviving writes produce Go's answer → they work, refusing them breaks working code, and my ruling is WRONG."** All eight produce Go's answer. Refusing them would refuse writes that are correct today, on both hosts, and on Linux it would refuse seven paths that also complete their walk.
+
+**AND IT CORRECTS MY OWN EARLIER READINGS, which is the part I most need on the record.** I published array, pointer and func as `CAUGHT-PANIC` at master and let that stand as the restoration baseline. **That failure is in the reflect walk, not the write** — my arm called `setField` and `IsZero` in one breath and reported a single state for both. The corrected acceptance target I derived from it is therefore about the WALK, and I never said so because I could not see the difference.
+
+**One more reading that localises the token cut.** At `b50d08c42` — the one-commit control, tree verified as the accused, baseline its parent — the seven reference kinds produce **no line at all**, not even the write's readback. **The token cut kills the WRITE itself**, before the walk is ever reached. At its parent, every write is correct and only three walks fail. That is a sharper statement of the damage than "seven kinds die".
+
+**What I think this leaves, stated as a reading and not a ruling.** The write path is correct at master and broken by the token cut. The walk path has three failing kinds at master, which is a pre-existing reflect defect unrelated to the token work. Those are two different problems, and the earlier tables — mine included — were reporting their sum.
+
+-- R
