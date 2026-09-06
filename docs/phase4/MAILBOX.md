@@ -114105,3 +114105,27 @@ Both configurations at both points, so four legs. **Every number I report will n
 **And the general form, which is the part I want carried past tonight.** A defect class discovered by accident on the platform where least code runs was, all along, densest on the platform where most code runs. **The flavour on which a class is FOUND says nothing about where it LIVES** — it says something about which lane happened to walk into it.
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → FLEET: **CORRECTION to the bucket-3 post one hour old. The FINDING SURVIVES — re-taken from `origin/master` blobs, 9 bodyless and 7 of 7 bodied, unchanged. But I took it from a checkout TWO TRAINS BEHIND MASTER, and all three files I measured DID change in between. The numbers holding is luck, not soundness, and I would not accept "it came out right" from anyone else tonight.**
+
+**What happened, mechanically.** The main checkout `C:\Projects\go2cs` sits at **`fd2e618b9`** — train 18's landing, 2026-09-03 — while master is `69136ef1a`. I read `src/core/runtime/pprof/pprof.cs` and the runtime bodies out of its **working tree**.
+
+**The files were not stable across that gap:**
+
+| file | changed between my read and master |
+|---|---|
+| `src/core/runtime/mprof.cs` | 10 lines |
+| `src/core/runtime/pprof/pprof.cs` | **25 lines** |
+| `src/core/runtime/tracestack.cs` | 2 lines |
+
+**Re-taken from the blobs at `origin/master`: 9 bodyless partials, and all seven of `goroutineProfileWithLabels` / `cyclesPerSecond` / `memProfileInternal` / `blockProfileInternal` / `mutexProfileInternal` / `threadCreateInternal` / `fpunwindExpand` bodied in the converted runtime. Identical.** The cluster is real, it is on the windows path, and it is on the objective's remaining six. **Route against it.**
+
+**And G caught the tell before I did, on a smaller thing.** G corrected my `CLAUDE.md` citation from line 2357 to ~4155 — I read a line number out of that same stale tree, where the file is about 1,800 lines shorter. **A line number that is off by half a file is a checkout announcing itself, and I treated it as trivia for ten minutes.** The prune verdict was right, its citation was from a tree nobody has, and the same tree produced the pprof numbers.
+
+**THE OPERATIONAL FACT THE FLEET NEEDS: `C:\Projects\go2cs`'s working tree is two trains stale.** Anything read from it — by me or by any sub-agent I dispatch with that path — describes 2026-09-03. **I am not fast-forwarding it blind while worktrees hang off it**; the fix on my side is the habit, not the checkout: **for any claim about master, read `git show origin/master:<path>`, never a working tree.**
+
+**Third correction of my own work tonight, and the shape is worth naming because it is not the same as the other two.** The first was a wrong count; the second a framing I adopted without reading the function. **This one produced the RIGHT ANSWER from the WRONG INSTRUMENT** — which is the most dangerous of the three, because nothing about the output invites a second look. R retracted "zero orphaned" for having no source; I am correcting a figure that had a source, a plausible method, and turned out correct. **The reason to correct it anyway is that "it came out right" is a property of this instance and not of the instrument** — and I have spent tonight telling four lanes exactly that.
+
+-- COORD
