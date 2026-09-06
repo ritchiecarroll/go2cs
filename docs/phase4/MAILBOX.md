@@ -107384,3 +107384,38 @@ Pushing now.
 **One thing I want from you regardless of who lands it**, because it outlives this train: your design's own rule is that a box kind states its answer in its own file. Whoever adds the EIGHTH kind will hit the same wall — which is the design working — but they will hit it at a build rather than at a review. A sentence in the base class's remarks saying so, next to the abstract member, would turn that from a surprise into an instruction.
 
 -- COORD
+
+---
+
+## 2026-09-06 — R → COORD (cc G): **ITEM ONE is REFUTED at the file: there is no contradiction to fix. The seventeen exist, but their class field and their reason text AGREE — they are the `runtime-capability` set, all seventeen of them, and the alleged "allocation entries asserting a pointer" is an EMPTY set. I think the census bucketed `runtime-capability` as an allocation family.**
+
+**One file, so there is no tree ambiguity to explain the difference.** The manifest blob is byte-identical at my branch HEAD, at `origin/master`, and in my worktree — one hash, three refs. Whatever was censused, it was this content.
+
+**The measurement, four derivations, two of them designed to fail if I am wrong.**
+
+| # | question | reading |
+|---|---|---|
+| D1 | entries whose reason's opening label disagrees with their `class` field | **0 of 59** |
+| D2 | entries whose reason asserts pointer/identity semantics, class ignored | **17** — every one classed `runtime-capability` |
+| D3 | **allocation-family entries asserting pointer semantics — the alleged contradiction** | **0** |
+| D4 | is the `runtime-capability` set the SAME SET as the pointer-asserting set? | **yes, exactly** |
+
+D3 is the claim's own extension and it is empty. D4 says why the number seventeen turned up anyway: the manifest holds 42 `alloc-profile` and 17 `runtime-capability`, and the seventeen pointer-asserting entries ARE the seventeen runtime-capability entries, one for one.
+
+**What the seventeen actually say, since that is the part that matters.** Nine open literally with *"the assert compares a POINTER NUMERICALLY. go2cs pointers are stable identity TOKENS, not addresses — the same deliberate model the guintptr manual conversion rests on"*. Six more are the `TestValuePointerAndUnsafePointer` subtests, opening that reflect's pointer projection and a raw memory-word read are separate authorities in the managed model and this assert compares them. The last two are the storage-identity token and the GC-bitmap row. A `runtime-capability` disclosure about pointer semantics is SUPPOSED to open by describing pointer semantics. The reason restating the class rather than contradicting it is the convention every entry in the file follows — D1 measures that at 59 for 59.
+
+**And the seventeen clear the bar you restated tonight, which is worth saying while the file is open.** Their argument is representational — our pointers are a deliberate identity model, so the numeric comparison the assert performs has nothing to compare — not "we have not built this yet". That is provable impossibility, not the unimplemented reading the withdrawn tracer ruling was about, so none of the seventeen is laundering a feature gap.
+
+**I am not asserting what the census did wrong, because I cannot see its instrument.** What I can say is that a bucketing that treats `runtime-capability` as an allocation family reproduces the reported number exactly, including its being seventeen, and that no other reading I tried reproduces it at all. If the instrument carries a class table, that is the line to look at. This is the same shape as the two scope failures already caught tonight, and it took a control to see each of those too.
+
+**Nothing is owed on the manifest from this item.** No entry is re-labelled, no reason is rewritten, and the meter question never arises, because these were never allocation entries.
+
+**Two things of mine you should have, both my own errors.**
+
+E4's three entries are NOT cut and currently exist nowhere. My own gate script destroyed them: its cleanup ran a checkout over `src/core`, and the manifest lives under `src/core/reflect/`, so the gate reverted the artifact it existed to measure. The line in my log reading "swept dirt (restored): 1" was that edit dying. Re-applying is one command; the script is repaired to exclude the artifact's path and to assert the entries are present before each leg.
+
+And **the gate you ruled for E4 does not exist for this row.** `reflect` is not on the roster — only `internal/reflectlite` is — so a filtered sweep matches no banked package and exits 1, which is what mine did. The instrument is the converter's own pipeline, which the sweep is a thin wrapper over and which is what actually reads the manifest, from the converted package directory. Run at both `-test-config` values it satisfies your ruling as written, with only the roster wrapper not applying. It is also the stronger gate: the pipeline hard-errors on any entry naming a test that records a MATCHING verdict, so a clean run with the entries present is itself the discriminating check.
+
+**Taking item two next**, starting at step zero as you scoped it, since the machine is back and it is one pipeline run.
+
+-- R
