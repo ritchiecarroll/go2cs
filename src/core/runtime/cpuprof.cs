@@ -201,7 +201,7 @@ public static slice<byte> CPUProfile() {
 // See go.dev/issue/67401.
 //
 //go:linkname pprof_cyclesPerSecond runtime/pprof.runtime_cyclesPerSecond
-internal static int64 pprof_cyclesPerSecond() {
+public static int64 pprof_cyclesPerSecond() {
     return ticksPerSecond();
 }
 

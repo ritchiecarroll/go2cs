@@ -24052,4 +24052,54 @@ coordinator's ruling when it was posted was that the finding stands on its own m
 this entry preserves.
 
 -- G
+---
+
+## 2026-09-06 — C1: **two board rows CORRECTED by measurement — `runtime/trace`'s blocker is RETIRED and REPLACED, and `net/http/pprof`'s row is FALSE AS WRITTEN (the bodies exist; it is an un-performed push)**
+
+Both rows were measured tonight at the landed master `b91684991` under COORD's two bounded dispatches. Nothing above is rewritten; these are the dated readings that supersede the two rows' stated mechanisms.
+
+### `runtime/trace` — the stated blocker fired its own retirement condition
+
+The row reads *"`NotImplementedException: getg` … Both tests enter the tracer through `getg`; no managed body exists"* (2026-08-14), carrying the note that the `getg` module-init no-op equivalence landed at `65b6dd5ba` and whether it reaches this path was UNMEASURED.
+
+**It reaches it.** One ungated pipeline run (Release, tiering off, oracle `go1.23.12`, cgo off, no `-test-filter`): both tests produce verdicts and neither dies on `getg`. The blocker is now
+
+```
+failed to start tracing: runtime error: tracing is not supported:
+the go2cs managed runtime has no execution tracer
+```
+
+which is a **deliberate hand-owned refusal**, not a missing body — `src/core/runtime/{linux,windows}/trace_impl.cs:57`, `public static error StartTrace()` returning that `errorString`.
+
+**The count did not move: 0 of 2 before, 0 of 2 after.** The entire mechanism was replaced underneath an unchanged number, which is the trap this board already records for another row the same night — a verdict count is not evidence that nothing changed. The row stays in the denominator at 0 of 2; its class is unchanged and this block asserts nothing about it (coordinator ruling, withdrawn and restated 2026-09-06: an honest refusal by name is what UNIMPLEMENTED looks like, and a row with two live verdicts is the negation of the no-eligible-tests class).
+
+### `net/http/pprof` — "no managed body" is false; the bodies exist and are unreachable
+
+The row reads *"Profile collection has no managed body — sibling of `runtime/pprof`'s and `runtime/trace`'s stubs"* (2026-08-14). **Every destination body exists**, read from the files rather than inferred:
+
+| linkname destination | consumer decl (`runtime/pprof/pprof.cs`) | body in `runtime` | accessibility |
+|---|---|---|---|
+| `pprof_goroutineProfileWithLabels` | bodyless partial, 1103 | `mprof.cs:1331` | `internal` |
+| `pprof_cyclesPerSecond` | bodyless partial, 1106 | `cpuprof.cs:204` | `internal` |
+| `pprof_memProfileInternal` | bodyless partial, 1109 | `mprof.cs:1095` | `internal` |
+| `pprof_blockProfileInternal` | bodyless partial, 1112 | `mprof.cs:1222` | `internal` |
+| `pprof_mutexProfileInternal` | bodyless partial, 1115 | `mprof.cs:1280` | `internal` |
+| `pprof_threadCreateInternal` | bodyless partial, 1118 | `mprof.cs:1323` | `internal` |
+| `pprof_fpunwindExpand` | bodyless partial, 1121 | `tracestack.cs:266` | `internal` |
+| `pprof_makeProfStack` | bodyless partial, 1124 | `{linux,windows,darwin}/proc.cs:1001` | `internal`, all three |
+
+They are real converted bodies, not stubs. So the row is an **un-performed linkname push**, mechanical rather than capability-shaped, and it blocks `runtime/pprof` directly with `net/http/pprof` downstream of it. A ninth destination, `blockevent`, is declared in `pprof_test.go` and lands with the row's test emission, so the production push is **eight**.
+
+**The graph invariant, measured BEFORE any design** (`check-solution-integrity.ps1`, all three targets, with the documented positive control red):
+
+| injection | windows | linux | darwin |
+|---|---|---|---|
+| baseline | 0 cycles / 307 projects | 0 / 307 | 0 / 307 |
+| `runtime → runtime/pprof` (Go's push direction) | **38 cycles** | **36** | **36** |
+| `runtime/pprof → runtime` (the pull direction) | 0 | 0 | 0 |
+
+So seven of the eight are pulls across an edge that already exists and are legal; the eighth, `pprof_cyclesPerSecond`, is Go's PUSH direction and its naive shape is illegal by 36–38 cycles. Design record: `docs/phase4/DESIGN-pprof-linkname-push.md`.
+
+-- C1
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

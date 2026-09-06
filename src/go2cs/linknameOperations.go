@@ -310,6 +310,20 @@ type linknamePush struct {
 	// the whole reason this registry is curated — so the consumer's shape is part of the same
 	// recorded judgment as the disposition.
 	bareDecl bool
+
+	// selfSymbolPull records the THIRD consumer shape, and it is a NARROW EXTENSION for one measured
+	// destination rather than general machinery: a TWO-arg `//go:linkname <thisFunc> <ownPkg>.<symbol>`
+	// naming a symbol in the CONSUMER'S OWN package that no file in that package defines, so the
+	// declaration is a local pull of a name another package pushes in. Go writes it exactly once in the
+	// pinned toolchain outside cmd/ where the declaration is bodyless and the target is its own package:
+	// runtime/pprof.pprof_cyclesPerSecond, pushed by runtime/cpuprof.go. ONE member today.
+	//
+	// Without it the matcher refuses this shape by design -- and rightly, for the other two arms: a
+	// two-arg directive is normally a PULL, a different mechanism entirely, and admitting it blindly
+	// would let a mis-keyed row forward an unrelated declaration. What makes THIS shape safe to admit
+	// is that the target names the consumer's own package: a pull naming ANOTHER package stays refused,
+	// so the widening cannot reach the mechanism it is distinguished from.
+	selfSymbolPull bool
 }
 
 // linknamePushTargets is the registry of `//go:linkname` PUSH destinations the converter resolves,
@@ -333,6 +347,20 @@ var linknamePushTargets = map[string]linknamePush{
 	// never fires (unique's map simply keeps its entries), not a fabricated answer. Before this the
 	// stub threw out of `unique.Make`'s setupMake.Do, taking net/netip and gob's TestNetIP with it.
 	"unique.runtime_registerUniqueMapCleanup": {source: "runtime.unique_runtime_registerUniqueMapCleanup"},
+	// runtime/pprof's cycles-per-second -- the ONE member of the self-symbol shape (see selfSymbolPull).
+	// runtime/cpuprof.go carries the body (`return ticksPerSecond()`) under the two-arg directive
+	// `//go:linkname pprof_cyclesPerSecond runtime/pprof.runtime_cyclesPerSecond`, and
+	// runtime_cyclesPerSecond exists nowhere in runtime/pprof: the consumer pulls a name its own package
+	// never defines. The forwarder is on the CONSUMER side, across the runtime/pprof -> runtime edge that
+	// already exists, so the graph cost is zero -- measured, along with the 38/36/36 cycles the literal
+	// reading of Go's push direction would have cost.
+	//
+	// MEASURED PAYOFF, on a restored scratch probe before this was cut: net/http/pprof goes from
+	// host-fatal at 0 of 15 with 15 empty verdicts, to failing at 11 of 15 with ZERO empty and a host
+	// that survives -- seven /debug/pprof subtests recovered from infrastructure-error. It does NOT bank
+	// the row: the residual is the execution tracer (the same capability runtime/trace refuses by name),
+	// CPU profile collection, one skip and the parent shadow of those two.
+	"runtime/pprof.pprof_cyclesPerSecond": {source: "runtime.pprof_cyclesPerSecond", selfSymbolPull: true},
 	// syscall's environment snapshot, pushed by runtime/runtime.go. The pushed body is ordinary
 	// converted Go — `append([]string{}, envs...)` — and `runtime.envs` is genuinely populated in the
 	// managed model by the hand-owned runtime/goenvs_impl.cs module initializer, so the forwarder
