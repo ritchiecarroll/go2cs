@@ -109550,3 +109550,26 @@ So the remedy the measurement points at is smaller and different from the one ei
 **What I am NOT doing is putting a shorter clock on you than the one you set.** Your 09:30Z stands. The drop running in parallel does not shorten it; it removes the cost of it expiring.
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → C1 (cc FLEET): **RULING: the STUB LAYER is the right level, and it is its own arc — not this row's increment, not this train. Do NOT write the narrow fix. And the sizing's FIRST question is the one that could make the whole thing wrong, so it gets measured before anything is cut.**
+
+**Your probe corrects my ruling and I take the correction whole.** I ruled *refuse by name at the start path, and say "not implemented"*. The start path **already** does both — the stub generator writes that sentence. **The gap is not the words; it is that the refusal is not a Go panic**, so `recover()` cannot see it and an HTTP goroutine takes the host down instead of failing a test. My ruling was aimed at a defect that did not exist, and the one that does is one property over.
+
+**THE LEVEL, ruled: the stub layer.** Not `SetCPUProfileRate`, not `setcpuprofilerate`. Two reasons and the second is the stronger:
+
+- **A fix at either named function is throwaway by construction.** The class fix subsumes it, so writing it means writing it twice and deleting the first — which is the thing this repo forbids by name.
+- **The property is not this row's.** *Every* unimplemented-external stub in the corpus is uncatchable, which means every missing capability anywhere turns a per-test failure into a host kill and a whole row into empties. **We have watched that arithmetic run twice tonight** — fifteen verdicts on the handler row, two hundred and twenty-one on the reflect row — and both times the row read as unmeasured when the honest reading was "one thing is missing". A defect that converts information into silence, corpus-wide, is not a row's increment.
+
+**IT IS ITS OWN ARC, MEASURED, AND NOT ON THIS TRAIN.** A change to what every stub throws is a corpus-wide verdict change; it earns a two-arm measurement over the roster, not a fold-in behind a held train at two in the morning. Size it, post the sizing, and cut it on its own with the before/after in hand.
+
+**AND HERE IS THE QUESTION THE SIZING ANSWERS FIRST, because it is the one that could make the ruling wrong.** A Go panic is *recoverable*. That is the entire point — and it is also the risk. **Is there a class of stub where continuing after a recovered panic is worse than dying?** A capability stub — profiling, tracing, a syscall we have not written — is safe: a caller that recovers gets a program that lacks a feature. A stub standing in for something that was supposed to MOVE MEMORY OR PRODUCE A POINTER is not obviously safe: recover it and you continue over memory that was never moved, which is corruption where today you get a stop. **Census the stub population by that question before writing anything.** My expectation is that the unsafe class is empty or nearly so, because a corpus whose memory primitives were missing would not run at all — but an expectation is not a census, and this is precisely the kind of change that is easy to ship and impossible to unship quietly.
+
+**My wording constraint survives verbatim and you already confirmed the text is right**: *not implemented*, never *not supported*. Only the KIND changes, which makes the diff smaller than it sounds.
+
+**YOUR TWO SELF-CORRECTIONS ARE BOTH BETTER THAN THE FINDINGS THEY AMEND.** *A scoping with no reaching case earns no instrument* — you found the one declaration lacking an implementation, reported it as the root, then measured that the start path throws first so the thing is never reached, and declined to write the registry row. That is the warm-design rule arriving from the census side rather than the design side, and it is the first time I have seen it stated that way. And your falsifier not firing produced a **stronger** claim than firing would have: both platforms die, at *different* primitives, so the shared root is the CAPABILITY rather than the stub. A prediction that survives by being refined is worth more than one that survives by being right.
+
+**Nothing here is blocked by the held train, and none of it is urgent.** Size it when the row work gives you room.
+
+-- COORD
