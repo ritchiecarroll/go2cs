@@ -196,11 +196,14 @@ func TestManualConversionRegistrationsHaveBodies(t *testing.T) {
 // handOwnBodies is one package's hand-own witness, split by which builds compile it: `flat` is the
 // package's own directory (every target), `perGOOS` is one set per platform folder (that target
 // alone). `perGOOSPartial` narrows a per-GOOS set to declarations carrying `partial` — the bodyless
-// partial completion, which displaces without a registration.
+// partial completion, which displaces without a registration. `perGOOSReplaced` narrows it to
+// declarations sitting in a WHOLE-FILE `[module: GoManualConversion]` replacement — the third
+// displacement mechanism, which also needs no registration (see strandedOn).
 type handOwnBodies struct {
-	flat           map[string]bool
-	perGOOS        map[string]map[string]bool
-	perGOOSPartial map[string]map[string]bool
+	flat            map[string]bool
+	perGOOS         map[string]map[string]bool
+	perGOOSPartial  map[string]map[string]bool
+	perGOOSReplaced map[string]map[string]bool
 }
 
 // compiledOn is the FORWARD arm's whole rule: is a hand-own declaring this member in the set of
@@ -211,10 +214,26 @@ func (b handOwnBodies) compiledOn(member string, goos string) bool {
 }
 
 // strandedOn is the REVERSE arm's whole rule: a body this flavour compiles that no registration
-// displaces there. `partial` is exempt because writing into a bodyless partial IS a displacement —
-// the mechanism that needs no registry entry (see the test's arm comment).
+// displaces there. THERE ARE THREE DISPLACEMENT MECHANISMS and only one of them needs a registry
+// entry, so two are exempt here:
+//
+//   - `partial` — writing a body into a bodyless partial IS the displacement; PartialStubGenerator's
+//     predicate is `IsPartialDefinition && PartialImplementationPart is null`, so a written body
+//     steps the throwing stub aside by construction.
+//   - a WHOLE-FILE `[module: GoManualConversion]` replacement — `containsManualConversionMarker`
+//     drops the marked file from the convert set, so the converter NEVER EMITS a body for the
+//     members it declares and there is nothing to collide with. An `_impl.cs` COMPANION is the
+//     opposite case and is NOT exempt: the converter still emits the file beside it, which is
+//     exactly what a registration displaces.
+//
+// Measured 2026-09-06: without the replacement exemption this arm reported syscall's hand-owned
+// `Exec`/`forkExec` under linux/ and windows/ as stranded the moment a darwin-scoped entry existed,
+// three findings, zero real — the windows corpus builds at 0 errors across 307 projects and
+// syscall.csproj builds at 0 errors under -p:GoTargetOS=linux.
 func (b handOwnBodies) strandedOn(member string, goos string) bool {
-	return b.perGOOS[goos][member] && !b.perGOOSPartial[goos][member]
+	return b.perGOOS[goos][member] &&
+		!b.perGOOSPartial[goos][member] &&
+		!b.perGOOSReplaced[goos][member]
 }
 
 // anywhere is the pre-Q62 question, kept for the fallback: does SOME hand-own of this package
@@ -266,15 +285,17 @@ func handOwnedDefinitionsByFlavor(t *testing.T, packageDir string) handOwnBodies
 	t.Helper()
 
 	bodies := handOwnBodies{
-		flat:           map[string]bool{},
-		perGOOS:        map[string]map[string]bool{},
-		perGOOSPartial: map[string]map[string]bool{},
+		flat:            map[string]bool{},
+		perGOOS:         map[string]map[string]bool{},
+		perGOOSPartial:  map[string]map[string]bool{},
+		perGOOSReplaced: map[string]map[string]bool{},
 	}
 
-	bodies.flat, _ = handOwnedDefinitionsIn(packageDir)
+	bodies.flat, _, _ = handOwnedDefinitionsIn(packageDir)
 
 	for _, goos := range knownTargetGOOS {
-		bodies.perGOOS[goos], bodies.perGOOSPartial[goos] = handOwnedDefinitionsIn(filepath.Join(packageDir, goos))
+		bodies.perGOOS[goos], bodies.perGOOSPartial[goos], bodies.perGOOSReplaced[goos] =
+			handOwnedDefinitionsIn(filepath.Join(packageDir, goos))
 	}
 
 	return bodies
@@ -284,13 +305,14 @@ func handOwnedDefinitionsByFlavor(t *testing.T, packageDir string) handOwnBodies
 // in one directory — every `*_impl.cs` plus every file carrying the whole-file
 // `[module: GoManualConversion]` marker, which are the two shapes a hand-own takes
 // (platformHandOwn_test.go's own framing) — and, separately, the subset declared on a `partial` line.
-func handOwnedDefinitionsIn(dir string) (map[string]bool, map[string]bool) {
+func handOwnedDefinitionsIn(dir string) (map[string]bool, map[string]bool, map[string]bool) {
 	defined := map[string]bool{}
 	partial := map[string]bool{}
+	replaced := map[string]bool{}
 
 	entries, err := os.ReadDir(dir)
 	if err != nil {
-		return defined, partial
+		return defined, partial, replaced
 	}
 
 	for _, entry := range entries {
@@ -313,10 +335,18 @@ func handOwnedDefinitionsIn(dir string) (map[string]bool, map[string]bool) {
 		// TField and Zero, all three registered). Calibrated against the corpus rather than
 		// assumed — a `_impl.cs`-only suffix check reported those three as missing bodies.
 		isImpl := strings.Contains(name, "_impl")
+		isMarked := manualConversionMarker.MatchString(text)
 
-		if !isImpl && !manualConversionMarker.MatchString(text) {
+		if !isImpl && !isMarked {
 			continue
 		}
+
+		// The two shapes displace DIFFERENTLY, so the reverse arm must tell them apart. A marked
+		// file that is NOT an `_impl` companion is a whole-file REPLACEMENT: the converter drops it
+		// from the convert set and emits no body for what it declares, so nothing can collide and no
+		// registration is owed. A companion supplements a file the converter still writes, and there
+		// a registration is exactly what keeps the two from colliding.
+		isWholeFileReplacement := isMarked && !isImpl
 
 		for _, line := range csharpDeclarationLine.FindAllString(text, -1) {
 			isPartial := csharpPartialDeclaration.MatchString(line)
@@ -327,11 +357,15 @@ func handOwnedDefinitionsIn(dir string) (map[string]bool, map[string]bool) {
 				if isPartial {
 					partial[match[1]] = true
 				}
+
+				if isWholeFileReplacement {
+					replaced[match[1]] = true
+				}
 			}
 		}
 	}
 
-	return defined, partial
+	return defined, partial, replaced
 }
 
 // csharpPartialDeclaration marks a declaration line as the implementing half of a bodyless partial —
@@ -390,10 +424,29 @@ func TestPerFlavorWitnessCannotAnswerAcrossFlavors(t *testing.T) {
 		}
 	}
 
+	// A WHOLE-FILE `[module: GoManualConversion]` replacement — no `_impl` in the name, so the
+	// collector admits it on the marker alone, exactly as the corpus's syscall/linux/exec_unix.cs is
+	// admitted. The marker goes above the namespace, where the corpus writes it.
+	writeMarked := func(rel string, decl string) {
+		full := filepath.Join(packageDir, filepath.FromSlash(rel))
+
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		source := "[module: go.GoManualConversion]\n\nnamespace go;\n\npartial class fixture_package {\n\n" +
+			decl + " {\n}\n\n}\n"
+
+		if err := os.WriteFile(full, []byte(source), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
 	write("linux/only_impl.cs", "internal static error perFlavorOnly(nint fd)")
 	write("shared_impl.cs", "internal static error flatEverywhere(nint fd)")
 	write("darwin/partial_impl.cs", "internal static partial int64 partialCompletion()")
 	write("child/deep_impl.cs", "internal static error childPackageOnly(nint fd)")
+	writeMarked("linux/whole_file.cs", "internal static error wholeFileReplacement(nint fd)")
 
 	if err := os.MkdirAll(filepath.Join(packageDir, "windows"), 0o755); err != nil {
 		t.Fatal(err)
@@ -405,6 +458,17 @@ func TestPerFlavorWitnessCannotAnswerAcrossFlavors(t *testing.T) {
 	if !bodies.perGOOS["linux"]["perFlavorOnly"] || !bodies.flat["flatEverywhere"] || !bodies.perGOOS["darwin"]["partialCompletion"] {
 		t.Fatalf("the witness did not collect the fixture bodies (linux=%v flat=%v darwin=%v); the control measures nothing",
 			bodies.perGOOS["linux"], bodies.flat, bodies.perGOOS["darwin"])
+	}
+
+	// THE POPULATION MUST STAY WHOLE. The whole-file replacement is exempt from the REVERSE arm, and
+	// the cheap way to spell that exemption is a `continue` in the collector — which would also empty
+	// it out of the FORWARD arm's witness, so a registration whose only body sits in a whole-file
+	// hand-own would read as MISSING. That is the silent-subtraction class arriving through the fix
+	// for a false positive. This assertion fails on a collector-level exemption and passes on the
+	// reasoning-level one, which is the whole difference between the two implementations.
+	if !bodies.perGOOS["linux"]["wholeFileReplacement"] {
+		t.Fatal("the witness did not collect the whole-file-marked body — the exemption belongs in strandedOn, " +
+			"NOT in handOwnedDefinitionsIn: a collector that skips marked files blinds the FORWARD arm too")
 	}
 
 	// FORWARD: a per-GOOS body answers for its own flavour and for no other.
@@ -447,6 +511,25 @@ func TestPerFlavorWitnessCannotAnswerAcrossFlavors(t *testing.T) {
 		if bodies.strandedOn("flatEverywhere", goos) {
 			t.Errorf("strandedOn(flatEverywhere, %s) = true — a flat body is not routed to any one flavour", goos)
 		}
+
+		// REVERSE: a WHOLE-FILE replacement is never stranded — the converter drops the marked file
+		// from the convert set and emits no body for what it declares, so there is nothing beside it
+		// to collide with and no registration is owed. Corpus instance: syscall's Exec/forkExec under
+		// linux/ and windows/ read as stranded the moment a darwin-scoped entry existed, three
+		// findings and zero real, while both platforms built at 0 errors.
+		if bodies.strandedOn("wholeFileReplacement", goos) {
+			t.Errorf("strandedOn(wholeFileReplacement, %s) = true — a whole-file [module: GoManualConversion] "+
+				"replacement is the THIRD displacement mechanism: the converter never emits a body for it, "+
+				"so nothing can collide and no registry entry is owed", goos)
+		}
+	}
+
+	// AND THE ARM MUST STILL BITE. The exemption above is narrow by construction — it keys on a file
+	// being marked AND not an `_impl` companion — so the genuinely stranded case must survive it. If
+	// this ever goes quiet, the exemption has widened into a blanket and the reverse arm is disarmed.
+	if !bodies.strandedOn("perFlavorOnly", "linux") {
+		t.Error("strandedOn(perFlavorOnly, linux) = false — the reverse arm no longer fires on a plain " +
+			"`_impl` body that no registration covers; the whole-file exemption has widened into a blanket")
 	}
 }
 
