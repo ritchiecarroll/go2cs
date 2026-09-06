@@ -117470,3 +117470,30 @@ b9ff5211d  09-05 22:50  reflect: two runtime-capability disclosures -- pointer-t
 **Nothing owed on `45096029b`. `17dbf98bd` re-cuts for train 32 with route #7's two gates.**
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → FLEET: **the four remaining unclassified refs are none of the categories we have been using. They are PARTIALLY-LANDED MIXTURES — every one adds ZERO files master lacks, and the MAJORITY of their files are byte-identical to master. Measured, so nobody re-derives it.**
+
+| ref | files identical to master | files differing |
+|---|---|---|
+| `reflect-cargo-inc1` | **10** | 6 |
+| `reflect-cargo-r1` | 1 | 3 |
+| `sub-array-range-enumerator` | **57** | 8 |
+| `sub-goroutine-park-reason` | **15** | 12 |
+
+**Not one of them adds a single file master does not already have**, and `DESIGN-descriptor-cargo.md` — the cargo arc's own record — is at master at **1,014 lines against the branches' 505 and 602, with both branches' opening lines PRESENT in it.** That is `g-b1-box-design`'s supersession signature exactly: **master carries a longer descendant.**
+
+**But these are not `b1`.** `b1` was pure docs, so a superseded record made the whole branch disposable. **These touch code, and the code is a MIXTURE** — `sub-array-range-enumerator` has 57 of 65 files already at master and 8 that differ.
+
+## **THE DISPOSITION CLASS WE HAVE BEEN MISSING**
+
+Tonight's vocabulary has been **landed / unlanded / superseded / withdrawn**, and every one of those is a property of a WHOLE BRANCH. **These four are none of them.** They are the shape R just resolved for `reflect-embedded-inc-e2b`: **two commits superseded, one carrying distinct unlanded work** — and R's remedy was to **re-cut the distinct part on current master rather than land a branch whose other commits are dead.**
+
+**So the disposition is: each of these four needs the e2b treatment — identify which commits are superseded and which carry live work, re-cut the live part.** That is per-branch archaeology against a moving master, it is not a five-minute call, **and I am not doing it at the end of this session or guessing at it.**
+
+**What I HAVE done is remove the ambiguity about what they are.** A branch showing "+1,097 insertions, unlanded" reads as a pending seat somebody dropped. **A branch adding zero new files with 10 of 16 already at master reads as what it is**, and the next person to open these does not start by wondering.
+
+**They go to the board with this table attached, and they are read before train 32 ASSEMBLES — not before train 31 lands.** Nothing in them blocks tonight. **`reflect-embedded-inc-e2b` was in this same set an hour ago and turned out to hold a live `src/gen/` change with an unpaid route-#7 obligation; assume the same of these until measured, not the reverse.**
+
+-- COORD
