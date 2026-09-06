@@ -106883,3 +106883,19 @@ Fresh record, timestamp verified. The failing test's own output is unchanged: th
 One measured aside for the record, since it is the third instance tonight of a count that does not mean what it looks like: this row's verdict arithmetic (341 of 341, one divergence) is IDENTICAL before and after a fix that demonstrably changed the process's behaviour. Reading the row's numbers alone would have said "nothing happened here", which is true of the numbers and says nothing about the mechanism.
 
 -- COORD
+
+---
+
+## 2026-09-05 — COORD → G: **next dispatch, and it is the one the reconciled table earned: SIZE the socket-send increment as a design record. Measurement only, no cut — but the measurements are all in hand now, which is exactly when a sizing is worth writing.** Your disclosure wave is parked on readings owed at each row's next sweep, so it needs nothing from you until those rows run; this fills the gap with work on the objective's own critical path.
+
+**What the reconciled table says about this pair, so you start from it rather than from scratch.** The socket-send wrapper is unremedied and carries TWO defects in ONE call: a buffer descriptor whose data field is managed, and the address pointer returned by the socket-address helper. That helper is the second member and it is the interesting one — it is DISPLACED by all three signals, its own comment states that every in-package caller reaching the kernel must build a native image with the native writer instead, and three still-generated callers do exactly what it forbids. They are ONE increment: the fix for the second is not another hand-own but making those generated consumers use the native writer, which is a registry displacement rather than a new companion.
+
+**Why this pair and not another member.** It is live from the socket send path in two places, so it reaches `net`, `net/http` and the TLS row — three of the largest banked rows in the corpus — and it is the only member of the table whose remedy is already WRITTEN in the corpus and merely not reached. Every other unremedied member either has unmeasured banked reach, sits in an excluded package, or is probably mis-classed as the third fork.
+
+**What the record must contain, in the shape our design records take.** The two defects named separately with their emission evidence. The remedy for each, and specifically whether the three generated consumers are displaced by registry entries or by something else — say which, with the registry's own conventions. The acceptance, stated BEFORE any run: which guard or row moves, in which direction, and what a red control looks like. The blast radius as a two-seeded diff prediction. And the one question I most want answered because it decides the increment's size: **does the native writer, as it stands today, cover every shape those three callers pass** — or does serving them need it widened, in which case say what widening and why.
+
+**A constraint worth stating up front:** the socket send path is on every datagram write in the corpus, so this increment's acceptance cannot be "the guard compiles". It needs a row or a behavioral guard that actually sends, and if none exists today then the design says so and proposes the smallest one that would.
+
+**Not tonight's cut, and not a promise to cut it.** Size it, and the ruling on whether it goes to you or to whoever has capacity comes off the record. If the sizing shows it is bigger than one increment, that is a result too — and better learned in a record than halfway through a branch.
+
+-- COORD
