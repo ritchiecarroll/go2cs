@@ -367,10 +367,19 @@ ONE stdlib in a build; there is now only one on disk.
     is NOT a deadline kill; a gated/filtered census gates on the CAPTURED STREAM; and the cheap
     check is the results file's timestamp against the comparison's.
     ⚠ **Three record-file rules, all measured 2026-09-02.** (1) A **gated** (`-test-filter`) run
-    REWRITES the package's comparison record with nothing marking it gated — a harvest read
-    `runtime/debug` as bankable off a filtered control's record, the only tell being 9 go entries where
-    the full run had 10 — so after any gated diagnostic that record is poisoned for banking until an
-    UNGATED run overwrites it. (2) A paired before/after measurement needs two FILES, not two runs: the
+    REWRITES the package's comparison record — a harvest read `runtime/debug` as bankable off a
+    filtered control's record, the only tell being 9 go entries where the full run had 10 — so after
+    any gated diagnostic that record is poisoned for banking until an UNGATED run overwrites it.
+    ⚠ **This clause said "with nothing marking it gated" until 2026-09-06, and that half is now FALSE:
+    a gated record is SELF-MARKING.** The record carries `testFilter` with the filter expression as its
+    value (`commandLineOptions.go:61`), guarded BOTH ways by `filterZeroMatch_test.go` — `:149`/`:176`
+    require the key on a filtered run, `:163` requires its ABSENCE on an unfiltered one, and `:195`
+    records why the key is `testFilter` rather than `gated`. **The ritual above stands unchanged on its
+    own merits — a gated record is still not bank-eligible — but "you cannot tell" has become "you can
+    tell, and here is the field", so the detection is one read rather than an inference from entry
+    counts.** Found by a lane reading a record it had just written, confirmed independently from the
+    converter source, and verified at master before this edit: the standing example of why a doc
+    describes what was true when it was written and only somebody with a record open ever re-checks it. (2) A paired before/after measurement needs two FILES, not two runs: the
     record is git-ignored, so a branch restore cannot bring the "after" back and the baseline overwrites
     it in place — the diff then compares a file with itself and reads "zero moved"; copy each side's
     `results.json` to a distinct path first. (3) `git checkout HEAD -- src/core` + `git clean -fd` clears
