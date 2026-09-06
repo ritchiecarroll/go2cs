@@ -11,7 +11,6 @@ using Δruntime = runtime_package;
 using Δsync = sync_package;
 using @unsafe = unsafe_package;
 using @internal;
-using go.sync;
 
 partial class syscall_package {
 
@@ -159,110 +158,7 @@ internal static ref ProcAttr zeroProcAttr => ref ᏑzeroProcAttr.Value;
 internal static ж<SysProcAttr> ᏑzeroSysProcAttr = new StandardBox<SysProcAttr>(default(SysProcAttr));
 internal static ref SysProcAttr zeroSysProcAttr => ref ᏑzeroSysProcAttr.Value;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string bothSetcttyAndForegroundˢ = "both Setctty and Foreground set in SysProcAttr"u8;
-internal static readonly @string setcttySetButCttyNotˢ = "Setctty set but Ctty not valid in child"u8;
-
-internal static (nint pid, error err) forkExec(@string argv0, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
-    nint pid = default!;
-    error err = default!;
-
-    ref var attr = ref Ꮡattr.DerefOrNull();
-    array<nint> p = new(2);
-    nint n = default!;
-    ref var err1 = ref heap(new Errno(), out var Ꮡerr1);
-    ref var wstatus = ref heap(new WaitStatus(), out var Ꮡwstatus);
-    if (Ꮡattr == nil) {
-        Ꮡattr = ᏑzeroProcAttr; attr = ref Ꮡattr.DerefOrNull();
-    }
-    var sys = attr.Sys;
-    if (sys == nil) {
-        sys = ᏑzeroSysProcAttr;
-    }
-    // Convert args to C form.
-    (var argv0p, err) = BytePtrFromString(argv0);
-    if (err != default!) {
-        return (0, err);
-    }
-    (var argvp, err) = SlicePtrFromStrings(argv);
-    if (err != default!) {
-        return (0, err);
-    }
-    (var envvp, err) = SlicePtrFromStrings(attr.Env);
-    if (err != default!) {
-        return (0, err);
-    }
-    if ((Δruntime.GOOS == "freebsd"u8 || Δruntime.GOOS == "dragonfly"u8) && len(argv) > 0 && len(argv[0]) > len(argv0)) {
-        argvp[0] = argv0p;
-    }
-    ж<byte> chroot = default!;
-    if ((~sys).Chroot != ""u8) {
-        (chroot, err) = BytePtrFromString((~sys).Chroot);
-        if (err != default!) {
-            return (0, err);
-        }
-    }
-    ж<byte> dir = default!;
-    if (attr.Dir != ""u8) {
-        (dir, err) = BytePtrFromString(attr.Dir);
-        if (err != default!) {
-            return (0, err);
-        }
-    }
-    // Both Setctty and Foreground use the Ctty field,
-    // but they give it slightly different meanings.
-    if ((~sys).Setctty && (~sys).Foreground) {
-        return (0, errorspkg.New(bothSetcttyAndForegroundˢ));
-    }
-    if ((~sys).Setctty && (~sys).Ctty >= len(attr.Files)) {
-        return (0, errorspkg.New(setcttySetButCttyNotˢ));
-    }
-    acquireForkLock();
-    // Allocate child status pipe close on exec.
-    {
-        err = forkExecPipe(p[..]); if (err != default!) {
-            releaseForkLock();
-            return (0, err);
-        }
-    }
-    // Kick off child.
-    (pid, err1) = forkAndExecInChild(argv0p, argvp, envvp, chroot, dir, ref (Ꮡattr).DerefOrNull(), ref (sys).DerefOrNull(), p[1]);
-    if (err1 != 0) {
-        Close(p[0]);
-        Close(p[1]);
-        releaseForkLock();
-        return (0, err1);
-    }
-    releaseForkLock();
-    // Read child error status from pipe.
-    Close(p[1]);
-    while (ᐧ) {
-        (n, err) = readlen(p[0], Ꮡerr1.Reinterpret<Errno, byte>(), (nint)/* unsafe.Sizeof(err1) */ (uintptr)8);
-        if (!AreEqual(err, EINTR)) {
-            break;
-        }
-    }
-    Close(p[0]);
-    if (err != default! || n != 0) {
-        if (n == (nint)/* unsafe.Sizeof(err1) */ (uintptr)8) {
-            err = err1;
-        }
-        if (err == default!) {
-            err = EPIPE;
-        }
-        // Child failed; wait for it to exit, to make sure
-        // the zombies don't accumulate.
-        var (_, err1Δ1) = Wait4(pid, Ꮡwstatus, 0, nil);
-        while (AreEqual(err1Δ1, EINTR)) {
-            (_, err1Δ1) = Wait4(pid, Ꮡwstatus, 0, nil);
-        }
-        // OS-specific cleanup on failure.
-        forkAndExecFailureCleanup(ref (Ꮡattr).DerefOrNull(), ref (sys).DerefOrNull());
-        return (0, err);
-    }
-    // Read got EOF, so pipe closed on exec, so exec succeeded.
-    return (pid, default!);
-}
+// go2cs generated this placeholder — func forkExec is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Combination of fork and exec, careful to be thread safe.
 public static (nint pid, error err) ForkExec(@string argv0, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
@@ -291,51 +187,6 @@ internal static Func<ж<byte>, ж<ж<byte>>, ж<ж<byte>>, error> execveDarwin;
 
 internal static Func<ж<byte>, ж<ж<byte>>, ж<ж<byte>>, error> execveOpenBSD;
 
-// Exec invokes the execve(2) system call.
-public static error /*err*/ Exec(@string argv0, slice<@string> argv, slice<@string> envv) {
-    error err = default!;
-
-    (var argv0p, err) = BytePtrFromString(argv0);
-    if (err != default!) {
-        return err;
-    }
-    (var argvp, err) = SlicePtrFromStrings(argv);
-    if (err != default!) {
-        return err;
-    }
-    (var envvp, err) = SlicePtrFromStrings(envv);
-    if (err != default!) {
-        return err;
-    }
-    runtime_BeforeExec();
-    var rlim = ᏑorigRlimitNofile.Load();
-    if (rlim != nil) {
-        Setrlimit(RLIMIT_NOFILE, rlim);
-    }
-    error err1 = default!;
-    if (Δruntime.GOOS == "solaris"u8 || Δruntime.GOOS == "illumos"u8 || Δruntime.GOOS == "aix"u8){
-        // RawSyscall should never be used on Solaris, illumos, or AIX.
-        err1 = execveLibc(
-            (uintptr)argv0p,
-            (uintptr)@unsafe.Pointer.FromBox(Ꮡ(argvp, 0)),
-            (uintptr)@unsafe.Pointer.FromBox(Ꮡ(envvp, 0)));
-    } else 
-    if (Δruntime.GOOS == "darwin"u8 || Δruntime.GOOS == "ios"u8){
-        // Similarly on Darwin.
-        err1 = execveDarwin(argv0p, Ꮡ(argvp, 0), Ꮡ(envvp, 0));
-    } else 
-    if (Δruntime.GOOS == "openbsd"u8 && Δruntime.GOARCH != "mips64"u8){
-        // Similarly on OpenBSD.
-        err1 = execveOpenBSD(argv0p, Ꮡ(argvp, 0), Ꮡ(envvp, 0));
-    } else {
-        var (ᴛ1, ᴛ2, ᴛ3) = RawSyscall(SYS_EXECVE,
-            (uintptr)argv0p,
-            (uintptr)@unsafe.Pointer.FromBox(Ꮡ(argvp, 0)),
-            (uintptr)@unsafe.Pointer.FromBox(Ꮡ(envvp, 0)));
-        (_, _, err1) = (ᴛ1, ᴛ2, ᴛ3);
-    }
-    runtime_AfterExec();
-    return err1;
-}
+// go2cs generated this placeholder — func Exec is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 } // end syscall_package
