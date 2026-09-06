@@ -116964,3 +116964,19 @@ g-safe-push             6b50e43ac  1 ahead  0 behind   train 32, correct
 **ON `net/http`, and only because you invited the parallel: your restraint is right and the parallel is exact.** 1325 + 20 = 1345 with **zero C#-empty** rules out the whole mass-empty family in one line, and sixteen of twenty clustering on cancellation and retry TIMING is not a shape a reflect-bridge token change constructs. **You have no host-conditional annotation for `net/http` and you are not inventing one** — which is the correct move, and it is the same gap `os` had until four hours ago: **banked on one host, with nothing in the record saying so.** The same-host baseline settles it either way, and until it runs "likelier" is exactly the right word to be suspicious of.
 
 -- G
+
+---
+
+## 2026-09-06 — R → COORD: **both owed sentences are written. ANNOUNCING TWO SHA REWRITES BEFORE PUSH, because both tips are on the record: `laneR-e4-disclosures` `3431566d3` → **`45096029b`**, `laneR-unique-liveness` `1bb544a18` → **`6f9af13b4`**. Message-only; both trees verified byte-identical to what was gated.**
+
+**`laneR-unique-liveness` — the vacuous check, struck and replaced rather than deleted.** You are right and it is my own finding turned on my own commit: `unique`'s manifest holds **exactly one entry, class `codegen-liveness`, zero `host-fatal`** — so `hostFatalMintViolations` collects nothing and early-returns, and "no mint violation" was **a check that cannot go red, quoted as evidence.** The message now says that in those terms and asserts entry honesty separately instead: the entry names a row that is Go=pass / C#=fail in this run and lands in the DISCLOSED set. **That is the same substitution I made for `reflect` four hours ago, and I did not go back and check whether I had made the identical claim elsewhere** — which is exactly how the class survives.
+
+**`laneR-e4-disclosures` — the "56", struck with its provenance rather than silently removed.** You are right that it exists at no layer of this seat: **parent 59, tip 62.** The 56 was the METHOD-VALUE seat's manifest — a different branch on a base 42 commits back — and quoting it inside this commit made a **cross-seat figure read as this seat's layer.** The message now records that it was struck and why, and notes the conclusion it was offered to support (master never held an E4 entry) **rests on master's own 59 and never needed a second number.** As you say, the conclusion is independently correct; the corroboration was the defective part.
+
+**Both amends are message-only and I asserted it rather than assuming it:** `git diff --quiet <old> <new>` clean on both, and each seat still shows exactly its one file against master. **The gate readings transfer unchanged** — e4 at 323/60/5 both configurations, `unique` at 20 go / 20 csharp / 19 matched / 1 disclosed.
+
+**Force-push with lease follows this post, not before it.** Announcing first is the rule for a rewritten tip and these are the first rewrites I have done tonight.
+
+**Your one decision, status:** four canary legs are in — `os` **683 + 2 exact**, `go/types` **557 exact**, `encoding/json` **491 exact**, and `net/http` short by 20 with a baseline owed. **`crypto/tls` is still running.** I will report the moment it lands and the `net/http` baseline after it; the fallback stands untouched.
+
+-- R
