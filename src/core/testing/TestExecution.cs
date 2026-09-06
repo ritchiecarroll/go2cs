@@ -264,6 +264,24 @@ public sealed class TestExecution
     {
         lock (m_syncRoot)
         {
+            // RESIDUAL, deliberately NOT changed with Log's fix above and recorded here rather than
+            // left to be rediscovered. Go's Fail diverges from this in TWO ways and only ONE of them
+            // is the same defect Log had:
+            //
+            //   func (c *common) Fail() {
+            //       if c.parent != nil { c.parent.Fail() }        // propagate FIRST, unconditionally
+            //       ...
+            //       if c.done { panic("Fail in goroutine after " + c.name + " has completed") }
+            //       c.failed = true
+            //   }
+            //
+            // The KIND is the same divergence Log carried -- Go panics, this throws a .NET exception
+            // that a converted recover() cannot see. The ORDER is not: Go marks the whole ancestor
+            // chain failed BEFORE it can panic, and its recursive parent.Fail() would itself panic on
+            // a done ancestor, where FailFromChild never does. Fixing the kind alone would leave the
+            // order wrong; fixing the order needs FailFromChild's semantics decided against Go's
+            // recursion, which is a separate question from the one Log's fix answers. Neither is
+            // reached by the late-log path this cut is for.
             if (m_finished)
                 throw new InvalidOperationException($"Fail called after {Name} completed");
             m_failed = true;
@@ -288,15 +306,93 @@ public sealed class TestExecution
         throw new TestAbortException();
     }
 
+    /// <summary>
+    /// Go's <c>common.logDepth</c> (testing.go:1015-1032): append one record to this test's output,
+    /// and when this test has already FINISHED, hand the record to the nearest LIVE ancestor instead
+    /// of refusing it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This host refused every late record until 2026-09-06, and it diverged from Go's contract in
+    /// TWO ways at once. Go's own text:
+    /// </para>
+    /// <code>
+    /// if c.done {
+    ///     for parent := c.parent; parent != nil; parent = parent.parent {
+    ///         parent.mu.Lock()
+    ///         defer parent.mu.Unlock()
+    ///         if !parent.done {
+    ///             parent.output = append(parent.output, parent.decorate(s, depth+1)...)
+    ///             return
+    ///         }
+    ///     }
+    ///     panic("Log in goroutine after " + c.name + " has completed: " + s)
+    /// }
+    /// </code>
+    /// <para>
+    /// REACHABILITY. Go panics only when NO live ancestor exists, and <c>runTests</c> runs every
+    /// top-level test as <c>t.Run</c> on a root <c>T</c> (testing.go:2155-2169, the child's parent
+    /// set at :1724), so mid-run there is ALWAYS a live ancestor and Go's panic is effectively
+    /// unreachable until the whole run ends. A refusal here therefore fired on a path Go structurally
+    /// never takes — and it fires routinely, because <c>internal/testenv.Command</c> installs a
+    /// <c>cmd.Cancel</c> closure that calls <c>t.Logf</c> (exec.go:186,199) from <c>os/exec</c>'s
+    /// <c>watchCtx</c> goroutine, which can outlive the test that started it.
+    /// </para>
+    /// <para>
+    /// KIND. Go PANICS, so <c>recover()</c> can see it and golib's backstop reports it Go-style and
+    /// exits 2. A raw <see cref="InvalidOperationException"/> is invisible to a converted
+    /// <c>recover()</c> and lands in the host's INFRASTRUCTURE bucket — which by TestRunner's own
+    /// definition means "the host could not run the test", the opposite of what happened. So the
+    /// refusal, when it is genuinely owed, is <c>builtin.panic</c> carrying Go's text composed exactly
+    /// as testing.go composes it.
+    /// </para>
+    /// <para>
+    /// Two deliberate differences from Go's letter, neither observable. Go holds every ancestor lock
+    /// it takes until it returns (its <c>defer</c>s); this walk releases each one before moving on,
+    /// which cannot matter because the record is appended INSIDE the lock that proved the ancestor
+    /// live. And the appended record keeps this host's existing trailing-newline trim while the PANIC
+    /// text carries the caller's string untrimmed, which is what Go's <c>s</c> is.
+    /// </para>
+    /// </remarks>
     public void Log(string text)
     {
         lock (m_syncRoot)
         {
-            if (m_finished)
-                throw new InvalidOperationException($"Log called after {Name} completed");
-            AppendLog(text.TrimEnd('\r', '\n'));
+            if (!m_finished)
+            {
+                AppendLog(text.TrimEnd('\r', '\n'));
+                return;
+            }
+
+            // Child lock, then ancestor locks, outermost-first — the same order FailFromChild takes
+            // and the same order Go takes, so this walk cannot invert against either.
+            for (TestExecution? ancestor = m_parent; ancestor is not null; ancestor = ancestor.m_parent)
+            {
+                lock (ancestor.m_syncRoot)
+                {
+                    if (ancestor.m_finished)
+                        continue;
+
+                    ancestor.AppendLog(text.TrimEnd('\r', '\n'));
+                    return;
+                }
+            }
+
+            throw builtin.panic(LogAfterCompleteText(Name, text));
         }
     }
+
+    /// <summary>
+    /// Go's panic text for a late log with no live ancestor, composed exactly as testing.go:1029
+    /// composes it: <c>"Log in goroutine after " + c.name + " has completed: " + s</c>.
+    /// </summary>
+    /// <remarks>
+    /// Composed rather than a constant because Go's own text carries the test's name and the record,
+    /// and quoted rather than paraphrased for the reason the Setenv/Parallel texts below are: a
+    /// recovered value is compared against the whole string.
+    /// </remarks>
+    internal static string LogAfterCompleteText(string name, string record) =>
+        $"Log in goroutine after {name} has completed: {record}";
 
     public void Helper()
     {
