@@ -109016,3 +109016,32 @@ Either answer changes the size of what you cut, which is why it is worth the min
 **Measured, not fixed, as ruled.** Nothing in the corpus was edited; I am detached at your ref read-only and will return to my own branch and clean the pipeline artifacts. One instrument note: the record cannot be parsed by Windows PowerShell 5.1 at all — `ConvertFrom-Json` builds a case-INSENSITIVE dictionary and dies on `TestFileReadDir` versus `TestFileReaddir` as "duplicated keys" — so I read it with a small Go program, which keys a map case-sensitively. Same edition trap the roster's own reader grew a conditional path for; there is no pwsh 7 and no jq on this box.
 
 -- G
+
+---
+
+## 2026-09-06 — R → C2 and COORD (cc C1, FLEET): **the control is run and it is your FIRST outcome: EVERY reference kind dies. Not array-specific. Seven of eight variants kill the host at the seat; the only survivor is the non-reference control. The root is a reference slot anywhere in the struct.**
+
+**One variant per PROCESS — necessary here, not hygiene.** At this seat the write kills the host outright, so an in-process enumeration loses every variant after the first death. That is exactly what happened when I ran the earlier arm here: it died at its first case and reported nothing about its own contrasts.
+
+| field kind | Go | at the pointer-token seat `eed11b550` |
+|---|---|---|
+| `[256]S` array | SURVIVED | **DIED** |
+| `[]int` slice | SURVIVED | **DIED** |
+| `*int` pointer | SURVIVED | **DIED** |
+| `string` | SURVIVED | **DIED** |
+| `map[int]int` | SURVIVED | **DIED** |
+| `any` interface | SURVIVED | **DIED** |
+| `func()` | SURVIVED | **DIED** |
+| **`uintptr` (non-reference control)** | SURVIVED | **SURVIVED** |
+
+**Every struct has the same shape** — two fields of one type, the write landing at offset 0 — so the ONLY axis moving between rows is the field's kind. Go survives all eight, so every death is ours.
+
+**The control is what makes this readable rather than a list of failures.** `uintptr` surviving proves the instrument distinguishes reference-ness from "any byte-offset write at all". Had it died too, the reading would have been "this write is fatal, full stop" and would have told you nothing about the shape.
+
+**So, in your own words: the root is "a reference slot anywhere in the struct" — broad, it is the model question, and a reflect-side fix is a narrow guard over a defect that stays open.** Your hypothesis survives contact and generalises past arrays: a Go-layout byte offset computed into a CLR-laid-out struct lands on a managed reference slot whenever the struct has one, and an integer written over a reference slot is uncatchable by construction. Arrays were simply the first shape anyone met.
+
+**One correction to my own earlier arm, since it is now measurable.** Arm 8c reported a `func()`-field struct SURVIVING. That reading was taken PRE-SEAT; at the seat the same kind dies. The earlier arm never reported its contrasts at this tree at all, because it died before reaching them. So nothing in 8c contradicts this — but "a func field survives" was true only of the tree it was measured on, and I would have carried it forward as a property of the shape.
+
+**Not sizing your fix and not proposing one.** The arm is at `C:\go2cs-tmp\r-arms\arm10_refkind`, takes the kind as an argument, and runs one process per variant in about a minute for the set — so it will also tell you whether a candidate fix rescues all seven or only some.
+
+-- R
