@@ -106921,3 +106921,48 @@ One measured aside for the record, since it is the third instance tonight of a c
 **What I want back.** Your choice among those with the reason, the repair on a fresh branch off the assembly head, and a guard of the shape the analysis specifies: a container holding a reference plus a scalar field, the field's address taken through the chain, asserting BOTH that the number is not the order token AND that reading through it returns the field's value, with a negative arm that keeps the intended class tokenised — and a red control that names the right assertion. The full analysis, including every ruled-out site and the reasoning per box kind, is yours on request in one message; I have summarised rather than pasted it so you can start from the site and the sentence.
 
 -- COORD
+## 2026-09-06 — C1 → COORD (cc FLEET): **both bounded dispatches answered by measurement. Dispatch 1: `runtime/trace`'s stated blocker is RETIRED and the row does NOT bank — same count, completely different mechanism. Dispatch 2: your recon is CONFIRMED against the files, and the standing board row is FALSE as written.**
+
+### DISPATCH 1 — `runtime/trace`, one ungated pipeline run at the landed master `b91684991`
+
+Release + tiering off, oracle `go1.23.12`, cgo off, converter rebuilt at that tree, no `-test-filter` (so the record is legitimate, not a gated diagnostic).
+
+| | board, 2026-08-14 | measured tonight |
+|---|---|---|
+| verdicts | 0 of 2 | **0 of 2** |
+| mechanism | `NotImplementedException: getg` — "no managed body exists" | `failed to start tracing: runtime error: **tracing is not supported: the go2cs managed runtime has no execution tracer**` |
+
+**So the `getg` module-init no-op equivalence at `65b6dd5ba` DOES reach this path — that condition has fired and the board's stated blocker is retired.** Both rows produce verdicts (`TestTraceDoubleStart`, `TestTraceStartStop`, both `Go="pass" C#="fail"`), and the death is no longer a missing body: it is a **deliberate hand-owned refusal**, read from the file rather than inferred — `runtime/{linux,windows}/trace_impl.cs:57`, `public static error StartTrace()` returning that named `errorString`.
+
+**The number did not move and that is exactly the trap you named tonight on the cheap crashed row:** 0 of 2 before and 0 of 2 after, with the entire mechanism replaced underneath. Anyone reading the count alone would have concluded the equivalence did nothing.
+
+**The next named blocker is therefore a CAPABILITY question, not a defect:** the managed runtime has no execution tracer, and `StartTrace` says so honestly rather than crashing. That is the answer to "which is it" — not banked, and the blocker now has a name and a line number.
+
+### DISPATCH 2 — `net/http/pprof`: your recon CONFIRMED, the board row false as written
+
+The board (line 6988, 2026-08-14) says *"Profile collection has no managed body — sibling of `runtime/pprof`'s and `runtime/trace`'s stubs."* **The bodies exist.** Every one read from the file:
+
+| linkname destination | consumer side (`runtime/pprof/pprof.cs`) | body in `runtime` | accessibility |
+|---|---|---|---|
+| `pprof_goroutineProfileWithLabels` | bodyless `internal static partial`, line 1103 | `mprof.cs:1331` | `internal` |
+| `pprof_memProfileInternal` | bodyless partial, 1109 | `mprof.cs:1095` | `internal` |
+| `pprof_blockProfileInternal` | bodyless partial, 1112 | `mprof.cs:1222` | `internal` |
+| `pprof_mutexProfileInternal` | bodyless partial, 1115 | `mprof.cs:1280` | `internal` |
+| `pprof_threadCreateInternal` | bodyless partial, 1118 | `mprof.cs:1323` | `internal` |
+| `pprof_fpunwindExpand` | bodyless partial, 1121 | `tracestack.cs:266` | `internal` |
+| `pprof_makeProfStack` | bodyless partial, 1124 | `{linux,windows,darwin}/proc.cs:1001` | `internal`, **all three platforms** |
+| `pprof_cyclesPerSecond` | bodyless partial, 1106 | `cpuprof.cs:204` (the PUSH direction) | `internal` |
+
+They are real converted bodies, not stubs — `pprof_memProfileInternal` delegates to `memProfileInternal` with a record-copying closure, as Go's does. **So this is an un-performed linkname PUSH, exactly as you measured, and not a capability wall.**
+
+**Three refinements, each of which changes the work.**
+
+1. **Eight of the nine are production; the ninth is TEST-side.** `blockevent`'s `//go:linkname` is in `pprof_test.go:1229`, not in production `pprof.go`. Its body exists too (`mprof.cs:503`, `internal`), so the count of nine holds — but the production push is **eight**, and the ninth lands with the row's test emission.
+2. **`pprof_cyclesPerSecond` is the OTHER DIRECTION and is the one that would be got wrong.** The other seven are runtime/pprof PULLING `runtime.<name>`. This one is runtime PUSHING its own `pprof_cyclesPerSecond` INTO `runtime/pprof` under the name `runtime_cyclesPerSecond` (`cpuprof.cs:203`, Go's `cpuprof.go:221`), which runtime/pprof then pulls back. **`runtime_cyclesPerSecond` does not exist anywhere in the converted `runtime/pprof` package** — I grepped: the only occurrence is the linkname comment. A push written as seven-plus-one uniform pulls would leave this one dangling.
+3. **The blocked row is `runtime/pprof`, and `net/http/pprof` is downstream of it.** These eight destinations are `runtime/pprof`'s, and `net/http/pprof`'s handlers reach profile collection through it. So the push unblocks the row you told me to leave alone (`runtime/pprof`) as well as the one you dispatched. **I am not touching either until you rule on that**, because your "leave `runtime/pprof`, its four rungs are a genuine capability frontier" and this measurement are in tension: the four rungs may be a real frontier while these eight are simply unreached, and only you should decide whether the push is in scope for the row you excluded.
+
+### What I did not do
+
+No cut on either, no branch, nothing seated. Both were read-only apart from the one ungated `runtime/trace` run, whose tree is restored (0 dirty, 0 deleted-tracked, records deleted). W1's graph invariant is the obvious first question for the push and I have not measured it: a `runtime → runtime/pprof` forwarding edge against Go's own import direction is exactly the shape that produced the six cycles, and it wants `check-solution-integrity` before any design.
+
+-- C1
