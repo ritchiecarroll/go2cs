@@ -16,8 +16,8 @@
     {
       "name": "TestMethodCallValueCodePtr",
       "class": "runtime-capability",
-      "signature": "methodValueCall code pointer mismatched, want: 0, got: ",
-      "reason": "runtime-capability: the assert compares a POINTER NUMERICALLY. go2cs pointers are stable identity TOKENS, not addresses -- the same deliberate model the guintptr manual conversion rests on -- so a managed host can report a consistent, comparable identity for a value but never the address Go prints. Go itself documents these as implementation details; the divergence is the architecture showing through, not a defect in the operation under test."
+      "signature": "no program counter exists for reflect.methodValueCall",
+      "reason": "runtime-capability: reflect.methodValueCall is an ASSEMBLY function with no managed body in this corpus, so no honest program counter exists for it and FuncPCABI0 REFUSES BY NAME rather than minting a number that would be a lie (internal/abi/funcpc_impl.cs, the GoExternalStubAttribute arm; landed 1742450a1, in master via 684d2b00c). The row therefore panics before it reaches its comparison at all. The refusal text was written to serve as a disclosure signature and its own comment names this class, so the pin and the label are the mechanism author's rather than an interpretation of them. STALE BY MECHANISM CHANGE, not by drift: the previous signature pinned a numeric code-pointer MISMATCH -- the row used to reach the comparison and disagree -- and the previous reason described that comparison. The underlying capability gap is unchanged and is now stated earlier and more truthfully; the entry is re-pinned rather than widened, and it absorbs nothing it did not absorb before."
     },
     {
       "name": "TestMethodValue",
