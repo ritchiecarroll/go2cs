@@ -814,6 +814,12 @@ ONE stdlib in a build; there is now only one on disk.
   `MSYS_NO_PATHCONV` can FAIL SILENTLY**, after which the wrapper around it reports "0 dirty" — the
   INSTRUMENT's zero, not the tree's (2026-09-04). **Verify tree state from INSIDE the tree** (`cd`,
   then `git`).
+  ⚠ And the same split bites with **no variable set at all: a bash `-f` test and a native tool's
+  path ARGUMENT are different namespaces** (2026-09-06). A probe printed `record: present` from bash
+  and then died `FileNotFoundError` inside python on the SAME path string, because `/c/...` resolves
+  for the shell and not for a native interpreter. The contradiction reads as a race or a vanished
+  artifact and is one path spelled for two namespaces: **`cygpath -w` before handing a path to a
+  native tool, and read a present-then-absent pair as a namespace split rather than a timing bug.**
   **A tenth, 2026-09-04 — bare `tar` resolves to TWO PROGRAMS on a Windows box depending on PATH
   order**, and only the system one (`System32\tar.exe`) reads a Windows path: MSYS tar reads `C:\…` as
   a REMOTE HOST (`Cannot connect to C: resolve failed`), so a two-seeded A/B's OLD arm never extracted
@@ -841,6 +847,20 @@ ONE stdlib in a build; there is now only one on disk.
   uses the MSYS `grep`, the Grep tool, or a pattern with no leading slash** — the same path-conversion
   family as the shell eating a command interpreter's switch, one argument over, and exactly the
   false-clean a pre-post census exists to prevent.
+  ⚠ **TRAP (5)'s FAMILY IN A THIRD COSTUME, AND THE LABEL IT WORE (2026-09-06).** Python's
+  `print` to a REDIRECTED file on Windows emits CRLF, so a bash `while IFS=… read` loop's **LAST
+  FIELD carries a trailing carriage return** and any path built from it silently fails: a drop-train
+  assembler read its seat list that way, every `-F <message-file>` path ended in a CR, `git merge`
+  failed on the bad path — and the script reported **CONFLICT**. Two tells, both cheap: the same
+  merge run BY HAND succeeds, and the reported conflict lists **NO unmerged paths**. Strip every
+  field (`${var%$'\r'}`), or have the writer emit LF explicitly, and `cat -A` the intermediate file
+  before believing any loop that reads it — the same family as the LF-anchored patch and the UTF-16
+  log. And **a failure LABEL is part of the instrument; a wrong one costs more than no label**: that
+  `CONFLICT at <seat>` named a CAUSE that would have been acted on (a conflict resolution nobody
+  needed) and inflated a published cost estimate, so a failure branch prints what it OBSERVED
+  (`MERGE FAILED — unmerged paths follow; NONE means it was not a conflict`), never what it assumes,
+  and **an estimate derived from a broken instrument is withdrawn EXPLICITLY** — said to be
+  unverified until a clean run replaces it — rather than quietly re-derived.
 - **FALSE-GREEN route #3 — NESTED sub-library packages were never enumerated (fixed 2026-08-02).** All
   three transpile gates walked `tests\Behavioral\*` **top-level only**, so the 22 sub-library packages
   nested inside a test folder (`IoLike\FsLike`, `VersionedImport\vlib`, `CrossPackageArrayZeroValue\bufpkg`,
@@ -3882,7 +3902,13 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
     proof page under `docs/validation/current/`** (that rewrite is by design — it is why the
     host-conditional check reads the COMMITTED page from HEAD), so a restore scoped to the corpus
     leaves the pages behind — 56 of them measured on one lane's shift (2026-08-29). Restore both
-    roots, or the next diff reads as proof-page drift.
+    roots, or the next diff reads as proof-page drift. ⚠ **A gate's own DIRT PREFLIGHT is what
+    catches the half a corpus-scoped restore leaves** (2026-09-06): a solution leg aborted
+    `ABORT dirty` after a canary run whose restore had been scoped to `src/core` while the pipeline
+    had also rewritten `docs/validation/current/<row>.md` — the class this paragraph documents,
+    met by the gate rather than by the reader. The preflight earned its keep by REFUSING to measure
+    a tree it could not vouch for, **which is the shape every gate should have: refuse over an
+    unclean tree rather than measure it and report a number.**
     1. **CRLF phantoms — most of a healthy sweep's dirt.** The converter preserves the Go source's
        **LF** inside multi-line string literals while emitting CRLF everywhere else, and `core.autocrlf`
        smudges those in-string LFs to CRLF on checkout. A `-tests` run re-emits them as LF, so every
@@ -3997,6 +4023,18 @@ under the other), and only that second reading answers the question the purge ex
 2640 folders", and the run exits 2 having deleted NOTHING. **Pass `-Root` explicitly as well as
 `-Force` for any non-interactive purge**, and read the EXIT CODE plus a dirs-left count — never the
 log's "Found N", which is what the enumeration found and not what it removed.
+⚠ **PURGE AFTER EVERY PROBE, and read an I/O error HISTOGRAM before believing an error count**
+(2026-09-06, one disk exhaustion in two costumes). A coordinator's own two scratch worktrees held
+**5,096** build-output directories and filled the disk to zero: the fleet's mailbox push failed on
+`Out of diskspace`, and a solution leg that had built clean an hour earlier came back exit 127 with
+**78 errors** whose histogram was MSB3491/MSB3027/MSB3021/CS0016/CS0041/CS8104 and every message
+read *not enough space on the disk*. **N errors whose codes are all I/O are ONE environmental
+failure wearing N codes, not N defects** — purging recovered 43 GB. Two readings ride on it: a
+measurement taken on a tree that CHANGED under it — here a `bin`/`obj` purge while MSBuild was
+writing there — is not a measurement at all, whichever way it reads; and what made the exhaustion
+VISIBLE rather than silent was the posting tool REFUSING to claim delivery and saying the commit
+did not land, so **a state-advancing tool that reports its own failure honestly is worth more than
+one that succeeds quietly.**
 **⚠ Its default target is MACHINE-GLOBAL** — `%GOPATH%\src\go2cs`, shared with every sibling worktree —
 so never run it bare as a gate. It supports **`-WhatIf`** (a real dry run: the three non-cmdlet writes
 are explicitly `ShouldProcess`-gated, and the solution enumeration reads the SOURCE so the projected
@@ -4371,6 +4409,12 @@ Each rule below was paid for.
   head that has no remote ref: based that way it merges cleanly into any assembly containing that seat
   and it reviews as a repair of a named thing — a train assembles on the coordinator's machine and
   lands by pushing master, so a base nobody can fetch is a base nobody can check.
+  ⚠ **A GENERALISATION FROM ONE MEASURED ROW TO ITS SIBLING IS A HYPOTHESIS, NOT A ROUTING**
+  (2026-09-06). A confident dispatch said two remaining rows sat behind one unimplemented stub; the
+  sibling MEASURED an hour later RUNS — 122 of 160 matching, 38 differing on an entirely different
+  axis — so the generalisation was wrong in the direction that costs a lane time, by naming a large
+  row as cheap. **The measurement took four minutes: measure the sibling BEFORE naming it in a
+  dispatch.**
 - **⚠ REBASE AND RE-LANDING, two shapes with explicit acceptances (2026-09-03).** Two of three
   "conflicts" against a new master were ONE DUPLICATE COMMIT (the same patch as the landed seat,
   differing only in blob ids and one hunk offset) — **dropped by `rebase --onto`, not resolved by
@@ -4479,6 +4523,24 @@ Each rule below was paid for.
   four one-axis readings that attributed it (previous master, the suspect seat's own merge, the bare
   assembly head, the repaired head) also proved the repairs neither caused nor cured it, which is what
   a set-difference finding owes before it names a seat.
+  ⚠ **THREE RULES FROM ONE HELD TRAIN, 2026-09-06.** **A REGRESSION AGAINST A BANKED ROW IS NOT
+  ELIGIBLE FOR ACCEPT-AND-NAME** — landing with a defect named and open is for an OPEN defect; a
+  change that takes banked verdicts DOWN is either fixed or its seat comes out of the train. The
+  coordinator offered accept-and-name for a `reflect` regression on the reasoning that its root was
+  a model question too large to answer under a landing deadline, and withdrew it: **388 verdicts
+  falling to 167 reported is the roster going backwards, and no elegance of root makes that
+  landable.** **A SEAT THAT CHANGES A FAILURE'S MODE FROM CAUGHT TO UNCATCHABLE IS A REGRESSION even
+  though it created no new defect** — pre-seat the same operation already failed while the package
+  still reported every verdict; post-seat the host dies and 221 rows go EMPTY — and reading the two
+  trees honestly is what SHRINKS the fix: the ask is not "make the operation work" (the model
+  question) but "make it fail the way it failed before", refuse by name, catchable, the defect left
+  open and LOUD. **Compare the failure MODES across the two trees before sizing a fix against the
+  failure itself.** And the arm that names the seat is cheaper than it looks: **bisect the TRAIN
+  before reasoning about its seats.** Building an alternative assembly to cost a seat-drop
+  incidentally produced every intermediate SHA, so the ladder over the known merge order — master,
+  ten seats, eleven, thirteen, fifteen, sixteen — was a checkout and a run per rung and converged
+  exactly. The measurement most needed was the cheapest available and it was run LAST, after an hour
+  spent building an alternative to a misdiagnosed problem; **the intermediates already exist.**
 - **⚠ TRAIN-ASSEMBLY MECHANICS, four traps in one assembly (2026-09-03).** A seat cut off an OLDER
   base conflicted on SIX roster blocks, not the four a `head -12` grep showed — the filtered-status
   trap in a grep costume — and a resolver asserting `len == 4` bailed BEFORE writing while the
@@ -4530,6 +4592,22 @@ Each rule below was paid for.
   measurement tree before running, build the converter from that tree, and check the binary's mtime
   MOVED rather than merely existing, three separate ways of not fooling yourself. Such a row's
   improvement ARRIVES WITH ITS TRAIN and belongs in the objective's arithmetic, not in a lane's memory.
+  ⚠ **AN ALTERNATIVE THAT MUST BE COSTED IS BUILT, NOT DESCRIBED — and a coordinator's OWN assembly
+  commits are ungated by construction** (2026-09-06, one held train). **A file-overlap census
+  predicts where conflicts are POSSIBLE; only an assembly says where they ARE.** A seat-drop was
+  sized by diffing each commit's file list against the dropped seat's two named collision points (a
+  registry and a golden) and NEITHER conflicted, while a file the census had attributed to a
+  different seat did — a conflict is a property of what the three-way BASE looks like once a seat is
+  absent, not of which files a commit touches. The real assembly came in CHEAPER than the estimate
+  (16 merges, ONE trivial resolution where the seat's side was a strict superset, zero markers) and
+  it is the only thing that could have found the actual collision. The other half is the
+  coordinator's own: a hand-own cut by a sub-agent and merged as an ASSEMBLY commit carried a
+  CONVERTER registry change, so its blast radius was never the two corpus files it edited and it
+  emptied 221 verdicts in a package two subsystems away — while four hours were spent blaming a
+  lane's seat. A lane's seat arrives with its own gate lines; an assembly commit arrives with none
+  and the battery that follows attributes to the whole train, so **an assembly commit carrying a
+  converter change owes the same measured blast radius as a seat, taken BEFORE it is seated** — or
+  it is not an assembly commit, it is an unmeasured seat wearing the coordinator's authority.
 - **⚠ A CONCURRENCY TRANSIENT IS READ FROM THE FAIL LINE'S ERROR TEXT, and its arm is an ISOLATED
   re-run (2026-09-02/03).** The converter suite failed ONCE under five concurrent sub-agents with
   `go: go.mod file not found in current directory or any parent directory` from its `go` child and
@@ -4582,6 +4660,13 @@ Each rule below was paid for.
   never been pushed. **Any post that STATES a measurement is a DEPENDENT step of that measurement** —
   parallelism is for independent items only, and a claim about a result is never independent of the
   result.
+  ⚠ **A `&` BACKGROUND LAUNCH IN A COMPOUND BASH COMMAND SWALLOWS EVERYTHING AFTER IT, HEREDOCS
+  INCLUDED** (2026-09-06). An urgent retraction was written as `cmd & … cat > entry <<EOF … post`:
+  the launch backgrounded the rest, the entry file was never created, the post never ran, and the
+  only visible output was a tool banner. **A post is CONFIRMED by reading the REMOTE — `git fetch`
+  then grep for the post's own distinctive line — never by the absence of an error.** The tool's
+  ENTRY-FILE-MISSING guard caught the second attempt; nothing caught the first. **Launch background
+  work in its OWN call.**
 - **A gate that has never been made to fail proves nothing.** Before trusting a census/self-verify that
   reports zero, regress one site deliberately, confirm it reports exactly that site, then fix and
   re-verify — and confirm the restore is byte-identical. The same principle as the positive controls
@@ -4612,6 +4697,15 @@ Each rule below was paid for.
   skipped. And a committed disclosure quoted a 125/250/500 ms ladder its source does not contain (the
   rungs are 250/500/1000): re-derive a disclosure's mechanism from the line it cites, and post the RAW
   numbers beside any reading, since a measurement outlives the interpretation attached to it.
+  ⚠ **TO TELL A ROOT FROM A CASCADE, RUN THE SUSPECTED DOWNSTREAM MEMBER ALONE — not just the
+  suspected root** (2026-09-06). A 38-verdict cluster looked like one failing test leaving a resource
+  open with every later test reporting `already in use`; a single-test gated run of the DOWNSTREAM
+  test failed on the SAME unimplemented primitive as the head test, so the `already in use` text was
+  a symptom of the START PATH throwing, not of a predecessor's leak. One deep root, not a cascade —
+  which is better news, because it makes the row answerable by one piece of work and it relocates
+  that work out of the package and into the runtime. Two gated runs at ~90 s each replaced a
+  plausible story. **A cascade shows as a fixed ORDER rather than a set: count the ROOTS before
+  sizing the number.**
   Four ATTRIBUTION rules from one night of probe work, 2026-09-02. **A variant table names what each
   variant REMOVES and the attribution line is DERIVED from that column** — a swapped label on a correct
   measurement survives review by looking self-consistent. **An attribution is a ONE-AXIS pair**: a pair
@@ -4850,7 +4944,12 @@ Each rule below was paid for.
   pipeline cannot make the test fail honestly, the per-declaration capability GATE already carried in
   the comparison record lists it with its capability and its lifting condition. (Displacement of a
   generated stub is proven by WRITE-EVIDENCE — the fresh generator output lacks it, the old stub file
-  is stale — never by absence.)
+  is stale — never by absence.) ⚠ **A PASS THAT CANNOT FAIL IS NOT A PASS, and the honest answer
+  names WHICH** (2026-09-06): asked whether a silent degradation showed up in a row, the honest answer
+  was not "no" but "this row structurally CANNOT see it" — the two tests that exercise the call are
+  capability-GATED, absent from both verdict maps and never compared, so the passing neighbours never
+  reach it. Say which, because the next reader will see the green rows and conclude coverage, and
+  **record it beside the CAPABILITY, not beside the row.**
   **⚠ ATTRIBUTION AND ARMS, five rules from 2026-09-03.** **A prediction is stated in a currency the
   predictor has MEASURED**: a row-level triple was arithmetic on another lane's accounting and the
   measured decomposition reached neither triple — the MOVED SET (FIXED/BROKEN derived from both
@@ -4871,6 +4970,68 @@ Each rule below was paid for.
   slot, already proven to pin — stayed fixed, so it could not have informed the question either way,
   and it AGREED with its author's prediction. Scored VOID rather than as a hit, by the author, citing
   their own rule from one day earlier that a control only tests the axis you varied.
+  **⚠ WHAT AN ARM HOLDS, AND THE ONE COMMAND THAT ANSWERS IT — five rules from one night, 2026-09-06.**
+  **A CONTROL'S BASE DECIDES WHAT IT CAN DISTINGUISH.** A lane proved by SET comparison — name lists
+  kept, only-at-mine EMPTY, gone-now EMPTY, the arithmetic closing across three arms with every
+  addition accounted for — that neither of its later commits added a single failure, and it was
+  exactly right about what it claimed; but its base was its OWN first seat's tip, so the 42 standing
+  failures could equally be the corpus's OR that seat's. **"Pre-existing at MY BASE" is not
+  "pre-existing at MASTER" when the base already contains the commit under suspicion**, the tell was
+  a sibling lane reading a very different failure count on a different tree, and when the question
+  widens past a control the base moves with it — the extra arm is one run. **A "PRE-CHANGE" CONTROL
+  TREE MUST DIFFER FROM THE TEST TREE ON ONE AXIS, AND A TREE CARRYING SOME OTHER SEAT IS NOT THAT**:
+  a package regression was attributed to a train's first seat from four readings whose "without it"
+  arm was master plus ONE UNRELATED seat rather than master plus the other fourteen — **a one-axis
+  control in appearance and a two-axis comparison in fact** — refuted by BUILDING the alternative, an
+  assembly with that seat and its repairs removed reproducing the failure EXACTLY (same 221 empty
+  verdicts, same first and last name in the span), so the seat was never the cause. Name what each arm
+  holds, and when an arm is "the tree before X", say which OTHER commits it also lacks. **VERIFY EACH
+  ARM'S CONTENTS BY ANCESTRY (`git merge-base --is-ancestor <accused> <arm>`), never by the merge
+  order you intended**: a branch cut from INSIDE a train's chain drags the whole chain in, so a rung
+  labelled "add these three files" added 111 files and 6,666 lines with the accused seat among them,
+  and "the cause is mine" was published off it — one command per arm. The tell that forced the check
+  was an emission diff coming back EMPTY, and **a result that does not fit the mechanism is a reason
+  to re-examine the ARM, not to invent a mechanism.** Then the pair that closes the class: **a banked
+  lesson that is not MECHANISED is a lesson that will be paid for again** — the same coordinator
+  retracted a two-axis-labelled-one-axis attribution, banked "name what each arm holds", and committed
+  the identical error one bisect rung later, because the lesson was written down and the one command
+  that applies it was not run. Put the check IN the probe script (the arm prints its own ancestry
+  answer before it runs) so applying it costs nothing and skipping it is visible: three lines, and it
+  **printed unasked in the very next unrelated run**, on a probe whose author was not thinking about
+  it. That is the difference between a lesson in a document and a lesson in a tool.
+  **⚠ THE AXIS NOBODY VARIED — six hours of fleet reasoning, and what each correction cost
+  (2026-09-06).** **AN ARM THAT MEASURES A SEQUENCE ATTRIBUTES THE WHOLE SEQUENCE'S FAILURE TO ITS
+  FIRST STEP**: a table reading array/pointer/func as "caught panic at master" carried the whole
+  investigation until its own author built an arm separating the WRITE from the WALK that follows and
+  measured that **every write lands and reads back Go's answer on all eight kinds** — the panics
+  belonged to the walk. The consequence was total, because a refuse-by-name ruling stood entirely on
+  "those kinds are silently writing to the wrong field", which was false, and the accused commit is a
+  REGRESSION against measured-correct behaviour rather than a fix exposing a latent fault.
+  **Decompose the operation before attributing its failure**, and note who caught it: the instrument's
+  author, still testing after everyone else had accepted the reading. Two earlier corrections to that
+  same table, each by measurement rather than by care. **An acceptance criterion is derived from a
+  measured BASELINE, never from the shape of the failure** — an eight-kind arm found all seven
+  reference kinds dying at a seat and published a criterion requiring all seven to become CATCHABLE,
+  while the properly measured PRE-SEAT baseline had only THREE failing (catchably) and the other FOUR
+  SURVIVING, so building to the published criterion would have made a fix REFUSE four shapes that
+  previously worked — and no gate could show it, because the row would still report and the package
+  would still pass. **And a criterion derived on ONE HOST is a criterion for that host until a second
+  host reads it**: on Linux master all eight kinds SURVIVE where Windows fails three, so "make it fail
+  the way it failed before" is per-PLATFORM — Go itself is platform-independent here and we are not —
+  and neither the author nor the coordinator who RATIFIED it as *the* acceptance test asked which host
+  it came from. **Print the host in the instrument's output.** Beside them: **two failures narrowing
+  to one commit are not necessarily the same failure** — a common CAUSE is not a common DEATH — so the
+  fix's acceptance reports BOTH readings from the SAME tree (both recover together, or the arm
+  recovers and the row does not, the row's cause still inside that commit but not what the arm
+  measures), asked BEFORE the fix runs. The mechanical corrective for all of it: **before ruling on a
+  defect, name the axis every reading in front of you SHARES, and ask what sits on the axis nobody
+  varied.** Here survived / caught / died are all LIVENESS, not one measurement asked whether the
+  surviving write produced GO'S ANSWER, and one added assertion settled in minutes what six hours of
+  argument could not — it was available the whole time. **Rule at the speed of the EVIDENCE, not the
+  speed of the conversation**: five coordinator attributions or rulings in one night, four corrected,
+  none wrong for want of care in the argument, and every refutation came from somebody BUILDING the
+  thing — an assembly, a baseline run, a real merge — rather than reasoning about it. The build was
+  cheaper than the argument.
   **⚠ A FALSIFICATION IS BANKED AS A LIVE ASSERTION, and a finding SURVIVES its mechanism**
   (2026-09-03). A candidate root posted by the coordinator was measured FALSE twice over (the predicate
   never reaches the token; the fallback race produced 0 wrong answers in 200k+ takes under 200k+ forced
@@ -5235,6 +5396,25 @@ Each rule below was paid for.
   caught it: the copy belongs to the range EXPRESSION where `gc` puts it, scoped exactly as `gc` scopes
   it, and that is what then lets the enumerator be cheap. ⚠ And **a three-row filtered acceptance cannot
   falsify "no OTHER row moved"** — say so, and let the union gate carry it.
+  **⚠ WHEN SIZING A CORPUS-WIDE BEHAVIOUR CHANGE, PICK THE DEFAULT THAT MAKES THE ARC MONOTONIC**
+  (2026-09-06) — the default changes the arc's SHAPE, not just its safety. Default-FATAL for
+  unimplemented stubs (list the CAPABILITY ones, leave everything else exactly as today) means every
+  increment can only convert a host death into a reported verdict and never the reverse: no
+  full-roster blast-radius gate before the first landing, landable one package at a time with a
+  per-increment row measurement, and safe to stop between any two — where the opposite default would
+  have shipped 24 unclassified stubs with a kind nobody decided. **A sizing whose author picks the
+  harder default against their own convenience is one that does not need second-guessing.** Two rules
+  ride with it. **PUT THE DECISION WHERE THE KNOWLEDGE IS**: a stub's kind (capability versus
+  memory-moving / address-returning / atomic) is SEMANTIC and a structural predicate provably cannot
+  recover it — measured, not argued, since the unsafe thirteen return void, bool and a pointer so no
+  return-type rule spans them, while "takes an unsafe pointer" sweeps in the 140 capability stubs that
+  must stay recoverable — and a curated symbol table inside a Roslyn analyzer is the OTHER wrong home:
+  **the converter knows what the symbol IS, the generator knows only what it LOOKS LIKE, so the
+  converter stamps an attribute and the generator reads it.** And **for a change that makes failures
+  RECOVERABLE the acceptance criterion is the FALSE-GREEN direction, named**: a test that stops dying
+  and starts FAILING is the point, while a test that stops dying and starts PASSING may be passing on
+  a RECOVERED missing capability — the only way such an arc can do damage — so each increment's
+  measurement rules that out explicitly rather than reporting a net verdict improvement.
 - **⚠ A merge that touches `package_info.cs` must carry the matching `stdlib-metadata.txt` change —
   check it in the PREFLIGHT.** `stdlib-metadata.txt` is generated FROM the corpus (`go generate .` in
   `src/go2cs`, gated by `TestStdLibMetadataInSync` under the converter's own `go test`), and a corpus
@@ -5250,6 +5430,25 @@ Each rule below was paid for.
   header/summary numbers are RECOMPOSED from the merged table, never accepted from either side, and
   the format guard (guard-as-calculator) runs after EVERY resolution — it caught this one and a
   hand-composed Linux-denominator slip the same evening.
+  ⚠ **A COUNT IS NOT A SET, AND A COPIED NUMBER IS NOT A DERIVED ONE — three readings of one roster,
+  2026-09-06.** **QUOTE THE SET, NEVER THE COUNT**: an `os` row read 685 = 683 + 1 + 1, its board
+  record 683 = 681 + 1 + 1, and a summary 682 of 686 counting the capability-GATED rows against the
+  total — three internally consistent compositions over ONE failure set, so a dispatch quoting a count
+  ("four failing verdicts") can be wrong while every number it came from is right. The invariant
+  across compositions is the SET. **A TRACKER THAT COPIES A DERIVED NUMBER GOES STALE SILENTLY, AND IN
+  THE FLATTERING DIRECTION** — the coordinator's remaining-rows list named a row unowned that had
+  banked four days earlier, and a probe spent on it measured nothing but the bookkeeping. ⚠ And the
+  obvious remedy is itself a trap, which is the correction worth carrying: **read the
+  guard-recomputed HEADER, or count the table rows — never the roster's PROSE derivation.** A
+  document's derivation and its computed figure look alike on the page and go stale differently: the
+  roster carries a DATED prose derivation ("202 banked, eight remaining", correct on the day it was
+  written) beside a header the format guard recomputes from the table on every change (203/210), and
+  a coordinator who wrote "do not carry a list, re-read the roster's derived section" then published
+  the stale number TWICE — in the post whose own point was that stale counts are dangerous. The prose
+  explains HOW a number was reached and is a record of one day's reasoning. Its constructive note:
+  every candidate queued for an exclusion ruling that has actually reached a MEASUREMENT has come back
+  implementable, three for three, which is the argument for measuring the remainder rather than
+  reasoning about it.
 - **A liveness/health probe must be able to OBSERVE the thing it asks about** (2026-08-29, the iter
   lane): a process filter on the worktree path can never match `dotnet.exe` running from Program
   Files, so a healthy 18-minute build read as reaped and was reported as owed. Silence is not
