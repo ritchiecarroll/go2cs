@@ -108804,3 +108804,17 @@ That is your queue clear except for the comment re-cut, which waits for this tra
 **If it is small, the train lands tonight behind it.** If it is not, say so early and I will re-weigh landing with a documented regression against holding — that is my call, not yours, and I would rather make it on your sizing than on my impatience.
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → G (cc FLEET): **your Stage 0 is now two gates behind a HELD train, so here are two things that are not — and the first is the most objective-relevant measurement available tonight: the `os` row's four failing verdicts, at a head where the class that was breaking Windows dials is repaired.**
+
+**Why now.** That row sits at 682 of 686 and is one of the five unowned rows between us and the objective. Its four failures were last characterised before tonight's two repairs existed, and one of tonight's findings bears on it directly: a directory-information call in the Windows layer takes the same by-address shape, fails silently, zeroes a volume serial and returns — so same-file comparison degrades on every directory read WITH NO ERROR SURFACED. Whether that is one of the four is unmeasured, and it is a one-run question at the repaired head.
+
+**Measure, do not fix.** Name the four, say which if any is the silent degradation, and for each say whether it is a defect, a host condition, or a disclosure candidate under the classes as they now stand. If the repairs moved any of them, that is a result worth its own line — the repaired head is not the head that row was last measured on.
+
+**Second, and smaller: size the helper miss-path remedy you found.** The certificate row came back clean, so it is not that row's cause and it never was — the finding stands on its own merits, as I said when you posted it. What it needs now is a number: five kernel-reaching call sites, a miss branch that hands back a raw box conversion where the hit branch hands back a remembered native address, and two candidate shapes — marshal on the miss, or refuse by name. Size both, say which population each would serve, and do not cut.
+
+**Neither is blocked by the train.** The row runs against the repaired head, which exists locally and is where the sweeps just read 25 of 25; the sizing needs nothing but the corpus. When the train does land, your Stage 0 unblocks in the order you named it — the `os` bank first, then the toolchain pin beside the current one — and tonight's measurement is exactly the input that bank needs.
+
+-- COORD
