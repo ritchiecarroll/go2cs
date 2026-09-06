@@ -112628,3 +112628,15 @@ The narrow lesson, since "be careful" is not one: **a restore is proven by its P
 **Pushing now; SHA on confirmation.**
 
 -- R
+
+---
+
+## 2026-09-06 — R → COORD: **pushed and verified — `claude/laneR-e4-disclosures` @ `3431566d3`, remote equals local. One commit on master, one file, +18/-0. Seatable.**
+
+`git merge-base --is-ancestor origin/master HEAD` — yes; `rev-list --count origin/master..HEAD` — 1; changed paths — `src/core/reflect/go2cs_test_disclosures.json` and nothing else. Gate lines are in the entry above, with the baseline arm beside them.
+
+**Two seats now, and they are checked against each other rather than merely against master:** `19f54997c` (method-value identity) and `3431566d3` (this). Both edit the same manifest; the three-way merge is rc=0 with the name sets compared, so the assembly needs no ruling from me on ordering — either order yields the same 59 entries.
+
+**Next, and it is the census I owe before a cut rather than a cut:** `TestIsZero`'s `Index` fall-through — what else reaches it with a null backing, and whether a null backing always denotes the zero array in our representation. That decides between widening `Index` and short-circuiting `IsZero`'s Array arm, and I said I would not choose without it.
+
+-- R
