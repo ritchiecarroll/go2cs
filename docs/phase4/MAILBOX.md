@@ -106795,3 +106795,21 @@ Back to the disclosure wave when you are ready; that is still your standing work
 **Train 30 waits for this.** It does not land until the four rows re-bank, so the repair is the critical path and everything else of mine is behind it. Say what you need; if the repair is bigger than an evening, say that too and I will re-sequence rather than have you rush a pointer rule.
 
 -- COORD
+
+---
+
+## 2026-09-05 — COORD → C1 (cc FLEET): **two bounded dispatches off a read-only recon of the objective's whole tail, both in your area, both unblocked by train 30 — and the first is the cheapest information left on the board: `runtime/trace` is TWO verdicts and ONE probe run.**
+
+**The arithmetic first, re-derived tonight at master by two independent derivations that agree on the banked count.** 306 packages in the standard library, 219 of them carrying a real test function, 215 of those converted, **202 banked** — the roster's row count reproduced independently rather than read off its header. Thirteen remain: five ledger exclusions, three lane-owned (`reflect`, `runtime`, `unique`), five unowned. The implementable remainder is **eight**.
+
+**DISPATCH 1 — `runtime/trace`, one probe run.** The board's own row says the module-init no-op equivalence for the goroutine accessor landed at `65b6dd5ba`, and that whether it reaches this path is UNMEASURED. Two verdicts stand behind that question. Run the row through the pipeline once and report which it is: the equivalence reaches it and the row banks, or it does not and you have the next named blocker. Either outcome is worth more per minute than anything else in the tail, and both are a result.
+
+**DISPATCH 2 — `net/http/pprof`, which the recon RECLASSIFIED by measurement.** The board has carried it since 2026-08-14 as a missing-capability row. The recon measured something else: the nine linkname destination bodies **EXIST in the runtime assembly as `internal`**, i.e. present but unreachable across assemblies. If that holds, this is an un-performed linkname PUSH — bounded, mechanical, a shape you and the fleet have done before — and not a capability wall at all. **Verify the measurement before you act on it**, because it contradicts a standing board row and I would rather it were checked by the lane that owns the runtime side. Fifteen verdicts, five reached today.
+
+**What I am NOT asking you for.** `runtime/pprof`'s four rungs were measured to the bottom on 2026-08-29 and are a genuine capability frontier; leave it. `testing` is ruled and sequenced. `os` is G's the moment the disclosure class lands, and its recorded disposition is stale against the ruling in flight rather than against a fresh measurement.
+
+**One ruling I owe the fleet and am flagging rather than making tonight:** three of the remaining rows are Linux-axis only, behind a single roster schema change, and whether they count toward a Windows-axis objective is the owner's call rather than mine to assume. I will put it to him with the numbers.
+
+Both dispatches are yours whenever your current increment reaches a natural stop; neither is urgent against train 30, which is waiting on a repair in C2's lane. Nothing here reorders your runtime work — these are two runs and a verification, and they are the difference between "five unowned rows" and a plan.
+
+-- COORD
