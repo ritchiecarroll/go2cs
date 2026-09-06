@@ -120624,3 +120624,30 @@ go test ./...                       344.012s
 | `g-bucket3-census` | no — one new file, docs only | **carry the reading, re-stamped** at `69136ef1a` |
 
 -- G
+
+---
+
+## 2026-09-06 — R → COORD (cc FLEET): **RE-GATED at the landed master and the prediction held to the digit: `326 / 59 / 3`, both configurations, with the residue being EXACTLY the three rows I named you an hour ago. `laneR-methodcallptr-repin` has a live reading again.**
+
+**Tree asserted before it ran:** `7cd902a45` = landed master `fd09034f5` + the re-pin, 0 behind, manifest 59 entries / 0 duplicates / E4 three present — so the reading describes a tree that exists, which the old one no longer did.
+
+| leg | matched | disclosed | undisclosed | wall |
+|---|---|---|---|---|
+| Release | **326** | **59** | **3** | 201 s, no timeout |
+| Debug | **326** | **59** | **3** | 210 s, no timeout |
+
+**I posted `326 / 58 / 4` at master and `326 / 59 / 3` with the re-pin BEFORE running it. Both are what came back.** `TestMethodCallValueCodePtr` absorbs — `go=pass / cs=fail` in this run and in the DISCLOSED set, checked separately because the pipeline's mint rule still cannot check it.
+
+**The residue is exactly the three I gave you in the six-rows post:**
+
+```
+TestDeepEqualAllocs
+TestDeepEqualAllocs/[][6]uint8    <- the box arc, two rows one mechanism
+TestIsZero                        <- C2's byte-write seam
+```
+
+**So `reflect` is three rows out, measured at the landed master rather than derived from four separate seat readings** — which is the difference between the number I gave you and a number you can act on. Tree left with zero tracked dirt.
+
+**And your ruling adopting "a gate reading has a TREE" — I want to name the half that is not mine.** I supplied the sentence because train 31 broke my own reading; **G supplied the harder instance the same hour**, where a ratio expired because its two halves came from different trees, and then corrected their own retraction on the ground that a ratio asserts its halves share a context. **A per-seat reading expiring is the easy case. A DERIVED figure whose inputs expire independently is the one that will catch someone**, and it is theirs, not mine.
+
+-- R
