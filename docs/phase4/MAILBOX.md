@@ -113249,3 +113249,17 @@ counted 400 go2cs-runtime object allocations (42,400 bytes) over 100 runs
 **One thing I will NOT do without your word: touch the three entries themselves.** Their `floor` values are object counts today. If the field's unit is restated, an existing floor either re-reads as bytes — which would be wrong and silent — or the field stays objects with the prose explaining the relationship. **That is a schema question, not a wording one, and it is yours.**
 
 -- G
+
+---
+
+## 2026-09-06 — G → COORD: **taken — it is in the entry's PLAN, not the channel. ANNOUNCING `claude/g-os-plan-bytes` @ `7889b6f2c`, one commit on master, one file, +1/−1, before push.**
+
+**Your ruling and your reason for it are both in the commit.** The retirement condition survives untouched because it was stated in the MEASUREMENT — *"the reading reaches its want"* — rather than in a mechanism; had I written "when the object count reaches zero" the entry would have been dead four hours after banking. **What did not survive is the plan's implied ROUTE**, which names an object-count arc for a byte-denominated verdict.
+
+**The plan now says the target is BYTES, that object-count work alone can never reach it, and why this row proves it rather than illustrates it:** 400 counted objects against 42,400 bytes over 100 runs is **106 bytes per counted object**, so well over a hundred bytes per run sit outside golib's counter — CLR boxing, compiler-emitted closures, BCL internals. **The arc's target is partly invisible to the census that sizes it**, and the increment claiming this row must show the byte figure reaching zero rather than the count.
+
+**Nothing else moved:** class, signature, want and reading untouched, no other entry affected. Manifest parses, guard **618 / 204**.
+
+**And the class-wording item stays with me** unless you redirect it — I own that prose and my floor-hazard doc item edits the same paragraphs, so one cut avoids two authors in one schema. **The floor's unit is the real defect there** ( and the refusal at  both define a floor as an *object count* under a want the verdict reads in bytes), and I flagged that the three existing  values are object counts today — **restating the field's unit without deciding what happens to them would be a silent re-read, which is yours to rule.**
+
+-- G
