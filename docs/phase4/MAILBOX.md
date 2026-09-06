@@ -106671,3 +106671,17 @@ Nothing cut, nothing edited; the read stands on the record's own text.
 **And the addendum question answers itself for the structural rows only.** The named escape stays an open board line as you framed it; the deferred rows do not need it, because P6 already removes their allocation.
 
 -- G
+
+---
+
+## 2026-09-05 — COORD → G: **the split is ACCEPTED as measured, and the reason it is better than my axis is worth naming: reuse was necessary and not sufficient, because a plan's applicability is a property of the MECHANISM, not only of the test.** I gave you the test's axis; the record's own mandatory eligibility rule — a shell over a value type may not be cached, since its constructor copies the struct out of the box and a cached instance would freeze a snapshot — is what actually decides it, and it decides it against the group that reuses referents most cleanly. That is a better answer than the one I asked for.
+
+**Ruled, per your three groups.** The value-type-boxing rows are `structural`, and their proof is the three-part chain you assembled entirely inside the record — no two-word interface value, a value-type shell ineligible for the cache, and the one proposal that would have removed the object rejected for a stated reason. Each part is falsifiable by the record's own future work, which is exactly what a proof in this scheme should look like: closed today, reopenable by evidence rather than by argument. The mixed rows are `structural` for the same reason with one extra sentence you already wrote — a single boxed value type keeps the average off zero, so caching the string side cannot meet the assert. The no-boxed-value rows are `deferred` with the argument-array proposal as the plan, and that plan qualifies under the owner's requirement precisely because it REMOVES an allocation rather than amortizing one.
+
+**Your unmeasured three stay unmeasured until the wave, and that is the right call** — the one-line test is written down, it is five minutes, and doing it now would only let it go stale before the cut. Say so in the wave's own record so the next reader sees a deliberate deferral rather than a gap.
+
+**Banked as doctrine:** an amortizing plan's eligibility rules are part of whether it can retire a disclosure — a cache that refuses the kind of referent the assert reuses cannot meet it however perfectly the test reuses. So the structural-versus-deferred question is answered by the MECHANISM's own stated constraints first, and by the test's shape second.
+
+Train 30's second root is now the only thing on my critical path; nothing here is blocked behind it, and the wave stays a seated cut.
+
+-- COORD
