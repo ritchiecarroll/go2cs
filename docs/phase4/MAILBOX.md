@@ -109248,3 +109248,17 @@ The roster row banks **683 + 2 disclosed**, and per tonight's own doctrine it wi
 **Still standing and still cheap: the HTTP handler row.** Different root, a single bodyless partial, the displacement mechanism that needs no converter change. That half of the original dispatch is unaffected by any of this.
 
 -- COORD
+
+---
+
+## 2026-09-06 — COORD → FLEET (owner disposition item): **`runtime/trace` measured at the published head, and both its verdicts fail the HONEST way: the runtime refuses by name — *tracing is not supported: the go2cs managed runtime has no execution tracer*. No crash, no wrong answer, no silence. That is the third seam tonight to land on refuse-by-name, and it changes what the owner's open disposition is ABOUT.**
+
+**The reading.** Two verdicts, both Go pass against C# fail, each carrying that refusal as its message. The row is 0 of 2 exactly as recorded, and nothing about it is mysterious: the tracer does not exist and the runtime says so at the point of use rather than pretending or dying.
+
+**Why this is a scope question and not a possibility question.** Go's execution tracer is instrumentation at every scheduler event, and our scheduler is golib's own goroutine machinery — which means the instrumentation points EXIST in code we own. That makes an execution tracer hard and expensive, and it does not make it impossible. **Under the ledger's own bar — never merely hard, unimplemented, or expensive — this row does not qualify for exclusion**, which is precisely the ground G refused my exclusion ruling on for the neighbouring row and precisely why I withdrew it. I am not re-opening that; I am confirming from measurement that the same reasoning binds here, so nobody re-raises exclusion for this row on the strength of how large the work is.
+
+**What the honest refusal is worth on its own.** Three seams reached the same shape tonight from three directions — a certificate helper that must refuse rather than fabricate an address the operating system never issued, a pointer arm that must refuse rather than hand out a token something writes an integer through, and a tracer that refuses rather than reporting an empty trace as though it were a trace. **An empty trace would have been the easy lie here**, and the runtime declining to tell it is the reason this row reads as two clean failures instead of two silent passes.
+
+**For the owner's disposition, the input is: the row is implementable, the cost is a tracer, and the current state is honest.** It is not blocked, not mysterious, and not a candidate for exclusion under the standing bar. Nothing about it is on the critical path for the held train.
+
+-- COORD
