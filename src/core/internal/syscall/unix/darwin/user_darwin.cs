@@ -49,70 +49,22 @@ public static UntypedInt SC_GETPW_R_SIZE_MAX => 0x47;
 //go:cgo_import_dynamic libc_getpwnam_r getpwnam_r  "/usr/lib/libSystem.B.dylib"
 internal static partial void libc_getpwnam_r_trampoline();
 
-public static syscall.Errno Getpwnam(ж<byte> Ꮡname, ж<Passwd> Ꮡpwd, ж<byte> Ꮡbuf, uintptr size, ж<ж<Passwd>> Ꮡresult) {
-    ref var result = ref Ꮡresult.DerefOrNull();
-
-    // Note: Returns an errno as its actual result, not in global errno.
-    var (errno, _, _) = syscall_syscall6(abi.FuncPCABI0(libc_getpwnam_r_trampoline),
-        (uintptr)Ꮡname,
-        (uintptr)Ꮡpwd,
-        (uintptr)Ꮡbuf,
-        size,
-        (uintptr)Ꮡresult,
-        0);
-    return ((syscall.Errno)errno);
-}
+// go2cs generated this placeholder — func Getpwnam is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:cgo_import_dynamic libc_getpwuid_r getpwuid_r  "/usr/lib/libSystem.B.dylib"
 internal static partial void libc_getpwuid_r_trampoline();
 
-public static syscall.Errno Getpwuid(uint32 uid, ж<Passwd> Ꮡpwd, ж<byte> Ꮡbuf, uintptr size, ж<ж<Passwd>> Ꮡresult) {
-    ref var result = ref Ꮡresult.DerefOrNull();
-
-    // Note: Returns an errno as its actual result, not in global errno.
-    var (errno, _, _) = syscall_syscall6(abi.FuncPCABI0(libc_getpwuid_r_trampoline),
-        (uintptr)uid,
-        (uintptr)Ꮡpwd,
-        (uintptr)Ꮡbuf,
-        size,
-        (uintptr)Ꮡresult,
-        0);
-    return ((syscall.Errno)errno);
-}
+// go2cs generated this placeholder — func Getpwuid is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:cgo_import_dynamic libc_getgrnam_r getgrnam_r  "/usr/lib/libSystem.B.dylib"
 internal static partial void libc_getgrnam_r_trampoline();
 
-public static syscall.Errno Getgrnam(ж<byte> Ꮡname, ж<Group> Ꮡgrp, ж<byte> Ꮡbuf, uintptr size, ж<ж<Group>> Ꮡresult) {
-    ref var result = ref Ꮡresult.DerefOrNull();
-
-    // Note: Returns an errno as its actual result, not in global errno.
-    var (errno, _, _) = syscall_syscall6(abi.FuncPCABI0(libc_getgrnam_r_trampoline),
-        (uintptr)Ꮡname,
-        (uintptr)Ꮡgrp,
-        (uintptr)Ꮡbuf,
-        size,
-        (uintptr)Ꮡresult,
-        0);
-    return ((syscall.Errno)errno);
-}
+// go2cs generated this placeholder — func Getgrnam is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:cgo_import_dynamic libc_getgrgid_r getgrgid_r  "/usr/lib/libSystem.B.dylib"
 internal static partial void libc_getgrgid_r_trampoline();
 
-public static syscall.Errno Getgrgid(uint32 gid, ж<Group> Ꮡgrp, ж<byte> Ꮡbuf, uintptr size, ж<ж<Group>> Ꮡresult) {
-    ref var result = ref Ꮡresult.DerefOrNull();
-
-    // Note: Returns an errno as its actual result, not in global errno.
-    var (errno, _, _) = syscall_syscall6(abi.FuncPCABI0(libc_getgrgid_r_trampoline),
-        (uintptr)gid,
-        (uintptr)Ꮡgrp,
-        (uintptr)Ꮡbuf,
-        size,
-        (uintptr)Ꮡresult,
-        0);
-    return ((syscall.Errno)errno);
-}
+// go2cs generated this placeholder — func Getgrgid is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:cgo_import_dynamic libc_sysconf sysconf "/usr/lib/libSystem.B.dylib"
 internal static partial void libc_sysconf_trampoline();
