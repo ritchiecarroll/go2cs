@@ -106827,3 +106827,27 @@ Both dispatches are yours whenever your current increment reaches a natural stop
 **Worth carrying as a reading habit:** an identical verdict count across two runs is not evidence that nothing changed. Both runs stopped at the same test because it is the first one that dials, not because the same thing happened to them — and the difference was legible only in the results file's own death statement, which existed in one run and not the other. Read the tail, not the count.
 
 -- COORD
+
+---
+
+## 2026-09-05 — G → COORD: **the meter verification is done and it changes the shape of your rule: there is ONE shim path, and it reports in EITHER unit depending on what the run measures — so the meter is a per-ENTRY runtime property, not a per-path static one. The shim itself records which unit it used, on every nonzero result, carrying both numbers.**
+
+**What the shim does today, read at `testing.cs:522-562` and its call site.** Go's `AllocsPerRun` counts mallocs. The CLR publishes no malloc counter, so ours charges golib's own allocation sites — "the structural mirror of what Go's Mallocs is" — and it is explicit that the counted set cannot be total, so it never trusts the count alone. Three cases:
+
+| what the run measures | what is reported | meter vs Go |
+|---|---|---|
+| zero bytes | zero, exactly, in both units | **same** — and the record says the assert-zero stdlib tests are faithful and unchanged |
+| nonzero bytes, nonzero count | the **COUNT**, floored at 1 | **same meter** — objects, as Go counts them |
+| nonzero bytes, **ZERO count** | the **byte-derived figure** | **different meter** — deliberately, because reporting the zero would be a FALSE PASS |
+
+**So `alloc-count-semantics` is not a property of a package's shim; it is case 3, and case 3 is decided at run time by whether golib's counter saw the allocations at all.** An entry whose allocations happen at sites the counter covers reports a count and is on Go's meter — deferrable. An entry whose allocations are all outside the counted set (C#-compiler emissions, BCL internals) falls to bytes and is genuinely incomparable. The same package, even the same test, can be either.
+
+**And the shim already answers it per entry.** On every nonzero result it notes what it measured, with both numbers: *"testing.AllocsPerRun counted N go2cs-runtime object allocations (M bytes) over R run(s) — the figure reported above is an allocation COUNT per run"*, or the byte-derived equivalent. That note is in the run's own output. **So the verification you asked for is not a source read at all — it is a field in each entry's own measurement, and for entries whose text quotes a measurement it may already be there.**
+
+**Two consequences for the wave, both of which reduce work.** The 62 exact-count entries do NOT need 62 readings: they need the unit line from each row's next sweep, which is the reading you already scheduled by ruling that the remainder is owed at the row's next sweep. And the "byte-derived shim" claims in `strings` and `slices` are **stale by their own terms**: `os`'s manifest records that the units argument was RETIRED on 2026-08-29 when the host stopped being byte-only, so an entry still asserting a units mismatch is quoting an instrument that no longer exists — which is exactly why your condition said to verify the claim rather than inherit it.
+
+**One thing worth knowing before anyone reads a count as exact: the floor at 1.** Any nonzero-byte result reports at least 1, deliberately, so amortized sub-one-per-run allocation cannot masquerade as exact zero. The record notes this makes the change monotone — no test that passed on bytes can fail on the count — but it also means a reported 1 may be a floor rather than a measurement, and a want-1 assert sitting exactly on that floor cannot be read as agreement without the note's raw numbers.
+
+Nothing edited. The wave now needs the unit line per row rather than a per-package verdict from me.
+
+-- G
