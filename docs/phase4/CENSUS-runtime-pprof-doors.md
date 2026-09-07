@@ -225,3 +225,73 @@ which is exactly the phantom-divergence shape the doctrine forbids.
 3. **The `StartCPUProfile` flag leak is Go's own ordering**, so nothing in the converted corpus can be
    blamed for it and nothing should be patched around it; it simply means the CPU class's 13 rows all
    lift or none do.
+
+---
+
+## AMENDMENT — 2026-09-07, lane G, master `5a27a8972` (G-LAPTOP, Ryzen 5 PRO 6650U)
+
+**Committed under the owner's 2026-09-07 course correction**, whose second pre-pin gate is *commit the
+measured-but-unbanked baselines* — H10 grants no carry-forward path, so a reading that lives only in a
+scratchpad is destroyed by the hop. This block is that reading. **Measured, not banked; the row is
+unbanked and this changes no roster figure.**
+
+**Configuration of record**: Release, `DOTNET_TieredCompilation=0`, `.NET 10.0.400`, oracle
+`go version go1.23.12 windows/amd64`, `CGO_ENABLED=0`, pins verified before the run and aborting on
+mismatch. Pipeline invoked DIRECTLY (`-test-action all`) because the row is unbanked and a
+roster-walking sweep refuses it. Record freshness checked: results file 191 ms OLDER than the
+comparison — correct single-run ordering — no timeout event in plain OR escaped form, no `testFilter`
+key, so the record is ungated.
+
+| | rows | detail |
+|:--|--:|:--|
+| go | **157** | 155 pass · 2 skip |
+| csharp | **147** | 118 pass · 23 fail · 4 skip · 2 infrastructure-error |
+| errors array | 38 | |
+
+**i9 reproduced 157 / 147 independently on different hardware the same day**, name for name.
+
+### The 10 go rows carrying no C# verdict are ONE cause
+
+Every one is a `TestTryAdd` subtest. **The C# side skips the PARENT** on Go's own guard — *"Can't
+determine whether anything was inlined into inlinedCallerDump"* — and a skipped parent runs no
+children. Under ruling #1 that is a **FEATURE GAP, not a disclosure** (the skip reason is our own
+missing capability), and it costs **11 verdicts**, not the 1 a skip-count suggests, because the ten
+are ABSENT rows rather than skipped ones.
+
+⚠ The 7 host-fatal disclosures are in **NEITHER** map — unix-only tests on a Windows record — so they
+were never candidates for a go-minus-csharp difference. All seven were minted **UNCHECKED**, the
+converter stating that each *"is named by no committed proof page, so its exclusion was NOT cleared
+against any platform"*. **That check can never clear this class on this platform.**
+
+### The 23 failures are NOT 23 roots, and the shared message is a MASK
+
+**12 of 23 carry the identical text `cpu profiling already in use`.** Run SOLO and gated,
+`TestMorestack` never mentions cpu profiling at all:
+
+```
+System.NotImplementedException: asmcgocall: no implementation reached this
+compilation (assembly, cgo, or a linkname whose push did not arrive)
+```
+
+An earlier test leaks the profiling flag; `StartCPUProfile` refuses at its precondition and the row
+dies **before reaching the stub that actually blocks it**. **Clearing the leak REVEALS deeper
+blockers rather than recovering rows** — for this row, onto the assembly/linkname frontier rather
+than the profiler one. A shared failure message is evidence of a shared PRECONDITION, never of a
+shared root: the precondition fails last, so it is the loudest and least informative signal.
+**Established for one row only; the other eleven each need the same solo treatment (~2 min apiece)
+and I did not generalise.**
+
+Remaining 11 by family: memory profiler 6, convert 1, generics 2, goroutine counts 1, mutex
+aggregation 1.
+
+`gated` holds **`TestFakeMapping`**, whose own capability text calls it a **vacuous pass** — the
+mapping/symbolization loop runs over an empty location set.
+
+### ⚠ UNRECONCILED against this record's own 2026-09-04 block
+
+That block reads **183 oracle verdict rows** (181 pass + 2 skip) on the i7; this one reads **157** go
+rows (155 + 2). **I did not resolve the difference and am not asserting a cause.** Candidates not
+tested: host-conditional tests between two different Windows boxes, or the two figures counting
+different things (a verdict-row stream against comparison-record entries). Both blocks state their
+box and their instrument, which is what lets a later reader settle it; **a number reconciled by
+argument rather than measurement would be worse than one left open.**
