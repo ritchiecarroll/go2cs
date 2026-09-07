@@ -169,11 +169,30 @@ internal static partial (nint n, bool ok) pprof_goroutineProfileWithLabels(slice
 // So there is no cheap consumer-side test that separates a live address from a dead one; that is
 // the whole difficulty, and it is why nothing is filtered here.
 //
-// NOT FIXED HERE, AND NOT THIS FILE'S TO FIX. The address going stale under GC belongs to the
-// pointer-provenance and pin-lifetime machinery, which is a live arc elsewhere. Reported to the
-// fleet with the witness above. When a label pointer is stable across a collection, filling
-// `labels[i]` from `entry.Labels` is a one-line change here and the label half of
-// TestGoroutineCounts becomes reachable; until then, filling it trades a measurable wrong answer
-// for an unmeasurable one.
+// NOT FIXED HERE, AND NOT THIS FILE'S TO FIX. It belongs to the pointer-provenance and
+// pin-lifetime machinery, which is a live arc elsewhere. Reported to the fleet with the witness
+// above, and that witness carries the gate: `PinnedBoxStalenessWitnessTests` arms 3 and 4 under
+// `GO2CS_PIN_STALENESS_STRICT=1`. When those go green, filling `labels[i]` from `entry.Labels` is
+// a one-line change here and the label half of TestGoroutineCounts becomes reachable; until then,
+// filling it trades a measurable wrong answer for an unmeasurable one.
+//
+// THE PRECONDITION WAS STATED WRONG HERE, and this paragraph is the correction (fleet exchange
+// 2026-09-07, off the witness's own 2026-09-04 measurement). It read "when a label pointer is
+// STABLE ACROSS A COLLECTION", which names relocation as the gate. Relocation is what was
+// OBSERVED, but it is not what blocks the fix: the witness's arm-1 bisect passes all six of its
+// assertions and shows the recovery missing BEFORE relocation is ever consulted. For a
+// reference-BEARING T, `StandardBox` allocates no `m_slot`, so `PinnableStorage` is null,
+// `EnsureStableAddress` never pins, `m_pin` stays null, `IsPinnedAt` is false and `Resolve`
+// returns NULL -- the consumer is handed a NativeBox aliasing the raw address, which reads
+// correctly only until the map moves. That is why 90 of 91 "worked": a native alias of an address
+// the collector was never asked to hold still.
+//
+// SO THE BLOCKER IS THAT THE NUMBER CARRIES NO RESOLVABLE IDENTITY, not that the pointee cannot
+// pin. `Resolve` has a PIN-FREE acceptance arm (`CurrentToken(box) == token`) that never consults
+// `m_pin`, and `s_reinterpretSources` is pin-free as well -- but it is keyed on the DERIVED BOX,
+// which a bare number cannot reach. What the `(uintptr)` hop hands across is neither an order
+// token nor an object, so neither arm has anything to match. The distinction is for whoever reads
+// this next: "the pointee cannot pin" reads permanent and stops the looking, while "the number
+// carries no resolvable identity" names a seam an owner can close.
 
 } // end pprof_package
