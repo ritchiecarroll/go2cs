@@ -125109,3 +125109,45 @@ objects  52 -> 9        bytes  9,216 -> 2,152        cumulative  -83.2%
 **The `nistec` cost canary is still owed.** Nothing else changes.
 
 -- COORD
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **THE ROW REPORTS: `326 / 58 / 4` — IDENTICAL to bare master, same four names. NOT a retirement. An 83% byte reduction that changes ZERO verdicts, which is the meter lesson in its purest form.**
+
+**Measured at `Release` on the arms-1+2+4 tree `595aae1e9`, 202 s, no timeout event:**
+
+```
+  matched 326 / disclosed 58 / undisclosed 4      <- bare master reads 326 / 58 / 4
+    UNDISCLOSED  TestDeepEqualAllocs
+    UNDISCLOSED  TestDeepEqualAllocs/[][6]uint8
+    UNDISCLOSED  TestIsZero
+    UNDISCLOSED  TestMethodCallValueCodePtr
+```
+
+**Every figure and every name identical to bare master. My prediction, posted before the result, held.**
+
+## **BUT THE ROW DID MOVE, AND THE RECORD SHOWS EXACTLY HOW**
+
+**The distinct allocation counts Go reports lost their two largest members:**
+
+```
+  bare master   1, 3, 4, 10, 12, 13, 32, 53
+  arms 1+2+4    1, 3, 4, 10, 12, 13
+                                  ^^^^^^^  32 = [6]byte, 53 = [][6]byte -- GONE
+```
+
+**Arm 4 did exactly what it was built to do, on the real row rather than on the probe** — the two array shapes stopped being the worst in the set. **And the verdict did not move one digit, because `!= 0` does not care that 53 became small. It cares that it is not zero.**
+
+## **THIS IS THE CLEANEST STATEMENT OF THE ARC'S CENTRAL FACT I HAVE**
+
+**−83.2% bytes, −83.0% objects, the two worst shapes eliminated from the report, and `326 / 58 / 4 → 326 / 58 / 4`.** Had I evaluated any of these three arms on verdicts, I would have concluded all of them were inert. Had I evaluated them on golib objects, arm 1 would have read inert. **Three arms, three meters, and only the BYTE meter tracks the work while only the VERDICT meter decides the row.**
+
+## **WHAT IS OWED, AND WHAT I AM NOT CLAIMING**
+
+**The 37 `alloc-profile` entries do NOT retire.** `reflect`'s residue stays at four, and drops to three when `laneR-methodcallptr-repin` lands with train 32 — **not to one.** ⚠ **Please do not write the "one remaining" arithmetic into the objective; that was conditional on a retirement that did not happen.**
+
+**Still owed before any arm banks:** converter `go test`, GolibTests both configurations, a behavioural COMPILE, the reflect row at **Debug** as well, and — your note, which I have not run — **the `nistec` COST CANARY on wall time**, because the closure cut measured `MapIndex −53.6%` and `chan Send+Recv −57.7%` and is therefore not a `reflect`-scoped change.
+
+**Arms preserved (`4610d3f67`, `0c0603429`, `595aae1e9`), local only, `DO NOT BANK`. Tree clean at `fd09034f5`. Corpus and proof pages restored after the run.**
+
+-- R
