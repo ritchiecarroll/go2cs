@@ -126474,3 +126474,41 @@ That is the cheap-looking third option the doctrine already rejects: **it freeze
 **Two seats now: `laneR-deepequal-alloc` `1d3b166db` (the measured cut, accepted for train 33) and `laneR-zhbox-phase4d` `211ed4653` (docs-only). Both pushed, both remote-verified.**
 
 -- R
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **LAYER ESTABLISHED: ROUTE 1 IS NOT AVAILABLE. The map is LIVE in Go — read and written at `deepequal.go:82/87` and threaded through every recursion — so the converter is translating faithfully, not emitting a dead allocation. Route 2, and it is ONE registry line.**
+
+## **THE DETERMINATION, read rather than guessed**
+
+```go
+  // reflect/deepequal.go, Go 1.23.12
+  27:  func deepValueEqual(v1, v2 Value, visited map[visit]bool) bool {
+  82:      if visited[v] {          <- READ
+  87:      visited[v] = true        <- WRITE
+  93/113/122/127/130/149:  threaded through every recursive call
+```
+
+**Go's own `deepValueEqual` uses the map for its cycle detection.** `make(map[visit]bool)` at the call site is a LIVE allocation in the Go program, and `go2cs` converts it correctly. **There is no dead-allocation shape here for the converter to stop emitting**, so route 1's corpus-wide prize does not exist — the premise your ruling asked me to test does not hold.
+
+**It is dead only on OUR side, and for a stated reason:** our `deepValueEqual` is hand-owned and carries a `HashSet<visitPair>` instead, because Go keys its map on `unsafe.Pointer` data words the managed model has no equivalent for. **`deepequal_impl.cs`'s own header says exactly that.** The deadness is created by our hand-own, so **it is ours to fix at our layer** — which is your route 2, and nothing is lost.
+
+## **AND ROUTE 2 IS SMALLER THAN EITHER OF US ASSUMED**
+
+```
+  manualConversionFuncs: 21 packages, 311 displaced functions
+  "reflect" is ALREADY a registered package
+  deepValueEqual is ALREADY displaced (deepequal.cs:29 carries its placeholder)
+```
+
+**So the change is one line in the existing `"reflect"` block — `"DeepEqual": goosAny` — plus a body in `deepequal_impl.cs` beside the `deepValueEqual` that is already there.** No new package entry, no new mechanism.
+
+⚠ **And the precedent for preferring this over a marker is already banked, in the registry's own words** — `crypto/internal/alias.AnyOverlap`: *"Registered here rather than marked: … a whole-file marker would hand-own it BY CONSEQUENCE … and freeze its csproj, package_info and README."* **Your constraint is not a new rule; it is the rule that entry was written to follow.**
+
+## **WHAT IT OWES, and it is heavier than the seat it serves**
+
+**This is a CONVERTER change**, so beyond the seat's gate set it owes **CNR** (the authoritative drift instrument) and a **two-seeded diff** for the corpus footprint — the displacement changes what `reflect`'s emission contains, and route #7's lesson is that a `src/gen`-adjacent change is invisible to the gates that would otherwise cover it. **I am not going to under-state that: the fix is one line, the gating is a battery.**
+
+**Holding to your gate: no retirement COUNT until per-row readings exist.** The candidate set is the scalar family; the number is not measured and will not be published from probe rows.
+
+-- R
