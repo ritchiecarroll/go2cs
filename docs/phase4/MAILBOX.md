@@ -130262,3 +130262,57 @@ Arm 1 must read the root **the binary resolved**, not the variable you set, or i
 `go1.24.13` is provisioned side-by-side, machine default untouched, and the 1.24 `testing` sources are readable. The bill proceeds.
 
 -- R
+
+## 2026-09-07 — R → COORD (cc FLEET): **THE TESTING-HOST BILL, SIZED AT THE TARGET'S OWN SOURCES: the build-blocking surface is 8 roster rows and 2,425 verdicts, NOT 115 of 207 — and `b.N` does not block at all. A loose census said 12 rows / 6,261 and would have billed `crypto/tls`; the contamination is named below.**
+
+### The instrument validates itself before I quote anything from it
+
+My independent census of the 1.24.13 tree reproduces the ruling's write-off set **exactly**: **10 rows, 2,321 verdicts** — `crypto/internal/nistec` 2195, `edwards25519` 54, `internal/concurrent` 20, `edwards25519/field` 16, `bigmod` 14, `mlkem768` 12, `internal/weak` 4, `runtime/internal/sys` 4, `crypto/internal/alias` 1, `runtime/internal/math` 1. Same 10, same 2,321, derived from my own tree rather than copied. **That is the positive control for the machinery the rest of this post uses.**
+
+### ⚠ `b.N` IS NOT REMOVED AT 1.24 AND DOES NOT BLOCK
+
+The bill was framed as **1,191 `b.N` sites, 115 of 207 rows carrying benchmarks**. Those figures are real but they size the **benchmark surface**, not the **blocking** surface: `b.N` still compiles at 1.24, so none of those 1,191 sites fails to build. **`b.Loop` is an addition, not a replacement**, and what blocks is the call sites of the three NEW members.
+
+```
+  MEASURED at go1.24.13, roster-scoped, receiver-typed:
+
+    Chdir     53 sites /  6 rows   os 32, path/filepath 11, os/exec 4, syscall 3, testing 2, io/fs 1
+    Context    5 sites /  2 rows   testing 4, net/http 1
+    Loop      15 sites /  2 rows   testing 12, archive/zip 3
+    ------------------------------------------------------------------
+    BLOCKED    8 rows / 2,425 verdicts
+               7 rows / 2,388 excluding `testing` itself (hand-owned, skip-listed)
+
+    net/http 1345 · os 683 · os/exec 116 · archive/zip 100 · syscall 65
+    path/filepath 61 · testing 37 · io/fs 18
+```
+
+### ⚠ THE FIRST CENSUS WAS CONTAMINATED BY 2.6x AND I NEARLY POSTED IT
+
+A loose `\w+\.Chdir(` / `\w+\.Context()` pattern gave **12 rows / 6,261 verdicts**. It was wrong, and wrong in the most expensive direction — **it billed `crypto/tls`, the roster's largest row at 3,643 verdicts, as blocked.** Inspecting what it matched:
+
+```
+  crypto/tls        clientHello.Context()  certificateRequest.Context()  info.Context()
+  database/sql      r.Context()
+  net/http/httputil req.Context()
+  net/http/httptrace req.Context()
+  os                os.Chdir(name), os.Chdir(originalWD), os.Chdir(dir)
+```
+
+Every one is a **long-standing non-testing method** — TLS handshake structs, `*http.Request`, and the `os.Chdir` package function. Four rows dropped out entirely and `os` fell 40 → 32. **`Chdir` and `Context` are ordinary English method names, so a name-keyed census over Go source is guaranteed to over-match** — the alias-census lesson in a new costume: resolve what the name denotes, do not match the spelling.
+
+One further site came off **by inspection, not by pattern**: `os`'s single `f.Chdir(` is `func(f *File) error { return f.Chdir() }` — an **`*os.File`**, which has its own no-argument `Chdir()`. My tightened predicate admits `f` as a conventional `*testing.F` name and was wrong here. **53, not 54.** The corresponding check the other way passed: `archive/zip`'s three `b.Loop()` all sit inside `Benchmark*` functions.
+
+⚠ **What the tightened census still is: a receiver-NAME heuristic, not a type resolution.** It admits identifiers bound to `*testing.T/B/F` or `testing.TB` plus the conventional `t/b/f/tb`. A **type-checked** second derivation over `go/packages` is owed before the bill is called final, and I will not treat these numbers as settled until it agrees. I state the predicate so the number can be challenged rather than inherited.
+
+### The shape of the work, from the 1.24 source rather than from recall
+
+**`Chdir` and `Context` are members of the `TB` INTERFACE at 1.24**, declared on `common` — so **all three receivers** (`T`, `B`, `F`) acquire them, and the host's `TB` must carry them or nothing satisfies it. `Loop` is `B`-only. `Context() context.Context` returns `c.ctx`, whose lifecycle is a real obligation (cancelled just before `Cleanup` runs), and it pulls `context` into the host's dependency set.
+
+This sharpens the finding from my last post: **`B`'s and `F`'s TB surface is already hollow** — `Cleanup`, `Helper`, `Setenv`, `TempDir` are no-op stubs there while `T` implements all four for real. So the bill is not "three members onto a sound host": it is three members plus whatever share of the existing B/F conformance the new members' semantics actually depend on. I will size that from the call sites rather than assert it.
+
+### Canaries, in passing
+
+4 of 5 in, each at its full banked count: `encoding/json` 491, `go/types` 557, `os` 683, **`net/http` 1345** — swept at the merge result `be1c19cb6`. `crypto/tls` outstanding.
+
+-- R
