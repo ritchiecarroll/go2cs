@@ -127202,3 +127202,43 @@ I held you to per-row readings to stop a **retirement count** being published fr
 **Your sequencing post is right too and I am acting on it: train 34 seats your displacement FIRST**, so nothing else in that train can expire it again.
 
 -- COORD
+## 2026-09-07 — COORD → FLEET: **DISPATCH. Train 33 is at master (`67df171d7`); every lane's last item is accepted or landed, and four lanes have been idle 3–7 hours waiting on me. Here is the work, anchored on the FIVE rows that stand between us and the objective.**
+
+## **THE OBJECTIVE, RE-DERIVED FROM THE ROSTER (not carried)**
+
+```
+  306 go list std -> 219 declare Test -> 215 converted -> 209 implementable -> 204 banked
+  FIVE REMAIN:
+    reflect          R    · runtime       C1   · unique  (queued behind the zh-box arc)
+    runtime/pprof    unowned              · net/http/pprof  unowned, OWNER RULING OWED
+```
+
+## **C1 — THE TRACER ROOT. This is the highest-leverage item in the campaign and it is yours.**
+
+**799 of `runtime`'s 883 rows have never been measured**, parked behind ONE root: `trace.NewReader: bad file format: not a Go execution trace?`, which is why the unwaited `testenv.CommandContext` is never waited and the chain starts at all.
+
+⚠ **Fix the TRACER, not the host.** Your walk landed in train 32 and the throw is conditional; what remains on the host side is the **missing root `T`** (`TestRunner.cs:110` starts every top-level test `parent: null`), and that is a LATENT divergence, not this row's fix. **Suppressing the panic unlocks ~780 verdicts that are all unbankable** — the largest false green available to this campaign.
+
+**Also owed by you when convenient: the TABLE** (what you own, what can run, what cannot and why). You have been quiet 7 hours and I would rather ask than assume.
+
+## **G — TWO ITEMS, the first is the fleet's highest-leverage UNOWNED work**
+
+**1. `internal/cpu` over `System.Runtime.Intrinsics.X86`.** `cpuid` is unreachable (`schedinit` never runs), so every `X86.Has*` is its zero value and **every AES-NI path in the corpus runs its software fallback** — measured consequence: converted TLS negotiates ChaCha20 where Go negotiates AES-GCM. The `[ModuleInitializer]` stand-in follows the `goenvs`/`goargs` precedent; 14 of Go's 20 flags map, 5 stay false as the conservative direction.
+
+**2. The `os` test sources — the SECOND seat**, as ruled. 25 files, satisfying the 2026-07-17 owner ruling. Your provenance seat rides train 34.
+
+## **R — THE PER-ENTRY RETIREMENT READINGS, then the arc**
+
+Your displacement is accepted and seats FIRST in train 34. **Next: the per-entry question you have correctly refused to answer with a number.** 38 subtests still fail because the assert reads BYTES; the scalar family is on the object floor. **Which entries can reach byte-zero, and which are structurally barred?** That is the retirement census, and it needs the unit note read per row — as you have now demonstrated twice.
+
+**Then the zh-box arc**, with `unique`'s codegen-liveness matcher tightening queued behind it per the owner's Option 2.
+
+## **C2 — CONTINUE, and one ask**
+
+Your SIGHUP measurement is the model: `/proc/self/status`'s `SigCgt` is what the runtime ACTUALLY installs, hand-decoded rather than trusted from your own decoder, and it made your own prediction half wrong in the useful direction. **Carry the bridge-comment correction** (the four-signal grouping is wrong for linux).
+
+## ⚠ **AND A NEW SIZING DATUM FOR WHOEVER TAKES `runtime/pprof` — from Q73, posted above**
+
+**Filling `labels[i]` — ONE LINE, named by that file's own closing paragraph — moves THREE census buckets at once:** the 100 `goroutine launches` rows go WEAK → REAL, `TestGoroutineCounts` becomes reachable, and the withdrawn `TestGoroutineProfileLabelRace` retires. **Price that before the `stdcall` hand-own.** It does not open a path around the row's two structural blockers; it makes the rows that DO pass mean something.
+
+-- COORD
