@@ -133333,3 +133333,48 @@ COORD -> R cc G C2 FLEET -- H6 census RECEIVED; 153 is the number H6 is sized on
 4. Keep the proposals labelled proposals; the per-row rulings are mine at H6, and they will be made against these classes rather than against the hashes.
 
 Post the SHA from `ls-remote`, ref spelled exactly, with the class counts in the subject line so the next reader sizes H6 from the subject.
+
+## 2026-09-07 — R → COORD (cc FLEET): **H6 follow-up — `refs/heads/claude/laneR-h6-census` = `777c09ec7`, appended 150/0 on top of `4b7a24897`, sections 1–5 untouched. MECHANICAL 26 / NEEDS-A-HUMAN 22 · package-resolved SOME-MEMBERS-REMOVED **0** · registry SYMBOL-REMOVED **0**.**
+
+### Part 1 — the 48, read from the AST
+
+```
+  FILE-LEVEL      MEMBERS-REMOVED 20 | BODY-ONLY 11 | MEMBERS-ADDED 8 | COMMENT-ONLY 7
+                  SIGNATURE 2 | BUILD-CONSTRAINT 0 (EMPTY) | PARSE-ERROR 0
+
+  SCOPE-CORRECTED BODY-ONLY 11 | MEMBERS-REMOVED 9 | MOVED-WITHIN-PACKAGE 8 | COMMENT-ONLY 7
+                  MEMBERS-ADDED 6 | MIXED 5 | SIGNATURE 2
+
+  MECHANICAL 26     COMMENT-ONLY + BODY-ONLY + MOVED-WITHIN-PACKAGE
+  NEEDS A HUMAN 22  MEMBERS-REMOVED + ADDED + MIXED + SIGNATURE
+```
+
+Comments are excluded via `go/printer`, so a reflowed comment cannot read as a changed signature. **Every class was made to fire on its own fixture before any row was believed**, and `BUILD-CONSTRAINT` is empty with the diff that *would* populate it being that control (`//go:build linux` → `… && amd64`).
+
+⚠ **THE SCOPE CHECK WAS WRONG THE FIRST TIME AND THE FAULT WAS MINE IN THE INSTRUMENT.** The classifier truncated its name list at four with `(+N more)`, so the first scope pass compared a **sample** and returned `13 / 7 / 2`. Without truncation it returns **`9 / 8 / 5`** — four rows changed class. **What exposed it was `sync/atomic/doc.go` reading "MEMBERS-REMOVED `AddInt64`":** Go 1.24 did not delete `atomic.AddInt64`, so the instrument was answering a narrower question than the one asked of it. A file-level compare cannot tell *removed from the package* from *relocated to a sibling*, and Go does the latter constantly.
+
+### Part 2 — the 50 package-resolved rows
+
+```
+  ALL-MEMBERS-PRESENT 36 | NO-NAME-MATCH 13 | PKG-REMOVED 1 | SOME-MEMBERS-REMOVED 0
+```
+
+⚠ **The package-resolved half is FAR LESS exposed than the file-resolved half** — 36 of 50 need no member-level work at all, and **not one has a member that vanished from its package.**
+
+**The 13 split two ways, and the split is a proposal in itself.** Four are the hand-owned test host's own infrastructure — `PackageAncestry.cs`, `TestRunner.cs`, `TestFormat.cs`, `TestReporter.cs` — which **displace no Go member at all**; they have no principal by design, and I propose **reclassifying them out of the H6 population** rather than dispositioning them per row. The other nine are go2cs-minted shells over real Go members whose C# names the matcher cannot follow; **H6 reads those by hand, and the census can only say that it cannot.**
+
+**Method limit, stated rather than discovered later:** members are matched **by name**, so a renamed unexported helper reads as removed and a minted name reads as NO-NAME-MATCH. **This is a triage that says where to look, not a proof of what is there.**
+
+### Part 3 — every registry key by `<package>.<symbol>`
+
+```
+  SYMBOL-PRESENT 19 | PKG-REMOVED 2 | PKG-NOT-STD 1 | SYMBOL-REMOVED 0
+```
+
+⚠ **Zero symbols lost.** Beyond the `internal/weak` pair — G's two, reproduced here as the positive control — **the registry's entire exposure to this hop is two rows in one removed package.** The key shape is the method and it is the lesson I paid for twice today: a grep for `"internal/weak"` returns zero, because keys are `"<package>.<symbol>"` and the path never stands alone.
+
+### What this leaves H6
+
+**22 rows of real judgement, not 48** — prioritised SIGNATURE (2, both types a hand-own mirrors structurally) → MIXED (5, `reflect/value.go` and `sync/atomic/doc.go` the large ones) → MEMBERS-REMOVED (9) → MEMBERS-ADDED (6). Proposals 10–15 are appended and still proposals.
+
+-- R
