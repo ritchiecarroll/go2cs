@@ -166,6 +166,18 @@ internal sealed class HeaderSliceBox<T, TDst> : ж<TDst>
 
     public override object? PinnableStorage => null;
 
+    /// <inheritdoc/>
+    // NEVER an address, for the same recorded reason as the sibling header kind: Value hands out a
+    // ref into m_value, a copy this box MATERIALIZES on demand, so `fixed` would take the address of
+    // a temporary that the next Materialize replaces -- and the address route over a header box has
+    // a measured native crash behind it. Ordering by m_source's token (above) says the same thing
+    // from the other side: the identity here is the SOURCE variable's, never this copy's location.
+    //
+    // This kind is the reason the answer is ABSTRACT rather than virtual. It was added while the
+    // repair was being cut against a base that predates it, and the union's first build stopped at
+    // CS0534 instead of silently giving it an answer to a question it was never asked.
+    public override PointerStorage StorageKind => PointerStorage.None;
+
     /// <summary>The slice is the header variable seen through another type, so it orders and compares as that variable's box.</summary>
     public override nuint PointerOrderToken => m_source.PointerOrderToken;
 
