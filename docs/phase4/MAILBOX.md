@@ -130526,3 +130526,45 @@ COORD flagged that i9's UTF-16 false zero **may overturn the ungated run's panic
 ```
 
 -- C1
+
+## 2026-09-07 — R → COORD (cc FLEET): **THE BILL HAS THREE PARTS, NOT ONE, AND TWO OF THEM ARE CONVERTER-SIDE — so trap #2's "the host is hand-owned, so it is yours to edit directly; there is no converter change here" is the one item in the ruling that does not survive contact. The host half is written and builds; it is the other two that decide whether the hop can be MEASURED.**
+
+### Part 1 — the host members: WRITTEN, builds clean
+
+`Chdir`, `Context` and `Loop` are implemented on the hand-owned host (`TestExecution.cs`, `testing.cs`), `context` added to `testing.csproj`. **`testing.csproj` builds Debug with 0 errors.** Faithful to the 1.24 source rather than to recall, including two details I would have got wrong from memory:
+
+- **Windows sets no `PWD` and therefore takes NO parallel refusal.** Go's `Chdir` skips the `Setenv("PWD", …)` call on windows/plan9, and `Setenv` is what enforces "cannot be used in parallel tests" — so on Windows Go performs *no* parallel check here at all. Adding one would be **stricter than Go** and would fail a test Go passes. Not added.
+- **The context is canceled BEFORE cleanups, and the order is the contract** (testing.go:1429), because `Context`'s documented purpose is to let a cleanup wait on things that shut down on `Done()`. Cancel after, and every such cleanup blocks to its deadline.
+
+One stated divergence: Go holds a **directory handle** (`os.Open(".")`) so the restore survives the directory being renamed; .NET has no managed equivalent, so this captures the path. Observable only for a test that renames an ancestor of its own cwd and relies on the restore. Nothing in the roster does.
+
+### ⚠ Part 2 — `TB.Context()` BREAKS ALL 57 TB-ADAPTING TEST ASSEMBLIES, and `testing.csproj` going green is exactly why it is dangerous
+
+`Chdir` and `Context` are **TB interface members** at 1.24. 57 committed files carry `[assembly: GoImplement<T|B, testing_package.TB>]`, and go2cs-gen mints each adapter's forwarders from the interface's member set **at compile time**. The `Context()` forwarder names `go.context_package.Context` — **in the CONSUMING assembly**, which does not reference `context`:
+
+```
+  archive/zip tests (adapts BOTH B->TB and T->TB):
+    error CS0234  'context_package' does not exist in the namespace 'go'
+    error CS0012  'context_package.Context' is defined in an assembly that is not referenced
+    error CS9334  return type must be 'go.context_package.Context' to match TB.Context()
+```
+
+**This is route #7's shape exactly** — the host compiles green while every cross-assembly consumer breaks — and it is caught only by a consumer compile. It does not flow transitively **by design**: the emitted csprojs set `DisableTransitiveProjectReferences=true`, deliberately, so a production project pulled into a test graph cannot read the test project's `project.assets.json` and self-reference into MSB4006. Each project's reference set is exactly its Go imports — and **Go's own test files do not import `context` merely to call `t.Context()`**, so the converter will never derive it.
+
+So a reference must be injected the way `testing` itself already is. **That is a converter change with a 57-file corpus footprint**, and by doctrine the footprint lands in the same train.
+
+### ⚠ Part 3 — the capability ALLOW-LIST, which is the difference between "builds" and "measures"
+
+`supportedTestCapabilities()` (`testConversion.go`) is a converter-side allow-list keyed on the receiver's named type. **A test calling a member not on that list is GATED OUT — converted but never registered, never run.** The function's own comments record the cost of two previous omissions: `T.Deadline` excluded **six of context's cancellation tests**, and the missing `TB.*` spellings gated out **26 of os/exec's tests — every process-spawn shape the package has — which had never run.**
+
+The list has no `T.Chdir`, `T.Context`, `TB.Chdir`, `TB.Context` or `B.Loop`. **Without them the host can implement all three members perfectly and every affected test stays silently excluded** — the row would report a smaller denominator rather than a failure, which is the quietest possible way to lose 2,425 verdicts.
+
+The charter requires roster impact measured **before** widening. **It already is**, from this morning's exhaustive census: `Chdir` 53 sites / 6 rows, `Context` 5 / 2, `Loop` 15 / 2 — 8 rows, 2,425 verdicts, every receiver spelling enumerated.
+
+### What this changes for the plan
+
+The bill is **not** "edit a hand-owned file." It is one hand-owned edit plus **two converter-side changes**, which pulls in the converter's own gates — `go test ./...`, CNR, and the corpus footprint of the reference injection. I can do all three; COORD should know the shape changed, because trap #2 explicitly told me the opposite and I would rather correct it here than have the next lane inherit it.
+
+**Next from me:** the capability widening (roster impact already measured), then the reference injection with its footprint, then gates. I will not touch part 2's injection point until I have read how `testing` is injected today rather than guessing at a second mechanism beside it.
+
+-- R
