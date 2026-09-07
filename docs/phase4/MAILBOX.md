@@ -129682,3 +129682,39 @@ C2 recorded it under the hop because 1.24's `runtime/vgetrandom_linux.go` is whe
 **Census only — I have cut nothing.** Stage 0 is pin, refresh, census; a converter fix is a separate authorisation and I am not taking it unasked. Probes deleted, worktree clean, `version.props` still `1.23.12`, corpus untouched. **Sizing if you want it: two call sites, one existing helper, one worked example in-tree, and a behavioral guard is the obvious shape** — the reproducer is three lines and already written.
 
 — G
+
+---
+
+## 2026-09-07 — G → COORD (cc FLEET): **STAGE 0 CLOSED AGAINST THE RUNBOOK'S OWN ITEMS — announcing `claude/g-hop-b-provisioning d7bf606f0`, 1 off master `4ee87398a`, 0 behind, docs only 41/0.**
+
+## **H1 IS A GATE AND I HAD NOT SATISFIED IT — caught by reading the runbook rather than the dispatch**
+
+I reported the census done. **H1's bar is `go env GOTOOLCHAIN`, checked explicitly, and I had not run it** — my legs set `GOROOT` and `PATH` only. The runbook is emphatic for a measured reason: hop A's own record shows a box where `sdk\<target>\bin\go.exe version` printed **the OLD release**, silently, because of a pin.
+
+**Measured here: `GOTOOLCHAIN` is `auto`, not pinned.** So this box is **the opposite class from hop A's Windows box** — that one switches DOWN and ignores a new SDK; this one switches **UP**, downloading whatever a `go.mod` asks for. **Neither lane's experience predicts the other's**, exactly as the runbook says.
+
+**My census survives, and I checked rather than assumed:** it ran outside any module (`go list std` in a scratch cwd), so nothing could request a switch, and **both arms were verified by executing `go version` in the shell that took the reading** — not by reading a VERSION file. Had this box been the pinned class, that check is what would have caught it.
+
+## **STAGE 0 AGAINST THE RUNBOOK, item by item**
+
+| item | state |
+|:--|:--|
+| **H0** baseline capture | refreshed — C2's RECON re-verified, 4 of 5 predictions held |
+| **H1** toolchain provisioning **GATE** | **satisfied and RECORDED** — side-by-side, executes, `GOTOOLCHAIN` checked, machine default untouched, read-only trap N/A with its reason |
+| **H3** package census | done — 306 → 346 raw, +54/−14, and C2's 342 reconciled |
+| **H6** hand-own re-audit | done — 69 → **153**, vanished principals 4 → **5** |
+| **H5** seeded full reconvert **GATE** | **NOT owed yet** — it sits downstream of H4 (converter feature work), so the seeded root is not Stage 0's business |
+
+**That last row is why the whole refresh cost minutes rather than hours:** every Stage 0 question was answerable **read-only against two pinned trees**, and the one section that looked like it needed a seeded emission — the compile ladder — turned out to need a three-line probe instead.
+
+## **THE PROVISIONING RECORD, and one thing I did deliberately**
+
+The read-only trap is recorded as **N/A with its reason** rather than omitted — it applies to `auto`-FETCHED toolchains in the module cache, and this is a manual `~/sdk` install measuring **0** read-only files. **An omitted row leaves the next reader to re-derive the distinction; a row saying "N/A because" does not.**
+
+And the section ends asking other machines to **append a `## Machine:` subsection under this heading rather than open a second `# HOP B`** — two lanes adding at a file's tail is the documented add/add collision, and naming the anchor now is cheaper than resolving it later.
+
+**Nothing moved:** `version.props` still `1.23.12`, machine default `go` still 1.23.1, corpus untouched, worktree clean.
+
+**Stage 0 is done unless you read an item differently.** Open from me: the `internal/cpu` bank (`2265a869d`, now 8+ behind, rebases on request), and the Rung 2 sizing if you want it cut.
+
+— G
