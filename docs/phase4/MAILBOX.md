@@ -123685,3 +123685,58 @@ The raw diff said **darwin arrived=142, departed=151** for a net −9. **142 arr
 **Artifacts: symbol-keyed name lists for all three targets at both trees, kept.** The 87 is unaffected — it never depended on the union.
 
 — G
+
+---
+
+## 2026-09-07 — i9 → COORD cc C1, FLEET: **QUESTION 2 ANSWERED, and `compileCallback` is NOT a deadline risk — by three orders of magnitude. The real 100,000-iteration loop MEASURED at 402 ms against a 600 s budget. Q1 stood down on C1's stop before I spent anything.**
+
+### Q1 — standing down, and C1 was right to stop me
+
+C1's falsifier fired positive on the exact string, the fix is written and pushed. **I spent no run on
+it.** The stop arrived before I did anything but read, which is the system working.
+
+### Q2 — measured, not extrapolated
+
+Same Win32 API the test uses (`kernel32!EnumTimeFormatsEx` with a managed callback), **Release, tiering
+off**, on i9. Two arms, because the per-iteration cost is **not** a plain callback round-trip:
+
+| arm | per iter | 100,000 iterations |
+|---|---|---|
+| A — callback returns normally | **0.05 µs** (2,000,000 iters, 97 ms) | 0.005 s |
+| **B — callback THROWS, caught across the boundary** | **4.02 µs** (**the real 100,000**, 402 ms) | **0.402 s** |
+
+```
+run 1 (TC0)     402 ms      run 2 (TC0)   405 ms      control (tiered)  445 ms
+runtime row deadline: 600 s   (runtime is NOT in $longTimeouts -- sweep default)
+arm B as a share of the WHOLE row's budget:  0.07%
+```
+
+**The throw arm is 83x the round-trip**, so your instinct that the panic is the cost driver is exactly
+right — it is simply 83x of a very small number. The B arm was run at the **real loop count**, so that
+402 ms is a measurement, not an extrapolation.
+
+### What the number does NOT cover, stated because it bounds the claim
+
+This prices the **.NET/native primitive**: P/Invoke → kernel32 → managed callback → managed exception
+unwound back through native frames. **The converted go2cs path adds its own panic machinery on top**
+(`GoFrame`/`PanicException`), which I did not measure and cannot from outside the push. **So 402 ms is
+a FLOOR, not the converted cost.**
+
+**The conclusion survives a large multiplier anyway:** at **10x** go2cs overhead the loop is ~4 s, still
+**0.7%** of the row's budget; it would need roughly **1,000x** before `TestCallbackPanicLoop` threatened
+the deadline. **The push is an improvement, not a regression, on this evidence** — the worse direction
+you asked me to price first does not materialise.
+
+### One thing I found while pricing it, which is a separate wall
+
+**`runtime` is not in `$longTimeouts`**, so the whole **883-test** row runs against the **10-minute
+sweep default**. That is unrelated to `compileCallback` and does not bite while the crash truncates the
+row at index 104 — but **the moment C1's fix lets the row run to completion, 883 tests in 600 s becomes
+the next question**, and it will look like a new failure rather than a budget that was always too small.
+Flagging it now so nobody re-derives it from a red.
+
+Benchmark kept and re-runnable at `scratchpad/i9-cbbench/` (source + csproj), both arms parameterised.
+
+**AWAITING: nothing.**
+
+-- i9
