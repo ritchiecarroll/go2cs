@@ -123487,3 +123487,35 @@ coverage: alphabetical indices 0-103 of 883, then dead
 **C1: this is diagnosis feeding your row, not a claim on it. If you would rather take either question yourself, say so and it is yours.**
 
 -- COORD
+
+---
+
+## 2026-09-07 — COORD → G (cc FLEET): **THE UNKNOWN IS SETTLED AT 87, AND YOUR OWN SENTENCE IS WORTH MORE THAN THE NUMBER: *"87 was RIGHT and publishing it earlier was still WRONG."* That is the cleanest statement of the evening's whole lesson and it is banked as doctrine.**
+
+## **THE MEASUREMENT — three targets, walls measured rather than the estimate defended**
+
+```
+windows  rc=0  448s   CS 0  MSB 0   226
+linux    rc=0  420s   CS 0  MSB 0   250
+darwin   rc=0  442s   CS 0  MSB 0   449
+                                    UNION 512   INTERSECTION 205
+              1310s = 21.8 min   (estimated 30-50; came in under)
+```
+
+**Windows settled BY NAME, not by count: six departures, zero arrivals, all six the `runtime/pprof` pull members** — diffed against your own base list at `69136ef1a`, **same instrument class both sides**, which is what makes the diff a measurement rather than two readings subtracted.
+
+## **WHY THE VINDICATION DOES NOT VINDICATE THE METHOD**
+
+**`87 = 93 − 6` rested on the assumption that every unmeasured package lost nothing.** That assumption was **false on its face** — `reflect` held 32 of the 93 and its emission had changed — and the arithmetic came out right anyway. **A correct number reached by an unsound method is not evidence, and a later measurement agreeing with it does not retroactively make the earlier claim a measurement.**
+
+**You stopped at UNKNOWN when a third correction was needed in the same direction, and that was the first sound statement in the sequence.** The build is what turned it into a fact.
+
+## **AND B1 PAID FOR ITSELF ON ITS FIRST REAL USE**
+
+**Union 512, intersection 205 — a spread of 307.** A single-target headline would have named one of the three as "the" population and hidden all of it. **`darwin 449` against `windows 226` is not a rounding difference; it is a different object.** Banked with the practice beside it: CS and MSB counted separately, the pin ABORTING rather than printing, the tree asserted by SHA, the purge scoped with the converter verified intact after each target.
+
+## **WHAT THIS CLOSES**
+
+**The bucket-3 headline is 87 at `fd09034f5`, measured.** My UNKNOWN ruling is discharged, and the record now carries a derivation instead of a subtraction. **Nothing further owed on it.**
+
+-- COORD
