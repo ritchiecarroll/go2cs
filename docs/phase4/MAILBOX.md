@@ -124792,3 +124792,46 @@ runtime   the frontier's concentration -- 127 of 135 unaimed stubs, 799 rows beh
 **Both arms preserved on `laneR-probe-getoradd-closure` (`4610d3f67`, `0c0603429`), local only, `DO NOT BANK` in both subjects. Tree clean at `fd09034f5`.**
 
 -- R
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **ARM 3 SIZED AND NOT RUN — reading the code first says it would be an OFF-TARGET win, so I am not spending a run to prove a number that cannot move THE ROW. Pivoting to the on-target work and saying why.**
+
+## **THE CHANGE IS SMALL AND WELL-BOUNDED**
+
+Making the `HashSet<visitPair>` lazy is **10 sites**: one creation (`deepequal_impl.cs:37`), one signature, one use (`visited.Add`, line 63), seven recursive pass-throughs. Threaded as `ref HashSet<visitPair>?`, created on first real `Add`:
+
+```csharp
+if (root1 is not null && root2 is not null) {
+    visited ??= new HashSet<visitPair>();
+    if (!visited.Add(new visitPair(root1, off1, root2, off2))) { return true; }
+}
+```
+
+Semantically identical, allocates only when a cycle-capable value with real roots is actually met.
+
+## ⚠ **AND `identityRoot` SETTLES ITS VALUE BEFORE ANY RUN**
+
+**`identityRoot` has a `case ISlice:` arm (line 272), so ANY slice comparison yields a non-null root and allocates the set regardless.** Every row this arc is aimed at — the 1-element scalar slices, `[][]byte`, `[]string`, and **THE ROW `[][6]uint8`** — is slice-headed. **The set is created for all of them either way.**
+
+**Predicted, from the code and not from a run: scalar rows drop by one set; every slice row is UNCHANGED; THE ROW is UNCHANGED.** It is a real win for `DeepEqual(int,int)` — 512 B to compare two boxed ints is still absurd, and that set is most of what is left — **but it is not this arc's target, and I would rather say so than bank a green that does not move the thing I was dispatched to move.**
+
+**I have not measured it. It is labelled predicted, and the prediction is falsifiable in one 165 s run if anyone wants it.**
+
+## **THE ON-TARGET WORK, and it is the big one**
+
+```
+  bare master   12,808.77 B / 53 obj
+  arm 2          9,216.55 B / 52      -28.1%   (both arms preserved, ungated)
+  want                0.00 B
+
+  remaining:  fixed 1,705 B   +   912.62 B PER ELEMENT
+```
+
+**The per-element 912.62 B is now the whole game, and it is the typed element walk** — `ΔValue.Index` minting an `ElemRefBox` and boxing into `ΔValue.boxed`, replaced by a per-element-type cached dispatch reading `ref E` off `IArray<T>`/`slice<T>`. **The typed surface exists** (`ref T this[nint]`, `Span<T>`); the walk simply does not use it.
+
+⚠ **That is a materially bigger change than anything in arms 1-2** — it touches the shape of the walk rather than one line of it, and `Value.Index` is consumed corpus-wide, not just by DeepEqual. **It wants its own increment, its own prediction, and its own gates, and I am not starting it as a fourth probe arm on a branch already carrying two ungated ones.**
+
+**Arms 1 and 2 remain preserved, local, `DO NOT BANK`. Tree clean at `fd09034f5`. Nothing of mine is running.**
+
+-- R
