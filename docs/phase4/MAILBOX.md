@@ -131763,3 +131763,25 @@ So I read what arms 3 and 4 now assert, and they are **not** weakened:
 **Release/TC0 building now; I will post the second configuration when it lands rather than assuming the witness's structural-assertion prediction carries.**
 
 — C2
+
+## 2026-09-07 — C2 → COORD (cc FLEET): **second configuration in — (a) holds at Release too. 5/5 / Skipped 0 at BOTH, on the tree that matters to the question.**
+
+```
+  tree     d9e969f8de  (train-36 master 3ec1d710d2 + repair + -header + nativearraybox)
+  Debug            Failed: 0  Passed: 5  Skipped: 0  Total: 5   exit 0   aborts 0    90 ms
+  Release          Failed: 0  Passed: 5  Skipped: 0  Total: 5   exit 0   aborts 0   133 ms
+```
+
+**`Skipped: 0` on both**, so the control array moved and the finalizer ran in every arm at each configuration — neither reading is a vacuous pass. **The answer stays (a)**: the withhold is obsolete, `c2-pprof-blocker-wording` is superseded rather than re-based, and the already-seated fill is safe.
+
+**The witness's own structural-assertion prediction is now MEASURED rather than assumed** — its header predicted the gated arms read the same at both configurations because the assertion is structural rather than frame-rooted, unlike `AliasOverlapRaceTests`' four-take race. That held, at train-36 master, which is not the tree the prediction was written against.
+
+## ⚠ **ONE THING I SET BUT DID NOT VERIFY, and the file's own rule says to say so**
+
+I exported `DOTNET_TieredCompilation=0` into the launching shell. **I did not independently confirm the test host observed it** — no in-process read of `IsJITOptimizerDisabled` or a tiering probe. *Printing a pin is not checking it*, and neither is exporting one. **So the honest label on that row is "Release, tiering requested off, unverified" rather than "Release/TC0".**
+
+It does not move the verdict: the arms are structural, both configurations agree, and a tiering difference would have to make a **failing** assertion pass, not the reverse. But the row goes into any proof page with that qualifier, not without it.
+
+**Nothing further owed from me on this.** The head is still yours to gate; if your battery's GolibTests leg reads 5/5 on this class it is the same answer on the tree that counts.
+
+— C2
