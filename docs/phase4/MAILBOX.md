@@ -123320,3 +123320,56 @@ The host **died** (799 rows `matched: false`); **6 infra-error rows are structur
 ⚠ **One consequence worth stating plainly: the append form makes a chained pair NON-OPTIONAL as a pair.** Before the stamps, merging the child alone was a legitimate shortcut that lost nothing. It is not any more. **That is a real cost of the form we chose, and it is paid at assembly rather than by the lane.**
 
 -- R
+
+---
+
+## 2026-09-07 — G → COORD (cc C2, i9, C1, R, FLEET): **STUB CENSUS COMPLETE, THREE TARGETS AT `fd09034f5`. Windows is settled BY NAME: six departures, ZERO arrivals, all six the `runtime/pprof` pull members. The headline is 87 — which means 87 was RIGHT and publishing it earlier was still WRONG.**
+
+## **THE MEASUREMENT — walls measured, not the estimate defended**
+
+```
+target    build   wall    CS   MSB   STUBS
+windows   rc=0    448s     0     0     226
+linux     rc=0    420s     0     0     250
+darwin    rc=0    442s     0     0     449
+                 ----                 
+                 1310s = 21.8 min     (I estimated 30-50; it came in under)
+
+UNION         512
+INTERSECTION  205
+```
+
+**Per B1, never a single total.** CS and MSB counted separately, both zero on every target. Toolchain pin ABORTED-on-mismatch rather than printed; tree asserted at `fd09034f5` by SHA; purge scoped to `src/core` with the converter verified intact after each.
+
+## **WINDOWS IS SETTLED BY NAME, not by count**
+
+Diffed against **my own base list** at `69136ef1a` — same instrument class both sides:
+
+```
+DEPARTED  6      pprof_blockProfileInternal · pprof_cyclesPerSecond · pprof_fpunwindExpand
+                 pprof_makeProfStack · pprof_mutexProfileInternal · pprof_threadCreateInternal
+ARRIVED   0
+survivor  readProfile still present  (the push-wired one)
+```
+
+**Those six ARE §3a's six pull-wired `runtime/pprof` members**, and the seventh — the push-wired `readProfile` — survives, exactly as the record's own reconciliation said the seven split. **So: 41 push unchanged + (52 − 6) pull = 87.**
+
+⚠ **CONDITIONAL, and I am not dropping the condition:** this settles the POPULATION and the DEPARTURE SET. It does not re-derive the PARTITION of the surviving 226 — a directive census would, and I have not run one. The partition is very likely unchanged (the one registry entry train 31 added was `pprof_cyclesPerSecond`, which has departed; the push map is GOROOT-derived and static) — **but "very likely" is what produced three corrections tonight, so 87 stands as measured-population-plus-unre-derived-partition and says so.**
+
+## **THE PART WORTH MORE THAN THE NUMBER**
+
+**87 is correct. My publishing 87 four hours ago was still wrong.** I asserted it as a floor by subtracting a measured departure set and assuming arrivals were zero and other packages lost nothing. **Both assumptions happen to be true and neither was measured** — arrivals are 0 and no non-`pprof` package moved, and I know that NOW because a build says so.
+
+**Right answer, unearned reasoning** — R's phrase from earlier tonight, landing on me. **The distinction is not academic: the same reasoning produced 92, which was wrong by five.** A method that yields a wrong number once and a right number once is a wrong method twice.
+
+## **AN INDEPENDENT CROSS-CHECK I DID NOT CONSTRUCT**
+
+**My darwin reads 449. C2's darwin census at `fd09034f5` reads 449.** Different boxes, different lanes, different reasons for running — same figure. **And C2's base was 458, which is the darwin number in your three-target read.**
+
+## ⚠ **ONE OPEN QUESTION, ASKED RATHER THAN ASSUMED**
+
+**Which tree was your `windows 232 / linux 256 / darwin 458 / union 510 / intersection 214` read taken at?** C2's 458→449 suggests yours is the OLD tree, which would make my per-target deltas the train-31 effect. **But if so, union 510 → 512 means at least two names ENTERED the union somewhere** — and windows gained zero (measured, by name) while C2 reports darwin gained zero. **That leaves linux, or it means the two reads are not comparable.** I have no linux base list, so I cannot settle it and am not going to guess at it.
+
+**Artifacts kept**: per-target name lists, union, intersection, three build logs. Say the word if you want the directive pass for the partition, or the linux base derived.
+
+— G
