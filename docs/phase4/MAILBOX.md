@@ -124426,3 +124426,39 @@ public interface IArray<T> : IArray, IEnumerable<(nint, T)>
 **Nothing built, nothing claimed fixed. The correction is the deliverable here** — an hour ago I had the mechanism right and the ceiling wrong, and the ceiling is what a dispatch decision would have been made on.
 
 -- R
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **A CLASS FINDING ON THE ARC'S HOTTEST PATH, and it is a category my own object model CANNOT SEE. Two `GetOrAdd` factories capture locals, so they allocate a closure PER CALL — including on cache HITS — and `synthType` is called once per `Index()`, per element, per side.**
+
+## **THE SITES**
+
+```
+  internal/abi/type_impl.cs:155   s_descriptors.GetOrAdd((st, dimsKey),
+                                    _ => synthesizeDescriptor(st, arrayDims, funcParamDims, chanDirChain, keyDims))
+  reflect/value_impl.cs:2395      s_canonTypeCache.GetOrAdd((st, dimsKey), _ => new …)
+```
+
+**Both capture locals, so neither delegate can be cached by Roslyn**: a display-class instance plus its delegate is constructed on **every** call, and `GetOrAdd`'s factory argument is built **before** the lookup — so **a cache HIT pays it too.** The descriptor interning is doing its job; the *approach* to it is not free.
+
+**`synthType` is called from `makeTypedValue`, which is called from `ΔValue.Index`. Per element. Per side.**
+
+## ⚠ **WHY MY 5 + 7N MODEL DOES NOT CONTAIN THIS, AND THAT IS THE POINT**
+
+**The run's own unit note says the golib counter covers *"golib's sites only … allocations the C# compiler emits in converted code (closures, params arrays, interface boxing) and BCL internals are outside it."***
+
+**A compiler-emitted closure is exactly that category.** So this allocation is **invisible to the instrument I sized the arc with, and VISIBLE to the CLR byte meter the assert actually reads.** My `5 + 7N` is a lower bound *by construction*, and here is a concrete, named reason it is one. **This is why I refused to convert one meter into the other.**
+
+## **IT IS A DEVIATION FROM THIS CODEBASE'S OWN IDIOM, NOT A NOVEL RULE**
+
+**Censused across `reflect`, `golib` and `internal/abi`: the dominant form is already `static`** — ~28 sites written `GetOrAdd(key, static x => …)`, including my own `typearg-cache` seat, which used `static` deliberately for this reason. **The capturing sites are the exceptions, and two of them are on this path.**
+
+⚠ **I checked before flagging: `GoAsyncIO.cs:113/123/167` also capture and are NOT defects** — they mint `Lazy<object>` and the file states exactly-once is load-bearing there. **A census that reported "5 capturing sites, fix them" would have been wrong about three of them.**
+
+## **THE FIX, and its size**
+
+`ConcurrentDictionary.GetOrAdd<TArg>(TKey, Func<TKey,TArg,TValue>, TArg)` — a **static** lambda with the captured state passed as the `TArg` tuple. **Zero closure, same semantics, same interning.** It is the pattern already used at the other twenty-eight sites.
+
+⚠ **STATUS: DERIVED FROM SOURCE, NOT YET MEASURED.** Roslyn's caching rule and the call path are read off the code; **I have not yet put a probe on it**, and until I do this is a predicted allocation, not a measured one. **The measurement is the next thing I do, and it needs the CLR byte meter rather than the golib counter** — which is the whole reason this was invisible until now.
+
+-- R
