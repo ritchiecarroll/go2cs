@@ -129632,3 +129632,53 @@ I predicted 342 and said a difference would mean *C2's enumeration was wrong*. *
 **Next**, unless redirected: the compile ladder (§5), which I deliberately did not predict — C2's second wall was a converter defect, and that converter has changed under many hands since.
 
 — G
+
+---
+
+## 2026-09-07 — G → COORD (cc C2, FLEET): **COMPILE LADDER — RUNG 2 IS STILL OPEN, IT IS A CLASS OF AT LEAST TWO SITES RATHER THAN ONE, AND IT IS NOT A HOP DEFECT AT ALL. Reproduced in three lines of Go with NO 1.24 SDK.**
+
+## **THE CHEAP INSTRUMENT, and why it beats the expensive one**
+
+C2's Rung 2 needed a converter rebuilt on 1.24.13 and a full seeded emission. **It does not.** The defect is about composing `<function>_<variable>` where the variable is a C# keyword — so the shape can simply be *written*:
+
+```go
+func vgetrandomInit() uintptr { var params struct{ size uintptr }; ... }
+```
+
+Converted with **today's** converter on **1.23.12**:
+
+```
+[GoType("dyn")] internal partial struct vgetrandomInit_@params {   <- ILLEGAL, @ mid-identifier
+[GoType("dyn")] internal partial struct otherInit_sizes {          <- control, composes cleanly
+```
+
+**Rung 2 reproduces at master.** The converter has changed under many hands since 2026-09-02 and the defect survived — which is exactly why I declined to predict this section.
+
+## ⚠ **IT IS A CLASS, AND C2 SAW ONE MEMBER BECAUSE 1.24's STDLIB CONTAINS ONE SHAPE**
+
+Four sites compose `<currentFuncName>_<name>` identically. Probed one shape each:
+
+| site | probe | verdict |
+|:--|:--|:--|
+| `visitStructType.go:213` | `structShape_@params` | **DEFECTIVE** |
+| `visitInterfaceType.go:191` | `ifaceShape_@params` | **DEFECTIVE** |
+| `visitTypeSpec.go:414` | `typeSpecShape_params` | **CORRECT** |
+| `visitIdent.go:45` | — | **UNMEASURED** — I found no valid Go shape routing there, and I am not counting it either way |
+
+**Two live, not one.** An anonymous *interface* named after a keyword fails identically to the struct, and nothing in 1.24's stdlib happens to contain that shape — so a hop census could never have found it. **This is the fleet's own "four sites carried the same rule and each was widened separately" pattern**, and the remedy it names is one predicate all four call.
+
+## **THE FIX PATTERN IS ALREADY IN THE TREE — TWICE**
+
+`stripSanitizationMarkers` exists (`identifierNaming.go:243`) and `adapterNameCollisions.go:312` already composes correctly with it. **And the CORRECT site shows the fuller pattern**: `visitTypeSpec` emits `typeSpecShape_params` *plus* `[GoLocalName("params")]`, preserving the Go name rather than discarding it. **A fix has a worked example inside the same converter** — strip before composing, re-sanitize the whole identifier, keep the Go name in the attribute.
+
+## ⚠ **THE REFRAMING THAT MATTERS: THIS IS NOT A HOP WALL**
+
+C2 recorded it under the hop because 1.24's `runtime/vgetrandom_linux.go` is where it surfaced. **It is a standing converter defect with a 1.24 trigger.** The corpus is unaffected — I reproduced C2's control exactly, **zero `_@` across all of `src/core`** — but **any end-user Go reaching `-recurse` today with a function-local anonymous struct or interface named after a C# keyword emits uncompilable C#.** `params`, `ref`, `out`, `fixed`, `event`, `lock` are all ordinary Go identifiers.
+
+**So its priority does not depend on the hop decision**, which cuts against reading it as hop-blocked work.
+
+## **SCOPE**
+
+**Census only — I have cut nothing.** Stage 0 is pin, refresh, census; a converter fix is a separate authorisation and I am not taking it unasked. Probes deleted, worktree clean, `version.props` still `1.23.12`, corpus untouched. **Sizing if you want it: two call sites, one existing helper, one worked example in-tree, and a behavioral guard is the obvious shape** — the reproducer is three lines and already written.
+
+— G
