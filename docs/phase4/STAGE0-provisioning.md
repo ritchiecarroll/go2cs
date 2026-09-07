@@ -244,3 +244,44 @@ installed" insufficient as provisioning evidence, in opposite directions.
 | Machine default AFTER (untouched) | `go version` → **go1.23.1**, `GOROOT` → `/usr/local/go` |
 | `GOTOOLCHAIN` | `auto` (no `~/.config/go/env` file exists) — **left in place** |
 | Disk headroom | 925 G free |
+
+---
+
+# HOP B — Go 1.24.13 toolchain provisioning (the NEXT corpus hop's Stage 0)
+
+Dispatched to G 2026-09-07 under the owner's standing ruling of 2026-09-05 (*"G = Stage 0 + hop
+census after os banks"*), whose trigger fired when `os` banked in trains 34/35. **Target `go1.24.13`,
+the final patch of an EOL series** — so the target is stable and cannot move under the hop.
+
+**Nothing here moves the corpus.** `src/version.props` still pins `1.23.12`; this section records a
+side-by-side install and the pins the box carries, which is what H1 asks for.
+
+⚠ **H1's "verify by RUNNING" bar is why hop A's own record exists, and it is not a formality:** on a
+pinned box `sdk\<target>\bin\go.exe version` prints the OLD release. Every row below marked *Actually
+runs* is the output of an executed binary, not a `VERSION` file read.
+
+## Machine: G's laptop (win-x64)
+
+| | value |
+|:--|:--|
+| Side-by-side root | `C:\Users\<user>\sdk\go1.24.13` (via `golang.org/dl/go1.24.13` + `download`, user-local) |
+| `VERSION` file | `go1.24.13` |
+| **Actually runs** | `<root>\bin\go.exe version` → **go1.24.13** ✓ (no pin to redirect it) |
+| Machine default AFTER (untouched) | `go version` → **go1.23.1**, machine default `GOROOT` → `C:\Program Files\Go` |
+| Pre-existing SDKs (before) | `sdk\go1.23.12` only (plus the machine default at `C:\Program Files\Go`) |
+| `GOTOOLCHAIN` | **`auto`** (no persisted `go/env` entry) — **left in place** |
+| Read-only trap | **N/A** — manual `~/sdk` install, **0** read-only files under `src/`; the attribute applies to `auto`-FETCHED toolchains in the module cache, not to this |
+| Corpus pin after | `version.props` → **1.23.12**, untouched |
+
+**This box is the `auto` class**, i.e. it switches **UP** silently when a `go.mod` asks for a newer
+release — the opposite failure direction from hop A's pinned Windows box. The Stage 0 census was run
+outside any module (`go list std` in a scratch cwd), so nothing could request a switch; both arms
+were verified by executing `go version` in the same shell that took the reading.
+
+**Consequence for later hop legs on this box:** set **both** `GOTOOLCHAIN=go1.24.13` and
+`GOROOT=<target-root>` per-invocation, per H1 — `auto` will otherwise resolve from whatever `go.mod`
+is in scope, and a leg that reads `GOROOT` alone cannot see it.
+
+> **Other machines: append your own `## Machine:` subsection below rather than creating a second
+> `# HOP B` heading** — two lanes adding a section at a file's tail is the documented add/add
+> collision, and it is avoidable by anchoring on this heading.
