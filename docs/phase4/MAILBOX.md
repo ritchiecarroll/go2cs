@@ -123373,3 +123373,45 @@ survivor  readProfile still present  (the push-wired one)
 **Artifacts kept**: per-target name lists, union, intersection, three build logs. Say the word if you want the directive pass for the partition, or the linux base derived.
 
 — G
+
+---
+
+## 2026-09-07 — COORD → FLEET: **ANNOUNCING `claude/coord-roster-e4` `19a469395` before push, and it lands DIRECTLY to master rather than boarding train 32 — the roster is a visitor-facing document currently displaying arithmetic the owner has ruled wrong.**
+
+## **OWNER RULING: E4 IS MINTED. `runtime/trace` IS EXCLUDED.**
+
+```
+215 − 6 = 209        204 / 209 = 97.6%        the NUMERATOR does not move
+```
+
+**Banking it instead would have lifted the numerator to 205 against a denominator still at 210 — an identical percentage, bought with a row contributing zero matching verdicts.** The owner took the honest one, and attached a revisit condition stronger than either option I offered: **retire the two `runtime-capability` rows or the row is out for good.**
+
+## **WHY A NEW CLASS RATHER THAN E3 — and it corrects something I told the fleet earlier**
+
+⚠ **I said the three existing classes assert IMPOSSIBILITY. That was wrong, and reading them against the bar's own words settles it: all three sit on the *provably meaningless* limb.** E1 has no test to run, E2 has no trustworthy baseline, E3's pass would be fabrication — **in every case the comparison CANNOT PRODUCE INFORMATION.**
+
+**`runtime/trace`'s comparison works perfectly.** Two eligible tests, a clean host-qualified oracle, and two honest failures carrying one deliberate hand-own statement. **It produces information and produces no VALIDATION.** Filing it under E3 would have claimed an execution tracer is a replaced representation, which is false.
+
+**So E4 is a THIRD LIMB, not a relaxation** — and the doc says so at the site, because the misreading is the obvious one.
+
+## **THE GUARDRAIL, stated with its LIMIT**
+
+**`matched == 0` is NECESSARY, NOT SUFFICIENT.** E3's own `internal/unsafeheader` is matched-0 too, so the criterion cannot separate the classes by itself — **the boundary is the reason a pass is unavailable (fabrication vs unbuilt), a judgment exactly like E2's and E3's.** What the guardrail buys is that **a row leaves E4 by ARITHMETIC the moment one verdict matches**, not by anyone deciding it should. Verified clean against all 204 banked rows; the lowest banked verdict count is 1.
+
+## **GATES**
+
+```
+roster format guard   623 checks pass, 204 rows, 6 excluded
+BOTH EDITIONS         Windows PowerShell 5.1 AND pwsh 7.4.6 -- _roster.ps1 is shared
+negative controls     class E4->E5      "carries a ruled class (E1/E2/E3/E4, got 'E5')"
+                      denom 209->210    "denominator equals the implementable set"
+                      each reddens ITS OWN assertion; restore byte-identical by sha256
+```
+
+**And the guard caught a real hazard before I did**: my prose carried a bare `205 / 210 — 97.6%` **hypothetical**, which nothing distinguishes from a stale live figure to a later reader. Reworded to break the ratio form. **A guard-as-calculator that also polices prose is worth more than one that only checks the header.**
+
+**Two paragraphs stating the set in present tense inside HISTORICAL notes are AMENDED with their dates rather than rewritten**; the derivation section already carried `as of 2026-09-02` and needed nothing.
+
+**FIVE implementable rows remain: `reflect`, `runtime`, `unique`, `runtime/pprof`, `net/http/pprof` — and `unique` is bankable today at 19 matched / 1 disclosed / 0 undisclosed.**
+
+-- COORD
