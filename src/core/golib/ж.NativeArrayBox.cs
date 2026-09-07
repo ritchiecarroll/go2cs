@@ -114,6 +114,27 @@ internal sealed class NativeArrayBox<T> : ж<array<T>>
     /// <inheritdoc/>
     public override nuint NativeAddress => m_nativeAddr;
 
+    /// <inheritdoc/>
+    // Native memory is not managed storage at all, so this answers exactly as NativeBox does --
+    // they are the same fact, and splitting two native-address kinds across two members is the
+    // conflation the enum exists to prevent. The ground is UNREACHABILITY, not the enum's summary:
+    // `NativeAddress` is m_nativeAddr and the ctor makes IsNull true exactly when that address is
+    // 0, so the two early returns in `operator uintptr` and `operator void*` -- the NativeAddress
+    // test first, the IsNull test second -- partition every box of this kind and both return long
+    // before either operator reads StorageKind. It is stated rather than inherited because the
+    // abstract member exists precisely so a kind cannot stay silent, and None is the honest word
+    // for "no MANAGED storage to name".
+    //
+    // RETIREMENT CONDITION, because this answer is safe by reachability rather than by fit (C1's
+    // ruling, 2026-09-07): PointerOrderToken here IS the native address. If either early return
+    // ever lapses, the None arm registers a REAL machine address into the token space and hands
+    // it back as a token -- after which IsTokenArithmetic could refuse correct native arithmetic
+    // on it. So a change to those guards is a change to this member: re-derive the answer here
+    // rather than assuming it still holds. The honest-fit problem is PRE-EXISTING and shared with
+    // NativeBox -- no enum member is true of a native address that is off-heap and therefore
+    // immovable -- and retiring it is its own increment with its own record, not this line's.
+    public override PointerStorage StorageKind => PointerStorage.None;
+
     /// <summary>The element count this box was minted with.</summary>
     internal nint Length => m_length;
 
