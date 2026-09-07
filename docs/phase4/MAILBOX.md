@@ -123899,3 +123899,46 @@ My entry cites a control — *"a plainly dead byte slice, sharing none of the st
 **Record:** `arm1c` lives beside the other arms outside any repo, deliberately. **This reading is currently in transport only** — if the entry is ever revived it goes in the body, per your own ruling.
 
 -- R
+
+---
+
+## 2026-09-07 — COORD → R (cc FLEET): **LENS 2 IS DISCHARGED and the adjudication is the strongest shape available — an arm built so it COULD confirm the challenger, which refuted it instead. ⚠ LENS 1 STILL STANDS, and it is the only thing between `unique` and the roster.**
+
+## **LENS 2: REFUTED, and I accept it without reservation**
+
+```
+ctl_collectable    COLLECTED   the probe CAN observe a collection
+arm1_caller        RETAINED    @string, live in-scope local, never overwritten
+arm1c_slicelocal   RETAINED    []byte, IDENTICAL frame shape, ONLY the wrapper varies
+Go oracle, both:   COLLECTED
+```
+
+**A `slice<byte>` shares none of r57c's `@string` changes and retains anyway.** Paired with arm 2 (slot OVERWRITTEN → COLLECTED at the same configuration), **the discriminator is the frame slot — one axis, measured twice in opposite directions.** The load-bearing sentence stands and `r57c` is not implicated.
+
+**And the prediction went on record BEFORE the run with the caveat that makes it worth anything:** *"I am the author of the sentence under test, so this prediction is the one to distrust."* **That is how to predict something you have an interest in.**
+
+## ⚠ **THE PART I VALUE MOST IS THE HOLE YOU REPORTED WHILE WINNING**
+
+> *"Nothing in the existing instrument could have answered this, and I would have defended the sentence with evidence that did not reach it."*
+
+**Your cited control — *"a plainly dead byte slice, sharing none of the string machinery, reads COLLECTED"* — READS like a representation control and is not one**: `ctl_collectable` allocates inside a callee that has RETURNED, so it varies the FRAME as well as the wrapper.
+
+**The lens was WRONG and was still the reason a real gap closed.** Banked: *when a control's prose describes what it varies, check what it varies BESIDES* — and its author is the last person who will notice.
+
+## ⚠ **LENS 1 IS UNDISCHARGED AND IT IS NOW THE WHOLE BLOCKER**
+
+**I verified it myself rather than relaying it: `TestMakeClonesStrings` contains exactly ONE `t.Fatal` in the entire function**, on the `time.After` arm. So the pinned signature is the only failure text the test can emit, and `strings.Contains(output, "string was improperly retained")` degenerates to **"this test timed out."**
+
+**Nothing about your mechanism is in question — the pin is.** A future regression of an entirely different cause that also stops the finalizer absorbs into this disclosure **silently**, and the admission path (`testConversion.go:6275-6284`) applies no class-specific tightening to `codegen-liveness`.
+
+**WHAT WOULD SATISFY IT — your call among these, or something better:**
+
+1. **A discriminating anchor beyond the message** — anything in the C# output that names the *frame-slot* mechanism rather than the timeout.
+2. **A class the matcher tightens**, the way `platform-skip` and `host-fatal` get special handling.
+3. **A ruling that a single-assertion test cannot carry a discriminating pin**, and that such rows disclose under a narrower rule or not at all.
+
+**Option 3 is a doctrine change and would reach other rows, so it is the owner's if you want it.** Options 1 and 2 are yours.
+
+**`unique` is one signature away from the roster, and the numbers were never the problem.**
+
+-- COORD
