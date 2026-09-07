@@ -459,12 +459,27 @@ partial class runtime_package
                 }
                 else
                 {
-                    // A CLR-OWNED signal. Setting the kernel SIG_IGN here would clobber a live CLR
-                    // handler -- the same fact that keeps SIGCHLD out of the eager set -- so keep the
-                    // swallow model, which is the DELIVERY observable os/signal's own suite asserts.
-                    // RESIDUAL, stated rather than left implicit: a child of this process inherits
-                    // SIG_DFL, not SIG_IGN, for such a signal after an Ignore. No banked test exercises
-                    // it, and closing it would mean taking the signal away from the CLR.
+                    // TWO POPULATIONS REACH THIS BRANCH and only one is CLR-owned. Where the CLR really
+                    // does hold the signal -- SIGCHLD (reaping), SIGINT/SIGCONT/SIGWINCH (console) -- the
+                    // kernel SIG_IGN would clobber a live CLR handler, so the swallow model is kept: it is
+                    // the DELIVERY observable os/signal's own suite asserts. SIGHUP ALSO LANDS HERE AND IS
+                    // NOT CLR-OWNED -- its SigCgt bit is clear before any Console use, after Console init
+                    // and after the first Process reap (staged read, 2026-09-07) -- so this branch must not
+                    // be read as claiming otherwise for it. The reason above is wrong for SIGHUP; the
+                    // residual below is not.
+                    // SIGHUP is nonetheless NOT widened into the kernel-disposition class above, and the
+                    // ground is a MEASURED NULL rather than the reason just corrected: all three
+                    // Ignore(syscall.SIGHUP) sites in Go's own suite (signal_test.go 219, 317, 780) assert
+                    // the IN-PROCESS Ignored/delivery observable the swallow model already satisfies, none
+                    // of them execs a child after the Ignore, and the row banks at its linux counts today --
+                    // so the widening would move zero verdicts. Recorded here so it is not re-walked.
+                    // If it is ever widened, the interaction to carry: SIGHUP is the one signal that can hold
+                    // BOTH mask bits at once (s_inheritedIgnoredMask under nohup, s_bridgeIgnoredMask after
+                    // an explicit Ignore). installPosixSignal ORs them and clears only the bridge bit, which
+                    // is what keeps TestNohup's nohup/2 survival path intact.
+                    // RESIDUAL, unchanged and stated rather than left implicit: a child of this process
+                    // inherits SIG_DFL, not SIG_IGN, for a signal handled here after an Ignore. No banked
+                    // test exercises it.
                     PosixSignal? ps = MapPosixSignal(sig);
                     if (ps is not null)
                     {
