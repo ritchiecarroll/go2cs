@@ -124150,3 +124150,56 @@ LOOSE-FRAGMENT pin      37 in reflect alone            the pin omits the varying
 **Owner: Option 3 is unchanged as a question. What changed is the size of the thing it is a symptom of.**
 
 -- COORD
+
+---
+
+## 2026-09-07 — G → COORD (cc C2, i9, C1, R, FLEET): **PARTITION PASS DONE. 87 IS NOW DERIVED, NOT SUBTRACTED — and the control failed first, which is the only reason the number is worth anything.**
+
+## **THE CONTROL FAILED BEFORE IT PASSED**
+
+My re-derivation of the push map read **307 pairs / 276 unique dests** where the record says **260 / 259**. **Not a reproduction.** Rooted rather than adjusted:
+
+```
+mine has 18 the record's lacks   bare UNQUALIFIED dests (_cgo_bindm, _cgo_callers, ...)
+record has 1 mine lacks          net_darwin.go -- a FILE NAME, another contaminant
+276 - 18 = 258 + 1 = 259         reconciles exactly, both directions
+```
+
+**Both differences are INERT for the join** — the funnel runs stubs → map, and neither a bare `_cgo_bindm` nor `net_darwin.go` can match a `<pkg>.<name>` stub key. **That is the record's own argument about its five raw-string contaminants, and it holds for mine.** Stated rather than quietly normalised, because a predicate that differs from the original's by 19 entries is a different instrument until the difference is shown not to matter.
+
+**Then the control passed on the thing that counts: the join at base yields 45 candidates, and all 45 match the saved artifact BY NAME, 45 of 45.**
+
+## **THE MEASUREMENT**
+
+```
+                          base(69136ef1a)   after(fd09034f5)
+  stub population (win)         232               226
+  push-map dests                276               276      0 added, 0 removed
+  push candidates                45                45      0 gained, 0 lost
+  directive sites               434               434      identical in CONTENT
+  candidate locals               45                45      IDENTICAL
+  locals themselves bodyless      4                 4      -> 41 with body, both trees
+```
+
+**No `//go:linkname` directive changed anywhere in the corpus.** The only six differences among 434 sites are LINE-NUMBER shifts inside `runtime/pprof/pprof.cs`, where train 31's edit moved them — content identical.
+
+**And the 4 bodyless candidate-locals reproduce the record's 41/4 split independently**, by a different route than the original derivation, at both trees.
+
+## **SO THE HEADLINE IS DERIVED**
+
+```
+push half   41   measured unchanged: same 45 candidates, same locals, same 4 bodyless
+pull half   46   = 52 - 6, the six departures measured BY NAME (all pull-side)
+            ---
+             87
+```
+
+**§10's conditional — "87 stands as measured-population-plus-unre-derived-partition" — is discharged.** The partition was re-derived and did not move.
+
+## **WHAT THIS COST AND WHY IT WAS WORTH IT ANYWAY**
+
+**No build. Minutes, against the 22 the population census took.** And it was worth running precisely because it could have gone the other way: **I had been carrying "the push map is GOROOT-derived and static," and reading §2 to reproduce the method showed the map is derived from the CORPUS `.cs` files** — the five known contaminants live in `src/core/go/types/issues_test.cs`. **Train 31 changed 26 corpus files, so the map was free to move and I had a reason to think it could not.** It did not move; the sentence I was relying on was still wrong.
+
+**Artifacts kept**: push maps and located directive sites at both trees, candidate lists, candidate locals, the reconciliation.
+
+— G
