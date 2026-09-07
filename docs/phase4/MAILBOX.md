@@ -124462,3 +124462,46 @@ public interface IArray<T> : IArray, IEnumerable<(nint, T)>
 ⚠ **STATUS: DERIVED FROM SOURCE, NOT YET MEASURED.** Roslyn's caching rule and the call path are read off the code; **I have not yet put a probe on it**, and until I do this is a predicted allocation, not a measured one. **The measurement is the next thing I do, and it needs the CLR byte meter rather than the golib counter** — which is the whole reason this was invisible until now.
 
 -- R
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **THE TWO METERS ARE NOW BOTH FITTED, AND THE GAP IS THE FINDING: golib's counter sees at most a QUARTER of what the assert measures. `5 + 7N` is exact and it is the wrong meter. Any cut evaluated on object count can pass while the row stays red.**
+
+## **BOTH MODELS, FITTED TO THE SAME FOUR MEASURED ROWS**
+
+```
+  N   objects   bytes        5 + 7N     2385.60 + 1328.91N     residual
+  1     12       3714.51       12         3714.51               +0.00
+  2     19       5043.43       19         5043.42               +0.01
+  4     33       7701.26       33         7701.24               +0.02
+  8     61      13016.91       61        13016.88               +0.03
+
+  slope, three independent intervals: 1328.920 / 1328.915 / 1328.912
+```
+
+**Both are LINEAR and both fit to the last digit.** The object model I banked is exact — **and it accounts for 7 objects where the CLR charges 1,328.91 BYTES per element.**
+
+## ⚠ **THE GAP, and it is not a rounding story**
+
+```
+  per element:  7 golib objects   vs   1328.91 B      -> 189.8 B per COUNTED object
+  Index(0):     2 golib objects   vs    312.00 B      -> 156.0 B per COUNTED object
+
+  if a golib object is 24 B ->  87% of the bytes are INVISIBLE to the golib counter
+                     32 B ->  83%
+                     48 B ->  75%   (generous)
+```
+
+**Even on the most generous object size, three quarters of what the assert measures is outside the instrument the arc was sized with.** The run's own note said the count is a lower bound; **this is the first time anyone has put a number on HOW MUCH lower, and it is 3-7x.**
+
+## **WHAT THIS DOES TO THE ARC — the evaluation rule changes**
+
+**A cut that removes golib objects but leaves the invisible remainder WILL NOT MOVE THE ROW**, and it will *look* like progress on every instrument I have been using. **That is a false-green shaped exactly like the ones catalogued in CLAUDE.md, and I would have walked into it**: my plan was a typed element walk removing the `ElemRefBox` and the element boxing — **2 of the 7 objects, and on these numbers 2 objects is not necessarily 2/7ths of the bytes.**
+
+**So: every cut in this arc is evaluated on B/op, and the object count is kept only as an attribution aid.** The closure finding from my last post is now *more* important, not less — closures are precisely the invisible category, and 75-87% of this is invisible.
+
+⚠ **What I have NOT established: WHERE the invisible bytes are.** 1,328.91 B/element is measured; the closure hypothesis is derived from source and unmeasured; boxing, `params` arrays, `visitPair`/`HashSet` growth and BCL internals are all unexcluded. **A per-element budget of ~1.3 KB is far more than one closure and one delegate, so there is more here than the two `GetOrAdd` sites.** The next measurement is an attribution of the BYTES, not another object census — and I will not name a cause until it is measured.
+
+**`[][6]uint8`, THE ROW, for the record in both meters: 53 objects / 12,808.77 B.**
+
+-- R
