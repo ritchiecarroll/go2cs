@@ -124835,3 +124835,50 @@ Semantically identical, allocates only when a cycle-capable value with real root
 **Arms 1 and 2 remain preserved, local, `DO NOT BANK`. Tree clean at `fd09034f5`. Nothing of mine is running.**
 
 -- R
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **THE NEXT INCREMENT'S DESIGN, AND A CORRECTNESS TRAP I MEASURED BEFORE WRITING ANY OF IT: the obvious fast path SILENTLY INVERTS Go's answer for NaN, and not one of this arc's 39 rows could catch it.**
+
+## ⚠ **THE TRAP, measured on both sides just now**
+
+```
+  C#:  SequenceEqual([NaN],[NaN])   = True      (Double.Equals(NaN, NaN) is True)
+       NaN == NaN                    = False
+  Go:  reflect.DeepEqual([NaN],[NaN]) = false
+```
+
+**`MemoryExtensions.SequenceEqual<T>` dispatches to `IEquatable<T>.Equals`, and `Double.Equals(NaN, NaN)` is TRUE. Go's `DeepEqual` reaches floats through `==`, where NaN is not equal to itself.** So generalising the existing `[]byte` span path to `float32`/`float64`/`complex` **flips a real answer**.
+
+⚠ **And the arc CANNOT see it: `deepEqualPerfTests` uses `1.414`, never NaN.** All 39 alloc rows would go green on a fast path that is wrong. **This is a green that cannot go red — found by asking what the optimisation MEANS, not by running the suite it was aimed at.**
+
+## **THE SCOPE IS SMALLER THAN I SAID, AND I WAS WRONG ABOUT THAT TOO**
+
+I said the typed element walk *"touches `Value.Index`, consumed corpus-wide"*. **It does not have to. DeepEqual's walk only has to stop CALLING it** — a change confined to the hand-owned `deepequal_impl.cs`, **which already contains this exact precedent**: the `[]byte` arm bypasses `Index` entirely via `TryByteSliceView` + spans. **`Value.Index` is untouched, and the blast radius is one hand-owned file.**
+
+## **THE FAMILY, and which members are safe**
+
+```
+  1. slices of INTEGER/bool blittables      -> span SequenceEqual        SAFE (bit equality == Go ==)
+  2. slices/arrays of integer ARRAYS        -> per-element span compare  SAFE   ([6]byte, [][6]uint8)
+  3. slices of float / complex              -> NOT SequenceEqual         NaN: needs elementwise ==
+  4. everything else                        -> the existing Value walk   unchanged
+```
+
+**Member 3 is the one that must not be written the easy way.** An elementwise `==` loop over a `Span<double>` is still allocation-free and still correct — **the cost is one hand-written loop, not the trap.**
+
+## **PREDICTIONS, ON RECORD BEFORE THE CUT**
+
+| shape | now | predicted | confidence |
+|---|---|---|---|
+| `[]int` 1-elem (member 1) | 12 obj | **near 0** | high |
+| `[6]byte` (member 2) | 32 obj | **near 0** | high |
+| `[][6]uint8` THE ROW (member 2) | 52 obj | **near 0 objects, bytes still > 0** | medium |
+| `[]float64` (member 3) | 12 obj | near 0 **and NaN still false** | medium |
+| `[]string`, `[][]byte` | 10 / 13 | **unchanged** — not blittable | high |
+
+⚠ **THE ROW is medium, not high, and deliberately so: the fixed ~1,705 B per call survives every member of this family.** Zero OBJECTS is plausible; zero BYTES is not, on this design alone. **I am not predicting the row closes.**
+
+**Gate note for whoever picks this up:** the alloc rows are NOT sufficient. It owes `TestDeepEqual`'s own NaN rows and the reflect row at both configurations — **the suite that proves the speed cannot prove the correctness.**
+
+-- R
