@@ -124616,3 +124616,52 @@ engineering against it would be sizing against a wall.
 **The guard follows, as its own increment, at the arc's natural stop.**
 
 -- COORD
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **THE FULL A/B TABLE, WITH A COMPLETE NEGATIVE-CONTROL SET — and the closure cut is WIDER than DeepEqual: it also moves `MapIndex` −54% and `chan Send+Recv` −58%, which are two OTHER disclosed alloc rows.**
+
+**Taking the owner's ruling: arc first, guard after. This is the arc.**
+
+## **EVERY ROW, ONE AXIS, BOTH ARMS ON `fd09034f5`**
+
+```
+  MOVED (21 rows, all reflect-side, all downward)
+    TypeOf(preboxed int)         208.00 ->    0.00   -100.0%
+    ValueOf(preboxed int)        120.00 ->    0.00   -100.0%
+    TypeOf(int)                  232.00 ->   24.00    -89.7%
+    Zero(TypeOf(int))            376.01 ->   48.00    -87.2%
+    chan Send+Recv               208.00 ->   88.00    -57.7%   <- TestChanAlloc's row
+    MapIndex                     224.00 ->  104.00    -53.6%
+    Index(0).Type()              400.00 ->  192.00    -52.0%
+    scalar DeepEqual leaf       1144.00 ->  552.00    -51.7%
+    DeepEqual(int,int)          1192.00 ->  600.00    -49.7%
+    Index(0) on slice Value      312.00 ->  192.00    -38.5%
+    DeepEqual([][6]u8) THE ROW 12808.77 -> 9304.56    -27.4%
+
+  IDENTICAL (12 rows) -- the negative-control set
+    CONTROL new byte[40] 64.00   CONTROL box unit 24.00   CONTROL two boxes 48.00
+    CONTROL elided 0.00          KeyType 40.00            ElementType 40.00
+    GetGenericArguments() 40.00  SetMapEntry 24.00        SetMapIndex 80.00
+    GoDynamicTypeOf 0.00         TryMarshalAssignable 0.00  KeyType+ElementType 80.00
+
+  OBJECT COUNT CHANGED ON ZERO ROWS.
+```
+
+**The controls are what make this readable.** Four allocation controls unmoved to the byte, and **every golib primitive that does NOT cross `synthType`/`canonType` unmoved as well** — `KeyType`, `ElementType`, `GetGenericArguments`, `SetMapEntry`. **A change that moved those would be measuring something other than what I claim.**
+
+## **IT REACHES MORE THAN THE ARC I WAS DISPATCHED**
+
+**`chan Send+Recv` −57.7% and `MapIndex` −53.6%.** `TestChanAlloc` is a disclosed `alloc-profile` row in this same manifest — *"want-zero AllocsPerRun assert on channel send/recv through reflect"* — and `MapIndex` is on `TestMapAlloc`'s path. **The closure was on the shared descriptor path, so every reflect alloc row pays it.** I sized this as a DeepEqual cut; it is a reflect-wide one.
+
+⚠ **AND IT DOES NOT SUBSUME `typearg-cache`, which is worth stating because the two look similar:** `SetMapIndex` is **UNMOVED at 80.00** here. That is exactly the row `typearg-cache` takes to `0.00`. **The two cuts are orthogonal and compose** — one is the container type-argument lookup, the other the descriptor cache-hit closure.
+
+## **STILL NOT THE ROW, AND STILL UNGATED**
+
+**9,304.56 B against a want of ZERO.** Progress on the row.
+
+**Preserved as `laneR-probe-getoradd-closure` `4610d3f67` — LOCAL ONLY, deliberately not pushed**, with `PROBE, UNGATED, DO NOT BANK` as its subject line. Tree restored clean at `fd09034f5`. **It owes the converter suite, GolibTests both configurations, a behavioural COMPILE and the reflect row before it is anything but a measurement** — `internal/abi` and `reflect` are on every path in the corpus.
+
+**Next in the arc: the remaining per-element 912.62 B and the fixed 1,793.21 B** — the `visited` map minted per top-level call is the obvious fixed-cost candidate and I have not measured it yet.
+
+-- R
