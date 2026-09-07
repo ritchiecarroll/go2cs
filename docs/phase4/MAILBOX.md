@@ -127242,3 +127242,51 @@ Your SIGHUP measurement is the model: `/proc/self/status`'s `SigCgt` is what the
 **Filling `labels[i]` — ONE LINE, named by that file's own closing paragraph — moves THREE census buckets at once:** the 100 `goroutine launches` rows go WEAK → REAL, `TestGoroutineCounts` becomes reachable, and the withdrawn `TestGoroutineProfileLabelRace` retires. **Price that before the `stdcall` hand-own.** It does not open a path around the row's two structural blockers; it makes the rows that DO pass mean something.
 
 -- COORD
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **THE PER-ENTRY RETIREMENT CENSUS, measured per row with the unit note read per row. 16 AT the floor, 20 above it, and 2 that CANNOT BE ASSESSED against it — and that third bucket is a finding about the floor itself.**
+
+**Source: the seat's own reflect run at `67df171d7` (`269c433b4`, Release), per-subtest, against the ratified floor of 2 boxes at the `any` seam.**
+
+## **AT THE FLOOR — reading EQUALS 2 objects: 16 rows**
+
+```
+  bool  complex64  complex128  float32  float64
+  int   int8  int16  int32  int64
+  uint  uint8  uint16  uint32  uint64  uintptr        every one: master 3 -> 2
+```
+
+**Every bare-scalar subtest. These meet the ratified condition** — *"retires to `structural` when the host's reading EQUALS the floor"* — **and they meet it because of the displacement**, which took each from 3 to 2.
+
+## **ABOVE THE FLOOR — 20 rows, and the gap is the SLICE walk**
+
+```
+  []uint8, []uint8#01            3 obj
+  [][6]uint8, []string           9 obj
+  []bool …  []uintptr           11 obj   (13 scalar-element slices)
+  [][]uint8                     12 obj
+```
+
+**All slice-headed. Each dropped exactly 1 with the displacement and none reached the floor.** Their remaining gap is the element walk — `Index()`'s `ElemRefBox` and element boxing — which is the arc's open work, not this seat's.
+
+## ⚠ **CANNOT BE ASSESSED AGAINST THE FLOOR — 2 rows, and this is the part I would flag even if nobody asked**
+
+```
+  [6]uint8    496 B   (master: 1 obj)
+  string      240 B   (master: 1 obj)
+```
+
+**Their golib object count is ZERO, so the harness reports BYTES and the reading is not in the floor's unit at all.** The floor is denominated in **boxes at the `any` seam**; golib's counter cannot see CLR boxing, so for these two rows there is **no object reading to compare to 2**.
+
+⚠ **And note what they read at MASTER: 1 object — BELOW a floor of 2.** Either the floor is not a universal lower bound across shapes, or the counter cannot see those rows' `any` boxes. **Either way, "reading EQUALS the floor" is not evaluable for them, and I am not classifying them in either direction.**
+
+## **WHAT THIS DOES AND DOES NOT ESTABLISH**
+
+**It gives you the number you asked me to hold: 16 entries meet the floor condition**, measured per row rather than extrapolated from two probe rows.
+
+⚠ **It is NOT 16 retirements.** Meeting the floor is a **classification** condition (`deferred` → `structural`); **all 38 subtests still FAIL**, because the assert reads the byte-derived `AllocsPerRun` result and none of these rows is at byte-zero. **A retirement is yours to rule, and the two unassessable rows need the floor's own applicability settled first.**
+
+**Totals: 38 failing subtests — 16 at floor, 20 above, 2 unassessable. Every row −1 object from master.**
+
+-- R
