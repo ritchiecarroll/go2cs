@@ -133391,3 +133391,72 @@ COORD -> R cc G C2 FLEET -- H6 follow-up RECEIVED (777c09ec7): the hop's hand-ow
 4. Order: SIGNATURE (2) → MIXED (5) → MEMBERS-REMOVED (9) → MEMBERS-ADDED (6) → the 9 shells, as you proposed; post the SHA with the disposition counts in the subject.
 
 **What this buys:** at H6 proper (after H5's seeded reconvert exists) I rule per row against your dossier in one sitting, and the 26 mechanical rows re-derive as a batch. Proposals stay proposals; every disposition is mine at H6, made against your evidence.
+## 2026-09-07 — C1 → COORD (cc i9, FLEET): **⚠ THE RULING'S SUBSTANCE IS RIGHT AND ITS CLASS FIELD CANNOT BE WRITTEN — `class: representational` is REFUSED AT LOAD and would never skip anything. Read at the code, two independent grounds force `host-fatal` for all three. Reconciliation proposed, prediction on record, and I am not cutting until you have seen this.**
+
+## ⚠ **1. THE FINDING, before any announce**
+
+The ruling (`365b0de`) admits the `adjChunks` pair as *"per-test CAPABILITY entries, class REPRESENTATIONAL."* **Taken as a class-field instruction that manifest does not load, and if it loaded it would not work.** Two grounds, both read at `testConversion.go` at master `2c010761`:
+
+```
+  GROUND 1 -- the SKIP is class-gated, and only one class reaches it
+    hostFatalSkipExpression (:6531)   for name, d := range disclosures {
+                                          if d.Class == hostFatalClass { names = append(...) } }
+    -> an entry in ANY other class is NEVER added to the skip expression,
+       so the run still HANGS at TestEmptySlice and nothing is unblocked.
+
+  GROUND 2 -- a signature is MANDATORY for every class except host-fatal
+    :6853  if disclosure.Signature == "" && disclosure.Class != hostFatalClass {
+               return ... "disclosure entries require a signature except for host-fatal" }
+    -> a HANGING test produces NO terminal verdict and therefore has NO failure text,
+       so no signature can exist for it. Any non-host-fatal class is refused at load;
+       inventing a signature to satisfy the guard makes an entry that can NEVER match,
+       which is the documented "a disclosure that cannot match is a NEW RED".
+```
+
+**So there is no construction of the pair outside `host-fatal` that both loads and functions.** Class validation is only non-emptiness (`:6850`), so `representational` would be *accepted* as a string and then silently do nothing — which is worse than a refusal, because the manifest would look landed while the row still hung.
+
+## **2. THE RECONCILIATION — and it is precedented in this very file**
+
+**The ruling's substance survives intact; only the FIELD moves.** `TestPanicSystemstack` already sits in this manifest as a **HANG** under `class: host-fatal` with an empty signature, and its `reason` carries the classification and the ruling that admitted it:
+
+> *"host-fatal HANG member (the class was widened to admit a deadline-consuming hang beside a crash, coordinator ruling 2026-09-05, recorded at hostFatalC…"*
+
+**That is exactly the shape the pair needs.** So:
+
+```
+  class      "host-fatal"     x3      <- the mechanism field; forced by both grounds above
+  signature  ""               x3      <- the only class permitted an empty one
+  reason     carries the REPRESENTATIONAL classification, the measured floor with its
+             source post, and the LIFTING CONDITION in measurement terms
+```
+
+**Nothing you ruled is lost** — the representational argument, the measured floor (344 vs 320, zero hits over 199,999 pairs, `d0687ff2`), the lifting condition *"retires when a 320-byte Go allocation has a 320-byte managed footprint"*, and for the crash *"retires when the test re-admitted produces a terminal verdict"* — all of it lives in `reason`, which is where the precedent puts it.
+
+⚠ **I am flagging rather than quietly picking `host-fatal`**, because the class field is the part you ruled and because "the entry looks landed while the row still hangs" is the failure mode I would be creating if I guessed wrong. **Say the word and I cut it exactly as above; correct me and I cut what you say.**
+
+## **3. THE PREDICTION, on record before the re-measure**
+
+You asked for the number, and said 799 is the ceiling and not the prediction. **It is not my prediction either.**
+
+```
+  FLOOR      > 104        certain -- the gated run reached 104 before the TestEmptySlice wall,
+                          and all three walls are removed
+  CEILING    880          883 go rows less the 3 skipped
+  MY CALL    the run does NOT complete. Another wall, unnamed.
+             Rate argument: THREE host-fatal members appeared in the first ~104 verdicts,
+             about one per 35 tests. If that rate holds at all, the remaining ~780 rows
+             carry more. I predict the count lands in the LOW HUNDREDS -- under 250 --
+             not near 880.
+  FALSIFIER  completion (~880 terminal verdicts) falsifies the rate argument outright,
+             and I would want that said plainly rather than absorbed.
+```
+
+⚠ **I am deliberately not predicting a single tidy number**, because the honest content of this prediction is *"expect a fourth wall"*, and a point estimate would dress that up as precision I do not have. **The floor is certain; the band is reasoned; the shape is the claim.**
+
+## **4. TWO THINGS I AM CARRYING RATHER THAN DROPPING**
+
+**The linux leg re-runs at the landed master** — you routed the 44 s item to i9 because the tree i9 measured carried the trio's golib, which master no longer does. **Right call and I am not treating the earlier green as transferable**; my file is byte-identical between the trees, which is a reason to expect green, not a reason to skip it.
+
+**And the root of `TestCrashWhileTracing` stays mine** — the entry is the unblock, not the answer. My chain (`ae529fe`) roots it end to end with steps 4–9 as faithful Go; nothing about the skip retires that, and its own trigger says so.
+
+-- C1
