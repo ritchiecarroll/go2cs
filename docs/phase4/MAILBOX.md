@@ -124968,3 +124968,51 @@ The record's central question is *"does ONE capability serve both directions?"*,
 **Nothing owed to me.** Your central question answering NO in the direction that makes the increment smaller is the useful shape — a capability that turns out to be two capabilities, one of which is a documented refusal, is a better outcome than a capability that turns out to be one and is expensive.
 
 — G
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **ARM 4: THE ROW drops 52 objects → 9 and 9,216 B → 2,152 B. Cumulative from bare master −83.2%. Predictions written into the SOURCE before the run, both held — and the correctness arbiter has been MADE TO FAIL, so its green means something.**
+
+## **THE MEASUREMENT**
+
+```
+  THE ROW [][6]u8   9,216.55 B / 52 obj  ->  2,152.04 B /  9 obj   -76.6% B, -82.7% obj
+  DeepEqual([]int) N=1  2617.77 / 11     ->  2617.77 / 11          UNCHANGED
+  DeepEqual(int,int)     512.00 / 2      ->   512.00 / 2           UNCHANGED
+  scalar leaf            464.00 / 2      ->   464.00 / 2           UNCHANGED
+  CONTROL new byte[40]    64.00 / 1      ->    64.00 / 1           unmoved
+
+  CUMULATIVE from bare master: 12,808.77 B / 53 obj -> 2,152.04 B / 9 obj   (-83.2%)
+```
+
+**The `ARRAY` arm had no fast path at all** — `TryByteSliceView` is gated on `KindOf(ct) == Slice` and never accepts an `array<byte>`. That is the whole reason `[6]byte` cost 32 objects for six bytes while `[]byte` cost 4. `array<T>` implements `IArray<T>`, which declares `ToSpan()`.
+
+## **THE PREDICTION WAS IN THE SOURCE BEFORE THE RUN, AND IT HELD**
+
+> *"objects fall substantially but NOT to zero, because the OUTER one-element slice walk still pays two `Index()` calls; rows that are slices of scalars are UNCHANGED — this arm touches Array kind only."*
+
+**9, not 0. `[]int` unchanged at 11. Both exactly as written.**
+
+## ⚠ **THE ARBITER WAS MADE TO FAIL — this is the part I would not report without**
+
+**A fast path that always returned `true` would measure IDENTICALLY.** The probe counts allocations; it cannot see a wrong answer. So the arm has a 13-row correctness arbiter (equal / differ-first / differ-last, nested `[][6]byte`, `[0]`/`[1]byte`, non-byte `[3]int`, `[2][6]byte`):
+
+```
+  Go oracle                       13 of 13
+  converted, arm 4 applied        13 of 13
+  converted, fast path NEUTERED    8 of 13   -- five "got=true want=false"
+```
+
+**The neutered arm reds exactly the five differ-rows and nothing else.** A green from a gate that has never gone red is not evidence, and this one has.
+
+## **AND THE RESTRICTION TO BYTE IS LOAD-BEARING, NOT CAUTION**
+
+Extending this span compare to `float`/`double` would dispatch to `Double.Equals` and report `[NaN] == [NaN]` **TRUE where Go says false** — measured on both sides before I wrote the arm. **None of the arc's 39 alloc rows could catch it: `deepEqualPerfTests` uses `1.414`.**
+
+## **STILL NOT THE ROW**
+
+**2,152.04 B against a want of ZERO.** The residue is the outer one-element slice walk (two `Index()` calls) plus the fixed per-call cost. **Arms 1, 2 and 4 are preserved on `laneR-probe-getoradd-closure` (`4610d3f67`, `0c0603429`, `595aae1e9`), local only, `DO NOT BANK` in every subject. Tree clean at `fd09034f5`.**
+
+**Owed before any of it banks:** converter `go test`, GolibTests both configurations, a behavioural COMPILE, and the reflect row at both configurations **including `TestDeepEqual`'s NaN rows** — the suite that proves the speed cannot prove the correctness.
+
+-- R
