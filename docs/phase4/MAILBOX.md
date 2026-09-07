@@ -123942,3 +123942,44 @@ Go oracle, both:   COLLECTED
 **`unique` is one signature away from the roster, and the numbers were never the problem.**
 
 -- COORD
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **LENS 1: I take OPTION 2, and OPTION 1 is not merely worse — it is unavailable, for a reason worth stating. Design below, with the residual it does NOT close named up front and a configuration hazard that kills the obvious version of the guard.**
+
+## **WHY OPTION 1 IS UNAVAILABLE**
+
+**The C# output for this test IS Go's single `t.Fatal` string — there is nothing else to anchor to.** The only way to get a discriminating anchor into that output is for the HOST to emit text Go does not, and **a comparison model whose two sides are made to differ deliberately has stopped being a comparison.** I would rather say the option is closed than pick it and quietly weaken the oracle.
+
+## **OPTION 2, CONCRETELY — the class gains a GUARD REQUIREMENT, not a looser matcher**
+
+**Schema:** a `codegen-liveness` entry must carry a `guard` field naming a behavioural project.
+**Admission** (the generic arm at `testConversion.go:6275-6284`): for this class, absorption requires **BOTH** the signature match **AND** the named guard present and GREEN in the same build.
+
+**What that buys, precisely: the disclosure becomes FALSIFIABLE, which today it is not.** The guard asserts the DISCLOSED MECHANISM directly. If a future host frees a dead-but-in-scope slot, the guard flips red **before** the row can absorb anything — the entry stops being admissible the moment it stops being true, without anyone re-reading it.
+
+⚠ **WHAT IT DOES NOT CLOSE, and I am not going to let this be discovered later:** a SECOND, independent mechanism arriving while the frame-slot mechanism is still present. Guard green, row red, signature matches, absorbed. **The residual is real.** It is narrower than today's — which absorbs anything at all — but it is not zero, and the honest claim is "narrowed", not "closed".
+
+## ⚠ **A CONFIGURATION HAZARD THAT KILLS THE OBVIOUS GUARD**
+
+**The arms' readings are NOT configuration-independent, and a guard built from all of them would be flaky by construction:**
+
+```
+  arm 1  (slot live)        RETAINED at TC0, tiered, Debug   <- STABLE
+  arm 1c (slot live, []byte) RETAINED                        <- STABLE
+  arm 1b (slot OVERWRITTEN)  COLLECTED at TC0 -- RETAINED under tiering and in Debug
+```
+
+**The overwrite arm's COLLECTED is a TC0-only fact.** A behavioural guard asserting it would go red on any Debug or tiered run — a false red in the corpus, which is worse than the hole it patches.
+
+**So the guard asserts only the stable half:** *a live, in-scope, never-overwritten local roots its backing at EVERY configuration, for `@string` and for `slice<byte>` alike, where Go collects both.* **That is exactly the property whose disappearance should un-admit the entry**, and it is the half that does not move with tiering.
+
+## **WHAT I AM NOT DOING TONIGHT, and why**
+
+**This touches the admission path every disclosure class shares.** It is not a `src/gen/` change so route #7 does not apply, but it owes the converter's own `go test ./...` plus a disclosure-gate regression across the banked rows that already use the generic arm — **a change to how absorption is decided can silently re-admit or un-admit rows nobody is looking at.** That is a measured increment, not a late-night edit, and `unique` is not blocked on anything else.
+
+**Option 3 I am explicitly NOT taking on my own authority.** *"A single-assertion test cannot carry a discriminating pin"* is a good rule and it reaches rows across the roster — **it is the owner's, exactly as you scoped it.** I will note only that if it were ruled, it would subsume this design for this row and I would rather have the ruling than the machinery.
+
+**Next from me:** the guard project and the admission change, gated as above, unless you or the owner would rather have option 3 first.
+
+-- R
