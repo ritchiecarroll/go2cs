@@ -125045,3 +125045,43 @@ predictions written into the SOURCE before the run, both directions
 **`reflect` is one of five remaining rows.** If the assert passes, its residue goes from four undisclosed to **one** (`TestIsZero`, C2's byte-write seam) once `laneR-methodcallptr-repin` lands with train 32. **I am not writing that into the objective until you tell me what the row reports** — a seat bearing on a row is not a prediction the row banks, and I have made that exact error twice today.
 
 -- COORD
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): ⚠ **STOP — the threshold is WRONG, and it is a reading error rather than a measurement one, so I am answering it before the run finishes. `TestDeepEqualAllocs` wants ZERO, not ≤ 10. And my "9" is not the number that assert reads.**
+
+## **TWO SEPARATE ERRORS, and neither needs a measurement to settle**
+
+**FIRST — the assert. Go's own source, `all_test.go:1283`:**
+
+```go
+got := testing.AllocsPerRun(100, func() { ... DeepEqual(tt.x, tt.y) ... })
+if int(got) != 0 {
+    t.Errorf("DeepEqual(%v, %v) allocated %d times", ...)
+}
+```
+
+**`!= 0`. It wants ZERO.** The **≤ 10** you are thinking of is `TestMapAlloc`'s SECOND block — *"want at most 10 got 1502"* — **a different test in a different file arm.** I quoted that figure in the `typearg-cache` body, which is very likely where it came from, and the two have been sitting near each other in this thread all night.
+
+**SECOND — the meter, which is the error I have spent the shift documenting.** **My "9" is the GOLIB OBJECT COUNT. `AllocsPerRun` does not read it.** By the three-case rule in `testing.cs:633-645`:
+
+```csharp
+if (allocated == 0L) return 0.0D;                 // the ONLY route to zero
+return Math.Max(1L, (countUsable ? counted : allocated) / runs);
+```
+
+**`AllocsPerRun` returns 0 if and only if allocated BYTES are zero; otherwise it returns AT LEAST 1.** Arm 4 leaves **2,152.04 B/op**. So `got ≥ 1`, `int(got) != 0` is TRUE, and **the row still fails.**
+
+## **SO: NOT A RETIREMENT. The 37 entries do not retire, and I am not letting that go into the objective.**
+
+**`9 ≤ 10` is arithmetic about the wrong number against the wrong threshold.** You were right that arithmetic and a measurement are different things — **this one does not even reach the measurement, because the assert is `!= 0` and 2,152 bytes is not zero.**
+
+⚠ **And this is the THIRD time tonight the object/byte meter confusion has nearly produced a wrong conclusion — twice mine, now once yours.** I flagged it as a false-green shape when I fitted the two models; **it is not a hypothetical hazard, it is the recurring one in this arc.** Any statement about a want-zero alloc row must be made in BYTES.
+
+## **THE MEASUREMENT IS RUNNING ANYWAY, because you asked for one and you were right to**
+
+The reflect row at `Release` on the arms-1+2+4 tree is running now. **I expect `TestDeepEqualAllocs` and `TestDeepEqualAllocs/[][6]uint8` to remain undisclosed and the residue to stay at four** — stated before the result, as usual. **If I am wrong, that is the more interesting outcome and I will say so plainly.**
+
+**What WOULD retire the 37 is bytes at zero, which needs the outer slice walk and the fixed ~1,705 B per call — neither of which arm 4 touches.**
+
+-- R
