@@ -24189,4 +24189,57 @@ the four minutes BEFORE writing a dispatch rather than after.
 it must be run on the suspected DOWNSTREAM member as well as on the head — running only the head
 cannot tell the two apart. These runs are diagnostic only: each rewrites the package's comparison
 record, so the records were deleted and the worktree restored after every one.
+
+## 2026-09-07 — PRE-PIN BASELINE COMMIT (R): `reflect` and `unique`, banked before the go1.24.13 pin
+
+**Why this block exists.** The course correction (`7c946ab62`) makes the Go 1.24 hop the objective and
+names the real pre-pin gate: the runbook's H10 allows **no carry-forward** — every roster row
+re-validates from scratch, numerator, denominator and disclosure set alike — while these readings lived
+only in scratchpads, mailbox posts and session memory. A hop destroys those, and the rows they would be
+re-derived against are refuted, so a post-hop delta would be subtracted from a **wrong** baseline. Two of
+the four rows named are mine. Here they are, with the instrument that produced them.
+
+### `reflect` — 326 matched / 59 disclosed / 3 undisclosed, of **388**
+
+⚠ **The denominator is 388, not 385, and the difference is exactly the three undisclosed rows.**
+`matched + disclosed = 385` is the figure in circulation — `7c946ab62` quotes "a package at 326-of-385" —
+but the comparison record reads **388 tests on the Go side and 388 on the C# side**. The 59 is a count of
+*manifest entries*; the 3 is a count of *distinct failing test names absent from the manifest*. A baseline
+banked at 385 absorbs those three into the denominator's absence and would under-state the post-hop gap by
+exactly 3. This is the refuted-baseline hazard the ruling names, one layer finer.
+
+```
+  go-side tests        388        matched                326
+  csharp-side tests    388        disclosed (entries)     59
+                                  undisclosed (names)      3
+  326 + 59 = 385   <- the figure in circulation
+  326 + 59 + 3 = 388   <- the row's true denominator
+```
+
+The three undisclosed are `TestDeepEqualAllocs`, `TestDeepEqualAllocs/[][6]uint8` and `TestIsZero`. The
+first two are want-zero allocation asserts, which owner ruling #1 keeps permanently undisclosed; `TestIsZero`
+is the corrupt-reference row (a non-null invalid reference from an unsafe byte write — no reflect-side fix
+applies). **None of the three is a candidate for disclosure at the re-bank**, which is a fact the post-hop
+re-derivation needs, because a row that re-appears at 326/59/3 has not regressed.
+
+**Provenance.** go1.23.12, at `4ee87398a` and at `07bd5f506`. Taken **four times** — two trees × Release and
+Debug — with all four legs agreeing to the digit, each from its own freshly written comparison record with a
+checked mtime and **no timeout event** in the tail. Not a single reading, and not a carried one.
+
+### `unique` — 19 matched / 1 disclosed / 0 undisclosed, of **20**
+
+The committed row above (2026-08-07, r41c-cloneseq) reads **`4 of 19`**. It is refuted twice over: the
+numerator moved to 19 (the descriptor companion, `66a73ab03`, on master) and **the denominator moved 19 → 20**.
+A post-hop re-derivation against `4 of 19` would be wrong in both terms.
+
+⚠ **The measurement and the disclosure have different standing, and banking them together would be a
+falsehood.** COORD confirmed the *measurement* at 19/1/0 "with flawless hygiene" while recording that **2 of
+3 adversarial lenses refuted the DISCLOSURE** (`d9eaa6d55`) — which is precisely why the row does not bank.
+So the baseline is: **19 matched of 20 is the measured reading; the single disclosure is CONTESTED and must
+not be inherited as settled.** The queued remedy is the owner's Option 2 (tightening the `codegen-liveness`
+matcher with a `guard` field on the entry and admission requiring the named guard green), which is post-hop.
+
+**What this block does NOT claim.** It banks no row and retires no disclosure. It records what these two rows
+measured at 1.23.12 so the 1.24.13 re-derivation has a true baseline to subtract from, per H10.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
