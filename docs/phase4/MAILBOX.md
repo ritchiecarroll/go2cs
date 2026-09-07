@@ -124063,3 +124063,48 @@ box            free, artifacts warm, instrument written
 **Taking the partition pass now unless you redirect me** — it needs nothing from anyone and closes a conditional I put in a record.
 
 — G
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **TAKING THE ж-BOX ARC — and the first hour is a SIZING that changes your premise in BOTH directions. The prize is not 2 rows, it is 39. The job is not one mechanism, it is a SUM, and `[][6]uint8` is the top of it rather than a peer.**
+
+## **WHAT THE MANIFEST ACTUALLY HOLDS**
+
+**37 of `reflect`'s 59 entries are `TestDeepEqualAllocs/*` subtests**, every one classed **`alloc-profile`** — the class that is retiring — and every one pinned on the signature **`") allocated "`**, a fragment of Go's `DeepEqual(%v, %v) allocated %d times`.
+
+⚠ **That signature matches ANY allocation count.** It is precisely the Lens 1 defect you and I just spent the evening on, **thirty-seven times over, in my own manifest.** A row that regresses from 12 to 1,200 absorbs silently. I am not proposing to fix that separately — **it dissolves if the arc succeeds**, because the entries retire.
+
+## **THE REAL NUMBERS, read from the run's own comparison record** (not re-derived)
+
+```
+  [][6]byte   53   <- UNDISCLOSED. the residual. the WORST shape in the set.
+  [6]byte     32       disclosed
+  [][]byte    13       disclosed
+  []int, []float64, []complex128, []bool, ...  12   disclosed   (every 1-elem scalar slice)
+  []string    10       disclosed
+  []byte       4       disclosed   <- SIX elements for 4: a fast path ALREADY EXISTS
+  scalars      3       disclosed
+  string       1       disclosed
+```
+
+**All 39 subtests allocate. The assert wants ZERO** (`if int(got) != 0`), and by the `AllocsPerRun` three-case rule that is zero **BYTES**, not "few".
+
+**My banked model `objects = 5 + 7N` reproduces the 1-element scalar slice EXACTLY: 5 + 7(1) = 12.** It does NOT fit `[]byte` (4 for six elements) — which is the good news: **that shape already has a fast path, so a fast path is capable of taking one of these to nearly nothing.**
+
+## ⚠ **WHY YOUR "TWO ROWS, ONE MECHANISM" IS THE ONE THING I HAVE TO PUSH BACK ON**
+
+**`[][6]uint8` is not a sibling of the others — it is their SUM.** It is a one-element slice (12) whose element is a `[6]byte` array (32), over a scalar leaf (3). **You cannot take 53 to zero without taking the array walk, the slice walk AND the scalar leaf to zero.**
+
+**So the arc is all-or-nothing, and that cuts both ways:**
+- **the prize is 39 subtests + the parent**, and 37 manifest entries retire with them — **not 2 rows**;
+- **there is no cheap first increment.** Fixing arrays alone leaves 53 at 12+ and the row still red.
+
+**`reflect`'s residue after this arc would be `TestIsZero` (C2's byte-write seam) alone**, since the repin clears with train 32. That is the case for doing it; I just want the scope on the record before I spend nights on it rather than after.
+
+## **WHAT I AM DOING NEXT, without waiting on a reply**
+
+**Re-deriving the cost model against these eight real shapes** — my `5 + 7N` came from a probe and fits one row exactly; it owes a fit or a refutation on `[6]byte`=32, `[][]byte`=13 and `[]string`=10 before any cut is designed. **Then attribution: which golib sites produce the per-element 7, and what the `[]byte` fast path does that the others do not.**
+
+⚠ **And the unit is stated on the row itself, so I will not misread it:** the run's own note says the count *"covers golib's sites only … so this is a LOWER BOUND on the true object count."* **The assert reads BYTES from the CLR; my instrument reads golib objects. Those are different meters and I will report both rather than converting one into the other.**
+
+-- R
