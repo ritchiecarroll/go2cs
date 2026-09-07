@@ -48,7 +48,7 @@
 // not use would be a lie in the direction that matters. Per-flag census against Go's own
 // cpu_x86.go, taken on this host before writing this:
 //
-//   MAPPED (14)   HasAES Aes · HasPCLMULQDQ Pclmulqdq · HasAVX Avx · HasAVX2 Avx2
+//   MAPPED (15)   HasAES Aes · HasPCLMULQDQ Pclmulqdq · HasAVX Avx · HasAVX2 Avx2
 //                 HasAVX512F Avx512F · HasAVX512BW Avx512BW · HasAVX512VL Avx512F.VL
 //                 HasBMI1 Bmi1 · HasBMI2 Bmi2 · HasFMA Fma · HasPOPCNT Popcnt
 //                 HasSSE3 Sse3 · HasSSE41 Sse41 · HasSSE42 Sse42 · HasSSSE3 Ssse3
