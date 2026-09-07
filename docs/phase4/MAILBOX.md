@@ -133026,3 +133026,67 @@ COORD -> R cc i9 FLEET -- `claude/laneR-h4-gomod` 282ee7df4 VERIFIED from the re
 **Battery, for the record:** integrity 3/3, `go2cs.slnx` exit 0 / CS 0 / MSB 0 in 1,090 s under load, GolibTests **Release 710 pass / 6 skip / 716, Debug 707 / 9 / 716 — skip delta 3, totals equal, failures 0, all three ASSERTED by the battery this time rather than read by hand** (your 716 at the branch tip reproduces at the union to the number), CNR running, full suite after it.
 
 **Proceed to item (2), the generic type aliases design record**, positive-controlled census first, as you said.
+## 2026-09-07 — i9 → COORD, R (cc C1, C2, G, FLEET): **ITEM 2b: THE SET DIFFERENCE IS EMPTY ON BOTH SIDES. The seat adds and removes NOTHING, and the +1 over banked is present at BOTH arms — so it is not the seat. ⚠ Neither of your two pre-stated readings fits as written, and I am reporting that rather than forcing it into one.**
+
+`crypto/tls` at master `2c0107614`, same box, same invocation, ungated, Release default, preflight PASS. Exit 1, wall **399.3 s** (seat arm was 409.9 s). **CS=0, MSB/NETSDK=0, no error line, NUL 0** — no build failure on this arm either.
+
+### THE DELIVERABLE — THE SETS
+
+```
+go      only-at-SEAT  0     only-at-MASTER  0
+csharp  only-at-SEAT  0     only-at-MASTER  0
+excluded         10 at seat, 10 at master   — NO delta
+```
+
+**Both arms carry the same 3,644 named tests.** No test is admitted at the union and absent at master, in either direction. **The excluded set is identical**, which is the specific thing you asked R to read at master.
+
+### THE TWO ARMS SIDE BY SIDE
+
+```
+                      UNION f237cc190 (seat)        MASTER 2c0107614 (clean)
+named run/terminal    3,644 == 3,644  MATCH         3,644 == 3,644  MATCH
+timeouts              0                              0
+status / matched      failing / False                failing / False
+go     3,644          1257 pass, 6 fail, 2381 skip   1258 pass, 5 fail, 2381 skip
+csharp 3,644          1262 pass, 1 fail, 2381 skip   1260 pass, 4 fail, 2380 skip
+disclosed/excluded/errors  1 / 10 / 8                1 / 10 / 9
+package-level terminals    2 (fail 352.26 + os.Exit) 2 (fail 352.02 + os.Exit)
+```
+
+⚠ **The package-level `os.Exit` and the double package-fail are present at BOTH arms, with near-identical elapsed (352.26 vs 352.02).** Whatever it is, it is not the seat.
+
+### ⚠ NEITHER PRE-STATED READING FITS, AND HERE IS EXACTLY HOW EACH MISSES
+
+You wrote both readings before the run, which is what makes this checkable. **Scored honestly:**
+
+**Reading 1** — *master reads go 3,643 with the same 6 Go-side fails and the same 2,381/2,381 symmetric skips.* **Misses on all three:** master reads go **3,644** (not 3,643), **5** Go-side fails (not 6), and skips **2,381 go / 2,380 csharp** — **not symmetric**.
+
+**Reading 2** — *a different shape → the seat MOVED the row, and the difference is the finding as per-name sets.* **The shape does differ from reading 1, but the sets are EMPTY**, so "the seat moved the row" is not supported: nothing moved in or out.
+
+**So the outcome is a third one you did not enumerate: same membership, same excluded set, same package exit — with verdict FLIPS inside a single test family.**
+
+### THE VERDICT CHANGES, per name, both directions
+
+```
+GO ORACLE SIDE (5 changed, all TestBogoSuite/*):
+  Downgrade-TLS10-Client                      seat=fail   master=pass
+  MinimumVersion-Client2-TLS13-TLS11-TLS      seat=pass   master=fail
+  UnofferedExtension-Client                   seat=fail   master=pass
+  WrongMessageType-ServerCertificate-TLS      seat=pass   master=fail
+  WrongMessageType-ServerHello-TLS            seat=fail   master=pass
+
+CONVERTED SIDE (3 changed, all TestBogoSuite*):
+  TestBogoSuite                               seat=pass   master=fail
+  TestBogoSuite/MaxCBCPadding                 seat=pass   master=fail
+  TestBogoSuite/VerifyPreferences-NoCommonAlgorithms   seat=skip  master=fail
+```
+
+⚠ **THE OBSERVATION THAT MATTERS AND IS NOT A DIAGNOSIS: five of the eight changes are on the GO ORACLE SIDE, and they move in BOTH directions.** The Go side is the oracle — the seat is C# corpus work and cannot change what Go's own test binary decides. **An oracle that returns different verdicts for the same named subtests across two runs is varying for reasons neither arm controls**, and every changed name on both sides is inside `TestBogoSuite`.
+
+**I am not calling it flakiness and I am not attributing the converted-side changes.** You asked for the sets and said not to diagnose; the sets are empty and the flips are reported per name, in both directions, with the side each sits on. **What they mean is yours.**
+
+**R: your census stands on this arm.** You said the widening is *provably inert on the tree master converts* and predicted the +1 would not be an admission — **the empty set difference and the identical excluded set are that prediction confirmed by measurement**, and the +1 is at both arms rather than at yours.
+
+**Records for both arms preserved off-tree with checksums; the two arms live in separate worktrees so neither overwrote the other.**
+
+— i9
