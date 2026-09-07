@@ -131849,3 +131849,53 @@ RECONSTRUCTION  commit f8d94d07cbbcecd25aff1bf46630ce747b11b74f
 **I will report against the property you named — COMPLETION, not the verdict count:** run actions versus terminal actions, whether the results file stops mid-stream, and whether the terminator is a clean package-level end or the markerless host death that is `printCountProfile`'s signature. **A verdict count differing from 147 is not the finding and I will not report it as one** — my baseline for this row at `5a27a8972` was 148 run / 148 terminal, go 157 / csharp 147, 23 failing, suite ran to completion.
 
 — i9
+
+## 2026-09-07 — i9 → COORD (cc C1, C2, G, R, FLEET): **THE ROW RAN TO COMPLETION — 151 run actions against 151 terminal actions, zero timeout events, a clean package-level terminator. No `printCountProfile` signature. ⚠ BUT IT IS MEASURED AT MY RECONSTRUCTION, NOT `a77760cd3`, AND THE READING IS VOID UNTIL YOU MATCH THE TREE SHA.**
+
+**The caveat leads because it decides whether any of the rest counts.** `a77760cd3` is not on the remote (HTTP 422), so this was measured at the union I rebuilt from your five pushed seats:
+
+```
+measured at   commit f8d94d07cbbcecd25aff1bf46630ce747b11b74f
+              TREE   634cc46bf200eca029fda30b5e67fedd2ac319b1
+compare with  git rev-parse a77760cd3^{tree}
+```
+
+**Equal → gate discharged. Not equal → this reading is void, push the head and I re-run in three minutes.** I am not asserting equality.
+
+### THE PROPERTY YOU NAMED
+
+```
+run actions       151
+terminal actions  151          MATCH        <- baseline was 148 == 148
+timeout events    0
+last event        {"package":"runtime/pprof","test":"","action":"fail",
+                   "elapsed":34.8334998,"output":null}
+```
+
+**A clean package-level terminator with a real elapsed time — not the markerless host death.** Nothing stops mid-stream: every started test reached a terminal action, and the results file ends where a completed run ends. **The `printCountProfile` signature you described — a run/terminal mismatch, a markerless death, or a results file cut short — is ABSENT.**
+
+**Provenance:** preflight PASS (`binary=go1.23.12 tree=go1.23.12 GOTOOLCHAIN=local dotnet=10.0.400 CGO_ENABLED=0`); convert **0** / 3.56 s, build **0** / 55.69 s, compare **1** / 109.76 s; histograms `error CS`=0 and `error MSB|NETSDK`=0 on **all three** legs; every stream ASCII with **NUL 0**, so the greps are valid rather than well-formed-empty; records written 16:20:15 against a 16:17:26 start, results 134 ms older than the comparison. **`testFilter` is `None`** — the run was genuinely ungated, verified from the record rather than from the command line.
+
+### SUPPORTING NUMBERS — explicitly NOT the finding, per your instruction
+
+```
+PROPERTY            BASELINE 5a27a8972      THIS RUN
+run == terminal     148 == 148  MATCH       151 == 151  MATCH
+timeout events      0                       0
+terminator          package fail            package fail (elapsed 34.83)
+go rows             157                     160
+csharp rows         147                     150
+csharp failing      23                      24
+```
+
+You said *"a verdict count that merely differs from 147 is NOT [the finding]"*, so I am not reporting 150 as one. ⚠ **One observation about it rather than a diagnosis: the shift is +3 on BOTH sides, symmetrically** — go 157→160 and csharp 147→150 — with failing moving 23→24. A symmetric change in the denominator is the shape of *more tests existing*, not of tests dying; an asymmetric one would have been worth stopping for. **It is C2's and your call what the trio adds to this row, and I have not looked.**
+
+Full csharp breakdown for the record: 120 pass, 24 fail, 4 skip, 2 infrastructure-error — **`infrastructure-error` kept separate from `fail`**, as always. Go side 158 pass / 2 skip. errors 39, excluded 2, disclosed 6, skipped 2. Release, tiering off, .NET 10.0.11.
+
+### SCOPE
+
+Records preserved off-tree with checksums. Worktree `job-i9-train37-pprof` is held at the reconstruction and can be re-measured or discarded on your word. **C1's `runtime` row worktree is untouched** — that one is still at `5a27a8972` with its four record pairs intact, deliberately not moved to train-37's tree, so the `runtime` readings stay mutually comparable.
+
+**If the trees match, this closes your last open question and train 37 lands.** If they do not, push the head or a union branch and say so; the re-run costs three minutes and I will not bank this reading in the meantime.
+
+— i9
