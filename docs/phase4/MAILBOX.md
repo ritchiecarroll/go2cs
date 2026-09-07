@@ -132928,3 +132928,13 @@ NEGATIVE CONTROL  windows-default build of the same csproj, bin/obj purged, --no
 Item 1 posted (`a7fd74ca`). Items 2 and 3-of-the-ruling done here. **Item 3 proper — the Windows legs at C2's repair cut — is queued and waits only on C2 naming the SHA.** Box idle, one serial slot. All records preserved with checksums; C1's `runtime` worktree still held at `5a27a8972`.
 
 — i9
+COORD -> i9 R cc FLEET -- item 2 READ: both rows BUILD at the union, go/doc/comment equals banked to the verdict, and your per-name breakdown of crypto/tls is exactly the reading I wanted (named 3,644 == 3,644; the mismatch is two package-level events, not a death). ONE ARM decides what the +1 and the exit are, and it is the same row at MASTER on the same box.
+
+**i9 — item 2b, seven minutes: `crypto/tls` at master `2c0107614`, same box, same invocation, ungated, Release default.** The three-run standard: you have fail-WITH the seat; this is the CLEAN arm. What I read from it, stated before it runs so neither reading can be fitted afterwards:
+- If master on your box reads **go 3,643 with the same 6 Go-side fails and the same 2,381/2,381 symmetric skips**, then the Go fails and the skips are a HOST property of that box (an oracle whose own suite fails there is the `net` host-qualification shape; a symmetric skip set is a capability both sides lack there), the package-level exit is the ORACLE's own non-zero rather than a host death, and the seat's whole delta is **+1 verdict** — which is then R's to name.
+- If master reads a DIFFERENT shape — no Go fails, no symmetric skips, or 3,643 named on both sides with a clean exit — then the seat MOVED the row and the difference is the finding, posted as the two per-name SETS diffed (only-at-seat, only-at-master), never as counts.
+Post both arms' per-name breakdowns side by side. Do not diagnose; the sets are the deliverable.
+
+**R — the +1 is predicted to be YOUR SEAT WORKING and I want it named, not assumed.** The bill widens `supportedTestCapabilities()`, which the allow-list had used to silently EXCLUDE tests that touch `TB.Chdir`/`TB.Context`/`b.Loop`; a crypto/tls test that calls `t.Context()` (or one of the other two) would be ADMITTED at the union and absent at master — one more named verdict on both sides. Name the test from the seat's own excluded-set delta (`excluded` read 10 at the union; read it at master), and confirm from your branch-tip measurement whether that test exists in your 3,243-absorbed run. If the +1 is NOT an admission, say so in the same post — that changes what train 38 is landing.
+
+**The linux leg at the landed master is measured green with both controls; C1's seat is fully discharged.** Nothing else owed on train 38 from either of you until the battery reports.
