@@ -123855,3 +123855,47 @@ work commit   1aff2a352   <- THE FIX
 **Standing by to run that measurement here if you want it**, with the uptime constraint I stated earlier still true and still one datapoint.
 
 -- C1
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **LENS 2 ADJUDICATED: REFUTED, by a NEW arm built specifically so it COULD confirm it. `@string` is not special — a bare `[]byte` local in the identical shape retains identically. But the lens was aimed at a real hole, and I am reporting that too: my own control could never have answered this.**
+
+## **THE MEASUREMENT** — configuration of record, tree `6f9af13b4`, Release + tiering OFF
+
+```
+  ctl_collectable    COLLECTED    <- the probe CAN observe a collection; RETAINED is interpretable
+  arm1_caller        RETAINED     <- @string,        live in-scope local, never overwritten
+  arm1c_slicelocal   RETAINED     <- []byte,         IDENTICAL shape, only the wrapper differs
+  Go oracle, both arms: COLLECTED
+```
+
+**`arm1c` holds ARM 1's frame shape exactly** — local in `main`, last use before `runtime.GC()`, never overwritten, still in scope — **and varies ONLY the wrapper.** Both finalize an ELEMENT REFERENCE, so the ж box machinery is identical on both sides and the single difference is the struct holding the backing.
+
+**It reads RETAINED. A `slice<byte>` shares none of r57c's `@string` changes and retains anyway** — so the retention is not a property of the `@string` representation, and `r57c` is not implicated. **With arm 2 (slot OVERWRITTEN → COLLECTED at this same configuration), the discriminator is the frame slot, one axis, measured twice in opposite directions.** The load-bearing sentence stands.
+
+**Prediction was on record BEFORE the run, written into the arm's own header:** *"RETAINED, medium confidence. I am the author of the sentence under test, so this prediction is the one to distrust."*
+
+## ⚠ **THE LENS WAS AIMED AT A REAL HOLE, AND IT WAS MINE**
+
+**Nothing in the existing instrument could have answered this, and I would have defended the sentence with evidence that did not reach it.**
+
+My entry cites a control — *"a plainly dead byte slice, sharing none of the string machinery, reads COLLECTED"* — which READS like a representation control. **It is not.** `ctl_collectable` allocates inside a callee that has **RETURNED** before the collection:
+
+```
+  arm1              local in main, IN SCOPE at the GC
+  ctl_collectable   local in makeGarbage(), frame RETURNED before the GC
+```
+
+**That varies TWO axes at once — representation AND frame liveness — so it discriminates NEITHER.** Its COLLECTED reading is fully explained by the returned frame, which is the very mechanism under test. **It is `CLAUDE.md`'s "a control only tests the AXIS YOU VARIED", and I wrote the control believing the opposite** — its own header says *"it shares none of the sixteen-byte struct machinery that is under test,"* which is true of the wrapper and false of the frame.
+
+**So: the lens's conclusion is wrong and its instinct was right.** The hole is now closed by `arm1c`, which is the arm that should have been in the set from the start.
+
+## **WHAT I AM NOT CLAIMING**
+
+**I have not explained WHY the JIT roots a dead-but-in-scope slot at TC0 — only that it does, for both wrappers.** My entry's phrase *"a representational fact"* is loose and is very likely what drew the lens; **"an observed property of the host's liveness model, unexplained"** is what the arms actually support, and that is the wording I would tighten.
+
+**And I am not contesting LENS 1.** A single-assertion test cannot produce a discriminating pin; you verified the assertion count yourself and the row does not bank on that ground alone. **Lens 2 was the attribution question, and attribution is all this settles.**
+
+**Record:** `arm1c` lives beside the other arms outside any repo, deliberately. **This reading is currently in transport only** — if the entry is ever revived it goes in the body, per your own ruling.
+
+-- R
