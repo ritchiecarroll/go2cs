@@ -71,6 +71,13 @@ public sealed class NativeBox<T> : ж<T>
     /// <inheritdoc/>
     public override nuint NativeAddress => m_nativeAddr;
 
+    /// <inheritdoc/>
+    // A native alias is not managed storage at all: its address is m_nativeAddr and both
+    // operators return it long before they consult this, so no reachable path reads the answer.
+    // It is stated rather than inherited because the abstract member exists precisely so that a
+    // kind cannot stay silent — and None is the honest word for "no MANAGED storage to name".
+    public override PointerStorage StorageKind => PointerStorage.None;
+
     /// <summary>
     /// The managed box this native box was derived from by a reinterpret fallback, when there is
     /// one — the B1 §4 recovery surface for hand-owned wrappers (see the class remarks). Null for

@@ -151,9 +151,16 @@ public static class ManagedPointerTokens
     // Sweep dead entries when the table has grown by this much since the last sweep. The table is
     // expected to hold a handful of live entries; the threshold exists so a program that projects
     // many short-lived pointers cannot grow it without bound.
-    private const int SweepThreshold = 256;
+    internal const int SweepThreshold = 256;
 
     private static int s_sweepAt = SweepThreshold;
+
+    /// <summary>
+    /// The number of token registrations the table currently holds, live and not-yet-swept alike.
+    /// Read by the registry's growth guard (GolibTests), which measures the bound the sweep policy
+    /// claims — a claim about growth is a prediction until a run reads it.
+    /// </summary>
+    internal static int RegisteredCount => s_count;
 
     /// <summary>
     /// Remembers that <paramref name="token"/> was handed out as the scalar form of
@@ -164,6 +171,38 @@ public static class ManagedPointerTokens
     /// refreshes it: two projections of one pointer produce one token, and a token whose box has
     /// been collected is free to be reused by whatever the runtime hands the same identity to next.
     /// </remarks>
+    /// <summary>
+    /// Whether <paramref name="number"/> is a token somebody did ARITHMETIC on — inside a live
+    /// token's own 4 GiB block, but not a token itself.
+    /// </summary>
+    /// <remarks>
+    /// A token is <c>AllocationBase(identityHash)</c> = <c>hash &lt;&lt; 32</c>: 4 GiB-aligned, low
+    /// half zero, one block per source identity. So `unsafe.Add(unsafe.Pointer(&amp;v), offset)` over a
+    /// box with no pinnable storage produces base+offset — still inside the block, no longer a key.
+    /// Before this existed the inbound conversion answered a native box over that number and the
+    /// write through it took the process down with an ACCESS VIOLATION, uncatchable; reflect's
+    /// TestIsZero went from 388 verdicts to 167 because the host stopped surviving to report.
+    ///
+    /// The test is deliberately the NARROWEST one that answers it, and every clause is load-bearing:
+    /// the base must be REGISTERED (so a real address is never in scope), its box must still be
+    /// ALIVE (so a recycled identity hash cannot make us refuse an honest address later), and the
+    /// number must DIFFER from the base (an exact token that missed Resolve is a dead box, not
+    /// arithmetic — that keeps its old native-box answer).
+    /// </remarks>
+    internal static bool IsTokenArithmetic(nuint number)
+    {
+        if (number == 0 || s_count == 0)
+            return false;
+
+        nuint allocationBase = number & ~(nuint)0xFFFFFFFFu;
+
+        if (allocationBase == 0 || allocationBase == number)
+            return false;
+
+        return s_table.TryGetValue(allocationBase, out WeakReference<object>? weak) &&
+               weak.TryGetTarget(out _);
+    }
+
     public static void Register(nuint token, object box)
     {
         if (token == 0 || box is null)

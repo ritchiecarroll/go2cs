@@ -103,6 +103,18 @@ func TestScopedSuppressionsHaveCompanions(t *testing.T) {
 				continue
 			}
 
+			// A FLAT companion that DECLARES every suppressed member answers for every target,
+			// because a flat file is compiled on every target — the routing guard's own rule
+			// (platformHandOwn_test.go: a shared principal's companion stays flat, one file, not
+			// three) seen from this side. Existence alone is NOT enough here, which is what the
+			// `os` lesson above is about: `tempfile_impl.cs` is flat and marked and declares no
+			// `readdir`, so it must not answer for one. The file has to name the member. Added
+			// 2026-09-05 for time's syncTimer (Q44): a flat principal (sleep.cs) in an L3 package,
+			// a shape neither arm above could accept and the routing guard forbids duplicating.
+			if hasFlatSources(t, pkgDir) && flatCompanionDeclares(t, pkgDir, suppressed) {
+				continue
+			}
+
 			// A package whose sources are entirely per-GOOS and has no folder for this target
 			// simply is not built there.
 			if !hasPerGoos && !hasFlatSources(t, pkgDir) {
@@ -174,6 +186,143 @@ func hasCompanion(t *testing.T, dir string) bool {
 	}
 
 	return false
+}
+
+// flatCompanionDeclares reports whether the package's FLAT hand-own companions — marked files and
+// `*_impl.cs` companions directly in the package directory, which every target compiles — declare
+// every one of the suppressed members. A method entry ("recvType.method") is looked up by its
+// method name. The predicate is deliberately textual (the member name followed by `(`): the
+// companion is C#, and this guard runs where no C# compiler is, so "declares" means "spells the
+// declaration", the same reading the emitted placeholder's own text invites.
+func flatCompanionDeclares(t *testing.T, dir string, members []string) bool {
+	t.Helper()
+
+	entries, err := os.ReadDir(dir)
+
+	if err != nil {
+		return false
+	}
+
+	var companions []string
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".cs") {
+			continue
+		}
+
+		path := filepath.Join(dir, entry.Name())
+		marked, err := containsManualConversionMarker(path)
+
+		if err != nil {
+			continue
+		}
+
+		if marked || strings.HasSuffix(entry.Name(), "_impl.cs") {
+			content, err := os.ReadFile(path)
+
+			if err != nil {
+				continue
+			}
+
+			companions = append(companions, string(content))
+		}
+	}
+
+	if len(companions) == 0 {
+		return false
+	}
+
+	for _, member := range members {
+		name := member
+
+		if dot := strings.LastIndex(member, "."); dot >= 0 {
+			name = member[dot+1:]
+		}
+
+		declared := false
+
+		for _, content := range companions {
+			if declaresStaticMember(content, name) {
+				declared = true
+				break
+			}
+		}
+
+		if !declared {
+			return false
+		}
+	}
+
+	return true
+}
+
+// declaresStaticMember reports whether some NON-comment line of a C# companion declares `name` as a
+// static member: the line carries `static ` and `name(`. A doc comment quoting the member ("Go's
+// syncTimer(c)") is not a declaration — the first form of this predicate matched exactly that, and
+// its negative control (the body renamed) stayed green until the comment was excluded.
+func declaresStaticMember(content, name string) bool {
+	for _, line := range strings.Split(content, "\n") {
+		trimmed := strings.TrimSpace(line)
+
+		if strings.HasPrefix(trimmed, "//") {
+			continue
+		}
+
+		if strings.Contains(trimmed, "static ") && strings.Contains(trimmed, name+"(") {
+			return true
+		}
+	}
+
+	return false
+}
+
+// TestFlatCompanionDeclaresNamesTheMember is flatCompanionDeclares's own control: a flat `_impl.cs`
+// that spells the member answers, one that does not — or a package with no companion at all — does
+// not, and a method entry is matched by its method name.
+func TestFlatCompanionDeclaresNamesTheMember(t *testing.T) {
+	dir := t.TempDir()
+
+	if err := os.WriteFile(filepath.Join(dir, "sleep_impl.cs"), []byte("partial class x { internal static int syncTimer(int c) { return 0; } }"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if !flatCompanionDeclares(t, dir, []string{"syncTimer"}) {
+		t.Errorf("a flat _impl.cs spelling syncTimer( must answer for syncTimer")
+	}
+
+	if !flatCompanionDeclares(t, dir, []string{"Timer.syncTimer"}) {
+		t.Errorf("a method entry must be matched by its method name")
+	}
+
+	if flatCompanionDeclares(t, dir, []string{"syncTimer", "readdir"}) {
+		t.Errorf("a companion that spells only one of two suppressed members must NOT answer for both")
+	}
+
+	if flatCompanionDeclares(t, t.TempDir(), []string{"syncTimer"}) {
+		t.Errorf("a package with no flat companion must not answer")
+	}
+
+	// A companion that only QUOTES the member in a comment does not declare it.
+	if err := os.WriteFile(filepath.Join(dir, "sleep_impl.cs"), []byte("// Go's syncTimer(c) is not read here\npartial class x { }"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if flatCompanionDeclares(t, dir, []string{"syncTimer"}) {
+		t.Errorf("a member spelled only in a comment must NOT count as declared")
+	}
+
+	if err := os.WriteFile(filepath.Join(dir, "sleep_impl.cs"), []byte("partial class x { internal static int syncTimer(int c) { return 0; } }"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// A plain converted file is not a companion, however much it spells.
+	if err := os.WriteFile(filepath.Join(dir, "sleep.cs"), []byte("internal static int readdir(int c) { return 0; }"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if flatCompanionDeclares(t, dir, []string{"readdir"}) {
+		t.Errorf("an unmarked, non-_impl file must not count as a companion")
+	}
 }
 
 // hasFlatSources reports whether the package has .cs files directly in its own directory — i.e. it

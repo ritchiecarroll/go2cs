@@ -104,10 +104,11 @@ internal static partial (nint n, bool ok) pprof_memProfileInternal(slice<profile
 // own concurrent collection: "New goroutines may not be in this list, but we didn't want to know
 // about them anyway."
 internal static partial (nint n, bool ok) pprof_goroutineProfileWithLabels(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels) {
-    // `labels` is deliberately never written; the block beneath this function records the
-    // measurement that decided it, and Go's own guard here -- drop a labels slice that does not
-    // match p -- is therefore already satisfied by leaving it untouched.
-    _ = labels;
+    // Go's own guard (goroutineProfileWithLabels, mprof.go): a labels slice whose length does not
+    // match p is dropped, and the concurrent collector then writes a label only when it holds a
+    // slice. The same predicate, stated once -- a nil slice has length 0 and never matches a
+    // non-empty p, so it never reaches the loop below.
+    bool writeLabels = len(labels) == len(p);
 
     var snapshot = global::go.golib.Goroutine.ProfileSnapshot();
     nint n = ((nint)snapshot.Length);
@@ -133,47 +134,65 @@ internal static partial (nint n, bool ok) pprof_goroutineProfileWithLabels(slice
                 ? default!
                 : new uintptr[]{ ((uintptr)global::go.GoSyntheticPC.Of(entry.Function)) }.slice());
 
-        // No label is written for this entry -- see the block beneath this function.
+        // THE LABEL is the very object the goroutine set: runtime_setProfLabel stores golib's slot
+        // and ProfileSnapshot hands it back, so this is the unsafe.Pointer SetGoroutineLabels minted
+        // with FromPinnedBox -- whose number, for a reference-bearing box such as labelMap, is the
+        // box's registered order TOKEN (Q44), not an address. The block beneath this function
+        // records why it was withheld before that and what re-entering it measured.
+        if (writeLabels) {
+            labels[i] = (entry.Labels as @unsafe.Pointer)!;
+        }
     }
 
     return (n, true);
 }
 
-// WHY THE LABELS ARE WITHHELD, AND WHAT WAS MEASURED TO PUT THEM THERE (2026-09-04)
+// WHY THE LABELS WERE WITHHELD FOR A DAY, AND WHAT RE-ENTERING THEM MEASURED (2026-09-04 -> 2026-09-05)
 //
-// The registry HAS every goroutine's labels and hands them to this function; what it cannot do
-// today is get them ACROSS this seam safely. The consumer reads a label the way
+// The registry HAS every goroutine's labels and hands them to this function; what it could not do
+// until Q44 was get them ACROSS this seam safely. The consumer reads a label the way
 // runtimeProfile.Label does -- through the NUMBER: `(*labelMap)(p.labels[i])`, i.e.
 // `(ж<labelMap>)(uintptr)`. `SetGoroutineLabels` produces that number with
-// `unsafe.Pointer.FromPinnedBox(ctxLabels)`, and the reverse conversion recovers a box that ALIASES
-// the raw address (ж.cs). So the label survives the round trip exactly as long as the labelMap the
-// address points at does not move.
+// `unsafe.Pointer.FromPinnedBox(ctxLabels)`, and the reverse conversion used to recover a box that
+// ALIASED the raw address (ж.cs). So a label survived the round trip exactly as long as the
+// labelMap the address pointed at did not move.
 //
-// It moved. Instrumented on BOTH sides of the seam in one run of TestGoroutineCounts: 192 entries,
-// 101 unlabelled, 91 labelled. For 90 of the 91 the address still pointed at the right map when the
-// profile read it (`len == 1`). For ONE -- the FINALIZER goroutine's, set from inside the finalizer
-// body by pprof.Do -- the SAME number read `len == 1` at the instant runtime_setProfLabel stored it
-// and `len == 1885431144` when the profile read it back, with two runtime.GC() calls in between.
-// printCountProfile asks that map for its length to size a slice, so the process dies with
-// OutOfMemoryException inside labelMap.String, and the row is classified `infrastructure-error` --
-// a HOST DEFECT, not a verdict at all. This file's own header argues that making a row unmeasurable
-// is the worse outcome, and that judgement decides this: the profile reports the half it can
-// guarantee and withholds the half it cannot.
+// It moved. Instrumented on BOTH sides of the seam in one run of TestGoroutineCounts (2026-09-04,
+// SUB-Q27): 192 entries, 101 unlabelled, 91 labelled. For 90 of the 91 the address still pointed
+// at the right map when the profile read it (`len == 1`). For ONE -- the FINALIZER goroutine's,
+// set from inside the finalizer body by pprof.Do -- the SAME number read `len == 1` at the instant
+// runtime_setProfLabel stored it and `len == 1885431144` when the profile read it back, with two
+// runtime.GC() calls in between. printCountProfile asks that map for its length to size a slice,
+// so the process died with OutOfMemoryException inside labelMap.String, and the row was classified
+// `infrastructure-error` -- a HOST DEFECT, not a verdict at all. This file's own header argues that
+// making a row unmeasurable is the worse outcome, and that judgement withheld the labels: the
+// profile reported the half it could guarantee.
 //
-// A REFUTED FIRST ATTEMPT, kept because it is the reason the above is stated so narrowly. The first
-// version of this file tried to hand back only labels whose pointer still "resolved to managed
-// storage", testing the recovered box's IsNative. That test rests on a false premise -- IsNative is
-// the NORMAL state for a pointer minted by FromPinnedBox, not evidence of a stale one -- and it
-// dropped ALL 91 labels rather than the one bad one. The tell was the guard's own warning count:
-// 182 drops (91 labelled goroutines across the two profile calls) where at most one was expected.
-// So there is no cheap consumer-side test that separates a live address from a dead one; that is
-// the whole difficulty, and it is why nothing is filtered here.
+// A REFUTED FIRST ATTEMPT, kept because it is the reason the mechanism above is stated so narrowly.
+// The first version of this file tried to hand back only labels whose pointer still "resolved to
+// managed storage", testing the recovered box's IsNative. That test rests on a false premise --
+// IsNative was the NORMAL state for a pointer minted by FromPinnedBox, not evidence of a stale one
+// -- and it dropped ALL 91 labels rather than the one bad one. The tell was the guard's own warning
+// count: 182 drops (91 labelled goroutines across the two profile calls) where at most one was
+// expected. So there was no cheap consumer-side test that separated a live address from a dead
+// one; that was the whole difficulty, and it is why nothing is filtered here.
 //
-// NOT FIXED HERE, AND NOT THIS FILE'S TO FIX. The address going stale under GC belongs to the
-// pointer-provenance and pin-lifetime machinery, which is a live arc elsewhere. Reported to the
-// fleet with the witness above. When a label pointer is stable across a collection, filling
-// `labels[i]` from `entry.Labels` is a one-line change here and the label half of
-// TestGoroutineCounts becomes reachable; until then, filling it trades a measurable wrong answer
-// for an unmeasurable one.
+// WHAT FIXED IT, AND WHERE. Not this file: the address going stale under GC belonged to golib's
+// address model. Q44 (DESIGN-managed-pointer-token.md) changed what `(uintptr)box` answers for a
+// REFERENCE-BEARING pointee -- labelMap wraps a map, so its StandardBox has no pinnable slot -- from
+// a movable field's address to the box's own registered order TOKEN, which `(ж<T>)(uintptr)`
+// resolves back to that very box (ManagedPointerTokens.Resolve) for as long as anything holds it:
+// here the goroutine's slot and this labels slice both hold the unsafe.Pointer, which retains the
+// box. A token cannot go stale across a collection because it is not an address. With that in
+// place the re-entry is the one line the 2026-09-04 note predicted: `labels[i]` filled from
+// `entry.Labels`, under Go's own length guard.
+//
+// MEASURED AT THAT UNION (2026-09-05, gated `^(TestGoroutineCounts|TestGoroutineProfileLabelRace)$`,
+// Release, tiering off, oracle go1.23.12 on linux): TestGoroutineCounts PASS in 10.7 s with its
+// label half reached -- the same run that died in labelMap.String the day before -- and
+// TestGoroutineProfileLabelRace, the host-fatal HANG whose /reset subtest spun until the package
+// deadline (182 s) because the substring it waited for was a label, PASS in 58 ms (/reset 42 ms,
+// /churn 6 ms); 4/4 verdicts matching. Its host-fatal disclosure entry is retired by that
+// measurement (go2cs_test_disclosures.json keeps the record).
 
 } // end pprof_package

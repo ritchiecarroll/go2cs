@@ -16,10 +16,13 @@ using static go.builtin;
 namespace GolibTests;
 
 // THE PINNED-BOX STALENESS WITNESS — a `ж<T>` whose T carries a managed reference, handed across a
-// seam as `unsafe.Pointer.FromPinnedBox(box)` and recovered through its NUMBER, does not come back
-// aliasing the same storage. Landed as a REPRODUCER, not a fix: the fix belongs to the pin-lifetime
-// arc (memory: syscall-buffer-pin-unheld), and the two gated arms below are what that arc turns
-// green.
+// seam as `unsafe.Pointer.FromPinnedBox(box)` and recovered through its NUMBER, must come back
+// aliasing the same storage. Landed 2026-09-04 as a REPRODUCER (5 of 5 RED under its gate at both
+// configurations — the history kept below) and CLOSED by Q44, the managed pointer TOKEN
+// (docs/phase4/DESIGN-managed-pointer-token.md): the address-take operators in ж.cs hand a
+// reference-bearing box its own order token, registered in ManagedPointerTokens, instead of the
+// address of a movable field — so arms 3 and 4 are this file's ACCEPTANCE, ungated, and arm 1's last
+// two steps and arm 5 state the token's properties rather than the address's defect.
 //
 // WHERE THE WITNESS CAME FROM. Measured in one instrumented run of runtime/pprof's
 // TestGoroutineCounts: 192 goroutines, 91 labelled through `runtime_setProfLabel` storing
@@ -44,44 +47,48 @@ namespace GolibTests;
 // bare value), so the recovery has only the number, and `(ж<T>)(uintptr)` consults
 // ManagedPointerTokens.Resolve and otherwise mints a NativeBox over the raw address (ж.cs:612-622).
 //
-// THE MECHANISM, and it is NOT the one the pin-release class has. For a reference-BEARING T,
-// StandardBox allocates no `m_slot` (ж.StandardBox.cs:54-68), so `PinnableStorage` is null, so
-// `EnsureStableAddress` never calls `PinnedBuffer.PinOnly` and `m_pin` stays null (ж.cs:444-451).
-// No PinnedBuffer is ever CONSTRUCTED for such a box — so "the pin was released by its finalizer"
-// (the mechanism AliasOverlapRaceTests and PinLifetimeAtTheNativeBoundaryTests measure, where a pin
-// IS taken and dies with its box) cannot be this defect's mechanism, and there is nothing for a
-// finalizer counter to count. The address is nonetheless REGISTERED
-// (`ManagedPointerTokens.RegisterPinned` inside the `fixed`, ж.cs:668), and validate-on-read then
-// refuses it by design (`IsPinnedAt` returns false the moment `m_pin` is null, ж.cs:460-465) — so
-// the recovery MISSES and the consumer is handed a native alias of an address the collector was
-// never asked to hold still. Arm 1 measures each step of that; arm 5 measures the address going
-// stale, which is what turns the latent miss into the garbage the witness read.
+// THE MECHANISM BEFORE Q44, and it was NOT the one the pin-release class has. For a reference-BEARING
+// T, StandardBox allocates no `m_slot` (ж.StandardBox.cs), so `PinnableStorage` is null, so
+// `EnsureStableAddress` never called `PinnedBuffer.PinOnly` and `m_pin` stayed null. No PinnedBuffer
+// was ever CONSTRUCTED for such a box — so "the pin was released by its finalizer" (the mechanism
+// AliasOverlapRaceTests and PinLifetimeAtTheNativeBoundaryTests measure, where a pin IS taken and
+// dies with its box) was never this defect's mechanism, and there was nothing for a finalizer
+// counter to count. The `fixed` address was nonetheless REGISTERED
+// (`ManagedPointerTokens.RegisterPinned`), validate-on-read then refused it by design (`IsPinnedAt`
+// returns false the moment `m_pin` is null), the recovery MISSED, and the consumer was handed a
+// native alias of an address the collector was never asked to hold still. Arm 1 still measures
+// steps 1–4 of that — they are true under the token too: no slot, no pin, not pinned at the number —
+// and its steps 5–6 flipped with the fix.
 //
-// THE BOUND THIS FILE CONTRADICTS, DELIBERATELY. Two banked guards already state the MISS as
-// expected: DarwinKeystoneArgsRecoveryTests.ReferenceBearingArgsStructDoesNotResolve_TheDesignsStatedBound
-// and NativeAddressStabilityTests.ReferenceBearingPointeeIsLeftAlone. They are right about today's
-// mechanism and this file does not dispute it — it records that the same bound, met at a CONSUMER
-// that keeps the number across a collection, is a correctness hole rather than a documented
-// narrowing. When the pin arc closes it, those two guards and arm 1 here go red together and are
-// updated in that cut; arms 3 and 4 go green.
+// THE FIX (Q44). Both address-take operators (`ж<T> → uintptr` and `ж<T> → void*`, ж.cs) take a new
+// arm BEFORE EnsureStableAddress: when `PinnableStorage` is null the number handed out is the box's
+// `PointerOrderToken` (for a StandardBox the identity hash's allocation base — high 32 bits, never a
+// heap address), registered weakly in ManagedPointerTokens, so `(ж<T>)(uintptr)` recovers the very
+// box through Resolve's order-token arm for as long as something else keeps it alive (the record's
+// weak-lifetime rule; the goroutine registry keeps pprof's alive through the Pointer's retained
+// source). Nothing on the read side changed, and nothing about a box that DOES pin changed.
 //
-// HOW IT IS GATED, and why not [Ignore]. GolibTests carries no [Ignore] anywhere and has no
-// known-red convention; what it does have is the Inconclusive idiom for "this arm measured nothing
-// / this is not a green" (AliasOverlapRaceTests, PinLifetimeAtTheNativeBoundaryTests,
-// DarwinKeystoneArgsRecoveryTests all use it). So arms 3 and 4 report INCONCLUSIVE by default,
-// naming the disclosure and the observed state — the suite stays green for every other lane and
-// nobody can forget the hole — and go RED under `GO2CS_PIN_STALENESS_STRICT=1`, which is the flag
-// the pin arc runs and, when it lands, deletes. They PASS with no flag at all once the recovery
-// aliases, so this is not a guard that can only be skipped.
+// THE COUPLED GUARDS, and which way each moved. DarwinKeystoneArgsRecoveryTests' reference-bearing
+// arm — banked stating the MISS as the keystone design's bound — takes its other branch under the
+// token and is rewritten in the same cut as ReferenceBearingArgsStructResolvesThroughItsToken_TheBoundQ44Narrowed;
+// NativeAddressStabilityTests.ReferenceBearingPointeeIsLeftAlone is predicted NOT to move (the fix
+// adds no storage, it mints a token, so the arm's two assertions stay true) and the cut's run of it
+// is the measurement rather than an edit.
+//
+// HOW IT WAS GATED, and why the gate is gone. While the hole was open arms 3 and 4 reported
+// INCONCLUSIVE by default (GolibTests' idiom for "this is not a green") and went RED under
+// `GO2CS_PIN_STALENESS_STRICT=1`, the flag the fixing arc would run and then delete. Q44 is that
+// arc: the flag, the Disclosure text and the Strict property are deleted with it, and the two arms
+// are plain assertions — a miss here is a failure now, never a disclosure.
 //
 // ⚠ ONE ARM PER PROCESS does not apply here and it is worth saying why: what the frame holds decides
 // what COLLECTS, and nothing in these arms is measured by collection — the box is deliberately kept
 // alive for every reading (the goroutine registry keeps the real one alive through the Pointer's
 // retained source), so the arms measure RELOCATION and RESOLUTION, both of which survive being run
 // in one host. The configuration-dependence AliasOverlapRaceTests records is predicted NOT to reach
-// the gated arms either, because their assertion is structural (`m_pin` is null, so the resolve
-// refuses) rather than frame-rooted — which is a prediction to be measured at both configurations,
-// not a claim.
+// these arms either, because what they assert is structural — under the token, a property of the
+// box's identity hash rather than of any frame — which is a prediction to be measured at both
+// configurations, not a claim.
 //
 // THE PREDICTION, ON RECORD BEFORE ANY RUN — posted to the fleet mailbox at `ce89582f9`, which
 // predates the first execution of this file. Arms 1, 2 and 5 PASS; arms 3 and 4 FAIL under the flag,
@@ -113,24 +120,16 @@ namespace GolibTests;
 // rather than left: at `dotnet test`'s DEFAULT console verbosity a skip prints its NAME and not its
 // reason, so the disclosure text reaches `--logger "console;verbosity=detailed"` and the .trx, not
 // the summary line.
+//
+// CLOSED BY Q44 (cut 2026-09-05). The prediction on record for THIS cut
+// (docs/phase4/DESIGN-managed-pointer-token.md §8, posted before any run of it): all five arms PASS
+// ungated, 10 of 10 across Debug and Release+TC0; arm 1's steps 5–6 flip to "Resolve returns the box
+// and the recovery IS the box"; arm 5 flips from "the address goes stale when the box moves" to "the
+// token is the same number after the move and still resolves". The measured result lands as a
+// FOLLOW-UP commit, as it did the first time.
 [TestClass]
 public class PinnedBoxStalenessWitnessTests
 {
-    // The flag the pin-lifetime arc flips to take these arms as a RED gate. Unset (the default) the
-    // arms measure and report INCONCLUSIVE rather than failing the suite for every other lane.
-    internal const string StrictVariable = "GO2CS_PIN_STALENESS_STRICT";
-
-    private const string Disclosure = "PINNED-BOX STALENESS (open, pin-lifetime arc)";
-
-    private static bool Strict
-    {
-        get
-        {
-            string? value = Environment.GetEnvironmentVariable(StrictVariable);
-            return value is "1" or "true" or "TRUE" or "True";
-        }
-    }
-
     // A reference-BEARING pointee, the shape of runtime/pprof's `labelMap`
     // (`[GoType("map[@string, @string]")] partial struct labelMap`, label.cs:54). golib's map is a
     // readonly struct over a dictionary, so the type carries a managed reference and StandardBox
@@ -207,15 +206,12 @@ public class PinnedBoxStalenessWitnessTests
     // control, which is what makes "not re-allocated" a measurement rather than a claim.
     private static object? SlotOf<T>(ж<T> box) => ((INilPointer)box).PinnableStorage;
 
+    // Once a plain gate: the arms this reports for are the ACCEPTANCE of Q44, so a miss here is a
+    // failure, not a disclosure — the GO2CS_PIN_STALENESS_STRICT gate that made them Inconclusive
+    // while the hole was open is deleted with the hole.
     private static void Report(bool ok, string message)
     {
-        if (ok)
-            return;
-
-        if (Strict)
-            Assert.Fail(message);
-
-        Assert.Inconclusive($"{Disclosure}: {message} [set {StrictVariable}=1 to take this arm as a red gate]");
+        Assert.IsTrue(ok, message);
     }
 
     // ---- ARM 1: THE BISECT ----------------------------------------------------------------------
@@ -256,15 +252,17 @@ public class PinnedBoxStalenessWitnessTests
         Assert.IsFalse(((INilPointer)box).IsPinnedAt(number),
             "step 4: validate-on-read must refuse a number the box is not pinned at");
 
-        Assert.IsNull(ManagedPointerTokens.Resolve(number),
-            "step 5: so the provenance record MISSES, even though the address was registered");
+        Assert.AreSame(box, ManagedPointerTokens.Resolve(number),
+            "step 5 (FLIPPED by Q44): the number is the box's order TOKEN, registered at the address take, " +
+            "so the provenance record resolves it to this very box — no pin, no slot, and no miss");
 
-        // And the consumer's emission (pprof.cs:919) is therefore handed a native alias.
+        // And the consumer's emission (pprof.cs:919) is therefore handed the box itself.
         ж<LabelMapShape> recovered = (ж<LabelMapShape>)(uintptr)pointer;
 
-        Assert.IsTrue(recovered.IsNative,
-            "step 6: the recovery mints a NativeBox over the raw address — the number is now treated " +
-            "as a machine address the collector was never asked to hold still");
+        Assert.AreSame(box, recovered,
+            "step 6 (FLIPPED by Q44): the recovery is the box itself, aliasing its storage — never a " +
+            "NativeBox over a number that was not an address");
+        Assert.IsFalse(recovered.IsNative, "and it is not a native alias");
 
         GC.KeepAlive(pointer);
     }
@@ -383,10 +381,10 @@ public class PinnedBoxStalenessWitnessTests
 
         Report(aliases,
             $"the number a reference-bearing box reported ({number:X}) did not recover that box after " +
-            $"two collections: Resolve MISSED (m_pin is null, so validate-on-read refuses), and the " +
-            $"consumer holds a NativeBox over a raw address instead (IsNative={recovered.IsNative}). " +
-            "This is the pprof label round trip, and reading a labelMap's length through it is what " +
-            "read 1885431144 and killed the host");
+            $"two collections: the token arm (Q44) registers the box's order token at the address take " +
+            $"and Resolve must find it, yet the consumer holds something else (IsNative={recovered.IsNative}). " +
+            "This is the pprof label round trip, and reading a labelMap's length through a missed " +
+            "recovery is what read 1885431144 and killed the host");
 
         // Only reachable once the recovery aliases — never dereference a number that did not.
         ж<LabelMapShape> aliased = (ж<LabelMapShape>)original!;
@@ -465,8 +463,9 @@ public class PinnedBoxStalenessWitnessTests
 
         Report(ReferenceEquals(recovered, original),
             $"a label set from inside a FINALIZER body did not recover its box from the number " +
-            $"({number:X}) after two collections (IsNative={recovered.IsNative}) — this is the exact " +
-            "arm that failed in TestGoroutineCounts, the finalizer goroutine's labelMap");
+            $"({number:X}) after two collections (IsNative={recovered.IsNative}) — the token arm must " +
+            "hold from the finalizer thread too; this is the exact arm that failed in " +
+            "TestGoroutineCounts, the finalizer goroutine's labelMap");
 
         ж<LabelMapShape> aliased = (ж<LabelMapShape>)original!;
         aliased.Value.Entries[(@string)"written-after"] = (@string)"1";
@@ -478,17 +477,20 @@ public class PinnedBoxStalenessWitnessTests
         GC.KeepAlive(pointer);
     }
 
-    // ---- ARM 5: THE ADDRESS COPY -----------------------------------------------------------------
+    // ---- ARM 5: THE TOKEN IS STABLE ACROSS A MOVE -------------------------------------------------
 
     [TestMethod]
-    public void TheNumberAReferenceBearingBoxReportsGoesStaleWhenTheBoxMoves()
+    public void TheNumberAReferenceBearingBoxReportsIsStableWhenTheBoxMoves()
     {
-        // The bisect's third question, and the reason the miss is not merely academic: the number is
-        // a REAL address of the box's own value slot at the moment it was taken, and nothing holds
-        // that address still. Re-taking it from the very same box after a collection reports a
-        // different one — so the consumer's stored number now names other memory, which is what a
-        // NativeBox over it reads. Unconditional and green today: it states the defect's
-        // consequence, not the property the fix must establish.
+        // Before Q44 this arm measured the defect's CONSEQUENCE: the number was a real address of the
+        // box's value field at the instant it was taken, nothing held that address still, and
+        // re-taking it after a collection reported a different one — so a consumer's stored number
+        // named other memory, and `before == after` was the Inconclusive branch ("the box did not
+        // relocate under this churn"). Under the token the number is the box's ORDER TOKEN, a
+        // property of the object's identity hash and not of where the collector currently keeps
+        // it, so the equality is the ASSERTED case now. The structural assertion below (the number
+        // IS the token) is the load-bearing one; the post-churn equality, with the control array
+        // demonstrably moved, is that property observed rather than an unmoved coincidence.
         byte[] control = new byte[64];
         nuint controlBefore = CurrentAddress(control);
 
@@ -497,6 +499,9 @@ public class PinnedBoxStalenessWitnessTests
 
         @unsafe.Pointer pointer = @unsafe.Pointer.FromPinnedBox(box);
         nuint before = (nuint)(uintptr)pointer;
+
+        Assert.AreEqual(box.PointerOrderToken, before,
+            "the number a reference-bearing box hands across the seam is its order token, not an address");
 
         Churn();
 
@@ -508,22 +513,14 @@ public class PinnedBoxStalenessWitnessTests
 
         nuint after = (nuint)(uintptr)box;
 
-        if (before == after)
-        {
-            // Not a silent pass: an unmoved box makes the consequence unobservable in THIS run,
-            // which is exactly why 90 of the witness's 91 labels read correctly. The hole is still
-            // the resolve miss (arm 1); this arm simply did not catch it becoming visible.
-            Assert.Inconclusive(
-                $"the reference-bearing box did not relocate under this churn (address {before:X} " +
-                "unchanged); the staleness is latent in this run — arm 1 is the structural reading");
-            return;
-        }
+        Assert.AreEqual(before, after,
+            "the token handed across the seam changed under a compacting collection — it is a " +
+            "property of the box's identity, never of its address");
 
-        Assert.AreNotEqual(before, after,
-            "the number handed across the seam is a stale address once the box moves");
+        Assert.AreSame(box, ManagedPointerTokens.Resolve(after),
+            "the token must still resolve to the box after the collection");
 
-        // And the storage is intact — a MOVE, not a loss, which is what makes the defect silent
-        // until something reads through the old number.
+        // And the storage is intact.
         Assert.IsNotNull(held.Entries);
 
         GC.KeepAlive(control);
