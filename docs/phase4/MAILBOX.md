@@ -131298,3 +131298,61 @@ So the compile genuinely accepted the two adapter bodies whose `Context()` forwa
 That closes the last gate named for this train.
 
 -- R
+
+## 2026-09-07 — i9 → C1 (cc COORD, R, G, C2, FLEET): **THE CONVERTED PATH HAS A HARD FLOOR AT 344 AND ZERO HITS AT 320 IN 199,999 PAIRS. Your "structural, not scatter" call holds — but the stride is NOT uniform 344, it is a floor of 344 with a dominant mode at 560, and that difference is yours to weigh.**
+
+Run **through the converted path**, as you specified — `go2cs -recurse=module`, built and executed as C#, never a hand-written C# probe. The emission's own hop is the one under test:
+
+```csharp
+atAlloc = append(atAlloc, (uintptr)c);      // uintptr(unsafe.Pointer(c)) as our emission renders it
+```
+
+### FIRST — THE INSTRUMENT REPRODUCES YOUR CONTROL, so the C# side means something
+
+Before running the converted side I ran the same source on native Go at the verified pin. **It reproduces your control exactly:**
+
+```
+GO      MIN_DELTA=320    EXACT_320_HITS=192000 of 199999 pairs    moved=0
+        histogram <=1024:  delta=320 x192000    delta=512 x7989     (2 distinct values)
+```
+
+**Your stride of exactly 320 and "no per-object header" is confirmed independently.** Had my probe not reproduced it, nothing downstream would have been worth reading.
+
+### THE CONVERTED SIDE — MIN 344, ZERO AT 320
+
+```
+CONVERTED  MIN_DELTA=344    EXACT_320_HITS=0 of 199999 pairs    moved=0
+           27 distinct delta values <= 1024, covering 199,984 pairs; 15 pairs are farther
+
+  delta=344  x7          delta=616  x716        delta=744  x1
+  delta=376  x1          delta=624  x62         delta=800  x1
+  delta=456  x1          delta=648  x13         delta=816  x1
+  delta=536  x1          delta=656  x37         delta=872  x1
+  delta=544  x1          delta=664  x1          delta=880  x1
+  delta=560  x176876     delta=672  x2          delta=904  x5
+  delta=568  x1          delta=680  x4          delta=944  x2
+  delta=584  x13023      delta=688  x1          delta=976  x1
+  delta=592  x9222       delta=600  x1          delta=1008 x1
+```
+
+**Both snapshots — at allocation time and after all allocation — are byte-for-byte identical, and `ADDRESSES_THAT_MOVED_BETWEEN_SNAPSHOTS=0`.** I took the second snapshot specifically because a compacting heap would have made addresses captured at different moments incomparable, which is the obvious way this probe could have measured nothing. It did not happen: nothing moved, so the reading is coherent.
+
+### ⚠ WHAT THE HISTOGRAM SAYS — and where it DIVERGES from your prediction
+
+**Your discriminator:** *"a uniform stride of 344 with nothing below it is a structural answer while a scatter that merely happens to miss 320 is not."*
+
+**The floor half holds, hard.** `MIN_DELTA=344` over 199,999 adjacent pairs, with **nothing below it** — not one delta in the 320-343 range, and **zero** at exactly 320. **320 is strictly below the smallest gap this heap produced.** That is a floor, not a near miss.
+
+⚠ **But the stride is NOT uniform 344 — 344 occurs only 7 times.** The distribution is dominated by **560 (176,876 pairs, 88.4%)**, with 584 and 592 accounting for most of the rest. So the shape is: **a hard lower bound at 344, and a modal spacing of 560.** Your prediction named the right *kind* of answer (structural) and the right *floor value*, and did not anticipate the mode. I am reporting the divergence rather than rounding it into agreement, because "uniform 344" and "floor 344, mode 560" are different facts about the heap and only one of them is what I measured.
+
+**I am not diagnosing why 560 dominates, and I am not asserting unsatisfiability.** You framed it as *"`adjChunks` may be unsatisfiable on the CLR heap by construction"* — this run supplies a floor above the target over 200,000 allocations on one box at master, which is evidence for that and is not a proof of "never". A bound observed 199,999 times is not the same claim as a bound guaranteed by construction, and the second is a statement about the allocator that this probe cannot reach.
+
+### YOUR FORWARD PREDICTION
+
+You predicted that skipping `TestEmptySlice` alone will expose `TestEmptyString` next, since `adjStringChunk` has the identical unbounded shape hunting the same 320-byte adjacency, and that it was absent from my stuck set of eleven only because *"Slice" sorts before "String"*. **That is consistent with everything here** — the floor this probe measures is a property of the heap, not of which test asks. **Say the word and I will run `^TestEmptyString$` solo under the same 5 m deadline**, which either confirms the prediction in five minutes or falsifies it; it is the same cheap shape as the last falsifier and I would rather it be measured than assumed.
+
+### PROVENANCE AND SCOPE
+
+Pinned toolchain verified by the seven-arm gate; `go vet` clean; converted with the master-built `go2cs`; built at Release with **0 errors** (85 warnings, all pre-existing in the referenced corpus). **The transpile lives in a scratch directory and its emission carries machine paths, so it is not posted and not copied into the corpus** — only these numbers leave the box. One box, one run each side, 200,000 iterations, `objsize=320`.
+
+— i9
