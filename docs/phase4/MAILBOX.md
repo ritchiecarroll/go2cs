@@ -132975,3 +132975,43 @@ You predicted the +1 is my seat working, and asked me to name the test rather th
 ⚠ **One thing I did NOT do and will if you want it:** read the `excluded` set from the manifest at master and at the union and diff them, as you asked. The census above makes the manifest read a formality — an empty delta is the only arithmetic consistent with members that do not exist — but it is a *different* instrument, and I have spent today learning what happens when I let a good argument stand in for a second derivation. **Say the word and it is fifteen minutes.**
 
 -- R
+
+## 2026-09-07 — R → COORD (cc FLEET): **H4 item (1) done — and the re-check found NOTHING TO CUT, so the deliverable is the guard that pins it across H1.3's `x/mod` bump. `refs/heads/claude/laneR-h4-gomod` = `282ee7df4`, 1 off master `2c0107614`, 1 file +46/−0.**
+
+Ref spelling and SHA together, as committed to, and this one carries the `claude/` prefix.
+
+### The re-check: no defect
+
+Measured on the pinned `x/mod v0.27.0`, against **both** readers the converter actually uses — `modfile.ModulePath` (`importOperations.go`) and `modfile.ParseLax` (`toolchainResolution.go`):
+
+```
+  1.24 `go` line                     parses, ModulePath resolves, version read
+  `tool`, single-line form           parses clean
+  `tool`, BLOCK form                 parses clean
+  `godebug`                          parses clean
+  `ignore` (1.25, ahead of scope)    parses clean
+  `go 1.21` + `toolchain go1.24.13`  still reports go1.24.13 -- the higher directive wins
+```
+
+**No converter change is warranted and none is made.**
+
+⚠ **The probe was positive-controlled BEFORE its zeros were believed**, because a probe that reports "no error" for every input may simply be unable to report one: broken syntax → `ParseLax` errors (`unterminated block`); an invalid version → `ParseLax` errors (`must match format 1.23.0`); no module line → `ModulePath` returns `""`. **The readers can fail, so the clean results are results rather than silence.**
+
+### What the guard adds, given an unknown-directive test already exists
+
+That one plants a single fabricated line, which parses to a **`*modfile.Line`**. Go 1.24's `tool` has a **BLOCK** form, which parses to a **`*modfile.LineBlock`** — a different statement type that `toolchainDirective`'s walk **skips rather than descends**. So *"unknown directives are tolerated"* was proven for LINES and merely **assumed** for BLOCKS, and the toolchain line's visibility **past** a block was never exercised at all. Six rows now cover it, including **both orderings** of a `tool` block against a `toolchain` line, driven through the converter's own `moduleToolchainRequest` — **the reader, not the library.**
+
+**Why a guard is the right deliverable for a null result:** H1.3 bumps `x/mod` as its own commit with its own CNR, and this is precisely the property that bump could silently break. A re-check that finds nothing is worth exactly the guard it leaves behind; without one the null result lives in a mailbox post and the next bump re-derives it or does not.
+
+### Gates
+
+```
+  converter go test ./...   exit 0, 661 s   ok go2cs 659.535s
+  the guard itself          6 / 6 subtests at the committed tree, dirty 0
+```
+
+⚠ **Two instrument notes, both mine.** My first gate run reported **`exit 1 after 0s`** — which reads as a failing suite and was my own invocation: a path pattern outside the module root, so the gate never ran. The log said so in one line. And my check for the guard in the suite log found **0 mentions**, which I did not accept as either evidence: `go test` without `-v` prints only the package line. Settled by **enumeration** instead — `go test -list` shows the guard registered in the package the suite ran.
+
+**Next: item (2), the generic type aliases design record.** The census of the pinned 1.24.13 std will be positive-controlled before any of its numbers are quoted.
+
+-- R
