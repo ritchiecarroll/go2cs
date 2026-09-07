@@ -133270,3 +133270,55 @@ COORD -> R cc G C2 FLEET -- both H4 items received; the amended record d5584ae7a
 **Controls:** the known-removed packages must appear as REMOVED (positive control); a hand-own with a byte-identical principal must read PRESENT-UNCHANGED (pick one and state it); the marker scan re-run with the unanchored pattern must read HIGHER than the anchored one (that is the reflect/reflectlite placeholder-comment over-count, proving the anchored scan is the one that ran); pins: bare `go version` under each GOROOT invocation printed as the version line ALONE.
 
 **Not in scope:** no cuts, no dispositions applied, no ruling implied by the doc — proposals only. Post the SHA from `ls-remote` with the ref spelled exactly.
+
+## 2026-09-07 — R → COORD (cc FLEET): **H6 PREP done — `refs/heads/claude/laneR-h6-census` = `4b7a24897`, 1 off master `2c0107614`, docs-only 173/0. ⚠ THE POPULATION IS 153 AND HAS ROUGHLY DOUBLED since the figure the plan carries, and a THIRD of it has no 1:1 Go principal at all.**
+
+```
+  marked, LINE-ANCHORED   142     *_impl.cs  109     union (the population)  153
+    both 98  |  whole-file rewrites 44  |  companions carrying no marker 11
+
+  2026-08-24 reading was 73 / 49 / 24.  ROUGHLY DOUBLED.
+```
+
+**Any H6 plan sized on the carried figure is sized on a corpus that no longer exists** — which is why the spec said re-measure, and it was right to.
+
+### ⚠ A THIRD OF THE POPULATION CARRIES A NAME GO NEVER HAD
+
+```
+  file-resolved     103   maps 1:1 to a Go file in the 1.23.12 tree
+  package-resolved   50   the name is go2cs-INVENTED; no such Go file exists
+```
+
+`internal/poll/runtime_netpoll.go`, `internal/syscall/windows/zsyscall_windows_ptrout.go`, `math/math.go`, `runtime/nanotime.go` — **confirmed absent from the outgoing tree.** These are go2cs splits and supplements whose principal is a *set of members inside a package*, not a file. They are classified by PACKAGE status and **their file-level principal must be named by hand at H6**. A census that mapped them to those non-existent paths would have reported a clean 1:1 world that does not exist — I had that version, and its 50 "UNRESOLVED" rows were the tell.
+
+### Status, and both controls firing
+
+```
+  PRESENT-UNCHANGED  50   PRESENT-CHANGED 48   PKG-CHANGED 48
+  REMOVED             5   MOVED/NEW-SHAPE  1   PKG-UNCHANGED 1        = 153
+```
+
+**PRESENT-UNCHANGED is derived by HASH, never by reading** — one row named in full with both sha256 prefixes (`bcache/cache.cs` → `crypto/internal/boring/bcache/cache.go`, identical).
+
+**The removed-package control is checked DIRECTLY, not only through hand-owns**, because a package with no hand-own cannot appear in the row table at all:
+
+```
+  internal/weak         present -> ABSENT   in corpus, 1 hand-own   <- fires
+  internal/concurrent   present -> ABSENT   in corpus, 2 hand-owns  <- fires
+  runtime/internal/sys  present -> ABSENT   in corpus, 0 hand-owns
+  runtime/internal/math present -> ABSENT   in corpus, 0 hand-owns
+```
+
+All four of G's H3 removals confirmed; the last two are **corpus removals that are H6 findings without being hand-own dispositions.**
+
+⚠ **The linkname control found G's two rows — and only on the SECOND pattern.** A grep for the quoted package path `"internal/weak"` returns **zero**, because the registry keys are `"<package>.<symbol>"` and the path never stands alone. `internal/weak.runtime_registerWeakPointer` and `internal/weak.runtime_makeStrongFromWeak` are at `linknameOperations.go:503,507`. **The control did its job by disagreeing with a search that looked right** — the third time today a pattern of mine failed to match the spelling it was hunting.
+
+### The proposals, and the arithmetic under them
+
+Nine rows, all labelled proposals. **The number that shapes H6: rows 6 and 8 are 96 of 153.** The re-audit is not a sweep with a handful of exceptions — the **majority** of hand-owns face a principal that moved, and the census can only say which ones need a human, not what to do about them.
+
+### What I did NOT do, and why
+
+**The spec asks for a one-line "what moved" per PRESENT-CHANGED principal. I have not written those 48 lines.** I have the hash inequality, not the diff — and a one-line summary composed from "these bytes differ" would be fabrication wearing the shape of a finding. **They are named but not characterised**, and that read is either H6's own work or a follow-up census that reads the diffs. Say which and I will run it.
+
+-- R
