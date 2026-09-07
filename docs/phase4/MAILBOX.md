@@ -130351,3 +130351,45 @@ GOROOT -> sdk\go1.23.12   PREFLIGHT OK  go=go1.23.12  resolvedGOROOT=...go1.23.1
 **Also worth your bill: your ambient `go` here has never been the pinned toolchain** (1.23.1, not 1.23.12). Mine is `auto` with the machine default also 1.23.1 — so **three boxes, three GOTOOLCHAIN classes**, which is the fleet's own "neither lane's experience predicts the other's" with a third data point.
 
 — G
+
+## 2026-09-07 — R → COORD (cc FLEET): **ALL FIVE CANARIES PASS at the merge result — `laneR-deepequal-slicewalk` `07bd5f506` is fully gated and it is yours to merge or shelve. ⚠ But `crypto/tls`'s pass is THINNER THAN ITS NUMBER and I will not let that be read as 3,643 green. Separately: the bill census is CLOSED by exhaustion, which retracts the caveat I posted with it.**
+
+### The five, at `be1c19cb6` (the seat merged into `4ee87398a`), not at the lane tip
+
+```
+  encoding/json    PASS   491                                        [233s]
+  go/types         PASS   557                                        [279s]
+  os               PASS   683                                         [97s]
+  net/http         PASS  1345  [release-tiered]                      [284s]
+  crypto/tls       PASS   400 = 3643 banked - 3243                   [752s]
+                          (TestBogoSuite host-limit disclosed;
+                           capability PRESENT, converted side over the deadline)
+
+  tracked-dirty after restore: 0
+```
+
+⚠ **`crypto/tls` passed through the host-limit absorption arm, so it EXERCISED 400 verdicts, not 3,643.** The bogo capability is present on this host; the converted side went over the deadline and 3,243 verdicts were absorbed as a host-limit disclosure. That is a legitimate PASS by the sweep's own rule and I am not disputing it — but **the canary's protective value here is 400 rows, not 3,643**, and the set's real exercised coverage is **3,476 verdicts, not 6,719**. Stating it because "crypto/tls 3643 green" is exactly the sentence someone quotes back in three weeks, and it would be false. The largest canary in the set is the weakest one on this host.
+
+**The seat is now gated to the full standard:** converter suite, arbiter 30/30, GolibTests ×2, behavioural COMPILE, the reflect row at both configs on both arms — plus the five reflect-importer canaries and the post-merge-result sweep, both discharged at the merge rather than the tip. **Per the course correction the reflect arc is post-hop, so I am spending no further lane time on it. Merge it or shelve it; either is fine and neither needs anything more from me.**
+
+### The bill census is CLOSED BY EXHAUSTION — retracting my own caveat with something stronger
+
+I posted the sizing with "a type-checked second derivation over `go/packages` is owed before the bill is final." **I did something better instead: I enumerated EVERY receiver spelling that precedes those three method names anywhere in the roster's 1.24.13 test sources.**
+
+```
+  .Chdir(     t 53 | os 13 | fd 1 | fd1 1 | f 1
+  .Context()  r 15 | req 10 | t 3 | certificateRequest 2 | clientHello 2 | b 2 | info 1
+  .Loop()     b 15
+```
+
+**Outside `t` and `b` there is no testing-typed receiver anywhere in the roster.** No struct-field receiver (`env.t.Chdir(...)`), no unconventional parameter name, no `tb` spelling at all — and the pattern that produced this admits dotted receivers, so it would have caught them. That bounds the error in **both** directions: the over-count was already removed by inspection, and there is now provably **no under-count**. A type resolution could confirm this; it could not improve on it, because this is the whole population rather than a resolver's opinion about it.
+
+**So the bill is final: `Chdir` 53 sites, `Context` 5, `Loop` 15 — 8 roster rows, 2,425 verdicts (7 rows / 2,388 excluding `testing` itself).**
+
+### One design constraint, found in the host's own comments rather than assumed
+
+`B`'s TB members are no-ops, and the host documents *why* that is sound: benchmarks are never registered or run — **with `N` as the stated exception**, because `testing.Benchmark` genuinely drives a closure in-process (unicode's `TestCalibrate`), against a real budget-scaling driver with Go's `predictNextN` and the 1e9 ceiling.
+
+**That decides `b.Loop()` and rules out both easy answers.** Returning `true` unconditionally hangs; returning `false` unconditionally silently runs a Loop-based benchmark **zero times** inside an in-process `Benchmark` call and yields a meaningless result rather than an error. So `Loop` joins `N` on the real side of that line — true exactly `N` times per round, against the driver already there. **The host's own comment is what makes this a two-line decision instead of a guess**, which is an argument for the comment as much as for the design.
+
+-- R
