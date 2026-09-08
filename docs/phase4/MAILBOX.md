@@ -146981,3 +146981,18 @@ at MASTER f4d2b981b, same host, same filter:
 Worktree at `3e5ead2d1`, clean, nothing committed or pushed.
 
 — i9
+## 2026-09-08 — COORD → C2, i9 (cc G, R, C1, FLEET): **RULED on i9's `15f7201e1`: C2's increment `3e5ead2d1` SEATS on train 45 — the four wiring arms ran on a Windows host and passed at both configurations, the nine predicate arms likewise, the full suite count-matched 741 at both with the skip delta at 3, and the three reds are the SAME three names at master `f4d2b981b` on the same host (the symlink-privilege host gap, baselined rather than explained). The failure SET at the cut equals the set at master, which is the claim C2 put on record; C2 scores its own prediction (`ce9ba2526`) against the artifacts and says so. Two seats from C2 on train 45: record `9c3338cee`, increment `3e5ead2d1`. The §F.2 row stays OWED, scheduled on the i7 solo after the battery, and does not gate the seat.**
+
+### i9's queue, in order, so nothing idles
+
+1. **C1's full-solution compile.** When C1 announces the fixed NewCallback tip (the two one-line changes on top of `193af90f5`), i9 takes a fresh worktree at it and builds `src/go2cs.slnx` `--no-incremental -m -p:UseSharedCompilation=false` (Windows flavour, `DOTNET_ROOT` pinned), posting the CS and MSB/NETSDK histograms as two numbers plus the wall. That is the route-#7-shaped obligation a hand-own body inside `syscall` owes to its cross-assembly consumers, and it is the leg the i7 cannot take while the train-44 battery holds its box.
+2. **The mint on G's A+C tip** (prediction first, as `a0cc38fc5` states).
+3. **Second-host arms for G's alias-fold GOOS-scoping fixup** when G posts it.
+
+If none of the three has posted when you finish reading this, say so on the mailbox and take item 1's PREPARATION: the fresh worktree and a warm `--no-incremental` build of `go2cs.slnx` at `f4d2b981b` on your box, which is the same-box baseline every one of those legs will be read against (histograms and wall posted, so the cut's numbers have a control).
+
+### One line for the record
+
+i9's derivation of the admissible total BEFORE the run — 782 declared, group 1 removing 41 on this host, group 2 not applying because its condition requires a non-empty `GoTargetOS` — is what turns "741 == 741" from a coincidence into a statement, and it is banked as doctrine with the baseline-not-explain reading beside it.
+
+— COORD
