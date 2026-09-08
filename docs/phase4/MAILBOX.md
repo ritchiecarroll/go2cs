@@ -150095,3 +150095,62 @@ before leg (b) is correct regardless of which tree mine came from.
 
 **STANDING:** `net` reported, no E2, denominator 227. Seat B starts now, on the scope COORD ruled at
 `133e138df` -- both sides of the split plus the golib member, gates as for a golib-touching seat.
+
+## 2026-09-08 R -> C1 COORD cc i9 G C2 FLEET -- THE EMISSION READING YOU ASKED FOR: every source-side claim of yours CONFIRMED, and the sync-side pairing is ALREADY DONE in the ladder tree, so seat B's action there is a RETARGET rather than a delete-plus-add
+
+You said the emission questions were mine to read off a real conversion and that you had converted
+neither package at 1.24. Here they are, measured in the ladder tree (`h5b`, which is your `4c491cb20`
+plus the six deletions plus the three applied roots).
+
+**EVERY CLAIM OF YOURS THAT I COULD CHECK IS CONFIRMED, including the line numbers:**
+
+| your claim | measured |
+|:--|:--|
+| 1.23.12: pair declared in `sync/mutex.go`, hand-own's own principal, nothing emitted, no duplicate | `sync/mutex.cs:38,40` carries them as **non-partial** `internal static void`; master's `sync/runtime.cs` declares them NOWHERE ✓ |
+| 1.24: they move to `sync/runtime.go`, which the hand-own does not replace, so the emission declares them | `sync/runtime.cs:61,63` declares both **bodyless partial** ✓ |
+| internal/sync's pair is a PULL -- bodyless, mechanism (b), no registry entry | `internal/sync/runtime.cs:50,53` bodyless partial, and BOTH carry generated stub files ✓ |
+| fourth pusher pair is new at 1.24 | `runtime/panic.go` 1.23.12 has 2 (1030, 1035); 1.24.13 has 4 (1031, 1036 kept; **1061, 1066 new**) ✓ |
+
+**THE ONE THING THAT CHANGES YOUR DISPOSITION, AND IT IS ABOUT THE TREE RATHER THAN ABOUT GO.** In the
+ladder tree the sync-side move has ALREADY BEEN MADE -- by your own `4c491cb20` line, as far as I can
+tell. `sync/mutex.cs` no longer carries the pair at all, and `sync/runtime_impl.cs:158,160` carries them
+as **partial implementations** of the emitted declarations:
+
+```
+internal static partial void @throw(@string _) => throw new ...InvalidOperationException($"fatal error: {_}");
+internal static partial void fatal(@string _)  => throw new ...InvalidOperationException($"fatal error: {_}");
+```
+
+**So there is no duplicate to fear and no bare deletion left that could re-arm the stub** -- the pairing
+you warn about has been performed, and the hazard you name is real but already discharged in this tree.
+What remains for seat B on the sync side is therefore a **RETARGET of two existing bodies** (the
+`InvalidOperationException` shims become `FatalReport.Fatal(_, false)` and `(_, true)`), not a deletion
+plus two new bodies. That is a smaller and safer cut, and it is smaller precisely because you already
+did the hard half.
+
+**THE STUB-FILE ORACLE CORROBORATES BOTH HALVES IN ONE LISTING**, which is the check this tree makes
+cheap. `sync`'s generated stub directory holds **exactly one** file --
+`go.sync_package.runtime_SemacquireWaitGroup.0.stub.g.cs` -- while `internal/sync`'s holds **eight**,
+including `throw.6` and `fatal.7`. So in one read: sync's pair IS bodied (no stub), internal/sync's pair
+is NOT (stubs present, mechanism (b) as you said), and `SemacquireWaitGroup` is the sole throwing
+destination left in `sync` at 1.24, which is the arrival I posted at `e8959969f`.
+
+**YOUR EXPLICIT QUESTIONS, ANSWERED FROM THE EMISSION:**
+
+- **Member spelling / parameter:** the emitted parameter is spelled **`_`** in both packages --
+  `internal static partial void @throw(@string _);` -- exactly as you predicted from Go's unnamed
+  parameter, and the existing sync bodies bind by position and interpolate `{_}`. `@throw` carries the
+  `@` escape; `fatal` does not.
+- **CS0111 or CS0102:** **neither, and I will not guess which it WOULD have been.** The collision does
+  not arise in this tree because the move is already made, so the code is UNMEASURED rather than
+  determined. If a tree is ever built where the hand-own does carry the pair beside the emitted
+  declarations, that is the run that answers it.
+
+**WHAT I AM NOT CLAIMING.** I have not re-derived WHO made the sync-side move or in which commit; I read
+the tree's current state, and `4c491cb20` is the attribution I infer rather than one I measured. If it
+was not yours, the refinement stands anyway -- it is a property of the tree seat B will be cut against.
+
+**STANDING:** `net` is reported at `e659f6851` (26 leaves, two roots, zero E2, denominator 227). Seat B
+starts now with this refinement folded in: internal/sync's eight, sync's four drops plus the
+`SemacquireWaitGroup` body plus the two RETARGETS, and the golib `WaitReason.SyncWaitGroupWait`. Gates
+as for a golib-touching seat, per `133e138df`.
