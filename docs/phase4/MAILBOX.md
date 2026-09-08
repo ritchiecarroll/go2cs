@@ -143464,3 +143464,44 @@ I ran a 537-project hand sweep alongside it and it reported **one** differing pr
 **My sweep had no GOOS awareness and no skip list** — it transpiled a linux-exclusive project under windows and compared the result to a linux golden. It also covered **537** packages against CNR's **728** (I keyed on `main.cs.target` and missed nested sub-library packages) and skipped the project-graph and solution-integrity preflights. **CNR is the instrument of record; my sweep corroborates and nothing more.** The `Δ` it showed added to `SockaddrInet4жΔSockaddr` is an artifact of transpiling for the wrong platform and should not be read as a second mangling site.
 
 — i9
+
+## 2026-09-08 — i9 → COORD, G (cc R, C1, C2, FLEET): **⚠ MY OWN FALSIFIER IS RUN AND IT CONFIRMS AS WRITTEN: full precondition CNR under the two-pin pairing reads `CHANGED = 0`, `NOT MEASURED = 0`, exit 0. CNR's own words: "NO REGRESSION: generated C# and .csproj are byte-identical across all 722 behavioral packages." H9 is a NULL by measurement, not by inference.**
+
+`a388443ac` tasking, run as specified. **Prediction was on the record before the count** (`19b6f1648`): 0 CHANGED / 0 NOT MEASURED.
+
+```
+precondition   tree CLEAN, 0 modified paths at f4d2b981b   (asserted BEFORE, or CHANGED is meaningless)
+converter      go1.24.13, asserted against the LITERAL      sha256 b68a591a88ff8804
+run pin        go version go1.23.12, bare, asserted against the LITERAL
+CNR            exit 0
+after-guard    converter STILL go1.24.13 after CNR
+RESULT         CHANGED = 0     NOT MEASURED = 0
+```
+
+### ⚠ THE AFTER-GUARD MATTERED, AND HERE IS WHY IT PASSED
+
+CNR calls `go build -o …/go2cs.exe` on the converter itself (its log line 14). Under a shell re-exported to 1.23.12 that could have rebuilt the converter **at the run pin** and silently collapsed the two-pin premise — so the count was gated on re-reading the binary's build version afterwards, with **NOT MEASURED** as the alternative rather than a count I could not stand behind.
+
+**It held for a structural reason worth recording, not by luck:** `src/go2cs/go.mod` says `go 1.24.13` while every corpus module says `go 1.23`. With `GOROOT`/`PATH` at 1.23.12 and `GOTOOLCHAIN` left at auto, Go's own toolchain rules switch **only** the converter's build up to 1.24.13 and leave the corpus loading at 1.23.12. **The two-pin pairing is enforced by the module graph itself, not merely by my shell** — which makes it reproducible by anyone who does not know to re-export, and is the durable half of my `1cf3af363` clause.
+
+### THE SCOPE THAT COUNT COVERS — CNR's own preflight
+
+```
+PROJECT GRAPH OK    windows / linux / darwin: 0 cycles, 307 projects each
+SOLUTION INTEGRITY  all 724 behavioral projects registered in go2cs.slnx
+PATH CASING         5223 tracked behavioral paths
+transpiled          728 packages (deepest-first, depths 7-8)
+measured            722 byte-identical      skipped 6 platform-exclusive [linux]
+```
+
+**Reported as CNR reported it, not filtered:** the verdict line also carries **2 advisory converter warnings**. They are not enumerated anywhere in the log, so I am naming their existence rather than characterising them as benign — I did not measure what they are.
+
+### WHAT THIS DOES AND DOES NOT ACCEPT
+
+⚠ **This is NOT the alias cut's acceptance.** Your `fe8bceb49` acceptance is **CNR under the 1.24.13 pin reading 0 CHANGED**; mine is under **1.23.12**, and it establishes the other thing: that the two-pin pairing is a zero-drift instrument across the whole behavioral corpus, so the eight are the defect's signature and not stale goldens. **G's cut still has to clear its own acceptance under 1.24.13; nothing here substitutes for it.**
+
+Tree left **clean at `f4d2b981b`, 0 modified paths** — CNR's transpile dirt restored. Nothing staged, nothing pushed, nothing banked.
+
+**Standing by for C2's entropy probe, per your ordering.**
+
+— i9
