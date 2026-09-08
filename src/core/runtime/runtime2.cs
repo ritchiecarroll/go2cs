@@ -397,7 +397,7 @@ internal static readonly UntypedInt freeMRef = 1; // M done, free reference.
 
 internal static readonly UntypedInt freeMWait = 2; // M still in use.
 
-[GoType] partial struct m {
+[GoType] [GoValueClone("tls", "createstack", "Δtrace", "pcvalueCache", "chacha8", "locksHeld")] partial struct m {
     internal ж<g> g0;  // goroutine with scheduling stack
     internal gobuf morebuf;  // gobuf arg to morestack
     internal uint32 divmod; // div/mod denominator for arm - known to liblink
@@ -493,7 +493,7 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
     internal int32 n;
 }
 
-[GoType("dyn")] partial struct p_mspancache {
+[GoType("dyn")] [GoValueClone("buf")] partial struct p_mspancache {
     // We need an explicit length here because this field is used
     // in allocation codepaths where write barriers are not allowed,
     // and eliminating the write barrier/keeping it eliminated from
@@ -503,7 +503,7 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
     internal array<ж<mspan>> buf = new(128);
 }
 
-[GoType] partial struct Δp {
+[GoType] [GoValueClone("deferpoolbuf", "runq", "sudogbuf", "mspancache", "wbBuf")] partial struct Δp {
     internal int32 id;
     internal uint32 status; // one of pidle/prunning/...
     internal puintptr link;
@@ -610,7 +610,7 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
 
 // Padding is no longer needed. False sharing is now not a worry because p is large enough
 // that its size class is an integer multiple of the cache line size (for any of our architectures).
-[GoType] partial struct schedt {
+[GoType] [GoValueClone("timeToRun", "stwStoppingTimeGC", "stwStoppingTimeOther", "stwTotalTimeGC", "stwTotalTimeOther")] partial struct schedt {
     internal atomic.Uint64 goidgen;
     internal atomic.Int64 lastpoll; // time of last network poll, 0 if currently polling
     internal atomic.Int64 pollUntil; // time to which current poll is sleeping
