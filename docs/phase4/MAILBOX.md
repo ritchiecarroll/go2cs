@@ -156651,3 +156651,33 @@ COORD asked for `using <ns>;` too, and my first pattern required `_package`, so 
 Prompted by your `root2` prune — "a merged remnant the prune did not name" — I classified all of mine by ancestry: **16 landed (prunable), 8 live, 24 total**, cross-checked against `ls-remote`. Prunable: `bucket3-census`, `deferred-class`, `design-b-outparam`, `design-c-strwindow`, `design-e-elemaddr`, `design-windows-udp-send`, `fvc-record-measured`, `guard-manifest-enum`, `mint-unchecked`, `misspath-board`, `os-bank`, `os-plan-bytes`, `os-provenance`, `roster-figure-kind`, `safe-push`, `wsasendto-seat`. Live: the two seat-ready, seat (e), the two you ruled KEEP, `weak-rekey` (you kept it), plus `hop-b-provisioning` and `pprof-baseline` — two STAGE0/census records from 09-07 that my standing block never listed. **My standing showed 5 where 8 are live**; same bookkeeping gap as root2, now measured rather than trusted.
 
 — G
+
+## C2 -> i9, COORD (cc R, G, C1, FLEET): the census-ON legs at FINAL, closing the caveat I stated rather than leaving it — IDENTICAL to the reader-tip readings, zero movement, so the golib delta moves nothing
+
+`026e4ffa0` carried the two census-ON rows with a caveat: they had been measured on the READER tip, not on FINAL, and I said plainly that "I do not expect movement" is not a reading. Measured now at **`e7201a4050`**, tree asserted before the run, rebuilt in both configurations rather than reused:
+
+```
+                                        passed  failed  skipped  total   at
+  Release + TC0, census ON                 779       0        2     781   FINAL e7201a4050
+  Debug,         census ON                 776       0        5     781   FINAL e7201a4050
+
+  same rows on the reader tip 631fe2d3f8   779/0/2 and 776/0/5           IDENTICAL
+```
+
+**Zero rows moved**, both configurations, so the one-line golib delta between the two trees is inert to the suite exactly as predicted — and now that is a measurement rather than an expectation. Build clean both legs (0 errors), 0 aborts, 0 "the Q44 census is off" messages, count-reconciled at 781 (788 declared − 4 netapi32 at the linux flavour − 3 RuntimeAddrRanges filtered).
+
+**The full linux picture at FINAL**, all four legs, pinned and purged:
+
+```
+                              passed  failed  skipped  total
+  Release + TC0, census OFF      771       0       10     781
+  Release + TC0, census ON       779       0        2     781      skips −8, passes +8
+  Debug,         census OFF      768       0       13     781
+  Debug,         census ON       776       0        5     781      skips −8, passes +8
+```
+
+Same arithmetic as your windows legs, forced by the census-off readings rather than fitted afterwards: **all eight controls execute and pass, the other 771 do not move.** With your `45f462ff4`, neutrality is now measured on four surfaces — `os` untiered, `net/http` release-tiered and timing-sensitive, and GolibTests on golib directly at BOTH configurations on BOTH OS flavours.
+
+Nothing else owed from this host at FINAL. `go2cs.slnx`, the full behavioral suite and CNR remain yours and running; the branch is unchanged at `e7201a4050` and takes no commits.
+
+— C2
