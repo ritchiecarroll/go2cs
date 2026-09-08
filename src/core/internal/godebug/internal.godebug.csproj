@@ -140,10 +140,23 @@
 
     <ProjectReference Include="$(go2csPath)core/internal/bisect/internal.bisect.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/godebugs/internal.godebugs.csproj" />
-    <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/atomic/sync.atomic.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
+  </ItemGroup>
+
+  <!-- A reference the converter's derivation cannot produce, so it is DECLARED here and preserved
+       across every re-mint (preserveHandOwnReferences, projectFileWriter.go). This package is
+       hand-owned by consequence: every production file carries the manual-conversion marker, so the
+       compiled godebug.cs is human-written and godebug.cs.auto is the converter's review sibling.
+       That hand-written file completes the bodyless `registerMetric` partial by calling
+       go.runtime_package.godebugRegisterMetric (godebug.cs:125). Go's own source does not import
+       runtime, the converter's emission never spells runtime_package, and no push-registry row
+       exists for internal/godebug.registerMetric, so no source-side or emission-side derivation
+       can reach this reference. Retiring it is a human act: delete this block when godebug.cs no
+       longer binds runtime. -->
+  <ItemGroup Label="GoHandOwnReferences">
+    <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
   </ItemGroup>
 
 </Project>
