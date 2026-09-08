@@ -247,6 +247,7 @@
     <None Include="$(MSBuildThisFileDirectory)validationProofPages.go" />
     <None Include="$(MSBuildThisFileDirectory)validationProofPages_test.go" />
     <None Include="$(MSBuildThisFileDirectory)valueCloneFieldSpelling_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)valueCloneStampMembers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)variableAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)visitArrayType.go" />
     <None Include="$(MSBuildThisFileDirectory)visitAssignStmt.go" />
