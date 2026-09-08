@@ -9,6 +9,8 @@ using go;
 // Go has two flavors of this protocol and selects one per GOOS. lock_sema.go (windows, darwin,
 // plan9, aix …) treats mutex.key as a tagged atomic slot — 0 unlocked, `locked` (1) held, or an *m
 // ADDRESS|locked heading a waiter chain through m.nextwaitm — and parks waiters on OS semaphores
+// (at Go 1.24 that chain field is renamed and reshaped as m.mWaitList; this file's protocol
+// description is written against 1.23.12, which is the release this corpus converts) —
 // (semacreate/semasleep/semawakeup). lock_futex.go (linux, freebsd, dragonfly) uses a {0,1,2} slot
 // (mutex_unlocked/mutex_locked/mutex_sleeping) and parks them on a futex (futexsleep/futexwakeup).
 //

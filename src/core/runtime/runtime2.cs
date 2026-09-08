@@ -4,12 +4,28 @@
 global using itab = go.@internal.abi_package.ITab;
 
 // go2cs HAND-OWNED. Unlike the companion pattern (runtime2_impl.cs supplies the bodyless
-// guintptr/muintptr/… partials this file declares), two edits here modify REGENERATED content a
-// companion cannot supply — efaceOf's body (a raw-metal reinterpret stubbed to an inert eface) and
-// the gomaxprocs/ncpu field-initializer seed (bootstrap-populated in Go). This marker drops
-// runtime2.go from a -stdlib reconvert so those edits — and the frozen bodyless partials the
-// companion implements — survive. (Trade-off: converter improvements to runtime2.go no longer flow
-// here until this is unfrozen; acceptable for a Phase-4 operational hand-owned file.)
+// guintptr/muintptr/… partials this file declares), FOUR edits here modify REGENERATED content a
+// companion cannot supply. The list was TWO until the 1.24.13 re-derive; the other two were found
+// by the three-way merge as genuine conflicts, i.e. this header under-documented its own delta and
+// nothing could have noticed until something merged against it:
+//
+//   1. efaceOf's body — a raw-metal reinterpret stubbed to an inert eface.
+//   2. the gomaxprocs/ncpu field-initializer seed — bootstrap-populated in Go.
+//   3. the waitReason block declared as `static readonly` FIELDS where the converter emits
+//      expression-bodied PROPERTIES. ⚠ The REASON for this is unrecorded; it is preserved because
+//      re-applying a hand-own's delta means re-applying it, not judging it, and it is flagged here
+//      so its owner can confirm or retire it rather than it surviving by silence a second time.
+//   4. waitReasonStrings' terminator as `}.array();` where the converter emits `}.array(38);`.
+//      Almost certainly the same change as (3) — an explicit length beside non-constant indices —
+//      but that is an INFERENCE and no compiler has been run against it here.
+//
+// This marker drops runtime2.go from a -stdlib reconvert so those edits — and the frozen bodyless
+// partials the companion implements — survive. THE TRADE-OFF IS SHARPER AT A RELEASE HOP THAN THE
+// ORIGINAL WORDING ADMITTED: a frozen file does not merely stop receiving converter improvements,
+// it stops receiving GO'S OWN CHANGES. At 1.24.13 seven declarations and three fields arrive that
+// fifteen emitted siblings read (g.syncGroup in ten files, m.mWaitList, m.fipsIndicator,
+// isIdleInSynctest and six waitReason constants), which is why this file is now RE-DERIVED from the
+// 1.24.13 emission with the delta above re-applied, rather than surgically patched.
 [module: go.GoManualConversion]
 
 namespace go;
@@ -17,12 +33,12 @@ namespace go;
 using abi = @internal.abi_package;
 using chacha8rand = @internal.chacha8rand_package;
 using goarch = @internal.goarch_package;
+using goexperiment = @internal.goexperiment_package;
 using atomic = @internal.runtime.atomic_package;
-using sys = runtime.@internal.sys_package;
+using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using runtime.@internal;
 
 partial class runtime_package {
 
@@ -90,33 +106,6 @@ internal static readonly UntypedInt _Pdead = 4;
 [GoType] partial struct mutex {
     // Empty struct if lock ranking is disabled, otherwise includes the lock rank
     internal partial ref lockRankStruct lockRankStruct { get; }
-    // Futex-based impl treats it as uint32 key,
-    // while sema-based impl as M* waitm.
-    // Used to be a union, but unions break precise GC.
-    internal uintptr key;
-}
-
-// sleep and wakeup on one-time events.
-// before any calls to notesleep or notewakeup,
-// must call noteclear to initialize the Note.
-// then, exactly one thread can call notesleep
-// and exactly one thread can call notewakeup (once).
-// once notewakeup has been called, the notesleep
-// will return.  future notesleep will return immediately.
-// subsequent noteclear must be called only after
-// previous notesleep has returned, e.g. it's disallowed
-// to call noteclear straight after notewakeup.
-//
-// notetsleep is like notesleep but wakes up after
-// a given number of nanoseconds even if the event
-// has not yet happened.  if a goroutine uses notetsleep to
-// wake up early, it must wait to call noteclear until it
-// can be sure that no other goroutine is calling
-// notewakeup.
-//
-// notesleep/notetsleep are generally called on g0,
-// notetsleepg is similar to notetsleep but is called on user g.
-[GoType] partial struct note {
     // Futex-based impl treats it as uint32 key,
     // while sema-based impl as M* waitm.
     // Used to be a union, but unions break precise GC.
@@ -358,6 +347,7 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
     internal int64 trackingStamp; // timestamp of when the G last started being tracked
     internal int64 runnableTime; // the amount of time spent runnable, cleared when running, only used when tracking
     internal muintptr lockedm;
+    internal uint8 fipsIndicator;
     internal uint32 sig;
     internal slice<byte> writebuf;
     internal uintptr sigcode0;
@@ -378,6 +368,7 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
     // current in-progress goroutine profile
     internal goroutineProfileStateHolder goroutineProfiled;
     internal ж<coro> coroarg; // argument during coroutine transfers
+    internal ж<synctestGroup> syncGroup;
     // Per-G tracer state.
     internal gTraceState trace;
 // Per-G GC state
@@ -454,7 +445,7 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
     internal array<uintptr> createstack = new(32); // stack that created this thread, it's used for StackRecord.Stack0, so it must align with it.
     internal uint32 lockedExt;      // tracking for external LockOSThread
     internal uint32 lockedInt;      // tracking for internal lockOSThread
-    internal muintptr nextwaitm;    // next m waiting for lock
+    internal mWaitList mWaitList;   // list of runtime lock waiters
     internal mLockProfile mLockProfile; // fields relating to runtime.lock contention
     internal slice<uintptr> profStack; // used for memory/block/mutex stack traces
     // wait* are used to carry arguments from gopark into park_m, because
@@ -490,6 +481,11 @@ internal static readonly UntypedInt freeMWait = 2; // M still in use.
     // Up to 10 locks held by this m, maintained by the lock ranking code.
     internal nint locksHeldLen;
     internal array<heldLockInfo> locksHeld = new(10);
+    // Size the runtime.m structure so it fits in the 2048-byte size class, and
+    // not in the next-smallest (1792-byte) size class. That leaves the 11 low
+    // bits of muintptr values available for flags, as required for
+    // GOEXPERIMENT=spinbitmutex.
+    internal array<byte> __ = new(goexperiment.SpinbitMutexInt * 700 * (2 - goarch.PtrSize / 4));
 }
 
 [GoType("dyn")] partial struct p_gFree {
@@ -726,7 +722,7 @@ internal static readonly UntypedInt _SigIgn = 256; // _SIG_DFL action is to igno
 // Keep in sync with linker (../cmd/link/internal/ld/pcln.go:/pclntab)
 // and with package debug/gosym and with symtab.go in package runtime.
 [GoType] partial struct _func {
-    public partial ref runtime.@internal.sys_package.NotInHeap NotInHeap { get; } // Only in static data
+    public partial ref @internal.runtime.sys_package.NotInHeap NotInHeap { get; } // Only in static data
     internal uint32 entryOff; // start pc, as offset from moduledata.text/pcHeader.textStart
     internal int32 nameOff;  // function name, as index into moduledata.funcnametab.
     internal int32 args;  // in/out args size
@@ -882,20 +878,26 @@ internal static readonly waitReason waitReasonSyncCondWait = 20;         // "syn
 internal static readonly waitReason waitReasonSyncMutexLock = 21;        // "sync.Mutex.Lock"
 internal static readonly waitReason waitReasonSyncRWMutexRLock = 22;     // "sync.RWMutex.RLock"
 internal static readonly waitReason waitReasonSyncRWMutexLock = 23;      // "sync.RWMutex.Lock"
-internal static readonly waitReason waitReasonTraceReaderBlocked = 24;   // "trace reader (blocked)"
-internal static readonly waitReason waitReasonWaitForGCCycle = 25;       // "wait for GC cycle"
-internal static readonly waitReason waitReasonGCWorkerIdle = 26;         // "GC worker (idle)"
-internal static readonly waitReason waitReasonGCWorkerActive = 27;       // "GC worker (active)"
-internal static readonly waitReason waitReasonPreempted = 28;            // "preempted"
-internal static readonly waitReason waitReasonDebugCall = 29;            // "debug call"
-internal static readonly waitReason waitReasonGCMarkTermination = 30;    // "GC mark termination"
-internal static readonly waitReason waitReasonStoppingTheWorld = 31;     // "stopping the world"
-internal static readonly waitReason waitReasonFlushProcCaches = 32;      // "flushing proc caches"
-internal static readonly waitReason waitReasonTraceGoroutineStatus = 33; // "trace goroutine status"
-internal static readonly waitReason waitReasonTraceProcStatus = 34;      // "trace proc status"
-internal static readonly waitReason waitReasonPageTraceFlush = 35;       // "page trace flush"
-internal static readonly waitReason waitReasonCoroutine = 36;            // "coroutine"
-internal static readonly waitReason waitReasonGCWeakToStrongWait = 37;   // "GC weak to strong wait"
+internal static readonly waitReason waitReasonSyncWaitGroupWait = 24;    // "sync.WaitGroup.Wait"
+internal static readonly waitReason waitReasonTraceReaderBlocked = 25;   // "trace reader (blocked)"
+internal static readonly waitReason waitReasonWaitForGCCycle = 26;       // "wait for GC cycle"
+internal static readonly waitReason waitReasonGCWorkerIdle = 27;         // "GC worker (idle)"
+internal static readonly waitReason waitReasonGCWorkerActive = 28;       // "GC worker (active)"
+internal static readonly waitReason waitReasonPreempted = 29;            // "preempted"
+internal static readonly waitReason waitReasonDebugCall = 30;            // "debug call"
+internal static readonly waitReason waitReasonGCMarkTermination = 31;    // "GC mark termination"
+internal static readonly waitReason waitReasonStoppingTheWorld = 32;     // "stopping the world"
+internal static readonly waitReason waitReasonFlushProcCaches = 33;      // "flushing proc caches"
+internal static readonly waitReason waitReasonTraceGoroutineStatus = 34; // "trace goroutine status"
+internal static readonly waitReason waitReasonTraceProcStatus = 35;      // "trace proc status"
+internal static readonly waitReason waitReasonPageTraceFlush = 36;       // "page trace flush"
+internal static readonly waitReason waitReasonCoroutine = 37;            // "coroutine"
+internal static readonly waitReason waitReasonGCWeakToStrongWait = 38;   // "GC weak to strong wait"
+internal static readonly waitReason waitReasonSynctestRun = 39;          // "synctest.Run"
+internal static readonly waitReason waitReasonSynctestWait = 40;         // "synctest.Wait"
+internal static readonly waitReason waitReasonSynctestChanReceive = 41;  // "chan receive (synctest)"
+internal static readonly waitReason waitReasonSynctestChanSend = 42;     // "chan send (synctest)"
+internal static readonly waitReason waitReasonSynctestSelect = 43;       // "select (synctest)"
 
 internal static array<@string> waitReasonStrings = new golib.SparseArray<@string>{
     [waitReasonZero] = ""u8,
@@ -922,6 +924,7 @@ internal static array<@string> waitReasonStrings = new golib.SparseArray<@string
     [waitReasonSyncMutexLock] = "sync.Mutex.Lock"u8,
     [waitReasonSyncRWMutexRLock] = "sync.RWMutex.RLock"u8,
     [waitReasonSyncRWMutexLock] = "sync.RWMutex.Lock"u8,
+    [waitReasonSyncWaitGroupWait] = "sync.WaitGroup.Wait"u8,
     [waitReasonTraceReaderBlocked] = "trace reader (blocked)"u8,
     [waitReasonWaitForGCCycle] = "wait for GC cycle"u8,
     [waitReasonGCWorkerIdle] = "GC worker (idle)"u8,
@@ -935,7 +938,12 @@ internal static array<@string> waitReasonStrings = new golib.SparseArray<@string
     [waitReasonTraceProcStatus] = "trace proc status"u8,
     [waitReasonPageTraceFlush] = "page trace flush"u8,
     [waitReasonCoroutine] = "coroutine"u8,
-    [waitReasonGCWeakToStrongWait] = "GC weak to strong wait"u8
+    [waitReasonGCWeakToStrongWait] = "GC weak to strong wait"u8,
+    [waitReasonSynctestRun] = "synctest.Run"u8,
+    [waitReasonSynctestWait] = "synctest.Wait"u8,
+    [waitReasonSynctestChanReceive] = "chan receive (synctest)"u8,
+    [waitReasonSynctestChanSend] = "chan send (synctest)"u8,
+    [waitReasonSynctestSelect] = "select (synctest)"u8
 }.array();
 
 internal static @string String(this waitReason w) {
@@ -971,6 +979,26 @@ internal static array<bool> ΔisWaitingForSuspendG = new golib.SparseArray<bool>
     [waitReasonGCWorkerActive] = true,
     [waitReasonFlushProcCaches] = true
 }.array();
+
+internal static bool isIdleInSynctest(this waitReason w) {
+    return ΔisIdleInSynctest[w];
+}
+
+// isIdleInSynctest indicates that a goroutine is considered idle by synctest.Wait.
+internal static array<bool> ΔisIdleInSynctest = new golib.SparseArray<bool>{
+    [waitReasonChanReceiveNilChan] = true,
+    [waitReasonChanSendNilChan] = true,
+    [waitReasonSelectNoCases] = true,
+    [waitReasonSleep] = true,
+    [waitReasonSyncCondWait] = true,
+    [waitReasonSyncWaitGroupWait] = true,
+    [waitReasonCoroutine] = true,
+    [waitReasonSynctestRun] = true,
+    [waitReasonSynctestWait] = true,
+    [waitReasonSynctestChanReceive] = true,
+    [waitReasonSynctestChanSend] = true,
+    [waitReasonSynctestSelect] = true
+}.array(44);
 
 internal static ж<ж<m>> Ꮡallm = new StandardBox<ж<m>>(default(ж<m>));
 internal static ref ж<m> allm => ref Ꮡallm.ValueSlot;
