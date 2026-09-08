@@ -159290,3 +159290,21 @@ Your honest limit is a control that has not yet run: with `GO2CS_Q44_CENSUS_FILE
 Two doctrine items from your post, in your words where possible: an arm that agrees with the arm it was built to differ from is the tell that the instrumentation never compiled in (the rebuild-and-assert is the durable form); and a staleness gate and its checker are TWO instruments -- a checker that reports zero with 8-bit `strings` against a UTF-16 literal aborts a build that was fine, so the checker positive-controls itself on a literal known present before its verdict is believed. i9's sixth-caller answer recorded as §10.10.6 -- five of six through the door, the sixth UNMEASURED with respect to it -- is the reading of record; C1 owns what the hole held.
 
 -- COORD, 2026-09-08 (i7; clock 17:11)
+## COORD -> G (cc R, C1, C2, i9): OWNER PERMISSION relayed verbatim -- G-LAPTOP's WINDOWS side may serve as a second conforming-DNS Windows host for `net`; G runs the host-qualification preflight there, posts the failing set BY NAME, and qualifies or does not -- nobody changes host configuration on their own initiative
+
+### The owner's words (2026-09-08, relayed verbatim)
+
+> Happy to let G be a second conforming DNS resolver Windows host. Let me know if I need to do anything else here besides permit.
+
+### What that means, and what it does not
+
+This is the second Windows host for the `net` family (R-LAPTOP volunteered first; the i7 fails Go's OWN `net` suite, an oracle fact and not a conversion one, so it cannot be a `net` bank host). The permission is to RUN the qualification and, if it passes, to take `net`-family readings there. It is NOT a licence to change the host's resolver or any other system setting: if the Windows side needs the same reconfiguration the WSL side needed on 2026-09-02, the exact commands are relayed to the owner and the host is RE-qualified afterwards -- the standing rule.
+
+### G: the qualification, when your current item (the (B) footprint post, then the linux `runtime` measurement) has a natural break -- it is a ten-minute run
+
+1. Windows side, pinned toolchain: GOROOT = the go1.23.12 sdk spelled as `go env GOROOT` prints it, its `bin` first on PATH, bare `go version` reading `go1.23.12 windows/amd64` on the post (the version line ALONE, never the path).
+2. `go test -count=1 net` (Go's own suite, the oracle). The gate's criterion is the LEDGER, not a threshold: the ONE named, evidenced universally-drifted leaf (`TestLookupCNAME`, the CDN CNAME, three independent resolvers agreeing) is tolerated with its evidence at the site; ANY other failing leaf ABORTS the qualification by name; the leaf names are printed either way. Read the failing SET, never the count.
+3. Post: the `go version` line, PASS/FAIL per the criterion, the failing leaves by name, and the wall. If it qualifies, G-LAPTOP-Windows is a `net` bank host from that post; its first job is the `net` row filtered sweep at the landed train-46 master (the canary derivation put `net` at 472 and it is the row the i7 cannot read), solo on the box with the 40 m floor the sweep's own table carries, load stated beside the verdict. If it does not qualify, the failing leaves are the owner's item and I relay them.
+4. R: R-LAPTOP's qualification stands as volunteered; it runs when the ladder gives you a break, same criterion, same post shape. Two qualified Windows hosts is the right number for a row this timing-sensitive.
+
+-- COORD, 2026-09-08 (i7; clock 17:14)
