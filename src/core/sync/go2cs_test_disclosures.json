@@ -2,36 +2,6 @@
   "schemaVersion": 1,
   "disclosures": [
     {
-      "name": "TestMapClearNoAllocations",
-      "class": "alloc-profile",
-      "signature": "AllocsPerRun of m.Clear = ",
-      "reason": "want-zero AllocsPerRun assert: Map.Clear walks the read/dirty maps through the golib map enumerator, and every enumeration step materializes a managed entry object where Go's bucket walk is allocation-free; a malloc-counting shim would fail the same assert"
-    },
-    {
-      "name": "TestMapRangeNoAllocations",
-      "class": "alloc-profile",
-      "signature": "AllocsPerRun of m.Range = ",
-      "reason": "want-zero AllocsPerRun assert: Range boxes each key and value into `any` for the visitor callback — a CLR heap allocation per entry that Go's non-escaping eface avoids"
-    },
-    {
-      "name": "TestOnceFunc",
-      "class": "alloc-profile",
-      "signature": "want 0 allocations per call, got ",
-      "reason": "want-zero AllocsPerRun assert: every measured call takes Once.Do's fast path — the once-body and its defer run only in AllocsPerRun's warm-up, and measured, that fast path accounts for the whole per-call figure. It evaluates two addresses of struct fields, `&once.done` and, inside atomic.Uint32.Load, `&done.v`, and each one materializes an interior-pointer box: a Go pointer must be a storable, identity-comparable, nil-able value, and the CLR's only allocation-free interior pointer (`ref T`) is stack-only and can be none of those. Go's `o.done.Load()` inlines to a single atomic load off the receiver and allocates nothing; a malloc-counting shim would fail the same assert"
-    },
-    {
-      "name": "TestOnceValue",
-      "class": "alloc-profile",
-      "signature": "want 0 allocations per call, got ",
-      "reason": "want-zero AllocsPerRun assert: the same Once.Do fast path as TestOnceFunc, measured at the same cost — the generic result slot is READ through the box it already lives in, never allocated, so the one-result form adds nothing per call"
-    },
-    {
-      "name": "TestOnceValues",
-      "class": "alloc-profile",
-      "signature": "want 0 allocations per call, got ",
-      "reason": "want-zero AllocsPerRun assert: the same Once.Do fast path as TestOnceFunc, measured at the same cost — the two result slots are read through the boxes they already live in and the tuple return is a value, so the two-result form adds nothing per call either"
-    },
-    {
       "name": "TestOnceXGC/OnceFunc",
       "class": "codegen-liveness",
       "signature": "wrapped function should be garbage collected, but still live",
@@ -48,12 +18,6 @@
       "class": "codegen-liveness",
       "signature": "wrapped function should be garbage collected, but still live",
       "reason": "Same as TestOnceXGC/OnceFunc: the by-value slice argument in the test's own body is reported live for the whole frame by the CLR's GC info, so the finalizer cannot become due while the test is looking"
-    },
-    {
-      "name": "TestPoolGC",
-      "class": "codegen-liveness",
-      "signature": "only 98 out of 100 resources are finalized",
-      "reason": "Go's own assert tolerates exactly one straggler (`fin1 >= N-1`, commented \"1 pointer can remain on stack or elsewhere\"); the managed run leaves TWO. The extra one is the discarded `p.Get()` result: Go drops the value immediately, while the CLR keeps the call's result temp in the test frame's GC-reported live set for the frame's whole lifetime — the same frame-liveness conservatism as TestOnceXGC, here one object wide. The Pool itself releases everything it cached (98 of 100 finalize on the FIRST try, deterministically across 9 measured runs); the count is pinned exactly so any real Pool retention regression fails loud instead of hiding behind this disclosure."
     }
   ]
 }
