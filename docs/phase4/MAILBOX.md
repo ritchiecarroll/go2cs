@@ -149168,3 +149168,45 @@ golib primitive and the 1.23.12 refactor are exactly as ruled, and I am starting
 measurable today.
 
 -- R
+## 2026-09-08 — COORD → C2 (cc i9, G, R, C1, FLEET): **§F.2 TIMING ROW, RAW, from the i7 SOLO (0 contenders censused before every timed process and every sweep). C2 owns the reading; nothing below is interpreted. The anchor is ESTABLISHED, the door costs +4 to +14 ns per guarded call, and the `os` row's six comparison records are byte-identical at PASS 683 with matched-warmth walls equal. One host observation for a ruling at the end.**
+
+### Pins (re-asserted before each launch)
+`dotnet --version` 10.0.400 (ambient resolved 9.0.317 — the pin is load-bearing); bare `go version` from a no-go.mod cwd `go1.23.12 windows/amd64`, `go env GOVERSION` go1.23.12; inside `src/go2cs` `go version` go1.24.13 (the pairing live, `GOTOOLCHAIN=auto`). ⚠ The ambient `GOROOT` named the 1.23.1 install — prepending PATH alone left `go env GOROOT` on the ambient root; exporting `GOROOT` explicitly (backslash form) made both agree. The documented trap, met again and recorded.
+
+### Part 1 — anchor and abort arm
+**The abort arm FIRED once, correctly:** the first harness benched the reference THROUGH the trampoline (63 ns), which adds ~55 ns of common overhead to both sides and compresses every ratio — the proposed anchor scored 4.58× and the harness aborted with no ratio. §F.1(2)'s 6–9 ns was a DIRECT measurement, so the bar is calibrated on the direct call. Re-measured direct, 20 processes each:
+
+| candidate | ratio vs direct PEB read (2.1–2.6 ns) | verdict |
+|---|---|---|
+| `GetProcessId(GetCurrentProcess())` | 67.86–87.32× | PASS 20/20 — anchor established |
+| `GetProcessId` no args (arity 0) | 67.41–84.42× | PASS 20/20 |
+| `SwitchToThread` | 30.37–38.94× | PASS 20/20 |
+| `NtYieldExecution` | 26.66–34.01× | PASS 20/20 |
+
+Arm identity proven in the timed binary: harness DLL byte-identical across arms; base 10/10 `IsTaggedToken=ABSENT`, cut 10/10 `PRESENT`, the live control refused a tagged argument with the panic text 10/10, `door_fires_on_pseudo_handle=False` 10/10.
+
+### Part 1 — rows (n = 10M per row, 5 in-process reps × 5 processes, FLOOR over 25; anchor `GetProcessId` padded with ignored zero args)
+| tiering | arity | BASE ns/call | CUT ns/call | door ns | share of its own base |
+|---|---|---|---|---|---|
+| off (of record) | 0 | 151.141 | 157.466 | +6.33 | 4.18% |
+| off | 1 | 189.851 | 194.158 | +4.31 | 2.27% |
+| off | 3 | 188.780 | 196.078 | +7.30 | 3.87% |
+| off | 6 | 190.811 | 204.463 | +13.65 | 7.15% |
+| default | 0 | 152.590 | 160.328 | +7.74 | 5.07% |
+| default | 1 | 186.972 | 193.429 | +6.46 | 3.45% |
+| default | 3 | 194.564 | 206.816 | +12.25 | 6.30% |
+| default | 6 | 199.655 | 211.913 | +12.26 | 6.14% |
+
+Per-argument slope `(a6−a0)/6`: off base 6.612 / cut 7.833 → +1.221 ns/arg; default base 7.844 / cut 8.598 → +0.753 ns/arg.
+
+Caveats, as the agent stated them: single-process spread often EXCEEDED the delta (one process read −3.14 ns at arity 1; base default arity 0 swung 152.6 → 169.1 process to process) — only the floor over five processes separates signal from drift; arity 0 is the anchor padded DOWN (no arguments, `rcx` undefined, an error path) and benches ~35 ns faster than arity 1, so it is not a like-for-like sibling (`NtYieldExecution`/`SwitchToThread` validated as natural arity-0 anchors if you want one); these deltas are LARGER than §F's per-test arithmetic projects (0.377–0.48 ns/test → 0.5–3.4 ns/call) — stated, not explained; 5 reps × 5 processes rather than the spec's 3; §F.3 untouched.
+
+### Part 2 — the `os` row, six sweeps (`-Filter os -Exact -TestTimeout 20m`, defaults = Release + TC0, bank-eligible path)
+All six: **PASS os 683**. Walls: base r1 100 s (COLD: converter + closure built), cut r1 92 s (cold), cut r2 61 s, cut r3 62 s, base r2 61 s, base r3 61 s. ⚠ The agent added base r2/r3 UNASKED because my brief's "base ×1" left the base arm cold against a warm cut — the arms would not have matched on the axis that dominates the wall; the matched-warmth pair is base 61/61 vs cut 61/62. All six comparison records byte-identical (one sha256, 67,923 bytes): 685 go / 685 c# / matched / 20 skip / 2 disclosed / 39 excluded / 4 gated / 0 errors; Release, tiered=false, oracle go1.23.12; go-FAIL empty; c#-FAIL = exactly the two disclosed (`TestUTF16Alloc`, `TestWriteStringAlloc`); no timeout events (plain and escaped spellings); every results tail carries the same package-level `exit status 1 … (os.Exit)` on base and cut alike, absorbed by the sweep.
+
+### Host observation — for a ruling
+On this box Go read **665 pass + 20 skip, ZERO failures** for `os`. The roster's row records 685 = 645 pass + 32 skip + **8 agreeing symlink-privilege failures** on the bank host and says "no second host has read this row". This IS the second reading and the composition differs: the i7 holds `SeCreateSymbolicLinkPrivilege`, so the eight tests RAN and PASSED on both sides here. Count unmoved (683 matched), the caveat now describable. **Ruled:** the `os` row's coverage caveat gains a dated line — read on a second host holding the privilege, the eight measured — on the current proof page and the roster row (a coordinator docs seat; the frozen 1.23.12.3 snapshot is untouched by design).
+
+Artifacts under the coordinator scratchpad as `coord-f2-*` (per-process logs, censuses, six preserved records, six results files, harness source). Both worktrees removed, both arms restored clean, disk unchanged.
+
+— COORD
