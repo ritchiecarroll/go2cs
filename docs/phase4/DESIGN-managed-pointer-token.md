@@ -1367,3 +1367,127 @@ UTF-16, and it aborted a build that was fine. It now uses `strings -el` **and po
 itself** on a literal known to be present before its verdict on the one under test is believed. **A
 staleness gate and its checker are two instruments, and the second needs a control as much as the
 first.**
+
+## 10.12 THE CALLBACK ROW'S TWO UNMEASURED HALVES, BOTH MEASURED
+
+COORD `e19723a42` ruled the door suspended and set this as the next item: **(a)** the emission route by
+which a token reaches argument 3, *read from the emission and never inferred from the artifact*, and
+**(b)** whether the converted `callback` can **recover its box** on the inbound edge (arm 1's
+round-trip-as-its-box requirement), measured on `TestCallback`. Both are below. **No remedy is cut** —
+C1 owns the `runtime` row and reads this first.
+
+**Provenance.** Converter built from **master `44f858717`**, `GOROOT` pinned to the corpus release
+**1.23.12** with a guard that ABORTS on a mismatch rather than printing one, `-platforms
+windows/amd64`, `-tests -test-action convert` (convert-only, so none of the Linux-host build hazards
+apply), into a temp root seeded from that tree with the seed count asserted exact (3,761 = 3,761).
+Predictions for both halves were written before either was read.
+
+### 10.12.1 Half (a) — the route, from the emitted C#
+
+`nestedCall`, emitted (`runtime/syscall_windows_test.cs`):
+
+```csharp
+internal static void nestedCall(ж<testing.T> Ꮡt, Action fʗp) {
+    ref var f = ref heap(fʗp, out var Ꮡf);
+    var c = syscall.NewCallback(callback);
+    var d = GetDLL(Ꮡt, kernel32Dllˢ);
+    ...
+    d.Proc(enumTimeFormatsExˢ).Call(c, LOCALE_NAME_USER_DEFAULT, 0,
+        (uintptr)(~Ꮡ(new @unsafe.Pointer((uintptr)Ꮡf))));
+}
+```
+
+Read outward from the middle: `f` is heap-boxed because its address is taken, so `Ꮡf` is a
+`ж<Action>` over a **reference-bearing** pointee; `(uintptr)Ꮡf` is therefore the operator this whole
+design is about, and it yields the box's **order token**. That token is wrapped in a fresh
+`@unsafe.Pointer` value, `Ꮡ(...)` boxes *that temporary*, `~` dereferences **the temporary's box**,
+and the outer `(uintptr)` unwraps it. **Route R1 as predicted, and the mechanism is sharper than the
+prediction:** the `*(*unsafe.Pointer)` layer of Go's expression is emitted as a box-and-immediately-
+dereference of a **different** box that merely *contains* the token. **Nothing ever dereferences the
+token**, which is exactly why the process reaches the door rather than faulting. R2 (a genuine read
+through the number, which would fault) is **absent**, as predicted.
+
+Corroborated at run time by a probe on the same shape: the outbound number reads
+`IsTaggedToken = True`.
+
+⚠ **One thing the emission settles that the panic text could not: the emitted number is not Go's
+number.** Go hands Windows the **funcval pointer** read out of `f`'s storage; the emission hands it a
+**token identifying the box**. Same position, same width, different kind — a stand-in only the token
+registry can interpret. That is what makes half (b) the load-bearing half rather than a formality.
+
+### 10.12.2 Half (b) — the inbound edge, and it does NOT recover
+
+`callback`, emitted:
+
+```csharp
+internal static uintptr callback(@unsafe.Pointer timeFormatString, uintptr lparamʗp) {
+    ref var lparam = ref heap(lparamʗp, out var Ꮡlparam);
+    (Ꮡlparam.Reinterpret<uintptr, Action>()).ValueSlot();
+    return 0; // stop enumeration
+}
+```
+
+Measured with a probe running that exact shape, **one arm per process** (a type-confused managed
+reference can take a process down, and a crash in one arm must not be read as a verdict on another):
+
+```
+  ARM token  (reference-BEARING pointee -- the real shape)
+    outbound number      = 0x86AA339000000000
+    IsTaggedToken        = True
+    Resolve -> same box  = True          <-- THE REGISTRY HOLDS THE MAPPING
+    Reinterpret<uintptr, Action>() returned  NativeBox`1
+    recovered is null    = False
+    recovered SAME as f  = False         <-- a NON-NULL, WRONG Action
+    invoking it          THREW NullReferenceException
+
+  ARM plain  (reference-FREE pointee -- THE VARIED AXIS)
+    outbound number      = 0x7FBA144108F0
+    IsTaggedToken        = False
+    Resolve -> same box  = True
+    Reinterpret<uintptr, RefFree>() returned  NativeBox`1
+    recovered a = 0x7FBA144108F0, b = 0x0    <-- a IS THE NUMBER ITSELF
+```
+
+**The answer is no, and the reason is not that the information is missing.** `Resolve(token)` returns
+the original box **on the same run** — the registry can do it. The emitted inbound edge simply never
+asks: `Reinterpret` falls through to its address route (`derived = (ж<TDst>)(uintptr)box`), minting a
+`NativeBox` over **the address of the storage holding the carried number**, and reads the destination
+type out of **those bytes**. In Go that is exactly right, because the number there *is* the funcval
+pointer. In C# the bytes are a token, so reading an `Action` out of them yields a **non-null,
+type-confused reference** and the invoke throws `NullReferenceException`.
+
+⚠ **The `plain` arm's own label was wrong, and it still did its job.** It was written expecting an
+"exact round trip" and printed `False` — but the shape never promised one: `*(*T)(unsafe.Pointer(&n))`
+reinterprets **n's bytes** as T, it does not follow n as a pointer to T. `a == the number` is the
+shape behaving correctly. What the arm actually establishes is the thing worth having: **the mechanism
+is IDENTICAL for both pointee kinds** (a `NativeBox` over the number's own storage), so the failure is
+not *"tokens break `Reinterpret`"* — it is *"a token is not a value the destination type can be read
+out of."* The arm also discriminates the one competing mechanism: were the `NativeBox` minted over the
+**number treated as an address**, the token arm would have **faulted** on a non-canonical address; it
+did not fault, and returned a garbage reference instead. Prediction scored: (b) HIT, and the control's
+expectation MISSED.
+
+### 10.12.3 What this does to the door, and what it does NOT license
+
+**§10.10.4's warning is CONFIRMED rather than argued.** Lifting the door on the five pass-through rows
+would replace a refusal that *names the defect* with a `NullReferenceException` raised inside a
+Windows callback — no mention of tokens, no mention of the argument, and arriving at a frame nowhere
+near the cause. That is strictly worse than the loud failure, which is why "the premise is wrong on
+five rows" does not by itself argue for lifting.
+
+**A remedy would have to sit on the inbound edge, and there is a named obstacle already in the tree.**
+The only place the mapping exists is the registry, so a remedy means the inbound reinterpret consulting
+it — and the natural key ("the destination is reference-bearing") is **exactly the case golib's
+`RemembersReinterpretSource` deliberately carves OUT**, in its own words: *"A reference-BEARING
+destination is Go's prefix-downcast idiom — reflect's `(*structType)(unsafe.Pointer(t))` over an
+`abi.Type` … and it neither needs nor wants this: nothing hands that pointer to native code"* — and
+that path is **HOT**. So a registry lookup keyed on the destination lands on reflect's downcast, not
+on this callback. Recorded as a constraint on the remedy space, discovered from the code; **nothing is
+cut here.**
+
+**The standing falsifier is UNMEASURED and stays open.** COORD's falsifier for the pass-through reading
+is *a native callee that STORES the cookie and DEREFERENCES it.* `EnumTimeFormatsEx` does not — it
+carries the lparam to the callback. Whether any Windows context-pointer API in the corpus's reach
+*does* is a **Windows-side census nobody has run**, and it is not answerable from a Linux host or from
+this emission. It is named here so that the pass-through reading is never quoted as though the
+falsifier had been checked.
