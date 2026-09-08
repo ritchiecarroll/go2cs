@@ -150907,3 +150907,52 @@ Both seated projects 4 of 4 at both pins with Output 1 compared; CNR CHANGED 1 o
 **The discrepancy, stated rather than smoothed:** CNR flags NativeIntConstMask while `run-behavioral --phase transpile` on that project reproduces the COMMITTED bytes (empty numstat, main.cs rewritten). Two instruments disagreeing on one tree locate a blind spot, and no golden moves until it is named. LEG 5's Transpile phase IS the runner's path, so it arbitrates: **if LEG 5 reads Target FAIL on NativeIntConstMask** (my standing prediction), the runner agrees with CNR when it runs the whole corpus and i9's per-project reading was the runner NOT re-transpiling that project (the `.cs` newer than both the `.go` and the binary after a restore -- route #2's door, which a filtered `--phase transpile` cannot distinguish from a real transpile, "main.cs rewritten" being the restore's own mtime); **if LEG 5 reads Target PASS there**, the runner and CNR genuinely emit different bytes for one project with one binary, which is an instrument split (flags, cwd, `-go2cspath`) to root BEFORE the fixup and before the landing, and the golden stays. Either way the record says which.
 
 -- COORD, 2026-09-08 (i7; clock 10:55)
+
+## 2026-09-08 — i9 → G, COORD (cc R, C1, C2, FLEET): **`AliasNamespaceShadow` on `4dfe1509f`: Transpile PASS, Compile PASS, **Target FAIL**, Output PASS with `1 compared`. Integrity 727, exactly your 724 + 3. ⚠ The Target failure is not a mismatch — THERE IS NO GOLDEN. Zero `.cs.target` committed anywhere in the project, and zero MSTest registrations.**
+
+Run at the pairing on `4dfe1509f` (based on landed master `a2e3b51c1`, verified), converter built from that tree at `go1.24.13`, bare `go version go1.23.12 windows/amd64` asserted with the GOROOT arm checked and not printed.
+
+### THE FOUR READINGS
+
+```
+Transpile   pass 1  fail 0  skip 0  timeout 0
+Compile     pass 1  fail 0  skip 0  timeout 0
+Target      pass 0  fail 1  skip 0  timeout 0     <- "target mismatch: main.cs"
+Output      pass 1  fail 0  skip 0  timeout 0     Output COMPARED: 1 compared, 0 failed
+FAIL (1 projects, 63.7s)
+
+check-solution-integrity: 727 behavioral projects, rc=0   (your 724 + 3)
+```
+
+The filter enumerates **1** project — `inner` and `sortlocal` are sub-libraries referenced by the guard's csproj, though each holds its own `.slnx` entry, which is where your 3 comes from.
+
+### ⚠ WHY TARGET FAILS, AND IT IS BETTER NEWS THAN IT SOUNDS
+
+The tree is **not dirty after the run** — the converter reproduces your committed `main.cs` byte for byte. So the mismatch is not the emission drifting. Measured at the commit, with a control:
+
+```
+git ls-tree -r 4dfe1509f -- .../AliasNamespaceShadow   ->   .cs.target files: 0
+  control, UnsafePointerParamPin at the same commit:   ->   .cs.target files: 1
+
+MSTest registrations for the project, all four files:  ->   0 / 0 / 0 / 0
+```
+
+**There is no golden to compare against, so Target cannot pass.** The project is `.slnx`-registered (hence 727), its emission is committed, and neither the golden nor the four `[TestMethod]` registrations exist yet.
+
+**This is the same shape I flagged on `d839cb1d7`** (`f4656bc82`): a registered project with a committed emission and no golden. There it meant the seat could not land; here it means the same.
+
+### WHAT THE OTHER THREE PHASES SAY, WHICH IS THE GOOD PART
+
+**Compile PASS and Output PASS with `1 compared`.** Your cut's `main.cs` and its two sub-library emissions **do** compile, and the program's stdout and exit code **do** match `go run` — which is precisely the arm you said had never been run ("the golden is a specification nobody has measured"). It is now measured, and it is correct. `1 compared` rather than `0 compared`, so the Output phase had a real opinion.
+
+So the only thing standing between this cut and a clean four-phase pass is a golden that has never been minted.
+
+### OFFER
+
+**I can mint it now** — `UpdateTestTargets --createTargetFiles --only AliasNamespaceShadow` under the pairing, which also generates the four MSTest registrations, then re-run the four phases and post them. That is about a minute of work and it is the lane I have been running all day. **I have not done it**, because `50922a250` scoped me to the four readings and the golden is yours to own; say the word.
+
+⚠ **One caution if you or I do mint it:** the emission is correct *today* against `go run` on **this host**, and the guard's whole subject is namespace shadowing across three assemblies. A golden minted from a passing Output is a measured specification, not a guessed one — which is the opposite of the two I held this morning — but it will still bank whatever the current converter emits, so the mint wants your eyes on the emitted `main.cs` first if you have not read it.
+
+Records preserved: the runner log and the integrity log, both named by SHA, under the durable logs directory. Tree restored, `dirty=0`, `deleted-tracked: 0`.
+
+— i9
