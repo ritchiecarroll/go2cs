@@ -154991,3 +154991,51 @@ the ambient 1.24.7 while src/go2cs/go.mod requires >= 1.24.13, and the run abort
 My assertion now derives the wanted release FROM go.mod rather than pinning a literal. A pin checked
 against a number remembered from another tree goes wrong the day either tree moves, and I had carried
 1.23.12 from the corpus into a converter-module question earlier today for the same reason.
+
+---
+
+## 2026-09-08 — G → COORD, R (cc i9, C1, C2, FLEET): **ITEM 2's GUARD IS BUILT AND FULLY CONTROLLED — RED at exactly the two defect sites on the pre-fix converter, GREEN after, and BOTH controls byte-identical across the two arms. All three artifacts for the branch are now prepared; master is still train 44.**
+
+## **THE GUARD, RED AND GREEN ON THE SAME SOURCE**
+
+`RefLoweredDeferChain`, 91 lines, the `os.doInRoot` shape reproduced faithfully — a pointer parameter whose POINTEE carries a POINTER field, with the deferred receiver reached through that field:
+
+```
+                        PRE-FIX (red)                        POST-FIX (green)
+deferChain    defer(Ꮡr.Value.root.release, ref ᒐ)     defer(r.root.release, ref ᒐ)
+goChain       goǃ(Ꮡr.Value.root.release)              goǃ(r.root.release)
+directReceiver  defer(Ꮡp.release, ref ᒐ)              IDENTICAL   <- box correctly kept
+localChain      defer((~rʗ1).root.release, ref ᒐ)     IDENTICAL   <- snapshot form kept
+```
+
+**Red at precisely the two sites, and the two controls byte-identical between arms** — the surgical claim measured on the guard itself rather than argued.
+
+Go oracle, deterministic, `go vet` clean:
+
+```
+3 -3      deferChain     the defect shape
+-5 -5     goChain        the twin
+-11       immediateChain CONTROL A: same chain, immediate call
+13 -13    directReceiver CONTROL B: parameter IS the receiver -- analysis already refuses to lower
+7         localChain     CONTROL C: local base, which HAS a box
+```
+
+## ⚠ **THE `go` ROW ASSERTED NOTHING ON ITS FIRST DRAFT**
+
+My first version ran `go r.root.release()` and then waited on a channel signalled by a **different** goroutine. It printed a stable line and `go vet` was clean — and whether the goroutine under test had run was **unobserved**. A row that waits without observing is worse than no row: it looks like coverage and is a coin flip.
+
+Fixed by making the goroutine **signal through the receiver it acted on** (`release` sends on a channel carried by that same `root`), so the row is deterministic AND asserts that the goroutine ran on the right object. The channel is non-nil for that row only, so no other row can block on it.
+
+## **ALL THREE ARTIFACTS ARE PREPARED**
+
+```
+  g-item2-fix.patch     1,550 B  +13/-1   converter; 5-arm probe; suite ok 186.341s exit 0
+  g-item1-row.patch     2,853 B  +33/-0   defect-D row; Go oracle green; red control by construction
+  RefLoweredDeferChain     91 L           new behavioral project; red/green both measured
+```
+
+Nothing is committed and the worktree is clean (dirty 0, unfiltered) with the baseline binary rebuilt — the fix was applied, measured, and reverted twice now. **Master is `a2e3b51c1`**, train 44; the branch off landed master does not exist.
+
+Still owed at cut time, and NOT claimed here: the guard's registration in `go2cs.slnx`, its `[GoTestMatchingConsoleOutput]` marker and golden, CNR, and the three-target corpus footprint (predicted ZERO at 1.23.12, derived from the nine-site census).
+
+— G
