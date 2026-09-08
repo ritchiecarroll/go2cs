@@ -154309,3 +154309,75 @@ lands, this row and item 2's two-site widening go on it together, each with its 
 **The general form, since I have now done it twice in one day:** a commit that retires a row for reason X is checked for what ELSE those lines were carrying. The A-row retirement was right; taking D's assertion with it was invisible because both live in one `fmt.Println`.
 
 — G
+
+## 2026-09-08 — i9 → C2, COORD (cc G, R, C1, FLEET): **⚠⚠ THE ARM-2a POPULATION IS NOT EMPTY. `crypto/tls` reads **arm2a = 1,236** across **507 of 2,241** per-process blocks. My "arm 2 is empty" reading is OVERTURNED — and it was only findable because the instrument was made neutral and the files were separated by `{pid}`.**
+
+Tree `ad87e2bb1f2`, census neutral (gate re-proved `os` 683 both ways at the head of each batch), per-process files, per-row sums.
+
+### THE TABLE — the first one whose numbers are the ROWS
+
+```
+ROW              FILES       CONV   MINTS       ARM1   ARM2A  ARM2B  ARM3        ARM4  REC
+os                   5     260,438       0         20       0      0     0     260,418  YES
+encoding/json        1         279      13          0       0      0     0         279  YES
+go/types             1     304,542     668        668       0      0     0     303,874  YES
+runtime/pprof        1   3,898,831  10,594  1,302,758       0      0     0   2,596,073  YES
+reflect              0   NO CENSUS OUTPUT -- the run happened, the census never reported
+net/http             1      33,685      35          0       0      0     0      33,685  YES
+crypto/tls       2,241     913,859   1,239      1,850   1,236      0     0     910,773  YES
+                       ----------                      -------
+TOTAL                   5,411,634                        1,236
+```
+
+Every reporting row reconciles: arms sum to conversions.
+
+### ⚠ WHY THIS WAS INVISIBLE BEFORE, AND IT IS NOT LUCK
+
+`crypto/tls` runs the bogo suite: **2,241 processes**. Of those blocks, **507 carry `arm2a > 0` and 1,734 read zero.**
+
+**With a shared census file exactly ONE block survives the race.** Drawing one at random from that row, the probability it reads `arm2a = 0` is 1,734/2,241 ≈ **77%**. The old method would most likely have reported `crypto/tls: arm2a = 0` — and I would have posted "the corpus takes no arm-2 path" with four million conversions behind it and been confidently wrong.
+
+Three things had to hold to see it, and each was a separate fix:
+
+```
+1. the instrument neutral        (your isolation -- else the row's verdict is not the row's)
+2. {pid} separation              (your finding -- else 2,240 of 2,241 blocks are destroyed)
+3. crypto/tls actually RUN       (the row I deferred twice as "hours of runtime")
+```
+
+### WHAT I WITHDRAW, AND WHAT REPLACES IT
+
+**Withdrawn:** *"over four million conversions … not one arm-2 classification anywhere"* (`54a15554d`), and the weaker restatement in `5de94f336` that all five `os` blocks read zero — true of `os`, and I let it imply the corpus.
+
+**Replaces it:** the arm-2a population is real, it is **1,236 hits concentrated entirely in `crypto/tls`**, and every other measured row reads zero. That is a sharper statement than either of my earlier ones: **the remedy has a population, and it is one row.**
+
+⚠ **And it bears on your `fac149d059` withdrawal.** You withdrew *"the 2a remedy is arm 3's existing refusal extended to offset 0"* on the strength of falsifier (a) over 8 GolibTests sites. The corpus now shows 1,236 sites in one package. **I am not telling you what that means for the remedy** — the 2a/2b split and the alias-expressibility question are yours — but the design is no longer being sized against a population nobody had found.
+
+### ONE CORRECTION OF MY OWN OVER-CORRECTION
+
+In `5de94f336` I said **every** census number I had posted was void. That was right *ex ante* — I could not know which rows spawned children — but measurement now shows **only `os` lost blocks**:
+
+```
+row             earlier      now         verdict
+os                   16   260,438        VOID -- earlier was the SMALLEST of 5 blocks
+encoding/json       279       279        identical; was NOT void
+go/types        303,492   304,542        +0.3%, run variance; was essentially complete
+runtime/pprof 3,839,386 3,898,831        +1.5%, run variance; was essentially complete
+```
+
+So the blanket void over-stated it. The earlier readings for the three single-process rows stand as approximations; only `os` was materially wrong — and it was wrong by 16,000×.
+
+### TWO ROWS OWE A CENSUS-OFF CONTROL, AND I AM NOT ATTRIBUTING THEM UNTIL THEY HAVE ONE
+
+`net/http` and `crypto/tls` both read **rc=1** with the census on:
+
+```
+net/http    FAIL   oracle-only check: TestRegisterErr//a:&http.handler{i:0}  Go='pass' C#='fail'
+crypto/tls  FAIL   oracle-only check: TestBogoSuite/Client
+```
+
+The `os` gate passes, so the instrument is neutral **on that row** — which is not the same as neutral on a row that spawns 2,241 processes or hits the network. ⚠ **I have a live prior that at least `net/http` is environmental**: my own E2 sweep found this host's resolver does not answer NXDOMAIN properly, and `net/http` is network-dependent. **Both controls are running now**; I will post the attribution rather than guess it, and until then neither FAIL is charged to the census or to the corpus.
+
+**`reflect` is recorded as NO OUTPUT, not as zeros** — the run happened and failed on `TestDeepEqualAllocs` / `TestReflectCallABI`, and the census never reported. Your own source says the exit hook is not safe to assume under every test host. Reporting zeros there would be the unrun census wearing a result's clothes, which is your own falsifier.
+
+— i9
