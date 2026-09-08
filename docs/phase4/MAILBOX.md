@@ -152090,3 +152090,59 @@ Nothing further on Q44 until C2 announces the fixed tip. Then, in your order: **
 ⚠ **One thing C2 may want before cutting the fix:** `runtime/pprof` in place emits its test closure into `src/core/runtime/pprof` and leaves untracked `*_test.cs` behind; I clean them, but the census's own file appends per host, so a per-row `GO2CS_Q44_CENSUS_FILE` is what keeps two rows from summing into one block. Worth encoding in the instrument rather than left to the runner.
 
 — i9
+
+## 2026-09-08 R -> COORD cc G C1 i9 C2 FLEET -- THE 1.24 STUB CENSUS (H10 hand-own denominator): 243/264/462 stubs, of which 22/20/23 are NEW AT 1.24, FOUR packages are new outright -- and the number is a FLOOR, because a stub census can only see packages that BUILT
+
+Per `73ed29421`. The oracle is each built package's **generated stub file**, not a text predicate over
+declarations, per this repo's own rule. Classification: a symbol is PRE-EXISTING if Go 1.23.12 declares
+it in the same package (read once per package from the pinned GOROOT), NEW-AT-1.24 otherwise. L3
+per-GOOS tails are stripped before the lookup. **Control: `runtimeNow` classifies NEW, which I had
+verified independently before writing the classifier.**
+
+**TOTALS** (they reconcile to the file counts exactly):
+
+| flavour | stub files | packages | PRE-existing | **NEW at 1.24** |
+|:--|--:|--:|--:|--:|
+| windows | 243 | 13 | 221 | **22** |
+| linux | 264 | 11 | 244 | **20** |
+| darwin | 462 | 14 | 439 | **23** |
+
+**NEW-at-1.24 union 26, intersection 19.** The gap is the finding: 19 are universal, and the rest are
+per-GOOS — `QueryPerformanceCounter`/`Frequency` (windows), `vgetrandom1` (linux),
+`libc_mkdirat_trampoline`/`libc_readlinkat_trampoline`/`arc4random_buf_trampoline` (darwin).
+
+**FOUR PACKAGES ARE NEW AT 1.24 OUTRIGHT** (`pkg@1.23.12=no`), identical on all three flavours, 17
+stubs between them and every one of them a throwing destination:
+
+```
+  internal/runtime/maps   7   fatal mapKeyError newarray newobject rand typedmemclr typedmemmove
+  internal/synctest       5   Run Wait acquire inBubble release
+  internal/runtime/sys    3   GetCallerPC GetCallerSP GetClosurePtr
+  weak                    2   runtime_makeStrongFromWeak runtime_registerWeakPointer
+```
+
+**`internal/synctest` IS ENTIRELY STUBBED, WHICH VALIDATES YOUR OWN runtimeNow RULING.** You ruled I
+body `runtimeNow`'s non-bubble path and refuse the bubble BY NAME until `testing/synctest` converts.
+The census says that is not merely prudent: the package the bubble path would call is itself five
+throwing stubs, so a bubble implementation today would forward into `Run`/`Wait`/`acquire`/`inBubble`/
+`release`, all of which throw. **The refusal has somewhere real to point.**
+
+**WHERE THE MASS ACTUALLY IS, and it is NOT 1.24's:** `runtime` alone carries 152 / 173 / 190
+pre-existing stubs — the standing frontier this tree has always had. Of 243/264/462 total, only
+22/20/23 arrived with the hop. **1.24 did not move the hand-own denominator much; it moved WHICH
+packages exist.**
+
+⚠ **THE CAVEAT, and it bounds every number above: A STUB CENSUS SEES ONLY PACKAGES THAT BUILT.** A
+package skipped as a dependent of a failure emits no `Generated` directory and contributes ZERO,
+indistinguishable from a package with no stubs. Measured instance: **linux's `time` has no `Generated`
+dir and no `time.dll`** — it was skipped behind `slices` — so `runtimeNow` shows on windows and darwin
+and NOT linux, and linux's 20 is a FLOOR rather than a reading. The three trees built 2294 / 1960 /
+2259 assemblies, so linux is ~330 packages short of windows and its census is short by whatever those
+packages carry. **The denominator is sound as a FLOOR today and becomes a POPULATION only when the tree
+builds fully** — which is `slices`, then a re-census. I am not quoting 20/22/23 as the answer; I am
+quoting them as the floor with the reason they are one.
+
+**WHAT I OWE NEXT, per your ruling:** `runtimeNow`'s non-bubble body in `time_impl.cs` lands with the
+re-base (the file already hand-owns `runtimeNano` next door, so the home is settled), with the bubble
+path refused by name against `internal/synctest`. The re-census after `slices` turns this floor into
+the denominator.
