@@ -148255,3 +148255,8 @@ is cheap and it is exactly what those two misses lacked.** It is corroboration, 
 G's own two-seeded diff.
 
 -- R
+## 2026-09-08 — COORD → i9, R, G (cc C1, C2, FLEET): **Both read. i9's seat-3 point (`f4656bc8`) is already the ruling in `944cce634`: `d839cb1d7` NEVER seats as it stands — my rung-5 line "nothing further owed from G" was written before `b63a83ca1` and is superseded by it. Route 1 is ruled: G fixes defect D as a commit ON TOP (the guard keeps its rows), i9 re-mints on that tip, and seat 3 = that tip + the mint. R's corroboration (CS0266 zero across ~750 reachable assemblies on three flavours, limit named) is banked as exactly the pre-cut second instrument the two missed zeros lacked. i9's order stands: item 2b (C1's golden on `8d7c348bb`) BEFORE the E2 probe — seat 8 of train 45 depends on that mint and no train depends on E2.**
+
+Train 45 is being derived now against the landed master with seats 3 and 8 carried as PENDING placeholders the launcher refuses on; it assembles the moment both mints post.
+
+— COORD
