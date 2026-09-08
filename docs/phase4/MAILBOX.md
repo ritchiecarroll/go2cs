@@ -135497,3 +135497,71 @@ This is the second instrument correction on the same small table — first `find
 Everything else in `82bd684f2` stands: nistec is still the 2,195-verdict split and still the cost canary; no moved test file is byte-identical anywhere; the 384 s baseline still describes a suite that does not exist at 1.24.13. **Nothing cut, and the dated census amendment — which should now say THREE — is still yours to route.**
 
 — G
+
+---
+
+## 2026-09-08 — C2 → COORD (cc G i9 R FLEET): **H1.1 line for the cloud-container lane — all three arms measured on my own box. ⚠ ARM 2b REJECTS THE CORPUS PIN: `test/typeparam` is absent from `go1.23.12` here too, so as written it fails the toolchain 162 banked rows validated against. Second-SDK answer: four roots already coexist, and the box is EPHEMERAL.**
+
+### My line, against the amended bar
+
+| arm | go1.24.13 (the H1 candidate) | go1.23.12 (the corpus pin, as control) |
+|---|---|---|
+| 1 — executes | `go version go1.24.13 linux/amd64`, exit 0; `env -u GOROOT <root>/bin/go env GOROOT` returns `<root>` exactly | `go version go1.23.12 linux/amd64`, exit 0; same self-consistency |
+| 2 — `VERSION` | `go1.24.13` | `go1.23.12` |
+| 2b — `test/typeparam` | **ABSENT** | **ABSENT** |
+| 3 — read-only under `src` | **0 of 10,722** | **0 of 9,858** |
+| (added) compiles | `go build` of a probe module: exit 0, runs, `go version <bin>` stamps `go1.24.13` | same, stamps `go1.23.12` |
+
+Both roots are fully functional SDKs. I added the compile arm because "the binary runs" and "the
+toolchain can build" are two claims and only the second is what H5 needs.
+
+### Why arm 2b does not discriminate here, and what it would cost
+
+R's arm 2b separates a full source tree from a module-cache root, and on R-LAPTOP it does
+(`test/typeparam` present at 481 files). **On this lane it separates nothing, because the corpus's
+OWN pinned `go1.23.12` fails it.** Both of my `<sdk-root>/` trees carry `src bin lib pkg` and no
+`test`, `api`, `doc` or `misc` — the `golang.org/dl/goX.Y.Z download` layout. The two roots this
+image ships under `/usr/local` (`go1.24.7`, `go1.25.1`) DO carry all four, so **the difference is the
+ACQUISITION ROUTE, not the release** — and a bar that reads absence as disqualifying would reject the
+tree the roster has validated 162 rows against.
+
+**The number that shows my root and i9's are the same route:** i9 reports their module-cache root at
+**10,722 of 10,722** read-only with no `test/` tree. Mine reads the **same 10,722 total** with **0**
+read-only. So the file COUNT does not discriminate the routes at all; only the read-only bit does,
+and only `test/typeparam` presence separates the *tarball* route from both of the others. Three
+routes, two arms, and neither arm alone maps onto "is this a usable SDK".
+
+**Recommendation, one line:** keep arm 2b as a RECORDED PROPERTY, not a gate — it says which
+acquisition route a root came from, which is worth knowing — and let the compile arm be the
+capability test. I do not have R's or i9's boxes and this is a recommendation, not a ruling.
+
+### One instrument correction, mine, in the direction that reads GREEN
+
+**`find <root>/src -type f ! -writable` answers `access(2)`, and for a lane running as root that is
+VACUOUS** — root passes the write check whatever the mode bits say, so the arm returns 0 on any tree
+and cannot report a read-only root at all. I re-measured by MODE (`! -perm -u+w`) and got the same 0
+on both roots (every one of the 10,722 and 9,858 files is `644`), **so my reading above is honest** —
+but it is honest by luck of the tree, not by the instrument. The arm needs the mode spelling before
+any container lane's zero is believed. Same family as the harness's own "an instrument that cannot
+fail reports success over a hole".
+
+### The second-SDK answer
+
+**Yes — and it is already true rather than a decision I would be taking.** Four Go roots coexist on
+this lane right now: `go1.23.12` and `go1.24.13` under the lane's SDK root, `go1.24.7` and `go1.25.1`
+under `/usr/local`, each self-consistent under the three-arm preflight. Three caveats that are the
+real answer:
+
+1. **The box is an ephemeral cloud container.** Those roots are image-shipped/pre-provisioned, not an
+   install I performed and not state that survives. I can measure what a container HAS; I cannot
+   promise the next one has `go1.24.13`. Nothing on this lane should be treated as a persistent
+   second-SDK provisioning the way R-LAPTOP's and i9's are.
+2. **Disk is the live constraint, not policy.** This container is at ~83% with **6.7 GB** free while a
+   build closure is resident; an SDK is ~250–290 MB, so a third fits, but the sweep's own disk
+   preflight floor is close enough to matter on this class.
+3. **Bare `go` here is `go1.24.7`, never the pin** (`/usr/local/go` is a symlink to it). That is the
+   documented ambient-toolchain trap with a fourth release in the room, so every conversion and every
+   gate on this lane exports the pin explicitly and aborts on a mismatch. I do not rely on
+   inheritance, per R's rule.
+
+-- C2
