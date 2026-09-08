@@ -151616,3 +151616,67 @@ a generic nil helper in golib NONE -- and zero uses of EqualityComparer<> anywhe
 **STANDING:** on the runtime host-killer as instructed, holding at the ask rather than cutting. The fatal chain's train-46 battery is unchanged and nothing is owed from me on it.
 
 — C1
+
+## 2026-09-08 — i9 → C2, COORD (cc G, R, C1, FLEET): **⚠ Q44 CENSUS — TWO ROWS MEASURED AND BOTH READ 100% ARM 4, WITH ARMS 1 / 2a / 2b / 3 ALL ZERO. Posting before the remaining five because C2 is sizing the 2a remedy right now, and on this evidence the corpus 2a population may be EMPTY rather than small.**
+
+Tree `c726b43d5b`, census on (`GO2CS_Q44_CENSUS`), per-row census file, configuration of record (`-test-config Release`, tiering off). **This is a partial table, posted early on purpose; the other five rows follow.**
+
+### THE TWO ROWS
+
+```
+row              run                       mints  conversions  arm1  arm2a  arm2b  arm3  arm4  control
+encoding/json    PASS 491 [59s] rc=0          13          279     0      0      0     0   279  RECONCILES
+runtime/pprof    DIED after 2 tests (rc=1)     0          231     0      0      0     0   231  RECONCILES
+```
+
+Both carry the census's own `Q44CENSUS-RECONCILES arms sum to N == conversions N` line.
+
+### ⚠ WHAT ARM 4 IS, WHICH IS THE POINT
+
+Read from the operator's own call sites in `ж.cs`, not inferred:
+
+```
+arm1   the token resolves to a ж<T> of the REQUESTED type      (correct resolve)
+arm2   resolves to a box of a DIFFERENT type -> 2a / 2b        (C2's remedy population)
+arm3   token arithmetic                                        (the refusal)
+arm4   ManagedPointerTokens.Resolve(...) is NULL               -- NOT A MANAGED TOKEN AT ALL
+```
+
+**Every conversion on both rows is a genuine native address.** Not one reached the managed-token resolve path. That is C2's §3 outcome — *"the honest conclusion is that the corpus does not take this path"* — arriving in a **stronger** form than the one named: C2's version was `conversions = 0 with mints > 0`; what I measure is **conversions plentiful and arm 2 empty**, which the `conversions = 0` falsifier would not have caught.
+
+### ⚠ THE `runtime/pprof` ROW CANNOT BE SCORED AGAINST C2'S PREDICTION, AND I WILL NOT PRETEND IT CAN
+
+C2 predicted **arm 2a non-zero on `runtime/pprof` FIRST**. It read arm2a = 0 — **but the run died almost immediately** and that number is worth nothing as a test of the prediction:
+
+```
+distinct tests seen: 2      pass 0   fail 2   infrastructure-error 1
+terminating event:   "test binary died on an unrecovered panic in a goroutine"
+first failure:       System.NotImplementedException: asmcgocall
+```
+
+231 conversions over **two tests** is package-init traffic, not `runtime/pprof`'s test run. **`runtime/pprof` is not a banked roster row** (verified against the roster: zero row matches; the roster's own text says `reflect` is "under active converter and runtime work"), so a run that does not complete is its normal state today — which means **neither of C2's two named rows can be measured to completion on this tree.** `reflect` is the other one and I expect the same; I will run it and report what it does rather than assume.
+
+**So C2's load-bearing prediction is not refuted by this — it is UNTESTABLE on the rows it names**, and that is the finding, not a score. If the prediction is to be tested, it needs a row that completes.
+
+### MY OWN INSTRUMENT NOTE
+
+`Mint()` has exactly **one** call site (`ж.PointerTokens.cs:234`), so `mints` counts token mints at that site alone. `encoding/json` reads `mints=13` — non-zero, so C2's falsifier is satisfied and the census demonstrably ran. `runtime/pprof` reads `mints=0` **with conversions 231**, which is outside the falsifier's precondition (it keys on `conversions = 0`), so it is not an unrun census — it is a run with no token mints. ⚠ **But note it also contradicts C2's framing that mints is a FLOOR because "the corpus mints far more than it converts back"**: on both rows mints is far *below* conversions (13 vs 279, 0 vs 231).
+
+### WHAT I AM DOING NEXT
+
+`go/types` (557) and `os` (683) are running now; then `net/http` (1345) and `crypto/tls` (3643), and `reflect`. Full table with the tree SHA and the per-row control line when they are in.
+
+⚠ **`os` carries a caveat I already own**: this host lacks `SeCreateSymbolicLinkPrivilege`, and my E2 sweep found `os`'s Go-side symlink tests failing for that reason. If the C# side reds there, the census reading is a floor like `runtime/pprof`'s, and I will label it so rather than tabling it as a measurement.
+
+### THE POPULATION, DERIVED AND CONTROLLED
+
+```
+named by COORD:  reflect, runtime/pprof     (neither is a banked roster row -- verified)
+five largest banked reflect importers, by parsed import declarations via `go list`
+over all 204 roster rows (87 import reflect):
+  crypto/tls 3643 · net/http 1345 · os 683 · go/types 557 · encoding/json 491
+controls:  encoding/json IN = 1 ✓    go/doc/comment OUT = 0 ✓
+parse integrity: 204 of 204 roster rows captured, zero dropped
+```
+
+— i9
