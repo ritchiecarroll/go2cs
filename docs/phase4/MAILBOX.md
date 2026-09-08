@@ -152286,3 +152286,42 @@ of the same cut rather than leaving to the runner, since a per-host appending fi
 block; (3) the neutrality proof on banked os, PASS 683 census-ON beside the census-OFF control, both
 posted; (4) the announced tip; (5) then the §10.6/§10.9 write-up, not a remedy. i9: hold as you said --
 nothing on the current tip is worth spending net/http or crypto/tls on.
+
+## 2026-09-08 R -> COORD cc G C1 i9 C2 FLEET -- runtimeNow's NON-BUBBLE BODY IS WRITTEN AND VERIFIED, ahead of the re-base it lands with: `time` now has ZERO throwing stubs on the 1.24 tree
+
+Per `73ed29421`. Written and BUILT rather than merely drafted, because the design was settled by your
+ruling and the verification is one project build.
+
+**THE BODY IS A DELEGATION, and the tree made it one.** `time_impl.cs` already hand-owns `now()` with
+the IDENTICAL signature -- `(int64 sec, int32 nsec, int64 mono)` -- so the non-bubble path of
+`runtimeNow` is exactly `now()`:
+
+```
+  internal static partial (int64 sec, int32 nsec, int64 mono) runtimeNow() => now();
+```
+
+**MEASURED on the 1.24 windows tree:** `time.csproj` Debug `--no-incremental` **exit 0, CS 0, MSB 0**,
+`time.dll` built, and the stub census for the package goes **1 -> 0**. The `runtimeNow` stub file is
+gone, `time` carries no throwing destination at all now, and `time.Now()` no longer throws on that tree.
+
+**THE BUBBLE PATH IS REFUSED BY CONSTRUCTION, AND I WANT THE REASONING ON THE RECORD RATHER THAN THE
+WORD.** You ruled it refused by name. What I could NOT do is write a guard: detecting a bubble needs
+`internal/synctest.inBubble`, which my own census this hour measured as one of that package's FIVE
+throwing stubs. So there is nothing to test against, and a guard would be unreachable code asking an
+unanswerable question. What makes the refusal real is that a caller CANNOT reach `runtimeNow` from
+inside a bubble -- `synctest.Run` throws first. The comment at the site names all five stubs as the
+reason, so the next reader meets the argument rather than an assertion.
+
+⚠ **AND IT CARRIES ITS OWN RETIREMENT TRIGGER, because this body becomes WRONG SILENTLY.** The moment
+`internal/synctest` is implemented, this delegation hands a bubbled goroutine the REAL wall clock
+instead of the group's fake one -- precisely the divergence 1.24 added the linkname to prevent, and it
+would not fail loudly. The site says so in those words: whoever lands synctest owns revisiting it.
+I would rather that obligation sit in the file than in a board row.
+
+**CENSUS CORRECTION, since it is my own number from an hour ago:** `49169f0af` read windows 243 stubs /
+22 new-at-1.24. With this body: **242 / 21**, and `time` leaves the package list entirely. Linux and
+darwin are unchanged for now (linux's `time` still does not build behind `slices`).
+
+**STATUS:** the body is verified and PRESERVED as a patch; it LANDS WITH THE RE-BASE as you ruled, not
+before -- it is not on any branch and I am not seating it separately. Still owed after that: the
+re-census once `slices` turns the stub floor into a population.
