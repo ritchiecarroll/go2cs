@@ -10,6 +10,36 @@
 // everything else in this file is the unmodified converted output (vestigial GC-queue machinery
 // other runtime files reference, kept for compilation). The marker keeps -stdlib reconverts from
 // regenerating the Go version over this file.
+//
+// ⚠ RE-DERIVED FROM THE 1.24.13 EMISSION, 2026-09-08 (H5). A frozen hand-own stops receiving GO'S
+// OWN CHANGES, and this file had drifted a release behind. Re-derived by a 3-way merge with
+// BASE = the tracked 1.23.12 .cs.auto sibling, OURS = this hand file, THEIRS = a fresh 1.24.13
+// emission, rather than by re-applying a remembered delta:
+//
+//   ONE conflict, in SetFinalizer, resolved to OURS -- the native bridge is the whole point of the
+//   hand-own, and the 41-line function is asserted present VERBATIM in the result.
+//   THE RE-DERIVE BRINGS 30 lines, all of them Go's: `sys` moves from runtime/internal/sys to
+//   internal/runtime/sys; runfinq gains 1.24's CLEANUP path (`arg == nil`, AddCleanup's queue) and
+//   its doc says "finalizers and cleanups"; two field comments re-space; SetFinalizer's doc gains
+//   the "consider [AddCleanup] instead" paragraph.
+//   ONE RESIDUE STAMP restored: [GoValueClone("fin")] on `finblock`, which the emission declares
+//   and the frozen file had lost. Applied under the per-line assertions the runtime2.cs re-derive
+//   used -- both lines unique in their file, the target unstamped, and stripping the attribute from
+//   the emission's line yields the target's line EXACTLY.
+//
+// ⚠ RED AT 1.23.12 BY CONSTRUCTION, exactly as runtime2.cs is: `using sys = internal.runtime.sys`
+// names a package that does not exist there. This must not land before the corpus hop.
+//
+// ⚠ AND WHAT MUST SURVIVE THE UNION WITH THE GOLIB TRAIN. mfinal.cs is edited on TWO branches and
+// this one does not carry the other: the finalizer-dispatch increment (claude/c1-finalizer-flags)
+// changes the RUNNER and the REGISTRATION CHECK -- GoFinalizerQueue.Run's bind-before-the-try, its
+// catch narrowed to TargetInvocationException, and SetFinalizer's
+// `GoReflect.TryBindFinalizerArgument(obj, ...)` guard. Those regions are DISJOINT from everything
+// above: the re-derive touches the file's usings, the finblock declaration, runfinq's cleanup path
+// and SetFinalizer's DOC COMMENT, while the increment touches SetFinalizer's BODY and the runner.
+// The golib train lands first, so at the union the increment's text is the later measured state and
+// is taken VERBATIM; if a 3-way reports them touching, that is the finding and not a resolution to
+// hand-pick.
 [module: go.GoManualConversion]
 
 namespace go;
@@ -17,11 +47,10 @@ namespace go;
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using atomic = @internal.runtime.atomic_package;
-using sys = runtime.@internal.sys_package;
+using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using runtime.@internal;
 
 partial class runtime_package {
 
@@ -31,7 +60,7 @@ partial class runtime_package {
 // finblock is allocated from non-GC'd memory, so any heap pointers
 // must be specially handled. GC currently assumes that the finalizer
 // queue does not grow during marking (but it can shrink).
-[GoType] partial struct finblock {
+[GoType] [GoValueClone("fin")] partial struct finblock {
     internal sys.NotInHeap _;
     internal ж<finblock> alllink;
     internal ж<finblock> next;
@@ -54,15 +83,16 @@ internal const uint32 fingWait = 4;
 
 internal const uint32 fingWake = 8;
 
+// This runs durring the GC sweep phase. Heap memory can't be allocated while sweep is running.
 internal static ж<mutex> Ꮡfinlock = new StandardBox<mutex>(new mutex(nil));
 internal static ref mutex finlock => ref Ꮡfinlock.Value; // protects the following variables
 
 internal static ж<g> fing; // goroutine that runs finalizers
 
 internal static ж<ж<finblock>> Ꮡfinq = new StandardBox<ж<finblock>>(default(ж<finblock>));
-internal static ref ж<finblock> finq => ref Ꮡfinq.ValueSlot;  // list of finalizers that are to be executed
+internal static ref ж<finblock> finq => ref Ꮡfinq.ValueSlot;        // list of finalizers that are to be executed
 
-internal static ж<finblock> finc;  // cache of free blocks
+internal static ж<finblock> finc;        // cache of free blocks
 
 internal static ж<array<byte>> Ꮡfinptrmask = new StandardBox<array<byte>>(new array<byte>(64));
 internal static ref array<byte> finptrmask => ref Ꮡfinptrmask.Value;
@@ -196,7 +226,7 @@ internal static bool finalizercommit(ж<g> Ꮡgp, @unsafe.Pointer @lock) {
     return true;
 }
 
-// This is the goroutine that runs all of the finalizers.
+// This is the goroutine that runs all of the finalizers and cleanups.
 internal static void runfinq() {
     @unsafe.Pointer frame = default!;
     uintptr framecap = default!;
@@ -221,6 +251,21 @@ internal static void runfinq() {
         while (fb != nil) {
             for (var i = fb.Value.cnt; i > 0; i--) {
                 var f = fb.at(finblock.Ꮡfin, (nint)(i - 1));
+                // arg will only be nil when a cleanup has been queued.
+                if ((~f).arg == nil) {
+                    Action cleanup = default!;
+                    ref var fn = ref heap<@unsafe.Pointer>(out var Ꮡfn);
+                    fn = @unsafe.Pointer.FromPinnedBox((~f).fn);
+                    cleanup = (Ꮡfn.Reinterpret<@unsafe.Pointer, Action>()).ValueSlot;
+                    ᏑfingStatus.Or(fingRunningFinalizer);
+                    cleanup();
+                    ᏑfingStatus.And(~fingRunningFinalizer);
+                    f.Value.fn = default!;
+                    f.Value.arg = default!;
+                    f.Value.ot = default!;
+                    atomic.Store(fb.of(finblock.Ꮡcnt), i - 1);
+                    continue;
+                }
                 ref var regs = ref heap(new abi.RegArgs(), out var Ꮡregs);
                 // The args may be passed in registers or on stack. Even for
                 // the register case, we still need the spill slots.
@@ -239,6 +284,8 @@ internal static void runfinq() {
                     frame = (uintptr)mallocgc(framesz, nil, true);
                     framecap = framesz;
                 }
+                // cleanups also have a nil fint. Cleanups should have been processed before
+                // reaching this point.
                 if ((~f).fint == nil) {
                     @throw("missing type in runfinq"u8);
                 }
@@ -353,6 +400,9 @@ public static bool blockUntilEmptyFinalizerQueue(int64 timeout) {
 // that obj is unreachable, it will free obj.
 //
 // SetFinalizer(obj, nil) clears any finalizer associated with obj.
+//
+// New Go code should consider using [AddCleanup] instead, which is much
+// less error-prone than SetFinalizer.
 //
 // The argument obj must be a pointer to an object allocated by calling
 // new, by taking the address of a composite literal, or by taking the
