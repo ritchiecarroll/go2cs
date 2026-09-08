@@ -270,6 +270,18 @@ internal static class Q44RegistryCensus
             $"entry={System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name ?? "?"} " +
             $"utc={DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}",
 
+            // ⚠ THE FOLD RULE, STATED IN THE OUTPUT ITSELF. One process now writes SEVERAL blocks
+            // (the partial flush) and they are CUMULATIVE SNAPSHOTS of one running total, not
+            // increments -- so summing the blocks within a file DOUBLE-COUNTS it. i9 read a row 1.96x
+            // high that way (c62ca28686) and was right that nothing in the output said so: the method
+            // had been correct until the flush existed, and the flush changed the shape underneath it
+            // silently. Keying on the FINAL block is also wrong, because a process killed before it
+            // finishes leaves only a PARTIAL -- which is the case the flush exists for. The rule that
+            // handles both is LAST BLOCK PER FILE, then sum across FILES, and it is printed in every
+            // block so that a reader cannot arrive at the naive sum honestly.
+            "Q44CENSUS-FOLD cumulative-snapshot -- the LAST block in THIS file is authoritative; " +
+            "sum across FILES, never across blocks",
+
             // ⚠ ONLY A FINAL BLOCK ASSERTS EXACT RECONCILIATION. A partial is taken while other
             // threads are mid-arm -- each has counted its conversion and not yet its arm -- so a
             // small shortfall there is the instrument being honest about a live count, not a broken

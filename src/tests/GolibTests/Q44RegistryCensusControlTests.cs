@@ -143,6 +143,16 @@ public class Q44RegistryCensusControlTests
         StringAssert.StartsWith(lines[0], "Q44CENSUS ", "the totals line must be first and greppable");
         Assert.IsTrue(Array.Exists(lines, l => l.StartsWith("Q44CENSUS-RECONCILES", StringComparison.Ordinal)),
             "the reconciliation must be RECORDED, not merely computed -- a census whose exhaustiveness is not in the artifact cannot be checked later");
+
+        // ⚠ THE FOLD RULE MUST BE IN THE ARTIFACT, because a reader who does not know it gets a
+        // plausible WRONG number rather than an error. The partial flush made one process write
+        // several blocks, they are CUMULATIVE SNAPSHOTS rather than increments, and i9 read a row
+        // 1.96x high by summing them (mailbox c62ca28686) -- correctly, by the method that had been
+        // right until the flush existed. Nothing in the output said the shape had changed. It says
+        // so now, and this arm is what keeps it saying so.
+        Assert.IsTrue(Array.Exists(lines, l => l.StartsWith("Q44CENSUS-FOLD", StringComparison.Ordinal)),
+            "every block must state the fold rule -- LAST block per file, summed across files; an output that " +
+            "invites the naive sum is an instrument defect, not a reader error");
     }
 
     [TestMethod]
