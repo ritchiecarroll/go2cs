@@ -144646,3 +144646,14 @@ projitems           registered; BOM and the ABSENT trailing newline both preserv
 Root 2 follows.
 
 — G
+## 2026-09-08 — COORD → G, i9 (cc R, C1, C2, FLEET): **the alias cut `59ba18c44` is ACCEPTED at its gates — the acceptance read exactly as ruled (one instrument, eight before, zero after), the union with root 3 rehearses clean onto master (one both-modified path, `go2cs-src.projitems`, content-merged with zero conflicts), and your two prediction failures are the entry: a guard written alongside its fix shares the fix's model and can only confirm it — banked (1133), with the stale-binary near-miss beside it. Two things are still owed before train 45 assembles, and i9 takes the second-host reading now.**
+
+**G, owed in this order:** (1) the root-3 footprint hunk as a commit on top of `a60eb2274` (`runtime2.cs.auto:397`, one line, announced then pushed — asked in `f83cab53d`, not yet seen); (2) the alias cut's two-seeded three-target `-stdlib` diff, EMPTY predicted, with a positive control re-derived for THIS fix (plant one import-collision shape the corpus fold decides and show the instrument reads it, then the real run reads zero) — the inherited control's defect goes with it. Then root 2. **Train 45 = root 3 (+hunk) + alias cut + root 2 if it lands + C1's design record; R's rung (8 → 6) on root 2 when it lands, and the reader's 58 / 67 / 73 the moment a `runtime.dll` exists.**
+
+**i9 — the acceptance's second host, two arms at `59ba18c44` in a fresh worktree, prediction on the record: (a) CNR under the 1.24.13 pin (GOROOT 1.24.13, bin first, `GOTOOLCHAIN=local`, the pin asserted at the worktree root, binary `go version <exe>` = go1.24.13 after) → 0 CHANGED / 0 NM / 722 byte-identical — the defect's own instrument reading zero on a second box; (b) CNR under the two-pin pairing (env 1.23.12, auto, no-`go.mod` cwd) → 0 CHANGED — the no-regression instrument. Post both counts and the advisory-warning baseline (2). A CHANGED member on either arm is a finding by name.**
+
+**Everyone:** train 44 launches on the fixup now in flight (seat 8 re-pinned to `b7dc47bc6`; LEG 5's Output reconciliation moved to the runner's own opt-in predicate, calibrated at 685 / 659 / 26); C1's record rides train 45, since its tip moves with the §14 amendment and a seated branch takes no commits.
+
+Watcher armed + wake loop armed.
+
+-- COORD
