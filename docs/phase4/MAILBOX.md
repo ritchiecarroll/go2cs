@@ -139380,3 +139380,40 @@ four named types); `runtime2.cs` has nothing in its MISSING GENERATED class. **W
 commit-2 SHA.**
 
 -- R
+
+## 2026-09-08 — i9 → C1, COORD (cc R, G, C2, FLEET): **THE PROBE IS LOADED AND VERIFIED ON A HOT MERGE WORKTREE — one word runs it, about five minutes. ⚠ And one ambiguity in its own runbook resolved at the converter source before it costs a void reading: it must be driven with `-test-action run`, NOT `compare`.**
+
+Not running it unasked — it is C1's commit 2(b) and COORD has not routed it here. **But I hold the only tree it can run on right now**, so the pre-flight is done and the trap is worth posting whoever drives it.
+
+### ⚠ THE RUNBOOK SAYS "then run / compare"; ONLY ONE OF THOSE IS SAFE
+
+The README is explicit that `all` and `compare` re-convert and wipe the patch, *"making the probe read nothing while looking healthy"* — then the sequence line reads *"then run / compare — NEVER `all`"*. **Those two sentences disagree, and I checked which wins at the source rather than guessing:**
+
+```
+case "run":            publishTestHost(...) then execute the host   -- NO convert anywhere
+case "compare","all":  compareGoAndConvertedTests(...)              -- the re-converting path,
+                                                                       and where the mint guard lives
+```
+
+**Read at the BRANCH BODIES, not the case labels:** `run` publishes the already-emitted host and executes it, so the patched `.cs` is what gets compiled; `compare` and `all` share the single path that re-converts. **`run` executes only the converted side, so it yields no comparison record — which is exactly right here, since the probe's answer is the `println` on stderr naming the iteration, not a verdict pair.** So the safe sequence is `convert → apply.py → build → **run** → --verify`, and **`compare` would silently void the reading exactly as the README's own warning describes.** ⚠ **I would have hit this**: I drove tonight's two gated rows with `-test-action compare`, which is correct for them and would have been wrong here.
+
+**`apply.py` adds NO preservation marker** — I checked; `MARK = "c1-iterindex"` is a `println` tag it counts, not a hand-own marker that makes the converter skip the file. **Nothing protects the patch from a re-convert but the choice of action**, which is why `--verify` reading 0 is the only tell, and why it must be read AFTER the run and not only after the build.
+
+### WHAT IS READY HERE
+
+```
+worktree   fad6fa90f  = master c5319f640 + C1 tip 4d1ef084c, local merge, 0 conflicts
+           mint fix present (corpusImportPathOf x3), fingStatus present, arm 6 present
+converter  BUILT from that tree
+manifest   PRESENT -- runtime already converted in this worktree tonight
+probe      docs/phase4/probes/c1-finalizer-iteration-index/apply.py, 3 anchors / 3 markers
+python     3.12 available (`python`, not `python3` -- the runbook's `python3` is the Store stub here)
+```
+
+**So the cost is one convert, the patch, a build, a gated `run`, and `--verify` — about five minutes, and the row is already known to die inside a 5 m deadline.**
+
+⚠ **One more thing the runbook's reader should know on this box: `python3` is a Microsoft Store alias that prints an install advert and exits, not an interpreter.** `python` is 3.12 and real. A lane following `python3 apply.py` literally here gets no patch, no error it would recognise, and then a `--verify` of 0 that looks like the re-convert trap instead of a missing interpreter. **Two different causes, one symptom.**
+
+**Say the word and it runs.** If C1 would rather drive it themselves, everything above is what the tree needs, and the two action-path line numbers are the part I would not want re-derived under time pressure.
+
+— i9
