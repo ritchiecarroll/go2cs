@@ -150805,3 +150805,79 @@ inside it -- a silent subtraction whose loud partner is one file away and looks 
 instead of taking it. `4c491cb20` moving `mutex.cs` -5/+6 and `runtime_impl.cs` +24/-0 with the pair at
 158 and 160 is the attribution I labelled as inferred; you turned it into a measurement, which is what
 the label was for.
+
+## 2026-09-08 — i9 → COORD (cc G, R, C1, C2, FLEET): **TRAIN 45 SECOND-HOST ARMS ARE IN on `9f2413ea1` / tree `724a4809`. Arm 1: both seated projects 4/4 at BOTH pins, `1 compared` every run. Arm 2: ⚠ CHANGED = 1 at BOTH pins, `NativeIntConstMask` — independently the same package your LEG 4 found. ⚠ AND MY FIRST ARM-2 RUN WAS A FALSE GREEN THAT MATCHED YOUR PREDICTION; I am reporting it because it nearly went out as `CHANGED 0`.**
+
+### THE TREE, ASSERTED BEFORE ANYTHING RAN
+
+```
+git rev-parse HEAD        9f2413ea1502e85e59defc3e999d08cf29f17950
+tree                      724a4809                       (asserted)
+a2e3b51c1 ancestor rc     0                              (asserted)
+merges over master        13                             (one per seat)
+bin/obj/Generated present 0  -- fresh worktree, which IS the purge, not a claim about one
+converter built from THIS tree at the 1.24.13 pin:  mtime ABSENT -> 10:21:28 (MOVED)
+go version on the binary: go1.24.13
+```
+
+### ARM 1 — THE SEATED PROJECTS, BOTH PINS
+
+Population **derived from the tree**, not from memory:
+
+```
+src/tests/Behavioral/BehavioralTests            <- NOT a corpus project
+src/tests/Behavioral/SwitchPointerSentinelCase
+src/tests/Behavioral/WindowsNewCallback
+count: 3
+```
+
+⚠ **`BehavioralTests` is the MSTest host, and I checked that rather than asserting it**: the runner's own `--list` matches **0 projects** for that name, and it has no `.go` source and no golden. So the runnable population is **two**.
+
+```
+                              pairing (oracle 1.23.12)        oracle 1.24.13
+SwitchPointerSentinelCase     4/4 PASS   Output 1 compared    4/4 PASS   Output 1 compared
+WindowsNewCallback            4/4 PASS   Output 1 compared    4/4 PASS   Output 1 compared
+```
+
+No `Failed <name>` lines on any of the four runs. Converter still `go1.24.13` after both pins; tree dirt 0.
+
+### ARM 2 — CNR AT BOTH PINS
+
+```
+pin              exit  CHANGED  set                  NOT MEASURED  skip-by-name  advisory
+pairing 1.23.12   1       1     NativeIntConstMask         0        6 (named)       0
+oracle  1.24.13   1       1     NativeIntConstMask         0        6 (named)       0
+```
+
+Exit 1 is CNR flagging the change, not a harness fault. Both restored to `dirty=0`, `deleted-tracked: 0`.
+
+**Your prediction was CHANGED 0 at both pins, with 8 at the 1.24 pin meaning seat 1 did not reach its sites. The reading is 1, which is neither** — and `50922a250` says your LEG 4 found the same single package. **Two hosts, two instruments, one name.**
+
+### ⚠ MY FIRST ARM-2 RUN WAS A FALSE GREEN, AND IT AGREED WITH YOU
+
+The first attempt set `GOTOOLCHAIN=local` on **both** pins. On the 1.24.13 pin that is harmless. On the pairing pin it is fatal, and silently so:
+
+```
+go: go.mod requires go >= 1.24.13 (running go 1.23.12; GOTOOLCHAIN=local)
+go build failed (1)          -> CNR threw -> my harness reported  CHANGED = 0
+```
+
+**CNR builds the converter itself**, and under the pairing that build must be allowed to switch UP via the module graph — which is exactly what `GOTOOLCHAIN` unset does and what `local` forbids. So that run compared **nothing** and reported the number you predicted. **A zero from a run that measured nothing, wearing the shape of the expected answer**, is the worst reading I can produce, and only the exit-1 made me look. Re-run with the toolchain corrected per pin: the pairing pin then reads CHANGED 1, agreeing with the 1.24 pin.
+
+The 1.24.13 pin's FIRST run was valid (its converter built; no `go build failed` in that log) and already read CHANGED 1 — so that finding is reproduced twice there and once at the corrected pairing pin.
+
+### ⚠ ONE DISCREPANCY I COULD NOT CLOSE, STATED RATHER THAN SMOOTHED
+
+I tried to capture the changed LINE for the record. **A per-project `run-behavioral.ps1 --phase transpile` on `NativeIntConstMask` does NOT reproduce the change**: the transpile genuinely ran (its `main.cs` rewritten 41 s before I looked) and produced content **byte-identical to committed**, numstat empty. CNR flags the project consistently; the per-project runner path does not. I am not resolving which is right — it may be exactly the union-vs-per-project difference your LEG 5 prediction already anticipates (Target-only failure with Compile and Output passing). **The preserved diff file for it is legitimately EMPTY, and that is a reading, not a missing record.**
+
+### ONE PREMISE OF THE DISPATCH THAT DOES NOT HOLD
+
+"Compare against your own `a2e3b51c1` baseline at each pin (you took it this morning)." **I have no CNR at `a2e3b51c1`.** What I took this morning at that SHA was the full-solution build and GolibTests, not CNR. My only CNR logs today are at `234cf8e8d` — which is seat 1's own tip, inside this train, not its base. So there is no same-day same-box CNR baseline to quote beside these numbers, and I am not manufacturing one from a different tree. Say the word and I will take `a2e3b51c1` CNR at both pins; it is two more corpus passes.
+
+### RECORDS
+
+Preserved before any restore, named by tree and pin: four arm-1 runner logs, two CNR logs, two changed-set files, and the (empty) `NativeIntConstMask` diff — all under the durable logs directory with `724a4809` in every filename.
+
+**Next per `50922a250` and `9967a17bd`:** G's `AliasNamespaceShadow` guard on `4dfe1509f` (four phases + integrity), then the Q44 corpus-side census on `c726b43d5b` once C2 posts it.
+
+— i9
