@@ -1,6 +1,8 @@
 # DESIGN — the orphaned-disclosure check
 
-**Status:** increment 1 LANDED (report-only). Increments 2 and 3 specified here, not built.
+**Status:** increment 1 LANDED (report-only, 2026-09-08). Increment 2 LANDED (platform-scoped
+entries, 2026-09-08 — see §8). Increment 3, the refusal, specified here and NOT built; §8.8 lists
+what it still needs.
 **Minted:** 2026-09-08, against master `44f858717`.
 **Instrument of record for the census below:** the committed proof pages under
 `docs/validation/current/` — **the Windows record**, and every number in §5 carries that limit.
@@ -111,7 +113,7 @@ the rule was written after. **The ordering is forced:**
 | # | What | Status |
 |:--|:--|:--|
 | **1** | **REPORT.** The predicate, an `orphanedDisclosures` array in the comparison record, and one stderr line per orphan. Never clears `Matched`. | **landed** |
-| **2** | **Platform-scoped entries** — schema plus reader, so a per-platform retirement is expressible without touching another platform's absorption. This is the durable fix doctrine rule (1) already names. | specified, not built |
+| **2** | **Platform-scoped entries** — schema plus reader, so a per-platform retirement is expressible without touching another platform's absorption. This is the durable fix doctrine rule (1) already names. | **landed** — §8 |
 | **3** | **REFUSE.** The report becomes an error, gated on 2 — a per-platform retirement must be *expressible* before an orphan can be *fatal*. | specified, not built |
 
 Increment 1 is also what MEASURES whether 2 is needed and how often. §5 is the first such measurement
@@ -267,3 +269,197 @@ was gated: no `testFilter` key.
   both files LF-normalized, this change's `gofmt` diff against master's is **identical hunk for hunk**
   — it adds ZERO new drift — and `testConversion.go`'s pre-existing 113-line struct-alignment drift is
   a master baseline this change neither touches nor inherits.
+
+---
+
+## 8. INCREMENT 2 — platform-scoped entries (landed 2026-09-08)
+
+Increment 2 as specified in §4: the schema and the reader, so a per-platform retirement is
+*expressible*. It deliberately does **not** refuse anything — that is increment 3, and it is gated on
+this because a refusal needs somewhere for the refused entry to GO.
+
+### 8.1 The schema
+
+An optional per-entry `platforms` list:
+
+```json
+{ "name": "TestSendmsgN", "class": "alloc-profile", "signature": "...", "reason": "...",
+  "platforms": ["linux"] }
+```
+
+**Absent or empty means every platform**, which is what makes this additive: all **46** committed
+manifests and all **267** entries omit it — re-measured by the guard itself, not carried from §5 —
+so every one of them loads and behaves byte-for-byte as before. The record's `disclosed` counts, the
+proof pages and every published figure are unmoved.
+
+**The type is `goosScope`, reused rather than re-derived.** The hand-own registry
+(`manualTypeOperations.go`) already expresses exactly this concept — a set of target operating
+systems, empty meaning all, with an `includes` predicate — so this is the JSON spelling of the Go one
+rather than a second `[]string` and a second membership test that drift apart the first time one of
+them learns something. One caveat rides along and is guarded rather than remembered: an empty
+`goosScope` *includes* everything, so the validator's whitelist is pinned non-empty by
+`TestDisclosurePlatformTargetsAreTheCorpusTargets`.
+
+**Validation at load**, all refusals, all by name:
+
+| Rule | Why it refuses rather than tolerates |
+|:--|:--|
+| every element in `windows, linux, darwin` | narrower than `isKnownGOOS` **on purpose**: an entry scoped to a GOOS this corpus does not build could never be in scope on any run, so it would be permanently inert — indistinguishable from a typo, and silent |
+| no duplicates | a duplicate changes nothing about the scope, which is exactly why it is evidence the list was edited without being read |
+| a scoped entry needs a run GOOS | see §8.3 |
+
+### 8.2 INERT is not STALE, and that is the whole point
+
+| | orphan | out of scope |
+|:--|:--|:--|
+| what it is | a **measurement**: this platform ran the test and it PASSED | the **absence** of one: the run never applied the entry |
+| evidence about the entry | positive, from this run's own verdict maps | none, in either direction |
+| record field | `orphanedDisclosures` | `outOfScopeDisclosures` |
+| stderr | one line per orphan | **none** — see below |
+| increment 3 | refuses | must **never** refuse |
+
+An out-of-scope entry is filtered at **load**, so it never enters the map any consumer sees: it
+absorbs nothing, counts nothing, withdraws nothing and cannot reach the orphan predicate. Published
+in `outOfScopeDisclosures` (name, class, platforms, goos) so its existence stays visible — without
+that list a scoped manifest would be silently smaller than the file on disk, and the difference
+between *"this package has four disclosures"* and *"this package applied two of its four here"* would
+live nowhere. It carries `goos` as `orphanedDisclosure` does, so an element quoted out of the record
+still says which run's platform excluded it.
+
+**No stderr line for these.** A linux-scoped entry on a Windows run is the ordinary, permanent,
+correct state of a cross-platform manifest; a warning per entry per run would be noise that trains a
+reader to ignore the orphan lines beside it. The orphan line gained the words **"in scope on this
+platform"**, which is the half that tells a reader the entry was APPLIED here and still found nothing.
+
+**Why the filter is at LOAD and not at each consumer** — measured, not argued, by
+`TestOutOfScopeHostFatalDoesNotWithdrawItsTest`. A `host-fatal` entry WITHDRAWS its test from both
+command lines before either child runs, so an out-of-scope one filtered any later would already have
+changed what the run contains: a linux-only host-killer would silently stop Windows from running a
+test it passes. One filter, one property, five consumers that cannot drift apart.
+
+### 8.3 The GOOS source of truth, read from the code
+
+`goosOfTarget(options.targetPlatform)` — the pipeline's own value for the platform a run is *for*.
+It is the same value that selects the per-GOOS source folder (`platformPackageInfoPath`,
+`productionCSFiles`), the csproj's `$(GoTargetOS)` and the manifest's `targetGOOS`, and it is what
+increment 1 already passes to the orphan report. **Deliberately not `runtime.GOOS`**, which is the
+platform the converter binary happens to be running on: the two differ on every cross-target run, and
+reading the wrong one would scope a manifest by the wrong platform with nothing saying so.
+
+**A scoped entry with no run GOOS is REFUSED** — the one place this increment adds a hard error, and
+a deviation from a literal reading of "absent or empty applies everywhere", which answers a different
+question (an absent *scope*, not an absent *platform*). Both guesses are silent and wrong: treating
+the entry as in scope WIDENS the oracle (absorbing on a platform nobody vouched for), treating it as
+out of scope disables an absorption and reddens a row for a reason no message names. A manifest with
+**no** scoped entry is unaffected by an absent GOOS, which is what keeps every existing manifest and
+fixture loading exactly as before. In production the value is never empty (`-platforms` defaults to
+`runtime.GOOS/runtime.GOARCH` and `parsePlatformList` refuses an empty field), so the refusal is aimed
+squarely at a future caller that forgets to pass it.
+
+### 8.4 The door, and why there are two
+
+`readTestDisclosureManifest(outputPath)` parses and validates, platform-agnostically, returning every
+valid entry. `loadTestDisclosures(outputPath, goos)` is the production door: read, validate, scope.
+
+Validity is a property of the **manifest**, scope is a property of the **run**, and conflating them
+would mean a manifest could be well-formed on one platform and malformed on another. The split is
+also why the 18 existing call sites are a pure **rename** with no arity change — they test parsing and
+refusal, where a platform would be noise — and why a caller cannot obtain the unscoped set by omitting
+an argument. Exactly one production call site reaches a manifest, and it goes through the scoped door.
+
+### 8.5 Predictions, written before the runs, and scored
+
+| | Prediction | Result |
+|:--|:--|:--|
+| P0 | baseline converter suite at `d3b5a04a3`: 0 FAIL | **INVALID — not scored.** See §8.7 |
+| P1 | converter suite after the change: 0 FAIL | **HELD on the SECOND attempt** — 0 FAIL, exit 0, 435.7 s, on a tree fingerprinted before and after. The FIRST attempt was RED and found a real omission — see §8.6 |
+| P2 | `go vet ./...` clean | **HELD** — exit 0, no diagnostics |
+| P3 | committed-manifest arm reads 46 / 267 / 0 scoped | **HELD** — `46, 267, of which scoped: 0`, a second derivation agreeing with §5's independent census |
+| P4 | the neuter reddens exactly 4 named arms, 10 stay green | **HELD** — exactly those four, exactly those ten |
+| P5 | restore after the neuter is byte-identical | **HELD** — `sha256sum -c: OK` |
+| P6 | roster guard exit 0, check count +9, coverage assertion unmoved | **HELD** — 629 → 638, coverage line unchanged |
+
+**P4 in full**, because a neuter that reddened the refusal arms too would have meant the refusals were
+reading scope rather than validating the field — a different bug, and predicted GREEN so that outcome
+was falsifiable. Neuter: `entry.Platforms.includes(goos)` → `true`.
+
+- **RED (4):** the foreign-GOOS non-absorption arm, the out-of-scope-is-not-an-orphan arm, the
+  out-of-scope host-fatal non-withdrawal arm, the out-of-scope sort arm.
+- **GREEN (10):** the in-scope arm, the unscoped arm, the empty-list arm, the three refusals, both
+  record-key arms, the whitelist arm, and the committed-manifest arm — the last necessarily so, since
+  no committed manifest carries the field, which is what makes it a **coverage** arm rather than a
+  scope arm.
+
+The orphan arm's failure text under the neuter is worth keeping, because it is the hazard itself:
+
+```
+an entry this run never applied is INERT, not stale ...
+got [{TestSendmsgN alloc-profile pass pass windows}]
+```
+
+Without the scope, a **linux-only** entry is accused as a stale orphan on a **Windows** run — which is
+the cross-platform removal doctrine rule (1) was written after, arriving through the orphan report.
+
+### 8.6 Gates
+
+| Gate | Reading |
+|:--|:--|
+| `go test -count=1 -timeout 30m ./...` (src/go2cs) | **0 FAIL, exit 0, 435.7 s** — see the two-attempt note below |
+| `go vet ./...` | exit 0 |
+| the 14 new arms, `-v -run` | 14 RUN / 14 PASS |
+| neuter control + restore | 4 RED / 10 GREEN, `sha256sum -c` OK |
+| `check-roster-format.ps1` | exit 0, **638** checks (from 629) |
+| roster guard, invalid GOOS planted in a real manifest | exit **1**, 639 checks, names `sync/TestMapClearNoAllocations` and the value `windwos` |
+| roster guard, valid scope planted in a real manifest | exit **0**, 639 checks — the hook fires and accepts |
+| Go coverage arm, valid scope planted | **RED** by design: `8 entries against 9 unscoped` — the arm is not vacuous |
+| both plants restored | `sha256sum -c` OK, `git status src/core` empty |
+
+The two plants are the loop hook's own control: it fires on **zero** entries today, so without them a
+broken hook would read exactly like a clean one. They also make the Go and PowerShell guards agree on
+the same real file in both directions.
+
+**The suite ran TWICE, and the first run earned its keep.** It came back RED on
+`TestProjitemsRegistersEveryGoSource`: this increment adds a new converter `.go` file, and a file not
+listed in `go2cs-src.projitems` is invisible in Visual Studio's Solution Explorer while `go build`
+walks the directory and never notices — the exact silence that guard exists for. It named the line and
+its anchor, the entry went in with the file's BOM and uniform CRLF preserved (verified by byte count,
+`\r\n` count and a zero bare-LF count, then by the guard's own
+`TestProjitemsKeepsItsByteOrderMarkAndConsistentLineEndings`), and the second run is the reading above.
+
+Both runs were launched with the tree **fingerprinted by sha256 before and after**, which the first
+baseline was not (§8.7). The final run's three fingerprints verified unchanged: the reading describes
+the tree that was committed, not a tree that moved under it.
+
+**The `-tests` pipeline arm is OWED**, not run: a train battery held `/tmp/t46-assemble.lock` for the
+whole of this work, and the rule is one converter/pipeline run per box. The command is in the commit
+message. Nothing in this increment changes emission, and the end-to-end behaviour it would measure —
+that a scoped entry is inert and an unscoped one unchanged — is measured at the loader by §8.5's arms;
+but the run is owed and is named as owed.
+
+### 8.7 The baseline I invalidated, stated
+
+The pre-change control was launched **and then edited under**: the suite compiled a half-finished tree
+and `TestSafePushSelfTest` failed inside it, its log carrying `loadTestDisclosures returns 4 values`.
+That test delegates to `go test` in `src/go2cs`, so it is sensitive to the tree compiling at all.
+
+**A measurement taken on a tree that changed under it is not a measurement**, whichever way it reads,
+so P0 is scored INVALID rather than explained. It is recorded here because the failure was momentarily
+readable as a pre-existing environmental red — the long-path warning in the same log invited exactly
+that — and a wrong "pre-existing" label is worse than no baseline at all. The post-change run in §8.6
+is on a stable tree and is what the increment rests on.
+
+### 8.8 What increment 3 still needs
+
+1. **The refusal itself** — `OrphanedDisclosures` non-empty becomes an error rather than a report.
+   Everything below is what it needs first.
+2. **A re-derivation of §5's seven** against fresh runs. That census is static, is the **Windows**
+   record, and leaves 75 of 267 entries unexamined for want of a proof page. A refusal must not fire
+   on a table nobody re-measured.
+3. **A ruling per entry**, because scoping one is still a cross-platform edit: the other platform's
+   preserved record is read first, and the entry is **scoped**, not removed, wherever it is live
+   elsewhere. That is now expressible, which was the whole of this increment.
+4. **A decision on `not-on-page` and `no-page` entries** (23 and 75). Neither bucket is cleared by
+   this increment: an entry naming a unix-only test on Windows is *not* out of scope unless somebody
+   scopes it, and until then it is invisible to both the report and this list.
+5. **A grace period.** Increment 1 has never run a full sweep; the first run-derived orphan census
+   arrives with the next one, and increment 3 should not precede it.

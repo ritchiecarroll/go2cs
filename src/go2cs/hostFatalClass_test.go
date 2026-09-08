@@ -296,7 +296,7 @@ func TestHostFatalMayOmitItsSignatureAndOtherClassesMayNot(t *testing.T) {
 		if err := os.WriteFile(filepath.Join(dir, testDisclosureFileName), []byte(body), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		_, _, err := loadTestDisclosures(dir)
+		_, _, err := readTestDisclosureManifest(dir)
 		return err
 	}
 	if err := write(hostFatalClass, ""); err != nil {

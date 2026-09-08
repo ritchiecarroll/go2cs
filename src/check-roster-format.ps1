@@ -880,6 +880,66 @@ $manifestParseFailures = 0
 # The package name comes from the PATH by Split-Path and Substring rather than by regex: a package
 # name is a path fragment, and deriving it with a pattern invites exactly the escaping mistakes that
 # a guard file cannot afford.
+# The PLATFORM SCOPE (increment 2 of the orphan-disclosure check). An entry may carry an optional
+# `platforms` list scoping it to the targets it describes, so a per-platform retirement is
+# expressible without touching another platform's absorption -- the durable fix doctrine rule (1)
+# names. Absent or empty means every platform, which is why all 46 committed manifests are unaffected.
+#
+# Mirrored here from the Go loader for the same reason the floor rules are: the loader refuses a bad
+# entry when its package is SWEPT, which is days after the merge and presents as a conversion error
+# on a row rather than as a manifest defect. This walks the whole tree on every roster change.
+#
+# ORDINAL COMPARISON, deliberately. PowerShell's -contains and its hashtables are case-INSENSITIVE
+# by default while the Go loader compares exactly, so a `platforms: ["Windows"]` entry would pass
+# here and be refused there -- two guards disagreeing about one manifest, which is worse than either
+# one being absent. -cnotcontains and an ordinal HashSet are what keep the two readings identical.
+$disclosurePlatformTargets = @('windows', 'linux', 'darwin')
+
+function Get-DisclosurePlatformViolations {
+    param([string] $Name, $Platforms)
+
+    if ($null -eq $Platforms) { return @() }
+
+    $violations = New-Object System.Collections.Generic.List[string]
+    $seen = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::Ordinal)
+
+    foreach ($platform in @($Platforms)) {
+        $text = [string]$platform
+
+        if ($disclosurePlatformTargets -cnotcontains $text) {
+            [void]$violations.Add("$Name names platform '$text', which is not one of $($disclosurePlatformTargets -join ', ')")
+            continue
+        }
+        if (-not $seen.Add($text)) {
+            [void]$violations.Add("$Name names platform '$text' twice")
+        }
+    }
+
+    return $violations.ToArray()
+}
+
+# Controlled BOTH ways against fixtures, because the tree cannot control it: no committed manifest
+# carries a scope today, so the loop below fires zero assertions and a broken predicate would read
+# exactly like a clean one. These arms are the only thing standing between that and a decoration.
+Assert-Equal 'platforms: absent is legal, and is what every committed manifest carries' 0 `
+    @(Get-DisclosurePlatformViolations -Name 'T' -Platforms $null).Count
+Assert-Equal 'platforms: an empty list means every platform, not no platform' 0 `
+    @(Get-DisclosurePlatformViolations -Name 'T' -Platforms @()).Count
+Assert-Equal 'platforms: one corpus target is accepted' 0 `
+    @(Get-DisclosurePlatformViolations -Name 'T' -Platforms @('linux')).Count
+Assert-Equal 'platforms: all three corpus targets are accepted' 0 `
+    @(Get-DisclosurePlatformViolations -Name 'T' -Platforms @('windows', 'linux', 'darwin')).Count
+Assert-Equal 'platforms: a misspelled GOOS is refused (the likely mistake)' 1 `
+    @(Get-DisclosurePlatformViolations -Name 'T' -Platforms @('windwos')).Count
+Assert-Equal 'platforms: a real GOOS this corpus does not build is refused' 1 `
+    @(Get-DisclosurePlatformViolations -Name 'T' -Platforms @('freebsd')).Count
+Assert-Equal 'platforms: a duplicate is refused (evidence the list was edited unread)' 1 `
+    @(Get-DisclosurePlatformViolations -Name 'T' -Platforms @('linux', 'linux')).Count
+Assert-Equal 'platforms: case matters, because the Go loader compares ordinally' 1 `
+    @(Get-DisclosurePlatformViolations -Name 'T' -Platforms @('Linux')).Count
+Assert-Equal 'platforms: the refusal names the offending value, not merely that the entry is invalid' $true `
+    ((@(Get-DisclosurePlatformViolations -Name 'T' -Platforms @('windwos')))[0] -like "*windwos*")
+
 $coreRoot = Join-Path $PSScriptRoot 'core'
 $manifestFiles = @(Get-ChildItem -LiteralPath $coreRoot -Recurse -File -Filter 'go2cs_test_disclosures.json' -ErrorAction SilentlyContinue | Sort-Object FullName)
 
@@ -930,6 +990,15 @@ foreach ($manifestFile in $manifestFiles) {
         }
         if ($class -eq $structuralClass) {
             Assert-Equal "structural entry names NO retirement plan (its claim is the assertion cannot be met): $pkg/$name" $true ([string]::IsNullOrWhiteSpace([string]$entry.plan))
+        }
+
+        # The PLATFORM SCOPE, conditional like the arms above: an entry with no `platforms` key fires
+        # nothing, which is every entry in the tree today. That is why the fixture arms exist -- this
+        # loop currently adds coverage without adding checks, exactly as the plain alloc-profile
+        # entries do, and a scope arriving tomorrow is validated the day it lands.
+        if ($null -ne $entry.platforms) {
+            $platformViolations = @(Get-DisclosurePlatformViolations -Name "$pkg/$name" -Platforms $entry.platforms)
+            Assert-Equal "platforms names only corpus targets, without duplicates: $pkg/$name ($($platformViolations -join '; '))" 0 $platformViolations.Count
         }
     }
 }

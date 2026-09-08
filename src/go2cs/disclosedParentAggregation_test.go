@@ -297,14 +297,14 @@ func TestHostConditionalSecondFailureArmIsAdmittedOnlyWhenGoFailsToo(t *testing.
 		t.Fatal("a Go-passing run whose converted side failed on the OTHER arm is a real divergence, never disclosed")
 	}
 
-	// And an UNANNOTATED entry can carry no second arm at all: loadTestDisclosures refuses the
+	// And an UNANNOTATED entry can carry no second arm at all: readTestDisclosureManifest refuses the
 	// manifest rather than accepting a pin that would never govern anything.
 	dir := t.TempDir()
 	manifest := `{"schemaVersion":1,"disclosures":[{"name":"TestBogo","class":"host-limit","signature":"s","reason":"r","hostConditionalSignature":"failed to download boringssl"}]}`
 	if err := os.WriteFile(filepath.Join(dir, testDisclosureFileName), []byte(manifest), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, err := loadTestDisclosures(dir); err == nil {
+	if _, _, err := readTestDisclosureManifest(dir); err == nil {
 		t.Fatal("a hostConditionalSignature on an unannotated disclosure must be refused, not silently ignored")
 	}
 }
@@ -461,13 +461,13 @@ func TestHostConditionalMarkerMustNameItsDependency(t *testing.T) {
 		return dir
 	}
 
-	if _, _, err := loadTestDisclosures(write(t, "   \t \n ")); err == nil {
+	if _, _, err := readTestDisclosureManifest(write(t, "   \t \n ")); err == nil {
 		t.Fatal("a blank host-conditional marker must be rejected, not silently honored")
 	}
 
 	// The ordinary shapes still load: an absent marker, and one that names its dependency.
 	for _, sentence := range []string{"", "The Go baseline depends on network reachability."} {
-		disclosures, _, err := loadTestDisclosures(write(t, sentence))
+		disclosures, _, err := readTestDisclosureManifest(write(t, sentence))
 
 		if err != nil {
 			t.Fatalf("loading a manifest with hostConditional %q must succeed: %v", sentence, err)

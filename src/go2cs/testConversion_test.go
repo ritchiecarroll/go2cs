@@ -384,7 +384,7 @@ func TestDeferredDisclosureFloor(t *testing.T) {
 		 "proof": "DeepEqual(any, any) boxes a value type into object, which the CLR's object model allocates: two per run"}]}`
 
 	writeManifest(valid)
-	disclosures, _, err := loadTestDisclosures(dir)
+	disclosures, _, err := readTestDisclosureManifest(dir)
 	if err != nil || disclosures["TestDeepEqualAllocs"].Floor != 2 {
 		t.Fatalf("a complete floored entry must load — got %#v, %v", disclosures, err)
 	}
@@ -394,30 +394,30 @@ func TestDeferredDisclosureFloor(t *testing.T) {
 	writeManifest(`{"schemaVersion": 1, "disclosures": [
 		{"name": "TestX", "class": "structural", "signature": "s", "reason": "the box the object model requires",
 		 "floor": 2, "proof": "p"}]}`)
-	if _, _, err := loadTestDisclosures(dir); err == nil {
+	if _, _, err := readTestDisclosureManifest(dir); err == nil {
 		t.Fatal("a structural entry naming a floor must be refused")
 	}
 
 	// A floor with no proof sketch is not falsifiable, which is the one property a floor must have.
 	writeManifest(strings.Replace(valid, `"proof": "DeepEqual(any, any) boxes a value type into object, which the CLR's object model allocates: two per run"`, `"proof": "  "`, 1))
-	if _, _, err := loadTestDisclosures(dir); err == nil {
+	if _, _, err := readTestDisclosureManifest(dir); err == nil {
 		t.Fatal("a floor with no proof must be refused — a claim the census cannot falsify is not a floor")
 	}
 
 	// A floor that does not exceed the want leaves nothing deferred: the entry is simply structural.
 	writeManifest(strings.Replace(valid, `"floor": 2`, `"floor": 0`, 1))
-	if _, _, err := loadTestDisclosures(dir); err != nil {
+	if _, _, err := readTestDisclosureManifest(dir); err != nil {
 		t.Fatalf("floor 0 means ABSENT (a legal floor is at least 1), so this must load — got %v", err)
 	}
 	writeManifest(strings.Replace(strings.Replace(valid, `"want": "0 allocations"`, `"want": "2 allocations"`, 1), `"floor": 2`, `"floor": 2`, 1))
-	if _, _, err := loadTestDisclosures(dir); err == nil {
+	if _, _, err := readTestDisclosureManifest(dir); err == nil {
 		t.Fatal("a floor equal to the want must be refused — nothing is deferred, so the entry is structural")
 	}
 
 	// A want a floor cannot be compared against: refusing the pairing beats guessing which number
 	// in the sentence was meant.
 	writeManifest(strings.Replace(valid, `"want": "0 allocations"`, `"want": "at most one per leg"`, 1))
-	if _, _, err := loadTestDisclosures(dir); err == nil {
+	if _, _, err := readTestDisclosureManifest(dir); err == nil {
 		t.Fatal("a floor beside a want that does not lead with its number must be refused")
 	}
 }
@@ -441,7 +441,7 @@ func TestDeferredDisclosureRequiresItsPlan(t *testing.T) {
 		 "plan": "DESIGN-syscall-out-parameter.md (B), then the buffer-element record (E), then C"}]}`
 
 	writeManifest(valid)
-	disclosures, _, err := loadTestDisclosures(dir)
+	disclosures, _, err := readTestDisclosureManifest(dir)
 	if err != nil || len(disclosures) != 1 || disclosures["TestWriteStringAlloc"].Plan == "" {
 		t.Fatalf("a complete deferred entry must load — got %#v, %v", disclosures, err)
 	}
@@ -458,7 +458,7 @@ func TestDeferredDisclosureRequiresItsPlan(t *testing.T) {
 			body = strings.Replace(valid, `"plan": "DESIGN-syscall-out-parameter.md (B), then the buffer-element record (E), then C"`, `"plan": ""`, 1)
 		}
 		writeManifest(body)
-		_, _, err := loadTestDisclosures(dir)
+		_, _, err := readTestDisclosureManifest(dir)
 		if err == nil {
 			t.Fatalf("a deferred entry missing %s must be refused: a deferred entry is a commitment, not a quieter disclosure", field)
 		}
@@ -472,13 +472,13 @@ func TestDeferredDisclosureRequiresItsPlan(t *testing.T) {
 	writeManifest(`{"schemaVersion": 1, "disclosures": [
 		{"name": "TestX", "class": "structural", "signature": "s", "reason": "the array literal Go keeps in the caller's frame has no managed equivalent",
 		 "plan": "some-record.md"}]}`)
-	if _, _, err := loadTestDisclosures(dir); err == nil {
+	if _, _, err := readTestDisclosureManifest(dir); err == nil {
 		t.Fatal("a structural entry naming a retirement plan must be refused — the two labels would blur back together")
 	}
 
 	writeManifest(`{"schemaVersion": 1, "disclosures": [
 		{"name": "TestX", "class": "structural", "signature": "s", "reason": "the array literal Go keeps in the caller's frame has no managed equivalent"}]}`)
-	if _, _, err := loadTestDisclosures(dir); err != nil {
+	if _, _, err := readTestDisclosureManifest(dir); err != nil {
 		t.Fatalf("a structural entry without a plan must load — got %v", err)
 	}
 
@@ -486,7 +486,7 @@ func TestDeferredDisclosureRequiresItsPlan(t *testing.T) {
 	// must still load with none of the deferred fields.
 	writeManifest(`{"schemaVersion": 1, "disclosures": [
 		{"name": "TestUTF16Alloc", "class": "alloc-profile", "signature": " allocs, want ", "reason": "r"}]}`)
-	if _, _, err := loadTestDisclosures(dir); err != nil {
+	if _, _, err := readTestDisclosureManifest(dir); err != nil {
 		t.Fatalf("a legacy alloc-profile entry must keep loading until its row re-sweeps — got %v", err)
 	}
 }
@@ -497,7 +497,7 @@ func TestDeferredDisclosureRequiresItsPlan(t *testing.T) {
 func TestDisclosureManifestLoading(t *testing.T) {
 	dir := t.TempDir()
 
-	disclosures, _, err := loadTestDisclosures(dir)
+	disclosures, _, err := readTestDisclosureManifest(dir)
 	if err != nil || disclosures != nil {
 		t.Fatalf("absent manifest should load as nil, nil — got %#v, %v", disclosures, err)
 	}
@@ -510,21 +510,21 @@ func TestDisclosureManifestLoading(t *testing.T) {
 
 	writeManifest(`{"schemaVersion": 1, "disclosures": [
 		{"name": "TestBuilderAllocs", "class": "alloc-count-semantics", "signature": "Builder allocs = ", "reason": "shim is byte-derived"}]}`)
-	disclosures, _, err = loadTestDisclosures(dir)
+	disclosures, _, err = readTestDisclosureManifest(dir)
 	if err != nil || len(disclosures) != 1 || disclosures["TestBuilderAllocs"].Signature != "Builder allocs = " {
 		t.Fatalf("valid manifest should parse — got %#v, %v", disclosures, err)
 	}
 
 	writeManifest(`{"schemaVersion": 1, "disclosures": [
 		{"name": "TestBuilderAllocs", "class": "alloc-count-semantics", "signature": "", "reason": "shim is byte-derived"}]}`)
-	if _, _, err = loadTestDisclosures(dir); err == nil {
+	if _, _, err = readTestDisclosureManifest(dir); err == nil {
 		t.Fatal("an empty signature must be rejected — it would match any failure")
 	}
 
 	writeManifest(`{"schemaVersion": 1, "disclosures": [
 		{"name": "TestX", "class": "alloc-profile", "signature": "a", "reason": "r"},
 		{"name": "TestX", "class": "alloc-profile", "signature": "b", "reason": "r"}]}`)
-	if _, _, err = loadTestDisclosures(dir); err == nil {
+	if _, _, err = readTestDisclosureManifest(dir); err == nil {
 		t.Fatal("duplicate disclosure names must be rejected")
 	}
 }

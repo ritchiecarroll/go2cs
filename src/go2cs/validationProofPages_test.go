@@ -33,7 +33,7 @@ func loadProofFixture(t *testing.T) (testComparison, map[string]testDisclosure) 
 
 	// Read through the production loader so the fixture manifest exercises the same validation the
 	// pipeline applies (every field required, no duplicates).
-	disclosures, _, err := loadTestDisclosures(proofFixtureDir)
+	disclosures, _, err := readTestDisclosureManifest(proofFixtureDir)
 
 	if err != nil {
 		t.Fatalf("load fixture disclosures: %v", err)

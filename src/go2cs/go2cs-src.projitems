@@ -171,6 +171,7 @@
     <None Include="$(MSBuildThisFileDirectory)platformManifest.go" />
     <None Include="$(MSBuildThisFileDirectory)platformProject.go" />
     <None Include="$(MSBuildThisFileDirectory)platformProject_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformScopedDisclosures_test.go" />
     <None Include="$(MSBuildThisFileDirectory)positionMapOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)positionMap_test.go" />
     <None Include="$(MSBuildThisFileDirectory)processGroupUnix.go" />
