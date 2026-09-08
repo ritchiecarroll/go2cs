@@ -187,3 +187,97 @@ vendor/golang.org/x/crypto/sha3/xor.cs                   encoding/binary        
 vendor/golang.org/x/crypto/sha3/xor.cs                   vendor/golang.org/x/sys/cpu          EXISTS
 vendor/golang.org/x/net/route/darwin/sys_impl.cs         syscall                              EXISTS
 ```
+
+---
+
+## 2026-09-08 — AMENDMENT: THE CLASS THIS CENSUS COULD NOT SEE (frozen metadata meeting 1.24)
+
+Routed by COORD (`ec1c08d54`) off R's re-based ladder, whose one non-`sync` residual is
+`internal/weak/package_info.cs` CS0426 on `ΔMapType`.
+
+**Why the census above missed it, structurally.** That census read the *marked files'* `using`
+aliases (143 clean). These are UNMARKED metadata files inside packages where every production file
+is marked, so `unmarkedFileCount == 0`, the driver `continue`s before `writeProjectFile`, and
+`package_info.cs` / `.csproj` / `README.md` are never re-emitted. The population was bounded by the
+instrument: a marker-keyed census cannot observe a file that carries no marker BY DESIGN.
+
+### The class, re-derived at master (not taken from the dispatch)
+
+Every PRODUCTION file marked in all four; the remaining `.cs` are test emission plus metadata.
+
+| package | marked production files | alias block | affected |
+|---|---|---|---|
+| `crypto/internal/boring/bcache` | `cache.cs` | **EMPTY** | no |
+| `internal/godebug` | `godebug.cs` | **EMPTY** | no |
+| `internal/concurrent` | `hashtriemap.cs`, `hashtriemap_whitebox.cs` | 8 `abi` | **yes** |
+| `internal/weak` | `pointer.cs` | 8 `abi` + `runtime.ΔError` | **yes** |
+
+**The affected subset is 2 of 4, and it is exactly the two that RELOCATE.** The two with empty
+alias blocks cannot break this way at all.
+
+### Exactly one of the eight aliases breaks
+
+`ArrayType`, `ChanDir`, `FuncType`, `InterfaceType`, `Kind`, `Name`, `StructType` all survive at
+1.24.13. `MapType` is **ABSENT**, replaced by `OldMapType`/`SwissMapType`, with **no `type MapType =`
+alias anywhere under any build tag** (checked). That is R's CS0426.
+
+**A second row the alias block does not carry:** `internal.concurrent.tests.csproj` references
+`runtime/internal/math`, which moves to `internal/runtime/math` at 1.24 (`runtime/internal/sys`
+likewise; `startlinetest` and `wasitest` REMAIN under `runtime/internal/`, so the namespace does not
+empty — the mechanism measured FALSE earlier in this record). `golib` is flagged by the raw
+predicate and excluded BY NAME: it is hand-written and in `go list std` at no release, the
+irrelevant hit `reconvert-deletions.ps1`'s own header documents.
+
+### The finding that changes the remedy
+
+Both affected members relocate, and both are RENAMES rather than deletions — principal file names
+carried across, both successors still importing `internal/abi`:
+
+- `internal/weak` → **`weak`** (public)
+- `internal/concurrent` → **`internal/sync`**
+
+**So a hand edit to the `ΔMapType` line would patch metadata for a package that does not exist at
+1.24.**
+
+### The orphan, and the deletion pass will not clear it
+
+`reconvert-deletions.ps1` tests PROTECTED — carries the line-anchored marker — **FIRST, before
+anything else**. Both old directories carry it, so they survive the hop as orphaned directories
+still compiling frozen metadata against a moved `abi`. **The marker that protects a hand-own from
+being clobbered also protects an ORPHANED hand-own from being cleaned up.** Their removal is
+explicit work, not something the deletion pass will do.
+
+### The hand-written code needs no edit
+
+`abi`-alias uses across `pointer.cs`, `hashtriemap.cs`, `hashtriemap_whitebox.cs`: **0, 0, 0**
+(`MapType` likewise 0). The block is minted from the package's IMPORTS wholesale, not from usage —
+so the break is metadata that nothing consumes, and re-minting it touches no hand-written line.
+
+### The destination is already pinned, and has a committed dependent
+
+`linknameOperations.go:504-521` re-keyed both rows to `weak.*` for 1.24 and its `reason` strings
+name **`weak/pointer.cs`**, the post-hop path, stating that relocating it "is H6/H9 work and these
+rows depend on it".
+
+### Sizing
+
+- **(A) hand-edit the alias per file — REJECTED by measurement.** Wrong for both affected members
+  (they relocate), leaves the orphan standing, and does not touch the csproj row.
+- **(B) un-freeze the metadata for the class.** Fixes the alias block and the csproj references for
+  all four automatically and at every future release — but does NOT move the marked file, so it
+  would emit metadata at the new path while the hand-own stays at the old one.
+- **(C) relocate the two directories, metadata re-minted at the new path.** The actual remedy.
+  **B and C compose:** C moves the file, B keeps it correct at the next hop.
+
+**A collision to name:** `internal/sync` at 1.24 is also where `sync`'s mutex implementation moves
+(`mutex.go`, `runtime.go`) — C1/seat B's subject. The hand-own displaces `hashtriemap.go`, which is
+present at the new path with its single `HashTrieMap` declaration, so there is no CS0102 against
+those two files; but the directory is shared work and should be sequenced with C1.
+
+### Limits
+
+- **No 1.24 conversion was run.** The alias-block prediction is derived from the pinned 1.24.13
+  sources and the frozen files, not from an emission. A conversion is what would settle it.
+- csproj extraction covered production AND tests csproj per package with the row count asserted
+  non-zero, because an empty extraction would have read as "no dangling references".
+- The relocation claims are `go list std` membership plus file-name carry-over, not a content diff.
