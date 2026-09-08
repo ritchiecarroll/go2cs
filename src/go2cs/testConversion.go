@@ -6407,6 +6407,19 @@ type testComparison struct {
 	// disclosed tests have no subtests, which is all of them before crypto/tls's TestBogoSuite.
 	Withdrawn []string `json:"withdrawn,omitempty"`
 
+	// OrphanedDisclosures are the manifest entries this run found naming a test whose CONVERTED side
+	// records a terminal `pass` — a disclosure that no longer describes anything on this platform.
+	// See orphanedDisclosure for the predicate, why it is a terminal pass rather than "did not
+	// fail", and why increment 1 REPORTS rather than refuses (the manifest is shared across
+	// platforms). Report-only: this field never clears Matched, so a run carrying it still validates
+	// and the entry stays absorbing wherever it is still live.
+	//
+	// omitempty, so a run with no orphan writes a record byte-for-byte what it was before this field
+	// existed — which is what keeps every banked row's record stable. The key is asserted PRESENT
+	// whenever the list is non-empty by TestOrphanedDisclosureReachesTheComparisonRecord, because an
+	// omitempty field nothing tests is a report that can go silently missing.
+	OrphanedDisclosures []orphanedDisclosure `json:"orphanedDisclosures,omitempty"`
+
 	// TestFilter records the -test-filter expression a GATED run was produced under, and it exists
 	// because the record does not otherwise know how it was made. A filtered run rewrites the SAME
 	// go2cs_test_comparison.json a full run writes, with nothing distinguishing the two -- and the
@@ -6807,6 +6820,87 @@ func hostFatalNames(disclosures map[string]testDisclosure) []string {
 		}
 	}
 	sort.Strings(out)
+	return out
+}
+
+// orphanedDisclosure names ONE manifest entry whose test the CONVERTED side reports as a terminal
+// `pass` in this run — a disclosure that no longer describes anything on this platform.
+//
+// THE GAP IT CLOSES. Until this existed, no check of any class verified that a disclosure entry
+// names a test that is actually FAILING. A signature that stops matching fails SAFE (the row goes
+// honestly red, which is how two stale entries were found at all), but an entry whose test has
+// simply started passing is absorbed by nothing, reported by nothing and accepted silently
+// everywhere — a permanent claim rather than a measurement.
+//
+// THE PREDICATE, AND WHY IT IS A TERMINAL PASS RATHER THAN "DID NOT FAIL" (ruled 2026-09-06). The
+// entry is reported only when csResults carries a terminal `pass` for its name. No-verdict rows,
+// infrastructure-error rows and deadline-killed rows are therefore excluded BY CONSTRUCTION rather
+// than by an exclusion list someone has to maintain: none of them ever puts "pass" in that map. The
+// inverse predicate — "this entry names a test that did not fail" — would fire on every row behind
+// a host-killer (797 unreached rows on one package in one afternoon, 221 on another the night
+// before) and report a wall of stale disclosures on EXACTLY the entries most likely still correct
+// and merely unreachable. Positive evidence, the same clause hostFatalMintViolations draws its
+// refusal from.
+//
+// IT IS NOT A WIDENING OF hostFatalMintViolations, and the two answer different questions.
+// That rule reads COMMITTED PROOF PAGES — the Windows record — to refuse a host-fatal entry at
+// MINT, before either child runs, because that class changes what runs. This one reads THIS RUN's
+// own verdicts, for every class, after both children have reported. Pointing the proof-page
+// instrument at a within-run question was the first framing of this gap and it was wrong.
+//
+// WHY REPORT-ONLY IN INCREMENT 1, which is the whole reason this returns a list instead of an
+// error. A per-package manifest is ONE file shared by every platform (doctrine rule (1)): an entry
+// present but not firing on one platform is legitimately kept for another, and an entry retired on
+// the strength of a Windows run has already turned a Linux-annotated row red once. A hard error
+// here would refuse every such entry on the platform that does not need it — so increment 1
+// REPORTS, increment 2 is platform-scoped entries (schema plus reader), and increment 3 is the
+// refusal, gated on 2. See docs/phase4/DESIGN-orphan-disclosure-check.md.
+//
+// The host-fatal class is deliberately NOT exempted. Such a test is withdrawn from both command
+// lines and produces no verdict, so it cannot reach this predicate in the ordinary case; if one
+// ever does, the withdrawal did not take — the test RAN and PASSED — and that is precisely what a
+// reader must see, exactly as matchTerminalStatuses lets the same case fall through to a mismatch
+// rather than absorbing it.
+type orphanedDisclosure struct {
+	Name   string `json:"name"`
+	Class  string `json:"class"`
+	Go     string `json:"go"`     // the Go side's terminal status, "" when it produced none
+	CSharp string `json:"csharp"` // always "pass" — carried so the record states the predicate it met
+	GOOS   string `json:"goos"`   // the platform this run measured; an entry may be live on another
+}
+
+// orphanedDisclosures applies the predicate above to the run's FINAL verdict maps. Both shapes the
+// ruling names are included: pass/pass (the entry describes nothing anywhere) and Go-anything /
+// C#=pass (the converted side passes a test the entry says it cannot) — both are stale on THIS
+// platform, and only the second could be read as a Go-side problem, which is why the Go status is
+// carried rather than filtered on.
+//
+// A name the run re-keyed (pairAddressVariantNames) will not be found under its manifest spelling
+// and is silently not reported. That is the safe direction — under-reporting a stale entry, never
+// inventing one — and it is the same blind spot matchTerminalStatuses has for such a name.
+func orphanedDisclosures(disclosures map[string]testDisclosure, goResults, csResults map[string]string, goos string) []orphanedDisclosure {
+	if len(disclosures) == 0 {
+		return nil
+	}
+
+	var out []orphanedDisclosure
+
+	for name, disclosure := range disclosures {
+		if csResults[name] != "pass" {
+			continue
+		}
+
+		out = append(out, orphanedDisclosure{
+			Name:   name,
+			Class:  disclosure.Class,
+			Go:     goResults[name],
+			CSharp: "pass",
+			GOOS:   goos,
+		})
+	}
+
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+
 	return out
 }
 
@@ -7735,6 +7829,21 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 		delete(goResults, name)
 	}
 	result.Withdrawn = append(result.Withdrawn, withdrawn...)
+
+	// THE ORPHANED-DISCLOSURE REPORT (increment 1, report-only). Computed from the FINAL verdict
+	// maps — after the eligibility filter, the address re-keying, the match and the withdrawal — so
+	// it describes the same rows every published count does. It deliberately does NOT clear Matched:
+	// the manifest is one file shared by every platform, so an entry idle here may be live and
+	// correct elsewhere, and refusing it on this platform's evidence is what turned a Linux-annotated
+	// row red once already. Increment 3 refuses, after increment 2 makes a per-platform retirement
+	// expressible. See orphanedDisclosure.
+	result.OrphanedDisclosures = orphanedDisclosures(disclosures, goResults, csResults, goosOfTarget(options.targetPlatform))
+	for _, orphan := range result.OrphanedDisclosures {
+		// stderr beside the converter's other warnings rather than into Errors: this says something
+		// about the MANIFEST, not about the run's verdicts, and an Errors entry would fail the row.
+		fmt.Fprintf(os.Stderr, "ORPHANED DISCLOSURE (%s): %s %s [%s] -- converted side records a terminal pass in this run\n",
+			orphan.GOOS, result.Package, orphan.Name, orphan.Class)
+	}
 
 	// Whether at least one failure is AGREED — both runtimes reporting "fail" for the same row.
 	// An agreed failure is a matched verdict, and it is the one legitimate reason a side's exit
