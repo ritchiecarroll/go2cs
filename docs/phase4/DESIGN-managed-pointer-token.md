@@ -1172,3 +1172,117 @@ appearance of a second, independent witness.
 the 0/0/0 for Go=pass-and-C#=fail, the 1,236, and every arm conclusion.
 
 -- C2, 2026-09-08 (amended six times)
+
+## 10.10 THE TOKEN DOOR'S FIRST OBSERVED REFUSALS — runtime's six, censused by class
+
+COORD `f70dc9a711` routed the six managed-pointer-token refusals among `runtime`'s failures as **Q44
+population data**: census them by name against the door's classes, add them to the record, **no remedy
+from a results file**. This section is that census and nothing else. It is the first population the
+token door has ever produced, so its shape matters more than its size.
+
+**Provenance, stated because the door is not at master.** The rows are i9's measurement (`848d3126f2`)
+of `runtime`'s converted suite on a tree carrying the door; the door itself — one private helper
+`refuseManagedPointerTokens(nuint fn, ReadOnlySpan<uintptr> a)`, `src/core/syscall/windows/dll_windows.cs`
+— is **held uncommitted** under COORD's suspension (§10.3's arm 3). i9 explicitly declined to judge
+whether the refusals are *correct*; that is this design's question and it is answered below. Every call
+shape here is re-derived from the pinned GOROOT source (`go1.23.12/src/runtime/syscall_windows_test.go`),
+not from the results file.
+
+### 10.10.1 The six rows, and the arithmetic that corroborates the door's own report
+
+| test | arg | Go | C# | Go call site | the uintptr is | class |
+|:--|--:|:--|:--|:--|:--|:--|
+| `Test64BitReturnStdCall` | 0 | pass | fail | `Proc("VerifyVersionInfoW").Call(&vi, …)` | `&OSVersionInfoEx` (carries `CSDVersion [128]uint16`) | 1 |
+| `TestCallback` | 3 | pass | fail | `nestedCall` → `Proc("EnumTimeFormatsEx").Call` | a `func()` value's funcval pointer | 1 |
+| `TestCallbackGC` | 3 | pass | fail | same funnel | same | 1 |
+| `TestCallbackPanic` | 3 | pass | fail | same funnel | same | 1 |
+| `TestCallbackPanicLoop` | 3 | pass | fail | same funnel (via `TestCallbackPanic`) | same | 1 |
+| `TestBlockingCallback` | 3 | pass | fail | same funnel | same | 1 |
+
+Class 1 is *reference-bearing pointee refused by name*. **All six are class 1; none is the standing
+pin-unheld hole.** The panic text is byte-identical across all six but for the index, which is what a
+single door reporting a single class looks like.
+
+Two arithmetic agreements, both cheap and both worth having because they are independent of the results
+file. **The index matches the source position:** `nestedCall` (line 167) calls
+`d.Proc("EnumTimeFormatsEx").Call(c, LOCALE_NAME_USER_DEFAULT, 0, uintptr(*(*unsafe.Pointer)(unsafe.Pointer(&f))))`,
+so the funcval argument sits at 0-based position **3** — exactly the index the door reports, over a
+0-based `ReadOnlySpan<uintptr>`. **And the shapes are five-plus-one, from the code rather than from the
+index column:** the five `Callback`-family tests are not five findings, they are five entries into ONE
+call shape, established by grepping the funnel's callers rather than inferred from their sharing an
+argument number.
+
+### 10.10.2 The completeness bound has a NAME, which is better than a caveat
+
+i9's caveat is that these six are among the **185 tests that ran**, with **695 of the oracle's 880 never
+executed**, so the count can only grow. That bound can be made concrete instead of carried as prose:
+`nestedCall` has **SIX** callers in the file — `TestCallback` (177), `TestCallbackGC` (184),
+**`TestCallbackPanicLocked` (206)**, `TestCallbackPanic` (227), `TestCallbackPanicLoop` (234, via
+`TestCallbackPanic`) and `TestBlockingCallback` (245) — and the refusal list has **five**.
+`TestCallbackPanicLocked` is absent from it while entering the identical funnel at the identical
+argument position.
+
+So the missing sixth caller is the completeness bound, stated as a falsifiable name rather than a
+fraction: either it is among the 695 that never ran, or it failed for another reason, or it passed —
+and each of those three is a different fact about the door. **A census that reports its own hole by
+name can be closed by one run; one that reports 185/880 cannot.**
+
+### 10.10.3 ⚠ THE FINDING: 6 of 6 on class, but **5 of 6 against the door's own premise**
+
+The door's message asserts a reason: *"passing it to native code would read or write memory that is not
+the caller's."* Checked per row against the Go source, that sentence is **true of one row and false of
+five**.
+
+- **`Test64BitReturnStdCall` (arg 0) — the premise HOLDS.** `VerifyVersionInfoW` genuinely dereferences
+  `&vi`; the pointee is reference-bearing because Go's inline `CSDVersion [128]uint16` converts to a
+  managed `array<uint16>` field. This is the `Timezoneinformation` class exactly, and the panic's own
+  remedy pointer (`zsyscall_windows_version_impl.cs`) names a hand-own that already mirrors the
+  identical `OSVERSIONINFOEX` shape for `RtlGetVersion`. **A correct refusal with a correct pointer.**
+- **The five callback rows (arg 3) — the premise FAILS.** The number is an **opaque pass-through
+  cookie**: kernel32 carries the lparam and hands it back to `callback`, which reinterprets it and calls
+  through it — `(*(*func())(unsafe.Pointer(&lparam)))()`, in Go code, on the way back. Native code never
+  dereferences it. It is **constructed and named, never read as an address by the callee.**
+
+That is §10.9.5's read-versus-name discriminator — the one that took arm 2 from 18 → 8 → 0 measured —
+**arriving at the token door instead of at the conversion site.** And it lands precisely on the
+adjacency §10.9.5 checked and recorded as empty:
+
+> *"that same class's third arm round-trips a token through `void*` to native code and back and requires
+> it to come back **as its box**. That is arm 1, it never reaches a syscall, and the door at `syscalln`
+> does not see it."*
+
+`runtime`'s suite is the case where it **does** reach a syscall, so the door **does** see it. The
+adjacency is no longer empty, and it was found by population rather than by argument.
+
+### 10.10.4 What is OBSERVED versus what is INFERRED, kept apart
+
+Two things are deliberately not claimed here, because neither was measured and a census that infers is
+the census that gets quoted.
+
+1. **How a token comes to be at argument 3 is not asserted.** The Go expression dereferences the address
+   of a func value; what the converted C# does with a reinterpret-read of a token box is not read in
+   this section. What is OBSERVED is only that the door fired on argument 3, so a token arrives there
+   whatever the emission's internal route. (Inferring the route from the artifact is the trap this
+   file's own §10.9.10 was written by.)
+2. **Whether the converted callback could recover the box on the way back is a SECOND question.** Arm
+   1's requirement is that a round-trip return *as its box*; the five rows would need that on the
+   inbound edge of `callback`, and no measurement here touches it. A refusal that were lifted at the
+   door without that half proven would trade a loud failure for a silent one.
+
+### 10.10.5 No remedy, and the falsifier the next reader needs
+
+Per COORD: **no remedy from a results file, and none is cut here.** The disposition is a recorded
+asymmetry, not a change: the door is right on the dereferenced row and wrong on its own stated reason
+for the pass-through rows, and the door's SCOPE note already concedes the narrower promise
+(*"DIRECT pointer arguments only … this door narrows the class, it does not close it"*).
+
+What a remedy would owe, so that nobody builds one from this table alone:
+
+- the emission route for a reinterpret-read of a token box, MEASURED, not inferred (§10.10.4 item 1);
+- the inbound half — the callback recovering its box — measured on the same row (item 2);
+- `TestCallbackPanicLocked` run, so the funnel's population is six of six rather than five of six;
+- and the falsifier for the pass-through reading itself: **a native callee that stores the cookie and
+  DEREFERENCES it** (a context pointer the OS reads, rather than one it merely carries). `EnumTimeFormatsEx`
+  does not; a door lifted for "pass-through" shapes in general would have to discriminate the two, and
+  nothing measured here shows that discrimination is available at the door — which is the same
+  structural objection §10.9.5 raised against a predicate at the conversion site, one seam along.
