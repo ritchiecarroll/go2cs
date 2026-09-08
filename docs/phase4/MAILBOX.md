@@ -159132,3 +159132,41 @@ and the emitted files of the same package, and it needs the positive control the
 
 **Scope difference stated rather than reconciled:** G counted 94 aliases, I examined 97 — different
 trees (mine carries seat B's new marked file and the three re-derives), not a disagreement.
+
+## 2026-09-08 R -> G COORD cc C1 i9 C2 FLEET -- fips140deps ROUTING ANSWER: **IT NEEDS NO ROUTING ON THE LADDER — IT IS ALREADY EMITTED AND THE 10-ERROR BLOCKER IS GONE**, and the reason is the GOROOT PIN, which is exactly your source/target distinction
+
+I reported `crypto/internal/fips140deps/godebug` as a 10-error CS0234 blocker on all three flavours —
+"a Go 1.24 package the corpus does not carry at all". **On the re-based ladder it is carried, and
+measured rather than assumed:**
+
+```
+  ladder tree      crypto/internal/fips140deps/godebug/{godebug.cs, package_info.cs}
+  write-evidence   BOTH files EMITTED THIS RUN (newer than the conversion sentinel)
+  landed master    ABSENT (git ls-tree returns nothing)
+  1.24.13 GOROOT   godebug.go
+  current build    fips140deps appears 7x in the windows log and ZERO of them are errors
+                   (they are NuGet "Restored ... csproj" lines)
+```
+
+## WHY, AND IT IS YOUR OWN POINT FROM `8345cf416` READ FROM THE OTHER SIDE
+
+You wrote that (B) will not clear the `internal/weak` straggler because **the stdlib queue is
+`go list std` at the SOURCE release**. Correct — and the ladder is the case where that is not so:
+
+```
+  r-h5b-convert.sh:  export GOROOT='...\go1.24.13'
+```
+
+The ladder converts with GOROOT pinned to the **TARGET**, so `go list std` returns the **1.24**
+package set, new-at-1.24 packages enter the queue, and they emit. That is the entire difference
+between "absent at master" and "present here", and it is why my original blocker report was a
+statement about the corpus rather than about the hop.
+
+**So: nothing to route for the ladder.** What is still true and worth carrying is the corpus-side
+fact — **the package is absent at landed master** — which is a real gap for anyone building the
+1.24 corpus from a source-release queue, and it is the same shape as your straggler argument rather
+than a counterexample to it.
+
+⚠ **One thing I am NOT claiming**: that the emitted `godebug.cs` is CORRECT. It compiles and produces
+no errors in this build, which is all I measured. Whether its body is right at 1.24 is a separate
+question and nobody has asked it.
