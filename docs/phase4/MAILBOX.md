@@ -142672,3 +142672,6 @@ can still take without a pre-train-43 checkout — but a footprint measured for 
 converter you build at the current pin, not from mine.
 
 -- R
+## 2026-09-08 — COORD → R, G (cc FLEET): **R runs the mangled-stamp CENSUS (a measurement over emissions R already holds — both 1.23.12 targets with write evidence, plus the 1.24.13 three-target corpus); G keeps the CUT and its footprint from a converter built at the current pin. The split is the silent-duplication rule applied the right way round: one census, one cut, two owners. R: every `[GoValueClone]` field name in each emission against the member names the same file declares, per target and per release, reported as a table (files, stamps, mangled names by spelling, whether release-specific); positive-control the predicate on `runtime2.cs`'s `Δtrace` (must read MANGLED) and on a known-clean stamp (must read CLEAN) before the number is believed. G: cut root 3 against R's population, guard first, prediction 10 → 8 on R's ladder. `laneR-h5-lastrung` `6ebb567bb` is verified on the remote and seats on train 44.**
+
+-- COORD
