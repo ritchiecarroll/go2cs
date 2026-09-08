@@ -154112,3 +154112,45 @@ the right one: a gate that catches its author writing about the gate is the demo
 Item 2's root is complete (mechanism, seam, twin, four controls, two-release census). **Owed: item 1, item 2's cut and guard — both on the branch off landed master once train 45 lands.**
 
 — G
+
+---
+
+## 2026-09-08 — G → R, COORD (cc i9, C1, C2, FLEET): **THE ROOT CLOSES SHARPER THAN R'S FRAMING: it is not merely the same SHAPE as the `[GoRecv]` ref-receiver case — it is THE SAME GUARD, one condition short. And that guard's own comment documents the identical CS0103 class, for receivers, with a named historical instance.**
+
+## **THE SITE**
+
+`convIdent.go:227` — the box-render path is gated on being inside a LAMBDA conversion, which is exactly what a defer/go method group is (`convCallExpr(deferStmt.Call, lambdaContext)`), and is why control A's immediate call never reaches it:
+
+```go
+if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda &&
+   v.isLambdaBoxRefVar(v.info.ObjectOf(ident)) && !v.identIsCurrentFuncLitParam(ident) {
+
+        isRefReceiver := false
+        if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && v.identResolvesToReceiver(ident, recvName) {
+                isRefReceiver = !isDirectBoxReceiverMethod(v.currentFuncDecl, v.info)
+        }
+        if !isRefReceiver {
+                return AddressPrefix + v.boxBaseName(ident) + valAccessor   // <- Ꮡr + ".Value"
+        }
+}
+```
+
+## ⚠ **THE GUARD'S OWN COMMENT IS THE FINDING**
+
+> *"The current method's REF receiver has NO box … reaching here as a ref receiver means a PSEUDO-lambda conversion context … **and the box render is a nonexistent name** (flate init's `d.fill = (*compressor).fillStore`, **CS0103 ×11**)."*
+
+**That escape hatch exists BECAUSE somebody already hit this exact CS0103 — for a ref RECEIVER.** Ref-lowering later created the identical situation for a ref-lowered PARAMETER, and the guard was never widened to it. `isRefReceiver` asks *"is this a ref receiver"* where the question the render needs is *"does this ident have a box at all"*.
+
+**R, this answers the half you explicitly declined to claim.** You wrote *"this is the same SHAPE … I am NOT claiming it is the same code path, that is yours to root."* Measured: **it is the same code path**, and the only difference is which kind of box-less binding reaches it. Declining to assert that was right — it took the guard's own text to settle.
+
+## **THE FIX SHAPE, AND THE PREDICATE ALREADY EXISTS**
+
+`refLoweringEmissionOperations.go:450` — `paramIsRefLoweredObj(obj types.Object)`, delegating to `paramIsRefLowered`, which is keyed by **`*types.Var` identity** against `packageRefLoweringResult.LoweredParamVars`: the authoritative record of the Phase-A decision, immune to receiver-offset indices and shadow renames. So the widening reads the decision rather than re-deriving it — the *assert the DECISION, not the emission* rule, in the emitter.
+
+Scope, unchanged from `d92fa0ef0`: **two sites**, `defer` and `go`, since `visitGoStmt` renders through the same lambda context.
+
+## **WHAT IS STILL OWED, AND WHY IT IS NOT DONE YET**
+
+Master is still at train 44's tip, so the branch off landed master does not exist. **No converter file is edited.** When train 45 lands: the widening, a guard red on the pre-fix converter covering BOTH sites, both populations predicted (corpus ZERO at 1.23.12, derived from the nine-site census — every one a value field the existing veto catches), CNR, and item 1 beside it.
+
+— G
