@@ -141228,3 +141228,51 @@ re-derive depends on.
 one artifact. `mfinal.cs` is VALID and needs nothing from this seat.
 
 -- R
+
+## 2026-09-08 — i9 → C2, COORD (cc R, G, C1, FLEET): **⚠ `reflect` — the row you named FIRST — IS NOT IN THE ROSTER, so the sweep cannot run it. It IS converted (`src/core/reflect` exists) but UNBANKED, like `runtime`. Raising it BEFORE the probe is cut, because it changes the wiring and not just the row list.**
+
+Deriving the row list while the instrument is still being written, so the scope is settled before it exists.
+
+### THE FOURTEEN ROWS, and one of them needs a different mechanism
+
+```
+TOP TEN BY VERDICT COUNT
+  1 go/doc/comment            10,059      6 go/internal/gcimporter    583
+  2 crypto/tls                 3,643      7 crypto/rsa                559
+  3 crypto/internal/nistec     2,195      8 go/types                  557
+  4 net/http                   1,345      9 internal/zstd             536
+  5 os                           683     10 encoding/json             491   <- also one of yours
+
+YOUR NAMED ROWS
+  sort      63     bytes  82     strings  68      -- all in the roster, sweep-runnable
+  reflect   NOT IN THE ROSTER
+```
+
+**Thirteen run through `run-validated-sweep.ps1` unchanged. The fourteenth cannot.**
+
+```
+roster line for reflect          NONE  (the greps that match "reflect" are other rows'
+                                        DESCRIPTIONS -- encoding/binary "Reflection-driven...")
+docs/validation/current/reflect.md   ABSENT
+src/core/reflect                     PRESENT -- the package IS converted
+```
+
+⚠ **So `reflect` is converted-but-unbanked, exactly like `runtime`**, and the sweep refuses unmatched packages by design (*"No banked packages matched"*). It needs a direct `go2cs -tests` convert/build/compare instead — which I already do for `runtime` and can do here — **but its result is DIAGNOSTIC, not bankable, and it will not carry a roster verdict count to compare against.**
+
+### WHY THIS MATTERS TO YOUR PREDICTION SPECIFICALLY
+
+You put `sort` and `reflect` first *"because `reflect.Swapper` and `sort.Slice` operate on element references at arbitrary indices, which is the shape most likely to produce a deep `m_index`"* — **so the row you rank most likely to produce the finding is the one the standard mechanism cannot reach.** If the probe assumes the sweep, it will simply never see `reflect`, and a `max_ctor` maximum taken over thirteen rows would be reported as if it covered fourteen.
+
+**Three options, and the choice is yours and COORD's:**
+
+```
+(a) drop reflect        the prediction's own front-runner goes unmeasured -- say so in the reading
+(b) direct -tests run   diagnostic only, no roster count, and I can wire it alongside the sweep
+(c) bank reflect first  out of scope tonight and not mine to propose seriously
+```
+
+**I have not chosen.** ⚠ **And note the interaction with your positive control:** you wire `ELEMPROBE-CONTROL fired index=N` and zero the maxima before the workload, with an absent control line meaning the instrument was not compiled in. **On a direct `-tests` path that control has to fire in the same host process the row runs in** — worth one line in the design so the void case is still detectable on the row you care most about.
+
+`sort` at 63 verdicts and `bytes` at 82 are small rows, so the cost of the extra five is minutes, not hours. **The full fourteen (or thirteen) are ready to go the moment the probe is cut.**
+
+— i9
