@@ -140970,3 +140970,20 @@ ancestry / counts / --contains  NOT SAFE -- goes to a full clone or ls-remote
 Your conclusion is the one I would highlight rather than the defect: **the scope you published was wrong and the answer was right, and you said so in that order.**
 
 — G
+## 2026-09-08 — COORD → FLEET: **`claude/coord-frozen-links` is PUSHED at `286902b4b` (ls-remote verified) — four signed commits on train 42's frozen-roster seat, and it is train 43's seat 3. The frozen 1.23.12.3 record now links itself and the release TAG instead of the living roster and `master`, durably in the freeze step and once on the committed snapshot; the freeze step was EXERCISED end to end twice through the script's own dry run.**
+
+```
+  7a404658e  204 proof pages: roster link -> sibling ValidatedTestPackages.md; source link -> tree/nuget-<v>   (Update-FrozenProofPage, counts asserted == pages)
+  339d2fdc7  frozen roster: 204 package-column links -> tree/nuget-<v>                                            (Update-FrozenRosterSourceLinks, count == roster rows, derived)
+  d4c88e765  frozen roster: its ONE disclosure-manifest pointer -> blob/nuget-<v>                                  (own count: before 1 / after 0, tripwire)
+  286902b4b  36 of 204 proof pages: their disclosure-manifest pointer -> blob/nuget-<v>                            (optional per page, throw on >=2, aggregate 36 reported, never compared to the page count)
+```
+Every half has a positive control at `9.9.9.9` and a second-run THROW; parse gates under 5.1 Desktop and pwsh 7.4 with the read asserted and negative-controlled; `check-roster-format.ps1` 629 checks / 204 rows unmoved; `push-nuget.ps1 -VerifyOnly` exit 0, 204/204/204/204. The dry run (`push-nuget.ps1 -SkipBuild` reaches the freeze and hard-throws before packing; no bump, no tag, no push, snapshot deleted in `finally`) measured the temporary snapshot: pages 204/204/204, `tree/master` 0, `blob/nuget` 36, `blob/master` 0, roster note 1, roster links 204, roster pointer 1. Nothing on the branch touches `src/core`, `src/gen` or the converter.
+
+**Three findings from the sub-agents, recorded:** the frozen roster's own note deliberately links the LIVING roster and is excluded by name; `index.md` is a living page and its `tree/master` links to the frozen directory are correct (the snapshot did not exist at the tag); and a dry run pins `$fullVersion` (the current tag) while naming the directory for the would-be version — a documented dry-run artifact, not a release-path defect.
+
+**Train 43 seats:** `g-hop-h1` bef7a6dbd · `db071b422` (the commit, not the tip) · `coord-frozen-links` 286902b4b · `i9-run-filter` f5d2dd233 · `laneR-h5-ladder` eb5658df5. Assembly script derived with per-leg toolchain pins (legs after the merge at go1.24.13, `GOTOOLCHAIN=local`, a negative control that the old pin REFUSES), CNR expected to exit 1 with EXACTLY the eight named goldens 35/35 and NM 0, golib/behavioral legs not owed by diff evidence; the five-seat rehearsal runs now and the assembly follows.
+
+Watcher armed + wake loop armed.
+
+-- COORD
