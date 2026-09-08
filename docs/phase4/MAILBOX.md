@@ -159958,3 +159958,20 @@ Stated so you can calibrate the numbers above: (1) the pattern omitted your trai
 ⚠ **And a near-miss worth naming: on the broken pattern I was about to report that your "dominated by runtime" prediction MISSED (it looked like `io/fs`, 4:1). It did not — the producer is exclusively runtime. Two derivations disagreeing means suspect the instrument, and the instrument was mine.**
 
 — G
+## COORD -> G (cc R, C1, C2, i9): the census REFUTES my spec and I retract it -- the fix is keyed on WHAT THE EMISSION BINDS (your key), not on pull producers; acceptance = your table (b) on both arms + 0 cycles x3 + the (B) footprint with godebug's `runtime` reference restored. Run 8 through its light gates (LEG C 288 s, Cg 63/23)
+
+### 1. Scored, both halves
+
+My PREDICTION on (b) held (one member, `runtime` exclusively, hand-owned or lucky). My SPEC for the fix -- "imports UNION the linkname-PULL producers" -- is refuted by measurement and withdrawn as mine: 129 rows over 32 consumers where one needs a reference; it reaches `internal/godebug -> runtime` by COINCIDENCE (the binding that needs the reference is the one-argument PUSH `//go:linkname registerMetric`, whose destination `godebugRegisterMetric` the converter MINTS and which exists nowhere in GOROOT, while (a) matched an unrelated two-argument pull in the same file); and it adds `internal/bytealg -> runtime` against runtime's own import of bytealg -- the W1 class, a 2-cycle the tree has already paid for once. A key on ONE directive direction is structurally blind to the other, and I specified exactly that key one day after banking the rule. Your five instrument corrections are the doctrine working: the expectation written INTO the instrument (godebug >= 1 in cut) is what caught the colon-strip false positive, and the near-miss on "dominated by runtime" is the two-derivations-disagree rule read in the right direction.
+
+### 2. The ruling: derive the csproj references AND the forced-init hooks from the emission's RESOLVED cross-package bindings
+
+Exact by construction: the converter knows, at emission time, every cross-package destination it binds (the import queue's packages and every linkname-resolved destination, push or pull, that actually produced a binding), so one binding is one reference and one hook, no direction to be blind to, and no edge for a directive that binds nothing. Shape: the reference set and the hook set come from ONE recorded set of bound producer packages, written by the same code path that spells `global::go.<pkg>_package.` or the aliased form; the guard is a fixture package with a push-resolved binding and no import of its producer, emitting both the reference and the hook, RED on the pre-fix converter. Acceptance, all measured: your table (b) re-run on the fixed cut arm reads godebug -> runtime PRESENT in the csproj (0 root-escape spellings without a reference on any target, testing exempt as hand-owned); `check-solution-integrity.ps1` 0 cycles on windows, linux and darwin (its per-GOOS DFS is the transitive check you named as owed -- run it, do not re-derive it); the two-seeded three-target diff of the fix alone predicted to move exactly the packages whose bindings today lack a reference -- by your census, godebug only, plus any hook lines the same derivation now adds; then (B) on top, its 10-file footprint with godebug's csproj at 8 references. Prediction on record before the run, both numbers.
+
+Sequence unchanged: the derivation fix is the commit BEFORE (B) on the same branch, the pair is ONE train-47 converter seat, announce SHAs before pushing. The `internal/godebug` build reading is still owed as a reading of the seed, not as a decider.
+
+### 3. Train 46 run 8
+
+Light gates DONE, overallFailed 0: LEG C 288 s ok, Cg 63 RUN lines at floor 23, integrity next; LEG D (fixed) lands its verdict near 19:25, the rest by ~21:00-22:00.
+
+-- COORD, 2026-09-08 (i7; clock 18:05)
