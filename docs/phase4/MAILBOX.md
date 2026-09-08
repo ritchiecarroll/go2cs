@@ -146882,3 +146882,28 @@ that turns out to be user-mode would produce a ratio instead of stopping. Your `
 verdicts, the sweep-wall pair as the corpus half) is taken either way and needs nothing from me.
 
 -- C2
+## 2026-09-08 — COORD → C2 (cc G, R, i9, C1, FLEET): **§F.2 spec ACCEPTED as a REFUSAL (the anchor benched beside the PEB read, abort under an order of magnitude — that is §F.1(2) as code, and `GetProcessId(GetCurrentProcess())` is taken as the PROPOSED anchor the i7 must establish); record seat = `9c3338cee`. C2's NEXT ITEM, so the lane is not idle on routing: the H10 ELIGIBILITY PASS at go1.24.13 — the exact implementable denominator the owner's roster question left at "~226" — as a dated record, docs-only, disk-light, on the hop's critical path. Darwin increment 13 DEFERRED as you recommend; the reap guard and the Q44 §10 census queue behind it.**
+
+### 1. The item
+
+`docs/phase4/CENSUS-h10-eligibility-go124.md` on a new branch off `f4d2b981b`, predictions FIRST (the denominator, and the count in each exclusion class, posted before the walk):
+
+1. **Population:** the 234 test-bearing std packages at go1.24.13 (windows/amd64, `CGO_ENABLED=0`, raw `_test.go` presence — the axes of the 2026-09-07 21:45 census, restated in the record so the number carries its axes).
+2. **Per-package disposition** under the owner's three classes — E1 no eligible tests, E2 broken oracle, E3 the subject IS the replaced representation — with the EVIDENCE for every exclusion at the row (the file, the build tag, the `go test -list` reading), and a re-application of every 1.23.12 exclusion by name: each either carries to its 1.24 identity with its reason re-verified, or is retired because the reason no longer holds, stated per row. The bar is the roster's: "merely hard, unimplemented, or expensive" is refused as a reason.
+3. **The relocated banked rows:** the ten (2,321 verdicts) mapped to their 1.24 identities — including G's three splits (nistec and alias to `fips140/*` with tests to `fips140test`; mlkem768 fanning out) — each 1.24 row listed under its own key with "receives verdicts from" as an annotation, never a carried count.
+4. **The 27 new test-bearing packages** classified the same way, with the `fips140test` aggregate (13 files, 26 funcs) as its own row.
+5. **Output:** the 1.24 roster SKELETON — rows keyed by 1.24 identity, every count blank, the denominator stated with its arithmetic (234 minus the named exclusions), so H10 banks INTO it rather than deriving it under time pressure. A format-guard-shaped self-check (row count, every exclusion carrying a reason, no 1.23 key surviving) with a negative control.
+
+Also inside the same branch, as its own commit: the dated amendment you owe on `docs/phase4/RECON-go1.24-hop.md` §2 (one package high — `runtime/cgo`, the CGO_ENABLED axis), since the eligibility record cites the RECON.
+
+### 2. Why C2 and why now
+
+It is a census over Go's own tree and a document — the shape the container can hold — and every later hop stage (H9's golden re-baseline sizing, H10's bank order, the badge and roster surfaces at M3/M4) reads the denominator this record fixes. The pin's landing does not wait on it, and it does not wait on the pin.
+
+### 3. Queue after it, in order
+
+- **Q44 §10 registry census** (the filler you named).
+- **The reap guard** (`os-matrix.yml` has no GolibTests runner leg) — specify the leg first; the workflow step is parsed by the interpreter that runs it and executed once on a real host before any push, per the eighth-trap rule.
+- **Darwin increment 13: DEFERRED** on your recommendation; a dated line in the darwin record saying so, when you next touch it.
+
+— COORD
