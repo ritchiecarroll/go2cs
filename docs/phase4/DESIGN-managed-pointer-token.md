@@ -1491,3 +1491,95 @@ carries the lparam to the callback. Whether any Windows context-pointer API in t
 *does* is a **Windows-side census nobody has run**, and it is not answerable from a Linux host or from
 this emission. It is named here so that the pass-through reading is never quoted as though the
 falsifier had been checked.
+
+## 10.13 THE TWO-TABLE CENSUS — the door does NOT retire, and a `uintptr`-source arm would touch ONE site
+
+COORD `3d8a7ff8bc` §4: one walk, two questions. Table 1 tests COORD's lead that the remedy's key is the
+**SOURCE** rather than the destination; table 2 decides whether the suspended door has any population
+left to protect. Population: the committed corpus at landed master `44f858717` — which **is** the
+three-target emission, because a package whose emission varies by GOOS keeps the varying files in
+per-GOOS folders — plus the `runtime` row's **test** emission (guarded 1.23.12 toolchain,
+`-platforms windows/amd64`), since the callback edge lives there and `runtime` is unbanked.
+
+### 10.13.1 Table 1 — `Reinterpret<uintptr, X>` with X reference-bearing
+
+| where | sites | destinations | reference-bearing X |
+|:--|--:|:--|--:|
+| production, all three targets | **3 distinct** (5 lines: `runtime/heapdump.cs`, `runtime/{windows,linux,darwin}/proc.cs`, `runtime/linux/lock_futex.cs`) | `byte`, `uint64`, `uint32` | **0** |
+| the other pointer-width source spellings (`nuint`) | 2 (`bbig/big.cs`, `flag/flag.cs`) | `big.Word`, `uintValue` | **0** |
+| `runtime` TEST emission | **1** (`syscall_windows_test.cs:189`) | **`Action`** | **1** |
+
+`big.Word` and `uintValue` are reference-free by two derivations — the emission's own
+`[GoType("num:nuint")]` and Go's `type Word uint` / `type uintValue uint`. A sixth production *mention*
+sits in a **comment** in `zsyscall_windows_wsa_impl.cs` and is not a site.
+
+**So the entire reference-bearing-destination population is the callback edge itself** — COORD's
+positive control, which fires. A `uintptr`-source arm would touch **exactly one site in the corpus.**
+
+⚠ **COORD's lead SURVIVES its falsifier, measured.** The falsifier was reflect's prefix downcast
+appearing here with a bare-number source. It does not: every downcast in the corpus is
+`Reinterpret<_type, …>` or `Reinterpret<abi.Type, …>` — a pointer **WRAPPER** source, never a bare
+number — across destinations `arraytype chantype interfacetype maptype ptrtype slicetype structtype`
+and `arrayType interfaceType ptrType rtype sliceType structType`. **A key on the `uintptr` SOURCE
+therefore does not collide with the carve-out `RemembersReinterpretSource` makes for the hot path**,
+which is what §10.12.3 could not settle and C1 needs before sizing.
+
+⚠ **Scope kept honest:** the wider bare-scalar family is 62 source/destination pairs, but a
+`byte`-source reinterpret is the **buffer** idiom (`(*T)(unsafe.Pointer(&buf[0]))`) whose source box is
+a real pinnable buffer and never a token. Restricting to **pointer-width** integer sources
+(`uintptr`, `nuint`, `uint64`, `uint32`) the destinations are `byte uint32 uint64 uintptr int64 float64
+big.Word uintValue uint64Value atomic.Int64 atomic.Uint64 atomic.Uintptr` — **all reference-free.**
+
+### 10.13.2 Table 2 — where a token CAN reach a native argument (windows flavour)
+
+**23 funnel sites** carry an address-of into a `Proc(…).Call` / `Syscall*` argument: **16 in
+production, all of them inside hand-owned `*_impl.cs`** (certchain, ptrout, wsa,
+`syscall_windows_impl`) — the mirror-and-transcribe remedy already in place, most visibly as
+`nativeIdentityOf(…)` + `cellAddr` — and **7 in the `runtime` test emission**, classified by the API's
+documented contract for that parameter:
+
+| API | arg | pointee | reference-bearing | contract |
+|:--|:--|:--|:--:|:--|
+| `UnionRect` | 0 `Ꮡres` | RECT (4×`int32`) | no | **WRITES** |
+| `UnionRect` | 1, 2 | RECT | no | **READS** |
+| `VerifyVersionInfoW` | 0 `Ꮡvi` | `OSVersionInfoEx` (`array<uint16>`) | **YES** | **READS** |
+| `wsprintfA` | 0 | `byte` element | no | **WRITES** |
+| `EnumWindows` | 0 | callback | — | callback/cookie |
+| **`EnumTimeFormatsEx`** | **3** | **`Action` box** | **YES** | **COOKIE** ← control fires |
+| `GetExitCodeThread` | 1 `Ꮡec` | `uint32` | no | **WRITES** |
+| `RegisterClassExW` | 0 `Ꮡwc` | `Wndclassex` (2× `ж<uint16>`) | **YES** | **READS** |
+
+⚠ **THE ANSWER: the door does NOT retire.** Of the three reference-bearing pointees that reach a
+native argument in this row, **one is the pass-through cookie and TWO are pointers the API READS** —
+so the pass-through case is the *minority* even in the row that motivated it, and the READ rows are
+exactly the population a refusal still protects. `Ꮡvi` is `Test64BitReturnStdCall`, already measured as
+a refusal whose premise holds (§10.10.3).
+
+**A prediction the census produces, for i9 to check:** `Ꮡwc` (`RegisterClassExW`, a READ pointer over a
+reference-bearing struct) is **not** among the six observed refusals, so `TestRegisterClass` is either
+unexecuted or fails earlier. **If it ever runs, the door must refuse its argument 0 with the identical
+text.** A refusal there would be correct; its absence today is the 695-unexecuted bound, not evidence.
+
+### 10.13.3 The instrument, and the two ways it was wrong first
+
+A line-based grep is unusable here — the funnel calls span lines, and 33 single-line hits sat against
+133 address-of-to-`uintptr` casts on this flavour — so the walk extracts each funnel call's
+**balanced** argument list. It was wrong twice, and both are worth carrying:
+
+1. **A lookbehind excluding `.`** rejected every `Proc(…).Call(…)` — *the primary shape COORD named* —
+   while reporting a plausible 16.
+2. Removing that lookbehind let **Go's own methods named `Call`** in: `net/rpc` and `net/rpc/jsonrpc`
+   contributed **15 of 43** sites with entirely convincing address-of arguments (`Ꮡcodec`, `Ꮡargs`,
+   `Ꮡreply`) and nothing native about them. **One over-restriction traded for one over-match, and only
+   the per-package breakdown showed it.** A `Call` now counts only when its receiver chain names a
+   `Proc`.
+
+The count moved **16 → 43 → 23**, which is this file's own "when a count keeps moving, suspect the
+unit" — the unit was *what counts as a funnel*. One level of local indirection is resolved
+(`var _p0 = (uintptr)Ꮡx;` then `Syscall(proc, _p0, …)`) because that is the dominant wrapper shape;
+**1 argument remains unresolved and is reported as UNKNOWN rather than as absent.**
+
+⚠ **Owed, and named rather than claimed:** the 16 production sites are asserted hand-owned from their
+`*_impl.cs` filenames and two spot-checks (`nativeIdentityOf`/`cellAddr`); a per-site pointee
+classification there is **not** done, so "production carries no unremediated token-to-native path" is
+this census's *reading*, not its measurement.
