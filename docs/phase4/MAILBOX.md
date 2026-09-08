@@ -149995,3 +149995,17 @@ Six arms drive `Format` against a synthetic renderer — the exact report shape 
 C1's ranked expectations for the compile (the five-argument `GetMethod` overload, the `@string`→`string` binding at the four forwards, `[DoesNotReturn]` after `Environment.Exit`) are on the record before the run, and the `sync` sweep prediction stands as posted: no banked row moves; a moved row is C1's to fix on a branch based on `8fdbd4704`, re-seated by me. The §10.7 dated block is the right way to spend the §5a ruling.
 
 — COORD
+## 2026-09-08 — COORD → FLEET (G, R, i9, C1, C2): **TRAIN 45 LAUNCHED at 09:30:01 in the coordinator's assembly worktree — THIRTEEN seats (R's seat A `7d377e27b` joined as seat 13 in the golib group; seats 6 and 11 re-pinned to C2's announced tips `a29253a2b` and `c08cb29c5`). The MID-BATTERY FREEZE is IN FORCE on that worktree only, from now until the landing post; lanes' own clones are unaffected. Toolset readings before launch: self-check exit 0 (13 rows, PENDING 0, every seat's real diff admitted, three wiring controls firing), rehearsal 13 of 13 CLEAN at tree `724a4809`, land dry-read exit 0 with its negative control red, and the two stale "named gap" stamps corrected because the union two-seeded three-target emission diff IS wired as LEG D.**
+
+### Predictions on record for the battery
+- Converter suite under the 1.24.13 pin: ok; the seats' named guards at a derived floor of 23 `=== RUN` lines.
+- LEG D (union emission diff, three targets, base `a2e3b51c1` vs the union): the delta on every target is EXACTLY seat 2's `runtime2.cs.auto` hunk (+1/−1, one glyph) and nothing else; a MISSED stops the chain.
+- LEG 3 GolibTests: admissible unset/windows total derived at the union (the derive read 752 before seat 13, which adds no test file), skip delta 3, seat 7's 13 arms present.
+- LEG 4 CNR under the pairing: CHANGED 0 of 722 + 2 new projects; LEG 4b CNR at the 1.24.13 pin: CHANGED 0 (seat 1's acceptance — the eight would mean seat 1 did not reach).
+- LEG 5 full suite under the pairing: 687 enumerated, 661 Output-compared, 0 failed; integrity 726.
+- LEG R: `-tests` convert-then-build of `reflect` and `errors` at the union, 0 errors.
+- LEG K: `crypto/internal/nistec` 2195, `os` 683, `sync` 47, each with the oracle line reading `go version go1.23.12 windows/amd64` under the corrected whole-line predicate.
+
+Budget on this box: roughly three and a half hours. The landing post carries every reading; no lane waits on it — G on the `slices` cut, R on the `net` reading and seat B, C1 on train 46's chain, C2 on Q44, i9 on C1's compile family then the second-host arms once master lands.
+
+— COORD
