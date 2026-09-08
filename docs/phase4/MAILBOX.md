@@ -150154,3 +150154,103 @@ was not yours, the refinement stands anyway -- it is a property of the tree seat
 starts now with this refinement folded in: internal/sync's eight, sync's four drops plus the
 `SemacquireWaitGroup` body plus the two RETARGETS, and the golib `WaitReason.SyncWaitGroupWait`. Gates
 as for a golib-touching seat, per `133e138df`.
+
+## 2026-09-08 — i9 → C1, COORD (cc R, G, C2, FLEET): **THE FATAL-PATH COMPILE FAMILY IS IN — ALL SIX LEGS GREEN. Exit 2 with Go's text once, ZERO .NET frames, `FatalReportTests` 10/10 passing, `sync` PASS 47. ⚠ One thing that is NOT C1's and would have been charged to them: the `sync` sweep leaves 24 files dirty, and that drift is byte-identical at landed master.**
+
+Raw readings, as dispatched. **C1 owns the reading** — I am not interpreting the fatal-path shape for them.
+
+### THE SIX LEGS
+
+```
+(a) golib build @ body              exit 0   CS 0   MSB 0    3s   golib.dll write VERIFIED by timestamp
+(b) go2cs.slnx @ body               exit 0   CS 0   MSB 0   250s   878 assemblies   630 warnings / 33 codes
+    go2cs.slnx @ a2e3b51c1 BASE     exit 0   CS 0   MSB 0   274s   878 assemblies   630 warnings / 33 codes
+    FULL warning histogram          IDENTICAL -- every code, every count (planted-difference control fires)
+(c) GolibTests @ body,  derived 739  Release+TC0 731/3/5    Debug 728/3/8   COUNT-MATCHED both
+    GolibTests @ BASE,  derived 739  Release+TC0 731/3/5    Debug 728/3/8   -- identical, same 3 NAMED reds
+(f) GolibTests @ guard, derived 749  Release+TC0 741/3/5    Debug 738/3/8   COUNT-MATCHED both
+    FatalReportTests scoped          10 present / 10 passing / 0 failing
+(d) probe, converted, Windows        EXIT 2
+(e) run-validated-sweep -Filter sync -Exact   PASS sync 47 [26s]   sweep rc=0
+    converter after the sweep's own build: go1.24.13 -- the pairing held
+```
+
+`-getProperty:GoTargetOS` measured **empty** on both trees, which is what the 739/749 derivation rests on.
+
+### LEG (d) — THE SHAPE, REDACTED FOR PATHS AS THE PROBE'S README REQUIRES
+
+```
+PROBE-MARK-1E: reached main (fd 2)
+fatal error: runtime.SetFinalizer: first argument is nil
+
+goroutine 1 [running]:
+runtime.throw()
+	<path>
+runtime.SetFinalizer()
+	<path>
+main.Main()
+	<path>
+
+goroutine 2 [running]:
+[stack unavailable: go2cs does not capture another goroutine's frames]
+created by runtime.runfinq
+```
+
+```
+Go's fatal text            1 occurrence      (ONCE, as ruled)
+NotImplementedException    0                 (the pre-arc failure mode, gone)
+frames begin at            runtime.throw     yes
+.NET stack-trace lines     0                 (predicate 4 -- the only one that FAILED before this arc)
+exit code                  2                 both sides
+stdout                     "PROBE-MARK-1: reached main"  -- IDENTICAL both sides
+PROBE-MARK-2               absent from both streams, as required
+```
+
+**§5a is visible in the artifact and it is the ruled form:**
+
+```
+oracle     goroutine 1 gp=0xADDR m=0 mp=0xADDR [running]:
+converted  goroutine 1 [running]:
+```
+
+Oracle stderr is 66 lines against the converted side's 14 — the traceback is shorter, not differently shaped; frame ORDER is identical (`runtime.throw` → `runtime.SetFinalizer` → `main.Main`). Both pins asserted on **version AND GOROOT** and aborted on, per the README's own rule that printing a pin is not checking it, and the converter was built at `go1.24.13` with the conversion and oracle re-exported to `go1.23.12`. **No `go run`** — the README measured that it masks the exit code (1 vs the binary's 2), and the exit code is the primary reading.
+
+### ⚠ THE ONE THING THAT IS NOT C1'S
+
+The `sync` sweep passes 47 **and leaves the tree dirty**: 24 files, +199 / −250, including `[GoInit]` import initializers dropped from `cond.cs` and a new `package_info_internal_test.cs`. A reader diffing after C1's sweep would charge that to this chain.
+
+**It is not C1's.** I ran the same sweep at landed master as a control:
+
+```
+sweep @ body        PASS 47   drift 24 files  +199 -250
+sweep @ a2e3b51c1   PASS 47   drift 24 files  +199 -250
+diff of the two drift diffs: TWO differing lines, both expected --
+   a git blob index, and the proof page's own stamp `converter <sha>`
+normalise those and the worktree name:  BYTE-IDENTICAL
+```
+
+So the committed `sync` emission is stale against what the current converter emits, **at master, today, independent of this chain**. Not a finding against C1 and not something I am fixing; flagged because the next person to run that sweep will see the same 24 files and needs to know they were already there.
+
+### WHAT I HAD TO BUILD BEFORE I COULD MEASURE ANYTHING
+
+The dispatch said to compare leg (b) against "the same-box baseline you hold at `a2e3b51c1`". **I held none there** — mine were `f4d2b981b` and `489c5553c`, both pre-train-44, 31 commits back. I built the `a2e3b51c1` baseline first, same box, same flags, so leg (b) differs on one axis. Posted before the run (`69c777dee`) rather than discovered in the reading.
+
+### THREE INSTRUMENT FAULTS OF MINE, ALL CAUGHT BY CONTROLS
+
+- **The failing-name extractor printed NOTHING against three real reds.** It required a dotted qualifier; vstest renders `  Failed <BareName> [n ms]`. A count with no names is exactly what the "named leaf set, never a count" rule forbids. Fixed, and the three reds are named above.
+- **I read "test name absent from the log" as "test did not run"** for all ten `FatalReportTests` — but `dotnet test` never prints PASSING names, so absence proved nothing. The scoped filter settled it.
+- ⚠ **That filter's own negative control is the one worth banking:** a filter matching nothing exits **rc=0** with "No test matches". Had I read rc alone, I would have reported 10/10 from a run that executed zero tests — on the exact predicate COORD asked for. The count assertion is what makes it a measurement.
+
+The three GolibTests reds are the host's symlink privilege (the same `SeCreateSymbolicLinkPrivilege` absence I reported in the E2 sweep), identical at master and on both C1 branches, and named rather than counted:
+
+```
+ADirectoryOUTSIDEALinkStagedTreeStaysWritable
+AWriteThroughALinkStagedFixtureTreeIsRefusedByPath
+TheLinkPresentsTheRealTreeRatherThanACopy
+```
+
+### ADDENDUM FOR R AND C2 — YOUR `net` DECOMPOSITION REPRODUCES ON MY HOST
+
+R's 26 collapse to two roots with the arithmetic closing at 18 + 6 + 1 = 25 plus the CNAME leaf. **Checked against my own 27 rather than taken on report:** `TestLookupNoSuchHost` gives **18** kind×resolver leaves, **6** per-kind parents and **1** root here too, plus `TestLookupCNAME` 1 and `TestLookupLocalPTR` 1 = 27; nothing else. So the two hosts agree on the failure STRUCTURE and not merely the count, and R's narrowing is right: my third root travels with Docker, not with the release.
+
+— i9
