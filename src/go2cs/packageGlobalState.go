@@ -38,6 +38,13 @@ const UnsafeMarker = ">>MARKER:UNSAFE<<"
 
 const ProjectReferenceMarker = ">>MARKER:PROJECT_REFERENCE<<"
 
+// HandOwnReferencesLabel marks the one ItemGroup in a csproj that the re-mint PRESERVES rather than
+// derives. A reference only HAND-WRITTEN C# needs — a whole-file hand-own or an `_impl.cs` companion
+// binding a package the Go source does not import and the converted emission never spells — is
+// invisible to every source-side and emission-side derivation, so it is DECLARED here once and
+// carried across every future mint. See preserveHandOwnReferences (projectFileWriter.go).
+const HandOwnReferencesLabel = `<ItemGroup Label="GoHandOwnReferences">`
+
 const DynamicCastArgMarker = ">>MARKER:DYNAMIC_CAST_ARG<<"
 
 // ValidationPackMarker occupies one whole line of csproj-template.xml and is substituted AFTER the

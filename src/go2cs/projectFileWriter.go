@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"fmt"
 	"go/types"
+	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -486,6 +487,24 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	newContents = []byte(applyPlatformReferenceAdoption(string(newContents), projectFileName,
 		goosOfTarget(options.targetPlatform), emittedReferences))
 
+	// Carry a human-DECLARED reference block across the re-mint. A csproj is minted from the Go
+	// import set plus the linkname destinations the converter itself resolved, and that derivation
+	// is exact for what the CONVERTER emits — but it cannot see a reference that only HAND-WRITTEN
+	// C# needs. `internal/godebug` is the measured case: its `godebug.cs` is a whole-file hand-own
+	// that completes the bodyless `registerMetric` partial by calling
+	// `global::go.runtime_package.godebugRegisterMetric` (godebug.cs:125), while the converter's own
+	// emission for that file (`godebug.cs.auto`) spells no `runtime_package` at all — an unqualified
+	// call and a bodyless partial. No source-side or emission-side derivation can reach that
+	// reference, because it is a property of C# a human wrote.
+	//
+	// So it is DECLARED, not inferred: a marked <ItemGroup Label="GoHandOwnReferences"> in the
+	// existing csproj is copied through verbatim, exactly as writePackageInfoFile preserves
+	// hand-added attributes by reading the file at the output path. Additive by construction (a
+	// re-mint can never drop a declared reference), never stale by accident (nothing is guessed),
+	// and general to any `_impl.cs` companion in any converted package — not just the four
+	// hand-owned-by-consequence ones the metadata un-freeze made visible.
+	newContents = preserveHandOwnReferences(projectFileName, newContents)
+
 	// Check if project file needs to be written
 	if needToWriteFile(projectFileName, newContents) {
 		// Write project file atomically
@@ -711,4 +730,82 @@ func hasMainFunction(pkg *types.Package) bool {
 
 	// main function should have no parameters and no return values
 	return funcType.Params().Len() == 0 && funcType.Results().Len() == 0
+}
+
+// preserveHandOwnReferences copies a marked `<ItemGroup Label="GoHandOwnReferences">` block out of
+// the csproj already sitting at the output path and into freshly minted contents, verbatim.
+//
+// The block is a HUMAN DECLARATION, never an inference. The converter's own reference derivation is
+// exact for what the converter EMITS — the Go import set plus every linkname destination it
+// resolved, each queued through linknameTargetAlias — and a census of the three-target emission
+// found zero root-escape spellings without a matching reference across every converted file. What
+// that derivation structurally cannot see is a reference only HAND-WRITTEN C# needs: a whole-file
+// hand-own or an `_impl.cs` companion may bind a package the Go source does not import and the
+// converted emission never spells. `internal/godebug` is the measured instance — `godebug.cs`
+// completes the bodyless `registerMetric` partial by calling
+// `global::go.runtime_package.godebugRegisterMetric` (godebug.cs:125) while `godebug.cs.auto`, the
+// converter's own output for that file, carries an unqualified call and no `runtime_package` at all.
+//
+// Preserving rather than deriving is what keeps this honest: nothing is guessed, a re-mint can never
+// DROP a declared reference, and retiring one is a human act. The block lives in its own ItemGroup
+// so it never mixes with the minted reference list, and it is inserted immediately before
+// `</Project>`.
+//
+// A csproj carrying no such block is returned untouched — the absence of a declaration is not an
+// invitation to infer one.
+func preserveHandOwnReferences(projectFileName string, newContents []byte) []byte {
+	existingBytes, err := os.ReadFile(projectFileName)
+
+	if err != nil {
+		// No csproj at the output path yet: a first conversion has nothing to preserve.
+		return newContents
+	}
+
+	// EOL-agnostic for the same reason writePackageInfoFile is: this file is read BACK off disk, so
+	// its line endings are the checkout's rather than the converter's, and splitting on "\r\n"
+	// alone returns one element for an LF copy.
+	existingLines := splitLines(string(existingBytes))
+	startIndex := -1
+
+	for i, line := range existingLines {
+		if strings.Contains(line, HandOwnReferencesLabel) {
+			startIndex = i
+			break
+		}
+	}
+
+	if startIndex < 0 {
+		return newContents
+	}
+
+	endIndex := -1
+
+	for i := startIndex; i < len(existingLines); i++ {
+		if strings.Contains(existingLines[i], "</ItemGroup>") {
+			endIndex = i
+			break
+		}
+	}
+
+	if endIndex < 0 {
+		// Fail loudly: a block opened and never closed would otherwise be dropped silently, which is
+		// the one outcome preservation exists to prevent.
+		log.Fatalf("Malformed %s block in project file \"%s\": no closing </ItemGroup>\n", HandOwnReferencesLabel, projectFileName)
+	}
+
+	var block strings.Builder
+
+	for i := startIndex; i <= endIndex; i++ {
+		block.WriteString(strings.TrimRight(existingLines[i], "\r"))
+		block.WriteString("\r\n")
+	}
+
+	contents := string(newContents)
+	closeIndex := strings.LastIndex(contents, "</Project>")
+
+	if closeIndex < 0 {
+		log.Fatalf("Project file \"%s\" has no closing </Project>; cannot preserve the %s block\n", projectFileName, HandOwnReferencesLabel)
+	}
+
+	return []byte(contents[:closeIndex] + block.String() + "\r\n" + contents[closeIndex:])
 }
