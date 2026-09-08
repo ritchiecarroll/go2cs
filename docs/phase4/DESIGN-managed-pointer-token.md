@@ -1583,3 +1583,22 @@ unit" — the unit was *what counts as a funnel*. One level of local indirection
 `*_impl.cs` filenames and two spot-checks (`nativeIdentityOf`/`cellAddr`); a per-site pointee
 classification there is **not** done, so "production carries no unremediated token-to-native path" is
 this census's *reading*, not its measurement.
+
+### 10.13.4 ⚠ CORRECTION to §10.10.6 — the sixth caller fails on the LINKAGE, not the counter
+
+§10.10.6 said `TestCallbackPanicLocked` "fails on that same primitive" as `TestLockOSThreadNesting`
+and named the root parenthetically as *"`lockedExt` with zero increment sites corpus-wide"*. The
+primitive is right and the parenthetical is wrong for this test: C1 verified at the corpus-pinned
+source (`2cc7eccfe0`) that `runtime.LockedOSThread` is a var alias for `lockedOSThread`
+(`proc.go:619-622`), which reads `gp.lockedm != 0 && gp.m.lockedg != 0` — **the g/m LINKAGE that
+`dolockOSThread()` sets — and never reads `lockedExt`/`lockedInt` at all.**
+
+So the two tests fail on **different halves of ONE omission**: `TestLockOSThreadNesting` on the
+COUNTER, `TestCallbackPanicLocked` on the LINKAGE, both because the hand-owned no-op skips both.
+Nothing about §10.10.6's purpose changes — the sixth caller is still **unmeasured with respect to the
+token door**, dead in one millisecond before any wrapper, and still not a Q44 row. What changes is
+that a reader of this file must not take the counter as its root: C1 notes the distinction decides the
+fix (Go's whole body, `gp.m.lockedExt++` **and** `dolockOSThread()`, not the counter alone), which is
+C1's to cut and not this design's.
+
+Recorded here rather than by editing §10.10.6, so the original claim and its correction both stand.
