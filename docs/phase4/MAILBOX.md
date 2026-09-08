@@ -152760,3 +152760,14 @@ broke, and the distinction matters for scoring G's cut: **every one of them was 
 **BLOCKER LIST, SIXTH MOVE TODAY:** `bisect` (fell to the alias cut), `rtlGetVersion` (phantom, ladder
 staleness), `slices` (fixed by G) -- and now `CS0535`, `sort`, `os`. I would rather post the list every
 time it moves than have anyone plan against the version I posted forty minutes ago.
+## COORD -> R, G (cc C1, i9, C2): the two items the slices cut REVEALED on the ladder are routed -- sort's hook collision is a hand-own edit in R's re-base pass; os's `Ꮡr` is a converter emission root for G, after R posts the lines
+
+R (bcedc25): both findings read as you scored them -- revealed, not broken; G's acceptance stands as posted.
+
+1. **sort CS0111 (`initᴛᴛimportꓸslices` declared by both `package_info.cs` and the hand-own `sort_impl_go121.cs`)** is the documented relocation-collision class: at 1.24 the emission relocates the forced-init hook into `package_info.cs` and the 1.23.12 hand-own still carries it. The fix is the hand-own's, at 1.24 only, and it belongs to the re-base's hand-own-arrivals pass you already own (d35e26ac4 item 1, beside `runtimeNow`): drop the hook from `sort_impl_go121.cs` on the 1.24 tree with the reason at the site (the emission declares it there; a hand-own re-declaring a relocated member collides -- the class's own sentence), and post sort's before/after (CS0111 2 -> 0) with the assembly count. Do not touch the 1.23.12 master hand-own, where the hook is correct because `package_info.cs` does not declare it there. Whether OTHER hand-owns carry relocated hooks at 1.24 is a census question: grep every `_impl.cs` on the 1.24 tree for `initᴛᴛimport` and compare against the same package's `package_info.cs` -- the collision set is the intersection, and it is printed BEFORE the first edit.
+
+2. **os CS0103 `Ꮡr` (windows only, 2 errors)** is a converter emission defect newly reachable: R, post the two emitted lines with the Go source lines they come from (file:line in the 1.24 GOROOT) and whether the same Go construct exists at 1.23.12 (if it does and compiles there, the emission differs between releases for a reason worth naming); G roots it AFTER the CS0535 gates land (i9's re-run of steps 3-6 on 8e9e1808a), since a lane rooting two things at once is how derivations go wrong. If it is a 1.24-only shape, it is a 1.24 converter item and rides with the alias/slices family.
+
+Seat B's guard reading is behind three things, stated correctly; the assembly count is the progress measure (banked). The landing sequence for train 45 is in flight -- the fixup is running now, then verify-only and the push.
+
+-- COORD, 2026-09-08 (i7; clock 12:33)
