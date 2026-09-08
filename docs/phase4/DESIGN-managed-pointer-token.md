@@ -1286,3 +1286,84 @@ What a remedy would owe, so that nobody builds one from this table alone:
   does not; a door lifted for "pass-through" shapes in general would have to discriminate the two, and
   nothing measured here shows that discrimination is available at the door — which is the same
   structural objection §10.9.5 raised against a predicate at the conversion site, one seam along.
+
+### 10.10.6 ⚠ THE NAMED GAP IS CLOSED, AND THE ANSWER IS THE THIRD BRANCH — the sixth caller is UNMEASURED with respect to the door
+
+§10.10.2 named `TestCallbackPanicLocked` as the funnel's missing sixth caller and said the answer
+would be one of three: it never ran, it failed for another reason, or it passed. i9 answered it from
+the preserved `runtime` record (`3cf0247177`, on `44f858717`) and it is the **second** branch, with
+the reason named:
+
+```
+  TestCallbackPanicLocked   Go = pass    C# = fail
+    elapsed 0.0009983 s                            <- ONE MILLISECOND
+    source  syscall_windows_test.go:187
+    output  "runtime.LockOSThread didn't"
+```
+
+It carries **no refusal text at all** — it fails its own `LockOSThread` precondition at the test's
+line 187 and is over before any syscall wrapper is reached. So:
+
+| | |
+|:--|:--|
+| five callers | refuse at argument 3 — **the funnel** |
+| sixth caller | dies at a `LockOSThread` precondition first — **never reaches the door** |
+
+**The funnel therefore reads FIVE of six, and the sixth is UNMEASURED with respect to the door** —
+neither a counter-example to its behaviour nor a confirmation of it. That is a materially different
+answer from "six of six", and it is the reason a census names its hole instead of carrying a
+fraction: the hole turned out to hold a different defect entirely. The completeness bound on §10.10.1
+is unchanged in size and now exact in kind: **five refusals from a six-caller funnel, one caller
+unreachable, and 695 of the oracle's 880 tests still unexecuted.**
+
+⚠ **The sixth caller's own failure belongs to another root, not to Q44.** C1 rooted
+`TestLockOSThreadNesting` in the hand-owned `LockOSThread`/`UnlockOSThread` no-ops (`lockedExt` with
+zero increment sites corpus-wide); `TestCallbackPanicLocked` fails on that same primitive from a
+different test file, so the no-op root costs a SECOND test. Recorded here only so that nobody
+re-reads it as a token-door row: it is not one.
+
+## 10.11 THE CENSUS INSTRUMENT: an arm-time START block, so that a zero is a measurement
+
+The census writes a block only when work has happened — the flush at conversion 1, the flush every
+250,000, the exit hook. So a process that **armed the census and converted nothing** wrote no file at
+all, and `no file` was ambiguous across four distinct facts: the gate was never set, `golib` never
+loaded there, the host died before the exit hook, or the write failed. COORD ruling 3 (`82c60cec4`)
+closed the third from one side with the partial flush. This closes the rest from the other:
+**golib's module initializer writes a START block before any conversion.** i9 confirmed
+(`d6306f2d12`) that the pipeline keeps no process record, so the disambiguation cannot come from
+outside the artifact — which is why `reflect` was recorded NO USABLE CENSUS rather than as a zero.
+
+**The distinction is NOT "one block", and getting that wrong was the first design error.** A process
+that exits **cleanly** having converted nothing runs its exit hook and writes a final zero block —
+that case was never ambiguous. The case that left no file is the one that **died** having converted
+nothing, and there the START block is the last thing in the file. So `ARMED-ZERO` is *"the START
+block survived the fold"*, decided by whether the marker sits after the file's last totals line.
+The block carries the **PARTIAL** header deliberately: it *is* a cumulative snapshot taken before any
+conversion, so every existing reader folds it correctly with no change and cannot double-count it.
+
+**Five arms, predictions written before the run, all five hit** (probe:
+`docs/phase4/probes/c2-census-start-block`):
+
+| arm | setup | measured |
+|:--|:--|:--|
+| A1 | gate ON, 0 conversions, clean exit | file exists, 2 blocks, `final`, conv 0 — already fine before |
+| A2 | gate ON, 0 conversions, **SIGKILL** | 1 block, **`ARMED-ZERO`**, conv 0 — **the case that left no file** |
+| B | gate **OFF** | **no file**; the reader REFUSES, exit 1 — "no file" keeps its one remaining meaning |
+| C | gate ON, 5 conversions | 3 blocks, ROW TOTAL conversions **== 5 exactly** — no perturbation |
+| N | A2's file, `Q44CENSUS-START` line deleted | falls back to `PARTIAL-ONLY`, ARMED-ZERO 0 — the verdict comes from the MARKER |
+
+Arm C is the one this instrument owes above all others, because it has broken neutrality twice: the
+start block adds one file write at module init, no hot-path operation, and the fold's total is
+unchanged. Arm N is the reader's own negative control — a reader that still said `ARMED-ZERO` with the
+marker gone would be counting blocks, which is precisely the wrong rule this design started with.
+
+⚠ **Two harness lessons, both paid on the probe's FIRST run and both worth more than the feature.**
+The first run measured a binary built **before** the `hang` branch existed, so arm A2 (kill before
+exit) read **identically to arm A1** — the arm agreeing with the arm it was built to differ from is
+the tell, and it is this file's own "instrumentation that never compiled in". The harness now rebuilds
+and *asserts* the binary is newer than its source. Then the assertion itself was wrong: it looked for
+the `hang` literal with 8-bit `strings`, which reports **zero** for a .NET literal because those are
+UTF-16, and it aborted a build that was fine. It now uses `strings -el` **and positive-controls
+itself** on a literal known to be present before its verdict on the one under test is believed. **A
+staleness gate and its checker are two instruments, and the second needs a control as much as the
+first.**

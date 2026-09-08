@@ -55,20 +55,37 @@ if ($files.Count -eq 0) {
 # emitted fields cannot silently shift a column.
 $rx = [regex]'^Q44CENSUS(?<partial>-PARTIAL)?\s+mints=(?<mints>\d+)\s+conversions=(?<conv>\d+)\s+arm1=(?<a1>\d+)\s+arm2a=(?<a2a>\d+)\s+arm2b=(?<a2b>\d+)\s+arm3=(?<a3>\d+)\s+arm4=(?<a4>\d+)'
 
+# The START marker, written into the block the census emits at module init BEFORE any conversion.
+# It is what separates a MEASURED zero (the process armed and converted nothing) from the four
+# things "no file" used to mean: gate unset, golib never loaded, the host died first, or a failed
+# write. It carries the PARTIAL header on purpose, so the fold above needs no special case.
+$rxStart = [regex]'^Q44CENSUS-START\s'
+
 $tot = [ordered]@{ mints = [long]0; conv = [long]0; a1 = [long]0; a2a = [long]0; a2b = [long]0; a3 = [long]0; a4 = [long]0 }
 $refused = @()
 $rows = @()
 
+$armedZero = 0
+
 foreach ($f in $files) {
-    $last = $null; $blocks = 0
+    $last = $null; $blocks = 0; $i = -1; $lastTotalsAt = -1; $startAt = -1
     foreach ($line in (Get-Content -LiteralPath $f.FullName)) {
+        $i++
         $m = $rx.Match($line)
-        if ($m.Success) { $last = $m; $blocks++ }
+        if ($m.Success) { $last = $m; $blocks++ ; $lastTotalsAt = $i; continue }
+        if ($rxStart.IsMatch($line)) { $startAt = $i }
     }
     if ($null -eq $last) { $refused += $f.FullName; continue }
 
     $kind = if ($last.Groups['partial'].Success) { 'PARTIAL-ONLY' } else { 'final' }
     if ($kind -eq 'PARTIAL-ONLY' -and $blocks -gt 1) { $kind = 'PARTIAL (no final)' }
+    # ARMED-ZERO is "the START block SURVIVED the fold", NOT "there is only one block" -- and the
+    # difference is the whole case. A process that exits CLEANLY having converted nothing runs its
+    # exit hook and writes a FINAL zero block, which was never ambiguous. The case that left NO
+    # FILE is the one that DIED having converted nothing, and there the start block is the last
+    # thing in the file. The START marker sits after its own totals line inside its block, so
+    # "after the last totals line" is exactly "no later block superseded it".
+    if ($startAt -gt $lastTotalsAt) { $kind = 'ARMED-ZERO'; $armedZero++ }
 
     $rows += [pscustomobject]@{
         File   = $f.Name
@@ -103,6 +120,10 @@ foreach ($r in $rows) {
 Write-Host ""
 Write-Host ("Q44READ ROW TOTAL  files={0}  mints={1}  conversions={2}" -f $rows.Count, $tot.mints, $tot.conv)
 Write-Host ("Q44READ ROW ARMS   arm1={0} arm2a={1} arm2b={2} arm3={3} arm4={4}" -f $tot.a1, $tot.a2a, $tot.a2b, $tot.a3, $tot.a4)
+
+if ($armedZero -gt 0) {
+    Write-Host ("Q44READ ARMED-ZERO {0} process(es) armed the census, converted NOTHING and DIED before their exit hook -- a MEASURED zero, not an unmeasured row" -f $armedZero)
+}
 
 $armSum = $tot.a1 + $tot.a2a + $tot.a2b + $tot.a3 + $tot.a4
 if ($armSum -ne $tot.conv) {

@@ -294,7 +294,7 @@ internal static class Q44RegistryCensus
     /// </summary>
     internal static void DumpTo(string path) => DumpTo(path, partial: false);
 
-    private static void DumpTo(string path, bool partial)
+    private static void DumpTo(string path, bool partial, bool start = false)
     {
         long c = Interlocked.Read(ref s_conversions);
         long a1 = Interlocked.Read(ref s_arm1), a2a = Interlocked.Read(ref s_arm2a);
@@ -328,6 +328,22 @@ internal static class Q44RegistryCensus
             "Q44CENSUS-FOLD cumulative-snapshot -- the LAST block in THIS file is authoritative; " +
             "sum across FILES, never across blocks",
         };
+
+        // ⚠ THE START BLOCK IS WHAT MAKES A ZERO A MEASUREMENT. Every other block is written
+        // because work happened -- the flush at conversion 1, the flush every 250,000, the exit
+        // hook. So a process that armed and converted NOTHING wrote no file, and "no file" read
+        // identically to "the gate was never set", to "golib never loaded" and to "the host died
+        // first". That is COORD ruling 3 (82c60cec4) from the other end: the flush closed "died
+        // before exit", and this closes "did nothing". An instrument must be able to report that
+        // it did nothing, or its zero is not a reading.
+        //
+        // It carries the PARTIAL header deliberately: it IS a cumulative snapshot, taken before
+        // any conversion, so every existing reader folds it correctly with no change (last block
+        // per file, summed across files) and a start-only file folds to a legitimate zero.
+        if (start)
+            lines.Add("Q44CENSUS-START armed at module init, before any conversion -- the zeros " +
+                      "above are a MEASURED zero. A file whose LAST block is this one armed and " +
+                      "converted nothing; NO FILE at all means the census never armed here");
 
         // Say so IN THE ARTIFACT when the configured path was made per-process, so a reader looking
         // for the name they set finds out why there are several files instead of wondering.
@@ -384,6 +400,19 @@ internal static class Q44RegistryCensus
             return;
 
         AppDomain.CurrentDomain.ProcessExit += static (_, _) => Dump();
+
+        // The START block, written here and not lazily, because the whole point is to exist in a
+        // process that goes on to do nothing. A write failure IS reported (DumpTo's own path),
+        // for the same reason the exit block reports one: an unwritable census directory makes
+        // the row unmeasurable, and finding that out at arm time rather than at exit is strictly
+        // better. The catch is here so that a census can never take the program under test down.
+        try
+        {
+            DumpTo(OutputPath, partial: true, start: true);
+        }
+        catch
+        {
+        }
 
         // ⚠ NO "armed" LINE ON stderr. It fired in every process that loaded golib with the gate
         // set -- including a spawned helper child that does no census work at all -- and it is half

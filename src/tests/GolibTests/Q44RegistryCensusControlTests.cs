@@ -260,4 +260,67 @@ public class Q44RegistryCensusControlTests
 
         GC.KeepAlive(plain);
     }
+
+    [TestMethod]
+    public void TheCensusWroteAStartBlockAtModuleInit_SoAZeroIsAMeasurement()
+    {
+        // ⚠ THE OTHER END OF COORD RULING 3 (82c60cec4). The flush closed "the host died before the
+        // exit hook"; this closes "the process did nothing". Every other block is written BECAUSE
+        // work happened -- the flush at conversion 1, the flush every 250,000, the exit hook -- so a
+        // process that armed and converted nothing left NO FILE, and "no file" read identically to
+        // the gate being unset, to golib never loading, and to a failed write. i9 confirmed the
+        // pipeline keeps no process record to disambiguate them from outside (d6306f2d12), so the
+        // disambiguation has to be IN the artifact.
+        //
+        // This asserts the mechanism in a REAL process rather than through a proxy: golib's module
+        // initializer ran before any test in this assembly, so if the start block works at all its
+        // line is already on disk and its block is the FIRST one in the file.
+        //
+        // BOTH candidate paths are checked rather than just OutputPath, because OutputPath re-reads
+        // GO2CS_Q44_CENSUS_FILE at call time and sibling controls in this class set and restore it --
+        // a control whose verdict depends on class ORDER is the failure this file already carries a
+        // lesson about.
+        string[] candidates =
+        {
+            Q44RegistryCensus.OutputPath,
+            System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"q44-census-{Environment.ProcessId}.txt"),
+        };
+
+        string found = null;
+        string[] lines = null;
+
+        foreach (string candidate in candidates)
+        {
+            if (!System.IO.File.Exists(candidate))
+                continue;
+
+            string[] read = System.IO.File.ReadAllLines(candidate);
+
+            if (Array.FindIndex(read, static l => l.StartsWith("Q44CENSUS-START ", StringComparison.Ordinal)) < 0)
+                continue;
+
+            found = candidate;
+            lines = read;
+            break;
+        }
+
+        Assert.IsNotNull(found,
+            "no census file carrying a Q44CENSUS-START line exists for this process -- the arm-time block " +
+            "did not get written, so a zero-conversion row is still indistinguishable from an unarmed one. " +
+            "Looked at: " + string.Join(", ", candidates));
+
+        int start = Array.FindIndex(lines, static l => l.StartsWith("Q44CENSUS-START ", StringComparison.Ordinal));
+        int firstTotals = Array.FindIndex(lines, static l => l.StartsWith("Q44CENSUS", StringComparison.Ordinal)
+                                                          && l.Contains(" conversions=", StringComparison.Ordinal));
+
+        Assert.IsTrue(firstTotals >= 0, "the start block must carry a totals line, or no reader can fold it");
+        Assert.IsTrue(firstTotals < start,
+            "the totals line must come FIRST in the block -- an existing control requires it greppable at the head, " +
+            "and it caught exactly this ordering the first time it ran");
+
+        // The start block's own totals must be the zeros it claims. Reading them from the FIRST block
+        // rather than the last is the point: later blocks are cumulative snapshots of real work.
+        StringAssert.Contains(lines[firstTotals], "conversions=0",
+            "the arm-time block must report zero conversions -- if it reports work, it was not written at arm time");
+    }
 }
