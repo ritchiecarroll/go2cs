@@ -1602,3 +1602,57 @@ fix (Go's whole body, `gp.m.lockedExt++` **and** `dolockOSThread()`, not the cou
 C1's to cut and not this design's.
 
 Recorded here rather than by editing §10.10.6, so the original claim and its correction both stand.
+
+### 10.13.5 The production reading UPGRADED to a measurement — 11 of 16 clean BY TYPE, and the other 5 reduce to one named question
+
+§10.13.3 flagged that *"production carries no unremediated token-to-native path"* was the census's
+**reading**, asserted from `*_impl.cs` filenames plus two spot-checks. It is now measured per site by
+resolving each addressed pointee's declared type.
+
+**11 of 16 are clean BY TYPE, which is stronger than clean by convention.** Their pointees are
+scalars, scalar pointers, or an empty struct — `ж<byte>` (`croutine` ×5, `sendBuf`), `ж<uint16>`
+(`serverName`, `userName`, `stringSid`, `server`), `ж<uint32>` (`entriesRead`, `totalEntries`,
+`bytesSent`, `bufType`), and `ж<SID>` where the converted `SID` is `[GoType] partial struct SID { }`,
+field-free. A box over a reference-**free** pointee has pinnable storage, so `(uintptr)Ꮡx` is a real
+pinned address and **cannot be a token whatever the file's ownership**.
+
+**The other 5 — the certchain group — address REFERENCE-BEARING pointees, measured:**
+
+```
+  CertContext        uint32 EncodingType; ж<byte> EncodedCert; uint32 Length;
+                     ж<CertInfo> CertInfo; ΔHandle Store            <- two ж<> fields
+  CertChainContext   ... ж<ж<CertSimpleChain>> Chains;
+                     ж<ж<CertChainContext>> LowerQualityChains      <- two ж<> fields
+```
+
+So those five genuinely route through the hand-own's `nativeIdentityOf`, **and that helper is
+CONDITIONAL**:
+
+```csharp
+private static uintptr nativeIdentityOf<T>(ж<T> box) {
+    if (box is not null && s_nativeIdentity.TryGetValue(box, out object? remembered))
+        return (uintptr)(nuint)remembered;
+    return (uintptr)box;                    // <- the fallback
+}
+```
+
+⚠ **The fallback is `(uintptr)box`, which for a reference-bearing pointee is exactly a token.** The
+file's author knew and wrote it down: *"A view this file built answers from the table; anything else —
+`CertCreateCertificateContext`'s native box, or a nil pointer — answers with its own address exactly as
+the generated wrapper would, which is what keeps the un-hand-owned producers working."* **Both
+enumerated cases are token-free** — a native box's `(uintptr)` IS its native address, and a nil box's
+is 0 — so the census does not contradict the hand-own.
+
+**THE RESIDUAL, now one named question instead of five unclassified sites:** can a **THIRD** box kind
+reach those sites — a **managed, non-nil** box over `CertContext`/`CertChainContext`, whose `(uintptr)`
+is neither a remembered native address nor 0 but a **token**? Nothing in the file enumerates that case,
+and with the door suspended such a number reaches crypt32 **silently**. Settling it is a call-graph
+question over the Windows x509 verifier path (which producers mint the boxes that reach
+`CertGetCertificateChain` and friends), not answerable from the pointee types alone, and it is **not
+this census's to close** — it is recorded here so the next reader has the question rather than the
+reassurance.
+
+**What changed, precisely:** the production side went from *"asserted hand-owned by filename"* to
+*"11 clean by type; 5 routed through a documented conditional whose two enumerated fallbacks are safe;
+1 unenumerated case named."* The value of closing this residual was not confirmation — it was that a
+reading which sounded settled turned out to contain a conditional nobody had priced.
