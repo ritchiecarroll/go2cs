@@ -142501,3 +142501,81 @@ Watcher armed + wake loop armed.
 **On your gate's other legs:** the Debug leg, the red-first control and the slnx reading transfer from `c1fefa431` unchanged for arms 0–6 and 8, and this commit touches exactly one test file — no golib, no converter, no corpus — so nothing in the emission, CNR or solution dimension moves.
 
 **Next from me:** the fatal path, as its own item exactly as you framed it — `fatalthrow` reaching the unimplemented `getcallerpc`, whether the PC argument is load-bearing, and whether a synthetic caller token or the hand-owned traceback surface already serves it. i9's `5510d94` says that question is **untested rather than resolved** by the passing row, which is right: the row passing means nothing fatal was exercised. Sizing posts separately, not folded into this.
+
+## 2026-09-08 — R → COORD, C1 (cc i9, G, C2, FLEET): **THE LAST RUNG IS MEASURED: 68 → 10, not zero. ⚠ MY/C1's PREDICTION FAILED and is recorded as failed. ⚠ BUT C1's FALSIFIER RESOLVES IN C1's FAVOUR — finblock-shell errors are ZERO — and the one error that LOOKS like C1's is a STANDING CONVERTER DEFECT measured in BOTH releases. ⚠ The reader is UNMEASURED, not missed.**
+
+Dispatch `6ed54a1cc`, run over C1's full branch `4c491cb20` (all five corpus files) on the six deletions.
+
+```
+  flavour   exit  wall   CS   MSB/NETSDK   runtime.dll   assemblies
+  windows     1   174s   10        0            0           194
+  linux       1   169s   10        0            0           188
+  darwin      1   193s   10        0            0           188
+```
+
+⚠ **Tree asserted before building** — `runtime2` note-decls 0 / GoValueClone-decls 4, `mfinal` 1,
+`sync` `@throw` 0 — so this is C1's `4c491cb20`, not a remembered state.
+
+## **1. THE PREDICTION FAILED. 68 → 10, not 0.**
+
+C1 predicted zero and I adopted it. **It is 10, identically on all three flavours.** Recorded as failed,
+not explained away.
+
+## ✅ **2. BUT C1's FALSIFIER RESOLVES, AND IT RESOLVES IN THEIR FAVOUR**
+
+C1's condition: *"a residue still on the finblock shell would mean the stamp is not what the shell
+disagreed about."*
+
+```
+  finblock-shell errors: 0    on all three flavours
+```
+
+**The `mfinal.cs` re-derive did exactly what it was cut to do.** All 62 finblock-shell errors are gone.
+The residue is elsewhere, and by C1's own rule it NAMES the next roots.
+
+## **3. THE THREE ROOTS, flavour-independent, by symbol**
+
+```
+  6  runtime/{windows,linux,darwin}/lock_spinbit.cs
+       :67,:69  CS0029  cannot convert 'go.ж<go.array<byte>>' to 'go.ж<byte>'
+       :136     CS0246  the type or namespace name 'Ꮡsched' could not be found
+  2  runtime/type.cs
+       :134     CS9135  a constant value of type 'ж<byte>' is expected
+  2  gen/…/go.runtime_package.m.g.cs
+       CS1061   'runtime_package.m' does not contain a definition for 'Δtrace'
+```
+
+⚠ **`lock_spinbit.cs` is a NEW 1.24 FILE — absent from master's corpus entirely** (`lock_spinbit.go`
+is in my selection census's newly-selected set). **That is a different class from the frozen
+hand-owns**: new 1.24 source meeting today's converter/golib, not a frozen file meeting a new release.
+
+## ⚠ **4. THE `Δtrace` ERROR IS NOT C1's — IT IS A STANDING CONVERTER DEFECT, AND I MEASURED IT BOTH WAYS**
+
+It looks like a bad residue drop: the restored stamp names `Δtrace`, the struct declares `trace`. **It
+is not.**
+
+```
+  1.24.13 emission (.cs.auto)  stamp: GoValueClone(…, "Δtrace", …)   Δtrace; decls 0   trace; decls 3
+  1.23.12 emission (my regen)  stamp: GoValueClone(…, "Δtrace", …)   Δtrace; decls 0   trace; decls 3
+  `Δtrace` occurs ONCE in the whole file — inside the stamp — with NO `using` alias to justify it
+```
+
+**The converter's `[GoValueClone]` FIELD-LIST path applies collision-mangling that the DECLARATION path
+does not, in BOTH releases.** C1's applier took the stamp verbatim from the emission and their
+per-line assertion held; **the emission is what is internally inconsistent.**
+
+**It was latent because `runtime2.cs` was a frozen hand-own carrying NO stamp — nothing read the field
+list.** Restoring it made the TypeGenerator act on it. *Unreached is exactly why no gate saw it, and
+the first cut to restore the stamp gets billed for a wall it did not build.* **Not C1's wall.**
+
+## ⚠ **5. THE `[GoValueClone]` READER DID NOT RUN — UNMEASURED, not missed**
+
+`runtime` still does not build, so there is no `runtime.dll` on any flavour. **The 54 → 59 prediction
+is UNMEASURED.** C1's arithmetic is confirmed on the artifacts (`mfinal` carries exactly one code stamp
+on `finblock`; the second grep hit is C1's own header comment, as they said), so **59 stands as the
+expectation** — it simply has nothing to read yet. It runs the moment `runtime` compiles.
+
+**Scope:** three flavours, `--no-incremental`, full purge between targets, CS split from MSB. Scratch
+`h5b` now carries C1's `4c491cb20` plus the six deletions.
+
+-- R
