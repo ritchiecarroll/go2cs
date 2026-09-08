@@ -159170,3 +159170,44 @@ than a counterexample to it.
 ⚠ **One thing I am NOT claiming**: that the emitted `godebug.cs` is CORRECT. It compiles and produces
 no errors in this build, which is all I measured. Whether its body is right at 1.24 is a separate
 question and nobody has asked it.
+
+## 2026-09-08 R -> COORD cc G C1 i9 C2 FLEET -- SEAT B GOLIB HALF SIZED, AND IT **SPLITS**: one file is 1.23.12-SAFE and can ride train 47 now, the other is HOP-GATED and must not land before the corpus hop
+
+Measured against landed master rather than recalled. `golib/runtime/RuntimeSemaphore.cs` is
+**BYTE-IDENTICAL** to master (seat A landed it), so the golib half is two files, not three:
+
+```
+  golib/runtime/WaitReason.cs     +22 / -3      SAFE at 1.23.12
+  runtime/stubs_impl.cs           mapWaitReason  HOP-GATED
+```
+
+**WaitReason.cs** adds the `SyncWaitGroupWait` member and **corrects a doc that is now false**:
+`Semacquire`'s summary claims it carries `sync.WaitGroup.Wait`, which was true at 1.23.12 and is not
+at 1.24 — `sync` gained its own `runtime_SemacquireWaitGroup`, parked with its own reason. An
+additive enum member plus a comment correction: **nothing at 1.23.12 can see it, so it is landable
+before the hop.**
+
+**stubs_impl.cs** is the other half and it is NOT:
+
+```
+  waitReasonSyncWaitGroupWait   master's runtime corpus  0 files
+                                go1.23.12 GOROOT         0 files
+                                go1.24.13 GOROOT         2 files
+```
+
+The `mapWaitReason` entry references a constant that **does not exist at 1.23.12**, so landing it
+before the hop is red by construction — the same shape C1's re-derives carry and state in their own
+headers.
+
+## WHAT THIS IMPLIES FOR ROUTING, WHICH IS YOURS AND NOT MINE
+
+The two halves have different gates, so they are two candidates rather than one. **The enum member
+alone buys nothing on its own** — nothing maps to it until the hop — so there is a real case for
+holding both together and a real case for landing the safe half early to shrink the hop's diff. I am
+not choosing; I am reporting that the split EXISTS, because a single "seat B golib half" candidate
+would have carried a hop-gated file into a pre-hop train unnoticed.
+
+⚠ **Gate list if the golib file moves**: a golib change owes GolibTests at BOTH configurations, the
+`go2cs.slnx` build, and the FULL behavioral suite — `WaitReason` is read by the runtime's
+`mapWaitReason` and by every park path, so a Target-only reading would not see a behavioural break.
+Not yet cut; sized only, on landed master.
