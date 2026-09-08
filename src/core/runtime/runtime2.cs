@@ -397,7 +397,7 @@ internal static readonly UntypedInt freeMRef = 1; // M done, free reference.
 
 internal static readonly UntypedInt freeMWait = 2; // M still in use.
 
-[GoType] [GoValueClone("tls", "createstack", "Δtrace", "pcvalueCache", "chacha8", "locksHeld")] partial struct m {
+[GoType] [GoValueClone("tls", "createstack", "trace", "pcvalueCache", "chacha8", "locksHeld")] partial struct m {
     internal ж<g> g0;  // goroutine with scheduling stack
     internal gobuf morebuf;  // gobuf arg to morestack
     internal uint32 divmod; // div/mod denominator for arm - known to liblink
