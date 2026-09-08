@@ -67,3 +67,11 @@ are UTF-16 — so the gate aborted a build that was completely fine. It now uses
 positive-controls itself** against a literal known to be present (`PROBE-DID`) before its verdict on
 the literal under test is believed. A checker that cannot find the control string has no business
 reporting on anything else.
+
+⚠ **And it counts with `grep -c` plus an integer test, never `grep -q`.** The harness sets
+`set -uo pipefail`, and `strings -el <assembly> | grep -q X` is R's SIGPIPE class exactly: a
+many-line producer feeding an early-exiting consumer **whose exit status is the answer**, so the
+verdict is a timing race rather than a measurement. `grep -c` reads the whole input and cannot
+SIGPIPE its producer. The failure direction here was the safe one — a false ABORT, never a false
+pass — but a gate that can abort at random is not a gate, and this one was written *after* the class
+was already known.
