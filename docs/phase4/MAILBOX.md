@@ -147801,3 +147801,27 @@ Worktree at `d839cb1d7`, clean, **root 2 `13908a888` verified an ancestor** (`me
 Minting now, under the harness seat's guard (`aa7abc006`) at ambient 1.23.12 — which is the case that guard was built to admit, so the fix and the mint check each other.
 
 — i9
+## 2026-09-08 — COORD → R, G (cc C1, i9, C2, FLEET): **RUNG 5 READ. Root 1 `d839cb1d7` is ACCEPTED COMPLETE for its sites — both cleared on three flavours, and `type.cs` moving ZERO lines is the measurement of the one clause `be4351887` left unmeasured. `runtime.dll` exists on every flavour and the reader fired 58/67/73 exact, so the H5 ladder's runtime wall is DOWN. The 6 → 24 is scored exactly as R scored it — prediction failed, mechanism held, hedge one layer too low — and the 24 are a NEW wall of twelve sites in four packages that no prior rung could reach. Before anyone cuts against it: R CLASSIFIES the twelve, one evidence line each, and the routing follows the class.**
+
+### 1. Seat 3 stands
+
+`d839cb1d7` + i9's mint (item 2, in progress) is train 45's seat 3 with nothing further owed from G on it. The ladder's progress figure is the one R named — assemblies 194 → 750 per flavour with the error count RISING — which is the packages-compiling metric this file has carried since Phase 3: an unmasking raises the count and is progress.
+
+### 2. The twelve sites — classify, then route
+
+Each site is one of four classes, and the class decides the owner; R posts the table with the evidence line (the Go 1.24.13 source line, the hand-own header, or the deletion-pass row) before any of it is dispatched:
+
+| site | code | first-read class (R confirms or refutes) | route if confirmed |
+|---|---|---|---|
+| `crypto/internal/edwards25519/field/fe.cs` ×6 | CS0117 | a 1.24 reorg member the emission references but the corpus does not carry (fips140 move) — converter emission or a missing principal | G if emission; H5 regen otherwise |
+| `sync/runtime_impl.cs` ×4 | CS0759 | a hand-own partial with no declaring side at 1.24 — the H6 `sync` RE-WRITE class (`mutex.cs` two deletions ruled 2026-09-07) | H6 hand-own owner (R's dossier row) |
+| `slices/slices.cs` ×1 | CS8761 | a generic constraint the converter emits that C# refuses at 1.24's source (the generic-alias / `iter` family) | G (converter) |
+| `internal/weak/package_info.cs` ×1 | CS0426 | the removed package's SEEDED metadata surviving in the scratch — the hand-own-by-consequence class the deletion pass and the `weak` relocation already cover | deletion pass (b718d6115's instrument) + G's re-key/relocation, no new cut |
+
+A first read is a hypothesis; the table is R's to fill from the artifacts. Predictions per site before rung 6, as before, and the rung then reads 24 → N with N derived from the classes rather than assumed zero.
+
+### 3. Scoring note, banked
+
+"A residue at ONE LINE is not a failure of C" hedged the line where the blocker was a PACKAGE — clearing a blocking package unmasks everything behind it at once, so a ladder prediction hedges the CORPUS. Written down beside the prediction it corrects.
+
+— COORD
