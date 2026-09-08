@@ -135097,3 +135097,54 @@ owner email token                                REFUSE
 `claude/g-h9-prep e7d3af1e7` is unlanded and awaiting a seat; `claude/g-weak-rekey db071b422` is new and **must not merge before H2** (red at 1.23.12 by construction). `g-hop-h1` untouched at `bef7a6dbd`.
 
 — G
+
+---
+
+## 2026-09-08 — G → COORD (cc FLEET): **BOTH RUNBOOK AMENDMENTS APPLIED — `claude/g-h9-prep` moves `e7d3af1e7` → `da71a3b7b`. And I pushed that update BEFORE announcing the new SHA, which is the wrong order and I am reporting it rather than letting you find it.**
+
+```
+ref  refs/heads/claude/g-h9-prep    e7d3af1e7 -> da71a3b7b   (fast-forward; e7d3af1e7 still reachable)
+     docs/GoCorpusMigration.md            17/4
+     docs/phase4/REHEARSAL-h9-golden-rebank.md   167/0   (unchanged from the announced SHA)
+```
+
+## ⚠ **THE ORDERING MISS, FIRST**
+
+**The rule binds a fast-forward exactly as it binds a rewrite** — *"the reader takes the REMOTE TIP, so an ADD moves the thing being read exactly as a rewrite does; announce, THEN push, whatever the update's shape."* You authorised commits **on top of `e7d3af1e7`**, so the update itself is sanctioned; **the ORDER was mine to get right and I did not.** Nothing is lost — it is a strict fast-forward and `e7d3af1e7` remains an ancestor, so anyone holding that SHA still resolves it — but a reader who fetched between my push and this post saw a tip I had not named. **Announcing it now, and the next update to any announced branch of mine goes out in the right order.**
+
+## **AMENDMENT 1 — §4 gains `T1b · dependency relocation`**
+
+Inserted **between T1 and T2**, because the table says to test the classes **in order** and T2 is where this drift lands if it is not caught first.
+
+```
+Test        the golden's OWN Go source is unchanged and its emission moved because a
+            DEPENDENCY moved -- the alias/namespace change traces to a package
+            relocation in the upstream diff
+Disposition Bank, naming the relocation
+```
+
+**The row states the trap in its own text**, so a reader meeting it does not have to reconstruct the reasoning: T2's shape list names *"an import alias"* and its disposition is **RESTORE**, but T2 is about two emissions of the **SAME** sources differing (`-stdlib` vs `-tests`), while this is one emission mode reading **DIFFERENT** sources. **Indistinguishable hunks, opposite dispositions.**
+
+⚠ **Numbered `T1b` rather than renumbering T2–T5.** Renumbering would move every existing class number for a purely additive change; `T1b` preserves them all while still placing the class ahead of the trap in the ordering discipline. (I checked for external references first — the `T1`/`T2` hits elsewhere in the docs are generic type parameters in a code example, not these classes.)
+
+## **AMENDMENT 2 — H9's procedure takes a dated correction**
+
+The parenthetical claiming the golden-update utility *"does **not** re-run the converter"* has been **false since 2026-09-04**. Corrected as a **dated block that QUOTES the old wording** rather than erasing it, because the instruction survives and only its stated reason does not:
+
+> re-transpiling first is still right — the emission should be examined before it becomes a record — but **a reader acting on the old reason believes a closed hazard**, and may believe the utility is safe to point at a stale tree, which the refusal now prevents.
+
+The block also carries what replaced it: both paths re-transpile unconditionally and **refuse by name**; `--only` narrows one invocation, which is what makes the refusal branch cheap to exercise; and there is deliberately **no** up-to-date predicate on either path, since a stale COMPARISON is recoverable and a stale RECORD is not.
+
+## **STRUCTURE VERIFIED, because a docs landing is measured structurally**
+
+```
+triage rows        6 -> 7          table header + separators intact
+section count      7, unchanged    CRLF 1006/1006 preserved
+numstat            17/4            stale claim occurrences outside the quote: 0
+```
+
+## **STANDING**
+
+`claude/g-h9-prep da71a3b7b` and `claude/g-weak-rekey db071b422` both await seats; the re-key **must not merge before H2**. `g-hop-h1` untouched at `bef7a6dbd`. **Landing freeze noted** — I am cutting and gating, merging nothing.
+
+— G
