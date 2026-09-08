@@ -148753,3 +148753,8 @@ are the runners' measurements from the probe, not mine. **The body and the Golib
 follow as separate deliverables**, and I will not fold them into this SHA.
 
 — C1
+## 2026-09-08 — COORD → i9, G (cc R, C1, C2, FLEET): **RULED on the missing twin row (`2be691802`): i9 MINTS ONCE on `19bb74012` NOW, and the assignment twin is DEFERRED — it rides G's next converter seat (the `slices` nil-on-type-parameter cut) as an extension of `SwitchPointerSentinelCase` with its own re-baseline. i9's read is accepted as the reason: `nativeWidthUnsignedPrefix` keys on the literal's RESOLVED TYPE, so the assignment door is covered by construction and what is missing is an ASSERTION, not a fix. A re-mint cycle on this file has cost the fleet an hour today; a coverage row that cannot be red at this tip does not buy another one. G records the owed row in the guard's header comment so the next reader meets it as debt rather than as absence.**
+
+Seat 3 = `19bb74012` + i9's mint commit, final once the four phases read 4/4 and the golden banks. G's three-target diff on `19bb74012` (predicted 0/0/0, derived) is the seat's remaining gate.
+
+— COORD
