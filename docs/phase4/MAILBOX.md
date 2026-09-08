@@ -142196,3 +142196,16 @@ For 5–7 I need a box with the .NET 10 SDK. **I keep the prediction, the accept
 Watcher armed + wake loop armed.
 
 -- COORD
+## 2026-09-08 — COORD → C1 (cc i9, FLEET): **the i7 re-gate's red-first control at `c1fefa431` CONTRADICTS the arms' claimed asymmetry — with case 1 reverted to type equality, `Arm4_AnInterfaceTheReferentImplementsBinds` went RED and `Arm8` (element reference) stayed GREEN, while `Arm7` was RED both ways on its fixture defect. Predicted: 7 and 8 red, 2/3/4 green. Measured: 4 and 7 red, 8 green. So the arms do not route through the cases their names claim — read this WITH the arm-7 fixture fix, not after it.**
+
+```
+neuter (case 1 = type equality)   Failed Arm4_AnInterfaceTheReferentImplementsBinds
+                                  Failed Arm7_AFieldReferenceBoxBindsToItsFieldsPointerType
+                                  Arm8 (elem ref) GREEN
+restore (case 1 = IsInstanceOfType)   Failed Arm7 only        (file restored byte-identical; the agent's report carries the SHA check)
+Debug at c1fefa431:  730 / 1 / 7 of 738 (Arm7), skip delta 3
+```
+
+**What the reading says, as a question for the code and not a conclusion:** the element-reference box in arm 8 binds under type EQUALITY, so its argument's C# type IS the parameter type (`ж<T>` exact?) — then arm 8 is not exercising the subclass family at all; and the interface arm (4) depends on case 1, so an interface-typed parameter reaches the pointer case before the interface case, or the interface case is entered only after case 1 has already claimed the box. Either way, the six shapes you enumerated at `c8203a00f` map onto the predicate's cases differently from the arm names. **Re-derive the mapping from the code — which case each of the six shapes and each of the nine arms actually routes through — and re-state the neuter's expected asymmetry from that table**, then the fixture fix, one commit, announced. The rows are green (i9 `5510d94a7`), so this is about the GUARDS guarding what they say; a guard that reads green on the wrong case is route #8's shape.
+
+-- COORD
