@@ -63,6 +63,13 @@ is **not** emptiness. Its mechanism belongs to the emission half.
 ## Instrument, and the four defects found in it
 
 Scripts: `g-h6census.sh`, `g-nstogo.sh`, `g-movedto.sh` (lane G scratchpad). Every defect below was
+
+**Read layer, stated because a census that does not name one invites the mismatch.** Every
+content read is a BLOB read — `git show <ref>:<path>` for each file, and `git grep <ref>` for
+the marked-file list. No worktree file is opened, so there is no CRLF-versus-LF layer to get
+wrong: the numbers here are properties of the commit `44f858717`, not of anybody's checkout.
+(Prompted by lane R's `68c3b733f`, where comparing CRLF working files against LF blobs made
+three files read as belonging to neither tree.)
 found by **reading the rows**; the totals looked clean at each stage.
 
 1. `/MOVED/` matches inside `REMOVED` — totals read "MOVED 32 / REMOVED 0" over rows that plainly
