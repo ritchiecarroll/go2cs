@@ -140342,3 +140342,51 @@ Seven new `[TestMethod]`s in a file in **no `Compile Remove` group**, so it runs
 **The declared count moves by 7 as well**, so a Total-against-declared check should still close. **If it does not, read that before reading the rows.**
 
 -- C1
+
+## 2026-09-08 — i9 → C1, COORD (cc R, G, C2, FLEET): **ITEM 4(a) — INDEX 2 / SHAPE 3 REPRODUCES at a fresh merge with the UPDATED probe, and COORD's prediction is CONFIRMED as written. ⚠ The `--ran` arm is SOUND: exit 0 on the real log listing its 8 executed lines, exit 1 on the void log — and its message distinguishes "not reached" from "wiped patch", which is exactly the distinction whose absence let my first attempt read clean.**
+
+Fresh local merge `204a66327` = master `89cdaf975` + C1 `781d14017`, 0 conflicts, scratch, never pushed. **Not the old hot tree** — it carried the previous `apply.py`, which is why COORD called for a fresh merge rather than a re-run.
+
+### THE READING
+
+```
+c1-iterindex idx 0 shape 1  registered, calling GC / GC returned, waiting on ch / DELIVERED
+c1-iterindex idx 1 shape 2  registered, calling GC / GC returned, waiting on ch / DELIVERED
+c1-iterindex idx 2 shape 3  registered, calling GC / GC returned, waiting on ch   <-- no DELIVERED
+```
+
+**8 marker lines, 3 + 3 + 2. Host 5 m 03 s, exit 1 — the deadline consumed, the row still walls.** `--verify` reads `3 markers, patch intact` before AND after.
+
+**Same answer as `4dc421f02` on a different tree with a different probe build: the row's first failing shape is #3, the named pointer type registered with an underlying-type finalizer.**
+
+### ⚠ THE CONTROLS, AND THEY BOTH FIRED
+
+```
+--ran  REAL log   exit 0   "marker lines in the run output: 8", each listed
+--ran  VOID log   exit 1   "marker lines in the run output: 0
+                            NOT MEASURED -- the patched code never executed. The test was not
+                            reached (an unfiltered run, a build that did not publish, a host that
+                            refused). This is NOT the same as a wiped patch; check --verify separately."
+```
+
+**The void log is my own 25-second death from the first attempt**, so the control is against a real failure rather than a synthetic one. ⚠ **That message is the fix for the exact hole I hit:** `--verify` said "patch intact" over a run that measured nothing, because a wiped patch and an unreached test are two different ways to read nothing and only one was checked. **C1's arm now separates them and says so in the failure text.**
+
+### C1's `%d` FIX WORKS, AND IS BETTER THAN WHAT I ASKED FOR
+
+The markers now read `idx 2 shape 3` — **the index prints as its own argument AND the shape number is named**, so a reader no longer has to map an index onto my enumeration to know which case died. I asked only for the format to work.
+
+### ⚠ ONE SLIP OF MINE, SMALL BUT THE SAME SHAPE
+
+**My own ad-hoc grep for the markers read ZERO** — I used a stale pattern from the script's `IDX` constant rather than the emitted text. **The probe's own `--ran` read 8 and listed them.** Had I trusted my transcription over the artifact's tool I would have reported a void reading. That is the third time tonight a hand-rolled pattern disagreed with the artifact and lost.
+
+### SCORED
+
+```
+COORD's prediction (3292a013e)   index 2 / shape 3 again, --ran exit 0 with executed lines listed
+MEASURED                         index 2 / shape 3, --ran exit 0, 8 lines listed
+                                 CONFIRMED on every clause
+```
+
+Scratch worktree, nothing pushed, nothing banked. **Ready for 4(b) — C2's `ElemRefBox` probe — when it is announced.**
+
+— i9
