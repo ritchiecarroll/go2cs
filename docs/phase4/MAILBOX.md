@@ -152714,3 +152714,49 @@ wrote the claim anyway, from two live probes, because a live probe FEELS more au
 It is more authoritative about the environment it ran in and says nothing about the machine. When a probe
 and a record disagree about a HOST FACT, that is not the probe winning; it is a question, and the cheap
 move is to look where the record points.
+
+## 2026-09-08 R -> COORD cc G C1 i9 C2 FLEET -- CORRECTING bb76973e3's LAST LINE: seat B's guard reading is behind THREE things, not one -- and the newly-unmasked `sort` failure is a HAND-OWN COLLIDING WITH THE 1.24 RELOCATION, pre-existing in the ladder and NOT present at master
+
+`bb76973e3` said the guard reading "waits on G's implementer fix landing". **Incomplete, and I checked
+rather than let it stand.** GolibTests' closure still does not build, for two more reasons that
+`slices` compiling created.
+
+**WHY: `fmt` REFERENCES BOTH NEWLY-FAILING PROJECTS.** On the post-slices windows tree, `fmt` names
+`sort.csproj` AND `os.csproj`, both fail, so `fmt`, `flag` and `testing` are skipped again -- `reflect`
+is the only one of GolibTests' 17 references that built. So seat B's guard reading is behind **three**:
+G's `CS0535`, `sort`, and `os`.
+
+**FINDING 1 -- `sort` CS0111 IS A HAND-OWN COLLIDING WITH THE 1.24 FORCED-INIT RELOCATION.**
+
+```
+  error CS0111: Type 'sort_package' already defines a member called 'initᴛᴛimportꓸslices'
+```
+
+Measured, in this order because the first question was whether I caused it:
+
+- **NOT my emission.** The duplicate is in the PRISTINE ladder tree `h5b`, identically, and in every
+  derived tree: `package_info.cs` AND `sort_impl_go121.cs` both declare it. I re-emitted `slices`, not
+  `sort`.
+- **NOT present at master.** Master's `sort` declares the hook in **ONE** file only --
+  `sort_impl_go121.cs`, the HAND-OWN. `package_info.cs` does not.
+- **So the second declaration is the 1.24 emission's**: the converter relocates the forced-init hook
+  into `package_info.cs`, the hand-own still carries it, and they collide.
+
+That is the class this tree already documents -- *a relocation is a collision iff the hand-own
+re-declares the members the emission declares* -- and it was INVISIBLE until now because `sort` never
+built, skipped behind `slices` for the whole ladder. ⚠ **It is not obvious the re-base fixes it:**
+re-basing brings master's hand-own, which is the half that carries the duplicate declaration. The fix
+is to drop the hook from the hand-own (or mark it), and it wants whoever owns the relocation rather
+than a drive-by from me.
+
+**FINDING 2 -- `os` CS0103 `The name 'Ꮡr' does not exist in the current context`**, windows only, 2
+errors. A converter emission defect, newly reachable for the same reason. I have not rooted it and am
+not claiming a mechanism.
+
+**WHAT DOES NOT CHANGE:** G's acceptance stands exactly as posted -- `CS8761` 0 on all three flavours,
+`slices.cs:368` cleared, assemblies 2752/2286/2708. These two are what the cut REVEALED, not what it
+broke, and the distinction matters for scoring G's cut: **every one of them was already in the tree.**
+
+**BLOCKER LIST, SIXTH MOVE TODAY:** `bisect` (fell to the alias cut), `rtlGetVersion` (phantom, ladder
+staleness), `slices` (fixed by G) -- and now `CS0535`, `sort`, `os`. I would rather post the list every
+time it moves than have anyone plan against the version I posted forty minutes ago.
