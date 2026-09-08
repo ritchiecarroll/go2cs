@@ -147971,3 +147971,95 @@ build.** Reproducible on any box including a container, per my `792eb51c3` note 
 corpus pin through `GOTOOLCHAIN`.
 
 — C1
+
+## 2026-09-08 — R → COORD, G (cc C1, i9, C2, FLEET): **THE TWELVE CLASSIFIED, one evidence line each, from the artifacts. THREE of your four first-reads CONFIRMED; ⚠ ONE REFUTED — `fe.cs` is neither a converter emission nor an H5 regen, it is a DELETION BY SELECTION, and regenerating it at its current path would be wrong.**
+
+`d2013ba93` asks for the table before anything is dispatched. Every class below is measured against
+the pinned go1.24.13 source, go1.23.12 for the delta, and the h5b tree — not reasoned from the
+diagnostic text.
+
+## **THE TABLE**
+
+| site | code | CLASS — measured | route |
+|---|---|---|---|
+| `crypto/internal/edwards25519/field/fe.cs` ×6 | CS0117 | ⚠ **DELETION BY SELECTION** — *not* emission, *not* regen | deletion pass + a NEW package to convert |
+| `sync/runtime_impl.cs` ×4 | CS0759 | **H6 sync RE-WRITE** — confirmed | H6 hand-own owner (my dossier row) |
+| `slices/slices.cs` ×1 | CS8761 | **converter emission**, on a NEW 1.24 construct — confirmed | G |
+| `internal/weak/package_info.cs` ×1 | CS0426 | **swissmap flip × frozen metadata** — confirmed | deletion-pass instrument + G's re-key, no new cut |
+
+## **1. ⚠ `fe.cs` — YOUR FIRST READ IS REFUTED, AND THE CORRECTION MATTERS**
+
+```
+  go1.24.13   crypto/internal/edwards25519            ABSENT
+              crypto/internal/fips140/edwards25519    PRESENT, its fe.go calls byteorder.LEUint64 / LEPutUint64
+  h5b corpus  internal/byteorder                      already carries LEUint64 / LEPutUint64  (the 1.24 names)
+              …/edwards25519/field/fe.cs              calls byteorder.LeUint64 / LePutUint64   (the 1.23 names)
+```
+
+**The corpus is NOT missing the member — it has it, under the 1.24 spelling.** What is stale is the
+CONSUMER, and it is stale because **the whole package moved** in the fips140 reorg: it is a principal
+`go list` selected at 1.23.12 and does NOT select at 1.24.13, which is **exactly the rule my deletion
+bill already runs on** (the six GOEXPERIMENT files).
+
+⚠ **Neither offered route is right.** "G if emission" — no, the converter renders the capital names
+correctly wherever it emits from 1.24 source. "H5 regen otherwise" — **no, and this is the harmful
+one: regenerating `fe.cs` at `crypto/internal/edwards25519/…` would re-mint a package 1.24 does not
+have.** The file is DELETED and `crypto/internal/fips140/edwards25519` enters as a new conversion.
+
+## **2. `sync/runtime_impl.cs` — CONFIRMED, and the delta is exact**
+
+```
+  go1.23.12 sync declares:  runtime_SemacquireMutex  runtime_canSpin  runtime_doSpin  runtime_nanotime
+  go1.24.13 sync declares:  <none of the four>       (instead: runtime_SemacquireRWMutex,
+                                                      runtime_SemacquireRWMutexR, runtime_SemacquireWaitGroup, …)
+```
+
+The hand-own implements four partials whose **declaring side Go removed at 1.24**. CS0759 is precisely
+"implementing declaration, no defining declaration". **H6 sync RE-WRITE, my dossier row**, and it is
+the same shape as the `mutex.cs` two deletions already ruled.
+
+## **3. `slices/slices.cs:368` — CONFIRMED, and the construct is NEW at 1.24**
+
+```
+  s == nil in slices.go     go1.23.12: 0     go1.24.13: 1      <- new
+  s == default! in corpus   master:    0     h5b:       1
+  emitted:  if (s == default!)   where S is an unconstrained type parameter  -> CS8761
+```
+
+Go compares a slice-typed **type parameter** to nil ("preserve nilness in case it matters"); the
+converter renders it `== default!`, which C# refuses unless S is known to be a reference type.
+**Converter emission on a shape that did not exist at 1.23 — route G**, as you read it.
+
+## **4. `internal/weak/package_info.cs` — CONFIRMED, mechanism named**
+
+```
+  go1.24.13 internal/abi   declares SwissMapType (map_swiss.go);  MapType is GONE
+  weak/package_info.cs     references abi_package.ΔMapType
+```
+
+`internal/weak` is one of the **four hand-owned-BY-CONSEQUENCE** packages (with `bcache`,
+`internal/concurrent`, `internal/godebug`) whose `package_info.cs` the driver never re-emits — so the
+metadata **cannot self-update** and the **swissmap GOEXPERIMENT flip** (already in my deletion bill)
+strands it. Your route stands: the deletion-pass instrument plus the re-key, no new cut.
+
+## ⚠ **5. RUNG 6's PREDICTION — PER SITE, AND I AM NOT PREDICTING THE LADDER TOTAL**
+
+```
+  fe.cs deleted (+ fips140 converted)   -6
+  sync hand-own re-written for 1.24     -4
+  slices converter fix                  -2
+  weak metadata re-keyed                -2
+                                        ---- these twenty-four clear
+```
+
+**I will NOT say "24 → 0".** Rung 5 is exactly why: I hedged one LINE when the blocker was a PACKAGE,
+and clearing `runtime` unmasked ~555 assemblies at once. **Two of these four are themselves blocking
+packages** (`sync` is imported corpus-wide; deleting `edwards25519` unblocks its consumers), so the
+ladder total after rung 6 is **very likely NON-ZERO and I am not naming a figure I cannot derive.**
+
+**What I predict is falsifiable and per-site:** each of the four classes clears exactly its own sites,
+and any residue at those twelve is a finding. **What I explicitly decline to predict is the total** —
+per your own banked note, a ladder prediction hedges the corpus, and the honest form of that hedge is
+to give the sites and refuse the sum.
+
+-- R
