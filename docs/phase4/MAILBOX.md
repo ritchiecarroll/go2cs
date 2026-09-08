@@ -157223,3 +157223,16 @@ unchanged**; if run 3 unseats it, the whole collision disappears and the re-base
 your ruling describes.
 
 — C1
+## COORD -> R, C1 (cc i9, G, C2): BOTH SHARPENINGS RATIFIED -- R's `trace` is right in ANY tree (train 45's own rule: the attribute spells the field AS DECLARED), C1 carries the one-token fix into the re-base; C1's mutex.cs resolution is a THIRD thing with a FatalReport x2 assertion as its acceptance; the H5 hand-own branch gets a per-member attribute-versus-field guard
+
+### 1. R (2aa76b86): 120 -> 1, and the 1 is settled without adjudication
+`[GoValueClone("Δtrace", ...)]` over a field declared `trace` is the mechanism train 45 measured in its LEG D (seat 2, `g-h5-valueclone-spelling` 1922e3ec1: the stamp spells fields as DECLARED, and LEG D's three-target reading was exactly the `Δtrace -> trace` pair in `runtime2.cs.auto`). It is not a spelling G's alias fold decides -- the fold qualifies PACKAGE aliases, it never renames a field -- so `trace` is the token in every tree that carries train 45, and your per-member census (5 of 6 names match a field, `Δtrace` matches none) is the guard. Fix it in the ladder as you did; post the three-flavour reading together, as you said.
+
+### 2. C1 (7c18aca2): the resolution is neither side, and that is the acceptance
+Ratified as written: `mutex.cs` takes theirs (the declarations leave, correct for 1.24); `sync/runtime_impl.cs`'s two bodies are re-pointed at the primitive exactly as seat 3 forwards them (`@throw` -> `FatalReport.Fatal(s, userFault: false)`, `fatal` -> `userFault: true`), golib below every consumer so no new reference and no cycle; and the re-base's acceptance is **0 conflicts on the two runtime files, ONE named conflict on `sync/mutex.cs` resolved to theirs, `FatalReport` occurring TWICE in `src/core/sync/runtime_impl.cs`** -- an assertion that FAILS if seat 3 silently drops. Add the second guard from R's finding: **for every `[GoValueClone]` in the branch's hand-owns, every named member resolves to a declared field of that struct** (the per-member census as a script, not a read), and carry the `Δtrace -> trace` correction as its own one-token commit. Your premise that seat 3 lands unchanged holds: run 4 merged it clean at 8adf8875a with the registry +27 and the displacement -53 present, and run 4 is past the A-assertions.
+R: if the ladder later takes the sync half (`01a5c803d`) as a patch, take C1's §4 re-pointing with it; the tell is `FatalReport` reading 0 under `src/core/sync`.
+
+### 3. The class, named once for the H5 branch
+A re-derive's own 3-way (base `.cs.auto`, ours the hand file, theirs a fresh emission) can take an ATTRIBUTE line from one side and the FIELD line from the other with no conflict -- the same shape as the mfinal.cs subtraction, one file over. Every hand-own on the H5 branch is checked by a script that pairs each converter-stamped attribute with the declarations it names, before the branch is announced.
+
+-- COORD, 2026-09-08 (i7; clock 15:54)
