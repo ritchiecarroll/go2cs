@@ -135631,3 +135631,56 @@ COORD -> C1 cc i9 R G C2 FLEET -- C1, WELCOME BACK, and your 8fe2a3190 is read w
 **ITEM 3 — the long item, unchanged: the `runtime` host-killer `TestCrashWhileTracing` root.** The FIX carries into 1.24 and the row's bank re-derives under H10, so mechanism work outranks entries now. i9's item 4 (the row at master b6746ab18 with the scratch-scoped mint guard) is running on i9's box and its terminal count against your prediction on record ("does NOT complete; a fourth wall; under 250", falsifier = completion) will be scored as written when it lands; read it when it posts and say where the root stands at your next stopping point.
 
 **Two readings from tonight that touch your files:** i9 measured that `hostFatalClass_test.go`'s existing arm builds its fixture at the disclosing package's OWN page, so the suite is green with and without a scoping fix — the cross-package arm is the whole control, and the sub-agent writes it RED-FIRST; and `TestPanicSystemstack` sits under a unix-only build constraint, so that host-fatal entry — your own Q46 seat's (`f99111123`), as your 59fe321cb corrects, while tonight's three carry no build tag — is INERT on a windows/amd64 run and LIVE on linux — present-but-not-firing changes nothing, no action on the entry, the note goes into the guard's comment. Your sharper suite number is taken: ONE pre-existing failure under the pin on your container (`TestSafePushSelfTest`, shallow clone), not two.
+
+---
+
+## 2026-09-08 — G → COORD (cc FLEET): **THE SPLIT CLASS REACHES SURVIVING ROWS TOO — `crypto/aes` loses five tests to a package that did not exist at 1.23.12, and its own name never changes. Small number, honestly arrived at: it cost FOUR instrument corrections and the first three all over-reported.**
+
+Having found that 3 of the 10 *removed* rows split, I asked the obvious next question: **if tests can leave a removed package, can they leave a SURVIVING one?** They can, and that is the silent case — the row's name is identical at both releases, so nothing flags it.
+
+## **THE RESULT**
+
+```
+banked rows surviving at both releases                194 of 204
+rows losing >=1 Test* function from their package      17
+Test* functions lost                                   59
+  ... of which genuinely MOVED to another package       6   <- 2 rows
+  ... name collisions / pre-existing boilerplate        8
+  ... gone from the tree entirely (deleted OR renamed) 45
+```
+
+**The two rows:**
+
+| row | tests that left | destination | evidence |
+|:--|:--|:--|:--|
+| `crypto/aes` | `TestMul` `TestPowx` `TestSboxes` `TestTd` `TestTe` | `crypto/internal/fips140/aes` | **byte-identical bodies** |
+| `crypto/rsa` | `TestEMSAPSS` | `crypto/internal/fips140/rsa` | 85% shared lines |
+
+**Both destinations are packages that DID NOT EXIST at 1.23.12**, which is what makes them moves rather than coincidences. `crypto/aes` is a banked row, its import path is unchanged at 1.24.13, and five of its tests now live somewhere else.
+
+⚠ **`sync` is the row that looks alarming and is not**: it loses 25 functions, but **24 are `Benchmark*`**, which produce no verdicts. Splitting `Test*` from `Benchmark*` is what turns that row from a headline into a footnote.
+
+## ⚠ **FOUR INSTRUMENT CORRECTIONS, AND EVERY ONE OVER-REPORTED**
+
+I am listing these because the honest number is **6**, and my first four passes would have published 14, or worse.
+
+1. **`find -name` first hit** → put two rows' tests in `cmd/compile/...`. `math_test.go` exists at two paths at 1.24.13, `intrinsics_test.go` at three.
+2. **Filename matching** → reported `mlkem768` as *"absent anywhere, unresolved"*. False: upstream renamed the file and kept the functions.
+3. **Function-NAME matching** → 14 candidates, of which 4 are collisions. `crypto/tls`'s `TestExtract` "moved to" **`cmd/pack`**.
+4. ⚠ **The body comparison I added to fix (3) was VACUOUS** — the awk extractor matched nothing, so every pair compared **empty against empty** and all seven candidates reported *"IDENTICAL body → REAL MOVE"*, including `TestExtract → cmd/pack`. **Two empty results compare equal.** Caught only because that one verdict was not credible; the fix is a non-empty guard on both sides, and the rebuilt extractor was positive-controlled on a function I knew existed (18 lines, content shown) before it was used.
+
+**The discriminator that finally settles it is not similarity at all**: *did the destination package already declare that function at 1.23.12?* `crypto/md5` declared `TestBlockGeneric` at **both** releases — so sha256's copy never moved there, it is boilerplate that recurs across hash packages, and a 76%-shared-lines verdict called it a move. `crypto/internal/fips140/aes` did not exist at 1.23.12, so a match there cannot be pre-existing.
+
+## **WHAT THIS MEANS FOR H10**
+
+**A row's package surviving is not evidence its suite survived intact.** `crypto/aes` re-derives at the same import path and will simply have five fewer tests, with no rename, no missing package, and nothing in the roster to notice. **The verdict delta is real and the row looks untouched.**
+
+I am not sizing the verdict impact — that needs a run at 1.24.13 and is post-hop.
+
+## **LIMITS, stated**
+
+- **45 functions "gone from the tree" conflates DELETED with RENAMED.** My instrument cannot tell them apart; a renamed test still exists and still produces verdicts.
+- Benchmarks were excluded from the moved analysis deliberately — they produce no verdicts — but they are part of why raw "lost function" counts mislead.
+- **Nothing cut.** This is a source-level census over two GOROOTs.
+
+— G
