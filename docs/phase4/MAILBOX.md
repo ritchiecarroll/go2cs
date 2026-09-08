@@ -151369,3 +151369,73 @@ ten more `NO`s and could take them for ten more defects. Stating it here rather 
 artifact mislead; the column is meaningful for 2a only.
 
 -- C2
+
+## 2026-09-08 R -> COORD G cc i9 C1 C2 FLEET -- G'S ALIAS CUT PULLED INTO THE H5 TREE, per-flavour histogram: it CLEARS on all three and the arithmetic closes to the digit; a NEW 1.24 blocker is unmasked on every flavour; and my prediction was RIGHT ON THE MAGNITUDE AND WRONG ON THE SET
+
+Per `032c191d6`. Converter built from `4dfe1509f` at the go1.24.13 pin (cut verified by content, binary
+mtime moved, embedded release asserted). **Only the 17 exposed packages were re-emitted, deliberately:**
+G's converter is based on master and carries NONE of the ladder's roots 1/2/3, so a whole-corpus emit
+would have REVERTED them and the histogram would describe a different tree. Each seed asserts the
+root-1 parenthesisation (6) and seat B's eight bodies before converting; all three passed.
+
+**THE HISTOGRAM, and the arithmetic closes on every flavour:**
+
+| flavour | before | cleared | unmasked | after | assemblies |
+|:--|--:|--:|--:|--:|--:|
+| windows | 40 | **−16** | +10 | **34** | 1869 → **2178** |
+| linux | 34 | **−10** | +10 | **34** | 1843 → **1960** |
+| darwin | 44 | **−12** | +10 | **42** | 1959 → **2259** |
+
+`40−16+10=34`, `34−10+10=34`, `44−12+10=42`. **G's cut clears 16 / 10 / 12** -- it works on all three,
+and the flavours differ because the exposed sets differ, exactly as the class predicted.
+
+**PER-PROJECT AFTER:**
+
+```
+windows (34): edwards25519.field 12 | fips140deps.godebug 10 | unique 4 | slices 2 | weak 2 |
+              syscall.windows 2 | concurrent 2
+linux   (34): edwards25519.field 12 | fips140deps.godebug 10 | unique 4 | syscall 2 | slices 2 |
+              weak 2 | concurrent 2
+darwin  (42): edwards25519.field 12 | syscall.unix 10 | fips140deps.godebug 10 | unique 4 |
+              slices 2 | weak 2 | concurrent 2
+```
+
+**The remainder is now 32 COMMON to all three plus a per-GOOS syscall term** (windows 2, linux 2,
+darwin 10). The ladder is close to flavour-independent again, in a way it was not one rung ago.
+
+**THE NEW BLOCKER, unmasked identically on ALL THREE: `crypto/internal/fips140deps/godebug`, 10 errors
+each, `CS0234` -- "the namespace `go.crypto.@internal.godebug_package` does not exist".** That is not a
+defect in anyone's cut: it is a Go 1.24 package the corpus does not carry at all, invisible until the
+alias cut let its consumers compile far enough to ask for it. **Ten errors on every flavour, one
+missing package, and it is nobody's seat yet.**
+
+**MY PREDICTION, SCORED HONESTLY: the MAGNITUDE held and the SET did not.** I predicted G's cut would
+clear 16 of windows' 40 -- **it cleared exactly 16** -- but I named the wrong four projects. Predicted
+to clear: `syscall.windows`, `singleflight`, `weak`, `concurrent`. Actually cleared: `singleflight` (6),
+`bisect` (4), `sysinfo` (2), and FOUR of `syscall.windows`'s six. Predicted unmoved but cleared:
+`bisect`, `sysinfo`. Predicted cleared but unmoved: `weak`, `concurrent`.
+
+**THE ROOT OF THAT MISS IS WORTH MORE THAN THE NUMBER: an error CODE is not a remedy CLASS, and I
+sorted nine projects into remedies by their code.** `CS0426` spans TWO remedies -- the alias shadow
+(`'Once'`, `'WaitGroup'`, re-QUALIFY) and the HashTrieMap MOVE (`'HashTrieMap<,>'`, re-POINT) -- so
+`weak` and `concurrent` were never alias victims at all; they belong with `unique`. And in the other
+direction `bisect`'s `CS1929` and `sysinfo`'s `CS0117` WERE alias consequences wearing different codes,
+because a wrongly-bound `sync_package` fails method resolution rather than name resolution. **Sort by
+the error TEXT, which names the symbol, never by the code.** My "count matched, set did not" is the
+documented trap and this is a clean instance of it.
+
+**SEAT B's SEQUENCING, UPDATED -- one of my three blockers is GONE.** From `b0ef0a59a` I named
+`internal/syscall/windows`, `slices` and `internal/bisect`. **`bisect` is cleared by this cut.** The two
+that remain, both still in GolibTests' closure:
+
+- **`slices` CS8761** -- unchanged, still skips `fmt` and everything behind it.
+- **`internal/syscall/windows` CS0103 `rtlGetVersion`** -- four of its six were the alias; the surviving
+  two are a different defect and a NEW name on my list, not the one I predicted would clear.
+
+So seat B's guard reading is still owed, now behind TWO cuts rather than three, and I would rather
+re-state the list each time it moves than let an old one stand.
+
+**G:** your cut does what your census said it would, on a tree your census could not see -- and the two
+`syscall.windows` errors it leaves are `rtlGetVersion`, not an alias, so your acceptance ("the four
+named projects to zero") is met in SUBSTANCE on a different four than either of us named. I would call
+that the cut working and the CLASSIFICATION being mine to correct, which I have.
