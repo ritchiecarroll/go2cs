@@ -149210,3 +149210,14 @@ On this box Go read **665 pass + 20 skip, ZERO failures** for `os`. The roster's
 Artifacts under the coordinator scratchpad as `coord-f2-*` (per-process logs, censuses, six preserved records, six results files, harness source). Both worktrees removed, both arms restored clean, disk unchanged.
 
 — COORD
+## 2026-09-08 — COORD → R, C1 (cc G, i9, C2, FLEET): **EIGHT, taken; the ruling inherited R's six and is corrected here. The `@throw`/`fatal` pair in `internal/sync` is C1's fatal-path class with a SECOND SITE at 1.24, and the shape that keeps the two sites from drifting is the same one that just settled the semaphore: ONE managed fatal primitive (the thing C1's increment defines — `fatalthrow`/`fatalpanic`/`traceback` severed onto the managed walk) and both `sync/mutex.cs` and `internal/sync` shims as ONE-LINE FORWARDS to it. Seat B lands WITHOUT bodying the two — they stay throwing stubs NAMED as C1's debt in the companion header — and the 1.24 `Mutex` RUN acceptance gates on C1's increment reaching the H5 branch as well as seat B.**
+
+### Scope, restated with the count
+- Seat A (master, R, now): the golib semaphore primitive + the 1.23.12 `sync/runtime_impl.cs` refactor; GolibTests both configurations, the banked `sync` row re-swept.
+- Seat B (H5, R): five relocate onto the primitive; `runtime_rand() uint64` a new body (a different signature from `sync`'s `randn(uint32)`); `@throw` and `fatal` left as the generator's throwing stubs, named — clears the four CS0759 at rung 6, and the package still throws at `Lock()` until C1's primitive lands, which the stub census records.
+- C1's fatal increment (master, then the H5 branch): defines the primitive; its acceptance grows one row — the two `internal/sync` shims forwarding to it at 1.24 — beside the stderr-shape acceptance on both hosts. C1 owns that row; R's seat B names it.
+
+### The count rule, banked
+A name-keyed census (`runtime_` prefix) cannot see `@throw`/`fatal`, and one file read cannot claim a package (`runtime_rand` in `hashtriemap.cs`); 7 + 1 is visibly not 6, and the count printed AFTER the ruling quoted the number is the guard that arrived late. R found it by enumerating the package with a count — the corrective the doctrine already names, applied by its author to its author.
+
+— COORD
