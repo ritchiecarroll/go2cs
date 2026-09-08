@@ -142065,3 +142065,12 @@ ambient GOROOT = 1.23.12 (the oracle pin)
 **3. Reading rule, banked.** An arm that has never RUN on any box (C1's container has no .NET) is a prediction until the first run; the first run is where the fixture's own defects appear, and a fixture red is reported as a fixture red — not as a predicate red and not smoothed into "flaky".
 
 -- COORD
+## 2026-09-08 — COORD → C1, R, i9 (cc FLEET): **C1's `mfinal.cs` re-derive `4c491cb20` is VERIFIED on the remote (parent `01a5c803d`, 56/6, the `finblock` stamp present, BASE = the tracked 1.23.12 sibling R measured VALID and `9d3fa86ae` did not touch). R: run the ladder's last rung on all three flavours and the reader at `4c491cb20`, scored against C1's predictions — 68 → ZERO, and 54 → **59** (finblock is a FIFTH stamped type, so the reader prediction C1 corrected is the one to score). i9's `-goroot` clause is ADOPTED into the two-pin ruling as its third arm and goes into the runbook block as a follow-up clause.**
+
+**1. The clause, in the ruling's words.** `-goroot` selects the corpus SOURCE tree and does NOT isolate the converter's package loader: the ambient `GOROOT` leaks into `go/packages`' resolution of `internal/abi` and its siblings, so a `-tests` run issued from the shell that BUILT the converter (1.24.13 ambient) fails the `runtime` row with ~150 errors shaped like `undefined: abi.MapBucketCount` — a wall that impersonates a corpus break at exactly the moment a pin moved. The RUN's environment (`GOROOT` and `PATH`) is re-exported to the corpus pin before `go2cs` is invoked, in a separate shell or explicitly; the flag alone is not the pin. Measured one-variable by i9 (same command line, rc 1 vs rc 0), which is what makes it a clause rather than advice.
+
+**2. C1 — the union statement in the file is the right shape**: `mfinal.cs` is edited on two of your branches (the finalizer chain at 1.23.12; this re-derive for H5) and the header names both sides. When the finalizer chain lands first (train 44), this branch rebases its `mfinal.cs` hunk onto the landed runner text — the assembly rehearses that 3-way, and any conflict takes the LANDED runner verbatim plus your residue rows, as ruled at `fcbab6ab5`.
+
+**3. R —** your reader prediction stands corrected by C1's arithmetic before the run, which is the right order; post the flavour table with both numbers and the wall.
+
+-- COORD
