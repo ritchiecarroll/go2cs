@@ -787,6 +787,16 @@ ONE stdlib in a build; there is now only one on disk.
   the Go-side predicate is byte-for-byte the C# `ConverterBuildInputs` one, and a THIRD derivation of
   the embed-directive rule had drifted (no whitespace guard): **three derivations of one predicate are
   kept in lockstep, or one of them under-reports.**
+  ⚠ **A DEFECT WAS A DRIFT BETWEEN TWO BRANCHES OF ONE PREDICATE** (2026-09-08): the converter's
+  literal path has two above-MaxUint32 branches — the UNSIGNED parse (value > MaxInt64) carried the
+  native-width rule WITH a comment stating it (`(nuint)` before the `UL`, because a bare `ulong` has
+  no implicit conversion) and the SIGNED parse (value <= MaxInt64, where `0x0102030405060708` lives)
+  never got it, so a `uintptr` variable initialised from such a constant emitted
+  `0x0102030405060708UL` against golib's EXPLICIT-only `uint64` operator (CS0266). Fixed as ONE
+  helper both branches call, never a second copy of the rule, with the red control neutering the
+  helper. **And the ZERO corpus footprint is DERIVED, not censused**: the corpus compiles 307/307
+  today, so any site taking the signed branch in a native-width unsigned context would ALREADY be
+  CS0266 — a differing file would be a finding about the COMPILE GATE, not about the fix.
 - **FALSE-GREEN route #2 — stale OUTPUT (fixed 2026-07-20).** Distinct from the stale-`go2cs.exe` trap
   (route #1, where an un-rebuilt binary runs old logic): here the exe IS current but the runners *skip
   transpiling* and validate the **previous** converter's `.cs`. All three of `BehavioralRunner.UpToDate`,
@@ -983,6 +993,19 @@ ONE stdlib in a build; there is now only one on disk.
   — the control caught it (NOTHING assembled, ABORT) and the relaunch cost two minutes (2026-09-08
   00:00). **A derived script states its launch shape in its header, and a robust one derives
   `ORIG_PATH` by REMOVING the pin directories rather than by trusting the launch.**
+  ⚠ **`bin/Release/Go/<p>.exe` IS THE GO BINARY, not the C# one** (2026-09-08, named at
+  `BehavioralRunner/Program.cs:1049`): running it as the C# side produced `8 1` exit 0 twenty times
+  — one step from a false "passes in one build flavour, fails in another" finding. The C# program is
+  `bin/Release/net10.0/<p>.exe`, and a stack naming `main.cs` is the tell. Disclosed by its author
+  before it was posted; the same family as trap (4) above.
+  ⚠ **AN ASSEMBLY COUNT TAKEN FROM DISK BY MTIME COUNTS FILES, NOT ASSEMBLIES** (2026-09-08): every
+  behavioral project's `bin` holds a private copy of the shared core closure, so a same-box baseline
+  first read **46,802** "assemblies" for a `go2cs.slnx` build that produces **878** — caught by
+  IMPLAUSIBILITY against the tree's own recorded figure, re-derived from the build log's per-project
+  output lines (878, exact), and cross-checked by the wall RATIO at the SAME count (235 s on the i9
+  against 923 s on the i7 class; a faster wall with a smaller count would have meant skipped work).
+  **A baseline whose population its author cannot name has no business being the control**, and the
+  correction is posted, not quietly replaced. CS and MSB/NETSDK stay two numbers.
 - **FALSE-GREEN route #3 — NESTED sub-library packages were never enumerated (fixed 2026-08-02).** All
   three transpile gates walked `tests\Behavioral\*` **top-level only**, so the 22 sub-library packages
   nested inside a test folder (`IoLike\FsLike`, `VersionedImport\vlib`, `CrossPackageArrayZeroValue\bufpkg`,
@@ -1342,6 +1365,20 @@ ONE stdlib in a build; there is now only one on disk.
   transient slot address) **is DEMOTED to the compile-shape guard its own comment already claimed**,
   with the demotion stated in the commit as a SCOPE change of that row and the golden re-baselined from
   the REBUILT binary.
+  ⚠ **EACH FIX BUYS THE NEXT PHASE'S MEASUREMENT, AND THE NEXT PHASE UNMASKS THE NEXT DEFECT**
+  (2026-09-08): ONE guard file surfaced three defects in a day, each by a row added for the previous
+  one — it carried a second defect in its own emission, written for the first, and the rows added
+  for the third unmasked a fourth. Two fixes let the project reach Compile and unmasked a
+  literal-emission drift (a `uintptr` initialised from an above-`uint32` constant); that fix let it
+  reach Output and unmasked a `*[N]T` conversion over a MANAGED scalar box, emitted as a `uintptr`
+  token round trip whose array view reads the pointee as an array header — IndexOutOfRange,
+  deterministic. Two rules ride with it. **A golden is HELD on a Compile red WHATEVER caused it** —
+  held, measured that the two landed fixes' converter delta cannot reach a variable-declaration
+  initializer, and the new row named as NEW in that commit: a pre-seat reading, nothing at master
+  affected. And **a defect too deep for a seat is NAMED**, its class located (the reinterpret-VIEW
+  half of the `[GoValueClone]` population), the guard's rows NARROWED to the property the seat
+  delivers with the runtime half banked as DEBT in the guard's header, and the design filed with a
+  re-census before any cut.
 - **⚠ Route #7's ATTRIBUTION mirror: a crash INSIDE a generated shell is usually the shell being
   faithful** (measured 2026-09-02, runtime's `textAddr`). The `RecvGenerator` shell's
   DerefOrNull → NullRef → NRE on the first field touch IS Go's nil-receiver semantics; the nil came
@@ -1410,6 +1447,14 @@ ONE stdlib in a build; there is now only one on disk.
   a guard's INPUT POPULATION rather than on an A/B arm.** The fix derives the scope from the same
   directory the manifest was loaded from, so the two cannot disagree; the cross-package arm, written
   RED-FIRST, reproduced the measured case by name.
+  ⚠ **AN OPERATOR GREP VERIFIES THE OPERATOR AND SAYS NOTHING ABOUT THE OPERANDS, AND A GUARD
+  WRITTEN TO ASSERT SEMANTICS THAT CANNOT COMPILE ASSERTS NOTHING** (2026-09-08): a commit line
+  reading "3 lowered comparisons, all `==`, zero `is`" was exactly as strong as the grep behind it —
+  the emitted comparison put a `byte` VALUE against a box of one, found by two lanes with a compiler
+  rather than by the grep. **And the `case nil:` arm of the same defect does NOT fail to compile** —
+  it emits the dereferenced value against `default!`, the zero value — so it is a SILENT
+  WRONG-ANSWER defect as well as a compile error, and the compile error is the lucky half: such a
+  guard's nil arm is Output-compared against `go run`, never compile-only.
   ⚠ **The constructive form of "assert the DECISION": a CONVERTER ATTRIBUTE that RECORDS a decision IS
   a census of its own population, and beats any predicate written later** (2026-09-05).
   `[GoValueClone]` marks every struct carrying a fixed-size array field (or another struct that does),
@@ -1422,6 +1467,12 @@ ONE stdlib in a build; there is now only one on disk.
   2026-09-03, the nine-shape dims guard and the canonical-identity tripwire). A red-by-construction
   guard lands WITH its arc — complete, with its registration reverted — rather than shipping a
   commented-out row that the next reader reads as coverage.
+  ⚠ **A RED-FIRST GUARD WHOSE MOTIVATING DEFECT IS FIXED BY A SIBLING CUT CANNOT BOARD ALONE**
+  (2026-09-08): a guard project carrying a second defect in its OWN emission (CS0019 at two lines)
+  measured 1 of 4 phases with Compile FAIL, and the behavioral enumerators walk the DIRECTORY — so
+  an unregistered project is still transpiled and compiled, and a guard with no golden still reddens
+  the suite. Seat the two roots as ONE seat with the golden minted on the COMBINED tip; **no runner
+  leg on a tree nobody assembles.**
   ⚠ **The freeze binds INSTRUMENTS, not just edits.** A verify-only landing preflight was one command
   from running in the worktree a multi-hour sweep was using, where its `git checkout --detach` would
   have yanked the tree out from under the running converter and destroyed hours of gating —
@@ -1587,6 +1638,26 @@ ONE stdlib in a build; there is now only one on disk.
   RECORDED acquisition-route property — present in the archive, absent from a `golang.org/dl` download
   and from module-cache roots — and **never a gate**: as a gate it rejected the corpus's own pinned
   1.23.12 on two lanes.
+  ⚠ **A CONTAINER LANE CAN HAVE THE CORPUS PIN'S GOROOT, AND ONE COMMAND SETTLES IT** (2026-09-08):
+  `GOTOOLCHAIN=go1.23.12 go version` materialises the release under the module cache
+  (`golang.org/toolchain@v0.0.1-go1.23.12.<goos>-<goarch>`), checksum-verified, read-only and
+  proxy-dependent (`go clean -modcache` removes it), and the two-part pin assertion holds against it
+  — the resolved binary lives under that root and `go env GOROOT` equals it. Admissible for
+  GOROOT-side census and oracle-side Go builds; NOT claimed for emission; NOT a provisioning install
+  (a module-cache toolchain passes arm 1 of the capability bar only). **"Not installed on this box"
+  was said three times before one command checked it** — a capability claimed ABSENT gets the
+  one-command check before the claim is repeated, and this one converts a standing "cannot measure
+  that here" into "can" for every container lane.
+  ⚠ **A BATTERY'S OWN PREDICATE WRITTEN AGAINST AN ASSUMED FORMAT REFUSES EVERY REAL RECORD**
+  (2026-09-08): a train leg expected the comparison record's `oracleGoVersion` to read the bare
+  token `go1.23.12` while the converter records the bare `go version` OUTPUT (`go version go1.23.12
+  windows/amd64`, `testConversion.go`), so BOTH passing canary rows — 2,195 and 683 verdicts, oracle
+  genuinely at the corpus pin — were stamped REFUSED, and the land script's required stamp carried
+  the same unmatched spelling. The landing accepted them through a SECOND named instrument-fault
+  path: exactly two such lines, no refusal of any OTHER value among them, both VERDICT PASS and
+  `exit=0` present, plus a standalone re-measurement whose corrected predicate accepts 2 of 2 and
+  REFUSES planted `go1.24.13`, `go1.23.1` and the bare token. **A format expectation is read off the
+  PRODUCER's source before it becomes a predicate**, and the next derive corrects the template.
 - **`TargetComparisonTests` compares goldens with line endings NORMALIZED** (CRLF→LF; see
   `TargetComparisonTests.FileMatch` / `BehavioralRunner.FilesEqual`, both strip CRs). It was a raw
   byte-for-byte compare until 2026-07-07. Content diffs are still caught exactly; a pure line-ending
@@ -1626,6 +1697,13 @@ ONE stdlib in a build; there is now only one on disk.
   re-transpiles: restore the source, purge `bin`/`obj`, re-transpile, and require the `.cs`
   CR-strip-identical to its golden before staging** — and re-read the worktree's state after any
   interruption, since a resumed agent inherits whatever the control left behind.
+  ⚠ **A GOLDEN PREDICTION IS SCORED ON THE POPULATION IT NAMES, NOT ON THE FILE'S BARE COUNT**
+  (2026-09-08): a prediction of three case-label `==` and zero `is` HELD at 3/0 on the named
+  population, where a bare grep reads 5 because two `==` are ordinary source expressions (a result
+  comparison, a `Println`) and would have mis-scored it. **And a mint whose Target phase PASSES
+  while Compile FAILS is the wrong-toolchain signature exactly** — the golden matches an emission
+  that does not build — so the mint was HELD and DELETED rather than left uncommitted, with its
+  registrations reverted alongside it.
 - **autocrlf gotcha (`core.autocrlf=true`) — two SEPARATE concerns:** the converter emits CRLF for C# line
   endings but preserves the Go source's LF inside multi-line string literals, so those `.cs`/`.cs.target`
   contain mixed CRLF/LF, and autocrlf rewrites the in-string LFs to CRLF on checkout.
@@ -1652,6 +1730,17 @@ ONE stdlib in a build; there is now only one on disk.
   renormalization is **not** owed, and the mixed-CRLF/LF phantom described above is *unchanged* in
   shape — it is simply platform-independent now. Do not "fix" a `.cs` to LF to match a Linux habit;
   the pin will put it back.
+  ⚠ **A LINE-ENDING GATE THAT IGNORES THE FILE'S OWN ATTRIBUTE REFUSES A FILE THAT IS RIGHT BY
+  DESIGN** (2026-09-08): a train leg asserted every `docs/*.md` in its delta CRLF "under the
+  eol=crlf pin" — but `docs/` is OUTSIDE that pin (its patterns are `*.cs`, `*.cs.auto`,
+  `*.cs.target`, `*.csproj`, `*.slnx`, `*.props`, `*.targets` and `src/core/**/README.md`), the
+  eight ordinary files read `i/lf w/crlf` only through autocrlf, and one seated probe README carries
+  `-text` (verbatim bytes, `i/lf w/lf`) — the same `-text` phantom this file documents for
+  `testdata`, in a docs costume. It rode green from the previous train only because every docs seat
+  there happened to be CRLF. Settled by measuring the LAYER (`git ls-files --eol` per file at the
+  assembled head) with a planted non-exempt LF control refused, and accepted through a named
+  land-script path keyed on the attribute. **Name the layer AND the attribute before calling a line
+  ending wrong.**
 - **testhost lock gotcha:** a stray `testhost`/`vstest.console` from a prior run can lock
   `BehavioralTests.dll` → next build fails with `MSB3027` ("file locked by testhost"). Kill it (and
   `dotnet build-server shutdown` frees bin/obj locks) before rebuilding — not a real compile error.
@@ -1715,6 +1804,12 @@ ONE stdlib in a build; there is now only one on disk.
   it was taken at, exactly as the total is** — carrying per-file counts from one seat's tree to master
   came within one command of accusing a lane whose arithmetic was right (one test file had grown from 9
   methods to 14 between the trees).
+  ⚠ **AND A GROUP WHOSE CONDITION REQUIRES A NON-EMPTY `GoTargetOS` DOES NOT APPLY ON A HOST WHERE
+  IT IS UNSET** (2026-09-08): 782 methods declared, group 1 (`!= 'linux'`) removes 41 in 8 files,
+  group 2 (`!= ''`) removes NOTHING on an unset host — **741 is the only legitimate total**, which
+  is what turns "741 == 741" from a coincidence into a statement, and is why a group-2 test class
+  compiled and RAN there at all. The skip delta Release → Debug read exactly 3, the liveness class,
+  so both legs ran what they should.
   ⚠ **A DEBUG-ONLY GolibTests reading silently under-measures the GC/pin-liveness class by THREE**
   (measured 2026-09-06). Exactly three tests RUN at Release and SKIP at Debug — the liveness class
   self-skipping where a non-optimizing frame would root its temporaries and make the assertion
@@ -2187,6 +2282,13 @@ ONE stdlib in a build; there is now only one on disk.
   on an "every single line" claim, which is strong enough to deserve one check. Measured properly:
   1,078 lines, ZERO ending in a carriage return. **A zero invites suspicion; a plausible total
   recruits the reader.**
+  ⚠ **`awk` STRIPPED 80 OF 82 CRs WHILE INSERTING TWO LINES, AND `cat -A` / `od -c` BEHIND `sed`
+  SHOWED CLEAN OUTPUT** (2026-09-08) — because the LINE tool had already dropped the CR before the
+  byte tool saw it. Caught by counting CR BYTES against the LINE COUNT immediately after the edit
+  (the gate is `lines == CR == 84`), re-inserted with a byte-preserving split, and confirmed by a
+  raw `dd` read that bypasses line tools. Its sibling the same hour: **a grep scoped to a per-GOOS
+  package's TOP LEVEL read ZERO for a seam implemented one directory down** and would have minted a
+  confident red-first prediction; the recursive re-read with a positive control is what stopped it.
   ⚠ **CASE-SENSITIVITY IS A FALSE-EMPTY GENERATOR** and joins `grep -P` on this box, backslash
   collapse in command strings, LF anchors and UTF-16 redirects: a case-sensitive grep for
   `the TABLE, as asked` against a file containing `THE TABLE, as asked` returned ZERO, which read as
@@ -2641,6 +2743,37 @@ ONE stdlib in a build; there is now only one on disk.
   parameter so it needs no tracked-file edit:
   `./check-solution-integrity.ps1 -TargetOS windows -InjectReference 'runtime=internal/syscall/windows'`
   must print exactly the six W1 cycles and exit 1.
+  ⚠ **A "RE-WRITE" ROW READ AT THE SOURCES WAS A PACKAGE SPLIT WITH A CYCLE CONSTRAINT**
+  (2026-09-08): at the newer release `sync.Mutex` wraps a NEW `internal/sync.Mutex` and the four
+  linkname stubs MOVED there, so the existing `sync/runtime_impl.cs` implements partials nothing
+  declares (CS0759 — an implementing declaration with no defining one) — and `internal/sync` cannot
+  reference `sync`, which is the W1 cycle class above. **The SEVERITY is not the four compile
+  errors**: the new package's bodyless partials are filled with THROWING stubs, so every
+  `sync.Mutex.Lock()` at that release throws while the package compiles clean and no gate reddens.
+  Duplicating the semaphore table was MEASURED safe (acquire and release both declared in the new
+  package; the word lives in its own `Mutex`) and still not cut that way — the machinery is HOISTED
+  into golib as one primitive both companions call, because **two provably-disjoint tables become
+  one bug the day the disjointness stops holding, and nothing in the tree would say so.**
+  ⚠ **A SPLIT IS ENUMERATED ON BOTH SIDES — LEAVE AND ARRIVE — AND A FACT ON THE RECORD IS NOT ON
+  THE WORK LIST UNTIL A SEAT CARRIES IT** (2026-09-08): a morning table named a new
+  `runtime_SemacquireWaitGroup` as a 1.24 ARRIVAL in `sync`, and the same lane's own scope
+  restatement — written after correcting six declarations to eight — enumerated only the four DROPS
+  and missed it. Measured in the emission: the declaration is already filled by a throwing stub and
+  REACHED on the path where `Wait()` must block, so every blocking `WaitGroup.Wait()` at the new
+  release throws while the package compiles clean. The arrival also needs a golib `WaitReason`
+  member new at that release, whose absence a first enum-shaped grep UNDER-counted (12 against the
+  string-mapping switch's 14).
+  ⚠ **A PRIMITIVE'S HOME IS DECIDED BY THE REFERENCE GRAPH, NOT BY PREFERENCE, AND A CALLER CENSUS
+  SHRANK THE INCREMENT** (2026-09-08): the fatal shims are declared in THREE packages (`runtime`,
+  `sync`, and at the new release `internal/sync`), golib is the only assembly below all three, and
+  `internal/sync` referencing `sync` is the W1 cycle — so the report type sits in golib and is
+  registered from `runtime`'s module initializer like its sibling. `fatalthrow` has exactly two
+  callers (`throw`, `fatal`) and `fatalpanic` one (`gopanic`, dead at its own caller-PC intrinsic),
+  so displacing the TWO callers leaves four functions UNREACHED rather than unimplemented — two
+  displacements instead of three severs — and `runtime`'s two linkname PUSHERS then land on the same
+  primitive as the hand-own, one rule rather than two. A hard-coded anchor that a second entry point
+  would have silently fallen past became a PARAMETER, and the fatal path drops frames up to the LAST
+  primitive frame BY TYPE so a delegate stub between is harmless.
 - **Run the behavioral suite via the solution, not the project:** `dotnet test src/go2cs.slnx`. Running
   `dotnet test` on `BehavioralTests.csproj` directly breaks because `$(go2csPath)` (→ `$(SolutionDir)`)
   has no solution context, so the `core\golib` ref fails to resolve. The baseline solution is now an
@@ -2981,6 +3114,14 @@ ONE stdlib in a build; there is now only one on disk.
   cancellation-timing suite**, and sixteen of the twenty diverging rows were cancellation and retry TIMING.
   **A battery's FIRST LEG and a SOLO re-run are not two arms of one experiment** — the deciding arm runs
   ALONE, matching the CLEAN arm's load rather than the failing arm's.
+  ⚠ **AND ON WARMTH, WHICH IS THE SAME RULE AS LOAD** (2026-09-08): a brief specifying "base ×1, cut
+  ×3" left the BASE arm COLD against warm cut arms — the axis that DOMINATES a sweep wall (100 s
+  cold against 61 s warm on the SAME row) — so the agent added base r2/r3 UNASKED and reported the
+  matched-warmth pair (61/61 against 61/62 s) with six byte-identical comparison records. **A pair's
+  arms match on warmth as they match on load**; the coordinator's brief was wrong and the deviation
+  is STATED, not hidden. Per-row cost is then stated as an ABSOLUTE with its own base named per row
+  (+4.3..+13.7 ns against 151–200 ns), the single-process spread often exceeding the delta, so only
+  a floor over processes separates signal from drift.
   ⚠ **A WALL-TIME GAP BETWEEN TWO ARMS IS A TELL, NOT A CURIOSITY**: 890 vs 351 seconds was the only thing
   separating a real regression from a timing suite flaking under battery load, and it is exactly the kind of
   number that gets noted and skipped. **Compare the arms' WALL CLOCKS before attributing their verdict
@@ -2998,6 +3139,16 @@ ONE stdlib in a build; there is now only one on disk.
   illusion applied to MEASUREMENTS rather than diffs, and it arrives from both directions: a base stale
   BEFORE the train, or a train that makes the reading stale after. **Re-gate, and state the expected
   numbers as a PREDICTION before re-running so the new reading cannot be a rationalisation.**
+  ⚠ **A NUMBER THAT MATCHES IS STILL UNEVIDENCED UNTIL THE TREE IT WAS TAKEN ON IS NAMED**
+  (2026-09-08): a lane carried GolibTests readings for a seat with no log behind them, found logs
+  reading 709 and nearly published them as a correction — they were ANOTHER arc's tree. The
+  arithmetic settled it (709 is not an admissible total for this tree; 739 is), both legs were
+  re-run on the seat tree, and they landed where the carried figures said. **The log's EXISTENCE
+  proved nothing; the tree name did.** Its sibling in the same seat: a row swept with the change in
+  place BEFORE it was committed is the wrong ORDER — a restore cannot tell uncommitted work from its
+  own dirt — so the file was restored BY NAME, verified by post-condition, re-swept against the
+  COMMITTED tree, and the residual dirt classified (forced-init relocation debt, none of the four
+  standing post-sweep classes).
   ⚠ **A RATIO EXPIRES MORE READILY THAN AN ABSOLUTE, because it has TWO tree-dependencies — and it
   silently asserts that its two halves share a context: one machine, one tree, one configuration.** A cost
   published as "+26.075s = +12.1%" survived a landing only in its wall-clock half (the converter-suite
@@ -3100,6 +3251,12 @@ ONE stdlib in a build; there is now only one on disk.
   "this is red and here is why that is fine". **The explanation is only as portable as the host it was
   formed on; the baseline is a DIFFERENCE and it travels.** Record such a disagreement as UNRECONCILED
   rather than inventing a mechanism for it.
+  ⚠ **AND THE BASELINE IS OWED EVEN WHEN THE DOCTRINE ALREADY NAMES THE CAUSE** (2026-09-08): three
+  GolibTests reds at a seat's tip (link-staged fixture arms) failed with the SAME three names at
+  master on the same box, for want of the symlink-creation privilege — "that is the known symlink
+  gap" would have been an explanation portable only to the host that formed it, where the baseline
+  is a DIFFERENCE anyone re-checks. The claim scored was **"the failure SET at the cut EQUALS the
+  set at master"**, posted BEFORE the run.
 - **⚠ The three-run flake standard, and the A/B a re-converting SWEEP silently invalidates
   (2026-09-01/02).** A row that fails once is not a finding: the standard is **fail-WITH the change,
   pass CLEAN, pass again WITH the change restored** — three runs, in that order, before anything is
@@ -3305,6 +3462,12 @@ ONE stdlib in a build; there is now only one on disk.
   privilege, so what retires is "one host only" and NOT the coverage caveat; a privileged host's reading
   remains unmeasured by anyone. **Two hosts agreeing is evidence about determinism, and evidence about
   coverage only if they differ on the axis in question.**
+  ⚠ **A SECOND HOST HOLDING THE PRIVILEGE CHANGES A ROW'S COMPOSITION WHILE ITS COUNT STANDS**
+  (2026-09-08): `os` on the i7 read Go 665 pass + 20 skip with ZERO failures, against the bank
+  host's 645 + 32 + 8 agreeing symlink-privilege failures — **683 matched either way**, but the
+  eight tests RAN and PASSED on both sides here, so the roster's "no second host has read this row"
+  caveat becomes describable and gains a dated coverage line. Two hosts agreeing is evidence about
+  coverage only when they DIFFER on the axis in question; these did.
   ⚠ **And the way it surfaced is the durable half: read the RECORD, not your own SUMMARY.** A summary of
   a comparison reports the DIFFERENCES and silently drops the agreements — precisely where a host
   condition hides. The hardest direction to point that rule is at your own prose: a lane re-deriving a
@@ -3312,6 +3475,17 @@ ONE stdlib in a build; there is now only one on disk.
   mis-framed artifact and a headline figure that should have been 29 rather than 28 — **a number it and
   the coordinator had quoted four times.** The next person to quote a figure quotes the writers, not the
   artifact.
+  ⚠ **A PROVENANCE CLAUSE INFERRED FROM A COUNT THAT IS INVARIANT ACROSS THE AXIS IT DESCRIBES CAN
+  BE WRONG WHILE EVERY NUMBER IN IT IS RIGHT** (2026-09-08): the `os` proof page's clause said the
+  i7 "also lacks" the symlink privilege because its `683 matched / 2 disclosed` matched the bank
+  host's — but all twenty rows that move with the privilege move on BOTH sides (8 agreeing fails
+  become passes, 12 skips become passes), so 683 CANNOT discriminate the hosts and the SET was never
+  read. A fresh reading contradicted it, and a two-line probe (the symlink call succeeds in the
+  sweep's own shell, though the token lists no such privilege and the developer-mode value is
+  absent) SUPERSEDED the clause for that host, stated as a dated reconciliation with "whether the
+  state differed then is not recoverable". **Read the SET before writing a host's capability into a
+  record**; the seat that found the contradiction stated it UNRECONCILED rather than resolving it by
+  inference.
 - **⚠ HOST QUALIFICATION for a network row: preflight `go test -count=1 net` BEFORE any net-family run
   (2026-09-02).** A host whose Go's OWN suite fails is disqualified as a bank host (a container
   answering `TestLookupCNAME` with the CDN CNAME and no IPv6; a WSL host failing that AND all 18
@@ -3338,6 +3512,34 @@ ONE stdlib in a build; there is now only one on disk.
   between two hosts is read against the record's own HOST-CONDITIONAL ENTRY before either reading is
   called a regression** (2026-09-05): `os/exec` reading 86+2 on a single-file container host IS that
   entry — `TestExtraFiles` fires where fds 3..100 are held — against 87+1 on the fleet's bank host.
+  ⚠ **AN E2 SWEEP REPORTS ITS FAILURES AS THE HOST, WITH THE CAUSE QUOTED, AND CALLS THEM UNDECIDED
+  RATHER THAN CLEARED** (2026-09-08): 227 packages at go1.24.13 on windows/amd64, 225 pass; `os`
+  fails 161 symlink leaves (the privilege measured read-only — not elevated, no privilege, no
+  developer mode, and nothing changed silently) and `net` fails 27 DNS leaves from THREE host causes
+  (a resolver mis-answering NXDOMAIN, a container's extra PTR name, the CDN-drifted CNAME). Both
+  sets reproduced identically on a second run with a planted-difference control. Three rules: **an
+  E2 reading binds to the host that measured it**; a roster name absent from `go list std` ERRORS,
+  which is not an oracle that fails, so resolve all 227 BEFORE sweeping; and a test that asks the
+  live internet measures the internet. The i7, which holds symlink creation, settled `os` the same
+  hour (PASS 1096/0/24) — two hosts differing on exactly the axis in question.
+  ⚠ **A HOST-QUALIFICATION PROBE RUN ON A SECOND HOST NARROWS THE CAUSE SET** (2026-09-08):
+  R-LAPTOP's `net` at go1.24.13 read 26 failing leaves, deterministic (two full runs, set difference
+  0 both ways, the compare positive-controlled by planting one leaf), collapsing to TWO roots — the
+  ledgered CDN-drifted `TestLookupCNAME` and 25 `TestLookupNoSuchHost` leaves from a resolver that
+  SYNTHESISES instead of answering NXDOMAIN. The other host's third cause (`TestLookupLocalPTR`)
+  PASSES here, so it travels with the container, not with Windows or the release. Zero E2 members;
+  **`net` stays UNDECIDED because no fleet host has a conforming resolver**, and changing one is the
+  OWNER's system-settings call, recorded as an ask rather than done under a measurement. A figure's
+  provenance offered by its author changes nothing about a same-box rule: **a number from ANOTHER
+  box is not a baseline at all.**
+  ⚠ **A ONE-RUN ORACLE VERDICT ON A NETWORKED, DOMAIN-JOINED HOST CAN BE WRONG IN EITHER DIRECTION**
+  (2026-09-08): `os/user` PASSED at go1.24.13 (1.05 s) and FAILED at go1.23.12 (21.2 s) on ONE host
+  forty minutes apart — one test on a domain-trust timeout, the ELAPSED TIMES the tell — so an E2
+  candidate on such a host needs its failure shown NOT to be the environment, and a single red is
+  not that showing (an unprompted companion sweep at the corpus pin read 200 of 204 sound, three
+  host-attributable). The failing line was NOT quoted, because it carried the domain, the account, a
+  profile path and a SID — the security order applied by the lane on its own. And `internal/pkgbits`
+  reporting `skip` is recorded as **no-test-ran**, never as a pass.
 - **⚠ Before a divergence is NAMED, read the ORACLE at the ROW's own source and measure it under the
   SAME shape (2026-09-02).** A converted `crypto/tls` shim exiting 89 under bogo's flag set was
   compared against Go's 2 measured with the flag ALONE — and the answer was in Go's OWN source, not in
@@ -3414,6 +3616,13 @@ ONE stdlib in a build; there is now only one on disk.
   and simply UNREACHED. Two companions: the falsifier that FIRED took an item OFF the remedy (one
   shape on three flavours rather than two), and the insurance control was NOT load-bearing for the
   non-null result and its author said so rather than letting it read as the rescue.
+  ⚠ **AN ANCHOR ABORT ARM FIRED ON ITS OWN REFERENCE, AND THAT IS THE ARM WORKING** (2026-09-08): a
+  harness benched the user-mode reference THROUGH the syscall trampoline (63 ns), adding ~55 ns of
+  common overhead to BOTH sides and compressing every ratio, so the proposed kernel anchor scored
+  4.58x and the harness ABORTED emitting no ratio. The bar is calibrated on the DIRECT call the
+  specification measures (2.1–2.6 ns); re-measured direct, `GetProcessId(GetCurrentProcess())` sits
+  at 68–87x on 20 of 20 processes and is the anchor. **The abort is reported as having fired, never
+  smoothed into "validated first time".**
 
 ### Adding a regression test when a converter defect is fixed
 When a meaningful converter bug is fixed, lock it in with a behavioral test so later changes can't silently
@@ -3594,6 +3803,36 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
    fails with scores of undefined-symbol errors that read exactly like a corpus break — **the RUN's
    environment is re-exported to the corpus pin, in a separate shell or explicitly, before the
    converter is invoked.**
+   ⚠ **THE INSTRUMENT WITH THE GUARD COULD NOT RUN IN THE TWO-PIN WINDOW, AND THE INSTRUMENT THAT
+   COULD HAD NO GUARD AT ALL** (2026-09-08): `UpdateTestTargets` refused a golden under BOTH
+   toolchain settings — under `auto` its guard reads `go env GOVERSION` with cwd = the converter
+   module (which switches up) and reports a mismatch that does not exist in the environment; under
+   `local` its single-toolchain staleness predicate rebuilds the converter and the rebuild refuses
+   (`go.mod requires go >= …`) — while the behavioral runner's `--update-targets` reads embedded ==
+   live at ITS cwd and would MINT without complaint, which is exactly how eight wrong goldens were
+   minted earlier. The lane did NOT route around the guard — **choosing the tool that lacks it is a
+   ruling, not a lane's convenience** — and delivered the half it could (four registrations, +3/−0
+   each) with the other half BLOCKED, not skipped.
+   ⚠ **A GUARD THAT COMPARES A BUILD-AXIS MEASUREMENT AGAINST AN EMISSION-AXIS PIN CONFLATES TWO
+   AXES THE WINDOW SEPARATES BY DEFINITION** (2026-09-08): that utility read `go env GOVERSION` at
+   the converter module (the BUILD axis, correct cwd) and compared it to `version.props` (the
+   corpus's EMISSION pin), so it refused a condition the two-pin window deliberately establishes.
+   The fix moves the COMPARE TARGET to the converter's own `go` directive, not the probe — a probe
+   at a no-go.mod cwd measures the AMBIENT toolchain, a third thing that is neither axis, and this
+   file already records that such a probe reads stale forever. The emission axis is STATED in the
+   guard's text as the window's accepted premise rather than dropped silently; and **a guard that
+   refuses a RULED condition trains people to route around it**, which is the failure the lane
+   declined to commit.
+   ⚠ **A TWO-PART REMEDY IS EVALUATED AS THE PAIR** (2026-09-08): a correction that read one half
+   (the ambient-GOVERSION probe) while the other half — staleness against the module's own `go`
+   directive — DELETES the very hazard cited against it objects to something nobody proposed, and
+   the coordinator ADOPTED that correction on reading rather than re-deriving the axis, in the
+   window a lane was about to act on it, which is the most expensive moment to be confidently wrong.
+   Re-derived: the converter's loader resolves GOROOT from the environment and every corpus and
+   behavioral module declares the older directive, so the ambient toolchain at a no-go.mod cwd IS
+   the emission axis (the release that parses the sources the utility re-transpiles), while the
+   build axis is embedded-versus-directive. Both retractions went out by SHA within the hour, and
+   the lane holding the cut received ONE final instruction rather than three.
 
 ### Corpus mechanics — measuring/iterating the converted stdlib (`src/core`)
 - **⚠ 37 packages are in LAYOUT L3 and the ritual below is UNCHANGED because of it, not despite it.**
@@ -3759,6 +3998,14 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
   ⚠ Beside it: **a two-seeded diff NAMES the toolchain that built EACH arm** (`go version <binary>`) —
   a `go build` in a shell without the GOROOT pin stamped one arm go1.24.7 against the other's
   go1.23.12, caught only by byte-comparing a pinned rebuild against the running binary.
+  ⚠ **A FIFTH mode: TWO STAGING ROOTS SEEDED FROM ONE TREE AT DIFFERENT TIMES READ FRESH-VS-SEEDED
+  PAIRS AS A FOOTPRINT** (2026-09-08) — the third mode's shape with only ONE lane involved. One
+  emission root was seeded AFTER that lane's own apply step changed a file and the other BEFORE, and
+  a windows-target conversion WRITES neither per-GOOS copy of it, so `diff -rq` reported darwin and
+  linux files "differing" that no converter had written. **Compare only the paths the conversion
+  WRITES, or classify by write-evidence first.** And when the seat's tip moved, the transfer of the
+  earlier rung's readings was MEASURED (byte-identical emission on the written target) rather than
+  reasoned from the diff's file list, with the unmeasured targets stated.
 - **⚠ The bank unit for a converter change's corpus footprint is the two-seeded diff's HUNKS, never
   its FILE set (measured 2026-09-02).** Applying the A/B's ten whole files onto a corpus that is
   stale in OTHER families carries those families in with them: the whole-file application landed
@@ -3832,6 +4079,20 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
   are scored SEPARATELY** (2026-09-05): one prediction's mechanism was right and all THREE of its
   specifics wrong — not those sites, not those tests, and on Windows not an errno but a fault. **A
   record that cites its predictions only when they land is an advertisement.**
+  ⚠ **A PREDICTION FOR ARMS THAT HAVE NEVER EXECUTED ANYWHERE SAYS SO, NAMES THE ARM MOST LIKELY TO
+  FAIL AND ITS NON-MECHANISM CAUSE, AND ASKS FOR THE SAME-BOX BASELINE ITS SCORING NEEDS**
+  (2026-09-08): four wiring arms were Inconclusive on linux by host gate, their bodies unexercised,
+  so the prediction was posted as 4/4 on Windows with the likely red NAMED (a tuple deconstruction
+  and a process-id equality, not the door under test) and the full-suite claim stated as "the
+  failure SET at the cut EQUALS the set at master on the same box" — so the run that scored it
+  GAINED its master arm before it started.
+  ⚠ **RANK A PREDICTION'S UNCERTAINTIES BY WHAT EACH RED WOULD MEAN, because the value of the run is
+  ATTRIBUTION** (2026-09-08): for one callback guard, line 1 (same function, same pointer) is a
+  CONVERTER question — a per-call-site lambda makes two delegates unequal, and the remedy keys the
+  table on (method, target) — and not a seam question; line 4's TEXT depends on the converted
+  `fmt`'s `%#x` over a golib `uintptr` and must not be billed to the seam if the VALUE agrees; and
+  line 5 depends on `recover()` presenting a Go string, which a distinct non-string marker keeps
+  separable from a FAILED refusal. **Read the numbers before the strings; report markers verbatim.**
   ⚠ **A displacement's map line is invalidated by ANY later change to the same source file, and the
   check runs ONCE at the ASSEMBLED tip** (2026-09-03, the seam cut into four times in one day). A
   train's comment drain shifted positions after a keystone's map was derived, so the source file
@@ -4248,6 +4509,23 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
   half of the same row that the unfixed generator had reported clean — and the second half needed a
   DIFFERENT fix (depth-aware promotion inside an embed), not the first fix applied twice. Errors behind
   a blocker are invisible until the blocker moves, so a two-half row is re-measured after each half.
+  ⚠ **A LADDER HEDGE AIMED AT THE LINE MISSES THE CORPUS** (2026-09-08): a lane pre-registered "a
+  residue at one named file and line after this rung is not a failure of it" and the rung read 6 →
+  24 errors, because the blocker cleared was the PACKAGE — ~555 assemblies behind it compiled for
+  the first time, surfacing twelve sites in four packages no prior rung could reach. Score it as the
+  lane did: **prediction FAILED, mechanism HELD, hedge one layer too low** — and read the progress
+  off the packages-compiling metric (194 → 750 assemblies per flavour) while the error count RISES.
+  A corrected prediction (58/67/73 per flavour, replacing a retired single figure) then hit three
+  for three, where the retired figure would have minted a phantom finding.
+  ⚠ **A STALE CONSUMER AT A MOVED PACKAGE'S OLD PATH READS AS A MISSING MEMBER, AND REGENERATING IT
+  AT THE OLD PATH RE-MINTS A PACKAGE THE NEW RELEASE DOES NOT HAVE** (2026-09-08): six CS0117 on a
+  1.24 ladder rung were neither a converter emission defect nor a regen defect — the package had
+  MOVED under a new parent, the corpus already carried the new release's names, and the old-path
+  consumer is a DELETION BY SELECTION (a principal `go list` selects at the old release and not at
+  the new, the deletion instrument's own rule). Both routes the coordinator offered were wrong, and
+  a table measured against the PINNED SOURCE refuted them. Beside it, a CONSTRUCT new at the release
+  (a nil comparison on a slice-typed type parameter, rendered `== default!`, CS8761) is a converter
+  cut with a ZERO footprint at the old release and the ladder as its acceptance.
 - **A corpus regen that moves `package_info.cs` records owes `go generate .` in `src/go2cs`** —
   `stdlib-metadata.txt` is generated FROM the corpus and gated by `TestStdLibMetadataInSync` under the
   plain converter `go test`, so banking a regen without the regenerate leaves the converter gate red at
@@ -4822,6 +5100,12 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
     gate green, and the production two-seeded diff is structurally blind to it. The prediction scored
     against that census missed in BOTH directions (a premise error on the base arm; a real move):
     **the census, not the prediction, is the instrument.**
+    ⚠ **A FILE-LEVEL `using X = Y;` ALIAS DUPLICATES A CSPROJ GLOBAL `<Using Include=Y Alias=X/>` AT
+    THE SAME SCOPE (CS1537)** when the alias precedes the file-scoped namespace (2026-09-08):
+    `syscall.csproj` already carries one such alias and none of its eight sibling `_impl.cs`
+    companions declare it. **Census the csproj's `Using` items before adding a file-level alias to a
+    hand-own**; and run the unmasking control (delete the blocker locally, rebuild) before believing
+    "one defect" — here it was one, with zero behind it.
   - **⚠ The S1/CS0030 "architectural wall" was a FORK, not a wall (2026-07-01) — and the fork held to 302/302.**
     **Native-type** pointer/unsafe ops (identical memory semantics in both GC languages) get a faithful
     conversion in the converter/`golib`. **Managed-referent** cases (`guintptr`/`muintptr`/… hiding a managed
@@ -5212,6 +5496,18 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
     disclosure**: the foreign system's values (a representational argument is available and must be
     argued) or only ours (no such argument exists, and the entry is a DEFECT wearing a disclosure's
     clothes).
+    ⚠ **A DISPATCH NAMING THE EXCLUSION CLASSES FROM MEMORY NAMED THREE WHERE THE ROSTER CARRIES
+    FOUR** (2026-09-08, E4 having been owner-minted the day before) — **and the denominator has
+    THREE AXES that must be named before any subtraction.** Raw `_test.go` on disk,
+    constraint-surviving, and declares `func Test*` read 227 / 217 / 215 at the corpus pin and 245 /
+    234 / 229 at go1.24.13; axis C at the corpus pin REPRODUCES the roster's anchor denominator of
+    215, which fixes the anchor's axis by DERIVATION rather than by prose, while a dispatch quoting
+    234 was quoting axis B while describing axis A. Four of the six E1 exclusions are ALREADY
+    outside axis C, so subtracting them double-counts; the new release's implementable denominator
+    is 229 − E3 − E4 = 227 pending the E2 sweep. **E2 is DECIDABLE ONLY ON THE HOST that runs the
+    reference `go test`** (windows/amd64), so a census elsewhere marks candidates NOT DECIDABLE
+    rather than producing a clean zero — a HOLE that can move the denominator DOWN and never up. The
+    lane's own range prediction (205–220) MISSED and is scored missed.
   - **⚠ A BANKED ROW CAN BE A VACUOUS PASS, and a census over the roster is what says how many**
     (2026-09-03). `internal/abi`'s `TestFuncPC` compares `FuncPCABI0(fn)` against a value `_test.s`
     writes in Go — assembly never converts, so the C# side reads `0 == 0` while Go compares two real
@@ -5277,6 +5573,19 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
     BETTER — an infra-error reverts to a genuine disclosable `fail` and 799 unmeasured rows unblock.
     **Neither sign was predictable from the bug's shape; both were measured before anyone acted, which
     is the only reason the difference is known.**
+    ⚠ **A REFUSAL THROWN INSIDE `MethodInfo.Invoke` ARRIVES WRAPPED IN `TargetInvocationException`
+    AND IS INVISIBLE TO A CONVERTED `recover()`** (2026-09-08): two of seven refusal arms of a
+    callback body surfaced wrapped, because the checking helpers live inside a `Bind` reached
+    REFLECTIVELY; the fix MEASURED is `BindingFlags.DoNotWrapExceptions` on the invoke, after which
+    all seven print as a bare panic carrying Go's own text. **Nothing reaches the two deepest arms
+    today, which is the booby-trap condition, not an exemption.**
+    ⚠ **`golib.panic(object)` NORMALISES A C# `string` TO `@string` AT THE ONE BOXING BOUNDARY**
+    (2026-09-08), so a hand-own's bare `throw panic("…")` literal IS the right form and the emitted
+    `recover()` type switch matches it — the comment at the site names the row that paid for it
+    (`sync`'s once-panic row reporting `want panic x, got x`). A hand-own author who worried the
+    literal would surface as a non-string-panic marker found the answer in the CALLEE, opened BEFORE
+    the run rather than after a wrong claim: **the third time in a week the answer sat in an
+    unopened callee.**
   - **⚠ After an operational SWEEP, `git status` is dirty and it is (almost always) NOTHING — classify,
     don't chase, and never bank it.** Two *different* phenomena get conflated here; a sweep produces only
     the first. ⚠ **The dirt is NOT confined to `src/core`: the sweep REWRITES each swept package's
@@ -5660,6 +5969,22 @@ reads backwards on the one platform 5.1 runs on).
   instrument faults met on the way, both UNDER-reporting coverage: `grep -c … || echo 0` prints TWO
   zeros (`grep -c` prints its own 0 AND exits 1), and a `sed`-built probe rewrote the very pattern it
   was meant to exercise.
+  ⚠ **AN ALLOWLIST ADDED TO A REFUSAL ARM IS CONTROLLED IN BOTH DIRECTIONS OR IT CANNOT FAIL**
+  (2026-09-08): a negative lookahead written into a `grep -E` arm — there is no lookaround in ERE,
+  and `grep -P` cannot run on this box — matched NOTHING and the arm failed OPEN, a planted
+  real-looking host reading CLEAN, caught only because the control ran the REFUSE direction too.
+  **An admit-only control reads green on a dead arm.** A LINE-based allowlist also fails open on a
+  line carrying a nickname AND a real host, so admit per OCCURRENCE (set membership on the captured
+  segment), never per line; and Go's RE2 refuses lookaround at COMPILE (loud) where ERE fails
+  silently, so confirm which engine the instrument uses. The durable rule is NOT "do not allowlist a
+  security gate": such an allowlist needs a per-occurrence match, a per-ARM scope (the network arm
+  admits the nicknames, the profile arm admits nothing, the shared placeholder set untouched) and
+  controls in BOTH directions plus the mixed-line case — and where an instrument cannot provide the
+  first two, refusing BROADLY is the honest fallback, a limit of that instrument and not a general
+  truth. The lane reverted to the broad arm on its own tradeoff (a false refusal costs one rewrite,
+  a false pass costs a scrub), sent the warning BEFORE the coordinator's seat pushed, and retracted
+  the general form of its own warning within the hour rather than leave it on the record as a reason
+  not to do what had just been done correctly.
 - C# style: see [`docs/coding-style.md`](docs/coding-style.md) (Allman braces, 4 spaces, `m_`/`s_`/`t_`
   field prefixes, explicit types over `var`, language keywords over BCL types, `\uXXXX` for non-ASCII).
 - Conversion strategy: [`docs/ConversionStrategies.md`](docs/ConversionStrategies.md) — a high-level,
@@ -5856,6 +6181,15 @@ Each rule below was paid for.
   a lane's defects. The stale-base illusion in a census's clothes: **the merge-base rule binds every
   branch instrument, the SECURITY census included.** The merge's own file count (63 = 24 + 39) was the
   honest number all along.
+  ⚠ **AND A BRIEF'S PREDICTION DERIVATION WRITTEN IN THE TWO-DOT FORM IS THE SAME ILLUSION INSIDE AN
+  INSTRUMENT** (2026-09-08): `git diff <base>..<seat> -- src/core` returned 12 files — the previous
+  train's landed work REVERSED, a −256-line golib file, a −77-line runtime file and six `.cs.auto` —
+  because the base is NOT an ancestor of the seat, while the THREE-DOT form returned the ONE file
+  intended (a one-glyph `+1/−1`). The finalize instrument implements three dots, STAMPS both numbers
+  with the reason, and compares the lines as FILES with `cmp`, since a glyph pair is not a shell
+  pattern. Beside it, that agent's first negative control passed arguments to a script that
+  HARDCODES its inputs and read a false green — its own instrument fault, named, and redone with a
+  control directory (7 of 8 anchors red).
   ⚠ **IN A GATE LINE, THE VERDICTS GET CHECKED AND THE ADJECTIVES RIDE IN FREE.** "matched 324, disclosed
   55, 388/388, zero orphaned, zero mint violations" — the first three computed from the record, **the last
   two never measured at all**: one had no source anywhere in the pipeline, the other was an early-return
@@ -6083,6 +6417,11 @@ Each rule below was paid for.
   claim, whoever first made it.** ⚠ And the disposition when the announce-then-push rule is broken by a
   lane's own hand: **a lane that pushed first and SELF-REPORTED before anyone discovered it took the
   correct form, and nothing beyond the note is owed** (G h9-prep e7d3af1e7 → da71a3b7b, 2026-09-07).
+  ⚠ **A POST THAT NAMES AN ANNOUNCED-BUT-UNPUSHED BRANCH IS REFUSED BY THE BRANCH GUARD, AND THAT IS
+  THE GUARD WORKING** (2026-09-08): announce-then-push means the branch name a ruling wants to cite
+  DOES NOT RESOLVE yet — two refusals in one hour, on two different lanes' work. **Cite the
+  ANNOUNCEMENT post's SHA and the tip SHA instead, never the branch name, until `ls-remote` shows
+  it**: a reader must be able to fetch what a post names.
 - **Three merge mechanics, measured 2026-09-01/02.** **Union CNR is never skipped on composition
   reasoning** — "both sides are transpile-clean, so the union is" is not a verdict, and the case it
   cannot see is exactly the one that bit: a merge carrying a NEW behavioral test cut from an older
@@ -6170,6 +6509,13 @@ Each rule below was paid for.
   ⚠ **And the lane's half of the same idle: a lane whose ORDERED items have all landed STARTS the next
   item on its list without waiting for a coordinator prompt** (2026-09-05, three quiet hours a lane
   named honestly). **The mailbox is read BETWEEN steps, not INSTEAD of them.**
+  ⚠ **A DISPATCH THAT SAYS "THE BASELINE YOU HOLD AT <SHA>" IS A CLAIM ABOUT THE LANE'S HOLDINGS,
+  AND THE LANE MEASURES IT** (2026-09-08): a dispatch named a same-box baseline "you hold at <sha>
+  (878/0/0)"; the lane held baselines at two OTHER commits only — 31 behind the landed master — and
+  comparing the chain against them would have charged the previous train's movement to the four
+  files under test, the empty-baseline-reads-as-total-disagreement class in a new costume. The lane
+  took the NAMED baseline FIRST (one extra solution build) so its comparison leg reads ONE axis, and
+  verified both trees from the remote before anything ran.
   ⚠ **TWO MORE, 2026-09-06, both about what a SEATED branch may carry.** The no-commits rule has a
   consequence worth spelling: **a correction to a seated record rides in the CUT's OWN commit as a
   DATED amendment, leaving the original sentence visible above it**, because a prediction is never
@@ -6186,6 +6532,17 @@ Each rule below was paid for.
   axis — so the generalisation was wrong in the direction that costs a lane time, by naming a large
   row as cheap. **The measurement took four minutes: measure the sibling BEFORE naming it in a
   dispatch.**
+  ⚠ **A CONCLUSION TRUE OF MOST OF A POPULATION, GENERALISED TO THE MEMBER THE POPULATION WAS
+  ENUMERATED TO EXPOSE** (2026-09-08): a design section listed the callback parameter types and
+  named the struct case explicitly, then carried the SCALAR conclusion ("the binder will not invoke
+  the operator") to the struct case, where there IS no operator to invoke — and one addendum later a
+  mechanism was built on the carried half. **The enumeration was the author's, the exception was in
+  it, and it was generalised over anyway.** The ruled reinterpret is UNIFORM (one rule for the
+  struct, the two integer widths and a named handle) and FAITHFUL (byte-for-byte what Go's own
+  descriptor copy does), and the reference implementation's mechanism was in the file already read
+  to build the enumeration. Companion: **a wake prompt that asserts a REFUTED finding is worse than
+  a stale one** — it would have a future self act on a claim the fleet has measured false — and is
+  corrected the moment the transport allows.
   ⚠ **A MEASUREMENT IS NOT AUTOMATICALLY THE EARLIEST EVIDENCE — ask the row's OWNER before dispatching
   a diagnosis of it.** A coordinator measured a crash on another lane's row, read it as the first
   sighting, and dispatched a second lane to root it; the owner had already named the failing string
@@ -6457,6 +6814,27 @@ Each rule below was paid for.
   CONDITIONED path** — exactly that refusal, the standalone file present with its control, everything
   else intact — never a general override. Beside it: **a lane's accepted zero is stated WITH ITS
   POPULATION**, so a train does not assemble on a broader reading than the arms support.
+  ⚠ **(e) THE SAME SELF-PATH DEFECT HAD A SECOND LATENT INSTANCE ONE GATE OVER** (2026-09-08): the
+  land script built its RECORD and LOG paths from a relative `$(dirname "$SELF")` and read them
+  AFTER `cd` into the worktree, so launched by a bare relative name it would have exited 3 with "no
+  ASSEMBLE DONE stamp" — a well-formed empty off a file it could not open, measured both ways
+  (readable after `cd`: OLD no, NEW absolute yes). Three mechanics from the same amendment: **a
+  refusal-pattern list is defined ONCE as an array and read by every consumer** (the scan, the
+  scan's control and the acceptance set were three copies about to drift); **an exclusion in a
+  refusal scan is STAMPED after the loop whether or not it is in force**, so it can never be silent,
+  while the scan's positive control applies NO exclusion; and a narrow acceptance path computes the
+  record's refusal SET from the SAME array the scan uses, so it can only accept the exact state the
+  scan would otherwise refuse on.
+  ⚠ **A CARRIED GATE IS MEASURED AGAINST THE NEW TRAIN'S SEATS BEFORE IT IS CARRIED** (2026-09-08):
+  one train's pure-append PREFIX test would have reddened two CORRECT docs seats on the next train —
+  a board and a RECON amendment are in-place INSERTIONS, not appends — found by a census of the
+  derived script's own output and replaced by the board's structural raw/endraw guard. Beside it:
+  **a derive that FIXES an instrument fault at the source carries NO acceptance path for it** (two
+  named acceptance paths were not carried forward, and the assemble script's predicate was corrected
+  with a six-arm control), because an acceptance path that outlives its fault is a lie-lever
+  waiting. The derive's own dry-read took four corrections, each caught by an IMPLAUSIBLE count
+  (19/37/16/7 of 43 anchors "wrong"), and its rehearsal reproduced the previous train's
+  relative-self-path fault on its first run.
 - **⚠ A CONCURRENCY TRANSIENT IS READ FROM THE FAIL LINE'S ERROR TEXT, and its arm is an ISOLATED
   re-run (2026-09-02/03).** The converter suite failed ONCE under five concurrent sub-agents with
   `go: go.mod file not found in current directory or any parent directory` from its `go` child and
@@ -6490,6 +6868,15 @@ Each rule below was paid for.
   doubt exits NON-ZERO leaving the decision to the lane. **A retry loop on a delivery check is a loop
   that must be right about failure, and an exit is not.** Its mirror is the announced-but-unlanded
   SHA: the same defect the other way round.
+  ⚠ **A POSTER VERIFIES ITS OWN ENTRY LANDED ONCE AND CANNOT SEE THAT A PRIOR ENTRY IS GONE** — it
+  fetches, resets to whatever the tip is, appends, and pushes — **so DETECTION OF A DROPPED POST
+  BELONGS TO A READER THAT REMEMBERS THE PREVIOUS TIP** (2026-09-08): the coordinator's mailbox
+  monitor asserts the previous anchor is an ANCESTOR of the new tip (`git merge-base --is-ancestor
+  <anchor> <tip>`) and stamps HISTORY REWRITTEN with both SHAs otherwise.
+  ⚠ **A RESTORE IS VERIFIED BY THE `## ` HEADING THE COMMIT ADDED, NEVER BY THE COMMIT SUBJECT**
+  (2026-09-08): a grep of the SUBJECT against the mailbox file read 0 for a post that was present,
+  because the body heading is worded differently — a phantom loss. Extract the added heading from
+  the commit's OWN diff, then grep for that; all three read exactly 1.
   ⚠ **IN A SHARED CLONE AN UNCOMMITTED EDIT BELONGS TO WHOEVER TOUCHES THE PATH NEXT** (2026-09-04): a
   sibling's mailbox post swept a scrub lane's three uncommitted substitutions into its OWN commit, and
   a second sibling's tree operation then reverted the scrub lane's remaining files before they could
@@ -6548,6 +6935,17 @@ Each rule below was paid for.
   inside the composition.** Its author found it by RUNNING the script against a real seat, having READ that
   code four times. Same shape inside git itself: **`--force-with-lease` is NOT EVALUATED when there is
   nothing to push**, so a clean lease on a no-op reads as the opposite of the truth.
+  ⚠ **A LOST MAILBOX RACE ANSWERED BY A FORCE DROPS A SIBLING'S POST, AND A `--force-with-lease`
+  WHOSE EXPECTED SHA IS READ AT PUSH TIME IS THAT FORCE WEARING THE CAREFUL SPELLING** (2026-09-08):
+  a lane hand-rolled `REMOTE=$(git ls-remote …)` then `--force-with-lease=…:$REMOTE` — a lease
+  asserting "the remote is whatever it currently is" is ALWAYS satisfied — skipping
+  `src/safe-push.sh`, whose RANGE step (`git rev-list --count <remote>..<local>`) ERRORS on an
+  object the local clone lacks, which is exactly what a moved remote produces. The push dropped
+  another lane's post; it was restored by MERGE with all three posts verified present. **The repair
+  is fetch, READ the interleaved commits, re-append, re-push — a restore is a merge, never another
+  force.** The coordinator mis-attributed both halves to the wrong lane TWICE (first from a
+  reconstruction, then from the restore-merge's own subject line) before reading the GRAPH:
+  **attribute a mailbox event from `git log --graph`, never from prose.**
   ⚠ **A COMPARISON WHOSE BASELINE SILENTLY READS EMPTY DOES NOT FAIL — IT CONFIDENTLY REPORTS TOTAL
   DISAGREEMENT** (2026-09-08): REPLACING `PATH` instead of prepending to it dropped `git`, the
   baseline fetch produced nothing behind a discarded stderr, and an eight-project check read "8 of 8
@@ -6558,6 +6956,14 @@ Each rule below was paid for.
   seat SHAs resolve (silence above = clean)" unconditionally; **the parenthetical was the tell, asserting
   a premise the same output had falsified two lines earlier** — written into the very command applying the
   rule about verdict lines that cannot go red.
+  ⚠ **A SCORER'S "PREDICTED 0" WAS A HARDCODED LABEL AGAINST A TOTAL THAT INCLUDED THE INSTRUMENT'S
+  OWN FLOOR FILES** (2026-09-08, six per-run reports), so the prediction was unmeetable BY
+  CONSTRUCTION and printed beside every run; and a corpus filter excluding on `report|manifest`
+  MISSED a progress text file, so a floor file would have counted as corpus movement. **Name the
+  floor files EXACTLY, score the CORPUS count and print MET/MISSED**, and control the filter on a
+  previous run's real data where it must reproduce the known reading (windows 0 / linux 0 / darwin
+  1). Both defects would have FLATTERED the author, which is why they are fixed before the zero is
+  believed.
   ⚠ **WHEN "REMEMBER TO ORDER IT CORRECTLY" HAS FAILED FOR FOUR PARTICIPANTS IN ONE SESSION — INCLUDING
   THE TWO WHO WROTE THE RULE DOWN — THE FIX IS A SCRIPT, NOT MORE CARE.** In every instance the INSTRUMENT
   was correct while the SHAPE OF THE COMMAND made its verdict inert, and every one produced output that
@@ -6583,6 +6989,13 @@ Each rule below was paid for.
   three lines up. **A placement failure in an INSTRUMENT, not a resolve failure** — fixed by printing
   the listing AFTER the delivery line behind a banner. Same shape as a gate that prints a verdict
   nobody greps.
+  ⚠ **AND THE TWO REMEDIES INTERACT: a fix that puts information in the right place does not help if
+  the next read is TRUNCATED** (2026-09-08). A lane read past three posts addressed to it and posted
+  "nothing owed that I know of" while a defect was already ruled to it — its own post tool printed
+  the absorbed entries exactly where its habit looks, and it `tail`ed the output so one long
+  unrelated entry filled the window. **The absorbed listing is read WHOLE, never tailed**, and "that
+  I know of" is doing real work in a sentence that is still wrong. Retracted by the lane the same
+  hour, with the cut.
 - **A gate that has never been made to fail proves nothing.** Before trusting a census/self-verify that
   reports zero, regress one site deliberately, confirm it reports exactly that site, then fix and
   re-verify — and confirm the restore is byte-identical. The same principle as the positive controls
@@ -6644,6 +7057,25 @@ Each rule below was paid for.
   ⚠ **Count a guard's DISCRIMINATING ARMS the same way** (2026-09-04): a control forcing the old
   behaviour reddened 3 of 7, not the 4 claimed, because two of the arms are cases where the old and
   the new behaviour COINCIDE — must-not-regress arms, not evidence about the mechanism.
+  ⚠ **A CHOKE POINT IS DERIVED TWO WAYS BEFORE A DOOR IS PLACED AT IT, AND THE DISPATCHED SITE IS
+  CORRECTED RATHER THAN OBEYED** (2026-09-08): a token door dispatched at one of EIGHT entry points
+  was placed one frame lower at the private dispatcher — exactly ONE call site in the file, through
+  which every native invocation routes — so one loop covers all eight entries and the call TARGET is
+  checked too. The guard SPLITS into "is the PREDICATE right" (9 arms) and "does the trampoline
+  CONSULT it" (4 arms), because one arm asserting both PASSES when either half is true, with four
+  negative controls firing DISJOINT arm sets. **And a door proven CORRECT on one platform is not
+  proven WIRED there**: reaching the dispatcher runs the windows module initializer, so the four
+  wiring arms are host-gated and owed on Windows.
+  ⚠ **A STDOUT-COMPARED GUARD LINE THAT PRINTS A BOOLEAN AGAINST A HARDCODED COPY OF THE ORACLE'S
+  TEXT IS A VACUOUS PASS IN WAITING** (2026-09-08): if the oracle rewords the panic, the Go side
+  prints `false`; a body raising anything else prints `false` too; the two lines MATCH and the
+  golden banks the vacuous `false` as the contract — two arms equal for OPPOSITE reasons. **Print
+  the RECOVERED VALUE and let the two sides compare strings**, so the file carries no assumption
+  about the pin's wording, and give the non-string outcomes (failed to refuse; refused with a
+  managed exception) DISTINCT markers, since they are different defects. And an identity arm (same
+  function, same pointer) needs its DISCRIMINATING complement (different function, different
+  pointer), or a constant-pointer implementation passes it. Both found by reading the guard against
+  the tree's own rules before any run.
   ⚠ **A BILL LINE READ FROM THE TRACE CAN BE THE WRONG WAY ROUND** (2026-09-05): "every
   `StructField.Offset` reads 0 — offsets are never synthesized" was billed off a stack, while the
   failing line's own printed operands (`mismatched offsets: 8 0`, i.e. `f.Offset` then `offs`) said
@@ -6908,6 +7340,12 @@ Each rule below was paid for.
   sizing, not the commit. ⚠ And **re-read the CITED LINE's own notation before claiming to falsify
   it**: a "0 of 345" headline measured a proposition the design never asserted (it compared against a
   remembered PARAPHRASE; the design's own notation holds 344 of 345, and what was wrong was the SCOPE).
+  ⚠ **A NAME-KEYED CENSUS MISSES THE MEMBERS THE NAME DOES NOT COVER, AND ONE FILE WAS READ FOR A
+  PACKAGE CLAIM** (2026-09-08): `internal/sync` has EIGHT bodyless partials, not six — two carry no
+  `runtime_` prefix, and a third lives in a different file from the one read. **7 + 1 is visibly not
+  6**, and the count was printed only AFTER the ruling had quoted the number; the two missed members
+  belong to another lane's fatal-path class with a SECOND SITE at the new release, and were NAMED
+  rather than silently adopted into the hand-own.
   ⚠ **A CENSUS NUMBER TRAVELS WITH ITS UNIT, and a reconciliation RE-DERIVES the other instrument's
   number rather than POSITIONING it** (2026-09-05). One lane's 46 — a whole-flavour count of
   address-taken scalar VARIABLES, deduplicated by variable — was placed into another lane's SITE chain
@@ -6927,6 +7365,17 @@ Each rule below was paid for.
   compiles" when the elided spelling emits BYTE-IDENTICALLY to the explicit one; and a residual
   deliberately NOT fixed is recorded at the call site, in the reference doc AND in the guard's
   comment, with its honest fix named as its own item.
+  ⚠ **A TYPE-BASED SCREEN COVERS EVERY OPERAND SHAPE WHERE A SYNTACTIC ENUMERATION MISSED ONE**
+  (2026-09-08): a switch-lowering screen listed identifier, selector and index expressions, and an
+  ADDRESS-OF label is a unary expression, so it fell THROUGH; screening on the label's `go/types`
+  TYPE (a pointer can never be a constant pattern) clears both diagnostics with ONE predicate, and
+  the guard GREW to carry both operand shapes — because the field-address form, the one the real
+  source has, would have kept emitting the wrong lowering under a bare-identifier-only guard. Two
+  companions: **a behavioral guard's `go.mod` must not trigger a toolchain DOWNLOAD** (a newer `go`
+  directive made the oracle fetch; pinned like its siblings, and under `GOTOOLCHAIN=local` it would
+  have failed outright); and the corpus's ProjectReference CONDITION SET is CLOSED — 2,651
+  unconditioned, 56 linux, 45 darwin, 23 windows, no negations, no AND/OR, and no output-type group
+  enclosing a reference — which makes a fold's GOOS conditioning PROVABLE rather than heuristic.
   ⚠ **AN OBSERVATION SET ASIDE AS "NOT THE ROOT" IS RE-READ AGAINST THE COMPILER'S OWN WORDS FOR THE
   ERROR BEFORE IT IS SET ASIDE** — twice in one evening (2026-09-08): a census node reading "not found
   here" was filed as a footnote while Go's chain was traced anyway, and a lowered comparison spelling
@@ -7008,6 +7457,16 @@ Each rule below was paid for.
   capability-GATED, absent from both verdict maps and never compared, so the passing neighbours never
   reach it. Say which, because the next reader will see the green rows and conclude coverage, and
   **record it beside the CAPABILITY, not beside the row.**
+  ⚠ **THE GATE FOR LISTING A TEST CAPABILITY IS "DOES THE HOST'S IMPLEMENTATION MAKE THE ASSERTION
+  CAPABLE OF FAILING", NEVER "DOES THE HOST DECLARE A MEMBER OF THAT NAME"** (2026-09-08): censused
+  over the 204 committed proof pages, the allow-list gates 44 declarations (testing 38, os 4,
+  net/http 1, math/big 1) and **ZERO are liftable** — 19 reach unexported internals of a
+  hand-written host, 17 are free-text capability reasons, and the 8 exported-member candidates split
+  into 2 that would not COMPILE and 6 that would pass VACUOUSLY (a parallel-benchmark body never
+  invoked, its iterator always false, a sub-benchmark returning true without running the body, a
+  calibration returning at its first line). The lane's own prediction that one row would go RED was
+  refuted by Go's source: **red versus vacuously green is exactly the distinction a name-keyed
+  widening cannot see.**
   **⚠ ATTRIBUTION AND ARMS, five rules from 2026-09-03.** **A prediction is stated in a currency the
   predictor has MEASURED**: a row-level triple was arithmetic on another lane's accounting and the
   measured decomposition reached neither triple — the MOVED SET (FIXED/BROKEN derived from both
@@ -7215,6 +7674,19 @@ Each rule below was paid for.
   one command away, the pattern named by its author — and the correction re-framed the item from
   WIRING to a bucket-3 FRONTIER, the body's own dependencies being themselves stubs, which moved the
   remedy from a push to a managed callback minted on the syscall side.
+  ⚠ **A WIDTH CLAIM IN A COMMENT IS CHECKED, NOT ARGUED** (2026-09-08): a parameter's comment
+  claimed 32-bit representability, and `GOOS=windows GOARCH=386 go build` (rc=0) cost ONE command
+  and turned the claim into a measurement.
+  ⚠ **A HAZARD NAMED FROM ONE LANE'S SOURCE READ CAN ALREADY BE DISCHARGED IN THE TREE THE SEAT WILL
+  BE CUT AGAINST — read the TREE before sizing the remedy** (2026-09-08): one lane warned that
+  deleting a package's two fatal shims without bodying them in its companion would silently re-arm
+  the generated throwing stub at the new release; the other MEASURED that the ladder tree ALREADY
+  carries them as partial implementations in that companion, so the seat's action is a RETARGET of
+  two existing bodies, not a delete-plus-add. **The GENERATED STUB DIRECTORY is a one-listing oracle
+  for which partials are bodied** (`sync` holds exactly one stub file, `internal/sync` eight). A
+  question the tree cannot exhibit — which diagnostic a collision WOULD raise — is reported
+  UNMEASURED rather than guessed, and an attribution inferred from a tree's state is LABELLED as
+  inferred.
   ⚠ **A COORDINATOR'S LEAD IS A HYPOTHESIS, and the coordinator's share of a bad rule is the larger
   one** (2026-09-05/06). A lead is **RETRACTED IN PUBLIC the moment it is measured false, with the real
   site in the same message** — the integer-setter chain a lane was dispatched to was measured SAFE (a
