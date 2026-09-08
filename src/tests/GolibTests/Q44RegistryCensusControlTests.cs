@@ -156,6 +156,44 @@ public class Q44RegistryCensusControlTests
     }
 
     [TestMethod]
+    public void ACensusPathWithoutPidIsMadePerProcess_BecauseASharedPathDESTROYSBlocks()
+    {
+        // ⚠ MEASURED, not reasoned: two processes writing ONE census path, and the second's first
+        // write truncated the first's entire census -- 19 blocks gone, no error, no report. A row
+        // that then reads like a small measured one is a DESTROYED one, which is this instrument's
+        // own falsifier. So a configured path without {pid} is made per-process rather than shared.
+        //
+        // A timestamp heuristic was tried first and DISCARDED: its verdict depends on how often the
+        // OTHER process happens to write, and three instruments in a row could not exercise the
+        // ordering that breaks it. This arm guards the STRUCTURAL property instead, which no
+        // ordering or cadence can defeat.
+        const string key = "GO2CS_Q44_CENSUS_FILE";
+        string saved = Environment.GetEnvironmentVariable(key);
+        try
+        {
+            string dir = System.IO.Path.GetTempPath();
+            string pid = Environment.ProcessId.ToString();
+
+            Environment.SetEnvironmentVariable(key, System.IO.Path.Combine(dir, "q44-noPidToken.txt"));
+            string resolved = Q44RegistryCensus.OutputPath;
+            StringAssert.Contains(resolved, pid,
+                "a path carrying no {pid} must still resolve PER PROCESS -- a shared path loses a whole " +
+                "process's census silently, which is worse than any filename surprise");
+            Assert.AreNotEqual(System.IO.Path.Combine(dir, "q44-noPidToken.txt"), resolved,
+                "the configured path must have been rewritten, not returned as given");
+
+            // And the token form is honoured EXACTLY -- the already-correct case must not move.
+            Environment.SetEnvironmentVariable(key, System.IO.Path.Combine(dir, "q44-{pid}-token.txt"));
+            Assert.AreEqual(System.IO.Path.Combine(dir, $"q44-{pid}-token.txt"), Q44RegistryCensus.OutputPath,
+                "a caller who wrote {pid} gets exactly that substitution and no second rewrite");
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(key, saved);
+        }
+    }
+
+    [TestMethod]
     public void TheArmsAreExhaustive_TheSumReconcilesWithTheConversionCount()
     {
         // The property that makes every other count meaningful: each conversion lands in exactly one
