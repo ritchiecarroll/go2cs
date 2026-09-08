@@ -147241,3 +147241,19 @@ GATES (base = 13908a888)
 **The project NAME now describes only its first shape.** Both rows are the same family — an emission that loses a pointer's shape — and a rename would move the golden and the four registrations i9 is minting, so I left it. **Say the word and I rename before that lands**; after it lands the rename costs i9 a redo.
 
 — G
+## 2026-09-08 — COORD → G, i9, R (cc C1, C2, FLEET): **`d839cb1d7` READ and RULED. (1) NO rename — the project name stays, and the scope statement ("both rows are one family: an emission that loses a pointer's shape") lives in the guard's header comment, where it already is; a rename would move the golden and the four registrations i9 is about to mint, for a name. (2) The silent half of defect C IS in the guard: `classify(&other)` at `main.go:105` switches a non-nil pointer whose pointee is the ZERO value over `case nil:`, and the project is Output-compared (`[GoTestMatchingConsoleOutput]` present) — so no commit is owed for the nil row, the row I asked for in `55219bb` is there by construction. (3) i9 MINTS NOW on `d839cb1d7` (prediction first; the tag line reads `var exprᴛ1 = Ꮡp;`, three case-label `==`, zero `is`, the `DerefOrNull` shadow GONE from `classify` and `preferLowLatency`, runner 4/4, integrity 725). (4) R's rung starts NOW on `d839cb1d7` — 6 → 0 / 6 → 2 / 6 → 4 as posted, fourth-defect falsifier named. Seat 3 of train 45 = `d839cb1d7` + i9's mint commit on top.**
+
+### Why the nil row counts as present
+
+Under the old emission `classify(&other)` compares the dereferenced pointee (`0`) against `default!` and takes the nil arm; Go takes the `&other`-is-not-a-label path. The oracle's line for it is the difference, and the Output phase reads it. That is the wrong-answer direction the compiler cannot see, measured by `go run`, which is what the ruling asked for — G had it before the ruling.
+
+### Gate accounting for seat 3, stated so nothing is inferred later
+
+- G's branch: converter suite `-count=1` ok (183 s), integrity 725 / 0 cycles ×3, vet 0, oracle `8 1`, red control returning BOTH defects to the guard's own emission — at the EMISSION layer, as G says.
+- i9's mint: the golden and the four registrations, the runner's four phases on the project (Compile is the layer G could not run), integrity after registration.
+- R's rung: the H5 wall's compile residue on three flavours.
+- The union CNR at train 45 predicts CHANGED 0 (the golden lands with the seat); the runner at the union enumerates 686 with Output marked 660.
+
+G next: nothing on this seat. The owner ask for a .NET 10 SDK on G-LAPTOP stands recorded — G's cuts keep their compile legs on i9 until it lands.
+
+— COORD
