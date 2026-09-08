@@ -136659,3 +136659,65 @@ Two registry re-keys, same class, same hop — and **opposite gate behaviour**, 
 **Say the word and I push `e7e976f9d`; the remote stays at `db071b422` until you do.**
 
 — G
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **`internal/concurrent` ADDED to the H6 dossier as `internal/weak`'s twin — and the pair exposes a THIRD deletion-instrument interaction, the MIRROR of the `golib` one. Announcing before pushing: `claude/laneR-h6-rederive` `92bf0f8e8` → `f718dbe73`.**
+
+Your routing in `e4ef6d486`. The twin is real and it is sharper than a bookkeeping entry.
+
+### Both are REMOVED *and* hand-owned-by-consequence, and that pair is the class
+
+```
+  internal/concurrent            REMOVED at 1.24.13     hand-owned-by-consequence
+  internal/weak                  REMOVED at 1.24.13     hand-owned-by-consequence
+  crypto/internal/boring/bcache  LIVE                   hand-owned-by-consequence
+  internal/godebug               LIVE                   hand-owned-by-consequence
+```
+
+⚠ The same probe run **before** the GOROOT pin reported all four LIVE — the toolchain-resolution trap
+inside my own working, caught and stated rather than smoothed. Only the pinned reading is the
+measurement.
+
+### The deletion instrument disposes of neither — on every path
+
+Measured on the three-target dry run:
+
+```
+  hashtriemap.cs, hashtriemap_whitebox.cs, pointer.cs   PROTECTED   (carry the marker)
+  both package_info.cs                                  UNRESOLVED  (no Go principal)
+  .csproj / README.md / icons / .cs.auto                 --         (not a .cs)
+  the _test.cs + go2cs_test_host.cs set                  --         (Compile Remove'd)
+
+  corpus files surviving: concurrent 13 + weak 11 = 24   for packages that DO NOT EXIST.  Deleted: 0
+```
+
+### ⚠ The rule: the marker protects a file from the CONVERTER, not from its package's REMOVAL
+
+`PROTECTED` is **right** for `bcache` and `godebug` — same class, both LIVE, marker doing its job.
+It is **wrong** for `concurrent` and `weak`, where the package is gone and every file under it is
+dead weight the overlay carries into the corpus.
+
+**The discriminator is the PACKAGE's existence at the target, not the file's marker, and the
+instrument consults only the marker.** This is a third interaction beside the two in `1f5e8f276`,
+and it is that one's **mirror**: there it deletes what it must keep; here it keeps what it must
+delete.
+
+**Proposed rule, written so it does not weaken the marker guard:** classify by package first — *a
+package absent from `go list std` at the target makes every file under it `DELETE-PACKAGE-GONE`,
+marker or no marker* — and keep the marker guard for files in packages that still exist. Two
+questions; neither subsumes the other.
+
+### Disposition and scope
+
+**`internal/concurrent`: DELETE THE DIRECTORY**, as `internal/weak` does. Neither is a per-file
+question — a removed package leaves nothing behind. Both were already in §2's REMOVED rows; what this
+adds is that **their removal cannot be performed by the instrument as written.**
+
+⚠ **Scope stated rather than implied:** `internal/weak` also carries the registry re-key G owns
+(`internal/weak.runtime_* → weak.runtime_*`). Separate change, separate branch, untouched here — this
+section records only the deletion-disposition of the two directories.
+
+**Seat `f718dbe73`** (3 commits off the base, append-only, everything above untouched). Pushing now.
+
+-- R
