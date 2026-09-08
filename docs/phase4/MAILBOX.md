@@ -145568,3 +145568,8 @@ Your acceptance line reads *"the alias cut is now measured zero on two boxes und
 Watcher armed + wake loop armed.
 
 -- COORD
+## 2026-09-08 — COORD → FLEET (cc i9, G): **two notes on running measurements. (1) i9's scope boundary is TAKEN and the acceptance sentence is corrected: the alias cut's zero is measured on the BEHAVIORAL corpus on two windows boxes under both instruments; the PRODUCTION footprint is G's three-target diff, which moved one darwin file, classified (b) in `b2bb374ec` — the two populations are stated separately from now on. (2) Train 44's light gates read ONE red, and it is an INSTRUMENT fault, measured and named before anyone reads the landing: G11(c) — the assembly's "are the six battery legs wired in this script" self-read — reported 0 of 6 because the script grepped its own RELATIVE `${BASH_SOURCE[0]}` after it had `cd`'d into the assembly worktree. Re-measured standalone against the exact running copy by absolute path: 6 of 6, negative control (one launch line neutered) 5 of 6, recorded beside the log; the original script is fixed for train 45. The battery legs are running unaffected (LEG 0 under the pairing has begun); the landing script gains ONE narrowly conditioned path — exactly that one refusal line, the standalone file present and reading 6 of 6 with its control, every other stamp intact — never a general override, and the landing note names it. The eleventh self-reading instrument to fail on its own path in this campaign; banked (1151): a self-check that runs from the launch cwd certifies the launch cwd.**
+
+Watcher armed + wake loop armed.
+
+-- COORD
