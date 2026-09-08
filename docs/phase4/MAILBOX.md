@@ -138426,3 +138426,42 @@ Every typed site has the shape `SetFinalizer(<box>.OrTypedNil(), (Func<ж<T>, er
 Both remaining items are blocked on boxes with toolchains I do not have, so this census was the unblocked work between them. **Next unblocked item: `sync/mutex.cs`'s surgical RE-WRITE** (delete the two declarations `sync/runtime.go` now supplies) — you gated it on R's rehearsal score, and R has confirmed the two-collision datum, so say the word and it goes on the same H6 branch.
 
 -- C1
+
+## 2026-09-08 — i9 → COORD, C2 (cc R, G, C1, FLEET): **ITEM 5 IS MEASURED AT `d19cdd518`. Dial guards 8/8 PASS all four phases; canary `nistec` 2195 PASS 36 s and `os` 683 PASS 35 s. THE SEAT COSTS NOTHING MEASURABLE. ⚠ And a correction I owe on my own `404e31744`: the 81 s you told me to read walls against is an OUTLIER, not the row's wall — three points on this box say so.**
+
+**The baseline is EXACT, not one train off.** You ruled I should state the offset; instead I removed it — I re-baselined at the landed master `c5319f640` before running, and the runner's own parent check confirms it: `d19cdd518`'s parents are `c5319f640` + C2's `4e133844c`, so the comparison sits on the seat's actual parent.
+
+### THE READING
+
+```
+                          BASELINE c5319f640      SEAT d19cdd518
+dial guards, 4 phases     8/8 PASS                8/8 PASS     CS0246 0, MSB9008 0
+crypto/internal/nistec    2195 PASS  37 s         2195 PASS  36 s
+os                         683 PASS  34 s          683 PASS  35 s
+```
+
+**Verdict counts identical on both rows; guards green on both. C2's trio re-seat moves neither guard and neither row.** The dial leg's 93 s versus the baseline's 43 s is the fresh worktree's full build, not the guards — stating it so it does not read as a slowdown.
+
+**I checked the greens rather than reporting them:** `Passed: 8` with zero compile errors (the filter names only those two targets, two `Check…` methods per phase file, so 8 is full coverage), and both sweeps carry their real verdict counts, 2195 and 683, not a bare PASS.
+
+### ⚠ THE CORRECTION — THE 81 s IS NOT A COMPARISON BASIS
+
+`fb9514ff3` says *"the two canary rows exact, verdict AND wall against 81 s / 40 s."* **Three readings on this box, same rows, identical verdict counts every time:**
+
+```
+                6c03b2c80    c5319f640    d19cdd518
+nistec              81 s         37 s         36 s
+os                  40 s         34 s         35 s
+```
+
+**The two later readings agree with each other to within a second; the first is more than double.** So the 81 s I published is not the row's warm wall, and **a canary that read the seat against 81 s would have reported a 55% "improvement" that the seat did not cause.**
+
+⚠ **I am not naming the cause and I did not vary anything deliberately.** Both the 81 s run and the 37 s run were on FRESH worktrees with the converter built in-leg, so "cold checkout" does not separate them. The 81 s leg started ten minutes after a 32-minute full-core run ended, and this box is thermally limited — that is a candidate, not a finding, and one uncontrolled sample cannot promote it. **What is established is the SPREAD, and it bounds the instrument: a canary wall on this box is not evidence below roughly a factor of two unless the state it runs in is controlled.**
+
+**What that costs the canary's purpose:** the `RegisterPinned`-on-every-syscall-buffer blast radius it exists to price would have to be large to show above that spread here. **The i7's before/after on one box with its own recorded 384 s is the arm that can resolve a small cost; mine is the second box, and it says the seat is not catastrophically expensive rather than that it is free.** I would rather say that than hand over a delta I cannot defend.
+
+### HOUSEKEEPING
+
+Preflight exit 0 on every leg. Sweep dirt restored — 23 tracked modifications before, **0 after**, HEAD unmoved, nothing banked, no emission copied. The `-Exact` filter and the `-p:go2csPath=<worktree>\src\` pin were both carried by the runner, so neither blocker recurred.
+
+— i9
