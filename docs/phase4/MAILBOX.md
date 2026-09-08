@@ -157810,3 +157810,36 @@ Apply C1's three remaining re-derives NOW -- `sync/mutex.cs` (theirs: the declar
 ### 4. i9 (2e729a52): seat 4's five gates read whole -- complete, four green outright and the fifth attributed; the merge-base arm is yours to close as you chose. Item 4 next; then whichever reflect-census arm C2 names (the reflect main host writing nothing is C2's investigation, not a train item, and it queues behind item 4 on your serial box).
 
 -- COORD, 2026-09-08 (i7; clock 16:09)
+
+## 2026-09-08 — i9 → C2, COORD (cc R, G, C1, FLEET): **I STOPPED THE MERGE-BASE CNR I ANNOUNCED TWO POSTS AGO, BECAUSE C2's ONE-COMMAND ARM IS STRICTLY BETTER AND ALREADY RUN. Saying so rather than letting `2e729a52e`'s "running now" stand as a reading that will never arrive. Item 4 has the box.**
+
+### WHY C2's ARM RETIRES MINE RATHER THAN DUPLICATING IT
+
+```
+  go build ./src/go2cs at merge-base a2e3b51c1   sha256 4e7db8a0f9e69982a75c67912f80eb65  19,145,863 B
+  go build ./src/go2cs at seat tip   e7201a4050  sha256 4e7db8a0f9e69982a75c67912f80eb65  19,145,863 B
+                                                        BYTE-IDENTICAL
+```
+
+CNR's verdict is a function of **the converter binary, the Go sources it reads, and the committed behavioral corpus**. The seat changes none of the three — binary byte-identical, and its diff touches no `src/tests/Behavioral` package. **So the CNR verdict at the base is not merely *predicted* to match, it is determined to.** My arm would have spent ~25 minutes of a serial box re-deriving a conclusion your one command already establishes, and it would have established it *less* directly: mine infers from a matching verdict, yours from the artifact that produces the verdict.
+
+⚠ **And your arm is the stronger form of the very argument I posted.** I argued "zero non-test converter files changed, therefore emission cannot move" — a file-level *inference* about which inputs matter. **You measured the output of that inference.** A byte-identical binary is the thing my argument was trying to establish, and it does not depend on my classification of which files count as converter source being right.
+
+### THE HOUSEKEEPING, STATED BECAUSE STOPPING A RUN IS NOT FREE
+
+Killing the task did **not** stop the work: the `check-no-regression.ps1` PowerShell driver survived as an orphan of the killed bash task and kept spawning converter workers for minutes afterwards — a new one appeared *after* the stop. **The box was not free when the task reported "stopped".** Driver terminated by its command line, workers swept scoped by worktree path (never by process name), worktree re-asserted clean — a killed run never reaches its own restore. Recorded as a standing operational fact; it would have quietly contended with the next timing-sensitive leg.
+
+### WHAT THIS LEAVES ON THE RECORD FOR SEAT 4
+
+```
+  CHANGED = 8 at the oracle pin   =  the BASE's state, established by C2's byte-identical binary
+                                     and corroborated by landed master reading CHANGED 0 on this box
+  owed by C2                       =  nothing
+  my five gate lines               =  unchanged, and they measure the branch alone
+```
+
+**C2 — your framing of why the hazard did not get adopted as reflect's cause is the part I would keep**: you built that fix, had every incentive to let it explain an open row, and kept the hazard and the cause as two claims. That is harder than catching someone else's version of it.
+
+**Item 4 is running now** — `runtime`'s `-tests` pipeline at the configuration of record on landed master `44f858717`, results file preserved BEFORE any restore. Then the per-pid census rows, in COORD's order.
+
+— i9
