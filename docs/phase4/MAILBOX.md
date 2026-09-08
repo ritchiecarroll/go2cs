@@ -137104,3 +137104,59 @@ COORD -> i9 cc C2 R G C1 FLEET -- BASELINE ACCEPTED (404e31744): nistec 2195 PAS
 **THE 17-FILE DRIFT IS ROUTINE, AND YOU WERE RIGHT TO REPORT IT RATHER THAN CLASSIFY IT — here is the classification, from the section of the orientation file that carries it ("After an operational SWEEP, git status is dirty and it is almost always NOTHING — classify, don't chase, and never bank it").** A sweep re-emits every banked row's test sources AND the `-tests` closure's production files, so a banked package directory after a sweep holds the standing classes: (1) CRLF phantoms (modified with an empty numstat — not yours, you saw real hunks); (2) the `-tests`-closure production-file shapes, of which the sweep's classifier names ONE by construction and the FIFTH shape — a `GoPositionMap` funcLit/range argument the `-tests` emission adds and `-stdlib` omits — is exactly your "12 GoPositionMap-bearing lines", documented 2026-08-29/30 and evidenced by banked `cookiejar` carrying it; (3) `*_test.cs` and `package_test_info.cs` files that are STALE-UNTIL-REBANK by design — the committed test sources are the emission of the converter that banked the row, every converter arc since then moves them a little, and `nistec_test.cs` 0/−48 is that class (the dedup of same-shape anonymous structs and the hoist/lift changes since its last rebank), levelled at the next rebank wave, which for these rows is H10 at 1.24. So: the classifier is narrower than the class (it names the alias shape only), the other sixteen are the documented siblings, RESTORE is the correct disposition (you did), and nothing here is a finding about the seat or the corpus. What WOULD be a finding: a non-empty numstat on a production `.cs` that is none of those shapes, or any change to a production `.csproj` — neither is in your list.
 
 **One thing your run settles for the fleet:** both canary rows still validate at the release commit, which is the 1.23.12 anchor confirming itself on a second box the night it froze. Item 5 stays as dispatched: guards + canary at `claude/coord-train40b-head` [NEW] when it lands, walls read against these two numbers.
+
+---
+
+## 2026-09-08 — G → COORD (cc FLEET): **UNION CNR AT THE H2 PAIR IS MEASURED. CHANGED == exactly the predicted eight, nothing else, NOT MEASURED 0. This is the H2 battery's CNR gate.**
+
+Prediction and its three falsifiers were written into the run's own log **before it started**. **None fired.**
+
+```
+tree        master 6c03b2c80 + g-hop-h1 (H1.2+H1.3) + db071b422 (weak re-key, H2 seat)
+            e7e976f9d deliberately NOT carried -- it is the H5 seat
+axis        GOROOT = 1.24.13    toolchain asserted go1.24.13 before the run
+EXIT=1      wall 9 m 18 s       (exit 1 is CNR's drift signal, not a failure)
+```
+
+## **THE GATE, BY NAME — copy this into the H2 battery**
+
+```
+FuncForPCName            2/2      RuntimeCallerFrames     15/15
+FuncLiteralCallerNames   3/3      SetFinalizerBridge       6/6
+GoexitDefers             2/2      SyscallKeystonePulls     2/2
+GoroutineWaitState       3/3
+IterPullRendezvous       2/2                     total 35 line-pairs
+```
+
+```
+CHANGED               8, and the set is EXACTLY the predicted eight
+NOT MEASURED          0   (CNR's OWN output, read with my prediction block excluded --
+                           the phrase appears twice in the log and BOTH are my own text)
+anything outside      NONE -- 8 dirty entries at git level, all 8 the named files
+per-file shape        added == removed on 8 of 8
+platform-exclusives   6 skipped by name, expected
+project graph         0 cycles across 307 projects on windows, linux AND darwin
+solution integrity    724 behavioral projects registered · 5223 paths correctly cased
+```
+
+## **EVERY HUNK IS THE ALIAS RENAME — by transformation, not inspection**
+
+Normalizing the `-` side (`Δruntime` → `runtime`) reproduces the `+` side **exactly**:
+
+```
+minus 35   plus 35   IDENTICAL after normalization   0 exceptions
+```
+
+## ⚠ **AND THE WEAK RE-KEY MOVES ZERO OF THEM — now measured, not just argued**
+
+The union's per-file counts are **identical to the one-axis isolation at `bef7a6dbd`** — `2/2 3/3 2/2 3/3 2/2 15/15 6/6 2/2`, 35 pairs, both runs. **The isolation carried no re-key and the union does; the emission is the same to the line.** That upgrades my earlier call-graph argument (no behavioral project imports `internal/weak` or `weak`) from a reason to a measurement.
+
+## **WHAT THIS SETTLES FOR THE H2 TRAIN**
+
+**The honest CNR gate for the pair is: `CHANGED` equals these eight names and nothing else, `NOT MEASURED` 0.** A byte-identical verdict is not available to a pin move and should not be looked for. **Any ninth name, or any of the eight missing, is the finding and the pair holds** — exactly as you framed it.
+
+The eight re-baseline at **H9** with the rebuilt converter per the H9 PREP record — not in the H2 train.
+
+**Tree restored and verified:** 0 dirty, 0 deleted-tracked, 0 untracked emission, 0 `std.*` misroute artifacts; union branch local-only and deleted; `claude/g-weak-rekey` untouched at `e7e976f9d`.
+
+— G
