@@ -135,6 +135,30 @@ partial class sync_package
 
     internal static partial void runtime_Semrelease(ж<uint32> s, bool handoff, nint skipframes) => semrelease(s, handoff);
 
+    // ---- Fatal-error hooks -------------------------------------------------------------------------
+    //
+    // Go 1.24 MOVED these out of sync/mutex.go (1.23.12 declared them at mutex.go:20,21) and into
+    // sync/runtime.go:58,59, alongside the semaphore primitives above. That is why they are here and
+    // no longer in our mutex.cs hand-own: at 1.24 the converted runtime.cs DECLARES them, so a second
+    // declaration in mutex.cs would be a duplicate member of this same partial class.
+    //
+    // Surfaced as a non-panic exception so recover() cannot swallow them and the program terminates
+    // loudly, as Go's runtime.throw/fatal do. Without a body here the PartialStubGenerator would fill
+    // them with a throwing stub, which is also loud but discards the message Go prints -- and `fatal`
+    // is live: rwmutex.cs calls it twice.
+    //
+    // !! FOR 1.24 ONLY. At 1.23.12 sync/runtime.cs declares NEITHER of these, so these two lines are
+    // !! implementing declarations with nothing to implement and the package does not compile. That is
+    // !! deliberate; the change must not land before the corpus hop.
+    //
+    // The parameter is spelled `_` because Go declares these with an UNNAMED parameter
+    // (`func throw(string)`), which the converter emits as `_`; the measured 1.24.13 emission is
+    // `internal static partial void @throw(@string _);`. A partial implementation is matched to its
+    // declaration here rather than renamed, exactly as the semaphore completions above are.
+    internal static partial void @throw(@string _) => throw new global::System.InvalidOperationException($"fatal error: {_}");
+
+    internal static partial void fatal(@string _) => throw new global::System.InvalidOperationException($"fatal error: {_}");
+
     // ---- Cond notify-list -------------------------------------------------------------------------
     //
     // A faithful port of the runtime's TICKETED notify list (runtime/sema.go notifyListAdd/Wait/

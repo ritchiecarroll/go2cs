@@ -33,11 +33,12 @@ namespace go;
 
 partial class sync_package {
 
-// Fatal-error hooks (Go provides these via runtime linkname). Surfaced as a non-panic exception so
-// recover() cannot swallow them and the program terminates loudly, as Go's runtime.throw/fatal do.
-internal static void @throw(@string s) => throw new global::System.InvalidOperationException($"fatal error: {s}");
-
-internal static void fatal(@string s) => throw new global::System.InvalidOperationException($"fatal error: {s}");
+// FOR 1.24 ONLY -- this file no longer declares the fatal-error hooks `throw` and `fatal`.
+// Go 1.23.12 declared them in mutex.go:20,21, i.e. in the very file this hand-own replaces, so the
+// hand-own had to supply them. Go 1.24 MOVED them to sync/runtime.go:58,59, where the converter
+// emits them as bodyless partials and sync/runtime_impl.cs supplies the bodies instead.
+// !! At 1.23.12 this file therefore does NOT compile: nothing declares `fatal`, which rwmutex.cs
+// !! calls twice. That is deliberate and is why this change must not land before the corpus hop.
 
 // A Mutex is a mutual exclusion lock.
 // The zero value for a Mutex is an unlocked mutex.
