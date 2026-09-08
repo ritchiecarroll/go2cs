@@ -301,6 +301,13 @@ ONE stdlib in a build; there is now only one on disk.
     (MSB3491/MSB3027/MSB3021/CS0016/CS0041/CS8104, every message "not enough space on the disk") is ONE
     environmental failure wearing N codes, not N defects** — read the code histogram before believing a
     count.
+    ⚠ **AN ERROR CODE IS NOT A REMEDY CLASS — SORT FAILURES BY THE ERROR TEXT THAT NAMES THE SYMBOL**
+    (2026-09-08, R echoed by G): on the H5 ladder CS0426 spanned TWO remedies (an alias shadow,
+    re-QUALIFY; a `HashTrieMap` move, re-POINT), while CS1929 and CS0117 WERE alias consequences wearing
+    other codes, because a wrongly-bound `sync_package` fails METHOD resolution rather than NAME
+    resolution. R predicted the magnitude exactly (16 of 40) and named the wrong four projects by sorting
+    on codes; G flagged the axis without predicting the members, and neither half alone was the answer.
+    **The histogram sizes a wall; the error TEXT classifies it.**
     ⚠ **The 2m default is FIVE TIMES SMALLER than the sweep's, so a hand-invoked `-tests` run fails
     where `run-validated-sweep.ps1` passes — on nothing but which default applied** (measured
     2026-08-24: `bytes` reported `Go="pass" C#=""` on 38 tests with ZERO reported, which is the exact
@@ -485,6 +492,15 @@ ONE stdlib in a build; there is now only one on disk.
     lines with unrelated paths and the truncated view was read as the ABSENCE of a preserved record
     that was sitting there. An unfiltered enumeration answers "is it there"; a head-limited one
     answers a different question — the same split as filtered vs unfiltered `git status --porcelain`.
+    ⚠ **FOUR MECHANICS FOR A REFUSING LEG, MEASURED WHILE ONE WAS BEING WRITTEN** (2026-09-08): a REFUSED
+    full run must not TRUNCATE the record it refused — the publish-on-exit trap, proven by planting a
+    sentinel, making the run refuse, and reading it back byte-identical; a land script's refusal set is
+    PARTITIONED ONCE into named classes with the OK flag set in ONE place, so a record carrying any third
+    refusal still aborts; a named acceptance path emits a DIFFERENT anchor from the wired leg's sentence,
+    because emitting the wired leg's "= 0" text would stamp something the run never measured; and a
+    helper's non-`local` loop variable clobbered its caller's `$a` and pointed the script at a file named
+    `cut`, reported as "zero anchors read" — the bash cousin of the PowerShell case-insensitive variable
+    collision. **`local` every loop variable in a helper.**
     ⚠ **"ABSENT FROM SOURCE" AND "ABSENT FROM THIS PATH" ARE DIFFERENT CLAIMS, AND THE WEAKER PHRASING
     IS FALSIFIABLE IN ONE COMMAND — taking the conclusion down with it.** A lane reported a helper as
     *"in EIGHT DOCS and ZERO source files"*; it is in **176 source files**, including the very package
@@ -797,6 +813,15 @@ ONE stdlib in a build; there is now only one on disk.
   helper. **And the ZERO corpus footprint is DERIVED, not censused**: the corpus compiles 307/307
   today, so any site taking the signed branch in a native-width unsigned context would ALREADY be
   CS0266 — a differing file would be a finding about the COMPILE GATE, not about the fix.
+  ⚠ **AN INSTRUMENT CARRYING ITS OWN COPY OF A RULE THE SYSTEM ALREADY DEFINES CAN FILE ITS OWN TARGET
+  UNDER "NOTHING TO DO HERE"** (2026-09-08, C2): a census's 2a/2b discriminator copied "the token this
+  box reports" as two arms (`INilPointer`, `IChannel`, else 0) while `ManagedPointerTokens.CurrentToken`
+  has a THIRD, so a registered object implementing neither projected to 0, compared unequal to its own
+  token, and was filed 2b — the SOUND bucket — when it is 2a, the DEFECT bucket, which is the worst
+  direction for an instrument whose finding is a zero. Found by READING the classifier for a peer's
+  defect, not by looking for it, and fixed by making the rule ONE definition the instrument CONSULTS,
+  guarded by name. Its companion perturbation was also a value already in hand. Neutrality at suite scale
+  is identical failure counts across the env gate (48/48), predicted before running.
 - **FALSE-GREEN route #2 — stale OUTPUT (fixed 2026-07-20).** Distinct from the stale-`go2cs.exe` trap
   (route #1, where an un-rebuilt binary runs old logic): here the exe IS current but the runners *skip
   transpiling* and validate the **previous** converter's `.cs`. All three of `BehavioralRunner.UpToDate`,
@@ -824,6 +849,16 @@ ONE stdlib in a build; there is now only one on disk.
   a `Copy-Item`, or an editor save. The comments in the code say the MEASURED shape, not the plausible
   one; the remedy (transpile unconditionally) is unchanged either way, since it does not depend on
   which restore stamped what.
+  ⚠ **AFTER ANY RESTORE, A FILTERED `--phase transpile` SKIPS BY DEFAULT AND REPORTS `pass 1`**
+  (2026-09-08, i9, resolved the same hour): the restore's own write makes the `.cs` newer than both its
+  `.go` and `go2cs.exe`, which is exactly the runner's up-to-date predicate, so "main.cs rewritten 41
+  seconds ago" was the RESTORE's mtime and the runner never ran. CNR, unconditional, flagged the drifting
+  golden; the per-project runner "reproduced the committed bytes" because it did nothing; a FORCED
+  transpile with the emission deleted first reproduced CNR's one line at numstat 1/1. **A per-project
+  transpile used as EVIDENCE forces the emission — delete the `.cs` or touch the `.go` — and asserts a
+  NUMSTAT, never `pass 1`**; the skip is the DEFAULT state after a restore, not an edge case. Two
+  instruments disagreeing located the blind spot in an hour, and the lane withdrew its own sentence by
+  name.
 - **`check-no-regression.ps1` re-transpiles UNCONDITIONALLY** (it has no `UpToDate` equivalent), which is
   why CNR was immune to both false-green routes and remains the authoritative drift instrument for
   converter changes. Preserve that asymmetry: never add an up-to-date skip to CNR.
@@ -860,6 +895,22 @@ ONE stdlib in a build; there is now only one on disk.
   MSB4166s, zero CS diagnostics) that reached its real 9-of-10 verdict in 45 s once
   `MSBUILDDISABLENODEREUSE=1` was set; set it for any back-to-back `-tests` queue before believing a
   diagnostic-free build failure.
+  ⚠ **A BEHAVIORAL-TREE CENSUS KEYS ON THE GO PACKAGE NAME, NEVER THE DIRECTORY NAME** (2026-09-08, G):
+  the emission keys on the package CLAUSE — a `sortlocal/` directory declaring `package sort` emits
+  `sort_package` — so a directory-keyed census of root-package collisions read NONE while the
+  package-keyed one read exactly one file, the lane's own guard. The Go-side twin of the alias rule
+  above: a directory census answers a different question and reports a clean zero for the wrong reason,
+  and the guard being its own counter-example is what exposed it before publication.
+  ⚠ **IN A GIT PATHSPEC `*` MATCHES `/`, UNLIKE A SHELL GLOB** (2026-09-08, C1): `src/core/runtime/*.cs`
+  swallowed `windows/proc.cs`, so a per-flavour census read 101/36 for windows, linux, darwin AND the
+  flat-only control — four identical numbers from one query, and the only tell was that **a census whose
+  arms CANNOT differ is announcing that it does not discriminate.** Fixed with the `:(glob)` magic
+  pathspec and controlled 0 against 3. Two companions from the same record: a "displacing X leaves Y
+  UNREACHED" sentence read as if the displacement achieved it for ALL of Y when it achieved it for four
+  sites and 58 were dead by construction (two reasons in one clause — stated, not rewritten); and at
+  go1.24.13 the `getcallerpc` family is ABSENT (0 sites), reborn as
+  `internal/runtime/sys.GetCallerPC/SP/GetClosurePtr` at 208 sites in five packages, so a cut keyed on
+  the old spelling is deleted by the hop.
   **Five more launch/instrument traps, each paid 2026-09-01/02.** (1) **Git Bash rewrites `cmd /c`
   into `cmd C:\`** — MSYS path conversion eats the `/c` — so the command never runs: `cmd` opens
   interactively, reads EOF, exits **0**. A "runner gate" passed that way with a log holding only the
@@ -922,6 +973,13 @@ ONE stdlib in a build; there is now only one on disk.
   first. In a shell that exports the variable, spell every path handed to a native Windows tool in
   Windows form (`cygpath -w`), or scope the export to the ONE command that needs it: a fixup that must
   commit and then run a PowerShell instrument is exactly where the two requirements collide.
+  ⚠ **A CNR WRAPPER THAT READS A THROWN CNR AS "CHANGED 0" PRODUCES THE PREDICTED NUMBER FROM A RUN THAT
+  MEASURED NOTHING** (2026-09-08, i9): `GOTOOLCHAIN=local` on the pairing pin makes CNR's OWN `go build`
+  of the converter fail (`go.mod requires go >= 1.24.13`), CNR throws, and the wrapper reported CHANGED 0
+  — route #6's shape, caught only by the exit 1. **A CNR wrapper asserts the VERDICT LINE (`==> NO
+  REGRESSION` or `==> CHANGED`) and the measurable count; a zero from an absent list is not a reading.**
+  Under the two-pin pairing `GOTOOLCHAIN` stays UNSET (auto) on the 1.23.12 pin so the converter build
+  can switch UP through the module graph.
   ⚠ **A CENSUS TAKEN WHILE THE BUILD IS RUNNING IS A COUNT OF THE BUILD, NOT OF THE PACKAGE.** A
   mid-build stub census read 138 where the settled count was 142 (2026-09-07) — four generator outputs
   had not been written yet. The reading was not wrong about what it SAW; it was wrong about what it was
@@ -1167,6 +1225,13 @@ ONE stdlib in a build; there is now only one on disk.
   cannot see the red is the argument AGAINST boarding it, not for it, and **a fact that points somewhere
   is not an argument for going there**: supply it accurately, label what it is, and let the conclusion be
   argued.
+  ⚠ **A CORRECT GENERAL RULE APPLIED TO AN UNVERIFIED PARTICULAR IS STILL A GUESS** (2026-09-08, R, twice
+  in one day): "dependents are skipped, not errored" correctly said ONE root behind five skipped
+  GolibTests references — and the root was then PICKED, the failure already in mind, rather than DERIVED.
+  One grep of the csproj `ProjectReference` graph, run only to audit an already-published claim, found
+  the real root (`fmt` → `slices`, CS8761, 99 dependents) and moved that seat's acceptance from one
+  blocker to three. **The rule names the SHAPE, the derivation names the MEMBER; run the derivation
+  BEFORE the claim.**
   ⚠ **A LATENT-MISATTRIBUTION HAZARD AND AN OBJECTIVE ACCELERATOR ARE DIFFERENT CLAIMS NEEDING DIFFERENT
   EVIDENCE, and they are easy to conflate when the population is the same.** The evidence for "this will
   bill the wrong commit someday" is that the class exists and no gate sees it; the evidence for
@@ -1447,6 +1512,11 @@ ONE stdlib in a build; there is now only one on disk.
   a guard's INPUT POPULATION rather than on an A/B arm.** The fix derives the scope from the same
   directory the manifest was loaded from, so the two cannot disagree; the cross-package arm, written
   RED-FIRST, reproduced the measured case by name.
+  ⚠ **A CENSUS KEYED ON `partial <type> X` COUNTS THE LEGAL CASE** (2026-09-08, R): 141 "collisions" were
+  `partial class <pkg>_package`, which every file declares by design — a duplicate partial TYPE is legal
+  and only a duplicate MEMBER is CS0102 — so the predicate keys on `[GoType]` and on member declarations
+  per package instead. Withdrawn by its author before the number was posted; third predicate over-match
+  in one day.
   ⚠ **AN OPERATOR GREP VERIFIES THE OPERATOR AND SAYS NOTHING ABOUT THE OPERANDS, AND A GUARD
   WRITTEN TO ASSERT SEMANTICS THAT CANNOT COMPILE ASSERTS NOTHING** (2026-09-08): a commit line
   reading "3 lowered comparisons, all `==`, zero `is`" was exactly as strong as the grep behind it —
@@ -1473,6 +1543,16 @@ ONE stdlib in a build; there is now only one on disk.
   an unregistered project is still transpiled and compiled, and a guard with no golden still reddens
   the suite. Seat the two roots as ONE seat with the golden minted on the COMBINED tip; **no runner
   leg on a tree nobody assembles.**
+  ⚠ **WHERE A GUARD'S COMMENT NAMES A CLASS, ITS CONDITION IS KEYED ON THE CLASS, NEVER ON THE INSTANCE
+  THAT PROMPTED IT — a comment cannot widen a condition** (2026-09-08, G/R): `convIdent:227`'s box-render
+  escape hatch says in its own words that a REF RECEIVER has no box, that reaching it inside a
+  lambda-conversion context (a `defer` or a `go` method group) renders a nonexistent name, and cites
+  flate's init CS0103 ×11 — while its flag asks "is this a ref RECEIVER" where the render needs "does
+  this ident have a box AT ALL". Ref-lowering later created the identical box-less binding for a
+  ref-lowered PARAMETER (`paramIsRefLowered` already existed at `refLoweringEmissionOperations:450`) and
+  the condition stayed receiver-only. TWO sites, the `defer` and the `go` twin at `visitGoStmt`, found by
+  putting a `go` variant in the probe rather than assuming. R's hedge ("same shape, not the same code
+  path") is scored as an UNDER-claim: right on the evidence held, weaker than the evidence would carry.
   ⚠ **The freeze binds INSTRUMENTS, not just edits.** A verify-only landing preflight was one command
   from running in the worktree a multi-hour sweep was using, where its `git checkout --detach` would
   have yanked the tree out from under the running converter and destroyed hours of gating —
@@ -1810,6 +1890,29 @@ ONE stdlib in a build; there is now only one on disk.
   is what turns "741 == 741" from a coincidence into a statement, and is why a group-2 test class
   compiled and RAN there at all. The skip delta Release → Debug read exactly 3, the liveness class,
   so both legs ran what they should.
+  ⚠ **`dotnet test --filter <expr>` THAT MATCHES NOTHING EXITS 0 WITH "No test matches"** (2026-09-08, i9
+  via C1), so an rc-only gate reports 10 of 10 from a run that executed ZERO tests — the vacuous-green
+  class through the tool everyone trusts to be loud. **A filtered MSTest gate asserts the EXECUTED count
+  against the expected count and greps for `No test matches`, never rc alone.**
+  ⚠ **GOLIBTESTS ON A LINUX HOST IS RED BY CONSTRUCTION WITHOUT `-p:GoTargetOS=linux`** (2026-09-08, C2):
+  48 failed / 744 at BOTH configurations, every block a `DllNotFoundException` on kernel32 from the
+  converted `syscall_package` static initializer; pinned, after a depth-UNLIMITED purge of 2,021 output
+  directories, at 0 failed / 781 both, count-reconciled (788 `[TestMethod]` − 4 in a netapi32 file − 3
+  filtered = 781). The csproj's own 2026-08-31 comment had ruled it. **A gate routed to lanes on two OS
+  families carries the flavour pin in its instruction**; and a window-grep (`-A8`) over failure blocks
+  INVENTED six non-kernel32 findings where block-parsing gave 48/48 — parse on real block boundaries.
+  ⚠ **A GATE WHOSE NEW TESTS ARE ENVIRONMENT-GATED `Assert.Inconclusive` READS COUNT-MATCHED WHILE NEVER
+  EXECUTING THEM** (2026-09-08, i9): 747 count-matched on four legs with eight census controls SKIPPED —
+  skip delta +8 in BOTH configurations, exactly the new file. "GolibTests green" for such a branch is
+  clean-because-untested; **the gate for an env-gated control set is the leg with the variable SET,
+  posted with the controls' own lines.** Companion: two branch Debug runs against one base run establish
+  "not a deterministic regression", never a RATE.
+  ⚠ **A DERIVATION CAN READ THE RIGHT NUMBER BY LUCK** (2026-09-08, G): 752 was reached by subtracting
+  the FIRST FOUR files of an EIGHT-file `Compile Remove` group, the inverse of a sibling lane's
+  735-vs-739 slip. **A count is stated WITH its derivation, and MSBuild `-getItem:Compile` is the sound
+  source**, never a number on its own. Three `FixtureLinkStagingTests` failures on the same run are the
+  symbolic-link privilege, a HOST capability shared by G-LAPTOP and the i9 box, named from the error
+  text.
   ⚠ **A DEBUG-ONLY GolibTests reading silently under-measures the GC/pin-liveness class by THREE**
   (measured 2026-09-06). Exactly three tests RUN at Release and SKIP at Debug — the liveness class
   self-skipping where a non-optimizing frame would root its temporaries and make the assertion
@@ -1983,6 +2086,14 @@ ONE stdlib in a build; there is now only one on disk.
   MUST-FIRE direction — a real build must read LOADED and an actively compiling analyzer server must
   read BLOCKER. It caught a genuine FOREIGN blocker, another agent's `go test`, before the first
   timed run.
+  ⚠ **A KILL CENSUS THAT MUST INCLUDE THE HOST SHELL BY DESIGN MATCHES ITS OWN LAUNCHER** (2026-09-08,
+  coordinator): a stray monitor was killed and re-armed in ONE background command, and the PowerShell
+  census `Name -eq bash.exe -and CommandLine -like '*<script>*'` matched the task's OWN parent bash —
+  whose command line carried the script name because it was about to launch it — killing four processes
+  including the querying task, exit 255. The self-match trap through the LAUNCHER's door, where the usual
+  host-shell exclusion cannot apply because the target IS a bash script. **Never kill and launch in one
+  command; and where the host-shell exclusion is unavailable, exclude by ANCESTRY (own PID and parent
+  chain) or by AGE — a stray is minutes old, the launcher seconds.**
   **⚠ ABSENCE AT ONE INSTANT IS NOT DEATH, in three costumes (2026-09-02/03).** A sub-agent's
   **0-byte task-output file does not mean it died** — the transcript is written at COMPLETION, and a
   worktree with no new files for an hour can be a seeded reconvert writing outside `src`; the
@@ -2250,6 +2361,12 @@ ONE stdlib in a build; there is now only one on disk.
   BEING DONE.** One returned zero and read as content LOSS; the other returned success and **WAS** content loss
   — five distinct mailbox posts silently replaced by a copy of an older one, subject and body both, because a
   derived script's substitution pattern named a file the target did not contain.
+  ⚠ **A PROBE THAT `git show`s A NONEXISTENT PATH READS 0 EXACTLY LIKE A REAL ZERO** (2026-09-08, i9): a
+  registration check named `TargetTests.cs` where the class file is `TargetComparisonTests.cs`, read 0
+  added, and was right BY LUCK, the real count also being 0; the mint's per-class shape gate caught the
+  same wrong name and REFUSED, which is what it was for. **A probe naming a file asserts the file EXISTS
+  (`git cat-file -e <ref>:<path>`) before it counts, or its zero is not a reading** — the false-empty
+  family through a path-typo door.
   ⚠ **`sed -i` ON A CRLF FILE NORMALISES ITS LINE ENDINGS EVEN WHEN THE SUBSTITUTION FAILS**
   (2026-09-08) — a SECOND AXIS introduced by a FAILED edit, caught only by a line-ending census
   across every probe arm. Its neighbour from the same run: **a BLANK import emits no `using`**, so an
@@ -2361,6 +2478,58 @@ ONE stdlib in a build; there is now only one on disk.
   marker set — not to the boundary the dispatch named**: a call-argument census missed two
   composite-literal sites the pointer twin's `anyBoxedPtrArgs` already marks, one of them a live
   defect. Grep the marker set first, and attach at every site it covers.
+  ⚠ **"ENV-GATED, FREE WHEN OFF" IS NOT "OBSERVATION-ONLY WHEN ON"** (2026-09-08, i9): a census's arm-4
+  classifier performed an EXTRA `Resolve` on every conversion, and `Resolve` evicts dead weak entries and
+  reassigns the count — so the instrument MUTATED the registry at moments the uninstrumented program
+  would not, and a BANKED row (`os`, PASS 683) flipped to FAIL with the census ON, twice, both
+  directions, one variable. **An instrument built out of the thing under test proves its NEUTRALITY on a
+  banked row with the instrument ON before any of its numbers are tabled**; numbers taken before that
+  proof are floors or void, never the record; and a remedy is never sized against a population the
+  instrument may have manufactured or hidden.
+  ⚠ **AN INSTRUMENT THAT WRITES TO THE PROGRAM'S OWN STDERR PERTURBS EVERY TEST THAT COMPARES A CHILD'S
+  STREAM, AND AN ENV GATE INHERITED BY CHILDREN ARMS IT IN PROCESSES NOBODY INSTRUMENTED** (2026-09-08,
+  C2/i9): the census printed "armed" from a `ModuleInitializer` at start and its whole block from a
+  `ProcessExit` hook at exit, while `childEnvWithGo2CSPath` copies the ENTIRE parent environment and
+  scrubs only `go2csPath` — so the gate variable reached every helper child and a child doing ZERO census
+  work emitted 222 bytes onto the stream its parent compares. `os` spawns helpers (a row flipped);
+  `go/types` and `encoding/json` do not (no flip), and **the mechanism that also explains the NEGATIVES
+  outranks one that explains only the positive.** Two named-and-refuted candidates preceded it, the
+  second an `Interlocked` counter placed ON the hot path by the neutrality fix itself — fixing a false
+  pass introduces the next one. Rules: **an instrument's reporting channel is a FILE, never the program's
+  stdout/stderr; a gate carried in the environment is inherited by children and must be scrubbed or
+  scoped; and neutrality is proven on the banked row that SPAWNS children.**
+  ⚠ **A SHARED PER-ROW INSTRUMENT FILE WITHOUT A PROCESS ID LETS A PARENT AND ITS HELPERS RACE, AND THE
+  BLOCK THAT SURVIVES IS THE LEAST REPRESENTATIVE ONE** (2026-09-08, C2/i9): with `{pid}` the `os` row
+  writes FIVE files (parent 260,132 conversions; children 94, 100, 96, 16); without it the surviving
+  block was the smallest child, 16, and was tabled as the row. **Every census number taken through the
+  shared path was VOID — not truncated, WRONG** — and the "floor" built on four million conversions went
+  with it, since a destroyed block could have held the very hits the floor denied. A per-process
+  instrument NAMES its process in its file, a row's table is the SUM over blocks with the block COUNT
+  printed, and a reading with fewer blocks than helper processes is not tabled.
+  ⚠ **A SHARED-FILE RACE READS THE MODAL BLOCK, SO A ZERO FROM IT IS A LIKELY ZERO, NOT A MEASURED ONE**
+  (2026-09-08, i9): `crypto/tls` carries 1,236 arm-2a conversions across 507 of 2,241 bogo processes and
+  ZERO in the other 1,734, so one surviving block drawn from that row reads zero with probability 77% —
+  the old method would MOST LIKELY have reported "the corpus takes no arm-2 path" with four million
+  conversions behind it. Three fixes were each NECESSARY to see it: instrument neutrality (the verdict is
+  the row's), per-pid files (every block survives), per-row sums (the row is the sum). The population's
+  existence changes nothing about the withdrawn remedy — the sites live in a banked row passing 3,643
+  verdicts — and everything about the record. Companion: **a `ProcessExit`-reporting census reads NOTHING
+  from a host that dies before exit, indistinguishable from no conversions**; report incrementally and
+  mark partial.
+  ⚠ **A PER-PROCESS INSTRUMENT THAT FLUSHES CUMULATIVE SNAPSHOTS IS FOLDED BY THE LAST BLOCK PER FILE,
+  THEN SUMMED ACROSS FILES** (2026-09-08, i9): one pid writes PARTIAL at conversions=1, PARTIAL at
+  250,135 and FINAL at 260,132 — monotone snapshots of one running total — so the naive fold (sum every
+  block) read 510,580 against the true 260,440, a factor of 1.96, while "take the FINAL block" silently
+  drops the processes that never wrote one, which are exactly the processes the flush exists for. **The
+  instrument's READING RULE is stated WITH the instrument: increment or snapshot, and how to fold.** A
+  reconciliation against the earlier measurement (260,440 against 260,438, two new one-conversion
+  processes) is what made the fold trustworthy; a host that dies before its first conversion stays
+  UNMEASURED, since the flush does not rescue it.
+  ⚠ **A CENSUS WHOSE OUTPUT INVITES THE WRONG FOLD IS THE CENSUS'S DEFECT** (2026-09-08, C2 accepting
+  i9's ask): the partial blocks were cumulative snapshots, the naive sum overcounted by 1.96x, and
+  NOTHING in the output said so. The reader now emits the per-file LAST value and the row total so the
+  naive sum is not the reachable reading, and a row whose main host writes nothing is recorded **NO
+  USABLE CENSUS**, never a near-zero.
   ⚠ **A CENSUS WHOSE TWO DERIVATIONS AGREE TELLS YOU THEY SHARE A BLIND SPOT; ONE WHOSE DERIVATIONS
   DISAGREE TELLS YOU WHERE THE BLIND SPOT IS.** A `ptrout`-class population read off the CONVERTED CORPUS
   saw 6; read off GO'S OWN SOURCES it saw 16 — **and the gap is the finding, not an error in either**,
@@ -2371,6 +2540,10 @@ ONE stdlib in a build; there is now only one on disk.
   independent derivations landing on the same PARTITION is the strongest cross-check available** — a run's
   stack trace and a directive census both split `runtime/pprof` into 1 + 6 = 7, name for name — unlike two
   runs of one instrument, which prove only determinism.
+  ⚠ **A SECOND NUMBER DERIVED FROM THE FIRST AND WRITTEN BESIDE IT AS "N DISTINCT NAMES" IS FALSE
+  CORROBORATION** (2026-09-08, i9): the "nine" matched NEITHER definition — 10 excluding one disclosed
+  row, 8 cases — and the charitable "definitional" reading was too charitable, as the author said.
+  **Chase a number that moves nothing when it disagrees with another derivation.**
   ⚠ **AN INSTRUMENT CAN BE PERFECTLY SOUND AND STILL BE POINTED AT THE WRONG QUESTION — AND THAT FAILURE
   HAS NO TELL.** Five entries in a 259-row linkname push map were Go source text **inside a backticked raw
   string**: inside the literal the lines genuinely DO begin with `//go:linkname`, `^` is true, and the
@@ -2536,6 +2709,31 @@ ONE stdlib in a build; there is now only one on disk.
   caught only because the guard PRINTED its warning count (182 drops where at most one was expected).
   There is no cheap consumer-side test separating a live address from a dead one; the honest form
   WITHHOLDS the half it cannot guarantee and writes the witness into the hand-own.
+  ⚠ **A CLASS THAT HIDES IN PACKAGES THAT DO NOT BUILD IS CENSUSED STATICALLY OVER THE PRISTINE TREE,
+  NEVER BY A BUILD** (2026-09-08, R): `sort`'s forced-init hook collision — `initᴛᴛimportꓸslices`
+  declared by BOTH the 1.24 emission's `package_info.cs` and the 1.23.12 hand-own `sort_impl_go121.cs` —
+  survived a whole ladder because `sort` never built behind `slices`. The static detector read 1
+  collision across 112 `_impl.cs` and was believed only because the SAME pattern read 2,695 hook
+  declarations across 334 `package_info.cs` files (the broad population is the narrow census's positive
+  control); it ran on the PRISTINE tree because the lane's own working tree had already dropped the hook
+  and would have HIDDEN the member; and the fix — drop the hand-own's copy, identical `[GoInit]`
+  semantics — was VERIFIED compiling before it was proposed, with the site's comment saying why a re-base
+  does not clear it. Companion converter root from the same post: a REF-LOWERED pointer parameter meeting
+  a BOX-FORM defer emission (`defer(Ꮡr.Value.root.decref, …)`) — the defer lowering does not consult the
+  parameter's ref-lowering decision, the `[GoRecv]` ref-receiver box-form trap one construct over.
+  ⚠ **A CENSUS OVER HAND-OWNS TAKES THE CLASS, NOT A FILE SUFFIX — measured twice in one day on two
+  different instruments** (2026-09-08, R): "census every `_impl.cs`" scanned 112 companions and missed
+  the 44 whole-file `[module: GoManualConversion]` rewrites — 156 hand-owns in all — one of which
+  declares a forced-init hook (`crypto/internal/boring/bcache/cache.cs:50`); the ANSWER did not move and
+  it gained a REASON, since bcache is one of the four hand-owned-by-consequence packages whose
+  `package_info.cs` is never re-emitted, so it can never RECEIVE the relocation and the collision class
+  is immune there BY CONSTRUCTION — the difference between "I found nothing" and stating what the
+  population DOES. The hop ladder's PREFLIGHT was blind in the same way: a 16-root wall, identical on
+  three flavours, sat in two `[module: GoManualConversion]` files carrying 1.23's package layout while
+  the set diff read 115/115 against a MARKED set of 145. **A hand-own preflight widens to the
+  line-anchored MARKER census and reports BOTH counts.** R's third narrowing of one census,
+  self-reported; four lanes probed their own gates in sequence that hour, each prompted by the previous
+  one's hole.
   ⚠ **A STATED CAVEAT IS NOT PROTECTION IF IT NAMES THE WRONG HAZARD** (2026-09-07): a lane hedged
   "read 19 and 525 as FLOORS" on the reasoning that subtests and benchmarks push a count UP, while the
   DOMINANT effect pushed it DOWN by 81 — build-constrained files. **A regex over source counts every
@@ -2607,6 +2805,16 @@ ONE stdlib in a build; there is now only one on disk.
   pattern matched nothing and the fallback silently hashed the WHOLE FILE, so two refs' hashes differed
   for reasons that had nothing to do with the row, caught only because they differed where they should
   not have. Redo such a comparison by locating the target on each side's own content.
+  ⚠ **AN INSTRUMENT'S OUTPUT IS READ AFTER IT RUNS, NEVER DESCRIBED FROM A TRUNCATED EARLIER VIEW**
+  (2026-09-08, C1, four misses in one day): a self-record control was claimed to have "fired naming
+  `getg`" from an earlier `head -8` run in which `getg` was visibly ABSENT — the lane told itself it
+  "would be there" and published while the post tool's own output showed it did not fire, the specificity
+  band that killed 3,118 `runtime` hits having also excluded `getg` at 108. **`head -8` is a silent WHERE
+  clause inside a control's description.** The three earlier misses were absence claims about the world
+  ("I have minted nothing", "getg appears unowned", "14 of 34" against a committed 47), each one grep
+  away and two made INSIDE the post correcting the first; the remedy is a script that puts the committed
+  record's lines in front of the author — deliberately NOT a gate, because an honest absence claim is
+  common and a refused honest post gets routed around.
   **Scope DELETES by lane prefix too, not just writes** (measured 2026-08-16: a lane's cleanup swept
   the whole shared scratchpad and unrecoverably deleted sibling lanes' artifacts). A cleanup command
   must name your own `<lane>-*` files; `Remove-Item <scratchpad>\*` is a cross-lane destructive act.
@@ -3106,6 +3314,12 @@ ONE stdlib in a build; there is now only one on disk.
   (they verified the remote moved) is not "benign for reads". **And an ANCESTRY question goes to a
   clone that HAS the ancestry**: a depth-200 shallow clone answered "NOT on the remote" for a ref the
   full-history repo showed contained, and it is the clone a lane reaches for by habit.
+  ⚠ **THE SAFE-PUSH SELF-TEST CANNOT PASS ON A SHALLOW CLONE** (2026-09-08, C2): `TestSafePushSelfTest`
+  aborts on `shallow update not allowed` while seeding its hermetic origin — identical at the announced
+  base, green on a full clone in 187 s — so **a cloud-container lane attributes that ONE converter-suite
+  red to its clone before hunting: a host-qualification fact, not a tree fact.** Companions: `go test`
+  from a worktree ROOT with no `go.mod` exits 1 and an empty grep of its output reads as an answer; and a
+  background task's exit code is the WRAPPER's last pipe stage, not the suite's.
   ⚠ **FOURTH CLAUSE, MEASURED 2026-09-06: THE ARMS MUST MATCH ON LOAD.** The standard exists so that two
   arms cannot convict — and two arms NEARLY DID, because as written it does not say the arms must be the
   same experiment. All three arms of one row: **seat-present under battery load FAIL 1325/0/20 in 890 s;
@@ -3149,6 +3363,14 @@ ONE stdlib in a build; there is now only one on disk.
   own dirt — so the file was restored BY NAME, verified by post-condition, re-swept against the
   COMMITTED tree, and the residual dirt classified (forced-init relocation debt, none of the four
   standing post-sweep classes).
+  ⚠ **A RULING THAT CITES A BANKED VERDICT AS A PROPERTY OF THIS TREE, WITHOUT A RUN ON THIS TREE,
+  CARRIES AN UNMEASURED PREMISE** (2026-09-08, coordinator): "inside a banked row at 3,643 verdicts PASS
+  on that same tree" quoted the ROSTER — another day, another host, and on the i7 a standing "not
+  measurable here" — while the lane's run on that tree read FAIL with the census ON and the OFF control
+  unfinished. The lane caught it before the control landed and named the three outcomes; the CONCLUSION
+  survived because it rested on other evidence, and the ruling was corrected in its REASON before the
+  premise was tested rather than after. **A roster figure names a tree and a day; a sentence about "this
+  tree" names a RUN.**
   ⚠ **A RATIO EXPIRES MORE READILY THAN AN ABSOLUTE, because it has TWO tree-dependencies — and it
   silently asserts that its two halves share a context: one machine, one tree, one configuration.** A cost
   published as "+26.075s = +12.1%" survived a landing only in its wall-clock half (the converter-suite
@@ -3266,6 +3488,15 @@ ONE stdlib in a build; there is now only one on disk.
   converter — which is exactly what happened on the h2 deadline rows, identical signatures on both
   sides reading as "the change is innocent". Swap the **PRESERVED pre-change `go2cs.exe`** into the
   sweep path instead, and state which binary each arm ran.
+  ⚠ **A ROW WHOSE FAILING MEMBER MOVES IS READ ACROSS THREE RECORDS, EACH WITH A PLANTED-DIFFERENCE
+  CONTROL** (2026-09-08, i9, `crypto/tls`): three census-OFF runs (393/398/394 s) read Go=pass/C#=fail
+  among bogo cases 0, 0 and 0 with the positive control on the same query reading 2, 1 and 3; the
+  skip-set difference was strictly one-way three times of three; exactly ONE divergence was shared across
+  records, an already-DISCLOSED row; and ZERO bogo subtests diverged in more than one run. So the row's
+  own divergence set is that single name and everything else is per-run bogo nondeterminism — and a claim
+  that the ORACLE is the flaky side was corrected by the same numbers. Each record passed three controls
+  before being read (both sides 3,644 and equal, every name joined, a planted difference detected), and
+  the records were preserved before the sweep's own cleanup.
   ⚠ **An A/B ARM that names a ref IS a ref derivation, and inherits the stale-ref rule** (2026-09-02):
   a Linux clone that had only ever fetched its own branch checked out `origin/master` at a commit
   predating the corpus hop, and the sweep's toolchain-pin guard refused it ("version.props pins
@@ -3495,6 +3726,12 @@ ONE stdlib in a build; there is now only one on disk.
   host's); and **a lane does not change a host's system configuration on its own initiative** — relay
   the commands to the owner, and RE-qualify afterwards (G-LAPTOP's WSL did, the same day: the 18
   leaves pass, wall 707 s → 35 s, and it is the fleet's Linux `net` bank host).
+  ⚠ **AN UNQUALIFIED AUTHORIZATION GIVEN IN ONE CONTEXT IS NOT SELF-EXTENDED TO A DISTINCT ENVIRONMENT ON
+  THE SAME BOX** (2026-09-08, G): "you are authorized to install .NET 10" arrived in a Windows-blocked
+  context, and a WSL root is a distinct environment — so the lane asked for the one-line confirmation
+  rather than assuming. **Its branch twin: a pruned-by-ruling branch is KEPT when its content exists
+  nowhere else** — the mailbox is transport, a SHA in a post is one `gc` from unfetchable, and the branch
+  is what makes the finding checkable.
   ⚠ **The gate's criterion is the FAILING SET, and it is a LEDGER rather than a threshold** (stated
   2026-09-05): a NAMED, EVIDENCED universally-drifted leaf is tolerated with its evidence at the site;
   ANY other failing leaf ABORTS by name; the leaf names are printed either way. Go 1.23.12's
@@ -3884,6 +4121,12 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
   and the darwin census compiles clean at master. **The scoping is the compiler's own rule, measured
   at the project file and at the loader, which is what makes narrowing the fold legitimate rather than
   fitting the answer.**
+  ⚠ **THE FLAVOUR'S BUILD LOG IS THE INSTRUMENT; THE LEFTOVER `bin` TREE IS THE LAST FLAVOUR'S**
+  (2026-09-08, R): a three-flavour ladder purges before each flavour and darwin runs LAST, so
+  "`internal.syscall.windows.dll` PRESENT under `bin`" was true of darwin — where that package compiles
+  nothing — and false of the windows question being asked. Corrected before it reached the post. **Read
+  per-flavour presence from that flavour's own log (built=N errors=N), never from what survives on
+  disk.**
 - **⚠ The corpus's emission cgo state is `CGO_ENABLED=0`, and a conversion against the committed
   tree must MATCH it** (measured 2026-08-29, net's Linux first contact — a corpus-level fact, not a
   lane detail: `net/linux/cgo_stub.cs` is on disk and `cgo_stub.go` is selected ONLY when cgo is
@@ -4006,6 +4249,21 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
   WRITES, or classify by write-evidence first.** And when the seat's tip moved, the transfer of the
   earlier rung's readings was MEASURED (byte-identical emission on the written target) rather than
   reasoned from the diff's file list, with the unmeasured targets stated.
+  ⚠ **A SEEDING CONTROL'S PREDICATE IS THE HAZARD, NOT A PROXY FOR IT — and a byte-for-byte `git
+  archive`-against-checkout comparison is the WRONG LAYER on a mixed-ending tree** (2026-09-08, the
+  coordinator and a sub-agent standalone; one finding stated twice, the second correcting the first's
+  mechanism). A train's seeding leg refused itself on 1 of ~300 converter files: a `_test.go` whose blob
+  is LF, from a Linux lane's commit, that autocrlf smudges to CRLF in the checkout, 263 of 264 reading
+  `w/crlf` — the ARCHIVE applies the conversion, so the brief's inverted mechanism made the conclusion
+  STRONGER, not weaker. A `_test.go` is not a `go build` input and Go source line endings do not reach
+  the binary (raw string literals spanning lines being the one exception, to be measured), so the
+  archive-built base converter WAS the base converter and the leg reported UNMEASURED for a CONTROL
+  fault. The corrected control has THREE arms, each keyed on what can change a BINARY: non-test files
+  CR-strip-identical (189, zero differences); `_test.go` EXCLUDED from the criterion while a CONTENT
+  change there is still red (a planted defect was refused — the split is STATED, not used as the
+  criterion); and the 15 `//go:embed` targets byte-identical. The first writing of arm 2 refused a benign
+  EOL-only difference in a non-test file and was caught by its own control — the exact false-refusal
+  class the exercise was correcting, one file over.
 - **⚠ The bank unit for a converter change's corpus footprint is the two-seeded diff's HUNKS, never
   its FILE set (measured 2026-09-02).** Applying the A/B's ten whole files onto a corpus that is
   stale in OTHER families carries those families in with them: the whole-file application landed
@@ -4134,6 +4392,18 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
   it now measures, or the run STATES that it has none**; a non-zero predicted reading is what shows
   the instrument detected the change, and its author SAYS the control was absent rather than claiming
   one it did not have.
+  ⚠ **A LINE-LEVEL FOOTPRINT PREDICTION DERIVED FROM ONE FLAVOUR'S COMMITTED FILE IS FLAVOUR-BLIND, AND
+  ITS "MISSED" ON ANOTHER FLAVOUR IS THE PREDICATE'S, NOT THE TRAIN'S** (2026-09-08, coordinator): a
+  standalone leg read windows MET / darwin MET / linux MISSED on the one predicted file
+  (`runtime/runtime2.cs.auto`, +1/−1), because the predicted line pair was a seat's `Δtrace → trace` on
+  the `m` struct's `[GoValueClone(…)]` list AS WINDOWS EMITS IT, while linux's `m` carries `sigmask` at
+  the head of that list — so the linux pair differed by the field list and the compare read NO.
+  Reproduced from two rebuilt binaries with content KEPT: linux's delta is exactly the same mechanism on
+  linux's own line. **A per-flavour prediction compares the MECHANISM — the token pair inside the line —
+  or derives its expected line PER FLAVOUR; and a failed arm's DIFF CONTENT is preserved before any
+  purge**, since that run purged its seeds and binaries and left only `Files differ`, so the miss had no
+  evidence until it was re-run. Note the standing class it rode on: a FLAT `.cs.auto` review sibling of a
+  hand-own whose emission VARIES per GOOS.
   ⚠ **A footprint PREDICTION is derived from the same KIND of run that will measure it — the
   two-seeded `-stdlib` emission — never from a single-package probe** (2026-09-03), whose numstat
   carries the import-init hook closure family the driver keeps: a probe predicted −86 where the
@@ -4262,6 +4532,20 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
   ZERO of in production existed once in the behavioral tree, and CNR is what censused it (CHANGED =
   one golden). **A footprint prediction names BOTH populations, and CNR's CHANGED set IS the
   behavioral census.**
+  ⚠ **A FOOTPRINT PREDICTED ZERO BY ARGUMENT COVERS EVERY CONTEXT THE RULE FIRES IN, OR IT IS A
+  PREDICTION ABOUT ONE CONTEXT** (2026-09-08, G/coordinator, with G's same-day amendment folded in):
+  "such a site would be CS0266 today, so none can exist" is true of an ASSIGNMENT context and FALSE of an
+  EXPLICIT-CAST context, where `(uintptr)<ulong literal>` compiles through `uintptr`'s explicit operator
+  — so a native-width unsigned prefix reached a behavioral golden as an intended-but-unpredicted
+  emission, found by the union CNR at CHANGED 1. The amendment sharpens the boundary: **"it compiles
+  today" bounds a converter branch only for IMPLICIT-CONVERSION sites**, because the converter's own
+  explicit-cast wrapping makes BOTH the bare `UL` and the `(nuint)`-prefixed form compile, so a 307/307
+  compile-clean corpus says NOTHING about whether explicit-cast sites reach the signed-parse branch — a
+  correct argument about one class published as an argument about the population. Two halves, adopted
+  fleet-wide: **enumerate the CONTEXTS a converter predicate fires in (assignment, cast, argument,
+  return, composite element) before arguing any is empty; and every footprint prediction names BOTH
+  populations — corpus via the two-seeded diff, behavioral via CNR — or says which it did not measure.**
+  Second reasoned-zero in one train.
   ⚠ **A DISPLACED BODY TAKES ITS CONVERSION SITES WITH IT, and no guard sees it** (measured
   2026-09-03): registering a function in `manualConversionFuncs` drops every `GoImplement` record the
   converted body minted (two endian-order records vanished from `package_info.cs`, in a seeded run
@@ -4526,6 +4810,19 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
   a table measured against the PINNED SOURCE refuted them. Beside it, a CONSTRUCT new at the release
   (a nil comparison on a slice-typed type parameter, rendered `== default!`, CS8761) is a converter
   cut with a ZERO footprint at the old release and the ladder as its acceptance.
+  ⚠ **A LADDER'S TOTAL IS NOT THE CUTTER'S PREDICTION; THE CUT'S OWN SITES ARE** (2026-09-08, R): a rung
+  predicted 24 → 20 and measured 40/34/44 per flavour, because clearing one package let ~1,100 more
+  assemblies compile and their errors were unreachable before — while the sub-prediction about the cut's
+  OWN sites held exactly. Third instance of the count-versus-own-sites split: **predict the sites the cut
+  REACHES, and score the total as a READING of the residue every other class contributes.**
+  ⚠ **ON AN UNMASKING LADDER THE ERROR COUNT STOPS MEASURING PROGRESS; THE COMPILED-ASSEMBLY COUNT IS THE
+  HONEST MEASURE** (2026-09-08, R): rung 5 read 24 errors at 750 assemblies and four exact cuts later the
+  ladder read 34 errors at 2,752 — the error total UP 40 percent while the compiling corpus more than
+  TRIPLED, every cut's own cleared set exact and every net swamped by what it unblocked. **Predict the
+  CLEARED SET, the cut's own sites to zero, and report the net as a READING**; a net-total prediction on
+  such a ladder is a bet on how much more corpus compiles. Companion: a compiler names only the
+  implementers it actually COMPILES, so "one site reported twice" is never the population — a CS0535 fix
+  reached a second implementer another lane's build never named.
 - **A corpus regen that moves `package_info.cs` records owes `go generate .` in `src/go2cs`** —
   `stdlib-metadata.txt` is generated FROM the corpus and gated by `TestStdLibMetadataInSync` under the
   plain converter `go test`, so banking a regen without the regenerate leaves the converter gate red at
@@ -4945,6 +5242,22 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
     a native type — and a hand-own's own "deliberately not covered" scope header is re-read and
     corrected in the SAME commit that changes the scope (one still named two functions that had been
     hand-owned three days and one hour earlier; a scope header that lies reads as the census).
+    ⚠ **WHEN A HOP MOVES A FACT INTO THE CORPUS, ASK WHETHER ITS CONSUMER IS CONVERTED OR HAND-OWNED —
+    the first updates itself, the second never does** (2026-09-08, R): the 1.24 runtime carries
+    `waitReasonSyncWaitGroupWait = 24` with its string free with the corpus (`runtime2.cs:881/927`), but
+    `mapWaitReason` lives in `runtime/stubs_impl.cs` under `[module: GoManualConversion]`, so without a
+    hand line the member still falls to `waitReasonZero` and the runtime-DERIVED guard fails on the 1.24
+    tree exactly as it does at 1.23.12. **A hop census lists, per moved fact, the hand-owns that CONSUME
+    it.**
+    ⚠ **A BODY THAT BECOMES WRONG SILENTLY WHEN A STUBBED PACKAGE IS LATER IMPLEMENTED CARRIES ITS
+    RETIREMENT TRIGGER AT THE SITE** (2026-09-08, R): `runtimeNow`'s non-bubble body is a delegation to
+    the hand-owned `now()` of identical signature, and the bubble refusal is real BY CONSTRUCTION —
+    `synctest.Run` throws first, since `internal/synctest` is five throwing stubs — while no guard could
+    be written, because `inBubble` is one of those five (unreachable code asking an unanswerable
+    question). The site's comment therefore NAMES all five stubs as the reason and states that the moment
+    synctest is implemented this delegation hands a bubbled goroutine the REAL wall clock without failing
+    loudly, so whoever lands synctest owns revisiting it: **the obligation sits in the FILE, not in a
+    board row.** Stub census 243/22 → 242/21 on windows, with `time` leaving the list.
     ⚠ **A DEAD CALLER GETS NOTHING, and the residue is a census assertion whose whole value is the day
     it goes RED** (2026-09-06): two of three callers of a defective wrapper had no call site anywhere,
     test emission included, so displacing them would have cost a registration, a placeholder and a body
@@ -5023,6 +5336,13 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
     reverse guard) is **FIXED, never disclosed** — disclosing launders a bug into a class; and a
     "race" test running with `race.Enabled == false` on BOTH sides collapses to a count-of-zero
     assertion and is not a genuine exclusion.
+    ⚠ **A `-tests` CONVERSION INTO A SCRATCH OUTPUT ROOT DROPS EVERY HAND-OWNED `*_impl.cs` THE PACKAGE
+    DEPENDS ON** (2026-09-08, i9), so the build fails naming exactly the missing bodies (`abiSeq` without
+    `regAssign`, which `abi_impl.cs` defines) and READS AS THE PACKAGE'S STATE. The sweep converts IN
+    PLACE — `core/<pkg>` as the output directory — precisely because the hand-owns live there, so **a
+    measurement of a row hand-rolls the sweep's own invocation line or runs the sweep.** A lane published
+    "neither named row can complete" off this and retracted within the hour; the census finding beside it
+    stood untouched because it had been run through the sweep.
     ⚠ **The host must print NOTHING a RE-EXECUTED helper's reader can see that Go's binary would not
     print** (measured 2026-09-04): a results-file flush reporting through the PRINTING reporter wrote
     `PASS … exit status 0` onto the stdout of every re-executed helper — the one stream `os/exec`'s
@@ -5680,6 +6000,15 @@ construct; otherwise add a new one (example: `tests/Behavioral/GlobalStructField
     (2026-09-04 — the sweep-restore trap above, met from the control-arm direction). **Stage the cut
     FIRST, restore control arms from the index**, and only then does a diff-against-index check mean
     what it says.
+    ⚠ **A SWEEP'S DIRT IS CONTROLLED AT MASTER BEFORE IT IS CHARGED TO THE CHAIN THAT RAN IT**
+    (2026-09-08, i9): a `sync` sweep after a fatal-path chain left 24 files dirty (+199/−250, `[GoInit]`
+    hooks dropped from `cond.cs`, a new `package_info_internal_test.cs`) — and the SAME sweep at landed
+    master left the same 24 files with the same numstat, the two drift diffs differing only by a blob
+    index and the proof page's own converter stamp. So it is master's standing relocation debt, flagged
+    for the regen and not fixed under a measurement. Beside it: the probe was run as the BUILT BINARY
+    because its own README had measured that `go run` masks the exit code (1 against the binary's 2), and
+    both pins were asserted on version AND GOROOT and ABORTED on, since printing a pin is not checking
+    it.
 - Open converter items: `src/go2cs/ToDo.md` (e.g. `visitMapType` completion, remaining dynamic-struct
   implicit-cast checks, optional recursive dependent-package conversion, comment conversion, cgo/asm targets).
 
@@ -5814,6 +6143,25 @@ reads backwards on the one platform 5.1 runs on).
   failure named as a SCOPE ARTIFACT of running master's guard on an older branch rather than counted.
   **A lane does not scrub a shared transport branch piecemeal** — the remedy is the coordinator's, as
   one act at the tip, plus the gate placed where the branch can reach it.
+  ⚠ **A LINE-ANCHORED SECURITY CENSUS CANNOT SEE A TOKEN WRAPPED ACROSS A LINE BREAK** (2026-09-08, i9):
+  of six planted shapes five fired and the SPLIT token was missed — an account name broken mid-token
+  across the wrap, with a sibling lane's SHA wrapped the same way. The first fix, joining on a bare
+  newline, was PARTIAL and its own re-probe caught it: an INDENTED continuation and a TRAILING SPACE at
+  the break, the two commonest real shapes, were still missed, and collapsing whitespace ADJACENT TO THE
+  BREAK closes all three without fusing arbitrary words. Structural, not per-arm — the joined copy is
+  appended to the buffer EVERY arm searches, so an arm added tomorrow is covered. **A red arm on ONE
+  historical plant shape proves the census catches that shape and nothing else: probe with realistic
+  variants before believing a gate.**
+  ⚠ **THE JOIN-CLASS DISCRIMINATOR IS CONTINUATION, NOT LENGTH** (2026-09-08, C2): a leaked path
+  CONTINUES past the account — the next byte is a separator — where fused prose ENDS at a space or EOL,
+  and a minimum-segment-length rule fails in BOTH directions (fused 9/10/16-character vocabulary against
+  4-character real accounts). 8 of 8 wrap positions kept, 6 prose shapes freed, one residual STATED (a
+  break exactly at the separator AND a path ending at an unknown account). Third instance of "a mechanism
+  does not transfer by resemblance" — a sibling's redundancy was real on its own gate and absent on this
+  two-arm one. Its red control was INVALID the first time, run against a tree not yet carrying the prose
+  arms (0 red where 4 were required), and was fixed by asserting that the variant DIFFERS in the intended
+  way AND that the arms it must fail are PRESENT; a duplicate arm that fired two kinds was DELETED rather
+  than the attributability test loosened.
   ⚠ **Four mechanics that guard carries** (2026-09-04). A guard's OWN source is a tracked file the
   guard scans — and the file most likely to be edited by whoever adds the next entry — so it is NEVER
   exempted: planted fixtures are assembled through `Sprintf` so the source reads as a placeholder
@@ -6110,6 +6458,23 @@ Each rule below was paid for.
   only a guard asking the question saw it. **A golib-touching seat runs GolibTests at BOTH
   configurations before it seats**, and a fix to a defect in a SEATED train's union lands on THAT
   seat's branch tip, never on a later branch that stacks on it.
+  ⚠ **"COMPILES AT BOTH RELEASES" IS A FACT ABOUT COMPILATION STATED AS A FACT ABOUT LANDABILITY**
+  (2026-09-08, R) — compiling is not correctness, applied to a LANDING decision. A golib `WaitReason`
+  member for a park reason the converted 1.23.12 runtime does not carry BUILT at 878 projects and FAILED
+  the runtime-DERIVED guard (`TheWaitReasonMapIsGosOwnTableByDerivation`) at both configurations: a
+  member added ahead of its runtime table is exactly the state that guard refuses, and it stays
+  un-weakened. The coordinator's split ruling rested on the compile claim and was REVERSED on the
+  measurement. Companion: the search that missed the second guard was `grep | head -8` — a head-limited
+  search on the ONE query whose purpose was completeness, the guard-discovery member of that family.
+  ⚠ **A NEW MEMBER ON A PUBLIC GOLIB INTERFACE IS A BREAKING CHANGE FOR EVERY IMPLEMENTER, TEST DOUBLES
+  INCLUDED, AND THE CUT'S PREDICTION CARRIES THE IMPLEMENTER CENSUS** (2026-09-08, i9/coordinator):
+  `ISlice.IsNil` added with one implementation (`slice<T>`) failed GolibTests at BOTH configurations on
+  CS0535 at a test double (`ArrayRangeAllocationTests.NamedSliceLike`) — golib itself compiled, the
+  CONSUMERS did not, the shape a producer-only compile cannot see, route #7's consumer gate firing as
+  named. RULED: **the member goes on EVERY implementer explicitly, and a DEFAULT INTERFACE IMPLEMENTATION
+  is never the remedy for a member whose answer depends on state the interface cannot see**
+  (`ISliceBacking` is internal by design), because the default would answer `false` for exactly the
+  implementers nobody checked — a silent wrong answer wearing a compile-clean face.
   ⚠ **A REGISTRY ROW WHOSE PRINCIPAL RELOCATED IS RE-KEYED, NEVER RETIRED — retiring a row for a LIVE
   push turns a loud refusal into a silent stub with the guard GREEN** (2026-09-07). The coordinator
   ruled "the `internal/weak` two-row RETIREMENT" for the hop's one failing converter test; the lane
@@ -6122,6 +6487,13 @@ Each rule below was paid for.
   and is re-derived there before it is cut; a relocated principal moves the KEY, and the hand-own's own
   relocation is the corpus move's work.** Same family as the silent subtraction above, arriving through
   a ruling's word.
+  ⚠ **A PEER'S CUT IS COMPOSED INTO A LADDER TREE BY ITS FULL FOOTPRINT (`git show --name-only <sha>`,
+  every path applied), NEVER BY THE FILES ONE REMEMBERS THE CUT FOR** (2026-09-08, R): a first
+  composition attempt died CS0122 on a peer's `FatalReport.cs` and read like a defect in a cut its author
+  could not compile — it was the COMPOSITION's, since that change widens `CrashReport.WriteToCrashOutput`
+  private → internal in a SECOND file that had not been copied, and every assertion written checked
+  PRESENCE while none checked CLOSURE. **Composition by memory is the stale-base illusion inside one
+  worktree.**
 - **⚠ A seam check that verifies a displacement HAPPENED but not that its destination EXISTS passes
   the exact failure it was written for, in mirror form.** The ten-names/zero-bodies property offered
   as the struct-passing merge instrument — every registered name has zero generated bodies and
@@ -6190,6 +6562,22 @@ Each rule below was paid for.
   pattern. Beside it, that agent's first negative control passed arguments to a script that
   HARDCODES its inputs and read a false green — its own instrument fault, named, and redone with a
   control directory (7 of 8 anchors red).
+  ⚠ **A SCRATCH TREE PINNED AT A FIXED BASE GOES STALE INVISIBLY FOR EXACTLY THE FILES THAT MATTER MOST —
+  THE HAND-OWNS** (2026-09-08, R): a hand-own landing on master AFTER a ladder's base is absent from the
+  ladder, and because a hand-own is what BODIES a displaced or bodyless declaration its absence presents
+  EITHER as a phantom compile blocker indistinguishable from a real wall (`rtlGetVersion` CS0103 from a
+  missing `zsyscall_windows_version_impl.cs`; restored, windows 34 → 32, prediction held) OR as NOTHING
+  AT ALL (`time/sleep_impl.cs` bodies `runtimeNow`; without it the tree carries one generated throwing
+  stub that compiles clean and throws at run time — blind to every error-count instrument). **Preflight
+  before ANY rung is read: `git ls-tree -r master -- src/core` against a `find` over the tree, every
+  missing file NAMED, and the ladder re-based on the landed master at each train landing.** That seat's
+  blocker list moved a third time in one day, each movement the finding.
+  ⚠ **A RE-BASE OWES THE STALE-FILE DELETION PASS** (2026-09-08, R): the seed's
+  `exp_aliastypeparams_off.cs` sitting beside the emitted `_on.cs` killed the first build at 186 dlls in
+  80 s; 86 stale files were deleted by WRITE-EVIDENCE, zero conflicts, the three flavours' sets
+  identical. Ruled with it: **1.24 hand-own edits live on ONE branch off master that never seats on a
+  train** — they cannot compile against the 1.23 corpus — **and land WITH the H5 regen**, with the
+  following stage reviewing them file by file.
   ⚠ **IN A GATE LINE, THE VERDICTS GET CHECKED AND THE ADJECTIVES RIDE IN FREE.** "matched 324, disclosed
   55, 388/388, zero orphaned, zero mint violations" — the first three computed from the record, **the last
   two never measured at all**: one had no source anywhere in the pipeline, the other was an early-return
@@ -6211,6 +6599,12 @@ Each rule below was paid for.
   ⚠ **And refusing to quote a MEANINGLESS green is the same discipline as catching a vacuous one, and it
   is cheaper**: *"`gofmt -l` is NOT a signal in this tree — the corpus is CRLF, so it lists all 258 files
   at master and here alike. Stated rather than quoted as a pass."*
+  ⚠ **A TEMPLATE STAMP THAT RESTATES A NARROW CENSUS AS A CLASS-WIDE ZERO IS A FALSE READING WITH A TRUE
+  NUMBER INSIDE IT** (2026-09-08, coordinator): an assembly's FINDING line said "no seat in this train
+  touches `src/go2cs` or `src/gen`, and G11(b) asserts that zero" while THREE seats touched `src/go2cs` —
+  G11(b)'s zero is over the lift/dedup OWNER SET only. **A stamp that names a census as its evidence
+  prints THAT census's population and scope beside the number, and a class-wide claim is computed by its
+  own one-command derivation (per-seat converter-file counts) rather than borrowed from a neighbour's.**
 - **Check the diffstat against the claim BEFORE the push, never after.** A merge whose file list does
   not match what the commit says it does is stopped at that point, not explained afterwards.
   ⚠ **A CORRECTION GETS A CENSUS, NOT A FIX OF THE INSTANCE YOU WERE SHOWN.** A lane announced a fresh SHA
@@ -6499,6 +6893,25 @@ Each rule below was paid for.
   durable pair is `git ls-tree -r origin/master -- <the deliverable's path>` (the guard project, the
   doc, the manifest) plus `git merge-base --is-ancestor <local branch> origin/master`, with the
   surviving LOCAL branch as the tell that fires when both of those read new.
+  ⚠ **A RULING THAT ASKS FOR AN ARTIFACT CHECKS WHETHER IT EXISTS FIRST — one `git show
+  origin/master:<path>`** (2026-09-08, coordinator/C1): the coordinator ruled a lane to mint a host-fatal
+  manifest entry on the strength of that lane's "I have minted nothing"; the entry had been at master
+  SIXTEEN HOURS. Two halves: **a lane's sentence about its OWN pushed surface is a claim like any
+  other**, and **a coordinator asking for a deliverable derives its ABSENCE from the tree, never from a
+  post** — the dispatch-preflight rule above, applied to rulings. Companion from the same post:
+  **citations for a corpus row are read AT THE CORPUS PIN** — line numbers taken at 1.24.13 (the
+  converter pin, because the ambient `go` switches UP inside `src/go2cs` under `GOTOOLCHAIN=auto`) cited
+  `exec.go:225-231`, which is PAST EOF at 1.23.12's 222 lines, and a line past EOF is the cheap tell.
+  ⚠ **A RULING THAT NAMES WORK GREPS THE IMPLEMENTING HALF FIRST — and "I wrote that rule an hour ago" is
+  not the check** (2026-09-08, coordinator/C1, twice in one hour): one ruling named a mint that already
+  existed; the next scheduled managed `getg`, which had landed with train 27, on a lane's "bodyless on
+  all three flavours" — a claim produced by two instruments structurally INCAPABLE of finding a partial's
+  implementing half, namely reading the DECLARATION file (`stubs.cs`) and a filename pattern keyed on the
+  SYMBOL, while the body lives in a file named for its CONCERN (`stubs_impl.cs:102`). **An instrument's
+  evidence base is a property of its KEY.** The narrow check is the lane's own is-implemented script —
+  implementing half (`partial … symbol(…) {`) against declaration (`;`) against a registry entry, with
+  raw mentions labelled as neither — and the coordinator runs that question BEFORE any ruling that names
+  work.
   ⚠ **A LOCAL BRANCH WITH ZERO COMMITS OVER MASTER WHOSE TIP IS AN ANCESTOR OF MASTER HAS LANDED, NOT
   "NOT STARTED"** (2026-09-07): the coordinator read `commits over master: 0` on a placement branch as
   an empty placement and RE-DISPATCHED it, while the very same check printed `is-ancestor-of-master:
@@ -6509,6 +6922,11 @@ Each rule below was paid for.
   ⚠ **And the lane's half of the same idle: a lane whose ORDERED items have all landed STARTS the next
   item on its list without waiting for a coordinator prompt** (2026-09-05, three quiet hours a lane
   named honestly). **The mailbox is read BETWEEN steps, not INSTEAD of them.**
+  ⚠ **AN IDLE LANE CHECKS ROUTING BEFORE SPENDING A RUN ON AN UNCLAIMED-LOOKING GAP** (2026-09-08, R): a
+  lane ran a peer guard's Compile+Output (196.8 s) that another lane had been routed twenty minutes
+  earlier. Two hosts agreeing on a .NET gate its author cannot run is CORROBORATION, not a second
+  finding, and is recorded as such. **"My lane is idle" is not "this gap is unclaimed": read anchor..tip
+  for the routing first.**
   ⚠ **A DISPATCH THAT SAYS "THE BASELINE YOU HOLD AT <SHA>" IS A CLAIM ABOUT THE LANE'S HOLDINGS,
   AND THE LANE MEASURES IT** (2026-09-08): a dispatch named a same-box baseline "you hold at <sha>
   (878/0/0)"; the lane held baselines at two OTHER commits only — 31 behind the landed master — and
@@ -7026,6 +7444,24 @@ Each rule below was paid for.
   skipped. And a committed disclosure quoted a 125/250/500 ms ladder its source does not contain (the
   rungs are 250/500/1000): re-derive a disclosure's mechanism from the line it cites, and post the RAW
   numbers beside any reading, since a measurement outlives the interpretation attached to it.
+  ⚠ **A REFUSAL PROVES A GATE CAUGHT THE TOKEN ONLY IF AN IDENTICALLY SHAPED PLANT CARRYING A HARMLESS
+  TOKEN READS CLEAN** (2026-09-08, i9, the split-token gate day): four lanes probed their gates with
+  eight, six, seven and six shapes and every probe measured the same ONE thing — that the plant FIRES —
+  and none measured WHY; a joiner that fused text too aggressively would refuse everything split across
+  lines and every "it fires" would still read PASS. **The PAIRED control (protected token → REFUSED;
+  harmless token in the same split shape → CLEAN) is what makes a shape probe a measurement of the
+  DETECTOR rather than of the joiner.** Companions from the same day: a two-line joiner passes a
+  THREE-WAY split while refusing the two-line case, and the blank-line paragraph break is the commonest
+  break in prose and none of four lanes had named it until one did.
+  ⚠ **A PASS ADDED TO A GATE FOR ONE CLASS IS A SINGLE POINT OF FAILURE FOR THAT CLASS, AND THE WAY TO
+  SEE IT IS TO BUILD THE GATE WITHOUT THE PASS AND RUN THE PLANTS THROUGH BOTH** (2026-09-08, i9/R): a
+  line-pass-only variant — the join block removed, the variant ASSERTED to differ from the subject before
+  any verdict — took eleven plants: the split identifier in four shapes was caught by the JOINED pass
+  ALONE, while wrapped PATHS were caught both ways, because a real path carries several triggering
+  substrings and one line break separates only one pair. So the redundancy offered as the difference
+  between two gates was real for paths and ABSENT for the class the join exists for: had the join broken
+  silently, as a sibling's had that same morning, four shapes would have passed clean. **The remedy is a
+  SELF-PROOF of the join — a known split plant that must refuse on every run — rather than more arms.**
   ⚠ **TO TELL A ROOT FROM A CASCADE, RUN THE SUSPECTED DOWNSTREAM MEMBER ALONE — not just the
   suspected root** (2026-09-06). A 38-verdict cluster looked like one failing test leaving a resource
   open with every later test reporting `already in use`; a single-test gated run of the DOWNSTREAM
@@ -7612,6 +8048,14 @@ Each rule below was paid for.
   method**: two lanes quoting different numbers for one named check (38 against 51 — parenthesised call
   sites against the bare token) both satisfied the relation the check asserts, so a discrepancy in a
   PASSING check is stated the moment it is seen rather than left to become the next carried figure.
+  ⚠ **TWO TRUE FACTS AND AN INVENTED RELATION** (2026-09-08, R): a hand-own missing from a tree and a
+  throwing stub in the same package were linked by CO-OCCURRENCE — "the hand-own bodies the stub" — when
+  one `git show` would have read that the file bodies `syncTimer` while the stub (`runtimeNow`) is a Go
+  1.24 ADDITION no release of the corpus has ever bodied. The correction ran in BOTH directions: the
+  absence costs zero, and the real gap is a frontier item rather than staleness. Companion instrument
+  note: a per-release count expression printed 0 for BOTH releases beside a grep that plainly showed the
+  1.24 declaration — **read the grep; a count that contradicts its own evidence line is the false-empty
+  family's arithmetic member.**
   ⚠ **A COMMENT THAT CLAIMS A BEHAVIOUR THE CODE LACKS READS AS THE CENSUS to the next reader, and a
   faithful PORT propagates the claim** (2026-09-05): the linux exec seam's Foreground-failure path
   SIGKILLs the child and returns without Go's `Wait4`/EINTR loop — one zombie per failed transfer —
@@ -7750,6 +8194,26 @@ Each rule below was paid for.
   275-line filter nothing can exercise shipped on a static census with no dynamic measurement.
   **Measure the path once before building on a flag**, and withdraw the predicate with its census
   kept, which is the warm-design rule paid forward.
+  ⚠ **A REMEDY SENTENCE PUBLISHED WITH ITS OWN FALSIFIER NAMED IS RETIRED BY THAT FALSIFIER BEFORE
+  ANYTHING IS BUILT** (2026-09-08, C2): a lane wrote "the 2a remedy is arm 3's refusal extended to offset
+  0" and, three paragraphs later, "falsifier (a): per site, does the test that reaches it pass" — ran it,
+  and it fired 8 of 8. Every 2a site PASSES at master, the project had RULED that shape three days
+  earlier as the same census's own loud form, so the arm was never an unremedied case and the design was
+  WITHDRAWN UNBUILT. Two mechanics: the verdicts were taken CENSUS-OFF (the instrument answers only WHICH
+  sites a filter reaches; the verdict of record is the uninstrumented tree's, and the perturbation's
+  DIRECTION — an extra `Resolve` cannot manufacture a PASS — is stated rather than assumed), and two
+  guessed site-owners were wrong twice with the owner found by measurement. **The warm-design trap
+  avoided by the falsifier-first habit, at the cost of one filtered run.**
+  ⚠ **NARROWING A GUARD'S ROWS FOR ONE DEFECT CAN SILENTLY DELETE ANOTHER DEFECT'S ONLY COVERAGE — the
+  silent-subtraction class inside a commit whose message is about something else** (2026-09-08, G): a
+  narrowing of `SwitchPointerSentinelCase`'s A rows to compile shape removed the two lines that were
+  another defect's ONLY assertion (a `uintptr` declared with a SIGNED-band literal, printed through the
+  element-address helpers), while the commit that fixed that defect had done so through source that
+  already existed and added no row. The nearest-looking substitute exercises the UNSIGNED-parse band,
+  which always carried the rule — a plausible neighbour covering the WRONG band. Two rules: **a narrowing
+  commit censuses which ASSERTIONS the removed lines carried, not only which ROWS**; and **a census
+  output that says "empty means no guard" is read for its RESULT, not its label** (the lane's own line
+  said empty while the output was not).
   ⚠ **A BOARD ROW THAT SURVIVES ITS OWN REFUTATION costs a fleet a night** (2026-09-06): a row dated
   three weeks earlier said a set of profile bodies does not exist; they exist, they are internal, and
   the row is an un-performed push — measured line by line. **A refuted row takes a DATED amendment the
@@ -8012,6 +8476,15 @@ Each rule below was paid for.
   caught it: the copy belongs to the range EXPRESSION where `gc` puts it, scoped exactly as `gc` scopes
   it, and that is what then lets the enumerator be cheap. ⚠ And **a three-row filtered acceptance cannot
   falsify "no OTHER row moved"** — say so, and let the union gate carry it.
+  ⚠ **READ THE FALL-THROUGH BEFORE MEASURING THE ARMS** (2026-09-08, C2): `IsTokenArithmetic` masks the
+  low 32 bits and requires `allocationBase != number`, so it is FALSE when the number IS the base (offset
+  0) — a cross-type resolve at offset 0 therefore falls PAST the arithmetic refusal to `new
+  NativeBox<T>((nuint)value.Value)`, a native box over a TOKEN, answering the write case wrongly today
+  and silently. That was read out of `ж.cs:700` BEFORE the four-arm census was wired at the registry
+  (caller-supplied values, no stack walk), predicted per arm with the SCOPE named — a GolibTests zero on
+  one arm is a scope statement, the corpus population owed to a Windows box — and the arm carrying a
+  built-in positive control was NAMED, since the refusal tests must drive arm 3 above zero or the census
+  never ran.
   **⚠ WHEN SIZING A CORPUS-WIDE BEHAVIOUR CHANGE, PICK THE DEFAULT THAT MAKES THE ARC MONOTONIC**
   (2026-09-06) — the default changes the arc's SHAPE, not just its safety. Default-FATAL for
   unimplemented stubs (list the CAPABILITY ones, leave everything else exactly as today) means every
@@ -8202,6 +8675,12 @@ Each rule below was paid for.
   firing. Its reading
   half: a filter built from expectations can be simply where you stopped reading — read every numbered
   item of a post addressed to you, and read anchor..tip before starting the next one.
+  ⚠ **A POST IS DISCHARGED PER ITEM, NEVER PER POST** (2026-09-08, G): a post headed "BOTH ITEMS FROM
+  `<sha>`" carried item 1 (the poster's own fix, done) and item 2 ("that is yours to root"); the reader
+  read item 1, saw the post was the poster's own work, and reported the WHOLE post handled — the
+  heading-as-summary trap from the other side, not acting on a heading but treating a post as discharged
+  once its first item was. **And a ruling naming a seat as a row's ride is re-read AT THE SEAT'S CUT**:
+  that lane's branch shipped without the twin row the ruling had put on it.
 - **Positive-control the DETECTOR, not just the gate** (2026-08-30, the pinning census guard): a
   BOM-less `.ps1` under Windows PowerShell 5.1 mis-reads non-ASCII literals through the system
   codepage, so a guard's `ᴋ`-matching regex was silently broken and its "0 findings" red was
