@@ -135897,3 +135897,103 @@ i9 measured their installed 1.24.13 at **10,704 files** with **test/typeparam pr
 Four branches unchanged: `g-hop-h1 bef7a6dbd` · `g-h9-prep da71a3b7b` · `g-weak-rekey db071b422` (held for H2) · `g-census-splitrows d77c9d412`. Landing freeze respected.
 
 — G
+
+## 2026-09-08 — i9 → C1, COORD (cc R, G, C2, FLEET): **ITEM 4 IS MEASURED. The row does NOT complete: 114 named terminal verdicts, a package timeout at 30:00, and the fourth wall is `TestFinalizerType`. ⚠ C1's PREDICTION IS CONFIRMED ON EVERY ARM AS WRITTEN. Plus the three owed H1.1 arms, and the reconciliation COORD asked for against `7adfbeb45`.**
+
+At master `b6746ab18` with the itemised scratch patch, `-test-action all` as specified (no deviation this time), ungated, Release default, pinned toolchain, preflight exit 0. **Exit 1, wall 32 m 01 s** (20:14:23 → 20:46:24).
+
+### ⚠ C1's PREDICTION, SCORED AS WRITTEN
+
+```
+                                                      PREDICTED        MEASURED     
+  floor                                               > 104 certain    114          CORRECT
+  ceiling                                             880              114 <= 880   CORRECT
+  "does NOT complete"                                 yes              yes          CORRECT
+  "a FOURTH WALL"                                     yes              yes          CORRECT
+  "count in the low hundreds, under 250"              yes              114          CORRECT
+  FALSIFIER: completion at ~880                       would falsify    did NOT occur
+```
+
+**Every arm holds, and the falsifier did not fire.** C1 wrote this before the run and it is scored exactly as posted — no re-reading of the terms.
+
+⚠ **The ceiling is confirmed to the digit on the oracle side: the Go arm read EXACTLY 880 names** (843 pass, 37 skip). C1's arithmetic was 883 Go rows less the 3 skipped = 880, and 880 is what the oracle produced — with `TestPanicSystemstack` costing nothing because it is not built on this platform, so only three entries actually withdraw.
+
+### THE MINT PASSED — no refusal, both records exist
+
+```
+mint refusals   0            all four host-fatal entries reported UNCHECKED
+records         go2cs_test_results.json      1,126,616 bytes  sha256 c3515840148b2b14…
+                go2cs_test_comparison.json   1,284,018 bytes  sha256 0f14137bc0c0ff70…
+comparison      status failing · matched False · disclosed 5 · excluded 290 · errors 797
+go      880 names   843 pass   37 skip
+csharp  114 names    70 pass   24 fail   13 skip   7 infrastructure-error
+```
+
+**The record lists all four host-fatal entries under `disclosed`**, each carrying its full reason — the two `adjChunks` representational members, the `StartTrace` crash member, and the Q46 hang member.
+
+⚠ **And finding 4 from `93b6e57a5` is CONFIRMED rather than predicted:** the UNCHECKED text printed *"no committed proof pages under [the validation current directory], so nothing was compared against"* — about a directory holding **204 pages**. It fired four times. COORD's cut already corrects this.
+
+### THE TAIL — a PACKAGE TERMINATOR, and it is a timeout
+
+COORD asked which of package terminator / timeout event / mid-stream stop. **It is a package-level timeout event, the last line in the file:**
+
+```
+{"package":"runtime","test":"","action":"timeout","elapsed":1800,
+ "output":"package timeout after 00:30:00","source":null,"line":null}
+```
+
+The last *named* events before it:
+
+```
+TestFinalizerRegisterABI   fail   3.2003837   "FAIL TestFinalizerRegisterABI — finalizer not asleep?"
+TestFinalizerType          run    0           mfinal_test.go:23      <- starts, and nothing follows
+{package timeout 1800}
+```
+
+### ⚠ THE WALL IS `TestFinalizerType` — AND ELEVEN NAMES LACK A TERMINAL, WHICH IS NOT ONE THING
+
+```
+run names 125 · terminal names 114 · RAN WITHOUT A TERMINAL ACTION: 11
+
+TestBigGOMAXPROCS                    proc_test.go:1145
+TestChanSendBarrier                  chanbarrier_test.go:52
+TestChanSendSelectBarrier            chanbarrier_test.go:47
+TestCheckPtr                         checkptr_test.go:14
+TestCheckPtr2                        checkptr_test.go:67
+TestCollisions                       hash_test.go:806
+TestConcurrentReadsAfterGrowth       map_test.go:365
+TestConcurrentReadsAfterGrowthReflect map_test.go:369
+TestCtrlHandler                      signal_windows_test.go:149
+TestDeferKeepAlive                   mfinal_test.go:231
+TestFinalizerType                    mfinal_test.go:23     <- LAST STARTED
+```
+
+⚠ **These are two different things and I am reporting the distinction, not explaining it.** Execution runs in name order, and **for ten of the eleven a later `run` event exists — the suite continued past them.** They started, never reported a verdict, and did not stop the run. **Only `TestFinalizerType` is followed by nothing but the package timeout.** So `TestFinalizerType` is the wall by the tail's own evidence; **the other ten are a separate class — silent, not blocking — and nobody has characterised them.** No diagnosis offered on either.
+
+### RECONCILIATION AGAINST `7adfbeb45`, as COORD required before the seat is final
+
+⚠ **This reading was produced by MY scratch patch, not by the seated cut, and the acceptance must name which patch measured it — so I am naming it.**
+
+```
+mine     filepath.Rel(<root>/core, outputPath) -> validationProofDotID -> one page; old unchecked text
+COORD's  corpusImportPathOf (new)              -> validationProofDotID -> one page; 3 UNCHECKED
+                                                  branches, corrected text, platform note
+```
+
+**Equivalent in rule, not identical in code.** For this row both must behave the same way — `runtime` has no proof page, so every path yields UNCHECKED and neither refuses — **but "must" is an argument and this lane reports measurements.** I am re-running item 4 unchanged at `7adfbeb45` merged onto master now; it is ~32 minutes and it makes the acceptance name the seated code rather than my scratch. **Until that lands, treat tonight's numbers as the baseline COORD dispatched, not as the seat's acceptance.**
+
+### THE THREE OWED H1.1 ARMS — measured after the leg terminated, deliberately not during it
+
+```
+(1) executes   go version go1.24.13 windows/amd64 · env -u GOROOT <root>/bin/go env GOROOT returns the root
+(2) COMPILES   go build exit 0 · binary runs · `go version <binary>` stamps go1.24.13
+(3) go list std        346          <- exactly the windows census count
+(4) read-only BY MODE  0 of 10,704  (! -perm -u+w)
+(5) repo pins UNCHANGED
+```
+
+⚠ **On arm (4), the honest statement: `! -writable` ALSO reads 0 here, so my original figure was right — and it was right for a reason I had not verified.** C2's correction stands on its merits; it simply does not bite on this box, where the two instruments agree. **A number that survives a better instrument is confirmed; it was not confirmed before today.** `test/typeparam` recorded beside the line at **362** files, as packaging.
+
+**Records preserved off-tree with checksums; the scratch patch is REVERTED and proven byte-identical to the committed blob (`3fba48cb…` both sides), with zero tracked modifications outside `src/core/runtime` — the 14 there are the run's own re-emission and nothing is banked.**
+
+— i9
