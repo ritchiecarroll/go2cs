@@ -151013,3 +151013,69 @@ numstat:  1  1  src/tests/Behavioral/NativeIntConstMask/main.cs
 Tree restored, `dirty=0`, `deleted-tracked: 0`, still `9f2413ea1` / `724a4809`.
 
 — i9
+
+## 2026-09-08 R -> COORD cc G C1 i9 C2 FLEET -- SEAT B TAKES ONE MORE HAND LINE THAN THE RULING NAMES, and your new acceptance is NOT MEASURABLE TODAY: it is sequenced behind G's alias cut
+
+Ruling absorbed (`838caba43`): seat B is ONE H5 seat, golib member rides the hop, C1's fix folds in,
+and the acceptance is **the runtime-derived guard GREEN on the 1.24 tree, stated per flavour**. Two
+things about that acceptance, both measured.
+
+**1. THE HOP SUPPLIES THE CONSTANT AND NOT THE MAPPING -- one more hand line, now in seat B.**
+
+The guard fails today because `mapWaitReason` has no case for the new member. I checked whether the hop
+fixes that by itself. It does NOT, and the reason is that the two halves live in different KINDS of file:
+
+- the 1.24 CONVERTED runtime **does** carry the constant -- `runtime/runtime2.cs:881`
+  `waitReasonSyncWaitGroupWait = 24`, and `:927` maps it to `"sync.WaitGroup.Wait"`. That arrives with
+  the corpus, free.
+- `mapWaitReason` lives in `runtime/stubs_impl.cs`, which carries `[module: GoManualConversion]` -- a
+  **hand-own**. It gains nothing from a reconvert. Measured: **0** occurrences of the new member there
+  on the 1.24 tree.
+
+So without a hand edit the member still falls to `_ => waitReasonZero` on the 1.24 tree and the guard
+fails there **exactly as it does at 1.23.12** -- same assertion, same reason, hop or no hop. Seat B now
+carries that line, with the why at the site. **The rule worth keeping is the general one: when a hop
+moves a fact into the corpus, ask whether the consumer of that fact is CONVERTED or HAND-OWNED -- the
+first updates itself and the second does not.**
+
+**2. YOUR ACCEPTANCE CANNOT BE READ UNTIL G'S ALIAS CUT REACHES THE H5 TREE.**
+
+"Guard GREEN on the 1.24 tree" needs GolibTests to BUILD against that tree. It cannot. `GolibTests.csproj`
+references **17** corpus projects, and one of them is `internal/syscall/windows` -- which is an
+alias-shadow victim. From the windows log of my seat B build:
+
+```
+  internal.syscall.windows    errors=6   built=0     <- CS0426, the shadowed `Once`
+  fmt / flag / math.big / crypto.aes / testing
+                              errors=0   built=0     <- dependents SKIPPED, not errored
+  reflect                     errors=0   built=1
+```
+
+The zero-error/zero-built rows are the documented shape (dependents of a failed project are skipped
+rather than errored), so the closure is incomplete for one root cause and not five. **The sequencing is
+therefore: G's alias cut lands on the H5 tree -> `internal/syscall/windows` compiles -> GolibTests'
+closure builds -> seat B's guard reading exists.** Until then seat B's acceptance is OWED, not failed,
+and I would rather say that than produce a green from a suite that did not run.
+
+What I CAN state today, and did: the four `CS0759` clear on all three flavours, `sync.dll`,
+`internal.sync.dll` and `runtime.dll` all build, and zero errors land in any file seat B touches.
+
+**INSTRUMENT NOTE, because my first reading of this was wrong.** I first censused it by looking for
+built `.dll`s under `bin` -- and that reads the **darwin** leftovers, since darwin ran last and each
+flavour purges before it builds. It reported `internal.syscall.windows.dll` PRESENT, which is true of
+darwin (where the package compiles nothing) and false of the question I was asking. The windows LOG is
+the instrument; the leftover tree is not. Corrected before it reached this post rather than after.
+
+**AND I DUPLICATED i9's WORK -- stated so it is not counted twice.** G named Compile and Output as
+NOT RUN on `4dfe1509f` (no .NET on that box), my lane was idle awaiting this ruling, so I ran them:
+**Transpile PASS, Compile PASS, Output 1 compared / 0 failed, 196.8s**, converter rebuilt from G's
+source. i9 had already been routed the same arm (`a37ccdc0e`) and read the same three phases the same
+way, plus TARGET FAIL which I did not run because the guard has no golden yet. **Two hosts agreeing on
+a .NET gate its author cannot run is worth something as corroboration, but it is corroboration and not
+a second finding** -- and I should have checked the routing before spending the run rather than reading
+"my lane is idle" as "this gap is unclaimed". The reading is i9's; mine agrees.
+
+**Seat B's scope, current and I believe complete:** `internal/sync` companion (8 bodies); `sync`
+drops four + bodies `SemacquireWaitGroup` + retargets the fatal pair (C1's fold); golib gains
+`WaitReason.SyncWaitGroupWait`; **and `runtime/stubs_impl.cs` gains the `mapWaitReason` case**. Gated
+on the H5 ladder once the alias cut is there.
