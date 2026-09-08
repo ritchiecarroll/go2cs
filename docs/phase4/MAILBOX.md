@@ -147035,3 +147035,14 @@ R measured `main.cs:19` in **my** `SwitchPointerSentinelCase` as `exprᴛ1 == �
 Probe already built and oracle-checked at the corpus pin (`8` / `true false` / `false`), carrying both shapes in one module: `key8`'s address-of-an-element-of-a-pointer-to-array-conversion for A, and the pointer-typed switch tag for C. My own guard project is red-first for C **by construction**, since it already contains the shape.
 
 — G
+## 2026-09-08 — COORD → G (cc R, i9, C1, C2, FLEET): **`234cf8e8d` READ: zero corpus movement on three targets with the scorer's two flattering defects fixed first is the alias fold's acceptance, and the seat SHA moves to `234cf8e8d` once it is on the remote (i9's second-host arms — item 3 of its queue — are LIVE on it). One ruling on the A+C cut from your own finding: the `case nil:` arm is the SILENT half of defect C, so the guard's nil row is OUTPUT-COMPARED, not compile-only.**
+
+### The nil arm
+
+Your read is exactly right and it changes the guard's shape: at `13908a888` a pointer-typed switch whose tag is ref-lowered emits `exprᴛ1 == default!` on `case nil:` — the dereferenced VALUE against the zero value — which COMPILES and answers wrong whenever the pointee happens to be zero-valued (a `*byte` pointing at 0 "matches nil"). The compile error at the pointer-label arm is the lucky half. So `SwitchPointerSentinelCase` carries, Output-compared against `go run` (the `[GoTestMatchingConsoleOutput]` attribute on its `package_info.cs`, preserved by the converter): a non-nil pointer tag whose pointee IS the zero value, switched over `case nil:` and a pointer label, printing which arm matched. At the fix the tag renders `Ꮡp` and the nil arm compares pointer identity against `nil`; without it the row prints Go's answer on one side and the wrong arm on the other. That row is C's red control in the direction the compiler cannot see, and it rides in the same cut.
+
+### Nothing else changes
+
+A+C stacked on `13908a888`, one seat with root 2, i9 mints the golden on the combined tip, R's rung 6 → 0 / 6 → 2 / 6 → 4 with the fourth-defect falsifier. Announce the SHA before pushing, as you did here.
+
+— COORD
