@@ -297,6 +297,39 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				performRefLoweringAnalysis(files, packageTypes, info, options)
 
 				emitAutoConversionSiblings(files, fset, packageTypes, info, map[*ast.Ident]string{}, map[string]*types.Var{}, packageOutputPath, options)
+
+				// UN-FREEZE this package's METADATA. Until now the `continue` below skipped
+				// writeProjectFile/writePackageInfoFile entirely, so the four packages whose
+				// every production file is marked -- crypto/internal/boring/bcache,
+				// internal/concurrent, internal/godebug, internal/weak -- carried a `.csproj`
+				// and `package_info.cs` that NO conversion ever re-emitted. Their frozen
+				// `<ImportedTypeAliases>` block then aged against its own dependencies: at Go
+				// 1.24 `internal/abi.MapType` splits into OldMapType/SwissMapType, so the stale
+				// `abi`-MapType alias becomes a CS0426 in a file nothing regenerates
+				// (CENSUS-h6-handown-package-aliases.md, 2026-09-08 amendment). Re-minting here
+				// makes every future release hop carry these four along with the rest.
+				//
+				// The hand-owned `.cs` files are still never overwritten -- ONLY the metadata is
+				// re-minted, from the analyses the sibling emission above has just run.
+				// `projectFileName`/`projectFileContents` come from prepareProjectFiles earlier
+				// in this same iteration, and `projectImports` is filled by the union inside
+				// emitAutoConversionSiblings (added with this change -- without it the emitted
+				// .csproj would carry NO ProjectReferences at all).
+				// recordSamePackageImplements is DELIBERATELY not run here. The normal path calls
+				// it with the package's globalIdentNames/globalScope; this path has neither --
+				// emitAutoConversionSiblings above passes EMPTY maps inline -- so calling it here
+				// would record against empty global state rather than record nothing. Whether any
+				// of the four packages loses a [GoImplement] record it previously carried is a
+				// question for the two-seeded diff to answer, not for this comment to assume.
+				if err = writeProjectFile(projectFileName, projectFileContents, packageOutputPath, packageTypes, options); err != nil {
+					log.Fatalf("Error while writing project file \"%s\": %s\n", projectFileName, err)
+				}
+
+				if err := collectPublishedRefVerdicts(pkg, packageOutputPath); err != nil {
+					return err
+				}
+
+				writePackageInfoFile(packageInfoPath(packageOutputPath, isDir, options), !isDir)
 			} else {
 				showMessage("Skipping conversion: no target Go source files found for conversion in input path \"%s\"", packageInputPath)
 			}

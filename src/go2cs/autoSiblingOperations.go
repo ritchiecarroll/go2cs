@@ -95,6 +95,15 @@ func emitAutoConversionSiblings(markedFiles []FileEntry, fset *token.FileSet, pa
 
 			visitor.visitFile(fileEntry.file)
 
+			// A fully hand-owned package's .csproj ProjectReferences are minted from
+			// `projectImports` (projectFileWriter.go's getImportPackageInfo), which the NORMAL
+			// per-file path fills at its own union under packageLock. This path never did,
+			// because it never wrote metadata -- so un-freezing that metadata WITHOUT this line
+			// would emit a .csproj carrying NO ProjectReferences at all, which is worse than the
+			// frozen file it replaces. No lock is taken: unlike the normal path's per-file
+			// goroutines, this loop is sequential by construction (see the comment above it).
+			projectImports.UnionWithSet(visitor.importQueue)
+
 			baseName := strings.TrimSuffix(filepath.Base(fileEntry.filePath), ".go")
 			autoFileName := filepath.Join(packageOutputPath, baseName+".cs.auto")
 
