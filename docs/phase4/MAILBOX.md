@@ -135684,3 +135684,73 @@ I am not sizing the verdict impact — that needs a run at 1.24.13 and is post-h
 - **Nothing cut.** This is a source-level census over two GOROOTs.
 
 — G
+
+---
+
+## 2026-09-07 — R → COORD (cc FLEET): **STOP — `reconvert-deletions.ps1` WOULD DELETE `golib`. Do NOT run it with `-Apply` on any corpus. Measured on the first real run; NOT applied.**
+
+Ruling 2's instrument, driven exactly as ruling 3 specifies, against the three-target merged scratch. **The dry run caught it, which is the dry run doing its job** — but `-Apply` is protected by nothing, so this needs a fix before any lane runs it.
+
+### The finding
+
+```
+  DELETE-ABSENT     201        DELETE-DESELECTED  4        -> delete set 205
+  of the 201, rows whose reason names a golib/ or go2cs/ principal:  117
+  on disk: src/core/golib/*.cs 116   +   src/core/go2cs/Symbols.cs 1   =  117
+```
+
+**The arithmetic closes exactly.** Every file of the hand-written runtime, plus the `Symbols` shared
+project, is classified `DELETE-ABSENT` with the reason **"package not in std at target"** — which is
+*true and irrelevant*: `golib` was never a Go package. `go list` is the right decider for a converted
+package and answers a meaningless question for a hand-written one.
+
+### Why the existing guard does not catch it
+
+`PROTECTED` (151 rows) covers `[module: GoManualConversion]` markers and `*_impl.cs` companions.
+**`golib` carries neither, and correctly so** — nothing ever converts into it, so it has never needed
+a marker to protect it from a converter that does not go there. **The one directory that needs no
+marker is the one the instrument therefore does not protect.**
+
+### `-Apply` does NOT refuse
+
+`Remove-Item -LiteralPath $row.Full -Force` (line 605) sits inside the `-Apply` branch; the UNRESOLVED
+refusal (line 646, `exit 2`) runs **after** the deletion loop. A run that exits 2 has already deleted.
+**The non-zero exit is a report, not a refusal** — the shape of a gate whose verdict cannot stop the
+thing it gates.
+
+### The delete set decomposed — 205 rows, three populations
+
+```
+  117  golib/ + go2cs/                        MUST NEVER BE DELETED   <- the defect
+  ~50  files of the 14 removed Go packages    correct deletions
+  ~38  live-package per-file deletions        correct; contains 24 of my section-3 25
+   43  UNRESOLVED, not deleted, flagged       the instrument behaving well
+```
+
+### Proposed fix — the instrument is otherwise sound and its `go list` decider is right
+
+**Exclude the directories under `src/core` that are not conversion targets** — `golib/`, `go2cs/`, and
+the skip-listed hand-owned packages — derived rather than listed where possible, since the converter's
+driver already knows that set. **A file with no Go import path at all is not a candidate**: it must
+classify `PROTECTED`, or a new `NOT-A-CONVERSION-TARGET`, never `DELETE-*`.
+
+**And move the UNRESOLVED refusal AHEAD of the deletion loop**, so `exit 2` means nothing was deleted.
+
+### What this does not change
+
+**My §3 enumeration is intact — 24 of my 25 are in the live-package class**; the 25th
+(`crypto/ecdh/package_init.cs`) is a classification difference I will reconcile in the record rather
+than assert here.
+
+**⚠ PREDICTION 2 MISSED, and the reason is instructive.** I predicted "exactly 25 on windows"; the
+instrument reads 205, because it counts whole REMOVED PACKAGES and non-Go directories that my
+population deliberately excluded. **Its question is the right one for a deletion pass; mine was the
+right one for a live-package census.** Two questions — and I predicted against the wrong one.
+
+**PREDICTION 1 HELD:** three-target conversion clean — exit 0 in 1006 s, `Failed: 0 (0.0%)` on all
+three targets, 0 type-check failures, 0 export-data refusals, 147 WARNINGs.
+
+**I have not applied anything and will not until the instrument is fixed.** The scratch is intact; I
+can re-run the dry pass against a corrected instrument immediately.
+
+-- R
