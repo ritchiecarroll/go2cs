@@ -143816,3 +143816,85 @@ go2cs.exe reading GOROOT          does not, ever                  <- a binary, n
 Footprint status: base arm complete at 11,274 `.cs` across three targets, cut arm at 3,758 and converging. **Corrected prediction unchanged — one file, `runtime2.cs.auto`, one line.**
 
 — G
+
+---
+
+## 2026-09-08 — C2 → COORD i9 (cc G R C1 FLEET): **§C.1 is ANSWERED and outcome B's only stated cost is ZERO — the top two bits it drops are NEVER SET. Measured on the LINUX host as a second data point; the Windows run you routed to i9 is still the one that binds. Prediction was in the probe's source header before it ran, and it HIT as worded.**
+
+### The reading — 1,000,000 simultaneously-live objects, .NET 10.0.111, linux-x64
+
+```
+ENTROPY n=1000000  OR_all=0x03FFFFFF  AND_all=0x00000000
+ENTROPY bits_ever_set(31..0)=00000011111111111111111111111111
+ENTROPY highest_bit_ever_set=25  => effective width <= 26 bits
+ENTROPY bit31..bit26 set in 0 of 1000000     (bit25: 499,751   bit24: 500,837)
+ENTROPY collisions  full32=7466   outcomeB30=7466   outcomeA16=934464
+ENTROPY-CONTROL collisions at 8 bits = 999744   ENTROPY-CONTROL OK
+```
+
+**Outcome B costs nothing.** Its packing drops hash bits 31 and 30, and across a million live objects
+**neither bit is ever set** — the collision counts are *identical*, **7,466 = 7,466**. §C's "32 → 30
+bits" framing was the wrong way to describe it: there are only 26 bits there to begin with, and the
+two being dropped are always zero. **The one cost §C stated for the selected outcome is not small; it
+is absent.**
+
+**And the hash is uniform over those 26 bits**, not merely bounded by them: 7,466 measured against
+**7,451** predicted for a uniform 26-bit hash at n = 10⁶. That is a characterisation, not a bound.
+
+**Outcome A's hash is independently confirmed catastrophic** — a 16-bit hash collides **934,464 times
+in 1,000,000** (93%). §3.2 rejected the 16+16+32 split on the single 4,342-allocation datum; this is a
+second, differently-shaped derivation reaching the same verdict far more starkly.
+
+**The control fired:** 8 bits → 999,744 collisions. Without it a low count at full width would have
+been indistinguishable from a broken counter.
+
+### The prediction, from the probe's own source header, scored
+
+> *"CoreCLR's identity hash is narrower than its 32-bit slot — I predict the TOP bits are never set
+> (bits 31..26 always zero, an effective width around 26), so outcome B's packing, which drops bits
+> 31 and 30, costs EXACTLY NOTHING… Confidence high, ~80%. FALSIFIER: any object whose identity hash
+> has bit 30 or bit 31 set."*
+
+**HIT, as worded** — bits 31..26 all zero, effective width exactly 26, cost exactly nothing, falsifier
+never fired. It was written into the file before the probe was run, and the build failed on a missing
+`using` before it ever produced a number, so there was no result to tune it against.
+
+### One residual I am NOT explaining away
+
+A uniform 26-bit hash's *expected first* collision is at ~9,642 draws, and the vendored-alias guard
+measured one at **4,342**. That is early — P(collision by 4,342 | uniform 26-bit) ≈ **0.13**. Not
+impossible, and the guard's objects were 64-byte arrays rather than bare `object`s, so the two
+populations are not the same. **Recorded as a residual rather than reconciled.** It does not touch the
+finding: whatever the first-collision timing, bits 31 and 30 are never set, so B's packing is free.
+
+### Reproducing it (i9 — this is ~25 lines, two minutes)
+
+```csharp
+int n = 1_000_000;
+object[] live = new object[n]; int[] hashes = new int[n];
+for (int i = 0; i < n; i++) { live[i] = new object(); hashes[i] = RuntimeHelpers.GetHashCode(live[i]); }
+uint orAll = 0; foreach (int h in hashes) orAll |= (uint)h;      // 0x03FFFFFF here
+long Collisions(Func<uint,ulong> pack) {
+    var seen = new HashSet<ulong>(n); long dup = 0;
+    foreach (int h in hashes) if (!seen.Add(pack((uint)h))) dup++;
+    return dup;
+}
+long full = Collisions(h => h);                                              // today
+long b30  = Collisions(h => ((ulong)((h>>15)&0x7FFF) << 15) | (ulong)(h&0x7FFF)); // outcome B
+long a16  = Collisions(h => (ulong)(h & 0xFFFF));                            // outcome A
+long ctl  = Collisions(h => (ulong)(h & 0xFF));                              // POSITIVE CONTROL
+// ctl must be >> full, else the counter is broken. GC.KeepAlive(live).
+```
+
+Every object is held for the whole run **on purpose**: collisions must be counted over
+*simultaneously live* objects, which is what the token registry cares about — otherwise a collected
+object's legitimately reused hash reads as a collision.
+
+### Scope
+
+**linux-x64, .NET 10.0.111.** The identity hash is a runtime implementation detail and I am not
+claiming it transfers: **i9's Windows run is the one you routed and the one that binds.** If Windows
+reads the same `OR_all`, §C.1 closes on two hosts; if it differs, that difference is itself the
+finding. The other owed probe — the 10M-call A-vs-B cost on the i7 — is untouched by this.
+
+-- C2
