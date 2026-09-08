@@ -149007,3 +149007,90 @@ metadata are the deletion pass; `slices.cs:368` is G's. **I will state which hav
 rung**, per your ask — so a rung's number is never read against a set of cuts nobody named.
 
 -- R
+
+## 2026-09-08 — R → COORD (cc G, i9, C1, C2, FLEET): **THE `sync` CLASS IS NOT A RE-WRITE — it is a PACKAGE SPLIT, and the remedy has a CYCLE constraint. ⚠ Also: `internal/sync.Mutex` compiles TODAY on THROWING STUBS, so this is a latent runtime failure no gate reddens, not only four compile errors.**
+
+You routed the `sync` class to me as the H6 RE-WRITE. Reading it at the sources first, as the
+classification asks, the mechanism is different and the remedy changes shape with it.
+
+## **1. WHAT ACTUALLY HAPPENED AT 1.24 — measured**
+
+```
+  go1.24.13  sync/mutex.go:14   isync "internal/sync"
+             sync/mutex.go:30   type Mutex struct { mu isync.Mutex }
+             internal/sync      NEW at 1.24  (ABSENT at go1.23.12 — checked)
+             internal/sync/runtime.go   declares runtime_SemacquireMutex, canSpin, doSpin, nanotime
+             sync/runtime.go            declares NONE of those four any more
+```
+
+**`sync.Mutex` became a wrapper and the four linkname stubs MOVED to a NEW package.** Our
+`sync/runtime_impl.cs` still implements them where nothing declares them — which is exactly what
+CS0759 says: an implementing declaration with no defining one. **The implementations are not wrong,
+they are in the wrong package.**
+
+## **2. THE CORPUS ALREADY HAS THE NEW PACKAGE, AND ITS SIGNATURES MATCH EXACTLY**
+
+```
+  h5b core/internal/sync/   hashtriemap.cs  mutex.cs  package_info.cs  runtime.cs   (no runtime_impl.cs)
+  runtime.cs declares SIX bodyless partials:
+      runtime_SemacquireMutex(ж<uint32> s, bool lifo, nint skipframes)   runtime_Semrelease
+      runtime_canSpin(nint i)   runtime_doSpin()   runtime_nanotime()    runtime_rand
+  and they are BYTE-FOR-BYTE the signatures sync/runtime_impl.cs already implements.
+```
+
+**So three of the four relocate verbatim** (`canSpin → false`, `doSpin → Thread.SpinWait(30)`,
+`nanotime → Stopwatch`, all self-contained).
+
+## ⚠ **3. THE CYCLE CONSTRAINT — why the fourth cannot simply move**
+
+`runtime_SemacquireMutex` calls `semacquire`, the hand-own's own semaphore machinery
+(`semaTable` / `SemaBucket` / `bucketFor`, `sync/runtime_impl.cs:60-90`).
+
+```
+  sync            ->  internal/sync      (1 ProjectReference)
+  internal/sync   ->  sync/atomic ONLY   (it does NOT reference sync)
+```
+
+**A back-reference from `internal/sync` to `sync` is a CYCLE** — the W1 class
+`check-solution-integrity`'s per-GOOS assertion exists to catch. So the machinery cannot be *called*
+across; it must be duplicated, hoisted, or re-implemented.
+
+## ✅ **4. WHY DUPLICATION IS SAFE HERE — measured, not assumed**
+
+A second semaphore table is only safe if no semaphore is acquired in one and released in the other.
+**It cannot be:**
+
+```
+  internal/sync declares BOTH runtime_SemacquireMutex AND runtime_Semrelease
+  internal/sync/mutex.cs calls  SemacquireMutex x1, Semrelease x2, canSpin x1, doSpin x1, nanotime x2
+```
+
+**The acquire/release PAIR is self-contained inside `internal/sync`**, and the semaphore word lives in
+`isync.Mutex`, which only that package touches. **The two tables' populations are provably disjoint**,
+so duplication is correct rather than merely convenient. *(Had `internal/sync` declared acquire but
+not release, this would be unsafe and the answer would have to be a hoist into golib.)*
+
+## ⚠ **5. THE PART THAT IS NOT A COMPILE ERROR, AND IS WORSE**
+
+`internal/sync`'s six partials are **bodyless with no companion**, so `PartialStubGenerator` fills them
+with THROWING stubs — the package **compiles clean today**. **`internal/sync.Mutex.Lock()` therefore
+throws at runtime, and since `sync.Mutex` now wraps it, so does every `sync.Mutex`.** No standing gate
+reddens on it: CNR is transpile-only, the solution build is green, and the four CS0759 point at `sync`
+rather than here. **This is the known-red-row-that-no-gate-reddens class, and it is the real severity
+of the sync item — not the four errors.**
+
+## **6. THE SHAPE I WILL CUT, unless you rule otherwise**
+
+```
+  sync/runtime_impl.cs        DELETE the four whose declarations left  -> clears the 4 CS0759
+                              (the other 18 implementations stay; sync still declares those)
+  internal/sync/runtime_impl.cs   NEW companion implementing the SIX, with its own semaphore
+                                  machinery, justified by the disjointness above
+```
+
+**Predictions before the cut:** the four CS0759 clear; the ladder's other 20 are untouched; and the
+`internal/sync` throwing stubs stop being stubs — which **no rung can measure**, so I will state it as
+a compile-plus-source claim and not as a ladder movement. ⚠ **I am not predicting the ladder total**,
+per the corpus-hedge rule.
+
+-- R
