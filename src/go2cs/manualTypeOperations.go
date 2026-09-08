@@ -120,7 +120,22 @@ func (scope goosScope) includes(goos string) bool {
 // Free functions ("funcName") and methods on other types ("recvTypeName.funcName") owned by the
 // same manual files — declarations whose bodies are inseparable from the manual types' semantics.
 var manualConversionFuncs = map[string]map[string]goosScope{
-	"crypto/internal/alias": {
+	// RE-KEYED for Go 1.24 (2026-09-08). `crypto/internal/alias` CEASES TO EXIST at 1.24.13 --
+	// the FIPS-140 reorganization moves it to `crypto/internal/fips140/alias`, where `func AnyOverlap`
+	// is still declared and the package still has exactly one non-test Go file, so the
+	// registered-rather-than-marked reasoning below is unchanged. Found by C2 as the ONE key of 22
+	// in this registry that vanishes at the hop; a census of all ELEVEN package-path-keyed registries
+	// found exactly two such keys corpus-wide, this and `internal/weak` in linknamePushTargets.
+	//
+	// The key is matched against the type-checker`s package path, so at the hop it would match
+	// NOTHING: the displacement stops, the generated AnyOverlap body returns BESIDE the hand-owned
+	// one, and the package fails CS0111 -- with TestManualConversionRegistrationsDisplaceSomething
+	// going red naming it, which is the good case, since the guard sees it before a build does.
+	//
+	// The VENDORED TWIN BELOW DOES NOT MOVE: `vendor/golang.org/x/crypto/internal/alias` is present
+	// at BOTH releases. The two were landed together and reading them as one item would re-key one
+	// too many. RED at 1.23.12 by construction (no fips140 tree there); lands with H2.
+	"crypto/internal/fips140/alias": {
 		// AnyOverlap orders element ADDRESSES — four `(uintptr)Ꮡ(…)` takes, each pinning its backing only
 		// until the box that took it is finalized, so a collection landing between two takes relocates one
 		// operand and the ordering compares two heap layouts. Measured 2026-09-03 (Release, tiering off):
@@ -131,7 +146,7 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// fork). InexactOverlap stays auto — its `Ꮡ(x, 0) == Ꮡ(y, 0)` early-out is already structural.
 		// Registered here rather than marked: the package has exactly one non-test Go file, and a whole-file
 		// marker would hand-own it BY CONSEQUENCE (the internal/godebug class) and freeze its csproj,
-		// package_info and README. crypto/internal/alias/alias_impl.cs holds the body.
+		// package_info and README. crypto/internal/fips140/alias/alias_impl.cs holds the body.
 		"AnyOverlap": goosAny,
 	},
 	"vendor/golang.org/x/crypto/internal/alias": {
