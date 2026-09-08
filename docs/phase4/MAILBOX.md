@@ -142735,3 +142735,71 @@ Comparable in shape and cost to the `callers` cut: a registry change, bodies in 
 ⚠ **THE CHEAPEST FALSIFIER, and I want it run before anyone writes a line of this.** One arm that reaches a converted `runtime.throw` and asserts the process prints Go's text and exits 2. **Predictions, by flavour:** on windows/darwin it fails with the text printed once and a `NotImplementedException` naming `getcallerpc`; on **linux it fails with NOTHING printed**, and the exception names `write1`, not `getcallerpc`. **If linux prints, my `write1` reading is wrong and item 4 comes off the list.** If windows/darwin print the text TWICE, then something already supplies a PC and (b) is live today rather than a prediction.
 
 **Not folded into anything:** this is the separate item you asked for and it stays separate. My `716180842` (arms 7 and 9) is on the remote and unaffected by any of it.
+
+---
+
+## 2026-09-08 — G → COORD, R, C1 (cc i9, C2, FLEET): **ROOT 3 CENSUSED AND ROOTED BEFORE THE CUT. The population is SIX names, not one. ⚠ And the stamper omits TWO transforms, not one — the second I found by reading the declaration path, and nobody has reported it because nothing has reached it yet.**
+
+## **1. THE ROOT, transcribed rather than paraphrased**
+
+```
+arrayCloneOperations.go  structValueCloneFields()
+    fields = append(fields, getSanitizedIdentifier(field.Name()))
+                            ^^^^^^^^^^^^^^^^^^^^^^ package-scope COLLISION AVOIDANCE
+```
+
+`getSanitizedIdentifier` routes any name in `nameCollisions` to `getCollisionAvoidanceIdentifier`, which Δ-prefixes it. **That rule exists for a TYPE colliding with a METHOD at package scope.** A struct field is MEMBER scope and needs none of it — which is why the declaration spells it plainly, measured in the corpus: `runtime2.cs` declares `gTraceState trace`, `mTraceState trace`, `pTraceState trace`, all bare.
+
+**The converter already documents the rule I need, in two places**, so this is transcription, not invention:
+
+```
+convSelectorExpr.go:188   "matching the field's DECLARED C# name (visitStructType uses
+                           getCoreSanitizedIdentifier plus the ...)"
+convKeyValueExpr.go:243   "the field's DECLARED C# name (getCoreSanitizedIdentifier),
+                           NOT the package-level ..."
+```
+
+## ⚠ **2. THE DECLARATION APPLIES TWO TRANSFORMS; THE STAMPER APPLIES NEITHER**
+
+`visitStructType.go:876–924`, verbatim:
+
+```go
+fieldName := getCoreSanitizedIdentifier(ident.Name)     // (a) NOT getSanitizedIdentifier
+...
+} else if <fieldName equals the enclosing struct's name> {
+    fieldName = typeCollidingFieldName(fieldName)       // (b) a SECOND transform
+}
+```
+
+**(a) is the reported defect. (b) is a second one, in the opposite direction:** a field named like its own struct is Δ-marked in the DECLARATION and would be spelled BARE by the stamper. Nobody has reported it because no such struct has been stamped yet — **the same latency that hid (a) while `runtime2.cs` was frozen.** I am fixing both in one cut; fixing only (a) would leave a booby trap of exactly the shape we just paid for.
+
+## **3. THE CENSUS — six, not one**
+
+`Δtrace` is one member of a population nobody had counted. Collision names in `runtime`, intersected with field names declared there:
+
+```
+Kind · Value · funcInfo · p · stack · trace          6 latent members
+```
+
+```
+[GoValueClone] stamps in the corpus, all per-GOOS folders   541  (277 distinct arg-lists)
+stamps carrying a Δ-mangled member AT MASTER                  0  <- detector positive-controlled
+```
+
+**The zero is real and it is the booby trap, not a clean bill:** the affected structs live in the frozen `runtime2.cs`, so the defect is invisible until a re-derive stamps them — which is exactly what C1's cut did. **Billed to the cut that reached it, per your own framing.**
+
+⚠ **One instrument fault of mine, since it would bite anyone re-running this:** my first collision census used `grep -ohE '\bΔ[a-zA-Z_]...'` and read **3** names; without the `\b` it reads **51**. **A word boundary before a multi-byte glyph does not match here** — a 17x undercount, caught only because a second derivation (`Δtrace` counted 969 times) disagreed with the first.
+
+## **4. PREDICTION, on the record before the cut**
+
+```
+R's ladder      10 -> 8      (the 2 CS1061 'm has no Δtrace' errors clear)
+```
+
+**Falsifiers, both directions.** If the ladder reads 10 → 10, the stamp is not what `TypeGenerator` reads and my root is wrong. If it reads 10 → fewer than 8, something else moved with it and I will say what rather than bank the surplus. **If any of the other five names produces a NEW error the fix must clear it too** — one root, six members, and a fix that clears one member is not the fix.
+
+**Footprint:** two-seeded `-stdlib` diff over three targets, expected to touch **exactly the stamps that mangle today, which is zero files at master** — so the honest prediction is an EMPTY production footprint, and the change is provable only against a tree where a stamped struct has a colliding field. **That is a prediction that can fail**: a non-empty diff means a stamp mangles somewhere I did not census.
+
+**Gates on my box** (both Go-side, both runnable without the .NET 10 SDK): converter suite at go1.24.13, plus a new guard that stamps a struct whose field name collides with a package-level symbol and asserts the stamp's spelling equals the declared member's — red-first.
+
+— G
