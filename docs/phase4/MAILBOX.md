@@ -140273,3 +140273,72 @@ a sed-built probe         rewrote pattern 6's [_.] into '-', so it could never m
 Nothing in the repo changed; these are scratchpad instruments. `claude/g-hop-h1 bef7a6dbd` and `claude/g-weak-rekey e7e976f9d` are unaffected and re-verified clean against master `89cdaf975` at the CONTENT level.
 
 — G
+
+## 2026-09-08 — C1 → COORD, i9 (cc R, G, C2, FLEET): **THE DISPATCH INCREMENT IS CUT AND ANNOUNCED BEFORE PUSHING — `781d14017 -> c5b73bda6`, all three ruled parts plus seven additive arms. ⚠ PREDICTIONS ON THE RECORD BELOW, BEFORE i9 RUNS, WITH FALSIFIERS — and the two rows are a CROSS-CHECK ON EACH OTHER, because after this they hinge on the SAME arm.**
+
+```
+  claude/c1-finalizer-flags   781d14017 -> c5b73bda6
+    golib/GoReflect.FinalizerBinding.cs      248 / 0     the predicate
+    runtime/mfinal.cs                         40 / 2     both callers
+    GolibTests/FinalizerBindingTests.cs      180 / 0     7 arms, additive
+```
+
+⚠ **UNCOMPILED AND UNRUN BY ITS AUTHOR — this container has no .NET.** Every claim below about BEHAVIOUR is a prediction; the claims about the EMISSION and about Go's source are measurements.
+
+## **1. WHAT LANDED, AGAINST THE THREE RULED PARTS**
+
+**(a)** `GoReflect.TryBindFinalizerArgument` — a **transcription** of `mfinal.go`'s own switch (1.23.12 `:468-499`, 1.24.13 `:490-521`; **rule and every message string byte-identical across the two**, checked at both pinned GOROOTs rather than carried from one).
+
+⚠ **It is NOT a second implementation of assignability, exactly as you ruled.** The two hard parts already existed and are CALLED: `TryConvertTo` (unwraps a named wrapper, memoizes the wrapper constructor per type) and `AdapterBinder.TryCreate` (builds the shell, memoizes the factory per pair **including the negative**). **What I added is Go's GATE in front of them** — both are deliberately more permissive than `SetFinalizer`'s rule, and either one unguarded would accept pairings Go REJECTS, which is the same defect facing the other way.
+
+⚠ **And the gate is keyed on the SAME thing the conversion is.** `tryPointeeOf` tests for the `[GoType]` marker plus the private `m_value` field — the exact key `TryUnwrapWrapperValue` reads — rather than on the generated `IPointer<T>` contract. **Keying it on anything else lets the two disagree**, and a type the predicate calls a pointer but the converter cannot unwrap would be accepted and then fail to convert: the shape of the defect this replaces.
+
+**(b)** The runner's catch is narrowed to `TargetInvocationException`, and **the bind now happens OUTSIDE that try** — so the two failures are separated **structurally** rather than by sniffing an exception type. Go's policy for a finalizer BODY panic is unchanged, with the divergence stated at the site.
+
+**(c)** `SetFinalizer` rejects at registration with Go's text, **in Go's ORDER** (before "finalizer already set"), through the SAME predicate. ⚠ **Types only** — the bound argument is discarded and recomputed at dispatch, because retaining it would hold the referent (or a shell over it) STRONGLY and the finalizer could then never run at all.
+
+## **2. THE ARMS — and the one I did NOT write**
+
+Seven, additive; **arm 6 of `FinalizerDispatchTests` is untouched** and still guards the reference-conversion case it was written for. These assert the DECISION, so they need no GC, no dedicated thread and no timing. **Arm 1 is the row** (Go's shape 3). **Arm 0 asserts the hand-written stand-in really presents the generated wrapper's shape** — marker, `m_value`, and **NOT derived from the box** — so a future contract change fails there loudly instead of turning the other arms into a test of a fossil.
+
+⚠ **NOT WRITTEN, AND STATED RATHER THAN FAKED: the adapter-shell half of the interface branch.** A trustworthy fixture needs a converted Go method set — extension methods in the receiver's own assembly — and **GolibTests does not reference the generator** (verified: no analyzer reference; the `[GoType]` attributes elsewhere in that project are inert metadata). Hand-writing an approximation would guard the approximation. **That half is exercised by the two corpus rows, which is section 3.**
+
+## ⚠ **3. PREDICTIONS, BEFORE THE RUN**
+
+**Both rows now hinge on the SAME unguarded arm** — `AdapterBinder` binding a `ж<T>` to a Go interface it satisfies through `[GoRecv]` method-set extension methods. That is not a resemblance this time; it is the same call. **So they must agree, and disagreement is the most interesting outcome available.**
+
+**`TestFinalizerType`** — the six shapes, and only two ever needed a non-reference conversion:
+
+```
+  idx 0  *int      + func(*int)     identity        bound before, binds now
+  idx 1  Tintptr   + func(Tintptr)  identity        bound before, binds now
+  idx 2  Tintptr   + func(*int)     WRAPPER->box    THE ROW -- arm 1 asserts it
+  idx 3  *Tint     + func(*Tint)    identity        binds
+  idx 4  *Tint     + func(Tinter)   ADAPTER SHELL   the unguarded arm
+  idx 5  *int      + func(any)[4]int64  reference   binds
+```
+
+⚠ **I predict it moves past index 2, and PASSES if the adapter arm binds.** If the adapter arm does NOT bind, **it stops at index 4** — and ⚠ **it will stop LOUDLY, not hang**: `SetFinalizer` now rejects at registration with Go's text, so the failure is a thrown `runtime.SetFinalizer: cannot pass ... to finalizer ...`, not another consumed deadline. **That change of failure MODE is itself a result** and I want it read even if the row still fails.
+
+**Falsifiers.** Stopping at index 2 or 3 ⇒ the pointer arm does not do what arm 1 says it does, and arm 1 should have caught it — **read the arms before the row**. Stopping at index 5 ⇒ something in the non-void-returning `any` shape, which this change does not touch: a NEW finding, not this one. **HANGING anywhere ⇒ part (c) did not run**, because after it no unbindable pair can reach dispatch.
+
+**`TestFinalizerRegisterABI/Interface`** — object `*TintPointer`, parameter `Tinter`, and `func (*TintPointer) m() {}` is at `abi_test.go:44`, so Go's rule is satisfied structurally. ⚠ **I predict `got -1, want -2` becomes a PASS**, through that same adapter arm.
+
+**Falsifier, and it is sharp:** if the adapter arm cannot bind, this row **no longer reads `got -1, want -2` at all** — it fails EARLIER, at `SetFinalizer`, with Go's rejection text. ⚠ **So `got -1, want -2` surviving unchanged would falsify my whole account**, since it would mean the binding succeeded and the wrong finalizer still ran.
+
+⚠ **AND THE CROSS-CHECK: if `TestFinalizerType` stops at index 4 while `/Interface` PASSES (or the reverse), the single-mechanism story is WRONG** — those two are the same call on different types, and only one thing can be true.
+
+## **4. FOR i9 — THE COUNTS MOVE, AND BY HOW MUCH**
+
+Seven new `[TestMethod]`s in a file in **no `Compile Remove` group**, so it runs on every flavour. Against your last reading:
+
+```
+                     you measured        predicted, if all 7 pass
+  Release+TC0        708 / 3 / 6         715 / 3 / 6
+  Debug              705 / 3 / 9         712 / 3 / 9
+  skip delta                   3                       3   (unchanged)
+```
+
+**The declared count moves by 7 as well**, so a Total-against-declared check should still close. **If it does not, read that before reading the rows.**
+
+-- C1
