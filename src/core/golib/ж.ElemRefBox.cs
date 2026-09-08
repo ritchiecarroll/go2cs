@@ -87,6 +87,7 @@ public sealed class ElemRefBox<T> : ж<T>
         // The box only — the collection is the caller's, already charged when it was created.
         // Leaf-ctor counting per the B1 split — same charge as before it.
         AllocationCounter.Count();
+        ElementIndexProbe.Ctor(m_index);
     }
 
     // The CONCRETE-header constructors (builtin's `Ꮡ(slice<T>, i)` / `Ꮡ(array<T>, i)` overloads,
@@ -115,6 +116,7 @@ public sealed class ElemRefBox<T> : ж<T>
         }
 
         AllocationCounter.Count();
+        ElementIndexProbe.Ctor(m_index);
     }
 
     internal ElemRefBox(array<T> array, int index)
@@ -131,6 +133,7 @@ public sealed class ElemRefBox<T> : ж<T>
         }
 
         AllocationCounter.Count();
+        ElementIndexProbe.Ctor(m_index);
     }
 
     /// <inheritdoc/>
@@ -186,6 +189,7 @@ public sealed class ElemRefBox<T> : ж<T>
                 return addr;
 
             (object storage, nint element) = CanonicalPair();
+            ElementIndexProbe.Token(element);
             return unchecked(AllocationBase(RuntimeHelpers.GetHashCode(storage)) + (nuint)(uint)element);
         }
     }
