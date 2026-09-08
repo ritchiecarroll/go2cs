@@ -276,40 +276,31 @@ public class Q44RegistryCensusControlTests
         // initializer ran before any test in this assembly, so if the start block works at all its
         // line is already on disk and its block is the FIRST one in the file.
         //
-        // BOTH candidate paths are checked rather than just OutputPath, because OutputPath re-reads
-        // GO2CS_Q44_CENSUS_FILE at call time and sibling controls in this class set and restore it --
-        // a control whose verdict depends on class ORDER is the failure this file already carries a
-        // lesson about.
-        string[] candidates =
-        {
-            Q44RegistryCensus.OutputPath,
-            System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"q44-census-{Environment.ProcessId}.txt"),
-        };
+        // ⚠ THE PATH IS READ FROM THE INSTRUMENT, NOT GUESSED -- and the first version of this guard
+        // guessed. It tried OutputPath and then the temp default, which is blind in one direction:
+        // OutputPath re-reads GO2CS_Q44_CENSUS_FILE at CALL time while the block was written at
+        // MODULE INIT, so with the variable set at init and unset by the time this runs, the block
+        // sits at the configured path and BOTH candidates name the temp default. Measured
+        // out-of-process: in that configuration the temp default does not exist at all, so the guard
+        // would have reported the block missing when it had been written correctly. Recording the
+        // path in golib removes the guess and the blind direction together, and makes this assertion
+        // independent of class order and of the environment.
+        string path = Q44RegistryCensus.StartBlockPath;
 
-        string found = null;
-        string[] lines = null;
+        Assert.IsNotNull(path,
+            "golib recorded no StartBlockPath -- the arm-time block was not written, so a " +
+            "zero-conversion row is still indistinguishable from an unarmed one");
 
-        foreach (string candidate in candidates)
-        {
-            if (!System.IO.File.Exists(candidate))
-                continue;
+        Assert.IsTrue(System.IO.File.Exists(path),
+            $"golib recorded StartBlockPath '{path}' but no file is there -- a remembered string is not " +
+            "a written census, and an unwritable directory makes the row unmeasurable rather than clean");
 
-            string[] read = System.IO.File.ReadAllLines(candidate);
-
-            if (Array.FindIndex(read, static l => l.StartsWith("Q44CENSUS-START ", StringComparison.Ordinal)) < 0)
-                continue;
-
-            found = candidate;
-            lines = read;
-            break;
-        }
-
-        Assert.IsNotNull(found,
-            "no census file carrying a Q44CENSUS-START line exists for this process -- the arm-time block " +
-            "did not get written, so a zero-conversion row is still indistinguishable from an unarmed one. " +
-            "Looked at: " + string.Join(", ", candidates));
+        string[] lines = System.IO.File.ReadAllLines(path);
 
         int start = Array.FindIndex(lines, static l => l.StartsWith("Q44CENSUS-START ", StringComparison.Ordinal));
+
+        Assert.IsTrue(start >= 0,
+            $"the file at the recorded StartBlockPath '{path}' carries no Q44CENSUS-START line");
         int firstTotals = Array.FindIndex(lines, static l => l.StartsWith("Q44CENSUS", StringComparison.Ordinal)
                                                           && l.Contains(" conversions=", StringComparison.Ordinal));
 

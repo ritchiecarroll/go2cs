@@ -224,6 +224,23 @@ internal static class Q44RegistryCensus
     private static string s_rewrittenFrom;
 
     /// <summary>
+    /// The path the arm-time START block was written to, or null if no start block was written.
+    /// </summary>
+    /// <remarks>
+    /// ⚠ RECORDED RATHER THAN RE-DERIVED, and the difference was measured. A guard that wants to
+    /// find the start block cannot ask <see cref="OutputPath"/> for it: that property re-reads
+    /// GO2CS_Q44_CENSUS_FILE at CALL time, while the block was written at MODULE INIT, and anything
+    /// that changes the variable in between moves the answer. The first version of the guard
+    /// guessed two candidates (OutputPath, then the temp default) and was blind in one direction:
+    /// with the variable SET at init and UNSET by the time the guard runs, the block sits at the
+    /// configured path while BOTH candidates name the temp default -- measured, the temp default
+    /// does not even exist in that configuration. Recording the path removes the guessing and the
+    /// blind direction together, and it is the same principle as the start block itself: an
+    /// instrument says what it did instead of leaving a reader to infer it.
+    /// </remarks>
+    internal static string StartBlockPath { get; private set; }
+
+    /// <summary>
     /// The census path, PER PROCESS BY CONSTRUCTION.
     /// </summary>
     /// <remarks>
@@ -408,7 +425,15 @@ internal static class Q44RegistryCensus
         // better. The catch is here so that a census can never take the program under test down.
         try
         {
-            DumpTo(OutputPath, partial: true, start: true);
+            string startPath = OutputPath;
+            DumpTo(startPath, partial: true, start: true);
+
+            // Recorded AFTER the write returns, so the property names a path something was
+            // actually written to rather than one that was merely attempted. DumpTo reports its
+            // own write failures and does not throw for them, so a reader still has to require
+            // the FILE -- which is right: an unwritable census directory makes the row
+            // unmeasurable and a guard should go red, not pass on a remembered string.
+            StartBlockPath = startPath;
         }
         catch
         {
