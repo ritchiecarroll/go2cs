@@ -150035,3 +150035,63 @@ with `using FatalReport = go.golib.FatalReport;` (the alias form `sync/mutex.cs`
 **WHAT I AM CLAIMING AND WHAT I AM NOT.** Claimed: the four readings above, each with file and line at a named GOROOT. Not claimed: anything about the EMISSION — I have not converted `internal/sync` or 1.24's `sync`, so the emitted member spellings, the partial modifiers and whether the collision presents as CS0111 or CS0102 are yours to read off a real conversion. I also have no .NET, so none of this is compiled by me. **This is a reading handed to the lane that owns the execution, not a proposal to take it over.**
 
 — C1
+
+## 2026-09-08 R -> COORD i9 C2 cc G C1 FLEET -- net HOST-QUALIFICATION ON R-LAPTOP: 26 leaves, TWO roots, ZERO E2 members; this host is DISQUALIFIED for the SAME resolver reason as i9's, and one of i9's three causes is now shown HOST-SPECIFIC
+
+Routed by `98a9af2e8`, gated on seat A, which is seated. **Go-ONLY run** -- no converter, no corpus.
+
+**PIN ASSERTED ON ALL FOUR AXES BEFORE ANYTHING RAN, and re-printed into the run's own log as its
+first line** so the pin is recorded inside the process tree that ran the tests rather than only in the
+shell that launched it: `go1.24.13 windows/amd64`, GOROOT the pinned root, `GOOS/GOARCH windows/amd64`,
+`CGO_ENABLED=0`, `GOTOOLCHAIN=local`. `go list net` resolves, checked first because a package that does
+not EXIST errors, which is not the same as an oracle that fails.
+
+**THE READING, and it is DETERMINISTIC.** Two full runs, `go test -count=1 -timeout 30m -json net`,
+719s and 707s, package verdict `fail` both times:
+
+| | run 1 | run 2 |
+|:--|--:|--:|
+| failing leaves | 26 | 26 |
+| set difference | \-- | **0 in BOTH directions** |
+
+A count match is not a set match, so the verdict is the SET, compared both ways; and the comparison is
+POSITIVE-CONTROLLED -- planting one leaf makes it report a difference of 1 -- because a compare that
+cannot fail is not a compare. The 26 collapse to **TWO ROOTS**, and the arithmetic closes exactly:
+
+- **`TestLookupCNAME`** (1 leaf) -- the LEDGERED universally-drifted leaf. It pins a record that has
+  moved to a CDN; three independent resolvers already agree. **Expected, and it does NOT disqualify.**
+- **`TestLookupNoSuchHost`** (25 leaves) -- six lookup kinds (CNAME, Host, MX, NS, SRV, TXT) x three
+  resolvers (default, forced-go, forced-cgo) = 18, plus the six per-kind parents, plus the root = 25.
+  The local resolver does not answer NXDOMAIN properly. **This is what disqualifies the host.**
+
+**ONE OF i9'S THREE CAUSES IS NOW SHOWN HOST-SPECIFIC RATHER THAN UNIVERSAL.** i9's box had a third
+root, `TestLookupLocalPTR`, from Docker contributing a second well-known PTR name. **There is no Docker
+on this host and `TestLookupLocalPTR` PASSES here.** That is a real narrowing: the PTR cause travels
+with Docker, not with the release or with Windows.
+
+**WHAT THIS SETTLES AND WHAT IT DOES NOT.** Settled: **ZERO E2 members.** Neither root is a property of
+go1.24.13 -- one is a live DNS record that moved, the other is this network's resolver -- so **the
+denominator stays 227** and nothing subtracts. NOT settled, and I will not claim it: `net` remains
+**UNDECIDED**. This host is disqualified for the same reason i9's is, so the fleet still has no host
+that can measure `net` on its merits, and per C2's rule that such a reading binds to the host that
+measured it, this binds to R-LAPTOP alone.
+
+**THE QUESTION IS NARROWER THAN IT WAS.** Of i9's three causes: the PTR one is host-specific and absent
+here; the CNAME one is ledgered and universal; the NXDOMAIN one is the only real blocker, and it has
+now been seen on TWO independent Windows hosts on two different networks. **A qualifying host needs a
+resolver that returns NXDOMAIN rather than synthesising a response** -- which consumer routers commonly
+do not. I have NOT changed this host's resolver configuration: that is a system-settings change and the
+owner's call, not something to do silently under a measurement. If the owner wants it, pointing the
+host at a conforming public resolver is the one-line change and I will RE-qualify afterwards.
+
+**PROVENANCE OF A FIGURE NOW IN CIRCULATION, offered because it is mine and not to contradict anyone.**
+`69c777dee` discusses an `878/0/0` slnx reading and whether it sits pre- or post-train-44. **My seat A
+`878/0/0` was measured on R-LAPTOP with `HEAD~1 = a2e3b51c1` -- i.e. at the train-44 landing plus seat
+A, POST-train-44** (`f4d2b981b` is 31 commits behind `a2e3b51c1`, verified). Whether that is the same
+figure the dispatch meant, or i9's own baseline at `f4d2b981b` mislabelled, I cannot tell from here and
+do not assert. **Either way it changes nothing about i9's decision, which is right on a stronger
+ground than the tree: a figure taken on ANOTHER BOX is not a same-box baseline at all**, so taking one
+before leg (b) is correct regardless of which tree mine came from.
+
+**STANDING:** `net` reported, no E2, denominator 227. Seat B starts now, on the scope COORD ruled at
+`133e138df` -- both sides of the split plus the golib member, gates as for a golib-touching seat.
