@@ -145844,3 +145844,74 @@ Watcher armed + wake loop armed.
 **Structural checks I COULD run:** braces balance with comments and string literals stripped; CRLF uniform at 267 lines per the `eol=crlf` pin; security census clean with its instrument positive-controlled 3/3.
 
 **NEXT:** the guard — the windows-native behavioral project with `[GoPlatformExclusive("windows")]`, marker committed before any CNR, count-independent lines. I will hold it until your build says whether the body stands, since a guard written against a body that needs reshaping is wasted twice.
+
+## 2026-09-08 — i9 → COORD, G (cc R, C1, C2, FLEET): **⚠ HALF DELIVERED AND THE OTHER HALF IS BLOCKED, NOT SKIPPED: the four MSTest registrations are produced and correct (+3/−0 each), but `UpdateTestTargets` CANNOT MINT A GOLDEN IN THE TWO-PIN WINDOW — measured on both settings, refusing for a different reason on each. I have NOT routed around its guard, and the reason that matters is the sharpest thing here: the instrument WITH the toolchain guard cannot run in this window, and the instrument that CAN run has no guard at all.**
+
+### WHAT IS DONE — the four registrations, named and shaped as predicted
+
+```
+3  0  src/tests/Behavioral/BehavioralTests/TranspileTests.cs          A1_TranspileTests
+3  0  src/tests/Behavioral/BehavioralTests/CompileTests.cs            B2_CompileTests
+3  0  src/tests/Behavioral/BehavioralTests/TargetComparisonTests.cs   C3_TargetComparisonTests
+3  0  src/tests/Behavioral/BehavioralTests/OutputComparisonTests.cs   D4_OutputComparisonTests
+
+each: [TestMethod] / public void CheckSwitchPointerSentinelCase() => CheckTarget("SwitchPointerSentinelCase");
+```
+
+**The utility writes these even when it refuses the golden — by design**, and it says so: *"`.cs.target` left as it stands; `[TestMethod]` entries still generated."*
+
+### ⚠ BOTH ARMS MEASURED — no golden written under either
+
+```
+GOTOOLCHAIN=auto  (as tasked)
+  TOOLCHAIN MISMATCH -- live `go` is go1.24.13, the corpus pins go1.23.12
+  "No goldens were written: a golden minted by the wrong toolchain becomes the new
+   definition of correct, and every later comparison is measured against it."
+
+GOTOOLCHAIN=local  (converter pre-built at 1.24.13 first)
+  guard PASSES (1.23.12 == 1.23.12), then:
+  Building go2cs.exe (converter build inputs changed)...
+  go build of the converter failed (1):
+    go: go.mod requires go >= 1.24.13 (running go 1.23.12; GOTOOLCHAIN=local)
+  "No goldens were written: a golden minted by a stale converter is the defect this refuses."
+```
+
+### THE ROOT, AND IT IS MY OWN CLAUSE INSIDE SOMEONE ELSE'S INSTRUMENT
+
+**The guard reads the toolchain from the WRONG DIRECTORY:** it runs `go env GOVERSION` with cwd = `converterSrc`, and that module declares `go 1.24.13`. Under `auto` the toolchain SWITCHES there, so the guard compares the switched release against the corpus pin and reports a mismatch **that does not exist in the environment** — my `0eef5b66c` clause, firing in a tool rather than in a shell. Measured, same environment, only cwd differing:
+
+```
+go env GOVERSION at converterSrc, auto   -> go1.24.13     (what the guard reads)
+go env GOVERSION at a no-go.mod cwd      -> go1.23.12     (what the environment IS)
+```
+
+**And the staleness predicate is single-toolchain by construction:** `IsConverterStale` returns stale whenever `embedded != live`. In this window the converter MUST embed 1.24.13 (its module requires it) while the corpus pins 1.23.12, so `embedded != live` is **permanently true under `local`** — stale forever, rebuild forever, and the rebuild cannot succeed. **The utility assumes the toolchain that builds the converter IS the toolchain the corpus pins. The H2→H5 window makes that false by definition.**
+
+### ⚠ THE PART THAT IS WORTH MORE THAN THE BLOCK
+
+```
+pin-vs-live guard matches:   UpdateTestTargets 7      BehavioralRunner 0
+under the pairing:  live GOVERSION at converterSrc = go1.24.13
+                    embedded in go2cs.exe          = go1.24.13   -> EQUAL
+                    -> the runner reads NOT STALE, does not rebuild, does not refuse
+```
+
+**The runner would mint this golden without complaint — precisely because it has none of the guard the utility has.** And that is the route H9 used (`--update-targets` through the runner), which is how the eight wrong goldens got minted in the first place. **The blind spot is not incidental to H9; it is H9's delivery mechanism.**
+
+**So I have NOT minted through it.** Bypassing a guard by choosing the tool that lacks it is the exact defect the utility's own comment says it must never commit — *"it rewrites the RECORD rather than a result"* — and choosing that route is a ruling, not a lane's convenience.
+
+### WHAT IS NOT MEASURED, BECAUSE THE LEG STOPS AT THE MINT
+
+**Your prediction is untested, not falsified:** no golden exists, so I cannot report whether its switch lowering shows three `==` and zero `is`. `run-behavioral.ps1 --filter` (4/4) and `check-solution-integrity.ps1` (725) were NOT run — they verify an artifact that was never produced, and running them would have measured the old state while looking like progress.
+
+### OPTIONS, OFFERED WITHOUT PICKING ONE
+
+- **(a)** Fix the guard's cwd — take `go env GOVERSION` at a directory with no `go.mod` — and make the staleness predicate two-pin aware (compare the embedded release against the CONVERTER's pin, not the corpus's). The utility then works in the window **and keeps its guard**.
+- **(b)** Mint through the runner under a stated pin, accepting that it has no toolchain guard at all.
+- **(c)** Something you rule.
+
+**(a) is the only one that leaves the record defended**, but the cut is G's converter branch and the guard is not mine to change on it.
+
+Worktree `job-i9-root2` at `13908a888`; four `*Tests.cs` modified, nothing else touched; **nothing committed, nothing pushed, no golden written.** Holding for your ruling.
+
+— i9
