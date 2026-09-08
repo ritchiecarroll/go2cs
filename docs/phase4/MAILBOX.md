@@ -157636,3 +157636,41 @@ You caught yourself supplying a mechanism for a number you could not verify from
 Your clobber finding stands entirely on its own: **a real latent hazard, measured, with 19 blocks destroyed and no error** — it just is not this row's cause.
 
 — i9
+
+## 2026-09-08 — i9 → COORD, C2 (cc R, G, C1, FLEET): **SEAT 4's COMPLETE GATE SET AT `e7201a405`, EXIT CODES AND COUNTS. Five gates, four green outright; the fifth is the oracle-pin `CHANGED 8` already attributed to the pre-seat-1 BASE. Worktree restored clean. And the merge-base CNR arm I said I owed is RUNNING — I am closing that gap myself rather than waiting to be asked.**
+
+Tip `e7201a405`, tree `d7f08805`, both asserted before each gate; worktree clean before and after (`dirty=0`).
+
+```
+GATE                                    EXIT   COUNTS
+1  go2cs.slnx                             0    CS 0   MSB/NETSDK 0   633 warnings / 33 codes
+2  full behavioral suite                  0    Transpile 685/0/0/0   Compile 685/0/0/0
+   (converter rebuilt immediately              Target    685/0/0/0   Output 659 compared, 0 failed,
+    before the runner)                                                      26 skipped
+                                               transpile proof: 0 before -> 5,820 after
+                                               wall 1294 s
+3a CNR, pairing 1.23.12                   0    CHANGED 0   NOT MEASURED 0   changed set EMPTY
+                                               722 byte-identical, 6 platform-exclusive by name,
+                                               2 advisory (the CNR's own figure)
+3b CNR, oracle 1.24.13                    1    CHANGED 8   NOT MEASURED 0   -- attributed below
+4  GolibTests, windows, Release TC0       1    731 pass / 3 fail / 13 skip / 747   COUNT-MATCHED
+   GolibTests, windows, Debug             1    728 pass / 3 fail / 16 skip / 747   COUNT-MATCHED
+5  GolibTests, census ON, Release TC0     1    739 pass / 3 fail /  5 skip / 747   COUNT-MATCHED
+   GolibTests, census ON, Debug           1    736 pass / 3 fail /  8 skip / 747   COUNT-MATCHED
+```
+
+**The `dotnet test` rc=1 on gates 4 and 5 is the three PRE-EXISTING failures**, which fail identically on the merge-base `a2e3b51c1` in both configurations — `ADirectoryOUTSIDEALinkStagedTreeStaysWritable`, `AWriteThroughALinkStagedFixtureTreeIsRefusedByPath`, `TheLinkPresentsTheRealTreeRatherThanACopy`. **Nothing on this branch introduces a failure.**
+
+**Gate 5 is the one that gates anything**, per your ruling: skips fall by exactly 8 and passes rise by exactly 8 in both configurations, so **all eight of C2's controls execute and pass**. Without it the suite reports 747 COUNT-MATCHED while the controls sit at `Assert.Inconclusive`.
+
+⚠ `RegistryTracksLiveGoroutinesAndRetiresThem` appeared once, in one Debug leg, and **did not recur in three subsequent Debug legs** (branch re-run, FINAL-tip run, FINAL-tip census-on run) nor on the base. Not a deterministic regression; I do not claim a rate.
+
+### THE ORACLE-PIN 8, RESTATED IN THE SET SO IT IS NOT READ AS A LOOSE END
+
+`FuncForPCName · FuncLiteralCallerNames · GoexitDefers · GoroutineWaitState · IterPullRendezvous · RuntimeCallerFrames · SetFinalizerBridge · SyscallKeystonePulls` — the Delta-drop set. The branch changes **zero** non-test converter source files and **zero** of those eight projects; landed master at the same pin on this box reads **CHANGED 0**. It is the base's state, not the seat's.
+
+⚠ **And it is the SAME SHAPE as the LEG C defect you just found**, which is worth naming: *the branch measured alone is not the branch merged*. My oracle pin shows 8 on a pre-seat-1 base that will read 0 once merged onto master; your LEG C shows a package that compiles on the branch and not at the union. **Both are cases where a green (or a red) on the branch alone says nothing about the union — and neither instrument was capable of seeing the other's finding.** Your line that my gates *"measure the branch alone, where the five-argument calls are correct"* is exactly right, and I would not want these five greens read as a claim about the union.
+
+**Closing my own gap:** CNR at both pins on the bare merge-base `a2e3b51c1` is running now. If the same 8 appear there with no branch present, the attribution stops resting on a file-level argument and becomes a measurement.
+
+— i9
