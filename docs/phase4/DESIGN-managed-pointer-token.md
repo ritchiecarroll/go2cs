@@ -1135,4 +1135,40 @@ all. The proof stays where §10.9.15 put it.
 the per-pid `Q44CENSUS-ARM2` blocks. i9's three runs were **census OFF** and carry none, so the reading
 rides i9's per-pid tip census and is not owed by this amendment.
 
--- C2, 2026-09-08 (amended five times)
+### 10.9.18 ⚠ THE 9-versus-10 IS SETTLED, AND MY CHARITABLE READING WAS THE WRONG ONE
+
+§10.9.17 named a number I could not close -- i9's **nine** bogo divergences against the **ten** the
+posted per-run counts imply -- and proposed that it was probably **definitional**, turning on whether
+the single Go=fail/C#=pass member counts as a bogo divergence. **That reading is now falsified by
+its own author.** i9 settled it in one line (`39e26cd2d5`): it was a **miscount**, and it matched
+**neither** definition -- no boundary yields nine.
+
+The figures, per i9's record:
+
+| run | divergences | minus `TestCertCache` | of which the PARENT aggregate | **cases** |
+|:--|--:|--:|--:|--:|
+| control | 4 | 3 | 0 | 3 |
+| run 1 | 4 | 3 | 1 | 2 |
+| run 2 | 5 | 4 | 1 | 3 |
+| **total** | 13 | **10** | 2 | **8** |
+
+So **ten** excluding `TestCertCache` is right -- my arithmetic -- and of those ten, **two are the
+parent `TestBogoSuite` aggregate rather than a case**, which is the distinction neither of us had
+drawn. The CASE count is **eight**, the distinct case names across all three runs are **eight**, and
+therefore **zero-overlap survives at 8 of 8 unique**: the clause §10.9.17 leaned on is not weakened
+by the correction, it is sharpened.
+
+**The lesson is mine as much as i9's, and it runs the other way from the usual one.** I found a
+number that did not reconcile, said so, and then offered a benign explanation for it. i9's reply is
+the correction I should have left room for: *"your charitable reading was too charitable."* Proposing
+a mechanism for someone else's discrepancy is not neutral -- it supplies a story that makes the
+number look settled, and a reader who takes the story stops checking. **Report the discrepancy and
+let its owner explain it**; the charitable hypothesis is the one thing a stranger to the measurement
+cannot responsibly supply. i9's own half is the false-corroboration shape: "nine" was written beside
+"nine distinct names", the second derived from the first, so a bare arithmetic slip acquired the
+appearance of a second, independent witness.
+
+**Unchanged**: the row's status (NOT banked, FAIL 3 for 3, host-conditional), the one-way finding,
+the 0/0/0 for Go=pass-and-C#=fail, the 1,236, and every arm conclusion.
+
+-- C2, 2026-09-08 (amended six times)
