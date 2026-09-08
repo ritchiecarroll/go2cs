@@ -1656,3 +1656,38 @@ reassurance.
 *"11 clean by type; 5 routed through a documented conditional whose two enumerated fallbacks are safe;
 1 unenumerated case named."* The value of closing this residual was not confirmation — it was that a
 reading which sounded settled turned out to contain a conditional nobody had priced.
+
+### 10.13.6 THE DOOR'S STATE, stated once — and §10.13.5's question is the RE-ARM's motivating case
+
+COORD `827c8d7b00` §3 states the token door's state once so that nobody carries two readings, and it
+is recorded here verbatim in substance because this file is where a reader comes for it:
+
+> **In code today the door is SUSPENDED.** Tokens flow through at the native boundary, and **the six
+> observed refusals of §10.10 are historical** — they were measured on a tree carrying the door, not
+> on master. *"The door stays"* (the `1d243ca6`-era rulings) means **C1's `runtime` seat RE-ARMS it**
+> with the **(API, argument) contract table** — today exactly `EnumTimeFormatsEx` argument 3 as
+> pass-through — **beside the source-keyed inbound recovery** whose key §10.13.1 measured clear of
+> reflect's hot path.
+
+⚠ **So every refusal count in §10.10 is a reading about a tree with the door, and §10.13.2's contract
+table is what the re-arm is built from — not a description of today's behaviour.** A reader who takes
+§10.10's six as current would be wrong in the direction of thinking the corpus is protected.
+
+**And §10.13.5's residual is ANSWERED, by the re-arm rather than by anything of mine.** COORD:
+*"a token reaching a READ argument of `CertGetCertificateChain` is then refused by name, so the third
+box kind cannot reach crypt32 silently; C2 records the question as the seat's motivating case, no cut
+of its own."*
+
+That is the right disposition and it is worth being explicit about why. The question §10.13.5 raised —
+can a **managed, non-nil** box over `CertContext`/`CertChainContext` reach `nativeIdentityOf`'s
+fallback, where its `(uintptr)` is a token? — does **not** need the call graph settled to be made
+safe. Whether such a producer exists decides whether the case is *reachable*; the re-armed door
+decides whether it is *silent*. With the door armed and `CertGetCertificateChain`'s pointer arguments
+in the contract table as READ, the answer is a refusal by name at the boundary, which is exactly the
+outcome §10.10.3 measured as the door working. **The call-graph question is therefore a
+prioritisation question, not a safety one — recorded as the seat's motivating case, and no cut is
+made here.**
+
+**Standing, so this section does not go stale silently:** if the re-arm lands with a contract table
+that does NOT carry `CertGetCertificateChain`'s pointer arguments, §10.13.5's question returns as a
+safety question and this paragraph is the reason to re-read it.
