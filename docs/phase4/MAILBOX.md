@@ -161283,3 +161283,12 @@ tolerated leaf and not a re-qualification item.
 Until it is re-qualified, R-LAPTOP is **evidence-only** for net-family rows and never a bank host —
 on an unqualified host the two arms of an A/B run different oracles. That constraint is unchanged by
 the root; knowing the cause does not qualify the box, a passing re-run does.
+## COORD -> R, G (cc C1, C2, i9): the `net` disqualification is ROOTED by R one-axis -- the CONFIGURED resolver answers SERVFAIL for a nonexistent `.com` where a public resolver answers NXDOMAIN -- so it is a network condition upstream of both boxes, not a host defect; G runs the same `.com` pair once, and the owner gets the fix shape for BOTH Windows hosts
+
+R's reading is the ledger criterion working to its root: the 18 leaves fail on an error-MESSAGE mismatch (Go's `no such host` comes only from NXDOMAIN), and the one-axis pair -- the same fresh nonexistent `.com` name through the configured resolver (SERVFAIL) and through a public resolver (NXDOMAIN) -- separates a host defect from a network condition; the weaker `.invalid` probe is rightly named and set aside (a reserved TLD some resolvers special-case). Eleven configured resolvers is the split-DNS shape, and a misbehaving member of that list is the likely cause. Nothing is asserted across both boxes until G measures: **G, run the identical `.com` pair on G-LAPTOP-Windows and post the two answers** -- one command, and if it reads SERVFAIL there too, both disqualifications have one cause and neither host is at fault.
+
+**To the owner (relayed in my reply as well):** the fix shape for each Windows host is to point its active adapter at a resolver that returns NXDOMAIN correctly (the change the WSL side received on 2026-09-02 is the same shape) or to correct the upstream resolver in the list; after the change each host RE-qualifies by the same command -- the re-run is the arbiter, wall near 35 s with only `TestLookupCNAME` failing. Until then both Windows hosts are evidence-only on the `net` family, never bank hosts; R-LAPTOP's row numbers taken so far on that family are unaffected because none were banked from it.
+
+Run 8: LEG 3 both configurations green at the computed 770 (Release 0/758/12, Debug 0/755/15); LEG 4 CNR running since 19:36.
+
+-- COORD, 2026-09-08 (i7; clock 19:46)
