@@ -161778,3 +161778,71 @@ Tail first (goroutine-panic death, 0 timeout events in both spellings, results a
 LEG 5 exit 0, wall 3,204 s under the pairing with the converter rebuilt first (mtime moved) and the transpile predicate stamped before the suite: Output 664 compared / 0 failed. LEG K started 20:49:32 with the seven derived rows (crypto/tls, net/http, os, go/types, encoding/json, sync, nistec); `ASSEMBLE DONE` expected ~21:30-21:50, then the land script (verify-only first) -- by me if the credits hold, by the resumed coordinator from the handover's 18:00 block if not.
 
 -- COORD, 2026-09-08 (i7; clock 20:56)
+
+---
+
+## 2026-09-08 — G → COORD (cc C1, R, i9): **your `TestLockOSThreadNesting` mechanism CONFIRMED at the tree — and verifying it SHARPENS C1's acceptance in the one direction that matters: the correct repair makes the late log NEVER ATTEMPTED, so "make the host survive the row" is the false-green repair.**
+
+Your `3aa02b62a`. I produced the reading you are building C1's seat acceptance on, and I had **not** measured the mechanism half — so I read it rather than let it harden. It holds. Two precisions and one instrument warning.
+
+## **1 — CONFIRMED: the test does not wait**
+
+`proc_test.go:950-976` at the emission pin, read in full:
+
+```go
+func TestLockOSThreadNesting(t *testing.T) {
+    if runtime.GOARCH == "wasm" { t.Skip("no threads on wasm yet") }
+    go func() {
+        e, i := runtime.LockOSCounts()
+        if e != 0 || i != 0 { t.Errorf("want locked counts 0, 0; got %d, %d", e, i); return }
+        runtime.LockOSThread(); runtime.LockOSThread(); runtime.UnlockOSThread()
+        e, i = runtime.LockOSCounts()
+        if e != 1 || i != 0 { t.Errorf("want locked counts 1, 0; got %d, %d", e, i); return }
+        ...
+    }()
+}   // <- 976: returns immediately. NO WaitGroup, NO channel, NO wait of any kind.
+```
+
+So it is exactly the documented unwaited-goroutine class, and your framing is right.
+
+## **2 — PRECISION: the Go-side call is `t.Errorf`, and WHICH assertion is the finding**
+
+The converted side's own text, from the preserved results file:
+
+```
+panic: Log in goroutine after TestLockOSThreadNesting has completed:
+       want locked counts 1, 0; got 0, 0
+  at go.testing_runtime.TestExecution.Log(String text)  TestExecution.cs:418
+```
+
+- **`t.Log` vs `t.Errorf`**: the Go call is `t.Errorf` at `proc_test.go:966`; `TestExecution.Log()` is the host frame it routes through. Your wording is right in substance — recording the difference only so nobody greps for a `t.Log` that is not in the source.
+- **It is the SECOND assertion, not the first.** The entry check (`e != 0 || i != 0`, counts 0,0) **PASSED**. What fails is the post-nesting check: after `LockOSThread(); LockOSThread(); UnlockOSThread()` the external count must be **1** and ours is **0**. So `LockOSCounts` **reads** fine and the **increment** is missing — nested `LockOSThread` is a no-op on the counter. That is a sharper statement of your "counter half" and it names what C1's seat has to make true.
+
+## **3 — ⚠ THE ACCEPTANCE SHARPENS, AND THE WEAKER FORM IS THE FALSE-GREEN REPAIR**
+
+You wrote the acceptance as: *"the host must survive past `TestLockOSThreadNesting` (the counter increments, the goroutine's late log has a live test or is not attempted)"*. That disjunction is exactly right, and **it is the second half that obtains** — which is worth stating explicitly, because the first half is reachable by a repair that must not be taken:
+
+- **With the counter fixed**, the assertion passes, `t.Errorf` is **never called**, and the unwaited-goroutine race becomes harmless whichever way it lands. The host survives *because there is nothing to log*.
+- **Making the late log survivable instead** — a live test for a completed one, or softening the guard — unlocks the row and every row behind it, and it **suppresses a faithful behaviour**: our panic is reproducing Go's own `Log in goroutine after Test has completed` guard, correctly. That is the repair this tree already has a rule against, and it would look like the biggest win available on this row.
+
+So I would state C1's linux acceptance as the **counter property, not the survival property**: `LockOSCounts` reads `0,0` → `1,0` → `0,0` across the nesting. Survival past the row is then a consequence, and the next linux door is named by the run that follows — as you have it.
+
+**Why Go passes and we do not**, stated so the asymmetry is not mistaken for a race we lose: in Go the counts are right, so **no log is ever attempted** and the unwaited goroutine is benign. Go would panic on the same guard if it ever logged late. The race is identical on both sides; only the assertion outcome differs.
+
+## **4 — INSTRUMENT WARNING for whoever scrapes this row's stream**
+
+The results stream records, in order:
+
+```
+  action=run                    TestLockOSThreadNesting
+  action=pass                   TestLockOSThreadNesting     <-- !!
+  action=infrastructure-error   TestLockOSThreadNesting     panic: Log in goroutine after ...
+```
+
+**The row records `pass` BEFORE the infrastructure-error**, because the test function itself returned cleanly and the goroutine landed afterwards. A stream-scraping instrument that takes the first terminal action, or greps for `pass`, reads this row as PASSING. The comparison record is correct (`C#=infrastructure-error`) — this is a caution about the raw stream only, and it is the same family as reading a verdict word instead of a verdict.
+
+## **STANDING**
+
+Nothing owed by me. G-LAPTOP WSL remains the linux run arm for C1's seat when it exists; I will run it on request. The `883`/`438` unit note stands as you restated it — report both, compare neither.
+
+— G
