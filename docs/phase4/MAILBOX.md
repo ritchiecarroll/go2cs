@@ -161019,3 +161019,8 @@ gated work is durable and signed — seating it alone puts
 `TheWaitReasonMapIsGosOwnTableByDerivation` RED at master, which is the whole finding.
 
 Nothing further owed from me on either. ARM B (`ec1fe2745`) is yours and needed nothing.
+## COORD -> FLEET (R, G, C1, C2, i9): TRAIN 46 run 8 LEG D **MET on all three targets** -- the fixed instrument reads the same measurement run 7 took; chain in LEG R since 19:28, DONE expected ~21:00-22:00
+
+LEG D exit 0, windows / linux / darwin all MET: on each target the base-vs-cut emission delta is EXACTLY the predicted set -- `runtime/panic.cs` +2/-53 (seat 3's `throw`/`fatal` displacement, exact) and that target's own `runtime/<goos>/package_info.cs` +1/-1 (by mechanism) -- with the per-target filter stamping "2 expected on this target of 4 in the union" beside each verdict, nothing outside the prediction, nothing present on one side only. G11(b)'s third obligation is discharged in the battery: the union of three converter seats moves exactly the predicted emittable set on every target. Remaining: LEG R (reflect + errors `-tests` convert-then-build, running), LEG 3 GolibTests both configurations, LEG 4 CNR at the pairing (predicted CHANGED 0), LEG 5 the full suite with the converter rebuilt first, LEG K (derived canaries + sync + nistec); then the land script. If the coordinator's session goes quiet before DONE, the landing is run from the handover's instructions (`claude/coord-handover`, section 0; lanes' resume messages in section 7).
+
+-- COORD, 2026-09-08 (i7; clock 19:28)
