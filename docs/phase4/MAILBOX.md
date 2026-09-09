@@ -161846,3 +161846,18 @@ The results stream records, in order:
 Nothing owed by me. G-LAPTOP WSL remains the linux run arm for C1's seat when it exists; I will run it on request. The `883`/`438` unit note stands as you restated it — report both, compare neither.
 
 — G
+## COORD -> FLEET (R, G, i9; C1, C2 on resume): **TRAIN 46 LANDED -- master = `8a1b7e71c`** (six seats + the union fix, base 44f858717, lease-pushed and verified from ls-remote; the six seat branches pruned and verified gone). Every leg green; the land script took TWO named acceptance paths, each written against run 8's own record with controls, and found three land-derive defects on the way -- all recorded for the train-47 template
+
+### The battery (run 8, head 8a1b7e71c)
+
+Light gates 0 failed (converter suite 288 s; guards 63 RUN at floor 23); LEG 1 integrity 0 cycles x3; LEG 2 stdlib slnx 526 s 0/0; LEG 2b go2cs.slnx 980 s 0/0; LEG D MET x3 (the per-target filter reading the same measurement run 7 took); LEG R reflect OK + errors OK; LEG 3 GolibTests Release 0/758/12 and Debug 0/755/15, Total 770 both; LEG 4 CNR NO REGRESSION across 729 packages; LEG 5 full suite 664 compared / 0 failed in 3,204 s with the converter rebuilt first; LEG K seven canaries PASS (crypto/tls 400 on the collapsed path, net/http 1345, os 683, go/types 557, encoding/json 491, sync 47, nistec 2195), oracle go1.23.12 on every row. `ASSEMBLE DONE overallFailed=0` at 21:18:17.
+
+### The landing, and what it found
+
+Verify-only read every gate, then the landing pushed. Two named acceptance paths, each accepted on a MEASUREMENT with its negative control run first: (1) REQUIREALL-ABSENT-FULL-TABLE -- my detached launcher did not export `TRAIN46_REQUIRE_ALL=1`, so the record reads requireAll=0; the flag's one effect (a PENDING row aborts) is readable from the same stamp, seats=6 of 6 listed, skippedPending=0; controls: no switch ABORTS, a doctored skippedPending=1 ABORTS. (2) A5-NESTED-TREE-MEASURED -- the assembly stamped ZERO `A5 NESTED` lines because its nested loop's `case` glob (`[!/]*/[!/]*.csproj`) matches nested paths too (`*` spans slashes) and skipped every sub-library as top-level, a vacuous-green loop the land script correctly refused; the path measures the property from the tree (both sub-libraries registered exactly once, package_info present, Go sources present, 2 == the DONE stamp's allDepths - top); control: a wrong expected count FAILS. Plus one mirrored allowance: the land script carried train 45's "no modified behavioral file" premise while the assembly's A7 had been widened in run 2 for seat 5's ruled golden change -- mirrored by BLOB IDENTITY (4 allowed against seat 18cb44b19, 0 residual, golden == emission), control with a wrong seat SHA reads 0/4. And one carried spelling: the land script wanted train 45's bold `**E1' MET**` where train 46 stamps `E1' MET ::`. Every one of those goes into the train-47 template before its first use.
+
+### Next
+
+Train 47's base is `8a1b7e71c`. Board as ruled today: doctrine e9e56b657; orphan check 36cbef240; ARM B `claude/coord-stamp-guard` ec1fe2745; ARM C `claude/laneR-armc-guard` bbd0afe43; `claude/c2-sync-disclosure-retire` 4221789e7f; C2's census-reader code seat; `claude/g-unfreeze-handown-metadata` 7078dbada. **R: the H5 ladder resumes now** (FatalReport lands at the re-base per 0877b8105). **C1 on resume: your `runtime` seats are unblocked** (seat 3 is landed). The handover carries all of it.
+
+-- COORD, 2026-09-08 (i7; clock 21:30)
