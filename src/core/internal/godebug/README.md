@@ -19,7 +19,7 @@ In typical usage, code should declare a Setting as a global and then call Value 
 		...
 	}
 
-Each time a non-default setting causes a change in program behavior, code must call \[Setting.IncNonDefault] to increment a counter that can be reported by [runtime/metrics.Read](https://pkg.go.dev/runtime/metrics@go1.23.1#Read). The call must only happen when the program executes a non-default behavior, not just when the setting is set to a non-default value. This is occasionally (but very rarely) infeasible, in which case the internal/godebugs table entry must set Opaque: true, and the documentation in doc/godebug.md should mention that metrics are unavailable.
+Each time a non-default setting causes a change in program behavior, code must call \[Setting.IncNonDefault] to increment a counter that can be reported by [runtime/metrics.Read](https://pkg.go.dev/runtime/metrics@go1.23.12#Read). The call must only happen when the program executes a non-default behavior, not just when the setting is set to a non-default value. This is occasionally (but very rarely) infeasible, in which case the internal/godebugs table entry must set Opaque: true, and the documentation in doc/godebug.md should mention that metrics are unavailable.
 
 Conventionally, the global variable representing a godebug is named for the godebug itself, with no case changes:
 

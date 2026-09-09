@@ -28,7 +28,9 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(OutDir)'==''">
+  <!-- Build outputs are copied to $(OutDir), so this default must also defer to an explicit
+       $(BaseOutputPath); otherwise that redirection silently never takes effect. -->
+  <PropertyGroup Condition="'$(OutDir)'=='' AND '$(BaseOutputPath)'==''">
     <OutDir>bin/$(Configuration)/$(TargetFramework)/</OutDir>
   </PropertyGroup>
 
@@ -125,8 +127,20 @@
   <ItemGroup>
     <!-- Remove all .cs files, including those in sub-folders -->
     <Compile Remove="**/*.cs" />
+    <!-- package_info.cs is compiled FIRST, ahead of the globs below. Roslyn orders module
+         initializers by compilation ITEM order, and the forced-init import hooks are module
+         initializers, so this is what makes "every import hook precedes every one of the package's
+         own inits" a deterministic guarantee rather than the alphabetical accident a bare glob
+         leaves it as (docs/phase4/DESIGN-import-hook-relocation.md S3).
+
+         Exists()-guarded because ONE shape has to serve every layout: a flat package holds the file
+         at its root, an L3 package holds it in the per-GOOS folder (the companion item is added
+         beside this one), and a platform-exclusive package built for another target has neither and
+         correctly contributes nothing. An unguarded item naming an absent file is not a no-op; it
+         is CS2001. -->
+    <Compile Include="package_info.cs" Condition="Exists('package_info.cs')" />
     <!-- Include only .cs files from current folder -->
-    <Compile Include="*.cs" />
+    <Compile Include="*.cs" Exclude="package_info.cs" />
     <!-- Converted test artifacts share this folder but belong to the colocated
          <name>.tests.csproj, which compiles them. A Go test file is `*_test.go`, so its
          conversion is `*_test.cs`. -->
@@ -145,16 +159,6 @@
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
   </ItemGroup>
 
-  <!-- A reference the converter's derivation cannot produce, so it is DECLARED here and preserved
-       across every re-mint (preserveHandOwnReferences, projectFileWriter.go). This package is
-       hand-owned by consequence: every production file carries the manual-conversion marker, so the
-       compiled godebug.cs is human-written and godebug.cs.auto is the converter's review sibling.
-       That hand-written file completes the bodyless `registerMetric` partial by calling
-       go.runtime_package.godebugRegisterMetric (godebug.cs:125). Go's own source does not import
-       runtime, the converter's emission never spells runtime_package, and no push-registry row
-       exists for internal/godebug.registerMetric, so no source-side or emission-side derivation
-       can reach this reference. Retiring it is a human act: delete this block when godebug.cs no
-       longer binds runtime. -->
   <ItemGroup Label="GoHandOwnReferences">
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
   </ItemGroup>

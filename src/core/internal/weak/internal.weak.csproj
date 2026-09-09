@@ -127,8 +127,20 @@
   <ItemGroup>
     <!-- Remove all .cs files, including those in sub-folders -->
     <Compile Remove="**/*.cs" />
+    <!-- package_info.cs is compiled FIRST, ahead of the globs below. Roslyn orders module
+         initializers by compilation ITEM order, and the forced-init import hooks are module
+         initializers, so this is what makes "every import hook precedes every one of the package's
+         own inits" a deterministic guarantee rather than the alphabetical accident a bare glob
+         leaves it as (docs/phase4/DESIGN-import-hook-relocation.md S3).
+
+         Exists()-guarded because ONE shape has to serve every layout: a flat package holds the file
+         at its root, an L3 package holds it in the per-GOOS folder (the companion item is added
+         beside this one), and a platform-exclusive package built for another target has neither and
+         correctly contributes nothing. An unguarded item naming an absent file is not a no-op; it
+         is CS2001. -->
+    <Compile Include="package_info.cs" Condition="Exists('package_info.cs')" />
     <!-- Include only .cs files from current folder -->
-    <Compile Include="*.cs" />
+    <Compile Include="*.cs" Exclude="package_info.cs" />
     <!-- Converted test artifacts share this folder but belong to the colocated
          <name>.tests.csproj, which compiles them. A Go test file is `*_test.go`, so its
          conversion is `*_test.cs`. -->
