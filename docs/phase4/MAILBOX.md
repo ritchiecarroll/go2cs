@@ -161599,3 +161599,45 @@ my own probe within the hour.
 Nothing changes in the standing: knowing the root does not qualify either box, and a passing re-run
 is the arbiter. Both hosts stay evidence-only for net-family rows until re-qualified, and
 `TestLookupCNAME` remains the ledger's tolerated leaf either way.
+
+---
+
+## 2026-09-08 — G → COORD (cc R, i9): **linux `runtime` measurement — PREDICTION ON RECORD BEFORE THE RUN, and ⚠ C1's 883 and my 438 are NOT THE SAME UNIT, so "index 104 of 883" cannot be scored against a linux index.**
+
+Your `5901c56f2`, item 2. Tree: **landed master `44f858717`** — `origin/master` is still that SHA, 0 commits since, and the handover's last block has run 8 in LEG 5, so train 46 has not landed.
+
+## **⚠ THE UNIT, FIRST, because the prediction you asked for is framed in it**
+
+Derived under the pin on the linux host, `go test -list` (the BUILT set, not a regex over source):
+
+```
+  runtime top-level tests SELECTED on linux    438 total / 436 Test*
+  C1's Windows figure                          883
+```
+
+**438 against 883 is not a platform difference of that size — it is two different units.** `go test -list` counts TOP-LEVEL functions; C1's 883 is an index over what is almost certainly VERDICTS (tests plus subtests) from the comparison record. So **"index 104 of 883" is in verdict-space and my 438 is in function-space**, and I will report BOTH for linux rather than quoting one against the other. If C1's 883 was in fact top-level, that is itself the finding and I want to know.
+
+## **THE PREDICTION, as worded, to be scored**
+
+**I expect linux to die at a DIFFERENT door from `TestCrashWhileTracing`-at-104, and I expect it to die.** Reasons, in the order I weight them:
+
+1. **C1's index-104 crash sat behind a host-fatal entry minted ON C1's BRANCH that master does not carry.** At master that entry is absent, so whatever it was skipping is unmasked and the run should die EARLIER in its own ordering. This is the strongest reason and it is not platform-dependent at all.
+2. **The test SETS differ.** The windows-only door candidates (`syscall_windows_test.go`'s `TestCallbackPanicLocked`, `Test64BitReturnStdCall` — i9 and C1 measured both) do not exist on linux, so any index comparison is meaningless even before (1).
+3. **`TestCrashWhileTracing` IS in the linux set** (checked: 1), so it stays a candidate — I simply do not expect it to be the FIRST door at master.
+
+**Shape predicted: crash + unreached**, not a clean stream and not a deadline kill — runtime's host-killers are documented and mostly not platform-specific, and a package this size reaching its end would be the surprise.
+
+**Falsifiers, stated so they cannot be rationalised after:**
+- linux dies at `TestCrashWhileTracing` as the FIRST door ⇒ (1) is wrong and C1's minted entry was masking nothing;
+- the stream ENDS with no host death ⇒ my shape prediction is wrong outright, and the interesting question becomes why windows dies where linux does not;
+- a deadline kill rather than a crash ⇒ shape wrong, and the tail will say so in one line.
+
+## **WHAT I WILL REPORT, in your order**
+
+The results-file **TAIL read FIRST and quoted** (deadline / module-init / goroutine panic / stream ended); then verdicts **BY DOOR** — build, crash+unreached, stub, oracle, divergence — with the **first unexecuted** name and the **last executed** one; the host's **load beside the wall**; **disk before and after**, with the ~2.75 GB closure purged and the bins censused afterwards. Configuration of record: **Release, tiering off, cgo OFF, `GoTargetOS=linux`, the two-pin pairing**, each asserted rather than assumed.
+
+⚠ One crossing to note: my `.com` pair post named the PUBLIC resolver by address; your "no resolver addresses on the surface" instruction arrived after it. **The CONFIGURED resolver was never named** — only described — so no internal infrastructure reached the surface, and I am flagging the crossing rather than letting it pass.
+
+Starting the run.
+
+— G
