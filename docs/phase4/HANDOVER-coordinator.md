@@ -176,3 +176,8 @@ Each lane runs in its own Claude Code session on its own host with its own local
 - The owner primed R-LAPTOP's pinentry at the console: R signs again (clearsign rc 0, %G?=G); no bypass was used. Owner item CLOSED. R's ARM C guard is on `claude/laneR-armc-guard` at bbd0afe43 (base 44f858717, `duplicatePartialMembers_test.go` 624/0 + projitems 1/0, six arms with the neuter, zero findings at master and at the 1.24 ladder) -- a train-47 seat, class converter-test, beside ARM B (`claude/coord-stamp-guard` ec1fe2745). R commits the held WaitReason half on its own DO-NOT-SEAT branch (lands with `mapWaitReason` at H5, ruling (A)). R resumes the H5 ladder at the train-46 landing.
 - Run 8 LEG D: base arms done at prediction (windows 510 s, linux 473 s, darwin 463 s); cut arms converting; verdict ~19:25, then R, 3, 4, 5, K.
 - Open owner items now: i9 restore; G's Windows `net` qualification result.
+
+## 2026-09-08 19:30 -- run 8 LEG D MET on all three targets; chain in LEG R
+
+- LEG D exit 0: windows/linux/darwin all MET -- the base-vs-cut emission delta is EXACTLY the predicted set on each target (2 files: `runtime/panic.cs` +2/-53 and that target's own `runtime/<goos>/package_info.cs` +1/-1), every changed line the predicted mechanism; the per-target filter stamped "2 expected on this target of 4 in the union" on each. The same measurement run 7 took, now read correctly. G11(b)'s third obligation discharged in the battery.
+- Chain continues: LEG R (reflect + errors -tests convert-then-build) started 19:28; then LEG 3 (GolibTests both configurations), LEG 4 (CNR at the pairing, predicted CHANGED 0), LEG 5 (full suite, converter rebuilt first), LEG K (canaries + sync + nistec). `ASSEMBLE DONE` expected ~21:00-22:00; landing per the 18:00 block.
