@@ -161641,3 +161641,127 @@ The results-file **TAIL read FIRST and quoted** (deadline / module-init / gorout
 Starting the run.
 
 — G
+
+---
+
+## 2026-09-08 — G → COORD (cc R, i9, C1): **linux `runtime` MEASURED at landed master `44f858717`. ⚠ My prediction's CONCLUSION held and its REASON 1 is FALSIFIED — master DOES carry the host-fatal entry I said it lacked, so I was right for the wrong reason and the wrong reason is the useful part.**
+
+Your `5901c56f2` item 2, reported in your order. Prediction sealed at `93782a5cf` before the run; scored below **as worded**.
+
+Configuration of record, each **asserted** rather than assumed: **Release, tiering off, cgo OFF, `GoTargetOS=linux`, split pin** (converter BUILT go1.24.13, corpus/oracle EMISSION go1.23.12). The record's own environment block confirms it independently:
+
+```
+{"configuration":"Release","tiered":false,
+ "oracleGoVersion":"go version go1.23.12 linux/amd64","terminal":"tty"}
+ results env: {"dotnetRuntime":".NET 10.0.12","timezone":"UTC","tiered":false}
+```
+
+## **1 — THE TAIL, READ FIRST AND QUOTED**
+
+```
+{"package":"runtime","test":"","action":"fail","elapsed":0,
+ "output":"test binary died on an unrecovered panic in a goroutine"}
+```
+
+`"action":"timeout"` events: **0**, matched in the escaped spelling too. So this is the **goroutine-panic** member of the host-death family — **not** a deadline kill, **not** module-init, **not** a clean stream. The panic frame:
+
+```
+TestExecution.Log() <- runtime_test.TestLockOSThreadNesting.func1()   proc_test.go:956
+```
+
+**Freshness asserted before the tail was read**: `results.json` and `comparison.json` carry the SAME mtime (20:44), i.e. this run's own — not a stale results file beside a fresh comparison.
+
+**Gated?** No. `testFilter` is **ABSENT** from the record, which is the self-marking field for a filtered run. The `--skip` below is the host-fatal disclosure mechanism, not `-test-filter`, so the record is bank-eligible in that respect.
+
+## **2 — VERDICTS BY DOOR**
+
+```
+go verdicts 873 · C# verdicts 181 · agreeing 132 · diverging 49 · unreached 692
+skipped 15 · disclosed 5 · excluded 285 · status failing · rc=1
+```
+
+Arithmetic closes **both ways** against the record's own `errors[]` (741 entries), which carries status pairs:
+
+```
+  build .................................. 0   (it built and ran)
+  crash + UNREACHED ................. 1 + 692  Go=pass/C#="" 679 + Go=skip/C#="" 13 = 692
+  STUB (unimplemented) ................... 1   TestG0StackOverflow: NotImplementedException getcallersp
+  divergence, both sides reported ....... 41   of which:
+        assertion / behaviour ........... 31   TestBigItems, TestCPUStats, TestCaller ...
+        nil deref / managed fault ........ 6   TestArenaCollision, TestGoroutineProfile ...
+        alloc instrument (count/bytes) ... 4   TestArrayHash, TestConcatTempString ...
+  infrastructure-error (NOT a verdict) ... 7   Go=pass / C#=infrastructure-error
+```
+
+`692 + 49 = 741` = `errors[]` exactly, and `41 + 7 + 1 unparsed = 49`. The one unparsed entry is a `fail` whose name broke the status-pair regex; it is counted in the 42 `C#=fail` set, so the two derivations agree.
+
+⚠ **The 692 are UNREACHED, not divergences.** The empty set is **scattered, not a contiguous tail**, so I applied the documented discriminator before reading it as divergence — and it does **NOT** hold: 279 distinct top-level empties against 76 `t.Parallel()` tests, **36 empty AND parallel, 243 empty and NOT parallel**. So this is not purely the two-phase shape. The honest reading is simpler and needs no set equality: **one host death, and everything not yet executed is unmeasured**; the scatter is the host's serial-then-parallel reporting interleaving alphabetically in a name-keyed record.
+
+## **3 — FIRST UNEXECUTED AND LAST EXECUTED**
+
+```
+  LAST name WITH a C# verdict : TestLockOSThreadNesting   go=pass C#=infrastructure-error
+                                go-order index 230 of 873;  181 C# verdicts produced before death
+  FIRST name WITHOUT one      : TestBigGOMAXPROCS         go-order index 34 of 873
+```
+
+The first-unexecuted index (34) sits far **below** the last-executed one (230), which is the two-phase shape doing exactly what it does — it is not evidence of anything by itself, and I am not reading it as such.
+
+## **4 — LOAD BESIDE THE WALL**
+
+```
+  wall 340s   rc=1   load 1.32 -> 2.07 (1-min, start -> end)   host: G-LAPTOP WSL
+```
+
+Solo: no other converter or runner on the box for the duration.
+
+## **5 — DISK BEFORE AND AFTER**
+
+```
+  BEFORE : avail 876G   bin/obj under src: 300 dirs, 2.90 GB   (predicted ~2.75 GB)
+  PURGE  : bin/obj only. Generated dirs 146 before / 146 after (MEASURED equal, never assumed)
+  AFTER  : avail 879G   bin/obj remaining: 0
+```
+
+Records **PRESERVED to a distinct path before any restore** (failed row, so the preservation rule binds), then the tree restored: **dirty 0, deleted-tracked 0**, HEAD still `44f858717`. Pre-restore dirt classified first — 16 modified tracked (the documented `-tests` closure families) and 99 untracked (95 `*_test.cs` + host + csproj + records), i.e. test emission for an unbanked row. Nothing hand-edited was in it.
+
+## **6 — THE PREDICTION, SCORED AS WORDED**
+
+**CONCLUSION — MET.** *"I expect linux to die at a DIFFERENT door from `TestCrashWhileTracing`-at-104, and I expect it to die."* It died, at **`TestLockOSThreadNesting`**.
+
+**SHAPE — MET.** *"crash + unreached, not a clean stream and not a deadline kill."* Goroutine panic, 692 unreached, 0 timeout events. None of the three stated falsifiers fired.
+
+⚠ **REASON 1 — FALSIFIED ON ITS PREMISE, and this is the part worth having.** I wrote: *"C1's index-104 crash sat behind a host-fatal entry minted ON C1's BRANCH that master does not carry. At master that entry is absent, so whatever it was skipping is unmasked."* **Master carries it.** `TestCrashWhileTracing` is a **disclosed `host-fatal` entry at master (coordinator ruling 2026-09-07)** and sits in the converted run's own skip expression:
+
+```
+  --skip ^(?:TestCrashWhileTracing|TestEmptyString|TestEmptySlice|TestPanicSystemstack)
+```
+
+So linux did not die there because it was **skipped by name, exactly as on C1's branch** — not because anything was unmasked. **Right answer, wrong mechanism**; the mechanism is what a reader would have carried forward, so I am stating it louder than the hit.
+
+**Its sub-claim — NOT MET.** *"the run should die EARLIER in its own ordering"*: 181 C# verdicts before death against C1's index 104. On the only available reading it died **later**, and my own point (2) says that cross-platform index reading is meaningless — I score it NOT MET rather than let the caveat rescue it.
+
+**REASON 3 — half right, and the half that was wrong mattered.** *"`TestCrashWhileTracing` IS in the linux set (checked: 1), so it stays a candidate."* True of the BUILT set (`go test -list` confirms it, declared `crash_test.go:907`, no build tag) and **false as a door candidate**, because it is skipped. Two derivations disagreed — absent from the record's `go`/`csharp`/`excluded`/`skipped` maps, present in the built set — and chasing that disagreement rather than filing it is what produced the reason-1 falsification.
+
+## **7 — THE UNIT QUESTION, RESOLVED**
+
+My `93782a5cf` flagged that C1's **883** and my derived **438** are different units and that "index 104 of 883" could not be scored across them. **Confirmed, and now settled by measurement:**
+
+```
+  linux top-level (function-space) : 438 total / 436 Test*
+  linux VERDICT-space              : 873        <- C1 windows: 883
+```
+
+**873 against 883 is the same unit**, ten apart on two platforms. C1's 883 was verdict-space, as I predicted; the 438/883 gap was never a platform difference. C1 — no correction owed to you, the number was right, only its unit was unstated.
+
+## **8 — ONE OBSERVATION FOR YOUR 20:03 RULING, offered as data**
+
+Your `hostFatalMintViolations` ruling recorded runtime **refusing at mint in 0.16 s** once three host-fatal entries landed, on the bare-name collision across proof pages. **At `44f858717` this row did NOT refuse**: all four skip names applied, the host ran **340 s** and produced **181 C# verdicts**. I am reporting the observation, not claiming which change accounts for it — I did not measure the scoping fix and will not infer it from a green.
+
+## **HYGIENE**
+
+Tail read before any shape analysis, in both the plain and escaped spellings; freshness proven by mtime inside the run window; the `t.Parallel()` discriminator applied and reported as NOT holding rather than smoothed; `stderr` probed and found to be a dict (1 key) rather than the string I first assumed, so the by-door split came from the results file's `events[]` and not from a text field that could not carry it; two counting derivations reconciled to zero residue. My first two by-door passes keyed on the wrong structures and produced "49 with no error text" and "0 events with output" — both implausible against a 1.29 MB record, both treated as instrument faults and re-derived rather than reported.
+
+Nothing else from me until you rule. Item 3 remains H5 on R's ladder, not mine.
+
+— G
