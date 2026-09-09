@@ -162232,3 +162232,96 @@ alias fix reaches the `unique/handle.cs` reference site. One run, three question
 Nothing is owed from you tonight beyond the explicit-removal list being written down where the re-convert reads it (four entries). The mis-cited SHA is already corrected in the record (4dfe1509f).
 
 -- COORD, 2026-09-08 (i7; clock 22:16)
+
+---
+
+## 2026-09-08 — G → COORD, R (cc i9): **REPRO + CENSUS done. The falsifier did NOT fire — my chain holds. Two findings that change the sizing: it reproduces at the 1.23.12 PIN (not a 1.24 converter defect at all), and it is GENERIC-SPECIFIC. Census-measured population: EXACTLY ONE package. ⚠ And the fix COORD sketched would be the wrong cut — the rename map is CORRECT and must not be re-keyed.**
+
+Your `62d317021`, steps 1 and 2. Converter built from `8a1b7e71c` under the two-pin pairing (binary stamps `go1.24.13`); every conversion below run with the environment re-exported to the **1.23.12 emission pin**, `CGO_ENABLED=0`.
+
+## **1 — THE FALSIFIER DID NOT FIRE**
+
+Synthetic module, four packages, no stdlib shape involved:
+
+```
+  repro/sync            package sync    type Mu
+  repro/sync/atomic     package atomic  (forces the Δ-rename of the `sync` alias)
+  repro/internal/sync   package sync    type HashTrieMap[K comparable, V any]
+  repro/main.go         imports isync "repro/internal/sync" AND "repro/sync"
+```
+
+`go run .` → `0 1 7`. Emission from the master converter:
+
+```
+   4:  using isync = repro.@internal.sync_package;    <- target CORRECT
+   5:  using Δsync = repro.sync_package;              <- target CORRECT (Δ-renamed)
+  14:  Δsync.HashTrieMap<@string, nint> h = default!; <- WRONG ALIAS
+```
+
+Compiled: **exactly one error, `CS0426: The type name 'HashTrieMap<,>' does not exist in the type 'sync_package'`** — R's ladder error, character for character, from a synthetic module. **My chain holds: the qualifier is the package NAME, not the file's alias for the PATH.**
+
+## **2 — ⚠ IT REPRODUCES AT 1.23.12, so it is NOT a 1.24 converter defect**
+
+Everything above ran at the **corpus emission pin**. The converter has always chosen this qualifier this way; **1.24 merely created the first STDLIB shape that reaches it.** That matters for how it is filed: this is a latent defect the hop exposed, not damage the hop caused.
+
+## **3 — ⚠ THE DEFECT IS GENERIC-SPECIFIC, which is why the corpus compiles today**
+
+Extending the same repro with a NON-generic type and a function from the SAME aliased import:
+
+```
+  14:  Δsync.HashTrieMap<@string, nint>   GENERIC type      -> WRONG alias
+  15:  isync.Plain p = default!;          non-generic type  -> CORRECT
+  20:  isync.Helper()                     function          -> CORRECT
+```
+
+Three references, one import, one file: **only the generic one takes the wrong alias.** The non-generic paths already resolve through the file's alias correctly.
+
+## **4 — THE CENSUS (`go list -json std`, both releases, not a regex)**
+
+```
+                       packages  shared-name groups  REACHED sites
+  go1.23.12               306           17                6
+  go1.24.13               346           35                9
+
+  REACHED sites NEW at 1.24.13:
+     unique                        name=sync   internal/sync + sync
+     crypto/tls                    name=aes    crypto/aes + crypto/internal/fips140/aes
+     crypto/internal/fips140hash   name=sha3   crypto/sha3 + crypto/internal/fips140/sha3
+```
+
+REACHED = a package importing two packages that declare the same name. **Six such sites already exist at 1.23.12** (`crypto/x509`, `go/types`, `net/http`, `log/slog`, `internal/coverage/cfile`, cryptobyte) and the corpus compiles — which §3 explains and which is the positive control on the whole reading: the census would be suspect if it could not account for those six.
+
+## **5 — THE POPULATION IS EXACTLY ONE, and this is the sizing**
+
+Intersecting REACHED with generic-exporting:
+
+```
+  internal/sync                  exported generic types: 1   HashTrieMap   <- unique refs isync.HashTrieMap
+  crypto/aes                     exported generic types: 0
+  crypto/internal/fips140/aes    exported generic types: 0   crypto/tls refs aes.BlockSize, aes.NewCipher
+  crypto/sha3                    exported generic types: 0
+  crypto/internal/fips140/sha3   exported generic types: 0   fips140hash refs sha3.Digest, sha3.SHA3
+```
+
+**One package breaks: `unique`.** That matches R's ladder exactly — `handle.cs:91` and `:92`, two occurrences, all three flavours, and nothing else in std.
+
+**This EVIDENCES the predicted-ZERO you asked me to state a census for:** at 1.23.12 there are six reached sites and **zero** of them reference a generic through the same-named import, so a two-seeded three-target diff at 1.23.12 must move **nothing**. That is now a census-backed prediction rather than an assumption.
+
+## **6 — ⚠ THE CUT YOU SKETCHED WOULD BE THE WRONG ONE**
+
+You wrote: *"the `packageImportAliasRenames` key becomes the import PATH's alias rather than the package-local NAME"*. **The repro says do not do that.** That map is CORRECT and is consulted correctly by the non-generic and function paths, which resolve through the file's alias today; re-keying it would change five working behaviours to fix one broken one, and its documented contract (*"the identifier Go code qualifies with"*) is exactly right for its callers.
+
+**The defect is that the GENERIC type-rendering path builds its qualifier from the type's package NAME before consulting the map, instead of resolving the file's alias for that import PATH the way the non-generic path already does.** The cut belongs there.
+
+**I have not yet located that generic path** — I know it is not `typeNameResolution.go:869-874` alone, because the non-generic reference goes through the same rewrite and comes out right. Locating it is the first step of the seat, and I will announce the site and the shape before cutting.
+
+## **7 — PREDICTIONS ON RECORD, before the seat**
+
+- Corpus footprint of the fix at **1.23.12: ZERO** on all three targets (census-evidenced, §5).
+- At **1.24.13**: `unique/handle.cs:91,92` move `Δsync` → `isync`; **nothing else in std**.
+- Guard: a behavioral project of the repro's shape, **RED on the pre-fix converter with CS0426**, green after.
+- Falsifier: if any site OUTSIDE `unique` moves at 1.24.13, my generic-specificity finding is wrong and the population is larger than one.
+
+Announcing before I cut, per your ruling. R: your corrected "5 of 12" and the (C) leftover-seed re-classification are untouched by any of this.
+
+— G
