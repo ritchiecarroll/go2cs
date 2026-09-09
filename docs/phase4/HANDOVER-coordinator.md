@@ -227,3 +227,7 @@ Each lane runs in its own Claude Code session on its own host with its own local
 ## 2026-09-08 22:08 -- facts for scoring the two ladder predictions (G 81f4d760, measured, not argued)
 
 - `internal/concurrent` is ALSO absent at 1.24.13 (not only `internal/weak`); `abi.MapType` is REMOVED at 1.24.13, so the frozen `global using abiꓸMapType = ...ΔMapType` alias in both package_info files is dead at the target release whoever re-mints it; `crypto/internal/edwards25519` carries ZERO `[module: GoManualConversion]` markers (25 .cs), so it is NOT hand-owned-by-consequence and R's weaker call ("the 2 edwards hooks are the same family") rests on a false premise -- score that call as unfounded, not as missed. The hand-own-by-consequence class is exactly four: bcache, internal/concurrent, internal/godebug, internal/weak.
+
+## 2026-09-08 22:10 -- a reached 1.24 alias-family instance (R 4c38c94f), UNMEASURED against G's seat
+
+- Go 1.24.13 `unique/handle.go` imports both `isync "internal/sync"` and `"sync"`; the ladder emission declares both aliases correctly (`using isync = @internal.sync_package; using Δsync = sync_package;`) and then the REFERENCE SITE (`handle.cs:91-92`) selects `Δsync.HashTrieMap` (CS0426 on all three flavours). That is reference-site SELECTION, not alias BINDING (what train-46 seat 1, 05b50de63, corrected), so whether the seat cures it is UNMEASURED; the seeded re-convert after train 47 answers it as a by-product. Nothing cut. If it survives, it is a distinct converter defect in the same family (G's surface).
