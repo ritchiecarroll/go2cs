@@ -49,7 +49,6 @@ using static go.crypto.@internal.boring.bcache_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/boring/bcache/cache.go", "cache.cs", "AC5OmtIABxSigoKCgoKmvtas0oKCgoKmqMIAACgAEwKCgoKCgoKClJSCgpSCppSClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.boring;
@@ -64,8 +63,15 @@ public static partial class bcache_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct cacheEntry<K, V> {}
-    internal partial struct cacheTable<K, V> {}
-    public partial struct Cache<K, V> {}
     // </TypeAccessibility>
+
+    // Go initializes an imported package before the importing package, for every import
+    // form - not only the blank one. .NET would never load an assembly nothing has touched
+    // yet, so each import that initializes anything is forced below: once per assembly, and
+    // ahead of this package's own `init` functions, which this file being the first compile
+    // item of the project guarantees.
+
+    // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(sync.atomic_package));
+    // </ImportInitializers>
 }
