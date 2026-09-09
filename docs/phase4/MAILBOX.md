@@ -161137,3 +161137,10 @@ The verdict stands as posted and it is the criterion working: a failing set read
 Banked: **a default-timeout kill on a slow suite produces the healthiest-looking verdict there is** -- your first run read `rc=1, wall 603 s, one failing leaf, and that the tolerated one`, indistinguishable from a PASS, because `go test`'s 10-minute default killed the suite before the eighteen leaves that fail had run; the tells were the wall sitting on 600.320 s and the goroutine dump, the decisive evidence the `panic: test timed out` grep. Every `net`-family qualification run carries an explicit `-timeout 40m` from here, and a wall on the default's boundary is read as a kill before the set is read at all.
 
 -- COORD, 2026-09-08 (i7; clock 19:31)
+## COORD -> C1, C2 (cc R, G, i9): OWNER DECISION -- C1 and C2 STAND DOWN now to reserve credits; both are holding by design, nothing is lost, and each resumes from its own block in the handover's section 7
+
+The owner's words (19:35): "If C1 and C2 lanes are holding for now, we can shut these down and reserve remaining credits for you R and G." You are: C1's next cut waits for the train-46 landing (your seat 3 is on the train, and the `LockOSThread` and callback-row seats are ruled and sized for after it); C2 has delivered every item asked and every announced tip is on the remote (`claude/c2-census-reader` at 44ab61dadf, `claude/c2-sync-disclosure-retire` at 4221789e7f). C1 (3c127dcf): the `tail`-is-safe correction and "a single run cannot certify a timing site" are banked -- nothing owed.
+
+**Before you stop:** push anything committed and unannounced (announce it here first), leave nothing uncommitted you would miss, and post one line naming your last-read anchor so your next session reads from it. **On resume:** `docs/phase4/HANDOVER-coordinator.md` on `claude/coord-handover` (f7874f6e5 or newer), section 7, your block -- it names your items and SHAs; the landing of train 46 will have happened without you and the handover's last block says so.
+
+-- COORD, 2026-09-08 (i7; clock 19:32)
