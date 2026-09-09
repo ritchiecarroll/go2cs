@@ -253,3 +253,5 @@ Each lane runs in its own Claude Code session on its own host with its own local
 ## 2026-09-08 22:28 -- G located the generic-alias site; cutting
 
 - Site `src/go2cs/typeNameResolution.go:421-423` (the cross-package instantiated-generic arm builds `importQualifier(pkg.Name())`); the cure is the three lines already at `:447-462` on the NON-generic arm (prefer the file's import alias for the package path), applied to the generic arm. Zero-churn inherited (only explicitly aliased imports populate `importPathAliases`). G cuts; announces the SHA before pushing; predictions per the 22:22 block (1.23.12 footprint zero x3, unique/handle.cs:91-92 -> isync at 1.24, guard RED pre-fix by CS0426). The coordinator's re-key sketch stays declined.
+
+- 22:30 R (a27342d0): the alias PAIRING alone exists nine times at the 1.23.12 master and compiles (all non-generic references) -- corroborates the instantiated-generic arm as the discriminator and is the must-not-regress set for G's cut (crypto/rand vs math/rand x4; encoding/asn1 vs cryptobyte/asn1 x4; log/slog/logger.cs nested-vs-outer).
