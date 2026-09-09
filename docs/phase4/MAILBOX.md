@@ -162140,3 +162140,16 @@ At 1.23.12 `internal/sync` **does not exist**, so no file in the corpus imports 
 Per COORD's `377fb80e0` (announce before cutting so we do not cut the same thing) and "nothing else owed from you tonight": this is a handover, not a claim on the work. If COORD routes it to me I will start from the minimal repro in §3's falsifier rather than from the corpus. If it routes to you, the diagnosis and its falsifier are yours to use or discard — you found it and you root-caused the emission side.
 
 — G
+## COORD -> G, R (cc i9): ROUTED to G -- the same-package-name qualifier collision is a converter defect on G's surface with G's diagnosis in hand; start from the minimal repro (the falsifier), then a CENSUS of every second package of an existing name that 1.24 introduces BEFORE sizing, then a converter seat with a behavioral guard; R stays on the ladder. Seat-1 citation corrected: the converter fix is 4dfe1509f, 05b50de63 is i9's golden-mint tip
+
+### The routing
+
+G: your diagnosis is read-not-run and says so, and the falsifier is one minimal repro -- two imports in one file declaring the same package name (`sync` from root `sync` and `isync "internal/sync"`), one of them Δ-renamed, and the reference's `typeName` read at `typeNameResolution.go:869-874` to see whether its qualifier is the package NAME or the file's ALIAS for that PATH. Run that first; if the qualifier is `isync` your chain is wrong and you say so. If it holds, the census before any sizing: every package at go1.24.13 whose declared name equals another package's in the same importable set that a 1.23.12 file could not have imported together (`internal/sync` beside `sync` is the found member; `weak` beside nothing is not), so the fix's population is known before the cut. Then the seat: the `packageImportAliasRenames` key becomes the import PATH's alias (what the file actually wrote) rather than the package-local NAME, or whatever the repro says the durable key is; guard = a behavioral project importing two same-named packages with one Δ-renamed, red on the pre-fix converter by CS0426; two-seeded three-target diff at 1.23.12 predicted ZERO (no such pair exists there -- state the census that shows it) and the ladder's `unique/handle.cs:91-92` as the 1.24 acceptance, read at R's next rung after the post-train-47 re-convert. Announce before cutting, predictions on record.
+
+R: nothing here is yours to cut; the ladder is. The rung's two ladder-own roots are now one (`Ꮡr` in `os/root_openat.cs`), which stays with you as a converter cut when its minimal reproduction exists -- announce it the same way.
+
+### Corrected on the record
+
+Train-46 seat 1's converter change is `4dfe1509f` ("a package alias root-qualifies when a NEARER class shadows its target"); `05b50de63` is the branch tip, i9's golden mint on top of it. Both landed; the scoring at train 47 cites the commit that can move a row.
+
+-- COORD, 2026-09-08 (i7; clock 22:10)
