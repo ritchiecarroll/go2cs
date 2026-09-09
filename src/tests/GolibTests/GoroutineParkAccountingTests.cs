@@ -58,7 +58,13 @@ public class GoroutineParkAccountingTests
             [WaitReason.SyncCondWait] = "sync.Cond.Wait",
             [WaitReason.SyncMutexLock] = "sync.Mutex.Lock",
             [WaitReason.SyncRWMutexRLock] = "sync.RWMutex.RLock",
-            [WaitReason.SyncRWMutexLock] = "sync.RWMutex.Lock"
+            [WaitReason.SyncRWMutexLock] = "sync.RWMutex.Lock",
+
+            // New at go1.24, and this expectation is release-INDEPENDENT: it asserts golib's own
+            // WaitReasons.Text against a literal and reads no corpus, so it is correct while master
+            // still carries the 1.23.12 corpus. The string is verbatim from the 1.24.13
+            // waitReasonStrings table (runtime2.go:1116).
+            [WaitReason.SyncWaitGroupWait] = "sync.WaitGroup.Wait"
         };
 
         // Both directions. The forward one catches a wrong string; this one catches a member added

@@ -68,9 +68,18 @@ public enum WaitReason
 
     /// <summary>
     /// "semacquire" — blocked on a runtime semaphore that is not a mutex: Go's
-    /// <c>sync_runtime_Semacquire</c> (<c>sync.WaitGroup.Wait</c>) and
-    /// <c>poll_runtime_Semacquire</c> (<c>internal/poll</c>'s fdMutex).
+    /// <c>poll_runtime_Semacquire</c> (<c>internal/poll</c>'s fdMutex), and, at go1.23.12,
+    /// <c>sync_runtime_Semacquire</c> carrying <c>sync.WaitGroup.Wait</c>.
     /// </summary>
+    /// <remarks>
+    /// ⚠ <b>Written release-aware on purpose, because this file sits on a tree that hops.</b> At
+    /// <b>go1.23.12</b> a waiting <c>sync.WaitGroup</c> parks through <c>sync_runtime_Semacquire</c>,
+    /// so a traceback reads <c>semacquire</c>. From <b>go1.24</b> it parks through <c>sync</c>'s own
+    /// <c>runtime_SemacquireWaitGroup</c> and reads <see cref="SyncWaitGroupWait"/> instead — the
+    /// header word for a waiting <c>WaitGroup</c> CHANGES at the hop. Both sentences are true of the
+    /// release they name, so neither goes stale when the corpus moves; the previous wording named
+    /// the <c>sync.WaitGroup.Wait</c> caller unconditionally, which the 1.24 corpus falsifies.
+    /// </remarks>
     Semacquire,
 
     /// <summary>"sleep" — inside <c>time.Sleep</c>.</summary>
@@ -86,7 +95,18 @@ public enum WaitReason
     SyncRWMutexRLock,
 
     /// <summary>"sync.RWMutex.Lock" — a writer waiting out the readers.</summary>
-    SyncRWMutexLock
+    SyncRWMutexLock,
+
+    /// <summary>
+    /// "sync.WaitGroup.Wait" — blocked in <c>sync.WaitGroup.Wait</c>, which from go1.24 parks
+    /// through its own <c>runtime_SemacquireWaitGroup</c> rather than through
+    /// <see cref="Semacquire"/>.
+    /// </summary>
+    /// <remarks>
+    /// Declared LAST, matching Go's own constant order — <c>waitReasonSyncWaitGroupWait</c> follows
+    /// <c>waitReasonSyncRWMutexLock</c> in <c>runtime2.go</c> — so appending here renumbers nothing.
+    /// </remarks>
+    SyncWaitGroupWait
 }
 
 /// <summary>
@@ -119,6 +139,7 @@ public static class WaitReasons
         WaitReason.SyncMutexLock => "sync.Mutex.Lock",
         WaitReason.SyncRWMutexRLock => "sync.RWMutex.RLock",
         WaitReason.SyncRWMutexLock => "sync.RWMutex.Lock",
+        WaitReason.SyncWaitGroupWait => "sync.WaitGroup.Wait",
         _ => "unknown wait reason"
     };
 
