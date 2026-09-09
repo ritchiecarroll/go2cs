@@ -217,3 +217,9 @@ Each lane runs in its own Claude Code session on its own host with its own local
 ## 2026-09-08 21:36 -- one more train-47 seat boarded
 
 - `claude/g-h6-alias-census` at 898cbfefe (docs, one new file `docs/phase4/CENSUS-h6-handown-package-aliases.md` +283 three-dot against master; merge-base 44f858717, read three-dot at seat fill). The H6 dated blocks owed by R (ARM B/C halves) and C2 (the cross-check) go on that file. G verified the landed state by ancestry (its three seats in master; `g-root2-pointer-case` 13908a888 pruned-and-in-master). Train-47 board is now EIGHT seats: doctrine e9e56b657; orphan check 36cbef240; ARM B ec1fe2745; ARM C bbd0afe43; c2-sync-disclosure-retire 4221789e7f; C2 census-reader code seat; g-unfreeze-handown-metadata 7078dbada; g-h6-alias-census 898cbfefe. Base 8a1b7e71c.
+
+## 2026-09-08 22:05 -- R's H5 ladder rung at the landed master
+
+- Rung at 8a1b7e71c: 12 unique sites on every flavour (7 root / 5 cascade), ASM 2975/3053/3003; FatalReport CLEARED as predicted; flavour-independence restored (40/34/44 -> 12/12/12). Roots: `ΔMapType` not in abi (internal/weak, internal/concurrent package_info), `HashTrieMap` not in sync (unique/handle.cs, the 1.24 package split), edwards25519 forced-init hooks, `Ꮡr` not in scope (os/root_openat.cs:123, a converter emission defect -- R cuts it with a minimal repro, announced first); 5 godebug cascades.
+- **TWO PREDICTIONS ON RECORD FOR TRAIN 47'S LANDING, to be SCORED not argued:** R -- G's un-freeze seat clears 7 of 12 (ΔMapType roots + godebug cascades; edwards hooks weaker); G (8345cf41) -- (B) moves zero ladder rows. Score them at the next rung after train 47 lands.
+- Ratified: the fresh seeded re-convert of the ladder's src/core is spent AFTER train 47 (captures train 46's three converter seats + G's metadata seat); `panic_impl.cs` then lands by emission, not by copy (R's copy duplicated: CS0111). R's ASM miss (~3000 vs ~1900 predicted) is an unexplained residue, stated.
