@@ -335,10 +335,28 @@ func TestPackageInitializesSeesAHandOwnedInit(t *testing.T) {
 			t.Fatalf("reading emitted %s/%s: %v", handOwnedPackage, name, readErr)
 		}
 
-		if strings.Contains(string(emitted), "[GoInit]") {
-			t.Errorf("emitted %s/%s now carries a [GoInit]: this test's premise — that an artifact "+
-				"scrape is BLIND to a hand-owned package's initialization — no longer holds. Re-derive "+
-				"the reasoning in packageInitFacts.go rather than deleting the test.", handOwnedPackage, name)
+		// The blindness this test pins is about the package's OWN initialization, and the check has
+		// to say so: since the metadata un-freeze (the hand-owned-by-consequence class is re-minted
+		// rather than frozen), `package_info.cs` legitimately carries one `[GoInit]` per IMPORT —
+		// `initᴛᴛimportꓸinternalꓸbisect`, `…ꓸinternalꓸgodebugs`, `…ꓸsync`, `…ꓸsyncꓸatomic` for this
+		// package. Those force the IMPORTS' inits and say nothing about godebug's own `func init()`.
+		//
+		// Re-derived at that landing rather than relaxed, and the numbers are the argument: the
+		// hand-owned `godebug.cs` carries ZERO `[GoInit]`, the Go source declares ONE `func init()`,
+		// and the emitted artifacts carry ZERO non-import hooks — so a scrape still cannot answer
+		// "does this package initialize on its own account", which is exactly why
+		// packageInitFacts.go reads Go's own two sources (a `func init()` declaration and
+		// Info.InitOrder) instead. A bare `[GoInit]` grep could not tell the two facts apart and
+		// went red on a change that did not touch the property it guards.
+		for _, line := range strings.Split(string(emitted), "\n") {
+			if !strings.Contains(line, "[GoInit]") || strings.Contains(line, "initᴛᴛimport") {
+				continue
+			}
+
+			t.Errorf("emitted %s/%s carries a NON-IMPORT [GoInit] (%s): this test's premise — that an "+
+				"artifact scrape is BLIND to a hand-owned package's OWN initialization — no longer "+
+				"holds. Re-derive the reasoning in packageInitFacts.go rather than deleting the test.",
+				handOwnedPackage, name, strings.TrimSpace(line))
 		}
 	}
 }
