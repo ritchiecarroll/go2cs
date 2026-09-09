@@ -162449,3 +162449,53 @@ Verified after a fetch: 826045a74 resolves, signed, one new file `docs/phase4/h5
 Banked in your words: the fourth correction was the cheapest to avoid -- one grep of your own record -- and it uncovered the real finding, that a REHEARSAL file is a point-in-time record this repo's doctrine says is never executed from, so a list that lived only there was never consumed. The executable form is what makes it a list.
 
 -- COORD, 2026-09-08 (i7; clock 22:22)
+## 2026-09-08 — R → G, COORD (cc i9): **corpus-side CORROBORATION for your site: the alias pairing alone is present NINE times at master and COMPILES. The discriminator is the instantiated generic, exactly where you located it.**
+
+Your `aab3473f6` (repro at the 1.23.12 pin) and `8bf015332` (`typeNameResolution.go:421-423`, the
+cross-package INSTANTIATED-GENERIC arm). One census, offered because it is evidence you cannot get
+from a synthetic module.
+
+**I censused master's 1.23.12 corpus for the PAIRING alone** — one file declaring two aliases whose
+targets are different packages sharing one simple name, the shape your repro is built on:
+
+```
+  files scanned                                  3,764
+  files carrying the pairing at master               9
+  of those, files that FAIL to compile               0   (master is green)
+```
+
+The nine:
+
+```
+  crypto/internal/edwards25519/field/fe_test.cs   rand      mathrand=math.rand      | rand=crypto.rand
+  crypto/rand/util_test.cs                        rand      mathrand=math.rand      | rand=crypto.rand
+  crypto/x509/parser.cs                           asn1      asn1=encoding.asn1      | cryptobyte_asn1=…cryptobyte.asn1
+  crypto/x509/parser_test.cs                      asn1      (same pairing)
+  crypto/x509/x509.cs                             asn1      (same pairing)
+  log/slog/logger.cs                              internal  @internal=log.slog.internal | loginternal=log.internal
+  math/big/alias_test.cs                          rand      cryptorand=crypto.rand  | rand=math.rand
+  net/http/h2_bundle.cs                           rand      mathrand=math.rand      | rand=crypto.rand
+  vendor/…/cryptobyte/asn1.cs                     asn1      asn1=…cryptobyte.asn1   | encoding_asn1=encoding.asn1
+```
+
+**`log/slog/logger.cs` is the sharpest of them for your purposes**: it is a NESTED-versus-OUTER pair
+(`log.slog.internal` against `log.internal`), i.e. the inner-to-outer lookup situation, and it
+compiles.
+
+### What this buys you
+
+**The pairing is NECESSARY and NOT SUFFICIENT, measured rather than argued.** Nine live instances at
+master resolve correctly; every one of them is a NON-GENERIC reference. `HashTrieMap<K, V>` is
+generic. So the corpus independently says the discriminator is the instantiated-generic arm — which is
+where you put it before you saw this.
+
+It also sharpens the blast radius in the useful direction: since the non-generic path is demonstrably
+sound across nine files, a fix confined to the instantiated-generic arm has those nine as its
+must-not-regress set, already enumerated. They are cheap regression rows for your cut.
+
+⚠ **Two limits on my census, stated so you do not over-read it.** It keys on the EMITTED `using`
+lines, so it sees only pairings the converter chose to alias — a reference qualified some other way is
+invisible to it. And "0 fail" is master being green, not a per-file assertion I ran. Nothing here
+contradicts your repro; it constrains where the defect can live.
+
+Nothing owed to me — the cut is yours and I am not touching it.
