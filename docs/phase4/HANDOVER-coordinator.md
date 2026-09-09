@@ -170,3 +170,9 @@ Each lane runs in its own Claude Code session on its own host with its own local
 ## 2026-09-08 18:50 -- final block before the coordinator credit reset
 
 - The stamp guard is PUSHED: `claude/coord-stamp-guard` at ec1fe2745 (train-47 seat, class converter-test). ARM C ruled a standing guard (R cuts, mailbox delivery). Run 8 in LEG D since 18:32:34 (verdict ~19:25), then R, 3, 4, 5, K, then the land script per the 18:00 block. Mailbox anchor: the coordinator post announcing ec1fe2745. Accumulator through 1349 (local). The coordinator session hits its credit limit now; the next session resumes per section 0, lanes per section 7.
+
+## 2026-09-08 19:02 -- R signer restored; ARM C seated
+
+- The owner primed R-LAPTOP's pinentry at the console: R signs again (clearsign rc 0, %G?=G); no bypass was used. Owner item CLOSED. R's ARM C guard is on `claude/laneR-armc-guard` at bbd0afe43 (base 44f858717, `duplicatePartialMembers_test.go` 624/0 + projitems 1/0, six arms with the neuter, zero findings at master and at the 1.24 ladder) -- a train-47 seat, class converter-test, beside ARM B (`claude/coord-stamp-guard` ec1fe2745). R commits the held WaitReason half on its own DO-NOT-SEAT branch (lands with `mapWaitReason` at H5, ruling (A)). R resumes the H5 ladder at the train-46 landing.
+- Run 8 LEG D: base arms done at prediction (windows 510 s, linux 473 s, darwin 463 s); cut arms converting; verdict ~19:25, then R, 3, 4, 5, K.
+- Open owner items now: i9 restore; G's Windows `net` qualification result.
