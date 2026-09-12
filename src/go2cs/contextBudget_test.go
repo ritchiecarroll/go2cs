@@ -9,6 +9,10 @@
 package main
 
 import (
+	"bytes"
+	"crypto/sha1" //nolint:gosec // git object names ARE SHA-1; this reproduces git's hash, not a security digest
+	"encoding/hex"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -54,6 +58,21 @@ const (
 	// contextJournalPath is the byte-identical pre-split CLAUDE.md. Every rule that reads thin in
 	// its new home has its full dated derivation here, so the split lost nothing.
 	contextJournalPath = "docs/doctrine/JOURNAL-2026-09-12.md"
+
+	// contextJournalBlob is the git object name the journal MUST hash to: it is the very same
+	// object as CLAUDE.md@1800b04f8, the commit before the split. That identity is the whole value
+	// of the file -- it is what makes the journal a PROOF rather than another copy. Until
+	// 2026-09-12 nothing asserted it: TestContextBudgetJournalPresent checked existence and a
+	// minimum size, so the journal could be appended to, edited, or truncated to 600 KB and the
+	// suite stayed green, while every distilled rule's claim to be recoverable quietly stopped
+	// being true. The SHA was verified by hand on each commit of the split, which is exactly the
+	// "lives in attention rather than in a guard" failure this file exists to prevent.
+	//
+	// NEVER APPEND TO THE JOURNAL. It is a frozen point-in-time object, not a running log. New
+	// doctrine goes to a rule, a skill or a record (see the routing table in CLAUDE.md); material
+	// that was never in the pre-split CLAUDE.md -- batch19's 1,355 lines, for instance -- has its
+	// own loss-proof in its own git objects, not here.
+	contextJournalBlob = "4730713b8ae419aa4282379cad291e9f97ea8380"
 )
 
 var htmlCommentPattern = regexp.MustCompile(`(?s)<!--.*?-->`)
@@ -259,4 +278,36 @@ func TestContextBudgetJournalPresent(t *testing.T) {
 			"CLAUDE.md -- it looks truncated rather than complete",
 			contextJournalPath, info.Size(), minimumJournalBytes)
 	}
+
+	// Size and existence do not make the journal a proof; BLOB IDENTITY does. Hash it the way git
+	// does and require the object name the pre-split CLAUDE.md had.
+	if got := gitBlobName(t, contextJournalPath); got != contextJournalBlob {
+		t.Errorf("the doctrine journal %s hashes to %s, not %s.\n"+
+			"It is supposed to be the SAME GIT OBJECT as CLAUDE.md@1800b04f8 -- that identity is\n"+
+			"what makes every distilled rule's derivation recoverable, and it is the only property\n"+
+			"of this file that matters. If you appended to it: don't. The journal is frozen.\n"+
+			"Route new doctrine per the table in CLAUDE.md (safety floor / rules / skills / records).\n"+
+			"If you edited or reflowed it: restore with `git checkout %s -- %s`.",
+			contextJournalPath, got, contextJournalBlob, contextJournalBlob[:9], contextJournalPath)
+	}
+}
+
+// gitBlobName reproduces `git hash-object` for a text file: sha1("blob <len>\x00" + LF-normalized
+// content). The normalization is not optional -- the repo checks out with core.autocrlf=true, so
+// the journal is CRLF on disk (770,694 bytes) while its blob is LF (762,859). Hashing the bytes as
+// they sit on disk would fail on every Windows checkout and pass on Linux, which is a guard that
+// reports the platform rather than the file.
+func gitBlobName(t *testing.T, relative string) string {
+	t.Helper()
+
+	raw, err := os.ReadFile(filepath.Join(repoRootFromPackageDir(t), filepath.FromSlash(relative)))
+
+	if err != nil {
+		t.Fatalf("cannot read %s: %v", relative, err)
+	}
+
+	content := bytes.ReplaceAll(raw, []byte("\r\n"), []byte("\n"))
+	digest := sha1.Sum(append([]byte(fmt.Sprintf("blob %d\x00", len(content))), content...)) //nolint:gosec
+
+	return hex.EncodeToString(digest[:])
 }
