@@ -21,7 +21,13 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
      rule reads thin, when you need the incident or the number behind it, or when you are about
      to design an instrument in one of these areas, READ THE DERIVATION BLOCK under its section.
      It costs nothing until you open it, and it is where the variants, the retractions and the
-     second derivations live. -->
+     second derivations live.
+     BATCH19 MERGED 2026-09-12: the fifteen doctrine hunks the extraction map routes here from
+     origin/claude/coord-doctrine-batch19 (commits 24bfc8304 / c5e17217b / e9e56b657, items
+     1154-1321, all PURE INSERTIONS into the pre-split CLAUDE.md) are folded in -- most as NEW
+     INSTANCES of rules already stated, whose dated narratives sit at the END of the relevant
+     DERIVATIONS block under a "BATCH19" banner; where an instance widened, completed or corrected
+     a rule the visible line says so and BOTH narratives are kept. -->
 
 ## Configuration is part of the verdict
 
@@ -52,8 +58,13 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   ASSIGNABILITY, enforce at REGISTRATION, never swallow a BINDING failure.
 - **An agreeing failure on an ABSENT HOST CAPABILITY masks a question; agreement on shared semantics answers
   one** — name the capability and tests on the row and proof page; a second host in the same state gives
-  reproducibility, never coverage. **Read the RECORD, not your own SUMMARY**, and **read the test's OWN
-  SOURCE before framing its failure mode.**
+  reproducibility, never coverage, while a host that DIFFERS on that axis retires the caveat and earns a
+  DATED coverage line: the row's COMPOSITION changes where its matched COUNT stands. **Never write a host's
+  capability into a record from a count that is INVARIANT across the axis it describes** — every number in
+  the clause can be right while the clause is wrong, because rows that move with the capability move on BOTH
+  sides; read the SET, probe the capability directly, and state an unreconciled contradiction AS
+  unreconciled. **Read the RECORD, not your own SUMMARY**, and **read the test's OWN SOURCE before framing
+  its failure mode.**
 
 <!-- DERIVATIONS (configuration, finalizers, agreement vs coverage) — Phase 1 text, verbatim:
 - **⚠ THE MEASUREMENT CONFIGURATION IS PART OF THE VERDICT — the `-tests` pipeline publishes DEBUG
@@ -231,6 +242,28 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   mis-framed artifact and a headline figure that should have been 29 rather than 28 — **a number it and
   the coordinator had quoted four times.** The next person to quote a figure quotes the writers, not the
   artifact.
+
+  ===== BATCH19 (24bfc8304 / c5e17217b / e9e56b657, merged 2026-09-12) — verbatim =====
+  These two COMPLETE the agreement-vs-coverage pair above: the first supplies the case the rule above
+  could only describe in the negative (a second host that DOES differ on the axis), the second is a new
+  trap in its own right and is now stated visibly.
+  ⚠ **A SECOND HOST HOLDING THE PRIVILEGE CHANGES A ROW'S COMPOSITION WHILE ITS COUNT STANDS**
+  (2026-09-08): `os` on the i7 read Go 665 pass + 20 skip with ZERO failures, against the bank
+  host's 645 + 32 + 8 agreeing symlink-privilege failures — **683 matched either way**, but the
+  eight tests RAN and PASSED on both sides here, so the roster's "no second host has read this row"
+  caveat becomes describable and gains a dated coverage line. Two hosts agreeing is evidence about
+  coverage only when they DIFFER on the axis in question; these did.
+  ⚠ **A PROVENANCE CLAUSE INFERRED FROM A COUNT THAT IS INVARIANT ACROSS THE AXIS IT DESCRIBES CAN
+  BE WRONG WHILE EVERY NUMBER IN IT IS RIGHT** (2026-09-08): the `os` proof page's clause said the
+  i7 "also lacks" the symlink privilege because its `683 matched / 2 disclosed` matched the bank
+  host's — but all twenty rows that move with the privilege move on BOTH sides (8 agreeing fails
+  become passes, 12 skips become passes), so 683 CANNOT discriminate the hosts and the SET was never
+  read. A fresh reading contradicted it, and a two-line probe (the symlink call succeeds in the
+  sweep's own shell, though the token lists no such privilege and the developer-mode value is
+  absent) SUPERSEDED the clause for that host, stated as a dated reconciliation with "whether the
+  state differed then is not recoverable". **Read the SET before writing a host's capability into a
+  record**; the seat that found the contradiction stated it UNRECONCILED rather than resolving it by
+  inference.
 -->
 
 ## Host qualification
@@ -241,10 +274,20 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   name, names print either way; Go 1.23.12's `TestLookupCNAME` is such a leaf. `.`-source the criterion block
   and control it in four arms against the LIVE block — **a warn-and-continue switch is the lie-lever shape.**
 - **A live PUBLIC DNS assertion is universal drift once three independent resolvers agree.** **A lane never
-  changes a host's system configuration on its own initiative**: relay, then RE-qualify. **A count borrowed
-  across boxes is re-measured on the box that will score it**; **a first-run failure that does not recur is a
-  HOST ARTIFACT**, never a disclosure; **counts differing between hosts are read against the record's
-  HOST-CONDITIONAL ENTRY.**
+  changes a host's system configuration on its own initiative**: relay, then RE-qualify — and **an
+  unqualified authorization given in ONE context does not self-extend to a DISTINCT ENVIRONMENT on the same
+  box** (a WSL root is not the Windows host): ask for the one line. **A count borrowed
+  across boxes is re-measured on the box that will score it** — a number from ANOTHER box is not a baseline
+  at all; **a first-run failure that does not recur is a HOST ARTIFACT**, never a disclosure; **counts
+  differing between hosts are read against the record's HOST-CONDITIONAL ENTRY.**
+- **An E2 sweep reports its failures AS THE HOST with the cause quoted, and calls them UNDECIDED rather than
+  CLEARED** — an E2 reading binds to the host that measured it, a test that asks the live internet measures
+  the internet, and a roster name absent from `go list std` ERRORS instead of failing as an oracle, so
+  resolve all of them BEFORE sweeping. **A one-run oracle verdict on a networked, DOMAIN-JOINED host is wrong
+  in EITHER direction and the ELAPSED TIMES are the tell** (1.05 s pass vs 21.2 s fail, same host, forty
+  minutes apart): an E2 candidate owes a showing that its failure is NOT the environment, and one red is not
+  that showing. **A `skip` is recorded as NO TEST RAN, never as a pass**, and a failing line carrying a
+  domain, account, profile path or SID is NOT quoted.
 
 <!-- DERIVATIONS (host qualification) — Phase 1 text, verbatim:
 - **⚠ HOST QUALIFICATION for a network row: preflight `go test -count=1 net` BEFORE any net-family run
@@ -273,6 +316,46 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   between two hosts is read against the record's own HOST-CONDITIONAL ENTRY before either reading is
   called a regression** (2026-09-05): `os/exec` reading 86+2 on a single-file container host IS that
   entry — `TestExtraFiles` fires where fds 3..100 are held — against 87+1 on the fleet's bank host.
+
+  ===== BATCH19 (24bfc8304 / c5e17217b / e9e56b657, merged 2026-09-12) — verbatim =====
+  The authorization-scope half WIDENS the "never change a host's configuration on your own initiative"
+  rule above (the same reasoning, one environment further out) and is now carried in it; the E2 sweep
+  entries are new operational rules, stated visibly. The branch-retention twin below is mailbox/merge
+  material kept here because it arrived in this hunk and evidence is never dropped.
+  ⚠ **AN UNQUALIFIED AUTHORIZATION GIVEN IN ONE CONTEXT IS NOT SELF-EXTENDED TO A DISTINCT ENVIRONMENT ON
+  THE SAME BOX** (2026-09-08, G): "you are authorized to install .NET 10" arrived in a Windows-blocked
+  context, and a WSL root is a distinct environment — so the lane asked for the one-line confirmation
+  rather than assuming. **Its branch twin: a pruned-by-ruling branch is KEPT when its content exists
+  nowhere else** — the mailbox is transport, a SHA in a post is one `gc` from unfetchable, and the branch
+  is what makes the finding checkable.
+  ⚠ **AN E2 SWEEP REPORTS ITS FAILURES AS THE HOST, WITH THE CAUSE QUOTED, AND CALLS THEM UNDECIDED
+  RATHER THAN CLEARED** (2026-09-08): 227 packages at go1.24.13 on windows/amd64, 225 pass; `os`
+  fails 161 symlink leaves (the privilege measured read-only — not elevated, no privilege, no
+  developer mode, and nothing changed silently) and `net` fails 27 DNS leaves from THREE host causes
+  (a resolver mis-answering NXDOMAIN, a container's extra PTR name, the CDN-drifted CNAME). Both
+  sets reproduced identically on a second run with a planted-difference control. Three rules: **an
+  E2 reading binds to the host that measured it**; a roster name absent from `go list std` ERRORS,
+  which is not an oracle that fails, so resolve all 227 BEFORE sweeping; and a test that asks the
+  live internet measures the internet. The i7, which holds symlink creation, settled `os` the same
+  hour (PASS 1096/0/24) — two hosts differing on exactly the axis in question.
+  ⚠ **A HOST-QUALIFICATION PROBE RUN ON A SECOND HOST NARROWS THE CAUSE SET** (2026-09-08):
+  R-LAPTOP's `net` at go1.24.13 read 26 failing leaves, deterministic (two full runs, set difference
+  0 both ways, the compare positive-controlled by planting one leaf), collapsing to TWO roots — the
+  ledgered CDN-drifted `TestLookupCNAME` and 25 `TestLookupNoSuchHost` leaves from a resolver that
+  SYNTHESISES instead of answering NXDOMAIN. The other host's third cause (`TestLookupLocalPTR`)
+  PASSES here, so it travels with the container, not with Windows or the release. Zero E2 members;
+  **`net` stays UNDECIDED because no fleet host has a conforming resolver**, and changing one is the
+  OWNER's system-settings call, recorded as an ask rather than done under a measurement. A figure's
+  provenance offered by its author changes nothing about a same-box rule: **a number from ANOTHER
+  box is not a baseline at all.**
+  ⚠ **A ONE-RUN ORACLE VERDICT ON A NETWORKED, DOMAIN-JOINED HOST CAN BE WRONG IN EITHER DIRECTION**
+  (2026-09-08): `os/user` PASSED at go1.24.13 (1.05 s) and FAILED at go1.23.12 (21.2 s) on ONE host
+  forty minutes apart — one test on a domain-trust timeout, the ELAPSED TIMES the tell — so an E2
+  candidate on such a host needs its failure shown NOT to be the environment, and a single red is
+  not that showing (an unprompted companion sweep at the corpus pin read 200 of 204 sound, three
+  host-attributable). The failing line was NOT quoted, because it carried the domain, the account, a
+  profile path and a SID — the security order applied by the lane on its own. And `internal/pkgbits`
+  reporting `skip` is recorded as **no-test-ran**, never as a pass.
 -->
 
 ## Controls: a gate that has never been made to fail proves nothing
@@ -316,6 +399,9 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   insurance arm is measured against the LEGAL values it must pass before it throws** (`struct{}` has zero
   fields, `[0]T` is legal Go: discriminate by SIZE). **A PASS THAT CANNOT FAIL IS NOT A PASS, and the honest
   answer names WHICH**: "this row structurally CANNOT see it" beats "no", recorded beside the CAPABILITY.
+  **Lift a capability gate only where the HOST'S IMPLEMENTATION makes the assertion CAPABLE OF FAILING,
+  never because the host DECLARES a member of that name** — red versus vacuously green is exactly what a
+  name-keyed widening cannot see.
   **Displacement of a generated stub is proven by WRITE-EVIDENCE, never by absence**, and **a fixpoint needs
   its demotion STICKY**, with a pass-count/oscillation guard.
 - **Three ways a guard is green without measuring anything.** It tests the COMMENT instead of the CONDITION —
@@ -325,6 +411,23 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   where the pre-fix behaviour is a REFUSED CALL. **A guard written alongside its fix shares the fix's model
   and can only confirm it** — only an instrument its author did not write caught either of two wrong models —
   and **the mtime-moved assertion separates a rebuilt binary from a leftover.**
+- **A PLANT THAT FIRES PROVES THE GATE FIRES, NOT THAT IT DISCRIMINATES** — a refusal proves the gate caught
+  the TOKEN only if an IDENTICALLY SHAPED plant carrying a HARMLESS token reads CLEAN; without that paired
+  arm an over-fusing joiner refuses every shape and every "it fires" still reads PASS, so more shapes measure
+  the same one thing. **Measure a pass's redundancy by BUILDING THE GATE WITHOUT IT and running the plants
+  through both**: a pass that is the only catcher for a class owes a SELF-PROOF on every run, not more arms.
+- **ONE ARM ASSERTING TWO HALVES PASSES WHEN EITHER HALF IS TRUE** — split a guard into "is the PREDICATE
+  right" and "does the caller CONSULT it", negative controls firing DISJOINT arm sets; **a door proven
+  CORRECT on one platform is not proven WIRED there**, so host-gate the wiring arms and say they are owed.
+  **A guard line printing a BOOLEAN against a HARDCODED copy of the oracle's text is a vacuous pass in
+  waiting**: reword the oracle and both sides print `false` and MATCH, equal for OPPOSITE reasons, and the
+  golden banks it — print the RECOVERED VALUE, let the two sides compare strings, give each non-string
+  outcome its own marker, and give an identity arm its DISCRIMINATING complement (different function,
+  different pointer) or a constant-pointer implementation passes it.
+- **A NARROWING COMMIT CENSUSES WHICH ASSERTIONS THE REMOVED LINES CARRIED, NOT ONLY WHICH ROWS** — narrowing
+  a guard's rows for one defect silently deletes another defect's ONLY coverage, the silent-subtraction class
+  inside a commit whose message is about something else, and the nearest-looking substitute exercises the
+  OTHER band. **A census output that says "empty means no guard" is read for its RESULT, not its label.**
 
 <!-- DERIVATIONS (controls, guards, vacuous greens) — Phase 1 text, verbatim:
 - **A gate that has never been made to fail proves nothing.** Before trusting a census/self-verify that
@@ -566,6 +669,68 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   from the wrong cwd fails, and the alias read from the STALE binary the previous broken run left was
   nearly banked as a pass — **the mtime-moved assertion is what separates a rebuilt binary from a
   leftover.**
+
+  ===== BATCH19 (24bfc8304 / c5e17217b / e9e56b657, merged 2026-09-12) — verbatim =====
+  The first four are NEW VISIBLE RULES above (the paired plant, the pass-redundancy build, the split
+  conjunctive guard, the boolean-against-hardcoded-oracle line, the narrowing census); the capability-gate
+  entry AMENDS the "A PASS THAT CANNOT FAIL IS NOT A PASS" rule with the criterion for LIFTING a gate.
+  ⚠ **A REFUSAL PROVES A GATE CAUGHT THE TOKEN ONLY IF AN IDENTICALLY SHAPED PLANT CARRYING A HARMLESS
+  TOKEN READS CLEAN** (2026-09-08, i9, the split-token gate day): four lanes probed their gates with
+  eight, six, seven and six shapes and every probe measured the same ONE thing — that the plant FIRES —
+  and none measured WHY; a joiner that fused text too aggressively would refuse everything split across
+  lines and every "it fires" would still read PASS. **The PAIRED control (protected token → REFUSED;
+  harmless token in the same split shape → CLEAN) is what makes a shape probe a measurement of the
+  DETECTOR rather than of the joiner.** Companions from the same day: a two-line joiner passes a
+  THREE-WAY split while refusing the two-line case, and the blank-line paragraph break is the commonest
+  break in prose and none of four lanes had named it until one did.
+  ⚠ **A PASS ADDED TO A GATE FOR ONE CLASS IS A SINGLE POINT OF FAILURE FOR THAT CLASS, AND THE WAY TO
+  SEE IT IS TO BUILD THE GATE WITHOUT THE PASS AND RUN THE PLANTS THROUGH BOTH** (2026-09-08, i9/R): a
+  line-pass-only variant — the join block removed, the variant ASSERTED to differ from the subject before
+  any verdict — took eleven plants: the split identifier in four shapes was caught by the JOINED pass
+  ALONE, while wrapped PATHS were caught both ways, because a real path carries several triggering
+  substrings and one line break separates only one pair. So the redundancy offered as the difference
+  between two gates was real for paths and ABSENT for the class the join exists for: had the join broken
+  silently, as a sibling's had that same morning, four shapes would have passed clean. **The remedy is a
+  SELF-PROOF of the join — a known split plant that must refuse on every run — rather than more arms.**
+  ⚠ **A CHOKE POINT IS DERIVED TWO WAYS BEFORE A DOOR IS PLACED AT IT, AND THE DISPATCHED SITE IS
+  CORRECTED RATHER THAN OBEYED** (2026-09-08): a token door dispatched at one of EIGHT entry points
+  was placed one frame lower at the private dispatcher — exactly ONE call site in the file, through
+  which every native invocation routes — so one loop covers all eight entries and the call TARGET is
+  checked too. The guard SPLITS into "is the PREDICATE right" (9 arms) and "does the trampoline
+  CONSULT it" (4 arms), because one arm asserting both PASSES when either half is true, with four
+  negative controls firing DISJOINT arm sets. **And a door proven CORRECT on one platform is not
+  proven WIRED there**: reaching the dispatcher runs the windows module initializer, so the four
+  wiring arms are host-gated and owed on Windows.
+  ⚠ **A STDOUT-COMPARED GUARD LINE THAT PRINTS A BOOLEAN AGAINST A HARDCODED COPY OF THE ORACLE'S
+  TEXT IS A VACUOUS PASS IN WAITING** (2026-09-08): if the oracle rewords the panic, the Go side
+  prints `false`; a body raising anything else prints `false` too; the two lines MATCH and the
+  golden banks the vacuous `false` as the contract — two arms equal for OPPOSITE reasons. **Print
+  the RECOVERED VALUE and let the two sides compare strings**, so the file carries no assumption
+  about the pin's wording, and give the non-string outcomes (failed to refuse; refused with a
+  managed exception) DISTINCT markers, since they are different defects. And an identity arm (same
+  function, same pointer) needs its DISCRIMINATING complement (different function, different
+  pointer), or a constant-pointer implementation passes it. Both found by reading the guard against
+  the tree's own rules before any run.
+  ⚠ **THE GATE FOR LISTING A TEST CAPABILITY IS "DOES THE HOST'S IMPLEMENTATION MAKE THE ASSERTION
+  CAPABLE OF FAILING", NEVER "DOES THE HOST DECLARE A MEMBER OF THAT NAME"** (2026-09-08): censused
+  over the 204 committed proof pages, the allow-list gates 44 declarations (testing 38, os 4,
+  net/http 1, math/big 1) and **ZERO are liftable** — 19 reach unexported internals of a
+  hand-written host, 17 are free-text capability reasons, and the 8 exported-member candidates split
+  into 2 that would not COMPILE and 6 that would pass VACUOUSLY (a parallel-benchmark body never
+  invoked, its iterator always false, a sub-benchmark returning true without running the body, a
+  calibration returning at its first line). The lane's own prediction that one row would go RED was
+  refuted by Go's source: **red versus vacuously green is exactly the distinction a name-keyed
+  widening cannot see.**
+  ⚠ **NARROWING A GUARD'S ROWS FOR ONE DEFECT CAN SILENTLY DELETE ANOTHER DEFECT'S ONLY COVERAGE — the
+  silent-subtraction class inside a commit whose message is about something else** (2026-09-08, G): a
+  narrowing of `SwitchPointerSentinelCase`'s A rows to compile shape removed the two lines that were
+  another defect's ONLY assertion (a `uintptr` declared with a SIGNED-band literal, printed through the
+  element-address helpers), while the commit that fixed that defect had done so through source that
+  already existed and added no row. The nearest-looking substitute exercises the UNSIGNED-parse band,
+  which always carried the rule — a plausible neighbour covering the WRONG band. Two rules: **a narrowing
+  commit censuses which ASSERTIONS the removed lines carried, not only which ROWS**; and **a census
+  output that says "empty means no guard" is read for its RESULT, not its label** (the lane's own line
+  said empty while the output was not).
 -->
 
 ## Arms and attribution
@@ -832,8 +997,12 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   "Followed by `(`" as a proxy for "is code" is a predicate of its own and needs its own control, since a
   comment can QUOTE a call: a figure can be RIGHT BY ARITHMETIC and WRONG BY DERIVATION, and **a
   reconciliation that merely FITS is refused as a disclosure on resemblance is.** **Key a census on the
-  CONSTRAINT, not the name**, **state a gate as the PROPERTY the emission needs, never a spelling**, and
-  **re-read the CITED LINE's own notation before claiming to falsify it.** **A census number travels with its
+  CONSTRAINT, not the name** — a name-keyed count misses every member the name does not cover, a PACKAGE
+  claim read from ONE FILE is not a census, and the count is PRINTED BEFORE a ruling quotes the number.
+  **State a gate as the PROPERTY the emission needs, never a spelling**: a SYNTACTIC enumeration of operand
+  shapes misses the one nobody listed (an address-of label is a unary expression), where screening on the
+  `go/types` TYPE clears every shape with ONE predicate. **Re-read the CITED LINE's own notation before
+  claiming to falsify it.** **A census number travels with its
   UNIT, and a reconciliation RE-DERIVES the other instrument's number rather than POSITIONING it.**
 - **When a helper documents the N renderers that must spell a thing ONE way, census all N**: the renderer that
   never got the spelling IS the defect. **A switch arm returning for ONE pointee kind lets every other kind
@@ -849,6 +1018,11 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   census a blocker post across the WHOLE build output, not the file its first error names. **"The stamp is
   there" is not "the stamp is read"**: give the sites that share an implicit rule ONE named predicate and
   assert the OUTPUT. **A fix can silently do NOTHING when an accessor materializes a DETACHED COPY.**
+- **READ THE FALL-THROUGH BEFORE MEASURING THE ARMS** — where the predicate is FALSE the value does not stop,
+  it lands in the next branch and can be answered WRONGLY AND SILENTLY there, so the arms are designed from
+  the code's own fall-through, not from the arm list. **Predict PER ARM with the SCOPE named** (a zero on one
+  arm is a statement about the harness's population, not about the corpus), and **NAME the arm that carries a
+  built-in positive control** — if nothing drives that arm above zero the census never ran at all.
 
 <!-- DERIVATIONS (census predicates, renderers, nulls and blockers) — Phase 1 text, verbatim:
   **⚠ PREDICATE DISCIPLINE FOR A CENSUS — every count in one table is derived under ONE stated
@@ -918,6 +1092,39 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   call, and the control that finds it asserts the OUTPUT, not the artifact. Its golib twin: **a fix
   can silently do NOTHING** when an accessor materializes a DETACHED COPY of the storage — every write
   lands on a throwaway object and every read misses, with no error anywhere.
+
+  ===== BATCH19 (24bfc8304 / c5e17217b / e9e56b657, merged 2026-09-12) — verbatim =====
+  The first is a NEW INSTANCE of "key a census on the CONSTRAINT, not the name" and sharpens it with two
+  clauses now carried visibly (one file is not a package claim; print the count BEFORE the ruling quotes
+  it). The second is a new instance of "state a gate as the PROPERTY the emission needs, never a
+  spelling", with the go/types screen named visibly; its two companions are kept here in full. The third
+  is the new visible "READ THE FALL-THROUGH BEFORE MEASURING THE ARMS" rule.
+  ⚠ **A NAME-KEYED CENSUS MISSES THE MEMBERS THE NAME DOES NOT COVER, AND ONE FILE WAS READ FOR A
+  PACKAGE CLAIM** (2026-09-08): `internal/sync` has EIGHT bodyless partials, not six — two carry no
+  `runtime_` prefix, and a third lives in a different file from the one read. **7 + 1 is visibly not
+  6**, and the count was printed only AFTER the ruling had quoted the number; the two missed members
+  belong to another lane's fatal-path class with a SECOND SITE at the new release, and were NAMED
+  rather than silently adopted into the hand-own.
+  ⚠ **A TYPE-BASED SCREEN COVERS EVERY OPERAND SHAPE WHERE A SYNTACTIC ENUMERATION MISSED ONE**
+  (2026-09-08): a switch-lowering screen listed identifier, selector and index expressions, and an
+  ADDRESS-OF label is a unary expression, so it fell THROUGH; screening on the label's `go/types`
+  TYPE (a pointer can never be a constant pattern) clears both diagnostics with ONE predicate, and
+  the guard GREW to carry both operand shapes — because the field-address form, the one the real
+  source has, would have kept emitting the wrong lowering under a bare-identifier-only guard. Two
+  companions: **a behavioral guard's `go.mod` must not trigger a toolchain DOWNLOAD** (a newer `go`
+  directive made the oracle fetch; pinned like its siblings, and under `GOTOOLCHAIN=local` it would
+  have failed outright); and the corpus's ProjectReference CONDITION SET is CLOSED — 2,651
+  unconditioned, 56 linux, 45 darwin, 23 windows, no negations, no AND/OR, and no output-type group
+  enclosing a reference — which makes a fold's GOOS conditioning PROVABLE rather than heuristic.
+  ⚠ **READ THE FALL-THROUGH BEFORE MEASURING THE ARMS** (2026-09-08, C2): `IsTokenArithmetic` masks the
+  low 32 bits and requires `allocationBase != number`, so it is FALSE when the number IS the base (offset
+  0) — a cross-type resolve at offset 0 therefore falls PAST the arithmetic refusal to `new
+  NativeBox<T>((nuint)value.Value)`, a native box over a TOKEN, answering the write case wrongly today
+  and silently. That was read out of `ж.cs:700` BEFORE the four-arm census was wired at the registry
+  (caller-supplied values, no stack walk), predicted per arm with the SCOPE named — a GolibTests zero on
+  one arm is a scope statement, the corpus population owed to a Windows box — and the arm carrying a
+  built-in positive control was NAMED, since the refusal tests must drive arm 3 above zero or the census
+  never ran.
 -->
 
 ## Predictions
@@ -971,7 +1178,16 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   "unverified" written WITHOUT LOOKING, which hides better; a CALL SITE cited without reading the CALLEE (the
   site PANICS on its first line, the callee returning an INERT NIL); a finding routed from a lane's PROSE
   instead of the record; a check quoted without its COUNTING METHOD; a ruling premise quoted from doctrine
-  instead of read AT THE TREE. **A ruled measurement can be satisfied by a READ.**
+  instead of read AT THE TREE. **A ruled measurement can be satisfied by a READ** — a width claim in a
+  comment costs ONE `GOOS=windows GOARCH=386 go build` and stops being an argument.
+- **TWO TRUE FACTS AND AN INVENTED RELATION: CO-OCCURRENCE IS NOT A RELATION.** A missing hand-own and a
+  throwing stub in the same package are not "the hand-own bodies the stub" until one `git show` says which
+  symbol the file actually bodies — and the correction runs in BOTH directions, since the absence can cost
+  nothing while the real gap is a frontier item rather than staleness. **READ THE GREP: a count that
+  contradicts its own evidence line is the false-empty family's arithmetic member.** **A hazard named from
+  ONE LANE'S SOURCE READ can already be DISCHARGED in the tree the seat will be cut against** — read the
+  TREE before sizing the remedy, report what the tree cannot exhibit as UNMEASURED rather than guessing,
+  and LABEL an attribution inferred from a tree's state as inferred.
 - **A COMMENT THAT CLAIMS A BEHAVIOUR THE CODE LACKS READS AS THE CENSUS, and a faithful PORT propagates the
   claim** — the darwin twin inherited a missing `Wait4`/EINTR loop, one zombie per failed transfer. **A
   DELIBERATE NO-OP is the shape MOST likely to carry a documented reason**: `pprof_impl.cs`'s `_ = labels;`
@@ -1136,13 +1352,53 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   about its fitness now; the other three grounds were measurements. **And printing `n/a (failure path not
   entered)` rather than a green it did not measure is honest for a PROBE and disqualifying for a GUARD — a
   guard has no `n/a`.**
+
+  ===== BATCH19 (24bfc8304 / c5e17217b / e9e56b657, merged 2026-09-12) — verbatim =====
+  The first is a NEW INSTANCE of "bank the negative you MEASURED, not the one you reasoned to" (its
+  branch-standing companion is merge material, kept here because it arrived in this hunk). The second is
+  the new visible CO-OCCURRENCE rule. The third is a new instance of "a ruling premise quoted from
+  doctrine instead of read AT THE TREE", now carried visibly with the width-claim one-liner and the
+  read-the-TREE-before-sizing clause.
+  ⚠ **A MECHANISM MEASURED FALSE BEFORE POSTING** (2026-09-08, G): "the namespace empties" was one edit
+  from being posted as the cause of a peer's CS0246 on a bare `using` — 403 such usings classified across
+  the two releases name ZERO lost directories (`runtime/internal` keeps two packages at the newer
+  release, both in `go list std`), so the mechanism is the EMISSION half and was stated as its owner's
+  rather than guessed. Companion: **standing blocks drift** — 16 of one lane's 24 remote branches were
+  landed remnants by ancestry and its standing showed 5 live where 8 are; **classify by ancestry plus
+  `ls-remote`, never by memory.**
+  ⚠ **TWO TRUE FACTS AND AN INVENTED RELATION** (2026-09-08, R): a hand-own missing from a tree and a
+  throwing stub in the same package were linked by CO-OCCURRENCE — "the hand-own bodies the stub" — when
+  one `git show` would have read that the file bodies `syncTimer` while the stub (`runtimeNow`) is a Go
+  1.24 ADDITION no release of the corpus has ever bodied. The correction ran in BOTH directions: the
+  absence costs zero, and the real gap is a frontier item rather than staleness. Companion instrument
+  note: a per-release count expression printed 0 for BOTH releases beside a grep that plainly showed the
+  1.24 declaration — **read the grep; a count that contradicts its own evidence line is the false-empty
+  family's arithmetic member.**
+  ⚠ **A WIDTH CLAIM IN A COMMENT IS CHECKED, NOT ARGUED** (2026-09-08): a parameter's comment
+  claimed 32-bit representability, and `GOOS=windows GOARCH=386 go build` (rc=0) cost ONE command
+  and turned the claim into a measurement.
+  ⚠ **A HAZARD NAMED FROM ONE LANE'S SOURCE READ CAN ALREADY BE DISCHARGED IN THE TREE THE SEAT WILL
+  BE CUT AGAINST — read the TREE before sizing the remedy** (2026-09-08): one lane warned that
+  deleting a package's two fatal shims without bodying them in its companion would silently re-arm
+  the generated throwing stub at the new release; the other MEASURED that the ladder tree ALREADY
+  carries them as partial implementations in that companion, so the seat's action is a RETARGET of
+  two existing bodies, not a delete-plus-add. **The GENERATED STUB DIRECTORY is a one-listing oracle
+  for which partials are bodied** (`sync` holds exactly one stub file, `internal/sync` eight). A
+  question the tree cannot exhibit — which diagnostic a collision WOULD raise — is reported
+  UNMEASURED rather than guessed, and an attribution inferred from a tree's state is LABELLED as
+  inferred.
 -->
 
 ## Negative results, withdrawals and sizing
 
-- **The warm-design trap: the speculative branch is easiest to write while the design is still warm.**
-  Machinery you cannot make FAIL under its own control is DELETED with the measurement in a comment at the
-  site. **A negative result is BANKED — in CODE at the gate, or in the RECORD — where the next reader will
+- **The warm-design trap: the speculative branch is easiest to write while the design is still warm.** **RUN
+  THE FALSIFIER YOU YOURSELF NAMED BEFORE BUILDING THE REMEDY IT QUALIFIES** — a remedy sentence published
+  with its own falsifier three paragraphs below it is retired by that falsifier, at the cost of one filtered
+  run, and the design is WITHDRAWN UNBUILT. **PRICE THE OBVIOUS REPAIR BEFORE WRITING IT**: a repair can be a
+  TRUE corpus-wide structural finding and still not SAVE THE ROW, because the death one line later is
+  FAITHFUL — say which increment actually moves the verdict, and split a census PER COUNTER rather than per
+  family. Machinery you cannot make FAIL under its own control is DELETED with the measurement in a comment
+  at the site. **A negative result is BANKED — in CODE at the gate, or in the RECORD — where the next reader will
   stand**: a follow-up marked *measured wrong: 0 fixed, 1 broken*, or a fix CANCELLED WITH ITS MEASUREMENT
   ATTACHED. **A guard asserting MORE than its increment delivers is narrowed to the DELIVERED reach and the
   removed assertion banked as a NEGATIVE**, and **a cut whose only motivating failure is NON-REPRODUCIBLE is
@@ -1319,6 +1575,36 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   back decides admissibility with no corpus change and no host risk — and **positive-control it**: the
   arm that must go red is a pointer you EXPECT to move, so a "stable" verdict cannot come from a probe
   that could never observe movement.
+
+  ===== BATCH19 (24bfc8304 / c5e17217b / e9e56b657, merged 2026-09-12) — verbatim =====
+  Both are NEW INSTANCES of the warm-design trap, and both SHARPEN it: the first adds "run the falsifier
+  you named yourself, first"; the second adds "a true structural finding that does not save the row is
+  priced before it is written", plus the per-counter census split. Both clauses are now carried visibly
+  in the warm-design bullet.
+  ⚠ **A REMEDY SENTENCE PUBLISHED WITH ITS OWN FALSIFIER NAMED IS RETIRED BY THAT FALSIFIER BEFORE
+  ANYTHING IS BUILT** (2026-09-08, C2): a lane wrote "the 2a remedy is arm 3's refusal extended to offset
+  0" and, three paragraphs later, "falsifier (a): per site, does the test that reaches it pass" — ran it,
+  and it fired 8 of 8. Every 2a site PASSES at master, the project had RULED that shape three days
+  earlier as the same census's own loud form, so the arm was never an unremedied case and the design was
+  WITHDRAWN UNBUILT. Two mechanics: the verdicts were taken CENSUS-OFF (the instrument answers only WHICH
+  sites a filter reaches; the verdict of record is the uninstrumented tree's, and the perturbation's
+  DIRECTION — an extra `Resolve` cannot manufacture a PASS — is stated rather than assumed), and two
+  guessed site-owners were wrong twice with the owner found by measurement. **The warm-design trap
+  avoided by the falsifier-first habit, at the cost of one filtered run.**
+  ⚠ **THE OBVIOUS REPAIR WAS PRICED BEFORE IT WAS WRITTEN AND IT BUYS NOTHING** (2026-09-08, C1):
+  `TestLockOSThreadNesting`'s root is the hand-owned `LockOSThread` family as NO-OPS — one counter has
+  ZERO increment sites corpus-wide and the other three, all on the cgo extra-M path we emit OFF (the
+  census split PER COUNTER after catching its author's own draft claim) — so Go reads 1,0 where we read
+  0,0, and the goroutine's late `Log` then panics through a top-level test constructed with a NULL
+  parent. The natural repair (give top-level tests Go's root T so the Log is absorbed) is a TRUE
+  corpus-wide structural finding and **does NOT save the row**: Go's own `Fail` panics with no walk, ours
+  reproduces it, the host dies one line later and that death is FAITHFUL — only the counter saves the
+  row. Prediction on record before any run: accounting the two counters in the four hand-owned bodies
+  makes the test a matched pass and moves the wall past 185 WITHOUT clearing it. Two companion
+  corrections: the first two stderr lines are ONE guard (a fixed-size allocator asserting a size that was
+  NEVER initialised — the unreached-`schedinit` class, not a teardown), and a shipped comment claiming
+  honesty "by persistence" is FALSIFIED because the hand-own displaced the incrementing code. NOT
+  measured: no build, no run.
 -->
 
 ## Where a fix goes, and what an increment is worth

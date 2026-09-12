@@ -14,7 +14,10 @@ paths:
 
 <!-- PHASE 2 APPLIED 2026-09-12 (branch claude/context-diet). Every visible rule is traceable to Phase-1 text; every date,
      SHA, count, package name and named incident that was visible before is preserved in the comment beside the rule it
-     justifies. Nothing deleted. Byte-identical pre-split original: docs/doctrine/JOURNAL-2026-09-12.md. -->
+     justifies. Nothing deleted. Byte-identical pre-split original: docs/doctrine/JOURNAL-2026-09-12.md.
+     BATCH19 MERGED 2026-09-12: the items routed here from branch claude/coord-doctrine-batch19 (commits 24bfc8304 / c5e17217b /
+     e9e56b657, pure insertions into the OLD CLAUDE.md shape at anchors 3647 / 3761 / 4250) are folded in below — most as further
+     evidence under rules this file already carried, three as new or amended visible rules. -->
 
 ## What `src/core` holds
 
@@ -74,7 +77,9 @@ content differences). Seeding, the marker gate, the overlay rule and the phantom
 - **darwin COMPILES CLEAN**: its census is a cheap regression guard at any branch tip (`.github/workflows/os-matrix.yml`,
   `goos=darwin stage=census`), not a wall. What darwin lacks is a RUN layer: `docs/phase4/FINDING-darwin-run-layer.md`.
 - **A `GoTargetOS` switch poisons `obj/`** — the `<Compile>` item set changes while timestamps don't, so an incremental build
-  after a switch validates the OTHER target's assemblies. Purge `bin`/`obj`/`Generated` between switches.
+  after a switch validates the OTHER target's assemblies. Purge `bin`/`obj`/`Generated` between switches. **Even WITH a purge
+  per flavour, a leftover `bin` tree is the LAST flavour's** — read per-flavour presence from that flavour's own build log
+  (`built=N errors=N`), never from what survives on disk.
 - **A reference closure is GOOS-conditioned like the item set**: a reference under a `$(GoTargetOS)` condition belongs to that
   flavour only, so a fold ignoring conditions reaches windows-only packages while deciding a darwin emission.
 
@@ -96,7 +101,12 @@ content differences). Seeding, the marker gate, the overlay rule and the phantom
      GOOS-CONDITIONED CLOSURE, 2026-09-08: one alias cut's single darwin footprint file was minted through a WINDOWS-conditioned
      edge, while the Go dependency list at darwin holds none of those packages and the darwin census compiles clean at master.
      The scoping is the compiler's own rule, measured at the project file and at the loader, which is what makes narrowing the
-     fold legitimate rather than fitting the answer. -->
+     fold legitimate rather than fitting the answer.
+
+     FLAVOUR BUILD LOG vs LEFTOVER bin, 2026-09-08 (R): a three-flavour ladder purges before each flavour and darwin runs LAST,
+     so "internal.syscall.windows.dll PRESENT under bin" was TRUE of darwin — where that package compiles nothing — and FALSE of
+     the windows question actually being asked. Caught and corrected before it reached the post. The purge bullet above is what
+     MAKES the leftover tree the last flavour's, so the two readings are one mechanism seen from opposite ends. -->
 
 ## cgo: the corpus is emitted at `CGO_ENABLED=0`
 
@@ -150,7 +160,13 @@ once.** Set `CGO_ENABLED=0` before converting against or regenerating the corpus
 - **Blast radius = TWO seeded reconverts (pre-change, changed) diffed against EACH OTHER — never the committed-tree diff — over
   the WHOLE corpus.** The committed tree is a moving baseline carrying unbanked drift; a scoped census reproduces its own scope.
 - **Take EVERY seed before ANY arm converts**, or seed from a frozen snapshot (`git archive`): seeding each arm from the live
-  worktree as it starts reports files as "differing" that NEITHER converter wrote.
+  worktree as it starts reports files as "differing" that NEITHER converter wrote. **Compare only the paths the conversion
+  WRITES — or classify by write-evidence FIRST**: a single-target run writes NEITHER other flavour's per-GOOS copy, so a
+  whole-tree `diff -rq` reads a seeding skew as a footprint even with one lane involved.
+- **A seeding control keys on what can change a BINARY, never on byte identity**: `git archive` APPLIES autocrlf, so an
+  archive-against-checkout byte compare refuses on line endings alone — the WRONG LAYER on a mixed-ending tree. Three arms:
+  non-test files CR-strip-identical; `_test.go` EXCLUDED from the criterion while a CONTENT change there is still red (the split
+  is STATED, never used as the criterion); every `//go:embed` target byte-identical.
 - **Prove the write; never infer it** — four assertions owed every run:
   1. **The binary's MTIME MOVED and is newer than its sources.** Existence-and-size is too weak: `go build -o <path> <dir>` can
      land the binary at `<dir>/go2cs.exe` while exiting 0, and the check then passes on the STALE binary at the invoked path.
@@ -196,7 +212,24 @@ once.** Set `CGO_ENABLED=0` before converting against or regenerating the corpus
      documented pipeline trap; what was new is that it can take out an A/B's arms silently, since the trap's usual tell (a
      visibly dead run) is what the diff then reads as a green. The impossible WALL is minutes where a three-target conversion
      floors at ~9. The diff script now ASSERTS the written count and ABORTS on an empty arm, and the lane retracted its own
-     reading with the mechanism before anything seated on it. -->
+     reading with the mechanism before anything seated on it.
+
+     FIFTH MODE, 2026-09-08 — the third mode's shape with only ONE lane involved: two staging roots seeded from ONE tree at
+     DIFFERENT times, one AFTER that lane's own apply step changed a file and one BEFORE. A windows-target conversion writes
+     neither per-GOOS copy of that file, so `diff -rq` reported darwin and linux files "differing" that no converter had written.
+     When the seat's tip moved, the transfer of the earlier rung's readings was MEASURED (byte-identical emission on the written
+     target) rather than reasoned from the diff's file list, with the unmeasured targets stated.
+
+     SEEDING CONTROL PREDICATE, 2026-09-08 (the coordinator and a sub-agent standalone; one finding stated twice, the second
+     correcting the first's mechanism). A train's seeding leg REFUSED ITSELF on 1 of ~300 converter files: a `_test.go` whose blob
+     is LF, from a Linux lane's commit, that autocrlf smudges to CRLF in the checkout — 263 of 264 reading `w/crlf`. The ARCHIVE
+     applies the conversion, so the brief's inverted mechanism made the conclusion STRONGER, not weaker: a `_test.go` is not a
+     `go build` input and Go source line endings do not reach the binary (raw string literals spanning lines being the one
+     exception, still to be measured), so the archive-built base converter WAS the base converter and the leg reported UNMEASURED
+     for a CONTROL fault. Corrected arms as measured: arm 1, 189 non-test files CR-strip-identical with zero differences; arm 2,
+     a planted `_test.go` content defect REFUSED; arm 3, 15 `//go:embed` targets byte-identical. The FIRST writing of arm 2
+     refused a benign EOL-only difference in a NON-test file and was caught by its own control — the exact false-refusal class the
+     exercise was correcting, one file over. -->
 
 ## Reconvert → overlay → build → bucket
 
@@ -294,7 +327,12 @@ once.** Set `CGO_ENABLED=0` before converting against or regenerating the corpus
   `UTF8Encoding($false)`); PS 5.1 `Get-Content` reads BOM-less UTF-8 as ANSI and `Out-File utf8` re-encodes the damage. Python's
   `utf-8-sig` breaks BOTH ways: read-sig/write-sig ADDS a BOM, read-sig/write-plain STRIPS one.
 - **Measure packages-compiling, not raw error count**: fixing file-inclusion bugs *raises* the count because newly-included files
-  surface their own latent defects — progress, not regression.
+  surface their own latent defects — progress, not regression. On an UNMASKING LADDER the error total stops measuring progress at
+  all: **predict the CLEARED SET and the cut's OWN sites to zero, and report the net total as a READING** of the residue every
+  other class contributes. A prediction or hedge pinned to a FILE AND LINE is one layer too low when the blocker cleared is a
+  PACKAGE.
+- **A compiler names only the implementers it actually COMPILES**, so the sites one build reports are never the population —
+  "one site, reported twice" is a reading of that build's reach, not a census.
 - **Never bank "my fix caused N new errors" without the five-minute control**: revert the fix, build PAST the original blocker,
   see whether they remain. Unmasked errors appear precisely where compilation could not previously reach, so "the errors are in
   different files from my change" is evidence of UNMASKING, never of causation.
@@ -317,7 +355,21 @@ once.** Set `CGO_ENABLED=0` before converting against or regenerating the corpus
      needed depth-aware promotion inside an embed. The stdlib-metadata drift happened 2026-08-15: the second leveling regen moved
      6 records and the drift surfaced in an unrelated lane's gate run, leaving the converter gate red at master for whoever ran
      it next. src/core/<pkg> is regenerable, which is why a converter-fix commit must not be buried under thousands of
-     generated-file changes. -->
+     generated-file changes.
+
+     UNMASKING LADDER — three instances, all 2026-09-08 on the Go 1.24.13 hop, which is why the metric bullet now states the
+     prediction discipline and not just the metric. (a) A lane pre-registered "a residue at one named file and line after this
+     rung is not a failure of it" and the rung read 6 -> 24 errors, because the blocker cleared was the PACKAGE: ~555 assemblies
+     behind it compiled for the first time, surfacing twelve sites in four packages no prior rung could reach. Scored as the lane
+     scored it — prediction FAILED, mechanism HELD, hedge one layer too low — while packages-compiling read 194 -> 750 assemblies
+     per flavour. A corrected prediction (58/67/73 per flavour, replacing a retired single figure) then hit three for three, where
+     the retired figure would have minted a phantom finding. (b) R: a rung predicted 24 -> 20 and measured 40/34/44 per flavour,
+     because clearing one package let ~1,100 more assemblies compile and their errors were unreachable before — while the
+     sub-prediction about the cut's OWN sites held exactly. Third instance of the count-versus-own-sites split. (c) R: rung 5 read
+     24 errors at 750 assemblies and four exact cuts later the ladder read 34 errors at 2,752 — the error total UP 40 percent
+     while the compiling corpus more than TRIPLED, every cut's own cleared set exact and every net swamped by what it unblocked.
+     A net-total prediction on such a ladder is a bet on how much more corpus compiles. COMPANION to (c), and the origin of the
+     implementers bullet: a CS0535 fix reached a SECOND implementer another lane's build never named. -->
 
 ## A DELETING instrument over the corpus
 
@@ -328,6 +380,10 @@ once.** Set `CGO_ENABLED=0` before converting against or regenerating the corpus
 - **Run every refusal BEFORE the deletion loop** so a non-zero exit MEANS nothing was removed, and **REFUSE while UNRESOLVED rows
   stand** (dry run → a human disposes → `-Apply`). Non-zero AFTER deleting is a report wearing a refusal.
 - **Predict against the question the instrument actually asks** — a deletion pass and a live-package census are two questions.
+- **A missing-member error at a MOVED package's OLD path on a release hop is neither an emission nor a regen defect — and
+  regenerating at the old path RE-MINTS a package the new release does not have.** The old-path consumer is a DELETION BY
+  SELECTION (the instrument's own rule: a principal `go list` selects at the old release and not at the new). Settle it with a
+  table measured against the PINNED SOURCE, never against either route offered.
 - **PowerShell `$x[0..($x.Count - 2)]` on a SINGLE-element array yields TWO elements** (`0..-1` counts DOWN to `@(0,-1)`). Guard
   the part count before slicing, and grep the other `src/*.ps1` instruments for the idiom.
 
@@ -335,7 +391,14 @@ once.** Set `CGO_ENABLED=0` before converting against or regenerating the corpus
      refused golib (116 files) and the Symbols shared project; the landed script exited 2 AFTER deleting. Prediction numbers: the
      deletion-pass question (whole removed packages plus non-Go directories) = 205, the live-package census = 25. The slicing
      idiom turned core/GlobalUsings.cs into the import path GlobalUsings.cs/GlobalUsings.cs and minted a phantom DELETE-ABSENT
-     row at ed191e9a8. -->
+     row at ed191e9a8.
+
+     MOVED PACKAGE, 2026-09-08: six CS0117 on a 1.24 ladder rung were neither a converter emission defect nor a regen defect —
+     the package had MOVED under a new parent and the corpus already carried the new release's names, so the consumer left at the
+     old path is this instrument's own deletion-by-selection class. BOTH routes the coordinator offered were wrong; a table
+     measured against the pinned source refuted them. Beside it, a CONSTRUCT new at the release — a nil comparison on a
+     slice-typed type parameter, rendered `== default!`, CS8761 — is a converter cut with a ZERO footprint at the old release and
+     the ladder as its acceptance. -->
 
 ## Deploying the core, and purging build output
 

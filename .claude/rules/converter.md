@@ -18,7 +18,12 @@ paths:
      Cross-file citations kept intact: false-green routes #1-#5 are DEFINED here and cited by number
      from .claude/skills/gate-forensics and elsewhere; routes #6-#8 are defined there and only cited
      here. The launch traps the Phase-1 text numbered informally ("a sixth" ... "a thirteenth") are
-     renamed by subject under "Census and launch traps" — nothing cites them by number. -->
+     renamed by subject under "Census and launch traps" — nothing cites them by number.
+     BATCH19 MERGE, 2026-09-12: the items routed to this file from claude/coord-doctrine-batch19
+     (commits 24bfc8304 / c5e17217b / e9e56b657; CLAUDE.md@44f858717 anchors 303, 487, 789, 816, 852,
+     914, 985) were merged — most as further evidence inside the comment of the rule they re-instantiate,
+     the rest as amendments to a visible rule, and ONE (the mtime assembly count) SUPERSEDING the remedy
+     that stood before it. -->
 
 Entry `src/go2cs/main.go`; stdlib driver `stdLibConverter.go` (dependency graph + topological
 `sortedQueue`). `visit*.go` walk AST nodes → C# declarations/statements (`visitFuncDecl.go`,
@@ -178,7 +183,10 @@ project-IDENTITY residual is G's.
   like the route-#7 gate. **The EMPTY error-code histogram is the tell: no `error (CS|MSB|NETSDK)[0-9]+`
   line means it is not a build failure.** Inversely, N errors ALL I/O-coded
   (MSB3491/MSB3027/MSB3021/CS0016/CS0041/CS8104, "not enough space on the disk") are ONE environmental
-  failure wearing N codes.
+  failure wearing N codes. **And an error CODE is not a remedy class** — one code spans two remedies while
+  other codes are one root wearing another (a wrongly-bound package alias fails METHOD resolution, so
+  CS1929/CS0117 are alias consequences). The histogram SIZES a wall; the error TEXT — and the DECLARING
+  file it names, not the file it appears in — CLASSIFIES it.
 - **`-test-action all`/`compare` RE-CONVERTS every non-marked corpus file before building**, wiping an
   instrumentation edit. Sequence `convert` → edit → `compare`; `grep -c MARKER <file>` after the run is
   the tell. A probe whose readings are CONSTANT across the population is its own false-empty.
@@ -205,7 +213,10 @@ project-IDENTITY residual is G's.
   success.
 - **Anchor a pathspec with `:/` or run from the repo root and say which** — the same
   `git diff --name-only <a>..<b> -- '*package_info.cs'` returns paths from the root and NOTHING from
-  `src/go2cs`, and the empty read passes for "no metadata debt".
+  `src/go2cs`, and the empty read passes for "no metadata debt". **In a git pathspec `*` MATCHES `/`**,
+  unlike a shell glob: `src/core/runtime/*.cs` swallows `windows/proc.cs`, so a per-flavour census
+  returns FOUR IDENTICAL numbers — spell it `:(glob)`, and read arms that CANNOT differ as the census
+  announcing that it does not discriminate.
 - **In a multi-target comparison neither "differs" NOR "identical" means anything until you know which
   side was WRITTEN** — a single-target conversion re-emits only its own per-GOOS files, so per-PATH
   diffs report fresh-vs-seeded pairs, and a host-default reconvert reports ZERO diff on `linux/` files
@@ -292,7 +303,38 @@ project-IDENTITY residual is G's.
      on all three targets, an unimplemented-stub population read **windows 232 / linux 256 / darwin 458 —
      union 510, intersection 214** (2026-09-06). A single-target run would have reported one of those
      three as the population and hidden a spread of nearly 300. **The gap between intersection and union
-     is the finding**; a total conceals which members are platform-specific and which are universal. -->
+     is the finding**; a total conceals which members are platform-specific and which are universal.
+
+     BATCH19, anchor 303 — the two readings behind "an error CODE is not a remedy class":
+
+     ⚠ **AN ERROR CODE IS NOT A REMEDY CLASS — SORT FAILURES BY THE ERROR TEXT THAT NAMES THE SYMBOL**
+     (2026-09-08, R echoed by G): on the H5 ladder CS0426 spanned TWO remedies (an alias shadow,
+     re-QUALIFY; a `HashTrieMap` move, re-POINT), while CS1929 and CS0117 WERE alias consequences wearing
+     other codes, because a wrongly-bound `sync_package` fails METHOD resolution rather than NAME
+     resolution. R predicted the magnitude exactly (16 of 40) and named the wrong four projects by sorting
+     on codes; G flagged the axis without predicting the members, and neither half alone was the answer.
+     **The histogram sizes a wall; the error TEXT classifies it.**
+     ⚠ **A PREDICTION THAT TREATED SIX ERRORS AS ONE CLASS MISSED BECAUSE THEY WERE TWO** (2026-09-08, R):
+     a coordinator's 7 → 1 read 7 → 5 — the CS0111 pair cleared with the re-derive that named it, while
+     four CS0759 in one hand-own are ORPHANED BY THE PACKAGE SPLIT (their defining declarations now live
+     in the new `internal/sync`, 0–1 against 2–3 declarations per file), which NO re-derive of that file
+     can reach. The lane declined a verbatim copy of the peer's file (3-wayed against a different base; it
+     would drop the peer's bodies and its own seat) in favour of applying that seat's DELTA to the merged
+     file, and held until the chain released the tree. **Score a routing by the ERROR TEXT's declaring
+     file, not by the file the error appears in.**
+
+     BATCH19, anchor 852 — the git-pathspec half of the pathspec rule above:
+
+     ⚠ **IN A GIT PATHSPEC `*` MATCHES `/`, UNLIKE A SHELL GLOB** (2026-09-08, C1): `src/core/runtime/*.cs`
+     swallowed `windows/proc.cs`, so a per-flavour census read 101/36 for windows, linux, darwin AND the
+     flat-only control — four identical numbers from one query, and the only tell was that **a census
+     whose arms CANNOT differ is announcing that it does not discriminate.** Fixed with the `:(glob)`
+     magic pathspec and controlled 0 against 3. Two companions from the same record: a "displacing X
+     leaves Y UNREACHED" sentence read as if the displacement achieved it for ALL of Y when it achieved
+     it for four sites and 58 were dead by construction (two reasons in one clause — stated, not
+     rewritten); and at go1.24.13 the `getcallerpc` family is ABSENT (0 sites), reborn as
+     `internal/runtime/sys.GetCallerPC/SP/GetClosurePtr` at 208 sites in five packages, so a cut keyed on
+     the old spelling is deleted by the hop. -->
 
 ## Reading a `-tests` result
 
@@ -432,8 +474,13 @@ The host reports in sorted order, in TWO phases: serial tests, then the parallel
 - **A gate whose CLEANUP destroys the artifact it measures reads as a clean sweep** — exclude the
   artifact's path from the cleanup AND assert it present before each leg.
 - **A `-clp:ErrorsOnly` build log cannot corroborate an assembly count** (the flag suppresses the lines
-  the grep counts): `exit=0 CS=0 MSB=0 asmLines=0` is the INSTRUMENT's zero. Count on DISK
-  (`find … -newermt <pre-build stamp>`) and BEFORE the next purge; the exit code stays primary.
+  the grep counts): `exit=0 CS=0 MSB=0 asmLines=0` is the INSTRUMENT's zero. **And a DISK count by mtime
+  counts FILES, not assemblies** — every behavioral project's `bin` holds a private copy of the shared
+  core closure, so a `go2cs.slnx` build reading 46,802 produced 878. Count the log's OWN per-project
+  output lines (drop `-clp:ErrorsOnly` to get them), cross-check the wall RATIO at the SAME count, and
+  read a disk count (`find … -newermt <pre-build stamp>`, BEFORE the next purge) as proof the build WROTE
+  something, never as the population. **A baseline whose population its author cannot name has no business
+  being the control**; CS and MSB/NETSDK stay two numbers, and the exit code stays primary.
 - **A census taken WHILE THE BUILD RUNS counts the build, not the package** — wait for the producing
   step to EXIT; a disagreeing count is a scheduling question first. A PowerShell `-match` per line
   captures only the FIRST hit; re-derive with `finditer`.
@@ -444,7 +491,10 @@ The host reports in sorted order, in TWO phases: serial tests, then the parallel
   a leg that cannot find its helper aborts loudly); a train LABEL from the running script's own
   basename, never written out; a RED control neutered by removing the SOURCE, not by a production-path
   switch; ORDERING proven by a LIVE arm that plants records, runs the real leg, and reads the preserved
-  copy PRESENT with the worktree copies GONE.
+  copy PRESENT with the worktree copies GONE. **A REFUSING leg owes three more**: a refused run must not
+  TRUNCATE the record it refused (publish-on-exit); its refusal set is PARTITIONED ONCE with the OK flag
+  set in ONE place, so a third refusal still aborts; and a named acceptance path emits its OWN anchor,
+  never the wired leg's "= 0" sentence for something the run never measured.
 - **The preserved-record NAMESPACE is load-bearing** — a moved-set instrument taking the NEWEST
   preserved record as "the previous run" reads a control's synthetic one-row record as the baseline and
   prints a whole-suite FIXED/BROKEN set reading exactly like a catastrophic regression. A control
@@ -839,7 +889,33 @@ The host reports in sorted order, in TWO phases: serial tests, then the parallel
      after 5,000 goroutines (Go's own source says it fails on slow hosts) and failed on TWO trees at
      once while two `time` suites ran CONCURRENTLY on the i7 — two arms failing together under a shared
      load is not an A/B. No two `time` suites share a box; a control REFUSED by the disk preflight is
-     reported UNMEASURED, never argued around. -->
+     reported UNMEASURED, never argued around.
+
+     BATCH19, anchor 487 — the refusing-leg mechanics added to the preservation-leg rule above:
+
+     ⚠ **FOUR MECHANICS FOR A REFUSING LEG, MEASURED WHILE ONE WAS BEING WRITTEN** (2026-09-08): a REFUSED
+     full run must not TRUNCATE the record it refused — the publish-on-exit trap, proven by planting a
+     sentinel, making the run refuse, and reading it back byte-identical; a land script's refusal set is
+     PARTITIONED ONCE into named classes with the OK flag set in ONE place, so a record carrying any third
+     refusal still aborts; a named acceptance path emits a DIFFERENT anchor from the wired leg's sentence,
+     because emitting the wired leg's "= 0" text would stamp something the run never measured; and a
+     helper's non-`local` loop variable clobbered its caller's `$a` and pointed the script at a file named
+     `cut`, reported as "zero anchors read" — the bash cousin of the PowerShell case-insensitive variable
+     collision. **`local` every loop variable in a helper.** (That fourth mechanic is carried visibly under
+     "Census and launch traps"; the first three amend the preservation-leg bullet.)
+
+     BATCH19, anchor 985 — the reading that SUPERSEDES "count on DISK" in the assembly-count rule above:
+
+     ⚠ **AN ASSEMBLY COUNT TAKEN FROM DISK BY MTIME COUNTS FILES, NOT ASSEMBLIES** (2026-09-08): every
+     behavioral project's `bin` holds a private copy of the shared core closure, so a same-box baseline
+     first read **46,802** "assemblies" for a `go2cs.slnx` build that produces **878** — caught by
+     IMPLAUSIBILITY against the tree's own recorded figure, re-derived from the build log's per-project
+     output lines (878, exact), and cross-checked by the wall RATIO at the SAME count (235 s on the i9
+     against 923 s on the i7 class; a faster wall with a smaller count would have meant skipped work).
+     **A baseline whose population its author cannot name has no business being the control**, and the
+     correction is posted, not quietly replaced. CS and MSB/NETSDK stay two numbers. **This SUPERSEDES the
+     2026-09-07 `-clp:ErrorsOnly` remedy's "count on DISK" clause** (which stands as the answer to "did the
+     build write anything", not to "how many assemblies"); both narratives are kept, newer wins on fact. -->
 
 ## Test-harness mechanics (important when changing the converter)
 
@@ -862,7 +938,10 @@ The host reports in sorted order, in TWO phases: serial tests, then the parallel
   `[System.IO.File]::ReadAllText/WriteAllText`, **never** PS 5.1 `Get-Content`/`Out-File`.
 - **`check-no-regression.ps1` re-transpiles UNCONDITIONALLY** (it has no `UpToDate` equivalent), which
   is why CNR is immune to the false-green routes and remains the authoritative drift instrument.
-  **Preserve that asymmetry: never add an up-to-date skip to CNR.**
+  **Preserve that asymmetry: never add an up-to-date skip to CNR.** **A CNR WRAPPER asserts the VERDICT
+  LINE (`==> NO REGRESSION` / `==> CHANGED`) and the measurable count** — CNR builds the converter
+  itself, so a THROWN CNR read as "CHANGED 0" is route #6's shape handing back the predicted number from
+  a run that measured nothing. A zero from an ABSENT list is not a reading.
 - **A behavioral guard reading a child's state through an interpreter the harness does not install
   fails in BOTH directions** — a false-RED generator where the tool is missing, and a **false-GREEN
   where it silently errors into the same string on both sides**, which is two sides agreeing BECAUSE
@@ -876,7 +955,18 @@ The host reports in sorted order, in TWO phases: serial tests, then the parallel
      bind the converted packages, so the suite's 515 stdout comparisons against `go run` are also the
      broadest running validation the converted `fmt` gets — its closure is 57 projects (cold ~48 s,
      warm ~4 s)." Most behavioral tests also reference `core/fmt`; a few reference
-     `time`/`unsafe`/`strings`/`sort`/`math/rand`/`io`/`reflect`. -->
+     `time`/`unsafe`/`strings`/`sort`/`math/rand`/`io`/`reflect`.
+
+     BATCH19, anchor 914 — the CNR-wrapper clause above, and the `GOTOOLCHAIN` constraint it shares with
+     route #4:
+
+     ⚠ **A CNR WRAPPER THAT READS A THROWN CNR AS "CHANGED 0" PRODUCES THE PREDICTED NUMBER FROM A RUN THAT
+     MEASURED NOTHING** (2026-09-08, i9): `GOTOOLCHAIN=local` on the pairing pin makes CNR's OWN `go build`
+     of the converter fail (`go.mod requires go >= 1.24.13`), CNR throws, and the wrapper reported CHANGED 0
+     — route #6's shape, caught only by the exit 1. **A CNR wrapper asserts the VERDICT LINE (`==> NO
+     REGRESSION` or `==> CHANGED`) and the measurable count; a zero from an absent list is not a reading.**
+     Under the two-pin pairing `GOTOOLCHAIN` stays UNSET (auto) on the 1.23.12 pin so the converter build
+     can switch UP through the module graph. -->
 
 ## The false-green routes
 
@@ -897,7 +987,10 @@ right number off an invalid measurement. Four holes: a plain `cp` without `-p` s
 mtime is not content, so a branch switch can fire the refusal; no toolchain comparison (route #4's, in
 the harness); silent beside a deployed binary with no converter source tree. **Three derivations of one
 predicate are kept in lockstep or one under-reports** — the Go-side predicate is byte-for-byte the C#
-`ConverterBuildInputs` one.
+`ConverterBuildInputs` one. **The same arithmetic governs TWO BRANCHES of one converter predicate and an
+instrument's PRIVATE COPY of a rule the system already defines**: fix it as ONE helper both branches call
+or ONE definition the instrument CONSULTS, never a second copy — a drifted instrument copy files its own
+target under the SOUND bucket, the worst direction for an instrument whose finding is a zero.
 
 <!-- Derivation, verbatim from Phase 1:
 
@@ -912,7 +1005,29 @@ predicate are kept in lockstep or one under-reports** — the Go-side predicate 
      stays the harness's); and it is silent for a relocated binary. One method note from the same cut —
      the Go-side predicate is byte-for-byte the C# `ConverterBuildInputs` one, and a THIRD derivation of
      the embed-directive rule had drifted (no whitespace guard): **three derivations of one predicate are
-     kept in lockstep, or one of them under-reports.** -->
+     kept in lockstep, or one of them under-reports.**
+
+     BATCH19, anchor 789 — two 2026-09-08 instances that widened that rule past the staleness predicate:
+
+     ⚠ **A DEFECT WAS A DRIFT BETWEEN TWO BRANCHES OF ONE PREDICATE** (2026-09-08): the converter's
+     literal path has two above-MaxUint32 branches — the UNSIGNED parse (value > MaxInt64) carried the
+     native-width rule WITH a comment stating it (`(nuint)` before the `UL`, because a bare `ulong` has
+     no implicit conversion) and the SIGNED parse (value <= MaxInt64, where `0x0102030405060708` lives)
+     never got it, so a `uintptr` variable initialised from such a constant emitted
+     `0x0102030405060708UL` against golib's EXPLICIT-only `uint64` operator (CS0266). Fixed as ONE
+     helper both branches call, never a second copy of the rule, with the red control neutering the
+     helper. **And the ZERO corpus footprint is DERIVED, not censused**: the corpus compiles 307/307
+     today, so any site taking the signed branch in a native-width unsigned context would ALREADY be
+     CS0266 — a differing file would be a finding about the COMPILE GATE, not about the fix.
+     ⚠ **AN INSTRUMENT CARRYING ITS OWN COPY OF A RULE THE SYSTEM ALREADY DEFINES CAN FILE ITS OWN TARGET
+     UNDER "NOTHING TO DO HERE"** (2026-09-08, C2): a census's 2a/2b discriminator copied "the token this
+     box reports" as two arms (`INilPointer`, `IChannel`, else 0) while `ManagedPointerTokens.CurrentToken`
+     has a THIRD, so a registered object implementing neither projected to 0, compared unequal to its own
+     token, and was filed 2b — the SOUND bucket — when it is 2a, the DEFECT bucket, which is the worst
+     direction for an instrument whose finding is a zero. Found by READING the classifier for a peer's
+     defect, not by looking for it, and fixed by making the rule ONE definition the instrument CONSULTS,
+     guarded by name. Its companion perturbation was also a value already in hand. Neutrality at suite scale
+     is identical failure counts across the env gate (48/48), predicted before running. -->
 
 ### Route #2 — stale OUTPUT
 
@@ -931,7 +1046,9 @@ copies that `.cs` over its golden as a no-op and reports `Updated`, and the run 
 OLD emission and passes. **A golden re-baseline that re-baselined nothing.** The tell is arithmetic (an
 EMPTY numstat where CNR had just read `1 1`); the remedy is CNR's own, rebuild the converter first.
 **A re-baseline is believed only after its diff is non-empty and its golden byte-compares against the
-on-disk emission.**
+on-disk emission.** **The skip is the DEFAULT state after any restore** — the restore's own write stamps
+the `.cs` newer than both its `.go` and `go2cs.exe` — so a per-project `--phase transpile` used as
+EVIDENCE FORCES the emission (delete the `.cs`, touch the `.go`) and asserts a NUMSTAT, never `pass 1`.
 
 <!-- Fixed 2026-07-20. Verified by neutering a real converter fix (`lhsReusedInLaterRhs`) and
      rebuilding: the old runner reported PASS, the fixed runner reports `FAIL [Target,Output]` with no
@@ -941,7 +1058,20 @@ on-disk emission.**
      NOT reliably leave the up-to-date relation over foreign content — what does is a `.cs`-ONLY restore,
      a `Copy-Item`, or an editor save. The comments in the code say the MEASURED shape, not the plausible
      one; the remedy (transpile unconditionally) is unchanged either way, since it does not depend on
-     which restore stamped what. -->
+     which restore stamped what.
+
+     BATCH19, anchor 816 — the same door, walked again and resolved the same hour:
+
+     ⚠ **AFTER ANY RESTORE, A FILTERED `--phase transpile` SKIPS BY DEFAULT AND REPORTS `pass 1`**
+     (2026-09-08, i9, resolved the same hour): the restore's own write makes the `.cs` newer than both its
+     `.go` and `go2cs.exe`, which is exactly the runner's up-to-date predicate, so "main.cs rewritten 41
+     seconds ago" was the RESTORE's mtime and the runner never ran. CNR, unconditional, flagged the drifting
+     golden; the per-project runner "reproduced the committed bytes" because it did nothing; a FORCED
+     transpile with the emission deleted first reproduced CNR's one line at numstat 1/1. **A per-project
+     transpile used as EVIDENCE forces the emission — delete the `.cs` or touch the `.go` — and asserts a
+     NUMSTAT, never `pass 1`**; the skip is the DEFAULT state after a restore, not an edge case. Two
+     instruments disagreeing located the blind spot in an hour, and the lane withdrew its own sentence by
+     name. -->
 
 ### Route #3 — NESTED sub-library packages were never enumerated
 
@@ -984,7 +1114,9 @@ toolchain change any more.**
 environment re-exported to the corpus release and the toolchain rule on `auto`, Go switches ONLY the
 converter's own build to the newer directive and leaves every corpus module at the corpus release. Gate
 it with an AFTER-GUARD that re-reads the BINARY's release; NOT MEASURED beats a count nobody can stand
-behind. **The behavioral runner is green by a DIFFERENT route than CNR**: its predicate reads the
+behind. **`GOTOOLCHAIN` stays UNSET (auto) on the 1.23.12 pin** so that switch can happen: at
+`GOTOOLCHAIN=local` CNR's OWN `go build` of the converter fails `go.mod requires go >= 1.24.13` and
+throws, which a wrapper then reports as "CHANGED 0". **The behavioral runner is green by a DIFFERENT route than CNR**: its predicate reads the
 toolchain version at the RUNNER's cwd, which has no module file above it and answers the CORPUS release
 against the binary's NEWER stamp — so it reads PERMANENTLY STALE and rebuilds on every invocation
 (seconds; the content-addressed cache re-links only), which **fails safe: never a stale binary, never a
@@ -1000,7 +1132,9 @@ cold box fetches the newer release there.
      loading at the corpus release — CNR under that shell read every package byte-identical, 0 NOT
      MEASURED, with the converter still stamped at the newer release afterwards, gated by an AFTER-GUARD
      that re-reads the BINARY's release (NOT MEASURED being the alternative to a count nobody can stand
-     behind). -->
+     behind). ⚠ BATCH19, anchor 914 (2026-09-08, i9): the `GOTOOLCHAIN` half of that pairing is stated
+     visibly because `GOTOOLCHAIN=local` on the pin breaks CNR's own converter build
+     (`go.mod requires go >= 1.24.13`) — full narrative in the Test-harness mechanics comment. -->
 
 ### Route #5 — a converter build INPUT that is not a top-level `*.go`
 
@@ -1045,6 +1179,8 @@ nothing** while the outer suite genuinely runs and the arm genuinely appears in 
 - bare `rg` over `src/core` (obeys its `.gitignore`) — census with `git grep` or a raw walk;
 - a converted-C# census keyed on a type's spelled NAME (misses every minted alias — `_type`, `Δio`,
   `abiꓸFuncType`, the `ꓸ` family) — resolve the denotation or enumerate the aliases first;
+- a behavioral-tree census keyed on the DIRECTORY name (the emission keys on the Go package CLAUSE — a
+  `sortlocal/` directory declaring `package sort` emits `sort_package`) — key it on the package name;
 - a LEADING-SLASH pattern handed to a native binary from the POSIX shell (the shell rewrites the
   argument first) — use MSYS `grep`, the Grep tool, or no leading slash;
 - `git -C <drive-letter path>` from Git Bash under `MSYS_NO_PATHCONV` (fails silently, wrapper says
@@ -1083,6 +1219,8 @@ nothing** while the outer suite genuinely runs and the arm genuinely appears in 
   `true`'s; a `$(...)` INSIDE the line reading `$?` resets it. A failing state-advancing tool resets
   itself and exits non-zero with its rejection path POSITIVE-CONTROLLED; claim an instrument change
   only after its control printed the expected line.
+- **`local` every loop variable in a helper** — a non-`local` `$a` clobbered its caller's and pointed the
+  script at a file named `cut`, reported as "zero anchors read" (bash's PowerShell-collision cousin).
 - `MSB4166 "child node exited prematurely"` is BUILD-INFRASTRUCTURE, not a package root — set
   `MSBUILDDISABLENODEREUSE=1` for back-to-back `-tests` queues before believing a diagnostic-free
   build failure.
@@ -1095,8 +1233,9 @@ nothing** while the outer suite genuinely runs and the arm genuinely appears in 
   with the real interpreter, then RUN it once locally end to end with the step's own env block.
 - Never locate a comparison binary by a recursive glob's first hit —
   `Get-ChildItem -Recurse -Filter <name>.exe | Select -First 1` returns `bin\Release\Go\…` before
-  `bin\Release\net10.0\…`, so "C# matches Go exactly" can be ONE binary printed twice. Name the TFM
-  path, and positive-control by making the C# side differ once.
+  `bin\Release\net10.0\…`, so "C# matches Go exactly" can be ONE binary printed twice. Name the TFM path
+  (`bin/Release/Go/<p>.exe` IS THE GO BINARY, `BehavioralRunner/Program.cs:1049`; a stack naming
+  `main.cs` is the tell), and positive-control by making the C# side differ once.
 - **The LF-anchor trap is not converter-only** — harness C# is CRLF under `eol=crlf`, so an
   LF-anchored patch to `BehavioralRunner/Program.cs` matches zero times and the build reports exit 0 /
   0 errors *because the file never changed*. (`strings -el` for .NET UTF-16 literals, checked against a
@@ -1270,4 +1409,24 @@ nothing** while the outer suite genuinely runs and the arm genuinely appears in 
      go/dotnet pin, so `ORIG_PATH` captured the PINNED path and the same arm read 150 on both files again
      — the control caught it (NOTHING assembled, ABORT) and the relaunch cost two minutes (2026-09-08
      00:00). **A derived script states its launch shape in its header, and a robust one derives
-     `ORIG_PATH` by REMOVING the pin directories rather than by trusting the launch.** -->
+     `ORIG_PATH` by REMOVING the pin directories rather than by trusting the launch.**
+
+     BATCH19 (2026-09-08), three further instances of traps already carried above.
+
+     ⚠ **`bin/Release/Go/<p>.exe` IS THE GO BINARY, not the C# one** (named at
+     `BehavioralRunner/Program.cs:1049`): running it as the C# side produced `8 1` exit 0 twenty times
+     — one step from a false "passes in one build flavour, fails in another" finding. The C# program is
+     `bin/Release/net10.0/<p>.exe`, and a stack naming `main.cs` is the tell. Disclosed by its author
+     before it was posted; the same family as trap (4) above.
+
+     ⚠ The `local`-in-a-helper bullet above is the fourth mechanic of the refusing-leg reading (anchor 487,
+     2026-09-08): a helper's non-`local` loop variable clobbered its caller's `$a` and pointed the script
+     at a file named `cut`, reported as "zero anchors read" — the bash cousin of the PowerShell
+     case-insensitive variable collision. Full narrative in the "Reading a `-tests` result" comment.
+
+     ⚠ The DIRECTORY-vs-PACKAGE census producer above (anchor 852, 2026-09-08, G): the emission keys on
+     the package CLAUSE — a `sortlocal/` directory declaring `package sort` emits `sort_package` — so a
+     directory-keyed census of root-package collisions read NONE while the package-keyed one read exactly
+     one file, the lane's own guard. The Go-side twin of the minted-alias rule: a directory census answers
+     a different question and reports a clean zero for the wrong reason, and the guard being its own
+     counter-example is what exposed it before publication. -->

@@ -16,7 +16,12 @@ paths:
      verbatim or near-verbatim, inside the comment block beside the durable rule it justifies.
      Nothing was deleted. The visible half is the manual; the comments are the chronicle. If a
      rule reads thin, its derivation is in the comment under it, and its byte-identical
-     pre-split original is in docs/doctrine/JOURNAL-2026-09-12.md. -->
+     pre-split original is in docs/doctrine/JOURNAL-2026-09-12.md.
+
+     BATCH19 MERGED 2026-09-12: the doctrine items from claude/coord-doctrine-batch19
+     (24bfc8304 / c5e17217b / e9e56b657) that the extraction map routes to this file were
+     integrated here — most as further evidence inside an existing rule's comment, a few as new
+     visible rules where the trap was genuinely new. Nothing from that branch was dropped. -->
 ## Build the solution after any golib/runtime API change
 **Nothing routinely builds `src/go2cs.slnx` end to end, so a broken member rots invisibly** — every harness (`BehavioralRunner`, MSTest, `check-no-regression.ps1`, `run-validated-sweep.ps1`) builds each `.csproj` **by path** (the habit `check-solution-integrity.ps1` polices from the other direction). **After a golib/runtime API change, build `src/go2cs.slnx` once before banking** — ~90 s, no other gate covers it.
 <!-- The same by-path habit `check-solution-integrity.ps1` polices from the other direction. The
@@ -256,6 +261,8 @@ A byte endpoint quoted off an unconverged instrument is a false measurement.
 - **A guard's header is a CLAIM that ages** — correct it at the site, name the owning increment, and **never turn an arm on for the strength of a comment**.
 - In a file carrying `using static go.runtime_package`, the bare name `GC` binds Go's `runtime.GC()` and **SHADOWS `System.GC` (CS0119)** — qualify it.
 - **A design RULING is not reversed inside a FIX commit**, and **a row whose runtime pass was a PUN surviving by luck is DEMOTED to the compile-shape guard its own comment already claimed** — demotion stated in the commit as a SCOPE change, golden re-baselined from the REBUILT binary.
+- **EACH FIX BUYS THE NEXT PHASE'S MEASUREMENT, AND THE NEXT PHASE UNMASKS THE NEXT DEFECT** — budget a new guard file as a LADDER (Transpile → Compile → Output), not as one cut, and expect the row added for one defect to surface the next.
+- **A GOLDEN IS HELD ON A COMPILE RED WHATEVER CAUSED IT**: hold it, MEASURE that the landed fixes' converter delta cannot reach the new site, and name the new row as NEW in that commit. **A defect too deep for the seat is NAMED, not absorbed** — locate its class, NARROW the guard's rows to the property the seat actually delivers, bank the runtime half as DEBT in the guard's header, and file the design with a re-census before any cut.
 <!-- Its narrowest member: a banked SINGLE-VERDICT row whose mechanism lives in `golib` is guarded
      NOWHERE but that row (2026-09-04).
 
@@ -283,19 +290,43 @@ A byte endpoint quoted off an unconverged instrument is a false measurement.
      honestly: a row whose runtime pass was a PUN surviving by luck (a pointer-to-pointer reinterpret
      through a transient slot address) is DEMOTED to the compile-shape guard its own comment already
      claimed, with the demotion stated in the commit as a SCOPE change of that row and the golden
-     re-baselined from the REBUILT binary. -->
+     re-baselined from the REBUILT binary.
+
+     EACH FIX BUYS THE NEXT PHASE'S MEASUREMENT (2026-09-08): ONE guard file surfaced three defects in
+     a day, each by a row added for the previous one — it carried a second defect in its own emission,
+     written for the first, and the rows added for the third unmasked a fourth. Two fixes let the
+     project reach Compile and unmasked a literal-emission drift (a `uintptr` initialised from an
+     above-`uint32` constant); that fix let it reach Output and unmasked a `*[N]T` conversion over a
+     MANAGED scalar box, emitted as a `uintptr` token round trip whose array view reads the pointee as
+     an array HEADER — IndexOutOfRange, deterministic (the `NativeBox<array<T>>` shape named under the
+     LIFETIME class below, one symptom over). The golden was HELD on that Compile red, it was MEASURED
+     that the two landed fixes' converter delta cannot reach a variable-declaration initializer, and
+     the new row was named as NEW in that commit: a pre-seat reading, nothing at master affected. The
+     defect too deep for the seat was NAMED rather than absorbed — its class located as the
+     reinterpret-VIEW half of the `[GoValueClone]` population, the guard's rows narrowed to the
+     property the seat delivers, the runtime half banked as DEBT in the guard's header, and the design
+     filed with a re-census before any cut. -->
 ## The testing host is a cross-assembly contract
 **An interface member added to the hand-owned testing host breaks EVERY cross-assembly adapter, and the host compiling green is exactly why it is dangerous** — route #7 in the testing host's clothes. `TB.Context()` at Go 1.24 breaks **all 57** assemblies carrying `[assembly: GoImplement<…, testing_package.TB>]`: go2cs-gen mints each adapter's forwarders from the interface's member set AT COMPILE TIME, so the forwarder names `go.context_package.Context` in a consuming assembly that does not reference `context` (**CS0234 / CS0012 / CS9334**). **It cannot fix itself, deliberately**: the emitted csprojs set `DisableTransitiveProjectReferences=true`, so a project's reference set is exactly its Go imports, and Go's test files do not import `context` to call `t.Context()`. **The reference must be INJECTED the way `testing` already is; the existing injection is the specification.** Only a cross-assembly CONSUMER compile catches it — **`archive/zip`, which adapts both `B→TB` and `T→TB`, is the natural canary.**
 <!-- Measured 2026-09-07. -->
 ## Route #7's ATTRIBUTION mirror
 **A crash INSIDE a generated shell is usually the shell being faithful — trace to the ASSIGNMENT, not the frame, before billing `src/gen/`.** **The cheapest instrument for reaching that assignment is the BUILT GUARD BINARY run by hand** under the right runtime root (`DOTNET_ROOT`): the runner captures only the FIRST stderr line (`Fatal error.`) while the binary prints the whole managed stack, and the frame names the assignment.
+
+**A CORRECT GENERAL RULE APPLIED TO AN UNVERIFIED PARTICULAR IS STILL A GUESS: the rule names the SHAPE, the derivation names the MEMBER — run the derivation BEFORE the claim.** For skipped `GolibTests` project references the derivation is one grep of the csproj `ProjectReference` graph; "dependents are skipped, not errored" is TRUE and still does not name WHICH root, so picking the failure already in mind can hide two more blockers.
 <!-- Measured 2026-09-02, runtime's `textAddr`. The `RecvGenerator` shell's DerefOrNull → NullRef →
      NRE on the first field touch IS Go's nil-receiver semantics; the nil came from `funcInfo()`'s
      module search, which can never succeed because the package's sole moduledata is a permanent
      empty stub (`len(pclntable)==0` skips it every time). A structurally guaranteed nil is not a
      race and not goroutine-specific — which tests crash is decided only by which ones reach the call
      at all. The built-binary instrument: 2026-09-05 — two runs, five seconds, in place of a four-arm
-     bisect that had already been priced. -->
+     bisect that had already been priced.
+
+     A CORRECT GENERAL RULE APPLIED TO AN UNVERIFIED PARTICULAR IS STILL A GUESS (2026-09-08, lane R,
+     twice in one day): "dependents are skipped, not errored" correctly said ONE root sat behind five
+     skipped GolibTests references — and the root was then PICKED, the failure already in mind, rather
+     than DERIVED. One grep of the csproj `ProjectReference` graph, run only to audit an
+     already-published claim, found the real root (`fmt` → `slices`, CS8761, 99 dependents) and moved
+     that seat's acceptance from one blocker to three. -->
 ## Stubs, diagnostics and censuses
 - **A GENERATED ARTIFACT'S BOILERPLATE DIAGNOSTIC IS NOT A FINDING ABOUT THE SPECIFIC SYMBOL — it describes the SHAPE THE GENERATOR FOUND.** Generalizes: **any templated message is evidence about the TEMPLATE'S TRIGGER CONDITION, not the instance.** Frontier-vs-wiring is decided by whether a body and a push exist upstream — two greps — never by the stub's own words.
 - **The fix for a misleading diagnostic is usually to CLAIM LESS, not COMPUTE MORE.** A source generator sees ONE compilation and cannot answer "is this implemented somewhere else"; what it knows is **"nothing in THIS compilation implements it"**. **Before building an oracle a tool cannot be, check whether it is merely SAYING more than it knows.**
@@ -309,6 +340,8 @@ A byte endpoint quoted off an unconverged instrument is a false measurement.
 - **A LATENT-MISATTRIBUTION HAZARD AND AN OBJECTIVE ACCELERATOR ARE DIFFERENT CLAIMS NEEDING DIFFERENT EVIDENCE** and are easy to conflate when the population is the same — "this will bill the wrong commit someday" needs only the class and the gate gap; "connecting these advances the objective" needs something that currently REACHES them. **State which claim a population is offered for.**
 - **A MAP KEYED BY A DIRECTIVE'S DESTINATION IS BLIND TO THE OPPOSITE WIRING DIRECTION.** A PUSH is the producer naming its consumer; a PULL the consumer naming its producer — **45 push / 53 pull / 0 both, fully disjoint**, so "wired" was 98 where a destination-keyed census said 45. **The blind spot is a property of the KEY; no amount of re-running finds it.**
 - **A REGISTRY CHECK CANNOT SEE A DEPARTURE THAT DOES NOT GO THROUGH THE REGISTRY — enumerate the ways a member can LEAVE a population before trusting a census of it.** A whole-file `GoManualConversion` replacement and a bodyless-partial completion each remove a member from the unimplemented-stub population without touching the push registry. **The settling instrument is the GENERATOR'S OWN OUTPUT** — a structural after-state reads off ARTIFACTS rather than verdicts.
+- **A MARKER-KEYED CENSUS CANNOT OBSERVE A FILE THAT CARRIES NO MARKER BY DESIGN.** The frozen-metadata class — a package whose every production file is hand-owned, so the driver never re-emits its `package_info.cs`, csproj or README — is invisible to any census walking MARKED files. **Corollary: the marker that protects a hand-own from being CLOBBERED protects an ORPHANED hand-own from being CLEANED UP** (the deletion pass tests PROTECTED first), so orphan removal at a hop is explicit work.
+- **The `-stdlib` QUEUE IS `go list std` AT THE SOURCE RELEASE, so a package RENAMED at the target never enters the target's queue and no emission re-mints its metadata** — un-freezing frozen metadata cannot clear a straggler (**CS0426**) there: the RELOCATION clears it, and the un-freeze only makes the destination self-minting rather than re-frozen at the NEXT hop. **Read the queue's POPULATION before assigning a remedy a leg.**
 - **A PACKAGE-DELTA CENSUS KEYED REMOVED→SUCCESSOR IS BLIND TO A PACKAGE THAT GAINS FILES FROM ONE THAT IS NOT REMOVED.** **A hand-own census at a hop compares each hand-own's PRINCIPAL line count across BOTH releases.**
 <!-- All seven pprof stubs say "external (assembly or cgo) function is not implemented", including
      two with demonstrable bodies at known lines; three participants read that text as a statement
@@ -365,7 +398,28 @@ A byte endpoint quoted off an unconverged instrument is a false measurement.
      234-line spin-and-park implementation moves to the NEW `internal/sync`, the exact mechanism
      `sync/mutex.cs` is hand-owned for; the committed census row `internal/concurrent →
      internal/sync | 3/3` is TRUE while saying nothing about it, because `sync` is not a REMOVED
-     package. Ten `sync` hand-owns, one moved principal. -->
+     package. Ten `sync` hand-owns, one moved principal.
+
+     A MARKER-KEYED CENSUS CANNOT OBSERVE A FILE THAT CARRIES NO MARKER BY DESIGN (2026-09-08, lane
+     G) — the key-blindness family again, one file class over from the destination-keyed map and the
+     registry-keyed census above. A hop alias census walked MARKED files and so could not see the
+     frozen-metadata class: the four packages whose every production file is hand-owned, which is why
+     the driver never re-emits their `package_info.cs`, csproj or README. Re-derived at master, 2 of
+     the 4 are affected and BOTH RELOCATE at the next release as renames, so an alias hand-edit would
+     have patched metadata for a package that will not exist. The sizing ruled the relocation COMPOSED
+     with an un-freeze: un-freezing the metadata is a converter seat (its footprint at the current
+     release is those four packages' metadata re-minted, the eight missing forced-init hooks
+     arriving), and the relocation rides the hop's hand-own branch. Its corollary is the protection
+     marker read from the other side: the deletion pass tests PROTECTED first, so the marker that
+     keeps a hand-own from being clobbered also keeps an ORPHANED hand-own from being cleaned up.
+
+     UN-FREEZING THE FROZEN METADATA CANNOT CLEAR A STRAGGLER IN A PACKAGE THE QUEUE NEVER VISITS
+     (2026-09-08, lane G) — this SUPERSEDES the implied half of the ruling directly above, and both
+     are kept. The coordinator's "relocation composed with un-freeze" ruling STOOD; its implied "the
+     un-freeze levels the straggler" did NOT: the `-stdlib` queue is `go list std` at the SOURCE
+     release, so a package RENAMED at the target release never enters the target's queue and no
+     emission re-mints its metadata. The RELOCATION is what clears the CS0426; the un-freeze is only
+     what makes the relocation's destination self-minting rather than re-frozen at the NEXT hop. -->
 ## The native boundary, class 1: LAYOUT
 **ROOT: the CLR gives AUTO layout to any struct holding a reference-typed field and REORDERS it, so the KERNEL READS THE WRONG FIELD** — not "one word where four bytes belong". **Never pass a managed struct to native code by address**: ENCODE into a native buffer (a `writeNativeSockaddr`) or an explicit-layout / `fixed`-buffer blittable mirror, usually with a registry displacement. **A correctly laid-out struct (`Iovec`) can still hand the kernel managed addresses**, so correct layout is not sufficient.
 
@@ -432,6 +486,8 @@ A byte endpoint quoted off an unconverged instrument is a false measurement.
 - **A B/op census cannot SEE what a pin COSTS**: the `GCHandle`'s handle-table entry never lands on the GC heap, and a FINALIZABLE holder whose finalizer is suppressed only on a `Dispose` the contract never calls rides the finalization queue, is promoted at least a generation and frees its handle on the finalizer thread — **GC pressure proportional to pinned-box COUNT, reported as ZERO bytes**. **Price a pin from the TYPE** (header, fields, padding, handle, finalizer) **and the QUEUE it joins.** A remedy moving WHERE storage is allocated (pinned-object-heap boxes) **is its OWN increment** with its own footprint and cost pair.
 - **CLR function pointers, for any hand-own handing a Go func value to native code:** `Marshal.GetFunctionPointerForDelegate` **REFUSES a GENERIC delegate TYPE** whatever the target kind or overload — so a Go func value needs a **NON-GENERIC unmanaged-function-pointer shim per arity** forwarding by a TYPED call; **`DynamicInvoke` never applies a user-defined implicit conversion**, so the forward is TYPED or it silently narrows the contract; and **the native pointer's identity is per delegate INSTANCE**, so a stable Go-style numeric handle needs the shim instance **CACHED — and that cache is also the rooting the pointer needs for process life.**
 - **A NATIVE CALLBACK'S ARGUMENT BRIDGE IS A REINTERPRET, NOT A CONVERSION.** Go's own callback wrapper copies each argument's SIZE BYTES from the native word at its ABI offset — raw bits — so the shim's typed forward reads the LOW bytes of each word into the converted parameter type, **refusing BY NAME where the type is wider than a word**. An expression-tree compile, chosen because its convert node resolves user-defined operators, would have failed at compile time on the first struct-parameter arity: **the premise "a conversion the binder refuses" was the wrong reading of what the forward must DO.**
+- **A DOOR CAN BE RIGHT ON CLASS AND WRONG ON ITS OWN STATED REASON — audit a refusal's CLASS and its stated PREMISE separately.** `runtime`'s six managed-pointer-token refusals are 6 of 6 the reference-bearing-pointee class, refused by name, and none of them the pin-unheld hole — yet 5 of the 6 refuse on a premise ("native code would read or write memory that is not the caller's") that is FALSE for them: the five callback rows pass a funcval pointer at argument 3 as an **OPAQUE PASS-THROUGH COOKIE** the OS carries back to Go's own `callback`, which reinterprets and calls through it IN GO — native code never dereferences it. Those five rows are ONE funnel with SIX callers. **No remedy is owed from a results file**: what is owed is the emission route MEASURED, the inbound half (can `callback` recover its box) measured on the SAME row, the sixth caller run, and a falsifier — a native callee that STORES and DEREFERENCES the cookie.
+- **A NAMED COMPLETENESS GAP CAN BE A DIFFERENT FACT ALREADY IN THE ARTIFACT — resolve it from the PRESERVED RECORD before dispatching a solo run.** That funnel's sixth caller is absent from the refusal list because it NEVER REACHES the token door: Go=pass / C#=fail in 1 ms at its own line on `runtime.LockOSThread didn't`, before any syscall wrapper — so the funnel reads FIVE of six with the sixth **UNMEASURED with respect to the door**, neither counter-example nor confirmation. **A member missing from a population is UNMEASURED until its reason is read.**
 - **A REMEDIED member of a class can still be EXPOSED when the class's RULE changes underneath it** — a hand-own written BEFORE the managed-pointer token cut can be correct in SHAPE and broken in FACT if its own body takes the `uintptr` of a reference-bearing box. **Census the COMPANIONS' INTERNALS, not only the undisplaced wrappers.**
 - **A NEGATIVE census is worth what its SHAPE is worth**: "no hand-owned companion is exposed" carried because **72 of 96 conversions were MEASURED to take a native pointer**, where an empty grep would have closed nothing. **State what the population DOES, not only what it lacks**, and name the limits that make the closure honest.
 - **A box cannot OBSERVE a write performed through a `ref` it has already handed out** — the converted `*(*uintptr)(unsafe.Pointer(&slot)) = addr` writes through `ж<T>.Value`'s ref over the same managed storage, so a golib-side hook at the reinterpret seam runs when the VIEW is taken, not when the value is STORED. **The remedy for a pointer-typed destination is a converter EMISSION change, and an increment whose halves are converter + golib owes BOTH gate families and lands together.** `NativeBox<array<T>>` over Go's headerless `*[N]T` reinterprets element bytes as a managed `T[]` HEADER — **it IS the prestub null read it was meant to fix**; a design refuting its own shorthand on paper is the argument for **writing the record first**.
@@ -477,7 +533,20 @@ A byte endpoint quoted off an unconverged instrument is a false measurement.
      A NATIVE CALLBACK'S ARGUMENT BRIDGE IS A REINTERPRET, NOT A CONVERSION (ruled 2026-09-08): in
      Go's own words. The ahead-of-time caveat survives only in the generic instantiation, bounded to
      test-host reach with the falsifier stated; and the decision was RAISED FROM THE BODY INTO THE
-     RECORD before a line was written, which is the third time that order paid in one arc. -->
+     RECORD before a line was written, which is the third time that order paid in one arc.
+
+     A DOOR CAN BE RIGHT ON CLASS AND WRONG ON ITS OWN STATED REASON (2026-09-08, lane C2): every call
+     shape was re-derived from the pinned GOROOT source, and the zero-based index 3 matching the
+     door's own report is two derivations of ONE number. This is the CLAIM-LESS rule of the stubs
+     section met at the native boundary — the class was right and the prose asserted a cause the
+     evidence does not establish, so the fix is to delete the unwarranted half, not to compute more.
+
+     A NAMED COMPLETENESS GAP CAN BE A DIFFERENT FACT ALREADY IN THE ARTIFACT (2026-09-08, i9): the
+     hand-owned `LockOSThread` no-ops cost a SECOND test that the funnel's own name had filed under
+     the callback question. Read from the PRESERVED RECORD rather than held for the dispatched solo
+     run — a solo run is a different experiment and is still owed — it hands the other lane's root a
+     falsifiable prediction on a test it was not derived from: the fix should move the sixth caller
+     WITHOUT anyone touching the door. -->
 ## Pointer identity, box kinds and ordering tokens
 - **A BOX'S POINTEE TYPE IS ITS TYPE ARGUMENT, NEVER ITS STORAGE.** A finalizer-registration check resolving the pointee from the STORAGE OBJECT named the CONTAINER in its refusal for a field-reference box whose dynamic type is the field's own pointer type, **refusing at iteration 0 a shape Go ACCEPTS**. **A predicate keyed on any other field carries a RED-FIRST arm per box kind** — field-reference and element-reference included — or it is guarded only on the standard box.
 - **A RULE KEYED ON THE WRONG ATTRIBUTE IS A LOWER BOUND, NOT A RULE — and the ruled remedy is a THIRD ANSWER declared ABSTRACT on the base.** The pointer operator asked a PINNABILITY property ("can this be held still?") the question "is there an address here at all?"; those differ for every field or element reference rooted in a reference-bearing CONTAINER whose pointee is reference-FREE — the class that regressed every Windows dial. Testing the POINTEE's type restates the confusion one level down; **declaring the answer ABSTRACT makes every box kind STATE it or the assembly does not compile.**

@@ -16,7 +16,18 @@ paths:
      and named incident from that text is retained in the comment attached to the rule it justifies. Nothing was
      deleted, only moved. This file resisted the campaign's 5-10x target by its nature: almost all of it is the owner's
      standing SECURITY ORDER and the gate procedure implementing it, which is normative and stays visible. Only the
-     incident narratives were moved. Visible characters fell 21,152 -> ~9,500. -->
+     incident narratives were moved. Visible characters fell 21,152 -> ~9,500.
+
+     BATCH19 MERGE, 2026-09-12. The items routed here from origin/claude/coord-doctrine-batch19
+     (commits 24bfc8304 / c5e17217b / e9e56b657, CLAUDE.md@44f858717 anchors 5507, 5519, 5604, 5662) were
+     integrated: one new visible census rule (the line-break wrap and its join-class discriminator, which is
+     normative for the security order), three amendments to existing rules (guard-fixture template class,
+     foreign-name probe, allowlist fail-open), and their narratives into the comments beside them. -->
+
+<!-- Integration note, batch19: none of the four items CONTRADICTED standing doctrine. The allowlist item
+     (anchor 5662) narrows "Audit a widened gate ... controlled both ways" without reversing it, and its own
+     author retracted the general "do not allowlist a security gate" form within the hour; the retracted broad
+     form is recorded beside that rule so it is not re-derived. -->
 
 ## The security order
 - ⚠ **No real machine names or other internal-infrastructure identifiers on ANY pushed surface** — standing owner order.
@@ -76,6 +87,23 @@ paths:
   and positive control inside it. <!-- The order landed 2026-09-01 and was BREACHED in pushed docs by 2026-09-04 with no gate that
   could see it; the outside-a-path case is the order's own headline clause. The same-layer verification was shown RED on one extra byte
   and made to refuse an empty file list — a verification that passed vacuously over an empty list had already happened once. -->
+- ⚠ **A LINE-ANCHORED census cannot see a token WRAPPED ACROSS A LINE BREAK**, so append a whitespace-joined copy
+  of the input to the buffer EVERY arm searches — structural, never per-arm, so an arm added tomorrow is covered —
+  collapsing whitespace only ADJACENT TO THE BREAK, which closes the bare-newline, indented-continuation and
+  trailing-space-at-the-break shapes at once without fusing arbitrary words. **The join class discriminates by
+  CONTINUATION, never by LENGTH**: a leaked path CONTINUES past the account (the next byte is a separator) where
+  fused prose ENDS at a space or EOL, and a minimum-segment-length rule fails in BOTH directions. Probe with
+  realistic variants and STATE any residual shape the discriminator still misses. <!-- 2026-09-08, i9:
+  of six planted shapes five fired and the SPLIT token was missed — an account name broken mid-token across the wrap, with a sibling
+  lane's SHA wrapped the same way. The first fix, joining on a bare newline, was PARTIAL and its own re-probe caught it: an INDENTED
+  continuation and a TRAILING SPACE at the break, the two commonest real shapes, were still missed. A red arm on ONE historical plant
+  shape proves the census catches that shape and nothing else.
+  2026-09-08, C2, the discriminator: length fails both ways (fused 9/10/16-character vocabulary against 4-character real accounts);
+  continuation kept 8 of 8 wrap positions, freed 6 prose shapes, and left one residual STATED (a break exactly at the separator AND a
+  path ending at an unknown account). Third instance of "a mechanism does not transfer by resemblance" — a sibling's redundancy was
+  real on its own gate and absent on this two-arm one. Its red control was INVALID the first time, run against a tree not yet carrying
+  the prose arms (0 red where 4 were required), and was fixed by asserting that the variant DIFFERS in the intended way AND that the
+  arms it must fail are PRESENT; a duplicate arm that fired two kinds was DELETED rather than the attributability test loosened. -->
 - **An unclassified total is a number, never a finding** — classify a count-only census before reading it. <!-- 2026-09-08:
   904 hits over a tree that legitimately carries a public URL on every page, every one the repository's own public URL, with the
   profile-path, home-prefix and network-prefix arms all at zero. A number nobody classified is exactly what a gate wired after the push
@@ -110,7 +138,8 @@ paths:
 - ⚠ **POSITIVE-CONTROL THE INSTRUMENT ON THE BOX THAT WILL RUN IT.** The security-census false clean has at least two
   doors on GNU grep 3.0 and both read as a clean ZERO, so the rule is NOT "avoid `-F`": a case-insensitive LITERAL
   match — exactly how the pre-post identifier census is specified — is one of the dead combinations, so the one
-  instrument the owner's standing order rests on can read NOTHING and report clean. <!-- Measured independently on two lanes
+  instrument the owner's standing order rests on can read NOTHING and report clean. A lane gaining a LINUX host
+  inherits the `/home/` exposure and re-controls that arm THERE; a Windows reading does not carry. <!-- The Linux clause: 2026-09-08, G — narrative beside the EXACTLY-ONE-ARM rule below. Measured independently on two lanes
   at the same grep version, 2026-09-07: on one, -i combined with -F returns EMPTY (-c -F gives 1, -ic gives 1, -ic -F gives nothing); on
   the other, a case-insensitive count whose pattern ENDS IN A BACKSLASH returns EMPTY with "Trailing backslash" while the same pattern
   BRACKETED returns 1. Neither door is portable: a lane that "avoided -F" on one box walks into the other. Joins grep -P, the UTF-16
@@ -124,8 +153,13 @@ paths:
   Store a denylist as HASHES, with each token's LENGTH in the SAME struct as its hash. <!-- A length kept in a second list can
   silently disagree and disarm the entry while every test passes (2026-09-04). Name derivation red/red/green controlled, 2026-09-08. -->
 - **A control must be catchable by EXACTLY ONE ARM, or it cannot tell you that arm works** — each probe uses a token no
-  other arm matches, verified end to end through the real script. **Plant the instrument's own sentinel into the input
-  copy** so the control coincides with the subject on NO input. <!-- 2026-09-07: a lane ran SIX green controls over a gate whose
+  other arm matches, verified end to end through the real script; a HOME-PATH arm probed with the REAL account name is
+  caught by the owner-token arm too and proves nothing, so probe it with a FOREIGN name. **Plant the instrument's own
+  sentinel into the input copy** so the control coincides with the subject on NO input. <!-- 2026-09-08, G: the real account
+  name COINCIDED with the owner-token arm, so "all refused at 2 hits each" proved NOTHING about the path arm — per-arm isolation defeated
+  by a probe whose token TWO arms can match. Re-probed with a FOREIGN name the arm stands alone (home path REFUSED, bare foreign name
+  CLEAN, windows path REFUSED). Every lane gaining a Linux host inherits the exposure, so that arm is re-controlled there rather than
+  carried from the Windows reading — visible as a clause on the box rule above. 2026-09-07: a lane ran SIX green controls over a gate whose
   user-path arm was COMPLETELY DEAD (a heredoc had collapsed its doubled backslashes into the literal drive-colon-Users text) because the
   probe meant to prove that arm ALSO carried the account name, and the account arm caught it. 2026-09-08, 99a1f5e: a census anchored its
   "the grep works" control on a token every mailbox post happens to carry — the lane's own name — so on a CODE COMMIT MESSAGE it ABORTED
@@ -141,7 +175,17 @@ paths:
   initial zero was a broken control, not a clean tree. -->
 - **Never exempt a guard's own source** — it is a tracked file the guard scans and the one most likely to be edited by
   whoever adds the next entry. Assemble planted fixtures through `Sprintf` so the source reads as a placeholder while
-  the runtime string is real-looking. <!-- 2026-09-04: the green arm going RED first because the guard found ITSELF is the control working. -->
+  the runtime string is real-looking. A coarse battery census then reads those fixtures as HITS: exclude them as a
+  TEMPLATE class keyed on the SEGMENT after the root and **never on the path** — so a fixture carrying a REAL segment
+  still counts — PRINT the excluded lines beside the residual, and control the class both ways (fixture shapes
+  excluded, a real segment and a placeholder-elsewhere line SURVIVING) before any merge. <!-- 2026-09-04: the green arm
+  going RED first because the guard found ITSELF is the control working. 2026-09-08, coordinator: one battery run read residual = 11,
+  ALL inside the guard's own census test file — the detector's quoted literals and its `Sprintf` fixtures, whose SEGMENT after the root
+  is a placeholder — with the owner-account alternative at 0 and the authoritative repo guard green inside the same battery leg at the
+  union. The template class was applied to hard hits too and given a six-arm control: four fixture shapes excluded, while a real segment
+  and a placeholder-elsewhere line SURVIVE — the two arms that keep the class from laundering a name. Proved from the INSTALLED bytes on
+  the union delta (raw 21 / template 11 / residual 0), after a first patch that collapsed its backslashes in transit and broke the parse,
+  rebuilt from `chr(92)` per the Write-patterns rule below. -->
 - **Key clearances by (path, segment) with a liveness test, NEVER by line** — a line-numbered clearance goes stale on the
   next edit above it, route #8. A structural pass skipped over fixture-heavy trees stays honest only if a second,
   token-keyed pass still runs there. A guard RED at master BY CONSTRUCTION names its merge-order constraint (with or
@@ -155,7 +199,19 @@ paths:
   NAME a published artifact as such in a follow-up rather than rewriting it away. <!-- One posted a junk entry, 2026-09-05. -->
 - **Audit a widened gate for false positives** on documented-allowed forms (kernel constants, pattern descriptions,
   placeholders) with a match-then-subtract allowlist controlled both ways. **An arm requiring a separator on BOTH sides
-  misses a path ENDING in the token.**
+  misses a path ENDING in the token.** An allowlist on a REFUSAL arm is controlled in BOTH directions or it cannot
+  fail — **an admit-only control reads GREEN on a dead arm** — and needs three properties: admit per OCCURRENCE (set
+  membership on the captured segment) and **never per LINE**, which fails open on a line carrying a nickname AND a real
+  host; a per-ARM scope (see the per-arm-parameter rule above); and a control of the mixed-line case. **Never write a
+  negative lookahead into a `grep -E` arm**: ERE has no lookaround and `grep -P` cannot run on this box, so the arm
+  matches NOTHING and fails OPEN silently — confirm the engine (Go's RE2 refuses lookaround at COMPILE, loudly). Where
+  an instrument cannot provide per-occurrence matching and per-arm scope, **refusing BROADLY is the honest fallback** —
+  a limit of that instrument, not a general prohibition on allowlisting a security gate. <!-- 2026-09-08: the lookahead arm
+  shipped, a planted real-looking host read CLEAN, and it was caught only because the control ran the REFUSE direction too. The lane
+  reverted to the broad arm on its own tradeoff (a false refusal costs one rewrite, a false pass costs a scrub), sent the warning BEFORE
+  the coordinator's seat pushed, and RETRACTED the general form of its own warning — "do not allowlist a security gate" — within the hour
+  rather than leave it on the record as a reason not to do what had just been done correctly. The correctly-done thing is the per-arm
+  widening recorded above (network arm admits the nicknames, profile arm admits nothing, shared placeholder set untouched), same day. -->
 - **Write patterns that must survive verbatim into a FILE with the Write tool**, never spliced through an interpolating
   shell. <!-- Instrument traps paid for in this class: (a) a coarse census whose network-share alternative is spelled with FOUR consecutive
   backslashes in the ERE — the bash-quoted eight-backslash form — matches only a four-backslash run and is BLIND to the ordinary

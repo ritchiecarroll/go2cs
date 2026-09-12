@@ -11,7 +11,11 @@ description: Post to or read the fleet mailbox. Anchors, read discipline, push c
      Phase 2 (2026-09-12) distilled this file: every dated narrative was moved into an HTML
      comment OPENING ON THE LAST LINE OF THE RULE IT JUSTIFIES (so stripping leaves no residual
      blank line and the provenance costs ZERO tokens). Nothing was deleted; if a rule reads thin,
-     its full derivation is in the comment under it and in the JOURNAL. -->
+     its full derivation is in the comment under it and in the JOURNAL.
+     2026-09-12: batch19 items (branch claude/coord-doctrine-batch19, commits 24bfc8304 /
+     c5e17217b / e9e56b657, old-CLAUDE.md anchors 6492 / 6550 / 6560 / 6585) were merged into this
+     shape — three became new visible rules, two amended existing rules and folded into their
+     comments. -->
 ## Before you post a claim
 - **A post that STATES a measurement is a DEPENDENT step of that measurement.** Never compose the
   claim in the same response as the command that produces it — write it from the verification's own
@@ -52,6 +56,19 @@ description: Post to or read the fleet mailbox. Anchors, read discipline, push c
   commit" while the work was gone. The coordinator's own post script ran `git reset --hard` in the
   shared clone when a commit did not land, which is the revert mechanism; scoped to its own file the
   same day. -->
+- **A lost mailbox race is answered by a MERGE, never by a force — and a `--force-with-lease` whose
+  expected SHA is READ AT PUSH TIME is that force wearing the careful spelling.** A lease asserting
+  "the remote is whatever it currently is" is always satisfied. Push through `src/safe-push.sh`,
+  whose RANGE step (`git rev-list --count <remote>..<local>`) ERRORS on an object the local clone
+  lacks — exactly what a moved remote produces. Repair a dropped post by fetch, READ the interleaved
+  commits, re-append, re-push; and attribute a mailbox event from `git log --graph`, never from
+  prose. <!-- ⚠ 2026-09-08: a lane hand-rolled `REMOTE=$(git ls-remote …)` then
+  `--force-with-lease=…:$REMOTE`, skipping `src/safe-push.sh`, and the push DROPPED another lane's
+  post. It was restored by MERGE with all three posts verified present. The coordinator
+  mis-attributed both halves to the wrong lane TWICE — first from a reconstruction, then from the
+  restore-merge's OWN subject line — before reading the GRAPH. Twin of the lease defect recorded
+  under "Writing the guard inside the tool": a lease is also NOT EVALUATED when there is nothing to
+  push, so both spellings of "careful" fail silently. -->
 - **Pass free text through a FILE (`-F`), never as a native argument.** <!-- ⚠ 2026-09-03/04: a
   mailbox post instrument split its message on embedded double quotes (PS 5.1 native-argument
   quoting) and the commit failed as a bad pathspec. -->
@@ -89,6 +106,14 @@ description: Post to or read the fleet mailbox. Anchors, read discipline, push c
   — this file's own "remote rejected with exit 1 had landed" case, retried in a loop. A subject-less
   heading matched 91 DISTINCT bodies. The working counter-example never retries: it pushes, reads the
   ref back FROM THE REMOTE, and on any doubt exits NON-ZERO. -->
+- **Verify a RESTORE by the `## ` heading the commit's OWN diff added, never by the commit subject** —
+  a subject grep reads 0 for a post that is present and manufactures a PHANTOM LOSS. This scopes the
+  body-hash rule above rather than contradicting it: a duplicate CENSUS keys on the body hash because
+  one heading matches many bodies; a PRESENCE check keys on the added heading because the subject is
+  not in the file at all. <!-- ⚠ 2026-09-08, restoring the force-dropped post recorded under Posting:
+  a grep of the commit SUBJECT against the mailbox file read 0 for a post that WAS present, because
+  the body heading is worded differently. Extracting the added `## ` heading from each commit's own
+  diff and grepping for that read exactly 1 on all three posts. -->
 
 ## Reading and anchors
 - **Anchor a read-confirmation on state THE TOOL REMEMBERS, and treat the caller's argument as a
@@ -102,6 +127,13 @@ description: Post to or read the fleet mailbox. Anchors, read discipline, push c
   before arming. An abbreviated anchor reads MOVED on its first poll with nothing new — a vacuous
   fire that looks exactly like a lane post. <!-- ⚠ 2026-09-07, run 57: the mailbox monitor compares
   its anchor as a STRING against `rev-parse` of the remote tip. -->
+- **A poster verifies its OWN entry landed once and CANNOT see that a PRIOR entry is gone** — it
+  fetches, resets to whatever the tip is, appends, pushes. Detection of a DROPPED post belongs to a
+  READER THAT REMEMBERS THE PREVIOUS TIP: assert the previous anchor is an ANCESTOR of the new tip
+  (`git merge-base --is-ancestor <anchor> <tip>`) and stamp HISTORY REWRITTEN with both SHAs
+  otherwise. <!-- ⚠ 2026-09-08: added to the coordinator's mailbox monitor after the
+  `--force-with-lease` push recorded under Posting dropped a sibling's post. No poster's own delivery
+  check can reach this class — its entire view is the tip it just wrote, and it reads healthy. -->
 - **Print every line of a state-advancing tool's output — never `tail` an absorbed-range listing** —
   and treat "commits absorbed" as posts owed a read before the next dispatch. The monitor's delta
   ends at the FETCH instant; a post placed one minute later is inside the NEXT post's absorbed range
@@ -110,11 +142,17 @@ description: Post to or read the fleet mailbox. Anchors, read discipline, push c
   absorbed it into the read anchor and PRINTED it — and the tail hid it. The post went unread for
   twelve minutes, and was found only because a later post by another lane cited it. -->
 - **A thing you must read belongs where your habit looks**: print the absorbed-range listing AFTER
-  the delivery line, behind a banner. <!-- ⚠ 2026-09-08: a post tool printed its absorbed-range
+  the delivery line, behind a banner. Placement and whole-reading are ONE remedy — a listing in the
+  right place is VOID if the read is `tail`ed. <!-- ⚠ 2026-09-08: a post tool printed its absorbed-range
   listing ABOVE the delivery line, its author tailed the last two lines to confirm delivery, and the
   coordinator's post answering the question it had asked forty minutes earlier sat three lines up. A
   placement failure in an INSTRUMENT, not a resolve failure. Same shape as a gate that prints a
-  verdict nobody greps. -->
+  verdict nobody greps. ⚠ 2026-09-08, the interaction proved: a lane read past THREE posts addressed
+  to it and posted "nothing owed that I know of" while a defect was already ruled to it — its own
+  post tool printed the absorbed entries exactly where its habit looks, and it `tail`ed the output so
+  one long unrelated entry filled the window. The absorbed listing is read WHOLE, never tailed, and
+  "that I know of" was doing real work in a sentence that was still wrong. Retracted by the lane the
+  same hour, with the cut. -->
 
 ## Writing the guard inside the tool
 - **An assertion whose reference is derived from the thing under test can never fail, and it is
@@ -138,10 +176,19 @@ description: Post to or read the fleet mailbox. Anchors, read discipline, push c
   behind a discarded stderr, and an eight-project check read "8 of 8 DIFFER" — the exact INVERSE of
   the truth — until a control asserted the baseline blob non-empty. -->
 - **Derive the verdict from the count and exit on it; a hardcoded verdict string is a check that
-  cannot go red.** A confident parenthetical is the tell. <!-- ⚠ A loop correctly reported two
+  cannot go red.** A confident parenthetical is the tell. Score the count against a population that
+  EXCLUDES the instrument's OWN floor files — named EXACTLY, never matched by pattern — and print
+  MET/MISSED. <!-- ⚠ A loop correctly reported two
   failures and the `echo` after it printed "all seat SHAs resolve (silence above = clean)"
   unconditionally, asserting a premise the same output had falsified two lines earlier — written into
-  the very command applying the rule about verdict lines that cannot go red. -->
+  the very command applying the rule about verdict lines that cannot go red. ⚠ 2026-09-08, six
+  per-run reports: a scorer's "PREDICTED 0" was a HARDCODED LABEL against a total that INCLUDED the
+  instrument's own floor files, so the prediction was unmeetable BY CONSTRUCTION and printed beside
+  every run; and a corpus filter excluding on `report|manifest` MISSED a progress text file, so a
+  floor file would have counted as corpus movement. The fix names the floor files exactly, scores the
+  CORPUS count, prints MET/MISSED, and controls the filter on a previous run's real data where it
+  must reproduce the known reading (windows 0 / linux 0 / darwin 1). Both defects would have
+  FLATTERED the author, which is why they are fixed before the zero is believed. -->
 - **When ordering-by-care has already failed, the fix is a SCRIPT, not more care** — the assertion
   goes IN the script and REFUSES rather than reports: `BASE ASSERTED: <sha> contains master <sha>, 0
   behind, roster N rows`, each row confirmed banked IN THAT TREE before its leg. <!-- ⚠ "Remember to
