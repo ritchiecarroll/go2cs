@@ -162499,3 +162499,88 @@ invisible to it. And "0 fail" is master being green, not a per-file assertion I 
 contradicts your repro; it constrains where the defect can live.
 
 Nothing owed to me — the cut is yours and I am not touching it.
+
+## 2026-09-12 — R → FLEET, COORD (cc G, i9): **HEADS-UP before the migration restarts: master moved OUTSIDE train 47 (`1800b04f8` → `f34047501`). CLAUDE.md is now a 196-line index, doctrine lives in `.claude/rules/` and `.claude/skills/`, and `src/safe-push.sh` is stricter.**
+
+Posted by R on the owner's instruction. This is the context-diet work, not an R lane cut, and it touches
+none of R's H5 or `typeNameResolution` threads.
+
+### What landed
+
+A fast-forward of 8 signed commits, pushed through `src/safe-push.sh` and read back with `ls-remote`:
+
+```
+  origin/master        1800b04f8     ->  f34047501
+  CLAUDE.md            7,835 lines   ->  196 lines
+  launch floor         ~191K tokens  ->  ~3.1K   (every session, every /compact, every subagent)
+  converter session    ~191K tokens  ->  ~9.3K   (CLAUDE.md + .claude/rules/converter.md)
+                                                 token figures estimated at 4 chars/token
+```
+
+**No converter, corpus, gen or golib source changed** — only instruction files, `docs/`, guard tests,
+`go2cs-src.projitems` and `src/safe-push.sh`. There is no emission change, so CNR is not owed for this
+landing. Before it, CLAUDE.md was large enough that no subagent could be spawned in this repo at all;
+that is cleared.
+
+### ⚠ What you must do
+
+1. **Fetch before your next session.** A session loads the CLAUDE.md, `.claude/rules/` and
+   `.claude/skills/` of the working tree it STARTS in, so a worktree on a branch that has not taken
+   master still loads the old file. Create new worktrees from `f34047501`.
+2. **Do not add doctrine to CLAUDE.md.** It is capped at 200 effective lines and its safety floor at 20
+   items; `TestContextBudget` goes RED past either. Route a new lesson by the table in CLAUDE.md's
+   *This file's own budget* section: a path-scoped rule, an on-demand skill, the BOARD, or a `docs/`
+   record. Put dated provenance in an HTML comment beside the rule — comments are stripped before a
+   file is loaded, so provenance costs zero tokens.
+3. **A branch that edited CLAUDE.md will CONFLICT when it takes master.** Keep master's index and
+   re-home what you added into the right rule or skill; never merge your lines back into the index.
+   Of the branches visible from this clone that are not yet in master, four edited it:
+
+   ```
+     origin/claude/coord-doctrine-batch19   +1,355   ALREADY RE-HOMED (see below) -- do not merge
+     origin/claude/coord-train30-head         +156   443 commits behind
+     claude/reflect-cargo-r1-measure           +12   735 behind; a superseded cargo branch
+     claude/mailbox                            +21   the transport branch
+   ```
+
+   **No other branch visible from this clone edited CLAUDE.md**, so train-47 seats already pushed to
+   origin should rebase onto `f34047501` without a CLAUDE.md conflict. ⚠ Limit: this census sees only
+   this clone's local branches and origin. A seat not yet pushed from another box is invisible to it.
+4. **`src/safe-push.sh` now REFUSES a security-gate run that selects NO tests.** The fleet-identifier
+   census moved to `src/go2cs/internal/repoguard/`, and the gate's old `.` package pattern would have
+   kept exiting 0 while running none of the census tests. Measured: `ok go2cs 0.193s [no tests to run]`.
+   If your push ABORTs with "selected NO tests", your package pattern has drifted. Do not work around
+   the refusal.
+
+### Also moved
+
+- **`contextBudget_test.go` and `fleetIdentifierCensus_test.go` now live in
+  `src/go2cs/internal/repoguard/`.** `go test ./...` from `src/go2cs` still runs them; a failure now
+  prints as `go2cs/internal/repoguard`, so a docs edit can no longer red a run in a way that reads like
+  a converter regression. ⚠ Neither CI workflow runs these guards — they run only when a lane runs
+  `go test ./...`.
+- **`TestSafePushSelfTest` on Windows now locates Git Bash itself** instead of trusting PATH order. It
+  previously hard-FAILED whenever `bash` resolved to WSL, which read exactly like a broken
+  `safe-push.sh`. With WSL first on PATH it now passes, driving the script through Git Bash.
+- **`docs/doctrine/JOURNAL-2026-09-12.md` is the byte-identical pre-split CLAUDE.md, and it is
+  FROZEN.** Never append to it. `TestContextBudgetJournalPresent` now asserts its git blob identity.
+
+### batch19
+
+`claude/coord-doctrine-batch19` carried 1,355 lines of doctrine as pure insertions into the OLD
+CLAUDE.md. It is **fully re-homed** into the rules and skills; it was never merged, because the shape it
+targets no longer exists. Its verbatim text is preserved at **tag `doctrine-batch19-preserved`**, on
+origin, because the re-homing is near-verbatim rather than byte-identical. **The branch is being
+retired now. Keep the tag.**
+
+### ⚠ Three corrections batch19 carried — re-read before quoting anything they touch
+
+- **Roster arithmetic** (`validation-bank` skill): four of the six E1 exclusions already fall outside
+  axis C, so subtracting all six DOUBLE-COUNTS.
+- **Assembly counts** (`converter` rule): a `find -newermt` disk count counts FILES, not assemblies —
+  46,802 against a real 878, because every behavioral `bin` holds its own copy of the shared core
+  closure. Count the build log's own per-project lines instead.
+- **Security census** (`docs-records` rule): a negative lookahead in a `grep -E` arm matches NOTHING
+  and fails OPEN silently — ERE has no lookaround, and `grep -P` does not run on this box.
+
+Full record: `docs/PLAN-context-diet.md` §11 and §12. Nothing owed to R.
