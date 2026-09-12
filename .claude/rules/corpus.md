@@ -17,7 +17,28 @@ paths:
      justifies. Nothing deleted. Byte-identical pre-split original: docs/doctrine/JOURNAL-2026-09-12.md.
      BATCH19 MERGED 2026-09-12: the items routed here from branch claude/coord-doctrine-batch19 (commits 24bfc8304 / c5e17217b /
      e9e56b657, pure insertions into the OLD CLAUDE.md shape at anchors 3647 / 3761 / 4250) are folded in below — most as further
-     evidence under rules this file already carried, three as new or amended visible rules. -->
+     evidence under rules this file already carried, three as new or amended visible rules.
+
+     MOVED OUT 2026-09-12 (same branch, from 86037ef2e): two sections left this file for
+     .claude/skills/corpus-reconvert/SKILL.md — the one on measuring a converter change and the one on
+     the reconvert/overlay/build/bucket loop — whole, each rule with its attached HTML comment, and
+     MERGED into that skill's existing ordered procedure (§2 emit, §3 diff, §4 apply, §5 verify)
+     rather than appended as a second copy of the loop. WHY: this file is PATH-SCOPED
+     (paths: src/core/**), so it loads IN FULL for anyone — subagents included — who reads ANY file
+     under src/core, while a skill's body loads only when the skill is invoked. Those two sections are
+     a PROCEDURE you invoke rather than facts you need in hand while editing a corpus file, and
+     corpus-reconvert already advertised exactly that remit ("the seeded two-seeded diff, the hunk
+     rule, marker gates, per-target emission and the reconvert-overlay-build-bucket loop"). What STAYS
+     here is what answers "may I regenerate this file / how is the tree shaped": the five kinds,
+     layout L3, the cgo state of record, encoding-metric-banking a regen, the deleting instrument,
+     deployment. NOTHING was distilled on the way out — every date, count, package name, error code,
+     glyph and named incident from both sections is in the skill's comments, where it costs zero
+     tokens exactly as it did here; 22 rule units landed there as 17 visible lines plus one fold (the
+     `.cs.auto`-not-refreshed-by-the-overlay rule, which the skill already carried as "named, not
+     overlaid"). The two sections as this file last held them are at 86037ef2e:.claude/rules/corpus.md
+     (this file was 236 effective lines then, 162 after); the byte-identical pre-split original of both
+     is docs/doctrine/JOURNAL-2026-09-12.md. They are replaced below by ONE pointer line, deliberately
+     not a section. -->
 
 ## What `src/core` holds
 
@@ -152,172 +173,7 @@ once.** Set `CGO_ENABLED=0` before converting against or regenerating the corpus
      older corpus still references. The ruled fix also carries a DECISION-level guard over synthetic closures plus a fixture
      corpus tree. -->
 
-## Measuring a converter change
-
-- **The on-disk corpus can be STALE**: the committed tree measures *that* output, not today's converter. Reconvert.
-- **ADDRESS-OF/ALIASING (`Ꮡ`) changes owe a seeded reconvert-and-BUILD; CNR alone is NOT sufficient.** The behavioral corpus is a
-  SAMPLE of Go's shapes; the stdlib is the population.
-- **Blast radius = TWO seeded reconverts (pre-change, changed) diffed against EACH OTHER — never the committed-tree diff — over
-  the WHOLE corpus.** The committed tree is a moving baseline carrying unbanked drift; a scoped census reproduces its own scope.
-- **Take EVERY seed before ANY arm converts**, or seed from a frozen snapshot (`git archive`): seeding each arm from the live
-  worktree as it starts reports files as "differing" that NEITHER converter wrote. **Compare only the paths the conversion
-  WRITES — or classify by write-evidence FIRST**: a single-target run writes NEITHER other flavour's per-GOOS copy, so a
-  whole-tree `diff -rq` reads a seeding skew as a footprint even with one lane involved.
-- **A seeding control keys on what can change a BINARY, never on byte identity**: `git archive` APPLIES autocrlf, so an
-  archive-against-checkout byte compare refuses on line endings alone — the WRONG LAYER on a mixed-ending tree. Three arms:
-  non-test files CR-strip-identical; `_test.go` EXCLUDED from the criterion while a CONTENT change there is still red (the split
-  is STATED, never used as the criterion); every `//go:embed` target byte-identical.
-- **Prove the write; never infer it** — four assertions owed every run:
-  1. **The binary's MTIME MOVED and is newer than its sources.** Existence-and-size is too weak: `go build -o <path> <dir>` can
-     land the binary at `<dir>/go2cs.exe` while exiting 0, and the check then passes on the STALE binary at the invoked path.
-  2. **Name the toolchain that built EACH arm** (`go version <binary>`) — a build without the GOROOT pin can stamp the two arms
-     at different Go releases.
-  3. **Count files WRITTEN this run, per arm per target, and ABORT on an arm that emitted nothing** — two untouched seeds compare
-     0/0/0, indistinguishable from a clean gate. Corroborate with the wall and the exit code. **A lane finding its own vacuous
-     reading RETRACTS it publicly.**
-  4. **Write-evidence is a CONTENT test, never a timestamp**: hash a `[module: GoManualConversion]` file IN A PACKAGE THE ARC
-     TOUCHES across every seed and require equality; else fall back to whole-tree identity outside the emitted set. Mtimes are a
-     HINT — **a written count of ZERO is decisive, a nonzero one is not.**
-- **Derive hunk anchors from the BASE EMISSION** (difflib opcodes) so no converter glyph passes through a shell, and
-  **`git show HEAD:<file>` returns the LF blob against a CRLF checkout** — name the LAYER before quoting a count.
-
-<!-- ALIASING GATE proven 2026-08-15, the element-field-address fix: of three defects in that arc CNR caught ONE; the other two —
-     a pointer-receiver named-array blind spot and its over-broad first fix — appeared in NO behavioral test's shape and were
-     found only because the whole corpus was reconverted and compiled. The same census surfaced a real SHIPPED lost write:
-     encoding/xml's attribute-namespace translation writing into a copy.
-
-     TWO-SEEDED DIFF, 2026-08-29, the position-table splitter fix: a naive reconvert-vs-committed diff reported 147+ files,
-     almost all PRE-EXISTING unbanked drift from arcs that landed without their regens (the standing position-map staleness two
-     census lanes rooted independently the same day); the two-seeded diff isolated 26 metadata files, zero production code.
-     WHOLE-CORPUS SCOPE, 2026-09-04: the whole-corpus run found both a publication defect and fourteen sites in sync/map.cs the
-     name-keyed census had not predicted.
-
-     TELLS 1 and 2 paid 2026-09-01: a lane's "old" binary never existed and the diff silently compared committed-tree-vs-fixed,
-     reporting 724 phantom files (the emitted-before-seeded family, build-step edition). Tell 1 STRENGTHENED 2026-09-05:
-     `go build -o` fed an MSYS /c/... path wrote into a stray C:\c\ tree while the existence-and-size check read the STALE binary
-     at the right path and passed. The mtime assertion is the converter's own staleness predicate; checking out a branch whose
-     converter sources are newer than the binary is exactly what it REFUSES, correctly. The toolchain tell came from a build
-     stamping one arm go1.24.7 against the other's go1.23.12, caught only by byte-comparing a pinned rebuild against the running
-     binary.
-
-     THIRD MODE (live-worktree seeding), 2026-09-04: both standing tells passed — binary at the exact path, this run's mtimes on
-     both sides — yet base and new were seeded from different trees and the diff read exactly like a footprint. `find -newermt`
-     reported 179 src/core files inside one run's window that were a branch switch completing before the first seed; trusting
-     them would have discarded a sound A/B. A hand-own in an untouched package discriminates nothing. Same run: a heredoc
-     mangled a converter glyph, caught at zero matches (the LF-anchor family through its glyph door); and `git show HEAD:<file>`
-     produced 1,408 "differing" lines that CR-strip to 18.
-
-     FOURTH MODE, 2026-09-05, the emitted-vs-seeded trap's PUREST instance: both arms piped through `Select-Object -First N` were
-     KILLED at exit -1 with ZERO .cs written and the comparison of two untouched seeds read 0/0/0. The -First N kill is the
-     documented pipeline trap; what was new is that it can take out an A/B's arms silently, since the trap's usual tell (a
-     visibly dead run) is what the diff then reads as a green. The impossible WALL is minutes where a three-target conversion
-     floors at ~9. The diff script now ASSERTS the written count and ABORTS on an empty arm, and the lane retracted its own
-     reading with the mechanism before anything seated on it.
-
-     FIFTH MODE, 2026-09-08 — the third mode's shape with only ONE lane involved: two staging roots seeded from ONE tree at
-     DIFFERENT times, one AFTER that lane's own apply step changed a file and one BEFORE. A windows-target conversion writes
-     neither per-GOOS copy of that file, so `diff -rq` reported darwin and linux files "differing" that no converter had written.
-     When the seat's tip moved, the transfer of the earlier rung's readings was MEASURED (byte-identical emission on the written
-     target) rather than reasoned from the diff's file list, with the unmeasured targets stated.
-
-     SEEDING CONTROL PREDICATE, 2026-09-08 (the coordinator and a sub-agent standalone; one finding stated twice, the second
-     correcting the first's mechanism). A train's seeding leg REFUSED ITSELF on 1 of ~300 converter files: a `_test.go` whose blob
-     is LF, from a Linux lane's commit, that autocrlf smudges to CRLF in the checkout — 263 of 264 reading `w/crlf`. The ARCHIVE
-     applies the conversion, so the brief's inverted mechanism made the conclusion STRONGER, not weaker: a `_test.go` is not a
-     `go build` input and Go source line endings do not reach the binary (raw string literals spanning lines being the one
-     exception, still to be measured), so the archive-built base converter WAS the base converter and the leg reported UNMEASURED
-     for a CONTROL fault. Corrected arms as measured: arm 1, 189 non-test files CR-strip-identical with zero differences; arm 2,
-     a planted `_test.go` content defect REFUSED; arm 3, 15 `//go:embed` targets byte-identical. The FIRST writing of arm 2
-     refused a benign EOL-only difference in a NON-test file and was caught by its own control — the exact false-refusal class the
-     exercise was correcting, one file over. -->
-
-## Reconvert → overlay → build → bucket
-
-1. **SEED FIRST — non-negotiable.** `cp -r src/core <tmp>/core` before reconverting, **excluding `bin`/`obj`/`Generated`**, then
-   **verify the seeded `.cs` COUNT**. An EMPTY or PARTIAL root gives the marker nothing to detect — `<file>.cs.auto` is written
-   only when the marked file already exists at the output path — so every hand-owned rewrite emits as plain `.cs`, the overlay
-   rule ("copy `*.cs`, exclude `*.cs.auto`") protects NOTHING, and hand-owns are clobbered with auto conversions that COMPILE and
-   are operationally broken. Control: untouched seeded files reproduce HEAD byte-for-byte. Seeding also hides files the converter
-   has STOPPED emitting — classify emitted-vs-seeded by sentinel mtime and report would-be deletions.
-2. **Seed `<tmp>/src/version.props` and `<tmp>/docs/validation` too, mirroring the repository** (version.props at the root
-   holding `core/golib`, `docs/` its SIBLING); convert with `-go2cspath <tmp>/src`. Of the README's four badges, **Tests** and **Source·C#** read the
-   REPOSITORY (`src/version.props`, `docs/validation/current/<dot-id>.md`) and vanish without it; **Docs** and **Source·Go** read
-   the TOOLCHAIN and survive — so the tell is a README carrying two badges, not none.
-3. **Convert**: `go2cs.exe -stdlib -comments -go2cspath <tmp>/src` → output at **`<tmp>/src/core/<pkg>`** (`core` is hardcoded;
-   `-go2cspath` is the *output* root, unrelated to MSBuild's `$(go2csPath)`). ≈ 3–4 min for the full stdlib — **batch, never per package**.
-4. **NEVER convert twice into one temp root; never let two conversions overlap on a box.** Delete and re-seed the root for every
-   reconvert; confirm no `go2cs.exe` is alive first. A race corrupts ONE file with unresolved `«DYNTYPE:…:DYNTYPE»` lift markers
-   → CS1056/CS1003, reading exactly like a converter regression. Wrap the call in `$ErrorActionPreference='Continue'` (or don't
-   pipe its stderr): under `'Stop'` a stderr WARNING becomes a terminating `NativeCommandError` that aborts the wrapper and
-   leaves the exe alive.
-5. **MARKER GATE before overlaying — PATH-PRECISE, not a count.** For every `[module: GoManualConversion]`-marked committed file
-   the temp root must NOT hold a freshly-EMITTED plain `.cs` at that path. Marked files far outnumber `.cs.auto` producers, so
-   **a same-count assertion is wrong in both directions**.
-   - **Re-measure the census every time; never assert last session's number; treat a SHRINK as something to EXPLAIN.** Under L3
-     one hand-own can exist as TWO files, so marked FILES is not distinct hand-owns. Multiple markers in ONE assembly are legal
-     and normal (`runtime` carries eight).
-   - **Scan WHOLE FILES** (markers sit below long license/using blocks) and **LINE-ANCHOR**
-     `^\s*\[module:\s*(go\.)?GoManualConversion\]` — `reflect/value.cs` and `internal/reflectlite/value.cs` *mention* the marker
-     in placeholder comments, so an unanchored `grep GoManualConversion` raises a false clobber alarm and a head-window scan
-     makes the gate VACUOUS.
-   - **`.cs.auto` siblings are tracked in git but NOT refreshed by the overlay** → they stale on their own schedule and are
-     RE-MEASURED at every rebank head, by **CR-stripped equality** against the committed file.
-6. **Overlay** the fresh `.cs`, **`.csproj` and `README.md`** onto `src/core/<pkg>` — a straight copy, no rewriting. A seeded
-   reconvert of the whole stdlib is byte-identical to the committed tree, so any post-overlay diff is a real converter change.
-   Two knowns that are NOT: the SIX root attribution files (`src/core/README.md` and its five siblings) show modified with an
-   EMPTY `git diff --numstat` — CRLF phantoms, restore them; and kind 4, never re-emitted at all.
-7. **Build** with **`dotnet build <pkg>.csproj -c Debug`** — `src/core/Directory.Build.props` pins `$(go2csPath)`, so
-   `core\golib` + the `go2cs-gen` analyzer resolve to live source with **no `-p:go2csPath` flag** — or build all of
-   `go2cs-stdlib.slnx` (~92–150 s warm, 305 assemblies; the 306th, `crypto/x509/internal/macos`, is darwin-exclusive). Passing
-   the flag anyway needs forward slashes (`-p:go2csPath=H:/Projects/go2cs/src/`): a trailing `\` escapes the closing quote and
-   mangles the path into phantom golib-not-found errors.
-8. **Bucket**: `dotnet build … -clp:ErrorsOnly`, group by `error CS####`. Errors shown are *own-errors* of leaf-most failures —
-   dependents of a failed project are skipped, not errored.
-
-<!-- SEED FIRST learned 2026-07-25, cost a false operational-break alarm: 14 hand-owned files got clobbered, and godebug's auto
-     init() throws in a module initializer and takes down every dependent. PARTIAL SEED fleet-confirmed twice in one day,
-     2026-09-01: Copy-Item -Recurse dies on go2cs-gen's long obj\...\Generated\ paths and, under the ritual's own required
-     $ErrorActionPreference='Continue', carries on past the death — the unseeded-root hazard through a door the rule never named.
-     The emitted-files control is what makes a suspect seed's readings trustworthy.
-
-     MARKER CENSUS HISTORY — exactly why it is re-measured, never carried forward: 32 at r14; 39 before internal/concurrent's
-     hashtriemap.cs joined in r39d; 40 at r40; DOWN to 39 when the r41 train's regen retired math/unsafe.cs's hand-own without
-     saying so (the BitConverter bit casts went back to the auto `Ꮡf.Reinterpret<float32, uint32>()`, correct now that
-     Reinterpret genuinely aliases managed storage, and math's banked 76/76 re-proves it every sweep — benign in that instance,
-     but a hand-own disappeared under an overlay while the commit reported its marker gate "40/0"); back to 40 when
-     internal/weak/pointer.cs joined at r43e; 41 at r44a (re-measured 2026-08-07) when internal/cpu/cpu_x86_impl.cs joined, of
-     which only 15 produce .cs.auto and the other 26 are *_impl.cs companions and hand-owned packages the converter never
-     re-emits at that path; 42 since r50a for a NEW reason — L3 routes a hand-own into its principal's per-GOOS folders and
-     runtime/lock_sema_impl.cs's principal is selected on Windows AND macOS, so one hand-own exists as TWO files; 44 since r51b,
-     when runtime/lock_managed_impl.cs (the flat, platform-neutral managed core of the mutex/note protocol) and
-     runtime/linux/lock_futex_impl.cs (the futex flavor's 2-arg notetsleep_internal) both took the marker; 49 marked /
-     41 *_impl.cs companions / 59 distinct hand-owns at the r59 regen bank (2026-08-11); 53 marked / 42 companions at the Linux
-     regen wave (2026-08-14), 0 violations across 3 targets x 2 merge passes; 73 marked / 49 companions / 24 whole-file rewrites
-     at the 2026-08-24 post-merge rebank, 0 violations on windows and linux alike.
-
-     WHOLE-FILE SCAN measured 2026-08-17: a first-40-lines window reported 35 marked files against the real 60, which would have
-     made the clobber gate vacuous for 25 hand-owns. LINE-ANCHORING: an unanchored grep reports 63 against the real 40.
-     .cs.auto STALENESS is CleanupBacklog item 18 and the measurement moves — 11 of 16 stale at r40, 0 of 23 at the 2026-08-24
-     post-merge rebank; a seeded reconvert per target re-emits each sibling, and a RAW byte compare reports the whole set as
-     differing because a fresh emission carries the in-literal LF the working tree holds as CRLF.
-
-     BADGES: version.props + docs/validation seeding added 2026-08-02 with the README validation badges. The converter finds both
-     by the same upward walk it uses for $(go2csPath) and emits NO Tests badge when either is missing — a silent, corpus-wide
-     README diff on overlay. Docs and Source-Go were measured toolchain-sourced 2026-08-08 (go env GOVERSION, and GOROOT's own
-     src/vendor/modules.txt for the 19 GOROOT-vendored golang.org/x/* packages), which is why the symptom is now a two-badge line
-     rather than no badge line; the rule is unchanged, only the symptom is. A versioned docs/validation/<version>/ need NOT be
-     seeded — the badge reads current/, and the versioned directory is only the link target and the Exists-guarded pack input.
-
-     CONVERSION COST: per-file work is sub-second; the ≈3-4 min is go/packages loading the whole type graph, which is why the run
-     must be batched rather than invoked per package.
-
-     RACED CONVERSION found r41, 2026-08-05: runtime/arena.cs with nine unresolved DYNTYPE anonymous-struct lift markers. It is
-     NOT a converter regression — a clean-room reconvert (fresh root, seeded, single run) emits zero DYNTYPE markers anywhere in
-     the corpus, and so does a single-package run; hence a mechanical rule rather than a diagnostic one.
-
-     OVERLAY: trees unified 2026-08-01, so the reconvert's paths ARE the repository's paths — no rewriting, no exceptions; 2518
-     .cs/.csproj verified byte-identical on the consolidation commit, 300 README.md joining the byte-identical set 2026-08-02.
-     The six root attribution files were measured 2026-08-17 — this note previously named only one. -->
+Measuring a converter change's corpus footprint and the reconvert → overlay → build → bucket loop live in the `corpus-reconvert` skill.
 
 ## Encoding, metric, and banking a regen
 
