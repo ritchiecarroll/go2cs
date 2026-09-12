@@ -1,7 +1,9 @@
 # PLAN — context diet: CLAUDE.md from 200K tokens to an index
 
-> **Status**: **PHASE 1 EXECUTED 2026-09-12** on `claude/context-diet`. Phase 2 (compression) is
-> queued. See §11 for the execution record, including the two map corrections the gates forced.
+> **Status**: **COMPLETE 2026-09-12** on `claude/context-diet` — Phase 1 (relocate, `56ff452a5`),
+> Phase 2 (distil, `c8492fe31`), batch19 re-homed (`86037ef2e`), tier fix (`5b8c780d6`). See §11 for
+> the Phase 1 record and §12 for Phase 2, the batch19 routing and the measured subagent readings.
+> Launch floor 191,095 → 3,146 tokens; a converter session 191,095 → 9,348.
 >
 > **The one-sentence problem**: `CLAUDE.md` is **756,545 bytes / 7,836 lines ≈ 200K tokens**, it is
 > re-injected into the context window at the start of every session, after every `/compact`, and into
@@ -264,7 +266,7 @@ journal is a byte-identical copy of the original.
 The split is scripted for the reason §4.1 demonstrates: a hand split silently drops lines, and the
 first check of this very map found 264 of them.
 
-**Phase 2 — COMPRESS, one file at a time, at leisure.**
+**Phase 2 — COMPRESS, one file at a time, at leisure.** — **DONE 2026-09-12, see §12.**
 
 For each T2/T3 file: collapse its dated entries into durable rules, moving each entry's dated
 derivation into an inline `<!-- -->` block beside its rule. Expect 5–10x per file, based on the
@@ -375,3 +377,84 @@ The real risk is not token loss — G2 makes loss impossible. It is **a safety r
 T2 rule loads when a matching file is read, which can be after the damaging command has run. §5 exists
 to hold that line, and §5's list is the part of this plan most worth the owner's review. If a rule
 belongs in §5 and is filed in §4 instead, the migration trades tokens for an incident.
+
+---
+
+## 12. Execution record — Phase 2, batch19 re-homing and the tier fix, 2026-09-12
+
+Three commits on `claude/context-diet`, all signed: `c8492fe31` (distil), `86037ef2e` (batch19),
+`5b8c780d6` (tier relocation). Twelve subagents per phase — which is itself the Phase 1 result,
+since before the split no subagent could spawn in this repo at all.
+
+**Phase 2 — distillation.** Dated narratives became tell-first imperative rules; every date, SHA,
+file:line, measurement and named incident moved into an HTML comment beside the rule it justifies.
+
+| | before | after |
+|---|---|---|
+| effective lines, the twelve files | 7,843 | 2,628 |
+| effective characters | 746,765 | 325,256 |
+
+Nobody reached the 5–10x target and the reason is uniform: once the narratives are in comments,
+what remains is not chronicle but reference — converter.md is a ~110-item flag and route reference,
+docs-records.md a normative security order. Two lanes explicitly REFUSED to hit the line target by
+reflowing to longer lines, which lowers the line count without lowering token cost. **Report
+effective CHARACTERS beside effective lines; the line metric is gameable by wrap width.**
+
+**batch19 — re-homed, not merged.** `claude/coord-doctrine-batch19` carried 1,355 lines as pure
+insertions into a `CLAUDE.md` that no longer exists. Each of its 92 hunks was routed to the
+destination §4 assigns to its anchor: batch19 is based at `44f858717`, the map is written against
+`1800b04f8`, and the only difference is the licensing commit's 12-line insertion at line 735, so
+every anchor maps by `L <= 735 ? L : L + 12`. The router asserts the map tiles 1..7836 with no gap
+or overlap, refuses any hunk carrying a deletion or any anchor it cannot route, and refuses unless
+exactly 1,355 lines route. Nothing landed in `CLAUDE.md`; batch19 touched no T1 range.
+
+1,355 incoming lines produced **284 visible ones (~4.8:1)**, because most entries were new
+INSTANCES of traps the destinations already ruled on and belonged in those rules' comments. Twelve
+contradictions were found; none was resolved by dropping a side — each amends the visible rule the
+newer way and keeps both narratives with an explicit supersession note. Three corrections are worth
+reading before quoting anything they touch: the **roster arithmetic** (four of six E1 exclusions
+already fall outside axis C, so subtracting all six double-counts), **assembly counts** (the
+2026-09-07 `find -newermt` remedy counts FILES — 46,802 against a real 878), and three new normative
+**security-census** requirements including a `grep -E` negative lookahead that fails OPEN silently.
+
+**The tier fix.** The remaining gap was allocation, not compression. `.claude/rules/` is lazy per
+SUBTREE — `converter.md` loads in full on any read under `src/go2cs/**`. `.claude/skills/` is lazy
+per TASK: 421 tokens of name+description for all seven, bodies on invocation only. Gate-reading
+material moved to `gate-forensics`, the reconvert loop to `corpus-reconvert`; routes #1–#5 stay in
+`converter.md` by design. converter.md 588 → 325, corpus.md 236 → 162.
+
+**What a session pays, in tokens of project instructions:**
+
+| | pre-split | after Phase 2 | after the tier fix | §8 target |
+|---|---|---|---|---|
+| launch floor | 191,095 | 3,146 | **3,146** | ~3K ✓ |
+| converter session | 191,095 | 13,931 | **9,348** | ~5K ✗ |
+| worst case, all 5 rules | 191,095 | 44,731 | **42,062** | ~20K ✗ |
+
+The worst case moves least because `harness-gates.md` and `golib-gen.md` are heavily unwrapped —
+146 and 160 effective LINES against 63,069 and 41,058 effective CHARACTERS. Re-wrapping them, or
+moving more of them to skills, is where the remaining gap lives.
+
+**Subagent laziness, measured rather than assumed** (two arms, one axis — which file was read):
+
+| | read `src/go2cs/convChanType.go` | read `LICENSE` |
+|---|---|---|
+| path-scope sentinel | **present** | **absent** |
+| `converter.md` | loaded, **after** the Read | not loaded |
+| other four rules | not loaded | not loaded |
+
+Path-scoped rules DO fire inside subagents, they load ON the triggering read rather than at launch,
+and only the matching rule loads. A subagent's floor is `CLAUDE.md` alone.
+
+**Gates.** Every phase: `TestContextBudget|TestProjitems` under go1.24.13 (exit 0, guard count read
+from `-v` output, since a `-run` green alone does not prove execution); frontmatter derived
+independently of the Go guard and made to fail both ways; journal blob still
+`4730713b8ae419aa4282379cad291e9f97ea8380`; evidence-preservation checks against the pre-change
+blobs with negative controls. **One gate not in the original list earned its place: HTML comment
+balance and nesting.** An unclosed `<!--` silently swallows a file's remainder from context, no
+other gate here catches it, and it fired for real when a splice anchor collided with its own
+provenance comment and excised nearly twice the intended span.
+
+Two hazards recorded in passing: under `core.autocrlf=true` a `git checkout HEAD -- <file>` restore
+rewrites the working copy to CRLF and **`git status` cannot see it**; and a mid-write census counts
+the write, not the file — several early readings here were wrong until every agent had exited.
