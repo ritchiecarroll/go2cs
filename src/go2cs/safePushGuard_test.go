@@ -24,12 +24,12 @@ import (
 //
 // A script nobody runs fails open, which is false-green route #6, so the ruling was that it lands in
 // src/ WITH A GUARD. This is the guard, and it lives here for the same reason
-// projitemsIntegrity_test.go and fleetIdentifierCensus_test.go do: the converter's own `go test ./...`
-// is the one gate every lane already pays for.
+// projitemsIntegrity_test.go and internal/repoguard/fleetIdentifierCensus_test.go do: the converter's
+// own `go test ./...` is the one gate every lane already pays for.
 //
 // ⚠ IT NESTS, DELIBERATELY AND AT A MEASURED PRICE. The self-test's positive control is a REAL push
 // to a hermetic bare repository, and a real push runs the script's security gate, which invokes
-// `go test` on this package -- so this test spawns bash, which spawns go test. About 25 s on a 215 s
+// `go test` on go2cs/internal/repoguard -- so this test spawns bash, which spawns go test. About 25 s on a 215 s
 // suite, roughly 10%, paid by every lane on every run.
 //
 // The cheaper alternative was to run only the arms that need no network and leave the real-push arm

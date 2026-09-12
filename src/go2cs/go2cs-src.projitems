@@ -36,7 +36,6 @@
     <None Include="$(MSBuildThisFileDirectory)commandLineOptions.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyGenericCall_test.go" />
-    <None Include="$(MSBuildThisFileDirectory)contextBudget_test.go" />
     <None Include="$(MSBuildThisFileDirectory)convArrayType.go" />
     <None Include="$(MSBuildThisFileDirectory)convBasicLit.go" />
     <None Include="$(MSBuildThisFileDirectory)convBasicLit_test.go" />
@@ -96,7 +95,6 @@
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo_test.go" />
     <None Include="$(MSBuildThisFileDirectory)filterZeroMatch_test.go" />
-    <None Include="$(MSBuildThisFileDirectory)fleetIdentifierCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases.go" />
@@ -124,6 +122,8 @@
     <None Include="$(MSBuildThisFileDirectory)interfaceConversion.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\genstdlibmeta\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gensymbols\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\contextBudget_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\fleetIdentifierCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\stdlibmeta\generate.go" />
     <None Include="$(MSBuildThisFileDirectory)layoutDuplicates_test.go" />
     <None Include="$(MSBuildThisFileDirectory)liftedTypeNames.go" />

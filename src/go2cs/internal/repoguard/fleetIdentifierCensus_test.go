@@ -6,7 +6,7 @@
 // version 3 only, which can be found in the LICENSE file.
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
-package main
+package repoguard
 
 import (
 	"bytes"
@@ -37,6 +37,13 @@ import (
 // This is the same invariant-in-the-cheapest-place move projitemsIntegrity_test.go makes: it runs in
 // the converter's own `go test ./...`, which every lane already pays for, so a reintroduction is a
 // red converter suite at the merge rather than a scrub weeks later.
+//
+// It runs there from THIS package rather than from package main, and so does contextBudget_test.go
+// beside it. Neither guard tests converter behaviour. Both used to fail as `go2cs`, so a docs or
+// record edit could redden a run made right after a converter change, and the first hypothesis was
+// that the converter change broke something. `go test ./...` from src\go2cs walks internal\, so
+// nothing about WHEN or WHERE they run changed. What changed is that a failure prints as
+// `go2cs/internal/repoguard`, which says "not converter code" before anyone forms a hypothesis.
 //
 // TWO PASSES, because neither sees what the other does.
 //
@@ -486,18 +493,35 @@ func scanFleetTree(root string, rel []string, denied map[int]map[string]string) 
 	return out, read
 }
 
-// repoRootFromPackageDir walks up from src\go2cs to the repository root.
+// repoRootFromPackageDir walks up from the package directory to the first ancestor holding a .git
+// entry, which is the repository root.
+//
+// It SEARCHES rather than counting levels. It used to be a fixed filepath.Dir(filepath.Dir(wd)), which
+// was right only while these guards lived in src\go2cs, and moving them to src\go2cs\internal\repoguard
+// would have silently pointed it at src\go2cs instead of the root. A fixed depth breaks on every move,
+// and a search does not.
+//
+// .git is tested with os.Stat and never IsDir: in a git WORKTREE it is a FILE naming the real git
+// directory, and every lane in this fleet works from worktrees. The NEAREST .git wins, which is git's
+// own discovery rule, so the root found here is the tree `git -C <root> ls-files` then enumerates. No
+// .git anywhere above is a loud failure, because a guard that read a wrong root would scan the wrong
+// tree and pass.
 func repoRootFromPackageDir(t *testing.T) string {
 	t.Helper()
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("cannot determine the working directory: %v", err)
 	}
-	root := filepath.Dir(filepath.Dir(wd)) // src\go2cs -> src -> repo root
-	if _, err := os.Stat(filepath.Join(root, ".git")); err != nil {
-		t.Fatalf("repository root not found above %s: %v", wd, err)
+	for dir := wd; ; {
+		if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			t.Fatalf("repository root not found: no .git entry in %s or any ancestor", wd)
+		}
+		dir = parent
 	}
-	return root
 }
 
 // TestNoFleetIdentifiersInTrackedFiles is the guard. It enumerates TRACKED files only -- an

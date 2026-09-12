@@ -359,7 +359,7 @@ it runs, a converter-editing session loads more than it eventually will, and sti
 it loaded before.
 
 **Self-maintenance landed with it.** `CLAUDE.md` now carries a *This file's own budget* section with
-the routing table, and `src/go2cs/contextBudget_test.go` enforces it under the plain `go test ./...`
+the routing table, and `src/go2cs/internal/repoguard/contextBudget_test.go` enforces it under the plain `go test ./...`
 every lane already runs. The cap is measured on **effective** lines, so provenance kept in HTML
 comments is free by construction rather than by anyone's restraint.
 
