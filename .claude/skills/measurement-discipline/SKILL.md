@@ -12,6 +12,50 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
      comment beside the rule it justifies: comments are stripped before this file enters
      context, so provenance kept this way costs ZERO tokens. -->
 
+<!-- PHASE 2 DONE 2026-09-12. The visible half states each trap ONCE, as an imperative. Every
+     dated narrative, SHA, file:line, package name, incident, magnitude and mechanism that
+     justified a rule -- and every SECONDARY VARIANT of a rule stated above only once -- is
+     preserved VERBATIM in the DERIVATIONS comment closing the section that carries it. Nothing
+     was deleted: those blocks, sorted by source line, reproduce lines 15-1191 of the Phase 1
+     body byte for byte, no gap and no overlap (asserted when this file was built). So when a
+     rule reads thin, when you need the incident or the number behind it, or when you are about
+     to design an instrument in one of these areas, READ THE DERIVATION BLOCK under its section.
+     It costs nothing until you open it, and it is where the variants, the retractions and the
+     second derivations live. -->
+
+## Configuration is part of the verdict
+
+- **Name the configuration in every verdict and comparison**; `<pkg>.tests.csproj` pins none, so an unnamed
+  verdict sits at an optimization level no user ships. Of RECORD: **Release, tiered JIT off**, in
+  `testEnvironmentRecord{Configuration,Tiered}` (never `omitempty`), `results.json`, and the proof pages.
+  Build instruments with `-test-config Debug|Release` and `-test-tiered`, never a bare `dotnet build -c
+  Release`; `-test-release-tc0` is RETIRED. Both defaults are Release, with `internal/godebug`
+  `TestCmdBisect`, `log/slog` `TestCallDepth` and `net/http` `TestRegisterErr` opting out via
+  `execution: release-tiered`. **An override predicate keyed on a default's VALUE becomes always-on when the
+  default flips, and an override SUPERSEDES per-row annotations** — key on `$PSBoundParameters.ContainsKey`.
+- **Run the configuration A/B before suspecting any commit**; identity inferred from a STACK is
+  configuration-fragile. **Two runs agreeing prove DETERMINISM, not causation**; a colour asserted as a
+  configuration property needs two draws per configuration, and a host baseline is stable-failures PLUS
+  flaky-rows. **Re-measure at Release any GC-liveness, codegen-liveness or pin-lifetime reading taken at
+  Debug** — a non-optimizing frame roots temporaries, so every pin holds.
+- **Release+TC0 escape analysis can make an ALLOCATION probe read zero**: self-controls going red says every
+  guard on it would pass VACUOUSLY, so make the self-control body ESCAPE, never skip-with-reason. **A
+  stack-reading guard loses lambda frames to inlining** — pin `NoInlining`, keep edits OUT of the `#line`
+  region it measures, type the sink GENERIC. **A TIERING-class guard WARMS UP (thirty-plus calls, past
+  tier-1) or it is vacuous**, and a missing frame is read as a SEQUENCE, never a sample. **The one-variable
+  matrix — base vs cut × tiering ON/OFF, same box, same build — separates a configuration class from a
+  regression**; identical at both tiers means no tier axis.
+- **A Go finalizer run INLINE on the CLR finalizer thread deadlocks against `runtime.GC()`'s wait whenever
+  the body blocks**, leaving the thread dead for every LATER test in that host; `mfinal.cs` now carries Go's
+  shape. **The default binder NEVER applies a user-defined conversion, and a DEFINED type is a WRAPPER with
+  implicit operators, not a subclass**, so `DynamicInvoke` on a Go-typed argument binds NEVER: dispatch by
+  ASSIGNABILITY, enforce at REGISTRATION, never swallow a BINDING failure.
+- **An agreeing failure on an ABSENT HOST CAPABILITY masks a question; agreement on shared semantics answers
+  one** — name the capability and tests on the row and proof page; a second host in the same state gives
+  reproducibility, never coverage. **Read the RECORD, not your own SUMMARY**, and **read the test's OWN
+  SOURCE before framing its failure mode.**
+
+<!-- DERIVATIONS (configuration, finalizers, agreement vs coverage) — Phase 1 text, verbatim:
 - **⚠ THE MEASUREMENT CONFIGURATION IS PART OF THE VERDICT — the `-tests` pipeline publishes DEBUG
   (measured 2026-09-02, the net/http h2 pair).** The generated `<pkg>.tests.csproj` pins no
   Configuration, so every roster verdict to date was taken at an optimization level no user ships: one
@@ -187,6 +231,22 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   mis-framed artifact and a headline figure that should have been 29 rather than 28 — **a number it and
   the coordinator had quoted four times.** The next person to quote a figure quotes the writers, not the
   artifact.
+-->
+
+## Host qualification
+
+- **Preflight `go test -count=1 net` before any net-family run**; on an unqualified host the two A/B arms run
+  different oracles. **The gate's criterion is the FAILING SET, a LEDGER not a threshold**: a NAMED,
+  EVIDENCED universally-drifted leaf is tolerated with evidence at the site, ANY other failing leaf ABORTS by
+  name, names print either way; Go 1.23.12's `TestLookupCNAME` is such a leaf. `.`-source the criterion block
+  and control it in four arms against the LIVE block — **a warn-and-continue switch is the lie-lever shape.**
+- **A live PUBLIC DNS assertion is universal drift once three independent resolvers agree.** **A lane never
+  changes a host's system configuration on its own initiative**: relay, then RE-qualify. **A count borrowed
+  across boxes is re-measured on the box that will score it**; **a first-run failure that does not recur is a
+  HOST ARTIFACT**, never a disclosure; **counts differing between hosts are read against the record's
+  HOST-CONDITIONAL ENTRY.**
+
+<!-- DERIVATIONS (host qualification) — Phase 1 text, verbatim:
 - **⚠ HOST QUALIFICATION for a network row: preflight `go test -count=1 net` BEFORE any net-family run
   (2026-09-02).** A host whose Go's OWN suite fails is disqualified as a bank host (a container
   answering `TestLookupCNAME` with the CDN CNAME and no IPv6; a WSL host failing that AND all 18
@@ -213,6 +273,60 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   between two hosts is read against the record's own HOST-CONDITIONAL ENTRY before either reading is
   called a regression** (2026-09-05): `os/exec` reading 86+2 on a single-file container host IS that
   entry — `TestExtraFiles` fires where fds 3..100 are held — against 87+1 on the fleet's bank host.
+-->
+
+## Controls: a gate that has never been made to fail proves nothing
+
+- **Before trusting a census or self-verify that reports zero, regress one site deliberately, confirm it names
+  exactly that site, restore, verify byte-identical.** **A positive control neuters the MECHANISM — never a
+  switch every arm resets — and a check no OTHER check subsumes**; its red must name the RIGHT assertion. **A
+  control whose modification cannot be EXHIBITED proves nothing**: an unapplied patch reads as a PASSED
+  control over unmodified code, so the load-bearing row must fail ALONE with neighbours green.
+- **A control only tests the AXIS YOU VARIED** — vary every axis the PREDICATE reads, not the ones the change
+  targets (`ISlice<T> : IArray<T>` makes every array test a trap unless it excludes slices). **Five more ways
+  a control does not control what it names**: no CALLER's input shape; no arm THROUGH THE CALLER, hiding a
+  defect in the predicate's ARGUMENT; varying the COMPARISON rather than the PROBE; varying something BESIDES
+  what its prose claims; never reaching the dangerous path. **State a control's STRENGTH, not only its result.**
+- **An arm asserts the reason it failed, or it is not a control — a red firing for the WRONG reason is worse
+  than one that never fires, because it fires.** **The strongest adjudication is an arm built so it COULD
+  confirm the challenger**, varying only the disputed element, one axis measured twice in opposite
+  directions. **A positive control's target is chosen where ONLY the mechanism under test can produce the
+  signal**; for a merge invariant that is often a REAL REF whose value genuinely differs, in MIRROR arms.
+- **Isolate by the RELATION the defect travels on, not by textual mention, and run every member ALONE.**
+  **Calibrate every new assertion against a known-good ref BEFORE adding it.** **A control's FLOOR is DERIVED
+  from a text bound, never set from feel** — a mis-sized control fires on the POPULATION, not the instrument;
+  resolve by a SECOND derivation and **name falsifiers BOTH ways.** **When one collector feeds two arms, an
+  exemption belongs at the REASONING point, never the COLLECTION point**: **the fix for a false RED plants a
+  false GREEN.**
+- **Instrument mechanics that fail open**: an APPLIER asserts its own SITE COUNTS; a glyph-prefixed identifier
+  guard compares WHOLE TOKENS (`Ꮡs.assign(` contains `s.assign(`); an emission FLOOR is derived, never
+  guessed; a `[string]` PowerShell parameter coerces `$null` to `''` so a "no readable tail" refusal never
+  triggers; `Mandatory [string[]]` rejects an empty ELEMENT past `[AllowEmptyCollection]`. **A BEFORE arm
+  producing NO output makes every arm read DIFFERS** — control that it prints at all, THEN positive-control
+  the arm that must go red; **a gate is ruled only after its BEFORE shows it can MOVE**, calibrated with the
+  variable genuinely ABSENT (`TZ=` empty means UTC in Go).
+- **Count a guard's DISCRIMINATING lines and ARMS**: arms where old and new behaviour COINCIDE are
+  must-not-regress arms. **A body's own failure is earned by a control in a SEPARATE worktree at the same
+  SHA**, and **a ruling's load-bearing assumption is MEASURED before any code exists, with a negative control
+  that fires.** **When every synthetic axis comes back clean, the differentiator is INSIDE the row** — a
+  `t.Logf` before the `Fatalf`, and a reduction is trusted only once its assertion string appears VERBATIM in
+  the real row.
+- **A vacuous TRUE inside an auto arm is a false green that reads as coverage** (an arm iterating an EMPTY
+  `Fields` returned success while five assertions failed), so such arms are LOUD, never successful — but **an
+  insurance arm is measured against the LEGAL values it must pass before it throws** (`struct{}` has zero
+  fields, `[0]T` is legal Go: discriminate by SIZE). **A PASS THAT CANNOT FAIL IS NOT A PASS, and the honest
+  answer names WHICH**: "this row structurally CANNOT see it" beats "no", recorded beside the CAPABILITY.
+  **Displacement of a generated stub is proven by WRITE-EVIDENCE, never by absence**, and **a fixpoint needs
+  its demotion STICKY**, with a pass-count/oscillation guard.
+- **Three ways a guard is green without measuring anything.** It tests the COMMENT instead of the CONDITION —
+  when every arm matches the prose, ask what ELSE satisfies the CODE. Its POPULATION IS ZERO, making "no row
+  moves" its PREDICTION not its hedge: it ships with a TWO-ARMED control (FIRE on a planted instance, SILENT
+  across every real producer) and board debt carrying the producer TABLE. Or its red control asserts a FAULT
+  where the pre-fix behaviour is a REFUSED CALL. **A guard written alongside its fix shares the fix's model
+  and can only confirm it** — only an instrument its author did not write caught either of two wrong models —
+  and **the mtime-moved assertion separates a rebuilt binary from a leftover.**
+
+<!-- DERIVATIONS (controls, guards, vacuous greens) — Phase 1 text, verbatim:
 - **A gate that has never been made to fail proves nothing.** Before trusting a census/self-verify that
   reports zero, regress one site deliberately, confirm it reports exactly that site, then fix and
   re-verify — and confirm the restore is byte-identical. The same principle as the positive controls
@@ -243,15 +357,6 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   skipped. And a committed disclosure quoted a 125/250/500 ms ladder its source does not contain (the
   rungs are 250/500/1000): re-derive a disclosure's mechanism from the line it cites, and post the RAW
   numbers beside any reading, since a measurement outlives the interpretation attached to it.
-  ⚠ **TO TELL A ROOT FROM A CASCADE, RUN THE SUSPECTED DOWNSTREAM MEMBER ALONE — not just the
-  suspected root** (2026-09-06). A 38-verdict cluster looked like one failing test leaving a resource
-  open with every later test reporting `already in use`; a single-test gated run of the DOWNSTREAM
-  test failed on the SAME unimplemented primitive as the head test, so the `already in use` text was
-  a symptom of the START PATH throwing, not of a predecessor's leak. One deep root, not a cascade —
-  which is better news, because it makes the row answerable by one piece of work and it relocates
-  that work out of the package and into the runtime. Two gated runs at ~90 s each replaced a
-  plausible story. **A cascade shows as a fixed ORDER rather than a set: count the ROOTS before
-  sizing the number.**
   Four ATTRIBUTION rules from one night of probe work, 2026-09-02. **A variant table names what each
   variant REMOVES and the attribution line is DERIVED from that column** — a swapped label on a correct
   measurement survives review by looking self-consistent. **An attribution is a ONE-AXIS pair**: a pair
@@ -274,12 +379,6 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   ⚠ **Count a guard's DISCRIMINATING ARMS the same way** (2026-09-04): a control forcing the old
   behaviour reddened 3 of 7, not the 4 claimed, because two of the arms are cases where the old and
   the new behaviour COINCIDE — must-not-regress arms, not evidence about the mechanism.
-  ⚠ **A BILL LINE READ FROM THE TRACE CAN BE THE WRONG WAY ROUND** (2026-09-05): "every
-  `StructField.Offset` reads 0 — offsets are never synthesized" was billed off a stack, while the
-  failing line's own printed operands (`mismatched offsets: 8 0`, i.e. `f.Offset` then `offs`) said
-  the SYNTHESIZED offsets were Go's and the TEST's expectation — raw address arithmetic over managed
-  storage — was the zero. **Read the failing assertion's PRINTED OPERANDS before classifying a row**;
-  a row re-billed by its own line moves classes without a cut.
   Four more control-design rules, 2026-09-02. **A ruling's load-bearing assumption is MEASURED before
   any code exists, with a negative control that fires** — libc `setegid` reaches an already-parked .NET
   thread (glibc's setxid broadcast) where the raw `setresgid` syscall does not, so the design records
@@ -333,14 +432,6 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   read as proof with that check never executing, and a suite asserting `exit != 0` prints three greens.
   **An arm that cannot reach its target is a SCRIPT-ORDERING defect wearing a test's clothes** — the fix
   belongs in the script (input validation before the network read), not in the test.
-  ⚠ **AN ARM THAT CALLS THE PREDICATE CANNOT SEE A DEFECT IN THE PREDICATE'S ARGUMENT** (2026-09-08):
-  a registration check was CORRECT and was handed the WRONG OBJECT — the container a lifetime key
-  resolves a field reference to, where Go validates the interface's DYNAMIC type, the rule stated
-  twelve lines below in the same file — so the two arms that exercise the predicate DIRECTLY were
-  green while the row refused at iteration 0, and the arm that sees it calls the ENTRY POINT the row
-  calls. **Every predicate arm set carries at least one arm THROUGH THE CALLER.** And the denial that
-  preceded the fix, from four correct reads of the OBJECT and none of the CALL SITE, was corrected in
-  public BY SHA the hour it was measured false.
   ⚠ **A CONTROL THAT VARIES THE COMPARISON RATHER THAN THE PROBE TESTS THE WRONG AXIS.** A toolchain-pin
   guard was controlled by setting the PIN to an impossible value and watching it refuse: that exercises the
   equality test and **leaves the axis the guard exists to measure held fixed**, so it shipped able to pass
@@ -371,59 +462,12 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   silent-subtraction class arriving through the remedy.** Done correctly the collector's population is
   unchanged and a separate set is consulted only by the arm that needs the exemption, pinned by an assertion
   that fails on the collector-level implementation and passes on this one.
-  ⚠ **A CLAIM OF WHAT A CHANGE BUYS IS CHECKED AGAINST THE SIBLING CASES THAT ALSO REACH THE SHAPE**
-  (2026-09-08): "the fix for the box family" OVERSTATED one case's contribution, because a sibling
-  case reaches every box-family arm through a base-chain walk, so under the neuter exactly ONE arm
-  goes red — that case's UNIQUE contribution — where the author's own comment predicted two. The table
-  re-derived AT THE CODE reproduced the coordinator's measurement, and the wrong neuter comment was
-  replaced by a COMMENT-ONLY commit **proven so by a byte-identical hash after whole-line comments
-  were stripped from both sides, the stripper positive-controlled.**
-  ⚠ **ASK OF EVERY ACCEPTANCE: WHAT DOES THE SYSTEM DO *INSTEAD* WHEN THE SEAM FAILS? IF THE ANSWER IS
-  "FALLS BACK SILENTLY", THE PROBE NEEDS AN ARM WITH NO FALLBACK.** A port-lookup arm was masked by an
-  `/etc/services` fallback exactly as predicted, and the fallback-free arm was the only reason the BEFORE
-  failure was visible at all — *"a probe whose only distinguisher had been 'does it crash' would have read
-  BEFORE as a PASS"*. Its positive twin, **"REACHING A CONSUMER DEFECT IS THE PRODUCER WORKING"**: you
-  cannot die one package over without a chain to walk, so a NEW failure further along is evidence FOR the
-  fix. And **a SILENT-SUCCESS FAILURE IN THE CODE is the same species as a vacuous green in a gate** —
-  before one increment `net.LookupHost` on darwin returned **no addresses, no error, exit 0**, the SHAPE of
-  success with none of the content, so anything reporting darwin name resolution as working was reporting
-  the fallback. **A gate that cannot fail; a FUNCTION that cannot fail — record it where the consuming lane
-  will stand.**
-  ⚠ And the dispatch-side form of the agreeing-confounded-arm rule already beside this one: **say which arm
-  carries the change, in the dispatch, BEFORE either arm runs** — an acceptance dispatch returned an
-  IDENTICAL before/after pair because the probe was the constant and the increment never varied, so the
-  one-axis A/B had no axis at all.
   ⚠ **A control's FLOOR is DERIVED from a text bound BEFORE it is committed to, never set from feel**
   (2026-09-04): a mis-sized control fires on the POPULATION rather than on the instrument, and the
   number alone cannot tell the reader which — the resolution is a SECOND derivation (the instrument's
   arm against a build-tag-blind text upper bound) plus the known-count guard sources. Corollary:
   **name falsifiers in BOTH directions** — the two that fired on that census resolved opposite ways,
   one on the population and one on the prediction.
-  ⚠ **AN ARC AS A RECORD SHAPE: four predictions, each stated BEFORE its run and scored BY NAME**
-  (2026-09-08). A row that ate a five-minute deadline with ZERO converted verdicts became a
-  three-and-a-half-second PASS through a blocker that moved one deeper BY SYMBOL, an iteration-index
-  probe that named the failing shape, a dispatch increment whose adapter arm bound while registration
-  refused at index 0 on the container, and the referent fix that delivered every case — **with one
-  wrong denial corrected by SHA within the hour, and one superseded SHA MEASURED to confirm the
-  retraction rather than taken on report. What made it fast was never the fix: it was that every
-  reading had a prediction to disagree with.**
-  ⚠ **BEFORE sending a probe at two candidate mechanisms, ask which ARGUMENTS the failing call READS**
-  (2026-09-05): a struct the callee only WRITES cannot produce an errno about BUFFER SIZE
-  (`getpwuid_r`'s ERANGE), so a wrong layout there corrupts or faults rather than explaining the
-  symptom — the DISCRIMINATING arm is the one on a READ argument, and a candidate settled STATICALLY
-  (a managed struct with reference fields handed by address) is owed without a measurement at all.
-  State the prediction in the sharper form for the same cost: **"if X is the cause this arm CHANGES the
-  errno; an arm leaving it unchanged has FALSIFIED its own candidate"**, rather than pass/fail.
-  ⚠ **"A REPRODUCTION, NOT A PREDICTION" IS THE HONEST LABEL WHEN THE EXPECTATION WAS INFORMED BY THE
-  OTHER LANE'S RESULT** (2026-09-08): a second host's zero adds INDEPENDENCE — a second box, a second
-  operator, the same instrument — while the property that makes the zero a MEASUREMENT (one
-  instrument, eight before, zero after) belongs to the first lane, and the "eight before" reading is
-  the second lane's own earlier step, so the pair is not circular. Two companions: the pairing arm was
-  LOAD-BEARING rather than a formality, because a planted control had just shown the widened predicate
-  CAN stamp at the older convert pin, so a NEW stamp in the real corpus surfacing as CHANGED was a
-  live risk; and a non-fresh reading, taken in a worktree carrying build output from a full suite, was
-  REPRODUCED in a fresh worktree rather than argued sound — "because you banked a stale-binary
-  near-miss in the same hour".
   ⚠ **Three more, 2026-09-05.** **A cost canary's WALL that sits in a band ~100 s above the same
   box's reading hours earlier is ATTRIBUTED BEFORE IT IS QUOTED**, and the attribution instrument is
   a FOURTH ARM that re-runs an OLDER known tip TODAY: cut ×3, its own base, and the earlier tip all
@@ -444,150 +488,6 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   control neuters the MECHANISM, never a switch every arm resets** — neutering the Disabled default was
   measured VACUOUS first, while the mechanism neuter read 5 RED / 2 GREEN with each red naming its own
   assertion.
-  **⚠ SIX MORE, 2026-09-04, four of them retractions.** **The neuter rule met from the ARM's own
-  side**: a wiring arm asserting "the cache is empty after `runtime.GC()`" stayed GREEN with the
-  synchronous clear DELETED, because `GC()`'s own tail drains finalizers and the registry's sentinel
-  clears the cache by the ASYNCHRONOUS route — emptiness cannot discriminate the two paths, so the arm
-  guarded neither, and only making it fail exposed that. The discriminating property is WHERE and WHEN
-  the clear ran (caller thread at the head of `GC()` versus the finalizer thread; the gen2 count at
-  the first clear), timing-free — and the refuted control also taught something TRUE about the line it
-  guards: it is a GUARANTEE of Go's contract (`clearpools` at `gcStart`, synchronous), not the only
-  route to the outcome. Beside it, **a lane measuring a suite RED at master names the FIVE-MINUTE
-  CONTROL (the suite without its file) before attributing**, and checks whether a SEATED cut already
-  owns the reds. **A control arm that measures a DIFFERENCE over a WINDOW can pass for the wrong
-  reason**: a before/after `NumGoroutine` delta read GREEN against a neutered predicate because a
-  sibling test's goroutine exited inside the window and cancelled the +1 — assert the RELATION at a
-  MOMENT (the count while the goroutine is registered, against the total that sees it); and when a
-  control goes red, read WHICH arms went red and whether each names its OWN assertion, because "the
-  control failed" is not the reading and "these arms failed on these assertions" is. **A COUNT that
-  matches its prediction is not a SET that matches**: 19 admitted declarations equalled the predicted
-  19 while two MEMBERS differed — one in that should have been out, one out that should have been
-  in — and only a build failure on the first exposed the cancellation, so **a prediction names
-  MEMBERS and its scorecard compares the SET**, and a "to the digit" claim on a count is retracted the
-  moment the membership is read. **A falsified EXPLANATION does not falsify the MEASUREMENT it was
-  invented for**: a delta measured at 510.1 B was explained by a side table, the explanation was
-  refuted by segmentation, and BOTH the lane and the coordinator then retired the NUMBER with it —
-  while the number was right (512 = 384 + 128, two surviving boxes un-escaped). The measurement and
-  the story are independent claims: when a mechanism is refuted, re-derive what the measurement
-  OBLIGES and leave the number standing as an unexplained residue (a ladder to which no story was
-  attached — the count, 17/11/10 — survived every revision in that arc). **A defect REPORT is measured
-  at the REPORTING BRANCH'S OWN BASE converter as well as at master before anything is built for it**:
-  a routed emission-mangling chip reproduced at NEITHER (six conversions, byte-identical), both of its
-  diagnoses fell on rows written for each, and the standing population — thousands of compiling
-  formats of the same shape — had said so at one grep; `CS1010` beside `CS1003` is the signature of a
-  TEXT-CORRUPTED file (the r41 overlap family), never of an emission decision, an elimination
-  comparing two calls that differ by file POSITION and line FORM has isolated nothing, and the
-  negative result banks as a GUARD pinning the emitted form plus a dated record, never as a fix that
-  cannot be made to fail. And **the differential control has an ARITHMETIC form**: under standing
-  corpus drift an ABSOLUTE byte-identity leg (committed cut against fresh emission) fails BY
-  CONSTRUCTION, and the cut is exonerated when `D(master, emission) = D(cut, emission) + the cut's own
-  lines` closes FILE BY FILE, the residue being the standing forced-init/relocation debt named per
-  file — a chain's FAIL flag for such a leg is READ with that meaning rather than re-run green, and
-  the result post states which FORM each leg took.
-  ⚠ **A REFUSAL IS NOT RETIRED BY FINDING ITS EXPLANATION DATED — but the reason it happened may no
-  longer be the reason it would happen, which changes WHERE the fix lives.** `pprof_impl.cs`'s refusal
-  records BOTH an observation (a map reading `len == 1` at store and a garbage length at read-back
-  across two GCs, ending in an `OutOfMemoryException`) and an explanation naming an API that no longer
-  exists — today's `SetProfileLabels(object?)` stores a managed reference twice and mints nothing
-  (2026-09-07). The observation stands; the explanation is stale. **A record's MEASUREMENT and its
-  MECHANISM are separable claims**, and here the surviving `uintptr` hop sits at a GENERATED line, so a
-  remedy could live at the CONVERTER rather than behind the pointer-token arc.
-  ⚠ **A RULED FIX'S CAVEAT IS NARROWED FROM "I DO NOT KNOW" TO A NAMED RESIDUAL BY READING THE
-  CONTRACT, then discharged by an ARM rather than by a doc comment** (2026-09-08): equality on the box
-  type is pointer identity BY CONSTRUCTION — the operator delegates to the per-kind equality, and the
-  order token is documented per box kind as producing equal tokens for equal pointers — so the fix has
-  the right shape, and the ONE place it could compile and still diverge is a CROSS-KIND comparison (a
-  box recovered from a numeric handle against a heap box). That is NAMED, PRICED (a sentinel
-  comparison silently false makes the loop SPIN rather than fail loudly — the class of red no gate
-  reads) and folded into the guard as an output-compared round-trip row, with the unequal outcome
-  routed BY NAME to the token registry rather than to the fix. **Two posts crossing by under a minute
-  and converging independently — one from the diagnostic text, one from the artifact — is worth more
-  than either alone.**
-  **⚠ THE ORACLE'S CAPTURED STRINGS ARE THE SPECIFICATION — its FALLBACKS included** (2026-09-03).
-  Go's own `valueMethodName` climb fails on the package-level `reflect.Append` path and Go itself
-  prints `call of unknown method on int Value`, so threading the public name there would have "fixed"
-  a string Go DELIBERATELY prints and broken the byte-compare gate. **Our climb failing where Go's
-  SUCCEEDS is the defect; where Go's own fails is contract.** Capture the oracle's text through the
-  PUBLIC entry point before choosing what to thread — and prefer a SOLE-CALLER proof to a capture (a
-  panic you fail to provoke proves nothing about reachability), with a composer whose own test on the
-  threaded name preserves the fallback BY CONSTRUCTION rather than by a special case. ⚠ Its
-  construction rule: **an expectation read off the thing under test is not a test of it** — a
-  formatter-delegation guard's eight expected strings were taken FROM GO under the pinned toolchain,
-  and it went red on its first run for a REAL reason (a C# `int` is Go's `int32`, not `int`): the
-  mapping is PINNED, not one answer. ⚠ **The TIDY-LOOKING change is measured against Go's own output
-  BEFORE it is written** (2026-09-04): once interface method names were package-qualified, sorting the
-  RENDERED (qualified) strings looked like the obvious completion — and Go sorts by the BARE name
-  (`interface { zlib.aaa(); main.zzz() }`), so the tidy sort would have REVERSED Go's order. The sort
-  stays untouched with the evidence in a comment AT THE SITE, because the next reader will see the
-  qualification and reach for it; and a row that cannot be built (it needs a sibling package) is
-  recorded in the guard's comment rather than left unmentioned.
-  **⚠ PREDICATE DISCIPLINE FOR A CENSUS — every count in one table is derived under ONE stated
-  predicate with its exclusions named by file and line** (four instances, 2026-09-03). "Followed by
-  `(`" as a proxy for "is code" is a predicate of its own and needs its own control: a comment can
-  QUOTE a call, so one symbol read 93 under the paren proxy against 95 raw / 91 code / 89 call sites,
-  and a "91 actionable" figure was nearly published RIGHT BY ARITHMETIC AND WRONG BY DERIVATION. A
-  reconciliation that merely FITS ("subtract the bookkeeping") is refused exactly as a disclosure on
-  resemblance is. A name-keyed census read 14 sites in 2 files where the CONSTRAINT-keyed derivation
-  read 23 in 4 — two of the missed files banked rows. **A gate is stated as the PROPERTY the emission
-  needs ("names a library"), never as a spelling** — a literal `.dylib` gate would have excluded the
-  28 framework records the ruling counted IN — and a shipped comment claiming an invariant is
-  falsified by the same census and fixed in the SAME cut. **A sizing asserts a population by a
-  predicate the emission gates on, names the excluded shapes, and still runs the diff that would have
-  caught a wrong assertion** ("windows and linux ZERO by construction" was split by a count: the
-  pragma is absent on linux and present 51 times on windows in a DIFFERENT SHAPE) — correct the
-  sizing, not the commit. ⚠ And **re-read the CITED LINE's own notation before claiming to falsify
-  it**: a "0 of 345" headline measured a proposition the design never asserted (it compared against a
-  remembered PARAPHRASE; the design's own notation holds 344 of 345, and what was wrong was the SCOPE).
-  ⚠ **A CENSUS NUMBER TRAVELS WITH ITS UNIT, and a reconciliation RE-DERIVES the other instrument's
-  number rather than POSITIONING it** (2026-09-05). One lane's 46 — a whole-flavour count of
-  address-taken scalar VARIABLES, deduplicated by variable — was placed into another lane's SITE chain
-  (27 < 39 < 48 < 61) where it cannot sit; re-derived from the instrument's own file, 10 of the 46 are
-  lift-shaped and 0 are `&args` structs, so the operative conclusion survived and the MAPPING did not.
-  A number quoted without its unit reads as a member of whatever series it is placed in.
-  **⚠ ELIDED-vs-TYPED SIBLING DRIFT: when a helper documents the N renderers that must spell a thing
-  ONE way, census all N** (2026-09-04). A converter fix landing on the TYPED renderer of a construct
-  never reached its ELIDED twin — the arm that renders the same shape when the literal's type is
-  INFERRED — so the elided form kept the pre-fix emission and a keyed sibling kept the same hole: the
-  renderer that never got the spelling IS the defect. Its neighbour: **a switch arm that returns only
-  for ONE pointee kind lets every other kind FALL OUT to a generic fallback that cannot compile**
-  (CS0144 against an abstract box type), so the class is every kind the arm does not name, reached
-  through every literal shape that routes an elided element there. Two defects that are two ARMS of
-  one switch take controls on SEPARATE assertions when one half's compile failure MASKS the other (a
-  third binary carrying only one half isolates it); the fix's own assertion is stronger than "it
-  compiles" when the elided spelling emits BYTE-IDENTICALLY to the explicit one; and a residual
-  deliberately NOT fixed is recorded at the call site, in the reference doc AND in the guard's
-  comment, with its honest fix named as its own item.
-  ⚠ **AN OBSERVATION SET ASIDE AS "NOT THE ROOT" IS RE-READ AGAINST THE COMPILER'S OWN WORDS FOR THE
-  ERROR BEFORE IT IS SET ASIDE** — twice in one evening (2026-09-08): a census node reading "not found
-  here" was filed as a footnote while Go's chain was traced anyway, and a lowered comparison spelling
-  a PATTERN MATCH where Go means pointer equality was filed as "not that diagnostic and not that
-  root", when that diagnostic IS "a constant value is expected", the compiler's words for a pattern
-  whose operand is not constant. The ARTIFACT settled it in one read: the two arms of ONE lowered
-  chain DISAGREE — the pattern form for the address-of case and the equality form for nil one line
-  down — so the converter already knew the right form, and the screening that stopped the C# switch
-  closed the right half while leaving the pattern spelling in the chain it produced. **A converter
-  reproducer that exits 0 has measured the EMISSION, not the COMPILE; a compiler-error claim is a
-  compile-time claim.** ⚠ **ONE DEFECT CAN WEAR TWO DIAGNOSTICS**: the same lowering reads "a constant
-  value is expected" when the operand is a bare identifier and "type or namespace not found" when it
-  is a member CALL, since C# then reads a POSITIONAL PATTERN whose type would be the call's receiver —
-  so one root's second site was the other root in a different costume, and the rung prediction MOVED
-  before the rung, with falsifiers both ways. Its neighbour, a genuinely separate defect: **a C# cast
-  binds LOOSER than member access**, so a pointer-to-array index shape needs the cast PARENTHESISED
-  before the member access, or it indexes the operand and casts the result.
-  **⚠ A NULL IS A RESULT ONLY AFTER THE INSTRUMENT IS SHOWN TO HAVE FIRED** (three shapes,
-  2026-09-03/04). A spike's null at the CALL SITES was an instrument artifact — the DECLARATION had
-  never lowered, so nothing had fired — and the real blocker was the pass's own stated SCOPE, which
-  neither hypothesis had read: **read a pass's documented scope before predicting what it will do to a
-  site.** A COMPILE BLOCKER masks a whole flag-on emission (once the package compiled the census read
-  ZERO reduction, 98 = 98, because one predicate pinned the leaves and a chain is pinned by its
-  leaves) — so a blocker post is censused across the WHOLE build output, not the file its first error
-  names (four errors reported, 99 CS0103 missed in the sibling). And **"the stamp is there" is not
-  "the stamp is read"**: after three landed halves a positive control was STILL red with the stamp
-  visibly present in the emitted C#, because a FOURTH site discarded it — four sites carried the same
-  implicit membership rule and each was widened separately; the remedy is ONE named predicate they all
-  call, and the control that finds it asserts the OUTPUT, not the artifact. Its golib twin: **a fix
-  can silently do NOTHING** when an accessor materializes a DETACHED COPY of the storage — every write
-  lands on a throwaway object and every read misses, with no error anywhere.
   **⚠ A CONTROL WHOSE MODIFICATION CANNOT BE EXHIBITED PROVES NOTHING** (2026-09-04): an LF-anchored
   patch against CRLF source did not apply, the script's own assertion fired, and the run that followed
   read as a PASSED control while testing unmodified code — the census-instrument-that-never-compiled-in
@@ -638,6 +538,172 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   capability-GATED, absent from both verdict maps and never compared, so the passing neighbours never
   reach it. Say which, because the next reader will see the green rows and conclude coverage, and
   **record it beside the CAPABILITY, not beside the row.**
+  ⚠ **THREE WAYS A GUARD IS GREEN WITHOUT MEASURING ANYTHING, all 2026-09-06.** **A guard can test the
+  COMMENT instead of the CONDITION**: all three arms of a pointer-token guard built their box as a heap
+  box of a POINTER-to-struct — a reference-bearing POINTEE, which is what the arm's comment describes —
+  while the arm's actual condition is "no pinnable storage", which is ALSO true of every field or
+  element reference rooted in a reference-bearing CONTAINER whose pointee is reference-FREE. That
+  second class was unguarded, and it is the class that regressed every Windows dial. **When a guard's
+  arms all match the prose, ask what ELSE satisfies the CODE.** **A guard whose POPULATION IS ZERO has
+  "no row moves" as its PREDICTION, not its hedge** — and it is exactly the guard that can be green
+  because it is BROKEN: its payoff is a future defect's failure mode, never a moving row, so its
+  acceptance criterion is stated in the only direction it can be measured (a row that DID move
+  falsifies the population census), and it ships with a TWO-ARMED control — it must FIRE on a planted
+  instance of the shape and stay SILENT across every real producer — or it asserts the population
+  instead of measuring it. Board debt for such a guard carries the producer TABLE and the control
+  requirement, not just the title, so a later lane inherits the measurement rather than trusting it.
+  And **when the PRE-FIX behaviour is a REFUSED CALL rather than a crash, a red control asserting a
+  fault asserts something FALSE**: under the token arm three of four boxes are order tokens, so the
+  control asserts a nil error and a byte count instead. **Put that reasoning in the GUARD's header, not
+  only in the design record** — the next reader meets the guard.
+  ⚠ **A GUARD WRITTEN ALONGSIDE ITS FIX SHARES THE FIX'S MODEL AND CAN ONLY CONFIRM IT** (2026-09-08):
+  a fold cut's first attempt keyed on the CONVERTED package's own project file — which a behavioral
+  project does not have — and its fixture encoded THE SAME WRONG MODEL, so the guard PASSED while CNR
+  still read the eight; the second attempt globbed every project file and admitted the TEST-project
+  SIBLING, a far wider closure that moved hundreds of files, and NONE of the four guard arms had put
+  such a sibling on disk. **Only CNR — an instrument the author did not write and could not align —
+  caught either**, and both defects now carry SEPARATELY neutered arms. Beside it: a `go build -o`
+  from the wrong cwd fails, and the alias read from the STALE binary the previous broken run left was
+  nearly banked as a pass — **the mtime-moved assertion is what separates a rebuilt binary from a
+  leftover.**
+-->
+
+## Arms and attribution
+
+- **An attribution is a ONE-AXIS pair, and the dispatch says which arm carries the change BEFORE either arm
+  runs.** **A variant table names what each variant REMOVES and the attribution line is DERIVED from that
+  column.** **A gap between two arms of the SAME code with the SAME attribute is a CONFOUND TELL, never a
+  boundary cost**: read `DebuggableAttribute.IsJITOptimizerDisabled` INSIDE the probe process, and inlining
+  from `DOTNET_JitDisasmSummary=1` (an inlined callee is absent) — `DOTNET_JitPrintInlinedMethods` prints
+  nothing there. **A hand-transcribed proxy is diffed against the emission before its number is quoted.**
+- **Name what each arm HOLDS, and when an arm is "the tree before X" say which OTHER commits it also lacks**:
+  "pre-existing at MY BASE" is not "pre-existing at MASTER". **VERIFY EACH ARM BY ANCESTRY (`git merge-base
+  --is-ancestor <accused> <arm>`), printed per arm, never by the merge order you intended**, and **put the
+  check IN the probe script** — a banked lesson that is not MECHANISED is paid for again one rung later. **A
+  result that does not fit the mechanism is a reason to re-examine the ARM**, and **an AGREEING confounded
+  arm is the most dangerous kind**: score it VOID.
+- **Decompose the operation before attributing its failure** — an arm measuring a SEQUENCE attributes the
+  whole sequence's failure to its first step. **An acceptance criterion is derived from a measured BASELINE,
+  never from the shape of the failure**, and **a criterion derived on ONE HOST is that host's until a second
+  host reads it: print the host.** **Two failures narrowing to one commit are not necessarily the same
+  failure** — a common CAUSE is not a common DEATH.
+- **Before ruling, name the axis every reading SHARES and ask what sits on the axis nobody varied**, and
+  **rule at the speed of the EVIDENCE, not of the conversation**: every refutation came from somebody
+  BUILDING the thing. **An attribution read out of the SOURCE beats a before/after with a confound in it.**
+  **Where a run STOPS is a property of the RUN whenever the death is asynchronous**; the only honest movement
+  signal is the MOVED SET. **A COUNT that matches its prediction is not a SET that matches**, and **a
+  falsified EXPLANATION does not falsify the MEASUREMENT it was invented for.**
+- **A defect REPORT is measured at the REPORTING BRANCH'S OWN BASE converter as well as at master before
+  anything is built for it**: `CS1010` beside `CS1003` is the signature of a TEXT-CORRUPTED file, never of an
+  emission decision. **The differential control has an ARITHMETIC form** — under standing corpus drift an
+  ABSOLUTE byte-identity leg fails BY CONSTRUCTION, and the cut is exonerated when `D(master, emission) =
+  D(cut, emission) + the cut's own lines` closes FILE BY FILE. **Each arm runs its OWN binary, stated**: the
+  CUT's converter against the BASE tree emits bodiless placeholders, a red reading as "the baseline is broken".
+- **A canary row NOT MEASURABLE on the box by standing ruling is not an A/B instrument there**; **a two-point
+  comparison states its WITHIN-ARM spread before its direction**; **a cost canary's wall is ATTRIBUTED by a
+  FOURTH ARM re-running an older known tip TODAY.** **A control for a suite's row keeps the SUITE's
+  configuration**, and **a suite RED at master names the FIVE-MINUTE CONTROL — the suite without its file —
+  before attributing.** **A control arm measuring a DIFFERENCE over a WINDOW can pass for the wrong reason**:
+  assert the RELATION at a MOMENT, and read WHICH arms went red and whether each names its OWN assertion.
+- **Read the failing assertion's PRINTED OPERANDS before classifying a row** — a bill read off the stack can
+  be exactly the wrong way round. **Ask of every acceptance: what does the system do INSTEAD when the seam
+  fails? If it "falls back silently", the probe needs an arm with NO fallback** — a probe whose only
+  distinguisher is "does it crash" reads BEFORE as a PASS; twin: **reaching a consumer defect is the producer
+  working.** **A silent-success failure in the CODE is the same species as a vacuous green in a gate**:
+  `net.LookupHost` on darwin returned no addresses, no error, exit 0.
+- **One-arm attribution from the intermediate that already exists**: master GREEN, master+X RED, X-absent
+  seats ruled OUT by ancestry PRINTED PER BRANCH, survivors RE-GATED at the tree that lands; **the transfer
+  argument for legs NOT re-run is a FILE-SET check asserted in the land script.** **A falsification is BANKED
+  AS A LIVE ASSERTION and a finding SURVIVES its mechanism.** **A finding is rooted to a CLASS by repetition
+  with variation, not by hypothesis.** **To tell a root from a cascade, run the suspected DOWNSTREAM member
+  alone**: a cascade shows as a fixed ORDER rather than a set, so count the ROOTS before sizing the number.
+
+<!-- DERIVATIONS (arms, attribution, roots vs cascades) — Phase 1 text, verbatim:
+  ⚠ **TO TELL A ROOT FROM A CASCADE, RUN THE SUSPECTED DOWNSTREAM MEMBER ALONE — not just the
+  suspected root** (2026-09-06). A 38-verdict cluster looked like one failing test leaving a resource
+  open with every later test reporting `already in use`; a single-test gated run of the DOWNSTREAM
+  test failed on the SAME unimplemented primitive as the head test, so the `already in use` text was
+  a symptom of the START PATH throwing, not of a predecessor's leak. One deep root, not a cascade —
+  which is better news, because it makes the row answerable by one piece of work and it relocates
+  that work out of the package and into the runtime. Two gated runs at ~90 s each replaced a
+  plausible story. **A cascade shows as a fixed ORDER rather than a set: count the ROOTS before
+  sizing the number.**
+  ⚠ **A BILL LINE READ FROM THE TRACE CAN BE THE WRONG WAY ROUND** (2026-09-05): "every
+  `StructField.Offset` reads 0 — offsets are never synthesized" was billed off a stack, while the
+  failing line's own printed operands (`mismatched offsets: 8 0`, i.e. `f.Offset` then `offs`) said
+  the SYNTHESIZED offsets were Go's and the TEST's expectation — raw address arithmetic over managed
+  storage — was the zero. **Read the failing assertion's PRINTED OPERANDS before classifying a row**;
+  a row re-billed by its own line moves classes without a cut.
+  ⚠ **AN ARM THAT CALLS THE PREDICATE CANNOT SEE A DEFECT IN THE PREDICATE'S ARGUMENT** (2026-09-08):
+  a registration check was CORRECT and was handed the WRONG OBJECT — the container a lifetime key
+  resolves a field reference to, where Go validates the interface's DYNAMIC type, the rule stated
+  twelve lines below in the same file — so the two arms that exercise the predicate DIRECTLY were
+  green while the row refused at iteration 0, and the arm that sees it calls the ENTRY POINT the row
+  calls. **Every predicate arm set carries at least one arm THROUGH THE CALLER.** And the denial that
+  preceded the fix, from four correct reads of the OBJECT and none of the CALL SITE, was corrected in
+  public BY SHA the hour it was measured false.
+  ⚠ **A CLAIM OF WHAT A CHANGE BUYS IS CHECKED AGAINST THE SIBLING CASES THAT ALSO REACH THE SHAPE**
+  (2026-09-08): "the fix for the box family" OVERSTATED one case's contribution, because a sibling
+  case reaches every box-family arm through a base-chain walk, so under the neuter exactly ONE arm
+  goes red — that case's UNIQUE contribution — where the author's own comment predicted two. The table
+  re-derived AT THE CODE reproduced the coordinator's measurement, and the wrong neuter comment was
+  replaced by a COMMENT-ONLY commit **proven so by a byte-identical hash after whole-line comments
+  were stripped from both sides, the stripper positive-controlled.**
+  ⚠ **ASK OF EVERY ACCEPTANCE: WHAT DOES THE SYSTEM DO *INSTEAD* WHEN THE SEAM FAILS? IF THE ANSWER IS
+  "FALLS BACK SILENTLY", THE PROBE NEEDS AN ARM WITH NO FALLBACK.** A port-lookup arm was masked by an
+  `/etc/services` fallback exactly as predicted, and the fallback-free arm was the only reason the BEFORE
+  failure was visible at all — *"a probe whose only distinguisher had been 'does it crash' would have read
+  BEFORE as a PASS"*. Its positive twin, **"REACHING A CONSUMER DEFECT IS THE PRODUCER WORKING"**: you
+  cannot die one package over without a chain to walk, so a NEW failure further along is evidence FOR the
+  fix. And **a SILENT-SUCCESS FAILURE IN THE CODE is the same species as a vacuous green in a gate** —
+  before one increment `net.LookupHost` on darwin returned **no addresses, no error, exit 0**, the SHAPE of
+  success with none of the content, so anything reporting darwin name resolution as working was reporting
+  the fallback. **A gate that cannot fail; a FUNCTION that cannot fail — record it where the consuming lane
+  will stand.**
+  ⚠ And the dispatch-side form of the agreeing-confounded-arm rule already beside this one: **say which arm
+  carries the change, in the dispatch, BEFORE either arm runs** — an acceptance dispatch returned an
+  IDENTICAL before/after pair because the probe was the constant and the increment never varied, so the
+  one-axis A/B had no axis at all.
+  **⚠ SIX MORE, 2026-09-04, four of them retractions.** **The neuter rule met from the ARM's own
+  side**: a wiring arm asserting "the cache is empty after `runtime.GC()`" stayed GREEN with the
+  synchronous clear DELETED, because `GC()`'s own tail drains finalizers and the registry's sentinel
+  clears the cache by the ASYNCHRONOUS route — emptiness cannot discriminate the two paths, so the arm
+  guarded neither, and only making it fail exposed that. The discriminating property is WHERE and WHEN
+  the clear ran (caller thread at the head of `GC()` versus the finalizer thread; the gen2 count at
+  the first clear), timing-free — and the refuted control also taught something TRUE about the line it
+  guards: it is a GUARANTEE of Go's contract (`clearpools` at `gcStart`, synchronous), not the only
+  route to the outcome. Beside it, **a lane measuring a suite RED at master names the FIVE-MINUTE
+  CONTROL (the suite without its file) before attributing**, and checks whether a SEATED cut already
+  owns the reds. **A control arm that measures a DIFFERENCE over a WINDOW can pass for the wrong
+  reason**: a before/after `NumGoroutine` delta read GREEN against a neutered predicate because a
+  sibling test's goroutine exited inside the window and cancelled the +1 — assert the RELATION at a
+  MOMENT (the count while the goroutine is registered, against the total that sees it); and when a
+  control goes red, read WHICH arms went red and whether each names its OWN assertion, because "the
+  control failed" is not the reading and "these arms failed on these assertions" is. **A COUNT that
+  matches its prediction is not a SET that matches**: 19 admitted declarations equalled the predicted
+  19 while two MEMBERS differed — one in that should have been out, one out that should have been
+  in — and only a build failure on the first exposed the cancellation, so **a prediction names
+  MEMBERS and its scorecard compares the SET**, and a "to the digit" claim on a count is retracted the
+  moment the membership is read. **A falsified EXPLANATION does not falsify the MEASUREMENT it was
+  invented for**: a delta measured at 510.1 B was explained by a side table, the explanation was
+  refuted by segmentation, and BOTH the lane and the coordinator then retired the NUMBER with it —
+  while the number was right (512 = 384 + 128, two surviving boxes un-escaped). The measurement and
+  the story are independent claims: when a mechanism is refuted, re-derive what the measurement
+  OBLIGES and leave the number standing as an unexplained residue (a ladder to which no story was
+  attached — the count, 17/11/10 — survived every revision in that arc). **A defect REPORT is measured
+  at the REPORTING BRANCH'S OWN BASE converter as well as at master before anything is built for it**:
+  a routed emission-mangling chip reproduced at NEITHER (six conversions, byte-identical), both of its
+  diagnoses fell on rows written for each, and the standing population — thousands of compiling
+  formats of the same shape — had said so at one grep; `CS1010` beside `CS1003` is the signature of a
+  TEXT-CORRUPTED file (the r41 overlap family), never of an emission decision, an elimination
+  comparing two calls that differ by file POSITION and line FORM has isolated nothing, and the
+  negative result banks as a GUARD pinning the emitted form plus a dated record, never as a fix that
+  cannot be made to fail. And **the differential control has an ARITHMETIC form**: under standing
+  corpus drift an ABSOLUTE byte-identity leg (committed cut against fresh emission) fails BY
+  CONSTRUCTION, and the cut is exonerated when `D(master, emission) = D(cut, emission) + the cut's own
+  lines` closes FILE BY FILE, the residue being the standing forced-init/relocation debt named per
+  file — a chain's FAIL flag for such a leg is READ with that meaning rather than re-run green, and
+  the result post states which FORM each leg took.
   **⚠ ATTRIBUTION AND ARMS, five rules from 2026-09-03.** **A prediction is stated in a currency the
   predictor has MEASURED**: a row-level triple was arithmetic on another lane's accounting and the
   measured decomposition reached neither triple — the MOVED SET (FIXED/BROKEN derived from both
@@ -749,6 +815,227 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   read both guards Output 1/0 before landing. **The transfer argument for the legs NOT re-run is stated
   as a FILE-SET check** — the seat diff touches 0 converter/golib/gen files, so the CNR, solution and
   GolibTests readings transfer from the previous master — **asserted in the land script, never assumed.**
+  **⚠ A GUARD'S ROWS ARE ENUMERATED OVER THE AXES ITS PREDICATE READS, not the axes the change
+  targets** (measured 2026-09-03, twice on one golib predicate). A fix's identity guard held only slice
+  rows with ARRAY elements, so `ISlice<T> : IArray<T>` let a slice element's runtime LENGTH be stamped
+  as an array dimension on a map's descriptor and two equal `http.Header` values with different
+  insertion order interned as different `reflect.Type`s — `DeepEqual` false on textually identical
+  values, three banked verdicts pass→fail at a train head. The same latent predicate deep-cloned a
+  named-slice element and threw an `InvalidCastException` in the array-range copy the same week:
+  **`ISlice : IArray` makes every "is this an array" test a trap unless it excludes slices
+  explicitly.** The fix goes at the PREDICATE's door so no caller can reach the hole again.
+-->
+
+## Censuses and predicates
+
+- **Every count in one table is derived under ONE stated predicate, exclusions named by file and line.**
+  "Followed by `(`" as a proxy for "is code" is a predicate of its own and needs its own control, since a
+  comment can QUOTE a call: a figure can be RIGHT BY ARITHMETIC and WRONG BY DERIVATION, and **a
+  reconciliation that merely FITS is refused as a disclosure on resemblance is.** **Key a census on the
+  CONSTRAINT, not the name**, **state a gate as the PROPERTY the emission needs, never a spelling**, and
+  **re-read the CITED LINE's own notation before claiming to falsify it.** **A census number travels with its
+  UNIT, and a reconciliation RE-DERIVES the other instrument's number rather than POSITIONING it.**
+- **When a helper documents the N renderers that must spell a thing ONE way, census all N**: the renderer that
+  never got the spelling IS the defect. **A switch arm returning for ONE pointee kind lets every other kind
+  FALL OUT to a generic fallback that cannot compile** (CS0144 against an abstract box type), and two arms of
+  one switch take controls on SEPARATE assertions when one half's compile failure MASKS the other.
+- **An observation set aside as "not the root" is re-read against the COMPILER'S OWN WORDS first** — "a
+  constant value is expected" IS the compiler's words for a pattern whose operand is not constant — and **ONE
+  DEFECT CAN WEAR TWO DIAGNOSTICS**: the same lowering says that for a bare identifier and "type or namespace
+  not found" for a member CALL. **A converter reproducer that exits 0 has measured the EMISSION, not the
+  COMPILE**, and **a C# cast binds LOOSER than member access.**
+- **A NULL is a result only after the instrument is shown to have FIRED**, and **a pass's documented SCOPE is
+  read before predicting what it does to a site.** **A COMPILE BLOCKER masks a whole flag-on emission** —
+  census a blocker post across the WHOLE build output, not the file its first error names. **"The stamp is
+  there" is not "the stamp is read"**: give the sites that share an implicit rule ONE named predicate and
+  assert the OUTPUT. **A fix can silently do NOTHING when an accessor materializes a DETACHED COPY.**
+
+<!-- DERIVATIONS (census predicates, renderers, nulls and blockers) — Phase 1 text, verbatim:
+  **⚠ PREDICATE DISCIPLINE FOR A CENSUS — every count in one table is derived under ONE stated
+  predicate with its exclusions named by file and line** (four instances, 2026-09-03). "Followed by
+  `(`" as a proxy for "is code" is a predicate of its own and needs its own control: a comment can
+  QUOTE a call, so one symbol read 93 under the paren proxy against 95 raw / 91 code / 89 call sites,
+  and a "91 actionable" figure was nearly published RIGHT BY ARITHMETIC AND WRONG BY DERIVATION. A
+  reconciliation that merely FITS ("subtract the bookkeeping") is refused exactly as a disclosure on
+  resemblance is. A name-keyed census read 14 sites in 2 files where the CONSTRAINT-keyed derivation
+  read 23 in 4 — two of the missed files banked rows. **A gate is stated as the PROPERTY the emission
+  needs ("names a library"), never as a spelling** — a literal `.dylib` gate would have excluded the
+  28 framework records the ruling counted IN — and a shipped comment claiming an invariant is
+  falsified by the same census and fixed in the SAME cut. **A sizing asserts a population by a
+  predicate the emission gates on, names the excluded shapes, and still runs the diff that would have
+  caught a wrong assertion** ("windows and linux ZERO by construction" was split by a count: the
+  pragma is absent on linux and present 51 times on windows in a DIFFERENT SHAPE) — correct the
+  sizing, not the commit. ⚠ And **re-read the CITED LINE's own notation before claiming to falsify
+  it**: a "0 of 345" headline measured a proposition the design never asserted (it compared against a
+  remembered PARAPHRASE; the design's own notation holds 344 of 345, and what was wrong was the SCOPE).
+  ⚠ **A CENSUS NUMBER TRAVELS WITH ITS UNIT, and a reconciliation RE-DERIVES the other instrument's
+  number rather than POSITIONING it** (2026-09-05). One lane's 46 — a whole-flavour count of
+  address-taken scalar VARIABLES, deduplicated by variable — was placed into another lane's SITE chain
+  (27 < 39 < 48 < 61) where it cannot sit; re-derived from the instrument's own file, 10 of the 46 are
+  lift-shaped and 0 are `&args` structs, so the operative conclusion survived and the MAPPING did not.
+  A number quoted without its unit reads as a member of whatever series it is placed in.
+  **⚠ ELIDED-vs-TYPED SIBLING DRIFT: when a helper documents the N renderers that must spell a thing
+  ONE way, census all N** (2026-09-04). A converter fix landing on the TYPED renderer of a construct
+  never reached its ELIDED twin — the arm that renders the same shape when the literal's type is
+  INFERRED — so the elided form kept the pre-fix emission and a keyed sibling kept the same hole: the
+  renderer that never got the spelling IS the defect. Its neighbour: **a switch arm that returns only
+  for ONE pointee kind lets every other kind FALL OUT to a generic fallback that cannot compile**
+  (CS0144 against an abstract box type), so the class is every kind the arm does not name, reached
+  through every literal shape that routes an elided element there. Two defects that are two ARMS of
+  one switch take controls on SEPARATE assertions when one half's compile failure MASKS the other (a
+  third binary carrying only one half isolates it); the fix's own assertion is stronger than "it
+  compiles" when the elided spelling emits BYTE-IDENTICALLY to the explicit one; and a residual
+  deliberately NOT fixed is recorded at the call site, in the reference doc AND in the guard's
+  comment, with its honest fix named as its own item.
+  ⚠ **AN OBSERVATION SET ASIDE AS "NOT THE ROOT" IS RE-READ AGAINST THE COMPILER'S OWN WORDS FOR THE
+  ERROR BEFORE IT IS SET ASIDE** — twice in one evening (2026-09-08): a census node reading "not found
+  here" was filed as a footnote while Go's chain was traced anyway, and a lowered comparison spelling
+  a PATTERN MATCH where Go means pointer equality was filed as "not that diagnostic and not that
+  root", when that diagnostic IS "a constant value is expected", the compiler's words for a pattern
+  whose operand is not constant. The ARTIFACT settled it in one read: the two arms of ONE lowered
+  chain DISAGREE — the pattern form for the address-of case and the equality form for nil one line
+  down — so the converter already knew the right form, and the screening that stopped the C# switch
+  closed the right half while leaving the pattern spelling in the chain it produced. **A converter
+  reproducer that exits 0 has measured the EMISSION, not the COMPILE; a compiler-error claim is a
+  compile-time claim.** ⚠ **ONE DEFECT CAN WEAR TWO DIAGNOSTICS**: the same lowering reads "a constant
+  value is expected" when the operand is a bare identifier and "type or namespace not found" when it
+  is a member CALL, since C# then reads a POSITIONAL PATTERN whose type would be the call's receiver —
+  so one root's second site was the other root in a different costume, and the rung prediction MOVED
+  before the rung, with falsifiers both ways. Its neighbour, a genuinely separate defect: **a C# cast
+  binds LOOSER than member access**, so a pointer-to-array index shape needs the cast PARENTHESISED
+  before the member access, or it indexes the operand and casts the result.
+  **⚠ A NULL IS A RESULT ONLY AFTER THE INSTRUMENT IS SHOWN TO HAVE FIRED** (three shapes,
+  2026-09-03/04). A spike's null at the CALL SITES was an instrument artifact — the DECLARATION had
+  never lowered, so nothing had fired — and the real blocker was the pass's own stated SCOPE, which
+  neither hypothesis had read: **read a pass's documented scope before predicting what it will do to a
+  site.** A COMPILE BLOCKER masks a whole flag-on emission (once the package compiled the census read
+  ZERO reduction, 98 = 98, because one predicate pinned the leaves and a chain is pinned by its
+  leaves) — so a blocker post is censused across the WHOLE build output, not the file its first error
+  names (four errors reported, 99 CS0103 missed in the sibling). And **"the stamp is there" is not
+  "the stamp is read"**: after three landed halves a positive control was STILL red with the stamp
+  visibly present in the emitted C#, because a FOURTH site discarded it — four sites carried the same
+  implicit membership rule and each was widened separately; the remedy is ONE named predicate they all
+  call, and the control that finds it asserts the OUTPUT, not the artifact. Its golib twin: **a fix
+  can silently do NOTHING** when an accessor materializes a DETACHED COPY of the storage — every write
+  lands on a throwaway object and every read misses, with no error anywhere.
+-->
+
+## Predictions
+
+- **Every reading gets a prediction to disagree with** — that, not the fix, is what makes an arc fast. State
+  it BEFORE the run, score it BY NAME as worded with REASON separate from CONCLUSION, and **state it
+  falsifiably**: "if X is the cause this arm CHANGES the errno; an arm leaving it unchanged has FALSIFIED its
+  own candidate", not pass/fail. **Before probing two candidate mechanisms, ask which ARGUMENTS the failing
+  call READS** — a struct the callee only WRITES cannot produce an errno about BUFFER SIZE (`getpwuid_r`'s
+  ERANGE), so the DISCRIMINATING arm is on a READ argument.
+- **A prediction is stated in a currency the predictor has MEASURED** and **names the LAYER it models.** **"A
+  REPRODUCTION, NOT A PREDICTION" is the honest label when the expectation was informed by the other lane's
+  result**, and **a non-fresh reading is REPRODUCED in a fresh worktree rather than argued sound.** **An arm
+  added to test one's OWN mechanism can refute it and calibrate the instrument in one run**: its STABILITY —
+  same sign and magnitude in every order and both tiering modes — is what a REAL difference looks like, while
+  a pair whose sign flips with tiering is AT OR BELOW RESOLUTION. **A per-TEST figure quoted as per-CALL
+  understates by the arity.**
+
+<!-- DERIVATIONS (predictions) — Phase 1 text, verbatim:
+  ⚠ **AN ARC AS A RECORD SHAPE: four predictions, each stated BEFORE its run and scored BY NAME**
+  (2026-09-08). A row that ate a five-minute deadline with ZERO converted verdicts became a
+  three-and-a-half-second PASS through a blocker that moved one deeper BY SYMBOL, an iteration-index
+  probe that named the failing shape, a dispatch increment whose adapter arm bound while registration
+  refused at index 0 on the container, and the referent fix that delivered every case — **with one
+  wrong denial corrected by SHA within the hour, and one superseded SHA MEASURED to confirm the
+  retraction rather than taken on report. What made it fast was never the fix: it was that every
+  reading had a prediction to disagree with.**
+  ⚠ **BEFORE sending a probe at two candidate mechanisms, ask which ARGUMENTS the failing call READS**
+  (2026-09-05): a struct the callee only WRITES cannot produce an errno about BUFFER SIZE
+  (`getpwuid_r`'s ERANGE), so a wrong layout there corrupts or faults rather than explaining the
+  symptom — the DISCRIMINATING arm is the one on a READ argument, and a candidate settled STATICALLY
+  (a managed struct with reference fields handed by address) is owed without a measurement at all.
+  State the prediction in the sharper form for the same cost: **"if X is the cause this arm CHANGES the
+  errno; an arm leaving it unchanged has FALSIFIED its own candidate"**, rather than pass/fail.
+  ⚠ **"A REPRODUCTION, NOT A PREDICTION" IS THE HONEST LABEL WHEN THE EXPECTATION WAS INFORMED BY THE
+  OTHER LANE'S RESULT** (2026-09-08): a second host's zero adds INDEPENDENCE — a second box, a second
+  operator, the same instrument — while the property that makes the zero a MEASUREMENT (one
+  instrument, eight before, zero after) belongs to the first lane, and the "eight before" reading is
+  the second lane's own earlier step, so the pair is not circular. Two companions: the pairing arm was
+  LOAD-BEARING rather than a formality, because a planted control had just shown the widened predicate
+  CAN stamp at the older convert pin, so a NEW stamp in the real corpus surfacing as CHANGED was a
+  live risk; and a non-fresh reading, taken in a worktree carrying build output from a full suite, was
+  REPRODUCED in a fresh worktree rather than argued sound — "because you banked a stale-binary
+  near-miss in the same hour".
+-->
+
+## Read the artifact before the sentence
+
+- **Read the artifact before writing the sentence that is about it.** The forms: a design's notation, a
+  shipped comment's claim, a test file's existence, a claimed dependency on another lane's branch; an
+  "unverified" written WITHOUT LOOKING, which hides better; a CALL SITE cited without reading the CALLEE (the
+  site PANICS on its first line, the callee returning an INERT NIL); a finding routed from a lane's PROSE
+  instead of the record; a check quoted without its COUNTING METHOD; a ruling premise quoted from doctrine
+  instead of read AT THE TREE. **A ruled measurement can be satisfied by a READ.**
+- **A COMMENT THAT CLAIMS A BEHAVIOUR THE CODE LACKS READS AS THE CENSUS, and a faithful PORT propagates the
+  claim** — the darwin twin inherited a missing `Wait4`/EINTR loop, one zombie per failed transfer. **A
+  DELIBERATE NO-OP is the shape MOST likely to carry a documented reason**: `pprof_impl.cs`'s `_ = labels;`
+  sits over a recorded HOST-KILLING OOM. **A record's MEASUREMENT and its MECHANISM are separable claims**,
+  and **a refuted row takes a DATED amendment the day it is refuted, naming the file and line.**
+- **THE ORACLE'S CAPTURED STRINGS ARE THE SPECIFICATION — its FALLBACKS included**: our climb failing where
+  Go's SUCCEEDS is the defect, where Go's own fails is contract. **An expectation read off the thing under
+  test is not a test of it** — expected strings come FROM GO under the pinned toolchain, PINNED and not one
+  answer (a C# `int` is Go's `int32`). **The TIDY-LOOKING change is measured against Go's own output BEFORE
+  it is written**: Go sorts interface method names by the BARE name, so the obvious sort would REVERSE Go's
+  order — leave the evidence in a comment AT THE SITE.
+- **A COORDINATOR'S LEAD IS A HYPOTHESIS, and the coordinator's share of a bad rule is the larger one** —
+  retract IN PUBLIC the moment it is measured false, with the real site in the same message: **a lane sent to
+  the WRONG file loses more time than one sent nowhere.** **A lane's observation becomes fleet DOCTRINE only
+  after surviving an attempt to break it**: two runs agreeing to three decimals is a SUGGESTIVE NUMBER, not a
+  mechanism. **A DEFERRAL IS A READ OF THE RECORD, AND A READ HAS A TREE** — "settled" is a claim about the
+  TIP; resolve crossed messages by quoting the SHA SEQUENCE.
+- **AN ERROR THAT SAYS "DO NOT BOTHER" IS WORSE THAN ONE THAT SAYS "TRY THIS" — nobody measures a road they
+  have been told is closed**: a wrong positive gets measured and dies, while a wrong negative REMOVES the
+  measurement that would have killed it. **Read the code before predicting from it; bank the negative you
+  MEASURED, not the one you reasoned to.** **A file's SELF-DECLARED LABEL carries no weight**, and **printing
+  `n/a (failure path not entered)` is honest for a PROBE and disqualifying for a GUARD.** **A hand-owned host
+  that must hand a converted package an INSTANCE of an interface it may not reference has a supported answer
+  already: `golib.AdapterBinder.TryCreate`** — methods on the BOX receiver, interface type via
+  `Type.GetType`; no assembly, no project reference, no dynamic codegen.
+
+<!-- DERIVATIONS (reading artifacts, oracles, leads and deferrals) — Phase 1 text, verbatim:
+  ⚠ **A REFUSAL IS NOT RETIRED BY FINDING ITS EXPLANATION DATED — but the reason it happened may no
+  longer be the reason it would happen, which changes WHERE the fix lives.** `pprof_impl.cs`'s refusal
+  records BOTH an observation (a map reading `len == 1` at store and a garbage length at read-back
+  across two GCs, ending in an `OutOfMemoryException`) and an explanation naming an API that no longer
+  exists — today's `SetProfileLabels(object?)` stores a managed reference twice and mints nothing
+  (2026-09-07). The observation stands; the explanation is stale. **A record's MEASUREMENT and its
+  MECHANISM are separable claims**, and here the surviving `uintptr` hop sits at a GENERATED line, so a
+  remedy could live at the CONVERTER rather than behind the pointer-token arc.
+  ⚠ **A RULED FIX'S CAVEAT IS NARROWED FROM "I DO NOT KNOW" TO A NAMED RESIDUAL BY READING THE
+  CONTRACT, then discharged by an ARM rather than by a doc comment** (2026-09-08): equality on the box
+  type is pointer identity BY CONSTRUCTION — the operator delegates to the per-kind equality, and the
+  order token is documented per box kind as producing equal tokens for equal pointers — so the fix has
+  the right shape, and the ONE place it could compile and still diverge is a CROSS-KIND comparison (a
+  box recovered from a numeric handle against a heap box). That is NAMED, PRICED (a sentinel
+  comparison silently false makes the loop SPIN rather than fail loudly — the class of red no gate
+  reads) and folded into the guard as an output-compared round-trip row, with the unequal outcome
+  routed BY NAME to the token registry rather than to the fix. **Two posts crossing by under a minute
+  and converging independently — one from the diagnostic text, one from the artifact — is worth more
+  than either alone.**
+  **⚠ THE ORACLE'S CAPTURED STRINGS ARE THE SPECIFICATION — its FALLBACKS included** (2026-09-03).
+  Go's own `valueMethodName` climb fails on the package-level `reflect.Append` path and Go itself
+  prints `call of unknown method on int Value`, so threading the public name there would have "fixed"
+  a string Go DELIBERATELY prints and broken the byte-compare gate. **Our climb failing where Go's
+  SUCCEEDS is the defect; where Go's own fails is contract.** Capture the oracle's text through the
+  PUBLIC entry point before choosing what to thread — and prefer a SOLE-CALLER proof to a capture (a
+  panic you fail to provoke proves nothing about reachability), with a composer whose own test on the
+  threaded name preserves the fallback BY CONSTRUCTION rather than by a special case. ⚠ Its
+  construction rule: **an expectation read off the thing under test is not a test of it** — a
+  formatter-delegation guard's eight expected strings were taken FROM GO under the pinned toolchain,
+  and it went red on its first run for a REAL reason (a C# `int` is Go's `int32`, not `int`): the
+  mapping is PINNED, not one answer. ⚠ **The TIDY-LOOKING change is measured against Go's own output
+  BEFORE it is written** (2026-09-04): once interface method names were package-qualified, sorting the
+  RENDERED (qualified) strings looked like the obvious completion — and Go sorts by the BARE name
+  (`interface { zlib.aaa(); main.zzz() }`), so the tidy sort would have REVERSED Go's order. The sort
+  stays untouched with the evidence in a comment AT THE SITE, because the next reader will see the
+  qualification and reach for it; and a row that cannot be built (it needs a sibling package) is
+  recorded in the guard's comment rather than left unmentioned.
   **⚠ A FALSIFICATION IS BANKED AS A LIVE ASSERTION, and a finding SURVIVES its mechanism**
   (2026-09-03). A candidate root posted by the coordinator was measured FALSE twice over (the predicate
   never reaches the token; the fallback race produced 0 wrong answers in 200k+ takes under 200k+ forced
@@ -762,15 +1049,6 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   286/373/656/2124 s — which establishes "not host-conditional, not test-specific, a race" without
   asserting any mechanism, and a frame-by-frame VERIFICATION post follows the ones that merely CLAIMED
   the chain.
-  **⚠ A GUARD'S ROWS ARE ENUMERATED OVER THE AXES ITS PREDICATE READS, not the axes the change
-  targets** (measured 2026-09-03, twice on one golib predicate). A fix's identity guard held only slice
-  rows with ARRAY elements, so `ISlice<T> : IArray<T>` let a slice element's runtime LENGTH be stamped
-  as an array dimension on a map's descriptor and two equal `http.Header` values with different
-  insertion order interned as different `reflect.Type`s — `DeepEqual` false on textually identical
-  values, three banked verdicts pass→fail at a train head. The same latent predicate deep-cloned a
-  named-slice element and threw an `InvalidCastException` in the array-range copy the same week:
-  **`ISlice : IArray` makes every "is this an array" test a trap unless it excludes slices
-  explicitly.** The fix goes at the PREDICATE's door so no caller can reach the hole again.
   **⚠ ASSERTING AN ARTIFACT'S CONTENT WITHOUT READING IT — four instances on one arc, one of them the
   coordinator's** (2026-09-03): a design section's notation, a shipped comment's claim, a test file's
   existence (the guard a design "proposed" already existed and covered its whole tier), and a
@@ -798,34 +1076,6 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   `ResolveReceiverMethods` skips a by-ref receiver), with the interface type obtained by
   `Type.GetType` — no assembly, no project reference, no dynamic codegen. **`Reflection.Emit` and a
   satellite assembly were cancelled on the tree's own TEXT before either was built.**
-  ⚠ **THREE WAYS A GUARD IS GREEN WITHOUT MEASURING ANYTHING, all 2026-09-06.** **A guard can test the
-  COMMENT instead of the CONDITION**: all three arms of a pointer-token guard built their box as a heap
-  box of a POINTER-to-struct — a reference-bearing POINTEE, which is what the arm's comment describes —
-  while the arm's actual condition is "no pinnable storage", which is ALSO true of every field or
-  element reference rooted in a reference-bearing CONTAINER whose pointee is reference-FREE. That
-  second class was unguarded, and it is the class that regressed every Windows dial. **When a guard's
-  arms all match the prose, ask what ELSE satisfies the CODE.** **A guard whose POPULATION IS ZERO has
-  "no row moves" as its PREDICTION, not its hedge** — and it is exactly the guard that can be green
-  because it is BROKEN: its payoff is a future defect's failure mode, never a moving row, so its
-  acceptance criterion is stated in the only direction it can be measured (a row that DID move
-  falsifies the population census), and it ships with a TWO-ARMED control — it must FIRE on a planted
-  instance of the shape and stay SILENT across every real producer — or it asserts the population
-  instead of measuring it. Board debt for such a guard carries the producer TABLE and the control
-  requirement, not just the title, so a later lane inherits the measurement rather than trusting it.
-  And **when the PRE-FIX behaviour is a REFUSED CALL rather than a crash, a red control asserting a
-  fault asserts something FALSE**: under the token arm three of four boxes are order tokens, so the
-  control asserts a nil error and a byte count instead. **Put that reasoning in the GUARD's header, not
-  only in the design record** — the next reader meets the guard.
-  ⚠ **A GUARD WRITTEN ALONGSIDE ITS FIX SHARES THE FIX'S MODEL AND CAN ONLY CONFIRM IT** (2026-09-08):
-  a fold cut's first attempt keyed on the CONVERTED package's own project file — which a behavioral
-  project does not have — and its fixture encoded THE SAME WRONG MODEL, so the guard PASSED while CNR
-  still read the eight; the second attempt globbed every project file and admitted the TEST-project
-  SIBLING, a far wider closure that moved hundreds of files, and NONE of the four guard arms had put
-  such a sibling on disk. **Only CNR — an instrument the author did not write and could not align —
-  caught either**, and both defects now carry SEPARATELY neutered arms. Beside it: a `go build -o`
-  from the wrong cwd fails, and the alias read from the STALE binary the previous broken run left was
-  nearly banked as a pass — **the mtime-moved assertion is what separates a rebuilt binary from a
-  leftover.**
   ⚠ **The read-it-before-the-sentence rule met from two more directions, 2026-09-06.** **An
   "unverified" written WITHOUT LOOKING is the same failure as an unread anchor, and it hides better**:
   a design record's section said a registry gate's composition with a per-GOOS body was unverified
@@ -886,6 +1136,38 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   about its fitness now; the other three grounds were measurements. **And printing `n/a (failure path not
   entered)` rather than a green it did not measure is honest for a PROBE and disqualifying for a GUARD — a
   guard has no `n/a`.**
+-->
+
+## Negative results, withdrawals and sizing
+
+- **The warm-design trap: the speculative branch is easiest to write while the design is still warm.**
+  Machinery you cannot make FAIL under its own control is DELETED with the measurement in a comment at the
+  site. **A negative result is BANKED — in CODE at the gate, or in the RECORD — where the next reader will
+  stand**: a follow-up marked *measured wrong: 0 fixed, 1 broken*, or a fix CANCELLED WITH ITS MEASUREMENT
+  ATTACHED. **A guard asserting MORE than its increment delivers is narrowed to the DELIVERED reach and the
+  removed assertion banked as a NEGATIVE**, and **a cut whose only motivating failure is NON-REPRODUCIBLE is
+  HELD.**
+- **A CORRECT cut with zero measured payoff is WITHDRAWN, not banked on fidelity** — keep the census, record
+  the nulls in the file's own header, leave the elimination chain on the board. **But a PREREQUISITE with a
+  measured null LANDS** when it sits on the measured critical path of a NAMED blocker. **AN ARC IS WITHDRAWN
+  ON MEASUREMENT EXACTLY AS A COMMIT IS**, its product becoming the correctness fix plus a DESIGN RECORD of
+  the measured wall. **A design record's increment ORDER is a prediction like any other** — falsify it by
+  READING the mechanism before spending a battery, and correct the arithmetic in a DATED block. **A scoping
+  with no case earns no instrument.**
+- **A SIZING PROBE THAT STOPS AT THE DOOR IT IS SIZING CANNOT PREDICT WHAT LIES BEHIND IT** — predict the
+  next WALL unless the probe ran THROUGH, and score against the CUT's stubs, not the probe's; **a probe that
+  dies BEFORE its first measurement proves only the wall it died on**, leaving its prediction UNMEASURED,
+  never "met". **An acceptance table that enumerates WHERE a dispatch dies must first ask whether the row
+  dies BEFORE dispatch** — a mute exit code is the ABSENCE of evidence (138 is 128 + SIGBUS, never reaching
+  the managed throw path), so dispatch the stage that keeps whole stderr before arguing a mechanism.
+- **Enumerate outcomes per FAILURE, not per row**; **a row can be BLOCKED TWICE, so state the acceptance PER
+  BLOCKER**, said before an arc lands. **A cut owes its OWN behavioral guard**, pinning both acceptance
+  directions including the one no consumer exercises. **An audit can measure what a change BUYS and miss what
+  it COSTS, which is half a datum that reads whole**: **a benefit figure with no cost figure is not a
+  sizing.** **When a design's precondition is a runtime PROPERTY, measure the property STANDALONE before
+  anyone writes the design — and positive-control it** with an arm you EXPECT to move.
+
+<!-- DERIVATIONS (negative results, withdrawals, sizing) — Phase 1 text, verbatim:
 - **The warm-design trap:** the speculative branch is easiest to write while the design is still warm
   — and twice in one day (2026-09-01) a lane built guard/fix machinery, could not make it FAIL under
   its own control, and deleted it with the measurement recorded in a comment at the site. An
@@ -1037,6 +1319,82 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   back decides admissibility with no corpus change and no host risk — and **positive-control it**: the
   arm that must go red is a pointer you EXPECT to move, so a "stable" verdict cannot come from a probe
   that could never observe movement.
+-->
+
+## Where a fix goes, and what an increment is worth
+
+- **AN INCREMENT'S ORDER IS A PREDICTION WITH TWO AXES — the reduction AND the FOOTPRINT — and "smallest
+  first" reasoned from the reduction alone INVERTS once the footprint is measured.** Measure the footprint
+  BEFORE the battery; a large one is AFFORDABLE exactly when a mis-bound site fails LOUDLY at compile;
+  REDUCTION and REBIND COUNT are two numbers; **a bound is scored by the MEASURED number AND the REASON.**
+  **WHERE A BOX IS FORMED DECIDES WHICH INCREMENT REMOVES IT** — callee body, call site and a package away
+  behind a promotion cascade are three increments; name the falsifier ("any THIRD box moving on the row").
+- **A prediction is checked against the PREDICTOR'S OWN exclusion clauses before it is posted**, and **every
+  emission finding a prediction did not carry becomes an acceptance ROW** — a minted deref-or-null alias must
+  not move a nil-receiver panic earlier than Go's, and a lock through a ref-returning `.Value` must contend
+  on the SAME mutex, since a by-value copy-lock compiles and never contends. **"RETIRED FOR NO POPULATION" IS
+  A CLAIM ABOUT A TREE, NEVER A PERMANENT PROPERTY.** **A design record's STATED remedy is checked against
+  the LANGUAGE before an increment is cut against it** (a ref-capturing local function cannot become a
+  delegate, CS8175), and **a record's PROJECTED count is re-measured before it is quoted.**
+- **SEPARATE THE NAMING SURFACE FROM THE IDENTITY SURFACE BEFORE SIZING A TYPE-ERASURE REMEDY** — threading
+  identity changes a PUBLIC generic's SIGNATURE and risks a FALSE GREEN, since a lookup keyed on the carrier
+  while the store is keyed on the object returns early through the test's own `if !ok { return }`. **A
+  RECOMMENDATION BUILT ON A SHAPE ARGUMENT IS MEASURED ON ITS POPULATION — busiest shape first**, since a
+  heuristic can be right BY LUCK on the shape most likely to be asked; **recover a fact the converter DROPPED
+  at the LAST site where it is still statically known.** **A zero-cost "never worse" heuristic that the
+  durable fix retires the day it lands is THROWAWAY and is declined.**
+- **A PER-VALUE CORPUS-WIDE COST IS WEIGHED AGAINST THE POPULATION IT SERVES, by a second derivation**: a
+  dims field on `slice<T>` was DEMANDED by its creation sites and PAID FOR by every slice value the corpus
+  holds, so **"always right for a caseless row" does not outweigh a permanent tax on the most common type.**
+  **A `ConditionalWeakTable` keyed on a slice's BACKING ARRAY is sound only while empty backings are DISTINCT
+  objects**: `new T[0]` allocates fresh, `Array.Empty<T>()` is the shared singleton, `make(x, 0)` is where
+  golib hands it out, so enforce by SUBSTITUTION in the write path. **A predicate SOUND until a new backing
+  existed becomes a trap the day the backing arrives** — `ElemRefBox` read `m_array is not null` and took a
+  NATIVE-backed slice's EMPTY managed array as the backing: **use the type's OWN predicate (`IsNativeBacked`),
+  treat a new-kind guard going RED on OLD code as the guard's second job, and SPLIT a live master defect into
+  its own seat.** **An "expected-today" guard row lives only in a harness that can STATE an expected value
+  (GolibTests)**, since a stdout-compared behavioral project reds whole on any row differing from Go.
+- **CANDIDATES ARE RE-SCORED AFTER THE ROUTE IS CHOSEN.** Beside it: **a table with `GetOrAdd` and NO removal
+  path is a per-process accumulation defect a redesign should RETIRE, never re-key**; **a per-value cost
+  bounded by an EXTERNAL population is a different rule from the corpus-wide per-box byte rule**; **a sizing
+  that omits the LOAD-BEARING step is a HOLD, not a footnote**; a capability serving a handful of sites is a
+  CANDIDATE, not built. **Before dissolving a wall, measure what the wall is MADE OF** — an identity boundary
+  can be a property of the PORT's representation rather than the source semantics, measured by the falsifier
+  that would retire it and cut with a concurrency guard proven RED first.
+- **THE ORDER OF A FIX IS LOAD-BEARING, and a fix at the wrong layer reads as "the fix does not work"** —
+  populate first, then thread. **Read the site's own comment before editing the line beneath it**: the line
+  may be a documented REFUSAL, and skipping that passes a nine-shape guard while breaking a banked consumer's
+  IDENTITY. **A guard that prints NAMES must also assert IDENTITY where identity is the contract**; **a model
+  fix is checked for its EMISSION TWIN before it is scoped as golib-only**, the twin's gates (converter
+  suite, two-seeded diff by hunk, CNR with predicted golden drift) joining the increment; and **a consumer's
+  exposure is READ from its first substantive line, never guessed from its name.**
+- **READ THE FLAG-OFF EMISSION OF THE SAME SITE before cutting a fix at a call-site ARM** — an arm-level fix
+  compiled while making the site WORSE than flag-off. **A wrong classification is corrected where it is MADE,
+  never papered at the arm.** **A "perf" item is re-measured for CORRECTNESS against `go run` before it is
+  priced** — an allocation-hygiene item was a Go-SEMANTICS divergence, `for i, v := range a` over an array
+  VALUE observing the body's own writes. **A three-row filtered acceptance cannot falsify "no OTHER row
+  moved"**, and **a predicted-then-confirmed baseline is still MEASURED once.**
+- **Where a rule is PLACED decides which cases can reach it** — at a HELPER's arms, after the identity arm
+  returned, it cannot break an identity case; as a CALLER-side gate it runs ahead of identity and did. **A
+  caller-side copy that enforces ORDER** (`SetMapIndex` checking the key BEFORE its nil-map panic) **is
+  load-bearing and STAYS.** **A hash rule is stated WITH its equality rule, never after it**, and **a
+  pointer-identity rule that answers by REFERENT compares ORDER TOKENS — allocation base plus Go field offset
+  — never box OBJECTS**, since a field reference is MINTED AFRESH at every `&l.p`: equality is
+  `ReferenceEquals` OR equal tokens, `GetHashCode` hashes the token. **A golib equality change owes a
+  CROSS-ASSEMBLY CONSUMER GATE.** **A RULED FIX'S CAVEAT IS NARROWED TO A NAMED RESIDUAL BY READING THE
+  CONTRACT, then discharged by an ARM rather than a doc comment.**
+- **WHEN SIZING A CORPUS-WIDE BEHAVIOUR CHANGE, PICK THE DEFAULT THAT MAKES THE ARC MONOTONIC** —
+  default-FATAL for unimplemented stubs means every increment can only convert a host death into a reported
+  verdict and never the reverse: landable one package at a time, safe to stop between any two. **A sizing
+  whose author picks the harder default against their own convenience does not need second-guessing.** **PUT
+  THE DECISION WHERE THE KNOWLEDGE IS**: a stub's kind is SEMANTIC and a structural predicate provably cannot
+  recover it — **the converter knows what the symbol IS, the generator knows only what it LOOKS LIKE.** **For
+  a change that makes failures RECOVERABLE the acceptance criterion is the FALSE-GREEN direction, named**: a
+  test that stops dying and starts FAILING is the point, while one that starts PASSING may be passing on a
+  RECOVERED missing capability. **A REBASE leaves `go2cs.exe` stale (route #1) — rebuild before
+  re-transpiling a golden.**
+
+<!-- DERIVATIONS (placement, ordering, increments, sizing defaults) — Phase 1 text, verbatim:
   **⚠ AN INCREMENT'S ORDER IS A PREDICTION WITH TWO AXES — the reduction AND the FOOTPRINT — and
   "smallest first" reasoned from the reduction alone INVERTS the moment the footprint is measured**
   (2026-09-04, sharpening the ordering rule above). "One box on the os row" was a property of the
@@ -1189,3 +1547,4 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   and starts FAILING is the point, while a test that stops dying and starts PASSING may be passing on
   a RECOVERED missing capability — the only way such an arc can do damage — so each increment's
   measurement rules that out explicitly rather than reporting a net verdict improvement.
+-->
