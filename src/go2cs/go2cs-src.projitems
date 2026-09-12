@@ -36,6 +36,7 @@
     <None Include="$(MSBuildThisFileDirectory)commandLineOptions.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyGenericCall_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)contextBudget_test.go" />
     <None Include="$(MSBuildThisFileDirectory)convArrayType.go" />
     <None Include="$(MSBuildThisFileDirectory)convBasicLit.go" />
     <None Include="$(MSBuildThisFileDirectory)convBasicLit_test.go" />
