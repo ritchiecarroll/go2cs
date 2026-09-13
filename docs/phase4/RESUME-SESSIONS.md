@@ -37,8 +37,7 @@ loop is the FIRST, UNCONDITIONAL step of every lane's resume** — never gated o
 mechanism and cadence (COORD: Monitor 60 s + CronCreate 20 min at 9/29/49; i9: CronCreate at 7/27/47; C2: three
 Routines at :12/:32/:52; C1: three triggers; G and R: as their blocks say).
 
-The ladder: `docs/GoCorpusMigration.md` §2, H0–H12. Position at this revision: **H4 closes with train
-47's landing (run 8 = the landing candidate); H4a/H5 rung on i9 has stages A–C and C1-1 banked at the
+The ladder: `docs/GoCorpusMigration.md` §2, H0–H12. Position at this revision: **H4 CLOSED -- train 47 LANDED as master 31fe4925d at 17:26 (run 8); H4a/H5 rung on i9 has stages A–C and C1-1 banked at the
 union tree `161af6c44`, item 8 banked, item 11 closed, the next wall named C1-2.** Corpus publication
 (the roster at 1.24.13) follows H5/H6; the owner's high-level ask is progress toward that.
 
@@ -97,7 +96,8 @@ STATE AT THIS REVISION (2026-09-13 15:45):
   BRANCH: claude/coord-handover 7c76f343e5bd335c7bc837d1df5f18243e3697fd yes landed -- the handover log + this file
   BRANCH: claude/coord-train47-union dd021ff5ba1048ff1c0d354fc68dc75d17ced40f yes reproduction -- run-6 union head dd021ff5b, tree 161af6c44; DELETE after the landing
   BRANCH: claude/mailbox 7ff30f203cf9f13c5112658802ada4a6fbd8dee7 yes transport -- rotated 2026-09-13 02:36
-  master tip at this revision: a02ac3df3 (train 47's base); the landing SHA is filled at the landing.
+  master tip at this revision: 271300cea (docs commit) over 1885bce69 (doctrine d) over 31fe4925d (TRAIN 47 LANDED 17:26, tree 161af6c44); train 47's base was a02ac3df3.
+  BRANCH: claude/version-go1.24.13 31fe4925d055537dbb48c343f726e027631f6aa1 yes created -- the H5 branch, created from the landed SHA; the H5 set (088f8778f, ff54907996, 23d07f742) targets it, never master
   TRAIN 47: fifteen seats (table in .claude/coord-scripts/train47/coord-train47-assemble.sh) on base
     a02ac3df3; union tree 161af6c44; runs 4-7 refused on the instrument (each a real defect, each fixed
     with a self-check lesson: LD1, LD2, LR1, LA1, LL1); RUN 8 launched 14:12 = the landing candidate.
@@ -410,3 +410,4 @@ PROTOCOL: as COORD's section.
 - 2026-09-13 16:18 — session-bound ids rule (§0) + WAKE lines for i9 and C2; accepted-loss wording amended (686 unique blobs, all intermediate states).
 - 2026-09-13 17:15 — i9 block delta (NEXT / READ-FIRST / BLOCKED-ON) applied from 839a8d926; the rung is measured and idle.
 - 2026-09-13 17:18 — C1 block delta (NEXT / READ-FIRST / BLOCKED-ON / WAKE verbatim; c1-h5-rederive-patch tip) applied from cf06dafee.
+- 2026-09-13 17:48 — LANDED: master 31fe4925d (train 47) + 1885bce69 (doctrine d) + 271300cea (docs: this file, the skill and the verifier now on master too); claude/version-go1.24.13 created; H4 closed.
