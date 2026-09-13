@@ -1787,7 +1787,11 @@ if ($hop) {
 
 if ($hopNoTests) {
     Write-Host ''
-    Write-Host "hop no-eligible-tests -- ran on this host and declared no eligible Go tests for $targetGoos:" -ForegroundColor DarkCyan
+    # ${targetGoos}: not $targetGoos: -- a ':' after a BARE variable name is parsed as a scope
+    # qualifier, and both editions refuse it ("':' was not followed by a valid variable name
+    # character"). The line three below already spelled it correctly, which is what made the defect
+    # easy to write and invisible to re-read.
+    Write-Host "hop no-eligible-tests -- ran on this host and declared no eligible Go tests for ${targetGoos}:" -ForegroundColor DarkCyan
     $hopNoTestsRows | ForEach-Object { Write-Host "  $_" -ForegroundColor DarkCyan }
     Write-Host "  (each derives a '${targetGoos}: n/a' annotation. Both signals were required: the pipeline's own" -ForegroundColor DarkGray
     Write-Host '   line AND a not-applicable comparison record -- a row that merely produced no counts FAILED instead)' -ForegroundColor DarkGray
