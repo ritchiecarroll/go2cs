@@ -109,8 +109,12 @@ STATE AT THIS REVISION (2026-09-13 15:45):
     doctrine d (21821509c) -> docs commit (KICKOFF section 4 refresh + CLAUDE.md floor item 12 amendment
     + runbook H5 seed-list line; TestContextBudget must pass; effective count 178 -> 180 of 200) ->
     handover block 8 -> train-48 pin fill.
-  TRAIN 48 (template .claude/coord-scripts/train48/, derived by t48-derive.py, 189 ops, verified SOUND):
-    board on the train-48 NOTES; pins PENDING until the landing SHA exists (T48_CONTAIN_PIN, EXPECT_G3).
+  TRAIN 48 (template .claude/coord-scripts/train48/, derived by t48-derive.py, 195 ops, verified SOUND 18:15; i7-LOCAL until the instruments
+    are persisted -- see the OWNER HAND above): PINNED from the landing by derive ops (T48_CONTAIN_PIN 31fe4925d...6aa1, EXPECT_G3 204);
+    rows 1-10 filled and re-pinned at origin (row 1 = claude/g-handown-metadata-t48-r47 @35fe4e016 with allowed= cache.cs, ruled 18:25);
+    rows 11-19 PENDING (candidates proposed at mailbox 2e44b9b40; lanes keep/strike); ONLINE self-check overallFail=0 (18:28).
+    FIRST ACTION for train 48 on resume: fill rows 11-19 from the lanes' lines by derive ops, run the online self-check, the
+    fifteen-seat rehearsal (coord-train48-rehearse.sh) onto master, then the assembly from a per-run copy (launch-run1.sh).
     Seats include C1 mcleanup hand-own 23d07f742, C2 driver 02b87b501, goroot branch tip 3ced37e18,
     C2 H5c amendment stack (be9668d56 + 088f8778f on claude/c2-h5c-apply-amendment), a CNR seat that
     retains WARNING lines by kind, a converter per-file EMISSION MANIFEST seat.
@@ -438,3 +442,4 @@ PROTOCOL: as COORD's section.
 - 2026-09-13 17:15 — i9 block delta (NEXT / READ-FIRST / BLOCKED-ON) applied from 839a8d926; the rung is measured and idle.
 - 2026-09-13 17:18 — C1 block delta (NEXT / READ-FIRST / BLOCKED-ON / WAKE verbatim; c1-h5-rederive-patch tip) applied from cf06dafee.
 - 2026-09-13 17:48 — LANDED: master 31fe4925d (train 47) + 1885bce69 (doctrine d) + 271300cea (docs: this file, the skill and the verifier now on master too); claude/version-go1.24.13 created; H4 closed.
+- 2026-09-13 18:30 — train 48 pinned and self-checked online (0 FAIL); rows 11-19 proposed; H5 proper in step 2 on the version branch.
