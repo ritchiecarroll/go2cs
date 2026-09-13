@@ -84,7 +84,7 @@ campaign rather than a single serial run.
 | **Desktop (coordinator)** | assigns lanes, merges, signs, lands; owns the mailbox, every full-roster dispatch and every ruling | i7-5820K, 6C/12T, 32 GB, Haswell-E (2014); replaced the i9-13900K that died 2026-08-09 | CNR **1,059 / 1,132 s solo, 1,440 / 1,711 s loaded** at ~625 packages (2026-08-17/19); behavioral suite **~6,552 s at 603 packages** (2026-08-21); `go2cs.slnx` Debug `--no-incremental` **~3,546 s at 722 projects** (2026-08-21); `go2cs-stdlib.slnx` **516 s** (2026-08-14) |
 | **The i9 — "the sweeper"** | JOB-served worker; runs named instruments at stated budgets, reports raw output. **Makes no rulings, never commits to master.** Joined 2026-08-21 17:16 | **i9-13900K, 16C/24T, 64 GB**, `C:` 446 GB free; SDK 9.0.317, Go 1.23.1; clone at `C:\go2cs-build\repo`, **every job in its own `git worktree` at the SHA the job names** | Full roster (159 rows, JOB-001): **159/159 PASS in 7,059 s (~117.6 min)** — *above the ~50–60 min baseline the budget table still carries*. JOB-R3 (39 rows): **39/39, 14,148 verdicts, 2,431 s** summed row time. JOB-G2: **162/162, exactly 18,569 verdicts**, clean first pass. JOB-G1, same roster: **160/2** first pass, both reds retried green in isolation |
 | **Laptop R** | lane machine; holds the WSL2 Ubuntu-22.04 distro running the Linux legs | Ryzen 7 PRO 6850U, 32 GB; distro 16 threads, 15 GB | CNR **1,060 s**; the 161-row Linux roster re-run, per-row, detached |
-| **Laptop G** | lane machine; ran the Linux measurement campaign v1–v4 and **the .NET 10 perf scout** | Ryzen 7 PRO 6850U, hostname `GRETCHEN-LAPTOP` | CNR **720 s**; behavioral suite **1,792 s** (2026-08-07, i9-era corpus) |
+| **Laptop G** | lane machine; ran the Linux measurement campaign v1–v4 and **the .NET 10 perf scout** | Ryzen 7 PRO 6850U, hostname `G-LAPTOP` | CNR **720 s**; behavioral suite **1,792 s** (2026-08-07, i9-era corpus) |
 | **The perf-canon box** | dedicated, solo, sleep-proofed; owns the canonical AOT performance column. **A separate machine from laptop G** — the scout's method line says so | AMD Ryzen 5 PRO 6650U, 6C/12T, 30.8 GB; Win 11 10.0.26200, SDK 9.0.316, MSVC 14.44 | the bflat exploration's numbers (§3.4) and the canonical three-column table |
 
 ⚠ **Two roster facts to verify before a dispatch, not to assert.** (1) The **R / G labels appear to
@@ -229,7 +229,7 @@ From the **.NET 10 performance scout** (board 2026-08-22, lane G, `claude/dotnet
 Method: SDK **10.0.400** side-by-side to a user-local dir, the machine's 9.0 default untouched; the 10
 leg selected by `DOTNET_ROOT` + `DOTNET_ROLL_FORWARD=LatestMajor`, verified by a
 `FrameworkDescription` probe (`.NET 9.0.18` → `.NET 10.0.11` → restored). **Both legs execute
-identical IL.** Same day, same silicon (Ryzen 7 PRO 6850U, `GRETCHEN-LAPTOP` — *not* the perf-canon
+identical IL.** Same day, same silicon (Ryzen 7 PRO 6850U, `G-LAPTOP` — *not* the perf-canon
 6650U host; ratios internal to that box), quiet machine, `run-performance.ps1 --no-aot`, median-of-5.
 Go columns reproduce across legs within noise (Fib 118.3 vs 119.0) — the same-day control the protocol
 demands.
@@ -379,7 +379,7 @@ general case cannot know:
 |:--|:--|:--|
 | **E-a** | The bflat Fib question (§3.3) | answered either way, on the perf-canon host |
 | **E-b** | `crypto/tls`'s `TestBogoSuite` under the new shape | **three runs, two machines** — its `hostConditional` note makes one insufficient |
-| **E-c** | The three named regressions (§3.1) re-measured | reported whether or not they reproduce; a regression that vanished on other silicon is a finding about `GRETCHEN-LAPTOP` |
+| **E-c** | The three named regressions (§3.1) re-measured | reported whether or not they reproduce; a regression that vanished on other silicon is a finding about `G-LAPTOP` |
 
 ---
 

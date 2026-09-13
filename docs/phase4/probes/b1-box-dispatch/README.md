@@ -9,5 +9,5 @@ Run:  `dotnet run -c Release` (JIT arm), then
 `dotnet publish -c Release -r win-x64 -p:PublishAot=true` and run the published exe (AOT arm;
 needs MSVC link.exe — prepend the VS Installer dir to PATH for the SDK's vswhere probe).
 
-`output-jit.txt` / `output-aot.txt` are the runs of record (GRETCHEN-LAPTOP, Ryzen 5 PRO 6650U,
+`output-jit.txt` / `output-aot.txt` are the runs of record (G-LAPTOP, Ryzen 5 PRO 6650U,
 CoreCLR/NativeAOT 10.0.11, 2026-08-26).

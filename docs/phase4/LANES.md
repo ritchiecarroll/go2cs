@@ -343,8 +343,8 @@ your branch (subjects start "L3:"), push often, signal per stage.
 |:--|:--|:--|:--|:--|:--|
 | Coordinator | desktop (C: clone) | i7-5820K (2014 Haswell-E) | 6C/12T | 32 GB | slowest fleet box; budget tables key off it |
 | Sweeper / CPU worker | ritchie-desk2 | i9-13900K | -- | -- | fastest; random ~daily reboots pending RMA; Sonnet worker loop |
-| Lane R | RITCHIE-LAPTOP | Ryzen 7 PRO 6850U | 8C/16T | 31 GB | ⚠ probed at 34 GB free -- below the 60 GB preflight |
-| Lane G | GRETCHEN-LAPTOP | Ryzen 5 PRO 6650U | 6C/12T | 31 GB | 210 GB free |
+| Lane R | R-LAPTOP | Ryzen 7 PRO 6850U | 8C/16T | 31 GB | ⚠ probed at 34 GB free -- below the 60 GB preflight |
+| Lane G | G-LAPTOP | Ryzen 5 PRO 6650U | 6C/12T | 31 GB | 210 GB free |
 
 ⚠ **Historical cross-machine speed comparisons are SUSPECT**: fleet records had drifted to
 "both laptops 6850U", and the recorded "G faster than R" readings contradict the now-anchored

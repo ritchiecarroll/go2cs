@@ -180,7 +180,7 @@ unicode/utf16                            8             9s
 unicode/utf8                             14            6s
 ```
 
-## linux · corpus `18770d083` · Ryzen 7 PRO 6850U (RITCHIE-LAPTOP, WSL2 Ubuntu 22.04) · 2026-08-23 (JOB-007 Linux leg)
+## linux · corpus `18770d083` · Ryzen 7 PRO 6850U (R-LAPTOP, WSL2 Ubuntu 22.04) · 2026-08-23 (JOB-007 Linux leg)
 
 162 rows, **149 PASS / 10 FAIL / 3 CVAC** (152 green), aggregate **19113 s (5.3 h)**. Derivation: NOT
 mtime-derived — each row's wall clock is recorded directly by the per-row driver as it runs

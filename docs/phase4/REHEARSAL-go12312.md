@@ -366,7 +366,7 @@ before the hop leans on it.
 | Leg | Header | Rows | Aggregate | Derivation quality |
 |:--|:--|--:|--:|:--|
 | **windows** | `corpus 18770d083 · i9-13900K (ritchie-desk2) · 2026-08-23 (JOB-007)` | 162 (all PASS, 18,569 verdicts) | 7,697 s | ⚠ **mtime-derived**, not directly measured; self-check 7,701 vs 7,697 s |
-| **linux** | `corpus 18770d083 · Ryzen 7 PRO 6850U (RITCHIE-LAPTOP, WSL2 Ubuntu 22.04) · 2026-08-23 (JOB-007 Linux leg)` | 162 (149 PASS / 10 FAIL / 3 CVAC) | **19,113 s (5.3 h)** | ✔ **directly instrumented per row** — the better data |
+| **linux** | `corpus 18770d083 · Ryzen 7 PRO 6850U (R-LAPTOP, WSL2 Ubuntu 22.04) · 2026-08-23 (JOB-007 Linux leg)` | 162 (149 PASS / 10 FAIL / 3 CVAC) | **19,113 s (5.3 h)** | ✔ **directly instrumented per row** — the better data |
 
 ### 4.4 ⚠ **The Linux column exists — and the plan does not know it**
 
@@ -426,9 +426,9 @@ written against a stale copy of the floor table. That also explains the two misq
 | Machine | Role | `s_w` | Status | Linux? |
 |:--|:--|:--|:--|:--|
 | i9-13900K (ritchie-desk2) | sweeper; holds reserved set | 1.00 | anchor, by definition | no |
-| Ryzen 7 PRO 6850U (RITCHIE-LAPTOP) | Lane R | 0.45 | **PROVISIONAL** | **WSL2 Ubuntu 22.04** — ran the Linux leg. ⚠ probed at 34 GB free, **below the 60 GB preflight** |
+| Ryzen 7 PRO 6850U (R-LAPTOP) | Lane R | 0.45 | **PROVISIONAL** | **WSL2 Ubuntu 22.04** — ran the Linux leg. ⚠ probed at 34 GB free, **below the 60 GB preflight** |
 | i7-5820K (desktop) | coordinator | 0.35 | **PROVISIONAL** | no |
-| Ryzen 5 PRO 6650U (GRETCHEN-LAPTOP) | Lane G | 0.35 | **PROVISIONAL** | no |
+| Ryzen 5 PRO 6650U (G-LAPTOP) | Lane G | 0.35 | **PROVISIONAL** | no |
 | *"any fifth worker"* | — | 0.35 | **ASSUMED — no such machine in the roster** | — |
 
 **No native-Linux worker exists.** Linux capacity is WSL2 on Lane R plus CI overflow

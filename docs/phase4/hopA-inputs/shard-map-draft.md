@@ -92,9 +92,9 @@ of these boxes on this workload):
 | W | Worker | Silicon | `s_w` (provisional) |
 |:--:|:--|:--|--:|
 | 3+ | **i9 (sweeper)** | i9-13900K, 16C/24T | **1.00** (definition) |
-| 3+ | **R** (RITCHIE-LAPTOP) | Ryzen 7 PRO 6850U, 8C/16T | **0.45** |
+| 3+ | **R** (R-LAPTOP) | Ryzen 7 PRO 6850U, 8C/16T | **0.45** |
 | 3+ | **coordinator** | i7-5820K, 6C/12T | **0.35** |
-| 4+ | **G** (GRETCHEN-LAPTOP) | Ryzen 5 PRO 6650U, 6C/12T | **0.35** |
+| 4+ | **G** (G-LAPTOP) | Ryzen 5 PRO 6650U, 6C/12T | **0.35** |
 | 5 | **X** (fifth engaged machine) | unknown — placeholder silicon | **0.35** (assumed laptop-class) |
 
 `t_r` is the JOB-007 wall time × `k`; **k = 1 is assumed throughout this draft** (see §4's caveat
@@ -113,13 +113,13 @@ i9-seconds; "local wall" divides by the provisional `s_w`.
 | Worker | s_w | Rows | Load (i9-s) | Local wall | Shards @ ~90 min |
 |:--|--:|--:|--:|--:|--:|
 | **i9-13900K (sweeper)** | 1.00 | 45 | 4,272 | 4,272 s (~71 min) | 1 |
-| **R -- RITCHIE-LAPTOP 6850U** | 0.45 | 66 | 1,928 | 4,284 s (~71 min) | 1 |
+| **R -- R-LAPTOP 6850U** | 0.45 | 66 | 1,928 | 4,284 s (~71 min) | 1 |
 | **i7-5820K (coordinator)** | 0.35 | 51 | 1,501 | 4,289 s (~71 min) | 1 |
 
 **i9-13900K (sweeper)** (45 rows):
 > `index/suffixarray`† 573 · `hash/maphash`† 898 · `crypto/dsa`† 1317 · `archive/zip`† 354 · `crypto/tls`† 659 · `go/doc/comment`† 18 · `go/types`† 137 · `crypto/aes` 9 · `crypto/hmac` 9 · `crypto/sha256` 9 · `database/sql/driver` 9 · `debug/plan9obj` 9 · `encoding/hex` 9 · `go/constant` 9 · `hash/crc32` 9 · `internal/coverage/cformat` 9 · `internal/coverage/slicereader` 9 · `internal/cpu` 9 · `internal/diff` 9 · `internal/testenv` 9 · `internal/xcoff` 9 · `io/ioutil` 9 · `log/slog/internal/benchmarks` 9 · `testing/iotest` 9 · `text/scanner` 9 · `container/list` 8 · `crypto/des` 8 · `crypto/md5` 8 · `encoding/base32` 8 · `encoding/base64` 8 · `hash/fnv` 8 · `image/color` 8 · `internal/coverage/slicewriter` 8 · `internal/itoa` 8 · `maps` 8 · `math/cmplx` 8 · `path` 8 · `plugin` 8 · `runtime/internal/math` 8 · `cmp` 7 · `container/heap` 7 · `crypto/internal/alias` 7 · `hash/adler32` 7 · `internal/saferio` 7 · `math/bits` 7
 
-**R -- RITCHIE-LAPTOP 6850U** (66 rows):
+**R -- R-LAPTOP 6850U** (66 rows):
 > `go/internal/gcimporter` 306 · `crypto/internal/mlkem768` 228 · `time` 197 · `crypto/rsa` 119 · `compress/flate` 106 · `sync/atomic` 82 · `crypto/internal/edwards25519/field` 66 · `strings` 56 · `database/sql` 47 · `os/exec` 43 · `crypto/ecdsa` 32 · `encoding/json` 28 · `text/template` 25 · `compress/gzip` 21 · `regexp/syntax` 20 · `bytes` 18 · `debug/buildinfo` 18 · `sync` 18 · `crypto/subtle` 16 · `strconv` 16 · `crypto/ecdh` 15 · `crypto/ed25519` 15 · `image/png` 14 · `net/http/fcgi` 14 · `syscall` 14 · `crypto/rand` 13 · `expvar` 13 · `crypto/internal/bigmod` 12 · `flag` 12 · `os/signal` 12 · `debug/gosym` 11 · `go/ast` 11 · `go/printer` 11 · `runtime/debug` 11 · `debug/macho` 10 · `encoding/asn1` 10 · `errors` 10 · `go/format` 10 · `hash` 10 · `internal/abi` 10 · `internal/fuzz` 10 · `internal/reflectlite` 10 · `io/fs` 10 · `mime/quotedprintable` 10 · `net/mail` 10 · `net/url` 10 · `testing/slogtest` 10 · `bufio` 9 · `compress/bzip2` 9 · `crypto/rc4` 9 · `encoding/binary` 9 · `go/token` 9 · `internal/coverage/pods` 9 · `internal/dag` 9 · `io` 9 · `math` 9 · `unicode/utf16` 9 · `crypto/internal/boring` 8 · `go/version` 8 · `internal/buildcfg` 8 · `internal/sysinfo` 8 · `os/exec/internal/fdtest` 8 · `text/tabwriter` 8 · `container/ring` 7 · `internal/gover` 7 · `unicode/utf8` 6
 
 **i7-5820K (coordinator)** (51 rows):
@@ -132,20 +132,20 @@ Checksum: **162 rows assigned = 7 reserved + 155 bulk** (every roster row named 
 | Worker | s_w | Rows | Load (i9-s) | Local wall | Shards @ ~90 min |
 |:--|--:|--:|--:|--:|--:|
 | **i9-13900K (sweeper)** | 1.00 | 7 | 3,956 | 3,956 s (~66 min) | 1 |
-| **R -- RITCHIE-LAPTOP 6850U** | 0.45 | 61 | 1,468 | 3,262 s (~54 min) | 1 |
+| **R -- R-LAPTOP 6850U** | 0.45 | 61 | 1,468 | 3,262 s (~54 min) | 1 |
 | **i7-5820K (coordinator)** | 0.35 | 47 | 1,138 | 3,251 s (~54 min) | 1 |
-| **G -- GRETCHEN-LAPTOP 6650U** | 0.35 | 47 | 1,139 | 3,254 s (~54 min) | 1 |
+| **G -- G-LAPTOP 6650U** | 0.35 | 47 | 1,139 | 3,254 s (~54 min) | 1 |
 
 **i9-13900K (sweeper)** (7 rows):
 > `index/suffixarray`† 573 · `hash/maphash`† 898 · `crypto/dsa`† 1317 · `archive/zip`† 354 · `crypto/tls`† 659 · `go/doc/comment`† 18 · `go/types`† 137
 
-**R -- RITCHIE-LAPTOP 6850U** (61 rows):
+**R -- R-LAPTOP 6850U** (61 rows):
 > `go/parser` 259 · `regexp` 226 · `crypto/rsa` 119 · `encoding/pem` 105 · `crypto/internal/edwards25519/field` 66 · `encoding/xml` 54 · `os/exec` 43 · `math/rand` 31 · `html/template` 28 · `go/importer` 20 · `go/internal/srcimporter` 19 · `debug/buildinfo` 18 · `crypto/subtle` 16 · `strconv` 16 · `crypto/ed25519` 15 · `image/png` 14 · `net/rpc/jsonrpc` 14 · `crypto/rand` 13 · `path/filepath` 13 · `debug/elf` 12 · `os/signal` 12 · `go/ast` 11 · `image/jpeg` 11 · `runtime/debug` 11 · `encoding/asn1` 10 · `fmt` 10 · `hash` 10 · `internal/abi` 10 · `internal/profile` 10 · `io/fs` 10 · `net/mail` 10 · `runtime/metrics` 10 · `text/template/parse` 10 · `compress/bzip2` 9 · `crypto/hmac` 9 · `crypto/sha512` 9 · `encoding/binary` 9 · `encoding/hex` 9 · `go/token` 9 · `internal/coverage/cmerge` 9 · `internal/cpu` 9 · `internal/diff` 9 · `internal/testenv` 9 · `io/ioutil` 9 · `math` 9 · `text/scanner` 9 · `unicode/utf16` 9 · `crypto/internal/boring` 8 · `encoding/base32` 8 · `hash/crc64` 8 · `internal/buildcfg` 8 · `internal/coverage/slicewriter` 8 · `internal/sysinfo` 8 · `net/http/internal/ascii` 8 · `plugin` 8 · `text/tabwriter` 8 · `cmp` 7 · `crypto/internal/alias` 7 · `internal/gover` 7 · `math/bits` 7 · `unicode/utf8` 6
 
 **i7-5820K (coordinator)** (47 rows):
 > `crypto/internal/mlkem768` 228 · `time` 197 · `compress/flate` 106 · `mime/multipart` 71 · `strings` 56 · `math/rand/v2` 34 · `encoding/json` 28 · `compress/gzip` 21 · `bytes` 18 · `sync` 18 · `sort` 16 · `crypto/ecdh` 15 · `internal/types/errors` 14 · `syscall` 14 · `expvar` 13 · `flag` 12 · `debug/dwarf` 11 · `go/internal/gccgoimporter` 11 · `crypto/internal/hpke` 10 · `encoding/csv` 10 · `go/format` 10 · `image/draw` 10 · `internal/reflectlite` 10 · `mime` 10 · `net/textproto` 10 · `testing/slogtest` 10 · `compress/lzw` 9 · `crypto/rc4` 9 · `database/sql/driver` 9 · `go/build/constraint` 9 · `hash/crc32` 9 · `internal/coverage/pods` 9 · `internal/dag` 9 · `internal/xcoff` 9 · `log` 9 · `testing/iotest` 9 · `container/list` 8 · `crypto/md5` 8 · `encoding/base64` 8 · `hash/fnv` 8 · `internal/fmtsort` 8 · `maps` 8 · `os/exec/internal/fdtest` 8 · `runtime/internal/math` 8 · `container/heap` 7 · `encoding/ascii85` 7 · `internal/saferio` 7
 
-**G -- GRETCHEN-LAPTOP 6650U** (47 rows):
+**G -- G-LAPTOP 6650U** (47 rows):
 > `go/internal/gcimporter` 306 · `internal/godebugs` 177 · `sync/atomic` 82 · `archive/tar` 60 · `database/sql` 47 · `crypto/ecdsa` 32 · `text/template` 25 · `regexp/syntax` 20 · `compress/zlib` 18 · `crypto/elliptic` 16 · `crypto` 15 · `image/gif` 14 · `net/http/fcgi` 14 · `context` 13 · `crypto/internal/bigmod` 12 · `image` 12 · `debug/gosym` 11 · `go/printer` 11 · `debug/macho` 10 · `errors` 10 · `go/scanner` 10 · `internal/fuzz` 10 · `internal/zstd` 10 · `mime/quotedprintable` 10 · `net/url` 10 · `bufio` 9 · `crypto/aes` 9 · `crypto/sha256` 9 · `debug/plan9obj` 9 · `go/constant` 9 · `internal/coverage/cformat` 9 · `internal/coverage/slicereader` 9 · `internal/singleflight` 9 · `io` 9 · `log/slog/internal/benchmarks` 9 · `testing/quick` 9 · `crypto/des` 8 · `crypto/sha1` 8 · `go/version` 8 · `image/color` 8 · `internal/itoa` 8 · `math/cmplx` 8 · `path` 8 · `unicode` 8 · `container/ring` 7 · `hash/adler32` 7 · `runtime/internal/sys` 7
 
 Checksum: **162 rows assigned = 7 reserved + 155 bulk** (every roster row named exactly once).
@@ -155,21 +155,21 @@ Checksum: **162 rows assigned = 7 reserved + 155 bulk** (every roster row named 
 | Worker | s_w | Rows | Load (i9-s) | Local wall | Shards @ ~90 min |
 |:--|--:|--:|--:|--:|--:|
 | **i9-13900K (sweeper)** | 1.00 | 7 | 3,956 | 3,956 s (~66 min) | 1 |
-| **R -- RITCHIE-LAPTOP 6850U** | 0.45 | 47 | 1,124 | 2,498 s (~42 min) | 1 |
+| **R -- R-LAPTOP 6850U** | 0.45 | 47 | 1,124 | 2,498 s (~42 min) | 1 |
 | **i7-5820K (coordinator)** | 0.35 | 36 | 873 | 2,494 s (~42 min) | 1 |
-| **G -- GRETCHEN-LAPTOP 6650U** | 0.35 | 36 | 874 | 2,497 s (~42 min) | 1 |
+| **G -- G-LAPTOP 6650U** | 0.35 | 36 | 874 | 2,497 s (~42 min) | 1 |
 | **X -- fifth engaged machine** | 0.35 | 36 | 874 | 2,497 s (~42 min) | 1 |
 
 **i9-13900K (sweeper)** (7 rows):
 > `index/suffixarray`† 573 · `hash/maphash`† 898 · `crypto/dsa`† 1317 · `archive/zip`† 354 · `crypto/tls`† 659 · `go/doc/comment`† 18 · `go/types`† 137
 
-**R -- RITCHIE-LAPTOP 6850U** (47 rows):
+**R -- R-LAPTOP 6850U** (47 rows):
 > `go/parser` 259 · `time` 197 · `sync/atomic` 82 · `archive/tar` 60 · `encoding/xml` 54 · `math/rand/v2` 34 · `html/template` 28 · `regexp/syntax` 20 · `compress/zlib` 18 · `crypto/elliptic` 16 · `strconv` 16 · `image/gif` 14 · `net/http/fcgi` 14 · `context` 13 · `path/filepath` 13 · `image` 12 · `go/ast` 11 · `image/jpeg` 11 · `crypto/internal/hpke` 10 · `errors` 10 · `hash` 10 · `internal/fuzz` 10 · `internal/reflectlite` 10 · `mime/quotedprintable` 10 · `runtime/metrics` 10 · `compress/bzip2` 9 · `compress/lzw` 9 · `crypto/sha256` 9 · `encoding/binary` 9 · `go/token` 9 · `internal/coverage/cmerge` 9 · `internal/coverage/slicereader` 9 · `internal/singleflight` 9 · `io/ioutil` 9 · `testing/iotest` 9 · `testing/quick` 9 · `crypto/des` 8 · `encoding/base32` 8 · `hash/fnv` 8 · `internal/fmtsort` 8 · `internal/itoa` 8 · `net/http/internal/ascii` 8 · `runtime/internal/math` 8 · `container/heap` 7 · `container/ring` 7 · `internal/gover` 7 · `unicode/utf8` 6
 
 **i7-5820K (coordinator)** (36 rows):
 > `regexp` 226 · `internal/godebugs` 177 · `mime/multipart` 71 · `database/sql` 47 · `encoding/json` 28 · `compress/gzip` 21 · `bytes` 18 · `crypto/subtle` 16 · `crypto/ecdh` 15 · `internal/types/errors` 14 · `crypto/rand` 13 · `debug/elf` 12 · `debug/dwarf` 11 · `go/printer` 11 · `encoding/asn1` 10 · `go/format` 10 · `internal/abi` 10 · `io/fs` 10 · `net/textproto` 10 · `text/template/parse` 10 · `crypto/hmac` 9 · `database/sql/driver` 9 · `go/build/constraint` 9 · `internal/coverage/cformat` 9 · `internal/dag` 9 · `internal/xcoff` 9 · `log/slog/internal/benchmarks` 9 · `unicode/utf16` 9 · `crypto/sha1` 8 · `hash/crc64` 8 · `internal/coverage/slicewriter` 8 · `math/cmplx` 8 · `plugin` 8 · `cmp` 7 · `crypto/internal/alias` 7 · `internal/saferio` 7
 
-**G -- GRETCHEN-LAPTOP 6650U** (36 rows):
+**G -- G-LAPTOP 6650U** (36 rows):
 > `go/internal/gcimporter` 306 · `compress/flate` 106 · `crypto/internal/edwards25519/field` 66 · `os/exec` 43 · `math/rand` 31 · `go/importer` 20 · `debug/buildinfo` 18 · `sort` 16 · `crypto/ed25519` 15 · `net/rpc/jsonrpc` 14 · `expvar` 13 · `flag` 12 · `debug/gosym` 11 · `runtime/debug` 11 · `encoding/csv` 10 · `go/scanner` 10 · `internal/profile` 10 · `mime` 10 · `net/url` 10 · `bufio` 9 · `crypto/rc4` 9 · `debug/plan9obj` 9 · `go/constant` 9 · `internal/coverage/pods` 9 · `internal/diff` 9 · `io` 9 · `math` 9 · `container/list` 8 · `crypto/internal/boring` 8 · `encoding/base64` 8 · `image/color` 8 · `internal/sysinfo` 8 · `os/exec/internal/fdtest` 8 · `text/tabwriter` 8 · `encoding/ascii85` 7 · `math/bits` 7
 
 **X -- fifth engaged machine** (36 rows):

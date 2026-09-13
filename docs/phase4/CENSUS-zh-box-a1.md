@@ -289,7 +289,7 @@ Recorded by the lane at commit time — see the lane report; the coordinator re-
 > Added, not rewritten (§ doc-type rule). §5.1 recorded a toolchain debt: the numbers above were
 > measured on **go1.23.2** against a corpus then pinned to **1.23.1**. That debt is now paid on
 > **go1.23.12** — the pin the corpus re-banked at (`a2e079259`) — on the perf-canon host
-> (GRETCHEN-LAPTOP), converter rebuilt on 1.23.12 and stamp-verified (`go version <exe>` →
+> (G-LAPTOP), converter rebuilt on 1.23.12 and stamp-verified (`go version <exe>` →
 > `go1.23.12`, closing false-green route #4). Wall time **13.2 s** for all three targets, exit 0,
 > empty stderr, nothing emitted.
 

@@ -40,7 +40,7 @@ virtual shape's only measured loss (V5):
 
 Workloads per P-F2 — standard-box-dominant (`Value` read/write and `DerefOrNull`), a field-ref
 hop, mixed-kind at the 90/8/1.5/0.5 ratio through the base type, and the reinterpret/native
-case. Protocol per P-F4 — same machine (GRETCHEN-LAPTOP, Ryzen 5 PRO 6650U), interleaved rounds,
+case. Protocol per P-F4 — same machine (G-LAPTOP, Ryzen 5 PRO 6650U), interleaved rounds,
 N = 12, medians; JIT (CoreCLR 10.0.11, warmed, PGO) and Native AOT published from the same
 source. Noise threshold, stated from the harness's own behavior: cross-**process** medians of the
 same variant swing up to ~8 %, within-run interleaved medians are stable to ~1–3 % — so

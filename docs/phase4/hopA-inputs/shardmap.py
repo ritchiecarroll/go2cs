@@ -57,17 +57,17 @@ print(f"  top-10 sum: {t10sum} s = {100*t10sum/total:.1f}% of total wall")
 # calibration; LANES.md marks historical cross-machine ratios SUSPECT.
 MACHINES = {
     "i9-13900K (sweeper)":       1.00,
-    "6850U R (RITCHIE-LAPTOP)":  0.45,
+    "6850U R (R-LAPTOP)":  0.45,
     "i7-5820K (coordinator)":    0.35,
-    "6650U G (GRETCHEN-LAPTOP)": 0.35,
+    "6650U G (G-LAPTOP)": 0.35,
     "X (5th engaged machine)":   0.35,   # placeholder silicon, placeholder factor
 }
 FLEETS = {
-    3: ["i9-13900K (sweeper)", "6850U R (RITCHIE-LAPTOP)", "i7-5820K (coordinator)"],
-    4: ["i9-13900K (sweeper)", "6850U R (RITCHIE-LAPTOP)", "i7-5820K (coordinator)",
-        "6650U G (GRETCHEN-LAPTOP)"],
-    5: ["i9-13900K (sweeper)", "6850U R (RITCHIE-LAPTOP)", "i7-5820K (coordinator)",
-        "6650U G (GRETCHEN-LAPTOP)", "X (5th engaged machine)"],
+    3: ["i9-13900K (sweeper)", "6850U R (R-LAPTOP)", "i7-5820K (coordinator)"],
+    4: ["i9-13900K (sweeper)", "6850U R (R-LAPTOP)", "i7-5820K (coordinator)",
+        "6650U G (G-LAPTOP)"],
+    5: ["i9-13900K (sweeper)", "6850U R (R-LAPTOP)", "i7-5820K (coordinator)",
+        "6650U G (G-LAPTOP)", "X (5th engaged machine)"],
 }
 
 # The reserved set is TWO ideas, and only one of them is this script's to decide:
@@ -162,11 +162,11 @@ def makespan_with(factors):
 base = makespan_with({})
 print(f"  base (i9=1.00, R=0.45, i7=0.35, G=0.35): {base:.0f} s = {fmt_hm(base)}")
 scenarios = {
-    "slow laptops (R=0.35, G=0.25)": {"6850U R (RITCHIE-LAPTOP)": 0.35, "6650U G (GRETCHEN-LAPTOP)": 0.25},
+    "slow laptops (R=0.35, G=0.25)": {"6850U R (R-LAPTOP)": 0.35, "6650U G (G-LAPTOP)": 0.25},
     "slow coordinator (i7=0.25)":    {"i7-5820K (coordinator)": 0.25},
-    "fast laptops (R=0.55, G=0.45)": {"6850U R (RITCHIE-LAPTOP)": 0.55, "6650U G (GRETCHEN-LAPTOP)": 0.45},
-    "everything slow (R=0.35, i7=0.25, G=0.25)": {"6850U R (RITCHIE-LAPTOP)": 0.35,
-        "i7-5820K (coordinator)": 0.25, "6650U G (GRETCHEN-LAPTOP)": 0.25},
+    "fast laptops (R=0.55, G=0.45)": {"6850U R (R-LAPTOP)": 0.55, "6650U G (G-LAPTOP)": 0.45},
+    "everything slow (R=0.35, i7=0.25, G=0.25)": {"6850U R (R-LAPTOP)": 0.35,
+        "i7-5820K (coordinator)": 0.25, "6650U G (G-LAPTOP)": 0.25},
     "i9 degraded 20% (i9=0.80)":     {"i9-13900K (sweeper)": 0.80},
 }
 for label, f in scenarios.items():
