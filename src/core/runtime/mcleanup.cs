@@ -214,19 +214,28 @@ private sealed class GoCleanupSet
 // cleanup able to run at all.
 private sealed class GoCleanupSentinel
 {
-    private readonly global::System.Action m_body;
+    // NOT readonly, and dropped by Cancel rather than only flagged. The body closes over `arg`, so a
+    // cancelled cleanup that merely set a flag would keep arg alive until the OBJECT died -- Go's
+    // Stop frees its record there and then, and a Stop that silently retains is the wrong half of
+    // that contract. The sentinel shell left behind is two words and dies with the object.
+    private global::System.Action? m_body;
     private volatile bool m_cancelled;
 
     internal GoCleanupSentinel(global::System.Action body) => m_body = body;
 
     ~GoCleanupSentinel()
     {
-        if (m_cancelled)
+        // Read ONCE into a local. Cancel runs on the caller's thread and this runs on the CLR's, so
+        // the flag can turn true between the test and the use; taking the reference first means the
+        // two outcomes are "ran" and "did not run", never a null dereference on the finalizer thread.
+        global::System.Action? body = m_body;
+
+        if (m_cancelled || body is null)
             return;
 
         // HAND OFF, never invoke here -- running a Go body on the CLR finalizer thread is the
         // deadlock GoFinalizerQueue exists to avoid, and it is no less a deadlock for a cleanup.
-        GoFinalizerQueue.EnqueueCleanup(m_body);
+        GoFinalizerQueue.EnqueueCleanup(body);
     }
 
     // ---- the id table, which exists ONLY so Cleanup.Stop can find a sentinel it must not hold ----
@@ -269,6 +278,14 @@ private sealed class GoCleanupSentinel
         if (entry.TryGetTarget(out GoCleanupSentinel? sentinel))
         {
             sentinel.m_cancelled = true;
+            // Release arg NOW, as Go's Stop releases its record now -- see the field's comment.
+            //
+            // The race with ~ resolves to Go's own rule either way, which is why neither side needs
+            // a lock. ~ reads the body into a local BEFORE testing the flag, so: if it got there
+            // first the cleanup is already queued and Stop "has no effect if the cleanup call has
+            // already been queued for execution" -- Go's words, and this is that case; if Cancel got
+            // there first, ~ sees a null body, or the flag, or both, and does nothing.
+            sentinel.m_body = null;
             // Qualified: a bare `GC` binds Go's runtime.GC() in this namespace.
             global::System.GC.SuppressFinalize(sentinel);
         }
