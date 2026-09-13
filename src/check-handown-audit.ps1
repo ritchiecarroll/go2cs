@@ -78,7 +78,8 @@ $script:WorkItemPatterns = @(
     'train\s+\d+',                  # a train seat
     'claude/[A-Za-z0-9._-]+',       # a lane branch
     '#\d+',                         # an issue or PR
-    '\b[0-9a-f]{9,40}\b'            # a commit SHA
+    '\b[0-9a-f]{9,40}\b',           # a commit SHA
+    '\bH\d+[a-z]?\b'                # a ladder rung: a c row's work item may be the hop step that retires it
 )
 
 # Everything the gate prints goes here as well as to the host, so an arm can assert on the REASON a
@@ -378,7 +379,13 @@ function Invoke-SelfTest {
         Invoke-Arm -Name 'a row in the "no .auto emitted" state REFUSES' -Core $core -WantExit 1 -WantText 'A5-no-auto' `
             -Audit (New-Fixture -Rows @($rowOne, ($rowTwo -replace '\| bbbb \| cccc ', '| no .auto emitted | no .auto emitted ')))
 
-        # ARM 10 (MISUSE) -- a census that finds NOTHING exits 2. It must never report a clean audit,
+        # ARM 10 -- a LADDER RUNG is a work item. Added with the pattern rather than after it: an
+        # accepted pattern with no arm is an addition nobody has seen fire, which is the state this
+        # repository audited its own scrub census out of the same day.
+        Invoke-Arm -Name 'class c whose work item is a LADDER RUNG passes' -Core $core -WantExit 0 -WantText 'H6 AUDIT COMPLETE' `
+            -Audit (New-Fixture -Rows @($rowOne, ($rowTwo -replace [regex]::Escape($rowTwoTail), '| c | retired by H5c, owner G |')))
+
+        # ARM 11 (MISUSE) -- a census that finds NOTHING exits 2. It must never report a clean audit,
         # which is the whole reason exit 2 is separate from exit 0.
         $emptyCore = Join-Path $tmp 'empty'
         New-Item -ItemType Directory -Path $emptyCore -Force | Out-Null
@@ -389,11 +396,11 @@ function Invoke-SelfTest {
             Write-Host ("SELF-TEST FAILED: {0} arm(s) failed" -f $script:ArmsFailed)
             return 1
         }
-        if ($script:ArmsPassed -ne 10) {
-            Write-Host ("SELF-TEST FAILED: {0} arm(s) ran, expected 10 -- an arm that quietly stops running is what this count exists to catch" -f $script:ArmsPassed)
+        if ($script:ArmsPassed -ne 11) {
+            Write-Host ("SELF-TEST FAILED: {0} arm(s) ran, expected 11 -- an arm that quietly stops running is what this count exists to catch" -f $script:ArmsPassed)
             return 1
         }
-        Write-Host 'SELF-TEST CLEAN -- 10 arms'
+        Write-Host 'SELF-TEST CLEAN -- 11 arms'
         return 0
     } finally {
         if (Test-Path -LiteralPath $tmp) { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue }
