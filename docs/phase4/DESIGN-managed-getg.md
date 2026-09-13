@@ -469,3 +469,90 @@ Where that leaves the rows:
   `CGO_ENABLED=0`; the tools live in the lane's scratch and are attachable on request. A re-derivation
   at a later tip must reproduce the reconciliation of §2.2 (280 − 13 − 1 = 266 on windows) before any
   number here is quoted from it — a bucket count is re-derived at the tip, never carried.
+
+## 14. AMENDMENT 2026-09-13 (C1) — the finalizer/cleanup DOOR MAP: which door is live, which is retired, and why
+
+Owed by COORD `c58b4c01d` §1 with the `mcleanup.cs` hand-own, and written when that hand-own was cut
+rather than in advance, as ruled.
+
+**⚠ NUMBERED 14, NOT 13, DELIBERATELY.** `## 13` belongs to C1's LockOSThread amendment, which rides
+`dc34e4b4a` on `claude/c1-lockosthread-body` (train 47 row 16) and is on master nowhere. Appending
+this as §13 would have produced a second §13 the moment row 16 landed — the branch-level collision
+this lane had just spent an evening measuring, reproduced in a document. If row 16 is ever dropped
+the file carries a GAP at 13; a gap is cosmetic and a duplicate is not.
+
+### 14.1 The doors, measured at `a02ac3df3` rather than recalled
+
+Re-derive it rather than quoting it — every row below is a converted file that regenerates at each
+release hop, which is why this table names ENCLOSING FUNCTIONS and no line numbers:
+
+```sh
+  for s in createfing queuefinalizer wakefing runfinq EnsureRunner; do
+    grep -rn --include='*.cs' "\b$s\b" src/core | grep -v '\.auto'   # .auto is reference text, not compiled
+  done
+```
+
+| Door | Status | Callers OUTSIDE mfinal.cs |
+|---|---|---|
+| `GoFinalizerQueue.EnsureRunner()` | **LIVE** — starts the one real runner thread | none; reached only through `SetFinalizer` and `createfing` |
+| `createfing()` | **LIVE as of this amendment** — now a one-line forward to `EnsureRunner` | `mcleanup.cs`, in `AddCleanup` — its FIRST caller ever |
+| `goǃ(runfinq)` | **RETIRED** — was `createfing`'s body | none: the call site is gone |
+| `runfinq()` | **RETIRED as a body, LIVE as an IDENTITY** | referenced by `s_runfinq` for `isSystemGoroutine`'s `FuncID_runfinq` classification, never invoked |
+| `queuefinalizer(...)` | **VESTIGIAL** | `{darwin,linux,windows}/mheap.cs`, in `freeSpecial` — itself called only from `mgcsweep.cs` |
+| `wakefing()` | **VESTIGIAL** | `{darwin,linux,windows}/proc.cs`, in `findRunnable` |
+
+### 14.2 The distinction that makes "no caller" a meaningful claim
+
+`createfing` having no caller was load-bearing: it is why a door starting a body that dies in `gopark`
+sat harmlessly in the tree for months. `queuefinalizer` and `wakefing` each have THREE callers and
+that is not a contradiction of the same claim — **they are statically reachable and dynamically
+dead.** Both callers live inside converted machinery this port does not drive: `freeSpecial` is
+reached only from Go's own sweeper (`mgcsweep.cs`), and `wakefing` only from Go's own scheduler
+(`findRunnable`). A goroutine here is a managed thread and the CLR owns collection, so neither
+sweeper nor scheduler is ever entered.
+
+So the retirement predicate is **"is this door reached by a path the port actually executes"**, and
+answering it needs the caller's caller. A grep for direct callers answers a narrower question and,
+on exactly these two symbols, answers it in the reassuring direction.
+
+### 14.3 ⚠ ONE INTERACTION THIS CREATES, STATED AS A READING AND NOT AS A BUG
+
+`fingStatus` is now WRITTEN by the live runner — `EnsureRunner` sets `fingCreated`, `Enqueue` sets
+`fingWake`, `Run` sets and clears `fingWait` — and it is READ by `findRunnable`, which on seeing
+`fingWait|fingWake` calls `wakefing()`. `wakefing` CASes those bits away and returns the CONVERTED
+`fing`, which nothing assigns and which is therefore nil; the caller's `!= nil` guard then does
+nothing. The net effect, IF that path ever ran, would be a third party clearing the live runner's
+wait/wake bits.
+
+It is inert today for §14.2's reason, and it is recorded because the flag word only became shared
+when the live runner started maintaining it (`654e1bd29`) — before that, every write sat inside the
+vestigial machinery and there was nothing to interfere with. **Anyone who makes the converted
+scheduler live must re-read this before believing the finalizer queue.**
+
+### 14.4 Registration and dispatch, after the cleanup hand-own
+
+Two registration doors, one dispatch path:
+
+```
+  SetFinalizer(obj, fn) ──► GoFinalizerSentinel   ──┐   (holds the OBJECT: the finalizer is
+                            keyed on ReferentOf     │    invoked WITH it, resurrected for the call)
+                                                    ├──► GoFinalizerQueue ──► the fing thread
+  AddCleanup(ptr, fn, arg) ─► GoCleanupSentinel   ──┘        one queue, TWO ENTRY KINDS
+                              keyed on ReferentOf,
+                              holds the BODY ONLY
+```
+
+The asymmetry is the whole design and it runs in the opposite direction to intuition: the finalizer
+sentinel MAY hold its target (a dependent handle tolerates the value→key cycle, and Go requires the
+object to be passed to the body), while a cleanup sentinel MUST NOT — a cleanup is never handed the
+object, and holding it is the one thing that would stop the cleanup ever running. The same rule is
+why `Cleanup.Stop` resolves an `id` through a weak entry instead of the handle carrying its sentinel:
+a struct a program keeps in order to cancel later would otherwise pin the cleanup it means to cancel.
+
+### 14.5 What this section does not settle
+
+Whether `runtime.AddCleanup` reaches a Phase-4 row is a census item for the H10 eligibility read, per
+the ruling, and is not answered here. Nor is the ordering Go specifies between a cleanup and a
+finalizer on the same object (`c58b4c01d` acceptance; divergence 2 in `mcleanup.cs`'s header) — two
+.NET finalizers cannot be ordered against each other, and that is stated at the site rather than
+carried as an open item.
