@@ -251,7 +251,7 @@ You own the runtime hand-own re-derives and their appliers. Every C# reading you
 os-matrix census workflow; GolibTests and go2cs.slnx are built by no workflow you can run.
 STATE BLOCK (C1, 2026-09-13 15:39; push sweep: 13 of 13 branches already on origin at identical SHAs):
   LANE: C1   MODEL: Opus 5/high   HOST: C1 (linux container, no .NET SDK)
-  BRANCH: claude/c1-h5-rederive-patch 2c884157167bb60e276b485acc43e760bd17719a yes accepted -- the C1-1 H5 re-derive applier, 16 arms; ran on i9's real post-H5c root, cleared all seven sites, 120->100
+  BRANCH: claude/c1-h5-rederive-patch ff54907996fb2c7833b56e3608b878bdb467dc33 yes accepted -- C1-1 + C1-2 (amended 54ce45d9b) + C1-2b; VERSION-BRANCH ONLY (red converter guard at master by design); tip per cf06dafee (was 2c8841571 at 7d3734a84)
   BRANCH: claude/c1-mcleanup-handown 23d07f74260f96e88186bd3e14bc48812ad357b2 yes accepted -- mcleanup.cs hand-own + createfing rewire; train 48; census 306/306, both corpus flavours compile
   BRANCH: claude/c1-token-door-census ad19af72b4cd964b5ee32db1f9bfbcc3e60625ba yes accepted -- token-door census (7 wrappers, 1 reached 6 latent) + the TestGetStartupInfo stale-bank record
   BRANCH: claude/c1-seat-duplication-census a4802675d4cc6e7a1843c309af30362cc9cd7dbb yes accepted -- patch-id seat census, SHA-first split, 8 arms
@@ -268,16 +268,38 @@ STATE BLOCK (C1, 2026-09-13 15:39; push sweep: 13 of 13 branches already on orig
   WORKTREE: C1 home /go2cs claude/c1-h5-rederive-patch 0 clean at the pushed tip
   WORKTREE: C1 home /c1-armA detached 2e6cf71e4 0 reachable from origin/claude/c1-board-goroot
   WORKTREE: C1 home /c1-armB detached 449ecce7a 0 reachable from origin/claude/g-generic-alias-recut
-  NEXT: post the C1-2 member-bill sizing (measured, unposted at 15:39) then cut the runtime2.cs re-derive, starting from 2c884157167bb60e276b485acc43e760bd17719a
-  READ-FIRST: mailbox 0687402db (i9 rung result), f633ad759 (the C1-2 assignment), a2b892aef + 3ea7c0e38 (C2 on the gate), a50d4f8c1 (i9 on the applier); docs/phase4/PATCH-h5-c1-1-runtime-rederives.md; docs/phase4/CENSUS-token-door-live-wrappers.md
-  BLOCKED-ON: none (the dotnet builds host allowlist is an owner hand that would let this lane build; structural otherwise)
+  NEXT: nothing owed. The three H5 pieces are delivered, announced, read back and measured by i9
+        (build 100 -> 4 -> 0, join SHIFTED 14 -> 0, all three tables at 44 from the CLR). The one open
+        C1 item is to carry ff54907996 onto version-go1.24.13 when COORD creates it at the landing, and
+        to re-run `go test -count=1 ./...` in src/go2cs THERE to see that guard go green.
+  (delta applied from mailbox cf06dafee)
+  READ-FIRST: mailbox 8be44bbc0a (C1-2b ruling) 486a3926a (the explicit-length amendment) b3a32e52d +
+        82de2fc7c (the corrected bill) ; i9 c2b26c50b (pre-cut baseline) 9457d56c0 (CLR readings)
+        8c0f26247 + f036d552f (C1-2b verified, three flavours) ; C2 c441e195a (the .array bound)
+        71bbb81c3 (corpus census + marker retraction) ; docs/phase4/PATCH-h5-c1-2-runtime2-member-bill.md
+        and docs/phase4/PATCH-h5-c1-1-runtime-rederives.md
+  (delta applied from mailbox cf06dafee)
+  BLOCKED-ON: nothing blocking. version-go1.24.13 does not exist yet and that is COORD's to create.
+  (delta applied from mailbox cf06dafee)
   TOOLS: python3 3.11 on PATH (the applier's H5_PYTHON override exists for lanes without the name); GOROOT go1.24.7 (also 1.25.1 present), neither pin -- 1.23.12 and 1.24.13 are fetched from source tags when needed; GOTOOLCHAIN unset; DOTNET_ROOT none
 OPEN ACCEPTANCE (C1, gate-family decision, COORD's): CleanupDispatchTests' five arms on claude/c1-mcleanup-handown are written and unrunnable by any standing gate (GolibTests and go2cs.slnx are built by no workflow).
 HELD RIDERS: seven small measured results in a C1 scratch file, ordered posted as ONE mailbox entry (COORD, save-state) so they survive the container.
 NEXT (ruled f633ad759): C1-2 -- size the runtime2.cs 1.24.13 member bill (read the bodies at 1.24.13 first), then cut it as a hop-conditional applier after C1-1 (self-test: pre-C1-1 tree refuses; unpatched tree fails --verify naming members; idempotent); announce-then-push; i9 runs it.
 PROTOCOL: as COORD's section.
 ```
-WAKE (C1, derived from its trailers; C1 confirms or corrects): re-create on resume, UNCONDITIONALLY -- a Monitor on the mailbox tip (65 s) and three wake triggers (20 min cadence); the trigger ids in C1's posts are this session's and are dead to any other.
+WAKE (C1, verbatim from cf06dafee):
+  WAKE: three claude-code-remote ROUTINES (create_trigger), NOT CronCreate jobs --
+        trig_01HwSpTYDdZqjtJLpMBGCRKU `5 * * * *` / trig_01KfDoqdbnUk8A7MmviVogwn `25 * * * *` /
+        trig_01Qd573JaByefkopyckGzhX1 `45 * * * *`, all enabled, all last run SUCCEEDED, all
+        persistent_session_id-bound to THIS session = 20-minute cadence at 5/25/45. Read off
+        list_triggers on this box, confirming C2's 77f2d31f8 reading rather than taking it.
+        PLUS one CronCreate job 86a41926 at */17 added 21:25Z, so CronList on this lane is NOT empty
+        any more -- C2's forecast that it would read "No scheduled jobs" here was true until then and
+        the underlying point stands: CronList never enumerates Routines, so on this lane it answers a
+        different population either way.
+        IDS ARE AUDIT-ONLY. RECIPE on resume, UNCONDITIONAL and never gated on a check (i9's
+        refinement): create three Routines at 5/25/45 bound to the NEW session with the C1 WAKE TICK
+        prompt, plus one mailbox-tip Monitor.
 
 ## 4. C2 — instruments and designs (cloud) — STATE BLOCK received 20:49 (mailbox d198239b4)
 
@@ -387,3 +409,4 @@ PROTOCOL: as COORD's section.
 - 2026-09-13 15:55 — C1 (7d3734a84), G (f96225ea), i9 (29419cf30), C2 (d198239b4) blocks folded verbatim by fold-block.py; verifier gained landed-and-pruned and declared-local classes.
 - 2026-09-13 16:18 — session-bound ids rule (§0) + WAKE lines for i9 and C2; accepted-loss wording amended (686 unique blobs, all intermediate states).
 - 2026-09-13 17:15 — i9 block delta (NEXT / READ-FIRST / BLOCKED-ON) applied from 839a8d926; the rung is measured and idle.
+- 2026-09-13 17:18 — C1 block delta (NEXT / READ-FIRST / BLOCKED-ON / WAKE verbatim; c1-h5-rederive-patch tip) applied from cf06dafee.
