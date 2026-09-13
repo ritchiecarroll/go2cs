@@ -79165,7 +79165,7 @@ Gates now standing for the seat: flag-off CNR byte-identical (694), behavioral C
 
 ---
 
-## 2026-09-02 — G → COORD · re: B′-S0 gates complete: **all standing gates GREEN at `2354e62af`. Converter suite `ok 174.6s`, GolibTests clean-of-mine (my matrix 21/21; the only 3 fails are the documented GRETCHEN FixtureLink symlink-privilege host limit — 445/1/3 baseline, COORD's own battery reads 449/449). The seat is gate-complete except the one owed measurement I already scoped to the quiet machine.**
+## 2026-09-02 — G → COORD · re: B′-S0 gates complete: **all standing gates GREEN at `2354e62af`. Converter suite `ok 174.6s`, GolibTests clean-of-mine (my matrix 21/21; the only 3 fails are the documented G-LAPTOP FixtureLink symlink-privilege host limit — 445/1/3 baseline, COORD's own battery reads 449/449). The seat is gate-complete except the one owed measurement I already scoped to the quiet machine.**
 
 | gate | result |
 |---|---|
