@@ -68,6 +68,27 @@ param(
     # large rows repeatedly. Substring stays the interactive default, unchanged.
     [switch] $Exact,
     [switch] $IgnoreDiskPreflight,
+    # RELEASE-HOP RE-DERIVATION (H10), coordinator ruling 2026-09-13. At a hop the corpus moves to a
+    # release whose counts nobody has banked, so this gate's central comparison -- a measured count
+    # against a banked floor -- has nothing true to say: Go adds and removes tests between releases,
+    # so a count BELOW its floor is not a lost verdict and a count ABOVE it is not an unexplained
+    # gain. -Hop replaces that ONE comparison with a RECORD, and changes nothing else.
+    #
+    # ⚠ It is NOT an amnesty, and that distinction is the whole design. Everything that is not a count
+    # comparison still fails exactly as it did: a build error, a host death, an empty results file, a
+    # deadline kill, an infrastructure-blocked package, an oracle-unstable row, the disk floor -- and
+    # the toolchain pin. The pin especially: -Hop does NOT touch it, because the guard's own throw
+    # already names the hop path ("or, if the corpus is deliberately moving to $runningRelease, bump
+    # `<GoStdLibVersion>` in version.props first"). H2 is therefore this mode's PRECONDITION, and a
+    # -Hop run attempted before H2 refuses on that unmodified guard, correctly.
+    #
+    # Two further properties, each ruled rather than chosen here:
+    #   * the row population is the census SKELETON, not the banked roster (Get-HopSkeletonRows)
+    #   * "ran and produced counts" and "ran here, and there are no eligible tests" are TWO WORDS in
+    #     the record, decided by what the run PRODUCED and never by a table -- because the incoming
+    #     release's `n/a` annotations are DERIVED from the second word, and a broken row that
+    #     annotated itself platform-exclusive would poison that derivation at its source
+    [switch] $Hop,
     # Sweep-wide A/B measurement (docs/phase4 tiering/configuration census), 2026-09-02: generalized
     # from the old blanket -ReleaseTC0 switch to mirror the pipeline's own -test-config/-test-tiered
     # (the SAME flags -- Get-RosterExecutionArgs and this pair now emit identical argument shapes for
@@ -163,10 +184,16 @@ Write-Host "  CGO_ENABLED=0 pinned for the whole run (was '$priorSweepCgo') -- t
 $src = $SrcRoot
 $repo = $RepoRoot
 $table = Join-Path $repo 'docs/ValidatedTestPackages.md'
+# The -Hop row population. A separate path rather than a re-pointed $table, because the two files are
+# different KINDS: the roster is the record of what is banked, the skeleton the record of what is
+# ELIGIBLE at the incoming release. -Hop reads the second and writes nothing; the roster stays the
+# single source of truth for banked counts, and H10 banks into it from a hop run's record.
+$hopSkeleton = Join-Path $repo 'docs/phase4/CENSUS-h10-eligibility-go124.md'
 $exe = $Go2csExe
 $goroot = (& go env GOROOT).Trim()
 
 if (-not (Test-Path $table)) { throw "Cannot find the validated-package table at $table" }
+if ($Hop -and -not (Test-Path $hopSkeleton)) { throw "Cannot find the H10 eligibility census at $hopSkeleton" }
 if (-not $goroot) { throw 'Could not resolve GOROOT -- is the Go toolchain on PATH?' }
 
 # ---- toolchain pin ------------------------------------------------------------------------------
@@ -232,7 +259,13 @@ if ($pinnedRelease -and $goversion) {
 # The parsing itself lives in src\_roster.ps1, dot-sourced above, for one reason: the per-OS
 # annotation is a rule with an arithmetic consequence, and a rule with a consequence needs a guard
 # that can exercise it without running this multi-hour gate. That guard is src\check-roster-format.ps1.
-$rows = Get-ValidatedRosterRows -Path $table
+#
+# Under -Hop the SOURCE switches and nothing else about the row pipeline does: Get-HopSkeletonRows
+# returns the same property shape, so Filter/Exact, the sharding, the invocation and every verdict
+# path below read a hop row exactly as they read a roster row. The roster is not consulted at all on
+# a hop run -- it holds the OUTGOING release's counts, and comparing against those is the one thing
+# this mode exists to stop doing.
+$rows = if ($Hop) { Get-HopSkeletonRows -Path $hopSkeleton } else { Get-ValidatedRosterRows -Path $table }
 
 if ($Filter) {
     $rows = if ($Exact) { $rows | Where-Object { $_.Package -eq $Filter } }
@@ -241,7 +274,10 @@ if ($Filter) {
 # @() so a single match stays an array -- PowerShell unwraps a one-element pipeline to a scalar,
 # which has no .Count and would print a blank package count.
 $rows = @($rows)
-if (-not $rows) { throw "No banked packages matched$(if ($Filter) { " filter '$Filter'" })." }
+if (-not $rows) {
+    $population = if ($Hop) { 'eligible packages (hop skeleton)' } else { 'banked packages' }
+    throw "No $population matched$(if ($Filter) { " filter '$Filter'" })."
+}
 
 # ---- the OS dimension ----------------------------------------------------------------------------
 # A verdict count is a fact about (package, OS): Go itself runs a different test set per GOOS, so
@@ -255,8 +291,19 @@ if (-not $rows) { throw "No banked packages matched$(if ($Filter) { " filter '$F
 $targetGoos = Get-SweepTargetGoos
 
 foreach ($row in $rows) {
-    Add-Member -InputObject $row -NotePropertyName 'Effective' -Force `
-        -NotePropertyValue (Get-RosterRowExpectation -Row $row -Goos $targetGoos)
+    # A hop row has no expectation to resolve, in EITHER direction: no columns (the skeleton's counts
+    # are blank by design) and no per-OS annotation (it carries none at the incoming release -- those
+    # annotations are what a hop run's record lets H10 derive). So Get-RosterRowExpectation is not
+    # consulted; the row is given an expectation that is honest about being absent, and Applicable is
+    # TRUE because eligibility here is decided by what the run produces, never by a table cell.
+    $effective = if ($Hop) {
+        [PSCustomObject]@{ Expected = $null; Disclosed = $null; Applicable = $true; Source = 'hop' }
+    }
+    else {
+        Get-RosterRowExpectation -Row $row -Goos $targetGoos
+    }
+
+    Add-Member -InputObject $row -NotePropertyName 'Effective' -Force -NotePropertyValue $effective
 }
 
 # A row annotated `<goos>: n/a` cannot exist on this OS (ruled 2026-08-29, the registry row):
@@ -304,12 +351,32 @@ $sweepConfigOverride = $PSBoundParameters.ContainsKey('TestConfig') -or
                        $PSBoundParameters.ContainsKey('TestTiered')
 $sweepConfigLabel = if ($TestConfig -eq 'Release' -and $TestTiered) { 'Release (tiered)' } else { $TestConfig }
 
-$expectedTotal = ($rows | ForEach-Object { $_.Effective.Expected } | Measure-Object -Sum).Sum
+# Not computed on a hop run: every Effective.Expected is $null there, so the sum is meaningless, and
+# summing nulls under $ErrorActionPreference='Stop' is a risk taken for a number the hop header does
+# not print anyway.
+$expectedTotal = if ($Hop) { 0 } else { ($rows | ForEach-Object { $_.Effective.Expected } | Measure-Object -Sum).Sum }
 # test-config printed UNCONDITIONALLY, even at the Debug default -- the same reasoning the pipeline's
 # own comparison-record field was given (not omitempty): a reader must never assume Debug by absence,
 # and "no log can be read without knowing which configuration produced it" is the point of this row.
-Write-Host ("validated sweep: $($rows.Count) package(s), $expectedTotal expected verdicts, " +
-    "timeout $TestTimeout, test-config $sweepConfigLabel") -ForegroundColor Cyan
+#
+# On a hop run the expected total is 0 BY CONSTRUCTION, and printing "0 expected verdicts" beside a
+# 227-row population would read like a roster that had lost its counts. The hop header says what the
+# run is instead, including how many of its rows arrive carrying a predecessor.
+if ($Hop) {
+    $receivingRows = @($rows | Where-Object { $_.Receives })
+    Write-Host ("HOP re-derivation: $($rows.Count) eligible package(s) from the census skeleton, " +
+        "NO banked expectation in force, timeout $TestTimeout, test-config $sweepConfigLabel") -ForegroundColor Magenta
+    Write-Host ('  every row records what it measures; nothing is compared against a floor. Everything ' +
+        'that is not a count comparison still fails: build, host death, empty results, deadline, pin.') -ForegroundColor DarkGray
+    if ($receivingRows.Count -gt 0) {
+        Write-Host ("  $($receivingRows.Count) row(s) RECEIVE a relocated predecessor; its banked count travels " +
+            'into the record as provenance and is never an expectation (the census: "no count is carried")') -ForegroundColor DarkGray
+    }
+}
+else {
+    Write-Host ("validated sweep: $($rows.Count) package(s), $expectedTotal expected verdicts, " +
+        "timeout $TestTimeout, test-config $sweepConfigLabel") -ForegroundColor Cyan
+}
 
 # Announced only when the run actually carries one, so a sweep over default-path rows prints exactly
 # what it always printed. The sweep-wide override is announced separately below because it is not a
@@ -324,7 +391,10 @@ if ($sweepConfigOverride) {
         'an A/B measurement, not a bank-eligible sweep') -ForegroundColor Yellow
 }
 
-if ($targetGoos -ne 'windows') {
+# Not printed on a hop run: every row's Source is 'hop', so this line would report "0 row(s) carry a
+# <goos> expectation" and then promise comparison-validated-at-count, which is the OTHER reason for a
+# missing expectation and not this one. The hop header above says which reason is in force.
+if ($targetGoos -ne 'windows' -and -not $Hop) {
     $annotatedCount = @($rows | Where-Object { $_.Effective.Source -ne 'columns' }).Count
     Write-Host ("  target OS $targetGoos -- $annotatedCount row(s) carry a $targetGoos expectation; " +
         "$($rows.Count - $annotatedCount) fall back to the windows columns and report " +
@@ -349,11 +419,56 @@ if (-not (Test-Path $exe)) { throw "Converter not built: $exe" }
 # (CS2012, "the process cannot access the file"), which reads as a package failure but is not one.
 $env:MSBUILDDISABLENODEREUSE = '1'
 $pass = 0; $fail = 0; $failed = @(); $started = Get-Date
+# PER-ROW WALL TIMES, as a first-class machine-readable output rather than a log line to be scraped
+# (coordinator ruling 2026-09-13, P4). The number itself is not new -- every verdict line has printed
+# `[NNNs]` since 4e91a03e2 -- but a `[NNNs]` inside a coloured console line is only a cost proxy for
+# whoever still has the log, and runbook §3.2 is explicit that this is unrecoverable afterward: "per-row
+# log retention on the preceding consolidation sweep is a prerequisite of the next migration's shard
+# map, and is unrecoverable afterward. Make it an obligation of that sweep, not of this step."
+#
+# Measured cost of not having done it: of the roster's rows only the 162 in the first fenced block of
+# docs/phase4/DATA-sweep-row-walltimes.md carry a t_r at all, and the shard-map generator hard-asserts
+# that 162 -- every row without a t_r is a row an LPT-greedy assignment cannot order. Written on EVERY
+# run, not only hop runs, because the sweep that needs retaining is the ordinary consolidation sweep
+# that precedes a hop, and a file only a hop writes would arrive one migration too late.
+$rowTimings = New-Object System.Collections.Generic.List[object]
 # The third bucket, and it exists only off Windows: a row whose comparison VALIDATED at a count this
 # OS has no annotation for. Neither a pass (nothing is banked for it here) nor a silent failure --
 # reported by name and summarized apart, the same shape BehavioralRunner's NOT MEASURED takes, and
 # it still exits non-zero for the same reason: an unbanked count must never read as a green gate.
 $cvac = 0; $cvacRows = @()
+# ---- the -Hop buckets (coordinator ruling 2026-09-13) --------------------------------------------
+# A DISTINCT word from CVAC with its OWN counter, ruled rather than shared, and the reason is that the
+# two absences mean different things to whoever reads a mixed log or derives an annotation from it:
+#
+#   CVAC   no expectation for THIS OS       -- the roster HAS a row; this platform has no annotation
+#   HOP    no expectation at THIS RELEASE   -- the corpus moved; nothing is banked for any platform
+#
+# Same shape, same retires-as-annotations-land semantics, and the totals line prints them SIDE BY SIDE
+# rather than folded, so neither reason can be read as the other.
+#
+# ⚠ ONE DELIBERATE DIFFERENCE FROM CVAC, and it is the one place this cut departs from the ruling's
+# literal wording -- flagged here, announced in the landing post, and trivially reversible by deleting
+# the -not $Hop in the exit arm below. The ruling said "same non-failing semantics as CVAC", on my own
+# report that CVAC was already non-failing. IT IS NOT: `if ($cvac) { exit 1 }` at the foot of this
+# script, plus a red summary line, and its own comment states the reasoning -- "an unbanked count is
+# not a green gate". That reasoning is exactly right for a GATE, which is what this script is when it
+# sweeps the roster. A hop run is not a gate, it is a DERIVATION: every one of its rows is unbanked by
+# construction, so inheriting CVAC's exit arm would make -Hop exit 1 unconditionally, and an exit code
+# that cannot vary cannot tell a caller that the derivation broke. So $hop does NOT gate the exit,
+# while $fail and $unstable still do -- honouring the ruling's INTENT (non-failing) rather than its
+# wording (which describes a CVAC that does fail).
+$hop = 0; $hopRows = @()
+# The SECOND word the ruling requires, and the reason it is separate from $hop rather than a flavour of
+# it: the incoming release's `n/a` annotations are DERIVED from this bucket, so "there are no eligible
+# tests for this package here" must never be reachable by a row that merely failed to produce counts.
+# It is decided by what the run PRODUCED -- the pipeline's own "No eligible Go tests for the requested
+# target." line, cross-checked against the comparison record it writes beside it (status
+# `not-applicable`) -- and a row whose two signals DISAGREE is a FAIL naming the disagreement, never a
+# silent choice between them. Its sibling state, `infrastructure-blocked`, returns an ERROR from the
+# pipeline and therefore stays a FAIL, which is the distinction that keeps a capability-blocked package
+# out of this bucket.
+$hopNoTests = 0; $hopNoTestsRows = @()
 # Rows that passed as HOST-LIMITED: validated, and at a count smaller than the roster's because a
 # committed `host-limit` disclosure accounts for a block this host provably cannot produce. They
 # count as passes -- nothing regressed -- but a full sweep must not report their banked verdicts as
@@ -546,6 +661,54 @@ function Get-DisclosedCount {
     if ($match) { return [int]$match.Matches[0].Groups[1].Value }
 
     return 0
+}
+
+# THE SECOND HOP WORD's predicate: did this row run and find NO ELIGIBLE TESTS, as opposed to failing
+# to produce counts? Only a positive answer from the INSTRUMENT counts, never a reading of a log tail,
+# because the incoming release's `n/a` annotations are derived from this answer and a broken row
+# annotating itself platform-exclusive would poison that derivation at its source.
+#
+# TWO required signals, both written by the pipeline on the same success path
+# (testConversion.go: !manifestHasEligibleTests -> write the record, print the line, return nil):
+#   * the line "No eligible Go tests for the requested target." on stdout
+#   * a comparison record whose status is `not-applicable`
+#
+# ⚠ Their DISAGREEMENT is a refusal, not a coin toss, and it is reported rather than swallowed: one
+# signal without the other means either a stale record from a previous run of this package or output
+# that did not come from the path that writes it, and both are reasons to let the row fail loudly. The
+# sibling state this predicate must never admit is `infrastructure-blocked`, which the pipeline returns
+# as an ERROR with a record whose status differs -- so a capability-blocked package fails, by the
+# instrument's own distinction and not by this script's judgement.
+function Test-HopRowHasNoEligibleTests {
+    param($Output, [string] $OutDir)
+
+    $saidSo = @($Output | Select-String -SimpleMatch 'No eligible Go tests for the requested target.').Count -gt 0
+
+    $recordSaysSo = $false
+    $recordStatus = '<no record>'
+    $comparisonPath = Join-Path $OutDir 'go2cs_test_comparison.json'
+
+    if (Test-Path $comparisonPath) {
+        try {
+            $record = Get-Content -LiteralPath $comparisonPath -Raw | ConvertFrom-Json
+            if ($record.PSObject.Properties['status']) { $recordStatus = [string]$record.status }
+            $recordSaysSo = ($recordStatus -eq 'not-applicable')
+        }
+        catch {
+            # An unreadable record is not a no-eligible-tests answer. Say which, and refuse.
+            $recordStatus = "<unreadable: $($_.Exception.Message)>"
+        }
+    }
+
+    if ($saidSo -and $recordSaysSo) { return $true }
+
+    if ($saidSo -or $recordSaysSo) {
+        Write-Host ('        no-eligible-tests check REFUSED -- the two signals disagree: output ' +
+            "said-so=$saidSo, comparison record status='$recordStatus'. One without the other is a " +
+            'stale or foreign record, so this row fails rather than deriving an n/a annotation.') -ForegroundColor DarkYellow
+    }
+
+    return $false
 }
 
 # Reads the two evidence artifacts the delta check needs -- the run's own comparison record and
@@ -1129,10 +1292,22 @@ foreach ($row in $rows) {
         # materializing on a more-capable host -- consulted only when the plain classification is
         # not already a pass, since it costs a comparison-record read and a git show. Anything
         # unprovable falls through to the same failure as before, with the rejection reason attached.
-        $class = Get-SweepRowClassification -Expectation $row.Effective -Got $got -GotDisclosed $gotDisclosed -TargetGoos $targetGoos
+        #
+        # ⚠ On a hop run the classification is not CONSULTED, and that is a deliberate bypass rather
+        # than a new arm inside the pure rule. Two reasons. (1) Correctness: with Expected $null the
+        # rule would fall through `$Got -eq $Expectation.Expected` and answer 'unbanked-count' off
+        # Windows and 'count' on Windows -- CVAC's word for the wrong reason on one platform and a
+        # false FAIL on the other, for every row. (2) Scope: Get-SweepRowClassification is guarded by
+        # check-roster-format.ps1, and a new arm there is a rule that needs its own fixtures; the hop
+        # answer needs no rule, because there is nothing to compare. The three absorption arms below
+        # are skipped with it -- each exists to excuse a count DELTA against a floor, and a row with
+        # no floor has no delta to excuse. They also cost a comparison-record read and a git show per
+        # row, which on 227 rows would buy nothing.
+        $class = if ($Hop) { 'hop' }
+                 else { Get-SweepRowClassification -Expectation $row.Effective -Got $got -GotDisclosed $gotDisclosed -TargetGoos $targetGoos }
         $hostConditional = $null
 
-        if ($class -ne 'pass' -and $row.Conditional.Count -gt 0) {
+        if (-not $Hop -and $class -ne 'pass' -and $row.Conditional.Count -gt 0) {
             $hostConditional = Get-HostConditionalVerdict -Row $row -Got $got -OutDir $outDir
 
             if ($hostConditional.Accepted) {
@@ -1162,7 +1337,12 @@ foreach ($row in $rows) {
         # as the surplus check above.
         $capabilityAbsent = $null
         $hostLimit = $null
-        if ($class -ne 'pass' -and $capabilityConditionalBlocks.ContainsKey($pkg)) {
+        # -not $Hop, explicitly: this arm's guard is `$class -ne 'pass'`, and 'hop' is not 'pass', so a
+        # registered package (crypto/tls) would otherwise reach the capability-absent and host-limit
+        # probes on a hop run and try to excuse a shortfall against a floor that does not exist. The
+        # disclosed-moved arm above needs no such guard -- its own `$class -eq 'disclosed-moved'` is
+        # already unreachable from 'hop'.
+        if (-not $Hop -and $class -ne 'pass' -and $capabilityConditionalBlocks.ContainsKey($pkg)) {
             $rowBlock = $capabilityConditionalBlocks[$pkg]
             $capabilityAbsent = Get-CapabilityAbsentVerdict -Row $row -Got $got -OutDir $outDir -Block $rowBlock
 
@@ -1225,6 +1405,31 @@ foreach ($row in $rows) {
                 $cvac++; $cvacRows += "$pkg (count $got, windows column $($row.Expected))"
                 Write-Host "  CVAC  $label $got (validated; no $targetGoos expectation, windows column $($row.Expected)) [${rowSecs}s]" -ForegroundColor Cyan
             }
+            'hop' {
+                # HOP: the comparison reached "Validated N" -- the converter prints that line only
+                # after matching every verdict, so the two runtimes agreed row for row -- and there is
+                # no expectation at this release to weigh N against. The record IS the deliverable:
+                # this line, and the per-row TSV below, are what H10 banks into the roster.
+                #
+                # Its own counter, never folded into $cvac: CVAC means "no expectation for this OS",
+                # this means "no expectation at this release", and a reader of a mixed log must be able
+                # to tell which absence applied per row. It does not gate the exit (see $hop's
+                # declaration for the reasoning, and the exit arms at the foot).
+                #
+                # A RECEIVED predecessor is printed as provenance and nothing is compared against it:
+                # the census's own ruling is that a relocated row re-banks from zero. Printing it is
+                # what stops the record reading as though 20 verdicts for these tests had never been
+                # banked under another name.
+                $hop++
+                if ($row.Receives) {
+                    $hopRows += "$pkg (count $got, disclosed $gotDisclosed; receives $($row.Receives))"
+                    Write-Host "  HOP   $label $got (measured; no expectation at this release; receives $($row.Receives)) [${rowSecs}s]" -ForegroundColor Magenta
+                }
+                else {
+                    $hopRows += "$pkg (count $got, disclosed $gotDisclosed)"
+                    Write-Host "  HOP   $label $got (measured; no expectation at this release) [${rowSecs}s]" -ForegroundColor Magenta
+                }
+            }
             'disclosed-moved' {
                 # An annotated row whose matching count agreed and whose DISCLOSED count did not.
                 # Named as itself rather than mis-reported as a count failure.
@@ -1276,6 +1481,32 @@ foreach ($row in $rows) {
         Write-Host "  ORACLE $label oracle unstable on this host -- two oracle-only runs, no converted-side failure in either [${rowSecs}s]" -ForegroundColor Red
         Write-Host "        both runs' evidence preserved under $oracleEvidenceRoot" -ForegroundColor DarkGray
     }
+    elseif ($Hop -and (Test-HopRowHasNoEligibleTests -Output $out -OutDir $outDir)) {
+        # THE SECOND HOP WORD. The row ran, the pipeline reported that this package has no eligible Go
+        # tests for the target, and it said so the way it says so on SUCCESS: the line below plus a
+        # comparison record whose status is `not-applicable`. That pair is the derivation of an
+        # `<goos>: n/a` annotation at the incoming release -- which is why it may never be reachable by
+        # a row that merely produced no counts. Both signals are required and their disagreement is a
+        # FAIL, inside the predicate.
+        #
+        # NOT a pass: nothing was measured here, and it must never read as a re-validated row. Not a
+        # failure either, and this is the one place where saying so is a positive measurement rather
+        # than an absence: the pipeline's own capability-blocked sibling state returns an ERROR and
+        # lands in the FAIL arm below, so "no eligible tests" is distinguished from "blocked" by the
+        # instrument, not by this script's reading of a log tail.
+        #
+        # ⚠ REACHABILITY, because it depends on another rule and is not obvious from here: a row with
+        # no verdict line passes through the ORACLE RE-RUN ARM above first, and that arm would double
+        # this row's cost -- and then take it away with an 'oracle unstable' verdict on the second
+        # empty run -- if it accepted an empty divergence set as "every divergence was Go=fail/C#=pass"
+        # (vacuously true). It does not: Test-OracleOnlyFailure refuses any record whose status is not
+        # 'failing', and a no-eligible-tests record's status is 'not-applicable', so the rule answers
+        # NO with that reason and no re-run happens. This arm is reachable BECAUSE of that guard; if it
+        # is ever relaxed, this arm must move ahead of the re-run rather than behind it.
+        $hopNoTests++
+        $hopNoTestsRows += "$pkg (ran; no eligible tests for $targetGoos)"
+        Write-Host "  HOPNONE $label ran here; NO eligible tests for $targetGoos -- derives a '${targetGoos}: n/a' annotation [${rowSecs}s]" -ForegroundColor DarkCyan
+    }
     else {
         $fail++; $failed += $pkg
         Write-Host "  FAIL  $label [${rowSecs}s]" -ForegroundColor Red
@@ -1285,6 +1516,18 @@ foreach ($row in $rows) {
         # divergence each say something different about what this row just did.
         if ($oracleReason) { Write-Host "        oracle-only check: $oracleReason" -ForegroundColor DarkGray }
     }
+
+    # One record per row, taken here rather than inside each verdict arm so no arm can be added later
+    # that forgets to contribute -- the loop body cannot reach its own end without passing this line.
+    # $rowSecs is the SWEEP's wall clock for the row (convert + build + both hosts + compare), and
+    # after an oracle re-run it is attempt 2's, matching the verdict that was printed.
+    $rowCountForTiming = $null
+    if ($verdict) { $rowCountForTiming = [int]$verdict.Matches[0].Groups[1].Value }
+    [void]$rowTimings.Add([PSCustomObject]@{
+        Package = $pkg
+        Seconds = $rowSecs
+        Count   = $rowCountForTiming
+    })
 }
 
 $elapsed = [int]((Get-Date) - $started).TotalSeconds
@@ -1298,8 +1541,17 @@ if ($oracleFlakedRows.Count) { $summary += " ($($oracleFlakedRows.Count) after a
 $summary += " / $fail fail"
 if ($unstable) { $summary += " / $unstable oracle-unstable" }
 if ($cvac) { $summary += " / $cvac comparison-validated-at-count" }
+# SIDE BY SIDE, never folded into $cvac's segment, as ruled: `hop=` and `cvac=` name two different
+# reasons for the same missing expectation, and a derivation that read one as the other would annotate
+# a release-wide absence as a platform-specific one. Printed with an explicit `hop=` key rather than a
+# prose phrase because this is the segment a driver greps.
+if ($hop) { $summary += " / hop=$hop measured-at-count" }
+if ($hopNoTests) { $summary += " / hop-no-tests=$hopNoTests" }
 $summary += "  (${elapsed}s)"
-Write-Host $summary -ForegroundColor $(if ($fail -or $cvac -or $unstable) { 'Red' } else { 'Green' })
+# The colour follows the EXIT, so the line cannot look like one thing and exit as another: a hop run
+# whose rows all recorded is green, because recording is what it was asked to do. $fail and $unstable
+# still redden it, on a hop run exactly as on a sweep.
+Write-Host $summary -ForegroundColor $(if ($fail -or $unstable -or ($cvac -and -not $Hop)) { 'Red' } else { 'Green' })
 
 # The pipeline regenerates each package's committed test artifacts in place. Content drift is a
 # real signal; CRLF-only churn is not (autocrlf smudges LF fixtures on checkout) -- so report by
@@ -1521,6 +1773,54 @@ if ($cvac) {
     Write-Host "  (record a row's measured count as a '${targetGoos}: N + D' annotation in docs/ValidatedTestPackages.md to bank it)" -ForegroundColor DarkGray
 }
 
+# ---- the hop record ------------------------------------------------------------------------------
+# The two hop buckets, reported apart because they are the two halves of what H10 banks: the measured
+# counts, and the rows whose measurement is "there is nothing here to measure". Printed before the
+# failure list so a reader of a mixed run sees the derivation and then what broke.
+if ($hop) {
+    Write-Host ''
+    Write-Host "hop measured-at-count -- validated, with no expectation at this release to bank against ($targetGoos):" -ForegroundColor Magenta
+    $hopRows | ForEach-Object { Write-Host "  $_" -ForegroundColor Magenta }
+    Write-Host "  (these counts are H10's input: bank them into docs/ValidatedTestPackages.md as this release's rows)" -ForegroundColor DarkGray
+    Write-Host '  (a `receives` note is the relocated predecessor and its 1.23.12 count -- provenance, never a floor)' -ForegroundColor DarkGray
+}
+
+if ($hopNoTests) {
+    Write-Host ''
+    Write-Host "hop no-eligible-tests -- ran on this host and declared no eligible Go tests for $targetGoos:" -ForegroundColor DarkCyan
+    $hopNoTestsRows | ForEach-Object { Write-Host "  $_" -ForegroundColor DarkCyan }
+    Write-Host "  (each derives a '${targetGoos}: n/a' annotation. Both signals were required: the pipeline's own" -ForegroundColor DarkGray
+    Write-Host '   line AND a not-applicable comparison record -- a row that merely produced no counts FAILED instead)' -ForegroundColor DarkGray
+}
+
+# ---- the per-row timing file ---------------------------------------------------------------------
+# TSV, under the ignored scratchpad, stamped with this run's own start so successive runs accumulate
+# rather than overwrite. Written before the exit arms below so a FAILING run still leaves its timings:
+# a row's cost is a fact about the row, not about the verdict, and the shard map that needs it is
+# usually planned from a run that had failures in it.
+$timingDir = Join-Path $repo 'scratchpad/sweep-row-walltimes'
+[void](New-Item -ItemType Directory -Force -Path $timingDir)
+$modeWord = if ($Hop) { 'hop' } else { 'sweep' }
+$timingPath = Join-Path $timingDir ($started.ToString('yyyyMMdd-HHmmss') + '-' + $modeWord + '.tsv')
+$timingLines = New-Object System.Collections.Generic.List[string]
+[void]$timingLines.Add("# run-validated-sweep per-row wall times")
+[void]$timingLines.Add("# started`t$($started.ToString('o'))")
+[void]$timingLines.Add("# goos`t$targetGoos")
+[void]$timingLines.Add("# mode`t$modeWord")
+[void]$timingLines.Add("# test-config`t$sweepConfigLabel")
+[void]$timingLines.Add("# rows`t$($rowTimings.Count)")
+[void]$timingLines.Add("package`tseconds`tcount")
+foreach ($t in $rowTimings) {
+    $countField = ''
+    if ($null -ne $t.Count) { $countField = [string]$t.Count }
+    [void]$timingLines.Add("$($t.Package)`t$($t.Seconds)`t$countField")
+}
+# UTF8 without a BOM, LF-terminated: the consumer is a generator script, and a BOM would land inside
+# its first field. Out-File -Encoding utf8 writes a BOM under 5.1, so the bytes are written directly.
+[System.IO.File]::WriteAllText($timingPath, (($timingLines -join "`n") + "`n"), (New-Object System.Text.UTF8Encoding($false)))
+Write-Host ''
+Write-Host "per-row wall times: $($rowTimings.Count) row(s) -> $timingPath" -ForegroundColor DarkGray
+
 if ($fail) {
     Write-Host ''
     Write-Host 'failed:' -ForegroundColor Red
@@ -1536,6 +1836,17 @@ if ($unstable) { exit 1 }
 
 # An unbanked count is not a green gate: it exits non-zero exactly as it did before this dimension
 # existed, only now it is reported as itself rather than as a count failure.
-if ($cvac) { exit 1 }
+#
+# ⚠ EXCEPT on a hop run, and this is the cut's one departure from the ruling's literal wording -- see
+# $hop's declaration for the full reasoning, and the landing post, which states it rather than burying
+# it. In short: that sentence is right because this script is a GATE, and every row of a hop run is
+# unbanked BY CONSTRUCTION, so inheriting the arm would make -Hop exit 1 on every run including a
+# perfect one -- an exit code that cannot vary cannot report anything. A hop run is a derivation, and
+# its failure conditions are $fail and $unstable above, both of which still exit 1 here. Reverting this
+# is deleting `-and -not $Hop`.
+if ($cvac -and -not $Hop) { exit 1 }
 
+# $hop and $hopNoTests deliberately do NOT appear in any exit arm: recording a count where nothing is
+# banked, and recording that a package has no eligible tests here, are what -Hop was asked to do. A
+# mode whose successful completion exits non-zero would train its caller to ignore the code.
 exit 0
