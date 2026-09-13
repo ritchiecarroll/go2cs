@@ -198,9 +198,23 @@ line; then rule on whatever the lanes posted while you were down, in mailbox ord
   WORKTREE: job-i9-train37-pprof detached 9 write-tree branch + bundle; HEAD unmoved
   WORKTREE: job-i9-lift-accessibility claude/i9-funcinfo-bridge 1 write-tree branch + bundle; HEAD unmoved
   WORKTREE: mailbox-i9-clone6 claude/mailbox 1 never-push content, not bundled; the ref is the scrub order's and the content is unread
-  NEXT: run stage C behind 088f8778f6ce605f66ca6f2388068d7505b88d16 on the fresh scratch (stage B finished: 147 WARNINGs, 146 hand-owns, identical to the first run) -- predictions exit 0, .cs 3900, residue .cs 37, hand-owns 146
-  READ-FIRST: mailbox 0687402db (rung build result: R's 120 reproduced, C1-1 clears all seven, the next wall named), f633ad759 (COORD's C1-2 ruling), 7ff30f203 (this save-state order), 846cbd849 (stage C classification), f4c659e02 (item 8 .auto discriminator); docs/phase4/DATA-recon-pass1-2026-09-13.md on claude/i9-data-recon-2026-09-13
-  BLOCKED-ON: lane -- C1-2's sizing before the rung's next build loop; nothing else
+  NEXT: nothing blocking -- the rung is measured and idle. On resume: (1) re-create the wake leg and the
+        Monitor UNCONDITIONALLY (see the WAKE key); (2) read the mailbox delta from f036d552f; (3) the
+        retained scratch rung1-scratch-postrung carries H5c + C1-1 + C1-2 amended (54ce45d9b3) and builds
+        with exactly 4 errors, all m.mWaitList in windows/lock_spinbit.cs at 220/227/227/233, which are
+        C1-2b's input and NOT a defect. C1-2b (ff54907996) is a hop commit for version-go1.24.13 and is
+        deliberately NOT applied to the scratch. Re-verify with
+        `apply-h5-c1-2-member-bill.sh --verify <scratch>/src/core <go1.24.13>` (idempotent, expects
+        POST-CONDITION MET) before trusting the tree.
+  (delta applied from mailbox 839a8d926)
+  READ-FIRST: mailbox f036d552f (this lane's last post) · 9457d56c0 (the runtime readings: all three
+        tables at 44, isWaitingForSuspendG throws nowhere, and the red control that reproduces the
+        truncation at length 37 with a GREEN build) · 8c0f26247 (C1-2b verified against the real
+        converter: one hunk 161,245c161, byte-identical placeholder) · c2b26c50b (the pre-C1-2 baseline
+        and the predictions) · 795cbf619 (COORD's C1-2b ruling) · 486a3926a (the amendment ruling).
+  (delta applied from mailbox 839a8d926)
+  BLOCKED-ON: COORD -- the landing and the creation of version-go1.24.13. Nothing from any lane.
+  (delta applied from mailbox 839a8d926)
   TOOLS: GOROOT corpus/oracle $HOME/sdk/go1.23.12 (go1.23.12) and converter $HOME/sdk/go1.24.13 (go1.24.13), GOTOOLCHAIN=local, CGO_ENABLED=0, GOROOT spelled in BACKSLASH form or the emission misroutes and exits 0; python 3.12.0 -- there is NO python3 on this box AND WindowsApps shadows BOTH python and python3 with a Store redirector that exits 49, so prepend the real interpreter's directory or every candidate resolves to the alias; DOTNET_ROOT with SDK 10.0.401 beside 9.0.318 (net10.0 needs the 10.x); PowerShell 5.1 Desktop by ABSOLUTE path -- the Bash PATH is the Windows semicolon form so /usr/bin never resolves unless prepended on every call
 ```
 WAKE (i9, verbatim from 59e0e3099 s3): re-create on resume -- i9's wake leg is a CronCreate job and CronList marks it [session-only]. The id cdf12613 is THIS session's and is dead to any other. Same for the Monitor id (bvgzqvs2y), per-session by construction. Neither is inheritable state; both are STEPS. i9 cadence: 7,27,47 past the hour, PROTOCOL v3.6 leg b.
@@ -372,3 +386,4 @@ PROTOCOL: as COORD's section.
   (mailbox order 7ff30f203, due 16:30). Verifier: `.claude/coord-scripts/coord-resume-verify.sh`.
 - 2026-09-13 15:55 — C1 (7d3734a84), G (f96225ea), i9 (29419cf30), C2 (d198239b4) blocks folded verbatim by fold-block.py; verifier gained landed-and-pruned and declared-local classes.
 - 2026-09-13 16:18 — session-bound ids rule (§0) + WAKE lines for i9 and C2; accepted-loss wording amended (686 unique blobs, all intermediate states).
+- 2026-09-13 17:15 — i9 block delta (NEXT / READ-FIRST / BLOCKED-ON) applied from 839a8d926; the rung is measured and idle.
