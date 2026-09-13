@@ -1327,6 +1327,8 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						recvRender = v.convExprInLambdaContext(selectorExpr.X)
 					}
 
+					v.censusMethodValueReceiver("convSelectorExpr:1130", selectorExpr)
+
 					return fmt.Sprintf("(%s) => %s.%s(%s)", paramDecls.String(), recvRender,
 						v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)), paramUses.String())
 				}

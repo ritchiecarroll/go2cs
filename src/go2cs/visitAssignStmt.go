@@ -1408,6 +1408,8 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				// methodValueBindsReceiverAddress. convSelectorExpr emits the method group over
 				// the box for it, and a snapshot rename would make that box undeclared (CS0103).
 				if v.isMethodValue(selectorExpr, false) && !v.methodValueBindsReceiverAddress(selectorExpr) {
+					v.censusMethodValueReceiver("visitAssignStmt:1288", selectorExpr)
+
 					v.enterLambdaConversion(selectorExpr)
 					defer v.exitLambdaConversion()
 
@@ -1765,6 +1767,8 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				// methodValueBindsReceiverAddress. convSelectorExpr emits the method group over
 				// the box for it, and a snapshot rename would make that box undeclared (CS0103).
 				if v.isMethodValue(selectorExpr, false) && !v.methodValueBindsReceiverAddress(selectorExpr) {
+					v.censusMethodValueReceiver("visitAssignStmt:1637", selectorExpr)
+
 					v.enterLambdaConversion(selectorExpr)
 					defer v.exitLambdaConversion()
 
