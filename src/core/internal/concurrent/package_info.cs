@@ -85,6 +85,19 @@ public static partial class concurrent_package
     // <TypeAccessibility>
     // </TypeAccessibility>
 
+    // DECLARED, not derived. The <TypeAccessibility> section above is rebuilt from the
+    // `[GoType]` declarations in this package's COMPILED sources, and every production file
+    // here carries [module: GoManualConversion] -- so the converter's own declarations live in
+    // the uncompiled `.cs.auto` siblings and that derivation is EMPTY. Before the metadata
+    // un-freeze the section was never re-minted for this package and its entries survived by
+    // accident; a package re-mint now empties it. These declarations are therefore stated by a
+    // human OUTSIDE the rebuilt section, where a re-mint leaves them alone. Retiring one is a
+    // human act: delete it when the type it names is no longer exported.
+    // <GoHandOwnTypeAccessibility>
+    public partial struct HashTrieMap<K, V> {}
+    internal partial struct node<K, V> {}
+    // </GoHandOwnTypeAccessibility>
+
     // Go initializes an imported package before the importing package, for every import
     // form - not only the blank one. .NET would never load an assembly nothing has touched
     // yet, so each import that initializes anything is forced below: once per assembly, and
