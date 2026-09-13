@@ -1,8 +1,10 @@
 // convBinaryExpr.go - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
-// that can be found in the LICENSE file.
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 package main
 
@@ -1322,17 +1324,31 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 		rhsIsInterfaceType = false
 	}
 
-	// Go's ONLY legal map comparison is against nil. On a CONSTRAINED map type parameter
-	// (`m == nil` — maps.Clone's nil-preserve guard) no operator exists (CS8761); the
-	// IMap.IsNil property carries the exact check (backing-store null — an allocated empty
-	// map is NOT nil).
+	// A CONSTRAINED type parameter compared against nil has NO operator to bind (CS8761): C# forbids
+	// a user-defined operator on a type parameter, so the `x == default!` form that every CONCRETE
+	// site uses — correct there, because those are structs that DEFINE `operator ==` — does not
+	// compile when the operand is the parameter. The family interface's IsNil property carries the
+	// exact check, and the constraint already names that interface (`where M : IMap<K,V>` /
+	// `where S : ISlice<E>`), so this is a CONSTRAINED call: no cast and no boxing.
+	//
+	// MAPS came first (`m == nil` — maps.Clone's nil-preserve guard; IMap.IsNil is backing-store
+	// null, an allocated empty map is NOT nil). SLICES joined at go1.24, whose slices.Clone gained
+	// `if s == nil { return nil }` where 1.23 had `return append(s[:0:0], s...)` and never compared.
+	// The gate is WIDENED here rather than copied into a second arm: one rule that answers for both
+	// families cannot drift the way two rules can, which is exactly how the sibling literal branches
+	// of defect D came to disagree.
+	//
+	// CHANNELS are deliberately NOT included: IChannel has no IsNil member today, and the corpus
+	// carries exactly ONE chan-constrained generic declaration in either release. Adding the member
+	// without a reaching case would be speculative; this arm gains `|| typeParamChanCore(tp) != nil`
+	// the day one arrives, and until then a chan type parameter keeps the operator form it has.
 	if isEqualityComparison {
 		nilCompareOperand := func(operand ast.Expr, other ast.Expr) (string, bool) {
 			if ident, ok := other.(*ast.Ident); !ok || ident.Name != "nil" {
 				return "", false
 			}
 
-			if tp, ok := types.Unalias(v.info.TypeOf(operand)).(*types.TypeParam); ok && typeParamMapCore(tp) != nil {
+			if tp, ok := types.Unalias(v.info.TypeOf(operand)).(*types.TypeParam); ok && (typeParamMapCore(tp) != nil || typeParamSliceCore(tp) != nil) {
 				return v.convExpr(operand, nil), true
 			}
 

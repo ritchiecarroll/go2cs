@@ -33,6 +33,10 @@ set -uo pipefail
 die() { printf 'ABORT: %s\n' "$*" >&2; exit 1; }
 step() { printf '\n== %s\n' "$*"; }
 
+# Where the repository security guard lives, relative to the repository root. ONE definition, read by
+# the gate and by the self-test's cache control, so the two cannot drift apart when it moves again.
+GUARD_PKG="src/go2cs/internal/repoguard"
+
 BRANCH=""; REF="HEAD"; ANNOUNCED=""; NEW=0; DRY=0; SELFTEST=0; REMOTE="origin"
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -71,7 +75,7 @@ resolve_sha() {
 
 # ---------------------------------------------------------------------------------------------
 # The security gate DELEGATES to the repository's own instrument. It deliberately carries no
-# patterns and no denylist of its own: src/go2cs/fleetIdentifierCensus_test.go already implements the
+# patterns and no denylist of its own: src/go2cs/internal/repoguard/fleetIdentifierCensus_test.go already implements the
 # owner's standing order with two passes (path-anchored structural, and denied-token for identifiers
 # used OUTSIDE any path) over a SHA-256 denylist that never spells what it forbids. A second copy
 # here would be the silent-duplication shape -- two implementations of one rule, neither aware of the
@@ -85,12 +89,12 @@ resolve_sha() {
 security_gate() {
   local root rc
   root=$(git rev-parse --show-toplevel 2>/dev/null) || die "not inside a git repository"
-  [ -f "$root/src/go2cs/fleetIdentifierCensus_test.go" ] || \
-    die "the repository security guard is not at $root/src/go2cs/fleetIdentifierCensus_test.go -- a composition that cannot find its gate does not push"
+  [ -f "$root/$GUARD_PKG/fleetIdentifierCensus_test.go" ] || \
+    die "the repository security guard is not at $root/$GUARD_PKG/fleetIdentifierCensus_test.go -- a composition that cannot find its gate does not push"
   command -v go >/dev/null 2>&1 || \
     die "the Go toolchain is required to run the repository security guard, and a push that cannot run it is not gated"
 
-  printf '   delegating to src/go2cs/fleetIdentifierCensus_test.go (the repo guard, not a second denylist)\n'
+  printf '   delegating to %s/fleetIdentifierCensus_test.go (the repo guard, not a second denylist)\n' "$GUARD_PKG"
 
   # ⚠ `-count=1` IS LOAD-BEARING AND IS ASSERTED, NOT MERELY WRITTEN (coordinator requirement,
   # 2026-09-06). Without it cmd/go's test cache can serve this invocation, and the gate then reports
@@ -103,13 +107,19 @@ security_gate() {
   # So the output is READ rather than discarded, and a cached verdict is refused. The flag can be
   # deleted by a future edit; this check is what notices. The self-test proves the detector can fire
   # by measuring that the same invocation WITHOUT the flag really does cache.
+  #
+  # ⚠ `[no tests to run]` IS REFUSED FOR THE SAME REASON. When the guards moved out of package main
+  # into GUARD_PKG, the old invocation's `.` package pattern kept exiting 0 while selecting none of
+  # them -- `go test` treats a -run that matches nothing as success. A package pattern that has
+  # drifted from where the guard lives is the vacuous green in its quietest form.
   local guard_out
   guard_out=$( cd "$root/src/go2cs" && go test -count=1 \
-      -run 'TestNoFleetIdentifiersInTrackedFiles|TestFleetIdentifierScannerFiresAndRestores|TestFleetIdentifierClearancesAreLive' . 2>&1 )
+      -run 'TestNoFleetIdentifiersInTrackedFiles|TestFleetIdentifierScannerFiresAndRestores|TestFleetIdentifierClearancesAreLive' "./${GUARD_PKG#src/go2cs/}" 2>&1 )
   rc=$?
-  [ $rc -eq 0 ] || die "repository fleet-identifier guard FAILED (exit $rc) -- NOT pushed. Re-run it directly in src/go2cs to see the findings."
+  [ $rc -eq 0 ] || die "repository fleet-identifier guard FAILED (exit $rc) -- NOT pushed. Re-run it directly in $GUARD_PKG to see the findings."
   case "$guard_out" in
     *'(cached)'*) die "the security gate's inner run was CACHED, so it checked nothing -- an arm whose inner run was cached is not an arm. Restore -count=1 in security_gate." ;;
+    *'[no tests to run]'*|*'[no test files]'*) die "the security gate's inner run selected NO tests, so it checked nothing -- the package pattern no longer reaches $GUARD_PKG." ;;
   esac
   printf '   guard exit 0, not cached -- checked the TRACKED TREE, not the pushed RANGE (see the note at security_gate)\n'
 }
@@ -278,9 +288,9 @@ self_test() {
   # correct place to find out, instead of discovering it from a gate that silently stopped checking.
   local root cache_out
   root=$(git rev-parse --show-toplevel 2>/dev/null)
-  if [ -n "$root" ] && [ -f "$root/src/go2cs/fleetIdentifierCensus_test.go" ] && command -v go >/dev/null 2>&1; then
-    ( cd "$root/src/go2cs" && go test -run 'TestFleetIdentifierClearancesAreLive' . ) >/dev/null 2>&1
-    cache_out=$( cd "$root/src/go2cs" && go test -run 'TestFleetIdentifierClearancesAreLive' . 2>&1 )
+  if [ -n "$root" ] && [ -f "$root/$GUARD_PKG/fleetIdentifierCensus_test.go" ] && command -v go >/dev/null 2>&1; then
+    ( cd "$root/src/go2cs" && go test -run 'TestFleetIdentifierClearancesAreLive' "./${GUARD_PKG#src/go2cs/}" ) >/dev/null 2>&1
+    cache_out=$( cd "$root/src/go2cs" && go test -run 'TestFleetIdentifierClearancesAreLive' "./${GUARD_PKG#src/go2cs/}" 2>&1 )
     case "$cache_out" in
       *'(cached)'*) printf '  ok   %-30s cmd/go DOES cache this invocation, so -count=1 is load-bearing\n' 'cache detector control' ;;
       *) printf '  FAIL %-30s the same invocation without -count=1 did NOT report (cached):\n%s\n' 'cache detector control' "$cache_out"; fails=$((fails+1)) ;;

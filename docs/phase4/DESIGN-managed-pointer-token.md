@@ -448,6 +448,17 @@ differing sets identical name for name.
 measurement the other made until now, which is why this cross-reference is here rather than left for
 a reader to notice.
 
+> **⚠ AMENDED 2026-09-08 (C2), because a later post of mine leaned on this section for a conclusion it
+> does not support.** Mailbox `fac149d059` argued that the arm-2a remedy "is arm 3's EXISTING refusal
+> extended to offset 0" and cited this section as agreement "from a third direction". That citation
+> conflates two directions that this section is careful to keep apart. What the two records agree on is
+> the **READ** side: dereferencing a byte offset computed against C's layout, where a refusal is right
+> because there is no correct answer to give. Arm 2a is the **WRITE** side, and there the number is
+> **constructed and named, never dereferenced** — so a refusal at construction breaks callers that do
+> the legal thing. §10.9 measures that: 31 passing tests at master reach all eight 2a sites, and the
+> sentence is withdrawn. This section's own conclusion is unaffected; only the extension of it to arm 2a
+> was wrong.
+
 ### 10.7 What is in hand, and what is deliberately NOT committed
 
 The one-line narrowing, its measurement, the refusal and its complete guard ledger — **green →
@@ -458,3 +469,670 @@ drafted breaks eight writes that master gets right, and no amount of design sett
 population is empty.
 
 -- C2
+
+---
+
+## 10.8 THE §10.5 CENSUS IS RUN — and its finding is that arm 2 is 8, not 18
+
+C2, 2026-09-08, on COORD's `b1fd949c2` §3. Instrument on `claude/c2-q44-registry-census` off master
+`a2e3b51c1`. **Predictions were posted before it ran** (mailbox `fdfc59873d`) and are scored in §10.8.4.
+
+### 10.8.1 Where it attaches, and why there is no alternative
+
+§10.5 rules out the alternatives by construction — implicit conversions defeat a call-site grep,
+inlined frames defeat a stack walk — so attribution rides on the **call site classifying its own
+values**. That site is `ж.cs`'s `uintptr → ж<T>` operator, where all four arms are decided from values
+the operator already holds:
+
+```
+Resolve(n) is ж<T>                        ARM 1   same pointee type
+Resolve(n) non-null, NOT ж<T>             ARM 2   different pointee type
+     ... n == box.PointerOrderToken       ARM 2a  offset 0 -- the order-token route
+     ... n != box.PointerOrderToken       ARM 2b  resolved via the PINNED-PROVENANCE route
+Resolve(n) null, IsTokenArithmetic(n)     ARM 3   inside a live block, not the token -- refuses today
+Resolve(n) null, not token-arithmetic     ARM 4   a real address
+```
+
+**The 2a/2b split is not in §10.3 and it is the whole finding** — see §10.8.3.
+
+⚠ **One thing read out of the code before measuring, which sharpens §10.3.** `IsTokenArithmetic`
+masks the low 32 bits and requires `allocationBase != number`, so it is **FALSE when n IS the base.**
+Arm 2 therefore reaches neither arm 1's alias nor arm 3's refusal: it falls through to
+`new NativeBox<T>(n)`. §10.3 calls arm 2 "the new work"; the sharper statement is that the write case
+is **already being answered today, silently, by the arm-4 fall-through.**
+
+### 10.8.2 The controls, because a census's zero is worth nothing without them
+
+Seven control arms in `GolibTests.Q44RegistryCensusControlTests`, each asserting its counter
+**increased across the call** rather than that a total matches a guess — the only form that can tell a
+wired counter from an unwired one. With the census off they report **Inconclusive, never green**.
+
+| control | reading |
+|:--|:--|
+| all four arms + the mint driven deliberately | 7/7 fire with the census on; 7/7 Inconclusive with it off |
+| **perturbation A/B** (census on vs off, same filter) | **48 / 683 / 5 / 736 IDENTICAL** — the instrument does not disturb the suite |
+| exhaustiveness | `arms sum == conversions` printed into the artifact, holds in every run |
+| count reconciliation | 746 declared at this tree − 3 (`RuntimeAddrRangesTests`) − 7 (the control class) = **736 = reported Total** |
+
+⚠ **A defect this instrument caused, fixed, and then controlled for.** The first version dumped to
+**stderr** from a `ProcessExit` hook. Every counter fired, all arms went green, and **zero census lines
+reached any log** — the MSTest host swallows it. *A counter that moves into a channel nobody reads is
+the same defect as a counter that never moves, and harder to see, because the arms all look healthy.*
+It now reports to a **file**, a failure to write says `Q44CENSUS-UNREPORTED` rather than passing
+silently, and there is a control arm asserting the file appears. A second, smaller one followed: the
+reporting control originally deleted and rewrote the census's **own** output file, so running the
+control inside a census run destroyed the census mid-flight — it writes to its own path now, and the
+census run excludes the control class so **the instrument does not measure itself.**
+
+### 10.8.3 ⚠ THE READING, and the finding is the split
+
+`GolibTests` at master `a2e3b51c1`, control class excluded, **byte-identical at Debug and at
+Release + `DOTNET_TieredCompilation=0`**:
+
+```
+mints = 4,378        conversions = 52        (mints exceed resolves by 84x)
+arm1 = 9    arm2a = 8    arm2b = 10    arm3 = 1    arm4 = 24        sum = 52  RECONCILES
+```
+
+**Arm 2 totals 18 of 52 conversions — and only 8 of them are the defect.** The split is why:
+
+- **ARM 2a — 8 conversions — IS the defect.** `n` IS the box's own order token, the pointee type
+  differs, and the fall-through hands back `NativeBox<T>(token)`: **a native box over a number that is
+  not an address.** This is exactly the population §10.3's arm 2 targets.
+- **ARM 2b — 10 conversions — is SOUND and needs no remedy.** The resolve succeeded through the
+  **pinned-provenance** route (`IsPinnedAt`), which means `n` **is a real pinned address**. The
+  fall-through hands back `NativeBox<T>` over a real address, which is correct.
+
+**So a remedy sized against "arm 2 = 18" would change behaviour for 10 conversions that are already
+right.** §10.3's arm 2 is correctly aimed; its *size* is 8, and without the 2a/2b distinction the
+census would have overstated it by 2.25×. Arm 2b is also a population §10.3 does not describe: a
+cross-type resolve at a non-zero offset that never reaches `IsTokenArithmetic` because it resolved.
+
+Requested/resolved type pairs (all resolving to `StandardBox<T>`): `Byte` ×4 (2a) and ×2 (2b);
+`Pointer` ×5 (2b); `ThreeWords`, `StringHeaderShape`, `ж<T>`, `ReferenceBearingView` (2a each);
+`array<T>`, `Int64`, `Pointer<T>` (2b each). **Falsifier (b) — "any offset-0 site where V is NOT the
+type at the pointee's offset 0" — is answerable from that 2a list and is the next reading owed**, per
+site rather than per count.
+
+### 10.8.4 Predictions scored: 4 HIT, 2 MISSED
+
+| prediction | outcome |
+|:--|:--|
+| mints > resolves by a wide margin | **HIT** — 84× |
+| arm 1 > 0 | **HIT** — 9 |
+| **arm 2 = 0 or single digits** | **MISS** — 18 (8 after the split; still double digits as worded) |
+| arm 3 > 0, else the instrument is broken | **HIT** — 1; the instrument's own falsifier did not fire |
+| **arm 4 ≫ all others** | **MISS** — 24 of 52 is 46 %, the largest but not dominant |
+| identical at both configurations | **HIT** — byte-identical |
+
+The two misses share a cause: I expected golib's own tests barely to reach the cross-type write case,
+and they reach it in **a third of all conversions**. Predicted as a scope statement, measured as a
+population.
+
+### 10.8.5 ⚠ SCOPE — this is GolibTests, NOT the roster
+
+The population that matters is the **corpus** — `reflect`, `pprof`, the reflect-heavy roster rows —
+and this ran on a linux container where the windows corpus flavour does not execute those rows. **A
+zero or a small number here is not a corpus reading**, which is the scoped-zero-across-a-scope-boundary
+trap this tree has paid before. The corpus census is **owed to a Windows box**: the instrument is
+env-gated and free when off, so it costs a roster sweep nothing but the variable.
+
+**Falsifier (a)** — a population where arm 2's alias is not expressible AND the write is correct at
+master — **is not answered by this run.** It needs the corpus population and the per-site reading of
+§10.8.3's 2a list.
+
+---
+
+## 10.9 AMENDMENT 2026-09-08 — the instrument was NOT observation-only, falsifier (a) FIRES, and the 2a population is EMPTY where measurable
+
+C2, on COORD's `7d44b472fd`. This is the honest write-up of state that ruling asked for, in place of a
+remedy. Four things happened in one day and they compose into one conclusion: **§10.3's arm 2 is not a
+piece of work waiting to be done; it may be a null, and the evidence now points that way from three
+independent directions.**
+
+### 10.9.1 ⚠ Every number in §10.8 is a FLOOR, because the instrument was not neutral
+
+i9 (`f8213cf49`) measured the banked `os` row flipping **PASS → FAIL** with the census env gate as the
+**only** variable, twice, in both directions, and named a sufficient mechanism in the instrument's own
+code: the arm-4 classifier read `ManagedPointerTokens.Resolve(value) is null`, so **enabling the census
+performed a SECOND `Resolve` per conversion** — and `Resolve` is not passive, `TryRemove`ing a dead weak
+entry and reassigning the count. *"Env-gated, free when off" is TRUE and is NOT the property that
+matters: the census is free when off, and it was not neutral when on.*
+
+**Fixed** (`acbfa34503`): reaching that line already means `resolved` was not a `ж<T>` and the arithmetic
+refusal did not fire, so `resolved is null` **is** arm 4 — the same verdict from a value already in hand.
+Guarded by `TheCensusPerformsONEResolvePerConversion_TheNeutralityPROPERTY`, which reads
+`Expected:<1>. Actual:<2>` on the line it replaces.
+
+⚠ **The guard's FIRST form was wrong and is worth keeping written down.** "A conversion must not change
+the registered count" **failed on the fixed code**, correctly: the ONE resolve the operator legitimately
+performs evicts the dead entry whether the census is on or off. Nor can counting evictions see the
+defect — two resolves of the same token cannot evict twice, which is also why the corpus symptom was a
+timing effect rather than a countable double-eviction. What discriminates is **how many times `Resolve`
+is ENTERED per conversion**, which is the property COORD ruled on.
+
+### 10.9.2 ⚠ A SECOND defect, and it cut against the census's own purpose
+
+Found by reading the classifier for the first defect, not looked for. The 2a/2b discriminator carried its
+**own two-arm copy** of "the token this box reports today" (`INilPointer`, `IChannel`, else `0`) while
+`ManagedPointerTokens.CurrentToken` has a **third arm** for anything else. A registered object
+implementing neither interface therefore projected to `0`, compared unequal to its own token, and was
+filed **2b — the SOUND bucket, the one §10.3 says must not move — when it is 2a, the defect bucket.**
+
+**A census that files its own target under "nothing to do here" reports the population as ABSENT**, which
+is the worst possible direction for an instrument whose entire finding is a zero. `CurrentToken` is
+`internal` now and there is one definition of the rule. Measured rather than argued: with the copy
+restored, a plain object registered at its own token is filed 2b and
+`The2a2bDiscriminatorUsesTheRegistrysOwnProjection_NotACopyOfIt` says so by name.
+
+The fix moves **nothing** on the GolibTests population — every box it registers is a `ж<T>` or a channel,
+so the third arm is latent there — which is why §10.8.3's counts remain comparable to i9's corpus floors:
+re-measured on the fixed instrument, control class excluded, the reading is **byte-identical**
+(`mints 4378, conversions 52, arm1 9, arm2a 8, arm2b 10, arm3 1, arm4 24`, reconciling, Total 736).
+
+### 10.9.3 ⚠ FALSIFIER (a) FIRES — 8 of 8, and the verdicts are census-OFF
+
+§10.4's falsifier (a) is *"a population where arm 2's alias is not expressible AND the write is correct at
+master — then refusing there is a regression and the candidate is incomplete."* §10.8.5 said this run
+could not answer it. It is answered now, and **both halves hold for every measured site.**
+
+The verdicts are taken with the census **OFF**, so §10.9.1 does not touch them; the instrument supplied
+only the attribution of which sites a filter reaches, and the perturbation direction (an extra `Resolve`)
+cannot manufacture a pass anyway.
+
+| population | census OFF | census ON | 2a sites reached |
+|:--|:--|:--|:--|
+| the four classes owning the 2a types | **28 / 28 pass** | 28 / 28 pass | 7 |
+| `PointerTokenConversionTests` | **3 / 3 pass** | 3 / 3 pass | 1 |
+
+**31 passing tests, 0 failures, 0 aborts, 8 of 8 sites reached.** Two negative results banked so nobody
+re-walks them: the 8th site's owner was guessed twice from the type name and both guesses were wrong —
+`PointerNilPredicateTests` (22/22 pass) and `FinalizerDispatchTests` both read `arm2a=0`. It was found by
+measurement.
+
+### 10.9.4 ⚠ "Correct at master" understates it — the project ALREADY RULED this, three days earlier
+
+These are not incidental passes. The 2a behaviour is **asserted by name**, in tests written for it, with
+comments explaining the choice — and the decision was already made once, in the opposite direction from
+the withdrawn sentence. `PointerTokenConversionTests`' own header records it: the Q44 chain found a
+**behavioral row red** (`PointerCastSliceRange`, 2026-09-05) whose `**(**[2]int64)(unsafe.Pointer(&ip))`
+reaches exactly this conversion, and the resolution was to **amend THE ROW, not the operator** — *"the
+row's dereference was exactly such a pun, and the row is amended to the compile-shape guard it
+documents."* Its arm is named
+`ATokenOfAnotherPointeeTypeIsANativeBoxOverTheToken_TheLoudFormTheDesignChose`.
+
+Two independent classes document the mechanism, which is the second derivation this would otherwise owe:
+
+- **`ReinterpretSourceRetentionTests`** (the boundary idiom): a reference-bearing pointee has no pinnable
+  storage, so the box hands out its **order token** rather than a movable field's address — and that
+  premise is *itself* asserted, so a future change giving such a box pinnable storage fails THAT assertion
+  first instead of quietly making the design redundant. Then `IsNative`, and the number **equal** to
+  `source.PointerOrderToken`, *"never a heap address the collector was not asked to hold still"*; *"a
+  native reader of the view faults at a non-canonical address instead of reading a stale copy, which is
+  the LOUD FAILURE THE DESIGN CHOSE"*; *"a boundary wrapper never reads it, it recovers the record"* — via
+  `ReinterpretSource`, with `Resolve` beside it as the second recovery and a comment requiring the two to
+  agree.
+- **`RuntimeHashFamilyTests`** (the string header), which states what the token **replaced**: before Q44
+  this reinterpret took the ADDRESS route — a `NativeBox` over the **pinned managed string** whose `str`
+  field read back the `byte[]` reference as a `Pointer`, measured 2026-09-04 as runtime type
+  `System.Byte[]` with a field read through it a native SIGSEGV — *"which the seam refused by name. THAT
+  ROUTE NO LONGER EXISTS TO BE REFUSED"*, because the box now hands out its token and the reinterpret is
+  *"a native box OVER THE TOKEN (the design's loud form; its fields are not touched here — **a
+  dereference is the row-level fault the design chose, never a number**)"*.
+
+**So arm 2a is not an unremedied case. It is the case Q44 already fixed, and the token-over-a-non-address
+IS the fix.** Refusing there does not add safety; it refuses to construct the safe object, and it breaks
+the recovery too — `PointerTokenConversionTests` asserts `other.NativeAddress == the token` precisely *"so
+a boundary wrapper resolving the number still recovers the source."*
+
+### 10.9.5 Where the safety lives, and why a refusal at that site cannot be the remedy
+
+Three mechanisms already sit at the **dereference**: a native read of a token **faults** (non-canonical by
+construction); the hash seam **refuses a header by name** (`GoMemhashPointer` over the string box's number
+panics `"string HEADER"` while `GoStrhashPointer` over the same number hashes the CONTENT, both asserted in
+one arm); and the **token door** at the syscall boundary refuses a token as an argument. At 2a the number
+is **constructed and named** and never dereferenced, which is why all three are silent there.
+
+⚠ **That makes a refusal at the conversion site structurally unable to be the remedy, not merely
+mis-sized.** The operator cannot know whether the number it hands back will be dereferenced — that
+information arrives later, at the use — so a predicate placed at construction cannot discriminate the
+defect from the passing uses, **whatever it tests**. Any remedy has to sit where the information is.
+
+Adjacency checked rather than assumed: that same class's third arm round-trips a token through `void*` to
+native code and back and requires it to come back **as its box**. That is arm 1, it never reaches a
+syscall, and the door at `syscalln` does not see it.
+
+### 10.9.6 The corpus floor: 4,143,157 conversions, not one arm-2 classification
+
+i9's rows, on the **unfixed** instrument and therefore floors rather than the record (`72000a1f3a`,
+`f8213cf49`, `54a15554d8`):
+
+| row | conversions | arm 1 | arm 2a | arm 2b | arm 3 | note |
+|:--|--:|--:|--:|--:|--:|:--|
+| `go/types` | 303,492 | 668 | 0 | 0 | 0 | PASS 557; mints 668 == arm1 668, every mint resolved, every resolve correct |
+| `runtime/pprof` | 3,839,386 | 1,283,101 | 0 | 0 | 0 | 50 tests, 122 pass / 23 fail; partial |
+| `encoding/json` | 279 | 0 | 0 | 0 | 0 | PASS 491 |
+| `os` | — | — | — | — | — | **VOID**, census-induced failure (i9's own word) |
+| **total** | **4,143,157** | **1,283,769** | **0** | **0** | **0** | |
+
+### 10.9.7 Predictions scored, and mine is REFUTED
+
+§10.8 predicted arm 2a non-zero on **`runtime/pprof` first**, then `reflect`. Run correctly, `runtime/pprof`
+reads **arm2a = 0 across 3,839,386 conversions** with 1,283,101 reaching the token path and resolving
+correctly as arm 1. i9 declined to score it refuted on two fair caveats (a non-neutral instrument; a
+partial row). **Those caveats are not taken here: a prediction that survives only on its measurement's
+caveats is refuted, and mine is refuted on that row.** The perturbation ADDS resolves and so cannot have
+removed an arm-2 classification, which is the direction that matters.
+
+### 10.9.8 Disposition — the candidate is "NO CHANGE at 2a", with its falsifier named
+
+§10.7 said none of the seat should be committed until the census said which arm the corpus needs. It has
+now said, from three directions: the corpus floor is **zero**, the GolibTests 2a population is entirely
+**construct-and-name** with 31 passing tests over it, and the design **already chose** the loud form there
+deliberately. **§10.3's arm 2 is incomplete as written and mis-aimed rather than under-specified**: its
+target is not "offset-0 cross-type resolves" (8 of 52) but the subset *"where the number is later READ AS
+AN ADDRESS"*, and no measured site is in that subset. Third shrink of one target: **18 → 8** by the 2a/2b
+split, **8 → no-alias-machinery** by expressibility, **8 → 0 measured** by read-vs-name.
+
+**MUST-NOT-MOVE is two rows now, not one:** arm 2b (10 conversions, sound because *n* IS a real pinned
+address) and **arm 2a construct-and-name** (8 measured, all 8 with deliberately-asserting passing tests).
+
+The surviving candidate is **no change at 2a**, and it is stated with its falsifier rather than claimed:
+**a site where the token is read as an address by MANAGED code that would silently produce a WRONG VALUE
+rather than fault.** Native reads fault, the hash seam refuses by name, boundary wrappers recover — a
+silent wrong value is the only shape "no change" cannot absorb.
+
+### 10.9.9 What is OWED, and by whom
+
+- **i9, on a qualified host**: the neutrality PROOF COORD ruled — banked `os` at **PASS 683** with the
+  census ON beside the census-OFF control — then `encoding/json`, `go/types`, `runtime/pprof` re-taken on
+  the fixed instrument, then `reflect`, `net/http`, `crypto/tls`.
+- ⚠ **NOT C2's to run — and the FIRST version of this bullet was wrong in both of its stated reasons,
+  which is worth more than the conclusion it happened to reach.** It said the lane host is disqualified
+  because bare `go` reports 1.24.7 and "there is no PowerShell". Both were **PATH readings reported as
+  HOST facts**: the pinned `go1.23.12` is installed and passes all three preflight arms (`env -u GOROOT
+  <pinned>/bin/go env GOROOT` = the pinned root, `VERSION` = go1.23.12, the binary = go1.23.12), and
+  pwsh 7.6.5 is installed under the dotnet global-tools directory. A probe answering "not found" describes
+  the environment it ran in, not the machine — this tree's own written lesson, paid in the direction that
+  takes work off the lane's plate, which is the direction to distrust first.
+  **The REAL disqualifier is disk, it is structural, and the sweep's own preflight is what found it**:
+  `run-validated-sweep.ps1:126` refuses below a **25 GB** floor and the host measured **10.1 GB** free.
+  No cleanup reaches it — the writable allowance is roughly 9–11 GB — so this is a property of the host
+  class, not of a full drive. `-IgnoreDiskPreflight` exists, and the script's own words for what it
+  yields are **"unmeasurable results"**: below the floor, writes fail mid-run, builds report FALSE REDS
+  and a partial write can truncate a tracked file (three such incidents, 2026-08-13). A manufactured red
+  would land on the **census-ON** arm and read exactly like "the fix failed", which is the one outcome
+  that must not be fabricated — so the flag is refused here rather than used. The conclusion is unchanged
+  and every reason for it is different. The suite-scale reading below is evidence, not that proof: GolibTests at
+  Release with tiering off, `RuntimeAddrRangesTests` excluded (it hangs at master), **census OFF Failed 48
+  / Passed 686 / Skipped 11 / Total 745** and **census ON Failed 48 / Passed 695 / Skipped 2 / Total 745**,
+  0 aborted either way — the failure counts IDENTICAL across the env gate, the +9 being the control class
+  which is Inconclusive when the census is off.
+- **The lesson about post structure**, banked because it cost a published claim: mailbox `fac149d059`
+  stated what its finding *"CHANGES"* **and** named a live falsifier for that same change, three
+  paragraphs apart, in one post. Those are in tension by construction — if the falsifier is live, the
+  change is not yet known. The measurement in that post was sound and stands; the inference was published
+  one step ahead of the reading its own author had identified as owed, and it proposed reversing a ruling
+  already in the tree. **A post that names a live falsifier states the CANDIDATE and stops.**
+
+
+---
+
+### 10.9.10 ⚠ AMENDED 2026-09-08, LATER THE SAME DAY — the instrument is NEUTRAL, and §10.9.6's floor is WITHDRAWN
+
+Two results from i9 (`5de94f336b`), and they point opposite ways.
+
+**NEUTRALITY IS ACHIEVED, and it took both arms.** At `ad87e2bb1f`, the banked `os` row reads
+**`PASS os 683`, rc=0, sweep 1 pass 0 fail, with the census ON — identical to OFF.** Same tree, same
+configuration of record, one variable, both directions agreeing. COORD's ruled gate in `7d44b472fd` is
+met. Neither named mechanism achieved it alone: the extra `Resolve` (i9's, refuted by measurement) nor
+the classifier fix that removed it; what closed it was compiling the Resolve-entry counter **out** rather
+than gating it, together with the stderr and child-inheritance work.
+
+⚠ **AND §10.9.6's FLOOR IS WITHDRAWN — every number in that table was ONE SURVIVING BLOCK, not a row.**
+The shared-census-file race this record's own `{pid}` finding described is worse than an undercount. With
+`{pid}`, the `os` row writes **FIVE** files — a parent and four helper children:
+
+| process | conversions | arm 1 |
+|:--|--:|--:|
+| parent | 260,132 | 20 |
+| child | 94 | |
+| child | 100 | |
+| child | 96 | |
+| child | **16** | |
+| **row total** | **260,438** | **20** — arm2a 0, arm2b 0, arm3 0, arm4 260,418, reconciles |
+
+i9's earlier `os` reading was **`conversions=16`**: the last row of that table, the smallest child, the one
+that did almost nothing. **The race did not merely truncate the count, it preserved the LEAST
+representative block** — and that block was tabled as the row.
+
+So `encoding/json` at 279, `go/types` at 303,492, `runtime/pprof` at 3,839,386 and `os` at 16 were each a
+single surviving block. **The claim "4,143,157 conversions and not one arm-2 classification anywhere" is
+not a floor and is withdrawn**, because a destroyed block could have carried arm-2 hits and no run can now
+say. i9 withdrew it in the same post; it is withdrawn here too, in the record that cited it.
+
+**What survives is narrower, and only this**: on the `os` row measured properly, **all five blocks read
+arm2a, arm2b and arm3 at ZERO across 260,438 conversions.**
+
+⚠ **§10.9.7's "REFUTED" IS THEREFORE UNSCORED, NOT VINDICATED.** That subsection scored the prediction
+"arm 2a non-zero on `runtime/pprof` first" as **refuted**, on pprof's 3,839,386-conversion reading — a
+number now withdrawn. A refutation resting on void data is void. The prediction returns to **unscored**
+until pprof is re-taken on the fixed instrument with `{pid}`. **This is not a walk-back**: the
+properly-measured `os` row still reads 2a at zero, so the direction of the evidence has not changed and
+"the 2a population may be a GolibTests artifact" remains the leading candidate. Only its *support* shrank,
+from four million conversions to a quarter of a million on one row.
+
+**The sharpest form of my own error, stated because it is the useful part.** The per-process TRUNCATE was
+introduced to fix a real problem i9 named — two ROWS summing into one block. It fixed that and made the
+other failure mode **worse**: appending would have PRESERVED all five blocks, leaving a reader with an
+ambiguous file that could be read correctly once noticed; truncating **destroyed four of five** and left a
+well-formed file containing the least informative one. A change that converts a recoverable ambiguity into
+irrecoverable loss is a regression even when it fixes what it was aimed at, and the tell was available all
+along: the instrument offered `{pid}` and nothing required it.
+
+Attribution is shared and I am not arguing i9's generosity down. My instrument permitted a shared path and
+truncated per process; i9's runner chose the shared path to stop rows summing and never asked whether one
+row could be several PROCESSES. Both halves were needed. The durable fix is that a row's census can no
+longer be one file by accident, and that the reader prints the file COUNT beside the blocks so a
+five-process row cannot report as one.
+
+
+---
+
+### 10.9.11 ⚠ AMENDED AGAIN 2026-09-08 — THE ARM-2a POPULATION IS **NOT** EMPTY: 1,236 hits, all in `crypto/tls`
+
+i9 (`a12e46447c`), on the neutral instrument at `ad87e2bb1f` with per-process files and per-row sums,
+the gate re-proved at `os` 683 both ways at the head of each batch. **The first table whose numbers are
+the rows:**
+
+| row | files | conversions | mints | arm 1 | **arm 2a** | arm 4 |
+|:--|--:|--:|--:|--:|--:|--:|
+| `os` | 5 | 260,438 | 0 | 20 | 0 | 260,418 |
+| `encoding/json` | 1 | 279 | 13 | 0 | 0 | 279 |
+| `go/types` | 1 | 304,542 | 668 | 668 | 0 | 303,874 |
+| `runtime/pprof` | 1 | 3,898,831 | 10,594 | 1,302,758 | 0 | 2,596,073 |
+| `reflect` | 0 | **NO CENSUS OUTPUT** | | | | |
+| `net/http` | 1 | 33,685 | 35 | 0 | 0 | 33,685 |
+| **`crypto/tls`** | **2,241** | 913,859 | 1,239 | 1,850 | **1,236** | 910,773 |
+| **total** | | **5,411,634** | | | **1,236** | |
+
+**"The 2a population may be a GolibTests artifact" is DEAD.** §10.9.8 named that as the leading candidate
+and it is now falsified by measurement: the population is real, it is 1,236, and it is concentrated
+**entirely in one row**.
+
+⚠ **WHY IT WAS INVISIBLE, AND IT IS NOT LUCK — it is this record's own `{pid}` defect, quantified.**
+`crypto/tls` runs bogo at **2,241 processes**, of which **507 carry arm2a > 0 and 1,734 read zero**. Under
+the shared-file race exactly ONE block survives, so drawing one at random gives about a **77 % chance of
+reading arm2a = 0**. The old method would MOST LIKELY have reported `crypto/tls` at zero, and the corpus
+would have been declared arm-2-free with four million conversions behind it. Three separate fixes had to
+hold to see it: the instrument NEUTRAL (§10.9.1–2), pid SEPARATION (§10.9.10), and the row actually RUN.
+
+### 10.9.12 The prediction, scored properly at last — one half HIT, one half REFUTED
+
+§10.8 predicted **"arm 2a non-zero on `runtime/pprof` FIRST, then `reflect`."** §10.9.7 scored it refuted;
+§10.9.10 returned it to unscored when its evidence was voided. It can now be scored, and it splits:
+
+- **The EXISTENCE half — HIT.** Arm 2a is non-zero in the corpus: 1,236 sites.
+- **The ROW half — REFUTED, and firmly.** `runtime/pprof` reads **arm2a = 0 across 3,898,831
+  conversions**, which is about as strong a null as that row can give. `reflect` produced **no census
+  output at all** and is recorded as unmeasured rather than as zero. The row that carries the population
+  is `crypto/tls`, which the prediction did not name.
+
+Scored as worded, that is a **miss**: naming the mechanism's existence while naming the wrong rows is not
+a correct prediction, and the row half is what it was used for — deciding which rows to spend hours on.
+
+### 10.9.13 ⚠ What 1,236 DOES and DOES NOT settle
+
+**It does NOT resurrect §10.3's arm-2 refusal, and the reason is §10.9.3–5 unchanged.** Falsifier (a)
+fired on 8 of 8 GolibTests sites with 31 passing census-OFF tests over them, and the discriminator there
+was **read-vs-name**: at 2a the number is CONSTRUCTED AND NAMED, never dereferenced, which is why a
+refusal at the conversion site cannot separate the defect from the legal uses. **A count cannot answer
+that question.** 1,236 sites establish that the remedy has a population; they do not establish that any of
+them dereferences.
+
+**The next reading is per-site and it already exists.** The instrument records, for every arm-2 hit, the
+requested type, the resolved pointee type, whether each carries managed references, and
+`alias-expressible`. Those `Q44CENSUS-ARM2` lines are in `crypto/tls`'s 507 non-zero blocks now. Reading
+them answers what the count cannot: which shapes, and whether the alias is expressible for any of them —
+the same reading §10.8.3 did for the GolibTests eight.
+
+**Prediction on record before those lines are read**, so it can be scored:
+
+1. The 2a pairs will be **reference-bearing** on at least one side, so `alias-expressible=NO` for
+   substantially all of them — that property is what forces the token route in the first place.
+2. They will be **construct-and-name**, i.e. falsifier (a) holds on the corpus too. The argument is a
+   failure-mode one rather than a preference: a token dereferenced as an address faults at a
+   NON-CANONICAL address, loudly, and `crypto/tls`'s observed failure is `TestBogoSuite/Client`, an
+   assertion, with i9 holding attribution pending a census-OFF control. A crash is what dereferencing
+   would look like and it is not what the row shows.
+
+If (2) is wrong — if any of the 1,236 is read as an address by managed code producing a silently wrong
+VALUE rather than faulting — that is exactly the falsifier §10.9.8 named for "no change at 2a", and the
+disposition changes.
+
+**Two rows are NOT attributed and are recorded that way**: `net/http` (`TestRegisterErr`) and `crypto/tls`
+(`TestBogoSuite/Client`) both read rc=1 with the census on, and i9 is running census-OFF controls rather
+than guessing; the `os` gate proves neutrality on `os`, which is not the same as neutrality on a row that
+spawns 2,241 processes or touches the network. And `reflect` is recorded as **NO OUTPUT**, not as zeros,
+because the run happened and the census never reported — reporting zeros there would be the unrun census
+wearing a result's clothes.
+
+**i9's own over-correction, corrected**: `5de94f336b` called every earlier census number void, which was
+right ex ante and is now narrowed by measurement — only `os` lost blocks (16 → 260,438, wrong by a factor
+of sixteen thousand). `encoding/json` reads 279 both times; `go/types` 303,492 → 304,542 and
+`runtime/pprof` 3,839,386 → 3,898,831 are run variance of 0.3 % and 1.5 %. Those three stand as
+approximations.
+
+
+---
+
+### 10.9.14 ⚠ AMENDED A THIRD TIME — `crypto/tls` does NOT pass on this tree, and the neutrality claim is ROW-BOUNDED
+
+Three corrections land together, none of them to the 1,236.
+
+**COORD withdrew ruling 1's premise, and then i9 MEASURED it.** `82c60cec4` said the 1,236 sit "inside a
+banked row at 3,643 verdicts PASS on that same tree"; COORD withdrew that in `5e9c3f8bc7` on the ground
+that the only `crypto/tls` verdict held was **the ROSTER's** — a banked record from another day — not a
+run on `ad87e2bb1f`. i9's control then settled it (`6e3e99e6a2`): **census ON reads FAIL at 394 s, census
+OFF reads FAIL at 393 s.** The census is EXONERATED and the row does **not** reach PASS on this host and
+tree. ⚠ But the two arms name **different subtests** (`TestBogoSuite/Client` vs
+`.../CertificateSelection-Server-PreferenceOrder-TLS-TLS11`), so this is not one stable defect reported
+twice — it is a row whose failing member **moves between runs**, and whether that is corpus drift or bogo
+nondeterminism is a third question nobody has answered.
+
+**So ruling 1 keeps its conclusion and loses that reason.** As COORD restated it, the 2a remedy stays
+withdrawn on §10.9.3–5 alone: falsifier (a) fired on 8 of 8 GolibTests sites with **31 passing CENSUS-OFF
+tests** over them, and the discriminator is READ-versus-NAME — at 2a the number is constructed and NAMED,
+never dereferenced, so a predicate at the conversion site cannot separate a defect from a legal use
+whatever it tests. **No `crypto/tls` verdict, either way, bears on that.** The count of 1,236 establishes
+the remedy has a corpus population; it does not establish that one member is a defect.
+
+⚠ **AND §10.9.10's "NEUTRALITY IS ACHIEVED" IS BOUNDED — i9 bounded their own gate and the bound belongs
+here too.** The `os` gate is green both ways, but **`os` is UNANNOTATED**, so both its arms ran at
+`DOTNET_TieredCompilation=0`, which is `os`'s correct configuration. **The gate therefore never exercised
+a `release-tiered` row at all**, and its green was never evidence about one. Neutrality is proven on the
+rows tested, not as a property of the instrument — the scoped-zero-across-a-scope-boundary trap, applied
+to a gate rather than a census. i9 found this while catching a confound in their own runner: it exported
+`DOTNET_TieredCompilation=0` unconditionally, which is redundant for a default-Release row and **harmful**
+for a tiered one, and `net/http` is the only measured row annotated `release-tiered` — so that row's
+ON/OFF pair differed in TWO variables and **attributes nothing**. `net/http` is now unattributed and being
+re-run one variable at a time.
+
+**What is unaffected, and why:** the 1,236. `crypto/tls` is unannotated so no tiering confound touches it;
+the row fails census-OFF as well, so the census did not cause its verdict; and the arms reconcile across
+2,241 blocks. A perturbation that ADDS resolve calls cannot mint an arm-2 classification. **The count
+stands; only the row's verdict was ever in question, and this record never leaned on it.**
+
+**Still owed, and it is the same reading as before**: ruling 2's per-site attribution of the 1,236 by
+requested type and pointee type, from the `Q44CENSUS-ARM2` lines in the 507 non-zero blocks. That data is
+on i9's host, not this lane's; the ask is out. With `crypto/tls`'s verdict now known NOT to be a pass, the
+per-site reading is no longer a supplement to a verdict argument — **it is the whole of the evidence** for
+whether those sites are construct-and-name.
+
+
+---
+
+### 10.9.15 ⚠ THE NEUTRALITY BOUND IS CLOSED — proved on a TIERED, TIMING-SENSITIVE row, and `net/http` was never the corpus
+
+§10.9.14 recorded neutrality as **bounded to untiered rows**, because the `os` gate ran both arms at TC0.
+i9 closed that bound within the hour (`fe949e0bc3`), with a measurement rather than an argument.
+
+**The full 2×2 on `net/http`, one knob at a time:**
+
+| | census OFF | census ON |
+|:--|:--|:--|
+| **TC0 forced** (i9's runner bug) | FAIL | FAIL |
+| **tiering left correct** | **PASS 1,345** | **PASS 1,345** |
+
+**The verdict tracks the TIERING knob exactly and is INDEPENDENT of the census.** Arm C reproduced the
+FAIL with the census *compiled out* and produced the identical divergence — `TestRegisterErr//a:&http.
+handler{i:0}`, Go=pass C#=fail, the same one the census-ON run reported. Every arm carried a positive
+control on **both** knobs, so none can have passed for the wrong reason: arm C wrote 0 census blocks with
+`release-tiered` honoured, arm D wrote 1.
+
+⚠ **And arm D is the result worth more than the retraction.** It is census **ON** with the row **PASSING at
+the full 1,345** — so neutrality is now proved on **two rows: `os` (683, untiered) and `net/http` (1,345,
+tiered and timing-sensitive)**. `net/http` is the strongest available row to close that hole with, because
+it carries `execution: release-tiered` *precisely because* its verdicts are timing-sensitive — the roster's
+own reason being that the same published binary flipped verdicts run-to-run on an h2 write-deadline row.
+**A census that perturbed timing would show up there first, and it does not.** §10.9.14's framing survives
+unchanged — neutrality is a property of the rows tested, not of the instrument — and the set of rows is
+now two rather than one.
+
+`net/http`'s FAIL was i9's runner start to finish: an unconditional `DOTNET_TieredCompilation=0` on the one
+row of seven that must not have it. Not the corpus, not the census, not the resolver.
+
+**Row figure corrected**, since the posted one came from the broken run: `net/http` reads **33,447**
+conversions (arm D, PASS), not 33,685 — mints identical at 35, **every arm conclusion identical with
+arm2a = 0**, conversions differing by 0.7 %. The corpus total moves from 5,411,634 to **5,411,396**;
+**arm2a stays 1,236.**
+
+### 10.9.16 `crypto/tls`'s red, anatomised from the RECORD rather than the log line
+
+⚠ **A method correction that matters more than the numbers.** §10.9.14 said the two runs showed "exactly
+one divergence each on different subtests" — i9's phrasing and mine. That was a count of **PRINTED
+LINES**: the sweep prints the stream's last three lines plus one explanatory string naming a *single
+exemplar*, so the log cannot answer "how many diverged" and both of us asked it that question anyway. The
+preserved comparison record answers it: **FOUR, not one.**
+
+| subtest | shape | status |
+|:--|:--|:--|
+| `TestBogoSuite/CertificateSelection-Server-PreferenceOrder-TLS-TLS11` | Go=skip, C#=fail | bogo |
+| `TestBogoSuite/MinimumVersion-Client-TLS13-TLS1-TLS` | Go=fail, C#=pass | the oracle-flake shape |
+| `TestBogoSuite/VerifyPeerIfNoOBC-NoChannelID-TLS11` | Go=skip, C#=fail | bogo |
+| `TestCertCache` | Go=pass, C#=fail | **DISCLOSED and excused** |
+
+`TestCertCache` sits in the record's disclosed array with a full mechanism write-up — an address-exposed
+frame temp is not lifetime-tracked, so the CLR holds the object live until the test returns and the
+refcount cannot fall while the test is watching, measured identically in a separately built optimized
+host. **It is not part of the row's red and not a new finding**, and i9 notes nearly reporting it as one
+before reading the array.
+
+So the row's errors are **entirely `TestBogoSuite`**. The census-ON run's first error named
+`Client-Sign-RSA_PKCS1_SHA256-TLS12`, which does **not** appear in this set — **the divergent set moves
+between runs on this host**, which is the concrete form of the bogo-flakiness i9 had banked. Two of the
+three are Go=skip with C#=fail, a **skip-parity** question rather than obviously converted-code drift, and
+which cases the oracle skips is exactly what moves run to run.
+
+**Claimed**: `crypto/tls` does not reach PASS on this host, twice measured, and its red is bogo-only with
+one disclosed non-bogo divergence excused. **Not claimed**: that any of the three is corpus drift —
+establishing that needs a second full record to separate the stable members from the moving ones.
+
+**Unchanged by all of the above**: the 1,236, and every row's arm conclusions.
+
+### 10.9.17 ⚠ AMENDED A FIFTH TIME — the `crypto/tls` row as COORD RULED it: i9's DISCRIMINATOR **alone**, mechanism **OPEN**; three records close what §10.9.16 left open; and a LABEL OF MINE is retired
+
+**The ruling** (COORD `aee30e9a0a`, correcting one line of the train-45 landing post `0c26792e9c`): record
+the `crypto/tls` pair on this host as **i9's discriminator alone**, with the **MECHANISM stated as OPEN**
+and the row **host-conditional** until a bogo-capable host reads it. "Bogo flag-surface per R's mechanism"
+is **withdrawn** — at R's own request (`8fb3a61528`), before it reached this row.
+
+Both forms of that mechanism are dead, and R is the one who killed them:
+
+- the **CLASS** form ("the converted shim accepts more flags") is **refuted by i9's own counter-evidence**:
+  the ChannelID/OBC class skips **155 for 155 identically**, and exit 89 is present at
+  `handshake_test.cs:508` with the FAIL and SKIP mapping mirrored;
+- the **NARROW** form is **eliminated by measurement**: Go wires `CommandLine.Usage` to
+  `commandLineUsage` rather than to `Usage` *precisely* so a later assignment to `flag.Usage` is seen. A
+  conversion capturing it at init would make exit 89 never fire — which would have produced the observed
+  one-way direction exactly — but **the conversion preserves it**, so the candidate is dead.
+
+So **nothing yet answers why the oracle skips those two.** The row's wording is R's, adopted by i9 and by
+COORD: **unexplained, one-way, and every converted-side failure is on a case the oracle never ran** — not
+"flag-surface". The reason the wording is worth this much care is R's: *a mechanism recorded on a row
+outlives the thread that retired it.*
+
+**i9's three records** (`ce7d407b6e`), tree `ad87e2bb1f2`, **census OFF**, 393 s / 398 s / 394 s, each
+preserved before the sweep's own cleanup deletes them:
+
+| reading | control | run 1 | run 2 |
+|:--|--:|--:|--:|
+| Go fail / pass / skip | 2 / 1,261 / 2,381 | 0 / 1,263 / 2,381 | 0 / 1,263 / 2,381 |
+| C# fail / pass / skip | 4 / 1,261 / 2,379 | 3 / 1,262 / 2,379 | 5 / 1,261 / 2,378 |
+| divergences | 4 | 4 | 5 |
+| **Go=pass and C#=fail (bogo)** | **0** | **0** | **0** |
+| positive control (Go=skip, C#=fail) | 2 | 1 | 3 |
+| skip-set go-only / cs-only | 2 / 0 | 2 / 0 | 3 / 0 |
+
+Every record passed three controls **before** it was read: both sides non-empty and equal at 3,644; every
+name joined with no leftovers; and a **planted difference detected** (4→5, 4→5, 5→6), proving the compare
+can see one. I re-derived what the posted numbers allow: all six fail/pass/skip triples reconcile to
+**3,644** exactly, and the skip-set arithmetic closes (2,381 − 2 = 2,379, i.e. the skip sets agree on
+**2,379 of 2,381** within `TestBogoSuite`'s 3,242 subtests, which is COORD's figure).
+
+**What this CLOSES in my own §10.9.16.** That section claimed the red was bogo-only and explicitly did
+**not** claim any member was corpus drift, because "establishing that needs a second full record to
+separate the stable members from the moving ones". Two further records now exist and the separation is
+measured: **zero bogo subtests diverged in more than one run** — nine bogo divergences across three runs,
+nine distinct names, zero overlap — and the **only** divergence stable across all three is `TestCertCache`,
+which is the one already in the disclosed array with a mechanism write-up. So no bogo member of my table is
+established as corpus drift, and the one stable member is the one already excused.
+
+⚠ **A LABEL OF MINE IS RETIRED, on its author's own withdrawal.** My §10.9.16 table labelled
+`TestBogoSuite/MinimumVersion-Client-TLS13-TLS1-TLS` (Go=fail, C#=pass) "**the oracle-flake shape**". That
+label was not a reading of the record — it imported a **prior** i9 had banked, that Go's own bogo runner is
+flaky on that box. i9 has now **withdrawn that prior** as a reading of this row, from the skip counts: the
+oracle's skip count reads **2,381, 2,381, 2,381 — constant**, and its skip SET does not move at all, while
+the converted side's reads **2,379, 2,379, 2,378** and does move. Both sides' pass/fail *do* move (Go's
+fail going 2 → 0 → 0), so neither side is fully deterministic — but **the moving member of the skip set is
+on the CONVERTED side**, the opposite of the direction the prior assumed. The honest label for that row is
+**transient, Go-side, unstable across the three records**; "oracle-flake" is retired. **A label is a
+mechanism claim in miniature**, and mine outlived the prior it rested on by exactly one post — the same
+failure R's wording rule exists to prevent, committed one table cell at a time.
+
+**One number I could NOT close, named rather than smoothed over.** From the posted per-run divergence
+counts, and with `TestCertCache` established in all three (it is the shared member in both
+control-vs-run comparisons), the bogo divergences come to (4−1) + (4−1) + (5−1) = **10**, where i9's post
+says **nine**. The likely reading is definitional — whether the single Go=fail/C#=pass member counts as a
+"bogo divergence" at all — and one line from i9 settles it. **It moves nothing**: every load-bearing
+clause (0/0/0 for Go=pass-and-C#=fail, one-way three times out of three, zero bogo overlap across runs) is
+independent of that count. Recorded because a census is cross-checked by a differently-shaped derivation,
+and an unclosed reconciliation is a question, not a rounding error.
+
+**Credit, as i9 corrected it in the other direction too**: the **discriminator** — compare the skip
+COUNTS, one read rather than another 400-second arm — is **R's**, from `44e333057`; the three **records**
+are i9's. In i9's words: *the record is mine and the question is yours.*
+
+**Row status: NOT banked.** It reads FAIL 3 for 3 and is not bankable on this host; host-conditional until
+a bogo-capable host reads it. What the three records **do** establish: in **9,726** bogo case-verdicts
+(3,242 × 3) there is **no instance of the converted side failing a case the oracle passed**, and the row's
+reds are a small transient set — 2 to 3 of 3,242 per run — of cases the oracle declined to run, plus one
+disclosed non-bogo divergence. i9's own limit stands with it: three runs is three runs, and each transient
+case is a genuine failure in the run it appears in.
+
+**What this means for Q44 — and what it does not.** Unchanged: the **1,236**, and every row's arm
+conclusions. §10.9.14's ruling stands that **no `crypto/tls` verdict, either way, bears on the neutrality
+question**, which is proved on `os` (683, both arms at TC0) and `net/http` (1,345, `release-tiered` and
+timing-sensitive) in §10.9.15. One thing is now **positively evidenced rather than merely asserted**:
+§10.9.16 observed that the census-ON run's named divergence
+(`Client-Sign-RSA_PKCS1_SHA256-TLS12`) is absent from the census-OFF set, and inferred "the divergent set
+moves". Three **census-OFF** runs producing nine distinct names with **zero overlap** make a tenth distinct
+name exactly what this population does *with the census absent*. That is **consistency, not a neutrality
+proof** — n=1 on the census-ON side, and a row that fails either way cannot serve as a neutrality gate at
+all. The proof stays where §10.9.15 put it.
+
+**Still blocked, and stated as such**: the ARM2 **pair-line** reading of the 1,236 (READ-versus-NAME) needs
+the per-pid `Q44CENSUS-ARM2` blocks. i9's three runs were **census OFF** and carry none, so the reading
+rides i9's per-pid tip census and is not owed by this amendment.
+
+-- C2, 2026-09-08 (amended five times)

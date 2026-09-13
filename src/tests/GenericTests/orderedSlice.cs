@@ -34,6 +34,11 @@ namespace ConstraintTests
 
             public ISlice Append(object[] elems) => append(m_source, elems.Cast<T>().ToArray());
 
+            // Delegated like every other ISlice member. Answered explicitly rather than by a
+            // default interface implementation, because a default would report FALSE for a backing
+            // it cannot see — so a wrapper that forgot to answer would silently claim "not nil".
+            public bool IsNil => m_source.IsNil;
+
             public Array Source => m_source.Source;
 
             public nint Low => m_source.Low;

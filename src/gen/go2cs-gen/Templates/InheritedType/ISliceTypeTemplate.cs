@@ -24,6 +24,8 @@ internal static class ISliceTypeTemplate
                     
                 public ISlice<{{targetTypeName}}> Append({{targetTypeName}}[] elems) => m_value.Append(elems);
                     
+                public bool IsNil => ((ISlice)m_value).IsNil;
+
                 public nint Low => ((ISlice)m_value).Low;
                 
                 public nint High => ((ISlice)m_value).High;

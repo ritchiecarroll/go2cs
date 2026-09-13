@@ -11,4 +11,10 @@
 # Please keep the list sorted by first appearance.
 
 J. Ritchie Carroll <ritchiecarroll@gmail.com>
-Claude (Anthropic) <noreply@anthropic.com>
+
+# AI assistance. Portions of go2cs are written with Claude (Anthropic) working
+# under the direction of the author listed above, who reviews and accepts them.
+# An AI tool is not an author or copyright holder for the purposes of this file:
+# the resulting contributions are owned by the directing author, and the
+# assistance is recorded in commit trailers rather than here. See LICENSING.md,
+# "Ownership and contributions".

@@ -34,6 +34,26 @@ internal interface ISliceBacking
 
 public interface ISlice : IArray
 {
+    /// <summary>
+    /// Gets a flag indicating whether this slice is the NIL slice — structurally, the same question
+    /// <c>slice&lt;T&gt;.operator ==(slice&lt;T&gt;, NilType)</c> answers.
+    /// </summary>
+    /// <remarks>
+    /// Exists because a C# TYPE PARAMETER can use no user-defined operator. A generic Go body that
+    /// tests <c>s == nil</c> through a constrained type parameter (<c>slices.Clone[S ~[]E]</c> at
+    /// go1.24) has no <c>operator ==</c> to bind, so the converter emits this member instead — and
+    /// ONLY for a type-parameter operand; every concrete site keeps the operator it already uses.
+    ///
+    /// It is a BOOL on purpose. <see cref="ISliceBacking"/> answers the same question exactly and is
+    /// internal by design ("nothing outside golib may take the backing"), so the nil question is
+    /// surfaced without surfacing the array. Neither of the two members that LOOK like they already
+    /// answer it does: <see cref="IArray.Source"/> materializes a detached COPY (allocating, and
+    /// empty rather than null for a nil slice), and <c>Equals</c> is structural CONTENT equality
+    /// where <c>operator ==</c> is header identity — an empty non-nil slice is the case that
+    /// separates them, and it must read false here.
+    /// </remarks>
+    bool IsNil { get; }
+
     nint Low { get; }
 
     nint High { get; }
@@ -72,6 +92,13 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // so cannot serve as an identity. Explicitly implemented and internal: this adds no public
     // surface, and its only consumer is GoReflect's element-dimension side table.
     Array? ISliceBacking.Backing => m_array;
+
+    /// <summary>Gets a flag indicating whether this is the NIL slice.</summary>
+    /// <remarks>
+    /// The SAME condition <c>operator ==(slice&lt;T&gt;, NilType)</c> tests, written once here and
+    /// deferred to by that operator, so the two can never disagree about what nil means.
+    /// </remarks>
+    public bool IsNil => m_array is null;
 
     internal readonly T[] m_array;
     private readonly nint m_low;
@@ -991,7 +1018,10 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // in docs/ConversionStrategies-Reference.md.
     public static bool operator ==(slice<T> slice, NilType _)
     {
-        return slice.m_array is null;
+        // Deferred to IsNil so the operator and the interface member cannot drift apart: the
+        // converter binds the operator at a concrete site and the member at a type-parameter one,
+        // and the two must answer identically or the same Go source means different things.
+        return slice.IsNil;
     }
 
     public static bool operator !=(slice<T> slice, NilType nil)

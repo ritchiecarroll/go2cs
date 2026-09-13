@@ -1,8 +1,10 @@
 // dynamicTypeGate_test.go - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
-// that can be found in the LICENSE file.
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // Guards the W2b GATE: a `-tests` conversion that could not name an anonymous struct/interface
 // type must FAIL, loudly and by name, instead of exiting 0 into a build whose diagnostics point

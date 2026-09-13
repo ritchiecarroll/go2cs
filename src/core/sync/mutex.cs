@@ -19,9 +19,10 @@
 // (Go allows unlock on a different goroutine), and non-reentrant (a second Lock on the same thread
 // blocks, matching Go's self-deadlock). See runtime_impl.cs for the shared rationale.
 using System.Threading;
-// Aliased rather than imported wholesale: this file needs exactly two golib types, and a blanket
+// Aliased rather than imported wholesale: this file needs exactly three golib types, and a blanket
 // `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
 // beside converted code.
+using FatalReport = go.golib.FatalReport;
 using Goroutine = go.golib.Goroutine;
 using WaitReason = go.golib.WaitReason;
 
@@ -33,11 +34,21 @@ namespace go;
 
 partial class sync_package {
 
-// Fatal-error hooks (Go provides these via runtime linkname). Surfaced as a non-panic exception so
-// recover() cannot swallow them and the program terminates loudly, as Go's runtime.throw/fatal do.
-internal static void @throw(@string s) => throw new global::System.InvalidOperationException($"fatal error: {s}");
+// Fatal-error hooks (Go provides these via runtime linkname): one-line forwards to golib's fatal
+// primitive, which owns the report and the exit for every site that has one — runtime's own throw
+// and fatal, these two, and at Go 1.24 the new internal/sync's pair. golib is the only assembly
+// below all of them, and internal/sync referencing sync would be the project-reference cycle
+// check-solution-integrity's per-GOOS assertion exists to catch. COORD ruling, mailbox 4e9b115;
+// docs/phase4/DESIGN-fatal-path.md.
+//
+// The unrecoverability these lines used to get from a non-panic exception is now structural: the
+// primitive writes the report and calls Environment.Exit(2), so no recover(), no deferred function
+// and no catch runs — which is what Go's throw/fatal do. What changes is the TEXT: Go's
+// `fatal error: <text>`, a blank line and a Go-spelled traceback, in place of a .NET exception dump
+// that merely happened to contain the first line.
+internal static void @throw(@string s) => FatalReport.Fatal(s, userFault: false);
 
-internal static void fatal(@string s) => throw new global::System.InvalidOperationException($"fatal error: {s}");
+internal static void fatal(@string s) => FatalReport.Fatal(s, userFault: true);
 
 // A Mutex is a mutual exclusion lock.
 // The zero value for a Mutex is an unlocked mutex.

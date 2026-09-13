@@ -77,6 +77,21 @@ internal static void Main() {
     fmt.Println(second == Ꮡsentinel, Ꮡother == Ꮡsentinel);
     ref var elsewhere = ref heap(new mu(), out var Ꮡelsewhere);
     fmt.Println(preferLowLatency(ᏑtheSched.of(schedt.Ꮡlock)), preferLowLatency(Ꮡelsewhere), preferLowLatency(nil));
+    var (ᴛ1, ᴛ2, ᴛ3) = nativeWidthLiterals();
+    fmt.Println(ᴛ1, ᴛ2, ᴛ3);
+}
+
+internal static (uintptr declared, uintptr assigned, uintptr highByte) nativeWidthLiterals() {
+    uintptr declared = default!;
+    uintptr assigned = default!;
+    uintptr highByte = default!;
+
+    uintptr word = (nuint)0x0102030405060708UL;
+    declared = word;
+    highByte = (word >> (int)(56));
+    word = (nuint)0x7fedcba987654321UL;
+    assigned = word;
+    return (declared, assigned, highByte);
 }
 
 } // end main_package

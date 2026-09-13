@@ -67,7 +67,7 @@
   <PropertyGroup Condition="'$(OutputType)'=='Library'">
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageId>go.$(AssemblyName)</PackageId>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageDescription>$(Description) -- C# project converted from Go source</PackageDescription>
     <PackageProjectUrl>https://github.com/ritchiecarroll/go2cs</PackageProjectUrl>
     <PackageIcon>go2cs.png</PackageIcon>
@@ -77,6 +77,9 @@
   <ItemGroup Condition="'$(OutputType)'=='Library'">
     <None Include="go2cs.png" Pack="true" PackagePath="" Visible="false" />
     <None Include="go2cs.ico" Pack="true" PackagePath="" Visible="false" />
+    <None Include="LICENSE" Pack="true" PackagePath="" Condition="Exists('$(MSBuildProjectDirectory)/LICENSE')" />
+    <None Include="NOTICE" Pack="true" PackagePath="" Condition="Exists('$(MSBuildProjectDirectory)/NOTICE')" />
+    <None Include="AUTHORS" Pack="true" PackagePath="" Condition="Exists('$(MSBuildProjectDirectory)/AUTHORS')" />
   </ItemGroup>
 
   <!-- Include the per-package README (emitted by the converter) in the NuGet package -->
@@ -166,4 +169,7 @@
     <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="../../../LICENSE" Pack="true" PackagePath="" Condition="!Exists('$(MSBuildProjectDirectory)/LICENSE')" />
+  </ItemGroup>
 </Project>

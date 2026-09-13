@@ -95,7 +95,6 @@
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo_test.go" />
     <None Include="$(MSBuildThisFileDirectory)filterZeroMatch_test.go" />
-    <None Include="$(MSBuildThisFileDirectory)fleetIdentifierCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignNameCollisions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)foreignTypeAliases.go" />
@@ -123,6 +122,8 @@
     <None Include="$(MSBuildThisFileDirectory)interfaceConversion.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\genstdlibmeta\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gensymbols\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\contextBudget_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\fleetIdentifierCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\stdlibmeta\generate.go" />
     <None Include="$(MSBuildThisFileDirectory)layoutDuplicates_test.go" />
     <None Include="$(MSBuildThisFileDirectory)liftedTypeNames.go" />
@@ -199,6 +200,7 @@
     <None Include="$(MSBuildThisFileDirectory)refReceiverEligibility.go" />
     <None Include="$(MSBuildThisFileDirectory)refVerdictPublication.go" />
     <None Include="$(MSBuildThisFileDirectory)refVerdictPublication_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)repoRoot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)requiresUnsafeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)resolveBuildTags_test.go" />
     <None Include="$(MSBuildThisFileDirectory)resolveGo2CSPath_test.go" />
@@ -282,6 +284,10 @@
     <None Include="$(MSBuildThisFileDirectory)visitTypeSpec.go" />
     <None Include="$(MSBuildThisFileDirectory)visitTypeSwitchStmt.go" />
     <None Include="$(MSBuildThisFileDirectory)visitValueSpec.go" />
+    <None Include="$(MSBuildThisFileDirectory)licensing.go" />
+    <None Include="$(MSBuildThisFileDirectory)licensing_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" />
+    <None Include="$(MSBuildThisFileDirectory)LICENSE-EXCEPTION" />
     <None Include="$(MSBuildThisFileDirectory)writeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)wsaSendtoNoCallers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)writtenUnderlyingOperations.go" />

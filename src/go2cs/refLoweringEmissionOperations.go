@@ -1,8 +1,10 @@
 // refLoweringEmissionOperations.go - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
-// that can be found in the LICENSE file.
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // This file owns the ж-box reduction arc's REF-LOWERING EMISSION — stage A2 of
 // docs/phase4/DESIGN-zh-box-reduction.md (§3.3, §3.4; rulings §10.1/§10.3/§10.4). The

@@ -1,7 +1,8 @@
 // managed_impl.cs - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
+// SPDX-License-Identifier: BSD-3-Clause
+// Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
 // The runtime package's PROCESS-CONTROL surface, reimplemented on managed primitives.
@@ -175,6 +176,66 @@ partial class runtime_package
         appendGoFrames(trace, stack);
 
         return trace.ToString();
+    }
+
+    // The traceback half of Go's report for a FATAL error — runtime.throw and runtime.fatal, the
+    // path no recover() can see. Registered into golib for the same inverted-dependency reason the
+    // crash traceback is, and beside it deliberately: golib composes the report and owns the
+    // `fatal error:` line, this file owns the goroutine blocks, and neither can move the other's.
+    // docs/phase4/DESIGN-fatal-path.md.
+    [ModuleInitializer]
+    internal static void ᴛRegisterFatalTraceback()
+    {
+        FatalReport.TracebackRenderer = fatalTraceback;
+    }
+
+    private static readonly RuntimeMethodHandle s_fatalTracebackMethodHandle =
+        typeof(runtime_package).GetMethod(
+            nameof(fatalTraceback),
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static,
+            binder: null,
+            [typeof(bool)],
+            modifiers: null)!.MethodHandle;
+
+    // Go's fatal dump: the failing goroutine's real frames, then EVERY other goroutine — five
+    // headers on the probe's own row at the corpus pin, not one (DESIGN-fatal-path.md §1). It is
+    // the same renderStack the panic side and runtime.Stack use; what this method owns is which
+    // frames it starts from and which goroutines it is allowed to show.
+    //
+    // THE BOUNDARY. callerFrames anchors on this method's own frame, so the frames above it are
+    // golib's fatal plumbing (FatalReport.Format, FatalReport.Fatal, and whatever delegate stub the
+    // runtime put between them) and then the converted function that raised the fatal. Everything
+    // up to and including the LAST FatalReport frame is dropped, by TYPE IDENTITY rather than by a
+    // name or a count: the first frame rendered is therefore runtime.throw / runtime.fatal itself,
+    // which is exactly the frame Go's own traceback begins at, because Go starts its walk from
+    // fatalthrow's getcallerpc() — the return address inside throw. Dropping to the LAST such frame
+    // rather than skipping while-they-match is what makes a delegate-invoke stub between them
+    // harmless.
+    //
+    // THE SYSTEM-GOROUTINE AXIS is Go's throwType, read here because GOTRACEBACK is read here.
+    // Go's gotraceback raises the level for a throwTypeRuntime crash — "the runtime is crashing due
+    // to a runtime error, so print system goroutines and runtime frames" — while a throwTypeUser
+    // fatal leaves it alone. So a throw shows them unconditionally and a fatal shows them only
+    // under GOTRACEBACK=system or crash.
+    //
+    // The runtime-FRAME half of that same Go sentence is NOT implemented: this renderer has no
+    // frame filter, so a `fatal` prints the runtime frames a `throw` does. Stated rather than
+    // silently approximated — it costs a user-fault dump some noise and can never hide a frame.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static string fatalTraceback(bool userFault)
+    {
+        List<StackFrame> above = new(callerFrames(s_fatalTracebackMethodHandle));
+        int start = 0;
+
+        for (int i = 0; i < above.Count; i++)
+        {
+            if (above[i].GetMethod()?.DeclaringType == typeof(FatalReport))
+                start = i + 1;
+        }
+
+        List<StackFrame> frames = above.GetRange(start, above.Count - start);
+
+        return renderStack(frames, all: true, showSystem: !userFault || s_tracebackShowsSystem);
     }
 
     // GOMAXPROCS' remembered setting. Go's starts at NumCPU.
@@ -522,6 +583,27 @@ partial class runtime_package
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static nint Stack(slice<byte> buf, bool all)
     {
+        // GOTRACEBACK decides the system-goroutine axis here; the FATAL path decides it from Go's
+        // throwType as well (fatalTraceback), which is why renderStack takes the answer rather than
+        // reading the variable itself.
+        string rendered = renderStack(callerFrames(s_stackMethodHandle), all, s_tracebackShowsSystem);
+        byte[] encoded = Encoding.UTF8.GetBytes(rendered);
+        nint count = Math.Min((nint)encoded.Length, len(buf));
+
+        for (nint i = 0; i < count; i++)
+            buf[i] = encoded[i];
+
+        return count;
+    }
+
+    // The goroutine BLOCKS of a traceback, shared by runtime.Stack and by the fatal report: the
+    // calling goroutine's header and frames, the in-flight panic's snapshot beneath them, and under
+    // `all` one block per other live goroutine. Extracted rather than duplicated for the reason the
+    // semaphore hoist records one package over — two branches of one rule drift apart, and a
+    // traceback that renders one way for a panic and another way for a fatal is a divergence nobody
+    // would find until an operator read both.
+    private static string renderStack(IEnumerable<StackFrame> frames, bool all, bool showSystem)
+    {
         StringBuilder trace = new();
 
         // The CALLING goroutine, always first and always with real frames — Go dumps the current
@@ -529,7 +611,7 @@ partial class runtime_package
         Goroutine? current = Goroutine.Current;
 
         appendGoroutineHeader(trace, current);
-        appendGoFrames(trace, callerFrames());
+        appendGoFrames(trace, frames);
 
         // Go keeps a panicking goroutine's frames on the stack until the panic completes, so a
         // debug.Stack() taken inside a deferred function shows the PANIC SITE. A CLR exception has
@@ -567,7 +649,7 @@ partial class runtime_package
                 // part of a program's traceback, which is why no leak filter over runtime.Stack ever
                 // has to name them -- net/http's counted the unique map-cleanup goroutine as a leak
                 // for as long as this runtime rendered it (2026-09-04).
-                if (goroutine.IsSystem && !s_tracebackShowsSystem)
+                if (goroutine.IsSystem && !showSystem)
                     continue;
 
                 trace.Append('\n');
@@ -577,13 +659,7 @@ partial class runtime_package
             }
         }
 
-        byte[] encoded = Encoding.UTF8.GetBytes(trace.ToString());
-        nint count = Math.Min((nint)encoded.Length, len(buf));
-
-        for (nint i = 0; i < count; i++)
-            buf[i] = encoded[i];
-
-        return count;
+        return trace.ToString();
     }
 
     // Go's printcreatedby1 (runtime/traceback.go): `created by <func> in goroutine <parentGoid>` --
@@ -639,15 +715,21 @@ partial class runtime_package
     // <file>:line <n>`. This is observable output: Go programs (and Go's own tests) grep a traceback
     // for `<pkg>.<Func>`, which the CLR form never contains because a converted package's frames
     // live on a `<pkg>_package` class inside namespace `go`.
-    // The calling goroutine's frames ABOVE Stack itself, located by identity. Stack is NoInlining, so
-    // its frame is always present; if the search ever fails anyway, the fallback keeps the OLD
-    // count-based boundary (skip frame 0) rather than rendering Stack's own frame — a frame too many
-    // is the shape Go's readers tolerate, a frame too few is the shape that broke net/http.
+    // The calling goroutine's frames ABOVE the anchor method itself, located by identity. Every
+    // anchor is NoInlining, so its frame is always present; if the search ever fails anyway, the
+    // fallback keeps the OLD count-based boundary (skip frame 0) rather than rendering the anchor's
+    // own frame — a frame too many is the shape Go's readers tolerate, a frame too few is the shape
+    // that broke net/http.
+    //
+    // The anchor is a PARAMETER rather than this file's one Stack handle because there are now two
+    // entry points into the walk — Stack, and the fatal path's renderer — and each owns a different
+    // boundary. Hard-coding Stack's handle here would silently give the second entry point the
+    // fallback branch, i.e. a count, which is exactly the failure the identity boundary replaced.
     private static readonly RuntimeMethodHandle s_stackMethodHandle =
         typeof(runtime_package).GetMethod(nameof(Stack), [typeof(slice<byte>), typeof(bool)])!.MethodHandle;
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static IEnumerable<StackFrame> callerFrames()
+    private static IEnumerable<StackFrame> callerFrames(RuntimeMethodHandle anchor)
     {
         StackFrame[] frames = new StackTrace(skipFrames: 0, fNeedFileInfo: true).GetFrames();
         int boundary = -1;
@@ -656,15 +738,15 @@ partial class runtime_package
         {
             System.Reflection.MethodBase? method = frames[i].GetMethod();
 
-            if (method is not null && method.MethodHandle == s_stackMethodHandle)
+            if (method is not null && method.MethodHandle == anchor)
             {
                 boundary = i;
                 break;
             }
         }
 
-        // boundary == -1 cannot happen while Stack is NoInlining (its frame is on this stack, one
-        // above callerFrames' own); the fallback skips exactly the frames a count of 1 used to.
+        // boundary == -1 cannot happen while the anchor is NoInlining (its frame is on this stack,
+        // one above callerFrames' own); the fallback skips exactly the frames a count of 1 used to.
         int first = boundary >= 0 ? boundary + 1 : 1;
 
         for (int i = first; i < frames.Length; i++)

@@ -8,4 +8,6 @@ Package unsafe contains operations that step around the type safety of Go progra
 
 ---
 
-This package is a hand-maintained implementation of the Go standard library's `unsafe` API rather than converted Go source (the original is a compiler intrinsic). The go2cs implementation is distributed under the MIT license.
+This package is a hand-maintained implementation of the Go standard library's `unsafe` API rather than converted Go source (the original is a compiler intrinsic). The go2cs implementation is distributed under the same BSD-3-Clause license as the converted standard library, which can be found in the [LICENSE](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/LICENSE) file.
+
+Artwork licensed under Creative Commons Attribution 3.0; see [artwork attribution](https://github.com/ritchiecarroll/go2cs/blob/master/docs/images/README).

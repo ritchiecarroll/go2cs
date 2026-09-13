@@ -275,6 +275,9 @@ public static class ManagedPointerTokens
 
         s_count = s_table.Count;
 
+        if (Q44RegistryCensus.Enabled)
+            Q44RegistryCensus.Mint();
+
         if (s_count >= s_sweepAt)
             Sweep();
     }
@@ -435,6 +438,16 @@ public static class ManagedPointerTokens
     /// </summary>
     public static object? Resolve(nuint token)
     {
+        // ⚠ A CENSUS COUNTER STOOD HERE AND IS DELIBERATELY GONE (2026-09-08). It counted Resolve
+        // ENTRIES so a unit guard could assert "one resolve per conversion" -- the property COORD
+        // ruled on. It was the wrong place to prove it: an Interlocked increment on this path runs a
+        // quarter of a million times in one roster row, so the instrument built to show the census
+        // was observation-only was ITSELF work the census-off path does not do. i9 named it as the
+        // next candidate off the diff that removed the previous one, and that is the shape to stop
+        // rather than iterate. The neutrality gate is the banked `os` row, which discriminates in
+        // about 50 seconds per direction; a production-side counter cannot beat that and can only
+        // perturb what it measures.
+
         // The fast path every non-reflect program takes: nothing was ever registered, so no token
         // can resolve and the conversion goes straight to its native-address route.
         if (token == 0 || s_count == 0)
@@ -463,7 +476,12 @@ public static class ManagedPointerTokens
     }
 
     // The token the box would report today — the same projection reflect used to mint the entry.
-    private static nuint CurrentToken(object box)
+    // INTERNAL rather than private because the §10.5 census's 2a/2b discriminator asks the SAME
+    // question ("is this number the box's own token, i.e. offset 0?") and a second copy of the rule
+    // is a copy that can be wrong: the census carried a two-arm copy that omitted the fallback below,
+    // so a registered object implementing neither interface projected to 0 and every such site was
+    // classified 2b — the SOUND bucket — when it is 2a. One definition, one answer.
+    internal static nuint CurrentToken(object box)
     {
         return box switch
         {

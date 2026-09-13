@@ -1,8 +1,10 @@
 // manualTypeOperations.go - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
-// that can be found in the LICENSE file.
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 package main
 
@@ -538,6 +540,33 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// right outcome for a test whose premise (a poller wait that a break interrupts) the managed
 		// model does not have. A no-op there would buy a green that means nothing.
 		"netpollGenericInit": goosAny,
+		// runtime.throw and runtime.fatal -- the FATAL path (runtime/panic_impl.cs;
+		// docs/phase4/DESIGN-fatal-path.md). Both converted bodies print Go's `fatal error: <text>`
+		// line through golib's print and then call fatalthrow, whose FIRST statement is
+		// getcallerpc() -- a bodyless partial the generator fills with a throw, since getcallerpc
+		// and getcallersp are compiler intrinsics for a caller's PC and SP that the CLR does not
+		// expose. So every fatal on every flavour printed Go's first line and then a .NET exception
+		// dump naming getcallerpc, exiting 2 through golib's unhandled-exception backstop rather
+		// than through Go's own exit. Measured on windows and linux, frame for frame identical (the
+		// probe's own RESULTS block); the prediction that linux would differ, because write1 is a
+		// bodyless partial there, was FALSIFIED -- print resolves to golib's builtin, so runtime's
+		// gwrite/writeErr/write1 chain is never entered and write1 is UNREACHED rather than at
+		// fault. One shape on all three flavours, hence goosAny.
+		//
+		// TWO entries and not five: fatalthrow has exactly two callers, these; fatalpanic has one,
+		// gopanic, which is itself already dead at its own getcallerpc() and which no panic in this
+		// runtime reaches (a panic is a golib PanicException reported by CrashReport). Displacing
+		// these two therefore leaves fatalthrow, fatalpanic, getcallerpc and getcallersp all
+		// UNREACHED rather than unimplemented -- write1's shape, and the remedy the record's §3
+		// named ("stop the fatal path needing them") arrived at one frame higher and smaller.
+		//
+		// The bodies forward to golib's FatalReport, which owns the report and the exit for these
+		// two sites, for sync's two shims and, at Go 1.24, for the new internal/sync's: golib is
+		// the only assembly below all three, and internal/sync referencing sync would be the
+		// project-reference cycle check-solution-integrity's per-GOOS assertion exists to catch.
+		// One primitive, one-line forwards (COORD ruling, mailbox 4e9b115).
+		"throw": goosAny,
+		"fatal": goosAny,
 	},
 	// internal/abi.TypeOf reads an interface's type-word via unsafe.Pointer to reach a Go runtime
 	// type descriptor that has no managed form (the reflection bridge — Phase 4). type_impl.cs

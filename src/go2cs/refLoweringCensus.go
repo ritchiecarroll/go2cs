@@ -1,8 +1,10 @@
 // refLoweringCensus.go - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
-// that can be found in the LICENSE file.
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // This file owns the ж-box arc's CORPUS-WIDE A1 CENSUS instrument — the `-ref-census` flag
 // (docs/phase4/DESIGN-zh-box-reduction.md §9 stage A1). It is the corpus-scale companion of the

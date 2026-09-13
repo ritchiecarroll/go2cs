@@ -5,18 +5,6 @@ using time = time_package;
 
 partial class main_package {
 
-// Go runs an imported package's `init` before this package's own; .NET would never load
-// an assembly nothing has touched yet, so that initialization is forced here.
-[GoInit] internal static void initᴛᴛimportꓸfmt() {
-    builtin.initPackage(typeof(fmt_package));
-}
-
-// Go runs an imported package's `init` before this package's own; .NET would never load
-// an assembly nothing has touched yet, so that initialization is forced here.
-[GoInit] internal static void initᴛᴛimportꓸtime() {
-    builtin.initPackage(typeof(time_package));
-}
-
 [GoType("num:nint")] partial struct counter;
 
 internal static nint Len(this counter c) {
@@ -31,11 +19,7 @@ internal static nint Len(this counter c) {
     return b.n;
 }
 
-[GoType("dyn")] partial interface run_type {
-    nint Len();
-}
-
-[GoType("dyn")] partial interface run_typeᴛ1 {
+[GoType("dyn")] internal partial interface run_type {
     nint Len();
 }
 
@@ -49,7 +33,7 @@ internal static nint run(nint n) {
             }
         }
         {
-            var (v, ok) = values[1]._<run_typeᴛ1>(ᐧ); if (ok) {
+            var (v, ok) = values[1]._<run_type>(ᐧ); if (ok) {
                 total += v.Len();
             }
         }

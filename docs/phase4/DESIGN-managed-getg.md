@@ -215,6 +215,44 @@ a door this design moves; and `~` on a null `ж<T>` is a CLR `NullReferenceExcep
 null operand, not golib's nil-pointer panic — `GoFrame.IsPanic` adopts only `PanicException`, so under
 (A) the death is as unrecoverable as today's and less informative.
 
+### 5a. AMENDMENT 2026-09-08 (C1) — the SECOND of those three facts expires with this commit's own train, and the conclusion it supports gets STRONGER
+
+The sentence above — *"a runtime `throw(msg)` … dies at `fatalthrow`'s `getcallerpc()` BEFORE its own
+`getg()` — a `throw` is not a door this design moves"* — was TRUE when it was written and is TRUE at
+master. ⚠ **Line numbers below are named with their TREE, because this amendment's own commit moves
+them** — the same layer discipline the two-pin citation rule asks for, one axis over. **At
+`origin/master`**: `runtime/panic.cs:1090` `@throw` calls `fatalthrow(throwTypeRuntime)` at `:1098`,
+`fatal` calls `fatalthrow(throwTypeUser)` at `:1118`, and `fatalthrow` (`:1265`) opens with
+`getcallerpc()`, a bodyless partial the generator fills with a throw. **It stops being true in the train
+that carries this amendment**, and the sharpest evidence is on this very branch: `panic.cs` no longer
+declares `@throw` or `fatal` at all, while `fatalthrow` survives at `:1214` and `fatalpanic` at `:1245`
+— **the declarations stand and their callers are gone**, which is precisely what "unreached rather than
+unimplemented" means. The fatal-path chain (`claude/c1-fatal-path-body` `8fdbd4704`, train 46)
+displaces `throw` and `fatal` through `manualConversionFuncs` onto `runtime/panic_impl.cs:67` and `:76`,
+whose bodies do nothing but forward to golib's `FatalReport.Fatal`, which formats Go's report and calls
+`Environment.Exit(2)` (`golib/runtime/FatalReport.cs:141`). `fatalthrow` is never called, so
+`getcallerpc()` is never reached. That commit's own header records the census the displacement rests on:
+`fatalthrow` had exactly two callers and `fatalpanic` one (already dead at its own `getcallerpc()`), so
+**`fatalthrow`, `fatalpanic`, `getcallerpc` and `getcallersp` all become UNREACHED rather than
+unimplemented.**
+
+**The MECHANISM becomes false; the CONCLUSION stands and is strengthened.** A `throw` is still not a door
+this design moves — after the chain it is a *deterministic exit at the primitive* rather than a death at a
+different stub one frame earlier, which is a cleaner reason for the same claim. Nothing in §5's table
+moves: no row's "today", "(A)" or "(B)" column mentions `throw`.
+
+⚠ **§8.2 does not rest on this fact.** The `TestDebugCall` family reaches `getg` through
+`runtime.Getg()` (`export_test.go:573`) from `debugCallWorker`, and has nothing to do with `throw`; its
+prediction is unaffected. A census over every record in `docs/` found this premise load-bearing in
+**exactly one place** — here — outside the fatal arc's own documents.
+
+**Why the amendment rides the chain rather than landing earlier or later.** Committed on its own it would
+be FALSE on master; left to a landing-day fixup it would depend on an owner this record does not name.
+Appended here, on the branch that carries the change, it is true on every tree it can reach. Per the
+record-amendment rule it is a dated block: the original sentence above is left standing exactly as
+written, because a premise that expired is evidence about when it was true, not an error to erase.
+(COORD ruling, mailbox `f916391`.)
+
 ## 6. The shape — (B), and why the `m` is not the replaced representation
 
 **What is minted.** On the first `getg()` from a thread: one heap box of `g` and one heap box of `m`,

@@ -1,8 +1,10 @@
 // projectFileWriter.go - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
-// that can be found in the LICENSE file.
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // This file owns everything the converter writes that is NOT C# source: the .csproj, the icons
 // and publish profiles beside it, and the mechanics of getting an output file onto disk at all.
@@ -485,6 +487,21 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	// axis are measured separately (design §4 vs §4.3) and need not coincide.
 	newContents = []byte(applyPlatformReferenceAdoption(string(newContents), projectFileName,
 		goosOfTarget(options.targetPlatform), emittedReferences))
+
+	// Resolve the template's license marker for EVERY output type: a library packs real license
+	// metadata (licensing.go), an application resolves the same marker to the local-LICENSE form so
+	// the placeholder comment never survives into an emitted project file.
+	var licenseErr error
+
+	if outputType == "Library" {
+		newContents, licenseErr = licenseConvertedProject(newContents, projectFileName, options)
+	} else {
+		newContents, licenseErr = licenseExecutableProject(newContents, options)
+	}
+
+	if licenseErr != nil {
+		return licenseErr
+	}
 
 	// Check if project file needs to be written
 	if needToWriteFile(projectFileName, newContents) {

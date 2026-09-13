@@ -1,7 +1,19 @@
+go2cs contains components under multiple licenses.
+
+The MIT grant below applies to original runtime/support libraries, source generators,
+tests, tour, documentation and infrastructure, except where a file carries other terms.
+It does not grant MIT rights in the converter under src/go2cs or the BSD-licensed
+standard-library packages under src/core (excluding golib and go2cs), or replace upstream
+licenses on Go-derived and other third-party material. See LICENSING.md and NOTICE.
+The converter is AGPL-3.0-only; its license is src/go2cs/LICENSE, with the additional
+permission for emitted output in src/go2cs/LICENSE-EXCEPTION. Alternative commercial
+licensing for the converter is available from the copyright holder listed in AUTHORS.
+
 MIT License
 
 Copyright (c) 2018-2026 The go2cs Authors.
-See the AUTHORS file for the complete list of authors.
+For the complete list of authors, see:
+https://github.com/ritchiecarroll/go2cs/blob/master/AUTHORS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

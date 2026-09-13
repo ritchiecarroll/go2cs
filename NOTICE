@@ -26,3 +26,16 @@ may not be limited to, the following:
 
 * The go2cs icon was designed by William N. Carroll:
        see: https://github.com/ritchiecarroll/go2cs/blob/master/docs/images/
+
+Licensing boundaries are described in LICENSING.md. The converter uses
+AGPL-3.0-only with the go2cs Converter Output Exception (src/go2cs/LICENSE-EXCEPTION,
+an additional permission under AGPL section 7 covering everything the converter
+emits); original runtime/support components use MIT; the converted standard library
+and the project-owned additions inside it use BSD-3-Clause. Alternative commercial
+licensing for the converter is available from the copyright holder listed in the
+AUTHORS file, at the contact address given there. Existing third-party notices above remain applicable,
+including the Go gopher/icon attribution.
+
+"go2cs" and the go2cs logo identify this project. The licenses grant copyright
+permissions only, not the right to use the name or logo for a different product or
+a fork (LICENSING.md, "Name and trademark").

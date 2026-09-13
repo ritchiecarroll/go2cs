@@ -1,0 +1,44 @@
+name: CLA Assistant
+# Records each contributor's one-time relicensing grant for the converter (CONTRIBUTING.md,
+# section 2). It runs only for pull requests that touch src/go2cs: the MIT and BSD components need
+# the DCO sign-off alone (dco.yml). A contributor accepts by posting the exact sentence configured
+# below as a comment on the pull request; the action stores the acceptance in
+# .github/cla-signatures.json on master and reports a status check, so a converter pull request
+# from someone who has not accepted cannot merge while that check is required.
+#
+# pull_request_target is the trigger this action documents: the job runs with the base repository's
+# token and never checks out or executes the pull request's code, which is what makes that trigger
+# safe here.
+on:
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened, closed, synchronize]
+    paths:
+      - 'src/go2cs/**'
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+  statuses: write
+jobs:
+  cla:
+    if: (github.event_name == 'issue_comment' && (github.event.comment.body == 'recheck' || github.event.comment.body == 'I agree to the relicensing grant in CONTRIBUTING.md, section 2.')) || github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Relicensing grant for converter contributions
+        uses: contributor-assistant/github-action@v2.6.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path-to-document: 'https://github.com/ritchiecarroll/go2cs/blob/master/CONTRIBUTING.md'
+          path-to-signatures: '.github/cla-signatures.json'
+          branch: 'master'
+          allowlist: ${{ github.repository_owner }},dependabot[bot],github-actions[bot]
+          custom-pr-sign-comment: 'I agree to the relicensing grant in CONTRIBUTING.md, section 2.'
+          custom-notsigned-prcomment: 'Thank you for the pull request. It changes the go2cs converter (`src/go2cs`), which is offered to the public under AGPL-3.0-only and to companies under commercial licenses, so a one-time relicensing grant is needed from each contributor; the terms are in [CONTRIBUTING.md, section 2](https://github.com/ritchiecarroll/go2cs/blob/master/CONTRIBUTING.md#2-relicensing-grant-for-converter-contributions). To accept, post this sentence as a comment on the pull request, exactly: `I agree to the relicensing grant in CONTRIBUTING.md, section 2.`'
+          custom-allsigned-prcomment: '**CLA Assistant Lite** Every contributor to this pull request has accepted the relicensing grant in CONTRIBUTING.md, section 2.'
+          create-file-commit-message: 'CLA Assistant: create the converter relicensing-grant signature file'
+          signed-commit-message: 'CLA Assistant: $contributorName accepted the converter relicensing grant in $owner/$repo#$pullRequestNo'
+          lock-pullrequest-aftermerge: 'false'
+          use-dco-flag: 'false'

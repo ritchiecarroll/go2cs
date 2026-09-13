@@ -58,12 +58,12 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("abi.go", "abi.cs", "AA1cgoKClIKCgpSCgoKUAAIYgoKUgoKUAAUQggACEoI=")]
-[assembly: go.GoPositionMap("compiletype.go", "compiletype.cs", "AAQegKaAqICmgKaA")]
-[assembly: go.GoPositionMap("escape.go", "escape.cs", "AAYmgoLugoKU")]
+[assembly: go.GoPositionMap("abi.go", "abi.cs", "ABFcgoKClIKCgpSCgoKUAAIYgoKUgoKUAAUQggACEoI=")]
+[assembly: go.GoPositionMap("compiletype.go", "compiletype.cs", "AAgegKaAqICmgKaA")]
+[assembly: go.GoPositionMap("escape.go", "escape.cs", "AAomgoLugoKU")]
 [assembly: go.GoPositionMap("main.go", "main.cs", "7oKCgoSEgoI=")]
-[assembly: go.GoPositionMap("switch.go", "switch.cs", "ABdAgoKYlKQ=")]
-[assembly: go.GoPositionMap("type.go", "type.cs", "AESIAoKClAAgRKKMqIKCgIKkpoCkgqiApoKogqaCABQuooKU1qKClAACFIIADiSigpSmggAUMqKCgpQAKgiigpSUpKysrKysrKwABBKilIKkgqSCpIKkgqSoooKUqKKClKiigpSoooKUqKKClKiApoCkgAAIEIKCgpSmooKClKiAAA4igqSCpIKkgqSCpqKClAANMoKmgqaCpoLWooKClIKU1KKCgpSCgpSmggANHIIADFKC2oKogqiCqILagoKCgoKCzIKClIKsgoKCgoKClOqCgpSCqIKClIKCpoKClIKUgoKChIKCgpSCgpSCloKCgoKCgoKW")]
+[assembly: go.GoPositionMap("switch.go", "switch.cs", "ABtAgoKYlKQ=")]
+[assembly: go.GoPositionMap("type.go", "type.cs", "AEiIAoKClAAgRKKMqIKCgIKkpoCkgqiApoKogqaCABQuooKU1qKClAACFIIADiSigpSmggAUMqKCgpQAKgiigpSUpKysrKysrKwABBKilIKkgqSCpIKkgqSoooKUqKKClKiigpSoooKUqKKClKiApoCkgAAIEIKCgpSmooKClKiAAA4igqSCpIKkgqSCpqKClAANMoKmgqaCpoLWooKClIKU1KKCgpSCgpSmggANHIIADFKC2oKogqiCqILagoKCgoKCzIKClIKsgoKCgoKClOqCgpSCqIKClIKCpoKClIKUgoKChIKCgpSCgpSCloKCgoKCgoKW")]
 // </GoSourcePositionMaps>
 
 namespace go;

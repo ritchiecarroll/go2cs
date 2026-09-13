@@ -1063,60 +1063,9 @@ internal static void sync_fatal(@string s) {
     fatal(s);
 }
 
-// throw triggers a fatal error that dumps a stack trace and exits.
-//
-// throw should be used for runtime-internal fatal errors where Go itself,
-// rather than user code, may be at fault for the failure.
-//
-// NOTE: temporarily marked "go:noinline" pending investigation/fix of
-// issue #67274, so as to fix longtest builders.
-//
-// throw should be an internal detail,
-// but widely used packages access it using linkname.
-// Notable members of the hall of shame include:
-//   - github.com/bytedance/sonic
-//   - github.com/cockroachdb/pebble
-//   - github.com/dgraph-io/ristretto
-//   - github.com/outcaste-io/ristretto
-//   - github.com/pingcap/br
-//   - gvisor.dev/gvisor
-//   - github.com/sagernet/gvisor
-//
-// Do not remove or change the type signature.
-// See go.dev/issue/67401.
-//
-//go:linkname throw
-//go:nosplit
-internal static void @throw(@string s) {
-    // Everything throw does should be recursively nosplit so it
-    // can be called even when it's unsafe to grow the stack.
-    systemstack(() => {
-        print((@string)"fatal error: "u8);
-        printindented(s); // logically printpanicval(s), but avoids convTstring write barrier
-        print((@string)"\n"u8);
-    });
-    fatalthrow(throwTypeRuntime);
-}
+// go2cs generated this placeholder — func throw is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// fatal triggers a fatal error that dumps a stack trace and exits.
-//
-// fatal is equivalent to throw, but is used when user code is expected to be
-// at fault for the failure, such as racing map writes.
-//
-// fatal does not include runtime frames, system goroutines, or frame metadata
-// (fp, sp, pc) in the stack trace unless GOTRACEBACK=system or higher.
-//
-//go:nosplit
-internal static void fatal(@string s) {
-    // Everything fatal does should be recursively nosplit so it
-    // can be called even when it's unsafe to grow the stack.
-    systemstack(() => {
-        print((@string)"fatal error: "u8);
-        printindented(s); // logically printpanicval(s), but avoids convTstring write barrier
-        print((@string)"\n"u8);
-    });
-    fatalthrow(throwTypeUser);
-}
+// go2cs generated this placeholder — func fatal is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // runningPanicDefers is non-zero while running deferred functions for panic.
 // This is used to try hard to get a panic stack trace out when exiting.

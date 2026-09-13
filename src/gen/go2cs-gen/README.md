@@ -20,3 +20,5 @@ This is a development-time dependency (analyzer); it ships no runtime assembly.
 ## License
 
 MIT. See the [go2cs repository](https://github.com/ritchiecarroll/go2cs).
+
+Artwork licensed under Creative Commons Attribution 3.0; see [artwork attribution](https://github.com/ritchiecarroll/go2cs/blob/master/docs/images/README).

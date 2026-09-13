@@ -1,0 +1,33 @@
+name: DCO
+# Every pull-request commit carries a Developer Certificate of Origin sign-off (CONTRIBUTING.md).
+# For a change under src/go2cs the sign-off also carries the relicensing grant that keeps the
+# converter's commercial licensing channel open, so this check is part of what makes that channel
+# real rather than a sentence in a policy file. Pushes to master are the maintainer's own and are
+# not checked here.
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  dco:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Every commit in the pull request is signed off
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          total=$(git rev-list --no-merges --count "$BASE".."$HEAD")
+          missing=$(git log --no-merges --format='%h %s' --invert-grep --grep='^Signed-off-by: ' "$BASE".."$HEAD")
+          echo "commits checked: $total"
+          if [ "$total" -eq 0 ]; then echo "no commits to check (pull request range is empty)"; exit 1; fi
+          if [ -n "$missing" ]; then
+            echo "Commits without a Signed-off-by trailer (git commit -s adds it; see CONTRIBUTING.md):"
+            echo "$missing"
+            exit 1
+          fi
+          echo "all $total commit(s) carry a Signed-off-by trailer"

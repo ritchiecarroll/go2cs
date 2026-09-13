@@ -405,3 +405,11 @@ scratchpad/
 # `src/core/.gitignore`'s `*.go` rule still applies: a deeper .gitignore takes precedence, so
 # staged Go source copies stay ignored.
 !src/core/**/testdata/**
+
+# Session worktrees. These are ignored on the coordinator box only through .git/info/exclude, which
+# is LOCAL and never committed — so on any other machine `git add .claude/...` would sweep hundreds
+# of thousands of worktree files into a commit. Committing `.claude/rules/` and `.claude/skills/`
+# (the CLAUDE.md split, 2026-09-12, docs/PLAN-context-diet.md) is what puts tracked content under
+# `.claude/` for the first time and makes that reachable, so the rule is tracked here rather than
+# left to each clone's private exclude file.
+**/.claude/worktrees/

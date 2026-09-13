@@ -4,7 +4,7 @@ Measures handshake cost with **no `WriteTimeout` set** and keep-alives disabled,
 pays a full handshake. Written to answer whether net/http's `/h2` write-deadline divergence is a
 performance gap or a deadline-semantics fault; see MAILBOX 2026-08-29.
 
-Measured on GRETCHEN-LAPTOP (2026-08-29), three runs per side:
+Measured on G-LAPTOP (2026-08-29), three runs per side:
 
 | | mean | worst |
 |---|---|---|

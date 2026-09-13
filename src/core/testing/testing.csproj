@@ -26,7 +26,7 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageId>go.testing</PackageId>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageDescription>testing ($(TargetFramework) - $(Configuration)) -- hand-implemented C# counterpart of Go's testing package; the go2cs Phase-4 test host</PackageDescription>
     <PackageProjectUrl>https://github.com/ritchiecarroll/go2cs</PackageProjectUrl>
     <PackageIcon>go2cs.png</PackageIcon>
@@ -36,6 +36,9 @@
   <ItemGroup>
     <None Include="go2cs.png" Pack="true" PackagePath="" Visible="false" />
     <None Include="go2cs.ico" Pack="true" PackagePath="" Visible="false" />
+    <None Include="LICENSE" Pack="true" PackagePath="" Condition="Exists('$(MSBuildProjectDirectory)/LICENSE')" />
+    <None Include="NOTICE" Pack="true" PackagePath="" Condition="Exists('$(MSBuildProjectDirectory)/NOTICE')" />
+    <None Include="AUTHORS" Pack="true" PackagePath="" Condition="Exists('$(MSBuildProjectDirectory)/AUTHORS')" />
   </ItemGroup>
 
   <ItemGroup>
@@ -94,4 +97,7 @@
     <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="../LICENSE" Pack="true" PackagePath="" Condition="!Exists('$(MSBuildProjectDirectory)/LICENSE')" />
+  </ItemGroup>
 </Project>

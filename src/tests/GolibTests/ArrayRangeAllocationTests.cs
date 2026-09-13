@@ -361,6 +361,12 @@ public class ArrayRangeAllocationTests
 
         public byte[] Storage { get; }
 
+        // Answered explicitly rather than by a default interface implementation: a default
+        // would report FALSE for a backing it cannot see, so a stand-in that forgot to answer
+        // would silently claim "not nil". Explicit on every implementer makes a new one a
+        // COMPILE error instead -- which is how this very type was found.
+        public bool IsNil => Storage is null;
+
         public Array? Source => Storage;
 
         public nint Length => Storage.Length;

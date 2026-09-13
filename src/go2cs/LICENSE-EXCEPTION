@@ -1,0 +1,60 @@
+go2cs Converter Output Exception
+Version 1.0, 11 September 2026
+
+Copyright (c) 2018-2026 The go2cs Authors.
+For the complete list of authors, see:
+https://github.com/ritchiecarroll/go2cs/blob/master/AUTHORS
+
+This is an additional permission under section 7 of the GNU Affero General
+Public License, version 3 (the "AGPL"), granted by the copyright holders of the
+go2cs converter -- the program whose source files sit beside this file and
+refer to it in their license headers (the "Converter"). The AGPL text is in the
+LICENSE file beside this one.
+
+0. Definitions
+
+   "Embedded Templates" means the non-Go assets compiled into the Converter and
+   reproduced in its output: the project-file templates, the package metadata
+   template, the publish profiles and the icon files named by the //go:embed
+   directives in embeddedTemplates.go, together with any later asset the
+   Converter embeds for the same purpose.
+
+   "Output" means the files the Converter writes when it is run on Go source
+   code: converted C# source, project and solution files, package metadata,
+   generated adapters and test hosts, READMEs, publish profiles and icons,
+   including every copy or adaptation of an Embedded Template and every other
+   scaffolding or boilerplate text the Converter emits that is not derived from
+   the Go input.
+
+1. Grant
+
+   Output is not a "covered work" under the AGPL merely because the Converter
+   produced it. You may use, copy, modify, distribute and sublicense Output, in
+   source or binary form, under terms of your choosing, without the AGPL
+   applying to the Output, whether the Converter that produced it was modified
+   or unmodified.
+
+   To the extent Output contains material copied or adapted from the Embedded
+   Templates or from other original go2cs scaffolding, and that material would
+   otherwise be subject to the AGPL as part of the Converter, the copyright
+   holders grant you permission to use that material under the terms of the
+   MIT License (the text is in LICENSES/MIT.txt in the go2cs repository).
+   Keeping the attribution the Converter emits, or referring to this exception,
+   satisfies the MIT notice requirement for that material.
+
+2. Limits
+
+   This exception does not change the license of any Go input, of any material
+   in the Output derived from that input, or of any separately licensed
+   component the Output references or incorporates; the go2cs runtime library,
+   the go2cs source generators and the converted Go standard library carry
+   their own licenses. It does not apply to the Converter itself, to its source
+   code, or to any modified version of the Converter, all of which remain
+   covered by the AGPL. Nothing in this exception grants any trademark right.
+
+3. Notices
+
+   The Converter's source files refer to this exception in their license
+   headers, as section 7 of the AGPL requires for an additional permission.
+   When you convey the Converter, or a modified version of it, you may keep
+   this exception in place so that the same permission reaches your recipients.

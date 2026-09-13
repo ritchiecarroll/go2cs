@@ -1,0 +1,44 @@
+name: Licensing boundaries
+# Master and pull requests only: the OS matrix runs on a schedule and on dispatch, and a lane branch
+# pushes many times a day, so an unfiltered push trigger would spend a CI run per lane push on a
+# check whose whole point is the tree that lands.
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/go2cs/**'
+      - 'src/core/**'
+      - 'src/gen/**'
+      - 'LICENSE*'
+      - 'LICENSING.md'
+      - 'LICENSES/**'
+      - 'NOTICE'
+      - 'AUTHORS'
+      - '.github/workflows/licensing.yml'
+  pull_request:
+    paths:
+      - 'src/go2cs/**'
+      - 'src/core/**'
+      - 'src/gen/**'
+      - 'LICENSE*'
+      - 'LICENSING.md'
+      - 'LICENSES/**'
+      - 'NOTICE'
+      - 'AUTHORS'
+      - '.github/workflows/licensing.yml'
+permissions:
+  contents: read
+jobs:
+  licensing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: src/go2cs/go.mod
+          cache-dependency-path: src/go2cs/go.sum
+      - name: Check BSD standard-library headers and packaging, notices and licensing boundaries
+        working-directory: src/go2cs
+        env:
+          GOFLAGS: -buildvcs=false
+        run: go test -buildvcs=false ./... -run '^TestLicensing' -count=1

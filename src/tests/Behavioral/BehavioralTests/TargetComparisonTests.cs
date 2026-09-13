@@ -28,6 +28,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAddressOfParamWrite() => CheckTarget("AddressOfParamWrite");
 
     [TestMethod]
+    public void CheckAliasNamespaceShadow() => CheckTarget("AliasNamespaceShadow");
+
+    [TestMethod]
     public void CheckAliasStructComposite() => CheckTarget("AliasStructComposite");
 
     [TestMethod]
@@ -1513,6 +1516,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckRecvMapElementDeref() => CheckTarget("RecvMapElementDeref");
 
     [TestMethod]
+    public void CheckRefLoweredDeferChain() => CheckTarget("RefLoweredDeferChain");
+
+    [TestMethod]
     public void CheckRefLoweredNilTiming() => CheckTarget("RefLoweredNilTiming");
 
     [TestMethod]
@@ -1739,6 +1745,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSliceToArrayPointerAlias() => CheckTarget("SliceToArrayPointerAlias");
+
+    [TestMethod]
+    public void CheckSliceTypeParamNil() => CheckTarget("SliceTypeParamNil");
 
     [TestMethod]
     public void CheckSockaddrRoundTrip() => CheckTarget("SockaddrRoundTrip");

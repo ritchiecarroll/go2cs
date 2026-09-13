@@ -1,7 +1,8 @@
 // mem_persistent_impl.cs - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
+// SPDX-License-Identifier: BSD-3-Clause
+// Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
 // persistentalloc1 and inPersistentAlloc, hand-owned (increment 6 of the runtime row, Q-memory W1;

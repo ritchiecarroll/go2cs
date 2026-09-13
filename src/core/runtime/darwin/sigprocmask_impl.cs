@@ -1,7 +1,8 @@
 // sigprocmask_impl.cs - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
+// SPDX-License-Identifier: BSD-3-Clause
+// Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
 // The darwin run layer's increment 5 (2026-09-04): runtime.sigprocmask, the darwin flavour's

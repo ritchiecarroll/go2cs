@@ -1,8 +1,10 @@
 // visitFile.go - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
-// that can be found in the LICENSE file.
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 package main
 
@@ -62,6 +64,14 @@ func (v *Visitor) visitFile(file *ast.File) {
 		})
 
 		v.writeDoc(file.Doc, file.Package)
+	}
+
+	// License notices are retained even when ordinary comments are disabled.
+	if !v.options.includeComments {
+		v.outputBuilder.WriteString(sourceLicenseNotices(file, v.newline))
+	}
+	if v.options.provenance {
+		v.outputBuilder.WriteString(sourceProvenance(v.fset.PositionFor(file.Package, false).Filename, v.options, v.newline))
 	}
 
 	// Derive package name

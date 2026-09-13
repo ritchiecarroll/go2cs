@@ -223,7 +223,11 @@ public static class CrashReport
         WriteToCrashOutput(report);
     }
 
-    private static void WriteToCrashOutput(string report)
+    // internal rather than private because the FATAL path tees to the same descriptor: Go's
+    // debug.SetCrashOutput documents itself as covering "unhandled panics and other fatal errors",
+    // and one writer for both is what keeps the two from drifting apart. FatalReport.Fatal is the
+    // only other caller.
+    internal static void WriteToCrashOutput(string report)
     {
         nuint fd = CrashOutputFd;
 

@@ -30,6 +30,7 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("696e746572666163657b4c656e282920696e747d", "run_type")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -52,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("PerfIfaceShell.go", "PerfIfaceShell.cs", "ABVmgOiAAAoEhIKEgoCCpoCCuOaChISCgg==")]
+[assembly: go.GoPositionMap("PerfIfaceShell.go", "PerfIfaceShell.cs", "AAlmgOiA5ISChIKAgqaAgrjmgoSEgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -68,8 +69,18 @@ public static partial class main_package
 
     // <TypeAccessibility>
     internal partial interface run_type {}
-    internal partial interface run_typeᴛ1 {}
     internal partial struct box {}
     internal partial struct counter {}
     // </TypeAccessibility>
+
+    // Go initializes an imported package before the importing package, for every import
+    // form - not only the blank one. .NET would never load an assembly nothing has touched
+    // yet, so each import that initializes anything is forced below: once per assembly, and
+    // ahead of this package's own `init` functions, which this file being the first compile
+    // item of the project guarantees.
+
+    // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
+    // </ImportInitializers>
 }

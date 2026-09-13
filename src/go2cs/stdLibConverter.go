@@ -1,8 +1,10 @@
 // stdLibConverter.go - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
-// that can be found in the LICENSE file.
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // This file contains extensions to the go2cs project for handling standard library conversion
 package main
@@ -181,6 +183,14 @@ func (c *StdLibConverter) copyRootAttributionFiles() error {
 			// Not every Go version ships every file; skip what isn't there.
 			fmt.Printf("WARNING: Skipping root file %s: %v\n", name, err)
 			continue
+		}
+
+		// The shared LICENSE also covers the project-owned BSD-licensed hand-owns beside the
+		// converted packages, so the go2cs Authors are added as a copyright holder on its second
+		// line -- deterministically, HERE, so a regeneration reproduces the committed file instead
+		// of reverting a hand edit (licensing.go, withGo2csCopyright).
+		if name == "LICENSE" {
+			data = withGo2csCopyright(data)
 		}
 
 		destPath := filepath.Join(destDir, name)

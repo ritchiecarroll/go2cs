@@ -108,4 +108,9 @@
        normalizes it on Unix regardless, so it is not a portability seam. -->
   <Import Project="..\go2cs\go2cs.projitems" Label="Shared" />
 
+  <ItemGroup>
+    <None Include="LICENSE" Pack="true" PackagePath="" Condition="Exists('$(MSBuildProjectDirectory)/LICENSE')" />
+    <None Include="NOTICE" Pack="true" PackagePath="" Condition="Exists('$(MSBuildProjectDirectory)/NOTICE')" />
+    <None Include="AUTHORS" Pack="true" PackagePath="" Condition="Exists('$(MSBuildProjectDirectory)/AUTHORS')" />
+  </ItemGroup>
 </Project>

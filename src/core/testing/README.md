@@ -9,4 +9,6 @@ Package testing provides support for automated testing of Go packages. This is t
 
 ---
 
-This package is a hand-maintained implementation of the Go standard library's `testing` API rather than converted Go source — hand-owning the test host is what keeps one `testing` package shared by every converted test project. The go2cs implementation is distributed under the MIT license.
+This package is a hand-maintained implementation of the Go standard library's `testing` API rather than converted Go source — hand-owning the test host is what keeps one `testing` package shared by every converted test project. The go2cs implementation is distributed under the same BSD-3-Clause license as the converted standard library, which can be found in the [LICENSE](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/LICENSE) file.
+
+Artwork licensed under Creative Commons Attribution 3.0; see [artwork attribution](https://github.com/ritchiecarroll/go2cs/blob/master/docs/images/README).

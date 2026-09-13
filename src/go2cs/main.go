@@ -1,8 +1,10 @@
 // main.go - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
-// that can be found in the LICENSE file.
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // go2cs converts Go source code into C# that a Go developer can read and follow.
 //
@@ -208,6 +210,8 @@ func main() {
 	indentSpacesCmd := commandLine.Int("indent", 4, "Number of spaces for indentation")
 	preferVarDeclCmd := commandLine.Bool("var", true, "Prefer \"var\" declarations")
 	useChannelOperatorsCmd := commandLine.Bool("uco", true, fmt.Sprintf("Use channel operators: %s / %s", ChannelLeftOp, ChannelRightOp))
+	licenseCmd := commandLine.String("license", "", "Override NuGet license metadata with an SPDX expression (for example MIT or BSD-3-Clause); does not relicense input code")
+	provenanceCmd := commandLine.Bool("provenance", false, "Include a deterministic source-file provenance comment (no conversion timestamp)")
 	includeCommentsCmd := commandLine.Bool("comments", false, "Include comments in output")
 	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Parse cgo targets")
 	showParseTreeCmd := commandLine.Bool("tree", false, "Show parse tree")
@@ -435,6 +439,8 @@ Examples:
 		preferVarDecl:       *preferVarDeclCmd,
 		useChannelOperators: *useChannelOperatorsCmd,
 		includeComments:     *includeCommentsCmd,
+		provenance:          *provenanceCmd,
+		licenseExpression:   strings.TrimSpace(*licenseCmd),
 		parseCgoTargets:     *parseCgoTargetsCmd,
 		showParseTree:       *showParseTreeCmd,
 		debugMode:           *debugModeCmd,

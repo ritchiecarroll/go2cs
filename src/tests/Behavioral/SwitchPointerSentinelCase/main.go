@@ -129,7 +129,44 @@ func main() {
 	var elsewhere mu
 	fmt.Println(preferLowLatency(&theSched.lock), preferLowLatency(&elsewhere), preferLowLatency(nil))
 
+	// Defect D: an above-MaxUint32 literal in the SIGNED parse band reaching a native-width
+	// unsigned destination, through BOTH doors. The high byte is 1 and not 0 unless the width
+	// cast truncated to 32 bits.
+	fmt.Println(nativeWidthLiterals())
+
 	// ⚠ The element-address rows are DELIBERATELY NOT CALLED -- see key8's header. They guard
 	// defect A's COMPILE SHAPE only; calling them reaches DEFECT E, which is a golib model
 	// question rather than anything this project can assert.
+}
+
+// ------------------------------------------------------------------------------------------------
+// DEFECT D's row, RESTORED. An above-MaxUint32 untyped constant reaching a NATIVE-WIDTH unsigned
+// destination (`uintptr`) must carry the width cast: without it the emitted `ulong` literal has no
+// implicit conversion to `nuint` and the package does not compile (CS0266).
+//
+// ⚠ THE BAND IS THE POINT, and it is why this row is here rather than assumed covered. convBasicLit
+// takes TWO paths above MaxUint32 — a SIGNED parse for values <= MaxInt64 and an UNSIGNED parse
+// above it — and only the UNSIGNED one carried the native-width rule, so defect D lived exactly in
+// the SIGNED band. `GoShiftSemantics` exercises the unsigned band (0x8000000000000001) and looks
+// like coverage from a distance; it is not. Both literals below are in the SIGNED band on purpose.
+//
+// This row exists because D's ONLY assertion was `var word uintptr = 0x0102030405060708` beside the
+// element-address rows, and retiring those rows for defect E deleted it as collateral damage — the
+// two lived in one statement. Restored here where nothing reaches defect E.
+//
+// BOTH DOORS: `nativeWidthUnsignedPrefix` keys on the literal's RESOLVED TYPE and therefore serves a
+// declaration and an assignment alike — a claim worth an ASSERTION rather than a comment.
+//
+// It asserts VALUES, not merely that it compiles: a width cast that TRUNCATED to 32 bits would still
+// compile and would still print a plausible number, so the high byte is printed too — 0x01 for the
+// declared word, 0x00 if the top half were lost.
+func nativeWidthLiterals() (declared, assigned, highByte uintptr) {
+	var word uintptr = 0x0102030405060708 // DOOR 1: declaration with initializer
+	declared = word
+	highByte = word >> 56
+
+	word = 0x7fedcba987654321 // DOOR 2: plain assignment, same band
+	assigned = word
+
+	return
 }

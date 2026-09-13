@@ -1,10 +1,12 @@
 // fleetIdentifierCensus_test.go - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
-// that can be found in the LICENSE file.
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
-package main
+package repoguard
 
 import (
 	"bytes"
@@ -35,6 +37,13 @@ import (
 // This is the same invariant-in-the-cheapest-place move projitemsIntegrity_test.go makes: it runs in
 // the converter's own `go test ./...`, which every lane already pays for, so a reintroduction is a
 // red converter suite at the merge rather than a scrub weeks later.
+//
+// It runs there from THIS package rather than from package main, and so does contextBudget_test.go
+// beside it. Neither guard tests converter behaviour. Both used to fail as `go2cs`, so a docs or
+// record edit could redden a run made right after a converter change, and the first hypothesis was
+// that the converter change broke something. `go test ./...` from src\go2cs walks internal\, so
+// nothing about WHEN or WHERE they run changed. What changed is that a failure prints as
+// `go2cs/internal/repoguard`, which says "not converter code" before anyone forms a hypothesis.
 //
 // TWO PASSES, because neither sees what the other does.
 //
@@ -105,6 +114,7 @@ var fleetDeniedTokens = []fleetDeniedToken{
 	{7, "20befabea93592064aad4d07e1af70c5d6859667e1edffdb591accf60e2993ee", "fleet account name"},
 	{8, "deff430814c33ac000dbdf4bd1061321b8387df004594375c947fabf73d3acc1", "fleet account name"},
 	{13, "1070b0f89514d6852350c53ac7682edcb2d41f38d66fb95c340cdec08802c74e", "fleet machine name"},
+	{15, "64bcb3dc70c4e605e5f1f29e4e42af4ab20de3b69f6452e5d5444305f432ea6d", "fleet machine name"},
 }
 
 // fleetDeniedIndex groups the denylist by token length, so a line's tokens are hashed only when
@@ -282,6 +292,92 @@ func scanFleetIdentifiers(path string, content []byte, denied map[int]map[string
 			out = append(out, fleetFinding{path, n, "denied-token"})
 		}
 	}
+
+	// ⚠ THE SECOND PASS, over the same content with LINE BREAKS CLOSED. Every arm above is
+	// line-based, so a token that exists on NO SINGLE LINE is invisible to all of them at once --
+	// measured on this guard: the inline shape FIRES while the same token split across a break, with
+	// an indented continuation, or with a trailing space before the break, all read zero findings.
+	// The hole was found in three independent gates on one day (a lane's post census, a second
+	// lane's pre-post census, and this one), which is why the remedy is placed HERE rather than in
+	// each arm: a per-arm patch protects today's arms and silently misses the one added tomorrow.
+	//
+	// Whitespace is collapsed only where it ABUTS the break. Stripping all whitespace would close
+	// the same shapes and fuse arbitrary adjacent words, so the short arms would start firing on
+	// ordinary prose; restricting the fusion to line boundaries keeps the false-positive surface to
+	// word pairs that a break separates. Findings carry line 0 and a "-split" kind, because a line
+	// number means nothing in joined text and a reader must not be sent to a line that reads clean.
+	if joined := fleetJoinLineBreaks(content); joined != nil {
+		if structural {
+			if fleetHasFold(joined, "users") || bytes.Contains(joined, []byte("/home/")) {
+				// ⚠ ON THE JOINED SURFACE ONLY, the path must CONTINUE past the segment. Measured
+				// 2026-09-08, after i9 (0a1e7a0f8d) found that collapsing whitespace at a break fuses
+				// ORDINARY PROSE into what short structural arms match, and R (6fc8978fa8) measured the
+				// opposite constraint -- that dropping these arms from the joined pass is the
+				// FALSE-PASS direction, because a genuinely wrapped path then goes clean.
+				//
+				// Both are true of THIS gate, so neither lane's remedy was taken. Unqualified, this arm
+				// gave FOUR false refusals on prose this project writes constantly (a line ending in a
+				// profile-root word, the next opening with a separator and a short path word); removing
+				// it from the joined surface lost THREE of four wrap positions for an account not yet on
+				// the denylist. The discriminator that separates them is not length -- a fused word of
+				// nine or ten characters is ordinary here -- it is that A LEAKED PATH CONTINUES past the
+				// account and FUSED PROSE DOES NOT: the next byte is a separator in the first case and a
+				// space or end-of-line in the second.
+				//
+				// Measured both ways with the arm set this gate actually has: EIGHT of eight wrap
+				// positions still refuse (posix and windows spellings, long and SHORT accounts, wrapped
+				// inside the account, at the separator, inside the root word, and before it), and all
+				// five prose shapes go clean including the long fused words. The residual is ONE shape
+				// -- a break falling exactly at the separator AND the path ending at the account AND the
+				// account unknown -- which the unqualified arm did catch; every other ending, and every
+				// denied account, is still refused. Stated because it is a real if narrow loss.
+				for _, ix := range fleetProfileRe.FindAllSubmatchIndex(joined, -1) {
+					end := ix[3]
+					if end < len(joined) && (joined[end] == '/' || joined[end] == '\\') {
+						fleetConsiderSegment(&out, path, 0, "profile-path-split", string(joined[ix[2]:ix[3]]), nil)
+					}
+				}
+			}
+			if bytes.Contains(joined, []byte(`\\`)) {
+				for _, m := range fleetNetworkRe.FindAllSubmatch(joined, -1) {
+					fleetConsiderSegment(&out, path, 0, "network-path-split", string(m[2]), fleetNicknameHostSegments)
+				}
+			}
+		}
+		if !clearedTokens && fleetLineHasDeniedToken(joined, denied) {
+			out = append(out, fleetFinding{path, 0, "denied-token-split"})
+		}
+	}
+
+	return out
+}
+
+// fleetJoinLineBreaks returns content with every line break -- and the whitespace immediately
+// abutting it -- removed, so a token split across a break becomes contiguous for the line-based
+// arms above. It returns nil when there is nothing to join, so a single-line file costs one scan
+// and no allocation.
+func fleetJoinLineBreaks(content []byte) []byte {
+	if bytes.IndexByte(content, '\n') < 0 {
+		return nil
+	}
+
+	out := make([]byte, 0, len(content))
+	i := 0
+	for i < len(content) {
+		c := content[i]
+		if c != '\n' && c != '\r' {
+			out = append(out, c)
+			i++
+			continue
+		}
+		// Drop the break, the whitespace before it (already appended), and the whitespace after.
+		for len(out) > 0 && (out[len(out)-1] == ' ' || out[len(out)-1] == '\t') {
+			out = out[:len(out)-1]
+		}
+		for i < len(content) && (content[i] == '\n' || content[i] == '\r' || content[i] == ' ' || content[i] == '\t') {
+			i++
+		}
+	}
 	return out
 }
 
@@ -398,18 +494,35 @@ func scanFleetTree(root string, rel []string, denied map[int]map[string]string) 
 	return out, read
 }
 
-// repoRootFromPackageDir walks up from src\go2cs to the repository root.
+// repoRootFromPackageDir walks up from the package directory to the first ancestor holding a .git
+// entry, which is the repository root.
+//
+// It SEARCHES rather than counting levels. It used to be a fixed filepath.Dir(filepath.Dir(wd)), which
+// was right only while these guards lived in src\go2cs, and moving them to src\go2cs\internal\repoguard
+// would have silently pointed it at src\go2cs instead of the root. A fixed depth breaks on every move,
+// and a search does not.
+//
+// .git is tested with os.Stat and never IsDir: in a git WORKTREE it is a FILE naming the real git
+// directory, and every lane in this fleet works from worktrees. The NEAREST .git wins, which is git's
+// own discovery rule, so the root found here is the tree `git -C <root> ls-files` then enumerates. No
+// .git anywhere above is a loud failure, because a guard that read a wrong root would scan the wrong
+// tree and pass.
 func repoRootFromPackageDir(t *testing.T) string {
 	t.Helper()
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("cannot determine the working directory: %v", err)
 	}
-	root := filepath.Dir(filepath.Dir(wd)) // src\go2cs -> src -> repo root
-	if _, err := os.Stat(filepath.Join(root, ".git")); err != nil {
-		t.Fatalf("repository root not found above %s: %v", wd, err)
+	for dir := wd; ; {
+		if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			t.Fatalf("repository root not found: no .git entry in %s or any ancestor", wd)
+		}
+		dir = parent
 	}
-	return root
 }
 
 // TestNoFleetIdentifiersInTrackedFiles is the guard. It enumerates TRACKED files only -- an
@@ -506,16 +619,39 @@ func TestFleetIdentifierScannerFiresAndRestores(t *testing.T) {
 		name string
 		line string
 		kind string
+		// split marks a plant whose token exists on NO SINGLE LINE. The joined pass reports those
+		// at line 0, because a line number means nothing in joined text.
+		split bool
 	}{
-		{"windows profile path", fmt.Sprintf("root at C:\\Users\\%s\\sdk\n", seg), "profile-path"},
-		{"posix home path", fmt.Sprintf("root at /home/%s/go\n", seg), "profile-path"},
-		{"unc host", fmt.Sprintf("share at \\\\%s\\public\\x\n", host), "network-path"},
-		{"bare denied token", "owner column reads " + controlToken + " here\n", "denied-token"},
-		{"denied token inside a machine name", "row names " + controlToken + "-desk2\n", "denied-token"},
+		{"windows profile path", fmt.Sprintf("root at C:\\Users\\%s\\sdk\n", seg), "profile-path", false},
+		{"posix home path", fmt.Sprintf("root at /home/%s/go\n", seg), "profile-path", false},
+		{"unc host", fmt.Sprintf("share at \\\\%s\\public\\x\n", host), "network-path", false},
+		{"bare denied token", "owner column reads " + controlToken + " here\n", "denied-token", false},
+		{"denied token inside a machine name", "row names " + controlToken + "-desk2\n", "denied-token", false},
 		// The arm that pays for the 2026-09-07 widening: '_' is a token character, so without it in
 		// the split set this line's whole run is one 20-character token that matches no bucket and
 		// the plant goes UNDETECTED. Remove '_' from fleetLineHasDeniedToken and this arm goes red.
-		{"denied token joined by underscores", "owner column reads x_" + controlToken + "_y\n", "denied-token"},
+		{"denied token joined by underscores", "owner column reads x_" + controlToken + "_y\n", "denied-token", false},
+
+		// ⚠ THE SPLIT ARMS. Every plant above sits on ONE line, and for a long time so did every arm
+		// of this control -- six shapes, one geometry -- which is exactly why the line-break hole
+		// survived in this guard and in two other gates until three lanes probed for it on the same
+		// day. A token that exists on no single line was invisible to every line-based arm at once.
+		// Remove the joined pass in scanFleetIdentifiers and these three go red; the six above stay
+		// green, which is the whole point of adding them.
+		{"profile path split across a line break", fmt.Sprintf("root at /home/\n%s/go\n", seg), "profile-path-split", true},
+		{"profile path split with an indented continuation", fmt.Sprintf("root at /home/\n    %s/go\n", seg), "profile-path-split", true},
+		{"denied token split across a line break", "owner column reads " + controlToken[:6] + "\n" + controlToken[6:] + " here\n", "denied-token-split", true},
+
+		// Shapes contributed by other lanes' probes, added because each was found by RUNNING a
+		// neighbour's control rather than reasoning that this one covered it. G named the
+		// trailing-space break; R named the BLANK LINE -- a paragraph break, the commonest break in
+		// prose, which none of the three gates had tested. Both pass here, and that is knowable only
+		// because they were run: R's own fix covered the bare split and left the indented case open
+		// on exactly the reasoning that "should cover it".
+		{"profile path split with a trailing space", fmt.Sprintf("root at /home/ \n%s/go\n", seg), "profile-path-split", true},
+		{"profile path split across a BLANK LINE", fmt.Sprintf("root at /home/\n\n%s/go\n", seg), "profile-path-split", true},
+		{"profile path split across a blank line with indent", fmt.Sprintf("root at /home/\n   \n   %s/go\n", seg), "profile-path-split", true},
 	}
 
 	for _, p := range plants {
@@ -550,6 +686,9 @@ func TestFleetIdentifierScannerFiresAndRestores(t *testing.T) {
 				t.Fatalf("planted %s was NOT detected -- this guard cannot go red", p.name)
 			}
 			wantLine := strings.Count(clean, "\n") + 1
+			if p.split {
+				wantLine = 0 // the joined pass has no meaningful line number
+			}
 			found := false
 			for _, f := range got {
 				if f.Kind == p.kind && f.Line == wantLine && f.Path == rel {
@@ -738,6 +877,121 @@ func TestFleetIdentifierNicknameHostsAreAdmitted(t *testing.T) {
 // (a record renamed, a corpus file relocated by a layout change) is dead weight that reads as
 // diligence, and a cleared SEGMENT that no longer appears in its file is a clearance covering
 // nothing -- the shape that lets a guard go quietly vacuous.
+// TestSplitRefusalIsAttributableToTheToken is i9's contributed control (mailbox 5e7e71a063), and it
+// closes a gap every shape probe in this fleet shared on 2026-09-08 -- four lanes, twenty-seven shapes
+// between them, all measuring the same one thing: THAT THE PLANT FIRES. None measured WHY.
+//
+// A refusal is evidence the gate caught the TOKEN only if an identically-shaped plant carrying a
+// HARMLESS token comes back CLEAN. Without that arm, a joiner that fused text too aggressively would
+// refuse everything split across a line break, and every "it FIRES" any of us posted would still read
+// PASS. The committed control here had clean-INLINE (the baseline record) and plant-SPLIT; it never had
+// clean-SPLIT, so the failure mode that the split FIX itself introduces was the one shape untested.
+//
+// Two properties, and the second is the one a red exit code cannot give: the plants fire, and they fire
+// THE NAMED ARM and nothing else.
+func TestSplitRefusalIsAttributableToTheToken(t *testing.T) {
+	const controlToken = "zzcontrolaccount"
+	denied := fleetDeniedIndex([]fleetDeniedToken{{len(controlToken), fleetHash(controlToken), "control token"}})
+
+	// Both are token-shaped and split identically. Only one is denied.
+	const harmless = "zzharmlessword"
+	const seg = "zzexampleaccount"
+
+	// Pieces for the prose arms below. ASSEMBLED rather than spelled, for the same reason the plants
+	// are: this file is a tracked file the guard scans, and a profile-root word followed by a
+	// separator written out here would make the guard refuse its own source. proseTail stands for an
+	// ordinary directory word; what matters is that it is NOT in fleetPlaceholderSegments, or the arm
+	// would pass for free. proseLong is the length case that defeats a minimum-length discriminator.
+	const proseRoot = "sources live under /home"
+	const proseWin = "Users"
+	const proseSep = "/"
+	const proseBS = "\\"
+	const proseTail = "zzprosetail"
+	const proseLong = "zzgeneratedfiles"
+
+	cases := []struct {
+		name     string
+		content  string
+		wantKind string // "" means the arm must stay CLEAN
+	}{
+		{"denied token split across a break", "owner reads " + controlToken[:6] + "\n" + controlToken[6:] + " here\n", "denied-token-split"},
+		{"denied token split across a BLANK LINE", "owner reads " + controlToken[:6] + "\n\n" + controlToken[6:] + " here\n", "denied-token-split"},
+		{"profile path split across a break", fmt.Sprintf("root at /home/\n%s/go\n", seg), "profile-path-split"},
+
+		// ⚠ THE ARMS THAT MAKE THE ONES ABOVE MEAN SOMETHING. Same geometry, harmless content.
+		{"HARMLESS token, the same split geometry", fmt.Sprintf("a note about \n%s and things\n", harmless), ""},
+		{"HARMLESS token, blank-line geometry", fmt.Sprintf("a note about \n\n%s and things\n", harmless), ""},
+		{"PLACEHOLDER path split (must stay cleared)", "root at /home/\nuser/go\n", ""},
+		{"ordinary indented prose over three lines", "the census reads\n    every tracked file\n    and reports\n", ""},
+
+		// ⚠ THE FALSE-POSITIVE SURFACE, ASSERTED RATHER THAN ACCEPTED IN A COMMENT. Collapsing
+		// whitespace at a break also fuses the last word of one line to the first of the next, so two
+		// INNOCENT words can spell a denied token together. This arm requires that to REFUSE: the gate
+		// cannot distinguish it from a genuinely wrapped token, and refusing is the direction chosen --
+		// a false refusal costs one rewrite, a false pass costs the fleet a scrub. It is here so that
+		// nobody narrows the joiner to "fix" this and silently reopens the split hole; if this arm ever
+		// goes green, the split arms above are about to stop working.
+		{"ACCEPTED false positive: two innocent words fusing at a break", "the " + controlToken[:9] + "\n" + controlToken[9:] + " is a ledger column\n", "denied-token-split"},
+
+		// And the measurement that bounds it: the SAME pair not at a break stays clean, which is what
+		// collapsing only at the break buys over stripping all whitespace.
+		{"the same pair NOT at a break stays clean", "the " + controlToken[:9] + " " + controlToken[9:] + " is a ledger column\n", ""},
+
+		// ⚠ THE PROSE SHAPES THE JOINED STRUCTURAL ARM REFUSED UNTIL 2026-09-08. Each is ordinary
+		// project prose: a line ending in a profile-root word, the next opening with a separator and a
+		// path word. All four REFUSED with profile-path-split before the continuation requirement went
+		// in; the same words INLINE were clean, which is what proved it was the JOIN and not the
+		// content. Remove that requirement and these four go red -- they are the arm that keeps it.
+		{"prose: posix profile word, next line opens with a separator", proseRoot + "\n" + proseSep + proseTail + " is where they land\n", ""},
+		{"prose: profile word, next line opens with a separator", "shared by all " + proseWin + "\n" + proseSep + proseTail + " resolves per lane\n", ""},
+		{"prose: windows profile root, next line opens with a backslash", "sits under C:" + proseBS + proseWin + "\n" + proseBS + proseTail + " on that host\n", ""},
+		{"prose: profile word and a path word across a break", "a note about " + proseWin + "\n" + proseSep + proseTail + " spellings\n", ""},
+
+		// The LENGTH case, and it is why the discriminator is continuation rather than segment length:
+		// a sixteen-character fused word is ordinary vocabulary in this project, so any minimum-length
+		// rule would refuse this line while this one stays clean.
+		{"prose: a LONG fused word after the separator", proseRoot + "\n" + proseSep + proseLong + " land under obj\n", ""},
+		{"prose: fused word at END of line", proseRoot + "\n" + proseSep + proseLong + "\n", ""},
+
+		// The INLINE twins: same words, one line. Clean before the change too, which is what makes the
+		// six above a statement about the JOIN rather than about the words.
+		{"prose INLINE twin: posix", proseRoot + " " + proseSep + proseTail + " is where they land\n", ""},
+		{"prose INLINE twin: profile word", "shared by all " + proseWin + " " + proseSep + proseTail + " resolves per lane\n", ""},
+
+		// ⚠ THE OTHER DIRECTION is already asserted, by the `profile path split across a break` arm
+		// above: a wrapped path that CONTINUES past the account still refuses. No arm is added for it
+		// here -- a duplicate at a different wrap position fires the UNJOINED arm too (on the fragment
+		// left after the separator) and this test requires every finding to be the one named kind, so
+		// the honest place for multi-arm shapes is the plants control. R measured that dropping these
+		// arms takes every wrap position clean on their gate (6fc8978fa8); that existing arm is what
+		// keeps this gate from going the same way.
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := scanFleetIdentifiers("docs/phase4/CONTROL-record.md", []byte(c.content), denied)
+
+			if c.wantKind == "" {
+				if len(got) != 0 {
+					t.Fatalf("must stay CLEAN, fired %v -- a joiner that refuses harmless split text makes every "+
+						"\"it fires\" reading in this file meaningless", got)
+				}
+				return
+			}
+
+			if len(got) == 0 {
+				t.Fatalf("planted %s was NOT detected -- this arm cannot go red", c.name)
+			}
+			for _, f := range got {
+				if f.Kind != c.wantKind {
+					t.Fatalf("fired %q, want %q -- the refusal must be attributable to the arm claimed, "+
+						"and an exit code alone cannot tell those apart", f.Kind, c.wantKind)
+				}
+			}
+		})
+	}
+}
+
 func TestFleetIdentifierClearancesAreLive(t *testing.T) {
 	root := repoRootFromPackageDir(t)
 	for key, reason := range fleetClearedSegments {

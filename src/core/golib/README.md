@@ -12,3 +12,5 @@ automatically when you install any converted package — you normally do not ref
 ## License
 
 MIT. See the [go2cs repository](https://github.com/ritchiecarroll/go2cs).
+
+Artwork licensed under Creative Commons Attribution 3.0; see [artwork attribution](https://github.com/ritchiecarroll/go2cs/blob/master/docs/images/README).

@@ -45,3 +45,35 @@ The conversion strategy — how each Go construct maps to C# and why — is docu
 [`docs/ConversionStrategies.md`](../../docs/ConversionStrategies.md) (summary) and
 [`docs/ConversionStrategies-Reference.md`](../../docs/ConversionStrategies-Reference.md)
 (exhaustive reference).
+
+## Licensing and source provenance
+
+The converter is AGPL-3.0-only with the go2cs Converter Output Exception
+([LICENSE-EXCEPTION](LICENSE-EXCEPTION)), an additional permission under AGPL
+section 7 that every converter source header refers to. Alternative commercial
+licensing is available from the copyright holder listed in [AUTHORS](../../AUTHORS),
+at the contact address given there. See [LICENSING.md](../../LICENSING.md). Generated
+output does not inherit AGPL merely by being generated, and the exception grants
+MIT for the templates and scaffolding the converter reproduces in output.
+Converted standard-library packages carry the upstream BSD license, in their README
+and in the packed license file alike.
+
+`-provenance` adds a deterministic `// Converted from Go source: "..."` comment.
+It defaults to **off** and never includes a conversion timestamp. Paths are relative
+to GOROOT or the main module when known, otherwise only the filename is emitted.
+Recognized leading copyright/license notices are retained even with `-comments` off.
+
+`-license "MIT"` (or another NuGet-supported SPDX expression) overrides package
+license metadata without changing the input source's licensing. Without it, a local
+`LICENSE` is used if present; standard-library packages otherwise reference the
+shared upstream license. Unknown licenses produce a conversion warning, never a
+guessed license. NuGet validates the expression when packing.
+
+Local `LICENSE`, `NOTICE` and `AUTHORS` files are optionally packed when present.
+Conversion never authors license text. Standard-library packages pack their root
+BSD license by relative path, including for project-owned handwritten additions;
+the third-party dependency modules of a `-recurse` conversion get their own
+module's license file copied verbatim to the converted module root, once per
+module, and pack it the same way. The application's own module, and a dependency
+that ships no license file, are reported once per module on stderr and left
+unspecified. Application projects resolve the same metadata without a warning.

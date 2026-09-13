@@ -718,8 +718,25 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // reflect projection handed out was an order token (see ManagedPointerTokens). Recover
         // the box that token named, so the result aliases the very storage the reflect Value
         // did — instead of a native box over a number that is not an address.
-        if (ManagedPointerTokens.Resolve((nuint)value.Value) is ж<T> aliased)
+        // ONE resolve, its result classified rather than re-queried: the Q44 §10.5 census needs to
+        // distinguish "resolved to another pointee type" from "did not resolve", and calling Resolve
+        // twice could answer differently across a collection.
+        object? resolved = ManagedPointerTokens.Resolve((nuint)value.Value);
+
+        if (resolved is ж<T> aliased)
+        {
+            if (Q44RegistryCensus.Enabled)
+                Q44RegistryCensus.Arm1();
+
             return aliased;
+        }
+
+        // ARM 2 (§10.3): the token named a LIVE box whose pointee type is not T. This falls past the
+        // refusal below -- IsTokenArithmetic is false at offset 0 -- and reaches the native box at the
+        // bottom, over a number that is not an address. Counted here; not yet changed.
+        if (Q44RegistryCensus.Enabled && resolved is not null)
+            Q44RegistryCensus.Arm2(typeof(T), resolved,
+                                   ManagedPointerTokens.CurrentToken(resolved) == (nuint)value.Value);
 
         // THE REFUSAL. A number inside a LIVE token's own 4 GiB block, that is not that token, is
         // a token somebody did arithmetic on — `unsafe.Add(unsafe.Pointer(&v), offset)` over storage
@@ -731,7 +748,24 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // question is answered: a Go-layout byte offset into CLR-auto-laid-out storage still has no
         // meaning, and now says so out loud instead of corrupting memory.
         if (ManagedPointerTokens.IsTokenArithmetic((nuint)value.Value))
+        {
+            if (Q44RegistryCensus.Enabled)
+                Q44RegistryCensus.Arm3();
+
             throw RuntimeErrorPanic.UnsafePointerArithmeticWithoutAddress();
+        }
+
+        // ⚠ CLASSIFIED FROM THE RESOLVE ALREADY PERFORMED, never a second call. This line read
+        // `ManagedPointerTokens.Resolve(...) is null` until 2026-09-08, and that made the census
+        // NOT OBSERVATION-ONLY: `Resolve` EVICTS — a dead weak entry is TryRemove'd and the count
+        // reassigned — so enabling the census mutated the registry at moments the uninstrumented
+        // program never would. i9 measured the consequence: the banked `os` row flipped PASS -> FAIL
+        // with the env gate as the ONLY variable, twice, in both directions. Reaching this line
+        // already means `resolved` was not a `ж<T>` and the arithmetic refusal did not fire, so
+        // `resolved is null` IS arm 4 — the same verdict, from a value already in hand, with the
+        // census performing exactly the calls the census-off path performs.
+        if (Q44RegistryCensus.Enabled && resolved is null)
+            Q44RegistryCensus.Arm4();
 
         return new NativeBox<T>((nuint)value.Value);
     }

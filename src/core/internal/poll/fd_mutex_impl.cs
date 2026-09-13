@@ -1,7 +1,8 @@
 // fd_mutex_impl.cs - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
-// Use of this source code is governed by an MIT-style license
+// SPDX-License-Identifier: BSD-3-Clause
+// Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
 // Hand-owned companions for internal/poll's fdMutex read/write lock — `rwlock` and `rwunlock`,
