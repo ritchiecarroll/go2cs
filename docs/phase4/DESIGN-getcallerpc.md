@@ -148,3 +148,102 @@ Coordinator ruling `ce6961a` (2026-09-08): *"Q53 (`getcallerpc`) SIZED against t
 cut … census them, do not list them from memory."* The list this replaces — *"chan.cs (4), coro.cs,
 debugcall.cs, per-GOOS proc.cs/select.cs"*, from my post `28e1f5567` — named **4 files** where the
 census finds **19**, which is the reason the ruling said census.
+
+## 8. ERRATUM — dated block, 2026-09-13, by C1
+
+This is the block promised by `8840c6a65` and `d7dcb2e2e`. Those posts were the record's erratum
+because `238dfefea` was train 46 seat 6 and a seated branch takes no commits
+(`.claude/skills/train-assembly/SKILL.md:55`: *a seated record's erratum is POSTED, not amended —
+until the train lands the POST is the record's erratum, and the correction lands afterwards as ONE
+dated block*). Train 46 has landed; this is that one block. Nothing above is rewritten.
+
+The three defects were found by **building the reach instrument §6 said was needed** — that is, by
+doing the thing the record itself named as not done, which is the only reason they were found at all.
+
+### 8.1 Defect (i) — extractor greed, one character, five phantom functions per flavour
+
+The attributor's non-greedy `.*` took the first identifier followed by `(`. On a **tuple-returning
+declaration** that identifier is the modifier `static`, not the method name, so five declarations per
+flavour collapsed into a phantom function named `static` and every site inside one was attributed to
+it. Replaced by an extractor that enumerates every *name-paren* and *name-generic-paren* on the line,
+discards C# keywords, and takes the first survivor — controlled on **seven real corpus shapes in both
+directions**, with the OLD extractor demonstrated returning `static` on the tuple shape, so the fix is
+a measurement rather than an assertion.
+
+| reading | as posted (§1 `:31-33`, §2 `:54-55`, §1 `:37`) | CORRECTED |
+|:--|--:|--:|
+| enclosing functions (windows / linux / darwin) | 83 / 84 / 84 | **88 / 89 / 89** |
+| DEAD BY CONSTRUCTION bucket (functions / sites) | 47 / 58 | **49 / 54** |
+| CANDIDATE bucket (functions / sites) | 36 / 51 | **39 / 55** |
+
+Re-run on all three flavours at `origin/master`.
+
+### 8.2 Defect (ii) — 109 is the TOKEN-OCCURRENCE count; the call-site population is 107
+
+Two of the 109 are the **declarations themselves**: `src/core/runtime/stubs.cs:343`
+`internal static partial uintptr getcallerpc();` and `:346`
+`internal static partial uintptr getcallersp();`, both parameterless, which the site pattern matches.
+§2 `:73-75` already named those two rows as *"the declarations in `stubs.cs`, which the attributor read
+as enclosing themselves"* — and then did not follow it through to the site TOTAL in §1's table
+(`:31-33`) or §1's prose (`:35`). So **109 is token occurrences and 107 is call sites**. §3's
+*"the chain closes 4 of 109 sites"* (`:82`) is untouched and still true.
+
+### 8.3 Defect (iii) — P2's falsifier could not fire, and that is the one that would have been scored wrongly
+
+P2 (`:123-126`) predicts the 1.24 reachable count will be *"larger than the 1.23.12 figure of **4**"*
+with *"Falsifier: a reach census at the hop reading ≤ 4."* **The 4 is the fatal path's OWN site count
+from §3 and was never a reachable figure.** Essentially any reach census exceeds 4, so the falsifier
+cannot fire and the prediction is near-vacuous. Measured and attributed at 1.23.12:
+
+| flavour | REACHED (functions / sites) | UNREACHED (functions / sites) |
+|:--|--:|--:|
+| windows | 35 / **47** | 53 / 62 |
+| linux | 35 / **46** | 54 / 63 |
+| darwin | 36 / **50** | 53 / 59 |
+
+**P2's falsifier should read: a reach census at the hop reading at most 47, 46 and 50 per flavour** —
+which makes P2 a prediction that can be wrong.
+
+⚠ **The reach number is still an UPPER bound, measured rather than claimed.** It counts name-paren
+occurrences inside `runtime`'s own compile set with every column-0 declaration of that name excluded,
+which removes §2's named inflation source exactly. It remains an upper bound only for a name declared
+more than once inside `runtime`, and that is **1 of 35** — `start`, five declarations, two sites — the
+other 34 being unique. So the honest window on windows is **45 to 47 sites**, stated as a window rather
+than as a hedge.
+
+**CONTROLS, run before any bucket prints, the run refusing if either direction disagrees:** `gopanic`,
+`deferproc`, `goPanicIndex`, `chansend1` and `panicshift` MUST read zero in-runtime callers — all five
+read zero; `getg` MUST read nonzero — reads 265.
+
+### 8.4 The second derivation (R), recorded as a CLASS and not by its original attribution
+
+R's `df021e2388bd7b084b54b68bccd89ebe346af5b5` derives the same 1.24 relocation independently, from the
+**emission** side, where §4 (`:96-105`) derives it from GOROOT sources — two instruments, one reading.
+It also names a class §4 does not carry: **the relocation breaks `using` aliases inside frozen
+whole-file hand-owns** (`src/core/runtime/runtime2.cs`, `src/core/runtime/mfinal.cs`).
+
+⚠ **Scope, and this block honours it:** R's own follow-up `d5f3e0fda` retracts that post's
+attribution — *"The CLASS description in df021e238 stands; its ATTRIBUTION does not"* — because the 16
+roots R reported were R's re-base silently subtracting C1's re-derives, not undone maintenance and not
+an H6 class arriving early. **This block records the class and does not repeat the attribution.**
+
+### 8.5 What does NOT move
+
+- **Sites 109 and files 19 are unchanged on every flavour** (109 as the token-occurrence count that
+  §8.2 re-labels; the *population* did not move, only its name).
+- **§4's hop reading is untouched** — 182 → 0, and 208 across five packages — because it is a GOROOT
+  **source** census through a different instrument, which the extractor defect never entered.
+- **§3's 4-of-109 claim is untouched** and still true.
+- P1, P3 and P4 are untouched.
+
+### 8.6 Still NOT measured, stated rather than implied
+
+- **No 1.24 reach reading.** The emission does not exist at this pin and the authoring container has no
+  .NET, so the P2 comparison is still owed at the hop.
+- **Nothing about which reached sites are reached AT RUN TIME.** Reach here is a static property of the
+  emitted C#.
+- ⚠ `.claude/skills/train-assembly/SKILL.md:87` states, in its C1 provenance comment, *"the post carried
+  the erratum and one dated block landed after the train."* Until this block, that was **false at the
+  tree** — the post existed and no block had landed. It becomes true with this commit; it is recorded
+  here because a doctrine comment that reads as settled history for work still owed is the same class of
+  defect as the three above.
