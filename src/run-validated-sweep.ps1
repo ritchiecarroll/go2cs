@@ -455,11 +455,19 @@ $cvac = 0; $cvacRows = @()
 # not a green gate". That reasoning is exactly right for a GATE, which is what this script is when it
 # sweeps the roster. A hop run is not a gate, it is a DERIVATION: every one of its rows is unbanked by
 # construction, so inheriting CVAC's exit arm would make -Hop exit 1 unconditionally, and an exit code
-# that cannot vary cannot tell a caller that the derivation broke. So $hop does NOT gate the exit,
+# that cannot vary cannot tell a caller that the derivation broke. So $hopCount does NOT gate the exit,
 # while $fail and $unstable still do -- honouring the ruling's INTENT (non-failing) rather than its
 # wording (which describes a CVAC that does fail).
-$hop = 0; $hopRows = @()
-# The SECOND word the ruling requires, and the reason it is separate from $hop rather than a flavour of
+#
+# ⚠ IT IS $hopCount AND NOT $hop, AND THAT IS NOT A STYLE CHOICE. PowerShell variable names are
+# CASE-INSENSITIVE, so `$hop` IS the `[switch] $Hop` parameter above. Assigning [int] 0 to it raises
+# ArgumentTransformationMetadataException -- and because $ErrorActionPreference = 'Stop' is in force
+# from the disk preflight, that is TERMINATING: the script died here on EVERY run, hop or not, right
+# after building the converter. Measured by i9 on 5.1 Desktop at f92b10eac (rc=1, 0 rows, both arms),
+# with the base at 2e6cf71e4 running the same row green as the control. A PARSE GATE CANNOT SEE THIS:
+# it is a runtime binding error, and both editions parse the file clean.
+$hopCount = 0; $hopRows = @()
+# The SECOND word the ruling requires, and the reason it is separate from $hopCount rather than a flavour of
 # it: the incoming release's `n/a` annotations are DERIVED from this bucket, so "there are no eligible
 # tests for this package here" must never be reachable by a row that merely failed to produce counts.
 # It is decided by what the run PRODUCED -- the pipeline's own "No eligible Go tests for the requested
@@ -1413,14 +1421,14 @@ foreach ($row in $rows) {
                 #
                 # Its own counter, never folded into $cvac: CVAC means "no expectation for this OS",
                 # this means "no expectation at this release", and a reader of a mixed log must be able
-                # to tell which absence applied per row. It does not gate the exit (see $hop's
+                # to tell which absence applied per row. It does not gate the exit (see $hopCount's
                 # declaration for the reasoning, and the exit arms at the foot).
                 #
                 # A RECEIVED predecessor is printed as provenance and nothing is compared against it:
                 # the census's own ruling is that a relocated row re-banks from zero. Printing it is
                 # what stops the record reading as though 20 verdicts for these tests had never been
                 # banked under another name.
-                $hop++
+                $hopCount++
                 if ($row.Receives) {
                     $hopRows += "$pkg (count $got, disclosed $gotDisclosed; receives $($row.Receives))"
                     Write-Host "  HOP   $label $got (measured; no expectation at this release; receives $($row.Receives)) [${rowSecs}s]" -ForegroundColor Magenta
@@ -1545,7 +1553,7 @@ if ($cvac) { $summary += " / $cvac comparison-validated-at-count" }
 # reasons for the same missing expectation, and a derivation that read one as the other would annotate
 # a release-wide absence as a platform-specific one. Printed with an explicit `hop=` key rather than a
 # prose phrase because this is the segment a driver greps.
-if ($hop) { $summary += " / hop=$hop measured-at-count" }
+if ($hopCount) { $summary += " / hop=$hopCount measured-at-count" }
 if ($hopNoTests) { $summary += " / hop-no-tests=$hopNoTests" }
 $summary += "  (${elapsed}s)"
 # The colour follows the EXIT, so the line cannot look like one thing and exit as another: a hop run
@@ -1777,7 +1785,7 @@ if ($cvac) {
 # The two hop buckets, reported apart because they are the two halves of what H10 banks: the measured
 # counts, and the rows whose measurement is "there is nothing here to measure". Printed before the
 # failure list so a reader of a mixed run sees the derivation and then what broke.
-if ($hop) {
+if ($hopCount) {
     Write-Host ''
     Write-Host "hop measured-at-count -- validated, with no expectation at this release to bank against ($targetGoos):" -ForegroundColor Magenta
     $hopRows | ForEach-Object { Write-Host "  $_" -ForegroundColor Magenta }
@@ -1842,7 +1850,7 @@ if ($unstable) { exit 1 }
 # existed, only now it is reported as itself rather than as a count failure.
 #
 # ⚠ EXCEPT on a hop run, and this is the cut's one departure from the ruling's literal wording -- see
-# $hop's declaration for the full reasoning, and the landing post, which states it rather than burying
+# $hopCount's declaration for the full reasoning, and the landing post, which states it rather than burying
 # it. In short: that sentence is right because this script is a GATE, and every row of a hop run is
 # unbanked BY CONSTRUCTION, so inheriting the arm would make -Hop exit 1 on every run including a
 # perfect one -- an exit code that cannot vary cannot report anything. A hop run is a derivation, and
@@ -1850,7 +1858,7 @@ if ($unstable) { exit 1 }
 # is deleting `-and -not $Hop`.
 if ($cvac -and -not $Hop) { exit 1 }
 
-# $hop and $hopNoTests deliberately do NOT appear in any exit arm: recording a count where nothing is
+# $hopCount and $hopNoTests deliberately do NOT appear in any exit arm: recording a count where nothing is
 # banked, and recording that a package has no eligible tests here, are what -Hop was asked to do. A
 # mode whose successful completion exits non-zero would train its caller to ignore the code.
 exit 0
