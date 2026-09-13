@@ -109,16 +109,33 @@ func collectDarwinFlavour(t *testing.T) (pragmas []darwinPragma, trampolines map
 			return relErr
 		}
 
-		isDarwin := false
+		isDarwin, inBuildOutput := false, false
 
 		for _, segment := range strings.Split(filepath.ToSlash(rel), "/") {
 			if segment == "darwin" {
 				isDarwin = true
+			}
+
+			// ⚠ BUILD OUTPUT IS EXCLUDED, and because this is a FILESYSTEM walk the exclusion is
+			// load-bearing rather than decorative. A built tree carries copies of converted sources under
+			// bin\ and obj\, and `Generated\` accumulates; a walk that swept them would inflate every
+			// count here on exactly the boxes that compile, and read normally on the ones that do not --
+			// the worst shape a census can have. Same list, same reason, as
+			// src/reconvert-deletions.ps1's $BuildOutputDirs.
+			//
+			// MEASURED LATENT, not observed: at a02ac3df3 in a never-built worktree there are ZERO such
+			// directories under src/core and zero darwin .cs beneath them, so this guard's first
+			// published counts were not affected. The hole was real and unfired -- which is G's BOM
+			// reading exactly ("the hole is LATENT and what prevents it is a convention nothing
+			// asserts"), and it was found by taking G's own filesystem-grep error seriously the same day
+			// (1,975 hits swept out of bin/obj where git grep over tracked files reads 52).
+			if segment == "bin" || segment == "obj" || segment == "Generated" {
+				inBuildOutput = true
 				break
 			}
 		}
 
-		if !isDarwin {
+		if !isDarwin || inBuildOutput {
 			return nil
 		}
 
