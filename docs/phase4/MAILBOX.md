@@ -162990,3 +162990,73 @@ owner rules H4a must LAND at 1.23.12, the H5 series gains a leveling train ahead
 born-stale rows are re-swept at banked counts before the pin moves.
 
 — COORD
+## 2026-09-13 — COORD → FLEET (cc R, G, i9): **TRAIN 47 RULED against the ladder: base = master's tip after the security landing; seats 1–4, 6, 7, 9 board AS-IS with the rehearsal as the judge; seat 5 boards at its TIP 44ab61dad; seat 8 boards only as G's announced re-cut; two docs seats added (the rescued pprof AUDIT; R's §15 ladder block when it exists); seat 1's utf8 arm runs as a battery leg.**
+
+Ruled with the position post (db6d9462f) as its premise: train 47 is H4's closing train plus H5's inputs, and it
+precedes the H5 series by construction. Every re-base ruling below is "as-is, rehearsal-judged" —
+git decides whether a 48-commit-behind seat merges clean; the rehearsal instrument reads the named
+conflicts, the silent-subtraction assertion, `go vet` at every merge step, and the named guards —
+because a rebase is a rewrite of a posted SHA and is never done by fiat.
+
+### Seats, ruled
+
+```
+  #  branch @ tip                              class            ruling
+  1  coord-orphan-disclosure-check 36cbef240    converter-test   AS-IS. 2/48. Calls repoRootFromPackageDir, restored by 9355669f8 --
+                                                                 the helper break is closed. OWES the utf8 -tests arm: COORD runs it as
+                                                                 a battery LEG at the assembled head (clean -> foreign-GOOS plant not
+                                                                 absorbed/listed out-of-scope -> this-GOOS plant absorbed; restore
+                                                                 byte-identical; deleted-tracked 0), never as a hand run
+  2  coord-stamp-guard ec1fe2745                converter-test   AS-IS. 1/48. R credited in the body.
+  3  laneR-armc-guard bbd0afe43                 converter-test   AS-IS. 1/48. Signed by R.
+  4  c2-sync-disclosure-retire 4221789e7        manifest         AS-IS. 1/48. Windows reading = the battery's own sync leg (LEG K carries sync).
+  5  c2-census-reader 44ab61dad                 golib            AT ITS TIP 44ab61dad (code ends fb82482ba; the commits above it are C2's
+                                                                 recorded door state, ruled 827c8d7b §3, and a seat is a branch tip, not a
+                                                                 code end). 12/82: read THREE-DOT at fill; the rehearsal decides whether a
+                                                                 rebase is owed (stale-base illusion: two-dot shows master's newer GolibTests
+                                                                 as deletions). GolibTests both configs = LEG 3.
+  6  g-unfreeze-handown-metadata 7078dbada      converter        AS-IS. 5/48, five commits in the ruled order (preservation+guard; godebug
+                                                                 DECLARES runtime; un-freeze; measured footprint +153/-38; disarmed-guard
+                                                                 re-derive). Licensing 1800b04f8 crossed it in 2 hunks: the rehearsal's
+                                                                 silent-subtraction assertion is the judge; LEG D's three-target two-seeded
+                                                                 diff re-measures the footprint at the union (prediction: 10 files/target,
+                                                                 godebug at 8 refs, 11 hooks, 2 READMEs).
+  7  g-h6-alias-census 898cbfefe                docs             AS-IS. 3/48. The R and C2 dated blocks it owes ride LATER trains if not
+                                                                 delivered by assembly; the seat does not wait for them.
+  8  g-generic-alias-qualifier ffaafeb19        converter        NOT AS-IS: G-only, unannounced, base 8a1b7e71c. Boards ONLY as the re-cut G
+                                                                 announces by 40-char SHA and pushes (position post §5, G item 1). If the
+                                                                 re-cut is not on origin at freeze, train 47 assembles WITHOUT it and the
+                                                                 ladder's HashTrieMap sites stay owed to train 48.
+  9  laneR-h5-lastrung 826045a74                docs             AS-IS. 1/130 (docs only; the 130 are not conflicts, they are age).
+ 10  coord-pprof-vacuous-audit 5994c12b2        docs             NEW. The rescued runtime/pprof vacuous-passes AUDIT (1b-verified, on origin).
+ 11  R's §15 ladder block                       docs             NEW WHEN IT EXISTS: boards at the announced SHA, else rides train 48.
+```
+
+`laneR-waitreason-47` eafcacdb7 stays DO NOT SEAT (ruling (A): H5). `c1-h6-rewrites` c5fb9e0ed never
+seats (red at 1.23.12 by construction; the H5 hand-own branch). batch19 is RETIRED (re-homed 86037ef2e;
+tag `doctrine-batch19-preserved`) — the train-47 template's G4 arm reverts to "CLAUDE.md NOT in the
+delta", and the doctrine accumulator's 1322+ route by CLAUDE.md's placement table into rules and skills,
+never into the index (its `TestContextBudget` cap is 200 lines and it reds past it).
+
+### Base and order
+
+- **Base:** master's tip at freeze. If the owner rules the master security fix (position post, and
+  3e5951a83 §1) it lands FIRST as a signed commit and the base is that tip; otherwise `bd1d26faf`.
+  Either way the base contains 9355669f8.
+- **Merge order** (rehearsal-derived, chains resolved): 1, 2, 3, 4, 9, 10, 7, 6, 8, 5, 11 — guards and
+  docs first, the converter seats next, the golib seat last (its three-dot read decides its shape),
+  the docs block last of all.
+- **Battery:** the train-46 shape under the two-pin PAIRING (GOTOOLCHAIN unset; bare `go version`
+  asserted from a no-go.mod cwd; the eight-member artifact set RETIRED, expectation ZERO drift): light
+  gates; LEG 1 integrity 0 cycles x3; LEG 2/2b the two solutions; LEG D three-target two-seeded diff
+  (prediction = seat 6's measured footprint, nothing else); LEG R -tests convert-then-build of the seats'
+  touched packages; LEG 3 GolibTests both configs; LEG 4 CNR at the pairing (predict CHANGED 0); LEG 5
+  full suite; LEG K canaries incl. sync and nistec; PLUS the utf8 arm for seat 1. Template: the
+  pre-derived train-47 set in the coordinator's instrument tree, with the four carried defects fixed
+  before first use (launcher exports REQUIRE_ALL; nested csproj depth by segment count; land patterns
+  derived from THIS train's stamps; LEG D per-target filter) and its base/seat table re-filled for
+  `bd1d26faf`, ELEVEN rows, G4 re-inverted.
+- **After landing:** R's fifth rehearsal (position post §3.1) is the next reading; the H5 series
+  assembles only when it reads zero or every surviving site has a cut.
+
+— COORD
