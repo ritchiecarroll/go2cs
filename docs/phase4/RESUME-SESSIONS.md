@@ -96,6 +96,7 @@ STATE AT THIS REVISION (2026-09-13 15:45):
   BRANCH: claude/coord-handover 7c76f343e5bd335c7bc837d1df5f18243e3697fd yes landed -- the handover log + this file
   (the reproduction ref coord-train47-union, dd021ff5b, was DELETED after the landing at 17:27; its tree 161af6c44 is master's)
   BRANCH: claude/mailbox 7ff30f203cf9f13c5112658802ada4a6fbd8dee7 yes transport -- rotated 2026-09-13 02:36
+  claude/version-go1.24.13 fast-forwarded to 271300cea at 17:52 (docs + doctrine only; the H5 set lands on it).
   master tip at this revision: 271300cea (docs commit) over 1885bce69 (doctrine d) over 31fe4925d (TRAIN 47 LANDED 17:26, tree 161af6c44); train 47's base was a02ac3df3.
   BRANCH: claude/version-go1.24.13 31fe4925d055537dbb48c343f726e027631f6aa1 yes created -- the H5 branch, created from the landed SHA; the H5 set (088f8778f, ff54907996, 23d07f742) targets it, never master
   TRAIN 47: fifteen seats (table in .claude/coord-scripts/train47/coord-train47-assemble.sh) on base
@@ -364,7 +365,8 @@ branches are NOT pushed -- never scrub-censused -- and are preserved in a verifi
   BRANCH: claude/g-h6-completeness-gate c9c1b5f737c8808f2234e01671768d0cb7848685 yes accepted -- train 49, the H6 gate + go-test guard + BOM tolerance (counts the 32 never-written .cs.auto rows, i9's auto-discriminator.tsv)
   BRANCH: claude/g-repoguard-liveness-set 44857cdf898ef5d0b04e4b14351ec33c18290a38 yes accepted -- train 49, network-path-split liveness + finding-SET assertion + joined-pass suppression
   BRANCH: claude/g-fleet-patchid-census 9b78bfff61000f5ca4984f163503c182b5c1819e yes accepted -- train 48, the fleet-wide patch-id census (a census, not a gate)
-  BRANCH: claude/g-handown-metadata-t48 bb13897e6c73f3bd8ded1598a4b3b1b668fa65df yes accepted -- train-48 seat 6, the metadata un-freeze; OWES A RE-BASE once train 47 lands
+  BRANCH: claude/g-handown-metadata-t48 bb13897e6c73f3bd8ded1598a4b3b1b668fa65df yes superseded -- train-48 seat 6, the metadata un-freeze; OWES A RE-BASE once train 47 lands -- SUPERSEDED by the re-base below (G 8fef7f9a6)
+  BRANCH: claude/g-handown-metadata-t48-r47 35fe4e0167e044539245f7e4721a198fb35a98d0 yes accepted -- train-48 seat 6 RE-BASED onto the train-47 landing (G 8fef7f9a6; SHA read from origin)
   BRANCH: claude/g-h6-alias-census 898cbfefe9527726198a40654d954a8ff4dead4b yes accepted -- train-47 seat 8, the H6 alias census; base of the C2/R declared stack
   BRANCH: claude/g-generic-alias-recut 449ecce7a98b2a7acc2641ef82b9073d2566e143 yes accepted -- train-47 seat 7, the CollidingPackageNames generic arm
   BRANCH: claude/g-hop-b-provisioning d7bf606f070b2faa3738f53afc3aea2b101fc206 yes cut -- STAGE0 hop-B provisioning record for this box; offered, unruled
