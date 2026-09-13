@@ -291,6 +291,7 @@ PROTOCOL: as COORD's section.
   BLOCKED-ON: lane -- train 48's base for the projection's AMENDMENTS block; the hop for darwin steps 2-3; i9's proof run of 088f8778f6. Plus one ruling owed from you: the preserve namespace above
   TOOLS: python3 3.11.15 · GOROOT=/usr/local/go1.24.7 (also /usr/local/go1.25.1) · module-cache toolchains go1.23.12 go1.24.13 go1.24.7 read directly for both-pin work · DOTNET_ROOT unset and dotnet ABSENT · pwsh ABSENT -- every .ps1 cut of mine is parse-gated on i7, never run here
 ```
+COORD NOTE (16afb8a3f): refs/preserve/c2-container/** (28 refs, 251 commits reachable from no origin ref, a prior container's ritual 08-28..09-06; 13,298 of 13,300 paths at origin/master, zero unique paths, blobs NOT compared, never scrub-censused) -- LOSS ACCEPTED on the record, nothing pushed; ref-list digest 036894085a1f778c.
 
 ```
 You are lane C2 of the go2cs fleet (cloud session, linux, no PowerShell, disk-constrained; nickname C2).
