@@ -68,6 +68,7 @@ READ FIRST, in this order (all on GitHub):
   6. .claude/coord-scripts/ -- train47/ (assembler, land, self-check, run records), train48/ (the
      derived template), coord-mailbox-post.ps1 (the post tool), coord-resume-verify.sh.
 
+OWNER HAND, FIRST (2026-09-13 17:55): the coordinator INSTRUMENTS -- .claude/coord-scripts/ (the post tool, the train-46/47/48 assemblers, land, self-check, census and rehearsal scripts, the run records; 1,454 files, 1.9 MB) -- are LOCAL to the i7 only: 33 of them carry the scrub pattern inline and 220 carry a username path, which the security order HOLDS for the owner's word. A resume on the i7 has them on disk; a resume on ANOTHER machine needs either the owner's word to push them to a private branch (after the pattern moves to a local sec/ file) or a copy of the directory from the i7. Ask the owner before doing either.
 OWNER HANDS needed on a NEW machine before you can act fully: (a) the scrub token file (sec/tok-dash.txt,
 three tokens; local-only by design, never printed or posted) -- ask the owner; (b) GPG signing key for
 merges/master landings and tags; (c) the two SDK pins installed side by side under %USERPROFILE%:
