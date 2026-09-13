@@ -19,6 +19,42 @@
 // frame for frame identical (DESIGN-fatal-path.md §2); the linux prediction that it would differ
 // was FALSIFIED, which is what collapsed the remedy to one shape for all three flavours.
 //
+// ⚠ ERRATUM 2026-09-13 (C1; measured by i9, mailbox 9f00b7059 §4, confirmed from the code side at
+// d79dbb317 §1). THE SENTENCE ABOVE — "exited 2 through golib's unhandled-exception backstop" —
+// IS FALSE FOR THE ONE CONTEXT THE runtime ROW HAS, and it is left standing rather than rewritten
+// because the remedy was chosen on it. Under the -tests HOST the pre-state did NOT exit: the
+// NotImplementedException from getcallerpc reaches the host's per-test catch, is recorded as one
+// `infrastructure-error` verdict, and the binary RUNS ON. testing/TestExecution.cs:301 states the
+// mechanism in its own words — a raw .NET exception "is invisible to recover() and lands in the
+// host's INFRASTRUCTURE bucket". The premise holds only for a STANDALONE fatal, where nothing
+// catches; the row has no standalone fatals.
+//
+// WHAT THAT COST, measured rather than estimated: these bodies forward to FatalReport, which calls
+// Environment.Exit(2) (golib/runtime/FatalReport.cs:141) — by design, and no catch, recover or
+// deferred function can intercept it, which is exactly the property sync/mutex.cs's header cites
+// as the reason the report is trustworthy. So a fatal that used to cost ONE verdict now ends the
+// host. i9's three-probe bisect on master's first-parent line puts the runtime row's door at this
+// seat's own merge (7d3d03284): 185 C# verdicts before, 128 after, with the 128 name-set measured
+// to be a PREFIX of the 185 set — a 57-verdict TRUNCATION, no verdict changed.
+//
+// THE CHANGE IS STILL RIGHT AND IS NOT BEING REVERTED. The throw behind that door
+// (TestGCTestIsReachable, a runtime.throw out of mfixalloc.alloc where Go PASSES) is PRE-EXISTING:
+// it was on master before this seat and was being absorbed as one infrastructure-error among
+// seven. This seat did not create it; it stopped it being swallowed, which is what the fatal path
+// exists to do. Precisely, and against the obvious over-generalisation: infrastructure-errors are
+// NOT now fatal — TestAddrRangesAdd and TestFPUnwindAfterRecovery still read infrastructure-error
+// at 128 and the run continues past both. Only the ones reaching runtime.throw exit.
+//
+// WHAT IS OWED, and where: the door is being cleared at its cause rather than contained in the
+// host (coordinator routing, mailbox 1ef59adad — option (b), a harness-only exception in this
+// path, was REFUSED). runtime/mgc_impl.cs is the first one. Whoever clears the next door should
+// expect the same shape: a converted body reaching machinery schedinit never initialised.
+//
+// THE MEASUREMENT LESSON, since this seat's own gates were clean and still missed it: the seat
+// measured its SUBJECT thoroughly (windows vs linux, frame for frame) and the axis it moved was
+// the HOST's containment, which was in no arm of that comparison. A remedy that changes what
+// happens to an exception needs an arm per CONTAINER it can be raised in, not per platform.
+//
 // THE REMEDY IS NOT TO IMPLEMENT getcallerpc. It is to stop the fatal path needing it, and the
 // corpus census says where to cut: `fatalthrow` has exactly TWO callers, `throw` at panic.cs:1098
 // and `fatal` at panic.cs:1118, and `fatalpanic` has exactly ONE, `gopanic` at panic.cs:851, which

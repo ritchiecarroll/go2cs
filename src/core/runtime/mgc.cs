@@ -128,7 +128,6 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
-using ꓸꓸꓸunsafeꓸPointer = Span<unsafe_package.Pointer>;
 
 partial class runtime_package {
 
@@ -1676,60 +1675,7 @@ internal static void gcTestMoveStackOnNextCall() {
     gp.Value.stackguard0 = stackForceMove;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string alreadyHaveAReachableˢ = "already have a reachable special (duplicate pointer?)"u8;
-internal static readonly @string isReachableFailedˢ = "IsReachable failed"u8;
-
-// gcTestIsReachable performs a GC and returns a bit set where bit i
-// is set if ptrs[i] is reachable.
-internal static uint64 /*mask*/ gcTestIsReachable(params ꓸꓸꓸunsafeꓸPointer ptrsʗp) {
-    uint64 mask = default!;
-    var ptrs = ptrsʗp.sslice();
-
-    // This takes the pointers as unsafe.Pointers in order to keep
-    // them live long enough for us to attach specials. After
-    // that, we drop our references to them.
-    if (len(ptrs) > 64) {
-        throw panic("too many pointers for uint64 mask");
-    }
-    // Block GC while we attach specials and drop our references
-    // to ptrs. Otherwise, if a GC is in progress, it could mark
-    // them reachable via this function before we have a chance to
-    // drop them.
-    semacquire(Ꮡgcsema);
-    // Create reachability specials for ptrs.
-    var specials = new slice<ж<specialReachable>>(len(ptrs));
-    foreach (var (i, Δp) in ptrs) {
-        @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-        var s = (ж<specialReachable>)(uintptr)(Ꮡmheap_.of(mheap.ᏑspecialReachableAlloc).alloc());
-        unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-        s.Value.special.kind = _KindSpecialReachable;
-        if (!addspecial(Δp, s.of(specialReachable.Ꮡspecial))) {
-            @throw(alreadyHaveAReachableˢ);
-        }
-        specials[i] = s;
-        // Make sure we don't retain ptrs.
-        ptrs[i] = default!;
-    }
-    semrelease(Ꮡgcsema);
-    // Force a full GC and sweep.
-    GC();
-    // Process specials.
-    foreach (var (i, s) in specials) {
-        if (!(~s).done) {
-            printlock();
-            println((@string)"runtime: object"u8, i, (@string)"was not swept"u8);
-            @throw(isReachableFailedˢ);
-        }
-        if ((~s).reachable) {
-            mask |= (uint64)(((uint64)1).Lsh((uint64)(i)));
-        }
-        @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-        Ꮡmheap_.of(mheap.ᏑspecialReachableAlloc).free(@unsafe.Pointer.FromPinnedBox(s));
-        unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-    }
-    return mask;
-}
+// go2cs generated this placeholder — func gcTestIsReachable is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string stackˢ = "stack"u8;

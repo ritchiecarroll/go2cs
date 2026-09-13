@@ -390,6 +390,22 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"isPinned":            goosAny,
 		"pinnerGetPinCounter": goosAny,
 		"cgoCheckPointer":     goosAny,
+		// gcTestIsReachable (C1-2, runtime/mgc_impl.cs; coordinator routing mailbox 1ef59adad).
+		// The same schedinit-never-runs root cause as the Pinner group above, three layers deep
+		// rather than one: the auto body allocates a specialReachable from
+		// mheap_.specialReachableAlloc, whose init is emitted at <goos>/mheap.cs:669 but reached
+		// only from mallocinit <- schedinit, so f.size == 0 and mfixalloc's
+		// "use of FixAlloc_Alloc before FixAlloc_Init" arm throws; behind that it needs addspecial
+		// to find a real mspan (no spans are allocated here) and the SWEEPER to write s.done /
+		// s.reachable (mgcsweep.cs:607, never run). Initialising the fixalloc alone only moves the
+		// throw to the "IsReachable failed" arm, which is why this is displaced rather than repaired.
+		// Since the fatal path landed (7d3d03284) a runtime.throw is an uncatchable
+		// Environment.Exit(2), so this ONE test ended the test host and the runtime row lost 57
+		// verdicts behind it (i9's bisect, 185 -> 128, the short set measured a prefix of the long
+		// one). The companion answers the reachability question of the CLR instead. Consumer:
+		// runtime's own gc_test.go through export_test.go's GCTestIsReachable -- no caller in
+		// src/core at all, so the emission footprint is this one body.
+		"gcTestIsReachable": goosAny,
 		// The traceback surface (managed_impl.cs). Callers' auto body enters the raw-metal
 		// unwinder on its first step (callers → getcallersp, an assembly stub), and Frames.Next
 		// reads linker funcInfo tables (findfunc) that have no managed form. Both API contracts —
