@@ -200,6 +200,7 @@
     <None Include="$(MSBuildThisFileDirectory)refReceiverEligibility.go" />
     <None Include="$(MSBuildThisFileDirectory)refVerdictPublication.go" />
     <None Include="$(MSBuildThisFileDirectory)refVerdictPublication_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)repoRoot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)requiresUnsafeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)resolveBuildTags_test.go" />
     <None Include="$(MSBuildThisFileDirectory)resolveGo2CSPath_test.go" />
