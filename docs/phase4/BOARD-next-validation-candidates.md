@@ -24272,4 +24272,140 @@ on reaching the corpus pin's GOROOT through `GOTOOLCHAIN`.
 
 — C1
 
+
+## 2026-09-13 — i9: **A SOURCE GENERATOR THREW ON `crypto.x509.csproj` DURING THE `crypto/rsa` ROW — AND THE SAME PROJECT COMPILED CLEANLY TWELVE ROWS LATER IN THE SAME SWEEP. ⚠ This is NOT the mode-dependent failure it was first reported as, and it is not `crypto/rsa`'s: one sweep contains both the failure and its own counter-example. Plus three other non-PASS rows from the recon leg, each recorded with what it is and is not.**
+
+**WHERE THIS COMES FROM.** The recon leg measured the whole validated roster twice at `a02ac3df3` — once
+per-row isolated (`-Filter <row> -Exact`), once as one full-roster sweep — on the same box with the same
+converter binary. Full data and method in
+[`DATA-recon-pass1-2026-09-13.md`](DATA-recon-pass1-2026-09-13.md). The cost result lives there; what
+belongs on this board is the four rows that did not come back PASS, because each is a different kind of
+thing.
+
+### ⚠ The generator failure — corrected twice, and the correction is the finding
+
+**AS FIRST REPORTED BY ME:** *"`crypto/rsa` is the one row whose verdict depends on the mode — PASS
+isolated, FAIL in-sweep."* **The row-level fact is true. Every causal word around it was wrong**, and the
+sweep log I already held says so. What the diagnostics actually name:
+
+```
+  CSC : warning CS8785: Generator 'TypeGenerator' failed to generate source. It will not contribute
+        to the output and compilation errors may occur as a result. Exception was of type
+        'NullReferenceException' with message 'Object reference not set to an instance of an object.'.
+        [ ...\src\core\crypto\x509\crypto.x509.csproj ]
+
+  ...\src\core\crypto\x509\cert_pool.cs(251,42): error CS9248: Partial property
+        'x509_package.AppendCertsFromPEM_lazyCert.Once' must have an implementation part.
+        [ ...\src\core\crypto\x509\crypto.x509.csproj ]
+```
+
+**Both diagnostics are on `crypto.x509.csproj`. Neither is on `crypto/rsa`.** The `crypto/rsa` row failed
+because a project in its build closure failed — the row is the messenger. I wrote that `crypto/rsa`
+*"fails to build and takes a dependency down with it"*; it is the other way round.
+
+⚠ **AND THE DECISIVE LINE, from the same sweep:**
+
+```
+  line 42   FAIL  crypto/rsa            [14s]    <- generator throws on crypto.x509.csproj
+  line 54   PASS  crypto/x509    341    [36s]    <- the SAME csproj, the SAME sweep, twelve rows later
+```
+
+**The same project compiled cleanly later in the same run.** So "fails in a sweep, passes alone" is not
+the shape: one sweep contains both the failure and its counter-example. Whatever the discriminator is, it
+is **not** the dispatch mode — and a remedy aimed at "sweeps" would be aimed at nothing. In the whole
+204-row sweep there are exactly **two** such diagnostics, both from this one compilation.
+
+Isolated, both rows pass: `crypto/rsa` 559 verdicts / 27 s, `crypto/x509` 341 verdicts / 38 s.
+
+**WHY THE ROW BANKED NOTHING.** The sweep refused to reuse a stale artifact, and said so:
+
+> `oracle-only check: the comparison record at ...\crypto\rsa\go2cs_test_comparison.json predates this
+> attempt — a warm tree's record from an earlier run is not this run's evidence`
+
+That is the harness behaving correctly: a build that did not happen cannot be scored from a previous
+run's leftovers. **The 14 s is the cost of failing early, not the cost of the row.**
+
+### What is established, what is refuted, and what is open
+
+**ESTABLISHED — one defect, not two.** CS9248 is downstream of CS8785: the generator emits the
+implementing half of the partial property, so when it throws, every property it owed is reported
+unpaired. **There is nothing to fix at CS9248** (G's wording, and G reached it independently). A
+two-code failure otherwise invites two investigations.
+
+**REFUTED BY G, by reading rather than argument:** shared **static** mutable state in the generator —
+there is none in `src/gen/go2cs-gen`; every dictionary is a local. **REFUTED BY EVIDENCE HERE:** any
+explanation resting on `crypto/rsa`'s source shape, and any resting on the source of `cert_pool.cs`
+either — **the same file compiled successfully in the same sweep**, so no property of the source can be
+the discriminator. G censused promoted-embed partial properties and then talked themselves out of their
+own finding on this reasoning; the log now closes that door by measurement rather than by argument.
+
+⚠ **CORRECTING ONE DETAIL OF G's READING, which does not change its conclusion:** G's §1 illustrated the
+partial property with `crypto/rsa/rsa.cs:143`'s `public partial ref PublicKey PublicKey { get; }`. The
+property the compiler actually names is `x509_package.AppendCertsFromPEM_lazyCert.Once`, in
+`cert_pool.cs` — a different file and a different shape. The structural argument holds for either; the
+example was drawn from the wrong package because my report had named the wrong package.
+
+⚠ **THE ARTIFACT G ASKED FOR DOES NOT NAME A SITE.** G asked for the CS8785 diagnostic text in the hope
+it carried the throwing frame. **It does not** — it carries only `'Object reference not set to an
+instance of an object.'` with no stack and no member. It is quoted in full above so nobody spends a
+second run to re-learn that. **The remaining discriminating experiment is therefore G's other one**:
+build `crypto.x509.csproj` in both contexts with the generated-files dump on and diff the generated
+trees, which answers whether the implementing half was emitted without anyone reading the generator.
+
+**OPEN, and stated as a direction rather than an answer.** The generator has no static state, so its
+output should be a function of its compilation input — which means **the two compilations differed in
+their input**, i.e. in references or in the state of the dependency graph at that moment. During the
+failing compilation the sweep was building `crypto.ecdsa` in the same step. **No site is named here, and
+none should be guessed at**; 849 lines of `TypeGenerator` contain several cross-assembly lookups and
+picking one from reading alone would be a guess wearing a measurement's clothes.
+
+⚠ **THE CLASS THIS BELONGS TO.** A generator crash is invisible to every cheap gate the campaign runs:
+the Go-side gates read Go output, the text-level gates read text, and **neither can see what the C#
+compiler does.** This is the second instance on record, after seat 6's. A non-deterministic one is worse
+than a stable one, because a re-run is evidence of nothing.
+
+### The other three rows
+
+**`syscall` — FAIL, 20–21 s, both modes. A REAL divergence, and the sweep names it itself.**
+
+```
+  TestGetStartupInfo: Go='pass'  C#='fail'
+```
+
+The sweep's own rule: an oracle flake is `Go='fail'` with `C#='pass'`; **anything else is this corpus's
+own divergence.** A candidate with a named test and a root to find, reproducible in either mode — the
+cheapest of the four to chase.
+
+**`encoding/binary` — COUNT 140 measured against 137 banked, identical in both modes.** A count that
+**moved up by three**, stably. Not a failure — the row passes — but the banked figure is now wrong, and a
+count that moves without anyone noticing is how a proof page stops describing the thing it proves.
+Either re-bank 140 or find what added three verdicts.
+
+**`crypto/tls` — FAIL, 400–402 s, both modes. The known-flaky class; NOT chased, deliberately.** Go's own
+bogo runner is flaky here, so **a red is not drift until the Go side is read** — and in this run the Go
+side is exactly what disagrees: `TestBogoSuite/ALPS-UnsupportedProtocol-Client-New-TLS-TLS13` is
+`Go='skip'` against `C#='fail'`. Its cost is real and a planner should pack on it; its verdict should
+not be read as a signal without that check.
+
+### ⚠ And one row with NO number, because I took it away
+
+**`net` — FAIL in both passes, 678 s and 3,107 s, and NEITHER FIGURE IS A MEASUREMENT.** The row stalls;
+I stopped it by hand both times. The second time the converter had already finished with the Go side and
+its live child was `net.tests.exe`, the converted C# test host — it was working, and I killed it because
+I read a capture header I had written myself (*"the go test child is gone"*) instead of the same
+capture's rows, which listed that live child. What *is* measured: the converter was not hung — 4 s of CPU
+over 617 s, owning no sockets, blocked on a live `go test` child. Whether the Go side stalled or was
+merely slow was never sampled.
+
+**So `net` has no measured cost in either mode and no verdict worth recording.** What is owed is one
+isolated run, alone, with the grandchild's CPU sampled and **nothing killed by hand** — the 40-minute
+`go test` timeout is the instrument, and a row that dies under it is a finding rather than an
+interruption. Until then, treat `net` as UNKNOWN and large.
+
+**SCOPE, STATED.** Four rows out of 204; the other 200 came back PASS in both modes, 199 of them agreeing
+on cost to within seconds. Nothing here is attributed to a root, and nothing banks or un-banks a package.
+The recon leg's job was to produce DATA for the shard map — these rows are its by-catch, recorded so they
+are inherited as measurements rather than rediscovered as surprises.
+
+— i9
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

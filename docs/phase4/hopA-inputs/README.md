@@ -82,3 +82,26 @@ grown twice since CLAUDE.md described it as four rows. **Recommendation for the 
 the generator should DERIVE its reserved set from `$longTimeouts` at generation time, never carry a
 copied list** — a copied list has already drifted twice in the map's short life, which is the same
 hoist-vs-derive defect this campaign fixed in `_paths.ps1` the same week.
+
+## The recon leg's per-row cost data, banked 2026-09-13
+
+The hop shard map is parameterized by per-row wall times. [`DATA-recon-pass1-2026-09-13.md`](../DATA-recon-pass1-2026-09-13.md)
+re-measures the whole roster at the campaign's own corpus, TWICE, in both dispatch modes. These are the
+tables it was derived from, banked here for the same reason as everything above: the record quotes
+figures, and a re-derivation needs the rows.
+
+| file | rows | what |
+|:--|--:|:--|
+| `recon-pass1-20260913T123456Z-reparsed.tsv` | 205 | pass 1, ISOLATED (per-row `-Filter <row> -Exact`). `row / word / verdicts / banked / sweep_s / exit / last_test_on_failure`. 205 lines for 204 unique names: `archive/tar` appears twice (control run and roster run). RE-PARSED from the retained per-row logs with the sweep's complete row-word vocabulary; the as-run TSV is superseded and is NOT banked. |
+| `recon-pass2-20260913T144128Z.tsv` | 204 | pass 2, IN-SWEEP (one full-roster run). `row / word / verdicts / banked / sweep_s`. |
+
+**Reading rules, and they are not optional.** Use `sweep_s` — the sweep's own per-row figure — and never
+a shell wall, which is larger by process start-up and is not the quantity the older record holds. **Drop
+`net` from any fit**: its figures in both passes (678 s and 3,107 s) are lower bounds produced by a human
+stopping the row, not costs, and the record says exactly how. `crypto/rsa` is the only row whose VERDICT
+differs between the passes, so its `sweep_s` is not comparable across them either — and its in-sweep
+failure is a generator crash on a project in its build closure, not a property of the mode.
+
+**Both passes ran at tree `a02ac3df3` on the same box with the same converter binary**, so the dispatch
+mode is the only variable between the two files. That is what makes them a one-axis pair rather than two
+measurements.

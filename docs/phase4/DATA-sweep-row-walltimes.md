@@ -361,3 +361,34 @@ unicode                                  PASS   28        17s
 unicode/utf16                            PASS   8         18s
 unicode/utf8                             PASS   14        14s
 ```
+
+## windows · corpus `a02ac3df3` · i9-13900K (i9) · 2026-09-13 (recon leg) — POINTER, table lives elsewhere
+
+**204 rows, 199 PASS / 4 FAIL / 1 COUNT, aggregate 9,011 s (150.2 min)**, measured in-sweep (ONE
+full-roster `-SkipBuild` run, the sweep's own per-row `[NNNs]`, otherwise idle box). **The per-row table
+is NOT reproduced here.** It lives, beside the same 204 rows measured the other way, in
+`DATA-recon-pass1-2026-09-13.md`, with the TSVs it was derived from under `hopA-inputs/`.
+
+This section is deliberately a pointer rather than a third copy of the table: the recon measured the
+roster TWICE, and a 204-row block duplicated across two records is two sources of truth that will drift.
+What belongs here is the fact that a measurement at this (OS, corpus, machine) exists and where it is.
+
+**What a shard planner needs from it, in one paragraph.** These figures need **no mode adjustment**: the
+recon's one-axis arm held box, tree and converter binary constant and varied only dispatch-vs-sweep, and
+the mode makes no measurable difference to **190 of 199 rows** (72 identical to the second, median
+difference zero). The heavy rows, where a per-dispatch cost would hide, agree within seconds (`time` 359
+vs 357, `net/http` 238 vs 240, `regexp` 189 vs 193). **There is no per-dispatch setup to amortise** — the
+~10 s floor is intrinsic per-row work a sweep pays too — so per-row dispatch costs nothing and batching
+buys nothing. Correlation between a row's verdict count and its wall time is **0.08**: order the light
+bulk by ROW COUNT, heavy rows first.
+
+⚠ **Three rows must not be packed on their numbers.** `net` (3,107 s here, 678 s isolated) is **not a
+measurement** — I killed the converter both times, the second time while its converted C# test host was
+still running; treat `net` as UNKNOWN and large. `crypto/tls` (402 s) is the known-flaky class: real
+cost, unreliable verdict. `crypto/rsa`'s two verdicts differ by mode — PASS isolated at 559 verdicts in
+27 s, FAIL in-sweep in 14 s — but the FAILURE is neither mode-dependent nor `crypto/rsa`'s: a source
+generator threw while compiling `crypto.x509.csproj` in that row's build closure, and the SAME project
+compiled cleanly twelve rows later in the SAME sweep. Its 14 s is the cost of failing early, not of
+the row.
+
+These two sections above are a different corpus (`18770d083`) and toolchain; nothing here supersedes them.
