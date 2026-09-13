@@ -99,7 +99,7 @@ STATE AT THIS REVISION (2026-09-13 15:45):
   BRANCH: claude/mailbox 7ff30f203cf9f13c5112658802ada4a6fbd8dee7 yes transport -- rotated 2026-09-13 02:36
   claude/version-go1.24.13 fast-forwarded to 271300cea at 17:52 (docs + doctrine only; the H5 set lands on it).
   master tip at this revision: 271300cea (docs commit) over 1885bce69 (doctrine d) over 31fe4925d (TRAIN 47 LANDED 17:26, tree 161af6c44); train 47's base was a02ac3df3.
-  BRANCH: claude/version-go1.24.13 31fe4925d055537dbb48c343f726e027631f6aa1 yes created -- the H5 branch, created from the landed SHA; the H5 set (088f8778f, ff54907996, 23d07f742) targets it, never master
+  BRANCH: claude/version-go1.24.13 31fe4925d055537dbb48c343f726e027631f6aa1 yes created -- the H5 branch, created from the landed SHA; the H5 set (088f8778f, ff54907996, d4e40e28b) targets it, never master
   TRAIN 47: fifteen seats (table in .claude/coord-scripts/train47/coord-train47-assemble.sh) on base
     a02ac3df3; union tree 161af6c44; runs 4-7 refused on the instrument (each a real defect, each fixed
     with a self-check lesson: LD1, LD2, LR1, LA1, LL1); RUN 8 launched 14:12 = the landing candidate.
@@ -254,7 +254,8 @@ os-matrix census workflow; GolibTests and go2cs.slnx are built by no workflow yo
 STATE BLOCK (C1, 2026-09-13 15:39; push sweep: 13 of 13 branches already on origin at identical SHAs):
   LANE: C1   MODEL: Opus 5/high   HOST: C1 (linux container, no .NET SDK)
   BRANCH: claude/c1-h5-rederive-patch ff54907996fb2c7833b56e3608b878bdb467dc33 yes accepted -- C1-1 + C1-2 (amended 54ce45d9b) + C1-2b; VERSION-BRANCH ONLY (red converter guard at master by design); tip per cf06dafee (was 2c8841571 at 7d3734a84)
-  BRANCH: claude/c1-mcleanup-handown 23d07f74260f96e88186bd3e14bc48812ad357b2 yes accepted -- mcleanup.cs hand-own + createfing rewire; train 48; census 306/306, both corpus flavours compile
+  BRANCH: claude/c1-mcleanup-handown 23d07f74260f96e88186bd3e14bc48812ad357b2 yes superseded -- mcleanup.cs hand-own + createfing rewire; train 48; census 306/306, both corpus flavours compile -- SUPERSEDED for the H5 set by the -clean re-cut below (docs conflict resolved; C1 fc64c7d0c)
+  BRANCH: claude/c1-mcleanup-handown-clean d4e40e28bf6da7e676a887611bef2319c77f3d39 yes accepted -- the mcleanup seat re-cut on master 271300cea (DESIGN-managed-getg.md pure-append concatenation; code untouched); H5-set member (C1 fc64c7d0c; SHA verified at origin)
   BRANCH: claude/c1-token-door-census ad19af72b4cd964b5ee32db1f9bfbcc3e60625ba yes accepted -- token-door census (7 wrappers, 1 reached 6 latent) + the TestGetStartupInfo stale-bank record
   BRANCH: claude/c1-seat-duplication-census a4802675d4cc6e7a1843c309af30362cc9cd7dbb yes accepted -- patch-id seat census, SHA-first split, 8 arms
   BRANCH: claude/c1-lockosthread-body dc34e4b4a649a5a8365b769ede07e0567765e4ab yes landed -- LockOSThread carries Go's whole body (train-47 seat 15)
