@@ -18,24 +18,6 @@ using go.@internal;
 
 partial class pprof_package {
 
-// Go runs an imported package's `init` before this package's own; .NET would never load
-// an assembly nothing has touched yet, so that initialization is forced here.
-[GoInit] internal static void initᴛᴛimportꓸbytes() {
-    builtin.initPackage(typeof(bytes_package));
-}
-
-// Go runs an imported package's `init` before this package's own; .NET would never load
-// an assembly nothing has touched yet, so that initialization is forced here.
-[GoInit] internal static void initᴛᴛimportꓸcompressꓸgzip() {
-    builtin.initPackage(typeof(compress.gzip_package));
-}
-
-// Go runs an imported package's `init` before this package's own; .NET would never load
-// an assembly nothing has touched yet, so that initialization is forced here.
-[GoInit] internal static void initᴛᴛimportꓸstrconv() {
-    builtin.initPackage(typeof(strconv_package));
-}
-
 // lostProfileEvent is the function to which lost profiling
 // events are attributed.
 // (The name shows up in the pprof graphs.)

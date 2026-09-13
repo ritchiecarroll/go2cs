@@ -77,16 +77,16 @@ using static go.runtime.pprof_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("runtime/pprof/elf.go", "elf.cs", "ACgqwoKCgpSUgIK4gpaClKS01oKSlKSCgpKUtIKCkpS2goCCpICSpJKUgqaClIKCgJKkgoKCgoKSlIKUgIKkpg==")]
-[assembly: go.GoPositionMap("runtime/pprof/label.go", "label.cs", "AC02goKClAAEFMKClISCloSqooLIgpSClAACEgAIAoKUgoKUqqKCgqqigoKC")]
+[assembly: go.GoPositionMap("runtime/pprof/elf.go", "elf.cs", "ABAqwoKCgpSUgIK4gpaClKS01oKSlKSCgpKUtIKCkpS2goCCpICSpJKUgqaClIKCgJKkgoKCgoKSlIKUgIKkpg==")]
+[assembly: go.GoPositionMap("runtime/pprof/label.go", "label.cs", "ABs2goKClAAEFMKClISCloSqooLIgpSClAACEgAIAoKUgoKUqqKCgqqigoKC")]
 [assembly: go.GoPositionMap("runtime/pprof/map.go", "map.cs", "ABw4lIKCgpSChpKCgoKUgoK4goKClMiClIKCgoSCpoKEgpSClIKCgpSClA==")]
 [assembly: go.GoPositionMap("runtime/pprof/pe.go", "pe.cs", "AAwawoKClA==")]
-[assembly: go.GoPositionMap("runtime/pprof/pprof.go", "pprof.cs", "AJ0CwgOCgpQAChaCAAISAAgCgoKClIKUuILYsoKC2LKChIKClobYkqjSgoKClAAFKAAVAoKUgpaCgoKUloKCgpTa4oKCAAUkABECgpSCqIKCgpSWhMqAooCigAAMHrKCgoKmgoKCpu7UgoKCgoSEgoKCgoKmgoKUgtqkkoKCgoKUgoKUlIKCgoKCgoKClJaElIKCgoKUqIKCgoSCgoKmgoKCgpKCuJSCAAgSgKKAooKSkoKU2qKCgoKCgoKCyIKUgqamgpSuwqiSgqiS2qKmgoKmggABFPKCuIKCgoK6gpaIgoKEgoKCgoKCzAAGEIKCgpa6goKmgpSCuoKCgoKCgoKEgoKCgoKEgoKCgoKEgoKCgoKCgpaEgqiSgtjIgrqS2JKClKa4goKCgoKUlJSUgqaO4oKEuIKCgoKCugAHEICigKKAAAsmAA0UAAkEgoKCpoKUgoKCAAUQ5IKCgoKCgoCCpIKmppSCrNKChIKUgoLYkoKokoLYktiS6JKCgoKCgoKCqIiCloKChIKCgpSCgoKCgoKClIKCqIKUqKampqampqY=", "284-286:1;461-472:1;515-519:2;634-636:1;737-739:1;936-938:1")]
-[assembly: go.GoPositionMap("runtime/pprof/pprof_windows.go", "pprof_windows.cs", "ABoegoKCgoI=")]
-[assembly: go.GoPositionMap("runtime/pprof/proto.go", "proto.cs", "ACYusABS3AGigoKCgpSmgoKCgrqSgoKCqJKCgoKClIKokoKCgoKokoKCgqiSgoKCgoKC7oKUpsqCgqaWgoKWppSCgoKUAA8swoIACBKCrsKUgpSCuIKCpgAQJIKClIKUgpSCgoKChJSC7paClOiyhIKSgoKCgpaChJKChIKCkoK6hJaCgryCggACGAALApaEgoKAAAsYgoCCgsqAgrjegqaCkoCCpIKWgIKC2oCCuICCgpSCtoCSpAA4dIKCgoKCrLKAppKSkpSSlpKUkraCgoKCgpQACw4ACAKClISCio6C3oKCgsSCgoKCgu6UgoKEgoKCppaCgoKCgoKCloIADAwAFCymgoKCgpaCgoKCgpSCgpSCgpSClJSCgpSCgoKUloKCgpbKAAgWgriCpoI=", "369-373:1;683-688:1")]
+[assembly: go.GoPositionMap("runtime/pprof/pprof.go", "pprof.cs", "AO0BwgOCgpQAChaCAAISAAgCgoKClIKUuILYsoKC2LKChIKClobYkqjigoKClAAFKAAWAoKUgpaCgoKUloKCgpTa8oKCAAUkABECgpSCqIKCgpSWhMqAooCigAAMHrKCgoKmgoKCpu7UgoKCgoSEgoKCgoKmgoKUgtqkkoKCgoKUgoKUlIKCgoKCgoKClJaElIKCgoKUqIKCgoSCgoKmgoKCgpKCuJSCAAgSgKKAooKSkoKU2qKCgoKCgoKCyIKUgqamgpSuwqiSgqiS2qKmgoKmggABFPKCuIKCgoK6gpaIgoKEgoKCgoKCzAAGEIKCgpa6goKmgpSCuoKCgoKCgoKEgoKCgoKEgoKCgoKEgoKCgoKCgpaEgqiSgtjIgrqS2JKClKa4goKCgoKUlJSUgqaO4oKEuIKCgoKCugAHEICigKKAAAsmAA0UAAkEgoKCpoKUgoKCAAUQ5IKCgoKCgoCCpIKmppSCrNKChIKUgoLYkoKokoLYktiS6JKCgoKCgoKCqIiCloKChIKCgpSCgoKCgoKClIKCqIKUqKbGptbW1sY=", "284-286:1;461-472:1;515-519:2;634-636:1;737-739:1;936-938:1")]
+[assembly: go.GoPositionMap("runtime/pprof/pprof_windows.go", "pprof_windows.cs", "AA4egoKCgoI=")]
+[assembly: go.GoPositionMap("runtime/pprof/proto.go", "proto.cs", "ABQusABS3AGigoKCgpSmgoKCgrqSgoKCqJKCgoKClIKokoKCgoKokoKCgqiSgoKCgoKC7oKUpsqCgqaWgoKWppSCgoKUAA8swoIACBKCrsKUgpSCuIKCpgAQJIKClIKUgpSCgoKChJSC7paClOiyhIKSgoKCgpaChJKChIKCkoK6hJaCgryCggACGAALApaEgoKAAAsYgoCCgsqAgrjegqaCkoCCpIKWgIKC2oCCuICCgpSCtoCSpAA4dIKCgoKCrLKAppKSkpSSlpKUkraCgoKCgpQACw4ACQKClISCio6C3oKCgsSCgoKCgu6UgoKEgoKCppaCgoKCgoKCloIADAwAFCymgoKCgpaCgoKCgpSCgpSCgpSClJSCgpSCgoKUloKCgpbKAAgWgriCpoI=", "369-373:1;683-688:1")]
 [assembly: go.GoPositionMap("runtime/pprof/proto_windows.go", "proto_windows.cs", "AA0e0oKUgpSAlIKCgpSClIKCAAYQ6PKCgpSCgpSAlIKCgoKW5oKCgoKmlA==", "22-22:1;55-55:1")]
 [assembly: go.GoPositionMap("runtime/pprof/protobuf.go", "protobuf.cs", "AA4cgoKClKaCgqaUgqaClIKClIKCgoKCgpSCuIKClKaCgqaCgpSmgpSCgpSCgoKCgoKUgriCgqaCgriCgpSmgoKUuIKClMqCgqaCgoKCgoKCgg==")]
-[assembly: go.GoPositionMap("runtime/pprof/protomem.go", "protomem.cs", "ABsgkoKCgoKCgoKCloKCooKCuIKCgIK2gqaCgpSWgoKCgpSSgriCAAIYAAkCgpamloKE", "60-64:1")]
+[assembly: go.GoPositionMap("runtime/pprof/protomem.go", "protomem.cs", "ABUgkoKCgoKCgoKCloKCooKCuIKCgIK2gqaCgpSWgoKCgpSSgriCAAIYAAkCgpamloKE", "60-64:1")]
 [assembly: go.GoPositionMap("runtime/pprof/runtime.go", "runtime.cs", "AAsgysampqqyggACFAAJAoKCgg==")]
 // </GoSourcePositionMaps>
 
@@ -124,4 +124,34 @@ public static partial class pprof_package
     public partial struct LabelSet {}
     public partial struct Profile {}
     // </TypeAccessibility>
+
+    // Go initializes an imported package before the importing package, for every import
+    // form - not only the blank one. .NET would never load an assembly nothing has touched
+    // yet, so each import that initializes anything is forced below: once per assembly, and
+    // ahead of this package's own `init` functions, which this file being the first compile
+    // item of the project guarantees.
+
+    // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸbufio() => builtin.initPackage(typeof(bufio_package));
+    [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
+    [GoInit] internal static void initᴛᴛimportꓸcompressꓸgzip() => builtin.initPackage(typeof(compress.gzip_package));
+    [GoInit] internal static void initᴛᴛimportꓸcontext() => builtin.initPackage(typeof(context_package));
+    [GoInit] internal static void initᴛᴛimportꓸencodingꓸbinary() => builtin.initPackage(typeof(encoding.binary_package));
+    [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸabi() => builtin.initPackage(typeof(go.@internal.abi_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸsyscallꓸwindows() => builtin.initPackage(typeof(go.@internal.syscall.windows_package));
+    [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
+    [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
+    [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
+    [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
+    [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
+    [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
+    [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
+    [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
+    [GoInit] internal static void initᴛᴛimportꓸtextꓸtabwriter() => builtin.initPackage(typeof(text.tabwriter_package));
+    [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
+    // </ImportInitializers>
 }
