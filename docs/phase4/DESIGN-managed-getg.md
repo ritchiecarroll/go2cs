@@ -469,3 +469,41 @@ Where that leaves the rows:
   `CGO_ENABLED=0`; the tools live in the lane's scratch and are attachable on request. A re-derivation
   at a later tip must reproduce the reconciliation of §2.2 (280 − 13 − 1 = 266 on windows) before any
   number here is quoted from it — a bucket count is re-derived at the tip, never carried.
+
+## 13. AMENDMENT 2026-09-13 (C1) — §8.2's Linux row loses its stated premise, and §12 item 2 is answered
+
+Appended as a dated block; nothing above is rewritten.
+
+**§8.2's Linux `TestDebugCall` row (the table at `:206`) rests on a premise that is no longer true.**
+Its shape-(B) cell reads *"identical — `lockedm` is never set because `LockOSThread` is a no-op by
+construction, and setting it would only reach `tkill(tid, SIGTRAP)` against a managed thread."* As of
+this date `LockOSThread`/`UnlockOSThread`/`lockOSThread`/`unlockOSThread` carry **Go's whole body** in
+`src/core/runtime/managed_impl.cs`, so `dolockOSThread` runs and `g.lockedm`/`m.lockedg` become real
+links. **`lockedm` IS set now.**
+
+**The corrected prediction, checkable from source rather than asserted.** Go's `InjectDebugCall`
+(`export_debug_test.go`) reads `gp.lockedm == 0` first and returns
+`plainError("goroutine not locked to thread")`. Go's own `debug_test.go` callers call
+`runtime.LockOSThread`, so with the accounting live the goroutine IS locked and that first guard no
+longer fires; the row falls to the **NEXT** guard,
+`tid := int(gp.lockedm.ptr().procid); if tid == 0 { return nil, plainError("missing tid") }`. And
+`m.procid` is written only by `minit`/`unminit` (`src/core/runtime/<goos>/os_linux.cs`), which the
+managed host never runs. **Predicted: the row's text moves from `goroutine not locked to thread` to
+`missing tid`, and the row stays a divergence.** *Falsifier: any other text, or the row passing.*
+Stated before the seat is run, so it is scored as worded — the door moves one guard further in, which
+is this design's own idiom, not a repair.
+
+**§12 item 2 is separately ANSWERED and its wording is now stale.** It reads *"until it is gated the
+378 shadowed rows stay unmeasured"* for `TestCrashWhileTracing`'s log-after-completion fault. It WAS
+gated — C1's host-fatal entry at `d17103497`, live at `44f858717` — and i9's tail (`0dd133719`) then
+read **185 of 880** verdicts with 695 never reached. So the item is discharged, and the wall it named
+has moved to `TestLockOSThreadNesting`, whose own door is the accounting this amendment's change
+supplies. The two are the same story read one door apart. The disclosure entry's own dated amendment
+(same date, `src/core/runtime/go2cs_test_disclosures.json`) records why links 7-8 of that chain are
+not measurable **at that row** in either configuration.
+
+⚠ **NOT MEASURED HERE.** The authoring host has no .NET, so nothing in this block is a run: the body
+is reviewable as source and the prediction above is owed to whichever run first executes it (i9's
+standing item). The `lockedExt`/`lockedInt` census that motivated the change IS measured at this tree —
+`lockedExt` **0** increment/decrement sites, `lockedInt` **3** (all `oneNewExtraM`), positive control
+`locks++` **24**.

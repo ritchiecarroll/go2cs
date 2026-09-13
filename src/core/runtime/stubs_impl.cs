@@ -49,6 +49,14 @@
 //                             (`locks`, `printlock`, `mallocing`, `throwing`, `dying`, `preemptoff`,
 //                             `lockedExt/Int`, `libcall*`, `profilehz` — honest by persistence: the
 //                             converted code that increments them is the code that reads them).
+//                             ⚠ For `lockedExt/Int` that sentence was FALSE when written and stayed
+//                             false until 2026-09-13: the hand-own in managed_impl.cs displaced the
+//                             four bodies that DO the incrementing, so `lockedExt` had zero
+//                             increment sites corpus-wide (measured 2026-09-08, reproduced since)
+//                             and persistence had nothing to persist. Repaired by giving those four
+//                             Go's whole body; the sentence is true for them now, and is recorded
+//                             here rather than silently corrected because "honest by persistence"
+//                             is only honest where something writes.
 //
 // What this buys and what it does not, as measured (the increment's own row re-read is the record):
 //   - every reader that needed only the pair proceeds — acquirem/releasem, the m.locks and

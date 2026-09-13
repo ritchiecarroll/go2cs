@@ -80,9 +80,15 @@
 //     passes against these values at its `<= 4` threshold), so a timing fix would be speculative
 //     machinery. It is a board item whose trigger is the first flaky leak check, or the first
 //     consumer that needs prompt decay.
-//   - LockOSThread/UnlockOSThread are no-ops BY CONSTRUCTION, not by omission: go2cs runs each
-//     goroutine on its own managed thread, so the guarantee they exist to provide — "this
-//     goroutine will not be migrated to another OS thread" — already holds unconditionally.
+//   - LockOSThread/UnlockOSThread carry GO'S WHOLE BODY, and the split is worth stating exactly.
+//     The BINDING they exist to provide — "this goroutine will not be migrated to another OS
+//     thread" — holds BY CONSTRUCTION here, since go2cs runs each goroutine on its own managed
+//     thread; that half is a no-op and always was. The ACCOUNTING is NOT: `m.lockedExt`,
+//     `m.lockedInt` and the `m.lockedg`/`g.lockedm` back-links are state Go's own suite reads back
+//     through `runtime.LockOSCounts`, and until 2026-09-13 these four bodies were empty, so the
+//     counters read 0,0 where Go reads 1,0. ⚠ This bullet claimed the WHOLE pair was a no-op by
+//     construction, which conflated the two halves and is why the gap survived: the binding was
+//     the reason given, and the accounting was never separately checked.
 //   - Callers()/callers()/Frames.Next() walk the MANAGED stack projected to GO-LOGICAL frames:
 //     only converted Go declarations and function literals count — adapter shells (IGoAdapter) and
 //     go2cs-gen forwarders are dispatch plumbing Go has no frame for, and golib/the BCL/the test
@@ -1406,23 +1412,63 @@ partial class runtime_package
     }
 
     // LockOSThread wires the calling goroutine to its current operating system thread.
+    //
+    // THE BINDING HALF IS STILL TRUE BY CONSTRUCTION — a goroutine IS a managed thread here, so
+    // "this goroutine will not be migrated" holds whether or not these bodies run. What the four
+    // empty bodies got WRONG is the ACCOUNTING half: Go's `m.lockedExt`/`m.lockedInt` counters and
+    // the `m.lockedg`/`g.lockedm` back-links are STATE Go's own suite reads back, through
+    // `runtime.LockOSCounts` (export_test.go), and a no-op answers 0,0 where Go answers 1,0.
+    // Measured 2026-09-08 at 44f858717 and reproduced at this tree: `lockedExt` had ZERO
+    // increment/decrement sites corpus-wide and `lockedInt` exactly 3, all of them `oneNewExtraM`'s
+    // cgo extra-M path — because the hand-own displaced the very code that maintains them
+    // (positive control: `locks++` reads 24 in this same folder). So these carry Go's whole body now.
+    //
+    // DELIBERATE DIVERGENCE, ONE, NAMED: Go's LockOSThread starts the template thread first
+    // (proc.go, the `newmHandoff.haveTemplateThread` guard) so that a LOCKED thread can hand thread
+    // CREATION to a known-good one. `startTemplateThread` exists in the converted corpus
+    // (<goos>/proc.cs) but the managed host never creates threads through `newm`, so calling it
+    // would start a thread nothing hands work to — speculative machinery, not fidelity. Omitted,
+    // and this comment is the omission's record.
+    //
+    // `dolockOSThread`/`dounlockOSThread` are NOT hand-owned: they are the auto-converted bodies in
+    // <goos>/proc.cs, already faithful (they set and clear the same two back-links, behind Go's own
+    // `GOARCH == "wasm"` guard), in this same partial class. These four call them exactly as Go does.
     public static void LockOSThread()
     {
-        // Already true by construction — a goroutine IS a managed thread here (see the header).
+        var gp = getg();
+        gp.Value.m.Value.lockedExt++;
+        if (gp.Value.m.Value.lockedExt == 0)
+        {
+            gp.Value.m.Value.lockedExt--;
+            throw panic("LockOSThread nesting overflow");
+        }
+        dolockOSThread();
     }
 
     // UnlockOSThread undoes an earlier call to LockOSThread.
     public static void UnlockOSThread()
     {
+        var gp = getg();
+        if (gp.Value.m.Value.lockedExt == 0)
+            return;
+        gp.Value.m.Value.lockedExt--;
+        dounlockOSThread();
     }
 
     // The runtime-internal variants, reached through syscall and startTemplateThread.
     internal static void lockOSThread()
     {
+        getg().Value.m.Value.lockedInt++;
+        dolockOSThread();
     }
 
     internal static void unlockOSThread()
     {
+        var gp = getg();
+        if (gp.Value.m.Value.lockedInt == 0)
+            systemstack(badunlockosthread);
+        gp.Value.m.Value.lockedInt--;
+        dounlockOSThread();
     }
 
     // Pinner.Pin / Pinner.Unpin live in pinner_impl.cs (Q45). The "address is stable" half of
