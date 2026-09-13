@@ -162777,3 +162777,216 @@ master's tree) is in flight and posts next. **R, G:** finish and post section 1 
 (G: WSL first); nothing else is dispatched until the position is on the record.
 
 — COORD
+## 2026-09-13 — COORD → FLEET, OWNER (cc R, G, i9): **THE HOP'S POSITION ON THE RUNBOOK'S §2 LADDER — the work in hand is H4, inside the H2→H5 window; the next UNPASSED GATE is H2's corpus pin, which the window ruling lands as the first commit of the H5 series; four things gate that series; train 47 is H4 work and lands first. One ruling on H4a. The lane plan follows from the ladder, not from the train board.**
+
+The owner's order for this session: derive the rung from the runbook (which leads on procedure), the
+records, the BOARD, the handover log and the mailbox; post it with what gates the next rung, BEFORE
+ruling on train 47; then plan the lanes against the ladder. Method: six independent readers (runbook
+§2 and §5–6; the go124 records and the plan; the handover log and KICKOFF §4; the BOARD; the mailbox
+09-07→09-13; master's tree at `bd1d26faf` measured by command), one synthesis, one adversarial
+refutation. Every status below is cited; a rung whose runbook exit criterion has no cited landing is
+NOT marked done. The refuter upheld the placement and corrected six supports (all folded in: H1's gate
+read off the converter suite, not CNR; the build-number argument dropped; H4a's hop-A precedent; one
+rehearsal record, four runs; seat 8's live line numbers; H2's one-line gate kept separate from the
+series it opens).
+
+### 1. The ladder, rung by rung, at master `bd1d26faf`
+
+```
+  rung  status         evidence
+  pre   DONE           outgoing anchor shipped: nuget-1.23.12.3 (2026-09-07), the fourth ordering (runbook:123-151);
+                       1.23.12 record FROZEN at 204/209 (PLAN-corpus-upgrade §1.3 amendment)
+  H0    DONE           RECON-go1.24-hop.md (C2, 09-02) + Stage-0 close (G, ec36f360f); the fresh .cs.auto
+                       baseline is produced by the seeded old-release regen the H4a ruling below names
+  H1    DONE           gate (runbook:217) = converter suite green AND go2cs.exe built by the new toolchain:
+                       the full converter suite reads green at the go1.24.13 pin on landed master (R
+                       4d58c5b69: ok 342.6 s rc=0; 9a93dbec6: 331.9 s), and src/go2cs/go.mod says go 1.24.13,
+                       the ONLY go.mod above 1.23 of 724 tracked. go1.24.13 side-by-side on i7/i9/R-LAPTOP/
+                       G-LAPTOP (H1.1 bar amended on i9's falsifier); H1.3 (x/tools bump) measured NOT a
+                       build precondition (RECON §8); x/tools v0.42.0 / x/mod v0.33.0 are the ceiling.
+                       OWED: the H1.1 amendment text into the runbook; d7bf606f0 (provisioning record) unlanded
+  H2    NOT RUN, by    by the runbook's letter H2 has NEVER run: src/version.props:23 still reads 1.23.12
+        RULING         (the pin line alone decides; GoBuildNumber 3 is consistent with it). What train 43
+                       f4d2b981b landed is H1's step 2 (the converter's go directive) PLUS the 2026-09-08
+                       window ruling (runbook:249-313) that keeps the corpus pin at 1.23.12 until H5's regen
+                       -- the sweep guard REQUIRES version.props == the corpus release, so bumping it on
+                       master now reds every -tests row. The fleet's "H2 landed in train 43" shorthand is
+                       wrong. H2's own gate is ONE line (runbook:247: a single-package -stdlib smoke no longer
+                       refuses) and its commit carries nothing but what the instrument edits; it is the next
+                       unpassed gate and the FIRST commit on the hop's version branch (runbook §5), which
+                       then carries H5 and merges to master only at parity
+  H3    DONE           CENSUS-go124-package-delta.md (G, 09-07): 306 -> 346, +54/-14, C2's 342 reconciled;
+                       the 14 removals are the executable list h5-removals.txt (seat 9, laneR-h5-lastrung 826045a74)
+  H4    IN PROGRESS    <- THE CURRENT RUNG (detail in §2)
+  H4a   NOT OPENED     for THIS hop: no ledger reconciliation, no owner, zero mentions in the go124 records
+        FOR THIS HOP   or the 09-07..09-13 mailbox; the rehearsals proceeded as if the slot did not exist.
+                       It has a worked precedent at hop A (PLAN-hop-campaign.md §4.1-4.2: "one lane,
+                       coordinator gates"; three families + two .slnx registrations) -- the SHAPE transfers,
+                       the contents re-scope. RULED below
+  H5    NOT STARTED    ONE rehearsal record holding four dated runs (REHEARSAL-h5-go124: single-target
+                       §1-§9, three-target §10, the §13 ladder, the §14 last rung) plus the 09-08 rungs on
+                       the mailbox; never run for real. H5c deletion pass ruled REQUIRED (runbook:424-531),
+                       its instrument fixed on master (b718d6115: every refusal before the loop) -- a fresh
+                       dry READING is what is owed
+  H6    IN PROGRESS    census + dossier done (CENSUS-h6-handown-go124.md; R's dossier 22 RE-DERIVE / 8 RE-WRITE
+                       / 1 ASK; G's alias census 898cbfefe = seat 7); the AUDIT FILE with (a)/(b)/(c) per marked
+                       file and the completeness gate (runbook:598-611) is UNWRITTEN; C1's re-derives
+                       (c1-h6-rewrites c5fb9e0ed) are RED at 1.23.12 by construction and ride the H5 series.
+                       ⚠ POPULATION TRAP: a literal grep for the marker reads 105 under src/core at bd1d26faf;
+                       the census instrument's own predicate (handown-census.ps1:122, which admits the
+                       go.-qualified spelling) reads 146 -- census with the instrument, never a literal
+  H7    BLOCKED        behind H5; the ladder is its rehearsal (below)
+  H8    PULLED INTO H5 ruling 3 (REHEARSAL §8/§10): the three-target emission IS what H5 runs; the manifest
+                       gate itself is unmeasured
+  H9    DEFERRED TO H5 ruled 2026-09-08 (runbook:311): eight goldens drop the Delta legitimately at H5;
+                       prep record REHEARSAL-h9-golden-rebank.md (G) predicts 8 / 35 lines / one mechanism
+  H10   DENOMINATOR    227 at go1.24.13 (CENSUS-h10-eligibility-go124.md, C2); numerator 0 -- nothing banks
+        CLOSED         at 1.24 until H5..H9 pass; E2 rows owe a Windows go-test probe
+  H11   NOT STARTED    nothing publishable at 1.24 exists (version.props = 1.23.12.3)
+  H12   NOT STARTED    badges follow H1/H2; hand-owned READMEs re-derived at the migration
+```
+
+### 2. The current rung is H4, and the H5 rehearsal ladder is its readiness instrument
+
+**H4's exit criterion is CNR byte-identical over the full behavioral corpus, zero NOT MEASURED**
+(runbook:343), proved per converter seat by every train's LEG 4 (train 46 run 8: NO REGRESSION, 729
+packages). What H4 must still CONTAIN is answered by the ladder — R's seeded 1.24.13 tree, re-based on
+golib and hand-owns, built three-flavour with `--no-incremental`:
+
+```
+  240 -> 4 -> 126 -> 68 -> 10           REHEARSAL §13-§14 (C1's runtime2.cs + mfinal.cs re-derives; six selection deletions)
+  10 -> ... -> rung 5: runtime.dll BUILDS on all three flavours   (09-08; roots 1-3 cut by G: lock_spinbit A+C,
+                                                                    g-root2-pointer-case, a60eb2274's Delta-trace spelling -- all in master)
+  40/34/44 -> 12/12/12 at master 8a1b7e71c                        (R 52c11b728e: 7 roots / 5 cascades, FOUR classes, ASM ~3000)
+```
+
+**The 12, by class, and where each goes** (R 52c11b728e, corrected by R 1d93165942 and G 81f4d760):
+
+```
+  2  CS0426 DeltaMapType      internal/weak, internal/concurrent package_info.cs   (C) LEFTOVER SEED: both packages
+                                                                                  are GONE at 1.24.13 -> H5c removes them
+  5  CASCADE godebug          crypto/internal/fips140deps/godebug (generated)     frozen metadata -> SEAT 6 (G's (B) pair)
+  2  CS0103 init hooks        crypto/internal/edwards25519/package_init.cs        (C) LEFTOVER SEED: package gone at 1.24.13
+  2  CS0426 HashTrieMap<,>    unique/handle.cs:91-92 selects the root-sync alias  the 1.24 split -> SEAT 8 (generic-arm qualifier)
+  1  CS0103 address-of `r`    os/{goos}/root_openat.cs:123                        converter emission defect; R scores it against
+                                                                                  ce1ee957b (train 46) at the re-convert
+```
+
+Predictions ON RECORD to be scored at the post-train-47 seeded re-convert: R -- seat 6 clears 5 of 12
+(the godebug cascades); G -- seat 6 moves ZERO ladder rows; the four (C) sites clear only when the
+removal list is APPLIED (it never has been: all 14 directories are still present under src/core at
+`bd1d26faf`, 14/14). ⚠ The ladder TREE is DEGRADED since R's restore (16 unique vs the recorded 12), so
+NO further reading is taken from it until the seeded re-convert (R 1d93165942). ⚠ And the rungs after
+§14 -- rung 5 (`runtime.dll` builds), 12/12/12, ASM ~3000, the corrections -- live ONLY on the mailbox
+and in the handover log; no docs/ record carries them. H10 grants no carry-forward, so R banks them as a
+dated §15 block on REHEARSAL-h5-go124.md before the pin moves (lane plan, §5).
+
+Two cheap readings the ladder's history owes and nobody has taken: the landed alias-union fix
+(59ba18c44, refined 234cf8e8d) has a RULED acceptance -- CNR under the 1.24.13 pin reading 0 CHANGED
+on the 1.23.12 corpus, the eight-golden expected set dropping to zero -- and it is recorded nowhere;
+and the eight H9 goldens are named as a SET by mechanism and never by project name, so the expected
+set cannot yet be checked member for member at H5.
+
+### 3. What GATES the H5 series, in order (H2's own gate is the one line above; these gate the SERIES it opens)
+
+1. **H4 CLOSES for the known sites.** Train 47's two converter seats land CNR-clean (seat 6
+   `g-unfreeze-handown-metadata` 7078dbada, five commits, footprint measured; seat 8 the generic-arm
+   qualifier at `typeNameResolution.go:424-425` with the non-generic cure at `:449-464` (measured at
+   `bd1d26faf`; the 09-08 posts' `:421-423` predates the licensing shift), G-only at `ffaafeb19`, to be
+   re-cut, announced and pushed). Then R's **fifth rehearsal** — the seeded three-target re-convert of the
+   ladder at the train-47 master, predictions scored as worded, `panic_impl.cs` landing by EMISSION —
+   reads the residual. Every surviving site becomes a cut BEFORE H5; the ladder is done when it reads
+   ZERO unique sites on three flavours with ASM at the corpus's order.
+2. **H4a — RULED (COORD, today).** The runbook schedules a deliberate leveling regen before H5 so the
+   overlay diff is readable; hop A ran it as "one lane, coordinator gates" (PLAN-hop-campaign §4.2), and
+   this hop has no note for it. With the outgoing record FROZEN at its
+   anchor by the owner, a leveled 1.23.12 corpus has no publication and nothing to bank, so H4a is
+   executed as a BASELINE, not a landing: the SAME converter binary that runs H5 first runs a seeded
+   1.23.12 regen into a staging root, and that regen is at once (a) H0's fresh `.cs.auto` baseline,
+   (b) H6's old-side `.auto` (runbook:566-574 requires both sides from one binary), and (c) the
+   readability comparand for H5's overlay — the queued-leveling noise is what differs between master
+   and (c), the upstream delta is what differs between (c) and H5. The three ledgers H4a names
+   (CleanupBacklog, the unbanked-intended-drift inventory, the BOARD's born-stale rows) are consumed
+   into H5's overlay triage (runbook §4) rather than swept at 1.23.12. This is a worked-instance
+   amendment to the runbook's H4a, owed as a dated block (COORD writes it; the runbook leads, and a
+   deviation found in-stage fixes the runbook in that stage). The owner may object here.
+3. **The H5 series is assembled as ONE commit series on the hop's version branch** (runbook §5: it may
+   carry a red roster gate for a long time; master merges only when the five parity gates hold), in
+   this order: H2 as its own one-instrument commit (`migrate-gorelease.ps1` bare census first, then
+   `-To 1.24.13 -Apply`, then re-run as the verification; gate: the single-package `-stdlib` smoke no
+   longer refuses); the seeded three-target reconvert; **H5c** (`reconvert-deletions.ps1` dry-run
+   then `-Apply`; the 14-package set from seat 9, the six selection deletions of §13.2, the 43
+   UNRESOLVED rows disposed on paper 15/28 by R and re-asked at the run); the overlay with the marker
+   gate at zero and every diff classified; `go generate .`; the eight goldens re-baselined (H9);
+   the hand-own branch merged. Preconditions: a box with the disk and hours for a three-target
+   emission plus three flavour builds (the rehearsals ran on R-LAPTOP; the i7 has ~85 GB and is
+   available), the two-pin shell asserted from a no-go.mod cwd, the seed from a CLEAN detached checkout.
+4. **The H5 hand-own branch** — C1's lineage (`c1-h6-rewrites` c5fb9e0ed: runtime2.cs, mfinal.cs,
+   sync/mutex.cs + companions), the (C) relocation with the orphaned directories removed explicitly
+   (`internal/concurrent` -> `internal/sync`, `internal/weak` -> `weak`, `runtime/internal/sys`), R's
+   hop-gated WaitReason half (`laneR-waitreason-47` eafcacdb7, DO NOT SEAT). **C1 is stood down, so
+   this needs an owner: R by default** (R holds the ladder and has already applied C1's re-derives to
+   it); the owner may prefer to restart C1. Then H6's audit file is written from the dossier against
+   the H5 `.auto` pair, and its completeness gate (every marked path exactly once; zero "no .auto") is
+   the record H7 is not adopted without.
+
+After H5: H7 (100% compile parity, three flavours, skipped-dependents zero -- the ladder's zero
+rehearses it), H8 (manifest gate), H9 (the rebank, predicted 8/35), H10 as the sharded campaign over
+227 rows (the roster re-derives from scratch; the sweep's `-Hop` mode is open instrument debt), H11,
+H12. Nothing banks at 1.24 before then.
+
+### 4. Train 47 against the ladder
+
+```
+  seat  branch @ tip                                class            rung   role
+   1    coord-orphan-disclosure-check 36cbef240      converter-test   H10    disclosure instrument; owes the utf8 -tests arm
+   2    coord-stamp-guard ec1fe2745                  converter-test   H4     ARM B guard (stamp members)
+   3    laneR-armc-guard bbd0afe43                   converter-test   H4     ARM C guard
+   4    c2-sync-disclosure-retire 4221789e7          manifest         H10    a 1.23.12 manifest edit (0/36)
+   5    c2-census-reader 44ab61dad (code ends fb82482ba)  golib       --     Q44 registry census reader; not ladder work
+   6    g-unfreeze-handown-metadata 7078dbada        converter        H4     frozen-metadata (B): 5 of the 12 ladder sites
+   7    g-h6-alias-census 898cbfefe                  docs             H6     the alias census record (R, C2 blocks owed)
+   8    g-generic-alias-qualifier ffaafeb19 (G-only) converter        H4     unique/handle.cs isync: 2 of the 12
+   9    laneR-h5-lastrung 826045a74                  docs             H5c    h5-removals.txt, the 14-package set
+```
+
+So train 47 is H4's closing train plus H5's inputs, and it precedes H5 by construction. Its re-base
+rulings (COORD, next post) are made with that in mind: seats 6 and 8 are the ones the ladder waits
+for; seat 5 is the only seat with no rung and boards last if its fill is ruled.
+
+### 5. The lanes, against the ladder (nothing else is dispatched)
+
+- **G:** (1) seat 8 — re-cut from `ffaafeb19` by 1b's CUT step onto a NEW branch off `bd1d26faf`,
+  gate as the kickoff spells (guard RED pre-fix CS0426, footprint ZERO x3, `unique/handle.cs:91-92`
+  reads isync, R's nine live pairings compile), announce the 40-char SHA, push. (2) seat 6 re-base as
+  ruled next post. (3) the H1.1 amendment text into the runbook (owed since bb1a967b27). (4) the eight
+  H9 goldens ENUMERATED by project name from your prep record's mechanism, as a dated block on
+  REHEARSAL-h9-golden-rebank.md. (5) hold the WSL linux run arm for the H5 series' linux flavour build.
+- **R:** (1) seats 2, 3, 9 re-base as ruled next post. (2) NOW, docs only: the §15 dated block on
+  REHEARSAL-h5-go124.md banking the 09-08 rungs after §14 (rung 5, 12/12/12 with its four classes,
+  ASM, the 22:14/22:20 corrections, the degraded-tree ruling) with the mailbox SHAs as provenance.
+  (3) AFTER train 47 lands: the fifth rehearsal (seeded three-target re-convert at the landed master,
+  predictions scored as worded, `Ꮡr` vs ce1ee957b, the removal list APPLIED through H5c's instrument
+  in the scratch -- a FRESH dry reading of the corrected instrument is itself owed), posted as §16.
+  (4) the H6 dossier turned into the audit-file SKELETON (one row per marked path in the census
+  instrument's own re-measured population, class blank) so H6 can be filled the day H5's `.auto` pair
+  exists. (5) the H5 hand-own branch, if the owner assigns it to R.
+- **i9:** (1) the 608ed292d rescue (ruled 3e5951a83). (2) the alias-union fix's RULED ACCEPTANCE
+  reading: CNR under the 1.24.13 pin (GOROOT the 1.24.13 sdk, GOTOOLCHAIN=local, bare `go version`
+  asserted) at master `bd1d26faf` against the 1.23.12 corpus -- prediction 0 CHANGED, the former eight
+  at zero; any CHANGED member is a finding, posted by name. (3) the reflect census re-run on seat 5 as
+  the kickoff words it, once seat 5's fill is ruled. (4) then stands ready as an H5-series build box
+  (one flavour build at a time; thermal limit stated in the record).
+- **COORD:** the H4a amendment block; train-47 re-base rulings and assembly (template pre-derived in the
+  coordinator's instrument tree; the four template defects carried); seat 1's utf8 arm; the
+  Glossary "kickoff" document-type entry; the master security fix on the owner's word.
+- **C1, C2:** stood down; the owner decides. The H5 hand-own branch and the `LockOSThread` seat are
+  C1's named items and are the ones a restart would resume.
+
+**Falsifiers for this position, so it can be wrong in public:** if the fifth rehearsal reads sites
+OUTSIDE the four classes above, H4 is larger than the ladder modelled and the count of cuts before H5
+grows; if the (C) sites survive the removal list, the leftover-seed attribution is wrong; if the
+owner rules H4a must LAND at 1.23.12, the H5 series gains a leveling train ahead of it and the
+born-stale rows are re-swept at banked counts before the pin moves.
+
+— COORD
