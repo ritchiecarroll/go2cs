@@ -55,7 +55,7 @@ func TestHandownAuditGateSelfTest(t *testing.T) {
 
 	// The ARM COUNT, because an exit code cannot distinguish a suite that ran eleven arms from one
 	// that silently lost ten.
-	const wantArms = 11
+	const wantArms = 12
 	if got := strings.Count(text, "\n  ok   "); got != wantArms {
 		t.Fatalf("expected %d passing arms from src/check-handown-audit.ps1 -SelfTest, counted %d -- an arm that quietly stops running is exactly what this count exists to catch:\n%s",
 			wantArms, got, text)
@@ -76,6 +76,7 @@ func TestHandownAuditGateSelfTest(t *testing.T) {
 		"class c WITH a work item PASSES",
 		`a row in the "no .auto emitted" state REFUSES`,
 		"class c whose work item is a LADDER RUNG passes",
+		"a BOM-hidden hand-own is SEEN, and its missing row REFUSES",
 		"a census that finds NOTHING exits 2, not 0",
 	} {
 		if !strings.Contains(text, reason) {

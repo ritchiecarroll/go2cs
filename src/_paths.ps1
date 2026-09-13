@@ -243,3 +243,44 @@ function Get-RelativeDisplayPath {
 
     return $relative.TrimStart('\', '/').Replace('\', '/')
 }
+
+# ---------------------------------------------------------------------------------------------------
+# The HAND-OWN MARKER CENSUS predicate -- ONE definition, for this file's own stated reason: two copies
+# of a predicate that must agree are two predicates that will differ. handown-census.ps1 defines the H6
+# audit POPULATION with it, and check-handown-audit.ps1 RE-MEASURES that population against the audit
+# file. If the two ever disagreed, the gate would report an audit complete with respect to a population
+# the census never had -- which reads exactly like completeness.
+#
+# BOM TOLERANCE (coordinator ruling, mailbox e4b84be5b). The pattern is LINE-ANCHORED, so a UTF-8 BOM --
+# three bytes that are not whitespace -- hides a marker sitting on LINE 1. Measured 2026-09-13 over
+# 3,764 tracked .cs under src\core: 66 carry a BOM and NONE puts the marker on line 1, so live exposure
+# was ZERO; what prevented it was the licence-header convention, which nothing asserts. Ruled: make the
+# INSTRUMENT tolerant rather than require the corpus to stay careful. The eleven marked hand-owns that
+# do carry a BOM are found today for the right reason and stay found.
+#
+# WHY -P, AND NOT AN ERE ESCAPE. The obvious spelling under -E, '^(\xEF\xBB\xBF)?\s*\[module:...', is
+# DEAD: POSIX ERE does not read \xEF, so it matches exactly what the old pattern matched while READING
+# AS IF IT HANDLED THE BOM. Measured against a planted BOM file: -E with the escapes still missed it;
+# -P with \x{FEFF} found it. The loose alternative '^.{0,3}\[module:' finds it too AND admits
+# '// [module: ...]' comment mentions -- measured, one false positive on a three-file fixture, and the
+# audit file already documents 78 such comment-only mentions in the corpus.
+#
+# A git built without PCRE cannot run the tolerant arm. It FALLS BACK to the anchored ERE and SAYS SO,
+# because a census quietly losing its BOM arm is the exact failure this note is about. `git grep` exits
+# 1 on "no match" and 128 on a usage error, so the fallback keys on > 1 and never on an empty result.
+function Get-HandOwnMarkedPath {
+    param([Parameter(Mandatory)][string] $CoreRoot)
+
+    Push-Location $CoreRoot
+    try {
+        $marked = @(git grep -l -P '^(\x{FEFF})?\s*\[module:\s*(go\.)?GoManualConversion\]' -- '*.cs' 2>$null)
+        if ($LASTEXITCODE -gt 1) {
+            Write-Warning 'Get-HandOwnMarkedPath: this git cannot run PCRE (-P), so the census fell back to the anchored ERE and CANNOT see a marker hidden behind a leading BOM.'
+            $marked = @(git grep -l -E '^\s*\[module:\s*(go\.)?GoManualConversion\]' -- '*.cs' 2>$null)
+        }
+    } finally {
+        Pop-Location
+    }
+
+    return @($marked | ForEach-Object { ($_ -replace '\\', '/').Trim() })
+}

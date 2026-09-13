@@ -117,11 +117,10 @@ function Get-StrippedGo([string]$Path) {
 }
 
 # --- 1. Marker census: line-anchored, whole files, tracked files only -----------------------------
-Push-Location $core
-try {
-    $marked = @(git grep -l -E '^\s*\[module:\s*(go\.)?GoManualConversion\]' -- '*.cs' 2>$null) |
-        ForEach-Object { $_ -replace '/', '\' }
-} finally { Pop-Location }
+# The predicate itself lives in _paths.ps1 as Get-HandOwnMarkedPath, with the BOM tolerance and the
+# reason it is -P and not an ERE escape. ONE definition: check-handown-audit.ps1 re-measures this exact
+# population at H6, and a second spelling of it here is a second predicate that will eventually differ.
+$marked = @(Get-HandOwnMarkedPath -CoreRoot $core | ForEach-Object { $_ -replace '/', '\' })
 if ($marked.Count -eq 0) { throw 'marker census returned zero -- wrong directory or broken git grep' }
 
 # --- 2. Map each hand-own to the upstream Go source it replaces -----------------------------------

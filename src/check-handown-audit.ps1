@@ -100,26 +100,25 @@ function Add-Violation {
 }
 
 # --- 1. The census, RE-MEASURED --------------------------------------------------------------------
-# The predicate is handown-census.ps1's: line-anchored, whole-file, tracked .cs only, admitting both
-# marker spellings. Deliberately the same expression rather than a second spelling of it -- two
-# predicates that are meant to agree and are written out twice are two predicates that will differ.
+# The predicate is NOT spelled here. It lives in _paths.ps1 as Get-HandOwnMarkedPath -- the same
+# function handown-census.ps1 defines the audit POPULATION with -- because two predicates that are
+# meant to agree and are written out twice are two predicates that will differ, and if these two ever
+# differed this gate would report an audit complete with respect to a population the census never had.
+# The BOM tolerance and the reason it is -P rather than an ERE escape are documented at that function.
+. (Join-Path $PSScriptRoot '_paths.ps1')
+
 function Get-MarkedPath {
     param([string] $Core)
 
     if (-not (Test-Path -LiteralPath $Core)) {
         throw "corpus root not found: $Core"
     }
-    Push-Location $Core
-    try {
-        $marked = @(git grep -l -E '^\s*\[module:\s*(go\.)?GoManualConversion\]' -- '*.cs' 2>$null)
-    } finally {
-        Pop-Location
-    }
+    $marked = @(Get-HandOwnMarkedPath -CoreRoot $Core)
     # A census that returns nothing has not found a clean tree; it has failed to LOOK. Exit 2, never 0.
     if ($marked.Count -eq 0) {
         throw "marker census returned ZERO over $Core -- wrong directory, untracked tree, or broken git grep. A census that scanned nothing passes everything."
     }
-    return @($marked | ForEach-Object { ($_ -replace '\\', '/').Trim() })
+    return $marked
 }
 
 # --- 2. The audit's row table ----------------------------------------------------------------------
@@ -256,6 +255,13 @@ function Write-NoBom {
     [System.IO.File]::WriteAllLines($Path, [string[]]$Text, $enc)
 }
 
+# UTF-8 WITH a byte-order mark, for the one fixture that needs to be hidden from a BOM-blind predicate.
+function Write-WithBom {
+    param([string] $Path, [string[]] $Text)
+    $enc = New-Object System.Text.UTF8Encoding($true)
+    [System.IO.File]::WriteAllLines($Path, [string[]]$Text, $enc)
+}
+
 function Invoke-Arm {
     param([string] $Name, [string] $Audit, [string] $Core, [int] $WantExit, [string] $WantText)
 
@@ -297,6 +303,12 @@ function Invoke-SelfTest {
         Write-NoBom -Path (Join-Path $core 'pkga/one.cs') -Text '[module: GoManualConversion]'
         Write-NoBom -Path (Join-Path $core 'pkgb/two.cs') -Text '[module: go.GoManualConversion]'
         Write-NoBom -Path (Join-Path $core 'pkgb/plain.cs') -Text '// not a hand-own'
+        # The BOM-hidden hand-own: a byte-order mark, then the marker on LINE 1. Invisible to a
+        # line-anchored predicate that does not tolerate the mark, because the line begins EF BB BF
+        # rather than '['. Arm 12 is what this file exists for after the 2026-09-13 ruling, and it is
+        # the one arm here that reads the corpus-facing behaviour rather than the audit-facing one.
+        New-Item -ItemType Directory -Path (Join-Path $core 'pkgc') -Force | Out-Null
+        Write-WithBom -Path (Join-Path $core 'pkgc/bom.cs') -Text '[module: GoManualConversion]'
 
         Push-Location $tmp
         try {
@@ -310,8 +322,10 @@ function Invoke-SelfTest {
         # The fixture's own precondition, asserted rather than assumed: two marked files and one
         # unmarked one. Without the unmarked file a predicate matching every .cs would pass every arm.
         $probe = Get-MarkedPath -Core $core
-        if ($probe.Count -ne 2) {
-            Write-Host ("SELF-TEST UNMEASURED: fixture census reads {0} marked file(s), want 2 -- every arm below would be about the fixture" -f $probe.Count)
+        # THREE now: two plain markers and one hidden behind a BOM. If this reads 2 the predicate has
+        # lost its BOM tolerance, and arm 12 below would be measuring the fixture rather than the gate.
+        if ($probe.Count -ne 3) {
+            Write-Host ("SELF-TEST UNMEASURED: fixture census reads {0} marked file(s), want 3 (one of them BOM-hidden) -- every arm below would be about the fixture" -f $probe.Count)
             return 1
         }
 
@@ -328,12 +342,20 @@ function Invoke-SelfTest {
         $rowTwoTail = '| a | carried at 1234abcd9 with a gate that observes it |'
         $rowTwo = '| 2 | ' + $bt + 'pkgb/two.cs' + $bt + ' | pkgb/two.go | touched-substantive | .auto differential | - | bbbb | cccc ' + $rowTwoTail
 
+        # The BOM-hidden hand-own's row. Every fixture carries it by DEFAULT, so the arms above stay
+        # about what they are named for; arm 12 is the one that omits it, and omitting it is the whole
+        # measurement -- a BOM-blind census would not see pkgc/bom.cs either, so the audit without its
+        # row would read COMPLETE. With the tolerance the census sees three and the missing row refuses.
+        $rowThree = '| 3 | ' + $bt + 'pkgc/bom.cs' + $bt + ' | pkgc/bom.go | untouched | .auto differential | - | dddd | dddd | unchanged | both hashes filled |'
+
         $script:fixtureIndex = 0
         function New-Fixture {
-            param([string[]] $Rows)
+            param([string[]] $Rows, [switch] $OmitBomRow)
             $script:fixtureIndex++
             $path = Join-Path $tmp ("audit-{0}.md" -f $script:fixtureIndex)
-            Write-NoBom -Path $path -Text ($hdr + $Rows)
+            $all = $Rows
+            if (-not $OmitBomRow) { $all = @($Rows) + @($rowThree) }
+            Write-NoBom -Path $path -Text ($hdr + $all)
             return $path
         }
 
@@ -385,6 +407,17 @@ function Invoke-SelfTest {
         Invoke-Arm -Name 'class c whose work item is a LADDER RUNG passes' -Core $core -WantExit 0 -WantText 'H6 AUDIT COMPLETE' `
             -Audit (New-Fixture -Rows @($rowOne, ($rowTwo -replace [regex]::Escape($rowTwoTail), '| c | retired by H5c, owner G |')))
 
+        # ARM 12 -- THE BOM ARM, and the reason the predicate moved to _paths.ps1. The audit omits the
+        # BOM-hidden hand-own's row. A census that cannot see past a byte-order mark does not see the
+        # file either, so it counts two, matches two rows, and reports COMPLETE -- a green earned by
+        # the instrument's blindness. With the tolerance it counts three and REFUSES, naming the file.
+        #
+        # Red-proved by reverting the predicate to the anchored ERE: this arm reads exit 0 (COMPLETE)
+        # before the tolerance and exit 1 naming pkgc/bom.cs after it. It is the only arm here whose
+        # subject is the CORPUS-facing predicate rather than the audit-facing assertions.
+        Invoke-Arm -Name 'a BOM-hidden hand-own is SEEN, and its missing row REFUSES' -Core $core -WantExit 1 -WantText 'pkgc/bom.cs' `
+            -Audit (New-Fixture -Rows @($rowOne, $rowTwo) -OmitBomRow)
+
         # ARM 11 (MISUSE) -- a census that finds NOTHING exits 2. It must never report a clean audit,
         # which is the whole reason exit 2 is separate from exit 0.
         $emptyCore = Join-Path $tmp 'empty'
@@ -396,11 +429,11 @@ function Invoke-SelfTest {
             Write-Host ("SELF-TEST FAILED: {0} arm(s) failed" -f $script:ArmsFailed)
             return 1
         }
-        if ($script:ArmsPassed -ne 11) {
-            Write-Host ("SELF-TEST FAILED: {0} arm(s) ran, expected 11 -- an arm that quietly stops running is what this count exists to catch" -f $script:ArmsPassed)
+        if ($script:ArmsPassed -ne 12) {
+            Write-Host ("SELF-TEST FAILED: {0} arm(s) ran, expected 12 -- an arm that quietly stops running is what this count exists to catch" -f $script:ArmsPassed)
             return 1
         }
-        Write-Host 'SELF-TEST CLEAN -- 11 arms'
+        Write-Host 'SELF-TEST CLEAN -- 12 arms'
         return 0
     } finally {
         if (Test-Path -LiteralPath $tmp) { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue }
