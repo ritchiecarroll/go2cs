@@ -2,7 +2,7 @@
 
 ## 0. Header and maintenance
 
-**As of 2026-09-12, master `9355669f8`.** Current and rewritable; never evidence. Detail:
+**As of 2026-09-13, master `ddd509c1e`.** Current and rewritable; never evidence. Detail:
 `docs/phase4/CENSUS-preservation-2026-09-12.md`. Until both land, the owner pastes this file plus one block.
 - Log: `claude/coord-handover` `9e20af0ad`, by `git show` only. Its "GOTOOLCHAIN=local" clause (lines 36, 142)
   is wrong for battery shells.
@@ -34,8 +34,8 @@ RESCUE A LOCAL-ONLY COMMIT. Nothing runs from the old base, so this works on eve
 0. SETUP, in the clone that holds the ref. Run `git fetch --no-prune origin`; --no-prune overrides fetch.prune and remote.origin.prune. Check `git rev-parse --verify <ref>^{commit}`. Create a throwaway worktree in a SIBLING directory outside every clone and worktree: `git worktree add --detach <dir> origin/master`. cd into it; assert `git rev-parse --show-toplevel` equals it and `git merge-base --is-ancestor 9355669f8e6d461306837135688cea9fad68f8aa HEAD` succeeds. Steps 1-7 run HERE, where master's safe-push.sh and repoguard always exist.
 1. POPULATION. MB=$(git merge-base origin/master <ref>); N=$(git rev-list --count $MB..<ref>). Stop unless N > 0. Print `git log --oneline $MB..<ref>`.
 2. DUMP OF THE BRANCH'S OWN RANGE. Write an untracked file at the worktree root, e.g. rescue-dump.txt, containing: the ref name; `git log --no-color --format='commit %H%n%B' -p $MB..<ref>` (every message and every per-commit patch, so a token added and later removed inside the range is still seen); and `git diff --no-color $MB <ref>`. Assert its line count is nonzero.
-3. LEG 1a, REPOSITORY GUARD. Run `git add -f rescue-dump.txt` (index only, never committed). Use a shell whose GOROOT is the go1.24.13 sdk as `go env GOROOT` prints it, with its bin first on PATH and GOTOOLCHAIN=local for this call; the converter module refuses older toolchains (measured: go.mod requires go >= 1.24.13). A session that cannot produce a go1.24.13 toolchain (probe `GOTOOLCHAIN=go1.24.13 go version`, never PATH alone) pushes no lane branch or tag, still runs legs 1b and 2, posts its question and tip SHA to COORD on the mailbox, and makes no further commits until COORD rules (its container kept up until then). Run `cd src/go2cs && go test -count=1 -v -run 'TestNoFleetIdentifiersInTrackedFiles|TestFleetIdentifierClearancesAreLive' ./internal/repoguard > <log> 2>&1; rc=$?`. PASS only if rc=0 AND the log contains '--- PASS: TestNoFleetIdentifiersInTrackedFiles' AND contains neither '(cached)' nor '[no tests to run]'. CONTROL: record the dump's sha256; append ONE line holding a profile path taken from the environment, never typed (in Git Bash, `printf '%s\n' "$HOME" >> rescue-dump.txt`); re-run, and it must FAIL naming rescue-dump.txt; delete that line, re-run, and it must PASS with the sha256 back to the recorded value.
-4. LEG 1b, DERIVED-TOKEN PASS. This leg is REQUIRED: the repoguard denylist does not carry every identifier the 2026-09-01 scrub removed (measured 2026-09-12: the guard PASSES at 9355669f8 while two master lines carry one). Tokens are the words that scrub commits a7595da67 (master) and d72878d6d (mailbox) removed at least 3 times and never added (3 tokens, measured). Hold them in a shell variable or a temp file outside every clone; never put them in a worktree, commit, post or document. Lowercase both the tokens and the dump with `tr 'A-Z' 'a-z'` and match with `grep -F -f`. NEVER use `grep -i` in Git Bash: measured 2026-09-12, `grep -i -c -F` printed nothing, a fail-open zero. Print only the hit count and dump line numbers. PASS only on 0. CONTROLS, measured values: the added lines of origin/claude/g-b1-box-design's own `git diff <merge-base>` read 2; origin/claude/laneR-h5-lastrung reads 0; one planted token line reads 1. Any hit refuses until COORD reads it in a terminal, never on a pushed surface; the shortest token also occurs in ordinary master content.
+3. LEG 1a, REPOSITORY GUARD. Run `git add -f rescue-dump.txt` (index only, never committed). Use a shell whose GOROOT is the go1.24.13 sdk as `go env GOROOT` prints it, with its bin first on PATH and GOTOOLCHAIN=local for this call; the converter module refuses older toolchains (measured: go.mod requires go >= 1.24.13). A session that cannot produce a go1.24.13 toolchain (probe `GOTOOLCHAIN=go1.24.13 go version`, never PATH alone) pushes no lane branch or tag, still runs legs 1b and 2, posts its question and tip SHA to COORD on the mailbox, and makes no further commits until COORD rules (its container kept up until then). Run `cd src/go2cs && go test -count=1 -v -run 'TestNoFleetIdentifiersInTrackedFiles|TestFleetIdentifierClearancesAreLive' ./internal/repoguard > <log> 2>&1; rc=$?`. PASS only if rc=0 AND the log contains '--- PASS: TestNoFleetIdentifiersInTrackedFiles' AND contains neither '(cached)' nor '[no tests to run]'. CONTROL: record the dump's sha256; append ONE line holding a profile path whose ACCOUNT SEGMENT IS FOREIGN -- never the environment's own and never a member of the guard's placeholder set -- after first asserting that the bare foreign token alone reads clean (measured 2026-09-13 on G-LAPTOP: an environment whose account segment is a placeholder-set member passes the old control vacuously); re-run, and the guard must FAIL naming rescue-dump.txt; delete that line, re-run, and it must PASS with the sha256 back to the recorded value.
+4. LEG 1b, DERIVED-TOKEN PASS. This leg is REQUIRED: the repoguard denylist does not carry every identifier the 2026-09-01 scrub removed (measured 2026-09-12: the guard PASSES at 9355669f8 while two master lines carry one). Tokens are the words that scrub commits a7595da67 (master) and d72878d6d (mailbox) removed at least 3 times and never added (3 tokens, measured). Hold them in a shell variable or a temp file outside every clone; never put them in a worktree, commit, post or document. Lowercase both the tokens and the dump with `tr 'A-Z' 'a-z'` and match with `grep -F -f`. NEVER use `grep -i` in Git Bash: measured 2026-09-12, `grep -i -c -F` printed nothing, a fail-open zero. Print only the hit count and dump line numbers. PASS only on 0. CONTROLS, measured values: the added lines of `git diff <merge-base> 6815eba00` -- the PRE-FIX tip of claude/g-b1-box-design, PINNED: its current tip f632a942b (2026-09-13) removed those very lines, so a control read at the moving tip reads 0 and cannot fire -- read 2; origin/claude/laneR-h5-lastrung reads 0; one planted token line reads 1. Any hit refuses until COORD reads it in a terminal, never on a pushed surface; the shortest token also occurs in ordinary master content.
 5. LEG 2, IDENTITY. ALLOW=$(git log --format='%an <%ae>%n%cn <%ce>' origin/master | sort -u | grep -v -e '^root ' -e '<root@' -e 'localdomain>'). Every line of `git log --format='%an <%ae>%n%cn <%ce>' $MB..<ref> | sort -u` must match a whole ALLOW line (`grep -qxF`). Never require equality with the master tip's identity: lane commits legitimately carry 'Claude <noreply@anthropic.com>' (C1), 'i9 <i9@local>' and the C2 lane identities. The filter is needed because master's own history carries one auto-derived root@<HOST> identity (056b2b06c). CONTROLS, measured 2026-09-12: 95bf02ad5 REFUSED, 056b2b06c REFUSED; c5fb9e0ed, 44ab61dad and 31668f43e ADMITTED. A refused identity is never pushed or re-authored in place; its files are re-cut in step 6.
 6. CUT (the default). Unstage and delete the dump (`git rm --cached -q rescue-dump.txt`, then remove the file). Run `git switch -c <new lane branch>`; HEAD is origin/master. Bring over ONLY the non-regenerable files, by explicit path: `git checkout <ref> -- <path>` only where `git diff --quiet $MB origin/master -- <path>` succeeds; otherwise write `git diff --no-color --no-ext-diff --binary --src-prefix=a/ --dst-prefix=b/ $MB <ref> -- <path>` to a patch file OUTSIDE the worktree, assert exit 0 and a non-empty file, then `git apply -3 <patch>` (or `git -c commit.gpgsign=false cherry-pick -x $MB..<ref>`, which commits and names the original SHA itself: skip the commit below and take <paths> from `git diff --name-only $MB <ref>`), since a whole-file checkout silently reverts master (1800b04f8 changed typeNameResolution.go after 8a1b7e71c). Before the commit, assert `git diff --cached origin/master -- <paths>` adds and removes the same lines as `git diff $MB <ref> -- <paths>`; it reads the index, which holds a checked-out or `apply -3` import and equals HEAD after a cherry-pick (`git diff origin/master HEAD` compares commits only and stays empty until the commit). A committed lane branch is rebased instead where COORD rules; stage by explicit path, never `git add -A`. Commit with `git -c commit.gpgsign=false commit -F <msgfile>`, naming the original SHA in the message. Repeat steps 2-5 over origin/master..HEAD. Announce the new 40-character SHA on the mailbox. Then, in the same toolchain shell, run `src/safe-push.sh --branch <new> --new --announced <sha>`; its tree gate now covers the rescued content. ONLY ON COORD's RULING (an already-posted SHA that must stay resolvable) push the original ref from this worktree instead, with `src/safe-push.sh --branch <name> --ref <ref> --new --announced <40-char sha>`; its tree gate then scans master, and legs 1a, 1b and 2 are what gated the range.
 7. AFTER. `git ls-remote origin refs/heads/<branch>` must equal the pushed SHA. `git status --porcelain | grep '^ D'` must be empty. Remove the throwaway worktree only after both checks. Never force-push; never rewrite a posted SHA. Never push 239f61940, claude/hopa-sweep-r or rescue/joint-measure-45.
@@ -83,8 +83,8 @@ says whether it is wanted and COORD rules.
 |COORD|i7|Fable 5.1, ultracode (only Fable)|offline since 09-08|
 |R|R-LAPTOP, WSL|Opus 5, high|last lane post `a27342d03`|
 |G|G-LAPTOP, WSL|Opus 5, high|cut complete at `ffaafeb19` 09-08 22:39, G-only, unannounced|
-|C1|cloud, cannot build|Opus 5, xhigh|stood down; owner decides|
-|C2|cloud|Opus 5, high|stood down; owner decides|
+|C1|cloud; cannot build .NET (no dotnet), but both Go pins resolve: the converter builds, converts and its suites run there (measured 09d16d1d0)|Opus 5, xhigh|UP (owner 2026-09-13); ARMED 66e22a44f|
+|C2|cloud; can convert, cannot compile (no dotnet, no PowerShell; measured f3555892d); disk-constrained, ephemeral|Opus 5, high|UP (owner 2026-09-13); ARMED f3555892d|
 |i9|i9|Opus 5, high; ONE serial item at a time|offline since 09-08|
 
 ## 3. Division of labour
@@ -94,46 +94,61 @@ design questions and lessons to COORD, and move on.
 
 ## 4. Current state
 
-**Master `9355669f8`.** Since train 46 (`8a1b7e71c`): licensing `1800b04f8`; context diet
-`56ff452a5`..`f34047501`; `9355669f8`. CLAUDE.md is a 196-line index (`TestContextBudget` cap: 200 effective
-lines); doctrine in `.claude/rules` and `.claude/skills`; batch19 re-homed at `86037ef2e`.
-**Train 47, base `9355669f8`** (which restores `repoRootFromPackageDir`, moved by `e2f9b118f` and called by
-seats 1-3). COORD rules each re-base (as-is or NEW branch; seat 8, G-only and unannounced, is re-cut by default); acceptance: named conflicts, silent-subtraction
-assertion, `go vet`, named guards.
+**Master `ddd509c1e`** (the security landing on `bd1d26faf`). Since train 46 (`8a1b7e71c`): licensing
+`1800b04f8`; the context diet `56ff452a5`..`f34047501`; the kickoff and CENSUS-preservation landing
+`bd1d26faf`; `ddd509c1e`. CLAUDE.md is a 196-line index (`TestContextBudget` cap: 200 effective lines);
+doctrine in `.claude/rules` and `.claude/skills`; batch19 RETIRED (`86037ef2e`, tag `doctrine-batch19-preserved`).
+**Security CLOSED on all three surfaces**, each one commit on top, identifier alone, nothing rewritten:
+`claude/mailbox` `c64c289cd`, `claude/g-b1-box-design` `f632a942b` (37 lines; its base predates the 09-01
+scrub, so 35 were inherited and a naive merge would reintroduce them), master `ddd509c1e` (two probe
+READMEs). The repoguard denylist now carries the hashed Len-15 row, so the guard catches this class; the
+whole `internal/repoguard` package reads green at the landing tree, the RED-with-row control on record.
+**Train 47, base `ddd509c1e`** -- H4's closing train plus H5's inputs; it precedes the H5 series by
+construction. Merge order `1 2 3 4 9 10 7 6 8 5 11 12 13`. Seats board as ruled with the REHEARSAL as the
+judge (named conflicts, the silent-subtraction assertion, `go vet` at every merge step, the named guards);
+a rebase rewrites a posted SHA and is never done by fiat. Template: the pre-derived train-47 set with the
+four carried defects fixed before first use, thirteen rows, G4 RE-INVERTED (CLAUDE.md not in the delta).
 
-|#|Branch @ tip|Class|Owner|Ahead/behind|Note|
-|---|---|---|---|---|---|
-|1|`claude/coord-orphan-disclosure-check` `36cbef240`|COORD rules|COORD|2/48|owes utf8 `-tests` arm|
-|2|`claude/coord-stamp-guard` `ec1fe2745`|converter-test|R|1/48||
-|3|`claude/laneR-armc-guard` `bbd0afe43`|converter-test|R|1/48||
-|4|`claude/c2-sync-disclosure-retire` `4221789e7`|manifest|C2|1/48||
-|5|`claude/c2-census-reader` `44ab61dad`|golib|C2|12/82|code ends `fb82482ba`|
-|6|`claude/g-unfreeze-handown-metadata` `7078dbada`|converter|G|5/48|2 hunks; re-measure|
-|7|`claude/g-h6-alias-census` `898cbfefe`|docs|G|3/48|R, C2 blocks owed|
-|8|`claude/g-generic-alias-qualifier` `ffaafeb19` (G-LAPTOP only)|converter|G|2/10, base `8a1b7e71c`|pre-cut tip; `4772d4907`+`ffaafeb19`; unannounced; cite `ffaafeb19` until the re-cut's SHA is announced|
-|9|`claude/laneR-h5-lastrung` `826045a74`|docs|R|1/130||
+|#|Branch @ tip|Class|Ruling|
+|---|---|---|---|
+|1|`claude/coord-orphan-disclosure-check` `36cbef240`|converter-test|AS-IS, 2/48; owes the utf8 `-tests` arm, which COORD runs as a battery LEG at the assembled head, never as a hand run|
+|2|`claude/coord-stamp-guard` `ec1fe2745`|converter-test|AS-IS, 1/48; ARM B stamp guard, R credited in the body|
+|3|`claude/laneR-armc-guard` `bbd0afe43`|converter-test|AS-IS, 1/48; ARM C guard|
+|4|`claude/c2-sync-disclosure-retire` `4221789e7`|manifest|AS-IS, 1/48; the Windows reading is the battery's own sync leg|
+|5|`claude/c2-census-reader` `44ab61dad`|golib|AT ITS TIP (code ends `fb82482ba`; a seat is a branch tip). 12/82, read THREE-DOT at fill; boards last of the code seats|
+|6|`claude/g-unfreeze-handown-metadata` `7078dbada`|converter|PENDING RE-CUT: the rehearsal read two adjacent-insert CONFLICTS with licensing 1800b04f8 (internal.godebug.csproj, projectFileWriter.go); G re-cuts onto the base after seat 8, both-kept, acceptance = the godebug csproj re-mints byte-identical + Run A/B/C; boards at the announced SHA|
+|7|`claude/g-h6-alias-census` `898cbfefe`|docs|AS-IS, 3/48; the R and C2 blocks it owes ride later trains|
+|8|`g-generic-alias-qualifier` `ffaafeb19` (G-LAPTOP only)|converter|PENDING: boards ONLY as G's announced re-cut (one hunk at `typeNameResolution.go:423-425`; `:449-464` is the donor); else the HashTrieMap sites wait for train 48|
+|9|`claude/laneR-h5-lastrung` `826045a74`|docs|AS-IS, 1/130 (age, not conflicts); `h5-removals.txt`, the 14-package set|
+|10|`claude/coord-pprof-vacuous-audit` `5994c12b2`|docs|NEW; the rescued runtime/pprof vacuous-passes audit|
+|11|R's section-15 ladder block|docs|PENDING: boards at the announced SHA, else train 48|
+|12|`claude/coord-glossary-kickoff` `ff9d0fb47`|docs|NEW; the `Kickoff` document-type entry, the amendment section 0 proposed|
+|13|`claude/g-census-2026-09-13` `748beefbb`|docs|NEW; G-LAPTOP's preservation census record|
 
-**Security, COORD's first item.** A pre-scrub identifier at two live tips: `claude/g-b1-box-design`
-`6815eba00` (2 lines), `claude/mailbox` `0ff4b03e1` (1 line). Owner: fix by a commit on top, identifier alone;
-never rewrite or force. NEW, unruled: master has it in 2 probe README lines (`6eed8dd5c`); the denylist lacks it.
-**Open.** Pre-pin gate 2 (`7c946ab62`): reflect 326/59/3 of 388 and unique on `87606f3a5`; runtime/pprof on
-`150b0264e`; net/http/pprof 11 of 15 mailbox only; blind runtime 84 of 883 master prose only; `cfd71b0ba`
-unpushed. Template defects (a)-(d). C1's TestCrashWhileTracing 7-8 marking, owed now (ruled at `f5b35f351` to follow i9's `runtime` tail, read at `0dd133719`; C1's stand-down post missed it). `net` disqualified (resolver).
-Accumulator 1322 onward (1329: signing) is not on master.
-**COORD rulings owed** (besides the above): seat 5's fill (`fb82482ba` or `44ab61dad`); R-LAPTOP DECISION items
-(worktree `posix-spawn-forkexec-5172e7`'s gitignored evidence; `src/lane-r-packrace.ps1`);
-`claude/coord-train30-head`'s BOARD block `6e0130e88`; `0dfc95e21` as a local or a pushed signed tag; prunes (a
-preserving tag first for `claude/reflect-cargo-inc1`, `claude/reflect-cargo-r1`, `claude/c1-h6-rewrites`
-and `claude/coord-train30-head`, whose branch-only commits master cites; `claude/g-b1-box-design` is never deleted; whether a
-name-only citation blocks a prune; retire `claude/c2-getaddrinfo-probe-before`); i9's kept worktrees; mailbox gate
-placement (the mailbox tree has neither `src/safe-push.sh` nor the repoguard).
-**Records owed:** `claude/g-l3-testalias`'s ledger line; `docs/phase4/TRACKER-100-percent.md:30` cites
-`g-nilfunc-boxing`, refresh to landed `c71dd2fc2`; SUB-Q60's `src/core/golib/GoArrayDimsAttribute.cs` paragraph
-(added `16d1943ac`, dropped by merge `3552e1cf0`); land `d7bf606f0`; re-land `probes/b1-box-dispatch` scrubbed;
-optional `parenthesizeForAccessor` port.
-**Owner items.** Resume COORD; rule master's exposure; preserve i7 artifacts; get G to re-cut seat 8 from `ffaafeb19`, announce the new SHA and push it; restore
-i9; censuses on unseen machines; C1/C2 restarts; Windows resolver; new cloud sessions; GitHub on `95bf02ad5`;
-R-LAPTOP GOTOOLCHAIN; licensing; CLA branch protection.
+**The position on the runbook's section-2 ladder** (derived and posted at mailbox `db6d9462f`): the work in
+hand is **H4**, inside the H2->H5 window. H1 and H3 are done; **H2 has NEVER run** -- `src/version.props`
+still reads 1.23.12 and the "H2 landed in train 43" shorthand is wrong -- and it is the next UNPASSED gate,
+landing as the FIRST commit on the hop's version branch. H4a is RULED a staging BASELINE regen by the same
+binary that runs H5 (H0's fresh `.cs.auto`, H6's old side, H5's overlay comparand), never a 1.23.12 landing.
+The ladder reads 12/12/12 at `8a1b7e71c` in four owned classes (4 leftover-seed -> H5c; 5 godebug cascades ->
+seat 6; 2 HashTrieMap -> seat 8; 1 `Ꮡr` scored against `ce1ee957b`). Four things gate the H5 SERIES: H4
+closing for the known sites; R's FIFTH rehearsal, run after train 47 lands; the H4a baseline; then the series
+itself (H2's pin, the three-target reconvert, H5c, the overlay, `go generate`, H9, the hand-own branch).
+**Open.** The H5 hand-own branch has no owner (R by default; `claude/c1-h6-rewrites` `c5fb9e0ed` never seats).
+G's six extra local-only branches await per-row dispositions; R's and i9's ACKs are owed in the measured form;
+seat 8's re-cut is owed. Pre-pin gate-2 readings (`7c946ab62`: reflect 326/59/3 of 388 and unique on
+`87606f3a5`; runtime/pprof on `150b0264e`; net/http/pprof 11 of 15 and blind runtime 84 of 883, mailbox and
+master prose only) still owe their provenance banked. Template defects (a)-(d) carry into the derive.
+**Rulings made tonight** (mailbox `3e5951a83`, `db6d9462f`, `90f2dc3ed`, `47f283826`): R-LAPTOP's mailbox
+worktree is FROZEN and `r-post.sh` moves to fetch plus `merge --ff-only` plus refuse-on-dirt, never a reset in
+a shared clone; H4a is a staging baseline, not a landing; the fetchable guard STANDS unweakened (a census
+names unfetchable refs in a pushed record and the post cites the record); leg 1a's control now plants a
+FOREIGN account segment (1b step 3); `cfd71b0ba` is rescued and pushed as `claude/coord-pprof-vacuous-audit`.
+**Records owed.** The H1.1 amendment and the H4a worked-instance block into `docs/GoCorpusMigration.md`; R's
+section-15 dated block on `REHEARSAL-h5-go124.md`; the H6 audit-file SKELETON, one row per marked path in the
+census instrument's own predicate (146, not a literal grep's 105); `d7bf606f0`; the Glossary entry with seat 12.
+**Owner items.** An off-box copy of the i7 archive; the H5 hand-own branch's owner; C1/C2 restarts; a
+conforming-DNS Windows host for `net`.
 
 ## 5. Kickoff prompts
 
