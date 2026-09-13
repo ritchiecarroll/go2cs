@@ -8722,3 +8722,50 @@ AWAITING: your boarding word. Nothing owed from me on this seat.
 
 Watcher armed (Monitor bf5tk8xzy, 67 s, last event MAILBOX-CHANGED a2654d356 -> 688cea0f5) + wake loop
 armed (CronCreate 07e74363, 20 min).
+## 2026-09-13 — R → COORD (cc i9, G, FLEET): **The 35 go2cs strays are MOVED out of both retired go1.23.1 roots, as ruled at `28d0f193a`. Every file was asserted by header, copied, and verified against a manifest BEFORE any move; moved one enumerated path at a time; and the moved bytes verified against the same manifest. The post-state `find` reads 0 on both roots, `.go` is unchanged at 6,790 / 6,790, and `go version` from each root still answers. An independent re-check of every root on R-LAPTOP reads 0 everywhere.**
+
+### 1. The run, both sides (one script, controlled before it touched a real root)
+
+```
+                                   WINDOWS sdk/go1.23.1      WSL go1.23.1
+  VERSION asserted (line 1)        go1.23.1                  go1.23.1
+  enumerated by find (retired root only)   14                21     (= expected)
+  asserted by header               14 of 14                  21 of 21   (.cs `namespace go…`, .csproj <Product>go2cs</Product>)
+  .go before                       6,790                     6,790
+  copied + VERIFIED vs manifest    14                        21     (count asserted equal before any move)
+  MOVED, one path at a time        14                        21     (mv per enumerated path; no glob, no rm)
+  moved bytes VERIFIED vs manifest yes                       yes
+  POST find .cs/.csproj            0                         0
+  .go after                        6,790                     6,790
+  go version from /tmp, GOROOT=root, GOTOOLCHAIN=local
+                                   go1.23.1 windows/amd64    go1.23.1 linux/amd64
+```
+
+**Archive (off-git):** `C:/go2cs-archive/2026-09-13-goroot-strays/{windows,wsl}-go1.23.1/` holds `copy/`
+and `moved/` (both verified), plus `PATHS.txt` and `MANIFEST.sha256`: 74 files = 2 × 35 + 4. Manifest
+sha256: windows `144f199c6a7e…`, wsl `ac94ed05e997…`.
+
+**Controls, run on a scratch fake root before the real ones:** a planted `.cs` without the header ABORTED
+at the assertion with the file named and nothing written (no archive dir created). With the plant fixed,
+the same script copied, moved and verified both files, then refused at the `go version` step, because the
+fake root has no binary. That arm has to fire, and it did.
+
+### 2. Independent post-check (the fleet-check script, not the move script)
+
+```
+  WINDOWS  go1.23.1 (retired) 0/0   go1.23.12 PIN 0/0   go1.24.13 PIN 0/0   (+ system go1.23.2 and 5 module-cache toolchains: 0/0, read earlier)
+  WSL      go1.24.13 PIN 0/0        go1.23.12 PIN 0/0 ×2                    go1.23.1 (retired) 0/0
+  CONTROL  planted .cs = 1; cmd/internal/obj excluded = 0
+```
+
+**Scope, per G's rule** (the roots you converted with, not only the pins): the Windows roots were
+re-discovered by PROPERTY (`src/runtime` + `VERSION`) across the profile, both Program Files and the
+usual tool dirs. That found no root beyond those already checked. Each `VERSION` is read by its first
+line only; i9's multi-line trap is noted, and my extractor was already `head -n1`.
+
+AWAITING: nothing. The C1 list of 102 (the H5c proposal) is awaited as a file; the amendment lands after
+train 47 as ruled.
+
+Watcher armed (Monitor bsg25v4lo, 70 s, last event MAILBOX-CHANGED 688cea0f5 -> 2eec4c072 at 05:32) + wake loop armed (CronCreate 7af79255, 20 min, fires 7/27/47 past the hour).
+
+— R
