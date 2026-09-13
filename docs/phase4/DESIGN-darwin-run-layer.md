@@ -88,6 +88,63 @@ cheap standing guard: derive both, assert they agree, fail loudly if they ever d
 can be cross-checked is worth much more than one that merely works today, and this one comes with
 its own cross-check for free.
 
+> **AMENDMENT 2026-09-13 (C2, measured at master `a02ac3df3`; this record's author is lane C2, so this
+> is C2 correcting C2 — an earlier mailbox post of mine said this record "is not mine", which was
+> wrong).** Finding **(b)** above is **TRUE EXACTLY WHERE IT WAS MEASURED AND FALSE ONE FILE OVER.**
+> Building the map for real — step 1 of [`SIZING-darwin-option2.md`](SIZING-darwin-option2.md), now the
+> standing guard `src/go2cs/internal/repoguard/darwinTrampolineMap_test.go` — read **every**
+> `//go:cgo_import_dynamic` pragma in the darwin flavour instead of one file's, and (b) does not survive
+> the wider population. **No number in the table above changes**; what changes is how far (b)'s
+> conclusion reaches.
+>
+> | reading | at `e4c5b5b8`, this section | at `a02ac3df3`, whole darwin flavour |
+> |:--|--:|--:|
+> | pragma LINES read | 123 (`syscall/zsyscall_darwin_amd64.cs` only) | **219** |
+> | distinct local names | 123 | **203** |
+> | distinct (local name, symbol) pairs | 123 | **204** |
+> | derivable by the name transform | 123 of 123 — **still zero mismatches** | **217 of 219** |
+>
+> **The 123 are not a stale reading.** Re-measured today, all 123 pragmas in
+> `zsyscall_darwin_amd64.cs` pass even the *strict* form of the transform. "Zero mismatches" was right
+> about the file it read. **Both exceptions live in `runtime/darwin/sys_darwin.cs`**, which this
+> section's reading never covered — and that is the file the keystone family itself binds through, so
+> the two rows (b) cannot express are concentrated in the highest-stakes package rather than scattered
+> through the easy ones.
+>
+> **1. `libc_error` → `__error`** (errno) is the one local name that does not contain its symbol at all.
+> The transform yields `error`, which is not a libSystem export, so this one **fails loudly** at lookup.
+> The corpus already annotates it in `runtime/darwin/libccall_impl.cs`.
+>
+> **2. `libc_exit` names TWO DIFFERENT SYMBOLS in two packages** — `_exit` in
+> `runtime/darwin/sys_darwin.cs:954` and `exit` in `syscall/darwin/zsyscall_darwin_amd64.cs:2008`. This
+> is the one with teeth, for two independent reasons:
+>
+> - **(b) as written cannot express it at any accuracy.** "The trampoline NAME derives the symbol
+>   exactly" presumes one symbol per name. **A map must therefore be keyed on (package, local name),
+>   never on the local name alone** — a global map keeps whichever row it read last and resolves
+>   `runtime`'s thread-exit to **process-exit**. That is a live program difference, and no mismatch
+>   count would have surfaced it.
+> - **It fails SILENTLY.** The transform yields `exit`, a real libSystem export with different
+>   semantics, so unlike errno there is no lookup failure to notice. A *containment* test (does the name
+>   contain the symbol?) calls this row derivable — `libc_exit` does end in `_exit` — and reports 218 of
+>   219. The transform reports 217 and names it. The looser predicate is both the more flattering one
+>   and the one that hides the only silent case, which is why the guard scores the transform.
+>
+> **What survives intact, and it is the part the design leans on:** the pragma (derivation **(a)**) is
+> preserved into the emitted C# and remains the authority; the map is still derivable from the committed
+> corpus with no converter change; and the two-source cross-check this section proposed is exactly what
+> caught all of this — both exceptions were found as a DISAGREEMENT between (a) and (b) while building
+> the map, which is the cross-check earning its keep before it was even a guard. **So the recommendation
+> stands and gains one clause:** derive from the pragma, key per package, and treat the name as a
+> cross-check rather than as a source.
+>
+> Scope note, so two numbers in this record are not read as disagreeing: the **267** distinct symbols in
+> §1.2's table are counted across darwin Go sources in a GOROOT, while the 204 pairs here are counted in
+> the **converted corpus committed under `src/core`**. Different populations, and neither supersedes the
+> other. Separately, a walk of `src/core` that does not filter to darwin also picks up **51**
+> `cgo_import_dynamic` pragmas in `runtime/windows/os_windows.cs`; the guard excludes them by path
+> segment, and any future reading of these counts must do the same or it will overstate them.
+
 ### 1.3 The keystone family — ten members, not one
 
 Bodyless syscall-entry declarations in `src/core/syscall/darwin`:
