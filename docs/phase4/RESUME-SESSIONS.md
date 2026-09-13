@@ -30,6 +30,13 @@
 | G | G-LAPTOP (+WSL linux arm) | linux-arm gates, H6 alias/liveness census, filtered-sweep rule | Opus / high | execution and census work |
 | R | R-LAPTOP (TRAVEL STANDBY from 2026-09-13; spurts only) | readings and rulings in spurts; owner of reconvert-deletions.ps1 and the rehearsal instrument | Fable 5.1 / high (spurts) | standby |
 
+**Session-bound ids are not state (C2 56e93e709 §5, i9 59e0e3099 §1–§3).** Every Monitor id and every wake-loop id
+(CronCreate job or Routine) in any block below belongs to the session that created it and is dead to a resumed
+one; `CronList` marks them `[session-only]` and cannot see Routines at all. **Re-creating the watcher and the wake
+loop is the FIRST, UNCONDITIONAL step of every lane's resume** — never gated on a check — with the lane's own
+mechanism and cadence (COORD: Monitor 60 s + CronCreate 20 min at 9/29/49; i9: CronCreate at 7/27/47; C2: three
+Routines at :12/:32/:52; C1: three triggers; G and R: as their blocks say).
+
 The ladder: `docs/GoCorpusMigration.md` §2, H0–H12. Position at this revision: **H4 closes with train
 47's landing (run 8 = the landing candidate); H4a/H5 rung on i9 has stages A–C and C1-1 banked at the
 union tree `161af6c44`, item 8 banked, item 11 closed, the next wall named C1-2.** Corpus publication
@@ -196,6 +203,7 @@ line; then rule on whatever the lanes posted while you were down, in mailbox ord
   BLOCKED-ON: lane -- C1-2's sizing before the rung's next build loop; nothing else
   TOOLS: GOROOT corpus/oracle $HOME/sdk/go1.23.12 (go1.23.12) and converter $HOME/sdk/go1.24.13 (go1.24.13), GOTOOLCHAIN=local, CGO_ENABLED=0, GOROOT spelled in BACKSLASH form or the emission misroutes and exits 0; python 3.12.0 -- there is NO python3 on this box AND WindowsApps shadows BOTH python and python3 with a Store redirector that exits 49, so prepend the real interpreter's directory or every candidate resolves to the alias; DOTNET_ROOT with SDK 10.0.401 beside 9.0.318 (net10.0 needs the 10.x); PowerShell 5.1 Desktop by ABSOLUTE path -- the Bash PATH is the Windows semicolon form so /usr/bin never resolves unless prepended on every call
 ```
+WAKE (i9, verbatim from 59e0e3099 s3): re-create on resume -- i9's wake leg is a CronCreate job and CronList marks it [session-only]. The id cdf12613 is THIS session's and is dead to any other. Same for the Monitor id (bvgzqvs2y), per-session by construction. Neither is inheritable state; both are STEPS. i9 cadence: 7,27,47 past the hour, PROTOCOL v3.6 leg b.
 
 ```
 You are lane i9 of the go2cs fleet (nickname i9 on every pushed surface). Model: Fable 5.1, effort high.
@@ -291,7 +299,8 @@ PROTOCOL: as COORD's section.
   BLOCKED-ON: lane -- train 48's base for the projection's AMENDMENTS block; the hop for darwin steps 2-3; i9's proof run of 088f8778f6. Plus one ruling owed from you: the preserve namespace above
   TOOLS: python3 3.11.15 · GOROOT=/usr/local/go1.24.7 (also /usr/local/go1.25.1) · module-cache toolchains go1.23.12 go1.24.13 go1.24.7 read directly for both-pin work · DOTNET_ROOT unset and dotnet ABSENT · pwsh ABSENT -- every .ps1 cut of mine is parse-gated on i7, never run here
 ```
-COORD NOTE (16afb8a3f): refs/preserve/c2-container/** (28 refs, 251 commits reachable from no origin ref, a prior container's ritual 08-28..09-06; 13,298 of 13,300 paths at origin/master, zero unique paths, blobs NOT compared, never scrub-censused) -- LOSS ACCEPTED on the record, nothing pushed; ref-list digest 036894085a1f778c.
+COORD NOTE (16afb8a3f, amended per C2 56e93e709 s4): refs/preserve/c2-container/** (28 refs, 251 commits reachable from no origin ref, a prior container's ritual 08-28..09-06; never scrub-censused, so unpushable) -- zero unique PATHS; blobs COMPARED: 686 unique file versions over 369 paths, all intermediate states of 28 superseded lines whose current content is on origin (src 600, docs 81, CLAUDE.md 5). LOSS ACCEPTED on the record, nothing pushed; ref-list digest 036894085a1f778c.
+WAKE (C2, per 56e93e709 s5): the three wake routines (:12/:32/:52) and the Monitor id are bound to the session that created them and do NOT survive a resume -- a fresh C2 session RE-CREATES three wake routines (20 min, offsets :12 :32 :52) and a Monitor on origin/claude/mailbox as its FIRST step, unconditionally; the ids in the block above are dead to any other session.
 
 ```
 You are lane C2 of the go2cs fleet (cloud session, linux, no PowerShell, disk-constrained; nickname C2).
@@ -360,3 +369,4 @@ PROTOCOL: as COORD's section.
 - 2026-09-13 15:45 — skeleton: COORD section complete; lane sections from COORD's records, blocks pending
   (mailbox order 7ff30f203, due 16:30). Verifier: `.claude/coord-scripts/coord-resume-verify.sh`.
 - 2026-09-13 15:55 — C1 (7d3734a84), G (f96225ea), i9 (29419cf30), C2 (d198239b4) blocks folded verbatim by fold-block.py; verifier gained landed-and-pruned and declared-local classes.
+- 2026-09-13 16:18 — session-bound ids rule (§0) + WAKE lines for i9 and C2; accepted-loss wording amended (686 unique blobs, all intermediate states).
