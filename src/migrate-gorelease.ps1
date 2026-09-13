@@ -41,6 +41,23 @@
                         docs\validation\<published-version> snapshots that an immutable NuGet
                         version pins. Rewriting any of these turns a true statement false.
 
+    TWO STATES THE CENSUS REPORTS RATHER THAN TREATING AS A DEFECT:
+
+      ALREADY AT TARGET   the H2->H5 window. H1 step 2 moves src\go2cs\go.mod's `go` directive to the
+                          target BEFORE H2 bumps the corpus pin, so the tree legitimately carries two
+                          releases until H5's regen closes the window (runbook, ruling 2026-09-08).
+                          The go.mod site PROBES the directive instead of assuming it: at the outgoing
+                          release it is an ordinary pending edit; at a release newer than the pin --
+                          and, when -To is given, at exactly that target -- it is reported as already
+                          at target and -SkipGoMod is implied. An older directive stays a problem.
+
+      RETIRED             prose a NAMED commit removed. A site table that simply stops matching is
+                          indistinguishable from one whose anchor rotted, so a removal is recorded
+                          with the commit that performed it and the place the sentence now lives. The
+                          retirement is itself asserted -- the anchor must match ZERO times, and prose
+                          returning to a retired site is a failure, not a silent gap. The file stays
+                          in the review scan, so a re-introduced statement is reported unanchored.
+
     WHAT THIS DOES NOT DO -- deliberately, and the census prints it every run:
 
       * It does not RECONVERT. It prints the seeded-reconvert ritual and the layout-L3 multi-target
@@ -162,6 +179,46 @@ function Read-RepoText {
     }
 }
 
+# git QUOTES any path carrying a byte outside ASCII (core.quotePath, on by default), so the corpus's
+# own `src/core/golib/ж.NilArrayBox.cs` arrives from git grep as
+# "src/core/golib/\320\266.NilArrayBox.cs" -- surrounding quotes included. That string matches no
+# path rule, so a hand-owned golib file reported as UNCLASSIFIED for reasons that have nothing to do
+# with its content. `-c core.quotePath=false` is NOT the fix: the raw UTF-8 bytes would then be
+# decoded by the console's ANSI code page under PS 5.1 and the path would be mojibake -- the same
+# trap Read-RepoText exists to avoid, one layer out. The quoted form is pure ASCII on the wire and
+# its octal escapes ARE the path's own UTF-8 bytes, so decode it here and the round trip is exact.
+function Expand-GitPath {
+    param([Parameter(Mandatory)][AllowEmptyString()][string] $Path)
+
+    if ($Path.Length -lt 2 -or $Path.Substring(0, 1) -ne '"' -or $Path.Substring($Path.Length - 1, 1) -ne '"') {
+        return $Path
+    }
+
+    $inner = $Path.Substring(1, $Path.Length - 2)
+    $simple = @{ 'a' = 7; 'b' = 8; 't' = 9; 'n' = 10; 'v' = 11; 'f' = 12; 'r' = 13; '"' = 34; '\' = 92 }
+    $bytes = New-Object System.Collections.Generic.List[byte]
+
+    for ($i = 0; $i -lt $inner.Length; $i++) {
+        if ($inner[$i] -ne [char]92) { $bytes.Add([byte][char]$inner[$i]); continue }
+
+        $i++
+        if ($i -ge $inner.Length) { break }
+        $esc = [string]$inner[$i]
+
+        if ($simple.ContainsKey($esc)) { $bytes.Add([byte]$simple[$esc]); continue }
+
+        if ($esc -match '^[0-7]$' -and ($i + 2) -lt $inner.Length) {
+            $bytes.Add([Convert]::ToByte($inner.Substring($i, 3), 8))
+            $i += 2
+            continue
+        }
+
+        $bytes.Add([byte][char]$esc)
+    }
+
+    return [System.Text.Encoding]::UTF8.GetString($bytes.ToArray())
+}
+
 function Write-RepoText {
     param(
         [Parameter(Mandatory)][string] $Path,
@@ -258,15 +315,45 @@ $editableSites = @(
         Find = '(?m)^go {OLD}(?=\r?$)'
         Replace = 'go {NEW}'
         Expect = 1
+        # The H2->H5 WINDOW is a RULED state, not a defect, and without this probe the bare census
+        # reports it as a count mismatch and exits 1 -- the false red this instrument exists to avoid.
+        # H1 step 2 moves the converter module's directive to the target BEFORE H2 bumps the corpus
+        # pin, so between them the tree legitimately carries two releases (runbook
+        # docs/GoCorpusMigration.md, "Ruling 2026-09-08 -- the H2->H5 window: the converter at
+        # go1.24.13, the corpus still at 1.23.12"). The probe READS the directive rather than assuming
+        # it: at the outgoing release the anchor matches and nothing below changes; at a release NEWER
+        # than the pin -- and, when -To is given, at exactly that target -- the site is reported as
+        # already at target and -SkipGoMod is implied. An OLDER directive, or a newer one that is not
+        # the named target, stays a problem.
+        Probe = '(?m)^go (\d+\.\d+(?:\.\d+)?)(?=\r?$)'
         Note = "the converter module's go directive (H1.2, ruled: it moves each migration). -SkipGoMod leaves it"
     }
 
     # ---- DOC-STATEMENT --------------------------------------------------------------------------
+    # RETIRED 2026-09-13. The 2026-09-12 context diet (56ff452a5) rewrote CLAUDE.md as a 178-line
+    # index and the architecture row lost its parenthetical entirely: the row now reads "The Go
+    # stdlib, auto-converted by `go2cs -stdlib`. Hand-owned: `unsafe`, `testing`." and the file's own
+    # budget section rules that a fact which goes stale silently must not be quoted from it. So the
+    # statement was DROPPED, not relocated -- grepped for at 2026-09-13 across .claude/rules,
+    # .claude/skills, docs/Architecture.md and docs/Glossary.md, none of which states the corpus
+    # release as present-tense fact. The pre-diet sentence survives verbatim in
+    # docs/doctrine/JOURNAL-2026-09-12.md:58, where it is history and must not move.
+    #
+    # The row is kept rather than deleted for two reasons. It records WHY CLAUDE.md no longer carries
+    # a site, so the next migration does not re-derive the same dead end; and it keeps CLAUDE.md in
+    # the DOC-STATEMENT file set, so the REVIEW scan below still reads every line of it -- if the
+    # release ever returns to CLAUDE.md as present-tense prose, that line is reported unanchored
+    # instead of being silently unmanaged. The retirement is itself asserted: the anchor must match
+    # ZERO times, and a nonzero count is a failure telling the operator to un-retire the site.
+    # The present-tense corpus release is stated in docs/README.md, docs/ValidatedTestPackages.md,
+    # docs/Background.md and docs/ConversionStrategies.md, each anchored below; nothing is unstated.
     @{
         File = 'CLAUDE.md'; Class = 'DOC-STATEMENT'
         Find = '; Go {OLD}\) auto-converted'
         Replace = '; Go {NEW}) auto-converted'
         Expect = 1
+        Retired = '56ff452a5'
+        RetiredNote = 'the 2026-09-12 context diet dropped the architecture row parenthetical; the pre-diet sentence is frozen in docs/doctrine/JOURNAL-2026-09-12.md'
         Note = 'architecture row: the release the corpus on disk was converted from'
     }
     @{
@@ -359,12 +446,22 @@ $editableSites = @(
 # hop unchanged. Anything in one of those files matching neither an editable anchor nor one of these
 # is reported for REVIEW -- new prose is exactly the thing a migration must not substitute blindly.
 $historyAnchors = @(
+    # RETIRED 2026-09-13, all three: the 2026-09-12 context diet (56ff452a5) moved CLAUDE.md's
+    # Phase-3 milestone sentence and its whole git-anchors table out of the file. Their text now
+    # lives ONLY in docs/doctrine/JOURNAL-2026-09-12.md (the byte-identical pre-split CLAUDE.md, at
+    # :4580 and :7832-7833), which is a frozen record: TestContextBudget's repoguard asserts the
+    # journal's BLOB IDENTITY (src/go2cs/internal/repoguard/contextBudget_test.go, commit a35b58085),
+    # a strictly stronger guarantee than a per-anchor presence check, and the journal is classified
+    # MUST-NOT-CHANGE in the sweep below. Re-anchoring them at the journal would also be a category
+    # error: this table is {OLD}-templated and all three sentences are spelled at Go 1.23.1, the
+    # release their history happened in, so they were already dark at the 1.23.1 -> 1.23.12 hop.
+    # Retired entries are reported by name with the commit that retired them, never as "not present".
     @{ File = 'CLAUDE.md'; Find = 'packages of the full conversion \(Go {OLD}\) compile clean'
-       Note = 'Phase-3 milestone, commit-anchored' }
+       Retired = '56ff452a5'; Note = 'Phase-3 milestone, commit-anchored -- moved to the journal by the context diet' }
     @{ File = 'CLAUDE.md'; Find = "Go {OLD}'s TERMINAL validation marker"
-       Note = 'git-anchors table row' }
+       Retired = '56ff452a5'; Note = 'git-anchors table row -- the whole table moved to the journal by the context diet' }
     @{ File = 'CLAUDE.md'; Find = 'the {OLD} corpus publishes as'
-       Note = 'git-anchors table row (the anchor NuGet release)' }
+       Retired = '56ff452a5'; Note = 'git-anchors table row (the anchor NuGet release) -- moved to the journal by the context diet' }
     @{ File = 'docs/README.md'; Find = 'requires go2cs packages \*\*{OLD}\.5 or later\*\*'
        Note = 'the release Linux support FIRST shipped in' }
     @{ File = 'docs/README.md'; Find = 'All \*\*302\*\* packages \(Go {OLD}\) compile with zero errors'
@@ -398,6 +495,20 @@ $pathClasses = @(
 
     @{ Match = '^docs/validation/';                       Class = 'MUST-NOT-CHANGE'; Note = 'write-once published snapshot; the NuGet version pinning it is immutable' }
     @{ Match = '^src/core/testing/';                      Class = 'MUST-NOT-CHANGE'; Note = 'hand-owned test host: a measurement record naming the release it was measured on' }
+
+    # The HAND-OWNED half of the one tree (CLAUDE.md, "One tree"), classified 2026-09-13 by reading
+    # every occurrence. None of these is regenerable and none states the corpus pin: each is a
+    # comment recording a MEASUREMENT, a CENSUS or a TRANSCRIPTION taken against a named release --
+    # "measured against go1.23.12", "the only occurrences in Go 1.23.12 are ...", "runtime/mfinal.go
+    # :468-499 (1.23.12; :490-521 at 1.24.13)". Substituting the release would turn a true statement
+    # about a reading into a false one, and the SECOND kind above names BOTH releases deliberately.
+    # Each rule is keyed on a real hand-own class, never on a directory sweep.
+    @{ Match = '^src/core/golib/';                        Class = 'MUST-NOT-CHANGE'; Note = "golib is hand-written and never auto-overwritten; its release mentions are measurements, transcriptions of Go's own tables, and stdlib census records" }
+    @{ Match = '^src/core/.+_impl\.cs$';                  Class = 'MUST-NOT-CHANGE'; Note = 'hand-owned *_impl.cs companion: a comment recording what was measured against a named release (several name BOTH releases of the H2->H5 window on purpose)' }
+    @{ Match = '^src/core/(runtime/mfinal|sync/oncefunc)\.cs$'
+                                                          Class = 'MUST-NOT-CHANGE'; Note = 'whole-file [module: GoManualConversion] hand-own: transcribes Go source by FILE AND LINE at a named release, and cites both releases where they differ' }
+    @{ Match = '^src/core/.+/go2cs_test_disclosures\.json$'
+                                                          Class = 'MUST-NOT-CHANGE'; Note = "a disclosure's reason is a measured reading naming the release it was taken on; H10 re-judges every row from the new release's own sources, never by substitution" }
     @{ Match = '^src/go2cs/.+_test\.go$';                 Class = 'MUST-NOT-CHANGE'; Note = 'hermetic fixture: the release is an INPUT to the function under test, not a pin' }
     @{ Match = '^src/go2cs/.+\.go$';                      Class = 'MUST-NOT-CHANGE'; Note = 'illustrative comment; the code itself derives the release at runtime' }
 
@@ -406,6 +517,10 @@ $pathClasses = @(
     @{ Match = '^src/push-nuget\.ps1$';                   Class = 'DERIVED-AT-RUNTIME'; Note = 'reads <GoStdLibVersion>, owns <GoBuildNumber> per publish' }
     @{ Match = '^src/deploy-core\.ps1$';                  Class = 'DERIVED-AT-RUNTIME'; Note = 'copies version.props to the deploy root verbatim' }
     @{ Match = '^src/set-version\.ps1$';                  Class = 'MUST-NOT-CHANGE'; Note = 'stamps the CONVERTER TOOL version; its comment merely contrasts itself with version.props' }
+    @{ Match = '^src/handown-census\.ps1$';               Class = 'MUST-NOT-CHANGE'; Note = "a -GoRoot worked example in the parameter help, plus a comment naming the release a GOROOT change landed in" }
+    @{ Match = '^src/reconvert-deletions\.(ps1|bat)$';    Class = 'MUST-NOT-CHANGE'; Note = 'this pass NAMES the hop (-SourceGoRoot <old> -ExpectGo <new>); substituting either release would destroy the worked example and the seeded-vs-absent case it explains' }
+    @{ Match = '^src/utilities/UpdateTestTargets/';       Class = 'MUST-NOT-CHANGE'; Note = 'comments recording a measured ambient-toolchain skew against the corpus pin -- the finding IS the two releases disagreeing' }
+    @{ Match = '^src/tools/.+/go\.mod$';                  Class = 'MUST-NOT-CHANGE'; Note = "helper-tool module floor; H1.2 rules the CONVERTER module's directive only, and raising a tool's floor is a per-module decision, never a substitution" }
     @{ Match = '^src/_roster\.ps1$';                      Class = 'MUST-NOT-CHANGE'; Note = 'explanatory comment naming the era the roster columns were banked in' }
     @{ Match = '^src/release-nuget\.bat$';                Class = 'MUST-NOT-CHANGE'; Note = 'a worked example in a comment' }
 
@@ -423,6 +538,8 @@ $pathClasses = @(
     @{ Match = '^src/tour/README\.md$';                   Class = 'MUST-NOT-CHANGE'; Note = 'tour prose naming the release its worked example was captured on' }
     @{ Match = '^src/go2cs/testdata/';                    Class = 'MUST-NOT-CHANGE'; Note = 'hermetic golden for the proof-page renderer; the release is fixture data' }
     @{ Match = '^src/tests/ConverterBuildInputs\.cs$';    Class = 'MUST-NOT-CHANGE'; Note = "illustrative comment showing `go version go2cs.exe` output shape" }
+    @{ Match = '^src/tests/Behavioral/.+\.go$';           Class = 'MUST-NOT-CHANGE'; Note = "behavioral fixture comment: a census of the named release's std ('FOUR sites in Go X's std') or a measured Go answer transcribed beside the assertion it justifies" }
+    @{ Match = '^src/tests/GolibTests/.+\.cs$';           Class = 'MUST-NOT-CHANGE'; Note = "MSTest comment recording Go's own answer measured on a named toolchain, or Go source cited by FILE AND LINE at that release -- several cite both releases because the lines moved" }
     @{ Match = '^src/tests/Performance/README\.md$';      Class = 'MUST-NOT-CHANGE'; Note = 'measurement environment stamp: the toolchain a benchmark number was measured on' }
     @{ Match = '^src/archived/';                          Class = 'MUST-NOT-CHANGE'; Note = 'archived record' }
 
@@ -437,6 +554,22 @@ $pathClasses = @(
     @{ Match = '^docs/StdLibCompileMilestone\.md$';       Class = 'MUST-NOT-CHANGE'; Note = 'milestone record' }
     @{ Match = '^docs/ConversionStrategies-Reference\.md$'; Class = 'MUST-NOT-CHANGE'; Note = 'census records ("across the whole Go X stdlib, N sites") and illustrative doc-link examples' }
     @{ Match = '^docs/GoCorpusMigration\.md$';            Class = 'MUST-NOT-CHANGE'; Note = 'this runbook is version-agnostic by design' }
+    @{ Match = '^docs/doctrine/JOURNAL-';                 Class = 'MUST-NOT-CHANGE'; Note = "the frozen pre-diet CLAUDE.md; TestContextBudget's repoguard asserts its BLOB IDENTITY, so any edit at all fails the converter suite" }
+    @{ Match = '^docs/Glossary\.md$';                     Class = 'MUST-NOT-CHANGE'; Note = 'the hop-lettering key NAMES its campaign (Hop A = Go X); substituting would destroy the definition' }
+
+    # The context diet (56ff452a5) relocated 7,722 lines of CLAUDE.md into path-scoped rules and
+    # on-demand skills, so the release now appears in files this table had never seen. Classified
+    # 2026-09-13 by READING all 23 occurrences, one at a time. NONE is a present-tense corpus pin
+    # that moves at H2: every one is either dated provenance inside an HTML comment, a measured
+    # finding stated with the release it was measured on, or a WINDOW statement naming both pins.
+    # The window statements are the reason these files are not editable in this hop at all: while
+    # H2->H5 is open the tree carries two releases deliberately (runbook, "Ruling 2026-09-08"), and
+    # converter.md's "GOTOOLCHAIN stays UNSET (auto) on the 1.23.12 pin ... go.mod requires go >=
+    # 1.24.13" is a statement ABOUT that pairing -- rewriting one half of it makes it say nothing.
+    # Re-read these two files at H5, when the window closes and the pairing stops being true.
+    @{ Match = '^\.claude/rules/converter\.md$';          Class = 'MUST-NOT-CHANGE'; Note = 'H2->H5 WINDOW statements naming BOTH pins (the two-pin pairing), plus an illustrative forward-slash GOROOT spelling inside a dated finding; re-read at H5 when the window closes' }
+    @{ Match = '^\.claude/rules/harness-gates\.md$';      Class = 'MUST-NOT-CHANGE'; Note = 'dated measurements and toolchain-resolution findings whose whole content is which release a reading was taken at (including a GOVERSION-vs-GoStdLibVersion FORMAT example)' }
+    @{ Match = '^\.claude/skills/.+/SKILL\.md$';          Class = 'MUST-NOT-CHANGE'; Note = 'skill provenance: dated findings, stdlib census records and named test leaves, each true only of the release it names' }
 )
 
 # ---- resolve the two releases -------------------------------------------------------------------
@@ -461,6 +594,24 @@ if ($toRelease -and $toRelease -eq $fromRelease) {
 }
 
 $oldPattern = [regex]::Escape($fromRelease)
+
+# Ordering over bare releases, so the H2->H5 window probe can tell "H1.2 landed ahead of H2" (a
+# directive NEWER than the pin) from a directive that has slipped BACKWARDS, which stays a problem.
+# Returns < 0, 0 or > 0. A missing component reads as 0, so 1.24 and 1.24.0 compare equal.
+function Compare-Release {
+    param([Parameter(Mandatory)][string] $A, [Parameter(Mandatory)][string] $B)
+
+    $pa = @($A -split '\.' | ForEach-Object { [int]$_ })
+    $pb = @($B -split '\.' | ForEach-Object { [int]$_ })
+
+    for ($i = 0; $i -lt [Math]::Max($pa.Count, $pb.Count); $i++) {
+        $x = if ($i -lt $pa.Count) { $pa[$i] } else { 0 }
+        $y = if ($i -lt $pb.Count) { $pb[$i] } else { 0 }
+        if ($x -ne $y) { return $x - $y }
+    }
+
+    return 0
+}
 
 function Expand-Anchor {
     param([Parameter(Mandatory)][AllowEmptyString()][string] $Template, [switch] $AsReplacement)
@@ -529,9 +680,25 @@ foreach ($site in $editableSites) {
         $atTarget = ([regex]::Matches($text, $targetFind)).Count
     }
 
+    # A site whose prose a documented commit REMOVED. Reported by name with that commit rather than
+    # as an unexplained miss, and asserted in the one direction that can still be wrong: the anchor
+    # must match zero times, so prose returning to a retired site is a failure, never a silent gap.
+    $retired = ''
+    if ($site.ContainsKey('Retired')) { $retired = $site.Retired }
+
+    # The H2->H5 window, read rather than assumed. See the Probe comment on the go.mod site.
+    $probed = ''
+    if ($site.ContainsKey('Probe')) {
+        $m = [regex]::Match($text, $site.Probe)
+        if ($m.Success) { $probed = $m.Groups[1].Value }
+    }
+
     $state = 'mismatch'
-    if ($count -eq $site.Expect) { $state = 'pending' }
+    if ($retired) { $state = 'retired' }
+    elseif ($count -eq $site.Expect) { $state = 'pending' }
     elseif ($count -eq 0 -and $toRelease -and $atTarget -eq $site.Expect) { $state = 'migrated' }
+    elseif ($count -eq 0 -and $probed -and (Compare-Release $probed $fromRelease) -gt 0 -and
+            ((-not $toRelease) -or $probed -eq $toRelease)) { $state = 'at-target' }
 
     [void]$plan.Add([pscustomobject]@{
         File     = $site.File
@@ -541,15 +708,18 @@ foreach ($site in $editableSites) {
         Expect   = $site.Expect
         Found    = $count
         AtTarget = $atTarget
+        Probed   = $probed
         State    = $state
         Note     = $site.Note
+        Retired  = $retired
+        RetiredNote = $(if ($site.ContainsKey('RetiredNote')) { $site.RetiredNote } else { '' })
         Skipped  = $skipped
     })
 }
 
 # "Already migrated" is a whole-tree verdict, not a per-site one: a tree with SOME sites moved and
 # some not is half-migrated and must still be reported as work outstanding.
-$active = @($plan | Where-Object { -not $_.Skipped })
+$active = @($plan | Where-Object { -not $_.Skipped -and -not $_.Retired })
 $alreadyMigrated = $toRelease -and $active.Count -gt 0 -and @($active | Where-Object { $_.State -ne 'migrated' }).Count -eq 0
 
 $lastFile = ''
@@ -562,6 +732,20 @@ foreach ($row in $plan) {
 
     if ($row.Skipped) {
         $state = 'skipped'
+        $color = 'DarkGray'
+    }
+    elseif ($row.State -eq 'retired') {
+        if ($row.Found -gt 0) {
+            $state = "RETIRED at $($row.Retired), but PRESENT AGAIN ($($row.Found) site(s)) -- un-retire it"
+            $color = 'Red'
+        }
+        else {
+            $state = "RETIRED at $($row.Retired) -- the prose this anchored no longer exists"
+            $color = 'DarkGray'
+        }
+    }
+    elseif ($row.State -eq 'at-target') {
+        $state = "ALREADY AT TARGET $($row.Probed) (H1.2 landed ahead of H2; -SkipGoMod is implied)"
         $color = 'DarkGray'
     }
     elseif ($row.State -eq 'pending') {
@@ -579,6 +763,21 @@ foreach ($row in $plan) {
 
     Write-Host ('    [{0}] {1}' -f $row.Class, $state) -ForegroundColor $color
     Write-Host "        $($row.Note)" -ForegroundColor DarkGray
+
+    if ($row.State -eq 'retired' -and $row.RetiredNote) {
+        Write-Host "        retired: $($row.RetiredNote)" -ForegroundColor DarkGray
+    }
+
+    if ($row.State -eq 'at-target') {
+        Write-Host "        the H2->H5 window is a RULED state, not a defect (docs/GoCorpusMigration.md, ruling 2026-09-08):" -ForegroundColor DarkGray
+        Write-Host "        the converter module hops at H1.2 and the corpus pin follows at H2, so the tree carries both" -ForegroundColor DarkGray
+        Write-Host "        releases until H5's regen closes it. Nothing to edit here; -Apply leaves this file alone." -ForegroundColor DarkGray
+    }
+
+    # A retired site can still be wrong in one direction: the prose coming BACK. Say so loudly.
+    if ($row.State -eq 'retired' -and $row.Found -gt 0) {
+        [void]$failures.Add("$($row.File) -- RETIRED at $($row.Retired), but its anchor '$($row.Find)' matched $($row.Found) time(s). The prose returned; un-retire the site and restore its Expect.")
+    }
 
     if (-not $row.Skipped -and $row.State -eq 'mismatch') {
         $detail = "matched $($row.Found) time(s), expected $($row.Expect)"
@@ -617,6 +816,20 @@ foreach ($anchor in $historyAnchors) {
     $text = (Read-RepoText $path).Text
     $count = ([regex]::Matches($text, $find)).Count
 
+    # A retired anchor names the commit that removed its prose. It is NOT registered as covering, so
+    # if the sentence ever returns to this file the REVIEW scan reports the line instead of treating
+    # a dead anchor as having classified it.
+    $retired = ''
+    if ($anchor.ContainsKey('Retired')) { $retired = $anchor.Retired }
+
+    if ($retired) {
+        $state = if ($count -gt 0) { "RETIRED at $retired, but PRESENT AGAIN ($count) -- un-retire it" } else { "RETIRED at $retired" }
+        $color = if ($count -gt 0) { 'Yellow' } else { 'DarkGray' }
+        Write-Host ('  {0,-32} {1}' -f $anchor.File, $state) -ForegroundColor $color
+        Write-Host "      $($anchor.Note)" -ForegroundColor DarkGray
+        continue
+    }
+
     $color = if ($count -gt 0 -or $alreadyMigrated) { 'DarkGray' } else { 'Yellow' }
     $state = if ($count -gt 0) { "$count occurrence(s) preserved" } elseif ($alreadyMigrated) { 'n/a -- tree already migrated' } else { 'not present (prose may have moved)' }
     Write-Host ('  {0,-32} {1}' -f $anchor.File, $state) -ForegroundColor $color
@@ -633,7 +846,7 @@ $review = New-Object System.Collections.Generic.List[object]
 
 foreach ($file in $docFiles) {
     $path = Join-Path $repo $file
-    $editAnchors = @($plan | Where-Object { $_.File -eq $file -and -not $_.Skipped } | ForEach-Object { $_.Find })
+    $editAnchors = @($plan | Where-Object { $_.File -eq $file -and -not $_.Skipped -and -not $_.Retired } | ForEach-Object { $_.Find })
     $histAnchors = @()
     if ($historyCovered.ContainsKey($file)) { $histAnchors = @($historyCovered[$file]) }
 
@@ -700,7 +913,7 @@ foreach ($entry in $rawCounts) {
     $sep = $entry.LastIndexOf(':')
     if ($sep -lt 1) { continue }
 
-    $relPath = $entry.Substring(0, $sep)
+    $relPath = Expand-GitPath $entry.Substring(0, $sep)
     $hits = [int]$entry.Substring($sep + 1)
     $sweptTotal += $hits
 
@@ -848,7 +1061,7 @@ if ($failures.Count -gt 0) {
 
 # A migration must not mix its edits with anyone else's. Scoped to the files this run would touch:
 # an unrelated dirty file elsewhere in the tree is not this script's business.
-$targetFiles = @($plan | Where-Object { -not $_.Skipped } | ForEach-Object { $_.File } | Sort-Object -Unique)
+$targetFiles = @($plan | Where-Object { -not $_.Skipped -and -not $_.Retired -and $_.State -ne 'at-target' } | ForEach-Object { $_.File } | Sort-Object -Unique)
 $dirty = @(& git -C $repo status --porcelain -- $targetFiles 2>$null | Where-Object { $_ })
 
 if ($dirty.Count -gt 0) {
@@ -877,7 +1090,7 @@ foreach ($file in $targetFiles) {
     $text = $doc.Text
     $fileEdits = 0
 
-    foreach ($row in ($plan | Where-Object { $_.File -eq $file -and -not $_.Skipped })) {
+    foreach ($row in ($plan | Where-Object { $_.File -eq $file -and -not $_.Skipped -and -not $_.Retired -and $_.State -ne 'at-target' })) {
         # The replacement is LITERAL text, so any '$' in it must be doubled or Regex.Replace would
         # read it as a group reference. None of the anchors carries one today; doubling costs nothing
         # and removes the class of defect entirely.
@@ -925,7 +1138,7 @@ Write-Head 'post-apply verification'
 $remaining = 0
 $landed = 0
 
-foreach ($row in ($plan | Where-Object { -not $_.Skipped })) {
+foreach ($row in ($plan | Where-Object { -not $_.Skipped -and -not $_.Retired -and $_.State -ne 'at-target' })) {
     $path = Join-Path $repo $row.File
     $text = (Read-RepoText $path).Text
 

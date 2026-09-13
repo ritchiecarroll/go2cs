@@ -428,6 +428,23 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   a guard's rows for one defect silently deletes another defect's ONLY coverage, the silent-subtraction class
   inside a commit whose message is about something else, and the nearest-looking substitute exercises the
   OTHER band. **A census output that says "empty means no guard" is read for its RESULT, not its label.**
+- **A CONTROL NAMES THE TIP OR THE LITERAL ITS EXPECTATION WAS MEASURED AT; a control that reads its
+  expectation from the CURRENT TREE is not a control** — the tip moves, the expectation moves with it, and
+  the arm goes on reading its documented value while measuring nothing.
+  <!-- ⚠ 2026-09-13, named as a class from three instances in two days (C1 66e22a44f). (a) i9 0f22dc11d
+       measured a census leg's g-b1 control reading 0 at the MOVING TIP, because f632a942b had removed the
+       lines it depended on; pinned to 6815eba00 in the KICKOFF at 654343a5e. (b) G b0bd4205 measured the
+       same census's leg-1a control passing VACUOUSLY wherever the environment's own account segment is
+       itself a member of the placeholder set that control plants; amended to plant a FOREIGN segment.
+       (c) C1's own byte-preservation assertion FIRED — for the wrong reason — which is the same defect
+       wearing a red rather than a green. A control's expectation is a LITERAL or a PINNED SHA; anything
+       derived from the tree under test is the derive-the-reference-from-the-thing-under-test class in a
+       new costume, and it is caught by the arm never going red, never by anything looking wrong. -->
+- **A tool check spelled `command -v a b c` is FAIL-OPEN — it exits 0 if ANY name resolves.** Gate each tool
+  in its OWN call. <!-- ⚠ 2026-09-13: i9 57c4ac305 ran exactly that check, it printed only `git` and exited
+       0, and FOUR of the five tools were missing; the preflight it fronted read clean. C1 and R adopted the
+       per-tool loop the same day. Same family as the `[string]` parameter that coerces `$null` to `''`: the
+       instrument runs, reports success, and its verdict could not have refused anything. -->
 
 <!-- DERIVATIONS (controls, guards, vacuous greens) — Phase 1 text, verbatim:
 - **A gate that has never been made to fail proves nothing.** Before trusting a census/self-verify that
@@ -1023,6 +1040,14 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   the code's own fall-through, not from the arm list. **Predict PER ARM with the SCOPE named** (a zero on one
   arm is a statement about the harness's population, not about the corpus), and **NAME the arm that carries a
   built-in positive control** — if nothing drives that arm above zero the census never ran at all.
+- **`git patch-id` answers "is this EXACT PATCH on a ref", never "is this CONTENT in master"** — a re-split,
+  re-ordered or merge-carried landing has a NEW patch-id with its content FULLY PRESENT. The disposition
+  instrument is the per-file BLOB or ADDED-LINE test against master.
+  <!-- ⚠ 2026-09-13: C2 5cc609337 RETRACTED a fifteen-commit rescue population it had derived from a
+       patch-id census, after a per-path added-line test read 57-100% PRESENT on all eight tips. The i7's
+       six local-only branches and G's read the same way. The census was sound and pointed at the wrong
+       question, which is the failure with no tell: a patch-id answers about an OBJECT, and "did this land"
+       is a question about CONTENT. -->
 
 <!-- DERIVATIONS (census predicates, renderers, nulls and blockers) — Phase 1 text, verbatim:
   **⚠ PREDICATE DISCIPLINE FOR A CENSUS — every count in one table is derived under ONE stated

@@ -848,6 +848,14 @@ untrue. #6-#8 are other shapes, and re-running catches none of them.
      that disagrees with a later one is a scheduling question before it is a finding.** Beside it: a
      PowerShell `-match` per line captures only the FIRST hit, so a line bearing two stubs counts one — a
      Python `finditer` re-derivation is what settled that number. -->
+- **A TOKEN-DERIVING CENSUS NAMES ITS TOKENIZER AT THE SITE** — an alphanumeric-only split FRACTURES a
+  hyphenated identifier, so the arm runs DEAD while every control still reads its documented value, because
+  no control consumes the derived token. **Every derivation owes one control that DEPENDS on what it
+  derived.** <!-- ⚠ 2026-09-13, G 4e2eda884: a census leg's token derivation now names its tokenizer
+     (`[\w.-]+`) in the leg's own text. Nothing in the run looked wrong — the arm produced
+     fragments, matched nothing, and the leg's controls were all measuring OTHER arms, so a dead arm and a
+     healthy one are the same output. Silence by construction, the same shape as an exclusion filter
+     controlled in one direction only. -->
 ## Liveness: proving a run is alive or dead
 - **Never wait on a Windows pid from Bash**: `kill -0 <pid>` resolves pids in Git Bash's own emulation
   namespace, so the wait **exits on the FIRST iteration** — no error, exit 0, indistinguishable from a real
@@ -1156,6 +1164,14 @@ untrue. #6-#8 are other shapes, and re-running catches none of them.
      Cost leg, 2026-09-05, a train chain that did: the sweeps after a red suite are still data, reading the
      same root row by row, while a cost pair measures COST on a tree that WILL change and must be re-run
      anyway. -->
+- **`TestSafePushSelfTest` FAILS ON ANY SHALLOW CLONE and the failure presents as a PARTIAL PASS** — arm 5
+  seeds a hermetic origin by pushing `HEAD^{commit}` into a fresh bare repo, which a shallow clone REFUSES
+  (`shallow update not allowed`) — so a cloud lane cannot self-verify safe-push's four properties and must
+  say the leg is UNMEASURED rather than red. **safe-push ITSELF works from a shallow clone.** <!-- ⚠
+     2026-09-13, C1 09d16d1d0, proven twice the same night. Companion to the shallow-clone rule under
+     "Census scope": a shallow clone answers a CONTENT question soundly and a HISTORY question wrongly, and
+     a self-test that MANUFACTURES history to test against is a history question wearing a guard's clothes.
+     The environment is the variable, not the composition under test. -->
 - **A TRAIN BATTERY WHOSE EVERY LEG IS WINDOWS-DEFAULT CANNOT SEE A SEAT WHOSE ONLY FILE IS PER-GOOS**, and a
   green battery then reads as covering a file it never compiled: **a battery DERIVES a per-GOOS leg from the
   seats' file paths.** A comment-only change is provable without a compiler — strip whole-line comments both

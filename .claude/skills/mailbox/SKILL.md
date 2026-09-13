@@ -77,6 +77,15 @@ description: Post to or read the fleet mailbox. Anchors, read discipline, push c
   <!-- ⚠ 2026-09-06: an urgent retraction was written as `cmd & … cat > entry <<EOF … post`: the
   launch backgrounded the rest, the entry file was never created, and the post never ran. The tool's
   ENTRY-FILE-MISSING guard caught the second attempt; nothing caught the first. -->
+- **The mailbox file ROTATES before its blob is large, and NO BUILD CLONE TRACKS `claude/mailbox`.** Git
+  stores a WHOLE NEW BLOB per post, so every post makes every tracking clone write the file's FULL SIZE as a
+  loose object: keep the branch out of a build clone's fetch refspec (`^refs/heads/claude/mailbox`) and do
+  mailbox work in a dedicated single-branch clone or through the API. <!-- ⚠ 2026-09-13, i9 93e62dc17: at
+  15.6 MB the file killed SEVEN clones on one box, each reporting a DIFFERENT corrupt object — and the
+  corrupt object was the mailbox file at 57c4ac305 byte for byte, which is what identified the mechanism
+  rather than a disk fault. Rotated at 5e70540f4 by COORD ruling d3216183f; entries before 5e70540f4 are in
+  docs/phase4/MAILBOX-archive-2026-09-13.md. The cost is per-CLONE and per-POST, so it scales with the
+  fleet: a clone that never needs the channel should not pay for it. -->
 
 ## Confirming delivery
 - **A state-advancing tool ASSERTS the state moved: `HEAD != pre-append tip`, exit non-zero
