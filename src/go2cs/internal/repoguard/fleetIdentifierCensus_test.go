@@ -114,6 +114,7 @@ var fleetDeniedTokens = []fleetDeniedToken{
 	{7, "20befabea93592064aad4d07e1af70c5d6859667e1edffdb591accf60e2993ee", "fleet account name"},
 	{8, "deff430814c33ac000dbdf4bd1061321b8387df004594375c947fabf73d3acc1", "fleet account name"},
 	{13, "1070b0f89514d6852350c53ac7682edcb2d41f38d66fb95c340cdec08802c74e", "fleet machine name"},
+	{15, "64bcb3dc70c4e605e5f1f29e4e42af4ab20de3b69f6452e5d5444305f432ea6d", "fleet machine name"},
 }
 
 // fleetDeniedIndex groups the denylist by token length, so a line's tokens are hashed only when

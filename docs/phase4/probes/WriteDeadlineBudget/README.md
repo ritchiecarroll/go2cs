@@ -15,7 +15,7 @@ spans the handshake where Go's does not.**
 
 ## Measured
 
-**GRETCHEN-LAPTOP** (Ryzen 7 PRO 6850U, 15–28 W mobile), three runs, identical:
+**G-LAPTOP** (Ryzen 7 PRO 6850U, 15–28 W mobile), three runs, identical:
 
 | budget | `WriteTimeout` | Go | converted C# |
 |---|---|---|---|
