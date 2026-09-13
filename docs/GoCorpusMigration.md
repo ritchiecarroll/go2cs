@@ -783,11 +783,46 @@ machine need separate checkouts, because the gates re-transpile the tree they ru
 
 ⚠ **The validated sweep is SERIAL BY DESIGN** and says so in its own source: concurrent converted-test
 runs share freshly-built dependency assemblies and collide on them, *which reads as a package failure
-and is not one*. It exposes no jobs, throttle, shard or resume parameter. **Every unit of fleet
+and is not one*. It exposes no jobs, throttle or resume parameter, and the `-ShardCount`/`-ShardIndex`
+pair it DOES expose is a single-host time-slicer rather than a distribution device (amendment below).
+**Every unit of fleet
 concurrency therefore lives outside the instrument** and is a worktree running its own internally
 serial sweep. The per-row driver invokes the sweep one row at a time with its **exact-match filter** —
 a parameter that exists in the sweep for precisely this purpose, because a substring filter re-sweeps
 large rows repeatedly.
+
+#### Amendment 2026-09-13 — the sweep DOES expose a shard parameter, and this section's conclusion survives anyway
+
+This section read "It exposes no jobs, throttle, shard or resume parameter" until today. **The shard half
+was false at master and had been for eleven days.** `src/run-validated-sweep.ps1` has carried
+`-ShardCount`/`-ShardIndex` since an owner ruling of 2026-09-02: declared at `:105`–`:108` under
+`[ValidateRange(1, [int]::MaxValue)]`, documented at `:98`–`:104`, refusing `-ShardIndex` greater than
+`-ShardCount` at `:111`–`:114`, and slicing at `:276`–`:283`. Its reason is **thermal, on one host** — the
+parameter's own comment records that "a ~2-hour continuous full-roster run is exactly the load that trips
+it, so a multi-hour census is broken into shards with a cooldown gap BETWEEN separate invocations", with
+the gap explicitly the caller's job rather than the script's.
+
+⚠ **The paragraph's CONCLUSION is unaffected, and the reason is worth stating rather than leaving as
+luck.** `-ShardCount` slices the (already Filter/Exact/Applicable-filtered) row set into **contiguous
+pieces in ROSTER ORDER**, the last shard absorbing the remainder. A cost-ordered assignment — §3.2's
+LPT-greedy deal onto speed-weighted bins — is by construction **not** contiguous in roster order, so **the
+native parameter cannot express a shard map.** Fleet concurrency therefore still lives outside the
+instrument exactly as this section says, and the per-row `-Filter -Exact` driver remains the mechanism.
+What changed is only that a reader can no longer verify the old sentence with one `grep`: the parameter
+exists, it is simply the wrong shape for the job this section is about.
+
+By the same token a `-ShardCount` run is **not** a substitute for the cooldown discipline it was added
+for: the gap between invocations belongs to the caller, and a driver that dispatches shard N+1 the instant
+shard N exits reproduces the continuous load the parameter exists to break up.
+
+<!-- Provenance. Found by lane C2 on 2026-09-13 while deriving the H10 `-Hop` design (mailbox entry
+     389eee6d09ff741a7274a48eab4d3522980bbe48), reading the sweep as TEXT on a box with no PowerShell;
+     ruled by COORD as P5 of that design and cut as this in-stage amendment. The false sentence did not
+     drift — the paragraph and the `-ShardCount` addition were both live in the tree from 2026-09-06
+     (aa4e5fc2d) onward, so nothing rewrote it; it was simply never re-read against the script after the
+     owner's 2026-09-02 ruling landed. The class is the one `.claude/skills/measurement-discipline` now
+     carries for controls: a statement ABOUT an instrument, not re-derived FROM the instrument, goes stale
+     silently and reads authoritative while it does. -->
 
 ### 3.2 Cost proxy and ordering
 
