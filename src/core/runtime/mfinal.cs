@@ -10,6 +10,48 @@
 // everything else in this file is the unmodified converted output (vestigial GC-queue machinery
 // other runtime files reference, kept for compilation). The marker keeps -stdlib reconverts from
 // regenerating the Go version over this file.
+//
+// POINTER-MINT DOOR (2026-09-13, C1; coordinator ruling, mailbox c58b4c01d s2). golib names two
+// doors and they are not interchangeable: `new @unsafe.Pointer(box)` "takes the ADDRESS from the box
+// and RETAINS NOTHING" while `@unsafe.Pointer.FromPinnedBox(box)` is "the RETAINING door ... which
+// the syscall pin fix depends on" (unsafe.cs:237). This file uses the BARE mint at four sites where
+// the converter now emits the retaining one, so the sibling .auto and this file differ there; the
+// two hand-owns in the same position (registry/windows/value.cs, syscall/windows/security_windows.cs)
+// each say in their header which door they want, and this is that sentence. Read per site rather
+// than settled in one line, because the answer is not the same at all four. In-file line
+// numbers are as of this commit; the symbol beside each is the durable half.
+//
+//   :255  gopark(finalizercommit, <lock>, ...)  -- THE DOOR IS WRONG HERE, and the callee is what
+//         says so: gopark STORES the pointer (`mp.Value.waitlock = @lock`, <goos>/proc.cs:407) and
+//         park_m reads through it after the goroutine has parked. The corpus already agrees with
+//         itself one declaration further down -- goparkunlock passes the same parameter as
+//         `@unsafe.Pointer.FromPinnedBox(Ꮡlock)` (<goos>/proc.cs:419). Nothing can go wrong today
+//         because the argument is Ꮡfinlock, a package-level box that is statically rooted and can
+//         never be collected, but that is the ARGUMENT being safe, not the door being right. If this
+//         body is ever revived (see the reachability note below) this site takes FromPinnedBox.
+//
+//   :289  r = <Ꮡregs.of(abi.RegArgs.ᏑInts)>  -- BARE IS CORRECT. `regs` is a live local for the whole
+//         frame and is handed to reflectcall separately as `Ꮡregs`, so the box is rooted by the
+//         minting frame independently of this pointer; there is nothing for the retaining door to add.
+//
+//   :302  ityp = (ж<interfacetype>)(uintptr)(<(~f).fint>)  -- NOT A DOOR QUESTION. The .auto reaches
+//         the same type through Reinterpret; both forms are a pure cast and neither retains. Listed
+//         so a reader diffing against the sibling does not count it as a fourth divergence.
+//
+//   :318  reflectcall(nil, <(~f).fn>, ...)  -- UNDECIDABLE, and that is the honest answer rather than
+//         a default. reflectcall is a BODYLESS partial (stubs.cs:271) with no *_impl.cs companion, so
+//         there is no callee contract to read: whether it must retain `fn` is a property of a body
+//         that does not exist. Whoever implements it decides this site in the same commit.
+//
+// REACHABILITY, which is why none of the above is a live defect. All four sites are inside runfinq,
+// and runfinq is started only by `goǃ(runfinq)` in the converted createfing (:227). createfing has
+// NO caller in this corpus -- SetFinalizer calls GoFinalizerQueue.EnsureRunner (:538) instead, and
+// every other mention of createfing here is a comment, a MethodBase reference (s_runfinq, :649) or a
+// funcID comparison (traceback.cs:1302). So this is the vestigial machinery the paragraph above
+// declares dead, and reflectcall being unimplemented would stop the body anyway. The doors are
+// recorded now because the 1.24 three-way merge keeps THIS side of these lines uncontested -- the
+// 1.23 and 1.24 .auto agree on them, so ours wins with no conflict marker -- and a divergence nobody
+// wrote down is one that gets re-decided by accident.
 [module: go.GoManualConversion]
 
 namespace go;
