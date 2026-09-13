@@ -123,6 +123,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\genstdlibmeta\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gensymbols\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\contextBudget_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\darwinTrampolineMap_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\fleetIdentifierCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\stdlibmeta\generate.go" />
     <None Include="$(MSBuildThisFileDirectory)layoutDuplicates_test.go" />
