@@ -3718,7 +3718,7 @@ internal static (ж<g> gp, bool inheritTime, int64 rnow, int64 pollUntil, bool n
     var ranTimer = false;
     UntypedInt stealTries = 4;
     for (nint i = 0; i < stealTries; i++) {
-        var stealTimersOrRunNextG = i == stealTries - 1;
+        var stealTimersOrRunNextG = i == (nint)(stealTries - 1);
         for (var @enum = stealOrder.start(cheaprand()); !@enum.done(); @enum.next()) {
             if (Ꮡsched.of(schedt.Ꮡgcwaiting).Load()) {
                 // GC work may be available.
@@ -5368,7 +5368,6 @@ internal static void badunlockosthread() {
 
 // All these variables can be changed concurrently, so the result can be inconsistent.
 // But at least the current goroutine is running.
-
 internal static int32 mcount() {
     return (int32)(sched.mnext - sched.nmfreed);
 }
@@ -5472,7 +5471,7 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
         // with all signals blocked, so we don't have to worry
         // about any other code interrupting us.
         if (Ꮡmp.of(m.ᏑcgoCallersUse).Load() == 0 && mp.cgoCallers != nil && mp.cgoCallers.Value[0] != 0) {
-            while (cgoOff < len(mp.cgoCallers.Value) && mp.cgoCallers.Value[cgoOff] != 0) {
+            while (cgoOff < 32 && mp.cgoCallers.Value[cgoOff] != 0) {
                 cgoOff++;
             }
             n += copy(stk[..], (~mp.cgoCallers).Value[..(int)(cgoOff)]);
@@ -6934,7 +6933,7 @@ internal static uint32 runqgrab(ж<Δp> Ꮡpp, [GoArrayDims(256)] ж<array<Δgui
                         if (!Ꮡpp.of(runtime_package.Δp.Ꮡrunnext).cas(next, 0)) {
                             continue;
                         }
-                        batch[batchHead % (uint32)len(batch)] = next;
+                        batch[batchHead % (uint32)256] = next;
                         return 1;
                     }
                 }
@@ -6947,7 +6946,7 @@ internal static uint32 runqgrab(ж<Δp> Ꮡpp, [GoArrayDims(256)] ж<array<Δgui
         }
         for (var i = (uint32)0; i < n; i++) {
             var g = pp.runq[(nint)((h + i) % (uint32)len(pp.runq))];
-            batch[(batchHead + i) % (uint32)len(batch)] = g;
+            batch[(batchHead + i) % (uint32)256] = g;
         }
         if (atomic.CasRel(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead), h, h + n)) {
             // cas-release, commits consume

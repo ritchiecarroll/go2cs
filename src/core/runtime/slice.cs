@@ -5,7 +5,7 @@ namespace go;
 
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
-using math = runtime.@internal.math_package;
+using Δmath = runtime.@internal.math_package;
 using sys = runtime.@internal.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
@@ -49,7 +49,7 @@ internal static @unsafe.Pointer makeslicecopy(ж<_type> Ꮡet, nint tolen, nint 
     uintptr copymem = default!;
     if ((uintptr)tolen > (uintptr)fromlen){
         bool overflow = default!;
-        (tomem, overflow) = math.MulUintptr(et.Size_, (uintptr)tolen);
+        (tomem, overflow) = Δmath.MulUintptr(et.Size_, (uintptr)tolen);
         if (overflow || tomem > maxAlloc || tolen < 0) {
             panicmakeslicelen();
         }
@@ -107,14 +107,14 @@ internal static @unsafe.Pointer makeslicecopy(ж<_type> Ꮡet, nint tolen, nint 
 internal static @unsafe.Pointer makeslice(ж<_type> Ꮡet, nint len, nint cap) {
     ref var et = ref Ꮡet.DerefOrNull();
 
-    var (mem, overflow) = math.MulUintptr(et.Size_, (uintptr)cap);
+    var (mem, overflow) = Δmath.MulUintptr(et.Size_, (uintptr)cap);
     if (overflow || mem > maxAlloc || len < 0 || len > cap) {
         // NOTE: Produce a 'len out of range' error instead of a
         // 'cap out of range' error when someone does make([]T, bignumber).
         // 'cap out of range' is true too, but since the cap is only being
         // supplied implicitly, saying len is clearer.
         // See golang.org/issue/4085.
-        var (memΔ1, overflowΔ1) = math.MulUintptr(et.Size_, (uintptr)len);
+        var (memΔ1, overflowΔ1) = Δmath.MulUintptr(et.Size_, (uintptr)len);
         if (overflowΔ1 || memΔ1 > maxAlloc || len < 0) {
             panicmakeslicelen();
         }
@@ -227,7 +227,7 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
         lenmem = (uintptr)oldLen * (uintptr)goarch.PtrSize;
         newlenmem = (uintptr)newLen * (uintptr)goarch.PtrSize;
         capmem = roundupsize((uintptr)newcap * (uintptr)goarch.PtrSize, noscan);
-        overflow = (uintptr)newcap > maxAlloc / goarch.PtrSize;
+        overflow = (uintptr)newcap > (uintptr)(maxAlloc / goarch.PtrSize);
         newcap = (nint)(capmem / (uintptr)goarch.PtrSize);
         break;
     }
@@ -250,7 +250,7 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
     default: {
         lenmem = (uintptr)oldLen * et.Size_;
         newlenmem = (uintptr)newLen * et.Size_;
-        (capmem, overflow) = math.MulUintptr(et.Size_, (uintptr)newcap);
+        (capmem, overflow) = Δmath.MulUintptr(et.Size_, (uintptr)newcap);
         capmem = roundupsize(capmem, noscan);
         newcap = (nint)(capmem / et.Size_);
         capmem = (uintptr)newcap * et.Size_;

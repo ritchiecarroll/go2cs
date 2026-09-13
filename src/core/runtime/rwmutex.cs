@@ -105,7 +105,7 @@ internal static void runlock(this ж<rwmutex> Ꮡrw) {
 
     {
         var r = Ꮡrw.of(rwmutex.ᏑreaderCount).Add(-1); if (r < 0) {
-            if (r + 1 == 0 || r + 1 == -rwmutexMaxReaders) {
+            if (r + 1 == 0 || r + 1 == (int32)(-rwmutexMaxReaders)) {
                 @throw(runlockOfUnlockedRwmutexˢ);
             }
             // A writer is pending.

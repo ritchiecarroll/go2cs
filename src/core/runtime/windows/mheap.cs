@@ -588,7 +588,7 @@ internal static ж<mspan> spanOf(uintptr Δp) {
     arenaIdx ri = arenaIndex(Δp);
     if (arenaL1Bits == 0){
         // If there's no L1, then ri.l1() can't be out of bounds but ri.l2() can.
-        if (ri.l2() >= (nuint)len(mheap_.arenas[0])) {
+        if (ri.l2() >= (nuint)1048576) {
             return default!;
         }
     } else {

@@ -1622,7 +1622,7 @@ Run:
                 var nb = npattern;
                 if (nb + nb <= maxBits) {
                     // Double pattern until the whole uintptr is filled.
-                    while (nb <= goarch.PtrSize * 8) {
+                    while (nb <= (uintptr)(goarch.PtrSize * 8)) {
                         b |= (uintptr)(b.Lsh((uint64)(nb)));
                         nb += nb;
                     }

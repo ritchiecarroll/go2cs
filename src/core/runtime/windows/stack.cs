@@ -248,7 +248,7 @@ internal static void stackcacherefill(ref mcache c, uint8 order) {
     gclinkptr list = default!;
     uintptr size = default!;
     @lock(Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
-    while (size < _StackCacheSize / 2) {
+    while (size < (uintptr)(_StackCacheSize / 2)) {
         var x = stackpoolalloc(order);
         x.ptr().Value.next = list;
         list = x;
@@ -267,7 +267,7 @@ internal static void stackcacherelease(ref mcache c, uint8 order) {
     var x = c.stackcache[order].list;
     var size = c.stackcache[order].size;
     @lock(Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
-    while (size > _StackCacheSize / 2) {
+    while (size > (uintptr)(_StackCacheSize / 2)) {
         var y = x.ptr().Value.next;
         stackpoolfree(x, order);
         x = y;
@@ -334,7 +334,7 @@ internal static Δstack @stackalloc(uint32 n) {
     // If we need a stack of a bigger size, we fall back on allocating
     // a dedicated span.
     @unsafe.Pointer v = default!;
-    if (n < ((uint32)fixedStack << (int)(_NumStackOrders)) && n < _StackCacheSize){
+    if (n < (uint32)(((uint32)fixedStack << (int)(_NumStackOrders))) && n < _StackCacheSize){
         var order = (uint8)0;
         var n2 = n;
         while (n2 > fixedStack) {
@@ -452,7 +452,7 @@ internal static void stackfree(Δstack stk) {
     if (asanenabled) {
         asanpoison(v, n);
     }
-    if (n < ((uintptr)fixedStack << (int)(_NumStackOrders)) && n < _StackCacheSize){
+    if (n < (uintptr)(((uintptr)fixedStack << (int)(_NumStackOrders))) && n < _StackCacheSize){
         var order = (uint8)0;
         var n2 = n;
         while (n2 > fixedStack) {
@@ -649,7 +649,7 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
         print((@string)"    adjusting "u8, funcname(f), (@string)" frame=["u8, ((Δhex)(uint64)frame.sp), (@string)","u8, ((Δhex)(uint64)frame.fp), (@string)"] pc="u8, ((Δhex)(uint64)frame.pc), (@string)" continpc="u8, ((Δhex)(uint64)frame.continpc), (@string)"\n"u8);
     }
     // Adjust saved frame pointer if there is one.
-    if ((goarch.ArchFamily == goarch.AMD64 || goarch.ArchFamily == goarch.ARM64) && frame.argp - frame.varp == 2 * goarch.PtrSize) {
+    if ((goarch.ArchFamily == goarch.AMD64 || goarch.ArchFamily == goarch.ARM64) && frame.argp - frame.varp == (uintptr)(2 * goarch.PtrSize)) {
         if (stackDebug >= 3) {
             print((@string)"      saved bp\n"u8);
         }

@@ -17,7 +17,7 @@ internal const bool debugSelect = false;
 // Known to compiler.
 // Changes here must also be made in src/cmd/compile/internal/walk/select.go's scasetype.
 [GoType] partial struct scase {
-    internal ж<Δhchan> c;    // chan
+    internal ж<Δhchan> c;      // chan
     internal @unsafe.Pointer elem; // data element
 }
 
@@ -518,7 +518,7 @@ internal static uintptr sortkey(this ж<Δhchan> Ꮡc) {
 [GoType] partial struct runtimeSelect {
     internal selectDir dir;
     internal @unsafe.Pointer typ; // channel type (not used here)
-    internal ж<Δhchan> ch;    // channel
+    internal ж<Δhchan> ch;      // channel
     internal @unsafe.Pointer val; // ptr to data (SendDir) or ptr to receive buffer (RecvDir)
 }
 

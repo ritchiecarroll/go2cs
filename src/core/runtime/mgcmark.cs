@@ -1628,7 +1628,7 @@ internal static void gcDumpObject(@string label, uintptr obj, uintptr off) {
         // For big objects, just print the beginning (because
         // that usually hints at the object's type) and the
         // fields around off.
-        if (!(i < 128 * goarch.PtrSize || off - (uintptr)(16 * goarch.PtrSize) < i && i < off + (uintptr)(16 * goarch.PtrSize))) {
+        if (!(i < (uintptr)(128 * goarch.PtrSize) || off - (uintptr)(16 * goarch.PtrSize) < i && i < off + (uintptr)(16 * goarch.PtrSize))) {
             skipped = true;
             continue;
         }

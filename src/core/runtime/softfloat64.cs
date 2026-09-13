@@ -124,11 +124,11 @@ internal static uint64 fpack64(uint64 sign, uint64 mant, nint exp, uint64 trunc)
         mant >>= (int)(1);
         exp++;
     }
-    if (exp >= (1 << (int)(expbits64)) - 1 + bias64) {
+    if (exp >= (nint)((1 << (int)(expbits64)) - 1 + bias64)) {
         return (uint64)(sign ^ inf64);
     }
-    if (exp < bias64 + 1) {
-        if (exp < (nint)bias64 - (nint)mantbits64) {
+    if (exp < (nint)(bias64 + 1)) {
+        if (exp < (nint)((nint)bias64 - (nint)mantbits64)) {
             return (uint64)(sign | 0);
         }
         // repeat expecting denormal
@@ -177,11 +177,11 @@ internal static uint32 fpack32(uint32 sign, uint32 mant, nint exp, uint32 trunc)
         mant >>= (int)(1);
         exp++;
     }
-    if (exp >= (1 << (int)(expbits32)) - 1 + bias32) {
+    if (exp >= (nint)((1 << (int)(expbits32)) - 1 + bias32)) {
         return (uint32)(sign ^ inf32);
     }
-    if (exp < bias32 + 1) {
-        if (exp < (nint)bias32 - (nint)mantbits32) {
+    if (exp < (nint)(bias32 + 1)) {
+        if (exp < (nint)((nint)bias32 - (nint)mantbits32)) {
             return (uint32)(sign | 0);
         }
         // repeat expecting denormal

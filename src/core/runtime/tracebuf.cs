@@ -230,7 +230,7 @@ internal static readonly @string vCouldNotFitInˢ = "v could not fit in traceByt
 // Use varintReserve to reserve this space.
 [GoRecv] internal static void varintAt(this ref traceBuf buf, nint pos, uint64 v) {
     for (nint i = 0; i < traceBytesPerNumber; i++) {
-        if (i < traceBytesPerNumber - 1){
+        if (i < (nint)(traceBytesPerNumber - 1)){
             buf.arr[pos] = (byte)(0x80 | (byte)v);
         } else {
             buf.arr[pos] = (byte)v;

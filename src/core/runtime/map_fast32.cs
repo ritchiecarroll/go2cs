@@ -348,7 +348,7 @@ search:
             b.Value.tophash[(nint)(i)] = emptyOne;
             // If the bucket now ends in a bunch of emptyOne states,
             // change those to emptyRest states.
-            if (i == abi.MapBucketCount - 1){
+            if (i == (uintptr)(abi.MapBucketCount - 1)){
                 if (b.overflow(Ꮡt) != nil && (~b.overflow(Ꮡt)).tophash[0] != emptyRest) {
                     goto notLast;
                 }

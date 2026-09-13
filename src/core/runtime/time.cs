@@ -1062,7 +1062,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
         // out from under us while this function executes.
         var tsLocal = (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡtimers);
         if ((~tsLocal).raceCtx == 0) {
-            tsLocal.Value.raceCtx = racegostart(abi.FuncPCABIInternal((Func<ж<timers>, int64, int64>)(run)) + (uintptr)sys.PCQuantum);
+            tsLocal.Value.raceCtx = racegostart(abi.FuncPCABIInternal(((Func<ж<timers>, int64, int64>)(run))) + (uintptr)sys.PCQuantum);
         }
         raceacquirectx((~tsLocal).raceCtx, (uintptr)@unsafe.Pointer.FromRef(ref t));
     }

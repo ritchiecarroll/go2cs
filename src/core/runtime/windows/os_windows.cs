@@ -664,7 +664,7 @@ internal static int32 semasleep(int64 ns) {
             result = stdcall4(_WaitForMultipleObjects, 2,
                 (uintptr)Ꮡ(new uintptr[]{(~(~getg()).m).waitsema, (~(~getg()).m).resumesema}.array()),
                 0, (uintptr)ms);
-            if (result != _WAIT_OBJECT_0 + 1) {
+            if (result != (uintptr)(_WAIT_OBJECT_0 + 1)) {
                 // Not a suspend/resume event
                 break;
             }

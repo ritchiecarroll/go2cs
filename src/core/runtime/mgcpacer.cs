@@ -327,7 +327,7 @@ internal static void startCycle(this ж<gcControllerState> Ꮡc, int64 markStart
     var dedicatedMarkWorkersNeeded = (int64)(totalUtilizationGoal + 0.5D);
     var utilError = (float64)dedicatedMarkWorkersNeeded / totalUtilizationGoal - 1D;
     UntypedFloat maxUtilError = 0.3;
-    if (utilError < -maxUtilError || utilError > maxUtilError){
+    if (utilError < /* -maxUtilError */ -0.3D || utilError > maxUtilError){
         // Rounding put us more than 30% off our goal. With
         // gcBackgroundUtilization of 25%, this happens for
         // GOMAXPROCS<=3 or GOMAXPROCS=6. Enable fractional
@@ -805,7 +805,7 @@ internal static void addScannableStack(this ж<gcControllerState> Ꮡc, ж<Δp> 
         return;
     }
     pp.maxStackScanDelta += amount;
-    if (pp.maxStackScanDelta >= maxStackScanSlack || pp.maxStackScanDelta <= -maxStackScanSlack) {
+    if (pp.maxStackScanDelta >= maxStackScanSlack || pp.maxStackScanDelta <= (int64)(-maxStackScanSlack)) {
         Ꮡc.of(gcControllerState.ᏑmaxStackScan).Add(pp.maxStackScanDelta);
         pp.maxStackScanDelta = 0;
     }

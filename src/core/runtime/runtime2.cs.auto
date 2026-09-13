@@ -297,7 +297,7 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
     // stackguard1 is the stack pointer compared in the //go:systemstack stack growth prologue.
     // It is stack.lo+StackGuard on g0 and gsignal stacks.
     // It is ~0 on other goroutine stacks, to trigger a call to morestackc (and crash).
-    internal Δstack stack; // offset known to runtime/cgo
+    internal Δstack stack;   // offset known to runtime/cgo
     internal uintptr stackguard0; // offset known to liblink
     internal uintptr stackguard1; // offset known to liblink
     internal ж<_panic> _panic; // innermost panic - offset known to liblink
@@ -442,7 +442,7 @@ internal static UntypedInt freeMWait => 2; // M still in use.
     internal bool needextram;
     internal bool g0StackAccurate; // whether the g0 stack has accurate bounds
     internal uint8 traceback;
-    internal slice<ж<Δp>> allpSnapshot; // Snapshot of allp for use after dropping P in findRunnable, nil otherwise.
+    internal slice<ж<Δp>> allpSnapshot;  // Snapshot of allp for use after dropping P in findRunnable, nil otherwise.
     internal uint64 ncgocall;        // number of cgo calls in total
     internal int32 ncgo;         // number of cgo calls currently in progress
     internal atomic.Uint32 cgoCallersUse; // if non-zero, cgoCallers in use temporarily

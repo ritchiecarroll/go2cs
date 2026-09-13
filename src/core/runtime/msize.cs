@@ -15,7 +15,7 @@ internal static uintptr /*reqSize*/ roundupsize(uintptr size, bool noscan) {
     uintptr reqSize = default!;
 
     reqSize = size;
-    if (reqSize <= maxSmallSize - mallocHeaderSize) {
+    if (reqSize <= (uintptr)(maxSmallSize - mallocHeaderSize)) {
         // Small object.
         if (!noscan && reqSize > minSizeForMallocHeader) {
             // !noscan && !heapBitsInSpan(reqSize)
@@ -23,7 +23,7 @@ internal static uintptr /*reqSize*/ roundupsize(uintptr size, bool noscan) {
         }
         // (reqSize - size) is either mallocHeaderSize or 0. We need to subtract mallocHeaderSize
         // from the result if we have one, since mallocgc will add it back in.
-        if (reqSize <= smallSizeMax - 8) {
+        if (reqSize <= (uintptr)(smallSizeMax - 8)) {
             return (uintptr)class_to_size[size_to_class8[(nint)(divRoundUp(reqSize, smallSizeDiv))]] - (reqSize - size);
         }
         return (uintptr)class_to_size[size_to_class128[(nint)(divRoundUp(reqSize - (uintptr)smallSizeMax, largeSizeDiv))]] - (reqSize - size);

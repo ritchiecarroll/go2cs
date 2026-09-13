@@ -410,8 +410,8 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
         return (~ct).Dir == (~cv).Dir && typesEqual((~ct).Elem, (~cv).Elem, seen);
     }
     if (exprᴛ1 == abi.Func) {
-        var ft = Ꮡt.Reinterpret<_type, functype>();
-        var fv = Ꮡv.Reinterpret<_type, functype>();
+        var ft = Ꮡt.FuncType();
+        var fv = Ꮡv.FuncType();
         if ((~ft).OutCount != (~fv).OutCount || (~ft).InCount != (~fv).InCount) {
             return false;
         }

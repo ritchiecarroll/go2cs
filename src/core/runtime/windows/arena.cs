@@ -83,7 +83,7 @@ namespace go;
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using atomic = @internal.runtime.atomic_package;
-using math = runtime.@internal.math_package;
+using Δmath = runtime.@internal.math_package;
 using sys = runtime.@internal.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
@@ -214,18 +214,18 @@ internal static uintptr userArenaChunkPages => /* userArenaChunkBytes / pageSize
 internal static uintptr userArenaChunkMaxAllocBytes => /* userArenaChunkBytes / 4 */ 1048576;
 
 /* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void init() {
-    if (userArenaChunkPages * (uintptr)pageSize != userArenaChunkBytes) {
+    if ((uintptr)(userArenaChunkPages * (uintptr)pageSize) != userArenaChunkBytes) {
         @throw("user arena chunk size is not a multiple of the page size"u8);
     }
     if (userArenaChunkBytes % physPageSize != 0) {
         @throw("user arena chunk size is not a multiple of the physical page size"u8);
     }
     if (userArenaChunkBytes < heapArenaBytes){
-        if ((uintptr)heapArenaBytes % userArenaChunkBytes != 0) {
+        if ((uintptr)((uintptr)heapArenaBytes % userArenaChunkBytes) != 0) {
             @throw("user arena chunk size is smaller than a heap arena, but doesn't divide it"u8);
         }
     } else {
-        if (userArenaChunkBytes % (uintptr)heapArenaBytes != 0) {
+        if ((uintptr)(userArenaChunkBytes % (uintptr)heapArenaBytes) != 0) {
             @throw("user arena chunks size is larger than a heap arena, but not a multiple"u8);
         }
     }
@@ -558,7 +558,7 @@ internal static readonly @string runtimeAllocationSizeOutˢ = "runtime: allocati
 // Go slice backing store values allocated in a user arena chunk. It sets up the
 // heap bitmap for n consecutive values with type typ allocated at address ptr.
 internal static void userArenaHeapBitsSetSliceType(ref _type typ, nint n, @unsafe.Pointer ptr, ж<mspan> Ꮡs) {
-    var (mem, overflow) = math.MulUintptr(typ.Size_, (uintptr)n);
+    var (mem, overflow) = Δmath.MulUintptr(typ.Size_, (uintptr)n);
     if (overflow || n < 0 || mem > maxAlloc) {
         throw panic(((plainError)(@string)runtimeAllocationSizeOutˢ));
     }

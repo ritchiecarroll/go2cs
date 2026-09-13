@@ -143,7 +143,7 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
             if (finptrmask[0] == 0) {
                 // Build pointer mask for Finalizer array in block.
                 // Check assumptions made in finalizer1 array above.
-                if ((/* unsafe.Sizeof(finalizer{}) */ (uintptr)40 != 5 * goarch.PtrSize || /* unsafe.Offsetof(finalizer{}.fn) */ (uintptr)0 != 0 || /* unsafe.Offsetof(finalizer{}.arg) */ (uintptr)8 != goarch.PtrSize || /* unsafe.Offsetof(finalizer{}.nret) */ (uintptr)16 != 2 * goarch.PtrSize || /* unsafe.Offsetof(finalizer{}.fint) */ (uintptr)24 != 3 * goarch.PtrSize || /* unsafe.Offsetof(finalizer{}.ot) */ (uintptr)32 != 4 * goarch.PtrSize)) {
+                if ((/* unsafe.Sizeof(finalizer{}) */ (uintptr)40 != (uintptr)(5 * goarch.PtrSize) || /* unsafe.Offsetof(finalizer{}.fn) */ (uintptr)0 != 0 || /* unsafe.Offsetof(finalizer{}.arg) */ (uintptr)8 != goarch.PtrSize || /* unsafe.Offsetof(finalizer{}.nret) */ (uintptr)16 != (uintptr)(2 * goarch.PtrSize) || /* unsafe.Offsetof(finalizer{}.fint) */ (uintptr)24 != (uintptr)(3 * goarch.PtrSize) || /* unsafe.Offsetof(finalizer{}.ot) */ (uintptr)32 != (uintptr)(4 * goarch.PtrSize))) {
                     @throw("finalizer out of sync"u8);
                 }
                 foreach (var (i, _) in finptrmask) {
@@ -486,7 +486,7 @@ public static void SetFinalizer(any objʗp, any finalizerʗp) {
     if ((abiꓸKind)((~ftyp).Kind_ & abi.KindMask) != abi.Func) {
         @throw("runtime.SetFinalizer: second argument is "u8 + toRType(ftyp).@string() + ", not a function"u8);
     }
-    var ft = ftyp.Reinterpret<_type, functype>();
+    var ft = ftyp.FuncType();
     if (ft.IsVariadic()) {
         @throw("runtime.SetFinalizer: cannot pass "u8 + toRType(etyp).@string() + " to finalizer "u8 + toRType(ftyp).@string() + " because dotdotdot"u8);
     }

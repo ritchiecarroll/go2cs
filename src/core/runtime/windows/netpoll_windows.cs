@@ -37,7 +37,7 @@ internal static uintptr packNetpollKey(uint8 source, ж<pollDesc> Ꮡpd) {
     ref var pd = ref Ꮡpd.DerefOrNull();
 
     // TODO: Consider combining the source with pd.fdseq to detect stale pollDescs.
-    if (source > ((1 << (int)(sourceBits))) - 1) {
+    if (source > (uint8)(((1 << (int)(sourceBits))) - 1)) {
         // Also fail on 64-bit systems, even though it can hold more bits.
         @throw(runtimeSourceValueIsTooˢ);
     }

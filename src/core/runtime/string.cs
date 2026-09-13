@@ -94,7 +94,6 @@ internal static @string concatstring5(ж<tmpBuf> Ꮡbuf, @string a0, @string a1,
 //
 //go:linkname slicebytetostring
 internal static @string slicebytetostring(ж<tmpBuf> Ꮡbuf, ж<byte> Ꮡptr, nint n) {
-    ref var buf = ref Ꮡbuf.DerefOrNull();
     ref var ptr = ref Ꮡptr.DerefOrNull();
 
     if (n == 0) {
@@ -123,7 +122,7 @@ internal static @string slicebytetostring(ж<tmpBuf> Ꮡbuf, ж<byte> Ꮡptr, ni
         return @unsafe.String((ж<byte>)(uintptr)(pΔ1), 1);
     }
     @unsafe.Pointer Δp = default!;
-    if (Ꮡbuf != nil && n <= len(buf.Value)){
+    if (Ꮡbuf != nil && n <= 32){
         Δp = new @unsafe.Pointer(Ꮡbuf);
     } else {
         Δp = (uintptr)mallocgc((uintptr)n, nil, false);
@@ -145,7 +144,7 @@ internal static (@string s, slice<byte> b) rawstringtmp(ж<tmpBuf> Ꮡbuf, nint 
     slice<byte> b = default!;
 
     ref var buf = ref Ꮡbuf.DerefOrNull();
-    if (Ꮡbuf != nil && l <= len(buf.Value)){
+    if (Ꮡbuf != nil && l <= 32){
         b = buf.Value[..(int)(l)];
         s = slicebytetostringtmp(Ꮡ(b, 0), len(b));
     } else {
@@ -188,7 +187,7 @@ internal static slice<byte> stringtoslicebyte(ж<tmpBuf> Ꮡbuf, @string s) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     slice<byte> b = default!;
-    if (Ꮡbuf != nil && len(s) <= len(buf.Value)){
+    if (Ꮡbuf != nil && len(s) <= 32){
         buf = new tmpBuf(new byte[32].array());
         b = buf.Value[..(int)(len(s))];
     } else {
@@ -208,7 +207,7 @@ internal static slice<rune> stringtoslicerune([GoArrayDims(32)] ж<array<rune>> 
         n++;
     }
     slice<rune> a = default!;
-    if (Ꮡbuf != nil && n <= len(buf)){
+    if (Ꮡbuf != nil && n <= 32){
         buf = new rune[]{}.array(32);
         a = buf[..(int)(n)];
     } else {
@@ -311,7 +310,7 @@ internal static slice<byte> /*b*/ rawbyteslice(nint size) {
 internal static slice<rune> /*b*/ rawruneslice(nint size) {
     ref var b = ref heap<slice<rune>>(out var Ꮡb);
 
-    if ((uintptr)size > maxAlloc / 4) {
+    if ((uintptr)size > (uintptr)(maxAlloc / 4)) {
         @throw(outOfMemoryˢ);
     }
     var mem = roundupsize((uintptr)size * 4, true);
