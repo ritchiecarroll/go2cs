@@ -150,7 +150,12 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp
     // line the one Go writes.
     createfing();
     GoCleanupSentinel sentinel = new(fn);
-    s_cleanupRegistry.GetOrCreateValue(referent).Add(sentinel);
+    // GetValue with a factory, NOT GetOrCreateValue: the latter goes through Activator and throws
+    // MissingMethodException unless the value type has a PUBLIC parameterless constructor. It would
+    // work here today by accident -- a class with no declared constructor gets a public implicit one
+    // -- and would start throwing the day someone gives GoCleanupSet a constructor, from a call site
+    // that names neither the type nor the reason.
+    s_cleanupRegistry.GetValue(referent, static _ => new GoCleanupSet()).Add(sentinel);
     uint64 id = GoCleanupSentinel.Register(sentinel);
     return new Cleanup(
         id: id,
