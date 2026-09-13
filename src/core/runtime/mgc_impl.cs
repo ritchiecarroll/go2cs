@@ -116,9 +116,15 @@ internal static uint64 /*mask*/ gcTestIsReachable(params ꓸꓸꓸunsafeꓸPoint
     // the CLR's equivalent: pass one queues anything finalizable, the drain runs it, pass two
     // reclaims what the drain released. Without the second pass an object whose only reference was
     // released by a finalizer would still read alive.
-    GC.Collect();
-    GC.WaitForPendingFinalizers();
-    GC.Collect();
+    // ⚠ `global::System.GC` in full, and it is not pedantry: this class DECLARES Go's own
+    // `runtime.GC()` (managed_impl.cs:292), so inside runtime_package the bare name `GC`
+    // resolves to that method and `GC.Collect()` is CS0119 — 'GC() is a method, which is not
+    // valid in the given context', three of them, measured on the os-matrix census before this
+    // line was written this way. A `using System;` cannot win against a member of the
+    // enclosing type. Do not simplify.
+    global::System.GC.Collect();
+    global::System.GC.WaitForPendingFinalizers();
+    global::System.GC.Collect();
 
     for (int i = 0; i < n; i++) {
         if (observers[i] is {} observer && observer.IsAlive) {
