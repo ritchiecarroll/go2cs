@@ -77,7 +77,7 @@ internal static void traceStartReadCPU() {
         }
         doneʗ1.ᐸꟷ(new EmptyStruct());
     });
-    Δtrace.cpuLogDone = done;
+    Δtrace.cpuLogDone = done.WithDirection(GoChanDir.Recv);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

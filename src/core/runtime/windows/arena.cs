@@ -83,7 +83,7 @@ namespace go;
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using atomic = @internal.runtime.atomic_package;
-using math = runtime.@internal.math_package;
+using Δmath = runtime.@internal.math_package;
 using sys = runtime.@internal.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
@@ -552,7 +552,7 @@ internal static readonly @string runtimeAllocationSizeOutˢ = "runtime: allocati
 // Go slice backing store values allocated in a user arena chunk. It sets up the
 // heap bitmap for n consecutive values with type typ allocated at address ptr.
 internal static void userArenaHeapBitsSetSliceType(ref _type typ, nint n, @unsafe.Pointer ptr, ж<mspan> Ꮡs) {
-    var (mem, overflow) = math.MulUintptr(typ.Size_, (uintptr)n);
+    var (mem, overflow) = Δmath.MulUintptr(typ.Size_, (uintptr)n);
     if (overflow || n < 0 || mem > maxAlloc) {
         throw panic(((plainError)(@string)runtimeAllocationSizeOutˢ));
     }

@@ -53,7 +53,7 @@ namespace go;
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using atomic = @internal.runtime.atomic_package;
-using math = runtime.@internal.math_package;
+using Δmath = runtime.@internal.math_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
@@ -307,7 +307,7 @@ internal static ж<hmap> makemap(ж<maptype> Ꮡt, nint hint, ж<hmap> Ꮡh) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var h = ref Ꮡh.DerefOrNull();
 
-    var (mem, overflow) = math.MulUintptr((uintptr)hint, (~t.Bucket).Size_);
+    var (mem, overflow) = Δmath.MulUintptr((uintptr)hint, (~t.Bucket).Size_);
     if (overflow || mem > maxAlloc) {
         hint = 0;
     }

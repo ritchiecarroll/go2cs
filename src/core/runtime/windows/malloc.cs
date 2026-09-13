@@ -99,7 +99,7 @@ namespace go;
 using goarch = @internal.goarch_package;
 using goos = @internal.goos_package;
 using atomic = @internal.runtime.atomic_package;
-using math = runtime.@internal.math_package;
+using Δmath = runtime.@internal.math_package;
 using sys = runtime.@internal.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
@@ -1268,7 +1268,7 @@ internal static @unsafe.Pointer newarray(ж<_type> Ꮡtyp, nint n) {
     if (n == 1) {
         return (uintptr)mallocgc(typ.Size_, Ꮡtyp, true);
     }
-    var (mem, overflow) = math.MulUintptr(typ.Size_, (uintptr)n);
+    var (mem, overflow) = Δmath.MulUintptr(typ.Size_, (uintptr)n);
     if (overflow || mem > maxAlloc || n < 0) {
         throw panic(((plainError)(@string)runtimeAllocationSizeOutˢ));
     }

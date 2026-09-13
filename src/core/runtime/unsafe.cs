@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using math = runtime.@internal.math_package;
+using Δmath = runtime.@internal.math_package;
 using @unsafe = unsafe_package;
 using runtime.@internal;
 
@@ -66,7 +66,7 @@ internal static void unsafeslice(ref _type et, @unsafe.Pointer ptr, nint len) {
             panicunsafeslicenilptr1(getcallerpc());
         }
     }
-    var (mem, overflow) = math.MulUintptr(et.Size_, (uintptr)len);
+    var (mem, overflow) = Δmath.MulUintptr(et.Size_, (uintptr)len);
     if (overflow || mem > ((uintptr)0 - (uintptr)ptr)) {
         if (ptr == nil) {
             panicunsafeslicenilptr1(getcallerpc());
