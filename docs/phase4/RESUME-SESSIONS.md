@@ -94,7 +94,7 @@ pruned; the post tool's FLEET GUARD and the assembler's census enforce it.
 
 STATE AT THIS REVISION (2026-09-13 15:45):
   BRANCH: claude/coord-handover 7c76f343e5bd335c7bc837d1df5f18243e3697fd yes landed -- the handover log + this file
-  BRANCH: claude/coord-train47-union dd021ff5ba1048ff1c0d354fc68dc75d17ced40f yes reproduction -- run-6 union head dd021ff5b, tree 161af6c44; DELETE after the landing
+  (the reproduction ref coord-train47-union, dd021ff5b, was DELETED after the landing at 17:27; its tree 161af6c44 is master's)
   BRANCH: claude/mailbox 7ff30f203cf9f13c5112658802ada4a6fbd8dee7 yes transport -- rotated 2026-09-13 02:36
   master tip at this revision: 271300cea (docs commit) over 1885bce69 (doctrine d) over 31fe4925d (TRAIN 47 LANDED 17:26, tree 161af6c44); train 47's base was a02ac3df3.
   BRANCH: claude/version-go1.24.13 31fe4925d055537dbb48c343f726e027631f6aa1 yes created -- the H5 branch, created from the landed SHA; the H5 set (088f8778f, ff54907996, 23d07f742) targets it, never master
