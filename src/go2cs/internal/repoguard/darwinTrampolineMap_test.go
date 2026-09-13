@@ -49,23 +49,56 @@ import (
 //     syscall/darwin/zsyscall_darwin_amd64.cs. A global map keyed on the local name silently keeps
 //     whichever it read last, and resolving runtime's `libc_exit` to `exit` calls process-exit where
 //     thread-exit was meant. This is the one finding here with teeth.
-//  2. ONE LOCAL NAME DOES NOT CONTAIN ITS SYMBOL: `libc_error` -> `__error`, which is errno. The
-//     corpus already annotates it (runtime/darwin/libccall_impl.cs). So derivation (b) is right 202
-//     times out of 203 and the exception is named rather than averaged away.
+//  2. DERIVATION (b) CANNOT PRODUCE TWO OF THE PAIRS, and they fail in opposite directions.
+//     `libc_error` -> `__error` (errno, already annotated in runtime/darwin/libccall_impl.cs) does not
+//     contain its symbol at all, and (b) yields `error`, which is not a libSystem export -- a LOUD
+//     failure. Runtime's `libc_exit` -> `_exit` does contain its symbol, so a containment test calls it
+//     derivable, but the transform (b) actually runs yields `exit` -- a real export meaning process
+//     exit instead of thread exit, a SILENT failure. So (b) is right 217 of 219 pragma LINES / 201 of
+//     203 distinct local names, and both exceptions are named rather than averaged away.
 //     ⚠ docs/phase4/DESIGN-darwin-run-layer.md §1.2 records "zero mismatches" for this comparison;
-//     that held over the 123 pragmas it could see, and over all 203 there is exactly this one.
+//     that held over the 123 pragmas it could see. C2 amended §1.2 with a dated block on 2026-09-13.
 //  3. A TRAMPOLINE NAME CAN COME FROM PROSE. The scan that produced these counts first reported 208
 //     distinct trampolines; one was `libc_x`, matched inside a COMMENT in
 //     syscall/darwin/sockaddr_darwin_impl.cs that uses `abi.FuncPCABI0(libc_x_trampoline)` as an
 //     illustration. Comment lines are excluded below, and the count is 207. An assertion about code
 //     that reads prose is a class this repository hit four times on 2026-09-13 alone.
 const (
-	// The one local name whose symbol its own name does not contain, and the symbol it names. Spelled
-	// as data rather than tolerated by a loosened predicate: a guard that accepted any mismatch to
-	// accommodate this one would accept the next one too.
+	// The one local name whose symbol its own name does not CONTAIN at all, and the symbol it names.
+	// Spelled as data rather than tolerated by a loosened predicate: a guard that accepted any mismatch
+	// to accommodate this one would accept the next one too.
 	errnoLocalName = "libc_error"
 	errnoSymbol    = "__error"
+
+	// The SECOND pair derivation (b) cannot produce, and the dangerous one of the two -- see the
+	// derivationExceptions table for why the two fail differently.
+	threadExitLocalName = "libc_exit"
+	threadExitSymbol    = "_exit"
 )
+
+// derivationExceptions are every (local name, symbol) pair that derivation (b) -- strip the prefix
+// ending in `_`, the transform an implementation reaches for because it needs no table -- CANNOT
+// produce. Both are spelled as DATA and both are asserted still present below, so neither the
+// tolerance nor the guard can quietly rot into dead code.
+//
+// ⚠ THEY FAIL IN OPPOSITE DIRECTIONS, which is the whole reason the strict predicate is worth having:
+// derivation (b) applied to `libc_error` yields `error`, which is not a libSystem export, so that one
+// fails LOUDLY at lookup time. Applied to runtime's `libc_exit` it yields `exit`, which IS a real
+// libSystem export with different semantics -- process exit where thread exit was meant. A predicate
+// loose enough to call the second one derivable reports the silent failure as a success.
+// derivesByName IS derivation (b): strip the prefix ending in `_` and what remains is the symbol. It
+// has ONE home so the scoring loop and the assertion that the exceptions really ARE exceptions cannot
+// drift apart -- the same reason G's BOM predicate has one home. Note the `_`: without it this is the
+// weaker containment test, which calls runtime's `libc_exit` -> `_exit` derivable when the transform
+// yields `exit`.
+func derivesByName(local, symbol string) bool {
+	return local == symbol || strings.HasSuffix(local, "_"+symbol)
+}
+
+var derivationExceptions = []struct{ Local, Symbol, Why string }{
+	{errnoLocalName, errnoSymbol, "errno; annotated in runtime/darwin/libccall_impl.cs. (b) yields `error`, which does not exist -- fails loudly"},
+	{threadExitLocalName, threadExitSymbol, "thread exit in runtime/darwin/sys_darwin.cs. (b) yields `exit`, which exists and means something else -- fails SILENTLY"},
+}
 
 // darwinPragma is one `//go:cgo_import_dynamic` reading, kept with the file it came from because
 // finding 1 above makes the file's package part of the key.
@@ -255,16 +288,37 @@ func TestDarwinTrampolineMapDerivesTwoWaysAndAgrees(t *testing.T) {
 	// The PREFIX SET IS DERIVED FROM THE DATA, never typed: for each pragma the prefix is whatever
 	// precedes the symbol inside the local name. A typed list drifts from the corpus it describes,
 	// which is the defect this whole package keeps finding in other instruments.
+	// ⚠ THE PREDICATE IS THE TRANSFORM, NOT CONTAINMENT, and the difference is not cosmetic. Derivation
+	// (b) as this guard documents it is "strip the prefix" -- so the honest test is that the local name
+	// ends in `_` + the symbol. `strings.HasSuffix(p.Local, p.Symbol)` WITHOUT that underscore is the
+	// weaker containment test, and it admits `libc_exit` -> `_exit` (which does end in `_exit`) while
+	// the transform an implementation actually runs yields `exit`. Scoring (b) with containment reports
+	// 218 of 219 and hides the one row whose naive derivation lands on a real, wrong symbol; scoring it
+	// with the transform reports 217 and names both exceptions. Same class as counting one predicate
+	// under another predicate's label.
 	nameDerives, nameDoesNot := 0, []string{}
+
+	isException := func(p darwinPragma) bool {
+		for _, e := range derivationExceptions {
+			if p.Local == e.Local && p.Symbol == e.Symbol {
+				return true
+			}
+		}
+
+		return false
+	}
 
 	for _, p := range pragmas {
 		switch {
-		case p.Local == p.Symbol, strings.HasSuffix(p.Local, p.Symbol):
+		// `p.Local == p.Symbol` is a pragma with no prefix at all, which derivation (b) produces
+		// trivially. It matched ZERO rows at this reading and is kept as a legitimate shape rather
+		// than as a claim that it occurs -- the count below is what says whether it does.
+		case derivesByName(p.Local, p.Symbol):
 			nameDerives++
-		case p.Local == errnoLocalName && p.Symbol == errnoSymbol:
-			// The one named exception (errno). Counted separately, deliberately not folded into
-			// nameDerives -- the ratio below is a statement about the convention, and burying the
-			// exception in it would make the convention look universal.
+		case isException(p):
+			// A named exception. Counted separately, deliberately not folded into nameDerives -- the
+			// ratio below is a statement about the convention, and burying the exceptions in it would
+			// make the convention look universal.
 		default:
 			nameDoesNot = append(nameDoesNot, fmt.Sprintf("%s -> %s (%s)", p.Local, p.Symbol, p.File))
 		}
@@ -273,30 +327,71 @@ func TestDarwinTrampolineMapDerivesTwoWaysAndAgrees(t *testing.T) {
 	sort.Strings(nameDoesNot)
 
 	if len(nameDoesNot) > 0 {
-		t.Errorf("%d pragma(s) whose LOCAL NAME does not contain its own symbol, beyond the one known "+
-			"exception (%s -> %s).\nEach is a trampoline whose symbol CANNOT be derived from its name, so an "+
-			"implementation that derives symbols from names would resolve it wrongly:\n    %s",
-			len(nameDoesNot), errnoLocalName, errnoSymbol, strings.Join(nameDoesNot, "\n    "))
+		known := []string{}
+
+		for _, e := range derivationExceptions {
+			known = append(known, fmt.Sprintf("%s -> %s", e.Local, e.Symbol))
+		}
+
+		t.Errorf("%d pragma(s) whose symbol derivation (b) CANNOT produce from the local name, beyond the "+
+			"%d known exception(s) (%s).\nEach is a trampoline an implementation that derives symbols from "+
+			"names would resolve wrongly -- check whether it fails loudly (no such export) or silently (a "+
+			"real export, wrong semantics) before deciding how much it matters:\n    %s",
+			len(nameDoesNot), len(derivationExceptions), strings.Join(known, ", "), strings.Join(nameDoesNot, "\n    "))
 	}
 
-	// The errno exception must still BE there. A guard that tolerates an exception has to notice when
+	// Every named exception must still BE there. A guard that tolerates an exception has to notice when
 	// the exception goes away, or the tolerance silently becomes dead code that would hide a new case.
-	foundErrno := false
+	//
+	// ⚠ KEYED ON THE PAIR, never on the local name alone. `libc_exit` LEGITIMATELY appears with two
+	// symbols (finding 1 is that very fact), so a check asking "does libc_exit name _exit?" of every
+	// row it matches goes red on the syscall row for naming `exit` -- correct data failing a guard that
+	// forgot its own finding one screen earlier.
+	for _, e := range derivationExceptions {
+		// ⚠ AND THE PREDICATE MUST STILL REJECT IT. Without this arm the strictness of derivesByName is
+		// itself unguarded: relax the `_` back out and `libc_exit` -> `_exit` silently moves from the
+		// exception list into the derivable count, the ratio climbs from 217 to 218, every other
+		// assertion here stays green, and the reading now describes containment while still being
+		// labelled the transform. An exception that the predicate accepts is not an exception.
+		if derivesByName(e.Local, e.Symbol) {
+			t.Errorf("derivation (b) now ACCEPTS %s -> %s, which this guard records as one of the pairs it "+
+				"cannot produce (%s).\nEither the predicate was loosened -- check for a missing `_` in "+
+				"derivesByName, which turns the transform into containment -- or the corpus renamed the "+
+				"trampoline and the table is stale. The derivable count is not trustworthy until this is "+
+				"resolved, because it is now scoring a weaker property than its label claims.",
+				e.Local, e.Symbol, e.Why)
+		}
 
-	for _, p := range pragmas {
-		if p.Local == errnoLocalName {
-			foundErrno = true
+		found := []string{}
 
-			if p.Symbol != errnoSymbol {
-				t.Errorf("%s now names %q, not %q -- the errno exception this guard encodes has moved",
-					errnoLocalName, p.Symbol, errnoSymbol)
+		for _, p := range pragmas {
+			if p.Local == e.Local && p.Symbol == e.Symbol {
+				found = append(found, p.File)
 			}
 		}
-	}
 
-	if !foundErrno {
-		t.Errorf("%s is no longer in the corpus. The exception this guard encodes is dead code now: "+
-			"remove it, or find out what happened to errno's trampoline.", errnoLocalName)
+		if len(found) == 0 {
+			others := []string{}
+
+			for _, p := range pragmas {
+				if p.Local == e.Local {
+					others = append(others, fmt.Sprintf("%s (%s)", p.Symbol, p.File))
+				}
+			}
+
+			sort.Strings(others)
+
+			if len(others) == 0 {
+				t.Errorf("%s is no longer in the corpus at all. The exception this guard encodes (%s -> %s: %s) "+
+					"is dead code now: remove it, or find out what happened to that trampoline.",
+					e.Local, e.Local, e.Symbol, e.Why)
+			} else {
+				t.Errorf("%s no longer names %q anywhere; it now names %s. The exception this guard encodes "+
+					"(%s) has MOVED, and an implementation deriving this symbol by name is now either right "+
+					"for a new reason or wrong for a new one -- read the pragma before updating the table.",
+					e.Local, e.Symbol, strings.Join(others, " / "), e.Why)
+			}
+		}
 	}
 
 	// --- coverage: which address-taken trampolines have an authoritative symbol at all -------------
@@ -323,8 +418,18 @@ func TestDarwinTrampolineMapDerivesTwoWaysAndAgrees(t *testing.T) {
 		"%d distinct address-taken trampoline(s), %d with an authoritative symbol, %d with none "+
 		"(symbol only guessable)",
 		len(pragmas), len(symbolsByLocal), len(trampolines), covered, len(uncovered))
-	t.Logf("name-derives-symbol: %d of %d pragma LINE(s), plus the %s -> %s exception",
-		nameDerives, len(pragmas), errnoLocalName, errnoSymbol)
+	// LABELLED WITH THE PREDICATE IT SCORES. "name derives symbol" is ambiguous between containment and
+	// the transform, the two readings differ by exactly the row that matters, and an unlabelled ratio
+	// invites the reader to assume whichever is more flattering.
+	exceptions := []string{}
+
+	for _, e := range derivationExceptions {
+		exceptions = append(exceptions, fmt.Sprintf("%s -> %s", e.Local, e.Symbol))
+	}
+
+	t.Logf("derivation (b), scored as the TRANSFORM (local name ends in `_` + symbol): %d of %d pragma "+
+		"LINE(s), plus %d named exception(s) (%s)",
+		nameDerives, len(pragmas), len(derivationExceptions), strings.Join(exceptions, ", "))
 
 	if len(uncovered) > 0 {
 		t.Logf("trampolines with no surviving pragma (%d): %s", len(uncovered), strings.Join(uncovered, ", "))
