@@ -165,6 +165,48 @@ makes the H5 reading interpretable either way:
 - `TestGetStartupInfo` passes at H5 → the chain in §2 has a link I misread, and §2 names every link
   by file and line so the disagreement is locatable.
 
+## 5a. ⚠ AMENDMENT, 2026-09-13, same day — REACHABILITY, the axis §4 did not measure
+
+§4's table column reads `LIVE -- token reaches the door`. **That wording is wrong and this block
+corrects it.** What the census measured is that a wrapper is **UNDISPLACED** — no hand-own stands in
+front of it — so *if it is called*, the token reaches the door. Whether anything calls it is a
+**separate axis, and §4 did not measure it.** The BOARD makes exactly this distinction elsewhere in
+its own words (`Process32First`/`Next` are recorded as "reached-and-working rather than latent"), and
+I reproduced the class while quoting it.
+
+Measured now, over `src/core` (production *and* converted tests), predicate controlled against
+wrappers that are certainly called — `CloseHandle` 18, `WriteFile` 91, `CreateFile` 13,
+`GetStdHandle` 1 — so a zero is a reading and not a blind grep:
+
+| Wrapper | in-corpus callers | disposition |
+|---|--:|---|
+| `getStartupInfo` | **1** | **REACHED** — `syscall_windows_test.cs:247` → `GetStartupInfo` → `syscall_windows.cs:1555` → `Syscall` → the door |
+| `CertEnumCertificatesInStore` | 0 | latent public-API surface |
+| `CreateProcess` | 0 | latent — and *demonstrably* bypassed: `exec_windows.cs:376` declares its own `[LibraryImport] win32CreateProcess` over the blittable `NativeStartupInfoW`, so the corpus's own `StartProcess` never enters the zsyscall wrapper |
+| `CreateProcessAsUser` | 0 | latent — same bypass, `exec_windows.cs:379` |
+| `GetAdaptersInfo` | 0 | latent public-API surface |
+| `GetIfEntry` | 0 | latent public-API surface |
+| `WSASendTo` | 0 | latent public-API surface |
+
+**What this changes.** §5's prediction — *"the seven fail at H5"* — **is wrong**. Only the reached one
+can turn red; the other six stay exactly as silent at H5 as they are today, because nothing in the
+corpus calls them. The corrected prediction is:
+
+- **`TestGetStartupInfo` flips pass → fail at the next `syscall` run.** Unchanged, and it is the
+  whole of the falsifiable claim.
+- **The other six are latent, not live** — public API a user program or an out-of-corpus test can
+  reach, and the reason the roster is otherwise green is simply that nothing calls them.
+
+**What still stands, unchanged:** the eight-link chain in §2 (a statement about the wrapper, not about
+its callers); the dated timeline in §3; the class membership of all seven in §4; and the
+misattribution point in §5 — which shrinks from seven rows to one, and survives, because one
+mis-billed row is still mis-billed.
+
+**Why it happened, since the shape is more useful than the slip:** §4's predicate was sound and its
+controls passed; the defect was that I let a *column heading* assert something the predicate never
+tested, then read my own table back as though it had. An instrument's OUTPUT WORDING is part of the
+instrument — the same lesson G recorded today about an instrument's input, one field over.
+
 ## 6. What is NOT claimed
 
 **None of this has been run.** There is no Windows box in this container, the whole class is

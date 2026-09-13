@@ -179,8 +179,21 @@ echo
 
 echo "== wrappers handing the trampoline a reference-bearing pointer DIRECTLY: $(wc -l < "$work/members")"
 echo
-printf '   %-30s %-20s %s\n' "WRAPPER" "POINTEE" "STATUS IN zsyscall"
+# ⚠ THE COLUMN SAYS UNDISPLACED, NOT REACHED, and the difference is not pedantry: the first cut of
+# this instrument printed "LIVE -- token reaches the door", which asserts a REACHABILITY the predicate
+# never tests. Six of the seven members at a02ac3df3 have ZERO in-corpus callers -- they are latent
+# public-API surface, not live breaks -- and the wording had already been read back as though it were
+# a measurement before that was noticed. An instrument's OUTPUT WORDING is part of the instrument.
+# Reachability is measured separately; see the 5a amendment in
+# docs/phase4/CENSUS-token-door-live-wrappers.md.
+printf '   %-30s %-20s %s\n' "WRAPPER" "POINTEE" "DISPLACEMENT (not reachability)"
 while IFS=$'\t' read -r fn ty; do
-  if grep -q "func $fn is hand-converted" "$ZSYS"; then st="DISPLACED"; else st="LIVE -- token reaches the door"; fi
+  if grep -q "func $fn is hand-converted" "$ZSYS"; then
+    st="DISPLACED by a hand-own"
+  else
+    st="UNDISPLACED -- a token WOULD reach the door if called"
+  fi
   printf '   %-30s %-20s %s\n' "$fn" "$ty" "$st"
 done < "$work/members"
+echo
+echo "   NOTE: this census does NOT measure whether anything CALLS these wrappers."
