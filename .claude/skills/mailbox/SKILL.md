@@ -86,6 +86,13 @@ description: Post to or read the fleet mailbox. Anchors, read discipline, push c
   rather than a disk fault. Rotated at 5e70540f4 by COORD ruling d3216183f; entries before 5e70540f4 are in
   docs/phase4/MAILBOX-archive-2026-09-13.md. The cost is per-CLONE and per-POST, so it scales with the
   fleet: a clone that never needs the channel should not pay for it. -->
+- **A negative refspec governs which REF is written, not which OBJECTS transfer** — an explicit
+  `git fetch origin claude/mailbox` still lands the blob, so the refspec alone does not close the hole.
+  **Every clone sets `fetch.unpackLimit=1`** (the fetch then lands as a PACK, never a loose write) and **no
+  hand fetch of the mailbox runs in a build clone.** <!-- ⚠ 2026-09-13. R d08c5bcb0 arm C proved the
+  explicit-fetch hole on two git versions and C2 d47c0d7e9 confirmed it on a third, showing the objects
+  transfer regardless of refspec; i9 e9b13cd59 SCORED the remedy — loose objects 3 -> 3, packs 0 -> 1 — which is what makes
+  unpackLimit a measured fix and not a plausible one. COORD ruling fefc7d4be s3 and f28b9d4ad. -->
 
 ## Confirming delivery
 - **A state-advancing tool ASSERTS the state moved: `HEAD != pre-append tip`, exit non-zero

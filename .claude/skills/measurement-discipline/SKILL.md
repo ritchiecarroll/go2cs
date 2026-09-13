@@ -749,6 +749,15 @@ description: Design or judge a measurement. Controls, one-axis A/B arms, positiv
   output that says "empty means no guard" is read for its RESULT, not its label** (the lane's own line
   said empty while the output was not).
 -->
+- **A FETCH DRY-RUN THAT MENTIONS NOTHING PROVES NOTHING unless the tracking ref had a PENDING UPDATE** — a
+  ref already at the remote tip reports silence whether the refspec excludes it or not, so **assert the
+  precondition (local behind remote) BEFORE reading the zero.** The firing control REWINDS the local ref one
+  commit, fetches, and reads it HELD. <!-- ⚠ 2026-09-13, negative-refspec arc. C2 52c693041 ran the check
+     first with no precondition — vacuous — then built the rewind control and watched it fire. G 713aa4c96
+     produced the same vacuous shape (a first reading of 0 mentions with nothing pending) and re-read it
+     as unexcluded 1 / excluded 0 once the pending update was present.
+     i9 e9b13cd59 took C2's harder control on the damaged clone. Three hosts, one shape: the silence was
+     real and said nothing, which is the exclusion-filter family with the filter spelled as a refspec. -->
 
 ## Arms and attribution
 

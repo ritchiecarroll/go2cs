@@ -430,6 +430,14 @@ untrue. #6-#8 are other shapes, and re-running catches none of them.
      (`MERGE FAILED — unmerged paths follow; NONE means it was not a conflict`), never what it assumes,
      and **an estimate derived from a broken instrument is withdrawn EXPLICITLY** — said to be
      unverified until a clean run replaces it — rather than quietly re-derived. -->
+- **`git config --unset <name> <value>` TAKES THE VALUE AS A REGEX** — a value beginning with a metacharacter
+  (a negative refspec's leading `^`) matches NOTHING, exits 0 with no output, and a following `--add` then
+  **DUPLICATES** the entry. Use `--unset-all` plus explicit re-adds, and **print the refspec list beside any
+  reading of it** rather than trusting a count. <!-- ⚠ 2026-09-13, G 713aa4c96 on claude/mailbox: the
+     duplicate was introduced by the very step that was CHECKING its own work — an unset that no-opped, then
+     an add. Nothing looked wrong; the arm's number read healthy in BOTH arms, because a refspec listed
+     twice fetches exactly the refs it fetches once. The config LIST is the only reading that shows it, so a
+     refspec claim carries the list. -->
 ## Second derivations: an instrument built out of the thing under test
 - **An instrument built out of the thing under test cannot independently measure it; the corrective is a SECOND
   DERIVATION, chosen by asking what the FIRST's blind spot is.** Two derivations that AGREE share a blind spot;
