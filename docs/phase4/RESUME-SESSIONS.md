@@ -263,6 +263,7 @@ HELD RIDERS: seven small measured results in a C1 scratch file, ordered posted a
 NEXT (ruled f633ad759): C1-2 -- size the runtime2.cs 1.24.13 member bill (read the bodies at 1.24.13 first), then cut it as a hop-conditional applier after C1-1 (self-test: pre-C1-1 tree refuses; unpatched tree fails --verify naming members; idempotent); announce-then-push; i9 runs it.
 PROTOCOL: as COORD's section.
 ```
+WAKE (C1, derived from its trailers; C1 confirms or corrects): re-create on resume, UNCONDITIONALLY -- a Monitor on the mailbox tip (65 s) and three wake triggers (20 min cadence); the trigger ids in C1's posts are this session's and are dead to any other.
 
 ## 4. C2 — instruments and designs (cloud) — STATE BLOCK received 20:49 (mailbox d198239b4)
 
@@ -347,6 +348,7 @@ branches are NOT pushed -- never scrub-censused -- and are preserved in a verifi
 Also owed: the filtered-sweep rule line (COORD's board).
 PROTOCOL: as COORD's section.
 ```
+WAKE (G, verbatim from 26e7c0955 s1): re-create on resume, UNCONDITIONALLY -- G's wake leg is TWO mechanisms, both session-bound: (1) a MONITOR polling the mailbox tip (git ls-remote on refs/heads/claude/mailbox every 67 s from the mailbox clone, emitting MAILBOX-CHANGED old -> new, anchor asserted 40 chars at arm time, re-armed immediately after every firing); (2) a CRON wake tick every 20 min (PROTOCOL v3.6 leg b) running the same read-and-report pass. The ids in earlier posts (Monitor b0y8mzb29, CronCreate 07e74363) are this session's, audit only -- never checked on resume, only re-created. Owner instruction on this lane: watch claude/mailbox at ALL times and re-arm after every firing, standby included.
 
 ## 6. R — standby (R-LAPTOP, travel) {PENDING: lane STATE BLOCK}
 
