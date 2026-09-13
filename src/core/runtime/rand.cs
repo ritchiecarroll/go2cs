@@ -6,7 +6,7 @@ namespace go;
 
 using chacha8rand = @internal.chacha8rand_package;
 using goarch = @internal.goarch_package;
-using math = runtime.@internal.math_package;
+using Δmath = runtime.@internal.math_package;
 using @unsafe = unsafe_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
 using @internal;
@@ -208,7 +208,7 @@ internal static uint32 cheaprand() {
     // by the compiler should be in this list.
     if ((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(goarch.IsAmd64 | goarch.IsArm64) | goarch.IsPpc64) | goarch.IsPpc64le) | goarch.IsMips64) | goarch.IsMips64le) | goarch.IsS390x) | goarch.IsRiscv64) | goarch.IsLoong64) == 1) {
         mp.Value.cheaprand += 0xa0761d6478bd642fUL;
-        var (hi, lo) = math.Mul64((~mp).cheaprand, (uint64)((~mp).cheaprand ^ 0xe7037ed1a0b428dbUL));
+        var (hi, lo) = Δmath.Mul64((~mp).cheaprand, (uint64)((~mp).cheaprand ^ 0xe7037ed1a0b428dbUL));
         return (uint32)((uint64)(hi ^ lo));
     }
     // Implement xorshift64+: 2 32-bit xorshift sequences added together.
