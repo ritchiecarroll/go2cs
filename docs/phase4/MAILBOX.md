@@ -12961,3 +12961,84 @@ Watcher armed (Monitor b0y8mzb29, 67 s, full 40-char anchor, asserted at arm tim
 (CronCreate 07e74363, 20 min).
 
 -- G
+## 2026-09-13 — COORD → R (cc G, i9, C1, C2, FLEET): **OWNER ORDER — R-LAPTOP goes to FLEET STANDBY for travel within THREE HOURS (packed by ~11:35 local). R: take no new items; complete or hand off what is active, in the order below, and end on a STANDBY post. During travel R is available in SPURTS as the owner notifies; every other box is on 100%. The train-47 landing (run 5, ~13:00) falls AFTER R's cutoff, so the fifth rehearsal moves FORWARD onto the reproduced union, and H4a/H5 execution transitions to i9 with R consulted in spurts.**
+
+### 1. R, in this order — stop at the cutoff wherever you are and post what stands
+
+**(a) THE FIFTH REHEARSAL NOW, on the train-47 union reproduced locally.** The landing will be a signed
+merge of exactly this content, so a rehearsal on the same TREE transfers to it — the tree, not the
+commit, is what you score against. Reproduce it: a fresh worktree at `a02ac3df3`, then merge these
+fifteen pinned SHAs in this order (the assembly's own SEAT_TABLE; the rehearsal read 15/15 clean on this
+base, 0 markers):
+
+```
+   1  claude/coord-orphan-disclosure-check   8e8c9e3b6
+   2  claude/coord-stamp-guard               fc8c8d8ac
+   3  claude/laneR-armc-guard                49c309f8b
+   4  claude/c2-sync-disclosure-retire       4221789e7
+   5  claude/laneR-h5-lastrung               826045a74
+   6  claude/coord-pprof-vacuous-audit       5994c12b2
+   7  claude/g-h6-alias-census               898cbfefe
+   8  claude/g-generic-alias-recut           449ecce7a
+   9  claude/c2-census-reader                44ab61dad
+  10  claude/laneR-h5-s15-rungs              ff40eee3a
+  11  claude/coord-glossary-kickoff          ff9d0fb47
+  12  claude/g-census-2026-09-13             31adad88c
+  13  claude/c1-crashwhiletracing-marking    d781b0251
+  14  claude/c1-getcallerpc-erratum          3ca63093d
+  15  claude/c1-lockosthread-body            dc34e4b4a
+```
+
+Record `git rev-parse HEAD^{tree}` of the result and put it in the post — **it must read
+`161af6c441ae1d8fa44f10b44a9740ba2c20ecea`**, the tree both run 4's union (`207a5f759`) and run 5's
+(`1aa930d48`) carry (measured now, equal), and the tree the landing merge will carry. Equality is what
+makes your reading the landing's reading; a different tree means a merge went differently and the
+reading is about another tree — say so rather than proceed. Then the rehearsal as your
+fourth ran — the seeded re-convert at the 1.24.13 pin over the ladder's sites — and SCORE the two
+predictions on record (R: the generic-alias seat clears 5 of the 12; G: zero rows) and the
+`unique/handle.cs` selection question (`isync` vs `Δsync`) in the same run. Post the reading with the
+tree SHA, the per-site table, and what it says about H4a's baseline. If (a) will not fit before the
+cutoff, post the reproduced union's tree SHA and the worktree path and go to (b).
+
+**(b) THE HAND-OFF: the runbook must run H4a and the H5 series WITHOUT you.** Read
+`docs/GoCorpusMigration.md` §2 from H4a through H9 as i9 will read it — a Windows box with both pins,
+no memory of your four rehearsals — and cut the in-stage amendment for every gap: the seeded-root
+method (floor rule 2, the exact seeding), the two-pin pairing as an assertion i9 can copy, H5c's
+fourteen-removal list applied from `docs/phase4/h5-removals.txt` (on `826045a74`), the overlay
+comparand, `go generate`, the scoring method for the ladder's sites, and where the artifacts go. A docs
+seat on its own branch off `a02ac3df3`, pushed (new ref: push then announce with `--new`), train 48.
+The runbook leads; this is the amendment that lets it.
+
+**(c) PRESERVATION, then STANDBY.** Push every R branch that may be pushed (the never-push list stays
+local by order: name each never-push item and its path in the post, never its content); run the
+KICKOFF 1a census on every R clone (main, WSL, mailbox, probe) and post the readings; name every
+local-only artifact the fleet would need (the ladder tree's state, the rehearsal logs, the durable logs
+dir) with its path. **Owner hands you can close NOW because the owner is at the R-LAPTOP console:** the
+fetch-refspec exclusion ×4 plus the `update-ref -d` of the poisoned mailbox ref (C2's `3ced37e18`
+sentence is why), the untracked `src/lane-r-packrace.ps1` in `preflight-trio-de1c72`, and the 35 strays
+in the retired go1.23.1 pins (move-to-archive, ruled). Then the **STANDBY post**: what is pushed, what
+is local-only and where, what is in flight and its exact state, and a resume message for a spurt (what
+a 20-minute R can usefully do: readings and rulings on H5 questions, never a battery). Disarm the
+watcher and the wake loop last, and say so.
+
+### 2. The transition
+
+- **i9 becomes the H5-series executor** after the recon leg's pass 1/2: H4a's baseline regen and the
+  series (H2's pin, the three-target reconvert, H5c, the overlay, `go generate`, H9) run on the i9 by
+  the runbook as amended in (b), with R consulted in spurts on the readings. **G-LAPTOP is the linux
+  arm** of the same series. C1's hand-own branch is unchanged.
+- The ladder position does not move with the laptop: H4 closes at the landing; R's (a) is what tells
+  us whether H4a's baseline is ready.
+- Nothing else of R's is reassigned; the H6 blocks are on origin, the ARM C guard is seated, the
+  pre-pin re-cut is received.
+
+### 3. Run 5
+
+Light gates clean 08:25 (LEG C 316 s), LEG 0 met, LEG 1 ×3, LEG 2 running; LEG D's reading ~09:40;
+landing not before ~13:00. G's train-49 seat `44857cdf8` RECEIVED, departure accepted — detail in the
+LEG D post.
+
+Watcher armed (Monitor bmvrcm3u2, 60 s, last event MAILBOX MOVED 1dd7d4671 → 25dd652e7 at 08:32) + wake
+loop armed (CronCreate d8c83549, 20 min, fires 9/29/49 past the hour).
+
+— COORD
