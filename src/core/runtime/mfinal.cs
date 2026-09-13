@@ -179,11 +179,22 @@ internal static ж<g> wakefing() {
     return default!;
 }
 
+// go2cs NATIVE BRIDGE, and the ONE live door (COORD c58b4c01d). The converted body below the fold
+// started the CONVERTED runfinq via `goǃ(runfinq)` -- the body this file's own header declares dead,
+// which dies in gopark on its first park. That was harmless only while createfing had NO CALLER:
+// SetFinalizer calls GoFinalizerQueue.EnsureRunner() directly and never came through here.
+//
+// ⚠ 1.24's mcleanup.go GIVES IT ITS FIRST CALLER. AddCleanup calls createfing(), so a corpus that
+// took mcleanup.cs as a plain auto would have started the dead runner from a live public API --
+// runtime.AddCleanup would compile, return a Cleanup, and never run it, with no throw and no
+// diagnostic. A door that starts a runner the header declares dead is that defect waiting for its
+// next caller, so it is rewired rather than left standing beside the live one.
+//
+// EnsureRunner performs the identical fingUninitialized -> fingCreated CAS (see its body), so the
+// flag-word transition Go makes here is unchanged; only the runner started by it is the live one.
 internal static void createfing() {
     // start the finalizer goroutine exactly once
-    if (ᏑfingStatus.Load() == fingUninitialized && ᏑfingStatus.CompareAndSwap(fingUninitialized, fingCreated)) {
-        goǃ(runfinq);
-    }
+    GoFinalizerQueue.EnsureRunner();
 }
 
 internal static bool finalizercommit(ж<g> Ꮡgp, @unsafe.Pointer @lock) {
@@ -606,7 +617,16 @@ private static class GoFinalizerQueue
     // reflection and without invoking it.
     private static readonly global::System.Reflection.MethodBase s_runfinq = ((global::System.Action)runfinq).Method;
 
-    private static readonly global::System.Collections.Concurrent.ConcurrentQueue<(Delegate Fn, object Target)> s_queue = new();
+    // TWO ENTRY KINDS, ONE RUNNER (COORD c58b4c01d). A FINALIZER entry carries the Go value its body
+    // must be invoked with, and dispatch re-derives the argument by Go's binding rule. A CLEANUP
+    // entry carries no object at all: Go's AddCleanup closes `arg` into a `func()` at registration
+    // (mcleanup.go's `fn := func() { cleanup(arg) }`), and the cleanup is never handed the object
+    // whose death triggered it -- that is the whole difference between the two APIs. So a cleanup's
+    // Target is null and MUST be, because holding the object would be the one thing that stops the
+    // cleanup ever running. Kept as one queue rather than two so cleanups inherit the drain
+    // accounting, the system-goroutine registration and the parked-body budget already measured for
+    // finalizers.
+    private static readonly global::System.Collections.Concurrent.ConcurrentQueue<(Delegate Fn, object? Target, bool IsCleanup)> s_queue = new();
     private static readonly global::System.Threading.SemaphoreSlim s_pending = new(0);
 
     // Set exactly when nothing is queued AND nothing is executing.
@@ -656,7 +676,15 @@ private static class GoFinalizerQueue
         runner.Start();
     }
 
-    internal static void Enqueue(Delegate fn, object target)
+    /// <summary>
+    /// Queues a Go CLEANUP body (<c>runtime.AddCleanup</c>). The delegate already closes over its
+    /// argument, so there is nothing to bind and nothing to keep alive.
+    /// </summary>
+    internal static void EnqueueCleanup(global::System.Action fn) => EnqueueCore(fn, null, isCleanup: true);
+
+    internal static void Enqueue(Delegate fn, object target) => EnqueueCore(fn, target, isCleanup: false);
+
+    private static void EnqueueCore(Delegate fn, object? target, bool isCleanup)
     {
         lock (s_countGate)
         {
@@ -667,7 +695,7 @@ private static class GoFinalizerQueue
         // This is our wakefing: Go sets fingWake before waking the parked finalizer goroutine.
         ᏑfingStatus.Or(fingWake);
 
-        s_queue.Enqueue((fn, target));
+        s_queue.Enqueue((fn, target, isCleanup));
         s_pending.Release();
     }
 
@@ -712,7 +740,7 @@ private static class GoFinalizerQueue
             s_pending.Wait();
             ᏑfingStatus.And(~(uint32)(fingWait | fingWake));
 
-            if (!s_queue.TryDequeue(out (Delegate Fn, object Target) item))
+            if (!s_queue.TryDequeue(out (Delegate Fn, object? Target, bool IsCleanup) item))
                 continue;
 
             // |1 so a body starting exactly on a zero tick is not mistaken for "idle".
@@ -729,7 +757,16 @@ private static class GoFinalizerQueue
             // count, let the queue report idle, and NEVER RAN THE FINALIZER, with no error surface
             // anywhere. That cost runtime's TestFinalizerType its whole package deadline and zero
             // converted verdicts, and nothing in the system could say why.
-            if (!GoReflect.TryBindFinalizerArgument(item.Target, item.Fn, out object? finalizerArgument, out string? bindRejection))
+            //
+            // A CLEANUP entry skips it because there is nothing to bind: AddCleanup closed `arg`
+            // into a `func()` at registration, exactly as Go does, so the delegate is already
+            // complete. Running it through the finalizer binder would ask a question with no
+            // answer -- a zero-parameter body has no argument for Go's rule to match -- and the
+            // arm above would then throw on a body that is perfectly callable.
+            object? finalizerArgument = null;
+
+            if (!item.IsCleanup &&
+                !GoReflect.TryBindFinalizerArgument(item.Target, item.Fn, out finalizerArgument, out string? bindRejection))
                 throw new global::System.InvalidOperationException(bindRejection);
 
             try
@@ -746,12 +783,35 @@ private static class GoFinalizerQueue
                 ᏑfingStatus.Or(fingRunningFinalizer);
                 try
                 {
-                    item.Fn.DynamicInvoke(finalizerArgument);
+                    if (item.IsCleanup)
+                    {
+                        // ⚠ THE CATCH BELOW CANNOT SEE THIS ONE, AND THAT IS DELIBERATE RATHER THAN
+                        // AN OVERSIGHT. A direct invocation does not wrap the body's exception in a
+                        // TargetInvocationException, so the narrow catch that separates "the body
+                        // threw" from "we failed to CALL it" has nothing to key on here -- but it
+                        // has nothing to separate either: a cleanup body takes no argument, so the
+                        // call-failure class the narrow catch exists to let escape DOES NOT EXIST
+                        // for a cleanup. Its own catch is therefore a plain one, below, and is
+                        // exactly as narrow in what it can absorb.
+                        ((global::System.Action)item.Fn)();
+                    }
+                    else
+                    {
+                        item.Fn.DynamicInvoke(finalizerArgument);
+                    }
                 }
                 finally
                 {
                     ᏑfingStatus.And(~fingRunningFinalizer);
                 }
+            }
+            catch (global::System.Exception) when (item.IsCleanup)
+            {
+                // A throwing Go CLEANUP must not take down this thread, for the same reason and with
+                // the same stated divergence as the finalizer arm below: Go treats a panic in a
+                // cleanup as unrecoverable and crashes the process; we drop it. Guarded on IsCleanup
+                // so it can never widen the finalizer arm's scope back out to the bare `catch` that
+                // used to hide our own call failures.
             }
             catch (global::System.Reflection.TargetInvocationException)
             {
