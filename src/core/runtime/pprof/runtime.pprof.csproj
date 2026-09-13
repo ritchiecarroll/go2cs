@@ -31,6 +31,8 @@
   <!-- Same-package Go tests run in a separate assembly but retain package-private access. -->
   <ItemGroup>
     <InternalsVisibleTo Include="$(AssemblyName).tests" />
+    <!-- reflect.StructOf mints synthesized structs into this fixed-name dynamic assembly; a field type that is internal here cannot be loaded from there without the grant. -->
+    <InternalsVisibleTo Include="go2cs.SynthesizedStructs" />
   </ItemGroup>
 
   <!-- Build outputs are copied to $(OutDir), so this default must also defer to an explicit

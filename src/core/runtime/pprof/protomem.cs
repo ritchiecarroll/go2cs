@@ -12,12 +12,6 @@ using go.@internal;
 
 partial class pprof_package {
 
-// Go runs an imported package's `init` before this package's own; .NET would never load
-// an assembly nothing has touched yet, so that initialization is forced here.
-[GoInit] internal static void initᴛᴛimportꓸmath() {
-    builtin.initPackage(typeof(math_package));
-}
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string spaceˢ = "space"u8;
 internal static readonly @string bytesˢ = "bytes"u8;

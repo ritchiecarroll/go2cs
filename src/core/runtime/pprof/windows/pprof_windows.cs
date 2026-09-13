@@ -12,18 +12,6 @@ using go.@internal.syscall;
 
 partial class pprof_package {
 
-// Go runs an imported package's `init` before this package's own; .NET would never load
-// an assembly nothing has touched yet, so that initialization is forced here.
-[GoInit] internal static void initᴛᴛimportꓸinternalꓸsyscallꓸwindows() {
-    builtin.initPackage(typeof(go.@internal.syscall.windows_package));
-}
-
-// Go runs an imported package's `init` before this package's own; .NET would never load
-// an assembly nothing has touched yet, so that initialization is forced here.
-[GoInit] internal static void initᴛᴛimportꓸsyscall() {
-    builtin.initPackage(typeof(syscall_package));
-}
-
 internal static void addMaxRSS(io.Writer w) {
     ref var m = ref heap(new windows.PROCESS_MEMORY_COUNTERS(), out var Ꮡm);
     var (p, _) = syscall.GetCurrentProcess();
