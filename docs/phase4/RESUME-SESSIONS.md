@@ -94,11 +94,11 @@ list (branches and SHAs of unscrubbed content) is in HANDOVER-coordinator.md and
 pruned; the post tool's FLEET GUARD and the assembler's census enforce it.
 
 STATE AT THIS REVISION (2026-09-13 21:45, weekly usage 94 percent -- SAVE-STATE MODE):
-  BRANCH: claude/coord-handover 84741146d9daf2def5d0947f307a617bfe7de969 yes landed -- the handover log (block 10 + this file; block 11 = this refresh)
-  BRANCH: claude/mailbox 5e55c4b92b8128fd42ccc3ed78b79efb406651be yes transport -- rotated 2026-09-13 02:36
+  BRANCH: claude/coord-handover 7b8bcd723166d57497097a8ff0bf211ad6b33a25 yes landed -- the handover log (block 10 + this file; block 11 = this refresh)
+  BRANCH: claude/mailbox b05b136fe34777ec83410e9985b3f7a3ae8fc186 yes transport -- rotated 2026-09-13 02:36
   BRANCH: claude/version-go1.24.13 a4ece44fff696e88c9d4a72059b12efaa3185a8a yes cut -- the H5 branch: checkpoint 1 (dc78fb0df8: seeded reconvert at go1.24.13 + H5c; the C1-1/C1-2 appliers) then C1's relocation (c8d50e014f moves/deletes/two registry keys; a4ece44fff namespace/class lines). NOT the H5 gate.
   BRANCH: claude/c1-h5-relocation a4ece44fff696e88c9d4a72059b12efaa3185a8a yes accepted -- the relocation source ref (landed on the version branch by fast-forward)
-  BRANCH: claude/c2-h5c-slnx-orphan 23e94a2e6bd2c29c73c13549bbec59d475fba827 yes announced -- H5c: slnx guard + ORPHANED class + relocate REFUSED + report-only items; C2 is cutting the SELECTION fix on top (derive deselected from the emission; explanation gate = selection at both GOROOTs under the converter's printed tag set); i7 parse gate on every push
+  BRANCH: claude/c2-h5c-slnx-orphan b291530e95eaed62928488a89c8fd74934692b27 yes announced -- H5c: slnx guard + ORPHANED class + relocate REFUSED + report-only items; C2 is cutting the SELECTION fix on top (derive deselected from the emission; explanation gate = selection at both GOROOTs under the converter's printed tag set); i7 parse gate on every push
   BRANCH: claude/laneR-docs-h6-skeleton 067302ea09732cade2ef488a49fb7ab83410bd9d yes accepted -- the H6 audit skeleton at 145 rows == the version-branch census (R's record, G's amendments); lands on the VERSION BRANCH; train-48 seat 4 stays SHA-pinned at d18059950
   BRANCH: claude/coord-runbook-h5-tags 5c4c5b94e57509a4a272294ef4f5bad322e9b1a1 yes announced -- runbook H5 in-stage amendment (one tag resolution; selection-based DELETE-DESELECTED gate; carry the regenerated stdlib slnx; go2cs.slnx follows moved packages); lands on master with the H5 gate docs commit
   BRANCH: claude/c1-handown-address-guard 2b823dc951f20769296f03325764ddc1ed61aed3 yes accepted -- train 49 row (converter-guard)
@@ -300,7 +300,7 @@ WAKE (C1, verbatim from cf06dafee):
   BRANCH: claude/c2-q56-lift 0ac8a607cf6db2832f1dbcbb74cb1d0a0b327ae4 yes unclassified -- ON ORIGIN but NOT in C2's state block (an older ref; state unknown to COORD; C2 classifies or prunes it; SHA read from origin 18:05)
   BRANCH: claude/c2-recon-go124 90a020f906f40d7abb41a81d0fc3e4c8a7affbc0 yes unclassified -- ON ORIGIN but NOT in C2's state block (an older ref; state unknown to COORD; C2 classifies or prunes it; SHA read from origin 18:05)
   BRANCH: claude/c2-runlayer-pin e058910632b364c9fab644557c95f73e121aecb3 yes unclassified -- ON ORIGIN but NOT in C2's state block (an older ref; state unknown to COORD; C2 classifies or prunes it; SHA read from origin 18:05)
-  BRANCH: claude/c2-h5c-slnx-orphan 23e94a2e6bd2c29c73c13549bbec59d475fba827 yes accepted -- H5c: DELETE-ABSENT packages' slnx Project entries removed in -Apply (keyed on no surviving .csproj, accepted with the divergence), ORPHANED-HAND-OWN class refuses until every orphan has a disposition; one file on the H5-set tip; parse-gated on the i7 0 errors (46198c1b9 section 4)
+  BRANCH: claude/c2-h5c-slnx-orphan b291530e95eaed62928488a89c8fd74934692b27 yes accepted -- H5c: DELETE-ABSENT packages' slnx Project entries removed in -Apply (keyed on no surviving .csproj, accepted with the divergence), ORPHANED-HAND-OWN class refuses until every orphan has a disposition; one file on the H5-set tip; parse-gated on the i7 0 errors (46198c1b9 section 4)
   LOCAL-ONLY: c2-h5c-work 088f8778f6ce605f66ca6f2388068d7505b88d16 local alias, SHA identical to origin/claude/c2-h5c-apply-amendment so nothing is unpushed; no bundle cut because no bundle is needed none
   LOCAL-ONLY: refs/preserve/c2-container/** (28 refs, 251 commits) 036894085a1f778c not pushed -- historical container preserve namespace 08-28..09-06, security gate clean, all 13300 paths origin-reachable, zero unique content; a bundle in an ephemeral container preserves nothing so AWAITING YOUR RULING: push under one namespace or accept loss 036894085a1f778c
   WORKTREE: <C2-HOME>/go2cs claude/jolly-lovelace-j0sk1t 0 clean-at-landed-tip
@@ -313,9 +313,9 @@ WAKE (C1, verbatim from cf06dafee):
   WORKTREE: <C2-HOME>/dswt claude/c2-darwin-option2-sizing 0 clean-at-pushed-tip
   WORKTREE: <C2-HOME>/rbwt claude/c2-shardmap-repair 0 clean-at-pushed-tip
   WORKTREE: <C2-HOME>/mbx-clone claude/mailbox 0 separate single-branch clone, mailbox transport only
-  NEXT: nothing owed; row 17 re-pinned to the origin tip of claude/c2-h10-shardmap-projection by the derive; unclaimed offers stand (the array-length converter seat; Darwin steps 2-3 after the hop); the -Orphan flag stays for the next hop, exercised today only by the control
+  NEXT: nothing. The selection fix is cut and announced; i9's rerun is the next event and it is not mine. at 5c4c5b94e5) · 19d80c04e (the restore plan my tip is step 2 of) · c883a2dc7 (7 not 5) (C2 241eb474f, folded from the fenced delta)
   READ-FIRST: mailbox 46198c1b9 (H5c cut ACCEPTED with the no-surviving-csproj predicate; parse-gated on the i7) + 5b5e91b74 (the +283/-1 figure) · C2's own 77c6680fc (the cut) and a35f2c040 (the frozen tracking ref; i9 4ff24a03f widens it three-way -- row 13's rule wording is under-general when next touched) · master 271300cea · docs/phase4/BOARD-next-validation-candidates.md tail
-  BLOCKED-ON: nothing. Row 17's AMENDMENTS block is cut at the origin tip of claude/c2-h10-shardmap-projection; the H5c cut is accepted (46198c1b9 section 4); darwin steps 2-3 wait on the hop, not on a lane
+  BLOCKED-ON: nothing of mine. Parse gate on the i7 is COORD's, not a block on C2 (ruling fefc7d4be). (C2 241eb474f, folded from the fenced delta)
   TOOLS: python3 3.11.15 · GOROOT=/usr/local/go1.24.7 (also /usr/local/go1.25.1) · module-cache toolchains go1.23.12 go1.24.13 go1.24.7 read directly for both-pin work · DOTNET_ROOT unset and dotnet ABSENT · pwsh ABSENT -- every .ps1 cut of mine is parse-gated on i7, never run here
 ```
 COORD NOTE (16afb8a3f, amended per C2 56e93e709 s4): refs/preserve/c2-container/** (28 refs, 251 commits reachable from no origin ref, a prior container's ritual 08-28..09-06; never scrub-censused, so unpushable) -- zero unique PATHS; blobs COMPARED: 686 unique file versions over 369 paths, all intermediate states of 28 superseded lines whose current content is on origin (src 600, docs 81, CLAUDE.md 5). LOSS ACCEPTED on the record, nothing pushed; ref-list digest 036894085a1f778c.
@@ -388,3 +388,4 @@ PROTOCOL: as COORD's section.
 - 2026-09-13 21:15 -- G NEXT: half B cut, the fill rule (80c948a7f), pull half A by share; i9 NEXT: the restore, H5c on C2's fix, checkpoint 2, half A manifest + share
 - 2026-09-13 21:45 -- SAVE-STATE at 94 percent (owner order): COORD state block rewritten to the current position (pins re-read from origin); fleet STATE BLOCK order posted 6481627c0; handover block 11
 - 2026-09-13 21:55 -- C1 delta (5e55c4b92): two train-49 refs added, NEXT replaced verbatim, LOCAL-ONLY stranded post-tool commit noted; i9's never-push inventory restored under a dated marker (its 21:29 block reads none for new work)
+- 2026-09-13 22:00 -- C2's delta (241eb474f section 4) folded: NEXT + BLOCKED-ON copied from the fence; its BRANCH pin re-read from origin
