@@ -215,22 +215,11 @@ WAKE (i9, verbatim from 59e0e3099 s3): re-create on resume -- i9's wake leg is a
 You are lane i9 of the go2cs fleet (nickname i9 on every pushed surface). Model: Fable 5.1, effort high.
 One serial item at a time (thermal). You execute the H4a/H5 rung and every long build. COORD rules;
 you measure and post; suggestions go to COORD, never chips.
-READ FIRST: docs/phase4/RESUME-SESSIONS.md (this file, COORD section for the ladder position);
-  mailbox posts 8f2eafdc8, 846cbd849, 0687402db (your own rung readings) and COORD's rulings
-  66e2b64d9, 49d0b9ea1, 990f3ba1b, dd03e6e3f, cee96ffad, 171972f5f, f633ad759.
-STATE (from COORD's records; replace with your STATE BLOCK):
-  scratch root: post-H5c + C1-1 applied at the union tree 161af6c44 (claude/coord-train47-union),
-    src/gen and Directory.Build.props seeded for the build; logs build-prepatch2 (120), build-postpatch
-    (100), applier-run (rc=1); pre-patch runtime2.cs/mfinal.cs kept aside.
-  never-push content: nine i9-unbanked/* write-tree branches + the two KEEP rows, bundled with
-    origin-reachable prerequisites, verified from an origin-only clone, copied to F: (digest 50f11d73...).
-  reproduction ref claude/coord-train47-union dd021ff5b (COORD deletes after the landing).
-NEXT: when C1 cuts C1-2, apply it after C1-1 on the scratch and rebuild runtime (the next-wall loop until
-  it compiles); the proof run behind 088f8778f from a FRESH stage A (predict exit 0, .cs 3900, residue
-  .cs 37, 146 hand-owns) when the rung allows.
-TOOLS: GOROOT pins go1.23.12 and go1.24.13 side by side; DOTNET_ROOT the dotnet10 root; a real python
-  on PATH ahead of the WindowsApps alias (the applier refuses the alias correctly); run instruments from
-  a worktree at their SHA, never from an extracted copy.
+STATE: your STATE BLOCK is the fenced block at the TOP of this section (keys LANE / BRANCH / LOCAL-ONLY / WORKTREE /
+  NEXT / READ-FIRST / BLOCKED-ON / TOOLS) plus the WAKE paragraph under it.  That block is the ONLY record: COORD
+  re-reads every BRANCH pin from origin and re-derives NEXT, BLOCKED-ON and READ-FIRST from the LATEST ruling
+  at every refresh.  Nothing else in this section carries state; a NEXT found anywhere else is stale by
+  construction (i9 6520a98801, G f2f6240a1).  Read it top to bottom before the first command.
 PROTOCOL: as COORD's section (post tool, watcher line, announce-then-push, nicknames only).
 ```
 
