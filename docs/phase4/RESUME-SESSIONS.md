@@ -314,17 +314,20 @@ PROTOCOL: as COORD's section.
 
 ```
   LANE: G   MODEL: Opus/high   HOST: G-LAPTOP
-  BRANCH: claude/laneR-docs-h6-skeleton 067302ea09732cade2ef488a49fb7ab83410bd9d yes accepted -- the H6 audit at 145 rows, the POPULATION OF RECORD (COORD d36509f41); prediction filed and met at the tip
+  BRANCH: claude/laneR-docs-h6-skeleton 067302ea09732cade2ef488a49fb7ab83410bd9d yes accepted -- 145 rows, still set-identical to the census at the NEW tip c2345d7731
+  (delta applied from mailbox 1a806029b)
   BRANCH: claude/g-handown-metadata-t48-r47 35fe4e0167e044539245f7e4721a198fb35a98d0 yes accepted -- train-48 seat 6, the metadata un-freeze re-based onto the train-47 landing
   BRANCH: claude/g-h6-completeness-gate c9c1b5f737c8808f2234e01671768d0cb7848685 yes accepted -- train 49, the H6 gate + go-test guard + BOM tolerance
   BRANCH: claude/g-fleet-patchid-census 9b78bfff61000f5ca4984f163503c182b5c1819e yes accepted -- train 48, the fleet-wide patch-id census
   BRANCH: claude/g-repoguard-liveness-set 44857cdf898ef5d0b04e4b14351ec33c18290a38 yes accepted -- train 49, network-path-split liveness + finding-SET assertion
   LOCAL-ONLY: 18 refs (pre-session, never scrub-censused so never pushed) -- preserved in g2-state/g-local-only-2026-09-13.bundle on G-LAPTOP, 20 heads, 2,090,187 bytes, sha256 718de5f7d40da349, `git bundle verify` OK, all 18 at-risk tips present (0 missing, checked this hour)
   WORKTREE: G-LAPTOP go2cs/.claude/worktrees/row-harvest-2-1f7b91 claude/g-handown-metadata-t48-r47 0 uncommitted -- tree clean
-  NEXT: verify i9's half-A manifest hash-by-hash on arrival, then fill the H6 rows starting from claude/laneR-docs-h6-skeleton 067302ea09732cade2ef488a49fb7ab83410bd9d, PRINCIPAL CHANGED rows first
+  NEXT: verify i9's half-A manifest hash-by-hash on arrival, then fill from 067302ea0 with PRINCIPAL CHANGED rows first; the pair's right side for internal/sync/hashtriemap and weak/pointer is now a real emission at c2345d7731
+  (delta applied from mailbox 1a806029b)
   READ-FIRST: 80c948a7f (per-row pair rule) · fc4ccab4b (the pair is an emission product) · 825c65222 (the 27/5 split and the five no-left-side rows) · d496727c8 (⚠ the mtime test has a FALSE-NEGATIVE hole per C2 241eb474f needToWriteFile; principal-existence at the release is the proposed test) · a5534b5de §2 (the ARTIFACT RECIPE: binary e0b2a4c1…, flags, tag line, seed, the version.props note, three tree hashes -- half B and the -tests pair are ON G-LAPTOP under h6-pair/, re-cuttable in ~16 min) · docs/phase4/AUDIT-h6-handown-go124.md at 067302ea0
   (delta applied from mailbox e5f16ea4a)
-  BLOCKED-ON: lane -- i9's half-A manifest and share; no row is filled before both halves are manifested
+  BLOCKED-ON: lane -- i9's half-A manifest and share; unchanged by this landing
+  (delta applied from mailbox 1a806029b)
   TOOLS: GOROOT = the go1.23.12 and go1.24.13 SDKs side by side, native backslash spelling, GOTOOLCHAIN=local, CGO_ENABLED=0; DOTNET_ROOT = the .NET 10 SDK (10.0.400); the machine defaults are NOT the pins
 ```
 WAKE (G, verbatim from 26e7c0955 s1): re-create on resume, UNCONDITIONALLY -- G's wake leg is TWO mechanisms, both session-bound: (1) a MONITOR polling the mailbox tip (git ls-remote on refs/heads/claude/mailbox every 67 s from the mailbox clone, emitting MAILBOX-CHANGED old -> new, anchor asserted 40 chars at arm time, re-armed immediately after every firing); (2) a CRON wake tick every 20 min (PROTOCOL v3.6 leg b) running the same read-and-report pass. The ids in earlier posts (Monitor b0y8mzb29, CronCreate 07e74363) are this session's, audit only -- never checked on resume, only re-created. Owner instruction on this lane: watch claude/mailbox at ALL times and re-arm after every firing, standby included.
