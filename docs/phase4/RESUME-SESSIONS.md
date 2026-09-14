@@ -11,11 +11,10 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-13 15:55 — C1, G, i9, C2 blocks folded verbatim from their mailbox posts (R pending: standby); COORD's section complete from the coordinator's
-> own records; lane sections carry what COORD holds and are marked `{PENDING: lane STATE BLOCK}` until each
-> lane's block (ordered at mailbox `7ff30f203`, due 16:30) replaces them. Train 47 run 8 was in LEG 3 at
-> this revision; the landing SHA, the version branch and the post-landing docs commit are filled at the
-> landing.
+> **Status of this revision:** 2026-09-14 18:45 -- COORD ONLINE (mailbox `2cd01f8d6`; handover block 15). Every lane's STATE BLOCK
+> is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
+> every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
+> adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
 
 ---
 
@@ -28,7 +27,7 @@
 | C1 | cloud (linux) | runtime hand-own re-derives (C1-1 landed in the rung, C1-2 sizing), applier self-tests | Fable 5.1 / high | delicate hand-own work |
 | C2 | cloud (linux, no PowerShell, disk-constrained) | H5c instrument authoring (cannot execute .ps1 — COORD parse-gates, i9 runs), H10 map re-derivation, darwin plan | Fable 5.1 / high | design + instrument authoring |
 | G | G-LAPTOP (+WSL linux arm) | linux-arm gates, H6 alias/liveness census, filtered-sweep rule | Opus / high | execution and census work |
-| R | R-LAPTOP (TRAVEL STANDBY from 2026-09-13; spurts only) | readings and rulings in spurts; owner of reconvert-deletions.ps1 and the rehearsal instrument | Fable 5.1 / high (spurts) | standby |
+| R | R-LAPTOP (TRAVEL STANDBY from 2026-09-13; spurts only) | SAVE-STATE STEWARD (fold by script, verify, push); readings and rulings in spurts | Opus 5 / high as steward; Fable 5.1 in a ruling spurt | standby |
 
 **Session-bound ids are not state (C2 56e93e709 §5, i9 59e0e3099 §1–§3).** Every Monitor id and every wake-loop id
 (CronCreate job or Routine) in any block below belongs to the session that created it and is dead to a resumed
@@ -68,7 +67,7 @@ READ FIRST, in this order (all on GitHub):
   6. .claude/coord-scripts/ -- train47/ (assembler, land, self-check, run records), train48/ (the
      derived template), coord-mailbox-post.ps1 (the post tool), coord-resume-verify.sh.
 
-OWNER HAND, FIRST (2026-09-13 17:55): the coordinator INSTRUMENTS -- .claude/coord-scripts/ (the post tool, the train-46/47/48 assemblers, land, self-check, census and rehearsal scripts, the run records; 1,454 files, 1.9 MB) -- are LOCAL to the i7 only: 33 of them carry the scrub pattern inline and 220 carry a username path, which the security order HOLDS for the owner's word. A resume on the i7 has them on disk; a resume on ANOTHER machine needs either the owner's word to push them to a private branch (after the pattern moves to a local sec/ file) or a copy of the directory from the i7. Ask the owner before doing either.
+OWNER HAND, FIRST: the coordinator INSTRUMENTS. On the i7 they are on disk, untracked, at .claude/coord-scripts/ (with the run records and the local sec/ directory). On ANY OTHER machine take the scrubbed copy on claude/coord-instruments (.claude/coord-scripts/, 319 files: the post tool, the resume verifier, the train-46/47/48 assemblers with the union-slot files, the save-state scripts; username paths environment-derived, so a .py path spelled ~/... needs os.path.expanduser at the call site; records and sec/ excluded) -- a record copy first, a runnable one second. The scrub token file sec/tok-dash.txt is supplied by the owner and never printed or posted. GPG: the owner primes the box's gpg-agent at the keyboard (Kleopatra/pinentry; default-cache-ttl and max-cache-ttl 604800 in gpg-agent.conf) before the first signed landing.
 OWNER HANDS needed on a NEW machine before you can act fully: (a) the scrub token file (sec/tok-dash.txt,
 three tokens; local-only by design, never printed or posted) -- ask the owner; (b) GPG signing key for
 merges/master landings and tags; (c) the two SDK pins installed side by side under %USERPROFILE%:
@@ -93,56 +92,63 @@ pushed surface -- nicknames only (R-LAPTOP, G-LAPTOP, i9, i7, C1, C2); no userna
 list (branches and SHAs of unscrubbed content) is in HANDOVER-coordinator.md and is never pushed and never
 pruned; the post tool's FLEET GUARD and the assembler's census enforce it.
 
-SHUTDOWN 2026-09-13 22:40 (owner order at 98 percent weekly usage): every lane went OFFLINE after a final push sweep,
-  a FINAL STATE BLOCK (folded below, each section names its post) and disarming. RESUME ORDER: (1) COORD re-arms the
-  mailbox Monitor + the wake loop, reads the mailbox since the last OFFLINE post, posts COORD online with this position;
-  (2) C1 row 20 (internal/sync/hashtriemap.cs re-derive on f0f8826894) -> i9 rebuilds -> the H5 GATE read again;
-  (3) the scrubbed instruments push -- DONE 2026-09-14: claude/coord-instruments 2792447c54, unsigned, handover block 14; (4) train 48 run 3.
+RESUME 2026-09-14 18:26 -- COORD ONLINE (mailbox 2cd01f8d6ba1464d3ee0ee4d8ae9639f4a14532a; handover block 15). RESUME ORDER of the
+  2026-09-13 22:40 shutdown: (1) re-arm + read + post COORD online -- DONE 18:26; (2) C1 row 20 -> i9 rebuild -> the H5 GATE read
+  again -- IN PROGRESS (C1 first in the bring-up order); (3) the scrubbed instruments push -- DONE 2026-09-14 morning
+  (claude/coord-instruments); (4) train 48 run 3 -- on the i7, after the template's round-5 verification.
+  OWNER PROTOCOL (2026-09-14): lanes come up ONE AT A TIME from the PASTE PROMPT fence in their section (C1, i9, C2, G, R); the
+  owner primes each Windows box's gpg-agent at the keyboard first and is otherwise NOT at any lane keyboard -- lane requests that need
+  a person are OWNER-HAND posts to COORD, relayed to the owner in this session; NO CHIPS anywhere; model/effort per prompt header.
 
-STATE AT THIS REVISION (2026-09-13 21:45, weekly usage 94 percent -- SAVE-STATE MODE):
-  BRANCH: claude/coord-handover fa0cdc87f40dee75d67dc4c8cdf02b44a4eb0495 yes landed -- the handover log (block 10 + this file; block 11 = this refresh)
-  BRANCH: claude/mailbox cc25da5170264ec3b05bd8e5a69a005385c068fd yes transport -- rotated 2026-09-13 02:36
-  BRANCH: claude/version-go1.24.13 f0f88268945269530d47d9775f4a0772bf6f3a16 yes cut -- the H5 branch: checkpoint 1 (dc78fb0df8: seeded reconvert at go1.24.13 + H5c; the C1-1/C1-2 appliers) then C1's relocation (c8d50e014f moves/deletes/two registry keys; a4ece44fff namespace/class lines). NOT the H5 gate.
+STATE AT THIS REVISION (2026-09-14 18:45 -- new usage week; the save-state refresh runs after every landing/ruling and at every wake tick):
+  BRANCH: claude/coord-handover aba784ac5c51c16ef6ec14f3cb27e8cc75d51362 yes landed -- the handover log (blocks 1-15) + this file
+  BRANCH: claude/mailbox 2cd01f8d6ba1464d3ee0ee4d8ae9639f4a14532a yes transport -- rotated 2026-09-13 02:36; COORD's read anchor is the tool's own
+  BRANCH: claude/version-go1.24.13 f0f88268945269530d47d9775f4a0772bf6f3a16 yes cut -- THE H5 GATE TREE: checkpoint 1 (dc78fb0df8) -> C1's relocation (c8d50e014f + a4ece44fff) -> CHECKPOINT 2 (c2345d7731: corrected H5c, both solutions load, guards PASS x2) -> C1's three H6 rows (f0f8826894). GATE RED by row 20 only (sync 7 x CS1929); unique unbuilt behind sync.
+  BRANCH: claude/c1-h6-rows f0f88268945269530d47d9775f4a0772bf6f3a16 yes accepted -- C1's branch AT the version tip; C1's row-20 commit lands HERE, i9 fast-forwards the version branch onto it
   BRANCH: claude/c1-h5-relocation a4ece44fff696e88c9d4a72059b12efaa3185a8a yes accepted -- the relocation source ref (landed on the version branch by fast-forward)
-  BRANCH: claude/c2-h5c-slnx-orphan b291530e95eaed62928488a89c8fd74934692b27 yes announced -- H5c: slnx guard + ORPHANED class + relocate REFUSED + report-only items; C2 is cutting the SELECTION fix on top (derive deselected from the emission; explanation gate = selection at both GOROOTs under the converter's printed tag set); i7 parse gate on every push
-  BRANCH: claude/laneR-docs-h6-skeleton f7015899042c7145715e48bb618101b19b737eb3 yes accepted -- the H6 audit skeleton at 145 rows == the version-branch census (R's record, G's amendments); lands on the VERSION BRANCH; train-48 seat 4 stays SHA-pinned at d18059950
-  BRANCH: claude/coord-runbook-h5-tags 5c4c5b94e57509a4a272294ef4f5bad322e9b1a1 yes announced -- runbook H5 in-stage amendment (one tag resolution; selection-based DELETE-DESELECTED gate; carry the regenerated stdlib slnx; go2cs.slnx follows moved packages); lands on master with the H5 gate docs commit
+  BRANCH: claude/c2-h5c-slnx-orphan b291530e95eaed62928488a89c8fd74934692b27 yes accepted -- H5c, the deletion instrument of record for this hop (one tag resolution; selection-based explanation gate; ORPHANED printed); C2's two ruled changes (R4) land on top; i7 parse gate on every push
+  BRANCH: claude/laneR-docs-h6-skeleton f7015899042c7145715e48bb618101b19b737eb3 yes accepted -- the H6 audit skeleton at 145 rows == the version-branch census (R's record, G's amendments; G fills it); lands on the VERSION BRANCH
+  BRANCH: claude/coord-runbook-h5-tags 5c4c5b94e57509a4a272294ef4f5bad322e9b1a1 yes announced -- runbook H5 in-stage amendment; lands on master with the H5 gate docs commit
   BRANCH: claude/c1-handown-address-guard 2b823dc951f20769296f03325764ddc1ed61aed3 yes accepted -- train 49 row (converter-guard)
   BRANCH: claude/c1-train49-guards 394de9fd684756d6e3aeed6975587720d3d73180 yes accepted -- train 49 rows (ValueClone vacuity; go2cs.slnx path guard)
-  BRANCH: claude/coord-instruments 2792447c542c43aa000376415e93719211aa74a4 yes announced (mailbox cc25da517) -- the scrubbed instruments copy on master 271300cea0, 319 files, UNSIGNED (gpg-agent held no passphrase 2026-09-14; COORD signs at landing); RESUME ORDER item (3) DONE, handover block 14
-  master tip: 271300cea0 (docs) over 1885bce69 (doctrine d) over 31fe4925d (TRAIN 47 LANDED 17:26). Train 48 assembles on 271300cea0.
-  THE LADDER: H5 in its next-wall loop on the version branch. Step 2 read (i9 7ae5355bb): the corpus solution LOADS (the
-    stdlib slnx is REGENERATED by the reconvert; the step-5 wall was the regenerated file not carried), runtime 0 errors,
-    8 errors in two packages (sync: hand-owns vs the 1.24 shape; weak: Pointer<T> visibility + Strong->Value), unique unbuilt;
-    H5c had DELETED five live purego files (its own tag resolution; C2 5c47976ea located it) -> i9 RESTORES them from the
-    preserved staging root, runs H5c on C2's fixed tip (DELETE-DESELECTED must read 0), appliers, builds, then CHECKPOINT 2
-    (+ src/go2cs.slnx following moved packages) announce-then-push; C1 cuts ONE commit on it (weak: public + Strong->Value;
-    sync re-derives against the 1.24.13 auto + the pinned Go read from the golang/go tag; the xor_generic relocation to
-    crypto/internal/fips140/subtle); i9 rebuilds the corpus solution -> THE H5 GATE READING. Then H6 (G fills the 145-row
-    audit from the PAIR: half A = i9's preserved three staging roots, half B + the -tests pair cut by G on G-LAPTOP from the
-    byte-identical binary e0b2a4c109053c6b (tree ddf7cb17c8, go1.24.13, -trimpath -buildvcs=false, hash equal on 3 boxes);
-    a side is a file the converter WROTE in that half (per-target run-window mtime); moved-package rows take the old-path
-    emission; ARRIVED rows have no outgoing side; half A moves to G-LAPTOP by share + sha256 manifest).
-  TRAIN 48 (template .claude/coord-scripts/train48/, i7-LOCAL -- see the OWNER HAND above): 18 rows pinned at origin
-    (table in coord-train48-assemble.sh; 217 derive ops in t48-derive.py; NOTES sections 17-23), rows 9/15 BOARD conflicts
-    PRE-RESOLVED by union slots (coord-train48-resolutions/), 18 seat-content arms (green at the union, red at the base),
-    online self-check 0 FAIL, dry-read 0 FAIL, rehearsal replay 18 clean. RUN 1 stopped at the A-assertions (0 arms -- the
-    fill point, now filled). RUN 2 launched 21:18 in worktree C:/go2cs-tmp-coord/t48-asm (detached at 271300cea0) from
-    coord-train48-assemble-run2.sh (md5 2ff36bc5e938) via launch-run2.sh; record coord-train48-assemble-run2.stdout with the
-    wrapper line `assembly exit=N`. On green: land-anchor census -> land (signed) -> read back -> prune seats -> resume refresh.
-    IF THE i7 IS LOST: the template is re-derivable ONLY from the local files -- the derive inputs are train47/ (also local);
-    the seat table, the allowed= rulings, the stack (13 on 11), the SHA-mode row 4 and the 18 arms are described in the
-    handover blocks 9-11 and the mailbox (817f98813, 46198c1b9 s4, 80c948a7f); re-cutting from those is a day's work.
-  TRAIN 49 board: C1 address guard + two guards (above), G's H6 gate c9c1b5f73 + liveness 44857cdf8, C2 sizing 43e0dff04,
-    trampoline map 4bc0c35b0, the array-length converter seat (unclaimed), the vocabulary gap (a .claude-shaped class).
-  OWNER HANDS OPEN: the coordinator instruments push decision (username paths + the scrub literal; this file's OWNER HAND
-    above); cloud allowlist for the dotnet builds host AND go.dev/dl (C1/C2 hold neither pinned Go SDK); R-LAPTOP
-    src/lane-r-packrace.ps1; the thermal-sentence host; delete claude/awesome-franklin-ba9agv; remote branch deletions
-    blocked at coordinator tooling; a fleet share for off-box copies of the pair roots.
+  BRANCH: claude/coord-instruments 2792447c542c43aa000376415e93719211aa74a4 yes announced (mailbox cc25da517) -- the scrubbed instruments copy on master 271300cea0 (319 files; unsigned; COORD signs at landing)
+  BRANCH: claude/c1-token-door-census-recut 93bf3403014efeacc9a99ea6aaa56975a3ba89d8 yes accepted -- train 48 row 13 (re-pinned by NOTES 25; stack-on=11)
+  BRANCH: claude/g-h6-completeness-gate c9c1b5f737c8808f2234e01671768d0cb7848685 yes accepted -- train 49, the H6 gate; OWES a one-line fix (check-handown-audit.ps1:324) as a commit ON TOP (R3 item 1)
+  BRANCH: claude/g-repoguard-liveness-set 44857cdf898ef5d0b04e4b14351ec33c18290a38 yes accepted -- train 49, liveness + finding-SET assertion
+  BRANCH: claude/c2-darwin-option2-sizing 43e0dff04ccb19bc4dc7f753e1719b41598ff441 yes accepted -- train 49, darwin option 2 sizing
+  BRANCH: claude/c2-darwin-trampoline-map 4bc0c35b01b0aff944c84f8433e105f81d6683c4 yes accepted -- train 49, the trampoline map
+  master tip: 271300cea0 (docs) over 1885bce69 (doctrine d) over 31fe4925d (TRAIN 47 LANDED 2026-09-13 17:26). Train 48 assembles on 271300cea0.
+  THE LADDER (runbook section 2): H0-H4a landed. H5 "seeded full reconvert" GATE red by ONE row on the version tip: the relocated
+    internal/sync/hashtriemap.cs carries the 1.23 surface (4 of 11 public methods -- the two carrying a GoRecv prefix hide from a
+    line-anchored grep; the gate's own 7 x CS1929 is the count that settles it, C1 5d90eb4221). RULED (2cd01f8d6 R1): C1 re-derives it
+    to the eleven 1.24 methods on the auto's receiver, init/initSlow for NewHashTrieMap, the managed-hashing design kept, the valueCell
+    holder for Swap accepted; ONE commit on claude/c1-h6-rows; COORD's targeted build arm on the i7 (worktree h5arm at the version tip:
+    unique -> sync/weak/internal/sync; positive control = the seven CS1929 on the gate tree) posts CS errors by name; i9 fast-forwards
+    the version branch, rebuilds src/go2cs-stdlib.slnx, reads the gate (sync compiles; unique MEASURED for the first time; both registry
+    guards PASS) = THE H5 GATE READING; then the H5 docs commit on master carries the runbook amendment. H6 (R2/R3): the pair is
+    .auto(1.23.12) vs .auto(1.24.13) per hand-own from ONE binary (e0b2a4c109053c6b, tree ddf7cb17c8, go1.24.13, -trimpath -buildvcs=false):
+    half A = i9's preserved staging roots, RE-CUT on G-LAPTOP by the recipe (a5534b5de s2 / c883a2dc7 s3) and verified by the three
+    per-target tree hashes i9 posts (the fleet share is WITHDRAWN as an H6 prerequisite); half B + the -tests pair on G-LAPTOP; a side is
+    a file the converter WROTE in that half; PRINCIPAL-EXISTENCE is the ruled test (8808a00ad); moved-package rows take the old-path
+    emission; row 20 is a RELOCATION with both sides (C2 9ad0f8a4a). G fills the 145 rows NOW, PRINCIPAL-CHANGED first, row 20 LAST
+    after C1's commit; one dated block per batch.
+  TRAIN 48 (template .claude/coord-scripts/train48/ on the i7 and, scrubbed, on claude/coord-instruments): 18 rows pinned at origin
+    (table in coord-train48-assemble.sh; derive ops in t48-derive.py; NOTES 17-25), rows 9/15 BOARD conflicts PRE-RESOLVED by union
+    slots, 18 seat-content arms. RUN 2 (21:18 on 2026-09-13) was KILLED at LEG D by the shutdown order -- not a landing candidate; its
+    record is coord-train48-assemble-run2.stdout. Round 5 (NOTES 25: row 13 -> claude/c1-token-door-census-recut, A-row13 re-written)
+    is PRESENT; RUN 3 launches on the i7 from a FRESH worktree at master 271300cea0 once the re-derive / self-check / dry-read read
+    0 FAIL. On green: land-anchor census -> land (signed) -> read back -> prune seats -> resume refresh. Train 48 is COORD's, not i9's.
+  TRAIN 49 board: C1 address guard + two guards (above), G's H6 gate + liveness (above), C2 sizing + trampoline map (above), the
+    array-length converter seat (unclaimed), the vocabulary gap (a .claude-shaped class), C1's census-slice fix (5f7fef6683).
+  OWNER HANDS OPEN: GPG prime at each Windows box at bring-up (i9, G-LAPTOP, R-LAPTOP; check the 604800 TTLs); cloud allowlist for the
+    dotnet builds host AND go.dev/dl (C1/C2 hold neither pinned Go SDK; the blobless two-tag fetch of golang/go is the interim);
+    R-LAPTOP src/lane-r-packrace.ps1; the thermal-sentence host; delete claude/awesome-franklin-ba9agv; remote branch deletions
+    blocked at coordinator tooling. The weekly-usage figure is not readable from a session: the owner reports it at check-ins.
 
-FIRST ACTION: re-arm the Monitor and the wake loop; read the mailbox from the last OFFLINE post; post "COORD online"
-with the position (H5 red by row 20; train 48 run 3 pending; the instruments push DONE 2026-09-14); then rule on whatever the lanes
-posted in mailbox order, starting with C1's row 20 and i9's rebuild.
+FIRST ACTION (a COORD resume from THIS revision): re-arm the Monitor (60 s; anchor = the last tip READ, 40 chars) and the wake loop
+(20 min, 9/29/49); read the mailbox from the coordinator post tool's own anchor (never from memory), every entry, whole; post "COORD
+online" naming this revision's handover block; then rule on the lanes' posts in mailbox order -- C1's row-20 announce (the build arm),
+i9's gate reading, G's H6 blocks, C2's two pushes (parse gate) -- and land train 48 when run 3 is green.
 ```
 
 ---
@@ -413,8 +419,8 @@ OFFLINE at `claude/c1-h6-rows f0f88268945269530d47d9775f4a0772bf6f3a16`.
   LANE: C2 (cloud container; converts, CANNOT compile -- no dotnet, no PowerShell, no .ps1 ever ran here)
   BRANCH: claude/c2-h5c-slnx-orphan b291530e95eaed62928488a89c8fd74934692b27 yes the H5c instrument of record
           for this hop -- checkpoint 2 was produced by it; parse-gated 0 errors on the i7 (10b8fb992)
-  BRANCH: 13 further claude/c2-* lane refs, all at origin, all announced; none carries unpushed work
-  BRANCH: 14 local seat MERGES from 1e37f1291 section 4.4 remain UNPUSHED BY RULING, awaiting a seat set;
+  NOTE (was a prose BRANCH line; re-keyed 2026-09-14 so the verifier counts SHA-bearing lines only): 13 further claude/c2-* lane refs, all at origin, all announced; none carries unpushed work
+  NOTE (was a prose BRANCH line; re-keyed 2026-09-14 so the verifier counts SHA-bearing lines only): 14 local seat MERGES from 1e37f1291 section 4.4 remain UNPUSHED BY RULING, awaiting a seat set;
           every one of their announced tips IS at origin, so nothing is stranded
   WORKTREE: 11 (10 lane + the dedicated single-branch mailbox clone), 0 dirty, 0 untracked
   NEXT: read the mailbox from the anchor below, then EITHER cut whichever of the two offered changes COORD
@@ -548,3 +554,4 @@ docs/phase4/HANDOVER-coordinator.md (the SECURITY section and blocks 9-12), and 
 - 2026-09-13 22:32 -- H5 GATE READ on f0f8826894: red by row 20 only; C1 re-derives internal/sync/hashtriemap.cs; i9/G NEXT accordingly; version-branch pin re-read
 - 2026-09-13 22:40 -- CLEAN SHUTDOWN (owner order 22:35 at 98 percent): COORD SHUTDOWN banner + resume order in the COORD section; handover block 13; lanes' FINAL STATE BLOCKS folded as they arrive
 - 2026-09-14 -- instruments push executed: claude/coord-instruments 2792447c54 announced at mailbox cc25da517; RESUME ORDER item (3) done; COORD remains OFFLINE (Monitor + wake loop disarmed)
+- 2026-09-14 18:55 -- COORD ONLINE (mailbox 2cd01f8d6): the COORD section rewritten to the resume position (pins re-read at origin; seven train-48/49 and instrument pins added); section 0's R row to the steward role; C2's two prose BRANCH lines re-keyed to NOTE so the verifier counts SHA-bearing lines only (content unchanged; it read missing=2 at aba784ac5c); the fleet protocol amended by owner order (lanes without a keyboard, no chips, GPG prime); handover block 15. The lane PASTE PROMPT fences and the R1-R5 key re-derivations land in the next commit.
