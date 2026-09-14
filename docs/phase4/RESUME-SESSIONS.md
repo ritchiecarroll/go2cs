@@ -94,9 +94,9 @@ list (branches and SHAs of unscrubbed content) is in HANDOVER-coordinator.md and
 pruned; the post tool's FLEET GUARD and the assembler's census enforce it.
 
 STATE AT THIS REVISION (2026-09-13 15:45):
-  BRANCH: claude/coord-handover d504f09ddc74609a18bc8c7ca6d60c36e711126b yes landed -- the handover log + this file
+  BRANCH: claude/coord-handover affa083ecf72c6785820613e9619d5610763145c yes landed -- the handover log + this file
   (the reproduction ref coord-train47-union, dd021ff5b, was DELETED after the landing at 17:27; its tree 161af6c44 is master's)
-  BRANCH: claude/mailbox f2f6240a123bf73341cf46f3e3f1849f98d4be21 yes transport -- rotated 2026-09-13 02:36
+  BRANCH: claude/mailbox 97f2829c2ea66ca347ef33b5bec606ad4ed8d0c6 yes transport -- rotated 2026-09-13 02:36
   claude/version-go1.24.13 fast-forwarded to 271300cea at 17:52 (docs + doctrine only; the H5 set lands on it).
   master tip at this revision: 271300cea (docs commit) over 1885bce69 (doctrine d) over 31fe4925d (TRAIN 47 LANDED 17:26, tree 161af6c44); train 47's base was a02ac3df3.
   BRANCH: claude/version-go1.24.13 dc78fb0df87a8eabe3449965c6bbbabe6359989a yes created -- the H5 branch, created from the landed SHA; the H5 set (088f8778f, ff54907996, d4e40e28b) targets it, never master
@@ -370,7 +370,7 @@ branches are NOT pushed -- never scrub-censused -- and are preserved in a verifi
   BRANCH: claude/g-b1-box-design f632a942bb9ca67cbc8412ee9f3f6516fdc281b4 yes stale -- REMOTE tip; G's local 6815eba00 DIVERGES and the KICKOFF says push nothing here
   BRANCH: claude/laneR-docs-h6-skeleton c2b699dafc3c5805b69caba1ddc82f86db4f356b yes accepted -- R's H6 audit skeleton, G's mcleanup.cs row 77: 147 rows set-identical to the checkpoint census; re-cut to 145 after C1's relocation commit (two deletes, three moves), ONE dated block; the mgc_impl.cs row only after train 48 lands and master merges into the version branch (46198c1b9 section 5)
   LOCAL-ONLY: 20 branches (listed in claude/g-census-2026-09-13) not-scrub-censused-so-not-pushed preserved: bundle g2-state/g-local-only-2026-09-13.bundle (2,090,187 bytes) sha256 718de5f7d40da349 -- verify "is okay", 20 refs, all 27 prerequisites in origin/master (restores from an origin-only clone); on the same single volume as the clone
-  WORKTREE: G-LAPTOP go2cs/.claude/worktrees/row-harvest-2-1f7b91 claude/g-h6-completeness-gate 0 uncommitted -- tree clean, every branch above on origin
+  WORKTREE: G-LAPTOP go2cs/.claude/worktrees/row-harvest-2-1f7b91 claude/g-handown-metadata-t48-r47 0 uncommitted -- tree clean, every branch above on origin (branch name corrected per G 83eccc3e31; the path and the clean reading were exact)
   NEXT: after C1's relocation commit is read back at origin: re-measure the hand-own census at the version-branch tip (expect 145; falsifiers 144 and 146 named in G fd362f1af), re-cut the skeleton rows to the moved paths (internal/sync/hashtriemap.cs, weak/pointer.cs, crypto/internal/fips140/alias/alias_impl.cs; xor.cs and the whitebox rows OUT of the table, their provenance in the dated block) in ONE dated block carrying the track distinction and ruling 46198c1b9 section 5; annotate in the reason cell, class column blank until H6: PRINCIPAL CHANGED x2 (hashtriemap.cs, pointer.cs) and RE-POINT x1 (runtime/mbitmap_impl.cs: getgcmask -> pointerMask, mask lines identical per i9 4620838568, ruled 3f54a3253 -- NOT principal-changed); the mgc_impl.cs row only after train 48 lands on master and master merges into the version branch
   READ-FIRST: mailbox 46198c1b9 (the six orphan dispositions + the order) with its corrections 5b5e91b74 (+283/-1) and 3f54a3253 (re-cut shape (a)(b) confirmed; row 76 RE-POINT) · G's own fd362f1af (prediction + edit shape) · dd9ea4a1d + 814e227a1 (the H6/goexperiment rulings) · docs/phase4/CENSUS-g-laptop-2026-09-13.md · src/check-handown-audit.ps1
   BLOCKED-ON: nothing. The seat-6 re-base landed (35fe4e016 on origin) and the G-LAPTOP .git/index.lock item is DISCHARGED (G f2f6240a1: absent at the parent clone, the worktree gitdir and the mailbox clone; every git op works). Waiting only on C1's relocation commit for the re-cut; not blocked
@@ -408,3 +408,4 @@ PROTOCOL: as COORD's section.
 - 2026-09-13 18:30 — train 48 pinned and self-checked online (0 FAIL); rows 11-19 proposed; H5 proper in step 2 on the version branch.
 - 2026-09-13 19:00 -- BRANCH pins re-read at origin by refresh-resume.py; i9's version-branch checkpoint, C2's H5c cut, C1's three train-48 refs and G's skeleton tip added; NEXT per lane per mailbox 46198c1b9 (the six orphan dispositions); handover block 9
 - 2026-09-13 19:15 -- BLOCKED-ON re-measured for every lane (all four were stale: G f2f6240a1 caught its own -- a false BLOCKED-ON costs the session); G's NEXT corrected to RE-POINT x1 for mbitmap_impl.cs per 3f54a3253; READ-FIRST re-pointed at the latest rulings per lane
+- 2026-09-13 19:25 -- G's WORKTREE key names its real branch (G 83eccc3e31); note: WAKE is a paragraph outside the fence by design, not a missing key
