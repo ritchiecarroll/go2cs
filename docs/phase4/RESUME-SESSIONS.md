@@ -94,12 +94,12 @@ list (branches and SHAs of unscrubbed content) is in HANDOVER-coordinator.md and
 pruned; the post tool's FLEET GUARD and the assembler's census enforce it.
 
 STATE AT THIS REVISION (2026-09-13 15:45):
-  BRANCH: claude/coord-handover 7c76f343e5bd335c7bc837d1df5f18243e3697fd yes landed -- the handover log + this file
+  BRANCH: claude/coord-handover 8c4b9646ded7ca80a2e7a43afcaf882c7bbf2a06 yes landed -- the handover log + this file
   (the reproduction ref coord-train47-union, dd021ff5b, was DELETED after the landing at 17:27; its tree 161af6c44 is master's)
-  BRANCH: claude/mailbox 7ff30f203cf9f13c5112658802ada4a6fbd8dee7 yes transport -- rotated 2026-09-13 02:36
+  BRANCH: claude/mailbox 5b5e91b7420c728fc6dc0ee53101ccabb823c249 yes transport -- rotated 2026-09-13 02:36
   claude/version-go1.24.13 fast-forwarded to 271300cea at 17:52 (docs + doctrine only; the H5 set lands on it).
   master tip at this revision: 271300cea (docs commit) over 1885bce69 (doctrine d) over 31fe4925d (TRAIN 47 LANDED 17:26, tree 161af6c44); train 47's base was a02ac3df3.
-  BRANCH: claude/version-go1.24.13 31fe4925d055537dbb48c343f726e027631f6aa1 yes created -- the H5 branch, created from the landed SHA; the H5 set (088f8778f, ff54907996, d4e40e28b) targets it, never master
+  BRANCH: claude/version-go1.24.13 dc78fb0df87a8eabe3449965c6bbbabe6359989a yes created -- the H5 branch, created from the landed SHA; the H5 set (088f8778f, ff54907996, d4e40e28b) targets it, never master
   TRAIN 47: fifteen seats (table in .claude/coord-scripts/train47/coord-train47-assemble.sh) on base
     a02ac3df3; union tree 161af6c44; runs 4-7 refused on the instrument (each a real defect, each fixed
     with a self-check lesson: LD1, LD2, LR1, LA1, LL1); RUN 8 launched 14:12 = the landing candidate.
@@ -204,15 +204,7 @@ line; then rule on whatever the lanes posted while you were down, in mailbox ord
   WORKTREE: job-i9-train37-pprof detached 9 write-tree branch + bundle; HEAD unmoved
   WORKTREE: job-i9-lift-accessibility claude/i9-funcinfo-bridge 1 write-tree branch + bundle; HEAD unmoved
   WORKTREE: mailbox-i9-clone6 claude/mailbox 1 never-push content, not bundled; the ref is the scrub order's and the content is unread
-  NEXT: nothing blocking -- the rung is measured and idle. On resume: (1) re-create the wake leg and the
-        Monitor UNCONDITIONALLY (see the WAKE key); (2) read the mailbox delta from f036d552f; (3) the
-        retained scratch rung1-scratch-postrung carries H5c + C1-1 + C1-2 amended (54ce45d9b3) and builds
-        with exactly 4 errors, all m.mWaitList in windows/lock_spinbit.cs at 220/227/227/233, which are
-        C1-2b's input and NOT a defect. C1-2b (ff54907996) is a hop commit for version-go1.24.13 and is
-        deliberately NOT applied to the scratch. Re-verify with
-        `apply-h5-c1-2-member-bill.sh --verify <scratch>/src/core <go1.24.13>` (idempotent, expects
-        POST-CONDITION MET) before trusting the tree.
-  (delta applied from mailbox 839a8d926)
+  NEXT: when C1 announces the relocation commit on claude/version-go1.24.13: merge it and C2's claude/c2-h5c-slnx-orphan (one file, +283/-1 on the H5-set tip), rebuild go2cs.exe, seeded reconvert (the seed carries the hand-owns at their new homes; expect .cs.auto siblings beside them and placeholders in fips140/alias alias.cs and runtime mbitmap.cs), H5c -Apply (expect 14 slnx entries removed == 14 projects gone, ORPHANED 0), the appliers, the three builds -- the CORPUS SOLUTION reading is the H5 GATE reading; a red sync or weak is the H6 wall named by file -- then both registry guards --- PASS x2 / 0 SKIP and the census (expect 145); commit, announce, push, read back (mailbox 46198c1b9 section 3)
   READ-FIRST: mailbox f036d552f (this lane's last post) · 9457d56c0 (the runtime readings: all three
         tables at 44, isWaitingForSuspendG throws nowhere, and the red control that reproduces the
         truncation at length 37 with a GREEN build) · 8c0f26247 (C1-2b verified against the real
@@ -271,15 +263,12 @@ STATE BLOCK (C1, 2026-09-13 15:39; push sweep: 13 of 13 branches already on orig
   BRANCH: claude/awesome-franklin-ba9agv 21222f2e86468e2a640236218073427522e99e66 yes superseded -- session-designated branch, same tip as the superseded gctestisreachable; no unique work; owner deletes
   BRANCH: claude/c1-mfinal-mint-door-clean 3f1612524a764fbc0732e5b44d511a4a698fd1c9 yes accepted -- mfinal pointer-mint door named per site, the clean re-cut
   BRANCH: claude/c1-mfinal-mint-door 0dab478581d78eb39a23c08a8ec232672009215a yes superseded -- pre-re-cut; superseded by -clean
+  BRANCH: claude/c1-token-door-census-stacked b4914e878e7b4f0347c217ce028b7e4ccbc1b6a1 yes accepted -- train-48 row 11, the token-door census RE-CUT on top of row 13 (c2-census-goroot-fix-clean); stack-on=13
   LOCAL-ONLY: c1-stranded-2026-09-13 a5aa199100e54a3c4eeddc447357a2c1e845f5e5 a post-tool commit stranded on a stale base; content superseded by the delivered entry ddcfde091 -- no bundle needed
   WORKTREE: C1 home /go2cs claude/c1-h5-rederive-patch 0 clean at the pushed tip
   WORKTREE: C1 home /c1-armA detached 2e6cf71e4 0 reachable from origin/claude/c1-board-goroot
   WORKTREE: C1 home /c1-armB detached 449ecce7a 0 reachable from origin/claude/g-generic-alias-recut
-  NEXT: nothing owed. The three H5 pieces are delivered, announced, read back and measured by i9
-        (build 100 -> 4 -> 0, join SHIFTED 14 -> 0, all three tables at 44 from the CLR). The one open
-        C1 item is to carry ff54907996 onto version-go1.24.13 when COORD creates it at the landing, and
-        to re-run `go test -count=1 ./...` in src/go2cs THERE to see that guard go green.
-  (delta applied from mailbox cf06dafee)
+  NEXT: ONE commit on claude/version-go1.24.13 on top of the checkpoint, unsigned by owner authorization, announce-then-push: git mv the checkpoint's auto internal/sync/hashtriemap.cs and weak/pointer.cs to .cs.auto; git mv internal/concurrent/hashtriemap.cs -> internal/sync/, internal/weak/pointer.cs -> weak/, crypto/internal/alias/alias_impl.cs -> crypto/internal/fips140/alias/; git rm vendor/golang.org/x/crypto/sha3/xor.cs, internal/concurrent/hashtriemap_whitebox.cs and the two old .cs.auto siblings; registry keys crypto/internal/alias -> crypto/internal/fips140/alias and getgcmask -> pointerMask with the mbitmap_impl.cs body renamed; nothing else. Read-back: the two guards name ZERO entries beside the committed corpus (mailbox 46198c1b9 sections 1 and 3)
   READ-FIRST: mailbox 8be44bbc0a (C1-2b ruling) 486a3926a (the explicit-length amendment) b3a32e52d +
         82de2fc7c (the corrected bill) ; i9 c2b26c50b (pre-cut baseline) 9457d56c0 (CLR readings)
         8c0f26247 + f036d552f (C1-2b verified, three flavours) ; C2 c441e195a (the .array bound)
@@ -316,7 +305,7 @@ WAKE (C1, verbatim from cf06dafee):
   BRANCH: claude/c2-h10-map-rederivation 41c1d1d28ef17381453d86899192bf1905b3f464 yes accepted -- H10 shard-map re-derivation + DATA record; timings read by column name, the plan-through-driver gap struck after i9 measured it
   BRANCH: claude/c2-darwin-trampoline-map 4bc0c35b01b0aff944c84f8433e105f81d6683c4 yes accepted -- darwin trampoline guard scores the TRANSFORM not containment, + the dated DESIGN §1.2 amendment; steps 2-3 wait on the hop per COORD
   BRANCH: claude/c2-h10-dispatch-driver 02b87b501d4bd5cf88d64d0c830b671d6098b642 yes accepted -- the H10 per-row dispatch driver; map gains a machine-readable plan
-  BRANCH: claude/c2-h10-shardmap-projection 0b24685bc2aad38a5a025b5145d298c65a56b0ee yes cut -- the go1.24.13 H10 shard-map projection; BLOCKED awaiting train 48's base for its AMENDMENTS block
+  BRANCH: claude/c2-h10-shardmap-projection a633896bf69d554f33b19b7a574466175ece32db yes cut -- the go1.24.13 H10 shard-map projection; BLOCKED awaiting train 48's base for its AMENDMENTS block
   BRANCH: claude/c2-darwin-option2-sizing 43e0dff04ccb19bc4dc7f753e1719b41598ff441 yes cut -- sizing of the darwin run layer's option 2, at a02ac3df3
   BRANCH: claude/c2-h6-crosscheck 191164e7a55d95755fd5d87c984ec7680ba1c298 yes cut -- C2's dated cross-check block on the H6 hand-own package-alias census
   BRANCH: claude/c2-board-peros-nested-hazard a0496fb937f337843e0e9f77b9969bd238a1d80d yes cut -- BOARD: DESIGN-peros-roster.md 7's nested table silently loses 5 of 11 floors
@@ -345,6 +334,7 @@ WAKE (C1, verbatim from cf06dafee):
   BRANCH: claude/c2-q56-lift 0ac8a607cf6db2832f1dbcbb74cb1d0a0b327ae4 yes unclassified -- ON ORIGIN but NOT in C2's state block (an older ref; state unknown to COORD; C2 classifies or prunes it; SHA read from origin 18:05)
   BRANCH: claude/c2-recon-go124 90a020f906f40d7abb41a81d0fc3e4c8a7affbc0 yes unclassified -- ON ORIGIN but NOT in C2's state block (an older ref; state unknown to COORD; C2 classifies or prunes it; SHA read from origin 18:05)
   BRANCH: claude/c2-runlayer-pin e058910632b364c9fab644557c95f73e121aecb3 yes unclassified -- ON ORIGIN but NOT in C2's state block (an older ref; state unknown to COORD; C2 classifies or prunes it; SHA read from origin 18:05)
+  BRANCH: claude/c2-h5c-slnx-orphan a2fad6fb4b4011baa0cb694e67bc3fee7ee4e870 yes accepted -- H5c: DELETE-ABSENT packages' slnx Project entries removed in -Apply (keyed on no surviving .csproj, accepted with the divergence), ORPHANED-HAND-OWN class refuses until every orphan has a disposition; one file on the H5-set tip; parse-gated on the i7 0 errors (46198c1b9 section 4)
   LOCAL-ONLY: c2-h5c-work 088f8778f6ce605f66ca6f2388068d7505b88d16 local alias, SHA identical to origin/claude/c2-h5c-apply-amendment so nothing is unpushed; no bundle cut because no bundle is needed none
   LOCAL-ONLY: refs/preserve/c2-container/** (28 refs, 251 commits) 036894085a1f778c not pushed -- historical container preserve namespace 08-28..09-06, security gate clean, all 13300 paths origin-reachable, zero unique content; a bundle in an ephemeral container preserves nothing so AWAITING YOUR RULING: push under one namespace or accept loss 036894085a1f778c
   WORKTREE: <C2-HOME>/go2cs claude/jolly-lovelace-j0sk1t 0 clean-at-landed-tip
@@ -357,8 +347,7 @@ WAKE (C1, verbatim from cf06dafee):
   WORKTREE: <C2-HOME>/dswt claude/c2-darwin-option2-sizing 0 clean-at-pushed-tip
   WORKTREE: <C2-HOME>/rbwt claude/c2-shardmap-repair 0 clean-at-pushed-tip
   WORKTREE: <C2-HOME>/mbx-clone claude/mailbox 0 separate single-branch clone, mailbox transport only
-  NEXT: nothing blocking. On resume: (1) re-create the wake Routines and the Monitor UNCONDITIONALLY (WAKE key above); (2) read the mailbox delta from the tip, IN FULL, every entry -- a heading scan is a small-N skim (i9 a6580dc67); (3) if COORD has assigned the CONVERTER SEAT for the array-length rule (486a3926a §3), its footprint is measured in c441e195a §1-§2: 21 bare .array() sites, one short, the failing form being a len(<other declaration>) length with exactly two instances in the whole go1.24.13 stdlib. Darwin work starts from 4bc0c35b01b0aff944c84f8433e105f81d6683c4.
-  (delta applied from mailbox 0d8088e2b)
+  NEXT: nothing owed; row 17 re-pinned to the origin tip of claude/c2-h10-shardmap-projection by the derive; unclaimed offers stand (the array-length converter seat; Darwin steps 2-3 after the hop); the -Orphan flag stays for the next hop, exercised today only by the control
   READ-FIRST: master 271300cea (the landing + docs) · claude/version-go1.24.13 (the H5 branch; C2's 088f8778f merges clean onto it per i9 b529aee6f) · mailbox 873492c2f (no re-base for mergeability) 486a3926a (array-length ruling + census dispatch) 9457d56c0 (CLR readings, red control) 1e37f1291 + this post (watcher claims withdrawn) · docs/phase4/BOARD-next-validation-candidates.md tail (C2's finding + amendment)
   (delta applied from mailbox 0d8088e2b)
   BLOCKED-ON: lane -- train 48's base for the projection's AMENDMENTS block on claude/c2-h10-shardmap-projection; the hop for darwin steps 2-3. Nothing owed from COORD.
@@ -406,9 +395,10 @@ branches are NOT pushed -- never scrub-censused -- and are preserved in a verifi
   BRANCH: claude/g-unfreeze-handown-recut ce2d9d082e5cbaba00674004c30cefb6e521c374 yes superseded -- second cut of seat 6, superseded by bb13897e6
   BRANCH: g-nilfunc-boxing 4b9513773fd4dd9dd05a482024c81af751f90051 yes stale -- older G work, on origin, no current claim
   BRANCH: claude/g-b1-box-design f632a942bb9ca67cbc8412ee9f3f6516fdc281b4 yes stale -- REMOTE tip; G's local 6815eba00 DIVERGES and the KICKOFF says push nothing here
+  BRANCH: claude/laneR-docs-h6-skeleton c2b699dafc3c5805b69caba1ddc82f86db4f356b yes accepted -- R's H6 audit skeleton, G's mcleanup.cs row 77: 147 rows set-identical to the checkpoint census; re-cut to 145 after C1's relocation commit (two deletes, three moves), ONE dated block; the mgc_impl.cs row only after train 48 lands and master merges into the version branch (46198c1b9 section 5)
   LOCAL-ONLY: 20 branches (listed in claude/g-census-2026-09-13) not-scrub-censused-so-not-pushed preserved: bundle g2-state/g-local-only-2026-09-13.bundle (2,090,187 bytes) sha256 718de5f7d40da349 -- verify "is okay", 20 refs, all 27 prerequisites in origin/master (restores from an origin-only clone); on the same single volume as the clone
   WORKTREE: G-LAPTOP go2cs/.claude/worktrees/row-harvest-2-1f7b91 claude/g-h6-completeness-gate 0 uncommitted -- tree clean, every branch above on origin
-  NEXT: re-base seat 6 claude/g-handown-metadata-t48 from bb13897e6c73f3bd8ded1598a4b3b1b668fa65df onto the train-47 landing SHA once run 8 lands
+  NEXT: after C1's relocation commit is read back at origin: re-measure the hand-own census at the version-branch tip (expect 145), re-cut the skeleton rows to the moved paths (internal/sync/hashtriemap.cs, weak/pointer.cs, crypto/internal/fips140/alias/alias_impl.cs; xor.cs and the whitebox removed) in ONE dated block carrying the track distinction and ruling 46198c1b9 section 5; mark hashtriemap.cs, pointer.cs and runtime/mbitmap_impl.cs PRINCIPAL CHANGED (i9 4620838568 reads pointerMask as a re-point, mask lines identical); the mgc_impl.cs row only after train 48 lands on master and master merges into the version branch
   READ-FIRST: mailbox 7ff30f203 (the save-state order), dd9ea4a1d + 814e227a1 (the H6/goexperiment rulings), f4c659e02 + b42438150 (i9's .auto and emission readings that score G's work), docs/phase4/CENSUS-g-laptop-2026-09-13.md, src/check-handown-audit.ps1
   BLOCKED-ON: landing (seat 6 re-base); owner hand -- G-LAPTOP .git/index.lock
   TOOLS: GOROOT = the go1.23.12 sdk in native backslash spelling; GOTOOLCHAIN unset (auto); DOTNET_ROOT = the dotnet10 side-by-side root (SDK 10.0.400; the machine default 9.0.316 fails net10.0 with NETSDK1045); python none
@@ -443,3 +433,4 @@ PROTOCOL: as COORD's section.
 - 2026-09-13 17:18 — C1 block delta (NEXT / READ-FIRST / BLOCKED-ON / WAKE verbatim; c1-h5-rederive-patch tip) applied from cf06dafee.
 - 2026-09-13 17:48 — LANDED: master 31fe4925d (train 47) + 1885bce69 (doctrine d) + 271300cea (docs: this file, the skill and the verifier now on master too); claude/version-go1.24.13 created; H4 closed.
 - 2026-09-13 18:30 — train 48 pinned and self-checked online (0 FAIL); rows 11-19 proposed; H5 proper in step 2 on the version branch.
+- 2026-09-13 19:00 -- BRANCH pins re-read at origin by refresh-resume.py; i9's version-branch checkpoint, C2's H5c cut, C1's three train-48 refs and G's skeleton tip added; NEXT per lane per mailbox 46198c1b9 (the six orphan dispositions); handover block 9
