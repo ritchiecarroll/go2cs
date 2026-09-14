@@ -346,38 +346,21 @@ STATE: your STATE BLOCK is the fenced block at the TOP of this section (keys LAN
 PROTOCOL: as COORD's section.
 ```
 
-## 5. G — linux arm and census (G-LAPTOP) — STATE BLOCK received 15:44 (mailbox f96225ea)
+## 5. G — linux arm and census (G-LAPTOP) — STATE BLOCK received (mailbox a5534b5de)
 
 ```
-You are lane G of the go2cs fleet (G-LAPTOP with a WSL linux arm; nickname G). Model: Opus, effort high.
-STATE BLOCK (G, 2026-09-13 15:44; push sweep: everything G owns is on origin; 20 pre-session local-only
-branches are NOT pushed -- never scrub-censused -- and are preserved in a verified bundle):
   LANE: G   MODEL: Opus/high   HOST: G-LAPTOP
-  BRANCH: claude/g-census-2026-09-13 31adad88c2ff17440b2b038f2a8aed86873599b6 yes accepted -- train-47 seat 12, the preservation census
-  BRANCH: claude/g-h6-completeness-gate c9c1b5f737c8808f2234e01671768d0cb7848685 yes accepted -- train 49, the H6 gate + go-test guard + BOM tolerance (counts the 32 never-written .cs.auto rows, i9's auto-discriminator.tsv)
-  BRANCH: claude/g-repoguard-liveness-set 44857cdf898ef5d0b04e4b14351ec33c18290a38 yes accepted -- train 49, network-path-split liveness + finding-SET assertion + joined-pass suppression
-  BRANCH: claude/g-fleet-patchid-census 9b78bfff61000f5ca4984f163503c182b5c1819e yes accepted -- train 48, the fleet-wide patch-id census (a census, not a gate)
-  BRANCH: claude/g-handown-metadata-t48 bb13897e6c73f3bd8ded1598a4b3b1b668fa65df yes superseded -- train-48 seat 6, the metadata un-freeze; OWES A RE-BASE once train 47 lands -- SUPERSEDED by the re-base below (G 8fef7f9a6)
-  BRANCH: claude/g-handown-metadata-t48-r47 35fe4e0167e044539245f7e4721a198fb35a98d0 yes accepted -- train-48 seat 6 RE-BASED onto the train-47 landing (G 8fef7f9a6; SHA read from origin)
-  BRANCH: claude/g-h6-alias-census 898cbfefe9527726198a40654d954a8ff4dead4b yes accepted -- train-47 seat 8, the H6 alias census; base of the C2/R declared stack
-  BRANCH: claude/g-generic-alias-recut 449ecce7a98b2a7acc2641ef82b9073d2566e143 yes accepted -- train-47 seat 7, the CollidingPackageNames generic arm
-  BRANCH: claude/g-hop-b-provisioning d7bf606f070b2faa3738f53afc3aea2b101fc206 yes cut -- STAGE0 hop-B provisioning record for this box; offered, unruled
-  BRANCH: claude/g-pprof-baseline 150b0264e85d52e5fe76f55d8b1dc75c89b546c7 yes cut -- runtime/pprof baseline before the pin moved; offered, unruled
-  BRANCH: claude/g-l3-testalias 1d49a34b6578d382fac77a7beca92cc9dc2f7cd7 yes cut -- the -tests MERGE alias contradiction; offered, unruled
-  BRANCH: claude/g-weak-rekey e7e976f9d4c5aac8b6e6a16c87d01015d2d1bb3a yes cut -- H4 re-key of crypto/internal/alias; offered, unruled
-  BRANCH: claude/g-unfreeze-handown-metadata 7078dbada7377dc195e84d5e3752d133093e2669 yes superseded -- earlier cut of seat 6, superseded by bb13897e6
-  BRANCH: claude/g-unfreeze-handown-recut ce2d9d082e5cbaba00674004c30cefb6e521c374 yes superseded -- second cut of seat 6, superseded by bb13897e6
-  BRANCH: g-nilfunc-boxing 4b9513773fd4dd9dd05a482024c81af751f90051 yes stale -- older G work, on origin, no current claim
-  BRANCH: claude/g-b1-box-design f632a942bb9ca67cbc8412ee9f3f6516fdc281b4 yes stale -- REMOTE tip; G's local 6815eba00 DIVERGES and the KICKOFF says push nothing here
-  BRANCH: claude/laneR-docs-h6-skeleton 067302ea09732cade2ef488a49fb7ab83410bd9d yes accepted -- R's H6 audit skeleton, G's mcleanup.cs row 77: 147 rows set-identical to the checkpoint census; re-cut to 145 after C1's relocation commit (two deletes, three moves), ONE dated block; the mgc_impl.cs row only after train 48 lands and master merges into the version branch (46198c1b9 section 5)
-  LOCAL-ONLY: 20 branches (listed in claude/g-census-2026-09-13) not-scrub-censused-so-not-pushed preserved: bundle g2-state/g-local-only-2026-09-13.bundle (2,090,187 bytes) sha256 718de5f7d40da349 -- verify "is okay", 20 refs, all 27 prerequisites in origin/master (restores from an origin-only clone); on the same single volume as the clone
-  WORKTREE: G-LAPTOP go2cs/.claude/worktrees/row-harvest-2-1f7b91 claude/g-handown-metadata-t48-r47 0 uncommitted -- tree clean, every branch above on origin (branch name corrected per G 83eccc3e31; the path and the clean reading were exact)
-  NEXT: HALF B IS CUT on G-LAPTOP (mailbox 695a04ba9: exit 0, three targets, 32 .cs.auto each, binary e0b2a4c1 re-hashed at the run, tree hashes + per-file manifests on this box; version.props seeded from the outgoing master verbatim). Next: pull i9's preserved half A (three staging roots) over the LAN by share and verify every sha256 against i9's manifest before reading a row (i9 posts the manifest first); then the H6 fill on G-LAPTOP under the pair rule (mailbox 80c948a7f): a side is a file the converter WROTE in that half (banner census), a moved-package row takes the 1.23.12 emission at the OLD path (internal/concurrent/hashtriemap.cs, internal/weak/pointer.cs) as its left side, xor_generic mirrors it on the 1.24 side until C1's relocation lands, per-target rows filled per target and named in the audit; PRINCIPAL-CHANGED rows first (row 145 weak/pointer.cs is in the red set), then the skeleton's order; the mgc_impl.cs row only after train 48 lands and master merges into the version branch
-  READ-FIRST: mailbox 46198c1b9 (the six orphan dispositions + the order) with its corrections 5b5e91b74 (+283/-1) and 3f54a3253 (re-cut shape (a)(b) confirmed; row 76 RE-POINT) · G's own fd362f1af (prediction + edit shape) · dd9ea4a1d + 814e227a1 (the H6/goexperiment rulings) · docs/phase4/CENSUS-g-laptop-2026-09-13.md · src/check-handown-audit.ps1
-  BLOCKED-ON: half A's manifest and share path from i9 (the copy is the last input; nothing else)
-  TOOLS: GOROOT = the go1.23.12 sdk in native backslash spelling; GOTOOLCHAIN unset (auto); DOTNET_ROOT = the dotnet10 side-by-side root (SDK 10.0.400; the machine default 9.0.316 fails net10.0 with NETSDK1045); python none
-Also owed: the filtered-sweep rule line (COORD's board).
-PROTOCOL: as COORD's section.
+  BRANCH: claude/laneR-docs-h6-skeleton 067302ea09732cade2ef488a49fb7ab83410bd9d yes accepted -- the H6 audit at 145 rows, the POPULATION OF RECORD (COORD d36509f41); prediction filed and met at the tip
+  BRANCH: claude/g-handown-metadata-t48-r47 35fe4e0167e044539245f7e4721a198fb35a98d0 yes accepted -- train-48 seat 6, the metadata un-freeze re-based onto the train-47 landing
+  BRANCH: claude/g-h6-completeness-gate c9c1b5f737c8808f2234e01671768d0cb7848685 yes accepted -- train 49, the H6 gate + go-test guard + BOM tolerance
+  BRANCH: claude/g-fleet-patchid-census 9b78bfff61000f5ca4984f163503c182b5c1819e yes accepted -- train 48, the fleet-wide patch-id census
+  BRANCH: claude/g-repoguard-liveness-set 44857cdf898ef5d0b04e4b14351ec33c18290a38 yes accepted -- train 49, network-path-split liveness + finding-SET assertion
+  LOCAL-ONLY: 18 refs (pre-session, never scrub-censused so never pushed) -- preserved in g2-state/g-local-only-2026-09-13.bundle on G-LAPTOP, 20 heads, 2,090,187 bytes, sha256 718de5f7d40da349, `git bundle verify` OK, all 18 at-risk tips present (0 missing, checked this hour)
+  WORKTREE: G-LAPTOP go2cs/.claude/worktrees/row-harvest-2-1f7b91 claude/g-handown-metadata-t48-r47 0 uncommitted -- tree clean
+  NEXT: verify i9's half-A manifest hash-by-hash on arrival, then fill the H6 rows starting from claude/laneR-docs-h6-skeleton 067302ea09732cade2ef488a49fb7ab83410bd9d, PRINCIPAL CHANGED rows first
+  READ-FIRST: 80c948a7f (per-row pair rule) · 77c30c9af (banner test WITHDRAWN, per-target run-window mtime is the test) · fc4ccab4b (the pair is an emission product) · 825c65222 (the 27/5 split and the five no-left-side rows) · docs/phase4/AUDIT-h6-handown-go124.md at 067302ea0
+  BLOCKED-ON: lane -- i9's half-A manifest and share; no row is filled before both halves are manifested
+  TOOLS: GOROOT = the go1.23.12 and go1.24.13 SDKs side by side, native backslash spelling, GOTOOLCHAIN=local, CGO_ENABLED=0; DOTNET_ROOT = the .NET 10 SDK (10.0.400); the machine defaults are NOT the pins
 ```
 WAKE (G, verbatim from 26e7c0955 s1): re-create on resume, UNCONDITIONALLY -- G's wake leg is TWO mechanisms, both session-bound: (1) a MONITOR polling the mailbox tip (git ls-remote on refs/heads/claude/mailbox every 67 s from the mailbox clone, emitting MAILBOX-CHANGED old -> new, anchor asserted 40 chars at arm time, re-armed immediately after every firing); (2) a CRON wake tick every 20 min (PROTOCOL v3.6 leg b) running the same read-and-report pass. The ids in earlier posts (Monitor b0y8mzb29, CronCreate 07e74363) are this session's, audit only -- never checked on resume, only re-created. Owner instruction on this lane: watch claude/mailbox at ALL times and re-arm after every firing, standby included.
 
