@@ -130,7 +130,7 @@ STATE AT THIS REVISION (2026-09-13 15:45):
     it discharges at H5 proper on the version branch after train 48 lands.
   OWNER HANDS OPEN: cloud allowlist for the dotnet builds host (C1/C2 cannot fetch the SDK), G-LAPTOP
     .git/index.lock, R-LAPTOP src/lane-r-packrace.ps1, the thermal-sentence host, delete
-    claude/awesome-franklin-ba9agv, delete claude/coord-train47-union after the landing, remote branch
+    claude/awesome-franklin-ba9agv, coord-train47-union DELETED at the landing 17:27; remote branch
     deletions blocked at coordinator tooling.
 
 FIRST ACTION: re-arm the Monitor and the wake loop; read the mailbox delta since the anchor in this file's
@@ -337,13 +337,11 @@ WAKE (C2, verbatim from 0d8088e2b):
 You are lane C2 of the go2cs fleet (cloud session, linux, no PowerShell, disk-constrained; nickname C2).
 Model: Fable 5.1, effort high. You author H5c/H10 instruments and designs; COORD parse-gates your .ps1
 on the i7 and i9 executes them.
-STATE (from COORD's records; replace with your STATE BLOCK):
-  claude/c2-h5c-apply-amendment 088f8778f (stacked: 01caa02a0 -> be9668d56 -> 088f8778f; item 11
-  closed); claude/c2-h10-map-rederivation 41c1d1d28; sizing 43e0dff04; trampoline map 4bc0c35b0;
-  driver 02b87b501 (train 48); darwin plan steps 2-3 hardware-free, wait on the hop.
-NEXT: train 48's base for the projection's AMENDMENTS block once the landing SHA exists; the per-file
-  emission manifest seat (converter) if COORD assigns it.
-BLOCKED-ON: owner hand -- the dotnet builds host allowlist.
+STATE: your STATE BLOCK is the fenced block at the TOP of this section (keys LANE / BRANCH / LOCAL-ONLY / WORKTREE /
+  NEXT / READ-FIRST / BLOCKED-ON / TOOLS) plus the WAKE paragraph under it.  That block is the ONLY record: COORD
+  re-reads every BRANCH pin from origin and re-derives NEXT, BLOCKED-ON and READ-FIRST from the LATEST ruling
+  at every refresh.  Nothing else in this section carries state; a NEXT found anywhere else is stale by
+  construction (i9 6520a98801, G f2f6240a1).  Read it top to bottom before the first command.
 PROTOCOL: as COORD's section.
 ```
 
