@@ -93,13 +93,19 @@ pushed surface -- nicknames only (R-LAPTOP, G-LAPTOP, i9, i7, C1, C2); no userna
 list (branches and SHAs of unscrubbed content) is in HANDOVER-coordinator.md and is never pushed and never
 pruned; the post tool's FLEET GUARD and the assembler's census enforce it.
 
+SHUTDOWN 2026-09-13 22:40 (owner order at 98 percent weekly usage): every lane went OFFLINE after a final push sweep,
+  a FINAL STATE BLOCK (folded below, each section names its post) and disarming. RESUME ORDER: (1) COORD re-arms the
+  mailbox Monitor + the wake loop, reads the mailbox since the last OFFLINE post, posts COORD online with this position;
+  (2) C1 row 20 (internal/sync/hashtriemap.cs re-derive on f0f8826894) -> i9 rebuilds -> the H5 GATE read again;
+  (3) the scrubbed instruments push (owner ruled 22:15, NOT DONE -- see handover block 13); (4) train 48 run 3.
+
 STATE AT THIS REVISION (2026-09-13 21:45, weekly usage 94 percent -- SAVE-STATE MODE):
-  BRANCH: claude/coord-handover ce2b89a7fdaf6a8a945aa33d824536776a84e3ae yes landed -- the handover log (block 10 + this file; block 11 = this refresh)
-  BRANCH: claude/mailbox 4e42736e1ef3e497548e6684859e63910ea34e71 yes transport -- rotated 2026-09-13 02:36
+  BRANCH: claude/coord-handover b3dd20a5adc76227c682962e0be9a069bc525a9e yes landed -- the handover log (block 10 + this file; block 11 = this refresh)
+  BRANCH: claude/mailbox 714a80be2e29bfa9707d16794f656ada7fae0a51 yes transport -- rotated 2026-09-13 02:36
   BRANCH: claude/version-go1.24.13 f0f88268945269530d47d9775f4a0772bf6f3a16 yes cut -- the H5 branch: checkpoint 1 (dc78fb0df8: seeded reconvert at go1.24.13 + H5c; the C1-1/C1-2 appliers) then C1's relocation (c8d50e014f moves/deletes/two registry keys; a4ece44fff namespace/class lines). NOT the H5 gate.
   BRANCH: claude/c1-h5-relocation a4ece44fff696e88c9d4a72059b12efaa3185a8a yes accepted -- the relocation source ref (landed on the version branch by fast-forward)
   BRANCH: claude/c2-h5c-slnx-orphan b291530e95eaed62928488a89c8fd74934692b27 yes announced -- H5c: slnx guard + ORPHANED class + relocate REFUSED + report-only items; C2 is cutting the SELECTION fix on top (derive deselected from the emission; explanation gate = selection at both GOROOTs under the converter's printed tag set); i7 parse gate on every push
-  BRANCH: claude/laneR-docs-h6-skeleton 067302ea09732cade2ef488a49fb7ab83410bd9d yes accepted -- the H6 audit skeleton at 145 rows == the version-branch census (R's record, G's amendments); lands on the VERSION BRANCH; train-48 seat 4 stays SHA-pinned at d18059950
+  BRANCH: claude/laneR-docs-h6-skeleton f7015899042c7145715e48bb618101b19b737eb3 yes accepted -- the H6 audit skeleton at 145 rows == the version-branch census (R's record, G's amendments); lands on the VERSION BRANCH; train-48 seat 4 stays SHA-pinned at d18059950
   BRANCH: claude/coord-runbook-h5-tags 5c4c5b94e57509a4a272294ef4f5bad322e9b1a1 yes announced -- runbook H5 in-stage amendment (one tag resolution; selection-based DELETE-DESELECTED gate; carry the regenerated stdlib slnx; go2cs.slnx follows moved packages); lands on master with the H5 gate docs commit
   BRANCH: claude/c1-handown-address-guard 2b823dc951f20769296f03325764ddc1ed61aed3 yes accepted -- train 49 row (converter-guard)
   BRANCH: claude/c1-train49-guards 394de9fd684756d6e3aeed6975587720d3d73180 yes accepted -- train 49 rows (ValueClone vacuity; go2cs.slnx path guard)
@@ -133,9 +139,9 @@ STATE AT THIS REVISION (2026-09-13 21:45, weekly usage 94 percent -- SAVE-STATE 
     src/lane-r-packrace.ps1; the thermal-sentence host; delete claude/awesome-franklin-ba9agv; remote branch deletions
     blocked at coordinator tooling; a fleet share for off-box copies of the pair roots.
 
-FIRST ACTION: re-arm the Monitor and the wake loop; read the mailbox delta since the anchor in this file's
-last handover block; post "COORD online" with the position (the rung, the train state) and the standing
-line; then rule on whatever the lanes posted while you were down, in mailbox order.
+FIRST ACTION: re-arm the Monitor and the wake loop; read the mailbox from the last OFFLINE post; post "COORD online"
+with the position (H5 red by row 20; train 48 run 3 pending; the instruments push owed); then rule on whatever the lanes
+posted in mailbox order, starting with C1's row 20 and i9's rebuild.
 ```
 
 ---
@@ -314,7 +320,7 @@ PROTOCOL: as COORD's section.
 
 ```
   LANE: G   MODEL: Opus/high   HOST: G-LAPTOP
-  BRANCH: claude/laneR-docs-h6-skeleton 067302ea09732cade2ef488a49fb7ab83410bd9d yes accepted -- 145 rows, still set-identical to the census at the NEW tip c2345d7731
+  BRANCH: claude/laneR-docs-h6-skeleton f7015899042c7145715e48bb618101b19b737eb3 yes accepted -- 145 rows, still set-identical to the census at the NEW tip c2345d7731
   (delta applied from mailbox 1a806029b)
   BRANCH: claude/g-handown-metadata-t48-r47 35fe4e0167e044539245f7e4721a198fb35a98d0 yes accepted -- train-48 seat 6, the metadata un-freeze re-based onto the train-47 landing
   BRANCH: claude/g-h6-completeness-gate c9c1b5f737c8808f2234e01671768d0cb7848685 yes accepted -- train 49, the H6 gate + go-test guard + BOM tolerance
@@ -404,3 +410,4 @@ docs/phase4/HANDOVER-coordinator.md (the SECURITY section and blocks 9-12), and 
 - 2026-09-13 22:12 -- CHECKPOINT 2 read back (version branch c2345d7731); i9/C1 NEXT for the gate rebuild; handover block 12
 - 2026-09-13 22:22 -- R's section carries the SAVE-STATE STEWARD paste prompt (owner order 22:15): fold by script, verify, unsigned commit, announce-then-push, report the tip; the fold scripts are pushed on claude/coord-instruments under .claude/coord-scripts/save-state/
 - 2026-09-13 22:32 -- H5 GATE READ on f0f8826894: red by row 20 only; C1 re-derives internal/sync/hashtriemap.cs; i9/G NEXT accordingly; version-branch pin re-read
+- 2026-09-13 22:40 -- CLEAN SHUTDOWN (owner order 22:35 at 98 percent): COORD SHUTDOWN banner + resume order in the COORD section; handover block 13; lanes' FINAL STATE BLOCKS folded as they arrive
