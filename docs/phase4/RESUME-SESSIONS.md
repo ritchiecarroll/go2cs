@@ -94,8 +94,8 @@ list (branches and SHAs of unscrubbed content) is in HANDOVER-coordinator.md and
 pruned; the post tool's FLEET GUARD and the assembler's census enforce it.
 
 STATE AT THIS REVISION (2026-09-13 21:45, weekly usage 94 percent -- SAVE-STATE MODE):
-  BRANCH: claude/coord-handover 749a681284b36224e25d790528cffab82489e6cd yes landed -- the handover log (block 10 + this file; block 11 = this refresh)
-  BRANCH: claude/mailbox 81849503e8720623ae70ffeae2aad9191ee7ab9d yes transport -- rotated 2026-09-13 02:36
+  BRANCH: claude/coord-handover 37ea67de252f8db1e9461448d9909e18b37a6bef yes landed -- the handover log (block 10 + this file; block 11 = this refresh)
+  BRANCH: claude/mailbox 81a6b950d56945692e77cef47d88cd18568767d4 yes transport -- rotated 2026-09-13 02:36
   BRANCH: claude/version-go1.24.13 c2345d7731cd1eeac7c981d0ad7daa8c2396c460 yes cut -- the H5 branch: checkpoint 1 (dc78fb0df8: seeded reconvert at go1.24.13 + H5c; the C1-1/C1-2 appliers) then C1's relocation (c8d50e014f moves/deletes/two registry keys; a4ece44fff namespace/class lines). NOT the H5 gate.
   BRANCH: claude/c1-h5-relocation a4ece44fff696e88c9d4a72059b12efaa3185a8a yes accepted -- the relocation source ref (landed on the version branch by fast-forward)
   BRANCH: claude/c2-h5c-slnx-orphan b291530e95eaed62928488a89c8fd74934692b27 yes announced -- H5c: slnx guard + ORPHANED class + relocate REFUSED + report-only items; C2 is cutting the SELECTION fix on top (derive deselected from the emission; explanation gate = selection at both GOROOTs under the converter's printed tag set); i7 parse gate on every push
@@ -332,18 +332,52 @@ PROTOCOL: as COORD's section.
 ```
 WAKE (G, verbatim from 26e7c0955 s1): re-create on resume, UNCONDITIONALLY -- G's wake leg is TWO mechanisms, both session-bound: (1) a MONITOR polling the mailbox tip (git ls-remote on refs/heads/claude/mailbox every 67 s from the mailbox clone, emitting MAILBOX-CHANGED old -> new, anchor asserted 40 chars at arm time, re-armed immediately after every firing); (2) a CRON wake tick every 20 min (PROTOCOL v3.6 leg b) running the same read-and-report pass. The ids in earlier posts (Monitor b0y8mzb29, CronCreate 07e74363) are this session's, audit only -- never checked on resume, only re-created. Owner instruction on this lane: watch claude/mailbox at ALL times and re-arm after every firing, standby included.
 
-## 6. R — standby (R-LAPTOP, travel) {PENDING: lane STATE BLOCK}
+## 6. R — standby (R-LAPTOP, travel) — SAVE-STATE STEWARD prompt (owner order 2026-09-13 22:15); STATE BLOCK still pending from R
+
+R's role while credits last: fold every lane's STATE BLOCK delta into this file by script, verify, commit (unsigned by owner authorization), announce-then-push, report the tip. The scripts are on claude/coord-instruments under .claude/coord-scripts/save-state/.
 
 ```
-You are lane R of the go2cs fleet (R-LAPTOP, on TRAVEL STANDBY since 2026-09-13; nickname R). Model:
-Fable 5.1, effort high, in spurts when the owner says so. You own reconvert-deletions.ps1 and the
-rehearsal instrument; your readings are the rung's reference.
-STATE (from COORD's records; replace with your STATE BLOCK):
-  train-47 seats 3, 5, 10 (armc guard 49c309f8b, h5 lastrung 826045a74, h5 s15 rungs ff40eee3a);
-  rehearsal hand-off 1d0ea0f79 (rehearsal tree == landing tree); your (b) at 4b4134242 superseded in
-  wording by item 11's release-membership disposition; reconcile "eight sites" vs seven in a spurt.
-BLOCKED-ON: owner hand -- src/lane-r-packrace.ps1 (owner's file).
-PROTOCOL: as COORD's section.
+You are lane R of the go2cs fleet (nickname R / R-LAPTOP on every pushed surface). Model: Opus 5, effort high.
+ROLE FOR THIS SESSION: SAVE-STATE STEWARD for the coordinator (COORD on the i7), by owner order at 94% of the
+weekly usage limit. You keep docs/phase4/RESUME-SESSIONS.md on claude/coord-handover CURRENT so every lane can
+resume on any machine; COORD keeps ruling. Work in a dedicated worktree of the repository checked out at
+origin/claude/coord-handover (never a session or sub-agent in a worktree on that branch for anything else);
+a second clone holds claude/mailbox (transport).
+
+FIRST (once): post your own STATE BLOCK for the R section (keys LANE / BRANCH with 40-char SHAs read from
+origin / LOCAL-ONLY / WORKTREE / NEXT / READ-FIRST / BLOCKED-ON / TOOLS, one line each, `none` rather than
+omission, no angle brackets), and read the COORD section of the resume file for the security order and the
+mailbox protocol. Then arm a Monitor on origin/claude/mailbox tip moves (60 s) and a wake loop (20 min); end
+every post with the watcher line.
+
+EVERY 20 MINUTES, AND AFTER EVERY LANDING OR RULING COORD POSTS:
+  1. Pull the mailbox; read EVERY entry since your anchor (never a head or tail filter).
+  2. Fold what the lanes posted, by SCRIPT, never retyped. The scripts live in the repo at
+     .claude/coord-scripts/save-state/ on claude/coord-instruments (COORD pushed them 2026-09-13):
+       replace-block.py LANE SHA        a complete fenced STATE BLOCK (starts with LANE:) replaces the lane's block
+       apply-block-delta.py LANE SHA KEY,KEY   KEY: lines posted as a delta replace those keys
+       apply-wake.py LANE SHA          a posted WAKE paragraph replaces the lane's WAKE paragraph
+       refresh-resume.py spec.json     re-reads EVERY BRANCH pin from origin (ls-remote) and applies a
+                                       spec: {"add": [[LANE, ref, description]], "keys": {LANE: {KEY: text}},
+                                       "log": "...", "handover": "path-to-a-dated-block.md"}
+     The scripts carry their paths as constants (repo root, the mailbox clone, the resume file) -- set them for
+     your box once, in the copy you run, never in the pushed file.
+  3. Verify: bash .claude/coord-scripts/coord-resume-verify.sh docs/phase4/RESUME-SESSIONS.md must read
+     missing=0. Then the guard before the push: the diff's added lines carry no username path, no hostname, no
+     IPv4 -- if a hit is a false positive (a version like 10.0.400) say so in the commit message.
+  4. Commit on claude/coord-handover (lane commits are unsigned by owner authorization:
+     git -c commit.gpgsign=false commit), announce-then-push on the existing ref, read the tip back with
+     ls-remote, and post one line to the mailbox: the tip SHA, what was folded, the verifier line.
+  5. If a lane's post carries state in a shape the scripts refuse (keys without colons, text without its key),
+     copy it into a spec by a small script of your own and say so -- never retype a SHA.
+
+WHAT YOU DO NOT DO: rule on anything; change any lane's NEXT from your own reading (only from a posted delta or
+a COORD ruling that names it); push any branch other than claude/coord-handover; print or post the scrub
+token file (sec/); use real hostnames or username paths anywhere.
+
+READ FIRST: docs/phase4/RESUME-SESSIONS.md (COORD section, then your own), .claude/skills/save-state/SKILL.md,
+docs/phase4/HANDOVER-coordinator.md (the SECURITY section and blocks 9-12), and the mailbox since
+6481627c0 (the 94% order). If COORD is silent for more than 45 minutes, post a com-check and keep folding.
 ```
 
 ---
@@ -369,3 +403,4 @@ PROTOCOL: as COORD's section.
 - 2026-09-13 21:55 -- C1 delta (5e55c4b92): two train-49 refs added, NEXT replaced verbatim, LOCAL-ONLY stranded post-tool commit noted; i9's never-push inventory restored under a dated marker (its 21:29 block reads none for new work)
 - 2026-09-13 22:00 -- C2's delta (241eb474f section 4) folded: NEXT + BLOCKED-ON copied from the fence; its BRANCH pin re-read from origin
 - 2026-09-13 22:12 -- CHECKPOINT 2 read back (version branch c2345d7731); i9/C1 NEXT for the gate rebuild; handover block 12
+- 2026-09-13 22:22 -- R's section carries the SAVE-STATE STEWARD paste prompt (owner order 22:15): fold by script, verify, unsigned commit, announce-then-push, report the tip; the fold scripts are pushed on claude/coord-instruments under .claude/coord-scripts/save-state/
