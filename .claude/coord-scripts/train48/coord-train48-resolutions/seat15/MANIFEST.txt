@@ -1,0 +1,8 @@
+seat=15
+pin=da5e83047
+branch=claude/c2-board-both-ordered
+base=271300cea
+paths=1
+saved=2026-09-13 20:13:16
+resolution=git merge-file --union (COORD ruling E4, 2026-09-13) -- the BOARD is an APPEND-ONLY ledger
+provenance=SCRATCH REPLAY of seats 1..N in table order onto 271300cea; ours is the union THROUGH THE PREVIOUS SEAT, with every earlier conflict already resolved

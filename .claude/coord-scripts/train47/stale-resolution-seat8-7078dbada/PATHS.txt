@@ -1,0 +1,2 @@
+src/core/internal/godebug/internal.godebug.csproj
+src/go2cs/projectFileWriter.go

@@ -1,0 +1,6 @@
+seat=8
+pin=7078dbada
+branch=claude/g-unfreeze-handown-metadata
+base=ddd509c1e
+paths=2
+saved=2026-09-13 02:06:30
