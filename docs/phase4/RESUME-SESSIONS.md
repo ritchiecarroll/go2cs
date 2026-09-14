@@ -248,19 +248,7 @@ HELD RIDERS: seven small measured results in a C1 scratch file, ordered posted a
 NEXT (ruled f633ad759): C1-2 -- size the runtime2.cs 1.24.13 member bill (read the bodies at 1.24.13 first), then cut it as a hop-conditional applier after C1-1 (self-test: pre-C1-1 tree refuses; unpatched tree fails --verify naming members; idempotent); announce-then-push; i9 runs it.
 PROTOCOL: as COORD's section.
 ```
-WAKE (C1, verbatim from cf06dafee):
-  WAKE: three claude-code-remote ROUTINES (create_trigger), NOT CronCreate jobs --
-        trig_01HwSpTYDdZqjtJLpMBGCRKU `5 * * * *` / trig_01KfDoqdbnUk8A7MmviVogwn `25 * * * *` /
-        trig_01Qd573JaByefkopyckGzhX1 `45 * * * *`, all enabled, all last run SUCCEEDED, all
-        persistent_session_id-bound to THIS session = 20-minute cadence at 5/25/45. Read off
-        list_triggers on this box, confirming C2's 77f2d31f8 reading rather than taking it.
-        PLUS one CronCreate job 86a41926 at */17 added 21:25Z, so CronList on this lane is NOT empty
-        any more -- C2's forecast that it would read "No scheduled jobs" here was true until then and
-        the underlying point stands: CronList never enumerates Routines, so on this lane it answers a
-        different population either way.
-        IDS ARE AUDIT-ONLY. RECIPE on resume, UNCONDITIONAL and never gated on a check (i9's
-        refinement): create three Routines at 5/25/45 bound to the NEW session with the C1 WAKE TICK
-        prompt, plus one mailbox-tip Monitor.
+WAKE   the container-restart death mode     not folded
 
 ## 4. C2 — instruments and designs (cloud) — STATE BLOCK received 20:49 (mailbox d198239b4)
 
@@ -345,7 +333,8 @@ PROTOCOL: as COORD's section.
   LOCAL-ONLY: 18 refs (pre-session, never scrub-censused so never pushed) -- preserved in g2-state/g-local-only-2026-09-13.bundle on G-LAPTOP, 20 heads, 2,090,187 bytes, sha256 718de5f7d40da349, `git bundle verify` OK, all 18 at-risk tips present (0 missing, checked this hour)
   WORKTREE: G-LAPTOP go2cs/.claude/worktrees/row-harvest-2-1f7b91 claude/g-handown-metadata-t48-r47 0 uncommitted -- tree clean
   NEXT: verify i9's half-A manifest hash-by-hash on arrival, then fill the H6 rows starting from claude/laneR-docs-h6-skeleton 067302ea09732cade2ef488a49fb7ab83410bd9d, PRINCIPAL CHANGED rows first
-  READ-FIRST: 80c948a7f (per-row pair rule) · 77c30c9af (banner test WITHDRAWN, per-target run-window mtime is the test) · fc4ccab4b (the pair is an emission product) · 825c65222 (the 27/5 split and the five no-left-side rows) · docs/phase4/AUDIT-h6-handown-go124.md at 067302ea0
+  READ-FIRST: 80c948a7f (per-row pair rule) · fc4ccab4b (the pair is an emission product) · 825c65222 (the 27/5 split and the five no-left-side rows) · d496727c8 (⚠ the mtime test has a FALSE-NEGATIVE hole per C2 241eb474f needToWriteFile; principal-existence at the release is the proposed test) · a5534b5de §2 (the ARTIFACT RECIPE: binary e0b2a4c1…, flags, tag line, seed, the version.props note, three tree hashes -- half B and the -tests pair are ON G-LAPTOP under h6-pair/, re-cuttable in ~16 min) · docs/phase4/AUDIT-h6-handown-go124.md at 067302ea0
+  (delta applied from mailbox e5f16ea4a)
   BLOCKED-ON: lane -- i9's half-A manifest and share; no row is filled before both halves are manifested
   TOOLS: GOROOT = the go1.23.12 and go1.24.13 SDKs side by side, native backslash spelling, GOTOOLCHAIN=local, CGO_ENABLED=0; DOTNET_ROOT = the .NET 10 SDK (10.0.400); the machine defaults are NOT the pins
 ```
