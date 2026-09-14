@@ -94,9 +94,9 @@ list (branches and SHAs of unscrubbed content) is in HANDOVER-coordinator.md and
 pruned; the post tool's FLEET GUARD and the assembler's census enforce it.
 
 STATE AT THIS REVISION (2026-09-13 15:45):
-  BRANCH: claude/coord-handover 8c4b9646ded7ca80a2e7a43afcaf882c7bbf2a06 yes landed -- the handover log + this file
+  BRANCH: claude/coord-handover d504f09ddc74609a18bc8c7ca6d60c36e711126b yes landed -- the handover log + this file
   (the reproduction ref coord-train47-union, dd021ff5b, was DELETED after the landing at 17:27; its tree 161af6c44 is master's)
-  BRANCH: claude/mailbox 5b5e91b7420c728fc6dc0ee53101ccabb823c249 yes transport -- rotated 2026-09-13 02:36
+  BRANCH: claude/mailbox f2f6240a123bf73341cf46f3e3f1849f98d4be21 yes transport -- rotated 2026-09-13 02:36
   claude/version-go1.24.13 fast-forwarded to 271300cea at 17:52 (docs + doctrine only; the H5 set lands on it).
   master tip at this revision: 271300cea (docs commit) over 1885bce69 (doctrine d) over 31fe4925d (TRAIN 47 LANDED 17:26, tree 161af6c44); train 47's base was a02ac3df3.
   BRANCH: claude/version-go1.24.13 dc78fb0df87a8eabe3449965c6bbbabe6359989a yes created -- the H5 branch, created from the landed SHA; the H5 set (088f8778f, ff54907996, d4e40e28b) targets it, never master
@@ -205,14 +205,8 @@ line; then rule on whatever the lanes posted while you were down, in mailbox ord
   WORKTREE: job-i9-lift-accessibility claude/i9-funcinfo-bridge 1 write-tree branch + bundle; HEAD unmoved
   WORKTREE: mailbox-i9-clone6 claude/mailbox 1 never-push content, not bundled; the ref is the scrub order's and the content is unread
   NEXT: when C1 announces the relocation commit on claude/version-go1.24.13: merge it and C2's claude/c2-h5c-slnx-orphan (one file, +283/-1 on the H5-set tip), rebuild go2cs.exe, seeded reconvert (the seed carries the hand-owns at their new homes; expect .cs.auto siblings beside them and placeholders in fips140/alias alias.cs and runtime mbitmap.cs), H5c -Apply (expect 14 slnx entries removed == 14 projects gone, ORPHANED 0), the appliers, the three builds -- the CORPUS SOLUTION reading is the H5 GATE reading; a red sync or weak is the H6 wall named by file -- then both registry guards --- PASS x2 / 0 SKIP and the census (expect 145); commit, announce, push, read back (mailbox 46198c1b9 section 3)
-  READ-FIRST: mailbox f036d552f (this lane's last post) · 9457d56c0 (the runtime readings: all three
-        tables at 44, isWaitingForSuspendG throws nowhere, and the red control that reproduces the
-        truncation at length 37 with a GREEN build) · 8c0f26247 (C1-2b verified against the real
-        converter: one hunk 161,245c161, byte-identical placeholder) · c2b26c50b (the pre-C1-2 baseline
-        and the predictions) · 795cbf619 (COORD's C1-2b ruling) · 486a3926a (the amendment ruling).
-  (delta applied from mailbox 839a8d926)
-  BLOCKED-ON: COORD -- the landing and the creation of version-go1.24.13. Nothing from any lane.
-  (delta applied from mailbox 839a8d926)
+  READ-FIRST: mailbox 46198c1b9 (the six dispositions; the order; the H5 GATE reading = the corpus solution) with 5b5e91b74 (C2's cut is +283/-1 on the H5-set tip, one file) · i9's own ea4abf715 + d6ae791ee (the checkpoint announce and read-back; the guard split) · 4620838568 (pointerMask RE-POINT) · 4ff24a03f (tracking-ref freshness: wildcard fetch --prune before trusting origin/X)
+  BLOCKED-ON: C1's relocation commit on claude/version-go1.24.13 (step 1 of 46198c1b9 section 3); nothing from COORD -- the checkpoint dc78fb0df8 is at origin and read back
   TOOLS: GOROOT corpus/oracle $HOME/sdk/go1.23.12 (go1.23.12) and converter $HOME/sdk/go1.24.13 (go1.24.13), GOTOOLCHAIN=local, CGO_ENABLED=0, GOROOT spelled in BACKSLASH form or the emission misroutes and exits 0; python 3.12.0 -- there is NO python3 on this box AND WindowsApps shadows BOTH python and python3 with a Store redirector that exits 49, so prepend the real interpreter's directory or every candidate resolves to the alias; DOTNET_ROOT with SDK 10.0.401 beside 9.0.318 (net10.0 needs the 10.x); PowerShell 5.1 Desktop by ABSOLUTE path -- the Bash PATH is the Windows semicolon form so /usr/bin never resolves unless prepended on every call
 ```
 WAKE (i9, verbatim from 59e0e3099 s3): re-create on resume -- i9's wake leg is a CronCreate job and CronList marks it [session-only]. The id cdf12613 is THIS session's and is dead to any other. Same for the Monitor id (bvgzqvs2y), per-session by construction. Neither is inheritable state; both are STEPS. i9 cadence: 7,27,47 past the hour, PROTOCOL v3.6 leg b.
@@ -269,14 +263,8 @@ STATE BLOCK (C1, 2026-09-13 15:39; push sweep: 13 of 13 branches already on orig
   WORKTREE: C1 home /c1-armA detached 2e6cf71e4 0 reachable from origin/claude/c1-board-goroot
   WORKTREE: C1 home /c1-armB detached 449ecce7a 0 reachable from origin/claude/g-generic-alias-recut
   NEXT: ONE commit on claude/version-go1.24.13 on top of the checkpoint, unsigned by owner authorization, announce-then-push: git mv the checkpoint's auto internal/sync/hashtriemap.cs and weak/pointer.cs to .cs.auto; git mv internal/concurrent/hashtriemap.cs -> internal/sync/, internal/weak/pointer.cs -> weak/, crypto/internal/alias/alias_impl.cs -> crypto/internal/fips140/alias/; git rm vendor/golang.org/x/crypto/sha3/xor.cs, internal/concurrent/hashtriemap_whitebox.cs and the two old .cs.auto siblings; registry keys crypto/internal/alias -> crypto/internal/fips140/alias and getgcmask -> pointerMask with the mbitmap_impl.cs body renamed; nothing else. Read-back: the two guards name ZERO entries beside the committed corpus (mailbox 46198c1b9 sections 1 and 3)
-  READ-FIRST: mailbox 8be44bbc0a (C1-2b ruling) 486a3926a (the explicit-length amendment) b3a32e52d +
-        82de2fc7c (the corrected bill) ; i9 c2b26c50b (pre-cut baseline) 9457d56c0 (CLR readings)
-        8c0f26247 + f036d552f (C1-2b verified, three flavours) ; C2 c441e195a (the .array bound)
-        71bbb81c3 (corpus census + marker retraction) ; docs/phase4/PATCH-h5-c1-2-runtime2-member-bill.md
-        and docs/phase4/PATCH-h5-c1-1-runtime-rederives.md
-  (delta applied from mailbox cf06dafee)
-  BLOCKED-ON: nothing blocking. version-go1.24.13 does not exist yet and that is COORD's to create.
-  (delta applied from mailbox cf06dafee)
+  READ-FIRST: mailbox 46198c1b9 (the six dispositions measured; the git-move mechanism; the two registry keys crypto/internal/alias -> crypto/internal/fips140/alias and getgcmask -> pointerMask) · C1's own ce3add7af (pointerMask found by signature) · 3f54a3253 (row 76 RE-POINT) · 8be44bbc0a (C1-2b ruling)
+  BLOCKED-ON: nothing. The checkpoint is at origin (dc78fb0df8); the relocation commit is C1's to cut NOW, first in the order (46198c1b9 sections 1 and 3)
   TOOLS: python3 3.11 on PATH (the applier's H5_PYTHON override exists for lanes without the name); GOROOT go1.24.7 (also 1.25.1 present), neither pin -- 1.23.12 and 1.24.13 are fetched from source tags when needed; GOTOOLCHAIN unset; DOTNET_ROOT none
 OPEN ACCEPTANCE (C1, gate-family decision, COORD's): CleanupDispatchTests' five arms on claude/c1-mcleanup-handown are written and unrunnable by any standing gate (GolibTests and go2cs.slnx are built by no workflow).
 HELD RIDERS: seven small measured results in a C1 scratch file, ordered posted as ONE mailbox entry (COORD, save-state) so they survive the container.
@@ -348,10 +336,8 @@ WAKE (C1, verbatim from cf06dafee):
   WORKTREE: <C2-HOME>/rbwt claude/c2-shardmap-repair 0 clean-at-pushed-tip
   WORKTREE: <C2-HOME>/mbx-clone claude/mailbox 0 separate single-branch clone, mailbox transport only
   NEXT: nothing owed; row 17 re-pinned to the origin tip of claude/c2-h10-shardmap-projection by the derive; unclaimed offers stand (the array-length converter seat; Darwin steps 2-3 after the hop); the -Orphan flag stays for the next hop, exercised today only by the control
-  READ-FIRST: master 271300cea (the landing + docs) · claude/version-go1.24.13 (the H5 branch; C2's 088f8778f merges clean onto it per i9 b529aee6f) · mailbox 873492c2f (no re-base for mergeability) 486a3926a (array-length ruling + census dispatch) 9457d56c0 (CLR readings, red control) 1e37f1291 + this post (watcher claims withdrawn) · docs/phase4/BOARD-next-validation-candidates.md tail (C2's finding + amendment)
-  (delta applied from mailbox 0d8088e2b)
-  BLOCKED-ON: lane -- train 48's base for the projection's AMENDMENTS block on claude/c2-h10-shardmap-projection; the hop for darwin steps 2-3. Nothing owed from COORD.
-  (delta applied from mailbox 0d8088e2b)
+  READ-FIRST: mailbox 46198c1b9 (H5c cut ACCEPTED with the no-surviving-csproj predicate; parse-gated on the i7) + 5b5e91b74 (the +283/-1 figure) · C2's own 77c6680fc (the cut) and a35f2c040 (the frozen tracking ref; i9 4ff24a03f widens it three-way -- row 13's rule wording is under-general when next touched) · master 271300cea · docs/phase4/BOARD-next-validation-candidates.md tail
+  BLOCKED-ON: nothing. Row 17's AMENDMENTS block is cut at the origin tip of claude/c2-h10-shardmap-projection; the H5c cut is accepted (46198c1b9 section 4); darwin steps 2-3 wait on the hop, not on a lane
   TOOLS: python3 3.11.15 · GOROOT=/usr/local/go1.24.7 (also /usr/local/go1.25.1) · module-cache toolchains go1.23.12 go1.24.13 go1.24.7 read directly for both-pin work · DOTNET_ROOT unset and dotnet ABSENT · pwsh ABSENT -- every .ps1 cut of mine is parse-gated on i7, never run here
 ```
 COORD NOTE (16afb8a3f, amended per C2 56e93e709 s4): refs/preserve/c2-container/** (28 refs, 251 commits reachable from no origin ref, a prior container's ritual 08-28..09-06; never scrub-censused, so unpushable) -- zero unique PATHS; blobs COMPARED: 686 unique file versions over 369 paths, all intermediate states of 28 superseded lines whose current content is on origin (src 600, docs 81, CLAUDE.md 5). LOSS ACCEPTED on the record, nothing pushed; ref-list digest 036894085a1f778c.
@@ -398,9 +384,9 @@ branches are NOT pushed -- never scrub-censused -- and are preserved in a verifi
   BRANCH: claude/laneR-docs-h6-skeleton c2b699dafc3c5805b69caba1ddc82f86db4f356b yes accepted -- R's H6 audit skeleton, G's mcleanup.cs row 77: 147 rows set-identical to the checkpoint census; re-cut to 145 after C1's relocation commit (two deletes, three moves), ONE dated block; the mgc_impl.cs row only after train 48 lands and master merges into the version branch (46198c1b9 section 5)
   LOCAL-ONLY: 20 branches (listed in claude/g-census-2026-09-13) not-scrub-censused-so-not-pushed preserved: bundle g2-state/g-local-only-2026-09-13.bundle (2,090,187 bytes) sha256 718de5f7d40da349 -- verify "is okay", 20 refs, all 27 prerequisites in origin/master (restores from an origin-only clone); on the same single volume as the clone
   WORKTREE: G-LAPTOP go2cs/.claude/worktrees/row-harvest-2-1f7b91 claude/g-h6-completeness-gate 0 uncommitted -- tree clean, every branch above on origin
-  NEXT: after C1's relocation commit is read back at origin: re-measure the hand-own census at the version-branch tip (expect 145), re-cut the skeleton rows to the moved paths (internal/sync/hashtriemap.cs, weak/pointer.cs, crypto/internal/fips140/alias/alias_impl.cs; xor.cs and the whitebox removed) in ONE dated block carrying the track distinction and ruling 46198c1b9 section 5; mark hashtriemap.cs, pointer.cs and runtime/mbitmap_impl.cs PRINCIPAL CHANGED (i9 4620838568 reads pointerMask as a re-point, mask lines identical); the mgc_impl.cs row only after train 48 lands on master and master merges into the version branch
-  READ-FIRST: mailbox 7ff30f203 (the save-state order), dd9ea4a1d + 814e227a1 (the H6/goexperiment rulings), f4c659e02 + b42438150 (i9's .auto and emission readings that score G's work), docs/phase4/CENSUS-g-laptop-2026-09-13.md, src/check-handown-audit.ps1
-  BLOCKED-ON: landing (seat 6 re-base); owner hand -- G-LAPTOP .git/index.lock
+  NEXT: after C1's relocation commit is read back at origin: re-measure the hand-own census at the version-branch tip (expect 145; falsifiers 144 and 146 named in G fd362f1af), re-cut the skeleton rows to the moved paths (internal/sync/hashtriemap.cs, weak/pointer.cs, crypto/internal/fips140/alias/alias_impl.cs; xor.cs and the whitebox rows OUT of the table, their provenance in the dated block) in ONE dated block carrying the track distinction and ruling 46198c1b9 section 5; annotate in the reason cell, class column blank until H6: PRINCIPAL CHANGED x2 (hashtriemap.cs, pointer.cs) and RE-POINT x1 (runtime/mbitmap_impl.cs: getgcmask -> pointerMask, mask lines identical per i9 4620838568, ruled 3f54a3253 -- NOT principal-changed); the mgc_impl.cs row only after train 48 lands on master and master merges into the version branch
+  READ-FIRST: mailbox 46198c1b9 (the six orphan dispositions + the order) with its corrections 5b5e91b74 (+283/-1) and 3f54a3253 (re-cut shape (a)(b) confirmed; row 76 RE-POINT) · G's own fd362f1af (prediction + edit shape) · dd9ea4a1d + 814e227a1 (the H6/goexperiment rulings) · docs/phase4/CENSUS-g-laptop-2026-09-13.md · src/check-handown-audit.ps1
+  BLOCKED-ON: nothing. The seat-6 re-base landed (35fe4e016 on origin) and the G-LAPTOP .git/index.lock item is DISCHARGED (G f2f6240a1: absent at the parent clone, the worktree gitdir and the mailbox clone; every git op works). Waiting only on C1's relocation commit for the re-cut; not blocked
   TOOLS: GOROOT = the go1.23.12 sdk in native backslash spelling; GOTOOLCHAIN unset (auto); DOTNET_ROOT = the dotnet10 side-by-side root (SDK 10.0.400; the machine default 9.0.316 fails net10.0 with NETSDK1045); python none
 Also owed: the filtered-sweep rule line (COORD's board).
 PROTOCOL: as COORD's section.
@@ -434,3 +420,4 @@ PROTOCOL: as COORD's section.
 - 2026-09-13 17:48 — LANDED: master 31fe4925d (train 47) + 1885bce69 (doctrine d) + 271300cea (docs: this file, the skill and the verifier now on master too); claude/version-go1.24.13 created; H4 closed.
 - 2026-09-13 18:30 — train 48 pinned and self-checked online (0 FAIL); rows 11-19 proposed; H5 proper in step 2 on the version branch.
 - 2026-09-13 19:00 -- BRANCH pins re-read at origin by refresh-resume.py; i9's version-branch checkpoint, C2's H5c cut, C1's three train-48 refs and G's skeleton tip added; NEXT per lane per mailbox 46198c1b9 (the six orphan dispositions); handover block 9
+- 2026-09-13 19:15 -- BLOCKED-ON re-measured for every lane (all four were stale: G f2f6240a1 caught its own -- a false BLOCKED-ON costs the session); G's NEXT corrected to RE-POINT x1 for mbitmap_impl.cs per 3f54a3253; READ-FIRST re-pointed at the latest rulings per lane
