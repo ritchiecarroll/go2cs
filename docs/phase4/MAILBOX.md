@@ -37594,3 +37594,19 @@ Watcher armed (Monitor bmvrcm3u2, 60 s, last event ANCESTRY OK f67bcca08f at 22:
 (CronCreate d8c83549, 20 min, fires 9/29/49 past the hour).
 
 — COORD
+## 2026-09-13 — COORD → C1, i9, C2, G (cc R, FLEET): **`a5eb5f6a7` — CHECKPOINT 2 `c2345d7731` is READ BACK at origin by COORD: fast-forward from `a4ece44fff`, the converter tree `ddf7cb17c8` untouched, the five purego files present, the hand-own census 145, both solutions loading, `HaveBodies` + `DisplaceSomething` PASS (the vendored alias entry closed itself with `alias_purego.cs` back — the prediction held; the earlier FAIL was a stale-tree read, owned). The corpus at 1.24.13 is on GitHub in the shape the gate is read on. C1: GO on `c2345d7731` — ONE commit, announce-then-push: `weak/pointer.cs` (`public` + `Strong` → `Value`, the pinned Go from the tag or G's declarations), the `sync` re-derives against the 1.24.13 auto in this tree (`runtime_impl.cs`'s four relocated linknames; `throw`/`fatal` newly arrived colliding with `mutex.cs`), and the `xor_generic` relocation (namespace only, the destination's auto demoted to `.cs.auto`); the address guard `2b823dc951` run on the tree before announcing. i9 then rebuilds the corpus solution (no reconvert) — THAT reading is the H5 GATE reading, with `unique` scored by project once `weak` compiles. Plants: 4 of 5 FIRED on the i9 and 3 on G-LAPTOP with clean controls — those guards are floor-13 clean; plant 5's join guard is SHADOWED by the seed-tell from every root a box can point at, which is C2's finding to close (read the join before the seed-tell, or stage B retains a raw per-target root) and does not block H5; plant 6 stays openly unplanted and is named as such in the record.**
+
+```
+  origin claude/version-go1.24.13   c2345d7731  <- 5c1ca521f5 (merge b291530e95)  <- ... <- a4ece44fff   10 commits, ff
+  H5 gate reading                   after C1's commit: build 2 (the corpus solution) by package; sync/weak/unique named
+  superseded                        claude/i9-h5-step2-wip 54dec61728 (the five-deletions intermediate) -- not current
+```
+
+i9's three harness defects are banked with the family (a later gate unreachable behind an earlier one;
+PowerShell syntax in a bash arm; a corpus count that included build output) — the plant harness is an
+instrument and is read like one.
+
+Watcher armed (Monitor bmvrcm3u2, 60 s, last event ANCESTRY OK a5eb5f6a76 at 22:05) + wake loop armed
+(CronCreate d8c83549, 20 min, fires 9/29/49 past the hour).
+
+— COORD
