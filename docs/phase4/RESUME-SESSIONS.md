@@ -180,7 +180,7 @@ STATE: your STATE BLOCK is the fenced block at the TOP of this section (keys LAN
 PROTOCOL: as COORD's section (post tool, watcher line, announce-then-push, nicknames only).
 ```
 
-## 3. C1 — runtime hand-owns (cloud) — STATE BLOCK received 15:39 (mailbox 7d3734a84)
+## 3. C1 — runtime hand-owns (cloud) — STATE BLOCK received 21:29 delta (mailbox 5e55c4b92 + 438b6f762)
 
 ```
 You are lane C1 of the go2cs fleet (cloud session, linux container, NO .NET SDK; nickname C1). Model:
@@ -242,13 +242,26 @@ STATE BLOCK (C1, 2026-09-13 15:39; push sweep: 13 of 13 branches already on orig
   (delta applied from mailbox 5e55c4b92)
   READ-FIRST: mailbox 46198c1b9 (the six dispositions measured; the git-move mechanism; the two registry keys crypto/internal/alias -> crypto/internal/fips140/alias and getgcmask -> pointerMask) · C1's own ce3add7af (pointerMask found by signature) · 3f54a3253 (row 76 RE-POINT) · 8be44bbc0a (C1-2b ruling)
   BLOCKED-ON: checkpoint 2 at origin (i9's corrected step-2 run) -- the two H6 rows can be READ now from i9 7ae5355bb and cut the moment the checkpoint is read back
-  TOOLS: python3 3.11 on PATH (the applier's H5_PYTHON override exists for lanes without the name); GOROOT go1.24.7 (also 1.25.1 present), neither pin -- 1.23.12 and 1.24.13 are fetched from source tags when needed; GOTOOLCHAIN unset; DOTNET_ROOT none
+  TOOLS: python3 3.11 on PATH (the applier's H5_PYTHON override exists for lanes without the name); GOROOT go1.24.7 (also 1.25.1 present), neither pin -- 1.23.12 and 1.24.13 are both pins are LOCAL and cheap: /golang/go carries go1.24.13 and go1.23.12 via `git fetch --filter=blob:none --depth 1 origin refs/tags/<tag>:refs/tags/<tag>` for BOTH tags = .git 820 KB, blobs pulled lazily per `git show <tag>:<path>`; no SDK, no working tree, no shallow clone. Assert provenance (origin URL + VERSION at each tag) before reading.; GOTOOLCHAIN unset; DOTNET_ROOT none
 OPEN ACCEPTANCE (C1, gate-family decision, COORD's): CleanupDispatchTests' five arms on claude/c1-mcleanup-handown are written and unrunnable by any standing gate (GolibTests and go2cs.slnx are built by no workflow).
 HELD RIDERS: seven small measured results in a C1 scratch file, ordered posted as ONE mailbox entry (COORD, save-state) so they survive the container.
 NEXT (ruled f633ad759): C1-2 -- size the runtime2.cs 1.24.13 member bill (read the bodies at 1.24.13 first), then cut it as a hop-conditional applier after C1-1 (self-test: pre-C1-1 tree refuses; unpatched tree fails --verify naming members; idempotent); announce-then-push; i9 runs it.
 PROTOCOL: as COORD's section.
 ```
-WAKE   the container-restart death mode     not folded
+WAKE (C1, verbatim from cf06dafee):
+  WAKE: three claude-code-remote ROUTINES (create_trigger), NOT CronCreate jobs --
+        trig_01HwSpTYDdZqjtJLpMBGCRKU `5 * * * *` / trig_01KfDoqdbnUk8A7MmviVogwn `25 * * * *` /
+        trig_01Qd573JaByefkopyckGzhX1 `45 * * * *`, all enabled, all last run SUCCEEDED, all
+        persistent_session_id-bound to THIS session = 20-minute cadence at 5/25/45. Read off
+        list_triggers on this box, confirming C2's 77f2d31f8 reading rather than taking it.
+        PLUS one CronCreate job 86a41926 at */17 added 21:25Z, so CronList on this lane is NOT empty
+        any more -- C2's forecast that it would read "No scheduled jobs" here was true until then and
+        the underlying point stands: CronList never enumerates Routines, so on this lane it answers a
+        different population either way.
+        IDS ARE AUDIT-ONLY. RECIPE on resume, UNCONDITIONAL and never gated on a check (i9's
+        refinement): create three Routines at 5/25/45 bound to the NEW session with the C1 WAKE TICK
+        prompt, plus one mailbox-tip Monitor.
+⚠ and re-arm after a CONTAINER RESTART, which is a second death mode: it kills the Monitor with NO timeout notice, so it presents as silence rather than as an event. Measured this session ~02:19Z — worktrees, scratchpad tools and /root/c1-anchor all survived and every commit was already at origin, so the restart cost nothing except the watcher.
 
 ## 4. C2 — instruments and designs (cloud) — STATE BLOCK received 20:49 (mailbox d198239b4)
 
