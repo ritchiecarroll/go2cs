@@ -93,45 +93,45 @@ pushed surface -- nicknames only (R-LAPTOP, G-LAPTOP, i9, i7, C1, C2); no userna
 list (branches and SHAs of unscrubbed content) is in HANDOVER-coordinator.md and is never pushed and never
 pruned; the post tool's FLEET GUARD and the assembler's census enforce it.
 
-STATE AT THIS REVISION (2026-09-13 15:45):
-  BRANCH: claude/coord-handover 544e4201bdbd36ce90e25b2f7fec94261685b23f yes landed -- the handover log + this file
-  (the reproduction ref coord-train47-union, dd021ff5b, was DELETED after the landing at 17:27; its tree 161af6c44 is master's)
-  BRANCH: claude/mailbox cf1d2146705db28616d38d3f32cda2bce17d3398 yes transport -- rotated 2026-09-13 02:36
-  claude/version-go1.24.13 fast-forwarded to 271300cea at 17:52 (docs + doctrine only; the H5 set lands on it).
-  master tip at this revision: 271300cea (docs commit) over 1885bce69 (doctrine d) over 31fe4925d (TRAIN 47 LANDED 17:26, tree 161af6c44); train 47's base was a02ac3df3.
-  BRANCH: claude/version-go1.24.13 a4ece44fff696e88c9d4a72059b12efaa3185a8a yes created -- the H5 branch, created from the landed SHA; the H5 set (088f8778f, ff54907996, d4e40e28b) targets it, never master
-  TRAIN 47: fifteen seats (table in .claude/coord-scripts/train47/coord-train47-assemble.sh) on base
-    a02ac3df3; union tree 161af6c44; runs 4-7 refused on the instrument (each a real defect, each fixed
-    with a self-check lesson: LD1, LD2, LR1, LA1, LL1); RUN 8 launched 14:12 = the landing candidate.
-    Landing sequence: land-anchor record census (coord-resume-verify is NOT this; use
-    .claude/coord-scripts/train47 land + the census script described in the handover block 8) -> verify-only
-    -> announce -> land (signed) -> read back -> create claude/version-go1.24.13 from the landed master ->
-    doctrine d (21821509c) -> docs commit (KICKOFF section 4 refresh + CLAUDE.md floor item 12 amendment
-    + runbook H5 seed-list line; TestContextBudget must pass; effective count 178 -> 180 of 200) ->
-    handover block 8 -> train-48 pin fill.
-  TRAIN 48 (template .claude/coord-scripts/train48/, derived by t48-derive.py, 195 ops, verified SOUND 18:15; i7-LOCAL until the instruments
-    are persisted -- see the OWNER HAND above): PINNED from the landing by derive ops (T48_CONTAIN_PIN 31fe4925d...6aa1, EXPECT_G3 204);
-    rows 1-10 filled and re-pinned at origin (row 1 = claude/g-handown-metadata-t48-r47 @35fe4e016 with allowed= cache.cs, ruled 18:25);
-    rows 11-19 PENDING (candidates proposed at mailbox 2e44b9b40; lanes keep/strike); ONLINE self-check overallFail=0 (18:28).
-    FIRST ACTION for train 48 on resume: fill rows 11-19 from the lanes' lines by derive ops, run the online self-check, the
-    fifteen-seat rehearsal (coord-train48-rehearse.sh) onto master, then the assembly from a per-run copy (launch-run1.sh).
-    Seats include C1 mcleanup hand-own 23d07f742, C2 driver 02b87b501, goroot branch tip 3ced37e18,
-    C2 H5c amendment stack (be9668d56 + 088f8778f on claude/c2-h5c-apply-amendment), a CNR seat that
-    retains WARNING lines by kind, a converter per-file EMISSION MANIFEST seat.
-  TRAIN 49 board: C1 patch (superseded by the rung's applier 2c8841571 on claude/c1-h5-rederive-patch),
-    C1 token census ad19af72b4, G liveness 44857cdf8, G H6 gate c9c1b5f73, C2 sizing 43e0dff04,
-    C2 trampoline map 4bc0c35b0, C2 map re-derivation 41c1d1d28 (claude/c2-h10-map-rederivation),
-    i9 DATA record fd3f22f3b, C1-2 (runtime2.cs 1.24.13 member bill, sizing).
-  THE RUNG (i9, H4a/H5 at the union): stage B (R's reconvert readings reproduced: 0 failed x3, 147
-    WARNINGs, 146 hand-owns), stage C (H5c: 98/4/27/0, 102 deleted, exit 3 = arithmetic term, fixed at
-    088f8778f), C1-1 applied (4a5938b7d5 tip; 120 -> 100 errors), next wall = C1-2 (frozen runtime2.cs
-    lacks 1.24.13 members: g.syncGroup, g.isIdleInSynctest, m.mWaitList, fipsIndicator, six waitReason
-    consts; synctest is 1.24-only). mcleanup carry is NOT in the rung (rc=1 expected on a train-47 tree);
-    it discharges at H5 proper on the version branch after train 48 lands.
-  OWNER HANDS OPEN: cloud allowlist for the dotnet builds host (C1/C2 cannot fetch the SDK), G-LAPTOP
-    .git/index.lock, R-LAPTOP src/lane-r-packrace.ps1, the thermal-sentence host, delete
-    claude/awesome-franklin-ba9agv, coord-train47-union DELETED at the landing 17:27; remote branch
-    deletions blocked at coordinator tooling.
+STATE AT THIS REVISION (2026-09-13 21:45, weekly usage 94 percent -- SAVE-STATE MODE):
+  BRANCH: claude/coord-handover d60e262fe884a68cbb3f252d301da107e2efc1a3 yes landed -- the handover log (block 10 + this file; block 11 = this refresh)
+  BRANCH: claude/mailbox 6481627c0d20550ee6375ed73e4b5d82d96eacbd yes transport -- rotated 2026-09-13 02:36
+  BRANCH: claude/version-go1.24.13 a4ece44fff696e88c9d4a72059b12efaa3185a8a yes cut -- the H5 branch: checkpoint 1 (dc78fb0df8: seeded reconvert at go1.24.13 + H5c; the C1-1/C1-2 appliers) then C1's relocation (c8d50e014f moves/deletes/two registry keys; a4ece44fff namespace/class lines). NOT the H5 gate.
+  BRANCH: claude/c1-h5-relocation a4ece44fff696e88c9d4a72059b12efaa3185a8a yes accepted -- the relocation source ref (landed on the version branch by fast-forward)
+  BRANCH: claude/c2-h5c-slnx-orphan 23e94a2e6bd2c29c73c13549bbec59d475fba827 yes announced -- H5c: slnx guard + ORPHANED class + relocate REFUSED + report-only items; C2 is cutting the SELECTION fix on top (derive deselected from the emission; explanation gate = selection at both GOROOTs under the converter's printed tag set); i7 parse gate on every push
+  BRANCH: claude/laneR-docs-h6-skeleton 067302ea09732cade2ef488a49fb7ab83410bd9d yes accepted -- the H6 audit skeleton at 145 rows == the version-branch census (R's record, G's amendments); lands on the VERSION BRANCH; train-48 seat 4 stays SHA-pinned at d18059950
+  BRANCH: claude/coord-runbook-h5-tags 5c4c5b94e57509a4a272294ef4f5bad322e9b1a1 yes announced -- runbook H5 in-stage amendment (one tag resolution; selection-based DELETE-DESELECTED gate; carry the regenerated stdlib slnx; go2cs.slnx follows moved packages); lands on master with the H5 gate docs commit
+  BRANCH: claude/c1-handown-address-guard 2b823dc951f20769296f03325764ddc1ed61aed3 yes accepted -- train 49 row (converter-guard)
+  BRANCH: claude/c1-train49-guards 394de9fd684756d6e3aeed6975587720d3d73180 yes accepted -- train 49 rows (ValueClone vacuity; go2cs.slnx path guard)
+  master tip: 271300cea0 (docs) over 1885bce69 (doctrine d) over 31fe4925d (TRAIN 47 LANDED 17:26). Train 48 assembles on 271300cea0.
+  THE LADDER: H5 in its next-wall loop on the version branch. Step 2 read (i9 7ae5355bb): the corpus solution LOADS (the
+    stdlib slnx is REGENERATED by the reconvert; the step-5 wall was the regenerated file not carried), runtime 0 errors,
+    8 errors in two packages (sync: hand-owns vs the 1.24 shape; weak: Pointer<T> visibility + Strong->Value), unique unbuilt;
+    H5c had DELETED five live purego files (its own tag resolution; C2 5c47976ea located it) -> i9 RESTORES them from the
+    preserved staging root, runs H5c on C2's fixed tip (DELETE-DESELECTED must read 0), appliers, builds, then CHECKPOINT 2
+    (+ src/go2cs.slnx following moved packages) announce-then-push; C1 cuts ONE commit on it (weak: public + Strong->Value;
+    sync re-derives against the 1.24.13 auto + the pinned Go read from the golang/go tag; the xor_generic relocation to
+    crypto/internal/fips140/subtle); i9 rebuilds the corpus solution -> THE H5 GATE READING. Then H6 (G fills the 145-row
+    audit from the PAIR: half A = i9's preserved three staging roots, half B + the -tests pair cut by G on G-LAPTOP from the
+    byte-identical binary e0b2a4c109053c6b (tree ddf7cb17c8, go1.24.13, -trimpath -buildvcs=false, hash equal on 3 boxes);
+    a side is a file the converter WROTE in that half (per-target run-window mtime); moved-package rows take the old-path
+    emission; ARRIVED rows have no outgoing side; half A moves to G-LAPTOP by share + sha256 manifest).
+  TRAIN 48 (template .claude/coord-scripts/train48/, i7-LOCAL -- see the OWNER HAND above): 18 rows pinned at origin
+    (table in coord-train48-assemble.sh; 217 derive ops in t48-derive.py; NOTES sections 17-23), rows 9/15 BOARD conflicts
+    PRE-RESOLVED by union slots (coord-train48-resolutions/), 18 seat-content arms (green at the union, red at the base),
+    online self-check 0 FAIL, dry-read 0 FAIL, rehearsal replay 18 clean. RUN 1 stopped at the A-assertions (0 arms -- the
+    fill point, now filled). RUN 2 launched 21:18 in worktree C:/go2cs-tmp-coord/t48-asm (detached at 271300cea0) from
+    coord-train48-assemble-run2.sh (md5 2ff36bc5e938) via launch-run2.sh; record coord-train48-assemble-run2.stdout with the
+    wrapper line `assembly exit=N`. On green: land-anchor census -> land (signed) -> read back -> prune seats -> resume refresh.
+    IF THE i7 IS LOST: the template is re-derivable ONLY from the local files -- the derive inputs are train47/ (also local);
+    the seat table, the allowed= rulings, the stack (13 on 11), the SHA-mode row 4 and the 18 arms are described in the
+    handover blocks 9-11 and the mailbox (817f98813, 46198c1b9 s4, 80c948a7f); re-cutting from those is a day's work.
+  TRAIN 49 board: C1 address guard + two guards (above), G's H6 gate c9c1b5f73 + liveness 44857cdf8, C2 sizing 43e0dff04,
+    trampoline map 4bc0c35b0, the array-length converter seat (unclaimed), the vocabulary gap (a .claude-shaped class).
+  OWNER HANDS OPEN: the coordinator instruments push decision (username paths + the scrub literal; this file's OWNER HAND
+    above); cloud allowlist for the dotnet builds host AND go.dev/dl (C1/C2 hold neither pinned Go SDK); R-LAPTOP
+    src/lane-r-packrace.ps1; the thermal-sentence host; delete claude/awesome-franklin-ba9agv; remote branch deletions
+    blocked at coordinator tooling; a fleet share for off-box copies of the pair roots.
 
 FIRST ACTION: re-arm the Monitor and the wake loop; read the mailbox delta since the anchor in this file's
 last handover block; post "COORD online" with the position (the rung, the train state) and the standing
@@ -414,3 +414,4 @@ PROTOCOL: as COORD's section.
 - 2026-09-13 19:42 -- step 1 landed on the version branch (i9 9b7848700); i9 NEXT re-derived for step 2 with C2's narrowed tip and the superseded figure corrected (i9 caught its own stale +283); handover block 10
 - 2026-09-13 20:30 -- NEXT re-derived for i9 (corrected reconvert + checkpoint 2 + the H6 pair), C1 (the weak/sync H6 rows on checkpoint 2; two train-49 guards), G (hold for the pair; OQ-2/OQ-3 ruled) per d2ad84bdb and fc4ccab4b
 - 2026-09-13 21:15 -- G NEXT: half B cut, the fill rule (80c948a7f), pull half A by share; i9 NEXT: the restore, H5c on C2's fix, checkpoint 2, half A manifest + share
+- 2026-09-13 21:45 -- SAVE-STATE at 94 percent (owner order): COORD state block rewritten to the current position (pins re-read from origin); fleet STATE BLOCK order posted 6481627c0; handover block 11
