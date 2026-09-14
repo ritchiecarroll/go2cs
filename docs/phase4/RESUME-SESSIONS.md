@@ -94,9 +94,9 @@ list (branches and SHAs of unscrubbed content) is in HANDOVER-coordinator.md and
 pruned; the post tool's FLEET GUARD and the assembler's census enforce it.
 
 STATE AT THIS REVISION (2026-09-13 21:45, weekly usage 94 percent -- SAVE-STATE MODE):
-  BRANCH: claude/coord-handover 7b8bcd723166d57497097a8ff0bf211ad6b33a25 yes landed -- the handover log (block 10 + this file; block 11 = this refresh)
-  BRANCH: claude/mailbox b05b136fe34777ec83410e9985b3f7a3ae8fc186 yes transport -- rotated 2026-09-13 02:36
-  BRANCH: claude/version-go1.24.13 a4ece44fff696e88c9d4a72059b12efaa3185a8a yes cut -- the H5 branch: checkpoint 1 (dc78fb0df8: seeded reconvert at go1.24.13 + H5c; the C1-1/C1-2 appliers) then C1's relocation (c8d50e014f moves/deletes/two registry keys; a4ece44fff namespace/class lines). NOT the H5 gate.
+  BRANCH: claude/coord-handover 749a681284b36224e25d790528cffab82489e6cd yes landed -- the handover log (block 10 + this file; block 11 = this refresh)
+  BRANCH: claude/mailbox 81849503e8720623ae70ffeae2aad9191ee7ab9d yes transport -- rotated 2026-09-13 02:36
+  BRANCH: claude/version-go1.24.13 c2345d7731cd1eeac7c981d0ad7daa8c2396c460 yes cut -- the H5 branch: checkpoint 1 (dc78fb0df8: seeded reconvert at go1.24.13 + H5c; the C1-1/C1-2 appliers) then C1's relocation (c8d50e014f moves/deletes/two registry keys; a4ece44fff namespace/class lines). NOT the H5 gate.
   BRANCH: claude/c1-h5-relocation a4ece44fff696e88c9d4a72059b12efaa3185a8a yes accepted -- the relocation source ref (landed on the version branch by fast-forward)
   BRANCH: claude/c2-h5c-slnx-orphan b291530e95eaed62928488a89c8fd74934692b27 yes announced -- H5c: slnx guard + ORPHANED class + relocate REFUSED + report-only items; C2 is cutting the SELECTION fix on top (derive deselected from the emission; explanation gate = selection at both GOROOTs under the converter's printed tag set); i7 parse gate on every push
   BRANCH: claude/laneR-docs-h6-skeleton 067302ea09732cade2ef488a49fb7ab83410bd9d yes accepted -- the H6 audit skeleton at 145 rows == the version-branch census (R's record, G's amendments); lands on the VERSION BRANCH; train-48 seat 4 stays SHA-pinned at d18059950
@@ -144,7 +144,7 @@ line; then rule on whatever the lanes posted while you were down, in mailbox ord
 
 ```
   LANE: i9   MODEL: opus-5/effort-not-exposed   HOST: i9
-  BRANCH: claude/version-go1.24.13 a4ece44fff696e88c9d4a72059b12efaa3185a8a yes landed -- C1's relocation + namespace commit, landed by i9; NOT advanced past it tonight
+  BRANCH: claude/version-go1.24.13 c2345d7731cd1eeac7c981d0ad7daa8c2396c460 yes landed -- C1's relocation + namespace commit, landed by i9; NOT advanced past it tonight
   BRANCH: claude/i9-h5-step2-wip 54dec61728719e7566184da2d479ebb3a12fef07 yes cut -- step-2 reconvert + H5c + applied corpus; carries the five wrong deletions, NOT checkpoint 2
   LOCAL-ONLY: none
   LOCAL-ONLY: (PRESERVED never-push inventory, copied from this file's 15:45 revision -- i9's 21:29 block reads none for NEW local-only work; the bundles below stay the record until the owner rules on them)
@@ -161,9 +161,9 @@ line; then rule on whatever the lanes posted while you were down, in mailbox ord
   LOCAL-ONLY: i9-unbanked/job-i9-lift-accessibility-2026-09-13 836f6b5ce5efa83e6d2b7aee999eb442a74536d8 unexamined in-flight work bundles/job-i9-lift-accessibility.bundle 6e2d1ce49579509a
   LOCAL-ONLY: mailbox-i9-clone2-HEAD 297b56f0bc96ff5d2ad29971e855d8eea621ebb0 a mailbox commit that exists nowhere else, never-push ref bundles/mailbox-i9-clone2-HEAD.bundle 1ec3c49ff66c165e
   WORKTREE: i9-h5-version h5-version 0 -- clean at 54dec61728…, now also at origin on claude/i9-h5-step2-wip
-  NEXT: restore-then-rerun H5c on the PRESERVED scratch (already restored: 3898 .cs / 145 hand-owns, content-verified against the staging roots) using C2's selection-fix tip when it lands, expecting DELETE-DESELECTED 0 with the five SELECTED, starting from 54dec61728719e7566184da2d479ebb3a12fef07
+  NEXT: CHECKPOINT 2 is at origin (c2345d7731, i9 a5eb5f6a7, read back by COORD). Next: when C1 announces its ONE commit on c2345d7731 (weak public + Strong->Value; sync re-derives; xor_generic relocation) and it is read back, fast-forward the version branch onto it if C1 cannot push it, then REBUILD the corpus solution (no reconvert) -- THAT reading is the H5 GATE reading, by package (sync, weak, unique); post it with the three build results and the two guards; then the H6 pair: post a per-file sha256 manifest of the three preserved staging roots (half A, guarded) and expose them on the share for G's LAN copy; plant 6 (UNEXPLAINED-DESELECTION) on a scratch COPY with a throwaway .cs named after an arch-gated principal, one post (mailbox 8445d63a0). claude/i9-h5-step2-wip 54dec61728 is SUPERSEDED (the five-deletions intermediate)
   READ-FIRST: mailbox 5c47976ea (C2's corrected predicate accepted) · 80c948a7f + 825c65222c (the pair's fill rule and its correction) · d2ad84bdb (no reconvert; half A is the preserved root) · this post's section 1
-  BLOCKED-ON: lane -- C2's selection fix on claude/c2-h5c-slnx-orphan (tip 23e94a2e6b… carries the unconditional ORPHANED line but NOT the deselection derivation, measured)
+  BLOCKED-ON: C1's commit on c2345d7731 for the gate rebuild; nothing for the half-A manifest and plant 6
   TOOLS: GOROOT go1.24.13 and go1.23.12 side by side, backslash form, GOTOOLCHAIN=local, CGO_ENABLED=0 · DOTNET_ROOT the dotnet10 root (SDK 10.0.401) · python 3.12 · PATH must carry the POSIX dirs AND the gh dir or one of the two vanishes
 ```
 WAKE (i9, verbatim from 59e0e3099 s3): re-create on resume -- i9's wake leg is a CronCreate job and CronList marks it [session-only]. The id cdf12613 is THIS session's and is dead to any other. Same for the Monitor id (bvgzqvs2y), per-session by construction. Neither is inheritable state; both are STEPS. i9 cadence: 7,27,47 past the hour, PROTOCOL v3.6 leg b.
@@ -215,33 +215,9 @@ STATE BLOCK (C1, 2026-09-13 15:39; push sweep: 13 of 13 branches already on orig
   WORKTREE: C1 home /go2cs claude/c1-h5-rederive-patch 0 clean at the pushed tip
   WORKTREE: C1 home /c1-armA detached 2e6cf71e4 0 reachable from origin/claude/c1-board-goroot
   WORKTREE: C1 home /c1-armB detached 449ecce7a 0 reachable from origin/claude/g-generic-alias-recut
-  NEXT: THREE H6 rows, ONE commit on top of i9's CHECKPOINT 2 (announce-then-push; a marked-file edit
-    BEFORE the overlay would be reverted by the seeded copy -- bee677a84):
-      weak         TWO things, not one. (a) public on `partial struct Pointer<T>` at pointer.cs:138
-                   [the accessibility word d2ad84bdb names]; (b) Strong<T>() -> Value<T>() -- the hand-own
-                   declares the 1.23 API while unique/handle.cs calls Value 12x and Strong 0x, so (a)
-                   alone leaves `unique` red. SETTLED AT THE PIN: go1.24.13 src/weak/pointer.go:83 is
-                   Value(), go1.23.12 has no top-level weak, go1.23.12 internal/weak/pointer.go:73 is
-                   Strong(). Do NOT widen: runtime_makeStrongFromWeak still exists and pointer.cs:229's
-                   internal Strong() is a handle helper, not the API.
-      xor_generic  RELOCATE-ONLY, no body re-derive. The ENTIRE 1.23->1.24 delta is one build-tag line
-                   (loong64 added to a negated arch list); xorBytes/aligned/words/xorLoop are
-                   byte-identical at identical line numbers. So: namespace go.crypto ->
-                   go.crypto.@internal.fips140 (class subtle_package unchanged both sides) + demote the
-                   destination's existing auto to .cs.auto. Simulated against the address guard: clean
-                   before, FIRES after a bare git mv.
-      sync         TWO causes with OPPOSITE remedies, 6 of 6 errors accounted at the pin:
-                   CS0759 x4 -- runtime_SemacquireMutex/canSpin/doSpin/nanotime MOVED OUT of
-                     src/sync/runtime.go into src/internal/sync/runtime.go at 1.24; the hand-own
-                     implements all four as partials (runtime_impl.cs :50 :179 :181 :185) so they have
-                     no defining declaration left in the package.
-                   CS0111 x2 -- throw and fatal are NEW in 1.24's src/sync/runtime.go (:58, :59) and
-                     mutex.cs already defines both (:49, :51).
-                   One half is a relocation, the other an arrival. I will not pick the disposition for
-                   the four.
-  (delta applied from mailbox 5e55c4b92)
+  NEXT: GO (mailbox post-checkpoint2): ONE commit on top of claude/version-go1.24.13 c2345d7731 (announce-then-push; if the ref is not yours to push, announce the SHA on your own ref and i9 fast-forwards): weak/pointer.cs `public partial struct Pointer<T>` + Strong<T>() -> Value<T>() (pinned Go from the golang/go tag or G 553ac199b); sync re-derives against the 1.24.13 auto in that tree (runtime_impl.cs: the four linknames relocated to internal/sync -> drop the partial implementations that have no defining declaration; throw/fatal newly arrived in sync/runtime.go colliding with mutex.cs -> one definition); the xor_generic relocation (git mv the destination's auto to .cs.auto, the hand-own onto crypto/internal/fips140/subtle/xor_generic.cs, namespace go.crypto -> go.crypto.@internal.fips140); run the address guard 2b823dc951 on the tree before announcing. Then train 49: nothing more owed
   READ-FIRST: mailbox 46198c1b9 (the six dispositions measured; the git-move mechanism; the two registry keys crypto/internal/alias -> crypto/internal/fips140/alias and getgcmask -> pointerMask) · C1's own ce3add7af (pointerMask found by signature) · 3f54a3253 (row 76 RE-POINT) · 8be44bbc0a (C1-2b ruling)
-  BLOCKED-ON: checkpoint 2 at origin (i9's corrected step-2 run) -- the two H6 rows can be READ now from i9 7ae5355bb and cut the moment the checkpoint is read back
+  BLOCKED-ON: nothing. Checkpoint 2 is at origin; the three rows are root-caused at the pin (5e55c4b92) and the cut is GO
   TOOLS: python3 3.11 on PATH (the applier's H5_PYTHON override exists for lanes without the name); GOROOT go1.24.7 (also 1.25.1 present), neither pin -- 1.23.12 and 1.24.13 are both pins are LOCAL and cheap: /golang/go carries go1.24.13 and go1.23.12 via `git fetch --filter=blob:none --depth 1 origin refs/tags/<tag>:refs/tags/<tag>` for BOTH tags = .git 820 KB, blobs pulled lazily per `git show <tag>:<path>`; no SDK, no working tree, no shallow clone. Assert provenance (origin URL + VERSION at each tag) before reading.; GOTOOLCHAIN unset; DOTNET_ROOT none
 OPEN ACCEPTANCE (C1, gate-family decision, COORD's): CleanupDispatchTests' five arms on claude/c1-mcleanup-handown are written and unrunnable by any standing gate (GolibTests and go2cs.slnx are built by no workflow).
 HELD RIDERS: seven small measured results in a C1 scratch file, ordered posted as ONE mailbox entry (COORD, save-state) so they survive the container.
@@ -389,3 +365,4 @@ PROTOCOL: as COORD's section.
 - 2026-09-13 21:45 -- SAVE-STATE at 94 percent (owner order): COORD state block rewritten to the current position (pins re-read from origin); fleet STATE BLOCK order posted 6481627c0; handover block 11
 - 2026-09-13 21:55 -- C1 delta (5e55c4b92): two train-49 refs added, NEXT replaced verbatim, LOCAL-ONLY stranded post-tool commit noted; i9's never-push inventory restored under a dated marker (its 21:29 block reads none for new work)
 - 2026-09-13 22:00 -- C2's delta (241eb474f section 4) folded: NEXT + BLOCKED-ON copied from the fence; its BRANCH pin re-read from origin
+- 2026-09-13 22:12 -- CHECKPOINT 2 read back (version branch c2345d7731); i9/C1 NEXT for the gate rebuild; handover block 12
