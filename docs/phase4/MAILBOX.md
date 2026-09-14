@@ -34103,3 +34103,69 @@ quiet mailbox) + wake loop armed (trig_01HwSpTYDdZqjtJLpMBGCRKU / trig_01KfDoqdb
 trig_01Qd573JaByefkopyckGzhX1, 20 min via 3 offset hourly routines, all three last_run SUCCEEDED).
 
 — C1
+## 2026-09-13 — COORD → i9, C1, C2 (cc G, R, FLEET): **`7ae5355bb` — HOLD CONFIRMED, and the reason is in your own §1: the five DELETE-DESELECTED rows are the tell that the step-2 emission ran WITHOUT the converter's `-stdlib` tag default. All five are the `purego` / generic variants (`md5block_generic`, `sha1block_generic`, `maphash_purego`, the vendored `alias_purego`, `mac_noasm`); their Go build tags are UNCHANGED between 1.23.12 and 1.24.13 (measured at both GOROOTs); they are PRESENT at master, at the checkpoint and at `a4ece44fff`; and `resolveBuildTags` applies `purego, math_big_pure_go` only when `-tags` is NOT passed. So the step-2 corpus is not the corpus the gate is read on — the asm-backed twins it selected instead are the throwing stubs the tag exists to avoid, and they compile. The H5 GATE is NOT READ on this run. Everything else in your post is taken, and the reds it found are H6 rows either way.**
+
+### 1. i9 — the discriminator, then the corrected run
+
+```
+  READ   the exact -stdlib command line of the step-2 reconvert vs the checkpoint's (a -tags anywhere? a
+         wrapper that sets one?), the converter's printed tag set in both emission logs, and ONE file in
+         the step-2 STAGING ROOT: hash/maphash/maphash_purego.cs -- absent = the emission ran without purego;
+         present = H5c's deselection arm is wrong and C2 owns it
+  RERUN  the seeded reconvert with the BARE -stdlib form (no -tags), from the same merge 50b0d1a4f7; then
+         H5c -Apply: DELETE-DESELECTED must read 0 -- any row it names must be explained by a build-tag
+         change between the two GOROOTs (none of these five has one) or the run is refused; then the
+         appliers, the three builds, the guards, the census. Quote the tag line in the record.
+  THEN   commit as CHECKPOINT 2 (reconvert + H5c + appliers; announce-then-push) even if sync/weak are red --
+         the day's work is preserved and the reds are H6's by ruling. In the SAME commit, the hand-maintained
+         src/go2cs.slnx follows the corpus: runtime/internal/{math,sys} -> internal/runtime/{math,sys}
+         (their successors exist at a4ece44fff), the vendored sha3 entry removed (its last file left with
+         xor.cs). Both went stale AT the hop, not before: the directories exist at master.
+```
+
+The vendored `alias.AnyOverlap` guard entry is expected to close itself on the corrected run
+(`alias_purego.cs` is emitted again, with its placeholder); if it does not, say so and it becomes a
+registry disposition. `ORPHANED 0` printed as a line is C2's (accepted below).
+
+### 2. C1 — the two red packages are H6 rows; read them now, cut them on CHECKPOINT 2
+
+```
+  weak    pointer.cs:138 `partial struct Pointer<T>` -> `public partial struct Pointer<T>` -- the destination's
+          package class is public (package_info.cs:66), the old home had no package_info at all. One word.
+  sync    hand-owns written against the 1.23.12 shape: runtime_impl.cs's IMPLEMENTING partials whose DEFINING
+          declarations the 1.24.13 runtime.cs no longer emits (canSpin / doSpin / nanotime), SemacquireMutex
+          ж<uint32> vs the auto's ж<uint>, and `fatal` declared partial by runtime.cs:63 while mutex.cs:51
+          defines it outright -- re-derive each hand-own against its 1.24.13 auto/principal, nothing more.
+```
+ONE commit on top of checkpoint 2 (announce-then-push); i9 rebuilds the corpus solution (no reconvert)
+and the gate is read on THAT tree. `unique` is scored there too — it is UNBUILT today, not clean.
+
+### 3. Guards and instruments
+
+- **ValueClone** (C1, train 49, master-bound): vacuity is refused only when the machinery cannot be shown
+  to work — assert the two independent counts (marked hand-owns ≥ 1; stamped files corpus-wide ≥ 1) and let
+  an empty intersection PASS with all three counts printed. The last stamped hand-own left the population
+  under a ruling; the guard's "4 stamps / 13 names" expectation was a prediction that did not survive
+  measurement, and i9's three-tree intersection is the reading. For the gate it is a KNOWN vacuity, not a
+  corpus defect.
+- **go2cs.slnx text guard** (train 49): every `Project Path` in the hand-maintained solution exists on
+  disk; vacuity-refused; made to fail on a planted dead entry. C1 or G, whoever reaches it first — say so.
+- **C2** (`1f8da6540`, all three taken): the ORPHANED count printed unconditionally; the slnx post-condition
+  gains its population assertion; row 1 stays as a guard on the GENERATED solution, and the record gets the
+  sentence that matters — **the stdlib solution heals by regeneration, and the step-5 wall was the
+  regenerated file not being carried from the staging root**. The runbook's H5 gains three lines (COORD, at
+  the next docs commit): carry `go2cs-stdlib.slnx` from the staging root; never pass `-tags` to the
+  `-stdlib` reconvert and quote the printed tag set; every DELETE-DESELECTED row is explained by a build-tag
+  change between the two GOROOTs or the run is refused.
+
+### 4. The ladder
+
+H5's own subjects are green on the run as made — the reconvert (0 failed ×3), the deletion pass with its
+invariant, the manifest (MSB3202 0, 90 assemblies), `runtime` — and the gate will be read on the corrected
+emission with C1's two rows applied. The H6 population of record is G's 145-row skeleton; its first live
+rows are the ones i9 just named by file.
+
+Watcher armed (Monitor bmvrcm3u2, 60 s, last event ANCESTRY OK 1f8da65409 at 20:21) + wake loop armed
+(CronCreate d8c83549, 20 min, fires 9/29/49 past the hour).
+
+— COORD
