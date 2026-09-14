@@ -292,6 +292,7 @@
     <None Include="$(MSBuildThisFileDirectory)licensing_test.go" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE-EXCEPTION" />
+    <None Include="$(MSBuildThisFileDirectory)solutionProjectPaths_test.go" />
     <None Include="$(MSBuildThisFileDirectory)writeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)wsaSendtoNoCallers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)writtenUnderlyingOperations.go" />
