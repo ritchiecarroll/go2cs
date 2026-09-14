@@ -155,6 +155,19 @@ posted in mailbox order, starting with C1's row 20 and i9's rebuild.
   LOCAL-ONLY: claude/i9-board-archive-tar 314e699c649169a26658f648fd935298ea1a5e91 census-dirty (users-dir/drive-abs/domain-suffix) preserved: bundles/i9-board-archive-tar.bundle b0333e2da78d7044
   LOCAL-ONLY: claude/i9-board-runtime-door-bisect 68ad83c2c13a073f3d11cbc28224b8ec66a8c88b census-dirty (same classes) preserved: bundles/i9-board-runtime-door-bisect.bundle aeda50e5cb6d7a9c
   LOCAL-ONLY: claude/i9-data-recon-2026-09-13 fd3f22f3bb6d4a0fc9cb2635c3c652816c14d903 census-dirty (same classes) preserved: bundles/i9-data-recon-2026-09-13.bundle b691dfb55af0fc67
+  LOCAL-ONLY: (PRESERVED never-push inventory, copied from this file's 15:45 revision -- i9's final block lists only its census-dirty bundles; the bundles below stay the record until the owner rules on them)
+  LOCAL-ONLY: claude/i9-commit3-measurement 7db72bca087eca462ff6d1fea65a398cdeeb4cc8 commit message says local-only comparison build bundles/i9-commit3-measurement.bundle 919071fe815fde14
+  LOCAL-ONLY: claude/i9-a1-residual-round5 608ed292d346ea76d866b0b313e1548c4674ee11 commit message says local only not for master bundles/job-i9-a1-round5-HEAD.bundle 7b16946db244ca25
+  LOCAL-ONLY: i9-unbanked/job-i9-q44-2026-09-13 3ff6694def9fb96424480d230852979e34c05427 unexamined in-flight crypto/tls work, scrub order bundles/job-i9-q44.bundle ebea0b0437b3b574
+  LOCAL-ONLY: i9-unbanked/job-i9-train38-2026-09-13 d32fed17971d1c88223834df6368240649eb9026 unexamined in-flight work bundles/job-i9-train38.bundle 1eb1c71b88511ca1
+  LOCAL-ONLY: i9-unbanked/job-i9-pprof-landed-2026-09-13 8bb8fdec8c267d5f138842fb081b65cd084060b7 unexamined in-flight work bundles/job-i9-pprof-landed.bundle 52e6c8d0655a8d2f
+  LOCAL-ONLY: i9-unbanked/job-i9-a1-round4-2026-09-13 829eb09dd907f7241a184c81e8a9c7af8fcb3784 unexamined in-flight work bundles/job-i9-a1-round4.bundle 186adb683f897e2b
+  LOCAL-ONLY: i9-unbanked/job-i9-NICK1-2026-09-13 30589aa65917c8d9db2c1a2494a0b41f5d6ff01f unexamined in-flight work bundles/job-i9-NICK1.bundle 42051da9f6b76d38
+  LOCAL-ONLY: i9-unbanked/job-i9-runtime-remeasure-2026-09-13 ee0e1d504d46d4cbd6207fa782aed7831136dd5f unexamined in-flight work bundles/job-i9-runtime-remeasure.bundle 87a3dbf04beb8f2e
+  LOCAL-ONLY: i9-unbanked/job-i9-g-pprof-2026-09-13 06393f56a4dd3e4d3cf226de8d35bf74cf717e1e unexamined in-flight work bundles/job-i9-g-pprof.bundle d20d49d62548de7e
+  LOCAL-ONLY: i9-unbanked/job-i9-train37-pprof-2026-09-13 0bae8d4292f0e27a5ca7ed696e3313e1867f284e unexamined in-flight work, prerequisite NOT on origin so bundled to an origin-reachable ancestor bundles/job-i9-train37-pprof.bundle 3a1e4ff68c739714
+  LOCAL-ONLY: i9-unbanked/job-i9-lift-accessibility-2026-09-13 836f6b5ce5efa83e6d2b7aee999eb442a74536d8 unexamined in-flight work bundles/job-i9-lift-accessibility.bundle 6e2d1ce49579509a
+  LOCAL-ONLY: mailbox-i9-clone2-HEAD 297b56f0bc96ff5d2ad29971e855d8eea621ebb0 a mailbox commit that exists nowhere else, never-push ref bundles/mailbox-i9-clone2-HEAD.bundle 1ec3c49ff66c165e
   WORKTREE: i9-h5-version h5-version 0 -- clean at f0f8826894, at origin
   NEXT: when C1's row-20 re-derive of internal/sync/hashtriemap.cs is at origin, fast-forward claude/version-go1.24.13 onto it and REBUILD src/go2cs-stdlib.slnx -- sync must compile, then unique is MEASURED for the first time (the CS1061 prediction, deferred behind runtime, then weak, now sync) -- starting from f0f88268945269530d47d9775f4a0772bf6f3a16
   READ-FIRST: mailbox 4e42736e1 (COORD's row-20 ruling) · 1ebaa3f98 (my H5 gate reading) · 36519d7009 (the 2-of-11 confirmation) · 714a80be2 (this shutdown order)
