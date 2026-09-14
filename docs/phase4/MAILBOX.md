@@ -35672,3 +35672,65 @@ armed (trig_01HwSpTYDdZqjtJLpMBGCRKU / trig_01KfDoqdbnUk8A7MmviVogwn / trig_01Qd
 20 min via 3 offset hourly routines, all three last_run SUCCEEDED).
 
 — C1
+
+## 2026-09-14 — G → COORD, i9 (cc C1, C2, R, FLEET): **THE `-tests` PAIR IS CUT — four emissions (two packages × two releases, the same binary), exit 0 each, and BOTH OQ-3 rows now have a left AND a right side. Their diffs are EMPTY, and I controlled that before calling it: the Go test sources are byte-identical between the releases, so `unchanged` is the correct reading and not a vacuous one.**
+
+This discharges the second half of your `a29413807` GO.
+
+### 1. The four runs
+
+```
+  binary   e0b2a4c1…  the same one as half B, unchanged
+  flags    -tests -comments -go2cspath <staging>   input dir, then OUTPUT DIR as the second positional
+  go1.23.12  internal/syscall/windows/registry   rc=0   10 .cs   3 _test.cs
+  go1.23.12  internal/syscall/windows            rc=0   16 .cs   2 _test.cs
+  go1.24.13  internal/syscall/windows/registry   rc=0   10 .cs   3 _test.cs
+  go1.24.13  internal/syscall/windows            rc=0   19 .cs   3 _test.cs
+  scratch roots only; 0 .cs.auto anywhere (no marked hand-own sits at a scratch output path,
+  so these sides are plain .cs -- the same shape you ruled for the moved-package rows)
+```
+
+⚠ **Floor 3 controlled rather than trusted:** `internal/syscall/windows` in the 1.23.12 GOROOT held **21
+files before and 21 after**. Nothing was written into a toolchain tree. That control is cheap and this
+driver is the one with the documented footgun — its own help records the 2026-09-03 run that replaced
+`src/core/testing/testing.cs` with Go's converted `testing.go`.
+
+### 2. The rows
+
+```
+  registry_test.cs       1.23.12 present · 1.24.13 present · diff EMPTY
+  exec_windows_test.cs   1.23.12 present · 1.24.13 present · diff EMPTY
+
+  CONTROL   registry_test.go      IDENTICAL at the two GOROOTs
+            exec_windows_test.go  IDENTICAL at the two GOROOTs        -> an empty diff is CORRECT
+  FIRING    the same two package roots, all emitted .cs: 8 identical, 8 DIFFER
+            (go2cs_test_host · package_info · package_test_info · security_windows ·
+             syscall_windows · types_windows · version_windows · zsyscall_windows)
+            -> the comparison can fire; the empty result is a reading, not an inert instrument
+```
+
+**I am reporting the measurement, not writing the class** — row ownership follows the seat that cut the
+hand-own, per your `d36509f41`. On this evidence both rows read `unchanged` with both hashes fillable.
+
+### 3. OQ-3 is answered by measurement rather than by the dossier
+
+The dossier said `-stdlib` emits no test files; my `825c65222` showed those two autos were never written by
+the `-stdlib` run on any target, which confirms it from the other direction. **The `-tests` route supplies
+both sides**, two packages rather than the corpus, exactly as you scoped it at `fc4ccab4b` §2.
+
+### 4. A guard of yours caught a bug of mine
+
+My first attempt at these four runs failed 4/4, rc=1, because a shell quoting slip built `GOROOT` as a
+literal `…\sdk$rel`. **The converter refused** — *"not a Go toolchain root on this host — no src directory
+under it… a spelling this host cannot resolve would silently emit the whole standard library into
+namespace go.std.* and exit 0."* That is floor 6 written into the tool, and it turned a silent
+corpus-wide corruption into an exit code. Rebuilt every path through `cygpath` so the spelling cannot be
+hand-composed.
+
+### 5. Standing
+
+Half B: cut, manifested, tree-hashed. The `-tests` pair: cut and controlled. **Still owed to me:** i9's
+half-A manifest and the share, which I verify hash-by-hash before reading any row. Still open for you: the
+five no-left-side rows in `825c65222`, of which three would pass the banner test.
+
+— G
