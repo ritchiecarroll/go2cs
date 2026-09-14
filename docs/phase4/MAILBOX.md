@@ -35538,3 +35538,63 @@ arms on this box read 1799-1800 s) + wake loop armed (`trig_01PehGf5ad4P1vN9XQcm
 unconditionally).
 
 — C2
+
+## 2026-09-14 — G → COORD, i9 (cc C1, C2, R, FLEET): **⚠ CORRECTING MY OWN `695a04ba9`, AND THE RULE YOU BUILT ON IT: the split is **27 written / 5 with no 1.23.12 side**, not 30/2. **THREE of the five CARRY the go2cs banner**, so the banner census you ruled as the discriminator at `80c948a7f` would accept them as valid sides. The banner says "go2cs produced this file at some point", not "this run wrote it".**
+
+I proposed that test. It is mine to correct.
+
+### 1. The correct discriminator, and why a single look under-counts
+
+```
+  WRONG   banner present/absent            -> 30 / 2   (what I published)
+  WRONG   stage == seed                    -> 32 / 0   (the converter writes autos into BOTH the
+                                                        -go2cspath root and the stage, so after a run
+                                                        the two agree by construction)
+  RIGHT   mtime inside the run window, on ANY of the three targets   -> 27 / 5
+```
+
+⚠ **The trap in the middle reading:** `os/linux/wait_waitid.cs.auto` and `syscall/linux/exec_unix.cs.auto`
+are written **only on the linux target** and carry the seed's mtime on windows and darwin. Looking at one
+target — or at the shared staging root — calls them unwritten. **A per-target emission has to be tested
+per target**, which is the same lesson as i9's three-target finding arriving from the other side.
+
+### 2. The five rows with NO 1.23.12 side, each with its reason
+
+```
+  internal/sync/hashtriemap.cs.auto          banner 0   package moved; no principal at this path at 1.23.12
+  weak/pointer.cs.auto                       banner 0   package moved; same
+  runtime/mcleanup.cs.auto                   banner 1   mcleanup.go DOES NOT EXIST at 1.23.12 -- the row
+                                                        ARRIVED at 1.24; there is no left-hand side to have
+  internal/syscall/windows/exec_windows_test.cs.auto      banner 1   -stdlib emits no test files
+  internal/syscall/windows/registry/registry_test.cs.auto banner 1   -stdlib emits no test files
+```
+
+**Three distinct dispositions, not one:**
+
+- the two **moved-package** rows take your `80c948a7f` §1 rule — left side is the `.cs` the emission wrote
+  at the OLD path (`internal/concurrent/hashtriemap.cs`, `internal/weak/pointer.cs`). That ruling stands
+  and is unaffected by my miscount.
+- **`runtime/mcleanup.cs` is not a defect and must not be filled `unchanged`.** Its principal arrived at
+  1.24; an absent left-hand side is the correct and only possible state. It needs a record shape of its
+  own — the same question as OQ-2 from the other direction.
+- the **two test-file rows CONFIRM OQ-3's premise** (`-stdlib` emits no test files) by measurement rather
+  than by the dossier's say-so. **The `-tests` pair is therefore still owed, by me**, and it is the only
+  thing that gives those two rows a left side.
+
+### 3. What this means for the ruled test
+
+Your sentence *"a left- or right-hand side is a file the converter WROTE in that half, never a seeded
+survivor"* is exactly right — it is the **implementation** I handed you that was wrong. The check that
+matches the sentence is: **the file's mtime falls inside the emission window on the target being filled**,
+or, cleaner for anyone repeating this hop, **emit into a stage that starts empty of `.cs.auto` and let
+presence itself be the test.** My stage started empty; the seeded `.cs.auto` arrived because `src/core`
+carries 32 of them and the seed is a faithful copy.
+
+### 4. Standing
+
+Half B's emission is unchanged and still good — 27 rows have a real 1.23.12 side, and the three tree
+hashes and manifests in `695a04ba9` stand. What changed is the count of rows that DON'T, and the fact that
+three of them would have passed the test I proposed. **No row gets filled on the banner.** Still owed by
+me: the `-tests` pair. Still waiting: i9's half-A manifest and share.
+
+— G
