@@ -94,9 +94,9 @@ list (branches and SHAs of unscrubbed content) is in HANDOVER-coordinator.md and
 pruned; the post tool's FLEET GUARD and the assembler's census enforce it.
 
 STATE AT THIS REVISION (2026-09-13 15:45):
-  BRANCH: claude/coord-handover affa083ecf72c6785820613e9619d5610763145c yes landed -- the handover log + this file
+  BRANCH: claude/coord-handover d2ca46adaab6602ecc4c1011360000d2c3bad578 yes landed -- the handover log + this file
   (the reproduction ref coord-train47-union, dd021ff5b, was DELETED after the landing at 17:27; its tree 161af6c44 is master's)
-  BRANCH: claude/mailbox 97f2829c2ea66ca347ef33b5bec606ad4ed8d0c6 yes transport -- rotated 2026-09-13 02:36
+  BRANCH: claude/mailbox e6ae3b4a6028532ffc6060b7b194defbbe6b9708 yes transport -- rotated 2026-09-13 02:36
   claude/version-go1.24.13 fast-forwarded to 271300cea at 17:52 (docs + doctrine only; the H5 set lands on it).
   master tip at this revision: 271300cea (docs commit) over 1885bce69 (doctrine d) over 31fe4925d (TRAIN 47 LANDED 17:26, tree 161af6c44); train 47's base was a02ac3df3.
   BRANCH: claude/version-go1.24.13 dc78fb0df87a8eabe3449965c6bbbabe6359989a yes created -- the H5 branch, created from the landed SHA; the H5 set (088f8778f, ff54907996, d4e40e28b) targets it, never master
@@ -247,13 +247,14 @@ STATE BLOCK (C1, 2026-09-13 15:39; push sweep: 13 of 13 branches already on orig
   BRANCH: claude/c1-mfinal-mint-door-clean 3f1612524a764fbc0732e5b44d511a4a698fd1c9 yes accepted -- mfinal pointer-mint door named per site, the clean re-cut
   BRANCH: claude/c1-mfinal-mint-door 0dab478581d78eb39a23c08a8ec232672009215a yes superseded -- pre-re-cut; superseded by -clean
   BRANCH: claude/c1-token-door-census-stacked b4914e878e7b4f0347c217ce028b7e4ccbc1b6a1 yes accepted -- train-48 row 11, the token-door census RE-CUT on top of row 13 (c2-census-goroot-fix-clean); stack-on=13
+  BRANCH: claude/c1-h5-relocation a4ece44fff696e88c9d4a72059b12efaa3185a8a yes accepted -- the H5 relocation: five moves (autos -> .cs.auto), two deletes, two registry keys (crypto/internal/alias -> crypto/internal/fips140/alias; getgcmask -> pointerMask) + the namespace/class commit on top (ruling 43ce0c8e6); i9 fast-forwards claude/version-go1.24.13 onto its tip, then step 2 (f0837eea1)
   LOCAL-ONLY: c1-stranded-2026-09-13 a5aa199100e54a3c4eeddc447357a2c1e845f5e5 a post-tool commit stranded on a stale base; content superseded by the delivered entry ddcfde091 -- no bundle needed
   WORKTREE: C1 home /go2cs claude/c1-h5-rederive-patch 0 clean at the pushed tip
   WORKTREE: C1 home /c1-armA detached 2e6cf71e4 0 reachable from origin/claude/c1-board-goroot
   WORKTREE: C1 home /c1-armB detached 449ecce7a 0 reachable from origin/claude/g-generic-alias-recut
-  NEXT: ONE commit on claude/version-go1.24.13 on top of the checkpoint, unsigned by owner authorization, announce-then-push: git mv the checkpoint's auto internal/sync/hashtriemap.cs and weak/pointer.cs to .cs.auto; git mv internal/concurrent/hashtriemap.cs -> internal/sync/, internal/weak/pointer.cs -> weak/, crypto/internal/alias/alias_impl.cs -> crypto/internal/fips140/alias/; git rm vendor/golang.org/x/crypto/sha3/xor.cs, internal/concurrent/hashtriemap_whitebox.cs and the two old .cs.auto siblings; registry keys crypto/internal/alias -> crypto/internal/fips140/alias and getgcmask -> pointerMask with the mbitmap_impl.cs body renamed; nothing else. Read-back: the two guards name ZERO entries beside the committed corpus (mailbox 46198c1b9 sections 1 and 3)
+  NEXT: nothing owed on H5: the relocation (c8d50e014f + a4ece44fff on claude/c1-h5-relocation) is verified at origin and i9 lands it; the ValueClone vacuity and DisplaceSomething readings are cured by step 2's reconvert. Standing: train-48 rows 12/13/14 pinned at origin; the CS1106 mechanism (go2cs-gen emits the static partial part) is the next thing to check, not a claim
   READ-FIRST: mailbox 46198c1b9 (the six dispositions measured; the git-move mechanism; the two registry keys crypto/internal/alias -> crypto/internal/fips140/alias and getgcmask -> pointerMask) · C1's own ce3add7af (pointerMask found by signature) · 3f54a3253 (row 76 RE-POINT) · 8be44bbc0a (C1-2b ruling)
-  BLOCKED-ON: nothing. The checkpoint is at origin (dc78fb0df8); the relocation commit is C1's to cut NOW, first in the order (46198c1b9 sections 1 and 3)
+  BLOCKED-ON: nothing. Waiting on i9's step 2 readings (by-project sync / weak / unique after the CS0111 clears) to score the consumer-side CS1061 prediction
   TOOLS: python3 3.11 on PATH (the applier's H5_PYTHON override exists for lanes without the name); GOROOT go1.24.7 (also 1.25.1 present), neither pin -- 1.23.12 and 1.24.13 are fetched from source tags when needed; GOTOOLCHAIN unset; DOTNET_ROOT none
 OPEN ACCEPTANCE (C1, gate-family decision, COORD's): CleanupDispatchTests' five arms on claude/c1-mcleanup-handown are written and unrunnable by any standing gate (GolibTests and go2cs.slnx are built by no workflow).
 HELD RIDERS: seven small measured results in a C1 scratch file, ordered posted as ONE mailbox entry (COORD, save-state) so they survive the container.
@@ -409,3 +410,4 @@ PROTOCOL: as COORD's section.
 - 2026-09-13 19:00 -- BRANCH pins re-read at origin by refresh-resume.py; i9's version-branch checkpoint, C2's H5c cut, C1's three train-48 refs and G's skeleton tip added; NEXT per lane per mailbox 46198c1b9 (the six orphan dispositions); handover block 9
 - 2026-09-13 19:15 -- BLOCKED-ON re-measured for every lane (all four were stale: G f2f6240a1 caught its own -- a false BLOCKED-ON costs the session); G's NEXT corrected to RE-POINT x1 for mbitmap_impl.cs per 3f54a3253; READ-FIRST re-pointed at the latest rulings per lane
 - 2026-09-13 19:25 -- G's WORKTREE key names its real branch (G 83eccc3e31); note: WAKE is a paragraph outside the fence by design, not a missing key
+- 2026-09-13 19:32 -- C1's relocation ref added (tip re-read at origin), C1 NEXT/BLOCKED-ON after the namespace commit a4ece44fff; i9 lands it then step 2
