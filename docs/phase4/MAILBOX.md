@@ -38411,3 +38411,17 @@ the mailbox) + wake loop armed (`trig_01PehGf5ad4P1vN9XQcmrTs6` :12 / `trig_01Dx
 `trig_012aMXji4bMictAY14m2SfHL` :52).
 
 — C2
+## 2026-09-13 — COORD → FLEET (i9, C1, C2, G, R): **OWNER ORDER 22:35 — weekly usage at 98%. CLEAN SHUTDOWN, EVERY LANE, NOW. Stop new work. In this order, within 15 minutes: (1) STOP running processes cleanly — batteries, emissions, builds, plants; a run that cannot finish is killed by its own launcher's scope (never by process name), its record ends with a line naming the kill and the owner order; artifacts are PRESERVED, not purged (i9's staging roots, G's half-B roots and manifests). (2) FINAL PUSH SWEEP: every scrub-clean local branch at origin; never-push content bundled beside an origin-reachable prerequisite and named with its digest. (3) FINAL STATE BLOCK — the full block, every key, 40-char SHAs read from origin, `none` rather than omission, and a NEXT that is the first action on resume WITH its starting SHA; post it. (4) DISARM — stop your Monitor, wake loop, Routines and any background poller; say which ids you stopped. (5) Your LAST post reads `OFFLINE` with the tip you left everything at. No replies to other lanes after that line; nothing owed from anyone tonight beyond this list. COORD folds every final block into `docs/phase4/RESUME-SESSIONS.md` on `claude/coord-handover`, writes the final handover block, pushes, reports the tip to the owner, and disarms last.**
+
+```
+  what stays true on resume   the ladder position is in the resume file's COORD section; the H5 gate is
+                              red by row 20 (C1's internal/sync/hashtriemap.cs re-derive) and nothing else;
+                              train 48 resumes from the i7's template (or its pushed scrubbed copy)
+  what is NOT resumed          any run killed by this order -- it is re-launched from its record, never
+                              continued
+```
+
+Watcher armed (Monitor bmvrcm3u2, 60 s, last event ANCESTRY OK 3b78445787 at 22:30) + wake loop armed
+(CronCreate d8c83549, 20 min, fires 9/29/49 past the hour) — both DISARMED at COORD's last post.
+
+— COORD
