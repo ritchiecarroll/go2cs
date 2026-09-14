@@ -94,8 +94,8 @@ list (branches and SHAs of unscrubbed content) is in HANDOVER-coordinator.md and
 pruned; the post tool's FLEET GUARD and the assembler's census enforce it.
 
 STATE AT THIS REVISION (2026-09-13 21:45, weekly usage 94 percent -- SAVE-STATE MODE):
-  BRANCH: claude/coord-handover d60e262fe884a68cbb3f252d301da107e2efc1a3 yes landed -- the handover log (block 10 + this file; block 11 = this refresh)
-  BRANCH: claude/mailbox 6481627c0d20550ee6375ed73e4b5d82d96eacbd yes transport -- rotated 2026-09-13 02:36
+  BRANCH: claude/coord-handover 84741146d9daf2def5d0947f307a617bfe7de969 yes landed -- the handover log (block 10 + this file; block 11 = this refresh)
+  BRANCH: claude/mailbox 5e55c4b92b8128fd42ccc3ed78b79efb406651be yes transport -- rotated 2026-09-13 02:36
   BRANCH: claude/version-go1.24.13 a4ece44fff696e88c9d4a72059b12efaa3185a8a yes cut -- the H5 branch: checkpoint 1 (dc78fb0df8: seeded reconvert at go1.24.13 + H5c; the C1-1/C1-2 appliers) then C1's relocation (c8d50e014f moves/deletes/two registry keys; a4ece44fff namespace/class lines). NOT the H5 gate.
   BRANCH: claude/c1-h5-relocation a4ece44fff696e88c9d4a72059b12efaa3185a8a yes accepted -- the relocation source ref (landed on the version branch by fast-forward)
   BRANCH: claude/c2-h5c-slnx-orphan 23e94a2e6bd2c29c73c13549bbec59d475fba827 yes announced -- H5c: slnx guard + ORPHANED class + relocate REFUSED + report-only items; C2 is cutting the SELECTION fix on top (derive deselected from the emission; explanation gate = selection at both GOROOTs under the converter's printed tag set); i7 parse gate on every push
@@ -147,6 +147,19 @@ line; then rule on whatever the lanes posted while you were down, in mailbox ord
   BRANCH: claude/version-go1.24.13 a4ece44fff696e88c9d4a72059b12efaa3185a8a yes landed -- C1's relocation + namespace commit, landed by i9; NOT advanced past it tonight
   BRANCH: claude/i9-h5-step2-wip 54dec61728719e7566184da2d479ebb3a12fef07 yes cut -- step-2 reconvert + H5c + applied corpus; carries the five wrong deletions, NOT checkpoint 2
   LOCAL-ONLY: none
+  LOCAL-ONLY: (PRESERVED never-push inventory, copied from this file's 15:45 revision -- i9's 21:29 block reads none for NEW local-only work; the bundles below stay the record until the owner rules on them)
+  LOCAL-ONLY: claude/i9-commit3-measurement 7db72bca087eca462ff6d1fea65a398cdeeb4cc8 commit message says local-only comparison build bundles/i9-commit3-measurement.bundle 919071fe815fde14
+  LOCAL-ONLY: claude/i9-a1-residual-round5 608ed292d346ea76d866b0b313e1548c4674ee11 commit message says local only not for master bundles/job-i9-a1-round5-HEAD.bundle 7b16946db244ca25
+  LOCAL-ONLY: i9-unbanked/job-i9-q44-2026-09-13 3ff6694def9fb96424480d230852979e34c05427 unexamined in-flight crypto/tls work, scrub order bundles/job-i9-q44.bundle ebea0b0437b3b574
+  LOCAL-ONLY: i9-unbanked/job-i9-train38-2026-09-13 d32fed17971d1c88223834df6368240649eb9026 unexamined in-flight work bundles/job-i9-train38.bundle 1eb1c71b88511ca1
+  LOCAL-ONLY: i9-unbanked/job-i9-pprof-landed-2026-09-13 8bb8fdec8c267d5f138842fb081b65cd084060b7 unexamined in-flight work bundles/job-i9-pprof-landed.bundle 52e6c8d0655a8d2f
+  LOCAL-ONLY: i9-unbanked/job-i9-a1-round4-2026-09-13 829eb09dd907f7241a184c81e8a9c7af8fcb3784 unexamined in-flight work bundles/job-i9-a1-round4.bundle 186adb683f897e2b
+  LOCAL-ONLY: i9-unbanked/job-i9-NICK1-2026-09-13 30589aa65917c8d9db2c1a2494a0b41f5d6ff01f unexamined in-flight work bundles/job-i9-NICK1.bundle 42051da9f6b76d38
+  LOCAL-ONLY: i9-unbanked/job-i9-runtime-remeasure-2026-09-13 ee0e1d504d46d4cbd6207fa782aed7831136dd5f unexamined in-flight work bundles/job-i9-runtime-remeasure.bundle 87a3dbf04beb8f2e
+  LOCAL-ONLY: i9-unbanked/job-i9-g-pprof-2026-09-13 06393f56a4dd3e4d3cf226de8d35bf74cf717e1e unexamined in-flight work bundles/job-i9-g-pprof.bundle d20d49d62548de7e
+  LOCAL-ONLY: i9-unbanked/job-i9-train37-pprof-2026-09-13 0bae8d4292f0e27a5ca7ed696e3313e1867f284e unexamined in-flight work, prerequisite NOT on origin so bundled to an origin-reachable ancestor bundles/job-i9-train37-pprof.bundle 3a1e4ff68c739714
+  LOCAL-ONLY: i9-unbanked/job-i9-lift-accessibility-2026-09-13 836f6b5ce5efa83e6d2b7aee999eb442a74536d8 unexamined in-flight work bundles/job-i9-lift-accessibility.bundle 6e2d1ce49579509a
+  LOCAL-ONLY: mailbox-i9-clone2-HEAD 297b56f0bc96ff5d2ad29971e855d8eea621ebb0 a mailbox commit that exists nowhere else, never-push ref bundles/mailbox-i9-clone2-HEAD.bundle 1ec3c49ff66c165e
   WORKTREE: i9-h5-version h5-version 0 -- clean at 54dec61728…, now also at origin on claude/i9-h5-step2-wip
   NEXT: restore-then-rerun H5c on the PRESERVED scratch (already restored: 3898 .cs / 145 hand-owns, content-verified against the staging roots) using C2's selection-fix tip when it lands, expecting DELETE-DESELECTED 0 with the five SELECTED, starting from 54dec61728719e7566184da2d479ebb3a12fef07
   READ-FIRST: mailbox 5c47976ea (C2's corrected predicate accepted) · 80c948a7f + 825c65222c (the pair's fill rule and its correction) · d2ad84bdb (no reconvert; half A is the preserved root) · this post's section 1
@@ -192,11 +205,41 @@ STATE BLOCK (C1, 2026-09-13 15:39; push sweep: 13 of 13 branches already on orig
   BRANCH: claude/c1-mfinal-mint-door 0dab478581d78eb39a23c08a8ec232672009215a yes superseded -- pre-re-cut; superseded by -clean
   BRANCH: claude/c1-token-door-census-stacked b4914e878e7b4f0347c217ce028b7e4ccbc1b6a1 yes accepted -- train-48 row 11, the token-door census RE-CUT on top of row 13 (c2-census-goroot-fix-clean); stack-on=13
   BRANCH: claude/c1-h5-relocation a4ece44fff696e88c9d4a72059b12efaa3185a8a yes accepted -- the H5 relocation: five moves (autos -> .cs.auto), two deletes, two registry keys (crypto/internal/alias -> crypto/internal/fips140/alias; getgcmask -> pointerMask) + the namespace/class commit on top (ruling 43ce0c8e6); i9 fast-forwards claude/version-go1.24.13 onto its tip, then step 2 (f0837eea1)
-  LOCAL-ONLY: c1-stranded-2026-09-13 a5aa199100e54a3c4eeddc447357a2c1e845f5e5 a post-tool commit stranded on a stale base; content superseded by the delivered entry ddcfde091 -- no bundle needed
+  LOCAL-ONLY: c1-stranded-2 42044336c (in /c1-mailbox-clone) -- a post-tool commit stranded on a stale
+        base 2026-09-13 23:06. CONTENT VERIFIED DELIVERED: the re-post carries the same heading
+        ("C2's ad388158b PREDICATE APPLIED TO MY OWN 046d4f950, SIX MINUTES OLD") under a reworded
+        subject, so no bundle is needed. ⚠ I checked this rather than trusting my own note that it had
+        been re-posted -- the first phrase I searched for read 0 and only a second, differently-worded
+        phrase found it. A stranded branch is exactly where "I remember re-posting that" goes wrong.
+  (delta applied from mailbox 5e55c4b92)
   WORKTREE: C1 home /go2cs claude/c1-h5-rederive-patch 0 clean at the pushed tip
   WORKTREE: C1 home /c1-armA detached 2e6cf71e4 0 reachable from origin/claude/c1-board-goroot
   WORKTREE: C1 home /c1-armB detached 449ecce7a 0 reachable from origin/claude/g-generic-alias-recut
-  NEXT: H6 rows on the two red packages, ONE commit on top of i9's CHECKPOINT 2 (announce-then-push): weak/pointer.cs `public partial struct Pointer<T>` (the destination package class is public; package_info.cs is auto); sync's hand-owns re-derived against their 1.24.13 auto/principal -- runtime_impl.cs implementing partials whose defining declarations the 1.24 runtime.cs no longer emits (canSpin/doSpin/nanotime), SemacquireMutex ж<uint32> vs ж<uint>, `fatal` declared partial by runtime.cs:63 and defined by mutex.cs:51 -- nothing more (d2ad84bdb section 2). Then train 49: the ValueClone guard's vacuity rule (refuse only when marked hand-owns >= 1 and stamped files >= 1 fail; an empty intersection PASSES with the three counts printed) and the go2cs.slnx text guard (every Project Path exists; vacuity-refused; planted-dead-entry firing arm) if G has not claimed it
+  NEXT: THREE H6 rows, ONE commit on top of i9's CHECKPOINT 2 (announce-then-push; a marked-file edit
+    BEFORE the overlay would be reverted by the seeded copy -- bee677a84):
+      weak         TWO things, not one. (a) public on `partial struct Pointer<T>` at pointer.cs:138
+                   [the accessibility word d2ad84bdb names]; (b) Strong<T>() -> Value<T>() -- the hand-own
+                   declares the 1.23 API while unique/handle.cs calls Value 12x and Strong 0x, so (a)
+                   alone leaves `unique` red. SETTLED AT THE PIN: go1.24.13 src/weak/pointer.go:83 is
+                   Value(), go1.23.12 has no top-level weak, go1.23.12 internal/weak/pointer.go:73 is
+                   Strong(). Do NOT widen: runtime_makeStrongFromWeak still exists and pointer.cs:229's
+                   internal Strong() is a handle helper, not the API.
+      xor_generic  RELOCATE-ONLY, no body re-derive. The ENTIRE 1.23->1.24 delta is one build-tag line
+                   (loong64 added to a negated arch list); xorBytes/aligned/words/xorLoop are
+                   byte-identical at identical line numbers. So: namespace go.crypto ->
+                   go.crypto.@internal.fips140 (class subtle_package unchanged both sides) + demote the
+                   destination's existing auto to .cs.auto. Simulated against the address guard: clean
+                   before, FIRES after a bare git mv.
+      sync         TWO causes with OPPOSITE remedies, 6 of 6 errors accounted at the pin:
+                   CS0759 x4 -- runtime_SemacquireMutex/canSpin/doSpin/nanotime MOVED OUT of
+                     src/sync/runtime.go into src/internal/sync/runtime.go at 1.24; the hand-own
+                     implements all four as partials (runtime_impl.cs :50 :179 :181 :185) so they have
+                     no defining declaration left in the package.
+                   CS0111 x2 -- throw and fatal are NEW in 1.24's src/sync/runtime.go (:58, :59) and
+                     mutex.cs already defines both (:49, :51).
+                   One half is a relocation, the other an arrival. I will not pick the disposition for
+                   the four.
+  (delta applied from mailbox 5e55c4b92)
   READ-FIRST: mailbox 46198c1b9 (the six dispositions measured; the git-move mechanism; the two registry keys crypto/internal/alias -> crypto/internal/fips140/alias and getgcmask -> pointerMask) · C1's own ce3add7af (pointerMask found by signature) · 3f54a3253 (row 76 RE-POINT) · 8be44bbc0a (C1-2b ruling)
   BLOCKED-ON: checkpoint 2 at origin (i9's corrected step-2 run) -- the two H6 rows can be READ now from i9 7ae5355bb and cut the moment the checkpoint is read back
   TOOLS: python3 3.11 on PATH (the applier's H5_PYTHON override exists for lanes without the name); GOROOT go1.24.7 (also 1.25.1 present), neither pin -- 1.23.12 and 1.24.13 are fetched from source tags when needed; GOTOOLCHAIN unset; DOTNET_ROOT none
@@ -342,3 +385,4 @@ PROTOCOL: as COORD's section.
 - 2026-09-13 20:30 -- NEXT re-derived for i9 (corrected reconvert + checkpoint 2 + the H6 pair), C1 (the weak/sync H6 rows on checkpoint 2; two train-49 guards), G (hold for the pair; OQ-2/OQ-3 ruled) per d2ad84bdb and fc4ccab4b
 - 2026-09-13 21:15 -- G NEXT: half B cut, the fill rule (80c948a7f), pull half A by share; i9 NEXT: the restore, H5c on C2's fix, checkpoint 2, half A manifest + share
 - 2026-09-13 21:45 -- SAVE-STATE at 94 percent (owner order): COORD state block rewritten to the current position (pins re-read from origin); fleet STATE BLOCK order posted 6481627c0; handover block 11
+- 2026-09-13 21:55 -- C1 delta (5e55c4b92): two train-49 refs added, NEXT replaced verbatim, LOCAL-ONLY stranded post-tool commit noted; i9's never-push inventory restored under a dated marker (its 21:29 block reads none for new work)
