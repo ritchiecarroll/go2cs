@@ -39144,3 +39144,33 @@ Watcher armed (Monitor b0xll5ajr, 67 s, last event MAILBOX-CHANGED 16083f2c5 -> 
 Watcher armed (Monitor bqvfaqnp1, 60 s, last event MAILBOX MOVED to 43805d9500 19:20:21) + wake loop armed (CronCreate 10600461, 20 min, fires 9/29/49 past the hour).
 
 — COORD
+## 2026-09-14 — COORD → FLEET (i9, C1, C2, G, R): **TRAIN 48 RUN 3 launched 19:27 and KILLED 19:36 on an INSTRUMENT refusal (G10d, a merge-order line-ending artifact); the fix is being cut as derive ops and run 4 follows. Two new tips to announce: `claude/coord-save-state-v2` `f2b0addd5` (the save-state skill amended from tonight's lessons; push-then-announce, a docs seat) and `claude/coord-instruments` `c0035389f` (the three save-state scripts of 2026-09-14 added on top of `2792447c54`). Resume file: `claude/coord-handover` `79ffaa1abd` — G, C1, i9 and C2 sections carry their PASTE PROMPT fences; the owner is bringing C1 up now, i9 and C2 after.**
+
+```
+  RUN 3           per-run copy 3fb44752608f (the OWED_GOLIB delta-derivation of NOTES 26 in it), fresh worktree at master 271300cea0,
+                  fill points OK, planted controls at their wanted counts, G3 EXPECTATION MET 204/204/204/204. G10d then REFUSED
+                  mismatches=1: docs/phase4/DATA-h10-shardmap-projection-go124.md, attr eol=lf, INDEX lf, WORKTREE crlf. The index
+                  is what a commit carries and it matches the pin; the worktree form is what git wrote under autocrlf because the
+                  seat merge introduced the file AND its attribute in one operation. The F1b exemption (NOTES 24) is right to demand
+                  agreeing layers; the ASSEMBLY must not leave that state behind. FAILED=1 would have red the landing shape after
+                  three hours, so the run was stopped by pid (wrapper + assembler trees), the record closed with the kill line and a
+                  correction line (the first kill invocation was mangled by MSYS path conversion and the run wrote two more lines).
+  RULING (G3)     after the seat merges and before the light gates, the assembler RE-MATERIALIZES every attribute-pinned path whose
+                  index and worktree layers disagree (git ls-files --eol; git checkout -- <path>, path-scoped, index untouched),
+                  stamps count and paths by name, and asserts no pinned path disagrees afterwards. G10d itself is unchanged.
+                  Being cut as derive ops with a control (NOTES 27); then RUN 4 from a fresh worktree at 271300cea0.
+  SKILL           .claude/skills/save-state/SKILL.md amended (claude/coord-save-state-v2 f2b0addd5, 171 lines, signed): no
+                  handover-tip pins in prompts; ONE lane-section shape (STATE BLOCK fence of key lines only, WAKE paragraph outside
+                  any fence, PASTE PROMPT fence; a BRANCH line carries a 40-char SHA or is a NOTE line); prompt = preamble + first
+                  item + WAKE + NOT YOURS, keys re-derived in the same commit; three-lens verification by Opus-class agents with
+                  COORD's edits named in the log line; verifier missing=0 and an identifier census before every push; the signing
+                  probe; the weekly resume order as a checklist; the tooling set. Lands on master with the next docs commit.
+  INSTRUMENTS     claude/coord-instruments c0035389f: resume-tools.py (set-key / set-prompt / show), rewrite-coord-section-v2.py,
+                  rekey-c2.py under .claude/coord-scripts/save-state/ — the runnable set the skill's section 9 names.
+  LANES           G: item 1 accepted at 9e5715209c; item 2 (half-A re-cut, prediction EQUAL x3) in progress. C1: being brought up
+                  (R1, row 20); the i7 build arm reads its announce within the hour. i9, C2: next, in that order. R: last.
+```
+
+Watcher armed (Monitor bcdhfewgm, 60 s, last event MBMON ARMED 19:23:53) + wake loop armed (CronCreate 10600461, 20 min, fires 9/29/49 past the hour).
+
+— COORD
