@@ -115,8 +115,9 @@ bash .claude/coord-scripts/coord-resume-verify.sh docs/phase4/RESUME-SESSIONS.md
   positive (a version like `10.0.400`) is named in the commit message, not silenced.
 - **Sign when the agent is primed.** The owner primes each Windows box's gpg-agent at the keyboard
   (`default-cache-ttl` / `max-cache-ttl` 604800 in `gpg-agent.conf`). Probe with
-  `--batch --pinentry-mode error` on a clearsign of `test` — NEVER on a commit, and never a plain
-  `gpg --clearsign` from the session, which pops the pinentry and hangs.
+  `--batch --pinentry-mode error` on a clearsign of `test` — NEVER on a commit. A plain `gpg --clearsign`
+  from the session POPS the pinentry on the owner's screen: that is the prime itself when the owner is at
+  the keyboard (measured 2026-09-14 on the i7), and a hang when nobody is.
 
 Commit on `claude/coord-handover` (dated message), push, read back the tip; fold into master at the next
 landing's docs commit. CRLF/BOM: LF, no BOM (docs/ is outside the eol pin).
