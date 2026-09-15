@@ -74,7 +74,7 @@ func sourceLicenseNotices(file *ast.File, newline string) string {
 			continue
 		}
 		for _, comment := range group.List {
-			out.WriteString(strings.ReplaceAll(strings.ReplaceAll(comment.Text, "\r\n", "\n"), "\n", newline))
+			out.WriteString(normalizeNewlines(comment.Text, newline))
 			out.WriteString(newline)
 		}
 		out.WriteString(newline)

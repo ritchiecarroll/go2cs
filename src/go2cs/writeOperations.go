@@ -27,8 +27,16 @@ import (
 // no CRLF-shaped scan can match, and the failure is not a diff but a hard stop: the marker sections
 // are never found and the conversion log.Fatals (F3 in docs/PLAN-linux-operation.md).
 //
-// These helpers are that seam. They belong to the READ path only; nothing here changes what is
-// written, which is why applying them cannot move emitted bytes on any platform.
+// These helpers are that seam. normalizeToLF and normalizeToCRLF belong to the READ path only, and
+// nothing they do changes what is written.
+//
+// ⚠ normalizeNewlines below is the exception, and it is deliberate. There is exactly one class of
+// text the converter WRITES without having line-broken it itself: a comment's raw Text, copied out
+// of the Go source. A block comment's Text is its WHOLE span, interior newlines included, and Go
+// sources are bare-LF, so writing it verbatim put bare LFs into a file whose every other line ends
+// CRLF -- which made "the converter emits CRLF unconditionally", three lines above, untrue in the
+// emitted bytes. git normalizes the committed corpus either way, so nothing downstream saw it; the
+// raw emission did. normalizeNewlines is the one spelling every such writer now uses.
 
 // normalizeToLF collapses CRLF to bare LF so read-back content can be scanned or split into lines
 // independently of how it was checked out.
@@ -41,7 +49,29 @@ func normalizeToLF(content string) string {
 // no-op on content that is already uniformly CRLF — which is what lets a caller keep an
 // unchanged-content early-out and stay byte-identical on a Windows tree.
 func normalizeToCRLF(content string) string {
-	return strings.ReplaceAll(normalizeToLF(content), "\n", "\r\n")
+	return normalizeNewlines(content, "\r\n")
+}
+
+// normalizeNewlines rewrites content into a uniform `newline` form. It collapses CRLF FIRST, which
+// is the whole point: a plain "\n" -> newline replacement over CRLF-carrying input yields CR CR LF,
+// silently, on exactly the inputs a Windows checkout produces. Idempotent, and an exact no-op on
+// content already uniform in `newline`.
+//
+// This is THE spelling for writing source text the converter did not line-break itself. Three sites
+// used to answer this question and had drifted to three answers: writeCommentString wrote
+// comment.Text verbatim, writeStandAloneCommentString replaced "\n" without collapsing first, and
+// sourceLicenseNotices spelled it correctly by hand. A second implementation of a predicate is a
+// second predicate, and it drifts from the first the moment it is written.
+//
+// ⚠ Only ONE of those three was a live defect, and the distinction is worth keeping straight.
+// go/scanner STRIPS carriage returns out of a general comment, so an ast.Comment's Text never holds
+// a CR whatever the source file's endings are -- measured at go1.24.13: a CRLF source yields
+// Text with CR 0 and LF 3. So writeStandAloneCommentString's missing collapse could not be reached
+// through the parser, and aligning it removes a second spelling rather than fixing a live bug. The
+// collapse still has to be here: normalizeToCRLF's callers hand this function READ-BACK FILE
+// CONTENT, where CRs are exactly what a Windows checkout produces.
+func normalizeNewlines(content string, newline string) string {
+	return strings.ReplaceAll(normalizeToLF(content), "\n", newline)
 }
 
 // splitLines splits read-back content into lines EOL-agnostically. Note it treats a BARE LF as a
@@ -110,7 +140,7 @@ func (v *Visitor) writeStandAloneCommentString(builder *strings.Builder, targetP
 				continue
 			}
 
-			comment = strings.ReplaceAll(comment, "\n", v.newline)
+			comment = normalizeNewlines(comment, v.newline)
 
 			if !strings.Contains(prefix, "\n") && !strings.HasSuffix(comment, v.newline) {
 				comment += v.newline
@@ -331,7 +361,7 @@ func (v *Visitor) writeCommentString(builder *strings.Builder, comment *ast.Comm
 			builder.WriteString(strings.Repeat(" ", padding))
 		}
 
-		builder.WriteString(comment.Text)
+		builder.WriteString(normalizeNewlines(comment.Text, v.newline))
 	}
 }
 

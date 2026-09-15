@@ -33,8 +33,20 @@ import (
 )
 
 // convertWithComments converts a single-file package with `-comments` on and returns the emitted
-// C# split into lines.
+// C# split into lines, with the CRs dropped so a line's trailing content is its own.
+//
+// ⚠ It is built ON convertWithCommentsRaw rather than beside it. Stripping CRs is exactly what
+// hides a line-ending defect, so the raw form is the primitive and this is the convenience: a guard
+// that needs to see the bytes asks for them, and nothing has to keep two conversion setups in step.
 func convertWithComments(t *testing.T, source string) []string {
+	t.Helper()
+
+	return strings.Split(strings.ReplaceAll(convertWithCommentsRaw(t, source), "\r", ""), "\n")
+}
+
+// convertWithCommentsRaw converts a single-file package with `-comments` on and returns the emitted
+// C# EXACTLY as it was written, every byte intact.
+func convertWithCommentsRaw(t *testing.T, source string) string {
 	t.Helper()
 
 	root := t.TempDir()
@@ -69,10 +81,7 @@ func convertWithComments(t *testing.T, source string) []string {
 		t.Fatalf("conversion failed: %v", err)
 	}
 
-	// The converter emits CRLF; drop the CRs so a line's trailing content is its own.
-	emitted := strings.ReplaceAll(readGenerated(t, filepath.Join(outDir, "main.cs")), "\r", "")
-
-	return strings.Split(emitted, "\n")
+	return readGenerated(t, filepath.Join(outDir, "main.cs"))
 }
 
 // findCommentLine returns the index of the single line carrying the given comment text, failing if
