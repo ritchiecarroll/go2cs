@@ -101,13 +101,13 @@ RESUME 2026-09-14 18:26 -- COORD ONLINE (mailbox 2cd01f8d6ba1464d3ee0ee4d8ae9639
   a person are OWNER-HAND posts to COORD, relayed to the owner in this session; NO CHIPS anywhere; model/effort per prompt header.
 
 STATE AT THIS REVISION (2026-09-14 18:45 -- new usage week; the save-state refresh runs after every landing/ruling and at every wake tick):
-  BRANCH: claude/coord-handover 2bfe22adec16e7a33ee6698e13edb345ec58a3a6 yes landed -- the handover log (blocks 1-15) + this file
-  BRANCH: claude/mailbox 3eb4dc2fecab09a1293a67c7497ba39a061d4bae yes transport -- rotated 2026-09-13 02:36; COORD's read anchor is the tool's own
+  BRANCH: claude/coord-handover 2f03847b73ffaf7614ef4140748d7d119ecf49b1 yes landed -- the handover log (blocks 1-15) + this file
+  BRANCH: claude/mailbox 45b0901d662204ff479b5460c8c1534ed96cd6d4 yes transport -- rotated 2026-09-13 02:36; COORD's read anchor is the tool's own
   BRANCH: claude/version-go1.24.13 f0f88268945269530d47d9775f4a0772bf6f3a16 yes cut -- THE H5 GATE TREE: checkpoint 1 (dc78fb0df8) -> C1's relocation (c8d50e014f + a4ece44fff) -> CHECKPOINT 2 (c2345d7731: corrected H5c, both solutions load, guards PASS x2) -> C1's three H6 rows (f0f8826894). GATE RED by row 20 only (sync 7 x CS1929); unique unbuilt behind sync.
   BRANCH: claude/c1-h6-rows f0f88268945269530d47d9775f4a0772bf6f3a16 yes accepted -- C1's branch AT the version tip; C1's row-20 commit lands HERE, i9 fast-forwards the version branch onto it
   BRANCH: claude/c1-h5-relocation a4ece44fff696e88c9d4a72059b12efaa3185a8a yes accepted -- the relocation source ref (landed on the version branch by fast-forward)
   BRANCH: claude/c2-h5c-slnx-orphan b291530e95eaed62928488a89c8fd74934692b27 yes accepted -- H5c, the deletion instrument of record for this hop (one tag resolution; selection-based explanation gate; ORPHANED printed); C2's two ruled changes (R4) land on top; i7 parse gate on every push
-  BRANCH: claude/laneR-docs-h6-skeleton 39ea984165ee41b32ff4edfe211f64416ffdeded yes accepted -- the H6 audit skeleton at 145 rows == the version-branch census (R's record, G's amendments; G fills it); lands on the VERSION BRANCH
+  BRANCH: claude/laneR-docs-h6-skeleton 90e2ef9b8cf9cdd3ffebdfc4f1c5ca03399ed111 yes accepted -- the H6 audit skeleton at 145 rows == the version-branch census (R's record, G's amendments; G fills it); lands on the VERSION BRANCH
   BRANCH: claude/coord-runbook-h5-tags 5c4c5b94e57509a4a272294ef4f5bad322e9b1a1 yes announced -- runbook H5 in-stage amendment; lands on master with the H5 gate docs commit
   BRANCH: claude/c1-handown-address-guard 2b823dc951f20769296f03325764ddc1ed61aed3 yes accepted -- train 49 row (converter-guard)
   BRANCH: claude/c1-train49-guards 394de9fd684756d6e3aeed6975587720d3d73180 yes accepted -- train 49 rows (ValueClone vacuity; go2cs.slnx path guard)
@@ -136,8 +136,11 @@ STATE AT THIS REVISION (2026-09-14 18:45 -- new usage week; the save-state refre
     (table in coord-train48-assemble.sh; derive ops in t48-derive.py; NOTES 17-25), rows 9/15 BOARD conflicts PRE-RESOLVED by union
     slots, 18 seat-content arms. RUN 2 (21:18 on 2026-09-13) was KILLED at LEG D by the shutdown order -- not a landing candidate; its
     record is coord-train48-assemble-run2.stdout. Round 5 (NOTES 25: row 13 -> claude/c1-token-door-census-recut, A-row13 re-written)
-    is PRESENT; RUN 3 launches on the i7 from a FRESH worktree at master 271300cea0 once the re-derive / self-check / dry-read read
-    0 FAIL. On green: land-anchor census -> land (signed) -> read back -> prune seats -> resume refresh. Train 48 is COORD's, not i9's.
+    is PRESENT. RUN 3 (19:27) KILLED at G10d -- a merge-order eol artifact; G3 = re-materialize pinned paths after the merges (NOTES 27).
+    RUN 4 (20:13) STOPPED ITSELF at LEG D (21:35): H1 = LEG D compares the UNION of the two arms' written sets (the un-freeze seat's
+    files are cut-only; NOTES 28 in cut) + seat 12's mgc.cs was hand-edited not re-emitted (COORD re-emits at the union, re-pins row
+    12, C1 named). RUN 5 follows from a FRESH worktree at master 271300cea0 after re-derive / self-check / dry-read read 0 FAIL.
+    On green: land-anchor census -> land (signed) -> read back -> prune seats -> resume refresh. Train 48 is COORD's, not i9's.
   TRAIN 49 board: C1 address guard + two guards (above), G's H6 gate + liveness (above), C2 sizing + trampoline map (above), the
     array-length converter seat (unclaimed), the vocabulary gap (a .claude-shaped class), C1's census-slice fix (5f7fef6683).
   OWNER HANDS OPEN: GPG prime at each Windows box at bring-up (i9, G-LAPTOP, R-LAPTOP; check the 604800 TTLs); cloud allowlist for the
@@ -583,7 +586,7 @@ ACK: "watcher armed + wake loop armed", the claude/coord-handover tip you fetche
 
 ```
   LANE: G   MODEL: Opus/high   HOST: G-LAPTOP
-  BRANCH: claude/laneR-docs-h6-skeleton 39ea984165ee41b32ff4edfe211f64416ffdeded yes accepted -- the H6 audit, 145 rows, set-identical to the census at the version-branch tip f0f8826894; row 3 followed the fips140 relocation, row 20 marked RE-DERIVE IN PROGRESS (C1)
+  BRANCH: claude/laneR-docs-h6-skeleton 90e2ef9b8cf9cdd3ffebdfc4f1c5ca03399ed111 yes accepted -- the H6 audit, 145 rows, set-identical to the census at the version-branch tip f0f8826894; row 3 followed the fips140 relocation, row 20 marked RE-DERIVE IN PROGRESS (C1)
   BRANCH: claude/g-handown-metadata-t48-r47 35fe4e0167e044539245f7e4721a198fb35a98d0 yes accepted -- train-48 seat 6, the metadata un-freeze re-based onto the train-47 landing
   BRANCH: claude/g-h6-completeness-gate 9e5715209c7c0c2abf802746070da730e3018e22 yes accepted -- train 49, the H6 gate; OWES a one-line fix (check-handown-audit.ps1:324 $probe unwrapped, cc07363b8) as a commit ON TOP, floor 9
   BRANCH: claude/g-fleet-patchid-census 9b78bfff61000f5ca4984f163503c182b5c1819e yes accepted -- train 48, the fleet-wide patch-id census
@@ -661,7 +664,7 @@ R's role while credits last: fold every lane's STATE BLOCK delta into this file 
 
 ```
   LANE: R   MODEL: Opus 5/high (steward); Fable 5.1 in a ruling spurt   HOST: R-LAPTOP (owner travel; FLEET STANDBY, spurts only)
-  BRANCH: claude/laneR-docs-h6-skeleton 39ea984165ee41b32ff4edfe211f64416ffdeded yes accepted -- R's record of the H6 audit skeleton, amended by G (G fills it); pin re-read at origin by script
+  BRANCH: claude/laneR-docs-h6-skeleton 90e2ef9b8cf9cdd3ffebdfc4f1c5ca03399ed111 yes accepted -- R's record of the H6 audit skeleton, amended by G (G fills it); pin re-read at origin by script
   LOCAL-ONLY: none posted -- R's own STATE BLOCK is PENDING; posting it is R's first act on resume
   WORKTREE: pending R's own block
   NEXT: post your own STATE BLOCK in the scripts' shape (column-0 fence, the lane key first, every branch key line carrying a 40-char SHA read by ls-remote, local-only items named by rev-parse in the clone that holds them) plus a WAKE paragraph, then fold both into section 6 of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover at its tip (read it by ls-remote and name it in the ACK; no SHA is pinned in the prompt): replace-block.py over COORD's minimal fence, then the typed one-line wake placeholder and apply-wake.py; coord-resume-verify.sh before and after in a dedicated steward checkout or a throwaway clone -- never the main clone, where its per-ref fetch would re-create the mailbox tracking ref deleted at 4db3a7488d -- with missing=0 preserved and no miss added, an identifier census of the added lines, ONE commit per the STEP 0 probe, a section-7 log line, announce-then-push, read-back, one line to COORD; then the steward loop (fold every lane's ACK and STATE BLOCK delta posted after the last fold COORD announces, in mailbox order, floor 2cd01f8d6b, folded-once rule, by script and never retyped) at every wake tick and after every COORD landing or ruling; readings and rulings only in owner-opened spurts (R5)
@@ -765,3 +768,4 @@ YOUR ACK: "watcher armed + wake loop armed", the claude/coord-handover tip you f
 - 2026-09-14 20:50 -- H6 fill block 2 accepted; the two c rows (46, 48) ruled to C1 on the version branch after row 20 (d36cea91) -- C1 NEXT extended; pins re-read (the skeleton follows G push).
 - 2026-09-14 21:00 -- H6 fill blocks 3 and 4 accepted (skeleton fb895df3c6; 24 of 145 classed; the member-body arm ruled into the method 8cf7fdf6; block acceptance protocol ab37365b: accepted at COORD next post or wake tick unless objected); pins re-read.
 - 2026-09-14 21:38 -- H6 fill blocks 5-7 accepted (skeleton 39ea984165; 37 of 145); COMMENT-ONLY and NOT-APPLICABLE-TO-MANAGED ruled as b reasons; rows 2/74 fill as (a) with present + owed observers; the GolibTests break (H5 relocation left GolibTests.csproj refs and test aliases stale) ruled a (c) work item for C1 right after row 20 -- C1 NEXT re-sequenced; i9 gate item (iv) go2cs.slnx builds; pins re-read.
+- 2026-09-14 21:55 -- H6 block 8 accepted (skeleton 90e2ef9b8c; 44 of 145); train 48 runs 3/4 recorded in the COORD section (G3, H1, seat 12 re-emission; run 5 pending); pins re-read.
