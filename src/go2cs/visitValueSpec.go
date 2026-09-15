@@ -975,7 +975,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 				}
 
 				if len(valueSpec.Values) >= i+1 {
-					v.outputBuilder.WriteString(v.getPrintedNode(valueSpec.Values[i]))
+					// The GoBigConst twin of the annotation below: same go/printer output, same
+					// bare LFs, same reason to take v.newline.
+					v.outputBuilder.WriteString(normalizeNewlines(v.getPrintedNode(valueSpec.Values[i]), v.newline))
 				}
 
 				v.outputBuilder.WriteString(" */")
@@ -1157,7 +1159,14 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 							v.showWarning("Go const converted to C# using 'unsafe.Sizeof' may not match run-time value - verify usage: const %s = %s", goIDName, orgExpr)
 						}
 
-						orgExpr = fmt.Sprintf(" /* %s */", orgExpr)
+						// A folded constant whose Go expression spans lines arrives here straight from
+						// go/printer, which emits BARE LF and knows nothing of v.newline. Echoing it
+						// verbatim inside the annotation put bare LFs into an otherwise CRLF file --
+						// the same class as writeCommentString's, at a different writer (G, mailbox
+						// 5c622f56d8 s6: runtime/mgcpacer.cs line 21, os/windows/exec_windows.cs
+						// line 131). The annotation is emitted text, so it takes the emitter's
+						// newline like every other emitted byte.
+						orgExpr = fmt.Sprintf(" /* %s */", normalizeNewlines(orgExpr, v.newline))
 					}
 				}
 

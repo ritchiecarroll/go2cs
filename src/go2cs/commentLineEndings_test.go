@@ -199,3 +199,44 @@ func TestCountBareLF(t *testing.T) {
 		}
 	}
 }
+
+// TestFoldedConstantAnnotationEmitsUniformCRLF is the SECOND writer of this class, and it is a
+// different one: not a comment at all, but a synthesized `/* … */` annotation echoing the Go
+// expression beside a folded constant. The expression text comes from go/printer via
+// getPrintedNode, which emits BARE LF and knows nothing of v.newline, so a const whose expression
+// spans lines put bare LFs into an otherwise CRLF file.
+//
+// It survived the first cut of this seat because it is not a comment: fixing writeCommentString
+// took fmt, runtime and os from 812 + 240 bare LFs to 8 + 1, and those nine were all this. Located
+// by G (mailbox 5c622f56d8 §6, runtime/mgcpacer.cs line 21 and os/windows/exec_windows.cs line 131)
+// and independently by C2's own emission, which found three more in runtime's linux arm
+// (mpagealloc ×2, os_linux ×5 — the same writer, files G's windows arm does not carry).
+//
+// ⚠ The fixture asserts the annotation was EMITTED before it reads the count. A const whose Go
+// expression prints identically to its folded value emits no annotation at all (visitValueSpec
+// elides it), so a fixture that folds to its own text would measure nothing and report a clean zero.
+func TestFoldedConstantAnnotationEmitsUniformCRLF(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads the fixture package via go/packages")
+	}
+
+	source := "package main\n" +
+		"\n" +
+		"// A folded constant whose expression spans lines — the os/exec_windows.go shape.\n" +
+		"const spanning = 0x00000100 |\n" +
+		"\t0x00000200 |\n" +
+		"\t0x00000400\n" +
+		"\n" +
+		"func main() { _ = spanning }\n"
+
+	emitted := convertWithCommentsRaw(t, source)
+
+	// The annotation has to be there, or the bare-LF count below is a count over nothing.
+	if !strings.Contains(emitted, "0x00000200") {
+		t.Fatalf("no folded-constant annotation in the emission, so this guard measured nothing:\n%s", emitted)
+	}
+
+	if bare := countBareLF(emitted); bare != 0 {
+		t.Errorf("emitted .cs carries %d bare LF, want 0 — a folded constant's printed expression reached the output with go/printer's own newlines", bare)
+	}
+}
