@@ -132,7 +132,8 @@ func (v *Visitor) foldedNamedFloatConstLiteral(operand ast.Expr, targetCSType st
 		suffix = "F"
 	}
 
-	return fmt.Sprintf("/* %s */ %s%s", strings.TrimSpace(v.getPrintedNode(operand)), exactFloatText(tv.Value, "", isFloat32), suffix)
+	// A multi-line operand arrives from go/printer with BARE LFs; the annotation is emitted text.
+	return fmt.Sprintf("/* %s */ %s%s", normalizeNewlines(strings.TrimSpace(v.getPrintedNode(operand)), v.newline), exactFloatText(tv.Value, "", isFloat32), suffix)
 }
 
 // isUntypedNamedConstRef reports whether the expression is a reference (ident or selector) to an
@@ -958,7 +959,8 @@ func (v *Visitor) complexConstLiteral(expr ast.Expr) string {
 	// annotation — it re-renders in the shape convBasicLit already emits, so most sites stay
 	// byte-identical to the operator form they replace.
 	if v.containsUntypedNamedConstRef(expr) {
-		return fmt.Sprintf("/* %s */ %s", strings.TrimSpace(v.getPrintedNode(expr)), text)
+		// A multi-line expression arrives from go/printer with BARE LFs; the annotation is emitted text.
+		return fmt.Sprintf("/* %s */ %s", normalizeNewlines(strings.TrimSpace(v.getPrintedNode(expr)), v.newline), text)
 	}
 
 	return text

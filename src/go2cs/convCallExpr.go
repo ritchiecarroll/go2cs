@@ -5767,7 +5767,10 @@ func (v *Visitor) foldUnsafeConstBuiltin(callExpr *ast.CallExpr) (string, bool) 
 		csTypeName = "uintptr"
 	}
 
-	return fmt.Sprintf("/* %s */ (%s)%d", strings.TrimSpace(v.getPrintedNode(callExpr)), csTypeName, value), true
+	// The printed node carries go/printer's own BARE LFs when the call spans lines, and this
+	// annotation is emitted text -- so it takes the emitter's newline, like the folded-constant
+	// annotations in visitValueSpec. One spelling, seven callers.
+	return fmt.Sprintf("/* %s */ (%s)%d", normalizeNewlines(strings.TrimSpace(v.getPrintedNode(callExpr)), v.newline), csTypeName, value), true
 }
 
 // unsafeFieldOperand resolves an `unsafe.Offsetof` operand — Go requires the form

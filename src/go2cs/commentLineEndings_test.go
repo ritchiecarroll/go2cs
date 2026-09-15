@@ -240,3 +240,120 @@ func TestFoldedConstantAnnotationEmitsUniformCRLF(t *testing.T) {
 		t.Errorf("emitted .cs carries %d bare LF, want 0 — a folded constant's printed expression reached the output with go/printer's own newlines", bare)
 	}
 }
+
+// The THREE SIBLING annotation writers, ruled into this seat by a79e08a3b2 §"C2 §8". Each wraps a
+// go/printer result in a synthesized `/* … */` beside a folded constant, exactly as visitValueSpec
+// does — and each is a different site with a different trigger, so each gets its own fixture rather
+// than one fixture asserted to reach all three.
+//
+// ⚠ Finding the shapes was the work. A `const` declaration whose expression spans lines does NOT
+// reach any of them: it is visitValueSpec's annotation, already cured by the previous commit, and a
+// fixture built that way reports a clean zero over a site it never touched. Each fixture below was
+// emitted with the converter built at the previous commit and at this tree before it was settled,
+// and each shows a NON-ZERO bare-LF count on the earlier binary — which is what makes it a fixture
+// for THIS site rather than a restatement of the last one.
+
+// TestComplexConstAnnotationEmitsUniformCRLF covers complexConstLiteral: a folded COMPLEX constant
+// whose expression names an untyped const and spans lines.
+func TestComplexConstAnnotationEmitsUniformCRLF(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads the fixture package via go/packages")
+	}
+
+	source := "package main\n" +
+		"\n" +
+		"const scale = 3.5\n" +
+		"\n" +
+		"func complexes() complex128 {\n" +
+		"\tc := 1i *\n" +
+		"\t\tscale *\n" +
+		"\t\t2\n" +
+		"\treturn c\n" +
+		"}\n" +
+		"\n" +
+		"func main() { _ = complexes() }\n"
+
+	emitted := convertWithCommentsRaw(t, source)
+
+	if !strings.Contains(emitted, "scale *") {
+		t.Fatalf("no folded-complex annotation in the emission, so this guard measured nothing:\n%s", emitted)
+	}
+
+	if bare := countBareLF(emitted); bare != 0 {
+		t.Errorf("emitted .cs carries %d bare LF, want 0 — complexConstLiteral's annotation kept go/printer's newlines", bare)
+	}
+}
+
+// TestUintptrCallAnnotationEmitsUniformCRLF covers the uintptr call-expression annotation: a
+// constant-valued call (unsafe.Sizeof) written across lines.
+func TestUintptrCallAnnotationEmitsUniformCRLF(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads the fixture package via go/packages")
+	}
+
+	source := "package main\n" +
+		"\n" +
+		"import \"unsafe\"\n" +
+		"\n" +
+		"type wide struct {\n" +
+		"\ta [4]int64\n" +
+		"\tb [2]int32\n" +
+		"}\n" +
+		"\n" +
+		"func sizes() uintptr {\n" +
+		"\tn := unsafe.Sizeof(\n" +
+		"\t\twide{},\n" +
+		"\t)\n" +
+		"\treturn n\n" +
+		"}\n" +
+		"\n" +
+		"func main() { _ = sizes() }\n"
+
+	emitted := convertWithCommentsRaw(t, source)
+
+	if !strings.Contains(emitted, "unsafe.Sizeof(") {
+		t.Fatalf("no uintptr call annotation in the emission, so this guard measured nothing:\n%s", emitted)
+	}
+
+	if bare := countBareLF(emitted); bare != 0 {
+		t.Errorf("emitted .cs carries %d bare LF, want 0 — the uintptr call annotation kept go/printer's newlines", bare)
+	}
+}
+
+// TestFoldedFloatAnnotationEmitsUniformCRLF covers foldedNamedFloatConstLiteral. Its trigger is
+// narrow and worth recording: the operand must be COMPUTED (not a bare reference), must name an
+// UNTYPED const that survived tightening, and must reach the folder at a site that resolves a float
+// target. A plain `var x float64 = <spanning expr>` does NOT reach it — measured, four shapes tried.
+// The doc comment's own example does: a CONVERSION, float64(…) and float32(…), which is
+// convCallExpr's conversion path. Both widths are exercised because the float32 arm rounds through a
+// different route (constant.Float32Val, never a float64 intermediate).
+func TestFoldedFloatAnnotationEmitsUniformCRLF(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: loads the fixture package via go/packages")
+	}
+
+	source := "package main\n" +
+		"\n" +
+		"const Pi = 3.14159265358979323846264338327950288419716939937510582097494459\n" +
+		"\n" +
+		"func conv() (float64, float32) {\n" +
+		"\ta := float64(100000 *\n" +
+		"\t\tPi)\n" +
+		"\tb := float32(100000 *\n" +
+		"\t\tPi)\n" +
+		"\treturn a, b\n" +
+		"}\n" +
+		"\n" +
+		"func main() { _, _ = conv() }\n"
+
+	emitted := convertWithCommentsRaw(t, source)
+
+	if strings.Count(emitted, "100000 *") != 2 {
+		t.Fatalf("expected both folded-float annotations in the emission, found %d, so this guard measured nothing or only half:\n%s",
+			strings.Count(emitted, "100000 *"), emitted)
+	}
+
+	if bare := countBareLF(emitted); bare != 0 {
+		t.Errorf("emitted .cs carries %d bare LF, want 0 — foldedNamedFloatConstLiteral's annotation kept go/printer's newlines", bare)
+	}
+}
