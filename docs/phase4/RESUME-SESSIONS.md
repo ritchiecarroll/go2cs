@@ -23,9 +23,9 @@
 | Lane | Box | Role next week | Model / effort | Why |
 |---|---|---|---|---|
 | COORD | i7 | rulings, merges, master landings, train assembly, the ladder | Fable 5.1 / high, ultracode on | signs everything; the instrument's reader |
-| i9 | i9 (fastest box, thermal: one serial item) | H4a/H5 executor: the rung, reconverts, builds, H5c/applier runs | Fable 5.1 / high | measurement rigor on the critical path |
-| C1 | cloud (linux) | runtime hand-own re-derives (C1-1 landed in the rung, C1-2 sizing), applier self-tests | Fable 5.1 / high | delicate hand-own work |
-| C2 | cloud (linux, no PowerShell, disk-constrained) | H5c instrument authoring (cannot execute .ps1 — COORD parse-gates, i9 runs), H10 map re-derivation, darwin plan | Fable 5.1 / high | design + instrument authoring |
+| i9 | i9 (fastest box, thermal: one serial item) | H4a/H5 executor: the rung, reconverts, builds, H5c/applier runs | Opus 5 / high (owner order 2026-09-14: every lane on Opus; COORD alone on Fable) | measurement rigor on the critical path |
+| C1 | cloud (linux) | runtime hand-own re-derives (C1-1 landed in the rung, C1-2 sizing), applier self-tests | Opus 5 / high (owner order 2026-09-14: every lane on Opus; COORD alone on Fable) | delicate hand-own work |
+| C2 | cloud (linux, no PowerShell, disk-constrained) | H5c instrument authoring (cannot execute .ps1 — COORD parse-gates, i9 runs), H10 map re-derivation, darwin plan | Opus 5 / high (owner order 2026-09-14: every lane on Opus; COORD alone on Fable) | design + instrument authoring |
 | G | G-LAPTOP (+WSL linux arm) | linux-arm gates, H6 alias/liveness census, filtered-sweep rule | Opus / high | execution and census work |
 | R | R-LAPTOP (TRAVEL STANDBY from 2026-09-13; spurts only) | SAVE-STATE STEWARD (fold by script, verify, push); readings and rulings in spurts | Opus 5 / high as steward; Fable 5.1 in a ruling spurt | standby |
 
@@ -101,7 +101,7 @@ RESUME 2026-09-14 18:26 -- COORD ONLINE (mailbox 2cd01f8d6ba1464d3ee0ee4d8ae9639
   a person are OWNER-HAND posts to COORD, relayed to the owner in this session; NO CHIPS anywhere; model/effort per prompt header.
 
 STATE AT THIS REVISION (2026-09-14 18:45 -- new usage week; the save-state refresh runs after every landing/ruling and at every wake tick):
-  BRANCH: claude/coord-handover 2f03847b73ffaf7614ef4140748d7d119ecf49b1 yes landed -- the handover log (blocks 1-15) + this file
+  BRANCH: claude/coord-handover 3845d54a3db738591ff1def73ca57000169ec3ce yes landed -- the handover log (blocks 1-15) + this file
   BRANCH: claude/mailbox 45b0901d662204ff479b5460c8c1534ed96cd6d4 yes transport -- rotated 2026-09-13 02:36; COORD's read anchor is the tool's own
   BRANCH: claude/version-go1.24.13 f0f88268945269530d47d9775f4a0772bf6f3a16 yes cut -- THE H5 GATE TREE: checkpoint 1 (dc78fb0df8) -> C1's relocation (c8d50e014f + a4ece44fff) -> CHECKPOINT 2 (c2345d7731: corrected H5c, both solutions load, guards PASS x2) -> C1's three H6 rows (f0f8826894). GATE RED by row 20 only (sync 7 x CS1929); unique unbuilt behind sync.
   BRANCH: claude/c1-h6-rows f0f88268945269530d47d9775f4a0772bf6f3a16 yes accepted -- C1's branch AT the version tip; C1's row-20 commit lands HERE, i9 fast-forwards the version branch onto it
@@ -159,7 +159,7 @@ i9's gate reading, G's H6 blocks, C2's two pushes (parse gate) -- and land train
 ## 2. i9 — H5 executor — STATE BLOCK received (mailbox 9a094006f)
 
 ```
-  LANE: i9   MODEL: Fable 5.1/high   HOST: i9
+  LANE: i9   MODEL: Opus 5/high   HOST: i9
   BRANCH: claude/version-go1.24.13 f0f88268945269530d47d9775f4a0772bf6f3a16 yes landed -- checkpoint 2 + C1's three H6 rows; the H5 gate tree
   BRANCH: claude/i9-h5-step2-wip 54dec61728719e7566184da2d479ebb3a12fef07 yes superseded -- the five-deletions intermediate, NOT current
   BRANCH: claude/i9-board-archive-tar 314e699c649169a26658f648fd935298ea1a5e91 yes accepted -- train-48 seat (row 10); i9's 22:38 block called it census-dirty (users-dir/drive-abs/domain-suffix) and unpushed, but it was at origin at this SHA before that post; COORD census 2026-09-14: 0 identifier-class hits in its added lines vs master; bundle preserved: bundles/i9-board-archive-tar.bundle b0333e2da78d7044
@@ -188,7 +188,7 @@ WAKE (i9, verbatim from 59e0e3099 s3): re-create on resume -- i9's wake leg is a
 
 PASTE PROMPT (revision 2026-09-14 18:26 -- derived from the COORD ONLINE post 2cd01f8d6 and this lane's STATE BLOCK; verified on three lenses: refs at origin, security/format, actionability) -- paste as the FIRST message of a fresh session on this lane's machine, after the owner's GPG prime on a Windows box:
 ```
-RESUME 2026-09-14. You are lane i9 of the go2cs fleet — nickname i9 on every pushed surface. Model: Fable 5.1, effort high. Host: i9 (Windows; the fastest box; ONE serial item at a time, thermal). COORD (Fable 5.1, ultracode) is ONLINE on the i7 since 2026-09-14 18:26; its COORD ONLINE post (the first mailbox entry after b2556d385c) carries your resume ruling in section 2 and the fleet protocol in section 3. Read that post before anything else in the mailbox.
+RESUME 2026-09-14. You are lane i9 of the go2cs fleet — nickname i9 on every pushed surface. Model: Opus 5, effort high. Host: i9 (Windows; the fastest box; ONE serial item at a time, thermal). COORD (Fable 5.1, ultracode) is ONLINE on the i7 since 2026-09-14 18:26; its COORD ONLINE post (the first mailbox entry after b2556d385c) carries your resume ruling in section 2 and the fleet protocol in section 3. Read that post before anything else in the mailbox.
 
 STEP 0 — GPG. Windows boxes: the owner primed this box's gpg-agent at the keyboard before pasting this. Verify WITHOUT prompting, as a probe only, never on a commit:
   echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error -u "$(git config --get user.signingkey)" --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
@@ -228,7 +228,7 @@ WAKE: re-create both, unconditionally and before the ACK -- the mailbox watcher 
 ## 3. C1 — runtime hand-owns (cloud) — STATE BLOCK received 21:29 delta (mailbox 5e55c4b92 + 438b6f762)
 
 ```
-  LANE: C1   MODEL: Fable 5.1/high   HOST: C1 (linux container, no .NET SDK)
+  LANE: C1   MODEL: Opus 5/high   HOST: C1 (linux container, no .NET SDK)
   BRANCH: claude/c1-h5-rederive-patch ff54907996fb2c7833b56e3608b878bdb467dc33 yes accepted -- C1-1 + C1-2 (amended 54ce45d9b) + C1-2b; VERSION-BRANCH ONLY (red converter guard at master by design); tip per cf06dafee (was 2c8841571 at 7d3734a84)
   BRANCH: claude/c1-mcleanup-handown 23d07f74260f96e88186bd3e14bc48812ad357b2 yes superseded -- mcleanup.cs hand-own + createfing rewire; train 48; census 306/306, both corpus flavours compile -- SUPERSEDED for the H5 set by the -clean re-cut below (docs conflict resolved; C1 fc64c7d0c)
   BRANCH: claude/c1-mcleanup-handown-clean d4e40e28bf6da7e676a887611bef2319c77f3d39 yes accepted -- the mcleanup seat re-cut on master 271300cea (DESIGN-managed-getg.md pure-append concatenation; code untouched); H5-set member (C1 fc64c7d0c; SHA verified at origin)
@@ -281,7 +281,7 @@ WAKE (C1, verbatim from cf06dafee):
 
 PASTE PROMPT (revision 2026-09-14 18:26 -- derived from the COORD ONLINE post 2cd01f8d6 and this lane's STATE BLOCK; verified on three lenses: refs at origin, security/format, actionability) -- paste as the FIRST message of a fresh session on this lane's machine, after the owner's GPG prime on a Windows box:
 ```
-RESUME 2026-09-14. You are lane C1 of the go2cs fleet — nickname C1 on every pushed surface. Model: Fable 5.1, effort high. Host: C1 (cloud, linux container, no .NET SDK, both Go pins reachable by the blobless two-tag fetch of golang/go). COORD (Fable 5.1, ultracode) is ONLINE on the i7 since 2026-09-14 18:26; its COORD ONLINE post (the first mailbox entry after b2556d385c) carries your resume ruling in section 2 and the fleet protocol in section 3. Read that post before anything else in the mailbox.
+RESUME 2026-09-14. You are lane C1 of the go2cs fleet — nickname C1 on every pushed surface. Model: Opus 5, effort high. Host: C1 (cloud, linux container, no .NET SDK, both Go pins reachable by the blobless two-tag fetch of golang/go). COORD (Fable 5.1, ultracode) is ONLINE on the i7 since 2026-09-14 18:26; its COORD ONLINE post (the first mailbox entry after b2556d385c) carries your resume ruling in section 2 and the fleet protocol in section 3. Read that post before anything else in the mailbox.
 
 STEP 0 — GPG. Windows boxes: the owner primed this box's gpg-agent at the keyboard before pasting this. Verify WITHOUT prompting, as a probe only, never on a commit:
   echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error -u "$(git config --get user.signingkey)" --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
@@ -504,7 +504,7 @@ OFFLINE at `claude/c1-h6-rows f0f88268945269530d47d9775f4a0772bf6f3a16`.
 ## 4. C2 — instruments and designs (cloud) — STATE BLOCK received (mailbox c08c372ca)
 
 ```
-  LANE: C2   MODEL: Fable 5.1/high   HOST: C2 (cloud container; converts, CANNOT compile -- no dotnet, no PowerShell, no .ps1 ever ran here)
+  LANE: C2   MODEL: Opus 5/high   HOST: C2 (cloud container; converts, CANNOT compile -- no dotnet, no PowerShell, no .ps1 ever ran here)
   BRANCH: claude/c2-h5c-slnx-orphan b291530e95eaed62928488a89c8fd74934692b27 yes the H5c instrument of record
           for this hop -- checkpoint 2 was produced by it; parse-gated 0 errors on the i7 (10b8fb992)
   NOTE (was a prose BRANCH line; re-keyed 2026-09-14 so the verifier counts SHA-bearing lines only): 13 further claude/c2-* lane refs, all at origin, all announced; none carries unpushed work
@@ -532,7 +532,7 @@ WAKE (C2, verbatim from 0d8088e2b):
 
 PASTE PROMPT (revision 2026-09-14 18:26 -- derived from the COORD ONLINE post 2cd01f8d6 and this lane's STATE BLOCK; verified on three lenses: refs at origin, security/format, actionability) -- paste as the FIRST message of a fresh session on this lane's machine, after the owner's GPG prime on a Windows box:
 ```
-RESUME 2026-09-14. You are lane C2 of the go2cs fleet — nickname C2 on every pushed surface. Model: Fable 5.1, effort high. Host: C2 (cloud, linux container; converts, cannot compile: no dotnet, no PowerShell; disk-constrained, ephemeral). COORD (Fable 5.1, ultracode) is ONLINE on the i7 since 2026-09-14 18:26; its COORD ONLINE post (the first mailbox entry after b2556d385c) carries your resume ruling in section 2 and the fleet protocol in section 3. Read that post before anything else in the mailbox.
+RESUME 2026-09-14. You are lane C2 of the go2cs fleet — nickname C2 on every pushed surface. Model: Opus 5, effort high. Host: C2 (cloud, linux container; converts, cannot compile: no dotnet, no PowerShell; disk-constrained, ephemeral). COORD (Fable 5.1, ultracode) is ONLINE on the i7 since 2026-09-14 18:26; its COORD ONLINE post (the first mailbox entry after b2556d385c) carries your resume ruling in section 2 and the fleet protocol in section 3. Read that post before anything else in the mailbox.
 
 STEP 0 — GPG. Windows boxes: the owner primed this box's gpg-agent at the keyboard before pasting this. Verify WITHOUT prompting, as a probe only, never on a commit:
   echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error -u "$(git config --get user.signingkey)" --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
@@ -769,3 +769,4 @@ YOUR ACK: "watcher armed + wake loop armed", the claude/coord-handover tip you f
 - 2026-09-14 21:00 -- H6 fill blocks 3 and 4 accepted (skeleton fb895df3c6; 24 of 145 classed; the member-body arm ruled into the method 8cf7fdf6; block acceptance protocol ab37365b: accepted at COORD next post or wake tick unless objected); pins re-read.
 - 2026-09-14 21:38 -- H6 fill blocks 5-7 accepted (skeleton 39ea984165; 37 of 145); COMMENT-ONLY and NOT-APPLICABLE-TO-MANAGED ruled as b reasons; rows 2/74 fill as (a) with present + owed observers; the GolibTests break (H5 relocation left GolibTests.csproj refs and test aliases stale) ruled a (c) work item for C1 right after row 20 -- C1 NEXT re-sequenced; i9 gate item (iv) go2cs.slnx builds; pins re-read.
 - 2026-09-14 21:55 -- H6 block 8 accepted (skeleton 90e2ef9b8c; 44 of 145); train 48 runs 3/4 recorded in the COORD section (G3, H1, seat 12 re-emission; run 5 pending); pins re-read.
+- 2026-09-14 23:16 -- owner order: EVERY lane on Opus 5 / high (COORD alone on Fable; 43 percent of the week Fable spent by the startup) -- i9, C1, C2 model lines and prompt headers changed; the Opus session window was exhausted ~21:50-23:10 (lanes silent; the two COORD cuts re-dispatched 23:14); handover block 17 appended.
