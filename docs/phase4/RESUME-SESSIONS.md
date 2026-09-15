@@ -265,20 +265,35 @@ WAKE: re-create both, unconditionally and before the ACK -- the mailbox watcher 
 OPEN ACCEPTANCE (C1, gate-family decision, COORD's): CleanupDispatchTests' five arms on claude/c1-mcleanup-handown are written and unrunnable by any standing gate (GolibTests and go2cs.slnx are built by no workflow).
 HELD RIDERS: seven small measured results in a C1 scratch file, ordered posted as ONE mailbox entry (COORD, save-state) so they survive the container.
 ```
-WAKE (C1, verbatim from cf06dafee):
-  WAKE: three claude-code-remote ROUTINES (create_trigger), NOT CronCreate jobs --
-        trig_01HwSpTYDdZqjtJLpMBGCRKU `5 * * * *` / trig_01KfDoqdbnUk8A7MmviVogwn `25 * * * *` /
-        trig_01Qd573JaByefkopyckGzhX1 `45 * * * *`, all enabled, all last run SUCCEEDED, all
-        persistent_session_id-bound to THIS session = 20-minute cadence at 5/25/45. Read off
-        list_triggers on this box, confirming C2's 77f2d31f8 reading rather than taking it.
-        PLUS one CronCreate job 86a41926 at */17 added 21:25Z, so CronList on this lane is NOT empty
-        any more -- C2's forecast that it would read "No scheduled jobs" here was true until then and
-        the underlying point stands: CronList never enumerates Routines, so on this lane it answers a
-        different population either way.
-        IDS ARE AUDIT-ONLY. RECIPE on resume, UNCONDITIONAL and never gated on a check (i9's
-        refinement): create three Routines at 5/25/45 bound to the NEW session with the C1 WAKE TICK
-        prompt, plus one mailbox-tip Monitor.
-⚠ and re-arm after a CONTAINER RESTART, which is a second death mode: it kills the Monitor with NO timeout notice, so it presents as silence rather than as an event. Measured this session ~02:19Z — worktrees, scratchpad tools and /root/c1-anchor all survived and every commit was already at origin, so the restart cost nothing except the watcher.
+WAKE (C1, re-derived 2026-09-15 at this resume; supersedes the cf06dafee paragraph):
+WAKE: FIVE legs, every one SESSION-BOUND and re-created unconditionally at every resume --
+      (a) three claude-code-remote ROUTINES (create_trigger, persistent_session_id bound to the
+          NEW session) at `5 * * * *` / `25 * * * *` / `45 * * * *` = a 20-minute cadence;
+      (b) one CronCreate job at `*/17` carrying the same C1 WAKE TICK prompt -- the leg that
+          survives a clamp and needs no Routine;
+      (c) one mailbox-tip Monitor polling `git ls-remote origin refs/heads/claude/mailbox` at
+          ~67 s, stamping `date -u` into its ARMED line and every event.
+      IDS ARE AUDIT-ONLY AND ALWAYS DEAD. CronList never enumerates Routines, so a CronList that
+      reads them absent is not evidence either way, and a list_triggers reading is an audit of the
+      ACCOUNT, not of this session's bindings. RE-CREATE, NEVER CHECK. The C1 WAKE TICK prompt is
+      not on GitHub: compose it on R's recorded shape (Monitor alive-or-relaunch; re-diff the
+      mailbox from the 40-char anchor file, ancestry asserted, every entry whole, posts addressed
+      to C1 first, then advance; a ruling addressed to C1 outranks the task in hand; AWAITING over
+      45 minutes gets a com-check; OWNER-HAND to COORD by post, never to a local prompt; no chips;
+      if idle, resume the item in hand; end every post with the watcher line).
+⚠ A CONTAINER RESTART CAN TAKE EVERYTHING LOCAL, and it presents as silence rather than as an event —
+the Monitor dies with no timeout notice. Measured twice, with OPPOSITE results: ~02:19Z on 2026-09-14
+the worktrees, the scratchpad tools and the anchor file all survived, and the earlier version of this
+paragraph recorded that as a property; at the 2026-09-15 resume NONE of it survived — six worktrees,
+the scratchpad tools, the dedicated mailbox clone (with LOCAL-ONLY `c1-stranded-2`), the anchor file
+and the blobless golang/go clone were all gone, and the container came up as a fresh clone at master
+on the session-designated branch. So the rule is the pessimistic one, and it is a rule rather than an
+observation: A CLOUD LANE'S STATE IS WHAT IS AT ORIGIN, PLUS WHAT THE RESUME PROMPT ITSELF NAMES —
+nothing else, ever. A survival measured once is an instance, not a property. The prompt's own
+fallbacks are the load-bearing parts and all three carried this resume: the read anchor comes from the
+lane's OFFLINE post when the anchor file is gone, the post tool is rebuilt from
+`.claude/skills/mailbox/SKILL.md` plus the coordinator's tool as the reference shape, and both Go pins
+come back in seconds from a blobless two-tag fetch (1.1 MB). Re-arm all five legs after any restart.
 
 PASTE PROMPT (revision 2026-09-14 18:26 -- derived from the COORD ONLINE post 2cd01f8d6 and this lane's STATE BLOCK; verified on three lenses: refs at origin, security/format, actionability) -- paste as the FIRST message of a fresh session on this lane's machine, after the owner's GPG prime on a Windows box:
 ```
@@ -789,3 +804,4 @@ YOUR ACK: "watcher armed + wake loop armed", the claude/coord-handover tip you f
 - 2026-09-14 23:45 -- R (steward) own STATE BLOCK folded from mailbox ef8944dc4 by replace-block.py (COORD's minimal fence replaced verbatim: six BRANCH pins read by ls-remote, eight never-push LOCAL-ONLY items named, NOTE for stale heads, NEXT the steward loop, BLOCKED-ON none) and R's WAKE paragraph by apply-wake.py over a typed placeholder (R's small spec, which also dropped the section-6 heading's stale 'still pending' clause); NEXT's spurt list then set by resume-tools.py set-key per COORD 4906f27 (C2's mtime counts closed as superseded); verifier missing=0 before and after.
 - 2026-09-14 23:55 -- the half-A mismatch CLOSED (G join 6c820a2115: 18 non-native per-GOOS pairs, seed bytes vs the native emission; no re-cut); G BLOCKED-ON none on all targets; i9 item 2 closed with one confirmation reading; H6 block 10 accepted (54cd0ee8cc; 54 of 145; row 99 ruled b); R ONLINE (ef8944dc42, steward; folds its own block); pins re-read; the hnd worktree fast-forwarded to origin before this refresh (two writers).
 - 2026-09-15 00:15 -- R (steward): C1's STATE BLOCK delta (729cfde94, C1 ONLINE + row-20 push read back) folded: NEXT / BLOCKED-ON / TOOLS by apply-block-delta.py; BRANCH claude/c1-h6-rows (f0f8826894 to 5a03aac159), LOCAL-ONLY (c1-stranded-2 retired) and WORKTREE (three lines to one) by R's small spec (the script replaces only a key's FIRST line and leaves continuations); NOT folded, left to COORD: C1's MODEL conflict note (its prompt's RECORD POINTERS vs the owner order) and its WAKE-paragraph correction (no replacement paragraph posted); verifier missing=0 before and after.
+- 2026-09-15 00:20 -- R (steward): C1's replacement WAKE paragraph (953332713, posted to R for the item left unfolded at 2c37151777) folded by apply-wake.py over the cf06dafee paragraph (14 lines -> 29; the script strips two leading spaces from each line, so its WAKE: line now sits at column 0); verifier missing=0 before and after. C1's MODEL note stays with COORD.
