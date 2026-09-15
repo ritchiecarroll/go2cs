@@ -709,10 +709,6 @@ if (-not [string]::IsNullOrWhiteSpace($EmissionRoot)) {
 
     if ($markedInEmission.Count -gt 0) { $seedTell += '[module: GoManualConversion] file(s)' }
 
-    if ($seedTell.Count -gt 0) {
-        Deny ("-EmissionRoot looks SEEDED rather than raw-emitted (found: {0}). In a seeded tree every committed file is present by the seed, so 'absent from the emission' can never be true and DELETE-DESELECTED would report a VACUOUS zero. Pass the converter's own per-target output root, or omit -EmissionRoot and let the two-release selection gate decide alone." -f ($seedTell -join ', '))
-    }
-
     # ⚠ THE BASE IS FOUND, NEVER COMPOSED -- i9's arm-3 trap, banked by the coordinator at 9c07f494f §2:
     # a path that does not exist answers ABSENT, which is indistinguishable from a real absence and points
     # the same way the hypothesis does. A staging root is `<stage>/<target>/src/core/...`, so composing
@@ -757,6 +753,25 @@ if (-not [string]::IsNullOrWhiteSpace($EmissionRoot)) {
 
     if ($overlap -eq 0) {
         Deny ("EMISSION JOIN BROKEN: none of the {0} corpus .cs under {1} is present in the {2}-entry emission index built from {3}. The two trees share no path, so the emission arm could never fire and every row would fall through to the selection arms unprotected. The base is almost certainly at the wrong level -- pass the root whose child is 'src' or 'core'." -f $corpusCs.Count, $CoreDir, $EmissionIndex.Count, $emissionBase)
+    }
+
+    # ⚠ THE SEED-TELL REFUSAL IS HELD UNTIL HERE, DELIBERATELY (ruling R4, on C2's offer 2d2d74b471 §4).
+    # It used to fire immediately after $seedTell was built, ABOVE the base/index/overlap block -- which
+    # made EMISSION JOIN BROKEN unreachable on any seeded root, so plant 5 could only ever be measured
+    # with a raw-emitted root that joins nothing, and no lane has one. Both boxes that planted it hit
+    # that shadow.
+    #
+    # Holding the refusal until the overlap is scored costs nothing -- it still exits before a single row
+    # is classified -- and buys two things. The join reading is carried in the refusal's OWN text, so ONE
+    # seeded run yields BOTH readings. And the two more fundamental refusals above now fire FIRST: an
+    # empty corpus population and a zero overlap both make the seed-tell reading itself meaningless,
+    # because you cannot say a root "looks seeded" from an index that shares no path with the corpus. A
+    # check asserts its input population is non-empty before its verdict means anything.
+    #
+    # The two Write-Host lines below stay BELOW this refusal, so "(proved raw: no golib, no hand-own
+    # marker)" is still reached only when $seedTell is EMPTY. That claim's truth is unchanged.
+    if ($seedTell.Count -gt 0) {
+        Deny ("-EmissionRoot looks SEEDED rather than raw-emitted (found: {0}). In a seeded tree every committed file is present by the seed, so 'absent from the emission' can never be true and DELETE-DESELECTED would report a VACUOUS zero. Pass the converter's own per-target output root, or omit -EmissionRoot and let the two-release selection gate decide alone. EMISSION JOIN, read BEFORE this refusal: {1} of {2} corpus .cs found in the {3}-entry emission index built from {4}." -f ($seedTell -join ', '), $overlap, $corpusCs.Count, $EmissionIndex.Count, $emissionBase)
     }
 
     Write-Host "  emission index    $($EmissionIndex.Count) emitted .cs, base $emissionBase (proved raw: no golib, no hand-own marker)"
