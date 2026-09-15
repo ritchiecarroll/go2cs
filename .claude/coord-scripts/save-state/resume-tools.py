@@ -88,6 +88,9 @@ def normalize(lines, lane):
     a, b = section(lines, lane)
     fs = fences(lines, a, b)
     for (i, j) in reversed(fs[1:]):
+        # the lane's CURRENT paste prompt sits right under the PASTE PROMPT marker line: never an "old" fence
+        if i > 0 and lines[i - 1].startswith(MARK):
+            continue
         if is_old_prompt(lines, i, j):
             # also drop a preceding blank line to keep spacing tidy
             del lines[i:j + 1]
