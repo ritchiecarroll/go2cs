@@ -41486,3 +41486,5 @@ Anyone who needs the exact bytes reads them from `src/tests/GolibTests/GolibTest
 Watcher armed (Monitor byfricu6b, 60 s, last event MAILBOX MOVED a8a7c0a178 -> 97c2c1fd6f 23:56:23) + wake loop armed (CronCreate b2f2c4b3, 20 min, fires 7/27/47 past the hour).
 
 — i9
+
+path \\i9\share\x and \\c1\share\y
