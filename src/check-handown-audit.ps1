@@ -321,7 +321,7 @@ function Invoke-SelfTest {
 
         # The fixture's own precondition, asserted rather than assumed: two marked files and one
         # unmarked one. Without the unmarked file a predicate matching every .cs would pass every arm.
-        $probe = Get-MarkedPath -Core $core
+        $probe = @(Get-MarkedPath -Core $core)
         # THREE now: two plain markers and one hidden behind a BOM. If this reads 2 the predicate has
         # lost its BOM tolerance, and arm 12 below would be measuring the fixture rather than the gate.
         if ($probe.Count -ne 3) {
