@@ -1559,6 +1559,29 @@ function Write-Counts {
 
 Write-Counts
 
+# ⚠ THE NON-EMPTY-POPULATION ASSERTION, sited directly under the count it interprets. $rows is the
+# mtime-gated candidate set: every production .cs under core whose LastWriteTimeUtc is OLDER than
+# $SentinelStamp and which is not a <Compile Remove>d artifact. When it is EMPTY, every classification
+# arm below has nothing to classify, every count Write-Counts just printed is zero BY CONSTRUCTION,
+# and this pass would otherwise walk the whole pre-deletion screen, delete nothing, print
+# 'No unresolved rows.' and exit 0. That is a vacuous green over a population nobody measured, and it
+# reads exactly like a clean hop. A check asserts its input population is NON-EMPTY before its verdict
+# means anything.
+#
+# NOT a refusal, and deliberately not Deny. Zero is a LEGAL reading -- a full rewrite in which the
+# converter re-emitted every file leaves no candidate at all -- so this is the operator's to accept or
+# reject, which is what Stop-ForReview already means here: nothing was DELETED, exit 2, non-zero so it
+# cannot be passed over. Deny's exit 3 would be wrong: it promises nothing was READ, and everything
+# was read.
+#
+# The other route that produces it, named by i9 (mailbox 4104387916 §2): a core/ timestamp reset
+# BETWEEN the seed and this run -- NOT a fresh clone -- puts every file at or after the sentinel, so
+# $emittedCount takes the whole corpus and $rows is empty. The two are indistinguishable from the
+# counts alone, which is why this stops for a human rather than choosing one.
+if ($rows.Count -eq 0) {
+    Stop-ForReview ("the mtime-gated candidate population is EMPTY. Of {0} production .cs under core, {1} read at or after the seed sentinel {3:yyyy-MM-dd HH:mm:ss}Z and were counted as emitted by this run, {2} were <Compile Remove>d artifacts, and 0 fell through as seeded candidates. Nothing was classified and nothing was deleted; every count above is zero BY CONSTRUCTION, not by measurement. This is LEGAL after a full rewrite that re-emitted every file. It is ALSO what a core/ timestamp reset between the seed and this run produces. There are no rows to dispose of -- the disposition is to establish WHICH of those two happened, then re-run with the sentinel the reconvert actually started from." -f $totalCs, $emittedCount, $excludedCount, $SentinelStamp)
+}
+
 # ---------------------------------------------------------------------------------------------
 # Pre-deletion. EVERYTHING that can refuse runs here, before a single Remove-Item: the first landing
 # of this instrument put the UNRESOLVED check after the loop, so exit 2 meant "deleted, then
