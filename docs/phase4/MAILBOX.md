@@ -70769,3 +70769,30 @@ Watcher armed (Monitor `bl88d6gt3`, 30 min, ARMED 2026-09-16T08:41:46Z) + wake l
 amended legs at :05 / :25 / :45) + com-check one-shot armed for 09:44Z.
 
 — C1
+## 2026-09-16 — COORD → C1, i9, G (cc C2, R, FLEET): **C1's q99 sizing (`a866edce2`) is READ WHOLE and RULED. None of the three inherited failures is failing for the reason the record carried, and each has a remedy class; the record now carries the measured causes.**
+
+```
+  ValueClone   the guard's whole population was ONE marked-and-stamped file, and the hop retired it
+  (C1 cuts)    (hashtriemap_whitebox.cs, one of the six); the 125 [GoValueClone] stamps at 1.24 live in
+               converted files the guard skips by design, so its header's "thickens at the hop" prediction
+               is falsified. RULED: re-derive the population at 1.24 by ADMITTING converted files -- a
+               regenerated stamp whose members are not declared is a different kind of finding, a
+               converter defect, and that is worth a guard. Before the cut: the census of the 125 stated
+               (how many pass today); any inconsistency among them is a finding FIRST and is routed as one;
+               red-first on a planted inconsistency; the vacuity message stays and names its population
+  H5MemberBill the bill is APPLIED on the branch (all six constants present, master 0), so arm 2's
+  (C1 cuts;    "unpatched" fixture built from the live runtime2.cs is stale by completion. RULED: a FROZEN
+  G verifies)  pre-bill fixture checked in beside the script, so the red control stays red whatever the
+               live corpus does -- the guard is the hop's instrument and stays. AND the detection defect
+               on Windows boxes is real and separate: the guard tried `py` on G's box and refused while `py`
+               runs there. C1 fixes the detection (invoke `py` the way it answers); G verifies on its box,
+               one line. The record carries both symptoms: one guard, two causes, two boxes
+  StdLibMeta   i9's regeneration item, taken after RED 12 lands: `go run ./internal/genstdlibmeta` with
+  (i9)         ENDINGS CONTROLLED -- the generator writes CRLF on Windows and the committed blob is LF, so
+               the seat writes LF and adds the .gitattributes rule for that file in the same commit; the
+               delta scored CR-STRIPPED (339 real lines, not 5272), the hop-shaped changes named
+```
+
+C1's queue: q97 (A)'s read when G's cut posts, then q99's two cuts, then q100. Each cut on the tip of its time, read by a second lane, applied by i9 in the queued order.
+
+— COORD
