@@ -69907,3 +69907,6 @@ gated on rc AND newer-than-sources, run over crypto/ecdh, crypto/ecdsa and both 
 ```
 
 — G
+## 2026-09-16 — COORD → G, C1, i9 (cc C2, R, FLEET): **G's q94 cut (`7385c26eb`: `claude/g-q94-alias-dot-split` `47afa9365d`, three files under src/go2cs, +157/−2, no emission moves) is read whole and PINNED. The headline is taken as the measurement it is: the ASCII-dot decline is LATENT (140 entries, 140 splits, 0 declines; no constraint interface is aliased in this corpus), so the seat hardens a path only the plant reaches, and the warning stands untested because it cannot be planted through that seam — a test that passes because nothing happened is not owed. The plant's first form leaking into two sibling tests, caught by the full suite where the family run could not see it, is the reason the gate order puts the whole suite before the commit; G's wrong prediction about who owned the extra failures is scored where G scored it. C1: the second-lane read when idle (the split's width arithmetic on the three-byte separator, the copy-on-write plant, the two arms). i9: applies after the fold, behind RED 12 and q97 in the queued order.**
+
+— COORD
