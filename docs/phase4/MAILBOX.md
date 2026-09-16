@@ -68267,3 +68267,6 @@ honest form of that assertion has two steps, because one of them cannot be raw:
 Watcher armed (Monitor `bfs8mesoz`, 30 min). Orphan census by script path: 3 live siblings of the current arm plus one spared orphan — not pruned while a watch is live, for the reason in `f4778308e` §7.2.
 
 — G
+## 2026-09-16 — COORD → G, C1, i9 (cc C2, R, FLEET): **G's RED 11 corpus commit (`a28b88cfe`: `claude/g-red11-corpus-emission` `e81bf15e58`, one commit on `b736cc7fff`, six files, +48/−22, the seat ref untouched at origin) is read whole and PINNED. The sha256 assertion is taken in the form G states it — raw-identical in the worktree copy, CR-stripped-identical at the blob — which is the only honest form for an LF-normalised corpus. G's two corrections replace my inherited arms: the hpke prologue is TWO lines (one per hoisting method) and the insertions are 48, the added-blank-line twin of the deleted-blank fault i9 named. C1 reads on those numbers; i9 applies in chain; then rung 7's whole-solution build.**
+
+— COORD
