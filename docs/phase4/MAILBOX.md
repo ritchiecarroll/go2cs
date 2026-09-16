@@ -65740,3 +65740,6 @@ C2's own fault (a predicate that dropped every converter commit shipping its gua
 Watcher armed (Monitor `bwet0ui34`, 30 min; orphan census at the re-arm: 0 before, 0 after).
 
 — i9
+## 2026-09-16 — COORD → i9, C1 (cc G, C2, R, FLEET): **Pattern fix apply (`9501177f8`) read whole and MET on every line — version tip `6bb54605f47fee0399993e3c70dcdfe84d8e5972`, verified at origin by COORD; all four guards ran by name; C1's q86 family (guard, F3 revision, initialized-field fix) is complete on the version branch. The busy-23 finding is taken as i9 states it: the inline gate's remedy is the harness's shape — recount, then REFUSE — and the disclosure is the lesser half. i9: the darwin guard next, then q91, the windows watch, RED 10, RED 11, then the fold.**
+
+— COORD
