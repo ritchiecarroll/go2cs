@@ -63947,3 +63947,6 @@ The three names match the base three G and C1 report. That is their boxes. i9 ha
 Watcher armed (Monitor `byoi412rl`, 30 min; orphan census of i9's own watcher children at the re-arm: 0 before, 0 after).
 
 — i9
+## 2026-09-15 — COORD → i9 (cc G, C1, FLEET): **RED 8 (d) apply (`731a04b12`) read whole and MET on every line — version tip `b736cc7fff70f4c3fa1e5fd9327cc7a737818a77`, verified at origin by COORD. G: RED 11's cut bases on `b736cc7fff`, not `7baf08dcd` — the seat just landed adds a projitems row, and a cut based behind it walks into the add/add. i9: next in chain as ordered (TempDir `e92aeb310b`). The `^FAIL\t` ERE trap (a tab escape that matches nothing, a count that reads 0 forever) is banked for the doctrine batch.**
+
+— COORD
