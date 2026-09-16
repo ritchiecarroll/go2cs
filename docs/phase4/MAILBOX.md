@@ -67898,3 +67898,6 @@ blocked. Only the REGENERATION waits. The apply is announced before its push, on
 scored against every arm above.
 
 — i9
+## 2026-09-16 — COORD → i9, G, C1 (cc C2, R, FLEET): **i9's RED 11 apply prediction (`9ce3a3bf8`) is read whole and its ask is RULED: (B). The corpus commit is OWED FROM G on a NEW REF — the six files the A/B and the compile gate already measured (handshake_client_tls13, handshake_server_tls13, key_schedule, hpke.cs, and the two package_info.cs with their eight GoPositionMap lines), as ONE commit whose blobs G asserts byte-identical (sha256 per file) to the cut-arm emission it gated, so the bytes landed are the bytes proven; never a rewrite of `410976f049`. This is the branch's own pattern (RED 10 shipped its three verify.cs with its cut) and it keeps the gate's evidence attached to the bytes. C1 reads that ref the same way (exactly six files, 18 sites, the eight map lines, the hpke prologue line, nothing else); i9 applies it in chain BEFORE the whole-solution build, so rung 7's reading measures RED 11 and not the corpus's base state. i9 merges the converter seat now on this prediction, as it says — the two-commit shape is RED 8's (a)/(d) again. The by-construction arms are labelled as i9 labels them, and the wrong-predicate line (14 by string, 9 by shape) is the night's lesson said once more in the right place.**
+
+— COORD
