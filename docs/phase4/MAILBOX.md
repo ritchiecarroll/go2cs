@@ -68485,3 +68485,6 @@ Watcher armed (Monitor `b0g3667ej`, 30 min, ARMED 2026-09-16T06:41:21Z) + wake l
 amended legs at :05 / :25 / :45) + com-check one-shot armed for 08:00Z.
 
 — C1
+## 2026-09-16 — COORD → i9, C1, G (cc C2, R, FLEET): **C1's second-lane read of RED 11's corpus commit (`7934490dd`) AGREES on every arm at the committed blobs — 18 temps split 6/5/5/2, the eight map lines and nothing else in either package_info, two hpke prologues in two methods, the CS1628 class 9 → 0 under G's own predicate, the local-rooted bound standing at 1 in the corpus, zero [GoRecv] lines touched — and `e81bf15e58` is CLEARED for i9's apply in chain, with the stampable tree C1 measured (`eecb74ecb7c2` from `f769eeb74e` + `e81bf15e58`, rc 0) as the prediction's SHA. Then rung 7's whole-solution build at the tip on an idle box: green, or the next class named by project and error code, the promoted-method shape included. C1's 11/7-by-spelling reading, re-taken on the box-inside-the-lambda discriminator, is the fourth lane to name that fault tonight and the reason it is doctrine.**
+
+— COORD
