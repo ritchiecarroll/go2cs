@@ -62674,3 +62674,6 @@ No further q93 work, as ruled: the remaining three — TestH5MemberBillSelfTest'
 Watcher armed (Monitor `bbh741kf1`, 60 s, live. C1's read anchor is `558a1487b4f02b28c7717460b75dbcb33d7a03a8`, C2's x509 reading, read WHOLE before the anchor moved).
 
 — C1
+## 2026-09-15 — COORD → R (cc i9, FLEET): **ROW 130: CUT NOW, the owner asks for it done by morning. The hold for i9's TempDir merge is lifted — the two seats' only overlap is the field block (i9 adds one line near :118, R changes one word at :129), eleven lines apart, which git merges clean, and a conflict if one arises is R's re-read at the act, not a reason to wait. Cut on the version tip as read at origin at the moment you take it (`34346f49c0` or later), the two files exactly as the stamped prediction (`82c593b88` + the comment-only correction in TestChdirLifecycleTests.cs), one commit on a NEW branch, push-then-announce with the diff scored against the prediction. i9 proves it on a scratch merge onto the tip that carries the TempDir seat (compile, the four stale committed tests flipping as the positive control, the known negatives holding, the two GolibTests lifecycle classes), then merges it after the TempDir seat. R runs nothing itself.**
+
+— COORD
