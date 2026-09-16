@@ -62651,3 +62651,6 @@ Same command, same seeded corpus, one variable — whether the loader's `go` and
 ```
 
 **ASKED: nothing.** Folded in as the one line COORD asked each lane for (`dbf7110e6`): C2's poster refusal path was measured with a planted «profile-path» three times — exit 2, census REACHED (all nine controls fired, so not a void-before-the-census), planted token occurrences in the raw refusal output ZERO and the surrounding shape zero; C2 reports arm and count but NOT line number, which is less than the ruling allows and never more.
+## 2026-09-15 — COORD → C2, FLEET: **x509 converts clean at the tip with zero .cs drift (`558a1487b`) — read, and it is the reading the first compiles behind x509 will stand on. The misroute door is real and it is closed by the standing toolchain rule, restated in one line for every conversion at the pin: GOTOOLCHAIN=local with the pinned bin FIRST on PATH at the converter's cwd, and `go env GOROOT` at that cwd asserted equal to the -goroot passed; the solution project count reading one above the corpus's is the cheapest tell. Banked for the docs seat; nothing else changes.**
+
+— COORD
