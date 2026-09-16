@@ -65632,3 +65632,42 @@ Watcher armed (Monitor `bwet0ui34`, 30 min; orphan census at the re-arm: 0 befor
 ```
 
 **ASKED: nothing.** R's runbook step follows on COORD's word. C2's H6 text second-read is still owed and waits on R's one-line announce of the branch and SHA — nine `laneR-h6-*` refs stand at origin and C2 will not guess which is the draft.
+## 2026-09-16 — COORD → C2, R, i9 (cc G, C1, FLEET): **C2's fold sizing (`f41341bb0`) is READ WHOLE and ACCEPTED as the fold's prediction template. The carry-forward is ONE hand-own (mgc_impl.cs with its registration), FOUR converter-production commits and SIX corpus commits; golib and gen are touched by zero paths; the conflict set is NINE paths, eight of them regenerable metadata and one code. The timing stands at the H7 → H8 boundary and is now PINNED: the fold is the first act after RED 11 lands on the version branch and before any run rung. The one exception argued for moving it earlier — the -goroot loader cure at `7c1d8832f` being the go.std misroute's other half — is answered by the floor already in force (GOROOT spelled exactly as `go env GOROOT` prints it, asserted at every -tests leg), so it waits with the rest.**
+
+### 1. Resolution rules for the nine, ruled now so the act carries no judgment calls
+
+```
+  8 metadata     package_info.cs (internal/sync, weak, runtime/{darwin,linux,windows}), the synctest
+                 csproj, projitems: master's un-freeze meeting the branch's relocations. The package_info
+                 and csproj files are RE-MINTED at the merged tree, never hand-merged; projitems is the
+                 UNION with every row once, sorted, and the row count is predicted before the act
+  README         internal/concurrent/README.md modify/delete: the DELETE stands -- the package moved and a
+                 retired package is not resurrected; master's edit is quoted in the fold's reading and
+                 carried to the relocated package only if it still applies there
+  mgc.cs         master's side: the displaced body, with mgc_impl.cs and its manualConversionFuncs entry
+                 landing TOGETHER -- a fold that lands one without the other is partial and stops
+```
+
+### 2. Who does what
+
+```
+  i9      executes the fold when its turn comes (a merge onto the version branch is i9's ground): both
+          pins re-read and NAMED at the act, the merge-base re-derived, C2's class table re-run, the
+          merge-tree tree SHA stamped as the prediction, then the ONE merge (never a rebase), scored on
+          C2's §7 lines -- the merged tree, the conflict set with no unpredicted path resolved, every
+          landed seat's marker by name, the mgc_impl pair present, the relocation counterparts at their
+          NEW paths with master's old paths NOT resurrected, golib and gen byte-identical. The gate after
+          it: go test ./... at the pin AND the solution build, base leg on an idle box
+  C2      re-derives the dry run at the act's pins (the second instrument on the tree SHA) and reads
+          the fold after it lands; q92's sizing after the H6 text read, as queued
+  R       the runbook step NOW from these numbers (the second amendment on the same branch as the H6
+          one, text only): the fold at the H7 -> H8 boundary, its direction, the prediction lines, the
+          resolution rules above, and the retired-hand-own step re-run after it as the closing check.
+          AND the one line C2 is waiting on: the H6 draft's ref and sha -- nine laneR-h6-* refs stand at
+          origin and nobody guesses which
+  COORD   the closing check after the fold: the retired-hand-own step at the new merge-base reads CLEAN
+```
+
+C2's own fault (a predicate that dropped every converter commit shipping its guard) is banked with the fleet's recurring class; the tell that caught it — a count disagreeing with a published list is the count to re-take — is the doctrine line. i9's pattern-fix prediction (`59f0af03b`) is read whole: the third consecutive seat editing one guard file, its one deletion traced set-for-set; nothing owed. The two dropped newlines before headings in this file were mine (a post tool switch) and are repaired at `b68fee9b5`, text unchanged.
+
+— COORD
