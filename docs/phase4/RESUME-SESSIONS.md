@@ -20,6 +20,23 @@
 
 ## 0. Fleet map and model classes (recommended for next week's rungs)
 
+> **OWNER STEER 2026-09-15 23:00 (box), IN FORCE FOR EVERY LANE UNTIL THE HOP LANDS.** The owner's words: "a much higher proportion
+> of activity is being spent debating and fixing the mailbox protocol vs the core work of 1.24.13 corpus migration ... I am all
+> about having a good, reliable process, but not at the expense of the project objectives ... I could be instead doing all this
+> work on one machine with sub-agents with better token spend." COORD's order relaying it (mailbox ce3e97735):
+> (1) PROTOCOL FREEZE -- the mailbox protocol is frozen at v3.6 + C2's delta gate + the placeholder rule; no protocol proposals,
+>     instrument-hygiene essays or self-corrections on the channel; the one exception is a shipped instrument blocking a post or a
+>     seat, reported in one line. The shared identifier census ships once from COORD's sub-agent and every tool adopts it in one line.
+> (2) POST BUDGET -- a lane posts a PREDICTION, a READING, a CUT/REF or a MERGE, nothing else; lessons batch into ONE dated block per
+>     lane in the next docs seat; COM-CHECKs only when COORD asks; silence after a ruling means proceeding; COORD's acknowledgements
+>     are one line unless they carry a ruling.
+> (3) THE WORK, in order -- the compile front (the RED chain to the version tip, then the first compiles behind crypto/x509 read
+>     by class and cut as they appear), then H8 (q91's host cure, q92's export), H9, H10. Guard and census items (q90 (c) linux,
+>     q93, q94, the interop-pattern fold) WAIT until the compile front is idle for want of a reading.
+> (4) MEASURED -- COORD reports at each status the share of mailbox entries that are loop-of-record versus everything else; the
+>     target is that everything else rounds to zero. If it does not, COORD recommends consolidating to one machine with sub-agents.
+
+
 | Lane | Box | Role next week | Model / effort | Why |
 |---|---|---|---|---|
 | COORD | i7 | rulings, merges, master landings, train assembly, the ladder | Fable 5.1 / high, ultracode on | signs everything; the instrument's reader |
@@ -101,8 +118,8 @@ RESUME 2026-09-14 18:26 -- COORD ONLINE (mailbox 2cd01f8d6ba1464d3ee0ee4d8ae9639
   a person are OWNER-HAND posts to COORD, relayed to the owner in this session; NO CHIPS anywhere; model/effort per prompt header.
 
 STATE AT THIS REVISION (2026-09-14 18:45 -- new usage week; the save-state refresh runs after every landing/ruling and at every wake tick):
-  BRANCH: claude/coord-handover 2748fb564dc738d3942941aabae57723eff51e83 yes landed -- the handover log (blocks 1-15) + this file
-  BRANCH: claude/mailbox 8261f58677d37330fda329dda75a8b7c4f556a7e yes transport -- rotated 2026-09-13 02:36; COORD's read anchor is the tool's own
+  BRANCH: claude/coord-handover 2214de549a82feb0966d8131c3a5f372cb38c2b7 yes landed -- the handover log (blocks 1-15) + this file
+  BRANCH: claude/mailbox c7fa53c86f6c64ddd89f38f26ebfe675e86d5f9d yes transport -- rotated 2026-09-13 02:36; COORD's read anchor is the tool's own
   BRANCH: claude/version-go1.24.13 34346f49c0851836e6f0cd760d3b6b4a960e3fea yes cut -- THE H5 GATE TREE: checkpoint 1 (dc78fb0df8) -> C1's relocation (c8d50e014f + a4ece44fff) -> CHECKPOINT 2 (c2345d7731: corrected H5c, both solutions load, guards PASS x2) -> C1's three H6 rows (f0f8826894). GATE RED by row 20 only (sync 7 x CS1929); unique unbuilt behind sync.
   BRANCH: claude/c1-h6-rows 1a4ebbfcfb592ee105f9a886782a02fd74e7bd93 yes accepted -- C1's branch AT the version tip; C1's row-20 commit lands HERE, i9 fast-forwards the version branch onto it
   BRANCH: claude/c1-h5-relocation a4ece44fff696e88c9d4a72059b12efaa3185a8a yes accepted -- the relocation source ref (landed on the version branch by fast-forward)
@@ -918,3 +935,4 @@ YOUR ACK: "watcher armed + wake loop armed", the claude/coord-handover tip you f
 - 2026-09-15 21:10 (box) -- RED 8 (a) APPLIED on the version branch: f0a2f23e12 -> 28c8a52e484cb77366644596d80c7aef93ec0945 (i9 193f6d440, MET every line: 12 CS0310 gone, 328/16, hpke 6, x509 1, the fourteen unbuilt by closure behind x509 = one class); push read back e560618f8. RED 9's apply prediction stamped (hpke 6 -> 0, 329/15, projitems 298, alias control 60+1) -- i9 applying. RED 10 CUT by G (641e84906: claude/g-red10-nested-map-pointer-value 61868ec1ac, one line, prediction before the diff, A/B running); stamped ac1945ef4; C1 second lane after the reading. q93 QUEUED (the version branch's standing base-three FAIL set; ValueClone stamp guard vacuous). RED 8 (d) ordered to cut now (C1). OWNER 20:50: R-LAPTOP open until ~05:30 -> row 130 ordered to R (prediction now, cut after i9's TempDir merge, i9 proves); the owner nudging C2; plain-language ladder status given at 20:47 and 20:55.
 - 2026-09-15 21:40 (box) -- RED 9 APPLIED on the version branch: 28c8a52e48 -> 34346f49c0851836e6f0cd760d3b6b4a960e3fea (i9 71be22862, MET every line: hpke 6 gone, 329/15, ONE CS site left = x509 verify.cs:1313 = RED 10). Next in i9's order: RED 7 (a) 6c8794678c + C1's comment commit 0930be1f2 -> RED 8 (d) 4e3ddc114 -> TempDir e92aeb310 -> q86 -> F3 -> pattern fix -> darwin guard -> q91 -> windows watch; RED 10 61868ec1ac after its A/B reading and C1's read. C2 BACK at 21:30 via the owner: its poster's whole-file ipv4 census refused on three pre-existing strings; the OWNER authorized C2's delta gate (21:33); C2 posts six staged deliverables next (three reviews = third reads, RED 10 sizing, Chdir census, base pre-registration). RED 10 KEY-operand residue RECORDED as a boundary (C2 measured against the built cut; no corpus instance). R's row-130 ruling e1030736e (three items; R cuts after the TempDir merge; owner's spurt confirmed until 05:30). q92 promoted (ParallelConflict first). q93 queued.
 - 2026-09-15 22:35 (box) -- C2's six late deliverables landing as third reads: RED 8 (a) AGREES (4e8abac31; a latent ASCII-dot / silent-decline finding queued as q94 for G after RED 10), RED 9 AGREES (2fb240bf4; idempotence + determinism checked), RED 7 (a) AGREES (2e43b3954; stubbed packages 42 -> 39 corroborates the five), the RED 10 sizing (534d9b483: ten fixture arms; the KEY operand carries the defect too; the site is NEW at the hop while the clause is pre-existing -> RULED: the key operand joins G's seat as the one helper's third caller, arm E red-first, prediction unchanged, the recorded boundary superseded), the TempDir/Chdir census (d96ccb4af: population ONE, three negatives walked, two corrections shrank it) landing behind i9's seat. R reproduced C2's identifier arm to the same count at the same tree (336bf44b5) and found the mailbox's own security discussion ratcheting the count up -> RULED: no instance of any identifier class in the mailbox again, placeholders only, the shared census reports masked values (relayed to the census sub-agent on claude/coord-identifier-census). RED 7 (a) apply prediction stamped (4cb8d315a); i9 applying onto 34346f49c0. Owner online with R-LAPTOP until ~05:30; row 130 held for the TempDir merge.
+- 2026-09-15 23:05 (box) -- OWNER STEER folded into section 0 (in force for every lane): protocol FROZEN at v3.6 + delta gate + placeholders; post budget = prediction / reading / cut / merge only; the compile front first, then H8-H10, guard and census items wait; COORD measures the loop-of-record share at each status and recommends a one-machine strategy if the rest does not round to zero. C1's q90 (c) linux table read (634b21959: 0 live native-boundary sites; no guard cut, per the steer). C2's q93 sizing read (c7fa53c86: C1's fourth failure is a BOX property -- C1's exact ref passes on C2's box; a GOFLAGS plant reproduces the shape; C1 answers in one line; TestH5MemberBillSelfTest's ARM 2 failed OPEN and is worth a seat later). Census sub-agent still authoring claude/coord-identifier-census.
