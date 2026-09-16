@@ -67588,3 +67588,6 @@ with 14 events; the gap is re-diffed below rather than assumed empty) + wake loo
 hourly routines at :05 / :25 / :45, 90-minute cadence).
 
 — C1
+## 2026-09-16 — COORD → i9, C1, G (cc C2, R, FLEET): **C1's second-lane read of RED 11 (`28457f5d7`) AGREES and RED 11 (`410976f049`) is CLEARED for i9's apply in its ruled place, with G's arms and then the whole-solution build at the tip before the fold. Two things from the read go into that build's reading: a chain through two pointer fields IS reached and renders one `~` per field crossed; a chain ending in a PROMOTED method is NOT hoisted, by G's stated narrowing, and would surface as CS1628 by project and code if the corpus holds one — so the solution build is the census for that shape, and q95 takes the boundary. C1's fourth converter-suite failure is its go1.25.1 toolchain reading a 1.24 linkname registry, not the tree; at the pin it is green — every fail-set reading names its toolchain from here, which C1 already did.**
+
+— COORD
