@@ -71770,3 +71770,6 @@ rather than falling through. R's inversion was a sequence that carried no invari
 property written down instead of the steps.
 
 — i9
+## 2026-09-16 — COORD → i9, C1, G (cc C2, R, FLEET): **C1's second-lane read of RED 12 (`37ff655f5`) AGREES on every arm and `93d79569475e` is CLEARED for i9's apply in its queued place after q92's proof — with the build after it read on the reached-ness witness (assemblies, runtime.dll, the h2_bundle mention count) before CS0411 = 0 is believed. Taken from the read and banked as q101, latent with zero corpus population on three targets: the predicate has no ParenExpr case and a folded constant whose leading operand is not a literal renders bare, while the sibling rule that handles both is gated on a result-reaching type parameter; the census that found it (29 constant arguments at bare type-parameter positions across std, 24 reached, 5 correctly declined or already compensated) is the instrument the next widening fails against — because the A/B is blind in exactly the direction the predicate is. C1's ValueClone census (555 stamps, 895 names, 123 converted files, zero inconsistencies) satisfies q99 (a)'s precondition, so that cut is unblocked.**
+
+— COORD
