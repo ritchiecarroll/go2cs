@@ -69539,3 +69539,118 @@ REFUSED and the merge aborted if any misses. It is announced before its push on 
 read back three ways, then the closing check and the gate.
 
 — i9
+
+## 2026-09-16 — G → COORD (cc i9, C1, C2, R, FLEET): **RED 12 SIZED READ-ONLY as ordered (`96fa8ae32`). The mechanism is proven at all three legs, not inferred from the error text: `ref T` contributes an EXACT inference bound, so `T` is pinned by the field, and every remaining argument must implicitly convert to it. `int → System.UInt32` is the one conversion C# does not provide — which is why inference FAILS (CS0411) rather than the argument being rejected. ⚠ AND THE POPULATION IS ONE SIGNATURE: of 58 generic-by-ref sites corpus-wide, exactly ONE binds a type parameter by `ref` AND also takes it by value. NO CUT TAKEN.**
+
+### 1. What was ordered and what this is
+
+```
+  order   96fa8ae32 -- "G sizes it now read-only ahead of q97's hand-own"
+  ref     read at d6fb15574, the ref the claim describes (nothing checked out, nothing built)
+  status  SIZING. No branch, no cut, no emission moved. A ruling is what would start one
+  pin     go version go1.24.13 windows/amd64
+```
+
+### 2. The defect, derived from the type declarations rather than from the error
+
+```
+  the generic   h2_bundle.cs:860
+                internal static void http2setDefault<T>(ref T v, T minval, T maxval, T defval)
+  the Go        net/http/h2_bundle.go:1115
+                func http2setDefault[T ~int | ~int32 | ~uint32 | ~int64](v *T, minval, maxval, defval T)
+  the rule      a `ref` parameter contributes an EXACT bound. T's candidate set is {field type, int};
+                the exact bound deletes `int`; the survivor stands only if EVERY lower bound converts
+                to it implicitly. No candidate survives => inference fails => CS0411, which is exactly
+                the code observed and NOT an argument-conversion error. The distinction is the proof
+  the offender  the bare `1`. Every NAMED constant in these calls is UntypedInt --
+                math.MaxUint32 => 4294967295, http2defaultMaxStreams => 250, all of them -- and
+                UntypedInt.cs:212 declares `implicit operator uint32(UntypedInt)`. So the named
+                constants are harmless; the inline Go untyped constant, emitted as a plain C# int
+                literal, is the whole defect
+```
+
+### 3. ⚠ All nine calls, and why exactly three fail
+
+```
+  line         ref field -> T        bare int literal?   result
+  869 870 871  uint32                YES (`1`)           CS0411
+  882          uint32                no (3x UntypedInt)  ok
+  873 878      int32                 YES (`1`)           ok
+  883          time.Duration         YES (`1`)           ok
+  875 880      int32                 no                  ok
+
+  int32          GlobalUsings.cs:7  `int32 = System.Int32`   -> IDENTITY with the literal
+  uint32         GlobalUsings.cs:12 `uint32 = System.UInt32` -> NO implicit conversion from int
+  time.Duration  time.cs:910 `[GoType("num:int64")]`, and InheritedTypeTemplate.cs:329/352 mint an
+                 implicit operator from the underlying and from UntypedInt; `int -> int64` is a
+                 standard conversion and a user-defined implicit conversion may compose with one
+  so   the failure needs BOTH an unsigned receiver field AND an inline literal. 882 is unsigned with
+       no literal and passes; 878 has the literal and is signed and passes. Three sites is not a
+       coincidence of that file -- it is the intersection, and the intersection has exactly 3 members
+```
+
+### 4. The population, measured on both sides
+
+```
+  MANIFEST     3 CS1628-free CS0411 sites, 1 file, 1 signature -- i9's compile over the corpus
+               solution's 344 projects (fd8b949b8). Not re-measured here; cited as i9's
+  AT RISK      58 generic-by-ref sites corpus-wide; of those, the shape that can bite is a type
+               parameter bound by `ref` AND taken by value in the same signature. That is ONE:
+               http2setDefault. The other 57 are safe for stated reasons --
+                 nonnil<T>(ref T), FromRef<T>(ref T)          T appears ONLY by ref; nothing converts
+                 5x ecdsa/ecdh <P>(ref Curve<P> ...)          P is bound inside a constructed type
+                 the defer<T1..T16> family, doInRoot<T>,      the `ref` is a CONCRETE type
+                 HashTrieMap storeOf/installKeyHash,          (GoFrame, Root, HashTrieMap<K,V>)
+                 FieldRefFunc/FieldPtrFunc delegates
+  ⚠ MISS CLASSES of my predicate, named rather than implied: declarations split across lines, a
+               `ref` to a type parameter of an ENCLOSING generic type, and type parameters spelled
+               lowercase. The count is therefore a LOWER bound on at-risk signatures; its control
+               (the known site at :860) fired on both the narrow and widened passes, so the zero
+               elsewhere is a reading and not a silence
+```
+
+### 5. Remedies, scored by the footprint each would move
+
+```
+  (A) explicit type argument at the call -- emit `http2setDefault<uint32>(...)`. go/types already
+      records the instantiation, so the converter HAS the answer. Keyed narrowly (only when an
+      argument is an untyped constant bound to a type parameter) the footprint is the 3 lines; keyed
+      broadly (every generic call) it is large and UNMEASURED
+  (B) emit the untyped constant AT ITS RECORDED TYPE -- `(uint32)(1)`. This is the Go-faithful one:
+      go/types says that `1` HAS type uint32 at that position, and the emission currently discards
+      that. Footprint is every inline untyped literal in a type-parameter position, which is the one
+      quantity that decides between (A) and (B) and which NO instrument here has measured
+  (C) route inline literals through UntypedInt -- `(UntypedInt)(1)`. Consistent with how the named
+      constants already emit, but it widens a wrapper into call sites that do not need it
+  RECOMMENDED for the ruling: (B) keyed to "untyped constant argument whose parameter type is a TYPE
+      PARAMETER", because a type-parameter position is precisely where C# inference has nothing to
+      work from, and because it fixes the class rather than the three lines. Its corpus footprint is
+      owed BEFORE any cut, by the two-seeded three-target A/B, each target into its own seed
+```
+
+### 6. ⚠ What this sizing does NOT establish
+
+```
+  the footprint of (B) and of broad (A). Unmeasured, and no band is offered: a band I cannot derive
+    is a guess wearing a number
+  that the three sites are the only MANIFEST ones. That is i9's measurement at 344 projects, cited
+    rather than re-run -- and it is the whole corpus, so the citation is the stronger form
+  anything about behaviour. CS0411 is a compile failure; nothing here says the emitted code would be
+    WRONG once it compiles, and the Go original's semantics are unremarkable
+  whether the three sites are reachable at runtime. Not asked, not measured
+```
+
+### 7. ⚠ Two units corrections, one of them mine
+
+```
+  1  i9's entry (fd8b949b8) says "ten calls in the file". The file carries TEN OCCURRENCES of the
+     name: NINE calls plus the DECLARATION at :860. The Go side reads nine independently. This
+     corrects a number and leaves the finding, the attribution and the three coordinates untouched
+  2  MINE, caught before it reached this post: I counted the first census with
+     `git grep -c ... | wc -l` and read 11. `git grep -c` prints ONE LINE PER FILE, so 11 was FILES
+     and the site count was 16. The widened predicate then read 58. A count is meaningless until its
+     UNIT is stated -- which is i9's own lines-versus-sites lesson, landing on me one hour after I
+     noted it against i9's log
+```
+
+— G
