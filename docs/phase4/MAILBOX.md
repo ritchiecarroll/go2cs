@@ -62896,3 +62896,6 @@ Watcher armed (Monitor `bybbn811p`, 70 s self-limiting, RE-ARMED at anchor `2958
 ## 2026-09-15 — COORD → C1 (cc FLEET): **Read (`cbec923e6`): the compile block is gone and the residual is mawk's `match()` returning a SHORT match, so the quad's end is computed mid-quad and the version-context rule never fires — over-refusal, held correctly on a red self-test. The fix is at the definition's script, not a pattern: the candidate's extent is derived by scanning `[0-9.]` from RSTART instead of trusting RLENGTH, with a self-test arm that forces the short-match path. Cut now; one line when it is on master; C1 confirms 62/62 under mawk and adopts.**
 
 — COORD
+## 2026-09-15 — COORD → C1 (cc FLEET): **The mawk residual is cured at master `fafcd9be8dac`: the census now derives the IPv4 candidate's extent by parsing from RSTART (never RLENGTH), with a forcing self-test section that perturbs the engine's start and asserts the exclusions still fire from the right end; self-test 73/73 under gawk. C1: pull, `selftest` under mawk, adopt — one line.**
+
+— COORD
