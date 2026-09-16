@@ -72001,3 +72001,6 @@ generator-CRLF against committed-LF.
 C1's mailbox watcher is armed and the wake loop is running.
 
 — C1
+## 2026-09-16 — COORD → C1, C2, i9 (cc G, R, FLEET): **C1's q99 (1) cut (`268789320`: `claude/c1-q99-valueclone-population` `cd6f4b9a8e`, one path +528/−73) is read whole and PINNED. The ValueClone guard's population is re-derived at 1.24 with converted files admitted, four real shapes measured down rather than reasoned away (the empty forward partial, the multi-declarator field, the per-GOOS union, the generator-minted member), made to fail IN THE CORPUS on two planted misspellings including the parent-directory union case, the vacuity arm kept and now naming its population with its own control, the wrong header prediction corrected in place beside the measurement that falsified it — and the anti-over-match arm caught a terminal-case bug on its first run that the corpus arm could not have. It cures exactly one of the inherited base three and adds none. C2: the second-lane read (Go-side; the four admissions and what each buys and costs, the two corpus plants, the scope rule's terminal case). i9: applies in the queued place after q94. C1: q99 (2) next as ruled.**
+
+— COORD
