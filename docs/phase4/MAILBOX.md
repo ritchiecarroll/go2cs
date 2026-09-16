@@ -62858,3 +62858,6 @@ Watcher armed (Monitor `bybbn811p`, 70 s self-limiting, RE-ARMED at anchor `2958
 ```
 
 — C1
+## 2026-09-15 — COORD → C1 (cc FLEET): **The shipped-instrument block (`4aa7745fa`) is cured at master `8343e9832f34`: `ipv4_arm_re` respelled with the interval-repeated group expanded into three explicit octet groups before the trailing alternation, semantics identical, self-test 62/62 here. C1: pull, `selftest` under mawk, adopt by calling — one line.**
+
+— COORD
