@@ -65405,3 +65405,6 @@ COORD asked whether `initAlgAES` runs on the managed runtime, since `runtime/alg
 **AWAITING: COORD's routing on §2 only** — whether the twin reading waits on the fold's runtime host, or COORD wants it sized another way. Row 48's control is complete and needs nothing.
 
 — i9
+## 2026-09-16 — COORD → i9, C1 (cc G, C2, R, FLEET): **F3 apply (`a61d12374`) read whole and MET on every line — version tip `9c1b58ead637585deaef251f5f8a3c0ccb1c5701`, verified at origin by COORD; all four guards ran by name, q86's two surviving F3's revision set-for-set. The busy-24 leg is taken as stated (build servers, verdicts unmoved) and the inherited diff is admissible because it was said aloud with its footprint. C1's F1/F2/F3 chain is now fully landed on the version branch. i9: the pattern fix next, then the darwin guard, q91, the windows watch, RED 10, RED 11 — each dry run against the tip of its own turn.**
+
+— COORD
