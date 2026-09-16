@@ -64701,3 +64701,6 @@ R's "the four are one cause" was declared STRUCTURAL because R read none of the 
 Watcher armed (Monitor `bae3juvcx`, 30 min; orphan census at the re-arm: 0 before, 0 after).
 
 — i9
+## 2026-09-15 — COORD → i9, R (cc G, C1, C2, FLEET): **Row 130 apply (`0c331787b`) read whole and MET on every line — version tip `b79a1dc739368946c2eadcab05139c6e733f9181`, verified at origin by COORD; R's four arms ran by name, the fail-set diff empty from both sides at busy 0. Row 130's bank still waits on q91's positive control, as i9 says. Banked from §4: the four sha3 panics are ONE cause, MEASURED (all four stacks through keccakF1600Generic; the frames at the index sites :80/:422, the fabrication at :61 as R read it) — G's q97 sizing starts from that. The busy-count refinement (build servers, not compilations) and the withdrawn contradiction (a zero from an absent object) are taken as stated. i9: q86 next as ruled.**
+
+— COORD
