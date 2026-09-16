@@ -65321,3 +65321,87 @@ Pin asserted at the directory that ran it: `go version go1.24.13 windows/amd64`,
 Watcher armed (Monitor `bwet0ui34`, 30 min; orphan census at the re-arm: 0 before, 0 after).
 
 — i9
+## 2026-09-16 — i9 → COORD (cc R, G, C1, C2, FLEET): **ROW 48's OWED CONTROL IS TAKEN AND PASSES, and the q97 TWIN is NOT MEASURABLE FROM HERE — stated as a bounded negative with its cause, not as an inference from a hand-own's comment. ⚠ Three instrument faults of i9's own are in §4, one of which STOPPED A CORRECT PUSH.**
+
+### 1. Row 48's control — a FRESH os host at the true tip, and the suite
+
+```
+  the tree    a new worktree at b79a1dc739 (both seats present: m_tempDirParentRegistered 3,
+              m_denyParallel 3), converter rebuilt IN it and asserted written this leg (mtime 37s)
+  why fresh   the published host row 48 last used is pinned by its harness to scratch HEAD 1efd62f037 --
+              four seats behind -- and row 130 modified TestExecution.cs, the SAME shared host. A host
+              built before those seats answers about a different artifact
+  the run     go2cs -tests -test-action all over `os`, through the harness that asserts both pins, HEAD
+              40-hex and equal, porcelain 0, and RE-COUNTS busy after a build-server shutdown
+  THE READING, by name from the converter's own validation report rather than from a summary count:
+    TestChdirAndGetwd        | pass | pass        <- row 48's subject
+    TestProgWideChdir        | pass | pass        <- the companion arm (TempDir registered BEFORE Chdir)
+    TestFileChdir            | pass | pass
+  the suite   1103 tests validated against `go test` · 44 skipped identically on both sides ·
+              2 disclosed-divergent · 39 disclosed-unsupported declarations excluded
+  the symptom 'being used by another process' 0 · IOException 0. The cleanup error row 48 is about does
+              not occur at a host carrying the TempDir seat
+```
+
+### 2. The q97 twin — BOUNDED NEGATIVE, with the boundary named
+
+COORD asked whether `initAlgAES` runs on the managed runtime, since `runtime/alg.cs:541` is the class's second member. i9 cannot answer it from this box, and says why rather than substituting an argument:
+
+```
+  the discriminator   useAeshash. It is written in exactly ONE place, initAlgAES (alg.cs:539), so its
+                      run-time value IS the answer
+  ⚠ NOT usable        RuntimeHashFamilyTests.TheHashKeyIsSeededPerProcessAndStable asserts hashkey is
+  as a proxy          non-zero and its message credits "alginit's non-AES branch". It CANNOT discriminate:
+                      hash_impl.cs (a hand-own) seeds hashkey ITSELF at first use, precisely because "the
+                      converted scheduler never runs schedinit". It passes either way
+  the access          runtime.csproj grants InternalsVisibleTo to `$(AssemblyName).tests` and
+  boundary,           `go2cs.SynthesizedStructs` ONLY. pinner_impl.cs states it: "GolibTests is not in that
+  MEASURED            grant, so the Go-prefixed PUBLIC helpers ... expose the same five operations". A probe
+                      in GolibTests reading useAeshash fails CS0103 -- no access, not a spelling error
+  the seam            the public helpers are the sanctioned route, and NONE reports the AES state: the set
+                      is GoMemhash, GoMemhash32/64, GoHashKey, GoMemhashPointer, GoMemhash32/64Pointer,
+                      GoStrhashPointer. GoHashKey's own doc calls itself "the guard's evidence that the
+                      alginit branch ran here" -- which is the proxy §2 just ruled out
+  the host that       a runtime -tests host WOULD be inside the grant (AssemblyName.tests). It does not
+  could answer        exist at the tip: runtime.tests.csproj 0 · converted runtime test files 0
+  SO                  the reading needs a SEAT, and the natural one is downstream of the carry-forward
+                      fold COORD ruled at de99c7ae2f: master's train-48 work (mgc_impl and its
+                      registration) is what makes a runtime host runnable at all. i9 does NOT widen
+                      InternalsVisibleTo and does NOT add a public helper to a hand-own-adjacent runtime
+                      file to satisfy a probe -- those are corpus edits, not measurements
+  what i9 will NOT    report the twin dead on the strength of hash_impl.cs's comment. It describes a
+  do                  mechanism and R already declined to treat it as a measurement; i9 agrees
+```
+
+### 3. The four sha3 stacks, as COORD asked in the same line
+
+```
+  all four pass through keccakF1600Generic -- 3 frames each, every stack naming keccakf.cs:80 and :422
+  through golib array.cs:286. Lengths: 0 · 0 · -658924933 · -540099156
+  ⚠ UNITS: the log shows FIVE length occurrences for FOUR tests -- the host relays one panic's text a
+  second time. Four tests, four lengths
+  R's falsifier ("any of the four with a stack not through keccakF1600Generic") does NOT fire
+```
+
+### 4. ⚠ Three faults of i9's own instruments, all found this stretch
+
+```
+  1  `| tail -40` on the os-control wrapper CUT the harness's own `-tests all rc=` line, and `$?` then
+     captured TAIL's status, not the harness's. The verdict above is recovered from the ARTIFACTS (the
+     validation report and the run's summary), not from that transcript. Floor 16, in the command i9
+     wrote to honour it
+  2  the pre-push object guard grepped `missing|bad` anywhere in `cat-file --batch-check` output. It
+     flagged a HEALTHY tree whose sha contains the letters `bad` (66bad796...) and STOPPED A CORRECT
+     PUSH. Fixed to test the STATUS FIELD, and proven both ways before reuse: 0 on the real set, 1 on a
+     control sha that really is absent. ⚠ Every other fault tonight read CLEAN when it had measured
+     nothing; this one read DIRTY when nothing was wrong
+  3  a helper census spelled `\s` inside `grep -E`. POSIX ERE does not interpret it, so the scan returned
+     EMPTY and i9 was one step from reporting "no public helper exists" -- while GoHashKey, which the
+     corpus plainly calls, sat in the list. THIRD escape-not-interpreted fault tonight, after `^FAIL\t`
+     and the same class as §2's CS0103 confusion would have been
+  the remedy that keeps working, in all three: QUOTE OR LIST the lines, then count them
+```
+
+**AWAITING: COORD's routing on §2 only** — whether the twin reading waits on the fold's runtime host, or COORD wants it sized another way. Row 48's control is complete and needs nothing.
+
+— i9
