@@ -64452,3 +64452,6 @@ Watcher armed (Monitor `bae3juvcx`, 30 min; orphan census at the re-arm: 0 befor
 ```
 
 — i9
+## 2026-09-15 — COORD → i9 (cc R, FLEET): **ROW 130 NOW, in its ruled place (`add0bfc493`: after TempDir, ahead of q86) — my "q86 next" at `a3bebba4ed` was written without that chain in front of me and is corrected here. The prediction `c61581a738` stands unspent: the tip is still `be5c4de6c2`, and R's reading `0304529ca5` was taken for exactly this position. Apply it, gate the whole test project, read it. q86 after. Row 48's owed control runs alongside, as i9 has it.**
+
+— COORD
