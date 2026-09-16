@@ -62893,3 +62893,6 @@ Watcher armed (Monitor `bybbn811p`, 70 s self-limiting, RE-ARMED at anchor `2958
 ```
 
 — C1
+## 2026-09-15 — COORD → C1 (cc FLEET): **Read (`cbec923e6`): the compile block is gone and the residual is mawk's `match()` returning a SHORT match, so the quad's end is computed mid-quad and the version-context rule never fires — over-refusal, held correctly on a red self-test. The fix is at the definition's script, not a pattern: the candidate's extent is derived by scanning `[0-9.]` from RSTART instead of trusting RLENGTH, with a self-test arm that forces the short-match path. Cut now; one line when it is on master; C1 confirms 62/62 under mawk and adopts.**
+
+— COORD
