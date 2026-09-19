@@ -274,6 +274,12 @@ PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; 
 RESUME 2026-09-19. You are lane i9 (host i9, Windows, the fastest box; ONE serial item at a time). First read section 0a
 of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its steps 0, 1 and 2 in that order; then this.
 
+Step 0, NOW, while the owner is at this keyboard: GPG. Windows box, let pinentry pop and the owner type the passphrase:
+  echo test | "$(git config --get gpg.program || echo gpg)" --clearsign >/dev/null; echo rc=$?
+then the probe, never on a commit:
+  echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
+Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpgsign=false commit. Report the state in your ACK.
+
 Your first item: the q94 APPLY, from your own posted prediction 909668679 (claude/g-q94-alias-dot-split 47afa9365d
 onto the version tip d71e4eed634e6921983f5ed246038694d3c9ba1e; three paths; projitems 330 to 331 rows with the
 doubled control; twelve markers unchanged; guards TestForeignConstraintProxySplitsOnAliasDot,
@@ -390,6 +396,12 @@ PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; 
 RESUME 2026-09-19. You are lane C1 (cloud, linux; go1.24.13 through GOTOOLCHAIN; no .NET, so you never claim a
 compile). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its steps 0, 1 and
 2 in that order; then this.
+
+Step 0, NOW, while the owner is at this keyboard: GPG. Windows box, let pinentry pop and the owner type the passphrase:
+  echo test | "$(git config --get gpg.program || echo gpg)" --clearsign >/dev/null; echo rc=$?
+then the probe, never on a commit:
+  echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
+Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpgsign=false commit. Report the state in your ACK.
 
 Your first item: the q102 CUT. The cross-partial index keys on the bare type name within a directory and ignores
 the enclosing *_package class: 4 of 7808 (directory, type-name) pairs collide, none stamped, your fourth take equal to
@@ -603,6 +615,12 @@ RESUME 2026-09-19. You are lane C2 (cloud; no .NET; go1.25.1 only, so every read
 extra base failure). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its
 steps 0, 1 and 2 in that order; then this.
 
+Step 0, NOW, while the owner is at this keyboard: GPG. Windows box, let pinentry pop and the owner type the passphrase:
+  echo test | "$(git config --get gpg.program || echo gpg)" --clearsign >/dev/null; echo rc=$?
+then the probe, never on a commit:
+  echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
+Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpgsign=false commit. Report the state in your ACK.
+
 Your first item: the H8 COMPARAND PROCEDURE. The runbook's H8 amendment says no outgoing manifest is committed and
 neither its comparand nor the default-flavour byte-identity arm has a procedure at this hop. Draft both as one dated
 in-stage runbook amendment on a branch you name, plus one script: (a) how the 1.23.12 outgoing manifest is produced
@@ -660,6 +678,12 @@ PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; 
 RESUME 2026-09-19. You are lane G (host G-LAPTOP, Windows plus the WSL linux arm). First read section 0a of
 docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its steps 0, 1 and 2 in that order; then this.
 
+Step 0, NOW, while the owner is at this keyboard: GPG. Windows box, let pinentry pop and the owner type the passphrase:
+  echo test | "$(git config --get gpg.program || echo gpg)" --clearsign >/dev/null; echo rc=$?
+then the probe, never on a commit:
+  echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
+Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpgsign=false commit. Report the state in your ACK.
+
 Your first item: the H8 CENSUS READING. Your census (three sequential full-corpus conversions, base 46307b4704,
 running when the cutoff hit) may have finished on disk: find its output root and log BEFORE re-running anything. If
 the log shows completion, use it; if it was killed, re-run from a clean seeded root under the pin with nothing else
@@ -714,6 +738,12 @@ PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; 
 RESUME 2026-09-19. You are lane R (host R-LAPTOP, Windows; steward of this file, goal work in owner-opened spurts).
 First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its steps 0, 1 and 2 in that
 order; then this.
+
+Step 0, NOW, while the owner is at this keyboard: GPG. Windows box, let pinentry pop and the owner type the passphrase:
+  echo test | "$(git config --get gpg.program || echo gpg)" --clearsign >/dev/null; echo rc=$?
+then the probe, never on a commit:
+  echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
+Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpgsign=false commit. Report the state in your ACK.
 
 Your first item: the STEWARD LOOP, resumed. Your delta f8fef0119 is FOLDED in this revision: the NEXT key's stale
 tail is replaced by the statement of record (q98 and q92 landed; the eight names absent at the version tip; the
