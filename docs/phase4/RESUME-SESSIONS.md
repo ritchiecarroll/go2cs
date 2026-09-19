@@ -219,7 +219,8 @@ RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane
   POSITION: rung 7 CLOSED (H7 compile parity MET at 46307b4704 on three flavours, COORD a065b1bd9); H7a folded (fc275f1ac3,
   then the interop fold 30057d0c4a); version tip d71e4eed63 (q97 applied); master 7105c8468 (docs seat 4); mailbox anchor
   f8fef0119 (R's delta, folded in this revision); 2026-09-19 evening: q94 APPLIED (version tip 1c1f63d4cc); i9, C2, C1, R ACKed;
-  q102 re-based onto cd6f4b9a8e (3d88353a8); G ACKed (census on disk complete, rc 0, 802 s); H8 comparand RULED bb1d9b4d6
+  q102 re-based onto cd6f4b9a8e (3d88353a8); q99 (1) APPLIED edfa0f5041 and STAMPED 6cd09b343 (the base three is a base two);
+  G ACKed (census on disk complete, rc 0, 802 s); H8 comparand RULED bb1d9b4d6
   (produce the outgoing 1.23.12 manifest on G-LAPTOP from C2's 746d3a7c75, an accepted docs seat). LIVE RUNGS: H8 (G's census reading; C2's comparand procedure; COORD rules
   the comparand) and H9 (i9, after its applies: q94 -> q99 (1) -> q99 (2) -> metadata 828ef5d0b7 -> fail-set literal -> H9 ->
   q100 after the i7's gate). C1: q102 cut -> q86 field-pattern fix (RULED its own seat) -> the pthread seven held as a NOTE.
@@ -417,9 +418,12 @@ Then: (2) the q86 field-pattern fix, RULED its own seat: q86's pushed field patt
 (public array<int8> X__opaque = new(56); does not match), so 242 names are newly reference-bearing under the
 corrected rule and usigactiont, pthreadattr and itimerval flip false to true. One commit on a new ref off F3's head,
 which carries q86's file; state why the declared-set verdict is unchanged; red-first on the three real declarations
-you quoted; C2 second-reads. (3) The seven pthread members the darwin remedy list does not name: a NOTE for the
-post-hop darwin campaign, no work now. (4) If COORD posts the i7's q100 gate reading RED, the fix is a commit on top
-of 0dca38552c, never a rewrite.
+you quoted; C2 second-reads. (2b, RULED 0a2b43651 after C2's q100 read) ONE comment-only commit on top of 0dca38552c on
+the q100 branch: the zh.cs arm comment corrected to "FIRING at this line means it carries none" with the bound stated
+in code, plus the design's bound sentence; announce-then-push; COORD re-pins. (3) The seven pthread members the darwin
+remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
+1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
+i7 gate read CLEAR (1135d780c); nothing owed there.
 Blocked on: nothing.
 ```
 
@@ -635,6 +639,8 @@ scores the gate with it.
 
 DONE 2026-09-19: the comparand procedure is cut at claude/c2-h8-comparand-procedure 746d3a7c75 and RULED (bb1d9b4d6):
 produce the outgoing manifest; G executes; the branch is an accepted docs seat landing with the H8 gate commit.
+
+DONE 2026-09-19: the q100 second read (a810502ff, AGREES; two findings routed to C1 at 0a2b43651).
 
 Then: (2) the second-lane read of C1's q100 cut at origin, claude/c1-q100-native-array-view-floor 0dca38552c: the
 floor's placement at the uintptr door, its scope (array<U> only), the tenth named panic beside the nine, and the four
