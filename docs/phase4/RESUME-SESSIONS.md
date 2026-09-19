@@ -218,7 +218,8 @@ STATE AT THIS REVISION (2026-09-14 18:45 -- new usage week; the save-state refre
 RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane restarts from section 0a plus its own fence).
   POSITION: rung 7 CLOSED (H7 compile parity MET at 46307b4704 on three flavours, COORD a065b1bd9); H7a folded (fc275f1ac3,
   then the interop fold 30057d0c4a); version tip d71e4eed63 (q97 applied); master 7105c8468 (docs seat 4); mailbox anchor
-  f8fef0119 (R's delta, folded in this revision); 2026-09-19 evening: q94 APPLIED (version tip 1c1f63d4cc), i9/C2 ACKed. LIVE RUNGS: H8 (G's census reading; C2's comparand procedure; COORD rules
+  f8fef0119 (R's delta, folded in this revision); 2026-09-19 evening: q94 APPLIED (version tip 1c1f63d4cc); i9, C2, C1, R ACKed;
+  q102 re-based onto cd6f4b9a8e (3d88353a8). LIVE RUNGS: H8 (G's census reading; C2's comparand procedure; COORD rules
   the comparand) and H9 (i9, after its applies: q94 -> q99 (1) -> q99 (2) -> metadata 828ef5d0b7 -> fail-set literal -> H9 ->
   q100 after the i7's gate). C1: q102 cut -> q86 field-pattern fix (RULED its own seat) -> the pthread seven held as a NOTE.
   C2: H8 comparand -> q100 second read -> q102/q86 second reads. R: steward loop -> the reflect row read at the version tip in
@@ -406,8 +407,9 @@ Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpg
 Your first item: the q102 CUT. The cross-partial index keys on the bare type name within a directory and ignores
 the enclosing *_package class: 4 of 7808 (directory, type-name) pairs collide, none stamped, your fourth take equal to
 C2's. Your own design constraint: the enclosing class is never found by brace matching (that instrument failed twice
-in one direction); key on the file's own partial class *_package declaration. One commit on a new ref off the
-version tip d71e4eed634e6921983f5ed246038694d3c9ba1e; the guard red-first on a planted collision; the corpus arm
+in one direction); key on the file's own partial class *_package declaration. One commit on a NEW ref whose parent
+is q99 (1)'s head cd6f4b9a8e8839411ff4dd92428e00df545bf308 (RULED 3d88353a8: the index exists only there; the seated
+branch takes no commits); the guard red-first on a planted collision; the corpus arm
 reads the same 4 of 7808 before and 0 findings after; push-then-announce; C2 second-reads.
 
 Then: (2) the q86 field-pattern fix, RULED its own seat: q86's pushed field pattern cannot see an initialized field
