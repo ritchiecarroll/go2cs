@@ -218,7 +218,7 @@ STATE AT THIS REVISION (2026-09-14 18:45 -- new usage week; the save-state refre
 RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane restarts from section 0a plus its own fence).
   POSITION: rung 7 CLOSED (H7 compile parity MET at 46307b4704 on three flavours, COORD a065b1bd9); H7a folded (fc275f1ac3,
   then the interop fold 30057d0c4a); version tip d71e4eed63 (q97 applied); master 7105c8468 (docs seat 4); mailbox anchor
-  f8fef0119 (R's delta, folded in this revision). LIVE RUNGS: H8 (G's census reading; C2's comparand procedure; COORD rules
+  f8fef0119 (R's delta, folded in this revision); 2026-09-19 evening: q94 APPLIED (version tip 1c1f63d4cc), i9/C2 ACKed. LIVE RUNGS: H8 (G's census reading; C2's comparand procedure; COORD rules
   the comparand) and H9 (i9, after its applies: q94 -> q99 (1) -> q99 (2) -> metadata 828ef5d0b7 -> fail-set literal -> H9 ->
   q100 after the i7's gate). C1: q102 cut -> q86 field-pattern fix (RULED its own seat) -> the pthread seven held as a NOTE.
   C2: H8 comparand -> q100 second read -> q102/q86 second reads. R: steward loop -> the reflect row read at the version tip in
@@ -280,7 +280,7 @@ then the probe, never on a commit:
   echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
 Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpgsign=false commit. Report the state in your ACK.
 
-Your first item: the q94 APPLY, from your own posted prediction 909668679 (claude/g-q94-alias-dot-split 47afa9365d
+Your first item (q94 APPLIED 2026-09-19 at 1c1f63d4cc, stamped; on a restart start at q99 (1) below): the q94 APPLY, from your own posted prediction 909668679 (claude/g-q94-alias-dot-split 47afa9365d
 onto the version tip d71e4eed634e6921983f5ed246038694d3c9ba1e; three paths; projitems 330 to 331 rows with the
 doubled control; twelve markers unchanged; guards TestForeignConstraintProxySplitsOnAliasDot,
 TestForeignConstraintProxyAsciiDotUnchanged plus the two q98 projitems guards; the full converter suite, never -run).
@@ -611,8 +611,8 @@ WAKE (C2, verbatim from 0d8088e2b):
 
 PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; derived from the mailbox record at f8fef0119 and COORD's rulings of this revision; the shared preamble is section 0a) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0:
 ```
-RESUME 2026-09-19. You are lane C2 (cloud; no .NET; go1.25.1 only, so every reading carries that caveat and its one
-extra base failure). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its
+RESUME 2026-09-19. You are lane C2 (cloud; no .NET; the go1.24.13 pin runs here through GOTOOLCHAIN, measured 881a37afd, so the
+old go1.25.1 caveat is withdrawn). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its
 steps 0, 1 and 2 in that order; then this.
 
 Step 0, NOW, while the owner is at this keyboard: GPG. Windows box, let pinentry pop and the owner type the passphrase:
