@@ -294,7 +294,7 @@ d71e4eed63 first; if it moved, re-stamp before applying.
 Then, in COORD's order, one at a time, each predicted, applied, gated, announced, pushed:
   q99 (1) claude/c1-q99-valueclone-population cd6f4b9a8e (cleared 21a832257)
   q99 (2) claude/c1-q99-h5-member-bill-fixture 0253ca4c2c (APPLIED 06b1636cae, stamped 12a4cfbaa; the fail set is ONE)
-  q102 claude/c1-q102-crosspartial-package-key 0ef96433a8 (on q99 (1)'s head; ONLY after C2's read and COORD's clearance)
+  q102 claude/c1-q102-crosspartial-package-key 0ef96433a8 (on q99 (1)'s head; CLEARED on C2's read 14e4ce0e8)
   the metadata seat claude/g-metadata-regen 828ef5d0b7 (C2-read 8d8be3730); if G's follow-up commit on that branch
     is at origin by then, take the branch tip, else the pinned SHA
   re-derive the base-three fail-set literal (predicted EMPTY) across all four gate scripts
@@ -409,8 +409,8 @@ Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpg
 
 Your first item (DONE 2026-09-19: CUT at claude/c1-q102-crosspartial-package-key 0ef96433a8 on cd6f4b9a8e, accepted for C2's
 read at 15d15513a; on a restart start at (2b) below): the q102 CUT. The cross-partial index keys on the bare type name
-within a directory and ignores the enclosing *_package class: 4 of 8091 (directory, type-name) pairs having a body
-collide (C1's stated predicate; the earlier 7808 carried no predicate and is retired), none stamped. Your own design constraint: the enclosing class is never found by brace matching (that instrument failed twice
+within a directory and ignores the enclosing *_package class: 4 of 8230 (dir, bare name) buckets collide, the count
+the production index itself keys under blanking (C2 14e4ce0e8; 8091 and 7808 retired as second predicates), none stamped. Your own design constraint: the enclosing class is never found by brace matching (that instrument failed twice
 in one direction); key on the file's own partial class *_package declaration. One commit on a NEW ref whose parent
 is q99 (1)'s head cd6f4b9a8e8839411ff4dd92428e00df545bf308 (RULED 3d88353a8: the index exists only there; the seated
 branch takes no commits); the guard red-first on a planted collision; the corpus arm
@@ -640,7 +640,11 @@ scores the gate with it.
 DONE 2026-09-19: the comparand procedure is cut at claude/c2-h8-comparand-procedure 746d3a7c75 and RULED (bb1d9b4d6):
 produce the outgoing manifest; G executes; the branch is an accepted docs seat landing with the H8 gate commit.
 
-DONE 2026-09-19: the q100 second read (a810502ff, AGREES; two findings routed to C1 at 0a2b43651).
+DONE 2026-09-19: the q100 second read (a810502ff, AGREES; two findings routed to C1 at 0a2b43651) and the q102 second read
+(14e4ce0e8, AGREES, arms run here; denominator 8230 from the index). ASSIGNED NEXT: the H9 prediction re-derived at the
+version tip -- the converter seats landed since the goldens' last baseline classified emission-affecting or not, the
+predicted CNR CHANGED set by name with the mechanism per golden, whether the eight stand and any ninth; posted before
+i9's CNR as the prediction i9 scores against; git and Go only.
 
 Then: (2) the second-lane read of C1's q100 cut at origin, claude/c1-q100-native-array-view-floor 0dca38552c: the
 floor's placement at the uintptr door, its scope (array<U> only), the tenth named panic beside the nine, and the four
