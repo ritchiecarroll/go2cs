@@ -294,6 +294,7 @@ d71e4eed63 first; if it moved, re-stamp before applying.
 Then, in COORD's order, one at a time, each predicted, applied, gated, announced, pushed:
   q99 (1) claude/c1-q99-valueclone-population cd6f4b9a8e (cleared 21a832257)
   q99 (2) claude/c1-q99-h5-member-bill-fixture 0253ca4c2c (pinned; G-verified 2290b3a59)
+  q102 claude/c1-q102-crosspartial-package-key 0ef96433a8 (on q99 (1)'s head; ONLY after C2's read and COORD's clearance)
   the metadata seat claude/g-metadata-regen 828ef5d0b7 (C2-read 8d8be3730); if G's follow-up commit on that branch
     is at origin by then, take the branch tip, else the pinned SHA
   re-derive the base-three fail-set literal (predicted EMPTY) across all four gate scripts
@@ -406,9 +407,10 @@ then the probe, never on a commit:
   echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
 Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpgsign=false commit. Report the state in your ACK.
 
-Your first item: the q102 CUT. The cross-partial index keys on the bare type name within a directory and ignores
-the enclosing *_package class: 4 of 7808 (directory, type-name) pairs collide, none stamped, your fourth take equal to
-C2's. Your own design constraint: the enclosing class is never found by brace matching (that instrument failed twice
+Your first item (DONE 2026-09-19: CUT at claude/c1-q102-crosspartial-package-key 0ef96433a8 on cd6f4b9a8e, accepted for C2's
+read at 15d15513a; on a restart start at (2b) below): the q102 CUT. The cross-partial index keys on the bare type name
+within a directory and ignores the enclosing *_package class: 4 of 8091 (directory, type-name) pairs having a body
+collide (C1's stated predicate; the earlier 7808 carried no predicate and is retired), none stamped. Your own design constraint: the enclosing class is never found by brace matching (that instrument failed twice
 in one direction); key on the file's own partial class *_package declaration. One commit on a NEW ref whose parent
 is q99 (1)'s head cd6f4b9a8e8839411ff4dd92428e00df545bf308 (RULED 3d88353a8: the index exists only there; the seated
 branch takes no commits); the guard red-first on a planted collision; the corpus arm
