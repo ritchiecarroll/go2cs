@@ -219,7 +219,8 @@ RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane
   POSITION: rung 7 CLOSED (H7 compile parity MET at 46307b4704 on three flavours, COORD a065b1bd9); H7a folded (fc275f1ac3,
   then the interop fold 30057d0c4a); version tip d71e4eed63 (q97 applied); master 7105c8468 (docs seat 4); mailbox anchor
   f8fef0119 (R's delta, folded in this revision); 2026-09-19 evening: q94 APPLIED (version tip 1c1f63d4cc); i9, C2, C1, R ACKed;
-  q102 re-based onto cd6f4b9a8e (3d88353a8). LIVE RUNGS: H8 (G's census reading; C2's comparand procedure; COORD rules
+  q102 re-based onto cd6f4b9a8e (3d88353a8); G ACKed (census on disk complete, rc 0, 802 s); H8 comparand RULED bb1d9b4d6
+  (produce the outgoing 1.23.12 manifest on G-LAPTOP from C2's 746d3a7c75, an accepted docs seat). LIVE RUNGS: H8 (G's census reading; C2's comparand procedure; COORD rules
   the comparand) and H9 (i9, after its applies: q94 -> q99 (1) -> q99 (2) -> metadata 828ef5d0b7 -> fail-set literal -> H9 ->
   q100 after the i7's gate). C1: q102 cut -> q86 field-pattern fix (RULED its own seat) -> the pthread seven held as a NOTE.
   C2: H8 comparand -> q100 second read -> q102/q86 second reads. R: steward loop -> the reflect row read at the version tip in
@@ -632,6 +633,9 @@ hash, and the control that proves the arm can fail; (c) the predicted class-coun
 census (docs/phase4/h5-removals.txt, 14 entries, plus the additions). Push-then-announce for COORD's ruling; G
 scores the gate with it.
 
+DONE 2026-09-19: the comparand procedure is cut at claude/c2-h8-comparand-procedure 746d3a7c75 and RULED (bb1d9b4d6):
+produce the outgoing manifest; G executes; the branch is an accepted docs seat landing with the H8 gate commit.
+
 Then: (2) the second-lane read of C1's q100 cut at origin, claude/c1-q100-native-array-view-floor 0dca38552c: the
 floor's placement at the uintptr door, its scope (array<U> only), the tenth named panic beside the nine, and the four
 test arms' logic; a read, not a compile, and say so. (3) Second reads of C1's q102 and q86 cuts when announced.
@@ -694,6 +698,13 @@ converting on this box. Post the reading the runbook's H8 amendment asks for: pl
 four q97 paths measured outside the root-attribution six), whether q97's sha3 files appear in variantFiles,
 partialFiles, exclusiveFiles or packagesWithDelta, and the H8 prediction scored against the design's recorded table.
 Stop before scoring the gate: COORD rules the comparand, and C2 is drafting its procedure.
+
+RULED 2026-09-19 (mailbox bb1d9b4d6): after the incoming reading, (1b) run h8-comparand.sh selftest from
+claude/c2-h8-comparand-procedure 746d3a7c75 on this box, all controls red-proved; (1c) PRODUCE the outgoing 1.23.12
+manifest: one census under the 1.23.12 pin on a clean worktree of master 7105c8468 (version.props 1.23.12), same
+binary, flags and seed as the incoming run, a directory never reused, nothing else converting; CGO_ENABLED=0 stated;
+(1d) post both manifests' class counts side by side, C2's P1-P5 scored as worded, the byte-identity arm scored on a
+real E1/E2 pair; STOP before declaring the rung.
 
 Then: (2) the root-attribution overlay cut from the census emission root, on a branch you name (prediction of record:
 the differing set is exactly VERSION and LICENSE); push-then-announce. (3) The follow-up commit on
