@@ -301,7 +301,8 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
   H9 per the runbook section 2: CNR first and solo under the pin; want zero NOT MEASURED and CHANGED on exactly the
     eight named goldens; re-baseline with UpdateTestTargets --createTargetFiles --only <the eight>; a ninth golden,
     a non-alias hunk or a T5 is a finding, never a rebank
-  q100 claude/c1-q100-native-array-view-floor 0dca38552c, ONLY after COORD posts the i7's gate reading CLEAR.
+  q100 claude/c1-q100-native-array-view-floor at its RE-PINNED tip abe3b3798b (9c5460585: the i7 gate CLEAR at 0dca38552c
+    stands; the commit on top is comment-and-prose-only, verified).
 Not yours: G's H8 census, C2's comparand procedure, the runtime row. Blocked on: nothing for the first five.
 ```
 
@@ -419,8 +420,8 @@ reads the same 4 of 7808 before and 0 findings after; push-then-announce; C2 sec
 Then: (2) RETIRED 2026-09-19 (C1 0d88cc637, COORD verified): the q86 field-pattern fix was ALREADY cut and applied --
 claude/c1-q86-initialized-field-fix 292756d64f is an ancestor of the version tip; the four arms are green at the tree; the
 "242" was prose and does not re-derive (+237 direct / +278 transitive, one axis). Nothing to cut. (2b, RULED 0a2b43651 after C2's q100 read) ONE comment-only commit on top of 0dca38552c on
-the q100 branch: the zh.cs arm comment corrected to "FIRING at this line means it carries none" with the bound stated
-in code, plus the design's bound sentence; announce-then-push; COORD re-pins. (3) The seven pthread members the darwin
+the q100 branch: DONE 2026-09-19 at abe3b3798b, re-pinned by COORD (9c5460585). Next for C1: (4) the slice<T> census,
+then (3) the pthread NOTE; every published corpus number comes from the instrument in-process, never a replica (a7c20e7cb). (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
