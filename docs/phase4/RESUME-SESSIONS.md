@@ -293,7 +293,7 @@ d71e4eed63 first; if it moved, re-stamp before applying.
 
 Then, in COORD's order, one at a time, each predicted, applied, gated, announced, pushed:
   q99 (1) claude/c1-q99-valueclone-population cd6f4b9a8e (cleared 21a832257)
-  q99 (2) claude/c1-q99-h5-member-bill-fixture 0253ca4c2c (pinned; G-verified 2290b3a59)
+  q99 (2) claude/c1-q99-h5-member-bill-fixture 0253ca4c2c (APPLIED 06b1636cae, stamped 12a4cfbaa; the fail set is ONE)
   q102 claude/c1-q102-crosspartial-package-key 0ef96433a8 (on q99 (1)'s head; ONLY after C2's read and COORD's clearance)
   the metadata seat claude/g-metadata-regen 828ef5d0b7 (C2-read 8d8be3730); if G's follow-up commit on that branch
     is at origin by then, take the branch tip, else the pinned SHA
@@ -416,11 +416,9 @@ is q99 (1)'s head cd6f4b9a8e8839411ff4dd92428e00df545bf308 (RULED 3d88353a8: the
 branch takes no commits); the guard red-first on a planted collision; the corpus arm
 reads the same 4 of 7808 before and 0 findings after; push-then-announce; C2 second-reads.
 
-Then: (2) the q86 field-pattern fix, RULED its own seat: q86's pushed field pattern cannot see an initialized field
-(public array<int8> X__opaque = new(56); does not match), so 242 names are newly reference-bearing under the
-corrected rule and usigactiont, pthreadattr and itimerval flip false to true. One commit on a new ref off F3's head,
-which carries q86's file; state why the declared-set verdict is unchanged; red-first on the three real declarations
-you quoted; C2 second-reads. (2b, RULED 0a2b43651 after C2's q100 read) ONE comment-only commit on top of 0dca38552c on
+Then: (2) RETIRED 2026-09-19 (C1 0d88cc637, COORD verified): the q86 field-pattern fix was ALREADY cut and applied --
+claude/c1-q86-initialized-field-fix 292756d64f is an ancestor of the version tip; the four arms are green at the tree; the
+"242" was prose and does not re-derive (+237 direct / +278 transitive, one axis). Nothing to cut. (2b, RULED 0a2b43651 after C2's q100 read) ONE comment-only commit on top of 0dca38552c on
 the q100 branch: the zh.cs arm comment corrected to "FIRING at this line means it carries none" with the bound stated
 in code, plus the design's bound sentence; announce-then-push; COORD re-pins. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
