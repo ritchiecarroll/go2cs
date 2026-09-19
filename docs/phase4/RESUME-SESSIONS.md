@@ -222,7 +222,7 @@ RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane
   the comparand) and H9 (i9, after its applies: q94 -> q99 (1) -> q99 (2) -> metadata 828ef5d0b7 -> fail-set literal -> H9 ->
   q100 after the i7's gate). C1: q102 cut -> q86 field-pattern fix (RULED its own seat) -> the pthread seven held as a NOTE.
   C2: H8 comparand -> q100 second read -> q102/q86 second reads. R: steward loop -> the reflect row read at the version tip in
-  a spurt. COORD on the i7: the q100 gate (Opus sub-agent, GolibTests fail-set diff + one-axis regression + go2cs.slnx),
+  a spurt. COORD on the i7: the q100 gate DONE, CLEAR for i9's apply (mailbox 1135d780c; fail set identical both sides, +4 arms, made to fail 2 of 4),
   rulings, folds, this file's refresh at every landing, the save-state cadence rising toward 90% weekly usage.
   PROTOCOL: frozen; posts are loop-of-record only; the mailbox is a tool, not an objective (owner order 2026-09-19).
 

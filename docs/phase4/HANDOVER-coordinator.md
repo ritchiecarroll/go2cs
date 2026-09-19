@@ -526,7 +526,7 @@ Each lane runs in its own Claude Code session on its own host with its own local
 
 **Resume file.** Every lane's NEXT re-derived at each ruling; the fold script now reconfigures its console output to UTF-8 (a lane's Cyrillic box identifier crashed a print before save). Train-49 candidates: the three red seats, the EOL seat, the two darwin docs branches, the docs seat `claude/coord-docs-0915`; queue q82 (linkname census), q83 (repoguard named-path entry point).
 
-## 2026-09-19 — RESUME after the 2026-09-16 weekly cutoff; q100 gated CLEAR on the i7
+## 22. 2026-09-19 — RESUME after the 2026-09-16 weekly cutoff; q100 gated CLEAR on the i7
 
 - Resume: GPG primed on the i7 (clearsign rc 0, batch probe CACHED). RESUME-SESSIONS re-cut at ebb53c31df then fefd0654648 (section 0a shared preamble; five SHORT fences: identity + first item + queue, GPG inlined; R's delta f8fef0119 folded, section 7 untouched). COORD ONLINE = mailbox 1b4570be9: position (rung 7 closed, H7a folded, version tip d71e4eed63, master 7105c8468), one first item per lane, the protocol FROZEN by owner order (the mailbox is a tool, not an objective; posts loop-of-record only; a quiet tick posts nothing).
 - Rulings: i9 q94 apply -> q99 (1) -> q99 (2) -> metadata 828ef5d0b7 -> fail-set literal -> H9 -> q100; G the H8 census reading (disk first) -> overlay -> the metadata follow-up commit; C1 q102 cut -> the q86 field-pattern fix as its OWN seat (ruled) -> the pthread seven held as a NOTE; C2 the H8 comparand procedure -> q100 second read; R steward -> the reflect row read at the version tip in a spurt.
