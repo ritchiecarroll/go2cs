@@ -446,7 +446,11 @@ WITHDRAWN, COORD's error); nistec SPLITS by name (2 fips140/edwards25519, 2 fips
 executable denominator; the build configuration is printed beside every H10 count. ASSIGNED NEXT: DRAFT the H10 roster
 relocation seat (docs only, a branch you name, push-then-announce; COORD holds it for the H10 docs commit): per relocated row
 the dated note with successor(s) by name and counts, the two retirements, the purego line, fiat's 0 denominator, the twelve
-new-row candidates with their 1.24.13 declaration counts; banked figures untouched, no verdict moves. (3) The seven pthread members the darwin
+new-row candidates with their 1.24.13 declaration counts; banked figures untouched, no verdict moves. DONE 2026-09-20 at
+claude/c1-h10-roster-relocation 4de76ded06 off master (c7724dcd6; ACCEPTED and HELD by COORD for the H10 docs commit; placement
+stays). ASSIGNED NEXT: the H11 and H12 gate pre-read at the version tip -- enumerate every gate the two rungs name, classify
+each cloud-runnable or .NET-only, RUN every runnable one under the pin and post the reading per gate (command, rc), state what
+a Windows box must run for the rest, cite any missing or stale procedure by line; a reading, no cut. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
