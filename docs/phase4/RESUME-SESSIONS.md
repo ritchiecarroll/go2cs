@@ -1735,8 +1735,15 @@ docs seat. R's leg at fcb75ab3: 90 of 105, 76 PASS / 4 BUILD / 9 NOVERDICT (none
 internal/coverage/cfile + internal/trace: the converted testing host's link-staged fixture tree importing internal/...
 packages is refused by the Go toolchain's internal-package rule -- REPRODUCED on i9's box (ee5e830e: 16/16 and 92/92,
 the same conversion-blocked record) -> NOT a host setting: HOST DEBT, one class, two rows (PackageAncestry.
-StageFixtureLinks); the R-LAPTOP Developer-Mode owner item RETIRED; the rows stay NOVERDICT by cause; an i7 sizing
-queued after the two seats cutting). R's CORRECTION (fcb75ab3) taken: the runbook sentence is i9's -- mtime is unrelated
+StageFixtureLinks) -- SIZED on the i7 (~07:25): a MACHINE SETTING crossed with a 1.24 TOOLCHAIN CHANGE -- on a box
+with symlink privilege the host stages by symlink and Go accepts (the i7: cfile GREEN, 15 validated / 1 disclosed);
+without it the host falls back to a JUNCTION and Go 1.24 refuses (the 1.24 go binary dropped winsymlink=0 from its
+DefaultGODEBUG, so EvalSymlinks no longer evaluates mount points; GODEBUG=winsymlink=0 makes the junction accepted).
+THREE rows in the class (cfile, trace, runtime x5 trees). RULED a HOST SEAT (an i7 sub-agent cutting on
+claude/coord-host-junction-godebug): GODEBUG=winsymlink=0 in the child environment on the junction path ONLY + the
+refusal names Developer Mode; red-first by forcing the junction branch on the i7; C1 design + C2 structural; the
+apply after the foreign-generic apply. The owner item RESTORED as OPTIONAL (Developer Mode on R-LAPTOP and i9 makes
+the symlink path available today); the rows stay NOVERDICT by cause and are re-measured by the driver). R's CORRECTION (fcb75ab3) taken: the runbook sentence is i9's -- mtime is unrelated
 to provenance in either direction (over in R's tree, under in five of i9's seven packages); the remedy unchanged.
 i9 RE-TOOK its table (0bb72afd): genuine residue in six of seven packages -> its two-row arm STILL OWED; go/types
 (0 genuine) becomes the CONTROL beside archive/zip; i9's net row hangs in its test host (TIMEOUT expected at 40 m).
