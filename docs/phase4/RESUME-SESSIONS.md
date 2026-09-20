@@ -690,7 +690,13 @@ converter site, a fix shape, a red-first arm; no cut -- COORD routes. Tag-asymme
 228; 1 tagged-only Test vs 3 untagged-only; the rule: an empty C# column has three causes -- a deadline kill, a real
 failure, the asymmetry -- separated by the results tail and the file-selection diff; membership and bankability are
 different claims). RUNBOOK LINE OWED at the next docs seat: the PATH-resolved pin (the converter spawns go from PATH) in
-H10's preconditions table. Fold C2's notes into the amendment
+H10's preconditions table. SIZINGS DONE (dfdcbc65) and ROUTED (COORD after 53c57e752): row 1 fips140test = the test
+emission's using-static + initPackage of a production class the driver never emitted (test-only package) -> an i7
+sub-agent cut after the Core arm, C1 design read / C2 structural, i9 applies; row 2 crypto/mlkem = zh<T> at a
+constrained type-argument position (Go satisfies the constraint via the pointer method set) -> C2 DESIGN READ of (a)
+generator vs (b) converter, then COORD rules; row 3 internal/sync = an untyped constant (math.MaxInt as UntypedInt) at a
+generic argument whose type parameter is also bound by a typed argument (the 4 of 8 sites) -> R after the registration
+seat. C1 idle by ruling until the launch. Fold C2's notes into the amendment
 commit: proc.cs cited per-GOOS (runtime/{linux,windows,darwin}/proc.cs:848), the RegisterPinned step that makes
 initAlgAES arm 2, and the clause that the box materialises at eleven construction sites (scope by provenance). (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
@@ -987,7 +993,10 @@ preconditions table, per-row steps against the rulings cited) -> COORD lands; th
 directions; fips140test's nistec_ordinv_test.go oracle-only, latent behind CS0234). ASSIGNED: read i9's wrapper ref
 claude/i9-h10-recon-wrapper at its tip AFTER i9's second commit (the linked-worktree guard + per-row artifact capture).
 FIRST READ DONE (c0c2063e at 43aba50262: spec met, the parse well controlled; the classifier finding + diverged-lines
-note -> both in i9's second commit). RE-READ at the new tip when announced. READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
+note -> both in i9's second commit). RE-READ at the new tip when announced. ALSO ASSIGNED (COORD after dfdcbc65): the
+crypto/mlkem DESIGN READ -- (a) the generator making zh<T> satisfy every interface *T's method set satisfies vs (b) the
+converter emitting T at a constrained type-argument position; against src/gen/go2cs-gen's actual pointer-receiver
+interface machinery, the semantic difference under (b), the blast radius by census; a recommendation, COORD rules. READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
 two additive citation notes) -- LANDED by COORD at master ceb1c87971. Then read i9's recon wrapper when announced.
 Blocked on: nothing.
 ```
@@ -1284,6 +1293,9 @@ pinned 1.23.1 unless GOTOOLCHAIN=local -- assert by output. SEAT WIDENED 2026-09
 time row (abs_test.go:23 exported anonymous-struct var read across the internal/external test boundary; the gate fires
 at time_test.cs(33)) is a SECOND red arm of the same seat -- go2cs -tests of time past CONVERT at the tip; a second
 commit on the same ref if its root is a different gap. Then the recon list runs beside the seat in its own worktree.
+QUEUED after the seat (COORD after dfdcbc65): row 3 internal/sync CS0411 -- an untyped constant at a generic argument
+whose type parameter is also bound by a typed argument gets the conversion to the pinned type at the call (or explicit
+type arguments); red-first on C1's fixture f<T>(T a, T b), the row past COMPILE, the converter suite, the corpus diff.
 Blocked on: nothing for (1); (2) needs an owner-opened spurt.
 ```
 
