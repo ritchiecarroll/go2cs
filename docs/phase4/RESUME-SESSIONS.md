@@ -406,6 +406,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     a difference re-runs the list on a clean tree. Leg at 58654661: 13 of 16 started, 9 PASS, 2 BUILD (crypto/mlkem
     expected; hash/maphash UNPREDICTED), 1 NOVERDICT (crypto/tls), net on its 40 m floor. The warn-only-row arm
     (crypto/cipher; or any license-less scratch output root) rides the seventh commit's red-first.
+    WRAPPER POST-PROCESSING COST (G add323f4, RULED): per-property reflection over a multi-MB comparison JSON holds a
+    core for 10+ min after the converter exits (crypto/cipher 4.77 MB). No mid-leg change (wall_s only; sweep_s is
+    the banked cost). net banks the CONVERTER's wall (log start -> artifacts' mtime), i9 states both. The SEVENTH
+    commit also: a linear-time parse in both editions (-AsHashtable on Core; a .NET deserializer on 5.1), a bounded
+    results-tail read; red-first on a synthetic 5 MB document. A computing wrapper with no child is not a hung one:
+    the census counts the wrapper's PID and its CPU delta.
     WRAPPER CUT (f2eae7c85): claude/i9-h10-recon-wrapper 43aba50262 on 93feb8df2b, src/run-h10-recon.ps1 +321 (LF, 100755,
     census clean, signed). Two defects caught by the one-row dry run: the converter SPAWNS go from PATH (the pin gate had
     asserted the absolute path -- green about the wrong object; now three agreeing derivations: PATH-resolved go version
