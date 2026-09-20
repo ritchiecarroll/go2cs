@@ -710,7 +710,10 @@ converter site, a fix shape, a red-first arm; no cut -- COORD routes. Tag-asymme
 228; 1 tagged-only Test vs 3 untagged-only; the rule: an empty C# column has three causes -- a deadline kill, a real
 failure, the asymmetry -- separated by the results tail and the file-selection diff; membership and bankability are
 different claims). RUNBOOK LINE OWED at the next docs seat: the PATH-resolved pin (the converter spawns go from PATH) in
-H10's preconditions table. SIZINGS DONE (dfdcbc65) and ROUTED (COORD after 53c57e752): row 1 fips140test = the test
+H10's preconditions table. ASSIGNED (COORD after R 57e9e70e): (1) the design read of R's seat ce8d0bd654 (the three-step
+resolution, the fourth flag site, the IndexExpr residual); (2) SIZE the reflect TestIsZero AccessViolation from the
+emission at CONVERT (setField's unsafe write, the golib door, the class -- the 25-site pinned-box class or another -- a
+fix shape, a red-first arm); no cut. SIZINGS DONE (dfdcbc65) and ROUTED (COORD after 53c57e752): row 1 fips140test = the test
 emission's using-static + initPackage of a production class the driver never emitted (test-only package) -> an i7
 sub-agent cut after the Core arm, C1 design read / C2 structural, i9 applies; row 2 crypto/mlkem = zh<T> at a
 constrained type-argument position (Go satisfies the constraint via the pointer method set) -> C2 DESIGN READ of (a)
@@ -1321,7 +1324,18 @@ pinned 1.23.1 unless GOTOOLCHAIN=local -- assert by output. SEAT WIDENED 2026-09
 time row (abs_test.go:23 exported anonymous-struct var read across the internal/external test boundary; the gate fires
 at time_test.cs(33)) is a SECOND red arm of the same seat -- go2cs -tests of time past CONVERT at the tip; a second
 commit on the same ref if its root is a different gap. Then the recon list runs beside the seat in its own worktree.
-QUEUED after the registration seat (COORD after ea03e60d): the crypto/mlkem CONSTRAINT-PROXY WIDENING (row 2) -- the two
+SEAT CUT (57e9e70e): claude/laneR-anon-struct-typearg ce8d0bd654 on d91c832543, five files under src/go2cs (the pre-visit
+liftExplicitAnonStructTypeArgs ahead of convCallExpr's rendering paths; the fourth site of liftAtCallBoundary), corpus 0;
+arm 1 made to fail both ways (two sites, one signature, five assertions); arm 2 reflect past CONVERT and BUILD, 195 tests
+run then an AccessViolationException in setField[TestIsZero_type...] (converted-side 186/5/2 before the abort; the
+TestIsZero emission byte-identical across the two converters -> predates the seat); arm 3 suite green (red first on
+projitems registration); arm 4 two-seeded corpus diff EMPTY x3 targets, CNR clean. R's mechanism corrected: the lifts
+were minted, the gap was publication. ACCEPTED for the reads (COORD after 1901534dc): C1 design half, C2 structural +
+suite + fixture; i9 applies the ref tip. time = a DIFFERENT gap (the package-level lift publishes; the external variant's
+resetPackageState discards it, seeding only production's package_info.cs) -> R's SECOND COMMIT on the same ref (carry the
+internal variant's dynamic lifts like whiteboxBridgeTypeNames; the qualified spelling measured first).
+R's ORDER: the time commit, then the crypto/mlkem CONSTRAINT-PROXY WIDENING (row 2), then the reflect TestIsZero crash on
+C1's sizing. Was: QUEUED after the registration seat (COORD after ea03e60d): the crypto/mlkem CONSTRAINT-PROXY WIDENING (row 2) -- the two
 converter gates, the generator's no-self-parameter path, the flipped named control, red-first with the generated proxy
 asserted to EXIST, the row past COMPILE, the suites, the corpus diff predicted EMPTY (the 18 proxies keep their dedupe
 key); C1/C2 read the halves; i9 applies. Row 3 (internal/sync CS0411) MOVES to an i7 sub-agent after fips140test.
