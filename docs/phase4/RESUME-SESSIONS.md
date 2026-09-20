@@ -451,7 +451,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     throwaway detached worktrees, one process per list, one attempt per row, TSVs pushed as new per-lane refs
     (LANE-h10-recon-tsv) when a list completes with the word histogram and the named CONVERT/BUILD/DIVERGED/NOVERDICT
     rows; expected words for the known rows stated (time CONVERT, reflect NOVERDICT, fips140test/mlkem/internal-sync
-    BUILD, nistec PASS 44). i9 runs its 16 (the reserved rows + the two windows-only). APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
+    BUILD, nistec PASS 44). i9 runs its 16 (the reserved rows + the two windows-only). i9's LEG ACK (caf34a52): RUNNING
+    since 01:23 local at 0dc65a8e8d (a detached hidden process; LEG_RC written as the log's last line); the wrapper and
+    the list taken by blob (sha256 stated); the composition verified before launch (the script from the wrapper ref's
+    blob, -Tree at the version tip, the provenance column = the tree measured); no slice/cooldown -- ruled NONE (one
+    process, one attempt per row; the driver's constants are for the costed passes). The TSV comes back as
+    claude/i9-h10-recon-tsv. APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
     at the act; both reads done, CLEARED); (2) the fips140test seat claude/coord-fips140test-testonly ce8fc43a87 on
     93feb8df2b (cut by an i7 sub-agent: three sites gated on productionClassEmitted; suite rc 0; the row 13 CS0234 -> 0)
     after C1's design + C2's structural reads -- no source overlap with R's seat, both add a projitems line (the
@@ -786,7 +791,10 @@ PATH-resolved pin line in H10's preconditions table + CLAUDE.md:48's architectur
 at master; the sample trees are src/tour, src/utilities, src/tools), the context-budget gate run. THE RELOCATION MAP OF
 RECORD is C1's table (350a301a: 10 rows, 13 arcs -- i9's count, C1's prose said 14/4 splits; 3 splits; 11 targets);
 ASSIGNED: read C2's generator commit 8d7739f4e3 against the tsv contract the roster seat will write (header
-source/target, one line per arc, LF, thirteen lines from 4de76ded06); the roster seat after the leg adds docs/phase4/hopA-inputs/relocations.tsv (one line per arc) and derives the
+source/target, one line per arc, LF, thirteen lines from 4de76ded06); DONE (2ed8b5f5): C1's derived tsv run through
+C2's generator 50e8c528f9 on the real inputs -- rc 0, 13/10/11, the inheritance on the two mlkem768 arms, the split
+print 2 beside 2. Banked for the landing: the generator's declared reserved set (15, keyed to the 1.23 basis, keeps
+mlkem768 to find its cost) and the run list (14, invocable at the tip) differ by exactly the relocated predecessor; the roster seat after the leg adds docs/phase4/hopA-inputs/relocations.tsv (one line per arc) and derives the
 $longTimeouts re-path from it. SIZINGS DONE (dfdcbc65) and ROUTED (COORD after 53c57e752): row 1 fips140test = the test
 emission's using-static + initPackage of a production class the driver never emitted (test-only package) -> an i7
 sub-agent cut after the Core arm, C1 design read / C2 structural, i9 applies; row 2 crypto/mlkem = zh<T> at a
