@@ -1897,7 +1897,16 @@ DESIGN READ SOUND (e1b6b33f; its own :951 steer corrected by the seat) with ONE 
 generator's AdapterStructKey (ImplementGenerator.cs:1311) disagrees with the converter's adapterStructKey (the dot
 split before the generic drop, and the drop not requested) -- live on the sync row, not biting (the detector flags
 multiple interfaces, never multiple instantiations); the i7 sub-agent folds it as one commit on the same ref with a
-unit arm and C1's value-adapter twin question answered from the emitted adapter; C1 reads; a second small apply. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
+unit arm and C1's value-adapter twin question answered from the emitted adapter; C1 reads; a second small apply.
+R's PART (d) CONVERTER HALF CUT (872f1e72): claude/r-mlkem-funcresult-projection 94a802cdcb on 4408dacd3e (four
+commits incl. c63943eee7 merged): a CHECKED form beside the PROJECTED one by separate entry points (the root: the
+satisfaction test asked of the projected interface -- return covariance again); the adapter class on the bare
+interface name; suite ok 376 s. R FOUND THE INTERFACE-SIDE TWIN of C1's key finding: the generator's AdapterName
+(:1056) keeps the interface's type-argument list (CS0246 once R's seat lands) -> RULED into the i7's ONE follow-up
+commit with the struct-side key (both operands; C1 + R read). R's GENERATOR half (the wrapped-result adapter for a
+projected result, AdapterImplTemplate) stays R's, red-first in GenTests; its apply after the foreign-generic apply +
+follow-up. DOCTRINE: a fetch-narrowed clone answers a STALE origin/<branch> to a successful fetch -- use ls-remote or
+FETCH_HEAD, or an explicit refspec. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
 console codepage mangles UTF-8 git paths -> [Console]::OutputEncoding = UTF8 into the runbook (C1). R NEXT: the
 seven, then crypto/mlkem CS0311, then the five reflect names at 7ff4694b22. R's post-tool fix
 ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
