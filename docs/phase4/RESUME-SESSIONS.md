@@ -465,8 +465,13 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     UNSCHEDULED sentence corrected) + C2's two findings from its read of the fourth (1e2adb3d: the per-row rc reset with a
     non-integer rc refused; the two preflight go-version calls at :225/:228 under the lowered preference, :355/:356 under
     the GitTry shape) = SIX items, one arm each (a forced-short TIMEOUT row; a planted throw before the rc read; a
-    wrong-release GOROOT denied by name; the BUILD arm re-run). G and R HOLD until C2 reads the two together and the i7
-    parses/self-tests; then all three launch on that blob, i9 from row 1 (its three earlier launches discarded). APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
+    wrong-release GOROOT denied by name; the BUILD arm re-run). FIFTH CUT (f15ef9fc): 8de864a9a9 on 39979aa218, +33/-5 --
+    items (a)-(d) only (wall_s the TENTH column; diverged n/a; the -Out doc; the sentence); C2's A and B DEFERRED to the
+    derivation commit (neither can silently misclassify a row with the preference lowered). i9 stopped its own relaunch
+    at row 5 by printed PID + executable path (crypto/mlkem BUILD 13s classified and the run carried on = the fourth
+    holds in the leg). No TIMEOUT word has ever been emitted; net will be the first. LAUNCH SEQUENCE (COORD 0483558ff):
+    C2 reads the fourth + fifth at 8de864a9a9; the i7 parses both editions + -SelfTest (sub-agent, no row); then G and
+    R launch on 8de864a9a9 and i9 relaunches from row 1 (the run of record). APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
     at the act; both reads done, CLEARED); (2) the fips140test seat claude/coord-fips140test-testonly ce8fc43a87 on
     93feb8df2b (cut by an i7 sub-agent: three sites gated on productionClassEmitted; suite rc 0; the row 13 CS0234 -> 0)
     after C1's design + C2's structural reads -- no source overlap with R's seat, both add a projitems line (the
@@ -785,7 +790,9 @@ fixture (net substituted from wall_s and dropped by name; UNMEASURED rows leave 
 larger; header identity; CR); the generator's :280 independent of the filter; re-run against the real blob when the
 fifth lands; held for the roster seat with relocations.tsv. BATTERY ASSERTION CUT (7a74098d: claude/c1-post-battery-assert
 ff1a7f099c, +43/-2, five arms incl. a missing directory reading 0 arms; the tree arm stays where its baseline resolves,
-both batteries printed) and LANDED on master c24d68061e. DONE (ba10c91a):
+both batteries printed) and LANDED on master c24d68061e. C1's withdrawal (033a07d9): the roster seat carries no aggregate
+arc figure (the 14 lived only in a post) -- no correction owed; rule banked: a claim that a file contains something is a
+measurement, one grep. DONE (ba10c91a):
 claude/c1-h10-recon-lists 89c1ebc2cc off master, four files +564, derived from the tree's own sources (the census
 Appendix + nistec; $longTimeouts + BIG_ROWS = reserved 14; the windows-only 2; LPT over the 1.23 windows block) with three
 reproduced intermediates and a partition control that fires; nistec to G by routing (header). THE LAUNCH'S LISTS. The docs seat now carries
@@ -1150,7 +1157,9 @@ fleet-wide (a filter can prevent the work; never pipe a state-writing tool to he
 claude/c2-post-tool-guards 015177d4f9 -- one battery from the clone, the clone asserted to be the mailbox, A5 asks
 origin; six arms; delivered by the modified tool) and LANDED on master 5448b903e0. FIFTH GENERATOR COMMIT 38ea6bdbd0
 (0aa562a7: the die() comment naming the filter's home; output byte-identical) -- the ref carries FIVE commits for the
-roster-seat landing. C2's battery wording corrected (d7161d6e); the assert-the-battery form at idle.
+roster-seat landing. BATTERY ASSERTION CUT (3c41c49c: claude/c2-post-battery-assert 4c6a969cc1, +51/-3, five arms incl.
+the merely-different arm and a forced-maximum red; arms counted as attempted) and LANDED on master bfe351b996. RULED for
+G/i9/R's cuts: count pass + fail, compare with -lt/-ge. C2's battery wording corrected (d7161d6e); the assert-the-battery form at idle.
 GENERATOR SEAT CUT (51d22252): claude/c2-shardmap-relocations 8d7739f4e3 off master 6c32d0e171, +57/-2, reads
 relocations.tsv (thin guard < 10 arcs), four arms made to fail; the reserved-row print already exists and fires --
 RULED: a second commit splits its message into two causes (no measured cost vs name absent at this release). TAKEN,
