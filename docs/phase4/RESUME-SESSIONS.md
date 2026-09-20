@@ -445,8 +445,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     probed, NOVERDICT for the unreadable case (one spelling per class), the whole map + the orphan assertion kept; the durable relocations.tsv lands with the
     roster seat and the wrapper's map derivation switches to it in a commit landing with the seat.
     NEXT: the third commit (announce-then-push); C2 reads its diff; the i7 Core arm re-runs on the FINAL tip after the
-    fips140test seat's conversions finish (never two conversions on one box); then LAUNCH. ALSO: apply R's seat
-    ce8d0bd654 (tip of claude/laneR-anon-struct-typearg at the act) on C1's design read; C2's structural read DONE.
+    fips140test seat's conversions finish (never two conversions on one box); then LAUNCH. The third commit is AT
+    ORIGIN (ddc205a1ee); the i7 Core re-run launched on it (sub-agent). APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
+    at the act; both reads done, CLEARED); (2) the fips140test seat claude/coord-fips140test-testonly ce8fc43a87 on
+    93feb8df2b (cut by an i7 sub-agent: three sites gated on productionClassEmitted; suite rc 0; the row 13 CS0234 -> 0)
+    after C1's design + C2's structural reads -- no source overlap with R's seat, both add a projitems line (the
+    projitems guard resolves the merge at the act).
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
@@ -719,7 +723,10 @@ different claims). RUNBOOK LINE OWED at the next docs seat: the PATH-resolved pi
 H10's preconditions table. ASSIGNED (COORD after R 57e9e70e): (1) the design read of R's seat ce8d0bd654 (the three-step
 resolution, the fourth flag site, the IndexExpr residual); (2) SIZE the reflect TestIsZero AccessViolation from the
 emission at CONVERT (setField's unsafe write, the golib door, the class -- the 25-site pinned-box class or another -- a
-fix shape, a red-first arm); no cut. DESIGN READ of R's seat DONE (be9a7447, SOUND). NEXT DOCS SEAT (two items): the
+fix shape, a red-first arm); no cut. DESIGN READ of R's seat DONE (be9a7447, SOUND). ALSO ASSIGNED: the design read of
+the fips140test seat ce8fc43a87 (three sites; the negative-sense option; GoFiles == 0 vs the driver's
+unmarkedFileCount) and the SIZING of its masked residual: 2 x CS1929 in acvp_test.cs (zh<ecdsa_package.hmacDRBG> at a
+pointer-receiver seam; no branch for it at origin). NEXT DOCS SEAT (two items): the
 PATH-resolved pin line in H10's preconditions table + CLAUDE.md:48's architecture-map row naming src/Examples/ (absent
 at master; the sample trees are src/tour, src/utilities, src/tools), the context-budget gate run. THE RELOCATION MAP OF
 RECORD is C1's table (350a301a: 10 rows, 13 arcs -- i9's count, C1's prose said 14/4 splits; 3 splits; 11 targets);
@@ -1024,7 +1031,8 @@ axis confirmation through the pipeline (d5cdd55ab), the wrapper pre-cut reads (f
 correction: verified premises do not transfer their standing to a synthesis -- BOARD line; 7c43a15e the converter's two
 Validated format strings). ASSIGNED: read C1's (d) aa66874ff7 as the H10 procedure amendment (order, host rule,
 preconditions table, per-row steps against the rulings cited) -> COORD lands; then read i9's recon wrapper.
-NEXT: the diff read of i9's third commit ddc205a1ee when at origin.
+NEXT: the diff read of i9's third commit ddc205a1ee (at origin); then the structural read of the fips140test seat
+ce8fc43a87 (the fixture + the suite on this box).
 R's SEAT STRUCTURAL READ DONE (15a14bad: suite green on this box; the fixture fires all six lines reverted and passes
 restored byte-identically; reflect rc 1 -> rc 0 as a same-box A/B; time still rc 1 as the control). NEXT: the diff read
 of i9's third commit; then the generator's reserved-set derivation from relocations.tsv (a commit on the shardmap ref
