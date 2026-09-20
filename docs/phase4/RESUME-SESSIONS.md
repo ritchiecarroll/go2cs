@@ -826,7 +826,13 @@ contain NO runtime/cgo while C2's linux emission carries its nine artifacts (340
 until measured. PROBES (both boxes): GOOS=linux|darwin|windows CGO_ENABLED=0 go list runtime/cgo (GoFiles / IgnoredGoFiles /
 CgoFiles) under the pin; the converter's own reason (C2: grep the converter for a runtime/cgo or cgo-package exclusion + the
 E1 log lines; G: the census manifest's per-package row and the emission log lines). Then COORD rules: a host-conditional
-converter exclusion = a small converter seat; a toolchain difference = a runbook statement + a re-take on the named host. (2) the H8 record under docs/phase4/ (both
+converter exclusion = a small converter seat; a toolchain difference = a runbook statement + a re-take on the named host.
+G's PROBES (fa81e7327): on G-LAPTOP `go list std` at CGO_ENABLED=0 OMITS runtime/cgo on all three GOOS (control: present at
+CGO_ENABLED=1) while `go list runtime/cgo` named directly resolves with GoFiles (linux 8 = windows' 3 + the five C2 saw under
+linux/); the converter enumerates std, so the package was NEVER QUEUED on G (no skip line, no directory) -- the fork is
+ENUMERATION, not buildability and not the host. RESOLVES ON: C2's distinct package list from its E1 log, grep -x runtime/cgo,
+the set difference against G's list. G's H8 RECORD is pushed at claude/g-h8-record 56c0eb7a71 (held for the H8 docs commit;
+section B, the exemption and the probe land as one dated block once the fork is resolved). (2) the H8 record under docs/phase4/ (both
 manifests' class tables, P1-P5 as scored, the 38 -> 47 -> 51 decomposition, per-target movement) on a branch you name;
 (3) after i9 applies the H11 seat: the 347-README OVERLAY -- seed a never-reused root from the applied tree's src/core, one
 single-target -stdlib emission with the converter built at that tip, cut ONLY src/core/**/README.md as one commit on a new
