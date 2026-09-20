@@ -24,10 +24,27 @@
 # `sweep_s := wall_s`, and `net` is EXPECTED to TIMEOUT -- so without this column there is nothing
 # to substitute from and the basis is refused either way.
 #
+# `post_s` is the second extra, and it exists because `sweep_s` CLOSES TOO EARLY to see the cost that
+# matters most to a schedule: the seconds this script spends after the converter returns, reading and
+# comparing the row's artifacts. Measured 2026-09-20: 540 s on `go/doc/comment` against a 23 s
+# conversion here, and ~52:1 on `crypto/cipher` on G's box. Without this column a reader can only
+# subtract two numbers that do not span the gap, and a leg budgeted from `sweep_s` is out by more than
+# an order of magnitude. shardmap.py reads FOUR columns by name and ignores every other (:262), which
+# is why `wall_s` and `post_s` can be carried without touching the basis.
+#
 # ---------------------------------------------------------------------------------------------------
 # THE ONE-ATTEMPT CLOCK
 #
-# sweep_s is this script's clock around the ONE pipeline invocation for the row. The recon leg makes a
+# sweep_s is this script's clock around the ONE CONVERTER INVOCATION for the row, and it CLOSES THE
+# MOMENT THAT INVOCATION RETURNS -- before this script reads a single artifact. It is therefore the
+# CONVERTER's cost, not the ROW's: this script's own post-processing lies entirely outside it.
+#
+# An earlier wording of this paragraph said "the ONE pipeline invocation for the row", which reads as
+# though sweep_s covered the row end to end. It does not, and the difference is not a rounding error:
+# `go/doc/comment` reported sweep_s=23 and then spent 540 s in this script, and G measured ~59 minutes
+# of wrapper phase against a 66 s conversion. `post_s` is the column that closes that gap.
+#
+# What the single attempt DOES buy is unchanged: the recon leg makes a
 # single attempt per row, so the oracle re-run inflation measured in run-validated-sweep.ps1 (it resets
 # $rowStarted at :1105 and re-takes $rowSecs at :1107, so an EXTERNAL clock there spans both attempts)
 # cannot arise here by construction. A row whose Go oracle is unstable is a READING -- its word says so
@@ -243,6 +260,143 @@ function Find-Exe([string] $dir, [string] $stem) {
     return $null
 }
 
+# ---------------------------------------------------------------------------------------------------
+# ONE PARSE PER ROW, AND A DICTIONARY INSTEAD OF A PROPERTY GRAPH
+#
+# ⚠⚠ THIS IS NOT WHERE THE WRAPPER PHASE WENT, AND AN EARLIER DRAFT OF THIS COMMENT SAID IT WAS.
+# G measured ~59 minutes of wrapper phase against a 66 s conversion on `crypto/cipher` (~52:1), and
+# this leg measured 540 s against a 23 s conversion on `go/doc/comment` (~23:1). I wrote that down
+# here as a parse cost. It is not: measured in this commit's own arm, the OLD parse of that row's
+# 10,059-member document takes 0.1 SECONDS. The phase is the results-file read -- see the block above
+# Test-ResultsTimedOut, where the 547 s is measured and the remedy is.
+#
+# What this change is actually worth, and it is worth doing on its own terms:
+#     ONE parse per row      the sixth cut parsed the same document at the classifier AND again at
+#                            the verdicts cross-check, so whatever it costs was paid twice
+#     a dictionary           2.5x on the 10,059-member fixture, and no PSObject property graph for a
+#                            document this script only ever reads by key
+#     one set of consumers   the members are read the same way in both editions
+#
+# Two editions, two remedies, because `-AsHashtable` DOES NOT EXIST on 5.1:
+#     Core (>= 6)   ConvertFrom-Json -AsHashtable          a dictionary; no property graph is built
+#     5.1           JavaScriptSerializer.DeserializeObject a Dictionary[string,object]; likewise
+# Both answer .Keys / an indexer through System.Collections.IDictionary, so ONE set of consumers below
+# serves both editions and there is no per-edition branch outside this function.
+function Read-JsonDocument([string] $Path) {
+    $raw = [System.IO.File]::ReadAllText($Path)
+    if ($PSVersionTable.PSVersion.Major -ge 6) {
+        return ($raw | ConvertFrom-Json -AsHashtable)
+    }
+    Add-Type -AssemblyName System.Web.Extensions
+    $ser = New-Object System.Web.Script.Serialization.JavaScriptSerializer
+    # The default MaxJsonLength is ~4 MB and a row's comparison document has already been measured at
+    # 4.77 MB. Left at the default this would throw on exactly the rows the change exists to serve.
+    $ser.MaxJsonLength  = [int]::MaxValue
+    $ser.RecursionLimit = 1024
+    return $ser.DeserializeObject($raw)
+}
+
+# ⚠ A MISSING MEMBER IS AN EMPTY SET, NOT A THROW. A comparison document with no `csharp` object at
+# all is a reading this classifier must survive -- it is what a row that failed to build looks like.
+# The cast to IDictionary is not decoration: Dictionary[string,object] implements the non-generic
+# Contains EXPLICITLY, so without the cast PowerShell does not find the method.
+function Get-DocMember($doc, [string] $member) {
+    if ($null -eq $doc -or -not ($doc -is [System.Collections.IDictionary])) { return $null }
+    $d = [System.Collections.IDictionary] $doc
+    # ⚠ NOT .Contains(), AND THE CAST DOES NOT RESCUE IT. Dictionary[string,object] -- what the
+    # 5.1 deserializer returns -- implements the non-generic IDictionary.Contains EXPLICITLY, so it is
+    # absent from the public method table PowerShell's adapter binds against, and the call throws
+    # "Cannot find an overload for Contains". Measured by this commit's own arm on the 5.1 path,
+    # which is the edition the leg runs.
+    #
+    # Membership here is over the TOP-LEVEL keys only (go, csharp, disclosed, matched, status), so a
+    # linear test is a handful of comparisons and never touches the per-entry walk this commit exists
+    # to remove. -contains is case-insensitive, which is exactly what the `$jj.go` property access it
+    # replaces already was.
+    if (@($d.Keys) -notcontains $member) { return $null }
+    return $d[$member]
+}
+
+function Get-DocKeys($doc, [string] $member) {
+    $sub = Get-DocMember $doc $member
+    if ($null -eq $sub -or -not ($sub -is [System.Collections.IDictionary])) { return @() }
+    return @(([System.Collections.IDictionary] $sub).Keys)
+}
+
+# ⚠⚠ THIS IS THE WRAPPER PHASE. `Get-Content -Tail 400` OVER A ONE-LINE FILE IS ~QUADRATIC.
+#
+# Measured on all 14 rows of this leg: `go2cs_test_results.json` contains a SINGLE line -- 2.9 MB of
+# it on `go/doc/comment`, 1.74 MB on `crypto/tls`. So `Get-Content -Tail 400` bounded NOTHING: the
+# "tail" was always the entire document. Timed directly on this box, returning ONE line:
+#
+#     1.74 MB (crypto/tls)        191 s     <- from that row's evidence timestamps
+#     2.90 MB (go/doc/comment)    547 s     <- timed directly; the row's own phase measured 540 s
+#
+# 1.67x the bytes for 2.86x the time, on two independent rows: the reader is about quadratic in file
+# size, and it is the whole of the phase G reported at ~52:1. The replacement is 0.06 s on the same
+# 2.9 MB fixture -- about 9,500x -- and the arm states its budget in MINUTES because at these sizes a
+# budget in seconds is one the old path could miss without anyone noticing it had.
+#
+# ⚠ AND A BYTE BOUND CANNOT SIMPLY REPLACE IT. With one line, keeping "the last 256 KB" hands the
+# TIMEOUT predicate a FRAGMENT of that line, and a deadline record earlier in the document is then
+# invisible -- the arm would narrow silently and the row would be classified PASS. No row in this leg
+# carried a timeout marker, so there is no positive sample here with which to show any particular
+# window would have caught it, and a bound that cannot be red-tested is not one to ship.
+#
+# So the two readers are separated by what they actually need:
+#     the PREDICATE  Test-ResultsTimedOut  streams the WHOLE file in overlapped chunks. Complete
+#                    coverage, bounded MEMORY, and no per-line object at all.
+#     the EVIDENCE   Get-TailLines         keeps a bounded tail for a human to read. Truncation is
+#                    acceptable here and is stated in the file it writes.
+# ⚠ THE OVERLAP IS NOT OPTIONAL. A marker straddling a chunk boundary is invisible to a per-chunk
+# search, and it would fail exactly once in a while -- the worst failure rate there is. Each chunk
+# carries the previous chunk's last ($marker length - 1) characters, so no boundary can hide one.
+function Test-ResultsTimedOut([string] $Path) {
+    $fi = New-Object System.IO.FileInfo $Path
+    if (-not $fi.Exists -or $fi.Length -le 0) { return $false }
+    # The same pattern the pipeline arm used, kept verbatim so this is a change of READER, not of
+    # PREDICATE: a deadline kill states itself as `"action":"timeout"` with optional whitespace.
+    $rx    = [regex] '"action"\s*:\s*"timeout"'
+    $keep  = 64
+    $chunk = New-Object char[] 1048576
+    $sr = New-Object System.IO.StreamReader($Path, [System.Text.Encoding]::UTF8, $true)
+    try {
+        $carry = ''
+        while ($true) {
+            $n = $sr.Read($chunk, 0, $chunk.Length)
+            if ($n -le 0) { break }
+            $text = $carry + (New-Object string($chunk, 0, $n))
+            if ($rx.IsMatch($text)) { return $true }
+            if ($text.Length -gt $keep) { $carry = $text.Substring($text.Length - $keep) }
+            else                        { $carry = $text }
+        }
+    } finally { $sr.Dispose() }
+    return $false
+}
+
+function Get-TailLines([string] $Path, [int] $MaxLines = 400, [int] $MaxBytes = 262144) {
+    $fi = New-Object System.IO.FileInfo $Path
+    if (-not $fi.Exists) { return @() }
+    $len = $fi.Length
+    if ($len -le 0) { return @() }
+    $take = [long] [Math]::Min([long] $MaxBytes, $len)
+    $buf  = New-Object byte[] $take
+    $read = 0
+    # ReadWrite share: the converter may still hold the file open on a row that is being torn down.
+    $fs = [System.IO.File]::Open($Path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+    try {
+        $null = $fs.Seek($len - $take, [System.IO.SeekOrigin]::Begin)
+        $read = $fs.Read($buf, 0, [int] $take)
+    } finally { $fs.Dispose() }
+    if ($read -le 0) { return @() }
+    $lines = @([System.Text.Encoding]::UTF8.GetString($buf, 0, $read) -split "`r?`n")
+    # ⚠ THE FIRST LINE OF A MID-FILE SEEK IS A FRAGMENT, and a half-line matched against the timeout
+    # predicate is a verdict read off a broken string. Dropping it costs one line of a 400-line window.
+    if ($take -lt $len -and $lines.Count -gt 1) { $lines = $lines[1..($lines.Count - 1)] }
+    if ($lines.Count -gt $MaxLines) { $lines = $lines[($lines.Count - $MaxLines)..($lines.Count - 1)] }
+    return @($lines)
+}
+
 $goVer = Join-Path $GoRoot 'VERSION'
 if (-not (Test-Path -LiteralPath $GoRoot)) { Deny "no GOROOT at '$GoRoot'" }
 $goExe = Find-Exe (Join-Path $GoRoot 'bin') 'go'
@@ -381,7 +535,7 @@ Write-Host "  output            : $Out"
 if ($DryRun) { Write-Host '  MODE              : DRY RUN -- one row, nothing written' -ForegroundColor Cyan }
 
 $emit = New-Object System.Collections.Generic.List[string]
-$emit.Add("row`tword`tverdicts`tsweep_s`tfirst_in_list`trc`tdiverged`tplatform`ttree`twall_s")
+$emit.Add("row`tword`tverdicts`tsweep_s`tfirst_in_list`trc`tdiverged`tplatform`ttree`twall_s`tpost_s")
 
 $treeSha = (GitTry @('-C', $Tree, 'rev-parse', 'HEAD')).Out
 # ⚠ THE PLATFORM IS GOOS/GOARCH BY `go env` OUTPUT, NOT .NET's OSVersion.Platform. The first cut
@@ -405,12 +559,23 @@ foreach ($row in $rows) {
     $goDir  = Join-Path $GoRoot  ("src/" + $row)
     $outDir = Join-Path $Tree    ("src/core/" + $row)
 
-    # -test-allow-handown for `testing` ONLY: the pipeline refuses that row by design, and the refusal
-    # text prescribes the flag. Never -tags (the corpus axis comes by doing nothing, resolveBuildTags
-    # applies purego,math_big_pure_go to every -tests run) and never -test-filter (its own warning says
-    # a filtered run publishes NO validation artifacts and is DIAGNOSTIC ONLY -- it would not be a row).
+    # ⚠⚠ NO LIST RUNNER PASSES -test-allow-handown. COORD `576` (a), on C1's sizing: this line
+    # is what destroyed R's `testing` row and the seven rows after it. The converter ALREADY has the
+    # right construct -- `testTargetHandOwnHost`, owner-ruled 2026-08-30 -- which converts the external
+    # test variant only and emits NO production file, and all three of its evidence clauses hold for
+    # `testing` at the leg tree. It never fired because `requireConvertibleTestTarget` consults
+    # `testAllowHandOwn` BEFORE the host mode, so this flag short-circuited past it and the row
+    # converted production in place, over 10 `[module: GoManualConversion]` files, with no restore
+    # between rows. THE ROW NEVER NEEDED THE FLAG; THE FLAG IS WHAT DESTROYED IT.
+    #
+    # The earlier comment here read "the pipeline refuses that row by design, and the refusal text
+    # prescribes the flag". The refusal text prescribes it for a SCRATCH root, which is the census use;
+    # aimed at the tree's own src/core it is the destructive case that flag's own text forbids.
+    #
+    # Never -tags either (the corpus axis comes by doing nothing: resolveBuildTags applies
+    # purego,math_big_pure_go to every -tests run) and never -test-filter (its own warning says a
+    # filtered run publishes NO validation artifacts and is DIAGNOSTIC ONLY -- it would not be a row).
     $extra = @()
-    if ($row -eq 'testing') { $extra = @('-test-allow-handown') }
 
     Write-Host ''
     Write-Host ("  -> {0,-44} [{1} of {2}]" -f $row, $i, $rows.Count)
@@ -462,13 +627,35 @@ foreach ($row in $rows) {
         # the invocation propagates past `finally` and out of the loop, so the run dies rather than
         # refusing -- the very shape this file calls "a guard that dies is not a guard that refused".
         # The error text is kept as the row's output so the evidence capture still has something to
-        # write, and $rc is left $null so the refusal below fires and NAMES the row.
+        # write, and $rc is left $null so the classifier below reads the row as NOVERDICT and NAMES it.
+        #
+        # ⚠ THIS ASSIGNMENT WAS DEAD WHEN IT WAS WRITTEN, AND IS LIVE ONLY NOW. Under the sixth cut the
+        # very next guard called Deny, and Deny exits -- so nothing on this path ever read $output and
+        # the evidence capture it was written for could not be reached. Remedy (ii) below is what gives
+        # it a reader: the row now runs on to the capture, and this text is what lands in that row's
+        # output-no-summary.txt. A comment claiming a purpose the control flow denied is the shape this
+        # file keeps catching elsewhere; it was in here too.
         $output = @("RECON: the converter invocation threw: $($_.Exception.Message)")
     } finally { $ErrorActionPreference = $prevEap }
-    # The file's own idiom, one line down from where it is already used on $diverged: refuse rather
-    # than carry a value this row did not produce.
-    if ($rc -isnot [int]) { Deny "row '$row' produced no exit code -- the invocation threw before `$LASTEXITCODE could be read. Refusing rather than classifying the row on a stale number." }
+    # ⚠⚠ A THROWN ROW IS CLASSIFIED; IT IS NOT A REASON TO END THE LEG. The sixth cut called Deny
+    # here, and Deny EXITS -- so one row that threw discarded every row after it, which on a 105-row
+    # list is hours of measurement thrown away to report one failure. COORD ruled remedy (ii): the row
+    # is banked with the honest word and the loop carries on. THIS LOOP NOW KEEPS NO EXIT PATH AT ALL.
+    #
+    # The row still carries nothing it did not produce, which is what the Deny was protecting: `rc`
+    # reads n/a, `diverged` reads n/a, `sweep_s` reads UNMEASURED, and the only number on the line is
+    # `wall_s`, which this script observed itself.
+    # ⚠ RESET PER ROW, for the same reason $rc is: a value carried from the previous row is the
+    # defect C2 measured at finding A, and a DERIVED verdict count is exactly the kind of value that
+    # would survive silently and read as this row's.
+    $derivedVerdicts = $null
+    $rowThrew = ($rc -isnot [int])
+    if ($rowThrew) {
+        Write-Host "     !! the invocation produced no exit code -- banking NOVERDICT, the leg carries on" -ForegroundColor Yellow
+    }
     $elapsed = [int] ((Get-Date) - $started).TotalSeconds
+    # post_s starts where sweep_s stops: everything from here to the emit is THIS SCRIPT's cost.
+    $postStarted = Get-Date
 
     $lines = @($output | ForEach-Object { [string] $_ })
     $v = Get-VerdictCount $lines
@@ -476,8 +663,40 @@ foreach ($row in $rows) {
     # ---- the artifacts, read BEFORE the classifier, because two of them DECIDE it
     $cmpSrc = Join-Path $outDir 'go2cs_test_comparison.json'
     $resSrc = Join-Path $outDir 'go2cs_test_results.json'
-    $resTail = @()
-    if (Test-Path -LiteralPath $resSrc) { $resTail = @(Get-Content -LiteralPath $resSrc -Tail 400) }
+    $resTail = @(Get-TailLines $resSrc)
+
+    # ⚠ ONE PARSE PER ROW, NOT TWO. The sixth cut parsed this same document twice -- once for
+    # `diverged` in the classifier and again for the verdicts cross-check below -- so every second of
+    # the phase G measured was paid TWICE on every row that reached both. Parsed here, once, and the
+    # two readers share it. `$cmpUnreadable` is kept apart from a null document because "no artifact"
+    # and "an artifact I could not read" are different facts and the classifier separates them.
+    #
+    # ⚠⚠ AND IT IS READ ONLY IF THIS ROW WROTE IT. COORD `989`, on C1's finding: the comparison
+    # record is GITIGNORED (`src/core/.gitignore:19` names it) and `git clean -fd` skips it, so a PRIOR
+    # run's document survives in the tree and is indistinguishable from this run's. Deriving a word
+    # from it would report a previous run's verdicts as this row's -- R's contamination class one layer
+    # over, with arithmetic the only tell.
+    #
+    # ⚠ LastWriteTime, NOT CreationTime, AND THE DIFFERENCE IS LOAD-BEARING HERE. The evidence spec
+    # (`989` (a)) names CreationTime because its question is "was this file COPIED in", where a copy
+    # inherits its source's write time. THIS question is the other one -- "did THIS row write it" --
+    # and an OVERWRITE leaves CreationTime at the original creation (NTFS also tunnels it back through
+    # a delete-and-recreate within seconds). So a fresh record overwritten in place would read STALE
+    # under CreationTime. LastWriteTime is correct whether the converter overwrites or recreates, which
+    # is why it is the predicate here and CreationTime is the predicate there.
+    $cmpDoc        = $null
+    $cmpUnreadable = $false
+    $cmpStale      = $false
+    if (Test-Path -LiteralPath $cmpSrc) {
+        $cmpWrite = (Get-Item -LiteralPath $cmpSrc -Force).LastWriteTime
+        if ($cmpWrite -lt $started) {
+            $cmpStale = $true
+            Write-Host ("     !! comparison record predates this row (written {0}, row started {1}) -- STALE, not read" -f `
+                $cmpWrite.ToString('HH:mm:ss'), $started.ToString('HH:mm:ss')) -ForegroundColor Yellow
+        } else {
+            try { $cmpDoc = Read-JsonDocument $cmpSrc } catch { $cmpUnreadable = $true }
+        }
+    }
 
     # ---- the word: the outcome class this cost was measured under (COORD's vocabulary)
     #
@@ -489,29 +708,59 @@ foreach ($row in $rows) {
     # two the basis most needs. A deadline kill STATES ITSELF in the results file
     # (`"action":"timeout"`), so the authoritative signal is the artifact, not the console.
     $diverged = ''
-    $timedOut = @($resTail | Where-Object { $_ -match '"action"\s*:\s*"timeout"' }).Count -gt 0
-    if     ($rc -ne 0 -and ($lines -match 'Conversion failed|unresolved dynamic')) { $word = 'CONVERT' }
+    # ⚠ THE WHOLE DOCUMENT, NOT THE KEPT TAIL. $resTail is bounded for the evidence copy; deciding a
+    # row's WORD from a bounded window would narrow this arm by exactly the amount that was trimmed.
+    $timedOut = Test-ResultsTimedOut $resSrc
+    # ⚠ THE THROWN ARM COMES FIRST, AND ITS ORDER IS LOAD-BEARING. With $rc left $null, `$rc -ne 0`
+    # is TRUE, so every rc-guarded arm below is reachable on a row that never produced an exit code --
+    # a thrown row whose error text happened to contain "error CS1234" would be classified BUILD.
+    if     ($rowThrew)                                                             { $word = 'NOVERDICT' }
+    elseif ($rc -ne 0 -and ($lines -match 'Conversion failed|unresolved dynamic')) { $word = 'CONVERT' }
     elseif ($rc -ne 0 -and ($lines -match 'error CS[0-9]+'))                       { $word = 'BUILD' }
     elseif ($timedOut)                                                             { $word = 'TIMEOUT' }
-    elseif ($null -eq $v.Count)                                                    { $word = 'NOVERDICT' }
+    # ⚠⚠ AN ABSENT SUMMARY IS NOT AN ABSENT RESULT. COORD `f45a3643d` (1), on R's `unicode/utf8`:
+    # the converter prints its `Validated N tests` line ONLY on a MATCHED comparison, so a row with one
+    # undisclosed divergence prints nothing, `verdicts` read NOMATCH, the word fell through to
+    # NOVERDICT and `sweep_s` to UNMEASURED -- EVERY DIVERGED READING ON ALL THREE LISTS WAS HIDDEN
+    # INSIDE NOVERDICT AND ITS COST DROPPED FROM THE BASIS. R's DIVERGED count of 0 over 105 rows is
+    # that defect, not a fact about the corpus.
+    #
+    # So NOVERDICT is now reserved for a row with NO USABLE COMPARISON DOCUMENT -- none written, one
+    # that will not parse, one that predates this row, or a thrown invocation. A row whose converter
+    # ran all the way to a comparison is never UNMEASURED: it falls through to the derivation below,
+    # which reads the same net-undisclosed set whether or not the summary happened to print.
+    elseif ($null -eq $v.Count -and $null -eq $cmpDoc)                             { $word = 'NOVERDICT' }
     else {
         # ⚠ DISTINCT DIVERGING TEST NAMES from the comparison JSON -- not output lines, which count
         # mentions rather than tests. Ordinal/case-sensitive: legal Go test names differ only by case.
         $diverged = 0
         if (Test-Path -LiteralPath $cmpSrc) {
             try {
-                $jj = Get-Content -LiteralPath $cmpSrc -Raw | ConvertFrom-Json
+                if ($cmpUnreadable) { throw 'the comparison document could not be parsed' }
+                $jj = $cmpDoc
+                # ⚠ @{} IS CASE-INSENSITIVE AND THAT IS PRESERVED HERE DELIBERATELY. The comment below
+                # calls the comparison Ordinal, and the $names set IS -- but these two maps are 5.1
+                # hashtables, whose default comparer collapses names differing only by case. That is a
+                # REAL defect, measured, and it is NOT this commit's to fix: COORD ruled these items
+                # "and nothing more", and changing it here would also destroy the old-vs-new
+                # equivalence arm that makes the parse change checkable. Reported separately.
+                $goSub = Get-DocMember $cmpDoc 'go'
+                $csSub = Get-DocMember $cmpDoc 'csharp'
                 $goMap = @{}
-                foreach ($p in $jj.go.PSObject.Properties)     { $goMap[$p.Name] = [string] $p.Value }
+                if ($goSub -is [System.Collections.IDictionary]) {
+                    foreach ($k in @(([System.Collections.IDictionary] $goSub).Keys)) { $goMap[[string] $k] = [string] $goSub[$k] }
+                }
                 $csMap = @{}
-                foreach ($p in $jj.csharp.PSObject.Properties) { $csMap[$p.Name] = [string] $p.Value }
+                if ($csSub -is [System.Collections.IDictionary]) {
+                    foreach ($k in @(([System.Collections.IDictionary] $csSub).Keys)) { $csMap[[string] $k] = [string] $csSub[$k] }
+                }
                 # ⚠ THE DISCLOSED ONES ARE SUBTRACTED, AND THEY ARE PROSE, NOT NAMES. `disclosed` is a
                 # list of SENTENCES -- "TestReadStringAllocs (alloc-profile): at-most-one AllocsPerRun
                 # assert: ..." -- so a membership test against the whole string never matches and every
                 # disclosed row reads DIVERGED. Measured on bufio: 1 diverging name, and it IS the
                 # disclosed one, so the NET is 0 and the row is a PASS. The name is the leading token.
                 $disclosedNames = New-Object System.Collections.Generic.HashSet[string] ([System.StringComparer]::Ordinal)
-                foreach ($s in @($jj.disclosed)) {
+                foreach ($s in @(Get-DocMember $cmpDoc 'disclosed')) {
                     if ($s -and ($s -match '^(\S+)')) { $null = $disclosedNames.Add($Matches[1]) }
                 }
                 $names = New-Object System.Collections.Generic.HashSet[string] ([System.StringComparer]::Ordinal)
@@ -524,12 +773,29 @@ foreach ($row in $rows) {
                     $c = ''; if ($csMap.ContainsKey($n)) { $c = $csMap[$n] }
                     if (-not [string]::Equals($g, $c, [System.StringComparison]::Ordinal)) { $d++ }
                 }
+                # ⚠ THE DERIVED COUNT, WHEN THE SUMMARY DID NOT PRINT. The arithmetic is the
+                # CONVERTER'S OWN, pinned by C1 at `testConversion.go:8387` so that three lanes and one
+                # assembler do not each invent one:
+                #     verdicts = len(go) - len(disclosed)
+                # `withdrawn` is already absent from the Go map and is NOT subtracted again; `gated` is
+                # published beside the count and is NOT subtracted; `matched` is a BOOL in the schema,
+                # never a count. len(go) is taken from the DOCUMENT's key list, not from $goMap, whose
+                # 5.1 comparer would collapse two names differing only by case.
+                if ($null -eq $v.Count) {
+                    $goKeyCount     = @(Get-DocKeys $cmpDoc 'go').Count
+                    $disclosedCount = @(Get-DocMember $cmpDoc 'disclosed').Count
+                    $derivedVerdicts = $goKeyCount - $disclosedCount
+                    Write-Host ("     .. no summary line, but a comparison record: verdicts derived as {0} - {1} = {2}" -f `
+                        $goKeyCount, $disclosedCount, $derivedVerdicts) -ForegroundColor Cyan
+                }
+
                 # `diverged` is the NET, UNDISCLOSED count: a disclosed divergence is accounted for by
                 # the roster and is not a finding. The artifact's own `matched`/`status` corroborate it,
                 # and a disagreement is reported rather than resolved silently.
                 $diverged = $d
-                if ($d -eq 0 -and $jj.matched -ne $true) {
-                    Write-Host "     !! net diverged 0 but the artifact says matched=$($jj.matched) status=$($jj.status)" -ForegroundColor Yellow
+                $mMatched = Get-DocMember $cmpDoc 'matched'
+                if ($d -eq 0 -and $mMatched -ne $true) {
+                    Write-Host "     !! net diverged 0 but the artifact says matched=$mMatched status=$(Get-DocMember $cmpDoc 'status')" -ForegroundColor Yellow
                 }
             } catch { $diverged = 'UNREAD' }
         }
@@ -548,14 +814,19 @@ foreach ($row in $rows) {
     # shardmap reads a non-integer as None and still schedules the row; an APPROXIMATION poisons every
     # derived figure. So a disagreement or a miss emits the word NOMATCH, not a number.
     $verdicts = 'NOMATCH'
+    # ⚠ A DERIVED COUNT IS A MEASUREMENT, NOT A GUESS, AND IT IS WHY THIS ROW IS NOT NOMATCH. It is
+    # the converter's own expression over this row's own record; the cross-check below is skipped for
+    # it only because the cross-check compares the SUMMARY against the map, and there is no summary.
+    if ($null -eq $v.Count -and $null -ne $derivedVerdicts) { $verdicts = $derivedVerdicts }
     if ($null -ne $v.Count) {
         $verdicts = $v.Count
         if (Test-Path -LiteralPath $cmpSrc) {
             try {
-                $j = Get-Content -LiteralPath $cmpSrc -Raw | ConvertFrom-Json
+                if ($cmpUnreadable) { throw 'the comparison document could not be parsed' }
+                # THE SAME DOCUMENT THE CLASSIFIER READ, not a second parse of the same file.
                 # ORDINAL by the sweep's own comment: legal Go verdict names differ ONLY BY CASE, so a
                 # case-insensitive count COLLAPSES those pairs and undercounts with a plausible integer.
-                $goNames = @($j.go.PSObject.Properties.Name)
+                $goNames = @(Get-DocKeys $cmpDoc 'go')
                 $mapCount = ($goNames | Sort-Object -CaseSensitive -Unique).Count
                 # ⚠⚠ THE TWO NUMBERS DIFFER BY THE DISCLOSURES, BY CONSTRUCTION -- measured on the
                 # one-row dry run, where bufio read "summary 80 vs map 81" and my first cross-check
@@ -594,8 +865,15 @@ foreach ($row in $rows) {
         $sweepS = 'UNMEASURED'
     }
     if ($word -eq 'NOVERDICT') {
-        # No summary line means the row produced no verdict. Its WALL is real -- and is emitted as
-        # wall_s -- but a cost banked under no verdict is a number with no evidence behind it, so the
+        # ⚠ THREE DIFFERENT FACTS REACH THIS ONE WORD, AND THIS COMMENT USED TO STATE ONLY THE FIRST
+        # (C2, queued since 765aba82). They are not interchangeable to anyone reading the TSV:
+        #     (a) NO SUMMARY LINE        the row produced no verdict at all
+        #     (b) AN UNREADABLE ARTIFACT a comparison JSON existed and this instrument could not read
+        #                                it. The row may well have PASSED; NOVERDICT says only that
+        #                                nothing here can tell -- which is why it is not a PASS.
+        #     (c) A THROWN INVOCATION    remedy (ii): the converter returned no exit code at all.
+        # They share the word because they share ONE consequence: the wall is real and is emitted as
+        # wall_s, but a cost banked under no verdict is a number with no evidence behind it, so the
         # generator REFUSES it and the concatenation excludes the row.
         $sweepS = 'UNMEASURED'
     }
@@ -605,7 +883,25 @@ foreach ($row in $rows) {
     # in a file three lanes are concatenated into is the empty-counter class this fleet banked twice
     # tonight. `n/a` and not `UNREAD`: UNREAD means an artifact EXISTED and could not be read, which
     # is a different and worse fact than never having produced one.
-    if ($diverged -eq '') { $diverged = 'n/a' }
+    # ⚠⚠ `-eq ''` COERCES, AND IT WAS DESTROYING THE COLUMN. PowerShell converts the RIGHT operand
+    # to the LEFT operand's type, so `0 -eq ''` is TRUE: a row with a REAL net-undisclosed count of
+    # ZERO had it rewritten to `n/a`. Measured on this leg -- all TEN PASS rows emitted `diverged=n/a`
+    # while their comparison records read `matched=true` -- so the column asserted "this row never
+    # produced an artifact", which is this comment's own definition of n/a, of ten rows that did.
+    #
+    # This is inside the ruled set rather than beside it: COORD `f45a3643d` (1) specifies `diverged` =
+    # the net undisclosed distinct names for exactly the rows the DIVERGED derivation now reaches, and
+    # a PASS row's net count is 0. Left as it was, the column cannot express the value the same ruling
+    # requires it to carry, and the assembler could not tell "no divergences" from "no artifact".
+    #
+    # The type test first is the whole fix: only a STRING that is empty means "never set".
+    if ($diverged -is [string] -and $diverged -eq '') { $diverged = 'n/a' }
+
+    # ⚠ AND THE SAME RULE FOR rc. A row that threw has no exit code; emitting an empty cell would read
+    # as a zero, which is the SUCCESS value -- the worst possible default for the one row that failed
+    # hardest. n/a, for the same reason `diverged` uses it one line above.
+    $rcCell = $rc
+    if ($rowThrew) { $rcCell = 'n/a' }
 
     # ---- CAPTURE THE EVIDENCE BEFORE THE TREE IS DISCARDED (ruled)
     # The worktree is removed when the list is done, and with it every artifact this row produced.
@@ -619,9 +915,14 @@ foreach ($row in $rows) {
     # the TIMEOUT arm. One definition, used twice: the classifier reads it, and this copies it out.
     if (Test-Path -LiteralPath $cmpSrc) { Copy-Item -LiteralPath $cmpSrc -Destination (Join-Path $rowDir 'go2cs_test_comparison.json') -Force }
     if ($resTail.Count -gt 0) {
-        # The TAIL, because the results file is large and its end is where a deadline kill states
-        # itself -- C1's rule: an empty C# column has three causes, and this artifact separates one.
-        [System.IO.File]::WriteAllText((Join-Path $rowDir 'results-tail.txt'), (($resTail -join "`n") + "`n"))
+        # ⚠ THIS COPY IS BOUNDED AND SAYS SO. The results file is one line of up to a few MB; a human
+        # reading the evidence wants its end, not all of it, and the row's WORD was decided by
+        # Test-ResultsTimedOut over the WHOLE file rather than from this. Without the banner a later
+        # reader could search this file, find no timeout marker, and conclude the row did not time out
+        # -- a truncation reading as a fact, which is this fleet's most repeated failure.
+        $banner = "# BOUNDED EVIDENCE COPY -- at most $($resTail.Count) line(s) / 256 KB from the END of"
+        $banner += " $resSrc. The TIMEOUT arm did NOT read this file; it streamed the whole document."
+        [System.IO.File]::WriteAllText((Join-Path $rowDir 'results-tail.txt'), ($banner + "`n" + ($resTail -join "`n") + "`n"))
     }
 
     # The summary line itself, and the whole stdout when there ISN'T one -- a row with no summary is
@@ -629,14 +930,17 @@ foreach ($row in $rows) {
     if ($v.Line) { [System.IO.File]::WriteAllText((Join-Path $rowDir 'summary.txt'), $v.Line + "`n") }
     else         { [System.IO.File]::WriteAllText((Join-Path $rowDir 'output-no-summary.txt'), (($lines -join "`n") + "`n")) }
 
-    Write-Host ("     {0,-10} verdicts={1,-8} {2}s  rc={3}   evidence -> {4}" -f $word, $verdicts, $elapsed, $rc, $rowKey)
+    Write-Host ("     {0,-10} verdicts={1,-8} {2}s  rc={3}   evidence -> {4}" -f $word, $verdicts, $elapsed, $rcCell, $rowKey)
     if ($DryRun -and $v.Line) {
         Write-Host ''
         Write-Host '     the MATCHED summary line, beside the row it produced:' -ForegroundColor Cyan
         Write-Host "       $($v.Line)"
     }
 
-    $emit.Add("$row`t$word`t$verdicts`t$sweepS`t$first`t$rc`t$diverged`t$plat`t$treeSha`t$wallS")
+    # Closed as late as possible: everything after the converter returned is this script's own cost,
+    # and the evidence capture above is part of it.
+    $postS = [int] ((Get-Date) - $postStarted).TotalSeconds
+    $emit.Add("$row`t$word`t$verdicts`t$sweepS`t$first`t$rcCell`t$diverged`t$plat`t$treeSha`t$wallS`t$postS")
 
     if ($DryRun) { break }
 }
