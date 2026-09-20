@@ -304,7 +304,16 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     drop, 8 goldens / 35 pairs on windows/amd64, SyscallKeystonePulls IN, SetegidBroadcastSeam a platform SKIP), mechanism 2
     (RED 12: GenericTypeInference, GenericUntypedIntArg; RED 11: ReceiverCapturedInClosure main.cs + package_info.cs; RED 9:
     SystemCertVerify). REBANK with UpdateTestTargets --createTargetFiles --only <the twelve>, then the full behavioral suite
-    green across four phases; one commit of the twelve goldens on the version branch, announce-then-push
+    green across four phases; one commit of the twelve goldens on the version branch, announce-then-push.
+    READING 2026-09-20 (6a1653dce): REBANK DONE 68fcf34ea5 (12 goldens + 13 emission files; 12/12 byte-equal; determinism
+    clean); SUITE NOT GREEN: Output 661 pass / 3 fail / NOT MEASURED 0 -- FuncLiteralCallerNames + GoroutineWaitState fail
+    identically at pre-hop MASTER (the BEHAVIORAL BASE TWO, banked as objective-2 items), SystemCertVerify is a REGRESSION
+    on the version branch (PASS at master; access violation 0xC0000005 at the tip pre-rebank; RED 9 a candidate, its probe
+    VOID because neither side compiles in isolation). RULED: push the rebank (COORD stamps); H9's gate = Output's failing
+    set equals master's BY NAME with APPEARED empty; H9 closes when SystemCertVerify passes. i9 NOW: the project at
+    46307b4704 and at d71e4eed63 (range-splitting), the managed stack at the AV (DOTNET_DbgEnableMiniDump + dotnet-dump),
+    then the one-axis alias revert as a converter-output comparison; COORD routes the fix (candidate class: the open
+    syscall buffer-pin hole; C1 owns the native-boundary guards)
   the root-attribution overlay claude/g-root-attribution a819ba7417 (VERSION + LICENSE only; gate = blob identity vs the
     seat, no other path, the hand-own guard by name, the converter suite still EMPTY; no corpus build owed)
   q100 claude/c1-q100-native-array-view-floor at its RE-PINNED tip abe3b3798b (9c5460585: the i7 gate CLEAR at 0dca38552c
