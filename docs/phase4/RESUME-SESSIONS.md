@@ -299,9 +299,15 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
   the metadata seat claude/g-metadata-regen 828ef5d0b7 (C2-read 8d8be3730); if G's follow-up commit on that branch
     is at origin by then, take the branch tip, else the pinned SHA
   re-derive the base-three fail-set literal (predicted EMPTY) across all four gate scripts
-  H9 per the runbook section 2: CNR first and solo under the pin; want zero NOT MEASURED and CHANGED on exactly the
-    eight named goldens; re-baseline with UpdateTestTargets --createTargetFiles --only <the eight>; a ninth golden,
-    a non-alias hunk or a T5 is a finding, never a rebank
+  H9 per the runbook section 2 AS RULED 2026-09-19 (COORD on C2's measured prediction 56ec9931a): CNR first and solo under
+    the pin; want zero NOT MEASURED and CHANGED = the ELEVEN (alias drop: RuntimeCallerFrames, SetFinalizerBridge,
+    SetegidBroadcastSeam, FuncLiteralCallerNames, GoroutineWaitState, FuncForPCName, GoexitDefers, IterPullRendezvous,
+    37 pairs, added == removed; RED 12: GenericTypeInference, GenericUntypedIntArg; RED 11: ReceiverCapturedInClosure +4/-1,
+    accepted as the hoist shape on the quoted hunk) plus whatever of the SEVEN the linux arm cannot see (FindFirstFileData,
+    PointerOutParameter, SystemCertVerify, WindowsNewCallback, WsaProtocolInfo, SockaddrRoundTrip, WsaSendtoRoundTrip) i9
+    classifies by mechanism; SyscallKeystonePulls must NOT be in CHANGED; re-baseline with UpdateTestTargets
+    --createTargetFiles --only <that list>; a golden i9 cannot attribute to a landed seat, a non-alias hunk on an alias
+    golden, or a T5 is a finding, never a rebank
   q100 claude/c1-q100-native-array-view-floor at its RE-PINNED tip abe3b3798b (9c5460585: the i7 gate CLEAR at 0dca38552c
     stands; the commit on top is comment-and-prose-only, verified).
 Not yours: G's H8 census, C2's comparand procedure, the runtime row. Blocked on: nothing for the first five.
@@ -650,7 +656,11 @@ DONE 2026-09-19: the q100 second read (a810502ff, AGREES; two findings routed to
 (14e4ce0e8, AGREES, arms run here; denominator 8230 from the index). ASSIGNED NEXT: the H9 prediction re-derived at the
 version tip -- the converter seats landed since the goldens' last baseline classified emission-affecting or not, the
 predicted CNR CHANGED set by name with the mechanism per golden, whether the eight stand and any ninth; posted before
-i9's CNR as the prediction i9 scores against; git and Go only.
+i9's CNR as the prediction i9 scores against; git and Go only. DONE 2026-09-19 (56ec9931a, MEASURED on 735 goldens at
+06b1636cae) and RULED (COORD): the eleven replace the eight. ASSIGNED NEXT: the runbook's dated in-stage H9 correction (the
+eleven with mechanism and pairs, the per-mechanism added == removed rule, the linux arm's admissibility control and its seven
+blind projects, the process gap: an emission-changing seat carries its golden re-baseline) on a branch you name; then idle by
+ruling until G's outgoing census reading, scored against your P1-P5.
 
 Then: (2) the second-lane read of C1's q100 cut at origin, claude/c1-q100-native-array-view-floor 0dca38552c: the
 floor's placement at the uintptr door, its scope (array<U> only), the tenth named panic beside the nine, and the four
