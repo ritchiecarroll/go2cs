@@ -459,7 +459,7 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     NEXT: the third commit (announce-then-push); C2 reads its diff; the i7 Core arm re-runs on the FINAL tip after the
     fips140test seat's conversions finish (never two conversions on one box); then LAUNCH. The third commit is AT
     ORIGIN (ddc205a1ee); the i7 Core re-run launched on it (sub-agent). H10 RECON LEG LAUNCHED 2026-09-20 (COORD
-    a82eb75b1) at VERSION TIP 0dc65a8e8d: wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
+    a82eb75b1) at VERSION TIP 2e4487f4a6 (0dc65a8e8d = the leg's tip): wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
     throwaway detached worktrees, one process per list, one attempt per row, TSVs pushed as new per-lane refs
     (LANE-h10-recon-tsv) when a list completes with the word histogram and the named CONVERT/BUILD/DIVERGED/NOVERDICT
     rows; expected words for the known rows stated (time CONVERT, reflect NOVERDICT, fips140test/mlkem/internal-sync
@@ -833,7 +833,10 @@ stands on the generator's own print. ROUTED (COORD after b23753f5): C2 corrects 
 inside 8d7739f4e's comment and die() as a commit on top of claude/c2-shardmap-relocations; C1 cuts the post-tool
 fetch-refspec remedy (git fetch origin master in a single-branch clone writes no tracking ref -> the census cannot be
 materialised; explicit master:refs/remotes/origin/master) as ONE commit on its post-tool ref with a two-shape control,
-announce-then-push, landing with R's ead735e69c. Task 27 (the concatenation) waits on the TSV refs. ALL THREE LISTS LIVE (G's ACK 5952b121: 107 rows on the fifth;
+announce-then-push, landing with R's ead735e69c. Task 27 (the concatenation) waits on the TSV refs. The fetch-refspec remedy CUT (d2e61acc: 4b33fc803 on 06afd818ea,
+the two-shape control, the real-clone red-then-green) -- TAKEN; the tmp+mv materialise ROUTED as one commit on top; the
+scratchpad-derivation item DECLINED; the INSTRUMENT LANDING = C1's two + C2's refspec + R's ead735e69c together when
+all three read at origin (COORD merges; bash -n, census, repoguard). ALL THREE LISTS LIVE (G's ACK 5952b121: 107 rows on the fifth;
 the early run discarded). hash/maphash BUILD on i9's list (unpredicted) -> C1 sizes at CONVERT from the completion post. C1's
 withdrawal (033a07d9): the roster seat carries no aggregate
 arc figure (the 14 lived only in a post) -- no correction owed; rule banked: a claim that a file contains something is a
@@ -871,7 +874,10 @@ the conjunct between the refusal and every native dereference; ten NativeBox con
 MintOpaque's EmptyStruct box harmless unflagged; the two refusals disjoint). C1's DESIGN READ DONE (f26830f6: SOUND --
 the sealedness the stronger reason for the flag; the READ fabricates a managed reference; the middle conjunct reads back
 the forward decision; AliasesAnOrderToken public with zero consumers). C2's LATE FINDING (0603459f): the fixture never
-drives ValueSlot (the accessor reflect faults through) -- the apply HELD (COORD 93d60f2c8) for ONE test commit on the
+drives ValueSlot (the accessor reflect faults through) -- the apply HELD (COORD 93d60f2c8) for ONE test commit [DONE: a1fff3775 cut on the i7 (the red arm = the test host
+CRASHES without the ValueSlot guard while the older arms pass); APPLIED and STAMPED at 2e4487f4a6 (parents 0dc65a8e8d +
+a1fff3775, five blobs EQUAL, corpus-non-golib 0, GolibTests 783/0/17, go2cs.slnx 0 errors, census, repoguard 6/6) --
+VERSION TIP 2e4487f4a6] on the
 seat ref (the classification observed via AliasesAnOrderToken, the refusal asserted on a ValueSlot write and read,
 made red by removing the guard; a real-address control reads false); the i7 sub-agent adds it, COORD announces the SHA
 before the push, then the merge carries both commits (GolibTests both sides, go2cs.slnx, census, repoguard, signed push). DESIGN READ of R's seat DONE (be9a7447, SOUND). ALSO ASSIGNED: the design read of
@@ -1401,7 +1407,7 @@ with the population asserted; made to fail two ways firing :48 and :70; one go t
 CLEARED for i9's apply on 4df427fdcb (COORD after 6acab84c); its stamp fixes the leg's tip. APPLIED (03a5cbbf) at
 0dc65a8e8d and STAMPED by COORD (tree f236cdeed2, parents 4df427fdcb + dd376e3f12, 3 files +147/-12, testConversion.go
 and the projitems composed exactly as a clean merge composes them -- verified by a throwaway merge on the i7; corpus 0;
-signed) -- VERSION TIP 0dc65a8e8d; THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
+signed) -- VERSION TIP 2e4487f4a6 (0dc65a8e8d = the leg's tip); THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
 measured a write target; four arms made to fail on the shipped bytes) LANDED on master 70bce870c2 with C1's docs seat.
 G runs its list (107) at 0dc65a8e8d. G's floor-1 finding banked fleet-wide:
 a process census by name pattern is a dead counter for a renamed converter -- count by executable path with a positive
@@ -1563,7 +1569,9 @@ silent no-op (prove a cleanup by its post-condition); a TaskStop kills the wrapp
 delta (cb723e05: SOUND -- a lifetime gap across two variants; the carry seeds resolver step 3; the per-package reset
 outside resetPackageState; the order hazard closed by the literal [internal, external] slice at :1088) and C2's
 second-box A/B (339c3d48: rc 1 -> 0, 29 .cs both arms, the bare name binds, no second crossing site): the apply is
-COORD's from the i7 after the arm-2a apply. R's LEG ACK (9bd7ebb6): 105 rows RUNNING on the fifth at 0dc65a8e8d since
+COORD's from the i7 after the arm-2a apply -- LAUNCHED after the stamp (Opus sub-agent, worktree ap2, the ref's tip as
+it stands at launch = c2506f5164; the converter suite + check-no-regression + census + repoguard; no corpus build;
+stamp follows). R's LEG ACK (9bd7ebb6): 105 rows RUNNING on the fifth at 0dc65a8e8d since
 02:29 local (pid 30352; the blob hash matched; both traps checked before row 1); fips140test and internal/sync are the
 two named expectations on R's list; at 67669ba2 the leg reads 13 of 105 started, 11 PASS, 1 BUILD. ASKED (COORD after 58654661): R's leg tree's PRE-RUN
 ignored residue count by i9's mtime method (control 0); non-zero = the two-row re-measurement arm after R's list. R's post-tool fix
