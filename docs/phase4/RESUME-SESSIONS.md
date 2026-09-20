@@ -397,6 +397,9 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     wrapper's clock around the ONE invocation (one attempt per row, so the sweep's re-run inflation cannot arise); word =
     the outcome class PASS/DIVERGED/CONVERT/BUILD/TIMEOUT/NOVERDICT; no -tags; the drift assertion guards the summary-line
     format with a planted non-match. i9 CUTS on this; C2 reads the file; the i7 runs the Core arm by sub-agent; then LAUNCH.
+    ADDED (COORD after G 21be19338): -test-timeout per row from the deadline floors (a stated default for unfloored rows,
+    never the converter's 2-minute default; the floor used is an extra column); a deadline kill = word TIMEOUT with
+    sweep_s NON-INTEGER (UNSCHEDULED, re-measured under a larger floor); the results-file tail read before the word.
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
@@ -657,7 +660,12 @@ authority on membership)'; C1 commits it alone on the ref, announce-then-push; C
 one merge. DONE: 628ca2459 (+9/-3, the literal 228 deliberately omitted -- no hop-specific count in the runbook, C1's
 judgement upheld). LANDED on master 6c32d0e171 (2026-09-20; signed merge of the four commits; +173; gates green). C1 is
 idle by ruling until the recon lists are needed at the launch; its next goal item is the recon leg's roster seat landing
-after the leg (a8511e37d7 re-based then). Fold C2's notes into the amendment
+after the leg (a8511e37d7 re-based then). ASSIGNED (COORD after G 21be19338): SIZE the three converter-debt successor
+rows on this box at the CONVERT stage (the emitted .cs is the subject): fips140test CS0234 x13 (fipstest_package absent
+from go.crypto.@internal -- a test-only package whose Go package name differs from its directory), crypto/mlkem CS0311
+x4 (zh<EncapsulationKey768> refused as the type argument of a constrained parameter), internal/sync CS0411 x4 (inference
+fails on expectNotSwapped<K,V>(zh<T>, K, V, V)); per row the construct by file:line in Go and in the emission, the
+converter site, a fix shape, a red-first arm; no cut -- COORD routes. Fold C2's notes into the amendment
 commit: proc.cs cited per-GOOS (runtime/{linux,windows,darwin}/proc.cs:848), the RegisterPinned step that makes
 initAlgAES arm 2, and the clause that the box materialises at eleven construction sites (scope by provenance). (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
@@ -1094,7 +1102,17 @@ list = 107 rows (C1 bf4ecf2ee's 106 + crypto/internal/fips140/nistec, a row on t
 takes 0 rows (the linux-only bucket is empty) and is the discriminator for diverged rows only. G's four post-tool files
 be340825dd are HELD: g-post.sh derives from dirname "$0" three times with no work-tree refusal and g-fetchable-check.sh
 carries fourteen rm -rf lines -- add the refusal (R/C2/i9's) or state by measurement that the uses are read-only and
-every removed path is outside any work tree; at G's next idle, after the rows. Was: after COORD closes H9: the twelve successor packages through the real
+every removed path is outside any work tree; at G's next idle, after the rows.
+SUCCESSOR READINGS DONE (21be19338, at c7eb36d845 on windows): seven rows clean (bigmod 79, edwards25519/field 16,
+fips140/mlkem 10, internal/runtime/math 1, internal/runtime/sys 4, weak 6, edwards25519 54 on a 15-minute deadline --
+the 2-minute default -test-timeout was G's instrument); fiat a 0-denominator row (no verdict line); nistec = THE ORACLE
+TAG ASYMMETRY (testConversion.go:7968 builds go test -json without the resolved build tags while every -tests conversion
+carries purego,math_big_pure_go -> 44 false divergences Go='' C#='pass'; unconditional, every tag-gated test in every
+row); three converter-debt rows (fips140test CS0234 x13; crypto/mlkem CS0311 x4; internal/sync CS0411 x4).
+ASSIGNED (COORD after 21be19338): the ORACLE-TAGS converter seat off 93feb8df2b -- the oracle's args carry the resolved
+tags; red-first: a Go unit arm (planted empty set fails), the nistec row 45/0 vs the before 44 false, the converter
+suite, an EMPTY two-seeded corpus diff; push-then-announce; C2 reads (the unit arm on its box); i9 applies; target:
+landed before the LAUNCH. Then the preflight on both sides. Was: after COORD closes H9: the twelve successor packages through the real
 pipeline on the banking platform at the version tip (all four overrides), per row the verdict count and the diverged set by
 name -- the first H10 rows; a reading, no bank. G's post tool PUBLISHED (80b5d83df): claude/g-lane-post-tool be340825dd off
 master a6be940665, FOUR files under .claude/coord-scripts/lanes/ (g-post.sh + the fetchable, staleness and placeholder
