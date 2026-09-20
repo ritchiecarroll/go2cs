@@ -1126,6 +1126,10 @@ four-class tree guard sits inside if (-not DryRun), so a dry run accepts a MAIN 
 Then C2's design read, then COORD lands the driver ref + the wrapper ref on master. i9's and C1's re-audits under
 R's decoy test: the SHARED census writes nothing beside the entry it is handed (its temps under mktemp).
 R's door-scope arm (the fetch half + a vacuity guard) LANDED -> MASTER 8e4be1e3ff (~10:45).
+C2's DESIGN READ of the driver SOUND (d55a5462; two comment lines -> i9's hoist commit: the dry run never reaches the
+ledger key by ordering; the converter stamp = mtime+size fails safe); C2's own post tool writes refs into whatever
+repo it runs from ($REPO without a door) -> C2 fixes at idle. WAITING: i9's tree-guard hoist commit -> then the
+driver ref + the wrapper ref land on master; APPLY BATCH 2 (ab2) in its gates; the ecdh seat (ec1) in CNR.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
