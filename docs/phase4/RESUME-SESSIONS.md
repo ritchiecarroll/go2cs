@@ -1261,7 +1261,11 @@ claim, the control set; C1 has the design read; COORD applies from the i7 after 
 SOUND (C1 f4125ff2: the scope rule is the codebase's own MethodInfo trio; C2 9d5a410a: the :671 gap MEASURED over the
 whole package, the symbol wins in both decided directions, the C# guard crosses a real assembly boundary). The :671
 FOLLOW-UP (an ordering test in the dynamicTypeGate convention + the gate comment's consumer count) is cutting on the
-i7 as a second commit on the ref, announce-then-push; the apply carries both, after the time apply.
+i7 as a second commit on the ref -- CUT c6524dc53b on 76efbdf3a6 (the ordering test red with :671 deleted even though
+the identical assignment survives in convertTestVariants; green restored byte-identical; the consumer count by
+predicate; each commit carries its author model's trailer), ANNOUNCED (fcdd9503e) then pushed; the seat CLEARED on
+both reads. THE APPLY (both commits onto the version tip after R's time apply lands; converter gate + go2cs-stdlib.slnx
++ census + repoguard; testConversion.go composition by throwaway merge) launches on the i7 at the time stamp.
 FIRST READ DONE (c0c2063e at 43aba50262: spec met, the parse well controlled; the classifier finding + diverged-lines
 note -> both in i9's second commit). RE-READ at the new tip when announced. ALSO ASSIGNED (COORD after dfdcbc65): the
 crypto/mlkem DESIGN READ -- (a) the generator making zh<T> satisfy every interface *T's method set satisfies vs (b) the
