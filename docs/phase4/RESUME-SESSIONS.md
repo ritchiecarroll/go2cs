@@ -1064,7 +1064,16 @@ Then, as the owner's spurt continues: (2) the reflect row, yours, read at the ve
 suite through the real pipeline (go2cs -tests -test-action all <goroot-1.24.13>/src/reflect <core>/reflect, all four
 overrides set, never the sweep wrapper) on a clean worktree of the version tip, Go control side on go1.24.13 by
 go version OUTPUT; post the verdict count, the diverged set by name and the new assertions by name. A reading for
-H10, not a bank. (3) Row 130's positive control when i9 says the regeneration has run.
+H10, not a bank. READ 2026-09-20 (3db8d7de7): NOT MEASURED -- the pipeline exits 1 at CONVERT in both configurations on
+ONE 1.24-new construct, a non-empty anonymous struct reached only through a generic type-argument position
+(TypeFor[struct{ f int }](), all_test.go:3547 and :6921; the resolver's registration gate at visitStructType.go:249 never
+publishes for that position; one signature, two sites); blast radius reflect alone in the corpus; +6/-1 test
+declarations. RULED: the converter seat is R's -- publish the lifted name for the type-argument position; red-first on a
+two-site planted fixture, the reflect row past CONVERT (both configs), the two-seeded corpus diff predicted EMPTY and no
+CNR change; push-then-announce; C1/C2 read (C2 runs the Go suite + the fixture); i9 applies (converter gate; no corpus
+build if the diff is empty); then R re-reads the row for the verdict count and the diverged set. (3) Row 130's positive
+control when i9 says the regeneration has run. FLEET NOTE: the 1.24.13 SDK's own bin/go.exe answers go1.23.1 on a box
+pinned 1.23.1 unless GOTOOLCHAIN=local -- assert by output.
 Blocked on: nothing for (1); (2) needs an owner-opened spurt.
 ```
 
