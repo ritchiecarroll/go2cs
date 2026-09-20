@@ -561,7 +561,7 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     NEXT: the third commit (announce-then-push); C2 reads its diff; the i7 Core arm re-runs on the FINAL tip after the
     fips140test seat's conversions finish (never two conversions on one box); then LAUNCH. The third commit is AT
     ORIGIN (ddc205a1ee); the i7 Core re-run launched on it (sub-agent). H10 RECON LEG LAUNCHED 2026-09-20 (COORD
-    a82eb75b1) at VERSION TIP 4408dacd3e (0dc65a8e8d = the leg's tip): wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
+    a82eb75b1) at VERSION TIP f0c3399684 (0dc65a8e8d = the leg's tip): wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
     throwaway detached worktrees, one process per list, one attempt per row, TSVs pushed as new per-lane refs
     (LANE-h10-recon-tsv) when a list completes with the word histogram and the named CONVERT/BUILD/DIVERGED/NOVERDICT
     rows; expected words for the known rows stated (time CONVERT, reflect NOVERDICT, fips140test/mlkem/internal-sync
@@ -931,7 +931,12 @@ comment-first-mention trap) -- RULED: derived from relocations.tsv at the roster
 LANDED on the roster seat ref (b23753f5: claude/c1-h10-roster-relocation 957c71d0e on a8511e37d7, 13 arcs, LF, no #
 header because C2's reader has no comment filter; gated through C2's reader, five arms red; the seat's roster rewrite
 does not move the map, control shown) -- lands WITH the roster seat after the three TSVs; the longTimeouts 11 -> 12
-stands on the generator's own print. ROUTED (COORD after b23753f5): C2 corrects the withdrawn 14-arc/four-split figure
+stands on the generator's own print. THE ROSTER SEAT'S CONTRACT RULED (COORD after C1 138645ed + C2 9d310b84): the
+seat RETIRES the ten relocation sources as banked rows and ADDS the eleven targets AS BANKED BY INHERITANCE; the axis
+moves 219 -> 214 and the identity holds (C2's arm R4: 205 + 9 = 214); the ninth's detector goes quiet on this edit;
+no fourth bucket; C1 cuts the row-set edit on top of 957c71d0e with the concatenation once G's TSV lands. i9's
+evidence commit eca66ad342 (three projections, clean at 076c006d41) and C2's ninth 0a418b65bf TAKEN.
+ROUTED (COORD after b23753f5): C2 corrects the withdrawn 14-arc/four-split figure
 inside 8d7739f4e's comment and die() as a commit on top of claude/c2-shardmap-relocations; C1 cuts the post-tool
 fetch-refspec remedy (git fetch origin master in a single-branch clone writes no tracking ref -> the census cannot be
 materialised; explicit master:refs/remotes/origin/master) as ONE commit on its post-tool ref with a two-shape control,
@@ -1541,7 +1546,7 @@ with the population asserted; made to fail two ways firing :48 and :70; one go t
 CLEARED for i9's apply on 4df427fdcb (COORD after 6acab84c); its stamp fixes the leg's tip. APPLIED (03a5cbbf) at
 0dc65a8e8d and STAMPED by COORD (tree f236cdeed2, parents 4df427fdcb + dd376e3f12, 3 files +147/-12, testConversion.go
 and the projitems composed exactly as a clean merge composes them -- verified by a throwaway merge on the i7; corpus 0;
-signed) -- VERSION TIP 4408dacd3e (0dc65a8e8d = the leg's tip); THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
+signed) -- VERSION TIP f0c3399684 (0dc65a8e8d = the leg's tip); THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
 measured a write target; four arms made to fail on the shipped bytes) LANDED on master 70bce870c2 with C1's docs seat.
 G runs its list (107) at 0dc65a8e8d. G's floor-1 finding banked fleet-wide:
 a process census by name pattern is a dead counter for a renamed converter -- count by executable path with a positive
@@ -1742,8 +1747,9 @@ CNR NO REGRESSION over 729; census clean; repoguard 6/6); ANNOUNCED (3a680658f);
 with two follow-ups landing WITH the seat as a SECOND commit (cutting on the i7, no push until announced): the
 scratch-root arms pin the KIND (C1's plant fired nothing), and the by-construction premise stated as conditional on
 the root's contents (a seeded root opens the host path) -- CUT 3983310d6d on 36531d847c (three files +64/-19; both
-asserts proven load-bearing by their own plants; census clean), ANNOUNCED then pushed; the apply from the i7 carries
-both (suite + CNR + census + repoguard). C2's structural read not owed on this seat. The basis
+asserts proven load-bearing by their own plants; census clean), ANNOUNCED then pushed; the apply from the i7 carried
+both -- APPLIED and STAMPED at f0c3399684 (~06:40: parents 4408dacd3e + 3983310d6d; three EQUAL; suite ok 490 s; CNR
+NO REGRESSION over 729; census clean under both pins 112/116; repoguard 6/6). VERSION TIP f0c3399684. C2's structural read not owed on this seat. The basis
 KEEPS all ten lane columns ("four named" = the generator's required set).
 R's RE-RUN DONE (3974183a): 7/7 on a fresh tree (census CLEAN), second TSV commit a5fe6375e4 on 6716955147 (+8/-8):
 85 PASS / 7 BUILD / 13 NOVERDICT, sweep_s 4,655 s over 92 rows; two real findings under the contamination: `unique`
