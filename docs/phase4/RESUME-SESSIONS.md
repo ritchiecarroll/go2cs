@@ -305,6 +305,8 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     (RED 12: GenericTypeInference, GenericUntypedIntArg; RED 11: ReceiverCapturedInClosure main.cs + package_info.cs; RED 9:
     SystemCertVerify). REBANK with UpdateTestTargets --createTargetFiles --only <the twelve>, then the full behavioral suite
     green across four phases; one commit of the twelve goldens on the version branch, announce-then-push
+  the root-attribution overlay claude/g-root-attribution a819ba7417 (VERSION + LICENSE only; gate = blob identity vs the
+    seat, no other path, the hand-own guard by name, the converter suite still EMPTY; no corpus build owed)
   q100 claude/c1-q100-native-array-view-floor at its RE-PINNED tip abe3b3798b (9c5460585: the i7 gate CLEAR at 0dca38552c
     stands; the commit on top is comment-and-prose-only, verified).
 Not yours: G's H8 census, C2's comparand procedure, the runtime row. Blocked on: nothing for the first five.
@@ -681,7 +683,9 @@ i9's CNR as the prediction i9 scores against; git and Go only. DONE 2026-09-19 (
 eleven with mechanism and pairs, the per-mechanism added == removed rule, the linux arm's admissibility control and its seven
 blind projects, the process gap: an emission-changing seat carries its golden re-baseline) on a branch you name; DONE
 2026-09-20 at claude/c2-h9-correction 4f24f7d39e (docs only, off master; ACCEPTED as the H9 docs seat). Idle by ruling until
-G's outgoing census side-by-side, scored against your P1-P5. OWED (COORD re-ruling on i9's CNR dc9eb368c): ONE commit on top
+G's outgoing census side-by-side, scored against your P1-P5. ALSO: the second read of G's root-attribution overlay
+a819ba7417 (VERSION + LICENSE byte-compared against the 1.24.13 toolchain root on your box). OWED (COORD re-ruling on i9's
+CNR dc9eb368c): ONE commit on top
 of 4f24f7d39e qualifying the eleven as the LINUX reading, the banking-platform reading as the TWELVE (SyscallKeystonePulls IN,
 SetegidBroadcastSeam a windows SKIP, RED 9 added), the per-GOOS alias mechanism named, the rule: an H9 prediction is made on
 the banking platform or platform-qualified. DONE 2026-09-20 at d70666d9c0 on top of 4f24f7d39e (d56fc3c56: the READ THIS
@@ -760,7 +764,9 @@ binary, flags and seed as the incoming run, a directory never reused, nothing el
 real E1/E2 pair; STOP before declaring the rung.
 
 Then: (2) the root-attribution overlay cut from the census emission root, on a branch you name (prediction of record:
-the differing set is exactly VERSION and LICENSE); push-then-announce. (3) The follow-up commit on
+the differing set is exactly VERSION and LICENSE); push-then-announce. DONE 2026-09-20: claude/g-root-attribution
+a819ba7417 on 0f97dcc8db, +4/-4, prediction MET, pinned by COORD (C2 reads; i9 applies after H9). STILL OWED: the H8
+side-by-side (both class-count rows, C2's P1-P5, arm (b) on a real E1/E2 pair, the CGO value); STOP before the rung. (3) The follow-up commit on
 claude/g-metadata-regen ON TOP of 828ef5d0b7, never a rewrite: stdlibMetadata_test.go line 60 still claims the asset
 is written CRLF; replace it with the facts you measured (C2 found it at 8d8be3730; your sweep confirmed it is the only
 survivor under src/go2cs); announce-then-push. (4) The linux-flavour arm of whatever COORD routes after H8.
