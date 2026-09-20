@@ -1979,7 +1979,13 @@ interface name; suite ok 376 s. R FOUND THE INTERFACE-SIDE TWIN of C1's key find
 (:1056) keeps the interface's type-argument list (CS0246 once R's seat lands) -> RULED into the i7's ONE follow-up
 commit with the struct-side key (both operands; C1 + R read). R's GENERATOR half (the wrapped-result adapter for a
 projected result, AdapterImplTemplate) stays R's, red-first in GenTests; its apply after the foreign-generic apply +
-follow-up. DOCTRINE: a fetch-narrowed clone answers a STALE origin/<branch> to a successful fetch -- use ls-remote or
+follow-up. PART (d) WHOLE (R 8b2cf39fc ~08:40): claude/r-mlkem-funcresult-projection e67f173ab0 (the generator half
+over the converter half; GenTests 47/47; red = one CS0266; the wrap BOUNDED to a local non-generic struct target; a
+return-type twin of the box-receiver helper made the direct-zh primary visible). RULED: C1 design + C2 structural after
+their host-follow-up reads; APPLY ORDER on the version tip: (1) the host seat, (2) the foreign-generic follow-up, (3)
+R's ref after R merges the follow-up + cuts the generic-composition arm (the 1,323-adapter diff, stdlib, CNR, the
+mlkem row past COMPILE at that apply). R's post tool: the self-test plants ONE token of four (C1's shape from the other
+end) -> R cuts every-token planting + the word-bounded bar NOW while idle. DOCTRINE: a fetch-narrowed clone answers a STALE origin/<branch> to a successful fetch -- use ls-remote or
 FETCH_HEAD, or an explicit refspec. CENSUS CLOSED (3f70a096e): the verdict is per-branch, read from CONFIG,
 negatives included (C2: wildcard + negative freezes the ref under a plain fetch, moves it under an explicit one);
 a worktree is not a clone; R's two acts: steward-r maps master; mailbox-r deletes its unmaintained origin/master;
