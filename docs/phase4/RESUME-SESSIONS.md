@@ -1648,7 +1648,18 @@ did not fire because the fifth blob's :385 passes -test-allow-handown for testin
 host check. RULED (c): the wrapper line is DELETED in the seventh (testing measured there on G's relaunch blob); a
 converter seat reorders requireConvertibleTestTarget (host check before the flag; the :5289-5295 control re-ruled to
 the host path; scratch-root census untouched) -- an i7 sub-agent after the fips140test apply, C1 reads. The basis
-KEEPS all ten lane columns ("four named" = the generator's required set). SIX genuine BUILD rows routed to C1
+KEEPS all ten lane columns ("four named" = the generator's required set).
+R's RE-RUN DONE (3974183a): 7/7 on a fresh tree (census CLEAN), second TSV commit a5fe6375e4 on 6716955147 (+8/-8):
+85 PASS / 7 BUILD / 13 NOVERDICT, sweep_s 4,655 s over 92 rows; two real findings under the contamination: `unique`
+BUILD (CS0411 x10 -- the internal/sync class -- + CS0030) and `unicode/utf8` = a ONE-test divergence
+(TestRuneCountNonASCIIAllocation, deferred alloc class) reading NOVERDICT. WRAPPER DEFECT RULED (COORD after
+3974183a): the converter prints its Validated summary ONLY on a matched comparison, so EVERY DIVERGED row reads
+NOVERDICT/UNMEASURED on all three lists and its cost is dropped -- (1) the SEVENTH derives DIVERGED (or PASS) from
+go2cs_test_comparison.json when the summary is absent (verdicts = matched, diverged = the net undisclosed names,
+sweep_s measured; NOVERDICT reserved for rows with NO comparison document); red-first on R's unicode/utf8 evidence
+pair; (2) the fifth's rows are RE-CLASSIFIED at the concatenation from per-row evidence commits on each TSV ref
+(docs/phase4/hopA-inputs/recon-evidence/LANE/ROW/, NOVERDICT rows only; sweep_s := wall_s), every re-classified row
+named by the assembler. R: push a5fe6375e4, the evidence commit (13 rows), teardown both trees; then mlkem, reflect. SIX genuine BUILD rows routed to C1
 for sizing: sync (CS0708 x17...), runtime (CS0310 x22: a union constraint with a POINTER member lowers to
 `where T : new()` and zh<T> is abstract -> constraint emission; + CS1061 testing.B.Elapsed on the hand-own),
 crypto/ecdh (CS1537), embed/internal/embedtest (CS0234, the known recompute remedy); internal/sync stays an i7
