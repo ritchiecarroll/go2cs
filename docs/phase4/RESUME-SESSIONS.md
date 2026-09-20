@@ -316,6 +316,8 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     syscall buffer-pin hole; C1 owns the native-boundary guards)
   the root-attribution overlay claude/g-root-attribution a819ba7417 (VERSION + LICENSE only; gate = blob identity vs the
     seat, no other path, the hand-own guard by name, the converter suite still EMPTY; no corpus build owed)
+  then q100 at abe3b3798b, then the H11 seat claude/c1-h11-published-stamp 135f0cdc15 on C2's clearance (converter-suite
+    gate, the new guard arms by name; no corpus build); state the version tip after each
   q100 claude/c1-q100-native-array-view-floor at its RE-PINNED tip abe3b3798b (9c5460585: the i7 gate CLEAR at 0dca38552c
     stands; the commit on top is comment-and-prose-only, verified).
 Not yours: G's H8 census, C2's comparand procedure, the runtime row. Blocked on: nothing for the first five.
@@ -469,7 +471,12 @@ RULED 66620cce9: badges follow the PUBLISHED stamp (newest nuget tag + docs/vali
 alone. ASSIGNED: the Go-side seat on a new ref off the version tip -- version.props counter 3 -> 0; the emitter's counter-0
 case targets the newest recorded snapshot; the badge guard's EXISTENCE arm (335/191 = the positive control); a repoguard
 arm for H2's reset; the runbook H2/H11.2/H12 amendments; red-first each; C2 reads; i9 applies after the overlay and q100.
-Size the README re-emission path (badge-only vs the next full -stdlib emission) and name it in the announce. (3) The seven pthread members the darwin
+Size the README re-emission path (badge-only vs the next full -stdlib emission) and name it in the announce. DONE 2026-09-20:
+claude/c1-h11-published-stamp 135f0cdc15 off 0f97dcc8db (9f3dcb5a2; five parts; NO badge-only path exists -- the overlay
+rides a full -stdlib emission, routed to G from the applied tree). ACCEPTED for C2's read; i9 applies after the overlay and
+q100. ASSIGNED NEXT: the static native-boundary shortlist for the SystemCertVerify path (every syscall/windows call with a
+pointer or buffer reached from the program and the converted crypto/x509 windows root-store path at the version tip, pinned
+across the call or not, by file:line); a reading, no run. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
@@ -798,8 +805,12 @@ DONE (cb1fa651a: outgoing 1476/79/87/277 of 1919 vs incoming 1631/83/93/283 of 2
 windows, 3342 = 3342, equal tree hashes; pkgdelta +40 per target MET). RULED (COORD): the rung rests on all three flavours.
 NEXT for G: (1) arm (b) on DARWIN first (C2 takes linux in parallel; a second linux reading from G is a derivation, not waste); (2) the H8 record under docs/phase4/ (both
 manifests' class tables, P1-P5 as scored, the 38 -> 47 -> 51 decomposition, per-target movement) on a branch you name;
-(3) after COORD closes H9: the twelve successor packages through the real pipeline on the banking platform at the version
-tip (all four overrides), per row the verdict count and the diverged set by name -- the first H10 rows; a reading, no bank. (3) The follow-up commit on
+(3) after i9 applies the H11 seat: the 347-README OVERLAY -- seed a never-reused root from the applied tree's src/core, one
+single-target -stdlib emission with the converter built at that tip, cut ONLY src/core/**/README.md as one commit on a new
+ref, the diff predicted before the copy (335 tag / 191 snapshot targets -> the published stamp, nothing else), the existence
+arm green on that tree; push-then-announce. (4) after COORD closes H9: the twelve successor packages through the real
+pipeline on the banking platform at the version tip (all four overrides), per row the verdict count and the diverged set by
+name -- the first H10 rows; a reading, no bank. (3) The follow-up commit on
 claude/g-metadata-regen ON TOP of 828ef5d0b7, never a rewrite: stdlibMetadata_test.go line 60 still claims the asset
 is written CRLF; replace it with the facts you measured (C2 found it at 8d8be3730; your sweep confirmed it is the only
 survivor under src/go2cs); announce-then-push. (4) The linux-flavour arm of whatever COORD routes after H8.
