@@ -456,7 +456,14 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     the list taken by blob (sha256 stated); the composition verified before launch (the script from the wrapper ref's
     blob, -Tree at the version tip, the provenance column = the tree measured); no slice/cooldown -- ruled NONE (one
     process, one attempt per row; the driver's constants are for the costed passes). The TSV comes back as
-    claude/i9-h10-recon-tsv. APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
+    claude/i9-h10-recon-tsv. THREE LAUNCH TRAPS (d48af1e1, c8b00399), all i9's own file: -Out is a FILE (WriteAllText is
+    the last statement); never pipe the wrapper (exit in a pipeline loses the output; redirect at the process level);
+    and ANY FAILING ROW KILLS THE LEG (the converter call at :387 under Stop -> a terminating NativeCommandError in 5.1;
+    CONVERT/BUILD unreachable; crypto/mlkem killed the leg at row 4 twice). FOURTH COMMIT 39979aa218 (2af7004f: the call
+    under Continue with 2>&1 kept; the A/B on internal/sync produced the first BUILD word) TAKEN; a FIFTH rides before
+    the relaunch (wall_s = the observed integer wall on every row; diverged = n/a where no artifact; the -Out doc; the
+    UNSCHEDULED sentence corrected). G and R HOLD until C2 reads the two together and the i7 parses/self-tests; then all
+    three launch on that blob, i9 from row 1 (its three earlier launches discarded). APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
     at the act; both reads done, CLEARED); (2) the fips140test seat claude/coord-fips140test-testonly ce8fc43a87 on
     93feb8df2b (cut by an i7 sub-agent: three sites gated on productionClassEmitted; suite rc 0; the row 13 CS0234 -> 0)
     after C1's design + C2's structural reads -- no source overlap with R's seat, both add a projitems line (the
@@ -766,7 +773,11 @@ the wrong paths (a dated factual correction, C1's next docs seat); ConversionStr
 dead src/Examples links (two URL edits, the same seat). SECOND DOCS SEAT LANDED (c88d4423 -> master 7a7e7f50d1): the
 two links repointed (targets verified present), the PLAN paragraph corrected beside, never rewritten. C1's rule banked:
 a sizing names the layer a fault is DETECTED at and the layer it is REPORTED at. C1 NEXT: the three recon TSVs into the
-banked basis at the roster seat when the legs report. DONE (ba10c91a):
+banked basis at the roster seat when the legs report. CONTRACT RULED (75673b41; C2 reproduced all four branches at
+430ad499 and measured net's wall unconsumed): the generator dies on a non-integer sweep_s, so the BANKED basis EXCLUDES
+UNMEASURED rows (the filter lives in C1's concatenation and is STATED in the roster-seat commit); net alone banks
+sweep_s := wall_s whatever its word, so the hand-stopped drop fires. The assert-the-battery form for the post tools
+(C1's proposal) ruled the durable one, each lane at idle. DONE (ba10c91a):
 claude/c1-h10-recon-lists 89c1ebc2cc off master, four files +564, derived from the tree's own sources (the census
 Appendix + nistec; $longTimeouts + BIG_ROWS = reserved 14; the windows-only 2; LPT over the 1.23 windows block) with three
 reproduced intermediates and a partition control that fires; nistec to G by routing (header). THE LAUNCH'S LISTS. The docs seat now carries
@@ -1119,7 +1130,10 @@ arms -- C2's first attempt restored to the committed file and was void). FOURTH 
 14-vs-15 paragraph beside RESERVED_DECLARED, comment only; the strict-subset measurement both ways) -- RULED PUSH (the
 generator is the one home; the roster seat carries a pointer). The ref carries four commits, landing with the roster
 seat. C2's `| head` SIGPIPE finding banked
-fleet-wide (a filter can prevent the work; never pipe a state-writing tool to head).
+fleet-wide (a filter can prevent the work; never pipe a state-writing tool to head). POST-TOOL GUARDS CUT (77e96d95:
+claude/c2-post-tool-guards 015177d4f9 -- one battery from the clone, the clone asserted to be the mailbox, A5 asks
+origin; six arms; delivered by the modified tool) and LANDED on master 5448b903e0. A fifth generator commit ruled: the
+die() comment naming the filter's home. C2's battery wording corrected (d7161d6e); the assert-the-battery form at idle.
 GENERATOR SEAT CUT (51d22252): claude/c2-shardmap-relocations 8d7739f4e3 off master 6c32d0e171, +57/-2, reads
 relocations.tsv (thin guard < 10 arcs), four arms made to fail; the reserved-row print already exists and fires --
 RULED: a second commit splits its message into two causes (no measured cost vs name absent at this release). TAKEN,
