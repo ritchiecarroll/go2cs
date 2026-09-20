@@ -763,7 +763,10 @@ LANDED (23db898f -> master e0c49ae1e1 within 70bce870c2): the PATH-resolved pin 
 'zero SELECTED non-test .go files' clause, CLAUDE.md's Examples row -> src/archived/Examples/ (the samples were ARCHIVED,
 358 files tracked; src/tour is the Tour application). Two findings ROUTED: docs/PLAN-linux-operation.md:35-36 states
 the wrong paths (a dated factual correction, C1's next docs seat); ConversionStrategies-Reference.md:2007/:10687 carry
-dead src/Examples links (two URL edits, the same seat). DONE (ba10c91a):
+dead src/Examples links (two URL edits, the same seat). SECOND DOCS SEAT LANDED (c88d4423 -> master 7a7e7f50d1): the
+two links repointed (targets verified present), the PLAN paragraph corrected beside, never rewritten. C1's rule banked:
+a sizing names the layer a fault is DETECTED at and the layer it is REPORTED at. C1 NEXT: the three recon TSVs into the
+banked basis at the roster seat when the legs report. DONE (ba10c91a):
 claude/c1-h10-recon-lists 89c1ebc2cc off master, four files +564, derived from the tree's own sources (the census
 Appendix + nistec; $longTimeouts + BIG_ROWS = reserved 14; the windows-only 2; LPT over the 1.23 windows block) with three
 reproduced intermediates and a partition control that fires; nistec to G by routing (header). THE LAUNCH'S LISTS. The docs seat now carries
@@ -1112,8 +1115,10 @@ inheritance is an ADDITION (no successor map exists in the generator today), (b)
 the intersect stays. The plan is generated only after the seat lands, so the refusal never fronts the leg.
 SECOND COMMIT ff53bb06be (90e78eae): the print split by cause (targets, not sources; three arms); THIRD COMMIT
 50e8c528f9 (8b645ee5: the two downstream counts follow the split, one axis each, restored to the FIXED file between
-arms -- C2's first attempt restored to the committed file and was void). The ref carries three commits, landing with
-the roster seat. C2's `| head` SIGPIPE finding banked
+arms -- C2's first attempt restored to the committed file and was void). FOURTH COMMIT efd0b67f88 (4c83f889: the
+14-vs-15 paragraph beside RESERVED_DECLARED, comment only; the strict-subset measurement both ways) -- RULED PUSH (the
+generator is the one home; the roster seat carries a pointer). The ref carries four commits, landing with the roster
+seat. C2's `| head` SIGPIPE finding banked
 fleet-wide (a filter can prevent the work; never pipe a state-writing tool to head).
 GENERATOR SEAT CUT (51d22252): claude/c2-shardmap-relocations 8d7739f4e3 off master 6c32d0e171, +57/-2, reads
 relocations.tsv (thin guard < 10 arcs), four arms made to fail; the reserved-row print already exists and fires --
