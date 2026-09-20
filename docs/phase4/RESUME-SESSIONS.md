@@ -1000,7 +1000,14 @@ arms live): a materialised tool is asserted by CONTENT HASH vs the ref's blob + 
 takes the two lines at its next idle. G's census (594011551): 42 wide / 1 narrowed + SEVEN local-origin clones stale
 under a wide refspec = the THIRD stale cause banked. G OFF IDLE (7c3612fb5): the two provisional rows (nistec 45/0,
 fips140test 2215/52 expected) at f83ba29ffb with the thirteenth wrapper in a censused throwaway tree, evidence on a
-NEW ref under G's prefix; then three CONVERT-stage sizings: crypto/ecdh (CS1537), crypto/sha3, encoding/json.]
+NEW ref under G's prefix; then three CONVERT-stage sizings: crypto/ecdh (CS1537), crypto/sha3, encoding/json.
+THE TRAIN LANDED (~08:45): MASTER 307912e6da = five signed merges (legs 1, 2a R, 2c G, 3 the spine 1fa2b0ad4, 3b the
+docs half; 35 docs files, 0 deletions, DIFFER 0, the roster composed with both hunks, 203 rows = -10/+9 since two
+targets are nobody's principal); LEG (2b) WITHHELD: i9's TSV ref eca66ad342 is cut from the VERSION branch (161
+commits, 112 deletions) -> RULED: i9 re-cuts the four additive files byte-identical onto a NEW ref off master (push-
+then-announce), lands as leg (2b) when announced. Then #34 LANDED: MASTER a8febe6a4b (C1's c1-post-byte-predicate
+84641ba45: content hash + self-test fail-count refusal; the scope limit: the hash sees a bad transfer, the self-test
+a bad source). C2 NEXT: THE PLAN (shardmap --timings on the landed basis; the tenth commit; leg 4). tr1 left in place.]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
@@ -1821,7 +1828,14 @@ staged tree's teardown, T.Setenv's idiom, red-first by an arm asserting the stor
 must FAIL on bb6c75f60e); ApplyJunctionGodebug returns whether it applied and the refusal names which environment
 supplied the setting; a token-wise winsymlink match; comment lines (CLR-store-first ordering; winreadlinkvolume the
 un-restored neighbour, neither release's configuration; the stderr note = this host imposed it; half-application
-inherited). Then C2 reads the follow-up delta, then the apply. The owner item RESTORED as OPTIONAL (Developer Mode on R-LAPTOP and i9 makes
+inherited). FOLLOW-UP LANDED ~08:40: 4959a2f026 at origin (+146/-13, +93/-0, signed): the restore in TestHost.Run's
+finally after ReleaseFixtureLinks/Delete(runRoot) (both stores captured, each restored to its own value, absence as
+absence); the message's three truthful branches; the token-wise guard (untrimmed like internal/godebug); three reds
+on the old blob by direct run (the leak into both stores; the false sentence; winsymlinkfoo=1 refused outright);
+cfile Validated 15 twice; census clean (116 + the branch's 83); repoguard ok. Relayed: the non-Windows branch reasoned;
+the pre-existing privilege sentence untrue off Windows (left); the stores-disagree case unmeasured. THE APPLY RUNNING
+on the i7 (worktree ha1: merge onto f83ba29ffb, stdlib, suite, CNR, cfile + internal/trace; NO PUSH) -- C2's delta
+read + COORD's verification gate the push. The owner item RESTORED as OPTIONAL (Developer Mode on R-LAPTOP and i9 makes
 the symlink path available today); the rows stay NOVERDICT by cause and are re-measured by the driver). R's CORRECTION (fcb75ab3) taken: the runbook sentence is i9's -- mtime is unrelated
 to provenance in either direction (over in R's tree, under in five of i9's seven packages); the remedy unchanged.
 i9 RE-TOOK its table (0bb72afd): genuine residue in six of seven packages -> its two-row arm STILL OWED; go/types
