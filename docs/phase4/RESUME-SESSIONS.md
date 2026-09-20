@@ -545,7 +545,11 @@ pointer-element case Part 2's InlineArray layout would NOT reach). Part 1 = a la
 fix. N rule for the emission: evaluate constant expressions (alg.go:467 hashRandomBytes / 8), never copy their text; fire on
 the CONVERSION, not a statement shape (lock_spinbit.go:75). C1's disclosure: its GOROOT greps ran on the bare toolchain
 (1.24.7), re-taken at the 1.24.13 pin identically -- right by coincidence, not by method; the rule stands (R's ef2f8d792).
-Now: the design read of R's companions when announced; otherwise idle by ruling. (3) The seven pthread members the darwin
+Now: the design read of R's companions when announced; otherwise idle by ruling. The design read is DONE (534a217e2 +
+the extension a5e48cd3e). ASSIGNED 2026-09-20 ~22:30 (COORD): the LIVENESS BOUND for the 25 resolved-different-pointee
+sites at d91c832543 -- per site the enclosing function, its one-hop callers by file:line, whether any caller's package is a
+banked roster row or a successor candidate (BOUND-LIVE / inert at zero callers / out of scope); one table; a second
+derivation for the caller counts; memequal128's zero as the positive control. So H10 runs the rows that can crash first. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
