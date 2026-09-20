@@ -14,8 +14,16 @@
 #   b  a planted identifier -> REFUSED, and nothing is written, staged, committed or pushed
 #   c  two clones push back to back -> both present, the second retried after one rejection
 #   d  a 61-line body -> refused; the same file with FLEET_LONG=1 -> accepted
-#   e  fleet-read.sh lists only what is after SINCE, reads inbox/FLEET/ too, prints NEXT-SINCE
+#   e  fleet-read.sh reads the range after a POSITION cursor, inbox/FLEET/ too, NEXT-SINCE = the tip
 #   f  the real clone's inbox + ledger fingerprint, byte-equal before and after
+#   g  a ledger line stamped in 2001 but COMMITTED after the cursor is printed and counted
+#   h  an inbox file whose NAME sorts before consumed ones is printed when its COMMIT is in range
+#   i  NEXT-SINCE is the tip SHA read, and a legacy cursor in the future is repaired out loud
+#
+# (g), (h) and (i) are each run TWICE: first on the PRE-FIX fleet-read.sh -- the real one, taken by
+# its blob id, not a paraphrase of it -- where each must fail, and then on the tool beside this
+# harness, where each must pass. A red half that does not reproduce fails the arm rather than
+# passing it quietly, because an arm whose defect has gone missing measures nothing.
 #
 # Exits non-zero if any arm fails. Env: FLEET_ARMS_TMP overrides the temp root.
 # =================================================================================================
@@ -80,6 +88,11 @@ for L in COORD C1 C2 R G i9 FLEET; do
     cp -- "$REAL/docs/phase4/inbox/$L/README.md" "$SEED/docs/phase4/inbox/$L/README.md" || setupfail "the real clone has no inbox/$L/README.md"
 done
 cp -- "$REAL/docs/phase4/LEDGER.md" "$SEED/docs/phase4/LEDGER.md" || setupfail "the real clone has no LEDGER.md"
+# The line arm (e) looks for in an unfiltered read is DERIVED from the ledger it seeded, never a
+# sentence typed in here: an unfiltered read prints the last 20 lines, so any line named by hand
+# drops out of that window the week the ledger grows past it and reds an arm that is working.
+LAST_LEDGER="$(grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2} ' "$SEED/docs/phase4/LEDGER.md" | tail -1)"
+[ -n "$LAST_LEDGER" ] || setupfail "the seeded LEDGER.md has no dated line -- arm (e)'s ledger half would be vacuous"
 git -C "$SEED" add -- docs/phase4 && git -C "$SEED" commit -q -m "arms: the inbox skeleton, copied" || setupfail "could not commit the skeleton"
 git -C "$SEED" push -q "$BARE" claude/mailbox || setupfail "could not push the throwaway claude/mailbox"
 
@@ -108,6 +121,37 @@ send() { # send <clone> <from> <to> <subject> <bodyfile> <outfile>  -- returns f
     FLEET_LANE="$2" FLEET_MAILBOX_CLONE="$TD/$1" bash "$MSG" "$3" "$4" "$5" > "$6" 2>&1
 }
 field() { awk -v k="$1" '$1==k{print $2}' "$2"; }
+has()  { grep -q  -- "$1" "$2"; }
+hasF() { grep -Fq -- "$1" "$2"; }
+
+# ---- the PRE-FIX reader, for the red half of (g) (h) and (i) ---------------------------------------
+# fleet-read.sh exactly as it stood at ce2641b18d, the tip the time-cursor defect was measured at,
+# named by its BLOB ID. A blob id is stable whatever commit later touches the path and whatever line
+# endings a checkout uses, where "the commit before the fix" stops being the pre-fix version the
+# moment anything else edits the file, and a re-implementation of the old logic would only ever
+# prove itself. If the blob is not in this clone the three arms FAIL and say so; they never skip.
+PREBLOB="67b24aceb917c7e3795b599e8209e1a4148d262c"
+PRE="$TD/fleet-read-prefix.sh"
+gcat() { ( cd -- "$1" && MSYS_NO_PATHCONV=1 git cat-file blob "$2" ); }
+gcat "$REAL" "$PREBLOB" > "$PRE" 2>/dev/null; prc=$?
+PRE_OK=1; { [ "$prc" -eq 0 ] && [ -s "$PRE" ]; } || PRE_OK=0
+
+readnew() { FLEET_MAILBOX_CLONE="$TD/A" bash "$RDR" "$1" ${2:+"$2"} > "$3" 2>&1; }
+readold() { FLEET_MAILBOX_CLONE="$TD/A" bash "$PRE" "$1" ${2:+"$2"} > "$3" 2>&1; }
+utc()     { date -u +%Y%m%dT%H%M%SZ; }
+# plant <path relative to the clone> <append|write> <line> -- ONE commit at the throwaway remote.
+# Written with git rather than fleet-msg.sh on purpose: the point of (g) and (h) is a name and a
+# stamp that fleet-msg.sh's own clock would never produce.
+plant() {
+    local rel="$1" mode="$2" line="$3"
+    git -C "$TD/A" fetch -q origin claude/mailbox || return 1
+    git -C "$TD/A" reset -q --hard FETCH_HEAD || return 1
+    mkdir -p -- "$(dirname -- "$TD/A/$rel")" || return 1
+    if [ "$mode" = "append" ]; then printf '%s\n' "$line" >> "$TD/A/$rel"; else printf '%s\n' "$line" > "$TD/A/$rel"; fi
+    git -C "$TD/A" add -- "$rel" || return 1
+    git -C "$TD/A" commit -q -m "arms: a planted line" || return 1
+    git -C "$TD/A" push -q origin claude/mailbox || return 1
+}
 
 # ---- (a) ------------------------------------------------------------------------------------------
 printf 'One line WHAT.\nOne line of evidence.\nNEXT: nothing.\n' > "$TD/body-a.md"
@@ -125,6 +169,11 @@ else
                        *) bad a "header line 2 is '$h2'" ;; esac
     fi
 fi
+# The cut arm (e) reads from is a POSITION -- the tip that holds arm (a)'s message -- and not the
+# stamp on its name: the stamp is a second or so before the commit that carries it, so a cursor
+# taken from the name can land either side of that commit and the arm would flap.
+CUT_A="$(BARETIP)"
+SINCE_A_LEGACY="$(utc)"
 
 # ---- (b) the planted token. Assembled from pieces so this harness itself stays census-clean. -------
 seg="Users"; acct="qwertyname"; sep="/"
@@ -181,21 +230,91 @@ printf 'One line WHAT.\nNEXT: nothing.\n' > "$TD/body-e.md"
 send A G C1 "arm e -- after the cut" "$TD/body-e.md" "$TD/out-e1"; rc_e1=$?
 send A COORD FLEET "arm e -- a ruling to everyone" "$TD/body-e.md" "$TD/out-e2"; rc_e2=$?
 F_E1="$(field FILE "$TD/out-e1")"; F_E2="$(field FILE "$TD/out-e2")"
-B_A="${FILE_A##*/}"; SINCE_A="${B_A%%-*}"
-FLEET_MAILBOX_CLONE="$TD/A" bash "$RDR" C1 "$SINCE_A" > "$TD/out-read-since" 2>&1; rc_r1=$?
-FLEET_MAILBOX_CLONE="$TD/A" bash "$RDR" C1 > "$TD/out-read-all" 2>&1; rc_r2=$?
+TIP_E="$(BARETIP)"
+readnew C1 "$CUT_A" "$TD/out-read-since"; rc_r1=$?
+readnew C1 ""       "$TD/out-read-all";   rc_r2=$?
+readnew C1 "$SINCE_A_LEGACY" "$TD/out-read-legacy"; rc_r3=$?
 NS="$(field NEXT-SINCE "$TD/out-read-since")"
-has() { grep -q -- "$1" "$2"; }
+NSL="$(field NEXT-SINCE "$TD/out-read-legacy")"
+M_E="$(field MESSAGES "$TD/out-read-since")"
 if   [ "$rc_e1" -ne 0 ] || [ "$rc_e2" -ne 0 ]; then bad e "could not seed the reader (rc $rc_e1 / $rc_e2)"
-elif [ "$rc_r1" -ne 0 ] || [ "$rc_r2" -ne 0 ]; then bad e "fleet-read.sh exited $rc_r1 / $rc_r2"
-elif has "$FILE_A" "$TD/out-read-since";       then bad e "the SINCE read still listed the file AT the cut"
-elif ! has "$F_E1" "$TD/out-read-since";       then bad e "the SINCE read missed the later message to C1"
-elif ! has "$F_E2" "$TD/out-read-since";       then bad e "the SINCE read missed inbox/FLEET/"
+elif [ "$rc_r1" -ne 0 ] || [ "$rc_r2" -ne 0 ] || [ "$rc_r3" -ne 0 ]; then bad e "fleet-read.sh exited $rc_r1 / $rc_r2 / $rc_r3"
+elif has "$FILE_A" "$TD/out-read-since";       then bad e "the range read still listed the file AT the cut"
+elif ! has "$F_E1" "$TD/out-read-since";       then bad e "the range read missed the later message to C1"
+elif ! has "$F_E2" "$TD/out-read-since";       then bad e "the range read missed inbox/FLEET/"
+elif [ "${M_E:-0}" -ne 2 ];                    then bad e "MESSAGES $M_E -- the range after the cut holds exactly the two later files"
 elif ! has "$FILE_A" "$TD/out-read-all";       then bad e "the unfiltered read missed the file at the cut"
-elif ! has 'PROTOCOL v4 addressed comms' "$TD/out-read-all"; then bad e "the unfiltered read printed no ledger line"
+elif ! hasF "$LAST_LEDGER" "$TD/out-read-all"; then bad e "the unfiltered read did not print the ledger's newest line"
 elif [ -z "$NS" ];                             then bad e "no NEXT-SINCE was printed"
-elif [[ ! "$NS" > "$SINCE_A" ]];               then bad e "NEXT-SINCE=$NS did not advance past $SINCE_A"
-else ok e "SINCE=$SINCE_A excluded the file at the cut, listed the later one and inbox/FLEET/, ledger read, NEXT-SINCE=$NS"
+elif [ "$NS" != "$TIP_E" ];                    then bad e "NEXT-SINCE=$NS is not the tip it read ($TIP_E)"
+elif ! has "$F_E1" "$TD/out-read-legacy";      then bad e "the legacy time cursor $SINCE_A_LEGACY did not resolve to a position -- the later message is missing"
+elif [ "$NSL" != "$TIP_E" ];                   then bad e "the legacy read's NEXT-SINCE=$NSL is not the tip ($TIP_E)"
+else ok e "the range after $CUT_A held exactly $M_E files (the one at the cut excluded, inbox/FLEET/ included), the unfiltered read printed the ledger tail, NEXT-SINCE=$NS, and the legacy time form resolved to the same tip"
+fi
+
+# ---- (g) a ledger line STAMPED in 2001 and COMMITTED after the cursor --------------------------------
+# The pre-fix half is asserted as "the planted line is absent", not as "LEDGER 0": the old tool also
+# hides every OTHER line whose stamp is behind the reader's UTC clock, so the count it prints depends
+# on the box's timezone while the planted line's invisibility does not. Both counts are reported.
+CUT_G="$(BARETIP)"; T_G="$(utc)"
+G_LINE='2001-01-01 00:00 · RULING · 000000g00 · arm g -- stamped in 2001, committed after the cut'
+plant docs/phase4/LEDGER.md append "$G_LINE"; rc_gp=$?
+readnew C1 "$CUT_G" "$TD/out-g-new"; rc_gn=$?
+readold C1 "$T_G"   "$TD/out-g-old"; rc_go=$?
+L_GN="$(field LEDGER "$TD/out-g-new")"; L_GO="$(field LEDGER "$TD/out-g-old")"
+if   [ "$rc_gp" -ne 0 ];   then bad g "could not plant the back-stamped ledger line (rc=$rc_gp)"
+elif [ "$PRE_OK" -ne 1 ];  then bad g "the pre-fix reader (blob $PREBLOB) is not in this clone -- the red half cannot be shown"
+elif [ "$rc_go" -ne 0 ];   then bad g "the pre-fix reader exited $rc_go; see $TD/out-g-old"
+elif hasF "$G_LINE" "$TD/out-g-old"; then bad g "the PRE-FIX reader printed the back-stamped line -- the defect does not reproduce, so this arm measures nothing"
+elif [ "$rc_gn" -ne 0 ];   then bad g "fleet-read.sh exited $rc_gn; see $TD/out-g-new"
+elif ! hasF "$G_LINE" "$TD/out-g-new"; then bad g "the fixed reader did not print the back-stamped line"
+elif [ "${L_GN:-0}" -ne 1 ]; then bad g "LEDGER $L_GN -- not the one line the range $CUT_G..tip added"
+else ok g "pre-fix LEDGER $L_GO, the 2001 line invisible at $T_G; fixed LEDGER $L_GN with the line printed"
+fi
+
+# ---- (h) an inbox file whose NAME sorts before the names already consumed ----------------------------
+# Not written through fleet-msg.sh: its own clock can only ever produce a name that sorts LAST, which
+# is exactly why the name-ordered reader looked correct for as long as one box wrote all the files.
+CUT_H="$(BARETIP)"; T_H="$(utc)"
+H_FILE="docs/phase4/inbox/C1/20250101T000000Z-R.md"
+plant "$H_FILE" write "# arm h -- a name from January 2025, committed now"; rc_hp=$?
+readnew C1 "$CUT_H" "$TD/out-h-new"; rc_hn=$?
+readold C1 "$T_H"   "$TD/out-h-old"; rc_ho=$?
+M_HN="$(field MESSAGES "$TD/out-h-new")"; M_HO="$(field MESSAGES "$TD/out-h-old")"
+if   [ "$rc_hp" -ne 0 ];   then bad h "could not plant the early-named inbox file (rc=$rc_hp)"
+elif [ "$PRE_OK" -ne 1 ];  then bad h "the pre-fix reader (blob $PREBLOB) is not in this clone -- the red half cannot be shown"
+elif [ "$rc_ho" -ne 0 ];   then bad h "the pre-fix reader exited $rc_ho; see $TD/out-h-old"
+elif has "$H_FILE" "$TD/out-h-old"; then bad h "the PRE-FIX reader listed the early-named file -- the defect does not reproduce, so this arm measures nothing"
+elif [ "$rc_hn" -ne 0 ];   then bad h "fleet-read.sh exited $rc_hn; see $TD/out-h-new"
+elif ! has "$H_FILE" "$TD/out-h-new"; then bad h "the fixed reader did not list the early-named file"
+elif [ "${M_HN:-0}" -ne 1 ]; then bad h "MESSAGES $M_HN -- not the one file the range $CUT_H..tip added"
+else ok h "pre-fix MESSAGES $M_HO, $H_FILE invisible at $T_H; fixed MESSAGES $M_HN with the file listed"
+fi
+
+# ---- (i) NEXT-SINCE is the tip read, and a legacy cursor in the future is repaired -------------------
+CUT_I="$(BARETIP)"; T_I="$(utc)"
+I_LINE='2099-01-01 00:00 · RULING · 000000i00 · arm i -- a stamp from the future'
+plant docs/phase4/LEDGER.md append "$I_LINE"; rc_ip=$?
+TIP_I="$(BARETIP)"
+readnew C1 "$CUT_I" "$TD/out-i-new"; rc_in=$?
+readold C1 "$T_I"   "$TD/out-i-old"; rc_io=$?
+NS_IN="$(field NEXT-SINCE "$TD/out-i-new")"; NS_IO="$(field NEXT-SINCE "$TD/out-i-old")"
+FUT="$(date -u -d "@$(( $(date -u +%s) + 86400 ))" +%Y%m%dT%H%M%SZ)"; rc_fut=$?
+readnew C1 "$FUT" "$TD/out-i-fut"; rc_if=$?
+readold C1 "$FUT" "$TD/out-i-futold"; rc_ifo=$?
+NS_IF="$(field NEXT-SINCE "$TD/out-i-fut")"
+if   [ "$rc_ip" -ne 0 ] || [ "$rc_fut" -ne 0 ]; then bad i "could not plant the 2099 line / read the clock (rc $rc_ip / $rc_fut)"
+elif [ "$PRE_OK" -ne 1 ];  then bad i "the pre-fix reader (blob $PREBLOB) is not in this clone -- the red half cannot be shown"
+elif [ "$rc_io" -ne 0 ] || [ "$rc_ifo" -ne 0 ]; then bad i "the pre-fix reader exited $rc_io / $rc_ifo"
+elif [ "${NS_IO:0:4}" != "2099" ]; then bad i "the PRE-FIX reader's NEXT-SINCE is '$NS_IO', not the 2099 stamp it read -- the defect does not reproduce"
+elif hasF "is in the future" "$TD/out-i-futold"; then bad i "the PRE-FIX reader repaired a future cursor -- the defect does not reproduce"
+elif [ "$rc_in" -ne 0 ] || [ "$rc_if" -ne 0 ]; then bad i "fleet-read.sh exited $rc_in / $rc_if"
+elif [ "$NS_IN" != "$TIP_I" ]; then bad i "NEXT-SINCE=$NS_IN is not the tip it read ($TIP_I)"
+elif ! hasF "$I_LINE" "$TD/out-i-new"; then bad i "the 2099 line was not printed -- a stamp still decides membership"
+elif ! hasF "SINCE $FUT is in the future -- repaired to" "$TD/out-i-fut"; then bad i "a cursor a day ahead was not repaired out loud"
+elif [ "$NS_IF" != "$TIP_I" ]; then bad i "the repaired read's NEXT-SINCE=$NS_IF is not the tip ($TIP_I)"
+elif ! hasF "$G_LINE" "$TD/out-i-fut"; then bad i "the repaired cursor did not reach arm (g)'s line, which landed minutes ago"
+else ok i "pre-fix NEXT-SINCE=$NS_IO (the stamp, hours ahead) and no repair; fixed NEXT-SINCE=$NS_IN = the tip, $FUT repaired out loud and still reaching the recent range"
 fi
 
 # ---- (f) arm (f), second half ------------------------------------------------------------------------
@@ -209,5 +328,5 @@ else
 fi
 
 echo "----"
-if [ "$FAILED" -eq 0 ]; then echo "ARMS: 6/6 PASS"; exit 0; fi
+if [ "$FAILED" -eq 0 ]; then echo "ARMS: 9/9 PASS"; exit 0; fi
 echo "ARMS: $FAILED FAILED"; exit 1
