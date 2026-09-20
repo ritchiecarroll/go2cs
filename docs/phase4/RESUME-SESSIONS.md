@@ -457,7 +457,10 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     sweep_s 654 s over 13 rows. The TSV ref pushes now, then the evidence commit. The warn-only arm was VACUOUS
     (the LICENSE branch is never reached for a stdlib row) -> still OWED with a real mechanism. THE NINTH b3ded6602a
     (comment-only: citations by refusal text; three stale testConversion.go line pins replaced) taken; G STAYS on
-    the eighth. C1 cites the verdict expression by name, not :8387. i9's TSV AT ORIGIN (7257173d): claude/i9-h10-
+    the eighth. THE CORE ARM ON THE TENTH GREEN (i7): the canary passes on the committed reader and refuses a folding
+    reader and plain ConvertFrom-Json on both editions; two items for the ELEVENTH post-leg (the console message's
+    'reader folded' over-claim; -SelfTest exits before the canary). C1 cites the verdict expression by name. i9's TSV AT
+    ORIGIN (7257173d): claude/i9-h10-
     recon-tsv 748da4f895 (one path on 0dc65a8e8d, signed, 17 lines, CR 0, ten columns; read back byte-identical;
     provenance reads on the tree's originals) -> C1's concatenation UNBLOCKED on R's a5fe6375e4 + i9's 748da4f895;
     G's full 107 on the eighth follows. i9's evidence commit follows its census (slow on single-line records --
@@ -1704,8 +1707,9 @@ repoguard; push-then-announce) -- CUT and PUSHED 36531d847c (3 files +37/-15; re
 CNR NO REGRESSION over 729; census clean; repoguard 6/6); ANNOUNCED (3a680658f); C1's DESIGN READ SOUND (18f254c9)
 with two follow-ups landing WITH the seat as a SECOND commit (cutting on the i7, no push until announced): the
 scratch-root arms pin the KIND (C1's plant fired nothing), and the by-construction premise stated as conditional on
-the root's contents (a seeded root opens the host path). Then the apply from the i7 carries both (suite + CNR +
-census + repoguard). C2's structural read not owed on this seat. The basis
+the root's contents (a seeded root opens the host path) -- CUT 3983310d6d on 36531d847c (three files +64/-19; both
+asserts proven load-bearing by their own plants; census clean), ANNOUNCED then pushed; the apply from the i7 carries
+both (suite + CNR + census + repoguard). C2's structural read not owed on this seat. The basis
 KEEPS all ten lane columns ("four named" = the generator's required set).
 R's RE-RUN DONE (3974183a): 7/7 on a fresh tree (census CLEAN), second TSV commit a5fe6375e4 on 6716955147 (+8/-8):
 85 PASS / 7 BUILD / 13 NOVERDICT, sweep_s 4,655 s over 92 rows; two real findings under the contamination: `unique`
@@ -1733,8 +1737,9 @@ minimal UNC prefix (the routed red could not fire); the seam is the PLACEHOLDER 
 the census header's own contract (the Go guard applies it to every kind: 237 census refusals vs the guard's 0) ->
 (a) extend the admit to unc_ arms, the red a non-placeholder non-nickname host, the selftest gains the known negative;
 THEN the u+4hex admit on the unc_ host token (C1's A/B 48b7d578: clears 120 of 237, refuses all 117 real hosts; R's
-terminator alternative admits 19 ordinary hosts -> refused) as the next census commit, covering the census AND the Go
-guard. CHANNEL NOTE: COORD's post tool runs the fleet guard over the whole mailbox tree; R's 79910e4a spelled the
+terminator alternative admits 19 ordinary hosts -> refused) -- CUT a99ec42af (both halves) and LANDED on master
+01d4e54a39 (self-test 103 -> 112; repoguard whole package 52/0; census clean x3); lanes re-copy posting copies from
+it; R re-censuses the five and pushes the second evidence commit. CHANNEL NOTE: COORD's post tool runs the fleet guard over the whole mailbox tree; R's 79910e4a spelled the
 escape shape literally and blocked COORD's channel -> a CORRECTION commit on top at 06dc8a77ff (the literals as
 bracketed tokens); every lane DESCRIBES the shape until the admit lands.
 one commit C1 cuts, COORD lands -- CUT aad0273e7 (2 files, selftest 95 -> 103, both reds fired) and LANDED on
