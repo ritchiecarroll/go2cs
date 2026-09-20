@@ -1659,7 +1659,13 @@ go2cs_test_comparison.json when the summary is absent (verdicts = matched, diver
 sweep_s measured; NOVERDICT reserved for rows with NO comparison document); red-first on R's unicode/utf8 evidence
 pair; (2) the fifth's rows are RE-CLASSIFIED at the concatenation from per-row evidence commits on each TSV ref
 (docs/phase4/hopA-inputs/recon-evidence/LANE/ROW/, NOVERDICT rows only; sweep_s := wall_s), every re-classified row
-named by the assembler. R: push a5fe6375e4, the evidence commit (13 rows), teardown both trees; then mlkem, reflect. SIX genuine BUILD rows routed to C1
+named by the assembler. R: push a5fe6375e4, the evidence commit (13 rows), teardown both trees; then mlkem, reflect.
+EVIDENCE SPEC AMENDED (COORD after C1 7b54a26c): per row the JSON's CreationTime inside the run window, testFilter
+ABSENT (the assembler refuses a stamped record), package == row; verdicts = len(go) - len(disclosed) (the converter's
+:8387; withdrawn already removed from the Go map, gated not subtracted; matched is a BOOL); the seventh reads only a
+JSON newer than the row's start (else NOVERDICT 'stale record'). G owes no evidence commit (its eight fifth rows all
+PASS with summaries); C2 sized R's recoverable cost at up to 772 s over the 13 NOVERDICT rows. i9's ACK of the
+pull-forward is OUTSTANDING (asked at the amendment post). SIX genuine BUILD rows routed to C1
 for sizing: sync (CS0708 x17...), runtime (CS0310 x22: a union constraint with a POINTER member lowers to
 `where T : new()` and zh<T> is abstract -> constraint emission; + CS1061 testing.B.Elapsed on the hand-own),
 crypto/ecdh (CS1537), embed/internal/embedtest (CS0234, the known recompute remedy); internal/sync stays an i7
