@@ -462,6 +462,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     provenance reads on the tree's originals) -> C1's concatenation UNBLOCKED on R's a5fe6375e4 + i9's 748da4f895;
     G's full 107 on the eighth follows. i9's evidence commit follows its census (slow on single-line records --
     an operational note); the TENTH (comment shrink + a startup canary asserting 2) pre-taken as a guard.
+    THE TENTH CUT (i9 863404b6): 8b2d1c614e on b3ded6602a (+39/-2) is EXECUTABLE (Assert-OrdinalJsonReader in the
+    preflight, Deny on a folding/throwing reader) -> G STAYS on the eighth; the tenth is the blob for the NEXT launch
+    after C2's delta read + the i7 Core arm (queued to the same sub-agent). EVIDENCE RULED as i9 proposed: push the
+    two RECORDS (net, net/http) when clean; HOLD both tails (net's is a genuine leak -- six profile paths, six
+    account occurrences; net/http's refuses on ipv4 alone with an all-loopback set -> a census question for C1: the
+    ipv4 arm's context should admit loopback/unspecified quads; a private address stays refused).
     C2's DELTA READ of the eighth GREEN (b70531b9; the count-mismatch throw degrades to UNREAD/NOVERDICT; the guard's
     comment overreach banked post-leg); G's clearance waits ONLY on the i7 Core arm re-run on the eighth (running).
     ASSEMBLER RULED (COORD after C1 f100c5b9): header equality goes; each lane read BY NAME; the banked header is the
