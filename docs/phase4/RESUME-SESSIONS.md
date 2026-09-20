@@ -1683,7 +1683,12 @@ DIRECTORY is the provenance, CreationTime read at the WRAPPER's copy never the c
 object_pairs_hook is a REGRESSION guard (Python is case-sensitive: 47 both ways; the red is a planted exact
 duplicate); math/rand's real word is PASS 47 at 43 s (returns at the re-classification). NOTE: the wake-loop cron
 295e6b42 exists but fires only while the REPL is idle -- with the watcher's events arriving continuously it has not
-fired this span; COORD performs the tick's duties inline on every event. SIX genuine BUILD rows routed to C1
+fired this span; COORD performs the tick's duties inline on every event.
+(5) AMENDED (COORD after C1 bfc08bd2): the two HOST rows (internal/coverage/cfile 16/16, internal/trace 92/92 net
+undisclosed, no results tail) stay NOVERDICT by the ruled cause and are NOT re-classified; the assembler NAMES any
+row whose net undisclosed set equals its verdict count (a detector; COORD rules per row). R's mlkem seat = a
+WORKTREE at the tip with the baseline green, NOT yet a diff (R 679c6bdb) -- the reads wait for the announce; R's
+two leg trees torn down (tracked 14142 before/after; the two leak originals held by hash for the redaction). SIX genuine BUILD rows routed to C1
 for sizing: sync (CS0708 x17...), runtime (CS0310 x22: a union constraint with a POINTER member lowers to
 `where T : new()` and zh<T> is abstract -> constraint emission; + CS1061 testing.B.Elapsed on the hand-own),
 crypto/ecdh (CS1537), embed/internal/embedtest (CS0234, the known recompute remedy); internal/sync stays an i7
