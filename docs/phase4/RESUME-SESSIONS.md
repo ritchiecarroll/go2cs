@@ -1675,7 +1675,15 @@ COORD lands, R re-censuses. math/rand's comparison JSON has FOUR case-collision 
 refuse ConvertFrom-Json -> the seventh's SHAPE fixture (47 ordinal names in both editions) and the assembler parses
 go/csharp as pair lists (object_pairs_hook; plain loads keeps the last = 43, the red). R tears down both leg trees
 now; the constraint-proxy (crypto/mlkem CS0311) seat is CUT with a green baseline (8 arms) -- announce pending; C1
-design + C2 structural reads; apply from the i7 after the fips140test apply and the hand-own reorder seat. SIX genuine BUILD rows routed to C1
+design + C2 structural reads; apply from the i7 after the fips140test apply and the hand-own reorder seat.
+SPEC CORRECTIONS (COORD after R 1a6f91f4 + C2 bdff0ad6): unicode/utf8 verdicts = 15 (len(go) - len(disclosed));
+TWO of R's twelve documents refuse ConvertFrom-Json (math/rand, mime/multipart) = two shape fixtures; clause (c) =
+the record's package equals the row's LAST SEGMENT or the one before a vN (math/rand/v2 renders rand), the evidence
+DIRECTORY is the provenance, CreationTime read at the WRAPPER's copy never the committed one; the assembler's
+object_pairs_hook is a REGRESSION guard (Python is case-sensitive: 47 both ways; the red is a planted exact
+duplicate); math/rand's real word is PASS 47 at 43 s (returns at the re-classification). NOTE: the wake-loop cron
+295e6b42 exists but fires only while the REPL is idle -- with the watcher's events arriving continuously it has not
+fired this span; COORD performs the tick's duties inline on every event. SIX genuine BUILD rows routed to C1
 for sizing: sync (CS0708 x17...), runtime (CS0310 x22: a union constraint with a POINTER member lowers to
 `where T : new()` and zh<T> is abstract -> constraint emission; + CS1061 testing.B.Elapsed on the hand-own),
 crypto/ecdh (CS1537), embed/internal/embedtest (CS0234, the known recompute remedy); internal/sync stays an i7
