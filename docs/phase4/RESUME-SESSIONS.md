@@ -325,6 +325,14 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     Windows box before H11 is declared: check-roster-format.ps1 and release-nuget.ps1 -VerifyOnly at the applied tree
   then C2's subtree-load seat claude/c2-subtree-load-goroot-guard 19175c31ad (merge-base 43a3627667; projitems composed by
     both seats, the q98 guards police it; the converter suite with TestSubtreeLoad* by name; no corpus build)
+  then R's P-256 cut claude/laneR-p256-table-decode d01e5d307d on C1's and C2's reads (corpus build + GolibTests vs the box-base
+    four + SystemCertVerify direct exe + the converter suite), then the FULL four-phase behavioral suite: H9 closes when
+    Output's failing set = FuncLiteralCallerNames + GoroutineWaitState with APPEARED empty
+  i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
+    StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
+    stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
+  H11 seat prediction 0fa1abc22: stamp 8cf90ac83b, six NEW arms by name (three files, 21 of the badge file's 22 pre-exist),
+    the baseline measured at i9's own tip first (rc 0, fail set EMPTY, 732 arms)
   q100 claude/c1-q100-native-array-view-floor at its RE-PINNED tip abe3b3798b (9c5460585: the i7 gate CLEAR at 0dca38552c
     stands; the commit on top is comment-and-prose-only, verified).
 Not yours: G's H8 census, C2's comparand procedure, the runtime row. Blocked on: nothing for the first five.
@@ -963,6 +971,13 @@ silently on a host crash); the nistec/ecdsa projects reaching ScalarBaseMult run
 bound on the q97 precedent (0b9d2973c: MemoryMarshal.Cast's target element must be a PRIMITIVE; array<T> may be the SOURCE
 through ToSpan(), never the DESTINATION -- no [N]E in this corpus is a legal target); C1 reads the design half, C2 reads,
 i9 applies after the H11 seat and re-runs the H9 suite. The general typed-view cure stays post-hop.
+CUT 2026-09-20 (c8004c3f0): claude/laneR-p256-table-decode d01e5d307d off the version tip 025903ef01, five files +195/-14
+(nistec p256_impl.cs [GoInit] decode; fiat p256_impl.cs Montgomery-limb loader; p256.cs init displaced; package_info map;
+manualTypeOperations.go registration); red-first re-run at the rebased base (0xC0000005 before with q100's floor PRESENT --
+measured not firing -- exit 0 Go-identical after; made to fail on OUTPUT by reversed limb order); the big-endian arm SUBSUMED
+by explicit little-endian reads; window-aware; converter suite ok. ACCEPTED for the reads (C1 design half, C2 structural +
+Go suite); i9 applies after the H11 and subtree seats: corpus build (nistec + fiat assemblies), GolibTests vs i9's box-base
+four, SystemCertVerify as the direct exe, then the four-phase suite -- Output failing set = the base two by name CLOSES H9.
 DIAGNOSED by i9 (1b2ad7d8f) before R started: both probes FAIL in Output (the crash predates rung 7); the managed stack
 names ElemRefBox<p256AffineTable>.get_ValueSlot via DerefOrNull from nistec.Select <- ScalarBaseMult <- ecdsa.GenerateKey;
 the site is crypto/internal/fips140/nistec/p256.cs:574-616 -- the 1.24 EMBEDDED P-256 table, FromPinnedBox cast
