@@ -236,7 +236,14 @@ RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane
   q100 after the i7's gate). C1: q102 cut -> q86 field-pattern fix (RULED its own seat) -> the pthread seven held as a NOTE.
   C2: H8 comparand -> q100 second read -> q102/q86 second reads. R: steward loop -> the reflect row read at the version tip in
   a spurt. MASTER moved 2026-09-20 to 43ee2ac8b3 (the identifier census's release-literal admit, signed merge), then to
-  a6be940665 (the H8 DOCS SEAT: C2's amendment d7b0876ce6 + G's record d384d6357d, two signed merges, gates green). COORD on the i7: the q100 gate DONE, CLEAR for i9's apply (mailbox 1135d780c; fail set identical both sides, +4 arms, made to fail 2 of 4),
+  a6be940665 (the H8 DOCS SEAT: C2's amendment d7b0876ce6 + G's record d384d6357d, two signed merges, gates green), then
+  to 4d25779a1a (the LANE INSTRUMENT SEAT: c1-post.sh b6241569f0, r-post.sh 80fc4b9406, c2-post.sh bbe99c2817 under
+  .claude/coord-scripts/lanes/, three signed merges, the tracked-tree guard green; i9's and G's tools at their next idle).
+  H11 GATES (i9 a9749f5e3, RULED 5b06ed59d): check-roster-format.ps1 2 of 638 and release-nuget.ps1 -VerifyOnly 10 problems
+  are ONE pre-existing cause -- the ten relocated rows still at pre-hop paths, nistec's and edwards25519's disclosure files
+  orphaned by the relocation -- identical at three trees; HOP DEBT owned by H10 (the rows re-path + re-bank, the files
+  follow their packages); H11 is DECLARED AFTER H10 by the ladder's order; C1's held seat 4de76ded06 annotates and does
+  not re-path (C1 74c0b8f45); i9's two 'removed' are C1's two re-named successors (weak, internal/sync). COORD on the i7: the q100 gate DONE, CLEAR for i9's apply (mailbox 1135d780c; fail set identical both sides, +4 arms, made to fail 2 of 4),
   rulings, folds, this file's refresh at every landing, the save-state cadence rising toward 90% weekly usage.
   PROTOCOL: frozen; posts are loop-of-record only; the mailbox is a tool, not an objective (owner order 2026-09-19).
 
