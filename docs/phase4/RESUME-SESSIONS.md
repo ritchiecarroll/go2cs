@@ -1180,6 +1180,15 @@ the worktree state (no re-merge; gate logs reused only with a final line + rc). 
 NEXT on the i7 after batch 2 pushes: the rehearsal (the i7's W=4 slice 1 + fips140test non-banking) on the batch-2
 tip with the driver + wrapper from master; R's mlkem wrap-bound fix as a small apply; the ecdh apply; then the
 json / maphash / synctest / embedtest / sha3 converter seats.
+~12:35: i9's wrapper-identity driver commit 2972968a05 (the blob id beside the file sha256; built via the API with
+zero local objects, signed, the set-based deletion guard) LANDED -> MASTER 7099328479. R's correction (e61343883):
+the mlkem row stops one gate EARLIER -- a foreign struct has no declaration so forwardReturnTypes is empty and the
+lookup exits before the map; the fix = foreign return types from the referenced symbol + the map-bound lift, four
+arms green in R's worktree; the row + the stdlib gates before the announce. C2's correction (69b4daeea): the fired
+bound was :189 (assembly equality; 683 of 1,824 production records are package-qualified -- a proxy), not :192.
+C1 RAN the index tool (a5a6305c5): sound; it refuses on the nine relocated principals without proof pages (the
+driver's re-bank resolves it). Batch 2's resume: state verified, gate (a) reused, (b)-(g) queued behind ec2's suite;
+the sibling-poll defects (self-match; the 1,024-char CommandLine truncation) fixed.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
