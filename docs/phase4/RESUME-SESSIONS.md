@@ -1264,7 +1264,9 @@ claude/g-oracle-tags dd376e3f12 on 93feb8df2b, three files (testConversion.go +4
 oracleTestArgs_test.go new, projitems +1); the oracle appends options.loaderBuildFlags() -- one definition; unit arm red
 on the unfixed builder, green fixed, the planted empty set fails it; nistec BEFORE rc 1 / 44 false, AFTER rc 0 / 0
 diverged / 44 VALIDATED (COORD's 45 corrected); suite rc 0; two-seeded corpus diff 0. ACCEPTED (COORD after 1a46bacb):
-C2 reads the Go unit arm; i9 applies THIRD (after R's and fips140test's seats). G's floor-1 finding banked fleet-wide:
+C2 reads the Go unit arm; i9 applies THIRD (after R's and fips140test's seats). C2's READ DONE (6acab84c: SOUND -- 3/3
+with the population asserted; made to fail two ways firing :48 and :70; one go test site; one buildTags assignment) ->
+CLEARED for i9's apply on 4df427fdcb (COORD after 6acab84c); its stamp fixes the leg's tip. G's floor-1 finding banked fleet-wide:
 a process census by name pattern is a dead counter for a renamed converter -- count by executable path with a positive
 arm; G fixes h10-rows.sh/armb.sh before its recon list. PREFLIGHT DONE on both sides (3164e0c9): windows green first
 run; the WSL arm had NO go1.24.13 root (only 1.23.12 and the ambient) -- provisioned side-by-side under the arm's home,
