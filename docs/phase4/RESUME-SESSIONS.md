@@ -437,7 +437,13 @@ DONE 2026-09-20 (7a5d2af28: 204 rows, 7227 -> 7319 declarations, 62 rows moved, 
 23 off-platform; TEN banked rows have no package at 1.24.13 -- the hop's relocations). ASSIGNED NEXT (COORD): the SUCCESSOR
 MAP for the ten by test-name migration (banked row -> 1.24.13 package(s) declaring its removed names -> found / not found),
 plus the declaration counts of the unbanked successors (crypto/internal/fips140/*, internal/runtime/*, weak, internal/sync);
-a reading, no roster edit; the roster re-point is COORD's docs seat at H10. (3) The seven pthread members the darwin
+a reading, no roster edit; the roster re-point is COORD's docs seat at H10. DONE 2026-09-20 (49ddc38cd, ACCEPTED: eight
+re-point 1:1, alias + nistec MERGE into crypto/internal/fips140test, mlkem768 SPLITS across fips140/mlkem + crypto/mlkem;
+two names retire; TestP256PrecomputedTable RULED off-platform at 1.24.13; twelve unbanked successors = 391 declarations enter
+H10 as new rows). ASSIGNED NEXT: the conversion-only -tests pre-stage of the twelve successor packages at the version tip
+(converter built at the tip under the 1.24.13 pin; each into its own never-reused root, second positional, sequential; NO
+-test-action): per package the exit code, emitted .cs count, unresolved lift markers or refusals by name, emitted vs source
+test-declaration count; no compile, no bank. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
