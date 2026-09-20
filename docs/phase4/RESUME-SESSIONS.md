@@ -1067,6 +1067,10 @@ strip made the marker miss the record's closed spelling -> the anchor-class qual
 anchored name; the arm reaches the anchored path end to end; R cutting both on R's ref. THE DRIVER's BRIEF DRAFTING
 on the i7 (sub-agent; scratchpad driver-brief-DRAFT.md; runbook-sourced vs proposed items; open questions).
 BATCH 2 = the seat ref 8b1a284122 + the host ref 91f1bd5877 + R's ref after the anchored commit; after ha1 pushes.
+R's ANCHORED CUT DONE (~10:00, 64a7c8739): R's ref 1adcf8cf52 (the emittedAdapterPair pairing strips both sides first,
+then the anchored name + qualifier, adapterResolvedName strips its own input; five arms incl. the parity control;
+the projitems guard caught the new source; the channel merge commit was R's tool, fixed to abort + re-run). ALL
+THREE BATCH-2 REFS CUT; C1 + C2 small delta reads; the batch launches when ha1 pushes, no push until the reads land.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
