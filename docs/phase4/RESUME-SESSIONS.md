@@ -451,6 +451,13 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     93feb8df2b (cut by an i7 sub-agent: three sites gated on productionClassEmitted; suite rc 0; the row 13 CS0234 -> 0)
     after C1's design + C2's structural reads -- no source overlap with R's seat, both add a projitems line (the
     projitems guard resolves the merge at the act).
+    R's SEAT APPLIED (46fac3c2) at 9b89dfe46c and STAMPED by COORD at origin (tree 967a36d40d, parents ours-then-theirs
+    93feb8df2b + ce8d0bd654, 5 files +307/-3, every blob the seat's, corpus 0, markers 0, signed) -- VERSION TIP
+    9b89dfe46c. The time commit was not at origin at the act (rides its own apply). i9's two findings banked: assert the
+    -run POPULATION beside every verdict (a no-match pattern exits 0); size a seat with the merge-base form tip...seat,
+    never two-dot against a moved tip. fips140test x oracle overlap in testConversion.go trial-merged clean. NEXT applies
+    on 9b89dfe46c: ce8fc43a87 (fips140test) then dd376e3f12 (oracle), each predicted, gated, stamped; then the leg's
+    worktrees are cut at the tip carrying all three.
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
