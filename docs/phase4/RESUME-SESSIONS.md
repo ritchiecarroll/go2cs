@@ -571,7 +571,11 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     NEXT: the third commit (announce-then-push); C2 reads its diff; the i7 Core arm re-runs on the FINAL tip after the
     fips140test seat's conversions finish (never two conversions on one box); then LAUNCH. The third commit is AT
     ORIGIN (ddc205a1ee); the i7 Core re-run launched on it (sub-agent). H10 RECON LEG LAUNCHED 2026-09-20 (COORD
-    a82eb75b1) at VERSION TIP f0c3399684 (0dc65a8e8d = the leg's tip): wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
+    a82eb75b1) at VERSION TIP f83ba29ffb (the foreign-generic adapter seat STAMPED ~08:30: parents f0c3399684 + c63943eee7, three EQUAL,
+CNR 729 no regression, GenTests 43/43, stdlib 344/0, the sync row COMPILES 46/6 to the name; the COLLISION-KEY
+follow-up (both operands + the value-adapter twin question) CUTTING on the i7 in worktree ck1; two instrument
+findings banked: the circular machine-scope GOROOT pin; an empty materialised tool passes vacuously -- assert byte size
++ self-test) (0dc65a8e8d = the leg's tip): wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
     throwaway detached worktrees, one process per list, one attempt per row, TSVs pushed as new per-lane refs
     (LANE-h10-recon-tsv) when a list completes with the word histogram and the named CONVERT/BUILD/DIVERGED/NOVERDICT
     rows; expected words for the known rows stated (time CONVERT, reflect NOVERDICT, fips140test/mlkem/internal-sync
@@ -980,7 +984,10 @@ reading: the spine composes with master (both roster hunks survive) = leg (3)'s 
 (~08:30): an i7 Opus sub-agent (worktree tr1, detached at master 076c006d41) merges legs (1) lists 89c1ebc2cc,
 (2) R 36b3783953 / i9 eca66ad342 / G de9aa07ebe, (3) the spine 3f17460a7 -- signed, NO PUSH; COORD verifies (EQUAL
 blobs, zero deletions, both roster hunks, census, repoguard, markers) then pushes master and posts the stamp; leg
-(3b) C1's docs half when announced; leg (4) C2's shardmap + THE PLAN after --timings on the landed basis.]
+(3b) C1's docs half when announced; leg (4) C2's shardmap + THE PLAN after --timings on the landed basis.
+CORRECTED ~08:35: the spine is FOUR commits (1fa2b0ad4: verdicts = |go minus names(disclosed)|, runtime/pprof 161;
+two files); leg (3b) = claude/c1-h10-docs-half 47c60b1d3 off master (+74/-0, docs/GoCorpusMigration.md: the tree-
+discard scope docs/validation/current/ + the leg's readings) -- the train sub-agent re-pointed and (3b) added.]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
@@ -1598,7 +1605,11 @@ with the population asserted; made to fail two ways firing :48 and :70; one go t
 CLEARED for i9's apply on 4df427fdcb (COORD after 6acab84c); its stamp fixes the leg's tip. APPLIED (03a5cbbf) at
 0dc65a8e8d and STAMPED by COORD (tree f236cdeed2, parents 4df427fdcb + dd376e3f12, 3 files +147/-12, testConversion.go
 and the projitems composed exactly as a clean merge composes them -- verified by a throwaway merge on the i7; corpus 0;
-signed) -- VERSION TIP f0c3399684 (0dc65a8e8d = the leg's tip); THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
+signed) -- VERSION TIP f83ba29ffb (the foreign-generic adapter seat STAMPED ~08:30: parents f0c3399684 + c63943eee7, three EQUAL,
+CNR 729 no regression, GenTests 43/43, stdlib 344/0, the sync row COMPILES 46/6 to the name; the COLLISION-KEY
+follow-up (both operands + the value-adapter twin question) CUTTING on the i7 in worktree ck1; two instrument
+findings banked: the circular machine-scope GOROOT pin; an empty materialised tool passes vacuously -- assert byte size
++ self-test) (0dc65a8e8d = the leg's tip); THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
 measured a write target; four arms made to fail on the shipped bytes) LANDED on master 70bce870c2 with C1's docs seat.
 G runs its list (107) at 0dc65a8e8d. G's floor-1 finding banked fleet-wide:
 a process census by name pattern is a dead counter for a renamed converter -- count by executable path with a positive
