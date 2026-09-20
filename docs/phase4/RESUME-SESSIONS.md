@@ -1173,6 +1173,13 @@ main loop's shared helper -- no second spelling; a two-assembly red arm; then th
 PATH). BATCH 2 LANDS ON ITS OTHER GATES with the row recorded as CS0266 x2; R's fix rides a small apply on top.
 R's instrument findings: a floor-3 emission into the live SDK (cleaned, proven); the go CHILD resolves from PATH
 not GOROOT -> C1 adds the PATH-first line to H10's preconditions.
+OUTAGE 11:40-12:10 (the i7's session limit; reset 12:10): both i7 sub-agents killed mid-battery -- batch 2 (merges
+done in ab2 at 7e7f05f63a; gates in flight) and the ecdh const guard (edits in place in ec2). RELAUNCHED 12:13 from
+the worktree state (no re-merge; gate logs reused only with a final line + rc). G's design read of the ecdh seat SOUND
+(0879a208c; a comment debt: the count assertion is unreachable as a failure; the injection-landed rule banked).
+NEXT on the i7 after batch 2 pushes: the rehearsal (the i7's W=4 slice 1 + fips140test non-banking) on the batch-2
+tip with the driver + wrapper from master; R's mlkem wrap-bound fix as a small apply; the ecdh apply; then the
+json / maphash / synctest / embedtest / sha3 converter seats.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a

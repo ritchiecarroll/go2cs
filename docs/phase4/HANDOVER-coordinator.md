@@ -721,3 +721,4 @@ Each lane runs in its own Claude Code session on its own host with its own local
 - 11:13: C1's ecdh structural read sound; the const-key guard cutting as the seat's second commit (ec2); C1's vacuous-verdict arm landed -> MASTER bdabdea4b7.
 - 11:21: C2's index regeneration tool landed -> MASTER 3e3d57a497; i9's os A/B unmoved (1103/0 both ways) -- C1's question closed for both packages.
 - 11:24: the mlkem row reads CS0266 x2 at BUILD off R's ref (the white-box wrap bound) -> R cuts the fix; batch 2 lands on its other gates with the row recorded; R's fix as a small apply; C1's PATH-first runbook line.
+- 12:14: OUTAGE 11:40-12:10 (session limit) killed batch 2's battery and the const-guard commit mid-run; both relaunched from their worktrees; G's ecdh design read SOUND.
