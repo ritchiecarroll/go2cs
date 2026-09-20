@@ -435,8 +435,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     count matched on the disclosed entry's leading token, cross-checked against the artifact's matched flag. Lesson
     banked: a guard whose success case is an error stream passes all its refusal controls (git answers 'not in a work
     tree' on stderr -> a terminating error under strict preference; every native git call now reads the exit code).
-    NEXT: C2 re-reads at 4739769503; the i7 Core arm re-runs there AFTER the fips140test seat's conversions finish
-    (never two conversions on one box); then LAUNCH.
+    C2 RE-READ at 4739769503 DONE (e747531c: the four items in; three findings -> a THIRD COMMIT ruled: (A) platform-
+    neutral binary names (three hardcoded .exe paths refuse a linux GOROOT with the wrong cause); (B) the successor map at
+    :271-281 is a hand copy already wrong three ways vs C1's ruled map -- carry the four corrections + an owner comment,
+    derive from the roster's relocation table when the roster seat lands; (C) word = UNREAD when diverged is not an int).
+    NEXT: the third commit (announce-then-push); C2 reads its diff; the i7 Core arm re-runs on the FINAL tip after the
+    fips140test seat's conversions finish (never two conversions on one box); then LAUNCH.
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
