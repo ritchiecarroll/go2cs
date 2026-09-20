@@ -1848,7 +1848,17 @@ CS0708/CS0540 cascade) and the wrapped type is unqualified (CS0246). The hand-ow
 GENERATOR SEAT LAUNCHED on the i7 (Opus sub-agent, worktree fg1, new ref claude/coord-foreign-generic-adapter off the
 version tip: the bare Name + a sanitized-argument suffix for a closed foreign instantiation; the wrapped type fully
 qualified; a two-assembly compile-probe red-first; local-generic and foreign-non-generic controls; stdlib rebuild;
-the sync row as the prediction test); C1 design + C2 structural reads when announced; the apply from the i7 after. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
+the sync row as the prediction test) -- CUT and PUSHED c63943eee7 (~06:35): a CLOSED non-generic adapter with the bare
+package-qualified name (the generic route is unrepresentable for a non-generic interface typed at closed args --
+CS1503; the dedupe key is the closed instantiation, a second one fails loudly at CS0102); the converter's cast-site
+rule in interfaceConversion.go drops the type-argument list; a third facet (boxBound's open-receiver comparison)
+fixed; the probe in src/tests/GenTests red-first (CS0692/0246/0708/0540/0050 -> 5/5, GenTests 43/43); the CONTROL =
+the whole corpus's 1,323 generated adapters unchanged; suite ok 707 s; stdlib 344/344 0 errors; the sync row COMPILES,
+46 matched / 6 diverged (2 alloc + the TestOnceXGC family), TestMapMatchesHashTrieMap passes. Banked: a
+staleCoreReferences entry (sync.tests.csproj -> runtime/internal/math) falls due with the sync row at the re-bank;
+the converter must see GOROOT in the backslash spelling (floor 6). Three inert siblings named post-hop. C1 design
++ C2 structural reads; the apply from the i7 after the reorder apply (running); R MERGES c63943eee7 into the
+mlkem ref before cutting part (d) (the same two files). Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
 console codepage mangles UTF-8 git paths -> [Console]::OutputEncoding = UTF8 into the runbook (C1). R NEXT: the
 seven, then crypto/mlkem CS0311, then the five reflect names at 7ff4694b22. R's post-tool fix
 ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
