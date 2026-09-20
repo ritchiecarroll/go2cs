@@ -963,7 +963,17 @@ declaration map; a target that is nobody's principal is a CANDIDATE; every targe
 source's record; no proof file moved/created; a format-gate refusal recorded, the driver retires it; testing stays
 in the population under the hand-own cause; the five-uncosted clause discharged by G's 107. The diverged
 subtraction (i9 64d873bb2): disclosed entries are SENTENCES, the name is the leading token -- C1 fixes
-reclassify.py and re-posts the deltas (12/1/19 known); cs=infrastructure-error entries are a HOST class in the plan.]
+reclassify.py and re-posts the deltas (12/1/19 known); cs=infrastructure-error entries are a HOST class in the plan.
+SPINE = THREE COMMITS at origin (C1 47157c503, b612bfa1c): 495ab5a37 the disclosed-match fix (leading token; lands
+on i9's 12/1/19 exactly; only two rows move); 3f17460a7 the ROW-SET EDIT: NINE principals by verdict majority (nistec
+2200/2200 -> fips140test, which is principal twice with alias; fips140/nistec and crypto/mlkem CANDIDATES) = 203
+banked + 23 candidates = 226; column sums equal, ten source rows removed, C2's shardmap detector QUIET after. COORD
+re-read the nistec declaration sets at the PINNED go1.24.13: patch-stable. RULED (after 47157c503): the DOCS HALF
+rides a SEPARATE ref off current master as leg (3b) -- C1 does NOT merge master into the spine; verdicts = |go minus
+names(disclosed)| (runtime/pprof 161, the guard's report stays); the plan's host column = 17 infrastructure-error
+entries across five rows. R's items CLOSED: the case-collision class (PS 5.1 JSON reader) is the cause of the two
+recovered rows (the eighth's ordinal maps cover it); testing's clobber = the reorder seat's BEFORE (no artifact ref);
+unsafe has no tests (absence correct); the two refspec acts DONE.]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
