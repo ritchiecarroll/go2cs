@@ -316,8 +316,9 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     syscall buffer-pin hole; C1 owns the native-boundary guards)
   the root-attribution overlay claude/g-root-attribution a819ba7417 (VERSION + LICENSE only; gate = blob identity vs the
     seat, no other path, the hand-own guard by name, the converter suite still EMPTY; no corpus build owed)
-  then q100 at abe3b3798b, then the H11 seat claude/c1-h11-published-stamp 135f0cdc15 on C2's clearance (converter-suite
-    gate, the new guard arms by name; no corpus build); state the version tip after each
+  then q100 at abe3b3798b, then the H11 seat claude/c1-h11-published-stamp 135f0cdc15 (CLEARED on C2's read 4c0a86310;
+    converter-suite gate, the new guard arms by name; no corpus build); state the version tip after each. Still owed by a
+    Windows box before H11 is declared: check-roster-format.ps1 and release-nuget.ps1 -VerifyOnly at the applied tree
   q100 claude/c1-q100-native-array-view-floor at its RE-PINNED tip abe3b3798b (9c5460585: the i7 gate CLEAR at 0dca38552c
     stands; the commit on top is comment-and-prose-only, verified).
 Not yours: G's H8 census, C2's comparand procedure, the runtime row. Blocked on: nothing for the first five.
@@ -725,7 +726,8 @@ differences in runtime/cgo (absent from the seed); RULED PASS WITH A NAMED EXEMP
 reading). OWED: a commit on top of 0a993ec908 -- the arm derives and reports the seed-absent package set every run
 (placement differences outside it still fail; content differences anywhere still fail), and the H8 amendment DEFINES the
 default flavour as the host-selected flavour with the csproj's unset default (windows) named as the banking convention.
-Also owed: the H11 seat second read (135f0cdc15; a run this time), then R's p256 fix read. DONE earlier: the correction at
+The H11 seat second read is DONE (4c0a86310, AGREES, suite run, plant verified; CLEARED for i9). Owed: the runtime/cgo
+probes (07b4e55fb), the seed-absent exemption commit, then R's p256 fix read. DONE earlier: the correction at
 4f24f7d39e (docs only, off master; ACCEPTED as the H9 docs seat). Idle by ruling until
 G's outgoing census side-by-side, scored against your P1-P5. ALSO: the second read of G's root-attribution overlay
 a819ba7417 (VERSION + LICENSE byte-compared against the 1.24.13 toolchain root on your box). OWED (COORD re-ruling on i9's
