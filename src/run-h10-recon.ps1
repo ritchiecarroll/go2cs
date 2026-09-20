@@ -332,6 +332,32 @@ function ConvertFrom-JsonElementOrdinal($el) {
     }
 }
 
+# ⚠⚠ THE READER IS PROVED ON A LITERAL, BEFORE ANY ROW IS READ.
+#
+# The count check beside the maps cannot see a folding READER -- both of its sides come from the
+# document the reader produced. This one does not read a row's document at all: it parses a
+# twenty-four byte literal carrying ONE case collision and requires BOTH names back. The expectation
+# is 2, written here, and nothing the reader does can produce it.
+#
+# It refuses the whole leg rather than a row, deliberately: a reader that folds would mis-score every
+# row with a case collision and score the rest correctly, which is the shape that gets banked before
+# anyone notices. Two names are cheaper to check than 107 rows are to re-run.
+function Assert-OrdinalJsonReader {
+    $probe = Join-Path ([System.IO.Path]::GetTempPath()) ("recon-canary-" + [guid]::NewGuid().ToString('N') + ".json")
+    try {
+        [System.IO.File]::WriteAllText($probe, '{"go":{"Aa":"1","aA":"2"}}')
+        $doc = $null
+        try { $doc = Read-JsonDocument $probe } catch {
+            Deny "the JSON reader REFUSED a document carrying two names that differ only by case: $($_.Exception.Message). Windows PowerShell's ConvertFrom-Json does exactly this, which is why this wrapper does not use it."
+        }
+        $n = @(Get-DocKeys $doc 'go').Count
+        if ($n -ne 2) {
+            Deny "the JSON reader FOLDS names differing only by case -- $n of 2 survived a literal probe. Every row whose Go test names differ only by case would be scored on a short verdict count, silently. (math/rand carries four such pairs, mime/multipart one.)"
+        }
+        Write-Host "  ordinal-reader canary : 2 of 2 names survived a case collision"
+    } finally { Remove-Item -LiteralPath $probe -Force -ErrorAction SilentlyContinue }
+}
+
 function Read-JsonDocument([string] $Path) {
     $raw = [System.IO.File]::ReadAllText($Path)
     if ($PSVersionTable.PSVersion.Major -ge 6) {
@@ -464,6 +490,8 @@ if (-not (Test-Path -LiteralPath $goVer))  { Deny "'$GoRoot' has no VERSION file
 # converter will actually run. So: prepend, and then assert THROUGH PATH as well, which is the
 # resolution the converter performs.
 $env:PATH = (Join-Path $GoRoot 'bin') + [System.IO.Path]::PathSeparator + $env:PATH
+
+Assert-OrdinalJsonReader
 
 $goVersion = NativeFirstLine { & $goExe version }
 $pathGo    = (Get-Command go -ErrorAction SilentlyContinue)
@@ -807,8 +835,17 @@ foreach ($row in $rows) {
                 if ($csSub -is [System.Collections.IDictionary]) {
                     foreach ($k in @(([System.Collections.IDictionary] $csSub).Keys)) { $csMap[[string] $k] = [string] $csSub[$k] }
                 }
-                # ⚠ AND THE LOSS IS MADE LOUD RATHER THAN TRUSTED. If a future edition's reader folds
-                # anyway, the row says so instead of publishing a quietly short verdict count.
+                # ⚠ THIS CATCHES A MAP-CONSTRUCTION REGRESSION AND NOTHING WIDER, AND AN EARLIER
+                # CUT CLAIMED MORE. It said "if a future edition's reader folds anyway, the row says
+                # so" -- which is the ONE case it cannot see, because BOTH sides of the comparison
+                # come from the same parsed document: a folding reader yields a folded document AND a
+                # folded map, the two agree, and this stays silent. (C2's finding; and this lane's
+                # own rule that a gate must not compare a value to its own variable.)
+                #
+                # What it DOES catch is the regression that actually happened -- ordinal keys read
+                # correctly and then dropped into a case-folding container on the way to the map --
+                # which is worth keeping. The READER is proved separately, on a literal, by the
+                # canary in the preflight, whose expectation the reader did not produce.
                 $goKeyN = @(Get-DocKeys $cmpDoc 'go').Count
                 if ($goMap.Count -ne $goKeyN) {
                     Write-Host ("     !! ORDINAL NAMES LOST: the document carries $goKeyN `go` names and the map holds $($goMap.Count) -- the reader folded") -ForegroundColor Red
