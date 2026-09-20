@@ -1160,6 +1160,11 @@ winsymlink=0) at 6d814e2d38 with master's wrapper; C2 cuts the docs/validation/i
 the i7 (worktree ec2): mark only what the writer can declare (a const-key guard at the marking site + a const arm);
 C1's s4 (the rooting renderer's fall-through) named and left open for the apply's reader. C1's vacuous-verdict arm
 fff854c571 LANDED -> MASTER bdabdea4b7. G's design read of the ecdh seat is the last before its apply.
+~11:30: C2's validation-index regeneration tool (regen-validation-index.py: the current table derived from the
+roster; sets compared, order apart) LANDED -> MASTER 3e3d57a497 (C1 reads post-landing). i9's os half: PASS 1103/0
+with and without winsymlink=0 in a censused tree at 6d814e2d38, the stale control firing -> C1's os/path question
+CLOSED for both packages. i9's two hash units both correct (blob content LF vs working file CRLF) -> the driver
+prints the git blob id next.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
