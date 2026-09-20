@@ -400,6 +400,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     ADDED (COORD after G 21be19338): -test-timeout per row from the deadline floors (a stated default for unfloored rows,
     never the converter's 2-minute default; the floor used is an extra column); a deadline kill = word TIMEOUT with
     sweep_s NON-INTEGER (UNSCHEDULED, re-measured under a larger floor); the results-file tail read before the word.
+    RESIDUE (58654661, RULED): i9's leg tree carries pre-run build residue (the dependency CLOSURE of the bufio dry run
+    and the internal/sync arms, incl. go/types and net never converted before the run); the two-row arm (archive/zip +
+    go/types in a SECOND throwaway tree at 0dc65a8e8d, word + verdicts + diverged compared) runs BEFORE the TSV push;
+    a difference re-runs the list on a clean tree. Leg at 58654661: 13 of 16 started, 9 PASS, 2 BUILD (crypto/mlkem
+    expected; hash/maphash UNPREDICTED), 1 NOVERDICT (crypto/tls), net on its 40 m floor. The warn-only-row arm
+    (crypto/cipher; or any license-less scratch output root) rides the seventh commit's red-first.
     WRAPPER CUT (f2eae7c85): claude/i9-h10-recon-wrapper 43aba50262 on 93feb8df2b, src/run-h10-recon.ps1 +321 (LF, 100755,
     census clean, signed). Two defects caught by the one-row dry run: the converter SPAWNS go from PATH (the pin gate had
     asserted the absolute path -- green about the wrong object; now three agreeing derivations: PATH-resolved go version
@@ -821,7 +827,8 @@ stands on the generator's own print. ROUTED (COORD after b23753f5): C2 corrects 
 inside 8d7739f4e's comment and die() as a commit on top of claude/c2-shardmap-relocations; C1 cuts the post-tool
 fetch-refspec remedy (git fetch origin master in a single-branch clone writes no tracking ref -> the census cannot be
 materialised; explicit master:refs/remotes/origin/master) as ONE commit on its post-tool ref with a two-shape control,
-announce-then-push, landing with R's ead735e69c. Task 27 (the concatenation) waits on the TSV refs. C1's
+announce-then-push, landing with R's ead735e69c. Task 27 (the concatenation) waits on the TSV refs. ALL THREE LISTS LIVE (G's ACK 5952b121: 107 rows on the fifth;
+the early run discarded). hash/maphash BUILD on i9's list (unpredicted) -> C1 sizes at CONVERT from the completion post. C1's
 withdrawal (033a07d9): the roster seat carries no aggregate
 arc figure (the 14 lived only in a post) -- no correction owed; rule banked: a claim that a file contains something is a
 measurement, one grep. DONE (ba10c91a):
@@ -1552,7 +1559,8 @@ outside resetPackageState; the order hazard closed by the literal [internal, ext
 second-box A/B (339c3d48: rc 1 -> 0, 29 .cs both arms, the bare name binds, no second crossing site): the apply is
 COORD's from the i7 after the arm-2a apply. R's LEG ACK (9bd7ebb6): 105 rows RUNNING on the fifth at 0dc65a8e8d since
 02:29 local (pid 30352; the blob hash matched; both traps checked before row 1); fips140test and internal/sync are the
-two named expectations on R's list; at 67669ba2 the leg reads 13 of 105 started, 11 PASS, 1 BUILD. R's post-tool fix
+two named expectations on R's list; at 67669ba2 the leg reads 13 of 105 started, 11 PASS, 1 BUILD. ASKED (COORD after 58654661): R's leg tree's PRE-RUN
+ignored residue count by i9's mtime method (control 0); non-zero = the two-row re-measurement arm after R's list. R's post-tool fix
 ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
 an idle-time master landing with C1's fetch-refspec commit. R NEXT: the constraint-proxy widening.
 SEAT CUT (57e9e70e): claude/laneR-anon-struct-typearg ce8d0bd654 on d91c832543, five files under src/go2cs (the pre-visit
