@@ -427,6 +427,17 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     concatenation (it lives in G's TSV at its ref and G's completion post); the assembler's guard = each header carries
     the four columns BY NAME (cut with the concatenation); the blob split carried from the completion posts; a row from
     both of G's launches NAMED as a cross-blob duplicate.
+    THE SEVENTH IS CUT (i9 fb40d741, ~05:00): 3af7d536b0 on 8c1a325ac3 (+336/-32, signed, eleven items; the :470 exit
+    REMOVED; the handown flag line DELETED; DIVERGED derived from the JSON with verdicts = len(go) - len(disclosed);
+    the staleness gate on LastWriteTime (accepted: an overwrite keeps CreationTime); post_s; the diverged column's
+    `0 -eq ''` coercion fixed by a type test -- the fifth's TSVs carry n/a on every PASS row, C1 reads that column as
+    UNINFORMATIVE). THE MECHANISM CORRECTED: the 52:1 is Get-Content -Tail 400 over a multi-MB single-line RESULTS
+    file (quadratic; 524 s -> 0.02 s chunked), NOT the JSON parse (0.1 s). i9's LEG COMPLETE 16/16 at 04:00:03; its
+    three NOVERDICT rows re-classify DIVERGED (crypto/tls 12, net 1 -- hung 63 min yet reached comparison, net/http
+    19; +4,550 s to the basis; crypto/tls's record by hash on the share). SEQUENCE (COORD after fb40d741): i9 pushes;
+    C2 reads the diff; the i7 Core-edition arm runs as a sub-agent (no build); G STOPS its list NOW and relaunches the
+    remaining rows on the seventh at clearance; i9 runs the warn-only arm (bufio on a license-less scratch root) after
+    the push, its two-row residue arm BEFORE its TSV push (reading asked), then the TSV ref + evidence commit.
     ABORT COST RULED (COORD after C2 ff7a229f): the basis models the roster AS IT IS at the leg's tip -- BUILD rows at
     their abort cost, no word filter; the plan regenerates when a seat lands and the driver re-measures; two lines on
     C2's ref with the roster seat (the contract-check comment at the word read; an output line naming the abort-costed
