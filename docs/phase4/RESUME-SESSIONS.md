@@ -321,7 +321,9 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     fail set on i9 = four link-staging/goroutine tests PRE-EXISTING at the parent on i9's box and PASSING on the i7 at the same
     tree family -- RULED a box question: i9 runs the four at 46307b4704 on its box; box property -> i9's box-base, the i7's
     reading stays the corpus reading; else a regression in the 46307b4704..43a3627667 range, q97 the only src/core seat).
-  then the H11 seat claude/c1-h11-published-stamp 135f0cdc15 (CLEARED on C2's read 4c0a86310;
+  the H11 seat APPLIED 8fa5cc2e7d (8f0e49ec2: the predicted stamp 8cf90ac83b exactly; six arms RUN=1 with the unmatchable
+    control RUN=0; GoBuildNumber 0; STAMPED by COORD) -- VERSION TIP 8fa5cc2e7d
+  the H11 seat claude/c1-h11-published-stamp 135f0cdc15 (CLEARED on C2's read 4c0a86310;
     converter-suite gate, the new guard arms by name; no corpus build); state the version tip after each. Still owed by a
     Windows box before H11 is declared: check-roster-format.ps1 and release-nuget.ps1 -VerifyOnly at the applied tree
   then C2's subtree-load seat claude/c2-subtree-load-goroot-guard 19175c31ad (merge-base 43a3627667; projitems composed by
@@ -989,6 +991,10 @@ measured not firing -- exit 0 Go-identical after; made to fail on OUTPUT by reve
 by explicit little-endian reads; window-aware; converter suite ok. ACCEPTED for the reads (C1 design half, C2 structural +
 Go suite); i9 applies after the H11 and subtree seats: corpus build (nistec + fiat assemblies), GolibTests vs i9's box-base
 four, SystemCertVerify as the direct exe, then the four-phase suite -- Output failing set = the base two by name CLOSES H9.
+C2's read DONE (f57364a67, NO OBJECTION; the 88064 length check is two independent derivations; two comment asks). R OWES
+one commit on top of d01e5d307d before the apply: the by-ref chain line (a by-value hop silently writes zeros -- the
+wrapper's lazy backing materialises on a temp), the asm-variant scope bound (p256_asm.go's same reinterpret is out of
+the corpus under purego), the memory cost line. C1's design read still owed.
 DIAGNOSED by i9 (1b2ad7d8f) before R started: both probes FAIL in Output (the crash predates rung 7); the managed stack
 names ElemRefBox<p256AffineTable>.get_ValueSlot via DerefOrNull from nistec.Select <- ScalarBaseMult <- ecdsa.GenerateKey;
 the site is crypto/internal/fips140/nistec/p256.cs:574-616 -- the 1.24 EMBEDDED P-256 table, FromPinnedBox cast
