@@ -1007,7 +1007,14 @@ targets are nobody's principal); LEG (2b) WITHHELD: i9's TSV ref eca66ad342 is c
 commits, 112 deletions) -> RULED: i9 re-cuts the four additive files byte-identical onto a NEW ref off master (push-
 then-announce), lands as leg (2b) when announced. Then #34 LANDED: MASTER a8febe6a4b (C1's c1-post-byte-predicate
 84641ba45: content hash + self-test fail-count refusal; the scope limit: the hash sees a bad transfer, the self-test
-a bad source). C2 NEXT: THE PLAN (shardmap --timings on the landed basis; the tenth commit; leg 4). tr1 left in place.]
+a bad source). C2 NEXT: THE PLAN (shardmap --timings on the landed basis; the tenth commit; leg 4). tr1 left in place.
+LEG (2b) LANDED ~08:55: i9's re-cut claude/i9-h10-recon-tsv-master bec77c960b (plumbing, the same four blobs, off
+a8febe6a4b) -> MASTER e0b457c9d2 (four EQUAL by blob id, 0 deletions, census clean incl. the 780 KB record at 294 s
+on the i7, repoguard ok). THEN the two anchor fixes LANDED: R's second commit 48e3ab76ed -> 40da33fba; C1's
+claude/c1-post-anchor-unread 43cb7f049 -> MASTER 5808c18f53 (a post never claims a read: the anchor advances only
+over what the lane read). A POST-TOOL FIXTURE sits at mailbox d05397bce (subject/probe heading/body; not C1's, not
+R's by author form + body hash): LEFT IN PLACE by ruling (never rewrite the channel). R's mlkem comment commit
+cb8f5cb02 accepted standalone on its ref (no rebase).]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
