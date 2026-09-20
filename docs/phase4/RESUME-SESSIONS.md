@@ -350,7 +350,17 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
   then R's P-256 cut claude/laneR-p256-table-decode at its tip 9200da804e (d01e5d307d + the comment-only commit; both reads'
     AGREES extended to the tip by C1 a5e48cd3e and C2 296b8af66) on C1's and C2's reads (corpus build + GolibTests vs the box-base
     four + SystemCertVerify direct exe + the converter suite), then the FULL four-phase behavioral suite: H9 closes when
-    Output's failing set = FuncLiteralCallerNames + GoroutineWaitState with APPEARED empty
+    Output's failing set = FuncLiteralCallerNames + GoroutineWaitState with APPEARED empty.
+    APPLIED 2026-09-20 at c7eb36d845 (i9 f53e977e0: tree 470ba0b83c = the predicted stamp, signed, 5 paths +213/-14, markers
+    0; SystemCertVerify direct exe rc 0, 17 lines IDENTICAL to Go where it died 0xC0000005 -- the cure MEASURED; corpus
+    go2cs-stdlib.slnx 344 assemblies / 0 CS errors with nistec + fiat produced; GolibTests = exactly the box-base four;
+    converter suite rc 0; stage 3 first read 86 CS0246/CS0234 = the UNPINNED go2csPath standalone build, harness-gates.md
+    already names it; the box was at 1.4 GB free of 1.9 TB -- bin/obj reclaimed to 303 GB, the four-phase suite RUNNING).
+    Two corrections taken from C1: internal/weak -> weak (3 .cs), internal/concurrent -> internal/sync (5 .cs); RELOCATED
+    is 7 not 6. PUSH c7eb36d845 after the suite under i9's own invariant; COORD verifies tree 470ba0b83c at origin.
+    NEXT after H9: apply G's README overlay 7c374389b0 on top of c7eb36d845 after C2's existence read (READMEs only, no
+    overlap with the decode's five paths; COORD stamps); then reclaim RETIRED trees children-first, never during a suite
+    (parent rule: --git-common-dir == --git-dir with >1 worktree row is never removed); then i9-post.sh at idle.
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
@@ -810,7 +820,16 @@ not deleted). The H9 docs seat lands at 2e75b14586. Queue: P1-P5 on G's side-by-
 
 Then: (2) the second-lane read of C1's q100 cut at origin, claude/c1-q100-native-array-view-floor 0dca38552c: the
 floor's placement at the uintptr door, its scope (array<U> only), the tenth named panic beside the nine, and the four
-test arms' logic; a read, not a compile, and say so. (3) Second reads of C1's q102 and q86 cuts when announced.
+test arms' logic; a read, not a compile, and say so. (3) Second reads of C1's q102 and q86 cuts when announced (both APPLIED since; stale).
+DONE 2026-09-20: the population bound of R's reflect construct (9d844b0c: TWO across the std test corpus on the grep
+predicate, R's two, row-scoped; the first two counts 9 and 6 were a dead empty-struct arm -- a backslash inside a POSIX
+bracket expression is literal; BOARD line for C2's next docs seat) and R's before-arm reproduced on this box at
+d91c832543 (01f8b727: rc 1 at CONVERT, one signature, all_test.cs(4201) = R's offset). ASSIGNED 2026-09-20 (COORD
+6396765b7): (a) the EXISTENCE read of G's README overlay 7c374389b0 -- the 1.23.12.3 tag present at origin (ls-remote
+--tags), every snapshot badge target in the 337 files has its file under docs/validation/1.23.12.3/ at the version tip
+(set difference by name both directions, a planted phantom link as the control; predicted tag present, 0 missing); a
+read, not a compile; post it, then i9 applies. (b) at R's reflect-seat cut: the converter suite + the planted two-site
+fixture on this box, the before-arm above as the same-box BEFORE.
 Blocked on: nothing.
 ```
 
@@ -936,7 +955,13 @@ manifests' class tables, P1-P5 as scored, the 38 -> 47 -> 51 decomposition, per-
 OVERLAY from the version tip d91c832543 -- seed a never-reused root from that tree's src/core, one
 single-target -stdlib emission with the converter built at that tip, cut ONLY src/core/**/README.md as one commit on a new
 ref, the diff predicted before the copy (335 tag / 191 snapshot targets -> the published stamp, nothing else), the existence
-arm green on that tree; push-then-announce. (4) after COORD closes H9: the twelve successor packages through the real
+arm green on that tree; push-then-announce. DONE 2026-09-20 (65a2c2e1): claude/g-readme-overlay 7c374389b0 on
+d91c832543, 337 files +531/-531, 0 outside src/core/**/README.md; prediction MISSED as worded (878/337 vs 861/335) --
+RULED a COUNT ARTIFACT by COORD's own diff at origin: the seven 'gained' badges are the seven READMEs ALREADY carrying
+1.23.12.3 in the base (five UNCHANGED: unsafe, testing, macos, syscall, route; bcache + godebug corrected only in their
+Go-side badges @go1.23.12 -> @go1.24.13); the stamp 1.23.12.3 is Newest() recorded release, right by construction;
+ACCEPTED as cut. C2 reads the EXISTENCE arm (G's post did not report it); i9 applies on c7eb36d845 after that read.
+(4) after COORD closes H9: the twelve successor packages through the real
 pipeline on the banking platform at the version tip (all four overrides), per row the verdict count and the diverged set by
 name -- the first H10 rows; a reading, no bank. G's post tool PUBLISHED (80b5d83df): claude/g-lane-post-tool be340825dd off
 master a6be940665, FOUR files under .claude/coord-scripts/lanes/ (g-post.sh + the fetchable, staleness and placeholder
