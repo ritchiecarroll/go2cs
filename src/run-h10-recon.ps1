@@ -192,10 +192,23 @@ $env:CGO_ENABLED  = '0'
 # the `&` call under ErrorActionPreference=Stop and the run dies rc 1 with NO refusal line -- measured,
 # and it made the pin control look like it had fired when it had only crashed. A guard that dies is not
 # a guard that refused.
-$goExe = Join-Path $GoRoot 'bin/go.exe'
+# ⚠ THE EXECUTABLE SUFFIX IS NOT ALWAYS `.exe`, AND HARDCODING IT MISNAMES THE REFUSAL. The first cut
+# joined 'bin/go.exe': on a non-Windows worker that path does not exist while 'bin/go' does, so the
+# preflight refused a perfectly valid GOROOT with "not a GOROOT" -- a refusal naming a cause that is
+# not the cause, which is worse than no refusal because it sends the reader to the wrong place.
+# The runner's OS need not match a row's marker (ruled), so a linux worker taking bulk rows is a
+# legitimate configuration, not a hypothetical.
+function Find-Exe([string] $dir, [string] $stem) {
+    foreach ($c in @((Join-Path $dir "$stem.exe"), (Join-Path $dir $stem))) {
+        if (Test-Path -LiteralPath $c -PathType Leaf) { return $c }
+    }
+    return $null
+}
+
 $goVer = Join-Path $GoRoot 'VERSION'
 if (-not (Test-Path -LiteralPath $GoRoot)) { Deny "no GOROOT at '$GoRoot'" }
-if (-not (Test-Path -LiteralPath $goExe))  { Deny "'$GoRoot' has no bin/go.exe -- not a GOROOT" }
+$goExe = Find-Exe (Join-Path $GoRoot 'bin') 'go'
+if (-not $goExe) { Deny "'$GoRoot/bin' holds neither 'go' nor 'go.exe' -- not a GOROOT" }
 if (-not (Test-Path -LiteralPath $goVer))  { Deny "'$GoRoot' has no VERSION file -- the second derivation of the pin is unavailable" }
 
 # ⚠⚠ PATH IS PART OF THE PIN, AND ASSERTING THE BINARY BY ABSOLUTE PATH DOES NOT ASSERT IT.
@@ -229,11 +242,9 @@ $freeGb = [int] ((Get-PSDrive -Name ($Tree.Substring(0,1))).Free / 1GB)
 Write-Host "  disk free         : $freeGb GB (floor 25)"
 if ($freeGb -lt 25) { Deny "$freeGb GB free is under the ruled 25 GB floor" }
 
-$converter = Join-Path $Tree 'src/go2cs/go2cs.exe'
-if (-not (Test-Path -LiteralPath $converter)) {
-    $converter = Join-Path $Tree 'src/go2cs/bin/Release/net10.0/go2cs.exe'
-}
-if (-not (Test-Path -LiteralPath $converter)) { Deny "no converter binary under '$Tree/src/go2cs' -- build it at this tree first" }
+$converter = Find-Exe (Join-Path $Tree 'src/go2cs') 'go2cs'
+if (-not $converter) { $converter = Find-Exe (Join-Path $Tree 'src/go2cs/bin/Release/net10.0') 'go2cs' }
+if (-not $converter) { Deny "no converter binary ('go2cs' or 'go2cs.exe') under '$Tree/src/go2cs' -- build it at this tree first" }
 Write-Host "  converter         : $converter"
 
 Write-Host ''
@@ -268,26 +279,63 @@ if ($Floors.Count -lt 5) { Deny "derived only $($Floors.Count) deadline floor(s)
 # ⚠ THE FAN-OUT: a relocated row's floor is inherited by its SUCCESSOR(S) (e0d5121e2 section 1).
 # `crypto/internal/mlkem768` is a floor row AND one of the ten relocated paths, and it fans out to
 # two successors -- so its floor must reach both or they run at the default and are killed short.
-$Successors = @{
-    'crypto/internal/mlkem768'     = @('crypto/internal/fips140/mlkem', 'crypto/mlkem')
-    'crypto/internal/edwards25519' = @('crypto/internal/fips140/edwards25519')
-    'crypto/internal/nistec'       = @('crypto/internal/fips140/nistec')
-    'crypto/internal/alias'        = @('crypto/internal/fips140/alias')
-    'crypto/internal/bigmod'       = @('crypto/internal/fips140/bigmod')
-    'runtime/internal/math'        = @('internal/runtime/math')
-    'runtime/internal/sys'         = @('internal/runtime/sys')
-    'internal/concurrent'          = @('internal/sync')
-    'internal/weak'                = @('weak')
+# ⚠⚠ THIS IS A COPY, AND IT IS LABELLED AS ONE. Owner: C1. Source of record: C1's relocation table,
+# ruled the map of record at `350a301a` and seated at `4de76ded06`. The first cut of this file carried
+# a ten-entry copy that C2 measured already wrong in four ways (one row absent, one target wrong, two
+# missing their second half); the second cut deleted nine of them and kept only the floored one. Both
+# were wrong answers to the same question, and COORD ruled the third: carry the WHOLE map here, as a
+# copy that says whose it is, and make the DURABLE form a data file.
+#
+# ⚠ THE DURABLE FORM IS NOT THIS. `docs/phase4/hopA-inputs/relocations.tsv` (one line per arc) lands
+# with C1's roster seat after the leg, and the sweep's own $longTimeouts re-path is derived from it in
+# that same commit. This map and C2's reserved-set derivation switch to reading that file in commits
+# that land WITH the seat -- the correction and the act that would expose it are one landing. Until
+# then a copy is what exists, so it is named rather than disguised.
+#
+# ⚠ SOURCE -> TARGETS, NEVER 1:1. Three of the ten rows SPLIT, and `crypto/internal/fips140test`
+# receives arcs from three different rows -- so a table keyed either way drops arcs silently. Every
+# arm of a split inherits the floor (e0d5121e2 section 1): a budget copied is an over-estimate, which
+# is the safe direction; a budget split is a guess.
+#
+# ⚠ COUNTS, MEASURED FROM THE SET RATHER THAN CARRIED: 10 rows, 13 arcs, 11 distinct targets, 3 splits.
+# C1's prose and COORD's ruling both say 14 arcs (and C1 "four of the ten split"); the table they
+# publish lists 13 across 3 splits, and their own 11-distinct-targets figure is consistent only with
+# 13 (13 arcs - 3 into fips140test + 1 = 11; 14 would give 12). 10 rows + 4 splits = 14 is arithmetic
+# that closes on itself. The SET below is C1's table verbatim; only the count is corrected.
+$FlooredSuccessors = @{
+    'crypto/internal/alias'              = @('crypto/internal/fips140test')
+    'crypto/internal/bigmod'             = @('crypto/internal/fips140/bigmod')
+    'crypto/internal/edwards25519'       = @('crypto/internal/fips140/edwards25519', 'crypto/internal/fips140test')
+    'crypto/internal/edwards25519/field' = @('crypto/internal/fips140/edwards25519/field')
+    'crypto/internal/mlkem768'           = @('crypto/internal/fips140/mlkem', 'crypto/mlkem')
+    'crypto/internal/nistec'             = @('crypto/internal/fips140/nistec', 'crypto/internal/fips140test')
+    'internal/concurrent'                = @('internal/sync')
+    'internal/weak'                      = @('weak')
+    'runtime/internal/math'              = @('internal/runtime/math')
+    'runtime/internal/sys'               = @('internal/runtime/sys')
 }
 $inherited = 0
-foreach ($old in $Successors.Keys) {
+foreach ($old in $FlooredSuccessors.Keys) {
     if ($Floors.ContainsKey($old)) {
-        foreach ($new in $Successors[$old]) {
+        foreach ($new in $FlooredSuccessors[$old]) {
             if (-not $Floors.ContainsKey($new)) { $Floors[$new] = $Floors[$old]; $inherited++ }
         }
     }
 }
-Write-Host "  deadline floors   : $($Floors.Count) derived from the sweep ($inherited inherited by successors)"
+# ⚠ THE ASSERTION STAYS, and it is what makes a stale copy loud instead of silent. A floored row that
+# neither exists at the tree nor has a mapping REFUSES and is named, rather than running at the default
+# floor and being killed short. That is exactly the transition ahead: when the roster seat re-paths the
+# sweep's table, any floored row this copy does not cover stops the leg instead of under-running it.
+$orphanFloors = @()
+foreach ($k in @($Floors.Keys)) {
+    if ($FlooredSuccessors.ContainsKey($k)) { continue }          # mapped; its successors carry it
+    if (-not (Test-Path -LiteralPath (Join-Path $Tree ("src/core/" + $k)))) { $orphanFloors += $k }
+}
+if ($orphanFloors.Count -gt 0) {
+    Deny ("floored row(s) absent from the tree with no successor mapping: " + ($orphanFloors -join ', ') +
+          " -- each would run at the DEFAULT floor and be killed short. Map them here, or re-path the sweep's table, before running the leg.")
+}
+Write-Host "  deadline floors   : $($Floors.Count) derived from the sweep ($inherited inherited by a floored relocation)"
 
 Write-Host ''
 Write-Host "  rows in list      : $($rows.Count)"
@@ -406,7 +454,15 @@ foreach ($row in $rows) {
                 }
             } catch { $diverged = 'UNREAD' }
         }
-        if ($diverged -is [int] -and $diverged -gt 0) { $word = 'DIVERGED' } else { $word = 'PASS' }
+        # ⚠ AN UNREADABLE ARTIFACT IS NOT A PASS. The first cut fell to PASS whenever $diverged was not
+        # an int, so a comparison JSON nobody could read produced the basis's strongest verdict --
+        # while `verdicts`, twenty lines down, refuses to guess for exactly the stated reason. `word`
+        # is the only record of WHICH verdict a cost was measured under, and a reader filtering on it
+        # would have seen a pass over an artifact that was never read. NOVERDICT is the honest class:
+        # the row ran, and this instrument cannot say what it did.
+        if     ($diverged -isnot [int]) { $word = 'NOVERDICT' }
+        elseif ($diverged -gt 0)        { $word = 'DIVERGED' }
+        else                            { $word = 'PASS' }
     }
 
     # ---- verdicts: cross-checked, and NEVER 0 on a failure to read.
