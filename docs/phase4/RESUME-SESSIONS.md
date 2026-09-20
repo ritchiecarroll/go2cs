@@ -400,6 +400,18 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     ADDED (COORD after G 21be19338): -test-timeout per row from the deadline floors (a stated default for unfloored rows,
     never the converter's 2-minute default; the floor used is an extra column); a deadline kill = word TIMEOUT with
     sweep_s NON-INTEGER (UNSCHEDULED, re-measured under a larger floor); the results-file tail read before the word.
+    WRAPPER CUT (f2eae7c85): claude/i9-h10-recon-wrapper 43aba50262 on 93feb8df2b, src/run-h10-recon.ps1 +321 (LF, 100755,
+    census clean, signed). Two defects caught by the one-row dry run: the converter SPAWNS go from PATH (the pin gate had
+    asserted the absolute path -- green about the wrong object; now three agreeing derivations: PATH-resolved go version
+    output, the binary under -GoRoot, the VERSION file; the control re-taken with a REAL wrong release), and the
+    cross-check relation is map == summary + disclosed-divergent. THIRD FINDING: -test-action all PUBLISHES validation
+    artifacts (bufio's proof page re-banked to 1.24.13; docs/validation/index.md -25 by one row). RULED (COORD after
+    c101d970): option (a) -- every worker's list runs in a THROWAWAY linked worktree at the tip, discarded afterwards;
+    SECOND COMMIT on the ref: a guard refusing to run unless the tree is a linked worktree (--git-dir != --git-common-dir)
+    with HEAD detached at the expected tip, and a per-row copy of go2cs_test_comparison.json + the results tail + the
+    summary line into a scratch dir outside any work tree (the TSV there too); no git checkout/clean inside the wrapper.
+    Then the slice/cooldown regime from the generator's constants. Also measured (c101d970): the two windows-only rows
+    carry no tag asymmetry (205 same / 2 differ / 0 unmeasurable); nistec shows one direction on windows.
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
@@ -665,7 +677,11 @@ rows on this box at the CONVERT stage (the emitted .cs is the subject): fips140t
 from go.crypto.@internal -- a test-only package whose Go package name differs from its directory), crypto/mlkem CS0311
 x4 (zh<EncapsulationKey768> refused as the type argument of a constrained parameter), internal/sync CS0411 x4 (inference
 fails on expectNotSwapped<K,V>(zh<T>, K, V, V)); per row the construct by file:line in Go and in the emission, the
-converter site, a fix shape, a red-first arm; no cut -- COORD routes. Fold C2's notes into the amendment
+converter site, a fix shape, a red-first arm; no cut -- COORD routes. Tag-asymmetry bound DONE (41728747: 2 rows of
+228; 1 tagged-only Test vs 3 untagged-only; the rule: an empty C# column has three causes -- a deadline kill, a real
+failure, the asymmetry -- separated by the results tail and the file-selection diff; membership and bankability are
+different claims). RUNBOOK LINE OWED at the next docs seat: the PATH-resolved pin (the converter spawns go from PATH) in
+H10's preconditions table. Fold C2's notes into the amendment
 commit: proc.cs cited per-GOOS (runtime/{linux,windows,darwin}/proc.cs:848), the RegisterPinned step that makes
 initAlgAES arm 2, and the clause that the box materialises at eleven construction sites (scope by provenance). (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
@@ -957,7 +973,10 @@ the read. Also DONE: the ordering predicate on i9's published tool (4f3e5104: ex
 axis confirmation through the pipeline (d5cdd55ab), the wrapper pre-cut reads (f9da1c467 sizing, d4f915ed1 its own
 correction: verified premises do not transfer their standing to a synthesis -- BOARD line; 7c43a15e the converter's two
 Validated format strings). ASSIGNED: read C1's (d) aa66874ff7 as the H10 procedure amendment (order, host rule,
-preconditions table, per-row steps against the rulings cited) -> COORD lands; then read i9's recon wrapper. READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
+preconditions table, per-row steps against the rulings cited) -> COORD lands; then read i9's recon wrapper.
+(d) LANDED at master 6c32d0e171. Tag-asymmetry bound DONE (50554616: 2 of 207 differ on linux -- nistec files SWAP, both
+directions; fips140test's nistec_ordinv_test.go oracle-only, latent behind CS0234). ASSIGNED: read i9's wrapper ref
+claude/i9-h10-recon-wrapper at its tip AFTER i9's second commit (the linked-worktree guard + per-row artifact capture). READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
 two additive citation notes) -- LANDED by COORD at master ceb1c87971. Then read i9's recon wrapper when announced.
 Blocked on: nothing.
 ```
@@ -1111,8 +1130,9 @@ carries purego,math_big_pure_go -> 44 false divergences Go='' C#='pass'; uncondi
 row); three converter-debt rows (fips140test CS0234 x13; crypto/mlkem CS0311 x4; internal/sync CS0411 x4).
 ASSIGNED (COORD after 21be19338): the ORACLE-TAGS converter seat off 93feb8df2b -- the oracle's args carry the resolved
 tags; red-first: a Go unit arm (planted empty set fails), the nistec row 45/0 vs the before 44 false, the converter
-suite, an EMPTY two-seeded corpus diff; push-then-announce; C2 reads (the unit arm on its box); i9 applies; target:
-landed before the LAUNCH. Then the preflight on both sides. Was: after COORD closes H9: the twelve successor packages through the real
+suite, an EMPTY two-seeded corpus diff; push-then-announce; C2 reads (the unit arm on its box); i9 applies. BOUNDED
+(C2 50554616, C1 41728747, i9 c101d970): TWO rows of 228 (nistec, fips140test), file-level; so the LAUNCH does NOT wait
+for this seat -- the two rows' verdict readings are provisional until it lands. Then the preflight on both sides. Was: after COORD closes H9: the twelve successor packages through the real
 pipeline on the banking platform at the version tip (all four overrides), per row the verdict count and the diverged set by
 name -- the first H10 rows; a reading, no bank. G's post tool PUBLISHED (80b5d83df): claude/g-lane-post-tool be340825dd off
 master a6be940665, FOUR files under .claude/coord-scripts/lanes/ (g-post.sh + the fetchable, staleness and placeholder
