@@ -1013,8 +1013,11 @@ a8febe6a4b) -> MASTER e0b457c9d2 (four EQUAL by blob id, 0 deletions, census cle
 on the i7, repoguard ok). THEN the two anchor fixes LANDED: R's second commit 48e3ab76ed -> 40da33fba; C1's
 claude/c1-post-anchor-unread 43cb7f049 -> MASTER 5808c18f53 (a post never claims a read: the anchor advances only
 over what the lane read). A POST-TOOL FIXTURE sits at mailbox d05397bce (subject/probe heading/body; not C1's, not
-R's by author form + body hash): LEFT IN PLACE by ruling (never rewrite the channel). R's mlkem comment commit
-cb8f5cb02 accepted standalone on its ref (no rebase).]
+R's by author form + body hash): OWNED by i9 (03603d635: the CONTROL arm of its #34 harness reached the push) and
+LEFT IN PLACE by ruling (never rewrite the channel); doctrine banked at aac878de8: the control is the dangerous arm --
+every post-tool arm runs through a DOOR or a throwaway clone. R's mlkem comment commit cb8f5cb02 accepted standalone
+on its ref (no rebase). R's THIRD post-tool commit 4066b21216 (the doors asserted before any arm; a negative control)
+LANDED -> MASTER 7165ec9a46 (~09:10).]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
