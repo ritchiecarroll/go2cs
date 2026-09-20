@@ -615,7 +615,10 @@ recon on name lists through the per-package pipeline; OS need not match the mark
 ASSIGNED NEXT: (a) the population BY NAME (227 per e0d5121e2 vs 206 by C2's arithmetic; reconcile); (b) per-worker
 lists by the stated rule (reserved + windows-only -> i9; linux-only -> G WSL; the rest LPT/round-robin across G and R;
 sums closing; platform class per row); (c) the TSV path/columns/digest rule; (d) the in-stage H10 amendment as a second
-commit on the docs ref (launch checklist with citations, the order, the host rule, plan+driver cited, per-row steps). (3) The seven pthread members the darwin
+commit on the docs ref (launch checklist with citations, the order, the host rule, plan+driver cited, per-row steps).
+DOCS SEAT LANDED on master ceb1c87971 (signed; gates green; C2's read ebd9553dc). Fold C2's notes into the amendment
+commit: proc.cs cited per-GOOS (runtime/{linux,windows,darwin}/proc.cs:848), the RegisterPinned step that makes
+initAlgAES arm 2, and the clause that the box materialises at eleven construction sites (scope by provenance). (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
@@ -901,7 +904,8 @@ rc 0) = floor 2's -tests form; testing needs -test-allow-handown; internal/sysca
 (their markers read linux: n/a); the marker count is 198 of 204 numeric (202 was occurrences incl. 2 prose examples).
 ASSIGNED NEXT (COORD after f14cafb9): read C1's docs seat claude/c1-board-night-lines 6e082a09c5 (the section-4 bound's
 arm classification against zh.cs at master; the BOARD block's four lines against the record); COORD lands it signed on
-the read. Then read i9's recon wrapper when announced.
+the read. READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
+two additive citation notes) -- LANDED by COORD at master ceb1c87971. Then read i9's recon wrapper when announced.
 Blocked on: nothing.
 ```
 
