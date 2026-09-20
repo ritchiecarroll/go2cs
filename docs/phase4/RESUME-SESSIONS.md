@@ -812,7 +812,14 @@ the differing set is exactly VERSION and LICENSE); push-then-announce. DONE 2026
 a819ba7417 on 0f97dcc8db, +4/-4, prediction MET, pinned by COORD (C2 reads; i9 applies after H9). The H8 side-by-side is
 DONE (cb1fa651a: outgoing 1476/79/87/277 of 1919 vs incoming 1631/83/93/283 of 2090; marker gate zero x6; arm (b) PASS on
 windows, 3342 = 3342, equal tree hashes; pkgdelta +40 per target MET). RULED (COORD): the rung rests on all three flavours.
-NEXT for G: (1) arm (b) on DARWIN first (C2 takes linux in parallel; a second linux reading from G is a derivation, not waste); (2) the H8 record under docs/phase4/ (both
+NEXT for G: (1) arm (b) on DARWIN first (C2 takes linux in parallel; a second linux reading from G is a derivation, not waste);
+DONE 2026-09-20 (0adcbd8cd): darwin 3395 = 3395 PASS, linux 3397 = 3397 PASS, cross-flavour controls fired -- BUT G's emissions
+contain NO runtime/cgo while C2's linux emission carries its nine artifacts (3406): a HOST-DEPENDENT package selection
+(windows-built converter cross-emitting vs a linux build). RULED: the byte-identity clause is OPEN on all three flavours
+until measured. PROBES (both boxes): GOOS=linux|darwin|windows CGO_ENABLED=0 go list runtime/cgo (GoFiles / IgnoredGoFiles /
+CgoFiles) under the pin; the converter's own reason (C2: grep the converter for a runtime/cgo or cgo-package exclusion + the
+E1 log lines; G: the census manifest's per-package row and the emission log lines). Then COORD rules: a host-conditional
+converter exclusion = a small converter seat; a toolchain difference = a runbook statement + a re-take on the named host. (2) the H8 record under docs/phase4/ (both
 manifests' class tables, P1-P5 as scored, the 38 -> 47 -> 51 decomposition, per-target movement) on a branch you name;
 (3) after i9 applies the H11 seat: the 347-README OVERLAY -- seed a never-reused root from the applied tree's src/core, one
 single-target -stdlib emission with the converter built at that tip, cut ONLY src/core/**/README.md as one commit on a new
