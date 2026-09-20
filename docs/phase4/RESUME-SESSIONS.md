@@ -1165,6 +1165,14 @@ roster; sets compared, order apart) LANDED -> MASTER 3e3d57a497 (C1 reads post-l
 with and without winsymlink=0 in a censused tree at 6d814e2d38, the stale control firing -> C1's os/path question
 CLOSED for both packages. i9's two hash units both correct (blob content LF vs working file CRLF) -> the driver
 prints the git blob id next.
+~11:35: R's crypto/mlkem row reading off d6c7ebd78b (d6d2970a2): CONVERT ok, the stdlib builds, the test host FAILS
+AT BUILD with exactly CS0266 x2 -- the wrap map's bound (ImplementGenerator.cs:189: the struct must be in this
+compilation) skips the white-box pair (the struct in the production assembly, the interface local). RULED: R cuts
+the fix on its ref (the condition = the pair's adapter is minted in THIS compilation; the name composed through the
+main loop's shared helper -- no second spelling; a two-assembly red arm; then the row with the pinned bin FIRST on
+PATH). BATCH 2 LANDS ON ITS OTHER GATES with the row recorded as CS0266 x2; R's fix rides a small apply on top.
+R's instrument findings: a floor-3 emission into the live SDK (cleaned, proven); the go CHILD resolves from PATH
+not GOROOT -> C1 adds the PATH-first line to H10's preconditions.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
