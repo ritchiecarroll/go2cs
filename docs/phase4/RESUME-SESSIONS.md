@@ -1049,7 +1049,16 @@ composition arm with a MADE red, GenTests 53/53) -- and R's s1 CORRECTS the ruli
 pointer path before the deferred marker (C1 read the seat ref where it is absent) -> the ck2 converter cut STOPPED
 (report only); the value path unfixed symmetrically (queued); the keys unstripped on purpose. APPLY BATCH 2 = the seat
 ref 8b1a284122 + the host ref at its FOURTH commit (hc2 cutting) + R's 1f70b32f83, one battery, launched when hc2 lands
-and the ha1 host apply has pushed. NEXT: the DRIVER's brief (the plan at master; run-h10-dispatch.ps1 unexercised).]
+and the ha1 host apply has pushed. NEXT: the DRIVER's brief (the plan at master; run-h10-dispatch.ps1 unexercised).
+~09:35: R's correction (280ea555/242dbcae): adapterTypeRef carries (the marker), the two resolvers compose; R's payload
+strip reaches adapterResolvedName; anchoredAdapterMemberName (the white-box -tests model only) is the one unstripped
+site -> RULED: R cuts it NOW on R's ref, name-only, adopting the stopped sub-agent's four arms (the resolvers compose
+the stripped name; the nested generic; the collision qualifier's prefix from the interface symbol; a PARITY control
+asserting the garbled key on purpose); the group-key-vs-record-spelling mismatch banked for the paired seat. LANDED
+on master: R's fourth post-tool commit a37fc2f5a7 -> ab7a59457f; C1's assemble.py determinism 03f791ea5e ->
+e1add354aa (the committed basis stays in lane order; readers compare as sets); C2's anchor fix 2968cbaf80 -> MASTER
+35a880b68c (the last of the four lanes). Fleet lines: name the hash FUNCTION beside every digest; a door whose misuse
+hangs is worse than one that refuses.]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
