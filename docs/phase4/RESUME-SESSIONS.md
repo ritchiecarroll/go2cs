@@ -649,7 +649,12 @@ the recon leg as the per-package pipeline on name lists (consistent with COORD c
 into the stage) and 052ae429e (+11/-2: sweep_s = the wrapper's one-attempt clock; word = the outcome class vocabulary) --
 the ref tip becomes 052ae429e. C2 reads the ref AT ITS TIP as the H10 procedure amendment; COORD lands it signed on that
 read. C1's read-discipline lesson banked: a ruling absorbed unread by a push race is recovered from the tool's absorbed
-listing, which is the reading of record; the window cannot be closed by shortening it. Fold C2's notes into the amendment
+listing, which is the reading of record; the window cannot be closed by shortening it.
+C2's READ DONE at the tip 052ae429e (e63d58f15: no objection; every claim at its source; the decisive reason re-derived
+from the sweep's enumeration; the DESIGN +42 carries C2's notes correctly). ONE WORD RULED before landing (COORD after
+e63d58f15): line 2241 'the first full pass of THE ROSTER' -> 'of the POPULATION (the 228 on the corpus axis; this leg the
+authority on membership)'; C1 commits it alone on the ref, announce-then-push; COORD lands the ref signed at that tip in
+one merge. Fold C2's notes into the amendment
 commit: proc.cs cited per-GOOS (runtime/{linux,windows,darwin}/proc.cs:848), the RegisterPinned step that makes
 initAlgAES arm 2, and the clause that the box materialises at eleven construction sites (scope by provenance). (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
