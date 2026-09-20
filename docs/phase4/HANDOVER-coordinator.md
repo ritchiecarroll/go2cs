@@ -712,3 +712,4 @@ Each lane runs in its own Claude Code session on its own host with its own local
 - 10:38: the driver's Core-edition arm green with one finding (the tree guard under -DryRun) -> i9's follow-up; C2's design read owed; then both refs land on master.
 - 10:41: R's door-scope arm landed -> MASTER 8e4be1e3ff.
 - 10:44: C2's driver design read SOUND (two comment lines to i9's hoist commit); C2's REPO hole to fix at idle; waiting on i9's hoist, batch 2, the ecdh seat.
+- 10:49: C2's two post-tool doors landed -> MASTER 566ffa44f9.
