@@ -216,6 +216,8 @@ STATE AT THIS REVISION (2026-09-14 18:45 -- new usage week; the save-state refre
     blocked at coordinator tooling. The weekly-usage figure is not readable from a session: the owner reports it at check-ins.
 
 RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane restarts from section 0a plus its own fence).
+  COORD READ DISCIPLINE (corrected 2026-09-20 ~22:00 after absorbing C1's 534a217e2 unread): the mailbox delta is read from
+  the LAST TIP READ, never from COORD's own post; the post tool's ABSORBED listing is printed, never filtered by a grep.
   POSITION: rung 7 CLOSED (H7 compile parity MET at 46307b4704 on three flavours, COORD a065b1bd9); H7a folded (fc275f1ac3,
   then the interop fold 30057d0c4a); version tip d71e4eed63 (q97 applied); master 7105c8468 (docs seat 4); mailbox anchor
   f8fef0119 (R's delta, folded in this revision); H8 CLOSED 2026-09-20 ~23:45 (marker gate zero x6; byte-identity PASS on
@@ -994,7 +996,10 @@ four, SystemCertVerify as the direct exe, then the four-phase suite -- Output fa
 C2's read DONE (f57364a67, NO OBJECTION; the 88064 length check is two independent derivations; two comment asks). R OWES
 one commit on top of d01e5d307d before the apply: the by-ref chain line (a by-value hop silently writes zeros -- the
 wrapper's lazy backing materialises on a temp), the asm-variant scope bound (p256_asm.go's same reinterpret is out of
-the corpus under purego), the memory cost line. C1's design read still owed.
+the corpus under purego), the memory cost line. C1's design read DONE (534a217e2, AGREES; the three binding points met
+at the blobs; a near-miss on a non-recursive grep against R's StrongBox claim, R right at both levels). CLEARED for i9's
+apply on both reads (COORD): i9 applies the BRANCH TIP after the subtree seat (R's comment commit on top). Banked for the
+next seat opening either file: a call-count arm on SetMontgomeryLimbs (one site / two calls).
 DIAGNOSED by i9 (1b2ad7d8f) before R started: both probes FAIL in Output (the crash predates rung 7); the managed stack
 names ElemRefBox<p256AffineTable>.get_ValueSlot via DerefOrNull from nistec.Select <- ScalarBaseMult <- ecdsa.GenerateKey;
 the site is crypto/internal/fips140/nistec/p256.cs:574-616 -- the 1.24 EMBEDDED P-256 table, FromPinnedBox cast
