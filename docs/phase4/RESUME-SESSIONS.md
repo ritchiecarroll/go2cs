@@ -450,6 +450,14 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     ordinal maps 47/52/15 in BOTH editions, the guard red-tested (OrdinalIgnoreCase -> fires); post-leg comment fixes:
     -AsHashtable on pwsh 7.4.6 is ORDINAL (the fold was the bare @{}); the -SelfTest six-parameter defect. G CLEARED
     TO RELAUNCH ON THE EIGHTH (dc018aa4): two blobs of record -- the fifth for rows scored, the eighth for the rest.
+    i9's COMPLETION (8a726f15, ~05:20): the RESIDUE ARM GREEN on all three comparisons (archive/zip treatment, go/types
+    control: same word, count, diverged set) -> the exposure RETIRED; 16/16 on the fifth, no split; 10 PASS / 3
+    NOVERDICT (-> DIVERGED tls 12, net 1, net/http 19) / 2 BUILD (crypto/mlkem; hash/maphash = 42 x CS0411 -- the
+    inference CLASS with internal/sync and unique, three rows, C1 sizes once -- + 1 CS1955) / 1 CONVERT (time);
+    sweep_s 654 s over 13 rows. The TSV ref pushes now, then the evidence commit. The warn-only arm was VACUOUS
+    (the LICENSE branch is never reached for a stdlib row) -> still OWED with a real mechanism. THE NINTH b3ded6602a
+    (comment-only: citations by refusal text; three stale testConversion.go line pins replaced) taken; G STAYS on
+    the eighth. C1 cites the verdict expression by name, not :8387.
     C2's DELTA READ of the eighth GREEN (b70531b9; the count-mismatch throw degrades to UNREAD/NOVERDICT; the guard's
     comment overreach banked post-leg); G's clearance waits ONLY on the i7 Core arm re-run on the eighth (running).
     ASSEMBLER RULED (COORD after C1 f100c5b9): header equality goes; each lane read BY NAME; the banked header is the
