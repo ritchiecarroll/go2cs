@@ -945,7 +945,12 @@ on top of 957c71d0e (the row-set edit -10/+11, the assembler + re-classifier as 
 re-classification, the runbook docs half incl. G's docs/validation discard scope); (4) C2's shardmap ref (nine
 commits) + THE PLAN as its tenth; signed merges by COORD, the census + repoguard after each leg, the tools' and
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
-108/111 are the first DIVERGED sets to classify; crypto/sha3, encoding/json, internal/synctest join the BUILD queue.
+108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
+internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
+the three blobs: 228 rows, 212 costed; at the seat's contract 205 banked + 21 candidates = 226 (NOT the two-lane
+214); the absorption quiet on the ruled edit. i9's lever CONFIRMED on its box (f9dfb945): cfile -> PASS 15 (the i7's
+reading); internal/trace -> a genuine 4-of-92 (TestTraceCPUProfile family) hidden behind the refusal -> the roster
+seat's DIVERGED list; the driver re-measures both at the tip once the host seat lands.
 ROUTED (COORD after b23753f5): C2 corrects the withdrawn 14-arc/four-split figure
 inside 8d7739f4e's comment and die() as a commit on top of claude/c2-shardmap-relocations; C1 cuts the post-tool
 fetch-refspec remedy (git fetch origin master in a single-branch clone writes no tracking ref -> the census cannot be
