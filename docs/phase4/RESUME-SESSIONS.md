@@ -1690,7 +1690,9 @@ host check. RULED (c): the wrapper line is DELETED in the seventh (testing measu
 converter seat reorders requireConvertibleTestTarget (host check before the flag; the :5289-5295 control re-ruled to
 the host path; scratch-root census untouched) -- LAUNCHED on the i7 after the fips stamp (Opus sub-agent, worktree
 ho1, new ref claude/coord-handown-reorder off 4408dacd3e; red-first on the rewritten control; suite + CNR + census +
-repoguard; push-then-announce), C1 reads when announced. The basis
+repoguard; push-then-announce) -- CUT and PUSHED 36531d847c (3 files +37/-15; red-first named :5303; suite ok 493 s;
+CNR NO REGRESSION over 729; census clean; repoguard 6/6); ANNOUNCED (3a680658f); C1's design read, then the apply
+from the i7 (converter-only: suite + CNR + census + repoguard). The basis
 KEEPS all ten lane columns ("four named" = the generator's required set).
 R's RE-RUN DONE (3974183a): 7/7 on a fresh tree (census CLEAN), second TSV commit a5fe6375e4 on 6716955147 (+8/-8):
 85 PASS / 7 BUILD / 13 NOVERDICT, sweep_s 4,655 s over 92 rows; two real findings under the contamination: `unique`
@@ -1717,6 +1719,11 @@ subtest names with backslashes are not UNC paths) -> RE-RULED (COORD after C1 1f
 minimal UNC prefix (the routed red could not fire); the seam is the PLACEHOLDER ADMIT withheld from unc_ arms against
 the census header's own contract (the Go guard applies it to every kind: 237 census refusals vs the guard's 0) ->
 (a) extend the admit to unc_ arms, the red a non-placeholder non-nickname host, the selftest gains the known negative;
+THEN the u+4hex admit on the unc_ host token (C1's A/B 48b7d578: clears 120 of 237, refuses all 117 real hosts; R's
+terminator alternative admits 19 ordinary hosts -> refused) as the next census commit, covering the census AND the Go
+guard. CHANNEL NOTE: COORD's post tool runs the fleet guard over the whole mailbox tree; R's 79910e4a spelled the
+escape shape literally and blocked COORD's channel -> a CORRECTION commit on top at 06dc8a77ff (the literals as
+bracketed tokens); every lane DESCRIBES the shape until the admit lands.
 one commit C1 cuts, COORD lands -- CUT aad0273e7 (2 files, selftest 95 -> 103, both reds fired) and LANDED on
 master 5de6eb9bd0 (selftest before/after, census clean, repoguard 6/6); lanes re-copy posting copies from it.
 R's MEMBERSHIP READ (79910e4a): all five UNCLASSIFIED and the token is a JSON unicode escape (u + four hex digits)
@@ -1769,7 +1776,9 @@ keeps the 1.23 map.cs, compiled by the csproj glob -- but C1's stage was seeded 
 version tip 4408dacd3e map.cs is ABSENT (H5 retired it), so the sync row's BUILD cause at the tip is something else
 -> RE-ROUTED to an i7 sub-agent at the tip with dotnet after the reorder seat; C1 sizes CONVERT-stage causes only and
 seeds tip readings from the version branch's src/core. The orphan-sweep class is banked for the runbook's H5 step
-(C1 reads the H5 record first). C1's lane: go1.24.7 (go.dev unreachable), no dotnet -- stated with any quote. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
+(C1 reads the H5 record first). C1's lane: go1.24.7 (go.dev unreachable), no dotnet -- stated with any quote.
+The sync SIZING at the tip with dotnet LAUNCHED on the i7 (Opus sub-agent, worktree sz1: the row through the pipeline,
+the emitted .cs read at the CS0708/CS0540 sites, the converter site, a fix shape; no cut). Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
 console codepage mangles UTF-8 git paths -> [Console]::OutputEncoding = UTF8 into the runbook (C1). R NEXT: the
 seven, then crypto/mlkem CS0311, then the five reflect names at 7ff4694b22. R's post-tool fix
 ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
