@@ -368,7 +368,11 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     26 skips = the declared opt-out class (no [GoTestMatchingConsoleOutput]; 28 non-declarers - 2 tooling; 696 - 6
     platform-exclusive = 690; 1,298.8 s). c7eb36d845 STAMPED at origin by COORD (tree 470ba0b83c = the prediction, parents
     ours-then-theirs, the 5 blobs = the seat's, markers 0, signed) -- VERSION TIP c7eb36d845. H10 OPEN; the sweep launch
-    waits on C1's brief + COORD's ruling. i9 NEXT: the overlay apply (cleared), then the tree reclamation children-first,
+    waits on C1's brief + COORD's ruling. OVERLAY APPLIED 93feb8df2b (i9 78ff1ee37: tree ae9d3de1e7 = the stamp, parents
+    ours-then-theirs, 337 READMEs +531/-531, 0 outside; the two axes met with controls -- old stamp 0 files vs 335
+    pre-merge, shipped stamp 342, no Go-tag regression in ADDED lines; STAMPED by COORD at origin) -- VERSION TIP
+    93feb8df2b. i9's substring proxy arm (fips140/nistec) aborted a correct merge once; replaced by the set
+    intersection with a planted control. i9 NEXT: the tree reclamation children-first,
     then i9-post.sh with the state-dir refusal in first. The H9 docs = C2's 2e75b14586 + a closure block (i7 sub-agent)
     landing on master signed.
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
