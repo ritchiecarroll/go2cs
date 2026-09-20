@@ -1749,7 +1749,12 @@ the tip before cutting. SIX genuine BUILD rows routed to C1
 for sizing: sync (CS0708 x17...), runtime (CS0310 x22: a union constraint with a POINTER member lowers to
 `where T : new()` and zh<T> is abstract -> constraint emission; + CS1061 testing.B.Elapsed on the hand-own),
 crypto/ecdh (CS1537), embed/internal/embedtest (CS0234, the known recompute remedy); internal/sync stays an i7
-sub-agent. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
+sub-agent. C1's sync SIZING (767f0870) found an ORPHAN -- Go 1.24 moved sync.Map to hashtriemap.go and a seeded root
+keeps the 1.23 map.cs, compiled by the csproj glob -- but C1's stage was seeded from MASTER's 1.23.12 corpus: at the
+version tip 4408dacd3e map.cs is ABSENT (H5 retired it), so the sync row's BUILD cause at the tip is something else
+-> RE-ROUTED to an i7 sub-agent at the tip with dotnet after the reorder seat; C1 sizes CONVERT-stage causes only and
+seeds tip readings from the version branch's src/core. The orphan-sweep class is banked for the runbook's H5 step
+(C1 reads the H5 record first). C1's lane: go1.24.7 (go.dev unreachable), no dotnet -- stated with any quote. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
 console codepage mangles UTF-8 git paths -> [Console]::OutputEncoding = UTF8 into the runbook (C1). R NEXT: the
 seven, then crypto/mlkem CS0311, then the five reflect names at 7ff4694b22. R's post-tool fix
 ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
