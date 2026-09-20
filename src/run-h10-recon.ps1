@@ -119,7 +119,16 @@ param(
     [switch] $DryRun,
 
     # Exercise every guard and the format assertion, run no row, write nothing.
-    [switch] $SelfTest
+    [switch] $SelfTest,
+
+    # ⚠⚠ THE TREE MAY BE ON A BRANCH, AND ONLY THE CALLER KNOWS WHETHER THAT IS RIGHT.
+    # A RECON leg's tree is detached and thrown away, so a branch means someone is about to commit
+    # readings by habit -- the refusal below is for that, and it stays the default.
+    # The H10 DRIVER's tree is the opposite by ruling (the brief's B.4 / OQ4): it is a linked
+    # worktree ON A BRANCH because its artifacts are BANKED and committed from it. The driver runs
+    # this wrapper per row rather than carrying a second copy of its pipeline, so it needs to say so.
+    # DEFAULT FALSE: every recon caller, every arm and every existing invocation is unchanged.
+    [switch] $AllowBranch
 )
 
 Set-StrictMode -Version Latest
@@ -255,7 +264,14 @@ if (-not $SelfTest) {
         Deny "'$Tree' is a MAIN checkout (--git-dir == --git-common-dir), not a linked worktree. The leg publishes validation artifacts and its tree is discarded afterwards -- run it in a linked worktree created for this list."
     }
     $sym = GitTry @('-C', $Tree, 'symbolic-ref', '-q', 'HEAD')
-    if ($sym.Code -eq 0 -and $sym.Out) { Deny "'$Tree' HEAD is on branch '$($sym.Out)' -- a recon tree is DETACHED, so nothing can be committed from it by habit" }
+    if ($sym.Code -eq 0 -and $sym.Out -and -not $AllowBranch) {
+        Deny "'$Tree' HEAD is on branch '$($sym.Out)' -- a recon tree is DETACHED, so nothing can be committed from it by habit. If this is the H10 DRIVER's banking tree, pass -AllowBranch and say so."
+    }
+    # ⚠ THE SWITCH IS REPORTED, NOT SILENT. A caller that turns a guard off should leave a trace in
+    # the leg's own output, so a reader of the log can see which discipline this run was under.
+    if ($sym.Code -eq 0 -and $sym.Out -and $AllowBranch) {
+        Write-Host "  tree              : ON BRANCH '$($sym.Out)' -- permitted by -AllowBranch (a BANKING tree, not a recon tree)"
+    }
     $head = GitTry @('-C', $Tree, 'rev-parse', 'HEAD')
     if ($head.Out -ne $ExpectTip) { Deny "'$Tree' is at $($head.Out), not the expected tip $ExpectTip -- the leg's readings are comparable only across one tree" }
 
