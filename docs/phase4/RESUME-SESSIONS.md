@@ -457,7 +457,11 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     sweep_s 654 s over 13 rows. The TSV ref pushes now, then the evidence commit. The warn-only arm was VACUOUS
     (the LICENSE branch is never reached for a stdlib row) -> still OWED with a real mechanism. THE NINTH b3ded6602a
     (comment-only: citations by refusal text; three stale testConversion.go line pins replaced) taken; G STAYS on
-    the eighth. C1 cites the verdict expression by name, not :8387.
+    the eighth. C1 cites the verdict expression by name, not :8387. i9's TSV AT ORIGIN (7257173d): claude/i9-h10-
+    recon-tsv 748da4f895 (one path on 0dc65a8e8d, signed, 17 lines, CR 0, ten columns; read back byte-identical;
+    provenance reads on the tree's originals) -> C1's concatenation UNBLOCKED on R's a5fe6375e4 + i9's 748da4f895;
+    G's full 107 on the eighth follows. i9's evidence commit follows its census (slow on single-line records --
+    an operational note); the TENTH (comment shrink + a startup canary asserting 2) pre-taken as a guard.
     C2's DELTA READ of the eighth GREEN (b70531b9; the count-mismatch throw degrades to UNREAD/NOVERDICT; the guard's
     comment overreach banked post-leg); G's clearance waits ONLY on the i7 Core arm re-run on the eighth (running).
     ASSEMBLER RULED (COORD after C1 f100c5b9): header equality goes; each lane read BY NAME; the banked header is the
@@ -1691,8 +1695,11 @@ converter seat reorders requireConvertibleTestTarget (host check before the flag
 the host path; scratch-root census untouched) -- LAUNCHED on the i7 after the fips stamp (Opus sub-agent, worktree
 ho1, new ref claude/coord-handown-reorder off 4408dacd3e; red-first on the rewritten control; suite + CNR + census +
 repoguard; push-then-announce) -- CUT and PUSHED 36531d847c (3 files +37/-15; red-first named :5303; suite ok 493 s;
-CNR NO REGRESSION over 729; census clean; repoguard 6/6); ANNOUNCED (3a680658f); C1's design read, then the apply
-from the i7 (converter-only: suite + CNR + census + repoguard). The basis
+CNR NO REGRESSION over 729; census clean; repoguard 6/6); ANNOUNCED (3a680658f); C1's DESIGN READ SOUND (18f254c9)
+with two follow-ups landing WITH the seat as a SECOND commit (cutting on the i7, no push until announced): the
+scratch-root arms pin the KIND (C1's plant fired nothing), and the by-construction premise stated as conditional on
+the root's contents (a seeded root opens the host path). Then the apply from the i7 carries both (suite + CNR +
+census + repoguard). C2's structural read not owed on this seat. The basis
 KEEPS all ten lane columns ("four named" = the generator's required set).
 R's RE-RUN DONE (3974183a): 7/7 on a fresh tree (census CLEAN), second TSV commit a5fe6375e4 on 6716955147 (+8/-8):
 85 PASS / 7 BUILD / 13 NOVERDICT, sweep_s 4,655 s over 92 rows; two real findings under the contamination: `unique`
