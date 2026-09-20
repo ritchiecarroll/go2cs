@@ -323,6 +323,8 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
   then the H11 seat claude/c1-h11-published-stamp 135f0cdc15 (CLEARED on C2's read 4c0a86310;
     converter-suite gate, the new guard arms by name; no corpus build); state the version tip after each. Still owed by a
     Windows box before H11 is declared: check-roster-format.ps1 and release-nuget.ps1 -VerifyOnly at the applied tree
+  then C2's subtree-load seat claude/c2-subtree-load-goroot-guard 19175c31ad (merge-base 43a3627667; projitems composed by
+    both seats, the q98 guards police it; the converter suite with TestSubtreeLoad* by name; no corpus build)
   q100 claude/c1-q100-native-array-view-floor at its RE-PINNED tip abe3b3798b (9c5460585: the i7 gate CLEAR at 0dca38552c
     stands; the commit on top is comment-and-prose-only, verified).
 Not yours: G's H8 census, C2's comparand procedure, the runtime row. Blocked on: nothing for the first five.
@@ -854,6 +856,10 @@ the prefix -> 0 runtime/cgo files, queue hash identical, src/core byte-identical
 DEFECT, C2's seat (the subtree branch must not fire under GOROOT; red-first on C2's control; the author's comment amended);
 G then verifies its linux emission unchanged (3397, queue 342) from the seat's converter; C2 re-takes the linux pair
 (predicted 3397 = 3397, 0 placement differences, exemption count 0); then COORD closes H8 and cuts the H8 docs commit.
+SEAT CUT (d44c00ded): claude/c2-subtree-load-goroot-guard 19175c31ad off 43a3627667 (conversionDriver.go isPathUnder guard +
+unit arm red-proved on two axes + projitems; all four readings met; suite green) -- ACCEPTED; G verifies the negative-host arm
+from the seat's converter; C2 re-takes the linux pair from it; then H8 closes; i9 applies after the H11 seat. C2 also owes the
+amendment's (d) sentence (toolchain location + the seat's SHA) with the seed-absent exemption arm, on top of 0a993ec908.
 G's diff (4f4e3f9f7): both boxes' sorted package lists share one sha256 (342 = 342, LF, one trailing newline) -- the
 enumeration question is CLOSED; G's negative arm (GOROOT not under GOPATH on G-LAPTOP, the branch does not fire) confirms
 C2's cause from the side where it does not fire. G's runbook point is TAKEN into C2's seat scope: the H8 arm states the
