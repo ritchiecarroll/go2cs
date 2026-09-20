@@ -439,8 +439,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     neutral binary names (three hardcoded .exe paths refuse a linux GOROOT with the wrong cause); (B) the successor map at
     :271-281 is a hand copy already wrong three ways vs C1's ruled map -- carry the four corrections + an owner comment,
     derive from the roster's relocation table when the roster seat lands; (C) word = UNREAD when diverged is not an int).
+    The third commit's map = C1's 14-arc table (350a301a; source -> targets LIST, never 1:1; 11 targets, fips140test
+    receives three; every arm inherits the floor) with the owner comment; the durable relocations.tsv lands with the
+    roster seat and the wrapper's map derivation switches to it in a commit landing with the seat.
     NEXT: the third commit (announce-then-push); C2 reads its diff; the i7 Core arm re-runs on the FINAL tip after the
-    fips140test seat's conversions finish (never two conversions on one box); then LAUNCH.
+    fips140test seat's conversions finish (never two conversions on one box); then LAUNCH. ALSO: apply R's seat
+    ce8d0bd654 (tip of claude/laneR-anon-struct-typearg at the act) on C1's design read; C2's structural read DONE.
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
@@ -713,7 +717,9 @@ different claims). RUNBOOK LINE OWED at the next docs seat: the PATH-resolved pi
 H10's preconditions table. ASSIGNED (COORD after R 57e9e70e): (1) the design read of R's seat ce8d0bd654 (the three-step
 resolution, the fourth flag site, the IndexExpr residual); (2) SIZE the reflect TestIsZero AccessViolation from the
 emission at CONVERT (setField's unsafe write, the golib door, the class -- the 25-site pinned-box class or another -- a
-fix shape, a red-first arm); no cut. SIZINGS DONE (dfdcbc65) and ROUTED (COORD after 53c57e752): row 1 fips140test = the test
+fix shape, a red-first arm); no cut. THE RELOCATION MAP OF RECORD is C1's table (350a301a: 10 rows, 14 arcs, 11
+targets); the roster seat after the leg adds docs/phase4/hopA-inputs/relocations.tsv (one line per arc) and derives the
+$longTimeouts re-path from it. SIZINGS DONE (dfdcbc65) and ROUTED (COORD after 53c57e752): row 1 fips140test = the test
 emission's using-static + initPackage of a production class the driver never emitted (test-only package) -> an i7
 sub-agent cut after the Core arm, C1 design read / C2 structural, i9 applies; row 2 crypto/mlkem = zh<T> at a
 constrained type-argument position (Go satisfies the constraint via the pointer method set) -> C2 DESIGN READ of (a)
@@ -1012,6 +1018,10 @@ axis confirmation through the pipeline (d5cdd55ab), the wrapper pre-cut reads (f
 correction: verified premises do not transfer their standing to a synthesis -- BOARD line; 7c43a15e the converter's two
 Validated format strings). ASSIGNED: read C1's (d) aa66874ff7 as the H10 procedure amendment (order, host rule,
 preconditions table, per-row steps against the rulings cited) -> COORD lands; then read i9's recon wrapper.
+R's SEAT STRUCTURAL READ DONE (15a14bad: suite green on this box; the fixture fires all six lines reverted and passes
+restored byte-identically; reflect rc 1 -> rc 0 as a same-box A/B; time still rc 1 as the control). NEXT: the diff read
+of i9's third commit; then the generator's reserved-set derivation from relocations.tsv (a commit on the shardmap ref
+landing WITH the roster seat).
 (d) LANDED at master 6c32d0e171. Tag-asymmetry bound DONE (50554616: 2 of 207 differ on linux -- nistec files SWAP, both
 directions; fips140test's nistec_ordinv_test.go oracle-only, latent behind CS0234). ASSIGNED: read i9's wrapper ref
 claude/i9-h10-recon-wrapper at its tip AFTER i9's second commit (the linked-worktree guard + per-row artifact capture).
