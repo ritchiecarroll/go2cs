@@ -713,3 +713,4 @@ Each lane runs in its own Claude Code session on its own host with its own local
 - 10:41: R's door-scope arm landed -> MASTER 8e4be1e3ff.
 - 10:44: C2's driver design read SOUND (two comment lines to i9's hoist commit); C2's REPO hole to fix at idle; waiting on i9's hoist, batch 2, the ecdh seat.
 - 10:49: C2's two post-tool doors landed -> MASTER 566ffa44f9.
+- 10:54: THE DRIVER SEAT LANDED on master (5e03f102af, the hoist included) + C1's door-scope fix (306950be71); the wrapper ref is version-based -> i9 re-cuts it as a one-file ref off master.

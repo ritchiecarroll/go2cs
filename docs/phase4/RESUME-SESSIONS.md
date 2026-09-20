@@ -1131,6 +1131,12 @@ ledger key by ordering; the converter stamp = mtime+size fails safe); C2's own p
 repo it runs from ($REPO without a door) -> C2 fixes at idle. WAITING: i9's tree-guard hoist commit -> then the
 driver ref + the wrapper ref land on master; APPLY BATCH 2 (ab2) in its gates; the ecdh seat (ec1) in CNR.
 C2's two doors (the REPO default -> the tool's clone; --mark-read validated) LANDED -> MASTER 566ffa44f9 (~10:50).
+~11:00: i9's tree-guard HOIST (4a55d4d7b5, C2's two comment lines in) -> THE DRIVER SEAT LANDED -> master 5e03f102af;
+C1's door-scope fix (dac6d3bc54: a census-dir door; the census fetch into an OWNED ref with --refmap= EMPTY -- the
+load-bearing token) -> MASTER 306950be71. THE WRAPPER REF d79a43c978 IS VERSION-BASED (merge-base 9d80085377; 168
+commits / 2,579 files / 112 deletions) -> RULED: i9 re-cuts it as a ONE-FILE ref off master by plumbing (the
+fifteenth's blob 55466ef4d8 at src/run-h10-recon.ps1); lands beside the driver when announced; the rehearsal takes
+both by blob from master. G re-derived its running post tool from its ref (6a15e8ff3); C1's running copy EQUAL.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
