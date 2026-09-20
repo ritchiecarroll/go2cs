@@ -1841,7 +1841,11 @@ assembly, sequential by default (the assembly Parallelize line commented out at 
 TestHost.Run sites in TestingRuntimeTests.cs); s5 the restore's half-application mirror; s7 cite sites WITH the
 extension -- practice, no arm) -> a COMMENT-ONLY THIRD COMMIT on the host ref cutting on the i7 (worktree hc1; does
 not hold the apply). APPLY BATCH 2 RULED: ONE battery, three merges (the foreign-generic follow-up; the host ref's
-third commit; R's ref after the generic-composition arm), gates once, three stamps. The owner item RESTORED as OPTIONAL (Developer Mode on R-LAPTOP and i9 makes
+third commit; R's ref after the generic-composition arm), gates once, three stamps. C2's DELTA READ of the follow-up
+SOUND (626ba01b7: the apply may push; the lock asymmetry -> the third commit). C1's CORRECTION (a7d0b89e6): 27
+synchronous TestHost.Run sites, not six (COORD's `head -6` -- floor 16); the attribute DELIBERATELY disabled with its
+reason at BehavioralTestBase.cs:22 -> the third commit also comments the enforcement site (three files, comment-
+only; hc1 re-briefed). The owner item RESTORED as OPTIONAL (Developer Mode on R-LAPTOP and i9 makes
 the symlink path available today); the rows stay NOVERDICT by cause and are re-measured by the driver). R's CORRECTION (fcb75ab3) taken: the runbook sentence is i9's -- mtime is unrelated
 to provenance in either direction (over in R's tree, under in five of i9's seven packages); the remedy unchanged.
 i9 RE-TOOK its table (0bb72afd): genuine residue in six of seven packages -> its two-row arm STILL OWED; go/types
@@ -2005,7 +2009,14 @@ return-type twin of the box-receiver helper made the direct-zh primary visible).
 their host-follow-up reads; APPLY ORDER on the version tip: (1) the host seat, (2) the foreign-generic follow-up, (3)
 R's ref after R merges the follow-up + cuts the generic-composition arm (the 1,323-adapter diff, stdlib, CNR, the
 mlkem row past COMPILE at that apply). R's post tool: the self-test plants ONE token of four (C1's shape from the other
-end) -> R cuts every-token planting + the word-bounded bar NOW while idle. DOCTRINE: a fetch-narrowed clone answers a STALE origin/<branch> to a successful fetch -- use ls-remote or
+end) -> R cuts every-token planting + the word-bounded bar NOW while idle. CUT AND LANDED: claude/r-post-tool-arms
+72c6e8cde4 -> MASTER 3a2eb49749 (~08:50; probe word-bounded, plant kept as a substring since  frees planted; the
+dropped-token red CANNOT exist tool-side -- the degraded-set hole OPEN and NAMED, the change is visibility). C1's #41
+design read of the whole seat SOUND (f8951500: the bound load-bearing -- a third consumer of dropGeneric's default;
+s4 the lookup side is SLICED -> R folds one comment line with the generic-composition arm). C2's structural read
+after THE PLAN. i9's FOURTEENTH 91fb31e1aa (69f32095; the preflight restructure with the ruled red; C2's s2 folded
+safely with UNREAD preserved; C2's s3 measured) = the blob of record once at origin; i9's post-tool anchor defect
+(eight entries marked read unread) -> explicit mark-read + #34's lines at i9's next idle. DOCTRINE: a fetch-narrowed clone answers a STALE origin/<branch> to a successful fetch -- use ls-remote or
 FETCH_HEAD, or an explicit refspec. CENSUS CLOSED (3f70a096e): the verdict is per-branch, read from CONFIG,
 negatives included (C2: wildcard + negative freezes the ref under a plain fetch, moves it under an explicit one);
 a worktree is not a clone; R's two acts: steward-r maps master; mailbox-r deletes its unmaintained origin/master;
