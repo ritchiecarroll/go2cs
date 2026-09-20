@@ -880,7 +880,13 @@ component-boundary matching), section (d)'s fourth axis, selftest 41/41. ⚠ WIT
 content DIFFER' counter was DEAD since its first cut (join -j0 invalid, stderr swallowed) -- every 'content differs 0' in
 tonight's arm (b) posts (G's and C2's) was not a measurement; every verdict stands on the tree hashes and comm. G's H8
 record carries this in its closure block. C2's first arm-b re-take was VOID (CGO_ENABLED defaulted to 1 -- a one-axis
-violation caught by its own written prediction); the re-take is running on the pin.
+violation caught by its own written prediction); the re-take is running on the pin. DONE (f38c9b876): the linux pair
+from the seat's converter PASSES on its own merits -- 3397 = 3397, only-in 0/0, content DIFFER 0 (a real reading, first run of
+the fixed counter), all four tree hashes equal, seed-absent set 0 packages, both controls proven able to fail on THIS pair
+(a hex-digit change -> content DIFFER 1 FAIL; a path moved one folder -> only-in 1 FAIL); the runner's built-in control was
+invalid (a non-hex perturbation refused on form) and replaced. H8's byte-identity clause: windows PASS (G), linux PASS (C2,
+seat converter), darwin PASS (G, a box where the branch never fired). CLOSE waits on G's negative-host arm from the seat's
+converter; then G's dated closure block on claude/g-h8-record and COORD's H8 docs commit (C2's d7b0876ce6 + G's record).
 G's diff (4f4e3f9f7): both boxes' sorted package lists share one sha256 (342 = 342, LF, one trailing newline) -- the
 enumeration question is CLOSED; G's negative arm (GOROOT not under GOPATH on G-LAPTOP, the branch does not fire) confirms
 C2's cause from the side where it does not fire. G's runbook point is TAKEN into C2's seat scope: the H8 arm states the
