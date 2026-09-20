@@ -215,63 +215,56 @@ function Test-SummaryContract {
 Write-Host ''
 Write-Host 'H10 recon leg -- preflight'
 
-# ⚠⚠ -SelfTest COVERS THE SUMMARY-LINE CONTRACT ONLY, AND ITS OWN COMMENT ONCE CLAIMED MORE.
-# It exits HERE, before `Assert-OrdinalJsonReader` runs in the preflight below, so the guard that
-# REFUSES THE LEG is untested by the one flag that exists to test the guards.
-#
-# ⚠ I TRIED THE OBVIOUS FIX AND IT DOES NOT WORK: calling the canary from this block fails with
-# CommandNotFoundException, because the function is defined ~130 lines BELOW here and a script's
-# top-level flow cannot forward-reference it. The parse is clean either way, so only RUNNING
-# `-SelfTest` catches it -- which is how this note came to be written rather than a broken switch
-# shipped.
-#
-# THE REAL FIX IS A PREFLIGHT RESTRUCTURE, deliberately not in this commit: the block must move
-# BELOW the JSON reader definitions, AND the eight tree/scratch validations between here and there
-# must stop denying on the dummy values `-SelfTest` is forced to supply -- see the next paragraph.
-#
-# ⚠ BECAUSE IT CANNOT BE INVOKED AS DOCUMENTED EITHER. Six parameters are [Parameter(Mandatory)]
-# with no parameter set of their own, so `-SelfTest` alone prompts for all six and under
-# -NonInteractive is rc 1 with nothing run; it is reachable only by supplying six values it never
-# uses, and those values then fail the tree validation below. The two defects are one restructure.
-#
-# THE CANARY IS NOT UNTESTED MEANWHILE: it runs in the preflight of every real leg, and its
-# red-first arm drives it against a deliberately folding reader and requires the refusal.
-if ($SelfTest) {
-    Write-Host ''
-    if (Test-SummaryContract) { Write-Host '  SELF-TEST PASSED -- the summary-line contract only; see the note above'; exit 0 }
-    Deny 'the summary-line contract FAILED its self-test -- the parse and its controls disagree'
+# ⚠⚠ -SelfTest USED TO RUN HERE AND NOW RUNS BELOW THE READER DEFINITIONS. Two defects were
+# reported separately and were ONE restructure, which is why they are fixed together:
+#   (1) it exited here, BEFORE `Assert-OrdinalJsonReader` is defined, so the switch that exists to
+#       test the guards never ran the guard that REFUSES THE LEG; and
+#   (2) calling the canary from here fails with CommandNotFoundException anyway -- a script's
+#       top-level flow cannot forward-reference a function defined ~130 lines below. The PARSE is
+#       clean either way, so only RUNNING `-SelfTest` catches it. I tried exactly that in the
+#       twelfth and backed it out rather than ship a broken switch.
+# The block now sits after the last reader definition and before the GOROOT checks, which is the
+# only region where every function it calls exists and no real input has been demanded yet.
+
+# ⚠⚠ SKIPPED UNDER -SelfTest, AND THAT IS THE SECOND HALF OF THE RESTRUCTURE. These validate the
+# REAL run's inputs; `-SelfTest` has no tree, no scratch and no name list, and its six mandatory
+# parameters force it to invent values it never uses. Left unguarded they refuse the self-test on
+# the dummies -- which is what made the switch unreachable as documented, so moving the block alone
+# would not have been enough.
+# ⚠ THE GUARD IS ON THE SWITCH, NOT ON THE VALUES: nothing here is weakened for a real leg, which
+# always runs with $SelfTest false and takes every one of these refusals exactly as before.
+if (-not $SelfTest) {
+    if (-not (Test-Path -LiteralPath $NameList)) { Deny "no name list at '$NameList'" }
+    if (-not (Test-Path -LiteralPath $Tree))     { Deny "no tree at '$Tree'" }
+    if (-not (Test-Path -LiteralPath (Join-Path $Tree 'src/core'))) { Deny "'$Tree' has no src/core -- the output root must be the worktree, whose src/core is the seed" }
+
+    # ---------------------------------------------------------------- the throwaway-worktree guard (ruled)
+    # `-test-action all` PUBLISHES the proof page, the index row and the README badge -- measured on the
+    # one-row dry run, where a SINGLE row re-banked bufio's proof page to 1.24.13 and removed 25 lines from
+    # the shared index. Those are the ROW ACT's artifacts; the recon leg produces READINGS. So the leg runs
+    # in a LINKED WORKTREE that is discarded whole afterwards, and this script refuses to run anywhere else.
+    #
+    # ⚠ The wrapper NEVER repairs the tree itself: no `git checkout --`, no `git clean`. A tool that cleans
+    # up after itself inside a work tree is one bad path away from discarding someone's work, and the
+    # discard is the caller's act on a tree it created for this.
+    $gd  = GitTry @('-C', $Tree, 'rev-parse', '--git-dir')
+    $gcd = GitTry @('-C', $Tree, 'rev-parse', '--git-common-dir')
+    if ($gd.Code -ne 0 -or $gcd.Code -ne 0) { Deny "'$Tree' is not a git work tree" }
+    # A LINKED worktree's --git-dir is <common>/worktrees/<name>; the MAIN checkout's two are equal.
+    if ($gd.Out -eq $gcd.Out) {
+        Deny "'$Tree' is a MAIN checkout (--git-dir == --git-common-dir), not a linked worktree. The leg publishes validation artifacts and its tree is discarded afterwards -- run it in a linked worktree created for this list."
+    }
+    $sym = GitTry @('-C', $Tree, 'symbolic-ref', '-q', 'HEAD')
+    if ($sym.Code -eq 0 -and $sym.Out) { Deny "'$Tree' HEAD is on branch '$($sym.Out)' -- a recon tree is DETACHED, so nothing can be committed from it by habit" }
+    $head = GitTry @('-C', $Tree, 'rev-parse', 'HEAD')
+    if ($head.Out -ne $ExpectTip) { Deny "'$Tree' is at $($head.Out), not the expected tip $ExpectTip -- the leg's readings are comparable only across one tree" }
+
+    # The scratch must OUTLIVE the tree, so it must not be inside one.
+    # ⚠ The SUCCESS case here is git FAILING (not a repository). Read the code, never the stream.
+    if (-not (Test-Path -LiteralPath $Scratch)) { New-Item -ItemType Directory -Path $Scratch -Force | Out-Null }
+    $sc = GitTry @('-C', $Scratch, 'rev-parse', '--is-inside-work-tree')
+    if ($sc.Code -eq 0 -and $sc.Out -eq 'true') { Deny "the scratch '$Scratch' is inside a git work tree -- it holds the only copy of this leg's evidence and must survive the tree's removal" }
 }
-
-if (-not (Test-Path -LiteralPath $NameList)) { Deny "no name list at '$NameList'" }
-if (-not (Test-Path -LiteralPath $Tree))     { Deny "no tree at '$Tree'" }
-if (-not (Test-Path -LiteralPath (Join-Path $Tree 'src/core'))) { Deny "'$Tree' has no src/core -- the output root must be the worktree, whose src/core is the seed" }
-
-# ---------------------------------------------------------------- the throwaway-worktree guard (ruled)
-# `-test-action all` PUBLISHES the proof page, the index row and the README badge -- measured on the
-# one-row dry run, where a SINGLE row re-banked bufio's proof page to 1.24.13 and removed 25 lines from
-# the shared index. Those are the ROW ACT's artifacts; the recon leg produces READINGS. So the leg runs
-# in a LINKED WORKTREE that is discarded whole afterwards, and this script refuses to run anywhere else.
-#
-# ⚠ The wrapper NEVER repairs the tree itself: no `git checkout --`, no `git clean`. A tool that cleans
-# up after itself inside a work tree is one bad path away from discarding someone's work, and the
-# discard is the caller's act on a tree it created for this.
-$gd  = GitTry @('-C', $Tree, 'rev-parse', '--git-dir')
-$gcd = GitTry @('-C', $Tree, 'rev-parse', '--git-common-dir')
-if ($gd.Code -ne 0 -or $gcd.Code -ne 0) { Deny "'$Tree' is not a git work tree" }
-# A LINKED worktree's --git-dir is <common>/worktrees/<name>; the MAIN checkout's two are equal.
-if ($gd.Out -eq $gcd.Out) {
-    Deny "'$Tree' is a MAIN checkout (--git-dir == --git-common-dir), not a linked worktree. The leg publishes validation artifacts and its tree is discarded afterwards -- run it in a linked worktree created for this list."
-}
-$sym = GitTry @('-C', $Tree, 'symbolic-ref', '-q', 'HEAD')
-if ($sym.Code -eq 0 -and $sym.Out) { Deny "'$Tree' HEAD is on branch '$($sym.Out)' -- a recon tree is DETACHED, so nothing can be committed from it by habit" }
-$head = GitTry @('-C', $Tree, 'rev-parse', 'HEAD')
-if ($head.Out -ne $ExpectTip) { Deny "'$Tree' is at $($head.Out), not the expected tip $ExpectTip -- the leg's readings are comparable only across one tree" }
-
-# The scratch must OUTLIVE the tree, so it must not be inside one.
-# ⚠ The SUCCESS case here is git FAILING (not a repository). Read the code, never the stream.
-if (-not (Test-Path -LiteralPath $Scratch)) { New-Item -ItemType Directory -Path $Scratch -Force | Out-Null }
-$sc = GitTry @('-C', $Scratch, 'rev-parse', '--is-inside-work-tree')
-if ($sc.Code -eq 0 -and $sc.Out -eq 'true') { Deny "the scratch '$Scratch' is inside a git work tree -- it holds the only copy of this leg's evidence and must survive the tree's removal" }
 
 # The pin BY OUTPUT, never by the string handed in. GOTOOLCHAIN=local is load-bearing on this fleet:
 # R measured, and i9 reproduced, that a 1.24.13 SDK's own go.exe answers the MACHINE pin without it.
@@ -507,6 +500,27 @@ function Get-TailLines([string] $Path, [int] $MaxLines = 400, [int] $MaxBytes = 
 }
 
 $goVer = Join-Path $GoRoot 'VERSION'
+# ⚠⚠ -SelfTest RUNS HERE, AND THE PLACEMENT IS THE POINT. Every function it calls is defined
+# above (`Test-SummaryContract`, and now `Assert-OrdinalJsonReader` with the whole reader chain it
+# proves), and nothing below this line has yet demanded a real GOROOT, tree or name list. It exits
+# before the pin checks, which are the first thing a dummy invocation could not satisfy.
+#
+# ⚠ THE CANARY IS THE HALF THAT WAS MISSING. `Test-SummaryContract` proves the summary parse and
+# its three planted refusals; `Assert-OrdinalJsonReader` proves the JSON reader does not FOLD two
+# names differing only by case -- the defect that would silently short every verdict count on
+# `math/rand` and `mime/multipart`. It refuses the leg from inside, so a failure here never reaches
+# the PASSED line below.
+#
+# ⚠ ORDER: the contract's result is captured BEFORE the canary runs, so a canary refusal is not
+# able to mask a contract failure by exiting first -- both are reported by the same invocation.
+if ($SelfTest) {
+    Write-Host ''
+    $ok = Test-SummaryContract
+    Assert-OrdinalJsonReader
+    if ($ok) { Write-Host '  SELF-TEST PASSED -- the summary-line contract AND the ordinal-reader canary'; exit 0 }
+    Deny 'the summary-line contract FAILED its self-test -- the parse and its controls disagree'
+}
+
 if (-not (Test-Path -LiteralPath $GoRoot)) { Deny "no GOROOT at '$GoRoot'" }
 $goExe = Find-Exe (Join-Path $GoRoot 'bin') 'go'
 if (-not $goExe) { Deny "'$GoRoot/bin' holds neither 'go' nor 'go.exe' -- not a GOROOT" }
@@ -963,11 +977,26 @@ foreach ($row in $rows) {
     #
     # ⚠⚠ THIS LINE IS A RESTATEMENT OF INTENT AND IS PROVABLY INERT: the initialiser three lines
     # above already holds 'NOMATCH' and nothing between them touches $verdicts. IT IS NOT THE
-    # MECHANISM. The mechanism is the two `-not $cmpStale` guards below, which are what stop
-    # $v.Count from over-writing NOMATCH afterwards -- so deleting either of them because this
-    # explicit line "already covers the case" would reinstate the defect the eleventh fixed. Kept
-    # because an explicit statement beside a guard is this file's habit; labelled because C1 named
-    # the inverse risk, which is the one that actually bites.
+    # MECHANISM.
+    #
+    # ⚠⚠ AND THE MECHANISM IS NO LONGER WHAT THE THIRTEENTH SAID IT WAS. That commit wrote here
+    # that the two `-not $cmpStale` guards below stop $v.Count over-writing NOMATCH, "so deleting
+    # either of them ... would reinstate the defect the eleventh fixed" -- and the SAME commit added
+    # `if ($word -eq 'NOVERDICT') { $verdicts = 'NOMATCH' }` after all five assignments, which makes
+    # that false. The sentence described the eleventh's state and was written into the thirteenth.
+    # (C2's finding; a comment out of date inside the commit that dated it.)
+    #
+    # ⚠ THE GUARDS ARE STILL NECESSARY AND THE REASON IS DIFFERENT -- MEASURED by deleting one in
+    # a copy and driving the stale row through it:
+    #     as committed   verdicts=NOMATCH, and no cross-check line
+    #     guard deleted  verdicts=NOMATCH STILL (the derived line above restores it), but the row
+    #                    prints "!! verdicts DISAGREE: map 0 != summary 61 + disclosed 0"
+    # That is a loud, confident warning about a comparison that was never meant to happen -- this
+    # run's summary against a document belonging to an EARLIER run. The guards no longer carry the
+    # VALUE; they prevent a WRONG LINE, which is the harder thing for a reader to discount.
+    #
+    # Kept because an explicit statement beside a guard is this file's habit; labelled because C1
+    # named the inverse risk, and re-labelled because C2 caught the label itself going stale.
     if ($cmpStale) { $verdicts = 'NOMATCH' }
     # ⚠ A DERIVED COUNT IS A MEASUREMENT, NOT A GUESS, AND IT IS WHY THIS ROW IS NOT NOMATCH. It is
     # the converter's own expression over this row's own record; the cross-check below is skipped for
@@ -1076,8 +1105,22 @@ foreach ($row in $rows) {
     # a PASS row's net count is 0. Left as it was, the column cannot express the value the same ruling
     # requires it to carry, and the assembler could not tell "no divergences" from "no artifact".
     #
-    # The type test first is the whole fix: only a STRING that is empty means "never set".
-    if ($diverged -is [string] -and $diverged -eq '') { $diverged = 'n/a' }
+    # ⚠⚠ KEYED TO THE WORD, NOT TO "THE INITIALISER IS STILL AN EMPTY STRING" (C2's finding,
+    # ruled in by COORD). The old predicate was `$diverged -is [string] -and $diverged -eq ''`, which
+    # is correct TODAY and correct only because the initialiser happens to be a string: initialise
+    # `$diverged = 0` some day and a row that never ran the derivation emits a real-looking ZERO,
+    # silently, and no type test can tell it from a measured zero. `sweep_s` five lines up is keyed
+    # to the word and has no such dependency; this now matches it.
+    #
+    # ⚠ AND IT IS NOT C2's LINE AS LITERALLY WRITTEN, BECAUSE THAT ONE LOSES `UNREAD`. Keying
+    # bluntly on word=NOVERDICT would rewrite UNREAD to n/a -- and the comment above says exactly why
+    # that is wrong: UNREAD means an artifact EXISTED and could not be read, which is a different and
+    # worse fact than never having produced one. UNREAD is set INSIDE the derivation and reaches
+    # NOVERDICT through the `-isnot [int]` guard, so it is excluded by name here.
+    #
+    # PASS and DIVERGED are the only two words the derivation produces; every other word means it
+    # never ran, whatever the initialiser holds.
+    if ($word -ne 'PASS' -and $word -ne 'DIVERGED' -and $diverged -ne 'UNREAD') { $diverged = 'n/a' }
 
     # ⚠ AND THE SAME RULE FOR rc. A row that threw has no exit code; emitting an empty cell would read
     # as a zero, which is the SUCCESS value -- the worst possible default for the one row that failed
