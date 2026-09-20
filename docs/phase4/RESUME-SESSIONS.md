@@ -459,7 +459,13 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     (comment-only: citations by refusal text; three stale testConversion.go line pins replaced) taken; G STAYS on
     the eighth. THE CORE ARM ON THE TENTH GREEN (i7): the canary passes on the committed reader and refuses a folding
     reader and plain ConvertFrom-Json on both editions; two items for the ELEVENTH post-leg (the console message's
-    'reader folded' over-claim; -SelfTest exits before the canary). C1 cites the verdict expression by name. i9's TSV AT
+    'reader folded' over-claim; -SelfTest exits before the canary). C2's DELTA READ of the tenth SOUND (15fca3ce) ->
+    THE TENTH IS THE BLOB OF RECORD FOR THE NEXT LAUNCH (G's running list stays on the eighth). CENSUS COST CORRECTED
+    (C2): bytes on one line nearly free; ARM HITS superlinear (~M^1.4); line count linear; price by line count and
+    arm-shaped tokens, never size; ONE census at a time on a leg box (i9's 25-45 min = contention). WARN-ONLY ARM
+    DISCHARGED (i9 0adb5c93): internal/saferio PASS on the eighth with rc 0 while warning; the red is the THIRD blob
+    ddc205a1ee (no lowering) which dies at the & call -- an ordinal is not a predicate. C1 cites the verdict
+    expression by name. i9's TSV AT
     ORIGIN (7257173d): claude/i9-h10-
     recon-tsv 748da4f895 (one path on 0dc65a8e8d, signed, 17 lines, CR 0, ten columns; read back byte-identical;
     provenance reads on the tree's originals) -> C1's concatenation UNBLOCKED on R's a5fe6375e4 + i9's 748da4f895;
@@ -1792,8 +1798,13 @@ widen<A,T,TWide> (two shapes the row reaches; the niladic form cannot be a widen
 closes over the TYPE ARGUMENTS and only rendering over the projection (no return covariance in Go). A FOURTH PART
 RULED: the generator mints an adapter for a generic interface over a PROJECTED constraint (DecapsulationKey768,
 decapsulationKey<encapsulationKey>), its identifier from bare names via the sync seat's naming helper -- R cuts it
-after that helper lands (meanwhile the suite on the three parts + the GolibTests arm); C1/C2 reads; the apply after
-the reorder and sync applies (go2cs.slnx, GolibTests, stdlib, CNR, the row). SIX genuine BUILD rows routed to C1
+after that helper lands (meanwhile the suite on the three parts + the GolibTests arm); C1's DESIGN READ (42943086):
+widenResult REQUIRED (builtin.cs:2835 already declares the Func<T> widen); the fourth part mirrors sync's mechanism
+(the struct side's generic path is GATED, the interface side has NONE) -- both seats follow the :951 precedent (the
+bare name + the type-parameter list riding separately, a GENERIC adapter, never an invented suffix) and must keep
+src/go2cs/adapterNameCollisions.go (the converter's cast-site rule) in sync; the collision detector reads closed
+instantiations as different interfaces (blind). The sync sub-agent STEERED to this mid-cut. C2 structural when
+pushed; the apply after the reorder and sync applies (go2cs.slnx, GolibTests, stdlib, CNR, the row). SIX genuine BUILD rows routed to C1
 for sizing: sync (CS0708 x17...), runtime (CS0310 x22: a union constraint with a POINTER member lowers to
 `where T : new()` and zh<T> is abstract -> constraint emission; + CS1061 testing.B.Elapsed on the hand-own),
 crypto/ecdh (CS1537), embed/internal/embedtest (CS0234, the known recompute remedy); internal/sync stays an i7
