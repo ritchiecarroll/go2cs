@@ -1119,6 +1119,12 @@ procedure) + R's scantemp fix (61f3a43fc3: the census fold temp had written into
 MASTER 7674ee7f4d. DOCTRINE (three lanes in one hour): a door is a property of a PATH; a tool's doors cover every
 path it writes OR fetches into, enumerated from the script; C1's tool force-fetches origin/master into the main
 checkout above its dry-run gate -> C1 fixes at idle. C1's runbook read of the wrapper's fifteenth SOUND.
+THE DRIVER's CORE-EDITION ARM GREEN (~10:45, i7 sub-agent, read-only): parse 0 errors both editions (identical
+token counts); the sweep + rebank dry runs byte-identical across editions (CRLF only); the digest reproduced; the
+wrapper's -SelfTest with the canary; -AllowBranch a one-axis control. ONE FINDING -> i9's one-commit follow-up: the
+four-class tree guard sits inside if (-not DryRun), so a dry run accepts a MAIN checkout -- hoist it, red-first.
+Then C2's design read, then COORD lands the driver ref + the wrapper ref on master. i9's and C1's re-audits under
+R's decoy test: the SHARED census writes nothing beside the entry it is handed (its temps under mktemp).
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a

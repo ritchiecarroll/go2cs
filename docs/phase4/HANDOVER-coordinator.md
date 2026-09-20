@@ -709,3 +709,4 @@ Each lane runs in its own Claude Code session on its own host with its own local
 - 10:27: i9's driver seat cut (145ebc27c7 + the wrapper's fifteenth); reads routed (C2 design, C1 runbook) + the i7's Core-edition arm; both refs to land on master after; G's synctest correction taken; master at c22f9b8e74.
 - 10:30: R's abort fix + arm landed -> MASTER a5b110b47e; three i7 sub-agents running (batch 2, the ecdh seat, the driver's Core arm).
 - 10:34: C1's tree-precondition line + R's scantemp fix landed -> MASTER 7674ee7f4d; the doors doctrine line (writes OR fetches, enumerated from the script).
+- 10:38: the driver's Core-edition arm green with one finding (the tree guard under -DryRun) -> i9's follow-up; C2's design read owed; then both refs land on master.
