@@ -644,8 +644,12 @@ are different units), the two windows-only rows, -test-allow-handown for testing
 DOCS SEAT LANDED on master ceb1c87971 (signed; gates green; C2's read ebd9553dc). (d) CUT (d5c982a5): aa66874ff7 on the
 same ref (fast-forward from 6e082a09c5, parent ceb1c87971, +129: the H10 amendment +87 -- order, mechanism, TSV contract,
 host rule, preconditions table, per-row steps -- and C2's three notes appended under the section-4 bound +42); it states
-the recon leg as the per-package pipeline on name lists (consistent with COORD c260f4313). C2 reads (d); COORD lands the
-ref signed on that read. C1 may add the wrapper's word vocabulary + the one-attempt clock at its next commit. Fold C2's notes into the amendment
+the recon leg as the per-package pipeline on name lists (consistent with COORD c260f4313). TWO MORE COMMITS announced
+(584135e2, announce-then-push): 9817f8916 (+30/-1: c7f68b53e's pipeline + corpus-axis rulings and the two units written
+into the stage) and 052ae429e (+11/-2: sweep_s = the wrapper's one-attempt clock; word = the outcome class vocabulary) --
+the ref tip becomes 052ae429e. C2 reads the ref AT ITS TIP as the H10 procedure amendment; COORD lands it signed on that
+read. C1's read-discipline lesson banked: a ruling absorbed unread by a push race is recovered from the tool's absorbed
+listing, which is the reading of record; the window cannot be closed by shortening it. Fold C2's notes into the amendment
 commit: proc.cs cited per-GOOS (runtime/{linux,windows,darwin}/proc.cs:848), the RegisterPinned step that makes
 initAlgAES arm 2, and the clause that the box materialises at eleven construction sites (scope by provenance). (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
