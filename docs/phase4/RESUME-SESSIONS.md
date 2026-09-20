@@ -446,7 +446,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     roster seat and the wrapper's map derivation switches to it in a commit landing with the seat.
     NEXT: the third commit (announce-then-push); C2 reads its diff; the i7 Core arm re-runs on the FINAL tip after the
     fips140test seat's conversions finish (never two conversions on one box); then LAUNCH. The third commit is AT
-    ORIGIN (ddc205a1ee); the i7 Core re-run launched on it (sub-agent). APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
+    ORIGIN (ddc205a1ee); the i7 Core re-run launched on it (sub-agent). H10 RECON LEG LAUNCHED 2026-09-20 (COORD
+    a82eb75b1) at VERSION TIP 0dc65a8e8d: wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
+    throwaway detached worktrees, one process per list, one attempt per row, TSVs pushed as new per-lane refs
+    (LANE-h10-recon-tsv) when a list completes with the word histogram and the named CONVERT/BUILD/DIVERGED/NOVERDICT
+    rows; expected words for the known rows stated (time CONVERT, reflect NOVERDICT, fips140test/mlkem/internal-sync
+    BUILD, nistec PASS 44). i9 runs its 16 (the reserved rows + the two windows-only). APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
     at the act; both reads done, CLEARED); (2) the fips140test seat claude/coord-fips140test-testonly ce8fc43a87 on
     93feb8df2b (cut by an i7 sub-agent: three sites gated on productionClassEmitted; suite rc 0; the row 13 CS0234 -> 0)
     after C1's design + C2's structural reads -- no source overlap with R's seat, both add a projitems line (the
@@ -748,7 +753,12 @@ an i7 sub-agent after TestIsZero (generated sources first; the generator fix; th
 productionClassEmitted; the row past COMPILE); C1 reads design, C2 structural, i9 applies. ASSIGNED (COORD after
 a17af4af): THE RECON LISTS AS FILES on a new ref off master --
 docs/phase4/hopA-inputs/recon-lists/population.txt (228 by name) + i9.txt/g.txt/r.txt (16/107/105, the rule in a
-header comment, sums closing), LF, census-gated, push-then-announce; the LAUNCH names its tip. DONE (ba10c91a):
+header comment, sums closing), LF, census-gated, push-then-announce; the LAUNCH names its tip. DOCS SEAT CUT AND
+LANDED (23db898f -> master e0c49ae1e1 within 70bce870c2): the PATH-resolved pin row, the two-arm preflight bullet, the
+'zero SELECTED non-test .go files' clause, CLAUDE.md's Examples row -> src/archived/Examples/ (the samples were ARCHIVED,
+358 files tracked; src/tour is the Tour application). Two findings ROUTED: docs/PLAN-linux-operation.md:35-36 states
+the wrong paths (a dated factual correction, C1's next docs seat); ConversionStrategies-Reference.md:2007/:10687 carry
+dead src/Examples links (two URL edits, the same seat). DONE (ba10c91a):
 claude/c1-h10-recon-lists 89c1ebc2cc off master, four files +564, derived from the tree's own sources (the census
 Appendix + nistec; $longTimeouts + BIG_ROWS = reserved 14; the windows-only 2; LPT over the 1.23 windows block) with three
 reproduced intermediates and a partition control that fires; nistec to G by routing (header). THE LAUNCH'S LISTS. The docs seat now carries
@@ -1085,8 +1095,10 @@ landing WITH the roster seat). CONFIRMED (COORD after 8cf1e707): cut NOW on the 
 (relocations.tsv: header source/target, one line per arc, LF; refuse by name when absent or thin); (a) the floor
 inheritance is an ADDITION (no successor map exists in the generator today), (b) the intersected-out print is one line;
 the intersect stays. The plan is generated only after the seat lands, so the refusal never fronts the leg.
-SECOND COMMIT ff53bb06be (90e78eae): the print split by cause (targets, not sources; three arms); a THIRD commit ruled
-for the two downstream counts (:648-650, :682) splitting _uncosted the same way. C2's `| head` SIGPIPE finding banked
+SECOND COMMIT ff53bb06be (90e78eae): the print split by cause (targets, not sources; three arms); THIRD COMMIT
+50e8c528f9 (8b645ee5: the two downstream counts follow the split, one axis each, restored to the FIXED file between
+arms -- C2's first attempt restored to the committed file and was void). The ref carries three commits, landing with
+the roster seat. C2's `| head` SIGPIPE finding banked
 fleet-wide (a filter can prevent the work; never pipe a state-writing tool to head).
 GENERATOR SEAT CUT (51d22252): claude/c2-shardmap-relocations 8d7739f4e3 off master 6c32d0e171, +57/-2, reads
 relocations.tsv (thin guard < 10 arcs), four arms made to fail; the reserved-row print already exists and fires --
@@ -1272,7 +1284,12 @@ on the unfixed builder, green fixed, the planted empty set fails it; nistec BEFO
 diverged / 44 VALIDATED (COORD's 45 corrected); suite rc 0; two-seeded corpus diff 0. ACCEPTED (COORD after 1a46bacb):
 C2 reads the Go unit arm; i9 applies THIRD (after R's and fips140test's seats). C2's READ DONE (6acab84c: SOUND -- 3/3
 with the population asserted; made to fail two ways firing :48 and :70; one go test site; one buildTags assignment) ->
-CLEARED for i9's apply on 4df427fdcb (COORD after 6acab84c); its stamp fixes the leg's tip. G's floor-1 finding banked fleet-wide:
+CLEARED for i9's apply on 4df427fdcb (COORD after 6acab84c); its stamp fixes the leg's tip. APPLIED (03a5cbbf) at
+0dc65a8e8d and STAMPED by COORD (tree f236cdeed2, parents 4df427fdcb + dd376e3f12, 3 files +147/-12, testConversion.go
+and the projitems composed exactly as a clean merge composes them -- verified by a throwaway merge on the i7; corpus 0;
+signed) -- VERSION TIP 0dc65a8e8d; THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
+measured a write target; four arms made to fail on the shipped bytes) LANDED on master 70bce870c2 with C1's docs seat.
+G runs its list (107) at 0dc65a8e8d. G's floor-1 finding banked fleet-wide:
 a process census by name pattern is a dead counter for a renamed converter -- count by executable path with a positive
 arm; G fixes h10-rows.sh/armb.sh before its recon list. PREFLIGHT DONE on both sides (3164e0c9): windows green first
 run; the WSL arm had NO go1.24.13 root (only 1.23.12 and the ambient) -- provisioned side-by-side under the arm's home,
