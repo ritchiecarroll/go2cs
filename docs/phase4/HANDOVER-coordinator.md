@@ -705,3 +705,4 @@ Each lane runs in its own Claude Code session on its own host with its own local
 - 10:06: batch 2 cleared on reads; the H10 re-bank amendment landed (master 058c96d81e) + C1's drop-tree post tool; the sha3 sizing in (the group key's locality); the json + sha3 converter seats queued after batch 2.
 - 10:13: R's comment commit (batch 2's third ref at d6c7ebd78b); the batch-2 brief written, waiting on the host apply's push; G's three sizings routed (maphash's TypeFor companion parameter, synctest's iter.Seq binding, embedtest's unconditional using-static) as converter seats after batch 2.
 - 10:17: the host seat STAMPED at version tip 6d814e2d38 (cfile 15, internal/trace 92 with zero divergences); APPLY BATCH 2 launched on top (ab2, no push).
+- 10:20: C1's TypeFor population correction (3 files, json out); C2's drop-tree + the design s6 dated amendment landing on master.

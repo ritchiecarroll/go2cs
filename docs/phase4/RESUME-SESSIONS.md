@@ -1098,6 +1098,12 @@ ok; CNR 729 no regression; cfile Validated 15; internal/trace Validated 92 with 
 -- i9's 4-of-92 is the fallback path's). APPLY BATCH 2 LAUNCHED on top (i7 sub-agent, worktree ab2: the seat ref
 8b1a284122 + the host ref 91f1bd5877 (its third + fourth) + R's d6c7ebd78b; one battery incl. crypto/mlkem as the
 prediction test; NO push). The ha1 worktree removed.
+C1's CORRECTION (d6a1fdde): the CS0411 TypeFor population is 3 files / 5 sites (maphash x3 functions, unique x2);
+encoding/json is NOT in it (every TypeFor argument concrete) -> seat (2)'s arm sizes on five sites and seat (1)
+carries no such expectation. C2 (4f29a874): the tree reading dropped (claude/c2-post-drop-tree-reading 4d362ed0d2)
+and DESIGN-h10-dispatch-driver.md s6 amended by dated block (claude/c2-design-driver-s6-amendment 6f2b053f2f) --
+both LANDING on master; C2's own tick defect (the watcher's fetch moves the tracking ref under the anchor logic)
+-> C2 fixes at idle (read the anchor from what was READ, never from the tracking ref).
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
