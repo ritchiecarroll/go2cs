@@ -497,7 +497,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     gains a THIRD BUCKET (a costed row off the roster = a CANDIDATE, scheduled, an ADDITION only on a terminal pass
     at the roster seat's re-derivation; the identity = banked + candidates); C2 cuts it as one commit on its ref
     (the eighth there), landing with the roster seat. RULE 3 (C1 f22c82d7, RULED YES): the ipv4 doc-constant admit
-    is a SHAPE admit and is consulted in BOTH census modes like rule 5 -- C1 cuts one commit, COORD lands.
+    is a SHAPE admit and is consulted in BOTH census modes like rule 5 -- CUT 5b063c916 and LANDED on master
+    076c006d41 (self-test 112 -> 116; attribution unchanged; repoguard 52/0); lanes re-copy from it; i9's net/http
+    record commits unaltered. C2's THIRD BUCKET CUT (b7ec3b7d3e, the eighth on its ref; 204 + 15 = 219, 210 + 9 with
+    the targets simulated; candidates scheduled) -- taken; the NINTH RULED: the relocation-source-still-banked
+    detector REPORTS (never refuses) and the population file (recon-lists/population.txt) is the declared candidate
+    set so the identity is live. i9's LC_ALL=C: no change (the locale was C); the awk candidates untestable, not gating.
     i9's EVIDENCE RECORDS (e4d4936f): neither censuses clean -- net's RECORD carries the account in build-temp paths
     (25 occurrences), net/http's refuses on ipv4 alone (all loopback). RULED (COORD after e4d4936f): share-by-hash
     REFUSED (the assembler's container cannot read the share) -> net/http commits UNALTERED after rule 3 lands; net
