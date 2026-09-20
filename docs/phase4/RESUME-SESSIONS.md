@@ -734,7 +734,14 @@ different claims). RUNBOOK LINE OWED at the next docs seat: the PATH-resolved pi
 H10's preconditions table. ASSIGNED (COORD after R 57e9e70e): (1) the design read of R's seat ce8d0bd654 (the three-step
 resolution, the fourth flag site, the IndexExpr residual); (2) SIZE the reflect TestIsZero AccessViolation from the
 emission at CONVERT (setField's unsafe write, the golib door, the class -- the 25-site pinned-box class or another -- a
-fix shape, a red-first arm); no cut. ASSIGNED (COORD after a17af4af): THE RECON LISTS AS FILES on a new ref off master --
+fix shape, a red-first arm); no cut. CS1929 SIZED (a5fc7d1b): TestingOnlyNewDRBG returns zh<hmacDRBG> (hmacdrbg.cs:120),
+Generate is emitted `this ref hmacDRBG` (:138); the publicize pass fired correctly (hmacDRBG public at :22), so the cut
+is GENERATOR-side (RecvGenerator: the zh<T> overload not generated or not bindable for a publicized type -- one build of
+the generated sources answers which); red-first = a two-project fixture (an exported func returning *unexported with an
+exported pointer-receiver method, called cross-package) with two controls. RULED: the next fips140test seat = one ref by
+an i7 sub-agent after TestIsZero (generated sources first; the generator fix; the ProjectReference gate on
+productionClassEmitted; the row past COMPILE); C1 reads design, C2 structural, i9 applies. ASSIGNED (COORD after
+a17af4af): THE RECON LISTS AS FILES on a new ref off master --
 docs/phase4/hopA-inputs/recon-lists/population.txt (228 by name) + i9.txt/g.txt/r.txt (16/107/105, the rule in a
 header comment, sums closing), LF, census-gated, push-then-announce; the LAUNCH names its tip. The docs seat now carries
 three items (+ the net/internal/cgotest clause at ValidatedTestPackages.md:567-569). SIZED (1a46bacb): all_test.go:1510 -- ARM 2a of the reverse door zh.cs:715: a
@@ -1056,6 +1063,10 @@ Validated format strings). ASSIGNED: read C1's (d) aa66874ff7 as the H10 procedu
 preconditions table, per-row steps against the rulings cited) -> COORD lands; then read i9's recon wrapper.
 C1's DESIGN READ of the fips140test seat DONE (a17af4af: SOUND; the two ungated seeds at testConversion.go:3123/:3335
 reach only a MIXED test-only suite -- exactly one in the tree, embed/internal/embedtest, not converted; inert).
+STRUCTURAL READ DONE (cf54b86f: suite rc 0; the fixture made to fail naming exactly the three sites, the control green;
+the row's emission 14 lines -> 0; a FOURTH site of the class in the project file: testConversion.go:4172-4174 adds a
+ProjectReference to a production .csproj never written, gated on the model alone -- pre-existing, identical both arms).
+-> ce8fc43a87 CLEARED for i9's apply (COORD after a5fc7d1b); i9 reports how the build passes the dangling reference.
 DIFF READ at ddc205a1ee DONE (765aba82: clean; the map verified mechanically; NOVERDICT's two paths share one comment
 -- a clause on the next commit). NEXT: the Go unit arm of G's oracle seat dd376e3f12; the structural read of the
 fips140test seat ce8fc43a87 (the fixture + the suite on this box); then the TestIsZero golib seat when cut.
@@ -1250,7 +1261,12 @@ on the unfixed builder, green fixed, the planted empty set fails it; nistec BEFO
 diverged / 44 VALIDATED (COORD's 45 corrected); suite rc 0; two-seeded corpus diff 0. ACCEPTED (COORD after 1a46bacb):
 C2 reads the Go unit arm; i9 applies THIRD (after R's and fips140test's seats). G's floor-1 finding banked fleet-wide:
 a process census by name pattern is a dead counter for a renamed converter -- count by executable path with a positive
-arm; G fixes h10-rows.sh/armb.sh before its recon list. Then the preflight on both sides, then the g-post.sh refusal. Was: after COORD closes H9: the twelve successor packages through the real
+arm; G fixes h10-rows.sh/armb.sh before its recon list. PREFLIGHT DONE on both sides (3164e0c9): windows green first
+run; the WSL arm had NO go1.24.13 root (only 1.23.12 and the ambient) -- provisioned side-by-side under the arm's home,
+no sudo, both old roots kept as the dissenting control; the linux clone's origin was the windows repo (an empty
+comparand made the worktree arm red for the wrong reason) -- given a GitHub remote. G is READY for its list (107).
+Then the g-post.sh work-tree refusal at idle (G's own measurement confirms the hold: MB is a dirname-derived write
+target). Was: after COORD closes H9: the twelve successor packages through the real
 pipeline on the banking platform at the version tip (all four overrides), per row the verdict count and the diverged set by
 name -- the first H10 rows; a reading, no bank. G's post tool PUBLISHED (80b5d83df): claude/g-lane-post-tool be340825dd off
 master a6be940665, FOUR files under .claude/coord-scripts/lanes/ (g-post.sh + the fetchable, staleness and placeholder
