@@ -1642,8 +1642,13 @@ R's LEG COMPLETE (6209554e): 105/105 in 1 h 28 m, TSV at claude/laneR-h10-recon-
 row 98 `testing` is WHOLLY HAND-OWNED and the pipeline converted it in place (19 new auto files beside the 10 marked;
 CS0111) so rows 98-105 are ONE event -> R re-runs the seven (testing/iotest, text/scanner, text/template, text/
 template/parse, unicode, unicode/utf8, unique) on a FRESH tree at 0dc65a8e8d on the fifth, pushes a SECOND TSV
-commit; `testing` = NOVERDICT/UNMEASURED/n-a by cause; EXCLUDED from every -tests list until a converter seat
-(refuse production emission for wholly hand-owned packages; C1 sizes first). SIX genuine BUILD rows routed to C1
+commit; `testing` = NOVERDICT/UNMEASURED/n-a by cause. C1 SIZED (22d7b1b9): the construct EXISTS -- testTargetHandOwnHost
+(owner-ruled 2026-08-30; tests only against the hand-owned production; three evidence clauses hold for testing) and
+did not fire because the fifth blob's :385 passes -test-allow-handown for testing, which short-circuits BEFORE the
+host check. RULED (c): the wrapper line is DELETED in the seventh (testing measured there on G's relaunch blob); a
+converter seat reorders requireConvertibleTestTarget (host check before the flag; the :5289-5295 control re-ruled to
+the host path; scratch-root census untouched) -- an i7 sub-agent after the fips140test apply, C1 reads. The basis
+KEEPS all ten lane columns ("four named" = the generator's required set). SIX genuine BUILD rows routed to C1
 for sizing: sync (CS0708 x17...), runtime (CS0310 x22: a union constraint with a POINTER member lowers to
 `where T : new()` and zh<T> is abstract -> constraint emission; + CS1061 testing.B.Elapsed on the hand-own),
 crypto/ecdh (CS1537), embed/internal/embedtest (CS0234, the known recompute remedy); internal/sync stays an i7
