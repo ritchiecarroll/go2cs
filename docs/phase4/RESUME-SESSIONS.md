@@ -363,6 +363,14 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     (parent rule: --git-common-dir == --git-dir with >1 worktree row is never removed); then i9-post.sh at idle.
     OVERLAY CLEARED (9d32f4813) on C2's existence read; at the act assert tree/go1.23.12 and @go1.23.12 read 0 in ADDED
     lines and the old stamp 1.24.13.3 reads 0 files; COORD stamps c7eb36d845 and the overlay merge at origin.
+    H9 CLOSED 2026-09-20 (i9 dd5aaa8f3; COORD declared): the suite at c7eb36d845 -- Transpile/Compile/Target 690/690, zero
+    failures, zero timeouts; Output 662 pass / 2 fail / 26 skip; the failing set = the base two BY NAME, APPEARED empty; the
+    26 skips = the declared opt-out class (no [GoTestMatchingConsoleOutput]; 28 non-declarers - 2 tooling; 696 - 6
+    platform-exclusive = 690; 1,298.8 s). c7eb36d845 STAMPED at origin by COORD (tree 470ba0b83c = the prediction, parents
+    ours-then-theirs, the 5 blobs = the seat's, markers 0, signed) -- VERSION TIP c7eb36d845. H10 OPEN; the sweep launch
+    waits on C1's brief + COORD's ruling. i9 NEXT: the overlay apply (cleared), then the tree reclamation children-first,
+    then i9-post.sh with the state-dir refusal in first. The H9 docs = C2's 2e75b14586 + a closure block (i7 sub-agent)
+    landing on master signed.
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
