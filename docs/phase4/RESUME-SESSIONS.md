@@ -471,7 +471,11 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     at row 5 by printed PID + executable path (crypto/mlkem BUILD 13s classified and the run carried on = the fourth
     holds in the leg). No TIMEOUT word has ever been emitted; net will be the first. LAUNCH SEQUENCE (COORD 0483558ff):
     C2 reads the fourth + fifth at 8de864a9a9; the i7 parses both editions + -SelfTest (sub-agent, no row); then G and
-    R launch on 8de864a9a9 and i9 relaunches from row 1 (the run of record). APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
+    R launch on 8de864a9a9 and i9 relaunches from row 1 (the run of record). BOTH READS IN (C2 9306f9e8 clean with the
+    four structural properties measured; the i7 sub-agent: parse 0/0 both editions with identical token counts, -SelfTest
+    rc 0 both editions byte-identical, the five confirmations, A/B absent as deferred). GO POSTED 2026-09-20 (COORD after
+    9306f9e8): the leg runs on the blob sha256 86cc38c01cddb686... (40,652 bytes, 628 lines, CR 0) at -Tree 0dc65a8e8d
+    with the lists 89c1ebc2cc; G and R launch, i9 relaunches from row 1. APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
     at the act; both reads done, CLEARED); (2) the fips140test seat claude/coord-fips140test-testonly ce8fc43a87 on
     93feb8df2b (cut by an i7 sub-agent: three sites gated on productionClassEmitted; suite rc 0; the row 13 CS0234 -> 0)
     after C1's design + C2's structural reads -- no source overlap with R's seat, both add a projitems line (the
