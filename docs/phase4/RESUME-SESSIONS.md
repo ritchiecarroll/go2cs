@@ -427,6 +427,11 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     concatenation (it lives in G's TSV at its ref and G's completion post); the assembler's guard = each header carries
     the four columns BY NAME (cut with the concatenation); the blob split carried from the completion posts; a row from
     both of G's launches NAMED as a cross-blob duplicate.
+    ABORT COST RULED (COORD after C2 ff7a229f): the basis models the roster AS IT IS at the leg's tip -- BUILD rows at
+    their abort cost, no word filter; the plan regenerates when a seat lands and the driver re-measures; two lines on
+    C2's ref with the roster seat (the contract-check comment at the word read; an output line naming the abort-costed
+    rows with sum and share -- today 6 rows / 468 s / 10.3% of R's basis). The 12-second cost band of the eight
+    contaminated rows is banked as the cheap second detector for a contamination.
     WRAPPER CUT (f2eae7c85): claude/i9-h10-recon-wrapper 43aba50262 on 93feb8df2b, src/run-h10-recon.ps1 +321 (LF, 100755,
     census clean, signed). Two defects caught by the one-row dry run: the converter SPAWNS go from PATH (the pin gate had
     asserted the absolute path -- green about the wrong object; now three agreeing derivations: PATH-resolved go version
