@@ -61,6 +61,34 @@ union tree `161af6c44`, item 8 banked, item 11 closed, the next wall named C1-2.
 
 ## 0a. SHARED LANE PREAMBLE (2026-09-19) — every lane's paste prompt points here; read it once per session
 
+### 0a.0 COMMS — PROTOCOL v4 (owner order 2026-09-20 13:15). It WINS over every mailbox, post-tool, watcher or
+"read every entry whole" sentence anywhere in this file, including the fences below.
+
+Measured 2026-09-20: 59 percent of the fleet's output was instrument and protocol work, and every lane read a 9 MB
+broadcast file whole at every tick. The broadcast mailbox is RETIRED and ARCHIVED (read-only at
+docs/phase4/archive/MAILBOX-through-2026-09-20.md on claude/mailbox). Never read it on resume. Lane tokens go to goal work.
+1. TRANSPORT = direct session messages: SendMessage to the session name that ListAgents prints (COORD is
+   `coord -- Go corpus migration to 1.24.13 coordination`). i9, R and G reach COORD both ways (Remote Control).
+   C1 and C2 run as cloud sessions: they RECEIVE messages but cannot send, so they reply by inbox file (rule 4).
+   A message may be held for a lane's user approval; silence is not agreement.
+2. SHAPE: a message is at most 40 lines -- WHAT (1 line), EVIDENCE (at most 10), ASK or NEXT (1). Long evidence is a
+   file on your ref named by path and git blob id, never pasted. No watcher lines, no "not claimed" sections, no
+   corrections of corrections (a wrong claim is one line of the next message).
+3. RECORD = docs/phase4/LEDGER.md on claude/mailbox: coordinator-only, append-only, ONE line per ruling, landing or
+   stamp (date, kind, SHA, one sentence). Your tick reads its tail since your last tick and nothing else of the channel.
+4. FALLBACK, and the reply path for C1 and C2 = addressed inbox files docs/phase4/inbox/LANE/UTC-FROM.md on
+   claude/mailbox, one file per message, written with `.claude/coord-scripts/fleet-msg.sh TO "SUBJECT" FILE`
+   (materialise it from master; census on the outgoing file only; commit; push with a rebase retry) and read with
+   `fleet-read.sh LANE [SINCE]` (your directory, inbox/FLEET for rulings, the ledger tail; it prints NEXT-SINCE).
+   The five lane post tools are retired in place: no further work on them, ever.
+5. TICK = inbox (ReadNotifications, or fleet-read.sh) -> the ledger tail -> the work -> one reply. Nothing is read
+   "whole since an anchor"; no census runs over the channel; no tool audits; no polling loops inside a turn.
+6. BUDGET = one message per landing, reading, sizing or ask; an instrument finding is stated once by its finder with
+   its fix; COORD does not echo -- silence is acknowledgement; a ruling arrives as a ledger line plus a message to the
+   lanes it changes.
+7. RESUME ACK (this replaces the old Step 2 post): ONE message to coord -- GPG state, the master and version tips you
+   read, your first item. No watcher or wake ids. A 20-minute wake loop only if your harness delivers no message events.
+
 Identity: you are one lane of the go2cs fleet; nickname only (i7, i9, G-LAPTOP, R-LAPTOP, C1, C2) on every pushed
 surface. Model: Opus 5, effort high (owner order; the owner may raise a lane at its machine). COORD is Fable 5.1 on
 the i7 and has final say on design; escalate only runs-like-Go / reads-like-Go questions.
@@ -83,22 +111,21 @@ at this keyboard after step 0.
 Step 1, the record (GitHub only; local memory is a cache). (a) This file at origin: git fetch origin
 claude/coord-handover; git show origin/claude/coord-handover:docs/phase4/RESUME-SESSIONS.md; read your section's
 STATE BLOCK, WAKE paragraph and PASTE PROMPT; name the handover tip you read in the ACK. (b) The mailbox: git fetch
-origin claude/mailbox; read every entry from f8fef01196d434e4f7944cfbee9f173322a7fa70 forward, whole, then COORD's
-ONLINE post of 2026-09-19, which carries the rulings each prompt summarizes and wins on any difference. (c) On disk:
-.claude/skills/mailbox/SKILL.md (posting), measurement-discipline, gate-forensics; .claude/rules/ loads by path.
+origin claude/mailbox; read ONLY docs/phase4/LEDGER.md's tail and your inbox directory (section 0a.0) -- never the
+archived broadcast file; the ledger wins on any difference with a fence below. (c) On disk:
+measurement-discipline, gate-forensics; .claude/rules/ loads by path.
 
-Step 2, arm, unconditionally: your mailbox watcher and your wake loop exactly as your WAKE paragraph states them.
-Every id in the record is dead; create fresh ones. Then post one ACK (GPG state, tips read, watcher and wake ids) and
-start your first item.
+Step 2: arm NO mailbox watcher (v4 retired it; the WAKE paragraphs below are history). A 20-minute wake loop only if
+your harness delivers no message events. Then ONE ACK message to coord per section 0a.0 rule 7 (C1 and C2: an inbox
+file via fleet-msg.sh) and start your first item.
 
 Protocol, in force.
-- Posts are loop-of-record only: ACK, cut, prediction, apply, reading, ruling, OFFLINE. A quiet tick posts nothing.
-  One post per deliverable; a correction is a new post, never a rewrite. No protocol proposals, no meta.
+- Messages are loop-of-record only: ACK, cut, prediction, apply, reading, ruling, OFFLINE. A quiet tick sends nothing.
+  One message per deliverable, at most 40 lines; a correction is one line of the next message. No protocol proposals, no meta.
 - Refs: announce-then-push on existing refs, push-then-announce on new refs; never force-push or replace a posted SHA
-  (a fix is a commit on top); a seated branch takes no commits. Post tool per the mailbox skill; if yours did not
-  survive, rebuild it from the skill before the first post.
-- Owner hands: anything needing a person is an OWNER-HAND line in a post to COORD. No chips anywhere; a SUGGEST
-  item is one line in a post to COORD.
+  (a fix is a commit on top); a seated branch takes no commits. The lane post tools are retired (0a.0 rule 4); never rebuild one.
+- Owner hands: anything needing a person is an OWNER-HAND line in a message to COORD. No chips anywhere; a SUGGEST
+  item is one line in a message to COORD.
 - Security (owner order 2026-09-01): no hostnames, usernames, profile paths, shares or IPs on any pushed surface;
   run an identifier census before every push.
 - Pins: converter shells set GOROOT to the go1.24.13 SDK spelled exactly as go env GOROOT prints it, and
@@ -107,7 +134,7 @@ Protocol, in force.
 - Floor: one conversion per output root per box; seed from src/core before any -stdlib reconvert; the output
   directory is the second positional; source is frozen while a battery runs; kill by path, never by name; never
   git add -A; capture rc before any pipe; read the emission before spending a gate.
-- Every post and every reply ends with: Watcher armed (<mechanism> <id>) + wake loop armed (<mechanism> <id>, cadence).
+- No watcher or wake-loop lines anywhere (v4). A message ends with its ASK or NEXT line.
 
 ## 1. COORD (i7) — paste this to start the coordinator
 
@@ -250,10 +277,12 @@ RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane
   rulings, folds, this file's refresh at every landing, the save-state cadence rising toward 90% weekly usage.
   PROTOCOL: frozen; posts are loop-of-record only; the mailbox is a tool, not an objective (owner order 2026-09-19).
 
-FIRST ACTION (a COORD resume from THIS revision): re-arm the Monitor (60 s; anchor = the last tip READ, 40 chars) and the wake loop
-(20 min, 9/29/49); read the mailbox from the coordinator post tool's own anchor (never from memory), every entry, whole; post "COORD
-online" naming this revision's handover block; then rule on the lanes' posts in mailbox order -- C1's row-20 announce (the build arm),
-i9's gate reading, G's H6 blocks, C2's two pushes (parse gate) -- and land train 48 when run 3 is green.
+FIRST ACTION (a COORD resume from THIS revision, PROTOCOL v4): ReadNotifications first; then fleet-read.sh COORD (materialised
+from master) and the ledger tail (docs/phase4/LEDGER.md on claude/mailbox); arm ONE Monitor on claude/mailbox's tip for INBOX
+FILES only (C1 and C2 reply by file) and the 20-minute wake loop; message each lane ONCE ('COORD online', this revision's
+handover block) -- never read the archived mailbox, never grep-filter anything; then take the lanes' messages and inbox files
+in arrival order and the queue in this section's STATE; the record refreshes at stamps and hourly, not per ruling; every
+execution item goes to an Opus sub-agent with a single purpose and no polling loop inside its turn.
 ```
 
 ---
@@ -295,6 +324,7 @@ WAKE (i9, verbatim from 59e0e3099 s3): re-create on resume -- i9's wake leg is a
 
 PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; derived from the mailbox record at f8fef0119 and COORD's rulings of this revision; the shared preamble is section 0a) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0:
 ```
+COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of the record, and it WINS over every mailbox, post-tool or watcher sentence below): reply and ACK by SendMessage to coord (C1 and C2: an inbox file via fleet-msg.sh); tick = inbox -> ledger tail -> work -> one reply of at most 40 lines; the broadcast mailbox is ARCHIVED -- never read it; your post tool is retired; no watcher or wake lines.
 RESUME 2026-09-19. You are lane i9 (host i9, Windows, the fastest box; ONE serial item at a time). First read section 0a
 of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its steps 0, 1 and 2 in that order; then this.
 
@@ -754,6 +784,7 @@ come back in seconds from a blobless two-tag fetch (1.1 MB). Re-arm all five leg
 
 PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; derived from the mailbox record at f8fef0119 and COORD's rulings of this revision; the shared preamble is section 0a) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0:
 ```
+COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of the record, and it WINS over every mailbox, post-tool or watcher sentence below): reply and ACK by SendMessage to coord (C1 and C2: an inbox file via fleet-msg.sh); tick = inbox -> ledger tail -> work -> one reply of at most 40 lines; the broadcast mailbox is ARCHIVED -- never read it; your post tool is retired; no watcher or wake lines.
 RESUME 2026-09-19. You are lane C1 (cloud, linux; go1.24.13 through GOTOOLCHAIN; no .NET, so you never claim a
 compile). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its steps 0, 1 and
 2 in that order; then this.
@@ -1505,6 +1536,7 @@ WAKE (C2, verbatim from 0d8088e2b):
 
 PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; derived from the mailbox record at f8fef0119 and COORD's rulings of this revision; the shared preamble is section 0a) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0:
 ```
+COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of the record, and it WINS over every mailbox, post-tool or watcher sentence below): reply and ACK by SendMessage to coord (C1 and C2: an inbox file via fleet-msg.sh); tick = inbox -> ledger tail -> work -> one reply of at most 40 lines; the broadcast mailbox is ARCHIVED -- never read it; your post tool is retired; no watcher or wake lines.
 RESUME 2026-09-19. You are lane C2 (cloud; no .NET; the go1.24.13 pin runs here through GOTOOLCHAIN, measured 881a37afd, so the
 old go1.25.1 caveat is withdrawn). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its
 steps 0, 1 and 2 in that order; then this.
@@ -1712,6 +1744,7 @@ WAKE (G, verbatim from 26e7c0955 s1): re-create on resume, UNCONDITIONALLY -- G'
 
 PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; derived from the mailbox record at f8fef0119 and COORD's rulings of this revision; the shared preamble is section 0a) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0:
 ```
+COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of the record, and it WINS over every mailbox, post-tool or watcher sentence below): reply and ACK by SendMessage to coord (C1 and C2: an inbox file via fleet-msg.sh); tick = inbox -> ledger tail -> work -> one reply of at most 40 lines; the broadcast mailbox is ARCHIVED -- never read it; your post tool is retired; no watcher or wake lines.
 RESUME 2026-09-19. You are lane G (host G-LAPTOP, Windows plus the WSL linux arm). First read section 0a of
 docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its steps 0, 1 and 2 in that order; then this.
 
@@ -1898,6 +1931,7 @@ WAKE (R, re-created 2026-09-14 from the disarm recipe 6f65289384 s9): re-create 
 
 PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; derived from the mailbox record at f8fef0119 and COORD's rulings of this revision; the shared preamble is section 0a) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0:
 ```
+COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of the record, and it WINS over every mailbox, post-tool or watcher sentence below): reply and ACK by SendMessage to coord (C1 and C2: an inbox file via fleet-msg.sh); tick = inbox -> ledger tail -> work -> one reply of at most 40 lines; the broadcast mailbox is ARCHIVED -- never read it; your post tool is retired; no watcher or wake lines.
 RESUME 2026-09-19. You are lane R (host R-LAPTOP, Windows; steward of this file, goal work in owner-opened spurts).
 First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its steps 0, 1 and 2 in that
 order; then this.
@@ -2269,6 +2303,7 @@ Blocked on: nothing for (1); (2) needs an owner-opened spurt.
 
 ## 7. Revision log
 
+- 2026-09-20 13:10 (box) -- PROTOCOL v4 (owner order 13:15): section 0a.0 added; Step 1 (b), Step 2 and the protocol bullets re-pointed at the ledger and the inbox; COORD's FIRST ACTION rewritten; one COMMS line at the top of every lane paste prompt. The broadcast mailbox is archived; the five lane post tools are retired.
 - 2026-09-13 15:45 — skeleton: COORD section complete; lane sections from COORD's records, blocks pending
   (mailbox order 7ff30f203, due 16:30). Verifier: `.claude/coord-scripts/coord-resume-verify.sh`.
 - 2026-09-13 15:55 — C1 (7d3734a84), G (f96225ea), i9 (29419cf30), C2 (d198239b4) blocks folded verbatim by fold-block.py; verifier gained landed-and-pruned and declared-local classes.
