@@ -111,6 +111,34 @@ function GitTry([string[]] $gitArgs) {
     } finally { $ErrorActionPreference = $old }
 }
 
+# ⚠ THE SAME FAULT GitTry EXISTS FOR, AT THE CALLS WHOSE TEXT IS THE MEASUREMENT.
+# GitTry can discard stderr because its verdict is the EXIT CODE. The preflight's `go version` calls
+# cannot: their OUTPUT is what the pin is asserted on, and the message the pin exists to catch --
+# "go: ..\go.mod requires go >= 1.24 (running go 1.23.1; GOTOOLCHAIN=local)" -- arrives on stderr.
+# Under Stop that message KILLS the preflight four lines before the Deny that would have named it,
+# which is exactly what :192's comment warns about: a guard that dies is not a guard that refused.
+# (C2 1e2adb3d, finding B. My own commit's comment stated the rule and left two call sites under it.)
+function NativeFirstLine([scriptblock] $sb) {
+    $old = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $o = & $sb 2>&1
+        $ls = @($o | ForEach-Object { [string] $_ })
+        if ($ls.Count -eq 0) { return '' }
+        return $ls[0]
+    } finally { $ErrorActionPreference = $old }
+}
+
+# For the calls whose verdict IS the exit code and whose stderr is noise -- GitTry's shape, generalised.
+function NativeQuiet([scriptblock] $sb) {
+    $old = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $o = & $sb 2>$null
+        return (($o | Out-String).Trim())
+    } finally { $ErrorActionPreference = $old }
+}
+
 # ---------------------------------------------------------------- the summary-line contract
 # ONE definition, consulted by the assertion AND by the per-row parse, so the check cannot drift from
 # the thing it checks (R's barmatch() shape; C1 paid for the replica lesson at a7c20e7cb).
@@ -232,10 +260,10 @@ if (-not (Test-Path -LiteralPath $goVer))  { Deny "'$GoRoot' has no VERSION file
 # resolution the converter performs.
 $env:PATH = (Join-Path $GoRoot 'bin') + [System.IO.Path]::PathSeparator + $env:PATH
 
-$goVersion = (& $goExe version) 2>&1 | Select-Object -First 1
+$goVersion = NativeFirstLine { & $goExe version }
 $pathGo    = (Get-Command go -ErrorAction SilentlyContinue)
 if (-not $pathGo) { Deny "no 'go' resolvable on PATH after prepending '$GoRoot\bin'" }
-$pathGoVer = (& go version) 2>&1 | Select-Object -First 1
+$pathGoVer = NativeFirstLine { & go version }
 $verFile   = (Get-Content -LiteralPath $goVer -TotalCount 1)
 Write-Host "  go version OUTPUT : $goVersion   (the SDK at -GoRoot, by absolute path)"
 Write-Host "  go ON PATH        : $pathGoVer   (what the converter will SPAWN)"
@@ -362,8 +390,8 @@ $treeSha = (GitTry @('-C', $Tree, 'rev-parse', 'HEAD')).Out
 # `windows/amd64` is the roster's own spelling and the one every other reading in this campaign uses.
 $plat = $Platform
 if (-not $plat) {
-    $goos   = (& go env GOOS)   2>$null
-    $goarch = (& go env GOARCH) 2>$null
+    $goos   = NativeQuiet { & go env GOOS }
+    $goarch = NativeQuiet { & go env GOARCH }
     if ($goos -and $goarch) { $plat = "$goos/$goarch" }
 }
 if (-not $plat) { Deny "cannot determine the platform -- `go env GOOS/GOARCH` produced nothing, and a row's reading is not comparable without it" }
@@ -416,6 +444,11 @@ foreach ($row in $rows) {
     # ⚠ And unlike GitTry, stderr is KEPT rather than discarded (`2>&1`, not `2>$null`): the classifier
     # reads the converter's stderr TEXT to separate CONVERT from BUILD.
     $started = Get-Date
+    # ⚠ RESET PER ROW. $rc was assigned ONLY inside the try, so an invocation that threw before the
+    # $LASTEXITCODE read -- or that never launched a process -- handed the classifier and the TSV the
+    # PREVIOUS row's exit code, silently, and the row was classified from a number it did not produce.
+    # Lowering the preference makes that narrow; narrow is not closed. (C2 1e2adb3d, finding A.)
+    $rc = $null
     $prevEap = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
     try {
@@ -424,7 +457,17 @@ foreach ($row in $rows) {
         # CAPTURED ON THE VERY NEXT LINE, before anything touches $? or a pipe. Floor 7, and the fault
         # five lanes hit in one night.
         $rc = $LASTEXITCODE
+    } catch {
+        # ⚠ WITHOUT THIS CATCH THE GUARD BELOW IS UNREACHABLE FOR THE CASE IT NAMES. A throw out of
+        # the invocation propagates past `finally` and out of the loop, so the run dies rather than
+        # refusing -- the very shape this file calls "a guard that dies is not a guard that refused".
+        # The error text is kept as the row's output so the evidence capture still has something to
+        # write, and $rc is left $null so the refusal below fires and NAMES the row.
+        $output = @("RECON: the converter invocation threw: $($_.Exception.Message)")
     } finally { $ErrorActionPreference = $prevEap }
+    # The file's own idiom, one line down from where it is already used on $diverged: refuse rather
+    # than carry a value this row did not produce.
+    if ($rc -isnot [int]) { Deny "row '$row' produced no exit code -- the invocation threw before `$LASTEXITCODE could be read. Refusing rather than classifying the row on a stale number." }
     $elapsed = [int] ((Get-Date) - $started).TotalSeconds
 
     $lines = @($output | ForEach-Object { [string] $_ })
