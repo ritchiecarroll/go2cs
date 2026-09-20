@@ -488,7 +488,10 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     is the only exit in the row loop and the TSV is written after the loop -> a rare throw would discard a list; the
     i7 parse gate on it green both editions, self-test passing, banked). The SEVENTH (the derivation commit, after the
     leg): a thrown row CLASSIFIED (NOVERDICT / n/a / UNMEASURED / the observed wall_s) with no exit in the loop, the
-    NOVERDICT two-paths clause, the dead-assignment comment. APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
+    NOVERDICT two-paths clause, the dead-assignment comment. i9's take (9701c79a: the fifth has 0 Deny calls inside the
+    loop, the sixth 1; remedy (ii) preferred, not cut without a ruling) confirmed: (ii) rides the seventh after the leg.
+    LEG STATE (9701c79a): rows 1-4 done on the fifth (archive/zip PASS 100, crypto/dsa PASS 4, fips140/mlkem PASS 10,
+    crypto/mlkem BUILD), crypto/tls in flight. APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
     at the act; both reads done, CLEARED); (2) the fips140test seat claude/coord-fips140test-testonly ce8fc43a87 on
     93feb8df2b (cut by an i7 sub-agent: three sites gated on productionClassEmitted; suite rc 0; the row 13 CS0234 -> 0)
     after C1's design + C2's structural reads -- no source overlap with R's seat, both add a projitems line (the
@@ -840,7 +843,13 @@ flush). READS: C1 design, C2 structural; the APPLY is COORD's from the i7 while 
 GolibTests both sides, slnx, signed push). reflect re-measured after it lands; the five names are R's next sizing.
 C2's STRUCTURAL READ DONE (67f031fc: SOUND; the predicate verified against all three box kinds -- NativeAddress == 0 is
 the conjunct between the refusal and every native dereference; ten NativeBox construction sites, one flagged,
-MintOpaque's EmptyStruct box harmless unflagged; the two refusals disjoint). The apply waits on C1's design half. DESIGN READ of R's seat DONE (be9a7447, SOUND). ALSO ASSIGNED: the design read of
+MintOpaque's EmptyStruct box harmless unflagged; the two refusals disjoint). C1's DESIGN READ DONE (f26830f6: SOUND --
+the sealedness the stronger reason for the flag; the READ fabricates a managed reference; the middle conjunct reads back
+the forward decision; AliasesAnOrderToken public with zero consumers). C2's LATE FINDING (0603459f): the fixture never
+drives ValueSlot (the accessor reflect faults through) -- the apply HELD (COORD 93d60f2c8) for ONE test commit on the
+seat ref (the classification observed via AliasesAnOrderToken, the refusal asserted on a ValueSlot write and read,
+made red by removing the guard; a real-address control reads false); the i7 sub-agent adds it, COORD announces the SHA
+before the push, then the merge carries both commits (GolibTests both sides, go2cs.slnx, census, repoguard, signed push). DESIGN READ of R's seat DONE (be9a7447, SOUND). ALSO ASSIGNED: the design read of
 the fips140test seat ce8fc43a87 (three sites; the negative-sense option; GoFiles == 0 vs the driver's
 unmarkedFileCount) and the SIZING of its masked residual: 2 x CS1929 in acvp_test.cs (zh<ecdsa_package.hmacDRBG> at a
 pointer-receiver seam; no branch for it at origin). NEXT DOCS SEAT (two items): the
@@ -1517,6 +1526,15 @@ pinned 1.23.1 unless GOTOOLCHAIN=local -- assert by output. SEAT WIDENED 2026-09
 time row (abs_test.go:23 exported anonymous-struct var read across the internal/external test boundary; the gate fires
 at time_test.cs(33)) is a SECOND red arm of the same seat -- go2cs -tests of time past CONVERT at the tip; a second
 commit on the same ref if its root is a different gap. Then the recon list runs beside the seat in its own worktree.
+ARM 2 CUT (8a23be80): c2506f5164 the second commit on claude/laneR-anon-struct-typearg (ce8d0bd654 not replaced), 7 files
++370/-17 corpus 0 -- captureInternalTestDynamicTypeLifts + seedInternalTestDynamicTypeLifts at the seam (the bare lifted
+name binds through the using static go.time_internal_test_package the converter already emits: no qualifier); production
+wins by a guard; four unit arms; time rc 1 -> 0 at CONVERT; suite green; corpus footprint EMPTY x3 + CNR clean re-run
+after C1's three comment corrections were folded in. ACCEPTED FOR THE READS (COORD 93d60f2c8): C1 the design delta, C2
+structural + the four arms + the time row's CONVERT on its box; the APPLY is COORD's from the i7 after the arm-2a apply
+(the ref tip; the converter gate; no corpus build). R's disclosures banked: a git restore of an untracked path is a
+silent no-op (prove a cleanup by its post-condition); a TaskStop kills the wrapper shell, not the converter it spawned
+(census by executable path before starting anything else). R NEXT: the constraint-proxy widening.
 SEAT CUT (57e9e70e): claude/laneR-anon-struct-typearg ce8d0bd654 on d91c832543, five files under src/go2cs (the pre-visit
 liftExplicitAnonStructTypeArgs ahead of convCallExpr's rendering paths; the fourth site of liftAtCallBoundary), corpus 0;
 arm 1 made to fail both ways (two sites, one signature, five assertions); arm 2 reflect past CONVERT and BUILD, 195 tests
