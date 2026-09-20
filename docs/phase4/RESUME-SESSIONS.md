@@ -1071,6 +1071,10 @@ R's ANCHORED CUT DONE (~10:00, 64a7c8739): R's ref 1adcf8cf52 (the emittedAdapte
 then the anchored name + qualifier, adapterResolvedName strips its own input; five arms incl. the parity control;
 the projitems guard caught the new source; the channel merge commit was R's tool, fixed to abort + re-run). ALL
 THREE BATCH-2 REFS CUT; C1 + C2 small delta reads; the batch launches when ha1 pushes, no push until the reads land.
+i9 ACCEPTED THE DRIVER SEAT (fb022226c: the parse gate + a one-slice dry run green; the -DryRun refusal hoisted).
+RULED (a): the grafted fips140test row is NON-BANKING in the rehearsal (evidence + the minted five-pin file as a
+prediction; i9 banks it in the campaign at W=4 slice 1 seq 13; the driver grows no 'banked elsewhere' skip); the
+rehearsal's seven native rows bank if green; a holder is a property of W. i9 cutting the seat.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
