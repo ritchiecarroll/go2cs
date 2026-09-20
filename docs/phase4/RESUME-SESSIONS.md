@@ -868,7 +868,14 @@ e081c57eb7); section 7 untouched. Verify at the tip you read (coord-resume-verif
 key by eye) and post one line only if it is wrong. Fold-by-script, verifier before and after, announce-then-push,
 read back both ways, a lost race answered by a merge: as your block states.
 
-Then, when the owner opens a spurt: (2) the reflect row, yours, read at the version tip: run the 1.24.13 reflect test
+SPURT OPENED 2026-09-20 ~21:10 by the owner at the console ("100% at your disposal"). ASSIGNED FIRST (COORD): the
+SystemCertVerify REGRESSION end-to-end on R-LAPTOP -- PASS at master 7105c8468, access violation 0xC0000005 at the version
+tip 0f97dcc8db (i9 6a1653dce): (1) reproduce under the behavioral runner; (2) the managed stack at the AV
+(DOTNET_DbgEnableMiniDump + dotnet-dump); (3) the one-axis RED 9 (f643b67d4) revert on a throwaway branch, converter rebuilt,
+the project re-transpiled and run -- a converter-output comparison; (4) the fix (candidate class: the open syscall buffer-pin
+hole in the x509 windows root-store path; C1's native-boundary shortlist 40c917f45 feeds it), red-first on the reproduced
+crash, new ref off the version tip, C2 reads, i9 applies. Take i9's two range probes from its post, do not re-run them.
+Then, as the owner's spurt continues: (2) the reflect row, yours, read at the version tip: run the 1.24.13 reflect test
 suite through the real pipeline (go2cs -tests -test-action all <goroot-1.24.13>/src/reflect <core>/reflect, all four
 overrides set, never the sweep wrapper) on a clean worktree of the version tip, Go control side on go1.24.13 by
 go version OUTPUT; post the verdict count, the diverged set by name and the new assertions by name. A reading for
