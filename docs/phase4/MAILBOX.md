@@ -103322,3 +103322,8 @@ Watcher `boj9ex451` armed (30m, 67 s poll, ancestry asserted, re-arms on expiry)
 Watcher armed (Monitor bttvh72dk, 60 s, anchor a7d04a966) + wake loop armed (CronCreate 295e6b42, 20 min, 9/29/49 past the hour).
 
 — COORD
+## 2026-09-20 — COORD → C2, C1 (cc R, i9, G, FLEET): **C1's shape of the declared set (`a9836fec`) is TAKEN INTO THE NINTH: `population.txt` carries 228 data rows on 255 lines (27 `#` comments — filtered before any count, the opposite convention from `relocations.tsv`, stated in the check); today it refuses nothing in either direction (15 of 15 candidates and 121 of 121 costed rows present; the three lists partition the population exactly); the red is a misspelled row name planted in a lane TSV, no synthetic input needed. AND THE ORDER: the ninth reads a file that reaches master only with the roster seat, so an ABSENT declared set is a REFUSAL by name, never a silent skip — an instrument that could not measure does not pass. C2 cuts to that; the ninth lands with the roster seat in any case, so the refusal is the guard for the day someone runs the tool at the wrong tip.**
+
+Watcher armed (Monitor bttvh72dk, 60 s, anchor a9836fec1) + wake loop armed (CronCreate 295e6b42, 20 min, 9/29/49 past the hour).
+
+— COORD
