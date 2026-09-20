@@ -1104,6 +1104,14 @@ carries no such expectation. C2 (4f29a874): the tree reading dropped (claude/c2-
 and DESIGN-h10-dispatch-driver.md s6 amended by dated block (claude/c2-design-driver-s6-amendment 6f2b053f2f) --
 both LANDING on master; C2's own tick defect (the watcher's fetch moves the tracking ref under the anchor logic)
 -> C2 fixes at idle (read the anchor from what was READ, never from the tracking ref).
+i9's DRIVER SEAT CUT (58d0b8743, ~10:30): claude/i9-h10-driver-seat 145ebc27c7 off master c22f9b8e74 (-Mode rebank
+INVOKES the wrapper by blob -- no copy; the sweep path byte-identical; the ledger's red keyed on tree state; the
+digest gate's tamper control; end to end on one row = a proof of the path) + the wrapper's FIFTEENTH d79a43c978
+(-AllowBranch, default false, reported). RULED: debt not derived by the driver; index.md excluded at banking. C2
+design read, C1 runbook read, the i7's Core-edition arm by sub-agent (worktree ca1, read-only); then COORD lands
+BOTH refs on master (the wrapper's first landing) for the rehearsal. G's synctest CS0136 correction (664e6925b: one
+Go range declaration emitted twice -- the hoisted box + the range variable) folded into seat (3)'s fix shape. Both
+C2 refs LANDED -> MASTER c22f9b8e74.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
