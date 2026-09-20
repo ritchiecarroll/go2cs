@@ -842,7 +842,12 @@ under GOPATH, so each stdlib package converts its whole subtree (13 skip message
 the prefix -> 0 runtime/cgo files, queue hash identical, src/core byte-identical but for that directory). RULED a CONVERTER
 DEFECT, C2's seat (the subtree branch must not fire under GOROOT; red-first on C2's control; the author's comment amended);
 G then verifies its linux emission unchanged (3397, queue 342) from the seat's converter; C2 re-takes the linux pair
-(predicted 3397 = 3397, 0 placement differences, exemption count 0); then COORD closes H8 and cuts the H8 docs commit. (2) the H8 record under docs/phase4/ (both
+(predicted 3397 = 3397, 0 placement differences, exemption count 0); then COORD closes H8 and cuts the H8 docs commit.
+G's diff (4f4e3f9f7): both boxes' sorted package lists share one sha256 (342 = 342, LF, one trailing newline) -- the
+enumeration question is CLOSED; G's negative arm (GOROOT not under GOPATH on G-LAPTOP, the branch does not fire) confirms
+C2's cause from the side where it does not fire. G's runbook point is TAKEN into C2's seat scope: the H8 arm states the
+toolchain's location (GOROOT under GOPATH or not) as a condition of the emission beside the pin and CGO_ENABLED, and the
+converter's fix removes the dependence; the seat's amendment says which. (2) the H8 record under docs/phase4/ (both
 manifests' class tables, P1-P5 as scored, the 38 -> 47 -> 51 decomposition, per-target movement) on a branch you name;
 (3) after i9 applies the H11 seat: the 347-README OVERLAY -- seed a never-reused root from the applied tree's src/core, one
 single-target -stdlib emission with the converter built at that tip, cut ONLY src/core/**/README.md as one commit on a new
