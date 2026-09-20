@@ -693,7 +693,11 @@ blind projects, the process gap: an emission-changing seat carries its golden re
 2026-09-20 at claude/c2-h9-correction 4f24f7d39e. H8 (COORD ruling on cb1fa651a): (a) score P1-P5 as worded in one post
 (P5 ruled not a defect); (b) `manifest` gains the emitted-set restriction (sentinel mtime or --emitted-only) with a
 seeded-and-emitted control, a commit on top of bdc016826a; (c) the H8 amendment takes the measured 'both directions' wording
-(true at exclusive only) and the per-file-tag-selection derivation lesson. DONE earlier: the correction at 4f24f7d39e (docs only, off master; ACCEPTED as the H9 docs seat). Idle by ruling until
+(true at exclusive only) and the per-file-tag-selection derivation lesson; (d) the build-tag axis (purego,
+math_big_pure_go) added to H8 section (d), cut AFTER G's linux/darwin readings so the ref G executes from is not churned.
+(a) DONE 2026-09-20 at 411d2ad4e (P1 refuted, P2 split -- a relocation nets zero, P3 refuted both, P4 honoured, P5 a
+finding by its wording, ruled not a defect; root cause: package-level derivation blind to per-file tag selection) -- (b) DONE at 04c7ca64ec (--emitted-only, the census's sentinel-mtime discriminator).
+DONE earlier: the correction at 4f24f7d39e (docs only, off master; ACCEPTED as the H9 docs seat). Idle by ruling until
 G's outgoing census side-by-side, scored against your P1-P5. ALSO: the second read of G's root-attribution overlay
 a819ba7417 (VERSION + LICENSE byte-compared against the 1.24.13 toolchain root on your box). OWED (COORD re-ruling on i9's
 CNR dc9eb368c): ONE commit on top
