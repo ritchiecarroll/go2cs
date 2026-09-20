@@ -17,6 +17,13 @@
 # the hand-stopped drop never fired (:308) -- so `net` MUST be measured and emitted even though its
 # cost is discarded. The extras below are additive; the parser reads by name and ignores them.
 #
+# One extra is NOT decoration: `wall_s` is the observed integer wall for EVERY row whatever its
+# word. `sweep_s` answers "may this row be scheduled on this number" and is deliberately
+# non-integer when the row earned no cost; `wall_s` answers "how long did it take", which stays
+# a fact for a row that timed out. The concatenation banks the hand-stopped row `net` with
+# `sweep_s := wall_s`, and `net` is EXPECTED to TIMEOUT -- so without this column there is nothing
+# to substitute from and the basis is refused either way.
+#
 # ---------------------------------------------------------------------------------------------------
 # THE ONE-ATTEMPT CLOCK
 #
@@ -58,6 +65,9 @@ param(
     # The pinned GOROOT. Asserted BY OUTPUT below, never by this string.
     [Parameter(Mandatory)][string] $GoRoot,
 
+    # The TSV to write: a FILE PATH, never a directory. The write is this script's LAST
+    # statement ([System.IO.File]::WriteAllText below), so a directory throws AFTER every row
+    # has run and the whole leg is lost at its final line. Its parent must already exist.
     [Parameter(Mandatory)][string] $Out,
 
     # The commit -Tree must be detached at. Required: the leg's readings are only comparable if every
@@ -343,7 +353,7 @@ Write-Host "  output            : $Out"
 if ($DryRun) { Write-Host '  MODE              : DRY RUN -- one row, nothing written' -ForegroundColor Cyan }
 
 $emit = New-Object System.Collections.Generic.List[string]
-$emit.Add("row`tword`tverdicts`tsweep_s`tfirst_in_list`trc`tdiverged`tplatform`ttree")
+$emit.Add("row`tword`tverdicts`tsweep_s`tfirst_in_list`trc`tdiverged`tplatform`ttree`twall_s")
 
 $treeSha = (GitTry @('-C', $Tree, 'rev-parse', 'HEAD')).Out
 # ⚠ THE PLATFORM IS GOOS/GOARCH BY `go env` OUTPUT, NOT .NET's OSVersion.Platform. The first cut
@@ -524,17 +534,35 @@ foreach ($row in $rows) {
         }
     }
 
+    # ⚠ wall_s IS THE OBSERVED WALL FOR EVERY ROW, WHATEVER ITS WORD, AND IT IS ALWAYS AN INTEGER.
+    # `sweep_s` answers "what may this row be SCHEDULED on" and is deliberately non-integer when the
+    # row earned no cost. `wall_s` answers the different question "how long did this actually take",
+    # which is still a fact for a row that timed out or produced no verdict -- and it is the only
+    # number the hand-stopped row `net` can ever supply, because `net` is expected to TIMEOUT and its
+    # cost in both 1.23 passes was a lower bound produced by stopping it. The concatenation banks
+    # `net` with `sweep_s := wall_s`; without this column there is nothing to substitute FROM, and the
+    # basis is refused either way (C2 `7c71a87f`, COORD's ruling).
+    $wallS  = $elapsed
     $sweepS = $elapsed
     if ($word -eq 'TIMEOUT') {
         # A deadline kill is not a cost: the row did not finish, so its wall is a floor the operator
-        # imposed, not a measurement of the row. NON-INTEGER, which the generator reads as UNSCHEDULED.
+        # imposed, not a measurement of the row. NON-INTEGER -- which the generator REFUSES (:280, by
+        # name and by value); the banked basis excludes such rows at the concatenation.
         $sweepS = 'UNMEASURED'
     }
     if ($word -eq 'NOVERDICT') {
-        # No summary line means the row produced no verdict. Its WALL is real, but a cost banked under
-        # no verdict is a number with no evidence behind it, so the row is UNSCHEDULED by construction.
+        # No summary line means the row produced no verdict. Its WALL is real -- and is emitted as
+        # wall_s -- but a cost banked under no verdict is a number with no evidence behind it, so the
+        # generator REFUSES it and the concatenation excludes the row.
         $sweepS = 'UNMEASURED'
     }
+
+    # ⚠ AN EMPTY FIELD READS AS A ZERO. A row that produced no comparison artifact at all -- BUILD,
+    # CONVERT, TIMEOUT, NOVERDICT -- left `diverged` at its initial empty string, and an empty column
+    # in a file three lanes are concatenated into is the empty-counter class this fleet banked twice
+    # tonight. `n/a` and not `UNREAD`: UNREAD means an artifact EXISTED and could not be read, which
+    # is a different and worse fact than never having produced one.
+    if ($diverged -eq '') { $diverged = 'n/a' }
 
     # ---- CAPTURE THE EVIDENCE BEFORE THE TREE IS DISCARDED (ruled)
     # The worktree is removed when the list is done, and with it every artifact this row produced.
@@ -565,7 +593,7 @@ foreach ($row in $rows) {
         Write-Host "       $($v.Line)"
     }
 
-    $emit.Add("$row`t$word`t$verdicts`t$sweepS`t$first`t$rc`t$diverged`t$plat`t$treeSha")
+    $emit.Add("$row`t$word`t$verdicts`t$sweepS`t$first`t$rc`t$diverged`t$plat`t$treeSha`t$wallS")
 
     if ($DryRun) { break }
 }
