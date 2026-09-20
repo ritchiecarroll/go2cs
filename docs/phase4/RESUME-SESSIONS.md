@@ -235,7 +235,8 @@ RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane
   the comparand) and H9 (i9, after its applies: q94 -> q99 (1) -> q99 (2) -> metadata 828ef5d0b7 -> fail-set literal -> H9 ->
   q100 after the i7's gate). C1: q102 cut -> q86 field-pattern fix (RULED its own seat) -> the pthread seven held as a NOTE.
   C2: H8 comparand -> q100 second read -> q102/q86 second reads. R: steward loop -> the reflect row read at the version tip in
-  a spurt. MASTER moved 2026-09-20 to 43ee2ac8b3 (the identifier census's release-literal admit, signed merge). COORD on the i7: the q100 gate DONE, CLEAR for i9's apply (mailbox 1135d780c; fail set identical both sides, +4 arms, made to fail 2 of 4),
+  a spurt. MASTER moved 2026-09-20 to 43ee2ac8b3 (the identifier census's release-literal admit, signed merge), then to
+  a6be940665 (the H8 DOCS SEAT: C2's amendment d7b0876ce6 + G's record d384d6357d, two signed merges, gates green). COORD on the i7: the q100 gate DONE, CLEAR for i9's apply (mailbox 1135d780c; fail set identical both sides, +4 arms, made to fail 2 of 4),
   rulings, folds, this file's refresh at every landing, the save-state cadence rising toward 90% weekly usage.
   PROTOCOL: frozen; posts are loop-of-record only; the mailbox is a tool, not an objective (owner order 2026-09-19).
 
@@ -905,7 +906,9 @@ converter; then G's dated closure block on claude/g-h8-record and COORD's H8 doc
 G's negative-host arm (1d340011c): parent vs seat converters emit BYTE-IDENTICALLY on G-LAPTOP (3397 = 3397, same tree
 hash; the drift arm correctly attributed 2 differing paths to q97's footprint). ** H8 CLOSED 2026-09-20 (COORD) ** -- rung 8
 of the hop. OWED: G's ONE dated closure block on claude/g-h8-record (on top of 56c0eb7a71); then COORD's signed H8 docs
-commit on master (C2's amendment d7b0876ce6 + G's record).
+commit on master (C2's amendment d7b0876ce6 + G's record). LANDED: master a6be940665 (G's closure block d384d6357d on
+56c0eb7a71, append-only +133). Held for master now: C2's H9 correction 2e75b14586 (with H9), C1's roster seat 4de76ded06
+(with H10).
 G's diff (4f4e3f9f7): both boxes' sorted package lists share one sha256 (342 = 342, LF, one trailing newline) -- the
 enumeration question is CLOSED; G's negative arm (GOROOT not under GOPATH on G-LAPTOP, the branch does not fire) confirms
 C2's cause from the side where it does not fire. G's runbook point is TAKEN into C2's seat scope: the H8 arm states the
