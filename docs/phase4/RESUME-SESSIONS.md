@@ -218,7 +218,8 @@ STATE AT THIS REVISION (2026-09-14 18:45 -- new usage week; the save-state refre
 RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane restarts from section 0a plus its own fence).
   POSITION: rung 7 CLOSED (H7 compile parity MET at 46307b4704 on three flavours, COORD a065b1bd9); H7a folded (fc275f1ac3,
   then the interop fold 30057d0c4a); version tip d71e4eed63 (q97 applied); master 7105c8468 (docs seat 4); mailbox anchor
-  f8fef0119 (R's delta, folded in this revision); 2026-09-19 evening: q94 APPLIED (version tip 1c1f63d4cc); i9, C2, C1, R ACKed;
+  f8fef0119 (R's delta, folded in this revision); H8 CLOSED 2026-09-20 ~23:45 (marker gate zero x6; byte-identity PASS on
+  three flavours; the runtime/cgo defect fixed at 19175c31ad); 2026-09-19 evening: q94 APPLIED (version tip 1c1f63d4cc); i9, C2, C1, R ACKed;
   q102 re-based onto cd6f4b9a8e (3d88353a8); q99 (1) APPLIED edfa0f5041, q99 (2) 06b1636cae, q102 23df814f64, the metadata seat
   0f97dcc8db (VERSION TIP; the converter fail set is EMPTY; i9 next: the fail-set literal -> H9 against the eleven -> q100);
   G ACKed (census on disk complete, rc 0, 802 s); H8 comparand RULED bb1d9b4d6
@@ -887,6 +888,10 @@ the fixed counter), all four tree hashes equal, seed-absent set 0 packages, both
 invalid (a non-hex perturbation refused on form) and replaced. H8's byte-identity clause: windows PASS (G), linux PASS (C2,
 seat converter), darwin PASS (G, a box where the branch never fired). CLOSE waits on G's negative-host arm from the seat's
 converter; then G's dated closure block on claude/g-h8-record and COORD's H8 docs commit (C2's d7b0876ce6 + G's record).
+G's negative-host arm (1d340011c): parent vs seat converters emit BYTE-IDENTICALLY on G-LAPTOP (3397 = 3397, same tree
+hash; the drift arm correctly attributed 2 differing paths to q97's footprint). ** H8 CLOSED 2026-09-20 (COORD) ** -- rung 8
+of the hop. OWED: G's ONE dated closure block on claude/g-h8-record (on top of 56c0eb7a71); then COORD's signed H8 docs
+commit on master (C2's amendment d7b0876ce6 + G's record).
 G's diff (4f4e3f9f7): both boxes' sorted package lists share one sha256 (342 = 342, LF, one trailing newline) -- the
 enumeration question is CLOSED; G's negative arm (GOROOT not under GOPATH on G-LAPTOP, the branch does not fire) confirms
 C2's cause from the side where it does not fire. G's runbook point is TAKEN into C2's seat scope: the H8 arm states the
