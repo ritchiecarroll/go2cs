@@ -722,7 +722,9 @@ emission at CONVERT (setField's unsafe write, the golib door, the class -- the 2
 fix shape, a red-first arm); no cut. DESIGN READ of R's seat DONE (be9a7447, SOUND). NEXT DOCS SEAT (two items): the
 PATH-resolved pin line in H10's preconditions table + CLAUDE.md:48's architecture-map row naming src/Examples/ (absent
 at master; the sample trees are src/tour, src/utilities, src/tools), the context-budget gate run. THE RELOCATION MAP OF
-RECORD is C1's table (350a301a: 10 rows, 13 arcs -- i9's count, C1's prose said 14/4 splits; 3 splits; 11 targets); the roster seat after the leg adds docs/phase4/hopA-inputs/relocations.tsv (one line per arc) and derives the
+RECORD is C1's table (350a301a: 10 rows, 13 arcs -- i9's count, C1's prose said 14/4 splits; 3 splits; 11 targets);
+ASSIGNED: read C2's generator commit 8d7739f4e3 against the tsv contract the roster seat will write (header
+source/target, one line per arc, LF, thirteen lines from 4de76ded06); the roster seat after the leg adds docs/phase4/hopA-inputs/relocations.tsv (one line per arc) and derives the
 $longTimeouts re-path from it. SIZINGS DONE (dfdcbc65) and ROUTED (COORD after 53c57e752): row 1 fips140test = the test
 emission's using-static + initPackage of a production class the driver never emitted (test-only package) -> an i7
 sub-agent cut after the Core arm, C1 design read / C2 structural, i9 applies; row 2 crypto/mlkem = zh<T> at a
@@ -1030,6 +1032,12 @@ landing WITH the roster seat). CONFIRMED (COORD after 8cf1e707): cut NOW on the 
 (relocations.tsv: header source/target, one line per arc, LF; refuse by name when absent or thin); (a) the floor
 inheritance is an ADDITION (no successor map exists in the generator today), (b) the intersected-out print is one line;
 the intersect stays. The plan is generated only after the seat lands, so the refusal never fronts the leg.
+GENERATOR SEAT CUT (51d22252): claude/c2-shardmap-relocations 8d7739f4e3 off master 6c32d0e171, +57/-2, reads
+relocations.tsv (thin guard < 10 arcs), four arms made to fail; the reserved-row print already exists and fires --
+RULED: a second commit splits its message into two causes (no measured cost vs name absent at this release). TAKEN,
+lands with the roster seat; C1 reads it. Census finding banked: the fire-direction arm is inert by construction on a
+cloud box (no account/machine/owner token) -- the 91 pattern arms are the guard there; the self-test should say so
+(the next instrument seat, protocol frozen); a BOARD line for C2's docs seat.
 (d) LANDED at master 6c32d0e171. Tag-asymmetry bound DONE (50554616: 2 of 207 differ on linux -- nistec files SWAP, both
 directions; fips140test's nistec_ordinv_test.go oracle-only, latent behind CS0234). ASSIGNED: read i9's wrapper ref
 claude/i9-h10-recon-wrapper at its tip AFTER i9's second commit (the linked-worktree guard + per-row artifact capture).
