@@ -330,7 +330,7 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     Windows box before H11 is declared: check-roster-format.ps1 and release-nuget.ps1 -VerifyOnly at the applied tree
   then C2's subtree-load seat claude/c2-subtree-load-goroot-guard 19175c31ad (merge-base 43a3627667; projitems composed by
     both seats, the q98 guards police it; the converter suite with TestSubtreeLoad* by name; no corpus build)
-  then R's P-256 cut claude/laneR-p256-table-decode d01e5d307d on C1's and C2's reads (corpus build + GolibTests vs the box-base
+  then R's P-256 cut claude/laneR-p256-table-decode at its tip 9200da804e (d01e5d307d + the comment-only commit) on C1's and C2's reads (corpus build + GolibTests vs the box-base
     four + SystemCertVerify direct exe + the converter suite), then the FULL four-phase behavioral suite: H9 closes when
     Output's failing set = FuncLiteralCallerNames + GoroutineWaitState with APPEARED empty
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
@@ -998,7 +998,10 @@ one commit on top of d01e5d307d before the apply: the by-ref chain line (a by-va
 wrapper's lazy backing materialises on a temp), the asm-variant scope bound (p256_asm.go's same reinterpret is out of
 the corpus under purego), the memory cost line. C1's design read DONE (534a217e2, AGREES; the three binding points met
 at the blobs; a near-miss on a non-recursive grep against R's StrongBox claim, R right at both levels). CLEARED for i9's
-apply on both reads (COORD): i9 applies the BRANCH TIP after the subtree seat (R's comment commit on top). Banked for the
+apply on both reads (COORD): i9 applies the BRANCH TIP after the subtree seat (R's comment commit on top). R's commit
+LANDED (fb461aeb9): 9200da804e on top of d01e5d307d, one file +21/-3, comment-only (verified from the i7: non-comment
+changed lines 0, comment-stripped sha identical); the ref chain, the asm-variant bound and the cost stated; SystemCertVerify
+direct exe exit 0 re-verified after the edit. i9 APPLIES 9200da804e. Banked for the
 next seat opening either file: a call-count arm on SetMontgomeryLimbs (one site / two calls).
 DIAGNOSED by i9 (1b2ad7d8f) before R started: both probes FAIL in Output (the crash predates rung 7); the managed stack
 names ElemRefBox<p256AffineTable>.get_ValueSlot via DerefOrNull from nistec.Select <- ScalarBaseMult <- ecdsa.GenerateKey;
