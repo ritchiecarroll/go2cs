@@ -989,7 +989,12 @@ key by eye) and post one line only if it is wrong. Fold-by-script, verifier befo
 read back both ways, a lost race answered by a merge: as your block states. ⚠ 2026-09-20 22:08: a SECOND control reached
 the record from R's tooling (ad9842f0d0, subject 'subject line', a one-line test body, no identifier, not scrubbed); R OWES
 one post -- which copy ran (scratchpad / the published repo copy / other), why the control-heading bar did not fire, the fix
-made to fail through the real script both directions -- and posts nothing else until then (COORD ruling).
+made to fail through the real script both directions -- and posts nothing else until then (COORD ruling). CLOSED (R
+ce27f1a75, COORD ruling): the working copy ran live as the bar's NEGATIVE arm (a guard whose negative arm requires the
+dangerous act -- a design defect); fix = an offline --bar-check sharing the bar's predicate; no scrub (no identifier); R's
+unbidden scrub attempt (rejected non-FF, rc read through a pipe) owned. R publishes the fix as one commit on
+claude/laneR-post-tool for the next instrument seat. R RESUMED goal work: the reflect row read at the version tip
+d91c832543 through the real pipeline (all four overrides, build configuration stated), a reading for H10.
 
 SPURT OPENED 2026-09-20 ~21:10 by the owner at the console ("100% at your disposal"). ASSIGNED FIRST (COORD): the
 SystemCertVerify REGRESSION end-to-end on R-LAPTOP -- PASS at master 7105c8468, access violation 0xC0000005 at the version
