@@ -1112,6 +1112,8 @@ design read, C1 runbook read, the i7's Core-edition arm by sub-agent (worktree c
 BOTH refs on master (the wrapper's first landing) for the rehearsal. G's synctest CS0136 correction (664e6925b: one
 Go range declaration emitted twice -- the hoisted box + the range variable) folded into seat (3)'s fix shape. Both
 C2 refs LANDED -> MASTER c22f9b8e74.
+R's abort fix + arm LANDED -> MASTER a5b110b47e (~10:35). i9's census-dir check EQUAL. Running on the i7: APPLY
+BATCH 2 (ab2), the ecdh seat (ec1), the driver's Core-edition arm (ca1).
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a

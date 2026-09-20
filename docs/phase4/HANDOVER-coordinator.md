@@ -707,3 +707,4 @@ Each lane runs in its own Claude Code session on its own host with its own local
 - 10:17: the host seat STAMPED at version tip 6d814e2d38 (cfile 15, internal/trace 92 with zero divergences); APPLY BATCH 2 launched on top (ab2, no push).
 - 10:20: C1's TypeFor population correction (3 files, json out); C2's drop-tree + the design s6 dated amendment landing on master.
 - 10:27: i9's driver seat cut (145ebc27c7 + the wrapper's fifteenth); reads routed (C2 design, C1 runbook) + the i7's Core-edition arm; both refs to land on master after; G's synctest correction taken; master at c22f9b8e74.
+- 10:30: R's abort fix + arm landed -> MASTER a5b110b47e; three i7 sub-agents running (batch 2, the ecdh seat, the driver's Core arm).
