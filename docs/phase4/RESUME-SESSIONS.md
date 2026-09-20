@@ -690,7 +690,10 @@ i9's CNR as the prediction i9 scores against; git and Go only. DONE 2026-09-19 (
 06b1636cae) and RULED (COORD): the eleven replace the eight. ASSIGNED NEXT: the runbook's dated in-stage H9 correction (the
 eleven with mechanism and pairs, the per-mechanism added == removed rule, the linux arm's admissibility control and its seven
 blind projects, the process gap: an emission-changing seat carries its golden re-baseline) on a branch you name; DONE
-2026-09-20 at claude/c2-h9-correction 4f24f7d39e (docs only, off master; ACCEPTED as the H9 docs seat). Idle by ruling until
+2026-09-20 at claude/c2-h9-correction 4f24f7d39e. H8 (COORD ruling on cb1fa651a): (a) score P1-P5 as worded in one post
+(P5 ruled not a defect); (b) `manifest` gains the emitted-set restriction (sentinel mtime or --emitted-only) with a
+seeded-and-emitted control, a commit on top of bdc016826a; (c) the H8 amendment takes the measured 'both directions' wording
+(true at exclusive only) and the per-file-tag-selection derivation lesson. DONE earlier: the correction at 4f24f7d39e (docs only, off master; ACCEPTED as the H9 docs seat). Idle by ruling until
 G's outgoing census side-by-side, scored against your P1-P5. ALSO: the second read of G's root-attribution overlay
 a819ba7417 (VERSION + LICENSE byte-compared against the 1.24.13 toolchain root on your box). OWED (COORD re-ruling on i9's
 CNR dc9eb368c): ONE commit on top
@@ -773,8 +776,13 @@ real E1/E2 pair; STOP before declaring the rung.
 
 Then: (2) the root-attribution overlay cut from the census emission root, on a branch you name (prediction of record:
 the differing set is exactly VERSION and LICENSE); push-then-announce. DONE 2026-09-20: claude/g-root-attribution
-a819ba7417 on 0f97dcc8db, +4/-4, prediction MET, pinned by COORD (C2 reads; i9 applies after H9). STILL OWED: the H8
-side-by-side (both class-count rows, C2's P1-P5, arm (b) on a real E1/E2 pair, the CGO value); STOP before the rung. (3) The follow-up commit on
+a819ba7417 on 0f97dcc8db, +4/-4, prediction MET, pinned by COORD (C2 reads; i9 applies after H9). The H8 side-by-side is
+DONE (cb1fa651a: outgoing 1476/79/87/277 of 1919 vs incoming 1631/83/93/283 of 2090; marker gate zero x6; arm (b) PASS on
+windows, 3342 = 3342, equal tree hashes; pkgdelta +40 per target MET). RULED (COORD): the rung rests on all three flavours.
+NEXT for G: (1) arm (b) on linux and darwin (run the views on the WSL arm); (2) the H8 record under docs/phase4/ (both
+manifests' class tables, P1-P5 as scored, the 38 -> 47 -> 51 decomposition, per-target movement) on a branch you name;
+(3) after COORD closes H9: the twelve successor packages through the real pipeline on the banking platform at the version
+tip (all four overrides), per row the verdict count and the diverged set by name -- the first H10 rows; a reading, no bank. (3) The follow-up commit on
 claude/g-metadata-regen ON TOP of 828ef5d0b7, never a rewrite: stdlibMetadata_test.go line 60 still claims the asset
 is written CRLF; replace it with the facts you measured (C2 found it at 8d8be3730; your sweep confirmed it is the only
 survivor under src/go2cs); announce-then-push. (4) The linux-flavour arm of whatever COORD routes after H8.
