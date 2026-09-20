@@ -489,7 +489,14 @@ instrument after that. DONE 2026-09-20 (9d50b5f5e): P 2 (the p256 pair) / C 5 / 
 arm) / U 6 -- the resolved-different-pointee class is 25; C1's Cast premise WITHDRAWN (Cast is where T:struct; the check is
 at runtime); the InlineArray layout direction banked POST-HOP for the class cure. ASSIGNED NEXT: the second hop -- the call
 sites of the five alg.cs hash helpers taking a pointer parameter and of AliasPointer's raw-metal fork (array.cs:216), each
-scored into the same classes; then the design read of R's two companions when announced. (3) The seven pthread members the darwin
+scored into the same classes; then the design read of R's two companions when announced. DONE 2026-09-20 (4255bbf3e: 38
+call sites; memequal128 has zero callers; AliasPointer's raw fork reached by 13 of 33, provably not by 13; 7 V + 4 C residue).
+FINDING: golib already carries NativeArrayBox<T> + the public door builtin.NativeArrayPointer<T>(addr, N), built for exactly
+this mechanism, never emitted; N is in the Go type and the emission drops it. RULED: the class cure for UNMANAGED element
+types is the emission rule (*[N]E)(unsafe.Pointer(x)) -> NativeArrayPointer<E>(addr, N); a generated NESTED array element
+(the P-256 table) is a struct with a reference, so (a) stands for the site and the InlineArray layout is Part 2 -- both
+post-hop. ASSIGNED: one reading -- of the 25 sites, how many have an unmanaged element type under the shipped layout, by
+site (what Part 1 buys). Then the design read of R's companions. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
