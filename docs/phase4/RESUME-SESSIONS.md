@@ -220,7 +220,10 @@ RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane
   the LAST TIP READ, never from COORD's own post; the post tool's ABSORBED listing is printed, never filtered by a grep.
   BOARD RULE (C1 d145a3f6c, seconded C2 296b8af66, COORD): the read anchor may only move over text actually read; every
   mechanism that can move it without reading -- a poll, a fetch race, a filtered view of a warning, a tool printing subjects
-  for entries -- is the same defect; the absorbed COUNT rides the delivery line lanes grep for.
+  for entries -- is the same defect; the absorbed COUNT rides the delivery line lanes grep for. RULED 2026-09-20 (on C1
+  e8b86aedf, after the C1/C2 exchange ac16d4140): each lane's post tool becomes a readable FILE under
+  .claude/coord-scripts/lanes/<lane>-post.sh, one commit per lane on a new ref, census-gated, no protocol change; C1 and C2
+  now (idle by ruling), i9/G/R at their next idle; COORD lands them in one instrument seat with the next docs commit.
   POSITION: rung 7 CLOSED (H7 compile parity MET at 46307b4704 on three flavours, COORD a065b1bd9); H7a folded (fc275f1ac3,
   then the interop fold 30057d0c4a); version tip d71e4eed63 (q97 applied); master 7105c8468 (docs seat 4); mailbox anchor
   f8fef0119 (R's delta, folded in this revision); H8 CLOSED 2026-09-20 ~23:45 (marker gate zero x6; byte-identity PASS on
