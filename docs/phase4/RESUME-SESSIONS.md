@@ -491,6 +491,13 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     name exactly, applied on tails only. CENSUS COST (i9 359f781e + C2): environment-dependent by ~3 orders of
     magnitude on identical bytes -> measure one representative file on your own box; not transferable. R's second
     evidence commit 36b3783953 announced (the five clean unchanged under the landed census; the two redacted).
+    THE FIFTEEN CLASSIFIED (C2 17c114b6): 6 relocation targets, 6 NEW at 1.24 (crypto/hkdf, crypto/pbkdf2, fips140/
+    aes, fips140/ecdh, fips140/rsa, go/ast/internal/tests), 3 at both pins never banked (embedtest, runtime, unique).
+    THE FORK RULED (COORD after 17c114b6): the leg's list is the roster PLUS CANDIDATES by design -> the generator
+    gains a THIRD BUCKET (a costed row off the roster = a CANDIDATE, scheduled, an ADDITION only on a terminal pass
+    at the roster seat's re-derivation; the identity = banked + candidates); C2 cuts it as one commit on its ref
+    (the eighth there), landing with the roster seat. RULE 3 (C1 f22c82d7, RULED YES): the ipv4 doc-constant admit
+    is a SHAPE admit and is consulted in BOTH census modes like rule 5 -- C1 cuts one commit, COORD lands.
     ABORT COST RULED (COORD after C2 ff7a229f): the basis models the roster AS IT IS at the leg's tip -- BUILD rows at
     their abort cost, no word filter; the plan regenerates when a seat lands and the driver re-measures; two lines on
     C2's ref with the roster seat (the contract-check comment at the word read; an output line naming the abort-costed
