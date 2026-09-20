@@ -1251,7 +1251,11 @@ ASSIGNED (COORD 4c92156c): the STRUCTURAL READ of the fips140test generator seat
 Common.EffectiveScopeIsPublic, narrowing unchanged; the .tests.csproj ProjectReference gated on testProductionAbsent
 because MSB9008 is a warning; Roslyn compile-probe fixtures 1-fail-4-pass -> 5/5; the row COMPILES: 2215 matched /
 52 diverged, all pre-existing Go=pass C#=fail; stdlib 344/344 0 errors) -- the footprint, the fixtures' cross-assembly
-claim, the control set; C1 has the design read; COORD applies from the i7 after R's time apply lands.
+claim, the control set; C1 has the design read; COORD applies from the i7 after R's time apply lands. BOTH READS
+SOUND (C1 f4125ff2: the scope rule is the codebase's own MethodInfo trio; C2 9d5a410a: the :671 gap MEASURED over the
+whole package, the symbol wins in both decided directions, the C# guard crosses a real assembly boundary). The :671
+FOLLOW-UP (an ordering test in the dynamicTypeGate convention + the gate comment's consumer count) is cutting on the
+i7 as a second commit on the ref, announce-then-push; the apply carries both, after the time apply.
 FIRST READ DONE (c0c2063e at 43aba50262: spec met, the parse well controlled; the classifier finding + diverged-lines
 note -> both in i9's second commit). RE-READ at the new tip when announced. ALSO ASSIGNED (COORD after dfdcbc65): the
 crypto/mlkem DESIGN READ -- (a) the generator making zh<T> satisfy every interface *T's method set satisfies vs (b) the
@@ -1602,7 +1606,13 @@ an mtime split over-reports by every COPIED file (publish preserves write times:
 bin/ read pre-run on a never-run tree; 12,462 such in R's tree); CreationTime is the discriminator; the walked count
 asserted non-zero; git's ignored set read with -z (paths with spaces). RULED (6b9c41af): i9 re-reads its table by
 CreationTime before its TSV push (0 = arm not owed); C1 folds the method into the residue precondition at the next
-docs seat. R's leg at 28146f7b: 88 of 105, 74 PASS / 4 BUILD / 9 NOVERDICT. R's post-tool fix
+docs seat. R's leg at fcb75ab3: 90 of 105, 76 PASS / 4 BUILD / 9 NOVERDICT (none a deadline artifact; two are HOST readings --
+internal/coverage/cfile + internal/trace: the Go ORACLE refuses internal/... imports through a link-staged fixture
+tree on R-LAPTOP, no symlink privilege -> OWNER HAND: Developer Mode on R-LAPTOP; RULED 8d9609e9: i9 re-runs both
+rows on its box after its list). R's CORRECTION (fcb75ab3) taken: the runbook sentence is i9's -- mtime is unrelated
+to provenance in either direction (over in R's tree, under in five of i9's seven packages); the remedy unchanged.
+i9 RE-TOOK its table (0bb72afd): genuine residue in six of seven packages -> its two-row arm STILL OWED; go/types
+(0 genuine) becomes the CONTROL beside archive/zip; i9's net row hangs in its test host (TIMEOUT expected at 40 m). R's post-tool fix
 ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
 an idle-time master landing with C1's fetch-refspec commit. R NEXT: the constraint-proxy widening.
 SEAT CUT (57e9e70e): claude/laneR-anon-struct-typearg ce8d0bd654 on d91c832543, five files under src/go2cs (the pre-visit
