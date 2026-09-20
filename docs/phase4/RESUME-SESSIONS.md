@@ -1088,7 +1088,13 @@ resumer rebuilds; the ledger folded in. C1: the draft -> the runbook's in-stage 
 old-path number banked (17,541 s over 10.7 MB, >= 2.46x worse than quadratic; the replacement 0.10 s). G's finding:
 every post cycle drops the 101 s tree census pass (the gate is entry + subject); channel-file rotation = an owner
 question, noted. Two records to amend by dated block: DESIGN-h10-dispatch-driver.md s6 (C2); the plan's makespan
-lines at the next regeneration.]
+lines at the next regeneration.
+encoding/json SIZED by C1 (cf47785d9): the publicization rule runs one scope per call and never sees the internal
+test file's exported consumer of a production type -> RULED: a production type's accessibility MAY be widened by its
+package's internal-test exported members (Go's package includes them; C1's control keeps it narrow); C1 measures the
+population; an i7 sub-agent cuts the converter seat when the box frees (queued behind the host apply + the ecdh
+seat). The post-cycle magnitude is the BOX (C1 12 s, G 177 s); the tree-pass drop stands. i9's census self-match
+half banked (the anchor-qualified predicate + both controls).]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
