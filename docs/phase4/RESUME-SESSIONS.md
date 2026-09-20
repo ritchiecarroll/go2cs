@@ -696,8 +696,12 @@ seeded-and-emitted control, a commit on top of bdc016826a; (c) the H8 amendment 
 (true at exclusive only) and the per-file-tag-selection derivation lesson; (d) the build-tag axis (purego,
 math_big_pure_go) added to H8 section (d), cut AFTER G's linux/darwin readings so the ref G executes from is not churned.
 (a) DONE 2026-09-20 at 411d2ad4e (P1 refuted, P2 split -- a relocation nets zero, P3 refuted both, P4 honoured, P5 a
-finding by its wording, ruled not a defect; root cause: package-level derivation blind to per-file tag selection) -- (b) DONE at 04c7ca64ec (--emitted-only, the census's sentinel-mtime discriminator).
-DONE earlier: the correction at 4f24f7d39e (docs only, off master; ACCEPTED as the H9 docs seat). Idle by ruling until
+finding by its wording, ruled not a defect; root cause: package-level derivation blind to per-file tag selection) -- (b) DONE at 04c7ca64ec (--emitted-only, the census's sentinel-mtime discriminator); (c) + (d) DONE at
+0a993ec908 (4c7147a86: the measured wording, both corroboration traps at the site, the build-tag axis in section (d)). The
+comparand branch tip 0a993ec908 = the H8 docs seat. ASSIGNED (COORD, after 4c7147a86): the LINUX byte-identity pair on
+this box -- two throwaway clones of 46307b4704, a linux converter build named by sha, E2 three-target merged vs E1
+single-target linux/amd64, views with h8-comparand.sh at 0a993ec908, counts + tree hashes posted, both sides non-empty;
+purge the clones after. DONE earlier: the correction at 4f24f7d39e (docs only, off master; ACCEPTED as the H9 docs seat). Idle by ruling until
 G's outgoing census side-by-side, scored against your P1-P5. ALSO: the second read of G's root-attribution overlay
 a819ba7417 (VERSION + LICENSE byte-compared against the 1.24.13 toolchain root on your box). OWED (COORD re-ruling on i9's
 CNR dc9eb368c): ONE commit on top
@@ -783,7 +787,7 @@ the differing set is exactly VERSION and LICENSE); push-then-announce. DONE 2026
 a819ba7417 on 0f97dcc8db, +4/-4, prediction MET, pinned by COORD (C2 reads; i9 applies after H9). The H8 side-by-side is
 DONE (cb1fa651a: outgoing 1476/79/87/277 of 1919 vs incoming 1631/83/93/283 of 2090; marker gate zero x6; arm (b) PASS on
 windows, 3342 = 3342, equal tree hashes; pkgdelta +40 per target MET). RULED (COORD): the rung rests on all three flavours.
-NEXT for G: (1) arm (b) on linux and darwin (run the views on the WSL arm); (2) the H8 record under docs/phase4/ (both
+NEXT for G: (1) arm (b) on DARWIN first (C2 takes linux in parallel; a second linux reading from G is a derivation, not waste); (2) the H8 record under docs/phase4/ (both
 manifests' class tables, P1-P5 as scored, the 38 -> 47 -> 51 decomposition, per-target movement) on a branch you name;
 (3) after COORD closes H9: the twelve successor packages through the real pipeline on the banking platform at the version
 tip (all four overrides), per row the verdict count and the diverged set by name -- the first H10 rows; a reading, no bank. (3) The follow-up commit on
