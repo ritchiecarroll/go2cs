@@ -716,3 +716,4 @@ Each lane runs in its own Claude Code session on its own host with its own local
 - 10:54: THE DRIVER SEAT LANDED on master (5e03f102af, the hoist included) + C1's door-scope fix (306950be71); the wrapper ref is version-based -> i9 re-cuts it as a one-file ref off master.
 - 10:58: the ecdh seat cut and at origin (b5d3687634; the premise refuted -- the recompile model's two-source merge; the row clean at build); G + C1 reads; the apply in the next batch.
 - 11:01: G's post tool landed -> MASTER a731c13594; batch 2's merges verified, the battery in its gates.
+- 11:06: the wrapper on master (8b076c8d69) + R's three post-tool commits -> MASTER 7f95f60e4f; the driver + wrapper both on master; the rehearsal after batch 2.

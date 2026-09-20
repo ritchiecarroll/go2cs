@@ -1148,6 +1148,10 @@ G's re-derived post tool 263f48a6c2 LANDED -> MASTER a731c13594 (~11:05; content
 inverted -- a leading colon in diff-tree's first column -- owned on the channel). BATCH 2 interim: the three merges
 verified in ab2 (58dea330b7 / 219f5f873b / 7e7f05f63a; 0 deletions; 12/12 EQUAL on R's merge by supersession);
 census green on 15 files; the battery running its gates after the ecdh seat's run finished.
+~11:10: THE WRAPPER ON MASTER (i9's one-file re-cut f30c90d109 -> 8b076c8d69; the fifteenth's blob 5d07919168 --
+COORD's ruling had named the file's sha256 where a blob id was needed; i9 verified four ways) + R's post-tool
+commits 8-10 (8d24c655d0: the dry run no longer claims the bar; --mark-read; the third vacuity shape) -> MASTER
+7f95f60e4f. THE DRIVER AND THE WRAPPER ARE BOTH ON MASTER -> the rehearsal starts on the i7 when batch 2 pushes.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
