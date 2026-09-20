@@ -1114,6 +1114,11 @@ Go range declaration emitted twice -- the hoisted box + the range variable) fold
 C2 refs LANDED -> MASTER c22f9b8e74.
 R's abort fix + arm LANDED -> MASTER a5b110b47e (~10:35). i9's census-dir check EQUAL. Running on the i7: APPLY
 BATCH 2 (ab2), the ecdh seat (ec1), the driver's Core-edition arm (ca1).
+~10:40: C1's H10 tree-precondition line (e0fe113bc6: ruling (4) moved from the provenance comment into the
+procedure) + R's scantemp fix (61f3a43fc3: the census fold temp had written into the caller's directory) LANDED ->
+MASTER 7674ee7f4d. DOCTRINE (three lanes in one hour): a door is a property of a PATH; a tool's doors cover every
+path it writes OR fetches into, enumerated from the script; C1's tool force-fetches origin/master into the main
+checkout above its dry-run gate -> C1 fixes at idle. C1's runbook read of the wrapper's fifteenth SOUND.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
