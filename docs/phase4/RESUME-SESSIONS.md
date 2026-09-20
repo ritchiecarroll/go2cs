@@ -438,6 +438,15 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     C2 reads the diff; the i7 Core-edition arm runs as a sub-agent (no build); G STOPS its list NOW and relaunches the
     remaining rows on the seventh at clearance; i9 runs the warn-only arm (bufio on a license-less scratch root) after
     the push, its two-row residue arm BEFORE its TSV push (reading asked), then the TSV ref + evidence commit.
+    THE CORE ARM ON THE SEVENTH GREEN (i7 sub-agent, ~05:00): parse 0/0 both editions; self-test 5/5 both (needs six
+    dummy mandatory params -- a defect banked post-leg, with the 'every guard' doc claim); the red refuses both; six
+    static reads confirmed. C2's completed read GREEN (2bbfcc44; cite shardmap.py's refusal STRINGS not line numbers,
+    post-leg). THE EIGHTH (i9 2d266663, ~05:05): 0ff8d5f8d7 on 3af7d536b0 (+54/-9): ordinal Dictionary maps with a
+    count-mismatch throw; Core reads via System.Text.Json (no -AsHashtable: PowerShell hashtables fold case); arm E
+    red on the seventh's @{} (43/51), green 47/52/15. RULED: G RELAUNCHES ONCE ON THE EIGHTH after i9's push + C2's
+    delta read + the i7 Core arm re-run (the same sub-agent, waiting for the push); the split stated against the
+    SIXTH and the EIGHTH. The parse hypothesis is DEAD on G's own document (0.37 s / 0.19 s); the whole cost is the
+    results-tail read.
     ABORT COST RULED (COORD after C2 ff7a229f): the basis models the roster AS IT IS at the leg's tip -- BUILD rows at
     their abort cost, no word filter; the plan regenerates when a seat lands and the driver re-measures; two lines on
     C2's ref with the roster seat (the contract-check comment at the word read; an output line naming the abort-costed
