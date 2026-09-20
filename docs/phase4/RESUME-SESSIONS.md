@@ -498,6 +498,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     at the roster seat's re-derivation; the identity = banked + candidates); C2 cuts it as one commit on its ref
     (the eighth there), landing with the roster seat. RULE 3 (C1 f22c82d7, RULED YES): the ipv4 doc-constant admit
     is a SHAPE admit and is consulted in BOTH census modes like rule 5 -- C1 cuts one commit, COORD lands.
+    i9's EVIDENCE RECORDS (e4d4936f): neither censuses clean -- net's RECORD carries the account in build-temp paths
+    (25 occurrences), net/http's refuses on ipv4 alone (all loopback). RULED (COORD after e4d4936f): share-by-hash
+    REFUSED (the assembler's container cannot read the share) -> net/http commits UNALTERED after rule 3 lands; net
+    and crypto/tls commit a VERDICT PROJECTION (the record minus its free-text fields by a stated expression, the
+    full record's sha256 as provenance; a private quad inside a test name redacted by REDACTED-PRIVATE-ADDRESS).
+    C2's LC_ALL=C discriminator: i9 runs it once (verdicts locale-invariant on the self-test).
     ABORT COST RULED (COORD after C2 ff7a229f): the basis models the roster AS IT IS at the leg's tip -- BUILD rows at
     their abort cost, no word filter; the plan regenerates when a seat lands and the driver re-measures; two lines on
     C2's ref with the roster seat (the contract-check comment at the word read; an output line naming the abort-costed
