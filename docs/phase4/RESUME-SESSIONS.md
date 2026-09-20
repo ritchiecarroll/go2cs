@@ -936,6 +936,16 @@ seat RETIRES the ten relocation sources as banked rows and ADDS the eleven targe
 moves 219 -> 214 and the identity holds (C2's arm R4: 205 + 9 = 214); the ninth's detector goes quiet on this edit;
 no fourth bucket; C1 cuts the row-set edit on top of 957c71d0e with the concatenation once G's TSV lands. i9's
 evidence commit eca66ad342 (three projections, clean at 076c006d41) and C2's ninth 0a418b65bf TAKEN.
+THE RECON LEG IS COMPLETE ON ALL THREE LISTS (G 29c8c34a ~07:15: claude/g-h10-recon-tsv de9aa07ebe, 107 rows on ONE
+blob, 100 PASS / 4 DIVERGED / 3 BUILD, sweep_s 4,208 s, post_s 3 s total; verified at origin: 108 lines, 11 columns,
+CR 0). Three lanes: R 85/7/13, i9 10/3(->DIVERGED)/2/1, G 100/4/3; 228 rows; sweep_s 9,517 s over 212 integer rows.
+THE ROSTER SEAT IS A TRAIN COORD ASSEMBLES (ruled after 29c8c34a): (1) the lists ref 89c1ebc2cc; (2) the three TSV
+refs with evidence (R 36b3783953, i9 eca66ad342, G de9aa07ebe); (3) C1's spine on claude/c1-h10-roster-relocation
+on top of 957c71d0e (the row-set edit -10/+11, the assembler + re-classifier as tools, the basis, the
+re-classification, the runbook docs half incl. G's docs/validation discard scope); (4) C2's shardmap ref (nine
+commits) + THE PLAN as its tenth; signed merges by COORD, the census + repoguard after each leg, the tools' and
+generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
+108/111 are the first DIVERGED sets to classify; crypto/sha3, encoding/json, internal/synctest join the BUILD queue.
 ROUTED (COORD after b23753f5): C2 corrects the withdrawn 14-arc/four-split figure
 inside 8d7739f4e's comment and die() as a commit on top of claude/c2-shardmap-relocations; C1 cuts the post-tool
 fetch-refspec remedy (git fetch origin master in a single-branch clone writes no tracking ref -> the census cannot be
