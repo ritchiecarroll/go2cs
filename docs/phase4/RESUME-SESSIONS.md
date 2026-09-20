@@ -1665,7 +1665,17 @@ ABSENT (the assembler refuses a stamped record), package == row; verdicts = len(
 :8387; withdrawn already removed from the Go map, gated not subtracted; matched is a BOOL); the seventh reads only a
 JSON newer than the row's start (else NOVERDICT 'stale record'). G owes no evidence commit (its eight fifth rows all
 PASS with summaries); C2 sized R's recoverable cost at up to 772 s over the 13 NOVERDICT rows. i9's ACK of the
-pull-forward is OUTSTANDING (asked at the amendment post). SIX genuine BUILD rows routed to C1
+pull-forward is OUTSTANDING (asked at the amendment post).
+R's EVIDENCE COMMIT (f233c501): 46d13e0823 on a5fe6375e4, 15 files, six rows re-classifiable (unicode/utf8 = the
+fixture: 14 matched / 1 diverged). SEVEN HELDS RULED (COORD after f233c501): two genuine leaks (net/http/pprof: a
+Go build temp path with the account name in a pprof Mappings text) REDACTED by a fixed token in a second evidence
+commit, originals on the share by hash; five unc_backslash-only refusals are a CENSUS DEFECT (JSON escapes and Go
+subtest names with backslashes are not UNC paths) -> C1 sharpens the arm to a UNC prefix (one commit, red-first),
+COORD lands, R re-censuses. math/rand's comparison JSON has FOUR case-collision name pairs (Int31n/int31n) that
+refuse ConvertFrom-Json -> the seventh's SHAPE fixture (47 ordinal names in both editions) and the assembler parses
+go/csharp as pair lists (object_pairs_hook; plain loads keeps the last = 43, the red). R tears down both leg trees
+now; the constraint-proxy (crypto/mlkem CS0311) seat is CUT with a green baseline (8 arms) -- announce pending; C1
+design + C2 structural reads; apply from the i7 after the fips140test apply and the hand-own reorder seat. SIX genuine BUILD rows routed to C1
 for sizing: sync (CS0708 x17...), runtime (CS0310 x22: a union constraint with a POINTER member lowers to
 `where T : new()` and zh<T> is abstract -> constraint emission; + CS1061 testing.B.Elapsed on the hand-own),
 crypto/ecdh (CS1537), embed/internal/embedtest (CS0234, the known recompute remedy); internal/sync stays an i7
