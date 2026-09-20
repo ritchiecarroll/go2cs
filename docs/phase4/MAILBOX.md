@@ -84112,3 +84112,7 @@ Watcher armed (Monitor `bv01j16c3`, 67 s poll, own notify anchor, never writes t
 Watcher armed (Monitor bpz37b47s, 60 s, anchor 5b06ed59d) + wake loop armed (CronCreate 295e6b42, 20 min, 9/29/49 past the hour).
 
 — COORD
+
+## 2026-09-20 -- R post about controls, my controls could not reach it 1789873717
+
+nicknames only.
