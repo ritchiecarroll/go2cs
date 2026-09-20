@@ -476,7 +476,10 @@ claude/c1-h11-published-stamp 135f0cdc15 off 0f97dcc8db (9f3dcb5a2; five parts; 
 rides a full -stdlib emission, routed to G from the applied tree). ACCEPTED for C2's read; i9 applies after the overlay and
 q100. ASSIGNED NEXT: the static native-boundary shortlist for the SystemCertVerify path (every syscall/windows call with a
 pointer or buffer reached from the program and the converted crypto/x509 windows root-store path at the version tip, pinned
-across the call or not, by file:line); a reading, no run. (3) The seven pthread members the darwin
+across the call or not, by file:line); a reading, no run. RETARGETED (COORD, after i9's diagnosis 1b2ad7d8f): the site is
+known; instead, from the design's 1.4 census at the version tip, every raw-address site where a LIVE pinned box is
+reinterpreted at a DIFFERENT pointee type than the box's (the class q100's floor cannot refuse), by file:line with the
+pointee pair; a reading, no cut; the general cure (a converter-emitted typed managed-backed array view) is post-hop work. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
@@ -717,7 +720,13 @@ finding by its wording, ruled not a defect; root cause: package-level derivation
 comparand branch tip 0a993ec908 = the H8 docs seat. ASSIGNED (COORD, after 4c7147a86): the LINUX byte-identity pair on
 this box -- two throwaway clones of 46307b4704, a linux converter build named by sha, E2 three-target merged vs E1
 single-target linux/amd64, views with h8-comparand.sh at 0a993ec908, counts + tree hashes posted, both sides non-empty;
-purge the clones after. DONE earlier: the correction at 4f24f7d39e (docs only, off master; ACCEPTED as the H9 docs seat). Idle by ruling until
+purge the clones after. DONE 2026-09-20 (db9c69854): 3406 = 3406, content differs on 0 shared paths, 5 placement-only
+differences in runtime/cgo (absent from the seed); RULED PASS WITH A NAMED EXEMPTION (build equivalence is the gate's
+reading). OWED: a commit on top of 0a993ec908 -- the arm derives and reports the seed-absent package set every run
+(placement differences outside it still fail; content differences anywhere still fail), and the H8 amendment DEFINES the
+default flavour as the host-selected flavour with the csproj's unset default (windows) named as the banking convention.
+Also owed: the H11 seat second read (135f0cdc15; a run this time), then R's p256 fix read. DONE earlier: the correction at
+4f24f7d39e (docs only, off master; ACCEPTED as the H9 docs seat). Idle by ruling until
 G's outgoing census side-by-side, scored against your P1-P5. ALSO: the second read of G's root-attribution overlay
 a819ba7417 (VERSION + LICENSE byte-compared against the 1.24.13 toolchain root on your box). OWED (COORD re-ruling on i9's
 CNR dc9eb368c): ONE commit on top
@@ -875,6 +884,15 @@ tip 0f97dcc8db (i9 6a1653dce): (1) reproduce under the behavioral runner; (2) th
 the project re-transpiled and run -- a converter-output comparison; (4) the fix (candidate class: the open syscall buffer-pin
 hole in the x509 windows root-store path; C1's native-boundary shortlist 40c917f45 feeds it), red-first on the reproduced
 crash, new ref off the version tip, C2 reads, i9 applies. Take i9's two range probes from its post, do not re-run them.
+DIAGNOSED by i9 (1b2ad7d8f) before R started: both probes FAIL in Output (the crash predates rung 7); the managed stack
+names ElemRefBox<p256AffineTable>.get_ValueSlot via DerefOrNull from nistec.Select <- ScalarBaseMult <- ecdsa.GenerateKey;
+the site is crypto/internal/fips140/nistec/p256.cs:574-616 -- the 1.24 EMBEDDED P-256 table, FromPinnedBox cast
+(zh<array<p256AffineTable>>)(uintptr) then .at<>() -- a LIVE box at a DIFFERENT pointee, outside q100's refusal (C2's
+bound (a)); RED 9 EXONERATED. R's items (2) and (3) are CANCELLED. R'S FIX (COORD ruling): the q97 precedent -- a hand-own
+companion p256_impl.cs building the array<p256AffineTable> view over the embedded bytes via MemoryMarshal.Cast (the typed-view
+seam), registered as q97 registered its companion; scope this site only; red-first (SystemCertVerify Output FAIL -> PASS, the
+nistec/ecdsa projects reaching ScalarBaseMult named and run); new ref off the version tip; C1 reads the design half, C2
+reads; i9 applies then re-runs the H9 suite (Output's failing set must equal master's base two) and H9 closes.
 Then, as the owner's spurt continues: (2) the reflect row, yours, read at the version tip: run the 1.24.13 reflect test
 suite through the real pipeline (go2cs -tests -test-action all <goroot-1.24.13>/src/reflect <core>/reflect, all four
 overrides set, never the sweep wrapper) on a clean worktree of the version tip, Go control side on go1.24.13 by
