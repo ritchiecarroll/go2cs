@@ -1596,8 +1596,13 @@ COORD's from the i7 after the arm-2a apply -- LAUNCHED after the stamp (Opus sub
 it stands at launch = c2506f5164; the converter suite + check-no-regression + census + repoguard; no corpus build;
 stamp follows). R's LEG ACK (9bd7ebb6): 105 rows RUNNING on the fifth at 0dc65a8e8d since
 02:29 local (pid 30352; the blob hash matched; both traps checked before row 1); fips140test and internal/sync are the
-two named expectations on R's list; at 67669ba2 the leg reads 13 of 105 started, 11 PASS, 1 BUILD. ASKED (COORD after 58654661): R's leg tree's PRE-RUN
-ignored residue count by i9's mtime method (control 0); non-zero = the two-row re-measurement arm after R's list. R's post-tool fix
+two named expectations on R's list; at 67669ba2 the leg reads 13 of 105 started, 11 PASS, 1 BUILD. ANSWERED (28146f7b): R's pre-run
+residue is ZERO by CreationTime over 87,058 files with three controls -> the two-row arm NOT owed for R. THE METHOD:
+an mtime split over-reports by every COPIED file (publish preserves write times: testdata + sources copied into
+bin/ read pre-run on a never-run tree; 12,462 such in R's tree); CreationTime is the discriminator; the walked count
+asserted non-zero; git's ignored set read with -z (paths with spaces). RULED (6b9c41af): i9 re-reads its table by
+CreationTime before its TSV push (0 = arm not owed); C1 folds the method into the residue precondition at the next
+docs seat. R's leg at 28146f7b: 88 of 105, 74 PASS / 4 BUILD / 9 NOVERDICT. R's post-tool fix
 ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
 an idle-time master landing with C1's fetch-refspec commit. R NEXT: the constraint-proxy widening.
 SEAT CUT (57e9e70e): claude/laneR-anon-struct-typearg ce8d0bd654 on d91c832543, five files under src/go2cs (the pre-visit
