@@ -462,8 +462,11 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     CONVERT/BUILD unreachable; crypto/mlkem killed the leg at row 4 twice). FOURTH COMMIT 39979aa218 (2af7004f: the call
     under Continue with 2>&1 kept; the A/B on internal/sync produced the first BUILD word) TAKEN; a FIFTH rides before
     the relaunch (wall_s = the observed integer wall on every row; diverged = n/a where no artifact; the -Out doc; the
-    UNSCHEDULED sentence corrected). G and R HOLD until C2 reads the two together and the i7 parses/self-tests; then all
-    three launch on that blob, i9 from row 1 (its three earlier launches discarded). APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
+    UNSCHEDULED sentence corrected) + C2's two findings from its read of the fourth (1e2adb3d: the per-row rc reset with a
+    non-integer rc refused; the two preflight go-version calls at :225/:228 under the lowered preference, :355/:356 under
+    the GitTry shape) = SIX items, one arm each (a forced-short TIMEOUT row; a planted throw before the rc read; a
+    wrong-release GOROOT denied by name; the BUILD arm re-run). G and R HOLD until C2 reads the two together and the i7
+    parses/self-tests; then all three launch on that blob, i9 from row 1 (its three earlier launches discarded). APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
     at the act; both reads done, CLEARED); (2) the fips140test seat claude/coord-fips140test-testonly ce8fc43a87 on
     93feb8df2b (cut by an i7 sub-agent: three sites gated on productionClassEmitted; suite rc 0; the row 13 CS0234 -> 0)
     after C1's design + C2's structural reads -- no source overlap with R's seat, both add a projitems line (the
@@ -777,7 +780,10 @@ banked basis at the roster seat when the legs report. CONTRACT RULED (75673b41; 
 430ad499 and measured net's wall unconsumed): the generator dies on a non-integer sweep_s, so the BANKED basis EXCLUDES
 UNMEASURED rows (the filter lives in C1's concatenation and is STATED in the roster-seat commit); net alone banks
 sweep_s := wall_s whatever its word, so the hand-stopped drop fires. The assert-the-battery form for the post tools
-(C1's proposal) ruled the durable one, each lane at idle. DONE (ba10c91a):
+(C1's proposal) ruled the durable one, each lane at idle. ASSEMBLER BUILT (8add449d): five arms firing on a synthetic
+fixture (net substituted from wall_s and dropped by name; UNMEASURED rows leave by name; a duplicate folds to the
+larger; header identity; CR); the generator's :280 independent of the filter; re-run against the real blob when the
+fifth lands; held for the roster seat with relocations.tsv. DONE (ba10c91a):
 claude/c1-h10-recon-lists 89c1ebc2cc off master, four files +564, derived from the tree's own sources (the census
 Appendix + nistec; $longTimeouts + BIG_ROWS = reserved 14; the windows-only 2; LPT over the 1.23 windows block) with three
 reproduced intermediates and a partition control that fires; nistec to G by routing (header). THE LAUNCH'S LISTS. The docs seat now carries
