@@ -423,6 +423,10 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     warn-only-row arm; red-first timed in MINUTES against G's real 4.77 MB comparison document shared by sha256; the
     i7 Core arm (sub-agent) + C2's read; then G relaunches its REMAINING rows on the seventh (the in-flight row re-run,
     the blob split stated in the completion post); R and i9 finish on the fifth unless a row of theirs hits G's ratio.
+    BASIS RULED (a) (COORD after C1 9f5e7a38): the basis carries the FOUR named columns only; post_s dropped at the
+    concatenation (it lives in G's TSV at its ref and G's completion post); the assembler's guard = each header carries
+    the four columns BY NAME (cut with the concatenation); the blob split carried from the completion posts; a row from
+    both of G's launches NAMED as a cross-blob duplicate.
     WRAPPER CUT (f2eae7c85): claude/i9-h10-recon-wrapper 43aba50262 on 93feb8df2b, src/run-h10-recon.ps1 +321 (LF, 100755,
     census clean, signed). Two defects caught by the one-row dry run: the converter SPAWNS go from PATH (the pin gate had
     asserted the absolute path -- green about the wrong object; now three agreeing derivations: PATH-resolved go version
@@ -470,7 +474,7 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     NEXT: the third commit (announce-then-push); C2 reads its diff; the i7 Core arm re-runs on the FINAL tip after the
     fips140test seat's conversions finish (never two conversions on one box); then LAUNCH. The third commit is AT
     ORIGIN (ddc205a1ee); the i7 Core re-run launched on it (sub-agent). H10 RECON LEG LAUNCHED 2026-09-20 (COORD
-    a82eb75b1) at VERSION TIP 2e4487f4a6 (0dc65a8e8d = the leg's tip): wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
+    a82eb75b1) at VERSION TIP 7ff4694b22 (0dc65a8e8d = the leg's tip): wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
     throwaway detached worktrees, one process per list, one attempt per row, TSVs pushed as new per-lane refs
     (LANE-h10-recon-tsv) when a list completes with the word histogram and the named CONVERT/BUILD/DIVERGED/NOVERDICT
     rows; expected words for the known rows stated (time CONVERT, reflect NOVERDICT, fips140test/mlkem/internal-sync
@@ -1265,7 +1269,9 @@ i7 as a second commit on the ref -- CUT c6524dc53b on 76efbdf3a6 (the ordering t
 the identical assignment survives in convertTestVariants; green restored byte-identical; the consumer count by
 predicate; each commit carries its author model's trailer), ANNOUNCED (fcdd9503e) then pushed; the seat CLEARED on
 both reads. THE APPLY (both commits onto the version tip after R's time apply lands; converter gate + go2cs-stdlib.slnx
-+ census + repoguard; testConversion.go composition by throwaway merge) launches on the i7 at the time stamp.
++ census + repoguard; testConversion.go composition by throwaway merge) LAUNCHED on the i7 at the time stamp (Opus
+sub-agent, worktree ap3, onto 7ff4694b22; the ROW as the prediction test after the merge commit and before the push:
+COMPILE clean, ~2215/52); stamp follows.
 FIRST READ DONE (c0c2063e at 43aba50262: spec met, the parse well controlled; the classifier finding + diverged-lines
 note -> both in i9's second commit). RE-READ at the new tip when announced. ALSO ASSIGNED (COORD after dfdcbc65): the
 crypto/mlkem DESIGN READ -- (a) the generator making zh<T> satisfy every interface *T's method set satisfies vs (b) the
@@ -1444,7 +1450,7 @@ with the population asserted; made to fail two ways firing :48 and :70; one go t
 CLEARED for i9's apply on 4df427fdcb (COORD after 6acab84c); its stamp fixes the leg's tip. APPLIED (03a5cbbf) at
 0dc65a8e8d and STAMPED by COORD (tree f236cdeed2, parents 4df427fdcb + dd376e3f12, 3 files +147/-12, testConversion.go
 and the projitems composed exactly as a clean merge composes them -- verified by a throwaway merge on the i7; corpus 0;
-signed) -- VERSION TIP 2e4487f4a6 (0dc65a8e8d = the leg's tip); THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
+signed) -- VERSION TIP 7ff4694b22 (0dc65a8e8d = the leg's tip); THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
 measured a write target; four arms made to fail on the shipped bytes) LANDED on master 70bce870c2 with C1's docs seat.
 G runs its list (107) at 0dc65a8e8d. G's floor-1 finding banked fleet-wide:
 a process census by name pattern is a dead counter for a renamed converter -- count by executable path with a positive
@@ -1607,8 +1613,11 @@ delta (cb723e05: SOUND -- a lifetime gap across two variants; the carry seeds re
 outside resetPackageState; the order hazard closed by the literal [internal, external] slice at :1088) and C2's
 second-box A/B (339c3d48: rc 1 -> 0, 29 .cs both arms, the bare name binds, no second crossing site): the apply is
 COORD's from the i7 after the arm-2a apply -- LAUNCHED after the stamp (Opus sub-agent, worktree ap2, the ref's tip as
-it stands at launch = c2506f5164; the converter suite + check-no-regression + census + repoguard; no corpus build;
-stamp follows). R's LEG ACK (9bd7ebb6): 105 rows RUNNING on the fifth at 0dc65a8e8d since
+it stands at launch = c2506f5164; the converter suite + check-no-regression + census + repoguard; no corpus build)
+-- APPLIED and STAMPED at 7ff4694b22 (parents 2e4487f4a6 + c2506f5164; five blobs EQUAL, projitems + testConversion.go
+verified as unions both ways; CNR NO REGRESSION over 729 behavioral packages; suite ok after a deadline kill under
+contention -> ONE battery at a time on the i7, explicit -timeout on every go test gate). VERSION TIP 7ff4694b22.
+R's LEG ACK (9bd7ebb6): 105 rows RUNNING on the fifth at 0dc65a8e8d since
 02:29 local (pid 30352; the blob hash matched; both traps checked before row 1); fips140test and internal/sync are the
 two named expectations on R's list; at 67669ba2 the leg reads 13 of 105 started, 11 PASS, 1 BUILD. ANSWERED (28146f7b): R's pre-run
 residue is ZERO by CreationTime over 87,058 files with three controls -> the two-row arm NOT owed for R. THE METHOD:
