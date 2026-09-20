@@ -1685,9 +1685,11 @@ bin/ read pre-run on a never-run tree; 12,462 such in R's tree); CreationTime is
 asserted non-zero; git's ignored set read with -z (paths with spaces). RULED (6b9c41af): i9 re-reads its table by
 CreationTime before its TSV push (0 = arm not owed); C1 folds the method into the residue precondition at the next
 docs seat. R's leg at fcb75ab3: 90 of 105, 76 PASS / 4 BUILD / 9 NOVERDICT (none a deadline artifact; two are HOST readings --
-internal/coverage/cfile + internal/trace: the Go ORACLE refuses internal/... imports through a link-staged fixture
-tree on R-LAPTOP, no symlink privilege -> OWNER HAND: Developer Mode on R-LAPTOP; RULED 8d9609e9: i9 re-runs both
-rows on its box after its list). R's CORRECTION (fcb75ab3) taken: the runbook sentence is i9's -- mtime is unrelated
+internal/coverage/cfile + internal/trace: the converted testing host's link-staged fixture tree importing internal/...
+packages is refused by the Go toolchain's internal-package rule -- REPRODUCED on i9's box (ee5e830e: 16/16 and 92/92,
+the same conversion-blocked record) -> NOT a host setting: HOST DEBT, one class, two rows (PackageAncestry.
+StageFixtureLinks); the R-LAPTOP Developer-Mode owner item RETIRED; the rows stay NOVERDICT by cause; an i7 sizing
+queued after the two seats cutting). R's CORRECTION (fcb75ab3) taken: the runbook sentence is i9's -- mtime is unrelated
 to provenance in either direction (over in R's tree, under in five of i9's seven packages); the remedy unchanged.
 i9 RE-TOOK its table (0bb72afd): genuine residue in six of seven packages -> its two-row arm STILL OWED; go/types
 (0 genuine) becomes the CONTROL beside archive/zip; i9's net row hangs in its test host (TIMEOUT expected at 40 m).
@@ -1785,7 +1787,13 @@ the widening as cut; the row past COMPILE as the cross-check; PlainConstraintPro
 unmodified generator un-inverted); C1 design + C2 structural; the apply from the i7 after the reorder seat (golib +
 converter: go2cs.slnx, GolibTests, CNR, the row). WARN-ONLY ARM ROW (C2 b8195216): internal/saferio (a generic
 unsafe.Sizeof never folds -> the verify-usage warning) -- i9 runs it through the eighth after its TSV/evidence, the
-fourth blob as the red. SIX genuine BUILD rows routed to C1
+fourth blob as the red. R's THREE PARTS CUT (cf3a2d76): the coherent state reached; widenResult<T,TWide> beside
+widen<A,T,TWide> (two shapes the row reaches; the niladic form cannot be a widen overload); the Implements test
+closes over the TYPE ARGUMENTS and only rendering over the projection (no return covariance in Go). A FOURTH PART
+RULED: the generator mints an adapter for a generic interface over a PROJECTED constraint (DecapsulationKey768,
+decapsulationKey<encapsulationKey>), its identifier from bare names via the sync seat's naming helper -- R cuts it
+after that helper lands (meanwhile the suite on the three parts + the GolibTests arm); C1/C2 reads; the apply after
+the reorder and sync applies (go2cs.slnx, GolibTests, stdlib, CNR, the row). SIX genuine BUILD rows routed to C1
 for sizing: sync (CS0708 x17...), runtime (CS0310 x22: a union constraint with a POINTER member lowers to
 `where T : new()` and zh<T> is abstract -> constraint emission; + CS1061 testing.B.Elapsed on the hand-own),
 crypto/ecdh (CS1537), embed/internal/embedtest (CS0234, the known recompute remedy); internal/sync stays an i7
