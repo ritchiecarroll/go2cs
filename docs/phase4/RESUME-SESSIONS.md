@@ -490,7 +490,7 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     NEXT: the third commit (announce-then-push); C2 reads its diff; the i7 Core arm re-runs on the FINAL tip after the
     fips140test seat's conversions finish (never two conversions on one box); then LAUNCH. The third commit is AT
     ORIGIN (ddc205a1ee); the i7 Core re-run launched on it (sub-agent). H10 RECON LEG LAUNCHED 2026-09-20 (COORD
-    a82eb75b1) at VERSION TIP 7ff4694b22 (0dc65a8e8d = the leg's tip): wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
+    a82eb75b1) at VERSION TIP 4408dacd3e (0dc65a8e8d = the leg's tip): wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
     throwaway detached worktrees, one process per list, one attempt per row, TSVs pushed as new per-lane refs
     (LANE-h10-recon-tsv) when a list completes with the word histogram and the named CONVERT/BUILD/DIVERGED/NOVERDICT
     rows; expected words for the known rows stated (time CONVERT, reflect NOVERDICT, fips140test/mlkem/internal-sync
@@ -1287,7 +1287,11 @@ predicate; each commit carries its author model's trailer), ANNOUNCED (fcdd9503e
 both reads. THE APPLY (both commits onto the version tip after R's time apply lands; converter gate + go2cs-stdlib.slnx
 + census + repoguard; testConversion.go composition by throwaway merge) LAUNCHED on the i7 at the time stamp (Opus
 sub-agent, worktree ap3, onto 7ff4694b22; the ROW as the prediction test after the merge commit and before the push:
-COMPILE clean, ~2215/52); stamp follows.
+COMPILE clean, ~2215/52) -- APPLIED and STAMPED at 4408dacd3e (parents 7ff4694b22 + c6524dc53b; five blobs EQUAL,
+testConversion.go a verified three-way union; suite ok 454 s; CNR NO REGRESSION over 729; stdlib 344/344 0 errors;
+census 6/6; repoguard 6/6; the ROW prediction hit exactly: test-only, no ProjectReference to the absent production
+project, 2215 matched / 52 diverged). VERSION TIP 4408dacd3e. Banked: the i7's machine-scope GOROOT is the ambient Go
+and `go env GOROOT` prints it in PowerShell even with 1.24.13 first on PATH -- every PowerShell leg pins $env:GOROOT.
 FIRST READ DONE (c0c2063e at 43aba50262: spec met, the parse well controlled; the classifier finding + diverged-lines
 note -> both in i9's second commit). RE-READ at the new tip when announced. ALSO ASSIGNED (COORD after dfdcbc65): the
 crypto/mlkem DESIGN READ -- (a) the generator making zh<T> satisfy every interface *T's method set satisfies vs (b) the
@@ -1466,7 +1470,7 @@ with the population asserted; made to fail two ways firing :48 and :70; one go t
 CLEARED for i9's apply on 4df427fdcb (COORD after 6acab84c); its stamp fixes the leg's tip. APPLIED (03a5cbbf) at
 0dc65a8e8d and STAMPED by COORD (tree f236cdeed2, parents 4df427fdcb + dd376e3f12, 3 files +147/-12, testConversion.go
 and the projitems composed exactly as a clean merge composes them -- verified by a throwaway merge on the i7; corpus 0;
-signed) -- VERSION TIP 7ff4694b22 (0dc65a8e8d = the leg's tip); THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
+signed) -- VERSION TIP 4408dacd3e (0dc65a8e8d = the leg's tip); THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
 measured a write target; four arms made to fail on the shipped bytes) LANDED on master 70bce870c2 with C1's docs seat.
 G runs its list (107) at 0dc65a8e8d. G's floor-1 finding banked fleet-wide:
 a process census by name pattern is a dead counter for a renamed converter -- count by executable path with a positive
@@ -1658,7 +1662,9 @@ commit; `testing` = NOVERDICT/UNMEASURED/n-a by cause. C1 SIZED (22d7b1b9): the 
 did not fire because the fifth blob's :385 passes -test-allow-handown for testing, which short-circuits BEFORE the
 host check. RULED (c): the wrapper line is DELETED in the seventh (testing measured there on G's relaunch blob); a
 converter seat reorders requireConvertibleTestTarget (host check before the flag; the :5289-5295 control re-ruled to
-the host path; scratch-root census untouched) -- an i7 sub-agent after the fips140test apply, C1 reads. The basis
+the host path; scratch-root census untouched) -- LAUNCHED on the i7 after the fips stamp (Opus sub-agent, worktree
+ho1, new ref claude/coord-handown-reorder off 4408dacd3e; red-first on the rewritten control; suite + CNR + census +
+repoguard; push-then-announce), C1 reads when announced. The basis
 KEEPS all ten lane columns ("four named" = the generator's required set).
 R's RE-RUN DONE (3974183a): 7/7 on a fresh tree (census CLEAN), second TSV commit a5fe6375e4 on 6716955147 (+8/-8):
 85 PASS / 7 BUILD / 13 NOVERDICT, sweep_s 4,655 s over 92 rows; two real findings under the contamination: `unique`
