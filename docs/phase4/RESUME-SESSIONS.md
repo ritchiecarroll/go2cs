@@ -1696,8 +1696,12 @@ R's EVIDENCE COMMIT (f233c501): 46d13e0823 on a5fe6375e4, 15 files, six rows re-
 fixture: 14 matched / 1 diverged). SEVEN HELDS RULED (COORD after f233c501): two genuine leaks (net/http/pprof: a
 Go build temp path with the account name in a pprof Mappings text) REDACTED by a fixed token in a second evidence
 commit, originals on the share by hash; five unc_backslash-only refusals are a CENSUS DEFECT (JSON escapes and Go
-subtest names with backslashes are not UNC paths) -> C1 sharpens the arm to a UNC prefix (one commit, red-first),
-COORD lands, R re-censuses. math/rand's comparison JSON has FOUR case-collision name pairs (Int31n/int31n) that
+subtest names with backslashes are not UNC paths) -> RE-RULED (COORD after C1 1fcd18d1): the unc_ arms are ALREADY a
+minimal UNC prefix (the routed red could not fire); the seam is the PLACEHOLDER ADMIT withheld from unc_ arms against
+the census header's own contract (the Go guard applies it to every kind: 237 census refusals vs the guard's 0) ->
+(a) extend the admit to unc_ arms, the red a non-placeholder non-nickname host, the selftest gains the known negative;
+one commit C1 cuts, COORD lands; R first posts the five hosts' MEMBERSHIP only (placeholder/nickname/unclassified),
+then re-censuses and pushes the second evidence commit. math/rand's comparison JSON has FOUR case-collision name pairs (Int31n/int31n) that
 refuse ConvertFrom-Json -> the seventh's SHAPE fixture (47 ordinal names in both editions) and the assembler parses
 go/csharp as pair lists (object_pairs_hook; plain loads keeps the last = 43, the red). R tears down both leg trees
 now; the constraint-proxy (crypto/mlkem CS0311) seat is CUT with a green baseline (8 arms) -- announce pending; C1
