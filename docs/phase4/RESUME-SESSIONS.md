@@ -426,6 +426,17 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     Two more lines for the second commit: platform = GOOS/GOARCH by go env (it read Win32NT); DOTNET_ROOT set INSIDE a
     dotnet-tool pwsh (the i7's net8 apphost dies at launch with DOTNET_ROOT pointing at .NET 10). The Core re-run at the
     new tip is the i7's; then LAUNCH.
+    SECOND COMMIT ANNOUNCED (cf81fcf5, announce-then-push): 4739769503 on 43aba50262, +210/-13, signed -- the linked-worktree
+    guard (-ExpectTip, detached HEAD, scratch outside any tree), the evidence capture (comparison JSON + results tail +
+    summary survive a checkout), rc guards + TIMEOUT from the results tail + non-integer sweep_s, floors DERIVED from the
+    sweep's table at run time (13, 2 inherited by successors; <5 entries REFUSES), platform = go env GOOS/GOARCH (refuses
+    if unknown), the pwsh/DOTNET_ROOT header note. FIFTH DEFECT found implementing diverged: the disclosed list is PROSE,
+    so a name-membership test never matched and every disclosed row read DIVERGED -> diverged = the NET undisclosed
+    count matched on the disclosed entry's leading token, cross-checked against the artifact's matched flag. Lesson
+    banked: a guard whose success case is an error stream passes all its refusal controls (git answers 'not in a work
+    tree' on stderr -> a terminating error under strict preference; every native git call now reads the exit code).
+    NEXT: C2 re-reads at 4739769503; the i7 Core arm re-runs there AFTER the fips140test seat's conversions finish
+    (never two conversions on one box); then LAUNCH.
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
