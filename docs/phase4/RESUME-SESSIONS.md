@@ -1631,7 +1631,20 @@ tree on R-LAPTOP, no symlink privilege -> OWNER HAND: Developer Mode on R-LAPTOP
 rows on its box after its list). R's CORRECTION (fcb75ab3) taken: the runbook sentence is i9's -- mtime is unrelated
 to provenance in either direction (over in R's tree, under in five of i9's seven packages); the remedy unchanged.
 i9 RE-TOOK its table (0bb72afd): genuine residue in six of seven packages -> its two-row arm STILL OWED; go/types
-(0 genuine) becomes the CONTROL beside archive/zip; i9's net row hangs in its test host (TIMEOUT expected at 40 m). R's post-tool fix
+(0 genuine) becomes the CONTROL beside archive/zip; i9's net row hangs in its test host (TIMEOUT expected at 40 m).
+R's LEG COMPLETE (6209554e): 105/105 in 1 h 28 m, TSV at claude/laneR-h10-recon-tsv 6716955147 (106 lines, CR 0);
+80 PASS / 14 BUILD / 11 NOVERDICT; sweep_s 4,557 s over 94 integer rows. CONTAMINATION RULED (COORD after 6209554e):
+row 98 `testing` is WHOLLY HAND-OWNED and the pipeline converted it in place (19 new auto files beside the 10 marked;
+CS0111) so rows 98-105 are ONE event -> R re-runs the seven (testing/iotest, text/scanner, text/template, text/
+template/parse, unicode, unicode/utf8, unique) on a FRESH tree at 0dc65a8e8d on the fifth, pushes a SECOND TSV
+commit; `testing` = NOVERDICT/UNMEASURED/n-a by cause; EXCLUDED from every -tests list until a converter seat
+(refuse production emission for wholly hand-owned packages; C1 sizes first). SIX genuine BUILD rows routed to C1
+for sizing: sync (CS0708 x17...), runtime (CS0310 x22: a union constraint with a POINTER member lowers to
+`where T : new()` and zh<T> is abstract -> constraint emission; + CS1061 testing.B.Elapsed on the hand-own),
+crypto/ecdh (CS1537), embed/internal/embedtest (CS0234, the known recompute remedy); internal/sync stays an i7
+sub-agent. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
+console codepage mangles UTF-8 git paths -> [Console]::OutputEncoding = UTF8 into the runbook (C1). R NEXT: the
+seven, then crypto/mlkem CS0311, then the five reflect names at 7ff4694b22. R's post-tool fix
 ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
 an idle-time master landing with C1's fetch-refspec commit. R NEXT: the constraint-proxy widening.
 SEAT CUT (57e9e70e): claude/laneR-anon-struct-typearg ce8d0bd654 on d91c832543, five files under src/go2cs (the pre-visit
