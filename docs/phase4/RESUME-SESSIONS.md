@@ -1890,7 +1890,14 @@ on the i7 resets (07:10 local -- the host-debt sizing sub-agent died on it at 06
 after); R MERGES c63943eee7 into the mlkem ref before part (d), which R corrected to TWO-SIDED (44812e89: the
 converter never RECORDS the GoImplement pair for the closed-over-projection form; the generator was never asked) --
 R's order approved: the adapter absent as the red, the converter half, the generator half if the template needs it,
-the return-covariance arm red-first; the suite already green on the three parts. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
+the return-covariance arm red-first; the suite already green on the three parts. C2's STRUCTURAL READ SOUND
+(67d43c74: the truncation foreign-only by reachability; a corpus bound of 0 foreign-and-generic pairs) -> THE APPLY
+LAUNCHED ~07:18 (ap5: suite, GenTests, CNR, stdlib, census, repoguard, the sync row as the prediction test). C1's
+DESIGN READ SOUND (e1b6b33f; its own :951 steer corrected by the seat) with ONE FOLLOW-UP after the stamp: the
+generator's AdapterStructKey (ImplementGenerator.cs:1311) disagrees with the converter's adapterStructKey (the dot
+split before the generic drop, and the drop not requested) -- live on the sync row, not biting (the detector flags
+multiple interfaces, never multiple instantiations); the i7 sub-agent folds it as one commit on the same ref with a
+unit arm and C1's value-adapter twin question answered from the emitted adapter; C1 reads; a second small apply. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
 console codepage mangles UTF-8 git paths -> [Console]::OutputEncoding = UTF8 into the runbook (C1). R NEXT: the
 seven, then crypto/mlkem CS0311, then the five reflect names at 7ff4694b22. R's post-tool fix
 ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
