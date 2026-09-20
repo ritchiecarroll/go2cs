@@ -458,6 +458,10 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     never two-dot against a moved tip. fips140test x oracle overlap in testConversion.go trial-merged clean. NEXT applies
     on 9b89dfe46c: ce8fc43a87 (fips140test) then dd376e3f12 (oracle), each predicted, gated, stamped; then the leg's
     worktrees are cut at the tip carrying all three.
+    i7 CORE ARM GREEN on the final tip ddc205a1ee (sub-agent): parse 0/0, -SelfTest, both refusal controls fire by name,
+    dry run 13 floors (2 inherited), real row bufio PASS 80 windows/amd64 CR 0, the evidence survives the tree removal;
+    caveat: a dry run pre-warms a row (153 s cold vs 31 s warm) -- no dry run precedes a measured row in the leg. THE
+    WRAPPER IS LAUNCH-READY. LAUNCH after: i9's two applies (+ stamps) and C1's recon LISTS as files (a new ref).
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
@@ -730,7 +734,10 @@ different claims). RUNBOOK LINE OWED at the next docs seat: the PATH-resolved pi
 H10's preconditions table. ASSIGNED (COORD after R 57e9e70e): (1) the design read of R's seat ce8d0bd654 (the three-step
 resolution, the fourth flag site, the IndexExpr residual); (2) SIZE the reflect TestIsZero AccessViolation from the
 emission at CONVERT (setField's unsafe write, the golib door, the class -- the 25-site pinned-box class or another -- a
-fix shape, a red-first arm); no cut. SIZED (1a46bacb): all_test.go:1510 -- ARM 2a of the reverse door zh.cs:715: a
+fix shape, a red-first arm); no cut. ASSIGNED (COORD after a17af4af): THE RECON LISTS AS FILES on a new ref off master --
+docs/phase4/hopA-inputs/recon-lists/population.txt (228 by name) + i9.txt/g.txt/r.txt (16/107/105, the rule in a
+header comment, sums closing), LF, census-gated, push-then-announce; the LAUNCH names its tip. The docs seat now carries
+three items (+ the net/internal/cgotest clause at ValidatedTestPackages.md:567-569). SIZED (1a46bacb): all_test.go:1510 -- ARM 2a of the reverse door zh.cs:715: a
 reference-bearing pointee (func() fields -> delegate -> StorageKind None) registers an ORDER TOKEN, offset 0 keeps arm
 3's refusal false by construction, the NativeBox write through a non-address is an uncatchable AV; six sibling sites
 safe. FIX (a) golib-only: arm 2a refuses when the resolved box's storage kind is None (RuntimeErrorPanic, arm 3's
@@ -1047,6 +1054,8 @@ axis confirmation through the pipeline (d5cdd55ab), the wrapper pre-cut reads (f
 correction: verified premises do not transfer their standing to a synthesis -- BOARD line; 7c43a15e the converter's two
 Validated format strings). ASSIGNED: read C1's (d) aa66874ff7 as the H10 procedure amendment (order, host rule,
 preconditions table, per-row steps against the rulings cited) -> COORD lands; then read i9's recon wrapper.
+C1's DESIGN READ of the fips140test seat DONE (a17af4af: SOUND; the two ungated seeds at testConversion.go:3123/:3335
+reach only a MIXED test-only suite -- exactly one in the tree, embed/internal/embedtest, not converted; inert).
 DIFF READ at ddc205a1ee DONE (765aba82: clean; the map verified mechanically; NOVERDICT's two paths share one comment
 -- a clause on the next commit). NEXT: the Go unit arm of G's oracle seat dd376e3f12; the structural read of the
 fips140test seat ce8fc43a87 (the fixture + the suite on this box); then the TestIsZero golib seat when cut.
