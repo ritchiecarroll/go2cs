@@ -447,6 +447,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     delta read + the i7 Core arm re-run (the same sub-agent, waiting for the push); the split stated against the
     SIXTH and the EIGHTH. The parse hypothesis is DEAD on G's own document (0.37 s / 0.19 s); the whole cost is the
     results-tail read.
+    C2's DELTA READ of the eighth GREEN (b70531b9; the count-mismatch throw degrades to UNREAD/NOVERDICT; the guard's
+    comment overreach banked post-leg); G's clearance waits ONLY on the i7 Core arm re-run on the eighth (running).
+    ASSEMBLER RULED (COORD after C1 f100c5b9): header equality goes; each lane read BY NAME; the banked header is the
+    INTERSECTION (the ten), drops reported by name and lane, a missing named column REFUSES, no union-and-pad; the
+    basis's diverged column is REWRITTEN from the records by the re-classifier (0 for a clean PASS), the fifth's n/a
+    never carried for a row with a record; net's hang (3,792 s) never reaches the schedule (dropped before seen[]).
     ABORT COST RULED (COORD after C2 ff7a229f): the basis models the roster AS IT IS at the leg's tip -- BUILD rows at
     their abort cost, no word filter; the plan regenerates when a seat lands and the driver re-measures; two lines on
     C2's ref with the roster seat (the contract-check comment at the word read; an output line naming the abort-costed
