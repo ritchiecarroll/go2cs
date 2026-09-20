@@ -1863,8 +1863,12 @@ the whole corpus's 1,323 generated adapters unchanged; suite ok 707 s; stdlib 34
 46 matched / 6 diverged (2 alloc + the TestOnceXGC family), TestMapMatchesHashTrieMap passes. Banked: a
 staleCoreReferences entry (sync.tests.csproj -> runtime/internal/math) falls due with the sync row at the re-bank;
 the converter must see GOROOT in the backslash spelling (floor 6). Three inert siblings named post-hop. C1 design
-+ C2 structural reads; the apply from the i7 after the reorder apply (running); R MERGES c63943eee7 into the
-mlkem ref before cutting part (d) (the same two files). Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
++ C2 structural reads; the apply from the i7 after the reorder apply (DONE, f0c3399684) and after the Opus RATE LIMIT
+on the i7 resets (07:10 local -- the host-debt sizing sub-agent died on it at 06:44, worktree hd1 left, re-launch
+after); R MERGES c63943eee7 into the mlkem ref before part (d), which R corrected to TWO-SIDED (44812e89: the
+converter never RECORDS the GoImplement pair for the closed-over-projection form; the generator was never asked) --
+R's order approved: the adapter absent as the red, the converter half, the generator half if the template needs it,
+the return-covariance arm red-first; the suite already green on the three parts. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
 console codepage mangles UTF-8 git paths -> [Console]::OutputEncoding = UTF8 into the runbook (C1). R NEXT: the
 seven, then crypto/mlkem CS0311, then the five reflect names at 7ff4694b22. R's post-tool fix
 ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
