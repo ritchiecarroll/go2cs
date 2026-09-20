@@ -808,6 +808,18 @@ foreach ($row in $rows) {
     # that will not parse, one that predates this row, or a thrown invocation. A row whose converter
     # ran all the way to a comparison is never UNMEASURED: it falls through to the derivation below,
     # which reads the same net-undisclosed set whether or not the summary happened to print.
+    #
+    # ⚠⚠ A STALE RECORD IS ITS OWN ARM AND IT COMES FIRST, because the arm below is not enough.
+    # MEASURED on the tenth: the same row twice in one tree, the second run printing "STALE, not read"
+    # and then emitting PASS 61 / diverged 0 -- a verdict computed from NO DOCUMENT AT ALL. The arm
+    # below requires BOTH no-summary AND no-document; a stale record leaves `$cmpDoc` null but leaves
+    # `$cmpUnreadable` FALSE, because nothing ever attempted a parse, so a row WITH a summary fell
+    # through, read an empty map, and reached `$d = 0`.
+    #
+    # `$cmpStale` and `$cmpUnreadable` are two different facts and only one of them had a consequence.
+    # This is the file's own "AN UNREADABLE ARTIFACT IS NOT A PASS" rule, which the staleness gate I
+    # added to satisfy COORD `989` walked straight past: the gate fired, printed, and was ignored.
+    elseif ($cmpStale)                                                             { $word = 'NOVERDICT' }
     elseif ($null -eq $v.Count -and $null -eq $cmpDoc)                             { $word = 'NOVERDICT' }
     else {
         # ⚠ DISTINCT DIVERGING TEST NAMES from the comparison JSON -- not output lines, which count
@@ -912,11 +924,16 @@ foreach ($row in $rows) {
     # shardmap reads a non-integer as None and still schedules the row; an APPROXIMATION poisons every
     # derived figure. So a disagreement or a miss emits the word NOMATCH, not a number.
     $verdicts = 'NOMATCH'
+    # ⚠ A STALE ROW BANKS NO COUNT EITHER. The summary line is this run's output and its number is
+    # real, but it cannot be cross-checked against a document this run wrote, and a count banked under
+    # NOVERDICT is the shape this file refuses everywhere else. NOMATCH, by the same rule remedy (ii)
+    # applies to a thrown row.
+    if ($cmpStale) { $verdicts = 'NOMATCH' }
     # ⚠ A DERIVED COUNT IS A MEASUREMENT, NOT A GUESS, AND IT IS WHY THIS ROW IS NOT NOMATCH. It is
     # the converter's own expression over this row's own record; the cross-check below is skipped for
     # it only because the cross-check compares the SUMMARY against the map, and there is no summary.
-    if ($null -eq $v.Count -and $null -ne $derivedVerdicts) { $verdicts = $derivedVerdicts }
-    if ($null -ne $v.Count) {
+    if (-not $cmpStale -and $null -eq $v.Count -and $null -ne $derivedVerdicts) { $verdicts = $derivedVerdicts }
+    if (-not $cmpStale -and $null -ne $v.Count) {
         $verdicts = $v.Count
         if (Test-Path -LiteralPath $cmpSrc) {
             try {
@@ -1022,6 +1039,19 @@ foreach ($row in $rows) {
         $banner = "# BOUNDED EVIDENCE COPY -- at most $($resTail.Count) line(s) / 256 KB from the END of"
         $banner += " $resSrc. The TIMEOUT arm did NOT read this file; it streamed the whole document."
         [System.IO.File]::WriteAllText((Join-Path $rowDir 'results-tail.txt'), ($banner + "`n" + ($resTail -join "`n") + "`n"))
+    }
+
+    # ⚠ THE CAUSE OF A NOVERDICT, WRITTEN WHERE A READER WILL LOOK. COORD `989` asked for the cause
+    # and then ruled at `267113705a` that there is NO tail column and none is added -- it lives in the
+    # row's evidence directory and the completion post. A stale record is the one NOVERDICT cause that
+    # leaves no trace in the row's own output, because the converter ran fine; without this file the
+    # row is indistinguishable from one whose comparison simply did not match.
+    if ($cmpStale) {
+        [System.IO.File]::WriteAllText((Join-Path $rowDir 'noverdict-cause.txt'),
+            "stale record: the comparison document at $cmpSrc predates this row's start, so it was " +
+            "not read and no word was derived from it. The record is a survivor of an earlier run in " +
+            "this tree (it is gitignored, and `git clean -fd` skips it). Re-run in a tree whose " +
+            "pre-row-1 residue census removed prior records by name.`n")
     }
 
     # The summary line itself, and the whole stdout when there ISN'T one -- a row with no summary is
