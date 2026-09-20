@@ -502,7 +502,13 @@ this mechanism, never emitted; N is in the Go type and the emission drops it. RU
 types is the emission rule (*[N]E)(unsafe.Pointer(x)) -> NativeArrayPointer<E>(addr, N); a generated NESTED array element
 (the P-256 table) is a struct with a reference, so (a) stands for the site and the InlineArray layout is Part 2 -- both
 post-hop. ASSIGNED: one reading -- of the 25 sites, how many have an unmanaged element type under the shipped layout, by
-site (what Part 1 buys). Then the design read of R's companions. (3) The seven pthread members the darwin
+site (what Part 1 buys). DONE 2026-09-20 (5889776655): 22 of 25 unmanaged (byte 14, uint8 6, uint64 1, uint32 1, aliases
+resolved at golib.csproj); 3 managed = BOTH p256 sites + runtime/plugin.cs:86 (element = the unsafe.Pointer box CLASS -- a
+pointer-element case Part 2's InlineArray layout would NOT reach). Part 1 = a latent-hazard retirement of 22, not a crash
+fix. N rule for the emission: evaluate constant expressions (alg.go:467 hashRandomBytes / 8), never copy their text; fire on
+the CONVERSION, not a statement shape (lock_spinbit.go:75). C1's disclosure: its GOROOT greps ran on the bare toolchain
+(1.24.7), re-taken at the 1.24.13 pin identically -- right by coincidence, not by method; the rule stands (R's ef2f8d792).
+Now: the design read of R's companions when announced; otherwise idle by ruling. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
