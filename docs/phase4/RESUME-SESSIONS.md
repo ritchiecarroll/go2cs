@@ -810,7 +810,11 @@ fixture (net substituted from wall_s and dropped by name; UNMEASURED rows leave 
 larger; header identity; CR); the generator's :280 independent of the filter; re-run against the real blob when the
 fifth lands; held for the roster seat with relocations.tsv. BATTERY ASSERTION CUT (7a74098d: claude/c1-post-battery-assert
 ff1a7f099c, +43/-2, five arms incl. a missing directory reading 0 arms; the tree arm stays where its baseline resolves,
-both batteries printed) and LANDED on master c24d68061e. C1's withdrawal (033a07d9): the roster seat carries no aggregate
+both batteries printed) and LANDED on master c24d68061e; the ATTEMPTED-ARMS fix (5968c8f0: claude/c1-post-battery-
+attempted 06afd818ea, +18/-4, pass + fail and -lt; the post clone attempts 92 and was printed 91) LANDED on master
+5b214c7619. The $longTimeouts re-path DERIVED (11 -> 12 floors; mlkem768 fans out; no key absent from the 228; the
+comment-first-mention trap) -- RULED: derived from relocations.tsv at the roster seat, never a literal table. C1's
+withdrawal (033a07d9): the roster seat carries no aggregate
 arc figure (the 14 lived only in a post) -- no correction owed; rule banked: a claim that a file contains something is a
 measurement, one grep. DONE (ba10c91a):
 claude/c1-h10-recon-lists 89c1ebc2cc off master, four files +564, derived from the tree's own sources (the census
@@ -1534,7 +1538,13 @@ after C1's three comment corrections were folded in. ACCEPTED FOR THE READS (COO
 structural + the four arms + the time row's CONVERT on its box; the APPLY is COORD's from the i7 after the arm-2a apply
 (the ref tip; the converter gate; no corpus build). R's disclosures banked: a git restore of an untracked path is a
 silent no-op (prove a cleanup by its post-condition); a TaskStop kills the wrapper shell, not the converter it spawned
-(census by executable path before starting anything else). R NEXT: the constraint-proxy widening.
+(census by executable path before starting anything else). CLEARED FOR THE APPLY (COORD after cb723e05) on C1's design
+delta (cb723e05: SOUND -- a lifetime gap across two variants; the carry seeds resolver step 3; the per-package reset
+outside resetPackageState; the order hazard closed by the literal [internal, external] slice at :1088) and C2's
+second-box A/B (339c3d48: rc 1 -> 0, 29 .cs both arms, the bare name binds, no second crossing site): the apply is
+COORD's from the i7 after the arm-2a apply. R's LEG ACK (9bd7ebb6): 105 rows RUNNING on the fifth at 0dc65a8e8d since
+02:29 local (pid 30352; the blob hash matched; both traps checked before row 1); fips140test and internal/sync are the
+two named expectations on R's list. R NEXT: the constraint-proxy widening.
 SEAT CUT (57e9e70e): claude/laneR-anon-struct-typearg ce8d0bd654 on d91c832543, five files under src/go2cs (the pre-visit
 liftExplicitAnonStructTypeArgs ahead of convCallExpr's rendering paths; the fourth site of liftAtCallBoundary), corpus 0;
 arm 1 made to fail both ways (two sites, one signature, five assertions); arm 2 reflect past CONVERT and BUILD, 195 tests
