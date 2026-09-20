@@ -296,8 +296,8 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
   q99 (1) claude/c1-q99-valueclone-population cd6f4b9a8e (cleared 21a832257)
   q99 (2) claude/c1-q99-h5-member-bill-fixture 0253ca4c2c (APPLIED 06b1636cae, stamped 12a4cfbaa; the fail set is ONE)
   q102 claude/c1-q102-crosspartial-package-key 0ef96433a8 (APPLIED 23df814f64, stamped 1df0f168f; the fail set stays ONE)
-  the metadata seat claude/g-metadata-regen 828ef5d0b7 (C2-read 8d8be3730); if G's follow-up commit on that branch
-    is at origin by then, take the branch tip, else the pinned SHA
+  the metadata seat claude/g-metadata-regen at the branch tip 913af15cb (G's comment-only follow-up on 828ef5d0b7, pinned
+    c87391297; i9's prediction be83bda9f at stamp dbae51619a, the fail set predicted EMPTY)
   re-derive the base-three fail-set literal (predicted EMPTY) across all four gate scripts
   H9 per the runbook section 2 AS RULED 2026-09-19 (COORD on C2's measured prediction 56ec9931a): CNR first and solo under
     the pin; want zero NOT MEASURED and CHANGED = the ELEVEN (alias drop: RuntimeCallerFrames, SetFinalizerBridge,
@@ -432,7 +432,12 @@ a standing reading in nativeCallGateDarwin_test.go). The slice<T> census is DONE
 re-route BANKED post-hop). ASSIGNED NEXT (COORD, after 99e00361a): the H10 PRE-STAGING CENSUS -- for every banked roster row,
 the Test/Benchmark/Example/Fuzz declaration delta between the go1.23.12 and go1.24.13 GOROOT test sources under windows/amd64
 build constraints (added / removed / renamed by exact name), and every disclosure pin's survival at 1.24.13; one table, rows
-with the largest movement named; a reading, no cut; numbers from the instrument in-process, never a replica (a7c20e7cb). (3) The seven pthread members the darwin
+with the largest movement named; a reading, no cut; numbers from the instrument in-process, never a replica (a7c20e7cb).
+DONE 2026-09-20 (7a5d2af28: 204 rows, 7227 -> 7319 declarations, 62 rows moved, 181 pins / 158 survive / 0 re-signs /
+23 off-platform; TEN banked rows have no package at 1.24.13 -- the hop's relocations). ASSIGNED NEXT (COORD): the SUCCESSOR
+MAP for the ten by test-name migration (banked row -> 1.24.13 package(s) declaring its removed names -> found / not found),
+plus the declaration counts of the unbanked successors (crypto/internal/fips140/*, internal/runtime/*, weak, internal/sync);
+a reading, no roster edit; the roster re-point is COORD's docs seat at H10. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
@@ -659,8 +664,9 @@ predicted CNR CHANGED set by name with the mechanism per golden, whether the eig
 i9's CNR as the prediction i9 scores against; git and Go only. DONE 2026-09-19 (56ec9931a, MEASURED on 735 goldens at
 06b1636cae) and RULED (COORD): the eleven replace the eight. ASSIGNED NEXT: the runbook's dated in-stage H9 correction (the
 eleven with mechanism and pairs, the per-mechanism added == removed rule, the linux arm's admissibility control and its seven
-blind projects, the process gap: an emission-changing seat carries its golden re-baseline) on a branch you name; then idle by
-ruling until G's outgoing census reading, scored against your P1-P5.
+blind projects, the process gap: an emission-changing seat carries its golden re-baseline) on a branch you name; DONE
+2026-09-20 at claude/c2-h9-correction 4f24f7d39e (docs only, off master; ACCEPTED as the H9 docs seat). Idle by ruling until
+G's outgoing census side-by-side, scored against your P1-P5.
 
 Then: (2) the second-lane read of C1's q100 cut at origin, claude/c1-q100-native-array-view-floor 0dca38552c: the
 floor's placement at the uintptr door, its scope (array<U> only), the tenth named panic beside the nine, and the four
