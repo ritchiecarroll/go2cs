@@ -443,7 +443,13 @@ two names retire; TestP256PrecomputedTable RULED off-platform at 1.24.13; twelve
 H10 as new rows). ASSIGNED NEXT: the conversion-only -tests pre-stage of the twelve successor packages at the version tip
 (converter built at the tip under the 1.24.13 pin; each into its own never-reused root, second positional, sequential; NO
 -test-action): per package the exit code, emitted .cs count, unresolved lift markers or refusals by name, emitted vs source
-test-declaration count; no compile, no bank. (3) The seven pthread members the darwin
+test-declaration count; no compile, no bank. DONE 2026-09-20 (506ab57d9: 12/12 rc 0, 0 markers, 141 .cs, 150/150). CORRECTED
+under the corpus's tags (purego,math_big_pure_go): TestP256PrecomputedTable is INCLUDED at 1.24.13 (the off-platform ruling
+WITHDRAWN, COORD's error); nistec SPLITS by name (2 fips140/edwards25519, 2 fips140/nistec); fiat enters H10 with a 0
+executable denominator; the build configuration is printed beside every H10 count. ASSIGNED NEXT: DRAFT the H10 roster
+relocation seat (docs only, a branch you name, push-then-announce; COORD holds it for the H10 docs commit): per relocated row
+the dated note with successor(s) by name and counts, the two retirements, the purego line, fiat's 0 denominator, the twelve
+new-row candidates with their 1.24.13 declaration counts; banked figures untouched, no verdict moves. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
