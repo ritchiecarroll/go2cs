@@ -748,7 +748,10 @@ an i7 sub-agent after TestIsZero (generated sources first; the generator fix; th
 productionClassEmitted; the row past COMPILE); C1 reads design, C2 structural, i9 applies. ASSIGNED (COORD after
 a17af4af): THE RECON LISTS AS FILES on a new ref off master --
 docs/phase4/hopA-inputs/recon-lists/population.txt (228 by name) + i9.txt/g.txt/r.txt (16/107/105, the rule in a
-header comment, sums closing), LF, census-gated, push-then-announce; the LAUNCH names its tip. The docs seat now carries
+header comment, sums closing), LF, census-gated, push-then-announce; the LAUNCH names its tip. DONE (ba10c91a):
+claude/c1-h10-recon-lists 89c1ebc2cc off master, four files +564, derived from the tree's own sources (the census
+Appendix + nistec; $longTimeouts + BIG_ROWS = reserved 14; the windows-only 2; LPT over the 1.23 windows block) with three
+reproduced intermediates and a partition control that fires; nistec to G by routing (header). THE LAUNCH'S LISTS. The docs seat now carries
 three items (+ the net/internal/cgotest clause at ValidatedTestPackages.md:567-569). SIZED (1a46bacb): all_test.go:1510 -- ARM 2a of the reverse door zh.cs:715: a
 reference-bearing pointee (func() fields -> delegate -> StorageKind None) registers an ORDER TOKEN, offset 0 keeps arm
 3's refusal false by construction, the NativeBox write through a non-address is an uncatchable AV; six sibling sites
@@ -1082,6 +1085,9 @@ landing WITH the roster seat). CONFIRMED (COORD after 8cf1e707): cut NOW on the 
 (relocations.tsv: header source/target, one line per arc, LF; refuse by name when absent or thin); (a) the floor
 inheritance is an ADDITION (no successor map exists in the generator today), (b) the intersected-out print is one line;
 the intersect stays. The plan is generated only after the seat lands, so the refusal never fronts the leg.
+SECOND COMMIT ff53bb06be (90e78eae): the print split by cause (targets, not sources; three arms); a THIRD commit ruled
+for the two downstream counts (:648-650, :682) splitting _uncosted the same way. C2's `| head` SIGPIPE finding banked
+fleet-wide (a filter can prevent the work; never pipe a state-writing tool to head).
 GENERATOR SEAT CUT (51d22252): claude/c2-shardmap-relocations 8d7739f4e3 off master 6c32d0e171, +57/-2, reads
 relocations.tsv (thin guard < 10 arcs), four arms made to fail; the reserved-row print already exists and fires --
 RULED: a second commit splits its message into two causes (no measured cost vs name absent at this release). TAKEN,
