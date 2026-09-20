@@ -499,7 +499,10 @@ relocation seat (docs only, a branch you name, push-then-announce; COORD holds i
 the dated note with successor(s) by name and counts, the two retirements, the purego line, fiat's 0 denominator, the twelve
 new-row candidates with their 1.24.13 declaration counts; banked figures untouched, no verdict moves. DONE 2026-09-20 at
 claude/c1-h10-roster-relocation 4de76ded06 off master (c7724dcd6; ACCEPTED and HELD by COORD for the H10 docs commit; placement
-stays). ASSIGNED NEXT: the H11 and H12 gate pre-read at the version tip -- enumerate every gate the two rungs name, classify
+stays). CORRECTION TAKEN (b3f7face4): there is no held H11 amendment -- the four H11 runbook amendments are APPLIED with
+135f0cdc15; the H11-follows-H10 sentence (H11's pre-flight cannot pass until every roster row is banked at the new base) is
+ONE commit on top of 4de76ded06, announce-then-push, with the two retiring declarations re-measured against the CORPUS at the
+version tip in the same announce. ASSIGNED NEXT: the H11 and H12 gate pre-read at the version tip -- enumerate every gate the two rungs name, classify
 each cloud-runnable or .NET-only, RUN every runnable one under the pin and post the reading per gate (command, rc), state what
 a Windows box must run for the rest, cite any missing or stale procedure by line; a reading, no cut. DONE 2026-09-20
 (127220cb9: ten gates, six run; FINDING: H2's ruled build-number RESET never happened -- version.props at the tip reads base
@@ -983,7 +986,10 @@ tail is replaced by the statement of record (q98 and q92 landed; the eight names
 control fires at the -tests regeneration, where all eight renamed tests must PASS on a tree carrying your cut
 e081c57eb7); section 7 untouched. Verify at the tip you read (coord-resume-verify.sh from your steward clone, then the
 key by eye) and post one line only if it is wrong. Fold-by-script, verifier before and after, announce-then-push,
-read back both ways, a lost race answered by a merge: as your block states.
+read back both ways, a lost race answered by a merge: as your block states. ⚠ 2026-09-20 22:08: a SECOND control reached
+the record from R's tooling (ad9842f0d0, subject 'subject line', a one-line test body, no identifier, not scrubbed); R OWES
+one post -- which copy ran (scratchpad / the published repo copy / other), why the control-heading bar did not fire, the fix
+made to fail through the real script both directions -- and posts nothing else until then (COORD ruling).
 
 SPURT OPENED 2026-09-20 ~21:10 by the owner at the console ("100% at your disposal"). ASSIGNED FIRST (COORD): the
 SystemCertVerify REGRESSION end-to-end on R-LAPTOP -- PASS at master 7105c8468, access violation 0xC0000005 at the version
