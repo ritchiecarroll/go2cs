@@ -783,7 +783,9 @@ sweep_s := wall_s whatever its word, so the hand-stopped drop fires. The assert-
 (C1's proposal) ruled the durable one, each lane at idle. ASSEMBLER BUILT (8add449d): five arms firing on a synthetic
 fixture (net substituted from wall_s and dropped by name; UNMEASURED rows leave by name; a duplicate folds to the
 larger; header identity; CR); the generator's :280 independent of the filter; re-run against the real blob when the
-fifth lands; held for the roster seat with relocations.tsv. DONE (ba10c91a):
+fifth lands; held for the roster seat with relocations.tsv. BATTERY ASSERTION CUT (7a74098d: claude/c1-post-battery-assert
+ff1a7f099c, +43/-2, five arms incl. a missing directory reading 0 arms; the tree arm stays where its baseline resolves,
+both batteries printed) and LANDED on master c24d68061e. DONE (ba10c91a):
 claude/c1-h10-recon-lists 89c1ebc2cc off master, four files +564, derived from the tree's own sources (the census
 Appendix + nistec; $longTimeouts + BIG_ROWS = reserved 14; the windows-only 2; LPT over the 1.23 windows block) with three
 reproduced intermediates and a partition control that fires; nistec to G by routing (header). THE LAUNCH'S LISTS. The docs seat now carries
@@ -1138,8 +1140,9 @@ generator is the one home; the roster seat carries a pointer). The ref carries f
 seat. C2's `| head` SIGPIPE finding banked
 fleet-wide (a filter can prevent the work; never pipe a state-writing tool to head). POST-TOOL GUARDS CUT (77e96d95:
 claude/c2-post-tool-guards 015177d4f9 -- one battery from the clone, the clone asserted to be the mailbox, A5 asks
-origin; six arms; delivered by the modified tool) and LANDED on master 5448b903e0. A fifth generator commit ruled: the
-die() comment naming the filter's home. C2's battery wording corrected (d7161d6e); the assert-the-battery form at idle.
+origin; six arms; delivered by the modified tool) and LANDED on master 5448b903e0. FIFTH GENERATOR COMMIT 38ea6bdbd0
+(0aa562a7: the die() comment naming the filter's home; output byte-identical) -- the ref carries FIVE commits for the
+roster-seat landing. C2's battery wording corrected (d7161d6e); the assert-the-battery form at idle.
 GENERATOR SEAT CUT (51d22252): claude/c2-shardmap-relocations 8d7739f4e3 off master 6c32d0e171, +57/-2, reads
 relocations.tsv (thin guard < 10 arcs), four arms made to fail; the reserved-row print already exists and fires --
 RULED: a second commit splits its message into two causes (no measured cost vs name absent at this release). TAKEN,
