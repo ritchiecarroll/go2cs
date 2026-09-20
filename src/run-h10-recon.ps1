@@ -10,11 +10,20 @@
 # ---------------------------------------------------------------------------------------------------
 # WHAT THIS WRITES, AND WHY EVERY COLUMN IS WHERE IT IS
 #
-# shardmap.py:262 reads FOUR columns BY NAME and refuses a header lacking any of them:
+# ⚠ CITED BY MESSAGE TEXT, NOT BY LINE NUMBER. An earlier cut named four line numbers in
+# shardmap.py; C2's own commit then inserted thirty lines into that file and TWO of the four went
+# stale, pointing at unrelated code. A cross-file line citation goes stale when EITHER file moves and
+# NO test in either repository can see it -- the wrapper's census does not parse Python and the
+# generator's tests do not read this file. The refusal's own text cannot drift without the refusal
+# itself changing, which is the property a citation needs. (C2's finding and C2's remedy.)
+#
+# shardmap.py reads FOUR columns BY NAME -- `need = ("row", "word", "verdicts", "sweep_s")` -- and
+# refuses a header lacking any of them:
 #     row · word · verdicts · sweep_s
-# It also refuses the file outright on ANY CR byte (:249), refuses a non-integer sweep_s by name
-# ("a row with no measured cost is UNSCHEDULED, never nominal", :280), and refuses the whole basis if
-# the hand-stopped drop never fired (:308) -- so `net` MUST be measured and emitted even though its
+# It also refuses the file outright on ANY CR byte ("carries ... CR byte(s) -- the banked TSVs are
+# LF"), refuses a non-integer sweep_s by name ("a row with no measured cost is UNSCHEDULED, never
+# nominal"), and refuses the whole basis if the hand-stopped drop never fired ("none of the
+# hand-stopped rows ... appear in") -- so `net` MUST be measured and emitted even though its
 # cost is discarded. The extras below are additive; the parser reads by name and ignores them.
 #
 # One extra is NOT decoration: `wall_s` is the observed integer wall for EVERY row whatever its
@@ -29,7 +38,7 @@
 # comparing the row's artifacts. Measured 2026-09-20: 540 s on `go/doc/comment` against a 23 s
 # conversion here, and ~52:1 on `crypto/cipher` on G's box. Without this column a reader can only
 # subtract two numbers that do not span the gap, and a leg budgeted from `sweep_s` is out by more than
-# an order of magnitude. shardmap.py reads FOUR columns by name and ignores every other (:262), which
+# an order of magnitude. shardmap.py reads FOUR columns by name and ignores every other, which
 # is why `wall_s` and `post_s` can be carried without touching the basis.
 #
 # ---------------------------------------------------------------------------------------------------
@@ -51,11 +60,17 @@
 # -- not a re-run.
 #
 # ---------------------------------------------------------------------------------------------------
-# TWO FORMAT STRINGS, NOT ONE  (C2 f9da1c467-line, verified here at the source)
+# TWO FORMAT STRINGS, NOT ONE  (C2's line, verified here at the source)
+#
+# ⚠ NAMED BY BRANCH RATHER THAN BY LINE, for the reason in the header block above: an earlier
+# cut cited these at `testConversion.go:8271` and `:8274`, and at the version tip those two lines
+# are now `agreedFailure := false` and `agreedFailure = true`. THREE SEATS ARE LANDING IN THAT FILE,
+# so its line numbers are the least stable citation in this campaign; the format strings themselves
+# are what this wrapper actually matches on and they cannot drift without the match breaking.
 #
 # The converter prints the summary from TWO sites, chosen by whether the row carries disclosures:
-#     testConversion.go:8271  "...(%d skipped..., %d disclosed-divergent (%s), %d ...excluded).\n"
-#     testConversion.go:8274  "...(%d skipped..., %d disclosed-unsupported declarations excluded).\n"
+#   the DISCLOSED branch     "...(%d skipped..., %d disclosed-divergent (%s), %d ...excluded).\n"
+#   the no-disclosure branch "...(%d skipped..., %d disclosed-unsupported declarations excluded).\n"
 # A wrapper asserting ONE literal refuses every row of the other kind. The assertion below is on the
 # COMMON PREFIX and the captured integer; the tail is deliberately variable.
 #
@@ -819,7 +834,8 @@ foreach ($row in $rows) {
                     if (-not [string]::Equals($g, $c, [System.StringComparison]::Ordinal)) { $d++ }
                 }
                 # ⚠ THE DERIVED COUNT, WHEN THE SUMMARY DID NOT PRINT. The arithmetic is the
-                # CONVERTER'S OWN, pinned by C1 at `testConversion.go:8387` so that three lanes and one
+                # CONVERTER'S OWN -- the expression `len(goResults)-len(disclosed)` inside the
+                # `Validated %d tests against go test` summary -- pinned by C1 so that three lanes and one
                 # assembler do not each invent one:
                 #     verdicts = len(go) - len(disclosed)
                 # `withdrawn` is already absent from the Go map and is NOT subtracted again; `gated` is
@@ -875,12 +891,12 @@ foreach ($row in $rows) {
                 $mapCount = ($goNames | Sort-Object -CaseSensitive -Unique).Count
                 # ⚠⚠ THE TWO NUMBERS DIFFER BY THE DISCLOSURES, BY CONSTRUCTION -- measured on the
                 # one-row dry run, where bufio read "summary 80 vs map 81" and my first cross-check
-                # called that a disagreement. testConversion.go:8271 passes
+                # called that a disagreement. the converter's disclosed branch passes
                 # `len(goResults) - len(disclosed)` as the headline count while the map holds ALL of
                 # goResults, so a bare equality test fires on EVERY row carrying a disclosure and
                 # throws away a perfectly good cost. The relation is:
                 #     map == summary + disclosed-divergent
-                # The no-disclosure branch (:8274) prints no such group, and 0 is then correct.
+                # The no-disclosure branch prints no such group, and 0 is then correct.
                 $disclosed = 0
                 if ($v.Line -match '(\d+) disclosed-divergent') { $disclosed = [int] $Matches[1] }
                 if ($mapCount -ne ($v.Count + $disclosed)) {
@@ -905,8 +921,9 @@ foreach ($row in $rows) {
     $sweepS = $elapsed
     if ($word -eq 'TIMEOUT') {
         # A deadline kill is not a cost: the row did not finish, so its wall is a floor the operator
-        # imposed, not a measurement of the row. NON-INTEGER -- which the generator REFUSES (:280, by
-        # name and by value); the banked basis excludes such rows at the concatenation.
+        # imposed, not a measurement of the row. NON-INTEGER -- which the generator REFUSES by name
+        # and by value ("a row with no measured cost is UNSCHEDULED, never nominal"); the banked basis
+        # excludes such rows at the concatenation.
         $sweepS = 'UNMEASURED'
     }
     if ($word -eq 'NOVERDICT') {
