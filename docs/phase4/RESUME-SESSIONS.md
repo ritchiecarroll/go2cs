@@ -866,6 +866,13 @@ SEAT CUT (d44c00ded): claude/c2-subtree-load-goroot-guard 19175c31ad off 43a3627
 unit arm red-proved on two axes + projitems; all four readings met; suite green) -- ACCEPTED; G verifies the negative-host arm
 from the seat's converter; C2 re-takes the linux pair from it; then H8 closes; i9 applies after the H11 seat. C2 also owes the
 amendment's (d) sentence (toolchain location + the seat's SHA) with the seed-absent exemption arm, on top of 0a993ec908.
+DONE (1dbd13862): d7b0876ce6 (verified on top of 0a993ec908) -- the seedabsent mode (the set DERIVED from the seed, reported every run, both
+vacuous shapes refused; placement inside PASS-with-exemption naming the paths, outside FAIL; content anywhere FAIL;
+component-boundary matching), section (d)'s fourth axis, selftest 41/41. ⚠ WITHDRAWN NUMBER: the instrument's 'same path,
+content DIFFER' counter was DEAD since its first cut (join -j0 invalid, stderr swallowed) -- every 'content differs 0' in
+tonight's arm (b) posts (G's and C2's) was not a measurement; every verdict stands on the tree hashes and comm. G's H8
+record carries this in its closure block. C2's first arm-b re-take was VOID (CGO_ENABLED defaulted to 1 -- a one-axis
+violation caught by its own written prediction); the re-take is running on the pin.
 G's diff (4f4e3f9f7): both boxes' sorted package lists share one sha256 (342 = 342, LF, one trailing newline) -- the
 enumeration question is CLOSED; G's negative arm (GOROOT not under GOPATH on G-LAPTOP, the branch does not fire) confirms
 C2's cause from the side where it does not fire. G's runbook point is TAKEN into C2's seat scope: the H8 arm states the
