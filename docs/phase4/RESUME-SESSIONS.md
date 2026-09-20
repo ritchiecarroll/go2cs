@@ -411,7 +411,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     the banked cost). net banks the CONVERTER's wall (log start -> artifacts' mtime), i9 states both. The SEVENTH
     commit also: a linear-time parse in both editions (-AsHashtable on Core; a .NET deserializer on 5.1), a bounded
     results-tail read; red-first on a synthetic 5 MB document. A computing wrapper with no child is not a hung one:
-    the census counts the wrapper's PID and its CPU delta.
+    the census counts the wrapper's PID and its CPU delta. CORRECTED (i9 c27c0065, verified by C1 at the blob): the
+    cost lands on NEITHER column -- $elapsed closes at :428 before the JSON opens at :460; sweep_s and wall_s are the
+    same number except where sweep_s reads UNMEASURED; the basis was never at risk. RULED (787bbf64): a trailing post_s
+    column rides the seventh commit (C2's reader must ignore unnamed columns); the :30 header sentence rides it too;
+    i9's post-tool commit (-s, floor, output-line count, positive control) YES at idle AFTER the leg. The instrument
+    thread CLOSED at a8cfd8ff: no post-tool posts from any lane until that commit.
     WRAPPER CUT (f2eae7c85): claude/i9-h10-recon-wrapper 43aba50262 on 93feb8df2b, src/run-h10-recon.ps1 +321 (LF, 100755,
     census clean, signed). Two defects caught by the one-row dry run: the converter SPAWNS go from PATH (the pin gate had
     asserted the absolute path -- green about the wrong object; now three agreeing derivations: PATH-resolved go version
@@ -839,7 +844,10 @@ scratchpad-derivation item DECLINED; the INSTRUMENT LANDING = C1's two + C2's re
 all three read at origin (COORD merges; bash -n, census, repoguard) -- LANDED on master d8fe647ae8 (four signed
 merges: C1's H10 runbook seat claude/c1-h10-residue-runbook 03110c0b0 first -- residue preconditions, the TREE
 DISCARD block, what sweep_s measures, the is-it-alive line -- then C1's 4b33fc803+9ff722b1e, C2's 9feff23855+
-f4b736452f, R's ead735e69c; census clean x4, repoguard 6/6). Lanes re-copy their posting copies from the landed blob. ALL THREE LISTS LIVE (G's ACK 5952b121: 107 rows on the fifth;
+f4b736452f, R's ead735e69c; census clean x4, repoguard 6/6). Lanes re-copy their posting copies from the landed blob. ROUTED (11afb109): ONE new ref off d8fe647ae8, two commits,
+one announce -- (a) the runbook sentence at 03110c0b0 corrected in place with a dated note (neither column carries
+the wrapper cost; post_s named), (b) the two floors on c1-post.sh (patterns 100/166, hashes 10/34); COORD lands.
+DOCTRINE banked: a ruling is authority about what is decided, not a measurement of what the code does. ALL THREE LISTS LIVE (G's ACK 5952b121: 107 rows on the fifth;
 the early run discarded). hash/maphash BUILD on i9's list (unpredicted) -> C1 sizes at CONVERT from the completion post. C1's
 withdrawal (033a07d9): the roster seat carries no aggregate
 arc figure (the 14 lived only in a post) -- no correction owed; rule banked: a claim that a file contains something is a
