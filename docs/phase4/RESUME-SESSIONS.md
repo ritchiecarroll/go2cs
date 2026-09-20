@@ -973,7 +973,14 @@ rides a SEPARATE ref off current master as leg (3b) -- C1 does NOT merge master 
 names(disclosed)| (runtime/pprof 161, the guard's report stays); the plan's host column = 17 infrastructure-error
 entries across five rows. R's items CLOSED: the case-collision class (PS 5.1 JSON reader) is the cause of the two
 recovered rows (the eighth's ordinal maps cover it); testing's clobber = the reorder seat's BEFORE (no artifact ref);
-unsafe has no tests (absence correct); the two refspec acts DONE.]
+unsafe has no tests (absence correct); the two refspec acts DONE.
+C1's DELTA READ of the eleventh SOUND (8344d8bb6; four cosmetic findings -> i9's twelfth: the NOVERDICT comment's fourth
+fact, the inert NOMATCH restatement, the cause file's eaten backticks, .fff on the staleness line); C1's merge-tree
+reading: the spine composes with master (both roster hunks survive) = leg (3)'s prediction. THE TRAIN ASSEMBLING
+(~08:30): an i7 Opus sub-agent (worktree tr1, detached at master 076c006d41) merges legs (1) lists 89c1ebc2cc,
+(2) R 36b3783953 / i9 eca66ad342 / G de9aa07ebe, (3) the spine 3f17460a7 -- signed, NO PUSH; COORD verifies (EQUAL
+blobs, zero deletions, both roster hunks, census, repoguard, markers) then pushes master and posts the stamp; leg
+(3b) C1's docs half when announced; leg (4) C2's shardmap + THE PLAN after --timings on the landed basis.]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
