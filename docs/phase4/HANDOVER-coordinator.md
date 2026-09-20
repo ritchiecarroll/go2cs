@@ -710,3 +710,4 @@ Each lane runs in its own Claude Code session on its own host with its own local
 - 10:30: R's abort fix + arm landed -> MASTER a5b110b47e; three i7 sub-agents running (batch 2, the ecdh seat, the driver's Core arm).
 - 10:34: C1's tree-precondition line + R's scantemp fix landed -> MASTER 7674ee7f4d; the doors doctrine line (writes OR fetches, enumerated from the script).
 - 10:38: the driver's Core-edition arm green with one finding (the tree guard under -DryRun) -> i9's follow-up; C2's design read owed; then both refs land on master.
+- 10:41: R's door-scope arm landed -> MASTER 8e4be1e3ff.
