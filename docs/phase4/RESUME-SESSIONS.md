@@ -482,7 +482,13 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     post's rc; nothing replaced). RULED (COORD after 85611044): the SIXTH is the blob for any list NOT YET STARTED (C2
     reads its diff; the i7 parses/self-tests it; then launch); a list already running on the fifth FINISHES there
     (identical ten-column header; hardening only; the blob stated in the completion post). i9 relaunches on the sixth
-    after the two reads. APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
+    after the two reads. WITHDRAWN (COORD after 146ec041): THE FIFTH IS THE BLOB FOR ALL THREE LISTS -- i9's run of
+    record is LIVE on it (469b7c25: 16 rows, launched 01:20 local, sha256 86cc38c01c... matched before launch, pid
+    33528, stderr 0); G and R launch on the fifth NOW; the SIXTH stands landed but unrun (C2 146ec041: its rc refusal
+    is the only exit in the row loop and the TSV is written after the loop -> a rare throw would discard a list; the
+    i7 parse gate on it green both editions, self-test passing, banked). The SEVENTH (the derivation commit, after the
+    leg): a thrown row CLASSIFIED (NOVERDICT / n/a / UNMEASURED / the observed wall_s) with no exit in the loop, the
+    NOVERDICT two-paths clause, the dead-assignment comment. APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
     at the act; both reads done, CLEARED); (2) the fips140test seat claude/coord-fips140test-testonly ce8fc43a87 on
     93feb8df2b (cut by an i7 sub-agent: three sites gated on productionClassEmitted; suite rc 0; the row 13 CS0234 -> 0)
     after C1's design + C2's structural reads -- no source overlap with R's seat, both add a projitems line (the
