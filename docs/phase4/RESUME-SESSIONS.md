@@ -1021,7 +1021,10 @@ preconditions table, per-row steps against the rulings cited) -> COORD lands; th
 R's SEAT STRUCTURAL READ DONE (15a14bad: suite green on this box; the fixture fires all six lines reverted and passes
 restored byte-identically; reflect rc 1 -> rc 0 as a same-box A/B; time still rc 1 as the control). NEXT: the diff read
 of i9's third commit; then the generator's reserved-set derivation from relocations.tsv (a commit on the shardmap ref
-landing WITH the roster seat).
+landing WITH the roster seat). CONFIRMED (COORD after 8cf1e707): cut NOW on the shardmap ref against the contract
+(relocations.tsv: header source/target, one line per arc, LF; refuse by name when absent or thin); (a) the floor
+inheritance is an ADDITION (no successor map exists in the generator today), (b) the intersected-out print is one line;
+the intersect stays. The plan is generated only after the seat lands, so the refusal never fronts the leg.
 (d) LANDED at master 6c32d0e171. Tag-asymmetry bound DONE (50554616: 2 of 207 differ on linux -- nistec files SWAP, both
 directions; fips140test's nistec_ordinv_test.go oracle-only, latent behind CS0234). ASSIGNED: read i9's wrapper ref
 claude/i9-h10-recon-wrapper at its tip AFTER i9's second commit (the linked-worktree guard + per-row artifact capture).
