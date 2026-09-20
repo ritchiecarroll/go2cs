@@ -330,10 +330,14 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     control RUN=0; GoBuildNumber 0; STAMPED by COORD) -- VERSION TIP 8fa5cc2e7d
   the H11 seat claude/c1-h11-published-stamp 135f0cdc15 (CLEARED on C2's read 4c0a86310;
     converter-suite gate, the new guard arms by name; no corpus build); state the version tip after each. Still owed by a
-    Windows box before H11 is declared: check-roster-format.ps1 and release-nuget.ps1 -VerifyOnly at the applied tree
-  then C2's subtree-load seat claude/c2-subtree-load-goroot-guard 19175c31ad (merge-base 43a3627667; projitems composed by
-    both seats, the q98 guards police it; the converter suite with TestSubtreeLoad* by name; no corpus build)
-  then R's P-256 cut claude/laneR-p256-table-decode at its tip 9200da804e (d01e5d307d + the comment-only commit) on C1's and C2's reads (corpus build + GolibTests vs the box-base
+    Windows box before H11 is declared: check-roster-format.ps1 and release-nuget.ps1 -VerifyOnly at the applied tree --
+    i9 takes them AFTER R's tip and the H9 suite (COORD's order; the -VerifyOnly pass refuses on a dirty tree / non-master
+    branch by its own arms, so the refusal reason is the reading, never a bare rc)
+  C2's subtree-load seat APPLIED d91c832543 (9e3ed92e9: the predicted stamp 178a17ed8f; projitems a REAL composition, 335
+    rows, both seats' rows present once; the seat's arm RUN=1 with 7 subtests; H11's six arms re-run by name; STAMPED by
+    COORD) -- VERSION TIP d91c832543. i9's regex-on-a-backslash-path fault banked (fixed strings + both controls for paths).
+  then R's P-256 cut claude/laneR-p256-table-decode at its tip 9200da804e (d01e5d307d + the comment-only commit; both reads'
+    AGREES extended to the tip by C1 a5e48cd3e and C2 296b8af66) on C1's and C2's reads (corpus build + GolibTests vs the box-base
     four + SystemCertVerify direct exe + the converter suite), then the FULL four-phase behavioral suite: H9 closes when
     Output's failing set = FuncLiteralCallerNames + GoroutineWaitState with APPEARED empty
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
