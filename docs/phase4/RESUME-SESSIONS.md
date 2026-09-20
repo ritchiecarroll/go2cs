@@ -723,7 +723,16 @@ different claims). RUNBOOK LINE OWED at the next docs seat: the PATH-resolved pi
 H10's preconditions table. ASSIGNED (COORD after R 57e9e70e): (1) the design read of R's seat ce8d0bd654 (the three-step
 resolution, the fourth flag site, the IndexExpr residual); (2) SIZE the reflect TestIsZero AccessViolation from the
 emission at CONVERT (setField's unsafe write, the golib door, the class -- the 25-site pinned-box class or another -- a
-fix shape, a red-first arm); no cut. DESIGN READ of R's seat DONE (be9a7447, SOUND). ALSO ASSIGNED: the design read of
+fix shape, a red-first arm); no cut. SIZED (1a46bacb): all_test.go:1510 -- ARM 2a of the reverse door zh.cs:715: a
+reference-bearing pointee (func() fields -> delegate -> StorageKind None) registers an ORDER TOKEN, offset 0 keeps arm
+3's refusal false by construction, the NativeBox write through a non-address is an uncatchable AV; six sibling sites
+safe. FIX (a) golib-only: arm 2a refuses when the resolved box's storage kind is None (RuntimeErrorPanic, arm 3's
+family); (b) the unmanaged alias post-hop (never covers :1510). RULED: an i7 sub-agent cuts (a) after the Core re-run
+(Q44 counters read on the row first; red-first asserting the RETURNED type, never writing; the three controls; the
+GolibTests fail-set diff; the reflect row through the pipeline); C1 design read, C2 structural, i9 applies. C1's census
+correction TAKEN: the fire-direction arm is inert when the INVOKING DIRECTORY carries no denied identity; C1's post
+tools run two batteries per invocation (entry gates before the cd) -- a one-line fix at idle. C1 corrects the 14 in its
+roster seat prose. DESIGN READ of R's seat DONE (be9a7447, SOUND). ALSO ASSIGNED: the design read of
 the fips140test seat ce8fc43a87 (three sites; the negative-sense option; GoFiles == 0 vs the driver's
 unmarkedFileCount) and the SIZING of its masked residual: 2 x CS1929 in acvp_test.cs (zh<ecdsa_package.hmacDRBG> at a
 pointer-receiver seam; no branch for it at origin). NEXT DOCS SEAT (two items): the
@@ -1031,8 +1040,9 @@ axis confirmation through the pipeline (d5cdd55ab), the wrapper pre-cut reads (f
 correction: verified premises do not transfer their standing to a synthesis -- BOARD line; 7c43a15e the converter's two
 Validated format strings). ASSIGNED: read C1's (d) aa66874ff7 as the H10 procedure amendment (order, host rule,
 preconditions table, per-row steps against the rulings cited) -> COORD lands; then read i9's recon wrapper.
-NEXT: the diff read of i9's third commit ddc205a1ee (at origin); then the structural read of the fips140test seat
-ce8fc43a87 (the fixture + the suite on this box).
+DIFF READ at ddc205a1ee DONE (765aba82: clean; the map verified mechanically; NOVERDICT's two paths share one comment
+-- a clause on the next commit). NEXT: the Go unit arm of G's oracle seat dd376e3f12; the structural read of the
+fips140test seat ce8fc43a87 (the fixture + the suite on this box); then the TestIsZero golib seat when cut.
 R's SEAT STRUCTURAL READ DONE (15a14bad: suite green on this box; the fixture fires all six lines reverted and passes
 restored byte-identically; reflect rc 1 -> rc 0 as a same-box A/B; time still rc 1 as the control). NEXT: the diff read
 of i9's third commit; then the generator's reserved-set derivation from relocations.tsv (a commit on the shardmap ref
@@ -1217,7 +1227,14 @@ ASSIGNED (COORD after 21be19338): the ORACLE-TAGS converter seat off 93feb8df2b 
 tags; red-first: a Go unit arm (planted empty set fails), the nistec row 45/0 vs the before 44 false, the converter
 suite, an EMPTY two-seeded corpus diff; push-then-announce; C2 reads (the unit arm on its box); i9 applies. BOUNDED
 (C2 50554616, C1 41728747, i9 c101d970): TWO rows of 228 (nistec, fips140test), file-level; so the LAUNCH does NOT wait
-for this seat -- the two rows' verdict readings are provisional until it lands. Then the preflight on both sides. Was: after COORD closes H9: the twelve successor packages through the real
+for this seat -- the two rows' verdict readings are provisional until it lands. ORACLE SEAT CUT (c72eea38):
+claude/g-oracle-tags dd376e3f12 on 93feb8df2b, three files (testConversion.go +45/-12 with oracleTestArgs extracted,
+oracleTestArgs_test.go new, projitems +1); the oracle appends options.loaderBuildFlags() -- one definition; unit arm red
+on the unfixed builder, green fixed, the planted empty set fails it; nistec BEFORE rc 1 / 44 false, AFTER rc 0 / 0
+diverged / 44 VALIDATED (COORD's 45 corrected); suite rc 0; two-seeded corpus diff 0. ACCEPTED (COORD after 1a46bacb):
+C2 reads the Go unit arm; i9 applies THIRD (after R's and fips140test's seats). G's floor-1 finding banked fleet-wide:
+a process census by name pattern is a dead counter for a renamed converter -- count by executable path with a positive
+arm; G fixes h10-rows.sh/armb.sh before its recon list. Then the preflight on both sides, then the g-post.sh refusal. Was: after COORD closes H9: the twelve successor packages through the real
 pipeline on the banking platform at the version tip (all four overrides), per row the verdict count and the diverged set by
 name -- the first H10 rows; a reading, no bank. G's post tool PUBLISHED (80b5d83df): claude/g-lane-post-tool be340825dd off
 master a6be940665, FOUR files under .claude/coord-scripts/lanes/ (g-post.sh + the fetchable, staleness and placeholder
