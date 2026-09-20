@@ -477,6 +477,11 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     two RECORDS (net, net/http) when clean; HOLD both tails (net's is a genuine leak -- six profile paths, six
     account occurrences; net/http's refuses on ipv4 alone with an all-loopback set -> a census question for C1: the
     ipv4 arm's context should admit loopback/unspecified quads; a private address stays refused).
+    THE TENTH IS NOT THE BLOB OF RECORD (i9 URGENT 328200bb3, RULED a2edbc22d): a STALE comparison record with a
+    summary line reads PASS on the tenth (the stale flag prints and the classifier falls through; only the unreadable
+    path reaches UNREAD). THE ELEVENTH (cutting on the i9): stale = the unreadable consequence (NOVERDICT / NOMATCH /
+    UNMEASURED / n/a, cause 'stale record' in the evidence); red-first on a stale record WITH a summary (arm D's
+    missing case); the four smaller items ride it or a twelfth; C1 + C2 read the delta; no leg reading moves.
     C2's DELTA READ of the eighth GREEN (b70531b9; the count-mismatch throw degrades to UNREAD/NOVERDICT; the guard's
     comment overreach banked post-leg); G's clearance waits ONLY on the i7 Core arm re-run on the eighth (running).
     ASSEMBLER RULED (COORD after C1 f100c5b9): header equality goes; each lane read BY NAME; the banked header is the
