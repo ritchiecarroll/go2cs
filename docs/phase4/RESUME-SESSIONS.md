@@ -485,7 +485,11 @@ DONE 2026-09-20 (1a6935a1b): 23 pinned-box different-pointee sites (zero reach t
 reinterpretations in all; the CRASHER is in the 20 UNTRACED local-variable sites, not the 23; p256.cs:577 is the same defect
 on the big-endian arm; the cert path is CLEAN (KeepAlive-without-fixed is the correct idiom). ASSIGNED NEXT: the one-hop
 backward trace of the 20 V sites to their definitions, scored into the same classes, by file:line; liveness is the
-instrument after that. (3) The seven pthread members the darwin
+instrument after that. DONE 2026-09-20 (9d50b5f5e): P 2 (the p256 pair) / C 5 / N 6 / A 1 (fails by NAME via the arithmetic
+arm) / U 6 -- the resolved-different-pointee class is 25; C1's Cast premise WITHDRAWN (Cast is where T:struct; the check is
+at runtime); the InlineArray layout direction banked POST-HOP for the class cure. ASSIGNED NEXT: the second hop -- the call
+sites of the five alg.cs hash helpers taking a pointer parameter and of AliasPointer's raw-metal fork (array.cs:216), each
+scored into the same classes; then the design read of R's two companions when announced. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
