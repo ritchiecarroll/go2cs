@@ -1709,8 +1709,10 @@ subtest names with backslashes are not UNC paths) -> RE-RULED (COORD after C1 1f
 minimal UNC prefix (the routed red could not fire); the seam is the PLACEHOLDER ADMIT withheld from unc_ arms against
 the census header's own contract (the Go guard applies it to every kind: 237 census refusals vs the guard's 0) ->
 (a) extend the admit to unc_ arms, the red a non-placeholder non-nickname host, the selftest gains the known negative;
-one commit C1 cuts, COORD lands; R first posts the five hosts' MEMBERSHIP only (placeholder/nickname/unclassified),
-then re-censuses and pushes the second evidence commit. math/rand's comparison JSON has FOUR case-collision name pairs (Int31n/int31n) that
+one commit C1 cuts, COORD lands -- CUT aad0273e7 (2 files, selftest 95 -> 103, both reds fired) and LANDED on
+master 5de6eb9bd0 (selftest before/after, census clean, repoguard 6/6); lanes re-copy posting copies from it.
+R posts the five hosts' MEMBERSHIP only (placeholder/nickname/unclassified), then re-censuses under the landed
+census and pushes the second evidence commit. math/rand's comparison JSON has FOUR case-collision name pairs (Int31n/int31n) that
 refuse ConvertFrom-Json -> the seventh's SHAPE fixture (47 ordinal names in both editions) and the assembler parses
 go/csharp as pair lists (object_pairs_hook; plain loads keeps the last = 43, the red). R tears down both leg trees
 now; the constraint-proxy (crypto/mlkem CS0311) seat is CUT with a green baseline (8 arms) -- announce pending; C1
