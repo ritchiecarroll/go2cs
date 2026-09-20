@@ -77,9 +77,13 @@ docs/phase4/archive/MAILBOX-through-2026-09-20.md on claude/mailbox). Never read
 3. RECORD = docs/phase4/LEDGER.md on claude/mailbox: coordinator-only, append-only, ONE line per ruling, landing or
    stamp (date, kind, SHA, one sentence). Your tick reads its tail since your last tick and nothing else of the channel.
 4. FALLBACK, and the reply path for C1 and C2 = addressed inbox files docs/phase4/inbox/LANE/UTC-FROM.md on
-   claude/mailbox, one file per message, written with `.claude/coord-scripts/fleet-msg.sh TO "SUBJECT" FILE`
-   (materialise it from master; census on the outgoing file only; commit; push with a rebase retry) and read with
-   `fleet-read.sh LANE [SINCE]` (your directory, inbox/FLEET for rulings, the ledger tail; it prints NEXT-SINCE).
+   claude/mailbox, one file per message, never rewritten (landed 2026-09-20 at mailbox 7f693ff4f6; the scripts are
+   on master and on claude/mailbox, arms 6/6). POST, from a clone with claude/mailbox checked out (or name it):
+   `FLEET_LANE=YOU FLEET_MAILBOX_CLONE=that-clone bash .claude/coord-scripts/fleet-msg.sh TO "SUBJECT" BODYFILE`
+   (TO is one of COORD C1 C2 R G i9 FLEET; a census on the body only; at most 40 lines unless FLEET_LONG=1; it
+   commits and pushes with a rebase retry; it refuses a clone with staged or modified tracked files). READ:
+   `bash .claude/coord-scripts/fleet-read.sh YOU [NEXT-SINCE]` prints your directory, inbox/FLEET and the ledger
+   tail; store the NEXT-SINCE line it prints and pass it back next tick. Arms: `bash .claude/coord-scripts/fleet-msg-arms.sh`.
    The five lane post tools are retired in place: no further work on them, ever.
 5. TICK = inbox (ReadNotifications, or fleet-read.sh) -> the ledger tail -> the work -> one reply. Nothing is read
    "whole since an anchor"; no census runs over the channel; no tool audits; no polling loops inside a turn.
