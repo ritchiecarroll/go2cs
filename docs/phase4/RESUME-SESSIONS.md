@@ -439,8 +439,10 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     neutral binary names (three hardcoded .exe paths refuse a linux GOROOT with the wrong cause); (B) the successor map at
     :271-281 is a hand copy already wrong three ways vs C1's ruled map -- carry the four corrections + an owner comment,
     derive from the roster's relocation table when the roster seat lands; (C) word = UNREAD when diverged is not an int).
-    The third commit's map = C1's 14-arc table (350a301a; source -> targets LIST, never 1:1; 11 targets, fips140test
-    receives three; every arm inherits the floor) with the owner comment; the durable relocations.tsv lands with the
+    The third commit's map = C1's table (350a301a; source -> targets LIST, never 1:1; 10 rows, 13 ARCS (i9 f21d32b7
+    corrected the 14: three splits, fips140test receives three, 13 - 3 + 1 = 11 targets), every arm inherits the floor)
+    with the owner comment; THIRD COMMIT ANNOUNCED (f21d32b7): ddc205a1ee on 4739769503, +77/-21 -- both binary spellings
+    probed, NOVERDICT for the unreadable case (one spelling per class), the whole map + the orphan assertion kept; the durable relocations.tsv lands with the
     roster seat and the wrapper's map derivation switches to it in a commit landing with the seat.
     NEXT: the third commit (announce-then-push); C2 reads its diff; the i7 Core arm re-runs on the FINAL tip after the
     fips140test seat's conversions finish (never two conversions on one box); then LAUNCH. ALSO: apply R's seat
@@ -717,8 +719,10 @@ different claims). RUNBOOK LINE OWED at the next docs seat: the PATH-resolved pi
 H10's preconditions table. ASSIGNED (COORD after R 57e9e70e): (1) the design read of R's seat ce8d0bd654 (the three-step
 resolution, the fourth flag site, the IndexExpr residual); (2) SIZE the reflect TestIsZero AccessViolation from the
 emission at CONVERT (setField's unsafe write, the golib door, the class -- the 25-site pinned-box class or another -- a
-fix shape, a red-first arm); no cut. THE RELOCATION MAP OF RECORD is C1's table (350a301a: 10 rows, 14 arcs, 11
-targets); the roster seat after the leg adds docs/phase4/hopA-inputs/relocations.tsv (one line per arc) and derives the
+fix shape, a red-first arm); no cut. DESIGN READ of R's seat DONE (be9a7447, SOUND). NEXT DOCS SEAT (two items): the
+PATH-resolved pin line in H10's preconditions table + CLAUDE.md:48's architecture-map row naming src/Examples/ (absent
+at master; the sample trees are src/tour, src/utilities, src/tools), the context-budget gate run. THE RELOCATION MAP OF
+RECORD is C1's table (350a301a: 10 rows, 13 arcs -- i9's count, C1's prose said 14/4 splits; 3 splits; 11 targets); the roster seat after the leg adds docs/phase4/hopA-inputs/relocations.tsv (one line per arc) and derives the
 $longTimeouts re-path from it. SIZINGS DONE (dfdcbc65) and ROUTED (COORD after 53c57e752): row 1 fips140test = the test
 emission's using-static + initPackage of a production class the driver never emitted (test-only package) -> an i7
 sub-agent cut after the Core arm, C1 design read / C2 structural, i9 applies; row 2 crypto/mlkem = zh<T> at a
@@ -1018,6 +1022,7 @@ axis confirmation through the pipeline (d5cdd55ab), the wrapper pre-cut reads (f
 correction: verified premises do not transfer their standing to a synthesis -- BOARD line; 7c43a15e the converter's two
 Validated format strings). ASSIGNED: read C1's (d) aa66874ff7 as the H10 procedure amendment (order, host rule,
 preconditions table, per-row steps against the rulings cited) -> COORD lands; then read i9's recon wrapper.
+NEXT: the diff read of i9's third commit ddc205a1ee when at origin.
 R's SEAT STRUCTURAL READ DONE (15a14bad: suite green on this box; the fixture fires all six lines reverted and passes
 restored byte-identically; reflect rc 1 -> rc 0 as a same-box A/B; time still rc 1 as the control). NEXT: the diff read
 of i9's third commit; then the generator's reserved-set derivation from relocations.tsv (a commit on the shardmap ref
@@ -1347,8 +1352,12 @@ were minted, the gap was publication. ACCEPTED for the reads (COORD after 190153
 suite + fixture; i9 applies the ref tip. time = a DIFFERENT gap (the package-level lift publishes; the external variant's
 resetPackageState discards it, seeding only production's package_info.cs) -> R's SECOND COMMIT on the same ref (carry the
 internal variant's dynamic lifts like whiteboxBridgeTypeNames; the qualified spelling measured first).
-R's ORDER: the time commit, then the crypto/mlkem CONSTRAINT-PROXY WIDENING (row 2), then the reflect TestIsZero crash on
-C1's sizing. Was: QUEUED after the registration seat (COORD after ea03e60d): the crypto/mlkem CONSTRAINT-PROXY WIDENING (row 2) -- the two
+C1's DESIGN READ DONE (be9a7447: SOUND; the two-site reuse runs through visitStructType.go:168-207's signature-keyed
+reuse block; three comment corrections ride the time commit -- the four-step resolution, the IndexExpr residual's real
+reason, the placement claim; the four liftAtCallBoundary sites set-and-clear rather than save/restore = C1's small cut
+after the hop; the construct spreads to six sites at 1.25 incl. encoding/json/v2). CLEARED for i9's apply (COORD after
+f21d32b7). R's ORDER: the time commit, then the crypto/mlkem CONSTRAINT-PROXY WIDENING (row 2), then the reflect
+TestIsZero crash on C1's sizing. Was: QUEUED after the registration seat (COORD after ea03e60d): the crypto/mlkem CONSTRAINT-PROXY WIDENING (row 2) -- the two
 converter gates, the generator's no-self-parameter path, the flipped named control, red-first with the generated proxy
 asserted to EXIST, the row past COMPILE, the suites, the corpus diff predicted EMPTY (the 18 proxies keep their dedupe
 key); C1/C2 read the halves; i9 applies. Row 3 (internal/sync CS0411) MOVES to an i7 sub-agent after fips140test.
