@@ -944,6 +944,16 @@ refs with evidence (R 36b3783953, i9 eca66ad342, G de9aa07ebe); (3) C1's spine o
 on top of 957c71d0e (the row-set edit -10/+11, the assembler + re-classifier as tools, the basis, the
 re-classification, the runbook docs half incl. G's docs/validation discard scope); (4) C2's shardmap ref (nine
 commits) + THE PLAN as its tenth; signed merges by COORD, the census + repoguard after each leg, the tools' and
+[SPINE FIRST COMMIT f361c53e4 (C1 f2e00433c): basis 213 of 228 kept, two assemblies agree on every figure; 2 PASS
+recovered (math/rand, mime/multipart), 11 DIVERGED, 2 NOVERDICT by the host cause, testing NOVERDICT (hand-own).
+RULED 3f70a096e: (ONE) NO disclosure-file move -- master keeps the two source files; the five pins are MINTED at the
+fips140test RE-BANK on the version branch by the driver under the renamed declarations from the measured reading;
+(TWO) each source's 1.23.12 anchor appears ONCE, on its PRINCIPAL target derived by VERDICT majority through the
+declaration map; a target that is nobody's principal is a CANDIDATE; every target states its arc and links the
+source's record; no proof file moved/created; a format-gate refusal recorded, the driver retires it; testing stays
+in the population under the hand-own cause; the five-uncosted clause discharged by G's 107. The diverged
+subtraction (i9 64d873bb2): disclosed entries are SENTENCES, the name is the leading token -- C1 fixes
+reclassify.py and re-posts the deltas (12/1/19 known); cs=infrastructure-error entries are a HOST class in the plan.]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
@@ -1750,7 +1760,17 @@ refusal names Developer Mode; red-first by forcing the junction branch on the i7
 (~07:45: two files under src/core/testing; ApplyJunctionGodebug via TestHost.PublishEnvironmentVariable feeding the
 probe's CLR child AND the converted syscall copy; the mechanism confirmed by go version -m; red/green/green-without-
 GODEBUG on cfile; testing.csproj 0 errors; census 116; repoguard 6/6); C1 design + C2 structural; the apply after
-the foreign-generic apply with cfile + internal/trace as the prediction tests. The owner item RESTORED as OPTIONAL (Developer Mode on R-LAPTOP and i9 makes
+the foreign-generic apply with cfile + internal/trace as the prediction tests. READS DONE: C1 design (da6f38afc: the
+process-wide unrestored GODEBUG write is the finding -- the corpus's own GODEBUG reader observes the CLR store and the
+os + path/filepath tests read winsymlink; the refusal's sentence false when the caller pre-set winsymlink) and C2
+structural (25e24a786: SOUND, apply may proceed; the per-process effect; the substring guard; half-application a
+warning). RULED (3f70a096e): ONE FOLLOW-UP commit on the seat ref by an i7 sub-agent (worktree hf1, LAUNCHED ~08:05):
+the setting lives exactly as long as the junctions (both stores captured before the first write, restored at the
+staged tree's teardown, T.Setenv's idiom, red-first by an arm asserting the stores after a forced-junction host --
+must FAIL on bb6c75f60e); ApplyJunctionGodebug returns whether it applied and the refusal names which environment
+supplied the setting; a token-wise winsymlink match; comment lines (CLR-store-first ordering; winreadlinkvolume the
+un-restored neighbour, neither release's configuration; the stderr note = this host imposed it; half-application
+inherited). Then C2 reads the follow-up delta, then the apply. The owner item RESTORED as OPTIONAL (Developer Mode on R-LAPTOP and i9 makes
 the symlink path available today); the rows stay NOVERDICT by cause and are re-measured by the driver). R's CORRECTION (fcb75ab3) taken: the runbook sentence is i9's -- mtime is unrelated
 to provenance in either direction (over in R's tree, under in five of i9's seven packages); the remedy unchanged.
 i9 RE-TOOK its table (0bb72afd): genuine residue in six of seven packages -> its two-row arm STILL OWED; go/types
@@ -1909,7 +1929,10 @@ interface name; suite ok 376 s. R FOUND THE INTERFACE-SIDE TWIN of C1's key find
 commit with the struct-side key (both operands; C1 + R read). R's GENERATOR half (the wrapped-result adapter for a
 projected result, AdapterImplTemplate) stays R's, red-first in GenTests; its apply after the foreign-generic apply +
 follow-up. DOCTRINE: a fetch-narrowed clone answers a STALE origin/<branch> to a successful fetch -- use ls-remote or
-FETCH_HEAD, or an explicit refspec. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
+FETCH_HEAD, or an explicit refspec. CENSUS CLOSED (3f70a096e): the verdict is per-branch, read from CONFIG,
+negatives included (C2: wildcard + negative freezes the ref under a plain fetch, moves it under an explicit one);
+a worktree is not a clone; R's two acts: steward-r maps master; mailbox-r deletes its unmaintained origin/master;
+no mailbox clone widened. C1's correction taken: the post-tools case was a stale working-tree COPY, not a stale ref. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
 console codepage mangles UTF-8 git paths -> [Console]::OutputEncoding = UTF8 into the runbook (C1). R NEXT: the
 seven, then crypto/mlkem CS0311, then the five reflect names at 7ff4694b22. R's post-tool fix
 ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
