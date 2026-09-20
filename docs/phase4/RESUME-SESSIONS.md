@@ -577,7 +577,7 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     NEXT: the third commit (announce-then-push); C2 reads its diff; the i7 Core arm re-runs on the FINAL tip after the
     fips140test seat's conversions finish (never two conversions on one box); then LAUNCH. The third commit is AT
     ORIGIN (ddc205a1ee); the i7 Core re-run launched on it (sub-agent). H10 RECON LEG LAUNCHED 2026-09-20 (COORD
-    a82eb75b1) at VERSION TIP f83ba29ffb (the foreign-generic adapter seat STAMPED ~08:30: parents f0c3399684 + c63943eee7, three EQUAL,
+    a82eb75b1) at VERSION TIP 6d814e2d38 (the host seat STAMPED ~10:20 on f83ba29ffb; the foreign-generic adapter seat STAMPED ~08:30: parents f0c3399684 + c63943eee7, three EQUAL,
 CNR 729 no regression, GenTests 43/43, stdlib 344/0, the sync row COMPILES 46/6 to the name; the COLLISION-KEY
 follow-up (both operands + the value-adapter twin question) CUTTING on the i7 in worktree ck1; two instrument
 findings banked: the circular machine-scope GOROOT pin; an empty materialised tool passes vacuously -- assert byte size
@@ -1093,6 +1093,11 @@ the rule incl. unique x2 -- the CS0411 class explained -- + a CS1955 T(nil) chan
 (a func literal assigned to iter.Seq[V] emitted as a bare delegate; + a CS0136 closure scope flatten), embedtest (a
 test-only package gets an unconditional production using-static, CS0234); the seat ORDER: json, maphash, synctest,
 embedtest, sha3. G next: two population sweeps + a fresh internal/sync sizing at f83ba29ffb.
+THE HOST SEAT STAMPED ~10:20: VERSION TIP 6d814e2d38 (parents f83ba29ffb + 4959a2f026; two EQUAL; stdlib 344/0; suite
+ok; CNR 729 no regression; cfile Validated 15; internal/trace Validated 92 with ZERO divergences on the natural path
+-- i9's 4-of-92 is the fallback path's). APPLY BATCH 2 LAUNCHED on top (i7 sub-agent, worktree ab2: the seat ref
+8b1a284122 + the host ref 91f1bd5877 (its third + fourth) + R's d6c7ebd78b; one battery incl. crypto/mlkem as the
+prediction test; NO push). The ha1 worktree removed.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
@@ -1738,7 +1743,7 @@ with the population asserted; made to fail two ways firing :48 and :70; one go t
 CLEARED for i9's apply on 4df427fdcb (COORD after 6acab84c); its stamp fixes the leg's tip. APPLIED (03a5cbbf) at
 0dc65a8e8d and STAMPED by COORD (tree f236cdeed2, parents 4df427fdcb + dd376e3f12, 3 files +147/-12, testConversion.go
 and the projitems composed exactly as a clean merge composes them -- verified by a throwaway merge on the i7; corpus 0;
-signed) -- VERSION TIP f83ba29ffb (the foreign-generic adapter seat STAMPED ~08:30: parents f0c3399684 + c63943eee7, three EQUAL,
+signed) -- VERSION TIP 6d814e2d38 (the host seat STAMPED ~10:20 on f83ba29ffb; the foreign-generic adapter seat STAMPED ~08:30: parents f0c3399684 + c63943eee7, three EQUAL,
 CNR 729 no regression, GenTests 43/43, stdlib 344/0, the sync row COMPILES 46/6 to the name; the COLLISION-KEY
 follow-up (both operands + the value-adapter twin question) CUTTING on the i7 in worktree ck1; two instrument
 findings banked: the circular machine-scope GOROOT pin; an empty materialised tool passes vacuously -- assert byte size
