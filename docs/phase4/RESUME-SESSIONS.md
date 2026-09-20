@@ -1058,7 +1058,15 @@ asserting the garbled key on purpose); the group-key-vs-record-spelling mismatch
 on master: R's fourth post-tool commit a37fc2f5a7 -> ab7a59457f; C1's assemble.py determinism 03f791ea5e ->
 e1add354aa (the committed basis stays in lane order; readers compare as sets); C2's anchor fix 2968cbaf80 -> MASTER
 35a880b68c (the last of the four lanes). Fleet lines: name the hash FUNCTION beside every digest; a door whose misuse
-hangs is worse than one that refuses.]
+hangs is worse than one that refuses.
+~09:45: THE HOST REF'S FOURTH COMMIT 91f1bd5877 at origin (comment-only: the true sequentiality sentence -- nothing
+concurrent wraps a host run; 35 sites; the pairing caution first at the enforcement site; C2 delta read) = the tip
+batch 2 merges. C1 measured crypto/mlkem = a MIXED suite -> white-box reference -> the anchored path ON (65c0abde).
+R (aed592bf2): the anchored cut is TWO changes -- the emittedAdapterPair PAIRING must strip both sides (R's payload
+strip made the marker miss the record's closed spelling -> the anchor-class qualification goes missing), then the
+anchored name; the arm reaches the anchored path end to end; R cutting both on R's ref. THE DRIVER's BRIEF DRAFTING
+on the i7 (sub-agent; scratchpad driver-brief-DRAFT.md; runbook-sourced vs proposed items; open questions).
+BATCH 2 = the seat ref 8b1a284122 + the host ref 91f1bd5877 + R's ref after the anchored commit; after ha1 pushes.]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
