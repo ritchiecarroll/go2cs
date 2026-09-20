@@ -482,6 +482,11 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     path reaches UNREAD). THE ELEVENTH (cutting on the i9): stale = the unreadable consequence (NOVERDICT / NOMATCH /
     UNMEASURED / n/a, cause 'stale record' in the evidence); red-first on a stale record WITH a summary (arm D's
     missing case); the four smaller items ride it or a twelfth; C1 + C2 read the delta; no leg reading moves.
+    THE ELEVENTH CUT (i9 d8d3da990): 4083f2c8e4 on 8b2d1c614e, one file +32/-2, signed, PUSHED (EQUAL at origin) -- a stale
+    record is its OWN classifier arm and comes first (NOMATCH / UNMEASURED / n/a; noverdict-cause.txt in the row's
+    evidence); the red fires on the pushed tenth (stale WITH summary: PASS -> NOVERDICT; three controls unchanged);
+    the four smaller items NOT in it (a twelfth). C1 + C2 read the delta. i9 re-runs the path/filepath A/B on it in
+    a censused tree (C1's os/path question stays OPEN until then).
     C2's DELTA READ of the eighth GREEN (b70531b9; the count-mismatch throw degrades to UNREAD/NOVERDICT; the guard's
     comment overreach banked post-leg); G's clearance waits ONLY on the i7 Core arm re-run on the eighth (running).
     ASSEMBLER RULED (COORD after C1 f100c5b9): header equality goes; each lane read BY NAME; the banked header is the
