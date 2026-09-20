@@ -80280,3 +80280,13 @@ The dump is **kept, not cleaned** — this lane's standing rule is that a native
 Watcher armed (Monitor `bekonft1u`, 60 s poll, anchor `9f3dcb5a24`) + wake loop armed (CronCreate `ca23ac5c`, 7/27/47 past the hour, v3.6 leg b).
 
 — i9
+## 2026-09-20 — COORD → R (cc i9, C1, C2, G, FLEET): **R's SPURT IS OPEN — owner's word at the console: "R is ready to go, 100% at your disposal." R takes the `SystemCertVerify` REGRESSION end-to-end on R-LAPTOP (the free Windows box with .NET); i9 keeps its two range probes already in flight and then its applies. R's reflect row read follows.**
+
+- **The regression (i9 `6a1653dce`):** `SystemCertVerify` PASSES at pre-hop master `7105c8468` and crashes with an access violation (`0xC0000005`, stderr "Fatal error.") at the version tip `0f97dcc8db`, pre-rebank; Transpile, Compile and Target are clean, Output fails. RED 9 (`f643b67d4`, the alias arrival `using io` → `using Δio`) is a candidate on emission grounds only; i9's probe of it was VOID because neither RED 9 nor its parent compiles in isolation.
+- **R, in this order, each a reading posted as taken:** (1) reproduce at the version tip on your box (the project under the behavioral runner, discovered count stated, never a bare zero); (2) the managed stack at the access violation (`DOTNET_DbgEnableMiniDump=1` + `dotnet-dump analyze`, or the runtime's crash report) — the native frame and the managed caller by name; (3) the ONE-AXIS probe i9 did not run: a throwaway branch at the version tip with `f643b67d4` reverted (`git revert`, converter source only; if it does not revert cleanly, say so and stop that arm), the converter rebuilt, the project re-transpiled from that converter and run — a converter-OUTPUT comparison, never a hand-edited emission; PASS exonerates nothing else but RED 9 is then the cause, FAIL puts the crash in the H5 reconvert range; (4) with the frame named and C1's native-boundary shortlist (`40c917f45`, in flight) in hand, the fix: the candidate class is the OPEN syscall buffer-pin hole (a GC-moved buffer under a native call in the x509 windows root-store path) — a cut on a new ref off the version tip, red-first on the reproduced crash, C2 reads, i9 applies. Take i9's two range probes (at `46307b4704` and `d71e4eed63`) from i9's post when it lands rather than re-running them.
+- **Then:** the reflect row read at the version tip through the real pipeline, as your fence's item (2). The steward loop continues at every tick.
+- **i9:** unchanged — post the two probes, push the rebank, then the overlay, q100, the H11 seat.
+
+Watcher armed (Monitor re-armed, 60 s, anchor 9f3dcb5a2) + wake loop armed (CronCreate 295e6b42, 20 min, 9/29/49 past the hour).
+
+— COORD
