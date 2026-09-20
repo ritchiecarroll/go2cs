@@ -389,6 +389,14 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     C2 reads the file. Then the preflight at 93feb8df2b (disk >= 25 GB) and the slice/cooldown regime for the reserved
     rows; i9's list = reserved 14 + windows-only 2 = 16 (net included). i9's POST TOOL LANDED at master c2cd9c2f46
     (575afbcde7; gates + census green).
+    CONFIRMED 2026-09-20 (COORD c260f4313, after i9 5e1471f3d/bde60048e/ac47d3e30 and C2 f9da1c467/d4f915ed1/7c43a15e):
+    the PIPELINE, decisively because run-validated-sweep.ps1 enumerates from the ROSTER (-Filter -Exact throws 'No banked
+    packages matched' for the twelve successors and the 23 unbanked rows) -- one instrument for all 228. Spec: verdicts =
+    the converter's own 'Validated (\d+) tests against go test' line (per-row assertion exactly one match; cross-checked
+    against go2cs_test_comparison.json's ordinal map count; NON-INTEGER on disagreement/no match, never 0); sweep_s = the
+    wrapper's clock around the ONE invocation (one attempt per row, so the sweep's re-run inflation cannot arise); word =
+    the outcome class PASS/DIVERGED/CONVERT/BUILD/TIMEOUT/NOVERDICT; no -tags; the drift assertion guards the summary-line
+    format with a planted non-match. i9 CUTS on this; C2 reads the file; the i7 runs the Core arm by sub-agent; then LAUNCH.
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
@@ -633,7 +641,11 @@ skeleton-only' of e0d5121e2 is a superseded estimate, C1's 23 by name is the rea
 pipeline per package cited to the runbook's own H10 line, the corpus axis as the population key, fiat's 0-denominator
 mechanism (a complete test project with zero converted test source; declarations recorded vs C# test source produced
 are different units), the two windows-only rows, -test-allow-handown for testing.
-DOCS SEAT LANDED on master ceb1c87971 (signed; gates green; C2's read ebd9553dc). Fold C2's notes into the amendment
+DOCS SEAT LANDED on master ceb1c87971 (signed; gates green; C2's read ebd9553dc). (d) CUT (d5c982a5): aa66874ff7 on the
+same ref (fast-forward from 6e082a09c5, parent ceb1c87971, +129: the H10 amendment +87 -- order, mechanism, TSV contract,
+host rule, preconditions table, per-row steps -- and C2's three notes appended under the section-4 bound +42); it states
+the recon leg as the per-package pipeline on name lists (consistent with COORD c260f4313). C2 reads (d); COORD lands the
+ref signed on that read. C1 may add the wrapper's word vocabulary + the one-attempt clock at its next commit. Fold C2's notes into the amendment
 commit: proc.cs cited per-GOOS (runtime/{linux,windows,darwin}/proc.cs:848), the RegisterPinned step that makes
 initAlgAES arm 2, and the clause that the box materialises at eleven construction sites (scope by provenance). (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
@@ -921,8 +933,11 @@ rc 0) = floor 2's -tests form; testing needs -test-allow-handown; internal/sysca
 (their markers read linux: n/a); the marker count is 198 of 204 numeric (202 was occurrences incl. 2 prose examples).
 ASSIGNED NEXT (COORD after f14cafb9): read C1's docs seat claude/c1-board-night-lines 6e082a09c5 (the section-4 bound's
 arm classification against zh.cs at master; the BOARD block's four lines against the record); COORD lands it signed on
-the read. Also DONE: the ordering predicate on i9's published tool (4f3e5104: exact; the %G? E-vs-N method note) and the
-axis confirmation through the pipeline (d5cdd55ab). READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
+the read. Also DONE: the ordering predicate on i9's published tool (4f3e5104: exact; the %G? E-vs-N method note), the
+axis confirmation through the pipeline (d5cdd55ab), the wrapper pre-cut reads (f9da1c467 sizing, d4f915ed1 its own
+correction: verified premises do not transfer their standing to a synthesis -- BOARD line; 7c43a15e the converter's two
+Validated format strings). ASSIGNED: read C1's (d) aa66874ff7 as the H10 procedure amendment (order, host rule,
+preconditions table, per-row steps against the rulings cited) -> COORD lands; then read i9's recon wrapper. READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
 two additive citation notes) -- LANDED by COORD at master ceb1c87971. Then read i9's recon wrapper when announced.
 Blocked on: nothing.
 ```
