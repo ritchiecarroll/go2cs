@@ -282,10 +282,46 @@ function Find-Exe([string] $dir, [string] $stem) {
 #     5.1           JavaScriptSerializer.DeserializeObject a Dictionary[string,object]; likewise
 # Both answer .Keys / an indexer through System.Collections.IDictionary, so ONE set of consumers below
 # serves both editions and there is no per-edition branch outside this function.
+# ⚠⚠ AND THE NAMES MUST SURVIVE THE READ, ORDINALLY, ON BOTH EDITIONS.
+#
+# Legal Go test names differ only by case, and the corpus has instances: `math/rand` carries FOUR
+# collision pairs (`TestUniformFactorial/n=3/Int31n` vs `.../int31n`) and `mime/multipart` one.
+# Measured here against those two documents:
+#
+#     ConvertFrom-Json (5.1)          REFUSES outright -- "contains the duplicated keys"
+#     ConvertFrom-Json -AsHashtable   PowerShell's hashtable is CASE-INSENSITIVE, so on Core the
+#                                     same names collapse -- 47 arrive as 43 with NO error at all
+#     JavaScriptSerializer (5.1)      Dictionary[string,object], ORDINAL: 47 and 52 preserved
+#     System.Text.Json (Core)         ordinal, and it keeps properties differing only by case
+#
+# COORD `454195a30` (3): "a case-folding hashtable that keeps 43 is the same defect silently."
+# A refusal is loud and a fold is not, which is why -AsHashtable is the worse of the two and is
+# not used here despite being the shorter spelling.
+function ConvertFrom-JsonElementOrdinal($el) {
+    switch ($el.ValueKind.ToString()) {
+        'Object' {
+            $d = New-Object 'System.Collections.Generic.Dictionary[string,object]' ([System.StringComparer]::Ordinal)
+            foreach ($p in $el.EnumerateObject()) { $d[$p.Name] = (ConvertFrom-JsonElementOrdinal $p.Value) }
+            return $d
+        }
+        'Array'  {
+            $l = New-Object 'System.Collections.Generic.List[object]'
+            foreach ($i in $el.EnumerateArray()) { $l.Add((ConvertFrom-JsonElementOrdinal $i)) }
+            return $l.ToArray()
+        }
+        'String' { return $el.GetString() }
+        'Number' { $n = 0L; if ($el.TryGetInt64([ref] $n)) { return $n } else { return $el.GetDouble() } }
+        'True'   { return $true }
+        'False'  { return $false }
+        default  { return $null }
+    }
+}
+
 function Read-JsonDocument([string] $Path) {
     $raw = [System.IO.File]::ReadAllText($Path)
     if ($PSVersionTable.PSVersion.Major -ge 6) {
-        return ($raw | ConvertFrom-Json -AsHashtable)
+        $doc = [System.Text.Json.JsonDocument]::Parse($raw)
+        try { return (ConvertFrom-JsonElementOrdinal $doc.RootElement) } finally { $doc.Dispose() }
     }
     Add-Type -AssemblyName System.Web.Extensions
     $ser = New-Object System.Web.Script.Serialization.JavaScriptSerializer
@@ -738,21 +774,30 @@ foreach ($row in $rows) {
             try {
                 if ($cmpUnreadable) { throw 'the comparison document could not be parsed' }
                 $jj = $cmpDoc
-                # ⚠ @{} IS CASE-INSENSITIVE AND THAT IS PRESERVED HERE DELIBERATELY. The comment below
-                # calls the comparison Ordinal, and the $names set IS -- but these two maps are 5.1
-                # hashtables, whose default comparer collapses names differing only by case. That is a
-                # REAL defect, measured, and it is NOT this commit's to fix: COORD ruled these items
-                # "and nothing more", and changing it here would also destroy the old-vs-new
-                # equivalence arm that makes the parse change checkable. Reported separately.
+                # ⚠⚠ ORDINAL MAPS, AND AN EARLIER CUT OF THIS FILE SAID OTHERWISE. It carried
+                # `$goMap = @{}` with a comment calling that a real defect deliberately left alone as
+                # out of scope. It is not out of scope: COORD `454195a30` (3) requires all 47 of
+                # `math/rand`'s names to survive in BOTH editions, and a `@{}` here reduced them to 43
+                # with no error -- measured on R's committed fixture, 4 names lost, and 1 on
+                # `mime/multipart`. A PowerShell hashtable's default comparer is case-INSENSITIVE;
+                # the $names set beside it was already Ordinal, so the two disagreed about what a
+                # name is. Whatever the deserializer preserves, these must not throw away.
                 $goSub = Get-DocMember $cmpDoc 'go'
                 $csSub = Get-DocMember $cmpDoc 'csharp'
-                $goMap = @{}
+                $goMap = New-Object 'System.Collections.Generic.Dictionary[string,string]' ([System.StringComparer]::Ordinal)
                 if ($goSub -is [System.Collections.IDictionary]) {
                     foreach ($k in @(([System.Collections.IDictionary] $goSub).Keys)) { $goMap[[string] $k] = [string] $goSub[$k] }
                 }
-                $csMap = @{}
+                $csMap = New-Object 'System.Collections.Generic.Dictionary[string,string]' ([System.StringComparer]::Ordinal)
                 if ($csSub -is [System.Collections.IDictionary]) {
                     foreach ($k in @(([System.Collections.IDictionary] $csSub).Keys)) { $csMap[[string] $k] = [string] $csSub[$k] }
+                }
+                # ⚠ AND THE LOSS IS MADE LOUD RATHER THAN TRUSTED. If a future edition's reader folds
+                # anyway, the row says so instead of publishing a quietly short verdict count.
+                $goKeyN = @(Get-DocKeys $cmpDoc 'go').Count
+                if ($goMap.Count -ne $goKeyN) {
+                    Write-Host ("     !! ORDINAL NAMES LOST: the document carries $goKeyN `go` names and the map holds $($goMap.Count) -- the reader folded") -ForegroundColor Red
+                    throw "the comparison document's names did not survive the read ordinally ($goKeyN -> $($goMap.Count))"
                 }
                 # ⚠ THE DISCLOSED ONES ARE SUBTRACTED, AND THEY ARE PROSE, NOT NAMES. `disclosed` is a
                 # list of SENTENCES -- "TestReadStringAllocs (alloc-profile): at-most-one AllocsPerRun
