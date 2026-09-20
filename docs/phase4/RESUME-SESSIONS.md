@@ -1023,7 +1023,15 @@ R's by author form + body hash): OWNED by i9 (03603d635: the CONTROL arm of its 
 LEFT IN PLACE by ruling (never rewrite the channel); doctrine banked at aac878de8: the control is the dangerous arm --
 every post-tool arm runs through a DOOR or a throwaway clone. R's mlkem comment commit cb8f5cb02 accepted standalone
 on its ref (no rebase). R's THIRD post-tool commit 4066b21216 (the doors asserted before any arm; a negative control)
-LANDED -> MASTER 7165ec9a46 (~09:10).]
+LANDED -> MASTER 7165ec9a46 (~09:10). LEG (4) THE PLAN CUT (C2 642404c76): a85a7cf2fb, the tenth commit on the
+shardmap ref -- 424 dispatch rows over W=[3,4], 14 unscheduled, makespan 88/74 min, 11 reserved rows on the i9, 203+23
+= 226; the basis content- but not byte-reproducible (row order) -> RULED: assemble.py writes rows sorted (C1, one
+line, red-first); the merge RUNNING on the i7 by sub-agent (worktree tr4; the plan's own digest gate + census +
+repoguard; no push). C2's #34 728d906f4a (the inert-arm predicate) and i9's post-tool fix 638516f720 (the anchor
+fix, the door, #34 half 2, the empty-message guard) LANDED -> MASTER da378999db (~09:20). i9's write-tree near-miss
+banked (a gate counts lines only after its rc; assert the tree's entry count). NEXT after leg (4): THE DRIVER's brief
+(run-h10-dispatch.ps1 unexercised; first run = a one-shard rehearsal on a Windows box against the tip after APPLY
+BATCH 2). The host third commit 2d286b2702 announced (C2 delta read); the follow-up 8b1a284122 announced (C1 + R).]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on

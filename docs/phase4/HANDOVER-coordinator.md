@@ -692,3 +692,4 @@ Each lane runs in its own Claude Code session on its own host with its own local
 - 08:58: leg (2b) landed (e0b457c9d2); R's and C1's post-tool anchor fixes landed -> MASTER 5808c18f53; a stray post-tool fixture at mailbox d05397bce left in place (never rewrite the channel).
 - 09:04: the stray fixture owned by i9, left in place; the door doctrine banked; R's third post-tool commit landed -> MASTER 7165ec9a46.
 - 09:07: the collision-key follow-up cut and pushed (8b1a284122; both operands; corpus emission byte-identical; the value-adapter twin measured, not folded); C1 + R read; apply batch 2 pending the host third commit and R's arm.
+- 09:12: leg (4) THE PLAN cut by C2 (a85a7cf2fb) and merging on the i7 by sub-agent (tr4, digest gate); C2's #34 and i9's post-tool fix landed -> MASTER da378999db; the host third commit and the collision-key follow-up announced; the driver's brief next.
