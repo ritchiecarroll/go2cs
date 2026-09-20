@@ -421,6 +421,11 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     names; -test-timeout from $longTimeouts via the successor map (fan-out inherits) + the sweep's default. Then C2
     re-reads at the tip, the i7 Core arm re-runs there, then LAUNCH. The $longTimeouts re-path rides the roster seat;
     the generator prints intersected-out reserved rows (with the seat).
+    i7 CORE-EDITION ARM GREEN on 43aba50262 (sub-agent): parse 0/0 (pwsh 7.4.6, 5.1), -SelfTest pass, bufio dry run
+    (157 s with the build) and real row (32 s) PASS 80, CR 0, the tree dirtied as i9 saw and discarded with the worktree.
+    Two more lines for the second commit: platform = GOOS/GOARCH by go env (it read Win32NT); DOTNET_ROOT set INSIDE a
+    dotnet-tool pwsh (the i7's net8 apphost dies at launch with DOTNET_ROOT pointing at .NET 10). The Core re-run at the
+    new tip is the i7's; then LAUNCH.
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
