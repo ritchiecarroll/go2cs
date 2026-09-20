@@ -836,7 +836,10 @@ materialised; explicit master:refs/remotes/origin/master) as ONE commit on its p
 announce-then-push, landing with R's ead735e69c. Task 27 (the concatenation) waits on the TSV refs. The fetch-refspec remedy CUT (d2e61acc: 4b33fc803 on 06afd818ea,
 the two-shape control, the real-clone red-then-green) -- TAKEN; the tmp+mv materialise ROUTED as one commit on top; the
 scratchpad-derivation item DECLINED; the INSTRUMENT LANDING = C1's two + C2's refspec + R's ead735e69c together when
-all three read at origin (COORD merges; bash -n, census, repoguard). ALL THREE LISTS LIVE (G's ACK 5952b121: 107 rows on the fifth;
+all three read at origin (COORD merges; bash -n, census, repoguard) -- LANDED on master d8fe647ae8 (four signed
+merges: C1's H10 runbook seat claude/c1-h10-residue-runbook 03110c0b0 first -- residue preconditions, the TREE
+DISCARD block, what sweep_s measures, the is-it-alive line -- then C1's 4b33fc803+9ff722b1e, C2's 9feff23855+
+f4b736452f, R's ead735e69c; census clean x4, repoguard 6/6). Lanes re-copy their posting copies from the landed blob. ALL THREE LISTS LIVE (G's ACK 5952b121: 107 rows on the fifth;
 the early run discarded). hash/maphash BUILD on i9's list (unpredicted) -> C1 sizes at CONVERT from the completion post. C1's
 withdrawal (033a07d9): the roster seat carries no aggregate
 arc figure (the 14 lived only in a post) -- no correction owed; rule banked: a claim that a file contains something is a
