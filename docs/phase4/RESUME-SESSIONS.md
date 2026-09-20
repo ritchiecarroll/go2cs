@@ -316,7 +316,11 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     syscall buffer-pin hole; C1 owns the native-boundary guards)
   the root-attribution overlay claude/g-root-attribution a819ba7417 (APPLIED 43a3627667 on the rebank 68fcf34ea5 -- both
     STAMPED; VERSION TIP 43a3627667; the converter suite EMPTY)
-  then q100 at abe3b3798b, then the H11 seat claude/c1-h11-published-stamp 135f0cdc15 (CLEARED on C2's read 4c0a86310;
+  q100 APPLIED 025903ef01 (stamped; four pure additions; floor arms 4/4; go2cs.slnx 0 errors / 912 assemblies; GolibTests
+    fail set on i9 = four link-staging/goroutine tests PRE-EXISTING at the parent on i9's box and PASSING on the i7 at the same
+    tree family -- RULED a box question: i9 runs the four at 46307b4704 on its box; box property -> i9's box-base, the i7's
+    reading stays the corpus reading; else a regression in the 46307b4704..43a3627667 range, q97 the only src/core seat).
+  then the H11 seat claude/c1-h11-published-stamp 135f0cdc15 (CLEARED on C2's read 4c0a86310;
     converter-suite gate, the new guard arms by name; no corpus build); state the version tip after each. Still owed by a
     Windows box before H11 is declared: check-roster-format.ps1 and release-nuget.ps1 -VerifyOnly at the applied tree
   q100 claude/c1-q100-native-array-view-floor at its RE-PINNED tip abe3b3798b (9c5460585: the i7 gate CLEAR at 0dca38552c
