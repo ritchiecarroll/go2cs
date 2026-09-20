@@ -417,6 +417,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     column rides the seventh commit (C2's reader must ignore unnamed columns); the :30 header sentence rides it too;
     i9's post-tool commit (-s, floor, output-line count, positive control) YES at idle AFTER the leg. The instrument
     thread CLOSED at a8cfd8ff: no post-tool posts from any lane until that commit.
+    SEVENTH COMMIT PULLED FORWARD (COORD after G 515a988e: crypto/cipher's wrapper phase ~59 MIN and counting, 52:1,
+    3,457 s CPU): i9 cuts it NOW in a separate worktree (the leg untouched) -- the linear parse both editions, the
+    bounded tail, post_s, the :30 sentence, remedy (ii), the NOVERDICT clause, the dead-assignment comment, the
+    warn-only-row arm; red-first timed in MINUTES against G's real 4.77 MB comparison document shared by sha256; the
+    i7 Core arm (sub-agent) + C2's read; then G relaunches its REMAINING rows on the seventh (the in-flight row re-run,
+    the blob split stated in the completion post); R and i9 finish on the fifth unless a row of theirs hits G's ratio.
     WRAPPER CUT (f2eae7c85): claude/i9-h10-recon-wrapper 43aba50262 on 93feb8df2b, src/run-h10-recon.ps1 +321 (LF, 100755,
     census clean, signed). Two defects caught by the one-row dry run: the converter SPAWNS go from PATH (the pin gate had
     asserted the absolute path -- green about the wrong object; now three agreeing derivations: PATH-resolved go version
