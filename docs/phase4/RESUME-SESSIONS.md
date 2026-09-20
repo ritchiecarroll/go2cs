@@ -1075,6 +1075,15 @@ i9 ACCEPTED THE DRIVER SEAT (fb022226c: the parse gate + a one-slice dry run gre
 RULED (a): the grafted fips140test row is NON-BANKING in the rehearsal (evidence + the minted five-pin file as a
 prediction; i9 banks it in the campaign at W=4 slice 1 seq 13; the driver grows no 'banked elsewhere' skip); the
 rehearsal's seven native rows bank if green; a holder is a property of W. i9 cutting the seat.
+~10:10: BATCH 2 CLEARED ON READS (C1 fe07b469e + C2 767c73dd1 on R's anchored cut; C2 a83fdbf9 on the host fourth);
+R pushes a two-line comment correction first (the parity claim false at adapterResolvedName's site = the banked
+residual). LANDED: C1's drop-tree post tool aee4714ce2 -> b436b34e82; THE H10 RE-BANK AMENDMENT (three commits,
+3123d9fe4d) -> MASTER 058c96d81e (the runbook leads on the re-bank procedure). The sha3 SIZING (i7): the converter's
+collision-GROUP KEY normalises an alias-qualified LOCAL struct to the foreign form (the generator keys off the symbol)
+-> the set splits, no prefix, CS0246/CS0426; flate = the working foreign example; 2 of 195 test projects carry the
+shape -> a converter seat AFTER batch 2 (shared locality resolver with anchoredAdapterMemberName). C1's json
+population = a CLASS (6 packages / 9 types / 20 members) -> the json seat first, sha3 second, both i7 sub-agents off
+the post-batch-2 tip (they touch R's files).
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
