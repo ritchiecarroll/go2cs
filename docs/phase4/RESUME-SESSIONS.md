@@ -813,7 +813,15 @@ ff1a7f099c, +43/-2, five arms incl. a missing directory reading 0 arms; the tree
 both batteries printed) and LANDED on master c24d68061e; the ATTEMPTED-ARMS fix (5968c8f0: claude/c1-post-battery-
 attempted 06afd818ea, +18/-4, pass + fail and -lt; the post clone attempts 92 and was printed 91) LANDED on master
 5b214c7619. The $longTimeouts re-path DERIVED (11 -> 12 floors; mlkem768 fans out; no key absent from the 228; the
-comment-first-mention trap) -- RULED: derived from relocations.tsv at the roster seat, never a literal table. C1's
+comment-first-mention trap) -- RULED: derived from relocations.tsv at the roster seat, never a literal table. THE FILE
+LANDED on the roster seat ref (b23753f5: claude/c1-h10-roster-relocation 957c71d0e on a8511e37d7, 13 arcs, LF, no #
+header because C2's reader has no comment filter; gated through C2's reader, five arms red; the seat's roster rewrite
+does not move the map, control shown) -- lands WITH the roster seat after the three TSVs; the longTimeouts 11 -> 12
+stands on the generator's own print. ROUTED (COORD after b23753f5): C2 corrects the withdrawn 14-arc/four-split figure
+inside 8d7739f4e's comment and die() as a commit on top of claude/c2-shardmap-relocations; C1 cuts the post-tool
+fetch-refspec remedy (git fetch origin master in a single-branch clone writes no tracking ref -> the census cannot be
+materialised; explicit master:refs/remotes/origin/master) as ONE commit on its post-tool ref with a two-shape control,
+announce-then-push, landing with R's ead735e69c. Task 27 (the concatenation) waits on the TSV refs. C1's
 withdrawal (033a07d9): the roster seat carries no aggregate
 arc figure (the 14 lived only in a post) -- no correction owed; rule banked: a claim that a file contains something is a
 measurement, one grep. DONE (ba10c91a):
@@ -1544,7 +1552,9 @@ outside resetPackageState; the order hazard closed by the literal [internal, ext
 second-box A/B (339c3d48: rc 1 -> 0, 29 .cs both arms, the bare name binds, no second crossing site): the apply is
 COORD's from the i7 after the arm-2a apply. R's LEG ACK (9bd7ebb6): 105 rows RUNNING on the fifth at 0dc65a8e8d since
 02:29 local (pid 30352; the blob hash matched; both traps checked before row 1); fips140test and internal/sync are the
-two named expectations on R's list. R NEXT: the constraint-proxy widening.
+two named expectations on R's list; at 67669ba2 the leg reads 13 of 105 started, 11 PASS, 1 BUILD. R's post-tool fix
+ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
+an idle-time master landing with C1's fetch-refspec commit. R NEXT: the constraint-proxy widening.
 SEAT CUT (57e9e70e): claude/laneR-anon-struct-typearg ce8d0bd654 on d91c832543, five files under src/go2cs (the pre-visit
 liftExplicitAnonStructTypeArgs ahead of convCallExpr's rendering paths; the fourth site of liftAtCallBoundary), corpus 0;
 arm 1 made to fail both ways (two sites, one signature, five assertions); arm 2 reflect past CONVERT and BUILD, 195 tests
