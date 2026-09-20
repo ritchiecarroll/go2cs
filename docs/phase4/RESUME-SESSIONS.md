@@ -1152,6 +1152,10 @@ census green on 15 files; the battery running its gates after the ecdh seat's ru
 COORD's ruling had named the file's sha256 where a blob id was needed; i9 verified four ways) + R's post-tool
 commits 8-10 (8d24c655d0: the dry run no longer claims the bar; --mark-read; the third vacuity shape) -> MASTER
 7f95f60e4f. THE DRIVER AND THE WRAPPER ARE BOTH ON MASTER -> the rehearsal starts on the i7 when batch 2 pushes.
+~11:20: the deletion predicate banked (toward the base the ref is MEANT for, as a set); i9's three flagged old refs
+withdrawn. ASSIGNED: R reads the crypto/mlkem row (-test-action all) off its ref; i9 runs the os A/B (with/without
+winsymlink=0) at 6d814e2d38 with master's wrapper; C2 cuts the docs/validation/index.md central regeneration tool
+(ruling (2)) red-first on a new ref off master. G on its sweeps + the ecdh design read; C1 the ecdh structural read.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
