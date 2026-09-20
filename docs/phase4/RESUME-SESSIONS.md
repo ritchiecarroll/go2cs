@@ -1835,7 +1835,13 @@ on the old blob by direct run (the leak into both stores; the false sentence; wi
 cfile Validated 15 twice; census clean (116 + the branch's 83); repoguard ok. Relayed: the non-Windows branch reasoned;
 the pre-existing privilege sentence untrue off Windows (left); the stores-disagree case unmeasured. THE APPLY RUNNING
 on the i7 (worktree ha1: merge onto f83ba29ffb, stdlib, suite, CNR, cfile + internal/trace; NO PUSH) -- C2's delta
-read + COORD's verification gate the push. The owner item RESTORED as OPTIONAL (Developer Mode on R-LAPTOP and i9 makes
+read + COORD's verification gate the push. C1's DESIGN READ of the follow-up SOUND (fb91388a5: the restore stronger
+than asked; s4 = the four statics are unsynchronised -> MEASURED by COORD: the guard tier is the Behavioral MSTest
+assembly, sequential by default (the assembly Parallelize line commented out at BehavioralTestBase.cs:23; six awaited
+TestHost.Run sites in TestingRuntimeTests.cs); s5 the restore's half-application mirror; s7 cite sites WITH the
+extension -- practice, no arm) -> a COMMENT-ONLY THIRD COMMIT on the host ref cutting on the i7 (worktree hc1; does
+not hold the apply). APPLY BATCH 2 RULED: ONE battery, three merges (the foreign-generic follow-up; the host ref's
+third commit; R's ref after the generic-composition arm), gates once, three stamps. The owner item RESTORED as OPTIONAL (Developer Mode on R-LAPTOP and i9 makes
 the symlink path available today); the rows stay NOVERDICT by cause and are re-measured by the driver). R's CORRECTION (fcb75ab3) taken: the runbook sentence is i9's -- mtime is unrelated
 to provenance in either direction (over in R's tree, under in five of i9's seven packages); the remedy unchanged.
 i9 RE-TOOK its table (0bb72afd): genuine residue in six of seven packages -> its two-row arm STILL OWED; go/types
