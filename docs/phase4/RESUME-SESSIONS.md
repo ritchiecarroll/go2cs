@@ -2307,6 +2307,7 @@ Blocked on: nothing for (1); (2) needs an owner-opened spurt.
 
 ## 7. Revision log
 
+- 2026-09-20 14:45 (box) -- hourly v4 refresh: the LEDGER (docs/phase4/LEDGER.md on claude/mailbox, tip c32614c66b) is the record of rulings from 12:55; the day's state: batch 2 in its battery (ab2, 0adf2e4318); the rehearsal + BATCH 3 (ecdh 8ce22ff7c3 + C1's json seat bf7e31d037 + C2's synctest seat db570064e9) queued behind it on the i7; seats routed R maphash+CS1955, G internal/sync then the ecdh reading, C1 embedtest, C2 sha3 (on the batch-2 tip); i9 idle until the rehearsal; master 008b8eef4d.
 - 2026-09-20 13:10 (box) -- PROTOCOL v4 (owner order 13:15): section 0a.0 added; Step 1 (b), Step 2 and the protocol bullets re-pointed at the ledger and the inbox; COORD's FIRST ACTION rewritten; one COMMS line at the top of every lane paste prompt. The broadcast mailbox is archived; the five lane post tools are retired.
 - 2026-09-13 15:45 — skeleton: COORD section complete; lane sections from COORD's records, blocks pending
   (mailbox order 7ff30f203, due 16:30). Verifier: `.claude/coord-scripts/coord-resume-verify.sh`.
