@@ -1031,7 +1031,17 @@ repoguard; no push). C2's #34 728d906f4a (the inert-arm predicate) and i9's post
 fix, the door, #34 half 2, the empty-message guard) LANDED -> MASTER da378999db (~09:20). i9's write-tree near-miss
 banked (a gate counts lines only after its rc; assert the tree's entry count). NEXT after leg (4): THE DRIVER's brief
 (run-h10-dispatch.ps1 unexercised; first run = a one-shard rehearsal on a Windows box against the tip after APPLY
-BATCH 2). The host third commit 2d286b2702 announced (C2 delta read); the follow-up 8b1a284122 announced (C1 + R).]
+BATCH 2). The host third commit 2d286b2702 announced (C2 delta read); the follow-up 8b1a284122 announced (C1 + R).
+READS ~09:25: C2's structural read of R's seat SOUND (788a42262; two comment lines -> R's arm commit: the cancelling
+key misses; unify the collision-key spelling toward the registration :185); C1's design read of the follow-up
+(0fc2ceee8): struct side SOUND; s2 = the CONVERTER's three name paths (adapterTypeRef, adapterResolvedName,
+anchoredAdapterMemberName) do not strip the type-argument list -> on mlkem's critical path -> the CONVERTER HALF
+CUTTING as a THIRD commit on the seat ref (i7 sub-agent, worktree ck2; name-only strip at the call sites, keys
+untouched, red-first Go arms, suite, CNR predicted clean); R merges at the third commit then cuts the arm; s7 = the
+host third commit's 'no Thread' clause FALSE (a Thread at TestingRuntimeTests.cs:191 inside a test body) -> a FOURTH
+comment-only commit on the host ref (worktree hc2) with C2's corrections (35 sites not 36; the attribute-site
+comment leads with the interleaving caution). C2's delta read of the host third commit SOUND (a6ab63a8). i9's
+path/filepath A/B SETTLED (07d4d8d8: 61/0 both ways in a censused tree; arm C = the stale control -> NOVERDICT).]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
