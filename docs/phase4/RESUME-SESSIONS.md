@@ -654,7 +654,10 @@ C2's READ DONE at the tip 052ae429e (e63d58f15: no objection; every claim at its
 from the sweep's enumeration; the DESIGN +42 carries C2's notes correctly). ONE WORD RULED before landing (COORD after
 e63d58f15): line 2241 'the first full pass of THE ROSTER' -> 'of the POPULATION (the 228 on the corpus axis; this leg the
 authority on membership)'; C1 commits it alone on the ref, announce-then-push; COORD lands the ref signed at that tip in
-one merge. Fold C2's notes into the amendment
+one merge. DONE: 628ca2459 (+9/-3, the literal 228 deliberately omitted -- no hop-specific count in the runbook, C1's
+judgement upheld). LANDED on master 6c32d0e171 (2026-09-20; signed merge of the four commits; +173; gates green). C1 is
+idle by ruling until the recon lists are needed at the launch; its next goal item is the recon leg's roster seat landing
+after the leg (a8511e37d7 re-based then). Fold C2's notes into the amendment
 commit: proc.cs cited per-GOOS (runtime/{linux,windows,darwin}/proc.cs:848), the RegisterPinned step that makes
 initAlgAES arm 2, and the clause that the box materialises at eleven construction sites (scope by provenance). (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
