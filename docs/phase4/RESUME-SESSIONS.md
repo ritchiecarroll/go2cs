@@ -487,6 +487,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     evidence); the red fires on the pushed tenth (stale WITH summary: PASS -> NOVERDICT; three controls unchanged);
     the four smaller items NOT in it (a twelfth). C1 + C2 read the delta. i9 re-runs the path/filepath A/B on it in
     a censused tree (C1's os/path question stays OPEN until then).
+    C1 + C2 DELTA READS of the eleventh SOUND (8344d8bb6, 46fae0b1c; five small items). THE TWELFTH fe02886a15 +
+    THIRTEENTH e17cb9152d announced (72cfc82f; push follows): the thirteenth = THE BLOB OF RECORD once at origin
+    (arm G's hole -- fresh + unreadable + summary banked 61 under NOVERDICT -- closed by deriving verdicts from the
+    word; the red fires on the twelfth); C1's four + C2's two folded; -SelfTest's canary call BACKED OUT (a forward
+    reference) -> THE FOURTEENTH = the preflight restructure, i9's, red-first with a planted folding reader. C2 reads
+    the 12+13 delta. G runs the two provisional rows on the thirteenth.
     C2's DELTA READ of the eighth GREEN (b70531b9; the count-mismatch throw degrades to UNREAD/NOVERDICT; the guard's
     comment overreach banked post-leg); G's clearance waits ONLY on the i7 Core arm re-run on the eighth (running).
     ASSEMBLER RULED (COORD after C1 f100c5b9): header equality goes; each lane read BY NAME; the banked header is the
@@ -987,7 +993,14 @@ blobs, zero deletions, both roster hunks, census, repoguard, markers) then pushe
 (3b) C1's docs half when announced; leg (4) C2's shardmap + THE PLAN after --timings on the landed basis.
 CORRECTED ~08:35: the spine is FOUR commits (1fa2b0ad4: verdicts = |go minus names(disclosed)|, runtime/pprof 161;
 two files); leg (3b) = claude/c1-h10-docs-half 47c60b1d3 off master (+74/-0, docs/GoCorpusMigration.md: the tree-
-discard scope docs/validation/current/ + the leg's readings) -- the train sub-agent re-pointed and (3b) added.]
+discard scope docs/validation/current/ + the leg's readings) -- the train sub-agent re-pointed and (3b) added.
+TOOL RULE AMENDED (C1's red d7f8f842a: a 90% patterns truncation passed byte-size + attempted-arm count, 10 of 21
+arms live): a materialised tool is asserted by CONTENT HASH vs the ref's blob + the self-test FAIL count refuses;
+#34's gate MOVED -- C1 cuts it NOW (red-first: the truncation + a planted fail=1 both REFUSED); every lane's post tool
+takes the two lines at its next idle. G's census (594011551): 42 wide / 1 narrowed + SEVEN local-origin clones stale
+under a wide refspec = the THIRD stale cause banked. G OFF IDLE (7c3612fb5): the two provisional rows (nistec 45/0,
+fips140test 2215/52 expected) at f83ba29ffb with the thirteenth wrapper in a censused throwaway tree, evidence on a
+NEW ref under G's prefix; then three CONVERT-stage sizings: crypto/ecdh (CS1537), crypto/sha3, encoding/json.]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
