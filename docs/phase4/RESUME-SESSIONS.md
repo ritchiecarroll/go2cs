@@ -655,7 +655,9 @@ census (docs/phase4/h5-removals.txt, 14 entries, plus the additions). Push-then-
 scores the gate with it.
 
 DONE 2026-09-19: the comparand procedure is cut at claude/c2-h8-comparand-procedure 746d3a7c75 and RULED (bb1d9b4d6):
-produce the outgoing manifest; G executes; the branch is an accepted docs seat landing with the H8 gate commit.
+produce the outgoing manifest; G executes; the branch is an accepted docs seat landing with the H8 gate commit. RE-PINNED
+2026-09-20 at bdc016826a (614b27450, a7c61cdbd): the keying gate -- `manifest` builds classify's input flat-keyed and stamped,
+an unstamped triple is refused, selftest 27/27; G's side-by-side runs from this tip.
 
 DONE 2026-09-19: the q100 second read (a810502ff, AGREES; two findings routed to C1 at 0a2b43651) and the q102 second read
 (14e4ce0e8, AGREES, arms run here; denominator 8230 from the index). ASSIGNED NEXT: the H9 prediction re-derived at the
