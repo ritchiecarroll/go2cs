@@ -383,12 +383,38 @@ foreach ($row in $rows) {
     $rowTimeout = $TestTimeout
     if ($Floors.ContainsKey($row)) { $rowTimeout = $Floors[$row]; Write-Host "     floor: $rowTimeout (derived)" }
 
+    # ⚠⚠ THE CONVERTER'S STDERR IS A TERMINATING ERROR UNDER Stop, AND FAILING IS THE MEASUREMENT.
+    # `GitTry` above carries this exact diagnosis for git: in 5.1 a native command's stderr becomes a
+    # NativeCommandError, which ErrorActionPreference='Stop' raises. I applied it to every git call and
+    # NOT here -- to the one native call in this file whose FAILURE is a reading rather than a fault.
+    #
+    # Measured 2026-09-20, twice, at row 4 of 16: `crypto/mlkem` fails its `dotnet publish` (the ruled
+    # CS0311 row), the converter says so on stderr, and the SCRIPT DIED -- mid-list, before the exit
+    # code was read and before the classifier ran.
+    #
+    # ⚠ So the CONVERT and BUILD arms twenty lines below were UNREACHABLE BY CONSTRUCTION: a row cannot
+    # be classified as failing, because failing is what stopped the run. Every control I had ever run
+    # against the classifier used a row that SUCCEEDED, which is why nothing caught it. That is the
+    # mirror of this file's own banked lesson -- there, a guard whose SUCCESS case wrote to stderr
+    # passed all its refusal controls; here, a classifier whose FAILURE cases write to stderr can never
+    # reach its failure arms.
+    #
+    # ⚠ `2>&1` alone does NOT fix it: the merged record is still an ErrorRecord and Stop raises it. The
+    # preference must be lowered around the call. It is lowered ONLY around the call, and restored in a
+    # finally, so every other statement keeps Stop.
+    #
+    # ⚠ And unlike GitTry, stderr is KEPT rather than discarded (`2>&1`, not `2>$null`): the classifier
+    # reads the converter's stderr TEXT to separate CONVERT from BUILD.
     $started = Get-Date
-    $output  = & $converter -tests -test-action all -test-config $TestConfig -test-timeout $rowTimeout `
-                            -go2cspath (Join-Path $Tree 'src') @extra $goDir $outDir 2>&1
-    # CAPTURED ON THE VERY NEXT LINE, before anything touches $? or a pipe. Floor 7, and the fault five
-    # lanes hit in one night.
-    $rc      = $LASTEXITCODE
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $output = & $converter -tests -test-action all -test-config $TestConfig -test-timeout $rowTimeout `
+                               -go2cspath (Join-Path $Tree 'src') @extra $goDir $outDir 2>&1
+        # CAPTURED ON THE VERY NEXT LINE, before anything touches $? or a pipe. Floor 7, and the fault
+        # five lanes hit in one night.
+        $rc = $LASTEXITCODE
+    } finally { $ErrorActionPreference = $prevEap }
     $elapsed = [int] ((Get-Date) - $started).TotalSeconds
 
     $lines = @($output | ForEach-Object { [string] $_ })
