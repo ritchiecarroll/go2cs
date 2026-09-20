@@ -502,7 +502,10 @@ claude/c1-h10-roster-relocation 4de76ded06 off master (c7724dcd6; ACCEPTED and H
 stays). CORRECTION TAKEN (b3f7face4): there is no held H11 amendment -- the four H11 runbook amendments are APPLIED with
 135f0cdc15; the H11-follows-H10 sentence (H11's pre-flight cannot pass until every roster row is banked at the new base) is
 ONE commit on top of 4de76ded06, announce-then-push, with the two retiring declarations re-measured against the CORPUS at the
-version tip in the same announce. ASSIGNED NEXT: the H11 and H12 gate pre-read at the version tip -- enumerate every gate the two rungs name, classify
+version tip in the same announce. DONE (09a22ce3b): a8511e37d7 verified at origin (one commit on top, docs/ValidatedTestPackages.md +36/-0) -- the H11-follows-H10 dependency block
+with the measured gate state cited, and the retiring pair re-measured where the gate reads (TestNewModFromBigZero,
+TestPQCrystalsAccumulated: 2 files at master, 0 at d91c832543, RETIRED; the surviving control moves 14 -> 12, the negative
+control 0/0). The held seat's tip for the H10 docs commit is now a8511e37d7. ASSIGNED NEXT: the H11 and H12 gate pre-read at the version tip -- enumerate every gate the two rungs name, classify
 each cloud-runnable or .NET-only, RUN every runnable one under the pin and post the reading per gate (command, rc), state what
 a Windows box must run for the rest, cite any missing or stale procedure by line; a reading, no cut. DONE 2026-09-20
 (127220cb9: ten gates, six run; FINDING: H2's ruled build-number RESET never happened -- version.props at the tip reads base
