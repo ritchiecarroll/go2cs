@@ -847,7 +847,13 @@ DISCARD block, what sweep_s measures, the is-it-alive line -- then C1's 4b33fc80
 f4b736452f, R's ead735e69c; census clean x4, repoguard 6/6). Lanes re-copy their posting copies from the landed blob. ROUTED (11afb109): ONE new ref off d8fe647ae8, two commits,
 one announce -- (a) the runbook sentence at 03110c0b0 corrected in place with a dated note (neither column carries
 the wrapper cost; post_s named), (b) the two floors on c1-post.sh (patterns 100/166, hashes 10/34); COORD lands.
-DOCTRINE banked: a ruling is authority about what is decided, not a measurement of what the code does. ALL THREE LISTS LIVE (G's ACK 5952b121: 107 rows on the fifth;
+DOCTRINE banked: a ruling is authority about what is decided, not a measurement of what the code does. LANDED on
+master 5be8728915 (claude/c1-postcol-and-floors: 854f90492 + 75fcde82c; census clean x2, repoguard 6/6). CLOSING
+RULINGS (COORD after 6fa84787): the BYTE predicate (hash the materialised census against origin/master:<path> before
+executing it) is the guard for C1's and C2's tools -- ONE commit each at idle AFTER the roster seat lands, announce-
+only; i9's idle commit re-scoped to the output-line count only (its :128 byte comparison already closes the rest);
+C2's post_s confirmation taken (the timings reader ignores unnamed columns; the arc reader shape-exact); then
+silence on the thread. ALL THREE LISTS LIVE (G's ACK 5952b121: 107 rows on the fifth;
 the early run discarded). hash/maphash BUILD on i9's list (unpredicted) -> C1 sizes at CONVERT from the completion post. C1's
 withdrawal (033a07d9): the roster seat carries no aggregate
 arc figure (the 14 lived only in a post) -- no correction owed; rule banked: a claim that a file contains something is a
