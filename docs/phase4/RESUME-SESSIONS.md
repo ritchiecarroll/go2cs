@@ -1745,7 +1745,16 @@ projection's accepted func shape (a result list CONTAINING the type parameter; n
 shape, the two existing fixtures + the positive test unchanged, the row past COMPILE, corpus diff predicted EMPTY;
 new ref, push-then-announce; C1 design + C2 structural; apply from the i7 after the reorder seat.
 PlainConstraintProxyTests.cs kept only if green on the unmodified generator. BANKED: re-measure a routed defect at
-the tip before cutting. SIX genuine BUILD rows routed to C1
+the tip before cutting. R's INTERIM (788a0aee): the func-shape widening alone takes the row CS0311 x4 -> CS1526 x8
+(D projects, E cannot: the sibling-constraint rule at :1873 refuses a parameter another constraint mentions; and no
+widen form for Func<A,(T,error)>). RULED (COORD after b8195216): THREE PARTS on ONE ref -- (a) the sibling rule
+relaxed to the coherent state (the mentioning constraint closes over the PROJECTED form; siblingCall re-ruled), (b) a
+golib widen overload Func<A,(T,error)> -> Func<A,(TWide,error)> with identical nil semantics + a GolibTests arm, (c)
+the widening as cut; the row past COMPILE as the cross-check; PlainConstraintProxyTests INVERTED rides (red on the
+unmodified generator un-inverted); C1 design + C2 structural; the apply from the i7 after the reorder seat (golib +
+converter: go2cs.slnx, GolibTests, CNR, the row). WARN-ONLY ARM ROW (C2 b8195216): internal/saferio (a generic
+unsafe.Sizeof never folds -> the verify-usage warning) -- i9 runs it through the eighth after its TSV/evidence, the
+fourth blob as the red. SIX genuine BUILD rows routed to C1
 for sizing: sync (CS0708 x17...), runtime (CS0310 x22: a union constraint with a POINTER member lowers to
 `where T : new()` and zh<T> is abstract -> constraint emission; + CS1061 testing.B.Elapsed on the hand-own),
 crypto/ecdh (CS1537), embed/internal/embedtest (CS0234, the known recompute remedy); internal/sync stays an i7
