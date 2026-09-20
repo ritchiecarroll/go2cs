@@ -1084,6 +1084,15 @@ collision-GROUP KEY normalises an alias-qualified LOCAL struct to the foreign fo
 shape -> a converter seat AFTER batch 2 (shared locality resolver with anchoredAdapterMemberName). C1's json
 population = a CLASS (6 packages / 9 types / 20 members) -> the json seat first, sha3 second, both i7 sub-agents off
 the post-batch-2 tip (they touch R's files).
+R's comment commit CUT: R's ref tip = d6c7ebd78b (batch 2's third ref). THE BATCH-2 BRIEF is written (scratchpad
+batch2-brief.md: three merges onto the version tip in worktree ab2, one battery -- GenTests/GolibTests, the suite,
+CNR, the stdlib 344, the rows crypto/mlkem (the prediction test) + sync + cfile + internal/trace, census, repoguard;
+NO push) -- launched the moment ha1 pushes. G's THREE SIZINGS (315d2270b) ROUTED as converter seats after batch 2:
+hash/maphash (the reflect.TypeFor[T] lowering mints an uninferable companion type parameter, CS0411 x42; 4 files by
+the rule incl. unique x2 -- the CS0411 class explained -- + a CS1955 T(nil) channel conversion), internal/synctest
+(a func literal assigned to iter.Seq[V] emitted as a bare delegate; + a CS0136 closure scope flatten), embedtest (a
+test-only package gets an unconditional production using-static, CS0234); the seat ORDER: json, maphash, synctest,
+embedtest, sha3. G next: two population sweeps + a fresh internal/sync sizing at f83ba29ffb.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
