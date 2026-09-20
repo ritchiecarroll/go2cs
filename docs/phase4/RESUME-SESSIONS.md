@@ -314,8 +314,8 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     46307b4704 and at d71e4eed63 (range-splitting), the managed stack at the AV (DOTNET_DbgEnableMiniDump + dotnet-dump),
     then the one-axis alias revert as a converter-output comparison; COORD routes the fix (candidate class: the open
     syscall buffer-pin hole; C1 owns the native-boundary guards)
-  the root-attribution overlay claude/g-root-attribution a819ba7417 (VERSION + LICENSE only; gate = blob identity vs the
-    seat, no other path, the hand-own guard by name, the converter suite still EMPTY; no corpus build owed)
+  the root-attribution overlay claude/g-root-attribution a819ba7417 (APPLIED 43a3627667 on the rebank 68fcf34ea5 -- both
+    STAMPED; VERSION TIP 43a3627667; the converter suite EMPTY)
   then q100 at abe3b3798b, then the H11 seat claude/c1-h11-published-stamp 135f0cdc15 (CLEARED on C2's read 4c0a86310;
     converter-suite gate, the new guard arms by name; no corpus build); state the version tip after each. Still owed by a
     Windows box before H11 is declared: check-roster-format.ps1 and release-nuget.ps1 -VerifyOnly at the applied tree
@@ -480,7 +480,12 @@ pointer or buffer reached from the program and the converted crypto/x509 windows
 across the call or not, by file:line); a reading, no run. RETARGETED (COORD, after i9's diagnosis 1b2ad7d8f): the site is
 known; instead, from the design's 1.4 census at the version tip, every raw-address site where a LIVE pinned box is
 reinterpreted at a DIFFERENT pointee type than the box's (the class q100's floor cannot refuse), by file:line with the
-pointee pair; a reading, no cut; the general cure (a converter-emitted typed managed-backed array view) is post-hop work. (3) The seven pthread members the darwin
+pointee pair; a reading, no cut; the general cure (a converter-emitted typed managed-backed array view) is post-hop work.
+DONE 2026-09-20 (1a6935a1b): 23 pinned-box different-pointee sites (zero reach the aliased-return arm); 66 array
+reinterpretations in all; the CRASHER is in the 20 UNTRACED local-variable sites, not the 23; p256.cs:577 is the same defect
+on the big-endian arm; the cert path is CLEAN (KeepAlive-without-fixed is the correct idiom). ASSIGNED NEXT: the one-hop
+backward trace of the 20 V sites to their definitions, scored into the same classes, by file:line; liveness is the
+instrument after that. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
@@ -893,6 +898,10 @@ tip 0f97dcc8db (i9 6a1653dce): (1) reproduce under the behavioral runner; (2) th
 the project re-transpiled and run -- a converter-output comparison; (4) the fix (candidate class: the open syscall buffer-pin
 hole in the x509 windows root-store path; C1's native-boundary shortlist 40c917f45 feeds it), red-first on the reproduced
 crash, new ref off the version tip, C2 reads, i9 applies. Take i9's two range probes from its post, do not re-run them.
+BINDING on the cut (C1's design read 1a6935a1b section 7): the view is built over the box's window (m_low/m_length), never
+the raw address; p256.cs:577 (the big-endian arm) takes the same cure or the companion states why not; the companion's
+header says SITE cure, not class cure. Check: the embedded table's first eight bytes read as the reference
+0x79e730d418a9143c -- if that is the minidump's fault address the mechanism is confirmed from the dump.
 DIAGNOSED by i9 (1b2ad7d8f) before R started: both probes FAIL in Output (the crash predates rung 7); the managed stack
 names ElemRefBox<p256AffineTable>.get_ValueSlot via DerefOrNull from nistec.Select <- ScalarBaseMult <- ecdsa.GenerateKey;
 the site is crypto/internal/fips140/nistec/p256.cs:574-616 -- the 1.24 EMBEDDED P-256 table, FromPinnedBox cast
