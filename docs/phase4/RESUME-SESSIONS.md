@@ -1790,8 +1790,15 @@ version tip 4408dacd3e map.cs is ABSENT (H5 retired it), so the sync row's BUILD
 -> RE-ROUTED to an i7 sub-agent at the tip with dotnet after the reorder seat; C1 sizes CONVERT-stage causes only and
 seeds tip readings from the version branch's src/core. The orphan-sweep class is banked for the runbook's H5 step
 (C1 reads the H5 record first). C1's lane: go1.24.7 (go.dev unreachable), no dotnet -- stated with any quote.
-The sync SIZING at the tip with dotnet LAUNCHED on the i7 (Opus sub-agent, worktree sz1: the row through the pipeline,
-the emitted .cs read at the CS0708/CS0540 sites, the converter site, a fix shape; no cut). Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
+The sync SIZING DONE on the i7 (~05:50): R's 32 errors reproduce name-for-name, ALL in ONE generated file -- the
+ImplementGenerator pointer adapter for sync_test.mapInterface over the FOREIGN GENERIC struct internal/sync.HashTrieMap
+[any, any] (new at 1.24; the corpus's first foreign-and-generic GoImplement pair): the generic branch is guarded by
+!foreignStruct (ImplementGenerator.cs:951), so the class identifier is minted with a type-argument list (CS0692 + the
+CS0708/CS0540 cascade) and the wrapped type is unqualified (CS0246). The hand-own drift produced zero errors. A
+GENERATOR SEAT LAUNCHED on the i7 (Opus sub-agent, worktree fg1, new ref claude/coord-foreign-generic-adapter off the
+version tip: the bare Name + a sanitized-argument suffix for a closed foreign instantiation; the wrapped type fully
+qualified; a two-assembly compile-probe red-first; local-generic and foreign-non-generic controls; stdlib rebuild;
+the sync row as the prediction test); C1 design + C2 structural reads when announced; the apply from the i7 after. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
 console codepage mangles UTF-8 git paths -> [Console]::OutputEncoding = UTF8 into the runbook (C1). R NEXT: the
 seven, then crypto/mlkem CS0311, then the five reflect names at 7ff4694b22. R's post-tool fix
 ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
