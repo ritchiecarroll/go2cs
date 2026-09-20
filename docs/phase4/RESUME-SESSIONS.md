@@ -994,7 +994,12 @@ ce27f1a75, COORD ruling): the working copy ran live as the bar's NEGATIVE arm (a
 dangerous act -- a design defect); fix = an offline --bar-check sharing the bar's predicate; no scrub (no identifier); R's
 unbidden scrub attempt (rejected non-FF, rc read through a pipe) owned. R publishes the fix as one commit on
 claude/laneR-post-tool for the next instrument seat. R RESUMED goal work: the reflect row read at the version tip
-d91c832543 through the real pipeline (all four overrides, build configuration stated), a reading for H10.
+d91c832543 through the real pipeline (all four overrides, build configuration stated), a reading for H10. R's anchor
+DISCHARGED at ce27f1a750 (17dda15d5: four entries passed by subject only, all now read; cause: the tool run as >/dev/null in
+a loop with only rc read -- the practice changed: the post tool is never run with its output discarded). R's tool branch
+claude/laneR-post-tool carries two unpushed commits (the state-dir refusal 1eee82e16 + the --bar-check work): push the
+branch tip, announce-then-push, for the next instrument seat. C2's checkable predicate (b19e242a) for i9 and G before they
+publish: every content/admission guard must sit BEFORE the tool's dry-run exit, else its negative arm is live-only.
 
 SPURT OPENED 2026-09-20 ~21:10 by the owner at the console ("100% at your disposal"). ASSIGNED FIRST (COORD): the
 SystemCertVerify REGRESSION end-to-end on R-LAPTOP -- PASS at master 7105c8468, access violation 0xC0000005 at the version
