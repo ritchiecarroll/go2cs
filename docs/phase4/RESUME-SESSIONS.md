@@ -1074,7 +1074,21 @@ converter seat CUTTING on the i7 (worktree ec1, ref claude/coord-ecdh-alias-coll
 disagreeing targets); crypto/sha3 CS0246 (the minted SHA3zhHash wrapper unresolvable at the call site) -> an i7 SIZING
 (worktree sz3, read-only); encoding/json CS0052/50/51 (an unexported type narrower than its internal-test consumers)
 -> C1 sizes. G NEXT: hash/maphash (the CS0411 class), internal/synctest, embedtest. Banked: ps -W carries no
-arguments -- process censuses read the COMMAND LINE.]
+arguments -- process censuses read the COMMAND LINE.
+THE DRIVER's BRIEF DRAFTED (~09:55): claude/coord-h10-driver-brief-draft 3d8e522b57 off master 0bddc7e894 =
+docs/phase4/DRAFT-h10-driver-brief.md (311 lines, A-G; 22 runbook citations, 9 rulings, proposed items). CENTRAL
+FINDING: src/run-h10-dispatch.ps1 dispatches the SWEEP per row (H10 forbids it for a re-bank; unreachable for the
+23 candidates + nine successors) -> a DRIVER SEAT (-Mode rebank: the reader/gate/refusals/packing/cooldown kept, the
+per-row body = the recon wrapper's pipeline block, an idempotent resume ledger) -> i9 CUTS IT (C2 design read, C1
+runbook read, the i7 Core arm). THE TEN OPEN QUESTIONS RULED (0cb09c354): per-shard lane refs off the version tip
+merged as trains, figures derived; index.md regenerated centrally; the worktree on a branch; W=4 (W=3 fallback);
+the REHEARSAL = the i7's slice 1 (7 rows) + fips140test grafted, on the i7 after batch 2 + the driver seat; the
+acceptance predicate + a regression control; TSV + W/worker/slice/seq/banked/manifest_pins; -SkipBuild kept but a
+resumer rebuilds; the ledger folded in. C1: the draft -> the runbook's in-stage H10 amendment (a docs seat). i9's
+old-path number banked (17,541 s over 10.7 MB, >= 2.46x worse than quadratic; the replacement 0.10 s). G's finding:
+every post cycle drops the 101 s tree census pass (the gate is entry + subject); channel-file rotation = an owner
+question, noted. Two records to amend by dated block: DESIGN-h10-dispatch-driver.md s6 (C2); the plan's makespan
+lines at the next regeneration.]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
