@@ -446,7 +446,10 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     red on the seventh's @{} (43/51), green 47/52/15. RULED: G RELAUNCHES ONCE ON THE EIGHTH after i9's push + C2's
     delta read + the i7 Core arm re-run (the same sub-agent, waiting for the push); the split stated against the
     SIXTH and the EIGHTH. The parse hypothesis is DEAD on G's own document (0.37 s / 0.19 s); the whole cost is the
-    results-tail read.
+    results-tail read. THE CORE ARM ON THE EIGHTH GREEN (i7, ~05:12): parse 0/0, self-test 5/5, red refuses, the
+    ordinal maps 47/52/15 in BOTH editions, the guard red-tested (OrdinalIgnoreCase -> fires); post-leg comment fixes:
+    -AsHashtable on pwsh 7.4.6 is ORDINAL (the fold was the bare @{}); the -SelfTest six-parameter defect. G CLEARED
+    TO RELAUNCH ON THE EIGHTH (dc018aa4): two blobs of record -- the fifth for rows scored, the eighth for the rest.
     C2's DELTA READ of the eighth GREEN (b70531b9; the count-mismatch throw degrades to UNREAD/NOVERDICT; the guard's
     comment overreach banked post-leg); G's clearance waits ONLY on the i7 Core arm re-run on the eighth (running).
     ASSEMBLER RULED (COORD after C1 f100c5b9): header equality goes; each lane read BY NAME; the banked header is the
@@ -1724,7 +1727,15 @@ fired this span; COORD performs the tick's duties inline on every event.
 undisclosed, no results tail) stay NOVERDICT by the ruled cause and are NOT re-classified; the assembler NAMES any
 row whose net undisclosed set equals its verdict count (a detector; COORD rules per row). R's mlkem seat = a
 WORKTREE at the tip with the baseline green, NOT yet a diff (R 679c6bdb) -- the reads wait for the announce; R's
-two leg trees torn down (tracked 14142 before/after; the two leak originals held by hash for the redaction). SIX genuine BUILD rows routed to C1
+two leg trees torn down (tracked 14142 before/after; the two leak originals held by hash for the redaction).
+R REFUTED ITS OWN SEAT (b995e373): the mlkem CS0311 x4 (live at 4408dacd3e) is funcResultProjectionArg at
+constraintOperations.go:1899 refusing the constructor idiom func([]byte) (E, error) (niladic + one result required);
+the proxy widening broke TestFuncResultProjectionPositive -> DISCARDED. RE-ROUTED (COORD after b995e373): widen the
+projection's accepted func shape (a result list CONTAINING the type parameter; niladic dropped), red-first on mlkem's
+shape, the two existing fixtures + the positive test unchanged, the row past COMPILE, corpus diff predicted EMPTY;
+new ref, push-then-announce; C1 design + C2 structural; apply from the i7 after the reorder seat.
+PlainConstraintProxyTests.cs kept only if green on the unmodified generator. BANKED: re-measure a routed defect at
+the tip before cutting. SIX genuine BUILD rows routed to C1
 for sizing: sync (CS0708 x17...), runtime (CS0310 x22: a union constraint with a POINTER member lowers to
 `where T : new()` and zh<T> is abstract -> constraint emission; + CS1061 testing.B.Elapsed on the hand-own),
 crypto/ecdh (CS1537), embed/internal/embedtest (CS0234, the known recompute remedy); internal/sync stays an i7
