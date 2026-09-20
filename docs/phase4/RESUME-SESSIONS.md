@@ -1137,6 +1137,13 @@ load-bearing token) -> MASTER 306950be71. THE WRAPPER REF d79a43c978 IS VERSION-
 commits / 2,579 files / 112 deletions) -> RULED: i9 re-cuts it as a ONE-FILE ref off master by plumbing (the
 fifteenth's blob 55466ef4d8 at src/run-h10-recon.ps1); lands beside the driver when announced; the rehearsal takes
 both by blob from master. G re-derived its running post tool from its ref (6a15e8ff3); C1's running copy EQUAL.
+THE ECDH SEAT CUT (~11:05): claude/coord-ecdh-alias-collision b5d3687634 on f83ba29ffb (8 files +486/-1). The sizing's
+premise REFUTED: the live alias map is dot-form on both passes; the cause is the RECOMPILE model's two-source merge
+of package_test_info.cs (seeded from production's fips140 binding, merged with the external variant's own-type
+binding; both needed) -> the variant's colliding key renders FULLY QUALIFIED with no global using + a writer refusal
+on a doubled name; five arms; the row CLEAN AT BUILD (0 errors); suite ok; CNR no regression; census 116/21; the
+population: ONE genuine pair (24 L3 per-GOOS pairs never meet). G design read, C1 structural; the apply in the next
+i7 batch after batch 2; G runs the row's -test-action all reading off the seat ref.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
