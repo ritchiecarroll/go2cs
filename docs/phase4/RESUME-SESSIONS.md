@@ -925,12 +925,15 @@ C2's cause from the side where it does not fire. G's runbook point is TAKEN into
 toolchain's location (GOROOT under GOPATH or not) as a condition of the emission beside the pin and CGO_ENABLED, and the
 converter's fix removes the dependence; the seat's amendment says which. (2) the H8 record under docs/phase4/ (both
 manifests' class tables, P1-P5 as scored, the 38 -> 47 -> 51 decomposition, per-target movement) on a branch you name;
-(3) after i9 applies the H11 seat: the 347-README OVERLAY -- seed a never-reused root from the applied tree's src/core, one
+(3) UNBLOCKED 2026-09-20 21:40 (the H11 seat applied 8fa5cc2e7d; G told at 22:20 after naming it pending): the 347-README
+OVERLAY from the version tip d91c832543 -- seed a never-reused root from that tree's src/core, one
 single-target -stdlib emission with the converter built at that tip, cut ONLY src/core/**/README.md as one commit on a new
 ref, the diff predicted before the copy (335 tag / 191 snapshot targets -> the published stamp, nothing else), the existence
 arm green on that tree; push-then-announce. (4) after COORD closes H9: the twelve successor packages through the real
 pipeline on the banking platform at the version tip (all four overrides), per row the verdict count and the diverged set by
-name -- the first H10 rows; a reading, no bank. (3) The follow-up commit on
+name -- the first H10 rows; a reading, no bank. G's post tool PUBLISHED (80b5d83df): claude/g-lane-post-tool be340825dd off
+master a6be940665, FOUR files under .claude/coord-scripts/lanes/ (g-post.sh + the fetchable, staleness and placeholder
+guards), accepted; lands with i9's tool in the next instrument seat. (3) The follow-up commit on
 claude/g-metadata-regen ON TOP of 828ef5d0b7, never a rewrite: stdlibMetadata_test.go line 60 still claims the asset
 is written CRLF; replace it with the facts you measured (C2 found it at 8d8be3730; your sweep confirmed it is the only
 survivor under src/go2cs); announce-then-push. (4) The linux-flavour arm of whatever COORD routes after H8.
