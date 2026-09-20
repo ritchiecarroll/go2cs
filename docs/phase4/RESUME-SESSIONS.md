@@ -929,7 +929,9 @@ T[] reference; R's own 'class' slip corrected at 10e18c194). RULED shape (a) (f6
 companion loading a P256Element from already-Montgomery limbs + a nistec hand-own companion decoding the 88,064 embedded
 bytes into a real 43-entry table once at init, BOTH arms (:577 big-endian, :584), window-aware, headers saying site cure; the
 table is written once and read at two sites so the copy is legitimate; red-first as the direct exe (the suite runner aborts
-silently on a host crash); the nistec/ecdsa projects reaching ScalarBaseMult run too; C1 reads the design half, C2 reads,
+silently on a host crash); the nistec/ecdsa projects reaching ScalarBaseMult run too; the companions' headers ALSO state G's
+bound on the q97 precedent (0b9d2973c: MemoryMarshal.Cast's target element must be a PRIMITIVE; array<T> may be the SOURCE
+through ToSpan(), never the DESTINATION -- no [N]E in this corpus is a legal target); C1 reads the design half, C2 reads,
 i9 applies after the H11 seat and re-runs the H9 suite. The general typed-view cure stays post-hop.
 DIAGNOSED by i9 (1b2ad7d8f) before R started: both probes FAIL in Output (the crash predates rung 7); the managed stack
 names ElemRefBox<p256AffineTable>.get_ValueSlot via DerefOrNull from nistec.Select <- ScalarBaseMult <- ecdsa.GenerateKey;
