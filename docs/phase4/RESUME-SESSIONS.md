@@ -581,7 +581,13 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
 CNR 729 no regression, GenTests 43/43, stdlib 344/0, the sync row COMPILES 46/6 to the name; the COLLISION-KEY
 follow-up (both operands + the value-adapter twin question) CUTTING on the i7 in worktree ck1; two instrument
 findings banked: the circular machine-scope GOROOT pin; an empty materialised tool passes vacuously -- assert byte size
-+ self-test) (0dc65a8e8d = the leg's tip): wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
++ self-test) (0dc65a8e8d = the leg's tip). THE FOLLOW-UP CUT ~09:05: 8b1a284122 on the seat ref (both operands: the
+struct key drops generics then takes the last segment; the interface NAME through StripGenericTypeArguments; five arms
+red/green; GenTests 48/48; stdlib 344/0; corpus emission byte-identical over 1,323 files with a made-to-fail
+instrument; master's census clean). The value-adapter twin MEASURED, NOT FOLDED (the identifier defect of the whole
+seat, needs a converter half, unreachable for committed records); the interface-side KEYS left identical on purpose
+(both halves garble alike; a paired seat if R's arm needs it). C1 + R read; R merges + cuts the generic-composition
+arm; APPLY BATCH 2 = this ref + the host third commit + R's ref: wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
     throwaway detached worktrees, one process per list, one attempt per row, TSVs pushed as new per-lane refs
     (LANE-h10-recon-tsv) when a list completes with the word histogram and the named CONVERT/BUILD/DIVERGED/NOVERDICT
     rows; expected words for the known rows stated (time CONVERT, reflect NOVERDICT, fips140test/mlkem/internal-sync
@@ -1639,7 +1645,13 @@ signed) -- VERSION TIP f83ba29ffb (the foreign-generic adapter seat STAMPED ~08:
 CNR 729 no regression, GenTests 43/43, stdlib 344/0, the sync row COMPILES 46/6 to the name; the COLLISION-KEY
 follow-up (both operands + the value-adapter twin question) CUTTING on the i7 in worktree ck1; two instrument
 findings banked: the circular machine-scope GOROOT pin; an empty materialised tool passes vacuously -- assert byte size
-+ self-test) (0dc65a8e8d = the leg's tip); THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
++ self-test) (0dc65a8e8d = the leg's tip). THE FOLLOW-UP CUT ~09:05: 8b1a284122 on the seat ref (both operands: the
+struct key drops generics then takes the last segment; the interface NAME through StripGenericTypeArguments; five arms
+red/green; GenTests 48/48; stdlib 344/0; corpus emission byte-identical over 1,323 files with a made-to-fail
+instrument; master's census clean). The value-adapter twin MEASURED, NOT FOLDED (the identifier defect of the whole
+seat, needs a converter half, unreachable for committed records); the interface-side KEYS left identical on purpose
+(both halves garble alike; a paired seat if R's arm needs it). C1 + R read; R merges + cuts the generic-composition
+arm; APPLY BATCH 2 = this ref + the host third commit + R's ref; THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
 measured a write target; four arms made to fail on the shipped bytes) LANDED on master 70bce870c2 with C1's docs seat.
 G runs its list (107) at 0dc65a8e8d. G's floor-1 finding banked fleet-wide:
 a process census by name pattern is a dead counter for a renamed converter -- count by executable path with a positive
