@@ -832,7 +832,13 @@ CGO_ENABLED=1) while `go list runtime/cgo` named directly resolves with GoFiles 
 linux/); the converter enumerates std, so the package was NEVER QUEUED on G (no skip line, no directory) -- the fork is
 ENUMERATION, not buildability and not the host. RESOLVES ON: C2's distinct package list from its E1 log, grep -x runtime/cgo,
 the set difference against G's list. G's H8 RECORD is pushed at claude/g-h8-record 56c0eb7a71 (held for the H8 docs commit;
-section B, the exemption and the probe land as one dated block once the fork is resolved). (2) the H8 record under docs/phase4/ (both
+section B, the exemption and the probe land as one dated block once the fork is resolved). SOLVED by C2 (1257a20ba):
+EMITTED WITHOUT BEING QUEUED -- conversionDriver.go:167 loads ./... for any input under GOPATH and a GOTOOLCHAIN GOROOT sits
+under GOPATH, so each stdlib package converts its whole subtree (13 skip messages, 6 doubled; one-axis control: -gopath off
+the prefix -> 0 runtime/cgo files, queue hash identical, src/core byte-identical but for that directory). RULED a CONVERTER
+DEFECT, C2's seat (the subtree branch must not fire under GOROOT; red-first on C2's control; the author's comment amended);
+G then verifies its linux emission unchanged (3397, queue 342) from the seat's converter; C2 re-takes the linux pair
+(predicted 3397 = 3397, 0 placement differences, exemption count 0); then COORD closes H8 and cuts the H8 docs commit. (2) the H8 record under docs/phase4/ (both
 manifests' class tables, P1-P5 as scored, the 38 -> 47 -> 51 decomposition, per-target movement) on a branch you name;
 (3) after i9 applies the H11 seat: the 347-README OVERLAY -- seed a never-reused root from the applied tree's src/core, one
 single-target -stdlib emission with the converter built at that tip, cut ONLY src/core/**/README.md as one commit on a new
@@ -908,6 +914,14 @@ BINDING on the cut (C1's design read 1a6935a1b section 7): the view is built ove
 the raw address; p256.cs:577 (the big-endian arm) takes the same cure or the companion states why not; the companion's
 header says SITE cure, not class cure. Check: the embedded table's first eight bytes read as the reference
 0x79e730d418a9143c -- if that is the minidump's fault address the mechanism is confirmed from the dump.
+REPRODUCED by R (ef2f8d792, ten frames, second box) and the ruled MemoryMarshal.Cast seam REFUTED by execution: Cast admits
+only blittable destinations at runtime and every generated Go array type is a struct holding an array<E> (a struct with a
+T[] reference; R's own 'class' slip corrected at 10e18c194). RULED shape (a) (f6acfe252): a SITE cure by COPY -- a fiat
+companion loading a P256Element from already-Montgomery limbs + a nistec hand-own companion decoding the 88,064 embedded
+bytes into a real 43-entry table once at init, BOTH arms (:577 big-endian, :584), window-aware, headers saying site cure; the
+table is written once and read at two sites so the copy is legitimate; red-first as the direct exe (the suite runner aborts
+silently on a host crash); the nistec/ecdsa projects reaching ScalarBaseMult run too; C1 reads the design half, C2 reads,
+i9 applies after the H11 seat and re-runs the H9 suite. The general typed-view cure stays post-hop.
 DIAGNOSED by i9 (1b2ad7d8f) before R started: both probes FAIL in Output (the crash predates rung 7); the managed stack
 names ElemRefBox<p256AffineTable>.get_ValueSlot via DerefOrNull from nistec.Select <- ScalarBaseMult <- ecdsa.GenerateKey;
 the site is crypto/internal/fips140/nistec/p256.cs:574-616 -- the 1.24 EMBEDDED P-256 table, FromPinnedBox cast
