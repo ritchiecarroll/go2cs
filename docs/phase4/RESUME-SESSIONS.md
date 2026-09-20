@@ -361,6 +361,8 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     NEXT after H9: apply G's README overlay 7c374389b0 on top of c7eb36d845 after C2's existence read (READMEs only, no
     overlap with the decode's five paths; COORD stamps); then reclaim RETIRED trees children-first, never during a suite
     (parent rule: --git-common-dir == --git-dir with >1 worktree row is never removed); then i9-post.sh at idle.
+    OVERLAY CLEARED (9d32f4813) on C2's existence read; at the act assert tree/go1.23.12 and @go1.23.12 read 0 in ADDED
+    lines and the old stamp 1.24.13.3 reads 0 files; COORD stamps c7eb36d845 and the overlay merge at origin.
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
@@ -559,7 +561,16 @@ Now: the design read of R's companions when announced; otherwise idle by ruling.
 the extension a5e48cd3e). ASSIGNED 2026-09-20 ~22:30 (COORD): the LIVENESS BOUND for the 25 resolved-different-pointee
 sites at d91c832543 -- per site the enclosing function, its one-hop callers by file:line, whether any caller's package is a
 banked roster row or a successor candidate (BOUND-LIVE / inert at zero callers / out of scope); one table; a second
-derivation for the caller counts; memequal128's zero as the positive control. So H10 runs the rows that can crash first. (3) The seven pthread members the darwin
+derivation for the caller counts; memequal128's zero as the positive control. So H10 runs the rows that can crash first.
+DONE 2026-09-20 (150a7384): 25 sites / 14 enclosing functions -- BOUND-LIVE 2 (the p256 pair, live only through the
+SUCCESSOR fips140/nistec, RETIRE with the decode at c7eb36d845), RUNTIME-RESIDENT 4 (initAlgAES, cheaprand, runtime and
+reflect pkgPath: no roster row, run by every converted program at startup -- a taxonomy addition; the class cure's first
+population post-hop; a BOARD line at C1's next docs seat), flavor-gated 2 (net/darwin), linkname edge 9, inert 8; ZERO
+banked linux rows reach any site (202/202 platform markers linux). Void measurement of c7eb36d845 (not at origin) caught
+by C1's own in-run control. RULED closed (COORD 9d32f4813). ASSIGNED NEXT (9d32f4813): state whether the held roster seat
+a8511e37d7 carries the DISCLOSURE-FILE moves for the ten relocated rows (successor paths by name; the two retiring names
+dropped); if not, a second commit on the same held ref; predict the two Windows gates on that tree (check-roster-format
+2 -> 0 of 638; release-nuget -VerifyOnly 10 -> 0); announce; COORD re-takes both on the i7 as a PREDICTION TEST, not a landing. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
@@ -829,7 +840,14 @@ d91c832543 (01f8b727: rc 1 at CONVERT, one signature, all_test.cs(4201) = R's of
 --tags), every snapshot badge target in the 337 files has its file under docs/validation/1.23.12.3/ at the version tip
 (set difference by name both directions, a planted phantom link as the control; predicted tag present, 0 missing); a
 read, not a compile; post it, then i9 applies. (b) at R's reflect-seat cut: the converter suite + the planted two-site
-fixture on this box, the before-arm above as the same-box BEFORE.
+fixture on this box, the before-arm above as the same-box BEFORE. (a) DONE (e871b62c: PASSES, no objection).
+ASSIGNED 2026-09-20 (9d32f4813): the H10 CONVERT PRE-FLIGHT -- every roster row at d91c832543 through
+go2cs -tests -test-action convert on this box (the row platform is linux), the ten relocated rows at their successor paths
+from C1's map; enumerate from docs/ValidatedTestPackages.md and STATE the count before the run; sequential, ONE output
+root at a time, each row's output purged after its rc is read; the converter built once at the tip, go version by OUTPUT
+with GOTOOLCHAIN=local; the results-file tail read before any mass claim; post the CONVERT fail set BY NAME with the
+converter's first message per failure. Prediction of record: {reflect} and nothing else; every addition is a converter
+seat COORD routes in parallel instead of the sweep finding it serially.
 Blocked on: nothing.
 ```
 
@@ -961,7 +979,12 @@ RULED a COUNT ARTIFACT by COORD's own diff at origin: the seven 'gained' badges 
 1.23.12.3 in the base (five UNCHANGED: unsafe, testing, macos, syscall, route; bcache + godebug corrected only in their
 Go-side badges @go1.23.12 -> @go1.24.13); the stamp 1.23.12.3 is Newest() recorded release, right by construction;
 ACCEPTED as cut. C2 reads the EXISTENCE arm (G's post did not report it); i9 applies on c7eb36d845 after that read.
-(4) after COORD closes H9: the twelve successor packages through the real
+C2's existence read PASSED (e871b62c: 194/194 snapshot files -- the .html badge resolves to the .md file; the shipped
+tag present, the never-shipped one absent, both controls live; the two version axes move in opposite directions and
+neither contaminates the other; the three platform-exclusive READMEs byte-identical) -- CLEARED for i9's apply on
+c7eb36d845 (COORD 9d32f4813).
+(4) RELEASED 2026-09-20 (9d32f4813): the ELEVEN non-nistec successor rows NOW at d91c832543 on the row platform (linux);
+fips140/nistec after c7eb36d845 is at origin (the decode is in that package). Was: after COORD closes H9: the twelve successor packages through the real
 pipeline on the banking platform at the version tip (all four overrides), per row the verdict count and the diverged set by
 name -- the first H10 rows; a reading, no bank. G's post tool PUBLISHED (80b5d83df): claude/g-lane-post-tool be340825dd off
 master a6be940665, FOUR files under .claude/coord-scripts/lanes/ (g-post.sh + the fetchable, staleness and placeholder
