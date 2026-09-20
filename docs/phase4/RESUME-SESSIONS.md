@@ -1156,6 +1156,10 @@ commits 8-10 (8d24c655d0: the dry run no longer claims the bar; --mark-read; the
 withdrawn. ASSIGNED: R reads the crypto/mlkem row (-test-action all) off its ref; i9 runs the os A/B (with/without
 winsymlink=0) at 6d814e2d38 with master's wrapper; C2 cuts the docs/validation/index.md central regeneration tool
 (ruling (2)) red-first on a new ref off master. G on its sweeps + the ecdh design read; C1 the ecdh structural read.
+~11:20: C1's ecdh structural read SOUND (a9d7308a) with one finding -> a SECOND COMMIT on the seat ref cutting on
+the i7 (worktree ec2): mark only what the writer can declare (a const-key guard at the marking site + a const arm);
+C1's s4 (the rooting renderer's fall-through) named and left open for the apply's reader. C1's vacuous-verdict arm
+fff854c571 LANDED -> MASTER bdabdea4b7. G's design read of the ecdh seat is the last before its apply.
 G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
 was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
 carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a

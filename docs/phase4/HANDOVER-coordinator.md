@@ -718,3 +718,4 @@ Each lane runs in its own Claude Code session on its own host with its own local
 - 11:01: G's post tool landed -> MASTER a731c13594; batch 2's merges verified, the battery in its gates.
 - 11:06: the wrapper on master (8b076c8d69) + R's three post-tool commits -> MASTER 7f95f60e4f; the driver + wrapper both on master; the rehearsal after batch 2.
 - 11:10: the deletion predicate banked; three lane assignments (R the mlkem row reading, i9 the os A/B, C2 the index.md regeneration tool) while batch 2 runs.
+- 11:13: C1's ecdh structural read sound; the const-key guard cutting as the seat's second commit (ec2); C1's vacuous-verdict arm landed -> MASTER bdabdea4b7.
