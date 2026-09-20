@@ -805,7 +805,15 @@ the native box over the token is load-bearing). RULED (a'): the refusal moves to
 token-bearing native box (subclass or sealed flag; the address stays the token; no per-deref lookup for ordinary
 boxes) whose value-slot read/write throws the arm-3 RuntimeErrorPanic family; the sub-agent continues (red-first at the
 deref; the seven must not appear; the reflect row before/after with the Q44 counters first). C1's ref-citation
-correction (7715abb3) taken: cite a ref at EVERY citation; the fixture-first rule applies to every component. DESIGN READ of R's seat DONE (be9a7447, SOUND). ALSO ASSIGNED: the design read of
+correction (7715abb3) taken: cite a ref at EVERY citation; the fixture-first rule applies to every component.
+SEAT CUT AND PUSHED (i7 sub-agent): claude/coord-arm2a-token-refusal 40c9b3316a on 9b89dfe46c, five files +381/-15
+(zh.cs, zh.NativeBox.cs, zh.Contracts.cs, RuntimeErrorPanic.cs, OrderTokenOffsetZeroRefusalTests.cs); the FLAG form
+(NativeBox sealed), both accessors refuse; GolibTests 0 failed -> 0 failed (the seven did not reappear); the negative
+control reproduces the abort; slnx 0 errors; the reflect row AFTER: host survives, 419 tests started (was 195 then the
+AV), TestIsZero a caught panic, diverged by name TestGroupSizeZero/TestIsZero/TestMapOfKeyPanic/TestMapOfKeyUpdate/
+TestTypeFieldReadOnly; Q44 on a surviving host: arm2a=1 (the BEFORE census is blind: the abort precedes the first
+flush). READS: C1 design, C2 structural; the APPLY is COORD's from the i7 while i9 runs the leg (merge onto the tip,
+GolibTests both sides, slnx, signed push). reflect re-measured after it lands; the five names are R's next sizing. DESIGN READ of R's seat DONE (be9a7447, SOUND). ALSO ASSIGNED: the design read of
 the fips140test seat ce8fc43a87 (three sites; the negative-sense option; GoFiles == 0 vs the driver's
 unmarkedFileCount) and the SIZING of its masked residual: 2 x CS1929 in acvp_test.cs (zh<ecdsa_package.hmacDRBG> at a
 pointer-receiver seam; no branch for it at origin). NEXT DOCS SEAT (two items): the
