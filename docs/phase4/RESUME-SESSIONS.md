@@ -483,6 +483,14 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     INTERSECTION (the ten), drops reported by name and lane, a missing named column REFUSES, no union-and-pad; the
     basis's diverged column is REWRITTEN from the records by the re-classifier (0 for a clean PASS), the fifth's n/a
     never carried for a row with a record; net's hang (3,792 s) never reaches the schedule (dropped before seen[]).
+    C1's ASSEMBLER BUILT (e1cbebff: 108 rows read by shardmap end to end; eight reds by site; the population
+    arithmetic closes only WITH the roster seat -- 15 costed rows off the 1.23 roster: six relocation targets, nine
+    for the roster seat to classify) and the RE-CLASSIFIER BUILT (9e2d5acc: over R's twelve records, 47/52
+    reproduced, the tell naming exactly the two host rows). CLAUSE (c) NAMES ITS DOCUMENT (COORD after 9e2d5acc):
+    the comparison record's package = the last segment (or before a vN); the results tail's package = the full row
+    name exactly, applied on tails only. CENSUS COST (i9 359f781e + C2): environment-dependent by ~3 orders of
+    magnitude on identical bytes -> measure one representative file on your own box; not transferable. R's second
+    evidence commit 36b3783953 announced (the five clean unchanged under the landed census; the two redacted).
     ABORT COST RULED (COORD after C2 ff7a229f): the basis models the roster AS IT IS at the leg's tip -- BUILD rows at
     their abort cost, no word filter; the plan regenerates when a seat lands and the driver re-measures; two lines on
     C2's ref with the roster seat (the contract-check comment at the word read; an output line naming the abort-costed
