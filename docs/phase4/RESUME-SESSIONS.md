@@ -452,7 +452,15 @@ new-row candidates with their 1.24.13 declaration counts; banked figures untouch
 claude/c1-h10-roster-relocation 4de76ded06 off master (c7724dcd6; ACCEPTED and HELD by COORD for the H10 docs commit; placement
 stays). ASSIGNED NEXT: the H11 and H12 gate pre-read at the version tip -- enumerate every gate the two rungs name, classify
 each cloud-runnable or .NET-only, RUN every runnable one under the pin and post the reading per gate (command, rc), state what
-a Windows box must run for the rest, cite any missing or stale procedure by line; a reading, no cut. (3) The seven pthread members the darwin
+a Windows box must run for the rest, cite any missing or stale procedure by line; a reading, no cut. DONE 2026-09-20
+(127220cb9: ten gates, six run; FINDING: H2's ruled build-number RESET never happened -- version.props at the tip reads base
+1.24.13 / counter 3 carried from 1.23.12; 335 READMEs target a nuget tag and 191 a validation snapshot that do not exist;
+the emitter has no unpublished-line case; the badge guard is green over it; H11.2's monotonicity script does not exist).
+RULED 66620cce9: badges follow the PUBLISHED stamp (newest nuget tag + docs/validation/<version>/), never version.props
+alone. ASSIGNED: the Go-side seat on a new ref off the version tip -- version.props counter 3 -> 0; the emitter's counter-0
+case targets the newest recorded snapshot; the badge guard's EXISTENCE arm (335/191 = the positive control); a repoguard
+arm for H2's reset; the runbook H2/H11.2/H12 amendments; red-first each; C2 reads; i9 applies after the overlay and q100.
+Size the README re-emission path (badge-only vs the next full -stdlib emission) and name it in the announce. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
