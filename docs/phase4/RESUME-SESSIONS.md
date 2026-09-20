@@ -218,6 +218,9 @@ STATE AT THIS REVISION (2026-09-14 18:45 -- new usage week; the save-state refre
 RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane restarts from section 0a plus its own fence).
   COORD READ DISCIPLINE (corrected 2026-09-20 ~22:00 after absorbing C1's 534a217e2 unread): the mailbox delta is read from
   the LAST TIP READ, never from COORD's own post; the post tool's ABSORBED listing is printed, never filtered by a grep.
+  BOARD RULE (C1 d145a3f6c, seconded C2 296b8af66, COORD): the read anchor may only move over text actually read; every
+  mechanism that can move it without reading -- a poll, a fetch race, a filtered view of a warning, a tool printing subjects
+  for entries -- is the same defect; the absorbed COUNT rides the delivery line lanes grep for.
   POSITION: rung 7 CLOSED (H7 compile parity MET at 46307b4704 on three flavours, COORD a065b1bd9); H7a folded (fc275f1ac3,
   then the interop fold 30057d0c4a); version tip d71e4eed63 (q97 applied); master 7105c8468 (docs seat 4); mailbox anchor
   f8fef0119 (R's delta, folded in this revision); H8 CLOSED 2026-09-20 ~23:45 (marker gate zero x6; byte-identity PASS on
@@ -1001,7 +1004,9 @@ at the blobs; a near-miss on a non-recursive grep against R's StrongBox claim, R
 apply on both reads (COORD): i9 applies the BRANCH TIP after the subtree seat (R's comment commit on top). R's commit
 LANDED (fb461aeb9): 9200da804e on top of d01e5d307d, one file +21/-3, comment-only (verified from the i7: non-comment
 changed lines 0, comment-stripped sha identical); the ref chain, the asm-variant bound and the cost stated; SystemCertVerify
-direct exe exit 0 re-verified after the edit. i9 APPLIES 9200da804e. Banked for the
+direct exe exit 0 re-verified after the edit. i9 APPLIES 9200da804e. C2's Go suite at the cut (296b8af66, the half of its
+assignment it had absorbed unread): rc 0, 0 failures at d01e5d307d on a second box, transferring to 9200da804e (zero
+executable lines moved). The corpus build, GolibTests and the direct exe remain i9's arms. Banked for the
 next seat opening either file: a call-count arm on SetMontgomeryLimbs (one site / two calls).
 DIAGNOSED by i9 (1b2ad7d8f) before R started: both probes FAIL in Output (the crash predates rung 7); the managed stack
 names ElemRefBox<p256AffineTable>.get_ValueSlot via DerefOrNull from nistec.Select <- ScalarBaseMult <- ecdsa.GenerateKey;
