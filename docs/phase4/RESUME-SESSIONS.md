@@ -458,6 +458,11 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     never two-dot against a moved tip. fips140test x oracle overlap in testConversion.go trial-merged clean. NEXT applies
     on 9b89dfe46c: ce8fc43a87 (fips140test) then dd376e3f12 (oracle), each predicted, gated, stamped; then the leg's
     worktrees are cut at the tip carrying all three.
+    fips140test APPLIED (404d07fc) at 4df427fdcb and STAMPED at origin (tree 114cd299b5, parents 9b89dfe46c + ce8fc43a87,
+    5 files +306/-4, four blobs the seat's + the projitems COMPOSED with all three registration lines, corpus 0, signed)
+    -- VERSION TIP 4df427fdcb. i9's mechanism banked: the gate travels as an empty class name; :1229 recomputes it (the
+    one-call-site remedy when embedtest converts). i9 stays on the queue: the oracle seat dd376e3f12 next, then the leg;
+    the ProjectReference/generated-sources reads are the i7's next fips140test seat's.
     i7 CORE ARM GREEN on the final tip ddc205a1ee (sub-agent): parse 0/0, -SelfTest, both refusal controls fire by name,
     dry run 13 floors (2 inherited), real row bufio PASS 80 windows/amd64 CR 0, the evidence survives the tree removal;
     caveat: a dry run pre-warms a row (153 s cold vs 31 s warm) -- no dry run precedes a measured row in the leg. THE
