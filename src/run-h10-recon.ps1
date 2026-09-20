@@ -803,7 +803,7 @@ foreach ($row in $rows) {
         if ($cmpWrite -lt $started) {
             $cmpStale = $true
             Write-Host ("     !! comparison record predates this row (written {0}, row started {1}) -- STALE, not read" -f `
-                $cmpWrite.ToString('HH:mm:ss'), $started.ToString('HH:mm:ss')) -ForegroundColor Yellow
+                $cmpWrite.ToString('HH:mm:ss.fff'), $started.ToString('HH:mm:ss.fff')) -ForegroundColor Yellow
         } else {
             try { $cmpDoc = Read-JsonDocument $cmpSrc } catch { $cmpUnreadable = $true }
         }
@@ -960,6 +960,14 @@ foreach ($row in $rows) {
     # real, but it cannot be cross-checked against a document this run wrote, and a count banked under
     # NOVERDICT is the shape this file refuses everywhere else. NOMATCH, by the same rule remedy (ii)
     # applies to a thrown row.
+    #
+    # ⚠⚠ THIS LINE IS A RESTATEMENT OF INTENT AND IS PROVABLY INERT: the initialiser three lines
+    # above already holds 'NOMATCH' and nothing between them touches $verdicts. IT IS NOT THE
+    # MECHANISM. The mechanism is the two `-not $cmpStale` guards below, which are what stop
+    # $v.Count from over-writing NOMATCH afterwards -- so deleting either of them because this
+    # explicit line "already covers the case" would reinstate the defect the eleventh fixed. Kept
+    # because an explicit statement beside a guard is this file's habit; labelled because C1 named
+    # the inverse risk, which is the one that actually bites.
     if ($cmpStale) { $verdicts = 'NOMATCH' }
     # ⚠ A DERIVED COUNT IS A MEASUREMENT, NOT A GUESS, AND IT IS WHY THIS ROW IS NOT NOMATCH. It is
     # the converter's own expression over this row's own record; the cross-check below is skipped for
@@ -990,10 +998,28 @@ foreach ($row in $rows) {
                     $verdicts = 'NOMATCH'
                 }
             } catch {
-                Write-Host '     !! comparison JSON unreadable -- emitting the summary count unchecked' -ForegroundColor Yellow
+                Write-Host '     !! comparison JSON unreadable -- the count cannot be cross-checked' -ForegroundColor Yellow
             }
         }
     }
+
+    # ⚠⚠ NO COUNT IS BANKED UNDER NOVERDICT, WHATEVER PUT IT THERE -- AND THE STALE ARM ABOVE WAS
+    # THE ONLY FACT THAT GOT THAT RULE. MEASURED, not reasoned: a FRESH but UNREADABLE record reads
+    # word=NOVERDICT and reached here holding verdicts=61 -- a count taken from the summary line of a
+    # run whose comparison document could not be parsed at all. That is verbatim the shape the stale
+    # arm refuses thirty lines above, by the same sentence: "a count banked under NOVERDICT is the
+    # shape this file refuses everywhere else". The file refused it in one place and produced it in
+    # another, by a different route to the same word.
+    #
+    # ⚠ DERIVED FROM THE WORD RATHER THAN ADDED AS A FIFTH SPECIAL CASE, which is C1's own reading
+    # of why the ruled quad holds: `sweep_s` and `diverged` FOLLOW from the word instead of being
+    # assigned in parallel, so they cannot drift out of sync with it. One line here covers all FOUR
+    # facts in the list below -- stale, unreadable, thrown, and no-summary-no-document -- where four
+    # parallel assignments would leave the next fact uncovered exactly as the third one was.
+    #
+    # NOTHING BANKED MOVES: all three NOVERDICT rows of this lane's leg already read NOMATCH, so this
+    # closes a reachable hole rather than restating a figure.
+    if ($word -eq 'NOVERDICT') { $verdicts = 'NOMATCH' }
 
     # ⚠ wall_s IS THE OBSERVED WALL FOR EVERY ROW, WHATEVER ITS WORD, AND IT IS ALWAYS AN INTEGER.
     # `sweep_s` answers "what may this row be SCHEDULED on" and is deliberately non-integer when the
@@ -1013,13 +1039,21 @@ foreach ($row in $rows) {
         $sweepS = 'UNMEASURED'
     }
     if ($word -eq 'NOVERDICT') {
-        # ⚠ THREE DIFFERENT FACTS REACH THIS ONE WORD, AND THIS COMMENT USED TO STATE ONLY THE FIRST
-        # (C2, queued since 765aba82). They are not interchangeable to anyone reading the TSV:
+        # ⚠ FOUR DIFFERENT FACTS REACH THIS ONE WORD, AND THIS COMMENT HAS NOW BEEN INCOMPLETE
+        # TWICE (C2 queued the first correction since 765aba82; C1 found the second in the eleventh's
+        # delta read). They are not interchangeable to anyone reading the TSV:
         #     (a) NO SUMMARY LINE        the row produced no verdict at all
         #     (b) AN UNREADABLE ARTIFACT a comparison JSON existed and this instrument could not read
         #                                it. The row may well have PASSED; NOVERDICT says only that
         #                                nothing here can tell -- which is why it is not a PASS.
         #     (c) A THROWN INVOCATION    remedy (ii): the converter returned no exit code at all.
+        #     (d) A STALE RECORD         a comparison JSON existed, was readable, and PREDATES this
+        #                                row -- so it describes an EARLIER run. ⚠⚠ THIS IS THE ONE
+        #                                CAUSE THAT LEAVES NO TRACE IN THE ROW'S OWN OUTPUT, because
+        #                                the converter ran fine. A reader holding the old three-item
+        #                                list and a clean-looking row had no reason to go looking for
+        #                                `noverdict-cause.txt`, which is written for exactly this
+        #                                case. (C1's finding, and the omission bit hardest here.)
         # They share the word because they share ONE consequence: the wall is real and is emitted as
         # wall_s, but a cost banked under no verdict is a number with no evidence behind it, so the
         # generator REFUSES it and the concatenation excludes the row.
@@ -1080,10 +1114,10 @@ foreach ($row in $rows) {
     # row is indistinguishable from one whose comparison simply did not match.
     if ($cmpStale) {
         [System.IO.File]::WriteAllText((Join-Path $rowDir 'noverdict-cause.txt'),
-            "stale record: the comparison document at $cmpSrc predates this row's start, so it was " +
-            "not read and no word was derived from it. The record is a survivor of an earlier run in " +
-            "this tree (it is gitignored, and `git clean -fd` skips it). Re-run in a tree whose " +
-            "pre-row-1 residue census removed prior records by name.`n")
+            "stale record: the comparison document at $cmpSrc predates this row's start, so it " +
+            "was not read and no word was derived from it. The record is a survivor of an earlier " +
+            'run in this tree (it is gitignored, and `git clean -fd` skips it). Re-run in a tree ' +
+            "whose pre-row-1 residue census removed prior records by name." + [char] 10)
     }
 
     # The summary line itself, and the whole stdout when there ISN'T one -- a row with no summary is
