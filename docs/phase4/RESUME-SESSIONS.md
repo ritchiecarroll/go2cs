@@ -1041,7 +1041,15 @@ untouched, red-first Go arms, suite, CNR predicted clean); R merges at the third
 host third commit's 'no Thread' clause FALSE (a Thread at TestingRuntimeTests.cs:191 inside a test body) -> a FOURTH
 comment-only commit on the host ref (worktree hc2) with C2's corrections (35 sites not 36; the attribute-site
 comment leads with the interleaving caution). C2's delta read of the host third commit SOUND (a6ab63a8). i9's
-path/filepath A/B SETTLED (07d4d8d8: 61/0 both ways in a censused tree; arm C = the stale control -> NOVERDICT).]
+path/filepath A/B SETTLED (07d4d8d8: 61/0 both ways in a censused tree; arm C = the stale control -> NOVERDICT).
+LEG (4) LANDED ~09:30: MASTER 711a5925a1 (the plan's digest reproduced byte-identical from the merged tree's inputs
+materialised LF -- this checkout smudges .tsv/.py to CRLF; 203+23=226; 11 reserved rows) = THE ROSTER TRAIN COMPLETE
+(legs 1, 2a, 2b, 2c, 3, 3b, 4). R's mlkem seat WHOLE at 1f70b32f83 (354ac05f: the follow-up merged, the generic-
+composition arm with a MADE red, GenTests 53/53) -- and R's s1 CORRECTS the ruling: R's 94a802cdc already strips the
+pointer path before the deferred marker (C1 read the seat ref where it is absent) -> the ck2 converter cut STOPPED
+(report only); the value path unfixed symmetrically (queued); the keys unstripped on purpose. APPLY BATCH 2 = the seat
+ref 8b1a284122 + the host ref at its FOURTH commit (hc2 cutting) + R's 1f70b32f83, one battery, launched when hc2 lands
+and the ha1 host apply has pushed. NEXT: the DRIVER's brief (the plan at master; run-h10-dispatch.ps1 unexercised).]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
