@@ -1066,7 +1066,15 @@ R (aed592bf2): the anchored cut is TWO changes -- the emittedAdapterPair PAIRING
 strip made the marker miss the record's closed spelling -> the anchor-class qualification goes missing), then the
 anchored name; the arm reaches the anchored path end to end; R cutting both on R's ref. THE DRIVER's BRIEF DRAFTING
 on the i7 (sub-agent; scratchpad driver-brief-DRAFT.md; runbook-sourced vs proposed items; open questions).
-BATCH 2 = the seat ref 8b1a284122 + the host ref 91f1bd5877 + R's ref after the anchored commit; after ha1 pushes.]
+BATCH 2 = the seat ref 8b1a284122 + the host ref 91f1bd5877 + R's ref after the anchored commit; after ha1 pushes.
+G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
+was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
+carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
+converter seat CUTTING on the i7 (worktree ec1, ref claude/coord-ecdh-alias-collision: normalise the key + refuse on
+disagreeing targets); crypto/sha3 CS0246 (the minted SHA3zhHash wrapper unresolvable at the call site) -> an i7 SIZING
+(worktree sz3, read-only); encoding/json CS0052/50/51 (an unexported type narrower than its internal-test consumers)
+-> C1 sizes. G NEXT: hash/maphash (the CS0411 class), internal/synctest, embedtest. Banked: ps -W carries no
+arguments -- process censuses read the COMMAND LINE.]
 generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
 108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
 internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
