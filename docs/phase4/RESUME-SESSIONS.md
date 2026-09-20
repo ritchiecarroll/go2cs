@@ -1012,7 +1012,15 @@ FIRST READ DONE (c0c2063e at 43aba50262: spec met, the parse well controlled; th
 note -> both in i9's second commit). RE-READ at the new tip when announced. ALSO ASSIGNED (COORD after dfdcbc65): the
 crypto/mlkem DESIGN READ -- (a) the generator making zh<T> satisfy every interface *T's method set satisfies vs (b) the
 converter emitting T at a constrained type-argument position; against src/gen/go2cs-gen's actual pointer-receiver
-interface machinery, the semantic difference under (b), the blast radius by census; a recommendation, COORD rules. READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
+interface machinery, the semantic difference under (b), the blast radius by census; a recommendation, COORD rules.
+DESIGN READ DONE (ea03e60d): (a) unwritable (zh<T> in golib's assembly; no conditional conformance) -- its intent is
+the shipped ConstraintProxy path (18 records, 5 packages); (b) changes every implementor's contract (E in the
+constraint interface's own signature) and loses writes through E-typed parameters; the adapter has no projection at a
+bare type-parameter reach. The converter's own fixture constraintProxyGenericCall_test.go:89-91 records the shape as
+'never compiled as C#'. RULED: WIDEN THE PROXY (converter gates :1582/:1602, the generator's :1329 guard -> a
+no-self-parameter path, the widenCall negative control flipped on purpose); the seat is R's after the registration
+seat; C1 reads the converter half, C2 the generator half; i9 applies. C2's floor-1 violation (two converters
+overlapped two minutes; a wrapper PID killed, the residual PID read past; results file voided) banked as a BOARD line. READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
 two additive citation notes) -- LANDED by COORD at master ceb1c87971. Then read i9's recon wrapper when announced.
 Blocked on: nothing.
 ```
@@ -1309,7 +1317,11 @@ pinned 1.23.1 unless GOTOOLCHAIN=local -- assert by output. SEAT WIDENED 2026-09
 time row (abs_test.go:23 exported anonymous-struct var read across the internal/external test boundary; the gate fires
 at time_test.cs(33)) is a SECOND red arm of the same seat -- go2cs -tests of time past CONVERT at the tip; a second
 commit on the same ref if its root is a different gap. Then the recon list runs beside the seat in its own worktree.
-QUEUED after the seat (COORD after dfdcbc65): row 3 internal/sync CS0411 -- an untyped constant at a generic argument
+QUEUED after the registration seat (COORD after ea03e60d): the crypto/mlkem CONSTRAINT-PROXY WIDENING (row 2) -- the two
+converter gates, the generator's no-self-parameter path, the flipped named control, red-first with the generated proxy
+asserted to EXIST, the row past COMPILE, the suites, the corpus diff predicted EMPTY (the 18 proxies keep their dedupe
+key); C1/C2 read the halves; i9 applies. Row 3 (internal/sync CS0411) MOVES to an i7 sub-agent after fips140test.
+Was queued: row 3 internal/sync CS0411 -- an untyped constant at a generic argument
 whose type parameter is also bound by a typed argument gets the conversion to the pinned type at the call (or explicit
 type arguments); red-first on C1's fixture f<T>(T a, T b), the row past COMPILE, the converter suite, the corpus diff.
 Blocked on: nothing for (1); (2) needs an owner-opened spurt.
