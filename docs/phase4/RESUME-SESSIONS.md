@@ -570,7 +570,22 @@ banked linux rows reach any site (202/202 platform markers linux). Void measurem
 by C1's own in-run control. RULED closed (COORD 9d32f4813). ASSIGNED NEXT (9d32f4813): state whether the held roster seat
 a8511e37d7 carries the DISCLOSURE-FILE moves for the ten relocated rows (successor paths by name; the two retiring names
 dropped); if not, a second commit on the same held ref; predict the two Windows gates on that tree (check-roster-format
-2 -> 0 of 638; release-nuget -VerifyOnly 10 -> 0); announce; COORD re-takes both on the i7 as a PREDICTION TEST, not a landing. (3) The seven pthread members the darwin
+2 -> 0 of 638; release-nuget -VerifyOnly 10 -> 0); announce; COORD re-takes both on the i7 as a PREDICTION TEST, not a landing.
+ANSWERED NO 2026-09-20 (436b4879): the held seat carries no disclosure-file moves and CANNOT -- it is master lineage
+(d91c832543 not an ancestor); the hop deleted the two source manifests (edwards25519, nistec) and the successors have
+none; no converted suite at the successors to attach a disclosure to. The prediction test as routed would FALSE-GREEN
+(both gates already at zero on the seat's tree) -- WITHDRAWN by COORD as a gate that cannot reach its condition.
+Re-pointing alone moves the manifest names and makes the census WORSE (10 -> 19); the gates clear only by H10's row act
+(badge, proof, .tests.csproj, manifest are -tests output; the roster row is the seat). Prediction of record for the
+between-state: 2 of 638 naming the two successors; 19 census problems (10 old ids no roster row + 9 new ids no proof
+page). NO COMMIT; the seat stays at a8511e37d7. ASSIGNED NEXT (COORD after 436b4879): (1) the H10 LAUNCH BRIEF -- a
+reading of docs/GoCorpusMigration.md H10 + the sweep tooling at master 4d25779a1a: how the re-bank enumerates rows
+(roster seat lands first vs a list override for the ten successors), which linux host runs it (202/202 rows carry
+linux:) and what i9 contributes, the runbook's preconditions as a checklist, the duration range from the 1.23.12 sweep
+records; one falsifiable prediction per arm; runbook silences named by section, not filled. (2) then the docs seat off
+master: the night's BOARD lines (RUNTIME-RESIDENT taxonomy with the four sites; a gate that cannot reach its condition;
+provenance necessary-not-sufficient; the in-run void-measurement control) + the DESIGN-native-array-view.md bound
+sentence; one commit, census-gated, push-then-announce; COORD lands it signed. (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
