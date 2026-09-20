@@ -215,9 +215,30 @@ function Test-SummaryContract {
 Write-Host ''
 Write-Host 'H10 recon leg -- preflight'
 
+# ⚠⚠ -SelfTest COVERS THE SUMMARY-LINE CONTRACT ONLY, AND ITS OWN COMMENT ONCE CLAIMED MORE.
+# It exits HERE, before `Assert-OrdinalJsonReader` runs in the preflight below, so the guard that
+# REFUSES THE LEG is untested by the one flag that exists to test the guards.
+#
+# ⚠ I TRIED THE OBVIOUS FIX AND IT DOES NOT WORK: calling the canary from this block fails with
+# CommandNotFoundException, because the function is defined ~130 lines BELOW here and a script's
+# top-level flow cannot forward-reference it. The parse is clean either way, so only RUNNING
+# `-SelfTest` catches it -- which is how this note came to be written rather than a broken switch
+# shipped.
+#
+# THE REAL FIX IS A PREFLIGHT RESTRUCTURE, deliberately not in this commit: the block must move
+# BELOW the JSON reader definitions, AND the eight tree/scratch validations between here and there
+# must stop denying on the dummy values `-SelfTest` is forced to supply -- see the next paragraph.
+#
+# ⚠ BECAUSE IT CANNOT BE INVOKED AS DOCUMENTED EITHER. Six parameters are [Parameter(Mandatory)]
+# with no parameter set of their own, so `-SelfTest` alone prompts for all six and under
+# -NonInteractive is rc 1 with nothing run; it is reachable only by supplying six values it never
+# uses, and those values then fail the tree validation below. The two defects are one restructure.
+#
+# THE CANARY IS NOT UNTESTED MEANWHILE: it runs in the preflight of every real leg, and its
+# red-first arm drives it against a deliberately folding reader and requires the refusal.
 if ($SelfTest) {
     Write-Host ''
-    if (Test-SummaryContract) { Write-Host '  SELF-TEST PASSED -- both real shapes parse, all three planted shapes refuse'; exit 0 }
+    if (Test-SummaryContract) { Write-Host '  SELF-TEST PASSED -- the summary-line contract only; see the note above'; exit 0 }
     Deny 'the summary-line contract FAILED its self-test -- the parse and its controls disagree'
 }
 
@@ -292,9 +313,13 @@ function Find-Exe([string] $dir, [string] $stem) {
 #                            document this script only ever reads by key
 #     one set of consumers   the members are read the same way in both editions
 #
-# Two editions, two remedies, because `-AsHashtable` DOES NOT EXIST on 5.1:
-#     Core (>= 6)   ConvertFrom-Json -AsHashtable          a dictionary; no property graph is built
+# Two editions, two readers, neither of them `ConvertFrom-Json`:
+#     Core (>= 6)   System.Text.Json JsonDocument          ordinal; keeps case-differing properties
 #     5.1           JavaScriptSerializer.DeserializeObject a Dictionary[string,object]; likewise
+# ⚠ AN EARLIER CUT OF THIS BLOCK SAID CORE USED `ConvertFrom-Json -AsHashtable`, and the eighth
+# replaced that with System.Text.Json for the reason stated thirteen lines below -- PowerShell's
+# hashtable is case-INSENSITIVE and folds the very names this reader exists to preserve. The line
+# survived the change and contradicted the code under it, which is worse than saying nothing.
 # Both answer .Keys / an indexer through System.Collections.IDictionary, so ONE set of consumers below
 # serves both editions and there is no per-edition branch outside this function.
 # ⚠⚠ AND THE NAMES MUST SURVIVE THE READ, ORDINALLY, ON BOTH EDITIONS.
@@ -336,8 +361,9 @@ function ConvertFrom-JsonElementOrdinal($el) {
 #
 # The count check beside the maps cannot see a folding READER -- both of its sides come from the
 # document the reader produced. This one does not read a row's document at all: it parses a
-# twenty-four byte literal carrying ONE case collision and requires BOTH names back. The expectation
-# is 2, written here, and nothing the reader does can produce it.
+# TWENTY-SIX byte literal carrying ONE case collision and requires BOTH names back. The expectation
+# is 2, written here, and nothing the reader does can produce it. (An earlier comment said
+# twenty-four; C2 counted the bytes and I had not.)
 #
 # It refuses the whole leg rather than a row, deliberately: a reader that folds would mis-score every
 # row with a case collision and score the rest correctly, which is the shape that gets banked before
@@ -388,9 +414,15 @@ function Get-DocMember($doc, [string] $member) {
     #
     # Membership here is over the TOP-LEVEL keys only (go, csharp, disclosed, matched, status), so a
     # linear test is a handful of comparisons and never touches the per-entry walk this commit exists
-    # to remove. -contains is case-insensitive, which is exactly what the `$jj.go` property access it
-    # replaces already was.
-    if (@($d.Keys) -notcontains $member) { return $null }
+    # to remove.
+    #
+    # ⚠ THE TWO HALVES DISAGREED ABOUT CASE AND NOW DO NOT (C2's note, named so it is never found
+    # as new). `-contains` is case-INSENSITIVE while `$d[$member]` on an ordinal dictionary is
+    # case-SENSITIVE, so a document spelling `GO` would pass the membership test and then fetch
+    # nothing -- an absent member reported as a present-but-empty one. `-ccontains` makes the two
+    # halves ask the same question. The schema's members are lower-case and no corpus record spells
+    # them otherwise, so this changes no reading; it removes a disagreement, not a bug.
+    if (@($d.Keys) -cnotcontains $member) { return $null }
     return $d[$member]
 }
 
@@ -860,7 +892,7 @@ foreach ($row in $rows) {
                 # canary in the preflight, whose expectation the reader did not produce.
                 $goKeyN = @(Get-DocKeys $cmpDoc 'go').Count
                 if ($goMap.Count -ne $goKeyN) {
-                    Write-Host ("     !! ORDINAL NAMES LOST: the document carries $goKeyN `go` names and the map holds $($goMap.Count) -- the reader folded") -ForegroundColor Red
+                    Write-Host ("     !! ORDINAL NAMES LOST between the parsed document and the map: the document carries $goKeyN `go` names and the map holds $($goMap.Count). This is a MAP-CONSTRUCTION fault; a folding READER is invisible here and is the canary's job.") -ForegroundColor Red
                     throw "the comparison document's names did not survive the read ordinally ($goKeyN -> $($goMap.Count))"
                 }
                 # ⚠ THE DISCLOSED ONES ARE SUBTRACTED, AND THEY ARE PROSE, NOT NAMES. `disclosed` is a
