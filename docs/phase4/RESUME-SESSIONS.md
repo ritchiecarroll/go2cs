@@ -1746,8 +1746,11 @@ without it the host falls back to a JUNCTION and Go 1.24 refuses (the 1.24 go bi
 DefaultGODEBUG, so EvalSymlinks no longer evaluates mount points; GODEBUG=winsymlink=0 makes the junction accepted).
 THREE rows in the class (cfile, trace, runtime x5 trees). RULED a HOST SEAT (an i7 sub-agent cutting on
 claude/coord-host-junction-godebug): GODEBUG=winsymlink=0 in the child environment on the junction path ONLY + the
-refusal names Developer Mode; red-first by forcing the junction branch on the i7; C1 design + C2 structural; the
-apply after the foreign-generic apply. The owner item RESTORED as OPTIONAL (Developer Mode on R-LAPTOP and i9 makes
+refusal names Developer Mode; red-first by forcing the junction branch on the i7 -- CUT and PUSHED bb6c75f60e
+(~07:45: two files under src/core/testing; ApplyJunctionGodebug via TestHost.PublishEnvironmentVariable feeding the
+probe's CLR child AND the converted syscall copy; the mechanism confirmed by go version -m; red/green/green-without-
+GODEBUG on cfile; testing.csproj 0 errors; census 116; repoguard 6/6); C1 design + C2 structural; the apply after
+the foreign-generic apply with cfile + internal/trace as the prediction tests. The owner item RESTORED as OPTIONAL (Developer Mode on R-LAPTOP and i9 makes
 the symlink path available today); the rows stay NOVERDICT by cause and are re-measured by the driver). R's CORRECTION (fcb75ab3) taken: the runbook sentence is i9's -- mtime is unrelated
 to provenance in either direction (over in R's tree, under in five of i9's seven packages); the remedy unchanged.
 i9 RE-TOOK its table (0bb72afd): genuine residue in six of seven packages -> its two-row arm STILL OWED; go/types
