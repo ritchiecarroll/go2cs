@@ -66,7 +66,8 @@ surface. Model: Opus 5, effort high (owner order; the owner may raise a lane at 
 the i7 and has final say on design; escalate only runs-like-Go / reads-like-Go questions.
 
 The objective, in order: (1) the Go corpus migration to 1.24.13 by the ladder in docs/GoCorpusMigration.md section 2
-(rung 7 closed 2026-09-16; H8 and H9 are live); (2) Go's own test suites at 100 percent of what is implementable,
+(rung 7 closed 2026-09-16; H8 closed 2026-09-20 at master docs a6be940665; H9 closed 2026-09-20 at c7eb36d845 with
+its runbook record at master 82e203372a; H10 is live, the sweep launch gated on C1's brief); (2) Go's own test suites at 100 percent of what is implementable,
 re-banked at 1.24.13 (H10). The mailbox is a communications tool, not an objective: it is not designed, not proposed
 about, not measured. Lane tokens go to goal work.
 
@@ -231,9 +232,11 @@ RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane
   q102 re-based onto cd6f4b9a8e (3d88353a8); q99 (1) APPLIED edfa0f5041, q99 (2) 06b1636cae, q102 23df814f64, the metadata seat
   0f97dcc8db (VERSION TIP; the converter fail set is EMPTY; i9 next: the fail-set literal -> H9 against the eleven -> q100);
   G ACKed (census on disk complete, rc 0, 802 s); H8 comparand RULED bb1d9b4d6
-  (produce the outgoing 1.23.12 manifest on G-LAPTOP from C2's 746d3a7c75, an accepted docs seat). LIVE RUNGS: H8 (G's census reading; C2's comparand procedure; COORD rules
-  the comparand) and H9 (i9, after its applies: q94 -> q99 (1) -> q99 (2) -> metadata 828ef5d0b7 -> fail-set literal -> H9 ->
-  q100 after the i7's gate). C1: q102 cut -> q86 field-pattern fix (RULED its own seat) -> the pthread seven held as a NOTE.
+  (produce the outgoing 1.23.12 manifest on G-LAPTOP from C2's 746d3a7c75, an accepted docs seat). LIVE RUNG (2026-09-20): H10 -- H8 CLOSED (docs a6be940665) and H9 CLOSED at c7eb36d845 (runbook record
+  82e203372a on master = C2's correction seat 2e75b14586 + the closure block a19d2bbbbb); the sweep launch waits on
+  C1's brief; the front = G's eleven successor readings, C2's CONVERT pre-flight, R's reflect seat, i9's overlay apply
+  then the ten relocated rows' re-bank. (Was: H8 and H9 with i9's apply queue q94 -> q99 -> metadata -> fail-set
+  literal -> H9 -> q100, all APPLIED.) C1: q102 cut -> q86 field-pattern fix (RULED its own seat) -> the pthread seven held as a NOTE.
   C2: H8 comparand -> q100 second read -> q102/q86 second reads. R: steward loop -> the reflect row read at the version tip in
   a spurt. MASTER moved 2026-09-20 to 43ee2ac8b3 (the identifier census's release-literal admit, signed merge), then to
   a6be940665 (the H8 DOCS SEAT: C2's amendment d7b0876ce6 + G's record d384d6357d, two signed merges, gates green), then
@@ -373,8 +376,12 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     pre-merge, shipped stamp 342, no Go-tag regression in ADDED lines; STAMPED by COORD at origin) -- VERSION TIP
     93feb8df2b. i9's substring proxy arm (fips140/nistec) aborted a correct merge once; replaced by the set
     intersection with a planted control. i9 NEXT: the tree reclamation children-first,
-    then i9-post.sh with the state-dir refusal in first. The H9 docs = C2's 2e75b14586 + a closure block (i7 sub-agent)
-    landing on master signed.
+    then i9-post.sh with the state-dir refusal in first. The H9 docs LANDED on master at 82e203372a (C2's 2e75b14586 +
+    the closure block a19d2bbbbb, signed merge, gates green).
+    ASSIGNED (H10 launch ruling): cut the RECON WRAPPER from the driver's own per-row function -- runs a name list
+    through the per-package pipeline and writes one TSV row per row (the banked TSV's columns), both editions, the i7
+    parse gate, a one-row dry run, C2 reads; then preflight a worktree at 93feb8df2b (pins by output, disk >= 25 GB) and
+    name the slice/cooldown regime for the reserved rows; i9 also takes the windows-only rows.
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
@@ -597,7 +604,18 @@ linux:) and what i9 contributes, the runbook's preconditions as a checklist, the
 records; one falsifiable prediction per arm; runbook silences named by section, not filled. (2) then the docs seat off
 master: the night's BOARD lines (RUNTIME-RESIDENT taxonomy with the four sites; a gate that cannot reach its condition;
 provenance necessary-not-sufficient; the in-run void-measurement control) + the DESIGN-native-array-view.md bound
-sentence; one commit, census-gated, push-then-announce; COORD lands it signed. (3) The seven pthread members the darwin
+sentence; one commit, census-gated, push-then-announce; COORD lands it signed.
+BRIEF DONE (d0c83ed9): the plan's population IS the roster file (shardmap.py); re-pointing the ten before the recon makes
+the generator REFUSE (6 costed rows orphan); H10 names no host; three of four preconditions inherited silently; reserved
+leg >= 88.7 min, no upper bound until the recon costs the 42. DOCS SEAT PUSHED (f14cafb9): claude/c1-board-night-lines
+6e082a09c5 off 4d25779a1a, +117 (BOARD block; DESIGN-native-array-view section-4 BOUND: the floor may sit on arm 4 only --
+the terminal is shared with arm 2 whose population includes initAlgAES, so a terminal guard panics every program at
+startup); C2 reads, COORD lands. H10 LAUNCH RULED (COORD after f14cafb9): recon leg -> roster seat -> plan -> driver; the
+recon on name lists through the per-package pipeline; OS need not match the marker, G-LAPTOP WSL the discriminator.
+ASSIGNED NEXT: (a) the population BY NAME (227 per e0d5121e2 vs 206 by C2's arithmetic; reconcile); (b) per-worker
+lists by the stated rule (reserved + windows-only -> i9; linux-only -> G WSL; the rest LPT/round-robin across G and R;
+sums closing; platform class per row); (c) the TSV path/columns/digest rule; (d) the in-stage H10 amendment as a second
+commit on the docs ref (launch checklist with citations, the order, the host rule, plan+driver cited, per-row steps). (3) The seven pthread members the darwin
 remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
 1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
 i7 gate read CLEAR (1135d780c); nothing owed there.
@@ -875,6 +893,15 @@ root at a time, each row's output purged after its rc is read; the converter bui
 with GOTOOLCHAIN=local; the results-file tail read before any mass claim; post the CONVERT fail set BY NAME with the
 converter's first message per failure. Prediction of record: {reflect} and nothing else; every addition is a converter
 seat COORD routes in parallel instead of the sweep finding it serially.
+DONE 2026-09-20 (5ceedaf88): 207 conversions (204 - 10 relocated + 12 successors + reflect as the positive control), 201
+clean at d91c832543 and IDENTICALLY at 93feb8df2b; converter fail set {reflect, time} (both hop debt: clean at 1.23.12
+with the same binary); time = i9's 2026-09-15 class (abs_test.go:23 exported anon-struct var read across the
+internal/external test boundary, time_test.cs(33)) -- FOLDED INTO R's seat by COORD; sync fails in a BARE root (seeded
+rc 0) = floor 2's -tests form; testing needs -test-allow-handown; internal/syscall/windows{,/registry} REFUSE on linux
+(their markers read linux: n/a); the marker count is 198 of 204 numeric (202 was occurrences incl. 2 prose examples).
+ASSIGNED NEXT (COORD after f14cafb9): read C1's docs seat claude/c1-board-night-lines 6e082a09c5 (the section-4 bound's
+arm classification against zh.cs at master; the BOARD block's four lines against the record); COORD lands it signed on
+the read. Then read i9's recon wrapper when announced.
 Blocked on: nothing.
 ```
 
@@ -1011,7 +1038,9 @@ tag present, the never-shipped one absent, both controls live; the two version a
 neither contaminates the other; the three platform-exclusive READMEs byte-identical) -- CLEARED for i9's apply on
 c7eb36d845 (COORD 9d32f4813).
 (4) RELEASED 2026-09-20 (9d32f4813): the ELEVEN non-nistec successor rows NOW at d91c832543 on the row platform (linux);
-fips140/nistec after c7eb36d845 is at origin (the decode is in that package). Was: after COORD closes H9: the twelve successor packages through the real
+fips140/nistec after c7eb36d845 is at origin (the decode is in that package). The time -tests class cut (i9's
+2026-09-15 finding, queued to G after RED 7 (a)) is TRANSFERRED to R's seat (COORD, 2026-09-20); G stays on rows, then
+the recon preflight on both sides (windows and WSL: pins by output, disk >= 25 GB, a worktree at 93feb8df2b). Was: after COORD closes H9: the twelve successor packages through the real
 pipeline on the banking platform at the version tip (all four overrides), per row the verdict count and the diverged set by
 name -- the first H10 rows; a reading, no bank. G's post tool PUBLISHED (80b5d83df): claude/g-lane-post-tool be340825dd off
 master a6be940665, FOUR files under .claude/coord-scripts/lanes/ (g-post.sh + the fetchable, staleness and placeholder
@@ -1148,7 +1177,10 @@ two-site planted fixture, the reflect row past CONVERT (both configs), the two-s
 CNR change; push-then-announce; C1/C2 read (C2 runs the Go suite + the fixture); i9 applies (converter gate; no corpus
 build if the diff is empty); then R re-reads the row for the verdict count and the diverged set. (3) Row 130's positive
 control when i9 says the regeneration has run. FLEET NOTE: the 1.24.13 SDK's own bin/go.exe answers go1.23.1 on a box
-pinned 1.23.1 unless GOTOOLCHAIN=local -- assert by output.
+pinned 1.23.1 unless GOTOOLCHAIN=local -- assert by output. SEAT WIDENED 2026-09-20 (COORD after C2 5ceedaf88): the
+time row (abs_test.go:23 exported anonymous-struct var read across the internal/external test boundary; the gate fires
+at time_test.cs(33)) is a SECOND red arm of the same seat -- go2cs -tests of time past CONVERT at the tip; a second
+commit on the same ref if its root is a different gap. Then the recon list runs beside the seat in its own worktree.
 Blocked on: nothing for (1); (2) needs an owner-opened spurt.
 ```
 
