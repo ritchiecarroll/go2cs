@@ -412,6 +412,15 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     summary line into a scratch dir outside any work tree (the TSV there too); no git checkout/clean inside the wrapper.
     Then the slice/cooldown regime from the generator's constants. Also measured (c101d970): the two windows-only rows
     carry no tag asymmetry (205 same / 2 differ / 0 unmeasurable); nistec shows one direction on windows.
+    PREFLIGHT GREEN at 93feb8df2b (8f974227: pins by output with the ambient go1.23.1 as the dissenting control; 370 GB);
+    the regime = the generator's C_TARGET 40 min / COOLDOWN 10 min, emitted into the plan; reserved-set finding: the
+    sweep's $longTimeouts table names pre-hop mlkem768 (intersected out silently), net/net/http uncosted, time
+    CONVERT-blocked. C2's READ (c0c2063e): spec met; the classifier's BUILD/TIMEOUT arms lack rc guards (8 candidate
+    rows incl. net, net/http); diverged counts lines. SECOND COMMIT RULED (COORD after be7d670db): the worktree guard +
+    artifact capture; rc guards, TIMEOUT from the results tail, non-integer sweep_s on TIMEOUT, diverged = distinct
+    names; -test-timeout from $longTimeouts via the successor map (fan-out inherits) + the sweep's default. Then C2
+    re-reads at the tip, the i7 Core arm re-runs there, then LAUNCH. The $longTimeouts re-path rides the roster seat;
+    the generator prints intersected-out reserved rows (with the seat).
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
@@ -976,7 +985,9 @@ Validated format strings). ASSIGNED: read C1's (d) aa66874ff7 as the H10 procedu
 preconditions table, per-row steps against the rulings cited) -> COORD lands; then read i9's recon wrapper.
 (d) LANDED at master 6c32d0e171. Tag-asymmetry bound DONE (50554616: 2 of 207 differ on linux -- nistec files SWAP, both
 directions; fips140test's nistec_ordinv_test.go oracle-only, latent behind CS0234). ASSIGNED: read i9's wrapper ref
-claude/i9-h10-recon-wrapper at its tip AFTER i9's second commit (the linked-worktree guard + per-row artifact capture). READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
+claude/i9-h10-recon-wrapper at its tip AFTER i9's second commit (the linked-worktree guard + per-row artifact capture).
+FIRST READ DONE (c0c2063e at 43aba50262: spec met, the parse well controlled; the classifier finding + diverged-lines
+note -> both in i9's second commit). RE-READ at the new tip when announced. READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
 two additive citation notes) -- LANDED by COORD at master ceb1c87971. Then read i9's recon wrapper when announced.
 Blocked on: nothing.
 ```
