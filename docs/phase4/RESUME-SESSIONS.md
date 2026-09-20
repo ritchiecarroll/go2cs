@@ -378,10 +378,17 @@ Then, in COORD's order, one at a time, each predicted, applied, gated, announced
     intersection with a planted control. i9 NEXT: the tree reclamation children-first,
     then i9-post.sh with the state-dir refusal in first. The H9 docs LANDED on master at 82e203372a (C2's 2e75b14586 +
     the closure block a19d2bbbbb, signed merge, gates green).
-    ASSIGNED (H10 launch ruling): cut the RECON WRAPPER from the driver's own per-row function -- runs a name list
-    through the per-package pipeline and writes one TSV row per row (the banked TSV's columns), both editions, the i7
-    parse gate, a one-row dry run, C2 reads; then preflight a worktree at 93feb8df2b (pins by output, disk >= 25 GB) and
-    name the slice/cooldown regime for the reserved rows; i9 also takes the windows-only rows.
+    ASSIGNED (H10 launch ruling, REDIRECTED after i9's read 5e1471f3d): the RECON WRAPPER invokes THE PIPELINE per package
+    (go2cs -tests -test-action all <GOROOT>/src/<row> <worktree>/src/core/<row>; NEVER the sweep script -- the runbook's own
+    H10 line; the driver drives the sweep and has no per-row function, so 'cut from the driver' was withdrawn); one
+    process per worker list, rows sequential, rc on the next line; emits the GENERATOR's schema row/word/verdicts/sweep_s
+    (LF only, sweep_s integer, verdicts parsed from the pipeline's summary line -- unparsable emits a non-integer never 0;
+    extras first_in_list/rc/diverged/platform/tree; net MUST appear so the hand-stopped drop fires); pins by OUTPUT at
+    start-up (go version with GOTOOLCHAIN=local; the converter's embedded toolchain; version.props vs GOROOT).
+    i9 runs 5.1 Desktop; the i7 takes the Core-edition run (parse gate both editions + a one-row real run, sub-agent);
+    C2 reads the file. Then the preflight at 93feb8df2b (disk >= 25 GB) and the slice/cooldown regime for the reserved
+    rows; i9's list = reserved 14 + windows-only 2 = 16 (net included). i9's POST TOOL LANDED at master c2cd9c2f46
+    (575afbcde7; gates + census green).
   i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
     StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
     stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
@@ -616,6 +623,16 @@ ASSIGNED NEXT: (a) the population BY NAME (227 per e0d5121e2 vs 206 by C2's arit
 lists by the stated rule (reserved + windows-only -> i9; linux-only -> G WSL; the rest LPT/round-robin across G and R;
 sums closing; platform class per row); (c) the TSV path/columns/digest rule; (d) the in-stage H10 amendment as a second
 commit on the docs ref (launch checklist with citations, the order, the host rule, plan+driver cited, per-row steps).
+(a)-(c) DONE (bf4ecf2ee): population 227 skeleton = 206 (C2) + 23 skeleton-only (incl. reflect, runtime, unique,
+runtime/pprof, net/http/pprof + 18 new 1.24 packages) - 2 (fips140/alias: no tests; fips140/nistec: the AXIS FINDING --
+0 tests on the census's no-tags windows axis, 1 under the corpus tags purego,math_big_pure_go); lists i9 16 / G 106 /
+R 105 / G-WSL 0, sums 227; the TSV contract read from shardmap.py (row/word/verdicts/sweep_s by name, LF only, net must
+appear). RULED by COORD: the CORPUS AXIS keys the population (C2 d5cdd55ab: the converter applies the tags to every
+-tests run); fips140/nistec is a row -> G; population 228; the recon leg is the authority on membership; the '33
+skeleton-only' of e0d5121e2 is a superseded estimate, C1's 23 by name is the reading of record. (d) now also carries: the
+pipeline per package cited to the runbook's own H10 line, the corpus axis as the population key, fiat's 0-denominator
+mechanism (a complete test project with zero converted test source; declarations recorded vs C# test source produced
+are different units), the two windows-only rows, -test-allow-handown for testing.
 DOCS SEAT LANDED on master ceb1c87971 (signed; gates green; C2's read ebd9553dc). Fold C2's notes into the amendment
 commit: proc.cs cited per-GOOS (runtime/{linux,windows,darwin}/proc.cs:848), the RegisterPinned step that makes
 initAlgAES arm 2, and the clause that the box materialises at eleven construction sites (scope by provenance). (3) The seven pthread members the darwin
@@ -904,7 +921,8 @@ rc 0) = floor 2's -tests form; testing needs -test-allow-handown; internal/sysca
 (their markers read linux: n/a); the marker count is 198 of 204 numeric (202 was occurrences incl. 2 prose examples).
 ASSIGNED NEXT (COORD after f14cafb9): read C1's docs seat claude/c1-board-night-lines 6e082a09c5 (the section-4 bound's
 arm classification against zh.cs at master; the BOARD block's four lines against the record); COORD lands it signed on
-the read. READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
+the read. Also DONE: the ordering predicate on i9's published tool (4f3e5104: exact; the %G? E-vs-N method note) and the
+axis confirmation through the pipeline (d5cdd55ab). READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
 two additive citation notes) -- LANDED by COORD at master ceb1c87971. Then read i9's recon wrapper when announced.
 Blocked on: nothing.
 ```
@@ -1044,7 +1062,12 @@ c7eb36d845 (COORD 9d32f4813).
 (4) RELEASED 2026-09-20 (9d32f4813): the ELEVEN non-nistec successor rows NOW at d91c832543 on the row platform (linux);
 fips140/nistec after c7eb36d845 is at origin (the decode is in that package). The time -tests class cut (i9's
 2026-09-15 finding, queued to G after RED 7 (a)) is TRANSFERRED to R's seat (COORD, 2026-09-20); G stays on rows, then
-the recon preflight on both sides (windows and WSL: pins by output, disk >= 25 GB, a worktree at 93feb8df2b). Was: after COORD closes H9: the twelve successor packages through the real
+the recon preflight on both sides (windows and WSL: pins by output, disk >= 25 GB, a worktree at 93feb8df2b). G's recon
+list = 107 rows (C1 bf4ecf2ee's 106 + crypto/internal/fips140/nistec, a row on the CORPUS AXIS by COORD's ruling); G-WSL
+takes 0 rows (the linux-only bucket is empty) and is the discriminator for diverged rows only. G's four post-tool files
+be340825dd are HELD: g-post.sh derives from dirname "$0" three times with no work-tree refusal and g-fetchable-check.sh
+carries fourteen rm -rf lines -- add the refusal (R/C2/i9's) or state by measurement that the uses are read-only and
+every removed path is outside any work tree; at G's next idle, after the rows. Was: after COORD closes H9: the twelve successor packages through the real
 pipeline on the banking platform at the version tip (all four overrides), per row the verdict count and the diverged set by
 name -- the first H10 rows; a reading, no bank. G's post tool PUBLISHED (80b5d83df): claude/g-lane-post-tool be340825dd off
 master a6be940665, FOUR files under .claude/coord-scripts/lanes/ (g-post.sh + the fetchable, staleness and placeholder
