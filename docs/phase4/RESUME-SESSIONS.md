@@ -1719,8 +1719,14 @@ the census header's own contract (the Go guard applies it to every kind: 237 cen
 (a) extend the admit to unc_ arms, the red a non-placeholder non-nickname host, the selftest gains the known negative;
 one commit C1 cuts, COORD lands -- CUT aad0273e7 (2 files, selftest 95 -> 103, both reds fired) and LANDED on
 master 5de6eb9bd0 (selftest before/after, census clean, repoguard 6/6); lanes re-copy posting copies from it.
-R posts the five hosts' MEMBERSHIP only (placeholder/nickname/unclassified), then re-censuses under the landed
-census and pushes the second evidence commit. math/rand's comparison JSON has FOUR case-collision name pairs (Int31n/int31n) that
+R's MEMBERSHIP READ (79910e4a): all five UNCLASSIFIED and the token is a JSON unicode escape (u + four hex digits)
+of the converter's glyphs (zh) inside .NET stack traces, not a host; R rightly refuses to redact evidence. RULED
+(COORD after 79910e4a): the unc_ arms exclude a u+4-hex host token (a real UNC still refuses; the escapes pass;
+the selftest gains both) -- one commit C1 cuts, COORD lands; then R re-censuses and pushes the second evidence
+commit. The redaction token is REDACTED-BUILD-TEMP-PATH (no brackets). C1's re-measure from the tip: zero orphans
+on all four rows; H5 already states the sentinel-mtime sweep (sync/map.cs named); runtime's CS0310 = the
+constraint emission confirmed; embedtest = the test-only gate only; crypto/ecdh's CS1537 (a duplicate using
+alias) needs the dotnet lane. NOTE: the post tool refuses an entry that spells a UNC literally -- describe reds. math/rand's comparison JSON has FOUR case-collision name pairs (Int31n/int31n) that
 refuse ConvertFrom-Json -> the seventh's SHAPE fixture (47 ordinal names in both editions) and the assembler parses
 go/csharp as pair lists (object_pairs_hook; plain loads keeps the last = 43, the red). R tears down both leg trees
 now; the constraint-proxy (crypto/mlkem CS0311) seat is CUT with a green baseline (8 arms) -- announce pending; C1
