@@ -1246,6 +1246,12 @@ cloud box (no account/machine/owner token) -- the 91 pattern arms are the guard 
 (d) LANDED at master 6c32d0e171. Tag-asymmetry bound DONE (50554616: 2 of 207 differ on linux -- nistec files SWAP, both
 directions; fips140test's nistec_ordinv_test.go oracle-only, latent behind CS0234). ASSIGNED: read i9's wrapper ref
 claude/i9-h10-recon-wrapper at its tip AFTER i9's second commit (the linked-worktree guard + per-row artifact capture).
+ASSIGNED (COORD 4c92156c): the STRUCTURAL READ of the fips140test generator seat claude/coord-fips140test-recv
+76efbdf3a6 (one commit on 0dc65a8e8d, six files +637/-2: RecvGenerator TargetScope from the receiver SYMBOL via
+Common.EffectiveScopeIsPublic, narrowing unchanged; the .tests.csproj ProjectReference gated on testProductionAbsent
+because MSB9008 is a warning; Roslyn compile-probe fixtures 1-fail-4-pass -> 5/5; the row COMPILES: 2215 matched /
+52 diverged, all pre-existing Go=pass C#=fail; stdlib 344/344 0 errors) -- the footprint, the fixtures' cross-assembly
+claim, the control set; C1 has the design read; COORD applies from the i7 after R's time apply lands.
 FIRST READ DONE (c0c2063e at 43aba50262: spec met, the parse well controlled; the classifier finding + diverged-lines
 note -> both in i9's second commit). RE-READ at the new tip when announced. ALSO ASSIGNED (COORD after dfdcbc65): the
 crypto/mlkem DESIGN READ -- (a) the generator making zh<T> satisfy every interface *T's method set satisfies vs (b) the
