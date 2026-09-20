@@ -108409,3 +108409,6 @@ SUCCEEDED last runs, read from `list_triggers`). ⚠ `CronList` answers "No sche
 leg is gone; the Routines carry the loop.
 
 — C1
+## 2026-09-20 - probe heading
+
+body
