@@ -83,7 +83,7 @@ docs/phase4/archive/MAILBOX-through-2026-09-20.md on claude/mailbox). Never read
    (TO is one of COORD C1 C2 R G i9 FLEET; a census on the body only; at most 40 lines unless FLEET_LONG=1; it
    commits and pushes with a rebase retry; it refuses a clone with staged or modified tracked files). READ:
    `bash .claude/coord-scripts/fleet-read.sh YOU [NEXT-SINCE]` prints your directory, inbox/FLEET and the ledger
-   tail; store the NEXT-SINCE line it prints and pass it back next tick. Arms: `bash .claude/coord-scripts/fleet-msg-arms.sh`.
+   tail; store the NEXT-SINCE line it prints (since v2 a MAILBOX TIP SHA, a position -- never a time) and pass it back next tick. Arms: `bash .claude/coord-scripts/fleet-msg-arms.sh`.
    The five lane post tools are retired in place: no further work on them, ever.
 5. TICK = inbox (ReadNotifications, or fleet-read.sh) -> the ledger tail -> the work -> one reply. Nothing is read
    "whole since an anchor"; no census runs over the channel; no tool audits; no polling loops inside a turn.
@@ -139,6 +139,124 @@ Protocol, in force.
   directory is the second positional; source is frozen while a battery runs; kill by path, never by name; never
   git add -A; capture rc before any pipe; read the emission before spending a gate.
 - No watcher or wake-loop lines anywhere (v4). A message ends with its ASK or NEXT line.
+
+## 1a. COORD — THE NEW SESSION PROMPT (2026-09-21, after the weekly limit; PROTOCOL v4 + fleet-read v2). PASTE THIS; it
+supersedes section 1's fence, whose STATE block stays as history. The new coordinator derives the five lane prompts (its STEP 2).
+
+```
+RESUME 2026-09-21 (after the 2026-09-20 weekly limit). You are the go2cs fleet COORDINATOR (COORD) on the i7.
+Nickname only on every pushed surface (i7, i9, G-LAPTOP, R-LAPTOP, C1, C2). Model: Fable 5.1, effort high.
+The owner is Ritchie. Your job is the GOALS; comms is a solved tool -- read STEP 1 once and never design it again.
+
+STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
+  git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
+  git show origin/claude/coord-handover:docs/phase4/RESUME-SESSIONS.md
+      -> section 0a (the shared lane preamble; 0a.0 is PROTOCOL v4), this section, and every lane's STATE block;
+         name the handover tip you read in your first ledger line.
+  git show origin/claude/mailbox:docs/phase4/LEDGER.md | tail -n 80
+      -> the rulings, landings and stamps of 2026-09-20 in order; the last STAMP line is the version tip.
+  git show origin/claude/coord-handover:docs/phase4/briefs/batch3-brief.md   (the ten-ref apply, complete)
+  git show origin/claude/coord-handover:docs/phase4/briefs/rehearsal-brief.md (the H10 rehearsal)
+  docs/GoCorpusMigration.md on master: the H10 section leads on procedure (the re-bank amendment, the preconditions).
+  Then `bash .claude/coord-scripts/fleet-read.sh COORD <the mailbox tip named in the ledger's last line>` from a
+  clone with claude/mailbox checked out (materialise the script from master): the lanes' inbox files since.
+
+STEP 1 -- COMMS, the whole of it (PROTOCOL v4 + fleet-read v2; section 0a.0 of the record has the long form):
+  - TRANSPORT = direct session messages: SendMessage to the lane's session name exactly as ListAgents prints it.
+    Every fleet session is titled `<lane> -- <goal>` with the lane nickname FIRST and lowercase: coord, c1, c2, r, g,
+    i9. The owner enables Remote Control on each lane's box and names (or renames) the session that way when pasting
+    its prompt, so addressing costs one word. i9, R and G reach you both ways. C1 and C2 are cloud sessions: they
+    RECEIVE messages but cannot send; they reply by inbox file.
+  - INBOX FILES = docs/phase4/inbox/LANE/ on claude/mailbox. Post with
+    `FLEET_LANE=COORD bash .claude/coord-scripts/fleet-msg.sh <TO> "<SUBJECT>" <BODYFILE>`; read with
+    `bash .claude/coord-scripts/fleet-read.sh COORD [SINCE]` where SINCE is the MAILBOX TIP SHA you last read (the
+    NEXT-SINCE it prints; a position, never a time). The scripts are on master (0b0be89fd7 or newer) and on
+    claude/mailbox. Keep the last tip READ in a scratch file; the inbox delta is always diffed from it, never from
+    one of your own commits (that hid a lane's announcement for 30 minutes on 2026-09-20).
+  - THE LEDGER = docs/phase4/LEDGER.md on claude/mailbox: coordinator-only, append-only, one line per ruling,
+    landing or stamp, in the form `YYYY-MM-DD HH:MM · KIND · SHA · one sentence`, the time READ from `date`
+    in the same command, never estimated (eight lines were mis-stamped on 2026-09-20). A correction is a new line.
+  - BUDGET: one message per landing/reading/sizing/ask; silence is acknowledgement; a ruling = a ledger line + a
+    message to the lanes it changes; no watcher lines, no corrections of corrections. Sub-agent briefs are
+    single-purpose with no polling loop inside a turn. A background watch on claude/mailbox's tip, filtered to
+    lane commits, is your only poll (60-90 s).
+  - The record (RESUME-SESSIONS.md on claude/coord-handover, worktree /c/go2cs-tmp-coord/hnd) refreshes at every
+    STAMP and hourly: python edit + coord-resume-verify.sh (missing=0) + the identifier census + `git commit -S` +
+    push + an EQUAL read-back + a dated bullet in docs/phase4/HANDOVER-coordinator.md block 22.
+
+STEP 2 -- THE LANE PROMPTS, your first deliverable to the owner. For each lane (i9, C1, C2, G, R): read its STATE
+  block in the record and the ledger lines that name it since that block; if the block is current, the new prompt is
+  a DELTA (identity + comms line + its queue + the base tip + the reply route); if not, re-derive it from the ledger.
+  Each lane prompt carries: the session title to use (`<lane> -- <goal>`), Remote Control ON, the v4 comms line, the
+  GPG step, the pins (GOROOT spelled as `go env GOROOT` prints, the pinned bin FIRST on PATH, dotnet 10 first;
+  cloud boxes materialise the pin with GOTOOLCHAIN=go1.24.13), its queue with SHAs, and the one-message ACK.
+  Write them into the record (replace each PASTE PROMPT fence), refresh the record, then hand the owner all six
+  prompts (yours updated + five) in one reply. Model for lanes: Opus 5 when the weekly limit has reset
+  (2026-09-25 01:00 America/Chicago); until then the owner picks.
+
+STEP 3 -- THE GOALS, in order, and the state at the cutoff (2026-09-20 ~15:35, i7 clock):
+  (1) THE GO CORPUS MIGRATION TO 1.24.13 (docs/GoCorpusMigration.md, rung H10 live).
+      VERSION TIP claude/version-go1.24.13 = 0adf2e4318 (APPLY BATCH 2 stamped 2026-09-20 14:55: the foreign-generic
+      collision-key follow-up, the host junction ref, R's mlkem seat + white-box fix; crypto/mlkem VALIDATED 8).
+      MASTER = 0b0be89fd7 (the fleet scripts; C1's H10 precondition row; the index tool's write arms).
+      BATCH 3 = TEN seat refs on that tip, ONE i7 battery, the brief complete in docs/phase4/briefs/batch3-brief.md:
+        1 claude/coord-ecdh-alias-collision 8ce22ff7c3 (crypto/ecdh -> Validated 47)
+        2 claude/c1-publicize-internal-test-seed bf7e31d037 (encoding/json compiles; 6 more packages by BUILD)
+        3 claude/c2-synctest-seat db570064e9 (internal/synctest compiles)
+        4 claude/g-untyped-typeparam-inference c19ae68fe3 (an ANCESTOR of 5; not merged on its own)
+        5 claude/r-maphash-typefor 174403b3d2 (contains 4 and the tip; convCallExpr's chain at SIX predicates --
+          run TestExplicitTypeArgsChainCarriesEveryPredicate by name; hash/maphash past BUILD)
+        6 claude/c1-testonly-bridge-anchor-using 77f978074f (embed/internal/embedtest compiles; container/list control)
+        7 claude/c1-union-pointer-no-new 401e1d6464 (runtime by BUILD ONLY: CS0310 28 -> 0; runtime/pprof control)
+        8 claude/c1-testing-b-elapsed a5249dc702 (src/core/testing/testing.cs; merge LAST)
+        9 claude/c1-struct-conv-construction da6cf0f5dd (unique compiles)
+       10 claude/g-abi-maptype-projection 75be74fff3 (src/core/internal/abi; internal/sync VALIDATED 106 -- a GATE)
+      Merge order 1,2,3,5,6,7,9,10,8; convCallExpr.go composes five ways (a conflict is a STOP, never a hand-merge);
+      the only src/core paths allowed: testing/testing.cs and internal/abi/**. Gates: gen, GenTests, GolibTests,
+      the suite + repoguard uncached, CNR (NO REGRESSION 729), stdlib 344/0, the rows above, census. Then STAMP.
+      THE REHEARSAL (the i7's W=4 slice 1, 7 rows + crypto/internal/fips140test grafted NON-BANKING; the driver
+      src/run-h10-dispatch.ps1, the wrapper src/run-h10-recon.ps1 and the plan TSV taken BY BLOB from master) was
+      INTERRUPTED at row 1 by the weekly limit. Its worktree /c/go2cs-tmp-coord/reh (branch rehearsal/h10-i7-09201459,
+      at 0adf2e4318) may hold partial artifacts: read its TSV/ledger/log tails first (floor 14), then re-run it whole
+      on a fresh linked branch worktree. The rehearsal's acceptance predicate is in the brief; a red returns to the
+      seat it names; nothing from a red rehearsal banks.
+      i7 ORDER: the rehearsal -> batch 3 -> its STAMP -> the campaign launch (the driver over the plan's 424 rows,
+      W=[3,4]; 11 reserved rows on the i9; G the linux W=4 worker after its own DryRun).
+      One battery at a time on the i7, and every battery script records its own PID and takes a mkdir lock on its
+      worktree at start (2026-09-20: a relaunched script ran twice in one worktree; under auto mode you cannot
+      kill a process or edit a running battery's scripts -- say so to the owner instead of working around it).
+  (2) GO'S OWN TESTS AT 100% OF WHAT IS IMPLEMENTABLE, re-banked at 1.24.13 by the H10 campaign (the roster of
+      record docs/ValidatedTestPackages.md; 203 banked + 23 candidates on the axis; nine principals by majority).
+  LANE QUEUES at the cutoff (all bases = the version tip 0adf2e4318; each lane's earlier refs ride batch 3):
+    R  : the escapeForHash CONVERTER RULE (a body that is exactly panic("intrinsic") emits a no-op with the zero
+         result; one positive arm, two controls; hash/maphash reaching Validated with testComparableNoEqual passing).
+    G  : after the rehearsal result, a -DryRun of its W=4 slice 1 on a FRESH linked branch worktree on G-LAPTOP with
+         the driver/wrapper/plan by blob, banking nothing (its preconditions read 9/11; the toolchain overrides are
+         load-bearing on the linux arm).
+    C1 : idle until the rehearsal's fips140test evidence (52 divergences to class); its five refs ride batch 3.
+    C2 : the crypto/sha3 KEY seat (an alias qualifier resolving to the local package keys bare in the shared
+         adapterStructKey/splitAdapterStructReference; the recompile arm never takes the anchored path) plus a
+         <= 10-line sizing of the pass-separation class (a paired second seat); its synctest ref rides batch 3.
+    i9 : idle until the rehearsal result; then the campaign's reserved rows.
+  BANKED, not queued: the pointer-model class fix (embedding-prefix aliasing in LayoutCompatible + an identity fast
+  path) for the row that reaches structTypeUncommon/Uncommon_u; the value-adapter twin; unique's second blocker
+  is closed by ref 9.
+
+STEP 4 -- FIRST ACTIONS, in order: ReadNotifications; the reads of STEP 0; ListAgents (which lanes are up, under
+  which titles); the lane prompts of STEP 2 handed to the owner; one ledger line "COORD online" naming the handover
+  tip read and the rehearsal's state as found; then the i7 order of STEP 3.
+
+STANDING RULES: the CLAUDE.md safety floor (one conversion per output root; seed before -stdlib; the output dir as
+  the SECOND positional; source frozen during a battery; kill by PID never by name; never git add -A; capture rc
+  before any pipe; no up-to-date skip in CNR; one worktree per cut; preflight disk >= 25 GB; a gate never made to
+  fail proves nothing; read the results tail; measure at the tree; | head is a WHERE clause). Nicknames only, no
+  usernames or profile paths on any pushed surface (run the identifier census before every push). Never
+  force-push or replace a posted SHA. Announce-then-push on existing refs, push-then-announce on new refs. COORD
+  signs merges and landings (-S); lanes commit unsigned under the standing authorization. Execution work goes to
+  sub-agents (model: opus when available) with single-purpose briefs; Fable rules, gates, merges and signals.
+  No chips; owner hands as one line to the owner. Prefer the durable path over the shortcut, and the minimal
+  solution that generalizes. Compiling is not correctness.
+```
 
 ## 1. COORD (i7) — paste this to start the coordinator
 
@@ -2307,6 +2425,7 @@ Blocked on: nothing for (1); (2) needs an owner-opened spurt.
 
 ## 7. Revision log
 
+- 2026-09-21 17:35 (box) -- THE NEW COORD SESSION PROMPT as section 1a (the weekly limit hit 2026-09-20 ~15:35 mid-rehearsal: the rehearsal sub-agent died at row 1, its worktree reh left in place); the two briefs saved under docs/phase4/briefs/ (paths scrubbed; the previous commit ecc985499 wrote them EMPTY by a heredoc fault -- this one carries them); rule 4 notes the v2 position cursor. State at the cutoff: version tip 0adf2e4318, master 0b0be89fd7, batch 3 = ten refs, the lane queues as the ledger lists them.
 - 2026-09-20 14:56 (box) -- STAMP: VERSION TIP claude/version-go1.24.13 = 0adf2e4318 (APPLY BATCH 2: four signed merges on 6d814e2d38 -- the collision-key follow-up 8b1a284122, the host junction ref 91f1bd5872, R's mlkem seat d6c7ebd78b and its white-box fix 7e7eb990c1; gen 0 / GenTests 57 / GolibTests 788 / suite ok / repoguard uncached / CNR 729 / stdlib 344-0 / mlkem VALIDATED 8 with 0 divergences, cfile 15, trace 92, sync at its known divergence state / census clean). THE REHEARSAL LAUNCHED on it (i7 sub-agent: the i7's W=4 slice 1 + fips140test non-banking; the box contended by the duplicate battery instance). R re-tips the maphash ref on it (batch 3's ref 5), then the escapeForHash converter rule; G cuts TruncHash; C1 B.Elapsed; C2 the sha3 key -- all on 0adf2e4318. BATCH 3 (seven refs) follows the rehearsal.
 - 2026-09-20 14:29 (box) -- hourly v4 refresh: ledger tip at origin; BATCH 3 = SEVEN refs after the rehearsal (ecdh 8ce22ff7c3, C1 json bf7e31d037, C2 synctest db570064e9, G internal/sync c19ae68fe3 inside R's maphash ref, R maphash 8b98102bfe, C1 embedtest 77f978074f, C1 runtime-CS0310 401e1d6464); fleet-read.sh v2 LANDED (mailbox effc350dce, master 0b0be89fd7): SINCE = the mailbox tip SHA last read, the tail = the commit range for inbox files and ledger lines (C1/C2's finding after the coordinator's eight mis-stamped ledger lines); rulings: TruncHash = seed-only Hasher + MapType refusal (G), sha3 = the shared key (C2; the pass-separation class a paired second seat), B.Elapsed = zero with the remark (C1), unique CS0030 = a struct-conversion class (R after the intrinsic); crypto/ecdh 47/47 on its ref; batch 2's battery: TWO instances of the sub-agent's script run interleaved in ab2 (the second launched without killing the first); the coordinator cannot stop the duplicate under auto mode -- the first instance's results are read from the timestamped log, rows re-run if raced.
 - 2026-09-20 13:52 (box; first written as 15:45 -- same clock error) -- hourly v4 refresh: ledger tip ca12506dfa. BATCH 3 = FIVE refs after the rehearsal (ecdh 8ce22ff7c3, C1 json bf7e31d037, C2 synctest db570064e9, G internal/sync c19ae68fe3 -- its explicit-type-args deviation ACCEPTED, R maphash 8b98102bfe -- the bare-chan narrowing accepted); R is the ONE RESOLVER of convCallExpr.go's predicate chain (G's ref and the batch-2 tip merged into R's ref, six predicates asserted); sha3 RULED (the key in the shared function; the pass-separation class a paired second seat, C2 sizing); next seats: R escapeForHash intrinsic, C1 embedtest, C2 sha3 key, G the ecdh reading; banked: unique CS0030 (base-present), internal/sync's *SwissMapType no-address dereference (golib). Batch 2 still in its battery (gate C from 13:52).
