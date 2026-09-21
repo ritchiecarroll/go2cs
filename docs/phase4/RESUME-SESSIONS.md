@@ -166,7 +166,9 @@ STEP 1 -- COMMS, the whole of it (PROTOCOL v4 + fleet-read v2; section 0a.0 of t
     Every fleet session is titled `<lane> -- <goal>` with the lane nickname FIRST and lowercase: coord, c1, c2, r, g,
     i9. The owner enables Remote Control on each lane's box and names (or renames) the session that way when pasting
     its prompt, so addressing costs one word. i9, R and G reach you both ways. C1 and C2 are cloud sessions: they
-    RECEIVE messages but cannot send; they reply by inbox file.
+    RECEIVE messages but cannot send; they reply by inbox file. The owner is bringing NEW HARDWARE LANES online
+    (real boxes with dotnet 10, the pinned Go, pwsh, >= 60 GB, Remote Control); the owner names each one by
+    nickname when it comes up, and it messages you both ways from its first session -- no inbox files for it.
   - INBOX FILES = docs/phase4/inbox/LANE/ on claude/mailbox. Post with
     `FLEET_LANE=COORD bash .claude/coord-scripts/fleet-msg.sh <TO> "<SUBJECT>" <BODYFILE>`; read with
     `bash .claude/coord-scripts/fleet-read.sh COORD [SINCE]` where SINCE is the MAILBOX TIP SHA you last read (the
@@ -193,6 +195,19 @@ STEP 2 -- THE LANE PROMPTS, your first deliverable to the owner. For each lane (
   Write them into the record (replace each PASTE PROMPT fence), refresh the record, then hand the owner all six
   prompts (yours updated + five) in one reply. Model for lanes: Opus 5 when the weekly limit has reset
   (2026-09-25 01:00, the owner's local time); until then the owner picks.
+  THE CLOUD LANES BECOME STANDBY LANES. C1's and C2's prompts say: finish the queue named in STEP 3, then STANDBY --
+  a standby lane holds no queue, ticks only on a message (no polling, no inbox reads of its own), and is routed ONLY
+  what a cloud box does well: Go-side converter seats gated by the Go suite and an emission read, sizings, designs,
+  doc and runbook seats, instrument arms. Never a .NET leg, never a row past BUILD, never a battery; every BUILD or
+  row gate for a standby lane's ref runs on a hardware lane. Their reply route stays the inbox file until the
+  harness lets a cloud session send.
+  THE HARDWARE LANES: when the owner announces a box, derive its prompt from the same template plus the full-gate
+  setup (the H10 precondition table in docs/GoCorpusMigration.md, incl. C1's PATH-first row; G-LAPTOP's 11-row
+  self-check of 2026-09-20 is the checklist; a LINKED worktree ON A BRANCH for the driver; GPG if the owner primes
+  it). A hardware lane gates its own seats END TO END (the suite, CNR, the stdlib solution, its rows) and announces
+  fully verified refs, so batch applies on the i7 become a formality; hardware lanes take the verification-heavy
+  work first: the batch-3 rows, the campaign's worker slices (re-emit the plan with shardmap.py when the worker set
+  changes -- never hand-edit the TSV; the driver refuses a digest mismatch), and the rows the cloud lanes cut blind.
 
 STEP 3 -- THE GOALS, in order, and the state at the cutoff (2026-09-20 ~15:35, i7 clock):
   (1) THE GO CORPUS MIGRATION TO 1.24.13 (docs/GoCorpusMigration.md, rung H10 live).
@@ -233,10 +248,14 @@ STEP 3 -- THE GOALS, in order, and the state at the cutoff (2026-09-20 ~15:35, i
     G  : after the rehearsal result, a -DryRun of its W=4 slice 1 on a FRESH linked branch worktree on G-LAPTOP with
          the driver/wrapper/plan by blob, banking nothing (its preconditions read 9/11; the toolchain overrides are
          load-bearing on the linux arm).
-    C1 : idle until the rehearsal's fips140test evidence (52 divergences to class); its five refs ride batch 3.
+    C1 : the rehearsal's fips140test evidence (52 divergences to class, a reading) when the rehearsal reports; its
+         five refs ride batch 3; then STANDBY (STEP 2).
     C2 : the crypto/sha3 KEY seat (an alias qualifier resolving to the local package keys bare in the shared
          adapterStructKey/splitAdapterStructReference; the recompile arm never takes the anchored path) plus a
-         <= 10-line sizing of the pass-separation class (a paired second seat); its synctest ref rides batch 3.
+         <= 10-line sizing of the pass-separation class (a paired second seat); its synctest ref rides batch 3;
+         then STANDBY (STEP 2).
+    NEW HARDWARE LANES (as they come online): their own precondition self-check first, then the verification work
+         of STEP 2 -- starting with batch 3's rows if batch 3 has not stamped, else the campaign slices.
     i9 : idle until the rehearsal result; then the campaign's reserved rows.
   BANKED, not queued: the pointer-model class fix (embedding-prefix aliasing in LayoutCompatible + an identity fast
   path) for the row that reaches structTypeUncommon/Uncommon_u; the value-adapter twin; unique's second blocker
@@ -2425,6 +2444,7 @@ Blocked on: nothing for (1); (2) needs an owner-opened spurt.
 
 ## 7. Revision log
 
+- 2026-09-21 18:03 (box) -- section 1a amended per the owner: C1 and C2 become STANDBY lanes after their current queue (Go-side seats, sizings, designs, docs, instrument arms; never a .NET leg or a row); new HARDWARE lanes (owner-provisioned, Remote Control, full gates) take the verification-heavy work and self-gate their refs; the plan is re-emitted with shardmap.py when the worker set changes.
 - 2026-09-21 17:35 (box) -- THE NEW COORD SESSION PROMPT as section 1a (the weekly limit hit 2026-09-20 ~15:35 mid-rehearsal: the rehearsal sub-agent died at row 1, its worktree reh left in place); the two briefs saved under docs/phase4/briefs/ (paths scrubbed; the previous commit ecc985499 wrote them EMPTY by a heredoc fault -- this one carries them); rule 4 notes the v2 position cursor. State at the cutoff: version tip 0adf2e4318, master 0b0be89fd7, batch 3 = ten refs, the lane queues as the ledger lists them.
 - 2026-09-20 14:56 (box) -- STAMP: VERSION TIP claude/version-go1.24.13 = 0adf2e4318 (APPLY BATCH 2: four signed merges on 6d814e2d38 -- the collision-key follow-up 8b1a284122, the host junction ref 91f1bd5872, R's mlkem seat d6c7ebd78b and its white-box fix 7e7eb990c1; gen 0 / GenTests 57 / GolibTests 788 / suite ok / repoguard uncached / CNR 729 / stdlib 344-0 / mlkem VALIDATED 8 with 0 divergences, cfile 15, trace 92, sync at its known divergence state / census clean). THE REHEARSAL LAUNCHED on it (i7 sub-agent: the i7's W=4 slice 1 + fips140test non-banking; the box contended by the duplicate battery instance). R re-tips the maphash ref on it (batch 3's ref 5), then the escapeForHash converter rule; G cuts TruncHash; C1 B.Elapsed; C2 the sha3 key -- all on 0adf2e4318. BATCH 3 (seven refs) follows the rehearsal.
 - 2026-09-20 14:29 (box) -- hourly v4 refresh: ledger tip at origin; BATCH 3 = SEVEN refs after the rehearsal (ecdh 8ce22ff7c3, C1 json bf7e31d037, C2 synctest db570064e9, G internal/sync c19ae68fe3 inside R's maphash ref, R maphash 8b98102bfe, C1 embedtest 77f978074f, C1 runtime-CS0310 401e1d6464); fleet-read.sh v2 LANDED (mailbox effc350dce, master 0b0be89fd7): SINCE = the mailbox tip SHA last read, the tail = the commit range for inbox files and ledger lines (C1/C2's finding after the coordinator's eight mis-stamped ledger lines); rulings: TruncHash = seed-only Hasher + MapType refusal (G), sha3 = the shared key (C2; the pass-separation class a paired second seat), B.Elapsed = zero with the remark (C1), unique CS0030 = a struct-conversion class (R after the intrinsic); crypto/ecdh 47/47 on its ref; batch 2's battery: TWO instances of the sub-agent's script run interleaved in ab2 (the second launched without killing the first); the coordinator cannot stop the duplicate under auto mode -- the first instance's results are read from the timestamped log, rows re-run if raced.
