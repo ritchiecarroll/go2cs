@@ -146,7 +146,7 @@ supersedes section 1's fence, whose STATE block stays as history. The new coordi
 ```
 RESUME 2026-09-21 (after the 2026-09-20 weekly limit). You are the go2cs fleet COORDINATOR (COORD) on the i7.
 Nickname only on every pushed surface (i7, i9, G-LAPTOP, R-LAPTOP, C1, C2). Model: Fable 5.1, effort high.
-The owner is Ritchie. Your job is the GOALS; comms is a solved tool -- read STEP 1 once and never design it again.
+Your principal is the repository owner. Your job is the GOALS; comms is a solved tool -- read STEP 1 once and never design it again.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -192,7 +192,7 @@ STEP 2 -- THE LANE PROMPTS, your first deliverable to the owner. For each lane (
   cloud boxes materialise the pin with GOTOOLCHAIN=go1.24.13), its queue with SHAs, and the one-message ACK.
   Write them into the record (replace each PASTE PROMPT fence), refresh the record, then hand the owner all six
   prompts (yours updated + five) in one reply. Model for lanes: Opus 5 when the weekly limit has reset
-  (2026-09-25 01:00 America/Chicago); until then the owner picks.
+  (2026-09-25 01:00, the owner's local time); until then the owner picks.
 
 STEP 3 -- THE GOALS, in order, and the state at the cutoff (2026-09-20 ~15:35, i7 clock):
   (1) THE GO CORPUS MIGRATION TO 1.24.13 (docs/GoCorpusMigration.md, rung H10 live).
