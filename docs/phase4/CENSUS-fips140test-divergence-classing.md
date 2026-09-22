@@ -150,3 +150,155 @@ No compile, no BUILD, no row, no gate — this box has no .NET SDK and no PowerS
 above is a READ of source, emission or the graft TSVs. The 44's class is named as a mechanism with its
 site narrowed, not confirmed; `TestACVP` and `TestXAESAllocations` carry no label yet. Three output
 lines close all 46.
+
+---
+
+# AMENDMENT 2026-09-22 — the 46 CLOSED on three output records
+
+COORD supplied the three output records from the graft's `go2cs_test_results.json` (4,537 events;
+profile paths scrubbed). All 52 now carry a label. **Two of the three hypotheses this record left
+standing were WRONG, and both are corrected below rather than quietly replaced.**
+
+## 1. The 44 — NOT the launch environment. `fips140/check`'s linker symbol.
+
+The child's combined output, via the parent's `t.Logf`:
+
+```
+FIPS 140-3 self-test passed: SHA2-256
+FIPS 140-3 self-test passed: cSHAKE128
+FIPS 140-3 self-test passed: SHA2-512
+FIPS 140-3 self-test passed: HMAC-SHA2-256
+panic: fips140: no verification checksum found
+    crypto/internal/fips140/check/check.go:64   ← .cctor
+TestConditionals did not complete successfully
+```
+
+**The re-exec worked.** The child launched, ran package inits, and printed Go's own `passed:` lines in
+Go's own format — so the four links this record cleared were cleared correctly, and **the one it left
+standing (a .NET apphost unable to start under a one-entry environment) is REFUTED**: the child started
+fine. Record 2 refutes it a second time, independently — `acvptool` launched the same published exe
+with `os.Environ()` plus one variable and reached its protocol.
+
+**CLASS: converter/golib defect.** Site, exactly:
+
+| where | what |
+|:--|:--|
+| `src/core/crypto/internal/fips140/check/check.cs:35` | `//go:linkname Linkinfo go:fipsinfo` — the target is **synthesized by the Go linker** (`cmd/link/internal/ld/fips.go`) |
+| `check.cs:52` | `public static Linkinfoᴛ1 Linkinfo = new();` — a **zero-valued** struct, because no C# build step writes that symbol |
+| `check.cs:70-71` | `if (Linkinfo.Magic[0] != 0xff || … || Linkinfo.Sum == zeroSum) throw panic("fips140: no verification checksum found")` — reached whenever `fips140.Enabled` |
+
+The converter class, stated generally: **a `//go:linkname` whose target is produced by the Go LINKER
+emits a zero-valued definition, and the failure surfaces far from the site as a runtime panic in a
+`.cctor`.** `check.cs:87-94` compounds it — the body walks `Linkinfo.Sects` and HMACs the section
+bounds, none of which a managed assembly supplies.
+
+**A DESIGN QUESTION, COORD's to rule, not this lane's.** The remedy is either (a) a hand-owned `check`
+that satisfies verification — defensible, since the integrity self-check is a property of the Go BUILD
+and the CAST semantics under test are untouched by it, and it unblocks 44 verdicts — or (b) a
+structural disposition, if declaring verification satisfied is judged a manufactured no-op under the
+"no managed answer exists" rule. Escalated as a reads-like-Go question; this record does not choose.
+
+**The asymmetry is now EVIDENCED, not hypothesised.** The four names that logged before the panic are
+exactly the four this record found matched-under-`Failures`: `SHA2-256`, `cSHAKE128`, `SHA2-512`,
+`HMAC-SHA2-256`. They are unconditional CASTs, running at package init **before** `check`'s `.cctor`
+panics. So under `TestCASTFailures` with `failfipscast=<one of those four>`, `cast.cs:50-54` substitutes
+the simulated error and `fatal` fires with `self-test failed: <name>` and a non-zero exit — every
+assertion the subtest makes is satisfied, so it **passes on both sides and does not diverge**. The
+other 19 are conditional CASTs that only run inside `TestConditionals`, which the panic prevents. The
+prior block's suspected mechanism is confirmed; it was right to record it unclaimed until now.
+
+## 2. `TestACVP` — NEITHER pre-derived branch. An empty `go:embed` payload.
+
+Both branches this record pre-derived were wrong: the test got far past `os.Stat` and far past
+`FetchModule`. `acvptool` was built and run, fetched both module versions, and **reached our published
+test exe as its module wrapper**. What failed:
+
+```
+failed to get config from middle: failed to parse config response from wrapper:
+    unexpected end of JSON input
+```
+
+`acvp_test.go:53-57` runs `processingLoop(bufio.NewReader(os.Stdin), os.Stdout)`; `:256-262`
+answers the mandatory `getConfig` command with a single byte string, `[][]byte{capabilitiesJson}`; and
+`capabilitiesJson` is filled by **`//go:embed acvp_capabilities.json`** at `:84-85`.
+
+`json.Unmarshal` returns *"unexpected end of JSON input"* on **empty** input. The wrapper framed and
+returned a reply — so the protocol loop ran — and its payload was **zero bytes**. That isolates the
+defect to the embedded payload: `capabilitiesJson` is empty in the converted emission.
+
+**The wrapper-mode dispatch WORKED**, which narrows this further: `acvp_test.go:45-47` enters
+`wrapperMain()` from `TestMain` when `ACVP_WRAPPER=1`, and the converter does emit that wiring for a
+package declaring `TestMain` — `src/core/os/exec/go2cs_test_host.cs:80`,
+`registry.SetTestMain(exec_test_package.TestMain)`, is the precedent in the tree.
+
+**CLASS: converter/golib defect** — the `//go:embed` of a test-only data file yielding an empty payload
+(the resource not emitted, or the data file absent from the publish directory). One verdict. Not
+`deferred`, not `structural`, and — as this record already established at `testConversion.go:6620-41` —
+not `host-fatal`.
+
+## 3. `TestXAESAllocations` — STRUCTURAL, one pin authored
+
+The meter:
+
+```
+go2cs: testing.AllocsPerRun counted 1,990 go2cs-runtime object allocations (157,600 bytes)
+over 10 run(s) … an allocation COUNT per run from go2cs's own runtime counter (golib's
+allocation sites), the structural mirror of runtime.MemStats.Mallocs … golib sites only,
+so a LOWER BOUND.
+expected zero allocations, got 199.0
+```
+
+Applying the label ladder (owner-delegated ruling 2026-09-05; a want of ZERO and a want of ONE are the
+same question):
+
+- **Not the incomparable-unit arm.** The counter SAW the allocations, so the figure is a COUNT of
+  objects — Go's own unit — not the byte-derived figure the shim reports when its counter saw none.
+  `alloc-count-semantics` does not apply.
+- **No floor hazard.** 199.0 against a want of 0 is not a value equal to both want and floor, and the
+  raw numbers are in hand (1,990 objects / 10 runs / 157,600 bytes).
+- **Same meter + a stated proof → `structural`.** The proof, from this row's OWN meter and body
+  (`xaes_test.go:19-37`): the measured closure allocates five local slices per run — key 32, nonce 24,
+  plaintext 16, aad 16, ciphertext cap 32 — plus the per-call AES/GCM and XAES-KDF state, none of
+  which escapes, so Go's escape analysis keeps every one off the heap while golib necessarily boxes
+  them. No named mechanism REMOVES those allocations (golib has no stack allocation for a slice), so
+  the `deferred` arm is unavailable; and because the figure is a LOWER BOUND it can only rise, never
+  approach the want.
+
+**Pin:** one, authored. `class` `alloc-profile`, signature `expected zero allocations, got ` —
+verbatim with the two pre-ruled families, and derived here from this row's own signature, never from
+the family.
+
+**One ruling tension, declared rather than buried.** The legacy caveat holds that the want-zero
+`alloc-profile` pins in `bytes`/`bufio` predate ruling #1 and stand as LEGACY "to be re-examined, not
+as precedent to extend." Against that: the 2026-09-05 ladder explicitly admits `structural` for a
+want-zero assert on a stated proof, and the governing family precedent — `TestEdwards25519Allocations`
+and `TestNISTECAllocations`, the same signature, the same package, BANKED — is live roster practice.
+This record applies the ladder and the family precedent. COORD may overrule; if it does, the verdict
+becomes a defect claim against golib's allocation floor, not a pin.
+
+## The arithmetic after this amendment
+
+| disposition | verdicts | pins |
+|:--|--:|--:|
+| `structural`, pre-ruled (`TestNISTECAllocations/P*` + `TestEdwards25519Allocations`) | 5 | 5 |
+| `structural`, pre-ruled (`TestNISTECAllocations` parent, riding the disclosed-parent aggregation) | 1 | 0 |
+| `structural`, newly authored (`TestXAESAllocations`) | 1 | 1 |
+| **converter/golib defect** (`TestCAST*` 44 + `TestACVP` 1) | 45 | 0 |
+| | **52** | **6** |
+
+**The expected pin count moves from 5 to 6, and disclosed verdicts to 7.** `TestXAESAllocations` has
+no 1.23.12 pin to inherit — neither source in the disposition table at
+`docs/ValidatedTestPackages.md:554-557` is XAES — so it is a NEW authored pin at 1.24.13. The roster
+sentence "five pins expected" is therefore superseded for the merged manifest: **six**.
+
+**45 of the 52 are defects, not disclosures** — fixable, and so pinned by nothing. Both trace to a
+single site each (`check.cs`'s linker symbol; the `go:embed` payload), and the 44 are gated on COORD's
+ruling above.
+
+## What this amendment does NOT claim
+
+Still no compile, no BUILD, no row, no gate, no .NET leg. Every site above is a READ of Go source at
+the pinned toolchain, of emission at `origin/claude/version-go1.24.13` (`0adf2e4318`), or of the three
+output records COORD supplied. The `check` remedy is escalated, not chosen. The `go:embed` sub-cause
+(resource not emitted vs. data file not published) is narrowed to two candidates, not resolved — that
+needs the graft worktree's own emission, which is not on any pushed ref.
