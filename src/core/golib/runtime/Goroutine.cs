@@ -124,7 +124,15 @@ public sealed class Goroutine
     // to park and one to unpark, and is what Go's own traceback does at the printing site:
     // goroutineheader prints the status word and OVERRIDES it with gp.waitreason.String() whenever
     // the status is _Gwaiting (runtime/traceback.go).
+    //
+    // The READIED bit (ReadiedFlag) rides in the same field for the same reason: "woken by its
+    // waker, not yet resumed" is a fact about a PARKED goroutine, so it can only ever sit beside a
+    // nonzero reason, and a separate field could say "readied" of a running goroutine. See Ready.
     private int m_waitReason;
+
+    // Set on m_waitReason by the WAKER (Ready), cleared when the goroutine's outermost park scope
+    // ends. Above every WaitReason value; Reason masks it off.
+    private const int ReadiedFlag = 1 << 30;
 
     // Go's gp.labels, MIRRORED onto the registry entry so a profiler can read it. The authoritative
     // per-goroutine storage is s_profileLabels below, an AsyncLocal, because Go INHERITS labels at
@@ -237,7 +245,7 @@ public sealed class Goroutine
         Volatile.Read(ref m_waitReason) == (int)WaitReason.Zero ? GoroutineState.Running : GoroutineState.Parked;
 
     // Go's gp.waitreason. WaitReason.Zero on a running goroutine, exactly as in Go.
-    internal WaitReason Reason => (WaitReason)Volatile.Read(ref m_waitReason);
+    internal WaitReason Reason => (WaitReason)(Volatile.Read(ref m_waitReason) & ~ReadiedFlag);
 
     /// <summary>
     /// The stack size, in bytes, reserved for each goroutine's thread.
@@ -412,9 +420,14 @@ public sealed class Goroutine
     ///     parked.Park.Wait();
     /// </code>
     /// <para>
-    /// There is deliberately no <c>goready</c> side. The waker already signals the primitive, and the
-    /// woken thread un-marks ITSELF when its scope disposes — which is also why the write is only ever
-    /// made by the goroutine's own thread.
+    /// The <c>goready</c> side is <see cref="Ready"/>, made by the WAKER before it signals the
+    /// primitive (DESIGN-gopark-goready-synctest.md, 2026-09-22). A primitive whose waker calls it
+    /// must enter this scope in Go's commit order: while still holding the lock that publishes its
+    /// waiter, and only then release that lock and wait. That is <c>gopark(unlockf)</c>'s contract,
+    /// under which a waker can only ever find a goroutine that is already parked. A scope that ends
+    /// without having been readied (a timeout, a real deadline, a primitive whose waker does not call
+    /// <see cref="Ready"/>) readies ITSELF at dispose, which was the only path before the ready side
+    /// existed.
     /// </para>
     /// <para>
     /// <b>Cost:</b> one volatile store to park, one to unpark, and no allocation — the scope is a
@@ -436,13 +449,18 @@ public sealed class Goroutine
             return default;
 
         int previous = Volatile.Read(ref goroutine.m_waitReason);
-        Volatile.Write(ref goroutine.m_waitReason, (int)reason);
 
         // Go's gopark, accounting half: the runtime's g moves _Grunning -> _Gwaiting with this reason,
         // at the OUTERMOST boundary only (an inner scope is a golib artifact around code that is not
-        // blocked; Go's parked goroutine cannot park again). See ParkTransition.
+        // blocked; Go's parked goroutine cannot park again). See ParkTransition. It runs BEFORE the
+        // reason is published -- the mirror of dispose's order -- so anything that reads this
+        // goroutine as parked (Ready, above all) finds its g already _Gwaiting. Measured, S1a's R2 arm
+        // (2026-09-22): with the reason published first, a racing waker readied a goroutine whose g
+        // was still _Grunning, and only the runtime's own check caught it.
         if (previous == (int)WaitReason.Zero)
             ParkTransition?.Invoke(reason, true);
+
+        Volatile.Write(ref goroutine.m_waitReason, (int)reason);
 
         return new ParkScope(goroutine, previous);
     }
@@ -460,6 +478,68 @@ public sealed class Goroutine
     /// nothing else moves.
     /// </summary>
     public static Action<WaitReason, bool>? ParkTransition { get; set; }
+
+    /// <summary>
+    /// Marks <paramref name="target"/> as woken, on behalf of the goroutine (or thread) that is about
+    /// to signal the primitive it is parked on. This is Go's <c>goready</c>, accounting half.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The WAKER decides when a goroutine becomes runnable, not the wakee's resumption: Go's
+    /// <c>goready</c> moves the g <c>_Gwaiting → _Grunnable</c> on the waker's side, and everything
+    /// that counts parked goroutines (the mutex-wait metric today, a synctest bubble's idleness next)
+    /// needs the fact at that moment. Accounting it on the wakee's dispose instead leaves a window,
+    /// between the signal and the woken thread running, in which the goroutine still reads parked.
+    /// </para>
+    /// <para>
+    /// Call it BEFORE releasing the primitive, from any thread (a timer service thread that is not a
+    /// goroutine included). <paramref name="target"/> is the goroutine that entered the park, captured
+    /// when its waiter was created; <c>null</c> (a waiter created on a thread with no goroutine
+    /// identity) is a no-op. A target that is not parked, or is already readied, is a bookkeeping
+    /// defect and PANICS by name. Go throws <c>bad g->status in ready</c> for the same state, and the
+    /// commit order <see cref="Park"/> requires makes it unreachable from a correct primitive.
+    /// </para>
+    /// </remarks>
+    public static void Ready(Goroutine? target)
+    {
+        if (target is null)
+            return;
+
+        while (true)
+        {
+            int current = Volatile.Read(ref target.m_waitReason);
+
+            if (current == (int)WaitReason.Zero || (current & ReadiedFlag) != 0)
+            {
+                throw new PanicException(current == (int)WaitReason.Zero
+                    ? $"golib: Ready of goroutine {target.Id}, which is not parked"
+                    : $"golib: Ready of goroutine {target.Id}, which is already readied ({WaitReasons.Text((WaitReason)(current & ~ReadiedFlag))})");
+            }
+
+            if (Interlocked.CompareExchange(ref target.m_waitReason, current | ReadiedFlag, current) == current)
+            {
+                ReadyTransition?.Invoke(target, (WaitReason)current);
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// The runtime's ready transition, installed at module init like <see cref="ParkTransition"/>:
+    /// invoked on the WAKER's thread by <see cref="Ready"/> with the target goroutine and the reason it
+    /// is parked on. The runtime moves the target's g <c>_Gwaiting → _Grunnable</c> (Go's
+    /// <c>ready</c>, where the mutex wait time is added), reaching it through
+    /// <see cref="RuntimeDescriptor"/>. The wakee's dispose then performs only the execute half.
+    /// </summary>
+    public static Action<Goroutine, WaitReason>? ReadyTransition { get; set; }
+
+    /// <summary>
+    /// The runtime's descriptor for this goroutine (its <c>g</c>), set by the runtime when it mints
+    /// one. Opaque to golib, like <c>m_profileLabels</c>. It exists because <see cref="Ready"/> runs on
+    /// the WAKER's thread and must reach the TARGET's g, and the runtime's own per-thread cache is
+    /// readable only from the target's thread.
+    /// </summary>
+    public object? RuntimeDescriptor { get; set; }
 
     /// <summary>
     /// Sets the calling goroutine's profile labels — Go's <c>getg().labels = labels</c>.
@@ -897,13 +977,22 @@ public sealed class Goroutine
             if (m_goroutine is null)
                 return;
 
-            // The outermost scope ends: the runtime's g returns to _Grunning (Go's ready + execute,
-            // collapsed — the managed model has no _Grunnable interval) BEFORE the reason clears, so
-            // an observer that reads the reason as Zero never sees the status still waiting.
-            if (m_previous == (int)WaitReason.Zero)
-                ParkTransition?.Invoke((WaitReason)Volatile.Read(ref m_goroutine.m_waitReason), false);
+            int current = Volatile.Read(ref m_goroutine.m_waitReason);
 
-            Volatile.Write(ref m_goroutine.m_waitReason, m_previous);
+            // The outermost scope ends: the runtime's g returns to _Grunning BEFORE the reason clears,
+            // so an observer that reads the reason as Zero never sees the status still waiting. If a
+            // waker readied it (Ready), the g is already _Grunnable and only Go's execute half is
+            // left; otherwise ready and execute happen here, collapsed, as they always did.
+            if (m_previous == (int)WaitReason.Zero)
+            {
+                ParkTransition?.Invoke((WaitReason)(current & ~ReadiedFlag), false);
+                Volatile.Write(ref m_goroutine.m_waitReason, (int)WaitReason.Zero);
+                return;
+            }
+
+            // A nested scope restores the enclosing reason and CARRIES a readied bit into it: the wake
+            // landed while the inner scope was the one showing, and it belongs to the goroutine.
+            Volatile.Write(ref m_goroutine.m_waitReason, m_previous | (current & ReadiedFlag));
         }
     }
 

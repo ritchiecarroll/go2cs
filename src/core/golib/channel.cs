@@ -228,6 +228,12 @@ internal sealed class Waiter(bool isSend, SelectState? sel = null, int opIndex =
     internal readonly int OpIndex = opIndex;
     internal readonly bool IsSend = isSend;
 
+    // The goroutine parked on this waiter (Go's sudog.g). Every waiter is constructed by the goroutine
+    // that is about to park on it -- chansend, chanrecv, and each case of a blocked select -- so the
+    // constructing thread's identity IS the parker. Null on a thread with no goroutine identity,
+    // where Ready is a no-op.
+    internal readonly Goroutine? Parker = Goroutine.Current;
+
     // Intrusive queue links — owned by the channel lock of the queue the waiter is on.
     internal Waiter? Next;
     internal Waiter? Prev;
@@ -238,8 +244,14 @@ internal sealed class Waiter(bool isSend, SelectState? sel = null, int opIndex =
     /// release (the woken thread reads <see cref="Elem"/>/<see cref="Ok"/> immediately after its
     /// wait returns; the semaphore release/wait pair provides the happens-before edge).
     /// </summary>
+    /// <remarks>
+    /// The parker is READIED before the release (Go's goready, on the waker's side), so it reads
+    /// runnable from the moment it is woken rather than from the moment its thread resumes. A select
+    /// is woken exactly once, by the claimant, so its goroutine is readied exactly once.
+    /// </remarks>
     internal void Wake()
     {
+        Goroutine.Ready(Parker);
         (Sel?.Park ?? Park).Release();
     }
 }
@@ -453,17 +465,22 @@ internal sealed class ChanCore<T> : ChanCore
             return false;
         }
 
-        // Park: enqueue as a sender, release the channel lock, THEN wait — the lock is never held
-        // across a park. A receiver (or close) publishes into the waiter before signaling.
+        // Park: enqueue as a sender, enter the park, release the channel lock, THEN wait — the lock is
+        // never held across the wait. A receiver (or close) publishes into the waiter before signaling.
+        // The park is entered UNDER the lock that publishes the waiter (Go's gopark(chanparkcommit):
+        // the g is waiting before unlockf releases the channel lock), so a waker can only ever find a
+        // parked goroutine to ready.
         // Two objects: the waiter and the SemaphoreSlim its field initializer allocates to park on.
         // Go's equivalent is one sudog, taken from a per-P free list rather than freshly allocated.
         AllocationCounter.Count(2);
         Waiter parked = new(isSend: true) { Elem = value };
         Sendq.Enqueue(parked);
-        Monitor.Exit(SyncRoot);
 
         using (Goroutine.Park(WaitReason.ChanSend))
+        {
+            Monitor.Exit(SyncRoot);
             parked.Park.Wait();
+        }
 
         if (!parked.Ok)
             throw new PanicException("send on closed channel");
@@ -541,14 +558,16 @@ internal sealed class ChanCore<T> : ChanCore
             return false;
         }
 
-        // As on the send side: the waiter plus its park semaphore.
+        // As on the send side: the waiter plus its park semaphore, and the park entered under the lock.
         AllocationCounter.Count(2);
         Waiter parked = new(isSend: false);
         Recvq.Enqueue(parked);
-        Monitor.Exit(SyncRoot);
 
         using (Goroutine.Park(WaitReason.ChanReceive))
+        {
+            Monitor.Exit(SyncRoot);
             parked.Park.Wait();
+        }
 
         value = parked.Elem is null ? default! : (T)parked.Elem;
         ok = parked.Ok;
@@ -875,12 +894,15 @@ internal static class SelectRuntime
             waiters[i] = waiter;
         }
 
-        UnlockAll(lockOrder);
-
-        // Park = unlock THEN wait. A waker that claimed us between the unlock and this wait has
+        // Park = park, unlock, THEN wait. The park is entered while every case's channel lock is still
+        // held (Go's selparkcommit unlocks only after the g is waiting), so a claimant can only ever
+        // ready a parked goroutine. A waker that claimed us between the unlock and this wait has
         // already released the semaphore, so the wait returns immediately — no lost wakeup.
         using (Goroutine.Park(WaitReason.Select))
+        {
+            UnlockAll(lockOrder);
             sel.Park.Wait();
+        }
 
         int winner = Volatile.Read(ref sel.Winner);
 

@@ -137,6 +137,10 @@
     <ProjectReference Include="..\..\core\golib\golib.csproj" />
     <ProjectReference Include="..\..\core\sync\atomic\sync.atomic.csproj" />
 
+    <!-- The ready-seam guards (GoroutineReadyTests) drive sync.Cond, whose notify list is one of the
+         park sites the waker readies (sync/runtime_impl.cs), through its converted public surface. -->
+    <ProjectReference Include="..\..\core\sync\sync.csproj" />
+
     <!-- The Linux spawn-seam gates (LinuxSpawnSeamTests) drive syscall.StartProcess/Wait4 —
          the converted surface over the posix_spawn hand-own, per the exec-wall design's §5.1
          and OQ-2 measured gates. The gate FILE compiles only under the linux corpus flavor

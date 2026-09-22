@@ -111,6 +111,16 @@ partial class runtime_package
 
     public static void GoTestSPWrite() => testSPWrite();
 
+    // The ready-seam guards' view (GoroutineReadyTests): ANOTHER goroutine's g status, read through the
+    // descriptor golib's record carries, so a test can wait for a parker to reach _Gwaiting and see a
+    // waker move it to _Grunnable. uint.MaxValue while that goroutine has minted no g.
+    public static uint GoStatusOf(Goroutine goroutine) =>
+        goroutine.RuntimeDescriptor is ж<g> gp ? (uint)readgstatus(gp) : uint.MaxValue;
+
+    public static uint GoStatusWaiting => (uint)_Gwaiting;
+
+    public static uint GoStatusRunnable => (uint)_Grunnable;
+
     // ---- getg: the calling goroutine's g and its m, minted once per thread ----
 
     // A goroutine is a dedicated thread for its whole life (golib's executor), so the thread IS the
@@ -155,6 +165,11 @@ partial class runtime_package
 
         gv.m = mp;
         mv.curg = gp;
+
+        // Published on the goroutine record so a WAKER's thread can reach this g (readyTransition);
+        // the thread-static above is readable only from this goroutine's own thread.
+        if (current is not null)
+            current.RuntimeDescriptor = gp;
 
         return gp;
     }
@@ -257,6 +272,30 @@ partial class runtime_package
     internal static void ᴛInstallParkTransition()
     {
         Goroutine.ParkTransition = parkTransition;
+        Goroutine.ReadyTransition = readyTransition;
+    }
+
+    // Go's ready, on the WAKER's thread (golib's Goroutine.Ready, DESIGN-gopark-goready-synctest.md):
+    // the TARGET's g moves _Gwaiting -> _Grunnable, where casgstatus adds the mutex wait time -- the
+    // same casgstatus Go's own ready makes on another goroutine's g. The wakee's dispose then does only
+    // the execute half (parkTransition, leaving). A target with no minted g has no status to move (the
+    // hook was not installed when it parked). A g already _Grunnable was readied earlier inside the
+    // SAME outermost park: a nested golib scope re-parked under it (the enclosing scope never left, so
+    // the g never went back to _Gwaiting), and there is nothing further to ready.
+    private static void readyTransition(Goroutine target, WaitReason reason)
+    {
+        if (target.RuntimeDescriptor is not ж<g> gp)
+            return;
+
+        uint32 status = readgstatus(gp);
+
+        if (status == (uint32)_Grunnable)
+            return;
+
+        if (status != (uint32)_Gwaiting)
+            throw new PanicException($"runtime: ready of goroutine {gp.Value.goid} parked on {WaitReasons.Text(reason)} whose status is {status}, not _Gwaiting ({(uint32)_Gwaiting})");
+
+        casgstatus(gp, (uint32)_Gwaiting, (uint32)_Grunnable);
     }
 
     private static void parkTransition(WaitReason reason, bool entering)
@@ -274,13 +313,16 @@ partial class runtime_package
         }
         else
         {
-            if (status != (uint32)_Gwaiting)
-                throw new PanicException($"runtime: park transition leaving {WaitReasons.Text(reason)} on goroutine {gp.Value.goid} whose status is {status}, not _Gwaiting ({(uint32)_Gwaiting})");
+            if (status != (uint32)_Gwaiting && status != (uint32)_Grunnable)
+                throw new PanicException($"runtime: park transition leaving {WaitReasons.Text(reason)} on goroutine {gp.Value.goid} whose status is {status}, not _Gwaiting ({(uint32)_Gwaiting}) or _Grunnable ({(uint32)_Grunnable})");
 
             // Go's ready: _Gwaiting -> _Grunnable, where casgstatus adds the mutex wait time
             // ((now - trackingStamp) * gTrackingPeriod) to sched.totalMutexWaitTime and stamps the
-            // runnable interval.
-            casgstatus(gp, (uint32)_Gwaiting, (uint32)_Grunnable);
+            // runnable interval. Done HERE only when no waker readied this goroutine
+            // (readyTransition): a timeout, a real deadline, or a primitive whose waker does not call
+            // golib's Ready. A readied g is already _Grunnable and takes only the execute half below.
+            if (status == (uint32)_Gwaiting)
+                casgstatus(gp, (uint32)_Gwaiting, (uint32)_Grunnable);
 
             // Go's execute: _Grunnable -> _Grunning, done HERE rather than through casgstatus, because
             // that arm also records sched.timeToRun (the /sched/latencies histogram), whose inline
