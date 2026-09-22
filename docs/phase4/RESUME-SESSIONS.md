@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 06:52 -- hourly refresh (ledger through mailbox d3c961d8a4): section 1a STATE DELTA 11 (batch 4 ran green but not stamped -- three C2 reds fixed, re-run queued; the legs running on the campaign tip with R's s1/s2 as legs 7-8; pass-1 tally 199/212; master dd18e5e2ab; the i7 order through H10's close). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 07:07 -- STAMP refresh (ledger through mailbox d06d4ffe6a): section 1a STATE DELTA 12 (the re-bank train stamped: version tip 07240495e6, 196 pages, 56,595 verdicts; the batch-4 re-run running; batch 5 next; the index tool to C1). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -339,6 +339,21 @@ STATE DELTA 2026-09-22 06:52 (ledger through mailbox d3c961d8a4; supersedes the 
     refusing (repoguard skips test sources), a delta-vs-HEAD arm BANKED. Order on the i7: legs -> batch-4 re-run -> STAMP -> batch 5 (five refs:
     R acb6b5a38a, G f401c4ea07, C1 65bc8acc2e + d66b3e288c, C2's anon-struct TBD) -> pass 2 (the rows the batches fix + R's s2 leg) -> H10's
     closing arithmetic (dispatched + unscheduled == 226; banked + candidates + debt == 226; tests.csproj count == roster rows).
+STATE DELTA 2026-09-22 07:07 (ledger through mailbox d06d4ffe6a; supersedes the deltas above where they differ) -- THE RE-BANK TRAIN IS STAMPED:
+  - VERSION TIP claude/version-go1.24.13 = 07240495e6: eight legs on c6fdbe73c3 (i7 s1/s2, G s1/s2, i9 s1/s2, R s1/s2; every ref's blobs EQUAL;
+    roster conflicts only different-rows; per-leg repoguard, the guard's set, the every-row-once checksum (196 pages, 196 unique, gate proven red
+    on a planted duplicate), a re-sweep sample equal to each leg's TSV) + the five Disclosed cells + the header from the guard: 28,459 -> 56,595
+    matching verdicts, 167 -> 160 disclosed; check-roster-format 1 of 671 (fips140test, hop debt); stdlib 344/0. index.md NOT regenerated: the index
+    tool refuses on the H10 inheritance anchors (10 source pages linked 'unmoved') and the candidate pages -> C1 fixes the tool (claude/c1-index-tool-anchors
+    off master); the index regenerates once after batch 5's rows.
+  - RUNNING on the i7: the BATCH-4 RE-RUN on 07240495e6 (worktree ab4b; C2's fixed tips d2b6b44ed1 / 34d8a5be0b + the four unchanged; predictions GenTests
+    61/61, embedtest 7, fips140test COMPILES -> DIVERGED 7, sha3 DIVERGED 5 alloc family). Then STAMP -> BATCH 5 (six refs: R acb6b5a38a, G f401c4ea07 +
+    6492844624 (slog PASS 197), C1 65bc8acc2e + d66b3e288c (+3 fips140 rows after R's s2b), C2's anon-struct seat TBD) -> pass 2 (the rows the batches fix)
+    -> H10's closing arithmetic -> H11.
+  - LANES: R's s2b (the three rowless fips140 packages' artifacts) + its memmove/token seat on the full behavioral suite; C1 the index tool + the three rows;
+    C2 the time anon-struct seat; G and i9 STANDBY. Rule clarified: a PASS row's artifacts and proof page ride the shard ref whether a roster row exists yet.
+  - Instrument notes banked: GNU grep 3.0 multi -e aborts on 14.5k-line lists (0 matches when piped -- use -E); `env -u DOTNET_ROOT pwsh` alone is
+    insufficient for a net8 apphost (the dotnet10 root must be off PATH too).
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1497,3 +1512,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 04:54 -- hourly refresh: STATE DELTA 9 in section 1a (master be8e137af5; batch 4 resumed; legs + batch 5 briefs; R's fix accepted). Nothing else moved.
 - 2026-09-22 05:52 -- hourly refresh: STATE DELTA 10 in section 1a (batch 5 four of five; the memmove/token ruling; the i7 queue). Nothing else moved.
 - 2026-09-22 06:52 -- hourly refresh: STATE DELTA 11 in section 1a (batch 4 not stamped, fixes in; the legs with legs 7-8; tally 199/212; the order to H10's close). Nothing else moved.
+- 2026-09-22 07:07 -- STAMP refresh: STATE DELTA 12 in section 1a (the re-bank train stamped at 07240495e6; the batch-4 re-run; batch 5 next). Nothing else moved.
