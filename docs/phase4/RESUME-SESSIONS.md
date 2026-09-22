@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-14 18:45 -- COORD ONLINE (mailbox `2cd01f8d6`; handover block 15). Every lane's STATE BLOCK
+> **Status of this revision:** 2026-09-21 23:40 -- COORD ONLINE after the 2026-09-20 weekly limit (ledger through mailbox b56e835d2f). Every lane's PASTE PROMPT fence is a short DELTA cut from the ledger (identity + comms + GPG + pins + first item + queue + floor); the STATE BLOCKs are the 2026-09-13..19 folds and stay as history (the ledger wins on any difference). Section 1a carries COORD's STATE DELTA of this revision.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -147,6 +147,23 @@ supersedes section 1's fence, whose STATE block stays as history. The new coordi
 RESUME 2026-09-21 (after the 2026-09-20 weekly limit). You are the go2cs fleet COORDINATOR (COORD) on the i7.
 Nickname only on every pushed surface (i7, i9, G-LAPTOP, R-LAPTOP, C1, C2). Model: Fable 5.1, effort high.
 Your principal is the repository owner. Your job is the GOALS; comms is a solved tool -- read STEP 1 once and never design it again.
+STATE DELTA 2026-09-21 23:40 (COORD online; supersedes the STEP 3 state below where they differ; the ledger wins over both):
+  - COORD's session is `coord -- Go corpus migration to 1.24.13 coordination` on the i7; no lane session was up at resume (ListAgents
+    empty); the six prompts of STEP 2 were re-cut into this file as DELTA fences (revision 2026-09-21 23:40); GPG CACHED on the i7.
+  - THE REHEARSAL DID NOT DIE AT ROW 1 (ledger 23:33, mailbox b56e835d2f): the driver ran the i7's W=4 slice 1 to DISPATCH CLEAN
+    (rc 0, 968 s; TSV 7 rows PASS banked=yes diverged 0 at 0adf2e4318; verdicts 54/1/140/155/64/6/243 = the recon basis; last write
+    15:58 on 09-20). Only the reporting sub-agent died. Steps 3-5 (the fips140test graft NON-BANKING, the five-clause predicate, the
+    made-to-fail control) run on the existing artifacts in worktree reh; rows 1-7 are NOT re-run. Two readings ride with it: the
+    launcher proceeded CONTENDED after its 40-min cap on heavy=2 -- the two dotnet.exe hosts of the harness's own pwsh tool shells,
+    a false sibling (the sibling predicate excludes a dotnet.exe whose command line hosts pwsh.dll) -- and internal/godebugs printed
+    'comparison JSON unreadable -- the count cannot be cross-checked'. Batch 3 follows the rehearsal verdict.
+  - C2's queue was EMPTY at the cutoff + 5 h (its 224209Z post): the sha3 KEY seat is cut at claude/c2-sha3-adapter-key f4b6e2d3d2
+    and the (B) sizing posted (ONE package, crypto/sha3). RULED 23:33: f4b6e2d3d2 does NOT ride batch 3 (frozen at ten) -- BATCH 4's
+    first ref. C2's NEXT = seat (B), the pass-separation pair stacked on it (its fence, section 4); then STANDBY.
+  - Lane queues as re-cut: R the escapeForHash rule then its DryRun; G its DryRun + the overrides reading; i9 its self-check + DryRun;
+    C1 the fips140test classing when the evidence ref is named; all W=4 workers WAIT for COORD's GO (campaign tip + digest) after
+    batch 3 STAMPS. Model recommendation handed to the owner: Opus 5 / high everywhere except the i9, where Sonnet 5 / high suffices
+    for a checklist-and-driver worker lane (readings escalate to COORD).
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -230,11 +247,11 @@ STEP 3 -- THE GOALS, in order, and the state at the cutoff (2026-09-20 ~15:35, i
       the only src/core paths allowed: testing/testing.cs and internal/abi/**. Gates: gen, GenTests, GolibTests,
       the suite + repoguard uncached, CNR (NO REGRESSION 729), stdlib 344/0, the rows above, census. Then STAMP.
       THE REHEARSAL (the i7's W=4 slice 1, 7 rows + crypto/internal/fips140test grafted NON-BANKING; the driver
-      src/run-h10-dispatch.ps1, the wrapper src/run-h10-recon.ps1 and the plan TSV taken BY BLOB from master) was
-      INTERRUPTED at row 1 by the weekly limit. Its worktree /c/go2cs-tmp-coord/reh (branch rehearsal/h10-i7-09201459,
-      at 0adf2e4318) may hold partial artifacts: read its TSV/ledger/log tails first (floor 14), then re-run it whole
-      on a fresh linked branch worktree. The rehearsal's acceptance predicate is in the brief; a red returns to the
-      seat it names; nothing from a red rehearsal banks.
+      src/run-h10-dispatch.ps1, the wrapper src/run-h10-recon.ps1 and the plan TSV taken BY BLOB from master): its DRIVER LEG RAN
+      GREEN on 2026-09-20 (7/7 PASS banked at 0adf2e4318 in worktree /c/go2cs-tmp-coord/reh, branch rehearsal/h10-i7-09201459);
+      the earlier 'died at row 1' reading was the reporting sub-agent's death, not the driver's (STATE DELTA above). Steps 3-5 run on
+      those artifacts; the acceptance predicate is in the brief; a red returns to the seat it names; nothing from a red rehearsal banks;
+      a green banks the seven native rows as claude/coord-h10-rebank-s1 (artifacts only, no index.md, no roster header).
       i7 ORDER: the rehearsal -> batch 3 -> its STAMP -> the campaign launch (the driver over the plan's 424 rows,
       W=[3,4]; 11 reserved rows on the i9; G the linux W=4 worker after its own DryRun).
       One battery at a time on the i7, and every battery script records its own PID and takes a mkdir lock on its
@@ -250,10 +267,9 @@ STEP 3 -- THE GOALS, in order, and the state at the cutoff (2026-09-20 ~15:35, i
          load-bearing on the linux arm).
     C1 : the rehearsal's fips140test evidence (52 divergences to class, a reading) when the rehearsal reports; its
          five refs ride batch 3; then STANDBY (STEP 2).
-    C2 : the crypto/sha3 KEY seat (an alias qualifier resolving to the local package keys bare in the shared
-         adapterStructKey/splitAdapterStructReference; the recompile arm never takes the anchored path) plus a
-         <= 10-line sizing of the pass-separation class (a paired second seat); its synctest ref rides batch 3;
-         then STANDBY (STEP 2).
+    C2 : DELIVERED 2026-09-20 20:11Z (the KEY seat f4b6e2d3d2 + the (B) sizing); RULED 23:33 to batch 4. NEXT: seat (B), the
+         pass-separation pair stacked on f4b6e2d3d2 (the production facet + the test-half cast rule on the Go side; the generator rule
+         written uncompiled for the i7's gate); its synctest ref rides batch 3; then STANDBY (STEP 2).
     NEW HARDWARE LANES (as they come online): their own precondition self-check first, then the verification work
          of STEP 2 -- starting with batch 3's rows if batch 3 has not stamped, else the campaign slices.
     i9 : idle until the rehearsal result; then the campaign's reserved rows.
@@ -463,374 +479,67 @@ execution item goes to an Opus sub-agent with a single purpose and no polling lo
 ```
 WAKE (i9, verbatim from 59e0e3099 s3): re-create on resume -- i9's wake leg is a CronCreate job and CronList marks it [session-only]. The id cdf12613 is THIS session's and is dead to any other. Same for the Monitor id (bvgzqvs2y), per-session by construction. Neither is inheritable state; both are STEPS. i9 cadence: 7,27,47 past the hour, PROTOCOL v3.6 leg b.
 
-PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; derived from the mailbox record at f8fef0119 and COORD's rulings of this revision; the shared preamble is section 0a) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0:
+PASTE PROMPT (revision 2026-09-21 23:40 -- resume after the 2026-09-20 weekly limit; a DELTA cut from the ledger through 2026-09-21 23:33 (mailbox b56e835d2f) and the batch-3 brief; the shared preamble is section 0a, PROTOCOL v4 is 0a.0) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0. SESSION TITLE: `i9 -- H10 campaign worker (W=4 sweeper slices, the reserved rows)` (the lane nickname FIRST and lowercase, so COORD addresses you in one word); REMOTE CONTROL ON.
 ```
-COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of the record, and it WINS over every mailbox, post-tool or watcher sentence below): reply and ACK by SendMessage to coord (C1 and C2: an inbox file via fleet-msg.sh); tick = inbox -> ledger tail -> work -> one reply of at most 40 lines; the broadcast mailbox is ARCHIVED -- never read it; your post tool is retired; no watcher or wake lines.
-RESUME 2026-09-19. You are lane i9 (host i9, Windows, the fastest box; ONE serial item at a time). First read section 0a
-of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its steps 0, 1 and 2 in that order; then this.
+RESUME 2026-09-21. You are lane i9 (host i9, Windows, the fastest local box, thermally ONE serial CPU task at a time). Nickname only on every pushed surface. Model: Opus 5, effort high (the owner
+may change it at the machine). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover, then this.
+COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of this file WINS over every older mailbox, post-tool or watcher sentence): reply and ACK by SendMessage to `coord -- Go corpus migration to 1.24.13 coordination` (C1 and C2 CANNOT send: an inbox file via `FLEET_LANE=i9 FLEET_MAILBOX_CLONE=<clone> bash .claude/coord-scripts/fleet-msg.sh COORD "<SUBJECT>" <BODYFILE>` from a clone with claude/mailbox checked out; the scripts are on master 0b0be89fd7 and on claude/mailbox). TICK = your inbox (a message event, or `bash .claude/coord-scripts/fleet-read.sh i9 [NEXT-SINCE]`, NEXT-SINCE = the mailbox tip SHA it printed last time, stored by you) -> the ledger tail it prints (docs/phase4/LEDGER.md: the LAST STAMP line is the version tip) -> the work -> ONE reply of at most 40 lines (WHAT 1 line / EVIDENCE <= 10 / ASK or NEXT 1). Never read the archived broadcast file. Silence from COORD is acknowledgement. No watcher or wake-loop lines; a 20-minute wake loop only if your harness delivers no message events.
 
-Step 0, NOW, while the owner is at this keyboard: GPG. Windows box, let pinentry pop and the owner type the passphrase:
+STEP 0, GPG, first, with the owner at this keyboard (Windows boxes): let pinentry pop --
   echo test | "$(git config --get gpg.program || echo gpg)" --clearsign >/dev/null; echo rc=$?
 then the probe, never on a commit:
   echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
-Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpgsign=false commit. Report the state in your ACK.
+Say CACHED or NOT-CACHED in the ACK. Lanes commit UNSIGNED under the standing authorization (git -c commit.gpgsign=false commit); COORD signs
+landings. Cloud boxes: gpg --list-secret-keys; no key -> every commit unsigned the same way; say so. Never block on a prompt after step 0.
 
-Your first item (q94 APPLIED 2026-09-19 at 1c1f63d4cc, stamped; on a restart start at q99 (1) below): the q94 APPLY, from your own posted prediction 909668679 (claude/g-q94-alias-dot-split 47afa9365d
-onto the version tip d71e4eed634e6921983f5ed246038694d3c9ba1e; three paths; projitems 330 to 331 rows with the
-doubled control; twelve markers unchanged; guards TestForeignConstraintProxySplitsOnAliasDot,
-TestForeignConstraintProxyAsciiDotUnchanged plus the two q98 projitems guards; the full converter suite, never -run).
-Your apply, gate, push scripts and merge message (i9-q94-*.sh, i9-q94-merge.msg) are in your logs directory from the
-last session; rebuild any missing one from the prediction before the act. Verify the version tip at origin is still
-d71e4eed63 first; if it moved, re-stamp before applying.
+PINS (every converter/build shell, verified by OUTPUT, never by a file): GOROOT = the go1.24.13 SDK spelled EXACTLY as `go env GOROOT` prints
+it (backslashes on Windows -- a forward-slash spelling or the machine-scope Go is a dead pin); that SDK's bin FIRST on PATH (GOROOT does NOT
+pin the child `go` the converter spawns); GOTOOLCHAIN=local; CGO_ENABLED=0; DOTNET_ROOT = the dotnet 10 root, first on PATH; assert
+`go version` = go1.24.13 and `dotnet --version` starts with 10. pwsh 7 for the .ps1 tools (launch it with DOTNET_ROOT unset in the parent if
+it is a dotnet-tool pwsh; set the pins inside via $env:).
 
-Then, in COORD's order, one at a time, each predicted, applied, gated, announced, pushed:
-  q99 (1) claude/c1-q99-valueclone-population cd6f4b9a8e (cleared 21a832257)
-  q99 (2) claude/c1-q99-h5-member-bill-fixture 0253ca4c2c (APPLIED 06b1636cae, stamped 12a4cfbaa; the fail set is ONE)
-  q102 claude/c1-q102-crosspartial-package-key 0ef96433a8 (APPLIED 23df814f64, stamped 1df0f168f; the fail set stays ONE)
-  the metadata seat claude/g-metadata-regen 913af15cb (APPLIED 0f97dcc8db, stamped c4489d419; THE FAIL SET IS EMPTY, the
-    converter suite rc 0 with validity arms)
-  re-derive the base-three fail-set literal (predicted EMPTY) across all four gate scripts
-  H9 per the runbook section 2 AS RE-RULED 2026-09-20 (COORD on i9's CNR reading dc9eb368c; the prediction is per-PLATFORM):
-    CNR at 0f97dcc8db VALID, CHANGED = 12 projects / 13 files, every member attributed to a landed seat -- mechanism 1 (alias
-    drop, 8 goldens / 35 pairs on windows/amd64, SyscallKeystonePulls IN, SetegidBroadcastSeam a platform SKIP), mechanism 2
-    (RED 12: GenericTypeInference, GenericUntypedIntArg; RED 11: ReceiverCapturedInClosure main.cs + package_info.cs; RED 9:
-    SystemCertVerify). REBANK with UpdateTestTargets --createTargetFiles --only <the twelve>, then the full behavioral suite
-    green across four phases; one commit of the twelve goldens on the version branch, announce-then-push.
-    READING 2026-09-20 (6a1653dce): REBANK DONE 68fcf34ea5 (12 goldens + 13 emission files; 12/12 byte-equal; determinism
-    clean); SUITE NOT GREEN: Output 661 pass / 3 fail / NOT MEASURED 0 -- FuncLiteralCallerNames + GoroutineWaitState fail
-    identically at pre-hop MASTER (the BEHAVIORAL BASE TWO, banked as objective-2 items), SystemCertVerify is a REGRESSION
-    on the version branch (PASS at master; access violation 0xC0000005 at the tip pre-rebank; RED 9 a candidate, its probe
-    VOID because neither side compiles in isolation). RULED: push the rebank (COORD stamps); H9's gate = Output's failing
-    set equals master's BY NAME with APPEARED empty; H9 closes when SystemCertVerify passes. i9 NOW: the project at
-    46307b4704 and at d71e4eed63 (range-splitting), the managed stack at the AV (DOTNET_DbgEnableMiniDump + dotnet-dump),
-    then the one-axis alias revert as a converter-output comparison; COORD routes the fix (candidate class: the open
-    syscall buffer-pin hole; C1 owns the native-boundary guards)
-  the root-attribution overlay claude/g-root-attribution a819ba7417 (APPLIED 43a3627667 on the rebank 68fcf34ea5 -- both
-    STAMPED; VERSION TIP 43a3627667; the converter suite EMPTY)
-  q100 APPLIED 025903ef01 (stamped; four pure additions; floor arms 4/4; go2cs.slnx 0 errors / 912 assemblies; GolibTests
-    fail set on i9 = four link-staging/goroutine tests PRE-EXISTING at the parent on i9's box and PASSING on the i7 at the same
-    tree family -- RULED a box question: i9 runs the four at 46307b4704 on its box; box property -> i9's box-base, the i7's
-    reading stays the corpus reading; else a regression in the 46307b4704..43a3627667 range, q97 the only src/core seat).
-  the H11 seat APPLIED 8fa5cc2e7d (8f0e49ec2: the predicted stamp 8cf90ac83b exactly; six arms RUN=1 with the unmatchable
-    control RUN=0; GoBuildNumber 0; STAMPED by COORD) -- VERSION TIP 8fa5cc2e7d
-  the H11 seat claude/c1-h11-published-stamp 135f0cdc15 (CLEARED on C2's read 4c0a86310;
-    converter-suite gate, the new guard arms by name; no corpus build); state the version tip after each. Still owed by a
-    Windows box before H11 is declared: check-roster-format.ps1 and release-nuget.ps1 -VerifyOnly at the applied tree --
-    i9 takes them AFTER R's tip and the H9 suite (COORD's order; the -VerifyOnly pass refuses on a dirty tree / non-master
-    branch by its own arms, so the refusal reason is the reading, never a bare rc)
-  C2's subtree-load seat APPLIED d91c832543 (9e3ed92e9: the predicted stamp 178a17ed8f; projitems a REAL composition, 335
-    rows, both seats' rows present once; the seat's arm RUN=1 with 7 subtests; H11's six arms re-run by name; STAMPED by
-    COORD) -- VERSION TIP d91c832543. i9's regex-on-a-backslash-path fault banked (fixed strings + both controls for paths).
-  then R's P-256 cut claude/laneR-p256-table-decode at its tip 9200da804e (d01e5d307d + the comment-only commit; both reads'
-    AGREES extended to the tip by C1 a5e48cd3e and C2 296b8af66) on C1's and C2's reads (corpus build + GolibTests vs the box-base
-    four + SystemCertVerify direct exe + the converter suite), then the FULL four-phase behavioral suite: H9 closes when
-    Output's failing set = FuncLiteralCallerNames + GoroutineWaitState with APPEARED empty.
-    APPLIED 2026-09-20 at c7eb36d845 (i9 f53e977e0: tree 470ba0b83c = the predicted stamp, signed, 5 paths +213/-14, markers
-    0; SystemCertVerify direct exe rc 0, 17 lines IDENTICAL to Go where it died 0xC0000005 -- the cure MEASURED; corpus
-    go2cs-stdlib.slnx 344 assemblies / 0 CS errors with nistec + fiat produced; GolibTests = exactly the box-base four;
-    converter suite rc 0; stage 3 first read 86 CS0246/CS0234 = the UNPINNED go2csPath standalone build, harness-gates.md
-    already names it; the box was at 1.4 GB free of 1.9 TB -- bin/obj reclaimed to 303 GB, the four-phase suite RUNNING).
-    Two corrections taken from C1: internal/weak -> weak (3 .cs), internal/concurrent -> internal/sync (5 .cs); RELOCATED
-    is 7 not 6. PUSH c7eb36d845 after the suite under i9's own invariant; COORD verifies tree 470ba0b83c at origin.
-    NEXT after H9: apply G's README overlay 7c374389b0 on top of c7eb36d845 after C2's existence read (READMEs only, no
-    overlap with the decode's five paths; COORD stamps); then reclaim RETIRED trees children-first, never during a suite
-    (parent rule: --git-common-dir == --git-dir with >1 worktree row is never removed); then i9-post.sh at idle.
-    OVERLAY CLEARED (9d32f4813) on C2's existence read; at the act assert tree/go1.23.12 and @go1.23.12 read 0 in ADDED
-    lines and the old stamp 1.24.13.3 reads 0 files; COORD stamps c7eb36d845 and the overlay merge at origin.
-    H9 CLOSED 2026-09-20 (i9 dd5aaa8f3; COORD declared): the suite at c7eb36d845 -- Transpile/Compile/Target 690/690, zero
-    failures, zero timeouts; Output 662 pass / 2 fail / 26 skip; the failing set = the base two BY NAME, APPEARED empty; the
-    26 skips = the declared opt-out class (no [GoTestMatchingConsoleOutput]; 28 non-declarers - 2 tooling; 696 - 6
-    platform-exclusive = 690; 1,298.8 s). c7eb36d845 STAMPED at origin by COORD (tree 470ba0b83c = the prediction, parents
-    ours-then-theirs, the 5 blobs = the seat's, markers 0, signed) -- VERSION TIP c7eb36d845. H10 OPEN; the sweep launch
-    waits on C1's brief + COORD's ruling. OVERLAY APPLIED 93feb8df2b (i9 78ff1ee37: tree ae9d3de1e7 = the stamp, parents
-    ours-then-theirs, 337 READMEs +531/-531, 0 outside; the two axes met with controls -- old stamp 0 files vs 335
-    pre-merge, shipped stamp 342, no Go-tag regression in ADDED lines; STAMPED by COORD at origin) -- VERSION TIP
-    93feb8df2b. i9's substring proxy arm (fips140/nistec) aborted a correct merge once; replaced by the set
-    intersection with a planted control. i9 NEXT: the tree reclamation children-first,
-    then i9-post.sh with the state-dir refusal in first. The H9 docs LANDED on master at 82e203372a (C2's 2e75b14586 +
-    the closure block a19d2bbbbb, signed merge, gates green).
-    ASSIGNED (H10 launch ruling, REDIRECTED after i9's read 5e1471f3d): the RECON WRAPPER invokes THE PIPELINE per package
-    (go2cs -tests -test-action all <GOROOT>/src/<row> <worktree>/src/core/<row>; NEVER the sweep script -- the runbook's own
-    H10 line; the driver drives the sweep and has no per-row function, so 'cut from the driver' was withdrawn); one
-    process per worker list, rows sequential, rc on the next line; emits the GENERATOR's schema row/word/verdicts/sweep_s
-    (LF only, sweep_s integer, verdicts parsed from the pipeline's summary line -- unparsable emits a non-integer never 0;
-    extras first_in_list/rc/diverged/platform/tree; net MUST appear so the hand-stopped drop fires); pins by OUTPUT at
-    start-up (go version with GOTOOLCHAIN=local; the converter's embedded toolchain; version.props vs GOROOT).
-    i9 runs 5.1 Desktop; the i7 takes the Core-edition run (parse gate both editions + a one-row real run, sub-agent);
-    C2 reads the file. Then the preflight at 93feb8df2b (disk >= 25 GB) and the slice/cooldown regime for the reserved
-    rows; i9's list = reserved 14 + windows-only 2 = 16 (net included). i9's POST TOOL LANDED at master c2cd9c2f46
-    (575afbcde7; gates + census green).
-    CONFIRMED 2026-09-20 (COORD c260f4313, after i9 5e1471f3d/bde60048e/ac47d3e30 and C2 f9da1c467/d4f915ed1/7c43a15e):
-    the PIPELINE, decisively because run-validated-sweep.ps1 enumerates from the ROSTER (-Filter -Exact throws 'No banked
-    packages matched' for the twelve successors and the 23 unbanked rows) -- one instrument for all 228. Spec: verdicts =
-    the converter's own 'Validated (\d+) tests against go test' line (per-row assertion exactly one match; cross-checked
-    against go2cs_test_comparison.json's ordinal map count; NON-INTEGER on disagreement/no match, never 0); sweep_s = the
-    wrapper's clock around the ONE invocation (one attempt per row, so the sweep's re-run inflation cannot arise); word =
-    the outcome class PASS/DIVERGED/CONVERT/BUILD/TIMEOUT/NOVERDICT; no -tags; the drift assertion guards the summary-line
-    format with a planted non-match. i9 CUTS on this; C2 reads the file; the i7 runs the Core arm by sub-agent; then LAUNCH.
-    ADDED (COORD after G 21be19338): -test-timeout per row from the deadline floors (a stated default for unfloored rows,
-    never the converter's 2-minute default; the floor used is an extra column); a deadline kill = word TIMEOUT with
-    sweep_s NON-INTEGER (UNSCHEDULED, re-measured under a larger floor); the results-file tail read before the word.
-    RESIDUE (58654661, RULED): i9's leg tree carries pre-run build residue (the dependency CLOSURE of the bufio dry run
-    and the internal/sync arms, incl. go/types and net never converted before the run); the two-row arm (archive/zip +
-    go/types in a SECOND throwaway tree at 0dc65a8e8d, word + verdicts + diverged compared) runs BEFORE the TSV push;
-    a difference re-runs the list on a clean tree. Leg at 58654661: 13 of 16 started, 9 PASS, 2 BUILD (crypto/mlkem
-    expected; hash/maphash UNPREDICTED), 1 NOVERDICT (crypto/tls), net on its 40 m floor. The warn-only-row arm
-    (crypto/cipher; or any license-less scratch output root) rides the seventh commit's red-first.
-    WRAPPER POST-PROCESSING COST (G add323f4, RULED): per-property reflection over a multi-MB comparison JSON holds a
-    core for 10+ min after the converter exits (crypto/cipher 4.77 MB). No mid-leg change (wall_s only; sweep_s is
-    the banked cost). net banks the CONVERTER's wall (log start -> artifacts' mtime), i9 states both. The SEVENTH
-    commit also: a linear-time parse in both editions (-AsHashtable on Core; a .NET deserializer on 5.1), a bounded
-    results-tail read; red-first on a synthetic 5 MB document. A computing wrapper with no child is not a hung one:
-    the census counts the wrapper's PID and its CPU delta. CORRECTED (i9 c27c0065, verified by C1 at the blob): the
-    cost lands on NEITHER column -- $elapsed closes at :428 before the JSON opens at :460; sweep_s and wall_s are the
-    same number except where sweep_s reads UNMEASURED; the basis was never at risk. RULED (787bbf64): a trailing post_s
-    column rides the seventh commit (C2's reader must ignore unnamed columns); the :30 header sentence rides it too;
-    i9's post-tool commit (-s, floor, output-line count, positive control) YES at idle AFTER the leg. The instrument
-    thread CLOSED at a8cfd8ff: no post-tool posts from any lane until that commit.
-    SEVENTH COMMIT PULLED FORWARD (COORD after G 515a988e: crypto/cipher's wrapper phase ~59 MIN and counting, 52:1,
-    3,457 s CPU): i9 cuts it NOW in a separate worktree (the leg untouched) -- the linear parse both editions, the
-    bounded tail, post_s, the :30 sentence, remedy (ii), the NOVERDICT clause, the dead-assignment comment, the
-    warn-only-row arm; red-first timed in MINUTES against G's real 4.77 MB comparison document shared by sha256; the
-    i7 Core arm (sub-agent) + C2's read; then G relaunches its REMAINING rows on the seventh (the in-flight row re-run,
-    the blob split stated in the completion post); R and i9 finish on the fifth unless a row of theirs hits G's ratio.
-    BASIS RULED (a) (COORD after C1 9f5e7a38): the basis carries the FOUR named columns only; post_s dropped at the
-    concatenation (it lives in G's TSV at its ref and G's completion post); the assembler's guard = each header carries
-    the four columns BY NAME (cut with the concatenation); the blob split carried from the completion posts; a row from
-    both of G's launches NAMED as a cross-blob duplicate.
-    THE SEVENTH IS CUT (i9 fb40d741, ~05:00): 3af7d536b0 on 8c1a325ac3 (+336/-32, signed, eleven items; the :470 exit
-    REMOVED; the handown flag line DELETED; DIVERGED derived from the JSON with verdicts = len(go) - len(disclosed);
-    the staleness gate on LastWriteTime (accepted: an overwrite keeps CreationTime); post_s; the diverged column's
-    `0 -eq ''` coercion fixed by a type test -- the fifth's TSVs carry n/a on every PASS row, C1 reads that column as
-    UNINFORMATIVE). THE MECHANISM CORRECTED: the 52:1 is Get-Content -Tail 400 over a multi-MB single-line RESULTS
-    file (quadratic; 524 s -> 0.02 s chunked), NOT the JSON parse (0.1 s). i9's LEG COMPLETE 16/16 at 04:00:03; its
-    three NOVERDICT rows re-classify DIVERGED (crypto/tls 12, net 1 -- hung 63 min yet reached comparison, net/http
-    19; +4,550 s to the basis; crypto/tls's record by hash on the share). SEQUENCE (COORD after fb40d741): i9 pushes;
-    C2 reads the diff; the i7 Core-edition arm runs as a sub-agent (no build); G STOPS its list NOW and relaunches the
-    remaining rows on the seventh at clearance; i9 runs the warn-only arm (bufio on a license-less scratch root) after
-    the push, its two-row residue arm BEFORE its TSV push (reading asked), then the TSV ref + evidence commit.
-    THE CORE ARM ON THE SEVENTH GREEN (i7 sub-agent, ~05:00): parse 0/0 both editions; self-test 5/5 both (needs six
-    dummy mandatory params -- a defect banked post-leg, with the 'every guard' doc claim); the red refuses both; six
-    static reads confirmed. C2's completed read GREEN (2bbfcc44; cite shardmap.py's refusal STRINGS not line numbers,
-    post-leg). THE EIGHTH (i9 2d266663, ~05:05): 0ff8d5f8d7 on 3af7d536b0 (+54/-9): ordinal Dictionary maps with a
-    count-mismatch throw; Core reads via System.Text.Json (no -AsHashtable: PowerShell hashtables fold case); arm E
-    red on the seventh's @{} (43/51), green 47/52/15. RULED: G RELAUNCHES ONCE ON THE EIGHTH after i9's push + C2's
-    delta read + the i7 Core arm re-run (the same sub-agent, waiting for the push); the split stated against the
-    SIXTH and the EIGHTH. The parse hypothesis is DEAD on G's own document (0.37 s / 0.19 s); the whole cost is the
-    results-tail read. THE CORE ARM ON THE EIGHTH GREEN (i7, ~05:12): parse 0/0, self-test 5/5, red refuses, the
-    ordinal maps 47/52/15 in BOTH editions, the guard red-tested (OrdinalIgnoreCase -> fires); post-leg comment fixes:
-    -AsHashtable on pwsh 7.4.6 is ORDINAL (the fold was the bare @{}); the -SelfTest six-parameter defect. G CLEARED
-    TO RELAUNCH ON THE EIGHTH (dc018aa4): two blobs of record -- the fifth for rows scored, the eighth for the rest.
-    i9's COMPLETION (8a726f15, ~05:20): the RESIDUE ARM GREEN on all three comparisons (archive/zip treatment, go/types
-    control: same word, count, diverged set) -> the exposure RETIRED; 16/16 on the fifth, no split; 10 PASS / 3
-    NOVERDICT (-> DIVERGED tls 12, net 1, net/http 19) / 2 BUILD (crypto/mlkem; hash/maphash = 42 x CS0411 -- the
-    inference CLASS with internal/sync and unique, three rows, C1 sizes once -- + 1 CS1955) / 1 CONVERT (time);
-    sweep_s 654 s over 13 rows. The TSV ref pushes now, then the evidence commit. The warn-only arm was VACUOUS
-    (the LICENSE branch is never reached for a stdlib row) -> still OWED with a real mechanism. THE NINTH b3ded6602a
-    (comment-only: citations by refusal text; three stale testConversion.go line pins replaced) taken; G STAYS on
-    the eighth. THE CORE ARM ON THE TENTH GREEN (i7): the canary passes on the committed reader and refuses a folding
-    reader and plain ConvertFrom-Json on both editions; two items for the ELEVENTH post-leg (the console message's
-    'reader folded' over-claim; -SelfTest exits before the canary). C2's DELTA READ of the tenth SOUND (15fca3ce) ->
-    THE TENTH IS THE BLOB OF RECORD FOR THE NEXT LAUNCH (G's running list stays on the eighth). CENSUS COST CORRECTED
-    (C2): bytes on one line nearly free; ARM HITS superlinear (~M^1.4); line count linear; price by line count and
-    arm-shaped tokens, never size; ONE census at a time on a leg box (i9's 25-45 min = contention). WARN-ONLY ARM
-    DISCHARGED (i9 0adb5c93): internal/saferio PASS on the eighth with rc 0 while warning; the red is the THIRD blob
-    ddc205a1ee (no lowering) which dies at the & call -- an ordinal is not a predicate. C1 cites the verdict
-    expression by name. i9's TSV AT
-    ORIGIN (7257173d): claude/i9-h10-
-    recon-tsv 748da4f895 (one path on 0dc65a8e8d, signed, 17 lines, CR 0, ten columns; read back byte-identical;
-    provenance reads on the tree's originals) -> C1's concatenation UNBLOCKED on R's a5fe6375e4 + i9's 748da4f895;
-    G's full 107 on the eighth follows. i9's evidence commit follows its census (slow on single-line records --
-    an operational note); the TENTH (comment shrink + a startup canary asserting 2) pre-taken as a guard.
-    THE TENTH CUT (i9 863404b6): 8b2d1c614e on b3ded6602a (+39/-2) is EXECUTABLE (Assert-OrdinalJsonReader in the
-    preflight, Deny on a folding/throwing reader) -> G STAYS on the eighth; the tenth is the blob for the NEXT launch
-    after C2's delta read + the i7 Core arm (queued to the same sub-agent). EVIDENCE RULED as i9 proposed: push the
-    two RECORDS (net, net/http) when clean; HOLD both tails (net's is a genuine leak -- six profile paths, six
-    account occurrences; net/http's refuses on ipv4 alone with an all-loopback set -> a census question for C1: the
-    ipv4 arm's context should admit loopback/unspecified quads; a private address stays refused).
-    THE TENTH IS NOT THE BLOB OF RECORD (i9 URGENT 328200bb3, RULED a2edbc22d): a STALE comparison record with a
-    summary line reads PASS on the tenth (the stale flag prints and the classifier falls through; only the unreadable
-    path reaches UNREAD). THE ELEVENTH (cutting on the i9): stale = the unreadable consequence (NOVERDICT / NOMATCH /
-    UNMEASURED / n/a, cause 'stale record' in the evidence); red-first on a stale record WITH a summary (arm D's
-    missing case); the four smaller items ride it or a twelfth; C1 + C2 read the delta; no leg reading moves.
-    THE ELEVENTH CUT (i9 d8d3da990): 4083f2c8e4 on 8b2d1c614e, one file +32/-2, signed, PUSHED (EQUAL at origin) -- a stale
-    record is its OWN classifier arm and comes first (NOMATCH / UNMEASURED / n/a; noverdict-cause.txt in the row's
-    evidence); the red fires on the pushed tenth (stale WITH summary: PASS -> NOVERDICT; three controls unchanged);
-    the four smaller items NOT in it (a twelfth). C1 + C2 read the delta. i9 re-runs the path/filepath A/B on it in
-    a censused tree (C1's os/path question stays OPEN until then).
-    C1 + C2 DELTA READS of the eleventh SOUND (8344d8bb6, 46fae0b1c; five small items). THE TWELFTH fe02886a15 +
-    THIRTEENTH e17cb9152d announced (72cfc82f; push follows): the thirteenth = THE BLOB OF RECORD once at origin
-    (arm G's hole -- fresh + unreadable + summary banked 61 under NOVERDICT -- closed by deriving verdicts from the
-    word; the red fires on the twelfth); C1's four + C2's two folded; -SelfTest's canary call BACKED OUT (a forward
-    reference) -> THE FOURTEENTH = the preflight restructure, i9's, red-first with a planted folding reader. C2 reads
-    the 12+13 delta. G runs the two provisional rows on the thirteenth.
-    C2's DELTA READ of the eighth GREEN (b70531b9; the count-mismatch throw degrades to UNREAD/NOVERDICT; the guard's
-    comment overreach banked post-leg); G's clearance waits ONLY on the i7 Core arm re-run on the eighth (running).
-    ASSEMBLER RULED (COORD after C1 f100c5b9): header equality goes; each lane read BY NAME; the banked header is the
-    INTERSECTION (the ten), drops reported by name and lane, a missing named column REFUSES, no union-and-pad; the
-    basis's diverged column is REWRITTEN from the records by the re-classifier (0 for a clean PASS), the fifth's n/a
-    never carried for a row with a record; net's hang (3,792 s) never reaches the schedule (dropped before seen[]).
-    C1's ASSEMBLER BUILT (e1cbebff: 108 rows read by shardmap end to end; eight reds by site; the population
-    arithmetic closes only WITH the roster seat -- 15 costed rows off the 1.23 roster: six relocation targets, nine
-    for the roster seat to classify) and the RE-CLASSIFIER BUILT (9e2d5acc: over R's twelve records, 47/52
-    reproduced, the tell naming exactly the two host rows). CLAUSE (c) NAMES ITS DOCUMENT (COORD after 9e2d5acc):
-    the comparison record's package = the last segment (or before a vN); the results tail's package = the full row
-    name exactly, applied on tails only. CENSUS COST (i9 359f781e + C2): environment-dependent by ~3 orders of
-    magnitude on identical bytes -> measure one representative file on your own box; not transferable. R's second
-    evidence commit 36b3783953 announced (the five clean unchanged under the landed census; the two redacted).
-    THE FIFTEEN CLASSIFIED (C2 17c114b6): 6 relocation targets, 6 NEW at 1.24 (crypto/hkdf, crypto/pbkdf2, fips140/
-    aes, fips140/ecdh, fips140/rsa, go/ast/internal/tests), 3 at both pins never banked (embedtest, runtime, unique).
-    THE FORK RULED (COORD after 17c114b6): the leg's list is the roster PLUS CANDIDATES by design -> the generator
-    gains a THIRD BUCKET (a costed row off the roster = a CANDIDATE, scheduled, an ADDITION only on a terminal pass
-    at the roster seat's re-derivation; the identity = banked + candidates); C2 cuts it as one commit on its ref
-    (the eighth there), landing with the roster seat. RULE 3 (C1 f22c82d7, RULED YES): the ipv4 doc-constant admit
-    is a SHAPE admit and is consulted in BOTH census modes like rule 5 -- CUT 5b063c916 and LANDED on master
-    076c006d41 (self-test 112 -> 116; attribution unchanged; repoguard 52/0); lanes re-copy from it; i9's net/http
-    record commits unaltered. C2's THIRD BUCKET CUT (b7ec3b7d3e, the eighth on its ref; 204 + 15 = 219, 210 + 9 with
-    the targets simulated; candidates scheduled) -- taken; the NINTH RULED: the relocation-source-still-banked
-    detector REPORTS (never refuses) and the population file (recon-lists/population.txt) is the declared candidate
-    set so the identity is live. i9's LC_ALL=C: no change (the locale was C); the awk candidates untestable, not gating.
-    i9's EVIDENCE RECORDS (e4d4936f): neither censuses clean -- net's RECORD carries the account in build-temp paths
-    (25 occurrences), net/http's refuses on ipv4 alone (all loopback). RULED (COORD after e4d4936f): share-by-hash
-    REFUSED (the assembler's container cannot read the share) -> net/http commits UNALTERED after rule 3 lands; net
-    and crypto/tls commit a VERDICT PROJECTION (the record minus its free-text fields by a stated expression, the
-    full record's sha256 as provenance; a private quad inside a test name redacted by REDACTED-PRIVATE-ADDRESS).
-    C2's LC_ALL=C discriminator: i9 runs it once (verdicts locale-invariant on the self-test).
-    ABORT COST RULED (COORD after C2 ff7a229f): the basis models the roster AS IT IS at the leg's tip -- BUILD rows at
-    their abort cost, no word filter; the plan regenerates when a seat lands and the driver re-measures; two lines on
-    C2's ref with the roster seat (the contract-check comment at the word read; an output line naming the abort-costed
-    rows with sum and share -- today 6 rows / 468 s / 10.3% of R's basis). The 12-second cost band of the eight
-    contaminated rows is banked as the cheap second detector for a contamination.
-    WRAPPER CUT (f2eae7c85): claude/i9-h10-recon-wrapper 43aba50262 on 93feb8df2b, src/run-h10-recon.ps1 +321 (LF, 100755,
-    census clean, signed). Two defects caught by the one-row dry run: the converter SPAWNS go from PATH (the pin gate had
-    asserted the absolute path -- green about the wrong object; now three agreeing derivations: PATH-resolved go version
-    output, the binary under -GoRoot, the VERSION file; the control re-taken with a REAL wrong release), and the
-    cross-check relation is map == summary + disclosed-divergent. THIRD FINDING: -test-action all PUBLISHES validation
-    artifacts (bufio's proof page re-banked to 1.24.13; docs/validation/index.md -25 by one row). RULED (COORD after
-    c101d970): option (a) -- every worker's list runs in a THROWAWAY linked worktree at the tip, discarded afterwards;
-    SECOND COMMIT on the ref: a guard refusing to run unless the tree is a linked worktree (--git-dir != --git-common-dir)
-    with HEAD detached at the expected tip, and a per-row copy of go2cs_test_comparison.json + the results tail + the
-    summary line into a scratch dir outside any work tree (the TSV there too); no git checkout/clean inside the wrapper.
-    Then the slice/cooldown regime from the generator's constants. Also measured (c101d970): the two windows-only rows
-    carry no tag asymmetry (205 same / 2 differ / 0 unmeasurable); nistec shows one direction on windows.
-    PREFLIGHT GREEN at 93feb8df2b (8f974227: pins by output with the ambient go1.23.1 as the dissenting control; 370 GB);
-    the regime = the generator's C_TARGET 40 min / COOLDOWN 10 min, emitted into the plan; reserved-set finding: the
-    sweep's $longTimeouts table names pre-hop mlkem768 (intersected out silently), net/net/http uncosted, time
-    CONVERT-blocked. C2's READ (c0c2063e): spec met; the classifier's BUILD/TIMEOUT arms lack rc guards (8 candidate
-    rows incl. net, net/http); diverged counts lines. SECOND COMMIT RULED (COORD after be7d670db): the worktree guard +
-    artifact capture; rc guards, TIMEOUT from the results tail, non-integer sweep_s on TIMEOUT, diverged = distinct
-    names; -test-timeout from $longTimeouts via the successor map (fan-out inherits) + the sweep's default. Then C2
-    re-reads at the tip, the i7 Core arm re-runs there, then LAUNCH. The $longTimeouts re-path rides the roster seat;
-    the generator prints intersected-out reserved rows (with the seat).
-    i7 CORE-EDITION ARM GREEN on 43aba50262 (sub-agent): parse 0/0 (pwsh 7.4.6, 5.1), -SelfTest pass, bufio dry run
-    (157 s with the build) and real row (32 s) PASS 80, CR 0, the tree dirtied as i9 saw and discarded with the worktree.
-    Two more lines for the second commit: platform = GOOS/GOARCH by go env (it read Win32NT); DOTNET_ROOT set INSIDE a
-    dotnet-tool pwsh (the i7's net8 apphost dies at launch with DOTNET_ROOT pointing at .NET 10). The Core re-run at the
-    new tip is the i7's; then LAUNCH.
-    SECOND COMMIT ANNOUNCED (cf81fcf5, announce-then-push): 4739769503 on 43aba50262, +210/-13, signed -- the linked-worktree
-    guard (-ExpectTip, detached HEAD, scratch outside any tree), the evidence capture (comparison JSON + results tail +
-    summary survive a checkout), rc guards + TIMEOUT from the results tail + non-integer sweep_s, floors DERIVED from the
-    sweep's table at run time (13, 2 inherited by successors; <5 entries REFUSES), platform = go env GOOS/GOARCH (refuses
-    if unknown), the pwsh/DOTNET_ROOT header note. FIFTH DEFECT found implementing diverged: the disclosed list is PROSE,
-    so a name-membership test never matched and every disclosed row read DIVERGED -> diverged = the NET undisclosed
-    count matched on the disclosed entry's leading token, cross-checked against the artifact's matched flag. Lesson
-    banked: a guard whose success case is an error stream passes all its refusal controls (git answers 'not in a work
-    tree' on stderr -> a terminating error under strict preference; every native git call now reads the exit code).
-    C2 RE-READ at 4739769503 DONE (e747531c: the four items in; three findings -> a THIRD COMMIT ruled: (A) platform-
-    neutral binary names (three hardcoded .exe paths refuse a linux GOROOT with the wrong cause); (B) the successor map at
-    :271-281 is a hand copy already wrong three ways vs C1's ruled map -- carry the four corrections + an owner comment,
-    derive from the roster's relocation table when the roster seat lands; (C) word = UNREAD when diverged is not an int).
-    The third commit's map = C1's table (350a301a; source -> targets LIST, never 1:1; 10 rows, 13 ARCS (i9 f21d32b7
-    corrected the 14: three splits, fips140test receives three, 13 - 3 + 1 = 11 targets), every arm inherits the floor)
-    with the owner comment; THIRD COMMIT ANNOUNCED (f21d32b7): ddc205a1ee on 4739769503, +77/-21 -- both binary spellings
-    probed, NOVERDICT for the unreadable case (one spelling per class), the whole map + the orphan assertion kept; the durable relocations.tsv lands with the
-    roster seat and the wrapper's map derivation switches to it in a commit landing with the seat.
-    NEXT: the third commit (announce-then-push); C2 reads its diff; the i7 Core arm re-runs on the FINAL tip after the
-    fips140test seat's conversions finish (never two conversions on one box); then LAUNCH. The third commit is AT
-    ORIGIN (ddc205a1ee); the i7 Core re-run launched on it (sub-agent). H10 RECON LEG LAUNCHED 2026-09-20 (COORD
-    a82eb75b1) at VERSION TIP 6d814e2d38 (the host seat STAMPED ~10:20 on f83ba29ffb; the foreign-generic adapter seat STAMPED ~08:30: parents f0c3399684 + c63943eee7, three EQUAL,
-CNR 729 no regression, GenTests 43/43, stdlib 344/0, the sync row COMPILES 46/6 to the name; the COLLISION-KEY
-follow-up (both operands + the value-adapter twin question) CUTTING on the i7 in worktree ck1; two instrument
-findings banked: the circular machine-scope GOROOT pin; an empty materialised tool passes vacuously -- assert byte size
-+ self-test) (0dc65a8e8d = the leg's tip). THE FOLLOW-UP CUT ~09:05: 8b1a284122 on the seat ref (both operands: the
-struct key drops generics then takes the last segment; the interface NAME through StripGenericTypeArguments; five arms
-red/green; GenTests 48/48; stdlib 344/0; corpus emission byte-identical over 1,323 files with a made-to-fail
-instrument; master's census clean). The value-adapter twin MEASURED, NOT FOLDED (the identifier defect of the whole
-seat, needs a converter half, unreachable for committed records); the interface-side KEYS left identical on purpose
-(both halves garble alike; a paired seat if R's arm needs it). C1 + R read; R merges + cuts the generic-composition
-arm; APPLY BATCH 2 = this ref + the host third commit + R's ref: wrapper ddc205a1ee (by blob), lists 89c1ebc2cc (i9 16 / g 107 / r 105),
-    throwaway detached worktrees, one process per list, one attempt per row, TSVs pushed as new per-lane refs
-    (LANE-h10-recon-tsv) when a list completes with the word histogram and the named CONVERT/BUILD/DIVERGED/NOVERDICT
-    rows; expected words for the known rows stated (time CONVERT, reflect NOVERDICT, fips140test/mlkem/internal-sync
-    BUILD, nistec PASS 44). i9 runs its 16 (the reserved rows + the two windows-only). i9's LEG ACK (caf34a52): RUNNING
-    since 01:23 local at 0dc65a8e8d (a detached hidden process; LEG_RC written as the log's last line); the wrapper and
-    the list taken by blob (sha256 stated); the composition verified before launch (the script from the wrapper ref's
-    blob, -Tree at the version tip, the provenance column = the tree measured); no slice/cooldown -- ruled NONE (one
-    process, one attempt per row; the driver's constants are for the costed passes). The TSV comes back as
-    claude/i9-h10-recon-tsv. THREE LAUNCH TRAPS (d48af1e1, c8b00399), all i9's own file: -Out is a FILE (WriteAllText is
-    the last statement); never pipe the wrapper (exit in a pipeline loses the output; redirect at the process level);
-    and ANY FAILING ROW KILLS THE LEG (the converter call at :387 under Stop -> a terminating NativeCommandError in 5.1;
-    CONVERT/BUILD unreachable; crypto/mlkem killed the leg at row 4 twice). FOURTH COMMIT 39979aa218 (2af7004f: the call
-    under Continue with 2>&1 kept; the A/B on internal/sync produced the first BUILD word) TAKEN; a FIFTH rides before
-    the relaunch (wall_s = the observed integer wall on every row; diverged = n/a where no artifact; the -Out doc; the
-    UNSCHEDULED sentence corrected) + C2's two findings from its read of the fourth (1e2adb3d: the per-row rc reset with a
-    non-integer rc refused; the two preflight go-version calls at :225/:228 under the lowered preference, :355/:356 under
-    the GitTry shape) = SIX items, one arm each (a forced-short TIMEOUT row; a planted throw before the rc read; a
-    wrong-release GOROOT denied by name; the BUILD arm re-run). FIFTH CUT (f15ef9fc): 8de864a9a9 on 39979aa218, +33/-5 --
-    items (a)-(d) only (wall_s the TENTH column; diverged n/a; the -Out doc; the sentence); C2's A and B DEFERRED to the
-    derivation commit (neither can silently misclassify a row with the preference lowered). i9 stopped its own relaunch
-    at row 5 by printed PID + executable path (crypto/mlkem BUILD 13s classified and the run carried on = the fourth
-    holds in the leg). No TIMEOUT word has ever been emitted; net will be the first. LAUNCH SEQUENCE (COORD 0483558ff):
-    C2 reads the fourth + fifth at 8de864a9a9; the i7 parses both editions + -SelfTest (sub-agent, no row); then G and
-    R launch on 8de864a9a9 and i9 relaunches from row 1 (the run of record). BOTH READS IN (C2 9306f9e8 clean with the
-    four structural properties measured; the i7 sub-agent: parse 0/0 both editions with identical token counts, -SelfTest
-    rc 0 both editions byte-identical, the five confirmations, A/B absent as deferred). GO POSTED 2026-09-20 (COORD after
-    9306f9e8): the leg runs on the blob sha256 86cc38c01cddb686... (40,652 bytes, 628 lines, CR 0) at -Tree 0dc65a8e8d
-    with the lists 89c1ebc2cc; G and R launch, i9 relaunches from row 1. SIXTH COMMIT (85611044): 8c1a325ac3 on
-    8de864a9a9, +47/-4 -- C2's (A) with a CATCH (a throw propagates past finally; the refusal was unreachable until the
-    catch, found by planting the throw) and (B) through NativeFirstLine/NativeQuiet helpers ((B) did not distinguish:
-    go version does not load the module -- hardening); i9's announce-after-push disclosed (the push ran ungated on the
-    post's rc; nothing replaced). RULED (COORD after 85611044): the SIXTH is the blob for any list NOT YET STARTED (C2
-    reads its diff; the i7 parses/self-tests it; then launch); a list already running on the fifth FINISHES there
-    (identical ten-column header; hardening only; the blob stated in the completion post). i9 relaunches on the sixth
-    after the two reads. WITHDRAWN (COORD after 146ec041): THE FIFTH IS THE BLOB FOR ALL THREE LISTS -- i9's run of
-    record is LIVE on it (469b7c25: 16 rows, launched 01:20 local, sha256 86cc38c01c... matched before launch, pid
-    33528, stderr 0); G and R launch on the fifth NOW; the SIXTH stands landed but unrun (C2 146ec041: its rc refusal
-    is the only exit in the row loop and the TSV is written after the loop -> a rare throw would discard a list; the
-    i7 parse gate on it green both editions, self-test passing, banked). The SEVENTH (the derivation commit, after the
-    leg): a thrown row CLASSIFIED (NOVERDICT / n/a / UNMEASURED / the observed wall_s) with no exit in the loop, the
-    NOVERDICT two-paths clause, the dead-assignment comment. i9's take (9701c79a: the fifth has 0 Deny calls inside the
-    loop, the sixth 1; remedy (ii) preferred, not cut without a ruling) confirmed: (ii) rides the seventh after the leg.
-    LEG STATE (9701c79a): rows 1-4 done on the fifth (archive/zip PASS 100, crypto/dsa PASS 4, fips140/mlkem PASS 10,
-    crypto/mlkem BUILD), crypto/tls in flight. APPLY QUEUE: (1) R's seat ce8d0bd654 (the ref tip
-    at the act; both reads done, CLEARED); (2) the fips140test seat claude/coord-fips140test-testonly ce8fc43a87 on
-    93feb8df2b (cut by an i7 sub-agent: three sites gated on productionClassEmitted; suite rc 0; the row 13 CS0234 -> 0)
-    after C1's design + C2's structural reads -- no source overlap with R's seat, both add a projitems line (the
-    projitems guard resolves the merge at the act).
-    R's SEAT APPLIED (46fac3c2) at 9b89dfe46c and STAMPED by COORD at origin (tree 967a36d40d, parents ours-then-theirs
-    93feb8df2b + ce8d0bd654, 5 files +307/-3, every blob the seat's, corpus 0, markers 0, signed) -- VERSION TIP
-    9b89dfe46c. The time commit was not at origin at the act (rides its own apply). i9's two findings banked: assert the
-    -run POPULATION beside every verdict (a no-match pattern exits 0); size a seat with the merge-base form tip...seat,
-    never two-dot against a moved tip. fips140test x oracle overlap in testConversion.go trial-merged clean. NEXT applies
-    on 9b89dfe46c: ce8fc43a87 (fips140test) then dd376e3f12 (oracle), each predicted, gated, stamped; then the leg's
-    worktrees are cut at the tip carrying all three.
-    fips140test APPLIED (404d07fc) at 4df427fdcb and STAMPED at origin (tree 114cd299b5, parents 9b89dfe46c + ce8fc43a87,
-    5 files +306/-4, four blobs the seat's + the projitems COMPOSED with all three registration lines, corpus 0, signed)
-    -- VERSION TIP 4df427fdcb. i9's mechanism banked: the gate travels as an empty class name; :1229 recomputes it (the
-    one-call-site remedy when embedtest converts). i9 stays on the queue: the oracle seat dd376e3f12 next, then the leg;
-    the ProjectReference/generated-sources reads are the i7's next fips140test seat's.
-    i7 CORE ARM GREEN on the final tip ddc205a1ee (sub-agent): parse 0/0, -SelfTest, both refusal controls fire by name,
-    dry run 13 floors (2 inherited), real row bufio PASS 80 windows/amd64 CR 0, the evidence survives the tree removal;
-    caveat: a dry run pre-warms a row (153 s cold vs 31 s warm) -- no dry run precedes a measured row in the leg. THE
-    WRAPPER IS LAUNCH-READY. LAUNCH after: i9's two applies (+ stamps) and C1's recon LISTS as files (a new ref).
-  i9's GolibTests BOX-BASE (0fa1abc22, all four fail at 46307b4704 on i9's box, two runs): the three link-staging tests +
-    StackEnumeratesExactlyTheGoroutinesNumGoroutineCounts; RegistryTracksLiveGoroutinesAndRetiresThem FLAKY; the i7's reading
-    stays the corpus reading. RULE: fail sets compared by FULLY-QUALIFIED name (the i7 names the class, i9 the methods).
-  H11 seat prediction 0fa1abc22: stamp 8cf90ac83b, six NEW arms by name (three files, 21 of the badge file's 22 pre-exist),
-    the baseline measured at i9's own tip first (rc 0, fail set EMPTY, 732 arms)
-  q100 claude/c1-q100-native-array-view-floor at its RE-PINNED tip abe3b3798b (9c5460585: the i7 gate CLEAR at 0dca38552c
-    stands; the commit on top is comment-and-prose-only, verified).
-Not yours: G's H8 census, C2's comparand procedure, the runtime row. Blocked on: nothing for the first five.
+STEP 1, the record (GitHub only; local memory is a cache): git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13;
+read section 0a of this file and your section; then the ledger tail (fleet-read.sh, or `git show origin/claude/mailbox:docs/phase4/LEDGER.md |
+tail -n 30`). Tips at this revision: MASTER 0b0be89fd7; VERSION TIP 0adf2e4318 (APPLY BATCH 2) -- batch 3 (ten refs) STAMPS after the i7
+battery and MOVES the tip: read the ledger's last STAMP line before cutting or basing anything, and name the tip you read.
+STEP 2, ONE ACK message to coord: GPG state, the master / version / handover tips you read, your first item. Then start it.
+
+YOUR FIRST ITEM: the H10 PRECONDITION SELF-CHECK on the i9 -- the 11-row table in docs/GoCorpusMigration.md (H10, 'THE PRECONDITIONS', master
+0b0be89fd7): all four overrides; the pinned bin FIRST on PATH; `go version` OUTPUT go1.24.13; dotnet 10; pwsh 7; disk >= 25 GB; CGO 0;
+version.props agrees with GOROOT/VERSION; the whole-solution build run once in a tree that is NOT the leg's; the converter binary rebuilt
+after the toolchain move; the leg tree censused for ignored residue with a control. Post the 11 answers as ONE reading (G-LAPTOP's
+2026-09-20 read is the shape: 9/11 with what fixed the two).
+
+THE DRIVER RECIPE (shared by every W=4 worker): a FRESH LINKED WORKTREE ON A BRANCH at the tip the ledger's last STAMP names
+(`git worktree add -b i9/h10-w4-<mmddHHMM> <path> <tip>`; the driver's tree guard refuses detached or main), censused BEFORE row 1 with
+`git status --ignored=matching` (record the count; a never-built tree answers 0), >= 25 GB free. The driver src/run-h10-dispatch.ps1, the
+wrapper src/run-h10-recon.ps1 and the plan docs/phase4/hopA-inputs/h10-dispatch-plan.tsv taken BY BLOB from master, never from a checkout
+(`MSYS_NO_PATHCONV=1 git show origin/master:<path> > file`; state each `git rev-parse origin/master:<path>` blob id AND the sha256 as read;
+the plan LF only, zero CR bytes -- the driver recomputes #digest and refuses a mismatch). Mandatory parameters, HASHTABLE splat (an array
+splat is positional): -Plan, -Worker spelled EXACTLY as the plan's worker column spells your box, -FleetSize 4, -OnlySlice <n>, -Mode rebank,
+-Tree, -GoRoot (backslash spelling), -Scratch OUTSIDE the tree, -ExpectTip <tip>, -RebankWrapper <wrapper file>, -Ledger, -TimingOut; read the
+driver's param() block and map every mandatory one. -DryRun FIRST: rc 0 and the row list = the plan's rows for you in order; BANK NOTHING;
+post the row list. The real run only on COORD's GO message (it names the campaign tip and the digest). One shard = one lane ref
+claude/i9-h10-rebank-s<N> off the campaign tip carrying that shard's artifacts ONLY -- never docs/validation/index.md, never the roster
+header -- push-then-announce with the TSV verbatim and every row's word; a NOVERDICT / CONVERT / BUILD / TIMEOUT row is reported by cause
+in the same message (the results-file tail first: a deadline kill states itself); you cut nothing for it. Every battery script records
+its PID and takes a mkdir lock on its worktree at start.
+
+YOUR QUEUE, in order (the i9 runs ONE serial CPU item at a time -- thermal; it is the plan's fastest worker and the RESERVED rows are
+pinned to it by the plan, never absorbed or skipped):
+  (1) the self-check above;
+  (2) -DryRun of your W=4 slice 1 by the recipe above (your rows at W=4: slice 1 = 28 rows, slice 2 = 76; the plan is the authority);
+  (3) WAIT for COORD's GO (the campaign launches after batch 3 STAMPS; the message names the tip and the digest); then your W=4 slices for real,
+      one ref per shard (claude/i9-h10-rebank-s1, -s2), push-then-announce each with its TSV.
+Nothing of yours rides batch 3. Later (post-hop): AOT perf builds live on this box.
+
+FLOOR (CLAUDE.md, in force): one conversion per output root per box, never two overlapping on one box; seed from src/core before any -stdlib
+reconvert; the output directory is the SECOND positional of a single-package conversion; source is frozen while a battery runs; kill by PID or
+path, never by name; never git add -A; capture rc on the next line before any pipe; read the emission before spending a gate; measure at the
+tree; `| head` is a WHERE clause. Refs: announce-then-push on existing refs, push-then-announce on new refs; never force-push or replace a
+posted SHA (a fix is a commit on top); a seated branch takes no commits. Security: nicknames only (i7, i9, G-LAPTOP, R-LAPTOP, C1, C2) -- no
+hostnames, usernames, profile paths, shares or IPs on any pushed surface; `.claude/coord-scripts/coord-identifier-census.sh entry <file>`
+before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: one OWNER-HAND line to COORD. Compiling is not correctness.
 ```
 
 
@@ -923,567 +632,49 @@ lane's OFFLINE post when the anchor file is gone, the post tool is rebuilt from
 `.claude/skills/mailbox/SKILL.md` plus the coordinator's tool as the reference shape, and both Go pins
 come back in seconds from a blobless two-tag fetch (1.1 MB). Re-arm all five legs after any restart.
 
-PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; derived from the mailbox record at f8fef0119 and COORD's rulings of this revision; the shared preamble is section 0a) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0:
+PASTE PROMPT (revision 2026-09-21 23:40 -- resume after the 2026-09-20 weekly limit; a DELTA cut from the ledger through 2026-09-21 23:33 (mailbox b56e835d2f) and the batch-3 brief; the shared preamble is section 0a, PROTOCOL v4 is 0a.0) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0. SESSION TITLE: `c1 -- H10 standby (fips140test divergence classing)` (the lane nickname FIRST and lowercase, so COORD addresses you in one word); REMOTE CONTROL ON.
 ```
-COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of the record, and it WINS over every mailbox, post-tool or watcher sentence below): reply and ACK by SendMessage to coord (C1 and C2: an inbox file via fleet-msg.sh); tick = inbox -> ledger tail -> work -> one reply of at most 40 lines; the broadcast mailbox is ARCHIVED -- never read it; your post tool is retired; no watcher or wake lines.
-RESUME 2026-09-19. You are lane C1 (cloud, linux; go1.24.13 through GOTOOLCHAIN; no .NET, so you never claim a
-compile). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its steps 0, 1 and
-2 in that order; then this.
+RESUME 2026-09-21. You are lane C1 (cloud, linux; no .NET, no PowerShell, little disk; you RECEIVE messages but cannot send -- reply by inbox file). Nickname only on every pushed surface. Model: Opus 5, effort high (the owner
+may change it at the machine). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover, then this.
+COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of this file WINS over every older mailbox, post-tool or watcher sentence): reply and ACK by SendMessage to `coord -- Go corpus migration to 1.24.13 coordination` (C1 and C2 CANNOT send: an inbox file via `FLEET_LANE=C1 FLEET_MAILBOX_CLONE=<clone> bash .claude/coord-scripts/fleet-msg.sh COORD "<SUBJECT>" <BODYFILE>` from a clone with claude/mailbox checked out; the scripts are on master 0b0be89fd7 and on claude/mailbox). TICK = your inbox (a message event, or `bash .claude/coord-scripts/fleet-read.sh C1 [NEXT-SINCE]`, NEXT-SINCE = the mailbox tip SHA it printed last time, stored by you) -> the ledger tail it prints (docs/phase4/LEDGER.md: the LAST STAMP line is the version tip) -> the work -> ONE reply of at most 40 lines (WHAT 1 line / EVIDENCE <= 10 / ASK or NEXT 1). Never read the archived broadcast file. Silence from COORD is acknowledgement. No watcher or wake-loop lines; a 20-minute wake loop only if your harness delivers no message events.
 
-Step 0, NOW, while the owner is at this keyboard: GPG. Windows box, let pinentry pop and the owner type the passphrase:
+STEP 0, GPG, first, with the owner at this keyboard (Windows boxes): let pinentry pop --
   echo test | "$(git config --get gpg.program || echo gpg)" --clearsign >/dev/null; echo rc=$?
 then the probe, never on a commit:
   echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
-Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpgsign=false commit. Report the state in your ACK.
+Say CACHED or NOT-CACHED in the ACK. Lanes commit UNSIGNED under the standing authorization (git -c commit.gpgsign=false commit); COORD signs
+landings. Cloud boxes: gpg --list-secret-keys; no key -> every commit unsigned the same way; say so. Never block on a prompt after step 0.
 
-Your first item (DONE 2026-09-19: CUT at claude/c1-q102-crosspartial-package-key 0ef96433a8 on cd6f4b9a8e, accepted for C2's
-read at 15d15513a; on a restart start at (2b) below): the q102 CUT. The cross-partial index keys on the bare type name
-within a directory and ignores the enclosing *_package class: 4 of 8230 (dir, bare name) buckets collide, the count
-the production index itself keys under blanking (C2 14e4ce0e8; 8091 and 7808 retired as second predicates), none stamped. Your own design constraint: the enclosing class is never found by brace matching (that instrument failed twice
-in one direction); key on the file's own partial class *_package declaration. One commit on a NEW ref whose parent
-is q99 (1)'s head cd6f4b9a8e8839411ff4dd92428e00df545bf308 (RULED 3d88353a8: the index exists only there; the seated
-branch takes no commits); the guard red-first on a planted collision; the corpus arm
-reads the same 4 of 7808 before and 0 findings after; push-then-announce; C2 second-reads.
+PINS: no .NET, no PowerShell, no pinned SDK on this box -- `GOTOOLCHAIN=go1.24.13` materialises the pin from the module proxy; assert
+`go version` = go1.24.13 in every shell. You never claim a compile: every emission claim is a READ, and every BUILD or row gate for your
+refs runs on a hardware lane (say which legs you omitted in every announce).
 
-Then: (2) RETIRED 2026-09-19 (C1 0d88cc637, COORD verified): the q86 field-pattern fix was ALREADY cut and applied --
-claude/c1-q86-initialized-field-fix 292756d64f is an ancestor of the version tip; the four arms are green at the tree; the
-"242" was prose and does not re-derive (+237 direct / +278 transitive, one axis). Nothing to cut. (2b, RULED 0a2b43651 after C2's q100 read) ONE comment-only commit on top of 0dca38552c on
-the q100 branch: DONE 2026-09-19 at abe3b3798b, re-pinned by COORD (9c5460585). The pthread NOTE is DISCHARGED (5d7486bba:
-a standing reading in nativeCallGateDarwin_test.go). The slice<T> census is DONE (99e00361a: no floor twin; the convTslice
-re-route BANKED post-hop). ASSIGNED NEXT (COORD, after 99e00361a): the H10 PRE-STAGING CENSUS -- for every banked roster row,
-the Test/Benchmark/Example/Fuzz declaration delta between the go1.23.12 and go1.24.13 GOROOT test sources under windows/amd64
-build constraints (added / removed / renamed by exact name), and every disclosure pin's survival at 1.24.13; one table, rows
-with the largest movement named; a reading, no cut; numbers from the instrument in-process, never a replica (a7c20e7cb).
-DONE 2026-09-20 (7a5d2af28: 204 rows, 7227 -> 7319 declarations, 62 rows moved, 181 pins / 158 survive / 0 re-signs /
-23 off-platform; TEN banked rows have no package at 1.24.13 -- the hop's relocations). ASSIGNED NEXT (COORD): the SUCCESSOR
-MAP for the ten by test-name migration (banked row -> 1.24.13 package(s) declaring its removed names -> found / not found),
-plus the declaration counts of the unbanked successors (crypto/internal/fips140/*, internal/runtime/*, weak, internal/sync);
-a reading, no roster edit; the roster re-point is COORD's docs seat at H10. DONE 2026-09-20 (49ddc38cd, ACCEPTED: eight
-re-point 1:1, alias + nistec MERGE into crypto/internal/fips140test, mlkem768 SPLITS across fips140/mlkem + crypto/mlkem;
-two names retire; TestP256PrecomputedTable RULED off-platform at 1.24.13; twelve unbanked successors = 391 declarations enter
-H10 as new rows). ASSIGNED NEXT: the conversion-only -tests pre-stage of the twelve successor packages at the version tip
-(converter built at the tip under the 1.24.13 pin; each into its own never-reused root, second positional, sequential; NO
--test-action): per package the exit code, emitted .cs count, unresolved lift markers or refusals by name, emitted vs source
-test-declaration count; no compile, no bank. DONE 2026-09-20 (506ab57d9: 12/12 rc 0, 0 markers, 141 .cs, 150/150). CORRECTED
-under the corpus's tags (purego,math_big_pure_go): TestP256PrecomputedTable is INCLUDED at 1.24.13 (the off-platform ruling
-WITHDRAWN, COORD's error); nistec SPLITS by name (2 fips140/edwards25519, 2 fips140/nistec); fiat enters H10 with a 0
-executable denominator; the build configuration is printed beside every H10 count. ASSIGNED NEXT: DRAFT the H10 roster
-relocation seat (docs only, a branch you name, push-then-announce; COORD holds it for the H10 docs commit): per relocated row
-the dated note with successor(s) by name and counts, the two retirements, the purego line, fiat's 0 denominator, the twelve
-new-row candidates with their 1.24.13 declaration counts; banked figures untouched, no verdict moves. DONE 2026-09-20 at
-claude/c1-h10-roster-relocation 4de76ded06 off master (c7724dcd6; ACCEPTED and HELD by COORD for the H10 docs commit; placement
-stays). CORRECTION TAKEN (b3f7face4): there is no held H11 amendment -- the four H11 runbook amendments are APPLIED with
-135f0cdc15; the H11-follows-H10 sentence (H11's pre-flight cannot pass until every roster row is banked at the new base) is
-ONE commit on top of 4de76ded06, announce-then-push, with the two retiring declarations re-measured against the CORPUS at the
-version tip in the same announce. DONE (09a22ce3b): a8511e37d7 verified at origin (one commit on top, docs/ValidatedTestPackages.md +36/-0) -- the H11-follows-H10 dependency block
-with the measured gate state cited, and the retiring pair re-measured where the gate reads (TestNewModFromBigZero,
-TestPQCrystalsAccumulated: 2 files at master, 0 at d91c832543, RETIRED; the surviving control moves 14 -> 12, the negative
-control 0/0). The held seat's tip for the H10 docs commit is now a8511e37d7. ASSIGNED NEXT: the H11 and H12 gate pre-read at the version tip -- enumerate every gate the two rungs name, classify
-each cloud-runnable or .NET-only, RUN every runnable one under the pin and post the reading per gate (command, rc), state what
-a Windows box must run for the rest, cite any missing or stale procedure by line; a reading, no cut. DONE 2026-09-20
-(127220cb9: ten gates, six run; FINDING: H2's ruled build-number RESET never happened -- version.props at the tip reads base
-1.24.13 / counter 3 carried from 1.23.12; 335 READMEs target a nuget tag and 191 a validation snapshot that do not exist;
-the emitter has no unpublished-line case; the badge guard is green over it; H11.2's monotonicity script does not exist).
-RULED 66620cce9: badges follow the PUBLISHED stamp (newest nuget tag + docs/validation/<version>/), never version.props
-alone. ASSIGNED: the Go-side seat on a new ref off the version tip -- version.props counter 3 -> 0; the emitter's counter-0
-case targets the newest recorded snapshot; the badge guard's EXISTENCE arm (335/191 = the positive control); a repoguard
-arm for H2's reset; the runbook H2/H11.2/H12 amendments; red-first each; C2 reads; i9 applies after the overlay and q100.
-Size the README re-emission path (badge-only vs the next full -stdlib emission) and name it in the announce. DONE 2026-09-20:
-claude/c1-h11-published-stamp 135f0cdc15 off 0f97dcc8db (9f3dcb5a2; five parts; NO badge-only path exists -- the overlay
-rides a full -stdlib emission, routed to G from the applied tree). ACCEPTED for C2's read; i9 applies after the overlay and
-q100. ASSIGNED NEXT: the static native-boundary shortlist for the SystemCertVerify path (every syscall/windows call with a
-pointer or buffer reached from the program and the converted crypto/x509 windows root-store path at the version tip, pinned
-across the call or not, by file:line); a reading, no run. RETARGETED (COORD, after i9's diagnosis 1b2ad7d8f): the site is
-known; instead, from the design's 1.4 census at the version tip, every raw-address site where a LIVE pinned box is
-reinterpreted at a DIFFERENT pointee type than the box's (the class q100's floor cannot refuse), by file:line with the
-pointee pair; a reading, no cut; the general cure (a converter-emitted typed managed-backed array view) is post-hop work.
-DONE 2026-09-20 (1a6935a1b): 23 pinned-box different-pointee sites (zero reach the aliased-return arm); 66 array
-reinterpretations in all; the CRASHER is in the 20 UNTRACED local-variable sites, not the 23; p256.cs:577 is the same defect
-on the big-endian arm; the cert path is CLEAN (KeepAlive-without-fixed is the correct idiom). ASSIGNED NEXT: the one-hop
-backward trace of the 20 V sites to their definitions, scored into the same classes, by file:line; liveness is the
-instrument after that. DONE 2026-09-20 (9d50b5f5e): P 2 (the p256 pair) / C 5 / N 6 / A 1 (fails by NAME via the arithmetic
-arm) / U 6 -- the resolved-different-pointee class is 25; C1's Cast premise WITHDRAWN (Cast is where T:struct; the check is
-at runtime); the InlineArray layout direction banked POST-HOP for the class cure. ASSIGNED NEXT: the second hop -- the call
-sites of the five alg.cs hash helpers taking a pointer parameter and of AliasPointer's raw-metal fork (array.cs:216), each
-scored into the same classes; then the design read of R's two companions when announced. DONE 2026-09-20 (4255bbf3e: 38
-call sites; memequal128 has zero callers; AliasPointer's raw fork reached by 13 of 33, provably not by 13; 7 V + 4 C residue).
-FINDING: golib already carries NativeArrayBox<T> + the public door builtin.NativeArrayPointer<T>(addr, N), built for exactly
-this mechanism, never emitted; N is in the Go type and the emission drops it. RULED: the class cure for UNMANAGED element
-types is the emission rule (*[N]E)(unsafe.Pointer(x)) -> NativeArrayPointer<E>(addr, N); a generated NESTED array element
-(the P-256 table) is a struct with a reference, so (a) stands for the site and the InlineArray layout is Part 2 -- both
-post-hop. ASSIGNED: one reading -- of the 25 sites, how many have an unmanaged element type under the shipped layout, by
-site (what Part 1 buys). DONE 2026-09-20 (5889776655): 22 of 25 unmanaged (byte 14, uint8 6, uint64 1, uint32 1, aliases
-resolved at golib.csproj); 3 managed = BOTH p256 sites + runtime/plugin.cs:86 (element = the unsafe.Pointer box CLASS -- a
-pointer-element case Part 2's InlineArray layout would NOT reach). Part 1 = a latent-hazard retirement of 22, not a crash
-fix. N rule for the emission: evaluate constant expressions (alg.go:467 hashRandomBytes / 8), never copy their text; fire on
-the CONVERSION, not a statement shape (lock_spinbit.go:75). C1's disclosure: its GOROOT greps ran on the bare toolchain
-(1.24.7), re-taken at the 1.24.13 pin identically -- right by coincidence, not by method; the rule stands (R's ef2f8d792).
-Now: the design read of R's companions when announced; otherwise idle by ruling. The design read is DONE (534a217e2 +
-the extension a5e48cd3e). ASSIGNED 2026-09-20 ~22:30 (COORD): the LIVENESS BOUND for the 25 resolved-different-pointee
-sites at d91c832543 -- per site the enclosing function, its one-hop callers by file:line, whether any caller's package is a
-banked roster row or a successor candidate (BOUND-LIVE / inert at zero callers / out of scope); one table; a second
-derivation for the caller counts; memequal128's zero as the positive control. So H10 runs the rows that can crash first.
-DONE 2026-09-20 (150a7384): 25 sites / 14 enclosing functions -- BOUND-LIVE 2 (the p256 pair, live only through the
-SUCCESSOR fips140/nistec, RETIRE with the decode at c7eb36d845), RUNTIME-RESIDENT 4 (initAlgAES, cheaprand, runtime and
-reflect pkgPath: no roster row, run by every converted program at startup -- a taxonomy addition; the class cure's first
-population post-hop; a BOARD line at C1's next docs seat), flavor-gated 2 (net/darwin), linkname edge 9, inert 8; ZERO
-banked linux rows reach any site (202/202 platform markers linux). Void measurement of c7eb36d845 (not at origin) caught
-by C1's own in-run control. RULED closed (COORD 9d32f4813). ASSIGNED NEXT (9d32f4813): state whether the held roster seat
-a8511e37d7 carries the DISCLOSURE-FILE moves for the ten relocated rows (successor paths by name; the two retiring names
-dropped); if not, a second commit on the same held ref; predict the two Windows gates on that tree (check-roster-format
-2 -> 0 of 638; release-nuget -VerifyOnly 10 -> 0); announce; COORD re-takes both on the i7 as a PREDICTION TEST, not a landing.
-ANSWERED NO 2026-09-20 (436b4879): the held seat carries no disclosure-file moves and CANNOT -- it is master lineage
-(d91c832543 not an ancestor); the hop deleted the two source manifests (edwards25519, nistec) and the successors have
-none; no converted suite at the successors to attach a disclosure to. The prediction test as routed would FALSE-GREEN
-(both gates already at zero on the seat's tree) -- WITHDRAWN by COORD as a gate that cannot reach its condition.
-Re-pointing alone moves the manifest names and makes the census WORSE (10 -> 19); the gates clear only by H10's row act
-(badge, proof, .tests.csproj, manifest are -tests output; the roster row is the seat). Prediction of record for the
-between-state: 2 of 638 naming the two successors; 19 census problems (10 old ids no roster row + 9 new ids no proof
-page). NO COMMIT; the seat stays at a8511e37d7. ASSIGNED NEXT (COORD after 436b4879): (1) the H10 LAUNCH BRIEF -- a
-reading of docs/GoCorpusMigration.md H10 + the sweep tooling at master 4d25779a1a: how the re-bank enumerates rows
-(roster seat lands first vs a list override for the ten successors), which linux host runs it (202/202 rows carry
-linux:) and what i9 contributes, the runbook's preconditions as a checklist, the duration range from the 1.23.12 sweep
-records; one falsifiable prediction per arm; runbook silences named by section, not filled. (2) then the docs seat off
-master: the night's BOARD lines (RUNTIME-RESIDENT taxonomy with the four sites; a gate that cannot reach its condition;
-provenance necessary-not-sufficient; the in-run void-measurement control) + the DESIGN-native-array-view.md bound
-sentence; one commit, census-gated, push-then-announce; COORD lands it signed.
-BRIEF DONE (d0c83ed9): the plan's population IS the roster file (shardmap.py); re-pointing the ten before the recon makes
-the generator REFUSE (6 costed rows orphan); H10 names no host; three of four preconditions inherited silently; reserved
-leg >= 88.7 min, no upper bound until the recon costs the 42. DOCS SEAT PUSHED (f14cafb9): claude/c1-board-night-lines
-6e082a09c5 off 4d25779a1a, +117 (BOARD block; DESIGN-native-array-view section-4 BOUND: the floor may sit on arm 4 only --
-the terminal is shared with arm 2 whose population includes initAlgAES, so a terminal guard panics every program at
-startup); C2 reads, COORD lands. H10 LAUNCH RULED (COORD after f14cafb9): recon leg -> roster seat -> plan -> driver; the
-recon on name lists through the per-package pipeline; OS need not match the marker, G-LAPTOP WSL the discriminator.
-ASSIGNED NEXT: (a) the population BY NAME (227 per e0d5121e2 vs 206 by C2's arithmetic; reconcile); (b) per-worker
-lists by the stated rule (reserved + windows-only -> i9; linux-only -> G WSL; the rest LPT/round-robin across G and R;
-sums closing; platform class per row); (c) the TSV path/columns/digest rule; (d) the in-stage H10 amendment as a second
-commit on the docs ref (launch checklist with citations, the order, the host rule, plan+driver cited, per-row steps).
-(a)-(c) DONE (bf4ecf2ee): population 227 skeleton = 206 (C2) + 23 skeleton-only (incl. reflect, runtime, unique,
-runtime/pprof, net/http/pprof + 18 new 1.24 packages) - 2 (fips140/alias: no tests; fips140/nistec: the AXIS FINDING --
-0 tests on the census's no-tags windows axis, 1 under the corpus tags purego,math_big_pure_go); lists i9 16 / G 106 /
-R 105 / G-WSL 0, sums 227; the TSV contract read from shardmap.py (row/word/verdicts/sweep_s by name, LF only, net must
-appear). RULED by COORD: the CORPUS AXIS keys the population (C2 d5cdd55ab: the converter applies the tags to every
--tests run); fips140/nistec is a row -> G; population 228; the recon leg is the authority on membership; the '33
-skeleton-only' of e0d5121e2 is a superseded estimate, C1's 23 by name is the reading of record. (d) now also carries: the
-pipeline per package cited to the runbook's own H10 line, the corpus axis as the population key, fiat's 0-denominator
-mechanism (a complete test project with zero converted test source; declarations recorded vs C# test source produced
-are different units), the two windows-only rows, -test-allow-handown for testing.
-DOCS SEAT LANDED on master ceb1c87971 (signed; gates green; C2's read ebd9553dc). (d) CUT (d5c982a5): aa66874ff7 on the
-same ref (fast-forward from 6e082a09c5, parent ceb1c87971, +129: the H10 amendment +87 -- order, mechanism, TSV contract,
-host rule, preconditions table, per-row steps -- and C2's three notes appended under the section-4 bound +42); it states
-the recon leg as the per-package pipeline on name lists (consistent with COORD c260f4313). TWO MORE COMMITS announced
-(584135e2, announce-then-push): 9817f8916 (+30/-1: c7f68b53e's pipeline + corpus-axis rulings and the two units written
-into the stage) and 052ae429e (+11/-2: sweep_s = the wrapper's one-attempt clock; word = the outcome class vocabulary) --
-the ref tip becomes 052ae429e. C2 reads the ref AT ITS TIP as the H10 procedure amendment; COORD lands it signed on that
-read. C1's read-discipline lesson banked: a ruling absorbed unread by a push race is recovered from the tool's absorbed
-listing, which is the reading of record; the window cannot be closed by shortening it.
-C2's READ DONE at the tip 052ae429e (e63d58f15: no objection; every claim at its source; the decisive reason re-derived
-from the sweep's enumeration; the DESIGN +42 carries C2's notes correctly). ONE WORD RULED before landing (COORD after
-e63d58f15): line 2241 'the first full pass of THE ROSTER' -> 'of the POPULATION (the 228 on the corpus axis; this leg the
-authority on membership)'; C1 commits it alone on the ref, announce-then-push; COORD lands the ref signed at that tip in
-one merge. DONE: 628ca2459 (+9/-3, the literal 228 deliberately omitted -- no hop-specific count in the runbook, C1's
-judgement upheld). LANDED on master 6c32d0e171 (2026-09-20; signed merge of the four commits; +173; gates green). C1 is
-idle by ruling until the recon lists are needed at the launch; its next goal item is the recon leg's roster seat landing
-after the leg (a8511e37d7 re-based then). ASSIGNED (COORD after G 21be19338): SIZE the three converter-debt successor
-rows on this box at the CONVERT stage (the emitted .cs is the subject): fips140test CS0234 x13 (fipstest_package absent
-from go.crypto.@internal -- a test-only package whose Go package name differs from its directory), crypto/mlkem CS0311
-x4 (zh<EncapsulationKey768> refused as the type argument of a constrained parameter), internal/sync CS0411 x4 (inference
-fails on expectNotSwapped<K,V>(zh<T>, K, V, V)); per row the construct by file:line in Go and in the emission, the
-converter site, a fix shape, a red-first arm; no cut -- COORD routes. Tag-asymmetry bound DONE (41728747: 2 rows of
-228; 1 tagged-only Test vs 3 untagged-only; the rule: an empty C# column has three causes -- a deadline kill, a real
-failure, the asymmetry -- separated by the results tail and the file-selection diff; membership and bankability are
-different claims). RUNBOOK LINE OWED at the next docs seat: the PATH-resolved pin (the converter spawns go from PATH) in
-H10's preconditions table. ASSIGNED (COORD after R 57e9e70e): (1) the design read of R's seat ce8d0bd654 (the three-step
-resolution, the fourth flag site, the IndexExpr residual); (2) SIZE the reflect TestIsZero AccessViolation from the
-emission at CONVERT (setField's unsafe write, the golib door, the class -- the 25-site pinned-box class or another -- a
-fix shape, a red-first arm); no cut. CS1929 SIZED (a5fc7d1b): TestingOnlyNewDRBG returns zh<hmacDRBG> (hmacdrbg.cs:120),
-Generate is emitted `this ref hmacDRBG` (:138); the publicize pass fired correctly (hmacDRBG public at :22), so the cut
-is GENERATOR-side (RecvGenerator: the zh<T> overload not generated or not bindable for a publicized type -- one build of
-the generated sources answers which); red-first = a two-project fixture (an exported func returning *unexported with an
-exported pointer-receiver method, called cross-package) with two controls. RULED: the next fips140test seat = one ref by
-an i7 sub-agent after TestIsZero (generated sources first; the generator fix; the ProjectReference gate on
-productionClassEmitted; the row past COMPILE); C1 reads design, C2 structural, i9 applies. ASSIGNED (COORD after
-a17af4af): THE RECON LISTS AS FILES on a new ref off master --
-docs/phase4/hopA-inputs/recon-lists/population.txt (228 by name) + i9.txt/g.txt/r.txt (16/107/105, the rule in a
-header comment, sums closing), LF, census-gated, push-then-announce; the LAUNCH names its tip. DOCS SEAT CUT AND
-LANDED (23db898f -> master e0c49ae1e1 within 70bce870c2): the PATH-resolved pin row, the two-arm preflight bullet, the
-'zero SELECTED non-test .go files' clause, CLAUDE.md's Examples row -> src/archived/Examples/ (the samples were ARCHIVED,
-358 files tracked; src/tour is the Tour application). Two findings ROUTED: docs/PLAN-linux-operation.md:35-36 states
-the wrong paths (a dated factual correction, C1's next docs seat); ConversionStrategies-Reference.md:2007/:10687 carry
-dead src/Examples links (two URL edits, the same seat). SECOND DOCS SEAT LANDED (c88d4423 -> master 7a7e7f50d1): the
-two links repointed (targets verified present), the PLAN paragraph corrected beside, never rewritten. C1's rule banked:
-a sizing names the layer a fault is DETECTED at and the layer it is REPORTED at. C1 NEXT: the three recon TSVs into the
-banked basis at the roster seat when the legs report. CONTRACT RULED (75673b41; C2 reproduced all four branches at
-430ad499 and measured net's wall unconsumed): the generator dies on a non-integer sweep_s, so the BANKED basis EXCLUDES
-UNMEASURED rows (the filter lives in C1's concatenation and is STATED in the roster-seat commit); net alone banks
-sweep_s := wall_s whatever its word, so the hand-stopped drop fires. The assert-the-battery form for the post tools
-(C1's proposal) ruled the durable one, each lane at idle. ASSEMBLER BUILT (8add449d): five arms firing on a synthetic
-fixture (net substituted from wall_s and dropped by name; UNMEASURED rows leave by name; a duplicate folds to the
-larger; header identity; CR); the generator's :280 independent of the filter; re-run against the real blob when the
-fifth lands; held for the roster seat with relocations.tsv. BATTERY ASSERTION CUT (7a74098d: claude/c1-post-battery-assert
-ff1a7f099c, +43/-2, five arms incl. a missing directory reading 0 arms; the tree arm stays where its baseline resolves,
-both batteries printed) and LANDED on master c24d68061e; the ATTEMPTED-ARMS fix (5968c8f0: claude/c1-post-battery-
-attempted 06afd818ea, +18/-4, pass + fail and -lt; the post clone attempts 92 and was printed 91) LANDED on master
-5b214c7619. The $longTimeouts re-path DERIVED (11 -> 12 floors; mlkem768 fans out; no key absent from the 228; the
-comment-first-mention trap) -- RULED: derived from relocations.tsv at the roster seat, never a literal table. THE FILE
-LANDED on the roster seat ref (b23753f5: claude/c1-h10-roster-relocation 957c71d0e on a8511e37d7, 13 arcs, LF, no #
-header because C2's reader has no comment filter; gated through C2's reader, five arms red; the seat's roster rewrite
-does not move the map, control shown) -- lands WITH the roster seat after the three TSVs; the longTimeouts 11 -> 12
-stands on the generator's own print. THE ROSTER SEAT'S CONTRACT RULED (COORD after C1 138645ed + C2 9d310b84): the
-seat RETIRES the ten relocation sources as banked rows and ADDS the eleven targets AS BANKED BY INHERITANCE; the axis
-moves 219 -> 214 and the identity holds (C2's arm R4: 205 + 9 = 214); the ninth's detector goes quiet on this edit;
-no fourth bucket; C1 cuts the row-set edit on top of 957c71d0e with the concatenation once G's TSV lands. i9's
-evidence commit eca66ad342 (three projections, clean at 076c006d41) and C2's ninth 0a418b65bf TAKEN.
-THE RECON LEG IS COMPLETE ON ALL THREE LISTS (G 29c8c34a ~07:15: claude/g-h10-recon-tsv de9aa07ebe, 107 rows on ONE
-blob, 100 PASS / 4 DIVERGED / 3 BUILD, sweep_s 4,208 s, post_s 3 s total; verified at origin: 108 lines, 11 columns,
-CR 0). Three lanes: R 85/7/13, i9 10/3(->DIVERGED)/2/1, G 100/4/3; 228 rows; sweep_s 9,517 s over 212 integer rows.
-THE ROSTER SEAT IS A TRAIN COORD ASSEMBLES (ruled after 29c8c34a): (1) the lists ref 89c1ebc2cc; (2) the three TSV
-refs with evidence (R 36b3783953, i9 eca66ad342, G de9aa07ebe); (3) C1's spine on claude/c1-h10-roster-relocation
-on top of 957c71d0e (the row-set edit -10/+11, the assembler + re-classifier as tools, the basis, the
-re-classification, the runbook docs half incl. G's docs/validation discard scope); (4) C2's shardmap ref (nine
-commits) + THE PLAN as its tenth; signed merges by COORD, the census + repoguard after each leg, the tools' and
-[SPINE FIRST COMMIT f361c53e4 (C1 f2e00433c): basis 213 of 228 kept, two assemblies agree on every figure; 2 PASS
-recovered (math/rand, mime/multipart), 11 DIVERGED, 2 NOVERDICT by the host cause, testing NOVERDICT (hand-own).
-RULED 3f70a096e: (ONE) NO disclosure-file move -- master keeps the two source files; the five pins are MINTED at the
-fips140test RE-BANK on the version branch by the driver under the renamed declarations from the measured reading;
-(TWO) each source's 1.23.12 anchor appears ONCE, on its PRINCIPAL target derived by VERDICT majority through the
-declaration map; a target that is nobody's principal is a CANDIDATE; every target states its arc and links the
-source's record; no proof file moved/created; a format-gate refusal recorded, the driver retires it; testing stays
-in the population under the hand-own cause; the five-uncosted clause discharged by G's 107. The diverged
-subtraction (i9 64d873bb2): disclosed entries are SENTENCES, the name is the leading token -- C1 fixes
-reclassify.py and re-posts the deltas (12/1/19 known); cs=infrastructure-error entries are a HOST class in the plan.
-SPINE = THREE COMMITS at origin (C1 47157c503, b612bfa1c): 495ab5a37 the disclosed-match fix (leading token; lands
-on i9's 12/1/19 exactly; only two rows move); 3f17460a7 the ROW-SET EDIT: NINE principals by verdict majority (nistec
-2200/2200 -> fips140test, which is principal twice with alias; fips140/nistec and crypto/mlkem CANDIDATES) = 203
-banked + 23 candidates = 226; column sums equal, ten source rows removed, C2's shardmap detector QUIET after. COORD
-re-read the nistec declaration sets at the PINNED go1.24.13: patch-stable. RULED (after 47157c503): the DOCS HALF
-rides a SEPARATE ref off current master as leg (3b) -- C1 does NOT merge master into the spine; verdicts = |go minus
-names(disclosed)| (runtime/pprof 161, the guard's report stays); the plan's host column = 17 infrastructure-error
-entries across five rows. R's items CLOSED: the case-collision class (PS 5.1 JSON reader) is the cause of the two
-recovered rows (the eighth's ordinal maps cover it); testing's clobber = the reorder seat's BEFORE (no artifact ref);
-unsafe has no tests (absence correct); the two refspec acts DONE.
-C1's DELTA READ of the eleventh SOUND (8344d8bb6; four cosmetic findings -> i9's twelfth: the NOVERDICT comment's fourth
-fact, the inert NOMATCH restatement, the cause file's eaten backticks, .fff on the staleness line); C1's merge-tree
-reading: the spine composes with master (both roster hunks survive) = leg (3)'s prediction. THE TRAIN ASSEMBLING
-(~08:30): an i7 Opus sub-agent (worktree tr1, detached at master 076c006d41) merges legs (1) lists 89c1ebc2cc,
-(2) R 36b3783953 / i9 eca66ad342 / G de9aa07ebe, (3) the spine 3f17460a7 -- signed, NO PUSH; COORD verifies (EQUAL
-blobs, zero deletions, both roster hunks, census, repoguard, markers) then pushes master and posts the stamp; leg
-(3b) C1's docs half when announced; leg (4) C2's shardmap + THE PLAN after --timings on the landed basis.
-CORRECTED ~08:35: the spine is FOUR commits (1fa2b0ad4: verdicts = |go minus names(disclosed)|, runtime/pprof 161;
-two files); leg (3b) = claude/c1-h10-docs-half 47c60b1d3 off master (+74/-0, docs/GoCorpusMigration.md: the tree-
-discard scope docs/validation/current/ + the leg's readings) -- the train sub-agent re-pointed and (3b) added.
-TOOL RULE AMENDED (C1's red d7f8f842a: a 90% patterns truncation passed byte-size + attempted-arm count, 10 of 21
-arms live): a materialised tool is asserted by CONTENT HASH vs the ref's blob + the self-test FAIL count refuses;
-#34's gate MOVED -- C1 cuts it NOW (red-first: the truncation + a planted fail=1 both REFUSED); every lane's post tool
-takes the two lines at its next idle. G's census (594011551): 42 wide / 1 narrowed + SEVEN local-origin clones stale
-under a wide refspec = the THIRD stale cause banked. G OFF IDLE (7c3612fb5): the two provisional rows (nistec 45/0,
-fips140test 2215/52 expected) at f83ba29ffb with the thirteenth wrapper in a censused throwaway tree, evidence on a
-NEW ref under G's prefix; then three CONVERT-stage sizings: crypto/ecdh (CS1537), crypto/sha3, encoding/json.
-THE TRAIN LANDED (~08:45): MASTER 307912e6da = five signed merges (legs 1, 2a R, 2c G, 3 the spine 1fa2b0ad4, 3b the
-docs half; 35 docs files, 0 deletions, DIFFER 0, the roster composed with both hunks, 203 rows = -10/+9 since two
-targets are nobody's principal); LEG (2b) WITHHELD: i9's TSV ref eca66ad342 is cut from the VERSION branch (161
-commits, 112 deletions) -> RULED: i9 re-cuts the four additive files byte-identical onto a NEW ref off master (push-
-then-announce), lands as leg (2b) when announced. Then #34 LANDED: MASTER a8febe6a4b (C1's c1-post-byte-predicate
-84641ba45: content hash + self-test fail-count refusal; the scope limit: the hash sees a bad transfer, the self-test
-a bad source). C2 NEXT: THE PLAN (shardmap --timings on the landed basis; the tenth commit; leg 4). tr1 left in place.
-LEG (2b) LANDED ~08:55: i9's re-cut claude/i9-h10-recon-tsv-master bec77c960b (plumbing, the same four blobs, off
-a8febe6a4b) -> MASTER e0b457c9d2 (four EQUAL by blob id, 0 deletions, census clean incl. the 780 KB record at 294 s
-on the i7, repoguard ok). THEN the two anchor fixes LANDED: R's second commit 48e3ab76ed -> 40da33fba; C1's
-claude/c1-post-anchor-unread 43cb7f049 -> MASTER 5808c18f53 (a post never claims a read: the anchor advances only
-over what the lane read). A POST-TOOL FIXTURE sits at mailbox d05397bce (subject/probe heading/body; not C1's, not
-R's by author form + body hash): OWNED by i9 (03603d635: the CONTROL arm of its #34 harness reached the push) and
-LEFT IN PLACE by ruling (never rewrite the channel); doctrine banked at aac878de8: the control is the dangerous arm --
-every post-tool arm runs through a DOOR or a throwaway clone. R's mlkem comment commit cb8f5cb02 accepted standalone
-on its ref (no rebase). R's THIRD post-tool commit 4066b21216 (the doors asserted before any arm; a negative control)
-LANDED -> MASTER 7165ec9a46 (~09:10). LEG (4) THE PLAN CUT (C2 642404c76): a85a7cf2fb, the tenth commit on the
-shardmap ref -- 424 dispatch rows over W=[3,4], 14 unscheduled, makespan 88/74 min, 11 reserved rows on the i9, 203+23
-= 226; the basis content- but not byte-reproducible (row order) -> RULED: assemble.py writes rows sorted (C1, one
-line, red-first); the merge RUNNING on the i7 by sub-agent (worktree tr4; the plan's own digest gate + census +
-repoguard; no push). C2's #34 728d906f4a (the inert-arm predicate) and i9's post-tool fix 638516f720 (the anchor
-fix, the door, #34 half 2, the empty-message guard) LANDED -> MASTER da378999db (~09:20). i9's write-tree near-miss
-banked (a gate counts lines only after its rc; assert the tree's entry count). NEXT after leg (4): THE DRIVER's brief
-(run-h10-dispatch.ps1 unexercised; first run = a one-shard rehearsal on a Windows box against the tip after APPLY
-BATCH 2). The host third commit 2d286b2702 announced (C2 delta read); the follow-up 8b1a284122 announced (C1 + R).
-READS ~09:25: C2's structural read of R's seat SOUND (788a42262; two comment lines -> R's arm commit: the cancelling
-key misses; unify the collision-key spelling toward the registration :185); C1's design read of the follow-up
-(0fc2ceee8): struct side SOUND; s2 = the CONVERTER's three name paths (adapterTypeRef, adapterResolvedName,
-anchoredAdapterMemberName) do not strip the type-argument list -> on mlkem's critical path -> the CONVERTER HALF
-CUTTING as a THIRD commit on the seat ref (i7 sub-agent, worktree ck2; name-only strip at the call sites, keys
-untouched, red-first Go arms, suite, CNR predicted clean); R merges at the third commit then cuts the arm; s7 = the
-host third commit's 'no Thread' clause FALSE (a Thread at TestingRuntimeTests.cs:191 inside a test body) -> a FOURTH
-comment-only commit on the host ref (worktree hc2) with C2's corrections (35 sites not 36; the attribute-site
-comment leads with the interleaving caution). C2's delta read of the host third commit SOUND (a6ab63a8). i9's
-path/filepath A/B SETTLED (07d4d8d8: 61/0 both ways in a censused tree; arm C = the stale control -> NOVERDICT).
-LEG (4) LANDED ~09:30: MASTER 711a5925a1 (the plan's digest reproduced byte-identical from the merged tree's inputs
-materialised LF -- this checkout smudges .tsv/.py to CRLF; 203+23=226; 11 reserved rows) = THE ROSTER TRAIN COMPLETE
-(legs 1, 2a, 2b, 2c, 3, 3b, 4). R's mlkem seat WHOLE at 1f70b32f83 (354ac05f: the follow-up merged, the generic-
-composition arm with a MADE red, GenTests 53/53) -- and R's s1 CORRECTS the ruling: R's 94a802cdc already strips the
-pointer path before the deferred marker (C1 read the seat ref where it is absent) -> the ck2 converter cut STOPPED
-(report only); the value path unfixed symmetrically (queued); the keys unstripped on purpose. APPLY BATCH 2 = the seat
-ref 8b1a284122 + the host ref at its FOURTH commit (hc2 cutting) + R's 1f70b32f83, one battery, launched when hc2 lands
-and the ha1 host apply has pushed. NEXT: the DRIVER's brief (the plan at master; run-h10-dispatch.ps1 unexercised).
-~09:35: R's correction (280ea555/242dbcae): adapterTypeRef carries (the marker), the two resolvers compose; R's payload
-strip reaches adapterResolvedName; anchoredAdapterMemberName (the white-box -tests model only) is the one unstripped
-site -> RULED: R cuts it NOW on R's ref, name-only, adopting the stopped sub-agent's four arms (the resolvers compose
-the stripped name; the nested generic; the collision qualifier's prefix from the interface symbol; a PARITY control
-asserting the garbled key on purpose); the group-key-vs-record-spelling mismatch banked for the paired seat. LANDED
-on master: R's fourth post-tool commit a37fc2f5a7 -> ab7a59457f; C1's assemble.py determinism 03f791ea5e ->
-e1add354aa (the committed basis stays in lane order; readers compare as sets); C2's anchor fix 2968cbaf80 -> MASTER
-35a880b68c (the last of the four lanes). Fleet lines: name the hash FUNCTION beside every digest; a door whose misuse
-hangs is worse than one that refuses.
-~09:45: THE HOST REF'S FOURTH COMMIT 91f1bd5877 at origin (comment-only: the true sequentiality sentence -- nothing
-concurrent wraps a host run; 35 sites; the pairing caution first at the enforcement site; C2 delta read) = the tip
-batch 2 merges. C1 measured crypto/mlkem = a MIXED suite -> white-box reference -> the anchored path ON (65c0abde).
-R (aed592bf2): the anchored cut is TWO changes -- the emittedAdapterPair PAIRING must strip both sides (R's payload
-strip made the marker miss the record's closed spelling -> the anchor-class qualification goes missing), then the
-anchored name; the arm reaches the anchored path end to end; R cutting both on R's ref. THE DRIVER's BRIEF DRAFTING
-on the i7 (sub-agent; scratchpad driver-brief-DRAFT.md; runbook-sourced vs proposed items; open questions).
-BATCH 2 = the seat ref 8b1a284122 + the host ref 91f1bd5877 + R's ref after the anchored commit; after ha1 pushes.
-R's ANCHORED CUT DONE (~10:00, 64a7c8739): R's ref 1adcf8cf52 (the emittedAdapterPair pairing strips both sides first,
-then the anchored name + qualifier, adapterResolvedName strips its own input; five arms incl. the parity control;
-the projitems guard caught the new source; the channel merge commit was R's tool, fixed to abort + re-run). ALL
-THREE BATCH-2 REFS CUT; C1 + C2 small delta reads; the batch launches when ha1 pushes, no push until the reads land.
-i9 ACCEPTED THE DRIVER SEAT (fb022226c: the parse gate + a one-slice dry run green; the -DryRun refusal hoisted).
-RULED (a): the grafted fips140test row is NON-BANKING in the rehearsal (evidence + the minted five-pin file as a
-prediction; i9 banks it in the campaign at W=4 slice 1 seq 13; the driver grows no 'banked elsewhere' skip); the
-rehearsal's seven native rows bank if green; a holder is a property of W. i9 cutting the seat.
-~10:10: BATCH 2 CLEARED ON READS (C1 fe07b469e + C2 767c73dd1 on R's anchored cut; C2 a83fdbf9 on the host fourth);
-R pushes a two-line comment correction first (the parity claim false at adapterResolvedName's site = the banked
-residual). LANDED: C1's drop-tree post tool aee4714ce2 -> b436b34e82; THE H10 RE-BANK AMENDMENT (three commits,
-3123d9fe4d) -> MASTER 058c96d81e (the runbook leads on the re-bank procedure). The sha3 SIZING (i7): the converter's
-collision-GROUP KEY normalises an alias-qualified LOCAL struct to the foreign form (the generator keys off the symbol)
--> the set splits, no prefix, CS0246/CS0426; flate = the working foreign example; 2 of 195 test projects carry the
-shape -> a converter seat AFTER batch 2 (shared locality resolver with anchoredAdapterMemberName). C1's json
-population = a CLASS (6 packages / 9 types / 20 members) -> the json seat first, sha3 second, both i7 sub-agents off
-the post-batch-2 tip (they touch R's files).
-R's comment commit CUT: R's ref tip = d6c7ebd78b (batch 2's third ref). THE BATCH-2 BRIEF is written (scratchpad
-batch2-brief.md: three merges onto the version tip in worktree ab2, one battery -- GenTests/GolibTests, the suite,
-CNR, the stdlib 344, the rows crypto/mlkem (the prediction test) + sync + cfile + internal/trace, census, repoguard;
-NO push) -- launched the moment ha1 pushes. G's THREE SIZINGS (315d2270b) ROUTED as converter seats after batch 2:
-hash/maphash (the reflect.TypeFor[T] lowering mints an uninferable companion type parameter, CS0411 x42; 4 files by
-the rule incl. unique x2 -- the CS0411 class explained -- + a CS1955 T(nil) channel conversion), internal/synctest
-(a func literal assigned to iter.Seq[V] emitted as a bare delegate; + a CS0136 closure scope flatten), embedtest (a
-test-only package gets an unconditional production using-static, CS0234); the seat ORDER: json, maphash, synctest,
-embedtest, sha3. G next: two population sweeps + a fresh internal/sync sizing at f83ba29ffb.
-THE HOST SEAT STAMPED ~10:20: VERSION TIP 6d814e2d38 (parents f83ba29ffb + 4959a2f026; two EQUAL; stdlib 344/0; suite
-ok; CNR 729 no regression; cfile Validated 15; internal/trace Validated 92 with ZERO divergences on the natural path
--- i9's 4-of-92 is the fallback path's). APPLY BATCH 2 LAUNCHED on top (i7 sub-agent, worktree ab2: the seat ref
-8b1a284122 + the host ref 91f1bd5877 (its third + fourth) + R's d6c7ebd78b; one battery incl. crypto/mlkem as the
-prediction test; NO push). The ha1 worktree removed.
-C1's CORRECTION (d6a1fdde): the CS0411 TypeFor population is 3 files / 5 sites (maphash x3 functions, unique x2);
-encoding/json is NOT in it (every TypeFor argument concrete) -> seat (2)'s arm sizes on five sites and seat (1)
-carries no such expectation. C2 (4f29a874): the tree reading dropped (claude/c2-post-drop-tree-reading 4d362ed0d2)
-and DESIGN-h10-dispatch-driver.md s6 amended by dated block (claude/c2-design-driver-s6-amendment 6f2b053f2f) --
-both LANDING on master; C2's own tick defect (the watcher's fetch moves the tracking ref under the anchor logic)
--> C2 fixes at idle (read the anchor from what was READ, never from the tracking ref).
-i9's DRIVER SEAT CUT (58d0b8743, ~10:30): claude/i9-h10-driver-seat 145ebc27c7 off master c22f9b8e74 (-Mode rebank
-INVOKES the wrapper by blob -- no copy; the sweep path byte-identical; the ledger's red keyed on tree state; the
-digest gate's tamper control; end to end on one row = a proof of the path) + the wrapper's FIFTEENTH d79a43c978
-(-AllowBranch, default false, reported). RULED: debt not derived by the driver; index.md excluded at banking. C2
-design read, C1 runbook read, the i7's Core-edition arm by sub-agent (worktree ca1, read-only); then COORD lands
-BOTH refs on master (the wrapper's first landing) for the rehearsal. G's synctest CS0136 correction (664e6925b: one
-Go range declaration emitted twice -- the hoisted box + the range variable) folded into seat (3)'s fix shape. Both
-C2 refs LANDED -> MASTER c22f9b8e74.
-R's abort fix + arm LANDED -> MASTER a5b110b47e (~10:35). i9's census-dir check EQUAL. Running on the i7: APPLY
-BATCH 2 (ab2), the ecdh seat (ec1), the driver's Core-edition arm (ca1).
-~10:40: C1's H10 tree-precondition line (e0fe113bc6: ruling (4) moved from the provenance comment into the
-procedure) + R's scantemp fix (61f3a43fc3: the census fold temp had written into the caller's directory) LANDED ->
-MASTER 7674ee7f4d. DOCTRINE (three lanes in one hour): a door is a property of a PATH; a tool's doors cover every
-path it writes OR fetches into, enumerated from the script; C1's tool force-fetches origin/master into the main
-checkout above its dry-run gate -> C1 fixes at idle. C1's runbook read of the wrapper's fifteenth SOUND.
-THE DRIVER's CORE-EDITION ARM GREEN (~10:45, i7 sub-agent, read-only): parse 0 errors both editions (identical
-token counts); the sweep + rebank dry runs byte-identical across editions (CRLF only); the digest reproduced; the
-wrapper's -SelfTest with the canary; -AllowBranch a one-axis control. ONE FINDING -> i9's one-commit follow-up: the
-four-class tree guard sits inside if (-not DryRun), so a dry run accepts a MAIN checkout -- hoist it, red-first.
-Then C2's design read, then COORD lands the driver ref + the wrapper ref on master. i9's and C1's re-audits under
-R's decoy test: the SHARED census writes nothing beside the entry it is handed (its temps under mktemp).
-R's door-scope arm (the fetch half + a vacuity guard) LANDED -> MASTER 8e4be1e3ff (~10:45).
-C2's DESIGN READ of the driver SOUND (d55a5462; two comment lines -> i9's hoist commit: the dry run never reaches the
-ledger key by ordering; the converter stamp = mtime+size fails safe); C2's own post tool writes refs into whatever
-repo it runs from ($REPO without a door) -> C2 fixes at idle. WAITING: i9's tree-guard hoist commit -> then the
-driver ref + the wrapper ref land on master; APPLY BATCH 2 (ab2) in its gates; the ecdh seat (ec1) in CNR.
-C2's two doors (the REPO default -> the tool's clone; --mark-read validated) LANDED -> MASTER 566ffa44f9 (~10:50).
-~11:00: i9's tree-guard HOIST (4a55d4d7b5, C2's two comment lines in) -> THE DRIVER SEAT LANDED -> master 5e03f102af;
-C1's door-scope fix (dac6d3bc54: a census-dir door; the census fetch into an OWNED ref with --refmap= EMPTY -- the
-load-bearing token) -> MASTER 306950be71. THE WRAPPER REF d79a43c978 IS VERSION-BASED (merge-base 9d80085377; 168
-commits / 2,579 files / 112 deletions) -> RULED: i9 re-cuts it as a ONE-FILE ref off master by plumbing (the
-fifteenth's blob 55466ef4d8 at src/run-h10-recon.ps1); lands beside the driver when announced; the rehearsal takes
-both by blob from master. G re-derived its running post tool from its ref (6a15e8ff3); C1's running copy EQUAL.
-THE ECDH SEAT CUT (~11:05): claude/coord-ecdh-alias-collision b5d3687634 on f83ba29ffb (8 files +486/-1). The sizing's
-premise REFUTED: the live alias map is dot-form on both passes; the cause is the RECOMPILE model's two-source merge
-of package_test_info.cs (seeded from production's fips140 binding, merged with the external variant's own-type
-binding; both needed) -> the variant's colliding key renders FULLY QUALIFIED with no global using + a writer refusal
-on a doubled name; five arms; the row CLEAN AT BUILD (0 errors); suite ok; CNR no regression; census 116/21; the
-population: ONE genuine pair (24 L3 per-GOOS pairs never meet). G design read, C1 structural; the apply in the next
-i7 batch after batch 2; G runs the row's -test-action all reading off the seat ref.
-G's re-derived post tool 263f48a6c2 LANDED -> MASTER a731c13594 (~11:05; content-only; COORD's own mode predicate was
-inverted -- a leading colon in diff-tree's first column -- owned on the channel). BATCH 2 interim: the three merges
-verified in ab2 (58dea330b7 / 219f5f873b / 7e7f05f63a; 0 deletions; 12/12 EQUAL on R's merge by supersession);
-census green on 15 files; the battery running its gates after the ecdh seat's run finished.
-~11:10: THE WRAPPER ON MASTER (i9's one-file re-cut f30c90d109 -> 8b076c8d69; the fifteenth's blob 5d07919168 --
-COORD's ruling had named the file's sha256 where a blob id was needed; i9 verified four ways) + R's post-tool
-commits 8-10 (8d24c655d0: the dry run no longer claims the bar; --mark-read; the third vacuity shape) -> MASTER
-7f95f60e4f. THE DRIVER AND THE WRAPPER ARE BOTH ON MASTER -> the rehearsal starts on the i7 when batch 2 pushes.
-~11:20: the deletion predicate banked (toward the base the ref is MEANT for, as a set); i9's three flagged old refs
-withdrawn. ASSIGNED: R reads the crypto/mlkem row (-test-action all) off its ref; i9 runs the os A/B (with/without
-winsymlink=0) at 6d814e2d38 with master's wrapper; C2 cuts the docs/validation/index.md central regeneration tool
-(ruling (2)) red-first on a new ref off master. G on its sweeps + the ecdh design read; C1 the ecdh structural read.
-~11:20: C1's ecdh structural read SOUND (a9d7308a) with one finding -> a SECOND COMMIT on the seat ref cutting on
-the i7 (worktree ec2): mark only what the writer can declare (a const-key guard at the marking site + a const arm);
-C1's s4 (the rooting renderer's fall-through) named and left open for the apply's reader. C1's vacuous-verdict arm
-fff854c571 LANDED -> MASTER bdabdea4b7. G's design read of the ecdh seat is the last before its apply.
-~11:30: C2's validation-index regeneration tool (regen-validation-index.py: the current table derived from the
-roster; sets compared, order apart) LANDED -> MASTER 3e3d57a497 (C1 reads post-landing). i9's os half: PASS 1103/0
-with and without winsymlink=0 in a censused tree at 6d814e2d38, the stale control firing -> C1's os/path question
-CLOSED for both packages. i9's two hash units both correct (blob content LF vs working file CRLF) -> the driver
-prints the git blob id next.
-~11:35: R's crypto/mlkem row reading off d6c7ebd78b (d6d2970a2): CONVERT ok, the stdlib builds, the test host FAILS
-AT BUILD with exactly CS0266 x2 -- the wrap map's bound (ImplementGenerator.cs:189: the struct must be in this
-compilation) skips the white-box pair (the struct in the production assembly, the interface local). RULED: R cuts
-the fix on its ref (the condition = the pair's adapter is minted in THIS compilation; the name composed through the
-main loop's shared helper -- no second spelling; a two-assembly red arm; then the row with the pinned bin FIRST on
-PATH). BATCH 2 LANDS ON ITS OTHER GATES with the row recorded as CS0266 x2; R's fix rides a small apply on top.
-R's instrument findings: a floor-3 emission into the live SDK (cleaned, proven); the go CHILD resolves from PATH
-not GOROOT -> C1 adds the PATH-first line to H10's preconditions.
-OUTAGE 11:40-12:10 (the i7's session limit; reset 12:10): both i7 sub-agents killed mid-battery -- batch 2 (merges
-done in ab2 at 7e7f05f63a; gates in flight) and the ecdh const guard (edits in place in ec2). RELAUNCHED 12:13 from
-the worktree state (no re-merge; gate logs reused only with a final line + rc). G's design read of the ecdh seat SOUND
-(0879a208c; a comment debt: the count assertion is unreachable as a failure; the injection-landed rule banked).
-NEXT on the i7 after batch 2 pushes: the rehearsal (the i7's W=4 slice 1 + fips140test non-banking) on the batch-2
-tip with the driver + wrapper from master; R's mlkem wrap-bound fix as a small apply; the ecdh apply; then the
-json / maphash / synctest / embedtest / sha3 converter seats.
-~12:35: i9's wrapper-identity driver commit 2972968a05 (the blob id beside the file sha256; built via the API with
-zero local objects, signed, the set-based deletion guard) LANDED -> MASTER 7099328479. R's correction (e61343883):
-the mlkem row stops one gate EARLIER -- a foreign struct has no declaration so forwardReturnTypes is empty and the
-lookup exits before the map; the fix = foreign return types from the referenced symbol + the map-bound lift, four
-arms green in R's worktree; the row + the stdlib gates before the announce. C2's correction (69b4daeea): the fired
-bound was :189 (assembly equality; 683 of 1,824 production records are package-qualified -- a proxy), not :192.
-C1 RAN the index tool (a5a6305c5): sound; it refuses on the nine relocated principals without proof pages (the
-driver's re-bank resolves it). Batch 2's resume: state verified, gate (a) reused, (b)-(g) queued behind ec2's suite;
-the sibling-poll defects (self-match; the 1,024-char CommandLine truncation) fixed.
-G's TWO ITEMS (62409fb2f, ~09:50): the provisional rows LANDED -> MASTER 0bddc7e894 (nistec PASS 44/0 -- COORD's 45
-was stale; fips140test DIVERGED 2267/52 = 2215 matched, compiles; a verdict PROJECTION committed for the record that
-carried profile paths); three sizings ROUTED: crypto/ecdh CS1537 (two alias-key spellings render identically) -> a
-converter seat CUTTING on the i7 (worktree ec1, ref claude/coord-ecdh-alias-collision: normalise the key + refuse on
-disagreeing targets); crypto/sha3 CS0246 (the minted SHA3zhHash wrapper unresolvable at the call site) -> an i7 SIZING
-(worktree sz3, read-only); encoding/json CS0052/50/51 (an unexported type narrower than its internal-test consumers)
--> C1 sizes. G NEXT: hash/maphash (the CS0411 class), internal/synctest, embedtest. Banked: ps -W carries no
-arguments -- process censuses read the COMMAND LINE.
-THE DRIVER's BRIEF DRAFTED (~09:55): claude/coord-h10-driver-brief-draft 3d8e522b57 off master 0bddc7e894 =
-docs/phase4/DRAFT-h10-driver-brief.md (311 lines, A-G; 22 runbook citations, 9 rulings, proposed items). CENTRAL
-FINDING: src/run-h10-dispatch.ps1 dispatches the SWEEP per row (H10 forbids it for a re-bank; unreachable for the
-23 candidates + nine successors) -> a DRIVER SEAT (-Mode rebank: the reader/gate/refusals/packing/cooldown kept, the
-per-row body = the recon wrapper's pipeline block, an idempotent resume ledger) -> i9 CUTS IT (C2 design read, C1
-runbook read, the i7 Core arm). THE TEN OPEN QUESTIONS RULED (0cb09c354): per-shard lane refs off the version tip
-merged as trains, figures derived; index.md regenerated centrally; the worktree on a branch; W=4 (W=3 fallback);
-the REHEARSAL = the i7's slice 1 (7 rows) + fips140test grafted, on the i7 after batch 2 + the driver seat; the
-acceptance predicate + a regression control; TSV + W/worker/slice/seq/banked/manifest_pins; -SkipBuild kept but a
-resumer rebuilds; the ledger folded in. C1: the draft -> the runbook's in-stage H10 amendment (a docs seat). i9's
-old-path number banked (17,541 s over 10.7 MB, >= 2.46x worse than quadratic; the replacement 0.10 s). G's finding:
-every post cycle drops the 101 s tree census pass (the gate is entry + subject); channel-file rotation = an owner
-question, noted. Two records to amend by dated block: DESIGN-h10-dispatch-driver.md s6 (C2); the plan's makespan
-lines at the next regeneration.
-encoding/json SIZED by C1 (cf47785d9): the publicization rule runs one scope per call and never sees the internal
-test file's exported consumer of a production type -> RULED: a production type's accessibility MAY be widened by its
-package's internal-test exported members (Go's package includes them; C1's control keeps it narrow); C1 measures the
-population; an i7 sub-agent cuts the converter seat when the box frees (queued behind the host apply + the ecdh
-seat). The post-cycle magnitude is the BOX (C1 12 s, G 177 s); the tree-pass drop stands. i9's census self-match
-half banked (the anchor-qualified predicate + both controls).]
-generator's arms between (3) and (4). Then the DRIVER's brief. G's reflect 226/414 and internal/runtime/maps
-108/111 are the first DIVERGED sets to classify (both CANDIDATE rows, not banked); crypto/sha3, encoding/json,
-internal/synctest join the BUILD queue. C2 READY for leg (4) (3c6291df; nine commits at origin); the rehearsal on
-the three blobs: 228 rows, 212 costed; at the seat's contract 205 banked + 21 candidates = 226 (NOT the two-lane
-214); the absorption quiet on the ruled edit. i9's lever CONFIRMED on its box (f9dfb945): cfile -> PASS 15 (the i7's
-reading); internal/trace -> a genuine 4-of-92 (TestTraceCPUProfile family) hidden behind the refusal -> the roster
-seat's DIVERGED list; the driver re-measures both at the tip once the host seat lands.
-ROUTED (COORD after b23753f5): C2 corrects the withdrawn 14-arc/four-split figure
-inside 8d7739f4e's comment and die() as a commit on top of claude/c2-shardmap-relocations; C1 cuts the post-tool
-fetch-refspec remedy (git fetch origin master in a single-branch clone writes no tracking ref -> the census cannot be
-materialised; explicit master:refs/remotes/origin/master) as ONE commit on its post-tool ref with a two-shape control,
-announce-then-push, landing with R's ead735e69c. Task 27 (the concatenation) waits on the TSV refs. The fetch-refspec remedy CUT (d2e61acc: 4b33fc803 on 06afd818ea,
-the two-shape control, the real-clone red-then-green) -- TAKEN; the tmp+mv materialise ROUTED as one commit on top; the
-scratchpad-derivation item DECLINED; the INSTRUMENT LANDING = C1's two + C2's refspec + R's ead735e69c together when
-all three read at origin (COORD merges; bash -n, census, repoguard) -- LANDED on master d8fe647ae8 (four signed
-merges: C1's H10 runbook seat claude/c1-h10-residue-runbook 03110c0b0 first -- residue preconditions, the TREE
-DISCARD block, what sweep_s measures, the is-it-alive line -- then C1's 4b33fc803+9ff722b1e, C2's 9feff23855+
-f4b736452f, R's ead735e69c; census clean x4, repoguard 6/6). Lanes re-copy their posting copies from the landed blob. ROUTED (11afb109): ONE new ref off d8fe647ae8, two commits,
-one announce -- (a) the runbook sentence at 03110c0b0 corrected in place with a dated note (neither column carries
-the wrapper cost; post_s named), (b) the two floors on c1-post.sh (patterns 100/166, hashes 10/34); COORD lands.
-DOCTRINE banked: a ruling is authority about what is decided, not a measurement of what the code does. LANDED on
-master 5be8728915 (claude/c1-postcol-and-floors: 854f90492 + 75fcde82c; census clean x2, repoguard 6/6). CLOSING
-RULINGS (COORD after 6fa84787): the BYTE predicate (hash the materialised census against origin/master:<path> before
-executing it) is the guard for C1's and C2's tools -- ONE commit each at idle AFTER the roster seat lands, announce-
-only; i9's idle commit re-scoped to the output-line count only (its :128 byte comparison already closes the rest);
-C2's post_s confirmation taken (the timings reader ignores unnamed columns; the arc reader shape-exact); then
-silence on the thread. ALL THREE LISTS LIVE (G's ACK 5952b121: 107 rows on the fifth;
-the early run discarded). hash/maphash BUILD on i9's list (unpredicted) -> C1 sizes at CONVERT from the completion post. C1's
-withdrawal (033a07d9): the roster seat carries no aggregate
-arc figure (the 14 lived only in a post) -- no correction owed; rule banked: a claim that a file contains something is a
-measurement, one grep. DONE (ba10c91a):
-claude/c1-h10-recon-lists 89c1ebc2cc off master, four files +564, derived from the tree's own sources (the census
-Appendix + nistec; $longTimeouts + BIG_ROWS = reserved 14; the windows-only 2; LPT over the 1.23 windows block) with three
-reproduced intermediates and a partition control that fires; nistec to G by routing (header). THE LAUNCH'S LISTS. The docs seat now carries
-three items (+ the net/internal/cgotest clause at ValidatedTestPackages.md:567-569). SIZED (1a46bacb): all_test.go:1510 -- ARM 2a of the reverse door zh.cs:715: a
-reference-bearing pointee (func() fields -> delegate -> StorageKind None) registers an ORDER TOKEN, offset 0 keeps arm
-3's refusal false by construction, the NativeBox write through a non-address is an uncatchable AV; six sibling sites
-safe. FIX (a) golib-only: arm 2a refuses when the resolved box's storage kind is None (RuntimeErrorPanic, arm 3's
-family); (b) the unmanaged alias post-hop (never covers :1510). RULED: an i7 sub-agent cuts (a) after the Core re-run
-(Q44 counters read on the row first; red-first asserting the RETURNED type, never writing; the three controls; the
-GolibTests fail-set diff; the reflect row through the pipeline); C1 design read, C2 structural, i9 applies. C1's census
-correction TAKEN: the fire-direction arm is inert when the INVOKING DIRECTORY carries no denied identity; C1's post
-tools run two batteries per invocation (entry gates before the cd) -- a one-line fix at idle. C1 corrects the 14 in its
-roster seat prose. TestIsZero REDIRECTED (COORD after the i7 sub-agent's stop): the conversion-time arm-2a refusal
-is FALSIFIED -- 7 GolibTests appear (six via PointerExtensions.Reinterpret's unpinnable-class fallback, one a banked
-row's shape; RuntimeHashFamilyTests.cs:182: 'a dereference is the row-level fault the design chose, never a number';
-the native box over the token is load-bearing). RULED (a'): the refusal moves to the DEREFERENCE -- arm 2a returns a
-token-bearing native box (subclass or sealed flag; the address stays the token; no per-deref lookup for ordinary
-boxes) whose value-slot read/write throws the arm-3 RuntimeErrorPanic family; the sub-agent continues (red-first at the
-deref; the seven must not appear; the reflect row before/after with the Q44 counters first). C1's ref-citation
-correction (7715abb3) taken: cite a ref at EVERY citation; the fixture-first rule applies to every component.
-SEAT CUT AND PUSHED (i7 sub-agent): claude/coord-arm2a-token-refusal 40c9b3316a on 9b89dfe46c, five files +381/-15
-(zh.cs, zh.NativeBox.cs, zh.Contracts.cs, RuntimeErrorPanic.cs, OrderTokenOffsetZeroRefusalTests.cs); the FLAG form
-(NativeBox sealed), both accessors refuse; GolibTests 0 failed -> 0 failed (the seven did not reappear); the negative
-control reproduces the abort; slnx 0 errors; the reflect row AFTER: host survives, 419 tests started (was 195 then the
-AV), TestIsZero a caught panic, diverged by name TestGroupSizeZero/TestIsZero/TestMapOfKeyPanic/TestMapOfKeyUpdate/
-TestTypeFieldReadOnly; Q44 on a surviving host: arm2a=1 (the BEFORE census is blind: the abort precedes the first
-flush). READS: C1 design, C2 structural; the APPLY is COORD's from the i7 while i9 runs the leg (merge onto the tip,
-GolibTests both sides, slnx, signed push). reflect re-measured after it lands; the five names are R's next sizing.
-C2's STRUCTURAL READ DONE (67f031fc: SOUND; the predicate verified against all three box kinds -- NativeAddress == 0 is
-the conjunct between the refusal and every native dereference; ten NativeBox construction sites, one flagged,
-MintOpaque's EmptyStruct box harmless unflagged; the two refusals disjoint). C1's DESIGN READ DONE (f26830f6: SOUND --
-the sealedness the stronger reason for the flag; the READ fabricates a managed reference; the middle conjunct reads back
-the forward decision; AliasesAnOrderToken public with zero consumers). C2's LATE FINDING (0603459f): the fixture never
-drives ValueSlot (the accessor reflect faults through) -- the apply HELD (COORD 93d60f2c8) for ONE test commit [DONE: a1fff3775 cut on the i7 (the red arm = the test host
-CRASHES without the ValueSlot guard while the older arms pass); APPLIED and STAMPED at 2e4487f4a6 (parents 0dc65a8e8d +
-a1fff3775, five blobs EQUAL, corpus-non-golib 0, GolibTests 783/0/17, go2cs.slnx 0 errors, census, repoguard 6/6) --
-VERSION TIP 2e4487f4a6] on the
-seat ref (the classification observed via AliasesAnOrderToken, the refusal asserted on a ValueSlot write and read,
-made red by removing the guard; a real-address control reads false); the i7 sub-agent adds it, COORD announces the SHA
-before the push, then the merge carries both commits (GolibTests both sides, go2cs.slnx, census, repoguard, signed push). DESIGN READ of R's seat DONE (be9a7447, SOUND). ALSO ASSIGNED: the design read of
-the fips140test seat ce8fc43a87 (three sites; the negative-sense option; GoFiles == 0 vs the driver's
-unmarkedFileCount) and the SIZING of its masked residual: 2 x CS1929 in acvp_test.cs (zh<ecdsa_package.hmacDRBG> at a
-pointer-receiver seam; no branch for it at origin). NEXT DOCS SEAT (two items): the
-PATH-resolved pin line in H10's preconditions table + CLAUDE.md:48's architecture-map row naming src/Examples/ (absent
-at master; the sample trees are src/tour, src/utilities, src/tools), the context-budget gate run. THE RELOCATION MAP OF
-RECORD is C1's table (350a301a: 10 rows, 13 arcs -- i9's count, C1's prose said 14/4 splits; 3 splits; 11 targets);
-ASSIGNED: read C2's generator commit 8d7739f4e3 against the tsv contract the roster seat will write (header
-source/target, one line per arc, LF, thirteen lines from 4de76ded06); DONE (2ed8b5f5): C1's derived tsv run through
-C2's generator 50e8c528f9 on the real inputs -- rc 0, 13/10/11, the inheritance on the two mlkem768 arms, the split
-print 2 beside 2. Banked for the landing: the generator's declared reserved set (15, keyed to the 1.23 basis, keeps
-mlkem768 to find its cost) and the run list (14, invocable at the tip) differ by exactly the relocated predecessor; the roster seat after the leg adds docs/phase4/hopA-inputs/relocations.tsv (one line per arc) and derives the
-$longTimeouts re-path from it. SIZINGS DONE (dfdcbc65) and ROUTED (COORD after 53c57e752): row 1 fips140test = the test
-emission's using-static + initPackage of a production class the driver never emitted (test-only package) -> an i7
-sub-agent cut after the Core arm, C1 design read / C2 structural, i9 applies; row 2 crypto/mlkem = zh<T> at a
-constrained type-argument position (Go satisfies the constraint via the pointer method set) -> C2 DESIGN READ of (a)
-generator vs (b) converter, then COORD rules; row 3 internal/sync = an untyped constant (math.MaxInt as UntypedInt) at a
-generic argument whose type parameter is also bound by a typed argument (the 4 of 8 sites) -> R after the registration
-seat. C1 idle by ruling until the launch. Fold C2's notes into the amendment
-commit: proc.cs cited per-GOOS (runtime/{linux,windows,darwin}/proc.cs:848), the RegisterPinned step that makes
-initAlgAES arm 2, and the clause that the box materialises at eleven construction sites (scope by provenance). (3) The seven pthread members the darwin
-remedy list does not name: a NOTE for the post-hop darwin campaign, no work now. (4) The slice<T> twin of the design's
-1.4 census (symtab.cs:359, iface.cs:481, reflect/value.cs:229) scored for provenance, a reading, no cut. (5) q100's
-i7 gate read CLEAR (1135d780c); nothing owed there.
-Blocked on: nothing.
+STEP 1, the record (GitHub only; local memory is a cache): git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13;
+read section 0a of this file and your section; then the ledger tail (fleet-read.sh, or `git show origin/claude/mailbox:docs/phase4/LEDGER.md |
+tail -n 30`). Tips at this revision: MASTER 0b0be89fd7; VERSION TIP 0adf2e4318 (APPLY BATCH 2) -- batch 3 (ten refs) STAMPS after the i7
+battery and MOVES the tip: read the ledger's last STAMP line before cutting or basing anything, and name the tip you read.
+STEP 2, ONE ACK message to coord: GPG state, the master / version / handover tips you read, your first item. Then start it.
+
+YOUR FIRST ITEM: STANDBY, until COORD's message names the rehearsal's EVIDENCE REF. Then: CLASS the crypto/internal/fips140test divergences from the
+rehearsal graft (expected ~52, Go=pass C#=fail, incl. TestACVP / TestCAST*) from go2cs_test_comparison.json, results-tail.txt and the minted
+go2cs_test_disclosures.json (five pins expected) on that ref: ONE table -- test name; class (the ruled labels: `deferred` with want /
+reading / plan, `structural` with the proof naming what Go keeps off the heap, host-fatal, or a converter / golib defect naming the site);
+the pin it maps to or NONE. A reading, no cut; reply by inbox file (<= 40 lines; the table itself on a ref you name, by path + blob id).
+
+STANDBY LANE (section 1a STEP 2): no queue of your own; tick only on a message; routed only what a cloud box does well -- Go-side
+converter seats gated by the suite and an emission read, sizings, designs, doc and runbook seats, instrument arms. Never a .NET leg, never
+a row past BUILD, never a battery.
+Your FIVE batch-3 refs ride the i7 battery: claude/c1-publicize-internal-test-seed bf7e31d037 (ref 2), claude/c1-testonly-bridge-anchor-using
+77f978074f (ref 6), claude/c1-union-pointer-no-new 401e1d6464 (ref 7), claude/c1-testing-b-elapsed a5249dc702 (ref 8, merged last),
+claude/c1-struct-conv-construction da6cf0f5dd (ref 9). Nothing to do on them unless COORD names a red row with your ref.
+
+FLOOR (CLAUDE.md, in force): one conversion per output root per box, never two overlapping on one box; seed from src/core before any -stdlib
+reconvert; the output directory is the SECOND positional of a single-package conversion; source is frozen while a battery runs; kill by PID or
+path, never by name; never git add -A; capture rc on the next line before any pipe; read the emission before spending a gate; measure at the
+tree; `| head` is a WHERE clause. Refs: announce-then-push on existing refs, push-then-announce on new refs; never force-push or replace a
+posted SHA (a fix is a commit on top); a seated branch takes no commits. Security: nicknames only (i7, i9, G-LAPTOP, R-LAPTOP, C1, C2) -- no
+hostnames, usernames, profile paths, shares or IPs on any pushed surface; `.claude/coord-scripts/coord-identifier-census.sh entry <file>`
+before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: one OWNER-HAND line to COORD. Compiling is not correctness.
 ```
 
 C1 FINAL STATE BLOCK (mailbox 5d90eb422, VERBATIM -- a shape the fold scripts do not parse; the STATE BLOCK at the top of this section is the last machine-folded one):
@@ -1675,175 +866,51 @@ COORD NOTE (16afb8a3f, amended per C2 56e93e709 s4): refs/preserve/c2-container/
 WAKE (C2, verbatim from 0d8088e2b):
   WAKE: re-create on resume, UNCONDITIONALLY -- C2's wake leg is THREE claude-code-remote ROUTINES (create_trigger), NOT CronCreate jobs, which is why CronList reads "No scheduled jobs" on this lane and why that empty is not a defect. Each carries persistent_session_id = THIS session and is dead to any other. Recipe: create three Routines at cron 12/32/52 * * * * bound to the NEW session with the C2 WAKE TICK prompt. Audit-only ids: trig_01PehGf5ad4P1vN9XQcmrTs6 / trig_01DxLxSRnqCwtc4a5KEEb5gP / trig_012aMXji4bMictAY14m2SfHL. Monitor: per-session, re-arm as a STEP, and stamp `date -u` into its ARMED line and every event -- see §4.
 
-PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; derived from the mailbox record at f8fef0119 and COORD's rulings of this revision; the shared preamble is section 0a) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0:
+PASTE PROMPT (revision 2026-09-21 23:40 -- resume after the 2026-09-20 weekly limit; a DELTA cut from the ledger through 2026-09-21 23:33 (mailbox b56e835d2f) and the batch-3 brief; the shared preamble is section 0a, PROTOCOL v4 is 0a.0) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0. SESSION TITLE: `c2 -- H10 standby (sha3 pass-separation seat)` (the lane nickname FIRST and lowercase, so COORD addresses you in one word); REMOTE CONTROL ON.
 ```
-COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of the record, and it WINS over every mailbox, post-tool or watcher sentence below): reply and ACK by SendMessage to coord (C1 and C2: an inbox file via fleet-msg.sh); tick = inbox -> ledger tail -> work -> one reply of at most 40 lines; the broadcast mailbox is ARCHIVED -- never read it; your post tool is retired; no watcher or wake lines.
-RESUME 2026-09-19. You are lane C2 (cloud; no .NET; the go1.24.13 pin runs here through GOTOOLCHAIN, measured 881a37afd, so the
-old go1.25.1 caveat is withdrawn). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its
-steps 0, 1 and 2 in that order; then this.
+RESUME 2026-09-21. You are lane C2 (cloud, linux; no .NET, no PowerShell, little disk; you RECEIVE messages but cannot send -- reply by inbox file). Nickname only on every pushed surface. Model: Opus 5, effort high (the owner
+may change it at the machine). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover, then this.
+COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of this file WINS over every older mailbox, post-tool or watcher sentence): reply and ACK by SendMessage to `coord -- Go corpus migration to 1.24.13 coordination` (C1 and C2 CANNOT send: an inbox file via `FLEET_LANE=C2 FLEET_MAILBOX_CLONE=<clone> bash .claude/coord-scripts/fleet-msg.sh COORD "<SUBJECT>" <BODYFILE>` from a clone with claude/mailbox checked out; the scripts are on master 0b0be89fd7 and on claude/mailbox). TICK = your inbox (a message event, or `bash .claude/coord-scripts/fleet-read.sh C2 [NEXT-SINCE]`, NEXT-SINCE = the mailbox tip SHA it printed last time, stored by you) -> the ledger tail it prints (docs/phase4/LEDGER.md: the LAST STAMP line is the version tip) -> the work -> ONE reply of at most 40 lines (WHAT 1 line / EVIDENCE <= 10 / ASK or NEXT 1). Never read the archived broadcast file. Silence from COORD is acknowledgement. No watcher or wake-loop lines; a 20-minute wake loop only if your harness delivers no message events.
 
-Step 0, NOW, while the owner is at this keyboard: GPG. Windows box, let pinentry pop and the owner type the passphrase:
+STEP 0, GPG, first, with the owner at this keyboard (Windows boxes): let pinentry pop --
   echo test | "$(git config --get gpg.program || echo gpg)" --clearsign >/dev/null; echo rc=$?
 then the probe, never on a commit:
   echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
-Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpgsign=false commit. Report the state in your ACK.
+Say CACHED or NOT-CACHED in the ACK. Lanes commit UNSIGNED under the standing authorization (git -c commit.gpgsign=false commit); COORD signs
+landings. Cloud boxes: gpg --list-secret-keys; no key -> every commit unsigned the same way; say so. Never block on a prompt after step 0.
 
-Your first item: the H8 COMPARAND PROCEDURE. The runbook's H8 amendment says no outgoing manifest is committed and
-neither its comparand nor the default-flavour byte-identity arm has a procedure at this hop. Draft both as one dated
-in-stage runbook amendment on a branch you name, plus one script: (a) how the 1.23.12 outgoing manifest is produced
-so G's 1.24.13 manifest has a comparand (the H0 baseline, or the preserved half-A staging roots i9 recorded with tree
-hashes at c883a2dc7 section 3); (b) the default-flavour byte-identity arm: which two emissions, compared by what
-hash, and the control that proves the arm can fail; (c) the predicted class-count deltas from the 1.24 package
-census (docs/phase4/h5-removals.txt, 14 entries, plus the additions). Push-then-announce for COORD's ruling; G
-scores the gate with it.
+PINS: no .NET, no PowerShell, no pinned SDK on this box -- `GOTOOLCHAIN=go1.24.13` materialises the pin from the module proxy; assert
+`go version` = go1.24.13 in every shell. You never claim a compile: every emission claim is a READ, and every BUILD or row gate for your
+refs runs on a hardware lane (say which legs you omitted in every announce).
 
-DONE 2026-09-19: the comparand procedure is cut at claude/c2-h8-comparand-procedure 746d3a7c75 and RULED (bb1d9b4d6):
-produce the outgoing manifest; G executes; the branch is an accepted docs seat landing with the H8 gate commit. RE-PINNED
-2026-09-20 at bdc016826a (614b27450, a7c61cdbd): the keying gate -- `manifest` builds classify's input flat-keyed and stamped,
-an unstamped triple is refused, selftest 27/27; G's side-by-side runs from this tip.
+STEP 1, the record (GitHub only; local memory is a cache): git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13;
+read section 0a of this file and your section; then the ledger tail (fleet-read.sh, or `git show origin/claude/mailbox:docs/phase4/LEDGER.md |
+tail -n 30`). Tips at this revision: MASTER 0b0be89fd7; VERSION TIP 0adf2e4318 (APPLY BATCH 2) -- batch 3 (ten refs) STAMPS after the i7
+battery and MOVES the tip: read the ledger's last STAMP line before cutting or basing anything, and name the tip you read.
+STEP 2, ONE ACK message to coord: GPG state, the master / version / handover tips you read, your first item. Then start it.
 
-DONE 2026-09-19: the q100 second read (a810502ff, AGREES; two findings routed to C1 at 0a2b43651) and the q102 second read
-(14e4ce0e8, AGREES, arms run here; denominator 8230 from the index). ASSIGNED NEXT: the H9 prediction re-derived at the
-version tip -- the converter seats landed since the goldens' last baseline classified emission-affecting or not, the
-predicted CNR CHANGED set by name with the mechanism per golden, whether the eight stand and any ninth; posted before
-i9's CNR as the prediction i9 scores against; git and Go only. DONE 2026-09-19 (56ec9931a, MEASURED on 735 goldens at
-06b1636cae) and RULED (COORD): the eleven replace the eight. ASSIGNED NEXT: the runbook's dated in-stage H9 correction (the
-eleven with mechanism and pairs, the per-mechanism added == removed rule, the linux arm's admissibility control and its seven
-blind projects, the process gap: an emission-changing seat carries its golden re-baseline) on a branch you name; DONE
-2026-09-20 at claude/c2-h9-correction 4f24f7d39e. H8 (COORD ruling on cb1fa651a): (a) score P1-P5 as worded in one post
-(P5 ruled not a defect); (b) `manifest` gains the emitted-set restriction (sentinel mtime or --emitted-only) with a
-seeded-and-emitted control, a commit on top of bdc016826a; (c) the H8 amendment takes the measured 'both directions' wording
-(true at exclusive only) and the per-file-tag-selection derivation lesson; (d) the build-tag axis (purego,
-math_big_pure_go) added to H8 section (d), cut AFTER G's linux/darwin readings so the ref G executes from is not churned.
-(a) DONE 2026-09-20 at 411d2ad4e (P1 refuted, P2 split -- a relocation nets zero, P3 refuted both, P4 honoured, P5 a
-finding by its wording, ruled not a defect; root cause: package-level derivation blind to per-file tag selection) -- (b) DONE at 04c7ca64ec (--emitted-only, the census's sentinel-mtime discriminator); (c) + (d) DONE at
-0a993ec908 (4c7147a86: the measured wording, both corroboration traps at the site, the build-tag axis in section (d)). The
-comparand branch tip 0a993ec908 = the H8 docs seat. ASSIGNED (COORD, after 4c7147a86): the LINUX byte-identity pair on
-this box -- two throwaway clones of 46307b4704, a linux converter build named by sha, E2 three-target merged vs E1
-single-target linux/amd64, views with h8-comparand.sh at 0a993ec908, counts + tree hashes posted, both sides non-empty;
-purge the clones after. DONE 2026-09-20 (db9c69854): 3406 = 3406, content differs on 0 shared paths, 5 placement-only
-differences in runtime/cgo (absent from the seed); RULED PASS WITH A NAMED EXEMPTION (build equivalence is the gate's
-reading). OWED: a commit on top of 0a993ec908 -- the arm derives and reports the seed-absent package set every run
-(placement differences outside it still fail; content differences anywhere still fail), and the H8 amendment DEFINES the
-default flavour as the host-selected flavour with the csproj's unset default (windows) named as the banking convention.
-The H11 seat second read is DONE (4c0a86310, AGREES, suite run, plant verified; CLEARED for i9). Owed: the runtime/cgo
-probes (07b4e55fb), the seed-absent exemption commit, then R's p256 fix read. DONE earlier: the correction at
-4f24f7d39e (docs only, off master; ACCEPTED as the H9 docs seat). Idle by ruling until
-G's outgoing census side-by-side, scored against your P1-P5. ALSO: the second read of G's root-attribution overlay
-a819ba7417 (VERSION + LICENSE byte-compared against the 1.24.13 toolchain root on your box). OWED (COORD re-ruling on i9's
-CNR dc9eb368c): ONE commit on top
-of 4f24f7d39e qualifying the eleven as the LINUX reading, the banking-platform reading as the TWELVE (SyscallKeystonePulls IN,
-SetegidBroadcastSeam a windows SKIP, RED 9 added), the per-GOOS alias mechanism named, the rule: an H9 prediction is made on
-the banking platform or platform-qualified. DONE 2026-09-20 at d70666d9c0 on top of 4f24f7d39e (d56fc3c56: the READ THIS
-BOX FIRST header, two-platform table, the rule; the linux reading kept as the evidence for it), COMPLETED at 2e75b14586
-(4eedb68ec: the TWELVE as the banked set by name, RED 9's discriminator and its control quoted, SetegidBroadcastSeam scoped
-not deleted). The H9 docs seat lands at 2e75b14586. Queue: P1-P5 on G's side-by-side, folding the build-tag axis into H8 section (d).
+YOUR FIRST ITEM: SEAT (B), the pass-separation pair (RULING 2026-09-21 23:33, mailbox b56e835d2f; your 224209Z post read: your queue was EMPTY, and
+claude/c2-sha3-adapter-key f4b6e2d3d2 does NOT ride batch 3 -- it is BATCH 4's first ref; do not re-base it). ONE new ref
+claude/c2-sha3-production-facet STACKED on f4b6e2d3d2 so the pair is one chain: (a) Go side -- every record the converter emits for the
+PRODUCTION half under the recompile model carries the facet GoImplement<S, I>(Pointer = true, Production = true); the TEST-half cast
+resolution applies the generator's rule (a faceted member keeps the unprefixed production name; only unfaceted members take the interface
+prefix; two faceted = a production-pass collision, both stand); arms red-first; suite + repoguard green; the emission read at the pin:
+sha3.cs's four production sites keep SHA3жHash, the five external-test casts spell what the generator will emit; compress/flate
+byte-identical as the control. (b) C# side, src/gen/go2cs-gen -- the collision rule reads the facet: WRITTEN UNCOMPILED on your box and
+SAID SO in the announce; the i7 gates gen + GenTests + the crypto/sha3 row with the pair applied. Push-then-announce (<= 40 lines): files +
+blob ids, the arms, the predicted sha3 row word, exactly what is uncompiled. Then STANDBY.
 
-Then: (2) the second-lane read of C1's q100 cut at origin, claude/c1-q100-native-array-view-floor 0dca38552c: the
-floor's placement at the uintptr door, its scope (array<U> only), the tenth named panic beside the nine, and the four
-test arms' logic; a read, not a compile, and say so. (3) Second reads of C1's q102 and q86 cuts when announced (both APPLIED since; stale).
-DONE 2026-09-20: the population bound of R's reflect construct (9d844b0c: TWO across the std test corpus on the grep
-predicate, R's two, row-scoped; the first two counts 9 and 6 were a dead empty-struct arm -- a backslash inside a POSIX
-bracket expression is literal; BOARD line for C2's next docs seat) and R's before-arm reproduced on this box at
-d91c832543 (01f8b727: rc 1 at CONVERT, one signature, all_test.cs(4201) = R's offset). ASSIGNED 2026-09-20 (COORD
-6396765b7): (a) the EXISTENCE read of G's README overlay 7c374389b0 -- the 1.23.12.3 tag present at origin (ls-remote
---tags), every snapshot badge target in the 337 files has its file under docs/validation/1.23.12.3/ at the version tip
-(set difference by name both directions, a planted phantom link as the control; predicted tag present, 0 missing); a
-read, not a compile; post it, then i9 applies. (b) at R's reflect-seat cut: the converter suite + the planted two-site
-fixture on this box, the before-arm above as the same-box BEFORE. (a) DONE (e871b62c: PASSES, no objection).
-ASSIGNED 2026-09-20 (9d32f4813): the H10 CONVERT PRE-FLIGHT -- every roster row at d91c832543 through
-go2cs -tests -test-action convert on this box (the row platform is linux), the ten relocated rows at their successor paths
-from C1's map; enumerate from docs/ValidatedTestPackages.md and STATE the count before the run; sequential, ONE output
-root at a time, each row's output purged after its rc is read; the converter built once at the tip, go version by OUTPUT
-with GOTOOLCHAIN=local; the results-file tail read before any mass claim; post the CONVERT fail set BY NAME with the
-converter's first message per failure. Prediction of record: {reflect} and nothing else; every addition is a converter
-seat COORD routes in parallel instead of the sweep finding it serially.
-DONE 2026-09-20 (5ceedaf88): 207 conversions (204 - 10 relocated + 12 successors + reflect as the positive control), 201
-clean at d91c832543 and IDENTICALLY at 93feb8df2b; converter fail set {reflect, time} (both hop debt: clean at 1.23.12
-with the same binary); time = i9's 2026-09-15 class (abs_test.go:23 exported anon-struct var read across the
-internal/external test boundary, time_test.cs(33)) -- FOLDED INTO R's seat by COORD; sync fails in a BARE root (seeded
-rc 0) = floor 2's -tests form; testing needs -test-allow-handown; internal/syscall/windows{,/registry} REFUSE on linux
-(their markers read linux: n/a); the marker count is 198 of 204 numeric (202 was occurrences incl. 2 prose examples).
-ASSIGNED NEXT (COORD after f14cafb9): read C1's docs seat claude/c1-board-night-lines 6e082a09c5 (the section-4 bound's
-arm classification against zh.cs at master; the BOARD block's four lines against the record); COORD lands it signed on
-the read. Also DONE: the ordering predicate on i9's published tool (4f3e5104: exact; the %G? E-vs-N method note), the
-axis confirmation through the pipeline (d5cdd55ab), the wrapper pre-cut reads (f9da1c467 sizing, d4f915ed1 its own
-correction: verified premises do not transfer their standing to a synthesis -- BOARD line; 7c43a15e the converter's two
-Validated format strings). ASSIGNED: read C1's (d) aa66874ff7 as the H10 procedure amendment (order, host rule,
-preconditions table, per-row steps against the rulings cited) -> COORD lands; then read i9's recon wrapper.
-C1's DESIGN READ of the fips140test seat DONE (a17af4af: SOUND; the two ungated seeds at testConversion.go:3123/:3335
-reach only a MIXED test-only suite -- exactly one in the tree, embed/internal/embedtest, not converted; inert).
-STRUCTURAL READ DONE (cf54b86f: suite rc 0; the fixture made to fail naming exactly the three sites, the control green;
-the row's emission 14 lines -> 0; a FOURTH site of the class in the project file: testConversion.go:4172-4174 adds a
-ProjectReference to a production .csproj never written, gated on the model alone -- pre-existing, identical both arms).
--> ce8fc43a87 CLEARED for i9's apply (COORD after a5fc7d1b); i9 reports how the build passes the dangling reference.
-DIFF READ at ddc205a1ee DONE (765aba82: clean; the map verified mechanically; NOVERDICT's two paths share one comment
--- a clause on the next commit). NEXT: the Go unit arm of G's oracle seat dd376e3f12; the structural read of the
-fips140test seat ce8fc43a87 (the fixture + the suite on this box); then the TestIsZero golib seat when cut.
-R's SEAT STRUCTURAL READ DONE (15a14bad: suite green on this box; the fixture fires all six lines reverted and passes
-restored byte-identically; reflect rc 1 -> rc 0 as a same-box A/B; time still rc 1 as the control). NEXT: the diff read
-of i9's third commit; then the generator's reserved-set derivation from relocations.tsv (a commit on the shardmap ref
-landing WITH the roster seat). CONFIRMED (COORD after 8cf1e707): cut NOW on the shardmap ref against the contract
-(relocations.tsv: header source/target, one line per arc, LF; refuse by name when absent or thin); (a) the floor
-inheritance is an ADDITION (no successor map exists in the generator today), (b) the intersected-out print is one line;
-the intersect stays. The plan is generated only after the seat lands, so the refusal never fronts the leg.
-SECOND COMMIT ff53bb06be (90e78eae): the print split by cause (targets, not sources; three arms); THIRD COMMIT
-50e8c528f9 (8b645ee5: the two downstream counts follow the split, one axis each, restored to the FIXED file between
-arms -- C2's first attempt restored to the committed file and was void). FOURTH COMMIT efd0b67f88 (4c83f889: the
-14-vs-15 paragraph beside RESERVED_DECLARED, comment only; the strict-subset measurement both ways) -- RULED PUSH (the
-generator is the one home; the roster seat carries a pointer). The ref carries four commits, landing with the roster
-seat. C2's `| head` SIGPIPE finding banked
-fleet-wide (a filter can prevent the work; never pipe a state-writing tool to head). POST-TOOL GUARDS CUT (77e96d95:
-claude/c2-post-tool-guards 015177d4f9 -- one battery from the clone, the clone asserted to be the mailbox, A5 asks
-origin; six arms; delivered by the modified tool) and LANDED on master 5448b903e0. FIFTH GENERATOR COMMIT 38ea6bdbd0
-(0aa562a7: the die() comment naming the filter's home; output byte-identical) -- the ref carries FIVE commits for the
-roster-seat landing. BATTERY ASSERTION CUT (3c41c49c: claude/c2-post-battery-assert 4c6a969cc1, +51/-3, five arms incl.
-the merely-different arm and a forced-maximum red; arms counted as attempted) and LANDED on master bfe351b996. RULED for
-G/i9/R's cuts: count pass + fail, compare with -lt/-ge. C2's battery wording corrected (d7161d6e); the assert-the-battery form at idle.
-GENERATOR SEAT CUT (51d22252): claude/c2-shardmap-relocations 8d7739f4e3 off master 6c32d0e171, +57/-2, reads
-relocations.tsv (thin guard < 10 arcs), four arms made to fail; the reserved-row print already exists and fires --
-RULED: a second commit splits its message into two causes (no measured cost vs name absent at this release). TAKEN,
-lands with the roster seat; C1 reads it. Census finding banked: the fire-direction arm is inert by construction on a
-cloud box (no account/machine/owner token) -- the 91 pattern arms are the guard there; the self-test should say so
-(the next instrument seat, protocol frozen); a BOARD line for C2's docs seat.
-(d) LANDED at master 6c32d0e171. Tag-asymmetry bound DONE (50554616: 2 of 207 differ on linux -- nistec files SWAP, both
-directions; fips140test's nistec_ordinv_test.go oracle-only, latent behind CS0234). ASSIGNED: read i9's wrapper ref
-claude/i9-h10-recon-wrapper at its tip AFTER i9's second commit (the linked-worktree guard + per-row artifact capture).
-ASSIGNED (COORD 4c92156c): the STRUCTURAL READ of the fips140test generator seat claude/coord-fips140test-recv
-76efbdf3a6 (one commit on 0dc65a8e8d, six files +637/-2: RecvGenerator TargetScope from the receiver SYMBOL via
-Common.EffectiveScopeIsPublic, narrowing unchanged; the .tests.csproj ProjectReference gated on testProductionAbsent
-because MSB9008 is a warning; Roslyn compile-probe fixtures 1-fail-4-pass -> 5/5; the row COMPILES: 2215 matched /
-52 diverged, all pre-existing Go=pass C#=fail; stdlib 344/344 0 errors) -- the footprint, the fixtures' cross-assembly
-claim, the control set; C1 has the design read; COORD applies from the i7 after R's time apply lands. BOTH READS
-SOUND (C1 f4125ff2: the scope rule is the codebase's own MethodInfo trio; C2 9d5a410a: the :671 gap MEASURED over the
-whole package, the symbol wins in both decided directions, the C# guard crosses a real assembly boundary). The :671
-FOLLOW-UP (an ordering test in the dynamicTypeGate convention + the gate comment's consumer count) is cutting on the
-i7 as a second commit on the ref -- CUT c6524dc53b on 76efbdf3a6 (the ordering test red with :671 deleted even though
-the identical assignment survives in convertTestVariants; green restored byte-identical; the consumer count by
-predicate; each commit carries its author model's trailer), ANNOUNCED (fcdd9503e) then pushed; the seat CLEARED on
-both reads. THE APPLY (both commits onto the version tip after R's time apply lands; converter gate + go2cs-stdlib.slnx
-+ census + repoguard; testConversion.go composition by throwaway merge) LAUNCHED on the i7 at the time stamp (Opus
-sub-agent, worktree ap3, onto 7ff4694b22; the ROW as the prediction test after the merge commit and before the push:
-COMPILE clean, ~2215/52) -- APPLIED and STAMPED at 4408dacd3e (parents 7ff4694b22 + c6524dc53b; five blobs EQUAL,
-testConversion.go a verified three-way union; suite ok 454 s; CNR NO REGRESSION over 729; stdlib 344/344 0 errors;
-census 6/6; repoguard 6/6; the ROW prediction hit exactly: test-only, no ProjectReference to the absent production
-project, 2215 matched / 52 diverged). VERSION TIP 4408dacd3e. Banked: the i7's machine-scope GOROOT is the ambient Go
-and `go env GOROOT` prints it in PowerShell even with 1.24.13 first on PATH -- every PowerShell leg pins $env:GOROOT.
-FIRST READ DONE (c0c2063e at 43aba50262: spec met, the parse well controlled; the classifier finding + diverged-lines
-note -> both in i9's second commit). RE-READ at the new tip when announced. ALSO ASSIGNED (COORD after dfdcbc65): the
-crypto/mlkem DESIGN READ -- (a) the generator making zh<T> satisfy every interface *T's method set satisfies vs (b) the
-converter emitting T at a constrained type-argument position; against src/gen/go2cs-gen's actual pointer-receiver
-interface machinery, the semantic difference under (b), the blast radius by census; a recommendation, COORD rules.
-DESIGN READ DONE (ea03e60d): (a) unwritable (zh<T> in golib's assembly; no conditional conformance) -- its intent is
-the shipped ConstraintProxy path (18 records, 5 packages); (b) changes every implementor's contract (E in the
-constraint interface's own signature) and loses writes through E-typed parameters; the adapter has no projection at a
-bare type-parameter reach. The converter's own fixture constraintProxyGenericCall_test.go:89-91 records the shape as
-'never compiled as C#'. RULED: WIDEN THE PROXY (converter gates :1582/:1602, the generator's :1329 guard -> a
-no-self-parameter path, the widenCall negative control flipped on purpose); the seat is R's after the registration
-seat; C1 reads the converter half, C2 the generator half; i9 applies. C2's floor-1 violation (two converters
-overlapped two minutes; a wrapper PID killed, the residual PID read past; results file voided) banked as a BOARD line. READ DONE (ebd9553dc: no objection; the section-4 bound derived from the file; the RegisterPinned step named;
-two additive citation notes) -- LANDED by COORD at master ceb1c87971. Then read i9's recon wrapper when announced.
-Blocked on: nothing.
+STANDBY LANE (section 1a STEP 2) after seat (B): no queue of your own; tick only on a message; Go-side work only (seats gated by the
+suite and an emission read, sizings, designs, docs, instrument arms); every BUILD or row gate for your refs runs on a hardware lane.
+Your ref 3 claude/c2-synctest-seat db570064e9 rides batch 3; nothing to do on it unless COORD names a red.
+
+FLOOR (CLAUDE.md, in force): one conversion per output root per box, never two overlapping on one box; seed from src/core before any -stdlib
+reconvert; the output directory is the SECOND positional of a single-package conversion; source is frozen while a battery runs; kill by PID or
+path, never by name; never git add -A; capture rc on the next line before any pipe; read the emission before spending a gate; measure at the
+tree; `| head` is a WHERE clause. Refs: announce-then-push on existing refs, push-then-announce on new refs; never force-push or replace a
+posted SHA (a fix is a commit on top); a seated branch takes no commits. Security: nicknames only (i7, i9, G-LAPTOP, R-LAPTOP, C1, C2) -- no
+hostnames, usernames, profile paths, shares or IPs on any pushed surface; `.claude/coord-scripts/coord-identifier-census.sh entry <file>`
+before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: one OWNER-HAND line to COORD. Compiling is not correctness.
 ```
 
 
@@ -1883,159 +950,67 @@ Blocked on: nothing.
 ```
 WAKE (G, verbatim from 26e7c0955 s1): re-create on resume, UNCONDITIONALLY -- G's wake leg is TWO mechanisms, both session-bound: (1) a MONITOR polling the mailbox tip (git ls-remote on refs/heads/claude/mailbox every 67 s from the mailbox clone, emitting MAILBOX-CHANGED old -> new, anchor asserted 40 chars at arm time, re-armed immediately after every firing); (2) a CRON wake tick every 20 min (PROTOCOL v3.6 leg b) running the same read-and-report pass. The ids in earlier posts (Monitor b0y8mzb29, CronCreate 07e74363) are this session's, audit only -- never checked on resume, only re-created. Owner instruction on this lane: watch claude/mailbox at ALL times and re-arm after every firing, standby included.
 
-PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; derived from the mailbox record at f8fef0119 and COORD's rulings of this revision; the shared preamble is section 0a) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0:
+PASTE PROMPT (revision 2026-09-21 23:40 -- resume after the 2026-09-20 weekly limit; a DELTA cut from the ledger through 2026-09-21 23:33 (mailbox b56e835d2f) and the batch-3 brief; the shared preamble is section 0a, PROTOCOL v4 is 0a.0) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0. SESSION TITLE: `g -- H10 linux W=4 worker (G-LAPTOP)` (the lane nickname FIRST and lowercase, so COORD addresses you in one word); REMOTE CONTROL ON.
 ```
-COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of the record, and it WINS over every mailbox, post-tool or watcher sentence below): reply and ACK by SendMessage to coord (C1 and C2: an inbox file via fleet-msg.sh); tick = inbox -> ledger tail -> work -> one reply of at most 40 lines; the broadcast mailbox is ARCHIVED -- never read it; your post tool is retired; no watcher or wake lines.
-RESUME 2026-09-19. You are lane G (host G-LAPTOP, Windows plus the WSL linux arm). First read section 0a of
-docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its steps 0, 1 and 2 in that order; then this.
+RESUME 2026-09-21. You are lane G (host G-LAPTOP, Windows plus the WSL linux arm). Nickname only on every pushed surface. Model: Opus 5, effort high (the owner
+may change it at the machine). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover, then this.
+COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of this file WINS over every older mailbox, post-tool or watcher sentence): reply and ACK by SendMessage to `coord -- Go corpus migration to 1.24.13 coordination` (C1 and C2 CANNOT send: an inbox file via `FLEET_LANE=G FLEET_MAILBOX_CLONE=<clone> bash .claude/coord-scripts/fleet-msg.sh COORD "<SUBJECT>" <BODYFILE>` from a clone with claude/mailbox checked out; the scripts are on master 0b0be89fd7 and on claude/mailbox). TICK = your inbox (a message event, or `bash .claude/coord-scripts/fleet-read.sh G [NEXT-SINCE]`, NEXT-SINCE = the mailbox tip SHA it printed last time, stored by you) -> the ledger tail it prints (docs/phase4/LEDGER.md: the LAST STAMP line is the version tip) -> the work -> ONE reply of at most 40 lines (WHAT 1 line / EVIDENCE <= 10 / ASK or NEXT 1). Never read the archived broadcast file. Silence from COORD is acknowledgement. No watcher or wake-loop lines; a 20-minute wake loop only if your harness delivers no message events.
 
-Step 0, NOW, while the owner is at this keyboard: GPG. Windows box, let pinentry pop and the owner type the passphrase:
+STEP 0, GPG, first, with the owner at this keyboard (Windows boxes): let pinentry pop --
   echo test | "$(git config --get gpg.program || echo gpg)" --clearsign >/dev/null; echo rc=$?
 then the probe, never on a commit:
   echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
-Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpgsign=false commit. Report the state in your ACK.
+Say CACHED or NOT-CACHED in the ACK. Lanes commit UNSIGNED under the standing authorization (git -c commit.gpgsign=false commit); COORD signs
+landings. Cloud boxes: gpg --list-secret-keys; no key -> every commit unsigned the same way; say so. Never block on a prompt after step 0.
 
-Your first item: the H8 CENSUS READING. Your census (three sequential full-corpus conversions, base 46307b4704,
-running when the cutoff hit) may have finished on disk: find its output root and log BEFORE re-running anything. If
-the log shows completion, use it; if it was killed, re-run from a clean seeded root under the pin with nothing else
-converting on this box. Post the reading the runbook's H8 amendment asks for: platform-manifest.json class counts
-(shared, variant, partial, exclusive), the per-target marker gate (zero per target), the base named (46307b4704; the
-four q97 paths measured outside the root-attribution six), whether q97's sha3 files appear in variantFiles,
-partialFiles, exclusiveFiles or packagesWithDelta, and the H8 prediction scored against the design's recorded table.
-Stop before scoring the gate: COORD rules the comparand, and C2 is drafting its procedure.
+PINS (every converter/build shell, verified by OUTPUT, never by a file): GOROOT = the go1.24.13 SDK spelled EXACTLY as `go env GOROOT` prints
+it (backslashes on Windows -- a forward-slash spelling or the machine-scope Go is a dead pin); that SDK's bin FIRST on PATH (GOROOT does NOT
+pin the child `go` the converter spawns); GOTOOLCHAIN=local; CGO_ENABLED=0; DOTNET_ROOT = the dotnet 10 root, first on PATH; assert
+`go version` = go1.24.13 and `dotnet --version` starts with 10. pwsh 7 for the .ps1 tools (launch it with DOTNET_ROOT unset in the parent if
+it is a dotnet-tool pwsh; set the pins inside via $env:).
 
-RULED 2026-09-19 (mailbox bb1d9b4d6): after the incoming reading, (1b) run h8-comparand.sh selftest from
-claude/c2-h8-comparand-procedure 746d3a7c75 on this box, all controls red-proved; (1c) PRODUCE the outgoing 1.23.12
-manifest: one census under the 1.23.12 pin on a clean worktree of master 7105c8468 (version.props 1.23.12), same
-binary, flags and seed as the incoming run, a directory never reused, nothing else converting; CGO_ENABLED=0 stated;
-(1d) post both manifests' class counts side by side, C2's P1-P5 scored as worded, the byte-identity arm scored on a
-real E1/E2 pair; STOP before declaring the rung.
+STEP 1, the record (GitHub only; local memory is a cache): git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13;
+read section 0a of this file and your section; then the ledger tail (fleet-read.sh, or `git show origin/claude/mailbox:docs/phase4/LEDGER.md |
+tail -n 30`). Tips at this revision: MASTER 0b0be89fd7; VERSION TIP 0adf2e4318 (APPLY BATCH 2) -- batch 3 (ten refs) STAMPS after the i7
+battery and MOVES the tip: read the ledger's last STAMP line before cutting or basing anything, and name the tip you read.
+STEP 2, ONE ACK message to coord: GPG state, the master / version / handover tips you read, your first item. Then start it.
 
-Then: (2) the root-attribution overlay cut from the census emission root, on a branch you name (prediction of record:
-the differing set is exactly VERSION and LICENSE); push-then-announce. DONE 2026-09-20: claude/g-root-attribution
-a819ba7417 on 0f97dcc8db, +4/-4, prediction MET, pinned by COORD (C2 reads; i9 applies after H9). The H8 side-by-side is
-DONE (cb1fa651a: outgoing 1476/79/87/277 of 1919 vs incoming 1631/83/93/283 of 2090; marker gate zero x6; arm (b) PASS on
-windows, 3342 = 3342, equal tree hashes; pkgdelta +40 per target MET). RULED (COORD): the rung rests on all three flavours.
-NEXT for G: (1) arm (b) on DARWIN first (C2 takes linux in parallel; a second linux reading from G is a derivation, not waste);
-DONE 2026-09-20 (0adcbd8cd): darwin 3395 = 3395 PASS, linux 3397 = 3397 PASS, cross-flavour controls fired -- BUT G's emissions
-contain NO runtime/cgo while C2's linux emission carries its nine artifacts (3406): a HOST-DEPENDENT package selection
-(windows-built converter cross-emitting vs a linux build). RULED: the byte-identity clause is OPEN on all three flavours
-until measured. PROBES (both boxes): GOOS=linux|darwin|windows CGO_ENABLED=0 go list runtime/cgo (GoFiles / IgnoredGoFiles /
-CgoFiles) under the pin; the converter's own reason (C2: grep the converter for a runtime/cgo or cgo-package exclusion + the
-E1 log lines; G: the census manifest's per-package row and the emission log lines). Then COORD rules: a host-conditional
-converter exclusion = a small converter seat; a toolchain difference = a runbook statement + a re-take on the named host.
-G's PROBES (fa81e7327): on G-LAPTOP `go list std` at CGO_ENABLED=0 OMITS runtime/cgo on all three GOOS (control: present at
-CGO_ENABLED=1) while `go list runtime/cgo` named directly resolves with GoFiles (linux 8 = windows' 3 + the five C2 saw under
-linux/); the converter enumerates std, so the package was NEVER QUEUED on G (no skip line, no directory) -- the fork is
-ENUMERATION, not buildability and not the host. RESOLVES ON: C2's distinct package list from its E1 log, grep -x runtime/cgo,
-the set difference against G's list. G's H8 RECORD is pushed at claude/g-h8-record 56c0eb7a71 (held for the H8 docs commit;
-section B, the exemption and the probe land as one dated block once the fork is resolved). SOLVED by C2 (1257a20ba):
-EMITTED WITHOUT BEING QUEUED -- conversionDriver.go:167 loads ./... for any input under GOPATH and a GOTOOLCHAIN GOROOT sits
-under GOPATH, so each stdlib package converts its whole subtree (13 skip messages, 6 doubled; one-axis control: -gopath off
-the prefix -> 0 runtime/cgo files, queue hash identical, src/core byte-identical but for that directory). RULED a CONVERTER
-DEFECT, C2's seat (the subtree branch must not fire under GOROOT; red-first on C2's control; the author's comment amended);
-G then verifies its linux emission unchanged (3397, queue 342) from the seat's converter; C2 re-takes the linux pair
-(predicted 3397 = 3397, 0 placement differences, exemption count 0); then COORD closes H8 and cuts the H8 docs commit.
-SEAT CUT (d44c00ded): claude/c2-subtree-load-goroot-guard 19175c31ad off 43a3627667 (conversionDriver.go isPathUnder guard +
-unit arm red-proved on two axes + projitems; all four readings met; suite green) -- ACCEPTED; G verifies the negative-host arm
-from the seat's converter; C2 re-takes the linux pair from it; then H8 closes; i9 applies after the H11 seat. C2 also owes the
-amendment's (d) sentence (toolchain location + the seat's SHA) with the seed-absent exemption arm, on top of 0a993ec908.
-DONE (1dbd13862): d7b0876ce6 (verified on top of 0a993ec908) -- the seedabsent mode (the set DERIVED from the seed, reported every run, both
-vacuous shapes refused; placement inside PASS-with-exemption naming the paths, outside FAIL; content anywhere FAIL;
-component-boundary matching), section (d)'s fourth axis, selftest 41/41. ⚠ WITHDRAWN NUMBER: the instrument's 'same path,
-content DIFFER' counter was DEAD since its first cut (join -j0 invalid, stderr swallowed) -- every 'content differs 0' in
-tonight's arm (b) posts (G's and C2's) was not a measurement; every verdict stands on the tree hashes and comm. G's H8
-record carries this in its closure block. C2's first arm-b re-take was VOID (CGO_ENABLED defaulted to 1 -- a one-axis
-violation caught by its own written prediction); the re-take is running on the pin. DONE (f38c9b876): the linux pair
-from the seat's converter PASSES on its own merits -- 3397 = 3397, only-in 0/0, content DIFFER 0 (a real reading, first run of
-the fixed counter), all four tree hashes equal, seed-absent set 0 packages, both controls proven able to fail on THIS pair
-(a hex-digit change -> content DIFFER 1 FAIL; a path moved one folder -> only-in 1 FAIL); the runner's built-in control was
-invalid (a non-hex perturbation refused on form) and replaced. H8's byte-identity clause: windows PASS (G), linux PASS (C2,
-seat converter), darwin PASS (G, a box where the branch never fired). CLOSE waits on G's negative-host arm from the seat's
-converter; then G's dated closure block on claude/g-h8-record and COORD's H8 docs commit (C2's d7b0876ce6 + G's record).
-G's negative-host arm (1d340011c): parent vs seat converters emit BYTE-IDENTICALLY on G-LAPTOP (3397 = 3397, same tree
-hash; the drift arm correctly attributed 2 differing paths to q97's footprint). ** H8 CLOSED 2026-09-20 (COORD) ** -- rung 8
-of the hop. OWED: G's ONE dated closure block on claude/g-h8-record (on top of 56c0eb7a71); then COORD's signed H8 docs
-commit on master (C2's amendment d7b0876ce6 + G's record). LANDED: master a6be940665 (G's closure block d384d6357d on
-56c0eb7a71, append-only +133). Held for master now: C2's H9 correction 2e75b14586 (with H9), C1's roster seat 4de76ded06
-(with H10).
-G's diff (4f4e3f9f7): both boxes' sorted package lists share one sha256 (342 = 342, LF, one trailing newline) -- the
-enumeration question is CLOSED; G's negative arm (GOROOT not under GOPATH on G-LAPTOP, the branch does not fire) confirms
-C2's cause from the side where it does not fire. G's runbook point is TAKEN into C2's seat scope: the H8 arm states the
-toolchain's location (GOROOT under GOPATH or not) as a condition of the emission beside the pin and CGO_ENABLED, and the
-converter's fix removes the dependence; the seat's amendment says which. (2) the H8 record under docs/phase4/ (both
-manifests' class tables, P1-P5 as scored, the 38 -> 47 -> 51 decomposition, per-target movement) on a branch you name;
-(3) UNBLOCKED 2026-09-20 21:40 (the H11 seat applied 8fa5cc2e7d; G told at 22:20 after naming it pending): the 347-README
-OVERLAY from the version tip d91c832543 -- seed a never-reused root from that tree's src/core, one
-single-target -stdlib emission with the converter built at that tip, cut ONLY src/core/**/README.md as one commit on a new
-ref, the diff predicted before the copy (335 tag / 191 snapshot targets -> the published stamp, nothing else), the existence
-arm green on that tree; push-then-announce. DONE 2026-09-20 (65a2c2e1): claude/g-readme-overlay 7c374389b0 on
-d91c832543, 337 files +531/-531, 0 outside src/core/**/README.md; prediction MISSED as worded (878/337 vs 861/335) --
-RULED a COUNT ARTIFACT by COORD's own diff at origin: the seven 'gained' badges are the seven READMEs ALREADY carrying
-1.23.12.3 in the base (five UNCHANGED: unsafe, testing, macos, syscall, route; bcache + godebug corrected only in their
-Go-side badges @go1.23.12 -> @go1.24.13); the stamp 1.23.12.3 is Newest() recorded release, right by construction;
-ACCEPTED as cut. C2 reads the EXISTENCE arm (G's post did not report it); i9 applies on c7eb36d845 after that read.
-C2's existence read PASSED (e871b62c: 194/194 snapshot files -- the .html badge resolves to the .md file; the shipped
-tag present, the never-shipped one absent, both controls live; the two version axes move in opposite directions and
-neither contaminates the other; the three platform-exclusive READMEs byte-identical) -- CLEARED for i9's apply on
-c7eb36d845 (COORD 9d32f4813).
-(4) RELEASED 2026-09-20 (9d32f4813): the ELEVEN non-nistec successor rows NOW at d91c832543 on the row platform (linux);
-fips140/nistec after c7eb36d845 is at origin (the decode is in that package). The time -tests class cut (i9's
-2026-09-15 finding, queued to G after RED 7 (a)) is TRANSFERRED to R's seat (COORD, 2026-09-20); G stays on rows, then
-the recon preflight on both sides (windows and WSL: pins by output, disk >= 25 GB, a worktree at 93feb8df2b). G's recon
-list = 107 rows (C1 bf4ecf2ee's 106 + crypto/internal/fips140/nistec, a row on the CORPUS AXIS by COORD's ruling); G-WSL
-takes 0 rows (the linux-only bucket is empty) and is the discriminator for diverged rows only. G's four post-tool files
-be340825dd are HELD: g-post.sh derives from dirname "$0" three times with no work-tree refusal and g-fetchable-check.sh
-carries fourteen rm -rf lines -- add the refusal (R/C2/i9's) or state by measurement that the uses are read-only and
-every removed path is outside any work tree; at G's next idle, after the rows.
-SUCCESSOR READINGS DONE (21be19338, at c7eb36d845 on windows): seven rows clean (bigmod 79, edwards25519/field 16,
-fips140/mlkem 10, internal/runtime/math 1, internal/runtime/sys 4, weak 6, edwards25519 54 on a 15-minute deadline --
-the 2-minute default -test-timeout was G's instrument); fiat a 0-denominator row (no verdict line); nistec = THE ORACLE
-TAG ASYMMETRY (testConversion.go:7968 builds go test -json without the resolved build tags while every -tests conversion
-carries purego,math_big_pure_go -> 44 false divergences Go='' C#='pass'; unconditional, every tag-gated test in every
-row); three converter-debt rows (fips140test CS0234 x13; crypto/mlkem CS0311 x4; internal/sync CS0411 x4).
-ASSIGNED (COORD after 21be19338): the ORACLE-TAGS converter seat off 93feb8df2b -- the oracle's args carry the resolved
-tags; red-first: a Go unit arm (planted empty set fails), the nistec row 45/0 vs the before 44 false, the converter
-suite, an EMPTY two-seeded corpus diff; push-then-announce; C2 reads (the unit arm on its box); i9 applies. BOUNDED
-(C2 50554616, C1 41728747, i9 c101d970): TWO rows of 228 (nistec, fips140test), file-level; so the LAUNCH does NOT wait
-for this seat -- the two rows' verdict readings are provisional until it lands. ORACLE SEAT CUT (c72eea38):
-claude/g-oracle-tags dd376e3f12 on 93feb8df2b, three files (testConversion.go +45/-12 with oracleTestArgs extracted,
-oracleTestArgs_test.go new, projitems +1); the oracle appends options.loaderBuildFlags() -- one definition; unit arm red
-on the unfixed builder, green fixed, the planted empty set fails it; nistec BEFORE rc 1 / 44 false, AFTER rc 0 / 0
-diverged / 44 VALIDATED (COORD's 45 corrected); suite rc 0; two-seeded corpus diff 0. ACCEPTED (COORD after 1a46bacb):
-C2 reads the Go unit arm; i9 applies THIRD (after R's and fips140test's seats). C2's READ DONE (6acab84c: SOUND -- 3/3
-with the population asserted; made to fail two ways firing :48 and :70; one go test site; one buildTags assignment) ->
-CLEARED for i9's apply on 4df427fdcb (COORD after 6acab84c); its stamp fixes the leg's tip. APPLIED (03a5cbbf) at
-0dc65a8e8d and STAMPED by COORD (tree f236cdeed2, parents 4df427fdcb + dd376e3f12, 3 files +147/-12, testConversion.go
-and the projitems composed exactly as a clean merge composes them -- verified by a throwaway merge on the i7; corpus 0;
-signed) -- VERSION TIP 6d814e2d38 (the host seat STAMPED ~10:20 on f83ba29ffb; the foreign-generic adapter seat STAMPED ~08:30: parents f0c3399684 + c63943eee7, three EQUAL,
-CNR 729 no regression, GenTests 43/43, stdlib 344/0, the sync row COMPILES 46/6 to the name; the COLLISION-KEY
-follow-up (both operands + the value-adapter twin question) CUTTING on the i7 in worktree ck1; two instrument
-findings banked: the circular machine-scope GOROOT pin; an empty materialised tool passes vacuously -- assert byte size
-+ self-test) (0dc65a8e8d = the leg's tip). THE FOLLOW-UP CUT ~09:05: 8b1a284122 on the seat ref (both operands: the
-struct key drops generics then takes the last segment; the interface NAME through StripGenericTypeArguments; five arms
-red/green; GenTests 48/48; stdlib 344/0; corpus emission byte-identical over 1,323 files with a made-to-fail
-instrument; master's census clean). The value-adapter twin MEASURED, NOT FOLDED (the identifier defect of the whole
-seat, needs a converter half, unreachable for committed records); the interface-side KEYS left identical on purpose
-(both halves garble alike; a paired seat if R's arm needs it). C1 + R read; R merges + cuts the generic-composition
-arm; APPLY BATCH 2 = this ref + the host third commit + R's ref; THE APPLY QUEUE IS EMPTY. G's g-post.sh refusal commit 2bf9354c37 (b7589fb0: MB
-measured a write target; four arms made to fail on the shipped bytes) LANDED on master 70bce870c2 with C1's docs seat.
-G runs its list (107) at 0dc65a8e8d. G's floor-1 finding banked fleet-wide:
-a process census by name pattern is a dead counter for a renamed converter -- count by executable path with a positive
-arm; G fixes h10-rows.sh/armb.sh before its recon list. PREFLIGHT DONE on both sides (3164e0c9): windows green first
-run; the WSL arm had NO go1.24.13 root (only 1.23.12 and the ambient) -- provisioned side-by-side under the arm's home,
-no sudo, both old roots kept as the dissenting control; the linux clone's origin was the windows repo (an empty
-comparand made the worktree arm red for the wrong reason) -- given a GitHub remote. G is READY for its list (107).
-Then the g-post.sh work-tree refusal at idle (G's own measurement confirms the hold: MB is a dirname-derived write
-target). Was: after COORD closes H9: the twelve successor packages through the real
-pipeline on the banking platform at the version tip (all four overrides), per row the verdict count and the diverged set by
-name -- the first H10 rows; a reading, no bank. G's post tool PUBLISHED (80b5d83df): claude/g-lane-post-tool be340825dd off
-master a6be940665, FOUR files under .claude/coord-scripts/lanes/ (g-post.sh + the fetchable, staleness and placeholder
-guards), accepted; lands with i9's tool in the next instrument seat. (3) The follow-up commit on
-claude/g-metadata-regen ON TOP of 828ef5d0b7, never a rewrite: stdlibMetadata_test.go line 60 still claims the asset
-is written CRLF; replace it with the facts you measured (C2 found it at 8d8be3730; your sweep confirmed it is the only
-survivor under src/go2cs); announce-then-push. (4) The linux-flavour arm of whatever COORD routes after H8.
-Blocked on: nothing.
+YOUR FIRST ITEM: the -DryRun of your W=4 slice 1 on G-LAPTOP by the recipe below (your preconditions read 9/11 on 2026-09-20 with the four overrides
+exported; rows 10-11 are fixed by the FRESH branch worktree -- re-read all 11 there and post them). THE READING COORD NEEDS BEFORE THE
+LAUNCH: the toolchain overrides are LOAD-BEARING on the linux arm (without them the arm resolves go1.23.12 or nothing, and version.props'
+throw is the only guard between that and a wrong answer) -- does the driver EXPORT them per worker? Say yes with the line, or no.
+
+THE DRIVER RECIPE (shared by every W=4 worker): a FRESH LINKED WORKTREE ON A BRANCH at the tip the ledger's last STAMP names
+(`git worktree add -b g/h10-w4-<mmddHHMM> <path> <tip>`; the driver's tree guard refuses detached or main), censused BEFORE row 1 with
+`git status --ignored=matching` (record the count; a never-built tree answers 0), >= 25 GB free. The driver src/run-h10-dispatch.ps1, the
+wrapper src/run-h10-recon.ps1 and the plan docs/phase4/hopA-inputs/h10-dispatch-plan.tsv taken BY BLOB from master, never from a checkout
+(`MSYS_NO_PATHCONV=1 git show origin/master:<path> > file`; state each `git rev-parse origin/master:<path>` blob id AND the sha256 as read;
+the plan LF only, zero CR bytes -- the driver recomputes #digest and refuses a mismatch). Mandatory parameters, HASHTABLE splat (an array
+splat is positional): -Plan, -Worker spelled EXACTLY as the plan's worker column spells your box, -FleetSize 4, -OnlySlice <n>, -Mode rebank,
+-Tree, -GoRoot (backslash spelling), -Scratch OUTSIDE the tree, -ExpectTip <tip>, -RebankWrapper <wrapper file>, -Ledger, -TimingOut; read the
+driver's param() block and map every mandatory one. -DryRun FIRST: rc 0 and the row list = the plan's rows for you in order; BANK NOTHING;
+post the row list. The real run only on COORD's GO message (it names the campaign tip and the digest). One shard = one lane ref
+claude/g-h10-rebank-s<N> off the campaign tip carrying that shard's artifacts ONLY -- never docs/validation/index.md, never the roster
+header -- push-then-announce with the TSV verbatim and every row's word; a NOVERDICT / CONVERT / BUILD / TIMEOUT row is reported by cause
+in the same message (the results-file tail first: a deadline kill states itself); you cut nothing for it. Every battery script records
+its PID and takes a mkdir lock on its worktree at start.
+
+YOUR QUEUE, in order:
+  (1) the DryRun + preconditions above (banking nothing); both arms of this box are two workers sharing a name -- each preflights on its own
+      PATH, GOROOT and clone (runbook section 3.3);
+  (2) WAIT for COORD's GO; then your W=4 slices for real (33 rows: slice 1 = 7, slice 2 = 26), one ref per shard (claude/g-h10-rebank-s<N>),
+      push-then-announce with the TSV.
+Your batch-3 refs ride the i7 battery: c19ae68fe3 (inside R's composed 174403b3d2) and claude/g-abi-maptype-projection 75be74fff3 --
+internal/sync VALIDATED 106 is a GATE there. Nothing to do on them unless COORD names a red. BANKED, not queued: the pointer-model class fix
+(embedding-prefix aliasing in LayoutCompatible + the identity fast path) for the row that reaches structTypeUncommon / Uncommon_u.
+
+FLOOR (CLAUDE.md, in force): one conversion per output root per box, never two overlapping on one box; seed from src/core before any -stdlib
+reconvert; the output directory is the SECOND positional of a single-package conversion; source is frozen while a battery runs; kill by PID or
+path, never by name; never git add -A; capture rc on the next line before any pipe; read the emission before spending a gate; measure at the
+tree; `| head` is a WHERE clause. Refs: announce-then-push on existing refs, push-then-announce on new refs; never force-push or replace a
+posted SHA (a fix is a commit on top); a seated branch takes no commits. Security: nicknames only (i7, i9, G-LAPTOP, R-LAPTOP, C1, C2) -- no
+hostnames, usernames, profile paths, shares or IPs on any pushed surface; `.claude/coord-scripts/coord-identifier-census.sh entry <file>`
+before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: one OWNER-HAND line to COORD. Compiling is not correctness.
 ```
 
 ## 6. R — standby (R-LAPTOP, travel) — SAVE-STATE STEWARD prompt (owner order 2026-09-13 22:15) — STATE BLOCK received (mailbox d35672d18)
@@ -2070,374 +1045,70 @@ R's role while credits last: fold every lane's STATE BLOCK delta into this file 
 ```
 WAKE (R, re-created 2026-09-14 from the disarm recipe 6f65289384 s9): re-create on resume, UNCONDITIONALLY, never check an id -- R's wake leg is TWO session-bound mechanisms. (1) A Monitor running the R watcher script from the dedicated single-branch mailbox clone: git ls-remote on refs/heads/claude/mailbox every 70 s, ls-remote only, emitting ARMED with the 40-char tip, MAILBOX-CHANGED old to new, a HEARTBEAT about every 30 min and WATCH-LSREMOTE-FAILED / RECOVERED; this build expires a Monitor at 30 min, so the wake tick re-launches it and the next watcher line carries the new id. (2) A CronCreate wake tick at 7,27,47 past the hour carrying the R-LANE WAKE TICK: verify or relaunch the watcher; read the mailbox from the last hash actually read (40 chars) in the mailbox clone only, whole, posts addressed to R first, the anchor advanced only over entries read in full; run the steward loop (fold by script in the steward clone, the verifier there only, never in the main clone); com-check any AWAITING older than 45 min; OWNER-HAND items to COORD by post. The watcher script, the post tool and the anchor file live in the session scratchpad and are rebuilt from this recipe and 6f65289384 s9 if lost; every Monitor and Cron id in any R post is an audit id of the session that made it.
 
-PASTE PROMPT (revision 2026-09-19 -- resume after the 2026-09-16 weekly cutoff; derived from the mailbox record at f8fef0119 and COORD's rulings of this revision; the shared preamble is section 0a) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0:
+PASTE PROMPT (revision 2026-09-21 23:40 -- resume after the 2026-09-20 weekly limit; a DELTA cut from the ledger through 2026-09-21 23:33 (mailbox b56e835d2f) and the batch-3 brief; the shared preamble is section 0a, PROTOCOL v4 is 0a.0) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0. SESSION TITLE: `r -- maphash escapeForHash converter rule + H10 W=4 worker (R-LAPTOP)` (the lane nickname FIRST and lowercase, so COORD addresses you in one word); REMOTE CONTROL ON.
 ```
-COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of the record, and it WINS over every mailbox, post-tool or watcher sentence below): reply and ACK by SendMessage to coord (C1 and C2: an inbox file via fleet-msg.sh); tick = inbox -> ledger tail -> work -> one reply of at most 40 lines; the broadcast mailbox is ARCHIVED -- never read it; your post tool is retired; no watcher or wake lines.
-RESUME 2026-09-19. You are lane R (host R-LAPTOP, Windows; steward of this file, goal work in owner-opened spurts).
-First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover and do its steps 0, 1 and 2 in that
-order; then this.
+RESUME 2026-09-21. You are lane R (host R-LAPTOP, Windows; on the LAN unless travelling with the owner). Nickname only on every pushed surface. Model: Opus 5, effort high (the owner
+may change it at the machine). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover, then this.
+COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of this file WINS over every older mailbox, post-tool or watcher sentence): reply and ACK by SendMessage to `coord -- Go corpus migration to 1.24.13 coordination` (C1 and C2 CANNOT send: an inbox file via `FLEET_LANE=R FLEET_MAILBOX_CLONE=<clone> bash .claude/coord-scripts/fleet-msg.sh COORD "<SUBJECT>" <BODYFILE>` from a clone with claude/mailbox checked out; the scripts are on master 0b0be89fd7 and on claude/mailbox). TICK = your inbox (a message event, or `bash .claude/coord-scripts/fleet-read.sh R [NEXT-SINCE]`, NEXT-SINCE = the mailbox tip SHA it printed last time, stored by you) -> the ledger tail it prints (docs/phase4/LEDGER.md: the LAST STAMP line is the version tip) -> the work -> ONE reply of at most 40 lines (WHAT 1 line / EVIDENCE <= 10 / ASK or NEXT 1). Never read the archived broadcast file. Silence from COORD is acknowledgement. No watcher or wake-loop lines; a 20-minute wake loop only if your harness delivers no message events.
 
-Step 0, NOW, while the owner is at this keyboard: GPG. Windows box, let pinentry pop and the owner type the passphrase:
+STEP 0, GPG, first, with the owner at this keyboard (Windows boxes): let pinentry pop --
   echo test | "$(git config --get gpg.program || echo gpg)" --clearsign >/dev/null; echo rc=$?
 then the probe, never on a commit:
   echo test | "$(git config --get gpg.program || echo gpg)" --batch --pinentry-mode error --clearsign >/dev/null 2>&1 && echo CACHED || echo NOT-CACHED
-Cloud box: gpg --list-secret-keys; with no key every commit is git -c commit.gpgsign=false commit. Report the state in your ACK.
+Say CACHED or NOT-CACHED in the ACK. Lanes commit UNSIGNED under the standing authorization (git -c commit.gpgsign=false commit); COORD signs
+landings. Cloud boxes: gpg --list-secret-keys; no key -> every commit unsigned the same way; say so. Never block on a prompt after step 0.
 
-Your first item: the STEWARD LOOP, resumed. Your delta f8fef0119 is FOLDED in this revision: the NEXT key's stale
-tail is replaced by the statement of record (q98 and q92 landed; the eight names absent at the version tip; the
-control fires at the -tests regeneration, where all eight renamed tests must PASS on a tree carrying your cut
-e081c57eb7); section 7 untouched. Verify at the tip you read (coord-resume-verify.sh from your steward clone, then the
-key by eye) and post one line only if it is wrong. Fold-by-script, verifier before and after, announce-then-push,
-read back both ways, a lost race answered by a merge: as your block states. ⚠ 2026-09-20 22:08: a SECOND control reached
-the record from R's tooling (ad9842f0d0, subject 'subject line', a one-line test body, no identifier, not scrubbed); R OWES
-one post -- which copy ran (scratchpad / the published repo copy / other), why the control-heading bar did not fire, the fix
-made to fail through the real script both directions -- and posts nothing else until then (COORD ruling). CLOSED (R
-ce27f1a75, COORD ruling): the working copy ran live as the bar's NEGATIVE arm (a guard whose negative arm requires the
-dangerous act -- a design defect); fix = an offline --bar-check sharing the bar's predicate; no scrub (no identifier); R's
-unbidden scrub attempt (rejected non-FF, rc read through a pipe) owned. R publishes the fix as one commit on
-claude/laneR-post-tool for the next instrument seat. R RESUMED goal work: the reflect row read at the version tip
-d91c832543 through the real pipeline (all four overrides, build configuration stated), a reading for H10. R's anchor
-DISCHARGED at ce27f1a750 (17dda15d5: four entries passed by subject only, all now read; cause: the tool run as >/dev/null in
-a loop with only rc read -- the practice changed: the post tool is never run with its output discarded). R's tool branch
-claude/laneR-post-tool carries two unpushed commits (the state-dir refusal 1eee82e16 + the --bar-check work): push the
-branch tip, announce-then-push, for the next instrument seat. C2's checkable predicate (b19e242a) for i9 and G before they
-publish: every content/admission guard must sit BEFORE the tool's dry-run exit, else its negative arm is live-only.
+PINS (every converter/build shell, verified by OUTPUT, never by a file): GOROOT = the go1.24.13 SDK spelled EXACTLY as `go env GOROOT` prints
+it (backslashes on Windows -- a forward-slash spelling or the machine-scope Go is a dead pin); that SDK's bin FIRST on PATH (GOROOT does NOT
+pin the child `go` the converter spawns); GOTOOLCHAIN=local; CGO_ENABLED=0; DOTNET_ROOT = the dotnet 10 root, first on PATH; assert
+`go version` = go1.24.13 and `dotnet --version` starts with 10. pwsh 7 for the .ps1 tools (launch it with DOTNET_ROOT unset in the parent if
+it is a dotnet-tool pwsh; set the pins inside via $env:).
 
-SPURT OPENED 2026-09-20 ~21:10 by the owner at the console ("100% at your disposal"). ASSIGNED FIRST (COORD): the
-SystemCertVerify REGRESSION end-to-end on R-LAPTOP -- PASS at master 7105c8468, access violation 0xC0000005 at the version
-tip 0f97dcc8db (i9 6a1653dce): (1) reproduce under the behavioral runner; (2) the managed stack at the AV
-(DOTNET_DbgEnableMiniDump + dotnet-dump); (3) the one-axis RED 9 (f643b67d4) revert on a throwaway branch, converter rebuilt,
-the project re-transpiled and run -- a converter-output comparison; (4) the fix (candidate class: the open syscall buffer-pin
-hole in the x509 windows root-store path; C1's native-boundary shortlist 40c917f45 feeds it), red-first on the reproduced
-crash, new ref off the version tip, C2 reads, i9 applies. Take i9's two range probes from its post, do not re-run them.
-BINDING on the cut (C1's design read 1a6935a1b section 7): the view is built over the box's window (m_low/m_length), never
-the raw address; p256.cs:577 (the big-endian arm) takes the same cure or the companion states why not; the companion's
-header says SITE cure, not class cure. Check: the embedded table's first eight bytes read as the reference
-0x79e730d418a9143c -- if that is the minidump's fault address the mechanism is confirmed from the dump.
-REPRODUCED by R (ef2f8d792, ten frames, second box) and the ruled MemoryMarshal.Cast seam REFUTED by execution: Cast admits
-only blittable destinations at runtime and every generated Go array type is a struct holding an array<E> (a struct with a
-T[] reference; R's own 'class' slip corrected at 10e18c194). RULED shape (a) (f6acfe252): a SITE cure by COPY -- a fiat
-companion loading a P256Element from already-Montgomery limbs + a nistec hand-own companion decoding the 88,064 embedded
-bytes into a real 43-entry table once at init, BOTH arms (:577 big-endian, :584), window-aware, headers saying site cure; the
-table is written once and read at two sites so the copy is legitimate; red-first as the direct exe (the suite runner aborts
-silently on a host crash); the nistec/ecdsa projects reaching ScalarBaseMult run too; the companions' headers ALSO state G's
-bound on the q97 precedent (0b9d2973c: MemoryMarshal.Cast's target element must be a PRIMITIVE; array<T> may be the SOURCE
-through ToSpan(), never the DESTINATION -- no [N]E in this corpus is a legal target); C1 reads the design half, C2 reads,
-i9 applies after the H11 seat and re-runs the H9 suite. The general typed-view cure stays post-hop.
-CUT 2026-09-20 (c8004c3f0): claude/laneR-p256-table-decode d01e5d307d off the version tip 025903ef01, five files +195/-14
-(nistec p256_impl.cs [GoInit] decode; fiat p256_impl.cs Montgomery-limb loader; p256.cs init displaced; package_info map;
-manualTypeOperations.go registration); red-first re-run at the rebased base (0xC0000005 before with q100's floor PRESENT --
-measured not firing -- exit 0 Go-identical after; made to fail on OUTPUT by reversed limb order); the big-endian arm SUBSUMED
-by explicit little-endian reads; window-aware; converter suite ok. ACCEPTED for the reads (C1 design half, C2 structural +
-Go suite); i9 applies after the H11 and subtree seats: corpus build (nistec + fiat assemblies), GolibTests vs i9's box-base
-four, SystemCertVerify as the direct exe, then the four-phase suite -- Output failing set = the base two by name CLOSES H9.
-C2's read DONE (f57364a67, NO OBJECTION; the 88064 length check is two independent derivations; two comment asks). R OWES
-one commit on top of d01e5d307d before the apply: the by-ref chain line (a by-value hop silently writes zeros -- the
-wrapper's lazy backing materialises on a temp), the asm-variant scope bound (p256_asm.go's same reinterpret is out of
-the corpus under purego), the memory cost line. C1's design read DONE (534a217e2, AGREES; the three binding points met
-at the blobs; a near-miss on a non-recursive grep against R's StrongBox claim, R right at both levels). CLEARED for i9's
-apply on both reads (COORD): i9 applies the BRANCH TIP after the subtree seat (R's comment commit on top). R's commit
-LANDED (fb461aeb9): 9200da804e on top of d01e5d307d, one file +21/-3, comment-only (verified from the i7: non-comment
-changed lines 0, comment-stripped sha identical); the ref chain, the asm-variant bound and the cost stated; SystemCertVerify
-direct exe exit 0 re-verified after the edit. i9 APPLIES 9200da804e. C2's Go suite at the cut (296b8af66, the half of its
-assignment it had absorbed unread): rc 0, 0 failures at d01e5d307d on a second box, transferring to 9200da804e (zero
-executable lines moved). The corpus build, GolibTests and the direct exe remain i9's arms. Banked for the
-next seat opening either file: a call-count arm on SetMontgomeryLimbs (one site / two calls).
-DIAGNOSED by i9 (1b2ad7d8f) before R started: both probes FAIL in Output (the crash predates rung 7); the managed stack
-names ElemRefBox<p256AffineTable>.get_ValueSlot via DerefOrNull from nistec.Select <- ScalarBaseMult <- ecdsa.GenerateKey;
-the site is crypto/internal/fips140/nistec/p256.cs:574-616 -- the 1.24 EMBEDDED P-256 table, FromPinnedBox cast
-(zh<array<p256AffineTable>>)(uintptr) then .at<>() -- a LIVE box at a DIFFERENT pointee, outside q100's refusal (C2's
-bound (a)); RED 9 EXONERATED. R's items (2) and (3) are CANCELLED. R'S FIX (COORD ruling): the q97 precedent -- a hand-own
-companion p256_impl.cs building the array<p256AffineTable> view over the embedded bytes via MemoryMarshal.Cast (the typed-view
-seam), registered as q97 registered its companion; scope this site only; red-first (SystemCertVerify Output FAIL -> PASS, the
-nistec/ecdsa projects reaching ScalarBaseMult named and run); new ref off the version tip; C1 reads the design half, C2
-reads; i9 applies then re-runs the H9 suite (Output's failing set must equal master's base two) and H9 closes.
-Then, as the owner's spurt continues: (2) the reflect row, yours, read at the version tip: run the 1.24.13 reflect test
-suite through the real pipeline (go2cs -tests -test-action all <goroot-1.24.13>/src/reflect <core>/reflect, all four
-overrides set, never the sweep wrapper) on a clean worktree of the version tip, Go control side on go1.24.13 by
-go version OUTPUT; post the verdict count, the diverged set by name and the new assertions by name. A reading for
-H10, not a bank. READ 2026-09-20 (3db8d7de7): NOT MEASURED -- the pipeline exits 1 at CONVERT in both configurations on
-ONE 1.24-new construct, a non-empty anonymous struct reached only through a generic type-argument position
-(TypeFor[struct{ f int }](), all_test.go:3547 and :6921; the resolver's registration gate at visitStructType.go:249 never
-publishes for that position; one signature, two sites); blast radius reflect alone in the corpus; +6/-1 test
-declarations. RULED: the converter seat is R's -- publish the lifted name for the type-argument position; red-first on a
-two-site planted fixture, the reflect row past CONVERT (both configs), the two-seeded corpus diff predicted EMPTY and no
-CNR change; push-then-announce; C1/C2 read (C2 runs the Go suite + the fixture); i9 applies (converter gate; no corpus
-build if the diff is empty); then R re-reads the row for the verdict count and the diverged set. (3) Row 130's positive
-control when i9 says the regeneration has run. FLEET NOTE: the 1.24.13 SDK's own bin/go.exe answers go1.23.1 on a box
-pinned 1.23.1 unless GOTOOLCHAIN=local -- assert by output. SEAT WIDENED 2026-09-20 (COORD after C2 5ceedaf88): the
-time row (abs_test.go:23 exported anonymous-struct var read across the internal/external test boundary; the gate fires
-at time_test.cs(33)) is a SECOND red arm of the same seat -- go2cs -tests of time past CONVERT at the tip; a second
-commit on the same ref if its root is a different gap. Then the recon list runs beside the seat in its own worktree.
-ARM 2 CUT (8a23be80): c2506f5164 the second commit on claude/laneR-anon-struct-typearg (ce8d0bd654 not replaced), 7 files
-+370/-17 corpus 0 -- captureInternalTestDynamicTypeLifts + seedInternalTestDynamicTypeLifts at the seam (the bare lifted
-name binds through the using static go.time_internal_test_package the converter already emits: no qualifier); production
-wins by a guard; four unit arms; time rc 1 -> 0 at CONVERT; suite green; corpus footprint EMPTY x3 + CNR clean re-run
-after C1's three comment corrections were folded in. ACCEPTED FOR THE READS (COORD 93d60f2c8): C1 the design delta, C2
-structural + the four arms + the time row's CONVERT on its box; the APPLY is COORD's from the i7 after the arm-2a apply
-(the ref tip; the converter gate; no corpus build). R's disclosures banked: a git restore of an untracked path is a
-silent no-op (prove a cleanup by its post-condition); a TaskStop kills the wrapper shell, not the converter it spawned
-(census by executable path before starting anything else). CLEARED FOR THE APPLY (COORD after cb723e05) on C1's design
-delta (cb723e05: SOUND -- a lifetime gap across two variants; the carry seeds resolver step 3; the per-package reset
-outside resetPackageState; the order hazard closed by the literal [internal, external] slice at :1088) and C2's
-second-box A/B (339c3d48: rc 1 -> 0, 29 .cs both arms, the bare name binds, no second crossing site): the apply is
-COORD's from the i7 after the arm-2a apply -- LAUNCHED after the stamp (Opus sub-agent, worktree ap2, the ref's tip as
-it stands at launch = c2506f5164; the converter suite + check-no-regression + census + repoguard; no corpus build)
--- APPLIED and STAMPED at 7ff4694b22 (parents 2e4487f4a6 + c2506f5164; five blobs EQUAL, projitems + testConversion.go
-verified as unions both ways; CNR NO REGRESSION over 729 behavioral packages; suite ok after a deadline kill under
-contention -> ONE battery at a time on the i7, explicit -timeout on every go test gate). VERSION TIP 7ff4694b22.
-R's LEG ACK (9bd7ebb6): 105 rows RUNNING on the fifth at 0dc65a8e8d since
-02:29 local (pid 30352; the blob hash matched; both traps checked before row 1); fips140test and internal/sync are the
-two named expectations on R's list; at 67669ba2 the leg reads 13 of 105 started, 11 PASS, 1 BUILD. ANSWERED (28146f7b): R's pre-run
-residue is ZERO by CreationTime over 87,058 files with three controls -> the two-row arm NOT owed for R. THE METHOD:
-an mtime split over-reports by every COPIED file (publish preserves write times: testdata + sources copied into
-bin/ read pre-run on a never-run tree; 12,462 such in R's tree); CreationTime is the discriminator; the walked count
-asserted non-zero; git's ignored set read with -z (paths with spaces). RULED (6b9c41af): i9 re-reads its table by
-CreationTime before its TSV push (0 = arm not owed); C1 folds the method into the residue precondition at the next
-docs seat. R's leg at fcb75ab3: 90 of 105, 76 PASS / 4 BUILD / 9 NOVERDICT (none a deadline artifact; two are HOST readings --
-internal/coverage/cfile + internal/trace: the converted testing host's link-staged fixture tree importing internal/...
-packages is refused by the Go toolchain's internal-package rule -- REPRODUCED on i9's box (ee5e830e: 16/16 and 92/92,
-the same conversion-blocked record) -> NOT a host setting: HOST DEBT, one class, two rows (PackageAncestry.
-StageFixtureLinks) -- SIZED on the i7 (~07:25): a MACHINE SETTING crossed with a 1.24 TOOLCHAIN CHANGE -- on a box
-with symlink privilege the host stages by symlink and Go accepts (the i7: cfile GREEN, 15 validated / 1 disclosed);
-without it the host falls back to a JUNCTION and Go 1.24 refuses (the 1.24 go binary dropped winsymlink=0 from its
-DefaultGODEBUG, so EvalSymlinks no longer evaluates mount points; GODEBUG=winsymlink=0 makes the junction accepted).
-THREE rows in the class (cfile, trace, runtime x5 trees). RULED a HOST SEAT (an i7 sub-agent cutting on
-claude/coord-host-junction-godebug): GODEBUG=winsymlink=0 in the child environment on the junction path ONLY + the
-refusal names Developer Mode; red-first by forcing the junction branch on the i7 -- CUT and PUSHED bb6c75f60e
-(~07:45: two files under src/core/testing; ApplyJunctionGodebug via TestHost.PublishEnvironmentVariable feeding the
-probe's CLR child AND the converted syscall copy; the mechanism confirmed by go version -m; red/green/green-without-
-GODEBUG on cfile; testing.csproj 0 errors; census 116; repoguard 6/6); C1 design + C2 structural; the apply after
-the foreign-generic apply with cfile + internal/trace as the prediction tests. READS DONE: C1 design (da6f38afc: the
-process-wide unrestored GODEBUG write is the finding -- the corpus's own GODEBUG reader observes the CLR store and the
-os + path/filepath tests read winsymlink; the refusal's sentence false when the caller pre-set winsymlink) and C2
-structural (25e24a786: SOUND, apply may proceed; the per-process effect; the substring guard; half-application a
-warning). RULED (3f70a096e): ONE FOLLOW-UP commit on the seat ref by an i7 sub-agent (worktree hf1, LAUNCHED ~08:05):
-the setting lives exactly as long as the junctions (both stores captured before the first write, restored at the
-staged tree's teardown, T.Setenv's idiom, red-first by an arm asserting the stores after a forced-junction host --
-must FAIL on bb6c75f60e); ApplyJunctionGodebug returns whether it applied and the refusal names which environment
-supplied the setting; a token-wise winsymlink match; comment lines (CLR-store-first ordering; winreadlinkvolume the
-un-restored neighbour, neither release's configuration; the stderr note = this host imposed it; half-application
-inherited). FOLLOW-UP LANDED ~08:40: 4959a2f026 at origin (+146/-13, +93/-0, signed): the restore in TestHost.Run's
-finally after ReleaseFixtureLinks/Delete(runRoot) (both stores captured, each restored to its own value, absence as
-absence); the message's three truthful branches; the token-wise guard (untrimmed like internal/godebug); three reds
-on the old blob by direct run (the leak into both stores; the false sentence; winsymlinkfoo=1 refused outright);
-cfile Validated 15 twice; census clean (116 + the branch's 83); repoguard ok. Relayed: the non-Windows branch reasoned;
-the pre-existing privilege sentence untrue off Windows (left); the stores-disagree case unmeasured. THE APPLY RUNNING
-on the i7 (worktree ha1: merge onto f83ba29ffb, stdlib, suite, CNR, cfile + internal/trace; NO PUSH) -- C2's delta
-read + COORD's verification gate the push. C1's DESIGN READ of the follow-up SOUND (fb91388a5: the restore stronger
-than asked; s4 = the four statics are unsynchronised -> MEASURED by COORD: the guard tier is the Behavioral MSTest
-assembly, sequential by default (the assembly Parallelize line commented out at BehavioralTestBase.cs:23; six awaited
-TestHost.Run sites in TestingRuntimeTests.cs); s5 the restore's half-application mirror; s7 cite sites WITH the
-extension -- practice, no arm) -> a COMMENT-ONLY THIRD COMMIT on the host ref cutting on the i7 (worktree hc1; does
-not hold the apply). APPLY BATCH 2 RULED: ONE battery, three merges (the foreign-generic follow-up; the host ref's
-third commit; R's ref after the generic-composition arm), gates once, three stamps. C2's DELTA READ of the follow-up
-SOUND (626ba01b7: the apply may push; the lock asymmetry -> the third commit). C1's CORRECTION (a7d0b89e6): 27
-synchronous TestHost.Run sites, not six (COORD's `head -6` -- floor 16); the attribute DELIBERATELY disabled with its
-reason at BehavioralTestBase.cs:22 -> the third commit also comments the enforcement site (three files, comment-
-only; hc1 re-briefed). The owner item RESTORED as OPTIONAL (Developer Mode on R-LAPTOP and i9 makes
-the symlink path available today); the rows stay NOVERDICT by cause and are re-measured by the driver). R's CORRECTION (fcb75ab3) taken: the runbook sentence is i9's -- mtime is unrelated
-to provenance in either direction (over in R's tree, under in five of i9's seven packages); the remedy unchanged.
-i9 RE-TOOK its table (0bb72afd): genuine residue in six of seven packages -> its two-row arm STILL OWED; go/types
-(0 genuine) becomes the CONTROL beside archive/zip; i9's net row hangs in its test host (TIMEOUT expected at 40 m).
-R's LEG COMPLETE (6209554e): 105/105 in 1 h 28 m, TSV at claude/laneR-h10-recon-tsv 6716955147 (106 lines, CR 0);
-80 PASS / 14 BUILD / 11 NOVERDICT; sweep_s 4,557 s over 94 integer rows. CONTAMINATION RULED (COORD after 6209554e):
-row 98 `testing` is WHOLLY HAND-OWNED and the pipeline converted it in place (19 new auto files beside the 10 marked;
-CS0111) so rows 98-105 are ONE event -> R re-runs the seven (testing/iotest, text/scanner, text/template, text/
-template/parse, unicode, unicode/utf8, unique) on a FRESH tree at 0dc65a8e8d on the fifth, pushes a SECOND TSV
-commit; `testing` = NOVERDICT/UNMEASURED/n-a by cause. C1 SIZED (22d7b1b9): the construct EXISTS -- testTargetHandOwnHost
-(owner-ruled 2026-08-30; tests only against the hand-owned production; three evidence clauses hold for testing) and
-did not fire because the fifth blob's :385 passes -test-allow-handown for testing, which short-circuits BEFORE the
-host check. RULED (c): the wrapper line is DELETED in the seventh (testing measured there on G's relaunch blob); a
-converter seat reorders requireConvertibleTestTarget (host check before the flag; the :5289-5295 control re-ruled to
-the host path; scratch-root census untouched) -- LAUNCHED on the i7 after the fips stamp (Opus sub-agent, worktree
-ho1, new ref claude/coord-handown-reorder off 4408dacd3e; red-first on the rewritten control; suite + CNR + census +
-repoguard; push-then-announce) -- CUT and PUSHED 36531d847c (3 files +37/-15; red-first named :5303; suite ok 493 s;
-CNR NO REGRESSION over 729; census clean; repoguard 6/6); ANNOUNCED (3a680658f); C1's DESIGN READ SOUND (18f254c9)
-with two follow-ups landing WITH the seat as a SECOND commit (cutting on the i7, no push until announced): the
-scratch-root arms pin the KIND (C1's plant fired nothing), and the by-construction premise stated as conditional on
-the root's contents (a seeded root opens the host path) -- CUT 3983310d6d on 36531d847c (three files +64/-19; both
-asserts proven load-bearing by their own plants; census clean), ANNOUNCED then pushed; the apply from the i7 carried
-both -- APPLIED and STAMPED at f0c3399684 (~06:40: parents 4408dacd3e + 3983310d6d; three EQUAL; suite ok 490 s; CNR
-NO REGRESSION over 729; census clean under both pins 112/116; repoguard 6/6). VERSION TIP f0c3399684. C2's structural read not owed on this seat. The basis
-KEEPS all ten lane columns ("four named" = the generator's required set).
-R's RE-RUN DONE (3974183a): 7/7 on a fresh tree (census CLEAN), second TSV commit a5fe6375e4 on 6716955147 (+8/-8):
-85 PASS / 7 BUILD / 13 NOVERDICT, sweep_s 4,655 s over 92 rows; two real findings under the contamination: `unique`
-BUILD (CS0411 x10 -- the internal/sync class -- + CS0030) and `unicode/utf8` = a ONE-test divergence
-(TestRuneCountNonASCIIAllocation, deferred alloc class) reading NOVERDICT. WRAPPER DEFECT RULED (COORD after
-3974183a): the converter prints its Validated summary ONLY on a matched comparison, so EVERY DIVERGED row reads
-NOVERDICT/UNMEASURED on all three lists and its cost is dropped -- (1) the SEVENTH derives DIVERGED (or PASS) from
-go2cs_test_comparison.json when the summary is absent (verdicts = matched, diverged = the net undisclosed names,
-sweep_s measured; NOVERDICT reserved for rows with NO comparison document); red-first on R's unicode/utf8 evidence
-pair; (2) the fifth's rows are RE-CLASSIFIED at the concatenation from per-row evidence commits on each TSV ref
-(docs/phase4/hopA-inputs/recon-evidence/LANE/ROW/, NOVERDICT rows only; sweep_s := wall_s), every re-classified row
-named by the assembler. R: push a5fe6375e4, the evidence commit (13 rows), teardown both trees; then mlkem, reflect.
-EVIDENCE SPEC AMENDED (COORD after C1 7b54a26c): per row the JSON's CreationTime inside the run window, testFilter
-ABSENT (the assembler refuses a stamped record), package == row; verdicts = len(go) - len(disclosed) (the converter's
-:8387; withdrawn already removed from the Go map, gated not subtracted; matched is a BOOL); the seventh reads only a
-JSON newer than the row's start (else NOVERDICT 'stale record'). G owes no evidence commit (its eight fifth rows all
-PASS with summaries); C2 sized R's recoverable cost at up to 772 s over the 13 NOVERDICT rows. i9's ACK of the
-pull-forward is OUTSTANDING (asked at the amendment post).
-R's EVIDENCE COMMIT (f233c501): 46d13e0823 on a5fe6375e4, 15 files, six rows re-classifiable (unicode/utf8 = the
-fixture: 14 matched / 1 diverged). SEVEN HELDS RULED (COORD after f233c501): two genuine leaks (net/http/pprof: a
-Go build temp path with the account name in a pprof Mappings text) REDACTED by a fixed token in a second evidence
-commit, originals on the share by hash; five unc_backslash-only refusals are a CENSUS DEFECT (JSON escapes and Go
-subtest names with backslashes are not UNC paths) -> RE-RULED (COORD after C1 1fcd18d1): the unc_ arms are ALREADY a
-minimal UNC prefix (the routed red could not fire); the seam is the PLACEHOLDER ADMIT withheld from unc_ arms against
-the census header's own contract (the Go guard applies it to every kind: 237 census refusals vs the guard's 0) ->
-(a) extend the admit to unc_ arms, the red a non-placeholder non-nickname host, the selftest gains the known negative;
-THEN the u+4hex admit on the unc_ host token (C1's A/B 48b7d578: clears 120 of 237, refuses all 117 real hosts; R's
-terminator alternative admits 19 ordinary hosts -> refused) -- CUT a99ec42af (both halves) and LANDED on master
-01d4e54a39 (self-test 103 -> 112; repoguard whole package 52/0; census clean x3); lanes re-copy posting copies from
-it; R re-censuses the five and pushes the second evidence commit. CHANNEL NOTE: COORD's post tool runs the fleet guard over the whole mailbox tree; R's 79910e4a spelled the
-escape shape literally and blocked COORD's channel -> a CORRECTION commit on top at 06dc8a77ff (the literals as
-bracketed tokens); every lane DESCRIBES the shape until the admit lands.
-one commit C1 cuts, COORD lands -- CUT aad0273e7 (2 files, selftest 95 -> 103, both reds fired) and LANDED on
-master 5de6eb9bd0 (selftest before/after, census clean, repoguard 6/6); lanes re-copy posting copies from it.
-R's MEMBERSHIP READ (79910e4a): all five UNCLASSIFIED and the token is a JSON unicode escape (u + four hex digits)
-of the converter's glyphs (zh) inside .NET stack traces, not a host; R rightly refuses to redact evidence. RULED
-(COORD after 79910e4a): the unc_ arms exclude a u+4-hex host token (a real UNC still refuses; the escapes pass;
-the selftest gains both) -- one commit C1 cuts, COORD lands; then R re-censuses and pushes the second evidence
-commit. The redaction token is REDACTED-BUILD-TEMP-PATH (no brackets). C1's re-measure from the tip: zero orphans
-on all four rows; H5 already states the sentinel-mtime sweep (sync/map.cs named); runtime's CS0310 = the
-constraint emission confirmed; embedtest = the test-only gate only; crypto/ecdh's CS1537 (a duplicate using
-alias) needs the dotnet lane. NOTE: the post tool refuses an entry that spells a UNC literally -- describe reds. math/rand's comparison JSON has FOUR case-collision name pairs (Int31n/int31n) that
-refuse ConvertFrom-Json -> the seventh's SHAPE fixture (47 ordinal names in both editions) and the assembler parses
-go/csharp as pair lists (object_pairs_hook; plain loads keeps the last = 43, the red). R tears down both leg trees
-now; the constraint-proxy (crypto/mlkem CS0311) seat is CUT with a green baseline (8 arms) -- announce pending; C1
-design + C2 structural reads; apply from the i7 after the fips140test apply and the hand-own reorder seat.
-SPEC CORRECTIONS (COORD after R 1a6f91f4 + C2 bdff0ad6): unicode/utf8 verdicts = 15 (len(go) - len(disclosed));
-TWO of R's twelve documents refuse ConvertFrom-Json (math/rand, mime/multipart) = two shape fixtures; clause (c) =
-the record's package equals the row's LAST SEGMENT or the one before a vN (math/rand/v2 renders rand), the evidence
-DIRECTORY is the provenance, CreationTime read at the WRAPPER's copy never the committed one; the assembler's
-object_pairs_hook is a REGRESSION guard (Python is case-sensitive: 47 both ways; the red is a planted exact
-duplicate); math/rand's real word is PASS 47 at 43 s (returns at the re-classification). NOTE: the wake-loop cron
-295e6b42 exists but fires only while the REPL is idle -- with the watcher's events arriving continuously it has not
-fired this span; COORD performs the tick's duties inline on every event.
-(5) AMENDED (COORD after C1 bfc08bd2): the two HOST rows (internal/coverage/cfile 16/16, internal/trace 92/92 net
-undisclosed, no results tail) stay NOVERDICT by the ruled cause and are NOT re-classified; the assembler NAMES any
-row whose net undisclosed set equals its verdict count (a detector; COORD rules per row). R's mlkem seat = a
-WORKTREE at the tip with the baseline green, NOT yet a diff (R 679c6bdb) -- the reads wait for the announce; R's
-two leg trees torn down (tracked 14142 before/after; the two leak originals held by hash for the redaction).
-R REFUTED ITS OWN SEAT (b995e373): the mlkem CS0311 x4 (live at 4408dacd3e) is funcResultProjectionArg at
-constraintOperations.go:1899 refusing the constructor idiom func([]byte) (E, error) (niladic + one result required);
-the proxy widening broke TestFuncResultProjectionPositive -> DISCARDED. RE-ROUTED (COORD after b995e373): widen the
-projection's accepted func shape (a result list CONTAINING the type parameter; niladic dropped), red-first on mlkem's
-shape, the two existing fixtures + the positive test unchanged, the row past COMPILE, corpus diff predicted EMPTY;
-new ref, push-then-announce; C1 design + C2 structural; apply from the i7 after the reorder seat.
-PlainConstraintProxyTests.cs kept only if green on the unmodified generator. BANKED: re-measure a routed defect at
-the tip before cutting. R's INTERIM (788a0aee): the func-shape widening alone takes the row CS0311 x4 -> CS1526 x8
-(D projects, E cannot: the sibling-constraint rule at :1873 refuses a parameter another constraint mentions; and no
-widen form for Func<A,(T,error)>). RULED (COORD after b8195216): THREE PARTS on ONE ref -- (a) the sibling rule
-relaxed to the coherent state (the mentioning constraint closes over the PROJECTED form; siblingCall re-ruled), (b) a
-golib widen overload Func<A,(T,error)> -> Func<A,(TWide,error)> with identical nil semantics + a GolibTests arm, (c)
-the widening as cut; the row past COMPILE as the cross-check; PlainConstraintProxyTests INVERTED rides (red on the
-unmodified generator un-inverted); C1 design + C2 structural; the apply from the i7 after the reorder seat (golib +
-converter: go2cs.slnx, GolibTests, CNR, the row). WARN-ONLY ARM ROW (C2 b8195216): internal/saferio (a generic
-unsafe.Sizeof never folds -> the verify-usage warning) -- i9 runs it through the eighth after its TSV/evidence, the
-fourth blob as the red. R's THREE PARTS CUT (cf3a2d76): the coherent state reached; widenResult<T,TWide> beside
-widen<A,T,TWide> (two shapes the row reaches; the niladic form cannot be a widen overload); the Implements test
-closes over the TYPE ARGUMENTS and only rendering over the projection (no return covariance in Go). A FOURTH PART
-RULED: the generator mints an adapter for a generic interface over a PROJECTED constraint (DecapsulationKey768,
-decapsulationKey<encapsulationKey>), its identifier from bare names via the sync seat's naming helper -- R cuts it
-after that helper lands (meanwhile the suite on the three parts + the GolibTests arm); C1's DESIGN READ (42943086):
-widenResult REQUIRED (builtin.cs:2835 already declares the Func<T> widen); the fourth part mirrors sync's mechanism
-(the struct side's generic path is GATED, the interface side has NONE) -- both seats follow the :951 precedent (the
-bare name + the type-parameter list riding separately, a GENERIC adapter, never an invented suffix) and must keep
-src/go2cs/adapterNameCollisions.go (the converter's cast-site rule) in sync; the collision detector reads closed
-instantiations as different interfaces (blind). The sync sub-agent STEERED to this mid-cut. C2 structural when
-pushed; the apply after the reorder and sync applies (go2cs.slnx, GolibTests, stdlib, CNR, the row). SIX genuine BUILD rows routed to C1
-for sizing: sync (CS0708 x17...), runtime (CS0310 x22: a union constraint with a POINTER member lowers to
-`where T : new()` and zh<T> is abstract -> constraint emission; + CS1061 testing.B.Elapsed on the hand-own),
-crypto/ecdh (CS1537), embed/internal/embedtest (CS0234, the known recompute remedy); internal/sync stays an i7
-sub-agent. C1's sync SIZING (767f0870) found an ORPHAN -- Go 1.24 moved sync.Map to hashtriemap.go and a seeded root
-keeps the 1.23 map.cs, compiled by the csproj glob -- but C1's stage was seeded from MASTER's 1.23.12 corpus: at the
-version tip 4408dacd3e map.cs is ABSENT (H5 retired it), so the sync row's BUILD cause at the tip is something else
--> RE-ROUTED to an i7 sub-agent at the tip with dotnet after the reorder seat; C1 sizes CONVERT-stage causes only and
-seeds tip readings from the version branch's src/core. The orphan-sweep class is banked for the runbook's H5 step
-(C1 reads the H5 record first). C1's lane: go1.24.7 (go.dev unreachable), no dotnet -- stated with any quote.
-The sync SIZING DONE on the i7 (~05:50): R's 32 errors reproduce name-for-name, ALL in ONE generated file -- the
-ImplementGenerator pointer adapter for sync_test.mapInterface over the FOREIGN GENERIC struct internal/sync.HashTrieMap
-[any, any] (new at 1.24; the corpus's first foreign-and-generic GoImplement pair): the generic branch is guarded by
-!foreignStruct (ImplementGenerator.cs:951), so the class identifier is minted with a type-argument list (CS0692 + the
-CS0708/CS0540 cascade) and the wrapped type is unqualified (CS0246). The hand-own drift produced zero errors. A
-GENERATOR SEAT LAUNCHED on the i7 (Opus sub-agent, worktree fg1, new ref claude/coord-foreign-generic-adapter off the
-version tip: the bare Name + a sanitized-argument suffix for a closed foreign instantiation; the wrapped type fully
-qualified; a two-assembly compile-probe red-first; local-generic and foreign-non-generic controls; stdlib rebuild;
-the sync row as the prediction test) -- CUT and PUSHED c63943eee7 (~06:35): a CLOSED non-generic adapter with the bare
-package-qualified name (the generic route is unrepresentable for a non-generic interface typed at closed args --
-CS1503; the dedupe key is the closed instantiation, a second one fails loudly at CS0102); the converter's cast-site
-rule in interfaceConversion.go drops the type-argument list; a third facet (boxBound's open-receiver comparison)
-fixed; the probe in src/tests/GenTests red-first (CS0692/0246/0708/0540/0050 -> 5/5, GenTests 43/43); the CONTROL =
-the whole corpus's 1,323 generated adapters unchanged; suite ok 707 s; stdlib 344/344 0 errors; the sync row COMPILES,
-46 matched / 6 diverged (2 alloc + the TestOnceXGC family), TestMapMatchesHashTrieMap passes. Banked: a
-staleCoreReferences entry (sync.tests.csproj -> runtime/internal/math) falls due with the sync row at the re-bank;
-the converter must see GOROOT in the backslash spelling (floor 6). Three inert siblings named post-hop. C1 design
-+ C2 structural reads; the apply from the i7 after the reorder apply (DONE, f0c3399684) and after the Opus RATE LIMIT
-on the i7 resets (07:10 local -- the host-debt sizing sub-agent died on it at 06:44, worktree hd1 left, re-launch
-after); R MERGES c63943eee7 into the mlkem ref before part (d), which R corrected to TWO-SIDED (44812e89: the
-converter never RECORDS the GoImplement pair for the closed-over-projection form; the generator was never asked) --
-R's order approved: the adapter absent as the red, the converter half, the generator half if the template needs it,
-the return-covariance arm red-first; the suite already green on the three parts. C2's STRUCTURAL READ SOUND
-(67d43c74: the truncation foreign-only by reachability; a corpus bound of 0 foreign-and-generic pairs) -> THE APPLY
-LAUNCHED ~07:18 (ap5: suite, GenTests, CNR, stdlib, census, repoguard, the sync row as the prediction test). C1's
-DESIGN READ SOUND (e1b6b33f; its own :951 steer corrected by the seat) with ONE FOLLOW-UP after the stamp: the
-generator's AdapterStructKey (ImplementGenerator.cs:1311) disagrees with the converter's adapterStructKey (the dot
-split before the generic drop, and the drop not requested) -- live on the sync row, not biting (the detector flags
-multiple interfaces, never multiple instantiations); the i7 sub-agent folds it as one commit on the same ref with a
-unit arm and C1's value-adapter twin question answered from the emitted adapter; C1 reads; a second small apply.
-R's PART (d) CONVERTER HALF CUT (872f1e72): claude/r-mlkem-funcresult-projection 94a802cdcb on 4408dacd3e (four
-commits incl. c63943eee7 merged): a CHECKED form beside the PROJECTED one by separate entry points (the root: the
-satisfaction test asked of the projected interface -- return covariance again); the adapter class on the bare
-interface name; suite ok 376 s. R FOUND THE INTERFACE-SIDE TWIN of C1's key finding: the generator's AdapterName
-(:1056) keeps the interface's type-argument list (CS0246 once R's seat lands) -> RULED into the i7's ONE follow-up
-commit with the struct-side key (both operands; C1 + R read). R's GENERATOR half (the wrapped-result adapter for a
-projected result, AdapterImplTemplate) stays R's, red-first in GenTests; its apply after the foreign-generic apply +
-follow-up. PART (d) WHOLE (R 8b2cf39fc ~08:40): claude/r-mlkem-funcresult-projection e67f173ab0 (the generator half
-over the converter half; GenTests 47/47; red = one CS0266; the wrap BOUNDED to a local non-generic struct target; a
-return-type twin of the box-receiver helper made the direct-zh primary visible). RULED: C1 design + C2 structural after
-their host-follow-up reads; APPLY ORDER on the version tip: (1) the host seat, (2) the foreign-generic follow-up, (3)
-R's ref after R merges the follow-up + cuts the generic-composition arm (the 1,323-adapter diff, stdlib, CNR, the
-mlkem row past COMPILE at that apply). R's post tool: the self-test plants ONE token of four (C1's shape from the other
-end) -> R cuts every-token planting + the word-bounded bar NOW while idle. CUT AND LANDED: claude/r-post-tool-arms
-72c6e8cde4 -> MASTER 3a2eb49749 (~08:50; probe word-bounded, plant kept as a substring since  frees planted; the
-dropped-token red CANNOT exist tool-side -- the degraded-set hole OPEN and NAMED, the change is visibility). C1's #41
-design read of the whole seat SOUND (f8951500: the bound load-bearing -- a third consumer of dropGeneric's default;
-s4 the lookup side is SLICED -> R folds one comment line with the generic-composition arm). C2's structural read
-after THE PLAN. i9's FOURTEENTH 91fb31e1aa (69f32095; the preflight restructure with the ruled red; C2's s2 folded
-safely with UNREAD preserved; C2's s3 measured) = the blob of record once at origin; i9's post-tool anchor defect
-(eight entries marked read unread) -> explicit mark-read + #34's lines at i9's next idle. DOCTRINE: a fetch-narrowed clone answers a STALE origin/<branch> to a successful fetch -- use ls-remote or
-FETCH_HEAD, or an explicit refspec. CENSUS CLOSED (3f70a096e): the verdict is per-branch, read from CONFIG,
-negatives included (C2: wildcard + negative freezes the ref under a plain fetch, moves it under an explicit one);
-a worktree is not a clone; R's two acts: steward-r maps master; mailbox-r deletes its unmaintained origin/master;
-no mailbox clone widened. C1's correction taken: the post-tools case was a stale working-tree COPY, not a stale ref. Eleven NOVERDICT named (two host readings -> i9). No R row near G's ratio (largest doc 130 KB). PS 5.1
-console codepage mangles UTF-8 git paths -> [Console]::OutputEncoding = UTF8 into the runbook (C1). R NEXT: the
-seven, then crypto/mlkem CS0311, then the five reflect names at 7ff4694b22. R's post-tool fix
-ead735e69c (exit-14 work-tree refusal + --bar-check, one commit on 80fc4b9406) ANNOUNCED (e7700318), push follows ->
-an idle-time master landing with C1's fetch-refspec commit. R NEXT: the constraint-proxy widening.
-SEAT CUT (57e9e70e): claude/laneR-anon-struct-typearg ce8d0bd654 on d91c832543, five files under src/go2cs (the pre-visit
-liftExplicitAnonStructTypeArgs ahead of convCallExpr's rendering paths; the fourth site of liftAtCallBoundary), corpus 0;
-arm 1 made to fail both ways (two sites, one signature, five assertions); arm 2 reflect past CONVERT and BUILD, 195 tests
-run then an AccessViolationException in setField[TestIsZero_type...] (converted-side 186/5/2 before the abort; the
-TestIsZero emission byte-identical across the two converters -> predates the seat); arm 3 suite green (red first on
-projitems registration); arm 4 two-seeded corpus diff EMPTY x3 targets, CNR clean. R's mechanism corrected: the lifts
-were minted, the gap was publication. ACCEPTED for the reads (COORD after 1901534dc): C1 design half, C2 structural +
-suite + fixture; i9 applies the ref tip. time = a DIFFERENT gap (the package-level lift publishes; the external variant's
-resetPackageState discards it, seeding only production's package_info.cs) -> R's SECOND COMMIT on the same ref (carry the
-internal variant's dynamic lifts like whiteboxBridgeTypeNames; the qualified spelling measured first).
-C1's DESIGN READ DONE (be9a7447: SOUND; the two-site reuse runs through visitStructType.go:168-207's signature-keyed
-reuse block; three comment corrections ride the time commit -- the four-step resolution, the IndexExpr residual's real
-reason, the placement claim; the four liftAtCallBoundary sites set-and-clear rather than save/restore = C1's small cut
-after the hop; the construct spreads to six sites at 1.25 incl. encoding/json/v2). CLEARED for i9's apply (COORD after
-f21d32b7). R's ORDER: the time commit, then the crypto/mlkem CONSTRAINT-PROXY WIDENING (row 2), then the reflect
-TestIsZero crash on C1's sizing. Was: QUEUED after the registration seat (COORD after ea03e60d): the crypto/mlkem CONSTRAINT-PROXY WIDENING (row 2) -- the two
-converter gates, the generator's no-self-parameter path, the flipped named control, red-first with the generated proxy
-asserted to EXIST, the row past COMPILE, the suites, the corpus diff predicted EMPTY (the 18 proxies keep their dedupe
-key); C1/C2 read the halves; i9 applies. Row 3 (internal/sync CS0411) MOVES to an i7 sub-agent after fips140test.
-Was queued: row 3 internal/sync CS0411 -- an untyped constant at a generic argument
-whose type parameter is also bound by a typed argument gets the conversion to the pinned type at the call (or explicit
-type arguments); red-first on C1's fixture f<T>(T a, T b), the row past COMPILE, the converter suite, the corpus diff.
-Blocked on: nothing for (1); (2) needs an owner-opened spurt.
+STEP 1, the record (GitHub only; local memory is a cache): git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13;
+read section 0a of this file and your section; then the ledger tail (fleet-read.sh, or `git show origin/claude/mailbox:docs/phase4/LEDGER.md |
+tail -n 30`). Tips at this revision: MASTER 0b0be89fd7; VERSION TIP 0adf2e4318 (APPLY BATCH 2) -- batch 3 (ten refs) STAMPS after the i7
+battery and MOVES the tip: read the ledger's last STAMP line before cutting or basing anything, and name the tip you read.
+STEP 2, ONE ACK message to coord: GPG state, the master / version / handover tips you read, your first item. Then start it.
+
+YOUR FIRST ITEM: THE escapeForHash CONVERTER RULE (ruled 2026-09-20 14:33: a converter rule, not a hand-own). A function whose body is EXACTLY
+`panic("intrinsic")` -- Go's compiler-intrinsic marker; hash/maphash's escapeForHash forces a heap escape, vacuous in C# -- emits a
+no-op returning the zero value of its result type. One positive arm (the maphash site) and two controls (a panic with any other string keeps
+its throw; a body with a statement beside the panic keeps its throw), red-first. NEW ref claude/r-escapeforhash-intrinsic off 0adf2e4318,
+ONE commit; the suite + repoguard green (-count=1); the emission read at the pin; the ROW GATE: hash/maphash with your ref 5 (174403b3d2)
+applied reaches Validated with testComparableNoEqual PASSING -- state 'gated with 174403b3d2 applied'. Push-then-announce (<= 40 lines:
+files + blob ids, the arms, the row line, ASK).
+
+THE DRIVER RECIPE (shared by every W=4 worker): a FRESH LINKED WORKTREE ON A BRANCH at the tip the ledger's last STAMP names
+(`git worktree add -b r/h10-w4-<mmddHHMM> <path> <tip>`; the driver's tree guard refuses detached or main), censused BEFORE row 1 with
+`git status --ignored=matching` (record the count; a never-built tree answers 0), >= 25 GB free. The driver src/run-h10-dispatch.ps1, the
+wrapper src/run-h10-recon.ps1 and the plan docs/phase4/hopA-inputs/h10-dispatch-plan.tsv taken BY BLOB from master, never from a checkout
+(`MSYS_NO_PATHCONV=1 git show origin/master:<path> > file`; state each `git rev-parse origin/master:<path>` blob id AND the sha256 as read;
+the plan LF only, zero CR bytes -- the driver recomputes #digest and refuses a mismatch). Mandatory parameters, HASHTABLE splat (an array
+splat is positional): -Plan, -Worker spelled EXACTLY as the plan's worker column spells your box, -FleetSize 4, -OnlySlice <n>, -Mode rebank,
+-Tree, -GoRoot (backslash spelling), -Scratch OUTSIDE the tree, -ExpectTip <tip>, -RebankWrapper <wrapper file>, -Ledger, -TimingOut; read the
+driver's param() block and map every mandatory one. -DryRun FIRST: rc 0 and the row list = the plan's rows for you in order; BANK NOTHING;
+post the row list. The real run only on COORD's GO message (it names the campaign tip and the digest). One shard = one lane ref
+claude/r-h10-rebank-s<N> off the campaign tip carrying that shard's artifacts ONLY -- never docs/validation/index.md, never the roster
+header -- push-then-announce with the TSV verbatim and every row's word; a NOVERDICT / CONVERT / BUILD / TIMEOUT row is reported by cause
+in the same message (the results-file tail first: a deadline kill states itself); you cut nothing for it. Every battery script records
+its PID and takes a mkdir lock on its worktree at start.
+
+YOUR QUEUE, in order:
+  (1) the escapeForHash seat above;
+  (2) the H10 precondition self-check on R-LAPTOP (the 11-row table) + a -DryRun of your W=4 slice 1 by the recipe above, banking nothing
+      (your rows at W=4: slice 1 = 9, slice 2 = 33); post the 11 answers + the DRYRUN row list;
+  (3) WAIT for COORD's GO; then your W=4 slices for real, one ref per shard (claude/r-h10-rebank-s<N>), push-then-announce with the TSV.
+Your ref 5 claude/r-maphash-typefor 174403b3d2 rides batch 3 (the chain guard TestExplicitTypeArgsChainCarriesEveryPredicate runs by name
+there); nothing to do on it unless COORD names a red. unique's CS0030 class went to C1 (ref 9, da6cf0f5dd). The STEWARD LOOP IS RETIRED
+(v4: COORD refreshes this record); your instrument-lessons block stays where your STATE block names it until a docs seat takes it.
+
+FLOOR (CLAUDE.md, in force): one conversion per output root per box, never two overlapping on one box; seed from src/core before any -stdlib
+reconvert; the output directory is the SECOND positional of a single-package conversion; source is frozen while a battery runs; kill by PID or
+path, never by name; never git add -A; capture rc on the next line before any pipe; read the emission before spending a gate; measure at the
+tree; `| head` is a WHERE clause. Refs: announce-then-push on existing refs, push-then-announce on new refs; never force-push or replace a
+posted SHA (a fix is a commit on top); a seated branch takes no commits. Security: nicknames only (i7, i9, G-LAPTOP, R-LAPTOP, C1, C2) -- no
+hostnames, usernames, profile paths, shares or IPs on any pushed surface; `.claude/coord-scripts/coord-identifier-census.sh entry <file>`
+before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: one OWNER-HAND line to COORD. Compiling is not correctness.
 ```
 
 ---
@@ -2639,3 +1310,5 @@ Blocked on: nothing for (1); (2) needs an owner-opened spurt.
 - 2026-09-16 07:55 (box) -- SAVE-STATE AT THE 100% WEEKLY-USAGE CUTOFF (owner: 'We have hit 100%'). STATE: version tip 46307b4704 (RED 12 applied; RUNG 7 CLOSED on three flavours at COORD a065b1bd9); master bfef6c9940; mailbox anchor c00a9063d (COORD's metadata pin). IN FLIGHT: i9's q97 apply (prediction 3cd70d93, tree fd7296f80e) then q94, q99 (1) cd6f4b9a8e, q99 (2) 0253ca4c2c, the metadata seat 828ef5d0b7, then the fail-set literal re-derived (predicted EMPTY), then H9 (CNR first, the eight goldens). G: H8's census (STOP before scoring; COORD rules the comparand) + the root-attribution overlay cut from its emission. C2: the metadata read, then q100's read. C1: q100 CUT (claude/c1-q100-native-array-view-floor 0dca38552c) -- the i7 GATES it (sub-agent NOT launched; launch on resume). DOCS SEAT 4 ON BRANCH, UNMERGED: claude/coord-docs-seat-4 cbf8c63c156146abfd3232243bbfadc6ed514de2 on master bfef6c9940 (docs/GoCorpusMigration.md +34: the H7 amendment 2026-09-16 -- arm 4 inert, minus golib, the drive-letter build root under MSYS_NO_PATHCONV, arms gate on rc, ASM units; CRLF parity 2162/2162; census empty with a negative control; worktree C:/go2cs-tmp-coord/docs4 left in place) -- COORD merges it signed no-ff on resume after one more read, then reclaims the worktree. Queued docs item: three DESIGN-*.md records with CR endings outside the markdown pin's scope (G b22bdd135 P4). ON RESUME: re-arm the mailbox watcher at c00a9063d96a7a741d367decc7866d1321d3f8eb, read the full delta, stamp what landed (i9's q97 apply first), launch the q100 gate on the i7, merge docs seat 4, fold. Doctrine batch G items 1616-1734 in the coordinator's accumulator memory (unlanded).
 - 2026-09-16 08:25 (box) -- q97 APPLIED on the version branch: 46307b4704 -> d71e4eed634e6921983f5ed246038694d3c9ba1e (i9 1495a830f; tree fd7296f80e = the stamp; 4 files +458/-382; all four blobs the seat's; keccakf.cs 45 lines emitted; the position-map row retired; the four sha3 vectors 0/4 -> 4/0 with ArrayShapeReinterpretTests unmoved; the corpus build exit 0 / CS sites 0 / 344 assemblies unchanged; six guards seen to run by name; the hand-own predicate reconciled 131 + 23 = 154). COORD stamp fdcee42155661941b0b39cd1287ca333cd7ab55e, re-taken at the tree from the i7. DOCS SEAT 4 LANDED: master bfef6c9940 -> 7105c846849d234743a5adee7a36255b55790e65, a signed no-ff merge of claude/coord-docs-seat-4 cbf8c63c156146abfd3232243bbfadc6ed514de2 (a COORD sub-agent's seat: the H7 amendment 2026-09-16 -- arm 4 inert where every project builds, minus golib, the drive-letter build root under MSYS_NO_PATHCONV, arms gate on their command's rc, ASM units; one file +34, additions only, the merged tree = the branch tree, census clean with a negative control); the docs4 worktree reclaimed. C2's metadata read (8d8be373) AGREES -- nothing blocks i9's apply; one finding: the guard's comment still claims CRLF (G's one-line commit on top, the pin moves). The q100 gate LAUNCHED on the i7 (a COORD sub-agent: GolibTests fail sets both ways at 46307b4704 vs 0dca38552c with the four new arms by name, the go2cs.slnx build, the behavioral suite). i9 next: q94.
 - 2026-09-19 (box) -- RESUME AFTER THE 2026-09-16 WEEKLY CUTOFF: section 0a (the shared lane preamble: GPG first at the keyboard, the record, arm, the frozen protocol in eight lines) added; all five PASTE PROMPT fences re-cut short (identity + first item + queue, pointing at 0a); R's delta f8fef0119 folded (the NEXT key's stale tail replaced by the statement of record; section 7 untouched); the COORD section gains a dated RESUME paragraph (position: rung 7 closed, H8/H9 live, i9's apply order, C1/C2/R items, the q100 gate on the i7). Nothing else moved.
+
+- 2026-09-21 23:40 -- COORD ONLINE after the 2026-09-20 weekly limit: the five lane PASTE PROMPT fences (revision 2026-09-19, 1345 lines net) replaced by DELTA fences cut from the ledger through 23:33 (mailbox b56e835d2f) and the batch-3 brief -- session titles `<lane> -- <goal>`, the v4 comms line, GPG, pins, the driver recipe for the W=4 workers, per-lane first item and queue with SHAs; section 1a gains the STATE DELTA (the rehearsal's driver leg ran green; C2's sha3 key seat ruled to batch 4, seat (B) next); the stale 'INTERRUPTED at row 1' paragraph corrected in place; status line updated. STATE BLOCKs untouched.
