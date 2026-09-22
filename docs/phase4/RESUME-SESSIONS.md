@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-21 23:40 -- COORD ONLINE after the 2026-09-20 weekly limit (ledger through mailbox b56e835d2f). Every lane's PASTE PROMPT fence is a short DELTA cut from the ledger (identity + comms + GPG + pins + first item + queue + floor); the STATE BLOCKs are the 2026-09-13..19 folds and stay as history (the ledger wins on any difference). Section 1a carries COORD's STATE DELTA of this revision.
+> **Status of this revision:** 2026-09-22 00:33 -- hourly refresh (ledger through mailbox c13e5bb227): section 1a STATE DELTA 2 (rehearsal GREEN; campaign tip = master merged after batch 3; batch 3 resumed past a projitems union; batch 4 = sha3 pair + escapeForHash; all five lanes up); 0a.0 rules 8-9 (owner hands through COORD; cloud lanes wake on SendMessage). Lane fences (revision 2026-09-21 23:40) and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -92,6 +92,14 @@ docs/phase4/archive/MAILBOX-through-2026-09-20.md on claude/mailbox). Never read
    lanes it changes.
 7. RESUME ACK (this replaces the old Step 2 post): ONE message to coord -- GPG state, the master and version tips you
    read, your first item. No watcher or wake ids. A 20-minute wake loop only if your harness delivers no message events.
+8. OWNER HANDS (owner order 2026-09-22): the owner watches the COORD session ONLY. A permission your harness holds, an
+   install, a credential, a console step: ONE line `OWNER-HAND: <what> -- <why> -- <exact command or click>` in your next
+   message to COORD, never a silent wait at your own prompt (say what is blocked, continue with what is not). COORD relays
+   the owner's answer by message when it can be granted from the console; when your harness needs the owner's own click,
+   COORD says so and the owner logs in to your box remotely.
+9. CLOUD LANES WAKE ON A MESSAGE EVENT (measured 2026-09-22: C1's evidence ref sat 25 min in an inbox file it never
+   ticked on). COORD's OUTBOUND to C1/C2 is SendMessage to the session name ListAgents prints (cloud sessions are listed
+   and receive); the inbox file is the cloud lane's REPLY path and COORD's record of the message, not its wake.
 
 Identity: you are one lane of the go2cs fleet; nickname only (i7, i9, G-LAPTOP, R-LAPTOP, C1, C2) on every pushed
 surface. Model: Opus 5, effort high (owner order; the owner may raise a lane at its machine). COORD is Fable 5.1 on
@@ -164,6 +172,33 @@ STATE DELTA 2026-09-21 23:40 (COORD online; supersedes the STEP 3 state below wh
     C1 the fips140test classing when the evidence ref is named; all W=4 workers WAIT for COORD's GO (campaign tip + digest) after
     batch 3 STAMPS. Model recommendation handed to the owner: Opus 5 / high everywhere except the i9, where Sonnet 5 / high suffices
     for a checklist-and-driver worker lane (readings escalate to COORD).
+STATE DELTA 2026-09-22 00:33 (ledger through mailbox c13e5bb227; supersedes the delta above where they differ):
+  - THE REHEARSAL IS GREEN (ledger 23:52): clause 2 amended (fresh OR tracked-and-unmodified), clause 5 VACUOUS -- the disclosure
+    manifest is HAND-OWNED and never minted by a run (src/core/.gitignore:15); pins are AUTHORED from divergence evidence. The
+    graft: fips140test DIVERGED 2267/52 (TestCAST 44, TestNISTEC 5, ACVP 1, Edwards25519Allocations 1, XAES 1); its evidence is
+    the record ref claude/coord-h10-rehearsal-record ac26e6a992 (docs/phase4/h10-rehearsal/). Control: the roster gate's disclosed
+    check is Test-Path only (a deleted pin was SILENT) -- a fix seat runs on the i7 (rfix) with the wrapper's one-verdict .Count
+    StrictMode trap and the census's JSON hang.
+  - THE VERSION BRANCH LACKS MASTER'S ROSTER SEAT (forked at 9d80085377, 2026-09-16; master alone has the 203-row roster, the plan,
+    shardmap, the driver). CAMPAIGN TIP = master merged INTO the version branch AFTER batch 3 stamps (one signed merge; battery:
+    suite + repoguard, CNR, stdlib 344, check-roster-format rc 0 with the two orphans cleared, census; keep the VERSION side of
+    version.props -- master's reads 1.23.12); then STAMP and GO. The rehearsal's seven rows RE-RUN at that tip as the i7's slice 1;
+    roster edit owed there: database/sql Tests 138 -> 140.
+  - BATCH 3 (ec3): merges 1-2 landed (d9bdb31ac2, 1271662ec9); STOPPED at merge 3 on a go2cs-src.projitems adjacent-insert;
+    RULED an authorized UNION resolution (TestProjitemsRegistersEveryGoSource after each; any .go/.cs/.ps1 conflict stays a STOP);
+    resumed from merge 3 with the full battery. convCallExpr.go auto-merged clean.
+  - BATCH 4 = C2's sha3 pair claude/c2-sha3-production-facet 65e3a46155 (carries f4b6e2d3d2; C# half uncompiled) + R's escapeForHash
+    rule claude/r-escapeforhash-intrinsic 5291f72c8e (hash/maphash VALIDATED 59/59 gated END TO END on R-LAPTOP with 174403b3d2):
+    one i7 battery after the campaign-tip merge; GO does not wait on it (crypto/sha3 reads BUILD in pass 1, re-dispatched after).
+  - LANES: all five up and ACKed (titles: i9 -- Corpus migration to 1.24.13 coordination; g -- Lane G corpus migration coordination;
+    r -- Lane R resume coordination; c1 -- Corpus migration coordination setup; c2 -- Go corpus migration coordination). i9 11/11
+    (pwsh 7.6.6 installed by the owner) + DryRun 28 rows = plan; G 11/11 both arms + DryRun 7 rows, runs the LINUX arm; R 11/11 but
+    pwsh 7 ABSENT (OWNER-HAND open) + DryRun 9 rows; the wrapper exports the Go half per row, the LAUNCHER exports DOTNET_ROOT +
+    PATH (G's finding). C1 classed all 52 (claude/c1-fips140test-classing e68f67b3e0; 44 = one mechanism: the re-exec'd child
+    panics in fips140/check .cctor 'no verification checksum found' under GODEBUG=fips140=on) and closes the 46 from three output
+    lines COORD pasted; C2 STANDBY. maphash's real wall ~4.6 min: the wrapper's derived 60 m floor is load-bearing (the
+    'deadline floors: N derived' line is the WRAPPER's per row, not the DryRun banner's).
+  - OWNER ORDER 2026-09-22: owner hands route through COORD (0a.0 rule 8); cloud lanes are woken by SendMessage (rule 9).
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1312,3 +1347,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-19 (box) -- RESUME AFTER THE 2026-09-16 WEEKLY CUTOFF: section 0a (the shared lane preamble: GPG first at the keyboard, the record, arm, the frozen protocol in eight lines) added; all five PASTE PROMPT fences re-cut short (identity + first item + queue, pointing at 0a); R's delta f8fef0119 folded (the NEXT key's stale tail replaced by the statement of record; section 7 untouched); the COORD section gains a dated RESUME paragraph (position: rung 7 closed, H8/H9 live, i9's apply order, C1/C2/R items, the q100 gate on the i7). Nothing else moved.
 
 - 2026-09-21 23:40 -- COORD ONLINE after the 2026-09-20 weekly limit: the five lane PASTE PROMPT fences (revision 2026-09-19, 1345 lines net) replaced by DELTA fences cut from the ledger through 23:33 (mailbox b56e835d2f) and the batch-3 brief -- session titles `<lane> -- <goal>`, the v4 comms line, GPG, pins, the driver recipe for the W=4 workers, per-lane first item and queue with SHAs; section 1a gains the STATE DELTA (the rehearsal's driver leg ran green; C2's sha3 key seat ruled to batch 4, seat (B) next); the stale 'INTERRUPTED at row 1' paragraph corrected in place; status line updated. STATE BLOCKs untouched.
+- 2026-09-22 00:33 -- hourly refresh: STATE DELTA 2 in section 1a (ledger through c13e5bb227); 0a.0 rules 8 (owner hands route through COORD, owner order 2026-09-22) and 9 (cloud lanes wake on SendMessage; the inbox file is their reply path); status line. Nothing else moved.
