@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 05:52 -- hourly refresh (ledger through mailbox 3c65a153a4): section 1a STATE DELTA 10 (batch 5 four of five refs; the runtime memmove/unpinned-address ruling; infrastructure-errors never disclosed; the i7 queue). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 06:52 -- hourly refresh (ledger through mailbox d3c961d8a4): section 1a STATE DELTA 11 (batch 4 ran green but not stamped -- three C2 reds fixed, re-run queued; the legs running on the campaign tip with R's s1/s2 as legs 7-8; pass-1 tally 199/212; master dd18e5e2ab; the i7 order through H10's close). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -321,6 +321,24 @@ STATE DELTA 2026-09-22 05:52 (ledger through mailbox 3c65a153a4; supersedes the 
     census (the README's ten hits close); the account name and profile paths stay denied.
   - QUEUE on the i7: batch 4 (in battery) -> STAMP -> the legs (six shard refs; brief legs-brief.md) -> batch 5 -> a pass-2 re-dispatch of the
     rows the batches fix -> H10's closing arithmetic. Lanes: i9, G, C1 STANDBY; R on its slices + the memmove/token seat; C2 on the anon-struct seat.
+STATE DELTA 2026-09-22 06:52 (ledger through mailbox d3c961d8a4; supersedes the deltas above where they differ):
+  - BATCH 4 RAN on all six seats (ab4 tip 4bec9cd014; suite ok with the named guards, CNR NO REGRESSION 729, stdlib 344/0 incl. embed.dll and
+    check.dll, census clean; maphash VALIDATED 59; crypto/sha3 COMPILES -- the CS0246/CS0426 class CLOSED, 5 alloc-family residuals) and is NOT
+    STAMPED: three reds in C2's files (a string.Format-over-braces fixture leaving the facet rule unproven at unit level; Convert.ChangeType on a
+    Go named byte type poisoning embedtest's initializer; the embed initializer's bare `embed` alias absent under a BLANK import -- fips140test
+    CS0103, a one-package regression). C2 fixed all three within the hour: facet ref -> d2b6b44ed1, embed ref -> 34d8a5be0b (go.embed_package
+    fully qualified for both import forms; Unsafe.BitCast after a size-1 assert). THE RE-RUN launches when the legs free the i7 (brief re-tipped,
+    fc17a979b6); predictions GenTests 61/61, embedtest 7, fips140test COMPILES -> DIVERGED 7 with TestACVP PASS.
+  - THE LEGS run NOW on the campaign tip c6fdbe73c3 itself (the shard refs never needed batch 4): legs 1-6 + LEG 7 = R's s1 claude/r-h10-rebank-s1
+    d120e99eb7 (8 PASS: aes 57, subtle 9, gob 106, gcimporter 621, cookiejar 17, httputil 53, os 1103, os/exec 116), then the five Disclosed cell
+    fixes, index.md once, the header from the guard; LEG 8 = R's s2 claude/r-h10-rebank-s2 4099c204b6 (32 PASS, 29 banked; synctest DIVERGED 28 =
+    the synctest.Run intrinsic, banked as a hand-own seat). PASS-1 TALLY 199 of 212 dispatched (i7 30 / G 31 / i9 98 / R 40); R STANDBY for the
+    slices, its memmove/token seat on the full behavioral suite. Three more rowless fips140 rows (aes 5, ecdsa 10, nistec 44) -> C1's rows ref. Owner at the console: pwsh 7 on R-LAPTOP (hand CLOSED); the owner's public handles RULED admitted
+    (LANDED on master dd18e5e2ab: a hashed admit set on the enclosing word in both guards; the README reads CLEAN).
+  - ROUTED this hour: log/slog TestCallDepth (a test-half frame's file:line reads ./0) -> C1 sizes; the census `converted` mode's unc arms stay
+    refusing (repoguard skips test sources), a delta-vs-HEAD arm BANKED. Order on the i7: legs -> batch-4 re-run -> STAMP -> batch 5 (five refs:
+    R acb6b5a38a, G f401c4ea07, C1 65bc8acc2e + d66b3e288c, C2's anon-struct TBD) -> pass 2 (the rows the batches fix + R's s2 leg) -> H10's
+    closing arithmetic (dispatched + unscheduled == 226; banked + candidates + debt == 226; tests.csproj count == roster rows).
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1478,3 +1496,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 04:44 -- hourly refresh: STATE DELTA 8 in section 1a (pass 1 complete on three workers; six shard refs; batch 4 running; legs next). Nothing else moved.
 - 2026-09-22 04:54 -- hourly refresh: STATE DELTA 9 in section 1a (master be8e137af5; batch 4 resumed; legs + batch 5 briefs; R's fix accepted). Nothing else moved.
 - 2026-09-22 05:52 -- hourly refresh: STATE DELTA 10 in section 1a (batch 5 four of five; the memmove/token ruling; the i7 queue). Nothing else moved.
+- 2026-09-22 06:52 -- hourly refresh: STATE DELTA 11 in section 1a (batch 4 not stamped, fixes in; the legs with legs 7-8; tally 199/212; the order to H10's close). Nothing else moved.
