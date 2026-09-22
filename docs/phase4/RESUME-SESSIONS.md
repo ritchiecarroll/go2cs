@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 04:54 -- hourly refresh (ledger through mailbox 86dec7f85d): section 1a STATE DELTA 9 (master be8e137af5 census converted mode; batch 4 resumed past a second union; the legs and batch 5 briefs on the record; R's template fix accepted; i9 standby). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 05:52 -- hourly refresh (ledger through mailbox 3c65a153a4): section 1a STATE DELTA 10 (batch 5 four of five refs; the runtime memmove/unpinned-address ruling; infrastructure-errors never disclosed; the i7 queue). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -304,6 +304,23 @@ STATE DELTA 2026-09-22 04:54 (ledger through mailbox 86dec7f85d; supersedes the 
   - i9 STANDBY after both slices (98 PASS); it re-runs runtime with R's template fix as a READING (the host died at 158 of 10,891 on that panic).
     G on its maps ref; C1 on the manifest then the rows; C2 on the anon-struct seat; R holding on pwsh 7 (OWNER-HAND). Pass-1 PASS tally 159; R's 42
     rows are the only pass-1 rows not run.
+STATE DELTA 2026-09-22 05:52 (ledger through mailbox 3c65a153a4; supersedes the deltas above where they differ):
+  - BATCH 5 has FOUR of five refs: R's named-pointer template fix acb6b5a38a (x509 518/0; LookupServicePort PASS); G's maps ref f401c4ea07
+    (five commits; internal/runtime/maps VALIDATED 111 = 3 + 108 disclosed -- the package IS the raw-memory swiss table; the refuse-by-name
+    companions on the FuncPCABI0 precedent; the four census rows deleted under the table's rule); C1's manifests 65bc8acc2e (rand deferred;
+    sync x2 alloc-count-semantics) and ten roster rows d66b3e288c (four refused at the bar: wasitest E1; cgotest/copyright/fips140deps E4);
+    C2's time anon-struct accessibility seat pending. Brief batch5-brief.md (fbc89bc9d1) on the record.
+  - RUNTIME: with R's template fix the host reaches 10,233 of 10,891 results and dies on the memmove PARTIAL STUB; R's sizing found a golib
+    GC-SAFETY HOLE -- unsafe.Pointer over reference-bearing element storage is an UNPINNED raw address (PinOnly null, taken anyway). RULED:
+    unpinnable storage yields the Q44 order token, the Pointer retains its source, memmove/memclr copy whole elements through the barrier;
+    R's seat claude/r-runtime-memmove-body (golib + runtime bodies), gated on R-LAPTOP incl. the full behavioral suite; batch 5 or 6 by size.
+  - RULES this hour: an infrastructure-error is never disclosed (the matcher's anti-laundering arm) -- a throwing stub becomes a REFUSE-BY-NAME
+    body whose text is the signature; the census `converted` mode is on master be8e137af5 (lanes run it on staged converted files).
+  - OWNER at the console: PowerShell 7 INSTALLED on R-LAPTOP (the hand CLOSED; R's 42 rows GO); the owner's PUBLIC HANDLES (the GitHub/NuGet
+    handle, the work-mail handle) RULED known public exceptions -- a seat cuts a hashed admit set on the enclosing word in the Go guard + the
+    census (the README's ten hits close); the account name and profile paths stay denied.
+  - QUEUE on the i7: batch 4 (in battery) -> STAMP -> the legs (six shard refs; brief legs-brief.md) -> batch 5 -> a pass-2 re-dispatch of the
+    rows the batches fix -> H10's closing arithmetic. Lanes: i9, G, C1 STANDBY; R on its slices + the memmove/token seat; C2 on the anon-struct seat.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1460,3 +1477,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 04:31 -- hourly refresh: STATE DELTA 7 in section 1a (shard refs; batch 4 six refs; batch 5 material; rulings). Nothing else moved.
 - 2026-09-22 04:44 -- hourly refresh: STATE DELTA 8 in section 1a (pass 1 complete on three workers; six shard refs; batch 4 running; legs next). Nothing else moved.
 - 2026-09-22 04:54 -- hourly refresh: STATE DELTA 9 in section 1a (master be8e137af5; batch 4 resumed; legs + batch 5 briefs; R's fix accepted). Nothing else moved.
+- 2026-09-22 05:52 -- hourly refresh: STATE DELTA 10 in section 1a (batch 5 four of five; the memmove/token ruling; the i7 queue). Nothing else moved.
