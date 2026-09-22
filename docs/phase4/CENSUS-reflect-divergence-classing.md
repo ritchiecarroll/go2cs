@@ -132,3 +132,104 @@ One pin authored, three defects sited but unconfirmed, one test unlabelled. No c
 row, no gate — every claim is a read of the two GOROOTs, of the emission at `c6fdbe73c3`, of the
 tracked manifest, or of the three evidence blobs. The Windows build path in the tail's stack trace is
 deliberately not reproduced here.
+
+---
+
+# AMENDMENT 2026-09-22 — the table CLOSED on i9's four output lines
+
+COORD supplied the four lines from i9's s1 leg tree (`src/core/reflect/go2cs_test_results.json`,
+intact, 460,207 B; one fail event each, no subtests). All five now carry a label.
+
+## Predictions, scored
+
+| prediction | outcome |
+|:--|:--|
+| `TestGroupSizeZero` should read `Group size got 8 want >8` | **MET, verbatim** |
+| `TestMapOfKeyUpdate` should fail on the SIGN assertion, not the length | **MET** — `map key 0.000000 has positive sign` |
+| `TestMapOfKeyPanic` should report the missing panic | **MET** — `didn't panic` |
+| `TestIsZero`'s failing arm is a `setField` layout/offset case | **MET on the shape, and the mechanism was WORSE than predicted**: the panic fires while the TABLE IS BUILT, so no arm ran at all (see below) |
+
+The three sited defects are confirmed as sited: `StructOf`'s trailing-zero-size padding leaves
+`Size()` at 8 against a want of `>8`; the managed dictionary lookup misses instead of panicking; the
+managed dictionary keeps the first key, so `Len()` is right and the sign is wrong.
+
+## `TestIsZero` — a converter/golib DEFECT, not structural, and not an `IsZero` fault at all
+
+The failure (i9's line): a panic at `NativeBox<T>.get_ValueSlot` (`golib/ж.NativeBox.cs:122`),
+*"dereference of a managed pointer with no address (\*Action over &lt;token&gt; — the order token of a
+reference-bearing pointee at offset 0, Q44 §10.3 arm 2a)"*, from `setField[S,V]`, from the
+table-literal initializer. i9 derived the offending arm: `all_test.go:1510`,
+`{setField(struct{ _, a, _ func() }{}, 0*unsafe.Sizeof((func())(nil)), func() {}), true}` — table
+index 80.
+
+Read at the emission rather than from the paraphrase. Converted here at `c6fdbe73c3` with the same
+binary generation as i9's leg (`-tests -test-action convert`), `reflect/all_test.cs:1785`:
+
+```csharp
+internal static S /*out*/ setField<S, V>(S @inʗp, uintptr offset, V value) {
+    ref var @in = ref heap(@inʗp, out var Ꮡin);
+    ((ж<V>)(uintptr)(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡin), offset))).ValueSlot = value;
+    return @in;
+}
+```
+
+`FromPinnedBox` is in the HAND-OWNED `unsafe` package (`src/core/unsafe/unsafe.cs:480`), not golib.
+Its own header states the mechanism: a pointee that *"carries managed references and so has no
+pinnable storage, whose registered address can never validate on read"* is represented by an ORDER
+TOKEN, which preserves identity and ordering only. `struct{ _, a, _ func() }` is three managed
+references, so it is unpinnable and the mint is a token; `NativeBox.ValueSlot` then refuses, and
+`ж.NativeBox.cs` says why in the design's own words — materialising a `T` from the token's bytes
+*"for a reference-bearing T fabricates a managed reference, the same type-safety hole the
+native-array-view floor refuses"*.
+
+**i9's data carries the natural control for free, and it is exact.** The `uintptr` arms 76–78
+(`all_test.go:1506-1508`) did NOT panic, over `struct{ _, a, _ uintptr }` — no managed references, so
+pinnable, so a real address, so the store lands. Same helper, same offsets, one axis: the pointee's
+reference-bearingness. That is the mechanism confirmed rather than argued.
+
+**Why this is a DEFECT and not a structural disclosure.** The rule is to read the shim body and ask
+whether a managed answer exists; only when none does is the disposition a roster one. One exists, and
+golib already has it: `GoReflect.GoFieldOffsets(Type)` returns a type's Go field offsets
+(`GoReflect.TypeLayout.cs:465`) and `ж.FieldRefBox.cs:143` already resolves a byte offset through it.
+So an offset-addressed write to a reference-bearing field has a managed route — resolve the offset to
+the field and store through the existing accessor — which neither dereferences a token nor fabricates
+a reference. The refusal at `ValueSlot` is correct; what is wrong is the converter reaching
+`ValueSlot` at all for this shape.
+
+**Pin: NONE.** It is fixable, so it must not be pinned. And pinning it would be an unusually wide
+hole: the panic fires during the TABLE BUILD, so **none of `TestIsZero`'s ~140 arms ran** — a pin
+would buy a green verdict while hiding every assertion the test makes. Note also that this is not an
+`IsZero` defect in any sense: the subject under test never executes. Arms 81–82 are never reached.
+
+## Does R's template fix reach it? NO — same family, own site, and for two independent reasons
+
+R's fix (ruled 2026-09-22 04:27, `claude/r-lookup-windows-getaddr-box`) is in the GENERATOR:
+`gen/go2cs-gen/Templates/InheritedType/PointerTypeTemplate.cs:52-56` converts a Go NAMED pointer type
+(`type P *T`) to `uintptr` with `fixed (void* ptr = &value.Value)`, a deref that bypasses `ж<T>`'s own
+`uintptr` operator; the fix makes those operators return `(uintptr)value.m_value` so a token CARRIER
+survives an address conversion.
+
+1. **Not in this emission path.** `setField` uses a plain `ж<V>` over the test's own type parameter,
+   not a generated named-pointer wrapper, so `PointerTypeTemplate` produces nothing here. R's reach is
+   11 named-pointer types and `V` is none of them.
+2. **Opposite side of the door.** R's site dereferences when only the ADDRESS is wanted, and the fix
+   is to stop dereferencing. Here every address conversion already succeeds — the token passes
+   through `FromPinnedBox`, `unsafe.Add` and the `(uintptr)`/`ж<V>` round trip intact — and the
+   failure is the final `.ValueSlot = value`, a STORE that genuinely wants the storage. No change to
+   how an address is produced can satisfy it.
+
+Same arm-2a FAMILY as R's fix and as G's routed `*SwissMapType` class, three distinct sites. This one
+belongs with the reflect hand-own seat COORD has already routed (the managed map plus `StructOf`), as
+a fourth member: `setField`'s offset write.
+
+## The closed table
+
+| test | class | pin |
+|:--|:--|:--|
+| `TestTypeFieldReadOnly` | 1.24-new + **structural** (read-only `Index` + `SetPanicOnFault`; Go skips js/wasip1 for the same reason) | **1**, authored |
+| `TestGroupSizeZero` | 1.24-new + **defect** — `reflect.StructOf` trailing-zero-size padding; `Group size got 8 want >8` | NONE |
+| `TestMapOfKeyPanic` | 1.24-new + **defect** — missing unhashable-key panic in the hand-owned `MapIndex`; `didn't panic` | NONE |
+| `TestMapOfKeyUpdate` | 1.24-new + **defect** — managed dictionary keeps the first key; `map key 0.000000 has positive sign` | NONE |
+| `TestIsZero` | not 1.24-new + **defect** — `setField`'s offset write dereferences an order token where an offset→field managed store exists | NONE |
+
+One pin across five divergences; four defects, all four fixable, none of them a disclosure.
