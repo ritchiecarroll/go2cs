@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 09:23 -- hourly refresh (ledger through mailbox 3f16c64784): section 1a STATE DELTA 15 (batch 5 running; pass-2 and batch-6 briefs staged; getfp / entersyscall / guard-table rulings). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 09:53 -- STAMP refresh (ledger through mailbox 7d865a6da9): section 1a STATE DELTA 16 (batch 5 stamped at 598d1978ad, every prediction met; pass 2 running; batch 6 queued with R's ref final; the CNR false-green debt). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -389,6 +389,22 @@ STATE DELTA 2026-09-22 09:23 (ledger through mailbox 3f16c64784; supersedes the 
     predicate dead by construction; 34 obsolete q84 rows), the third's rows (runtime fastrand x3 from the test artifacts) ruled `latent`.
   - LANES: R on the entersyscall hand-own (runtime's host at 10,571 of 10,891); C1 on the census rows then the two manifests (unit notes handed
     over); C2 on the anon-struct seat; G, i9 STANDBY. No owner hand open.
+STATE DELTA 2026-09-22 09:53 (ledger through mailbox 7d865a6da9; supersedes the deltas above where they differ) -- BATCH 5 STAMPED:
+  - VERSION TIP claude/version-go1.24.13 = 598d1978ad (batch 5's six seats on ae2f251988; every prediction MET: GenTests 63/63, GolibTests
+    812/0/14 = 826, CNR NO REGRESSION 729, stdlib 344/0; x509 518/0; maps 111 = 3 + 108 disclosed; internal/sync 106; rand 314 with 1 disclosed;
+    sync 46 with 6; log/slog 197/19 with TestCallDepth PASS both tiering ways; runtime past TestMemmoveAtomicity and dead at getfp as predicted).
+    Roster guard 19 of 699 = 17 header-arithmetic lines (derived 216 rows / 56,832 verdicts / 164 disclosed / ten exclusions; `215 testable` is
+    the 1.23.12 denominator, moves at the header write) + fips140test + ONE ref-4 defect (nistec row: unescaped `||`, fixed in pass 2's roster
+    commit with the stale Tests cells rand 298->314, sync 47->46, slog 194->197). INSTRUMENT DEBT: check-no-regression.ps1 exits 0 with `git`
+    absent from PATH (false green) -- a guard seat owed on master.
+  - RUNNING on the i7: PASS 2 (worktree p2 on 598d1978ad, branch i7/h10-pass2-*, brief docs/phase4/briefs/pass2-brief.md): leg 9 = R's s2b
+    a7cbca2637; the re-dispatch (fips140test DIVERGED 7 undisclosed until C1's pins; sha3 DIVERGED 5; maphash 59; embedtest 7; x509; maps; slog;
+    rand; sync; runtime by cause); the index regenerated once with master's tool; the header from the guard. Bank ref claude/coord-h10-pass2-s1.
+  - QUEUED: BATCH 6 (brief batch6-brief.md) on the pass-2 STAMP: C2 anon-struct 4faa7df98e (announce not yet read), C1 guard tables 48499a4981,
+    C1 fips140test/sha3 manifests (TBD), R getfp+entersyscall 0c0090e19b (FINAL: the family hand-owned; runtime now HANGS at 30m in
+    TestRuntimeLockMetricsAndProfile/runtime.lock/sample-1 instead of dying; 10,607 of 10,891). Then H10 closing arithmetic -> H11.
+  - LANES: R on the lock-metrics hang by cause (new ref claude/r-runtime-lock-metrics); C1 on the two manifests; C2 announce owed; G, i9 STANDBY.
+    No owner hand open.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1551,3 +1567,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 08:03 -- hourly refresh: STATE DELTA 13 in section 1a (master facb693040; C1's exclusion rows; batch 5 staged). Nothing else moved.
 - 2026-09-22 08:19 -- STAMP refresh: STATE DELTA 14 in section 1a (batch 4 stamped at ae2f251988; batch 5 running; the order to H11). Nothing else moved.
 - 2026-09-22 09:23 -- hourly refresh: STATE DELTA 15 in section 1a (batch 5 running; pass-2 and batch-6 briefs; the hour's rulings). Nothing else moved.
+- 2026-09-22 09:53 -- STAMP refresh: STATE DELTA 16 in section 1a (batch 5 stamped at 598d1978ad; pass 2 running; batch 6 queued). Nothing else moved.
