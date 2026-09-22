@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 09:53 -- STAMP refresh (ledger through mailbox 7d865a6da9): section 1a STATE DELTA 16 (batch 5 stamped at 598d1978ad, every prediction met; pass 2 running; batch 6 queued with R's ref final; the CNR false-green debt). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 11:13 -- STAMP refresh (ledger through mailbox 31624cd99c): section 1a STATE DELTA 17 (pass 2 stamped at f545b18d4d, ten of ten; batch 6 running; the denominator derivation seat; batch 7 = C1's manifests). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -405,6 +405,23 @@ STATE DELTA 2026-09-22 09:53 (ledger through mailbox 7d865a6da9; supersedes the 
     TestRuntimeLockMetricsAndProfile/runtime.lock/sample-1 instead of dying; 10,607 of 10,891). Then H10 closing arithmetic -> H11.
   - LANES: R on the lock-metrics hang by cause (new ref claude/r-runtime-lock-metrics); C1 on the two manifests; C2 announce owed; G, i9 STANDBY.
     No owner hand open.
+STATE DELTA 2026-09-22 11:13 (ledger through mailbox 31624cd99c; supersedes the deltas above where they differ) -- PASS 2 STAMPED:
+  - VERSION TIP claude/version-go1.24.13 = f545b18d4d: leg 9 f9a4b088f9 (R's s2b) + the re-dispatch shard aed26a88c9 (TEN rows, TEN predictions
+    matched; five Tests cells rand 314 / x509 518 / maphash 59 / slog 197 / sync 46; ROWLESS PASS: embedtest 7/0, internal/runtime/maps 111/108
+    -- C1 mints) + act C f545b18d4d (nistec `\|\|` escaped; header WRITTEN as the guard derives: 216 rows / 57,064 verdicts / 164 disclosed /
+    ten exclusions; format guard 1 of 699 = fips140test's manifest line; the INDEX NOT regenerated -- refused on fips140test page-less, 204 vs 216).
+    RULINGS (ledger 31624cd99c): testdata banking = convention; -tests emission drift = the pipeline is the reproduction path; maphash.cs body =
+    the RECONVERT class owed before H10 closes; the header's 216/215 = 100.5% is the 1.23.12 denominator, CARRIED on the version branch only --
+    a read-only DERIVATION seat (Opus) is deriving the 1.24.13 population from primary sources (the runbook predicts 226; test, don't quote).
+  - RUNNING on the i7: BATCH 6 (worktree ab6 on f545b18d4d): C2 4faa7df98e (anon-struct publicizes field types; time by BUILD then all),
+    C1 48499a4981 (guard tables; the suite must read FULLY GREEN), R bab8d58af1 (lock-metrics, contains getfp + entersyscall; runtime predicted
+    DEATH at asmcgocall via usleep ~10,612 of 10,891). Then STAMP -> BATCH 7 = C1's fips140test/sha3 manifests (not at origin yet) + the two
+    rows re-run + bank + the index regenerated + the header re-derived with the 1.24.13 denominator -> H10 closing arithmetic -> H11.
+  - INSTRUMENT SEAT owed on master (one sub-agent, after batch 6): CNR refuses without git/dotnet on PATH; census converted mode gains an
+    unc_backslash downgrade; current/ pages run under converted.
+  - LANES: R on the managed Windows usleep body (claude/r-runtime-usleep on bab8d58af1; the asmcgocall class re-counted after); C1 owes the
+    manifests ref + rows for embedtest / internal/runtime/maps (+ sha3 after its pins); C2 STANDBY after 4faa7df98e (announce not yet read);
+    G, i9 STANDBY. No owner hand open.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1568,3 +1585,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 08:19 -- STAMP refresh: STATE DELTA 14 in section 1a (batch 4 stamped at ae2f251988; batch 5 running; the order to H11). Nothing else moved.
 - 2026-09-22 09:23 -- hourly refresh: STATE DELTA 15 in section 1a (batch 5 running; pass-2 and batch-6 briefs; the hour's rulings). Nothing else moved.
 - 2026-09-22 09:53 -- STAMP refresh: STATE DELTA 16 in section 1a (batch 5 stamped at 598d1978ad; pass 2 running; batch 6 queued). Nothing else moved.
+- 2026-09-22 11:13 -- STAMP refresh: STATE DELTA 17 in section 1a (pass 2 stamped at f545b18d4d; batch 6 running; derivation seat). Nothing else moved.
