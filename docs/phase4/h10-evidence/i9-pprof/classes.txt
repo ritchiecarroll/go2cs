@@ -1,0 +1,47 @@
+===== runtime/pprof  go=161 cs=151 disclosed=6 differ=37  {('pass', 'infrastructure-error'): 2, ('pass', 'fail'): 23, ('pass', 'skip'): 2, ('pass', '<absent>'): 10}
+  tail last:  fail 
+  NotImplementedException names: {'asmcgocall: no implementation reached this compilation': 1, 'blockevent: no implementation reached this compilation': 1}
+  TestAtomicLoadStore64                                   go=pass  cs=infrastructure-error   System.NotImplementedException: asmcgocall: no implementation reached this compilation (assembly, cgo, or a linkname whose push did not arrive)
+  TestBlockProfileBias                                    go=pass  cs=infrastructure-error   System.NotImplementedException: blockevent: no implementation reached this compilation (assembly, cgo, or a linkname whose push did not arrive)
+  TestCPUProfile                                          go=pass  cs=fail                   cpu profiling already in use
+  TestCPUProfileInlining                                  go=pass  cs=skip                   Can't determine whether inlinedCallee was inlined into inlinedCaller.
+  TestCPUProfileLabel                                     go=pass  cs=fail                   cpu profiling already in use
+  TestCPUProfileMultithreaded                             go=pass  cs=fail                   cpu profiling already in use
+  TestCPUProfileRecursion                                 go=pass  cs=fail                   cpu profiling already in use
+  TestCPUProfileWithFork                                  go=pass  cs=fail                   cpu profiling already in use
+  TestConvertCPUProfile                                   go=pass  cs=fail                   sample 0 = {
+  TestConvertMemProfile                                   go=pass  cs=fail                   <no output>
+  TestConvertMemProfile/allocs                            go=pass  cs=fail                   sample 0 = {
+  TestConvertMemProfile/heap                              go=pass  cs=fail                   sample 0 = {
+  TestGenericsHashKeyInPprofBuilder                       go=pass  cs=fail                   profile = 
+  TestGenericsInlineLocations                             go=pass  cs=fail                   expected 
+  TestGoroutineSwitch                                     go=pass  cs=fail                   cpu profiling already in use
+  TestHeapRuntimeFrames                                   go=pass  cs=fail                   Profile got:
+  TestLabelRace                                           go=pass  cs=fail                   cpu profiling already in use
+  TestLabelSystemstack                                    go=pass  cs=fail                   cpu profiling already in use
+  TestMathBigDivide                                       go=pass  cs=fail                   cpu profiling already in use
+  TestMemoryProfiler                                      go=pass  cs=fail                   <no output>
+  TestMemoryProfiler/debug=1                              go=pass  cs=fail                   The entry did not match:
+  TestMemoryProfiler/proto                                go=pass  cs=fail                   Profile = PeriodType: space bytes
+  TestMorestack                                           go=pass  cs=fail                   cpu profiling already in use
+  TestMutexBlockFullAggregation                           go=pass  cs=fail                   did not see any samples in mutex profile for this test
+  TestTimeVDSO                                            go=pass  cs=fail                   cpu profiling already in use
+  TestTracebackAll                                        go=pass  cs=fail                   cpu profiling already in use
+  TestTryAdd                                              go=pass  cs=skip                   Can't determine whether anything was inlined into inlinedCallerDump.
+  TestTryAdd/bug35538                                     go=pass  cs=<absent>               <no output>
+  TestTryAdd/bug38096                                     go=pass  cs=<absent>               <no output>
+  TestTryAdd/directly_recursive_func_is_not_inlined       go=pass  cs=<absent>               <no output>
+  TestTryAdd/expand_wrapper_function                      go=pass  cs=<absent>               <no output>
+  TestTryAdd/full_stack_trace                             go=pass  cs=<absent>               <no output>
+  TestTryAdd/recursion_chain_inline                       go=pass  cs=<absent>               <no output>
+  TestTryAdd/truncated_stack_trace_first                  go=pass  cs=<absent>               <no output>
+  TestTryAdd/truncated_stack_trace_later                  go=pass  cs=<absent>               <no output>
+  TestTryAdd/truncated_stack_trace_only                   go=pass  cs=<absent>               <no output>
+  TestTryAdd/truncated_stack_trace_twice                  go=pass  cs=<absent>               <no output>
+===== net/http/pprof  go=15 cs=15 disclosed=0 differ=4  {('pass', 'skip'): 1, ('pass', 'fail'): 2, ('pass', 'infrastructure-error'): 1}
+  tail last:  fail 
+  NotImplementedException names: {'asmcgocall: no implementation reached this compilation': 1}
+  TestDeltaProfile                                        go=pass  cs=skip                   mutex profile is not working: PeriodType: contentions count
+  TestHandlers                                            go=pass  cs=fail                   <no output>
+  TestHandlers//debug/pprof/profile?seconds=1             go=pass  cs=infrastructure-error   System.NotImplementedException: asmcgocall: no implementation reached this compilation (assembly, cgo, or a linkname whose push did not arrive)
+  TestHandlers//debug/pprof/trace                         go=pass  cs=fail                   status code: got 500; want 200
