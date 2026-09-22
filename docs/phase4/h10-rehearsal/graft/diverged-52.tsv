@@ -1,0 +1,58 @@
+# crypto/internal/fips140test -- the 52 divergences of the H10 rehearsal GRAFT (2026-09-20, tree 0adf2e4318, wrapper blob 5d07919168). NON-BANKING evidence for C1's classing.
+# go names 2267 / csharp names 2267 / diverged 52 / disclosed [] / status failing
+# environment: configuration=Release tiered=False oracleGoVersion=go version go1.24.13 windows/amd64
+# errors (54): TestCASTFailures/AES-CBC: Go="pass" C#="fail" | TestCASTFailures/CTR_DRBG: Go="pass" C#="fail" | TestCASTFailures/CounterKDF: Go="pass" C#="fail" | TestCASTFailures/DetECDSA_P-256_SHA2-512_sign: Go="pass" C#="fail" | TestCASTFailures/ECDH_PCT: Go="pass" C#="fail" | TestCASTFailures/ECDSA_P-256_SHA2-512_sign_and_verify: Go="pass" C#="fail" | TestCASTFailures/ECDSA_PCT: Go="pass" C#="fail" | TestCASTFailures/Ed25519_sign_and_verify: Go="pass" C#="fail" | TestCASTFailures/Ed25519_sign_and_verify_PCT: Go="pass" C#="fail" | TestCASTFailures/HKDF-SHA2-256: Go="pass" C#="fail" | TestCASTFailures/KAS-ECC-SSC_P-256: Go="pass" C#="fail" | TestCASTFailures/ML-KEM-768: Go="pass" C#="fail" | TestCASTFailures/ML-KEM_PCT: Go="pass" C#="fail" | TestCASTFailures/ML-KEM_PCT#01: Go="pass" C#="fail" | TestCASTFailures/PBKDF2: Go="pass" C#="fail" | TestCASTFailures/RSASSA-PKCS-v1.5_2048-bit_sign_and_verify: Go="pass" C#="fail" | TestCASTFailures/RSA_sign_and_verify_PCT: Go="pass" C#="fail" | TestCASTFailures/TLSv1.2-SHA2-256: Go="pass" C#="fail" | TestCASTFailures/TLSv1.3-SHA2-256: Go="pass" C#="fail" | TestCASTPasses/AES-CBC: Go="pass" C#="fail" | TestCASTPasses/CTR_DRBG: Go="pass" C#="fail" | TestCASTPasses/CounterKDF: Go="pass" C#="fail" | TestCASTPasses/DetECDSA_P-256_SHA2-512_sign: Go="pass" C#="fail" | TestCASTPasses/ECDH_PCT: Go="pass" C#="fail" | TestCASTPasses/ECDSA_P-256_SHA2-512_sign_and_verify: Go="pass" C#="fail" | TestCASTPasses/ECDSA_PCT: Go="pass" C#="fail" | TestCASTPasses/Ed25519_sign_and_verify: Go="pass" C#="fail" | TestCASTPasses/Ed25519_sign_and_verify_PCT: Go="pass" C#="fail" | TestCASTPasses/HKDF-SHA2-256: Go="pass" C#="fail" | TestCASTPasses/HMAC-SHA2-256: Go="pass" C#="fail" | TestCASTPasses/KAS-ECC-SSC_P-256: Go="pass" C#="fail" | TestCASTPasses/ML-KEM-768: Go="pass" C#="fail" | TestCASTPasses/ML-KEM_PCT: Go="pass" C#="fail" | TestCASTPasses/ML-KEM_PCT#01: Go="pass" C#="fail" | TestCASTPasses/PBKDF2: Go="pass" C#="fail" | TestCASTPasses/RSASSA-PKCS-v1.5_2048-bit_sign_and_verify: Go="pass" C#="fail" | TestCASTPasses/RSA_sign_and_verify_PCT: Go="pass" C#="fail" | TestCASTPasses/SHA2-256: Go="pass" C#="fail" | TestCASTPasses/SHA2-512: Go="pass" C#="fail" | TestCASTPasses/TLSv1.2-SHA2-256: Go="pass" C#="fail" | TestCASTPasses/TLSv1.3-SHA2-256: Go="pass" C#="fail" | TestCASTPasses/cSHAKE128: Go="pass" C#="fail" | TestNISTECAllocations/P224: Go="pass" C#="fail" | TestNISTECAllocations/P256: Go="pass" C#="fail" | TestNISTECAllocations/P384: Go="pass" C#="fail" | TestNISTECAllocations/P521: Go="pass" C#="fail" | TestACVP: Go="pass" C#="fail" | TestCASTFailures: Go="pass" C#="fail" | TestCASTPasses: Go="pass" C#="fail" | TestEdwards25519Allocations: Go="pass" C#="fail" | TestNISTECAllocations: Go="pass" C#="fail" | TestXAESAllocations: Go="pass" C#="fail" | go test: go test -json -count=1 -timeout 30m0s -tags=purego,math_big_pure_go . failed: exit status 1
+{"Time":"2026-09-21T23:37:55.1462128-05:00","Action":"start | converted tests: C:\go2cs-tmp-coord\reh\src\core\crypto\internal\fips140test\bin\tests\publish\crypto.internal.fips140test.tests.exe --json -timeout 30m0s --res
+test	go	csharp
+TestACVP	pass	fail
+TestCASTFailures	pass	fail
+TestCASTFailures/AES-CBC	pass	fail
+TestCASTFailures/CTR_DRBG	pass	fail
+TestCASTFailures/CounterKDF	pass	fail
+TestCASTFailures/DetECDSA_P-256_SHA2-512_sign	pass	fail
+TestCASTFailures/ECDH_PCT	pass	fail
+TestCASTFailures/ECDSA_P-256_SHA2-512_sign_and_verify	pass	fail
+TestCASTFailures/ECDSA_PCT	pass	fail
+TestCASTFailures/Ed25519_sign_and_verify	pass	fail
+TestCASTFailures/Ed25519_sign_and_verify_PCT	pass	fail
+TestCASTFailures/HKDF-SHA2-256	pass	fail
+TestCASTFailures/KAS-ECC-SSC_P-256	pass	fail
+TestCASTFailures/ML-KEM-768	pass	fail
+TestCASTFailures/ML-KEM_PCT	pass	fail
+TestCASTFailures/ML-KEM_PCT#01	pass	fail
+TestCASTFailures/PBKDF2	pass	fail
+TestCASTFailures/RSASSA-PKCS-v1.5_2048-bit_sign_and_verify	pass	fail
+TestCASTFailures/RSA_sign_and_verify_PCT	pass	fail
+TestCASTFailures/TLSv1.2-SHA2-256	pass	fail
+TestCASTFailures/TLSv1.3-SHA2-256	pass	fail
+TestCASTPasses	pass	fail
+TestCASTPasses/AES-CBC	pass	fail
+TestCASTPasses/CTR_DRBG	pass	fail
+TestCASTPasses/CounterKDF	pass	fail
+TestCASTPasses/DetECDSA_P-256_SHA2-512_sign	pass	fail
+TestCASTPasses/ECDH_PCT	pass	fail
+TestCASTPasses/ECDSA_P-256_SHA2-512_sign_and_verify	pass	fail
+TestCASTPasses/ECDSA_PCT	pass	fail
+TestCASTPasses/Ed25519_sign_and_verify	pass	fail
+TestCASTPasses/Ed25519_sign_and_verify_PCT	pass	fail
+TestCASTPasses/HKDF-SHA2-256	pass	fail
+TestCASTPasses/HMAC-SHA2-256	pass	fail
+TestCASTPasses/KAS-ECC-SSC_P-256	pass	fail
+TestCASTPasses/ML-KEM-768	pass	fail
+TestCASTPasses/ML-KEM_PCT	pass	fail
+TestCASTPasses/ML-KEM_PCT#01	pass	fail
+TestCASTPasses/PBKDF2	pass	fail
+TestCASTPasses/RSASSA-PKCS-v1.5_2048-bit_sign_and_verify	pass	fail
+TestCASTPasses/RSA_sign_and_verify_PCT	pass	fail
+TestCASTPasses/SHA2-256	pass	fail
+TestCASTPasses/SHA2-512	pass	fail
+TestCASTPasses/TLSv1.2-SHA2-256	pass	fail
+TestCASTPasses/TLSv1.3-SHA2-256	pass	fail
+TestCASTPasses/cSHAKE128	pass	fail
+TestEdwards25519Allocations	pass	fail
+TestNISTECAllocations	pass	fail
+TestNISTECAllocations/P224	pass	fail
+TestNISTECAllocations/P256	pass	fail
+TestNISTECAllocations/P384	pass	fail
+TestNISTECAllocations/P521	pass	fail
+TestXAESAllocations	pass	fail

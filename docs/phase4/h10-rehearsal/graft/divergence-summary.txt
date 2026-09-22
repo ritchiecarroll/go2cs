@@ -1,0 +1,13 @@
+go names      : 2267
+csharp names  : 2267
+diverged      : 52
+disclosed     : 0
+matched flag  : False  status: failing
+pairs (go -> csharp):
+   pass     -> fail      52
+families:
+   TestCAST                           44
+   TestNISTEC                         5
+   TestACVP                           1
+   TestEdwards25519Allocations        1
+   TestXAES                           1

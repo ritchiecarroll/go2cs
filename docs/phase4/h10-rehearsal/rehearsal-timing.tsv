@@ -1,0 +1,8 @@
+w	worker	slice	seq	row	word	verdicts	sweep_s	first_in_list	rc	diverged	platform	tree	wall_s	post_s	banked	manifest_pins	cost_i9_s	reserved
+4	i7-5820K (coordinator)	1	1	crypto/internal/fips140/edwards25519	PASS	54	426	1	0	0	windows/amd64	0adf2e4318ef8313febb38048a9b0e947b256723	427	0	yes	0	325	0
+4	i7-5820K (coordinator)	1	2	internal/godebugs	PASS	1	120	1	0	0	windows/amd64	0adf2e4318ef8313febb38048a9b0e947b256723	121	0	yes	0	140	0
+4	i7-5820K (coordinator)	1	3	database/sql	PASS	140	146	1	0	0	windows/amd64	0adf2e4318ef8313febb38048a9b0e947b256723	146	0	yes	2	117	0
+4	i7-5820K (coordinator)	1	4	internal/types/errors	PASS	155	90	1	0	0	windows/amd64	0adf2e4318ef8313febb38048a9b0e947b256723	91	0	yes	0	84	0
+4	i7-5820K (coordinator)	1	5	compress/flate	PASS	64	60	1	0	0	windows/amd64	0adf2e4318ef8313febb38048a9b0e947b256723	61	0	yes	0	60	0
+4	i7-5820K (coordinator)	1	6	crypto	PASS	6	46	1	0	0	windows/amd64	0adf2e4318ef8313febb38048a9b0e947b256723	46	0	yes	0	53	0
+4	i7-5820K (coordinator)	1	7	html/template	PASS	243	71	1	0	0	windows/amd64	0adf2e4318ef8313febb38048a9b0e947b256723	71	0	yes	0	50	0
