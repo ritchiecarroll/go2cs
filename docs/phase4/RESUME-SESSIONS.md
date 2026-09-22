@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 12:27 -- STAMP refresh (ledger through mailbox 51a02d166a): section 1a STATE DELTA 18 (batch 6 stamped at 8fc439415f; batch 7 running with five refs; the closing arithmetic ruled at N = 230; the H10 close sequence). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 14:47 -- RESUME refresh (ledger through mailbox 32faf811cc): section 1a STATE DELTA 19 (COORD back after an i7 reboot; the owner's Opus 5.5 order applied to section 0 and every prompt; batch 7 resumed; the H10 re-bank debt ruled -- 14 rows never measured at 1.24.13 -> pass 3). STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -39,12 +39,12 @@
 
 | Lane | Box | Role next week | Model / effort | Why |
 |---|---|---|---|---|
-| COORD | i7 | rulings, merges, master landings, train assembly, the ladder | Fable 5.1 / high, ultracode on | signs everything; the instrument's reader |
-| i9 | i9 (fastest box, thermal: one serial item) | H4a/H5 executor: the rung, reconverts, builds, H5c/applier runs | Opus 5 / high (owner order 2026-09-14: every lane on Opus; COORD alone on Fable) | measurement rigor on the critical path |
-| C1 | cloud (linux) | runtime hand-own re-derives (C1-1 landed in the rung, C1-2 sizing), applier self-tests | Opus 5 / high (owner order 2026-09-14: every lane on Opus; COORD alone on Fable) | delicate hand-own work |
-| C2 | cloud (linux, no PowerShell, disk-constrained) | H5c instrument authoring (cannot execute .ps1 — COORD parse-gates, i9 runs), H10 map re-derivation, darwin plan | Opus 5 / high (owner order 2026-09-14: every lane on Opus; COORD alone on Fable) | design + instrument authoring |
-| G | G-LAPTOP (+WSL linux arm) | linux-arm gates, H6 alias/liveness census, filtered-sweep rule | Opus / high | execution and census work |
-| R | R-LAPTOP (TRAVEL STANDBY from 2026-09-13; spurts only) | SAVE-STATE STEWARD (fold by script, verify, push); readings and rulings in spurts | Opus 5 / high as steward; Fable 5.1 in a ruling spurt | standby |
+| COORD | i7 | rulings, merges, master landings, train assembly, the ladder | Opus 5.5 / max, ultracode on (owner order 2026-09-22: the whole fleet on Opus 5.5) | signs everything; the instrument's reader |
+| i9 | i9 (fastest box, thermal: one serial item) | H4a/H5 executor: the rung, reconverts, builds, H5c/applier runs | Opus 5.5 / high (owner order 2026-09-22: the whole fleet on Opus 5.5; COORD at max) | measurement rigor on the critical path |
+| C1 | cloud (linux) | runtime hand-own re-derives (C1-1 landed in the rung, C1-2 sizing), applier self-tests | Opus 5.5 / high (owner order 2026-09-22: the whole fleet on Opus 5.5; COORD at max) | delicate hand-own work |
+| C2 | cloud (linux, no PowerShell, disk-constrained) | H5c instrument authoring (cannot execute .ps1 — COORD parse-gates, i9 runs), H10 map re-derivation, darwin plan | Opus 5.5 / high (owner order 2026-09-22: the whole fleet on Opus 5.5; COORD at max) | design + instrument authoring |
+| G | G-LAPTOP (+WSL linux arm) | linux-arm gates, H6 alias/liveness census, filtered-sweep rule | Opus 5.5 / high | execution and census work |
+| R | R-LAPTOP (TRAVEL STANDBY from 2026-09-13; spurts only) | SAVE-STATE STEWARD (fold by script, verify, push); readings and rulings in spurts | Opus 5.5 / high | standby |
 
 **Session-bound ids are not state (C2 56e93e709 §5, i9 59e0e3099 §1–§3).** Every Monitor id and every wake-loop id
 (CronCreate job or Routine) in any block below belongs to the session that created it and is dead to a resumed
@@ -102,7 +102,7 @@ docs/phase4/archive/MAILBOX-through-2026-09-20.md on claude/mailbox). Never read
    and receive); the inbox file is the cloud lane's REPLY path and COORD's record of the message, not its wake.
 
 Identity: you are one lane of the go2cs fleet; nickname only (i7, i9, G-LAPTOP, R-LAPTOP, C1, C2) on every pushed
-surface. Model: Opus 5, effort high (owner order; the owner may raise a lane at its machine). COORD is Fable 5.1 on
+surface. Model: Opus 5.5, effort high (owner order 2026-09-22; the owner may raise a lane at its machine). COORD is Opus 5.5 (max) on
 the i7 and has final say on design; escalate only runs-like-Go / reads-like-Go questions.
 
 The objective, in order: (1) the Go corpus migration to 1.24.13 by the ladder in docs/GoCorpusMigration.md section 2
@@ -153,7 +153,7 @@ supersedes section 1's fence, whose STATE block stays as history. The new coordi
 
 ```
 RESUME 2026-09-21 (after the 2026-09-20 weekly limit). You are the go2cs fleet COORDINATOR (COORD) on the i7.
-Nickname only on every pushed surface (i7, i9, G-LAPTOP, R-LAPTOP, C1, C2). Model: Fable 5.1, effort high.
+Nickname only on every pushed surface (i7, i9, G-LAPTOP, R-LAPTOP, C1, C2). Model: Opus 5.5, effort max (owner order 2026-09-22).
 Your principal is the repository owner. Your job is the GOALS; comms is a solved tool -- read STEP 1 once and never design it again.
 STATE DELTA 2026-09-21 23:40 (COORD online; supersedes the STEP 3 state below where they differ; the ledger wins over both):
   - COORD's session is `coord -- Go corpus migration to 1.24.13 coordination` on the i7; no lane session was up at resume (ListAgents
@@ -448,6 +448,23 @@ STATE DELTA 2026-09-22 12:27 (ledger through mailbox 51a02d166a; supersedes the 
   - AFTER BATCH 7: STAMP -> H10 close = the core-refs table swept (7 banked rows' tests.csproj re-emitted at 1.24.13 = re-run crypto/tls, fmt,
     internal/trace, math/rand, mime/multipart, net/http, time + mlkem), the hop's final -stdlib reconvert (maphash.cs and the maps/x509 -tests
     emission classes), the header's final figures, then H11 / H12.
+STATE DELTA 2026-09-22 14:47 (ledger through mailbox 32faf811cc; supersedes the deltas above where they differ) -- COORD RESUMED AFTER AN i7 REBOOT:
+  - OWNER ORDER 2026-09-22 ~14:30: the whole fleet on Opus 5.5, COORD at max effort (section 0 and every prompt's model line updated in
+    this revision). GPG re-primed by the owner at the console (probe CACHED 14:43). Mailbox unchanged across the outage; watch re-armed.
+  - BATCH 7 (worktree ab7 on 8fc439415f, five refs): the reboot hit its LAST row (runtime). The five signed merges and two completed rows
+    survived -- crypto/internal/fips140test VALIDATED 2260 + 7 = 2267 (new page), crypto/sha3 VALIDATED 18 + 5 = 23 (page + badge); the
+    agent RESUMED from its transcript: runtime re-run from clean, then the bank and the index/header commit. time's floor is 40m.
+  - H10 RE-BANK DEBT RULED (ledger 32faf811cc; a page census of every row's [proof] links at d5414aa151): 25 of 219 rows link no 1.24.13
+    page -- 2 bank in batch 7; time is batch 7's; 8 inheritance-anchor rows HAVE their own pass-1 pages and link only the 1.23.12 anchor
+    (C1 links them); and 14 BANKED ROWS HAVE NEVER BEEN MEASURED AT 1.24.13 (crypto/tls, fmt, internal/coverage/cfile, internal/godebug,
+    internal/runtime/atomic, internal/trace, math/rand, mime/multipart, net/http, os/user, syscall, testing, unicode/utf8 + net) ->
+    PASS 3 on G at 8fc439415f (testing LAST: admissible now that the hand-own guard runs a host tests-only; net placed by host
+    qualification). H10 closes only when each of the 14 re-banks at 1.24.13 or is demoted to a candidate by name, header by the guard.
+  - LANES: G on PASS 3; C1 on the anchor-row links (8fc439415f); C2 on the census's unc_backslash refusal (a master instrument seat);
+    R status-checked on the lfnode identity seat (no ref at origin; session idle); i9's session NOT VISIBLE after the restart (asked of
+    the owner). No owner hand open.
+  - NEXT: batch 7's report -> STAMP -> merge C1's links + G's pass-3 shard -> net -> the core-refs table sweep -> the hop's final -stdlib
+    reconvert -> the header's final figures -> H11 / H12. The runbook's 'testing excluded from every list' line gets a dated amendment.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -580,8 +597,8 @@ STANDING RULES: the CLAUDE.md safety floor (one conversion per output root; seed
 ## 1. COORD (i7) — paste this to start the coordinator
 
 ```
-You are the go2cs fleet COORDINATOR on the i7 (nickname only on every pushed surface). Model: Fable 5.1,
-effort high, ultracode ON (Workflow tool for substantive tasks; adversarial cut + verify). Working
+You are the go2cs fleet COORDINATOR on the i7 (nickname only on every pushed surface). Model: Opus 5.5,
+effort max, ultracode ON (Workflow tool for substantive tasks; adversarial cut + verify). Working
 directory: the main checkout of the go2cs repository on this box (default branch master). Never open a
 session or sub-agent in a worktree on claude/coord-handover.
 
@@ -731,7 +748,7 @@ execution item goes to an Opus sub-agent with a single purpose and no polling lo
 ## 2. i9 — H5 executor — STATE BLOCK received (mailbox 9a094006f)
 
 ```
-  LANE: i9   MODEL: Opus 5/high   HOST: i9
+  LANE: i9   MODEL: Opus 5.5/high   HOST: i9
   (delta applied from mailbox 50ec12d0c)
   BRANCH: claude/version-go1.24.13 d71e4eed634e6921983f5ed246038694d3c9ba1e yes landed -- checkpoint 2 + C1's three H6 rows; the H5 gate tree
   BRANCH: claude/i9-h5-step2-wip 54dec61728719e7566184da2d479ebb3a12fef07 yes superseded -- the five-deletions intermediate, NOT current
@@ -765,7 +782,7 @@ WAKE (i9, verbatim from 59e0e3099 s3): re-create on resume -- i9's wake leg is a
 
 PASTE PROMPT (revision 2026-09-21 23:40 -- resume after the 2026-09-20 weekly limit; a DELTA cut from the ledger through 2026-09-21 23:33 (mailbox b56e835d2f) and the batch-3 brief; the shared preamble is section 0a, PROTOCOL v4 is 0a.0) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0. SESSION TITLE: `i9 -- H10 campaign worker (W=4 sweeper slices, the reserved rows)` (the lane nickname FIRST and lowercase, so COORD addresses you in one word); REMOTE CONTROL ON.
 ```
-RESUME 2026-09-21. You are lane i9 (host i9, Windows, the fastest local box, thermally ONE serial CPU task at a time). Nickname only on every pushed surface. Model: Opus 5, effort high (the owner
+RESUME 2026-09-21. You are lane i9 (host i9, Windows, the fastest local box, thermally ONE serial CPU task at a time). Nickname only on every pushed surface. Model: Opus 5.5, effort high (the owner
 may change it at the machine). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover, then this.
 COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of this file WINS over every older mailbox, post-tool or watcher sentence): reply and ACK by SendMessage to `coord -- Go corpus migration to 1.24.13 coordination` (C1 and C2 CANNOT send: an inbox file via `FLEET_LANE=i9 FLEET_MAILBOX_CLONE=<clone> bash .claude/coord-scripts/fleet-msg.sh COORD "<SUBJECT>" <BODYFILE>` from a clone with claude/mailbox checked out; the scripts are on master 0b0be89fd7 and on claude/mailbox). TICK = your inbox (a message event, or `bash .claude/coord-scripts/fleet-read.sh i9 [NEXT-SINCE]`, NEXT-SINCE = the mailbox tip SHA it printed last time, stored by you) -> the ledger tail it prints (docs/phase4/LEDGER.md: the LAST STAMP line is the version tip) -> the work -> ONE reply of at most 40 lines (WHAT 1 line / EVIDENCE <= 10 / ASK or NEXT 1). Never read the archived broadcast file. Silence from COORD is acknowledgement. No watcher or wake-loop lines; a 20-minute wake loop only if your harness delivers no message events.
 
@@ -830,7 +847,7 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 ## 3. C1 — runtime hand-owns (cloud) — STATE BLOCK received 21:29 delta (mailbox 5e55c4b92 + 438b6f762)
 
 ```
-  LANE: C1   MODEL: Opus 5/high   HOST: C1 (linux container, no .NET SDK)
+  LANE: C1   MODEL: Opus 5.5/high   HOST: C1 (linux container, no .NET SDK)
   BRANCH: claude/c1-h5-rederive-patch ff54907996fb2c7833b56e3608b878bdb467dc33 yes accepted -- C1-1 + C1-2 (amended 54ce45d9b) + C1-2b; VERSION-BRANCH ONLY (red converter guard at master by design); tip per cf06dafee (was 2c8841571 at 7d3734a84)
   BRANCH: claude/c1-mcleanup-handown 23d07f74260f96e88186bd3e14bc48812ad357b2 yes superseded -- mcleanup.cs hand-own + createfing rewire; train 48; census 306/306, both corpus flavours compile -- SUPERSEDED for the H5 set by the -clean re-cut below (docs conflict resolved; C1 fc64c7d0c)
   BRANCH: claude/c1-mcleanup-handown-clean d4e40e28bf6da7e676a887611bef2319c77f3d39 yes accepted -- the mcleanup seat re-cut on master 271300cea (DESIGN-managed-getg.md pure-append concatenation; code untouched); H5-set member (C1 fc64c7d0c; SHA verified at origin)
@@ -918,7 +935,7 @@ come back in seconds from a blobless two-tag fetch (1.1 MB). Re-arm all five leg
 
 PASTE PROMPT (revision 2026-09-21 23:40 -- resume after the 2026-09-20 weekly limit; a DELTA cut from the ledger through 2026-09-21 23:33 (mailbox b56e835d2f) and the batch-3 brief; the shared preamble is section 0a, PROTOCOL v4 is 0a.0) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0. SESSION TITLE: `c1 -- H10 standby (fips140test divergence classing)` (the lane nickname FIRST and lowercase, so COORD addresses you in one word); REMOTE CONTROL ON.
 ```
-RESUME 2026-09-21. You are lane C1 (cloud, linux; no .NET, no PowerShell, little disk; you RECEIVE messages but cannot send -- reply by inbox file). Nickname only on every pushed surface. Model: Opus 5, effort high (the owner
+RESUME 2026-09-21. You are lane C1 (cloud, linux; no .NET, no PowerShell, little disk; you RECEIVE messages but cannot send -- reply by inbox file). Nickname only on every pushed surface. Model: Opus 5.5, effort high (the owner
 may change it at the machine). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover, then this.
 COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of this file WINS over every older mailbox, post-tool or watcher sentence): reply and ACK by SendMessage to `coord -- Go corpus migration to 1.24.13 coordination` (C1 and C2 CANNOT send: an inbox file via `FLEET_LANE=C1 FLEET_MAILBOX_CLONE=<clone> bash .claude/coord-scripts/fleet-msg.sh COORD "<SUBJECT>" <BODYFILE>` from a clone with claude/mailbox checked out; the scripts are on master 0b0be89fd7 and on claude/mailbox). TICK = your inbox (a message event, or `bash .claude/coord-scripts/fleet-read.sh C1 [NEXT-SINCE]`, NEXT-SINCE = the mailbox tip SHA it printed last time, stored by you) -> the ledger tail it prints (docs/phase4/LEDGER.md: the LAST STAMP line is the version tip) -> the work -> ONE reply of at most 40 lines (WHAT 1 line / EVIDENCE <= 10 / ASK or NEXT 1). Never read the archived broadcast file. Silence from COORD is acknowledgement. No watcher or wake-loop lines; a 20-minute wake loop only if your harness delivers no message events.
 
@@ -1123,7 +1140,7 @@ OFFLINE at `claude/c1-h6-rows f0f88268945269530d47d9775f4a0772bf6f3a16`.
 ## 4. C2 — instruments and designs (cloud) — STATE BLOCK received (mailbox c08c372ca)
 
 ```
-  LANE: C2   MODEL: Opus 5/high   HOST: C2 (cloud container; converts, CANNOT compile -- no dotnet, no PowerShell, no .ps1 ever ran here)
+  LANE: C2   MODEL: Opus 5.5/high   HOST: C2 (cloud container; converts, CANNOT compile -- no dotnet, no PowerShell, no .ps1 ever ran here)
   BRANCH: claude/c2-h5c-slnx-orphan 40f2b85145c27d10ed2c73652f0d5c6e6287d0f6 yes the H5c instrument of record
   BRANCH: claude/c2-crlf-comment-emitter db37c4a03ec2d4756d841d0a18845511cd56d3e5 yes accepted -- EOL seat ACCEPTED (train 49, off master 271300cea; two commits: writeCommentString + the folded-constant annotation writers normalize through one normalizeNewlines; raw proof 1433 bare LF -> 0 over 10 files; CR-stripped identity 324/324; guards made to fail by the defect's own shape); a THIRD commit owed on the same branch: the three sibling annotation sites (convCallExpr.go:5770, convBinaryExpr.go:135, :961) through the same helper, fixtures per site
           for this hop -- checkpoint 2 was produced by it; parse-gated 0 errors on the i7 (10b8fb992)
@@ -1152,7 +1169,7 @@ WAKE (C2, verbatim from 0d8088e2b):
 
 PASTE PROMPT (revision 2026-09-21 23:40 -- resume after the 2026-09-20 weekly limit; a DELTA cut from the ledger through 2026-09-21 23:33 (mailbox b56e835d2f) and the batch-3 brief; the shared preamble is section 0a, PROTOCOL v4 is 0a.0) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0. SESSION TITLE: `c2 -- H10 standby (sha3 pass-separation seat)` (the lane nickname FIRST and lowercase, so COORD addresses you in one word); REMOTE CONTROL ON.
 ```
-RESUME 2026-09-21. You are lane C2 (cloud, linux; no .NET, no PowerShell, little disk; you RECEIVE messages but cannot send -- reply by inbox file). Nickname only on every pushed surface. Model: Opus 5, effort high (the owner
+RESUME 2026-09-21. You are lane C2 (cloud, linux; no .NET, no PowerShell, little disk; you RECEIVE messages but cannot send -- reply by inbox file). Nickname only on every pushed surface. Model: Opus 5.5, effort high (the owner
 may change it at the machine). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover, then this.
 COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of this file WINS over every older mailbox, post-tool or watcher sentence): reply and ACK by SendMessage to `coord -- Go corpus migration to 1.24.13 coordination` (C1 and C2 CANNOT send: an inbox file via `FLEET_LANE=C2 FLEET_MAILBOX_CLONE=<clone> bash .claude/coord-scripts/fleet-msg.sh COORD "<SUBJECT>" <BODYFILE>` from a clone with claude/mailbox checked out; the scripts are on master 0b0be89fd7 and on claude/mailbox). TICK = your inbox (a message event, or `bash .claude/coord-scripts/fleet-read.sh C2 [NEXT-SINCE]`, NEXT-SINCE = the mailbox tip SHA it printed last time, stored by you) -> the ledger tail it prints (docs/phase4/LEDGER.md: the LAST STAMP line is the version tip) -> the work -> ONE reply of at most 40 lines (WHAT 1 line / EVIDENCE <= 10 / ASK or NEXT 1). Never read the archived broadcast file. Silence from COORD is acknowledgement. No watcher or wake-loop lines; a 20-minute wake loop only if your harness delivers no message events.
 
@@ -1201,7 +1218,7 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 ## 5. G — linux arm and census (G-LAPTOP) — STATE BLOCK received (mailbox 6359de479)
 
 ```
-  LANE: G   MODEL: Opus/high   HOST: G-LAPTOP
+  LANE: G   MODEL: Opus 5.5/high   HOST: G-LAPTOP
   BRANCH: claude/laneR-docs-h6-skeleton a23112d39ead57247acc2bf5c7f86e55496751a6 yes accepted -- the H6 audit, 145 rows, set-identical to the census at the version-branch tip f0f8826894; row 3 followed the fips140 relocation, row 20 marked RE-DERIVE IN PROGRESS (C1)
   BRANCH: claude/g-handown-metadata-t48-r47 35fe4e0167e044539245f7e4721a198fb35a98d0 yes accepted -- train-48 seat 6, the metadata un-freeze re-based onto the train-47 landing
   BRANCH: claude/g-h6-completeness-gate 9e5715209c7c0c2abf802746070da730e3018e22 yes accepted -- train 49, the H6 gate; OWES a one-line fix (check-handown-audit.ps1:324 $probe unwrapped, cc07363b8) as a commit ON TOP, floor 9
@@ -1236,7 +1253,7 @@ WAKE (G, verbatim from 26e7c0955 s1): re-create on resume, UNCONDITIONALLY -- G'
 
 PASTE PROMPT (revision 2026-09-21 23:40 -- resume after the 2026-09-20 weekly limit; a DELTA cut from the ledger through 2026-09-21 23:33 (mailbox b56e835d2f) and the batch-3 brief; the shared preamble is section 0a, PROTOCOL v4 is 0a.0) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0. SESSION TITLE: `g -- H10 linux W=4 worker (G-LAPTOP)` (the lane nickname FIRST and lowercase, so COORD addresses you in one word); REMOTE CONTROL ON.
 ```
-RESUME 2026-09-21. You are lane G (host G-LAPTOP, Windows plus the WSL linux arm). Nickname only on every pushed surface. Model: Opus 5, effort high (the owner
+RESUME 2026-09-21. You are lane G (host G-LAPTOP, Windows plus the WSL linux arm). Nickname only on every pushed surface. Model: Opus 5.5, effort high (the owner
 may change it at the machine). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover, then this.
 COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of this file WINS over every older mailbox, post-tool or watcher sentence): reply and ACK by SendMessage to `coord -- Go corpus migration to 1.24.13 coordination` (C1 and C2 CANNOT send: an inbox file via `FLEET_LANE=G FLEET_MAILBOX_CLONE=<clone> bash .claude/coord-scripts/fleet-msg.sh COORD "<SUBJECT>" <BODYFILE>` from a clone with claude/mailbox checked out; the scripts are on master 0b0be89fd7 and on claude/mailbox). TICK = your inbox (a message event, or `bash .claude/coord-scripts/fleet-read.sh G [NEXT-SINCE]`, NEXT-SINCE = the mailbox tip SHA it printed last time, stored by you) -> the ledger tail it prints (docs/phase4/LEDGER.md: the LAST STAMP line is the version tip) -> the work -> ONE reply of at most 40 lines (WHAT 1 line / EVIDENCE <= 10 / ASK or NEXT 1). Never read the archived broadcast file. Silence from COORD is acknowledgement. No watcher or wake-loop lines; a 20-minute wake loop only if your harness delivers no message events.
 
@@ -1302,7 +1319,7 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 R's role while credits last: fold every lane's STATE BLOCK delta into this file by script, verify, commit (unsigned by owner authorization), announce-then-push, report the tip. The scripts are on claude/coord-instruments under .claude/coord-scripts/save-state/.
 
 ```
-  LANE: R   MODEL: Opus 5/high (steward); Fable 5.1 in a ruling spurt   HOST: R-LAPTOP (owner travel; FLEET STANDBY, spurts only)
+  LANE: R   MODEL: Opus 5.5/high   HOST: R-LAPTOP (owner travel; FLEET STANDBY, spurts only)
   BRANCH: claude/laneR-docs-h6-skeleton a23112d39ead57247acc2bf5c7f86e55496751a6 yes landed -- R's H6 audit skeleton, 145 rows, filled by G: RE-SEATED on R's reading 60ab510e7d and LANDED as a docs seat 4e672aa4a (master 4e672aa4a5cb), carrying G's fill blocks 1-19, one file, +1043/-154, 144 of 145 rows, row 130 REWRITE OWED (c). Ref PRUNED by the land; a23112d39 measured an ancestor of master
   BRANCH: claude/laneR-h6-alias-block 47592cb3f4dd91b4d400e3cac76e8ee34838b68b yes landed -- train 48 seat 3, docs; ref PRUNED by the land, the SHA measured an ancestor of master
   BRANCH: claude/laneR-prepin-baselines-recut becf28abc0977f769e44b578c538ca4675aeee1f yes landed -- train 48 seat 5, docs, the pre-pin baseline BOARD append; ref PRUNED by the land, the SHA measured an ancestor of master
@@ -1331,7 +1348,7 @@ WAKE (R, re-created 2026-09-14 from the disarm recipe 6f65289384 s9): re-create 
 
 PASTE PROMPT (revision 2026-09-21 23:40 -- resume after the 2026-09-20 weekly limit; a DELTA cut from the ledger through 2026-09-21 23:33 (mailbox b56e835d2f) and the batch-3 brief; the shared preamble is section 0a, PROTOCOL v4 is 0a.0) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0. SESSION TITLE: `r -- maphash escapeForHash converter rule + H10 W=4 worker (R-LAPTOP)` (the lane nickname FIRST and lowercase, so COORD addresses you in one word); REMOTE CONTROL ON.
 ```
-RESUME 2026-09-21. You are lane R (host R-LAPTOP, Windows; on the LAN unless travelling with the owner). Nickname only on every pushed surface. Model: Opus 5, effort high (the owner
+RESUME 2026-09-21. You are lane R (host R-LAPTOP, Windows; on the LAN unless travelling with the owner). Nickname only on every pushed surface. Model: Opus 5.5, effort high (the owner
 may change it at the machine). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover, then this.
 COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of this file WINS over every older mailbox, post-tool or watcher sentence): reply and ACK by SendMessage to `coord -- Go corpus migration to 1.24.13 coordination` (C1 and C2 CANNOT send: an inbox file via `FLEET_LANE=R FLEET_MAILBOX_CLONE=<clone> bash .claude/coord-scripts/fleet-msg.sh COORD "<SUBJECT>" <BODYFILE>` from a clone with claude/mailbox checked out; the scripts are on master 0b0be89fd7 and on claude/mailbox). TICK = your inbox (a message event, or `bash .claude/coord-scripts/fleet-read.sh R [NEXT-SINCE]`, NEXT-SINCE = the mailbox tip SHA it printed last time, stored by you) -> the ledger tail it prints (docs/phase4/LEDGER.md: the LAST STAMP line is the version tip) -> the work -> ONE reply of at most 40 lines (WHAT 1 line / EVIDENCE <= 10 / ASK or NEXT 1). Never read the archived broadcast file. Silence from COORD is acknowledgement. No watcher or wake-loop lines; a 20-minute wake loop only if your harness delivers no message events.
 
@@ -1613,3 +1630,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 09:53 -- STAMP refresh: STATE DELTA 16 in section 1a (batch 5 stamped at 598d1978ad; pass 2 running; batch 6 queued). Nothing else moved.
 - 2026-09-22 11:13 -- STAMP refresh: STATE DELTA 17 in section 1a (pass 2 stamped at f545b18d4d; batch 6 running; derivation seat). Nothing else moved.
 - 2026-09-22 12:27 -- STAMP refresh: STATE DELTA 18 in section 1a (batch 6 stamped at 8fc439415f; batch 7 running; N = 230 ruled). Nothing else moved.
+- 2026-09-22 14:47 -- RESUME refresh: STATE DELTA 19; the owner's order (whole fleet on Opus 5.5, COORD max) applied to section 0, COORD's prompt and the five lane headers and prompts; the H10 re-bank debt ruled.
