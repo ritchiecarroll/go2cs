@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 11:13 -- STAMP refresh (ledger through mailbox 31624cd99c): section 1a STATE DELTA 17 (pass 2 stamped at f545b18d4d, ten of ten; batch 6 running; the denominator derivation seat; batch 7 = C1's manifests). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 12:27 -- STAMP refresh (ledger through mailbox 51a02d166a): section 1a STATE DELTA 18 (batch 6 stamped at 8fc439415f; batch 7 running with five refs; the closing arithmetic ruled at N = 230; the H10 close sequence). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -428,6 +428,26 @@ STATE DELTA 2026-09-22 11:13 (ledger through mailbox 31624cd99c; supersedes the 
   - LANES: R on the managed Windows usleep body (claude/r-runtime-usleep on bab8d58af1; the asmcgocall class re-counted after); C1 owes the
     manifests ref + rows for embedtest / internal/runtime/maps (+ sha3 after its pins); C2 STANDBY after 4faa7df98e (announce not yet read);
     G, i9 STANDBY. No owner hand open.
+STATE DELTA 2026-09-22 12:27 (ledger through mailbox 51a02d166a; supersedes the deltas above where they differ) -- BATCH 6 STAMPED:
+  - VERSION TIP claude/version-go1.24.13 = 8fc439415f (batch 6 on f545b18d4d: C2 anon-struct 4faa7df98e, C1 guard tables 48499a4981, R c8aa799300
+    = usleep + nil-predicate fix + lock-metrics + getfp/entersyscall; every prediction met: GolibTests 822 = 812 + ten arms, CNR NO REGRESSION with
+    an EMPTY changed list, stdlib 344/0, runtime DEATH at testSPWrite 10,616 of 10,891 with asmcgocall = 3 roots + 70 echoes; time BUILD on the
+    masked second cause = the named-int range).
+  - RUNNING on the i7: BATCH 7 (worktree ab7 on 8fc439415f, brief docs/phase4/briefs/batch7-brief.md, FIVE refs): C1 manifests + rows 101d44d596
+    (219 rows; maps 111/108 RULED = 58 leaf pins + 50 implied ancestors), COORD closing-arith e43b8f3cd, C1 core-refs re-table 5dd8445e40 (ruling 11:
+    declared-not-measured LOGS during the hop, swept to zero at H10's close), C2 named-int range 9a9858e3de, R testSPWrite 71d03e812 (by SHA;
+    66e6b9905 sysAllocOS HELD -- it unmasked the lfnode/uintptr identity defect). Rows: fips140test / sha3 / maps banked; time by BUILD then all;
+    runtime by cause (predicted death at mcall(park_m), TestScavenger); the index regenerated to 219; the header re-derived (219 / 230, 219 / 224).
+  - CLOSING ARITHMETIC RULED (ledger 54439d0b29): N = 230 on the corpus axis (346 -> 234 -> 230, two routes agree; 215 reproduced at 1.23.12);
+    the runbook's 226 FALSIFIED (the generator's axis); header 216 / 230 = 93.9% and 216 / 224 = 96.4%; four E1 rows outside N STRUCK; the guard
+    reads population-go1.24.13.txt; shardmap's closing check refuses by name. net/http/pprof + runtime/pprof (never run at 1.24.13) MEASURED by
+    i9 at f545b18d4d: 155/37 and 15/4, neither bankable (evidence 553cdcbae3). Owner may reverse the definition choice (roster ladder => 227).
+  - LANES: R on the lfnode/uintptr identity seat (claude/r-runtime-lfnode on 66e6b9905) then mcall(park_m) by cause; i9 on runtime/pprof's
+    blockevent + the CPU-profile leak (RULED: plan9-shape setters hand-owned on windows, claude/i9-runtime-blockevent); C1, C2, G STANDBY.
+    No owner hand open. Instrument seat still owed on master: CNR refuses without git; census unc_backslash downgrade; pages under converted.
+  - AFTER BATCH 7: STAMP -> H10 close = the core-refs table swept (7 banked rows' tests.csproj re-emitted at 1.24.13 = re-run crypto/tls, fmt,
+    internal/trace, math/rand, mime/multipart, net/http, time + mlkem), the hop's final -stdlib reconvert (maphash.cs and the maps/x509 -tests
+    emission classes), the header's final figures, then H11 / H12.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1592,3 +1612,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 09:23 -- hourly refresh: STATE DELTA 15 in section 1a (batch 5 running; pass-2 and batch-6 briefs; the hour's rulings). Nothing else moved.
 - 2026-09-22 09:53 -- STAMP refresh: STATE DELTA 16 in section 1a (batch 5 stamped at 598d1978ad; pass 2 running; batch 6 queued). Nothing else moved.
 - 2026-09-22 11:13 -- STAMP refresh: STATE DELTA 17 in section 1a (pass 2 stamped at f545b18d4d; batch 6 running; derivation seat). Nothing else moved.
+- 2026-09-22 12:27 -- STAMP refresh: STATE DELTA 18 in section 1a (batch 6 stamped at 8fc439415f; batch 7 running; N = 230 ruled). Nothing else moved.
