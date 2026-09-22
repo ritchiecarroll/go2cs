@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 00:33 -- hourly refresh (ledger through mailbox c13e5bb227): section 1a STATE DELTA 2 (rehearsal GREEN; campaign tip = master merged after batch 3; batch 3 resumed past a projitems union; batch 4 = sha3 pair + escapeForHash; all five lanes up); 0a.0 rules 8-9 (owner hands through COORD; cloud lanes wake on SendMessage). Lane fences (revision 2026-09-21 23:40) and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 01:31 -- hourly refresh (ledger through mailbox 55196b7c43): section 1a STATE DELTA 3 (master 9e12c3e7d0 with the instrument + roster-guard seats; batch 3 in battery; batch 4 = five refs; C1's classing; lanes). Lane fences (revision 2026-09-21 23:40), 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -199,6 +199,26 @@ STATE DELTA 2026-09-22 00:33 (ledger through mailbox c13e5bb227; supersedes the 
     lines COORD pasted; C2 STANDBY. maphash's real wall ~4.6 min: the wrapper's derived 60 m floor is load-bearing (the
     'deadline floors: N derived' line is the WRAPPER's per row, not the DryRun banner's).
   - OWNER ORDER 2026-09-22: owner hands route through COORD (0a.0 rule 8); cloud lanes are woken by SendMessage (rule 9).
+STATE DELTA 2026-09-22 01:31 (ledger through mailbox 55196b7c43; supersedes the deltas above where they differ):
+  - MASTER 9e12c3e7d0: the instrument seat (3b48e0c8e0: wrapper one-verdict fix -> WRAPPER BLOB 158ce37f6c; the roster gate's
+    pin-count CEILING; the census made linear -- gawk's quadratic gsub on long lines, self-test 117/0) and the roster-guard seat
+    (the exclusion-ledger parse scoped to its section; header/NEWS re-derived 203/215 94.4, 203/209 97.1, linux 188 of 201).
+    check-roster-format on master = 2 of 672, EXACTLY the two relocation orphans (fips140/edwards25519, fips140test) -- the
+    campaign-tip merge's roster gate is that named set (brief corrected, b7d002a811). docs/README.md carries TEN pre-existing
+    census hits (the owner's public name/handle) -- the owner's call.
+  - BATCH 3 (ec3) still in its battery (resumed past the projitems union ~00:15). Then: the campaign-tip merge on MASTER 9e12c3e7d0
+    (brief docs/phase4/briefs/campaign-tip-merge-brief.md) -> STAMP -> GO (docs/phase4/briefs/go-message-template.md).
+  - BATCH 4 = FIVE refs, one i7 battery AFTER the campaign-tip merge, GO does not wait: C2's sha3 pair 65e3a46155; R's escapeForHash
+    5291f72c8e (hash/maphash 59/59 gated on R-LAPTOP); R's fips140/check hand-own b08fbbc3b4 (fips140test 52 -> 32 on R-LAPTOP;
+    src/core/crypto/internal/fips140/check/** allowed); R's println-LF golib seat (CUTTING: golib println writes CRLF on Windows,
+    Go writes LF; predicted fips140test 8); C2's //go:embed seat 3ace3efd6a (the converter had NO embed support; payloads staged +
+    EmbeddedResource + conversion-time walk; embed_impl.cs UNCOMPILED -- the battery's stdlib 344 compiles it; embedtest predicted
+    Validated 7; fips140test predicted 7 with TestACVP PASS). Predicted batch-4 rows: crypto/sha3 VALIDATED, hash/maphash 59,
+    embedtest 7, fips140test DIVERGED 7 (six pins incl. the new structural TestXAESAllocations + the nistec parent).
+  - C1's classing (claude/c1-fips140test-classing 769fc17fb1): 45 of 52 defects at three sites (check's linker symbol -> R's hand-own;
+    the empty go:embed -> C2's seat; println CRLF -> R's seat), 7 disclosures. The linkname-to-linker-symbol class BANKED for a
+    converter warning seat. traceviewer's staticContent is a latent PRODUCTION defect (2.7 MB payload enters at its next reconvert).
+  - LANES: C1 STANDBY; C2 STANDBY; R on println-lf then GO (pwsh 7 OWNER-HAND open); i9 and G holding for GO.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1348,3 +1368,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 
 - 2026-09-21 23:40 -- COORD ONLINE after the 2026-09-20 weekly limit: the five lane PASTE PROMPT fences (revision 2026-09-19, 1345 lines net) replaced by DELTA fences cut from the ledger through 23:33 (mailbox b56e835d2f) and the batch-3 brief -- session titles `<lane> -- <goal>`, the v4 comms line, GPG, pins, the driver recipe for the W=4 workers, per-lane first item and queue with SHAs; section 1a gains the STATE DELTA (the rehearsal's driver leg ran green; C2's sha3 key seat ruled to batch 4, seat (B) next); the stale 'INTERRUPTED at row 1' paragraph corrected in place; status line updated. STATE BLOCKs untouched.
 - 2026-09-22 00:33 -- hourly refresh: STATE DELTA 2 in section 1a (ledger through c13e5bb227); 0a.0 rules 8 (owner hands route through COORD, owner order 2026-09-22) and 9 (cloud lanes wake on SendMessage; the inbox file is their reply path); status line. Nothing else moved.
+- 2026-09-22 01:31 -- hourly refresh: STATE DELTA 3 in section 1a (ledger through 55196b7c43). Nothing else moved.
