@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 03:37 -- STAMP + GO refresh (ledger through mailbox db7abf82e4): section 1a STATE DELTA 5 (the campaign tip c6fdbe73c3 stamped; GO sent to i9/G/R; the i7's slices as a sub-agent; batch 4 next). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 04:06 -- hourly refresh (ledger through mailbox 598692e7ad): section 1a STATE DELTA 6 (campaign pass 1 in flight: the i7's 7/7, G's s1 ref accepted, i9 running, R blocked on pwsh 7; the banking rule; the linux-arm and compilation-unit rulings). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -248,6 +248,21 @@ STATE DELTA 2026-09-22 03:37 (ledger through mailbox db7abf82e4; supersedes the 
     campaign tip -> STAMP; crypto/sha3, hash/maphash, embedtest and fips140test re-dispatch at that tip. Then the legs: merge each
     lane's shard ref as an incremental train (census, repoguard, check-roster-format's set, the checksum re-assert, a filtered re-sweep
     sample), index.md regenerated once centrally after the last leg.
+STATE DELTA 2026-09-22 04:06 (ledger through mailbox 598692e7ad; supersedes the deltas above where they differ):
+  - CAMPAIGN pass 1 at c6fdbe73c3, in flight: the i7's slice 1 = 7/7 PASS (fips140/edwards25519 54, godebugs 1, database/sql 140 (roster
+    138 -> 140), types/errors 155, flate 64, crypto 6, html/template pending at the last interim) -- commit + slice 2 by the sub-agent in
+    worktree w4; G's s1 REF claude/g-h10-rebank-s1 06ac80d680 ACCEPTED (six PASS; xml 386 -> 387, buildinfo 197 -> 211; internal/runtime/maps
+    DIVERGED 108 = the *SwissMapType no-address deref class, OUT of the ref, routed to G after s2 as the banked pointer-model class fix),
+    G's s2 running; i9 s1 running (no announce yet); R fully staged, BLOCKED on pwsh 7 (OWNER-HAND).
+  - RULINGS since the launch: G's LINUX arm is not a banking platform (its s1 ran the windows flavour and died at LoadDLL(kernel32); the
+    linux rows are a later leg by the sweep's linux mechanism with GoTargetOS=linux); the Δio production rewrite is the -tests COMPILATION
+    UNIT axis, not the host (C1's four-root proof, 21 packages) -> C1 cuts the per-unit rename set (claude/c1-per-unit-alias-renames) on
+    c6fdbe73c3; BANKING RULE for every shard ref: TEST artifacts only (test .cs, package_test_info, host, tests.csproj, proof page, badge,
+    roster ROW edits), NEVER a production .cs -- restored before the commit and counted in the announce; the leg gate refuses otherwise.
+  - NEXT on the i7 after its slices: BATCH 4 (five refs, brief on the record) -> STAMP; then the legs (each shard ref merged as an
+    incremental train: census, repoguard, check-roster-format's set, the checksum re-assert, a filtered re-sweep sample; index.md once
+    centrally). Pending cuts to fold into a later batch: C1's per-unit alias renames; G's pointer-model fix (after s2); the linux-host
+    GoTargetOS refusal (an instrument seat); the README census hits (the owner's call).
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1400,3 +1415,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 01:31 -- hourly refresh: STATE DELTA 3 in section 1a (ledger through 55196b7c43). Nothing else moved.
 - 2026-09-22 02:38 -- STAMP refresh: STATE DELTA 4 in section 1a (batch 3 -> version tip 146c22828d; the campaign-tip merge launched). Nothing else moved.
 - 2026-09-22 03:37 -- STAMP + GO refresh: STATE DELTA 5 in section 1a (campaign tip c6fdbe73c3; GO; the i7's slices; batch 4 next). Nothing else moved.
+- 2026-09-22 04:06 -- hourly refresh: STATE DELTA 6 in section 1a (campaign pass 1 in flight; G's s1 ref; the banking rule; two rulings). Nothing else moved.
