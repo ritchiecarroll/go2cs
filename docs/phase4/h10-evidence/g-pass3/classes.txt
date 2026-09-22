@@ -1,0 +1,57 @@
+H10 PASS 3 -- G-LAPTOP, windows/amd64, tree 8fc439415f (claude/version-go1.24.13), -test-config Release,
+tiered JIT off, wrapper = src/run-h10-recon.ps1 blob 158ce37f6c run from a per-run copy (see WRAPPER COPY).
+Counts: counts.txt (Go / C# = verdict keys per side; matched = the converter's "Validated N", or for a
+DIVERGED row Go - disclosed - diverged; absent = Go-only keys). Every row rc 0, no deadline fired.
+
+VALIDATED AND BANKED (claude/g-h10-pass3-s1 c660a17d8c)
+  math/rand 47 / 0 (roster 43 -> 47) · mime/multipart 52 / 0 · internal/coverage/cfile 15 / 1
+
+VALIDATED, NOT BANKED (for COORD)
+  crypto/tls  1340 matched / 2 disclosed, 3418 Go-side BoGo cases WITHDRAWN under the disclosed
+              TestBogoSuite root (host-limit "bogo failed: exit status 1") -- the row's documented THIRD
+              host state (runner present, converted side cannot clear the wall). The roster Tests cell
+              (3643) is the FULL-host count; the 1.24.13 BoGo block is 3418 (1.23.12: 3242). A third-state
+              proof page would strip the block names the sweep's host-limit check proves withdrawals against.
+  testing     7 matched / 15 disclosed (roster 37 / 15) under the admissible tests-only host mode: 77
+              declarations excluded, 20 of them "the package under test is a hand-owned host, so its
+              internal test variant is not compiled" -- 37 -> 7 is the mode, not the suite. Status after the
+              row: test artifacts only (6 modified + example_loop_test.cs new); no hand-owned production file.
+
+DIVERGED -- nothing banked; first classes by name
+  unicode/utf8 (1)    TestRuneCountNonASCIIAllocation, NEW at 1.24: alloc-profile, 30 golib allocs / 10 runs
+                      = 3 per run vs Go 0. Mechanisms: (a) slice<byte>("..."u8) copies the constant (Go keeps a
+                      non-escaping []byte(const) on the stack) -- escape-analysis class; (b) RuneCount's slow
+                      path RuneCountInString((@string)(p[n..])) materialises a heap @string where Go's compiler
+                      uses a non-escaping temporary -- a LOCAL, removable mechanism (a byte-walking RuneCount or a
+                      zero-copy string view for a non-retained argument). 1 + 2 is inferred from the emission.
+  internal/runtime/atomic (1)  TestXchg8: infrastructure-error, NotImplementedException "Xchg8" -- an assembly
+                      function with no corpus body (the q82 census class).
+  os/user (2)         TestImpersonatedSelf/0: infrastructure-error, FileNotFoundException for assembly
+                      internal.itoa (from syscall.Errno.Error -> itoa.Itoa); parent TestImpersonatedSelf fails by
+                      aggregation. syscall.csproj's ProjectReference to internal/itoa is present and unconditional,
+                      so this is the TEST HOST's publish closure missing a transitive assembly -- only this row hit it
+                      (census over all 13 rows: 1 occurrence). Not re-built here (the battery held the tree).
+  internal/godebug (1) TestCmdBisect: bisect's reported source lines are one LOW (have 145/146/147, want
+                      146/147/148) -- a Caller/position-map line off-by-one.
+  fmt (2)             TestCountMallocs: alloc-profile, 200 golib allocs / 100 runs, UNDISCLOSED (the row carries no
+                      manifest pin); TestSprintf: Sprintf("%v", <func value with a String method>) prints "<nil>",
+                      Go wants "String(fn)".
+  internal/trace (4)  TestTraceCPUProfile + /Default /Stress /AllocFree: the C# host's `go run
+                      testdata/testprog/cpu-profile.go` is refused "use of internal package internal/profile not
+                      allowed" -- the subprocess builds outside GOROOT. The i7 read this row 92 / 0 at 0adf2e4318, so
+                      this is a host/tree delta to reconcile, not assumed a regression.
+  syscall (1)         TestGetStartupInfo: refused BY NAME at the native boundary -- "argument 0 is a managed pointer
+                      token, not an address -- the pointee is reference-bearing" (StartupInfo carries pointer fields).
+  net/http (19)       12 infrastructure-error = NotImplementedException "Run" at internal/synctest.Run (the 1.24
+                      synctest bubble, no managed body): TestNewClientServerTest/synctest/{h1,h2,https1},
+                      TestServerShutdownStateNew/{h1,h2}, TestTransportIdleConnRacesRequest/{h1,h2unencrypted},
+                      TestTransportRemovesConnsAfterBroken/{h1,h2}, TestTransportRemovesConnsAfterIdle/{h1,h2};
+                      1 fail TestRegisterErr//a: "registered at unknown location" -- ServeMux's registration site from
+                      runtime.Caller is lost (the godebug family); 6 parents fail by aggregation.
+
+internal/runtime/math: the re-emitted tests.csproj of fmt, math/rand, mime/multipart, internal/trace,
+crypto/tls and net/http now reference internal/runtime/math (none carries the old runtime/internal/math).
+
+WRAPPER COPY: one change, line 829 -- a floored row took its sweep floor IN PLACE of an asked -TestTimeout;
+the copy takes the larger (the sweep's own $raisesTheFloor rule). crypto/tls ran at 60m (floor 30m),
+net/http at 90m (floor 60m); every other row at 20m (no floor).

@@ -1,0 +1,14 @@
+row                      word         go    cs matched  disc   div absent  wall
+unicode/utf8             DIVERGED     15    15       -     0     1      0   120
+internal/runtime/atomic  DIVERGED     16    16       -     0     1      0    42
+os/user                  DIVERGED     17    17       -     0     2      0   119
+internal/godebug         DIVERGED      5     5       -     0     1      0    51
+fmt                      DIVERGED     63    63       -     0     2      0    51
+math/rand                PASS         47    47      47     0     0      0    37
+mime/multipart           PASS         52    52      52     0     0      0    60
+internal/coverage/cfile  PASS         16    17      15     1     0      0    93
+internal/trace           DIVERGED     92    93       -     0     4      0   153
+syscall                  DIVERGED     65    65       -     0     1      0    45
+crypto/tls               PASS       1342  1342    1340     2     0      0   885
+net/http                 DIVERGED   1387  1388       -     0    19      0   328
+testing                  PASS         22    22       7    15     0      0    41
