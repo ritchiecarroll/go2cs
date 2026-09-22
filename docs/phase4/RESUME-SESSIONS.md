@@ -400,7 +400,7 @@ STATE DELTA 2026-09-22 09:53 (ledger through mailbox 7d865a6da9; supersedes the 
   - RUNNING on the i7: PASS 2 (worktree p2 on 598d1978ad, branch i7/h10-pass2-*, brief docs/phase4/briefs/pass2-brief.md): leg 9 = R's s2b
     a7cbca2637; the re-dispatch (fips140test DIVERGED 7 undisclosed until C1's pins; sha3 DIVERGED 5; maphash 59; embedtest 7; x509; maps; slog;
     rand; sync; runtime by cause); the index regenerated once with master's tool; the header from the guard. Bank ref claude/coord-h10-pass2-s1.
-  - QUEUED: BATCH 6 (brief batch6-brief.md) on the pass-2 STAMP: C2 anon-struct 4faa7df98e (announce not yet read), C1 guard tables 48499a4981,
+  - (superseded by DELTA 17) QUEUED: BATCH 6 (brief batch6-brief.md) on the pass-2 STAMP: C2 anon-struct 4faa7df98e (announce not yet read), C1 guard tables 48499a4981,
     C1 fips140test/sha3 manifests (TBD), R lock-metrics bab8d58af1 (:= ref 4, contains getfp+entersyscall 0c0090e19b; the live-lock fixed, runtime now DIES at asmcgocall via usleep, 10,612 of 10,891; R on a managed usleep body next; was: HANG at 30m in
     TestRuntimeLockMetricsAndProfile/runtime.lock/sample-1 instead of dying; 10,607 of 10,891). Then H10 closing arithmetic -> H11.
   - LANES: R on the lock-metrics hang by cause (new ref claude/r-runtime-lock-metrics); C1 on the two manifests; C2 announce owed; G, i9 STANDBY.
@@ -417,6 +417,12 @@ STATE DELTA 2026-09-22 11:13 (ledger through mailbox 31624cd99c; supersedes the 
     C1 48499a4981 (guard tables; the suite must read FULLY GREEN), R c8aa799300 (usleep + the nil-predicate fix, contains bab8d58af1 lock-metrics + getfp + entersyscall -- amended in flight; runtime predicted DEATH at the testSPWrite stub ~10,616; asmcgocall = 3 roots + 70 echoes; was:
     DEATH at asmcgocall via usleep ~10,612 of 10,891). Then STAMP -> BATCH 7 = C1's fips140test/sha3 manifests (not at origin yet) + the two
     rows re-run + bank + the index regenerated + the header re-derived with the 1.24.13 denominator -> H10 closing arithmetic -> H11.
+  - CLOSING ARITHMETIC RULED 2026-09-22 11:30 (ledger 54439d0b29): N = 230 on the corpus axis (346 -> 234 -> 230; two routes agree; 215 reproduced at
+    1.23.12); the runbook's 226 FALSIFIED (the generator's axis, blind to net/http/pprof + runtime/pprof -- never run at 1.24.13, i9 DISPATCHED);
+    header -> 216 / 230 = 93.9% and 216 / 224 = 96.4% (implementable = N minus the SIX exclusion rows inside N); the four E1 rows outside N
+    STRUCK per the 2026-09-02 precedent; guard reads a population file of record; shardmap's closing check reads it too; runbook annotated.
+    SEAT cutting: claude/coord-h10-closing-arith (worktree ca on f545b18d4d) -> rides BATCH 7 with C1's 101d44d596 FINAL (219 rows; maps 111/108
+    ruled: leaf pins + 50 implied ancestors). Owner may reverse the definition choice (roster's literal ladder => N = 227, three banked rows outside).
   - INSTRUMENT SEAT owed on master (one sub-agent, after batch 6): CNR refuses without git/dotnet on PATH; census converted mode gains an
     unc_backslash downgrade; current/ pages run under converted.
   - LANES: R on the managed Windows usleep body (claude/r-runtime-usleep on bab8d58af1; the asmcgocall class re-counted after); C1 owes the
