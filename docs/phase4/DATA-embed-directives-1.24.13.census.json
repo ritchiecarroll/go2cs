@@ -1,0 +1,623 @@
+[
+  {
+    "pkg": "cmd/vendor/github.com/google/pprof/internal/driver",
+    "file": "webhtml.go",
+    "line": 44,
+    "half": "production",
+    "var": "embeddedFiles",
+    "type": "embed.FS",
+    "patterns": [
+      "html"
+    ],
+    "kinds": [
+      "dir"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/github.com/google/pprof/third_party/svgpan",
+    "file": "svgpan.go",
+    "line": 11,
+    "half": "production",
+    "var": "JSSource",
+    "type": "string",
+    "patterns": [
+      "svgpan.js"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/appends",
+    "file": "appends.go",
+    "line": 22,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/assign",
+    "file": "assign.go",
+    "line": 25,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/atomic",
+    "file": "atomic.go",
+    "line": 20,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/defers",
+    "file": "defers.go",
+    "line": 19,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/ifaceassert",
+    "file": "ifaceassert.go",
+    "line": 20,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/loopclosure",
+    "file": "loopclosure.go",
+    "line": 22,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/lostcancel",
+    "file": "lostcancel.go",
+    "line": 22,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/nilfunc",
+    "file": "nilfunc.go",
+    "line": 23,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/printf",
+    "file": "printf.go",
+    "line": 36,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/sigchanyzer",
+    "file": "sigchanyzer.go",
+    "line": 24,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/slog",
+    "file": "slog.go",
+    "line": 27,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/stdmethods",
+    "file": "stdmethods.go",
+    "line": 20,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/stringintconv",
+    "file": "string.go",
+    "line": 23,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/testinggoroutine",
+    "file": "testinggoroutine.go",
+    "line": 22,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/tests",
+    "file": "tests.go",
+    "line": 22,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/timeformat",
+    "file": "timeformat.go",
+    "line": 28,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/unmarshal",
+    "file": "unmarshal.go",
+    "line": 21,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/unreachable",
+    "file": "unreachable.go",
+    "line": 22,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/unsafeptr",
+    "file": "unsafeptr.go",
+    "line": 22,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "cmd/vendor/golang.org/x/tools/go/analysis/passes/unusedresult",
+    "file": "unusedresult.go",
+    "line": 32,
+    "half": "production",
+    "var": "doc",
+    "type": "string",
+    "patterns": [
+      "doc.go"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "crypto/internal/fips140test",
+    "file": "acvp_test.go",
+    "line": 85,
+    "half": "internal-test",
+    "var": "capabilitiesJson",
+    "type": "[]byte",
+    "patterns": [
+      "acvp_capabilities.json"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed",
+    "file": "example_test.go",
+    "line": 14,
+    "half": "external-test",
+    "var": "content",
+    "type": "embed.FS",
+    "patterns": [
+      "internal/embedtest/testdata/*.txt"
+    ],
+    "kinds": [
+      "glob"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embed_test.go",
+    "line": 18,
+    "half": "internal-test",
+    "var": "global",
+    "type": "embed.FS",
+    "patterns": [
+      "testdata/h*.txt",
+      "c*.txt",
+      "testdata/g*.txt"
+    ],
+    "kinds": [
+      "glob",
+      "glob",
+      "glob"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embed_test.go",
+    "line": 21,
+    "half": "internal-test",
+    "var": "concurrency",
+    "type": "string",
+    "patterns": [
+      "c*txt"
+    ],
+    "kinds": [
+      "glob"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embed_test.go",
+    "line": 24,
+    "half": "internal-test",
+    "var": "glass",
+    "type": "[]byte",
+    "patterns": [
+      "testdata/g*.txt"
+    ],
+    "kinds": [
+      "glob"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embed_test.go",
+    "line": 84,
+    "half": "internal-test",
+    "var": "testDirAll",
+    "type": "embed.FS",
+    "patterns": [
+      "testdata"
+    ],
+    "kinds": [
+      "dir"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embed_test.go",
+    "line": 101,
+    "half": "internal-test",
+    "var": "testHiddenDir",
+    "type": "embed.FS",
+    "patterns": [
+      "testdata"
+    ],
+    "kinds": [
+      "dir"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embed_test.go",
+    "line": 104,
+    "half": "internal-test",
+    "var": "testHiddenStar",
+    "type": "embed.FS",
+    "patterns": [
+      "testdata/*"
+    ],
+    "kinds": [
+      "glob"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embed_test.go",
+    "line": 144,
+    "half": "internal-test",
+    "var": "helloT",
+    "type": "[]T",
+    "patterns": [
+      "testdata/hello.txt"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embed_test.go",
+    "line": 146,
+    "half": "internal-test",
+    "var": "helloUint8",
+    "type": "[]uint8",
+    "patterns": [
+      "testdata/hello.txt"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embed_test.go",
+    "line": 148,
+    "half": "internal-test",
+    "var": "helloEUint8",
+    "type": "[]EmbedUint8",
+    "patterns": [
+      "testdata/hello.txt"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embed_test.go",
+    "line": 150,
+    "half": "internal-test",
+    "var": "helloBytes",
+    "type": "EmbedBytes",
+    "patterns": [
+      "testdata/hello.txt"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embed_test.go",
+    "line": 152,
+    "half": "internal-test",
+    "var": "helloString",
+    "type": "EmbedString",
+    "patterns": [
+      "testdata/hello.txt"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embedx_test.go",
+    "line": 22,
+    "half": "external-test",
+    "var": "global",
+    "type": "embed.FS",
+    "patterns": [
+      "testdata/*.txt"
+    ],
+    "kinds": [
+      "glob"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embedx_test.go",
+    "line": 25,
+    "half": "external-test",
+    "var": "concurrency",
+    "type": "string",
+    "patterns": [
+      "c*txt"
+    ],
+    "kinds": [
+      "glob"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embedx_test.go",
+    "line": 28,
+    "half": "external-test",
+    "var": "glass",
+    "type": "[]byte",
+    "patterns": [
+      "testdata/g*.txt"
+    ],
+    "kinds": [
+      "glob"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embedx_test.go",
+    "line": 31,
+    "half": "external-test",
+    "var": "sbig",
+    "type": "string",
+    "patterns": [
+      "testdata/ascii.txt"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "embed/internal/embedtest",
+    "file": "embedx_test.go",
+    "line": 34,
+    "half": "external-test",
+    "var": "bbig",
+    "type": "[]byte",
+    "patterns": [
+      "testdata/ascii.txt"
+    ],
+    "kinds": [
+      "file"
+    ],
+    "testdata": false
+  },
+  {
+    "pkg": "internal/trace/traceviewer",
+    "file": "http.go",
+    "line": 418,
+    "half": "production",
+    "var": "staticContent",
+    "type": "embed.FS",
+    "patterns": [
+      "static/trace_viewer_full.html",
+      "static/webcomponents.min.js"
+    ],
+    "kinds": [
+      "file",
+      "file"
+    ],
+    "testdata": false
+  }
+]
