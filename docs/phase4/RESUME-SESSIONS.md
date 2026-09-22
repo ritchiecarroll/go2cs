@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 04:44 -- hourly refresh (ledger through mailbox 0b016ef59c): section 1a STATE DELTA 8 (pass 1 complete on i7/G/i9: six shard refs, 159 PASS rows; R blocked on pwsh 7; batch 4 running; the legs next; batch 5 material). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 04:54 -- hourly refresh (ledger through mailbox 86dec7f85d): section 1a STATE DELTA 9 (master be8e137af5 census converted mode; batch 4 resumed past a second union; the legs and batch 5 briefs on the record; R's template fix accepted; i9 standby). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -291,6 +291,19 @@ STATE DELTA 2026-09-22 04:44 (ledger through mailbox 0b016ef59c; supersedes the 
     C1's alloc pins + roster rows, C2's anon-struct accessibility, the reflect hand-own seat (four members), the census `converted` mode (cutting).
   - RULINGS this hour: the Disclosed cell = the row's disclosed VERDICT count (the guard's ceiling checks it against the manifest); `.cs.auto` twins do not
     ride shard refs; TestTableGroupCount (93) structural; reflect's TestIsZero a defect (an offset->field managed door exists).
+STATE DELTA 2026-09-22 04:54 (ledger through mailbox 86dec7f85d; supersedes the deltas above where they differ):
+  - MASTER be8e137af5: the census CONVERTED mode landed (census blob 14223959dd; `converted` for a shard ref's staged test artifacts, `entry` for
+    messages/docs/manifests; repoguard's Go test the gate of record for the tracked tree). Worktrees ctip/rehrec/rfix/rguard/cmode reclaimed; disk 50 GB.
+  - BATCH 4 (ab4): seats 1-4 landed (809e416aca, 3ecaa0f83e, eba3c174e7, cc937ea556); seat 5 STOPPED on a testConversion.go adjacent insert (CTIP's
+    seededGlobalTypeAliases seed vs seat 5's registerProductionEmbedTargets, empty diff3 base) -- RULED a union for that hunk; the battery RESUMED
+    with seats 5-6 and gates (a)-(f). Then STAMP (TIP4) -> THE LEGS (brief docs/phase4/briefs/legs-brief.md: six shard refs in order i7 s1, i7 s2,
+    G s1, G s2, i9 s1, i9 s2; the five Disclosed cell fixes; index.md once; the header from the guard) -> BATCH 5 (brief batch5-brief.md:
+    R's named-pointer template fix acb6b5a38a ACCEPTED -- x509 518/0, LookupServicePort PASS, GenTests 57, GolibTests 793/3 env/14; G's
+    pointer-model ref + the maps.rand body + the TestTableGroupCount structural pin (in progress); C1's alloc pins (rand a COUNT; sync's two the
+    incomparable-unit arm; the sync rename-map entry owed) and up to fourteen roster rows (in progress); C2's anon-struct accessibility for time's BUILD).
+  - i9 STANDBY after both slices (98 PASS); it re-runs runtime with R's template fix as a READING (the host died at 158 of 10,891 on that panic).
+    G on its maps ref; C1 on the manifest then the rows; C2 on the anon-struct seat; R holding on pwsh 7 (OWNER-HAND). Pass-1 PASS tally 159; R's 42
+    rows are the only pass-1 rows not run.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1446,3 +1459,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 04:06 -- hourly refresh: STATE DELTA 6 in section 1a (campaign pass 1 in flight; G's s1 ref; the banking rule; two rulings). Nothing else moved.
 - 2026-09-22 04:31 -- hourly refresh: STATE DELTA 7 in section 1a (shard refs; batch 4 six refs; batch 5 material; rulings). Nothing else moved.
 - 2026-09-22 04:44 -- hourly refresh: STATE DELTA 8 in section 1a (pass 1 complete on three workers; six shard refs; batch 4 running; legs next). Nothing else moved.
+- 2026-09-22 04:54 -- hourly refresh: STATE DELTA 9 in section 1a (master be8e137af5; batch 4 resumed; legs + batch 5 briefs; R's fix accepted). Nothing else moved.
