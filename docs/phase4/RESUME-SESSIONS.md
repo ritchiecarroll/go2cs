@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 07:07 -- STAMP refresh (ledger through mailbox d06d4ffe6a): section 1a STATE DELTA 12 (the re-bank train stamped: version tip 07240495e6, 196 pages, 56,595 verdicts; the batch-4 re-run running; batch 5 next; the index tool to C1). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 08:03 -- hourly refresh (ledger through mailbox c64ed9a3b8): section 1a STATE DELTA 13 (master facb693040 index tool; C1's exclusion rows; batch 5 seven refs staged behind the batch-4 re-run; runtime to 10,571). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -354,6 +354,17 @@ STATE DELTA 2026-09-22 07:07 (ledger through mailbox d06d4ffe6a; supersedes the 
     C2 the time anon-struct seat; G and i9 STANDBY. Rule clarified: a PASS row's artifacts and proof page ride the shard ref whether a roster row exists yet.
   - Instrument notes banked: GNU grep 3.0 multi -e aborts on 14.5k-line lists (0 matches when piped -- use -E); `env -u DOTNET_ROOT pwsh` alone is
     insufficient for a net8 apphost (the dotnet10 root must be off PATH too).
+STATE DELTA 2026-09-22 08:03 (ledger through mailbox c64ed9a3b8; supersedes the deltas above where they differ):
+  - MASTER facb693040: C1's index-tool fix landed (regen-validation-index.py admits a page backed by a roster row's own [proof] link -- the ten
+    H10 inheritance anchors -- or by the roster's 'Excluded packages' table; a page-less row still refuses; self-test 14/14; real root at
+    07240495e6 orphans 24 -> 14). C1's rows ref -> 8945636eae: the FOUR bar-refused packages are roster EXCLUSION rows (wasitest E1;
+    cgotest / copyright / fips140deps E4; the Verdicts column records what ran); C1's simulation over the train's pages reads orphans 14 -> 0
+    with its ref merged. The three fips140 rows (aes 5, ecdsa 10, nistec 44) wait on R's s2b (their artifacts + proof pages).
+  - BATCH 5 = SEVEN refs, brief 352f79ab50: R acb6b5a38a + 6d08288e00 (the memmove/token GC-safety seat: a reference-bearing element pointer is an
+    order token, memmove/memclr copy whole elements; runtime's host now reaches 10,571 of 10,891 and dies at the getfp stub -> R's next body);
+    G f401c4ea07 + 6492844624; C1 65bc8acc2e + 8945636eae-or-later; C2's time anon-struct seat (cutting). Launches after the batch-4 re-run STAMPS (running in ab4b on 07240495e6). Then pass 2 -> the index regenerated once ->
+    H10's closing arithmetic -> H11.
+  - Lanes: R on s2b + the memmove/token seat's last gate; C2 on the anon-struct seat; C1, G, i9 STANDBY. No owner hand open.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1513,3 +1524,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 05:52 -- hourly refresh: STATE DELTA 10 in section 1a (batch 5 four of five; the memmove/token ruling; the i7 queue). Nothing else moved.
 - 2026-09-22 06:52 -- hourly refresh: STATE DELTA 11 in section 1a (batch 4 not stamped, fixes in; the legs with legs 7-8; tally 199/212; the order to H10's close). Nothing else moved.
 - 2026-09-22 07:07 -- STAMP refresh: STATE DELTA 12 in section 1a (the re-bank train stamped at 07240495e6; the batch-4 re-run; batch 5 next). Nothing else moved.
+- 2026-09-22 08:03 -- hourly refresh: STATE DELTA 13 in section 1a (master facb693040; C1's exclusion rows; batch 5 staged). Nothing else moved.
