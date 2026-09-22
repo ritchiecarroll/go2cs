@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 08:03 -- hourly refresh (ledger through mailbox c64ed9a3b8): section 1a STATE DELTA 13 (master facb693040 index tool; C1's exclusion rows; batch 5 seven refs staged behind the batch-4 re-run; runtime to 10,571). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 08:19 -- STAMP refresh (ledger through mailbox d5b0f94014): section 1a STATE DELTA 14 (batch 4 stamped at ae2f251988, every prediction met; batch 5 running with six refs; the train's three suite reds to C1; the order to H11). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -365,6 +365,20 @@ STATE DELTA 2026-09-22 08:03 (ledger through mailbox c64ed9a3b8; supersedes the 
     G f401c4ea07 + 6492844624; C1 65bc8acc2e + 8945636eae-or-later; C2's time anon-struct seat (cutting). Launches after the batch-4 re-run STAMPS (running in ab4b on 07240495e6). Then pass 2 -> the index regenerated once ->
     H10's closing arithmetic -> H11.
   - Lanes: R on s2b + the memmove/token seat's last gate; C2 on the anon-struct seat; C1, G, i9 STANDBY. No owner hand open.
+STATE DELTA 2026-09-22 08:19 (ledger through mailbox d5b0f94014; supersedes the deltas above where they differ) -- BATCH 4 STAMPED:
+  - VERSION TIP claude/version-go1.24.13 = ae2f251988 (batch 4's six seats on the re-bank train 07240495e6; every prediction met: GenTests 61/61
+    with the facet arms 4/4, GolibTests 791/14/805, CNR NO REGRESSION 729, stdlib 344/0; crypto/sha3 COMPILES -> DIVERGED 5 (the alloc family),
+    hash/maphash 59, embedtest 7, fips140test COMPILES -> DIVERGED 7 with TestACVP + TestCAST* PASS (its six pins are C1's next manifest)).
+    Three converter-suite reds PRE-EXIST at the train tip (the train's test artifacts moved three corpus guards; the legs brief did not run the
+    full suite -- a coordinator gate gap): C1 cuts the guard-table updates on ae2f251988. OWED to the hop's final -stdlib reconvert: production
+    re-emissions of converter seats (e.g. maphash.cs's intrinsic comment) -- row refs bank test artifacts only.
+  - RUNNING on the i7: BATCH 5 (worktree ab5 on ae2f251988) with SIX refs -- R acb6b5a38a (named-pointer template) + 6d08288e00 (memmove/token
+    GC-safety), G f401c4ea07 (maps 111/108) + 6492844624 (forwarder NoInlining -> slog PASS 197), C1 65bc8acc2e (rand/sync pins) + 5d11c8d3f9
+    (216 roster rows + ten exclusion rows); C2's time anon-struct seat rides batch 6 when cut. Then STAMP -> the next legs (leg 9 = R's s2b
+    a7cbca2637 with the three fips140 pages) -> the index regenerated once (C1's tool on master facb693040) -> pass 2 (fips140test with its pins,
+    sha3, rand, sync, slog, maps, x509 re-dispatched at the tip) -> H10's closing arithmetic -> H11.
+  - LANES: R on the getfp companion body (runtime's next death after TestMemmoveAtomicity); C2 on the anon-struct seat; C1 on the guard tables then
+    the fips140test/sha3 manifests; G, i9 STANDBY. No owner hand open.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1525,3 +1539,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 06:52 -- hourly refresh: STATE DELTA 11 in section 1a (batch 4 not stamped, fixes in; the legs with legs 7-8; tally 199/212; the order to H10's close). Nothing else moved.
 - 2026-09-22 07:07 -- STAMP refresh: STATE DELTA 12 in section 1a (the re-bank train stamped at 07240495e6; the batch-4 re-run; batch 5 next). Nothing else moved.
 - 2026-09-22 08:03 -- hourly refresh: STATE DELTA 13 in section 1a (master facb693040; C1's exclusion rows; batch 5 staged). Nothing else moved.
+- 2026-09-22 08:19 -- STAMP refresh: STATE DELTA 14 in section 1a (batch 4 stamped at ae2f251988; batch 5 running; the order to H11). Nothing else moved.
