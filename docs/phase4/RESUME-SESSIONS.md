@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 08:19 -- STAMP refresh (ledger through mailbox d5b0f94014): section 1a STATE DELTA 14 (batch 4 stamped at ae2f251988, every prediction met; batch 5 running with six refs; the train's three suite reds to C1; the order to H11). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 09:23 -- hourly refresh (ledger through mailbox 3f16c64784): section 1a STATE DELTA 15 (batch 5 running; pass-2 and batch-6 briefs staged; getfp / entersyscall / guard-table rulings). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -379,6 +379,16 @@ STATE DELTA 2026-09-22 08:19 (ledger through mailbox d5b0f94014; supersedes the 
     sha3, rand, sync, slog, maps, x509 re-dispatched at the tip) -> H10's closing arithmetic -> H11.
   - LANES: R on the getfp companion body (runtime's next death after TestMemmoveAtomicity); C2 on the anon-struct seat; C1 on the guard tables then
     the fips140test/sha3 manifests; G, i9 STANDBY. No owner hand open.
+STATE DELTA 2026-09-22 09:23 (ledger through mailbox 3f16c64784; supersedes the deltas above where they differ):
+  - BATCH 5 running in ab5 on ae2f251988 (six refs). Briefs staged on the record: pass-2 (leg 9 = R's s2b a7cbca2637; the re-dispatch of
+    fips140test / sha3 / maphash / embedtest / x509 / maps / slog / rand / sync / runtime with predicted words; the index regenerated once; the
+    header from the guard) and batch-6 (C2's time anon-struct seat; C1's guard tables + the fips140test/sha3 manifests; R's getfp + entersyscall
+    hand-own).
+  - RULINGS this hour: getfp => 0 accepted (Go's own 'not implemented'); the entersyscall FAMILY becomes a managed hand-own (no Ps to hand off;
+    syscallpc/sp/bp zero) while GetCallerPC/SP stay throwing by name -- R cutting; the train's three suite reds: two fixed by C1 (a value-clone
+    predicate dead by construction; 34 obsolete q84 rows), the third's rows (runtime fastrand x3 from the test artifacts) ruled `latent`.
+  - LANES: R on the entersyscall hand-own (runtime's host at 10,571 of 10,891); C1 on the census rows then the two manifests (unit notes handed
+    over); C2 on the anon-struct seat; G, i9 STANDBY. No owner hand open.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1540,3 +1550,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 07:07 -- STAMP refresh: STATE DELTA 12 in section 1a (the re-bank train stamped at 07240495e6; the batch-4 re-run; batch 5 next). Nothing else moved.
 - 2026-09-22 08:03 -- hourly refresh: STATE DELTA 13 in section 1a (master facb693040; C1's exclusion rows; batch 5 staged). Nothing else moved.
 - 2026-09-22 08:19 -- STAMP refresh: STATE DELTA 14 in section 1a (batch 4 stamped at ae2f251988; batch 5 running; the order to H11). Nothing else moved.
+- 2026-09-22 09:23 -- hourly refresh: STATE DELTA 15 in section 1a (batch 5 running; pass-2 and batch-6 briefs; the hour's rulings). Nothing else moved.
