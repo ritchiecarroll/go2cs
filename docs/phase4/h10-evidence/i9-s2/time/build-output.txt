@@ -1,0 +1,97 @@
+  toolchain: GOROOT <PROFILE> (VERSION go1.24.13, read in-process)
+2026/09/22 04:38:40 Converted test action failed: dotnet publish C:\go2cs-build\i9-h10-camp\src\core\time\time.tests.csproj -c Release -p:go2csPath=C:/go2cs-build/i9-h10-camp/src/ -o C:\go2cs-build\i9-h10-camp\src\core\time\bin\tests\publish failed: exit status 1
+Determining projects to restore...
+  Restored C:\go2cs-build\i9-h10-camp\src\core\time\tzdata\time.tzdata.csproj (in 131 ms).
+  Restored C:\go2cs-build\i9-h10-camp\src\core\time\time.tests.csproj (in 209 ms).
+  80 of 82 projects are up-to-date for restore.
+  golib -> C:\go2cs-build\i9-h10-camp\src\core\golib\bin\Release\net10.0\golib.dll
+  go2cs-gen -> C:\go2cs-build\i9-h10-camp\src\gen\go2cs-gen\bin\Release\netstandard2.0\go2cs-gen.dll
+  unicode.utf8 -> C:\go2cs-build\i9-h10-camp\src\core\unicode\utf8\bin\Release\net10.0\unicode.utf8.dll
+  internal.godebugs -> C:\go2cs-build\i9-h10-camp\src\core\internal\godebugs\bin\Release\net10.0\internal.godebugs.dll
+  internal.itoa -> C:\go2cs-build\i9-h10-camp\src\core\internal\itoa\bin\Release\net10.0\internal.itoa.dll
+  internal.syscall.windows.sysdll -> C:\go2cs-build\i9-h10-camp\src\core\internal\syscall\windows\sysdll\bin\Release\net10.0\internal.syscall.windows.sysdll.dll
+  unicode -> C:\go2cs-build\i9-h10-camp\src\core\unicode\bin\Release\net10.0\unicode.dll
+  unsafe -> C:\go2cs-build\i9-h10-camp\src\core\unsafe\bin\Release\net10.0\unsafe.dll
+  unicode.utf16 -> C:\go2cs-build\i9-h10-camp\src\core\unicode\utf16\bin\Release\net10.0\unicode.utf16.dll
+  cmp -> C:\go2cs-build\i9-h10-camp\src\core\cmp\bin\Release\net10.0\cmp.dll
+  internal.cfg -> C:\go2cs-build\i9-h10-camp\src\core\internal\cfg\bin\Release\net10.0\internal.cfg.dll
+  internal.byteorder -> C:\go2cs-build\i9-h10-camp\src\core\internal\byteorder\bin\Release\net10.0\internal.byteorder.dll
+  encoding -> C:\go2cs-build\i9-h10-camp\src\core\encoding\bin\Release\net10.0\encoding.dll
+  internal.profilerecord -> C:\go2cs-build\i9-h10-camp\src\core\internal\profilerecord\bin\Release\net10.0\internal.profilerecord.dll
+  internal.platform -> C:\go2cs-build\i9-h10-camp\src\core\internal\platform\bin\Release\net10.0\internal.platform.dll
+  internal.goos -> C:\go2cs-build\i9-h10-camp\src\core\internal\goos\bin\Release\net10.0\internal.goos.dll
+  internal.goarch -> C:\go2cs-build\i9-h10-camp\src\core\internal\goarch\bin\Release\net10.0\internal.goarch.dll
+  internal.coverage.rtcov -> C:\go2cs-build\i9-h10-camp\src\core\internal\coverage\rtcov\bin\Release\net10.0\internal.coverage.rtcov.dll
+  sync.atomic -> C:\go2cs-build\i9-h10-camp\src\core\sync\atomic\bin\Release\net10.0\sync.atomic.dll
+  internal.msan -> C:\go2cs-build\i9-h10-camp\src\core\internal\msan\bin\Release\net10.0\internal.msan.dll
+  internal.unsafeheader -> C:\go2cs-build\i9-h10-camp\src\core\internal\unsafeheader\bin\Release\net10.0\internal.unsafeheader.dll
+  internal.asan -> C:\go2cs-build\i9-h10-camp\src\core\internal\asan\bin\Release\net10.0\internal.asan.dll
+  internal.cpu -> C:\go2cs-build\i9-h10-camp\src\core\internal\cpu\bin\Release\net10.0\internal.cpu.dll
+  internal.runtime.atomic -> C:\go2cs-build\i9-h10-camp\src\core\internal\runtime\atomic\bin\Release\net10.0\internal.runtime.atomic.dll
+  internal.runtime.math -> C:\go2cs-build\i9-h10-camp\src\core\internal\runtime\math\bin\Release\net10.0\internal.runtime.math.dll
+  internal.runtime.sys -> C:\go2cs-build\i9-h10-camp\src\core\internal\runtime\sys\bin\Release\net10.0\internal.runtime.sys.dll
+  internal.goexperiment -> C:\go2cs-build\i9-h10-camp\src\core\internal\goexperiment\bin\Release\net10.0\internal.goexperiment.dll
+  internal.abi -> C:\go2cs-build\i9-h10-camp\src\core\internal\abi\bin\Release\net10.0\internal.abi.dll
+  internal.bytealg -> C:\go2cs-build\i9-h10-camp\src\core\internal\bytealg\bin\Release\net10.0\internal.bytealg.dll
+  internal.chacha8rand -> C:\go2cs-build\i9-h10-camp\src\core\internal\chacha8rand\bin\Release\net10.0\internal.chacha8rand.dll
+  internal.runtime.exithook -> C:\go2cs-build\i9-h10-camp\src\core\internal\runtime\exithook\bin\Release\net10.0\internal.runtime.exithook.dll
+  internal.race -> C:\go2cs-build\i9-h10-camp\src\core\internal\race\bin\Release\net10.0\internal.race.dll
+  internal.stringslite -> C:\go2cs-build\i9-h10-camp\src\core\internal\stringslite\bin\Release\net10.0\internal.stringslite.dll
+  internal.sync -> C:\go2cs-build\i9-h10-camp\src\core\internal\sync\bin\Release\net10.0\internal.sync.dll
+  internal.runtime.maps -> C:\go2cs-build\i9-h10-camp\src\core\internal\runtime\maps\bin\Release\net10.0\internal.runtime.maps.dll
+  runtime -> C:\go2cs-build\i9-h10-camp\src\core\runtime\bin\Release\net10.0\runtime.dll
+  sync -> C:\go2cs-build\i9-h10-camp\src\core\sync\bin\Release\net10.0\sync.dll
+  math.bits -> C:\go2cs-build\i9-h10-camp\src\core\math\bits\bin\Release\net10.0\math.bits.dll
+  iter -> C:\go2cs-build\i9-h10-camp\src\core\iter\bin\Release\net10.0\iter.dll
+  internal.testlog -> C:\go2cs-build\i9-h10-camp\src\core\internal\testlog\bin\Release\net10.0\internal.testlog.dll
+  internal.bisect -> C:\go2cs-build\i9-h10-camp\src\core\internal\bisect\bin\Release\net10.0\internal.bisect.dll
+  internal.reflectlite -> C:\go2cs-build\i9-h10-camp\src\core\internal\reflectlite\bin\Release\net10.0\internal.reflectlite.dll
+  math -> C:\go2cs-build\i9-h10-camp\src\core\math\bin\Release\net10.0\math.dll
+  errors -> C:\go2cs-build\i9-h10-camp\src\core\errors\bin\Release\net10.0\errors.dll
+  slices -> C:\go2cs-build\i9-h10-camp\src\core\slices\bin\Release\net10.0\slices.dll
+  maps -> C:\go2cs-build\i9-h10-camp\src\core\maps\bin\Release\net10.0\maps.dll
+  internal.godebug -> C:\go2cs-build\i9-h10-camp\src\core\internal\godebug\bin\Release\net10.0\internal.godebug.dll
+  strconv -> C:\go2cs-build\i9-h10-camp\src\core\strconv\bin\Release\net10.0\strconv.dll
+  path -> C:\go2cs-build\i9-h10-camp\src\core\path\bin\Release\net10.0\path.dll
+  io -> C:\go2cs-build\i9-h10-camp\src\core\io\bin\Release\net10.0\io.dll
+  internal.oserror -> C:\go2cs-build\i9-h10-camp\src\core\internal\oserror\bin\Release\net10.0\internal.oserror.dll
+  math.rand -> C:\go2cs-build\i9-h10-camp\src\core\math\rand\bin\Release\net10.0\math.rand.dll
+  bytes -> C:\go2cs-build\i9-h10-camp\src\core\bytes\bin\Release\net10.0\bytes.dll
+  internal.saferio -> C:\go2cs-build\i9-h10-camp\src\core\internal\saferio\bin\Release\net10.0\internal.saferio.dll
+  syscall -> C:\go2cs-build\i9-h10-camp\src\core\syscall\bin\Release\net10.0\syscall.dll
+  reflect -> C:\go2cs-build\i9-h10-camp\src\core\reflect\bin\Release\net10.0\reflect.dll
+  strings -> C:\go2cs-build\i9-h10-camp\src\core\strings\bin\Release\net10.0\strings.dll
+  internal.syscall.windows -> C:\go2cs-build\i9-h10-camp\src\core\internal\syscall\windows\bin\Release\net10.0\internal.syscall.windows.dll
+  internal.syscall.windows.registry -> C:\go2cs-build\i9-h10-camp\src\core\internal\syscall\windows\registry\bin\Release\net10.0\internal.syscall.windows.registry.dll
+  encoding.binary -> C:\go2cs-build\i9-h10-camp\src\core\encoding\binary\bin\Release\net10.0\encoding.binary.dll
+  internal.fmtsort -> C:\go2cs-build\i9-h10-camp\src\core\internal\fmtsort\bin\Release\net10.0\internal.fmtsort.dll
+  bufio -> C:\go2cs-build\i9-h10-camp\src\core\bufio\bin\Release\net10.0\bufio.dll
+  internal.syscall.execenv -> C:\go2cs-build\i9-h10-camp\src\core\internal\syscall\execenv\bin\Release\net10.0\internal.syscall.execenv.dll
+  encoding.base64 -> C:\go2cs-build\i9-h10-camp\src\core\encoding\base64\bin\Release\net10.0\encoding.base64.dll
+C:\go2cs-build\i9-h10-camp\src\core\time\time.cs(1191,23): warning CS0675: Bitwise-or operator used on a sign-extended operand; consider casting to a smaller unsigned type first [C:\go2cs-build\i9-h10-camp\src\core\time\time.csproj]
+C:\go2cs-build\i9-h10-camp\src\core\time\time.cs(1370,30): warning CS0675: Bitwise-or operator used on a sign-extended operand; consider casting to a smaller unsigned type first [C:\go2cs-build\i9-h10-camp\src\core\time\time.csproj]
+  time -> C:\go2cs-build\i9-h10-camp\src\core\time\bin\Release\net10.0\time.dll
+C:\go2cs-build\i9-h10-camp\src\core\context\context.cs(473,9): warning CS0252: Possible unintended reference comparison; to get a value comparison, cast the left hand side to type '╨╢<nint>' [C:\go2cs-build\i9-h10-camp\src\core\context\context.csproj]
+C:\go2cs-build\i9-h10-camp\src\core\context\context.cs(868,17): warning CS0252: Possible unintended reference comparison; to get a value comparison, cast the left hand side to type '╨╢<nint>' [C:\go2cs-build\i9-h10-camp\src\core\context\context.csproj]
+C:\go2cs-build\i9-h10-camp\src\core\context\context.cs(875,17): warning CS0252: Possible unintended reference comparison; to get a value comparison, cast the left hand side to type '╨╢<nint>' [C:\go2cs-build\i9-h10-camp\src\core\context\context.csproj]
+C:\go2cs-build\i9-h10-camp\src\core\context\context.cs(884,17): warning CS0252: Possible unintended reference comparison; to get a value comparison, cast the left hand side to type '╨╢<nint>' [C:\go2cs-build\i9-h10-camp\src\core\context\context.csproj]
+  context -> C:\go2cs-build\i9-h10-camp\src\core\context\bin\Release\net10.0\context.dll
+  io.fs -> C:\go2cs-build\i9-h10-camp\src\core\io\fs\bin\Release\net10.0\io.fs.dll
+  internal.poll -> C:\go2cs-build\i9-h10-camp\src\core\internal\poll\bin\Release\net10.0\internal.poll.dll
+  internal.filepathlite -> C:\go2cs-build\i9-h10-camp\src\core\internal\filepathlite\bin\Release\net10.0\internal.filepathlite.dll
+  os -> C:\go2cs-build\i9-h10-camp\src\core\os\bin\Release\net10.0\os.dll
+  path.filepath -> C:\go2cs-build\i9-h10-camp\src\core\path\filepath\bin\Release\net10.0\path.filepath.dll
+  time.tzdata -> C:\go2cs-build\i9-h10-camp\src\core\time\tzdata\bin\Release\net10.0\time.tzdata.dll
+  os.exec -> C:\go2cs-build\i9-h10-camp\src\core\os\exec\bin\Release\net10.0\os.exec.dll
+  fmt -> C:\go2cs-build\i9-h10-camp\src\core\fmt\bin\Release\net10.0\fmt.dll
+  testing -> C:\go2cs-build\i9-h10-camp\src\core\testing\bin\Release\net10.0\testing_package.dll
+  flag -> C:\go2cs-build\i9-h10-camp\src\core\flag\bin\Release\net10.0\flag.dll
+  internal.testenv -> C:\go2cs-build\i9-h10-camp\src\core\internal\testenv\bin\Release\net10.0\internal.testenv.dll
+  testing.quick -> C:\go2cs-build\i9-h10-camp\src\core\testing\quick\bin\Release\net10.0\testing.quick.dll
+C:\go2cs-build\i9-h10-camp\src\core\encoding\json\decode.cs(574,9): warning CS0219: The variable 'matchß┤¢1' is assigned but its value is never used [C:\go2cs-build\i9-h10-camp\src\core\encoding\json\encoding.json.csproj]
+  encoding.json -> C:\go2cs-build\i9-h10-camp\src\core\encoding\json\bin\Release\net10.0\encoding.json.dll
+  math.big -> C:\go2cs-build\i9-h10-camp\src\core\math\big\bin\Release\net10.0\math.big.dll
+  encoding.gob -> C:\go2cs-build\i9-h10-camp\src\core\encoding\gob\bin\Release\net10.0\encoding.gob.dll
+C:\go2cs-build\i9-h10-camp\src\core\time\abs_test.cs(30,29): error CS0052: Inconsistent accessibility: field type 'Action<time_internal_test_package.testingT>' is less accessible than field 'time_internal_test_package.InternalTestsß┤¢1.Test' [C:\go2cs-build\i9-h10-camp\src\core\time\time.tests.csproj]
+C:\go2cs-build\i9-h10-camp\src\core\time\Generated\go2cs-gen\go2cs.TypeGenerator\go.time_internal_test_package.InternalTestsß┤¢1.g.cs(29,97): error CS0050: Inconsistent accessibility: return type 'Action<time_internal_test_package.testingT>' is less accessible than method 'time_internal_test_package.InternalTestsß┤¢1.ßÅæTest(ref time_internal_test_package.InternalTestsß┤¢1)' [C:\go2cs-build\i9-h10-camp\src\core\time\time.tests.csproj]
+C:\go2cs-build\i9-h10-camp\src\core\time\Generated\go2cs-gen\go2cs.TypeGenerator\go.time_internal_test_package.InternalTestsß┤¢1.g.cs(40,16): error CS0051: Inconsistent accessibility: parameter type 'Action<time_internal_test_package.testingT>' is less accessible than method 'time_internal_test_package.InternalTestsß┤¢1.InternalTestsß┤¢1(@string, Action<time_internal_test_package.testingT>)' [C:\go2cs-build\i9-h10-camp\src\core\time\time.tests.csproj]
