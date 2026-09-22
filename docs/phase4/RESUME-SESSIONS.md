@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 04:31 -- hourly refresh (ledger through mailbox fdf4819a88): section 1a STATE DELTA 7 (shard refs G s1 / i9 s1 accepted, G s2 green, i7 s2 finishing; batch 4 = six refs; batch 5 material; rulings and two owned faults). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 04:44 -- hourly refresh (ledger through mailbox 0b016ef59c): section 1a STATE DELTA 8 (pass 1 complete on i7/G/i9: six shard refs, 159 PASS rows; R blocked on pwsh 7; batch 4 running; the legs next; batch 5 material). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -278,6 +278,19 @@ STATE DELTA 2026-09-22 04:31 (ledger through mailbox fdf4819a88; supersedes the 
     row. COORD's own faults owned in the ledger: a line quoting two GOROOT test literals pushed with the census red (chains now gate
     `census && commit && push`; the ledger's baseline is 2 hits); the mailbox watch fetched into the clone COORD pulls from (now ls-remote).
   - OWNER-HAND open: PowerShell 7 on R-LAPTOP (blocks R's 42 rows). Owner's call, non-blocking: docs/README.md's ten pre-existing census hits.
+STATE DELTA 2026-09-22 04:44 (ledger through mailbox 0b016ef59c; supersedes the deltas above where they differ) -- PASS 1 IS COMPLETE ON THREE OF FOUR WORKERS:
+  - SHARD REFS at c6fdbe73c3, all accepted for their legs: G s1 06ac80d680 (6 PASS) + s2 8236d68a06 (25); i9 s1 854b94107d (24) + s2 06f37e478e (74;
+    evidence refs 6dbe347c07 / b2eff468c7); the i7's s1 3aec6d8fe3 (7) + s2 a71adf7b91 (23) -- PUSHED by COORD from w4 (both parented on the tip;
+    no production .cs). PASS tally i7 30 / G 31 / i9 98 = 159 rows; R 0 (BLOCKED on pwsh 7, OWNER-HAND). Not cut, by cause: runtime + crypto/x509
+    (the named-pointer template deref -> R's cut), reflect 5 (C1 classed: 1 pin + 4 defects), fips140test 52 / sha3 BUILD / maphash 36 / embedtest 6
+    (batch 4), internal/runtime/maps 108 (G's seat + a maps.rand body + a structural parent pin), crypto/rand + sync alloc class (C1 authors pins),
+    time BUILD (a public anonymous struct over an internal field type -> C2). Fourteen first-time PASS packages have NO roster row -> C1 mints them.
+  - RUNNING on the i7: BATCH 4 (six refs; brief 46fde142a8) -> STAMP. Then THE LEGS: the six shard refs merged as incremental trains onto the batch-4
+    tip (per leg: census, repoguard, check-roster-format's failure set, the every-row-once checksum, a filtered re-sweep sample); index.md regenerated
+    once centrally after the last leg; the header re-derived by the guard. BATCH 5 material: R's template fix, G's pointer-model ref (three commits),
+    C1's alloc pins + roster rows, C2's anon-struct accessibility, the reflect hand-own seat (four members), the census `converted` mode (cutting).
+  - RULINGS this hour: the Disclosed cell = the row's disclosed VERDICT count (the guard's ceiling checks it against the manifest); `.cs.auto` twins do not
+    ride shard refs; TestTableGroupCount (93) structural; reflect's TestIsZero a defect (an offset->field managed door exists).
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1432,3 +1445,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 03:37 -- STAMP + GO refresh: STATE DELTA 5 in section 1a (campaign tip c6fdbe73c3; GO; the i7's slices; batch 4 next). Nothing else moved.
 - 2026-09-22 04:06 -- hourly refresh: STATE DELTA 6 in section 1a (campaign pass 1 in flight; G's s1 ref; the banking rule; two rulings). Nothing else moved.
 - 2026-09-22 04:31 -- hourly refresh: STATE DELTA 7 in section 1a (shard refs; batch 4 six refs; batch 5 material; rulings). Nothing else moved.
+- 2026-09-22 04:44 -- hourly refresh: STATE DELTA 8 in section 1a (pass 1 complete on three workers; six shard refs; batch 4 running; legs next). Nothing else moved.
