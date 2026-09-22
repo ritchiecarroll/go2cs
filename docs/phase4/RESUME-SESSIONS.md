@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 04:06 -- hourly refresh (ledger through mailbox 598692e7ad): section 1a STATE DELTA 6 (campaign pass 1 in flight: the i7's 7/7, G's s1 ref accepted, i9 running, R blocked on pwsh 7; the banking rule; the linux-arm and compilation-unit rulings). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 04:31 -- hourly refresh (ledger through mailbox fdf4819a88): section 1a STATE DELTA 7 (shard refs G s1 / i9 s1 accepted, G s2 green, i7 s2 finishing; batch 4 = six refs; batch 5 material; rulings and two owned faults). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -263,6 +263,21 @@ STATE DELTA 2026-09-22 04:06 (ledger through mailbox 598692e7ad; supersedes the 
     incremental train: census, repoguard, check-roster-format's set, the checksum re-assert, a filtered re-sweep sample; index.md once
     centrally). Pending cuts to fold into a later batch: C1's per-unit alias renames; G's pointer-model fix (after s2); the linux-host
     GoTargetOS refusal (an instrument seat); the README census hits (the owner's call).
+STATE DELTA 2026-09-22 04:31 (ledger through mailbox fdf4819a88; supersedes the deltas above where they differ):
+  - SHARD REFS at c6fdbe73c3 so far: G s1 06ac80d680 (6 PASS; maps DIVERGED out); i9 s1 854b94107d (24 PASS; runtime/x509/reflect/
+    fips140test DIVERGED out; i9 evidence ref 6dbe347c07); G s2 GREEN, ref held locally until its repoguard read (25 PASS; embedtest
+    DIVERGED = the embed class); the i7's s1 committed in w4, s2 at row 26 of 26; i9 s2 (76 rows) running; R staged, BLOCKED on pwsh 7.
+  - BATCH 4 = SIX refs (brief on the record, 46fde142a8): sha3 pair 65e3a46155, escapeForHash 5291f72c8e, check hand-own b08fbbc3b4,
+    println-lf b574ac27c2, embed 3ace3efd6a, per-unit alias renames be49d3c133 (C1; a -tests run no longer rewrites production .cs; the
+    recompile-fallback hazard BANKED). Launches on the i7 after its slices. BATCH 5 material: R's named-pointer TEMPLATE fix (the generator's
+    PointerTypeTemplate uintptr deref -- the runtime host death + x509 TestHybridPool + behavioral LookupServicePort are ONE class), G's
+    pointer-model LayoutCompatible fix (internal/runtime/maps), the reflect managed-map + StructOf hand-own seat (C1's classing: four of
+    five 1.24-new; TestTypeFieldReadOnly pinned structural; TestIsZero owed a reading).
+  - RULINGS: converted TEST sources are gated by repoguard's TestNoFleetIdentifiersInTrackedFiles (the census `entry` mode is for messages
+    and docs; a `converted` mode is being cut on the i7); the lookup_windows class is the template's; reflect is a CANDIDATE, not a banked
+    row. COORD's own faults owned in the ledger: a line quoting two GOROOT test literals pushed with the census red (chains now gate
+    `census && commit && push`; the ledger's baseline is 2 hits); the mailbox watch fetched into the clone COORD pulls from (now ls-remote).
+  - OWNER-HAND open: PowerShell 7 on R-LAPTOP (blocks R's 42 rows). Owner's call, non-blocking: docs/README.md's ten pre-existing census hits.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1416,3 +1431,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 02:38 -- STAMP refresh: STATE DELTA 4 in section 1a (batch 3 -> version tip 146c22828d; the campaign-tip merge launched). Nothing else moved.
 - 2026-09-22 03:37 -- STAMP + GO refresh: STATE DELTA 5 in section 1a (campaign tip c6fdbe73c3; GO; the i7's slices; batch 4 next). Nothing else moved.
 - 2026-09-22 04:06 -- hourly refresh: STATE DELTA 6 in section 1a (campaign pass 1 in flight; G's s1 ref; the banking rule; two rulings). Nothing else moved.
+- 2026-09-22 04:31 -- hourly refresh: STATE DELTA 7 in section 1a (shard refs; batch 4 six refs; batch 5 material; rulings). Nothing else moved.
