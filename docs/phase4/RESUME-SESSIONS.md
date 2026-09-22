@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 14:47 -- RESUME refresh (ledger through mailbox 32faf811cc): section 1a STATE DELTA 19 (COORD back after an i7 reboot; the owner's Opus 5.5 order applied to section 0 and every prompt; batch 7 resumed; the H10 re-bank debt ruled -- 14 rows never measured at 1.24.13 -> pass 3). STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 15:37 -- STAMP refresh (ledger through mailbox 18d8a287cd): section 1a STATE DELTA 20 (batch 7 stamped at 3469154a95, 219 / 230 = 95.2%; master 20eb0af70e census fix; batch 8a running). STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -465,6 +465,26 @@ STATE DELTA 2026-09-22 14:47 (ledger through mailbox 32faf811cc; supersedes the 
     the owner). No owner hand open.
   - NEXT: batch 7's report -> STAMP -> merge C1's links + G's pass-3 shard -> net -> the core-refs table sweep -> the hop's final -stdlib
     reconvert -> the header's final figures -> H11 / H12. The runbook's 'testing excluded from every list' line gets a dated amendment.
+STATE DELTA 2026-09-22 15:37 (ledger through mailbox 18d8a287cd; supersedes the deltas above where they differ) -- BATCH 7 STAMPED:
+  - VERSION TIP claude/version-go1.24.13 = 3469154a95 (batch 7 on 8fc439415f, eight signed commits: the five seats -- C1 101d44d596
+    manifests + rows, COORD e43b8f3cd closing arithmetic, C1 5dd8445e40 core-refs re-table + ruling 11, C2 9a9858e3de named-int range, R
+    71d03e812 testSPWrite -- the bank 9d06a0144 (fips140test VALIDATED 2267, sha3 VALIDATED 23), the index + header f9f3c1039 (index 219 =
+    roster 219; 219 / 230 -- 95.2%; 219 / 224 -- 97.8%; 57,276 verdicts; 279 disclosed), and 3469154a9: the behavioral golden
+    RangeOverIntegerTypes re-baselined for C2's ref ONLY (proven: the test prints exactly Go's output) -> CNR NO REGRESSION across 729).
+  - MASTER 20eb0af70e (main checkout fast-forwarded): C2's census fix -- converted mode MIRRORS the Go gate's fixture predicate (the four
+    structural arms report on *_test.cs / testdata, token and runtime arms still refuse), the hex-escape admit REVERTED (parity with the Go
+    gate restored); selftest 173 / 0 on the i7; tree-wide converted refusals 35 -> 0.
+  - RUNNING on the i7: BATCH 8a (worktree ab8 on 3469154a95, brief docs/phase4/briefs/batch8a-brief.md): C1 0e98bc97c (the eight anchor
+    rows link their own 1.24.13 pages) + C1 cceba4e728 (internal/sync's FIVE runtime hooks bodied -- canSpin false, doSpin procyield,
+    nanotime monotonic, the semaphore pair on golib's RuntimeSemaphore; arms red at 865fda89ad, green at the bodies); controls internal/sync
+    + sync. Then STAMP.
+  - LANES: G PASS 3 at 8fc439415f (13 never-measured banked rows; 3 in, all DIVERGED -- unicode/utf8's new TestRuneCountNonASCIIAllocation
+    alloc assert, internal/runtime/atomic, os/user); i9 the pprof seat (CPU profiler GREEN; blockevent = a NAMED refusal; the managed
+    bucket store BANKED post-hop); C2 time's TestLinkname on 3469154a95 (three forward rows); C1 the fips140test row's links + split clause on
+    3469154a95; R OFFLINE since the restart (its lfnode identity seat unblocks the held sysAllocOS commit).
+  - BATCH 8b after 8a: i9's pprof seat, G's pass-3 shard, C2's TestLinkname, C1's row repair, the instrument seat (the wrapper takes
+    max(asked, floor); CNR refuses without git), R's seat when reachable. Then net -> the core-refs table sweep -> the hop's final -stdlib
+    reconvert -> the header's final figures -> H11 / H12.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1631,3 +1651,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 11:13 -- STAMP refresh: STATE DELTA 17 in section 1a (pass 2 stamped at f545b18d4d; batch 6 running; derivation seat). Nothing else moved.
 - 2026-09-22 12:27 -- STAMP refresh: STATE DELTA 18 in section 1a (batch 6 stamped at 8fc439415f; batch 7 running; N = 230 ruled). Nothing else moved.
 - 2026-09-22 14:47 -- RESUME refresh: STATE DELTA 19; the owner's order (whole fleet on Opus 5.5, COORD max) applied to section 0, COORD's prompt and the five lane headers and prompts; the H10 re-bank debt ruled.
+- 2026-09-22 15:37 -- STAMP refresh: STATE DELTA 20 (batch 7 stamped at 3469154a95; master 20eb0af70e; batch 8a running); the batch-8a brief added.
