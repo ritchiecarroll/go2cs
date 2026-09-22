@@ -401,7 +401,7 @@ STATE DELTA 2026-09-22 09:53 (ledger through mailbox 7d865a6da9; supersedes the 
     a7cbca2637; the re-dispatch (fips140test DIVERGED 7 undisclosed until C1's pins; sha3 DIVERGED 5; maphash 59; embedtest 7; x509; maps; slog;
     rand; sync; runtime by cause); the index regenerated once with master's tool; the header from the guard. Bank ref claude/coord-h10-pass2-s1.
   - QUEUED: BATCH 6 (brief batch6-brief.md) on the pass-2 STAMP: C2 anon-struct 4faa7df98e (announce not yet read), C1 guard tables 48499a4981,
-    C1 fips140test/sha3 manifests (TBD), R getfp+entersyscall 0c0090e19b (FINAL: the family hand-owned; runtime now HANGS at 30m in
+    C1 fips140test/sha3 manifests (TBD), R lock-metrics bab8d58af1 (:= ref 4, contains getfp+entersyscall 0c0090e19b; the live-lock fixed, runtime now DIES at asmcgocall via usleep, 10,612 of 10,891; R on a managed usleep body next; was: HANG at 30m in
     TestRuntimeLockMetricsAndProfile/runtime.lock/sample-1 instead of dying; 10,607 of 10,891). Then H10 closing arithmetic -> H11.
   - LANES: R on the lock-metrics hang by cause (new ref claude/r-runtime-lock-metrics); C1 on the two manifests; C2 announce owed; G, i9 STANDBY.
     No owner hand open.
