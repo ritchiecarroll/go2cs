@@ -414,7 +414,7 @@ STATE DELTA 2026-09-22 11:13 (ledger through mailbox 31624cd99c; supersedes the 
     the RECONVERT class owed before H10 closes; the header's 216/215 = 100.5% is the 1.23.12 denominator, CARRIED on the version branch only --
     a read-only DERIVATION seat (Opus) is deriving the 1.24.13 population from primary sources (the runbook predicts 226; test, don't quote).
   - RUNNING on the i7: BATCH 6 (worktree ab6 on f545b18d4d): C2 4faa7df98e (anon-struct publicizes field types; time by BUILD then all),
-    C1 48499a4981 (guard tables; the suite must read FULLY GREEN), R bab8d58af1 (lock-metrics, contains getfp + entersyscall; runtime predicted
+    C1 48499a4981 (guard tables; the suite must read FULLY GREEN), R c8aa799300 (usleep + the nil-predicate fix, contains bab8d58af1 lock-metrics + getfp + entersyscall -- amended in flight; runtime predicted DEATH at the testSPWrite stub ~10,616; asmcgocall = 3 roots + 70 echoes; was:
     DEATH at asmcgocall via usleep ~10,612 of 10,891). Then STAMP -> BATCH 7 = C1's fips140test/sha3 manifests (not at origin yet) + the two
     rows re-run + bank + the index regenerated + the header re-derived with the 1.24.13 denominator -> H10 closing arithmetic -> H11.
   - INSTRUMENT SEAT owed on master (one sub-agent, after batch 6): CNR refuses without git/dotnet on PATH; census converted mode gains an
