@@ -217,3 +217,59 @@ the row's next death (if any) is named, not predicted. S1c moves no row until S4
 2. S1 as three seats (a/b/c) rather than one?
 3. The WaitGroup fix changes a hand-owned file's reason AND adds a waiter set. It is ruled here as
    S1a scope because it is a durable park that must be accounted; say if you want it split out.
+
+---
+
+## Amendment 2026-09-22 (evening) — the owner's ruling, five additions, and what S1a measured
+
+**Ruling (owner, via COORD).** H10 closes with `net/http` moved to the candidates. This arc lands
+AFTER the hop, as one train on master; nothing of it merges into `claude/version-go1.24.13`. The
+seat order stands: S1a → S1a2 (WaitGroup's waiter set and 1.24 reason, and Coro parking, split out of
+S1a) → S1c → S2 → S3 → S4. S1b (the runtime pair) is free to follow S1a, since runtime's row is also
+post-hop. §4's open question 1 is ruled: **Go's commit order**, with a contention-stress arm beside
+every reordered site.
+
+**Five additions from an owner-invoked feasibility workflow (COORD's relay; neither record covered
+them).** R spot-checked (1), (2) and (4) against the tree at `3469154a95`, and all three hold:
+
+1. **An S-HOST seat.** `TestTransportIdleConnRacesRequest/h2unencrypted` calls `t.Skip` INSIDE the
+   bubble, and the hand-owned testing host refuses `SkipNow`/`FailNow` off the test's own thread
+   (`TestExecution.cs`, `TryEnsureOwner` at the `FailNow` / `SkipNow` / `Parallel` / `Setenv` sites).
+   That is an undisclosable infrastructure error. Go does not apply that owner rule to a bubble root
+   started from the test. *Checked: the four call sites exist as stated.*
+2. **Creator-side spawn counting.** Go counts a new goroutine into the bubble at the `go` statement
+   (and when a timer fires). golib registers it later, at `Run` on the CHILD's thread
+   (`StartWithCreator` → `new Thread(() => Run(...))`), so between the `go` and the child's first
+   instruction the bubble can read idle: `Wait` returns early, fake time advances early (`runAsync`;
+   `IdleConnRacesRequest`). S1c must count the child in `Start`, on the creator's thread, and
+   discount it if the thread never starts. *Checked: registration is child-side.*
+3. **Nil select cases** are excluded from "every channel is bubbled", as Go does. Otherwise
+   `Server.Shutdown`'s select on `context.Background().Done()` (a nil channel) keeps the bubble busy.
+   S2.
+4. **The lazily started timer service thread** inherits the `ExecutionContext` of whoever arms the
+   FIRST timer (`time_impl.cs`: `s_timerThread = new Thread(serviceTimers)`, no `SuppressFlow`). With
+   bubble membership in an `AsyncLocal`, the engine thread would become a bubble member for its whole
+   life. Start it under `ExecutionContext.SuppressFlow()`. S3 (and S1c, which introduces the
+   `AsyncLocal`). *Checked: no flow suppression today.*
+5. **S3 needs a callback slot on the golib bubble** so `Run` can reach `time`'s private timer heap
+   across the assembly boundary (the `ParkTransition` / `ReadyTransition` pattern: golib owns the
+   slot, the owning assembly installs it).
+
+The workflow also notes that the Coro half of S1a2 is not reached by `net/http`.
+
+**What S1a measured (branch `claude/r-s1a-ready-seam`, `68fb51c5c`):**
+- **Park had its own ordering hole.** `Park` published the golib reason BEFORE the runtime
+  transition. Under R2 (Ready wired, old publish-before-park order), a racing waker found the
+  goroutine "parked" in golib while its g was still `_Grunning`, and only the runtime's check caught
+  it ("status is 2, not _Gwaiting"). `Park` now runs the transition first and publishes the reason
+  second (the mirror of dispose's order), and R2 then fails at golib's own invariant ("Ready of
+  goroutine N, which is not parked") on all four stress arms. §3's "Ready on a non-Parked target
+  panics by name" is therefore a golib-layer property, not only a runtime one.
+- **The g → goroutine link for `ReadyTransition` is a descriptor on the record.** `Ready` runs on the
+  waker's thread and must reach the TARGET's `g`, while `getg`'s cache is thread-static, so the
+  runtime publishes its `g` as `Goroutine.RuntimeDescriptor` when it mints one. This is the same link
+  S1b's `ready` / `injectglist` need in the other direction (they already hold the `g` and look up
+  the goroutine by `goid`).
+- **The readied bit rides in `m_waitReason`**, not in a second field, keeping that field's
+  documented one-field invariant ("readied" can only sit beside a nonzero reason). A nested dispose
+  carries the bit into the scope it restores.
