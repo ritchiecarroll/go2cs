@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 01:31 -- hourly refresh (ledger through mailbox 55196b7c43): section 1a STATE DELTA 3 (master 9e12c3e7d0 with the instrument + roster-guard seats; batch 3 in battery; batch 4 = five refs; C1's classing; lanes). Lane fences (revision 2026-09-21 23:40), 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 02:38 -- STAMP refresh (ledger through mailbox a573ea3be2): section 1a STATE DELTA 4 (batch 3 STAMPED, version tip 146c22828d; the campaign-tip merge running; banked items). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -219,6 +219,18 @@ STATE DELTA 2026-09-22 01:31 (ledger through mailbox 55196b7c43; supersedes the 
     the empty go:embed -> C2's seat; println CRLF -> R's seat), 7 disclosures. The linkname-to-linker-symbol class BANKED for a
     converter warning seat. traceviewer's staticContent is a latent PRODUCTION defect (2.7 MB payload enters at its next reconvert).
   - LANES: C1 STANDBY; C2 STANDBY; R on println-lf then GO (pwsh 7 OWNER-HAND open); i9 and G holding for GO.
+STATE DELTA 2026-09-22 02:38 (ledger through mailbox a573ea3be2; supersedes the deltas above where they differ):
+  - BATCH 3 STAMPED: VERSION TIP claude/version-go1.24.13 = 146c22828d (nine signed merges on 0adf2e4318; EQUAL 24 / COMPOSED 12;
+    one projitems union; suite ok; CNR NO REGRESSION 729; stdlib 344/0; corpus diff 20 files attributed; census clean). Rows: ecdh
+    VALIDATED 47, json 532, internal/sync 106 / 0 (the gate), unique 21; synctest and embedtest COMPILE; maphash past BUILD (escapeForHash
+    -> batch 4); runtime BUILD 0 errors (CS0310 28 -> 0). Worktree ec3 kept clean at the tip until the campaign-tip merge lands.
+  - RUNNING on the i7: THE CAMPAIGN-TIP MERGE (sub-agent; brief docs/phase4/briefs/campaign-tip-merge-brief.md; TIP3 146c22828d +
+    MASTER 9e12c3e7d0; worktree ctip) -> STAMP (CTIP) -> GO by docs/phase4/briefs/go-message-template.md to i9 (Windows, pwsh 7.6.6),
+    G (linux arm) and R (pwsh 7 OWNER-HAND still open) + the i7's own slice 1 as a sub-agent; then BATCH 4 (docs/phase4/briefs/batch4-brief.md,
+    five refs; R's println-lf SHA pending).
+  - BANKED (not queued): C1 -- the seeding takes the UNION of exported test members across GOOS so production stays shared (os/exec.cs went
+    variant at this tip); a hand-own seat for synctest.Run (runtime intrinsic); the linkname-to-linker-symbol converter warning; traceviewer's
+    2.7 MB embed payload at its next reconvert. `-test-action build` alone refuses without a convert's manifest (instrument note).
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1369,3 +1381,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-21 23:40 -- COORD ONLINE after the 2026-09-20 weekly limit: the five lane PASTE PROMPT fences (revision 2026-09-19, 1345 lines net) replaced by DELTA fences cut from the ledger through 23:33 (mailbox b56e835d2f) and the batch-3 brief -- session titles `<lane> -- <goal>`, the v4 comms line, GPG, pins, the driver recipe for the W=4 workers, per-lane first item and queue with SHAs; section 1a gains the STATE DELTA (the rehearsal's driver leg ran green; C2's sha3 key seat ruled to batch 4, seat (B) next); the stale 'INTERRUPTED at row 1' paragraph corrected in place; status line updated. STATE BLOCKs untouched.
 - 2026-09-22 00:33 -- hourly refresh: STATE DELTA 2 in section 1a (ledger through c13e5bb227); 0a.0 rules 8 (owner hands route through COORD, owner order 2026-09-22) and 9 (cloud lanes wake on SendMessage; the inbox file is their reply path); status line. Nothing else moved.
 - 2026-09-22 01:31 -- hourly refresh: STATE DELTA 3 in section 1a (ledger through 55196b7c43). Nothing else moved.
+- 2026-09-22 02:38 -- STAMP refresh: STATE DELTA 4 in section 1a (batch 3 -> version tip 146c22828d; the campaign-tip merge launched). Nothing else moved.
