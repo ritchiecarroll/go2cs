@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 15:37 -- STAMP refresh (ledger through mailbox 18d8a287cd): section 1a STATE DELTA 20 (batch 7 stamped at 3469154a95, 219 / 230 = 95.2%; master 20eb0af70e census fix; batch 8a running). STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 17:09 -- STAMP refresh (ledger through mailbox d507b229ef): section 1a STATE DELTA 21 (batch 8a stamped at 43d149b87d; batch 8b running with twelve refs; the H10-close work list; two owner decisions pending). STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -485,6 +485,26 @@ STATE DELTA 2026-09-22 15:37 (ledger through mailbox 18d8a287cd; supersedes the 
   - BATCH 8b after 8a: i9's pprof seat, G's pass-3 shard, C2's TestLinkname, C1's row repair, the instrument seat (the wrapper takes
     max(asked, floor); CNR refuses without git), R's seat when reachable. Then net -> the core-refs table sweep -> the hop's final -stdlib
     reconvert -> the header's final figures -> H11 / H12.
+STATE DELTA 2026-09-22 17:09 (ledger through mailbox d507b229ef; supersedes the deltas above where they differ) -- BATCH 8a STAMPED, 8b RUNNING:
+  - VERSION TIP claude/version-go1.24.13 = 43d149b87d (batch 8a: C1 0e98bc97c anchor rows' own pages + C1 cceba4e728 internal/sync's five
+    runtime hooks, proven red-first at the canSpin stub; every gate green). MASTER 20eb0af70e (census mirrors the gate's fixture predicate).
+  - RUNNING on the i7: BATCH 8b (worktree ab8b, brief docs/phase4/briefs/batch8b-brief.md): TWELVE refs -- C2 c3cb3b3101 runbook amendments
+    + shardmap basis; C1 51a1d30ff9 cells + guard 2f (the header's 'matching' overstated 120: Tests = the page's MATCHED count); C1 fb1ecbfe55
+    guard 2b2 (the csproj identity) + 2b3 (validated badge on exactly the rows with a README); C1 082ec41bb0 the manifest re-sign (29 scopes,
+    1 retired, two deferred pins); G c660a17d8c pass-3 bank (math/rand, mime/multipart, cfile); G 8519e1b44c Xchg8 (atomic 16); R c4594c55b8
+    syscall GetStartupInfo (65); C2 568c17380f time's linkname forwards; G 1f2724c755 testing's bridged-name predicate; C2 1913737522 fmt's
+    typed-nil func Stringer (golib + a new behavioral test); R c10500aa12 (+ 66e6b9905) native-rooted field identity + sysAllocOS; i9 1abe5678e4
+    pprof (CPU setters, readProfile, saveblockevent named refusal). The full behavioral suite with a base control; ~25 rows; badges repaired;
+    the header and index as the guard derives them.
+  - H10 CLOSE (an owner-invoked audit workflow verified four gaps, all now routed): the 11 never-measured banked rows -- syscall, atomic, time,
+    fmt, unicode/utf8 land in 8b; testing (G seat 5: two benchmark tests join the owner-ruled Phase-4D exclusion + a TempDir-in-Cleanup host
+    fix), os/user (G: the test host preloads its MANAGED assembly closure -- a lazy load under an anonymous impersonation token), godebug + the
+    net/http Caller row (the wrapper's execution pins), crypto/tls full-host + the net probe (i9), internal/trace (i7), net/http's synctest (R's
+    arc: S1a ready seam -> S1a2 -> S1c -> S2 -> S3 -> S4, Go's commit order ruled); the manifest RELABEL (122 legacy alloc-profile entries) after
+    a 27-row READING RUN on the i7; H10 step 5's deadline floors (the i7 wrapper instrument seat); the LINUX LEG (G's WSL arm, gating the
+    header's linux line and the host rule's re-reads); C2's corpus-wide NAME-RESOLUTION defect (a bare sync_package binds internal/sync in 17
+    files). OWNER DECISIONS PENDING: hold H10 for net/http's synctest arc (~1-2 days) or close with it demoted; production-host assembly preload
+    (post-hop).
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1652,3 +1672,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 12:27 -- STAMP refresh: STATE DELTA 18 in section 1a (batch 6 stamped at 8fc439415f; batch 7 running; N = 230 ruled). Nothing else moved.
 - 2026-09-22 14:47 -- RESUME refresh: STATE DELTA 19; the owner's order (whole fleet on Opus 5.5, COORD max) applied to section 0, COORD's prompt and the five lane headers and prompts; the H10 re-bank debt ruled.
 - 2026-09-22 15:37 -- STAMP refresh: STATE DELTA 20 (batch 7 stamped at 3469154a95; master 20eb0af70e; batch 8a running); the batch-8a brief added.
+- 2026-09-22 17:09 -- STAMP refresh: STATE DELTA 21 (batch 8a stamped at 43d149b87d; 8b running); the batch-8a (sanitized) and 8b briefs added.
