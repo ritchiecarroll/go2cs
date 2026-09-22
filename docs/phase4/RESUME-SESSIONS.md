@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 02:38 -- STAMP refresh (ledger through mailbox a573ea3be2): section 1a STATE DELTA 4 (batch 3 STAMPED, version tip 146c22828d; the campaign-tip merge running; banked items). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 03:37 -- STAMP + GO refresh (ledger through mailbox db7abf82e4): section 1a STATE DELTA 5 (the campaign tip c6fdbe73c3 stamped; GO sent to i9/G/R; the i7's slices as a sub-agent; batch 4 next). Lane fences, 0a.0 rules 8-9 and STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -231,6 +231,23 @@ STATE DELTA 2026-09-22 02:38 (ledger through mailbox a573ea3be2; supersedes the 
   - BANKED (not queued): C1 -- the seeding takes the UNION of exported test members across GOOS so production stays shared (os/exec.cs went
     variant at this tip); a hand-own seat for synctest.Run (runtime intrinsic); the linkname-to-linker-symbol converter warning; traceviewer's
     2.7 MB embed payload at its next reconvert. `-test-action build` alone refuses without a convert's manifest (instrument note).
+STATE DELTA 2026-09-22 03:37 (ledger through mailbox db7abf82e4; supersedes the deltas above where they differ) -- THE CAMPAIGN IS LAUNCHED:
+  - CAMPAIGN TIP STAMPED: claude/version-go1.24.13 = c6fdbe73c3 (master 9e12c3e7d0 merged into the batch-3 tip 146c22828d; zero
+    conflicts; src/core footprint zero; version.props 1.24.13; suite ok; GenTests 57; GolibTests 788/17/805; CNR NO REGRESSION 729;
+    stdlib 344/0; check-roster-format 2 of 672 = the two orphans; the plan digest reproduced; census 117/0). Tools at the tip:
+    driver 05ec63184b, wrapper 158ce37f6c, plan 24ffcff3b9, digest 005aeab497fd35e8610a968117e1836dc68c753ba822e16eb1cee5845c77d39d.
+  - GO SENT (FLEET inbox 20260922T083453Z-COORD @ db7abf82e; SendMessage to i9, G, R): W=4 slices at c6fdbe73c3, tools by blob, one
+    lane ref per shard claude/<lane>-h10-rebank-s<N> (artifacts + the rows' roster ROW edits; never index.md, never the header, never
+    sibling testdata), push-then-announce with the TSV. i9 28+76 rows (runtime's host crash known); G 7+26 on the linux arm; R 9+33
+    ONLY under pwsh 7 (OWNER-HAND still open). The i7's own 7+26 run as COORD's sub-agent in worktree w4 (branch i7/h10-w4-*), refs
+    claude/coord-h10-rebank-s1/-s2, unpushed until COORD reads them.
+  - Two launcher traps in the GO text (measured on the i7): a net8-apphost pwsh does not start with the dotnet10 root first on the
+    PARENT's PATH (set the .NET pins inside pwsh; a net10 dotnet-tool pwsh is the mirror); an unparsed driver argument list leaves
+    $LASTEXITCODE unset and reads rc 0 -- gate on a DRIVER_EXIT= marker.
+  - NEXT on the i7 after its slices: BATCH 4 (docs/phase4/briefs/batch4-brief.md; five refs incl. R's println-lf b574ac27c2) on the
+    campaign tip -> STAMP; crypto/sha3, hash/maphash, embedtest and fips140test re-dispatch at that tip. Then the legs: merge each
+    lane's shard ref as an incremental train (census, repoguard, check-roster-format's set, the checksum re-assert, a filtered re-sweep
+    sample), index.md regenerated once centrally after the last leg.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1382,3 +1399,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 00:33 -- hourly refresh: STATE DELTA 2 in section 1a (ledger through c13e5bb227); 0a.0 rules 8 (owner hands route through COORD, owner order 2026-09-22) and 9 (cloud lanes wake on SendMessage; the inbox file is their reply path); status line. Nothing else moved.
 - 2026-09-22 01:31 -- hourly refresh: STATE DELTA 3 in section 1a (ledger through 55196b7c43). Nothing else moved.
 - 2026-09-22 02:38 -- STAMP refresh: STATE DELTA 4 in section 1a (batch 3 -> version tip 146c22828d; the campaign-tip merge launched). Nothing else moved.
+- 2026-09-22 03:37 -- STAMP + GO refresh: STATE DELTA 5 in section 1a (campaign tip c6fdbe73c3; GO; the i7's slices; batch 4 next). Nothing else moved.
