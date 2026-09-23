@@ -1,8 +1,5 @@
 {
   "schemaVersion": 1,
-  "notes": [
-    "⚠ Four tests fail AGREEING on both runtimes — `TestResumption`, `TestResumptionKeepsOCSPAndSCT`, `TestVerifyConnection`, `TestCrossVersionResume` — because the suite's test certificates expired 2025-01-01, and both languages report the same `x509: certificate has expired` text. The expired-fixture ceiling is re-confirmed rather than carried: **180 of 184 is the most this host can score in either language, it worsens with time, and a Go patch release or regenerated fixtures changes the shape.**"
-  ],
   "disclosures": [
     {
       "name": "TestCertCache",
