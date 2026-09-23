@@ -12,48 +12,17 @@ partial class atomic_package {
 //go:linkname Load
 //go:linkname Loadp
 //go:linkname Load64
-
-//go:nosplit
-//go:noinline
-public static uint32 Load(ж<uint32> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.DerefOrNull();
-
-    return ptr;
-}
+// go2cs generated this placeholder — func Load is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func Loadp is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-//go:nosplit
-//go:noinline
-public static uint64 Load64(ж<uint64> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.DerefOrNull();
+// go2cs generated this placeholder — func Load64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    return ptr;
-}
+// go2cs generated this placeholder — func LoadAcq is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-//go:nosplit
-//go:noinline
-public static uint32 LoadAcq(ж<uint32> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.DerefOrNull();
+// go2cs generated this placeholder — func LoadAcq64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-    return ptr;
-}
-
-//go:nosplit
-//go:noinline
-public static uint64 LoadAcq64(ж<uint64> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.DerefOrNull();
-
-    return ptr;
-}
-
-//go:nosplit
-//go:noinline
-public static uintptr LoadAcquintptr(ж<uintptr> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.DerefOrNull();
-
-    return ptr;
-}
+// go2cs generated this placeholder — func LoadAcquintptr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:noescape
 public static partial uint32 Xadd(ж<uint32> ptr, int32 delta);
@@ -76,13 +45,7 @@ public static partial uint64 Xchg64(ж<uint64> ptr, uint64 @new);
 //go:noescape
 public static partial uintptr Xchguintptr(ж<uintptr> ptr, uintptr @new);
 
-//go:nosplit
-//go:noinline
-public static uint8 Load8(ж<uint8> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.DerefOrNull();
-
-    return ptr;
-}
+// go2cs generated this placeholder — func Load8 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:noescape
 public static partial void And8(ж<uint8> ptr, uint8 val);

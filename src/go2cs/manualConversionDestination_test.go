@@ -54,6 +54,7 @@ import (
 	"regexp"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -946,5 +947,231 @@ func TestManualFuncLookupReachesVendoredRegistrationFromTypeCheckerSpelling(t *t
 	// The canonicalization is a no-op for a plain stdlib path: crypto/internal/alias keys itself.
 	if !isManualFuncDeclInPackage("crypto/internal/fips140/alias", "linux", decls["AnyOverlap"]) {
 		t.Errorf("isManualFuncDeclInPackage(crypto/internal/fips140/alias, linux, AnyOverlap) = false; the unvendored twin's registration regressed")
+	}
+}
+
+// TestAtomicLoadsAreAcquireLoads guards internal/runtime/atomic's LOAD family against converting as
+// plain reads. Go gives several loads real bodies (`return *ptr` under //go:noinline): on amd64 an
+// aligned MOV is already an acquire and a noinline call is never hoisted, so the body is the whole
+// contract. Converted, the body is a plain read through a ref and the directive is a comment, so a
+// Release+TC0 JIT may inline it and hoist it out of a spin -- runtime's export_test
+// `for (Xadd(ready, 1); Load(ready) != 2; ) {}` spun forever. A hoisting hang is not a deterministic
+// red, so this is the STRUCTURAL arm: every exported free `Load*` Go gives a body in a file a corpus
+// target builds must be registered in manualConversionFuncs (so the plain body is never emitted) and
+// hand-owned in atomic_impl.cs over an acquire primitive. The family is DERIVED from Go's source at the
+// pin, per target, so a load the next release adds cannot stay plain unnoticed.
+//
+// RED PROOF: at the base (R's 287dbe4236) Load, Load64, LoadAcq, LoadAcq64, LoadAcquintptr and Load8
+// were unregistered and had no hand-owned body; each is named by both arms, and a hand-owned body
+// written without an acquire primitive is named by the third.
+func TestAtomicLoadsAreAcquireLoads(t *testing.T) {
+	const pkg = "internal/runtime/atomic"
+
+	goRoot := build.Default.GOROOT
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	implPath := filepath.Join("..", "core", filepath.FromSlash(pkg), "atomic_impl.cs")
+	implBytes, err := os.ReadFile(implPath)
+	if err != nil {
+		t.Skipf("%s is not beside the converter: %v", implPath, err)
+	}
+
+	impl := strings.ReplaceAll(string(implBytes), "\r\n", "\n")
+
+	// The Go-bodied loads each corpus target (amd64 on windows, linux and darwin) builds.
+	bodied := map[string][]string{}
+
+	for _, goos := range knownTargetGOOS {
+		ctx := build.Default
+		ctx.GOROOT, ctx.GOOS, ctx.GOARCH, ctx.CgoEnabled = goRoot, goos, "amd64", false
+
+		bp, err := ctx.ImportDir(filepath.Join(goRoot, "src", filepath.FromSlash(pkg)), 0)
+		if err != nil {
+			t.Fatalf("%s for %s/amd64: %v", pkg, goos, err)
+		}
+
+		for _, name := range bp.GoFiles {
+			file, err := parser.ParseFile(token.NewFileSet(), filepath.Join(bp.Dir, name), nil, parser.SkipObjectResolution)
+			if err != nil {
+				t.Fatalf("parse %s: %v", name, err)
+			}
+
+			for _, decl := range file.Decls {
+				fn, ok := decl.(*ast.FuncDecl)
+				if !ok || fn.Recv != nil || fn.Body == nil || !strings.HasPrefix(fn.Name.Name, "Load") || !ast.IsExported(fn.Name.Name) {
+					continue
+				}
+
+				bodied[fn.Name.Name] = append(bodied[fn.Name.Name], goos+":"+name)
+			}
+		}
+	}
+
+	if len(bodied) == 0 {
+		t.Fatalf("found no Go-bodied Load* in %s at %s: the guard is vacuous", pkg, goRoot)
+	}
+
+	// An acquire primitive: Volatile.Read, Interlocked (Read or a CAS), or the package latch the
+	// unsafe.Pointer family already takes (a monitor enter is an acquire).
+	acquire := regexp.MustCompile(`Volatile\.Read\(|Interlocked\.(Read|CompareExchange)\(|lock \(s_wideLatch\)`)
+
+	names := make([]string, 0, len(bodied))
+	for name := range bodied {
+		names = append(names, name)
+	}
+
+	sort.Strings(names)
+
+	for _, name := range names {
+		if _, registered := manualConversionFuncs[pkg][name]; !registered {
+			t.Errorf("%s.%s has a Go body (%s) and is not in manualConversionFuncs, so it converts as a PLAIN read the JIT may hoist out of a spin", pkg, name, strings.Join(bodied[name], ", "))
+		}
+
+		// The member runs from its declaration to the next blank line (expression- and block-bodied alike).
+		decl := regexp.MustCompile(`(?m)^    public static [^\n(]*\b` + regexp.QuoteMeta(name) + `\(`).FindStringIndex(impl)
+		if decl == nil {
+			t.Errorf("%s.%s has no hand-owned body in atomic_impl.cs", pkg, name)
+			continue
+		}
+
+		body := impl[decl[0]:]
+		if end := strings.Index(body, "\n\n"); end >= 0 {
+			body = body[:end]
+		}
+
+		if !acquire.MatchString(body) {
+			t.Errorf("%s.%s is hand-owned without an acquire primitive (Volatile.Read, Interlocked.Read/CompareExchange or the latch):\n%s", pkg, name, body)
+		}
+	}
+
+	t.Logf("Go-bodied loads checked: %s", strings.Join(names, ", "))
+}
+
+// TestNoReinterpretOfAManagedReferentPointerType guards the other half of the same seat: a converted
+// source must never VIEW a manualConversionTypes member (runtime's guintptr/puintptr/muintptr) as the
+// number Go hides in it. The managed form holds the ж<T> box itself, so the view has no referent:
+// golib's Reinterpret refuses a reference-bearing pointee and the conversion falls to the address
+// route, whose load dereferences an order token -- the host dies (arm-2a). Go writes the view exactly
+// where it only wants to know whether the pointer is nil (runqempty's
+// `atomic.Loaduintptr((*uintptr)(unsafe.Pointer(&pp.runnext)))`), so each such site is answered by a
+// hand-own over the reference instead. The family is read from the registry, not listed here.
+//
+// RED PROOF: at the base (R's 287dbe4236) runtime/{windows,linux,darwin}/proc.cs:6282 each carry
+// `Reinterpret<Δguintptr, uintptr>()`; the seat registers runqempty, so the re-emission is a placeholder.
+func TestNoReinterpretOfAManagedReferentPointerType(t *testing.T) {
+	coreDir := filepath.Join("..", "core")
+
+	if _, err := os.Stat(coreDir); err != nil {
+		t.Skip("src/core is not beside the converter; nothing to walk")
+	}
+
+	var sites []string
+	scanned := 0
+
+	for pkg, names := range manualConversionTypes {
+		var alternatives []string
+
+		for name := range names {
+			alternatives = append(alternatives, regexp.QuoteMeta(name))
+		}
+
+		sort.Strings(alternatives)
+
+		view := regexp.MustCompile(`Reinterpret<Δ?(` + strings.Join(alternatives, "|") + `)\s*,`)
+
+		err := filepath.WalkDir(filepath.Join(coreDir, filepath.FromSlash(pkg)), func(path string, entry os.DirEntry, err error) error {
+			if err != nil || entry.IsDir() || !strings.HasSuffix(path, ".cs") {
+				return err
+			}
+
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			scanned++
+
+			for i, line := range strings.Split(string(data), "\n") {
+				if view.MatchString(line) {
+					sites = append(sites, filepath.ToSlash(path)+":"+strconv.Itoa(i+1)+": "+strings.TrimSpace(line))
+				}
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			t.Fatalf("walk %s: %v", pkg, err)
+		}
+	}
+
+	if scanned == 0 {
+		t.Fatal("scanned no .cs files: the guard is vacuous")
+	}
+
+	for _, site := range sites {
+		t.Errorf("a managed-referent pointer type is reinterpreted as the number Go hides in it (no referent; arm-2a): %s", site)
+	}
+}
+
+// TestGenericReceiverMethodIsKeyedByItsReceiver pins the registry's key for a GENERIC-receiver method:
+// `Recv.Name`, exactly as for any other method, never the bare name a free function registers under.
+// Measured at this seat: registering internal/runtime/atomic's free `Load` displaced
+// `func (p *Pointer[T]) Load() *T` in types.go too, because the receiver `*Pointer[T]` is an index
+// expression the key derivation did not read, so the method looked itself up as `Load`.
+//
+// RED PROOF: without the index-expression arm in isManualFuncDeclInPackage, the first two
+// assertions fail (the generic method answers to the bare key and not to its own).
+func TestGenericReceiverMethodIsKeyedByItsReceiver(t *testing.T) {
+	const pkg = "go2cs.invalid/genericrecv"
+
+	file, err := parser.ParseFile(token.NewFileSet(), "a.go", `package genericrecv
+type Pointer[T any] struct{ v *T }
+type Pair[K comparable, V any] struct{}
+func (p *Pointer[T]) Load() *T { return p.v }
+func (p Pair[K, V]) Load() {}
+func Load() {}
+`, parser.SkipObjectResolution)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// In source order: Pointer[T].Load, Pair[K, V].Load, the free Load.
+	var fns []*ast.FuncDecl
+
+	for _, decl := range file.Decls {
+		if fn, ok := decl.(*ast.FuncDecl); ok {
+			fns = append(fns, fn)
+		}
+	}
+
+	if len(fns) != 3 {
+		t.Fatalf("parsed %d funcs, want 3", len(fns))
+	}
+
+	t.Cleanup(func() { delete(manualConversionFuncs, pkg) })
+
+	// Only the FREE function is registered: neither generic method may answer to its key.
+	manualConversionFuncs[pkg] = map[string]goosScope{"Load": goosAny}
+
+	if isManualFuncDeclInPackage(pkg, "windows", fns[0]) || isManualFuncDeclInPackage(pkg, "windows", fns[1]) {
+		t.Error("a free-function key `Load` displaced a generic method (Pointer[T].Load or Pair[K, V].Load)")
+	}
+
+	if !isManualFuncDeclInPackage(pkg, "windows", fns[2]) {
+		t.Error("the free function Load did not answer to its own key")
+	}
+
+	// Only the generic METHOD is registered, by its receiver: it must answer, and nothing else may.
+	manualConversionFuncs[pkg] = map[string]goosScope{"Pair.Load": goosAny}
+
+	if !isManualFuncDeclInPackage(pkg, "windows", fns[1]) {
+		t.Error("the generic method Pair[K, V].Load did not answer to its own key `Pair.Load`")
+	}
+
+	if isManualFuncDeclInPackage(pkg, "windows", fns[0]) || isManualFuncDeclInPackage(pkg, "windows", fns[2]) {
+		t.Error("the key `Pair.Load` displaced a declaration other than Pair[K, V].Load")
 	}
 }

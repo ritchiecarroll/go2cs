@@ -6267,24 +6267,7 @@ internal static (ж<Δp>, int64) pidlegetSpinning(int64 now) {
     return (pp, now);
 }
 
-// runqempty reports whether pp has no Gs on its local run queue.
-// It never returns true spuriously.
-internal static bool runqempty(ж<Δp> Ꮡpp) {
-    ref var pp = ref Ꮡpp.DerefOrNull();
-
-    // Defend against a race where 1) pp has G1 in runqnext but runqhead == runqtail,
-    // 2) runqput on pp kicks G1 to the runq, 3) runqget on pp empties runqnext.
-    // Simply observing that runqhead == runqtail and then observing that runqnext == nil
-    // does not mean the queue is empty.
-    while (ᐧ) {
-        var head = atomic.Load(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead));
-        var tail = atomic.Load(Ꮡpp.of(runtime_package.Δp.Ꮡrunqtail));
-        var runnext = atomic.Loaduintptr(Ꮡpp.of(runtime_package.Δp.Ꮡrunnext).Reinterpret<Δguintptr, uintptr>());
-        if (tail == atomic.Load(Ꮡpp.of(runtime_package.Δp.Ꮡrunqtail))) {
-            return head == tail && runnext == 0;
-        }
-    }
-}
+// go2cs generated this placeholder — func runqempty is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // To shake out latent assumptions about scheduling order,
 // we introduce some randomness into scheduling decisions

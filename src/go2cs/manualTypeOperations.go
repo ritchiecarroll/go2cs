@@ -353,6 +353,12 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"g.guintptr": goosAny,
 		"setGNoWB":   goosAny,
 		"setMNoWB":   goosAny,
+		// runqempty reads runnext as `(*uintptr)(unsafe.Pointer(&pp.runnext))` -- a guintptr viewed as the
+		// number it hides, which the managed guintptr (it holds the ж<g> box) cannot give: golib refuses
+		// the reinterpret and the address route's Loaduintptr dereferences an order token (arm-2a, host
+		// death, TestSchedLocalQueueEmpty). Go only asks whether that number is 0, so runtime2_impl.cs
+		// answers "runnext is nil" over Volatile.Read of the reference, beside the family's other members.
+		"runqempty": goosAny,
 		// The mutex/note key-slot protocol. Go has TWO flavors of it and selects one per GOOS:
 		// lock_sema.go (windows, darwin, plan9, aix …) smuggles an *m address through the uintptr
 		// slot and parks waiters on OS semaphores; lock_futex.go (linux, freebsd, dragonfly) uses a
@@ -829,8 +835,24 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 	// StorepNoWB (already hand-owned; its Go body is a `.s` file) takes for the store direction.
 	// The *unsafe.Pointer siblings (Casp1/storePointer/casPointer) carry an aliasing
 	// ж<unsafe.Pointer> by signature and stay auto-hooked partials.
+	//
+	// The ACQUIRE LOADS beside it (Load, Load64, LoadAcq, LoadAcq64, LoadAcquintptr, Load8) have real
+	// Go bodies too -- `return *ptr` under //go:noinline, an acquire on amd64 because an aligned MOV
+	// is one and a noinline call is never hoisted. Converted, each was a PLAIN read through a ref with
+	// the directive surviving only as a comment, so the Release+TC0 JIT could inline it and hoist it
+	// out of a spin: runtime's export_test `for (Xadd(ready, 1); Load(ready) != 2; ) {}` spun forever
+	// (TestSchedLocalQueueEmpty's 30-minute hang, i9's static read). atomic_impl.cs hand-owns them
+	// over Volatile.Read (Interlocked.Read for the two 64-bit widths, as its Loadint64 does), beside
+	// the asm-backed Loadint32/Loaduintptr/Loaduint it already carried. TestAtomicLoadsAreAcquireLoads
+	// derives the family from Go's own source, so a load the next release adds cannot stay plain.
 	"internal/runtime/atomic": {
-		"Loadp": goosAny,
+		"Loadp":          goosAny,
+		"Load":           goosAny,
+		"Load64":         goosAny,
+		"LoadAcq":        goosAny,
+		"LoadAcq64":      goosAny,
+		"LoadAcquintptr": goosAny,
+		"Load8":          goosAny,
 	},
 	// internal/chacha8rand's two ARRAY-SHAPE reinterpreters. Go opens the `*[32]uint64` output
 	// buffer as `(*[16][4]uint32)(unsafe.Pointer(buf))` (block_generic) and that in turn as
@@ -2528,6 +2550,17 @@ func isManualFuncDeclInPackage(pkgPath string, goos string, funcDecl *ast.FuncDe
 
 		if starExpr, ok := recvType.(*ast.StarExpr); ok {
 			recvType = starExpr.X
+		}
+
+		// A GENERIC receiver (`func (p *Pointer[T]) Load()`) is an index expression over the type's
+		// name. Left unread, it keyed the method BARE, so a free-function registration of the same
+		// name displaced the generic method too: internal/runtime/atomic's `Load` took
+		// `Pointer[T].Load` with it. A method is always keyed by its receiver's type name.
+		switch indexed := recvType.(type) {
+		case *ast.IndexExpr:
+			recvType = indexed.X
+		case *ast.IndexListExpr:
+			recvType = indexed.X
 		}
 
 		if ident, ok := recvType.(*ast.Ident); ok {

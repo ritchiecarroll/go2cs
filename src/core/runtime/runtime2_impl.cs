@@ -127,6 +127,28 @@ internal static Δguintptr guintptr(this ж<g> Ꮡgp) {
     return new Δguintptr(Ꮡgp);
 }
 
+// runqempty reports whether pp has no Gs on its local run queue. It never returns true spuriously.
+//
+// Hand-owned (proc.go, all three GOOS): Go reads runnext as `atomic.Loaduintptr((*uintptr)
+// (unsafe.Pointer(&pp.runnext)))` -- a guintptr viewed as the number it hides. The managed guintptr
+// holds the ж<g> box itself (the module header), so that view has no referent: golib refuses the
+// reinterpret because the pointee carries a reference, the conversion falls to the address route,
+// and Loaduintptr's Volatile.Read dereferences an order token -- the host dies (arm-2a). All Go asks
+// of the number is whether it is 0, i.e. whether runnext is nil, which here is the managed reference
+// being null, read with the same acquire. The loop and the re-read of runqtail are Go's, unchanged.
+internal static bool runqempty(ж<Δp> Ꮡpp) {
+    ref var pp = ref Ꮡpp.Value;
+
+    while (true) {
+        var head = global::go.@internal.runtime.atomic_package.Load(Ꮡpp.of(Δp.Ꮡrunqhead));
+        var tail = global::go.@internal.runtime.atomic_package.Load(Ꮡpp.of(Δp.Ꮡrunqtail));
+        var runnextNil = Volatile.Read(ref pp.runnext.m_ref) is null;
+
+        if (tail == global::go.@internal.runtime.atomic_package.Load(Ꮡpp.of(Δp.Ꮡrunqtail)))
+            return head == tail && runnextNil;
+    }
+}
+
 // setGNoWB performs *gp = new without a write barrier.
 // For times when it's impractical to use a guintptr.
 //

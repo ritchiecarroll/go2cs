@@ -96,6 +96,20 @@ partial class atomic_package
     public static partial uint32 Or32(ж<uint32> ptr, uint32 val) =>
         Interlocked.Or(ref ptr.Value, val);
 
+    // ACQUIRE LOADS (Load, LoadAcq). Go gives these real bodies (atomic_amd64.go: `return *ptr`
+    // under //go:noinline) because on amd64 an aligned MOV is already an acquire load and the
+    // compiler never hoists a noinline call. The converted body was a PLAIN read through a ref and
+    // the directive survived only as a comment, so a Release+TC0 JIT could inline it and hoist it
+    // out of a spin -- `for (Xadd(ready, 1); Load(ready) != 2; ) {}` in runtime's export_test spun
+    // forever (TestSchedLocalQueueEmpty's 30-minute hang). Volatile.Read is the CLR's acquire load
+    // and is never hoisted. Registered in manualConversionFuncs so the emission is a placeholder.
+
+    public static uint32 Load(ж<uint32> ptr) =>
+        Volatile.Read(ref ptr.Value);
+
+    public static uint32 LoadAcq(ж<uint32> ptr) =>
+        Volatile.Read(ref ptr.Value);
+
     // ---- 64-bit unsigned --------------------------------------------------------------------
 
     public static partial uint64 Xadd64(ж<uint64> ptr, int64 delta) =>
@@ -118,6 +132,15 @@ partial class atomic_package
 
     public static partial uint64 Or64(ж<uint64> ptr, uint64 val) =>
         Interlocked.Or(ref ptr.Value, val);
+
+    // Acquire loads (see the 32-bit pair). Interlocked.Read, as Loadint64 below: a 64-bit
+    // Volatile.Read is not guaranteed atomic on a 32-bit CLR, and Interlocked.Read is, while being
+    // at least an acquire.
+    public static uint64 Load64(ж<uint64> ptr) =>
+        Interlocked.Read(ref ptr.Value);
+
+    public static uint64 LoadAcq64(ж<uint64> ptr) =>
+        Interlocked.Read(ref ptr.Value);
 
     // ---- signed 32/64 -----------------------------------------------------------------------
 
@@ -162,6 +185,10 @@ partial class atomic_package
     public static partial nuint Loaduint(ж<nuint> ptr) =>
         Volatile.Read(ref ptr.Value);
 
+    // Acquire load (see the 32-bit pair); Go's body is real, so it is registered, not a partial.
+    public static uintptr LoadAcquintptr(ж<uintptr> ptr) =>
+        Volatile.Read(ref ptr.Value.Value);
+
     public static partial void Storeuintptr(ж<uintptr> ptr, uintptr @new) =>
         Volatile.Write(ref ptr.Value.Value, @new.Value);
 
@@ -202,6 +229,11 @@ partial class atomic_package
 
     public static partial void Store8(ж<uint8> ptr, uint8 val) =>
         Volatile.Write(ref ptr.Value, val);
+
+    // Acquire load (see the 32-bit pair). A byte read is atomic without the latch; the latch
+    // orders the read-modify-writes among themselves, and Volatile.Read orders this read.
+    public static uint8 Load8(ж<uint8> ptr) =>
+        Volatile.Read(ref ptr.Value);
 
     public static partial void And8(ж<uint8> ptr, uint8 val)
     {
