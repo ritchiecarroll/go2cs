@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 17:09 -- STAMP refresh (ledger through mailbox d507b229ef): section 1a STATE DELTA 21 (batch 8a stamped at 43d149b87d; batch 8b running with twelve refs; the H10-close work list; two owner decisions pending). STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-22 18:59 -- refresh (ledger through mailbox dde97a55ee): section 1a STATE DELTA 22 (owner rulings: net/http to candidates at H10's close, the preload option C; the i9's known CPU defect recorded in section 0 and its lane header and prompt; the NuGet early-publish goal). Other STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -40,7 +40,7 @@
 | Lane | Box | Role next week | Model / effort | Why |
 |---|---|---|---|---|
 | COORD | i7 | rulings, merges, master landings, train assembly, the ladder | Opus 5.5 / max, ultracode on (owner order 2026-09-22: the whole fleet on Opus 5.5) | signs everything; the instrument's reader |
-| i9 | i9 (fastest box, thermal: one serial item) | H4a/H5 executor: the rung, reconverts, builds, H5c/applier runs | Opus 5.5 / high (owner order 2026-09-22: the whole fleet on Opus 5.5; COORD at max) | measurement rigor on the critical path |
+| i9 | i9 (fastest box; KNOWN CPU DEFECT, warranty replacement pending -- one serial item, light tasks between heavy ones) | H4a/H5 executor: the rung, reconverts, builds, H5c/applier runs | Opus 5.5 / high (owner order 2026-09-22: the whole fleet on Opus 5.5; COORD at max) | measurement rigor on the critical path |
 | C1 | cloud (linux) | runtime hand-own re-derives (C1-1 landed in the rung, C1-2 sizing), applier self-tests | Opus 5.5 / high (owner order 2026-09-22: the whole fleet on Opus 5.5; COORD at max) | delicate hand-own work |
 | C2 | cloud (linux, no PowerShell, disk-constrained) | H5c instrument authoring (cannot execute .ps1 — COORD parse-gates, i9 runs), H10 map re-derivation, darwin plan | Opus 5.5 / high (owner order 2026-09-22: the whole fleet on Opus 5.5; COORD at max) | design + instrument authoring |
 | G | G-LAPTOP (+WSL linux arm) | linux-arm gates, H6 alias/liveness census, filtered-sweep rule | Opus 5.5 / high | execution and census work |
@@ -505,6 +505,21 @@ STATE DELTA 2026-09-22 17:09 (ledger through mailbox d507b229ef; supersedes the 
     header's linux line and the host rule's re-reads); C2's corpus-wide NAME-RESOLUTION defect (a bare sync_package binds internal/sync in 17
     files). OWNER DECISIONS PENDING: hold H10 for net/http's synctest arc (~1-2 days) or close with it demoted; production-host assembly preload
     (post-hop).
+STATE DELTA 2026-09-22 18:59 (ledger through mailbox dde97a55ee; supersedes the deltas above where they differ) -- OWNER RULINGS + the i9's hardware:
+  - OWNER RULINGS: H10 CLOSES with net/http MOVED TO THE CANDIDATES (like runtime; its synctest arc lands AFTER the hop -- R develops it on
+    its branches, nothing merges into the version branch before H10 closes; the feasibility workflow put it at 4 days - 3 weeks). The
+    production-host assembly preload = OPTION C (preload on first impersonation) + an opt-in startup switch + docs (a docs/README.md
+    'Common options' row linking a topic page), after H10 (C1 authors, the i7 gates); G measured the test-host preload at +15-21 ms / +1-6 MB.
+  - THE i9 (owner order): a KNOWN CPU DEFECT (13th-gen Raptor Lake instability; bugcheck 0x1E under an all-core build at ~16:37), an Intel
+    warranty replacement pending. Use it as needed, one task at a time, LIGHT tasks between heavy ones to let it cool, build parallelism
+    capped on heavy runs, stop-and-report on any fault. Recorded in section 0 and in the i9 lane header and prompt.
+  - BATCH 8b RUNNING on the i7 (twelve refs). BATCH 8c QUEUED (G testing 8ed02f7dce + os/user 629f97752b; C2 a91b638cf9 the one-line
+    name-resolution fix; the instrument seat d095fe8108 -- the wrapper's floors + execution pins, CNR's git/go refusal, H10 step 5's floors;
+    i9 5b5f35ff2 CPUProfilingBroken; the godebug and internal/trace re-runs). Of the 11 never-measured banked rows, 8 re-bank in 8b / 8c.
+  - OWNER GOAL (new): publish the std packages NEW at Go 1.24 to NuGet early to hold their IDs (the 'go.*' prefix reservation is pending),
+    and possibly placeholders for 1.25-1.27's new packages; a read-only research workflow is sizing it (the delta, NuGet.org's placeholder /
+    prerelease / reservation policies, the pipeline) -- COORD's lean: a PRERELEASE of the whole 1.24.13 corpus (new packages alone would not
+    install: their dependencies exist only at 1.24.13). Publishing is always the owner's act at the console (signing PIN).
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -789,6 +804,7 @@ execution item goes to an Opus sub-agent with a single purpose and no polling lo
 
 ```
   LANE: i9   MODEL: Opus 5.5/high   HOST: i9
+  HARDWARE (owner order 2026-09-22): KNOWN CPU DEFECT (13th-gen i9, the Raptor Lake instability class): a kernel bugcheck 0x1E under a sustained all-core build on 2026-09-22; an Intel warranty replacement is pending (owner). Use it as needed, ONE task at a time, with a LIGHT task (reads, docs, a single-package conversion, a small arm) BETWEEN heavy ones (all-core builds, full suites, big rows) so the chip cools; cap build parallelism on heavy runs (dotnet -m:4, go -p 4); if it faults, stop, report, and never retry the crashed run at once.
   (delta applied from mailbox 50ec12d0c)
   BRANCH: claude/version-go1.24.13 d71e4eed634e6921983f5ed246038694d3c9ba1e yes landed -- checkpoint 2 + C1's three H6 rows; the H5 gate tree
   BRANCH: claude/i9-h5-step2-wip 54dec61728719e7566184da2d479ebb3a12fef07 yes superseded -- the five-deletions intermediate, NOT current
@@ -822,7 +838,7 @@ WAKE (i9, verbatim from 59e0e3099 s3): re-create on resume -- i9's wake leg is a
 
 PASTE PROMPT (revision 2026-09-21 23:40 -- resume after the 2026-09-20 weekly limit; a DELTA cut from the ledger through 2026-09-21 23:33 (mailbox b56e835d2f) and the batch-3 brief; the shared preamble is section 0a, PROTOCOL v4 is 0a.0) -- paste as the FIRST message of a fresh session on this lane's machine with the owner at the keyboard for step 0. SESSION TITLE: `i9 -- H10 campaign worker (W=4 sweeper slices, the reserved rows)` (the lane nickname FIRST and lowercase, so COORD addresses you in one word); REMOTE CONTROL ON.
 ```
-RESUME 2026-09-21. You are lane i9 (host i9, Windows, the fastest local box, thermally ONE serial CPU task at a time). Nickname only on every pushed surface. Model: Opus 5.5, effort high (the owner
+RESUME 2026-09-21. You are lane i9 (host i9, Windows, the fastest local box, thermally ONE serial CPU task at a time). HARDWARE (owner order 2026-09-22): KNOWN CPU DEFECT (13th-gen i9, the Raptor Lake instability class): a kernel bugcheck 0x1E under a sustained all-core build on 2026-09-22; an Intel warranty replacement is pending (owner). Use it as needed, ONE task at a time, with a LIGHT task (reads, docs, a single-package conversion, a small arm) BETWEEN heavy ones (all-core builds, full suites, big rows) so the chip cools; cap build parallelism on heavy runs (dotnet -m:4, go -p 4); if it faults, stop, report, and never retry the crashed run at once. Nickname only on every pushed surface. Model: Opus 5.5, effort high (the owner
 may change it at the machine). First read section 0a of docs/phase4/RESUME-SESSIONS.md on claude/coord-handover, then this.
 COMMS (PROTOCOL v4, owner order 2026-09-20 13:15; section 0a.0 of this file WINS over every older mailbox, post-tool or watcher sentence): reply and ACK by SendMessage to `coord -- Go corpus migration to 1.24.13 coordination` (C1 and C2 CANNOT send: an inbox file via `FLEET_LANE=i9 FLEET_MAILBOX_CLONE=<clone> bash .claude/coord-scripts/fleet-msg.sh COORD "<SUBJECT>" <BODYFILE>` from a clone with claude/mailbox checked out; the scripts are on master 0b0be89fd7 and on claude/mailbox). TICK = your inbox (a message event, or `bash .claude/coord-scripts/fleet-read.sh i9 [NEXT-SINCE]`, NEXT-SINCE = the mailbox tip SHA it printed last time, stored by you) -> the ledger tail it prints (docs/phase4/LEDGER.md: the LAST STAMP line is the version tip) -> the work -> ONE reply of at most 40 lines (WHAT 1 line / EVIDENCE <= 10 / ASK or NEXT 1). Never read the archived broadcast file. Silence from COORD is acknowledgement. No watcher or wake-loop lines; a 20-minute wake loop only if your harness delivers no message events.
 
@@ -1673,3 +1689,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 14:47 -- RESUME refresh: STATE DELTA 19; the owner's order (whole fleet on Opus 5.5, COORD max) applied to section 0, COORD's prompt and the five lane headers and prompts; the H10 re-bank debt ruled.
 - 2026-09-22 15:37 -- STAMP refresh: STATE DELTA 20 (batch 7 stamped at 3469154a95; master 20eb0af70e; batch 8a running); the batch-8a brief added.
 - 2026-09-22 17:09 -- STAMP refresh: STATE DELTA 21 (batch 8a stamped at 43d149b87d; 8b running); the batch-8a (sanitized) and 8b briefs added.
+- 2026-09-22 18:59 -- refresh: STATE DELTA 22; the i9 hardware note (owner order) in section 0, the i9 lane header and its prompt.
