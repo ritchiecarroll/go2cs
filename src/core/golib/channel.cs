@@ -1784,6 +1784,20 @@ public static class channel
     /// </remarks>
     public static bool Wait(CancellationToken token, int timeout = DeadLockDetectionTimeout, WaitReason reason = WaitReason.Zero)
     {
+        // Inside a synctest bubble a nil-channel op or `select {}` blocks FOREVER, durably, as Go's
+        // does: the bubble counts the member idle and its Run reports "deadlock: all goroutines in
+        // bubble are blocked" (a recoverable panic in the root) -- the deadlock-grace fatal below would
+        // instead end the process from a member. Nothing ever releases the gate: the bubble wakes only
+        // its root or its Wait caller, and neither parks here.
+        if (!token.CanBeCanceled && SyncTestBubble.Current is not null &&
+            reason is WaitReason.ChanReceiveNilChan or WaitReason.ChanSendNilChan or WaitReason.SelectNoCases)
+        {
+            using (Goroutine.Park(reason))
+                Goroutine.WaitOnParkGate();
+
+            return false;
+        }
+
         using (Goroutine.Park(reason))
         {
             // Plain timed wait — every nil-channel op funnels here, so no per-call throwaway

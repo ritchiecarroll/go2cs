@@ -361,6 +361,8 @@ partial class runtime_package
         WaitReason.SyncWaitGroupWait => waitReasonSyncWaitGroupWait,
         WaitReason.Coroutine => waitReasonCoroutine,
         WaitReason.GCScavengeWait => waitReasonGCScavengeWait,
+        WaitReason.SynctestRun => waitReasonSynctestRun,
+        WaitReason.SynctestWait => waitReasonSynctestWait,
         _ => waitReasonZero,
     };
 

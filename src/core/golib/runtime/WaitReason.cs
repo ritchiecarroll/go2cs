@@ -103,7 +103,13 @@ public enum WaitReason
     /// managed <c>gopark</c> (runtime <c>park_impl.cs</c>), the first converted caller to reach it
     /// being <c>scavengerState.park</c> (runtime's TestScavenger).
     /// </summary>
-    GCScavengeWait
+    GCScavengeWait,
+
+    /// <summary>"synctest.Run" — a bubble's root, parked until its bubble is idle (golib SyncTestBubble.Run).</summary>
+    SynctestRun,
+
+    /// <summary>"synctest.Wait" — parked until every other member of its bubble is durably blocked.</summary>
+    SynctestWait
 }
 
 /// <summary>
@@ -139,6 +145,8 @@ public static class WaitReasons
         WaitReason.SyncWaitGroupWait => "sync.WaitGroup.Wait",
         WaitReason.Coroutine => "coroutine",
         WaitReason.GCScavengeWait => "GC scavenge wait",
+        WaitReason.SynctestRun => "synctest.Run",
+        WaitReason.SynctestWait => "synctest.Wait",
         _ => "unknown wait reason"
     };
 

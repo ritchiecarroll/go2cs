@@ -83,6 +83,11 @@ public sealed class Coro
     private volatile Goroutine? m_coroGoroutine;
     private volatile Goroutine? m_resumer;
 
+    // The creator's synctest bubble, which the coro goroutine joins (see Start), and whether its exit
+    // holds the bubble active until the resumer is readied (see Run).
+    private SyncTestBubble? m_bubble;
+    private bool m_exitBracketOpen;
+
     private Coro(Action body) => m_body = body;
 
     /// <summary>
@@ -107,12 +112,27 @@ public sealed class Coro
 
         Coro coro = new(body);
 
+        // A coro started by a synctest bubble member joins the bubble, counted by the creator (Go's
+        // newcoro -> newproc1 inherits the caller's syncGroup). Counted runnable here; its first park,
+        // as "coroutine", takes it out of the running set -- the end state Go reaches by creating it
+        // parked.
+        coro.m_bubble = Goroutine.Current?.Bubble;
+        coro.m_bubble?.Spawned();
+
         Thread thread = new(coro.Run, Goroutine.StackReserve)
         {
             IsBackground = true
         };
 
-        thread.Start();
+        try
+        {
+            thread.Start();
+        }
+        catch
+        {
+            coro.m_bubble?.SpawnFailed();
+            throw;
+        }
 
         // Go's newcoro returns a coro whose goroutine is already accounted for. Waiting here is what
         // makes that true of this one; see the class remarks.
@@ -154,12 +174,22 @@ public sealed class Coro
         // step. Here each side parks FIRST (Go's commit order: the peer cannot run, and so cannot
         // switch back and ready this side, until the release below), readies the peer on the waker's
         // side, and only then hands it the permit.
+        //
+        // In a synctest bubble the swap is also held open as ACTIVITY, as coroswitch_m does
+        // (sg.incActive before the caller waits, decActive once the peer is runnable): between this
+        // side idling and its peer being readied, every member can read idle for an instant, and the
+        // bubble would wake its root into a false "deadlock" (measured, S1c's coroutine arm).
+        SyncTestBubble? bubble = Goroutine.Current?.Bubble;
+
         if (Environment.CurrentManagedThreadId == m_threadId)
         {
             // The coro side: hand control back, then park until resumed.
+            bubble?.IncActive();
+
             using (Goroutine.Park(WaitReason.Coroutine))
             {
                 Goroutine.Ready(m_resumer);
+                bubble?.DecActive();
                 m_yield.Release();
                 m_resume.Wait();
             }
@@ -168,10 +198,12 @@ public sealed class Coro
         }
 
         m_resumer = Goroutine.Current;
+        bubble?.IncActive();
 
         using (Goroutine.Park(WaitReason.Coroutine))
         {
             Goroutine.Ready(m_coroGoroutine);
+            bubble?.DecActive();
             m_resume.Release();
             m_yield.Wait();
         }
@@ -203,8 +235,23 @@ public sealed class Coro
                     m_resume.Wait();
                 }
 
-                m_body();
-            });
+                try
+                {
+                    m_body();
+                }
+                finally
+                {
+                    // The exit is a switch too (Go's coroexit runs coroswitch_m with exit set): hold
+                    // the bubble active from before this goroutine leaves it (Goroutine.Run's exit
+                    // accounting, next) until its resumer is readied (the outer finally), or the bubble
+                    // reads every member idle in between.
+                    if (m_bubble is { } bubble)
+                    {
+                        bubble.IncActive();
+                        m_exitBracketOpen = true;
+                    }
+                }
+            }, m_bubble);
         }
         finally
         {
@@ -222,6 +269,10 @@ public sealed class Coro
             // The resumer is parked in its Switch (the body only ever runs while it is), so it is
             // readied before its permit, as every other switch does.
             Goroutine.Ready(m_resumer);
+
+            if (m_exitBracketOpen)
+                m_bubble!.DecActive();
+
             m_yield.Release();
         }
     }

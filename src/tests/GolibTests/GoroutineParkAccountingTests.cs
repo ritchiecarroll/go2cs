@@ -63,7 +63,10 @@ public class GoroutineParkAccountingTests
             [WaitReason.SyncWaitGroupWait] = "sync.WaitGroup.Wait",
             [WaitReason.Coroutine] = "coroutine",
             // The runtime's managed gopark (S1b), first set by scavengerState.park.
-            [WaitReason.GCScavengeWait] = "GC scavenge wait"
+            [WaitReason.GCScavengeWait] = "GC scavenge wait",
+            // The bubble's two (S1c), golib SyncTestBubble.
+            [WaitReason.SynctestRun] = "synctest.Run",
+            [WaitReason.SynctestWait] = "synctest.Wait"
         };
 
         // Both directions. The forward one catches a wrong string; this one catches a member added

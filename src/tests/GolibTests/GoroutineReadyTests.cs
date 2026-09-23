@@ -108,13 +108,17 @@ public class GoroutineReadyTests
     {
         long deadline = Environment.TickCount64 + TimeoutMs;
 
-        while (p.G is not { } g || Δruntime.GoStatusOf(g) != Δruntime.GoStatusWaiting)
+        // BOTH: the runtime's g is _Gwaiting AND golib counts the goroutine parked. Park moves the g
+        // first and publishes golib's state second, so polling the g alone let an arm Ready a goroutine
+        // golib did not yet count parked -- a one-in-five flake of ASecondReady..., found by S1c's
+        // repeated runs.
+        while (p.G is not { } g || Δruntime.GoStatusOf(g) != Δruntime.GoStatusWaiting || !g.IsParked)
         {
             if (p.Failure is not null)
                 Assert.Fail($"the parker failed before parking: {p.Failure}");
 
             if (Environment.TickCount64 > deadline)
-                Assert.Fail("the parker never reached _Gwaiting");
+                Assert.Fail("the parker never reached _Gwaiting and golib's parked state");
 
             Thread.Sleep(1);
         }

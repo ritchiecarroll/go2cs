@@ -134,6 +134,38 @@ public sealed class Goroutine
     // ends. Above every WaitReason value; Reason masks it off.
     private const int ReadiedFlag = 1 << 30;
 
+    // The synctest bubble this goroutine belongs to (SyncTestBubble), set by its CREATOR before its
+    // thread starts -- Go's newg.syncGroup = callergp.syncGroup -- and cleared when it exits. Read by
+    // other goroutines (a waker readying this one), hence volatile.
+    private volatile SyncTestBubble? m_bubble;
+
+    internal SyncTestBubble? Bubble
+    {
+        get => m_bubble;
+        set => m_bubble = value;
+    }
+
+    /// <summary>
+    /// Whether this goroutine is inside a park scope, as golib accounts it -- the state
+    /// <see cref="Ready"/> checks. It becomes true AFTER the runtime's g reads _Gwaiting (Park runs the
+    /// transition first), so a guard waiting to ready a parker waits on THIS, not on the g's status:
+    /// S1a's own arm polled the g and, in the window between the two, readied a goroutine golib did
+    /// not yet count parked (a one-in-five flake, found by S1c's repeat runs).
+    /// </summary>
+    public bool IsParked => Volatile.Read(ref m_waitReason) != (int)WaitReason.Zero;
+
+    // 1 while this goroutine's outermost park is counted IDLE by its bubble (a durable reason), so
+    // exactly one of the waker's Ready or the scope's dispose puts it back in the running count.
+    private int m_bubbleIdle;
+
+    // 1 while this goroutine's outermost park ENTERED the runtime's transition (the hook was installed
+    // when the park began). The ready and leaving halves run only then, so the three stay PAIRED: the
+    // runtime installs its hooks from a module initializer, and a goroutine that parked before the
+    // runtime assembly loaded and was woken after would otherwise ready or leave a g that never left
+    // _Grunning. Measured: S1c's arm run alone threw "park transition leaving synctest.Run ... status
+    // is 2" exactly so -- its members' first sync call loaded the runtime mid-park.
+    private int m_parkTransitioned;
+
     // Go's gp.labels, MIRRORED onto the registry entry so a profiler can read it. The authoritative
     // per-goroutine storage is s_profileLabels below, an AsyncLocal, because Go INHERITS labels at
     // goroutine creation (proc.go: `newg.labels = mp.curg.labels`) and ExecutionContext capture at
@@ -457,10 +489,23 @@ public sealed class Goroutine
         // goroutine as parked (Ready, above all) finds its g already _Gwaiting. Measured, S1a's R2 arm
         // (2026-09-22): with the reason published first, a racing waker readied a goroutine whose g
         // was still _Grunning, and only the runtime's own check caught it.
-        if (previous == (int)WaitReason.Zero)
-            ParkTransition?.Invoke(reason, true);
+        if (previous == (int)WaitReason.Zero && ParkTransition is { } parkTransition)
+        {
+            parkTransition(reason, true);
+            Volatile.Write(ref goroutine.m_parkTransitioned, 1);
+        }
 
         Volatile.Write(ref goroutine.m_waitReason, (int)reason);
+
+        // Its bubble counts it out of the running set on a durable reason (Go's changegstatus). After
+        // the reason is published and with the idle mark set FIRST, so that a wake the bubble issues
+        // from this very call -- this goroutine can be the bubble's root or waiter -- finds it parked
+        // and marked.
+        if (previous == (int)WaitReason.Zero && goroutine.m_bubble is { } bubble && SyncTestBubble.IsIdle(reason))
+        {
+            Volatile.Write(ref goroutine.m_bubbleIdle, 1);
+            bubble.Idled();
+        }
 
         return new ParkScope(goroutine, previous);
     }
@@ -518,7 +563,14 @@ public sealed class Goroutine
 
             if (Interlocked.CompareExchange(ref target.m_waitReason, current | ReadiedFlag, current) == current)
             {
-                ReadyTransition?.Invoke(target, (WaitReason)current);
+                // Back in its bubble's running count at the moment it is woken, on the waker's side
+                // (Go's goready -> changegstatus) -- never later, when its thread resumes.
+                if (target.m_bubble is { } bubble && Interlocked.Exchange(ref target.m_bubbleIdle, 0) == 1)
+                    bubble.Resumed();
+
+                if (Volatile.Read(ref target.m_parkTransitioned) == 1)
+                    ReadyTransition?.Invoke(target, (WaitReason)current);
+
                 return;
             }
         }
@@ -727,12 +779,26 @@ public sealed class Goroutine
     {
         long parentId = t_current?.Id ?? 0;
 
-        Thread thread = new(() => Run(body, creator, parentId, entry), s_stackReserve)
+        // A member's child joins its bubble, counted HERE, by the creator, at the go statement (Go's
+        // newproc) -- before the child's thread has run a single instruction, so a Wait issued right
+        // after the go statement cannot see the bubble idle without it.
+        SyncTestBubble? bubble = t_current?.m_bubble;
+        bubble?.Spawned();
+
+        Thread thread = new(() => Run(body, creator, parentId, entry, bubble), s_stackReserve)
         {
             IsBackground = true
         };
 
-        thread.Start();
+        try
+        {
+            thread.Start();
+        }
+        catch
+        {
+            bubble?.SpawnFailed();
+            throw;
+        }
     }
 
     /// <summary>
@@ -927,9 +993,18 @@ public sealed class Goroutine
     // still catch — the real path ends in an unhandled exception and a dead process by design.
     internal static void Run(Action body) => Run(body, creator: null, parentId: 0, entry: body.Method);
 
-    internal static void Run(Action body, System.Reflection.MethodBase? creator, long parentId, System.Reflection.MethodBase? entry)
+    // A goroutine whose creator was in a synctest bubble (and already counted it there) joins it here.
+    internal static void Run(Action body, SyncTestBubble? bubble) => Run(body, creator: null, parentId: 0, entry: body.Method, bubble);
+
+    internal static void Run(Action body, System.Reflection.MethodBase? creator, long parentId, System.Reflection.MethodBase? entry) =>
+        Run(body, creator, parentId, entry, bubble: null);
+
+    internal static void Run(Action body, System.Reflection.MethodBase? creator, long parentId, System.Reflection.MethodBase? entry, SyncTestBubble? bubble)
     {
         using Scope scope = Enter(creator, parentId, entry);
+
+        if (bubble is not null && t_current is { } member)
+            member.m_bubble = bubble;
 
         try
         {
@@ -1023,7 +1098,13 @@ public sealed class Goroutine
             // left; otherwise ready and execute happen here, collapsed, as they always did.
             if (m_previous == (int)WaitReason.Zero)
             {
-                ParkTransition?.Invoke((WaitReason)(current & ~ReadiedFlag), false);
+                // A park its bubble counted idle and nobody readied (a refused commit, a timeout):
+                // back in the running count now. A readied one was put back by its waker.
+                if (m_goroutine.m_bubble is { } bubble && Interlocked.Exchange(ref m_goroutine.m_bubbleIdle, 0) == 1)
+                    bubble.Resumed();
+
+                if (Interlocked.Exchange(ref m_goroutine.m_parkTransitioned, 0) == 1)
+                    ParkTransition?.Invoke((WaitReason)(current & ~ReadiedFlag), false);
                 Volatile.Write(ref m_goroutine.m_waitReason, (int)WaitReason.Zero);
                 return;
             }
@@ -1084,7 +1165,17 @@ public sealed class Goroutine
             t_current = null;
 
             if (m_owned)
+            {
+                // A member leaves its bubble as it exits (Go: -> _Gdead). Running when it exits: a
+                // goroutine ends on its own thread.
+                if (m_goroutine.m_bubble is { } bubble)
+                {
+                    m_goroutine.m_bubble = null;
+                    bubble.Exited();
+                }
+
                 Unregister(m_goroutine);
+            }
         }
     }
 }
