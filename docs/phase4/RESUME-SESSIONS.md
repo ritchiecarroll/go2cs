@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-23 01:01 -- refresh (ledger through mailbox 50cdffc0fb): section 1a STATE DELTA 23 (batch 8b stamped at bb54ff0920; crypto/tls re-routed to the AZ1 Azure lane, quota pending; DNS fixed on the i7; the reading run, the linux leg and S1b running). Other STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-23 04:03 -- STAMP refresh (ledger through mailbox 49cb270339): section 1a STATE DELTA 24 (batch 8c stamped at 1719e3b87f; the relabel ruled; 8d next; the net chain waits on the morning owner-hand). Other STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -540,6 +540,22 @@ STATE DELTA 2026-09-23 01:01 (ledger through mailbox 50cdffc0fb; supersedes the 
   - QUEUED on the i7 after the reading run: BATCH 8c (G 8ed02f7dce + 629f97752b, C2 a91b638cf9, claude/coord-instrument-h10 d095fe8108, i9 5b5f35ff2; rows
     testing, os/user, internal/godebug with its pin, internal/trace), then the relabel battery, the final -stdlib reconvert, the H10 close seat (net/http to
     the candidates). OWNER: the NuGet reservation follow-up SENT (no auto-receipt); the Azure quota ticket pending; all machines stay on overnight.
+STATE DELTA 2026-09-23 04:03 (ledger through mailbox 49cb270339; supersedes the deltas above where they differ) -- BATCH 8c STAMPED; the relabel RULED; 8d next:
+  - VERSION TIP claude/version-go1.24.13 = 1719e3b87f (BATCH 8c, ledger 49cb270339): internal/godebug 5 and internal/trace 92 banked; testing 53 + 15 and
+    os/user 17 confirmed; header 219 / 230, 57,197 matching, 282 disclosed; CNR CHANGED empty. testing's hand-owned README badge (37/52) is stale -> fixed by
+    hand in 8d.
+  - READINGS: claude/coord-h10-readings ac9f8251ee (126 entries; net skipped on a DNS flap -- the router's IPv6 link-local DNS; MORNING OWNER-HAND: unbind IPv6
+    from the i7's Ethernet adapter, then two Go net re-qualifications and net's reading).
+  - THE RELABEL RULED (ledger 90c7968420, X + O1-O5; a read-only analysis + two adversarial reviews): every legacy alloc-profile entry gets a live label;
+    DEFERRED needs a design RECORD naming a removing stage -- C1 writes stubs REC-A..G + manifests + an alloc-profile guard arm (seat brief
+    docs/phase4/briefs/h10-relabel-seat.md, this branch ebae01acaf). OWNER FYI (may countermand): crypto/rsa's 2026-08-10 structural ratification OVERTURNED
+    to deferred; fips140test's edwards/nistec/XAES pins REVERSED to deferred. COORD owes ONE BOARD finding (B5) at 8d's landing.
+  - ACCEPTED for BATCH 8d: C2's class-aware proof-page heading 68960ac100 (5 pages +211 bytes predicted). 8d = C1's relabel ref + 68960ac100 on 1719e3b87f,
+    a PAGE-BANKING battery over 26 rows (+ net if its chain completed): verdicts and cells unchanged, COUNT notes reproduce the TSV, no page carries
+    alloc-profile, the guard arm red-first.
+  - POST-HOP ACCEPTED: R's S1b 287dbe4236 (the runtime host no longer dies; the next site a hang) and C2's atomic acquire loads + runqempty 8ef7f65ec8 (the
+    hang's two defects, found by the i9's static read). R continues S1c.
+  - RUNNING: G's LINUX LEG (started at bb54ff0920; 8c changed no emission). AZ1 still STOPPED pending the Azure Falsv7 quota ticket.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1711,3 +1727,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 17:09 -- STAMP refresh: STATE DELTA 21 (batch 8a stamped at 43d149b87d; 8b running); the batch-8a (sanitized) and 8b briefs added.
 - 2026-09-22 18:59 -- refresh: STATE DELTA 22; the i9 hardware note (owner order) in section 0, the i9 lane header and its prompt.
 - 2026-09-23 01:01 -- refresh: STATE DELTA 23 (batch 8b stamped; AZ1; DNS; the reading run and the linux leg running).
+- 2026-09-23 04:03 -- STAMP refresh: STATE DELTA 24 (batch 8c stamped; the relabel ruled; 8d queued).
