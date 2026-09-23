@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-23 04:03 -- STAMP refresh (ledger through mailbox 49cb270339): section 1a STATE DELTA 24 (batch 8c stamped at 1719e3b87f; the relabel ruled; 8d next; the net chain waits on the morning owner-hand). Other STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-23 07:13 -- STAMP refresh (ledger through mailbox 8101e7ae52): section 1a STATE DELTA 25 (batch 8d stamped at 74bae27672 -- the relabel landed; the linux leg done; 8e forming; morning owner items). Other STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -556,6 +556,18 @@ STATE DELTA 2026-09-23 04:03 (ledger through mailbox 49cb270339; supersedes the 
   - POST-HOP ACCEPTED: R's S1b 287dbe4236 (the runtime host no longer dies; the next site a hang) and C2's atomic acquire loads + runqempty 8ef7f65ec8 (the
     hang's two defects, found by the i9's static read). R continues S1c.
   - RUNNING: G's LINUX LEG (started at bb54ff0920; 8c changed no emission). AZ1 still STOPPED pending the Azure Falsv7 quota ticket.
+STATE DELTA 2026-09-23 07:13 (ledger through mailbox 8101e7ae52; supersedes the deltas above where they differ) -- BATCH 8d STAMPED (the relabel landed); 8e forming:
+  - VERSION TIP claude/version-go1.24.13 = 74bae27672 (BATCH 8d, ledger 8101e7ae52): the H10 ALLOCATION RELABEL -- C1's claude/c1-alloc-relabel abfc1429d0
+    (records REC-A..G, manifests, guard 2g; accepted with a 13-item docs fix-up) + C2's class-aware proof-page heading 68960ac100; 28 pages re-banked with 0
+    verdict moves and 0 unit flips; os BANKED at 1105 + 2 (symlink-privileged host; supersedes the 8b keep-1103). Header 219 / 230, 57,199 matching, 282
+    disclosed; linux line 188/217 (G's re-derived 21,190 rides 8e). alloc-profile left: reflect 42 (unbanked), net 2 (its chain), 4 linux-scoped (retiring).
+  - LINUX LEG DONE (G, ledger d6eb143fa2): claude/g-linux-leg 5da426433b ACCEPTED for 8e (31 annotations moved, 136 confirmed, 20 FAIL, 1 ORACLE). FINDING:
+    25 of 30 linux FAILs die on internal/syscall/unix.vgetrandom (a NotImplementedException partial) -- RULED: G seats Go's own unsupported answer (-1, false)
+    and re-reads the 25; net's linux CS1929 = a GENERATOR bug (the metadata harvest double-counted [GoRecv] twins) fixed by C2 556ee00cb, ACCEPTED for 8e.
+  - BATCH 8e (on 74bae27672) = 5da426433b + C2 556ee00cb + G's vgetrandom seat and its re-read bank + G's four-pin retirement (+ sync/atomic's 150m re-read).
+  - POST-HOP ACCEPTED: R's S1c a523762f06 (bubble core) and S2 a97ec95a9e (bubbled channels); R on S3 (fake time). C2's atomic loads 8ef7f65ec8.
+  - OWNER, MORNING: unbind IPv6 on the i7's Ethernet (then two net re-qualifications and net's reading); the Azure Falsv7 quota ticket (AZ1 resumes at D);
+    FYI rulings to countermand if wished (rsa overturn, fips140test reversal); the string-literal §8 precondition (it reopens owner-approved decisions).
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1728,3 +1740,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 18:59 -- refresh: STATE DELTA 22; the i9 hardware note (owner order) in section 0, the i9 lane header and its prompt.
 - 2026-09-23 01:01 -- refresh: STATE DELTA 23 (batch 8b stamped; AZ1; DNS; the reading run and the linux leg running).
 - 2026-09-23 04:03 -- STAMP refresh: STATE DELTA 24 (batch 8c stamped; the relabel ruled; 8d queued).
+- 2026-09-23 07:13 -- STAMP refresh: STATE DELTA 25 (batch 8d stamped; the linux leg done; 8e forming).
