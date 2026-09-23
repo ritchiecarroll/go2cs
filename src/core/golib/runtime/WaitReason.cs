@@ -109,7 +109,16 @@ public enum WaitReason
     SynctestRun,
 
     /// <summary>"synctest.Wait" — parked until every other member of its bubble is durably blocked.</summary>
-    SynctestWait
+    SynctestWait,
+
+    /// <summary>"chan receive (synctest)" — receiving on a channel created in a synctest bubble.</summary>
+    SynctestChanReceive,
+
+    /// <summary>"chan send (synctest)" — sending on a channel created in a synctest bubble.</summary>
+    SynctestChanSend,
+
+    /// <summary>"select (synctest)" — a bubble member selecting only on channels created in a bubble.</summary>
+    SynctestSelect
 }
 
 /// <summary>
@@ -147,6 +156,9 @@ public static class WaitReasons
         WaitReason.GCScavengeWait => "GC scavenge wait",
         WaitReason.SynctestRun => "synctest.Run",
         WaitReason.SynctestWait => "synctest.Wait",
+        WaitReason.SynctestChanReceive => "chan receive (synctest)",
+        WaitReason.SynctestChanSend => "chan send (synctest)",
+        WaitReason.SynctestSelect => "select (synctest)",
         _ => "unknown wait reason"
     };
 

@@ -44,8 +44,8 @@ namespace go.golib;
 /// would be a wake nobody accounts. So it is left out of <see cref="IsIdle"/> here, deliberately.
 /// </para>
 /// <para>
-/// <b>Not yet:</b> fake time and fake timers (S3: <c>Run</c>'s loop has the timer slot, empty), bubbled
-/// channels and their <c>Synctest*</c> reasons (S2), and <c>internal/synctest</c>'s pulls (S4).
+/// <b>Not yet:</b> fake time and fake timers (S3: <c>Run</c>'s loop has the timer slot, empty) and
+/// <c>internal/synctest</c>'s pulls (S4). Bubbled channels (S2) tag at make in <c>ChanCore.Bubble</c>.
 /// </para>
 /// </remarks>
 public sealed class SyncTestBubble
@@ -89,8 +89,7 @@ public sealed class SyncTestBubble
 
     public int Active { get { lock (m_mu) return m_active; } }
 
-    // isIdleInSynctest (runtime2.go), minus Sleep until S3 (see the class remarks) and minus the three
-    // Synctest* channel reasons until S2 introduces them.
+    // isIdleInSynctest (runtime2.go), minus Sleep until S3 (see the class remarks).
     internal static bool IsIdle(WaitReason reason) => reason is
         WaitReason.ChanReceiveNilChan or
         WaitReason.ChanSendNilChan or
@@ -99,7 +98,10 @@ public sealed class SyncTestBubble
         WaitReason.SyncWaitGroupWait or
         WaitReason.Coroutine or
         WaitReason.SynctestRun or
-        WaitReason.SynctestWait;
+        WaitReason.SynctestWait or
+        WaitReason.SynctestChanReceive or
+        WaitReason.SynctestChanSend or
+        WaitReason.SynctestSelect;
 
     // ---- the four accounting points (called by Goroutine and Coro) ----
 

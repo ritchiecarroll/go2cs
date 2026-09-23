@@ -344,6 +344,32 @@ internal abstract class ChanCore
     /// <summary>The channel lock (hchan.lock). Never held across a park.</summary>
     internal readonly object SyncRoot = new();
 
+    /// <summary>
+    /// The synctest bubble this channel was made in, or <c>null</c> — Go's <c>hchan.synctest</c>
+    /// (makechan: <c>if getg().syncGroup != nil { c.synctest = true }</c>), kept as the bubble itself
+    /// so the direct-handoff check can compare bubbles as Go's does.
+    /// </summary>
+    internal readonly SyncTestBubble? Bubble = SyncTestBubble.Current;
+
+    /// <summary>
+    /// Go's check at the top of chansend / chanrecv: an operation on a bubbled channel from a goroutine
+    /// in no bubble panics with Go's text.
+    /// </summary>
+    internal void RefuseOutsideBubble(string operation)
+    {
+        if (Bubble is not null && SyncTestBubble.Current is null)
+            throw new PanicException($"{operation} on synctest channel from outside bubble");
+    }
+
+    /// <summary>
+    /// Go's check in send() / recv() before a direct handoff: the parked goroutine on the other side
+    /// must be in the same bubble as the caller (a goroutine of ANOTHER bubble can reach a bubbled
+    /// channel's queue, since it passes the no-bubble check). The waiter is already dequeued, as in
+    /// Go; the caller unlocks before this panic escapes.
+    /// </summary>
+    internal bool HandoffCrossesBubble(Waiter parked) =>
+        Bubble is not null && !ReferenceEquals(parked.Parker?.Bubble, SyncTestBubble.Current);
+
     /// <summary>Buffer capacity; 0 = unbuffered (rendezvous).</summary>
     internal readonly int Dataqsiz;
 
@@ -426,6 +452,8 @@ internal sealed class ChanCore<T> : ChanCore
     /// </summary>
     internal bool Send(in T value, bool block)
     {
+        RefuseOutsideBubble("send");
+
         Monitor.Enter(SyncRoot);
 
         if (Closed)
@@ -441,6 +469,10 @@ internal sealed class ChanCore<T> : ChanCore
             // Direct handoff to a parked receiver — the rendezvous. Unlock first (Go's send()
             // unlockf), then publish value+ok and signal.
             Monitor.Exit(SyncRoot);
+
+            if (HandoffCrossesBubble(receiver))
+                throw new PanicException("send on synctest channel from outside bubble");
+
             receiver.Elem = value;
             receiver.Ok = true;
             receiver.Wake();
@@ -476,7 +508,8 @@ internal sealed class ChanCore<T> : ChanCore
         Waiter parked = new(isSend: true) { Elem = value };
         Sendq.Enqueue(parked);
 
-        using (Goroutine.Park(WaitReason.ChanSend))
+        // A bubbled channel parks as Go's "chan send (synctest)", which its bubble counts idle.
+        using (Goroutine.Park(Bubble is null ? WaitReason.ChanSend : WaitReason.SynctestChanSend))
         {
             Monitor.Exit(SyncRoot);
             parked.Park.Wait();
@@ -495,6 +528,8 @@ internal sealed class ChanCore<T> : ChanCore
     /// </summary>
     internal bool Recv(out T value, out bool ok, bool block)
     {
+        RefuseOutsideBubble("receive");
+
         Monitor.Enter(SyncRoot);
 
         if (Closed && Qcount == 0)
@@ -509,6 +544,13 @@ internal sealed class ChanCore<T> : ChanCore
 
         if (sender is not null)
         {
+            // Go's recv(): a handoff across bubbles panics, after its unlockf.
+            if (HandoffCrossesBubble(sender))
+            {
+                Monitor.Exit(SyncRoot);
+                throw new PanicException("receive on synctest channel from outside bubble");
+            }
+
             if (Dataqsiz == 0)
             {
                 // Rendezvous: take the parked sender's value directly.
@@ -563,7 +605,8 @@ internal sealed class ChanCore<T> : ChanCore
         Waiter parked = new(isSend: false);
         Recvq.Enqueue(parked);
 
-        using (Goroutine.Park(WaitReason.ChanReceive))
+        // A bubbled channel parks as Go's "chan receive (synctest)", which its bubble counts idle.
+        using (Goroutine.Park(Bubble is null ? WaitReason.ChanReceive : WaitReason.SynctestChanReceive))
         {
             Monitor.Exit(SyncRoot);
             parked.Park.Wait();
@@ -658,6 +701,11 @@ internal sealed class ChanCore<T> : ChanCore
 
         if (receiver is not null)
         {
+            // Go's send(), reached from selectgo: a handoff across bubbles panics. Thrown with the
+            // select's locks held -- PollPassLocked releases them all before it escapes.
+            if (HandoffCrossesBubble(receiver))
+                throw new PanicException("send on synctest channel from outside bubble");
+
             receiver.Elem = value;
             receiver.Ok = true;
             receiver.Wake();
@@ -691,6 +739,10 @@ internal sealed class ChanCore<T> : ChanCore
 
         if (sender is not null)
         {
+            // Go's recv(), reached from selectgo (locks released by PollPassLocked, as above).
+            if (HandoffCrossesBubble(sender))
+                throw new PanicException("receive on synctest channel from outside bubble");
+
             if (Dataqsiz == 0)
             {
                 value = sender.Elem;
@@ -854,6 +906,8 @@ internal static class SelectRuntime
             return -1; // unreachable
         }
 
+        bool allSynctest = AllCasesBubbled(ops);
+
         ChanCore[] lockOrder = BuildLockOrder(ops);
         int[] pollOrder = BuildPollOrder(ops, liveCount);
 
@@ -898,7 +952,9 @@ internal static class SelectRuntime
         // held (Go's selparkcommit unlocks only after the g is waiting), so a claimant can only ever
         // ready a parked goroutine. A waker that claimed us between the unlock and this wait has
         // already released the semaphore, so the wait returns immediately — no lost wakeup.
-        using (Goroutine.Park(WaitReason.Select))
+        // Go: a bubble member whose every (non-nil) case is a bubbled channel parks as "select
+        // (synctest)", which its bubble counts idle.
+        using (Goroutine.Park(allSynctest && SyncTestBubble.Current is not null ? WaitReason.SynctestSelect : WaitReason.Select))
         {
             UnlockAll(lockOrder);
             sel.Park.Wait();
@@ -950,6 +1006,9 @@ internal static class SelectRuntime
         if (liveCount == 0)
             return -1;
 
+        // Go's selectgo checks before polling, with or without a default clause.
+        AllCasesBubbled(ops);
+
         ChanCore[] lockOrder = BuildLockOrder(ops);
         int[] pollOrder = BuildPollOrder(ops, liveCount);
 
@@ -982,7 +1041,21 @@ internal static class SelectRuntime
                     throw new PanicException("send on closed channel");
                 }
 
-                if (core.TryCommitSendLocked(op.SendValue))
+                bool sent;
+
+                // A commit may panic (a handoff across synctest bubbles): every lock is released
+                // before it escapes, as for the closed-channel panic above.
+                try
+                {
+                    sent = core.TryCommitSendLocked(op.SendValue);
+                }
+                catch (PanicException)
+                {
+                    UnlockAll(lockOrder);
+                    throw;
+                }
+
+                if (sent)
                 {
                     UnlockAll(lockOrder);
                     return i; // a send-case win pushes no pending frame (and must not touch the stack)
@@ -990,7 +1063,21 @@ internal static class SelectRuntime
             }
             else
             {
-                if (core.TryCommitRecvLocked(out object? value, out bool ok))
+                bool received;
+                object? value;
+                bool ok;
+
+                try
+                {
+                    received = core.TryCommitRecvLocked(out value, out ok);
+                }
+                catch (PanicException)
+                {
+                    UnlockAll(lockOrder);
+                    throw;
+                }
+
+                if (received)
                 {
                     SelectPending.Push(core, value, ok);
                     UnlockAll(lockOrder);
@@ -1000,6 +1087,34 @@ internal static class SelectRuntime
         }
 
         return -1;
+    }
+
+    // Go's selectgo, before any lock: a case on a bubbled channel from a goroutine in no bubble panics
+    // ("select on synctest channel from outside bubble"); returns whether EVERY non-nil case is on a
+    // bubbled channel. Nil cases are omitted from both questions, as Go omits them from its poll and
+    // lock orders (COORD's addition 3): Server.Shutdown's select over a bubbled channel and
+    // context.Background().Done() -- a nil channel -- still parks as "select (synctest)".
+    private static bool AllCasesBubbled(SelectOp[] ops)
+    {
+        bool all = true;
+
+        foreach (SelectOp op in ops)
+        {
+            if (op.Core is not { } core)
+                continue;
+
+            if (core.Bubble is not null)
+            {
+                if (SyncTestBubble.Current is null)
+                    throw new PanicException("select on synctest channel from outside bubble");
+            }
+            else
+            {
+                all = false;
+            }
+        }
+
+        return all;
     }
 
     private static int CountLive(SelectOp[] ops)

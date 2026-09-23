@@ -66,7 +66,11 @@ public class GoroutineParkAccountingTests
             [WaitReason.GCScavengeWait] = "GC scavenge wait",
             // The bubble's two (S1c), golib SyncTestBubble.
             [WaitReason.SynctestRun] = "synctest.Run",
-            [WaitReason.SynctestWait] = "synctest.Wait"
+            [WaitReason.SynctestWait] = "synctest.Wait",
+            // Bubbled channels (S2).
+            [WaitReason.SynctestChanReceive] = "chan receive (synctest)",
+            [WaitReason.SynctestChanSend] = "chan send (synctest)",
+            [WaitReason.SynctestSelect] = "select (synctest)"
         };
 
         // Both directions. The forward one catches a wrong string; this one catches a member added

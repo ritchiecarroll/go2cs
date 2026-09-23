@@ -363,6 +363,9 @@ partial class runtime_package
         WaitReason.GCScavengeWait => waitReasonGCScavengeWait,
         WaitReason.SynctestRun => waitReasonSynctestRun,
         WaitReason.SynctestWait => waitReasonSynctestWait,
+        WaitReason.SynctestChanReceive => waitReasonSynctestChanReceive,
+        WaitReason.SynctestChanSend => waitReasonSynctestChanSend,
+        WaitReason.SynctestSelect => waitReasonSynctestSelect,
         _ => waitReasonZero,
     };
 
