@@ -857,7 +857,8 @@ RESUME 2026-09-19 (after the 100% weekly cutoff of 2026-09-16 ~08:00; every lane
 
 FIRST ACTION (a COORD resume from THIS revision, PROTOCOL v4): ReadNotifications first; then fleet-read.sh COORD (materialised
 from master) and the ledger tail (docs/phase4/LEDGER.md on claude/mailbox); arm ONE Monitor on claude/mailbox's tip for INBOX
-FILES only (C1 and C2 reply by file) and the 20-minute wake loop; message each lane ONCE ('COORD online', this revision's
+FILES only (C1 and C2 reply by file) -- ONLY while a cloud lane (C1/C2) has work out, ignoring COORD's own ledger pushes;
+with the cloud lanes idle arm NOTHING (the Remote Control lanes reply by SendMessage; owner, 2026-09-23) -- and the 20-minute wake loop; message each lane ONCE ('COORD online', this revision's
 handover block) -- never read the archived mailbox, never grep-filter anything; then take the lanes' messages and inbox files
 in arrival order and the queue in this section's STATE; the record refreshes at stamps and hourly, not per ruling; every
 execution item goes to an Opus sub-agent with a single purpose and no polling loop inside its turn.
