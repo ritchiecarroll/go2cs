@@ -141,6 +141,10 @@
          park sites the waker readies (sync/runtime_impl.cs), through its converted public surface. -->
     <ProjectReference Include="..\..\core\sync\sync.csproj" />
 
+    <!-- The synctest fake-time guards (SyncTestFakeTimeTests) drive time's Now / Sleep / NewTimer /
+         AfterFunc inside a bubble, through its converted public surface over time_impl.cs. -->
+    <ProjectReference Include="..\..\core\time\time.csproj" />
+
     <!-- The Linux spawn-seam gates (LinuxSpawnSeamTests) drive syscall.StartProcess/Wait4 —
          the converted surface over the posix_spawn hand-own, per the exec-wall design's §5.1
          and OQ-2 measured gates. The gate FILE compiles only under the linux corpus flavor

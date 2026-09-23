@@ -38,14 +38,20 @@ namespace go.golib;
 /// <b>What it cannot see</b>, and why that is safe: a wait that bypasses <see cref="Goroutine.Park"/>
 /// (a BCL wait in hand-owned code, a blocking P/Invoke), or a park whose reason is not in
 /// <see cref="IsIdle"/>, leaves its member counted RUNNING, so the bubble never idles and
-/// <see cref="Run"/>/<see cref="Wait"/> HANG rather than return early. <c>time.Sleep</c> is one such
-/// reason today: Go counts it idle because a bubble's clock is fake and advances only when the bubble
-/// idles; until fake time lands (S3) a bubbled sleep is on the REAL clock and wakes on its own, which
-/// would be a wake nobody accounts. So it is left out of <see cref="IsIdle"/> here, deliberately.
+/// <see cref="Run"/>/<see cref="Wait"/> HANG rather than return early.
 /// </para>
 /// <para>
-/// <b>Not yet:</b> fake time and fake timers (S3: <c>Run</c>'s loop has the timer slot, empty) and
-/// <c>internal/synctest</c>'s pulls (S4). Bubbled channels (S2) tag at make in <c>ChanCore.Bubble</c>.
+/// <b>Fake time (S3).</b> A bubble has its own clock (<see cref="Now"/>, from <see cref="BaseTime"/>)
+/// and its own timer heap, held opaquely in <see cref="TimerState"/> by package <c>time</c>, which owns
+/// the timer type golib cannot name (COORD's addition 5). <c>time</c> installs
+/// <see cref="CheckTimers"/> and <see cref="NextTimerWake"/>; <see cref="Run"/>'s loop fires the due
+/// timers, parks, and when the bubble idles advances the clock to the next one -- Go's loop exactly.
+/// A bubbled <c>time.Sleep</c> therefore waits on a FAKE timer, woken only by that advance, which is
+/// why it is idle here as it is in Go.
+/// </para>
+/// <para>
+/// <b>Not yet:</b> <c>internal/synctest</c>'s pulls (S4). Bubbled channels (S2) tag at make in
+/// <c>ChanCore.Bubble</c>.
 /// </para>
 /// </remarks>
 public sealed class SyncTestBubble
@@ -76,11 +82,31 @@ public sealed class SyncTestBubble
     /// <summary>The calling goroutine's bubble, or <c>null</c>.</summary>
     public static SyncTestBubble? Current => Goroutine.Current?.Bubble;
 
-    /// <summary>The bubble's fake clock (S3 advances it; until then it reads <see cref="BaseTime"/>).</summary>
+    /// <summary>The bubble's fake clock, in nanoseconds since the Unix epoch; <see cref="Run"/> advances it.</summary>
     public long Now
     {
         get { lock (m_mu) return m_now; }
     }
+
+    /// <summary>
+    /// Package <c>time</c>'s per-bubble timer state (its fake timer heap) -- opaque to golib, which cannot
+    /// name time's types. Go keeps it as <c>synctestGroup.timers</c>.
+    /// </summary>
+    public object? TimerState { get; set; }
+
+    /// <summary>
+    /// Installed by package <c>time</c>: runs every fake timer of the bubble due at its <see cref="Now"/>
+    /// (Go's <c>sg.timers.check(sg.now)</c>). Called by <see cref="Run"/> on the root's thread, which is
+    /// a member, so a timer func that starts a goroutine (AfterFunc) starts it in the bubble.
+    /// </summary>
+    public static Action<SyncTestBubble>? CheckTimers { get; set; }
+
+    /// <summary>
+    /// Installed by package <c>time</c>: when the bubble's earliest pending fake timer fires, or 0 when
+    /// none is pending (Go's <c>sg.timers.wakeTime()</c>). Called under the bubble's lock (the one lock
+    /// order: bubble, then time's timer lock).
+    /// </summary>
+    public static Func<SyncTestBubble, long>? NextTimerWake { get; set; }
 
     // The counts, read under the bubble's lock: the guards' view.
     public int Total { get { lock (m_mu) return m_total; } }
@@ -89,11 +115,13 @@ public sealed class SyncTestBubble
 
     public int Active { get { lock (m_mu) return m_active; } }
 
-    // isIdleInSynctest (runtime2.go), minus Sleep until S3 (see the class remarks).
+    // isIdleInSynctest (runtime2.go), whole: Sleep included since S3 put a bubbled sleep on the fake
+    // clock (see the class remarks).
     internal static bool IsIdle(WaitReason reason) => reason is
         WaitReason.ChanReceiveNilChan or
         WaitReason.ChanSendNilChan or
         WaitReason.SelectNoCases or
+        WaitReason.Sleep or
         WaitReason.SyncCondWait or
         WaitReason.SyncWaitGroupWait or
         WaitReason.Coroutine or
@@ -243,7 +271,9 @@ public sealed class SyncTestBubble
             {
                 Monitor.Exit(sg.m_mu);
 
-                // S3: sg's fake timers are checked here (timers.check(sg.now)).
+                // Go: systemstack(func() { gp.syncGroup.timers.check(gp.syncGroup.now) }) -- every
+                // fake timer due at the bubble's clock fires, on this (the root's) thread.
+                CheckTimers?.Invoke(sg);
 
                 // gopark(synctestidle_c, nil, waitReasonSynctestRun, ...), with park_m's bracket.
                 sg.IncActive();
@@ -284,11 +314,20 @@ public sealed class SyncTestBubble
                     throw new PanicException("synctest: active < 0");
                 }
 
-                // S3: next := sg.timers.wakeTime(); advance sg.now and continue while a timer remains.
-                long next = 0;
+                // Go: next := sg.timers.wakeTime(); if next == 0 { break }; sg.now = next. The bubble is
+                // idle, so fake time jumps straight to the next timer; with none pending, Run is done.
+                long next = NextTimerWake?.Invoke(sg) ?? 0;
 
                 if (next == 0)
                     break;
+
+                if (next < sg.m_now)
+                {
+                    Monitor.Exit(sg.m_mu);
+                    throw new PanicException("synctest: time went backwards");
+                }
+
+                sg.m_now = next;
             }
 
             int total = sg.m_total;
