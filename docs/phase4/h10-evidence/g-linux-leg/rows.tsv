@@ -1,0 +1,220 @@
+row	word	windows_page_at_8c	linux_old	linux_new	wall_s	tree	banked	note
+archive/tar	COUNT	1.24.13	97	98	99	bb54ff0920	yes	
+archive/zip	PASS	1.24.13	100	100	80	bb54ff0920	no	
+bufio	PASS	1.24.13	80 + 1	80 + 1	18	bb54ff0920	no	
+bytes	COUNT	1.24.13	86 + 6	87 + 6	22	bb54ff0920	yes	
+cmp	PASS	1.24.13	4	4	13	bb54ff0920	no	
+compress/bzip2	PASS	1.24.13	4	4	14	bb54ff0920	no	
+compress/flate	PASS	1.24.13	64	64	40	bb54ff0920	no	
+compress/gzip	PASS	1.24.13	15	15	23	bb54ff0920	no	
+compress/lzw	PASS	1.24.13	17	17	15	bb54ff0920	no	
+compress/zlib	PASS	1.24.13	6	6	18	bb54ff0920	no	
+container/heap	PASS	1.24.13	7	7	13	bb54ff0920	no	
+container/list	PASS	1.24.13	10	10	14	bb54ff0920	no	
+container/ring	PASS	1.24.13	8	8	13	bb54ff0920	no	
+context	PASS	1.24.13	57 + 1	57 + 1	25	bb54ff0920	no	
+crypto	PASS	1.24.13	6	6	29	bb54ff0920	no	
+crypto/aes	COUNT	1.24.13	13	57	20	bb54ff0920	yes	
+crypto/cipher	FAIL	1.24.13	13 + 1		55	bb54ff0920	no	vgetrandom (572 infrastructure-error leaves)
+crypto/des	COUNT	1.24.13	18	55	19	bb54ff0920	yes	
+crypto/dsa	FAIL	1.24.13	4		27	bb54ff0920	no	vgetrandom (3 infrastructure-error leaves)
+crypto/ecdh	FAIL	1.24.13	47		23	bb54ff0920	no	vgetrandom (8 infrastructure-error leaves; the run ends, 14 absent)
+crypto/ecdsa	FAIL	1.24.13	82		35	bb54ff0920	no	vgetrandom (48 infrastructure-error leaves)
+crypto/ed25519	FAIL	1.24.13	8 + 1		24	bb54ff0920	no	vgetrandom (2 infrastructure-error leaves)
+crypto/elliptic	FAIL	1.24.13	82		21	bb54ff0920	no	vgetrandom (12 infrastructure-error leaves)
+crypto/hkdf	PASS	1.24.13		3	18	bb54ff0920	no	
+crypto/hmac	PASS	1.24.13	172	172	19	bb54ff0920	no	
+crypto/internal/boring	PASS	1.24.13	3	3	17	bb54ff0920	no	
+crypto/internal/boring/bcache	PASS	1.24.13		1	135	bb54ff0920	no	
+crypto/internal/fips140/aes	PASS	1.24.13		5	18	bb54ff0920	no	
+crypto/internal/fips140/bigmod	FAIL	nopage			19	bb54ff0920	no	vgetrandom (4 leaves; the run ends, 24 absent)
+crypto/internal/fips140/ecdh	PASS	1.24.13		1	17	bb54ff0920	no	
+crypto/internal/fips140/ecdsa	FAIL	1.24.13			22	bb54ff0920	no	vgetrandom (4 leaves)
+crypto/internal/fips140/edwards25519	PASS	nopage		54	305	bb54ff0920	no	
+crypto/internal/fips140/edwards25519/field	FAIL	nopage			33	bb54ff0920	no	vgetrandom (2 leaves)
+crypto/internal/fips140/mlkem	FAIL	nopage			18	bb54ff0920	no	vgetrandom (1 leaf)
+crypto/internal/fips140/nistec	PASS	1.24.13		44	18	bb54ff0920	no	
+crypto/internal/fips140/rsa	PASS	1.24.13		123	19	bb54ff0920	no	
+crypto/internal/fips140test	FAIL	nopage			129	bb54ff0920	no	vgetrandom (14 leaves) + 5 CAST/PCT 'success was not logged' (unattributed; plausibly downstream)
+crypto/internal/hpke	PASS	1.24.13	19	19	98	bb54ff0920	no	
+crypto/internal/sysrand	FAIL	1.24.13			17	bb54ff0920	no	vgetrandom (host dies on a TestConcurrentRead goroutine; 4 absent)
+crypto/md5	FAIL	1.24.13	11 + 1		19	bb54ff0920	no	vgetrandom (1 leaf)
+crypto/mlkem	FAIL	1.24.13			35	bb54ff0920	no	vgetrandom (4 leaves)
+crypto/pbkdf2	PASS	1.24.13		5	18	bb54ff0920	no	
+crypto/rand	FAIL	1.24.13	302		19	bb54ff0920	no	vgetrandom (host dies on a TestConcurrentRead goroutine; 306 absent)
+crypto/rc4	COUNT	1.24.13	2	75	18	bb54ff0920	yes	
+crypto/rsa	FAIL	1.24.13	559 + 1		42	bb54ff0920	no	vgetrandom (553 infrastructure-error leaves)
+crypto/sha1	FAIL	1.24.13	13 + 1		19	bb54ff0920	no	vgetrandom (1 leaf)
+crypto/sha256	COUNT	1.24.13	23 + 1	22 + 1	18	bb54ff0920	yes	
+crypto/sha3	PASS	1.24.13		18 + 5	33	bb54ff0920	no	
+crypto/sha512	COUNT	1.24.13	36 + 1	35 + 1	19	bb54ff0920	yes	
+crypto/subtle	FAIL	1.24.13	7		20	bb54ff0920	no	vgetrandom (1 leaf)
+crypto/tls	FAIL	1.23.12	401 + 1		691	bb54ff0920	no	vgetrandom (host dies on a TestCipherSuitePreference goroutine; 27 of 1342 C# rows)
+crypto/x509	FAIL	1.24.13	322		65	bb54ff0920	no	vgetrandom at static init (TypeInitializationException, verified on the published host)
+database/sql	COUNT	1.24.13	138 + 2	140 + 2	73	bb54ff0920	yes	
+database/sql/driver	PASS	1.24.13	1	1	14	bb54ff0920	no	
+debug/buildinfo	COUNT	1.24.13	197	211	26	bb54ff0920	yes	
+debug/dwarf	PASS	1.24.13	40	40	20	bb54ff0920	no	
+debug/elf	PASS	1.24.13	31	31	23	bb54ff0920	no	
+debug/gosym	PASS	1.24.13	9 + 1	9 + 1	18	bb54ff0920	no	
+debug/macho	PASS	1.24.13	7	7	17	bb54ff0920	no	
+debug/pe	PASS	1.24.13	10	10	22	bb54ff0920	no	
+debug/plan9obj	PASS	1.24.13	2	2	14	bb54ff0920	no	
+embed/internal/embedtest	PASS	1.24.13		7	15	bb54ff0920	no	
+encoding/ascii85	PASS	1.24.13	9	9	15	bb54ff0920	no	
+encoding/asn1	COUNT	1.24.13	38	40	17	bb54ff0920	yes	
+encoding/base32	PASS	1.24.13	26	26	15	bb54ff0920	no	
+encoding/base64	PASS	1.24.13	17	17	15	bb54ff0920	no	
+encoding/binary	DISC	1.24.13	137 + 9	140 + 6	16	bb54ff0920	yes	
+encoding/csv	PASS	1.24.13	71	71	15	bb54ff0920	no	
+encoding/gob	PASS	1.24.13	106	106	43	bb54ff0920	no	
+encoding/hex	PASS	1.24.13	12	12	14	bb54ff0920	no	
+encoding/json	COUNT	1.24.13	491	532	46	bb54ff0920	yes	
+encoding/xml	COUNT	1.24.13	386	387	45	bb54ff0920	yes	
+encoding/pem	COUNT	1.24.13	8	18	16	bb54ff0920	yes	
+errors	PASS	1.24.13	61	61	14	bb54ff0920	no	
+expvar	PASS	1.24.13	11	11	166	bb54ff0920	no	
+flag	PASS	1.24.13	24	24	23	bb54ff0920	no	
+fmt	DISC	1.24.13	63	62 + 1	23	bb54ff0920	yes	
+go/ast	PASS	1.24.13	9	9	21	bb54ff0920	no	
+go/ast/internal/tests	PASS	1.24.13		3	14	bb54ff0920	no	
+go/build	PASS	1.24.13	57 + 1	57 + 1	29	bb54ff0920	no	
+go/build/constraint	PASS	1.24.13	89	89	15	bb54ff0920	no	
+go/constant	PASS	1.24.13	9	9	15	bb54ff0920	no	
+go/doc	COUNT	1.24.13	85	86	22	bb54ff0920	yes	
+go/doc/comment	PASS	1.24.13	10059	10059	24	bb54ff0920	no	
+go/format	PASS	1.24.13	4	4	16	bb54ff0920	no	
+go/importer	PASS	1.24.13	3	3	46	bb54ff0920	no	
+go/internal/gccgoimporter	PASS	1.24.13	4	4	21	bb54ff0920	no	
+go/internal/gcimporter	COUNT	1.24.13	581	619	208	bb54ff0920	yes	
+go/internal/srcimporter	ORACLE	1.24.13	7		24	bb54ff0920	no	ORACLE unstable: Go's own TestImportStdLib fails on this host (twice); C# passes
+go/parser	COUNT	1.24.13	173	176	295	bb54ff0920	yes	
+go/printer	PASS	1.24.13	45	45	18	bb54ff0920	no	
+go/scanner	PASS	1.24.13	11	11	16	bb54ff0920	no	
+go/token	PASS	1.24.13	31	31	17	bb54ff0920	no	
+go/types	COUNT	1.24.13	557	574	114	bb54ff0920	yes	
+go/version	PASS	1.24.13	3	3	13	bb54ff0920	no	
+hash	PASS	1.24.13	18	18	18	bb54ff0920	no	
+hash/adler32	PASS	1.24.13	2	2	13	bb54ff0920	no	
+hash/crc32	PASS	1.24.13	10	10	14	bb54ff0920	no	
+hash/crc64	PASS	1.24.13	5	5	13	bb54ff0920	no	
+hash/fnv	PASS	1.24.13	19	19	14	bb54ff0920	no	
+hash/maphash	FAIL	1.24.13	22		34	bb54ff0920	no	vgetrandom at module init (TypeInitializationException, verified on the published host)
+html	PASS	1.24.13	3	3	14	bb54ff0920	no	
+html/template	PASS	1.24.13	243	243	34	bb54ff0920	no	
+image	PASS	1.24.13	8	8	20	bb54ff0920	no	
+image/color	PASS	1.24.13	10	10	14	bb54ff0920	no	
+image/draw	PASS	1.24.13	9	9	17	bb54ff0920	no	
+image/gif	PASS	1.24.13	28	28	25	bb54ff0920	no	
+image/jpeg	PASS	1.24.13	14	14	18	bb54ff0920	no	
+image/png	PASS	1.24.13	28	28	18	bb54ff0920	no	
+index/suffixarray	PASS	1.24.13	12	12	144	bb54ff0920	no	
+internal/abi	PASS	1.24.13	1 + 1	1 + 1	20	bb54ff0920	no	
+internal/buildcfg	COUNT	1.24.13	3	4	92	bb54ff0920	yes	
+internal/chacha8rand	PASS	1.24.13	4	4	17	bb54ff0920	no	
+internal/coverage/cfile	PASS	1.24.13	15 + 1	15 + 1	50	bb54ff0920	no	
+internal/coverage/cformat	PASS	1.24.13	2	2	14	bb54ff0920	no	
+internal/coverage/cmerge	PASS	1.24.13	2	2	13	bb54ff0920	no	
+internal/coverage/pods	PASS	1.24.13	1	1	14	bb54ff0920	no	
+internal/coverage/slicereader	PASS	1.24.13	1	1	13	bb54ff0920	no	
+internal/coverage/slicewriter	PASS	1.24.13	1	1	14	bb54ff0920	no	
+internal/coverage/test	PASS	1.24.13		6	15	bb54ff0920	no	
+internal/cpu	PASS	1.24.13	6 + 2	6 + 2	18	bb54ff0920	no	
+internal/dag	PASS	1.24.13	6	6	14	bb54ff0920	no	
+internal/diff	PASS	1.24.13	13	13	14	bb54ff0920	no	
+internal/fmtsort	PASS	1.24.13	3	3	15	bb54ff0920	no	
+internal/fuzz	PASS	1.24.13	52	52	28	bb54ff0920	no	
+internal/godebug	PASS	1.24.13	5	5	122	1719e3b87f	no	
+internal/godebugs	PASS	1.24.13	1	1	53	bb54ff0920	no	
+internal/gover	PASS	1.24.13	5	5	12	bb54ff0920	no	
+internal/itoa	PASS	1.24.13	3	3	13	bb54ff0920	no	
+internal/pkgbits	PASS	1.24.13		2	19	bb54ff0920	no	
+internal/platform	PASS	1.24.13	1	1	20	bb54ff0920	no	
+internal/poll	PASS	1.24.13	12 + 1	12 + 1	567	bb54ff0920	no	
+internal/profile	PASS	1.24.13	1	1	18	bb54ff0920	no	
+internal/reflectlite	PASS	1.24.13	30	30	21	bb54ff0920	no	
+internal/runtime/atomic	COUNT	1.24.13	15	16	20	bb54ff0920	yes	
+internal/runtime/maps	PASS	1.24.13		3 + 108	92	bb54ff0920	no	
+internal/runtime/math	PASS	nopage		1	13	bb54ff0920	no	
+internal/runtime/sys	PASS	nopage		4	13	bb54ff0920	no	
+internal/saferio	PASS	1.24.13	17	17	13	bb54ff0920	no	
+internal/singleflight	PASS	1.24.13	5	5	15	bb54ff0920	no	
+internal/sync	PASS	nopage		106	39	bb54ff0920	no	
+internal/syscall/windows	N/A	1.24.13	n/a			bb54ff0920	no	
+internal/syscall/windows/registry	N/A	1.24.13	n/a			bb54ff0920	no	
+internal/sysinfo	PASS	1.24.13	1	1	15	bb54ff0920	no	
+internal/testenv	PASS	1.24.13	7	7	16	bb54ff0920	no	
+internal/trace	PASS	1.24.13	95	95	214	1719e3b87f	no	
+internal/trace/internal/oldtrace	PASS	1.24.13	3	3	19	bb54ff0920	no	
+internal/types/errors	PASS	1.24.13	155	155	52	bb54ff0920	no	
+internal/xcoff	PASS	1.24.13	3	3	15	bb54ff0920	no	
+internal/zstd	PASS	1.24.13	536	536	20	bb54ff0920	no	
+io	PASS	1.24.13	60 + 1	60 + 1	103	bb54ff0920	no	
+io/fs	PASS	1.24.13	18	18	17	bb54ff0920	no	
+io/ioutil	PASS	1.24.13	28	28	16	bb54ff0920	no	
+iter	PASS	1.24.13	28	28	13	bb54ff0920	no	
+log	PASS	1.24.13	8 + 1	8 + 1	15	bb54ff0920	no	
+log/slog	COUNT	1.24.13	194 + 19	197 + 19	84	bb54ff0920	yes	
+log/slog/internal/benchmarks	PASS	1.24.13	3	3	15	bb54ff0920	no	
+log/slog/internal/buffer	PASS	1.24.13	1 + 1	1 + 1	14	bb54ff0920	no	
+maps	PASS	1.24.13	14	14	13	bb54ff0920	no	
+math	PASS	1.24.13	76	76	17	bb54ff0920	no	
+math/big	DISC	1.24.13	224 + 2	230 + 1	37	bb54ff0920	yes	
+math/bits	PASS	1.24.13	26	26	15	bb54ff0920	no	
+math/cmplx	PASS	1.24.13	24	24	14	bb54ff0920	no	
+math/rand	COUNT	1.24.13	43	47	25	bb54ff0920	yes	
+math/rand/v2	PASS	1.24.13	36	36	33	bb54ff0920	no	
+mime	PASS	1.24.13	18 + 1	18 + 1	16	bb54ff0920	no	
+mime/multipart	FAIL	1.24.13	52		21	bb54ff0920	no	vgetrandom (47 infrastructure-error leaves)
+mime/quotedprintable	PASS	1.24.13	5	5	16	bb54ff0920	no	
+net	FAIL	1.23.12	577 + 2		83	bb54ff0920	no	C# test build fails: CS1929 dnsclient_unix_test.cs:420/:422 resolvConfTest has no tryAcquireSema/releaseSema (promotion through the embedded *resolverConfig); host qualified (Go: 577 pass, TestLookupCNAME only)
+net/http	FAIL	1.23.12			141	bb54ff0920	no	NotImplementedException on a TLS-handshake goroutine (Test304Responses/h2); 1 of 1387 C# rows; vgetrandom by the stack, message not captured
+net/http/cgi	PASS	1.24.13	38 + 1	38 + 1	64	bb54ff0920	no	
+net/http/cookiejar	PASS	1.24.13	17	17	29	bb54ff0920	no	
+net/http/fcgi	PASS	1.24.13	12	12	30	bb54ff0920	no	
+net/http/httptest	FAIL	1.24.13	55		32	bb54ff0920	no	NotImplementedException on a TLS-handshake goroutine (TestServer/NewTLSServer); 44 of 55; vgetrandom by the stack, message not captured
+net/http/httptrace	PASS	1.24.13	2	2	26	bb54ff0920	no	
+net/http/httputil	PASS	1.24.13	53	53	35	bb54ff0920	no	
+net/http/internal	PASS	1.24.13	14 + 1	14 + 1	15	bb54ff0920	no	
+net/http/internal/ascii	PASS	1.24.13	13	13	13	bb54ff0920	no	
+net/mail	PASS	1.24.13	11	11	18	bb54ff0920	no	
+net/netip	COUNT	1.24.13	210 + 57	211 + 57	22	bb54ff0920	yes	
+net/rpc	PASS	1.24.13	15	15	36	bb54ff0920	no	
+net/rpc/jsonrpc	PASS	1.24.13	9	9	31	bb54ff0920	no	
+net/smtp	FAIL	1.24.13	19		27	bb54ff0920	no	vgetrandom (host dies on a TestTLSClient goroutine; 2 absent)
+net/textproto	PASS	1.24.13	26	26	16	bb54ff0920	no	
+net/url	COUNT	1.24.13	48	49	19	bb54ff0920	yes	
+os	FAIL	1.24.13			90	bb54ff0920	no	unstable host start: run 1 failing 914/914 rows (64 pass/fail), run 2 conversion-blocked (ArgumentException: empty path in RemoveDirectoryRecursive)
+os/exec	PASS	1.24.13	87 + 1	87 + 1	113	bb54ff0920	no	
+os/exec/internal/fdtest	PASS	1.24.13	1	1	92	bb54ff0920	no	
+os/signal	PASS	1.24.13	28 + 2	28 + 2	44	bb54ff0920	no	
+os/user	PASS	1.24.13	12	12	95	1719e3b87f	no	
+path	PASS	1.24.13	9	9	14	bb54ff0920	no	
+path/filepath	PASS	1.24.13	54	54	17	bb54ff0920	no	
+plugin	PASS	1.24.13	1	1	13	bb54ff0920	no	
+regexp	PASS	1.24.13	45	45	364	bb54ff0920	no	
+regexp/syntax	PASS	1.24.13	12	12	18	bb54ff0920	no	
+runtime/debug	PASS	1.24.13	4 + 5	4 + 5	17	bb54ff0920	no	
+runtime/metrics	PASS	1.24.13	2	2	21	bb54ff0920	no	
+slices	COUNT	1.24.13	119 + 3	120 + 3	18	bb54ff0920	yes	
+sort	PASS	1.24.13	63	63	20	bb54ff0920	no	
+strconv	PASS	1.24.13	55 + 11	55 + 11	22	bb54ff0920	no	
+strings	COUNT	1.24.13	68 + 4	69 + 4	28	bb54ff0920	yes	
+sync	DISC	1.24.13	47 + 4	46 + 6	32	bb54ff0920	yes	
+sync/atomic	FAIL	1.24.13	108		5340	bb54ff0920	no	package deadline at the 90m floor (5,400 s) on TestValueCompareAndSwapConcurrent; 89 of 108 C# rows
+syscall	FAIL	1.24.13	38 + 17		49	bb54ff0920	no	C# host OutOfMemoryException at Thread.StartCore after TestPrlimitFileLimit ('pipe2: too many open files'); 37 of 56 C# rows
+testing	PASS	1.24.13		53	110	1719e3b87f	no	no linux annotation; bb54ff0920 only (18 pass/fail, TBHelper output); PASS 53 on the 8c tree
+testing/fstest	PASS	1.24.13	7	7	17	bb54ff0920	no	
+testing/iotest	PASS	1.24.13	18	18	14	bb54ff0920	no	
+testing/quick	PASS	1.24.13	8	8	15	bb54ff0920	no	
+testing/slogtest	PASS	1.24.13	17	17	18	bb54ff0920	no	
+text/scanner	PASS	1.24.13	18	18	15	bb54ff0920	no	
+text/tabwriter	PASS	1.24.13	3	3	13	bb54ff0920	no	
+text/template	PASS	1.24.13	52	52	35	bb54ff0920	no	
+text/template/parse	PASS	1.24.13	52	52	18	bb54ff0920	no	
+time	COUNT	1.24.13	167	176	655	bb54ff0920	yes	
+unicode	PASS	1.24.13	28	28	18	bb54ff0920	no	
+unicode/utf16	PASS	1.24.13	8 + 1	8 + 1	15	bb54ff0920	no	
+unicode/utf8	DISC	1.24.13	14	14 + 1	15	bb54ff0920	yes	
+unique	PASS	1.24.13		21 + 1	16	bb54ff0920	no	
+weak	PASS	nopage		6	16	bb54ff0920	no	
