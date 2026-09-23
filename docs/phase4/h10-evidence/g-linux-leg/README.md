@@ -60,3 +60,25 @@ host's own run output. The go and csharp maps reproduce the counts below.
 net's host qualification at that tip: Go's own `go test -count=1 -timeout 40m net` read rc 1 in 41 s,
 with 578 pass, 24 skip and 1 fail, `TestLookupCNAME` (the tolerated drift). In the leg's reading one
 test that now passes was a skip.
+
+## Amended 2026-09-23 — net/http, the host rule's read before the close
+
+The runbook's host rule reads net/http at the close tip before it is classified or demoted. This is
+evidence only: net/http carries no Linux annotation and banks nothing.
+
+- **Tree and configuration.** `faaa8fe999` (batch 8g), the tree's own sweep (blob `710655e61f`),
+  Release, with the row's `release-tiered` pin applied (the record reads `tiered: true`). WSL arm,
+  unprivileged.
+- **Reading.** FAILING: 1,370 matched of 1,387, 0 disclosed, 17 undisclosed divergences. Wall 309 s.
+- **The divergences.** They are exactly the synctest class: the 11 leaves (10 pass / infrastructure-error,
+  plus `TestTransportIdleConnRacesRequest/h2unencrypted` as skip / infrastructure-error) and their 6
+  parents, all pass / fail.
+  - `TestNewClientServerTest/synctest/{h1,h2,https1}`
+  - `TestServerShutdownStateNew/{h1,h2}`
+  - `TestTransportIdleConnRacesRequest/{h1,h2unencrypted}`
+  - `TestTransportRemovesConnsAfterBroken/{h1,h2}`
+  - `TestTransportRemovesConnsAfterIdle/{h1,h2}`
+- **TestRegisterErr.** It and every one of its subtests read pass / pass on Linux.
+- **Record.** `records/net.http.verdicts.json`, reduced as above, with `errors`, `stderr` and `gated`
+  dropped. It was reduced by Python rather than PowerShell: the record carries keys that differ only in
+  case (`…/h1/GZIP` and `…/h1/gzip`), which ConvertFrom-Json refuses.
