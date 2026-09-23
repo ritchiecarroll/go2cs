@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-23 12:03 -- STAMP refresh (ledger through mailbox 356da783fa): section 1a STATE DELTA 26 (8e + 8f stamped, d1a0d314d5; net banked; crypto/tls running on R; the close seat next). Other STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-23 18:40 -- STAMP refresh (ledger through mailbox ba1170d078): section 1a STATE DELTA 27 (8g stamped; version tip 47e088d3d7; the close seat at 1a328f3ee8 running B9(b)-(g), holding for C2's repoguard payload admit). Other STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -585,6 +585,21 @@ STATE DELTA 2026-09-23 12:03 (ledger through mailbox 356da783fa; supersedes the 
     invisible alternative, the hoisted-literal comment off by default + a verbosity CLI param -- all first up post-hop.
   - H10 CLOSE remaining: R's crypto/tls bank + G's net linux bank + G's floor seat + R's REC-G docs in ONE last batch, then the CLOSE SEAT (net/http to the
     candidates, the final -stdlib reconvert, the header and the index).
+STATE DELTA 2026-09-23 18:40 (ledger through mailbox ba1170d078; supersedes the deltas above where they differ) -- 8g STAMPED; the CLOSE SEAT running; two pre-close/pre-release C2 seats:
+  - VERSION TIP claude/version-go1.24.13 = 47e088d3d7 (COORD's close-precondition docs, on the 8g STAMP faaa8fe999): 8g landed G's sync/atomic floor, R's REC-G
+    ChanCore design, G's net linux bank, R's CRYPTO/TLS BANK (raised wall, 1,761 s; floor 60m) and G's crypto/tls linux fourth state. 47e088d3d7 adds the BOARD's
+    relabel B5 block and the runbook's in-stage CLOSE checklist + three lessons. The owner ordered OFFICIAL LESSONS LEARNED into docs/GoCorpusMigration.md
+    after the hop (i9 issues EXCLUDED; memory hop-lessons-learned-order).
+  - THE CLOSE SEAT (Part B of docs/phase4/briefs/batch8g-and-close-brief.md; i7 worktree abclose, branch i7/h10-close-09231501, LOCAL, B_BASE 47e088d3d7,
+    REGEN_BASE 54dec61728) is at 1a328f3ee8: net/http's close reading + its move to the CANDIDATES, srcimporter's linux annotation DEMOTED, the core-refs
+    table at ZERO, the two-seeded final -stdlib regen overlaid. Rulings R-B1..R-B15 on the ledger. R-B13: 337 READMEs restored as class (v). R-B15:
+    log/syslog's csproj restored as class (vi). R-B14 (18:39): B9(a) is red ONLY on repoguard's fleet-identifier guard over Go's //go:embed payload
+    traceviewer/static/trace_viewer_full.html (new at this regen). The seat now runs B9(b)-(g), then HOLDS for C2's admit ref: merge, go2cs.exe hash
+    equal, B9(a) re-run, B10-B12. Then COORD announces and pushes the H10 CLOSE STAMP.
+  - C2 SEATS: (1) PRE-CLOSE, the repoguard //go:embed payload admit + the census's converted-mode mirror (sent just before the 18:39 ruling; the cloud-lane watch ARMED);
+    (2) PRE-RELEASE, the three-target csproj merge dropping a shared non-reference ItemGroup (log/syslog LICENSE); ACCEPTED pre-release: 781c1c3c31 (the
+    README badge-seed). All of these land before H12's 1.24.13.1 release.
+  - R keeps its crypto/tls trees until the close stamps. After the close: H11/H12, then the NuGet 1.24.13.1 release (the owner signs).
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1760,3 +1775,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-23 04:03 -- STAMP refresh: STATE DELTA 24 (batch 8c stamped; the relabel ruled; 8d queued).
 - 2026-09-23 07:13 -- STAMP refresh: STATE DELTA 25 (batch 8d stamped; the linux leg done; 8e forming).
 - 2026-09-23 12:03 -- STAMP refresh: STATE DELTA 26 (8e + 8f stamped; net banked; crypto/tls on R).
+- 2026-09-23 18:40 -- STAMP refresh: STATE DELTA 27 (8g stamped; the close seat running; C2's pre-close repoguard seat).
