@@ -178,3 +178,12 @@ All three were written by the wrapper, the converter or Go, so under the brief's
 edited. Admitting them is COORD's ruling.
 
 `run.log` is not committed (brief H.4).
+
+## Amended 2026-09-23 11:09: the three held files are ADMITTED and committed
+
+COORD ruled the three files in the table above ADMITTED. The census refused them in PASS 3 only, on the
+alphanumeric reduction of the computer name matching ordinary repository vocabulary, and the raw name was
+boolean-tested absent from all three. They are now committed beside this file, byte for byte as the wrapper,
+the converter and Go wrote them. Each staged blob equals `git hash-object --no-filters` of the kept copy, none
+carries a CR byte, and the SHA-256s in the table above hold unchanged. The standalone Go BoGo stream stays
+uncommitted.
