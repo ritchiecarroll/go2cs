@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-22 18:59 -- refresh (ledger through mailbox dde97a55ee): section 1a STATE DELTA 22 (owner rulings: net/http to candidates at H10's close, the preload option C; the i9's known CPU defect recorded in section 0 and its lane header and prompt; the NuGet early-publish goal). Other STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-23 01:01 -- refresh (ledger through mailbox 50cdffc0fb): section 1a STATE DELTA 23 (batch 8b stamped at bb54ff0920; crypto/tls re-routed to the AZ1 Azure lane, quota pending; DNS fixed on the i7; the reading run, the linux leg and S1b running). Other STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -520,6 +520,26 @@ STATE DELTA 2026-09-22 18:59 (ledger through mailbox dde97a55ee; supersedes the 
     and possibly placeholders for 1.25-1.27's new packages; a read-only research workflow is sizing it (the delta, NuGet.org's placeholder /
     prerelease / reservation policies, the pipeline) -- COORD's lean: a PRERELEASE of the whole 1.24.13 corpus (new packages alone would not
     install: their dependencies exist only at 1.24.13). Publishing is always the owner's act at the console (signing PIN).
+STATE DELTA 2026-09-23 01:01 (ledger through mailbox 50cdffc0fb; supersedes the deltas above where they differ) -- BATCH 8b STAMPED; crypto/tls re-routed; DNS fixed on the i7:
+  - VERSION TIP claude/version-go1.24.13 = bb54ff0920 (BATCH 8b, twelve refs + golden + rows bank + header; ledger fff6ac7aaf): time 178, fmt 62 + 1,
+    unicode/utf8 14 + 1 banked; three fips140 badges regenerated; header 219 / 230, 57,169 matching, 282 disclosed; os reads 1105 + 2 on the i7 (symlink
+    subtests) vs the roster's 1103 + 2 -- RULED keep 1103. MASTER unchanged 20eb0af70e.
+  - THE i9 (owner order, relayed by i9): NO crypto/tls until the CPU is replaced -- the second 0x1E fault (arg1 0xC0000096) came DURING the capped row.
+    LIGHT items only. 5b5f35ff2 boards 8c.
+  - CRYPTO/TLS: R's raised-wall evidence (claude/r-tls-bogo-evidence 7462befde0, GOFLAGS=-timeout=40m both sides) VALIDATED 4759 + 1, all 3419 BoGo verdicts
+    agree; the i9 recon's 11 = probable load flakes; C# BoGo 1788 s vs Go 30 s. OWNER: crypto/tls WAITS for a standard-wall full-host run. AZ1 = a TEMPORARY
+    Azure lane (Windows Server 2025, F-series v7; kit on this branch c0f11384e4: az1-setup.ps1, az1-tls-brief.md, az1-resume-prompt.txt) is READY through brief
+    section C at bb54ff0920 + its NOTES commit a805e17a56 (the expired-fixture caveat removed; on the VM, unpushed); the VM is STOPPED at 8 vCPUs pending an
+    Azure family-quota support request (Falsv7 -> 48; the auto-request was denied). On approval the owner resizes to F48als_v7 and AZ1 resumes at section D.
+    Fallbacks at the close (owner's call): R's raised-wall pin, wait for the i9's CPU, or demote by name.
+  - DNS: the router's own relay turns NXDOMAIN into SERVFAIL (upstream now public resolvers; the router has no further DNS setting); the i7 set per box to public
+    IPv4 resolvers with IPv6 DNS off -> DNS-conforming, Go's DNS test families pass (TestLookupCNAME = the tolerated drift). G's WSL pin (09-02) re-read INTACT.
+    The probe kit is on this branch 03f7d83a76 (docs/phase4/briefs/dns-probe.*).
+  - RUNNING: the i7's 27-ROW READING RUN at bb54ff0920 (net LAST, re-qualified just before it) -> C1's relabel (TestIPAppendTextNoAllocs routed to C1 too);
+    G's LINUX LEG at bb54ff0920 (net joins after its WSL full-suite qualification); R's post-hop S1b (S1a2 6171a7121b ACCEPTED for the post-hop train).
+  - QUEUED on the i7 after the reading run: BATCH 8c (G 8ed02f7dce + 629f97752b, C2 a91b638cf9, claude/coord-instrument-h10 d095fe8108, i9 5b5f35ff2; rows
+    testing, os/user, internal/godebug with its pin, internal/trace), then the relabel battery, the final -stdlib reconvert, the H10 close seat (net/http to
+    the candidates). OWNER: the NuGet reservation follow-up SENT (no auto-receipt); the Azure quota ticket pending; all machines stay on overnight.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1690,3 +1710,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-22 15:37 -- STAMP refresh: STATE DELTA 20 (batch 7 stamped at 3469154a95; master 20eb0af70e; batch 8a running); the batch-8a brief added.
 - 2026-09-22 17:09 -- STAMP refresh: STATE DELTA 21 (batch 8a stamped at 43d149b87d; 8b running); the batch-8a (sanitized) and 8b briefs added.
 - 2026-09-22 18:59 -- refresh: STATE DELTA 22; the i9 hardware note (owner order) in section 0, the i9 lane header and its prompt.
+- 2026-09-23 01:01 -- refresh: STATE DELTA 23 (batch 8b stamped; AZ1; DNS; the reading run and the linux leg running).
