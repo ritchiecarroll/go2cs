@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-23 07:13 -- STAMP refresh (ledger through mailbox 8101e7ae52): section 1a STATE DELTA 25 (batch 8d stamped at 74bae27672 -- the relabel landed; the linux leg done; 8e forming; morning owner items). Other STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-23 12:03 -- STAMP refresh (ledger through mailbox 356da783fa): section 1a STATE DELTA 26 (8e + 8f stamped, d1a0d314d5; net banked; crypto/tls running on R; the close seat next). Other STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -568,6 +568,23 @@ STATE DELTA 2026-09-23 07:13 (ledger through mailbox 8101e7ae52; supersedes the 
   - POST-HOP ACCEPTED: R's S1c a523762f06 (bubble core) and S2 a97ec95a9e (bubbled channels); R on S3 (fake time). C2's atomic loads 8ef7f65ec8.
   - OWNER, MORNING: unbind IPv6 on the i7's Ethernet (then two net re-qualifications and net's reading); the Azure Falsv7 quota ticket (AZ1 resumes at D);
     FYI rulings to countermand if wished (rsa overturn, fips140test reversal); the string-literal §8 precondition (it reopens owner-approved decisions).
+STATE DELTA 2026-09-23 12:03 (ledger through mailbox 356da783fa; supersedes the deltas above where they differ) -- 8e + 8f STAMPED; net BANKED; crypto/tls on R:
+  - VERSION TIP claude/version-go1.24.13 = d1a0d314d5 (BATCH 8f, ledger 356da783fa; 8e fc6269b0bf before it): the linux set (vgetrandom seat, 40 annotations moved,
+    the pin retirement), C2's generator fix (net's linux CS1929), G's syscall RLIMIT_NOFILE host seat, C1's three deferred net entries, and NET BANKED AT
+    1.24.13 on the i7 (476 + 3; every DNS test pass/pass bar TestLookupCNAME's matched fail/fail). Header 219 / 230, 57,203 matching, 283 disclosed; LINUX
+    188 / 217, 48,692 matching, 162 disclosed.
+  - THE i7 is a QUALIFIED net host: per-box public IPv4 DNS with IPv6 UNBOUND on its Ethernet (owner: stays off until needed; mapped drives B: and U: are down
+    meanwhile -- they answer SMB only over IPv6).
+  - CRYPTO/TLS (owner ruled): banks from a RAISED-WALL run on R (GOFLAGS=-timeout=40m both sides) -- RUNNING on R now; AZ1 (Azure, 48 vCPU, evidence
+    claude/az1-tls-evidence fad839a224) measured C# INSIDE the standard 600 s wall (213 s) while its Go oracle flaked (a loopback reset race). AZ1 released; the
+    owner deletes the VM (the Falsv7 quota stays; name the next VM AZ1).
+  - LINUX: sync/atomic CONFIRMED 108 at 150m (G's floor seat 48e1e4d245 for the next batch); net's linux re-read BUILDS (581 + 3 predicted; G banks it at
+    d1a0d314d5); go/internal/srcimporter an ORACLE row (Go's own test fails on the host).
+  - POST-HOP ACCEPTED: R's synctest arc S1a..S4 COMPLETE (net/http 1387/1387 bar the TestRegisterErr pair; net/http still moves to the candidates at the close);
+    R's REC-G ChanCore design bb69175480 (docs, rides the next batch); C2's atomic acquire loads. OWNER RULED: string-literal arm C approved, A/B held for an
+    invisible alternative, the hoisted-literal comment off by default + a verbosity CLI param -- all first up post-hop.
+  - H10 CLOSE remaining: R's crypto/tls bank + G's net linux bank + G's floor seat + R's REC-G docs in ONE last batch, then the CLOSE SEAT (net/http to the
+    candidates, the final -stdlib reconvert, the header and the index).
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1741,3 +1758,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-23 01:01 -- refresh: STATE DELTA 23 (batch 8b stamped; AZ1; DNS; the reading run and the linux leg running).
 - 2026-09-23 04:03 -- STAMP refresh: STATE DELTA 24 (batch 8c stamped; the relabel ruled; 8d queued).
 - 2026-09-23 07:13 -- STAMP refresh: STATE DELTA 25 (batch 8d stamped; the linux leg done; 8e forming).
+- 2026-09-23 12:03 -- STAMP refresh: STATE DELTA 26 (8e + 8f stamped; net banked; crypto/tls on R).
