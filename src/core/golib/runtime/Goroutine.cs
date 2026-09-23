@@ -541,6 +541,44 @@ public sealed class Goroutine
     /// </summary>
     public object? RuntimeDescriptor { get; set; }
 
+    // The gate the runtime's managed gopark waits on (runtime park_impl.cs, S1b of
+    // DESIGN-gopark-goready-synctest.md): ONE permit, released by that runtime's ready after it has
+    // readied this goroutine. A permit released between gopark's commit (its unlockf) and its wait is
+    // kept, so no wakeup is lost; a second release before the wait consumes the first is a double
+    // ready, which Ready has already refused by name. Allocated at the first gopark, so a goroutine
+    // that never parks through the runtime costs nothing.
+    private SemaphoreSlim? m_parkGate;
+
+    private SemaphoreSlim ParkGate =>
+        LazyInitializer.EnsureInitialized(ref m_parkGate, static () => new SemaphoreSlim(0, 1));
+
+    /// <summary>
+    /// Blocks the calling goroutine on its own park gate until <see cref="ReleaseParkGate"/> — the
+    /// wait half of the runtime's managed <c>gopark</c>. Call it inside the <see cref="Park"/> scope,
+    /// after the park is committed.
+    /// </summary>
+    public static void WaitOnParkGate()
+    {
+        if (t_current is not { } goroutine)
+            throw new InvalidOperationException("golib: WaitOnParkGate on a thread with no goroutine identity");
+
+        goroutine.ParkGate.Wait();
+    }
+
+    /// <summary>
+    /// Releases this goroutine from <see cref="WaitOnParkGate"/> — the signal half of the runtime's
+    /// managed <c>ready</c>, called after <see cref="Ready"/>.
+    /// </summary>
+    public void ReleaseParkGate() => ParkGate.Release();
+
+    /// <summary>
+    /// The live goroutine with the given id, or <c>null</c> once it has exited. How the runtime's
+    /// <c>ready</c> resolves a <c>g</c> to its goroutine (<c>g.goid</c> is this id), with no table
+    /// of its own; ids are never reused, so a stale <c>g</c> answers <c>null</c> rather than a
+    /// stranger.
+    /// </summary>
+    public static Goroutine? FromId(long id) => s_live.TryGetValue(id, out Goroutine? goroutine) ? goroutine : null;
+
     /// <summary>
     /// Sets the calling goroutine's profile labels — Go's <c>getg().labels = labels</c>.
     /// </summary>

@@ -474,6 +474,15 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// mime's registry reader reach it through startTemplateThread); it takes the same body.
 		"lockOSThread":   goosAny,
 		"unlockOSThread": goosAny,
+		// The park pair (S1b, docs/phase4/DESIGN-gopark-goready-synctest.md). The converted gopark ends
+		// in mcall(park_m) -- a g0 switch and a scheduler hand-off the managed runtime does not have --
+		// so every converted park reached the mcall stub (the runtime row died there, TestScavenger).
+		// gopark parks through golib's seam in Go's commit order; ready and injectglist (the batch form,
+		// scavengerState.wake's) resolve a g to its goroutine by goid and ready it on the waker's side.
+		// goready and goparkunlock stay converted. Bodies in park_impl.cs.
+		"gopark":      goosAny,
+		"ready":       goosAny,
+		"injectglist": goosAny,
 		// Pinner (Q45, docs/phase4/DESIGN-runtime-pinner.md). Address stability is the address-take's
 		// own contract for a managed ж<T> box (EnsureStableAddress at the pin moment, held for the
 		// box's life), so Pin takes no CLR pin — but the two OBSERVABLES Go's suite measures are real

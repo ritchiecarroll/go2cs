@@ -360,6 +360,7 @@ partial class runtime_package
         WaitReason.SyncRWMutexLock => waitReasonSyncRWMutexLock,
         WaitReason.SyncWaitGroupWait => waitReasonSyncWaitGroupWait,
         WaitReason.Coroutine => waitReasonCoroutine,
+        WaitReason.GCScavengeWait => waitReasonGCScavengeWait,
         _ => waitReasonZero,
     };
 

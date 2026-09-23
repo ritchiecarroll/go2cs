@@ -61,7 +61,9 @@ public class GoroutineParkAccountingTests
             [WaitReason.SyncRWMutexLock] = "sync.RWMutex.Lock",
             // Go 1.24's two, from go1.24.13's waitReasonStrings.
             [WaitReason.SyncWaitGroupWait] = "sync.WaitGroup.Wait",
-            [WaitReason.Coroutine] = "coroutine"
+            [WaitReason.Coroutine] = "coroutine",
+            // The runtime's managed gopark (S1b), first set by scavengerState.park.
+            [WaitReason.GCScavengeWait] = "GC scavenge wait"
         };
 
         // Both directions. The forward one catches a wrong string; this one catches a member added

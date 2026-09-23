@@ -373,56 +373,7 @@ internal static void goschedIfBusy() {
     mcall(gosched_m);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goparkBadGStatusˢ = "gopark: bad g status"u8;
-
-// Puts the current goroutine into a waiting state and calls unlockf on the
-// system stack.
-//
-// If unlockf returns false, the goroutine is resumed.
-//
-// unlockf must not access this G's stack, as it may be moved between
-// the call to gopark and the call to unlockf.
-//
-// Note that because unlockf is called after putting the G into a waiting
-// state, the G may have already been readied by the time unlockf is called
-// unless there is external synchronization preventing the G from being
-// readied. If unlockf returns false, it must guarantee that the G cannot be
-// externally readied.
-//
-// Reason explains why the goroutine has been parked. It is displayed in stack
-// traces and heap dumps. Reasons should be unique and descriptive. Do not
-// re-use reasons, add new ones.
-//
-// gopark should be an internal detail,
-// but widely used packages access it using linkname.
-// Notable members of the hall of shame include:
-//   - gvisor.dev/gvisor
-//   - github.com/sagernet/gvisor
-//
-// Do not remove or change the type signature.
-// See go.dev/issue/67401.
-//
-//go:linkname gopark
-internal static void gopark(Func<ж<g>, @unsafe.Pointer, bool> unlockf, @unsafe.Pointer @lock, waitReason reason, traceBlockReason traceReason, nint traceskip) {
-    if (reason != waitReasonSleep) {
-        checkTimeouts(); // timeouts may expire while two goroutines keep the scheduler busy
-    }
-    var mp = acquirem();
-    var gp = mp.Value.curg;
-    var status = readgstatus(gp);
-    if (status != _Grunning && status != _Gscanrunning) {
-        @throw(goparkBadGStatusˢ);
-    }
-    mp.Value.waitlock = @lock;
-    mp.Value.waitunlockf = unlockf;
-    gp.Value.waitreason = reason;
-    mp.Value.waitTraceBlockReason = traceReason;
-    mp.Value.waitTraceSkip = traceskip;
-    releasem(ref (mp).DerefOrNull());
-    // can't do anything that might move the G between Ms here.
-    mcall(park_m);
-}
+// go2cs generated this placeholder — func gopark is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Puts the current goroutine into a waiting state and unlocks the lock.
 // The goroutine can be made runnable again by calling goready(gp).
@@ -1054,29 +1005,7 @@ internal const bool osHasLowResTimer = /* GOOS == "windows" || GOOS == "openbsd"
 internal static UntypedInt osHasLowResClockInt => /* goos.IsWindows */ 1;
 internal const bool osHasLowResClock = /* osHasLowResClockInt > 0 */ true;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string badGStatusInReadyˢ = "bad g->status in ready"u8;
-
-// Mark gp ready to run.
-internal static void ready(ж<g> Ꮡgp, nint traceskip, bool next) {
-    var status = readgstatus(Ꮡgp);
-    // Mark runnable.
-    var mp = acquirem(); // disable preemption because it can be holding p in a local var
-    if ((uint32)(status & ~(uint32)_Gscan) != _Gwaiting) {
-        dumpgstatus(Ꮡgp);
-        @throw(badGStatusInReadyˢ);
-    }
-    // status is Gwaiting or Gscanwaiting, make Grunnable and put on runq
-    var Δtrace = traceAcquire();
-    casgstatus(Ꮡgp, _Gwaiting, _Grunnable);
-    if (Δtrace.ok()) {
-        Δtrace.GoUnpark(Ꮡgp, traceskip);
-        traceRelease(Δtrace);
-    }
-    runqput((~mp).p.ptr(), Ꮡgp, next);
-    wakep();
-    releasem(ref (mp).DerefOrNull());
-}
+// go2cs generated this placeholder — func ready is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // freezeStopWait is a large value that freezetheworld sets
 // sched.stopwait to in order to request that all Gs permanently stop.
@@ -3936,97 +3865,7 @@ internal static void resetspinning() {
     wakep();
 }
 
-// injectglist adds each runnable G on the list to some run queue,
-// and clears glist. If there is no current P, they are added to the
-// global queue, and up to npidle M's are started to run them.
-// Otherwise, for each idle P, this adds a G to the global queue
-// and starts an M. Any remaining G's are added to the current P's
-// local run queue.
-// This may temporarily acquire sched.lock.
-// Can run concurrently with GC.
-internal static void injectglist(ж<gList> Ꮡglist) {
-    ref var glist = ref Ꮡglist.DerefOrNull();
-
-    if (glist.empty()) {
-        return;
-    }
-    // Mark all the goroutines as runnable before we put them
-    // on the run queues.
-    var head = glist.head.ptr();
-    ж<g> tail = default!;
-    nint qsize = 0;
-    var Δtrace = traceAcquire();
-    for (var gp = head; gp != nil; gp = (~gp).schedlink.ptr()) {
-        tail = gp;
-        qsize++;
-        casgstatus(gp, _Gwaiting, _Grunnable);
-        if (Δtrace.ok()) {
-            Δtrace.GoUnpark(gp, 0);
-        }
-    }
-    if (Δtrace.ok()) {
-        traceRelease(Δtrace);
-    }
-    // Turn the gList into a gQueue.
-    ref var q = ref heap(new gQueue(), out var Ꮡq);
-    q.head.set(head);
-    q.tail.set(tail);
-    glist = new gList(nil);
-    void startIdle(nint nΔ1) {
-        for (nint i = 0; i < nΔ1; i++) {
-            var mp = acquirem(); // See comment in startm.
-            @lock(Ꮡsched.of(schedt.Ꮡlock));
-            var (ppΔ1, _) = pidlegetSpinning(0);
-            if (ppΔ1 == nil) {
-                unlock(Ꮡsched.of(schedt.Ꮡlock));
-                releasem(ref (mp).DerefOrNull());
-                break;
-            }
-            startm(ppΔ1, false, true);
-            unlock(Ꮡsched.of(schedt.Ꮡlock));
-            releasem(ref (mp).DerefOrNull());
-        }
-    }
-    var pp = (~(~getg()).m).p.ptr();
-    if (pp == nil) {
-        @lock(Ꮡsched.of(schedt.Ꮡlock));
-        globrunqputbatch(ref q, (int32)qsize);
-        unlock(Ꮡsched.of(schedt.Ꮡlock));
-        startIdle(qsize);
-        return;
-    }
-    nint npidle = (nint)Ꮡsched.of(schedt.Ꮡnpidle).Load();
-    gQueue globq = default!;
-    nint n = default!;
-    for (n = 0; n < npidle && !q.empty(); n++) {
-        var g = q.pop();
-        globq.pushBack(g);
-    }
-    if (n > 0) {
-        @lock(Ꮡsched.of(schedt.Ꮡlock));
-        globrunqputbatch(ref globq, (int32)n);
-        unlock(Ꮡsched.of(schedt.Ꮡlock));
-        startIdle(n);
-        qsize -= n;
-    }
-    if (!q.empty()) {
-        runqputbatch(pp, Ꮡq, qsize);
-    }
-    // Some P's might have become idle after we loaded `sched.npidle`
-    // but before any goroutines were added to the queue, which could
-    // lead to idle P's when there is work available in the global queue.
-    // That could potentially last until other goroutines become ready
-    // to run. That said, we need to find a way to hedge
-    //
-    // Calling wakep() here is the best bet, it will do nothing in the
-    // common case (no racing on `sched.npidle`), while it could wake one
-    // more P to execute G's, which might end up with >1 P's: the first one
-    // wakes another P and so forth until there is no more work, but this
-    // ought to be an extremely rare case.
-    //
-    // Also see "Worker thread parking/unparking" comment at the top of the file for details.
-    wakep();
-}
+// go2cs generated this placeholder — func injectglist is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string scheduleHoldingLocksˢ = "schedule: holding locks"u8;

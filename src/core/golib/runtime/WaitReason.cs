@@ -96,7 +96,14 @@ public enum WaitReason
     SyncWaitGroupWait,
 
     /// <summary>"coroutine" — a coroutine (<c>iter.Pull</c>) parked in a switch to its peer.</summary>
-    Coroutine
+    Coroutine,
+
+    /// <summary>
+    /// "GC scavenge wait" — the background scavenger parked until it is woken. Set by the runtime's
+    /// managed <c>gopark</c> (runtime <c>park_impl.cs</c>), the first converted caller to reach it
+    /// being <c>scavengerState.park</c> (runtime's TestScavenger).
+    /// </summary>
+    GCScavengeWait
 }
 
 /// <summary>
@@ -131,6 +138,7 @@ public static class WaitReasons
         WaitReason.SyncRWMutexLock => "sync.RWMutex.Lock",
         WaitReason.SyncWaitGroupWait => "sync.WaitGroup.Wait",
         WaitReason.Coroutine => "coroutine",
+        WaitReason.GCScavengeWait => "GC scavenge wait",
         _ => "unknown wait reason"
     };
 
