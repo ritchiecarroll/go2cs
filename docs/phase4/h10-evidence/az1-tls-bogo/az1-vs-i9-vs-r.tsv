@@ -1,0 +1,13 @@
+case	i9_go	i9_cs	R_go	R_cs	AZ1_go	AZ1_cs
+TestBogoSuite	pass	fail	pass	pass	fail	pass
+TestBogoSuite/ALPNClient-TLS-TLS13	pass	fail	pass	pass	pass	pass
+TestBogoSuite/CertificateVerificationSucceed-Client-TLS1-CustomCallback-TLS-Sync	skip	fail	skip	skip	skip	skip
+TestBogoSuite/ChannelID-Client-TLS12-TLS-Async-SplitHandshakeRecords	skip	fail	skip	skip	skip	skip
+TestBogoSuite/ChannelID-Server-TLS12-TLS-Sync	skip	fail	skip	skip	skip	skip
+TestBogoSuite/Compliance-wpa-202304-TLS-Server-RSA_PKCS1_SHA384	skip	fail	skip	skip	skip	skip
+TestBogoSuite/FalseStart-SessionTicketsDisabled-TLS-Async-ImplicitHandshake	skip	fail	skip	skip	skip	skip
+TestBogoSuite/MinimumVersion-Server2-TLS12-TLS11-TLS	pass	fail	pass	pass	pass	pass
+TestBogoSuite/NoExtendedMasterSecret-TLS12-Server	pass	fail	pass	pass	pass	pass
+TestBogoSuite/TLS-TLS1-ECDHE_ECDSA_WITH_AES_128_CBC_SHA-server	skip	fail	skip	skip	skip	skip
+TestBogoSuite/TLS-TLS11-ECDHE_RSA_WITH_AES_128_CBC_SHA-LargeRecord	pass	fail	pass	pass	pass	pass
+TestBogoSuite/WrongMessageType-CertificateVerify-TLS	pass	fail	pass	pass	pass	pass

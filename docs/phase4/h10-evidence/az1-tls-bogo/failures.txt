@@ -1,0 +1,37 @@
+AZ1 crypto/tls @ 4a960d31a3 (STAMP fc6269b0bf, 8e) -- the 9 undisclosed divergences, by E.4's derivation
+All 9 are Go="fail" / C#="pass". The C# side has NO failure text: every one of them passed in the converted
+host. The text quoted is therefore the GO side's (the oracle's `go test -json` stream, which the wrapper kept in
+output-no-summary.txt; that file is held off the branch, see EVIDENCE.md). Only loopback ports appear in it;
+nothing needed redaction.
+
+name	go	cs	Go failure text (bogo_shim_test.go:484, first line) / the shim's own stdout line
+TestBogoSuite	fail	pass	no message of its own: `--- FAIL: TestBogoSuite (20.85s)` after its leaves failed (fetchmodule.go:40 fetched the pinned boringssl module first)
+TestBogoSuite/CurveTest-Invalid-PadKeyShare-Client-P-521-TLS13	fail	pass	bad error (wanted "" / "local error: bad record MAC"): local error "read tcp [::1]:55215->[::1]:55965: wsarecv: An existing connection was forcibly closed by the remote host.", child error "exit status 1" / shim: unexpected error type returned: tls: invalid server key share
+TestBogoSuite/CurveTest-Invalid-PadKeyShare-Client-X25519-TLS13	fail	pass	bad error (wanted "" / "local error: bad record MAC"): local error "tls: error reading TLS 1.3 ChangeCipherSpec: read tcp [::1]:55215->[::1]:56010: wsarecv: An existing connection was forcibly closed by the remote host.", child error "exit status 1" / shim: unexpected error type returned: tls: invalid server key share
+TestBogoSuite/MinimumVersion-Client-TLS11-TLS1-TLS	fail	pass	bad error (wanted "" / "remote error: protocol version not supported"): local error "read tcp [::1]:55215->[::1]:55507: wsarecv: An existing connection was forcibly closed by the remote host.", child error "exit status 1" / shim: unexpected error type returned: tls: server selected unsupported protocol version 301
+TestBogoSuite/MinimumVersion-Client-TLS12-TLS11-TLS	fail	pass	bad error (wanted "" / "remote error: protocol version not supported"): local error "read tcp [::1]:55215->[::1]:55510: wsarecv: An existing connection was forcibly closed by the remote host.", child error "exit status 1" / shim: unexpected error type returned: tls: server selected unsupported protocol version 302
+TestBogoSuite/MinimumVersion-Client2-TLS12-TLS11-TLS	fail	pass	bad error (wanted "" / "remote error: protocol version not supported"): local error "read tcp [::1]:55215->[::1]:55511: wsarecv: An existing connection was forcibly closed by the remote host.", child error "exit status 1" / shim: unexpected error type returned: tls: server selected unsupported protocol version 302
+TestBogoSuite/TrailingMessageData-TLS13-ServerHello-TLS	fail	pass	bad error (wanted "" / "local error: bad record MAC"): local error "tls: error reading TLS 1.3 ChangeCipherSpec: read tcp [::1]:55215->[::1]:56215: wsarecv: An existing connection was forcibly closed by the remote host.", child error "exit status 1" / shim: unexpected error type returned: local error: tls: unexpected message
+TestBogoSuite/WrongMessageType-ClientCertificate-TLS	fail	pass	bad error (wanted "" / "remote error: unexpected message"): local error "read tcp [::1]:55215->[::1]:56210: wsarecv: An existing connection was forcibly closed by the remote host.", child error "exit status 1" / shim: unexpected error type returned: local error: tls: unexpected message
+TestBogoSuite/WrongMessageType-TLS13-ClientCertificate-TLS	fail	pass	bad error (wanted "" / "remote error: unexpected message"): local error "read tcp [::1]:55215->[::1]:56206: wsarecv: An existing connection was forcibly closed by the remote host.", child error "exit status 1" / shim: unexpected error type returned: local error: tls: unexpected message
+
+Standalone Go reading AFTER the row (E.6: GOROOT's own crypto/tls, same env.ps1, -count=1 -timeout 30m
+-tags purego,math_big_pure_go -run '^TestBogoSuite$' -json): TestBogoSuite FAIL in 10.81 s, 3418 leaves =
+1008 pass / 2396 skip / 14 fail, ALL 14 the same shape (bad error ... wsarecv: An existing connection was
+forcibly closed by the remote host). The 14:
+TestBogoSuite/CurveTest-Invalid-TruncateKeyShare-Client-P-256-TLS13
+TestBogoSuite/Downgrade-TLS12-Client
+TestBogoSuite/UnofferedExtension-Client
+TestBogoSuite/MinimumVersion-Client-TLS13-TLS12-TLS
+TestBogoSuite/MinimumVersion-Client2-TLS12-TLS1-TLS
+TestBogoSuite/WrongMessageType-ClientCertificate-TLS
+TestBogoSuite/CurveTest-Invalid-PadKeyShare-Client-X25519-TLS13
+TestBogoSuite/MinimumVersion-Client2-TLS12-TLS11-TLS
+TestBogoSuite/UnexpectedUnencryptedExtension-Client-TLS13
+TestBogoSuite/MinimumVersion-Client2-TLS13-TLS12-TLS
+TestBogoSuite/Downgrade-TLS11-Client
+TestBogoSuite/MinimumVersion-Client2-TLS13-TLS11-TLS
+TestBogoSuite/CurveTest-Invalid-Compressed-Client-P-384-TLS13
+TestBogoSuite/CurveTest-Invalid-TruncateKeyShare-Client-MLKEM-TLS13
+3 of the row's 8 failing leaves failed again standalone (PadKeyShare-Client-X25519-TLS13,
+MinimumVersion-Client2-TLS12-TLS11-TLS, WrongMessageType-ClientCertificate-TLS); 5 passed; 11 others failed.
