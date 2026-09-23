@@ -41,3 +41,22 @@ at Go 1.24, and Windows never reaches it.
 - encoding/binary `TestSizeAllocs/{complex64, complex128, binary.Struct}` read pass/pass.
 - math/big `TestNewIntAllocs` reads fail/fail, a matched both-fail.
 - bytes `TestGrow` reads pass/fail and is disclosed (alloc-profile).
+
+## Amended 2026-09-23 — the three unprivileged readings after the leg
+
+Same WSL arm and pins, run as the go1.24.13 install's unprivileged owner. The 1.23.12 Linux
+annotations were ROOT readings, so a test that skips itself under root can move. syscall's
+TestUnshareUidGidMapping is the measured case. `records/<row>.verdicts.json` is each row's comparison
+record reduced to its verdict fields: package, status, go, csharp, matched, skipped, disclosed,
+excluded and environment. `errors` and `stderr` are dropped because they carry host paths and the
+host's own run output. The go and csharp maps reproduce the counts below.
+
+| Row | Tree | Reading | Wall |
+|:--|:--|:--|--:|
+| `syscall` | `5b9ebc5e50` (the descriptor-limit restore + two disclosures, on `971d919113`) | VALIDATED 45 + 11, 56 of 56 C# rows (banked `ce065f8aa9`) | 132 s |
+| `sync/atomic` | `b293973e9f` (the vgetrandom seat), `-TestTimeout 150m` | VALIDATED 108, confirming `linux: 108`; the 90m floor was the leg's FAIL (floor seat `48e1e4d245`) | 5,868 s |
+| `net` | `fc6269b0bf` (batch 8e) | FAILING on one undisclosed verdict: 581 matched + 2 disclosed of 584; `TestIPAppendTextNoAllocs` pass / fail at 3 allocations per run (pinned in batch 8f) | 357 s |
+
+net's host qualification at that tip: Go's own `go test -count=1 -timeout 40m net` read rc 1 in 41 s,
+with 578 pass, 24 skip and 1 fail, `TestLookupCNAME` (the tolerated drift). In the leg's reading one
+test that now passes was a skip.
