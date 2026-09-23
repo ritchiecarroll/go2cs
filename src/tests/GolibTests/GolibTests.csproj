@@ -145,6 +145,10 @@
          AfterFunc inside a bubble, through its converted public surface over time_impl.cs. -->
     <ProjectReference Include="..\..\core\time\time.csproj" />
 
+    <!-- The synctest pull guards (SyncTestPullsTests) call internal/synctest's converted surface
+         (Run, Wait, Acquire, Bubble.Release, Bubble.Run) over its hand-owned companion. -->
+    <ProjectReference Include="..\..\core\internal\synctest\internal.synctest.csproj" />
+
     <!-- The Linux spawn-seam gates (LinuxSpawnSeamTests) drive syscall.StartProcess/Wait4 —
          the converted surface over the posix_spawn hand-own, per the exec-wall design's §5.1
          and OQ-2 measured gates. The gate FILE compiles only under the linux corpus flavor

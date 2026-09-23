@@ -873,6 +873,7 @@ partial class time_package
     {
         SyncTestBubble.CheckTimers = checkBubbleTimers;
         SyncTestBubble.NextTimerWake = nextBubbleTimerWake;
+        SyncTestBubble.AsyncTimerChan = asyncTimerChan;
     }
 
     // Resolves a Timer/Ticker box to its hidden runtime state.

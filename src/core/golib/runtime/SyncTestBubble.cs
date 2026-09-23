@@ -50,8 +50,15 @@ namespace go.golib;
 /// why it is idle here as it is in Go.
 /// </para>
 /// <para>
-/// <b>Not yet:</b> <c>internal/synctest</c>'s pulls (S4). Bubbled channels (S2) tag at make in
-/// <c>ChanCore.Bubble</c>.
+/// <b>The pulls (S4).</b> <c>internal/synctest</c>'s five linkname pulls land here through its
+/// hand-owned companion: <c>Run</c> → <see cref="Run"/>, <c>Wait</c> → <see cref="Wait"/>,
+/// <c>acquire</c> → <see cref="Acquire"/>, <c>release</c> → <see cref="Release"/>, <c>inBubble</c> →
+/// <see cref="InBubble"/>. Bubbled channels (S2) tag at make in <c>ChanCore.Bubble</c>.
+/// </para>
+/// <para>
+/// The panics a Go program can <c>recover</c> are raised through <see cref="builtin.panic"/>, so the
+/// recovered value is a Go <c>string</c> as it is in <c>runtime/synctest.go</c>; the runtime's own
+/// <c>throw</c>s (<c>active &lt; 0</c> and the like) stay plain <see cref="PanicException"/>s.
 /// </para>
 /// </remarks>
 public sealed class SyncTestBubble
@@ -82,6 +89,9 @@ public sealed class SyncTestBubble
     /// <summary>The calling goroutine's bubble, or <c>null</c>.</summary>
     public static SyncTestBubble? Current => Goroutine.Current?.Bubble;
 
+    /// <summary>The goroutine that called <see cref="Run"/> (Go's <c>synctestGroup.root</c>).</summary>
+    public Goroutine Root => m_root;
+
     /// <summary>The bubble's fake clock, in nanoseconds since the Unix epoch; <see cref="Run"/> advances it.</summary>
     public long Now
     {
@@ -107,6 +117,14 @@ public sealed class SyncTestBubble
     /// order: bubble, then time's timer lock).
     /// </summary>
     public static Func<SyncTestBubble, long>? NextTimerWake { get; set; }
+
+    /// <summary>
+    /// Installed by package <c>time</c>: whether <c>GODEBUG=asynctimerchan</c> is nonzero, read live
+    /// from the same setting time's timers read (Go's <c>debug.asynctimerchan.Load() != 0</c>). A bubble
+    /// needs synchronous timer channels, so <see cref="Run"/> refuses under the asynchronous model.
+    /// Unset (time never loaded) reads as the default, synchronous.
+    /// </summary>
+    public static Func<bool>? AsyncTimerChan { get; set; }
 
     // The counts, read under the bubble's lock: the guards' view.
     public int Total { get { lock (m_mu) return m_total; } }
@@ -252,10 +270,13 @@ public sealed class SyncTestBubble
     /// </summary>
     public static void Run(Action f)
     {
+        if (AsyncTimerChan?.Invoke() == true)
+            throw builtin.panic("synctest.Run not supported with asynctimerchan!=0");
+
         Goroutine gp = Goroutine.Current ?? throw new PanicException("synctest.Run on a thread with no goroutine identity");
 
         if (gp.Bubble is not null)
-            throw new PanicException("synctest.Run called from within a synctest bubble");
+            throw builtin.panic("synctest.Run called from within a synctest bubble");
 
         SyncTestBubble sg = new(gp);
         gp.Bubble = sg;
@@ -335,7 +356,7 @@ public sealed class SyncTestBubble
             Monitor.Exit(sg.m_mu);
 
             if (total != 1)
-                throw new PanicException("deadlock: all goroutines in bubble are blocked");
+                throw builtin.panic("deadlock: all goroutines in bubble are blocked");
         }
         finally
         {
@@ -352,12 +373,12 @@ public sealed class SyncTestBubble
         Goroutine? gp = Goroutine.Current;
 
         if (gp?.Bubble is not { } sg)
-            throw new PanicException("goroutine is not in a bubble");
+            throw builtin.panic("goroutine is not in a bubble");
 
         lock (sg.m_mu)
         {
             if (sg.m_waiting)
-                throw new PanicException("wait already in progress");
+                throw builtin.panic("wait already in progress");
 
             sg.m_waiting = true;
         }
@@ -389,6 +410,48 @@ public sealed class SyncTestBubble
 
             sg.m_waiter = null;
             sg.m_waiting = false;
+        }
+    }
+
+    // ---- acquire / release / inBubble (runtime/synctest.go; internal/synctest's Bubble) ----
+
+    /// <summary>
+    /// Go's <c>synctest_acquire</c>: the caller's bubble with one more source of activity, so it cannot
+    /// idle until <see cref="Release"/>; <c>null</c> outside a bubble.
+    /// </summary>
+    public static SyncTestBubble? Acquire()
+    {
+        if (Current is not { } sg)
+            return null;
+
+        sg.IncActive();
+        return sg;
+    }
+
+    /// <summary>Go's <c>synctest_release</c>: gives back an <see cref="Acquire"/>d activity.</summary>
+    public void Release() => DecActive();
+
+    /// <summary>
+    /// Go's <c>synctest_inBubble</c>: runs <paramref name="f"/> on the calling goroutine as a member of
+    /// <paramref name="sg"/>, and leaves it again. As in Go, the goroutine joins without being counted
+    /// into <c>Total</c> / <c>Running</c>: its caller holds an <see cref="Acquire"/>d activity for it.
+    /// </summary>
+    public static void InBubble(SyncTestBubble sg, Action f)
+    {
+        Goroutine gp = Goroutine.Current ?? throw new PanicException("synctest inBubble on a thread with no goroutine identity");
+
+        if (gp.Bubble is not null)
+            throw builtin.panic("goroutine is already bubbled");
+
+        gp.Bubble = sg;
+
+        try
+        {
+            f();
+        }
+        finally
+        {
+            gp.Bubble = null;
         }
     }
 }

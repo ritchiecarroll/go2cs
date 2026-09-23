@@ -113,6 +113,7 @@ public sealed class TestExecution
     private int m_logCharacters;
     private int m_logsDropped;
     private int m_ownerThread;
+    private Goroutine? m_ownerGoroutine;
     private int m_tempDirSequence;
 
     // Set under m_syncRoot on the FIRST TempDir call, where the PARENT directory's removal is registered
@@ -333,6 +334,13 @@ public sealed class TestExecution
 
     public void FailNow()
     {
+        if (InOwnersBubble())
+        {
+            // Go: c.Fail(); c.finished = true; runtime.Goexit() -- on THIS goroutine (see InOwnersBubble).
+            Fail();
+            throw new GoexitException();
+        }
+
         if (!TryEnsureOwner(nameof(FailNow)))
             return;
         Fail();
@@ -341,12 +349,42 @@ public sealed class TestExecution
 
     public void SkipNow()
     {
+        if (InOwnersBubble())
+        {
+            // Go: c.skipped = true; c.finished = true; runtime.Goexit() -- on THIS goroutine.
+            lock (m_syncRoot)
+                m_skipped = true;
+            throw new GoexitException();
+        }
+
         if (!TryEnsureOwner(nameof(SkipNow)))
             return;
         lock (m_syncRoot)
             m_skipped = true;
         throw new TestAbortException();
     }
+
+    /// <summary>
+    /// Whether the caller is a goroutine of a <c>synctest</c> bubble whose <c>Run</c> this test's own
+    /// goroutine called -- the one place this host's owner rule for <see cref="FailNow"/> and
+    /// <see cref="SkipNow"/> is waived.
+    /// </summary>
+    /// <remarks>
+    /// Go checks no owner here at all: <c>FailNow</c> and <c>SkipNow</c> mark the test and
+    /// <c>runtime.Goexit</c> whatever goroutine called them. <c>synctest.Run</c> runs its function on a
+    /// NEW goroutine, so a <c>t.Skip</c> inside the bubble (net/http's
+    /// <c>TestTransportIdleConnRacesRequest/h2unencrypted</c>) ends that goroutine, the bubble then has
+    /// no member left, <c>Run</c> returns on the test's goroutine, and the test finishes as skipped.
+    /// Refusing it, as <see cref="TryEnsureOwner"/> does for every other goroutine, turned that into an
+    /// undisclosable infrastructure error. The waiver is exactly as wide as the bubble: a member unwinds
+    /// with <see cref="GoexitException"/>, which ends THAT goroutine (its defers run, and the bubble
+    /// counts it exited), where the owner's own <see cref="TestAbortException"/> would unwind a stack
+    /// that is not the test's. Anything else off the test's goroutine is still refused.
+    /// </remarks>
+    private bool InOwnersBubble() =>
+        m_ownerGoroutine is not null &&
+        Environment.CurrentManagedThreadId != m_ownerThread &&
+        SyncTestBubble.Current?.Root == m_ownerGoroutine;
 
     /// <summary>
     /// Go's <c>common.logDepth</c> (testing.go:1015-1032): append one record to this test's output,
@@ -1137,6 +1175,7 @@ public sealed class TestExecution
     {
         Stopwatch timer = Stopwatch.StartNew();
         m_ownerThread = Environment.CurrentManagedThreadId;
+        m_ownerGoroutine = Goroutine.Current;
         s_current.Value = this;
         m_runner.Report(new TestEvent(m_runner.Package, Name, "run", Source: Source, Line: Line));
 
