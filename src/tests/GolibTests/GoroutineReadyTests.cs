@@ -345,6 +345,158 @@ public class GoroutineReadyTests
             _ => { RuntimeSemaphore.Acquire(s1, WaitReason.Semacquire); RuntimeSemaphore.Release(s2, false); });
     }
 
+    // ---- S1a2: WaitGroup and Coro ------------------------------------------------------------------
+
+    [TestMethod]
+    public void AWaitGroupWaitIsReadiedByTheDoneThatReachesZero()
+    {
+        ж<Δsync.WaitGroup> wg = @new<Δsync.WaitGroup>();
+        wg.Add(1);
+        AssertReadiedByWaker(() => wg.Wait(), () => wg.Done(), WaitReason.SyncWaitGroupWait);
+    }
+
+    [TestMethod]
+    public void EveryWaitGroupWaiterIsReadiedByTheDoneThatReachesZero()
+    {
+        ж<Δsync.WaitGroup> wg = @new<Δsync.WaitGroup>();
+        wg.Add(1);
+
+        Parker p1 = StartParker(() => wg.Wait());
+        Parker p2 = StartParker(() => wg.Wait());
+        AwaitParked(p1);
+        AwaitParked(p2);
+
+        using ReadyRecorder recorder = new(target => (ReferenceEquals(target, p1.G) && p1.Resumed) || (ReferenceEquals(target, p2.G) && p2.Resumed));
+
+        wg.Done();
+        AwaitDone(p1);
+        AwaitDone(p2);
+
+        ReadyEvent[] seen = recorder.Seen.ToArray();
+        Assert.AreEqual(2, seen.Length, "the Done that reaches zero readies every waiter");
+        Assert.AreNotSame(seen[0].Target, seen[1].Target, "one waiter readied twice");
+
+        foreach (ReadyEvent e in seen)
+        {
+            Assert.AreEqual(WaitReason.SyncWaitGroupWait, e.Reason);
+            Assert.IsFalse(e.ResumedAtReady, "readied after it resumed");
+        }
+    }
+
+    [TestMethod]
+    public void AWaitGroupWaitAtZeroReturnsWithoutParking()
+    {
+        // Go: `if v == 0 { return }` -- no park, so nothing to ready and no transition.
+        ж<Δsync.WaitGroup> wg = @new<Δsync.WaitGroup>();
+        ConcurrentQueue<WaitReason> parks = new();
+        Action<WaitReason, bool>? previous = Goroutine.ParkTransition;
+        Goroutine.ParkTransition = (reason, entering) => { if (entering) parks.Enqueue(reason); previous?.Invoke(reason, entering); };
+
+        try
+        {
+            Parker p = StartParker(() => wg.Wait());
+            AwaitDone(p);
+        }
+        finally
+        {
+            Goroutine.ParkTransition = previous;
+        }
+
+        Assert.AreEqual(-1, Array.IndexOf(parks.ToArray(), WaitReason.SyncWaitGroupWait), "Wait on a zero counter parked");
+    }
+
+    private sealed class Flag
+    {
+        private volatile bool m_value;
+        internal bool Value { get => m_value; set => m_value = value; }
+    }
+
+    [TestMethod]
+    public void ACoroutineSwitchReadiesItsPeer()
+    {
+        ConcurrentQueue<ReadyEvent> seen = new();
+        Flag bodyRan = new();
+        Coro coro = Coro.Start(() => bodyRan.Value = true);
+        Goroutine? resumer = null;
+
+        Action<Goroutine, WaitReason>? previous = Goroutine.ReadyTransition;
+        Goroutine.ReadyTransition = (target, reason) =>
+        {
+            bool resumed = !ReferenceEquals(target, resumer) && bodyRan.Value;
+            previous?.Invoke(target, reason);
+            seen.Enqueue(new ReadyEvent(target, reason, resumed, Δruntime.GoStatusOf(target)));
+        };
+
+        try
+        {
+            Parker p = StartParker(() => { resumer = Goroutine.Current; coro.Switch(); });
+            AwaitDone(p);
+        }
+        finally
+        {
+            Goroutine.ReadyTransition = previous;
+        }
+
+        ReadyEvent[] events = seen.ToArray();
+        Assert.AreEqual(2, events.Length, "a first switch readies the coro goroutine, and its exit readies the resumer");
+        Assert.AreNotSame(resumer, events[0].Target, "the first ready is the coro goroutine");
+        Assert.AreEqual(WaitReason.Coroutine, events[0].Reason, "a coro goroutine parks as Go's 'coroutine'");
+        Assert.IsFalse(events[0].ResumedAtReady, "the coro body ran before its goroutine was readied");
+        Assert.AreEqual(Δruntime.GoStatusRunnable, events[0].StatusAfter);
+        Assert.AreSame(resumer, events[1].Target, "the coro's exit readies the goroutine that resumed it");
+        Assert.AreEqual(WaitReason.Coroutine, events[1].Reason);
+        Assert.IsTrue(bodyRan.Value);
+    }
+
+    [TestMethod]
+    public void AWaitGroupSurvivesAWakerParkerRace()
+    {
+        ж<Δsync.WaitGroup> wg = @new<Δsync.WaitGroup>();
+        channel<int> turn = new(0);
+        channel<int> back = new(0);
+
+        // Each round: one side Adds and hands the turn over, then Dones while the other Waits -- and
+        // does not Add again until that Wait has RETURNED (`back`). Go forbids reusing a WaitGroup
+        // before a previous Wait has returned ("WaitGroup is reused before previous Wait has
+        // returned"); the first cut of this arm did exactly that and hung, measuring the test's
+        // contract violation rather than the seam.
+        Race(20000,
+            _ => { wg.Add(1); turn.Send(0); wg.Done(); back.Receive(); },
+            _ => { turn.Receive(); wg.Wait(); back.Send(0); });
+    }
+
+    [TestMethod]
+    public void ACoroutineSurvivesAWakerParkerRace()
+    {
+        const int switches = 20000;
+        ConcurrentQueue<Exception> failures = new();
+        Coro? coro = null;
+
+        coro = Coro.Start(() =>
+        {
+            try
+            {
+                for (int i = 0; i < switches; i++)
+                    coro!.Switch();
+            }
+            catch (Exception ex)
+            {
+                failures.Enqueue(ex);
+            }
+        });
+
+        Parker p = StartParker(() =>
+        {
+            for (int i = 0; i <= switches; i++)
+                coro.Switch();
+        });
+
+        Assert.IsTrue(p.Done.Wait(TimeoutMs * 4), "the switch race never finished");
+        Assert.IsNull(p.Failure, $"the resumer failed: {p.Failure?.Message}");
+        Assert.IsTrue(failures.IsEmpty, $"the coro side failed: {(failures.TryPeek(out Exception? first) ? first.Message : "")}");
+        Assert.IsTrue(coro.Exited);
+    }
+
     [TestMethod]
     public void TheNotifyListSurvivesAWakerParkerRace()
     {

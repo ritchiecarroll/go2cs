@@ -76,6 +76,13 @@ public sealed class Coro
 
     private volatile bool m_exited;
 
+    // The two goroutines of the handoff, for the park accounting (golib's Goroutine.Park / Ready):
+    // the coro goroutine, published before the creation handshake, and the goroutine that most
+    // recently resumed the coro, published before it releases the coro. Either is null on a thread
+    // with no goroutine identity, where Park is inert and Ready a no-op.
+    private volatile Goroutine? m_coroGoroutine;
+    private volatile Goroutine? m_resumer;
+
     private Coro(Action body) => m_body = body;
 
     /// <summary>
@@ -143,17 +150,31 @@ public sealed class Coro
         if (m_exited)
             throw new InvalidOperationException("coro: coroswitch on exited coro");
 
+        // Go's coroswitch parks the caller with waitReasonCoroutine and makes the peer runnable in one
+        // step. Here each side parks FIRST (Go's commit order: the peer cannot run, and so cannot
+        // switch back and ready this side, until the release below), readies the peer on the waker's
+        // side, and only then hands it the permit.
         if (Environment.CurrentManagedThreadId == m_threadId)
         {
             // The coro side: hand control back, then park until resumed.
-            m_yield.Release();
-            m_resume.Wait();
+            using (Goroutine.Park(WaitReason.Coroutine))
+            {
+                Goroutine.Ready(m_resumer);
+                m_yield.Release();
+                m_resume.Wait();
+            }
 
             return;
         }
 
-        m_resume.Release();
-        m_yield.Wait();
+        m_resumer = Goroutine.Current;
+
+        using (Goroutine.Park(WaitReason.Coroutine))
+        {
+            Goroutine.Ready(m_coroGoroutine);
+            m_resume.Release();
+            m_yield.Wait();
+        }
     }
 
     // The coro goroutine, start to finish.
@@ -168,13 +189,19 @@ public sealed class Coro
             // rather than by reproducing any of it.
             Goroutine.Run(() =>
             {
-                // Published before the handshake, so Start's wait orders both the id and the
-                // goroutine registration ahead of anything the creator does next.
-                m_threadId = Environment.CurrentManagedThreadId;
-                m_started.Set();
+                // Created blocked, per Go's newcoro (newproc1(..., waitReasonCoroutine)) — the body
+                // runs on the first switch in. Parked BEFORE the handshake publishes this goroutine,
+                // so the first Switch can only ever find it parked when it readies it.
+                using (Goroutine.Park(WaitReason.Coroutine))
+                {
+                    // Published before the handshake, so Start's wait orders both the id and the
+                    // goroutine registration ahead of anything the creator does next.
+                    m_coroGoroutine = Goroutine.Current;
+                    m_threadId = Environment.CurrentManagedThreadId;
+                    m_started.Set();
 
-                // Created blocked, per Go's newcoro — the body runs on the first switch in.
-                m_resume.Wait();
+                    m_resume.Wait();
+                }
 
                 m_body();
             });
@@ -191,6 +218,10 @@ public sealed class Coro
             // released peer dies reporting the panic, while a peer still parked on a permit nobody
             // will release wedges the run until something outside it times out.
             m_exited = true;
+
+            // The resumer is parked in its Switch (the body only ever runs while it is), so it is
+            // readied before its permit, as every other switch does.
+            Goroutine.Ready(m_resumer);
             m_yield.Release();
         }
     }

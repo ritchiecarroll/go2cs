@@ -49,10 +49,13 @@ partial class sync_package
 
     // go1.24 SPLIT WaitGroup.Wait's acquire out of runtime_Semacquire into its own linkname --
     // "SemacquireWaitGroup is like Semacquire, but for WaitGroup.Wait" (sync/runtime.go:16 at
-    // 1.24.13), called from waitgroup.go:118. The SEMANTICS did not change, so this forwards to
-    // the same primitive with the same reason: golib's WaitReason.Semacquire is already documented
-    // as sync.WaitGroup.Wait's reason, which is what it meant before the split too.
-    internal static partial void runtime_SemacquireWaitGroup(ж<uint32> s) => RuntimeSemaphore.Acquire(s, WaitReason.Semacquire);
+    // 1.24.13), called from waitgroup.go:118. The semantics did not change; the REASON did: Go
+    // 1.24's sync_runtime_SemacquireWaitGroup parks with waitReasonSyncWaitGroupWait
+    // ("sync.WaitGroup.Wait", sema.go:110), so this forwards to the same primitive under that reason.
+    // (This comment formerly said the reason was unchanged -- true at 1.23, stale at 1.24.) The
+    // hand-owned WaitGroup (waitgroup.cs) does not reach this stub; it parks under the same reason
+    // on its own.
+    internal static partial void runtime_SemacquireWaitGroup(ж<uint32> s) => RuntimeSemaphore.Acquire(s, WaitReason.SyncWaitGroupWait);
 
 
     internal static partial void runtime_SemacquireRWMutex(ж<uint32> s, bool lifo, nint skipframes) => RuntimeSemaphore.Acquire(s, WaitReason.SyncRWMutexLock);

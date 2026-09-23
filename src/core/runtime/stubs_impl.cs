@@ -358,6 +358,8 @@ partial class runtime_package
         WaitReason.SyncMutexLock => waitReasonSyncMutexLock,
         WaitReason.SyncRWMutexRLock => waitReasonSyncRWMutexRLock,
         WaitReason.SyncRWMutexLock => waitReasonSyncRWMutexLock,
+        WaitReason.SyncWaitGroupWait => waitReasonSyncWaitGroupWait,
+        WaitReason.Coroutine => waitReasonCoroutine,
         _ => waitReasonZero,
     };
 

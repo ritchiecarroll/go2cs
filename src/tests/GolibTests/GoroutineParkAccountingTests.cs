@@ -58,7 +58,10 @@ public class GoroutineParkAccountingTests
             [WaitReason.SyncCondWait] = "sync.Cond.Wait",
             [WaitReason.SyncMutexLock] = "sync.Mutex.Lock",
             [WaitReason.SyncRWMutexRLock] = "sync.RWMutex.RLock",
-            [WaitReason.SyncRWMutexLock] = "sync.RWMutex.Lock"
+            [WaitReason.SyncRWMutexLock] = "sync.RWMutex.Lock",
+            // Go 1.24's two, from go1.24.13's waitReasonStrings.
+            [WaitReason.SyncWaitGroupWait] = "sync.WaitGroup.Wait",
+            [WaitReason.Coroutine] = "coroutine"
         };
 
         // Both directions. The forward one catches a wrong string; this one catches a member added
