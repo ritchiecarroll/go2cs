@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 07:27 -- SAVE-STATE refresh (ledger through mailbox fa23518a2b): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded to nuget-1.23.12.3, master ebb4acb8cf, the Linux packaging fix RULED (three gaps, three refs, one 1.24.13.2 train; G cut SEATS 1-2 and the len/cap seat; COORD reviewing seat 2); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 07:43 -- SAVE-STATE refresh (ledger through mailbox 9b14d044bf): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded to nuget-1.23.12.3, master ebb4acb8cf, the Linux packaging train CUT (seats 1-3 on origin, unmerged; COORD reviewing seats 2 and 3); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -312,8 +312,15 @@ boxing). CUT 2026-09-24 (ledger "RULING · 6c9aaae62e / 4378ae6cf2"), both UNMER
   stdLibExportedMetadata(name, goos) prefers them on the -recurse=nuget path. Its red-first arms are claimed. COORD's
   independent review is RUNNING (worktree C:/go2cs-tmp-coord/rv-seat2 on the i7; findings go to G in one message). OWED: CNR
   and the full converter suite.
-NEXT, post-release, from master:
-- packaging SEAT 3 (trampoline forwards), cleared to start from ebb4acb8cf;
+- claude/g-asm-trampolines (packaging SEAT 3, on ebb4acb8cf): pure-JMP .s trampolines take writeLinknameForwarder OUTSIDE
+  GOROOT only, through the curated asmTrampolineTargets registry (syscall.gettimeofday); syscall.prlimit joins
+  linknameForwardTargets. The scope and the registry are RULED ACCEPTED (ledger "RULING · f48e8010d1 / ba9d193861 /
+  b95abf9638"). COORD's independent review is RUNNING (worktree C:/go2cs-tmp-coord/rv-seat3). OWED: the two-seeded footprint
+  on all 3 targets, H7 x3, behavioral, and the full converter suite. The raw-SYSCALL residual is a follow-on sizing item.
+- The len/cap seat's retirement commit (math/big manifest deleted; PASS on both platforms) is ACCEPTED; the roster row rides
+  the bank.
+NEXT, G's heavy-run order (one at a time): the len/cap behavioral verdict; CNR for len/cap and seat 2; the converter suites
+  for seats 2 and 3; the seat-3 footprint, then H7 x3; the seat-1 rehearsal pack; the walkthrough at the union (local feed);
 - BY OWNER ORDER (ledger 93410e7ef9), UP NEXT: FIX THE LINUX PACKAGING PROBLEM. Your sizing found three gaps, and
   COORD RULED ALL THREE (ledger "RULING · ebb4acb8cf · THE LINUX PACKAGING FIX" plus its CORRECTION line): three refs from
   master, each red-first with its own gates, forming ONE 1.24.13.2 train. Order: (1) the go.lib buildTransitive
@@ -2039,3 +2046,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 07:17 -- SAVE-STATE refresh: 1c records packaging seat 1's review commit 501b7e4c27.
 - 2026-09-24 07:20 -- SAVE-STATE refresh: 1b records the 14 deprecations DONE and verified, the go.* prefix as an external wait, and the release-branch recommendation.
 - 2026-09-24 07:27 -- SAVE-STATE refresh: 1b records release/go1.23 fast-forwarded; 1c records packaging seat 2 and COORD's running review.
+- 2026-09-24 07:43 -- SAVE-STATE refresh: 1c records packaging seat 3, its design rulings, the len/cap retirement accepted, and G's heavy-run order.
