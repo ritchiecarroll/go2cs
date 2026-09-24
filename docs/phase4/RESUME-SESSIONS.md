@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 08:41 -- SAVE-STATE refresh (ledger through mailbox a6fd8764ca): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, the Linux packaging train CUT (seat 1 accepted, seat 2 ACCEPTED with 2-A required, seat 3 REWORK, a corpus half owed; review at docs/phase4/reviews/packaging-train-seats-2-3-review-2026-09-24.md), the RUNTIME row held by the owner's separate cloud project, and C2's literal revision 4 under COORD verification; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 08:43 -- SAVE-STATE refresh (ledger through mailbox 56300f7712): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, the Linux packaging train CUT (seat 1 accepted, seat 2 ACCEPTED with 2-A required, seat 3 REWORK, a corpus half owed; review at docs/phase4/reviews/packaging-train-seats-2-3-review-2026-09-24.md), G's len/cap seat GATE-COMPLETE, the RUNTIME row held by the owner's separate cloud project, and C2's literal revision 4 under COORD verification; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -315,9 +315,10 @@ The M9 sweep scratch and branch are deleted.
 DONE post-hop (all UNMERGED): claude/g-rec-b-oracle 814603bbbb (the REC-B -m oracle); claude/g-context-bprime-read da3402f3d3
 (routed to I3, sized first); claude/g-rsa-mathbig-decomp 6ab65f3409 (rsa closed to the object; math/big's bytes are len/cap
 boxing). CUT 2026-09-24 (ledger "RULING · 6c9aaae62e / 4378ae6cf2"), both UNMERGED:
-- claude/g-named-slice-len (the constrained len/cap golib seat, on 38529c765a). SHAPE ACCEPTED. OWED: the behavioral output
-  verdict (run from a short root because of MAX_PATH), CNR, and, BY RULING, the orphaned math/big TestMulUnbalanced disclosure
-  retired IN THE SEAT as a second commit with the linux reading;
+- claude/g-named-slice-len (the constrained len/cap golib seat, on 38529c765a, with the math/big retirement commit on top).
+  GATE-COMPLETE and ACCEPTED for a post-release train (ledger "ACCEPT · b95abf9638"): behavioral 691/691 and Output 663/2/26,
+  where the 2 failures also fail at base on G-LAPTOP (host readings); CNR byte-identical across 730. The roster row
+  230+1 -> 231+0 rides the bank;
 - claude/g-rid-compile-asset (packaging SEAT 1, on ebb4acb8cf). DESIGN ACCEPTED. COORD's two review notes landed on top as
   commit 501b7e4c27 (the `go.` prefix-coupling comment; a PUBLISH arm; 4/4 on linux-x64 and on win-x64). OWED: the
   isolated-clone rehearsal pack, -VerifyOnly, and the census identities.
@@ -2074,3 +2075,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 07:55 -- SAVE-STATE refresh: 1b/1c record the owner's runtime cloud-project trial; R keeps reflect.
 - 2026-09-24 08:06 -- SAVE-STATE refresh: 1b records the atomic-loads pick-not-merge finding and C2's revision 4 under verification.
 - 2026-09-24 08:41 -- SAVE-STATE refresh: 1c records the seats 2-3 review verdicts and the train's owed corpus half.
+- 2026-09-24 08:43 -- SAVE-STATE refresh: 1c records the len/cap seat gate-complete and seat 2's CNR.
