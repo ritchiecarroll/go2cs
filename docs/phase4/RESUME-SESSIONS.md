@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 11:54 -- SAVE-STATE refresh (ledger through mailbox 908e769c3c): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED, master ebb4acb8cf, THE 1.24.13.2 PACKAGING TRAIN ASSEMBLED on the i7 with its battery running (G's walkthrough GREEN on the shipping tree; a GolibTests Debug-guard commit da5c9345ea to merge after the battery), the OWNER'S STRING-TIER RULING recorded and assigned (C1 record, C2 O1 census, R views+G8+G10, G V-fix 11), and the RUNTIME project waiting on R; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 12:09 -- SAVE-STATE refresh (ledger through mailbox 52ed75bb66): section 1b is the COORD new-session prompt: master ebb4acb8cf; THE 1.24.13.2 PACKAGING TRAIN ASSEMBLED on the i7 (t1242), battery PART 1 GREEN on every leg it could run (CNR, go2cs.slnx, H7 windows, Release GolibTests), PART 2 running (merge G's guard fix, behavioral, GolibTests x2); the owner's string-tier ruling recorded (C1 §8.4) and assigned; the owner asks to be told when R's net/http fix lands; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -266,6 +266,12 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    SUMMARY is in scratchpad/t1242-logs. Legs, in order: the converter suite, the roster guard, go2cs.slnx, GolibTests, CNR,
    the full behavioral suite, a purge, then H7 windows. The worktree is FROZEN while it runs. G was asked whether its union
    tree equals 53f52233fc.
+   BATTERY PART 1 READINGS: converter suite PASS; roster guard 1,821 PASS under pwsh 7 (the 5.1 red is a pre-existing
+   instrument artifact); go2cs.slnx 0 errors; GolibTests Debug 3 FAIL (only the new len/cap guards; G's Inconclusive fix
+   da5c9345ea merges in part 2) and Release 842/0 PASS; CNR NO REGRESSION across 730; H7 windows CS 0, sites 0, 343/343.
+   PART 2 (t1242-battery2-run1.sh): merge da5c9345ea, purge, the FULL behavioral suite (part 1's refused on its 25 GB
+   preflight), then GolibTests at Debug and Release.
+   OWNER ASK: TELL THE OWNER when R's net/http fix (the synctest train) LANDS on master, so the runtime project resumes.
    IF THIS SESSION DIES MID-BATTERY: the scratchpad is gone, so re-create t1242 from the five tips above and rerun the legs.
    Then: announce on the ledger, push master (a fast-forward from ebb4acb8cf), and the OWNER RUNS the 1.24.13.2 release
    (step (c)'s procedure).
@@ -2127,3 +2133,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 10:18 -- SAVE-STATE refresh: 1b records the union gate GREEN and the pre-assembly items.
 - 2026-09-24 11:00 -- SAVE-STATE refresh: 1b records the train assembled and its battery running, and the runtime project waiting on R.
 - 2026-09-24 11:54 -- SAVE-STATE refresh: 1b/1c record the owner's tier ruling and its assignments.
+- 2026-09-24 12:09 -- SAVE-STATE refresh: 1b records battery part 1 readings, part 2 running, and the owner's net/http ping ask.
