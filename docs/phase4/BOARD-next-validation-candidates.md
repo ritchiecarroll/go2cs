@@ -26049,4 +26049,70 @@ reached through `unsafe.Pointer`. This line records its membership. It does not 
 
 — COORD
 
+## 2026-09-24 -- G: the crypto/rsa and math/big decompositions (post-hop, owed by O5)
+
+**Instrument.** A scratch worktree at `38529c765a`, never committed. It adds an env-gated per-site tally at
+`AllocationCounter`'s nine increment sites, and the key is the innermost golib type, the outermost golib
+method, and the first converted-code frame with its file and line. The tally is on for exactly ONE
+measured iteration of `AllocsPerRun`. For a `ReadMemStats` window it opens at the first call and closes at
+the second. Each package ran alone through `-tests -test-action all -test-filter`, at Release (TC0) with
+`DOTNET_JitNoInline=1` so that no golib frame is inlined away. Bytes the counter cannot see were sampled
+by type with an in-process `GCAllocationTick` listener, over the same `ReadMemStats` window. This is the
+method R used for encoding/binary (ledger 2026-09-24 00:54).
+
+### crypto/rsa TestAllocations -- 174,351 per run, closed to the OBJECT
+
+The tally sums to **174,351**, the recorded reading (readings TSV line 116). The same run printed
+`got 174351.0`. Line numbers are those of `crypto/internal/fips140/bigmod/nat.cs` at `38529c765a`:
+
+| share | sites | objects/run | % | plan |
+|:--|:--|--:|--:|:--|
+| element takes into `addMulVVW*` | `montgomeryMul` 1024-bit path :891 and :893 (two `Ꮡ` per line: 2,596 calls x 16 limbs x 2 = 83,072 per line); 2048-bit path :919 and :921 (2 calls x 32 x 2 = 128 per line) | 166,400 | 95.44 | REC-E |
+| `NewNat` | :71, the `preallocLimbs` backing, 2,676; :72, the `Ꮡ(new ΔNat(...))` box, 2,676 | 5,352 | 3.07 | REC-B, the INLINED-CALL-SITE stage ("NewNat inlines, so the allocation can live on the stack") |
+| `T` | :888 `new slice<nuint>(nΔ4 * 2)`, 2,596; :916, 2 | 2,598 | 1.49 | REC-B constant-capacity make |
+| the output | `Bytes` :164 | 1 | 0.00 | none; Go allocates it too |
+| **other address-take boxes** | **none observed** | **0** | 0 | the plan's zh-box Phase A leg has NO share |
+
+The disclosure's plan should drop the zh-box leg at its next re-sign. REC-E alone takes the row from
+174,351 to 7,951, and REC-B's two stages take it to 1 (both UNMEASURED). The 340,756 -> 174,351 MOVE across
+the hop stays unattributed, because the r58a tree was not re-read.
+
+### math/big TestMulUnbalanced -- the bytes are a NEW class: `len`/`cap` box every named slice type
+
+The recorded reading is 10,506,112 B, ratio 26. The ruled plan's premise, "the managed temp-nat slice<T>
+workspaces the recursive unbalanced multiply mints per block", is **falsified**. golib counts only 9,999
+objects in the window:
+
+- 3 `nat` backings = 403,296 B (the product, about 1x the input);
+- 9,992 element takes in `alias` (nat.cs:361, 4,996 calls x 2; 128 B per call, measured) = 639,488 B;
+- 4 one-offs (the pool).
+
+That is about 1.04 MB. The allocation-tick sampler attributes **11,510,368 of 12,232,848 sampled bytes
+(94 %) to the type `nat` itself**: a BOXED named-slice struct, which is compiler-emitted and outside the
+counter. The cause is overload resolution. `builtin` has `len<T>(in slice<T>)`, which a `nat` cannot bind:
+inference does not see the implicit conversion. It also has `len(ISlice)`, so every `len(x)` / `cap(x)`
+on ANY named slice type boxes it.
+
+Measured on `sort.IntSlice` with the scratch golib:
+
+- at TC0, `len` and `cap` cost 56 B per call each (112 B for `len` at tier 0); `slice<T>` costs 0;
+- a constrained `len<TS>(in TS s) where TS : ISlice` reads **0 B for both**, at TC0 and with
+  `DOTNET_JitNoInline=1`, so it is dispatch and not stack allocation.
+
+golib already made this exact move for `len<TSeq>(TSeq) where TSeq : IByteSeq` (builtin.cs:1734, whose
+remark says an interface parameter "boxes the caller's struct on every call").
+
+**Reach:** 97 named slice types (`[GoType("[]…")]`) in 70 corpus files; the call-site count is
+UNMEASURED. **Prediction** (UNMEASURED): the fix takes math/big's ratio from 26 to about 3, under the
+budget of 10, so the row would PASS. **Open for the fix seat:**
+
+- the ambiguity census, since a type implementing both `ISlice` and `IByteSeq` meets two constrained
+  generics;
+- a GolibTests zero-byte guard beside `SliceRangeAllocationTests`;
+- the corpus footprint (converted code is unchanged; this is golib only).
+
+The math/big plan re-points from zh-box §3.6 to that seat at its next re-sign.
+
+— G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
