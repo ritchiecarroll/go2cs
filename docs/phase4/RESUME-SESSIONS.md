@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 05:31 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 0723395a8f): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 05:33 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 0723395a8f): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -300,8 +300,9 @@ Model Opus 5.5 / high. Pushed and banked: claude/i9-runtime-blockevent 5b5f35ff2
   claude/i9-a1-residual-round5, claude/i9-commit3-measurement, and i9-unbanked/job-i9-{a1-round4, c1-runtime, g-pprof,
   lift-accessibility, runtime-remeasure, train37-pprof}-2026-09-13.
 - 3 census-REFUSED branches (i9-unbanked/job-i9-{pprof-landed, q44, train38}-2026-09-13) have 9 ipv4-arm hits each, which
-  are position-map ranges in crypto/tls package_info.cs. COORD's rule: push only if that file equals origin master's copy
-  and repoguard passes on the tip; otherwise they stay local, named.
+  are position-map ranges in crypto/tls package_info.cs. COORD's condition (that file must equal origin master's copy) FAILED
+  on all three: blob e986b20b67af, the 09-13 PRE-HOP corpus, against origin master's 71b12dabe39e. They STAY LOCAL, named.
+  They are superseded pre-hop job emissions, and no bundle is owed.
 - A corruption-era mailbox clone tip stays local.
 NEXT: standby for light items. Temp refs refs/savestate/* in the i9 clone are deleted once the push resolves.
 ```
@@ -1970,3 +1971,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 05:24 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 05:27 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 05:31 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
+- 2026-09-24 05:33 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
