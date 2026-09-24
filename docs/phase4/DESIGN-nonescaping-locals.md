@@ -14,6 +14,45 @@
 > and prediction rows. X(2)'s membership clause extends to net/netip and bytes TestNewBufferShallow
 > (COORD's ruling 5).
 
+> **Oracle feasibility MEASURED, 2026-09-24 (G, mechanism owner).** Candidate mechanism 1 was read at
+> the pinned toolchain (go1.24.13 windows/amd64, `go build -a -gcflags=<pkg>=-m`, the test binary via
+> `go test -c -gcflags=-m`) against six of this record's members and a four-function control package.
+> Five findings amend §2; none is yet a stage, and nothing here is cut:
+>
+> 1. **Silence is the FRAME answer for a `var`, so §2.1's precondition is inverted for it.** A local
+>    `var` that stays in the frame is never mentioned, even at `-m=2`: formatBits' `var a [64 + 1]byte`
+>    (strconv/itoa.go:94) and md5's `var digest [Size]byte` (crypto/md5/md5.go:181) are both absent.
+>    One that escapes prints `moved to heap: <name>` at the name (control: `var b [8]byte; sink = &b`
+>    reads `moved to heap: b`). Read literally, "a site the oracle does not mention is treated as
+>    escaping" refuses every member of the first stage. The rule becomes per construct: a `var` is
+>    frame-resident unless `moved to heap` names it. A `make`, `new`, composite literal or conversion
+>    prints BOTH answers explicitly (`does not escape` / `escapes to heap`), and for those, silence
+>    is still a refusal.
+> 2. **The inlined-call-site stage's precondition HOLDS.** An inlined `make` is reported at the CALLER's
+>    call site, per site: in the control package, `len(utf16.Decode(s))` reads `make([]rune, 0, 64) does
+>    not escape` and `return utf16.Decode(s)` reads `escapes to heap`. At the member itself, the test
+>    binary reads `utf16_test.go:132:17: make([]rune, 0, 64) does not escape` inside
+>    TestAllocationsDecode's closure. The package build alone reads utf16.go:119 as escaping, so the
+>    oracle must run on the build that holds the CALL SITE (the test binary, for a test member).
+> 3. **crypto/sha256 `Sum`'s class-3b allocation is ALSO an inlined-call-site allocation.**
+>    `sha256.go:57:10: new(sha256.Digest) does not escape` sits at `New(`'s parenthesis inside `Sum`
+>    (the same holds at :69 for Sum224). The escape happens in `New`'s body, inlined into Sum, not in
+>    a same-function `new`. So the value-carrier stage needs the inlined-call-site machinery for
+>    the digests' `@new<Digest>`, not a same-function carrier alone. Before the §4 rows for sha256 and
+>    sha512 are sized, every other class-3b member has to be re-read the same way.
+> 4. **The oracle's key is the node's OPERATOR position, not `ast.Node.Pos()`.** A call and a `make`
+>    or `new` are keyed at the left parenthesis (utf16.go:119:13, sha256.go:57:10), a `var` at its name
+>    (c.go:16:18), and a conversion at its operand's `[` (strconv/itoa.go:193:14, `string(a[i:])`).
+>    `Pos()` misses all three. The matcher keys on file and line, confirms the construct kind and the
+>    printed expression text, and REFUSES a line with two sites whose text is the same.
+> 5. **One body, one answer.** The emitted C# body is written once, so the answer it uses is the
+>    decision for the NON-inlined body (reported at the body's own positions). An inlined copy's
+>    answer (finding 2) never changes the callee's body. It can only select a caller-frame overload
+>    at that call site.
+>
+> Instruments and raw readings: G's scratch; they are reproducible from the commands above. The gate of §5
+> (controlled both ways) stands. Findings 1 and 4 are the first rows it must control.
+
 ## 0. The population
 
 Every allocation Go's escape analysis proves stays in the frame, so Go never heap-allocates it, and
