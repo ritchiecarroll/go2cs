@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 05:00 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 11b716e66c): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 05:15 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 8d9beadbe7): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -237,12 +237,23 @@ claude/r-p2-sweep-evidence. First action: ls-remote your refs, then continue the
 ```
 
 ```
-G (G-LAPTOP; windows side plus the WSL linux arm). The owner qualified the windows side on 2026-09-24: public DNS with IPv6
-unbound on Wi-Fi, Developer Mode, long paths. The WSL arm's localhost now includes ::1. Your sweep shard S-G is COMPLETE
-(127 PASS + context's host-timing reading); its evidence ref is claude/g-p2-sweep-evidence. Post-release queue: the WSL
-loopback attribution record (claude/g-posthop-wsl-loopback, done); srcimporter's timing-dependent oracle (claude/g-posthop-srcimporter;
-COORD rules a named TestImportStdLib disclosure after a windows import-count reading); crypto/tls linux is banked at 4760.
-First action: ls-remote your refs, then post a one-line STATE BLOCK to COORD.
+G (G-LAPTOP; windows side plus the WSL linux arm). Model Opus 5.5 / high. HOST STATE, set by the owner on 2026-09-24
+(dated backups exist): windows DNS public v4, Wi-Fi IPv6 unbound, Developer Mode on, LongPaths on; WSL hosts carry ::1
+localhost, and resolv.conf is pinned. pwsh needs DOTNET_ROOT plus .dotnet first on PATH.
+Your pushed refs, all accepted or records:
+- claude/g-p2-sweep-evidence 878eccf4af (S-G, P2);
+- claude/g-tls-linux-rebank 836004dd20;
+- claude/g-sync-atomic-floor, claude/g-net-linux-bank, claude/g-syscall-nofile-host, claude/g-vgetrandom-unsupported,
+  claude/g-linux-pin-retire, claude/g-linux-leg (+ -evidence);
+- claude/g-posthop-wsl-loopback 020365abcd; claude/g-posthop-srcimporter 949871cd6b.
+Open housekeeping: about 90 older claude/g-* branches exist only on G-LAPTOP. Push the ones not contained in any origin ref
+after a census, per COORD's rule of 2026-09-24.
+NEXT, post-release and UNMERGED until the release lands, from the version tip 972a9a6a41:
+- the REC-B mechanism design (DESIGN-nonescaping-locals.md);
+- the B'-admission read of context.cs:700/709/711;
+- the rsa r56d and math/big decompositions;
+- C1's REC-F review.
+READ-FIRST: docs/phase4/p2-sweep/G-LAPTOP/README.md on claude/g-p2-sweep-evidence; the sweep brief on claude/coord-handover.
 ```
 
 ```
@@ -1923,3 +1934,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-23 22:32 -- STAMP refresh: STATE DELTA 28 (the H10 close stamped at fa18863b94).
 - 2026-09-24 02:03 -- STAMP refresh: STATE DELTA 29 (post-close stamped; H11 running; sweep dispatched).
 - 2026-09-24 05:00 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
+- 2026-09-24 05:15 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
