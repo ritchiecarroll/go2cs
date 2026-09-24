@@ -1,0 +1,74 @@
+<Project>
+  <!--
+    go.lib.targets - Gbtc
+    Copyright © 2026 The go2cs Authors. All rights reserved.
+
+    Use of this source code is governed by an MIT-style license
+    that can be found in the LICENSE file.
+
+    A RID-SELECTED COMPILE ASSET for the multi-flavour go.* packages.
+
+    A package whose C# varies by GOOS ships ONE nupkg with its flavours merged by push-nuget.ps1
+    (layout L3; docs/phase4/DESIGN-multiplatform-corpus.md section 9 option (a)):
+
+      lib/<tfm>/syscall.dll                   compile asset + RID-agnostic runtime fallback (the
+                                              REFERENCE flavour, Windows)
+      runtimes/win-x64/lib/<tfm>/syscall.dll  runtime asset, selected on win-x64
+      runtimes/linux-x64/lib/<tfm>/syscall.dll runtime asset, selected on linux-x64
+
+    NuGet's compile group has no RID dimension: project.assets.json lists compile = lib/<tfm> in the
+    RID-less graph AND in a <tfm>/linux-x64 graph alike (measured 2026-09-24 on the published
+    1.24.13.1). Only the RUNTIME asset follows the RID. So a converted closure that reaches a
+    platform-divergent surface (golang.org/x/sys/unix calling syscall.Rlimit, which exists only in
+    the linux flavour) compiled against the Windows surface on Linux and failed with CS0426, while
+    the assembly that would load at run time had the type all along.
+
+    This target closes that seam from the package side, so the consumer changes nothing: after
+    ResolvePackageAssets, every go.* compile item whose package also ships a
+    runtimes/<rid>/lib/<tfm>/ twin of the same file is swapped to that twin, together with its
+    HintPath. The HintPath half is NOT optional: ResolveAssemblyReference resolves a package
+    reference through HintPath first ("{HintPathFromItem}"), so moving the item identity alone left
+    the compiler on lib/ (measured, before the HintPath line existed).
+
+    THE RID is $(RuntimeIdentifier) when the build names one, else the SDK's own
+    $(NETCoreSdkRuntimeIdentifier): the host the build runs on, which is the platform a
+    go2cs -recurse conversion targets by default. $(GoCompileRuntimeIdentifier) overrides both.
+    On win-x64 the twin is the reference flavour itself, so the swap changes the path and not the
+    bytes. On a RID no go.* package ships (linux-arm64, say) nothing is swapped and the reference
+    flavour compiles, exactly as before this target existed; the shipped RID set is stated in the
+    design, not inferred here. Set GoRidCompileAssets=false to turn the swap off.
+  -->
+  <PropertyGroup>
+    <GoRidCompileAssets Condition="'$(GoRidCompileAssets)' == ''">true</GoRidCompileAssets>
+    <GoCompileRuntimeIdentifier Condition="'$(GoCompileRuntimeIdentifier)' == ''">$(RuntimeIdentifier)</GoCompileRuntimeIdentifier>
+    <GoCompileRuntimeIdentifier Condition="'$(GoCompileRuntimeIdentifier)' == ''">$(NETCoreSdkRuntimeIdentifier)</GoCompileRuntimeIdentifier>
+  </PropertyGroup>
+
+  <Target Name="GoSelectRidCompileAssets"
+          AfterTargets="ResolvePackageAssets"
+          Condition="'$(GoRidCompileAssets)' == 'true' and '$(GoCompileRuntimeIdentifier)' != ''">
+    <ItemGroup>
+      <!-- The `go.` literal below is the published package-ID prefix, a question still open with the
+           owner: a rename of the go.* package IDs must update this test too, or the swap silently stops. -->
+      <_GoRidCompileCandidate Include="@(ResolvedCompileFileDefinitions)"
+                              Condition="$([System.String]::Copy('%(ResolvedCompileFileDefinitions.NuGetPackageId)').StartsWith('go.', System.StringComparison.OrdinalIgnoreCase)) and '%(ResolvedCompileFileDefinitions.PathInPackage)' != ''" />
+      <!-- The twin sits beside lib/ in the same package folder: strip PathInPackage off the item's
+           full path to reach the package root, then descend runtimes/<rid>/ + PathInPackage. -->
+      <_GoRidCompileCandidate>
+        <GoRidTwin>$([System.IO.Path]::GetFullPath('$([System.String]::Copy('%(FullPath)').Substring(0, $([MSBuild]::Subtract($([System.String]::Copy('%(FullPath)').Length), $([System.String]::Copy('%(PathInPackage)').Length)))))runtimes/$(GoCompileRuntimeIdentifier)/%(PathInPackage)'))</GoRidTwin>
+      </_GoRidCompileCandidate>
+      <_GoRidCompileSwap Include="@(_GoRidCompileCandidate)"
+                         Condition="Exists('%(GoRidTwin)') and '%(GoRidTwin)' != '%(FullPath)'" />
+
+      <ResolvedCompileFileDefinitions Remove="@(_GoRidCompileSwap)" />
+      <ResolvedCompileFileDefinitions Include="@(_GoRidCompileSwap->'%(GoRidTwin)')" />
+      <ResolvedCompileFileDefinitions Condition="'%(ResolvedCompileFileDefinitions.GoRidTwin)' != ''">
+        <HintPath>%(ResolvedCompileFileDefinitions.GoRidTwin)</HintPath>
+        <PathInPackage>runtimes/$(GoCompileRuntimeIdentifier)/%(ResolvedCompileFileDefinitions.PathInPackage)</PathInPackage>
+      </ResolvedCompileFileDefinitions>
+    </ItemGroup>
+
+    <Message Importance="low"
+             Text="go.lib: compiling against the $(GoCompileRuntimeIdentifier) flavour of @(_GoRidCompileSwap->Count()) go.* package(s): @(_GoRidCompileSwap->'%(NuGetPackageId)', ', ')" />
+  </Target>
+</Project>

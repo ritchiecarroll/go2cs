@@ -67,6 +67,9 @@
     <None Include="../go2cs.ico" Pack="true" PackagePath="" Visible="false" />
     <None Include="../go2cs.png" Pack="true" PackagePath="" Visible="false" />
     <None Include="README.md" Pack="true" PackagePath="" />
+    <!-- The RID-selected compile asset for the multi-flavour go.* packages (see the file). Every
+         converted package depends on go.lib, so buildTransitive reaches every consumer. -->
+    <None Include="buildTransitive/go.lib.targets" Pack="true" PackagePath="buildTransitive/" />
   </ItemGroup>
 
   <ItemGroup>

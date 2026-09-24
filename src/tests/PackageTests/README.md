@@ -30,3 +30,29 @@ does not exist. Neither file is gitignored. Restore both after a run
 validation-pack block already uses for the same population — `rewriteOfCorePackage`, an
 output-location test no fixture satisfies — but changing that gate risks silently un-publishing a
 real roster row's proof page, so it is a ruling for the roster owner rather than a fixture-side fix.
+
+# `RidCompileAsset`: the RID-selected compile asset gate
+
+`RidCompileAsset` is the consumer fixture for go.lib's `buildTransitive/go.lib.targets`. A
+multi-flavour `go.*` package (layout L3) ships its reference flavour (Windows) in `lib/<tfm>/` and
+each platform's flavour under `runtimes/<rid>/lib/<tfm>/`. NuGet resolves the COMPILE asset from `lib/`
+whatever the RID is, so before the targets file a Linux consumer compiled against the Windows surface.
+The fixture touches a type only the current platform's `go.syscall` flavour defines (`Rlimit` on
+Linux, `DLLError` on Windows). `test-rid-compile-asset.ps1` restores it from ONE feed into a fresh
+package cache and runs four arms:
+
+- a RID-less build and run;
+- the same with `-r <host rid>`;
+- a framework-dependent `dotnet publish -r <host rid>`, whose PUBLISHED app is then run;
+- a control that proves the arm can fail. On Linux, `-p:GoRidCompileAssets=false` must fail with
+  CS0426. On Windows, the reference platform, the control is the no-op proof: the `runtimes/win-x64`
+  twin is byte-identical to `lib/`.
+
+```text
+pwsh src/tests/PackageTests/RidCompileAsset/test-rid-compile-asset.ps1 -Version <go.* version> [-Source <feed dir or URL>]
+```
+
+Against a package set that predates the targets file, `-TargetsFile src/core/golib/buildTransitive/go.lib.targets`
+imports the working-tree file explicitly. That is how the gate was read red-first, against the
+published 1.24.13.1: on Linux both build arms FAIL with CS0426 and the control PASSES. With the file,
+all four arms PASS on both platforms.
