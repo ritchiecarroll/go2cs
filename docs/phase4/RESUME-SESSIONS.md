@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 12:09 -- SAVE-STATE refresh (ledger through mailbox 52ed75bb66): section 1b is the COORD new-session prompt: master ebb4acb8cf; THE 1.24.13.2 PACKAGING TRAIN ASSEMBLED on the i7 (t1242), battery PART 1 GREEN on every leg it could run (CNR, go2cs.slnx, H7 windows, Release GolibTests), PART 2 running (merge G's guard fix, behavioral, GolibTests x2); the owner's string-tier ruling recorded (C1 §8.4) and assigned; the owner asks to be told when R's net/http fix lands; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 13:11 -- SAVE-STATE refresh (ledger through mailbox 2d76644da6): section 1b is the COORD new-session prompt: master ebb4acb8cf; THE 1.24.13.2 PACKAGING TRAIN ASSEMBLED on the i7 (t1242), battery PART 1 GREEN, PART 2 running (behavioral, then GolibTests x2); the owner's string-tier ruling recorded and assigned; C2's O1 census landed and the owner approved @string->sstring signature flips (verification running); the owner asks to be told when R's net/http fix lands; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -230,6 +230,10 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    - R: claude/r-string-views-g8-g10 (golib: read-only views, G8, G10; alloc rows re-read);
    - G: V-fix 11 + the guard, after the 1.24.13.2 train lands (adjacent to C2's REC-F NewArray door).
    The cloud lanes reply by inbox, so the mailbox Monitor is ARMED.
+   C2's O1 SURVIVAL CENSUS LANDED (3b53fec4f2 on claude/c2-literal-cache-draft; ledger "FINDING · 3b53fec4f2"): 476 survive
+   today; 2,766 = 57% (90% of format) with 8 func-value adapters; runtime.throw alone is 726 hand-owned sites. THE OWNER
+   RULED (ledger "OWNER RULING · 3b53fec4f2"): exported signatures MAY flip from @string to sstring. COORD's census
+   verification workflow is running; the fmt pilot's exact scope and its order against cheaper levers are set from it.
  - DONE 2026-09-24 (owner-approved; ledger "ANNOUNCE · b6746ab185"): the BRANCH release/go1.23 was FAST-FORWARDED from
    10c78227a7 (the 75% milestone, still pinned by tag stdlib-tests-75pct-2026-08-22) to b6746ab185, the commit of
    nuget-1.23.12.3, and read back by ls-remote. No tag moved. Mint release/go1.24 at the 1.25 cutover, not before. These are
@@ -2134,3 +2138,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 11:00 -- SAVE-STATE refresh: 1b records the train assembled and its battery running, and the runtime project waiting on R.
 - 2026-09-24 11:54 -- SAVE-STATE refresh: 1b/1c record the owner's tier ruling and its assignments.
 - 2026-09-24 12:09 -- SAVE-STATE refresh: 1b records battery part 1 readings, part 2 running, and the owner's net/http ping ask.
+- 2026-09-24 13:11 -- SAVE-STATE refresh: 1b records C2's O1 census and the owner's signature-flip ruling.
