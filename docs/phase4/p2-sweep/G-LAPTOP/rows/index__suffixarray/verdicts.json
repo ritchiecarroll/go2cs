@@ -1,0 +1,45 @@
+{
+ "package": "suffixarray",
+ "status": "validated",
+ "go": {
+  "TestIndex32": "pass",
+  "TestIndex64": "pass",
+  "TestNew32": "pass",
+  "TestNew32/ababab...": "pass",
+  "TestNew32/exhaustive2": "pass",
+  "TestNew32/exhaustive3": "pass",
+  "TestNew32/forcealloc": "pass",
+  "TestNew64": "pass",
+  "TestNew64/ababab...": "pass",
+  "TestNew64/exhaustive2": "pass",
+  "TestNew64/exhaustive3": "pass",
+  "TestNew64/forcealloc": "pass"
+ },
+ "csharp": {
+  "TestIndex32": "pass",
+  "TestIndex64": "pass",
+  "TestNew32": "pass",
+  "TestNew32/ababab...": "pass",
+  "TestNew32/exhaustive2": "pass",
+  "TestNew32/exhaustive3": "pass",
+  "TestNew32/forcealloc": "pass",
+  "TestNew64": "pass",
+  "TestNew64/ababab...": "pass",
+  "TestNew64/exhaustive2": "pass",
+  "TestNew64/exhaustive3": "pass",
+  "TestNew64/forcealloc": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkNew (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkSaveRestore (benchmark): benchmark execution is deferred to Phase 4D",
+  "ExampleIndex_Lookup (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

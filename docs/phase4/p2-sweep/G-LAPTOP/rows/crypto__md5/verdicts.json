@@ -1,0 +1,59 @@
+{
+ "package": "md5",
+ "status": "validated",
+ "go": {
+  "TestAllocations": "pass",
+  "TestBlockGeneric": "pass",
+  "TestGolden": "pass",
+  "TestGoldenMarshal": "pass",
+  "TestLarge": "pass",
+  "TestLargeHashes": "pass",
+  "TestMD5Hash": "pass",
+  "TestMD5Hash/OutOfBoundsRead": "pass",
+  "TestMD5Hash/ResetState": "pass",
+  "TestMD5Hash/StatefulWrite": "pass",
+  "TestMD5Hash/SumAppend": "pass",
+  "TestMD5Hash/WriteWithoutError": "pass"
+ },
+ "csharp": {
+  "TestAllocations": "fail",
+  "TestBlockGeneric": "pass",
+  "TestGolden": "pass",
+  "TestGoldenMarshal": "pass",
+  "TestLarge": "pass",
+  "TestLargeHashes": "pass",
+  "TestMD5Hash": "pass",
+  "TestMD5Hash/OutOfBoundsRead": "pass",
+  "TestMD5Hash/ResetState": "pass",
+  "TestMD5Hash/StatefulWrite": "pass",
+  "TestMD5Hash/SumAppend": "pass",
+  "TestMD5Hash/WriteWithoutError": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [
+  "TestAllocations (deferred): want-zero AllocsPerRun assert: Sum copies the digest (`d0 := *d`) so the caller can keep writing, and that copy must deep-copy the digest's [4]uint32 state and [64]byte block — golib's array<T> is a struct over a heap T[], so the copy is two managed allocations where Go's is stack-resident; Write/Sum also allocate through the hash.Hash interface surface. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O1): alloc-profile -> deferred. The fixed-array family (a Go array VALUE emitted as golib array<T> over a heap T[]) is deferred, never structural: net10.0 has value-typed fixed storage (DESIGN-zh-box-reduction.md:519-521). 6 per run = 5 class-4 + 1 box, read at md5.cs:167-198. The reason above names the same copy; its 'Write/Sum also allocate through the hash.Hash interface surface' is not in the counted figure."
+ ],
+ "excluded": [
+  "BenchmarkHash128 (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash1K (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash1KUnaligned (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash1M (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash256 (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash512 (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash64 (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash8Bytes (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash8BytesUnaligned (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash8K (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash8KUnaligned (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash8M (benchmark): benchmark execution is deferred to Phase 4D",
+  "ExampleNew (example): example execution is deferred to Phase 4D",
+  "ExampleNew_file (example): example execution is deferred to Phase 4D",
+  "ExampleSum (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

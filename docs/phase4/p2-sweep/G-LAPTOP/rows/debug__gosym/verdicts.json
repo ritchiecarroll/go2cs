@@ -1,0 +1,43 @@
+{
+ "package": "gosym",
+ "status": "validated",
+ "go": {
+  "Test115PclnParsing": "pass",
+  "TestGenericNames": "pass",
+  "TestIssue29551": "pass",
+  "TestLineAline": "skip",
+  "TestLineFromAline": "skip",
+  "TestPCLine": "pass",
+  "TestRemotePackage": "pass",
+  "TestStandardLibPackage": "pass",
+  "TestStandardLibPathPackage": "pass",
+  "TestSymVersion": "skip"
+ },
+ "csharp": {
+  "Test115PclnParsing": "pass",
+  "TestGenericNames": "pass",
+  "TestIssue29551": "pass",
+  "TestLineAline": "skip",
+  "TestLineFromAline": "skip",
+  "TestPCLine": "pass",
+  "TestRemotePackage": "pass",
+  "TestStandardLibPackage": "pass",
+  "TestStandardLibPathPackage": "pass",
+  "TestSymVersion": "skip"
+ },
+ "matched": true,
+ "skipped": [
+  "TestLineAline",
+  "TestLineFromAline",
+  "TestSymVersion"
+ ],
+ "disclosed": [],
+ "excluded": [
+  "Benchmark115 (benchmark): benchmark execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

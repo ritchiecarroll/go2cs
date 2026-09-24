@@ -1,0 +1,23 @@
+{
+ "package": "adler32",
+ "status": "validated",
+ "go": {
+  "TestGolden": "pass",
+  "TestGoldenMarshal": "pass"
+ },
+ "csharp": {
+  "TestGolden": "pass",
+  "TestGoldenMarshal": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkAdler32KB (benchmark): benchmark execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

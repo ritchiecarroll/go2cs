@@ -1,0 +1,45 @@
+{
+ "package": "ed25519",
+ "status": "validated",
+ "go": {
+  "TestAllocations": "pass",
+  "TestCryptoSigner": "pass",
+  "TestEd25519Vectors": "pass",
+  "TestEqual": "pass",
+  "TestGenerateKey": "pass",
+  "TestGolden": "pass",
+  "TestMalleability": "pass",
+  "TestSignVerify": "pass",
+  "TestSignVerifyContext": "pass",
+  "TestSignVerifyHashed": "pass"
+ },
+ "csharp": {
+  "TestAllocations": "fail",
+  "TestCryptoSigner": "pass",
+  "TestEd25519Vectors": "pass",
+  "TestEqual": "pass",
+  "TestGenerateKey": "pass",
+  "TestGolden": "pass",
+  "TestMalleability": "pass",
+  "TestSignVerify": "pass",
+  "TestSignVerifyContext": "pass",
+  "TestSignVerifyHashed": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [
+  "TestAllocations (deferred): want-zero AllocsPerRun assert: the run loop builds seed/message slices, derives a key, signs and verifies -- every step allocates in the managed model (golib slices, ж boxes, edwards25519 scalar/point state) where Go's escape analysis and fixed-size arrays keep the whole round on the stack. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O1): alloc-profile -> deferred. The relabel census's STRUCTURAL proposal (CENSUS c8e6ca9034:95) is refused: the entry is a MIXTURE, and its edwards25519 share moves with crypto/internal/fips140test's to deferred (X(3))."
+ ],
+ "excluded": [
+  "BenchmarkKeyGeneration (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkNewKeyFromSeed (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkSigning (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkVerification (benchmark): benchmark execution is deferred to Phase 4D",
+  "Example_ed25519ctx (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

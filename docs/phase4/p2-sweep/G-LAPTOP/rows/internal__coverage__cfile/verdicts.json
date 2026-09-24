@@ -1,0 +1,53 @@
+{
+ "package": "cfile",
+ "status": "validated",
+ "go": {
+  "TestApisOnNocoverBinary": "pass",
+  "TestAuxMetaDataFiles": "pass",
+  "TestCoverageApis": "pass",
+  "TestCoverageApis/emitToDir": "pass",
+  "TestCoverageApis/emitToDirNonAtomic": "pass",
+  "TestCoverageApis/emitToFailingWriter": "pass",
+  "TestCoverageApis/emitToNilWriter": "pass",
+  "TestCoverageApis/emitToNonexistentDir": "pass",
+  "TestCoverageApis/emitToWriter": "pass",
+  "TestCoverageApis/emitToWriterNonAtomic": "pass",
+  "TestCoverageApis/emitWithCounterClear": "pass",
+  "TestCoverageApis/emitWithCounterClearNonAtomic": "pass",
+  "TestCoverageSnapshot": "pass",
+  "TestIssue56006EmitDataRaceCoverRunningGoroutine": "skip",
+  "TestIssue59563TruncatedCoverPkgAll": "pass",
+  "TestTestSupport": "pass"
+ },
+ "csharp": {
+  "TestApisOnNocoverBinary": "pass",
+  "TestAuxMetaDataFiles": "pass",
+  "TestCoverageApis": "pass",
+  "TestCoverageApis/emitToDir": "pass",
+  "TestCoverageApis/emitToDirNonAtomic": "pass",
+  "TestCoverageApis/emitToFailingWriter": "pass",
+  "TestCoverageApis/emitToNilWriter": "pass",
+  "TestCoverageApis/emitToNonexistentDir": "pass",
+  "TestCoverageApis/emitToWriter": "pass",
+  "TestCoverageApis/emitToWriterNonAtomic": "pass",
+  "TestCoverageApis/emitWithCounterClear": "pass",
+  "TestCoverageApis/emitWithCounterClearNonAtomic": "pass",
+  "TestCoverageSnapshot": "pass",
+  "TestIssue56006EmitDataRaceCoverRunningGoroutine": "skip",
+  "TestIssue59563TruncatedCoverPkgAll": "fail",
+  "TestTestSupport": "pass"
+ },
+ "matched": true,
+ "skipped": [
+  "TestIssue56006EmitDataRaceCoverRunningGoroutine"
+ ],
+ "disclosed": [
+  "TestIssue59563TruncatedCoverPkgAll (host-identity): the assert requires the process's CURRENT DIRECTORY to sit under the GOROOT the process REPORTS. The test shells out twice to the real toolchain — `go test -coverpkg=all -coverprofile=…` with cmd.Dir = testdata/issue59563, then `go tool cover -func=…` — and scans the output for one row whose path has the prefix \"internal/coverage/cfile/testdata/issue59563/repro.go\" and contains \"large\".\n\nBOTH subprocesses SUCCEED in the converted host and the full listing is produced; the divergence is one prefix. Measured A/B, same toolchain, same command, only the run location differing:\n\n  control (real GOROOT/src/internal/coverage/cfile/testdata/issue59563)\n    -> 10280 func rows; internal/coverage/cfile/testdata/issue59563/repro.go:18: large 100.0%\n  experiment (identical layout — staged src/go.mod plus the ancestry path — OUTSIDE the reported GOROOT)\n    -> 10280 func rows; std/internal/coverage/cfile/testdata/issue59563/repro.go:18: large 100.0%\n\nIdentical row count to the digit, identical functions, identical percentages. Outside the reported GOROOT the toolchain reads the staged src/go.mod as an ORDINARY module named `std` rather than as GOROOT's own standard library, so every package path becomes module-qualified; strings.HasPrefix then fails and nfound stays 0. The coverage the test exists to check is CORRECT — `large` is 100.0%, which is the whole point of issue 59563 — and only the rendering of the host's directory identity differs.\n\nThe sandbox run-directory is deliberate (a test may write without touching the real tree) and PackageAncestry deliberately keeps GOROOT pointing at the real installation, because repointing it at the junction-mirrored ancestry regresses two already-validated packages that WALK GOROOT: compress/gzip's issue14937 test and path/filepath (measured: 0 *.gz found against the real 4; 1 src/unicode entry against the real 19).\n\nSame root as go/build's TestLocalDirectory, which the same cwd-vs-reported-GOROOT identity breaks in a different place: there ImportDir finds no known root and answers \".\", where this one gets a module-qualified `std/` prefix. One cause, two manifestations.\n\nRetires if the host can place cwd under the reported GOROOT without repointing GOROOT at a junction view, or if the toolchain's std-module identification stops depending on the directory's position."
+ ],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

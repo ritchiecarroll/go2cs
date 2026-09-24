@@ -1,0 +1,28 @@
+{
+ "package": "gccgoimporter",
+ "status": "validated",
+ "go": {
+  "TestGoxImporter": "pass",
+  "TestInstallationImporter": "skip",
+  "TestObjImporter": "skip",
+  "TestTypeParser": "pass"
+ },
+ "csharp": {
+  "TestGoxImporter": "pass",
+  "TestInstallationImporter": "skip",
+  "TestObjImporter": "skip",
+  "TestTypeParser": "pass"
+ },
+ "matched": true,
+ "skipped": [
+  "TestInstallationImporter",
+  "TestObjImporter"
+ ],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

@@ -1,0 +1,40 @@
+{
+ "package": "crc32",
+ "status": "validated",
+ "go": {
+  "TestArchCastagnoli": "pass",
+  "TestArchIEEE": "pass",
+  "TestCastagnoliRace": "pass",
+  "TestGolden": "pass",
+  "TestGoldenMarshal": "pass",
+  "TestGoldenMarshal/Castagnoli": "pass",
+  "TestGoldenMarshal/IEEE": "pass",
+  "TestMarshalTableMismatch": "pass",
+  "TestSimple": "pass",
+  "TestSlicing": "pass"
+ },
+ "csharp": {
+  "TestArchCastagnoli": "pass",
+  "TestArchIEEE": "pass",
+  "TestCastagnoliRace": "pass",
+  "TestGolden": "pass",
+  "TestGoldenMarshal": "pass",
+  "TestGoldenMarshal/Castagnoli": "pass",
+  "TestGoldenMarshal/IEEE": "pass",
+  "TestMarshalTableMismatch": "pass",
+  "TestSimple": "pass",
+  "TestSlicing": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkCRC32 (benchmark): benchmark execution is deferred to Phase 4D",
+  "ExampleMakeTable (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

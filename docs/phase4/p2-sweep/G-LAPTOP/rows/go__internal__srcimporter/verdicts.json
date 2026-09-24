@@ -1,0 +1,33 @@
+{
+ "package": "srcimporter",
+ "status": "validated",
+ "go": {
+  "TestCgo": "skip",
+  "TestImportStdLib": "pass",
+  "TestImportedTypes": "pass",
+  "TestIssue20855": "pass",
+  "TestIssue23092": "pass",
+  "TestIssue24392": "pass",
+  "TestReimport": "pass"
+ },
+ "csharp": {
+  "TestCgo": "skip",
+  "TestImportStdLib": "pass",
+  "TestImportedTypes": "pass",
+  "TestIssue20855": "pass",
+  "TestIssue23092": "pass",
+  "TestIssue24392": "pass",
+  "TestReimport": "pass"
+ },
+ "matched": true,
+ "skipped": [
+  "TestCgo"
+ ],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

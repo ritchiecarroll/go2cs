@@ -1,0 +1,23 @@
+{
+ "package": "fmtsort",
+ "status": "validated",
+ "go": {
+  "TestCompare": "pass",
+  "TestInterface": "pass",
+  "TestOrder": "pass"
+ },
+ "csharp": {
+  "TestCompare": "pass",
+  "TestInterface": "pass",
+  "TestOrder": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "package": "html",
+ "status": "validated",
+ "go": {
+  "TestEntityLength": "pass",
+  "TestUnescape": "pass",
+  "TestUnescapeEscape": "pass"
+ },
+ "csharp": {
+  "TestEntityLength": "pass",
+  "TestUnescape": "pass",
+  "TestUnescapeEscape": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkEscape (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkEscapeNone (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkUnescape (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkUnescapeDense (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkUnescapeNone (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkUnescapeSparse (benchmark): benchmark execution is deferred to Phase 4D",
+  "ExampleEscapeString (example): example execution is deferred to Phase 4D",
+  "ExampleUnescapeString (example): example execution is deferred to Phase 4D",
+  "FuzzEscapeUnescape (fuzz): fuzz execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

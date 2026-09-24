@@ -1,0 +1,29 @@
+{
+ "package": "hkdf",
+ "status": "validated",
+ "go": {
+  "TestFIPSServiceIndicator": "pass",
+  "TestHKDF": "pass",
+  "TestHKDFLimit": "pass"
+ },
+ "csharp": {
+  "TestFIPSServiceIndicator": "pass",
+  "TestHKDF": "pass",
+  "TestHKDFLimit": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "Benchmark16ByteMD5Single (benchmark): benchmark execution is deferred to Phase 4D",
+  "Benchmark20ByteSHA1Single (benchmark): benchmark execution is deferred to Phase 4D",
+  "Benchmark32ByteSHA256Single (benchmark): benchmark execution is deferred to Phase 4D",
+  "Benchmark64ByteSHA512Single (benchmark): benchmark execution is deferred to Phase 4D",
+  "Example_usage (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

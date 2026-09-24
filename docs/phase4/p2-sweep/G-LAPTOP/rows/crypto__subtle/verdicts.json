@@ -1,0 +1,43 @@
+{
+ "package": "subtle",
+ "status": "validated",
+ "go": {
+  "TestConstantTimeByteEq": "pass",
+  "TestConstantTimeCompare": "pass",
+  "TestConstantTimeCopy": "pass",
+  "TestConstantTimeEq": "pass",
+  "TestConstantTimeLessOrEq": "pass",
+  "TestDITPanic": "skip",
+  "TestWithDataIndependentTiming": "skip",
+  "TestXORBytes": "pass",
+  "TestXorBytesPanic": "pass"
+ },
+ "csharp": {
+  "TestConstantTimeByteEq": "pass",
+  "TestConstantTimeCompare": "pass",
+  "TestConstantTimeCopy": "pass",
+  "TestConstantTimeEq": "pass",
+  "TestConstantTimeLessOrEq": "pass",
+  "TestDITPanic": "skip",
+  "TestWithDataIndependentTiming": "skip",
+  "TestXORBytes": "pass",
+  "TestXorBytesPanic": "pass"
+ },
+ "matched": true,
+ "skipped": [
+  "TestDITPanic",
+  "TestWithDataIndependentTiming"
+ ],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkConstantTimeByteEq (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkConstantTimeEq (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkConstantTimeLessOrEq (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkXORBytes (benchmark): benchmark execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

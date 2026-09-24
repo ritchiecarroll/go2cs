@@ -1,0 +1,29 @@
+{
+ "package": "sysrand",
+ "status": "validated",
+ "go": {
+  "TestConcurrentRead": "pass",
+  "TestNoUrandomFallback": "pass",
+  "TestRead": "pass",
+  "TestReadByteValues": "pass",
+  "TestReadEmpty": "pass",
+  "TestReadError": "pass"
+ },
+ "csharp": {
+  "TestConcurrentRead": "pass",
+  "TestNoUrandomFallback": "pass",
+  "TestRead": "pass",
+  "TestReadByteValues": "pass",
+  "TestReadEmpty": "pass",
+  "TestReadError": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

@@ -1,0 +1,53 @@
+{
+ "package": "sha1",
+ "status": "validated",
+ "go": {
+  "TestAllocations": "pass",
+  "TestBlockGeneric": "pass",
+  "TestBlockSize": "pass",
+  "TestGolden": "pass",
+  "TestGoldenMarshal": "pass",
+  "TestLargeHashes": "pass",
+  "TestSHA1Hash": "pass",
+  "TestSHA1Hash/OutOfBoundsRead": "pass",
+  "TestSHA1Hash/ResetState": "pass",
+  "TestSHA1Hash/StatefulWrite": "pass",
+  "TestSHA1Hash/SumAppend": "pass",
+  "TestSHA1Hash/WriteWithoutError": "pass",
+  "TestSize": "pass"
+ },
+ "csharp": {
+  "TestAllocations": "fail",
+  "TestBlockGeneric": "pass",
+  "TestBlockSize": "pass",
+  "TestGolden": "pass",
+  "TestGoldenMarshal": "pass",
+  "TestLargeHashes": "pass",
+  "TestSHA1Hash": "pass",
+  "TestSHA1Hash/OutOfBoundsRead": "pass",
+  "TestSHA1Hash/ResetState": "pass",
+  "TestSHA1Hash/StatefulWrite": "pass",
+  "TestSHA1Hash/SumAppend": "pass",
+  "TestSHA1Hash/WriteWithoutError": "pass",
+  "TestSize": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [
+  "TestAllocations (deferred): want-zero AllocsPerRun assert: Sum copies the digest (`d0 := *d`) so the caller can keep writing, and that copy must deep-copy the digest's [5]uint32 state and [64]byte block — golib's array<T> is a struct over a heap T[], so the copy is two managed allocations where Go's is stack-resident; Write/Sum also allocate through the hash.Hash interface surface. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O1): alloc-profile -> deferred. 7 per run = 6 class-4 + 1 heap<digest> box. New() is outside the measured closure, so no hash.Hash shell is minted per run."
+ ],
+ "excluded": [
+  "BenchmarkHash1K (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash320Bytes (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash8Bytes (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash8K (benchmark): benchmark execution is deferred to Phase 4D",
+  "ExampleNew (example): example execution is deferred to Phase 4D",
+  "ExampleNew_file (example): example execution is deferred to Phase 4D",
+  "ExampleSum (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

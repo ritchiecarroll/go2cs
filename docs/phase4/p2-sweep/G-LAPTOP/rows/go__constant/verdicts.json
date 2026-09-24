@@ -1,0 +1,43 @@
+{
+ "package": "constant",
+ "status": "validated",
+ "go": {
+  "TestBitLen": "pass",
+  "TestBytes": "pass",
+  "TestFractions": "pass",
+  "TestMake": "pass",
+  "TestMakeFloat64": "pass",
+  "TestNumbers": "pass",
+  "TestOps": "pass",
+  "TestString": "pass",
+  "TestUnknown": "pass"
+ },
+ "csharp": {
+  "TestBitLen": "pass",
+  "TestBytes": "pass",
+  "TestFractions": "pass",
+  "TestMake": "pass",
+  "TestMakeFloat64": "pass",
+  "TestNumbers": "pass",
+  "TestOps": "pass",
+  "TestString": "pass",
+  "TestUnknown": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkStringAdd (benchmark): benchmark execution is deferred to Phase 4D",
+  "ExampleBinaryOp (example): example execution is deferred to Phase 4D",
+  "ExampleCompare (example): example execution is deferred to Phase 4D",
+  "ExampleSign (example): example execution is deferred to Phase 4D",
+  "ExampleUnaryOp (example): example execution is deferred to Phase 4D",
+  "ExampleVal (example): example execution is deferred to Phase 4D",
+  "Example_complexNumbers (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

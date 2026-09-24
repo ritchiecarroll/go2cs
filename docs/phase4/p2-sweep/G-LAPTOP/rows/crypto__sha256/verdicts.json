@@ -1,0 +1,72 @@
+{
+ "package": "sha256",
+ "status": "validated",
+ "go": {
+  "TestAllocations": "pass",
+  "TestBlockSize": "pass",
+  "TestCgo": "pass",
+  "TestGolden": "pass",
+  "TestGoldenMarshal": "pass",
+  "TestGoldenMarshal/224": "pass",
+  "TestGoldenMarshal/256": "pass",
+  "TestHash": "pass",
+  "TestHash/SHA-224": "pass",
+  "TestHash/SHA-224/OutOfBoundsRead": "pass",
+  "TestHash/SHA-224/ResetState": "pass",
+  "TestHash/SHA-224/StatefulWrite": "pass",
+  "TestHash/SHA-224/SumAppend": "pass",
+  "TestHash/SHA-224/WriteWithoutError": "pass",
+  "TestHash/SHA-256": "pass",
+  "TestHash/SHA-256/OutOfBoundsRead": "pass",
+  "TestHash/SHA-256/ResetState": "pass",
+  "TestHash/SHA-256/StatefulWrite": "pass",
+  "TestHash/SHA-256/SumAppend": "pass",
+  "TestHash/SHA-256/WriteWithoutError": "pass",
+  "TestLargeHashes": "pass",
+  "TestMarshalTypeMismatch": "pass",
+  "TestSize": "pass"
+ },
+ "csharp": {
+  "TestAllocations": "fail",
+  "TestBlockSize": "pass",
+  "TestCgo": "pass",
+  "TestGolden": "pass",
+  "TestGoldenMarshal": "pass",
+  "TestGoldenMarshal/224": "pass",
+  "TestGoldenMarshal/256": "pass",
+  "TestHash": "pass",
+  "TestHash/SHA-224": "pass",
+  "TestHash/SHA-224/OutOfBoundsRead": "pass",
+  "TestHash/SHA-224/ResetState": "pass",
+  "TestHash/SHA-224/StatefulWrite": "pass",
+  "TestHash/SHA-224/SumAppend": "pass",
+  "TestHash/SHA-224/WriteWithoutError": "pass",
+  "TestHash/SHA-256": "pass",
+  "TestHash/SHA-256/OutOfBoundsRead": "pass",
+  "TestHash/SHA-256/ResetState": "pass",
+  "TestHash/SHA-256/StatefulWrite": "pass",
+  "TestHash/SHA-256/SumAppend": "pass",
+  "TestHash/SHA-256/WriteWithoutError": "pass",
+  "TestLargeHashes": "pass",
+  "TestMarshalTypeMismatch": "pass",
+  "TestSize": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [
+  "TestAllocations (deferred): want-zero AllocsPerRun assert: Sum copies the digest (`d0 := *d`) so the caller can keep writing, and that copy must deep-copy the digest's [8]uint32 state and [64]byte block — golib's array<T> is a struct over a heap T[], so the copy is two managed allocations where Go's is stack-resident; Write/Sum also allocate through the hash.Hash interface surface. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O1): alloc-profile -> deferred. 46 per run = 36 + 4 + 4 + 2. The measured closure mints a source-generated hash.Hash shell for every New* call on every run (sha256_test.cs:322/:328; sha256.cs:40/:51): 2 per run, UNCOUNTED (AllocationCounter.cs:50-53), ruled structural on 2026-08-25."
+ ],
+ "excluded": [
+  "BenchmarkHash1K (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash8Bytes (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHash8K (benchmark): benchmark execution is deferred to Phase 4D",
+  "ExampleNew (example): example execution is deferred to Phase 4D",
+  "ExampleNew_file (example): example execution is deferred to Phase 4D",
+  "ExampleSum256 (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

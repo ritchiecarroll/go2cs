@@ -1,0 +1,54 @@
+{
+ "package": "lzw",
+ "status": "validated",
+ "go": {
+  "TestHiCodeDoesNotOverflow": "pass",
+  "TestNoLongerSavingPriorExpansions": "pass",
+  "TestReader": "pass",
+  "TestReaderReset": "pass",
+  "TestSmallLitWidth": "pass",
+  "TestStartsWithClearCode": "pass",
+  "TestWriter": "pass",
+  "TestWriterReset": "pass",
+  "TestWriterReset/Order_0": "pass",
+  "TestWriterReset/Order_0/LitWidth_6": "pass",
+  "TestWriterReset/Order_0/LitWidth_7": "pass",
+  "TestWriterReset/Order_0/LitWidth_8": "pass",
+  "TestWriterReset/Order_1": "pass",
+  "TestWriterReset/Order_1/LitWidth_6": "pass",
+  "TestWriterReset/Order_1/LitWidth_7": "pass",
+  "TestWriterReset/Order_1/LitWidth_8": "pass",
+  "TestWriterReturnValues": "pass"
+ },
+ "csharp": {
+  "TestHiCodeDoesNotOverflow": "pass",
+  "TestNoLongerSavingPriorExpansions": "pass",
+  "TestReader": "pass",
+  "TestReaderReset": "pass",
+  "TestSmallLitWidth": "pass",
+  "TestStartsWithClearCode": "pass",
+  "TestWriter": "pass",
+  "TestWriterReset": "pass",
+  "TestWriterReset/Order_0": "pass",
+  "TestWriterReset/Order_0/LitWidth_6": "pass",
+  "TestWriterReset/Order_0/LitWidth_7": "pass",
+  "TestWriterReset/Order_0/LitWidth_8": "pass",
+  "TestWriterReset/Order_1": "pass",
+  "TestWriterReset/Order_1/LitWidth_6": "pass",
+  "TestWriterReset/Order_1/LitWidth_7": "pass",
+  "TestWriterReset/Order_1/LitWidth_8": "pass",
+  "TestWriterReturnValues": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkDecoder (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkEncoder (benchmark): benchmark execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

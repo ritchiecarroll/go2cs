@@ -1,0 +1,35 @@
+{
+ "package": "heap",
+ "status": "validated",
+ "go": {
+  "Test": "pass",
+  "TestFix": "pass",
+  "TestInit0": "pass",
+  "TestInit1": "pass",
+  "TestRemove0": "pass",
+  "TestRemove1": "pass",
+  "TestRemove2": "pass"
+ },
+ "csharp": {
+  "Test": "pass",
+  "TestFix": "pass",
+  "TestInit0": "pass",
+  "TestInit1": "pass",
+  "TestRemove0": "pass",
+  "TestRemove1": "pass",
+  "TestRemove2": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkDup (benchmark): benchmark execution is deferred to Phase 4D",
+  "Example_intHeap (example): example execution is deferred to Phase 4D",
+  "Example_priorityQueue (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

@@ -1,0 +1,29 @@
+{
+ "package": "godebug",
+ "status": "validated",
+ "go": {
+  "TestBisectTestCase": "pass",
+  "TestCmdBisect": "pass",
+  "TestGet": "pass",
+  "TestMetrics": "pass",
+  "TestPanicNilRace": "skip"
+ },
+ "csharp": {
+  "TestBisectTestCase": "pass",
+  "TestCmdBisect": "pass",
+  "TestGet": "pass",
+  "TestMetrics": "pass",
+  "TestPanicNilRace": "skip"
+ },
+ "matched": true,
+ "skipped": [
+  "TestPanicNilRace"
+ ],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": true,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

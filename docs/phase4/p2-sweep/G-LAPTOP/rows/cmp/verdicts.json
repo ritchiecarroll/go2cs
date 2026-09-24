@@ -1,0 +1,28 @@
+{
+ "package": "cmp",
+ "status": "validated",
+ "go": {
+  "TestCompare": "pass",
+  "TestLess": "pass",
+  "TestOr": "pass",
+  "TestSort": "pass"
+ },
+ "csharp": {
+  "TestCompare": "pass",
+  "TestLess": "pass",
+  "TestOr": "pass",
+  "TestSort": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "ExampleOr (example): example execution is deferred to Phase 4D",
+  "ExampleOr_sort (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

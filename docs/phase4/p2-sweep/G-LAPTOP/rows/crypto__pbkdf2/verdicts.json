@@ -1,0 +1,30 @@
+{
+ "package": "pbkdf2",
+ "status": "validated",
+ "go": {
+  "TestMaxKeyLength": "pass",
+  "TestPBKDF2ServiceIndicator": "pass",
+  "TestWithHMACSHA1": "pass",
+  "TestWithHMACSHA256": "pass",
+  "TestZeroKeyLength": "pass"
+ },
+ "csharp": {
+  "TestMaxKeyLength": "pass",
+  "TestPBKDF2ServiceIndicator": "pass",
+  "TestWithHMACSHA1": "pass",
+  "TestWithHMACSHA256": "pass",
+  "TestZeroKeyLength": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkHMACSHA1 (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkHMACSHA256 (benchmark): benchmark execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

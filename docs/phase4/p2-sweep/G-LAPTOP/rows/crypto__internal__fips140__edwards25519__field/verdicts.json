@@ -1,0 +1,55 @@
+{
+ "package": "field",
+ "status": "validated",
+ "go": {
+  "TestAliasing": "pass",
+  "TestBytesBigEquivalence": "pass",
+  "TestCarryPropagate": "pass",
+  "TestConsistency": "pass",
+  "TestDecimalConstants": "pass",
+  "TestEqual": "pass",
+  "TestFeMul": "pass",
+  "TestFeSquare": "pass",
+  "TestInvert": "pass",
+  "TestMul64to128": "pass",
+  "TestMult32": "pass",
+  "TestMultiplyDistributesOverAdd": "pass",
+  "TestSelectSwap": "pass",
+  "TestSetBytesRoundTrip": "pass",
+  "TestSetBytesRoundTripEdgeCases": "pass",
+  "TestSqrtRatio": "pass"
+ },
+ "csharp": {
+  "TestAliasing": "pass",
+  "TestBytesBigEquivalence": "pass",
+  "TestCarryPropagate": "pass",
+  "TestConsistency": "pass",
+  "TestDecimalConstants": "pass",
+  "TestEqual": "pass",
+  "TestFeMul": "pass",
+  "TestFeSquare": "pass",
+  "TestInvert": "pass",
+  "TestMul64to128": "pass",
+  "TestMult32": "pass",
+  "TestMultiplyDistributesOverAdd": "pass",
+  "TestSelectSwap": "pass",
+  "TestSetBytesRoundTrip": "pass",
+  "TestSetBytesRoundTripEdgeCases": "pass",
+  "TestSqrtRatio": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkAdd (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkInvert (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkMult32 (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkMultiply (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkSquare (benchmark): benchmark execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

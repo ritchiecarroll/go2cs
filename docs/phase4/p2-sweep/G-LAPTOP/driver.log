@@ -1,0 +1,397 @@
+2026-09-24T02:20:51 p2-driver start: shard S-G host G-LAPTOP base 61724860b49a84c373f1c0c6f76d8df3cbad9804 pid 16544 selftest=False appendNetOs=True
+2026-09-24T02:20:51 PINS go='go version go1.24.13 windows/amd64' GOROOT=True GOFLAGS-empty=True dotnet=10.0.400 creds-absent=True
+2026-09-24T02:20:51 uptime 16.82 h (last boot 9/23/2026 9:31:37 AM)
+2026-09-24T02:20:52 LIST 128 rows: first archive/tar, last net
+2026-09-24T02:20:52   list   1 archive/tar
+2026-09-24T02:20:52   list   2 archive/zip
+2026-09-24T02:20:52   list   3 bufio
+2026-09-24T02:20:52   list   4 bytes
+2026-09-24T02:20:52   list   5 cmp
+2026-09-24T02:20:52   list   6 compress/bzip2
+2026-09-24T02:20:52   list   7 compress/flate
+2026-09-24T02:20:52   list   8 compress/gzip
+2026-09-24T02:20:52   list   9 compress/lzw
+2026-09-24T02:20:52   list  10 compress/zlib
+2026-09-24T02:20:52   list  11 container/heap
+2026-09-24T02:20:52   list  12 container/list
+2026-09-24T02:20:52   list  13 container/ring
+2026-09-24T02:20:52   list  14 context
+2026-09-24T02:20:52   list  15 crypto
+2026-09-24T02:20:52   list  16 crypto/aes
+2026-09-24T02:20:52   list  17 crypto/cipher
+2026-09-24T02:20:52   list  18 crypto/des
+2026-09-24T02:20:52   list  19 crypto/dsa
+2026-09-24T02:20:52   list  20 crypto/ecdh
+2026-09-24T02:20:52   list  21 crypto/ecdsa
+2026-09-24T02:20:52   list  22 crypto/ed25519
+2026-09-24T02:20:52   list  23 crypto/elliptic
+2026-09-24T02:20:52   list  24 crypto/hkdf
+2026-09-24T02:20:52   list  25 crypto/hmac
+2026-09-24T02:20:52   list  26 crypto/internal/boring
+2026-09-24T02:20:52   list  27 crypto/internal/boring/bcache
+2026-09-24T02:20:52   list  28 crypto/internal/fips140/aes
+2026-09-24T02:20:52   list  29 crypto/internal/fips140/bigmod
+2026-09-24T02:20:52   list  30 crypto/internal/fips140/ecdh
+2026-09-24T02:20:52   list  31 crypto/internal/fips140/ecdsa
+2026-09-24T02:20:52   list  32 crypto/internal/fips140/edwards25519
+2026-09-24T02:20:52   list  33 crypto/internal/fips140/edwards25519/field
+2026-09-24T02:20:52   list  34 crypto/internal/fips140/mlkem
+2026-09-24T02:20:52   list  35 crypto/internal/fips140/nistec
+2026-09-24T02:20:52   list  36 crypto/internal/fips140/rsa
+2026-09-24T02:20:52   list  37 crypto/internal/fips140test
+2026-09-24T02:20:52   list  38 crypto/internal/hpke
+2026-09-24T02:20:52   list  39 crypto/internal/sysrand
+2026-09-24T02:20:52   list  40 crypto/md5
+2026-09-24T02:20:52   list  41 crypto/mlkem
+2026-09-24T02:20:52   list  42 crypto/pbkdf2
+2026-09-24T02:20:52   list  43 crypto/rand
+2026-09-24T02:20:52   list  44 crypto/rc4
+2026-09-24T02:20:52   list  45 crypto/rsa
+2026-09-24T02:20:52   list  46 crypto/sha1
+2026-09-24T02:20:52   list  47 crypto/sha256
+2026-09-24T02:20:52   list  48 crypto/sha3
+2026-09-24T02:20:52   list  49 crypto/sha512
+2026-09-24T02:20:52   list  50 crypto/subtle
+2026-09-24T02:20:52   list  51 crypto/x509
+2026-09-24T02:20:52   list  52 database/sql
+2026-09-24T02:20:52   list  53 database/sql/driver
+2026-09-24T02:20:52   list  54 debug/buildinfo
+2026-09-24T02:20:52   list  55 debug/dwarf
+2026-09-24T02:20:52   list  56 debug/elf
+2026-09-24T02:20:52   list  57 debug/gosym
+2026-09-24T02:20:52   list  58 debug/macho
+2026-09-24T02:20:52   list  59 debug/pe
+2026-09-24T02:20:52   list  60 debug/plan9obj
+2026-09-24T02:20:52   list  61 embed/internal/embedtest
+2026-09-24T02:20:52   list  62 encoding/ascii85
+2026-09-24T02:20:52   list  63 encoding/asn1
+2026-09-24T02:20:52   list  64 encoding/base32
+2026-09-24T02:20:52   list  65 encoding/base64
+2026-09-24T02:20:52   list  66 encoding/binary
+2026-09-24T02:20:52   list  67 encoding/csv
+2026-09-24T02:20:52   list  68 encoding/gob
+2026-09-24T02:20:52   list  69 encoding/hex
+2026-09-24T02:20:52   list  70 encoding/json
+2026-09-24T02:20:52   list  71 encoding/xml
+2026-09-24T02:20:52   list  72 encoding/pem
+2026-09-24T02:20:52   list  73 errors
+2026-09-24T02:20:52   list  74 expvar
+2026-09-24T02:20:52   list  75 flag
+2026-09-24T02:20:52   list  76 fmt
+2026-09-24T02:20:52   list  77 go/ast
+2026-09-24T02:20:52   list  78 go/ast/internal/tests
+2026-09-24T02:20:52   list  79 go/build
+2026-09-24T02:20:52   list  80 go/build/constraint
+2026-09-24T02:20:52   list  81 go/constant
+2026-09-24T02:20:52   list  82 go/doc
+2026-09-24T02:20:52   list  83 go/doc/comment
+2026-09-24T02:20:52   list  84 go/format
+2026-09-24T02:20:52   list  85 go/importer
+2026-09-24T02:20:52   list  86 go/internal/gccgoimporter
+2026-09-24T02:20:52   list  87 go/internal/gcimporter
+2026-09-24T02:20:52   list  88 go/internal/srcimporter
+2026-09-24T02:20:52   list  89 go/parser
+2026-09-24T02:20:52   list  90 go/printer
+2026-09-24T02:20:52   list  91 go/scanner
+2026-09-24T02:20:52   list  92 go/token
+2026-09-24T02:20:52   list  93 go/types
+2026-09-24T02:20:52   list  94 go/version
+2026-09-24T02:20:52   list  95 hash
+2026-09-24T02:20:52   list  96 hash/adler32
+2026-09-24T02:20:52   list  97 hash/crc32
+2026-09-24T02:20:52   list  98 hash/crc64
+2026-09-24T02:20:52   list  99 hash/fnv
+2026-09-24T02:20:52   list 100 hash/maphash
+2026-09-24T02:20:52   list 101 html
+2026-09-24T02:20:52   list 102 html/template
+2026-09-24T02:20:52   list 103 image
+2026-09-24T02:20:52   list 104 image/color
+2026-09-24T02:20:52   list 105 image/draw
+2026-09-24T02:20:52   list 106 image/gif
+2026-09-24T02:20:52   list 107 image/jpeg
+2026-09-24T02:20:52   list 108 image/png
+2026-09-24T02:20:52   list 109 index/suffixarray
+2026-09-24T02:20:52   list 110 internal/abi
+2026-09-24T02:20:52   list 111 internal/buildcfg
+2026-09-24T02:20:52   list 112 internal/chacha8rand
+2026-09-24T02:20:52   list 113 internal/coverage/cfile
+2026-09-24T02:20:52   list 114 internal/coverage/cformat
+2026-09-24T02:20:52   list 115 internal/coverage/cmerge
+2026-09-24T02:20:52   list 116 internal/coverage/pods
+2026-09-24T02:20:52   list 117 internal/coverage/slicereader
+2026-09-24T02:20:52   list 118 internal/coverage/slicewriter
+2026-09-24T02:20:52   list 119 internal/coverage/test
+2026-09-24T02:20:52   list 120 internal/cpu
+2026-09-24T02:20:52   list 121 internal/dag
+2026-09-24T02:20:52   list 122 internal/diff
+2026-09-24T02:20:52   list 123 internal/fmtsort
+2026-09-24T02:20:52   list 124 internal/fuzz
+2026-09-24T02:20:52   list 125 internal/godebug
+2026-09-24T02:20:52   list 126 internal/godebugs
+2026-09-24T02:20:52   list 127 os
+2026-09-24T02:20:52   list 128 net
+2026-09-24T02:20:52 ROW archive/tar start (attempt 1, pkgTimeout 10m, budget 70m, free 211.9 GB)
+2026-09-24T02:23:14 ROW archive/tar PASS got=98 D=0/0 banked=98|0 wall=141s outer=141s page=MOVED [TestFileInfoHeaderSymlink] N=98 D=0 drift=clean rc=0
+2026-09-24T02:23:15 ROW archive/zip start (attempt 1, pkgTimeout 60m, budget 270m, free 210.4 GB)
+2026-09-24T02:25:33 ROW archive/zip PASS got=100 D=0/0 banked=100|0 wall=137s outer=137s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:25:33 ROW bufio start (attempt 1, pkgTimeout 10m, budget 70m, free 210 GB)
+2026-09-24T02:26:01 ROW bufio PASS got=80 D=1/1 banked=80|1 wall=26s outer=27s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:26:01 ROW bytes start (attempt 1, pkgTimeout 10m, budget 70m, free 209.8 GB)
+2026-09-24T02:26:33 ROW bytes PASS got=83 D=6/6 banked=83|6 wall=31s outer=31s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:26:33 ROW cmp start (attempt 1, pkgTimeout 10m, budget 70m, free 209.6 GB)
+2026-09-24T02:26:55 ROW cmp PASS got=4 D=0/0 banked=4|0 wall=20s outer=21s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:26:55 ROW compress/bzip2 start (attempt 1, pkgTimeout 10m, budget 70m, free 209.4 GB)
+2026-09-24T02:27:19 ROW compress/bzip2 PASS got=4 D=0/0 banked=4|0 wall=22s outer=22s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:27:19 ROW compress/flate start (attempt 1, pkgTimeout 10m, budget 70m, free 209.1 GB)
+2026-09-24T02:28:10 ROW compress/flate PASS got=64 D=0/0 banked=64|0 wall=49s outer=50s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:28:10 ROW compress/gzip start (attempt 1, pkgTimeout 10m, budget 70m, free 208.7 GB)
+2026-09-24T02:28:44 ROW compress/gzip PASS got=15 D=0/0 banked=15|0 wall=33s outer=34s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:28:44 ROW compress/lzw start (attempt 1, pkgTimeout 10m, budget 70m, free 208.4 GB)
+2026-09-24T02:29:09 ROW compress/lzw PASS got=17 D=0/0 banked=17|0 wall=23s outer=24s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:29:09 ROW compress/zlib start (attempt 1, pkgTimeout 10m, budget 70m, free 208.1 GB)
+2026-09-24T02:29:36 ROW compress/zlib PASS got=6 D=0/0 banked=6|0 wall=26s outer=26s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:29:36 ROW container/heap start (attempt 1, pkgTimeout 10m, budget 70m, free 207.9 GB)
+2026-09-24T02:30:00 ROW container/heap PASS got=7 D=0/0 banked=7|0 wall=22s outer=23s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:30:00 ROW container/list start (attempt 1, pkgTimeout 10m, budget 70m, free 207.6 GB)
+2026-09-24T02:30:22 ROW container/list PASS got=10 D=0/0 banked=10|0 wall=20s outer=21s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:30:22 ROW container/ring start (attempt 1, pkgTimeout 10m, budget 70m, free 207.4 GB)
+2026-09-24T02:30:43 ROW container/ring PASS got=8 D=0/0 banked=8|0 wall=20s outer=20s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:30:43 ROW context start (attempt 1, pkgTimeout 10m, budget 70m, free 207.2 GB)
+2026-09-24T02:31:31 ROW context COUNT got=58 D=0/0 banked=57|1 wall=46s outer=47s page=MOVED [TestAllocs] N=58 D=0 drift=auto=0 test-artifacts=0 production=1 rc=1
+2026-09-24T02:31:32 ROW crypto start (attempt 1, pkgTimeout 10m, budget 70m, free 206.7 GB)
+2026-09-24T02:32:37 ROW crypto PASS got=6 D=0/0 banked=6|0 wall=63s outer=64s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:32:37 ROW crypto/aes start (attempt 1, pkgTimeout 10m, budget 70m, free 205.5 GB)
+2026-09-24T02:33:11 ROW crypto/aes PASS got=57 D=0/0 banked=57|0 wall=33s outer=33s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:33:11 ROW crypto/cipher start (attempt 1, pkgTimeout 10m, budget 70m, free 205.1 GB)
+2026-09-24T02:34:14 ROW crypto/cipher PASS got=27272 D=0/0 banked=27272|0 wall=60s outer=61s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:34:15 ROW crypto/des start (attempt 1, pkgTimeout 10m, budget 70m, free 204.5 GB)
+2026-09-24T02:34:44 ROW crypto/des PASS got=55 D=0/0 banked=55|0 wall=27s outer=28s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:34:44 ROW crypto/dsa start (attempt 1, pkgTimeout 120m, budget 510m, free 204.3 GB)
+2026-09-24T02:36:07 ROW crypto/dsa PASS got=4 D=0/0 banked=4|0 wall=82s outer=83s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:36:07 ROW crypto/ecdh start (attempt 1, pkgTimeout 10m, budget 70m, free 204 GB)
+2026-09-24T02:36:50 ROW crypto/ecdh PASS got=47 D=0/0 banked=47|0 wall=41s outer=41s page=NOT REWRITTEN drift=auto=0 test-artifacts=1 production=0 rc=0
+2026-09-24T02:36:50 ROW crypto/ecdsa start (attempt 1, pkgTimeout 10m, budget 70m, free 203.6 GB)
+2026-09-24T02:37:52 ROW crypto/ecdsa PASS got=77 D=0/0 banked=77|0 wall=60s outer=60s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:37:52 ROW crypto/ed25519 start (attempt 1, pkgTimeout 10m, budget 70m, free 202.3 GB)
+2026-09-24T02:38:28 ROW crypto/ed25519 PASS got=9 D=1/1 banked=9|1 wall=34s outer=35s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:38:28 ROW crypto/elliptic start (attempt 1, pkgTimeout 10m, budget 70m, free 202 GB)
+2026-09-24T02:38:58 ROW crypto/elliptic PASS got=82 D=0/0 banked=82|0 wall=28s outer=29s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:38:58 ROW crypto/hkdf start (attempt 1, pkgTimeout 10m, budget 70m, free 201.8 GB)
+2026-09-24T02:39:27 ROW crypto/hkdf PASS got=3 D=0/0 banked=3|0 wall=27s outer=28s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:39:27 ROW crypto/hmac start (attempt 1, pkgTimeout 10m, budget 70m, free 201.5 GB)
+2026-09-24T02:39:58 ROW crypto/hmac PASS got=172 D=0/0 banked=172|0 wall=29s outer=30s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:39:58 ROW crypto/internal/boring start (attempt 1, pkgTimeout 10m, budget 70m, free 201.2 GB)
+2026-09-24T02:40:25 ROW crypto/internal/boring PASS got=3 D=0/0 banked=3|0 wall=25s outer=25s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:40:25 ROW crypto/internal/boring/bcache start (attempt 1, pkgTimeout 10m, budget 70m, free 201 GB)
+2026-09-24T02:41:00 ROW crypto/internal/boring/bcache PASS got=1 D=0/0 banked=1|0 wall=33s outer=34s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:41:00 ROW crypto/internal/fips140/aes start (attempt 1, pkgTimeout 10m, budget 70m, free 200.8 GB)
+2026-09-24T02:41:27 ROW crypto/internal/fips140/aes PASS got=5 D=0/0 banked=5|0 wall=25s outer=26s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:41:27 ROW crypto/internal/fips140/bigmod start (attempt 1, pkgTimeout 10m, budget 70m, free 200.5 GB)
+2026-09-24T02:41:56 ROW crypto/internal/fips140/bigmod PASS got=79 D=0/0 banked=79|0 wall=27s outer=28s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:41:56 ROW crypto/internal/fips140/ecdh start (attempt 1, pkgTimeout 10m, budget 70m, free 200.3 GB)
+2026-09-24T02:42:23 ROW crypto/internal/fips140/ecdh PASS got=1 D=0/0 banked=1|0 wall=25s outer=26s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T02:42:41 PURGE rc=0 converter-present=True bin/obj/Generated=0.0 MB log=purge-20260924-024223.log
+2026-09-24T02:42:41 ROW crypto/internal/fips140/ecdsa start (attempt 1, pkgTimeout 10m, budget 70m, free 210.6 GB)
+2026-09-24T02:44:57 ROW crypto/internal/fips140/ecdsa PASS got=10 D=0/0 banked=10|0 wall=134s outer=135s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T02:44:57 ROW crypto/internal/fips140/edwards25519 start (attempt 1, pkgTimeout 10m, budget 70m, free 209 GB)
+2026-09-24T02:50:19 ROW crypto/internal/fips140/edwards25519 PASS got=54 D=0/0 banked=54|0 wall=320s outer=321s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T02:50:19 ROW crypto/internal/fips140/edwards25519/field start (attempt 1, pkgTimeout 10m, budget 70m, free 208.6 GB)
+2026-09-24T02:51:10 ROW crypto/internal/fips140/edwards25519/field PASS got=16 D=0/0 banked=16|0 wall=49s outer=50s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:51:10 ROW crypto/internal/fips140/mlkem start (attempt 1, pkgTimeout 30m, budget 150m, free 208.4 GB)
+2026-09-24T02:51:41 ROW crypto/internal/fips140/mlkem PASS got=10 D=0/0 banked=10|0 wall=29s outer=30s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:51:41 ROW crypto/internal/fips140/nistec start (attempt 1, pkgTimeout 10m, budget 70m, free 208.1 GB)
+2026-09-24T02:52:11 ROW crypto/internal/fips140/nistec PASS got=44 D=0/0 banked=44|0 wall=28s outer=29s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:52:11 ROW crypto/internal/fips140/rsa start (attempt 1, pkgTimeout 10m, budget 70m, free 207.8 GB)
+2026-09-24T02:52:45 ROW crypto/internal/fips140/rsa PASS got=123 D=0/0 banked=123|0 wall=32s outer=32s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T02:52:45 ROW crypto/internal/fips140test start (attempt 1, pkgTimeout 10m, budget 70m, free 207.4 GB)
+2026-09-24T02:55:23 ROW crypto/internal/fips140test PASS got=2260 D=7/7 banked=2260|7 wall=156s outer=157s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:55:23 ROW crypto/internal/hpke start (attempt 1, pkgTimeout 10m, budget 70m, free 206.6 GB)
+2026-09-24T02:55:58 ROW crypto/internal/hpke PASS got=19 D=0/0 banked=19|0 wall=34s outer=34s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:55:58 ROW crypto/internal/sysrand start (attempt 1, pkgTimeout 10m, budget 70m, free 206 GB)
+2026-09-24T02:56:41 ROW crypto/internal/sysrand PASS got=6 D=0/0 banked=6|0 wall=41s outer=42s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:56:41 ROW crypto/md5 start (attempt 1, pkgTimeout 10m, budget 70m, free 205.8 GB)
+2026-09-24T02:57:12 ROW crypto/md5 PASS got=11 D=1/1 banked=11|1 wall=29s outer=30s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:57:12 ROW crypto/mlkem start (attempt 1, pkgTimeout 30m, budget 150m, free 205.5 GB)
+2026-09-24T02:57:57 ROW crypto/mlkem PASS got=8 D=0/0 banked=8|0 wall=43s outer=44s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:57:57 ROW crypto/pbkdf2 start (attempt 1, pkgTimeout 10m, budget 70m, free 205.2 GB)
+2026-09-24T02:58:26 ROW crypto/pbkdf2 PASS got=5 D=0/0 banked=5|0 wall=27s outer=28s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:58:26 ROW crypto/rand start (attempt 1, pkgTimeout 10m, budget 70m, free 204.9 GB)
+2026-09-24T02:59:20 ROW crypto/rand PASS got=314 D=1/1 banked=314|1 wall=53s outer=53s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:59:20 ROW crypto/rc4 start (attempt 1, pkgTimeout 10m, budget 70m, free 204.6 GB)
+2026-09-24T02:59:49 ROW crypto/rc4 PASS got=75 D=0/0 banked=75|0 wall=27s outer=28s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T02:59:49 ROW crypto/rsa start (attempt 1, pkgTimeout 10m, budget 70m, free 204.4 GB)
+2026-09-24T03:01:56 ROW crypto/rsa PASS got=568 D=1/1 banked=568|1 wall=124s outer=125s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:01:56 ROW crypto/sha1 start (attempt 1, pkgTimeout 10m, budget 70m, free 203.5 GB)
+2026-09-24T03:02:25 ROW crypto/sha1 PASS got=12 D=1/1 banked=12|1 wall=27s outer=28s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:02:25 ROW crypto/sha256 start (attempt 1, pkgTimeout 10m, budget 70m, free 203.3 GB)
+2026-09-24T03:02:54 ROW crypto/sha256 PASS got=22 D=1/1 banked=22|1 wall=27s outer=28s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:02:54 ROW crypto/sha3 start (attempt 1, pkgTimeout 10m, budget 70m, free 203.1 GB)
+2026-09-24T03:03:41 ROW crypto/sha3 PASS got=18 D=5/5 banked=18|5 wall=45s outer=46s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:03:41 ROW crypto/sha512 start (attempt 1, pkgTimeout 10m, budget 70m, free 202.8 GB)
+2026-09-24T03:04:10 ROW crypto/sha512 PASS got=35 D=1/1 banked=35|1 wall=27s outer=28s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:04:10 ROW crypto/subtle start (attempt 1, pkgTimeout 10m, budget 70m, free 202.6 GB)
+2026-09-24T03:05:02 ROW crypto/subtle PASS got=9 D=0/0 banked=9|0 wall=50s outer=51s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:05:03 ROW crypto/x509 start (attempt 1, pkgTimeout 10m, budget 70m, free 202.3 GB)
+2026-09-24T03:08:43 ROW crypto/x509 PASS got=518 D=0/0 banked=518|0 wall=219s outer=219s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T03:08:43 ROW database/sql start (attempt 1, pkgTimeout 10m, budget 70m, free 201.9 GB)
+2026-09-24T03:10:43 ROW database/sql PASS got=140 D=2/2 banked=140|2 wall=118s outer=119s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:10:44 ROW database/sql/driver start (attempt 1, pkgTimeout 10m, budget 70m, free 216.8 GB)
+2026-09-24T03:11:07 ROW database/sql/driver PASS got=1 D=0/0 banked=1|0 wall=21s outer=22s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:11:07 ROW debug/buildinfo start (attempt 1, pkgTimeout 10m, budget 70m, free 216.5 GB)
+2026-09-24T03:11:59 ROW debug/buildinfo PASS got=211 D=0/0 banked=211|0 wall=50s outer=51s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:11:59 ROW debug/dwarf start (attempt 1, pkgTimeout 10m, budget 70m, free 215.9 GB)
+2026-09-24T03:12:33 ROW debug/dwarf PASS got=40 D=0/0 banked=40|0 wall=32s outer=33s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:12:33 ROW debug/elf start (attempt 1, pkgTimeout 10m, budget 70m, free 215.7 GB)
+2026-09-24T03:13:12 ROW debug/elf PASS got=31 D=0/0 banked=31|0 wall=37s outer=38s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:13:12 ROW debug/gosym start (attempt 1, pkgTimeout 10m, budget 70m, free 215.5 GB)
+2026-09-24T03:13:44 ROW debug/gosym PASS got=10 D=0/0 banked=10|0 wall=30s outer=31s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:13:44 ROW debug/macho start (attempt 1, pkgTimeout 10m, budget 70m, free 215.2 GB)
+2026-09-24T03:14:12 ROW debug/macho PASS got=7 D=0/0 banked=7|0 wall=25s outer=26s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:14:12 ROW debug/pe start (attempt 1, pkgTimeout 10m, budget 70m, free 215 GB)
+2026-09-24T03:14:53 ROW debug/pe PASS got=10 D=0/0 banked=10|0 wall=39s outer=40s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:14:53 ROW debug/plan9obj start (attempt 1, pkgTimeout 10m, budget 70m, free 214.7 GB)
+2026-09-24T03:15:17 ROW debug/plan9obj PASS got=2 D=0/0 banked=2|0 wall=22s outer=22s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:15:36 PURGE rc=0 converter-present=True bin/obj/Generated=0.0 MB log=purge-20260924-031517.log
+2026-09-24T03:15:37 ROW embed/internal/embedtest start (attempt 1, pkgTimeout 10m, budget 70m, free 226.5 GB)
+2026-09-24T03:17:42 ROW embed/internal/embedtest PASS got=7 D=0/0 banked=7|0 wall=124s outer=125s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:17:42 ROW encoding/ascii85 start (attempt 1, pkgTimeout 10m, budget 70m, free 225.5 GB)
+2026-09-24T03:18:07 ROW encoding/ascii85 PASS got=9 D=0/0 banked=9|0 wall=23s outer=24s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:18:07 ROW encoding/asn1 start (attempt 1, pkgTimeout 10m, budget 70m, free 225.2 GB)
+2026-09-24T03:18:38 ROW encoding/asn1 PASS got=40 D=0/0 banked=40|0 wall=30s outer=31s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:18:39 ROW encoding/base32 start (attempt 1, pkgTimeout 10m, budget 70m, free 224.9 GB)
+2026-09-24T03:19:04 ROW encoding/base32 PASS got=26 D=0/0 banked=26|0 wall=23s outer=24s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:19:04 ROW encoding/base64 start (attempt 1, pkgTimeout 10m, budget 70m, free 224.7 GB)
+2026-09-24T03:19:29 ROW encoding/base64 PASS got=17 D=0/0 banked=17|0 wall=24s outer=25s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:19:29 ROW encoding/binary start (attempt 1, pkgTimeout 10m, budget 70m, free 224.4 GB)
+2026-09-24T03:19:54 ROW encoding/binary PASS got=140 D=6/6 banked=140|6 wall=23s outer=24s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:19:54 ROW encoding/csv start (attempt 1, pkgTimeout 10m, budget 70m, free 224.2 GB)
+2026-09-24T03:20:19 ROW encoding/csv PASS got=71 D=0/0 banked=71|0 wall=23s outer=24s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:20:19 ROW encoding/gob start (attempt 1, pkgTimeout 10m, budget 70m, free 223.9 GB)
+2026-09-24T03:21:37 ROW encoding/gob PASS got=106 D=0/0 banked=106|0 wall=76s outer=77s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T03:21:37 ROW encoding/hex start (attempt 1, pkgTimeout 10m, budget 70m, free 223.5 GB)
+2026-09-24T03:22:01 ROW encoding/hex PASS got=12 D=0/0 banked=12|0 wall=22s outer=23s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:22:01 ROW encoding/json start (attempt 1, pkgTimeout 10m, budget 70m, free 223.3 GB)
+2026-09-24T03:24:35 ROW encoding/json PASS got=532 D=0/0 banked=532|0 wall=152s outer=153s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:24:35 ROW encoding/xml start (attempt 1, pkgTimeout 10m, budget 70m, free 220 GB)
+2026-09-24T03:25:33 ROW encoding/xml PASS got=387 D=0/0 banked=387|0 wall=56s outer=56s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T03:25:33 ROW encoding/pem start (attempt 1, pkgTimeout 10m, budget 70m, free 219.7 GB)
+2026-09-24T03:25:59 ROW encoding/pem PASS got=18 D=0/0 banked=18|0 wall=24s outer=25s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:25:59 ROW errors start (attempt 1, pkgTimeout 10m, budget 70m, free 219.5 GB)
+2026-09-24T03:26:22 ROW errors PASS got=61 D=0/0 banked=61|0 wall=21s outer=22s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:26:22 ROW expvar start (attempt 1, pkgTimeout 10m, budget 70m, free 219.3 GB)
+2026-09-24T03:27:08 ROW expvar PASS got=11 D=0/0 banked=11|0 wall=43s outer=44s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:27:08 ROW flag start (attempt 1, pkgTimeout 10m, budget 70m, free 218.9 GB)
+2026-09-24T03:27:41 ROW flag PASS got=24 D=0/0 banked=24|0 wall=32s outer=32s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T03:27:41 ROW fmt start (attempt 1, pkgTimeout 10m, budget 70m, free 218.7 GB)
+2026-09-24T03:28:27 ROW fmt PASS got=62 D=1/1 banked=62|1 wall=44s outer=44s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:28:27 ROW go/ast start (attempt 1, pkgTimeout 10m, budget 70m, free 218.4 GB)
+2026-09-24T03:29:11 ROW go/ast PASS got=9 D=0/0 banked=9|0 wall=42s outer=42s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:29:11 ROW go/ast/internal/tests start (attempt 1, pkgTimeout 10m, budget 70m, free 217.9 GB)
+2026-09-24T03:29:35 ROW go/ast/internal/tests PASS got=3 D=0/0 banked=3|0 wall=22s outer=23s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:29:35 ROW go/build start (attempt 1, pkgTimeout 10m, budget 70m, free 217.7 GB)
+2026-09-24T03:30:55 ROW go/build PASS got=57 D=1/1 banked=57|1 wall=77s outer=78s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T03:30:55 ROW go/build/constraint start (attempt 1, pkgTimeout 10m, budget 70m, free 217.3 GB)
+2026-09-24T03:31:18 ROW go/build/constraint PASS got=89 D=0/0 banked=89|0 wall=21s outer=22s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:31:18 ROW go/constant start (attempt 1, pkgTimeout 10m, budget 70m, free 217.1 GB)
+2026-09-24T03:31:44 ROW go/constant PASS got=9 D=0/0 banked=9|0 wall=24s outer=25s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:31:44 ROW go/doc start (attempt 1, pkgTimeout 10m, budget 70m, free 216.8 GB)
+2026-09-24T03:32:26 ROW go/doc PASS got=86 D=0/0 banked=86|0 wall=39s outer=40s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:32:26 ROW go/doc/comment start (attempt 1, pkgTimeout 10m, budget 70m, free 216.4 GB)
+2026-09-24T03:33:00 ROW go/doc/comment PASS got=10059 D=0/0 banked=10059|0 wall=32s outer=32s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:33:00 ROW go/format start (attempt 1, pkgTimeout 10m, budget 70m, free 216.2 GB)
+2026-09-24T03:33:27 ROW go/format PASS got=4 D=0/0 banked=4|0 wall=26s outer=26s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:33:27 ROW go/importer start (attempt 1, pkgTimeout 10m, budget 70m, free 216 GB)
+2026-09-24T03:34:49 ROW go/importer PASS got=3 D=0/0 banked=3|0 wall=80s outer=81s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:34:49 ROW go/internal/gccgoimporter start (attempt 1, pkgTimeout 10m, budget 70m, free 215.1 GB)
+2026-09-24T03:35:22 ROW go/internal/gccgoimporter PASS got=4 D=0/0 banked=4|0 wall=31s outer=32s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:35:22 ROW go/internal/gcimporter start (attempt 1, pkgTimeout 10m, budget 70m, free 214.9 GB)
+2026-09-24T03:40:51 ROW go/internal/gcimporter PASS got=621 D=0/0 banked=621|0 wall=327s outer=327s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:40:51 ROW go/internal/srcimporter start (attempt 1, pkgTimeout 10m, budget 70m, free 214.6 GB)
+2026-09-24T03:41:30 ROW go/internal/srcimporter PASS got=7 D=0/0 banked=7|0 wall=38s outer=38s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:41:30 ROW go/parser start (attempt 1, pkgTimeout 90m, budget 390m, free 214.3 GB)
+2026-09-24T03:47:23 ROW go/parser PASS got=176 D=0/0 banked=176|0 wall=350s outer=351s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:47:23 ROW go/printer start (attempt 1, pkgTimeout 10m, budget 70m, free 214.1 GB)
+2026-09-24T03:47:52 ROW go/printer PASS got=45 D=0/0 banked=45|0 wall=27s outer=28s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=2 rc=0
+2026-09-24T03:48:14 PURGE rc=0 converter-present=True bin/obj/Generated=0.0 MB log=purge-20260924-034752.log
+2026-09-24T03:48:14 ROW go/scanner start (attempt 1, pkgTimeout 10m, budget 70m, free 226.5 GB)
+2026-09-24T03:50:20 ROW go/scanner PASS got=11 D=0/0 banked=11|0 wall=124s outer=125s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:50:20 ROW go/token start (attempt 1, pkgTimeout 10m, budget 70m, free 225.5 GB)
+2026-09-24T03:50:54 ROW go/token PASS got=31 D=0/0 banked=31|0 wall=32s outer=33s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:50:54 ROW go/types start (attempt 1, pkgTimeout 10m, budget 70m, free 225.1 GB)
+2026-09-24T03:54:57 ROW go/types PASS got=574 D=0/0 banked=574|0 wall=241s outer=242s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T03:54:57 ROW go/version start (attempt 1, pkgTimeout 10m, budget 70m, free 223 GB)
+2026-09-24T03:55:21 ROW go/version PASS got=3 D=0/0 banked=3|0 wall=22s outer=23s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:55:22 ROW hash start (attempt 1, pkgTimeout 10m, budget 70m, free 222.8 GB)
+2026-09-24T03:55:54 ROW hash PASS got=18 D=0/0 banked=18|0 wall=30s outer=31s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:55:54 ROW hash/adler32 start (attempt 1, pkgTimeout 10m, budget 70m, free 222.4 GB)
+2026-09-24T03:56:16 ROW hash/adler32 PASS got=2 D=0/0 banked=2|0 wall=21s outer=22s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:56:16 ROW hash/crc32 start (attempt 1, pkgTimeout 10m, budget 70m, free 222.2 GB)
+2026-09-24T03:56:41 ROW hash/crc32 PASS got=10 D=0/0 banked=10|0 wall=23s outer=24s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T03:56:41 ROW hash/crc64 start (attempt 1, pkgTimeout 10m, budget 70m, free 221.9 GB)
+2026-09-24T03:57:03 ROW hash/crc64 PASS got=5 D=0/0 banked=5|0 wall=21s outer=21s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:57:03 ROW hash/fnv start (attempt 1, pkgTimeout 10m, budget 70m, free 221.7 GB)
+2026-09-24T03:57:27 ROW hash/fnv PASS got=19 D=0/0 banked=19|0 wall=22s outer=22s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T03:57:27 ROW hash/maphash start (attempt 1, pkgTimeout 60m, budget 270m, free 221.5 GB)
+2026-09-24T04:03:04 ROW hash/maphash PASS got=59 D=0/0 banked=59|0 wall=336s outer=336s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:03:04 ROW html start (attempt 1, pkgTimeout 10m, budget 70m, free 221.2 GB)
+2026-09-24T04:03:28 ROW html PASS got=3 D=0/0 banked=3|0 wall=22s outer=23s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:03:28 ROW html/template start (attempt 1, pkgTimeout 10m, budget 70m, free 220.9 GB)
+2026-09-24T04:04:30 ROW html/template PASS got=243 D=0/0 banked=243|0 wall=60s outer=60s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T04:04:30 ROW image start (attempt 1, pkgTimeout 10m, budget 70m, free 220.4 GB)
+2026-09-24T04:05:06 ROW image PASS got=8 D=0/0 banked=8|0 wall=34s outer=35s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:05:06 ROW image/color start (attempt 1, pkgTimeout 10m, budget 70m, free 220 GB)
+2026-09-24T04:05:30 ROW image/color PASS got=10 D=0/0 banked=10|0 wall=22s outer=23s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:05:30 ROW image/draw start (attempt 1, pkgTimeout 10m, budget 70m, free 219.8 GB)
+2026-09-24T04:05:58 ROW image/draw PASS got=9 D=0/0 banked=9|0 wall=26s outer=27s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:05:58 ROW image/gif start (attempt 1, pkgTimeout 10m, budget 70m, free 219.5 GB)
+2026-09-24T04:06:33 ROW image/gif PASS got=28 D=0/0 banked=28|0 wall=33s outer=34s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:06:34 ROW image/jpeg start (attempt 1, pkgTimeout 10m, budget 70m, free 219.3 GB)
+2026-09-24T04:07:02 ROW image/jpeg PASS got=14 D=0/0 banked=14|0 wall=27s outer=28s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:07:02 ROW image/png start (attempt 1, pkgTimeout 10m, budget 70m, free 219.1 GB)
+2026-09-24T04:07:33 ROW image/png PASS got=28 D=0/0 banked=28|0 wall=28s outer=29s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:07:33 ROW index/suffixarray start (attempt 1, pkgTimeout 120m, budget 510m, free 218.8 GB)
+2026-09-24T04:09:52 ROW index/suffixarray PASS got=12 D=0/0 banked=12|0 wall=137s outer=138s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:09:52 ROW internal/abi start (attempt 1, pkgTimeout 10m, budget 70m, free 218.6 GB)
+2026-09-24T04:10:21 ROW internal/abi PASS got=1 D=1/1 banked=1|1 wall=27s outer=28s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:10:21 ROW internal/buildcfg start (attempt 1, pkgTimeout 10m, budget 70m, free 218.4 GB)
+2026-09-24T04:10:44 ROW internal/buildcfg PASS got=4 D=0/0 banked=4|0 wall=21s outer=22s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T04:10:44 ROW internal/chacha8rand start (attempt 1, pkgTimeout 10m, budget 70m, free 218.1 GB)
+2026-09-24T04:11:11 ROW internal/chacha8rand PASS got=4 D=0/0 banked=4|0 wall=25s outer=26s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:11:11 ROW internal/coverage/cfile start (attempt 1, pkgTimeout 10m, budget 70m, free 217.9 GB)
+2026-09-24T04:12:17 ROW internal/coverage/cfile PASS got=15 D=1/1 banked=15|1 wall=64s outer=64s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:12:17 ROW internal/coverage/cformat start (attempt 1, pkgTimeout 10m, budget 70m, free 217.3 GB)
+2026-09-24T04:12:40 ROW internal/coverage/cformat PASS got=2 D=0/0 banked=2|0 wall=22s outer=22s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:12:41 ROW internal/coverage/cmerge start (attempt 1, pkgTimeout 10m, budget 70m, free 217.1 GB)
+2026-09-24T04:13:03 ROW internal/coverage/cmerge PASS got=2 D=0/0 banked=2|0 wall=21s outer=22s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:13:03 ROW internal/coverage/pods start (attempt 1, pkgTimeout 10m, budget 70m, free 216.9 GB)
+2026-09-24T04:13:28 ROW internal/coverage/pods PASS got=1 D=0/0 banked=1|0 wall=23s outer=23s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:13:28 ROW internal/coverage/slicereader start (attempt 1, pkgTimeout 10m, budget 70m, free 216.6 GB)
+2026-09-24T04:13:50 ROW internal/coverage/slicereader PASS got=1 D=0/0 banked=1|0 wall=21s outer=21s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:13:51 ROW internal/coverage/slicewriter start (attempt 1, pkgTimeout 10m, budget 70m, free 216.4 GB)
+2026-09-24T04:14:13 ROW internal/coverage/slicewriter PASS got=1 D=0/0 banked=1|0 wall=21s outer=22s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:14:13 ROW internal/coverage/test start (attempt 1, pkgTimeout 10m, budget 70m, free 216.2 GB)
+2026-09-24T04:14:38 ROW internal/coverage/test PASS got=6 D=0/0 banked=6|0 wall=23s outer=24s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:14:38 ROW internal/cpu start (attempt 1, pkgTimeout 10m, budget 70m, free 216 GB)
+2026-09-24T04:15:03 ROW internal/cpu PASS got=8 D=0/0 banked=8|0 wall=23s outer=24s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:15:21 PURGE rc=0 converter-present=True bin/obj/Generated=0.0 MB log=purge-20260924-041503.log
+2026-09-24T04:15:21 ROW internal/dag start (attempt 1, pkgTimeout 10m, budget 70m, free 226.4 GB)
+2026-09-24T04:17:23 ROW internal/dag PASS got=6 D=0/0 banked=6|0 wall=120s outer=121s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:17:23 ROW internal/diff start (attempt 1, pkgTimeout 10m, budget 70m, free 225.5 GB)
+2026-09-24T04:17:50 ROW internal/diff PASS got=13 D=0/0 banked=13|0 wall=25s outer=26s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:17:50 ROW internal/fmtsort start (attempt 1, pkgTimeout 10m, budget 70m, free 225.1 GB)
+2026-09-24T04:18:15 ROW internal/fmtsort PASS got=3 D=0/0 banked=3|0 wall=23s outer=24s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:18:15 ROW internal/fuzz start (attempt 1, pkgTimeout 10m, budget 70m, free 224.9 GB)
+2026-09-24T04:19:14 ROW internal/fuzz PASS got=52 D=0/0 banked=52|0 wall=58s outer=59s page=NOT REWRITTEN drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T04:19:14 ROW internal/godebug start (attempt 1, pkgTimeout 10m, budget 70m, free 223.8 GB)
+2026-09-24T04:19:57 ROW internal/godebug PASS got=5 D=0/0 banked=5|0 wall=41s outer=41s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:19:57 ROW internal/godebugs start (attempt 1, pkgTimeout 10m, budget 70m, free 223.5 GB)
+2026-09-24T04:21:12 ROW internal/godebugs PASS got=1 D=0/0 banked=1|0 wall=74s outer=75s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:21:12 ROW os start (attempt 1, pkgTimeout 10m, budget 70m, free 223.2 GB)
+2026-09-24T04:22:48 ROW os PASS got=1105 D=2/2 banked=1105|2 wall=94s outer=95s page=MOVED [TestNetworkSymbolicLink,TestReadStdin/c1/r1/äöü,TestReadStdin/c1/r1/“hi”™,TestReadStdin/c1/r1/あ,TestReadStdin/c1/r1/🙈🙉🙊,TestReadStdin/c1/r10/äöü,TestReadStdin/c1/r10/“hi”™,TestReadStdin/c1/r10/あ,TestReadStdin/c1/r10/🙈🙉🙊,TestReadStdin/c1/r100/äöü,TestReadStdin/c1/r100/“hi”™,TestReadStdin/c1/r100/あ,TestReadStdin/c1/r100/🙈🙉🙊,TestReadStdin/c1/r16/äöü,TestReadStdin/c1/r16/“hi”™,TestReadStdin/c1/r16/あ,TestReadStdin/c1/r16/🙈🙉🙊,TestReadStdin/c1/r2/äöü,TestReadStdin/c1/r2/“hi”™,TestReadStdin/c1/r2/あ,TestReadStdin/c1/r2/🙈🙉🙊,TestReadStdin/c1/r20/äöü,TestReadStdin/c1/r20/“hi”™,TestReadStdin/c1/r20/あ,TestReadStdin/c1/r20/🙈🙉🙊,TestReadStdin/c1/r3/äöü,TestReadStdin/c1/r3/“hi”™,TestReadStdin/c1/r3/あ,TestReadStdin/c1/r3/🙈🙉🙊,TestReadStdin/c1/r4/äöü,TestReadStdin/c1/r4/“hi”™,TestReadStdin/c1/r4/あ,TestReadStdin/c1/r4/🙈🙉🙊,TestReadStdin/c1/r5/äöü,TestReadStdin/c1/r5/“hi”™,TestReadStdin/c1/r5/あ,TestReadStdin/c1/r5/🙈🙉🙊,TestReadStdin/c1/r50/äöü,TestReadStdin/c1/r50/“hi”™,TestReadStdin/c1/r50/あ,TestReadStdin/c1/r50/🙈🙉🙊,TestReadStdin/c1/r8/äöü,TestReadStdin/c1/r8/“hi”™,TestReadStdin/c1/r8/あ,TestReadStdin/c1/r8/🙈🙉🙊,TestReadStdin/c10/r1/äöü,TestReadStdin/c10/r1/“hi”™,TestReadStdin/c10/r1/あ,TestReadStdin/c10/r1/🙈🙉🙊,TestReadStdin/c10/r10/äöü,TestReadStdin/c10/r10/“hi”™,TestReadStdin/c10/r10/あ,TestReadStdin/c10/r10/🙈🙉🙊,TestReadStdin/c10/r100/äöü,TestReadStdin/c10/r100/“hi”™,TestReadStdin/c10/r100/あ,TestReadStdin/c10/r100/🙈🙉🙊,TestReadStdin/c10/r16/äöü,TestReadStdin/c10/r16/“hi”™,TestReadStdin/c10/r16/あ,TestReadStdin/c10/r16/🙈🙉🙊,TestReadStdin/c10/r2/äöü,TestReadStdin/c10/r2/“hi”™,TestReadStdin/c10/r2/あ,TestReadStdin/c10/r2/🙈🙉🙊,TestReadStdin/c10/r20/äöü,TestReadStdin/c10/r20/“hi”™,TestReadStdin/c10/r20/あ,TestReadStdin/c10/r20/🙈🙉🙊,TestReadStdin/c10/r3/äöü,TestReadStdin/c10/r3/“hi”™,TestReadStdin/c10/r3/あ,TestReadStdin/c10/r3/🙈🙉🙊,TestReadStdin/c10/r4/äöü,TestReadStdin/c10/r4/“hi”™,TestReadStdin/c10/r4/あ,TestReadStdin/c10/r4/🙈🙉🙊,TestReadStdin/c10/r5/äöü,TestReadStdin/c10/r5/“hi”™,TestReadStdin/c10/r5/あ,TestReadStdin/c10/r5/🙈🙉🙊,TestReadStdin/c10/r50/äöü,TestReadStdin/c10/r50/“hi”™,TestReadStdin/c10/r50/あ,TestReadStdin/c10/r50/🙈🙉🙊,TestReadStdin/c10/r8/äöü,TestReadStdin/c10/r8/“hi”™,TestReadStdin/c10/r8/あ,TestReadStdin/c10/r8/🙈🙉🙊,TestReadStdin/c100/r1/äöü,TestReadStdin/c100/r1/“hi”™,TestReadStdin/c100/r1/あ,TestReadStdin/c100/r1/🙈🙉🙊,TestReadStdin/c100/r10/äöü,TestReadStdin/c100/r10/“hi”™,TestReadStdin/c100/r10/あ,TestReadStdin/c100/r10/🙈🙉🙊,TestReadStdin/c100/r100/äöü,TestReadStdin/c100/r100/“hi”™,TestReadStdin/c100/r100/あ,TestReadStdin/c100/r100/🙈🙉🙊,TestReadStdin/c100/r16/äöü,TestReadStdin/c100/r16/“hi”™,TestReadStdin/c100/r16/あ,TestReadStdin/c100/r16/🙈🙉🙊,TestReadStdin/c100/r2/äöü,TestReadStdin/c100/r2/“hi”™,TestReadStdin/c100/r2/あ,TestReadStdin/c100/r2/🙈🙉🙊,TestReadStdin/c100/r20/äöü,TestReadStdin/c100/r20/“hi”™,TestReadStdin/c100/r20/あ,TestReadStdin/c100/r20/🙈🙉🙊,TestReadStdin/c100/r3/äöü,TestReadStdin/c100/r3/“hi”™,TestReadStdin/c100/r3/あ,TestReadStdin/c100/r3/🙈🙉🙊,TestReadStdin/c100/r4/äöü,TestReadStdin/c100/r4/“hi”™,TestReadStdin/c100/r4/あ,TestReadStdin/c100/r4/🙈🙉🙊,TestReadStdin/c100/r5/äöü,TestReadStdin/c100/r5/“hi”™,TestReadStdin/c100/r5/あ,TestReadStdin/c100/r5/🙈🙉🙊,TestReadStdin/c100/r50/äöü,TestReadStdin/c100/r50/“hi”™,TestReadStdin/c100/r50/あ,TestReadStdin/c100/r50/🙈🙉🙊,TestReadStdin/c100/r8/äöü,TestReadStdin/c100/r8/“hi”™,TestReadStdin/c100/r8/あ,TestReadStdin/c100/r8/🙈🙉🙊,TestReadStdin/c1000/r1/äöü,TestReadStdin/c1000/r1/“hi”™,TestReadStdin/c1000/r1/あ,TestReadStdin/c1000/r1/🙈🙉🙊,TestReadStdin/c1000/r10/äöü,TestReadStdin/c1000/r10/“hi”™,TestReadStdin/c1000/r10/あ,TestReadStdin/c1000/r10/🙈🙉🙊,TestReadStdin/c1000/r100/äöü,TestReadStdin/c1000/r100/“hi”™,TestReadStdin/c1000/r100/あ,TestReadStdin/c1000/r100/🙈🙉🙊,TestReadStdin/c1000/r16/äöü,TestReadStdin/c1000/r16/“hi”™,TestReadStdin/c1000/r16/あ,TestReadStdin/c1000/r16/🙈🙉🙊,TestReadStdin/c1000/r2/äöü,TestReadStdin/c1000/r2/“hi”™,TestReadStdin/c1000/r2/あ,TestReadStdin/c1000/r2/🙈🙉🙊,TestReadStdin/c1000/r20/äöü,TestReadStdin/c1000/r20/“hi”™,TestReadStdin/c1000/r20/あ,TestReadStdin/c1000/r20/🙈🙉🙊,TestReadStdin/c1000/r3/äöü,TestReadStdin/c1000/r3/“hi”™,TestReadStdin/c1000/r3/あ,TestReadStdin/c1000/r3/🙈🙉🙊,TestReadStdin/c1000/r4/äöü,TestReadStdin/c1000/r4/“hi”™,TestReadStdin/c1000/r4/あ,TestReadStdin/c1000/r4/🙈🙉🙊,TestReadStdin/c1000/r5/äöü,TestReadStdin/c1000/r5/“hi”™,TestReadStdin/c1000/r5/あ,TestReadStdin/c1000/r5/🙈🙉🙊,TestReadStdin/c1000/r50/äöü,TestReadStdin/c1000/r50/“hi”™,TestReadStdin/c1000/r50/あ,TestReadStdin/c1000/r50/🙈🙉🙊,TestReadStdin/c1000/r8/äöü,TestReadStdin/c1000/r8/“hi”™,TestReadStdin/c1000/r8/あ,TestReadStdin/c1000/r8/🙈🙉🙊,TestReadStdin/c16/r1/äöü,TestReadStdin/c16/r1/“hi”™,TestReadStdin/c16/r1/あ,TestReadStdin/c16/r1/🙈🙉🙊,TestReadStdin/c16/r10/äöü,TestReadStdin/c16/r10/“hi”™,TestReadStdin/c16/r10/あ,TestReadStdin/c16/r10/🙈🙉🙊,TestReadStdin/c16/r100/äöü,TestReadStdin/c16/r100/“hi”™,TestReadStdin/c16/r100/あ,TestReadStdin/c16/r100/🙈🙉🙊,TestReadStdin/c16/r16/äöü,TestReadStdin/c16/r16/“hi”™,TestReadStdin/c16/r16/あ,TestReadStdin/c16/r16/🙈🙉🙊,TestReadStdin/c16/r2/äöü,TestReadStdin/c16/r2/“hi”™,TestReadStdin/c16/r2/あ,TestReadStdin/c16/r2/🙈🙉🙊,TestReadStdin/c16/r20/äöü,TestReadStdin/c16/r20/“hi”™,TestReadStdin/c16/r20/あ,TestReadStdin/c16/r20/🙈🙉🙊,TestReadStdin/c16/r3/äöü,TestReadStdin/c16/r3/“hi”™,TestReadStdin/c16/r3/あ,TestReadStdin/c16/r3/🙈🙉🙊,TestReadStdin/c16/r4/äöü,TestReadStdin/c16/r4/“hi”™,TestReadStdin/c16/r4/あ,TestReadStdin/c16/r4/🙈🙉🙊,TestReadStdin/c16/r5/äöü,TestReadStdin/c16/r5/“hi”™,TestReadStdin/c16/r5/あ,TestReadStdin/c16/r5/🙈🙉🙊,TestReadStdin/c16/r50/äöü,TestReadStdin/c16/r50/“hi”™,TestReadStdin/c16/r50/あ,TestReadStdin/c16/r50/🙈🙉🙊,TestReadStdin/c16/r8/äöü,TestReadStdin/c16/r8/“hi”™,TestReadStdin/c16/r8/あ,TestReadStdin/c16/r8/🙈🙉🙊,TestReadStdin/c2/r1/äöü,TestReadStdin/c2/r1/“hi”™,TestReadStdin/c2/r1/あ,TestReadStdin/c2/r1/🙈🙉🙊,TestReadStdin/c2/r10/äöü,TestReadStdin/c2/r10/“hi”™,TestReadStdin/c2/r10/あ,TestReadStdin/c2/r10/🙈🙉🙊,TestReadStdin/c2/r100/äöü,TestReadStdin/c2/r100/“hi”™,TestReadStdin/c2/r100/あ,TestReadStdin/c2/r100/🙈🙉🙊,TestReadStdin/c2/r16/äöü,TestReadStdin/c2/r16/“hi”™,TestReadStdin/c2/r16/あ,TestReadStdin/c2/r16/🙈🙉🙊,TestReadStdin/c2/r2/äöü,TestReadStdin/c2/r2/“hi”™,TestReadStdin/c2/r2/あ,TestReadStdin/c2/r2/🙈🙉🙊,TestReadStdin/c2/r20/äöü,TestReadStdin/c2/r20/“hi”™,TestReadStdin/c2/r20/あ,TestReadStdin/c2/r20/🙈🙉🙊,TestReadStdin/c2/r3/äöü,TestReadStdin/c2/r3/“hi”™,TestReadStdin/c2/r3/あ,TestReadStdin/c2/r3/🙈🙉🙊,TestReadStdin/c2/r4/äöü,TestReadStdin/c2/r4/“hi”™,TestReadStdin/c2/r4/あ,TestReadStdin/c2/r4/🙈🙉🙊,TestReadStdin/c2/r5/äöü,TestReadStdin/c2/r5/“hi”™,TestReadStdin/c2/r5/あ,TestReadStdin/c2/r5/🙈🙉🙊,TestReadStdin/c2/r50/äöü,TestReadStdin/c2/r50/“hi”™,TestReadStdin/c2/r50/あ,TestReadStdin/c2/r50/🙈🙉🙊,TestReadStdin/c2/r8/äöü,TestReadStdin/c2/r8/“hi”™,TestReadStdin/c2/r8/あ,TestReadStdin/c2/r8/🙈🙉🙊,TestReadStdin/c3/r1/äöü,TestReadStdin/c3/r1/“hi”™,TestReadStdin/c3/r1/あ,TestReadStdin/c3/r1/🙈🙉🙊,TestReadStdin/c3/r10/äöü,TestReadStdin/c3/r10/“hi”™,TestReadStdin/c3/r10/あ,TestReadStdin/c3/r10/🙈🙉🙊,TestReadStdin/c3/r100/äöü,TestReadStdin/c3/r100/“hi”™,TestReadStdin/c3/r100/あ,TestReadStdin/c3/r100/🙈🙉🙊,TestReadStdin/c3/r16/äöü,TestReadStdin/c3/r16/“hi”™,TestReadStdin/c3/r16/あ,TestReadStdin/c3/r16/🙈🙉🙊,TestReadStdin/c3/r2/äöü,TestReadStdin/c3/r2/“hi”™,TestReadStdin/c3/r2/あ,TestReadStdin/c3/r2/🙈🙉🙊,TestReadStdin/c3/r20/äöü,TestReadStdin/c3/r20/“hi”™,TestReadStdin/c3/r20/あ,TestReadStdin/c3/r20/🙈🙉🙊,TestReadStdin/c3/r3/äöü,TestReadStdin/c3/r3/“hi”™,TestReadStdin/c3/r3/あ,TestReadStdin/c3/r3/🙈🙉🙊,TestReadStdin/c3/r4/äöü,TestReadStdin/c3/r4/“hi”™,TestReadStdin/c3/r4/あ,TestReadStdin/c3/r4/🙈🙉🙊,TestReadStdin/c3/r5/äöü,TestReadStdin/c3/r5/“hi”™,TestReadStdin/c3/r5/あ,TestReadStdin/c3/r5/🙈🙉🙊,TestReadStdin/c3/r50/äöü,TestReadStdin/c3/r50/“hi”™,TestReadStdin/c3/r50/あ,TestReadStdin/c3/r50/🙈🙉🙊,TestReadStdin/c3/r8/äöü,TestReadStdin/c3/r8/“hi”™,TestReadStdin/c3/r8/あ,TestReadStdin/c3/r8/🙈🙉🙊,TestReadStdin/c1/r1/���,TestReadStdin/c1/r1/"hi"T,TestReadStdin/c1/r1/?,TestReadStdin/c1/r1/??????,TestReadStdin/c1/r10/���,TestReadStdin/c1/r10/"hi"T,TestReadStdin/c1/r10/?,TestReadStdin/c1/r10/??????,TestReadStdin/c1/r100/���,TestReadStdin/c1/r100/"hi"T,TestReadStdin/c1/r100/?,TestReadStdin/c1/r100/??????,TestReadStdin/c1/r16/���,TestReadStdin/c1/r16/"hi"T,TestReadStdin/c1/r16/?,TestReadStdin/c1/r16/??????,TestReadStdin/c1/r2/���,TestReadStdin/c1/r2/"hi"T,TestReadStdin/c1/r2/?,TestReadStdin/c1/r2/??????,TestReadStdin/c1/r20/���,TestReadStdin/c1/r20/"hi"T,TestReadStdin/c1/r20/?,TestReadStdin/c1/r20/??????,TestReadStdin/c1/r3/���,TestReadStdin/c1/r3/"hi"T,TestReadStdin/c1/r3/?,TestReadStdin/c1/r3/??????,TestReadStdin/c1/r4/���,TestReadStdin/c1/r4/"hi"T,TestReadStdin/c1/r4/?,TestReadStdin/c1/r4/??????,TestReadStdin/c1/r5/���,TestReadStdin/c1/r5/"hi"T,TestReadStdin/c1/r5/?,TestReadStdin/c1/r5/??????,TestReadStdin/c1/r50/���,TestReadStdin/c1/r50/"hi"T,TestReadStdin/c1/r50/?,TestReadStdin/c1/r50/??????,TestReadStdin/c1/r8/���,TestReadStdin/c1/r8/"hi"T,TestReadStdin/c1/r8/?,TestReadStdin/c1/r8/??????,TestReadStdin/c10/r1/���,TestReadStdin/c10/r1/"hi"T,TestReadStdin/c10/r1/?,TestReadStdin/c10/r1/??????,TestReadStdin/c10/r10/���,TestReadStdin/c10/r10/"hi"T,TestReadStdin/c10/r10/?,TestReadStdin/c10/r10/??????,TestReadStdin/c10/r100/���,TestReadStdin/c10/r100/"hi"T,TestReadStdin/c10/r100/?,TestReadStdin/c10/r100/??????,TestReadStdin/c10/r16/���,TestReadStdin/c10/r16/"hi"T,TestReadStdin/c10/r16/?,TestReadStdin/c10/r16/??????,TestReadStdin/c10/r2/���,TestReadStdin/c10/r2/"hi"T,TestReadStdin/c10/r2/?,TestReadStdin/c10/r2/??????,TestReadStdin/c10/r20/���,TestReadStdin/c10/r20/"hi"T,TestReadStdin/c10/r20/?,TestReadStdin/c10/r20/??????,TestReadStdin/c10/r3/���,TestReadStdin/c10/r3/"hi"T,TestReadStdin/c10/r3/?,TestReadStdin/c10/r3/??????,TestReadStdin/c10/r4/���,TestReadStdin/c10/r4/"hi"T,TestReadStdin/c10/r4/?,TestReadStdin/c10/r4/??????,TestReadStdin/c10/r5/���,TestReadStdin/c10/r5/"hi"T,TestReadStdin/c10/r5/?,TestReadStdin/c10/r5/??????,TestReadStdin/c10/r50/���,TestReadStdin/c10/r50/"hi"T,TestReadStdin/c10/r50/?,TestReadStdin/c10/r50/??????,TestReadStdin/c10/r8/���,TestReadStdin/c10/r8/"hi"T,TestReadStdin/c10/r8/?,TestReadStdin/c10/r8/??????,TestReadStdin/c100/r1/���,TestReadStdin/c100/r1/"hi"T,TestReadStdin/c100/r1/?,TestReadStdin/c100/r1/??????,TestReadStdin/c100/r10/���,TestReadStdin/c100/r10/"hi"T,TestReadStdin/c100/r10/?,TestReadStdin/c100/r10/??????,TestReadStdin/c100/r100/���,TestReadStdin/c100/r100/"hi"T,TestReadStdin/c100/r100/?,TestReadStdin/c100/r100/??????,TestReadStdin/c100/r16/���,TestReadStdin/c100/r16/"hi"T,TestReadStdin/c100/r16/?,TestReadStdin/c100/r16/??????,TestReadStdin/c100/r2/���,TestReadStdin/c100/r2/"hi"T,TestReadStdin/c100/r2/?,TestReadStdin/c100/r2/??????,TestReadStdin/c100/r20/���,TestReadStdin/c100/r20/"hi"T,TestReadStdin/c100/r20/?,TestReadStdin/c100/r20/??????,TestReadStdin/c100/r3/���,TestReadStdin/c100/r3/"hi"T,TestReadStdin/c100/r3/?,TestReadStdin/c100/r3/??????,TestReadStdin/c100/r4/���,TestReadStdin/c100/r4/"hi"T,TestReadStdin/c100/r4/?,TestReadStdin/c100/r4/??????,TestReadStdin/c100/r5/���,TestReadStdin/c100/r5/"hi"T,TestReadStdin/c100/r5/?,TestReadStdin/c100/r5/??????,TestReadStdin/c100/r50/���,TestReadStdin/c100/r50/"hi"T,TestReadStdin/c100/r50/?,TestReadStdin/c100/r50/??????,TestReadStdin/c100/r8/���,TestReadStdin/c100/r8/"hi"T,TestReadStdin/c100/r8/?,TestReadStdin/c100/r8/??????,TestReadStdin/c1000/r1/���,TestReadStdin/c1000/r1/"hi"T,TestReadStdin/c1000/r1/?,TestReadStdin/c1000/r1/??????,TestReadStdin/c1000/r10/���,TestReadStdin/c1000/r10/"hi"T,TestReadStdin/c1000/r10/?,TestReadStdin/c1000/r10/??????,TestReadStdin/c1000/r100/���,TestReadStdin/c1000/r100/"hi"T,TestReadStdin/c1000/r100/?,TestReadStdin/c1000/r100/??????,TestReadStdin/c1000/r16/���,TestReadStdin/c1000/r16/"hi"T,TestReadStdin/c1000/r16/?,TestReadStdin/c1000/r16/??????,TestReadStdin/c1000/r2/���,TestReadStdin/c1000/r2/"hi"T,TestReadStdin/c1000/r2/?,TestReadStdin/c1000/r2/??????,TestReadStdin/c1000/r20/���,TestReadStdin/c1000/r20/"hi"T,TestReadStdin/c1000/r20/?,TestReadStdin/c1000/r20/??????,TestReadStdin/c1000/r3/���,TestReadStdin/c1000/r3/"hi"T,TestReadStdin/c1000/r3/?,TestReadStdin/c1000/r3/??????,TestReadStdin/c1000/r4/���,TestReadStdin/c1000/r4/"hi"T,TestReadStdin/c1000/r4/?,TestReadStdin/c1000/r4/??????,TestReadStdin/c1000/r5/���,TestReadStdin/c1000/r5/"hi"T,TestReadStdin/c1000/r5/?,TestReadStdin/c1000/r5/??????,TestReadStdin/c1000/r50/���,TestReadStdin/c1000/r50/"hi"T,TestReadStdin/c1000/r50/?,TestReadStdin/c1000/r50/??????,TestReadStdin/c1000/r8/���,TestReadStdin/c1000/r8/"hi"T,TestReadStdin/c1000/r8/?,TestReadStdin/c1000/r8/??????,TestReadStdin/c16/r1/���,TestReadStdin/c16/r1/"hi"T,TestReadStdin/c16/r1/?,TestReadStdin/c16/r1/??????,TestReadStdin/c16/r10/���,TestReadStdin/c16/r10/"hi"T,TestReadStdin/c16/r10/?,TestReadStdin/c16/r10/??????,TestReadStdin/c16/r100/���,TestReadStdin/c16/r100/"hi"T,TestReadStdin/c16/r100/?,TestReadStdin/c16/r100/??????,TestReadStdin/c16/r16/���,TestReadStdin/c16/r16/"hi"T,TestReadStdin/c16/r16/?,TestReadStdin/c16/r16/??????,TestReadStdin/c16/r2/���,TestReadStdin/c16/r2/"hi"T,TestReadStdin/c16/r2/?,TestReadStdin/c16/r2/??????,TestReadStdin/c16/r20/���,TestReadStdin/c16/r20/"hi"T,TestReadStdin/c16/r20/?,TestReadStdin/c16/r20/??????,TestReadStdin/c16/r3/���,TestReadStdin/c16/r3/"hi"T,TestReadStdin/c16/r3/?,TestReadStdin/c16/r3/??????,TestReadStdin/c16/r4/���,TestReadStdin/c16/r4/"hi"T,TestReadStdin/c16/r4/?,TestReadStdin/c16/r4/??????,TestReadStdin/c16/r5/���,TestReadStdin/c16/r5/"hi"T,TestReadStdin/c16/r5/?,TestReadStdin/c16/r5/??????,TestReadStdin/c16/r50/���,TestReadStdin/c16/r50/"hi"T,TestReadStdin/c16/r50/?,TestReadStdin/c16/r50/??????,TestReadStdin/c16/r8/���,TestReadStdin/c16/r8/"hi"T,TestReadStdin/c16/r8/?,TestReadStdin/c16/r8/??????,TestReadStdin/c2/r1/���,TestReadStdin/c2/r1/"hi"T,TestReadStdin/c2/r1/?,TestReadStdin/c2/r1/??????,TestReadStdin/c2/r10/���,TestReadStdin/c2/r10/"hi"T,TestReadStdin/c2/r10/?,TestReadStdin/c2/r10/??????,TestReadStdin/c2/r100/���,TestReadStdin/c2/r100/"hi"T,TestReadStdin/c2/r100/?,TestReadStdin/c2/r100/??????,TestReadStdin/c2/r16/���,TestReadStdin/c2/r16/"hi"T,TestReadStdin/c2/r16/?,TestReadStdin/c2/r16/??????,TestReadStdin/c2/r2/���,TestReadStdin/c2/r2/"hi"T,TestReadStdin/c2/r2/?,TestReadStdin/c2/r2/??????,TestReadStdin/c2/r20/���,TestReadStdin/c2/r20/"hi"T,TestReadStdin/c2/r20/?,TestReadStdin/c2/r20/??????,TestReadStdin/c2/r3/���,TestReadStdin/c2/r3/"hi"T,TestReadStdin/c2/r3/?,TestReadStdin/c2/r3/??????,TestReadStdin/c2/r4/���,TestReadStdin/c2/r4/"hi"T,TestReadStdin/c2/r4/?,TestReadStdin/c2/r4/??????,TestReadStdin/c2/r5/���,TestReadStdin/c2/r5/"hi"T,TestReadStdin/c2/r5/?,TestReadStdin/c2/r5/??????,TestReadStdin/c2/r50/���,TestReadStdin/c2/r50/"hi"T,TestReadStdin/c2/r50/?,TestReadStdin/c2/r50/??????,TestReadStdin/c2/r8/���,TestReadStdin/c2/r8/"hi"T,TestReadStdin/c2/r8/?,TestReadStdin/c2/r8/??????,TestReadStdin/c3/r1/���,TestReadStdin/c3/r1/"hi"T,TestReadStdin/c3/r1/?,TestReadStdin/c3/r1/??????,TestReadStdin/c3/r10/���,TestReadStdin/c3/r10/"hi"T,TestReadStdin/c3/r10/?,TestReadStdin/c3/r10/??????,TestReadStdin/c3/r100/���,TestReadStdin/c3/r100/"hi"T,TestReadStdin/c3/r100/?,TestReadStdin/c3/r100/??????,TestReadStdin/c3/r16/���,TestReadStdin/c3/r16/"hi"T,TestReadStdin/c3/r16/?,TestReadStdin/c3/r16/??????,TestReadStdin/c3/r2/���,TestReadStdin/c3/r2/"hi"T,TestReadStdin/c3/r2/?,TestReadStdin/c3/r2/??????,TestReadStdin/c3/r20/���,TestReadStdin/c3/r20/"hi"T,TestReadStdin/c3/r20/?,TestReadStdin/c3/r20/??????,TestReadStdin/c3/r3/���,TestReadStdin/c3/r3/"hi"T,TestReadStdin/c3/r3/?,TestReadStdin/c3/r3/??????,TestReadStdin/c3/r4/���,TestReadStdin/c3/r4/"hi"T,TestReadStdin/c3/r4/?,TestReadStdin/c3/r4/??????,TestReadStdin/c3/r5/���,TestReadStdin/c3/r5/"hi"T,TestReadStdin/c3/r5/?,TestReadStdin/c3/r5/??????,TestReadStdin/c3/r50/���,TestReadStdin/c3/r50/"hi"T,TestReadStdin/c3/r50/?,TestReadStdin/c3/r50/??????,TestReadStdin/c3/r8/���,TestReadStdin/c3/r8/"hi"T,TestReadStdin/c3/r8/?,TestReadStdin/c3/r8/??????] N=1105 D=2 drift=auto=0 test-artifacts=0 production=1 rc=0
+2026-09-24T04:22:50 Q5 IPv6 bindings: Bluetooth Network Connection=True; Wi-Fi=False; Ethernet=True; vEthernet (WSL (Hyper-V firewall))=True; Local Area Connection=True; Wi-Fi 3=True
+2026-09-24T04:24:13 Q5 netqual-1: rc=1 pass=True failing=[TestLookupCNAME] extra=[] panic=0
+2026-09-24T04:25:35 Q5 netqual-2: rc=1 pass=True failing=[TestLookupCNAME] extra=[] panic=0
+2026-09-24T04:25:35 ROW net start (attempt 1, pkgTimeout 120m, budget 510m, free 222.6 GB)
+2026-09-24T04:30:59 ROW net PASS got=476 D=3/3 banked=476|3 wall=322s outer=323s page=NOT REWRITTEN drift=clean rc=0
+2026-09-24T04:30:59 END processed=128 listed=128
+DRIVER_EXIT=0

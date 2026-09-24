@@ -1,0 +1,19 @@
+{
+ "package": "ecdh",
+ "status": "validated",
+ "go": {
+  "TestOrders": "pass"
+ },
+ "csharp": {
+  "TestOrders": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

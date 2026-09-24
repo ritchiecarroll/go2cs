@@ -1,0 +1,7 @@
+ M docs/validation/current/os.md
+ M docs/validation/index.md
+ M src/core/os/executable_test.cs
+ M src/core/os/os_windows_test.cs
+ M src/core/os/windows/exec_windows.cs
+ M src/core/os/windows/package_init.cs
+?? src/run-validated-sweep.p2-G-LAPTOP.ps1

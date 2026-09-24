@@ -1,0 +1,57 @@
+{
+ "package": "draw",
+ "status": "validated",
+ "go": {
+  "TestClip": "pass",
+  "TestDraw": "pass",
+  "TestDrawOverlap": "pass",
+  "TestDrawSrcNonpremultiplied": "pass",
+  "TestFill": "pass",
+  "TestFloydSteinbergCheckerboard": "pass",
+  "TestNonZeroSrcPt": "pass",
+  "TestPaletted": "pass",
+  "TestSqDiff": "pass"
+ },
+ "csharp": {
+  "TestClip": "pass",
+  "TestDraw": "pass",
+  "TestDrawOverlap": "pass",
+  "TestDrawSrcNonpremultiplied": "pass",
+  "TestFill": "pass",
+  "TestFloydSteinbergCheckerboard": "pass",
+  "TestNonZeroSrcPt": "pass",
+  "TestPaletted": "pass",
+  "TestSqDiff": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkCMYK (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkCopyOver (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkCopySrc (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkFillOver (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkFillSrc (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkGenericMaskOver (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkGenericMaskSrc (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkGenericOver (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkGenericSrc (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkGlyphOver (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkGray (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkGrayMaskOver (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkNRGBAOver (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkNRGBASrc (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkPalettedFill (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkPalettedRGBA (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkRGBA (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkRGBA64ImageMaskOver (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkRGBAMaskOver (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkYCbCr (benchmark): benchmark execution is deferred to Phase 4D",
+  "ExampleDrawer_floydSteinberg (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

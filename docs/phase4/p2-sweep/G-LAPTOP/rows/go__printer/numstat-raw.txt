@@ -1,0 +1,2 @@
+2	0	src/core/go/printer/testdata/generics.golden
+2	0	src/core/go/printer/testdata/generics.input

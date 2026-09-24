@@ -1,0 +1,29 @@
+{
+ "package": "crc64",
+ "status": "validated",
+ "go": {
+  "TestGolden": "pass",
+  "TestGoldenMarshal": "pass",
+  "TestGoldenMarshal/ECMA": "pass",
+  "TestGoldenMarshal/ISO": "pass",
+  "TestMarshalTableMismatch": "pass"
+ },
+ "csharp": {
+  "TestGolden": "pass",
+  "TestGoldenMarshal": "pass",
+  "TestGoldenMarshal/ECMA": "pass",
+  "TestGoldenMarshal/ISO": "pass",
+  "TestMarshalTableMismatch": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkCrc64 (benchmark): benchmark execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

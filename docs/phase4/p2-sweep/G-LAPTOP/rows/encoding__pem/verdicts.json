@@ -1,0 +1,59 @@
+{
+ "package": "pem",
+ "status": "validated",
+ "go": {
+  "TestBadDecode": "pass",
+  "TestBadEncode": "pass",
+  "TestCVE202224675": "pass",
+  "TestDecode": "pass",
+  "TestDecodeStrangeCases": "pass",
+  "TestDecodeStrangeCases/invalid_section_(not_base64)": "pass",
+  "TestDecodeStrangeCases/leading_garbage": "pass",
+  "TestDecodeStrangeCases/leading_garbage_on_block": "pass",
+  "TestDecodeStrangeCases/leading_malformed_BEGIN": "pass",
+  "TestDecodeStrangeCases/leading_partial_block": "pass",
+  "TestDecodeStrangeCases/multiple_BEGIN": "pass",
+  "TestDecodeStrangeCases/multiple_END": "pass",
+  "TestEncode": "pass",
+  "TestFuzz": "pass",
+  "TestGetLine": "pass",
+  "TestJustEnd": "pass",
+  "TestLineBreaker": "pass",
+  "TestMissingEndTrailer": "pass"
+ },
+ "csharp": {
+  "TestBadDecode": "pass",
+  "TestBadEncode": "pass",
+  "TestCVE202224675": "pass",
+  "TestDecode": "pass",
+  "TestDecodeStrangeCases": "pass",
+  "TestDecodeStrangeCases/invalid_section_(not_base64)": "pass",
+  "TestDecodeStrangeCases/leading_garbage": "pass",
+  "TestDecodeStrangeCases/leading_garbage_on_block": "pass",
+  "TestDecodeStrangeCases/leading_malformed_BEGIN": "pass",
+  "TestDecodeStrangeCases/leading_partial_block": "pass",
+  "TestDecodeStrangeCases/multiple_BEGIN": "pass",
+  "TestDecodeStrangeCases/multiple_END": "pass",
+  "TestEncode": "pass",
+  "TestFuzz": "pass",
+  "TestGetLine": "pass",
+  "TestJustEnd": "pass",
+  "TestLineBreaker": "pass",
+  "TestMissingEndTrailer": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkDecode (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkEncode (benchmark): benchmark execution is deferred to Phase 4D",
+  "ExampleDecode (example): example execution is deferred to Phase 4D",
+  "ExampleEncode (example): example execution is deferred to Phase 4D",
+  "FuzzDecode (fuzz): fuzz execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

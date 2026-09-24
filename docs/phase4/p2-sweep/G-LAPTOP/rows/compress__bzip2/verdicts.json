@@ -1,0 +1,29 @@
+{
+ "package": "bzip2",
+ "status": "validated",
+ "go": {
+  "TestBitReader": "pass",
+  "TestMTF": "pass",
+  "TestReader": "pass",
+  "TestZeroRead": "pass"
+ },
+ "csharp": {
+  "TestBitReader": "pass",
+  "TestMTF": "pass",
+  "TestReader": "pass",
+  "TestZeroRead": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkDecodeDigits (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkDecodeNewton (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkDecodeRand (benchmark): benchmark execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

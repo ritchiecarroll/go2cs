@@ -1,0 +1,42 @@
+{
+ "package": "color",
+ "status": "validated",
+ "go": {
+  "TestCMYKGray": "pass",
+  "TestCMYKRoundtrip": "pass",
+  "TestCMYKToRGBConsistency": "pass",
+  "TestNYCbCrAAlpha": "pass",
+  "TestNYCbCrAYCbCr": "pass",
+  "TestPalette": "pass",
+  "TestSqDiff": "pass",
+  "TestYCbCrGray": "pass",
+  "TestYCbCrRoundtrip": "pass",
+  "TestYCbCrToRGBConsistency": "pass"
+ },
+ "csharp": {
+  "TestCMYKGray": "pass",
+  "TestCMYKRoundtrip": "pass",
+  "TestCMYKToRGBConsistency": "pass",
+  "TestNYCbCrAAlpha": "pass",
+  "TestNYCbCrAYCbCr": "pass",
+  "TestPalette": "pass",
+  "TestSqDiff": "pass",
+  "TestYCbCrGray": "pass",
+  "TestYCbCrRoundtrip": "pass",
+  "TestYCbCrToRGBConsistency": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkNYCbCrAToRGBA (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkRGBToYCbCr (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkYCbCrToRGB (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkYCbCrToRGBA (benchmark): benchmark execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

@@ -1,0 +1,3 @@
+in-driver netqual-1: pass=0 fail=1 panic=0 tail=FAIL net 81.452s failing=[TestLookupCNAME ]
+in-driver netqual-2: pass=0 fail=1 panic=0 tail=FAIL net 80.966s failing=[TestLookupCNAME ]
+(the in-driver runs are non -v, so no per-test PASS lines; raw logs kept local)

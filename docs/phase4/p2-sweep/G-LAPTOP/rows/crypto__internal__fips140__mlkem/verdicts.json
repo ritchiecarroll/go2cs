@@ -1,0 +1,37 @@
+{
+ "package": "mlkem",
+ "status": "validated",
+ "go": {
+  "TestCompress": "pass",
+  "TestDecompress": "pass",
+  "TestDecompressCompress": "pass",
+  "TestEncodeDecode": "pass",
+  "TestFieldAdd": "pass",
+  "TestFieldMul": "pass",
+  "TestFieldReduce": "pass",
+  "TestFieldSub": "pass",
+  "TestGammas": "pass",
+  "TestZetas": "pass"
+ },
+ "csharp": {
+  "TestCompress": "pass",
+  "TestDecompress": "pass",
+  "TestDecompressCompress": "pass",
+  "TestEncodeDecode": "pass",
+  "TestFieldAdd": "pass",
+  "TestFieldMul": "pass",
+  "TestFieldReduce": "pass",
+  "TestFieldSub": "pass",
+  "TestGammas": "pass",
+  "TestZetas": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

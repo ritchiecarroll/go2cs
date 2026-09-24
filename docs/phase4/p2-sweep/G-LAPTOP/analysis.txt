@@ -1,0 +1,39 @@
+PLANTED CONTROLS: non-ASCII EQUAL ok; cell move names TestPlain; cp437-decoded HEAD reads MOVED (defect reproduced)
+ROWS 128  words={'PASS': 127, 'COUNT': 1}
+SUM got=48504  SUM banked Tests=48503  diff=1
+  got!=banked: context got=58 banked=57 word=COUNT
+ABSORPTIONS: none
+PAGES: {'MOVED': 3, 'NOT REWRITTEN (=EQUAL, COORD ruling)': 125}
+  MOVED archive/tar: names=['TestFileInfoHeaderSymlink'] page N/D=98/0 run got/D=98/0
+  MOVED context: names=['TestAllocs'] page N/D=58/0 run got/D=58/0
+  MOVED os: names=['TestNetworkSymbolicLink'] page N/D=1105/2 run got/D=1105/2
+DRIFT: {'clean': 110, 'auto=0 test-artifacts=0 production=1': 16, 'auto=0 test-artifacts=1 production=0': 1, 'auto=0 test-artifacts=0 production=2': 1}
+  drift context: auto=0 test-artifacts=0 production=1
+  drift crypto/ecdh: auto=0 test-artifacts=1 production=0
+  drift crypto/internal/fips140/ecdh: auto=0 test-artifacts=0 production=1
+  drift crypto/internal/fips140/ecdsa: auto=0 test-artifacts=0 production=1
+  drift crypto/internal/fips140/edwards25519: auto=0 test-artifacts=0 production=1
+  drift crypto/internal/fips140/rsa: auto=0 test-artifacts=0 production=1
+  drift crypto/x509: auto=0 test-artifacts=0 production=1
+  drift encoding/gob: auto=0 test-artifacts=0 production=1
+  drift encoding/xml: auto=0 test-artifacts=0 production=1
+  drift flag: auto=0 test-artifacts=0 production=1
+  drift go/build: auto=0 test-artifacts=0 production=1
+  drift go/printer: auto=0 test-artifacts=0 production=2
+  drift go/types: auto=0 test-artifacts=0 production=1
+  drift hash/crc32: auto=0 test-artifacts=0 production=1
+  drift html/template: auto=0 test-artifacts=0 production=1
+  drift internal/buildcfg: auto=0 test-artifacts=0 production=1
+  drift internal/fuzz: auto=0 test-artifacts=0 production=1
+  drift os: auto=0 test-artifacts=0 production=1
+WALLS (floored + unfloored>=450s):
+  archive/zip: floor 60m: 137s = 0.04x
+  crypto/dsa: floor 120m: 82s = 0.01x
+  crypto/internal/fips140/mlkem: floor 30m: 29s = 0.02x
+  crypto/mlkem: floor 30m: 43s = 0.02x
+  go/parser: floor 90m: 350s = 0.06x
+  hash/maphash: floor 60m: 336s = 0.09x
+  index/suffixarray: floor 120m: 137s = 0.02x
+  net: floor 120m: 322s = 0.04x
+ORPHANED DISCLOSURES: [('context', ['TestAllocs'])]
+ENVIRONMENTS: {'{"configuration": "Release", "oracleGoVersion": "go version go1.24.13 windows/amd64", "tiered": false}': 127, '{"configuration": "Release", "oracleGoVersion": "go version go1.24.13 windows/amd64", "tiered": true}': 1}

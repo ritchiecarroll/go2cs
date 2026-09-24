@@ -1,0 +1,62 @@
+{
+ "package": "fnv",
+ "status": "validated",
+ "go": {
+  "TestGolden128": "pass",
+  "TestGolden128a": "pass",
+  "TestGolden32": "pass",
+  "TestGolden32a": "pass",
+  "TestGolden64": "pass",
+  "TestGolden64a": "pass",
+  "TestGoldenMarshal": "pass",
+  "TestGoldenMarshal/128": "pass",
+  "TestGoldenMarshal/128a": "pass",
+  "TestGoldenMarshal/32": "pass",
+  "TestGoldenMarshal/32a": "pass",
+  "TestGoldenMarshal/64": "pass",
+  "TestGoldenMarshal/64a": "pass",
+  "TestIntegrity128": "pass",
+  "TestIntegrity128a": "pass",
+  "TestIntegrity32": "pass",
+  "TestIntegrity32a": "pass",
+  "TestIntegrity64": "pass",
+  "TestIntegrity64a": "pass"
+ },
+ "csharp": {
+  "TestGolden128": "pass",
+  "TestGolden128a": "pass",
+  "TestGolden32": "pass",
+  "TestGolden32a": "pass",
+  "TestGolden64": "pass",
+  "TestGolden64a": "pass",
+  "TestGoldenMarshal": "pass",
+  "TestGoldenMarshal/128": "pass",
+  "TestGoldenMarshal/128a": "pass",
+  "TestGoldenMarshal/32": "pass",
+  "TestGoldenMarshal/32a": "pass",
+  "TestGoldenMarshal/64": "pass",
+  "TestGoldenMarshal/64a": "pass",
+  "TestIntegrity128": "pass",
+  "TestIntegrity128a": "pass",
+  "TestIntegrity32": "pass",
+  "TestIntegrity32a": "pass",
+  "TestIntegrity64": "pass",
+  "TestIntegrity64a": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkFnv128KB (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkFnv128aKB (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkFnv32KB (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkFnv32aKB (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkFnv64KB (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkFnv64aKB (benchmark): benchmark execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

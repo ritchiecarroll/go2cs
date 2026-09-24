@@ -1,0 +1,5 @@
+ M docs/validation/index.md
+ M src/core/go/printer/printer_test.cs
+ M src/core/go/printer/testdata/generics.golden
+ M src/core/go/printer/testdata/generics.input
+?? src/run-validated-sweep.p2-G-LAPTOP.ps1

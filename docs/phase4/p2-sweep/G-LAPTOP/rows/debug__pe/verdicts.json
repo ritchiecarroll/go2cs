@@ -1,0 +1,39 @@
+{
+ "package": "pe",
+ "status": "validated",
+ "go": {
+  "TestBSSHasZeros": "skip",
+  "TestBuildingWindowsGUI": "pass",
+  "TestDWARF": "pass",
+  "TestImportTableInUnknownSection": "pass",
+  "TestImportedSymbolsNoPanicMissingOptionalHeader": "pass",
+  "TestImportedSymbolsNoPanicWithSliceOutOfBound": "pass",
+  "TestInvalidOptionalHeaderMagic": "pass",
+  "TestOpen": "pass",
+  "TestOpenFailure": "pass",
+  "TestReadCOFFSymbolAuxInfo": "pass"
+ },
+ "csharp": {
+  "TestBSSHasZeros": "skip",
+  "TestBuildingWindowsGUI": "pass",
+  "TestDWARF": "pass",
+  "TestImportTableInUnknownSection": "pass",
+  "TestImportedSymbolsNoPanicMissingOptionalHeader": "pass",
+  "TestImportedSymbolsNoPanicWithSliceOutOfBound": "pass",
+  "TestInvalidOptionalHeaderMagic": "pass",
+  "TestOpen": "pass",
+  "TestOpenFailure": "pass",
+  "TestReadCOFFSymbolAuxInfo": "pass"
+ },
+ "matched": true,
+ "skipped": [
+  "TestBSSHasZeros"
+ ],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

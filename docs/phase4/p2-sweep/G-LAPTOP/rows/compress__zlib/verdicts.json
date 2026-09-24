@@ -1,0 +1,32 @@
+{
+ "package": "zlib",
+ "status": "validated",
+ "go": {
+  "TestDecompressor": "pass",
+  "TestWriter": "pass",
+  "TestWriterBig": "pass",
+  "TestWriterDict": "pass",
+  "TestWriterDictIsUsed": "pass",
+  "TestWriterReset": "pass"
+ },
+ "csharp": {
+  "TestDecompressor": "pass",
+  "TestWriter": "pass",
+  "TestWriterBig": "pass",
+  "TestWriterDict": "pass",
+  "TestWriterDictIsUsed": "pass",
+  "TestWriterReset": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "ExampleNewReader (example): example execution is deferred to Phase 4D",
+  "ExampleNewWriter (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

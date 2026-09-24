@@ -1,0 +1,41 @@
+{
+ "package": "ring",
+ "status": "validated",
+ "go": {
+  "TestCornerCases": "pass",
+  "TestLink1": "pass",
+  "TestLink2": "pass",
+  "TestLink3": "pass",
+  "TestLinkUnlink": "pass",
+  "TestMoveEmptyRing": "pass",
+  "TestNew": "pass",
+  "TestUnlink": "pass"
+ },
+ "csharp": {
+  "TestCornerCases": "pass",
+  "TestLink1": "pass",
+  "TestLink2": "pass",
+  "TestLink3": "pass",
+  "TestLinkUnlink": "pass",
+  "TestMoveEmptyRing": "pass",
+  "TestNew": "pass",
+  "TestUnlink": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "ExampleRing_Do (example): example execution is deferred to Phase 4D",
+  "ExampleRing_Len (example): example execution is deferred to Phase 4D",
+  "ExampleRing_Link (example): example execution is deferred to Phase 4D",
+  "ExampleRing_Move (example): example execution is deferred to Phase 4D",
+  "ExampleRing_Next (example): example execution is deferred to Phase 4D",
+  "ExampleRing_Prev (example): example execution is deferred to Phase 4D",
+  "ExampleRing_Unlink (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

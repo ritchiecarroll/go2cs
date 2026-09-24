@@ -1,0 +1,56 @@
+{
+ "package": "expvar",
+ "status": "validated",
+ "go": {
+  "TestAppendJSONQuote": "pass",
+  "TestFloat": "pass",
+  "TestFunc": "pass",
+  "TestHandler": "pass",
+  "TestInt": "pass",
+  "TestMapCounter": "pass",
+  "TestMapDelete": "pass",
+  "TestMapInit": "pass",
+  "TestMapNil": "pass",
+  "TestNil": "pass",
+  "TestString": "pass"
+ },
+ "csharp": {
+  "TestAppendJSONQuote": "pass",
+  "TestFloat": "pass",
+  "TestFunc": "pass",
+  "TestHandler": "pass",
+  "TestInt": "pass",
+  "TestMapCounter": "pass",
+  "TestMapDelete": "pass",
+  "TestMapInit": "pass",
+  "TestMapNil": "pass",
+  "TestNil": "pass",
+  "TestString": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkFloatAdd (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkFloatSet (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkIntAdd (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkIntSet (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkMapAddDifferent (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkMapAddDifferentRandom (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkMapAddDifferentSteadyState (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkMapAddSame (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkMapAddSameSteadyState (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkMapSet (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkMapSetDifferent (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkMapSetDifferentRandom (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkMapSetString (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkMapString (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkRealworldExpvarUsage (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkStringSet (benchmark): benchmark execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

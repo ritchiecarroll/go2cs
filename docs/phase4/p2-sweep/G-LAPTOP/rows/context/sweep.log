@@ -1,0 +1,11 @@
+  CGO_ENABLED=0 pinned for the whole run (was '0') -- the corpus emission state and the annotations' state of record on every platform
+validated sweep: 1 package(s), 57 expected verdicts, timeout 10m, test-config Release
+  COUNT context                            58, banked 57 [46s]
+
+sweep: 0 pass / 1 fail  (46s)
+
+CONTENT drift in the corpus after the sweep -- inspect before banking or restoring:
+  1	1	src/core/context/README.md
+
+failed:
+  context (count 58, banked 57)

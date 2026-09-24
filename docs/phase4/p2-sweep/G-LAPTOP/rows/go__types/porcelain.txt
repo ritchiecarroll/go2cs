@@ -1,0 +1,16 @@
+ M docs/validation/index.md
+ M src/core/go/types/api_test.cs
+ M src/core/go/types/commentMap_test.cs
+ M src/core/go/types/eval_test.cs
+ M src/core/go/types/example_test.cs
+ M src/core/go/types/hilbert_test.cs
+ M src/core/go/types/instantiate_test.cs
+ M src/core/go/types/issues_test.cs
+ M src/core/go/types/methodset_test.cs
+ M src/core/go/types/named_test.cs
+ M src/core/go/types/package_init.cs
+ M src/core/go/types/resolver_test.cs
+ M src/core/go/types/scope2_test.cs
+ M src/core/go/types/sizes_test.cs
+ M src/core/go/types/typestring_test.cs
+?? src/run-validated-sweep.p2-G-LAPTOP.ps1

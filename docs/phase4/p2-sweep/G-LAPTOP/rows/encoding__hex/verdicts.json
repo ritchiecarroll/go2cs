@@ -1,0 +1,52 @@
+{
+ "package": "hex",
+ "status": "validated",
+ "go": {
+  "TestDecode": "pass",
+  "TestDecodeErr": "pass",
+  "TestDecodeString": "pass",
+  "TestDecodeStringErr": "pass",
+  "TestDecoderErr": "pass",
+  "TestDump": "pass",
+  "TestDumper": "pass",
+  "TestDumper_doubleclose": "pass",
+  "TestDumper_earlyclose": "pass",
+  "TestEncode": "pass",
+  "TestEncodeToString": "pass",
+  "TestEncoderDecoder": "pass"
+ },
+ "csharp": {
+  "TestDecode": "pass",
+  "TestDecodeErr": "pass",
+  "TestDecodeString": "pass",
+  "TestDecodeStringErr": "pass",
+  "TestDecoderErr": "pass",
+  "TestDump": "pass",
+  "TestDumper": "pass",
+  "TestDumper_doubleclose": "pass",
+  "TestDumper_earlyclose": "pass",
+  "TestEncode": "pass",
+  "TestEncodeToString": "pass",
+  "TestEncoderDecoder": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkDecode (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkDecodeString (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkDump (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkEncode (benchmark): benchmark execution is deferred to Phase 4D",
+  "ExampleDecode (example): example execution is deferred to Phase 4D",
+  "ExampleDecodeString (example): example execution is deferred to Phase 4D",
+  "ExampleDump (example): example execution is deferred to Phase 4D",
+  "ExampleDumper (example): example execution is deferred to Phase 4D",
+  "ExampleEncode (example): example execution is deferred to Phase 4D",
+  "ExampleEncodeToString (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

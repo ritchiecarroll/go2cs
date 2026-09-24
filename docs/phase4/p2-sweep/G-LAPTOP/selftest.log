@@ -1,0 +1,48 @@
+2026-09-24T02:20:39 p2-driver start: shard S-G host G-LAPTOP base 61724860b49a84c373f1c0c6f76d8df3cbad9804 pid 4132 selftest=True appendNetOs=False
+2026-09-24T02:20:39   ok   plain PASS
+2026-09-24T02:20:39   ok   PASS [release-tiered]
+2026-09-24T02:20:39   ok   pinned row WITHOUT suffix reds
+2026-09-24T02:20:39   ok   host-conditional PASS
+2026-09-24T02:20:39   ok   host-conditional-disclosure PASS
+2026-09-24T02:20:39   ok   capability-absent PASS
+2026-09-24T02:20:39   ok   host-limit PASS
+2026-09-24T02:20:39   ok   COUNT
+2026-09-24T02:20:39   ok   DISC
+2026-09-24T02:20:39   ok   CVAC
+2026-09-24T02:20:39   ok   FAIL
+2026-09-24T02:20:39   ok   RERUN then ORACLE
+2026-09-24T02:20:39   ok   RERUN, PASS, FLAKED ONCE (named discharge)
+2026-09-24T02:20:39   ok   RERUN then bare PASS reds
+2026-09-24T02:20:39   ok   column-0 look-alike is no verdict
+2026-09-24T02:20:39   ok   8-space tail line is no verdict
+2026-09-24T02:20:39   ok   no-verdict log
+2026-09-24T02:20:39   ok   two final verdict lines red DOUBLED
+2026-09-24T02:20:39   ok   refusal marker in .err: DISK PREFLIGHT
+2026-09-24T02:20:39   ok   refusal marker in .log: DISK PREFLIGHT
+2026-09-24T02:20:39   ok   refusal marker in .err: Toolchain pin
+2026-09-24T02:20:39   ok   refusal marker in .log: Toolchain pin
+2026-09-24T02:20:39   ok   refusal marker in .err: No banked packages matched
+2026-09-24T02:20:39   ok   refusal marker in .log: No banked packages matched
+2026-09-24T02:20:39   ok   refusal marker in .err: Converter not built
+2026-09-24T02:20:39   ok   refusal marker in .log: Converter not built
+2026-09-24T02:20:39   ok   refusal marker in .err: converter build failed
+2026-09-24T02:20:39   ok   refusal marker in .log: converter build failed
+2026-09-24T02:20:39   ok   S0.4 plant-refusal.log names its marker
+2026-09-24T02:20:39   ok   page EQUAL (volatile date/converter lines ignored)
+2026-09-24T02:20:39   ok   page MOVED names TestB
+2026-09-24T02:20:39   ok   page NOT REWRITTEN (mtime before row start)
+2026-09-24T02:20:40   ok   Q5 tolerated set alone passes
+2026-09-24T02:20:40   ok   Q5 tolerated + TestPlant aborts naming TestPlant
+2026-09-24T02:20:40   ok   Q5 TestPlant alone aborts
+2026-09-24T02:20:40   ok   Q5 empty set passes and prints the absent tolerated leaf
+2026-09-24T02:20:40   ok   Q5 a test-timed-out panic reds
+2026-09-24T02:20:40   (nul tell: nuls=0 text=[hello] rc=0 err=[] bytes=7)
+2026-09-24T02:20:40   ok   NUL-count tell over a Start-Process-redirected log reads 0
+2026-09-24T02:20:40   ok   git.exe HEAD == base
+2026-09-24T02:20:40   ok   Get-TrackedCount == S0 count
+2026-09-24T02:20:40   ok   Assert-Restored on the clean tree
+2026-09-24T02:20:40   ok   no function shadows git
+2026-09-24T02:20:40   ok   budget archive/tar = 4x10+30 = 70 min
+2026-09-24T02:20:40   ok   budget index/suffixarray = 4x120+30 = 510 min
+2026-09-24T02:20:40 SELFTEST 44 checks, 0 failed
+DRIVER_EXIT=0

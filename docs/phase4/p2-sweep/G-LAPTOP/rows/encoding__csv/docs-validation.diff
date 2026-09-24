@@ -1,0 +1,106 @@
+diff --git a/docs/validation/index.md b/docs/validation/index.md
+index 9d640c37f..9ae954708 100644
+--- a/docs/validation/index.md
++++ b/docs/validation/index.md
+@@ -9,31 +9,6 @@ Pages under `current/` are living proof — regenerated only when a package's ve
+ Versioned sibling directories are frozen publication snapshots: written once at release and never
+ rewritten, so the proof link for a published package stays the proof as of that binary.
+ 
+-## Frozen snapshots
+-
+-One directory per published release. The page counts below are exact and cannot go stale: a frozen
+-directory is written once and never rewritten, so each number is a permanent statement of how many
+-packages were validated when that build shipped.
+-
+-| Release | Snapshot | Proof pages | Roster as it stood |
+-|:--|:--|--:|:--|
+-| 1.23.1.2 | [`1.23.1.2/`](https://github.com/ritchiecarroll/go2cs/tree/master/docs/validation/1.23.1.2) | 72 | — |
+-| 1.23.1.3 | [`1.23.1.3/`](https://github.com/ritchiecarroll/go2cs/tree/master/docs/validation/1.23.1.3) | 73 | — |
+-| 1.23.1.4 | [`1.23.1.4/`](https://github.com/ritchiecarroll/go2cs/tree/master/docs/validation/1.23.1.4) | 110 | — |
+-| 1.23.1.5 | [`1.23.1.5/`](https://github.com/ritchiecarroll/go2cs/tree/master/docs/validation/1.23.1.5) | 110 | — |
+-| 1.23.1.6 | [`1.23.1.6/`](https://github.com/ritchiecarroll/go2cs/tree/master/docs/validation/1.23.1.6) | 126 | — |
+-| 1.23.1.7 | [`1.23.1.7/`](https://github.com/ritchiecarroll/go2cs/tree/master/docs/validation/1.23.1.7) | 162 | — |
+-| 1.23.12.1 | [`1.23.12.1/`](https://github.com/ritchiecarroll/go2cs/tree/master/docs/validation/1.23.12.1) | 172 | — |
+-| 1.23.12.2 | [`1.23.12.2/`](https://github.com/ritchiecarroll/go2cs/tree/master/docs/validation/1.23.12.2) | 189 | — |
+-| 1.23.12.3 | [`1.23.12.3/`](https://github.com/ritchiecarroll/go2cs/tree/master/docs/validation/1.23.12.3) | 204 | [`ValidatedTestPackages.md`](1.23.12.3/ValidatedTestPackages.md) |
+-
+-A snapshot froze the per-package proofs and not the roster PAGE around them until 1.23.12.3, so for
+-every release above it the campaign's own "how things stood" view lives only in the signed git tag.
+-`git show nuget-<version>` — `nuget-1.23.12.3`, `nuget-1.23.1.7` — reaches the exact source tree a
+-release was built from, roster included. From 1.23.12.3 on the snapshot carries that page itself, and
+-[`src/push-nuget.ps1`](https://github.com/ritchiecarroll/go2cs/blob/master/src/push-nuget.ps1) writes
+-it beside the proofs on every release.
+-
+ | Package | Proof | Converted package |
+ |:--|:--|:--|
+ | `archive/tar` | [`archive.tar.md`](current/archive.tar.md) | [`src/core/archive/tar`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/archive/tar) |
+@@ -61,8 +36,12 @@ it beside the proofs on every release.
+ | `crypto/elliptic` | [`crypto.elliptic.md`](current/crypto.elliptic.md) | [`src/core/crypto/elliptic`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/elliptic) |
+ | `crypto/hkdf` | [`crypto.hkdf.md`](current/crypto.hkdf.md) | [`src/core/crypto/hkdf`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/hkdf) |
+ | `crypto/hmac` | [`crypto.hmac.md`](current/crypto.hmac.md) | [`src/core/crypto/hmac`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/hmac) |
++| `crypto/internal/alias` | [`crypto.internal.alias.md`](current/crypto.internal.alias.md) | [`src/core/crypto/internal/alias`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/alias) |
++| `crypto/internal/bigmod` | [`crypto.internal.bigmod.md`](current/crypto.internal.bigmod.md) | [`src/core/crypto/internal/bigmod`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/bigmod) |
+ | `crypto/internal/boring` | [`crypto.internal.boring.md`](current/crypto.internal.boring.md) | [`src/core/crypto/internal/boring`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/boring) |
+ | `crypto/internal/boring/bcache` | [`crypto.internal.boring.bcache.md`](current/crypto.internal.boring.bcache.md) | [`src/core/crypto/internal/boring/bcache`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/boring/bcache) |
++| `crypto/internal/edwards25519` | [`crypto.internal.edwards25519.md`](current/crypto.internal.edwards25519.md) | [`src/core/crypto/internal/edwards25519`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/edwards25519) |
++| `crypto/internal/edwards25519/field` | [`crypto.internal.edwards25519.field.md`](current/crypto.internal.edwards25519.field.md) | [`src/core/crypto/internal/edwards25519/field`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/edwards25519/field) |
+ | `crypto/internal/fips140/aes` | [`crypto.internal.fips140.aes.md`](current/crypto.internal.fips140.aes.md) | [`src/core/crypto/internal/fips140/aes`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/fips140/aes) |
+ | `crypto/internal/fips140/bigmod` | [`crypto.internal.fips140.bigmod.md`](current/crypto.internal.fips140.bigmod.md) | [`src/core/crypto/internal/fips140/bigmod`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/fips140/bigmod) |
+ | `crypto/internal/fips140/ecdh` | [`crypto.internal.fips140.ecdh.md`](current/crypto.internal.fips140.ecdh.md) | [`src/core/crypto/internal/fips140/ecdh`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/fips140/ecdh) |
+@@ -72,8 +51,11 @@ it beside the proofs on every release.
+ | `crypto/internal/fips140/mlkem` | [`crypto.internal.fips140.mlkem.md`](current/crypto.internal.fips140.mlkem.md) | [`src/core/crypto/internal/fips140/mlkem`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/fips140/mlkem) |
+ | `crypto/internal/fips140/nistec` | [`crypto.internal.fips140.nistec.md`](current/crypto.internal.fips140.nistec.md) | [`src/core/crypto/internal/fips140/nistec`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/fips140/nistec) |
+ | `crypto/internal/fips140/rsa` | [`crypto.internal.fips140.rsa.md`](current/crypto.internal.fips140.rsa.md) | [`src/core/crypto/internal/fips140/rsa`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/fips140/rsa) |
++| `crypto/internal/fips140deps` | [`crypto.internal.fips140deps.md`](current/crypto.internal.fips140deps.md) | [`src/core/crypto/internal/fips140deps`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/fips140deps) |
+ | `crypto/internal/fips140test` | [`crypto.internal.fips140test.md`](current/crypto.internal.fips140test.md) | [`src/core/crypto/internal/fips140test`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/fips140test) |
+ | `crypto/internal/hpke` | [`crypto.internal.hpke.md`](current/crypto.internal.hpke.md) | [`src/core/crypto/internal/hpke`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/hpke) |
++| `crypto/internal/mlkem768` | [`crypto.internal.mlkem768.md`](current/crypto.internal.mlkem768.md) | [`src/core/crypto/internal/mlkem768`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/mlkem768) |
++| `crypto/internal/nistec` | [`crypto.internal.nistec.md`](current/crypto.internal.nistec.md) | [`src/core/crypto/internal/nistec`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/nistec) |
+ | `crypto/internal/sysrand` | [`crypto.internal.sysrand.md`](current/crypto.internal.sysrand.md) | [`src/core/crypto/internal/sysrand`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/sysrand) |
+ | `crypto/md5` | [`crypto.md5.md`](current/crypto.md5.md) | [`src/core/crypto/md5`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/md5) |
+ | `crypto/mlkem` | [`crypto.mlkem.md`](current/crypto.mlkem.md) | [`src/core/crypto/mlkem`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/mlkem) |
+@@ -107,8 +89,8 @@ it beside the proofs on every release.
+ | `encoding/gob` | [`encoding.gob.md`](current/encoding.gob.md) | [`src/core/encoding/gob`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/encoding/gob) |
+ | `encoding/hex` | [`encoding.hex.md`](current/encoding.hex.md) | [`src/core/encoding/hex`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/encoding/hex) |
+ | `encoding/json` | [`encoding.json.md`](current/encoding.json.md) | [`src/core/encoding/json`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/encoding/json) |
+-| `encoding/xml` | [`encoding.xml.md`](current/encoding.xml.md) | [`src/core/encoding/xml`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/encoding/xml) |
+ | `encoding/pem` | [`encoding.pem.md`](current/encoding.pem.md) | [`src/core/encoding/pem`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/encoding/pem) |
++| `encoding/xml` | [`encoding.xml.md`](current/encoding.xml.md) | [`src/core/encoding/xml`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/encoding/xml) |
+ | `errors` | [`errors.md`](current/errors.md) | [`src/core/errors`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/errors) |
+ | `expvar` | [`expvar.md`](current/expvar.md) | [`src/core/expvar`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/expvar) |
+ | `flag` | [`flag.md`](current/flag.md) | [`src/core/flag`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/flag) |
+@@ -149,6 +131,8 @@ it beside the proofs on every release.
+ | `internal/abi` | [`internal.abi.md`](current/internal.abi.md) | [`src/core/internal/abi`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/abi) |
+ | `internal/buildcfg` | [`internal.buildcfg.md`](current/internal.buildcfg.md) | [`src/core/internal/buildcfg`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/buildcfg) |
+ | `internal/chacha8rand` | [`internal.chacha8rand.md`](current/internal.chacha8rand.md) | [`src/core/internal/chacha8rand`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/chacha8rand) |
++| `internal/concurrent` | [`internal.concurrent.md`](current/internal.concurrent.md) | [`src/core/internal/concurrent`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/concurrent) |
++| `internal/copyright` | [`internal.copyright.md`](current/internal.copyright.md) | [`src/core/internal/copyright`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/copyright) |
+ | `internal/coverage/cfile` | [`internal.coverage.cfile.md`](current/internal.coverage.cfile.md) | [`src/core/internal/coverage/cfile`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/coverage/cfile) |
+ | `internal/coverage/cformat` | [`internal.coverage.cformat.md`](current/internal.coverage.cformat.md) | [`src/core/internal/coverage/cformat`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/coverage/cformat) |
+ | `internal/coverage/cmerge` | [`internal.coverage.cmerge.md`](current/internal.coverage.cmerge.md) | [`src/core/internal/coverage/cmerge`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/coverage/cmerge) |
+@@ -184,6 +168,7 @@ it beside the proofs on every release.
+ | `internal/trace` | [`internal.trace.md`](current/internal.trace.md) | [`src/core/internal/trace`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/trace) |
+ | `internal/trace/internal/oldtrace` | [`internal.trace.internal.oldtrace.md`](current/internal.trace.internal.oldtrace.md) | [`src/core/internal/trace/internal/oldtrace`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/trace/internal/oldtrace) |
+ | `internal/types/errors` | [`internal.types.errors.md`](current/internal.types.errors.md) | [`src/core/internal/types/errors`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/types/errors) |
++| `internal/weak` | [`internal.weak.md`](current/internal.weak.md) | [`src/core/internal/weak`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/weak) |
+ | `internal/xcoff` | [`internal.xcoff.md`](current/internal.xcoff.md) | [`src/core/internal/xcoff`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/xcoff) |
+ | `internal/zstd` | [`internal.zstd.md`](current/internal.zstd.md) | [`src/core/internal/zstd`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/zstd) |
+ | `io` | [`io.md`](current/io.md) | [`src/core/io`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/io) |
+@@ -213,6 +198,7 @@ it beside the proofs on every release.
+ | `net/http/httputil` | [`net.http.httputil.md`](current/net.http.httputil.md) | [`src/core/net/http/httputil`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/http/httputil) |
+ | `net/http/internal` | [`net.http.internal.md`](current/net.http.internal.md) | [`src/core/net/http/internal`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/http/internal) |
+ | `net/http/internal/ascii` | [`net.http.internal.ascii.md`](current/net.http.internal.ascii.md) | [`src/core/net/http/internal/ascii`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/http/internal/ascii) |
++| `net/internal/cgotest` | [`net.internal.cgotest.md`](current/net.internal.cgotest.md) | [`src/core/net/internal/cgotest`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/internal/cgotest) |
+ | `net/mail` | [`net.mail.md`](current/net.mail.md) | [`src/core/net/mail`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/mail) |
+ | `net/netip` | [`net.netip.md`](current/net.netip.md) | [`src/core/net/netip`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/netip) |
+ | `net/rpc` | [`net.rpc.md`](current/net.rpc.md) | [`src/core/net/rpc`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/rpc) |
+@@ -231,6 +217,9 @@ it beside the proofs on every release.
+ | `regexp` | [`regexp.md`](current/regexp.md) | [`src/core/regexp`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/regexp) |
+ | `regexp/syntax` | [`regexp.syntax.md`](current/regexp.syntax.md) | [`src/core/regexp/syntax`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/regexp/syntax) |
+ | `runtime/debug` | [`runtime.debug.md`](current/runtime.debug.md) | [`src/core/runtime/debug`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/runtime/debug) |
++| `runtime/internal/math` | [`runtime.internal.math.md`](current/runtime.internal.math.md) | [`src/core/runtime/internal/math`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/runtime/internal/math) |
++| `runtime/internal/sys` | [`runtime.internal.sys.md`](current/runtime.internal.sys.md) | [`src/core/runtime/internal/sys`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/runtime/internal/sys) |
++| `runtime/internal/wasitest` | [`runtime.internal.wasitest.md`](current/runtime.internal.wasitest.md) | [`src/core/runtime/internal/wasitest`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/runtime/internal/wasitest) |
+ | `runtime/metrics` | [`runtime.metrics.md`](current/runtime.metrics.md) | [`src/core/runtime/metrics`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/runtime/metrics) |
+ | `slices` | [`slices.md`](current/slices.md) | [`src/core/slices`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/slices) |
+ | `sort` | [`sort.md`](current/sort.md) | [`src/core/sort`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/sort) |

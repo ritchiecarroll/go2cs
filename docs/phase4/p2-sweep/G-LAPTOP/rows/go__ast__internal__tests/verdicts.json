@@ -1,0 +1,23 @@
+{
+ "package": "tests",
+ "status": "validated",
+ "go": {
+  "TestSortImportsUpdatesFileImportsField": "pass",
+  "TestSortImportsUpdatesFileImportsField/multiple_import_statements": "pass",
+  "TestSortImportsUpdatesFileImportsField/one_import_statement": "pass"
+ },
+ "csharp": {
+  "TestSortImportsUpdatesFileImportsField": "pass",
+  "TestSortImportsUpdatesFileImportsField/multiple_import_statements": "pass",
+  "TestSortImportsUpdatesFileImportsField/one_import_statement": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

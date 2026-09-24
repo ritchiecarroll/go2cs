@@ -1,0 +1,39 @@
+{
+ "package": "list",
+ "status": "validated",
+ "go": {
+  "TestExtending": "pass",
+  "TestInsertAfterUnknownMark": "pass",
+  "TestInsertBeforeUnknownMark": "pass",
+  "TestIssue4103": "pass",
+  "TestIssue6349": "pass",
+  "TestList": "pass",
+  "TestMove": "pass",
+  "TestMoveUnknownMark": "pass",
+  "TestRemove": "pass",
+  "TestZeroList": "pass"
+ },
+ "csharp": {
+  "TestExtending": "pass",
+  "TestInsertAfterUnknownMark": "pass",
+  "TestInsertBeforeUnknownMark": "pass",
+  "TestIssue4103": "pass",
+  "TestIssue6349": "pass",
+  "TestList": "pass",
+  "TestMove": "pass",
+  "TestMoveUnknownMark": "pass",
+  "TestRemove": "pass",
+  "TestZeroList": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "Example (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

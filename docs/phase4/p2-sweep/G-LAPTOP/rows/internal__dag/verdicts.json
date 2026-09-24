@@ -1,0 +1,29 @@
+{
+ "package": "dag",
+ "status": "validated",
+ "go": {
+  "TestParse": "pass",
+  "TestTopo": "pass",
+  "TestTransitiveReduction": "pass",
+  "TestTransitiveReduction/chain": "pass",
+  "TestTransitiveReduction/diamond": "pass",
+  "TestTranspose": "pass"
+ },
+ "csharp": {
+  "TestParse": "pass",
+  "TestTopo": "pass",
+  "TestTransitiveReduction": "pass",
+  "TestTransitiveReduction/chain": "pass",
+  "TestTransitiveReduction/diamond": "pass",
+  "TestTranspose": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

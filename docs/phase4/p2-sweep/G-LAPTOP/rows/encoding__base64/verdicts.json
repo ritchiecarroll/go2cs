@@ -1,0 +1,61 @@
+{
+ "package": "base64",
+ "status": "validated",
+ "go": {
+  "TestBig": "pass",
+  "TestDecode": "pass",
+  "TestDecodeBounds": "pass",
+  "TestDecodeCorrupt": "pass",
+  "TestDecodedLen": "pass",
+  "TestDecoder": "pass",
+  "TestDecoderBuffering": "pass",
+  "TestDecoderIssue15656": "pass",
+  "TestDecoderIssue3577": "pass",
+  "TestDecoderIssue4779": "pass",
+  "TestDecoderIssue7733": "pass",
+  "TestDecoderRaw": "pass",
+  "TestEncode": "pass",
+  "TestEncodedLen": "pass",
+  "TestEncoder": "pass",
+  "TestEncoderBuffering": "pass",
+  "TestNewLineCharacters": "pass"
+ },
+ "csharp": {
+  "TestBig": "pass",
+  "TestDecode": "pass",
+  "TestDecodeBounds": "pass",
+  "TestDecodeCorrupt": "pass",
+  "TestDecodedLen": "pass",
+  "TestDecoder": "pass",
+  "TestDecoderBuffering": "pass",
+  "TestDecoderIssue15656": "pass",
+  "TestDecoderIssue3577": "pass",
+  "TestDecoderIssue4779": "pass",
+  "TestDecoderIssue7733": "pass",
+  "TestDecoderRaw": "pass",
+  "TestEncode": "pass",
+  "TestEncodedLen": "pass",
+  "TestEncoder": "pass",
+  "TestEncoderBuffering": "pass",
+  "TestNewLineCharacters": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkDecodeString (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkEncodeToString (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkNewEncoding (benchmark): benchmark execution is deferred to Phase 4D",
+  "Example (example): example execution is deferred to Phase 4D",
+  "ExampleEncoding_Decode (example): example execution is deferred to Phase 4D",
+  "ExampleEncoding_DecodeString (example): example execution is deferred to Phase 4D",
+  "ExampleEncoding_Encode (example): example execution is deferred to Phase 4D",
+  "ExampleEncoding_EncodeToString (example): example execution is deferred to Phase 4D",
+  "ExampleNewEncoder (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

@@ -1,0 +1,8 @@
+=== RUN   TestOpenFileCreateExclDanglingSymlink
+=== RUN   TestOpenFileCreateExclDanglingSymlink/NoRoot
+=== RUN   TestOpenFileCreateExclDanglingSymlink/InRoot
+--- PASS: TestOpenFileCreateExclDanglingSymlink (0.01s)
+    --- PASS: TestOpenFileCreateExclDanglingSymlink/NoRoot (0.00s)
+    --- PASS: TestOpenFileCreateExclDanglingSymlink/InRoot (0.00s)
+PASS
+ok  	os	0.563s

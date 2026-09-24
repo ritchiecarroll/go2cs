@@ -1,0 +1,27 @@
+{
+ "package": "aes",
+ "status": "validated",
+ "go": {
+  "TestMul": "pass",
+  "TestPowx": "pass",
+  "TestSboxes": "pass",
+  "TestTd": "pass",
+  "TestTe": "pass"
+ },
+ "csharp": {
+  "TestMul": "pass",
+  "TestPowx": "pass",
+  "TestSboxes": "pass",
+  "TestTd": "pass",
+  "TestTe": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

@@ -1,0 +1,60 @@
+{
+ "package": "hpke",
+ "status": "validated",
+ "go": {
+  "TestRFC9180Vectors": "pass",
+  "TestRFC9180Vectors/DHKEM(P-256,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM": "skip",
+  "TestRFC9180Vectors/DHKEM(P-256,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305": "skip",
+  "TestRFC9180Vectors/DHKEM(P-256,_HKDF-SHA256),_HKDF-SHA512,_AES-128-GCM": "skip",
+  "TestRFC9180Vectors/DHKEM(P-521,_HKDF-SHA512),_HKDF-SHA512,_AES-256-GCM": "skip",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM/seq_num_0": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM/seq_num_1": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM/seq_num_2": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM/seq_num_255": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM/seq_num_256": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM/seq_num_4": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305/seq_num_0": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305/seq_num_1": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305/seq_num_2": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305/seq_num_255": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305/seq_num_256": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305/seq_num_4": "pass"
+ },
+ "csharp": {
+  "TestRFC9180Vectors": "pass",
+  "TestRFC9180Vectors/DHKEM(P-256,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM": "skip",
+  "TestRFC9180Vectors/DHKEM(P-256,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305": "skip",
+  "TestRFC9180Vectors/DHKEM(P-256,_HKDF-SHA256),_HKDF-SHA512,_AES-128-GCM": "skip",
+  "TestRFC9180Vectors/DHKEM(P-521,_HKDF-SHA512),_HKDF-SHA512,_AES-256-GCM": "skip",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM/seq_num_0": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM/seq_num_1": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM/seq_num_2": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM/seq_num_255": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM/seq_num_256": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM/seq_num_4": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305/seq_num_0": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305/seq_num_1": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305/seq_num_2": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305/seq_num_255": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305/seq_num_256": "pass",
+  "TestRFC9180Vectors/DHKEM(X25519,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305/seq_num_4": "pass"
+ },
+ "matched": true,
+ "skipped": [
+  "TestRFC9180Vectors/DHKEM(P-256,_HKDF-SHA256),_HKDF-SHA256,_AES-128-GCM",
+  "TestRFC9180Vectors/DHKEM(P-256,_HKDF-SHA256),_HKDF-SHA256,_ChaCha20Poly1305",
+  "TestRFC9180Vectors/DHKEM(P-256,_HKDF-SHA256),_HKDF-SHA512,_AES-128-GCM",
+  "TestRFC9180Vectors/DHKEM(P-521,_HKDF-SHA512),_HKDF-SHA512,_AES-256-GCM"
+ ],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

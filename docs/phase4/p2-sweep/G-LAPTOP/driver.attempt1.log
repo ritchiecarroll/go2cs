@@ -1,0 +1,5 @@
+2026-09-24T02:19:45 p2-driver start: shard S-G host G-LAPTOP base 61724860b49a84c373f1c0c6f76d8df3cbad9804 pid 16236 selftest=False appendNetOs=True
+2026-09-24T02:19:46 PINS go='go version go1.24.13 windows/amd64' GOROOT=True GOFLAGS-empty=True dotnet=10.0.400 creds-absent=True
+2026-09-24T02:19:46 uptime 16.80 h (last boot 9/23/2026 9:31:37 AM)
+2026-09-24T02:20:11 DRIVER EXCEPTION: The script failed due to call depth overflow.
+DRIVER_EXIT=1

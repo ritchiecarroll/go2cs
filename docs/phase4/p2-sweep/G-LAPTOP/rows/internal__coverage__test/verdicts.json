@@ -1,0 +1,29 @@
+{
+ "package": "test",
+ "status": "validated",
+ "go": {
+  "TestCounterDataAppendSegment": "pass",
+  "TestCounterDataWriterReader": "pass",
+  "TestMetaDataDecodeLitFlagIssue57942": "pass",
+  "TestMetaDataEmptyPackage": "pass",
+  "TestMetaDataEncoderDecoder": "pass",
+  "TestMetaDataWriterReader": "pass"
+ },
+ "csharp": {
+  "TestCounterDataAppendSegment": "pass",
+  "TestCounterDataWriterReader": "pass",
+  "TestMetaDataDecodeLitFlagIssue57942": "pass",
+  "TestMetaDataEmptyPackage": "pass",
+  "TestMetaDataEncoderDecoder": "pass",
+  "TestMetaDataWriterReader": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

@@ -1,0 +1,40 @@
+{
+ "package": "ast",
+ "status": "validated",
+ "go": {
+  "TestCommentMap": "pass",
+  "TestCommentText": "pass",
+  "TestFilter": "pass",
+  "TestFilterDuplicates": "pass",
+  "TestIsDirective": "pass",
+  "TestIssue28089": "pass",
+  "TestIssue33649": "pass",
+  "TestPreorderBreak": "pass",
+  "TestPrint": "pass"
+ },
+ "csharp": {
+  "TestCommentMap": "pass",
+  "TestCommentText": "pass",
+  "TestFilter": "pass",
+  "TestFilterDuplicates": "pass",
+  "TestIsDirective": "pass",
+  "TestIssue28089": "pass",
+  "TestIssue33649": "pass",
+  "TestPreorderBreak": "pass",
+  "TestPrint": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "ExampleCommentMap (example): example execution is deferred to Phase 4D",
+  "ExampleInspect (example): example execution is deferred to Phase 4D",
+  "ExamplePreorder (example): example execution is deferred to Phase 4D",
+  "ExamplePrint (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "package": "hash",
+ "status": "validated",
+ "go": {
+  "TestMarshalHash": "pass",
+  "TestMarshalHash/adler32": "pass",
+  "TestMarshalHash/crc32": "pass",
+  "TestMarshalHash/crc64": "pass",
+  "TestMarshalHash/fnv128": "pass",
+  "TestMarshalHash/fnv128a": "pass",
+  "TestMarshalHash/fnv32": "pass",
+  "TestMarshalHash/fnv32a": "pass",
+  "TestMarshalHash/fnv64": "pass",
+  "TestMarshalHash/fnv64a": "pass",
+  "TestMarshalHash/md5": "pass",
+  "TestMarshalHash/sha1": "pass",
+  "TestMarshalHash/sha224": "pass",
+  "TestMarshalHash/sha256": "pass",
+  "TestMarshalHash/sha384": "pass",
+  "TestMarshalHash/sha512": "pass",
+  "TestMarshalHash/sha512_224": "pass",
+  "TestMarshalHash/sha512_256": "pass"
+ },
+ "csharp": {
+  "TestMarshalHash": "pass",
+  "TestMarshalHash/adler32": "pass",
+  "TestMarshalHash/crc32": "pass",
+  "TestMarshalHash/crc64": "pass",
+  "TestMarshalHash/fnv128": "pass",
+  "TestMarshalHash/fnv128a": "pass",
+  "TestMarshalHash/fnv32": "pass",
+  "TestMarshalHash/fnv32a": "pass",
+  "TestMarshalHash/fnv64": "pass",
+  "TestMarshalHash/fnv64a": "pass",
+  "TestMarshalHash/md5": "pass",
+  "TestMarshalHash/sha1": "pass",
+  "TestMarshalHash/sha224": "pass",
+  "TestMarshalHash/sha256": "pass",
+  "TestMarshalHash/sha384": "pass",
+  "TestMarshalHash/sha512": "pass",
+  "TestMarshalHash/sha512_224": "pass",
+  "TestMarshalHash/sha512_256": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "Example_binaryMarshaler (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

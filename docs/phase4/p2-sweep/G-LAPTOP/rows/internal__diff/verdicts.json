@@ -1,0 +1,43 @@
+{
+ "package": "diff",
+ "status": "validated",
+ "go": {
+  "Test": "pass",
+  "Test/allnew.txt": "pass",
+  "Test/allold.txt": "pass",
+  "Test/basic.txt": "pass",
+  "Test/dups.txt": "pass",
+  "Test/end.txt": "pass",
+  "Test/eof.txt": "pass",
+  "Test/eof1.txt": "pass",
+  "Test/eof2.txt": "pass",
+  "Test/long.txt": "pass",
+  "Test/same.txt": "pass",
+  "Test/start.txt": "pass",
+  "Test/triv.txt": "pass"
+ },
+ "csharp": {
+  "Test": "pass",
+  "Test/allnew.txt": "pass",
+  "Test/allold.txt": "pass",
+  "Test/basic.txt": "pass",
+  "Test/dups.txt": "pass",
+  "Test/end.txt": "pass",
+  "Test/eof.txt": "pass",
+  "Test/eof1.txt": "pass",
+  "Test/eof2.txt": "pass",
+  "Test/long.txt": "pass",
+  "Test/same.txt": "pass",
+  "Test/start.txt": "pass",
+  "Test/triv.txt": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

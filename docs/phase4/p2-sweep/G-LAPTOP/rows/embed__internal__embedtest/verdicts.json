@@ -1,0 +1,31 @@
+{
+ "package": "embedtest",
+ "status": "validated",
+ "go": {
+  "TestAliases": "pass",
+  "TestDir": "pass",
+  "TestGlobal": "pass",
+  "TestHidden": "pass",
+  "TestOffset": "pass",
+  "TestUninitialized": "pass",
+  "TestXGlobal": "pass"
+ },
+ "csharp": {
+  "TestAliases": "pass",
+  "TestDir": "pass",
+  "TestGlobal": "pass",
+  "TestHidden": "pass",
+  "TestOffset": "pass",
+  "TestUninitialized": "pass",
+  "TestXGlobal": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

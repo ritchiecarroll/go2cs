@@ -1,0 +1,23 @@
+{
+ "package": "boring",
+ "status": "validated",
+ "go": {
+  "TestInit": "pass",
+  "TestUnreachable": "pass",
+  "TestUnreachableExceptTests": "pass"
+ },
+ "csharp": {
+  "TestInit": "pass",
+  "TestUnreachable": "pass",
+  "TestUnreachableExceptTests": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

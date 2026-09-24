@@ -1,0 +1,8 @@
+  CGO_ENABLED=0 pinned for the whole run (was '0') -- the corpus emission state and the annotations' state of record on every platform
+validated sweep: 1 package(s), 123 expected verdicts, timeout 10m, test-config Release
+  PASS  crypto/internal/fips140/rsa        123 [32s]
+
+sweep: 1 pass / 0 fail  (32s)
+
+known -tests-closure emission class (1 files, documented, not drift):
+  7	0	src/core/crypto/internal/fips140/rsa/package_init.cs

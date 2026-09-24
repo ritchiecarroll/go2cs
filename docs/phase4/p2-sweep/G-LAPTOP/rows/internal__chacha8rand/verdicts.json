@@ -1,0 +1,27 @@
+{
+ "package": "chacha8rand",
+ "status": "validated",
+ "go": {
+  "TestBlockGeneric": "pass",
+  "TestMarshal": "pass",
+  "TestOutput": "pass",
+  "TestReseed": "pass"
+ },
+ "csharp": {
+  "TestBlockGeneric": "pass",
+  "TestMarshal": "pass",
+  "TestOutput": "pass",
+  "TestReseed": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkBlock (benchmark): benchmark execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

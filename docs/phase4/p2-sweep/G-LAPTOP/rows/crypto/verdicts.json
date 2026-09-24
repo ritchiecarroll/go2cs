@@ -1,0 +1,29 @@
+{
+ "package": "crypto",
+ "status": "validated",
+ "go": {
+  "TestCFBDecryptOutOfBoundsWrite": "pass",
+  "TestCFBEncryptOutOfBoundsWrite": "pass",
+  "TestCTROutOfBoundsWrite": "pass",
+  "TestOFBOutOfBoundsWrite": "pass",
+  "TestPureGoTag": "pass",
+  "TestRC4OutOfBoundsWrite": "pass"
+ },
+ "csharp": {
+  "TestCFBDecryptOutOfBoundsWrite": "pass",
+  "TestCFBEncryptOutOfBoundsWrite": "pass",
+  "TestCTROutOfBoundsWrite": "pass",
+  "TestOFBOutOfBoundsWrite": "pass",
+  "TestPureGoTag": "pass",
+  "TestRC4OutOfBoundsWrite": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

@@ -1,0 +1,28 @@
+{
+ "package": "format",
+ "status": "validated",
+ "go": {
+  "TestNode": "pass",
+  "TestNodeNoModify": "pass",
+  "TestPartial": "pass",
+  "TestSource": "pass"
+ },
+ "csharp": {
+  "TestNode": "pass",
+  "TestNodeNoModify": "pass",
+  "TestPartial": "pass",
+  "TestSource": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkFormat (benchmark): benchmark execution is deferred to Phase 4D",
+  "ExampleNode (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

@@ -1,0 +1,54 @@
+{
+ "package": "image",
+ "status": "validated",
+ "go": {
+  "Test16BitsPerColorChannel": "pass",
+  "TestDecode": "pass",
+  "TestImage": "pass",
+  "TestNewXxxBadRectangle": "pass",
+  "TestRGBA64Image": "pass",
+  "TestRectangle": "pass",
+  "TestYCbCr": "pass",
+  "TestYCbCrSlicesDontOverlap": "pass"
+ },
+ "csharp": {
+  "Test16BitsPerColorChannel": "pass",
+  "TestDecode": "pass",
+  "TestImage": "pass",
+  "TestNewXxxBadRectangle": "pass",
+  "TestRGBA64Image": "pass",
+  "TestRectangle": "pass",
+  "TestYCbCr": "pass",
+  "TestYCbCrSlicesDontOverlap": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkAlpha16At (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkAlphaAt (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkAlphaSetAlpha (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkAlphaSetAlpha16 (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkAt (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkGray16At (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkGrayAt (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkGraySetGray (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkGraySetGray16 (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkNRGBA64At (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkNRGBA64SetNRGBA64 (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkNRGBAAt (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkNRGBASetNRGBA (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkRGBA64At (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkRGBA64SetRGBA64 (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkRGBAAt (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkRGBASetRGBA (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkSet (benchmark): benchmark execution is deferred to Phase 4D",
+  "Example (example): example execution is deferred to Phase 4D",
+  "Example_decodeConfig (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

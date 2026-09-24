@@ -1,0 +1,25 @@
+{
+ "package": "importer",
+ "status": "validated",
+ "go": {
+  "TestForCompiler": "pass",
+  "TestForCompiler/LookupCustom": "skip",
+  "TestForCompiler/LookupDefault": "pass"
+ },
+ "csharp": {
+  "TestForCompiler": "pass",
+  "TestForCompiler/LookupCustom": "skip",
+  "TestForCompiler/LookupDefault": "pass"
+ },
+ "matched": true,
+ "skipped": [
+  "TestForCompiler/LookupCustom"
+ ],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

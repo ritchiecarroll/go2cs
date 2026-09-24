@@ -1,0 +1,39 @@
+{
+ "package": "mlkem",
+ "status": "validated",
+ "go": {
+  "TestAccumulated": "pass",
+  "TestBadLengths": "pass",
+  "TestBadLengths/1024": "pass",
+  "TestBadLengths/768": "pass",
+  "TestConstantSizes": "pass",
+  "TestRoundTrip": "pass",
+  "TestRoundTrip/1024": "pass",
+  "TestRoundTrip/768": "pass"
+ },
+ "csharp": {
+  "TestAccumulated": "pass",
+  "TestBadLengths": "pass",
+  "TestBadLengths/1024": "pass",
+  "TestBadLengths/768": "pass",
+  "TestConstantSizes": "pass",
+  "TestRoundTrip": "pass",
+  "TestRoundTrip/1024": "pass",
+  "TestRoundTrip/768": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [
+  "BenchmarkDecaps (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkEncaps (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkKeyGen (benchmark): benchmark execution is deferred to Phase 4D",
+  "BenchmarkRoundTrip (benchmark): benchmark execution is deferred to Phase 4D",
+  "Example (example): example execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

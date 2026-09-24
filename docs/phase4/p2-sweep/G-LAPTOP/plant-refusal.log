@@ -1,0 +1,8 @@
+  CGO_ENABLED=0 pinned for the whole run (was '0') -- the corpus emission state and the annotations' state of record on every platform
+No banked packages matched filter 'net/http'.
+At C:\p2g\src\run-validated-sweep.p2-G-LAPTOP.ps1:244 char:19
++ ... ot $rows) { throw "No banked packages matched$(if ($Filter) { " filte ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (No banked packa...ter 'net/http'.:String) [], RuntimeException
+    + FullyQualifiedErrorId : No banked packages matched filter 'net/http'.
+ 

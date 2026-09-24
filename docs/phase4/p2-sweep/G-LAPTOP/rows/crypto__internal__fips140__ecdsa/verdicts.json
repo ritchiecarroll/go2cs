@@ -1,0 +1,37 @@
+{
+ "package": "ecdsa",
+ "status": "validated",
+ "go": {
+  "TestHashToNat": "pass",
+  "TestHashToNat/P-224": "pass",
+  "TestHashToNat/P-256": "pass",
+  "TestHashToNat/P-384": "pass",
+  "TestHashToNat/P-521": "pass",
+  "TestRandomPoint": "pass",
+  "TestRandomPoint/P-224": "pass",
+  "TestRandomPoint/P-256": "pass",
+  "TestRandomPoint/P-384": "pass",
+  "TestRandomPoint/P-521": "pass"
+ },
+ "csharp": {
+  "TestHashToNat": "pass",
+  "TestHashToNat/P-224": "pass",
+  "TestHashToNat/P-256": "pass",
+  "TestHashToNat/P-384": "pass",
+  "TestHashToNat/P-521": "pass",
+  "TestRandomPoint": "pass",
+  "TestRandomPoint/P-224": "pass",
+  "TestRandomPoint/P-256": "pass",
+  "TestRandomPoint/P-384": "pass",
+  "TestRandomPoint/P-521": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

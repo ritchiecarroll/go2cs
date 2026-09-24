@@ -1,0 +1,25 @@
+{
+ "package": "dsa",
+ "status": "validated",
+ "go": {
+  "TestParameterGeneration": "pass",
+  "TestSignAndVerify": "pass",
+  "TestSignAndVerifyWithBadPublicKey": "pass",
+  "TestSigningWithDegenerateKeys": "pass"
+ },
+ "csharp": {
+  "TestParameterGeneration": "pass",
+  "TestSignAndVerify": "pass",
+  "TestSignAndVerifyWithBadPublicKey": "pass",
+  "TestSigningWithDegenerateKeys": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

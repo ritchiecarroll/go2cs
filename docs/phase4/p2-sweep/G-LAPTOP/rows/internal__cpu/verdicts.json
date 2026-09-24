@@ -1,0 +1,38 @@
+{
+ "package": "cpu",
+ "status": "validated",
+ "go": {
+  "TestAllCapabilitiesDisabled": "skip",
+  "TestDisableAllCapabilities": "skip",
+  "TestDisableSSE3": "skip",
+  "TestSSE3DebugOption": "skip",
+  "TestX86ifAVX2hasAVX": "pass",
+  "TestX86ifAVX512BWhasAVX512F": "pass",
+  "TestX86ifAVX512FhasAVX2": "pass",
+  "TestX86ifAVX512VLhasAVX512F": "pass"
+ },
+ "csharp": {
+  "TestAllCapabilitiesDisabled": "skip",
+  "TestDisableAllCapabilities": "skip",
+  "TestDisableSSE3": "skip",
+  "TestSSE3DebugOption": "skip",
+  "TestX86ifAVX2hasAVX": "pass",
+  "TestX86ifAVX512BWhasAVX512F": "pass",
+  "TestX86ifAVX512FhasAVX2": "pass",
+  "TestX86ifAVX512VLhasAVX512F": "pass"
+ },
+ "matched": true,
+ "skipped": [
+  "TestAllCapabilitiesDisabled",
+  "TestDisableAllCapabilities",
+  "TestDisableSSE3",
+  "TestSSE3DebugOption"
+ ],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

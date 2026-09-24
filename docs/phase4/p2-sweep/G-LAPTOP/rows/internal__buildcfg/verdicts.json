@@ -1,0 +1,25 @@
+{
+ "package": "buildcfg",
+ "status": "validated",
+ "go": {
+  "TestConfigFlags": "pass",
+  "TestGoarm64FeaturesSupports": "pass",
+  "TestGogoarchTags": "pass",
+  "TestIsFIPSVersion": "pass"
+ },
+ "csharp": {
+  "TestConfigFlags": "pass",
+  "TestGoarm64FeaturesSupports": "pass",
+  "TestGogoarchTags": "pass",
+  "TestIsFIPSVersion": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

@@ -1,0 +1,21 @@
+{
+ "package": "cformat",
+ "status": "validated",
+ "go": {
+  "TestBasics": "pass",
+  "TestEmptyPackages": "pass"
+ },
+ "csharp": {
+  "TestBasics": "pass",
+  "TestEmptyPackages": "pass"
+ },
+ "matched": true,
+ "skipped": [],
+ "disclosed": [],
+ "excluded": [],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

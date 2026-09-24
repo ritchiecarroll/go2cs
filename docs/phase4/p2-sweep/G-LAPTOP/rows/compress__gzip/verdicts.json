@@ -1,0 +1,54 @@
+{
+ "package": "gzip",
+ "status": "validated",
+ "go": {
+  "TestCVE202230631": "pass",
+  "TestConcat": "pass",
+  "TestDecompressor": "pass",
+  "TestEmpty": "pass",
+  "TestGZIPFilesHaveZeroMTimes": "skip",
+  "TestIssue6550": "pass",
+  "TestLatin1": "pass",
+  "TestLatin1RoundTrip": "pass",
+  "TestLimitedWrite": "pass",
+  "TestMultistreamFalse": "pass",
+  "TestNilStream": "pass",
+  "TestRoundTrip": "pass",
+  "TestTruncatedStreams": "pass",
+  "TestWriterFlush": "pass",
+  "TestWriterReset": "pass"
+ },
+ "csharp": {
+  "TestCVE202230631": "pass",
+  "TestConcat": "pass",
+  "TestDecompressor": "pass",
+  "TestEmpty": "pass",
+  "TestGZIPFilesHaveZeroMTimes": "skip",
+  "TestIssue6550": "pass",
+  "TestLatin1": "pass",
+  "TestLatin1RoundTrip": "pass",
+  "TestLimitedWrite": "pass",
+  "TestMultistreamFalse": "pass",
+  "TestNilStream": "pass",
+  "TestRoundTrip": "pass",
+  "TestTruncatedStreams": "pass",
+  "TestWriterFlush": "pass",
+  "TestWriterReset": "pass"
+ },
+ "matched": true,
+ "skipped": [
+  "TestGZIPFilesHaveZeroMTimes"
+ ],
+ "disclosed": [],
+ "excluded": [
+  "ExampleReader_Multistream (example): example execution is deferred to Phase 4D",
+  "Example_compressingReader (example): example execution is deferred to Phase 4D",
+  "Example_writerReader (example): example execution is deferred to Phase 4D",
+  "FuzzReader (fuzz): fuzz execution is deferred to Phase 4D"
+ ],
+ "environment": {
+  "configuration": "Release",
+  "tiered": false,
+  "oracleGoVersion": "go version go1.24.13 windows/amd64"
+ }
+}

@@ -1,0 +1,7 @@
+ M docs/validation/index.md
+ M src/core/go/build/deps_test.cs
+ M src/core/go/build/package_init.cs
+ M src/core/go/build/read_test.cs
+ M src/core/go/build/vendor_test.cs
+?? src/core/go/build/testdata/
+?? src/run-validated-sweep.p2-G-LAPTOP.ps1
