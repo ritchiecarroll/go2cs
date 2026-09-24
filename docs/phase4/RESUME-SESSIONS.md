@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 05:24 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 3768d70d63): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 05:27 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 0723395a8f): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -173,9 +173,10 @@ READ FIRST, in order (every one is on origin; read each tip by ls-remote, never 
     census it, append, sign, push. Stamp times from `date` in the same command.
 
 WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 ~15:0x record each step):
- - THE HOP IS CUT OVER. master = ffa5c1015a: the signed cutover merge 5098289482 (claude/version-go1.24.13 972a9a6a41 INTO
-   master 074a12c4ae; one union conflict in fleetIdentifierCensus_test.go) plus one signed docs commit (the Milestones cell
-   names 509828948). At master's head: roster guard 1826 green, `release-nuget -VerifyOnly` "Tree is releasable"
+ - THE HOP IS CUT OVER. master = 38529c765a: the signed cutover merge 5098289482 (claude/version-go1.24.13 972a9a6a41 INTO
+   master 074a12c4ae; one union conflict in fleetIdentifierCensus_test.go), plus two signed docs commits: ffa5c1015a (the
+   Milestones cell names 509828948) and 38529c765a (the platforms note's package floor is 1.24.13.1; its Linux sentence
+   stays until G's post-publish WSL walkthrough measures it, and the Roadmap Platforms row follows). At master's head: roster guard 1826 green, `release-nuget -VerifyOnly` "Tree is releasable"
    (next 1.24.13.1; 9 origin tags, 0 missing). The i7's main checkout C:/Projects/go2cs is fast-forwarded to it.
  - ALL FIVE PARITY GATES HELD: P1 compile, P2 the §6 full-roster sweep (M: 218/218 covered once; 217 PASS + context 58|0 on
    G-LAPTOP, ruled a host-timing reading because the i7 reads 57|1 as banked; SF gate green, the rows identical at the sweep
@@ -197,6 +198,8 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
        - Add Piece 4, the validation-index frozen-snapshots row.
        - Run a nuget.org-only walkthrough smoke test; it re-proves README step 4 `dotnet run -c Debug`.
        - Hand the owner deprecations-1.24.13.1.md (14 IDs, nuget.org's form).
+       - G runs the README walkthrough on the WSL linux arm against the published packages; rewrite the platforms note
+         and the Roadmap Platforms row from that evidence.
    (e) THEN the owner-ordered OFFICIAL LESSONS LEARNED in docs/GoCorpusMigration.md (a read-only derivation workflow;
        EXCLUDE the i9's hardware issues), and the post-release trains.
  - OWNER DECISIONS OPEN: the string-literal tiers. C2's revision 3 is d382b60677 on claude/c2-literal-cache-draft, COORD's
@@ -1951,3 +1954,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 05:15 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 05:17 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 05:24 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
+- 2026-09-24 05:27 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
