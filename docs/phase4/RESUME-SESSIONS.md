@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 11:00 -- SAVE-STATE refresh (ledger through mailbox 4b92088dc8): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, THE 1.24.13.2 PACKAGING TRAIN ASSEMBLED LOCALLY on the i7 (t1242, HEAD 6a104f8d0c) with its gate battery RUNNING, the RUNTIME project waiting on R's synctest train, and C2's literal revision 4 VERIFIED with the owner's tier ruling awaited; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 11:54 -- SAVE-STATE refresh (ledger through mailbox 908e769c3c): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED, master ebb4acb8cf, THE 1.24.13.2 PACKAGING TRAIN ASSEMBLED on the i7 with its battery running (G's walkthrough GREEN on the shipping tree; a GolibTests Debug-guard commit da5c9345ea to merge after the battery), the OWNER'S STRING-TIER RULING recorded and assigned (C1 record, C2 O1 census, R views+G8+G10, G V-fix 11), and the RUNTIME project waiting on R; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -215,19 +215,21 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
        EXCLUDE the i9's hardware issues), and the post-release trains.
  - DONE 2026-09-24: the owner's 14 deprecations, VERIFIED 14/14 by COORD from nuget.org's registration API (ledger "STAMP ·
    ebb4acb8cf · THE 14 REMOVED-ID DEPRECATIONS ARE DONE").
- - OWNER DECISIONS OPEN: the string-literal tiers. C2's revision 3 is d382b60677 on claude/c2-literal-cache-draft, COORD's
-   verification is on claude/coord-handover docs/phase4/reviews/literal-revision-3-verification-2026-09-24.md. REVISION 4
-   ARRIVED: c555d91c55, inbox 20260924T125751Z-C2.md. It found revision 3's arms registered AFTER the import hooks, and it
-   measured hybrid lazy registration and does NOT recommend it; C2 is on STANDBY. COORD VERIFIED IT (claude/coord-handover
-   docs/phase4/reviews/literal-revision-4-verification-2026-09-24.md; ledger "FINDING · c555d91c55"). The TIER DECISION
-   BRIEF went to the owner in the COORD session on 2026-09-24. COORD RECOMMENDS:
-   - sstring-first becomes the PRIMARY tier, starting with the O1 survival census (C2, read-only) and then the fmt pilot;
-   - approve now the Tier-2-independent seats: arm C, read-only views, G8 (restated as Go's own rule) + G10, and V-fix 11
-     plus its guard;
-   - DEFER Tier 2: it misses test-assembly literals, its tax is per process, and it has no Windows or NativeAOT legs. It
-     is revisited, sized against sstring-first's measured residual;
-   - arms A/B stay HELD.
-   AWAITING THE OWNER'S RULING. Then C1 records it in DESIGN §8 and COORD assigns the seats.
+ - OWNER RULED THE STRING-LITERAL TIERS 2026-09-24 ("Yes to all four"; ledger "OWNER RULING · c555d91c55"). The basis:
+   COORD's verification of C2's revision 4 c555d91c55 (claude/coord-handover docs/phase4/reviews/literal-revision-4-
+   verification-2026-09-24.md). The ruling:
+   (1) sstring-first is the PRIMARY tier;
+   (2) approved now: arm C, read-only views, G8 (as Go's own rule: no copy-on-alias precondition) + G10, and V-fix 11
+       plus the NoUncountedBackingAllocations guard;
+   (3) Tier 2 is DEFERRED;
+   (4) arms A/B stay HELD.
+   ASSIGNED:
+   - C1: a dated §8 ruling block on a new ref claude/c1-literal-tier-ruling off C2's draft tip;
+   - C2: the O1 survival census (read-only), then arm C (a converter seat, cut from the post-1.24.13.2 master; COORD
+     takes its .NET legs);
+   - R: claude/r-string-views-g8-g10 (golib: read-only views, G8, G10; alloc rows re-read);
+   - G: V-fix 11 + the guard, after the 1.24.13.2 train lands (adjacent to C2's REC-F NewArray door).
+   The cloud lanes reply by inbox, so the mailbox Monitor is ARMED.
  - DONE 2026-09-24 (owner-approved; ledger "ANNOUNCE · b6746ab185"): the BRANCH release/go1.23 was FAST-FORWARDED from
    10c78227a7 (the 75% milestone, still pinned by tag stdlib-tests-75pct-2026-08-22) to b6746ab185, the commit of
    nuget-1.23.12.3, and read back by ls-remote. No tag moved. Mint release/go1.24 at the 1.25 cutover, not before. These are
@@ -296,6 +298,9 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    - d15 gofmt; c6-c9; the log/syslog IVT union;
    - the -tests index.md rewrite defect; clean-bin's src/gen gap; the go/printer testdata refresh;
    - the counter-0 dry-run README writes; the BoGo figures in code comments.
+   - an INSTRUMENT item: check-roster-format.ps1's 'ledger scope' self-test fails under Windows PowerShell 5.1, even on
+     master (it passes under pwsh 7). Either make the guard 5.1-clean or have every caller state pwsh 7; the train-48
+     battery shape calls it through powershell.exe (found 2026-09-24 in the 1.24.13.2 battery).
    - the identifier-census SCRUB of pre-existing hits on master: the BOARD's, plus a 'profile_root' hit in
      docs/ConversionStrategies-Reference.md (found by G 2026-09-24; it predates the packaging train). (A grep.exe.stackdump crash artifact in
      the main checkout was removed by COORD 2026-09-24; the checkout's porcelain is EMPTY.)
@@ -315,7 +320,9 @@ paste prompt below. Report to COORD by SendMessage (R, G) or by one inbox file o
 (C1, C2). Everything post-hop stays UNMERGED until COORD says the 1.24.13.1 release has landed.
 
 ```
-R (R-LAPTOP). Model Opus 5.5 / high. Standing goal: the net/http re-entry and the post-release reflect seats. RUNTIME is NOT
+R (R-LAPTOP). Model Opus 5.5 / high. Standing goal: the net/http re-entry and the post-release reflect seats.
+NEW SEAT (owner-approved 2026-09-24, ledger "OWNER RULING · c555d91c55"): claude/r-string-views-g8-g10 -- golib read-only
+string views, G8 as Go's own rule, and the G10 one-byte table; red first; GolibTests at Debug and Release; alloc rows re-read. RUNTIME is NOT
 yours while the owner's separate cloud project holds it (ledger "OWNER ORDER · ebb4acb8cf · THE RUNTIME ROW GOES TO A
 SEPARATE CLOUD PROJECT"); reflect stays yours.
 Refs:
@@ -397,7 +404,8 @@ READ-FIRST: docs/phase4/p2-sweep/G-LAPTOP/README.md on claude/g-p2-sweep-evidenc
 ```
 
 ```
-C1 (cloud; docs, records and design seats; no .NET, no PowerShell). Every branch is on origin (your 2026-09-24 09:58Z block).
+C1 (cloud; docs, records and design seats; no .NET, no PowerShell). DUE NOW: record the owner's tier ruling (ledger "OWNER RULING ·
+c555d91c55") as a dated §8 block on a new ref claude/c1-literal-tier-ruling, cut from C2's draft tip. Every branch is on origin (your 2026-09-24 09:58Z block).
 HOP-INDEPENDENT CURE is ALREADY RULED as the `b` shape (ledger "P4 IS GREEN", 15e4a75d9c); the audit is merged and
 nothing is owed there. Standing item: when the owner rules the string-literal tiers, record the ruling in
 docs/phase4/DESIGN-string-literal-allocation.md §8. First action: ls-remote, then wait for COORD's word.
@@ -409,10 +417,10 @@ C2 (cloud; converter, golib and instrument seats; no .NET leg). Post-release ref
 - claude/c2-rec-c-append-make (REC-C §B);
 - claude/c2-rec-f-golib (REC-F);
 - claude/c2-float-bits (the Float*bits bitcast).
-IN PROGRESS: the string-literal REVISION 4 on claude/c2-literal-cache-draft, i.e. revision 3's 12 fixes from COORD's
-verification (claude/coord-handover docs/phase4/reviews/literal-revision-3-verification-2026-09-24.md) plus a first probe
-of hybrid lazy registration. Then STANDBY for the owner's tier ruling. First action: ls-remote your refs, then continue
-revision 4 from its pushed tip.
+REVISION 4 is DONE (c555d91c55) and VERIFIED; the OWNER RULED (ledger "OWNER RULING · c555d91c55"). NOW: the O1 SURVIVAL
+CENSUS (read-only). Join the Go noescape verdicts to the C# filters and the materialization fixed point, over the 4,835
+production literal arguments and the 111 string(b) arguments, per GOOS; report the survivors, the residual and a pilot
+flip list. THEN arm C as a converter seat, from the post-1.24.13.2 master. Reply by inbox file.
 ```
 
 ```
@@ -2118,3 +2126,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 09:00 -- SAVE-STATE refresh: 1b records literal revision 4 verified and COORD's tier recommendation.
 - 2026-09-24 10:18 -- SAVE-STATE refresh: 1b records the union gate GREEN and the pre-assembly items.
 - 2026-09-24 11:00 -- SAVE-STATE refresh: 1b records the train assembled and its battery running, and the runtime project waiting on R.
+- 2026-09-24 11:54 -- SAVE-STATE refresh: 1b/1c record the owner's tier ruling and its assignments.
