@@ -1,0 +1,53 @@
+# c2-literal-cache -- captured 2026-09-24 on a shared 4-core cloud VM (linux-x64), Release, JIT tiering off.
+# Indicative, not a quiet-machine reading. Three invocations; the first was stopped by PID at its
+# capped-dictionary miss row (ConcurrentDictionary.Count takes every lock), which the --tail run re-measures.
+
+## dotnet c2-literal-cache.dll
+.NET 10.0.12  Ubuntu 24.04.4 LTS  cores=4  JIT tiering off
+-- degenerate literal "n" to an @string parameter (arm A's shape)
+V0 today: (@string)"n"u8 per call                             9.74 ns    32.0 B   1.00 counted
+V1 hoisted field nˢ (arm A)                                   2.15 ns     0.0 B   0.00 counted
+V2 golib cache, content-hashed direct-mapped                  7.31 ns     0.0 B   0.00 counted
+V5 golib cache, address-keyed direct-mapped                   7.07 ns     0.0 B   0.00 counted
+V3 golib cache, ConcurrentDictionary alt-lookup              16.91 ns     0.0 B   0.00 counted
+V4 UTF-16 literal, reference-keyed                            6.08 ns     0.0 B   0.00 counted
+-- format-position literal: Printf("%s", v) (arm B's shape)
+V0 today                                                      9.88 ns    32.0 B   1.00 counted
+V1 hoisted field (arm B)                                      2.28 ns     0.0 B   0.00 counted
+V2 golib cache (content)                                      7.76 ns     0.0 B   0.00 counted
+-- function-local const: @string fnAtoi = "Atoi"u8 (arm C's shape)
+V0 today                                                      9.53 ns    32.0 B   1.00 counted
+V1 hoisted under its own name (arm C)                         2.26 ns     0.0 B   0.00 counted
+V2 golib cache (content)                                      8.69 ns     0.0 B   0.00 counted
+-- slog-style ...any pack, 3 degenerate keys: f("a", 1, "b", 2, "c", 3)
+V0 today (key copy + box per key)                            62.94 ns   264.0 B   3.00 counted
+V1 pre-boxed hoisted fields (arm A, any-target)              16.54 ns    72.0 B   0.00 counted
+V2 golib cache (copy gone, box stays)                        63.36 ns   168.0 B   0.00 counted
+
+## dotnet c2-literal-cache.dll --tail
+.NET 10.0.12  Ubuntu 24.04.4 LTS  cores=4  JIT tiering off
+-- miss path: a NON-literal 8-byte span that differs every call (the cost the cache adds elsewhere)
+V0 today                                                     13.68 ns    32.0 B   1.00 counted
+V2 content cache, always missing                             27.48 ns    32.0 B   1.00 counted
+V3 dictionary cache, always missing (capped at 64K)          50.68 ns    31.6 B   0.99 counted
+-- thrash: two hot literals forced into ONE direct-mapped slot (worst case, deterministic by content)
+V2 alternating "k66"/"k108"                                  42.88 ns    64.0 B   2.00 counted
+-- concurrency: 8 threads x 2M mixed hits/misses, every result content-checked
+   content mismatches: 0 of 32000000 results
+
+## dotnet c2-literal-cache.dll --refined
+.NET 10.0.12  Ubuntu 24.04.4 LTS  cores=4  JIT tiering off
+-- refined variants, same shapes
+V0 today: "n" to @string param                               10.04 ns    32.0 B   1.00 counted
+V1 hoisted field                                              2.26 ns     0.0 B   0.00 counted
+V2 content DM                                                 7.53 ns     0.0 B   0.00 counted
+V6 packed-key DM (<= 8 B)                                    22.28 ns     0.0 B   0.00 counted
+V7 insert-only (<= 16 B)                                     11.45 ns     0.0 B   0.00 counted
+V0 "%s"                                                       9.58 ns    32.0 B   1.00 counted
+V6 "%s"                                                      22.80 ns     0.0 B   0.00 counted
+V7 "%s"                                                      10.88 ns     0.0 B   0.00 counted
+miss V0 (non-literal 8 B)                                    13.56 ns    32.0 B   1.00 counted
+miss V6                                                      29.03 ns    32.0 B   1.00 counted
+miss V7 (fills to cap, then length+probe only)               47.83 ns    31.9 B   1.00 counted
+gated-out V6 (non-literal 24 B: length check only)           18.59 ns    48.0 B   1.00 counted
+gated-out V0 (non-literal 24 B)                              16.35 ns    48.0 B   1.00 counted

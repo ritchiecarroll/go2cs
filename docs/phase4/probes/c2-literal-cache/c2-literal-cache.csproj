@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <AssemblyName>c2-literal-cache</AssemblyName>
+    <TieredCompilation>false</TieredCompilation>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- The REAL golib @string and AllocationCounter, not a mock of them. -->
+    <ProjectReference Include="../../../../src/core/golib/golib.csproj" />
+  </ItemGroup>
+</Project>

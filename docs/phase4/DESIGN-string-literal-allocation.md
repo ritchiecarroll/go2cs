@@ -515,3 +515,171 @@ a literal whose `u8` span is consumed as a span (no `@string` is minted); a lite
 
 **Gate:** each arm's two-seeded corpus reconvert hunk count, then its members' rows before and after at
 Release with tiering off.
+
+## 8.1 DRAFT amendment, 2026-09-24 (C2) -- sizing an INVISIBLE alternative to arms A and B, and the annotation-level flag
+
+**DRAFT, UNMERGED** (branch `claude/c2-literal-cache-draft`, off `47e088d3d7`). C1 amends the record of
+record post-hop; this block is its input and rewrites nothing above it. It is triggered by the owner's
+ruling (ledger 2026-09-23 10:10 (2)(3)): arm C is APPROVED; arms A and B are HELD while an alternative
+that leaves the visible code as Go wrote it is sized. The owner's axis is readability vs performance vs
+behavioral parity, because strings are among the first things a user meets. Measurements come from the
+probe [`probes/c2-literal-cache/`](probes/c2-literal-cache/README.md): the real golib `@string` and
+`AllocationCounter` at `47e088d3d7`, on .NET 10.0.12, Release, tiering off, on a shared 4-core linux
+VM. Read the ratios, not the absolute numbers.
+
+### 8.1.1 The problem an invisible form has to solve: recognising the literal from inside golib
+
+The per-call object is minted in golib: `(@string)"n"u8` and every implicit `"a"u8` at an `@string`
+parameter bind `implicit operator @string(ReadOnlySpan<byte>)` (string.cs:460-463). That operator
+calls the copying constructor (:92), whose `CopyOf` is the counted object §8's arms remove. To reuse
+one `@string` per literal with NO emission change, golib must recognise "the same literal again", and
+all it is handed is a `ReadOnlySpan<byte>`. There is no per-call-site hook without an emission change:
+- a source generator cannot rewrite an existing site;
+- C# interceptors intercept method invocations, not conversion operators;
+- `@string` is not a ref struct, so it cannot hold the span.
+
+That leaves three possible keys: the bytes (content), the span's address (a u8 literal is RVA data),
+or, if the converter drops `u8`, the interned UTF-16 literal's reference.
+
+### 8.1.2 Mechanisms, measured
+
+| mechanism | hit ns | B/op | counted/op | miss path (NON-literal span through the same entry) | visible delta |
+|:--|--:|--:|--:|:--|:--|
+| today: copy per evaluation | 9.5–10.0 | 32 | 1 | 13.7 ns (the baseline) | — |
+| hoisted field (Tier C; arms A/B/C) | 2.2–2.3 | 0 | 0 | n/a | `strˢN`/`sˢ` names (A/B); own name (C) |
+| golib cache, content-hashed, direct-mapped, `byte[]` slots | 7.3–8.7 | 0 | 0 | 27.5 ns (+14 ns, 2×) | **none** |
+| golib cache, address-keyed, direct-mapped | 7.1 | 0 | 0 | (same shape as content) | **none** |
+| golib cache, insert-only open addressing | 10.9–11.5 | 0 | 0 | 47.8 ns once it is full | **none** |
+| golib cache, `ConcurrentDictionary` + span alternate lookup | 16.9 | 0 | 0 | 50.7 ns | **none** |
+| UTF-16 literal, reference-keyed (converter drops `u8`) | 6.1 | 0 | 0 | +1 entry object on every miss | `(@string)"n"` for `(@string)"n"u8` |
+
+The same measurements by shape:
+
+| shape | today | hoisted field | content cache |
+|:--|:--|:--|:--|
+| arm B, `Printf("%s", v)` | 9.9 ns / 1 counted | 2.3 / 0 | 7.8 / 0 |
+| arm C, `@string fnAtoi = "Atoi"u8` | 9.5 / 1 | 2.3 / 0 | 8.7 / 0 |
+| **log/slog `...any` pack, three one-letter keys (arm A's actual members)** | 62.9 ns, 264 B, 3 counted | pre-boxed fields: 16.5 ns, 72 B, 0 | **63.4 ns, 168 B, 0 counted** |
+
+A forced two-literal slot collision measured 2 counted per call. The concurrency stress (8 threads ×
+2M mixed hits and misses, every result content-checked) found **0 mismatches in 32,000,000 results**.
+
+### 8.1.3 What the numbers say
+
+1. **A golib cache buys COUNT parity, not speed.** At every `@string`-typed site (arms A, B and C) it
+   takes `counted` from 1 to 0, which is exactly what `testing.AllocsPerRun` reads, and so exactly what
+   the arms remove. It recovers only ~25% of the time, where hoisting recovers ~78%: on this JIT a
+   32-byte allocation costs about what a lookup costs.
+2. **At any-typed sites the box stays.** log/slog's key/value packs are arm A's members. The cache
+   removes the counted copy (3 → 0 counted) and nothing else: the C# box at the interface slot is
+   compiler-emitted, and `AllocationCounter` excludes boxing by design (AllocationCounter.cs:53).
+   Bytes fall only to 168 (pre-boxed hoisting reaches 72), and time does not move. §8's COUNT
+   predictions for the members survive; the bytes and time that pre-boxing would buy do not.
+3. **The cache taxes every non-literal conversion through the same entry** (+14 ns, 2×). So it must
+   sit where literals arrive and nowhere wider:
+   - the `@string` span OPERATOR (string.cs:460), plus the one generator line that builds a named
+     string type from a span (InheritedTypeTemplate.cs:390, which calls the constructor directly today);
+   - NEVER the constructor (:92), which golib's own 22 `new @string(` sites use for runtime bytes;
+   - behind a length gate. A span over the gate pays one compare (16.4 → 18.6 ns, inside this VM's
+     spread).
+4. **Address keys are refused.** An RVA address moves with the image base (ASLR), so which literals
+   collide would change from RUN to run, and a banked `AllocsPerRun` row would flake. A content hash
+   is deterministic: a collision is a property of two literals' bytes and reproduces exactly.
+   Collisions matter only inside one measured function's literal set:
+   - direct-mapped, 4096 slots: P ≈ 1.1% for 10 literals and 25.8% for 50;
+   - **2-way set-associative, 2048 sets: ≈ 0 for 10 and 0.5% for 50.**
+
+   The §8 member set (15 distinct literals) maps to 15 distinct slots under FNV-1a/4096.
+5. **Thread safety is structural, not locked.** Each slot holds ONE reference (the `byte[]` itself),
+   so a racing reader sees either the old array or the new one, and every hit is content-verified. A
+   torn or stale slot can only produce a miss, never a wrong string. Because no entry object exists,
+   the miss path allocates exactly what today allocates. The UTF-16-keyed variant cannot do this: it
+   needs a (key, value) pair per slot, so it costs +1 object on every miss. It is also the fastest hit
+   (6.1 ns) but a visible delta, reintroduces a transcode at first use, and taxes every runtime .NET
+   string through `operator @string(string)`.
+6. **Parity hazards, against the hoisted form:**
+   - *Identity.* Two evaluations of one literal share a backing array, so `unsafe.StringData` returns
+     EQUAL pointers, which is Go's behaviour (RODATA) and not today's C#. The cache shares this
+     improvement with Tier C.
+   - *Mutation through `unsafe.Slice(unsafe.StringData(s), …)`.* Go faults on a literal. Today's C#
+     corrupts one copy, a hoisted field corrupts that field, and the cache corrupts every
+     equal-content `@string` that hits the slot, **including a non-literal with the same bytes**. That
+     is the ONE hazard class the cache adds over Tier C. It is bounded by the length gate, and it is
+     Go UB in every variant.
+   - *`[]byte(s)` / `slice<byte>(s)`.* These still copy (§1's preconditions), so nothing changes.
+   - *Initialization order.* NONE: the cache is consulted at evaluation, so §4.4's and §4.9's
+     relocation machinery (items 6 and 9) has nothing to guard, unlike every hoisted form.
+   - *Retention.* Bounded: 4096 × 16 B ≈ 64 KiB plus array headers.
+7. **Not built: a pointer-backed `@string`** (the RVA pointer held directly; zero allocation and zero
+   lookup). It adds a field and a branch to every `@string` read, and it needs a literal-only
+   constructor the converter would have to emit, which is a visible delta. A write through
+   `unsafe.StringData` would then fault on read-only image memory, which is exactly Go's behaviour.
+   It is too wide for this arm; recorded so the option is not rediscovered.
+8. **An instrument trap:** a capped `ConcurrentDictionary` cache that reads `.Count` takes every lock.
+   The probe's first run stalled there, so the cap is kept in a separate counter.
+
+### 8.1.4 Recommendation
+
+- **Arm C: land as approved.** It is the best time (2.3 ns), it hoists under the const's own name, and
+  it reopens no naming decision.
+- **Arms A and B: retire the hoisting forms** and replace them with the golib literal cache:
+  - **Design:** content-hashed, 2-way set-associative, one `byte[]` per slot, content-verified,
+    length-gated at ≤ 16 bytes. That covers every degenerate-slug literal, the verb formats, and all
+    §8 members, which are ≤ 9 bytes.
+  - **Where it is wired:** at exactly two entries, the `@string` span operator and
+    InheritedTypeTemplate.cs:390. The constructor stays copying.
+  - **What it gives:** zero visible delta, and count parity at every member row. It adds no
+    init-order machinery, and its only new hazard is 8.1.3 (6)'s, which is bounded and Go UB.
+- **What it does not buy, stated rather than taken:** speed (about a quarter of what hoisting buys),
+  and at any-typed sites the box and its bytes. If the owner wants those at log/slog's call sites,
+  the price is the visible positional names the ruling has already held.
+- **Before it lands:**
+  - an instrumented corpus sweep counting the operator's NON-literal callers, which sizes the 8.1.3
+    (3) tax on real code rather than on this probe;
+  - C1's member rows before and after, at Release with tiering off;
+  - `DESIGN-allocation-counting.md`'s site census gains the cache's miss path (the same `CopyOf`
+    charge);
+  - a golib test pinning the content-verify, the length gate, and the two-entries-only wiring.
+- **Predictions (UNMEASURED on the members):** §8's counts hold unchanged, because the cache removes
+  the same `CopyOf` the arms remove: log/slog 2_pairs 10 → 8, 2_pairs_disabled_inline 4 → 2,
+  9_kvs 27 → 18, attrs1 7 → 6, attrs3 12 → 9, attrs3_disabled 9 → 6, attrs6 21 → 15, attrs9 28 → 19;
+  log TestDiscard 2 → 1. Arm C's rows are unaffected, since it hoists regardless.
+
+### 8.1.5 The annotation-level flag -- the hoisted-literal comment goes OFF by default
+
+**`-annotations=quiet|normal|verbose`, default `normal`.** It governs only comments go2cs AUTHORS about
+its own mechanism. It is orthogonal to `-comments` (Go's own comments: the user's content,
+main.go:274) and to `-provenance` (its own opt-in, :273), and it is named apart from `-comments` so the
+two cannot be confused.
+
+Census of the converter-authored comment families in the committed corpus at `47e088d3d7` (3,925
+tracked converted `.cs`, excluding golib and `*_impl.cs`):
+
+| family | emitted at | lines | files | quiet | normal | verbose |
+|:--|:--|--:|--:|:--:|:--:|:--:|
+| `// Hoisted @string literals (single allocation; Go keeps these in RODATA)` | hoistedLiteralOperations.go:960 | 5,322 | 1,257 | off | **off** (the ruling) | on |
+| `// Hoisted Go big-integer constant (…)` | visitValueSpec.go:990 | 13 | 6 | off | off | on |
+| `} // end <PackageClass>` | visitFile.go:142, initOrderOperations.go:490/:547 | 2,936 | 2,936 | off | on | on |
+| `// blank import: <path> (side effects only; …)` | visitImportSpec.go:323 | 162 | 147 | off | on | on |
+| `// type <T> is a methodless func type — rendered inline …` | visitFuncType.go:36 | 69 | 58 | off | on | on |
+| package_init.cs ordering headers (production and test variant) | initOrderOperations.go | 97 | 97 | off | off | on |
+| metadata-anchor prose (`// go2cs metadata anchor for …`) | testConversion.go | 333 | 333 | off | off | on |
+| package_info.cs explanatory prose (the paragraphs between the region markers) | packageInfoWriter.go, positionMapOperations.go, typeAccessibilityOperations.go, importInitSection.go (and the alias-section prose, which is template text) | ≈15K | ≈733 | off | off | on |
+| arm A's proposed per-field literal echo | (§8, arm A) | — | — | off | off | on (moot if A retires) |
+
+The ≈15K figure is 16 prose lines repeated 733 times plus 8 repeated 401 times, READ from the
+repeated-line census, not counted per file. Hoisted-literal comments come off by default. Relocation
+notices and end markers stay: they tell a reader where Go code went or where a scope ends, which
+serves readability. Mechanism narration moves to `verbose`.
+
+**NEVER GOVERNED, because each is load-bearing:**
+- the package_info.cs `// <Region>` markers: the converter reads `ImportedTypeAliases` back out of them;
+- `// go2cs generated this placeholder — …` (409 lines, 89 files): platformHandOwn.go:384 scans for
+  `funcPlaceholderLead` as the hand-own witness;
+- `// Code generated by go2cs. DO NOT EDIT.` (97 files): the generated-code tooling contract;
+- `GoPositionMap` records, which are attributes, not comments.
+
+**Footprint of the default flip:** at least the 5,322 hoist headers plus the moved prose, as a
+corpus-wide re-baseline with goldens. Every removed line shifts C# line numbers, so the `GoPositionMap`
+tables regenerate (mechanically). This is its own seat post-hop: CNR one class, two-seeded corpus
+reconvert, and a reader check that nothing parses the prose lines between package_info.cs's markers.
