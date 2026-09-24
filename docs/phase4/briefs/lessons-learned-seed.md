@@ -80,3 +80,8 @@ tag `nuget-1.24.13.1`. The write-up is the step after the post-publish items in 
 15. **Process:**
     - ledger appends need a duplicate guard (a failed write once re-appended a STAMP);
     - keep the weekly-limit save-state discipline (RESUME-SESSIONS kept current at every stamp).
+16. **Linux packaging (measured after the publish, ledger 2026-09-24 FINDING on the walkthrough).** A converted
+    program that reaches platform-divergent syscall surface does not build on Linux from nuget.org. The multi-target
+    packages ship the linux flavour under runtimes/linux-x64, but lib/ (the compile surface) is the windows flavour, so
+    x/sys/unix fails with CS0426 'Rlimit'. Next hop: give each RID a compile surface (reference assemblies per RID, or a
+    RID-selected compile asset) and add a Linux walkthrough to the release checklist.
