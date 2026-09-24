@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 02:03 -- STAMP refresh (ledger through mailbox fb1422104a): section 1a STATE DELTA 29 (post-close stamped 61724860b4; H11 running; the section-6 sweep dispatched; announcement accepted). Other STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-24 05:00 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 11b716e66c): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -147,6 +147,122 @@ Protocol, in force.
   directory is the second positional; source is frozen while a battery runs; kill by path, never by name; never
   git add -A; capture rc before any pipe; read the emission before spending a gate.
 - No watcher or wake-loop lines anywhere (v4). A message ends with its ASK or NEXT line.
+
+## 1b. COORD — THE NEW SESSION PROMPT (2026-09-24, the 1.24.13.1 RELEASE ENDGAME). PASTE THIS. It supersedes 1a's fence for CURRENT STATE; 1a stays the reference for standing rules and history.
+
+```
+RESUME 2026-09-24 (weekly limit). You are the go2cs fleet COORDINATOR (COORD) on the i7. Model: Opus 5.5, effort max.
+Your principal is the repository owner. Nicknames only on every pushed surface: i7, i9, G-LAPTOP, R-LAPTOP, C1, C2, AZ1.
+Never hostnames, usernames, profile paths, IPs or shares. Never force-push or replace a posted SHA; announce on the ledger,
+THEN push, for any existing ref. COORD signs (-S, key probe first); lanes commit unsigned. Run the identifier census (`entry`)
+on everything you push. Never enter passwords or PINs; NuGet publishing and every system or network setting are the owner's.
+
+READ FIRST, in order (every one is on origin; read each tip by ls-remote, never trust a SHA in this prompt without it):
+ 1. CLAUDE.md (the 16 floors).
+ 2. The LEDGER: branch claude/mailbox, docs/phase4/LEDGER.md. Read its last 40 lines at least (from "sweep shard S-R
+    COMPLETE" onward). The ledger WINS over this prompt.
+ 3. This file's STATE DELTAs (section 1a, the last three) and the briefs under docs/phase4/briefs/ on claude/coord-handover:
+    postclose-h11-h12-brief.md (release brief, CP3 is yours), full-roster-sweep-brief.md (the §6 sweep; its RULINGS block),
+    announcement-1.24.13.1-draft.md (ACCEPTED r3), deprecations-1.24.13.1.md (the owner's post-publish hand),
+    docs-go-version-migration-plan.md.
+ 4. Comms: section 0a.0 (PROTOCOL v4). R and G are Remote Control sessions: SendMessage "r -- Lane R resume coordination",
+    "g -- Lane G corpus migration coordination". C1 and C2 are cloud sessions: SendMessage "c1 -- Corpus migration coordination setup",
+    "c2 -- Go corpus migration coordination"; they reply ONLY by inbox files on claude/mailbox docs/phase4/inbox/COORD/,
+    so arm ONE Monitor on the mailbox tip ONLY while a cloud lane has work out. Use ListAgents to confirm current session names.
+ 5. Ledger append discipline: write each entry to a FRESH scratch file, refuse an entry whose body equals the last ledger line,
+    census it, append, sign, push. Stamp times from `date` in the same command.
+
+WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 ~15:0x record each step):
+ - THE HOP IS CUT OVER. master = ffa5c1015a: the signed cutover merge 5098289482 (claude/version-go1.24.13 972a9a6a41 INTO
+   master 074a12c4ae; one union conflict in fleetIdentifierCensus_test.go) plus one signed docs commit (the Milestones cell
+   names 509828948). At master's head: roster guard 1826 green, `release-nuget -VerifyOnly` "Tree is releasable"
+   (next 1.24.13.1; 9 origin tags, 0 missing). The i7's main checkout C:/Projects/go2cs is fast-forwarded to it.
+ - ALL FIVE PARITY GATES HELD: P1 compile, P2 the §6 full-roster sweep (M: 218/218 covered once; 217 PASS + context 58|0 on
+   G-LAPTOP, ruled a host-timing reading because the i7 reads 57|1 as banked; SF gate green, the rows identical at the sweep
+   base and the release tree; no converter change between them), P3 behavioral, P4 the H6 gate (PASS 166/166), P5 the
+   isolated-clone rehearsal (all five ritual elements).
+ - Sweep evidence: lane refs claude/r-p2-sweep-evidence and claude/g-p2-sweep-evidence (the lanes push them; confirm by
+   ls-remote), plus the i7's S-7 root, which lived in the previous session's scratch only and is not needed to resume.
+ - NEXT, in order ((a) and (b) are DONE):
+   (c) THE OWNER'S RUN, at the i7's PHYSICAL console, in the main checkout C:/Projects/go2cs on master, fast-forwarded:
+       `git status --porcelain` must be EMPTY (a stray du.exe.stackdump was untracked there; the owner deletes it). The console
+       environment: the go1.24.13 SDK bin first on PATH; GOROOT set to the BACKSLASH spelling of the go1.24.13 SDK;
+       GOTOOLCHAIN=local, CGO_ENABLED=0, GOFLAGS empty; DOTNET_ROOT = the dotnet10 root, also first on PATH; both User-scope
+       NuGet credentials present, never printed. Warm GPG with the probe first. Then `src\release-nuget.bat`; the owner
+       enters the card PIN and types `publish`.
+   (d) AFTER THE PUBLISH:
+       - Commit version.props (counter 1), docs/validation/1.24.13.1/ and the retargeted READMEs together (signed), then
+         announce and push the commit and the tag nuget-1.24.13.1.
+       - The counter guard reads green at 1; spot-check one nuget.org README.
+       - Add Piece 4, the validation-index frozen-snapshots row.
+       - Run a nuget.org-only walkthrough smoke test; it re-proves README step 4 `dotnet run -c Debug`.
+       - Hand the owner deprecations-1.24.13.1.md (14 IDs, nuget.org's form).
+   (e) THEN the owner-ordered OFFICIAL LESSONS LEARNED in docs/GoCorpusMigration.md (a read-only derivation workflow;
+       EXCLUDE the i9's hardware issues), and the post-release trains.
+ - OWNER DECISIONS OPEN: the string-literal tiers. C2's revision 3 is d382b60677 on claude/c2-literal-cache-draft, COORD's
+   verification is on claude/coord-handover docs/phase4/reviews/literal-revision-3-verification-2026-09-24.md, and a
+   revision 4 is coming from C2. Also the go.* prefix answer, and whether release/go1.23 advances to nuget-1.23.12.3 and
+   release/go1.24 is minted.
+ - POST-RELEASE QUEUE, all UNMERGED until after the release:
+   - R's net/http re-entry train claude/r-synctest-reentry 0b6bf15ab0 (FIRST; net/http re-banks from the candidates);
+   - R's mustBeKind seat;
+   - C2's REC-C §A 3c98968c5f, REC-C §B 0fcdba94d5, REC-F 645a8e1f62 and Float*bits 9ac6051e46;
+   - generic type alias support plus a behavioral test (then remove README's exception);
+   - the performance rerun (README interim labels);
+   - d15 gofmt; c6-c9; the log/syslog IVT union;
+   - the -tests index.md rewrite defect; clean-bin's src/gen gap; the go/printer testdata refresh;
+   - the counter-0 dry-run README writes; the BoGo figures in code comments.
+ - i7 WORKTREES under C:/go2cs-tmp-coord kept: hnd (THIS record; never remove), abcut (the cutover, now on origin),
+   abh12, abrel, abcensus, abh6, abpost and abpost-stage (2.2 GB; reclaim after the release), plus older ones. Reclaim
+   children-first; never Stop-Process by name.
+ - PINS on the i7: GOROOT = the backslash spelling of the go1.24.13 SDK (go1.23.12 is beside it for the H6 gate's -FromGoRoot);
+   DOTNET_ROOT = the dotnet10 root, first on PATH; pwsh 7 runs with DOTNET_ROOT unset and dotnet10 off PATH; GPG key probe as
+   in the ledger's commits.
+FIRST ACTIONS: ListAgents; read the ledger tail; ls-remote the tips above; then pick up at the first undone step of NEXT.
+```
+
+## 1c. LANE RESUME PROMPTS (2026-09-24, the release endgame). They supersede sections 2-6's prompts for CURRENT STATE. Each lane reads its own tips by ls-remote.
+
+WAKE (all lanes): read CLAUDE.md, then the ledger tail (claude/mailbox docs/phase4/LEDGER.md, last 40 lines), then your own
+paste prompt below. Report to COORD by SendMessage (R, G) or by one inbox file on claude/mailbox docs/phase4/inbox/COORD/
+(C1, C2). Everything post-hop stays UNMERGED until COORD says the 1.24.13.1 release has landed.
+
+```
+R (R-LAPTOP). Standing goal: the net/http re-entry and the post-release runtime/reflect seats. Your ref
+claude/r-synctest-reentry (S1a..S4, seven signed picks on fa18863b94) is ACCEPTED as the FIRST POST-RELEASE train; hold it
+as is. Your mustBeKind seat (hand-owned reflect: ReadOnlySpan<byte> method, converting only on panic; predicted
+encoding/binary TestAppendAllocs 75 -> 42) is post-release; its gates are the importer canaries, the full behavioral suite,
+and the reflect and encoding/binary rows. Your sweep shard S-R is COMPLETE (89/89); its evidence ref is
+claude/r-p2-sweep-evidence. First action: ls-remote your refs, then continue the mustBeKind seat from its pushed tip.
+```
+
+```
+G (G-LAPTOP; windows side plus the WSL linux arm). The owner qualified the windows side on 2026-09-24: public DNS with IPv6
+unbound on Wi-Fi, Developer Mode, long paths. The WSL arm's localhost now includes ::1. Your sweep shard S-G is COMPLETE
+(127 PASS + context's host-timing reading); its evidence ref is claude/g-p2-sweep-evidence. Post-release queue: the WSL
+loopback attribution record (claude/g-posthop-wsl-loopback, done); srcimporter's timing-dependent oracle (claude/g-posthop-srcimporter;
+COORD rules a named TestImportStdLib disclosure after a windows import-count reading); crypto/tls linux is banked at 4760.
+First action: ls-remote your refs, then post a one-line STATE BLOCK to COORD.
+```
+
+```
+C1 (cloud; docs, records and design seats; no .NET, no PowerShell). Every branch is on origin (your 2026-09-24 09:58Z block).
+HOP-INDEPENDENT CURE is ALREADY RULED as the `b` shape (ledger "P4 IS GREEN", 15e4a75d9c); the audit is merged and
+nothing is owed there. Standing item: when the owner rules the string-literal tiers, record the ruling in
+docs/phase4/DESIGN-string-literal-allocation.md §8. First action: ls-remote, then wait for COORD's word.
+```
+
+```
+C2 (cloud; converter, golib and instrument seats; no .NET leg). Post-release refs, all UNMERGED:
+- claude/c2-rec-c-params-span (REC-C §A);
+- claude/c2-rec-c-append-make (REC-C §B);
+- claude/c2-rec-f-golib (REC-F);
+- claude/c2-float-bits (the Float*bits bitcast).
+IN PROGRESS: the string-literal REVISION 4 on claude/c2-literal-cache-draft, i.e. revision 3's 12 fixes from COORD's
+verification (claude/coord-handover docs/phase4/reviews/literal-revision-3-verification-2026-09-24.md) plus a first probe
+of hybrid lazy registration. Then STANDBY for the owner's tier ruling. First action: ls-remote your refs, then continue
+revision 4 from its pushed tip.
+```
 
 ## 1a. COORD — THE NEW SESSION PROMPT (2026-09-21, after the weekly limit; PROTOCOL v4 + fleet-read v2). PASTE THIS; it
 supersedes section 1's fence, whose STATE block stays as history. The new coordinator derives the five lane prompts (its STEP 2).
@@ -1806,3 +1922,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-23 18:40 -- STAMP refresh: STATE DELTA 27 (8g stamped; the close seat running; C2's pre-close repoguard seat).
 - 2026-09-23 22:32 -- STAMP refresh: STATE DELTA 28 (the H10 close stamped at fa18863b94).
 - 2026-09-24 02:03 -- STAMP refresh: STATE DELTA 29 (post-close stamped; H11 running; sweep dispatched).
+- 2026-09-24 05:00 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
