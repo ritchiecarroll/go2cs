@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 14:18 -- SAVE-STATE refresh (ledger through mailbox 9d7a8df1ed): section 1b is the COORD new-session prompt: master 4c53b02a0a (the 1.24.13.2 train LANDED); NEXT the owner runs the 1.24.13.2 release, then COORD's release record and the approved cleanup; string-tier work under way (C2 r2 accepted, the twin preferred; the i9 runs the twin compile probe; R's views+G8+G10 gating on 4c53b02a0a; G V-fix 11); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 14:25 -- SAVE-STATE refresh (ledger through mailbox 21c76351e5): section 1b is the COORD new-session prompt: master 4c53b02a0a (the 1.24.13.2 train LANDED); NEXT the owner runs the 1.24.13.2 release, then COORD's release record, the approved cleanup and the implicit-operator CS0121 corpus build; the string-tier pilot shape RULED (the twin plus a canonical value delegate); lanes: C2 arm C then the pilot, R views+G8+G10 gating, G V-fix 11, i9 standby; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -235,7 +235,11 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    RULED (ledger "OWNER RULING · 3b53fec4f2"): exported signatures MAY flip from @string to sstring. COORD's census
    verification DONE (claude/coord-handover docs/phase4/reviews/o1-survival-census-verification-2026-09-24.md). C2's r2
    34b60c14da is ACCEPTED: the TWIN shape gives 3,254 sites, 2,770 per evaluation, with NO adapters; the pilot list is 33.
-   THE TWIN COMPILE PROBE is DISPATCHED to the i9 (light: golib plus one scratch project; new ref claude/i9-sstring-twin-probe).
+   THE TWIN COMPILE PROBE is DONE (the i9, claude/i9-sstring-twin-probe b919919c96; ledger "RULING · b919919c96"): under the
+   priority attribute a METHOD-GROUP conversion is CS0123. RULED PILOT SHAPE: the twin, plus priority, plus the implicit u8->sstring
+   operator, plus ONE PUBLISHED CANONICAL VALUE DELEGATE per twinned function (identity-stable, registered under the Go name),
+   which the converter references at every value site; a converter rule over the explicit 33-parameter list; C2 cuts it after
+   arm C.
    The corpus-wide ambiguity build under the implicit u8->sstring operator follows on the i7 after the release. The pilot seat
    (C2, a converter rule over an explicit list) is cut after the probe.
  - DONE 2026-09-24 (owner-approved; ledger "ANNOUNCE · b6746ab185"): the BRANCH release/go1.23 was FAST-FORWARDED from
@@ -448,8 +452,8 @@ Model Opus 5.5 / high. Pushed and banked: claude/i9-runtime-blockevent 5b5f35ff2
   on all three: blob e986b20b67af, the 09-13 PRE-HOP corpus, against origin master's 71b12dabe39e. They STAY LOCAL, named.
   They are superseded pre-hop job emissions, and no bundle is owed.
 - A corruption-era mailbox clone tip stays local.
-NEXT: the LIGHT task dispatched 2026-09-24, the sstring TWIN compile probe (golib plus one scratch project; the arms in
-COORD's message), reported on the new ref claude/i9-sstring-twin-probe. Then standby.
+DONE 2026-09-24: the sstring TWIN compile probe, claude/i9-sstring-twin-probe b919919c96, ACCEPTED (decisive: CS0123 for method
+groups under priority). NEXT: standby for light items.
 ```
 
 ## 1a. COORD — THE NEW SESSION PROMPT (2026-09-21, after the weekly limit; PROTOCOL v4 + fleet-read v2). PASTE THIS; it
@@ -2145,3 +2149,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 13:46 -- SAVE-STATE refresh: 1b records the owner-approved post-publish cleanup list.
 - 2026-09-24 14:11 -- SAVE-STATE refresh: 1b/1c record the 1.24.13.2 train LANDED at 4c53b02a0a and what is next.
 - 2026-09-24 14:18 -- SAVE-STATE refresh: 1b/1c record C2's census r2, the i9 twin probe, and R's attribution of the two behavioral reds.
+- 2026-09-24 14:25 -- SAVE-STATE refresh: 1b/1c record the twin probe result and the pilot shape.
