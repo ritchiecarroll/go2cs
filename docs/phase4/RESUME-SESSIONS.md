@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 07:55 -- SAVE-STATE refresh (ledger through mailbox d8806c2286): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, the Linux packaging train CUT (seats 1-3 on origin, unmerged; COORD reviewing seats 2 and 3), and the RUNTIME row held by the owner's separate cloud project; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 08:06 -- SAVE-STATE refresh (ledger through mailbox 773df2f004): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, the Linux packaging train CUT (seats 1-3 on origin, unmerged; COORD reviewing seats 2 and 3), the RUNTIME row held by the owner's separate cloud project, and C2's literal revision 4 under COORD verification; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -250,6 +250,10 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    green. It ships in 1.24.13.2; then rewrite the README platforms note and the Roadmap Platforms row.
  - POST-RELEASE QUEUE, all UNMERGED until after the release (THE RELEASE HAS LANDED, so assemble them from master):
    - R's net/http re-entry train claude/r-synctest-reentry 0b6bf15ab0 (FIRST; net/http re-banks from the candidates);
+   - C2's atomic-loads seat 8ef7f65ec8 (the runtime row's TestSchedLocalQueueEmpty hang) rides as a CHERRY-PICK onto the
+     synctest train, NEVER a merge of claude/c2-atomic-acquire-loads: it sits on superseded picks of R's park-seam commits,
+     and the branch merge conflicts. The pick applies cleanly (ledger "FINDING · 8ef7f65ec8"). It touches the converter
+     (manualTypeOperations.go), so it carries CNR;
    - R's mustBeKind seat;
    - C2's REC-C §A 3c98968c5f, REC-C §B 0fcdba94d5, REC-F 645a8e1f62 and Float*bits 9ac6051e46;
    - generic type alias support plus a behavioral test (then remove README's exception);
@@ -2057,3 +2061,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 07:27 -- SAVE-STATE refresh: 1b records release/go1.23 fast-forwarded; 1c records packaging seat 2 and COORD's running review.
 - 2026-09-24 07:43 -- SAVE-STATE refresh: 1c records packaging seat 3, its design rulings, the len/cap retirement accepted, and G's heavy-run order.
 - 2026-09-24 07:55 -- SAVE-STATE refresh: 1b/1c record the owner's runtime cloud-project trial; R keeps reflect.
+- 2026-09-24 08:06 -- SAVE-STATE refresh: 1b records the atomic-loads pick-not-merge finding and C2's revision 4 under verification.
