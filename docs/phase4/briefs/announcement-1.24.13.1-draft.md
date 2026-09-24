@@ -1,5 +1,8 @@
 # NuGet 1.24.13.1 release announcement: DRAFT (revision r2, owner review applied)
 
+
+> **r3 (2026-09-24, owner): ACCEPTED AND READY TO PUBLISH.** One edit on top of r2: Piece 2's headline states the testable percentage, `(94.8%)`, right after the counts. The guard's §2e extension checks it against the roster header's testable percentage when present (the census seat, claude/i7-release-census). Re-read it at the release tip together with the counts.
+
 Drafted against the H10 close stamp `fa18863b94` (the version branch) and master `074a12c4ae`;
 repaired 2026-09-24 00:50 against two checkers' 33 defects (19 accuracy, 14 audience) (`repair-log.md` beside this file).
 **Revised (r2) 2026-09-24 01:27 per the owner's review**, which approved the draft save two requests:
@@ -216,7 +219,7 @@ record stays frozen as it shipped, at `validation/1.23.12.3`.
 ## 📰 NEWS — The converted standard library moves to Go 1.24.13
 
 go2cs now converts Go 1.24.13's standard library, and **218 of the 230 testable standard-library
-packages pass their own Go 1.24.13 test suites in C#**, compared verdict for verdict against
+packages (94.8%) pass their own Go 1.24.13 test suites in C#**, compared verdict for verdict against
 `go test -json`, with every difference disclosed. Each row of the
 [validated roster](ValidatedTestPackages.md) links a proof page that lists Go's verdict beside
 go2cs's, test by test. Converted programs can use Go 1.24's new APIs, such as `os.Root`,
