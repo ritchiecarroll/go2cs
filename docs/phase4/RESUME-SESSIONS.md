@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 09:00 -- SAVE-STATE refresh (ledger through mailbox b9f392681b): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, the Linux packaging train CUT (seat 1 accepted, seat 2 ACCEPTED plus its 2-A..2-D commit, seat 3 REWORKED at 267c262307 and under COORD re-review, a corpus half owed), G's len/cap seat GATE-COMPLETE, the RUNTIME row held by the owner's separate cloud project, and C2's literal revision 4 VERIFIED with the tier brief delivered and the owner's ruling awaited; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 10:18 -- SAVE-STATE refresh (ledger through mailbox 11ab192386): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, THE 1.24.13.2 PACKAGING TRAIN UNION GATE GREEN (the owner's gate met; G owes projitems, test pins, docs and the math/big bank; then COORD assembles), the RUNTIME row held by the owner's separate cloud project, and C2's literal revision 4 VERIFIED with the tier brief delivered and the owner's ruling awaited; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -242,6 +242,20 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
  - EXTERNAL WAIT: the go.* NuGet ID-prefix reservation. The owner's request is pending with NuGet, so there is no owner
    decision to chase. COORD's 2026-09-22 advice (ledger "NuGet 'go.' OCCUPANCY") was a narrowed follow-up to the 30 scoped
    std-root prefixes.
+ - THE 1.24.13.2 PACKAGING TRAIN'S UNION GATE IS GREEN; THE OWNER'S GATE IS MET (ledger "STAMP · e12ba22299"). The README
+   walkthrough is byte-identical to go run on WSL linux and on windows, from a rehearsal feed. The four refs are the len/cap
+   seat, seat 1, seat 2 (with its follow-up) and seat 3 (with its rework and corpus half); read the tips by ls-remote.
+   OWED BY G BEFORE ASSEMBLY:
+   - seat 3's go2cs-src.projitems registration (the converter suite is RED at the tip without it) and a green suite at the
+     union;
+   - two mutation-proven test pins (the types.Identical guard; the GOROOT-scope wiring);
+   - the cgo build-context alignment;
+   - Reference wording;
+   - a README platforms note plus Roadmap row docs commit;
+   - the math/big BANK commit (230+1 -> 231+0 with its proof page).
+   THEN COORD ASSEMBLES on the i7 from master (the train-assembly skill; signed merges). Gates: the converter suite, CNR,
+   behavioral on the i7, a windows H7 (golib changed), -VerifyOnly and the census identities. It lands, and then the OWNER
+   RUNS the 1.24.13.2 release (step (c)'s procedure).
  - UP NEXT, by OWNER ORDER (ledger 93410e7ef9): FIX THE LINUX PACKAGING PROBLEM. Owner G, after the in-flight len/cap
    seat. G SIZED IT (scratch prototypes on WSL against the published 1.24.13.1): it is THREE gaps. With all three hand-fixed,
    walkthrough steps 3-4 build on Linux and `dotnet run` output is byte-identical to `go run`. RULED by COORD (ledger
@@ -2091,3 +2105,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 08:43 -- SAVE-STATE refresh: 1c records the len/cap seat gate-complete and seat 2's CNR.
 - 2026-09-24 08:48 -- SAVE-STATE refresh: 1b records literal revision 4 arrived, the scrub item, and the seat-3 rework under re-review.
 - 2026-09-24 09:00 -- SAVE-STATE refresh: 1b records literal revision 4 verified and COORD's tier recommendation.
+- 2026-09-24 10:18 -- SAVE-STATE refresh: 1b records the union gate GREEN and the pre-assembly items.
