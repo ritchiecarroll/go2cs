@@ -740,6 +740,25 @@ func (m *ModuleConverter) generateRecurseBuildFiles() {
 				"  </PropertyGroup>",
 			)
 		}
+
+		// Pin the COMPILE surface to the platform this closure was converted FOR. The converter reads
+		// each go.* dependency's metadata record for the target GOOS (stdLibExportedMetadata), and go.lib's
+		// buildTransitive targets pick the matching runtimes/<rid>/lib twin as the compile asset; left
+		// to its own default that choice follows the BUILD host, so a linux conversion built on windows,
+		// a windows conversion built under WSL, or a host with no shipped twin compiled one flavor's
+		// metadata against another's assembly (CS0426/CS0118). go.lib.targets honors this property
+		// first; the Condition keeps a consumer value winning.
+		if rid := compileRuntimeIdentifierForTarget(m.options.targetPlatform); rid != "" {
+			propsLines = append(propsLines,
+				"",
+				"  <!-- The compile surface of the go.* packages: the platform this tree was converted for. go.lib's",
+				"       RID-selected compile asset reads it; override it here (or with a -p: global) only together",
+				"       with a re-conversion for the other platform. -->",
+				"  <PropertyGroup Condition=\"'$(GoCompileRuntimeIdentifier)' == ''\">",
+				fmt.Sprintf("    <GoCompileRuntimeIdentifier>%s</GoCompileRuntimeIdentifier>", rid),
+				"  </PropertyGroup>",
+			)
+		}
 	}
 
 	propsLines = append(propsLines, "", "</Project>", "")
@@ -793,4 +812,19 @@ func (m *ModuleConverter) writeRecurseBuildFile(path string, lines []string) {
 	}
 
 	fmt.Printf("Build file generated: %s\n", path)
+}
+
+// compileRuntimeIdentifierForTarget maps a conversion target (`os/arch`) to the RID whose go.* compile
+// asset matches the metadata the conversion read: the flavors push-nuget.ps1 ships (win-x64, linux-x64),
+// keyed by GOOS because the record is. Any other GOOS has no shipped twin and returns "", leaving the
+// property unset.
+func compileRuntimeIdentifierForTarget(targetPlatform string) string {
+	switch goosOfTarget(targetPlatform) {
+	case "windows":
+		return "win-x64"
+	case "linux":
+		return "linux-x64"
+	default:
+		return ""
+	}
 }

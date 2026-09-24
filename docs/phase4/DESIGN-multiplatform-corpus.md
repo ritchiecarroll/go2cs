@@ -1351,6 +1351,36 @@ not be banked.
 §4 measures macOS as 20 packages' distance from Linux, and §5 measures the arch axis at 16 packages; both
 are additions *by value* to a mechanism already proven, exactly as the big-three ruling intends.
 
+#### Amendment 2026-09-24 — the compile surface follows the conversion target (the 1.24.13.2 Linux train)
+
+§9(a) chose `lib/{tfm}` as a package's compile asset and filled it with ONE designated flavor (windows),
+and it named the consequence: "the compile surface is truthful for all but two packages". The README
+walkthrough measured what that exception costs a consumer on Linux (COORD FINDING 086853edd5): a
+`-recurse=nuget` conversion of `fatih/color` reaches `golang.org/x/sys/unix`, which calls
+`syscall.Rlimit`, and compiled against `go.syscall`'s `lib/` (byte-identical to the win-x64 flavor, no
+`Rlimit`) while the linux-x64 flavor that would LOAD had the type all along. NuGet has no RID-selected
+compile group: `project.assets.json` resolves compile = `lib/` in the RID-less graph and in
+`<tfm>/linux-x64` alike. §9(a)'s layout is unchanged; four pieces now close the seam around it:
+
+1. **A RID-selected compile asset** (`src/core/golib/buildTransitive/go.lib.targets`). After
+   `ResolvePackageAssets`, each go.* compile item whose package ships a `runtimes/<rid>/lib/<tfm>/` twin
+   is swapped to that twin with its `HintPath`. Every converted package depends on go.lib, so it reaches
+   every consumer, and on win-x64 the twin IS `lib/` (a no-op, byte-identical). Gate:
+   `src/tests/PackageTests/RidCompileAsset`.
+2. **Per-GOOS metadata records** (`stdlib-metadata.txt`, `##<name>@<goos>`). The converter's embedded
+   record had carried only the reference flavor, on §9(a)'s own premise; a linux conversion now reads the
+   linux flavor's exported aliases and GoImplement records.
+3. **One platform for both halves.** `-recurse=nuget` writes the conversion's target into the output root's
+   `Directory.Build.props` as a conditioned `GoCompileRuntimeIdentifier` default, which item 1 honors first,
+   so the compile flavor is the one the metadata was read for rather than the build host's.
+4. **Third-party assembly trampolines.** A pure-JMP `.s` block outside GOROOT with a `types.Identical`
+   target becomes a forwarder (`asmTrampolines.go`), so x/sys/unix's `Syscall` family runs instead of
+   throwing; `syscall.prlimit` joins the linkname forward targets.
+
+§9(a)'s "consumer changes: none" still holds. What changes is that the compile surface is now the
+conversion target's own flavor wherever the release ships one; a platform with no shipped twin
+(linux-arm64, osx) still compiles the reference flavor, as before.
+
 ---
 
 ## 13. What this design does **not** answer

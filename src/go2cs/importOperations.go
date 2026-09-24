@@ -892,7 +892,7 @@ func loadImportedTypeAliases(info PackageInfo, options Options) {
 		// pair locally in this package — go2cs-gen then emits a second, duplicate adapter class
 		// (syscall.Errno → error, consumed by golang.org/x/sys/windows: CS0102/CS0111/CS8646).
 		if info.PublishedStdLib {
-			if lines, ok := stdLibExportedMetadata(info.PackageName); ok {
+			if lines, ok := stdLibExportedMetadata(info.PackageName, goosOfTarget(options.targetPlatform)); ok {
 				if results, parseErr := parseExportedTypeAliasLines(lines); parseErr == nil {
 					applyExportedTypeAliases(results, info, false)
 					loadPackageImplementLines(lines, info.RootPackageName)

@@ -356,7 +356,7 @@ func TestGorootVendoredReferenceNamesTheVendoredProject(t *testing.T) {
 		t.Errorf("PackageName = %q, want %q", info.PackageName, want)
 	}
 
-	if _, recorded := stdLibExportedMetadata(info.PackageName); !recorded {
+	if _, recorded := stdLibExportedMetadata(info.PackageName, ""); !recorded {
 		t.Errorf("embedded metadata has no record for %q — the name does not key the record it must", info.PackageName)
 	}
 

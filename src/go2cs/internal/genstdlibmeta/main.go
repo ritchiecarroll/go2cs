@@ -64,5 +64,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("genstdlibmeta: wrote %s (%d packages, %d bytes)\n", outputFile, count, len(content))
+	fmt.Printf("genstdlibmeta: wrote %s (%d sections, %d bytes)\n", outputFile, count, len(content))
 }

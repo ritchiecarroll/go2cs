@@ -9,10 +9,58 @@
 #
 # Format: '##<dotted package name>' opens a section; its lines are the matching
 # package_info.cs lines verbatim, so the converter's existing parsers read them unchanged.
+# A package whose metadata varies by platform (no flat package_info.cs) keeps its
+# windows flavor in the unqualified section and every other flavor in its own
+# '##<dotted package name>@<goos>' section; a conversion for <goos> reads that section and
+# falls back to the unqualified one. Counts are of SECTIONS, not packages.
 #
 # Regenerate with `go generate .` from src/go2cs; never hand-edit.
 
 ##archive.tar
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<ReadFrom_dst, io_package.Writer>(Promoted = true)]
+[assembly: GoImplement<ReadFrom_dst, io_package.Writer>]
+[assembly: GoImplement<Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<WriteTo_src, io_package.Reader>(Promoted = true)]
+[assembly: GoImplement<WriteTo_src, io_package.Reader>]
+[assembly: GoImplement<Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<go.io.fs_package.File, io_package.Reader>]
+[assembly: GoImplement<headerError, error>]
+[assembly: GoImplement<headerFileInfo, go.io.fs_package.FileInfo>]
+[assembly: GoImplement<regFileReader, fileReader>(Pointer = true)]
+[assembly: GoImplement<regFileReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<regFileWriter, fileWriter>(Pointer = true)]
+[assembly: GoImplement<regFileWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<sparseFileReader, fileReader>(Pointer = true)]
+[assembly: GoImplement<sparseFileReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<sparseFileWriter, fileWriter>(Pointer = true)]
+[assembly: GoImplement<sparseFileWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<zeroReader, io_package.Reader>]
+
+##archive.tar@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<ReadFrom_dst, io_package.Writer>(Promoted = true)]
+[assembly: GoImplement<ReadFrom_dst, io_package.Writer>]
+[assembly: GoImplement<Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<WriteTo_src, io_package.Reader>(Promoted = true)]
+[assembly: GoImplement<WriteTo_src, io_package.Reader>]
+[assembly: GoImplement<Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<go.io.fs_package.File, io_package.Reader>]
+[assembly: GoImplement<headerError, error>]
+[assembly: GoImplement<headerFileInfo, go.io.fs_package.FileInfo>]
+[assembly: GoImplement<regFileReader, fileReader>(Pointer = true)]
+[assembly: GoImplement<regFileReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<regFileWriter, fileWriter>(Pointer = true)]
+[assembly: GoImplement<regFileWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<sparseFileReader, fileReader>(Pointer = true)]
+[assembly: GoImplement<sparseFileReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<sparseFileWriter, fileWriter>(Pointer = true)]
+[assembly: GoImplement<sparseFileWriter, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<zeroReader, io_package.Reader>]
+
+##archive.tar@linux
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 [assembly: GoImplement<ReadFrom_dst, io_package.Writer>(Promoted = true)]
@@ -434,6 +482,14 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
+##crypto.internal.sysrand@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##crypto.internal.sysrand@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
 ##crypto.md5
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("BlockSize", "const:ΔBlockSize")]
@@ -556,9 +612,38 @@
 [assembly: GoImplement<UnknownAuthorityError, error>]
 [assembly: GoImplement<go.crypto.rsa_package.PSSOptions, crypto_package.SignerOpts>(Pointer = true)]
 
+##crypto.x509.internal.macos@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<OSStatus, error>]
+
 ##crypto.x509.pkix
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
+
+##crypto.x509@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<CertificateInvalidError, error>]
+[assembly: GoImplement<ConstraintViolationError, error>]
+[assembly: GoImplement<HostnameError, error>]
+[assembly: GoImplement<InsecureAlgorithmError, error>]
+[assembly: GoImplement<SystemRootsError, error>]
+[assembly: GoImplement<UnhandledCriticalExtension, error>]
+[assembly: GoImplement<UnknownAuthorityError, error>]
+[assembly: GoImplement<go.crypto.rsa_package.PSSOptions, crypto_package.SignerOpts>(Pointer = true)]
+
+##crypto.x509@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<CertificateInvalidError, error>]
+[assembly: GoImplement<ConstraintViolationError, error>]
+[assembly: GoImplement<HostnameError, error>]
+[assembly: GoImplement<InsecureAlgorithmError, error>]
+[assembly: GoImplement<SystemRootsError, error>]
+[assembly: GoImplement<UnhandledCriticalExtension, error>]
+[assembly: GoImplement<UnknownAuthorityError, error>]
+[assembly: GoImplement<go.crypto.rsa_package.PSSOptions, crypto_package.SignerOpts>(Pointer = true)]
 
 ##database.sql
 // <ExportedTypeAliases>
@@ -1509,11 +1594,43 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
+##internal.filepathlite@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##internal.filepathlite@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
 ##internal.fmtsort
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
 ##internal.fuzz
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("CorpusEntry", "go.@internal.fuzz_package.CorpusEntryᴛ1")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<MalformedCorpusError, error>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<contextReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<crashError, error>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<pcgRand, mutatorRand>(Pointer = true)]
+[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
+
+##internal.fuzz@darwin
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("CorpusEntry", "go.@internal.fuzz_package.CorpusEntryᴛ1")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<MalformedCorpusError, error>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<contextReader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<crashError, error>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<pcgRand, mutatorRand>(Pointer = true)]
+[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
+
+##internal.fuzz@linux
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("CorpusEntry", "go.@internal.fuzz_package.CorpusEntryᴛ1")]
 // </ExportedTypeAliases>
@@ -1613,6 +1730,18 @@
 [assembly: GoImplement<DeadlineExceededError, error>(Pointer = true)]
 [assembly: GoImplement<errNetClosing, error>]
 
+##internal.poll@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<DeadlineExceededError, error>(Pointer = true)]
+[assembly: GoImplement<errNetClosing, error>]
+
+##internal.poll@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<DeadlineExceededError, error>(Pointer = true)]
+[assembly: GoImplement<errNetClosing, error>]
+
 ##internal.profile
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
@@ -1666,6 +1795,10 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
+##internal.runtime.syscall@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
 ##internal.saferio
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
@@ -1690,7 +1823,23 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
+##internal.syscall.execenv@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##internal.syscall.execenv@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
 ##internal.syscall.unix
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##internal.syscall.unix@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##internal.syscall.unix@linux
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
@@ -1711,6 +1860,16 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
+##internal.sysinfo@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##internal.sysinfo@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+
 ##internal.syslist
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
@@ -1721,11 +1880,34 @@
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 
+##internal.testenv@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
+
+##internal.testenv@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
+
 ##internal.testlog
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
 ##internal.testpty
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##internal.testpty@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<PtyError, error>(Pointer = true)]
+
+##internal.testpty@linux
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
@@ -1929,6 +2111,20 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
+##log.syslog@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<netConn, serverConn>(Pointer = true)]
+[assembly: GoImplement<net_package.Conn, io_package.Writer>]
+
+##log.syslog@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<netConn, serverConn>(Pointer = true)]
+[assembly: GoImplement<net_package.Conn, io_package.Writer>]
+
 ##maps
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
@@ -2008,6 +2204,20 @@
 ##mime.quotedprintable
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
+
+##mime@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
+
+##mime@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 
 ##net
 // <ExportedTypeAliases>
@@ -2325,6 +2535,16 @@
 [assembly: GoTypeAlias("Sockets", "ΔSockets")]
 // </ExportedTypeAliases>
 
+##net.internal.socktest@darwin
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Sockets", "ΔSockets")]
+// </ExportedTypeAliases>
+
+##net.internal.socktest@linux
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Sockets", "ΔSockets")]
+// </ExportedTypeAliases>
+
 ##net.mail
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
@@ -2396,6 +2616,121 @@
 [assembly: GoImplement<InvalidHostError, error>]
 [assembly: GoImplement<ΔError, error>(Pointer = true)]
 
+##net@darwin
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Addr", "ΔAddr")]
+[assembly: GoTypeAlias("Error", "ΔError")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<AddrError, error>(Pointer = true)]
+[assembly: GoImplement<AddrError, ΔError>(Pointer = true)]
+[assembly: GoImplement<Buffers, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<Buffers, io_package.WriterTo>(Pointer = true)]
+[assembly: GoImplement<Conn, io_package.Reader>]
+[assembly: GoImplement<DNSConfigError, ΔError>(Pointer = true)]
+[assembly: GoImplement<DNSError, error>(Pointer = true)]
+[assembly: GoImplement<DNSError, ΔError>(Pointer = true)]
+[assembly: GoImplement<IPAddr, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<IPAddr, Δsockaddr>(Pointer = true)]
+[assembly: GoImplement<IPConn, Conn>(Pointer = true)]
+[assembly: GoImplement<IPConn, PacketConn>(Pointer = true)]
+[assembly: GoImplement<IPNet, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<InvalidAddrError, ΔError>(Pointer = true)]
+[assembly: GoImplement<InvalidAddrError, ΔError>]
+[assembly: GoImplement<OpError, error>(Pointer = true)]
+[assembly: GoImplement<OpError, ΔError>(Pointer = true)]
+[assembly: GoImplement<ParseError, error>(Pointer = true)]
+[assembly: GoImplement<ParseError, ΔError>(Pointer = true)]
+[assembly: GoImplement<TCPAddr, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<TCPAddr, Δsockaddr>(Pointer = true)]
+[assembly: GoImplement<TCPConn, Conn>(Pointer = true)]
+[assembly: GoImplement<TCPListener, Listener>(Pointer = true)]
+[assembly: GoImplement<UDPAddr, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<UDPAddr, Δsockaddr>(Pointer = true)]
+[assembly: GoImplement<UDPConn, Conn>(Pointer = true)]
+[assembly: GoImplement<UDPConn, PacketConn>(Pointer = true)]
+[assembly: GoImplement<UnixAddr, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<UnixAddr, Δsockaddr>(Pointer = true)]
+[assembly: GoImplement<UnixConn, Conn>(Pointer = true)]
+[assembly: GoImplement<UnixConn, PacketConn>(Pointer = true)]
+[assembly: GoImplement<UnixListener, Listener>(Pointer = true)]
+[assembly: GoImplement<UnknownNetworkError, ΔError>(Pointer = true)]
+[assembly: GoImplement<UnknownNetworkError, ΔError>]
+[assembly: GoImplement<addrPortUDPAddr, ΔAddr>]
+[assembly: GoImplement<addrinfoErrno, ΔError>]
+[assembly: GoImplement<canceledError, error>]
+[assembly: GoImplement<dialParallel_dialResult, Conn>(Promoted = true)]
+[assembly: GoImplement<dialParallel_dialResult, error>(Promoted = true)]
+[assembly: GoImplement<fileAddr, ΔAddr>]
+[assembly: GoImplement<goLookupIPCNAMEOrder_result, error>(Promoted = true)]
+[assembly: GoImplement<notFoundError, error>(Pointer = true)]
+[assembly: GoImplement<onlyValuesCtx, context_package.Context>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<pipe, Conn>(Pointer = true)]
+[assembly: GoImplement<pipeAddr, ΔAddr>]
+[assembly: GoImplement<rawConn, syscall_package.RawConn>(Pointer = true)]
+[assembly: GoImplement<rawListener, syscall_package.RawConn>(Pointer = true)]
+[assembly: GoImplement<tcpConnWithoutReadFrom, io_package.Writer>]
+[assembly: GoImplement<tcpConnWithoutWriteTo, io_package.Reader>]
+[assembly: GoImplement<temporaryError, error>(Pointer = true)]
+[assembly: GoImplement<timeoutError, error>(Pointer = true)]
+
+##net@linux
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Addr", "ΔAddr")]
+[assembly: GoTypeAlias("Error", "ΔError")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<AddrError, error>(Pointer = true)]
+[assembly: GoImplement<AddrError, ΔError>(Pointer = true)]
+[assembly: GoImplement<Buffers, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<Buffers, io_package.WriterTo>(Pointer = true)]
+[assembly: GoImplement<Conn, io_package.Reader>]
+[assembly: GoImplement<DNSConfigError, ΔError>(Pointer = true)]
+[assembly: GoImplement<DNSError, error>(Pointer = true)]
+[assembly: GoImplement<DNSError, ΔError>(Pointer = true)]
+[assembly: GoImplement<IPAddr, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<IPAddr, Δsockaddr>(Pointer = true)]
+[assembly: GoImplement<IPConn, Conn>(Pointer = true)]
+[assembly: GoImplement<IPConn, PacketConn>(Pointer = true)]
+[assembly: GoImplement<IPNet, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<InvalidAddrError, ΔError>(Pointer = true)]
+[assembly: GoImplement<InvalidAddrError, ΔError>]
+[assembly: GoImplement<OpError, error>(Pointer = true)]
+[assembly: GoImplement<OpError, ΔError>(Pointer = true)]
+[assembly: GoImplement<ParseError, error>(Pointer = true)]
+[assembly: GoImplement<ParseError, ΔError>(Pointer = true)]
+[assembly: GoImplement<TCPAddr, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<TCPAddr, Δsockaddr>(Pointer = true)]
+[assembly: GoImplement<TCPConn, Conn>(Pointer = true)]
+[assembly: GoImplement<TCPListener, Listener>(Pointer = true)]
+[assembly: GoImplement<UDPAddr, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<UDPAddr, Δsockaddr>(Pointer = true)]
+[assembly: GoImplement<UDPConn, Conn>(Pointer = true)]
+[assembly: GoImplement<UDPConn, PacketConn>(Pointer = true)]
+[assembly: GoImplement<UnixAddr, ΔAddr>(Pointer = true)]
+[assembly: GoImplement<UnixAddr, Δsockaddr>(Pointer = true)]
+[assembly: GoImplement<UnixConn, Conn>(Pointer = true)]
+[assembly: GoImplement<UnixConn, PacketConn>(Pointer = true)]
+[assembly: GoImplement<UnixListener, Listener>(Pointer = true)]
+[assembly: GoImplement<UnknownNetworkError, ΔError>(Pointer = true)]
+[assembly: GoImplement<UnknownNetworkError, ΔError>]
+[assembly: GoImplement<addrPortUDPAddr, ΔAddr>]
+[assembly: GoImplement<canceledError, error>]
+[assembly: GoImplement<dialParallel_dialResult, Conn>(Promoted = true)]
+[assembly: GoImplement<dialParallel_dialResult, error>(Promoted = true)]
+[assembly: GoImplement<fileAddr, ΔAddr>]
+[assembly: GoImplement<goLookupIPCNAMEOrder_result, error>(Promoted = true)]
+[assembly: GoImplement<notFoundError, error>(Pointer = true)]
+[assembly: GoImplement<onlyValuesCtx, context_package.Context>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<pipe, Conn>(Pointer = true)]
+[assembly: GoImplement<pipeAddr, ΔAddr>]
+[assembly: GoImplement<rawConn, syscall_package.RawConn>(Pointer = true)]
+[assembly: GoImplement<rawListener, syscall_package.RawConn>(Pointer = true)]
+[assembly: GoImplement<tcpConnWithoutReadFrom, io_package.Writer>]
+[assembly: GoImplement<tcpConnWithoutWriteTo, io_package.Reader>]
+[assembly: GoImplement<temporaryError, error>(Pointer = true)]
+[assembly: GoImplement<timeoutError, error>(Pointer = true)]
+
 ##os
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("DirEntry", "go.io.fs_package.DirEntry")]
@@ -2438,7 +2773,57 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
+##os.exec.internal.fdtest@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##os.exec.internal.fdtest@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##os.exec@darwin
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Error", "ΔError")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<ExitError, error>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReadCloser>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.WriteCloser>(Pointer = true)]
+[assembly: GoImplement<prefixSuffixSaver, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<wrappedError, error>]
+[assembly: GoImplement<ΔError, error>(Pointer = true)]
+
+##os.exec@linux
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Error", "ΔError")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<ExitError, error>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Closer>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.ReadCloser>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<os_package.File, io_package.WriteCloser>(Pointer = true)]
+[assembly: GoImplement<prefixSuffixSaver, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<wrappedError, error>]
+[assembly: GoImplement<ΔError, error>(Pointer = true)]
+
 ##os.signal
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<signalCtx, context_package.Context>(Pointer = true)]
+[assembly: GoImplement<signalCtx, context_package.Context>(Promoted = true)]
+[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
+
+##os.signal@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<signalCtx, context_package.Context>(Pointer = true)]
+[assembly: GoImplement<signalCtx, context_package.Context>(Promoted = true)]
+[assembly: GoImplement<syscall_package.ΔSignal, os_package.ΔSignal>]
+
+##os.signal@linux
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 [assembly: GoImplement<signalCtx, context_package.Context>(Pointer = true)]
@@ -2449,11 +2834,84 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
+##os.user@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<UnknownGroupError, error>]
+[assembly: GoImplement<UnknownGroupIdError, error>]
+[assembly: GoImplement<UnknownUserError, error>]
+[assembly: GoImplement<UnknownUserIdError, error>]
+
+##os.user@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<UnknownGroupError, error>]
+[assembly: GoImplement<UnknownGroupIdError, error>]
+[assembly: GoImplement<UnknownUserError, error>]
+[assembly: GoImplement<UnknownUserIdError, error>]
+[assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+
+##os@darwin
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("DirEntry", "go.io.fs_package.DirEntry")]
+[assembly: GoTypeAlias("FileInfo", "go.io.fs_package.FileInfo")]
+[assembly: GoTypeAlias("FileMode", "go.io.fs_package.FileMode")]
+[assembly: GoTypeAlias("Kill", "const:ΔKill")]
+[assembly: GoTypeAlias("PathError", "go.io.fs_package.PathError")]
+[assembly: GoTypeAlias("Signal", "ΔSignal")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<File, go.io.fs_package.File>(Pointer = true)]
+[assembly: GoImplement<File, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<LinkError, error>(Pointer = true)]
+[assembly: GoImplement<SyscallError, error>(Pointer = true)]
+[assembly: GoImplement<dirFS, go.io.fs_package.FS>]
+[assembly: GoImplement<errSymlink, error>]
+[assembly: GoImplement<fileStat, go.io.fs_package.FileInfo>(Pointer = true)]
+[assembly: GoImplement<fileWithoutReadFrom, io_package.Writer>]
+[assembly: GoImplement<fileWithoutWriteTo, io_package.Reader>]
+[assembly: GoImplement<go.io.fs_package.File, io_package.Reader>]
+[assembly: GoImplement<rawConn, syscall_package.RawConn>(Pointer = true)]
+[assembly: GoImplement<rootFS, go.io.fs_package.FS>(Pointer = true)]
+[assembly: GoImplement<syscall_package.ΔSignal, ΔSignal>]
+[assembly: GoImplement<unixDirent, go.io.fs_package.DirEntry>(Pointer = true)]
+
+##os@linux
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("DirEntry", "go.io.fs_package.DirEntry")]
+[assembly: GoTypeAlias("FileInfo", "go.io.fs_package.FileInfo")]
+[assembly: GoTypeAlias("FileMode", "go.io.fs_package.FileMode")]
+[assembly: GoTypeAlias("Kill", "const:ΔKill")]
+[assembly: GoTypeAlias("PathError", "go.io.fs_package.PathError")]
+[assembly: GoTypeAlias("Signal", "ΔSignal")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<File, go.io.fs_package.File>(Pointer = true)]
+[assembly: GoImplement<File, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<LinkError, error>(Pointer = true)]
+[assembly: GoImplement<SyscallError, error>(Pointer = true)]
+[assembly: GoImplement<dirFS, go.io.fs_package.FS>]
+[assembly: GoImplement<errSymlink, error>]
+[assembly: GoImplement<fileStat, go.io.fs_package.FileInfo>(Pointer = true)]
+[assembly: GoImplement<fileWithoutReadFrom, io_package.Writer>]
+[assembly: GoImplement<fileWithoutWriteTo, io_package.Reader>]
+[assembly: GoImplement<go.io.fs_package.File, io_package.Reader>]
+[assembly: GoImplement<rawConn, syscall_package.RawConn>(Pointer = true)]
+[assembly: GoImplement<rootFS, go.io.fs_package.FS>(Pointer = true)]
+[assembly: GoImplement<syscall_package.ΔSignal, ΔSignal>]
+[assembly: GoImplement<unixDirent, go.io.fs_package.DirEntry>(Pointer = true)]
+
 ##path
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
 ##path.filepath
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##path.filepath@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##path.filepath@linux
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
@@ -2541,6 +2999,26 @@
 [assembly: GoImplement<stackProfile, countProfile>]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 
+##runtime.pprof@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<go.text.tabwriter_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<keysByCount, sort_package.Interface>(Pointer = true)]
+[assembly: GoImplement<runtimeProfile, countProfile>(Pointer = true)]
+[assembly: GoImplement<stackProfile, countProfile>]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
+
+##runtime.pprof@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<bufio_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<go.text.tabwriter_package.Writer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<keysByCount, sort_package.Interface>(Pointer = true)]
+[assembly: GoImplement<runtimeProfile, countProfile>(Pointer = true)]
+[assembly: GoImplement<stackProfile, countProfile>]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
+
 ##runtime.race
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
@@ -2552,6 +3030,28 @@
 ##runtime.trace
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
+
+##runtime@darwin
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Error", "ΔError")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<PanicNilError, ΔError>(Pointer = true)]
+[assembly: GoImplement<TypeAssertionError, ΔError>(Pointer = true)]
+[assembly: GoImplement<boundsError, ΔError>]
+[assembly: GoImplement<errorAddressString, ΔError>]
+[assembly: GoImplement<errorString, ΔError>]
+[assembly: GoImplement<plainError, ΔError>]
+
+##runtime@linux
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Error", "ΔError")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<PanicNilError, ΔError>(Pointer = true)]
+[assembly: GoImplement<TypeAssertionError, ΔError>(Pointer = true)]
+[assembly: GoImplement<boundsError, ΔError>]
+[assembly: GoImplement<errorAddressString, ΔError>]
+[assembly: GoImplement<errorString, ΔError>]
+[assembly: GoImplement<plainError, ΔError>]
 
 ##slices
 // <ExportedTypeAliases>
@@ -2614,6 +3114,31 @@
 [assembly: GoImplement<SockaddrInet4, ΔSockaddr>(Pointer = true)]
 [assembly: GoImplement<SockaddrInet6, ΔSockaddr>(Pointer = true)]
 [assembly: GoImplement<SockaddrUnix, ΔSockaddr>(Pointer = true)]
+
+##syscall@darwin
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Signal", "ΔSignal")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<Errno, error>]
+[assembly: GoImplement<InterfaceAddrMessage, RoutingMessage>(Pointer = true)]
+[assembly: GoImplement<InterfaceMessage, RoutingMessage>(Pointer = true)]
+[assembly: GoImplement<InterfaceMulticastAddrMessage, RoutingMessage>(Pointer = true)]
+[assembly: GoImplement<RouteMessage, RoutingMessage>(Pointer = true)]
+[assembly: GoImplement<SockaddrDatalink, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrInet4, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrInet6, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrUnix, Sockaddr>(Pointer = true)]
+
+##syscall@linux
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Signal", "ΔSignal")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<Errno, error>]
+[assembly: GoImplement<SockaddrInet4, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrInet6, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrLinklayer, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrNetlink, Sockaddr>(Pointer = true)]
+[assembly: GoImplement<SockaddrUnix, Sockaddr>(Pointer = true)]
 
 ##testing.fstest
 // <ExportedTypeAliases>
@@ -2720,6 +3245,44 @@
 ##time.tzdata
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
+
+##time.tzdata@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##time.tzdata@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+
+##time@darwin
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Hour", "const:ΔHour")]
+[assembly: GoTypeAlias("Local", "const:ΔLocal")]
+[assembly: GoTypeAlias("Location", "ΔLocation")]
+[assembly: GoTypeAlias("Minute", "const:ΔMinute")]
+[assembly: GoTypeAlias("Month", "ΔMonth")]
+[assembly: GoTypeAlias("Nanosecond", "const:ΔNanosecond")]
+[assembly: GoTypeAlias("Second", "const:ΔSecond")]
+[assembly: GoTypeAlias("UTC", "const:ΔUTC")]
+[assembly: GoTypeAlias("Weekday", "ΔWeekday")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<ParseError, error>(Pointer = true)]
+[assembly: GoImplement<fileSizeError, error>]
+
+##time@linux
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Hour", "const:ΔHour")]
+[assembly: GoTypeAlias("Local", "const:ΔLocal")]
+[assembly: GoTypeAlias("Location", "ΔLocation")]
+[assembly: GoTypeAlias("Minute", "const:ΔMinute")]
+[assembly: GoTypeAlias("Month", "ΔMonth")]
+[assembly: GoTypeAlias("Nanosecond", "const:ΔNanosecond")]
+[assembly: GoTypeAlias("Second", "const:ΔSecond")]
+[assembly: GoTypeAlias("UTC", "const:ΔUTC")]
+[assembly: GoTypeAlias("Weekday", "ΔWeekday")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<ParseError, error>(Pointer = true)]
+[assembly: GoImplement<fileSizeError, error>]
 
 ##unicode
 // <ExportedTypeAliases>
@@ -2835,7 +3398,63 @@
 [assembly: GoImplement<net_package.Conn, io_package.Reader>]
 [assembly: GoImplement<net_package.Conn, io_package.Writer>]
 
+##vendor.golang.org.x.net.nettest@darwin
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<chunkedCopy_dst, io_package.Writer>(Promoted = true)]
+[assembly: GoImplement<chunkedCopy_dst, io_package.Writer>]
+[assembly: GoImplement<chunkedCopy_src, io_package.Reader>(Promoted = true)]
+[assembly: GoImplement<chunkedCopy_src, io_package.Reader>]
+[assembly: GoImplement<go.math.rand_package.Rand, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<net_package.Conn, io_package.Reader>]
+[assembly: GoImplement<net_package.Conn, io_package.Writer>]
+
+##vendor.golang.org.x.net.nettest@linux
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
+[assembly: GoImplement<bytes_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<chunkedCopy_dst, io_package.Writer>(Promoted = true)]
+[assembly: GoImplement<chunkedCopy_dst, io_package.Writer>]
+[assembly: GoImplement<chunkedCopy_src, io_package.Reader>(Promoted = true)]
+[assembly: GoImplement<chunkedCopy_src, io_package.Reader>]
+[assembly: GoImplement<go.math.rand_package.Rand, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<net_package.Conn, io_package.Reader>]
+[assembly: GoImplement<net_package.Conn, io_package.Writer>]
+
+##vendor.golang.org.x.net.route@darwin
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Sys", "ΔSys")]
+[assembly: GoTypeAlias("SysType", "ΔSysType")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<DefaultAddr, Addr>(Pointer = true)]
+[assembly: GoImplement<Inet4Addr, Addr>(Pointer = true)]
+[assembly: GoImplement<Inet6Addr, Addr>(Pointer = true)]
+[assembly: GoImplement<InterfaceAddrMessage, Message>(Pointer = true)]
+[assembly: GoImplement<InterfaceAnnounceMessage, Message>(Pointer = true)]
+[assembly: GoImplement<InterfaceMessage, Message>(Pointer = true)]
+[assembly: GoImplement<InterfaceMetrics, ΔSys>(Pointer = true)]
+[assembly: GoImplement<InterfaceMulticastAddrMessage, Message>(Pointer = true)]
+[assembly: GoImplement<LinkAddr, Addr>(Pointer = true)]
+[assembly: GoImplement<RouteMessage, Message>(Pointer = true)]
+[assembly: GoImplement<RouteMetrics, ΔSys>(Pointer = true)]
+
 ##vendor.golang.org.x.sys.cpu
+// <ExportedTypeAliases>
+// </ExportedTypeAliases>
+[assembly: GoImplement<bigEndian, byteOrder>]
+[assembly: GoImplement<littleEndian, byteOrder>]
+
+##vendor.golang.org.x.sys.cpu@darwin
+// <ExportedTypeAliases>
+[assembly: GoTypeAlias("Errno", "go.syscall_package.Errno")]
+// </ExportedTypeAliases>
+[assembly: GoImplement<bigEndian, byteOrder>]
+[assembly: GoImplement<littleEndian, byteOrder>]
+
+##vendor.golang.org.x.sys.cpu@linux
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 [assembly: GoImplement<bigEndian, byteOrder>]

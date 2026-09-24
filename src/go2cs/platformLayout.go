@@ -147,14 +147,14 @@ func platformLayoutPath(packageOutputPath string, goos string, fileName string) 
 // should read — the mirror of platformLayoutDir, for the reading side.
 //
 // It exists because `package_info.cs` is closure-derived and therefore one of the artifacts L3
-// routes per-GOOS (27 of them corpus-wide, design §4.3), while the converter READS its dependencies'
+// routes per-GOOS (for a minority of the corpus; design §4.3), while the converter READS its dependencies'
 // copies to mint each conversion's `<ImportedTypeAliases>` block and to learn their
-// `[assembly: GoImplement]` records. A reader that only ever asked flat would, for those 27, find
+// `[assembly: GoImplement]` records. A reader that only ever asked flat would, for those, find
 // nothing and fall through to the DERIVED-alias path — no error, no warning, just a quietly
 // different closure in every dependent. That is the same silent-empty failure mode a stale
 // `-go2cspath` produced (CLAUDE.md, 2026-08-06), and it is worth the same care.
 //
-// Flat wins whenever it exists, so the 275 packages whose metadata is shared are untouched and this
+// Flat wins whenever it exists, so every package whose metadata is shared is untouched and this
 // costs them one `os.Stat`. When neither exists the FLAT path is returned, so every caller keeps its
 // existing not-exist handling unchanged.
 func platformPackageInfoPath(packageDir string, goos string) string {

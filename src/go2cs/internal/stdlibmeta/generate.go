@@ -33,20 +33,30 @@ const AssetFileName = "stdlib-metadata.txt"
 // TestStdLibMetadataAssetFileName.
 const PackageInfoFileName = "package_info.cs"
 
-// ReferenceGOOS is the platform flavor this record describes.
+// ReferenceGOOS is the platform flavor a package's UNQUALIFIED section describes.
 //
 // Layout L3 (docs/phase4/DESIGN-multiplatform-corpus.md §8) moves a package's platform-VARYING
-// artifacts into per-GOOS subfolders, and `package_info.cs` is one of them — 27 packages corpus-wide
-// carry a per-platform copy rather than a flat one. This asset, though, feeds `-recurse=nuget`,
-// where the dependency is a PUBLISHED assembly and the consumer therefore sees exactly one compile
-// surface: the flavor shipped as the package's `lib/{tfm}` compile-time asset (design §9(a)). So the
-// record is taken from the flat copy where one exists, and from this GOOS's copy where the metadata
-// varies — the same designated flavor `$(GoTargetOS)` defaults to.
+// artifacts into per-GOOS subfolders, and `package_info.cs` is one of them. The record is taken from
+// the flat copy where one exists (flat wins, exactly as the converter's platformPackageInfoPath reads
+// it), and otherwise from this GOOS's copy into the unqualified `##<name>` section: the flavor shipped
+// as the package's `lib/{tfm}` asset (design §9(a)) and the one `$(GoTargetOS)` defaults to.
+//
+// Every OTHER flavor of such a package is recorded too, as `##<name>@<goos>` (FlavorSeparator).
+// Until 2026-09-24 it was dropped, on the premise that a -recurse=nuget consumer could only ever see
+// the `lib/` compile surface; go.lib's RID-selected compile asset (buildTransitive/go.lib.targets)
+// makes a Linux consumer compile against the linux flavor, and a Linux conversion that still read the
+// windows record emitted `syscallꓸHandle = go.syscall_package.ΔHandle` (CS0426) and a Δ-renamed
+// `Sockaddr` the linux flavor does not have (CS0305). The converter now reads the section of the GOOS
+// it is converting for, and falls back to the unqualified one.
 //
 // It duplicates the converter's platformDefaultTargetOS for the same reason PackageInfoFileName
 // duplicates its constant (this package cannot import `package main`), and is asserted against it by
 // TestStdLibMetadataAssetFileName.
 const ReferenceGOOS = "windows"
+
+// FlavorSeparator joins a package's dotted name to the GOOS of a non-reference flavor in a section
+// header (`##syscall@linux`). `@` cannot occur in a dotted package name.
+const FlavorSeparator = "@"
 
 // SectionPrefix introduces a package section; the remainder of the line is the package's
 // dotted name (`math.rand.v2`), matching PackageInfo.PackageName and the `go.<name>` NuGet
@@ -75,13 +85,18 @@ var header = []string{
 	"#",
 	"# Format: '##<dotted package name>' opens a section; its lines are the matching",
 	"# " + PackageInfoFileName + " lines verbatim, so the converter's existing parsers read them unchanged.",
+	"# A package whose metadata varies by platform (no flat " + PackageInfoFileName + ") keeps its",
+	"# " + ReferenceGOOS + " flavor in the unqualified section and every other flavor in its own",
+	"# '##<dotted package name>" + FlavorSeparator + "<goos>' section; a conversion for <goos> reads that section and",
+	"# falls back to the unqualified one. Counts are of SECTIONS, not packages.",
 	"#",
 	"# Regenerate with `go generate .` from src/go2cs; never hand-edit.",
 }
 
 // Generate walks convertedRoot for package_info.cs files and returns the asset content, the
-// number of package sections written, and any error. Output is deterministic: sections are
-// sorted by package name and each carries its matched lines verbatim in file order.
+// number of sections written (a package with per-GOOS flavors writes one per flavor), and any
+// error. Output is deterministic: sections are sorted by name and each carries its matched lines
+// verbatim in file order.
 func Generate(convertedRoot string) ([]byte, int, error) {
 	sections, err := Collect(convertedRoot)
 
@@ -176,25 +191,38 @@ func Collect(convertedRoot string) (map[string][]string, error) {
 
 	sections := map[string][]string{}
 
+	// Packages whose record came from a FLAT copy. Sorted order visits `syscall` before
+	// `syscall/linux`, so a flat copy is always seen before any per-GOOS one of the same package.
+	flat := map[string]bool{}
+
 	for _, relDir := range sortedKeys(infoDirs) {
 		packageDir := relDir
+		flavor := ""
 
 		if !packageDirs[relDir] && packageDirs[path.Dir(relDir)] {
-			// A per-GOOS copy. Keep only the reference flavor: this asset feeds -recurse=nuget,
-			// where the dependency is a published assembly presenting exactly one compile surface
-			// (design §9(a)), and ReferenceGOOS names which one.
-			if path.Base(relDir) != ReferenceGOOS {
-				continue
-			}
-
+			// A per-GOOS copy: the reference flavor keys the unqualified section, every other
+			// flavor its own `<name>@<goos>` section (see ReferenceGOOS).
 			packageDir = path.Dir(relDir)
+
+			if goos := path.Base(relDir); goos != ReferenceGOOS {
+				flavor = goos
+			}
 		}
 
 		name := strings.ReplaceAll(packageDir, "/", ".")
 
-		// A flat copy is authoritative; a per-GOOS one only describes a package that has none.
-		if _, exists := sections[name]; exists && packageDir != relDir {
+		// A flat copy is authoritative for every flavor; a per-GOOS one only describes a package
+		// that has none, which is exactly when the converter reads the per-GOOS copy.
+		if packageDir != relDir && flat[name] {
 			continue
+		}
+
+		if packageDir == relDir {
+			flat[name] = true
+		}
+
+		if flavor != "" {
+			name += FlavorSeparator + flavor
 		}
 
 		lines, readErr := extract(infoDirs[relDir])
