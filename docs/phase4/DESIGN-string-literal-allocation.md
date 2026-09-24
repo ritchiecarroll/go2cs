@@ -2023,3 +2023,71 @@ the copying path, and G10 needs read-only views and applies to `string([]byte)` 
 
 **Not recommended:** the content cache (8.1R); O2 as a stage (already done); widening `sstring` before
 V-fix 11's counting and V-fix 10's proof; the helper-thread variant of the lazy form (it deadlocks).
+
+## 8.4 OWNER RULING, 2026-09-24 -- the string-literal tiers (recorded by C1; supersedes §8.3R2's order)
+
+> **Ruled by the owner on 2026-09-24: "Yes to all four recommendations"** (ledger 2026-09-24 11:53, OWNER
+> RULING · c555d91c55). The owner read COORD's tier brief, which was derived from COORD's verification of
+> revision 4 (`claude/coord-handover`, `docs/phase4/reviews/literal-revision-4-verification-2026-09-24.md`).
+> This block records the ruling. The revisions above it stand as written and hold the history, including the
+> order §8.3R2 recommended, which this ruling replaces.
+
+**What drove the ruling.** The verification made three owner-facing corrections. It found none of them to be
+a defect in C2's measurements.
+- **Tier 2 does not reach test-assembly literals.** Its hook is a first-position registration in
+  `package_info.cs`, and a test assembly never compiles `package_info.cs` (`test-csproj-template.xml:99-102`).
+  Every §8 member literal lives in a test assembly: log TestDiscard's `"%s"u8` (`log_test.cs:239`) and
+  log/slog's F6 keys (`logger_test.cs`). So Tier 2's stated payoff, count parity on the member rows, is out of
+  reach as designed.
+- **O1's reach is up to 4,835 production literal arguments.** That is 60% of the 8,083 joined literal
+  arguments, and 2,491 of the 2,556 in the format position arm B holds. The owner-facing text had quoted
+  only the 111 `string(b)` arguments. No revision measured sstring-first on its own.
+- **Tier 2's start-up tax is per process, and most of it is registration code.** The table's own work is
+  6-13% of the fixed-order delta; the registration code with a no-op Register is +25 to +74 ms. Banked
+  suites start the converted test host many times (crypto/tls's BoGo shim runs 3,418 cases; os/exec and
+  runtime also spawn).
+
+**1. sstring-first is the PRIMARY tier.** The owner had already directed this, and the ruling makes it the
+order of work. The steps run in this order:
+- **First, the O1 survival census.** §8.2.3 named it "the first census to run", and it never ran. It
+  measures how many of the 4,835 literal arguments survive the C# filters and the materialization fixed
+  point (§8.2R.2, O1). It is read-only.
+- **Then the fmt format-position pilot:** O1's `sstring` parameter on fmt's format position, the
+  population arm B holds.
+- **Then G11:** a non-escaping `string(r)` as an `sstring` over `stackalloc` (§8.2R2.2, row 4).
+
+**2. Approved now, independent of Tier 2:**
+- **Arm C**, already approved (ledger 2026-09-23 10:10): a function-local const hoisted to a const field
+  under the const's own name (§8, Arm C; §8.1.4).
+- **Read-only `Slice()` and `ToSpan()` views** (string.cs:251-281). This is also G10's precondition
+  (§8.2R2.1).
+- **G8 as Go's own rule.** `x + ""` returns the operand. Go's `concatstrings` returns its single non-empty
+  operand as it is (go1.24.13 runtime/string.go:46-50), and that operand may alias writable memory, so Go
+  returns an aliasing operand too. G8 therefore carries **no copy-on-alias precondition**: §8.2R2.1's
+  "aliases stay on the copying path" is not part of the approved rule.
+- **G10:** the static table for a one-byte `string([]byte)` (go1.24.13 runtime/string.go:144-150,
+  `slicebytetostring`'s `n == 1` branch), scoped as §8.2R2.1 narrowed it.
+- **V-fix 11:** `sstring`'s own allocations are counted through `AllocationCounter` (the sites §8.2R.2
+  lists).
+- **The `NoUncountedBackingAllocations` guard**, which AllocationCounter.cs:158 cites and which does not exist
+  yet (§8.2R.2).
+
+**3. Tier 2, the start-up registration table, is DEFERRED, not approved.** It misses test-assembly
+literals, its tax is per process, and it has no Windows or NativeAOT legs. It is revisited only against
+sstring-first's MEASURED residual, and only with those legs. The measurements the verification lists before
+any Tier 2 ruling can be final stand as that revisit's entry list:
+- Windows start-up A/B in the test-host shape and under `dotnet run`;
+- the net/http test process;
+- the Roslyn u8 dedup pin;
+- one AllocsPerRun member row read on a Tier 2 build;
+- a ReadyToRun publish of the fixed-order arms;
+- a NativeAOT arm.
+
+**4. Arms A and B stay HELD.**
+
+**Assigned by COORD with the ruling:**
+- C2 runs the O1 census (read-only), then cuts arm C. Arm C is a converter seat, and COORD takes C2's .NET
+  legs.
+- R cuts the read-only views, G8 and G10 (golib).
+- G cuts V-fix 11 and the guard after the 1.24.13.2 train lands. That work is adjacent to C2's REC-F NewArray
+  door, so it is based on REC-F or reconciled with it.
