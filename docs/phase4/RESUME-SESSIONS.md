@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 05:35 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 0723395a8f): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 05:46 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 0723395a8f): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -240,11 +240,11 @@ Refs:
   the roster; stdlib 344/0. Owed: the behavioral suite and reflect's base arm (the r-mbk-gates2 battery on R-LAPTOP; if
   that output is lost, re-run them).
 - claude/r-recg-chancore-design bb69175480 (REC-G docs, accepted).
-- claude/r-p2-sweep-evidence (S-R evidence, from 61724860b4; p2-driver.ps1 excluded and named).
-Local-only housekeeping, per COORD 2026-09-24:
-- push the non-fast-forward local tips as claude/laneR-promotion-pathscope-local and claude/laneR-typearg-cache-local,
-  never forced;
-- M9 deletes p2/R-LAPTOP-20260924T0703Z and the p2s scratch after the evidence push.
+- claude/r-p2-sweep-evidence 45ae823fa0 (S-R evidence, from 61724860b4, 564 files; p2-driver.ps1 and net/netip's comparison
+  JSON excluded and named).
+Local-only invariant HOLDS (2026-09-24): claude/laneR-promotion-pathscope-local 23dc6e931f and claude/laneR-typearg-cache-local
+fd9a4976e8 are pushed under new names (nothing forced), and M9 is done. The mustBeKind seat's reflect base arm reads
+418/391/27/22, identical to the seat's, so no reflect verdict moves; its behavioral retry was running.
 TOOLS: the Bash tool's PATH needs `export PATH=/usr/bin:/bin:$PATH` first, plus the go/dotnet pins. The sweep and gate
 scripts run under powershell.exe 5.1; check-roster-format runs under pwsh 7.
 First action: ls-remote your refs, then report the mustBeKind seat's gates.
@@ -1974,3 +1974,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 05:31 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 05:33 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 05:35 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
+- 2026-09-24 05:46 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
