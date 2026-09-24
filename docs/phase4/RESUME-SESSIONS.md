@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 06:48 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 93410e7ef9): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 07:04 -- SAVE-STATE refresh (ledger through mailbox 0dcb24d33f): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED, master ebb4acb8cf, the Linux packaging fix RULED (three gaps, three refs, one 1.24.13.2 train); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -173,7 +173,8 @@ READ FIRST, in order (every one is on origin; read each tip by ls-remote, never 
     census it, append, sign, push. Stamp times from `date` in the same command.
 
 WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 ~15:0x record each step):
- - THE HOP IS CUT OVER. master = 38529c765a: the signed cutover merge 5098289482 (claude/version-go1.24.13 972a9a6a41 INTO
+ - THE HOP IS CUT OVER AND RELEASED. master = ebb4acb8cf (the release record 3f501c7b48 and Piece 4 sit on top of the
+   cutover state below). The cutover state was 38529c765a: the signed cutover merge 5098289482 (claude/version-go1.24.13 972a9a6a41 INTO
    master 074a12c4ae; one union conflict in fleetIdentifierCensus_test.go), plus two signed docs commits: ffa5c1015a (the
    Milestones cell names 509828948) and 38529c765a (the platforms note's package floor is 1.24.13.1; its Linux sentence
    stays until G's post-publish WSL walkthrough measures it, and the Roadmap Platforms row follows). At master's head: roster guard 1826 green, `release-nuget -VerifyOnly` "Tree is releasable"
@@ -195,7 +196,7 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    seat is owed: a per-RID compile surface. The LESSONS seed and method are on claude/coord-handover
    docs/phase4/briefs/lessons-learned-seed.md; run the write-up in a fresh session.
  - NEXT, in order:
-   (c) THE OWNER'S RUN, at the i7's PHYSICAL console, in the main checkout C:/Projects/go2cs on master, fast-forwarded:
+   (c) DONE 2026-09-24 (kept as the procedure for 1.24.13.2). THE OWNER'S RUN, at the i7's PHYSICAL console, in the main checkout C:/Projects/go2cs on master, fast-forwarded:
        `git status --porcelain` must be EMPTY (a stray du.exe.stackdump was untracked there; the owner deletes it). The console
        environment: the go1.24.13 SDK bin first on PATH; GOROOT set to the BACKSLASH spelling of the go1.24.13 SDK;
        GOTOOLCHAIN=local, CGO_ENABLED=0, GOFLAGS empty; DOTNET_ROOT = the dotnet10 root, also first on PATH; both User-scope
@@ -216,12 +217,22 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    verification is on claude/coord-handover docs/phase4/reviews/literal-revision-3-verification-2026-09-24.md, and a
    revision 4 is coming from C2. Also the go.* prefix answer, and whether release/go1.23 advances to nuget-1.23.12.3 and
    release/go1.24 is minted.
- - UP NEXT, by OWNER ORDER (ledger 93410e7ef9): FIX THE LINUX PACKAGING PROBLEM. go.* packages give the compiler the
-   windows flavour in lib/ (the linux flavour sits unseen under runtimes/linux-x64), so an x/sys closure cannot build on Linux
-   from nuget.org. Owner G, after the in-flight len/cap seat. The fix is a per-RID compile surface (ref assemblies per RID, or
-   a RID-selected compile asset), sized against NuGet's compile/runtime asset resolution and push-nuget's L3 merge. GATE: G's
-   README walkthrough steps 1-4 green on WSL linux (a local feed, then nuget.org), with Windows still green. It ships in
-   1.24.13.2; then rewrite the README platforms note and the Roadmap Platforms row.
+ - UP NEXT, by OWNER ORDER (ledger 93410e7ef9): FIX THE LINUX PACKAGING PROBLEM. Owner G, after the in-flight len/cap
+   seat. G SIZED IT (scratch prototypes on WSL against the published 1.24.13.1): it is THREE gaps. With all three hand-fixed,
+   walkthrough steps 3-4 build on Linux and `dotnet run` output is byte-identical to `go run`. RULED by COORD (ledger
+   "RULING · ebb4acb8cf · THE LINUX PACKAGING FIX", plus the CORRECTION line after it that restores three code spans): ALL
+   THREE, as THREE refs cut from master, each red-first with its own gates, assembled as ONE 1.24.13.2 train, with the
+   walkthrough gate read at the union. Order:
+   (1) packaging: a buildTransitive targets file in go.lib that swaps each go.* compile item AND its HintPath to the
+       runtimes/<rid>/lib twin (RID = $(RuntimeIdentifier), else the host OS). Gates: a Windows no-op proof, restores RID-less
+       and RID-specific on both OSes, the release census identities, -VerifyOnly, and an isolated-clone pack.
+   (2) per-GOOS sections in genstdlibmeta (the embedded metadata is windows-only for 34 L3 packages, so x/sys/unix binds
+       ΔHandle and ΔSockaddr on Linux). Gates: TestStdLibMetadataInSync, CNR.
+   (3) converter forwards for pure `JMP pkg·F` asm trampolines; internal syscall targets exposed through the EXISTING
+       linkname-forward mechanism. Gates: the two-seeded footprint, H7 in three flavours, behavioral, and a red-first arm per shape.
+   A TTY residual (C# prints no colour under a pty, plus .NET's keypad escape) is a known-divergent row, sized separately.
+   GATE for the train: G's README walkthrough steps 1-4 green on WSL linux (a local feed, then nuget.org), with Windows still
+   green. It ships in 1.24.13.2; then rewrite the README platforms note and the Roadmap Platforms row.
  - POST-RELEASE QUEUE, all UNMERGED until after the release (THE RELEASE HAS LANDED, so assemble them from master):
    - R's net/http re-entry train claude/r-synctest-reentry 0b6bf15ab0 (FIRST; net/http re-banks from the candidates);
    - R's mustBeKind seat;
@@ -284,9 +295,12 @@ DONE post-hop (all UNMERGED): claude/g-rec-b-oracle 814603bbbb (the REC-B -m ora
 (routed to I3, sized first); claude/g-rsa-mathbig-decomp 6ab65f3409 (rsa closed to the object; math/big's bytes are len/cap
 boxing). NEXT, post-release, from master:
 - the golib seat for a constrained len<TS>/cap<TS> where TS : ISlice (ledger 52063e7b3f);
-- THEN, BY OWNER ORDER (ledger 93410e7ef9), UP NEXT: FIX THE LINUX PACKAGING PROBLEM, a per-RID compile surface so
-  x/sys/unix builds on Linux from the packages. The gate is your README walkthrough steps 1-4 green on WSL (a local feed
-  first), with Windows still green; it ships in 1.24.13.2;
+- THEN, BY OWNER ORDER (ledger 93410e7ef9), UP NEXT: FIX THE LINUX PACKAGING PROBLEM. Your sizing found three gaps, and
+  COORD RULED ALL THREE (ledger "RULING · ebb4acb8cf · THE LINUX PACKAGING FIX" plus its CORRECTION line): three refs from
+  master, each red-first with its own gates, forming ONE 1.24.13.2 train. Order: (1) the go.lib buildTransitive
+  compile-item-plus-HintPath swap to runtimes/<rid>/lib; (2) per-GOOS genstdlibmeta sections; (3) converter forwards for
+  pure `JMP pkg·F` trampolines, via the existing linkname-forward mechanism. The TTY residual is sized separately. The gate
+  is your README walkthrough steps 1-4 green on WSL (a local feed first), with Windows still green. Post each ref as it is cut;
 - a second read of C2's claude/c2-rec-f-golib 645a8e1f62;
 - AFTER THE PUBLISH: the README walkthrough steps 3-4 on the WSL linux arm against nuget.org 1.24.13.1 (steps 1-2 are
   already green), whose evidence rewrites the README platforms note and the Roadmap Platforms row.
@@ -2001,3 +2015,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 06:37 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 06:44 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 06:48 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
+- 2026-09-24 07:04 -- SAVE-STATE refresh: 1b/1c record the packaging-scope ruling (G: three gaps; all three as three refs in one 1.24.13.2 train) and step (c) DONE.
