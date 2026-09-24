@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 13:11 -- SAVE-STATE refresh (ledger through mailbox 2d76644da6): section 1b is the COORD new-session prompt: master ebb4acb8cf; THE 1.24.13.2 PACKAGING TRAIN ASSEMBLED on the i7 (t1242), battery PART 1 GREEN, PART 2 running (behavioral, then GolibTests x2); the owner's string-tier ruling recorded and assigned; C2's O1 census landed and the owner approved @string->sstring signature flips (verification running); the owner asks to be told when R's net/http fix lands; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 13:46 -- SAVE-STATE refresh (ledger through mailbox 2d76644da6): section 1b is the COORD new-session prompt: master ebb4acb8cf; THE 1.24.13.2 PACKAGING TRAIN ASSEMBLED on the i7 (t1242), battery PART 1 GREEN, PART 2 running (behavioral output phase, then GolibTests x2); the owner's string-tier and signature-flip rulings recorded; the owner-approved disk cleanup (42.7 GB) queued for after the publish; the owner asks to be told when R's net/http fix lands; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -275,6 +275,18 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    da5c9345ea merges in part 2) and Release 842/0 PASS; CNR NO REGRESSION across 730; H7 windows CS 0, sites 0, 343/343.
    PART 2 (t1242-battery2-run1.sh): merge da5c9345ea, purge, the FULL behavioral suite (part 1's refused on its 25 GB
    preflight), then GolibTests at Debug and Release.
+   OWNER-APPROVED CLEANUP (2026-09-24), to run AFTER the 1.24.13.2 publish, about 42.7 GB, from COORD's read-only audit:
+   - REMOVE these C:/go2cs-tmp-coord children: a2 (26.2 GB of build output), abpost-stage, abpost, abcut, abh12, abrel,
+     abcensus, abh6, acdocs, ard, docs-0915, h5arm, h9close, hdr-coord-orphan-disclosure-check, hdr-coord-stamp-guard, instr,
+     land-db, r1, r2, rb-h5, rv-seat3b, ss-skill, tr1, tr4, mbx;
+   - REMOVE C:/Projects/go2cs-mailbox-coord;
+   - REMOVE the .claude/worktrees agent-a661891ea6bb97f7c, agent-adaaab5addf5419c9 and agent-abbdda64836151d07, plus the
+     seven stale locked agent-* registrations (unlock, then prune);
+   - PURGE the build output of t48-seat12.
+   NOT approved, the owner's call: d0913b, kick, C:/go2cs-archive, and the app's own session worktrees. Method: for each
+   entry, git status must SUCCEED and print nothing; remove children only (rm -rf plus git worktree prune -v, because
+   worktree remove fails on long paths); afterwards the main checkout shows no ' D'. KEEP hnd, t1242 (until landed),
+   C:/Projects/go2cs and go2cs-mailbox.
    OWNER ASK: TELL THE OWNER when R's net/http fix (the synctest train) LANDS on master, so the runtime project resumes.
    IF THIS SESSION DIES MID-BATTERY: the scratchpad is gone, so re-create t1242 from the five tips above and rerun the legs.
    Then: announce on the ledger, push master (a fast-forward from ebb4acb8cf), and the OWNER RUNS the 1.24.13.2 release
@@ -2139,3 +2151,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 11:54 -- SAVE-STATE refresh: 1b/1c record the owner's tier ruling and its assignments.
 - 2026-09-24 12:09 -- SAVE-STATE refresh: 1b records battery part 1 readings, part 2 running, and the owner's net/http ping ask.
 - 2026-09-24 13:11 -- SAVE-STATE refresh: 1b records C2's O1 census and the owner's signature-flip ruling.
+- 2026-09-24 13:46 -- SAVE-STATE refresh: 1b records the owner-approved post-publish cleanup list.
