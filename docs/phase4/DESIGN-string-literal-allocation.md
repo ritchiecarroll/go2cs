@@ -527,6 +527,9 @@ probe [`probes/c2-literal-cache/`](probes/c2-literal-cache/README.md): the real 
 `AllocationCounter` at `47e088d3d7`, on .NET 10.0.12, Release, tiering off, on a shared 4-core linux
 VM. Read the ratios, not the absolute numbers.
 
+*(Revised 2026-09-24 by §8.1R below, per COORD's review; 8.1.1-8.1.5 are kept as reviewed so its citations
+resolve. §8.1R supersedes 8.1.2-8.1.4's figures and recommendation; §8.1.x, §8.2 and §8.3 follow it.)*
+
 ### 8.1.1 The problem an invisible form has to solve: recognising the literal from inside golib
 
 The per-call object is minted in golib: `(@string)"n"u8` and every implicit `"a"u8` at an `@string`
@@ -683,3 +686,562 @@ serves readability. Mechanism narration moves to `verbose`.
 corpus-wide re-baseline with goldens. Every removed line shifts C# line numbers, so the `GoPositionMap`
 tables regenerate (mechanically). This is its own seat post-hop: CNR one class, two-seeded corpus
 reconvert, and a reader check that nothing parses the prose lines between package_info.cs's markers.
+
+## 8.1R REVISION, 2026-09-24 (C2) -- the 22 review fixes, the recommended cache measured, and a table that replaces it
+
+**DRAFT, UNMERGED**, same branch. Input: COORD's adversarial review of `951c916403`
+(`docs/phase4/reviews/literal-cache-draft-review-2026-09-23.md` on `claude/coord-handover` at `a456cecaf7`;
+"fix N" below is its Part 2 item N). This block supersedes 8.1.2-8.1.4's figures and recommendation.
+8.1.1-8.1.5 stay as reviewed, so every review citation still resolves. Citations are at `47e088d3d7`, this
+branch's base. The new rows are round 2 of the same probe (`Caches2.cs`, `Round2.cs`; outputs in
+`output-round2-linux.txt`), on .NET 10.0.12, linux-x64, the shared 4-core VM, in three modes:
+- JIT with tiering off (the csproj's setting, and the mode C1's rows run in);
+- JIT with `DOTNET_TieredCompilation=1` (an environment override; the mode was not independently verified);
+- NativeAOT.
+
+**Legs NOT run, in any mode:** Windows, ARM64, the Performance suite, the banked operational sweep. Every
+probe build is local, unofficial, and not a gate.
+
+### 8.1R.1 Coverage: the ≤ 16 B gate misses most of arm B's population (fix 1)
+
+The draft's claim that the gate "covers every degenerate-slug literal, the verb formats" (:627-628) is
+false. Census over the Go source of `std` plus its tests (GOOS=windows, go1.24.13, 2,749 files; a literal
+counted only where it is a DIRECT call argument), with the format position decided by the converter's own
+predicate (hoistedLiteralOperations.go:595) and "degenerate" by its own slug floor
+(`len(literalSlug(v)) < minHoistSlugLength`, :103):
+
+| population | ≤ 8 B | 9-16 B | 17-32 B | > 32 B | total | ≤ 16 B |
+|:--|--:|--:|--:|--:|--:|--:|
+| format-position literals, production | 269 | 282 | 837 | 1,211 | 2,599 | 21.2% |
+| format-position literals, tests | 1,267 | 1,825 | 7,193 | 6,565 | 16,850 | 18.4% |
+| degenerate literal → `@string` param, production | 1,565 | 19 | 27 | 20 | 1,631 | 97.1% |
+| degenerate literal → `@string` param, tests | 3,296 | 298 | 119 | 208 | 3,921 | 91.7% |
+| degenerate literal → `any` param, production | 69 | 0 | 0 | 0 | 69 | 100% |
+| degenerate literal → `any` param, tests | 191 | 4 | 3 | 5 | 203 | 96.6% |
+
+Overall, 18.7% of format-position literals are ≤ 16 B and 7.9% are ≤ 8 B. COORD's 14-17% was measured over
+the C# tree with a different predicate, so the two figures agree on the conclusion rather than the digits.
+
+**The leftover set under a 16 B gate:**
+- 15,806 format-position literals over 16 B (2,048 of them production);
+- 374 degenerate literals over 16 B (47 production), e.g. COORD's crypto/cipher/gcm_test.cs:562.
+
+Each keeps copying on every call if arms A and B retire in favour of the cache.
+
+**The owner's options, as the review framed them:**
+- (a) a hybrid: the cache under the gate, hoisting above it;
+- (b) a raised gate: the hit cost grows with length, see 8.1R.2;
+- (c) accept the gap.
+
+8.1.x adds (d), which has no gate at all.
+
+### 8.1R.2 The recommended 2-way form, measured (fixes 2, 3, 4, 5, 16, 17)
+
+**Replacement policy (fix 3):**
+- no write on a hit;
+- a miss fills way 0 if it is empty, otherwise it overwrites way 1. That is one store either way.
+
+A literal that lands in way 0 is never evicted; one that lands in way 1 can be. Which way it lands in
+depends on what touched its set first. That dependence is the root of 8.1R.3.
+
+**The variants:**
+- V8 = FNV-1a over the bytes, then XOR the length, then AND 2047 (sets), two ways.
+- V9 = the same table with a word hash: two overlapping 64-bit reads cover 1-16 B, then a multiply-xor fold
+  (`Lit2.WordHash`).
+- V10 = the registration table of 8.1.x.
+- The round-1 V2 was FNV-1a, XOR length, AND 4095, direct-mapped (fix 17's hash spec).
+
+Hit cost, ns per conversion, `counted` 0 unless marked:
+
+| length | today (V0) | V8 2-way FNV | V9 2-way word | V10 table | mode |
+|:--|--:|--:|--:|--:|:--|
+| 1 B | 11.89 | 5.91 | 6.80 | 4.38 | JIT, tiering off |
+| 8 B | 11.92 | 8.39 | 7.15 | 4.15 | |
+| 12 B | 13.24 | 11.10 | 6.37 | 4.17 | |
+| 16 B | 13.30 | **14.75** | 6.23 | 4.58 | |
+| 32 B | 15.13 | 19.82, 1 counted | 19.39, 1 counted | 4.14 | |
+| 16 B | 12.88 | 14.45 | 5.21 | 3.84 | JIT, tiered |
+| 16 B | 8.47 | 14.46 | 6.55 | 4.38 | NativeAOT |
+| hoisted field | 1.33 / 2.58 / 1.62 | | | | tiering off / tiered / AOT |
+
+The noise floor is the baseline measured twice: 12.10 / 11.80 ns with tiering off, 11.65 / 11.52 tiered,
+7.37 / 7.59 AOT (≤ 3%).
+
+**Fix 4's extrapolation holds:** a byte-serial FNV hit at 16 B costs MORE than today's copy in every mode.
+Under NativeAOT, where the copy is cheapest, V8 is at or above today from 8 B up. The word hash fixes the
+16 B hit, but as specified it stops at 16 B.
+
+**Misses and the gate (fix 5 replaces the V6 evidence):**
+- A non-literal 8 B span that differs every call: today 16.17 ns, V8 32.68 ns (2×, and it inserts),
+  V10 17.68 ns. Tiered: 13.46 / 38.64 / 21.02. AOT: 10.58 / 26.34 / 12.52.
+- A 24 B span over V8's gate pays 17.56 → 19.65 ns with tiering off (+12%), 15.56 → 20.94 tiered, and
+  14.00 → 14.82 AOT.
+- The gate is NOT inside the noise floor under either JIT mode. The draft's "inside this VM's spread" is
+  withdrawn.
+
+**Three contents thrashing one set (fix 2)**, found by search, so the collision is a deterministic function
+of the bytes: 85.38 ns and 3 counted per round of three conversions (28.5 ns and 1 counted each; tiered 36.6,
+AOT 20.3). That is 2.4× today's time with tiering off (3.2× tiered, 2.7× AOT) at today's count.
+
+**Round 1's wording, corrected (fix 16):**
+- "2 counted per call" was per two conversions: about 21.4 ns each, 2.2× today at the same count.
+- "0 mismatches in 32,000,000" was 16M content-cache results plus 16M address-keyed ones, and the
+  content-cache half could not fail by construction.
+- Round 2's stress was 8 threads × 2M mixed hits and misses over V8, every result content-checked:
+  **0 mismatches in 16,000,000, x64 only.** A way is published by `Volatile.Write` after its bytes are
+  written, and x64's store order hides the reordering this check could catch. ARM64 is the leg that could
+  show it, and it was not run.
+
+**PerfStringMatch's `"// "u8` shape, 16M evaluations (fix 9):**
+
+| mode | today | V8 2-way | V10 table | hoisted |
+|:--|--:|--:|--:|--:|
+| JIT, tiering off | 192.8 ms | 128.8 | 71.7 | 22.5 |
+| JIT, tiered | 194.5 | 128.7 | 57.4 | 41.1 |
+| NativeAOT | 120.9 | **137.9** | 69.4 | 25.9 |
+
+That is the probe's loop, not the Performance suite, which stays unmeasured. Under NativeAOT, the leg the
+suite publishes, the 2-way cache is slower than doing nothing.
+
+**Share of the removable cost recovered (fix 17, corrected):** round 1's cache recovered 32% (arm A's shape)
+and 28% (arm B's). Round 2's V8 at arm A's 1 B hit recovers 56% with tiering off. The table recovers
+71-80% at every length with tiering off, and 54-66% under NativeAOT, where today's copy is cheapest.
+
+### 8.1R.3 Determinism: a process-global cache under a per-thread counter (fix 6)
+
+These points hold at once, each cited by the review:
+- a miss inserts any span under the gate;
+- the table is process-global while `AllocationCounter` is per-thread (AllocationCounter.cs:72-78);
+- go2cs's `AllocsPerRun` floors a nonzero result at 1 (testing.cs:743, :755), where Go divides with no
+  floor;
+- the literal set that a measured function touches includes its callees' literals (slog handler.cs:389's
+  `attrSep`).
+
+**Measured with `--eviction`:** thread A converts one literal 2M times while thread B converts non-literals
+that collide with its set.
+
+| literal's way | V8 counted misses on thread A, per 1M | V10 table |
+|:--|--:|--:|
+| way 0 (the literal touched the set first) | 0.0, 0.0, 0.0 (three runs) | 0.0 |
+| way 1 (a non-literal touched it first) | 91,439 / 92,639 / 91,594 (three runs) | 0.0 |
+| way 1, the full round-2 run, tiered | 141,040 and 156,781 | 0.0 |
+| way 1, the full round-2 run, NativeAOT | 168,433 and 168,005 | 0.0 |
+
+**The first round-2 run labelled its arms "way 0" and "way 1".** Instrumenting with `Lit2.WayOf` showed
+that BOTH literals were in way 1, because earlier rows of the same process had already filled way 0 of
+their sets. The labels in `round2-tc0` are wrong and are kept as run. Every later run prints the way it
+measured.
+
+**An instrument trap, found and fixed:** the eviction-only arm first read 1.0 per 1M in way 0. That was 2
+counted objects at iteration 0, which was Round2's own static constructor minting its two hoisted
+`@string` fields on the first `Use`. It now runs outside the window.
+
+**What this means:**
+- A literal in way 1 misses about 9-17% of the time while another thread churns its set. Under the floor
+  at 1, ONE such miss inside a window turns a row that wants 0 into a fail.
+- Whether a literal is in way 0 depends on process history, which is not a property of the test.
+- **Any row whose zero reading depends on the cache is statistical.** The draft's refusal of address keys
+  on determinism grounds now weighs against the content cache too.
+- The table reads 0 structurally: it takes no write after module init, so there is nothing to evict. That
+  0 is a property of the design and was not stressed under contention.
+
+### 8.1R.4 The count-to-bytes cliff (fix 7)
+
+`AllocsPerRun` trusts the count only while it is nonzero (testing.cs:750-755: `countUsable = … counted > 0`).
+A leg whose last COUNTED object goes away while uncounted bytes remain switches unit. It reports bytes per
+run, floored at 1, and the reading RISES.
+
+fmt TestCountMallocs's `Fprintf(buf, "%x")` legs (fmt_test.cs:1603-1607; go2cs_test_disclosures.json:9-10)
+show it:
+- Today a leg reads 2 against a want of 0: the `...any` pack's `slice()` copy plus the `"%x"u8` copy.
+- The disclosure's planned non-copying pack view removes the first; any literal mechanism removes the
+  second. Counted then falls to 0.
+- The box of `(nint)65536` into `any` is still allocated. Boxing is uncounted by design
+  (AllocationCounter.cs:53), and Go allocates nothing there for a constant.
+- So the leg reads about 24 (bytes) against a want of 0 and fails louder than today.
+
+The cliff is **common to every literal mechanism** (hoisting, the cache, the table, an `sstring`
+parameter), because it is a property of the instrument. It is not a reason to prefer one mechanism. It is a
+reason that each predicted row names what stays counted:
+- log TestDiscard 2 → 1: log.cs:289's `...any` params copy stays counted, and it is Go's own allocation.
+- log/slog 2_pairs … attrs9: the objects that stay counted are **not attributed in this draft.** They are
+  C1's rows, and they are read before a prediction is scored.
+
+### 8.1R.5 Footprint, callers, and the gate list (fixes 8, 9, 14, 15)
+
+A golib or generator mechanism reaches literals the arms never touch:
+- package-level lambdas and composites (fmt_test.cs:1566-1625);
+- callee literals (slog handler.cs:385-389, which feeds TestTextHandlerAlloc);
+- every package of every converted project, not only the corpus.
+
+The two-seeded reconvert hunk gate reads **zero** for such a change. So before landing, on every OS lane:
+- the full banked operational sweep;
+- a re-read of every `AllocsPerRun` row and every disclosure that cites a count;
+- the Performance suite under JIT AND NativeAOT (Performance/Directory.Build.targets:11);
+- Windows and ARM64 legs;
+- one `go2cs.slnx` build, the floor's rule after any golib API change.
+
+That is §4.6's bar for Tier C, and it applies to the table (8.1.x) as much as to the cache.
+
+**Entries the "two entries only" wiring does not cover (fix 14):**
+- the 16 UTF-16 tuple-return sites that bind `operator @string(string)` (string.cs:450), e.g.
+  path/filepath/windows/path.cs:193 and runtime/symtab.cs:959;
+- `sstring`'s escape to `@string`, which goes through the copying constructor (sstring.cs:177-180).
+
+The table's miss cost is small enough that the constructor could consult it too. That choice waits for the
+sweep's measurement of the tiered miss (+7.6 ns, the one mode where it is not small).
+
+**Guard the callers, not only the wiring (fix 15):**
+- The operator is a public implicit conversion, so a golib test pins that a NON-literal span with a
+  registered literal's bytes still copies. Under the table this is structural (the key is an image address)
+  but still worth pinning. Under the cache it is the undercount hazard of 8.1R.6.
+- DESIGN-string-byte-window stage 4 must not build its one-rune string through `(@string)span`.
+
+### 8.1R.6 Hazards and corrections (fixes 11, 12, 13, 17, 18)
+
+**Content-cache hazards the draft omitted (fix 13):**
+- A NON-literal whose bytes repeat hits and is undercounted, which is a false pass (AllocationCounter.cs:64-69).
+- After an eviction, two evaluations of one literal give DIFFERENT `unsafe.StringData` pointers.
+- Public writable views (string.cs:251-281) widen what a mutation reaches. Making `ToSpan` read-only is a
+  separate cleanup.
+- Retaining non-literal inserts contradicts unsafe.cs:1088-1099's rationale.
+
+The table has none of the four: non-literals never enter it, nothing evicts, and one literal's pointer never
+changes.
+
+**Corrections:**
+- **Retention (fix 17):** about 128-160 KiB of arrays plus a 32 KiB table for 4,096 ways, not "≈ 64 KiB".
+- **The draft's "15 distinct literals":** 12 go through the operator per call (`n s d a b c e f %s Atoi
+  ParseInt ParseUint`), plus `""`, `hello` and `two`.
+- **Fix 18:** only three sites bind the :92 span constructor: string.cs:151, sstring.cs:179, and string.cs:462
+  (the operator). The `IArray<byte>` constructor (:162) chains to it. The format-position test is at
+  hoistedLiteralOperations.go:595.
+- **Fix 11:** `Bytes` already branches on a null backing (string.cs:66), so a pointer-backed `@string` adds
+  no new branch. It still adds a field (16 → 24 B per `@string`), and 8.1.3 (7)'s conclusion stands.
+- **Fix 12:**
+  - Arm A would not pre-box `n`, `s` or `d`: `preBoxed` requires `valueUses == 0`
+    (hoistedLiteralOperations.go:720), and log/slog has value uses (text_handler_test.cs:194,
+    value_test.cs:269, handler_test.cs:560).
+  - The probe's 72 B pre-boxed figure used a `params object[]`, where real code passes `Span<any>`
+    (logger.cs:241-242).
+  - Arm A's real any-slot cost is unmeasured, and its advantage over the cache there is smaller than the
+    draft said.
+
+### 8.1R.7 The -annotations census, corrected (fixes 19-22)
+
+The draft's 8.1.5 table counted HEADER lines where COORD counted BLOCK lines. COORD's figures are cited here
+as COORD's, and they replace the draft's:
+- denominator 3,912 files, not 3,925 (the draft did not record the predicate behind its figure);
+- package_init prose 375 lines, not 97;
+- metadata anchors 1,890 lines, not 333;
+- package_info prose about 21.8K lines, not about 15K;
+- a default flip moves about 29K lines.
+
+The emitter list gains testConversion.go:1604, cgoDynamicImports.go:217 and refVerdictPublication.go:69.
+
+**Churn outside src/core (fix 20, COORD's figures):**
+- 399 `.cs.target` goldens (775 lines) and 15 Performance `.cs` files;
+- docs/README.md:334, ConversionStrategies.md:851 and ConversionStrategies-Reference.md:6968;
+- the hand-owned runtime/mranges_impl.cs, which a flip does not touch;
+- drift in every disclosure that cites a C# `path:line`.
+
+The flag must also reach the `-tests` seed and `check-no-regression.ps1`.
+
+**The prose-reader check already fails (fix 21).** packageInfoWriter.go:236-242 copies existing lines
+through verbatim, and `migrateProseBlock` finds a block by its first prose line (:36, :117-150). So:
+- changing the emitters alone leaves the committed prose in place, and the seat needs a strip pass;
+- once stripped, `verbose` cannot restore the prose in files already written unless the writer re-inserts it
+  on every emission. That is a design decision for the seat, not a flag default.
+
+**Never governed, extended (fix 22):**
+- the 225 `go2cs_test_host.cs` `DO NOT EDIT` headers (testConversion.go:4275);
+- both `funcPlaceholderLead` readers: platformHandOwn.go:384 and manualConversionDestination_test.go.
+
+The `/* expr */` const-echo family (convBinaryExpr.go:135, :961; convCallExpr.go:6170; about 1.8-2.1K lines,
+COORD's count) is Go's own source text shown beside the folded C# value. It is **on at `normal`, off at
+`quiet`**, the same class as the end markers.
+
+## 8.1.x The module-init LITERAL REGISTRATION TABLE, sized (fix 10)
+
+**The mechanism.** The go2cs generator already runs on every converted project, and already emits a
+`[ModuleInitializer]` (AdapterImplTemplate.cs:108-113). It would emit one more, listing every distinct u8
+literal of the compilation:
+- `Register("n"u8); Register("%s: %v"u8); …`
+- golib keeps one process-wide table keyed by (address, length).
+- The operator (string.cs:460) looks the span up. A hit returns the literal's one `@string`; a miss copies
+  exactly as today.
+
+**The first probe: does Roslyn store identical u8 data once per module? YES.** `probes/c2-rva-dedup/` gives
+the same results under JIT and under NativeAOT:
+- the same address from two methods, from a nested type, and from `Generic<int>` and `Generic<string>`;
+- the same address for 1 B and for 32 B literals;
+- stable across calls;
+- no prefix sharing: `"abc"` and `"abcd"` start at different addresses, and `"xabc"u8[1..]` is not
+  `"abc"`.
+
+So the one `Register("n"u8)` in the initializer names the very address that every `"n"u8` in the module
+hands the operator. The C# specification does not promise this; Roslyn does it. A golib test pins it, so a
+compiler change fails loudly instead of silently turning every hit into a miss.
+
+**Measured (V10):**
+- Hit: 3.7-4.6 ns at every length from 1 to 32 B in all three modes, and 0 counted. That is 2.7-3.6× cheaper
+  than today under JIT and 1.7-2.2× under NativeAOT, and 1.2-3.3 ns above a hoisted field.
+- Miss on a non-literal: +1.5 ns with tiering off, +7.6 tiered, +1.9 AOT.
+- It never inserts, so a miss allocates exactly today's one object.
+- Eviction and thrash cannot occur.
+- It has no length gate.
+
+**Why an address key is acceptable here when 8.1.3 (4) refused one.** That refusal was about COLLISIONS in
+a lossy cache, where ASLR would change which literals collide from run to run. This table is exact: it
+compares the full key and never evicts. The address differs per run, but it is registered in the same run,
+so every registered literal is found in every run. Membership is run-invariant.
+
+**How big it gets.** Measured at this branch's tree: the regex `"…"u8` over 4,045 tracked `src/core` `.cs`
+files (golib excluded), grouped by directory, which approximates one assembly per directory:
+
+| scope | directories | occurrences | distinct per directory, summed | median | p90 | max |
+|:--|--:|--:|--:|--:|--:|--:|
+| production | 443 | 27,809 | 20,584 | 6 | 103 | 2,230 (html) |
+| tests | 225 | 86,887 | 50,102 | 63 | 607 | 3,805 (net/http) |
+
+A process registers only the modules it loads.
+
+**Module-init cost at the largest module**: `--regcost`, 3,805 distinct literals, 1-40 B, one generated
+method, eager values:
+
+| mode | first call | work alone (second call) |
+|:--|--:|--:|
+| JIT, tiering off | 46.5-69.3 ms | 0.15-0.24 ms |
+| JIT, tiered | 46.0-47.1 ms | 0.26-0.27 ms |
+| NativeAOT | 1.18-1.48 ms | 0.10-0.13 ms |
+
+Under JIT the cost is almost all the JIT of one 3,805-call method, paid once per test-assembly process.
+The p90 production module (103 literals) scales to about 1-2 ms. The shape that would cut the JIT cost is to
+register only the literals the semantic model shows reaching an `@string` conversion, which the generator
+can see. That filter is unmeasured.
+
+**Eager or lazy values:**
+- Eager (the probe): one `byte[]` per literal at init, uncounted and outside every window.
+- Lazy: the entry holds only the key, and the first hit publishes the array with a CAS. The first
+  evaluation then costs one counted copy. AllocsPerRun's warm-up run absorbs it (testing.cs:725), but a
+  single-shot measurement would not.
+- Eager is recommended: memory is bounded by the module's literal bytes, and the count never moves.
+
+**Concurrency:**
+- Registration takes a lock. Modules initialise on whichever thread first touches them.
+- A registration that grows the table publishes a new table; that is the only write.
+- Reads take no lock.
+
+**Hazards:**
+- A non-literal never matches, because its address is heap or stack memory, never the module image. So it
+  is never undercounted.
+- A write through `unsafe.StringData` corrupts that literal for every later evaluation. The hoisted field
+  has the same hazard; the content cache has a wider one (non-literals too). It is Go UB, and Go faults.
+- Requires non-collectible modules, which is the default; go2cs uses no collectible load context.
+
+**Gates:**
+- 8.1R.5's full list;
+- a generator test that the initializer lists every distinct literal;
+- the golib dedup pin above;
+- NativeAOT's module-initializer order checked against the first literal use.
+
+## 8.2 THE sstring-FIRST MODEL -- a view where Go would not allocate
+
+`sstring` is a ref struct view over UTF-8 bytes (sstring.cs:19-46). C# enforces most of Go's escape rules
+on it at compile time: it cannot be boxed, stored in a field, array or map, captured by a lambda, or used as
+a type argument. A literal viewed as an `sstring` is Go's RODATA string: zero allocations and zero lookup
+at ANY length. That is why the owner asked for this model first.
+
+### 8.2.1 The parity target: Go 1.24.13's no-copy rules, read in cmd/compile
+
+| # | idiom | Go 1.24.13 | where |
+|:--|:--|:--|:--|
+| G0 | a string literal | never allocates (RODATA) | — |
+| G1 | `m[string(b)]` read, and `m[T{…, string(b), …}]` with a nonempty literal field | zero-copy view, any length | walk/order.go:321-345 |
+| G2 | `string(b)` as an operand of `== != < <= > >=` | zero-copy view, any length | walk/order.go:1410-1425 |
+| G3 | `switch string(b)` with side-effect-free cases | zero-copy view, any length | walk/switch.go:55-68 |
+| G4 | a non-escaping `string(b)` (a local, or `range string(b)`) | 32 B stack buffer: free ≤ 32 B, heap above | walk/convert.go:229-243 |
+| G5 | a non-escaping concatenation (e.g. inside a comparison) | 32 B stack buffer for the result | walk/expr.go:483-495 |
+| G6 | `range []byte(s)` (the reverse direction) | zero-copy | walk/order.go:870-880 |
+| — | `m[string(b)] = v` | copies (the key is stored) | — |
+
+`range string(b)` is G4, not a zero-copy site. `m[string(b)] = v` copies in Go too, so a write is never an
+opportunity.
+
+### 8.2.2 Where go2cs emits sstring today, and the census of where it could
+
+**Today, at this branch's tree:**
+- 381 `((sstring)x)` sites and 3 `sstring` locals, in 154 files (54 production);
+- emitted by three passes plus a hoist: `markSStringEligible` (escapeAnalysisOperations.go:1352),
+  `markSStringBinaryOperandConversions` (:1568), `markSStringSwitchConversions` (:1599), and
+  `planSStringHoists` (sstringHoistOperations.go:56).
+- All three require an unnamed `[]byte` source that is never written while the view is alive.
+- No literal is ever an `sstring` today.
+
+**Census of the idioms** (Go source of `std` plus tests, the 8.1R.1 walk; a site is a `string([]byte)`
+conversion):
+
+| idiom | production | tests | go2cs today | gap to Go |
+|:--|--:|--:|:--|:--|
+| G1 `m[string(b)]` read | 25 | 5 | copies | **full**: golib `map` has no span lookup |
+| (`m[string(b)] = v`) | 11 | 4 | copies | none: Go copies too |
+| G2 `string(b)` compared | 53 | 280 | view (both operands safe) | residual: operands the safety test refuses |
+| G5 concatenation inside a comparison | 1 | 30 | operand viewed, result allocates | result ≤ 32 B |
+| G4 `range string(b)` | 0 | 0 | — | — |
+| G3 `switch string(b)` | 7 | 1 | view | none |
+| `string(b)` as a call argument | 111 | 379 | copies | needs an `sstring` parameter (8.2.3) |
+| `string(b)` bound to a name | 99 | 225 | view only if every use is a safe read | G4 (≤ 32 B) and beyond |
+| `string(b)` returned | 135 | 42 | copies | none: it escapes |
+| elsewhere | 14 | 26 | copies | case by case |
+
+The biggest population is not in this table: **literals passed to string PARAMETERS**. Go's escape
+analysis is the oracle for those. The measurement is `go build -a -gcflags=-m std` (GOOS=windows,
+go1.24.13; 136,781 lines), joined by declaration position to every string parameter and to every literal
+argument:
+
+| | noescape | leaks to heap | leaks to result | no verdict |
+|:--|--:|--:|--:|--:|
+| production string PARAMETERS (919 functions have ≥ 1 noescape string param) | 1,115 (40%) | 1,379 | 249 | 19 |
+| literal args → string params, production | 4,835 (2,491 format-position) | 3,155 | 73 | 47 |
+| literal args → string params, tests | 18,711 (16,655 format-position) | 6,080 | 884 | 3,248 |
+
+So 60% of production literal arguments, and 65% of test ones, flow into a parameter Go proves does not
+escape. That is the reach of 8.2.3.
+
+### 8.2.3 The opportunities, with the proof each needs and its visible delta
+
+**O1 -- `sstring` PARAMETERS for proven non-escaping, non-materializing string parameters.**
+- **The change:** the callee's `@string format` becomes `sstring format`.
+  - A literal argument binds `"%s"u8` with no copy at any length, which is Go's G0 exactly.
+  - An `@string` argument converts implicitly and free (sstring.cs:172).
+  - An `sstring` argument passes through.
+- **Go's verdict is NECESSARY, NOT SUFFICIENT.** C# forbids four things Go's analysis allows for a
+  non-escaping value:
+  - capture by a closure: `log.Printf`'s `format` is noescape in Go but captured by the closure it hands
+    `l.output`;
+  - conversion to `any`: Go's analysis tracks the interface value, while C# boxes;
+  - use as a generic type argument;
+  - a store into a struct local's field.
+  
+  Each is a compile error, not a silent bug, which is the property that makes this safe to attempt.
+- **The cost that decides it:** every use that must MATERIALIZE, meaning an `sstring` passed onward to an
+  `@string` parameter or into `any`, copies. Today an `@string` parameter is passed on for free. So O1 is a
+  win only where no materializing use runs on the hot path. The predicate is a FIXED POINT over the call
+  graph, with the same shape as Go's own analysis.
+  - Example: fmt's format chain is noescape at every link: `Sprintf` print.go:237, `Fprintf` :222,
+    `doPrintf` :1019, `buffer.writeString` :107. Its `doPrintf` also passes `format` to its parse helpers
+    and `utf8.DecodeRuneInString`, and each of those needs the same verdict.
+  - Across packages, the verdicts are published the way `refVerdictPublication.go` already publishes ref
+    verdicts.
+- **The one golib obstacle:** `ReadOnlySpan<byte> → sstring` is EXPLICIT (sstring.cs:182-188), because an
+  implicit form makes `"…"u8 == x` ambiguous against `@string`'s implicit span operator (CS0034).
+  - With it explicit, every literal call site would read `(sstring)"%s"u8`. That visible cast per site is
+    rejected.
+  - **Proof needed first:** flip the operator to implicit, with exact-match comparison operators for every
+    pair that turns ambiguous (Tier A's span operators are the precedent), and build the corpus clean.
+- **Visible delta, if that proof holds:** the callee's parameter type (`sstring format` for
+  `@string format`). The vocabulary is already in 154 files, and call sites do not change.
+- **Reach:** up to 4,835 production literal arguments, 2,491 of them in the format position arm B holds.
+  The share that survives the C# filters and the materialization fixed point is **unmeasured**. It is the
+  first census to run.
+
+**O2 -- G1, the map read.**
+- `map<@string, V>` gains `this[sstring key]` over .NET's alternate lookup (`Dictionary.GetAlternateLookup`,
+  whose comparer takes `IAlternateEqualityComparer<ReadOnlySpan<byte>, @string>`; golib's map is a
+  `Dictionary` with its own comparer, map.cs:157).
+- The converter marks `m[string(b)]` reads as it already marks comparison operands. The key is never
+  stored, so no further proof is needed.
+- **Visible delta:** `m[((sstring)b)]`, the shape already emitted at comparisons.
+- **Reach:** 25 production, 5 test.
+- **Parity:** exact, any length.
+
+**O3 -- a literal consumed only by non-escaping uses**, e.g. `s := "abc"` used only by reads, or a
+function-local const.
+- `sstring s = (sstring)"abc"u8;`. It needs O1's implicit operator to drop the cast.
+- **Visible delta:** the local's type.
+- It overlaps Tier C's hoisting, which already reaches these sites at 1.3-2.6 ns with no type change, so
+  its gain is parity at ANY length without a field. It ranks below the table.
+
+**O4 -- G4, widening `markSStringEligible` past "safe reads"** to the oracle's `string(b) does not escape`.
+- Go stops at 32 B, and an sstring view has no limit, so above 32 B go2cs would allocate LESS than Go. That
+  is harmless for rows that assert upper bounds, and it is stated here so it is not mistaken for parity.
+- **Reach:** up to 99 production / 225 test bindings, before the oracle filters them.
+- Most of the call-argument sites (111 / 379) need O1 to be useful.
+
+**O5 -- G5, the concatenation result inside a comparison.**
+- A golib comparison over the parts (`a + b == c` without building `a + b`) would need an emitted helper,
+  which is a visible delta, for 1 production site.
+- Ranked last.
+
+### 8.2.4 Arms A, B and C against an sstring view
+
+| arm | member | served by a view? | what remains at the boundary |
+|:--|:--|:--|:--|
+| A | log/slog `...any` keys `n s d` | **no**: each key is boxed into `Span<any>` | the box, plus today's copy unless the table removes it |
+| A | log/slog LogAttrs keys `a`-`f` | **no**: `slog.String(key, …)` stores `key` in `Attr.Key` (Go: leaks) | the copy; the table removes it |
+| B | log TestDiscard `Printf("%s", …)` | **no, without restructuring**: Go-noescape, but captured by log.go's closure | the copy; the table removes it |
+| B | fmt TestCountMallocs's format literals | **yes, through O1** (the fmt chain above) | the pack and the box (8.1R.4's cliff) |
+| C | strconv `fnAtoi` / `fnParseInt` / `fnParseUint` | on the success path; the error path materialises into `NumError` (Go stores the literal pointer there for free) | the error path's copy; the approved hoist has none |
+
+**The cost at the `any` / `@string` boundary**, where a view must materialize, is exactly today's: one
+counted copy (about 11-15 ns) plus, at `any`, the uncounted box. Round 1 measured the log/slog pack at
+86 ns / 264 B / 3 counted today, against 78 ns / 168 B / 0 counted with the copy removed.
+
+### 8.2.5 Ranking: parity gain × corpus reach
+
+| rank | opportunity | parity gain | reach (production / tests) | visible delta | proof still owed |
+|:--|:--|:--|:--|:--|:--|
+| 1 | O1 `sstring` parameters | exact G0 at any length on the hot path | ≤ 4,835 / 18,711 literal args | callee param type | implicit-operator build; C#-filter census; materialization fixed point; cross-package verdicts |
+| 2 | O2 map read | exact G1 | 25 / 5 | `((sstring)b)` at the index | none beyond the golib overload |
+| 3 | O4 wider local views | G4, and beyond it at > 32 B | ≤ 99 / 225 | local's type | oracle join per site |
+| 4 | O3 literal locals | G0, where hoisting already gives count parity | overlaps Tier C | local's type | O1's operator |
+| 5 | O5 concat in comparison | G5 | 1 / 30 | emitted helper | — |
+
+## 8.3 RECOMMENDATION -- three tiers, in order
+
+**Tier 1: sstring where it is provable.**
+- Land O2 first (small, exact, and the cast shape already exists).
+- Then take O1 in three steps, each on its own seat:
+  - (i) the implicit-operator build proof;
+  - (ii) the census joining Go's `-m` verdicts to the C# filters and the materialization fixed point;
+  - (iii) the converter change on the population (ii) proves, with its two-seeded footprint.
+- *Readability:* the parameter type reads `sstring`, a Go-string word, and call sites stay as Go wrote them.
+- *Performance:* no allocation, no lookup.
+- *Parity:* Go's own rule, at any length.
+
+**Tier 2: the registration table (8.1.x) for everything a view cannot reach.** That covers literals stored,
+boxed, returned, or passed to leaking parameters.
+- **The content cache is retired**: the table beats it on every axis measured:
+  - hit at 16 B: 3.8-4.6 ns against 14.5-14.8;
+  - miss tax: +1.5-7.6 ns against +15.8-25.2;
+  - exactness: never evicts, never undercounts;
+  - coverage: no gate, so all 15,806 long format literals and 374 long degenerate literals are in.
+- It keeps the cache's one virtue: zero visible delta, with no converter change at all.
+- Its costs are:
+  - a generated initializer, about 47 ms under JIT at the largest test assembly and 1.2-1.5 ms under
+    NativeAOT;
+  - eager memory bounded by the module's literal bytes;
+  - a dependency on Roslyn's u8 deduplication, pinned by a test.
+- *Readability:* unchanged.
+- *Performance:* 1.7-3.6× faster than today by mode, 1.2-3.3 ns short of a field.
+- *Parity:* COUNT parity at every `@string`-typed site at any length (the `any` box remains).
+- **Predictions (UNMEASURED on the members):** §8's counts hold: log/slog 2_pairs 10 → 8, … attrs9 28 → 19;
+  log TestDiscard 2 → 1. Its sweep footprint is wider than §8's members, and 8.1R.4's cliff is named in
+  advance at fmt's `%x` legs.
+
+**Tier 3: hoisting, where it is already ruled or where time matters.**
+- Arm C lands as approved: its own name, 1.3-2.6 ns, and no naming decision reopened.
+- Tier C as landed stays.
+- Arms A and B are **not needed for count parity** once Tier 2 lands. Their positional names would buy only
+  the 1.2-3.3 ns between a table hit and a field.
+- *Readability:* a hoisted name per literal.
+- *Performance:* the fastest form measured.
+- *Parity:* count parity (identity parity too: one backing per literal).
+
+**Ordering, and what each step costs the owner's three axes:**
+- Tier 2 alone gives count parity everywhere at once with no visible change, so it is the step to take
+  first if only one is taken.
+- Tier 1 is the step that makes the converted code BEHAVE like Go's compiler rather than compensate at
+  runtime, and it is the only tier that is free at run time. It is a converter campaign sized by its own
+  census, not a draft-sized change.
+- Tier 3 is the performance tier and stays where the owner has already accepted its names.

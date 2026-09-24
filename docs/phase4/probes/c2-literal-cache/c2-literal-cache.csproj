@@ -11,6 +11,10 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <ServerGarbageCollection>false</ServerGarbageCollection>
   </PropertyGroup>
+  <!-- The regcost switch needs RegBulk.cs, which gen-regbulk.sh writes (189 KB, so it is not committed). -->
+  <PropertyGroup Condition="Exists('RegBulk.cs')">
+    <DefineConstants>$(DefineConstants);REGBULK</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <!-- The REAL golib @string and AllocationCounter, not a mock of them. -->
     <ProjectReference Include="../../../../src/core/golib/golib.csproj" />

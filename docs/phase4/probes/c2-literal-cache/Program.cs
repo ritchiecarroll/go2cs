@@ -48,7 +48,10 @@ static class Program
     static void Main()
     {
         AllocationCounter.Enable();
-        Console.WriteLine($".NET {Environment.Version}  {System.Runtime.InteropServices.RuntimeInformation.OSDescription}  cores={Environment.ProcessorCount}  JIT tiering off");
+        Console.WriteLine($".NET {Environment.Version}  {System.Runtime.InteropServices.RuntimeInformation.OSDescription}  cores={Environment.ProcessorCount}  csproj TieredCompilation=false (NativeAOT: no JIT)");
+        if (Environment.GetCommandLineArgs().Contains("--round2")) { Round2.Run(); return; }
+        if (Environment.GetCommandLineArgs().Contains("--eviction")) { Round2.RunEvictionOnly(); return; }
+        if (Environment.GetCommandLineArgs().Contains("--regcost")) { RegCost(); return; }
         if (Environment.GetCommandLineArgs().Contains("--tail")) goto tail;
         if (Environment.GetCommandLineArgs().Contains("--refined"))
         {
@@ -148,5 +151,23 @@ static class Program
         foreach (var th in threads) th.Start();
         foreach (var th in threads) th.Join();
         Console.WriteLine($"   content mismatches: {bad} of {8 * 2_000_000 * 2} results");
+    }
+
+    // §8.1.x: the module-initializer cost at the corpus's largest module. The first call includes the
+    // JIT of one 3,805-call method (none under NativeAOT); the second call is the dedup path alone.
+    static void RegCost()
+    {
+#if REGBULK
+        int before = Lit2.Registered;
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        RegBulk.Run();
+        double first = sw.Elapsed.TotalMilliseconds;
+        sw.Restart();
+        RegBulk.Run();
+        double again = sw.Elapsed.TotalMilliseconds;
+        Console.WriteLine($"registered {Lit2.Registered - before} of {RegBulk.Count} (Roslyn dedup would show fewer); first call {first:F2} ms; second call (all present) {again:F2} ms");
+#else
+        Console.WriteLine("RegBulk.cs is absent: run `bash gen-regbulk.sh 3805 > RegBulk.cs` and rebuild");
+#endif
     }
 }

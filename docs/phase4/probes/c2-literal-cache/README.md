@@ -42,3 +42,53 @@ dotnet bin/Release/net10.0/c2-literal-cache.dll --refined  # V6/V7
 ```
 
 Captured output: [`output-linux.txt`](output-linux.txt).
+
+## Round 2 (2026-09-24, §8.1R and §8.1.x)
+
+Added for COORD's review of the draft. `Caches2.cs` holds the RECOMMENDED form, measured instead of
+extrapolated:
+- `V8`: 2-way set-associative, 2,048 sets, FNV-1a, ≤ 16 B, no write on a hit, a miss fills way 0 if empty
+  and otherwise overwrites way 1;
+- `V9`: the same table with a word-at-a-time hash;
+- `V10`: the module-init literal REGISTRATION table, keyed by (address, length), exact, and never evicted.
+
+`Round2.cs` holds the rows:
+- a noise-floor duplicate of the baseline;
+- hits at 1, 8, 12, 16 and 32 B;
+- misses and the gate's own cost;
+- three contents thrashing one set;
+- PerfStringMatch's `"// "u8` shape;
+- a cross-thread eviction attack;
+- the 8-thread stress.
+
+```
+dotnet bin/Release/net10.0/c2-literal-cache.dll --round2                                # tiering off (the csproj)
+DOTNET_TieredCompilation=1 dotnet bin/Release/net10.0/c2-literal-cache.dll --round2     # tiered (env override)
+dotnet publish -c Release -r linux-x64 -p:PublishAot=true -o <dir> && <dir>/c2-literal-cache --round2
+dotnet bin/Release/net10.0/c2-literal-cache.dll --eviction                              # the eviction arms alone
+bash gen-regbulk.sh 3805 > RegBulk.cs && dotnet build -c Release && dotnet bin/Release/net10.0/c2-literal-cache.dll --regcost
+```
+
+`RegBulk.cs` (189 KB) is generated and not committed. The csproj compiles `--regcost` only when the file
+exists.
+
+Captured output: [`output-round2-linux.txt`](output-round2-linux.txt).
+
+**Read these corrections before its first section:**
+- **The header line** of the tiered and NativeAOT captures says "JIT tiering off". That was static text in
+  `Program.cs`, fixed after the runs. Each section's own `tiered=` line and its heading give the mode.
+- **The tiering-off capture's eviction arms are mislabelled.** It predates the `WayOf` instrumentation, and
+  its "literal in way 0" arm had in fact landed in way 1, because earlier rows had filled way 0 of its set.
+  The `--eviction` section is the corrected measurement.
+- **The thrash row** was labelled "per conversion". One operation is three conversions, so divide both
+  `ns` and `counted` by 3. The label is fixed in the source.
+- **The first `--eviction` runs** read 1.0 per 1M in way 0. That was Round2's own static constructor
+  minting its two hoisted fields inside the window. The constructor now runs before the window, and the
+  captured runs are after the fix.
+
+## The RVA deduplication probe
+
+[`../c2-rva-dedup/`](../c2-rva-dedup/Program.cs) asks the question §8.1.x's table depends on: does Roslyn
+store identical u8 literal data ONCE per module, so that every `"n"u8` hands out the same address? Its
+output under JIT and NativeAOT is at the end of `output-round2-linux.txt`. The printed addresses differ per
+run (ASLR); the equalities are the result.
