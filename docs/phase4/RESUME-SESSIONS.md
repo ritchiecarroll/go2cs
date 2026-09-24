@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 13:46 -- SAVE-STATE refresh (ledger through mailbox 2d76644da6): section 1b is the COORD new-session prompt: master ebb4acb8cf; THE 1.24.13.2 PACKAGING TRAIN ASSEMBLED on the i7 (t1242), battery PART 1 GREEN, PART 2 running (behavioral output phase, then GolibTests x2); the owner's string-tier and signature-flip rulings recorded; the owner-approved disk cleanup (42.7 GB) queued for after the publish; the owner asks to be told when R's net/http fix lands; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 14:11 -- SAVE-STATE refresh (ledger through mailbox 410cde53f0): section 1b is the COORD new-session prompt: master 4c53b02a0a -- THE 1.24.13.2 LINUX PACKAGING TRAIN LANDED (all gates green; 2 pre-existing behavioral reds queued); NEXT the owner runs the 1.24.13.2 release, then COORD's release record and the approved cleanup; the string-tier work under way (C2 census fixes then arm C; R views+G8+G10; G V-fix 11; the sstring TWIN compile probe owed by COORD); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -251,46 +251,25 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
  - EXTERNAL WAIT: the go.* NuGet ID-prefix reservation. The owner's request is pending with NuGet, so there is no owner
    decision to chase. COORD's 2026-09-22 advice (ledger "NuGet 'go.' OCCUPANCY") was a narrowed follow-up to the 30 scoped
    std-root prefixes.
- - THE 1.24.13.2 PACKAGING TRAIN'S UNION GATE IS GREEN; THE OWNER'S GATE IS MET (ledger "STAMP · e12ba22299"). The README
-   walkthrough is byte-identical to go run on WSL linux and on windows, from a rehearsal feed. The four refs are the len/cap
-   seat, seat 1, seat 2 (with its follow-up) and seat 3 (with its rework and corpus half); read the tips by ls-remote.
-   OWED BY G BEFORE ASSEMBLY:
-   - seat 3's go2cs-src.projitems registration (the converter suite is RED at the tip without it) and a green suite at the
-     union;
-   - two mutation-proven test pins (the types.Identical guard; the GOROOT-scope wiring);
-   - the cgo build-context alignment;
-   - Reference wording;
-   - a README platforms note plus Roadmap row docs commit;
-   - the math/big BANK commit (230+1 -> 231+0 with its proof page).
-   ALL OWED ITEMS ARE DONE (final tips: len/cap ebc5a66994, seat 1 501b7e4c27, seat 2 43c8d5aac7, seat 3 26042b3a92,
-   docs d18c5c008f; record-only ref claude/g-union-1.24.13.2-rehearsal is NOT for merge). COORD ASSEMBLED the train LOCALLY
-   on the i7 in worktree C:/go2cs-tmp-coord/t1242: five signed --no-ff merges on ebb4acb8cf, all clean, HEAD 6a104f8d0c,
-   tree 53f52233fc. Pre-battery checks: -VerifyOnly "Tree is releasable" (next 1.24.13.2), and the identifier census over
-   the 31-file train diff is CLEAN. THE BATTERY IS RUNNING from a per-run copy, scratchpad t1242-battery-run1.sh; its
-   SUMMARY is in scratchpad/t1242-logs. Legs, in order: the converter suite, the roster guard, go2cs.slnx, GolibTests, CNR,
-   the full behavioral suite, a purge, then H7 windows. The worktree is FROZEN while it runs. G was asked whether its union
-   tree equals 53f52233fc.
-   BATTERY PART 1 READINGS: converter suite PASS; roster guard 1,821 PASS under pwsh 7 (the 5.1 red is a pre-existing
-   instrument artifact); go2cs.slnx 0 errors; GolibTests Debug 3 FAIL (only the new len/cap guards; G's Inconclusive fix
-   da5c9345ea merges in part 2) and Release 842/0 PASS; CNR NO REGRESSION across 730; H7 windows CS 0, sites 0, 343/343.
-   PART 2 (t1242-battery2-run1.sh): merge da5c9345ea, purge, the FULL behavioral suite (part 1's refused on its 25 GB
-   preflight), then GolibTests at Debug and Release.
-   OWNER-APPROVED CLEANUP (2026-09-24), to run AFTER the 1.24.13.2 publish, about 42.7 GB, from COORD's read-only audit:
-   - REMOVE these C:/go2cs-tmp-coord children: a2 (26.2 GB of build output), abpost-stage, abpost, abcut, abh12, abrel,
-     abcensus, abh6, acdocs, ard, docs-0915, h5arm, h9close, hdr-coord-orphan-disclosure-check, hdr-coord-stamp-guard, instr,
-     land-db, r1, r2, rb-h5, rv-seat3b, ss-skill, tr1, tr4, mbx;
-   - REMOVE C:/Projects/go2cs-mailbox-coord;
-   - REMOVE the .claude/worktrees agent-a661891ea6bb97f7c, agent-adaaab5addf5419c9 and agent-abbdda64836151d07, plus the
-     seven stale locked agent-* registrations (unlock, then prune);
-   - PURGE the build output of t48-seat12.
-   NOT approved, the owner's call: d0913b, kick, C:/go2cs-archive, and the app's own session worktrees. Method: for each
-   entry, git status must SUCCEED and print nothing; remove children only (rm -rf plus git worktree prune -v, because
-   worktree remove fails on long paths); afterwards the main checkout shows no ' D'. KEEP hnd, t1242 (until landed),
-   C:/Projects/go2cs and go2cs-mailbox.
-   OWNER ASK: TELL THE OWNER when R's net/http fix (the synctest train) LANDS on master, so the runtime project resumes.
-   IF THIS SESSION DIES MID-BATTERY: the scratchpad is gone, so re-create t1242 from the five tips above and rerun the legs.
-   Then: announce on the ledger, push master (a fast-forward from ebb4acb8cf), and the OWNER RUNS the 1.24.13.2 release
-   (step (c)'s procedure).
+ - THE 1.24.13.2 LINUX PACKAGING TRAIN HAS LANDED (2026-09-24 ~14:15; ledger "ANNOUNCE · 4c53b02a0a"): master = 4c53b02a0a,
+   a fast-forward from ebb4acb8cf by SIX signed merges:
+   - len/cap ebc5a66994 (with the math/big bank, 231+0);
+   - seat 1 501b7e4c27 (go.lib RID compile asset);
+   - seat 2 43c8d5aac7 (per-GOOS metadata + the GoCompileRuntimeIdentifier pin);
+   - seat 3 26042b3a92 (Identical-guarded trampoline forwarders + prlimit public);
+   - docs d18c5c008f (the README platforms note, the Roadmap row);
+   - the GolibTests Debug guard da5c9345ea.
+   THE GATES OF RECORD, all green: converter suite; roster 1,821 (pwsh 7); go2cs.slnx 0 errors; GolibTests Debug 836/0/20 and
+   Release 842/0/14; CNR byte-identical across 730; behavioral 691/691/691 with Output 663/2/26 (the 2 also fail at master
+   ebb4acb8cf on the i7: PRE-EXISTING, queued); H7 windows and linux 343/343; the owner's walkthrough GREEN on linux and
+   windows. -VerifyOnly at master: releasable, next 1.24.13.2. The i7's main checkout is at 4c53b02a0a, clean.
+   NEXT:
+   (1) THE OWNER RUNS THE 1.24.13.2 RELEASE, with step (c)'s procedure, at the i7 console in C:/Projects/go2cs on master
+       4c53b02a0a.
+   (2) After the publish, COORD does (d): the release record (version.props counter 2, docs/validation/1.24.13.2, the
+       retargeted READMEs), announce, push the commit and the tag nuget-1.24.13.2, spot-check nuget.org.
+   (3) Then the OWNER-APPROVED CLEANUP (below), plus the t1242 worktree.
+   (4) Then the next train: R's synctest re-entry + C2's atomic-loads PICK.
  - UP NEXT, by OWNER ORDER (ledger 93410e7ef9): FIX THE LINUX PACKAGING PROBLEM. Owner G, after the in-flight len/cap
    seat. G SIZED IT (scratch prototypes on WSL against the published 1.24.13.1): it is THREE gaps. With all three hand-fixed,
    walkthrough steps 3-4 build on Linux and `dotnet run` output is byte-identical to `go run`. RULED by COORD (ledger
@@ -320,6 +299,9 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    - d15 gofmt; c6-c9; the log/syslog IVT union;
    - the -tests index.md rewrite defect; clean-bin's src/gen gap; the go/printer testdata refresh;
    - the counter-0 dry-run README writes; the BoGo figures in code comments.
+   - PRE-EXISTING behavioral reds on the i7: FuncLiteralCallerNames (Go closure names vary with inlining) and
+     GoroutineWaitState (timing) fail at master ebb4acb8cf AND at the 1.24.13.2 union; G-LAPTOP reads the same. Find why P3
+     read green, or disclose them with a named cause.
    - an INSTRUMENT item: check-roster-format.ps1's 'ledger scope' self-test fails under Windows PowerShell 5.1, even on
      master (it passes under pwsh 7). Either make the guard 5.1-clean or have every caller state pwsh 7; the train-48
      battery shape calls it through powershell.exe (found 2026-09-24 in the 1.24.13.2 battery).
@@ -381,7 +363,10 @@ claude/g-typed-nil-func-parked, claude/g-typed-nil-func-sizing, claude/g-unfreez
 The M9 sweep scratch and branch are deleted.
 DONE post-hop (all UNMERGED): claude/g-rec-b-oracle 814603bbbb (the REC-B -m oracle); claude/g-context-bprime-read da3402f3d3
 (routed to I3, sized first); claude/g-rsa-mathbig-decomp 6ab65f3409 (rsa closed to the object; math/big's bytes are len/cap
-boxing). CUT 2026-09-24 (ledger "RULING · 6c9aaae62e / 4378ae6cf2"), both UNMERGED:
+boxing). LANDED 2026-09-24 in master 4c53b02a0a (ledger "ANNOUNCE · 4c53b02a0a"): the len/cap seat, packaging seats 1-3, the walkthrough docs
+and the GolibTests guard; the history below is superseded. NEXT: V-fix 11 + the guard on REC-F's tip, onto 4c53b02a0a.
+The train scratch may be reclaimed; keep the record ref claude/g-union-1.24.13.2-rehearsal.
+(HISTORY) CUT 2026-09-24 (ledger "RULING · 6c9aaae62e / 4378ae6cf2"), both UNMERGED:
 - claude/g-named-slice-len (the constrained len/cap golib seat, on 38529c765a, with the math/big retirement commit on top).
   GATE-COMPLETE and ACCEPTED for a post-release train (ledger "ACCEPT · b95abf9638"): behavioral 691/691 and Output 663/2/26,
   where the 2 failures also fail at base on G-LAPTOP (host readings); CNR byte-identical across 730. The roster row
@@ -2152,3 +2137,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 12:09 -- SAVE-STATE refresh: 1b records battery part 1 readings, part 2 running, and the owner's net/http ping ask.
 - 2026-09-24 13:11 -- SAVE-STATE refresh: 1b records C2's O1 census and the owner's signature-flip ruling.
 - 2026-09-24 13:46 -- SAVE-STATE refresh: 1b records the owner-approved post-publish cleanup list.
+- 2026-09-24 14:11 -- SAVE-STATE refresh: 1b/1c record the 1.24.13.2 train LANDED at 4c53b02a0a and what is next.
