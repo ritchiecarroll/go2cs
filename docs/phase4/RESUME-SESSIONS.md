@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 16:04 -- SAVE-STATE refresh (ledger through mailbox 1a10a415c4): section 1b is the COORD new-session prompt: go2cs 1.24.13.2 PUBLISHED (the record is master e06494c6f8, the index row 9a5f63041b); the owner-approved cleanup DONE (76 GB free); the i7 idle for the owner's disk install; NEXT G's nuget.org walkthrough, then TRAIN A (synctest + atomic pick + mustBeKind; ping the owner when it lands) and TRAIN B (golib strings/allocs: REC-F, V-fix 11 ACCEPTED, REC-C, Float bits, R views+G8+G10, arm C), plus the implicit-operator CS0121 build before the twin pilot; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 16:17 -- SAVE-STATE refresh (ledger through mailbox 095f97b8c9): section 1b is the COORD new-session prompt: go2cs 1.24.13.2 PUBLISHED and its nuget.org smoke GREEN on linux and windows; the cleanup DONE (76 GB free); the i7 idle for the owner's disk install; NEXT TRAIN A (synctest + atomic pick + mustBeKind; ping the owner when it lands) and TRAIN B (golib strings/allocs), plus the implicit-operator CS0121 build before the twin pilot; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -279,7 +279,8 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    - RELEASE-DAY RULE: no GPG signing on the release machine during Phase 2, or `disable-scdaemon` in gpg-agent.conf (the
      owner's call). To resume a failed Phase 2: the signer with -Apply -Overwrite, then the push; NEVER re-run release-nuget.
    NEXT:
-   (1) nuget.org indexing, then G's post-publish walkthrough against nuget.org only (WSL linux + windows).
+   (1) DONE: G's post-publish smoke is GREEN on WSL linux and windows, nuget.org only (ledger "STAMP · 9a5f63041b · THE
+       1.24.13.2 POST-PUBLISH SMOKE IS GREEN"). The release lessons are in lessons-learned-seed.md item 17.
    (2) DONE: the OWNER-APPROVED CLEANUP (0 refusals, 32 registrations pruned, C: 32 -> 76 GB free; ledger "STAMP · 9a5f63041b ·
        THE OWNER-APPROVED i7 CLEANUP IS DONE"). The worktrees LEFT are the owner's call (d0913b, kick, C:/go2cs-archive, the app's
        session worktrees) plus hnd, the main checkout and go2cs-mailbox.
@@ -391,6 +392,10 @@ DONE post-hop (all UNMERGED): claude/g-rec-b-oracle 814603bbbb (the REC-B -m ora
 boxing). LANDED 2026-09-24 in master 4c53b02a0a (ledger "ANNOUNCE · 4c53b02a0a"): the len/cap seat, packaging seats 1-3, the walkthrough docs
 and the GolibTests guard; the history below is superseded. NEXT: V-fix 11 + the guard on REC-F's tip, onto 4c53b02a0a.
 The train scratch may be reclaimed; keep the record ref claude/g-union-1.24.13.2-rehearsal.
+DONE since: V-fix 11 + the guard claude/g-vfix11-sstring-counted fce07d9517 (ACCEPTED for train B; condition A clean), and the
+1.24.13.2 post-publish smoke (GREEN on both platforms). NOW: the (b) UNCLASSIFIED classification seat on fce07d9517: classify the 21
+guard-pinned sites as a real undercount or by-design, route the real ones, and A/B the alloc rows. Then the TTY residual, the
+raw-SYSCALL x/sys residual, and the prlimit comment.
 (HISTORY) CUT 2026-09-24 (ledger "RULING · 6c9aaae62e / 4378ae6cf2"), both UNMERGED:
 - claude/g-named-slice-len (the constrained len/cap golib seat, on 38529c765a, with the math/big retirement commit on top).
   GATE-COMPLETE and ACCEPTED for a post-release train (ledger "ACCEPT · b95abf9638"): behavioral 691/691 and Output 663/2/26,
@@ -2169,3 +2174,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 15:02 -- SAVE-STATE refresh: 1b records arm C and V-fix 11 in and the two next trains.
 - 2026-09-24 15:59 -- SAVE-STATE refresh: 1b records 1.24.13.2 PUBLISHED and the release-day lesson.
 - 2026-09-24 16:04 -- SAVE-STATE refresh: 1b records the cleanup done and V-fix 11 accepted.
+- 2026-09-24 16:17 -- SAVE-STATE refresh: 1b/1c record the post-publish smoke GREEN and G's next seat.
