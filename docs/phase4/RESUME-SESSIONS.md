@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 07:17 -- SAVE-STATE refresh (ledger through mailbox 9e241aeb7d): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED, master ebb4acb8cf, the Linux packaging fix RULED (three gaps, three refs, one 1.24.13.2 train; G cut SEAT 1 and the len/cap seat); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 07:20 -- SAVE-STATE refresh (ledger through mailbox 3c8ddd6c78): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, master ebb4acb8cf, the Linux packaging fix RULED (three gaps, three refs, one 1.24.13.2 train; G cut SEAT 1 and the len/cap seat); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -190,7 +190,7 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    counter 1, docs/validation/1.24.13.1 frozen with 233 files, 342 READMEs retargeted); the ledger line is d34556d2b0.
    THE HOP IS COMPLETE. Steps (a), (b) and (c) are DONE. In (d), done so far: the release record; nuget.org serving 1.24.13.1
    (all 13 deprecation alternates listed; go.strings' README links validation/1.24.13.1 and the nuget-1.24.13.1 tree); and
-   Piece 4, now on master ebb4acb8cf (ledger 31e88b4153). The owner's deprecations may run now. Still owed in (d): the
+   Piece 4, now on master ebb4acb8cf (ledger 31e88b4153). The owner's 14 deprecations are DONE and verified. Still owed in (d): the
    Windows nuget.org walkthrough smoke test. G's WSL walkthrough is DONE (ledger 086853edd5): the platforms note is STILL
    TRUE, because go.syscall's lib/ compile surface is the windows flavour, so no rewrite is needed. A post-release PACKAGING
    seat is owed: a per-RID compile surface. The LESSONS seed and method are on claude/coord-handover
@@ -208,15 +208,22 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
        - The counter guard reads green at 1; spot-check one nuget.org README.
        - Add Piece 4, the validation-index frozen-snapshots row.
        - Run a nuget.org-only walkthrough smoke test; it re-proves README step 4 `dotnet run -c Debug`.
-       - Hand the owner deprecations-1.24.13.1.md (14 IDs, nuget.org's form).
+       - DONE: the owner's 14 deprecations (deprecations-1.24.13.1.md), verified 14/14.
        - G runs the README walkthrough on the WSL linux arm against the published packages; rewrite the platforms note
          and the Roadmap Platforms row from that evidence.
    (e) THEN the owner-ordered OFFICIAL LESSONS LEARNED in docs/GoCorpusMigration.md (a read-only derivation workflow;
        EXCLUDE the i9's hardware issues), and the post-release trains.
+ - DONE 2026-09-24: the owner's 14 deprecations, VERIFIED 14/14 by COORD from nuget.org's registration API (ledger "STAMP ·
+   ebb4acb8cf · THE 14 REMOVED-ID DEPRECATIONS ARE DONE").
  - OWNER DECISIONS OPEN: the string-literal tiers. C2's revision 3 is d382b60677 on claude/c2-literal-cache-draft, COORD's
    verification is on claude/coord-handover docs/phase4/reviews/literal-revision-3-verification-2026-09-24.md, and a
-   revision 4 is coming from C2. Also the go.* prefix answer, and whether release/go1.23 advances to nuget-1.23.12.3 and
-   release/go1.24 is minted.
+   revision 4 is coming from C2. Also the RELEASE BRANCHES (git branches, NOT GitHub Releases; the repo has none besides a
+   2022 pre-release). origin release/go1.23 sits at the 2026-08-22 75% milestone 10c78227a7. COORD recommends
+   fast-forwarding it to nuget-1.23.12.3's commit (no force), and minting release/go1.24 only at the 1.25 cutover. It needs
+   the owner's yes, then announce-then-push.
+ - EXTERNAL WAIT: the go.* NuGet ID-prefix reservation. The owner's request is pending with NuGet, so there is no owner
+   decision to chase. COORD's 2026-09-22 advice (ledger "NuGet 'go.' OCCUPANCY") was a narrowed follow-up to the 30 scoped
+   std-root prefixes.
  - UP NEXT, by OWNER ORDER (ledger 93410e7ef9): FIX THE LINUX PACKAGING PROBLEM. Owner G, after the in-flight len/cap
    seat. G SIZED IT (scratch prototypes on WSL against the published 1.24.13.1): it is THREE gaps. With all three hand-fixed,
    walkthrough steps 3-4 build on Linux and `dotnet run` output is byte-identical to `go run`. RULED by COORD (ledger
@@ -2025,3 +2032,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 07:04 -- SAVE-STATE refresh: 1b/1c record the packaging-scope ruling (G: three gaps; all three as three refs in one 1.24.13.2 train) and step (c) DONE.
 - 2026-09-24 07:13 -- SAVE-STATE refresh: 1c records G's two cut refs (the len/cap seat and packaging seat 1) and the orphan-retirement ruling.
 - 2026-09-24 07:17 -- SAVE-STATE refresh: 1c records packaging seat 1's review commit 501b7e4c27.
+- 2026-09-24 07:20 -- SAVE-STATE refresh: 1b records the 14 deprecations DONE and verified, the go.* prefix as an external wait, and the release-branch recommendation.
