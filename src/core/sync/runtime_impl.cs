@@ -49,10 +49,13 @@ partial class sync_package
 
     // go1.24 SPLIT WaitGroup.Wait's acquire out of runtime_Semacquire into its own linkname --
     // "SemacquireWaitGroup is like Semacquire, but for WaitGroup.Wait" (sync/runtime.go:16 at
-    // 1.24.13), called from waitgroup.go:118. The SEMANTICS did not change, so this forwards to
-    // the same primitive with the same reason: golib's WaitReason.Semacquire is already documented
-    // as sync.WaitGroup.Wait's reason, which is what it meant before the split too.
-    internal static partial void runtime_SemacquireWaitGroup(ж<uint32> s) => RuntimeSemaphore.Acquire(s, WaitReason.Semacquire);
+    // 1.24.13), called from waitgroup.go:118. The semantics did not change; the REASON did: Go
+    // 1.24's sync_runtime_SemacquireWaitGroup parks with waitReasonSyncWaitGroupWait
+    // ("sync.WaitGroup.Wait", sema.go:110), so this forwards to the same primitive under that reason.
+    // (This comment formerly said the reason was unchanged -- true at 1.23, stale at 1.24.) The
+    // hand-owned WaitGroup (waitgroup.cs) does not reach this stub; it parks under the same reason
+    // on its own.
+    internal static partial void runtime_SemacquireWaitGroup(ж<uint32> s) => RuntimeSemaphore.Acquire(s, WaitReason.SyncWaitGroupWait);
 
 
     internal static partial void runtime_SemacquireRWMutex(ж<uint32> s, bool lifo, nint skipframes) => RuntimeSemaphore.Acquire(s, WaitReason.SyncRWMutexLock);
@@ -84,6 +87,10 @@ partial class sync_package
     {
         internal readonly ManualResetEventSlim Signal = new(false);
         internal uint32 Ticket;
+
+        // The goroutine parked on this waiter (Go's sudog.g): the waiter is constructed on its own
+        // thread, just before it parks. A notify readies it before signalling.
+        internal readonly Goroutine? Parker = Goroutine.Current;
     }
 
     private sealed class NotifyState
@@ -111,22 +118,36 @@ partial class sync_package
     internal static partial void runtime_notifyListWait(ж<notifyList> l, uint32 t)
     {
         NotifyState n = notifyFor(l);
-        NotifyWaiter w;
+        bool locked = false;
 
-        lock (n)
+        try
         {
+            Monitor.Enter(n, ref locked);
+
             // Already notified before this waiter got a chance to park — nothing to wait for.
             if (less(t, n.Notify))
                 return;
 
-            w = new NotifyWaiter { Ticket = t };
+            NotifyWaiter w = new() { Ticket = t };
             n.Waiters.AddLast(w);
-        }
 
-        // Go's notifyListWait parks with waitReasonSyncCondWait (sema.go:587), which is what makes a
-        // traceback distinguish a Cond waiter from a mutex waiter on the same lock.
-        using (Goroutine.Park(WaitReason.SyncCondWait))
-            w.Signal.Wait();
+            // Go's notifyListWait parks with waitReasonSyncCondWait (sema.go:587), which is what makes
+            // a traceback distinguish a Cond waiter from a mutex waiter on the same lock. The park is
+            // entered while the list lock that publishes the waiter is still held -- Go's
+            // goparkunlock(&l.lock) order -- so a notifier can only ever find a parked goroutine to
+            // ready. The WAIT is outside the lock, as before.
+            using (Goroutine.Park(WaitReason.SyncCondWait))
+            {
+                Monitor.Exit(n);
+                locked = false;
+                w.Signal.Wait();
+            }
+        }
+        finally
+        {
+            if (locked)
+                Monitor.Exit(n);
+        }
     }
 
     internal static partial void runtime_notifyListNotifyOne(ж<notifyList> l)
@@ -155,7 +176,12 @@ partial class sync_package
             }
         }
 
-        target?.Signal.Set();
+        if (target is null)
+            return;
+
+        // Go's readyWithTime -> goready, on the notifier's side, before the signal.
+        Goroutine.Ready(target.Parker);
+        target.Signal.Set();
     }
 
     internal static partial void runtime_notifyListNotifyAll(ж<notifyList> l)
@@ -171,7 +197,10 @@ partial class sync_package
         }
 
         foreach (NotifyWaiter w in targets)
+        {
+            Goroutine.Ready(w.Parker);
             w.Signal.Set();
+        }
     }
 
     // Size-agreement sanity check between sync.notifyList and runtime's — irrelevant here.

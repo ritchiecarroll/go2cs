@@ -17,7 +17,7 @@ namespace go.golib;
 /// <c>goroutine 7 [chan receive]:</c>, and Go's own tests grep it — <c>runtime/pprof</c>'s
 /// <c>awaitBlockedGoroutine</c> builds a regex around exactly this word. So every member's text
 /// below is copied VERBATIM from <c>$GOROOT/src/runtime/runtime2.go</c>'s
-/// <c>waitReasonStrings</c> table (go1.23.12), and the member names mirror Go's own constants
+/// <c>waitReasonStrings</c> table (go1.23.12; the two members Go 1.24 added, at go1.24.13), and the member names mirror Go's own constants
 /// minus their <c>waitReason</c> prefix.
 /// </para>
 /// <para>
@@ -68,8 +68,8 @@ public enum WaitReason
 
     /// <summary>
     /// "semacquire" — blocked on a runtime semaphore that is not a mutex: Go's
-    /// <c>sync_runtime_Semacquire</c> (<c>sync.WaitGroup.Wait</c>) and
-    /// <c>poll_runtime_Semacquire</c> (<c>internal/poll</c>'s fdMutex).
+    /// <c>sync_runtime_Semacquire</c> and <c>poll_runtime_Semacquire</c> (<c>internal/poll</c>'s
+    /// fdMutex). Not <c>sync.WaitGroup.Wait</c> since Go 1.24; see <see cref="SyncWaitGroupWait"/>.
     /// </summary>
     Semacquire,
 
@@ -86,7 +86,39 @@ public enum WaitReason
     SyncRWMutexRLock,
 
     /// <summary>"sync.RWMutex.Lock" — a writer waiting out the readers.</summary>
-    SyncRWMutexLock
+    SyncRWMutexLock,
+
+    /// <summary>
+    /// "sync.WaitGroup.Wait" — waiting for a WaitGroup's counter to reach zero. New in Go 1.24
+    /// (<c>sync_runtime_SemacquireWaitGroup</c> parks with it; before 1.24 the same wait read
+    /// "semacquire").
+    /// </summary>
+    SyncWaitGroupWait,
+
+    /// <summary>"coroutine" — a coroutine (<c>iter.Pull</c>) parked in a switch to its peer.</summary>
+    Coroutine,
+
+    /// <summary>
+    /// "GC scavenge wait" — the background scavenger parked until it is woken. Set by the runtime's
+    /// managed <c>gopark</c> (runtime <c>park_impl.cs</c>), the first converted caller to reach it
+    /// being <c>scavengerState.park</c> (runtime's TestScavenger).
+    /// </summary>
+    GCScavengeWait,
+
+    /// <summary>"synctest.Run" — a bubble's root, parked until its bubble is idle (golib SyncTestBubble.Run).</summary>
+    SynctestRun,
+
+    /// <summary>"synctest.Wait" — parked until every other member of its bubble is durably blocked.</summary>
+    SynctestWait,
+
+    /// <summary>"chan receive (synctest)" — receiving on a channel created in a synctest bubble.</summary>
+    SynctestChanReceive,
+
+    /// <summary>"chan send (synctest)" — sending on a channel created in a synctest bubble.</summary>
+    SynctestChanSend,
+
+    /// <summary>"select (synctest)" — a bubble member selecting only on channels created in a bubble.</summary>
+    SynctestSelect
 }
 
 /// <summary>
@@ -119,6 +151,14 @@ public static class WaitReasons
         WaitReason.SyncMutexLock => "sync.Mutex.Lock",
         WaitReason.SyncRWMutexRLock => "sync.RWMutex.RLock",
         WaitReason.SyncRWMutexLock => "sync.RWMutex.Lock",
+        WaitReason.SyncWaitGroupWait => "sync.WaitGroup.Wait",
+        WaitReason.Coroutine => "coroutine",
+        WaitReason.GCScavengeWait => "GC scavenge wait",
+        WaitReason.SynctestRun => "synctest.Run",
+        WaitReason.SynctestWait => "synctest.Wait",
+        WaitReason.SynctestChanReceive => "chan receive (synctest)",
+        WaitReason.SynctestChanSend => "chan send (synctest)",
+        WaitReason.SynctestSelect => "select (synctest)",
         _ => "unknown wait reason"
     };
 

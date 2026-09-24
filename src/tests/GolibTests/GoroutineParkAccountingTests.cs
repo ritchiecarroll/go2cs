@@ -58,7 +58,19 @@ public class GoroutineParkAccountingTests
             [WaitReason.SyncCondWait] = "sync.Cond.Wait",
             [WaitReason.SyncMutexLock] = "sync.Mutex.Lock",
             [WaitReason.SyncRWMutexRLock] = "sync.RWMutex.RLock",
-            [WaitReason.SyncRWMutexLock] = "sync.RWMutex.Lock"
+            [WaitReason.SyncRWMutexLock] = "sync.RWMutex.Lock",
+            // Go 1.24's two, from go1.24.13's waitReasonStrings.
+            [WaitReason.SyncWaitGroupWait] = "sync.WaitGroup.Wait",
+            [WaitReason.Coroutine] = "coroutine",
+            // The runtime's managed gopark (S1b), first set by scavengerState.park.
+            [WaitReason.GCScavengeWait] = "GC scavenge wait",
+            // The bubble's two (S1c), golib SyncTestBubble.
+            [WaitReason.SynctestRun] = "synctest.Run",
+            [WaitReason.SynctestWait] = "synctest.Wait",
+            // Bubbled channels (S2).
+            [WaitReason.SynctestChanReceive] = "chan receive (synctest)",
+            [WaitReason.SynctestChanSend] = "chan send (synctest)",
+            [WaitReason.SynctestSelect] = "select (synctest)"
         };
 
         // Both directions. The forward one catches a wrong string; this one catches a member added

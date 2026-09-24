@@ -52,6 +52,10 @@ public static class RuntimeSemaphore
     {
         internal readonly ManualResetEventSlim Signal = new(false);
         internal bool HandedOff;
+
+        // The goroutine parked on this waiter (Go's sudog.g): the acquirer constructs it on its own
+        // thread, just before parking. Release readies it before signalling.
+        internal readonly Goroutine? Parker = Goroutine.Current;
     }
 
     // The bucket carries the LOCK and the waiter queue only. The COUNT lives where Go keeps it —
@@ -86,9 +90,12 @@ public static class RuntimeSemaphore
         while (true)
         {
             SemaWaiter w;
+            bool locked = false;
 
-            lock (b)
+            try
             {
+                Monitor.Enter(b, ref locked);
+
                 if (s.Value > 0)
                 {
                     s.Value--; // acquired without parking
@@ -97,10 +104,22 @@ public static class RuntimeSemaphore
 
                 w = new SemaWaiter();
                 b.Waiters.Enqueue(w);
-            }
 
-            using (Goroutine.Park(reason))
-                w.Signal.Wait();
+                // Go's commit order (semacquire1 -> goparkunlock(&root.lock)): the park is entered
+                // while the bucket lock that publishes the waiter is still held, so Release can only
+                // ever find a parked goroutine to ready. The WAIT is outside the lock, as before.
+                using (Goroutine.Park(reason))
+                {
+                    Monitor.Exit(b);
+                    locked = false;
+                    w.Signal.Wait();
+                }
+            }
+            finally
+            {
+                if (locked)
+                    Monitor.Exit(b);
+            }
 
             if (w.HandedOff)
                 return; // ownership was handed to us directly (starvation mode)
@@ -134,6 +153,11 @@ public static class RuntimeSemaphore
             }
         }
 
-        w?.Signal.Set();
+        if (w is null)
+            return;
+
+        // Go's readyWithTime -> goready, on the releaser's side, before the signal.
+        Goroutine.Ready(w.Parker);
+        w.Signal.Set();
     }
 }
