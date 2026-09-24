@@ -591,3 +591,42 @@ result-used-by-value COMPILES and binds the primary, deliberately inverted to do
 result-used row is enforced at CONVERTER EMISSION, not by C#) and two execution guards (twin
 identity + chain; primary mutating the caller's storage with no box in existence). 21/21 with the
 original 15, the identity neuter reds exactly one row, restore verified.
+
+## 11. 2026-09-24 -- the context TestAllocs B′-admission read (G, post-hop)
+
+The disclosure's plan in `src/core/context/go2cs_test_disclosures.json` cites this record for three
+field-ref boxes in `WithDeadlineCause` (`context/context.cs:700`, `:709` and `:711` at `ffa5c1015a`).
+**B′ admits none of the three.** The per-site reasons follow:
+
+- **Measured, B′ changes nothing here.** With a converter built at `ffa5c1015a`, a single-package
+  conversion flag-on (`-dual-recv -dual-recv-params`) and one flag-off are BYTE-IDENTICAL for
+  `context` and `internal/sync`. The only `ref` primaries in `context` are the ones the flag-off
+  emission already carries (the `String`, `Deadline` and `Value` methods).
+  `sync` refuses to convert into an unseeded root: `refPrimaryHandOwns` registers `sync.Mutex.Lock`, and
+  the refusal names the missing hand-own. That is the registry's positive control and safety-floor
+  rule 2 working as intended, not a B′ reading.
+- **`:700` `c.of(timerCtx.ᏑcancelCtx).propagateCancel(parent, …)` -- irreducible by any ref form.**
+  Go's own escape analysis reads `context.go:466:7: leaking param: c` (go1.24.13 `-gcflags=-m`): the
+  receiver is retained. A retained interior pointer is free in Go and is a heap object in golib, so
+  this view has no Go counterpart. It is the leading candidate for the WithTimeout(5ms) leg's +1
+  (9 against want 8), but that attribution is UNMEASURED.
+- **`:709` `c.of(timerCtx.Ꮡmu).Lock()` and `:711` `defer(cʗ2.of(timerCtx.Ꮡmu).Unlock, …)` -- already
+  one object, and not B′'s to remove.** `cʗ2` is `c`, so both ask the same (box, accessor) pair, and
+  the field-view cache (`ж.Views.cs`) returns one view per call: the plan's "may already collapse"
+  now reads DOES. `sync.Mutex.Lock` and `Unlock` ARE ref primaries, the hand-owned registrations of
+  I3 (`refVerdictPublication.go`). The reason they do not bind here is I3's call-site base test
+  (`convSelectorExpr.go`, the I3 arm), which deliberately admits only a ref-lvalue base (the current
+  deref-aliased receiver or a deref-aliased pointer parameter) and NOT a bare pointer ident such as
+  `c`, whose rendering is the box. Removing the view needs TWO changes, and either one alone removes
+  zero counted objects, because the other site still mints the same view:
+  (a) I3's base widened to a pointer-ident base rendered through `.Value` (`c.Value.mu.Lock()`; `c`'s
+  nil panic is kept, because `.Value` on the nil box panics); and
+  (b) the `defer` at `:711` lowered without a method-group delegate. A delegate over a `this ref`
+  extension is CS1113. The precedent is the finally-flag form this package already emits for a
+  ref receiver (`finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); … }`, the `ᒐd1` flag in the
+  cancelCtx `Done` body).
+
+**Routing.** The (a)+(b) pair is I3's territory (the os arc's increments), not B′'s. Its reach is every
+`p.mu.Lock()` / `defer p.mu.Unlock()` pair on a box-local base (the same file also shows `cc` at
+`:310`/`:312` and `p` at `:434` and `:534`), and it is sized before anything is cut. The disclosure's
+plan should re-point from B′ to that pair plus the `:700` attribution at its next re-sign.
