@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 07:43 -- SAVE-STATE refresh (ledger through mailbox 9b14d044bf): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded to nuget-1.23.12.3, master ebb4acb8cf, the Linux packaging train CUT (seats 1-3 on origin, unmerged; COORD reviewing seats 2 and 3); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 07:55 -- SAVE-STATE refresh (ledger through mailbox d8806c2286): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, the Linux packaging train CUT (seats 1-3 on origin, unmerged; COORD reviewing seats 2 and 3), and the RUNTIME row held by the owner's separate cloud project; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -222,6 +222,13 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    10c78227a7 (the 75% milestone, still pinned by tag stdlib-tests-75pct-2026-08-22) to b6746ab185, the commit of
    nuget-1.23.12.3, and read back by ls-remote. No tag moved. Mint release/go1.24 at the 1.25 cutover, not before. These are
    git branches, not GitHub Releases; the repo has none besides a 2022 pre-release.
+ - OWNER TRIAL, 2026-09-24: a separate go2cs CLOUD PROJECT (Claude Projects, beta) holds the RUNTIME candidate row
+   ("Implement runtime stubs that stop the test run"). It is based on master ebb4acb8cf, works on claude/proj-<topic>
+   branches (unsigned, new branches only), and returns a pushed branch plus a before/after -tests reading naming its OS.
+   COORD merges it via a post-release train gated like any seat. Known overlap: linknameForwardTargets in visitFuncDecl.go,
+   which packaging seat 3 also edits; a union at assembly. No fleet lane dispatches on runtime meanwhile. REFLECT was NOT
+   started and stays R's. Watch origin for claude/proj-* refs (a Monitor on ls-remote) and ListAgents for the project's
+   session, which was not listed at the start.
  - EXTERNAL WAIT: the go.* NuGet ID-prefix reservation. The owner's request is pending with NuGet, so there is no owner
    decision to chase. COORD's 2026-09-22 advice (ledger "NuGet 'go.' OCCUPANCY") was a narrowed follow-up to the 30 scoped
    std-root prefixes.
@@ -266,7 +273,9 @@ paste prompt below. Report to COORD by SendMessage (R, G) or by one inbox file o
 (C1, C2). Everything post-hop stays UNMERGED until COORD says the 1.24.13.1 release has landed.
 
 ```
-R (R-LAPTOP). Model Opus 5.5 / high. Standing goal: the net/http re-entry and the post-release runtime/reflect seats.
+R (R-LAPTOP). Model Opus 5.5 / high. Standing goal: the net/http re-entry and the post-release reflect seats. RUNTIME is NOT
+yours while the owner's separate cloud project holds it (ledger "OWNER ORDER · ebb4acb8cf · THE RUNTIME ROW GOES TO A
+SEPARATE CLOUD PROJECT"); reflect stays yours.
 Refs:
 - claude/r-synctest-reentry 0b6bf15ab0: S1a..S4, seven signed picks on fa18863b94, ACCEPTED as the FIRST POST-RELEASE train;
   hold it as is.
@@ -2047,3 +2056,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 07:20 -- SAVE-STATE refresh: 1b records the 14 deprecations DONE and verified, the go.* prefix as an external wait, and the release-branch recommendation.
 - 2026-09-24 07:27 -- SAVE-STATE refresh: 1b records release/go1.23 fast-forwarded; 1c records packaging seat 2 and COORD's running review.
 - 2026-09-24 07:43 -- SAVE-STATE refresh: 1c records packaging seat 3, its design rulings, the len/cap retirement accepted, and G's heavy-run order.
+- 2026-09-24 07:55 -- SAVE-STATE refresh: 1b/1c record the owner's runtime cloud-project trial; R keeps reflect.
