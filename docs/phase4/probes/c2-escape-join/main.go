@@ -108,6 +108,8 @@ func main() {
 	expr := map[string]string{}
 	reParam := regexp.MustCompile(`^(.*\.go):(\d+):(\d+): (?:leaking param: (\w+)(.*)|(\w+) does not escape)$`)
 	reExpr := regexp.MustCompile(`^(.*\.go):(\d+):(\d+): (.+) (does not escape|escapes to heap)$`)
+	// Go 1.22+'s read-only string->[]byte optimisation prints its own line at the argument's position.
+	reZeroCopy := regexp.MustCompile(`^(.*\.go):(\d+):(\d+): zero-copy string->\[\]byte conversion$`)
 	fh, err := os.Open(*mFile)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -134,13 +136,17 @@ func main() {
 				param[k] = "leak-heap"
 			}
 		}
+		if m := reZeroCopy.FindStringSubmatch(s); m != nil {
+			expr[m[1]+":"+m[2]+":"+m[3]] = "zero-copy"
+			continue
+		}
 		if m := reExpr.FindStringSubmatch(s); m != nil {
 			k := m[1] + ":" + m[2] + ":" + m[3]
 			v := "noescape"
 			if m[5] == "escapes to heap" {
 				v = "heap"
 			}
-			if expr[k] != "heap" {
+			if expr[k] != "heap" && expr[k] != "zero-copy" {
 				expr[k] = v
 			}
 		}
@@ -223,6 +229,45 @@ func main() {
 					parent = stack[len(stack)-1]
 				}
 				stack = append(stack, n)
+
+				// I: every string([]byte) conversion, by what consumes it (the §8.2/§8.2R idiom table)
+				if call, ok := n.(*ast.CallExpr); ok {
+					if _, ok := strOfBytes(info, call); ok {
+						ctx := "I7 string(b) elsewhere"
+						switch pp := parent.(type) {
+						case *ast.CallExpr:
+							if pp.Fun != call {
+								ctx = "I6 string(b) as a call argument"
+							}
+						case *ast.BinaryExpr:
+							ctx = "I2/I3 string(b) as a binary operand (compare or concatenation)"
+						case *ast.SwitchStmt:
+							ctx = "I5 switch string(b)"
+						case *ast.RangeStmt:
+							ctx = "I4 range string(b)"
+						case *ast.IndexExpr:
+							ctx = "I1 string(b) as an index (map key)"
+						case *ast.AssignStmt, *ast.ValueSpec:
+							ctx = "I8 string(b) bound to a name"
+						case *ast.ReturnStmt:
+							ctx = "I9 string(b) returned"
+						}
+						counts[ctx+" "+scope]++
+					}
+				}
+				if be, ok := n.(*ast.BinaryExpr); ok {
+					switch be.Op {
+					case token.EQL, token.NEQ, token.LSS, token.LEQ, token.GTR, token.GEQ:
+						for _, side := range []ast.Expr{be.X, be.Y} {
+							if _, ok := strOfBytes(info, side); ok {
+								counts["I2 string(b) compared "+scope]++
+							}
+							if cb, ok := ast.Unparen(side).(*ast.BinaryExpr); ok && cb.Op == token.ADD && isString(info.TypeOf(cb)) {
+								counts["I3 concatenation inside a comparison "+scope]++
+							}
+						}
+					}
+				}
 
 				switch e := n.(type) {
 				case *ast.FuncDecl:

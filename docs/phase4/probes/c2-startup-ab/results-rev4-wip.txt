@@ -1,0 +1,28 @@
+# WIP (revision 4, 2026-09-24): per-arm exit reports, GO2CS_LITTABLE_REPORT=1, one run each, linux-x64, JIT tiered. Timing not yet run.
+
+## hello
+-- A
+LITTABLE off=False helper=False registered=0 slots=4096 hits=0 misses=0 lazyModules=0 mapsReads=0 lazyRuns=0 lazyCallerBytes=0 rangeless=0 literalOutsideRange=0 registerMs=0.00 assemblies=59 jitMethods=1919 jitMs=3270.1 jitILBytes=144006
+-- B
+LITTABLE off=False helper=False registered=3093 slots=16384 hits=70 misses=1319 lazyModules=0 mapsReads=0 lazyRuns=0 lazyCallerBytes=0 rangeless=0 literalOutsideRange=0 registerMs=8.72 assemblies=59 jitMethods=1981 jitMs=2636.3 jitILBytes=196755
+-- L 
+LITTABLE off=False helper=False registered=113 slots=4096 hits=70 misses=1319 lazyModules=43 mapsReads=7 lazyRuns=4 lazyCallerBytes=4488 rangeless=1 literalOutsideRange=0 registerMs=0.59 assemblies=59 jitMethods=1990 jitMs=3060.4 jitILBytes=149945
+LITTABLE-MODULE internal.oserror.dll via=proc-maps ran=True callerBytes=232 size=327680
+LITTABLE-MODULE io.fs.dll via=proc-maps ran=True callerBytes=616 size=385024
+LITTABLE-MODULE fmt.dll via=proc-maps ran=True callerBytes=3600 size=434176
+LITTABLE-MODULE SuHello.dll via=proc-maps ran=True callerBytes=40 size=327680
+-- L GO2CS_LITTABLE_HELPER=1
+LITTABLE off=False helper=True registered=113 slots=4096 hits=70 misses=1319 lazyModules=43 mapsReads=7 lazyRuns=4 lazyCallerBytes=0 rangeless=1 literalOutsideRange=0 registerMs=0.52 assemblies=59 jitMethods=1991 jitMs=2332.2 jitILBytes=149985
+LITTABLE-MODULE internal.oserror.dll via=proc-maps ran=True callerBytes=0 size=327680
+LITTABLE-MODULE io.fs.dll via=proc-maps ran=True callerBytes=0 size=385024
+LITTABLE-MODULE fmt.dll via=proc-maps ran=True callerBytes=0 size=434176
+LITTABLE-MODULE SuHello.dll via=proc-maps ran=True callerBytes=0 size=327680
+
+## nethttp
+== A http 
+LITTABLE off=False helper=False registered=0 slots=4096 hits=0 misses=0 lazyModules=0 mapsReads=0 lazyRuns=0 lazyCallerBytes=0 rangeless=0 literalOutsideRange=0 registerMs=0.00 assemblies=171 jitMethods=5721 jitMs=4073.1 jitILBytes=898079
+== B http 
+LITTABLE off=False helper=False registered=6323 slots=32768 hits=442 misses=2509 lazyModules=0 mapsReads=0 lazyRuns=0 lazyCallerBytes=0 rangeless=0 literalOutsideRange=0 registerMs=8.27 assemblies=171 jitMethods=5898 jitMs=4467.1 jitILBytes=1005591
+== L http 
+LITTABLE off=False helper=False registered=665 slots=4096 hits=442 misses=2509 lazyModules=153 mapsReads=39 lazyRuns=19 lazyCallerBytes=27712 rangeless=1 literalOutsideRange=0 registerMs=0.87 assemblies=171 jitMethods=5922 jitMs=4262.5 jitILBytes=918973
+== L http GO2CS_LITTABLE_HELPER=1
