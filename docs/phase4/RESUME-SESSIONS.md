@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 06:25 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox d34556d2b0): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 06:32 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox fd36b35466): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -239,10 +239,9 @@ R (R-LAPTOP). Model Opus 5.5 / high. Standing goal: the net/http re-entry and th
 Refs:
 - claude/r-synctest-reentry 0b6bf15ab0: S1a..S4, seven signed picks on fa18863b94, ACCEPTED as the FIRST POST-RELEASE train;
   hold it as is.
-- claude/r-reflect-mustbekind 2e134cf77d, WIP on fa18863b94: hand-owned reflect mustBeKind takes a ReadOnlySpan<byte>
-  method and converts only on panic. Its seat rows are green: encoding/binary 142 agree / 4 diverged; the 5 canaries equal
-  the roster; stdlib 344/0. Owed: the behavioral suite and reflect's base arm (the r-mbk-gates2 battery on R-LAPTOP; if
-  that output is lost, re-run them).
+- claude/r-reflect-mustbekind 2e134cf77d, one signed commit on fa18863b94, GATES COMPLETE and ACCEPTED for a post-release
+  train after the synctest train (ledger fd36b35466): encoding/binary TestAppendAllocs 75 -> 42; the canaries equal the
+  roster; reflect's seat equals its base (418/391/27/22); stdlib 344/0; behavioral adds nothing.
 - claude/r-recg-chancore-design bb69175480 (REC-G docs, accepted).
 - claude/r-p2-sweep-evidence 45ae823fa0 (S-R evidence, from 61724860b4, 564 files; p2-driver.ps1 and net/netip's comparison
   JSON excluded and named).
@@ -251,7 +250,7 @@ fd9a4976e8 are pushed under new names (nothing forced), and M9 is done. The must
 418/391/27/22, identical to the seat's, so no reflect verdict moves; its behavioral retry was running.
 TOOLS: the Bash tool's PATH needs `export PATH=/usr/bin:/bin:$PATH` first, plus the go/dotnet pins. The sweep and gate
 scripts run under powershell.exe 5.1; check-roster-format runs under pwsh 7.
-First action: ls-remote your refs, then report the mustBeKind seat's gates.
+First action: ls-remote your refs; STANDBY until COORD assembles the post-release trains.
 ```
 
 ```
@@ -1983,3 +1982,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 05:46 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 05:48 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 06:25 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
+- 2026-09-24 06:32 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
