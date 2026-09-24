@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 05:15 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 8d9beadbe7): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 05:17 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 8d9beadbe7): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -246,8 +246,11 @@ Your pushed refs, all accepted or records:
 - claude/g-sync-atomic-floor, claude/g-net-linux-bank, claude/g-syscall-nofile-host, claude/g-vgetrandom-unsupported,
   claude/g-linux-pin-retire, claude/g-linux-leg (+ -evidence);
 - claude/g-posthop-wsl-loopback 020365abcd; claude/g-posthop-srcimporter 949871cd6b.
-Open housekeeping: about 90 older claude/g-* branches exist only on G-LAPTOP. Push the ones not contained in any origin ref
-after a census, per COORD's rule of 2026-09-24.
+Local-only invariant HOLDS (2026-09-24): 136 of the 144 old claude/g-* tips are contained in origin refs. The other 8 were
+censused clean and pushed under their own names: claude/g-generic-alias-qualifier ffaafeb192 (read it for the post-release
+generic-type-alias seat), claude/g-mathbits-intrinsics, claude/g-seg3-spike, claude/g-structof-embedded-methods,
+claude/g-typed-nil-func-parked, claude/g-typed-nil-func-sizing, claude/g-unfreeze-handown-recut2, claude/g-wsasendto-seat.
+The M9 sweep scratch and branch are deleted.
 NEXT, post-release and UNMERGED until the release lands, from the version tip 972a9a6a41:
 - the REC-B mechanism design (DESIGN-nonescaping-locals.md);
 - the B'-admission read of context.cs:700/709/711;
@@ -1935,3 +1938,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 02:03 -- STAMP refresh: STATE DELTA 29 (post-close stamped; H11 running; sweep dispatched).
 - 2026-09-24 05:00 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 05:15 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
+- 2026-09-24 05:17 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
