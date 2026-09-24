@@ -493,6 +493,20 @@ public static partial class builtin
     }
 
     /// <summary>
+    /// Gets the maximum length the <paramref name="slice"/> can reach when resliced, for a NAMED slice
+    /// type or a <c>~[]E</c> type parameter, without boxing it.
+    /// </summary>
+    /// <param name="slice">Target slice.</param>
+    /// <returns>The capacity of the <paramref name="slice"/>.</returns>
+    /// <remarks>
+    /// <inheritdoc cref="len{TSlice}(in TSlice)" path="/remarks"/>
+    /// </remarks>
+    public static nint cap<TSlice>(in TSlice slice) where TSlice : ISlice
+    {
+        return slice.Capacity;
+    }
+
+    /// <summary>
     /// Gets the maximum capacity of the <paramref name="channel"/>.
     /// </summary>
     /// <param name="channel">Target channel.</param>
@@ -1711,6 +1725,39 @@ public static partial class builtin
     /// <param name="slice">Target slice.</param>
     /// <returns>The length of the <paramref name="slice"/>.</returns>
     public static nint len(ISlice slice)
+    {
+        return slice.Length;
+    }
+
+    /// <summary>
+    /// Gets the length of the <paramref name="slice"/>, for a NAMED slice type or a <c>~[]E</c> type
+    /// parameter, without boxing it.
+    /// </summary>
+    /// <param name="slice">Target slice.</param>
+    /// <returns>The length of the <paramref name="slice"/>.</returns>
+    /// <remarks>
+    /// <para>
+    /// A go2cs-gen named slice wrapper (Go's <c>type S []E</c>) cannot bind
+    /// <see cref="len{T}(in slice{T})"/>, because generic inference does not consider the wrapper's
+    /// implicit conversion to <c>slice&lt;T&gt;</c>. A <c>~[]E</c> type parameter cannot bind it either.
+    /// Before this overload the only candidates left were <see cref="len(ISlice)"/> and
+    /// <see cref="cap(ISlice)"/>, whose interface parameter BOXES the caller's struct on every call: 56 B
+    /// per call at Release with tiering off. math/big's <c>nat</c> paid that on every <c>len</c>/<c>cap</c>
+    /// of its multiply, about 94 % of <c>TestMulUnbalanced</c>'s bytes. Constrained like this, the call is
+    /// a <c>constrained.</c> direct dispatch on the value type, the same move
+    /// <see cref="len{TSeq}(TSeq)"/> makes for <see cref="IByteSeq"/>.
+    /// </para>
+    /// <para>
+    /// The parameter is <c>in</c> on purpose. A type that satisfies both <see cref="ISlice"/> and
+    /// <see cref="IByteSeq"/> meets two constrained candidates, and C# prefers the by-value parameter
+    /// when two candidates differ only in <c>in</c>. The call therefore resolves to the (equally
+    /// non-boxing) <see cref="IByteSeq"/> overload instead of being ambiguous. A concrete
+    /// <c>slice&lt;T&gt;</c> still binds its own, more specific overload, and an argument already typed
+    /// as <see cref="ISlice"/> still binds the non-generic <see cref="len(ISlice)"/>. Guarded by
+    /// <c>NamedSliceLenCapAllocationTests</c> in <c>GolibTests</c>.
+    /// </para>
+    /// </remarks>
+    public static nint len<TSlice>(in TSlice slice) where TSlice : ISlice
     {
         return slice.Length;
     }

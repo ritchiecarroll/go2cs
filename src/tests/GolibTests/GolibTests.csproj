@@ -159,6 +159,9 @@
     <Using Include="System.Int32" Alias="rune" />
 
     <ProjectReference Include="..\..\core\golib\golib.csproj" />
+    <!-- NamedSliceLenCapAllocationTests: sort.IntSlice is a generator-emitted named slice type (the
+         `type S []E` wrapper struct), the shape whose len/cap boxed through the ISlice overloads. -->
+    <ProjectReference Include="..\..\core\sort\sort.csproj" />
     <ProjectReference Include="..\..\core\sync\atomic\sync.atomic.csproj" />
 
     <!-- InternalSyncMutexContentionTests: a CONTENDED internal/sync.Mutex, the path its five runtime
