@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 05:46 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 0723395a8f): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 05:48 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 52063e7b3f): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -265,11 +265,13 @@ censused clean and pushed under their own names: claude/g-generic-alias-qualifie
 generic-type-alias seat), claude/g-mathbits-intrinsics, claude/g-seg3-spike, claude/g-structof-embedded-methods,
 claude/g-typed-nil-func-parked, claude/g-typed-nil-func-sizing, claude/g-unfreeze-handown-recut2, claude/g-wsasendto-seat.
 The M9 sweep scratch and branch are deleted.
-NEXT, post-release and UNMERGED until the release lands, from the version tip 972a9a6a41:
-- the REC-B mechanism design (DESIGN-nonescaping-locals.md);
-- the B'-admission read of context.cs:700/709/711;
-- the rsa r56d and math/big decompositions;
-- C1's REC-F review.
+DONE post-hop (all UNMERGED): claude/g-rec-b-oracle 814603bbbb (the REC-B -m oracle); claude/g-context-bprime-read da3402f3d3
+(routed to I3, sized first); claude/g-rsa-mathbig-decomp 6ab65f3409 (rsa closed to the object; math/big's bytes are len/cap
+boxing). NEXT, post-release, from master:
+- the golib seat for a constrained len<TS>/cap<TS> where TS : ISlice (ledger 52063e7b3f);
+- a second read of C2's claude/c2-rec-f-golib 645a8e1f62;
+- AFTER THE PUBLISH: the README walkthrough steps 3-4 on the WSL linux arm against nuget.org 1.24.13.1 (steps 1-2 are
+  already green), whose evidence rewrites the README platforms note and the Roadmap Platforms row.
 READ-FIRST: docs/phase4/p2-sweep/G-LAPTOP/README.md on claude/g-p2-sweep-evidence; the sweep brief on claude/coord-handover.
 ```
 
@@ -1975,3 +1977,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 05:33 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 05:35 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 05:46 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
+- 2026-09-24 05:48 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
