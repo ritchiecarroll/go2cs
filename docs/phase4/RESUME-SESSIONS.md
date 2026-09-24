@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 08:43 -- SAVE-STATE refresh (ledger through mailbox 56300f7712): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, the Linux packaging train CUT (seat 1 accepted, seat 2 ACCEPTED with 2-A required, seat 3 REWORK, a corpus half owed; review at docs/phase4/reviews/packaging-train-seats-2-3-review-2026-09-24.md), G's len/cap seat GATE-COMPLETE, the RUNTIME row held by the owner's separate cloud project, and C2's literal revision 4 under COORD verification; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 08:48 -- SAVE-STATE refresh (ledger through mailbox 56300f7712): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, the Linux packaging train CUT (seat 1 accepted, seat 2 ACCEPTED with 2-A required, seat 3 REWORKED at 267c262307 and under COORD re-review, a corpus half owed), G's len/cap seat GATE-COMPLETE, the RUNTIME row held by the owner's separate cloud project, and C2's literal revision 4 under COORD verification (the owner awaits the tier brief); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -216,8 +216,11 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
  - DONE 2026-09-24: the owner's 14 deprecations, VERIFIED 14/14 by COORD from nuget.org's registration API (ledger "STAMP ·
    ebb4acb8cf · THE 14 REMOVED-ID DEPRECATIONS ARE DONE").
  - OWNER DECISIONS OPEN: the string-literal tiers. C2's revision 3 is d382b60677 on claude/c2-literal-cache-draft, COORD's
-   verification is on claude/coord-handover docs/phase4/reviews/literal-revision-3-verification-2026-09-24.md, and a
-   revision 4 is coming from C2.
+   verification is on claude/coord-handover docs/phase4/reviews/literal-revision-3-verification-2026-09-24.md. REVISION 4
+   ARRIVED: c555d91c55, inbox 20260924T125751Z-C2.md. It found revision 3's arms registered AFTER the import hooks, and it
+   measured hybrid lazy registration and does NOT recommend it; C2 is on STANDBY. COORD's revision-4 verification workflow is
+   running. Its output is (i) a verification note under docs/phase4/reviews/ and (ii) the TIER DECISION BRIEF for the owner,
+   which the owner asked to receive.
  - DONE 2026-09-24 (owner-approved; ledger "ANNOUNCE · b6746ab185"): the BRANCH release/go1.23 was FAST-FORWARDED from
    10c78227a7 (the 75% milestone, still pinned by tag stdlib-tests-75pct-2026-08-22) to b6746ab185, the commit of
    nuget-1.23.12.3, and read back by ls-remote. No tag moved. Mint release/go1.24 at the 1.25 cutover, not before. These are
@@ -261,6 +264,9 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    - d15 gofmt; c6-c9; the log/syslog IVT union;
    - the -tests index.md rewrite defect; clean-bin's src/gen gap; the go/printer testdata refresh;
    - the counter-0 dry-run README writes; the BoGo figures in code comments.
+   - the identifier-census SCRUB of pre-existing hits on master: the BOARD's, plus a 'profile_root' hit in
+     docs/ConversionStrategies-Reference.md (found by G 2026-09-24; it predates the packaging train). (A grep.exe.stackdump crash artifact in
+     the main checkout was removed by COORD 2026-09-24; the checkout's porcelain is EMPTY.)
  - i7 WORKTREES under C:/go2cs-tmp-coord kept: hnd (THIS record; never remove), abcut (the cutover, now on origin),
    abh12, abrel, abcensus, abh6, abpost and abpost-stage (2.2 GB; reclaim after the release), plus older ones. Reclaim
    children-first; never Stop-Process by name.
@@ -2076,3 +2082,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 08:06 -- SAVE-STATE refresh: 1b records the atomic-loads pick-not-merge finding and C2's revision 4 under verification.
 - 2026-09-24 08:41 -- SAVE-STATE refresh: 1c records the seats 2-3 review verdicts and the train's owed corpus half.
 - 2026-09-24 08:43 -- SAVE-STATE refresh: 1c records the len/cap seat gate-complete and seat 2's CNR.
+- 2026-09-24 08:48 -- SAVE-STATE refresh: 1b records literal revision 4 arrived, the scrub item, and the seat-3 rework under re-review.
