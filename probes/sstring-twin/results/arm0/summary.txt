@@ -1,0 +1,5 @@
+pass1 rc=1
+errors outside Forms.cs: 0
+pass2 forms: FORM_A FORM_B FORM_C FORM_D FORM_E2 FORM_E3 FORM_N1
+pass2 rc=0
+run rc=0

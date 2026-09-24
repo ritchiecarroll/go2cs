@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The sstring twin compile probe (COORD dispatch 2026-09-24). A scratch console OUTSIDE src/ that
+       references golib only. Which call forms compile is chosen by forms.props (written per pass by
+       run-probe.sh): pass 1 defines every form to collect the compiler's verdicts, pass 2 defines the
+       forms that compiled and runs them to print which overload bound. -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <NoWarn>CS8981</NoWarn>
+  </PropertyGroup>
+
+  <Import Project="forms.props" Condition="Exists('forms.props')" />
+
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);$(ProbeForms)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="System.Object" Alias="any" />
+    <Using Include="System.Span&lt;System.Object&gt;" Alias="ꓸꓸꓸany" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/core/golib/golib.csproj" />
+  </ItemGroup>
+
+</Project>

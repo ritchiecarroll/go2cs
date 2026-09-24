@@ -1,0 +1,8 @@
+a: @string
+b: sstring
+c: sstring
+d: sstring
+e2: @string
+e3: sstring
+n1: @string
+done

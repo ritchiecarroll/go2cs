@@ -1,0 +1,8 @@
+a: sstring
+b: sstring
+c: sstring
+d: sstring
+e2: @string
+e3: sstring
+h: assigned, len 4
+done
