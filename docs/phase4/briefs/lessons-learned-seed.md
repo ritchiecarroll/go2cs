@@ -85,3 +85,20 @@ tag `nuget-1.24.13.1`. The write-up is the step after the post-publish items in 
     packages ship the linux flavour under runtimes/linux-x64, but lib/ (the compile surface) is the windows flavour, so
     x/sys/unix fails with CS0426 'Rlimit'. Next hop: give each RID a compile surface (reference assemblies per RID, or a
     RID-selected compile asset) and add a Linux walkthrough to the release checklist.
+17. **Release day, 1.24.13.2 (a follow-on release the same day).**
+    - **No GPG signing on the release machine during Phase 2.** The batch NuGet sign failed when the Certum card's
+      'select a smart card device' dialog recurred per package. The likely cause is Gpg4win's scdaemon (woken by
+      concurrent signed git commits) probing every reader and resetting the card session. Either freeze all GPG use
+      during Phase 2, or set `disable-scdaemon` in gpg-agent.conf when no GPG key lives on a card.
+    - **To resume a failed Phase 2, never re-run release-nuget.** It re-bumps the version. Run the signer with
+      -Apply -Overwrite (it signs every package again, on one PIN), then Phase 3's exact push. Nothing is re-packed.
+    - **'Indexed' means the whole restore closure is listed.** nuget.org indexes packages at different speeds. A smoke
+      test started when a sample listed the new version failed restore LOUDLY (NU1102 on two late packages); it never
+      mixed versions. Probe every id the walkthrough's restore needs before the post-publish smoke.
+    - **Read the owner's gate on the tree that ships.** The walkthrough was re-run on packages repacked at the
+      assembled train's exact tree, after a golib change moved the shipped binaries.
+    - **Allocation guards read Inconclusive at Debug.** A Debug build never leaves unoptimized code, so an
+      allocation assert over a struct passed as an interface boxes there. Follow the AliasOverlapRaceTests precedent,
+      and gate GolibTests at BOTH configurations.
+    - **The behavioral runner's 25 GB disk preflight refuses AFTER a large solution build.** Order or purge so that
+      the behavioral leg starts with room.
