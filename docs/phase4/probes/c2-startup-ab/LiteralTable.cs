@@ -4,9 +4,13 @@
 // Round 2 (revision 4) adds the HYBRID LAZY form: a module's initializer registers only its image range
 // and a registrar delegate (RegisterLazyModule); the first table MISS whose address falls inside that
 // range runs the module's registrar once, then retries. GO2CS_LITTABLE_HELPER=1 runs a registrar on a
-// helper thread instead of the missing thread, so its allocations land on another thread's byte counter.
+// helper thread instead of the missing thread, so its allocations land on another thread's byte counter;
+// it deadlocks once the registration order is fixed (see the design block, §8.1R3.2).
+// Round 3 adds anchor-based range discovery (no file read), and the exit diagnostics behind
+// GO2CS_LITTABLE_MISSLOG=1: each miss's address and length, classified against the module images and the
+// registered ranges, looked up again after every registrar has run, and the bytes of any that still miss.
 // Every arm carries this file; the A arm neither wires the operator nor generates registrations, so its
-// only cost is the report hook's one environment read at golib load.
+// only cost is the report hook's environment reads at golib load.
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -46,7 +50,21 @@ public static unsafe class LiteralTable
     private static readonly bool s_off = Environment.GetEnvironmentVariable("GO2CS_LITTABLE_OFF") == "1";
     private static readonly bool s_helper = Environment.GetEnvironmentVariable("GO2CS_LITTABLE_HELPER") == "1";
     public static int Registered;
-    private static long s_registerTicks, s_hits, s_misses, s_lazyRuns, s_lazyCallerBytes, s_rangeMisses, s_mapsReads;
+    private static long s_registerTicks, s_hits, s_misses, s_lazyRuns, s_lazyCallerBytes, s_rangeMisses, s_mapsReads, s_unalignedImages;
+    // GO2CS_LITTABLE_MISSLOG=1 (the diagnostic arm only; added after the timed arms were built): record the
+    // first 8,192 miss addresses and, at exit, classify each as inside a module image or outside every one.
+    private static readonly nint[]? s_missLog = Environment.GetEnvironmentVariable("GO2CS_LITTABLE_MISSLOG") == "1" ? new nint[8192] : null;
+    private static readonly int[]? s_missLen = s_missLog is null ? null : new int[8192];
+    private static int s_missLogged;
+
+    private static void LogMiss(nint key, int length)
+    {
+        if (s_missLog is { } log && s_missLogged < log.Length)
+        {
+            s_missLen![s_missLogged] = length;
+            log[s_missLogged++] = key;
+        }
+    }
 
     [ModuleInitializer]
     internal static void ReportHook()
@@ -62,9 +80,103 @@ public static unsafe class LiteralTable
 
             Console.Error.WriteLine(
                 $"LITTABLE off={s_off} helper={s_helper} registered={Registered} slots={s_table.Keys.Length} hits={s_hits} misses={s_misses} " +
-                $"lazyModules={s_lazy.Length} mapsReads={s_mapsReads} lazyRuns={s_lazyRuns} lazyCallerBytes={s_lazyCallerBytes} rangeless={outOfRange} literalOutsideRange={s_rangeMisses} " +
+                $"lazyModules={s_lazy.Length} mapsReads={s_mapsReads} unalignedImages={s_unalignedImages} lazyRuns={s_lazyRuns} lazyCallerBytes={s_lazyCallerBytes} rangeless={outOfRange} literalOutsideRange={s_rangeMisses} " +
                 $"registerMs={System.Diagnostics.Stopwatch.GetElapsedTime(0, s_registerTicks).TotalMilliseconds:F2} assemblies={AppDomain.CurrentDomain.GetAssemblies().Length} " +
                 $"jitMethods={System.Runtime.JitInfo.GetCompiledMethodCount()} jitMs={System.Runtime.JitInfo.GetCompilationTime().TotalMilliseconds:F1} jitILBytes={System.Runtime.JitInfo.GetCompiledILBytes()}");
+
+            if (s_missLog is { } missLog)
+            {
+                // every loaded module's image, from /proc/self/maps, by file name
+                var images = new List<(nint lo, nint hi, string name)>();
+                try
+                {
+                    foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
+                    {
+                        string path = asm.IsDynamic ? "" : asm.Location;
+                        if (path.Length > 0 && TryMappedRange(path, System.IO.File.ReadAllLines("/proc/self/maps"), out nint lo, out nint hi))
+                            images.Add((lo, hi, asm.GetName().Name ?? "?"));
+                    }
+                }
+                catch { }
+
+                var byImage = new Dictionary<string, int>();
+                int outside = 0;
+                for (int i = 0; i < s_missLogged; i++)
+                {
+                    string? owner = null;
+                    foreach (var (lo, hi, name) in images)
+                        if (missLog[i] >= lo && missLog[i] < hi) { owner = name; break; }
+                    if (owner is null) outside++;
+                    else byImage[owner] = byImage.GetValueOrDefault(owner) + 1;
+                }
+
+                // the same misses against the lazy modules' ranges as registered (anchor or maps discovery)
+                int inLazy = 0;
+                for (int i = 0; i < s_missLogged; i++)
+                    foreach (LazyModule m in s_lazy)
+                        if (missLog[i] >= m.Start && missLog[i] < m.End) { inLazy++; break; }
+
+                Console.Error.WriteLine($"LITTABLE-MISSES logged={s_missLogged} outsideEveryImage={outside} insideAnImage={s_missLogged - outside} insideALazyRange={inLazy} images={images.Count}");
+
+                // Were the misses literals that were simply looked up BEFORE their module registered? Run every
+                // registrar that has not run (diagnostic only, at exit, after every measured window), then look
+                // each logged miss up again: found now means the literal preceded its own registration.
+                foreach (LazyModule m in s_lazy)
+                    Interlocked.Exchange(ref m.Registrar, null)?.Invoke();
+
+                int foundNow = 0;
+                var foundByImage = new Dictionary<string, int>();
+                for (int i = 0; i < s_missLogged; i++)
+                {
+                    if (Find(Volatile.Read(ref s_table), missLog[i], s_missLen![i]) < 0)
+                    {
+                        // still unmatched: show what the span holds (at most 48 bytes, escaped)
+                        var head = new ReadOnlySpan<byte>((void*)missLog[i], Math.Min(s_missLen[i], 48));
+                        var sb = new System.Text.StringBuilder();
+                        foreach (byte c in head) sb.Append(c is >= 0x20 and < 0x7F and not (byte)'\\' ? ((char)c).ToString() : $"\\x{c:x2}");
+                        Console.Error.WriteLine($"LITTABLE-UNMATCHED len={s_missLen[i]} bytes=\"{sb}\"");
+                        continue;
+                    }
+                    foundNow++;
+                    foreach (var (lo, hi, name) in images)
+                        if (missLog[i] >= lo && missLog[i] < hi) { foundByImage[name] = foundByImage.GetValueOrDefault(name) + 1; break; }
+                }
+
+                Console.Error.WriteLine($"LITTABLE-MISSES-FOUND-AFTER-ALL-REGISTER {foundNow} of {s_missLogged} (registered now {Registered})");
+                foreach (var kv in foundByImage)
+                    Console.Error.WriteLine($"LITTABLE-MISSES-FOUND-IN {kv.Key} {kv.Value} of {byImage.GetValueOrDefault(kv.Key)}");
+
+                // how many separate mappings each image file has (a flat and a mapped layout would be two runs)
+                try
+                {
+                    string[] maps = System.IO.File.ReadAllLines("/proc/self/maps");
+                    foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
+                    {
+                        string path = asm.IsDynamic ? "" : asm.Location;
+                        if (path.Length == 0) continue;
+                        string name = asm.GetName().Name ?? "?";
+                        if (!byImage.ContainsKey(name)) continue;
+                        LazyModule? lm = null;
+                        foreach (LazyModule m in s_lazy) if (m.Name == name + ".dll") lm = m;
+                        var runs = new List<string>();
+                        foreach (string line in maps)
+                            if (line.EndsWith(path, StringComparison.Ordinal))
+                            {
+                                int dash = line.IndexOf('-'), space = line.IndexOf(' ');
+                                long a = Convert.ToInt64(line[..dash], 16), b = Convert.ToInt64(line[(dash + 1)..space], 16);
+                                runs.Add($"{(lm is null ? a : a - lm.Start):+#;-#;0}+{b - a}:{line.Substring(space + 1, 4)}");
+                            }
+                        int missIn = 0;
+                        if (lm is not null)
+                            for (int i = 0; i < s_missLogged; i++)
+                                if (missLog[i] >= lm.Start && missLog[i] < lm.End) missIn++;
+                        Console.Error.WriteLine($"LITTABLE-MAPS {name} lazySize={(lm is null ? -1 : (long)(lm.End - lm.Start))} missesInLazyRange={missIn} mappingsRelativeToLazyStart={string.Join(' ', runs)}");
+                    }
+                }
+                catch { }
+                foreach (var kv in byImage)
+                    Console.Error.WriteLine($"LITTABLE-MISSES-IN {kv.Key} {kv.Value}");
+            }
 
             if (Environment.GetEnvironmentVariable("GO2CS_LITTABLE_REPORT_MODULES") == "1")
                 foreach (LazyModule m in s_lazy)
@@ -120,6 +232,128 @@ public static unsafe class LiteralTable
     }
 
     // ---- lazy registration (arm L): the module's image range and its registrar ----
+    // Anchor discovery (round 3): the module passes the address of one of its own literals. Its image
+    // is mapped contiguously from an `MZ` header (flat or mapped layout, and inside a single-file bundle
+    // alike), so a page-by-page scan down from the anchor finds the header, confirmed by `PE\0\0` at
+    // e_lfanew. The extent covers both layouts: max over sections of raw end and virtual end. No file read,
+    // no /proc/self/maps, and nothing per literal.
+    public static void RegisterLazyModule(Module module, Action registrar, ReadOnlySpan<byte> anchor)
+    {
+        if (s_off)
+            return;
+
+        var m = new LazyModule { Registrar = registrar, Name = module.Name, Via = "anchor-scan-failed" };
+
+        if (TryImageFromAnchor(Addr(anchor), out nint lo, out nint hi))
+        {
+            m.Start = lo;
+            m.End = hi;
+            m.Via = "anchor";
+        }
+
+        lock (s_lock)
+        {
+            var next = new LazyModule[s_lazy.Length + 1];
+            s_lazy.CopyTo(next, 0);
+            next[^1] = m;
+            Array.Sort(next, (a, b) => a.Start.CompareTo(b.Start));
+            Volatile.Write(ref s_lazy, next);
+        }
+    }
+
+    // Round 3's first scan stepped page by page with no bound and faulted (AccessViolation) in a single-file
+    // bundle, whose images need not start on a page and whose neighbouring pages need not be readable. The
+    // scan is now bounded to the readable mapping run that holds the anchor (/proc/self/maps, re-read only
+    // when the anchor lies outside every cached run) and steps 16 bytes. Every timed L arm was built with the page-step scan, which found 43 of 43
+    // and 153 of 153 ranges under the JIT build's flat layout.
+    private static (long lo, long hi)[]? s_readable;
+
+    private static bool ReadableRun(nint address, out nint lo, out nint hi)
+    {
+        lo = hi = 0;
+
+        // read on first use, and again when the anchor lies outside every cached run (a module mapped since)
+        for (int attempt = 0; attempt < 2; attempt++)
+        {
+            if (s_readable is not null)
+                foreach (var (a, b) in s_readable)
+                    if (address >= (nint)a && address < (nint)b) { lo = (nint)a; hi = (nint)b; return true; }
+
+            if (attempt == 1)
+                return false;
+
+            var runs = new List<(long lo, long hi)>();
+
+            try
+            {
+                foreach (string line in System.IO.File.ReadAllLines("/proc/self/maps"))
+                {
+                    int dash = line.IndexOf('-'), space = line.IndexOf(' ');
+                    if (dash < 0 || space < 0 || line[space + 1] != 'r')
+                        continue;
+                    long a = Convert.ToInt64(line[..dash], 16), b = Convert.ToInt64(line[(dash + 1)..space], 16);
+                    if (runs.Count > 0 && runs[^1].hi == a) runs[^1] = (runs[^1].lo, b); // merge adjacent
+                    else runs.Add((a, b));
+                }
+            }
+            catch { }
+
+            s_readable = runs.ToArray();
+            s_mapsReads++;
+        }
+
+        return false;
+    }
+
+    private static bool TryImageFromAnchor(nint anchor, out nint lo, out nint hi)
+    {
+        lo = hi = 0;
+
+        if (!ReadableRun(anchor, out nint floor, out nint ceiling))
+            return false;
+
+        for (nint p = anchor & ~(nint)15; p >= floor; p -= 16)
+        {
+            if (*(ushort*)p != 0x5A4D) // "MZ"
+                continue;
+
+            if (p + 0x40 > ceiling)
+                continue;
+
+            int lfanew = *(int*)(p + 0x3C);
+
+            if (lfanew <= 0 || lfanew > 4096 - 256 || p + lfanew + 24 > ceiling || *(uint*)(p + lfanew) != 0x00004550) // "PE\0\0"
+                continue;
+
+            nint coff = p + lfanew + 4;
+            int sections = *(ushort*)(coff + 2), optionalSize = *(ushort*)(coff + 16);
+            nint table = coff + 20 + optionalSize;
+
+            if (table + sections * 40 > ceiling)
+                continue;
+
+            long extent = *(uint*)(coff + 20 + 56); // SizeOfImage
+
+            for (int k = 0; k < sections; k++)
+            {
+                nint sh = table + k * 40;
+                long virtualEnd = *(uint*)(sh + 12) + (long)*(uint*)(sh + 8);
+                long rawEnd = *(uint*)(sh + 20) + (long)*(uint*)(sh + 16);
+                extent = Math.Max(extent, Math.Max(virtualEnd, rawEnd));
+            }
+
+            if (anchor >= p + (nint)extent)
+                return false; // the nearest header below the anchor does not cover it
+
+            lo = p;
+            hi = p + (nint)extent;
+            if ((lo & 4095) != 0) s_unalignedImages++;
+            return true;
+        }
+
+        return false;
+    }
+
     public static void RegisterLazyModule(Module module, Action registrar)
     {
         if (s_off)
@@ -268,12 +502,13 @@ public static unsafe class LiteralTable
             return t.Values[i];
         }
 
-        return s_lazy.Length == 0 ? Miss() : LazyMiss(key, s.Length);
+        return s_lazy.Length == 0 ? Miss(key, s.Length) : LazyMiss(key, s.Length);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static byte[]? Miss()
+    private static byte[]? Miss(nint key, int length)
     {
+        LogMiss(key, length);
         s_misses++;
         return null;
     }
@@ -335,6 +570,7 @@ public static unsafe class LiteralTable
 
         if (found < 0 || key >= lazy[found].End)
         {
+            LogMiss(key, length);
             s_misses++;
             return null;
         }
@@ -377,6 +613,7 @@ public static unsafe class LiteralTable
             return t.Values[i];
         }
 
+        LogMiss(key, length);
         s_misses++;
         return null;
     }

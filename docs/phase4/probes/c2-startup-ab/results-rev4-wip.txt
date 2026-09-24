@@ -1,3 +1,5 @@
+# SUPERSEDED 2026-09-24 by results-rev4-linux.txt: every arm below registered AFTER package_info.cs's import hooks
+# (revision 3's order), so B and L show init-time misses that the fixed order removes. Kept as the WIP record.
 # WIP (revision 4, 2026-09-24): per-arm exit reports, GO2CS_LITTABLE_REPORT=1, one run each, linux-x64, JIT tiered. Timing not yet run.
 
 ## hello

@@ -1,5 +1,7 @@
 #!/bin/bash
-# The start-up A/B probe's driver. usage: driver.sh <scratch dir> <converter binary> <arm: A|B|L> <program: SuHello|SuHttp>
+# The start-up A/B probe's driver. usage: driver.sh <scratch dir> <converter binary> <arm: A|B|L> <program: SuHello|SuHttp> [single]
+# `single` also publishes the arm in the test host's shape (test-csproj-template.xml: SelfContained,
+# PublishSingleFile, no ReadyToRun, no trimming, uncompressed) into <arm>-<program>/single.
 # The scratch dir holds a `src` from `git archive HEAD src`; the programs are converted into src/tests/Behavioral/<program>.
 set -e
 W=$1; CONV=$2; ARM=$3; PROG=$4; P=$(cd "$(dirname "$0")" && pwd)
@@ -12,7 +14,14 @@ if [ ! -f "$H/$PROG.csproj" ]; then
   "$CONV" "$H" "$H"
 fi
 cp "$P/LiteralTable.cs" "$SRC/core/golib/LiteralTable.cs"
-find "$SRC" -name zz_regprobe.g.cs -delete
+find "$SRC" \( -name '*_regprobe.g.cs' -o -name regprobe.g.inc \) -delete
+# the registration file compiles FIRST, ahead of package_info.cs's import hooks (see genreg.py, ORDER)
+grep -q 'regprobe.g.inc' "$SRC/Directory.Build.props" || python3 - "$SRC/Directory.Build.props" <<'PY'
+import sys
+p = sys.argv[1]; t = open(p, encoding='utf-8').read(); i = t.rindex('</Project>')
+t = t[:i] + '  <ItemGroup><Compile Include="regprobe.g.inc" Condition="Exists(\'regprobe.g.inc\')" /></ItemGroup>\n' + t[i:]
+open(p, 'w', encoding='utf-8').write(t)
+PY
 if [ "$ARM" = A ]; then
   python3 "$P/operator-patch.py" "$SRC" revert
 else
@@ -23,4 +32,10 @@ fi
 (cd "$H" && dotnet build -c Release -p:GoTargetOS=linux -p:go2csPath="$SRC/" -clp:ErrorsOnly)
 rm -rf "$W/$ARM-$PROG"; mkdir -p "$W/$ARM-$PROG"; cp -r "$H/bin/Release/net10.0" "$W/$ARM-$PROG/jit"
 [ "$ARM" = A ] && ls "$W/A-$PROG/jit"/*.dll | xargs -n1 basename | sed 's/\.dll$//' > "$W/asms-$PROG.txt"
+if [ "$5" = single ]; then
+  (cd "$H" && dotnet publish -c Release -r linux-x64 -p:GoTargetOS=linux -p:go2csPath="$SRC/" -p:SelfContained=true \
+    -p:PublishSingleFile=true -p:PublishReadyToRun=false -p:PublishTrimmed=false -p:EnableCompressionInSingleFile=false \
+    -o "$W/$ARM-$PROG/single" -clp:ErrorsOnly)
+  echo "published $ARM $PROG single-file (self-contained, JIT, uncompressed)"
+fi
 echo "built $ARM $PROG (Release, net10.0, GoTargetOS=linux)"

@@ -1,19 +1,33 @@
-# usage: time.py <scratch dir holding <arm>-<program>/jit> <program> <N> <out>
+# usage: time.py <scratch dir holding <arm>-<program>/jit> <program> <N> <out> [comma-separated arms]
 # Start-up: wall time exec->exit under two JIT regimes, arms interleaved (order alternating), 3 warm-ups,
 # N measured. Arms (revision 4):
 #   A    today (golib carries the probe table unused; the operator is not wired; nothing registers)
 #   B    eager: the operator consults the table, one [ModuleInitializer] per module registers its literals
 #   Boff B with GO2CS_LITTABLE_OFF=1 (the initializers run, Register returns at once)
 #   L    hybrid lazy: each module registers only its range and a registrar; a miss inside it runs it once
-#   Lh   L with GO2CS_LITTABLE_HELPER=1 (the registrar runs on a pre-created worker thread)
-# Reported per arm: median, p25-p75, min; and each arm's delta against A at the median and at the min.
+#   Lh   L with GO2CS_LITTABLE_HELPER=1 (the registrar runs on a pre-created worker thread). It DEADLOCKS on
+#        the net/http program (INFERENCE: a registrar handed off from inside its own module initializer), so that
+#        program is timed without it.
+#   Bz, Lz  B and L as revision 3 and the first round-2 timing built them: the registration file compiled
+#        AFTER package_info.cs (genreg.py, ORDER), so init-time lookups of a module's own literals missed.
+#        Kept to time the order's effect; built by renaming the arm directories, not by driver.sh.
+#   As, Bs, Ls  A, B and L published single-file (driver.sh ... single), run as the executable.
+# Default arms: A, B, Boff, L. Reported per arm: median, p25-p75, min; and each arm's delta against A (As
+# when A is not among the arms) at the median and at the min.
 import subprocess, time, os, sys, statistics as st
 
 W, prog, n, out = sys.argv[1], sys.argv[2], int(sys.argv[3]), sys.argv[4]
 arms = {
     'A': ('A', {}), 'B': ('B', {}), 'Boff': ('B', {'GO2CS_LITTABLE_OFF': '1'}),
     'L': ('L', {}), 'Lh': ('L', {'GO2CS_LITTABLE_HELPER': '1'}),
+    'Bz': ('Bz', {}), 'Lz': ('Lz', {}),
+    # the `single` publishes (driver.sh ... single): the test host's shape
+    'As': ('A', {}, 'single'), 'Bs': ('B', {}, 'single'), 'Ls': ('L', {}, 'single'),
 }
+if len(sys.argv) > 5:
+    arms = {k: arms[k] for k in sys.argv[5].split(',')}
+else:
+    arms = {k: v for k, v in arms.items() if k in ('A', 'B', 'Boff', 'L')}
 
 def q(v, p):
     v = sorted(v)
@@ -27,18 +41,20 @@ with open(out, 'a') as o:
         order = list(arms)
         for i in range(n + 3):
             for k in (order if i % 2 == 0 else order[::-1]):
-                arm, e = arms[k]
-                cmd = ['dotnet', f"{W}/{arm}-{prog}/jit/{prog}.dll"]
+                arm, e, *kind = arms[k]
+                cmd = ([f"{W}/{arm}-{prog}/single/{prog}"] if kind == ['single']
+                       else ['dotnet', f"{W}/{arm}-{prog}/jit/{prog}.dll"])
                 t0 = time.perf_counter()
                 r = subprocess.run(cmd, env={**os.environ, **renv, **e}, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 t = (time.perf_counter() - t0) * 1000
                 assert r.returncode == 0, (k, regime)
                 if i >= 3:
                     ts[k].append(t)
-        a_med, a_min = st.median(ts['A']), min(ts['A'])
+        base = 'A' if 'A' in ts else 'As'
+        a_med, a_min = st.median(ts[base]), min(ts[base])
         for k, v in ts.items():
             line = (f"{prog}\t{regime}\t{k:4}\tmedian {st.median(v):7.1f}\tp25-p75 {q(v, .25):7.1f}-{q(v, .75):7.1f}\tmin {min(v):7.1f}"
-                    f"\tvs A: median {st.median(v) - a_med:+6.1f}  min {min(v) - a_min:+6.1f}\tn={n}")
+                    f"\tvs {base}: median {st.median(v) - a_med:+6.1f}  min {min(v) - a_min:+6.1f}\tn={n}")
             print(line)
             o.write(line + "\n")
         o.flush()

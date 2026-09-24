@@ -1,10 +1,19 @@
-# Writes zz_regprobe.g.cs into each closure module's project directory: one module initializer that
+# Writes regprobe.g.inc into each closure module's project directory: one module initializer that
 # registers every distinct regular "..."u8 literal of the module's compiled .cs files (GoTargetOS=linux).
 import os, re, sys, glob
 # usage: genreg.py <scratch src root> <file of closure assembly names> <report.tsv> [eager|lazy]
 #   eager: a [ModuleInitializer] that registers every literal (arm B).
 #   lazy:  a [ModuleInitializer] that registers only the module's range and a registrar delegate (arm L).
 # Regular "..."u8 literals only: verbatim @"..."u8 literals are skipped (about 17 lines, under 1%).
+# ORDER (round 3): Roslyn calls a module's [ModuleInitializer]s in compilation order, and package_info.cs is
+# compiled FIRST by design (DESIGN-import-hook-relocation S3): its import hooks are members of the package
+# class, so the first hook runs the package's static constructor, whose Go var initializers look literals up
+# at once. A registration that comes after package_info.cs therefore misses every init-time lookup of the
+# module's own literals (1,319 of 1,389 lookups in the hello program, arms B and L of revision 3). The file
+# is therefore not a .cs (the *.cs glob skips it) and driver.sh adds it as a Compile item in the scratch
+# src/Directory.Build.props, whose items precede the project's own. GO2CS_REGPROBE_FILE=zz_regprobe.g.cs
+# reproduces revision 3's order (compiled with the *.cs glob, after package_info.cs).
+regname = os.environ.get('GO2CS_REGPROBE_FILE', 'regprobe.g.inc')
 src, asmfile, report = sys.argv[1], sys.argv[2], sys.argv[3]
 mode = sys.argv[4] if len(sys.argv) > 4 else 'eager'
 asms = [a.strip() for a in open(asmfile) if a.strip()]
@@ -21,7 +30,7 @@ for a in asms:
     if a in ('golib', 'unsafe') or a not in proj:
         rows.append(f"{a}\tSKIP"); continue
     cs, t = proj[a]; d = os.path.dirname(cs)
-    files = [f for f in glob.glob(f"{d}/*.cs") if not re.search(r'(_test\.cs|package_test_info\.cs|go2cs_test_host\.cs|zz_regprobe\.g\.cs)$', f)]
+    files = [f for f in glob.glob(f"{d}/*.cs") if not re.search(r'(_test\.cs|package_test_info\.cs|go2cs_test_host\.cs|_regprobe\.g\.cs)$', f)]
     if '$(GoTargetOS)/*.cs' in t:
         files += [f for f in glob.glob(f"{d}/linux/*.cs") if not f.endswith('_test.cs')]
     seen = []; ss = set()
@@ -29,10 +38,11 @@ for a in asms:
         for m in lit.finditer(open(f, encoding='utf-8', errors='replace').read()):
             v = m.group(1)
             if v and v not in ss: ss.add(v); seen.append(v)
-    with open(f"{d}/zz_regprobe.g.cs", 'w', encoding='utf-8') as o:
+    with open(f"{d}/{regname}", 'w', encoding='utf-8') as o:
         o.write("// start-up probe (C2): registers this module's u8 literals (" + mode + ")\nnamespace go;\n\ninternal static class ᴛRegProbe\n{\n")
         if mode == 'lazy':
-            o.write("    [global::System.Runtime.CompilerServices.ModuleInitializer]\n    internal static void Init() => global::go.LiteralTable.RegisterLazyModule(typeof(ᴛRegProbe).Module, Register);\n\n    internal static void Register()\n    {\n")
+            anchor = seen[0] if seen else ""
+            o.write("    [global::System.Runtime.CompilerServices.ModuleInitializer]\n    internal static void Init() => global::go.LiteralTable.RegisterLazyModule(typeof(ᴛRegProbe).Module, Register, \"" + anchor + "\"u8);\n\n    internal static void Register()\n    {\n")
         else:
             o.write("    [global::System.Runtime.CompilerServices.ModuleInitializer]\n    internal static void Register()\n    {\n")
         for v in seen: o.write(f'        global::go.LiteralTable.Register("{v}"u8);\n')

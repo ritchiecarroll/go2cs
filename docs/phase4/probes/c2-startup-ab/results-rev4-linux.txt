@@ -1,0 +1,99 @@
+# c2-startup-ab, revision 4 (2026-09-24), linux-x64, shared 4-core VM, .NET SDK 10.0.112 / runtime 10.0.12,
+# corpus flavour GoTargetOS=linux, `dotnet build -c Release`, run as `dotnet <app>.dll`. Local and unofficial, not a gate.
+# Arms: A today; B eager; Boff = B with GO2CS_LITTABLE_OFF=1; L hybrid lazy (anchor-scan ranges);
+# B and L with the registration compiled BEFORE package_info.cs (the order the design requires);
+# Bz, Lz = revision 3's order (registration after package_info.cs's import hooks). Bz is built from the WIP
+# LiteralTable (d29c5e3542); Lz-SuHello from the round-3 file (anchor scan), Lz-SuHttp from the WIP file
+# (/proc/self/maps ranges). Every arm's golib carries LiteralTable.cs; the code paths that differ between
+# those versions are exit diagnostics and range discovery, which A, B and Bz never run.
+
+## start-up: wall ms exec->exit, time.py, 31 measured runs per arm after 3 warm-ups, arms interleaved
+SuHello	tiered	A   	median   378.0	p25-p75   366.9-  395.4	min   358.4	vs A: median   +0.0  min   +0.0	n=31
+SuHello	tiered	B   	median   417.7	p25-p75   402.1-  431.2	min   394.5	vs A: median  +39.7  min  +36.1	n=31
+SuHello	tiered	Boff	median   403.4	p25-p75   395.9-  416.0	min   380.3	vs A: median  +25.4  min  +21.9	n=31
+SuHello	tiered	L   	median   415.9	p25-p75   405.0-  433.2	min   388.7	vs A: median  +37.9  min  +30.3	n=31
+SuHello	tiered	Bz  	median   427.7	p25-p75   404.3-  442.1	min   393.9	vs A: median  +49.7  min  +35.5	n=31
+SuHello	tiered	Lz  	median   386.9	p25-p75   379.7-  403.2	min   361.9	vs A: median   +8.9  min   +3.4	n=31
+SuHello	tc0	A   	median   635.6	p25-p75   622.2-  656.8	min   606.8	vs A: median   +0.0  min   +0.0	n=31
+SuHello	tc0	B   	median   686.5	p25-p75   669.3-  705.1	min   647.5	vs A: median  +50.9  min  +40.7	n=31
+SuHello	tc0	Boff	median   680.3	p25-p75   660.7-  699.9	min   641.6	vs A: median  +44.7  min  +34.8	n=31
+SuHello	tc0	L   	median   677.3	p25-p75   666.4-  709.5	min   646.0	vs A: median  +41.7  min  +39.1	n=31
+SuHello	tc0	Bz  	median   682.3	p25-p75   667.1-  700.5	min   649.4	vs A: median  +46.7  min  +42.6	n=31
+SuHello	tc0	Lz  	median   664.6	p25-p75   642.0-  684.0	min   617.3	vs A: median  +28.9  min  +10.5	n=31
+SuHttp	tiered	A   	median  1063.2	p25-p75  1051.4- 1094.2	min   980.4	vs A: median   +0.0  min   +0.0	n=31
+SuHttp	tiered	B   	median  1129.9	p25-p75  1103.2- 1160.0	min  1058.7	vs A: median  +66.7  min  +78.3	n=31
+SuHttp	tiered	Boff	median  1108.6	p25-p75  1087.9- 1142.5	min  1057.3	vs A: median  +45.4  min  +76.9	n=31
+SuHttp	tiered	L   	median  1127.4	p25-p75  1105.2- 1166.4	min  1046.1	vs A: median  +64.2  min  +65.7	n=31
+SuHttp	tiered	Bz  	median  1119.2	p25-p75  1093.5- 1148.4	min  1067.3	vs A: median  +56.0  min  +87.0	n=31
+SuHttp	tiered	Lz  	median  1104.6	p25-p75  1089.5- 1123.0	min  1059.8	vs A: median  +41.4  min  +79.4	n=31
+SuHttp	tc0	A   	median  1754.8	p25-p75  1731.7- 1784.3	min  1664.3	vs A: median   +0.0  min   +0.0	n=31
+SuHttp	tc0	B   	median  1838.0	p25-p75  1813.3- 1869.6	min  1769.1	vs A: median  +83.2  min +104.8	n=31
+SuHttp	tc0	Boff	median  1829.1	p25-p75  1809.2- 1871.6	min  1769.3	vs A: median  +74.2  min +105.1	n=31
+SuHttp	tc0	L   	median  1886.8	p25-p75  1859.2- 1920.0	min  1791.7	vs A: median +132.0  min +127.4	n=31
+SuHttp	tc0	Bz  	median  1845.2	p25-p75  1810.1- 1905.6	min  1743.0	vs A: median  +90.4  min  +78.7	n=31
+SuHttp	tc0	Lz  	median  1820.3	p25-p75  1780.6- 1843.9	min  1734.6	vs A: median  +65.5  min  +70.3	n=31
+
+## per-arm exit report (GO2CS_LITTABLE_REPORT=1), one run each. jitMethods and jitILBytes repeat run to run;
+## jitMs is summed across threads, is not wall time, and these runs overlapped a build (noisy).
+SuHello	A	tiered	registered=0 hits=0 misses=0 lazyRuns=0 lazyCallerBytes=0 registerMs=0.00 jitMethods=1919 jitMs=1934.8 jitILBytes=144006
+SuHello	A	tc0	registered=0 hits=0 misses=0 lazyRuns=0 lazyCallerBytes=0 registerMs=0.00 jitMethods=1038 jitMs=2649.5 jitILBytes=127688
+SuHello	B	tiered	registered=3093 hits=1389 misses=0 lazyRuns=0 lazyCallerBytes=0 registerMs=4.31 jitMethods=1980 jitMs=1728.1 jitILBytes=198625
+SuHello	B	tc0	registered=3093 hits=1389 misses=0 lazyRuns=0 lazyCallerBytes=0 registerMs=2.99 jitMethods=1074 jitMs=2731.6 jitILBytes=181657
+SuHello	Boff	tiered	registered=0 hits=0 misses=1389 lazyRuns=0 lazyCallerBytes=0 registerMs=0.00 jitMethods=1978 jitMs=1565.3 jitILBytes=198049
+SuHello	Boff	tc0	registered=0 hits=0 misses=1389 lazyRuns=0 lazyCallerBytes=0 registerMs=0.00 jitMethods=1074 jitMs=3060.8 jitILBytes=181379
+SuHello	L	tiered	registered=2400 hits=1389 misses=0 lazyRuns=9 lazyCallerBytes=604064 registerMs=10.22 jitMethods=1994 jitMs=1682.3 jitILBytes=190605
+SuHello	L	tc0	registered=2400 hits=1389 misses=0 lazyRuns=9 lazyCallerBytes=604064 registerMs=3.80 jitMethods=1103 jitMs=3029.4 jitILBytes=173652
+SuHello	Bz	tiered	registered=3093 hits=70 misses=1319 lazyRuns=0 lazyCallerBytes=0 registerMs=4.62 jitMethods=1981 jitMs=1745.1 jitILBytes=196755
+SuHello	Bz	tc0	registered=3093 hits=70 misses=1319 lazyRuns=0 lazyCallerBytes=0 registerMs=3.16 jitMethods=1075 jitMs=3029.8 jitILBytes=179795
+SuHello	Lz	tiered	registered=113 hits=70 misses=1319 lazyRuns=4 lazyCallerBytes=4488 registerMs=0.45 jitMethods=1989 jitMs=1561.3 jitILBytes=152103
+SuHello	Lz	tc0	registered=113 hits=70 misses=1319 lazyRuns=4 lazyCallerBytes=4488 registerMs=1.60 jitMethods=1099 jitMs=2750.2 jitILBytes=135410
+SuHttp	A	tiered	registered=0 hits=0 misses=0 lazyRuns=0 lazyCallerBytes=0 registerMs=0.00 jitMethods=5721 jitMs=4209.6 jitILBytes=898079
+SuHttp	A	tc0	registered=0 hits=0 misses=0 lazyRuns=0 lazyCallerBytes=0 registerMs=0.00 jitMethods=2759 jitMs=7465.7 jitILBytes=848296
+SuHttp	B	tiered	registered=6323 hits=2949 misses=2 lazyRuns=0 lazyCallerBytes=0 registerMs=8.34 jitMethods=5899 jitMs=5049.4 jitILBytes=1007531
+SuHttp	B	tc0	registered=6323 hits=2949 misses=2 lazyRuns=0 lazyCallerBytes=0 registerMs=5.32 jitMethods=2881 jitMs=7475.9 jitILBytes=957146
+SuHttp	Boff	tiered	registered=0 hits=0 misses=2951 lazyRuns=0 lazyCallerBytes=0 registerMs=0.00 jitMethods=5896 jitMs=4486.7 jitILBytes=1006923
+SuHttp	Boff	tc0	registered=0 hits=0 misses=2951 lazyRuns=0 lazyCallerBytes=0 registerMs=0.00 jitMethods=2879 jitMs=7284.1 jitILBytes=956798
+SuHttp	L	tiered	registered=4974 hits=2949 misses=2 lazyRuns=52 lazyCallerBytes=1397672 registerMs=7.41 jitMethods=5955 jitMs=5023.3 jitILBytes=995035
+SuHttp	L	tc0	registered=4974 hits=2949 misses=2 lazyRuns=52 lazyCallerBytes=1397672 registerMs=4.42 jitMethods=2982 jitMs=7690.8 jitILBytes=944695
+SuHttp	Bz	tiered	registered=6323 hits=442 misses=2509 lazyRuns=0 lazyCallerBytes=0 registerMs=9.77 jitMethods=5898 jitMs=4924.2 jitILBytes=1005591
+SuHttp	Bz	tc0	registered=6323 hits=442 misses=2509 lazyRuns=0 lazyCallerBytes=0 registerMs=5.32 jitMethods=2880 jitMs=8242.0 jitILBytes=955214
+SuHttp	Lz	tiered	registered=665 hits=442 misses=2509 lazyRuns=19 lazyCallerBytes=27712 registerMs=0.88 jitMethods=5922 jitMs=4715.0 jitILBytes=918973
+SuHttp	Lz	tc0	registered=665 hits=442 misses=2509 lazyRuns=19 lazyCallerBytes=27712 registerMs=1.91 jitMethods=2950 jitMs=7556.3 jitILBytes=868901
+
+## the miss log (GO2CS_LITTABLE_MISSLOG=1): revision 3's order against the fixed order
+hello  Lz (rev 3 order): misses 1319, all inside a module image and inside that module's registered range; 1319 of 1319
+       found once every registrar has run (runtime 965, syscall 164, time 105, os 75, internal.poll 10).
+hello  L, B (fixed order): lookups 1389, hits 1389, misses 0.
+nethttp B, L (fixed order): lookups 2951, hits 2949, misses 2, both inside a module image and not found after every
+       registrar has run (net.http 1, vendor/golang.org/x/net/idna 1 by registered range).
+
+## runtime.dll's <Module>..cctor call order, read from IL (System.Reflection.Metadata)
+rev 3 order: 6 x runtime_package.initᴛᴛimport..., ᴛRegProbe.Init, runtime_package.ᴛInitArgs ... (the *_impl.cs hooks)
+fixed order: ᴛRegProbe.Init, then the 6 import hooks, then the *_impl.cs hooks
+
+## hybrid lazy, fixed order, per-module registrar bytes on the calling thread (hello, REPORT_MODULES=1, no miss log)
+syscall 337952, runtime 249296, time 6096, os 5496, fmt 3600, internal.poll 736, io.fs 616, internal.oserror 232,
+SuHello 40; 9 of 43 modules. INFERENCE from the arithmetic: syscall's and runtime's include the table growing on
+their watch (to 16,384 slots: three 16,384-entry arrays, about 327,700 B; to 8,192: about 163,900 B).
+Lh (GO2CS_LITTABLE_HELPER=1) with the fixed order: hello does not exit (rc=124 at a 60 s bound).
+
+## the 2 net/http misses (GO2CS_LITTABLE_MISSLOG=1, B, fixed order): bytes of the spans still unmatched after every registrar ran
+LITTABLE-UNMATCHED len=52: a verbatim @"..."u8 literal (net/http h2_bundle.cs:7762), which genreg.py skips
+LITTABLE-UNMATCHED len=6704: a compile-time u8 concatenation (idna tables15.0.0.cs:11, `""u8 + "..."u8`), which genreg.py's
+  regex registers as its pieces, not as the concatenated constant
+=> 0 non-literal callers in either process; both misses are literals this probe's regex generator does not see.
+
+## single-file (driver.sh ... single: self-contained, PublishSingleFile, no R2R, not trimmed, uncompressed), hello
+B  (eager): registered 3093, hits 1389, misses 0 (the address key needs no discovery).
+L, round-3 page-step anchor scan: Fatal AccessViolationException in TryImageFromAnchor (rc=134).
+L, bounded 16-byte scan within the readable mapping run (round 3, final): 43 of 43 ranges via=anchor, unalignedImages=43
+  (every bundled image starts off a page boundary; under the JIT build's flat layout, 0 of 43), mapsReads=34 (a re-read
+  whenever a newly loaded module's anchor is outside the cached runs), hits 1389, misses 0, lazyRuns 9.
+  The same bounded scan in the JIT build: 43 of 43, mapsReads=34.
+single	SuHello	tiered	As  	median   372.8	p25-p75   360.3-  388.6	min   340.6	vs As: median   +0.0  min   +0.0	n=31
+single	SuHello	tiered	Bs  	median   409.7	p25-p75   391.2-  420.0	min   377.6	vs As: median  +36.9  min  +37.0	n=31
+single	SuHello	tiered	Ls  	median   420.2	p25-p75   412.3-  440.9	min   393.6	vs As: median  +47.4  min  +52.9	n=31
+single	SuHello	tc0	As  	median   630.3	p25-p75   623.0-  651.0	min   599.5	vs As: median   +0.0  min   +0.0	n=31
+single	SuHello	tc0	Bs  	median   699.5	p25-p75   668.0-  711.1	min   636.5	vs As: median  +69.1  min  +36.9	n=31
+single	SuHello	tc0	Ls  	median   711.0	p25-p75   693.3-  731.2	min   665.4	vs As: median  +80.6  min  +65.9	n=31
+# the single-file timing started at load average 2.14, decaying from a build; arms interleaved.

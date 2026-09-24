@@ -527,8 +527,10 @@ probe [`probes/c2-literal-cache/`](probes/c2-literal-cache/README.md): the real 
 `AllocationCounter` at `47e088d3d7`, on .NET 10.0.12, Release, tiering off, on a shared 4-core linux
 VM. Read the ratios, not the absolute numbers.
 
-*(Revised 2026-09-24 by §8.1R and again by §8.1R2 below, per COORD's review and verification; 8.1.1-8.1.5 are kept as reviewed so its citations
-resolve. §8.1R supersedes 8.1.2-8.1.4's figures and recommendation; §8.1.x, §8.2 and §8.3 follow it.)*
+*(Revised 2026-09-24 by §8.1R, §8.1R2 and §8.1R3 below, per COORD's review and two verifications; 8.1.1-8.1.5
+are kept as reviewed so their citations resolve. §8.1R supersedes 8.1.2-8.1.4's figures and recommendation.
+The current text is the latest revision of each part: §8.1R3 for start-up and Tier 2, §8.2R2 for the
+sstring model, §8.3R2 for the recommendation.)*
 
 ### 8.1.1 The problem an invisible form has to solve: recognising the literal from inside golib
 
@@ -874,7 +876,8 @@ A golib or generator mechanism reaches literals the arms never touch:
 - callee literals (slog handler.cs:385-389, which feeds TestTextHandlerAlloc);
 - every package of every converted project, not only the corpus.
 
-The two-seeded reconvert hunk gate reads **zero** for such a change. So before landing, on every OS lane:
+The two-seeded reconvert hunk gate reads **zero** for such a change. *(Revision 4: not for Tier 2, whose order
+hook edits every `package_info.cs`, §8.1R3.6.)* So before landing, on every OS lane:
 - the full banked operational sweep;
 - a re-read of every `AllocsPerRun` row and every disclosure that cites a count;
 - the Performance suite under JIT AND NativeAOT (Performance/Directory.Build.targets:11);
@@ -887,6 +890,9 @@ That is §4.6's bar for Tier C, and it applies to the table (8.1.x) as much as t
 - the 16 UTF-16 tuple-return sites that bind `operator @string(string)` (string.cs:450), e.g.
   path/filepath/windows/path.cs:193 and runtime/symtab.cs:959;
 - `sstring`'s escape to `@string`, which goes through the copying constructor (sstring.cs:177-180).
+
+*(Revision 4: this list is restored and re-measured in §8.1R3.6: 21-23 non-empty tuple-element literals per
+flavour, tuple assignments included.)*
 
 The table's miss cost is small enough that the constructor could consult it too. That choice waits for the
 sweep's measurement of the tiered miss (+7.6 ns, the one mode where it is not small).
@@ -1020,6 +1026,9 @@ The p90 production module (103 literals) scales to about 1-2 ms. The shape that 
 register only the literals the semantic model shows reaching an `@string` conversion, which the generator
 can see. That filter is unmeasured.
 
+*(Superseded 2026-09-24: start-up is a SUM over the forced import closure, measured in §8.1R2.1 and
+§8.1R3.1; the filter is sized at about 3.5% in §8.1R2.1.)*
+
 **Eager or lazy values:**
 - Eager (the probe): one `byte[]` per literal at init, uncounted and outside every window.
 - Lazy: the entry holds only the key, and the first hit publishes the array with a CAS. The first
@@ -1045,7 +1054,12 @@ can see. That filter is unmeasured.
 - the golib dedup pin above;
 - NativeAOT's module-initializer order checked against the first literal use.
 
+*(Extended 2026-09-24 by §8.1R2.2's wiring, order, sentinel and read-only preconditions, and by §8.1R3.6's
+corpus footprint and UTF-16 carve-out.)*
+
 ## 8.2 THE sstring-FIRST MODEL -- a view where Go would not allocate
+
+*(Superseded 2026-09-24 by §8.2R and §8.2R2; kept as written so its citations resolve.)*
 
 `sstring` is a ref struct view over UTF-8 bytes (sstring.cs:19-46). C# enforces most of Go's escape rules
 on it at compile time: it cannot be boxed, stored in a field, array or map, captured by a lambda, or used as
@@ -1199,6 +1213,8 @@ counted copy (about 11-15 ns) plus, at `any`, the uncounted box. Round 1 measure
 
 ## 8.3 RECOMMENDATION -- three tiers, in order
 
+*(Superseded 2026-09-24 by §8.3R and §8.3R2.)*
+
 **Tier 1: sstring where it is provable.**
 - Land O2 first (small, exact, and the cast shape already exists).
 - Then take O1 in three steps, each on its own seat:
@@ -1219,7 +1235,7 @@ boxed, returned, or passed to leaking parameters.
 - It keeps the cache's one virtue: zero visible delta, with no converter change at all.
 - Its costs are:
   - a generated initializer, about 47 ms under JIT at the largest test assembly and 1.2-1.5 ms under
-    NativeAOT;
+    NativeAOT *(superseded: the cost is a sum over the closure, §8.1R2.1 and §8.1R3.1)*;
   - eager memory bounded by the module's literal bytes;
   - a dependency on Roslyn's u8 deduplication, pinned by a test.
 - *Readability:* unchanged.
@@ -1247,6 +1263,9 @@ boxed, returned, or passed to leaking parameters.
 - Tier 3 is the performance tier and stays where the owner has already accepted its names.
 
 ## 8.1R2 REVISION 3, 2026-09-24 (C2) -- the verification's 23 fixes, the start-up A/B, and §8.2 rewritten
+
+*(Revised by §8.1R3 (revision 4): its arms B and L registered after package_info.cs's import hooks, and the
+note's 12 fixes are applied there. Kept as written so its citations resolve.)*
 
 **DRAFT, UNMERGED**, same branch. Input: COORD's verification of revision 2
 (`docs/phase4/reviews/literal-revision-2-verification-2026-09-24.md` on `claude/coord-handover` at
@@ -1296,7 +1315,10 @@ order, load average about 1.0 at the start. ReadyToRun is the template's own pub
   it, is 1.1-6.9 ms per process. The rest is compiling one initializer method per module, whose IL
   resolves one data token per literal: about 9-15 µs per literal under JIT (Boff − A over the
   literal count).
+  *(Revision 4: at TC=0 "not the table" is withdrawn and the 9-15 µs is a ratio, §8.1R3.5.)*
 - **ReadyToRun removes it:** +0.2 ms and +1.6 ms median.
+  *(Revision 4: about 1-5 ms under R2R, and only for a published program; `dotnet run`, `dotnet build` and
+  the test host never get R2R, §8.1R3.5.)*
 - Under TC=0, the test host's regime, the tax is +58 ms for a hello world and +102 ms for a net/http
   program.
 - **COORD's inference (20-60 ms under JIT) holds** for the hello world and understates a larger closure.
@@ -1316,6 +1338,7 @@ registered (Caches2.cs's dedup test), not registration work. NativeAOT's first c
 
 **Mitigations, sized (V-fix 5):**
 - **ReadyToRun or NativeAOT:** measured above; this is the one that removes the cost.
+  *(Revision 4: NativeAOT was not an arm; withdrawn, §8.1R3.5.)*
 - **Registering only literals that reach an `@string` conversion:** at most about 3.5% fewer (COORD's
   figure: 121 of 3,419 closure literals are used only in comparisons). Not worth a semantic-model pass.
 - **A lazy per-module-range variant** (no per-literal registration; a span inside a module's read-only
@@ -1345,10 +1368,12 @@ registered (Caches2.cs's dedup test), not registration work. NativeAOT's first c
 - **Concurrent growth** (`--stress10`, x64): four writers register 50,000 keys through 13 growths while
   four readers look up. In 369K-713K hit lookups there were 0 wrong bytes and 0 counted objects. In as
   many miss lookups there were 0 wrong bytes. ARM64 is not run.
+  *(Revision 4: 369K-389K, §8.1R3.5.)*
 
 **Memory, honestly (V-fix 20).** A 64-bit `byte[]` costs 24 B plus its data rounded up to 8.
 - **fmt hello world:** 3,094 literals, 52 KiB of data in 136 KiB of arrays. The index is 20 B per slot:
   160 KiB at half load, 320 KiB at quarter load. Total 296-456 KiB.
+  *(Revision 4: 3,093 registered; the counts are reconciled in §8.1R3.5.)*
 - **net/http program:** 6,325 literals in 303 KiB of arrays, plus 320-640 KiB of index. Total 623-943 KiB.
 
 **Inlining (V-fix 19):**
@@ -1361,6 +1386,8 @@ registered (Caches2.cs's dedup test), not registration work. NativeAOT's first c
 **Initializer order (V-fix 15).** Generator initializers run AFTER package_info.cs's import hooks and after
 the package's own `init()` (COORD: os.csproj:147-151, fmt.csproj:140-153). A literal evaluated during init
 therefore misses and copies, counted exactly as today, and later evaluations share the table's backing.
+*(Revision 4: this probe's own arms had exactly this defect; measured in §8.1R3.1.)*
+
 - **Design:** package_info.cs's first-position hook calls a generated `partial` method that registers the
   module's literals. An empty body applies when the generator is absent.
 - **Gate:** the order, under JIT and NativeAOT.
@@ -1419,6 +1446,9 @@ until the order gate (above) exists.
   `haslit && hasbyte` test belongs to a different rule, concatenation (order.go:1185-1197, row G7 below).
 
 ## 8.2R THE sstring-FIRST MODEL, REWRITTEN AROUND THE VERIFIED GAPS (supersedes §8.2)
+
+*(Revised by §8.2R2 (revision 4): the census is regenerated, and G2, G8, G10, G12, G9 and the ranking are
+corrected there.)*
 
 **The census is committed.** [`probes/c2-escape-join/`](probes/c2-escape-join/main.go) (V-fix 13) holds:
 - the program;
@@ -1533,6 +1563,9 @@ sites (2 composite-key reads in tests). It is not worth a stage.
 
 ## 8.3R RECOMMENDATION, REVISED (supersedes §8.3)
 
+*(Superseded by §8.3R2 (revision 4). Its Gain line's "every `@string`-typed site" and "no visible delta" are
+withdrawn: the UTF-16 carve-out and the package_info.cs re-baseline, §8.3R2.)*
+
 **1. Tier 2, the registration table, is the base.** The verification found it sound, and this revision
 measured what it costs.
 - **Gain:** count parity at every `@string`-typed site, at any length, with no visible delta.
@@ -1561,3 +1594,432 @@ Tier 2 lands.
 - the content cache (8.1R);
 - O2 as a stage (already done);
 - widening sstring before V-fix 11's counting and V-fix 10's proof.
+
+## 8.1R3 REVISION 4, 2026-09-24 (C2) -- the verification's 12 fixes, the hybrid lazy probe, and a registration-order defect in revision 3's arms
+
+**DRAFT, UNMERGED**, same branch. Input: COORD's verification of revision 3
+(`docs/phase4/reviews/literal-revision-3-verification-2026-09-24.md` on `claude/coord-handover` at
+`2e3775f3b3`; "N-fix N" below is its fix N). This block supersedes, where it says so, §8.1R2, §8.2R and
+§8.3R. Nothing above is rewritten; supersession pointers are placed at the passages the note named.
+
+**Legs.** Everything here ran on the shared 4-core linux VM, locally, unofficial, not a gate. Not run:
+- Windows and ARM64;
+- `dotnet run` (N-fix 1: never measured);
+- a ReadyToRun publish of the revision-4 arms (the R2R rows below are revision 3's);
+- the Performance suite and the operational sweep;
+- the net/http TEST process (§8.1R2.1 says why).
+
+### 8.1R3.1 Revision 3's arms registered AFTER the lookups they were meant to serve
+
+**Found while sizing the hybrid form.** The probe's miss log (`GO2CS_LITTABLE_MISSLOG=1`) records each
+missed span; at exit the diagnostic runs every registrar that has not run and looks each logged miss up
+again. For the fmt hello world under revision 3's arm B:
+- 1,389 lookups, of which 70 hit and **1,319 missed**;
+- **all 1,319 are found once every module has registered**: they are the modules' own literals, looked up
+  before their module registered. **None is a non-literal caller.**
+- By module: runtime 965, syscall 164, time 105, os 75, internal/poll 10.
+
+**Why.** Roslyn calls a module's `[ModuleInitializer]`s in compilation order, and `package_info.cs` is
+compiled first by design (DESIGN-import-hook-relocation S3). Its import hooks are members of the package
+class, so the first hook runs the package's static constructor, whose Go variable initializers convert
+literals at once. `runtime.dll`'s `<Module>..cctor`, read from its IL: six import hooks, then the probe's
+registration, then the `*_impl.cs` hooks. The probe's file was compiled after `package_info.cs`, so it
+registered after the init-time lookups had missed. Renaming it to sort first changed nothing (the order is
+`package_info.cs`, then the `*.cs` glob); compiling it as a Compile item ahead of `package_info.cs`
+(scratch `src/Directory.Build.props`, `genreg.py`'s ORDER note) puts it first, and then:
+
+| program | order | lookups | hits | misses |
+|:--|:--|--:|--:|--:|
+| fmt hello world | revision 3 (after the hooks) | 1,389 | 70 | 1,319 |
+| | registration first | 1,389 | **1,389** | **0** |
+| net/http program | revision 3 | 2,951 | 442 | 2,509 |
+| | registration first | 2,951 | **2,949** | **2** |
+
+**What this changes:**
+- **§8.1R2.2's order precondition is not optional.** Without it Tier 2 misses 95% of a hello world's
+  start-up conversions, and those misses are counted, exactly as today. The design's first-position hook
+  (8.1R2.2, "package_info.cs's first-position hook calls a generated `partial` method") is what the fixed
+  probe emulates; the gate it names (the order, under JIT and NativeAOT) now has a measured failure mode.
+- **Revision 3's start-up COSTS stand.** Arm B registered every literal either way, so B − A measured the
+  registration work. What revision 3 did not measure is the behaviour: its B served 5% of lookups.
+- **The dynamic census of non-literal callers (N-fix 12, :640-641).** In these two processes: 0 of 1,389
+  lookups (hello) and 2 of 2,951 (net/http) reached the operator with a span the table does not hold,
+  and both of those are literals the probe's regex generator does not see: a verbatim `@"…"u8`
+  (h2_bundle.cs:7762) and a compile-time u8 concatenation (`""u8 + "…"u8`, x/net/idna
+  tables15.0.0.cs:11). A generator that reads constant values from the semantic model registers both.
+  **So 0 non-literal callers in either process.** It is a sample of two start-ups, not the corpus sweep
+  §8.1.3 asks for.
+- **The lazy form's economics change** (§8.1R3.2): with the order fixed, the init-time lookups are what
+  trigger the lazy registrars, so most of the closure registers anyway.
+
+### 8.1R3.2 The hybrid lazy registration, measured (N-fix 6, the owner's first mitigation)
+
+**The form** (arm L; `LiteralTable.cs` `RegisterLazyModule`, `genreg.py lazy`):
+- each module's initializer registers only its image range and a registrar delegate;
+- a table miss whose address lies inside a registered range whose registrar has not run runs it, once,
+  under a lock, then retries the lookup;
+- a miss outside every range costs one binary search over the ranges and is counted as today.
+
+**Range discovery.**
+- `Marshal.GetHINSTANCE(module)` returns no base on linux (0 of 43 modules in the hello closure).
+- `/proc/self/maps`, matched by the module's file path, works under the flat layout. Round 2 read it in
+  batches: 7 reads for hello and 39 for net/http, each a file read and a parse.
+- **The anchor scan** (round 3, used for every timing below): the module passes the address of one of its
+  own literals; the table scans down page by page to an `MZ` header whose `PE\0\0` signature it confirms,
+  and takes the image extent from the headers. No file read. It found 43 of 43 (hello) and 153 of 153
+  (net/http) module ranges. Single-file: §8.1R3.3.
+
+**What registers at start, with the order fixed:**
+
+| program | modules with a range | registrars run at start | literals registered | bytes allocated by registrars on the calling thread |
+|:--|--:|--:|--:|--:|
+| fmt hello world | 43 | 9 | 2,400 of 3,093 (78%) | 604,064 |
+| net/http program | 153 | 52 | 4,974 of 6,323 (79%) | 1,397,672 |
+
+Revision 3's order made the lazy form look far better than it is: only 4 registrars ran for hello (113
+literals), because the init-time misses happened before any range was known.
+
+**Start-up** (`time.py`, 31 runs per arm after 3 warm-ups, arms interleaved; ms, Δ against A at the
+median, with the Δ at the min in brackets; `results-rev4-linux.txt`):
+
+| program | regime | A | B − A | Boff − A | **L − A** | Bz − A (rev 3 order) | Lz − A (rev 3 order) |
+|:--|:--|--:|--:|--:|--:|--:|--:|
+| fmt hello world | tiered JIT | 378.0 | +39.7 (+36.1) | +25.4 (+21.9) | **+37.9 (+30.3)** | +49.7 (+35.5) | +8.9 (+3.4) |
+| | TC=0 | 635.6 | +50.9 (+40.7) | +44.7 (+34.8) | **+41.7 (+39.1)** | +46.7 (+42.6) | +28.9 (+10.5) |
+| net/http program | tiered JIT | 1,063.2 | +66.7 (+78.3) | +45.4 (+76.9) | **+64.2 (+65.7)** | +56.0 (+87.0) | +41.4 (+79.4) |
+| | TC=0 | 1,754.8 | +83.2 (+104.8) | +74.2 (+105.1) | **+132.0 (+127.4)** | +90.4 (+78.7) | +65.5 (+70.3) |
+
+**What the numbers say:**
+- **With the order fixed, the lazy form saves at most about 9 ms** (hello at TC=0: L − B = −9.2 at the
+  median, −1.6 at the min) and nothing measurable under tiered JIT (−1.8 hello, −2.5 net/http).
+- **On the net/http program at TC=0 it costs MORE than eager: +132.0 against +83.2**, and the min agrees
+  (+127.4 against +104.8). The cause is not measured. L compiles one range registration per module (153)
+  plus the registrars that run (52), each at full optimisation under TC=0, where B compiles one
+  registration per module (168); that is an INFERENCE, not a reading.
+- **Round 2's lazy savings (+11.0 / +19.5 ms for hello, before this revision) came from the order
+  defect:** Lz, with revision 3's order, reads the same size here (+8.9 / +28.9), because under that order
+  almost nothing registered.
+- **B − A reproduces revision 3 within its spread:** hello +39.7 tiered (revision 3: +40.8) and +50.9 at
+  TC=0 (+58.0; min +40.7 against +38.2); net/http +66.7 tiered (+63.4) and +83.2 at TC=0 (+102.3; min
+  +104.8 against +81.9). At TC=0 net/http's median and min disagree by about 20 ms in both rounds, so it
+  is quoted as **+83 to +105 ms**.
+
+**The in-window hazard (N-fix 6, testing.cs:743-755).** A registrar allocates one `byte[]` per literal of
+its module, uncounted, on the thread whose miss triggered it. If that miss is inside an `AllocsPerRun`
+window, the window's byte reading carries the registrar's bytes; at a counted reading of 0 the
+count-to-bytes seam turns them into a reported allocation.
+- **Size:** per module, its literal arrays, plus the table's growth when that registrar crosses a load
+  threshold. In hello with the order fixed, the 9 registrars allocate 604,064 B: syscall 337,952 and
+  runtime 249,296 (INFERENCE from the arithmetic: mostly the table doubling on their watch), then time
+  6,096, os 5,496, fmt 3,600 and io/fs 616.
+- **When it can happen:** only for a module whose first literal conversion is inside a window. A module
+  converted during init (which, with the order fixed, is most of the closure) registers before any test
+  runs. `AllocsPerRun`'s warm-up call runs the function once before measuring, so a registrar triggered by
+  the measured function runs in the warm-up, outside the window. A single-shot byte measurement has no
+  warm-up.
+- **The helper thread does not remove it.** `GO2CS_LITTABLE_HELPER=1` runs the registrar on a pre-created
+  thread so its bytes land elsewhere. It deadlocked on the net/http program under revision 3's order, and
+  with the order fixed it deadlocks on hello too (rc=124 at a 60 s bound; net/http was not rerun). INFERENCE: the first miss now happens inside a module
+  initializer, and the helper calling that module's registrar blocks on the same module initializer that
+  the missing thread is running and holding, the class-constructor deadlock. A helper would have to be
+  skipped while a module initializer is on the stack, which is exactly when most registrars run.
+
+**The range test on every miss.** A miss outside every range pays a binary search over the module ranges
+(43-153 entries here) before it is counted. It is the path of every non-literal span.
+
+### 8.1R3.3 Range discovery under single-file (the probe the note named)
+
+The hello world published in the test host's shape (`driver.sh … single`: self-contained,
+`PublishSingleFile`, no ReadyToRun, no trimming, uncompressed), run as the executable:
+- **Eager B needs no discovery and works unchanged:** 3,093 registered, 1,389 hits, 0 misses.
+- **The page-step anchor scan that the JIT timings used FAULTS:** an `AccessViolationException` in the
+  scan (rc=134). Every bundled image starts off a page boundary (43 of 43, from the bounded scan below),
+  so a page-step scan cannot land on the header and walks on below the image, here into an unreadable
+  page.
+- **A bounded scan works:** stepping 16 bytes, and only within the readable mapping run that holds the
+  anchor, found 43 of 43 ranges, with 1,389 hits and 0 misses. But the bound comes from
+  `/proc/self/maps`, and assemblies are mapped as they load, so it re-reads the file whenever an anchor
+  lies outside the runs it has: **34 reads per process**, in the single-file and the JIT build alike.
+  Windows would need `VirtualQuery` for the same bound; not built.
+- **Start-up, single-file** (31 runs, Δ against the single-file A; started at load average 2.1, decaying
+  from a build):
+
+| regime | A | B − A | L − A |
+|:--|--:|--:|--:|
+| tiered JIT | 372.8 | +36.9 (min +37.0) | +47.4 (min +52.9) |
+| TC=0 (the test host) | 630.3 | +69.1 (min +36.9) | +80.6 (min +65.9) |
+
+  The lazy form is SLOWER than eager in the test host's shape, in both regimes.
+
+**What it settles:** image-range discovery under single-file works only with a bounded scan, and the
+bound costs a maps read per newly loaded module on linux. With the order fixed, that cost is paid while
+saving nothing.
+
+### 8.1R3.4 The three mitigations, sized with their hazards (N-fix 6)
+
+| mitigation | reaches `dotnet run` and the test host | start-up saved | hazard |
+|:--|:--|:--|:--|
+| **hybrid lazy registration** | yes | measured: at most about 9 ms (hello, TC=0); none under tiered JIT; 49 ms WORSE on net/http at TC=0; worse in the single-file shape | the in-window byte reading above; a range test on every miss; a registrar handoff deadlocks, so the bytes stay on the missing thread; single-file needs a bounded scan and a maps read per loaded module (§8.1R3.3) |
+| **R2R of only the test host's registration initializers** | the test host only | not measured; revision 3's R2R rows (B − A about 1-5 ms) bound it | changes the codegen of record: the host's published code is then partly precompiled, and every count and timing row is read on that code (testConversion.go:6532-6556 publishes the host Release single-file with no R2R today). INFERENCE, not probed. |
+| **a per-module blob** (all of a module's literals in one data block, registered as one range) | yes | would remove the per-literal token resolution | misses under the address key: the literals the code converts are the u8 RVA fields Roslyn emits per literal, not slices of a blob, so a blob's addresses never equal the spans the operator sees (§8.1.x :979-980, :1036-1037). A reflection-over-RVA variant, enumerating the module's own `<PrivateImplementationDetails>` fields, is not probed. |
+
+### 8.1R3.5 Revision 3's start-up and table text, corrected (N-fixes 1-5, 12)
+
+- **Scope (N-fix 1).** `dotnet run`, `dotnet build` and the test host never get ReadyToRun:
+  `PublishReadyToRun` is set only for a non-Library publish (csproj-template.xml:50-55) and is absent from
+  test-csproj-template.xml:93-97. §8.1R2.1's ":1318 the one that removes the cost" holds only for a
+  published program.
+- **R2R and AOT (N-fix 2).** Under a ReadyToRun publish the cost is **about 1-5 ms**, not "removed" or
+  "2 ms or less": min B − A is +4.9 / +4.0, Boff − A is −3.0 / −6.4, and net/http's `Register` alone
+  took 3.14 ms. **NativeAOT was not an arm;** "NativeAOT: measured above" is withdrawn.
+- **TC=0 spread (N-fix 3).** At TC=0 revision 3's median and min B − A differ by about 20 ms (hello +58.0 /
+  +38.2); hello at TC=0 is quoted as **+38 to +58 ms**. `time.py` now records p25-p75 and the min for
+  every arm, Boff included. "Not the table" is withdrawn for TC=0: B − Boff was +19.2 / +22.1 ms against
+  `Register`'s 1.94 / 6.91 ms, and the gap is unexplained. It is not the inlined lookup's doing alone: B
+  and Boff run the same dll. In revision 4's run B − Boff at TC=0 is +6.2 (hello) and +9.0 ms (net/http)
+  at the median, so revision 3's 19-22 ms did not repeat; it is read as run-to-run spread.
+- **Per-literal cost and the Boff control (N-fix 4).**
+  - The 9-15 µs per literal is a RATIO (Boff − A over the literal count), not a slope: tiered Boff − A
+    rose ×1.22 for ×2.04 the literals.
+  - Boff also carries the inlined `Lookup` at every conversion and the table's 4,096-slot static
+    constructor, so Boff − A is not the initializers alone.
+  - The JIT metrics, one run per arm and regime (the report's `jitMethods`, `jitILBytes`; `jitMs` is
+    summed across threads and is not wall time):
+
+    | program | regime | A: methods / IL bytes | B | Boff | L |
+    |:--|:--|--:|--:|--:|--:|
+    | hello | tiered | 1,919 / 144,006 | 1,980 / 198,625 | 1,978 / 198,049 | 1,994 / 190,605 |
+    | | TC=0 | 1,038 / 127,688 | 1,074 / 181,657 | 1,074 / 181,379 | 1,103 / 173,652 |
+    | net/http | tiered | 5,721 / 898,079 | 5,899 / 1,007,531 | 5,896 / 1,006,923 | 5,955 / 995,035 |
+    | | TC=0 | 2,759 / 848,296 | 2,881 / 957,146 | 2,879 / 956,798 | 2,982 / 944,695 |
+
+    B adds about 54 KB of IL for hello and 109 KB for net/http, almost all of it the registration
+    initializers (Boff differs from B by 576 B and 608 B). `jitMs` is in `results-rev4-linux.txt`; it is
+    summed across threads and those runs overlapped a build.
+- **Reproducibility and labels (N-fix 5).**
+  - The JIT legs are `dotnet build -c Release` (driver.sh), run as `dotnet <app>.dll`.
+  - "TC=0, the test host's regime" is accurate for the JIT mode only: the host is a Release,
+    self-contained, single-file publish run with `DOTNET_TieredCompilation=0` (testConversion.go:6532-6556).
+    §8.1R3.3 is the first probe of that shape.
+  - Committed: `driver.sh`, `operator-patch.py` (the string.cs:460 operator wiring), `genreg.py`, the
+    per-module `report-*.tsv`.
+  - `genreg.py` skips verbatim `@"…"u8` literals: 16 distinct in the hello closure (linux), 27 in its
+    windows flavour, under 1%.
+  - §8.1R2.1's "a program's import hooks force every module" reads "every initializing import"
+    (visitImportSpec.go:429: an import whose package does not initialize transitively gets no hook).
+- **Figures (N-fix 12).**
+  - The concurrent-growth line reads **369K-389K** hit lookups (output-round3-linux.txt:62-63), not
+    369K-713K.
+  - **The literal counts, reconciled:**
+    - 3,095: genreg's distinct regular u8 spellings per module, summed over the hello closure (linux);
+    - 3,093: the run-time registrations. The 2 missing are internal/runtime/exithook's, a module in
+      the build output that the hello world never loads (no spelling in the closure repeats another's
+      bytes, checked). 3,092 under revision 3's LiteralTable;
+    - 3,088: the trimmed ReadyToRun publish, which loads 52 assemblies, not 59;
+    - 3,094: §8.1R2.2's memory line, from an uncommitted computation; replaced by 3,093;
+    - 3,419: COORD's count, by a predicate this probe does not reproduce. The same closure's windows
+      flavour reads 3,334 regular plus 27 verbatim, so a windows-flavour count is the likely source.
+  - **§8.3R's "2.0-3.0× faster with tiering off"** compared across runs, measured an inlined lookup, and
+    ran with tiering off. The tiered tax revision 3 quoted, +7.56 ns (miss row) and +7.76 ns (gate row),
+    was the round-2 FIXED-size table's (output-round2-linux.txt: 21.02 − 13.46, 23.32 − 15.56). **The
+    growable table, tiering off and on in one session** (`c2-literal-cache`
+    `output-round4-tiered-linux.txt`; lookup still inlined):
+
+    | load | regime | today, 8 B | table hit (1-32 B) | hit speed-up at 8 B | 8 B miss over today | 24 B miss over today |
+    |:--|:--|--:|--:|--:|--:|--:|
+    | at most half full | tiering off | 12.21 | 4.68-7.64 | 2.3× | +6.71 | +5.17 |
+    | | tiered | 13.02 | 3.53-4.37 | 3.3× | +5.43 | +13.72 |
+    | at most a quarter full | tiering off | 12.00 | 4.72-6.45 | 2.3× | +2.84 | +2.47 |
+    | | tiered | 12.28 | 3.50-4.31 | 3.1× | +8.29 | +8.66 |
+
+    A non-literal miss costs +2.5 to +6.7 ns with tiering off and +5.4 to +13.7 ns tiered. The two loads
+    swap order between rows, so the load factor's effect on a miss is inside this probe's run-to-run
+    spread; the tiered miss is the one to size on the corpus sweep.
+  - **The net/http TEST process** is labelled "likely larger than +102 ms at TC=0": it carries 3,805
+    test literals in net/http's own test module on top of the production closure.
+
+### 8.1R3.6 Tier 2's footprint and the UTF-16 carve-out (N-fixes 7, 8)
+
+**The corpus footprint is a re-baseline (N-fix 8).** The order precondition (§8.1R2.2, now measured in
+§8.1R3.1) adds a first-position call to every converter-emitted `package_info.cs`: **397 in src/core
+(90 of them per-GOOS) and 736 in the behavioral tests**, counted at this branch. The code a Go reader sees
+is unchanged, but §8's "the two-seeded reconvert hunk gate reads zero" (:877) does not hold for Tier 2,
+and §8.3R's "no visible delta" is withdrawn for the metadata files.
+
+**The UTF-16 carve-out (N-fix 7).** A string literal that is a whole element of a tuple return or a tuple
+assignment is emitted as a UTF-16 C# literal, because a u8 span cannot be a ValueTuple element
+(visitReturnStmt.go:349-354, visitAssignStmt.go:1700-1703). It converts through the counted
+`operator @string(string)` (string.cs:450), which a table keyed on u8 addresses cannot serve.
+- **Measured** (`c2-escape-join/utf16-tuple-sites.py`, production, empty literals excluded because they are
+  not counted): **23 literals in 22 statements (windows), 21 in 20 (linux), 21 in 20 (darwin)**, e.g.
+  runtime/symtab.cs:959 `return ("?", 0);`. It is a lower bound: a literal that is an operand inside an
+  element (`"[" + host + "]"`, net/url/url.cs:760) is not counted. COORD counted about 28.
+- Revision 2's list (§8.1R.5, "16 UTF-16 tuple-return sites") is restored with that count, and it now
+  includes tuple assignments.
+- **Arm A, or a UTF-16 path through the table** (keyed on the `string` reference, V4's key, which is
+  stable for an interned C# literal), is still needed at these sites. Neither is sized here.
+- **Parity is a prediction until an `AllocsPerRun` row is read on a Tier 2 build** (N-fix 7, R9). No row
+  has been.
+
+
+## 8.2R2 THE sstring-FIRST MODEL, REVISION 4 (supersedes §8.2R where it says so)
+
+**The census, regenerated.** The census files in the WIP save `d29c5e3542` came from a run whose joins
+all failed: every verdict row read `no-verdict`. They are regenerated here from the same `-m` inputs with
+`GOTOOLCHAIN=go1.24.13` (the README now says why the toolchain must match). The committed program now
+produces every row this section quotes (N-fix 11): §8.2R's G2, G3, G4 and O1 are its rows I2, I5, I8 and
+I6.
+
+| row (production) | windows | linux | darwin |
+|:--|--:|--:|--:|
+| literal → `string` parameter: noescape / leak-heap / leak-result / no-verdict | 2,344 / 3,090 / 73 / 20 | 2,313 / 2,849 / 73 / 21 | 2,314 / 2,848 / 73 / 20 |
+| `string` parameters: noescape / leak-heap / leak-result / no-verdict | 1,115 / 1,379 / 249 / 19 | 1,100 / 1,392 / 254 / 20 | 1,066 / 1,395 / 255 / 20 |
+| concatenation, 2 operands: heap / noescape / no-verdict | 540 / 61 / 4 | 525 / 55 / 4 | 525 / 54 / 4 |
+| concatenation, ≥ 3 operands: heap / noescape / no-verdict | 334 / 33 / 2 | 343 / 33 / 0 | 337 / 28 / 0 |
+| `[]byte("const")`: zero-copy / noescape / heap / no-verdict | **27 / 9** / 22 / 158 | **18 / 16** / 22 / 158 | **18 / 10** / 22 / 155 |
+| `string(rune/int)`: noescape / heap / no-verdict | 18 / 7 / 13 | 18 / 7 / 15 | 18 / 7 / 15 |
+| I1 map key / I2 compared / I5 switch / I6 call argument | 36 / 57 / 7 / 111 | 36 / 61 / 5 / 115 | 36 / 61 / 5 / 115 |
+| I8 bound to a name / I9 returned / I7 elsewhere | 99 / 135 / 14 | 99 / 137 / 14 | 98 / 140 / 14 |
+| M1 `m[string(b)]` reads covered by `tmpstring` | 25 of 25 | 25 of 25 | 25 of 25 |
+
+**Corrections to §8.2R's evidence (N-fix 11):**
+- **G2 is 57, not 53** (windows). The 53 came from an uncommitted predicate; the committed row replaces
+  it. G3 (7), G4 (99 bindings) and O1's 111 now regenerate.
+- **No-verdict counts.** §8.2.2's table read 47 production and 3,248 test literal arguments with no
+  verdict. The committed program reads 20 and 3,107 (3,083 plus 24 in format position), because it moves
+  arguments with no callee declaration, interface methods and variadic tails into their own counted
+  EXCLUDED rows. The earlier program is not committed, so the difference is not reconciled line by line.
+  The committed figures replace §8.2.2's.
+- **"Under 1% in every row" is withdrawn.** The GOOS flavours differ by more than 1% in several rows:
+  R5 noescape is 9 / 16 / 10, R5 zero-copy 27 / 18 / 18, and literal-argument leak-heap 3,090 / 2,849 /
+  2,848. Every figure below is given per GOOS.
+- **"The complete list" (§8.2R.1) is withdrawn as a claim.** It omits:
+  - `countrunes` for `len([]rune(s))`;
+  - `len(string(b))`, which never materialises the string;
+  - the 32-byte stack buffers `rawstringtmp` and `rawbyteslice` use for non-escaping results, beyond
+    G4 and G5;
+  - `concatbytes` for `[]byte(a + b)`;
+  - zero-copy `[]byte(s)` for a NON-literal read-only `s` (G12 below is only its constant case).
+  §8.2R.1 is a list of the rules this document ranks, not all of Go's.
+
+**G's oracle block** (`DESIGN-nonescaping-locals.md` on `claude/g-rec-b-oracle` at `814603bbbb`). Which of
+its five findings change these counts:
+- **Finding 4 (the operator position) changes one row.** The join now keys a conversion at its operand's
+  compiler position (`-poskey compiler`; `-poskey ast` reproduces revision 3's key). Only `string(rune/int)`
+  moves: 4 production sites per GOOS go from no-verdict to 2 heap and 2 noescape. Every other row is
+  identical under both keys, and concatenations were already keyed at their outermost `+`.
+- **Finding 1 (a frame-resident `var` is silent) changes nothing here.** The O1 join reads parameter
+  verdicts, which `-m` prints both ways (`leaking param` / `does not escape`). The census joins no `var`.
+- **Findings 2 and 5 (inlined call sites; one body, one answer) change no count, checked.** An inlined
+  copy is reported at the caller's call position, the `(` (finding 2), which is also where the new key
+  looks for a conversion whose operand is a call. So the join now takes a verdict only from a line whose
+  printed text is the construct it joins (`string(…)`, `[]byte`, ` + `, or the zero-copy line), and
+  counts a key that holds only another expression's line separately. On all three GOOS no key did, and
+  every row is identical with and without the check. Each verdict is therefore the non-inlined body's,
+  the one body go2cs emits (finding 5). What the census cannot count is the other direction: a caller
+  where Go keeps an inlined callee's allocation in the caller's frame, which a single emitted body cannot
+  reproduce.
+- **O1's parameter counts are unaffected:** a parameter verdict is printed once, at the declaration.
+- **Finding 3 (sha256's `new` is an inlined-call-site allocation)** is outside this census.
+
+### 8.2R2.1 G8, G10, G12 and G9, corrected (N-fixes 9, 10)
+
+**G8, the empty-operand concatenation.**
+- **§8.2R.2's "golib's `@string` is always immutable heap or literal data" is false.** `AliasOf` and
+  `TransientAliasOf` build an `@string` over storage the caller can still write (string.cs:121-154:
+  `tmpstring` and `unsafe.String`). Returning the non-empty operand from `operator +` would hand that
+  alias onward, where Go returns an immutable string.
+- **Where G8 is exact:**
+  - on an `@string` operand that is not an alias;
+  - on a literal operand only after Tier 2: until then the literal's own conversion still counts one;
+  - not on an `sstring` operand: that concatenation runs sstring's own `concat` (sstring.cs:453-458),
+    which allocates without counting (V-fix 11), so neither today's reading nor G8's is exact there.
+- **Precondition added:** an alias operand stays on the copying path (the alias factories mark the value,
+  or `operator +` copies when an operand is marked).
+
+**G10, one-byte strings.**
+- **Scope narrowed to `string([]byte)` of length 1** (go1.24.13 runtime/string.go:144-150,
+  `slicebytetostring`'s `n == 1` branch). `string(byte)` is `intstring`, which allocates when it escapes
+  (:291-298), so the table would be over-parity there, and §8.2R.2's extension to `string(r)` is dropped
+  from the parity claim.
+- **Precondition added: read-only views first** (string.cs:251-281). `Slice()` and `ToSpan()` hand out
+  writable views, and one write through a view of a shared one-byte string would corrupt that byte for
+  every later one-byte string in the process.
+
+**G12, read-only `[]byte("lit")`.**
+- **§8.2R.2's "the read-only half is not in `-m`'s output" is false.** `-m` prints `zero-copy
+  string->[]byte conversion` (go1.24.13 escape.go:338-345). The census now reads it: **27 / 18 / 18
+  production sites**.
+- **A non-escaping `[]byte(const)` is a STACK COPY in Go**, not zero-copy (walk/convert.go:277-292). The
+  9 / 16 / 10 noescape sites are therefore Go-exact today only if golib's copy is uncounted, and it is
+  counted. Their gain is a count, not a copy.
+- **Reach, re-ranked:** at most 27 production sites plus an unknown share of the 158 no-verdict ones, not
+  216. G12 moves below G11 in the ranking.
+
+**G9, multi-operand concatenation.**
+- The counted gain on a chain with an `sstring` operand needs V-fix 11 first: sstring's `concat`
+  allocates without counting today (sstring.cs:453-458), so such a chain already reads low.
+- **§8.2R.2's example is wrong.** time/time.cs:346 already counts 1, the same as Go. The 334 / 343 / 337
+  escaping ≥ 3-operand sites stand; the per-site gain has to be read on the emitted chain.
+
+### 8.2R2.2 The ranking, revised
+
+| # | opportunity | reach (production, windows / linux / darwin) | gain | visible delta | precondition added in revision 4 |
+|:--|:--|:--|:--|:--|:--|
+| 1 | G8 empty operand | dynamic | 1 object per evaluation | none | aliases stay on the copying path |
+| 2 | G10 one byte | dynamic | 1 object per evaluation | none | read-only views; `string([]byte)` of length 1 only |
+| 3 | G9 multi-operand | 369 / 376 / 365 sites | k − 2 per evaluation, read per chain | `concat(...)` | V-fix 11 for `sstring` operands |
+| 4 | G11 `string(r)` | 18 noescape of 38 | 1 per evaluation | a stack view | — |
+| 5 | G12 `[]byte("lit")` | 27 / 18 / 18 zero-copy, + part of 158 | 1 per evaluation | a hoisted field | a read-only proof |
+| 6 | O1 `sstring` parameters | 111 / 115 / 115 `string(b)` arguments | a count only for `string(b)`; about 4 ns for literals after Tier 2 | a parameter type | §8.2R.2's list |
+
+## 8.3R2 RECOMMENDATION, REVISION 4 (supersedes §8.3R)
+
+The ORDER stands, as COORD's note ruled it: the table, then G8/G10, then arm C, and the visible campaigns
+later. What changes is the text of each tier.
+
+**1. Tier 2, the registration table, is the base.**
+- **Gain:** count parity at every `@string` site whose literal is a u8 span. **Not** at the UTF-16 sites:
+  about 21-23 non-empty literals per flavour that are whole elements of tuple returns and tuple
+  assignments (`utf16-tuple-sites.txt`, a lower bound; COORD counted about 28), which convert through the
+  counted `operator @string(string)` (string.cs:450). Arm A, or a UTF-16 path through the table, is still
+  needed there. **Parity is a prediction until an `AllocsPerRun` row is read on a Tier 2 build.**
+- **Order is a correctness precondition, now measured** (§8.1R3.1): registered after `package_info.cs`'s
+  hooks, the table served 5% of a hello world's lookups.
+- **Footprint: a corpus re-baseline.** The order hook edits every converter-emitted `package_info.cs`:
+  397 in src/core and 736 in the behavioral tests. The code a Go reader sees is unchanged; §8's "zero-hunk"
+  premise for the two-seeded gate does not hold for Tier 2.
+- **Start-up, where it falls:** `dotnet run`, `dotnet build` and the test host never get ReadyToRun.
+  - JIT, linux: hello about +37 to +41 ms tiered and +38 to +58 ms at TC=0 (the single-file host shape:
+    +37 to +69 at TC=0); the net/http program about +63 to +67 ms tiered and +83 to +105 ms at TC=0.
+  - A ReadyToRun publish: about 1-5 ms. NativeAOT: not measured.
+  - `dotnet run`, Windows, and the net/http test process (likely larger than +102 ms at TC=0): not
+    measured.
+- **Mitigation: none of the three is recommended.** The hybrid lazy form, measured with the order fixed,
+  saves at most about 9 ms, costs 49 ms MORE on the net/http program at TC=0, is slower than eager in the
+  single-file host shape, needs a bounded scan there, and its helper variant deadlocks (§8.1R3.2-8.1R3.3).
+  R2R of the host's registration initializers changes the codegen of record, and the per-module blob misses
+  under the address key; neither is probed (§8.1R3.4). The start-up tax is Tier 2's price under JIT.
+- **Memory:** 0.3-0.9 MB for those closures (§8.1R2.2, with 3,093 literals for hello).
+- **Preconditions:** the wiring, order, sentinel, collectible and read-only preconditions of §8.1R2.2, and
+  the package_info.cs re-baseline.
+- *The owner's trade:*
+  - **readability:** unchanged;
+  - **performance:** a literal hit about 2.3× faster than today with tiering off and about 3.1-3.3×
+    tiered; a non-literal miss +2.5 to +6.7 ns with tiering off and +5.4 to +13.7 ns tiered (§8.1R3.5, one
+    session, lookup inlined);
+  - **parity:** Go's counts at u8 sites, predicted, and Go's identity within a module.
+
+**2. The golib-only Go rules, G8 and G10,** with revision 4's preconditions: G8 keeps alias operands on
+the copying path, and G10 needs read-only views and applies to `string([]byte)` of length 1 only.
+
+**3. Tier 3 as ruled.** Arm C lands. Tier C stays.
+
+**4. The visible converter campaigns, each the owner's readability call, in revised order (§8.2R2.2):**
+- G9, multi-operand concatenation: 369 / 376 / 365 production sites;
+- G11, `string(r)`: 18 non-escaping of 38;
+- G12, read-only `[]byte("lit")`: 27 / 18 / 18 zero-copy sites plus part of 158, with a read-only proof;
+- O1, the `sstring` parameter pilot: performance only after Tier 2, on unexported fmt helpers first.
+
+**Not recommended:** the content cache (8.1R); O2 as a stage (already done); widening `sstring` before
+V-fix 11's counting and V-fix 10's proof; the helper-thread variant of the lazy form (it deadlocks).

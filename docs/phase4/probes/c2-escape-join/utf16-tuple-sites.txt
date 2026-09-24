@@ -1,0 +1,31 @@
+windows	statements 22	literals 23
+linux	statements 20	literals 21
+darwin	statements 20	literals 21
+flat	return	archive/zip/reader.cs:997	1
+flat	return	embed/embed.cs:198	1
+darwin	return	go/build/darwin/build.cs:2151	1
+linux	return	go/build/linux/build.cs:2151	1
+windows	return	go/build/windows/build.cs:2151	1
+flat	assign	go/scanner/scanner.cs:845	1
+flat	return	go/scanner/scanner.cs:884	1
+flat	return	go/scanner/scanner.cs:890	1
+flat	assign	html/template/transition.cs:531	1
+flat	assign	html/template/transition.cs:534	1
+windows	return	internal/testenv/windows/testenv_windows.cs:30	1
+windows	return	internal/testenv/windows/testenv_windows.cs:33	1
+flat	return	io/fs/sub.cs:64	1
+flat	return	net/http/routing_tree.cs:233	1
+darwin	return	os/darwin/file.cs:691	1
+flat	return	os/getwd.cs:97	1
+linux	return	os/linux/file.cs:691	1
+windows	return	os/windows/file.cs:692	1
+darwin	return	path/filepath/darwin/path.cs:193	1
+linux	return	path/filepath/linux/path.cs:193	1
+flat	return	path/filepath/match.cs:350	1
+windows	return	path/filepath/windows/path.cs:193	1
+flat	return	runtime/symtab.cs:959	1
+flat	return	runtime/symtab.cs:965	1
+flat	return	runtime/traceback.cs:724	1
+flat	assign	time/format.cs:1364	1
+flat	assign	time/format.cs:1371	2
+flat	assign	time/format.cs:1395	1

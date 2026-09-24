@@ -98,14 +98,77 @@ func bucket(n int) string {
 	return "d>32"
 }
 
+// operandPos is where the compiler positions an expression node: a binary or unary expression at its
+// operator, an index or slice at its '[', a call at its '(', a selector at its '.', and a parenthesised
+// expression at its inner expression (the syntax package drops parentheses). key "ast" returns Pos().
+func operandPos(e ast.Expr, key string) token.Pos {
+	if key == "ast" {
+		return e.Pos()
+	}
+	switch x := e.(type) {
+	case *ast.ParenExpr:
+		return operandPos(x.X, key)
+	case *ast.BinaryExpr:
+		return x.OpPos
+	case *ast.UnaryExpr:
+		return x.OpPos
+	case *ast.StarExpr:
+		return x.Star
+	case *ast.IndexExpr:
+		return x.Lbrack
+	case *ast.IndexListExpr:
+		return x.Lbrack
+	case *ast.SliceExpr:
+		return x.Lbrack
+	case *ast.CallExpr:
+		return x.Lparen
+	case *ast.SelectorExpr:
+		return x.Sel.Pos() - 1
+	}
+	return e.Pos()
+}
+
 func main() {
 	mFile := flag.String("m", "", "the -gcflags=-m output for the same GOOS")
+	// A conversion's verdict is printed at its OPERAND's compiler position, which for a compound operand
+	// is its operator, not ast.Node.Pos() (G's oracle block, DESIGN-nonescaping-locals.md finding 4, at
+	// claude/g-rec-b-oracle 814603bbbb). "compiler" (the default) keys that way; "ast" reproduces the key
+	// revision 3 used, so the two can be diffed.
+	posKey := flag.String("poskey", "compiler", "operand key for conversion verdicts: compiler or ast")
 	flag.Parse()
 
 	// Parameter verdicts keyed by declaration position. Expression verdicts are keyed where -m reports
-	// them: a conversion at its ARGUMENT, a concatenation at its outermost `+`.
+	// them: a conversion at its operand's compiler position (operandPos), a concatenation at its outermost `+`.
 	param := map[string]string{}
-	expr := map[string]string{}
+	// Every expression line at a position, with its printed text: an inlined callee's allocation is
+	// reported at the caller's call position (G's finding 2), which is also a call operand's compiler
+	// position, so a verdict is taken only from a line whose text is the construct being joined.
+	type exprLine struct{ text, verdict string }
+	exprLines := map[string][]exprLine{}
+	textMismatch := map[string]int{}
+	verdictAt := func(row, k string, match func(string) bool) string {
+		v := ""
+		for _, l := range exprLines[k] {
+			if !match(l.text) {
+				continue
+			}
+			switch {
+			case l.verdict == "zero-copy":
+				v = "zero-copy"
+			case l.verdict == "heap" && v != "zero-copy":
+				v = "heap"
+			case v == "":
+				v = l.verdict
+			}
+		}
+		if v == "" {
+			if len(exprLines[k]) > 0 {
+				textMismatch[row]++ // a verdict sits at the key, for a different expression
+			}
+			return "no-verdict"
+		}
+		return v
+	}
 	reParam := regexp.MustCompile(`^(.*\.go):(\d+):(\d+): (?:leaking param: (\w+)(.*)|(\w+) does not escape)$`)
 	reExpr := regexp.MustCompile(`^(.*\.go):(\d+):(\d+): (.+) (does not escape|escapes to heap)$`)
 	// Go 1.22+'s read-only string->[]byte optimisation prints its own line at the argument's position.
@@ -137,7 +200,8 @@ func main() {
 			}
 		}
 		if m := reZeroCopy.FindStringSubmatch(s); m != nil {
-			expr[m[1]+":"+m[2]+":"+m[3]] = "zero-copy"
+			k := m[1] + ":" + m[2] + ":" + m[3]
+			exprLines[k] = append(exprLines[k], exprLine{"zero-copy", "zero-copy"})
 			continue
 		}
 		if m := reExpr.FindStringSubmatch(s); m != nil {
@@ -146,9 +210,7 @@ func main() {
 			if m[5] == "escapes to heap" {
 				v = "heap"
 			}
-			if expr[k] != "heap" && expr[k] != "zero-copy" {
-				expr[k] = v
-			}
+			exprLines[k] = append(exprLines[k], exprLine{m[4], v})
 		}
 	}
 	fh.Close()
@@ -301,21 +363,17 @@ func main() {
 								if b.Kind() == types.Uint8 {
 									kind = "byte"
 								}
-								v := expr[pos(e.Args[0].Pos())]
-								if v == "" {
-									v = "no-verdict"
-								}
-								counts[fmt.Sprintf("R1 string(%s) %s: %s", kind, scope, v)]++
+								row := fmt.Sprintf("R1 string(%s) %s", kind, scope)
+								v := verdictAt(row, pos(operandPos(e.Args[0], *posKey)), func(s string) bool { return strings.HasPrefix(s, "string(") })
+								counts[row+": "+v]++
 							}
 						}
 						if s, ok := tv.Type.Underlying().(*types.Slice); ok && at != nil && isString(at) {
 							if eb, ok := s.Elem().Underlying().(*types.Basic); ok && eb.Kind() == types.Uint8 {
 								if cv := info.Types[e.Args[0]].Value; cv != nil && cv.Kind() == constant.String {
-									v := expr[pos(e.Args[0].Pos())]
-									if v == "" {
-										v = "no-verdict"
-									}
-									counts[fmt.Sprintf("R5 []byte(\"const\") %s: %s", scope, v)]++
+									row := fmt.Sprintf("R5 []byte(\"const\") %s", scope)
+									v := verdictAt(row, pos(operandPos(e.Args[0], *posKey)), func(s string) bool { return s == "zero-copy" || strings.Contains(s, "[]byte") })
+									counts[row+": "+v]++
 								}
 							}
 						}
@@ -469,15 +527,17 @@ func main() {
 					if operands >= 3 {
 						k = ">=3 operands"
 					}
-					v := expr[pos(e.OpPos)]
-					if v == "" {
-						v = "no-verdict"
-					}
-					counts[fmt.Sprintf("R4 concatenation %s %s: %s", k, scope, v)]++
+					row := fmt.Sprintf("R4 concatenation %s %s", k, scope)
+					v := verdictAt(row, pos(e.OpPos), func(s string) bool { return strings.Contains(s, " + ") })
+					counts[row+": "+v]++
 				}
 				return true
 			})
 		}
+	}
+
+	for row, n := range textMismatch {
+		counts[row+": no-verdict, of which a verdict for another expression sits at the key"] = n
 	}
 
 	var keys []string
@@ -485,7 +545,7 @@ func main() {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-	fmt.Printf("m-lines=%d param-verdicts=%d expr-verdicts=%d files=%d functions-with-a-noescape-string-param=%d\n", lines, len(param), len(expr), len(seen), len(noEscFuncs))
+	fmt.Printf("m-lines=%d param-verdicts=%d expr-verdicts=%d files=%d functions-with-a-noescape-string-param=%d\n", lines, len(param), len(exprLines), len(seen), len(noEscFuncs))
 	for _, k := range keys {
 		fmt.Printf("%-100s %d\n", k, counts[k])
 	}

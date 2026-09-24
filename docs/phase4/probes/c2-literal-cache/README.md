@@ -104,3 +104,16 @@ run (ASLR); the equalities are the result.
 
 Captured output: [`output-round3-linux.txt`](output-round3-linux.txt). It also records the JIT inlining
 check from the start-up probe (`../c2-startup-ab/`).
+
+## Round 4 (revision 4, 2026-09-24): the growable table under tiered JIT
+
+COORD's revision-3 note (fix 12) asked for a tiered run of the growable table: revision 3's "2.0-3.0×"
+compared across runs, measured an inlined lookup, and ran with tiering off. `--round2` was run four times
+in one session, at both load factors, with `DOTNET_TieredCompilation=0` and `=1`:
+
+```
+C2_TABLE_LOAD=<2|4> DOTNET_TieredCompilation=<0|1> dotnet bin/Release/net10.0/c2-literal-cache.dll --round2
+```
+
+Captured output: [`output-round4-tiered-linux.txt`](output-round4-tiered-linux.txt). The lookup is still
+inlined, as in round 3.

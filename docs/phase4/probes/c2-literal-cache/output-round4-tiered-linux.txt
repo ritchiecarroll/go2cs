@@ -1,0 +1,199 @@
+# c2-literal-cache round 4 -- the growable V10 table (Caches2.cs) with tiering OFF and ON in one session, --round2, C2_TABLE_LOAD=2 (at most half full) and 4 (at most a quarter), linux-x64, shared 4-core VM, .NET 10.0.12 (2026-09-24). Local, unofficial, not a gate. Built from this branch's golib (lcd HEAD) in a scratch copy.
+ 12:46:33 up  9:15,  0 user,  load average: 1.00, 1.77, 1.95
+== C2_TABLE_LOAD=2 DOTNET_TieredCompilation=0
+.NET 10.0.12  Ubuntu 24.04.4 LTS  cores=4  csproj TieredCompilation=false (NativeAOT: no JIT)
+.NET 10.0.12  Ubuntu 24.04.4 LTS  X64  cores=4  tiered=0
+registered literals: 6
+-- noise floor: the baseline twice
+V0  today, 1 B                                                   13.61 ns   1.00 counted
+V0' today, 1 B (identical body)                                  13.63 ns   1.00 counted
+-- hit cost by length (1 / 8 / 12 / 16 / 32 B)
+V0  today      1 B                                               12.30 ns   1.00 counted
+V8  2-way FNV  1 B                                                6.34 ns   0.00 counted
+V9  2-way word 1 B                                                7.31 ns   0.00 counted
+V10 table      1 B                                                5.19 ns   0.00 counted
+V0  today      8 B                                               12.21 ns   1.00 counted
+V8  2-way FNV  8 B                                                9.19 ns   0.00 counted
+V9  2-way word 8 B                                                7.38 ns   0.00 counted
+V10 table      8 B                                                5.21 ns   0.00 counted
+V0  today      12 B                                              13.75 ns   1.00 counted
+V8  2-way FNV  12 B                                              12.13 ns   0.00 counted
+V9  2-way word 12 B                                               6.54 ns   0.00 counted
+V10 table      12 B                                               5.07 ns   0.00 counted
+V0  today      16 B                                              13.10 ns   1.00 counted
+V8  2-way FNV  16 B                                              15.22 ns   0.00 counted
+V9  2-way word 16 B                                               6.39 ns   0.00 counted
+V10 table      16 B                                               4.68 ns   0.00 counted
+V0  today      32 B                                              15.90 ns   1.00 counted
+V8  2-way FNV  32 B                                              20.33 ns   1.00 counted
+V9  2-way word 32 B                                              20.30 ns   1.00 counted
+V10 table      32 B                                               7.64 ns   0.00 counted
+V1  hoisted field (for scale)                                     1.45 ns   0.00 counted
+-- non-literal spans through the same entry (the tax elsewhere)
+miss V0  today, 8 B                                              15.70 ns   1.00 counted
+miss V8  2-way, 8 B (inserts)                                    32.09 ns   1.00 counted
+miss V10 table, 8 B (never inserts)                              22.41 ns   1.00 counted
+gate V0  today, 24 B                                             16.92 ns   1.00 counted
+gate V8  over the 16 B gate, 24 B                                19.70 ns   1.00 counted
+gate V10 table, 24 B non-literal                                 22.09 ns   1.00 counted
+-- three literals thrashing ONE 2-way set (FNV; found by search, deterministic by content)
+V8  alternating 3 contents in one set, per round of 3            86.39 ns   3.00 counted
+   (one op = 3 conversions: divide ns and counted by 3)
+-- PerfStringMatch's `"// "u8` shape, 16M evaluations
+   today         198.9 ms
+   V8 2-way      127.6 ms
+   V10 table      94.2 ms
+   hoisted        22.3 ms
+-- cross-thread eviction: thread A measures a literal, thread B converts colliding non-literals
+   literal seeded into way 1 (arm literal-first): V8 counted misses 122236.5 per 1M under attack; V10 table 0.0 per 1M
+   literal seeded into way 1 (arm non-literal-first): V8 counted misses 124673.5 per 1M under attack; V10 table 0.0 per 1M
+-- 8-thread stress, V8: 0 content mismatches in 16000000 results (X64)
+rc=0
+== C2_TABLE_LOAD=2 DOTNET_TieredCompilation=1
+.NET 10.0.12  Ubuntu 24.04.4 LTS  cores=4  csproj TieredCompilation=false (NativeAOT: no JIT)
+.NET 10.0.12  Ubuntu 24.04.4 LTS  X64  cores=4  tiered=1
+registered literals: 6
+-- noise floor: the baseline twice
+V0  today, 1 B                                                   12.07 ns   1.00 counted
+V0' today, 1 B (identical body)                                  12.49 ns   1.00 counted
+-- hit cost by length (1 / 8 / 12 / 16 / 32 B)
+V0  today      1 B                                               12.64 ns   1.00 counted
+V8  2-way FNV  1 B                                                4.66 ns   0.00 counted
+V9  2-way word 1 B                                                3.03 ns   0.00 counted
+V10 table      1 B                                                3.53 ns   0.00 counted
+V0  today      8 B                                               13.02 ns   1.00 counted
+V8  2-way FNV  8 B                                                7.41 ns   0.00 counted
+V9  2-way word 8 B                                                5.30 ns   0.00 counted
+V10 table      8 B                                                3.93 ns   0.00 counted
+V0  today      12 B                                              13.60 ns   1.00 counted
+V8  2-way FNV  12 B                                              11.33 ns   0.00 counted
+V9  2-way word 12 B                                               5.52 ns   0.00 counted
+V10 table      12 B                                               3.93 ns   0.00 counted
+V0  today      16 B                                              14.00 ns   1.00 counted
+V8  2-way FNV  16 B                                              15.57 ns   0.00 counted
+V9  2-way word 16 B                                               6.20 ns   0.00 counted
+V10 table      16 B                                               3.86 ns   0.00 counted
+V0  today      32 B                                              15.76 ns   1.00 counted
+V8  2-way FNV  32 B                                              23.15 ns   1.00 counted
+V9  2-way word 32 B                                              23.00 ns   1.00 counted
+V10 table      32 B                                               4.37 ns   0.00 counted
+V1  hoisted field (for scale)                                     2.67 ns   0.00 counted
+-- non-literal spans through the same entry (the tax elsewhere)
+miss V0  today, 8 B                                              15.46 ns   1.00 counted
+miss V8  2-way, 8 B (inserts)                                    40.67 ns   1.00 counted
+miss V10 table, 8 B (never inserts)                              20.89 ns   1.00 counted
+gate V0  today, 24 B                                             16.57 ns   1.00 counted
+gate V8  over the 16 B gate, 24 B                                22.99 ns   1.00 counted
+gate V10 table, 24 B non-literal                                 30.29 ns   1.00 counted
+-- three literals thrashing ONE 2-way set (FNV; found by search, deterministic by content)
+V8  alternating 3 contents in one set, per round of 3           114.44 ns   3.00 counted
+   (one op = 3 conversions: divide ns and counted by 3)
+-- PerfStringMatch's `"// "u8` shape, 16M evaluations
+   today         202.9 ms
+   V8 2-way      113.5 ms
+   V10 table      63.7 ms
+   hoisted        42.2 ms
+-- cross-thread eviction: thread A measures a literal, thread B converts colliding non-literals
+   literal seeded into way 1 (arm literal-first): V8 counted misses 139157.0 per 1M under attack; V10 table 0.0 per 1M
+   literal seeded into way 1 (arm non-literal-first): V8 counted misses 153571.5 per 1M under attack; V10 table 0.0 per 1M
+-- 8-thread stress, V8: 0 content mismatches in 16000000 results (X64)
+rc=0
+== C2_TABLE_LOAD=4 DOTNET_TieredCompilation=0
+.NET 10.0.12  Ubuntu 24.04.4 LTS  cores=4  csproj TieredCompilation=false (NativeAOT: no JIT)
+.NET 10.0.12  Ubuntu 24.04.4 LTS  X64  cores=4  tiered=0
+registered literals: 6
+-- noise floor: the baseline twice
+V0  today, 1 B                                                   12.61 ns   1.00 counted
+V0' today, 1 B (identical body)                                  12.23 ns   1.00 counted
+-- hit cost by length (1 / 8 / 12 / 16 / 32 B)
+V0  today      1 B                                               12.25 ns   1.00 counted
+V8  2-way FNV  1 B                                                6.25 ns   0.00 counted
+V9  2-way word 1 B                                                7.54 ns   0.00 counted
+V10 table      1 B                                                5.07 ns   0.00 counted
+V0  today      8 B                                               12.00 ns   1.00 counted
+V8  2-way FNV  8 B                                                9.06 ns   0.00 counted
+V9  2-way word 8 B                                                7.38 ns   0.00 counted
+V10 table      8 B                                                5.24 ns   0.00 counted
+V0  today      12 B                                              13.66 ns   1.00 counted
+V8  2-way FNV  12 B                                              11.89 ns   0.00 counted
+V9  2-way word 12 B                                               6.58 ns   0.00 counted
+V10 table      12 B                                               5.24 ns   0.00 counted
+V0  today      16 B                                              13.01 ns   1.00 counted
+V8  2-way FNV  16 B                                              15.62 ns   0.00 counted
+V9  2-way word 16 B                                               6.39 ns   0.00 counted
+V10 table      16 B                                               4.72 ns   0.00 counted
+V0  today      32 B                                              15.59 ns   1.00 counted
+V8  2-way FNV  32 B                                              20.67 ns   1.00 counted
+V9  2-way word 32 B                                              20.26 ns   1.00 counted
+V10 table      32 B                                               6.45 ns   0.00 counted
+V1  hoisted field (for scale)                                     1.40 ns   0.00 counted
+-- non-literal spans through the same entry (the tax elsewhere)
+miss V0  today, 8 B                                              15.52 ns   1.00 counted
+miss V8  2-way, 8 B (inserts)                                    32.17 ns   1.00 counted
+miss V10 table, 8 B (never inserts)                              18.36 ns   1.00 counted
+gate V0  today, 24 B                                             17.34 ns   1.00 counted
+gate V8  over the 16 B gate, 24 B                                19.69 ns   1.00 counted
+gate V10 table, 24 B non-literal                                 19.81 ns   1.00 counted
+-- three literals thrashing ONE 2-way set (FNV; found by search, deterministic by content)
+V8  alternating 3 contents in one set, per round of 3            87.92 ns   3.00 counted
+   (one op = 3 conversions: divide ns and counted by 3)
+-- PerfStringMatch's `"// "u8` shape, 16M evaluations
+   today         202.3 ms
+   V8 2-way      128.6 ms
+   V10 table      76.3 ms
+   hoisted        23.1 ms
+-- cross-thread eviction: thread A measures a literal, thread B converts colliding non-literals
+   literal seeded into way 1 (arm literal-first): V8 counted misses 105545.5 per 1M under attack; V10 table 0.0 per 1M
+   literal seeded into way 1 (arm non-literal-first): V8 counted misses 127960.0 per 1M under attack; V10 table 0.0 per 1M
+-- 8-thread stress, V8: 0 content mismatches in 16000000 results (X64)
+rc=0
+== C2_TABLE_LOAD=4 DOTNET_TieredCompilation=1
+.NET 10.0.12  Ubuntu 24.04.4 LTS  cores=4  csproj TieredCompilation=false (NativeAOT: no JIT)
+.NET 10.0.12  Ubuntu 24.04.4 LTS  X64  cores=4  tiered=1
+registered literals: 6
+-- noise floor: the baseline twice
+V0  today, 1 B                                                   11.34 ns   1.00 counted
+V0' today, 1 B (identical body)                                  11.78 ns   1.00 counted
+-- hit cost by length (1 / 8 / 12 / 16 / 32 B)
+V0  today      1 B                                               11.76 ns   1.00 counted
+V8  2-way FNV  1 B                                                5.15 ns   0.00 counted
+V9  2-way word 1 B                                                3.13 ns   0.00 counted
+V10 table      1 B                                                3.50 ns   0.00 counted
+V0  today      8 B                                               12.28 ns   1.00 counted
+V8  2-way FNV  8 B                                                7.07 ns   0.00 counted
+V9  2-way word 8 B                                                5.15 ns   0.00 counted
+V10 table      8 B                                                3.97 ns   0.00 counted
+V0  today      12 B                                              12.91 ns   1.00 counted
+V8  2-way FNV  12 B                                              12.15 ns   0.00 counted
+V9  2-way word 12 B                                               5.56 ns   0.00 counted
+V10 table      12 B                                               3.87 ns   0.00 counted
+V0  today      16 B                                              12.99 ns   1.00 counted
+V8  2-way FNV  16 B                                              15.23 ns   0.00 counted
+V9  2-way word 16 B                                               6.00 ns   0.00 counted
+V10 table      16 B                                               3.89 ns   0.00 counted
+V0  today      32 B                                              14.66 ns   1.00 counted
+V8  2-way FNV  32 B                                              20.74 ns   1.00 counted
+V9  2-way word 32 B                                              21.07 ns   1.00 counted
+V10 table      32 B                                               4.31 ns   0.00 counted
+V1  hoisted field (for scale)                                     2.63 ns   0.00 counted
+-- non-literal spans through the same entry (the tax elsewhere)
+miss V0  today, 8 B                                              14.94 ns   1.00 counted
+miss V8  2-way, 8 B (inserts)                                    39.20 ns   1.00 counted
+miss V10 table, 8 B (never inserts)                              23.23 ns   1.00 counted
+gate V0  today, 24 B                                             15.47 ns   1.00 counted
+gate V8  over the 16 B gate, 24 B                                20.92 ns   1.00 counted
+gate V10 table, 24 B non-literal                                 24.13 ns   1.00 counted
+-- three literals thrashing ONE 2-way set (FNV; found by search, deterministic by content)
+V8  alternating 3 contents in one set, per round of 3           109.55 ns   3.00 counted
+   (one op = 3 conversions: divide ns and counted by 3)
+-- PerfStringMatch's `"// "u8` shape, 16M evaluations
+   today         186.6 ms
+   V8 2-way      193.3 ms
+   V10 table      62.1 ms
+   hoisted        42.1 ms
+-- cross-thread eviction: thread A measures a literal, thread B converts colliding non-literals
+   literal seeded into way 1 (arm literal-first): V8 counted misses 115548.0 per 1M under attack; V10 table 0.0 per 1M
+   literal seeded into way 1 (arm non-literal-first): V8 counted misses 143166.5 per 1M under attack; V10 table 0.0 per 1M
+-- 8-thread stress, V8: 0 content mismatches in 16000000 results (X64)
+rc=0
+ 12:49:29 up  9:17,  0 user,  load average: 1.20, 1.53, 1.82
