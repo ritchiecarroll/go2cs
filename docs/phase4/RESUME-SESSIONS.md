@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 10:18 -- SAVE-STATE refresh (ledger through mailbox 11ab192386): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, THE 1.24.13.2 PACKAGING TRAIN UNION GATE GREEN (the owner's gate met; G owes projitems, test pins, docs and the math/big bank; then COORD assembles), the RUNTIME row held by the owner's separate cloud project, and C2's literal revision 4 VERIFIED with the tier brief delivered and the owner's ruling awaited; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 11:00 -- SAVE-STATE refresh (ledger through mailbox 4b92088dc8): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, THE 1.24.13.2 PACKAGING TRAIN ASSEMBLED LOCALLY on the i7 (t1242, HEAD 6a104f8d0c) with its gate battery RUNNING, the RUNTIME project waiting on R's synctest train, and C2's literal revision 4 VERIFIED with the owner's tier ruling awaited; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -238,7 +238,10 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    COORD merges it via a post-release train gated like any seat. Known overlap: linknameForwardTargets in visitFuncDecl.go,
    which packaging seat 3 also edits; a union at assembly. No fleet lane dispatches on runtime meanwhile. REFLECT was NOT
    started and stays R's. Watch origin for claude/proj-* refs (a Monitor on ls-remote) and ListAgents for the project's
-   session, which was not listed at the start.
+   session, which was not listed at the start. Its FIRST FINDINGS (ledger "RULING · 0b6bf15ab0"): the host dies on a nil P
+   in acquireSudog via TestSemaHandoff, with 10,669 of 10,884 results before it dies. Its item 1 (semacquire over golib's
+   RuntimeSemaphore) must be BASED on R's synctest train plus the atomic pick, and the OWNER HAS THE PROJECT WAITING until R's
+   synctest train LANDS. Item 2 (converter linkname forwards) is a separate branch cut from master after the 1.24.13.2 train.
  - EXTERNAL WAIT: the go.* NuGet ID-prefix reservation. The owner's request is pending with NuGet, so there is no owner
    decision to chase. COORD's 2026-09-22 advice (ledger "NuGet 'go.' OCCUPANCY") was a narrowed follow-up to the 30 scoped
    std-root prefixes.
@@ -253,9 +256,17 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    - Reference wording;
    - a README platforms note plus Roadmap row docs commit;
    - the math/big BANK commit (230+1 -> 231+0 with its proof page).
-   THEN COORD ASSEMBLES on the i7 from master (the train-assembly skill; signed merges). Gates: the converter suite, CNR,
-   behavioral on the i7, a windows H7 (golib changed), -VerifyOnly and the census identities. It lands, and then the OWNER
-   RUNS the 1.24.13.2 release (step (c)'s procedure).
+   ALL OWED ITEMS ARE DONE (final tips: len/cap ebc5a66994, seat 1 501b7e4c27, seat 2 43c8d5aac7, seat 3 26042b3a92,
+   docs d18c5c008f; record-only ref claude/g-union-1.24.13.2-rehearsal is NOT for merge). COORD ASSEMBLED the train LOCALLY
+   on the i7 in worktree C:/go2cs-tmp-coord/t1242: five signed --no-ff merges on ebb4acb8cf, all clean, HEAD 6a104f8d0c,
+   tree 53f52233fc. Pre-battery checks: -VerifyOnly "Tree is releasable" (next 1.24.13.2), and the identifier census over
+   the 31-file train diff is CLEAN. THE BATTERY IS RUNNING from a per-run copy, scratchpad t1242-battery-run1.sh; its
+   SUMMARY is in scratchpad/t1242-logs. Legs, in order: the converter suite, the roster guard, go2cs.slnx, GolibTests, CNR,
+   the full behavioral suite, a purge, then H7 windows. The worktree is FROZEN while it runs. G was asked whether its union
+   tree equals 53f52233fc.
+   IF THIS SESSION DIES MID-BATTERY: the scratchpad is gone, so re-create t1242 from the five tips above and rerun the legs.
+   Then: announce on the ledger, push master (a fast-forward from ebb4acb8cf), and the OWNER RUNS the 1.24.13.2 release
+   (step (c)'s procedure).
  - UP NEXT, by OWNER ORDER (ledger 93410e7ef9): FIX THE LINUX PACKAGING PROBLEM. Owner G, after the in-flight len/cap
    seat. G SIZED IT (scratch prototypes on WSL against the published 1.24.13.1): it is THREE gaps. With all three hand-fixed,
    walkthrough steps 3-4 build on Linux and `dotnet run` output is byte-identical to `go run`. RULED by COORD (ledger
@@ -2106,3 +2117,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 08:48 -- SAVE-STATE refresh: 1b records literal revision 4 arrived, the scrub item, and the seat-3 rework under re-review.
 - 2026-09-24 09:00 -- SAVE-STATE refresh: 1b records literal revision 4 verified and COORD's tier recommendation.
 - 2026-09-24 10:18 -- SAVE-STATE refresh: 1b records the union gate GREEN and the pre-assembly items.
+- 2026-09-24 11:00 -- SAVE-STATE refresh: 1b records the train assembled and its battery running, and the runtime project waiting on R.
