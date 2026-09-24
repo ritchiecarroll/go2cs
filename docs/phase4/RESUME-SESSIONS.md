@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 15:59 -- SAVE-STATE refresh (ledger through mailbox fd33af2701): section 1b is the COORD new-session prompt: go2cs 1.24.13.2 PUBLISHED (the record is master e06494c6f8, the index row 9a5f63041b); the owner-approved cleanup running; NEXT G's nuget.org walkthrough, then TRAIN A (synctest + atomic pick + mustBeKind; ping the owner when it lands) and TRAIN B (golib strings/allocs incl. arm C and V-fix 11), plus the implicit-operator CS0121 build before the twin pilot; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 16:04 -- SAVE-STATE refresh (ledger through mailbox 1a10a415c4): section 1b is the COORD new-session prompt: go2cs 1.24.13.2 PUBLISHED (the record is master e06494c6f8, the index row 9a5f63041b); the owner-approved cleanup DONE (76 GB free); the i7 idle for the owner's disk install; NEXT G's nuget.org walkthrough, then TRAIN A (synctest + atomic pick + mustBeKind; ping the owner when it lands) and TRAIN B (golib strings/allocs: REC-F, V-fix 11 ACCEPTED, REC-C, Float bits, R views+G8+G10, arm C), plus the implicit-operator CS0121 build before the twin pilot; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -280,8 +280,11 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
      owner's call). To resume a failed Phase 2: the signer with -Apply -Overwrite, then the push; NEVER re-run release-nuget.
    NEXT:
    (1) nuget.org indexing, then G's post-publish walkthrough against nuget.org only (WSL linux + windows).
-   (2) The OWNER-APPROVED CLEANUP is RUNNING (scratchpad cleanup-run.sh; t1242 included).
-   (3) The owner's disk install window is open once the cleanup ends.
+   (2) DONE: the OWNER-APPROVED CLEANUP (0 refusals, 32 registrations pruned, C: 32 -> 76 GB free; ledger "STAMP · 9a5f63041b ·
+       THE OWNER-APPROVED i7 CLEANUP IS DONE"). The worktrees LEFT are the owner's call (d0913b, kick, C:/go2cs-archive, the app's
+       session worktrees) plus hnd, the main checkout and go2cs-mailbox.
+   (3) The owner's DISK-INSTALL window is OPEN: the i7 is idle. After it, propose a layout that moves the worktree and
+       scratch roots onto the new disk.
    (4) Then the NEXT TRAINS, assembled from master 4c53b02a0a on the i7:
        - TRAIN A (runtime/reflect; the owner wants a ping when it lands): R's synctest re-entry 0b6bf15ab0, C2's atomic-loads
          commit 8ef7f65ec8 as a PICK, and R's mustBeKind 2e134cf77d. Verify that FuncLiteralCallerNames and GoroutineWaitState
@@ -2165,3 +2168,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 14:25 -- SAVE-STATE refresh: 1b/1c record the twin probe result and the pilot shape.
 - 2026-09-24 15:02 -- SAVE-STATE refresh: 1b records arm C and V-fix 11 in and the two next trains.
 - 2026-09-24 15:59 -- SAVE-STATE refresh: 1b records 1.24.13.2 PUBLISHED and the release-day lesson.
+- 2026-09-24 16:04 -- SAVE-STATE refresh: 1b records the cleanup done and V-fix 11 accepted.
