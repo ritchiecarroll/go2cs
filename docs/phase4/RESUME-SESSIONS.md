@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 08:06 -- SAVE-STATE refresh (ledger through mailbox 773df2f004): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, the Linux packaging train CUT (seats 1-3 on origin, unmerged; COORD reviewing seats 2 and 3), the RUNTIME row held by the owner's separate cloud project, and C2's literal revision 4 under COORD verification; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 08:41 -- SAVE-STATE refresh (ledger through mailbox a6fd8764ca): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, the Linux packaging train CUT (seat 1 accepted, seat 2 ACCEPTED with 2-A required, seat 3 REWORK, a corpus half owed; review at docs/phase4/reviews/packaging-train-seats-2-3-review-2026-09-24.md), the RUNTIME row held by the owner's separate cloud project, and C2's literal revision 4 under COORD verification; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -322,14 +322,25 @@ boxing). CUT 2026-09-24 (ledger "RULING · 6c9aaae62e / 4378ae6cf2"), both UNMER
   commit 501b7e4c27 (the `go.` prefix-coupling comment; a PUBLISH arm; 4/4 on linux-x64 and on win-x64). OWED: the
   isolated-clone rehearsal pack, -VerifyOnly, and the census identities.
 - claude/g-stdlib-meta-goos (packaging SEAT 2, on ebb4acb8cf): the asset gains `##<name>@<goos>` flavour sections, and
-  stdLibExportedMetadata(name, goos) prefers them on the -recurse=nuget path. Its red-first arms are claimed. COORD's
-  independent review is RUNNING (worktree C:/go2cs-tmp-coord/rv-seat2 on the i7; findings go to G in one message). OWED: CNR
-  and the full converter suite.
+  stdLibExportedMetadata(name, goos) prefers them on the -recurse=nuget path. COORD REVIEW DONE: ACCEPTED (record:
+  claude/coord-handover docs/phase4/reviews/packaging-train-seats-2-3-review-2026-09-24.md; ledger "RULING · ba9d193861 /
+  f48e8010d1"). OWED:
+  - 2-A, REQUIRED FOR THE TRAIN: the -recurse=nuget emission pins GoCompileRuntimeIdentifier from -platforms into
+    Directory.Build.props;
+  - 2-B tests, 2-C wording, 2-D docs;
+  - CNR.
 - claude/g-asm-trampolines (packaging SEAT 3, on ebb4acb8cf): pure-JMP .s trampolines take writeLinknameForwarder OUTSIDE
   GOROOT only, through the curated asmTrampolineTargets registry (syscall.gettimeofday); syscall.prlimit joins
   linknameForwardTargets. The scope and the registry are RULED ACCEPTED (ledger "RULING · f48e8010d1 / ba9d193861 /
-  b95abf9638"). COORD's independent review is RUNNING (worktree C:/go2cs-tmp-coord/rv-seat3). OWED: the two-seeded footprint
-  on all 3 targets, H7 x3, behavioral, and the full converter suite. The raw-SYSCALL residual is a follow-on sizing item.
+  b95abf9638"), but COORD's review says REWORK. BLOCKER: real x/sys/unix's gettimeofday takes its own unix.Timeval, so the
+  registry row's forwarder is CS1503 and x/sys/unix stops building. The rework:
+  - a types.Identical guard;
+  - drop the row and REMOVE the registry and its two hooks (the CS8799 against the internal hand-own goes with them);
+  - same-package targets exempted from lowering, or left as stubs;
+  - scope-exclusion and full-line tests; parser hygiene; the "442" figure made abstract.
+  THE TRAIN NEEDS A CORPUS HALF: syscall.prlimit is internal at master, so the two-seeded footprint lands as a COMMITTED
+  src/core change (syscall's linux flavour), with H7 linux and the census. Also owed: H7 x3, behavioral, the full suite.
+  The raw-SYSCALL residual and a bridged gettimeofday are one follow-on seat.
 - The len/cap seat's retirement commit (math/big manifest deleted; PASS on both platforms) is ACCEPTED; the roster row rides
   the bank.
 NEXT, G's heavy-run order (one at a time): the len/cap behavioral verdict; CNR for len/cap and seat 2; the converter suites
@@ -2062,3 +2073,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 07:43 -- SAVE-STATE refresh: 1c records packaging seat 3, its design rulings, the len/cap retirement accepted, and G's heavy-run order.
 - 2026-09-24 07:55 -- SAVE-STATE refresh: 1b/1c record the owner's runtime cloud-project trial; R keeps reflect.
 - 2026-09-24 08:06 -- SAVE-STATE refresh: 1b records the atomic-loads pick-not-merge finding and C2's revision 4 under verification.
+- 2026-09-24 08:41 -- SAVE-STATE refresh: 1c records the seats 2-3 review verdicts and the train's owed corpus half.
