@@ -1,12 +1,14 @@
-# O1 survival census, GOOS=windows. Population and verdicts as c2-escape-join's J rows; classes and
-# predicates in main.go; controls in main_test.go. Sites are production call sites.
+# O1 survival census, GOOS=windows, CGO_ENABLED=0. Population and verdicts as c2-escape-join's J rows;
+# classes and predicates in main.go; controls in main_test.go. Sites are production call sites.
 
-## P: the population (and R2: every production string literal by what consumes it)
+## P: the population (R2: every production string literal by what consumes it; H: the Tier C predicate
+## against the emitted corpus)
+H hoist predicted, and the emitted corpus declares a field with these bytes                        1379
 P lit -> string param: leak-heap                                                                   3090
 P lit -> string param: leak-heap (format position)                                                   65
 P lit -> string param: leak-result                                                                   73
 P lit -> string param: no-verdict                                                                    20
-P lit -> string param: noescape                                                                    2344
+P lit -> string param: noescape                                                                    2328
 P lit -> string param: noescape (format position)                                                  2491
 P lit EXCLUDED: argument of a builtin                                                               100
 P lit EXCLUDED: argument of a conversion                                                            355
@@ -21,41 +23,45 @@ P sb -> string param: noescape                                                  
 P sb EXCLUDED: no callee declaration                                                                 18
 P sb EXCLUDED: variadic tail                                                                          3
 P sb not a string parameter                                                                           6
-R2 a call argument (population P)                                                                 11224
+R2 a call argument (population P)                                                                 11208
 R2 a comparison operand                                                                            1843
-R2 a composite literal element (stored)                                                           17881
+R2 a composite literal element (stored)                                                            8672
 R2 a concatenation operand                                                                         1761
 R2 a conversion operand                                                                             355
 R2 a map key                                                                                        112
 R2 a switch case                                                                                    954
-R2 assigned to a variable                                                                           820
+R2 assigned to a variable                                                                           586
 R2 indexed                                                                                            6
 R2 other (RangeStmt)                                                                                  1
 R2 returned                                                                                        1182
-R2 set aside: import path                                                                          5889
+R2 set aside: import path                                                                          4784
 R2 set aside: in a const declaration                                                               1562
 R2 set aside: in a const declaration (a call argument, e.g. len("…"))                                27
 R2 set aside: struct tag                                                                             74
 R2 sliced                                                                                             1
+T lit (a generated test main, set aside) -> string param: noescape                                   16
 
-## S0: survival, TODAY'S golib and converter (range, copy and the spread disqualify; so does a func-value use)
-reached parameters (a noescape literal or any string(b) argument)   survive    58   fail   223
-noescape literal sites, non-format                                   survive   395   fail  1949
-noescape literal sites, format position                              survive    81   fail  2410
+## S0: survival, TODAY'S golib and converter (range, copy and the spread disqualify; so does every fixed-signature use)
+reached parameters (a noescape literal or any string(b) argument)   survive    70   fail   210
+noescape literal sites, non-format                                   survive   461   fail  1867
+  of the surviving non-format: inline today   183, Tier C-hoisted today   278 (one allocation per process)
+noescape literal sites, format position (never hoisted)              survive    81   fail  2410
+PER-EVALUATION survivors (inline today, format + non-format)          264
 string(b) argument sites (any verdict)                               survive     0   fail    84
-format-position share of surviving literal sites                     17.0% (81 of 476)
+format-position share of surviving literal sites                     14.9% (81 of 542)
 
 failing reached parameters, EVERY reason (a parameter counts once per reason)
 class                                                                                 params     lit fmt-lit    s(b)
 sig: the function is used as a value in test files only (e.g. export_test.go)             29     251    1328      21
 sig: the function is used as a value in production (delegate signature)                    5     727     476       2
-sig: hand-owned go2cs file (a converter change does not reach it)                         34     884     105       7
-cascade: passed to a parameter that does not survive                                      88     374     527      13
+cascade: passed to a parameter that does not survive                                      90     404     527      13
+sig: hand-owned go2cs file (a converter change does not reach it)                         15     751     105       6
 use: captured by a closure                                                                 5     736      30       2
-sig: exported method (reflection reach)                                                   38     398     149      12
+sig: exported method (reflection reach)                                                   37     382     149      12
 sig: method matching an interface method (binder: exact parameter types)                   8     230     124       2
 gap: copy(dst, s) (sstring has no copy)                                                    4     132       0       1
 gap: append(b, s...) (sstring has no spread)                                               7     115       0       1
+sig: the callee of a defer/go statement (lowered into golib's generic defer: CS0306)       2     103       0       0
 use: map key (no sstring map indexer)                                                     10      59       0       3
 use: argument of a generic function (type argument)                                        4      44       0       2
 use: converted to an interface (box)                                                       6      33       0       2
@@ -74,11 +80,12 @@ use: stored through a pointer                                                   
 failing reached parameters, FIRST reason by precedence (sums to the failures)
 class                                                                                 params     lit fmt-lit    s(b)
 sig: the function is used as a value in test files only (e.g. export_test.go)             27     251    1245      21
-sig: hand-owned go2cs file (a converter change does not reach it)                         34     884     105       7
-cascade: passed to a parameter that does not survive                                      88     374     527      13
+cascade: passed to a parameter that does not survive                                      90     404     527      13
+sig: hand-owned go2cs file (a converter change does not reach it)                         15     751     105       6
 sig: the function is used as a value in production (delegate signature)                    3       0     476       2
-sig: method matching an interface method (binder: exact parameter types)                   5     230      32       2
-sig: exported method (reflection reach)                                                   21     127      12       4
+sig: method matching an interface method (binder: exact parameter types)                   4     131      32       2
+sig: exported method (reflection reach)                                                   23     144      12       4
+sig: the callee of a defer/go statement (lowered into golib's generic defer: CS0306)       2     103       0       0
 use: converted to an interface (box)                                                       4      33       0       0
 use: map key (no sstring map indexer)                                                      5      29       0       0
 use: stored in a composite literal                                                         1       0      13       0
@@ -89,51 +96,54 @@ gap: range over the string (sstring has no enumerator)                          
 use: argument of a generic function (type argument)                                        2       1       0       1
 use: passed in a ...string tail                                                            1       1       0       0
 go: -m printed no verdict for the parameter                                                2       0       0       3
-go: the parameter's -m verdict is not noescape                                            21       0       0      29
+go: the parameter's -m verdict is not noescape                                            22       0       0      30
 
 callees by surviving noescape literal sites (top 25; fmt's unexported helpers are listed in F below)
-  strings.HasPrefix                                                      lit   115  fmt-lit     0
-  encoding/gob.errorf                                                    lit     0  fmt-lit    64
-  strings.HasSuffix                                                      lit    48  fmt-lit     0
-  encoding/json.(scanner).error                                          lit    27  fmt-lit     0
-  os.(File).checkValid                                                   lit    19  fmt-lit     0
-  net/http.http2asciiEqualFold                                           lit    18  fmt-lit     0
-  internal/fuzz.(coordinator).debugLogf                                  lit     0  fmt-lit    12
-  internal/stringslite.HasPrefix                                         lit    11  fmt-lit     0
-  image.pixelBufferLength                                                lit    10  fmt-lit     0
-  go/parser.assert                                                       lit     8  fmt-lit     0
-  net.internetSocket                                                     lit     8  fmt-lit     0
-  vendor/golang.org/x/net/http/httpguts.HeaderValuesContainsToken        lit     8  fmt-lit     0
-  fmt.(ss).okVerb                                                        lit     6  fmt-lit     0
-  go/parser.(parser).atComma                                             lit     6  fmt-lit     0
-  math/big.writeMultiple                                                 lit     6  fmt-lit     0
-  net/http.hasToken                                                      lit     6  fmt-lit     0
-  runtime.gogetenv                                                       lit     6  fmt-lit     0
-  go/doc.isTest                                                          lit     5  fmt-lit     0
-  image/png.(encoder).writeChunk                                         lit     5  fmt-lit     0
-  net/http.(transportRequest).logf                                       lit     0  fmt-lit     5
-  go/parser.(parser).expectClosing                                       lit     4  fmt-lit     0
-  internal/filepathlite.pathHasPrefixFold                                lit     4  fmt-lit     0
-  net.lookupPortMapWithNetwork                                           lit     4  fmt-lit     0
-  net.stringsEqualFold                                                   lit     4  fmt-lit     0
-  net.stringsHasSuffixFold                                               lit     4  fmt-lit     0
+  strings.HasPrefix                                                  lit   115 (hoisted    49)  fmt-lit     0
+  encoding/gob.errorf                                                lit     0 (hoisted     0)  fmt-lit    64
+  strings.HasSuffix                                                  lit    48 (hoisted    11)  fmt-lit     0
+  encoding/json.(scanner).error                                      lit    27 (hoisted    26)  fmt-lit     0
+  reflect.add                                                        lit    27 (hoisted    23)  fmt-lit     0
+  os.(File).checkValid                                               lit    19 (hoisted    19)  fmt-lit     0
+  net/http.http2asciiEqualFold                                       lit    18 (hoisted    17)  fmt-lit     0
+  internal/fuzz.(coordinator).debugLogf                              lit     0 (hoisted     0)  fmt-lit    12
+  internal/stringslite.HasPrefix                                     lit    11 (hoisted     9)  fmt-lit     0
+  reflect.(Value).assignTo                                           lit    11 (hoisted     2)  fmt-lit     0
+  image.pixelBufferLength                                            lit    10 (hoisted    10)  fmt-lit     0
+  reflect.arrayAt                                                    lit     9 (hoisted     0)  fmt-lit     0
+  go/parser.assert                                                   lit     8 (hoisted     8)  fmt-lit     0
+  net.internetSocket                                                 lit     8 (hoisted     8)  fmt-lit     0
+  vendor/golang.org/x/net/http/httpguts.HeaderValuesContainsToken    lit     8 (hoisted     8)  fmt-lit     0
+  fmt.(ss).okVerb                                                    lit     6 (hoisted     6)  fmt-lit     0
+  go/parser.(parser).atComma                                         lit     6 (hoisted     6)  fmt-lit     0
+  math/big.writeMultiple                                             lit     6 (hoisted     0)  fmt-lit     0
+  net/http.hasToken                                                  lit     6 (hoisted     6)  fmt-lit     0
+  runtime.gogetenv                                                   lit     6 (hoisted     6)  fmt-lit     0
+  go/doc.isTest                                                      lit     5 (hoisted     5)  fmt-lit     0
+  image/png.(encoder).writeChunk                                     lit     5 (hoisted     5)  fmt-lit     0
+  internal/abi.addChecked                                            lit     5 (hoisted     3)  fmt-lit     0
+  net/http.(transportRequest).logf                                   lit     0 (hoisted     0)  fmt-lit     5
+  go/parser.(parser).expectClosing                                   lit     4 (hoisted     4)  fmt-lit     0
 
 ## S1: survival, WITH the sstring golib gaps closed (an enumerator, copy, the spread)
-reached parameters (a noescape literal or any string(b) argument)   survive    72   fail   209
-noescape literal sites, non-format                                   survive   447   fail  1897
-noescape literal sites, format position                              survive    81   fail  2410
+reached parameters (a noescape literal or any string(b) argument)   survive    84   fail   196
+noescape literal sites, non-format                                   survive   518   fail  1810
+  of the surviving non-format: inline today   234, Tier C-hoisted today   284 (one allocation per process)
+noescape literal sites, format position (never hoisted)              survive    81   fail  2410
+PER-EVALUATION survivors (inline today, format + non-format)          315
 string(b) argument sites (any verdict)                               survive     4   fail    80
-format-position share of surviving literal sites                     15.3% (81 of 528)
+format-position share of surviving literal sites                     13.5% (81 of 599)
 
 failing reached parameters, EVERY reason (a parameter counts once per reason)
 class                                                                                 params     lit fmt-lit    s(b)
 sig: the function is used as a value in test files only (e.g. export_test.go)             29     251    1328      21
 sig: the function is used as a value in production (delegate signature)                    5     727     476       2
-sig: hand-owned go2cs file (a converter change does not reach it)                         34     884     105       7
-cascade: passed to a parameter that does not survive                                      81     334     527      11
+cascade: passed to a parameter that does not survive                                      83     359     527      11
+sig: hand-owned go2cs file (a converter change does not reach it)                         15     751     105       6
 use: captured by a closure                                                                 5     736      30       2
-sig: exported method (reflection reach)                                                   38     398     149      12
+sig: exported method (reflection reach)                                                   37     382     149      12
 sig: method matching an interface method (binder: exact parameter types)                   8     230     124       2
+sig: the callee of a defer/go statement (lowered into golib's generic defer: CS0306)       2     103       0       0
 use: map key (no sstring map indexer)                                                     10      59       0       3
 use: argument of a generic function (type argument)                                        4      44       0       2
 use: converted to an interface (box)                                                       6      33       0       2
@@ -151,11 +161,12 @@ use: stored through a pointer                                                   
 failing reached parameters, FIRST reason by precedence (sums to the failures)
 class                                                                                 params     lit fmt-lit    s(b)
 sig: the function is used as a value in test files only (e.g. export_test.go)             27     251    1245      21
-sig: hand-owned go2cs file (a converter change does not reach it)                         34     884     105       7
-cascade: passed to a parameter that does not survive                                      81     334     527      11
+cascade: passed to a parameter that does not survive                                      83     359     527      11
+sig: hand-owned go2cs file (a converter change does not reach it)                         15     751     105       6
 sig: the function is used as a value in production (delegate signature)                    3       0     476       2
-sig: method matching an interface method (binder: exact parameter types)                   5     230      32       2
-sig: exported method (reflection reach)                                                   21     127      12       4
+sig: method matching an interface method (binder: exact parameter types)                   4     131      32       2
+sig: exported method (reflection reach)                                                   23     144      12       4
+sig: the callee of a defer/go statement (lowered into golib's generic defer: CS0306)       2     103       0       0
 use: converted to an interface (box)                                                       4      33       0       0
 use: map key (no sstring map indexer)                                                      5      29       0       0
 use: stored in a composite literal                                                         1       0      13       0
@@ -163,49 +174,54 @@ use: other                                                                      
 use: argument of a generic function (type argument)                                        2       1       0       1
 use: passed in a ...string tail                                                            1       1       0       0
 go: -m printed no verdict for the parameter                                                2       0       0       3
-go: the parameter's -m verdict is not noescape                                            21       0       0      29
+go: the parameter's -m verdict is not noescape                                            22       0       0      30
 
 callees by surviving noescape literal sites (top 25; fmt's unexported helpers are listed in F below)
-  strings.HasPrefix                                                      lit   115  fmt-lit     0
-  encoding/gob.errorf                                                    lit     0  fmt-lit    64
-  strings.HasSuffix                                                      lit    48  fmt-lit     0
-  encoding/json.(scanner).error                                          lit    27  fmt-lit     0
-  fmt.(ss).accept                                                        lit    21  fmt-lit     0
-  os.(File).checkValid                                                   lit    19  fmt-lit     0
-  net/http.http2asciiEqualFold                                           lit    18  fmt-lit     0
-  internal/fuzz.(coordinator).debugLogf                                  lit     0  fmt-lit    12
-  internal/stringslite.HasPrefix                                         lit    11  fmt-lit     0
-  image.pixelBufferLength                                                lit    10  fmt-lit     0
-  fmt.(ss).okVerb                                                        lit     9  fmt-lit     0
-  go/parser.assert                                                       lit     8  fmt-lit     0
-  net.internetSocket                                                     lit     8  fmt-lit     0
-  vendor/golang.org/x/net/http/httpguts.HeaderValuesContainsToken        lit     8  fmt-lit     0
-  fmt.(ss).consume                                                       lit     7  fmt-lit     0
-  go/parser.(parser).atComma                                             lit     6  fmt-lit     0
-  math/big.writeMultiple                                                 lit     6  fmt-lit     0
-  net/http.hasToken                                                      lit     6  fmt-lit     0
-  runtime.gogetenv                                                       lit     6  fmt-lit     0
-  fmt.(ss).peek                                                          lit     5  fmt-lit     0
-  go/doc.isTest                                                          lit     5  fmt-lit     0
-  image/png.(encoder).writeChunk                                         lit     5  fmt-lit     0
-  net/http.(transportRequest).logf                                       lit     0  fmt-lit     5
-  fmt.(pp).catchPanic                                                    lit     4  fmt-lit     0
-  go/parser.(parser).expectClosing                                       lit     4  fmt-lit     0
+  strings.HasPrefix                                                  lit   115 (hoisted    49)  fmt-lit     0
+  encoding/gob.errorf                                                lit     0 (hoisted     0)  fmt-lit    64
+  strings.HasSuffix                                                  lit    48 (hoisted    11)  fmt-lit     0
+  encoding/json.(scanner).error                                      lit    27 (hoisted    26)  fmt-lit     0
+  reflect.add                                                        lit    27 (hoisted    23)  fmt-lit     0
+  fmt.(ss).accept                                                    lit    21 (hoisted     0)  fmt-lit     0
+  os.(File).checkValid                                               lit    19 (hoisted    19)  fmt-lit     0
+  net/http.http2asciiEqualFold                                       lit    18 (hoisted    17)  fmt-lit     0
+  internal/fuzz.(coordinator).debugLogf                              lit     0 (hoisted     0)  fmt-lit    12
+  internal/stringslite.HasPrefix                                     lit    11 (hoisted     9)  fmt-lit     0
+  reflect.(Value).assignTo                                           lit    11 (hoisted     2)  fmt-lit     0
+  image.pixelBufferLength                                            lit    10 (hoisted    10)  fmt-lit     0
+  fmt.(ss).okVerb                                                    lit     9 (hoisted     8)  fmt-lit     0
+  reflect.arrayAt                                                    lit     9 (hoisted     0)  fmt-lit     0
+  reflect.newName                                                    lit     9 (hoisted     0)  fmt-lit     0
+  go/parser.assert                                                   lit     8 (hoisted     8)  fmt-lit     0
+  net.internetSocket                                                 lit     8 (hoisted     8)  fmt-lit     0
+  vendor/golang.org/x/net/http/httpguts.HeaderValuesContainsToken    lit     8 (hoisted     8)  fmt-lit     0
+  fmt.(ss).consume                                                   lit     7 (hoisted     0)  fmt-lit     0
+  go/parser.(parser).atComma                                         lit     6 (hoisted     6)  fmt-lit     0
+  math/big.writeMultiple                                             lit     6 (hoisted     0)  fmt-lit     0
+  net/http.hasToken                                                  lit     6 (hoisted     6)  fmt-lit     0
+  runtime.gogetenv                                                   lit     6 (hoisted     6)  fmt-lit     0
+  fmt.(ss).peek                                                      lit     5 (hoisted     0)  fmt-lit     0
+  go/doc.isTest                                                      lit     5 (hoisted     5)  fmt-lit     0
 
-## S2: survival, WITH the gaps closed AND an adapter lambda at every func-value site
-reached parameters (a noescape literal or any string(b) argument)   survive   116   fail   165
-noescape literal sites, non-format                                   survive   533   fail  1811
-noescape literal sites, format position                              survive  2233   fail   258
+## S2: survival, FLIP shape: the gaps closed AND an adapter lambda at every func-value site
+reached parameters (a noescape literal or any string(b) argument)   survive   128   fail   152
+noescape literal sites, non-format                                   survive   604   fail  1724
+  of the surviving non-format: inline today   271, Tier C-hoisted today   333 (one allocation per process)
+noescape literal sites, format position (never hoisted)              survive  2233   fail   258
+PER-EVALUATION survivors (inline today, format + non-format)         2504
 string(b) argument sites (any verdict)                               survive    14   fail    70
-format-position share of surviving literal sites                     80.7% (2233 of 2766)
+format-position share of surviving literal sites                     78.7% (2233 of 2837)
+adapters: surviving parameters that need one 30, in 29 functions, at 42 value sites; 9 functions have a
+  production value site (13 production value sites)
 
 failing reached parameters, EVERY reason (a parameter counts once per reason)
 class                                                                                 params     lit fmt-lit    s(b)
-sig: hand-owned go2cs file (a converter change does not reach it)                         34     884     105       7
+sig: hand-owned go2cs file (a converter change does not reach it)                         15     751     105       6
 use: captured by a closure                                                                 5     736      30       2
-sig: exported method (reflection reach)                                                   38     398     149      12
-cascade: passed to a parameter that does not survive                                      58     456      66       4
+cascade: passed to a parameter that does not survive                                      60     481      66       4
+sig: exported method (reflection reach)                                                   37     382     149      12
 sig: method matching an interface method (binder: exact parameter types)                   8     230     124       2
+sig: the callee of a defer/go statement (lowered into golib's generic defer: CS0306)       2     103       0       0
 use: map key (no sstring map indexer)                                                     10      59       0       3
 use: argument of a generic function (type argument)                                        4      44       0       2
 use: converted to an interface (box)                                                       6      33       0       2
@@ -222,10 +238,11 @@ use: stored through a pointer                                                   
 
 failing reached parameters, FIRST reason by precedence (sums to the failures)
 class                                                                                 params     lit fmt-lit    s(b)
-sig: hand-owned go2cs file (a converter change does not reach it)                         34     884     105       7
-cascade: passed to a parameter that does not survive                                      58     456      66       4
-sig: method matching an interface method (binder: exact parameter types)                   5     230      32       2
-sig: exported method (reflection reach)                                                   21     127      12       4
+sig: hand-owned go2cs file (a converter change does not reach it)                         15     751     105       6
+cascade: passed to a parameter that does not survive                                      60     481      66       4
+sig: method matching an interface method (binder: exact parameter types)                   4     131      32       2
+sig: exported method (reflection reach)                                                   23     144      12       4
+sig: the callee of a defer/go statement (lowered into golib's generic defer: CS0306)       2     103       0       0
 use: argument of a generic function (type argument)                                        3      44       0       1
 use: converted to an interface (box)                                                       4      33       0       0
 use: captured by a closure                                                                 1       0      30       0
@@ -234,145 +251,277 @@ use: stored in a composite literal                                              
 use: other                                                                                 2       7       0       0
 use: passed in a ...string tail                                                            1       1       0       0
 go: -m printed no verdict for the parameter                                                2       0       0       3
-go: the parameter's -m verdict is not noescape                                            28       0       0      49
+go: the parameter's -m verdict is not noescape                                            29       0       0      50
 
 callees by surviving noescape literal sites (top 25; fmt's unexported helpers are listed in F below)
-  fmt.Errorf                                                             lit     0  fmt-lit   920
-  fmt.Sprintf                                                            lit     0  fmt-lit   446
-  fmt.Fprintf                                                            lit     0  fmt-lit   286
-  go/types.(Checker).errorf                                              lit     0  fmt-lit   130
-  strings.HasPrefix                                                      lit   115  fmt-lit     0
-  encoding/gob.errorf                                                    lit     0  fmt-lit    64
-  strings.HasSuffix                                                      lit    48  fmt-lit     0
-  go/types.(Checker).sprintf                                             lit     0  fmt-lit    46
-  testing/fstest.(fsTester).errorf                                       lit     0  fmt-lit    46
-  go/types.(error_).addf                                                 lit     0  fmt-lit    44
-  fmt.Printf                                                             lit     0  fmt-lit    39
-  go/ast.(printer).printf                                                lit     0  fmt-lit    29
-  encoding/json.(scanner).error                                          lit    27  fmt-lit     0
-  go/types.(Checker).softErrorf                                          lit     0  fmt-lit    26
-  go/internal/gccgoimporter.(parser).errorf                              lit     0  fmt-lit    25
-  go/types.(Checker).trace                                               lit    24  fmt-lit     0
-  go/types.(Checker).verifyVersionf                                      lit     0  fmt-lit    22
-  fmt.(ss).accept                                                        lit    21  fmt-lit     0
-  go/types.(unifier).tracef                                              lit     0  fmt-lit    21
-  os.(File).checkValid                                                   lit    19  fmt-lit     0
-  net/http.http2asciiEqualFold                                           lit    18  fmt-lit     0
-  html/template.errorf                                                   lit     0  fmt-lit    14
-  text/template/parse.(lexer).errorf                                     lit     0  fmt-lit    14
-  strings.TrimPrefix                                                     lit    13  fmt-lit     0
-  internal/fuzz.(coordinator).debugLogf                                  lit     0  fmt-lit    12
+  fmt.Errorf                                                         lit     0 (hoisted     0)  fmt-lit   920
+  fmt.Sprintf                                                        lit     0 (hoisted     0)  fmt-lit   446
+  fmt.Fprintf                                                        lit     0 (hoisted     0)  fmt-lit   286
+  go/types.(Checker).errorf                                          lit     0 (hoisted     0)  fmt-lit   130
+  strings.HasPrefix                                                  lit   115 (hoisted    49)  fmt-lit     0
+  encoding/gob.errorf                                                lit     0 (hoisted     0)  fmt-lit    64
+  strings.HasSuffix                                                  lit    48 (hoisted    11)  fmt-lit     0
+  go/types.(Checker).sprintf                                         lit     0 (hoisted     0)  fmt-lit    46
+  testing/fstest.(fsTester).errorf                                   lit     0 (hoisted     0)  fmt-lit    46
+  go/types.(error_).addf                                             lit     0 (hoisted     0)  fmt-lit    44
+  fmt.Printf                                                         lit     0 (hoisted     0)  fmt-lit    39
+  go/ast.(printer).printf                                            lit     0 (hoisted     0)  fmt-lit    29
+  encoding/json.(scanner).error                                      lit    27 (hoisted    26)  fmt-lit     0
+  reflect.add                                                        lit    27 (hoisted    23)  fmt-lit     0
+  go/types.(Checker).softErrorf                                      lit     0 (hoisted     0)  fmt-lit    26
+  go/internal/gccgoimporter.(parser).errorf                          lit     0 (hoisted     0)  fmt-lit    25
+  go/types.(Checker).trace                                           lit    24 (hoisted    18)  fmt-lit     0
+  go/types.(Checker).verifyVersionf                                  lit     0 (hoisted     0)  fmt-lit    22
+  fmt.(ss).accept                                                    lit    21 (hoisted     0)  fmt-lit     0
+  go/types.(unifier).tracef                                          lit     0 (hoisted     0)  fmt-lit    21
+  os.(File).checkValid                                               lit    19 (hoisted    19)  fmt-lit     0
+  net/http.http2asciiEqualFold                                       lit    18 (hoisted    17)  fmt-lit     0
+  html/template.errorf                                               lit     0 (hoisted     0)  fmt-lit    14
+  text/template/parse.(lexer).errorf                                 lit     0 (hoisted     0)  fmt-lit    14
+  strings.TrimPrefix                                                 lit    13 (hoisted     3)  fmt-lit     0
 
-## C: cascade roots at S2 (each cascading reached parameter's culprit chain, followed to the first
-## parameter that fails for its own reason; noescape literal sites totalled by that root)
+## S3: survival, TWIN shape: the gaps closed, the @string member kept, an sstring overload added (no adapters)
+reached parameters (a noescape literal or any string(b) argument)   survive   151   fail   129
+noescape literal sites, non-format                                   survive   989   fail  1339
+  of the surviving non-format: inline today   511, Tier C-hoisted today   478 (one allocation per process)
+noescape literal sites, format position (never hoisted)              survive  2265   fail   226
+  of all surviving sites, calls that are themselves deferred (bind the @string member: no gain) 6
+PER-EVALUATION survivors (inline today, format + non-format, less deferred)         2770
+string(b) argument sites (any verdict)                               survive    14   fail    70
+format-position share of surviving literal sites                     69.6% (2265 of 3254)
+
+failing reached parameters, EVERY reason (a parameter counts once per reason)
+class                                                                                 params     lit fmt-lit    s(b)
+sig: hand-owned go2cs file (a converter change does not reach it)                         15     751     105       6
+use: captured by a closure                                                                 5     736      30       2
+cascade: passed to a parameter that does not survive                                      58     444      78       4
+use: map key (no sstring map indexer)                                                     10      59       0       3
+use: argument of a generic function (type argument)                                        4      44       0       2
+use: converted to an interface (box)                                                       6      33       0       2
+use: stored in a composite literal                                                        10       0      13      10
+use: other                                                                                 2       7       0       0
+use: passed in a ...string tail                                                            1       1       0       0
+go: -m printed no verdict for the parameter                                                2       0       0       3
+go: the parameter's -m verdict is not noescape                                            34       0       0      62
+use: argument of defer/go (captured by the lowering)                                       1       0       0       1
+use: converted to a named string type                                                      1       0       0       2
+use: returned                                                                              5       0       0      18
+use: stored in a slice, array or map element, or appended as an element                    1       0       0       1
+use: stored through a pointer                                                              1       0       0       6
+
+failing reached parameters, FIRST reason by precedence (sums to the failures)
+class                                                                                 params     lit fmt-lit    s(b)
+sig: hand-owned go2cs file (a converter change does not reach it)                         15     751     105       6
+cascade: passed to a parameter that does not survive                                      58     444      78       4
+use: map key (no sstring map indexer)                                                      9      59       0       0
+use: argument of a generic function (type argument)                                        3      44       0       1
+use: converted to an interface (box)                                                       4      33       0       0
+use: captured by a closure                                                                 1       0      30       0
+use: stored in a composite literal                                                         1       0      13       0
+use: other                                                                                 2       7       0       0
+use: passed in a ...string tail                                                            1       1       0       0
+go: -m printed no verdict for the parameter                                                2       0       0       3
+go: the parameter's -m verdict is not noescape                                            33       0       0      56
+
+callees by surviving noescape literal sites (top 25; fmt's unexported helpers are listed in F below)
+  fmt.Errorf                                                         lit     0 (hoisted     0)  fmt-lit   920
+  fmt.Sprintf                                                        lit     0 (hoisted     0)  fmt-lit   446
+  fmt.Fprintf                                                        lit     0 (hoisted     0)  fmt-lit   286
+  go/types.(Checker).errorf                                          lit     0 (hoisted     0)  fmt-lit   130
+  bytes.(Buffer).WriteString                                         lit   128 (hoisted    48)  fmt-lit     0
+  strings.HasPrefix                                                  lit   115 (hoisted    49)  fmt-lit     0
+  strings.(Builder).WriteString                                      lit    99 (hoisted    27)  fmt-lit     0
+  encoding/gob.errorf                                                lit     0 (hoisted     0)  fmt-lit    64
+  strings.Join                                                       lit    53 (hoisted     1)  fmt-lit     0
+  strings.HasSuffix                                                  lit    48 (hoisted    11)  fmt-lit     0
+  go/types.(Checker).sprintf                                         lit     0 (hoisted     0)  fmt-lit    46
+  testing/fstest.(fsTester).errorf                                   lit     0 (hoisted     0)  fmt-lit    46
+  go/types.(error_).addf                                             lit     0 (hoisted     0)  fmt-lit    44
+  fmt.Printf                                                         lit     0 (hoisted     0)  fmt-lit    39
+  internal/trace/testtrace.(errAccumulator).Errorf                   lit     0 (hoisted     0)  fmt-lit    32
+  go/ast.(printer).printf                                            lit     0 (hoisted     0)  fmt-lit    29
+  encoding/json.(scanner).error                                      lit    27 (hoisted    26)  fmt-lit     0
+  reflect.add                                                        lit    27 (hoisted    23)  fmt-lit     0
+  go/types.(Checker).softErrorf                                      lit     0 (hoisted     0)  fmt-lit    26
+  go/internal/gccgoimporter.(parser).errorf                          lit     0 (hoisted     0)  fmt-lit    25
+  go/types.(Checker).trace                                           lit    24 (hoisted    18)  fmt-lit     0
+  go/types.(Checker).verifyVersionf                                  lit     0 (hoisted     0)  fmt-lit    22
+  fmt.(ss).accept                                                    lit    21 (hoisted     0)  fmt-lit     0
+  go/types.(unifier).tracef                                          lit     0 (hoisted     0)  fmt-lit    21
+  os.(File).checkValid                                               lit    19 (hoisted    19)  fmt-lit     0
+
+## C2: cascade roots at S2 (from each cascading reached parameter, a breadth-first search over failing
+## edges in sorted order to the nearest parameter that fails for its own reason; sites totalled by that root)
      248  internal/stringslite.Index #1  <-  use: argument of a generic function (type argument)
-      74  strings.(Builder).WriteString #0  <-  sig: method matching an interface method (binder: exact parameter types); sig: exported method (reflection reach)
-      61  internal/bytealg.IndexString #0  <-  sig: no Go body (assembly or linkname)
-      24  log.(Logger).Printf #0  <-  sig: exported method (reflection reach); use: captured by a closure
-      21  bytes.(Buffer).WriteString #0  <-  sig: method matching an interface method (binder: exact parameter types); sig: exported method (reflection reach)
-      21  log.(Logger).Printf #0  <-  use: captured by a closure; sig: exported method (reflection reach)
+      74  strings.(Builder).WriteString #0  <-  sig: exported method (reflection reach); sig: method matching an interface method (binder: exact parameter types); sig: the callee of a defer/go statement (lowered into golib's generic defer: CS0306)
+      68  internal/bytealg.IndexString #0  <-  sig: no Go body (assembly or linkname)
+      45  log.(Logger).Printf #0  <-  sig: exported method (reflection reach); use: captured by a closure
+      25  runtime.throw #0  <-  sig: hand-owned go2cs file (a converter change does not reach it); use: captured by a closure
+      23  bytes.(Buffer).WriteString #0  <-  sig: exported method (reflection reach); sig: method matching an interface method (binder: exact parameter types)
       21  log.Printf #0  <-  use: captured by a closure
       14  runtime.(timer).trace1 #0  <-  use: converted to an interface (box)
       12  net/textproto.(Conn).Cmd #0  <-  sig: exported method (reflection reach)
-      11  internal/bytealg.IndexByteString #0  <-  sig: no Go body (assembly or linkname)
+       6  internal/bytealg.IndexByteString #0  <-  sig: no Go body (assembly or linkname)
        4  crypto/internal/fips140/rsa.pkcs1v15ConstructEM #1  <-  use: map key (no sstring map indexer)
        3  strings.Cut #0  <-  go: the parameter's -m verdict is not noescape
-       2  bytes.(Buffer).WriteString #0  <-  sig: exported method (reflection reach); sig: method matching an interface method (binder: exact parameter types)
-       2  syscall.UTF16PtrFromString #0  <-  sig: hand-owned go2cs file (a converter change does not reach it)
+       1  log/slog/internal/buffer.(Buffer).WriteString #0  <-  sig: exported method (reflection reach); sig: method matching an interface method (binder: exact parameter types)
+       1  os.Stat #0  <-  go: the parameter's -m verdict is not noescape
+       1  path/filepath.Ext #0  <-  go: the parameter's -m verdict is not noescape
+       1  path/filepath.matchChunk #1  <-  go: the parameter's -m verdict is not noescape; use: returned
+       0  fmt.(fmt).truncateString #0  <-  go: the parameter's -m verdict is not noescape; use: returned
+       0  regexp.extract #0  <-  go: the parameter's -m verdict is not noescape; use: returned
+       0  strings.TrimSpace #0  <-  go: the parameter's -m verdict is not noescape; use: returned
+
+## C3: cascade roots at S3 (from each cascading reached parameter, a breadth-first search over failing
+## edges in sorted order to the nearest parameter that fails for its own reason; sites totalled by that root)
+     248  internal/stringslite.Index #1  <-  use: argument of a generic function (type argument)
+      70  net/textproto.CanonicalMIMEHeaderKey #0  <-  go: the parameter's -m verdict is not noescape; use: returned
+      68  internal/bytealg.IndexString #0  <-  sig: no Go body (assembly or linkname)
+      45  log.(Logger).Printf #0  <-  use: captured by a closure
+      33  log.Printf #0  <-  use: captured by a closure
+      25  runtime.throw #0  <-  sig: hand-owned go2cs file (a converter change does not reach it); use: captured by a closure
+      14  runtime.(timer).trace1 #0  <-  use: converted to an interface (box)
+       6  internal/bytealg.IndexByteString #0  <-  sig: no Go body (assembly or linkname)
+       4  crypto/internal/fips140/rsa.pkcs1v15ConstructEM #1  <-  use: map key (no sstring map indexer)
+       3  strings.Cut #0  <-  go: the parameter's -m verdict is not noescape
+       2  time.nextStdChunk #0  <-  go: the parameter's -m verdict is not noescape; use: argument of a generic function (type argument); use: returned
        1  log/slog.appendEscapedJSONString #1  <-  use: passed to a fixed signature (func value, interface method)
        1  os.Stat #0  <-  go: the parameter's -m verdict is not noescape
        1  path/filepath.Ext #0  <-  go: the parameter's -m verdict is not noescape
        1  path/filepath.matchChunk #1  <-  go: the parameter's -m verdict is not noescape; use: returned
        0  fmt.(fmt).truncateString #0  <-  go: the parameter's -m verdict is not noescape; use: returned
+       0  regexp.extract #0  <-  go: the parameter's -m verdict is not noescape; use: returned
+       0  strings.TrimSpace #0  <-  go: the parameter's -m verdict is not noescape; use: returned
 
 ## F: fmt's unexported helpers (every string parameter, reached or not)
-  fmt.(buffer).writeString                 #0  verdict noescape    S0 false S1 true  S2 true  lit   3 fmt-lit   0  S2 reasons: 
-  fmt.(fmt).fmtBx                          #1  verdict noescape    S0 true  S1 true  S2 true  lit   0 fmt-lit   0  S2 reasons: 
-  fmt.(fmt).fmtInteger                     #4  verdict noescape    S0 true  S1 true  S2 true  lit   0 fmt-lit   0  S2 reasons: 
-  fmt.(fmt).fmtQ                           #0  verdict noescape    S0 false S1 false S2 false lit   0 fmt-lit   0  S2 reasons: cascade: passed to a parameter that does not survive
-  fmt.(fmt).fmtS                           #0  verdict noescape    S0 false S1 false S2 false lit   0 fmt-lit   0  S2 reasons: cascade: passed to a parameter that does not survive
-  fmt.(fmt).fmtSbx                         #0  verdict noescape    S0 true  S1 true  S2 true  lit   1 fmt-lit   0  S2 reasons: 
-  fmt.(fmt).fmtSbx                         #2  verdict noescape    S0 true  S1 true  S2 true  lit   0 fmt-lit   0  S2 reasons: 
-  fmt.(fmt).fmtSx                          #0  verdict noescape    S0 true  S1 true  S2 true  lit   0 fmt-lit   0  S2 reasons: 
-  fmt.(fmt).fmtSx                          #1  verdict noescape    S0 true  S1 true  S2 true  lit   0 fmt-lit   0  S2 reasons: 
-  fmt.(fmt).padString                      #0  verdict noescape    S0 false S1 true  S2 true  lit   2 fmt-lit   0  S2 reasons: 
-  fmt.(fmt).truncateString                 #0  verdict leak-result S0 false S1 false S2 false lit   0 fmt-lit   0  S2 reasons: go: the parameter's -m verdict is not noescape; use: returned
-  fmt.(pp).argNumber                       #1  verdict noescape    S0 false S1 false S2 true  lit   0 fmt-lit   0  S2 reasons: 
-  fmt.(pp).catchPanic                      #2  verdict noescape    S0 false S1 true  S2 true  lit   4 fmt-lit   0  S2 reasons: 
-  fmt.(pp).doPrintf                        #0  verdict noescape    S0 false S1 false S2 true  lit   0 fmt-lit   0  S2 reasons: 
-  fmt.(pp).fmtBytes                        #2  verdict noescape    S0 false S1 true  S2 true  lit   1 fmt-lit   0  S2 reasons: 
-  fmt.(pp).fmtString                       #0  verdict noescape    S0 false S1 false S2 false lit   0 fmt-lit   0  S2 reasons: cascade: passed to a parameter that does not survive
-  fmt.(ss).accept                          #0  verdict noescape    S0 false S1 true  S2 true  lit  21 fmt-lit   0  S2 reasons: 
-  fmt.(ss).advance                         #0  verdict noescape    S0 true  S1 true  S2 true  lit   0 fmt-lit   0  S2 reasons: 
-  fmt.(ss).consume                         #0  verdict noescape    S0 false S1 true  S2 true  lit   7 fmt-lit   0  S2 reasons: 
-  fmt.(ss).convertFloat                    #0  verdict leak-heap   S0 false S1 false S2 false lit   0 fmt-lit   0  S2 reasons: go: the parameter's -m verdict is not noescape; use: stored in a struct field
-  fmt.(ss).doScanf                         #0  verdict noescape    S0 false S1 false S2 true  lit   0 fmt-lit   0  S2 reasons: 
-  fmt.(ss).errorString                     #0  verdict leak-heap   S0 false S1 false S2 false lit   0 fmt-lit   0  S2 reasons: go: the parameter's -m verdict is not noescape
-  fmt.(ss).okVerb                          #1  verdict noescape    S0 false S1 true  S2 true  lit   3 fmt-lit   0  S2 reasons: 
-  fmt.(ss).okVerb                          #2  verdict noescape    S0 true  S1 true  S2 true  lit   6 fmt-lit   0  S2 reasons: 
-  fmt.(ss).peek                            #0  verdict noescape    S0 false S1 true  S2 true  lit   5 fmt-lit   0  S2 reasons: 
-  fmt.(ss).scanNumber                      #0  verdict noescape    S0 false S1 true  S2 true  lit   0 fmt-lit   0  S2 reasons: 
-  fmt.hasX                                 #0  verdict noescape    S0 true  S1 true  S2 true  lit   0 fmt-lit   0  S2 reasons: 
-  fmt.indexRune                            #0  verdict noescape    S0 false S1 true  S2 true  lit   0 fmt-lit   0  S2 reasons: 
-  fmt.parseArgNumber                       #0  verdict noescape    S0 false S1 false S2 true  lit   0 fmt-lit   0  S2 reasons: 
-  fmt.parsenum                             #0  verdict noescape    S0 false S1 false S2 true  lit   0 fmt-lit   0  S2 reasons: 
+  fmt.(buffer).writeString           #0  verdict noescape    S0 false S1 true  S2 true  S3 true  lit   3 (hoisted   1) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(fmt).fmtBx                    #1  verdict noescape    S0 true  S1 true  S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(fmt).fmtInteger               #4  verdict noescape    S0 true  S1 true  S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(fmt).fmtQ                     #0  verdict noescape    S0 false S1 false S2 false S3 false lit   0 (hoisted   0) fmt-lit   0  reasons S2: cascade: passed to a parameter that does not survive | S3: cascade: passed to a parameter that does not survive
+  fmt.(fmt).fmtS                     #0  verdict noescape    S0 false S1 false S2 false S3 false lit   0 (hoisted   0) fmt-lit   0  reasons S2: cascade: passed to a parameter that does not survive | S3: cascade: passed to a parameter that does not survive
+  fmt.(fmt).fmtSbx                   #0  verdict noescape    S0 true  S1 true  S2 true  S3 true  lit   1 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(fmt).fmtSbx                   #2  verdict noescape    S0 true  S1 true  S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(fmt).fmtSx                    #0  verdict noescape    S0 true  S1 true  S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(fmt).fmtSx                    #1  verdict noescape    S0 true  S1 true  S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(fmt).padString                #0  verdict noescape    S0 false S1 true  S2 true  S3 true  lit   2 (hoisted   2) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(fmt).truncateString           #0  verdict leak-result S0 false S1 false S2 false S3 false lit   0 (hoisted   0) fmt-lit   0  reasons S2: go: the parameter's -m verdict is not noescape; use: returned | S3: go: the parameter's -m verdict is not noescape; use: returned
+  fmt.(pp).argNumber                 #1  verdict noescape    S0 false S1 false S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(pp).catchPanic                #2  verdict noescape    S0 false S1 false S2 false S3 true  lit   4 (hoisted   4) fmt-lit   0  reasons S2: sig: the callee of a defer/go statement (lowered into golib's generic defer: CS0306) | S3: 
+  fmt.(pp).doPrintf                  #0  verdict noescape    S0 false S1 false S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(pp).fmtBytes                  #2  verdict noescape    S0 false S1 true  S2 true  S3 true  lit   1 (hoisted   1) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(pp).fmtString                 #0  verdict noescape    S0 false S1 false S2 false S3 false lit   0 (hoisted   0) fmt-lit   0  reasons S2: cascade: passed to a parameter that does not survive | S3: cascade: passed to a parameter that does not survive
+  fmt.(ss).accept                    #0  verdict noescape    S0 false S1 true  S2 true  S3 true  lit  21 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(ss).advance                   #0  verdict noescape    S0 true  S1 true  S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(ss).consume                   #0  verdict noescape    S0 false S1 true  S2 true  S3 true  lit   7 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(ss).convertFloat              #0  verdict leak-heap   S0 false S1 false S2 false S3 false lit   0 (hoisted   0) fmt-lit   0  reasons S2: go: the parameter's -m verdict is not noescape; use: stored in a struct field | S3: go: the parameter's -m verdict is not noescape; use: stored in a struct field
+  fmt.(ss).doScanf                   #0  verdict noescape    S0 false S1 false S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(ss).errorString               #0  verdict leak-heap   S0 false S1 false S2 false S3 false lit   0 (hoisted   0) fmt-lit   0  reasons S2: go: the parameter's -m verdict is not noescape | S3: go: the parameter's -m verdict is not noescape
+  fmt.(ss).okVerb                    #1  verdict noescape    S0 false S1 true  S2 true  S3 true  lit   3 (hoisted   2) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(ss).okVerb                    #2  verdict noescape    S0 true  S1 true  S2 true  S3 true  lit   6 (hoisted   6) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(ss).peek                      #0  verdict noescape    S0 false S1 true  S2 true  S3 true  lit   5 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.(ss).scanNumber                #0  verdict noescape    S0 false S1 true  S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.hasX                           #0  verdict noescape    S0 true  S1 true  S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.indexRune                      #0  verdict noescape    S0 false S1 true  S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.parseArgNumber                 #0  verdict noescape    S0 false S1 false S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
+  fmt.parsenum                       #0  verdict noescape    S0 false S1 false S2 true  S3 true  lit   0 (hoisted   0) fmt-lit   0  reasons S2:  | S3: 
 
-## R: the residual (production literal arguments sstring cannot reach, at S2)
-literal sites whose parameter Go says leaks (heap or result) or has no verdict                     3248
-literal sites with no parameter to retype (EXCLUDED: argument of a builtin)                         100
-literal sites with no parameter to retype (EXCLUDED: argument of a conversion)                      355
-literal sites with no parameter to retype (EXCLUDED: interface method)                               30
-literal sites with no parameter to retype (EXCLUDED: no callee declaration)                        2747
-literal sites with no parameter to retype (EXCLUDED: variadic tail)                                 249
-noescape literal sites whose parameter fails, by first reason: cascade: passed to a parameter that does not survive    522
-noescape literal sites whose parameter fails, by first reason: sig: exported method (reflection reach)    139
-noescape literal sites whose parameter fails, by first reason: sig: hand-owned go2cs file (a converter change does not reach it)    989
-noescape literal sites whose parameter fails, by first reason: sig: method matching an interface method (binder: exact parameter types)    262
-noescape literal sites whose parameter fails, by first reason: use: argument of a generic function (type argument)     44
-noescape literal sites whose parameter fails, by first reason: use: captured by a closure            30
-noescape literal sites whose parameter fails, by first reason: use: converted to an interface (box)     33
-noescape literal sites whose parameter fails, by first reason: use: map key (no sstring map indexer)     29
-noescape literal sites whose parameter fails, by first reason: use: other                             7
-noescape literal sites whose parameter fails, by first reason: use: passed in a ...string tail        1
-noescape literal sites whose parameter fails, by first reason: use: stored in a composite literal     13
-noescape literal sites whose parameter fails: boxed                                                  33
-noescape literal sites whose parameter fails: cascade (an onward parameter fails)                   522
-noescape literal sites whose parameter fails: fixed signature                                      1390
-noescape literal sites whose parameter fails: other                                                  82
-noescape literal sites whose parameter fails: stored                                                 42
+## R: the residual (production literal arguments sstring cannot reach), at S2 (flip) and S3 (twin)
+                                                                                                         S2     S3
+literal sites whose parameter Go says leaks (heap or result) or has no verdict                         3248   3248
+literal sites with no string parameter to retype (EXCLUDED: argument of a builtin)                      100    100
+literal sites with no string parameter to retype (EXCLUDED: argument of a conversion)                   355    355
+literal sites with no string parameter to retype (EXCLUDED: interface method)                            30     30
+literal sites with no string parameter to retype (EXCLUDED: no callee declaration)                     2747   2747
+literal sites with no string parameter to retype (EXCLUDED: variadic tail)                              249    249
+literal sites with no string parameter to retype (not a string parameter)                                42     42
+noescape literal sites whose parameter fails, by first reason: cascade: passed to a parameter that does not survive    547    522
+noescape literal sites whose parameter fails, by first reason: sig: exported method (reflection reach)    156      0
+noescape literal sites whose parameter fails, by first reason: sig: hand-owned go2cs file (a converter change does not reach it)    856    856
+noescape literal sites whose parameter fails, by first reason: sig: method matching an interface method (binder: exact parameter types)    163      0
+noescape literal sites whose parameter fails, by first reason: sig: the callee of a defer/go statement (lowered into golib's generic defer: CS0306)    103      0
+noescape literal sites whose parameter fails, by first reason: use: argument of a generic function (type argument)     44     44
+noescape literal sites whose parameter fails, by first reason: use: captured by a closure                30     30
+noescape literal sites whose parameter fails, by first reason: use: converted to an interface (box)      33     33
+noescape literal sites whose parameter fails, by first reason: use: map key (no sstring map indexer)     29     59
+noescape literal sites whose parameter fails, by first reason: use: other                                 7      7
+noescape literal sites whose parameter fails, by first reason: use: passed in a ...string tail            1      1
+noescape literal sites whose parameter fails, by first reason: use: stored in a composite literal        13     13
+noescape literal sites whose parameter fails: boxed                                                      33     33
+noescape literal sites whose parameter fails: cascade (an onward parameter fails)                       547    522
+noescape literal sites whose parameter fails: fixed signature                                          1278    856
+noescape literal sites whose parameter fails: other                                                      82     82
+noescape literal sites whose parameter fails: stored                                                     42     72
+noescape literal sites whose parameter survives but whose call is deferred (binds @string)                0      6
 
-## PILOT: the parameters the fmt format-position pilot flips: fmt's format-position parameters and its
-## unexported helpers that survive at S2, closed under onward passing (S0/S1/S2: which preconditions each needs)
-  fmt.(buffer).writeString                     #0  fmt/print.go:107:30                          S0 false S1 true  S2 true 
-  fmt.(fmt).fmtBx                              #1  fmt/format.go:443:31                         S0 true  S1 true  S2 true 
-  fmt.(fmt).fmtInteger                         #4  fmt/format.go:197:72                         S0 true  S1 true  S2 true 
-  fmt.(fmt).fmtSbx                             #0  fmt/format.go:372:22                         S0 true  S1 true  S2 true 
-  fmt.(fmt).fmtSbx                             #2  fmt/format.go:372:42                         S0 true  S1 true  S2 true 
-  fmt.(fmt).fmtSx                              #0  fmt/format.go:438:21                         S0 true  S1 true  S2 true 
-  fmt.(fmt).fmtSx                              #1  fmt/format.go:438:24                         S0 true  S1 true  S2 true 
-  fmt.(fmt).padString                          #0  fmt/format.go:111:25                         S0 false S1 true  S2 true 
-  fmt.(pp).argNumber                           #1  fmt/print.go:994:36                          S0 false S1 false S2 true 
-  fmt.(pp).catchPanic                          #2  fmt/print.go:587:45                          S0 false S1 true  S2 true 
-  fmt.(pp).doPrintf                            #0  fmt/print.go:1019:23                         S0 false S1 false S2 true 
-  fmt.(pp).fmtBytes                            #2  fmt/print.go:509:44                          S0 false S1 true  S2 true 
-  fmt.(ss).accept                              #0  fmt/scan.go:515:21                           S0 false S1 true  S2 true 
-  fmt.(ss).advance                             #0  fmt/scan.go:1100:22                          S0 true  S1 true  S2 true 
-  fmt.(ss).consume                             #0  fmt/scan.go:479:22                           S0 false S1 true  S2 true 
-  fmt.(ss).doScanf                             #0  fmt/scan.go:1181:22                          S0 false S1 false S2 true 
-  fmt.(ss).okVerb                              #1  fmt/scan.go:520:32                           S0 false S1 true  S2 true 
-  fmt.(ss).okVerb                              #2  fmt/scan.go:520:41                           S0 true  S1 true  S2 true 
-  fmt.(ss).peek                                #0  fmt/scan.go:497:19                           S0 false S1 true  S2 true 
-  fmt.(ss).scanNumber                          #0  fmt/scan.go:588:25                           S0 false S1 true  S2 true 
-  fmt.Appendf                                  #1  fmt/print.go:247:24                          S0 false S1 false S2 true 
-  fmt.Errorf                                   #0  fmt/errors.go:22:13                          S0 false S1 false S2 true 
-  fmt.Fprintf                                  #1  fmt/print.go:222:27                          S0 false S1 false S2 true 
-  fmt.Fscanf                                   #1  fmt/scan.go:141:26                           S0 false S1 false S2 true 
-  fmt.Printf                                   #0  fmt/print.go:232:13                          S0 false S1 false S2 true 
-  fmt.Sprintf                                  #0  fmt/print.go:237:14                          S0 false S1 false S2 true 
-  fmt.Sscanf                                   #1  fmt/scan.go:113:25                           S0 false S1 false S2 true 
-  fmt.hasX                                     #0  fmt/scan.go:764:11                           S0 true  S1 true  S2 true 
-  fmt.indexRune                                #0  fmt/scan.go:468:16                           S0 false S1 true  S2 true 
-  fmt.parseArgNumber                           #0  fmt/print.go:972:21                          S0 false S1 false S2 true 
-  fmt.parsenum                                 #0  fmt/print.go:357:15                          S0 false S1 false S2 true 
-  unicode/utf8.DecodeRuneInString              #0  unicode/utf8/utf8.go:205:25                  S0 true  S1 true  S2 true 
-  unicode/utf8.RuneCountInString               #0  unicode/utf8/utf8.go:427:24                  S0 false S1 true  S2 true 
+## PILOT2: the fmt format-position pilot at S2 (flip): fmt's format-position parameters and its
+## unexported helpers that survive, closed under onward passing
+  32 parameters
+  fmt.(buffer).writeString                     #0  fmt/print.go:107:30                          S0 false S1 true  S2 true  S3 true 
+  fmt.(fmt).fmtBx                              #1  fmt/format.go:443:31                         S0 true  S1 true  S2 true  S3 true 
+  fmt.(fmt).fmtInteger                         #4  fmt/format.go:197:72                         S0 true  S1 true  S2 true  S3 true 
+  fmt.(fmt).fmtSbx                             #0  fmt/format.go:372:22                         S0 true  S1 true  S2 true  S3 true 
+  fmt.(fmt).fmtSbx                             #2  fmt/format.go:372:42                         S0 true  S1 true  S2 true  S3 true 
+  fmt.(fmt).fmtSx                              #0  fmt/format.go:438:21                         S0 true  S1 true  S2 true  S3 true 
+  fmt.(fmt).fmtSx                              #1  fmt/format.go:438:24                         S0 true  S1 true  S2 true  S3 true 
+  fmt.(fmt).padString                          #0  fmt/format.go:111:25                         S0 false S1 true  S2 true  S3 true 
+  fmt.(pp).argNumber                           #1  fmt/print.go:994:36                          S0 false S1 false S2 true  S3 true 
+  fmt.(pp).doPrintf                            #0  fmt/print.go:1019:23                         S0 false S1 false S2 true  S3 true 
+  fmt.(pp).fmtBytes                            #2  fmt/print.go:509:44                          S0 false S1 true  S2 true  S3 true 
+  fmt.(ss).accept                              #0  fmt/scan.go:515:21                           S0 false S1 true  S2 true  S3 true 
+  fmt.(ss).advance                             #0  fmt/scan.go:1100:22                          S0 true  S1 true  S2 true  S3 true 
+  fmt.(ss).consume                             #0  fmt/scan.go:479:22                           S0 false S1 true  S2 true  S3 true 
+  fmt.(ss).doScanf                             #0  fmt/scan.go:1181:22                          S0 false S1 false S2 true  S3 true 
+  fmt.(ss).okVerb                              #1  fmt/scan.go:520:32                           S0 false S1 true  S2 true  S3 true 
+  fmt.(ss).okVerb                              #2  fmt/scan.go:520:41                           S0 true  S1 true  S2 true  S3 true 
+  fmt.(ss).peek                                #0  fmt/scan.go:497:19                           S0 false S1 true  S2 true  S3 true 
+  fmt.(ss).scanNumber                          #0  fmt/scan.go:588:25                           S0 false S1 true  S2 true  S3 true 
+  fmt.Appendf                                  #1  fmt/print.go:247:24                          S0 false S1 false S2 true  S3 true 
+  fmt.Errorf                                   #0  fmt/errors.go:22:13                          S0 false S1 false S2 true  S3 true 
+  fmt.Fprintf                                  #1  fmt/print.go:222:27                          S0 false S1 false S2 true  S3 true 
+  fmt.Fscanf                                   #1  fmt/scan.go:141:26                           S0 false S1 false S2 true  S3 true 
+  fmt.Printf                                   #0  fmt/print.go:232:13                          S0 false S1 false S2 true  S3 true 
+  fmt.Sprintf                                  #0  fmt/print.go:237:14                          S0 false S1 false S2 true  S3 true 
+  fmt.Sscanf                                   #1  fmt/scan.go:113:25                           S0 false S1 false S2 true  S3 true 
+  fmt.hasX                                     #0  fmt/scan.go:764:11                           S0 true  S1 true  S2 true  S3 true 
+  fmt.indexRune                                #0  fmt/scan.go:468:16                           S0 false S1 true  S2 true  S3 true 
+  fmt.parseArgNumber                           #0  fmt/print.go:972:21                          S0 false S1 false S2 true  S3 true 
+  fmt.parsenum                                 #0  fmt/print.go:357:15                          S0 false S1 false S2 true  S3 true 
+  unicode/utf8.DecodeRuneInString              #0  unicode/utf8/utf8.go:205:25                  S0 true  S1 true  S2 true  S3 true 
+  unicode/utf8.RuneCountInString               #0  unicode/utf8/utf8.go:427:24                  S0 false S1 true  S2 true  S3 true 
+
+## PILOT3: the fmt format-position pilot at S3 (twin): fmt's format-position parameters and its
+## unexported helpers that survive, closed under onward passing
+  33 parameters
+  fmt.(buffer).writeString                     #0  fmt/print.go:107:30                          S0 false S1 true  S2 true  S3 true 
+  fmt.(fmt).fmtBx                              #1  fmt/format.go:443:31                         S0 true  S1 true  S2 true  S3 true 
+  fmt.(fmt).fmtInteger                         #4  fmt/format.go:197:72                         S0 true  S1 true  S2 true  S3 true 
+  fmt.(fmt).fmtSbx                             #0  fmt/format.go:372:22                         S0 true  S1 true  S2 true  S3 true 
+  fmt.(fmt).fmtSbx                             #2  fmt/format.go:372:42                         S0 true  S1 true  S2 true  S3 true 
+  fmt.(fmt).fmtSx                              #0  fmt/format.go:438:21                         S0 true  S1 true  S2 true  S3 true 
+  fmt.(fmt).fmtSx                              #1  fmt/format.go:438:24                         S0 true  S1 true  S2 true  S3 true 
+  fmt.(fmt).padString                          #0  fmt/format.go:111:25                         S0 false S1 true  S2 true  S3 true 
+  fmt.(pp).argNumber                           #1  fmt/print.go:994:36                          S0 false S1 false S2 true  S3 true 
+  fmt.(pp).catchPanic                          #2  fmt/print.go:587:45                          S0 false S1 false S2 false S3 true 
+  fmt.(pp).doPrintf                            #0  fmt/print.go:1019:23                         S0 false S1 false S2 true  S3 true 
+  fmt.(pp).fmtBytes                            #2  fmt/print.go:509:44                          S0 false S1 true  S2 true  S3 true 
+  fmt.(ss).accept                              #0  fmt/scan.go:515:21                           S0 false S1 true  S2 true  S3 true 
+  fmt.(ss).advance                             #0  fmt/scan.go:1100:22                          S0 true  S1 true  S2 true  S3 true 
+  fmt.(ss).consume                             #0  fmt/scan.go:479:22                           S0 false S1 true  S2 true  S3 true 
+  fmt.(ss).doScanf                             #0  fmt/scan.go:1181:22                          S0 false S1 false S2 true  S3 true 
+  fmt.(ss).okVerb                              #1  fmt/scan.go:520:32                           S0 false S1 true  S2 true  S3 true 
+  fmt.(ss).okVerb                              #2  fmt/scan.go:520:41                           S0 true  S1 true  S2 true  S3 true 
+  fmt.(ss).peek                                #0  fmt/scan.go:497:19                           S0 false S1 true  S2 true  S3 true 
+  fmt.(ss).scanNumber                          #0  fmt/scan.go:588:25                           S0 false S1 true  S2 true  S3 true 
+  fmt.Appendf                                  #1  fmt/print.go:247:24                          S0 false S1 false S2 true  S3 true 
+  fmt.Errorf                                   #0  fmt/errors.go:22:13                          S0 false S1 false S2 true  S3 true 
+  fmt.Fprintf                                  #1  fmt/print.go:222:27                          S0 false S1 false S2 true  S3 true 
+  fmt.Fscanf                                   #1  fmt/scan.go:141:26                           S0 false S1 false S2 true  S3 true 
+  fmt.Printf                                   #0  fmt/print.go:232:13                          S0 false S1 false S2 true  S3 true 
+  fmt.Sprintf                                  #0  fmt/print.go:237:14                          S0 false S1 false S2 true  S3 true 
+  fmt.Sscanf                                   #1  fmt/scan.go:113:25                           S0 false S1 false S2 true  S3 true 
+  fmt.hasX                                     #0  fmt/scan.go:764:11                           S0 true  S1 true  S2 true  S3 true 
+  fmt.indexRune                                #0  fmt/scan.go:468:16                           S0 false S1 true  S2 true  S3 true 
+  fmt.parseArgNumber                           #0  fmt/print.go:972:21                          S0 false S1 false S2 true  S3 true 
+  fmt.parsenum                                 #0  fmt/print.go:357:15                          S0 false S1 false S2 true  S3 true 
+  unicode/utf8.DecodeRuneInString              #0  unicode/utf8/utf8.go:205:25                  S0 true  S1 true  S2 true  S3 true 
+  unicode/utf8.RuneCountInString               #0  unicode/utf8/utf8.go:427:24                  S0 false S1 true  S2 true  S3 true 

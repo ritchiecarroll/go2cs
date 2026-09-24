@@ -11,6 +11,118 @@ built or run on .NET. The predicates and controls are in [`README.md`](README.md
 It is recorded here rather than as a design block because C1's §8.4 is appended at the same place in the
 design, on another branch. COORD places the block.
 
+## Amendment, 2026-09-24 (r2): COORD's verification fixes, the twin shape, and the per-evaluation column
+
+**Input.** COORD's verification (`claude/coord-handover`,
+`docs/phase4/reviews/o1-survival-census-verification-2026-09-24.md`) reproduced every Windows headline of
+the first commit (`3b53fec4f2`) and asked for six fixes. The owner has ruled that exported signatures may
+flip (ledger "OWNER RULING · 3b53fec4f2"). COORD ruled the pilot's shape: the `sstring` TWIN preferred,
+the flip with adapters as fallback. **Everything below this block is the first commit's text; this block
+supersedes its figures.**
+
+**The fixes, each applied and controlled** (predicates in the README):
+1. **The defer/go callee class.** A function called as a `defer`/`go` statement's call is lowered into
+   golib's generic defer. It fires on 5 parameters in the TSV. Two of them carry noescape literal sites:
+   - `fmt.(pp).catchPanic` #2 (4 sites);
+   - `strings.(Builder).WriteString` #0 (99 sites; `defer b.WriteString(")")` at regexp/syntax/regexp.go:254).
+   The flip pilot is now **32 on windows**, as COORD predicted.
+2. **Determinism.**
+   - The fixed point runs in sorted order.
+   - A culprit is read from the final state, as the first failing edge in sorted order.
+   - Cascade roots are found by a breadth-first search to the nearest parameter that fails for its own
+     reason. Following the culprit chain alone could loop inside a cycle of cascading parameters: one
+     root printed no reason until this change.
+   - Three Windows runs are byte-identical.
+3. **The hand-own predicate at function level:**
+   - a whole-file hand-own is an attribute LINE in either spelling the corpus uses:
+     `[module: GoManualConversion]` (26 files) and `[module: go.GoManualConversion]` (140 files);
+   - otherwise only the function the converter's placeholder names is hand-owned.
+   - A first attempt missed the `go.` spelling. The Tier C control below caught it: 10 runtime/mfinal.go
+     sites predicted hoisted had no field.
+4. **CGO pinned to 0,** the corpus's own setting. The linux `-m` is rebuilt at 0 (the first commit's
+   linux column was cgo ON). linux P + T = 2,297 + 2,482 + 18 = **4,797**, COORD's figure.
+5. **The per-evaluation column.**
+   - Tier C's own site predicate is applied to every non-format site, copied from
+     hoistedLiteralOperations.go and convBasicLit.go.
+   - Checked against the emitted corpus: 1,379 / 1,360 / 1,358 predicted-hoisted sites, and every one
+     finds a field with its bytes in its package. 0 misses on every GOOS.
+6. **Corrections:**
+   - "Errorf 920, Sprintf 446, Fprintf 286, Printf 39" sum to **1,691**, not 1,694. The announcement was
+     wrong; §3 below, with Appendf and Sscanf, is right.
+   - "4 functions with a production value site" counted SITES. The adapter line now counts per function
+     (below).
+   - The residual gains the 42 literal arguments bound to a non-string parameter.
+
+**A population correction the fixes exposed.** go test's generated test mains (packages `<path>.test`,
+build-cache files) were read as production. Their `exitCode` literals are now set aside under the T rows:
+- windows: J 2,344 = P 2,328 + T 16;
+- linux: 18 set aside;
+- darwin: 17 set aside.
+So the production population is **4,819** on windows (2,328 + 2,491 format position), 4,779 on linux and
+4,786 on darwin.
+
+The same test mains also inflated R2 (§4 below).
+- They carry go test's tables of test names, and those were read as production composite literals.
+- The first commit's "about 20,000" stored, returned and assigned occurrences (19,995), which COORD's
+  reproduction inherited, falls to **10,552** on windows. 9,443 were test-main literals.
+- Import paths fall by 1,105 for the same reason.
+
+**The answer, revised** (CGO_ENABLED=0; per-evaluation = sites that are inline today, so format position
+plus inline non-format):
+
+| surviving noescape literal sites | windows | linux | darwin |
+|:--|--:|--:|--:|
+| S0 today: total (format), **per evaluation** | 542 (81), **264** | 541 (81), **261** | 540 (81), **261** |
+| S1 gaps closed: total (format), **per evaluation** | 599 (81), **315** | 598 (81), **312** | 597 (81), **312** |
+| **S2 FLIP** + adapters: total (format), **per evaluation** | 2,837 (2,233), **2,504** | 2,826 (2,224), **2,491** | 2,832 (2,231), **2,498** |
+| **S3 TWIN**: total (format), **per evaluation** (less deferred calls) | 3,254 (2,265), **2,770** | 3,242 (2,256), **2,755** | 3,248 (2,263), **2,762** |
+| `string(b)` sites surviving S0 / S1 / S2 / S3 | 0 / 4 / 14 / 14 | 0 / 4 / 14 / 14 | 0 / 4 / 14 / 14 |
+| fmt pilot parameters, flip / twin | **32** / 33 | 30 / 31 | 30 / 31 |
+
+- **The per-evaluation value is fmt's format path.** At S2 on windows, 2,504 sites are inline today: all
+  2,233 format sites and 271 non-format ones. The other 333 surviving non-format sites are already hoisted
+  by Tier C and allocate once per process. That matches COORD's "about 2,233 plus about 230".
+- **The twin reaches more than the flip, and needs no adapter.** S3 adds 417 sites over S2 (266
+  per-evaluation) because it lifts every signature class but hand-owns:
+  - the binder and reflection: 163 + 156 sites at S2;
+  - the defer/go callees: 103;
+  - the value uses that the flip covers only with adapters.
+  At the flip, adapters are needed by 30 surviving parameters in 29 functions, at 42 value sites; 9 of
+  those functions have a production value site (13 sites). The twin needs none of them.
+- **The twin's new top callees are the WriteString pair:** `bytes.(Buffer).WriteString` 128 sites (48
+  hoisted) and `strings.(Builder).WriteString` 99 (27 hoisted). The twin keeps the `@string` member for
+  `io.StringWriter`, which is COORD's open question about the static adapters.
+- **Six surviving S3 sites are calls that are themselves deferred.** They bind the `@string` member and
+  gain nothing, so they are subtracted. That includes `catchPanic`'s 4, so its place in the twin pilot (33)
+  buys nothing; **32 of the 33 are useful.**
+- **What still fails at S3** (windows, first reason, 1,565 sites):
+  - hand-owned: 856 (`runtime.throw` 726, `testing.(common).Errorf` 77, …);
+  - cascade: 522;
+  - map key: 59;
+  - generic argument: 44;
+  - box: 33;
+  - closure: 30;
+  - composite: 13;
+  - other: 7;
+  - `...string`: 1.
+- **Cascade roots at S3:**
+  - `stringslite.Index` (generic Rabin-Karp): 248;
+  - `net/textproto.CanonicalMIMEHeaderKey` (leaks to its result): 70;
+  - `bytealg.IndexString` + `IndexByteString` (no Go body): 68 + 6;
+  - `log.(Logger).Printf` and `log.Printf` (closure): 45 + 33;
+  - `runtime.throw`: 25;
+  - `runtime.(timer).trace1` (box): 14.
+- **The residual** (sites with no survivor, windows; S2 / S3):
+  - Go says the parameter leaks, or has no verdict: 3,248;
+  - no string parameter to retype: 3,523 (the first commit's 3,481, plus the 42 non-string parameters);
+  - a noescape parameter that fails: 1,982 / 1,565;
+  - literals outside calls that are stored, returned or assigned: **10,552 occurrences** (8,672 composite
+    elements, 1,182 returned, 586 assigned, 112 map keys).
+- **Not re-run:** `c2-escape-join`'s linux column in the design was also produced at cgo ON. SUGGEST: rerun
+  it at 0 before any figure from it is re-quoted.
+
+*(The first commit's text follows. Its figures are superseded by the amendment above.)*
+
 ## 1. The answer
 
 The population is the production literal arguments that Go keeps off the heap: a noescape string

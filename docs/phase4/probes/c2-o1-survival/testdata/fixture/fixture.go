@@ -43,7 +43,8 @@ func storeElem(s string) int                    { var a [2]string; a[0] = s; ret
 func storeComposite(s string) int               { t := T{f: s}; return len(t.f) }
 func storeGlobal(s string)                      { global = s }
 func captures(s string) int                     { f := func() int { return len(s) }; return f() }
-func deferred(s string)                         { defer safeLen(s) }
+func deferred(s string)                         { defer deferSink(s) }
+func deferSink(s string)                        { _ = len(s) }
 func mapKey(s string, m map[string]int) int     { return m[s] }
 func returns(s string) string                   { return s }
 func addr(s string) int                         { p := &s; return len(*p) }
@@ -104,3 +105,19 @@ func one(f, g func(string)) int { f("a"); g("a"); return 1 }
 func testOnly(s string) int { return len(s) }
 
 func CallsTestOnly() int { return testOnly("a") }
+
+// ---- the Tier C hoist predicate: hoistSink is reached seven times, and only the first site hoists ----
+
+func hoistSink(s string) int { return len(s) }
+
+func Hoists() int {
+	return hoistSink("abcdef") + // hoisted: a non-degenerate literal, directly an argument, in a function
+		hoistSink("ab") + // inline: a degenerate slug
+		hoistSink(("abcdef")) + // inline: parenthesised, so the immediate parent is not the call
+		hoistSink("\xff\xfeabc") + // inline: the byte-array path
+		hoistSink("") // inline: empty
+}
+
+func init() { _ = hoistSink("ghijkl") } // inline: func init
+
+var _ = hoistSink("mnopqr") // inline: a package-level initializer, not a function
