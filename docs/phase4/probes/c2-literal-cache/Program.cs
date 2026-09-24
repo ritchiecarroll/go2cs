@@ -52,6 +52,7 @@ static class Program
         if (Environment.GetCommandLineArgs().Contains("--round2")) { Round2.Run(); return; }
         if (Environment.GetCommandLineArgs().Contains("--eviction")) { Round2.RunEvictionOnly(); return; }
         if (Environment.GetCommandLineArgs().Contains("--regcost")) { RegCost(); return; }
+        if (Environment.GetCommandLineArgs().Contains("--stress10")) { Round3.Stress(); return; }
         if (Environment.GetCommandLineArgs().Contains("--tail")) goto tail;
         if (Environment.GetCommandLineArgs().Contains("--refined"))
         {

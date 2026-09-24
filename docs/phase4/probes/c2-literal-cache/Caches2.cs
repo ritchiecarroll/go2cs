@@ -96,16 +96,24 @@ static class Lit2
     // stack memory, never inside the module image -- can never match. Entries are built at
     // registration and never change, so reads take no lock; a registration from a later module
     // publishes a new table, the one write.
-    sealed class Table(nint[] keys, int[] lengths, byte[]?[] values)
+    // Round 3 (§8.1R2): the table GROWS. It starts small, doubles past a quarter full (C2_TABLE_LOAD=2: half), and publishes the grown
+    // table with one volatile store; a reader holding the old table still sees a consistent (older)
+    // index, because a replaced table is never written again. Inserts into the live table write the
+    // length and value before the key (release), and readers read the key first (acquire).
+    sealed class Table(int size)
     {
-        public readonly nint[] Keys = keys;
-        public readonly int[] Lengths = lengths;
-        public readonly byte[]?[] Values = values;
+        public readonly nint[] Keys = new nint[size];
+        public readonly int[] Lengths = new int[size];
+        public readonly byte[]?[] Values = new byte[]?[size];
+        public int Count;
     }
 
-    static Table s_table = new(new nint[1 << 16], new int[1 << 16], new byte[]?[1 << 16]);
+    static Table s_table = new(1 << 4);
     static readonly object s_registerLock = new();
     public static int Registered;
+    public static int Grown;
+    // The load factor, one axis: C2_TABLE_LOAD=2 grows past half full; the default grows past a quarter.
+    public static readonly int LoadDenominator = Environment.GetEnvironmentVariable("C2_TABLE_LOAD") == "2" ? 2 : 4;
 
     static unsafe nint Addr(ReadOnlySpan<byte> s) => (nint)Unsafe.AsPointer(ref MemoryMarshal.GetReference(s));
 
@@ -116,6 +124,32 @@ static class Lit2
         return (int)(h >> 40) & mask;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static int Find(Table t, nint key, int length)
+    {
+        int mask = t.Keys.Length - 1;
+        for (int i = Slot(key, mask); ; i = (i + 1) & mask)
+        {
+            nint k = Volatile.Read(ref t.Keys[i]);
+            if (k == key && t.Lengths[i] == length) return i;
+            if (k == 0) return -1;
+        }
+    }
+
+    static void Insert(Table t, nint key, int length, byte[] value)
+    {
+        int mask = t.Keys.Length - 1;
+        for (int i = Slot(key, mask); ; i = (i + 1) & mask)
+        {
+            if (t.Keys[i] != 0) continue;
+            t.Lengths[i] = length;
+            t.Values[i] = value;
+            Volatile.Write(ref t.Keys[i], key);
+            t.Count++;
+            return;
+        }
+    }
+
     // Eager: the @string backing is built at registration, so a hit is a lookup and nothing else.
     public static void Register(ReadOnlySpan<byte> literal)
     {
@@ -124,19 +158,21 @@ static class Lit2
         {
             Table t = s_table;
             nint key = Addr(literal);
-            int mask = t.Keys.Length - 1;
-            for (int i = Slot(key, mask); ; i = (i + 1) & mask)
+            if (Find(t, key, literal.Length) >= 0) return; // deduplicated by Roslyn: already registered
+            if ((t.Count + 1) * LoadDenominator > t.Keys.Length) // grow past 1/LoadDenominator full
             {
-                if (t.Keys[i] == key && t.Lengths[i] == literal.Length) return; // deduplicated by Roslyn: already registered
-                if (t.Keys[i] == 0)
-                {
-                    t.Lengths[i] = literal.Length;
-                    t.Values[i] = literal.ToArray();
-                    Volatile.Write(ref t.Keys[i], key);
-                    Registered++;
-                    return;
-                }
+                var grown = new Table(t.Keys.Length * 2);
+                for (int i = 0; i < t.Keys.Length; i++)
+                    if (t.Keys[i] != 0) Insert(grown, t.Keys[i], t.Lengths[i], t.Values[i]!);
+                Insert(grown, key, literal.Length, literal.ToArray());
+                Volatile.Write(ref s_table, grown);
+                Grown++;
             }
+            else
+            {
+                Insert(t, key, literal.Length, literal.ToArray());
+            }
+            Registered++;
         }
     }
 
@@ -144,13 +180,7 @@ static class Lit2
     {
         if (s.Length == 0) return new @string(Array.Empty<byte>());
         Table t = Volatile.Read(ref s_table);
-        nint key = Addr(s);
-        int mask = t.Keys.Length - 1;
-        for (int i = Slot(key, mask); ; i = (i + 1) & mask)
-        {
-            nint k = Volatile.Read(ref t.Keys[i]);
-            if (k == key && t.Lengths[i] == s.Length) return new @string(t.Values[i]);
-            if (k == 0) return new @string(s); // not a registered literal: today's copy, exactly
-        }
+        int i = Find(t, Addr(s), s.Length);
+        return i >= 0 ? new @string(t.Values[i]) : new @string(s); // a miss is today's copy, exactly
     }
 }

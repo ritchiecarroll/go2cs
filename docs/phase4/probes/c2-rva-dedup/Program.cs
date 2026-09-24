@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // "abc"u8 hands out the SAME address? The module-init registration table depends on it.
 static unsafe class Program
 {
-    static nint Addr(ReadOnlySpan<byte> s) => (nint)Unsafe.AsPointer(ref MemoryMarshal.GetReference(s));
+    internal static nint Addr(ReadOnlySpan<byte> s) => (nint)Unsafe.AsPointer(ref MemoryMarshal.GetReference(s));
 
     [MethodImpl(MethodImplOptions.NoInlining)] static nint SiteA() => Addr("abc"u8);
     [MethodImpl(MethodImplOptions.NoInlining)] static nint SiteB() => Addr("abc"u8);
@@ -26,6 +26,8 @@ static unsafe class Program
         Console.WriteLine($"n    E==F {SiteE() == SiteF()}");
         Console.WriteLine($"32B  G==H {SiteG() == SiteH()}");
         Console.WriteLine($"stable across calls {SiteA() == SiteA()}");
+        Console.WriteLine($"other file  abc {SiteA() == OtherFile.Abc()}  n {SiteE() == OtherFile.N()}");
+        Console.WriteLine($"build: {(typeof(Program).Assembly.GetCustomAttributes(typeof(System.Diagnostics.DebuggableAttribute), false).Length > 0 && ((System.Diagnostics.DebuggableAttribute)typeof(Program).Assembly.GetCustomAttributes(typeof(System.Diagnostics.DebuggableAttribute), false)[0]).IsJITOptimizerDisabled ? "Debug (optimizer off)" : "optimized")}  runtime {Environment.Version}");
         Console.WriteLine($"addresses A={SiteA():x} E={SiteE():x} G={SiteG():x}");
     }
 }

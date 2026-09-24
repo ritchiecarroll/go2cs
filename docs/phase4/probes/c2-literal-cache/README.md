@@ -92,3 +92,15 @@ Captured output: [`output-round2-linux.txt`](output-round2-linux.txt).
 store identical u8 literal data ONCE per module, so that every `"n"u8` hands out the same address? Its
 output under JIT and NativeAOT is at the end of `output-round2-linux.txt`. The printed addresses differ per
 run (ASLR); the equalities are the result.
+
+## Round 3 (2026-09-24, §8.1R2)
+
+- **`V10` now grows.** It starts at 16 slots, doubles past a quarter full (`C2_TABLE_LOAD=2`: half), and
+  publishes each grown table with one volatile store. The lookup is inlined.
+- **`--stress10` (`Round3.cs`):** four writers register 50,000 keys through 13 growths while four
+  readers check every hit (equal bytes, 0 counted) and every miss (equal bytes).
+- **`../c2-rva-dedup/` gains a second source file.** It is recorded for Debug, Release and a ReadyToRun
+  publish.
+
+Captured output: [`output-round3-linux.txt`](output-round3-linux.txt). It also records the JIT inlining
+check from the start-up probe (`../c2-startup-ab/`).

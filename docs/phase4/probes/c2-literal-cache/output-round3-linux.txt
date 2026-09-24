@@ -1,0 +1,93 @@
+# c2-literal-cache round 3 -- captured output, linux-x64, shared 4-core VM, .NET 10.0.12 (2026-09-24). Local, unofficial, not a gate.
+# The growable V10 table (Caches2.cs), lookup inlined; C2_TABLE_LOAD selects the load factor. Rows from --round2, filtered to V10 and its controls.
+
+== C2_TABLE_LOAD=4 run 1
+V10 table      1 B                                                4.90 ns   0.00 counted
+V10 table      8 B                                                5.03 ns   0.00 counted
+V10 table      12 B                                               5.10 ns   0.00 counted
+V10 table      16 B                                               6.17 ns   0.00 counted
+V10 table      32 B                                               4.97 ns   0.00 counted
+V1  hoisted field (for scale)                                     1.47 ns   0.00 counted
+miss V0  today, 8 B                                              16.11 ns   1.00 counted
+miss V10 table, 8 B (never inserts)                              18.65 ns   1.00 counted
+gate V0  today, 24 B                                             17.81 ns   1.00 counted
+gate V10 table, 24 B non-literal                                 20.31 ns   1.00 counted
+   V10 table      77.3 ms
+   literal seeded into way 1 (arm literal-first): V8 counted misses 152281.0 per 1M under attack; V10 table 0.0 per 1M
+   literal seeded into way 1 (arm non-literal-first): V8 counted misses 120158.0 per 1M under attack; V10 table 0.0 per 1M
+== C2_TABLE_LOAD=4 run 2
+V10 table      1 B                                                5.20 ns   0.00 counted
+V10 table      8 B                                                5.04 ns   0.00 counted
+V10 table      12 B                                               5.06 ns   0.00 counted
+V10 table      16 B                                               6.02 ns   0.00 counted
+V10 table      32 B                                               4.86 ns   0.00 counted
+V1  hoisted field (for scale)                                     1.38 ns   0.00 counted
+miss V0  today, 8 B                                              14.42 ns   1.00 counted
+miss V10 table, 8 B (never inserts)                              17.13 ns   1.00 counted
+gate V0  today, 24 B                                             16.85 ns   1.00 counted
+gate V10 table, 24 B non-literal                                 18.52 ns   1.00 counted
+   V10 table      76.8 ms
+   literal seeded into way 1 (arm literal-first): V8 counted misses 107253.5 per 1M under attack; V10 table 0.0 per 1M
+   literal seeded into way 1 (arm non-literal-first): V8 counted misses 121948.0 per 1M under attack; V10 table 0.0 per 1M
+== C2_TABLE_LOAD=2 run 1
+V10 table      1 B                                                4.97 ns   0.00 counted
+V10 table      8 B                                                4.96 ns   0.00 counted
+V10 table      12 B                                               4.75 ns   0.00 counted
+V10 table      16 B                                               7.11 ns   0.00 counted
+V10 table      32 B                                               6.78 ns   0.00 counted
+V1  hoisted field (for scale)                                     1.70 ns   0.00 counted
+miss V0  today, 8 B                                              16.17 ns   1.00 counted
+miss V10 table, 8 B (never inserts)                              20.18 ns   1.00 counted
+gate V0  today, 24 B                                             17.89 ns   1.00 counted
+gate V10 table, 24 B non-literal                                 24.42 ns   1.00 counted
+   V10 table      80.8 ms
+   literal seeded into way 1 (arm literal-first): V8 counted misses 126873.5 per 1M under attack; V10 table 0.0 per 1M
+   literal seeded into way 1 (arm non-literal-first): V8 counted misses 128058.5 per 1M under attack; V10 table 0.0 per 1M
+== C2_TABLE_LOAD=2 run 2
+V10 table      1 B                                                5.00 ns   0.00 counted
+V10 table      8 B                                                4.87 ns   0.00 counted
+V10 table      12 B                                               4.90 ns   0.00 counted
+V10 table      16 B                                               8.49 ns   0.00 counted
+V10 table      32 B                                               8.08 ns   0.00 counted
+V1  hoisted field (for scale)                                     1.78 ns   0.00 counted
+miss V0  today, 8 B                                              16.42 ns   1.00 counted
+miss V10 table, 8 B (never inserts)                              22.48 ns   1.00 counted
+gate V0  today, 24 B                                             17.58 ns   1.00 counted
+gate V10 table, 24 B non-literal                                 24.62 ns   1.00 counted
+   V10 table      85.1 ms
+   literal seeded into way 1 (arm literal-first): V8 counted misses 112199.5 per 1M under attack; V10 table 0.0 per 1M
+   literal seeded into way 1 (arm non-literal-first): V8 counted misses 119468.0 per 1M under attack; V10 table 0.0 per 1M
+
+## --stress10 (concurrent growth), default load, two runs
+-- V10 concurrent growth (X64): 50000 registrations, 13 growths; 369274 hit lookups (0 wrong bytes, 0 counted objects); 369274 miss lookups (0 wrong bytes)
+-- V10 concurrent growth (X64): 50000 registrations, 13 growths; 388910 hit lookups (0 wrong bytes, 0 counted objects); 388910 miss lookups (0 wrong bytes)
+
+## ../c2-rva-dedup, Debug / Release / ReadyToRun publish (SDK 10.0.112)
+-- Debug
+abc  A==B True  A==Nested True  A==Generic<int> True  A==Generic<string> True
+abc vs abcd same start False   abc vs "xabc"[1..] same False
+n    E==F True
+32B  G==H True
+stable across calls True
+other file  abc True  n True
+build: Debug (optimizer off)  runtime 10.0.12
+-- Release
+abc  A==B True  A==Nested True  A==Generic<int> True  A==Generic<string> True
+abc vs abcd same start False   abc vs "xabc"[1..] same False
+n    E==F True
+32B  G==H True
+stable across calls True
+other file  abc True  n True
+build: optimized  runtime 10.0.12
+-- ReadyToRun publish
+abc  A==B True  A==Nested True  A==Generic<int> True  A==Generic<string> True
+abc vs abcd same start False   abc vs "xabc"[1..] same False
+n    E==F True
+32B  G==H True
+stable across calls True
+other file  abc True  n True
+build: optimized  runtime 10.0.12
+
+## JIT inlining check (DOTNET_TieredCompilation=0, DOTNET_JitDisasm=.cctor), the hello-world probe's main_package static constructor
+arm A: ; Total bytes of code 161
+arm B: ; Total bytes of code 283; the only call into the table: call     [go.LiteralTable:Find(go.LiteralTable+Table,nint,int):int]

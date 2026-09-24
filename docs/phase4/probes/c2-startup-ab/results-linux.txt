@@ -1,0 +1,17 @@
+# c2-startup-ab results, linux-x64, shared 4-core VM, .NET SDK 10.0.112 / runtime 10.0.12, corpus flavour GoTargetOS=linux, 2026-09-24
+# A = today; B = golib table + span operator lookup + one generated [ModuleInitializer] per closure module; Boff = B with GO2CS_LITTABLE_OFF=1 (initializers still run, Register returns at once).
+# wall ms exec->exit, 31 measured runs per arm after 3 warm-ups, arms interleaved in alternating order; load average ~1.0 at start of each program. Local and unofficial, not a gate.
+
+SuHello	tiered	median A 375.4  Boff 420.5  B 416.2	B-A +40.8 (initializers Boff-A +45.0, table B-Boff -4.2)	min A 355.4 B 395.7 (B-A +40.3)	n=31
+SuHello	tc0	median A 629.7  Boff 668.5  B 687.7	B-A +58.0 (initializers Boff-A +38.8, table B-Boff +19.2)	min A 597.0 B 635.2 (B-A +38.2)	n=31
+SuHello	r2r	median A 199.7  Boff 196.7  B 199.8	B-A +0.2 (initializers Boff-A -3.0, table B-Boff +3.1)	min A 182.5 B 187.4 (B-A +4.9)	n=31
+SuHttp	tiered	median A 1037.7  Boff 1092.8  B 1101.1	B-A +63.4 (initializers Boff-A +55.1, table B-Boff +8.3)	min A 972.0 B 1035.2 (B-A +63.2)	n=31
+SuHttp	tc0	median A 1719.5  Boff 1799.7  B 1821.8	B-A +102.3 (initializers Boff-A +80.2, table B-Boff +22.1)	min A 1622.6 B 1704.5 (B-A +81.9)	n=31
+SuHttp	r2r	median A 438.6  Boff 432.1  B 440.1	B-A +1.6 (initializers Boff-A -6.4, table B-Boff +8.0)	min A 397.0 B 401.0 (B-A +4.0)	n=31
+
+# registrations (GO2CS_LITTABLE_REPORT=1, one run each)
+hello  JIT: registered=3092 assemblies=59 registerMs=1.94 | R2R publish: registered=3088 assemblies=52 registerMs=1.06
+nethttp JIT: registered=6323 assemblies=171 registerMs=6.91 | R2R publish: registered=6319 assemblies=163 registerMs=3.14
+
+# generated literals per closure (genreg.py report): hello 3095 over 55 modules; nethttp 6325 over 168 modules (golib and unsafe skipped: hand-written)
+# largest per module (hello): runtime=1767 unicode=235 syscall=208 time=151 os=144 

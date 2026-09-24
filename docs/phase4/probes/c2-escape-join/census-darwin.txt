@@ -1,0 +1,68 @@
+m-lines=136368 param-verdicts=20804 expr-verdicts=34455 files=2851 functions-with-a-noescape-string-param=885
+J EXCLUDED literal arg, generic instantiation test                                                   1
+J EXCLUDED literal arg, interface method prod                                                        30
+J EXCLUDED literal arg, interface method test                                                        182
+J EXCLUDED literal arg, no callee declaration (func value / generic / conversion) prod               2729
+J EXCLUDED literal arg, no callee declaration (func value / generic / conversion) test               2211
+J EXCLUDED literal arg, variadic tail prod                                                           249
+J EXCLUDED literal arg, variadic tail test                                                           4323
+J literal -> string param prod: leak-heap                                                            2848
+J literal -> string param prod: leak-heap (format position)                                          65
+J literal -> string param prod: leak-result                                                          73
+J literal -> string param prod: no-verdict                                                           20
+J literal -> string param prod: noescape                                                             2314
+J literal -> string param prod: noescape (format position)                                           2489
+J literal -> string param test: leak-heap                                                            6227
+J literal -> string param test: leak-result                                                          902
+J literal -> string param test: no-verdict                                                           3121
+J literal -> string param test: no-verdict (format position)                                         24
+J literal -> string param test: noescape                                                             2066
+J literal -> string param test: noescape (format position)                                           16808
+J string PARAMETERS, prod: leak-heap                                                                 1395
+J string PARAMETERS, prod: leak-result                                                               255
+J string PARAMETERS, prod: no-verdict                                                                20
+J string PARAMETERS, prod: noescape                                                                  1066
+L degenerate literal -> @string-param prod a<=8                                                      1554
+L degenerate literal -> @string-param prod b9-16                                                     19
+L degenerate literal -> @string-param prod c17-32                                                    10
+L degenerate literal -> @string-param prod d>32                                                      13
+L degenerate literal -> @string-param test a<=8                                                      3252
+L degenerate literal -> @string-param test b9-16                                                     329
+L degenerate literal -> @string-param test c17-32                                                    118
+L degenerate literal -> @string-param test d>32                                                      208
+L degenerate literal -> any-param prod a<=8                                                          69
+L degenerate literal -> any-param test a<=8                                                          185
+L degenerate literal -> any-param test b9-16                                                         4
+L degenerate literal -> any-param test c17-32                                                        3
+L degenerate literal -> any-param test d>32                                                          5
+L degenerate literal -> other prod a<=8                                                              36
+L degenerate literal -> other test a<=8                                                              2
+L format-position literal prod a<=8                                                                  268
+L format-position literal prod b9-16                                                                 282
+L format-position literal prod c17-32                                                                845
+L format-position literal prod d>32                                                                  1202
+L format-position literal test a<=8                                                                  1286
+L format-position literal test b9-16                                                                 1846
+L format-position literal test c17-32                                                                7243
+L format-position literal test d>32                                                                  6628
+M1 m[string(b)] read prod: covered (tmpstring, convIndexExpr.go mapReadTmpStringKey)                 25
+M1 m[string(b)] read test: covered (tmpstring, convIndexExpr.go mapReadTmpStringKey)                 5
+M2 m[T{..., string(b), ...}] composite-key read test                                                 2
+R1 string(byte) prod: no-verdict                                                                     2
+R1 string(byte) prod: noescape                                                                       1
+R1 string(byte) test: no-verdict                                                                     7
+R1 string(rune/int) prod: heap                                                                       5
+R1 string(rune/int) prod: no-verdict                                                                 19
+R1 string(rune/int) prod: noescape                                                                   16
+R1 string(rune/int) test: no-verdict                                                                 105
+R4 concatenation 2 operands prod: heap                                                               525
+R4 concatenation 2 operands prod: no-verdict                                                         4
+R4 concatenation 2 operands prod: noescape                                                           54
+R4 concatenation 2 operands test: no-verdict                                                         748
+R4 concatenation >=3 operands prod: heap                                                             337
+R4 concatenation >=3 operands prod: noescape                                                         28
+R4 concatenation >=3 operands test: no-verdict                                                       380
+R5 []byte("const") prod: heap                                                                        22
+R5 []byte("const") prod: no-verdict                                                                  155
+R5 []byte("const") prod: noescape                                                                    28
+R5 []byte("const") test: no-verdict                                                                  1768
