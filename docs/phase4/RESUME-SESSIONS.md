@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 07:20 -- SAVE-STATE refresh (ledger through mailbox 3c8ddd6c78): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, master ebb4acb8cf, the Linux packaging fix RULED (three gaps, three refs, one 1.24.13.2 train; G cut SEAT 1 and the len/cap seat); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 07:27 -- SAVE-STATE refresh (ledger through mailbox fa23518a2b): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded to nuget-1.23.12.3, master ebb4acb8cf, the Linux packaging fix RULED (three gaps, three refs, one 1.24.13.2 train; G cut SEATS 1-2 and the len/cap seat; COORD reviewing seat 2); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -217,10 +217,11 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    ebb4acb8cf · THE 14 REMOVED-ID DEPRECATIONS ARE DONE").
  - OWNER DECISIONS OPEN: the string-literal tiers. C2's revision 3 is d382b60677 on claude/c2-literal-cache-draft, COORD's
    verification is on claude/coord-handover docs/phase4/reviews/literal-revision-3-verification-2026-09-24.md, and a
-   revision 4 is coming from C2. Also the RELEASE BRANCHES (git branches, NOT GitHub Releases; the repo has none besides a
-   2022 pre-release). origin release/go1.23 sits at the 2026-08-22 75% milestone 10c78227a7. COORD recommends
-   fast-forwarding it to nuget-1.23.12.3's commit (no force), and minting release/go1.24 only at the 1.25 cutover. It needs
-   the owner's yes, then announce-then-push.
+   revision 4 is coming from C2.
+ - DONE 2026-09-24 (owner-approved; ledger "ANNOUNCE · b6746ab185"): the BRANCH release/go1.23 was FAST-FORWARDED from
+   10c78227a7 (the 75% milestone, still pinned by tag stdlib-tests-75pct-2026-08-22) to b6746ab185, the commit of
+   nuget-1.23.12.3, and read back by ls-remote. No tag moved. Mint release/go1.24 at the 1.25 cutover, not before. These are
+   git branches, not GitHub Releases; the repo has none besides a 2022 pre-release.
  - EXTERNAL WAIT: the go.* NuGet ID-prefix reservation. The owner's request is pending with NuGet, so there is no owner
    decision to chase. COORD's 2026-09-22 advice (ledger "NuGet 'go.' OCCUPANCY") was a narrowed follow-up to the 30 scoped
    std-root prefixes.
@@ -307,8 +308,12 @@ boxing). CUT 2026-09-24 (ledger "RULING · 6c9aaae62e / 4378ae6cf2"), both UNMER
 - claude/g-rid-compile-asset (packaging SEAT 1, on ebb4acb8cf). DESIGN ACCEPTED. COORD's two review notes landed on top as
   commit 501b7e4c27 (the `go.` prefix-coupling comment; a PUBLISH arm; 4/4 on linux-x64 and on win-x64). OWED: the
   isolated-clone rehearsal pack, -VerifyOnly, and the census identities.
+- claude/g-stdlib-meta-goos (packaging SEAT 2, on ebb4acb8cf): the asset gains `##<name>@<goos>` flavour sections, and
+  stdLibExportedMetadata(name, goos) prefers them on the -recurse=nuget path. Its red-first arms are claimed. COORD's
+  independent review is RUNNING (worktree C:/go2cs-tmp-coord/rv-seat2 on the i7; findings go to G in one message). OWED: CNR
+  and the full converter suite.
 NEXT, post-release, from master:
-- packaging SEAT 2 (per-GOOS genstdlibmeta sections), cleared to start from ebb4acb8cf, then SEAT 3 (trampolines);
+- packaging SEAT 3 (trampoline forwards), cleared to start from ebb4acb8cf;
 - BY OWNER ORDER (ledger 93410e7ef9), UP NEXT: FIX THE LINUX PACKAGING PROBLEM. Your sizing found three gaps, and
   COORD RULED ALL THREE (ledger "RULING · ebb4acb8cf · THE LINUX PACKAGING FIX" plus its CORRECTION line): three refs from
   master, each red-first with its own gates, forming ONE 1.24.13.2 train. Order: (1) the go.lib buildTransitive
@@ -2033,3 +2038,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 07:13 -- SAVE-STATE refresh: 1c records G's two cut refs (the len/cap seat and packaging seat 1) and the orphan-retirement ruling.
 - 2026-09-24 07:17 -- SAVE-STATE refresh: 1c records packaging seat 1's review commit 501b7e4c27.
 - 2026-09-24 07:20 -- SAVE-STATE refresh: 1b records the 14 deprecations DONE and verified, the go.* prefix as an external wait, and the release-branch recommendation.
+- 2026-09-24 07:27 -- SAVE-STATE refresh: 1b records release/go1.23 fast-forwarded; 1c records packaging seat 2 and COORD's running review.
