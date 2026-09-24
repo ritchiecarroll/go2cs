@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 15:02 -- SAVE-STATE refresh (ledger through mailbox 5ed5365777): section 1b is the COORD new-session prompt: master 4c53b02a0a (the 1.24.13.2 train LANDED); NEXT the owner runs the 1.24.13.2 release (the PowerShell block given in-session), then COORD's release record, the approved cleanup, then TRAIN A (synctest + atomic pick + mustBeKind) and TRAIN B (golib strings/allocs incl. arm C and V-fix 11), plus the implicit-operator CS0121 build before the twin pilot; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 15:59 -- SAVE-STATE refresh (ledger through mailbox fd33af2701): section 1b is the COORD new-session prompt: go2cs 1.24.13.2 PUBLISHED (the record is master e06494c6f8, the index row 9a5f63041b); the owner-approved cleanup running; NEXT G's nuget.org walkthrough, then TRAIN A (synctest + atomic pick + mustBeKind; ping the owner when it lands) and TRAIN B (golib strings/allocs incl. arm C and V-fix 11), plus the implicit-operator CS0121 build before the twin pilot; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -271,12 +271,17 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    Release 842/0/14; CNR byte-identical across 730; behavioral 691/691/691 with Output 663/2/26 (the 2 also fail at master
    ebb4acb8cf on the i7: PRE-EXISTING, queued); H7 windows and linux 343/343; the owner's walkthrough GREEN on linux and
    windows. -VerifyOnly at master: releasable, next 1.24.13.2. The i7's main checkout is at 4c53b02a0a, clean.
+   1.24.13.2 IS PUBLISHED (2026-09-24 ~16:00 local; ledger "STAMP · e06494c6f8"): 344 packages on nuget.org.
+   - The record is master e06494c6f8; the tag nuget-1.24.13.2 points at 4c53b02a0a; the validation-index row is at
+     9a5f63041b.
+   - Phase 2 failed once (the Certum card's device prompt recurred per package; likely cause: Gpg4win's scdaemon, woken by
+     COORD's signed commits). It resumed with sign-nupkgs -Apply -Overwrite (344/344, one PIN), then the Phase 3 push.
+   - RELEASE-DAY RULE: no GPG signing on the release machine during Phase 2, or `disable-scdaemon` in gpg-agent.conf (the
+     owner's call). To resume a failed Phase 2: the signer with -Apply -Overwrite, then the push; NEVER re-run release-nuget.
    NEXT:
-   (1) THE OWNER RUNS THE 1.24.13.2 RELEASE, with step (c)'s procedure, at the i7 console in C:/Projects/go2cs on master
-       4c53b02a0a.
-   (2) After the publish, COORD does (d): the release record (version.props counter 2, docs/validation/1.24.13.2, the
-       retargeted READMEs), announce, push the commit and the tag nuget-1.24.13.2, spot-check nuget.org.
-   (3) Then the OWNER-APPROVED CLEANUP (below), plus the t1242 worktree.
+   (1) nuget.org indexing, then G's post-publish walkthrough against nuget.org only (WSL linux + windows).
+   (2) The OWNER-APPROVED CLEANUP is RUNNING (scratchpad cleanup-run.sh; t1242 included).
+   (3) The owner's disk install window is open once the cleanup ends.
    (4) Then the NEXT TRAINS, assembled from master 4c53b02a0a on the i7:
        - TRAIN A (runtime/reflect; the owner wants a ping when it lands): R's synctest re-entry 0b6bf15ab0, C2's atomic-loads
          commit 8ef7f65ec8 as a PICK, and R's mustBeKind 2e134cf77d. Verify that FuncLiteralCallerNames and GoroutineWaitState
@@ -2159,3 +2164,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 14:18 -- SAVE-STATE refresh: 1b/1c record C2's census r2, the i9 twin probe, and R's attribution of the two behavioral reds.
 - 2026-09-24 14:25 -- SAVE-STATE refresh: 1b/1c record the twin probe result and the pilot shape.
 - 2026-09-24 15:02 -- SAVE-STATE refresh: 1b records arm C and V-fix 11 in and the two next trains.
+- 2026-09-24 15:59 -- SAVE-STATE refresh: 1b records 1.24.13.2 PUBLISHED and the release-day lesson.
