@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 07:04 -- SAVE-STATE refresh (ledger through mailbox 0dcb24d33f): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED, master ebb4acb8cf, the Linux packaging fix RULED (three gaps, three refs, one 1.24.13.2 train); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 07:13 -- SAVE-STATE refresh (ledger through mailbox 9e241aeb7d): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED, master ebb4acb8cf, the Linux packaging fix RULED (three gaps, three refs, one 1.24.13.2 train; G cut SEAT 1 and the len/cap seat); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -293,9 +293,15 @@ claude/g-typed-nil-func-parked, claude/g-typed-nil-func-sizing, claude/g-unfreez
 The M9 sweep scratch and branch are deleted.
 DONE post-hop (all UNMERGED): claude/g-rec-b-oracle 814603bbbb (the REC-B -m oracle); claude/g-context-bprime-read da3402f3d3
 (routed to I3, sized first); claude/g-rsa-mathbig-decomp 6ab65f3409 (rsa closed to the object; math/big's bytes are len/cap
-boxing). NEXT, post-release, from master:
-- the golib seat for a constrained len<TS>/cap<TS> where TS : ISlice (ledger 52063e7b3f);
-- THEN, BY OWNER ORDER (ledger 93410e7ef9), UP NEXT: FIX THE LINUX PACKAGING PROBLEM. Your sizing found three gaps, and
+boxing). CUT 2026-09-24 (ledger "RULING · 6c9aaae62e / 4378ae6cf2"), both UNMERGED:
+- claude/g-named-slice-len (the constrained len/cap golib seat, on 38529c765a). SHAPE ACCEPTED. OWED: the behavioral output
+  verdict (run from a short root because of MAX_PATH), CNR, and, BY RULING, the orphaned math/big TestMulUnbalanced disclosure
+  retired IN THE SEAT as a second commit with the linux reading;
+- claude/g-rid-compile-asset (packaging SEAT 1, on ebb4acb8cf). DESIGN ACCEPTED. OWED: a comment coupling the `go.` literal
+  to the open package-prefix question, a publish arm, the isolated-clone rehearsal pack, -VerifyOnly, and the census identities.
+NEXT, post-release, from master:
+- packaging SEAT 2 (per-GOOS genstdlibmeta sections), cleared to start from ebb4acb8cf, then SEAT 3 (trampolines);
+- BY OWNER ORDER (ledger 93410e7ef9), UP NEXT: FIX THE LINUX PACKAGING PROBLEM. Your sizing found three gaps, and
   COORD RULED ALL THREE (ledger "RULING · ebb4acb8cf · THE LINUX PACKAGING FIX" plus its CORRECTION line): three refs from
   master, each red-first with its own gates, forming ONE 1.24.13.2 train. Order: (1) the go.lib buildTransitive
   compile-item-plus-HintPath swap to runtimes/<rid>/lib; (2) per-GOOS genstdlibmeta sections; (3) converter forwards for
@@ -2016,3 +2022,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 06:44 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 06:48 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 07:04 -- SAVE-STATE refresh: 1b/1c record the packaging-scope ruling (G: three gaps; all three as three refs in one 1.24.13.2 train) and step (c) DONE.
+- 2026-09-24 07:13 -- SAVE-STATE refresh: 1c records G's two cut refs (the len/cap seat and packaging seat 1) and the orphan-retirement ruling.
