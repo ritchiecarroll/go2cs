@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 06:32 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox fd36b35466): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 06:37 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 31e88b4153): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -187,7 +187,10 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
  - 1.24.13.1 IS PUBLISHED (2026-09-24). The owner ran release-nuget.bat from master 38529c765a; the signed tag nuget-1.24.13.1
    points at 38529c765a and is on origin. COORD committed and pushed the release record as master 3f501c7b48 (version.props
    counter 1, docs/validation/1.24.13.1 frozen with 233 files, 342 READMEs retargeted); the ledger line is d34556d2b0.
-   THE HOP IS COMPLETE. Steps (a), (b) and (c) below are DONE, and so are (d)'s first two items; resume at (d)'s third.
+   THE HOP IS COMPLETE. Steps (a), (b) and (c) are DONE. In (d), done so far: the release record; nuget.org serving 1.24.13.1
+   (all 13 deprecation alternates listed; go.strings' README links validation/1.24.13.1 and the nuget-1.24.13.1 tree); and
+   Piece 4, now on master ebb4acb8cf (ledger 31e88b4153). The owner's deprecations may run now. Still owed in (d): the
+   Windows nuget.org walkthrough smoke test, and G's WSL walkthrough followed by the platforms-note rewrite.
  - NEXT, in order:
    (c) THE OWNER'S RUN, at the i7's PHYSICAL console, in the main checkout C:/Projects/go2cs on master, fast-forwarded:
        `git status --porcelain` must be EMPTY (a stray du.exe.stackdump was untracked there; the owner deletes it). The console
@@ -1983,3 +1986,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 05:48 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 06:25 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 06:32 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
+- 2026-09-24 06:37 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
