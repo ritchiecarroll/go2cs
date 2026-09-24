@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 14:25 -- SAVE-STATE refresh (ledger through mailbox 21c76351e5): section 1b is the COORD new-session prompt: master 4c53b02a0a (the 1.24.13.2 train LANDED); NEXT the owner runs the 1.24.13.2 release, then COORD's release record, the approved cleanup and the implicit-operator CS0121 corpus build; the string-tier pilot shape RULED (the twin plus a canonical value delegate); lanes: C2 arm C then the pilot, R views+G8+G10 gating, G V-fix 11, i9 standby; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 15:02 -- SAVE-STATE refresh (ledger through mailbox 5ed5365777): section 1b is the COORD new-session prompt: master 4c53b02a0a (the 1.24.13.2 train LANDED); NEXT the owner runs the 1.24.13.2 release (the PowerShell block given in-session), then COORD's release record, the approved cleanup, then TRAIN A (synctest + atomic pick + mustBeKind) and TRAIN B (golib strings/allocs incl. arm C and V-fix 11), plus the implicit-operator CS0121 build before the twin pilot; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -277,7 +277,15 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    (2) After the publish, COORD does (d): the release record (version.props counter 2, docs/validation/1.24.13.2, the
        retargeted READMEs), announce, push the commit and the tag nuget-1.24.13.2, spot-check nuget.org.
    (3) Then the OWNER-APPROVED CLEANUP (below), plus the t1242 worktree.
-   (4) Then the next train: R's synctest re-entry + C2's atomic-loads PICK.
+   (4) Then the NEXT TRAINS, assembled from master 4c53b02a0a on the i7:
+       - TRAIN A (runtime/reflect; the owner wants a ping when it lands): R's synctest re-entry 0b6bf15ab0, C2's atomic-loads
+         commit 8ef7f65ec8 as a PICK, and R's mustBeKind 2e134cf77d. Verify that FuncLiteralCallerNames and GoroutineWaitState
+         turn green (R's attribution).
+       - TRAIN B (golib strings/allocs, owner's tier ruling): C2's REC-F 645a8e1f62, then G's V-fix 11 + guard
+         claude/g-vfix11-sstring-counted fce07d9517 (G's condition-A A/B pending); C2's REC-C §A 3c98968c5f and §B 0fcdba94d5;
+         C2's Float*bits 9ac6051e46; R's claude/r-string-views-g8-g10 (gating; not yet pushed); C2's arm C claude/c2-arm-c
+         2d068bca59, whose .NET legs are OWED BY COORD (corpus build, MSTest, the new behavioral test, the strconv member rows).
+       - BEFORE THE TWIN PILOT: the corpus-wide build under the implicit u8->sstring operator (a CS0121 census) on the i7.
  - UP NEXT, by OWNER ORDER (ledger 93410e7ef9): FIX THE LINUX PACKAGING PROBLEM. Owner G, after the in-flight len/cap
    seat. G SIZED IT (scratch prototypes on WSL against the published 1.24.13.1): it is THREE gaps. With all three hand-fixed,
    walkthrough steps 3-4 build on Linux and `dotnet run` output is byte-identical to `go run`. RULED by COORD (ledger
@@ -2150,3 +2158,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 14:11 -- SAVE-STATE refresh: 1b/1c record the 1.24.13.2 train LANDED at 4c53b02a0a and what is next.
 - 2026-09-24 14:18 -- SAVE-STATE refresh: 1b/1c record C2's census r2, the i9 twin probe, and R's attribution of the two behavioral reds.
 - 2026-09-24 14:25 -- SAVE-STATE refresh: 1b/1c record the twin probe result and the pilot shape.
+- 2026-09-24 15:02 -- SAVE-STATE refresh: 1b records arm C and V-fix 11 in and the two next trains.
