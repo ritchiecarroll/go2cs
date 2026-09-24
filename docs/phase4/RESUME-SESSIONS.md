@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-23 22:32 -- STAMP refresh (ledger through mailbox 35d9a46970): section 1a STATE DELTA 28 (THE H10 CLOSE STAMPED, version tip fa18863b94; 218/230 windows, 187/216 linux; the post-close batch and H11/H12 next). Other STATE BLOCKs untouched.
+> **Status of this revision:** 2026-09-24 02:03 -- STAMP refresh (ledger through mailbox fb1422104a): section 1a STATE DELTA 29 (post-close stamped 61724860b4; H11 running; the section-6 sweep dispatched; announcement accepted). Other STATE BLOCKs untouched.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -614,6 +614,20 @@ STATE DELTA 2026-09-23 22:32 (ledger through mailbox 35d9a46970; supersedes the 
     srcimporter cgo-ON read. C2: REC-C then REC-F on fa18863b94 (unmerged). C1: the docs seat. Everything post-hop lands AFTER the release.
   - OWNER DECISION OPEN: string-literal arms A/B vs C2's invisible golib cache (draft claude/c2-literal-cache-draft 951c916403, relayed to the owner;
     COORD's adversarial review workflow is running). The cloud-lane watch is ARMED (C1 and C2 have work out).
+STATE DELTA 2026-09-24 02:03 (ledger through mailbox fb1422104a; supersedes the deltas above where they differ) -- POST-CLOSE STAMPED; H11 running; the section-6 sweep dispatched:
+  - VERSION TIP claude/version-go1.24.13 = 61724860b4 (CP1: the post-close batch; zero footprint; the close's classes (v)/(vi) vanish; CNR empty). MASTER 074a12c4ae.
+  - OWNER RULINGS 2026-09-24: MASTER MOVES FIRST, then 1.24.13.1 is released from master; the ANNOUNCEMENT is ACCEPTED (r3 on coord-handover 77f85249fe:
+    no licensing text; a short front-page NEWS block with "218 of the 230 testable ... (94.8%)"); user-facing docs migrate to Go 1.24 (C1's
+    claude/c1-docs-go124 bc4f38ebd5, incl. the owner's three approved edits); the removed-ID deprecations run on nuget.org's form AFTER the publish.
+  - RELEASE BRIEF docs/phase4/briefs/postclose-h11-h12-brief.md: Part A DONE; PART B (H11) RUNNING on the i7 (worktree abrel), merging the
+    release-census seat claude/i7-release-census 2dc990302f at B6(3) (named identities, a committed monotonicity check, frozen-roster links, README
+    guard 2e headline-required plus the percentage). CP2 next: G's crypto/tls linux rebank 836004dd20 (4760; linux 53,048/162), RN-7 (isolated-clone
+    tag rehearsal), RN-10 prose, RN-12/13 (cutover then release from master), RN-15 (d15 gofmt re-dated post-release; c6-c9 post-hop).
+    PART C adds: C1's docs ref, the RN-5 overlay (3 platform-exclusive READMEs/csprojs from native emission), reruns R1-R5/R7/R8, the announcement.
+  - SECTION-6 SWEEP (P2) briefed at f223c19182 (SW-1..SW-19): S-R R-LAPTOP 89 rows (crypto/tls first, raised wall), S-G G-LAPTOP 126 (+net/os if G's
+    windows net re-qualifies after the owner's IPv6 unbind), S-7 the i7 after Part C. Sweep base 61724860b4. COORD merges (M) and writes the P2 line.
+  - POST-RELEASE queue: R's net/http re-entry train 0b6bf15ab0 (first); R's mustBeKind seat; C2's REC-C A/B, REC-F, Float*bits, string-literal rev 3
+    (Tier 2 registration table sound; start-up A/B owed; the owner rules after rev 3); generic type alias support; the performance rerun.
 
 STEP 0 -- THE RECORD (GitHub only; local memory is a cache). Run, in this order:
   git fetch origin claude/coord-handover claude/mailbox master claude/version-go1.24.13
@@ -1791,3 +1805,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-23 12:03 -- STAMP refresh: STATE DELTA 26 (8e + 8f stamped; net banked; crypto/tls on R).
 - 2026-09-23 18:40 -- STAMP refresh: STATE DELTA 27 (8g stamped; the close seat running; C2's pre-close repoguard seat).
 - 2026-09-23 22:32 -- STAMP refresh: STATE DELTA 28 (the H10 close stamped at fa18863b94).
+- 2026-09-24 02:03 -- STAMP refresh: STATE DELTA 29 (post-close stamped; H11 running; sweep dispatched).
