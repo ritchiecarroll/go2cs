@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 05:17 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 8d9beadbe7): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 05:24 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 3768d70d63): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -228,12 +228,23 @@ paste prompt below. Report to COORD by SendMessage (R, G) or by one inbox file o
 (C1, C2). Everything post-hop stays UNMERGED until COORD says the 1.24.13.1 release has landed.
 
 ```
-R (R-LAPTOP). Standing goal: the net/http re-entry and the post-release runtime/reflect seats. Your ref
-claude/r-synctest-reentry (S1a..S4, seven signed picks on fa18863b94) is ACCEPTED as the FIRST POST-RELEASE train; hold it
-as is. Your mustBeKind seat (hand-owned reflect: ReadOnlySpan<byte> method, converting only on panic; predicted
-encoding/binary TestAppendAllocs 75 -> 42) is post-release; its gates are the importer canaries, the full behavioral suite,
-and the reflect and encoding/binary rows. Your sweep shard S-R is COMPLETE (89/89); its evidence ref is
-claude/r-p2-sweep-evidence. First action: ls-remote your refs, then continue the mustBeKind seat from its pushed tip.
+R (R-LAPTOP). Model Opus 5.5 / high. Standing goal: the net/http re-entry and the post-release runtime/reflect seats.
+Refs:
+- claude/r-synctest-reentry 0b6bf15ab0: S1a..S4, seven signed picks on fa18863b94, ACCEPTED as the FIRST POST-RELEASE train;
+  hold it as is.
+- claude/r-reflect-mustbekind 2e134cf77d, WIP on fa18863b94: hand-owned reflect mustBeKind takes a ReadOnlySpan<byte>
+  method and converts only on panic. Its seat rows are green: encoding/binary 142 agree / 4 diverged; the 5 canaries equal
+  the roster; stdlib 344/0. Owed: the behavioral suite and reflect's base arm (the r-mbk-gates2 battery on R-LAPTOP; if
+  that output is lost, re-run them).
+- claude/r-recg-chancore-design bb69175480 (REC-G docs, accepted).
+- claude/r-p2-sweep-evidence (S-R evidence, from 61724860b4; p2-driver.ps1 excluded and named).
+Local-only housekeeping, per COORD 2026-09-24:
+- push the non-fast-forward local tips as claude/laneR-promotion-pathscope-local and claude/laneR-typearg-cache-local,
+  never forced;
+- M9 deletes p2/R-LAPTOP-20260924T0703Z and the p2s scratch after the evidence push.
+TOOLS: the Bash tool's PATH needs `export PATH=/usr/bin:/bin:$PATH` first, plus the go/dotnet pins. The sweep and gate
+scripts run under powershell.exe 5.1; check-roster-format runs under pwsh 7.
+First action: ls-remote your refs, then report the mustBeKind seat's gates.
 ```
 
 ```
@@ -1939,3 +1950,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 05:00 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 05:15 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 05:17 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
+- 2026-09-24 05:24 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
