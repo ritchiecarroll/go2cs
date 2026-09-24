@@ -1289,6 +1289,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		if linknameAlias, linknameFunc, hasLinknameForward = v.funcLinknameForward(funcDecl); !hasLinknameForward {
 			linknameAlias, linknameFunc, linknamePanic, hasLinknameForward = v.funcLinknamePush(funcDecl)
 		}
+
+		// A pure-JMP assembly trampoline (asmTrampolines.go) is the same frame-identical shape as a
+		// linkname pull, so it takes the same forwarder.
+		if !hasLinknameForward {
+			linknameAlias, linknameFunc, hasLinknameForward = v.funcAsmTrampolineForward(funcDecl)
+		}
 	}
 
 	// A nil body means the Go function is implemented externally (assembly or cgo):
@@ -2123,6 +2129,12 @@ var linknameForwardTargets = map[string]bool{
 	// Elsewhere vgetrandom_unsupported.go answers (-1, false) outright. No new project reference:
 	// internal/syscall/unix already references runtime.
 	"runtime.vgetrandom": true,
+	// syscall's prlimit, pulled by golang.org/x/sys/unix (`//go:linkname syscall_prlimit syscall.prlimit`
+	// in syscall_linux.go), which syscall authorizes with its own one-arg `//go:linkname prlimit` handle
+	// ("prlimit is accessed from x/sys/unix"). ORDINARY CONVERTED Go on the linux flavor. Without the
+	// row the pull was a throwing stub: the README walkthrough's third gap (COORD sizing 2026-09-24),
+	// alongside the asm trampolines asmTrampolines.go forwards.
+	"syscall.prlimit": true,
 }
 
 // linknameForwardDefinitions names the DEFINITION of a linknameForwardTargets row whose symbol is not
@@ -2397,6 +2409,11 @@ func (v *Visitor) linknameForwardArgName(param *types.Var, i int, dupBlank bool,
 // mismatch is bridged through `uintptr` — an integer/uintptr parameter is passed `(uintptr)p`, and
 // an integer/uintptr result is returned `(LocalType)(uintptr)r`. Non-integer params/results
 // (pointers, slices, strings) are the same golib type on both sides and pass through directly.
+//
+// That compatibility is the CALLER's precondition, never checked here. A linkname pull has it by Go's
+// own link-time contract. A pure-JMP assembly trampoline (funcAsmTrampolineForward) proves only an
+// identical FRAME, which two DIFFERENT pointer types satisfy (x/sys/unix's gettimeofday takes its own
+// *Timeval and jumps to syscall's), so that caller checks types.Identical before it reaches here.
 func (v *Visitor) writeLinknameForwarder(signature *types.Signature, alias string, targetFunc string) {
 	params := signature.Params()
 	dupBlank := hasDuplicateBlankParams(params) || bodyUsesBlankDiscard(v.currentFuncDecl)

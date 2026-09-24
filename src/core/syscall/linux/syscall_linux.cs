@@ -1204,7 +1204,7 @@ internal static error /*err*/ setrlimit(nint resource, ж<Rlimit> Ꮡrlim) {
 // Do not remove or change the type signature.
 //
 //go:linkname prlimit
-internal static error /*err*/ prlimit(nint pid, nint resource, ж<Rlimit> Ꮡnewlimit, ж<Rlimit> Ꮡold) {
+public static error /*err*/ prlimit(nint pid, nint resource, ж<Rlimit> Ꮡnewlimit, ж<Rlimit> Ꮡold) {
     error err = default!;
 
     err = prlimit1(pid, resource, Ꮡnewlimit, Ꮡold);

@@ -18936,6 +18936,30 @@ internal static any clone(any m) {
 
 `builtin.mapclone(any m)` is Go's `runtime.mapclone` at golib level: it recovers the boxed map's concrete key/value types through `IMap.CloneMap()` (a default interface method on `IMap<TKey, TValue>`, so both the concrete `map<K, V>` and the generated named-map wrappers get it with no source-generator change — no reflection) and returns a fresh `map<K, V>` populated from the source's entries. The clone's backing `Dictionary` is **independent** — Go's shallow clone (keys/values copied by ordinary assignment), so mutating the clone never touches the original — and a nil map clones to nil. This is what carries the `maps` package to full Phase-4 validation (14/14 tests vs `go test`; the 6 Clone/Copy/DeleteFunc tests previously threw). Extend `linknameForwardBuiltins` when another linkname intrinsic gains a golib builtin. Guarded by the `MapCloneLinkname` behavioral test — the exact `//go:linkname clone maps.clone` shape in a `main` package, cloning a `map[string]int`, mutating the clone (overwrite/add/delete) and asserting the original is unchanged, output-compared vs `go run`; proven to emit the throwing stub against the un-fixed converter.
 
+**A pure-JMP ASSEMBLY TRAMPOLINE takes the same forwarder** (`asmTrampolines.go`, 2026-09-24). A bodyless
+function whose platform-selected `.s` block holds ONE instruction, a jump to a Go function, is Go's own
+statement that the two are one function under two names. golang.org/x/sys/unix builds `Syscall`,
+`Syscall6`, `RawSyscall` and `RawSyscall6` that way (`JMP syscall·Syscall(SB)`), and before this rule each
+was a throwing stub that go-isatty reached inside fatih/color's type initializer:
+
+```csharp
+public static (uintptr r1, uintptr r2, syscall.Errno err) Syscall(uintptr trap, uintptr a1, uintptr a2, uintptr a3) {
+    var (ᴛ1, ᴛ2, ᴛ3) = syscall.Syscall((uintptr)trap, (uintptr)a1, (uintptr)a2, (uintptr)a3);
+    return ((uintptr)(uintptr)ᴛ1, (uintptr)(uintptr)ᴛ2, (syscall.Errno)(uintptr)ᴛ3);
+}
+```
+
+The rule is deliberately narrow. The block is selected with the conversion's own build context (target
+platform, `-tags`, the loader toolchain's release tags); a block under a preprocessor conditional, or
+with any other instruction (x/sys/unix's `SyscallNoError` issues a raw `SYSCALL`), keeps its stub. A jump
+proves an identical FRAME and nothing more, so the local and target signatures must be
+`types.Identical`: x/sys/unix's `gettimeofday` jumps to `syscall·gettimeofday` but takes its OWN
+`*Timeval`, and forwarding it would be CS1503 that stops the whole package building. A cross-package target
+must be exported (nothing widens the target package's surface), and a same-package target whose parameters
+Phase A lowered to `ref` keeps its stub. It applies only OUTSIDE the converted standard library: the
+corpus's own trampolines (internal/runtime/atomic and the hand-owned sync/atomic) are governed by hand-owns
+and the stub census, and a forwarder there would collide with a hand-owned partial.
+
 ### A cross-package `//go:linkname` PUSH resolves per recorded disposition — forwarder or announced panic
 
 The PULL above is one of two directions, and the converter long handled only that one. A **PUSH** runs the
