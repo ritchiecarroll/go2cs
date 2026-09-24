@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 14:11 -- SAVE-STATE refresh (ledger through mailbox 410cde53f0): section 1b is the COORD new-session prompt: master 4c53b02a0a -- THE 1.24.13.2 LINUX PACKAGING TRAIN LANDED (all gates green; 2 pre-existing behavioral reds queued); NEXT the owner runs the 1.24.13.2 release, then COORD's release record and the approved cleanup; the string-tier work under way (C2 census fixes then arm C; R views+G8+G10; G V-fix 11; the sstring TWIN compile probe owed by COORD); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 14:18 -- SAVE-STATE refresh (ledger through mailbox 9d7a8df1ed): section 1b is the COORD new-session prompt: master 4c53b02a0a (the 1.24.13.2 train LANDED); NEXT the owner runs the 1.24.13.2 release, then COORD's release record and the approved cleanup; string-tier work under way (C2 r2 accepted, the twin preferred; the i9 runs the twin compile probe; R's views+G8+G10 gating on 4c53b02a0a; G V-fix 11); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -233,7 +233,11 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    C2's O1 SURVIVAL CENSUS LANDED (3b53fec4f2 on claude/c2-literal-cache-draft; ledger "FINDING · 3b53fec4f2"): 476 survive
    today; 2,766 = 57% (90% of format) with 8 func-value adapters; runtime.throw alone is 726 hand-owned sites. THE OWNER
    RULED (ledger "OWNER RULING · 3b53fec4f2"): exported signatures MAY flip from @string to sstring. COORD's census
-   verification workflow is running; the fmt pilot's exact scope and its order against cheaper levers are set from it.
+   verification DONE (claude/coord-handover docs/phase4/reviews/o1-survival-census-verification-2026-09-24.md). C2's r2
+   34b60c14da is ACCEPTED: the TWIN shape gives 3,254 sites, 2,770 per evaluation, with NO adapters; the pilot list is 33.
+   THE TWIN COMPILE PROBE is DISPATCHED to the i9 (light: golib plus one scratch project; new ref claude/i9-sstring-twin-probe).
+   The corpus-wide ambiguity build under the implicit u8->sstring operator follows on the i7 after the release. The pilot seat
+   (C2, a converter rule over an explicit list) is cut after the probe.
  - DONE 2026-09-24 (owner-approved; ledger "ANNOUNCE · b6746ab185"): the BRANCH release/go1.23 was FAST-FORWARDED from
    10c78227a7 (the 75% milestone, still pinned by tag stdlib-tests-75pct-2026-08-22) to b6746ab185, the commit of
    nuget-1.23.12.3, and read back by ls-remote. No tag moved. Mint release/go1.24 at the 1.25 cutover, not before. These are
@@ -301,7 +305,8 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    - the counter-0 dry-run README writes; the BoGo figures in code comments.
    - PRE-EXISTING behavioral reds on the i7: FuncLiteralCallerNames (Go closure names vary with inlining) and
      GoroutineWaitState (timing) fail at master ebb4acb8cf AND at the 1.24.13.2 union; G-LAPTOP reads the same. Find why P3
-     read green, or disclose them with a named cause.
+     read green, or disclose them with a named cause. R ATTRIBUTES them to the synctest arc not yet being on master (its wait
+     reasons and park seam); VERIFY at the synctest train's union that both turn green.
    - an INSTRUMENT item: check-roster-format.ps1's 'ledger scope' self-test fails under Windows PowerShell 5.1, even on
      master (it passes under pwsh 7). Either make the guard 5.1-clean or have every caller state pwsh 7; the train-48
      battery shape calls it through powershell.exe (found 2026-09-24 in the 1.24.13.2 battery).
@@ -443,7 +448,8 @@ Model Opus 5.5 / high. Pushed and banked: claude/i9-runtime-blockevent 5b5f35ff2
   on all three: blob e986b20b67af, the 09-13 PRE-HOP corpus, against origin master's 71b12dabe39e. They STAY LOCAL, named.
   They are superseded pre-hop job emissions, and no bundle is owed.
 - A corruption-era mailbox clone tip stays local.
-NEXT: standby for light items (temp refs deleted).
+NEXT: the LIGHT task dispatched 2026-09-24, the sstring TWIN compile probe (golib plus one scratch project; the arms in
+COORD's message), reported on the new ref claude/i9-sstring-twin-probe. Then standby.
 ```
 
 ## 1a. COORD — THE NEW SESSION PROMPT (2026-09-21, after the weekly limit; PROTOCOL v4 + fleet-read v2). PASTE THIS; it
@@ -2138,3 +2144,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 13:11 -- SAVE-STATE refresh: 1b records C2's O1 census and the owner's signature-flip ruling.
 - 2026-09-24 13:46 -- SAVE-STATE refresh: 1b records the owner-approved post-publish cleanup list.
 - 2026-09-24 14:11 -- SAVE-STATE refresh: 1b/1c record the 1.24.13.2 train LANDED at 4c53b02a0a and what is next.
+- 2026-09-24 14:18 -- SAVE-STATE refresh: 1b/1c record C2's census r2, the i9 twin probe, and R's attribution of the two behavioral reds.
