@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 06:44 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 086853edd5): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 06:48 -- SAVE-STATE refresh at 97% weekly (ledger through mailbox 93410e7ef9): NEW section 1b (the COORD new-session prompt for the release endgame: master CUT OVER at ffa5c1015a, all five parity gates held, the owner's release run next) and 1c (lane prompts). Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -216,7 +216,13 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    verification is on claude/coord-handover docs/phase4/reviews/literal-revision-3-verification-2026-09-24.md, and a
    revision 4 is coming from C2. Also the go.* prefix answer, and whether release/go1.23 advances to nuget-1.23.12.3 and
    release/go1.24 is minted.
- - POST-RELEASE QUEUE, all UNMERGED until after the release:
+ - UP NEXT, by OWNER ORDER (ledger 93410e7ef9): FIX THE LINUX PACKAGING PROBLEM. go.* packages give the compiler the
+   windows flavour in lib/ (the linux flavour sits unseen under runtimes/linux-x64), so an x/sys closure cannot build on Linux
+   from nuget.org. Owner G, after the in-flight len/cap seat. The fix is a per-RID compile surface (ref assemblies per RID, or
+   a RID-selected compile asset), sized against NuGet's compile/runtime asset resolution and push-nuget's L3 merge. GATE: G's
+   README walkthrough steps 1-4 green on WSL linux (a local feed, then nuget.org), with Windows still green. It ships in
+   1.24.13.2; then rewrite the README platforms note and the Roadmap Platforms row.
+ - POST-RELEASE QUEUE, all UNMERGED until after the release (THE RELEASE HAS LANDED, so assemble them from master):
    - R's net/http re-entry train claude/r-synctest-reentry 0b6bf15ab0 (FIRST; net/http re-banks from the candidates);
    - R's mustBeKind seat;
    - C2's REC-C §A 3c98968c5f, REC-C §B 0fcdba94d5, REC-F 645a8e1f62 and Float*bits 9ac6051e46;
@@ -278,6 +284,9 @@ DONE post-hop (all UNMERGED): claude/g-rec-b-oracle 814603bbbb (the REC-B -m ora
 (routed to I3, sized first); claude/g-rsa-mathbig-decomp 6ab65f3409 (rsa closed to the object; math/big's bytes are len/cap
 boxing). NEXT, post-release, from master:
 - the golib seat for a constrained len<TS>/cap<TS> where TS : ISlice (ledger 52063e7b3f);
+- THEN, BY OWNER ORDER (ledger 93410e7ef9), UP NEXT: FIX THE LINUX PACKAGING PROBLEM, a per-RID compile surface so
+  x/sys/unix builds on Linux from the packages. The gate is your README walkthrough steps 1-4 green on WSL (a local feed
+  first), with Windows still green; it ships in 1.24.13.2;
 - a second read of C2's claude/c2-rec-f-golib 645a8e1f62;
 - AFTER THE PUBLISH: the README walkthrough steps 3-4 on the WSL linux arm against nuget.org 1.24.13.1 (steps 1-2 are
   already green), whose evidence rewrites the README platforms note and the Roadmap Platforms row.
@@ -1991,3 +2000,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 06:32 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 06:37 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
 - 2026-09-24 06:44 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
+- 2026-09-24 06:48 -- SAVE-STATE refresh: sections 1b (COORD) and 1c (lanes) for the 1.24.13.1 release endgame; deprecations-1.24.13.1.md added.
