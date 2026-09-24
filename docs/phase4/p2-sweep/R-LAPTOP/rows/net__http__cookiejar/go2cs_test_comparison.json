@@ -1,0 +1,54 @@
+{
+  "package": "cookiejar",
+  "status": "validated",
+  "go": {
+    "TestBasics": "pass",
+    "TestCanonicalHost": "pass",
+    "TestChromiumBasics": "pass",
+    "TestChromiumDeletion": "pass",
+    "TestChromiumDomain": "pass",
+    "TestDefaultPath": "pass",
+    "TestDomainAndType": "pass",
+    "TestDomainHandling": "pass",
+    "TestExpiration": "pass",
+    "TestHasDotSuffix": "pass",
+    "TestHasPort": "pass",
+    "TestIsIP": "pass",
+    "TestIssue19384": "pass",
+    "TestJarKey": "pass",
+    "TestJarKeyNilPSL": "pass",
+    "TestPunycode": "pass",
+    "TestUpdateAndDelete": "pass"
+  },
+  "csharp": {
+    "TestBasics": "pass",
+    "TestCanonicalHost": "pass",
+    "TestChromiumBasics": "pass",
+    "TestChromiumDeletion": "pass",
+    "TestChromiumDomain": "pass",
+    "TestDefaultPath": "pass",
+    "TestDomainAndType": "pass",
+    "TestDomainHandling": "pass",
+    "TestExpiration": "pass",
+    "TestHasDotSuffix": "pass",
+    "TestHasPort": "pass",
+    "TestIsIP": "pass",
+    "TestIssue19384": "pass",
+    "TestJarKey": "pass",
+    "TestJarKeyNilPSL": "pass",
+    "TestPunycode": "pass",
+    "TestUpdateAndDelete": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "ExampleNew (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

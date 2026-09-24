@@ -1,0 +1,586 @@
+{
+  "package": "testing",
+  "status": "validated",
+  "go": {
+    "TestAllocsPerRun": "pass",
+    "TestBenchmarkRaceBLoop": "pass",
+    "TestCallRunInCleanupHelper": "pass",
+    "TestChdir": "pass",
+    "TestChdir/absolute": "pass",
+    "TestChdir/current_(absolute)": "pass",
+    "TestChdir/current_(relative)_with_extra_os.Chdir": "pass",
+    "TestChdir/relative": "pass",
+    "TestChdirWithParallelAfter": "pass",
+    "TestChdirWithParallelBefore": "pass",
+    "TestChdirWithParallelGrandParentBefore": "pass",
+    "TestChdirWithParallelGrandParentBefore/child": "pass",
+    "TestChdirWithParallelGrandParentBefore/child/grand-child": "pass",
+    "TestChdirWithParallelParentBefore": "pass",
+    "TestChdirWithParallelParentBefore/child": "pass",
+    "TestConcurrentRun": "pass",
+    "TestConcurrentRun/#00": "pass",
+    "TestConcurrentRun/#01": "pass",
+    "TestContext": "pass",
+    "TestContext/inner": "pass",
+    "TestContext/inner2": "pass",
+    "TestFlag": "pass",
+    "TestFlag/#00": "pass",
+    "TestFlag/-test.v": "pass",
+    "TestFlag/-test.v=test2json": "pass",
+    "TestGoexitInCleanupAfterPanicHelper": "pass",
+    "TestMorePanic": "pass",
+    "TestPanic": "pass",
+    "TestPanic/parallel_subtest_panics_with_cleanup": "pass",
+    "TestPanic/parallel_subtest_panics_with_inner_cleanup_panic": "pass",
+    "TestPanic/parallel_subtest_panics_with_middle_cleanup_panic": "pass",
+    "TestPanic/parallel_subtest_panics_with_outer_cleanup_panic": "pass",
+    "TestPanic/root_test_panics": "pass",
+    "TestPanic/subtest_panics": "pass",
+    "TestPanic/subtest_panics_with_cleanup": "pass",
+    "TestPanic/subtest_panics_with_inner_cleanup_panic": "pass",
+    "TestPanic/subtest_panics_with_middle_cleanup_panic": "pass",
+    "TestPanic/subtest_panics_with_outer_cleanup_panic": "pass",
+    "TestPanicHelper": "pass",
+    "TestParentRun": "pass",
+    "TestParentRun/not_inner": "pass",
+    "TestParentRun/outer": "pass",
+    "TestSetenv": "pass",
+    "TestSetenv/initial_value_exists": "pass",
+    "TestSetenv/initial_value_exists_but_empty": "pass",
+    "TestSetenv/initial_value_is_not_exists": "pass",
+    "TestSetenvWithParallelAfter": "pass",
+    "TestSetenvWithParallelBefore": "pass",
+    "TestSetenvWithParallelGrandParentBefore": "pass",
+    "TestSetenvWithParallelGrandParentBefore/child": "pass",
+    "TestSetenvWithParallelGrandParentBefore/child/grand-child": "pass",
+    "TestSetenvWithParallelParentBefore": "pass",
+    "TestSetenvWithParallelParentBefore/child": "pass",
+    "TestTBHelper": "pass",
+    "TestTBHelperParallel": "pass",
+    "TestTempDir": "pass",
+    "TestTempDir/../test": "pass",
+    "TestTempDir/InSubtest": "pass",
+    "TestTempDir/test*": "pass",
+    "TestTempDir/test/..": "pass",
+    "TestTempDir/test/subtest": "pass",
+    "TestTempDir/test:subtest": "pass",
+    "TestTempDir/test[]": "pass",
+    "TestTempDir/test\\subtest": "pass",
+    "TestTempDir/äöüéè": "pass",
+    "TestTempDirInCleanup": "pass",
+    "TestTempDirInCleanup/test": "pass",
+    "TestTesting": "pass"
+  },
+  "csharp": {
+    "TestAllocsPerRun": "fail",
+    "TestBenchmarkRaceBLoop": "pass",
+    "TestCallRunInCleanupHelper": "pass",
+    "TestChdir": "pass",
+    "TestChdir/absolute": "pass",
+    "TestChdir/current_(absolute)": "pass",
+    "TestChdir/current_(relative)_with_extra_os.Chdir": "pass",
+    "TestChdir/relative": "pass",
+    "TestChdirWithParallelAfter": "pass",
+    "TestChdirWithParallelBefore": "pass",
+    "TestChdirWithParallelGrandParentBefore": "pass",
+    "TestChdirWithParallelGrandParentBefore/child": "pass",
+    "TestChdirWithParallelGrandParentBefore/child/grand-child": "pass",
+    "TestChdirWithParallelParentBefore": "pass",
+    "TestChdirWithParallelParentBefore/child": "pass",
+    "TestConcurrentRun": "pass",
+    "TestConcurrentRun/#00": "pass",
+    "TestConcurrentRun/#01": "pass",
+    "TestContext": "pass",
+    "TestContext/inner": "pass",
+    "TestContext/inner2": "pass",
+    "TestFlag": "pass",
+    "TestFlag/#00": "pass",
+    "TestFlag/-test.v": "pass",
+    "TestFlag/-test.v=test2json": "pass",
+    "TestGoexitInCleanupAfterPanicHelper": "pass",
+    "TestMorePanic": "fail",
+    "TestPanic": "fail",
+    "TestPanic/parallel_subtest_panics_with_cleanup": "fail",
+    "TestPanic/parallel_subtest_panics_with_inner_cleanup_panic": "fail",
+    "TestPanic/parallel_subtest_panics_with_middle_cleanup_panic": "fail",
+    "TestPanic/parallel_subtest_panics_with_outer_cleanup_panic": "fail",
+    "TestPanic/root_test_panics": "fail",
+    "TestPanic/subtest_panics": "fail",
+    "TestPanic/subtest_panics_with_cleanup": "fail",
+    "TestPanic/subtest_panics_with_inner_cleanup_panic": "fail",
+    "TestPanic/subtest_panics_with_middle_cleanup_panic": "fail",
+    "TestPanic/subtest_panics_with_outer_cleanup_panic": "fail",
+    "TestPanicHelper": "pass",
+    "TestParentRun": "pass",
+    "TestParentRun/not_inner": "pass",
+    "TestParentRun/outer": "pass",
+    "TestSetenv": "pass",
+    "TestSetenv/initial_value_exists": "pass",
+    "TestSetenv/initial_value_exists_but_empty": "pass",
+    "TestSetenv/initial_value_is_not_exists": "pass",
+    "TestSetenvWithParallelAfter": "pass",
+    "TestSetenvWithParallelBefore": "pass",
+    "TestSetenvWithParallelGrandParentBefore": "pass",
+    "TestSetenvWithParallelGrandParentBefore/child": "pass",
+    "TestSetenvWithParallelGrandParentBefore/child/grand-child": "pass",
+    "TestSetenvWithParallelParentBefore": "pass",
+    "TestSetenvWithParallelParentBefore/child": "pass",
+    "TestTBHelper": "fail",
+    "TestTBHelperParallel": "fail",
+    "TestTempDir": "pass",
+    "TestTempDir/../test": "pass",
+    "TestTempDir/InSubtest": "pass",
+    "TestTempDir/test*": "pass",
+    "TestTempDir/test/..": "pass",
+    "TestTempDir/test/subtest": "pass",
+    "TestTempDir/test:subtest": "pass",
+    "TestTempDir/test[]": "pass",
+    "TestTempDir/test\\subtest": "pass",
+    "TestTempDir/äöüéè": "pass",
+    "TestTempDirInCleanup": "pass",
+    "TestTempDirInCleanup/test": "pass",
+    "TestTesting": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [
+    "TestAllocsPerRun (structural): exact-count AllocsPerRun asserts (want 1 for each of five `new(T)` closures). The managed shim is deliberately byte-derived - the CLR has no malloc counter - so it reports go2cs-runtime object allocations and returns 2 where Go returns 1. [SUPERSEDED 2026-09-23: the host reports a COUNT from golib's counter; see the RELABEL paragraph.]. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): alloc-count-semantics -\u003e STRUCTURAL, on a RE-GROUNDED proof (not the edwards/nistec analogy, which X(3) reverses). WANT: 1 per new(T) leg. READING: the four unmanaged legs print 2 (`AllocsPerRun(100, alloc complex128) = 2, want 1`), COUNT by construction (each run mints a counted box, so testing.cs:750 takes the COUNT arm); the new(*byte) leg's first-call note reads 1 per run -- 100 go2cs-runtime object allocations (5,600 bytes) over 100 runs at bb54ff0920 (the batch-8b stamp), Release with tiering off, readings-go1.24.13.tsv line 126 (claude/coord-h10-readings ac9f8251ee) -- and passes. PROOF, with the object Go never allocates named: in Go too, `global = new(T)` escapes into `any` and costs one malloc (allocs_test.go:9-20). For an unmanaged T the managed pointer needs ADDRESS-STABLE storage, because through the interface it is reachable by reflect and unsafe as an integer address. Go's non-moving heap gives that for free; the CLR's compacting GC does not. So ж\u003cT\u003e over an unmanaged T allocates an eager pinnable T[1] slot beside the box (golib/ж.StandardBox.cs:61-67; AllocationCounter.cs:39-42): THE SLOT IS THE OBJECT GO NEVER ALLOCATES. The two nameable alternatives fail. (a) A pointer that IS the pinned array -- the box pinning itself -- roots itself through the strong pinned handle and can never die, a structural leak; and a lazily created slot breaks heap()'s ref alias, because storage handed out by ref must never migrate (DESIGN-zh-box-reduction.md:444-452). (b) Whole-program X3 analysis selecting a slot-free box kind is refused because the pointer flows into `any`, where every later use is outside the analysis. The new(*byte) leg is the control: a managed element type needs no slot and reads 1. No plan and no floor field; the signature is unchanged (the count-free convention, ledger 2026-09-22 04:57). Re-banked after the batch-8c STAMP, since testing diverges before it. The 8c STAMP (1719e3b87f, ledger 49cb270339) confirmed the testing row at 53 matched + 15 disclosed at the 8c tree.",
+    "TestMorePanic (host-identity): re-execs the binary and matches the child's panic/Goexit report against Go's text. The host classifies a runtime.Goexit escaping a cleanup after a panic as an INFRASTRUCTURE-ERROR row in its own vocabulary, where Go prints its panic layout. Same channel, same ruling. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go.",
+    "TestPanic (): ",
+    "TestPanic/parallel_subtest_panics_with_cleanup (host-identity): re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: \u003cname\u003e` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go.",
+    "TestPanic/parallel_subtest_panics_with_inner_cleanup_panic (host-identity): re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: \u003cname\u003e` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go.",
+    "TestPanic/parallel_subtest_panics_with_middle_cleanup_panic (host-identity): re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: \u003cname\u003e` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go.",
+    "TestPanic/parallel_subtest_panics_with_outer_cleanup_panic (host-identity): re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: \u003cname\u003e` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go.",
+    "TestPanic/root_test_panics (host-identity): re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: \u003cname\u003e` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go.",
+    "TestPanic/subtest_panics (host-identity): re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: \u003cname\u003e` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go.",
+    "TestPanic/subtest_panics_with_cleanup (host-identity): re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: \u003cname\u003e` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go.",
+    "TestPanic/subtest_panics_with_inner_cleanup_panic (host-identity): re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: \u003cname\u003e` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go.",
+    "TestPanic/subtest_panics_with_middle_cleanup_panic (host-identity): re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: \u003cname\u003e` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go.",
+    "TestPanic/subtest_panics_with_outer_cleanup_panic (host-identity): re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: \u003cname\u003e` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go.",
+    "TestTBHelper (host-identity): re-execs the test binary and requires the child's output to match a regex naming Go's own SOURCE POSITIONS (`helperfuncs_test.go:15: 0`) inside Go's `--- FAIL:` layout. The host reports its own positions and its own layout, and t.Helper's whole purpose - attributing a log line to the CALLER - is asserted here through that text. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go.",
+    "TestTBHelperParallel (host-identity): counts the LINES of the re-exec'd child's output and requires exactly 7 in Go's verbose layout (one `--- FAIL`, five parallel log lines, a final `FAIL`). The host's reporter produces 6 lines of its own form. The pinned count is the captured signature: a different count is a different failure and must go red. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
+  ],
+  "excluded": [
+    "BenchmarkBLoopPrint (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkBLoopRacy (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkBNPrint (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkHighPrecisionTimeNow (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkRacy (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkSubRacy (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkTBHelper (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkTimeNow (benchmark): benchmark execution is deferred to Phase 4D",
+    "ExampleB_Loop (example): example execution is deferred to Phase 4D",
+    "ExampleB_ReportMetric (example): example execution is deferred to Phase 4D",
+    "ExampleB_ReportMetric_parallel (example): example execution is deferred to Phase 4D",
+    "ExampleB_RunParallel (example): example execution is deferred to Phase 4D",
+    "FuzzNaming (fuzz): fuzz execution is deferred to Phase 4D",
+    "TestBRun (test): requires unsupported testing capabilities: B.Cleanup, B.Error, B.Fail, B.Failed, B.Fatalf, B.ReportAllocs, B.ResetTimer, B.Run, B.SetBytes, B.Skip, B.SkipNow, B.StartTimer, B.StopTimer, B.add, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.common, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.level, B.loop, B.missingBytes, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, benchState.extLen, benchState.match, benchState.maxLen, benchState.processBench, chattyFlag.json, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.FailNow, common.SkipNow, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, durationOrCountFlag.d, durationOrCountFlag.n, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+    "TestBenchmark (test): requires unsupported testing capabilities: B.Error, B.ResetTimer, B.Run, B.StartTimer, B.StopTimer, B.add, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.common, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.level, B.loop, B.missingBytes, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.match, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.SkipNow, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.finished, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, common.skipped, durationOrCountFlag.d, durationOrCountFlag.n, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique",
+    "TestBenchmarkBLoop (test): requires unsupported testing capabilities: B.Elapsed, B.Error, B.Fatal, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.loopSlowPath, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.stopOrScaleBLoop, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.FailNow, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.finished, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+    "TestBenchmarkBLoopBreak (test): requires unsupported testing capabilities: B.Elapsed, B.Error, B.Fatal, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.common, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.loopSlowPath, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.stopOrScaleBLoop, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.FailNow, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.finished, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, common.w, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+    "TestBenchmarkBLoopError (test): requires unsupported testing capabilities: B.Elapsed, B.Error, B.Fatal, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.common, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.loopSlowPath, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.stopOrScaleBLoop, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.FailNow, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.finished, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, common.w, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+    "TestBenchmarkBLoopIterationCorrect (test): requires unsupported testing capabilities: benchmark execution (Phase 4D): re-execs the test binary with -test.bench and counts BenchmarkBLoopPrint's own printed iterations; the host defers benchmark execution, so the child prints none",
+    "TestBenchmarkBLoopStop (test): requires unsupported testing capabilities: B.Elapsed, B.Error, B.Fatal, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.common, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.loopSlowPath, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.stopOrScaleBLoop, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.FailNow, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.finished, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, common.w, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+    "TestBenchmarkBNIterationCorrect (test): requires unsupported testing capabilities: benchmark execution (Phase 4D): re-execs the test binary with -test.bench and counts BenchmarkBNPrint's own printed iterations; the host defers benchmark execution, so the child prints none",
+    "TestBenchmarkContext (test): requires unsupported testing capabilities: B.Context, B.Fatalf, B.Run",
+    "TestBenchmarkOutput (test): requires unsupported testing capabilities: B.Error, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+    "TestBenchmarkRace (test): requires unsupported testing capabilities: race-detector-instrumented build: asserts a count of \"race detected\" in a re-exec'd child running a benchmark, a literal the host's reporter never writes",
+    "TestBenchmarkReadMemStatsBeforeFirstRun (test): requires unsupported testing capabilities: B.Error, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+    "TestBenchmarkStartsFrom1 (test): requires unsupported testing capabilities: B.Error, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+    "TestBenchmarkSubRace (test): requires unsupported testing capabilities: race-detector-instrumented build: asserts a count of \"race detected\" in a re-exec'd child running a benchmark, a literal the host's reporter never writes",
+    "TestCleanup (test): requires unsupported testing capabilities: T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+    "TestCleanupCalledEvenAfterGoexit (test): requires unsupported testing capabilities: T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+    "TestCleanupParallelSubtests (test): requires unsupported testing capabilities: T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.denyParallel, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.lastRaceErrors, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.barrier, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.sub, common.w, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+    "TestConcurrentCleanup (test): requires unsupported testing capabilities: T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+    "TestDeepSubtestRace (test): requires unsupported testing capabilities: race-detector-instrumented build: asserts a count of \"race detected\" in a re-exec'd child, a literal the host's reporter never writes",
+    "TestIsSpace (test): requires unsupported testing capabilities: chattyPrinter.Printf, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Fail, common.bench, common.chatty, common.checkFuzzFn, common.cleanupName, common.cleanupPc, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.runner",
+    "TestLogAfterComplete (test): requires unsupported testing capabilities: T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, filterMatch.verify, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+    "TestMatcher (test): requires unsupported testing capabilities: chattyPrinter.Printf, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Fail, common.bench, common.chatty, common.checkFuzzFn, common.cleanupName, common.cleanupPc, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.runner, filterMatch.matches, filterMatch.verify, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique",
+    "TestNaming (test): requires unsupported testing capabilities: chattyPrinter.Printf, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Fail, common.bench, common.chatty, common.checkFuzzFn, common.cleanupName, common.cleanupPc, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.runner, filterMatch.matches, filterMatch.verify, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique",
+    "TestNestedCleanup (test): requires unsupported testing capabilities: T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+    "TestPrettyPrint (test): the package under test is a hand-owned host, so its internal test variant is not compiled, and this EXTERNAL test file reaches a declaration of an excluded file through Go's export_test.go bridge — an exported alias of an unexported symbol the host replaces, leaving no symbol for the reference to name (bridged, not declared by the host: testing.PrettyPrint)",
+    "TestRaceBeforeParallel (test): requires unsupported testing capabilities: race-detector-instrumented build: asserts a count of \"race detected\" in a re-exec'd child, a literal the host's reporter never writes",
+    "TestRaceBeforeTests (test): requires unsupported testing capabilities: race-detector-instrumented build: asserts a count of \"race detected\" in a child run with GO_WANT_RACE_BEFORE_TESTS=1, a literal the host's reporter never writes",
+    "TestRaceDuringParallelFailsAllSubtests (test): requires unsupported testing capabilities: race-detector-instrumented build: asserts a count of \"race detected\" in a re-exec'd child, a literal the host's reporter never writes",
+    "TestRaceInCleanup (test): requires unsupported testing capabilities: race-detector-instrumented build: asserts counts of \"race detected during execution of test\" and \"--- FAIL:\" in a re-exec'd child, literals the host's reporter never writes",
+    "TestRaceName (test): requires unsupported testing capabilities: race-detector-instrumented build: asserts the verbose-run marker \"=== NAME\" is absent from a re-exec'd child, a literal the host's reporter never writes",
+    "TestRaceReports (test): requires unsupported testing capabilities: race-detector-instrumented build: asserts a count of \"race detected\" in a re-exec'd child, a literal the host's reporter never writes",
+    "TestRaceSubReports (test): requires unsupported testing capabilities: race-detector-instrumented build: asserts counts of \"race detected during execution of test\" and \"--- FAIL:\" in a re-exec'd child, literals the host's reporter never writes",
+    "TestRacyOutput (test): requires unsupported testing capabilities: T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyFlag.json, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, filterMatch.verify, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+    "TestReportMetric (test): requires unsupported testing capabilities: B.ReportMetric, BenchmarkResult.N, BenchmarkResult.String",
+    "TestResultString (test): requires unsupported testing capabilities: BenchmarkResult.String, BenchmarkResult.T",
+    "TestRunCleanup (test): requires unsupported testing capabilities: T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+    "TestRunParallel (test): requires unsupported testing capabilities: B.RunParallel, B.SetParallelism, PB.Next",
+    "TestRunParallelFail (test): requires unsupported testing capabilities: B.Error, B.Log, B.RunParallel",
+    "TestRunParallelFatal (test): requires unsupported testing capabilities: B.Fatal, B.RunParallel, PB.Next",
+    "TestRunParallelSkipNow (test): requires unsupported testing capabilities: B.RunParallel, B.SkipNow, PB.Next",
+    "TestRunningTests (test): requires unsupported testing capabilities: Go's -test.timeout running-tests dump: the parent retries with a doubled timeout until the child prints it and has no failure path, so a host that does not emit the dump makes the test loop forever rather than fail",
+    "TestRunningTestsInCleanup (test): requires unsupported testing capabilities: Go's -test.timeout running-tests dump: the parent retries with a doubled timeout until the child prints it and has no failure path, so a host that does not emit the dump makes the test loop forever rather than fail",
+    "TestSplitRegexp (test): requires unsupported testing capabilities: chattyPrinter.Printf, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Fail, common.bench, common.chatty, common.checkFuzzFn, common.cleanupName, common.cleanupPc, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.runner, filterMatch.verify",
+    "TestTRun (test): requires unsupported testing capabilities: T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.denyParallel, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.lastRaceErrors, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyFlag.json, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.FailNow, common.SkipNow, common.barrier, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.sub, common.w, filterMatch.matches, filterMatch.verify, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+    "TestTempDirInBenchmark (test): requires unsupported testing capabilities: B.Run, B.TempDir",
+    "TestTestState (test): requires unsupported testing capabilities: call.running, call.started, call.typ, call.waiting, chattyPrinter.Printf, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Fail, common.bench, common.chatty, common.checkFuzzFn, common.cleanupName, common.cleanupPc, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.runner, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel"
+  ],
+  "errors": [],
+  "gated": [
+    {
+      "name": "TestBRun",
+      "capabilities": "B.Cleanup, B.Error, B.Fail, B.Failed, B.Fatalf, B.ReportAllocs, B.ResetTimer, B.Run, B.SetBytes, B.Skip, B.SkipNow, B.StartTimer, B.StopTimer, B.add, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.common, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.level, B.loop, B.missingBytes, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, benchState.extLen, benchState.match, benchState.maxLen, benchState.processBench, chattyFlag.json, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.FailNow, common.SkipNow, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, durationOrCountFlag.d, durationOrCountFlag.n, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+      "rows": [
+        "TestBRun",
+        "TestBRun/bytes_set_by_all_benchmarks",
+        "TestBRun/bytes_set_by_some_benchmarks",
+        "TestBRun/chatty_with_recursion",
+        "TestBRun/cleanup_is_called",
+        "TestBRun/cleanup_is_called_on_failure",
+        "TestBRun/failure_carried_over_to_root",
+        "TestBRun/memory_allocation",
+        "TestBRun/simulate_sequential_run_of_subbenchmarks.",
+        "TestBRun/skipping_after_error",
+        "TestBRun/skipping_without_message,_chatty",
+        "TestBRun/skipping_without_message,_not_chatty"
+      ]
+    },
+    {
+      "name": "TestBenchmark",
+      "capabilities": "B.Error, B.ResetTimer, B.Run, B.StartTimer, B.StopTimer, B.add, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.common, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.level, B.loop, B.missingBytes, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.match, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.SkipNow, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.finished, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, common.skipped, durationOrCountFlag.d, durationOrCountFlag.n, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique",
+      "rows": [
+        "TestBenchmark"
+      ]
+    },
+    {
+      "name": "TestBenchmarkBLoop",
+      "capabilities": "B.Elapsed, B.Error, B.Fatal, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.loopSlowPath, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.stopOrScaleBLoop, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.FailNow, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.finished, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+      "rows": [
+        "TestBenchmarkBLoop"
+      ]
+    },
+    {
+      "name": "TestBenchmarkBLoopBreak",
+      "capabilities": "B.Elapsed, B.Error, B.Fatal, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.common, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.loopSlowPath, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.stopOrScaleBLoop, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.FailNow, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.finished, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, common.w, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+      "rows": [
+        "TestBenchmarkBLoopBreak"
+      ]
+    },
+    {
+      "name": "TestBenchmarkBLoopError",
+      "capabilities": "B.Elapsed, B.Error, B.Fatal, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.common, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.loopSlowPath, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.stopOrScaleBLoop, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.FailNow, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.finished, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, common.w, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+      "rows": [
+        "TestBenchmarkBLoopError"
+      ]
+    },
+    {
+      "name": "TestBenchmarkBLoopIterationCorrect",
+      "capabilities": "benchmark execution (Phase 4D): re-execs the test binary with -test.bench and counts BenchmarkBLoopPrint's own printed iterations; the host defers benchmark execution, so the child prints none",
+      "rows": [
+        "TestBenchmarkBLoopIterationCorrect"
+      ]
+    },
+    {
+      "name": "TestBenchmarkBLoopStop",
+      "capabilities": "B.Elapsed, B.Error, B.Fatal, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.common, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.loopSlowPath, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.stopOrScaleBLoop, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.FailNow, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.finished, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, common.w, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+      "rows": [
+        "TestBenchmarkBLoopStop"
+      ]
+    },
+    {
+      "name": "TestBenchmarkBNIterationCorrect",
+      "capabilities": "benchmark execution (Phase 4D): re-execs the test binary with -test.bench and counts BenchmarkBNPrint's own printed iterations; the host defers benchmark execution, so the child prints none",
+      "rows": [
+        "TestBenchmarkBNIterationCorrect"
+      ]
+    },
+    {
+      "name": "TestBenchmarkContext",
+      "capabilities": "B.Context, B.Fatalf, B.Run",
+      "rows": [
+        "TestBenchmarkContext"
+      ]
+    },
+    {
+      "name": "TestBenchmarkOutput",
+      "capabilities": "B.Error, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+      "rows": [
+        "TestBenchmarkOutput"
+      ]
+    },
+    {
+      "name": "TestBenchmarkRace",
+      "capabilities": "race-detector-instrumented build: asserts a count of \"race detected\" in a re-exec'd child running a benchmark, a literal the host's reporter never writes",
+      "rows": [
+        "TestBenchmarkRace"
+      ]
+    },
+    {
+      "name": "TestBenchmarkReadMemStatsBeforeFirstRun",
+      "capabilities": "B.Error, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+      "rows": [
+        "TestBenchmarkReadMemStatsBeforeFirstRun"
+      ]
+    },
+    {
+      "name": "TestBenchmarkStartsFrom1",
+      "capabilities": "B.Error, B.ResetTimer, B.StartTimer, B.StopTimer, B.benchFunc, B.benchTime, B.bstate, B.bytes, B.cancelCtx, B.chatty, B.checkRaces, B.ctx, B.doBench, B.duration, B.extra, B.failed, B.finished, B.hasSub, B.importPath, B.launch, B.loop, B.mu, B.name, B.netAllocs, B.netBytes, B.output, B.parallelism, B.previousDuration, B.previousN, B.resetRaces, B.result, B.run, B.run1, B.runCleanup, B.runN, B.showAllocResult, B.signal, B.skipped, B.start, B.startAllocs, B.startBytes, B.timerOn, B.trimOutput, B.w, BenchmarkResult.AllocedBytesPerOp, BenchmarkResult.AllocsPerOp, BenchmarkResult.Bytes, BenchmarkResult.Extra, BenchmarkResult.MemAllocs, BenchmarkResult.MemBytes, BenchmarkResult.MemString, BenchmarkResult.N, BenchmarkResult.String, BenchmarkResult.T, BenchmarkResult.mbPerSec, benchState.extLen, benchState.maxLen, benchState.processBench, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.runCleanup, common.runner, durationOrCountFlag.d, durationOrCountFlag.n, highPrecisionTime.now, highPrecisionTime.sub",
+      "rows": [
+        "TestBenchmarkStartsFrom1"
+      ]
+    },
+    {
+      "name": "TestBenchmarkSubRace",
+      "capabilities": "race-detector-instrumented build: asserts a count of \"race detected\" in a re-exec'd child running a benchmark, a literal the host's reporter never writes",
+      "rows": [
+        "TestBenchmarkSubRace"
+      ]
+    },
+    {
+      "name": "TestCleanup",
+      "capabilities": "T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+      "rows": [
+        "TestCleanup",
+        "TestCleanup/test"
+      ]
+    },
+    {
+      "name": "TestCleanupCalledEvenAfterGoexit",
+      "capabilities": "T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+      "rows": [
+        "TestCleanupCalledEvenAfterGoexit",
+        "TestCleanupCalledEvenAfterGoexit/test"
+      ]
+    },
+    {
+      "name": "TestCleanupParallelSubtests",
+      "capabilities": "T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.denyParallel, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.lastRaceErrors, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.barrier, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.sub, common.w, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+      "rows": [
+        "TestCleanupParallelSubtests",
+        "TestCleanupParallelSubtests/test",
+        "TestCleanupParallelSubtests/test/x"
+      ]
+    },
+    {
+      "name": "TestConcurrentCleanup",
+      "capabilities": "T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+      "rows": [
+        "TestConcurrentCleanup",
+        "TestConcurrentCleanup/test"
+      ]
+    },
+    {
+      "name": "TestDeepSubtestRace",
+      "capabilities": "race-detector-instrumented build: asserts a count of \"race detected\" in a re-exec'd child, a literal the host's reporter never writes",
+      "rows": [
+        "TestDeepSubtestRace"
+      ]
+    },
+    {
+      "name": "TestIsSpace",
+      "capabilities": "chattyPrinter.Printf, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Fail, common.bench, common.chatty, common.checkFuzzFn, common.cleanupName, common.cleanupPc, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.runner",
+      "rows": [
+        "TestIsSpace"
+      ]
+    },
+    {
+      "name": "TestLogAfterComplete",
+      "capabilities": "T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, filterMatch.verify, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+      "rows": [
+        "TestLogAfterComplete"
+      ]
+    },
+    {
+      "name": "TestMatcher",
+      "capabilities": "chattyPrinter.Printf, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Fail, common.bench, common.chatty, common.checkFuzzFn, common.cleanupName, common.cleanupPc, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.runner, filterMatch.matches, filterMatch.verify, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique",
+      "rows": [
+        "TestMatcher"
+      ]
+    },
+    {
+      "name": "TestNaming",
+      "capabilities": "chattyPrinter.Printf, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Fail, common.bench, common.chatty, common.checkFuzzFn, common.cleanupName, common.cleanupPc, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.runner, filterMatch.matches, filterMatch.verify, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique",
+      "rows": [
+        "TestNaming"
+      ]
+    },
+    {
+      "name": "TestNestedCleanup",
+      "capabilities": "T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+      "rows": [
+        "TestNestedCleanup",
+        "TestNestedCleanup/test"
+      ]
+    },
+    {
+      "name": "TestRaceBeforeParallel",
+      "capabilities": "race-detector-instrumented build: asserts a count of \"race detected\" in a re-exec'd child, a literal the host's reporter never writes",
+      "rows": [
+        "TestRaceBeforeParallel"
+      ]
+    },
+    {
+      "name": "TestRaceBeforeTests",
+      "capabilities": "race-detector-instrumented build: asserts a count of \"race detected\" in a child run with GO_WANT_RACE_BEFORE_TESTS=1, a literal the host's reporter never writes",
+      "rows": [
+        "TestRaceBeforeTests"
+      ]
+    },
+    {
+      "name": "TestRaceDuringParallelFailsAllSubtests",
+      "capabilities": "race-detector-instrumented build: asserts a count of \"race detected\" in a re-exec'd child, a literal the host's reporter never writes",
+      "rows": [
+        "TestRaceDuringParallelFailsAllSubtests"
+      ]
+    },
+    {
+      "name": "TestRaceInCleanup",
+      "capabilities": "race-detector-instrumented build: asserts counts of \"race detected during execution of test\" and \"--- FAIL:\" in a re-exec'd child, literals the host's reporter never writes",
+      "rows": [
+        "TestRaceInCleanup"
+      ]
+    },
+    {
+      "name": "TestRaceName",
+      "capabilities": "race-detector-instrumented build: asserts the verbose-run marker \"=== NAME\" is absent from a re-exec'd child, a literal the host's reporter never writes",
+      "rows": [
+        "TestRaceName"
+      ]
+    },
+    {
+      "name": "TestRaceReports",
+      "capabilities": "race-detector-instrumented build: asserts a count of \"race detected\" in a re-exec'd child, a literal the host's reporter never writes",
+      "rows": [
+        "TestRaceReports"
+      ]
+    },
+    {
+      "name": "TestRaceSubReports",
+      "capabilities": "race-detector-instrumented build: asserts counts of \"race detected during execution of test\" and \"--- FAIL:\" in a re-exec'd child, literals the host's reporter never writes",
+      "rows": [
+        "TestRaceSubReports"
+      ]
+    },
+    {
+      "name": "TestRacyOutput",
+      "capabilities": "T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyFlag.json, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, filterMatch.verify, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+      "rows": [
+        "TestRacyOutput"
+      ]
+    },
+    {
+      "name": "TestReportMetric",
+      "capabilities": "B.ReportMetric, BenchmarkResult.N, BenchmarkResult.String",
+      "rows": [
+        "TestReportMetric"
+      ]
+    },
+    {
+      "name": "TestResultString",
+      "capabilities": "BenchmarkResult.String, BenchmarkResult.T",
+      "rows": [
+        "TestResultString"
+      ]
+    },
+    {
+      "name": "TestRunCleanup",
+      "capabilities": "T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.w, filterMatch.matches, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+      "rows": [
+        "TestRunCleanup",
+        "TestRunCleanup/test",
+        "TestRunCleanup/test/x"
+      ]
+    },
+    {
+      "name": "TestRunParallel",
+      "capabilities": "B.RunParallel, B.SetParallelism, PB.Next",
+      "rows": [
+        "TestRunParallel"
+      ]
+    },
+    {
+      "name": "TestRunParallelFail",
+      "capabilities": "B.Error, B.Log, B.RunParallel",
+      "rows": [
+        "TestRunParallelFail"
+      ]
+    },
+    {
+      "name": "TestRunParallelFatal",
+      "capabilities": "B.Fatal, B.RunParallel, PB.Next",
+      "rows": [
+        "TestRunParallelFatal"
+      ]
+    },
+    {
+      "name": "TestRunParallelSkipNow",
+      "capabilities": "B.RunParallel, B.SkipNow, PB.Next",
+      "rows": [
+        "TestRunParallelSkipNow"
+      ]
+    },
+    {
+      "name": "TestRunningTests",
+      "capabilities": "Go's -test.timeout running-tests dump: the parent retries with a doubled timeout until the child prints it and has no failure path, so a host that does not emit the dump makes the test loop forever rather than fail",
+      "rows": [
+        "TestRunningTests"
+      ]
+    },
+    {
+      "name": "TestRunningTestsInCleanup",
+      "capabilities": "Go's -test.timeout running-tests dump: the parent retries with a doubled timeout until the child prints it and has no failure path, so a host that does not emit the dump makes the test loop forever rather than fail",
+      "rows": [
+        "TestRunningTestsInCleanup"
+      ]
+    },
+    {
+      "name": "TestSplitRegexp",
+      "capabilities": "chattyPrinter.Printf, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Fail, common.bench, common.chatty, common.checkFuzzFn, common.cleanupName, common.cleanupPc, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.runner, filterMatch.verify",
+      "rows": [
+        "TestSplitRegexp"
+      ]
+    },
+    {
+      "name": "TestTRun",
+      "capabilities": "T.barrier, T.chatty, T.checkRaces, T.cleanupStarted, T.common, T.denyParallel, T.done, T.duration, T.failed, T.finished, T.flushToParent, T.hasSub, T.isParallel, T.lastRaceErrors, T.level, T.mu, T.name, T.parent, T.report, T.resetRaces, T.runCleanup, T.runner, T.setRan, T.signal, T.start, T.sub, T.tstate, T.w, chattyFlag.json, chattyPrinter.Printf, chattyPrinter.Updatef, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Errorf, common.Fail, common.FailNow, common.SkipNow, common.barrier, common.bench, common.cancelCtx, common.chatty, common.checkFuzzFn, common.checkRaces, common.cleanupName, common.cleanupPc, common.cleanupStarted, common.cleanups, common.creator, common.decorate, common.done, common.duration, common.failed, common.finished, common.flushToParent, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.lastRaceErrors, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.raceErrorLogged, common.ran, common.runCleanup, common.runner, common.setRan, common.skipped, common.start, common.sub, common.w, filterMatch.matches, filterMatch.verify, highPrecisionTime.now, highPrecisionTime.sub, matcher.filter, matcher.fullName, matcher.matchFunc, matcher.mu, matcher.skip, matcher.subNames, matcher.unique, testState.isFuzzing, testState.match, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+      "rows": [
+        "TestTRun",
+        "TestTRun/alternate_sequential_and_parallel",
+        "TestTRun/alternate_sequential_and_parallel_2",
+        "TestTRun/chatty_with_recursion",
+        "TestTRun/chatty_with_recursion_and_json",
+        "TestTRun/cleanup_when_subtest_panics",
+        "TestTRun/failnow_skips_future_sequential_and_parallel_tests_at_same_level",
+        "TestTRun/failure_in_parallel_test_propagates_upwards",
+        "TestTRun/log_in_finished_sub_test_logs_to_parent",
+        "TestTRun/log_in_finished_sub_test_with_chatty",
+        "TestTRun/panic_on_goroutine_fail_after_test_exit",
+        "TestTRun/skip_output",
+        "TestTRun/skipping_after_error",
+        "TestTRun/skipping_without_message,_chatty",
+        "TestTRun/skipping_without_message,_not_chatty",
+        "TestTRun/stress_test",
+        "TestTRun/subtest_calls_error_on_ancestor",
+        "TestTRun/subtest_calls_error_on_parent",
+        "TestTRun/subtest_calls_fatal_on_ancestor",
+        "TestTRun/subtest_calls_fatal_on_parent",
+        "TestTRun/use_Run_to_locally_synchronize_parallelism"
+      ]
+    },
+    {
+      "name": "TestTempDirInBenchmark",
+      "capabilities": "B.Run, B.TempDir",
+      "rows": [
+        "TestTempDirInBenchmark"
+      ]
+    },
+    {
+      "name": "TestTestState",
+      "capabilities": "call.running, call.started, call.typ, call.waiting, chattyPrinter.Printf, chattyPrinter.json, chattyPrinter.lastName, chattyPrinter.lastNameMu, chattyPrinter.prefix, chattyPrinter.w, common.Fail, common.bench, common.chatty, common.checkFuzzFn, common.cleanupName, common.cleanupPc, common.creator, common.decorate, common.done, common.failed, common.frameSkip, common.helperNames, common.helperPCs, common.inFuzzFn, common.level, common.log, common.logDepth, common.mu, common.name, common.output, common.parent, common.runner, testState.maxParallel, testState.mu, testState.numWaiting, testState.release, testState.running, testState.startParallel, testState.waitParallel",
+      "rows": [
+        "TestTestState"
+      ]
+    }
+  ],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

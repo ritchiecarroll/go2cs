@@ -1,0 +1,32 @@
+{
+  "package": "tabwriter",
+  "status": "validated",
+  "go": {
+    "Test": "pass",
+    "TestPanicDuringFlush": "pass",
+    "TestPanicDuringWrite": "pass"
+  },
+  "csharp": {
+    "Test": "pass",
+    "TestPanicDuringFlush": "pass",
+    "TestPanicDuringWrite": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "BenchmarkCode (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkPyramid (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkRagged (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkTable (benchmark): benchmark execution is deferred to Phase 4D",
+    "ExampleWriter_Init (example): example execution is deferred to Phase 4D",
+    "Example_elastic (example): example execution is deferred to Phase 4D",
+    "Example_trailingTab (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

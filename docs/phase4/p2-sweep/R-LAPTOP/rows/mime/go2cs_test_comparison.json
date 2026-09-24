@@ -1,0 +1,67 @@
+{
+  "package": "mime",
+  "status": "validated",
+  "go": {
+    "TestCharsetDecoder": "pass",
+    "TestCharsetDecoderError": "pass",
+    "TestConsumeMediaParam": "pass",
+    "TestConsumeToken": "pass",
+    "TestConsumeValue": "pass",
+    "TestDecodeHeader": "pass",
+    "TestDecodeWord": "pass",
+    "TestEncodeWord": "pass",
+    "TestEncodedWordLength": "pass",
+    "TestExtensionsByType": "pass",
+    "TestExtensionsByType2": "pass",
+    "TestFormatMediaType": "pass",
+    "TestLookupMallocs": "pass",
+    "TestParseMediaType": "pass",
+    "TestParseMediaTypeBogus": "pass",
+    "TestTypeByExtension": "pass",
+    "TestTypeByExtensionCase": "pass",
+    "TestTypeByExtension_LocalData": "pass"
+  },
+  "csharp": {
+    "TestCharsetDecoder": "pass",
+    "TestCharsetDecoderError": "pass",
+    "TestConsumeMediaParam": "pass",
+    "TestConsumeToken": "pass",
+    "TestConsumeValue": "pass",
+    "TestDecodeHeader": "pass",
+    "TestDecodeWord": "pass",
+    "TestEncodeWord": "pass",
+    "TestEncodedWordLength": "pass",
+    "TestExtensionsByType": "pass",
+    "TestExtensionsByType2": "pass",
+    "TestFormatMediaType": "pass",
+    "TestLookupMallocs": "fail",
+    "TestParseMediaType": "pass",
+    "TestParseMediaTypeBogus": "pass",
+    "TestTypeByExtension": "pass",
+    "TestTypeByExtensionCase": "pass",
+    "TestTypeByExtension_LocalData": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [
+    "TestLookupMallocs (deferred): want-zero AllocsPerRun assert: TypeByExtension's converted lookup allocates in the managed runtime (sync.Map probe boxing and @string materialization) where Go's compiled lookup runs allocation-free; a malloc-counting shim would fail identically. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O5): alloc-profile -\u003e deferred. The census's floor (the sync.Map probe's any-boxing) is withdrawn: boxing is uncounted."
+  ],
+  "excluded": [
+    "BenchmarkExtensionsByType (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkQDecodeHeader (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkQDecodeWord (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkQEncodeWord (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkTypeByExtension (benchmark): benchmark execution is deferred to Phase 4D",
+    "ExampleFormatMediaType (example): example execution is deferred to Phase 4D",
+    "ExampleParseMediaType (example): example execution is deferred to Phase 4D",
+    "ExampleWordDecoder_Decode (example): example execution is deferred to Phase 4D",
+    "ExampleWordDecoder_DecodeHeader (example): example execution is deferred to Phase 4D",
+    "ExampleWordEncoder_Encode (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "package": "testenv",
+  "status": "validated",
+  "go": {
+    "TestCleanCmdEnvPWD": "skip",
+    "TestGoToolLocation": "pass",
+    "TestHasGoBuild": "pass",
+    "TestHasGoBuild/MustHaveExec": "pass",
+    "TestHasGoBuild/MustHaveExecPath": "pass",
+    "TestMustHaveExec": "pass",
+    "TestMustHaveExec/MustHaveExec": "pass"
+  },
+  "csharp": {
+    "TestCleanCmdEnvPWD": "skip",
+    "TestGoToolLocation": "pass",
+    "TestHasGoBuild": "pass",
+    "TestHasGoBuild/MustHaveExec": "pass",
+    "TestHasGoBuild/MustHaveExecPath": "pass",
+    "TestMustHaveExec": "pass",
+    "TestMustHaveExec/MustHaveExec": "pass"
+  },
+  "matched": true,
+  "skipped": [
+    "TestCleanCmdEnvPWD"
+  ],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

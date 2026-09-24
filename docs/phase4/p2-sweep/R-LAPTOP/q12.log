@@ -1,0 +1,25 @@
+PS=5.1.26100.9444
+GoTargetOS present=False
+DOTNET_Tiered*/DOTNET_TC_*/COMPlus_* names: []
+NUGET_API_KEY present=False NuGetCertFingerprint present=False
+GOFLAGS env present=False
+logicalCPUs=16 RAM_GB=31.3 lastBoot=2026-09-19T19:00:01.5000000Z uptime_h=108.1
+git=git version 2.42.0.windows.2
+freeGB C: (wt and profile drive)=99.4 profileDrive=C: tempDrive=C:
+go2cs.exe by image path=0
+test/battery processes: 
+dotnet processes=1 go processes=0
+LongPathsEnabled=0
+PartOfDomain=True
+gcc resolves=False
+cc resolves=False
+clang resolves=False
+The regular expression pattern ^.*\(Git|msys64|usr)\ is not valid.
+At <evidence-root>\q12.ps1:17 char:1
++ "echo executable on PATH=" + [bool](Get-Command echo -CommandType App ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (^.*\(Git|msys64|usr)\:String) [], RuntimeException
+    + FullyQualifiedErrorId : InvalidRegularExpression
+ 
+NET: Wi-Fi [Private, Internet]
+WSL distros running=3

@@ -1,0 +1,45 @@
+{
+  "package": "path",
+  "status": "validated",
+  "go": {
+    "TestBase": "pass",
+    "TestClean": "pass",
+    "TestCleanMallocs": "pass",
+    "TestDir": "pass",
+    "TestExt": "pass",
+    "TestIsAbs": "pass",
+    "TestJoin": "pass",
+    "TestMatch": "pass",
+    "TestSplit": "pass"
+  },
+  "csharp": {
+    "TestBase": "pass",
+    "TestClean": "pass",
+    "TestCleanMallocs": "pass",
+    "TestDir": "pass",
+    "TestExt": "pass",
+    "TestIsAbs": "pass",
+    "TestJoin": "pass",
+    "TestMatch": "pass",
+    "TestSplit": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "ExampleBase (example): example execution is deferred to Phase 4D",
+    "ExampleClean (example): example execution is deferred to Phase 4D",
+    "ExampleDir (example): example execution is deferred to Phase 4D",
+    "ExampleExt (example): example execution is deferred to Phase 4D",
+    "ExampleIsAbs (example): example execution is deferred to Phase 4D",
+    "ExampleJoin (example): example execution is deferred to Phase 4D",
+    "ExampleMatch (example): example execution is deferred to Phase 4D",
+    "ExampleSplit (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

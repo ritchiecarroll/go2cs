@@ -1,0 +1,26 @@
+{
+  "package": "benchmarks",
+  "status": "validated",
+  "go": {
+    "TestHandlers": "pass",
+    "TestHandlers/async": "pass",
+    "TestHandlers/text": "pass"
+  },
+  "csharp": {
+    "TestHandlers": "pass",
+    "TestHandlers/async": "pass",
+    "TestHandlers/text": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "BenchmarkAttrs (benchmark): benchmark execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

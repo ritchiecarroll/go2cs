@@ -1,0 +1,5 @@
+ M docs/validation/index.md
+ M src/core/syscall/syscall_windows_test.cs
+ M src/core/syscall/windows/package_init.cs
+ M src/core/syscall/windows/security_windows.cs.auto
+?? src/run-validated-sweep.p2-R-LAPTOP.ps1

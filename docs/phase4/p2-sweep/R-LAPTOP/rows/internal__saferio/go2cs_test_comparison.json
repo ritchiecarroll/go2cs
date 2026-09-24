@@ -1,0 +1,52 @@
+{
+  "package": "saferio",
+  "status": "validated",
+  "go": {
+    "TestReadData": "pass",
+    "TestReadData/large": "pass",
+    "TestReadData/large-EOF": "pass",
+    "TestReadData/large-UnexpectedEOF": "pass",
+    "TestReadData/maxint": "pass",
+    "TestReadData/small": "pass",
+    "TestReadData/small-EOF": "pass",
+    "TestReadDataAt": "pass",
+    "TestReadDataAt/SectionReader": "pass",
+    "TestReadDataAt/large": "pass",
+    "TestReadDataAt/maxint": "pass",
+    "TestReadDataAt/small": "pass",
+    "TestSliceCap": "pass",
+    "TestSliceCap/large": "pass",
+    "TestSliceCap/maxint": "pass",
+    "TestSliceCap/overflow": "pass",
+    "TestSliceCap/small": "pass"
+  },
+  "csharp": {
+    "TestReadData": "pass",
+    "TestReadData/large": "pass",
+    "TestReadData/large-EOF": "pass",
+    "TestReadData/large-UnexpectedEOF": "pass",
+    "TestReadData/maxint": "pass",
+    "TestReadData/small": "pass",
+    "TestReadData/small-EOF": "pass",
+    "TestReadDataAt": "pass",
+    "TestReadDataAt/SectionReader": "pass",
+    "TestReadDataAt/large": "pass",
+    "TestReadDataAt/maxint": "pass",
+    "TestReadDataAt/small": "pass",
+    "TestSliceCap": "pass",
+    "TestSliceCap/large": "pass",
+    "TestSliceCap/maxint": "pass",
+    "TestSliceCap/overflow": "pass",
+    "TestSliceCap/small": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

@@ -1,0 +1,17 @@
+diff --git a/src/core/internal/testenv/package_init.cs b/src/core/internal/testenv/package_init.cs
+index db521963d9..c135683a0f 100644
+--- a/src/core/internal/testenv/package_init.cs
++++ b/src/core/internal/testenv/package_init.cs
+@@ -10,5 +10,12 @@ partial class testenv_package {
+     static testenv_package() {
+         initᴛtryExec();
+         initᴛtryGoBuild();
++        initᴛᴛtests();
+     }
++
++    // -tests hook: implemented by the internal test variant's relocated-initializer
++    // file when its _test.go files need init-order relocation into this same class;
++    // erased entirely (declaration and call) when unimplemented — the production
++    // compile set excludes the *_test.cs implementation.
++    static partial void initᴛᴛtests();
+ } // end testenv_package

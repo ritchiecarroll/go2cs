@@ -1,0 +1,310 @@
+{
+  "package": "syscall",
+  "status": "validated",
+  "go": {
+    "TestChangingProcessParent": "pass",
+    "TestComputerName": "pass",
+    "TestEnv": "pass",
+    "TestEscapeArg": "pass",
+    "TestExecErrPermutedFds": "pass",
+    "TestGetStartupInfo": "pass",
+    "TestGettimeofday": "pass",
+    "TestGetwd_DoesNotPanicWhenPathIsLong": "pass",
+    "TestOpen": "pass",
+    "TestStdioAreInheritable": "skip",
+    "TestSyscallAllocations": "pass",
+    "TestSyscallAllocations/Syscall": "pass",
+    "TestSyscallAllocations/SyscallN": "pass",
+    "TestTOKEN_ALL_ACCESS": "pass",
+    "TestWTF16Golden": "pass",
+    "TestWTF16Golden/00": "pass",
+    "TestWTF16Golden/5C": "pass",
+    "TestWTF16Golden/7F": "pass",
+    "TestWTF16Golden/C280": "pass",
+    "TestWTF16Golden/D78A": "pass",
+    "TestWTF16Golden/DFBF": "pass",
+    "TestWTF16Golden/E0A080": "pass",
+    "TestWTF16Golden/E2B0BC": "pass",
+    "TestWTF16Golden/EDA080": "pass",
+    "TestWTF16Golden/EDA0800A": "pass",
+    "TestWTF16Golden/EDA080EDA080": "pass",
+    "TestWTF16Golden/EDA080F09D8C86EDA080": "pass",
+    "TestWTF16Golden/EDA6AF": "pass",
+    "TestWTF16Golden/EDAFBF": "pass",
+    "TestWTF16Golden/EDB080": "pass",
+    "TestWTF16Golden/EDB0800A": "pass",
+    "TestWTF16Golden/EDB080EDB080": "pass",
+    "TestWTF16Golden/EDB080F09D8C86EDB080": "pass",
+    "TestWTF16Golden/EDBBAE": "pass",
+    "TestWTF16Golden/EDBFBF": "pass",
+    "TestWTF16Golden/EFBFBF": "pass",
+    "TestWTF16Golden/F0908080": "pass",
+    "TestWTF16Golden/F09D8C86": "pass",
+    "TestWTF16Golden/F48FBFBF": "pass",
+    "TestWTF16Rountrip": "pass",
+    "TestWTF16Rountrip/00": "pass",
+    "TestWTF16Rountrip/5C": "pass",
+    "TestWTF16Rountrip/7F": "pass",
+    "TestWTF16Rountrip/C280": "pass",
+    "TestWTF16Rountrip/D78A": "pass",
+    "TestWTF16Rountrip/DFBF": "pass",
+    "TestWTF16Rountrip/E0A080": "pass",
+    "TestWTF16Rountrip/E2B0BC": "pass",
+    "TestWTF16Rountrip/EDA080": "pass",
+    "TestWTF16Rountrip/EDA0800A": "pass",
+    "TestWTF16Rountrip/EDA080EDA080": "pass",
+    "TestWTF16Rountrip/EDA080F09D8C86EDA080": "pass",
+    "TestWTF16Rountrip/EDA6AF": "pass",
+    "TestWTF16Rountrip/EDAFBF": "pass",
+    "TestWTF16Rountrip/EDB080": "pass",
+    "TestWTF16Rountrip/EDB0800A": "pass",
+    "TestWTF16Rountrip/EDB080EDB080": "pass",
+    "TestWTF16Rountrip/EDB080F09D8C86EDB080": "pass",
+    "TestWTF16Rountrip/EDBBAE": "pass",
+    "TestWTF16Rountrip/EDBFBF": "pass",
+    "TestWTF16Rountrip/EFBFBF": "pass",
+    "TestWTF16Rountrip/F0908080": "pass",
+    "TestWTF16Rountrip/F09D8C86": "pass",
+    "TestWTF16Rountrip/F48FBFBF": "pass",
+    "TestWin32finddata": "pass"
+  },
+  "csharp": {
+    "TestChangingProcessParent": "pass",
+    "TestComputerName": "pass",
+    "TestEnv": "pass",
+    "TestEscapeArg": "pass",
+    "TestExecErrPermutedFds": "pass",
+    "TestGetStartupInfo": "pass",
+    "TestGettimeofday": "pass",
+    "TestGetwd_DoesNotPanicWhenPathIsLong": "pass",
+    "TestOpen": "pass",
+    "TestStdioAreInheritable": "skip",
+    "TestSyscallAllocations": "pass",
+    "TestSyscallAllocations/Syscall": "pass",
+    "TestSyscallAllocations/SyscallN": "pass",
+    "TestTOKEN_ALL_ACCESS": "pass",
+    "TestWTF16Golden": "pass",
+    "TestWTF16Golden/00": "pass",
+    "TestWTF16Golden/5C": "pass",
+    "TestWTF16Golden/7F": "pass",
+    "TestWTF16Golden/C280": "pass",
+    "TestWTF16Golden/D78A": "pass",
+    "TestWTF16Golden/DFBF": "pass",
+    "TestWTF16Golden/E0A080": "pass",
+    "TestWTF16Golden/E2B0BC": "pass",
+    "TestWTF16Golden/EDA080": "pass",
+    "TestWTF16Golden/EDA0800A": "pass",
+    "TestWTF16Golden/EDA080EDA080": "pass",
+    "TestWTF16Golden/EDA080F09D8C86EDA080": "pass",
+    "TestWTF16Golden/EDA6AF": "pass",
+    "TestWTF16Golden/EDAFBF": "pass",
+    "TestWTF16Golden/EDB080": "pass",
+    "TestWTF16Golden/EDB0800A": "pass",
+    "TestWTF16Golden/EDB080EDB080": "pass",
+    "TestWTF16Golden/EDB080F09D8C86EDB080": "pass",
+    "TestWTF16Golden/EDBBAE": "pass",
+    "TestWTF16Golden/EDBFBF": "pass",
+    "TestWTF16Golden/EFBFBF": "pass",
+    "TestWTF16Golden/F0908080": "pass",
+    "TestWTF16Golden/F09D8C86": "pass",
+    "TestWTF16Golden/F48FBFBF": "pass",
+    "TestWTF16Rountrip": "pass",
+    "TestWTF16Rountrip/00": "pass",
+    "TestWTF16Rountrip/5C": "pass",
+    "TestWTF16Rountrip/7F": "pass",
+    "TestWTF16Rountrip/C280": "pass",
+    "TestWTF16Rountrip/D78A": "pass",
+    "TestWTF16Rountrip/DFBF": "pass",
+    "TestWTF16Rountrip/E0A080": "pass",
+    "TestWTF16Rountrip/E2B0BC": "pass",
+    "TestWTF16Rountrip/EDA080": "pass",
+    "TestWTF16Rountrip/EDA0800A": "pass",
+    "TestWTF16Rountrip/EDA080EDA080": "pass",
+    "TestWTF16Rountrip/EDA080F09D8C86EDA080": "pass",
+    "TestWTF16Rountrip/EDA6AF": "pass",
+    "TestWTF16Rountrip/EDAFBF": "pass",
+    "TestWTF16Rountrip/EDB080": "pass",
+    "TestWTF16Rountrip/EDB0800A": "pass",
+    "TestWTF16Rountrip/EDB080EDB080": "pass",
+    "TestWTF16Rountrip/EDB080F09D8C86EDB080": "pass",
+    "TestWTF16Rountrip/EDBBAE": "pass",
+    "TestWTF16Rountrip/EDBFBF": "pass",
+    "TestWTF16Rountrip/EFBFBF": "pass",
+    "TestWTF16Rountrip/F0908080": "pass",
+    "TestWTF16Rountrip/F09D8C86": "pass",
+    "TestWTF16Rountrip/F48FBFBF": "pass",
+    "TestWin32finddata": "pass"
+  },
+  "matched": true,
+  "skipped": [
+    "TestStdioAreInheritable"
+  ],
+  "disclosed": [],
+  "excluded": [
+    "ExampleLoadLibrary (example): example execution is deferred to Phase 4D",
+    "FuzzDecodeWTF16 (fuzz): fuzz execution is deferred to Phase 4D",
+    "FuzzEncodeWTF16 (fuzz): fuzz execution is deferred to Phase 4D",
+    "FuzzUTF16FromString (fuzz): fuzz execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "outOfScopeDisclosures": [
+    {
+      "name": "TestAllThreadsSyscall",
+      "class": "cgo-configuration",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestAllThreadsSyscallBlockedSyscall",
+      "class": "cgo-configuration",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestAllThreadsSyscallError",
+      "class": "cgo-configuration",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestAmbientCaps",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestAmbientCapsUserns",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestCloneNEWUSERAndRemap/setgroups=false",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestCloneNEWUSERAndRemap/setgroups=true",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestCloneTimeNamespace",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestDeathSignalSetuid",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestEmptyCredGroupsDisableSetgroups",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestExecPtrace",
+      "class": "host-limit",
+      "platforms": [
+        "linux",
+        "darwin"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestGroupCleanup",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestGroupCleanupUserNamespace",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestPidFDWithUserNS",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestPrlimitFileLimit",
+      "class": "host-limit",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestUnshare",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestUnshareMountNameSpace",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestUnshareMountNameSpaceChroot",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestUnshareUidGidMapping",
+      "class": "platform-skip",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    }
+  ],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

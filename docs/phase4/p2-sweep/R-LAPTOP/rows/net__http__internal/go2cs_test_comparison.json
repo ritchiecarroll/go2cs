@@ -1,0 +1,50 @@
+{
+  "package": "internal",
+  "status": "validated",
+  "go": {
+    "TestChunk": "pass",
+    "TestChunkEndReadError": "pass",
+    "TestChunkInvalidInputs": "pass",
+    "TestChunkInvalidInputs/bare_LF_in_chunk_data": "pass",
+    "TestChunkInvalidInputs/bare_LF_in_chunk_extension": "pass",
+    "TestChunkInvalidInputs/bare_LF_in_chunk_size": "pass",
+    "TestChunkInvalidInputs/extra_LF_in_chunk_size": "pass",
+    "TestChunkReadMultiple": "pass",
+    "TestChunkReadPartial": "pass",
+    "TestChunkReaderAllocs": "pass",
+    "TestChunkReaderByteAtATime": "pass",
+    "TestChunkReaderTooMuchOverhead": "pass",
+    "TestChunkReadingIgnoresExtensions": "pass",
+    "TestIncompleteChunk": "pass",
+    "TestParseHexUint": "pass"
+  },
+  "csharp": {
+    "TestChunk": "pass",
+    "TestChunkEndReadError": "pass",
+    "TestChunkInvalidInputs": "pass",
+    "TestChunkInvalidInputs/bare_LF_in_chunk_data": "pass",
+    "TestChunkInvalidInputs/bare_LF_in_chunk_extension": "pass",
+    "TestChunkInvalidInputs/bare_LF_in_chunk_size": "pass",
+    "TestChunkInvalidInputs/extra_LF_in_chunk_size": "pass",
+    "TestChunkReadMultiple": "pass",
+    "TestChunkReadPartial": "pass",
+    "TestChunkReaderAllocs": "fail",
+    "TestChunkReaderByteAtATime": "pass",
+    "TestChunkReaderTooMuchOverhead": "pass",
+    "TestChunkReadingIgnoresExtensions": "pass",
+    "TestIncompleteChunk": "pass",
+    "TestParseHexUint": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [
+    "TestChunkReaderAllocs (deferred): exact-count AllocsPerRun assert (fails above 1.5, i.e. wants 1): the measured loop constructs a fresh reader every iteration, and the converted NewChunkedReader emits TWO managed objects where Go allocates one - the box Ꮡ(new chunkedReader(r: br)), which is the direct analogue of Go's \u0026chunkedReader{}, plus a chunkedReaderжReader interface shell, because C# has no two-word interface value and the shell IS the itab+data fused into an object (docs/phase4/DESIGN-iface-shell-caching.md section 2). Measured 2 objects/run against Go's 1, deterministically. Not amortizable for this shape: P3's per-referent shell cache is keyed on the ж-box and this loop mints a new reader each iteration, so a fresh shell is required regardless - the same doc rules that nothing removes the shell allocation short of IDynamicInterfaceCastable. Distinct from alloc-count-semantics: go2cs's counter is a true object count here (a lower bound on the real total), not an incomparable byte-derived shim, so the divergence is a genuine profile difference and is disclosed as one. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O1): alloc-profile -\u003e deferred. The 2026-08-25 ATTRIBUTION above is SUPERSEDED: the two counted objects are the box at chunked.cs:33 (the direct analogue of Go's \u0026chunkedReader{}, Go's own allocation) and `chunkedReader.buf`, an `array\u003cbyte\u003e buf = new(2)` field (chunked.cs:40), which is the excess. The chunkedReaderжReader shell at :33 and the per-read bufio shell at :114 are UNCOUNTED (AllocationCounter.cs:50-53). The shell's structural ruling itself stands."
+  ],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

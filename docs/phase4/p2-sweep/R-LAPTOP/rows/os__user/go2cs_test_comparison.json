@@ -1,0 +1,57 @@
+{
+  "package": "user",
+  "status": "validated",
+  "go": {
+    "TestCurrent": "pass",
+    "TestCurrentNetapi32": "pass",
+    "TestGroupIds": "pass",
+    "TestGroupIdsTestUser": "skip",
+    "TestImpersonated": "skip",
+    "TestImpersonatedSelf": "pass",
+    "TestImpersonatedSelf/0": "pass",
+    "TestImpersonatedSelf/1": "pass",
+    "TestImpersonatedSelf/2": "pass",
+    "TestImpersonatedSelf/3": "pass",
+    "TestLookup": "pass",
+    "TestLookupGroup": "pass",
+    "TestLookupGroupIdServiceAccount": "pass",
+    "TestLookupGroupServiceAccount": "pass",
+    "TestLookupId": "pass",
+    "TestLookupIdServiceAccount": "pass",
+    "TestLookupServiceAccount": "pass"
+  },
+  "csharp": {
+    "TestCurrent": "pass",
+    "TestCurrentNetapi32": "pass",
+    "TestGroupIds": "pass",
+    "TestGroupIdsTestUser": "skip",
+    "TestImpersonated": "skip",
+    "TestImpersonatedSelf": "pass",
+    "TestImpersonatedSelf/0": "pass",
+    "TestImpersonatedSelf/1": "pass",
+    "TestImpersonatedSelf/2": "pass",
+    "TestImpersonatedSelf/3": "pass",
+    "TestLookup": "pass",
+    "TestLookupGroup": "pass",
+    "TestLookupGroupIdServiceAccount": "pass",
+    "TestLookupGroupServiceAccount": "pass",
+    "TestLookupId": "pass",
+    "TestLookupIdServiceAccount": "pass",
+    "TestLookupServiceAccount": "pass"
+  },
+  "matched": true,
+  "skipped": [
+    "TestGroupIdsTestUser",
+    "TestImpersonated"
+  ],
+  "disclosed": [],
+  "excluded": [
+    "BenchmarkCurrent (benchmark): benchmark execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

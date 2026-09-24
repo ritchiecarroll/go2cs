@@ -1,0 +1,34 @@
+{
+  "package": "fstest",
+  "status": "validated",
+  "go": {
+    "TestDash": "pass",
+    "TestMapFS": "pass",
+    "TestMapFSChmodDot": "pass",
+    "TestMapFSFileInfoName": "pass",
+    "TestShuffledFS": "pass",
+    "TestSymlink": "skip",
+    "TestTestFSWrappedErrors": "pass"
+  },
+  "csharp": {
+    "TestDash": "pass",
+    "TestMapFS": "pass",
+    "TestMapFSChmodDot": "pass",
+    "TestMapFSFileInfoName": "pass",
+    "TestShuffledFS": "pass",
+    "TestSymlink": "skip",
+    "TestTestFSWrappedErrors": "pass"
+  },
+  "matched": true,
+  "skipped": [
+    "TestSymlink"
+  ],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

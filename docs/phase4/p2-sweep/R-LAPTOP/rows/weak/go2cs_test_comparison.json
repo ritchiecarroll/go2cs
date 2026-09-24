@@ -1,0 +1,30 @@
+{
+  "package": "weak",
+  "status": "validated",
+  "go": {
+    "TestIssue69210": "pass",
+    "TestIssue70739": "pass",
+    "TestPointer": "pass",
+    "TestPointerEquality": "pass",
+    "TestPointerFinalizer": "pass",
+    "TestPointerSize": "pass"
+  },
+  "csharp": {
+    "TestIssue69210": "pass",
+    "TestIssue70739": "pass",
+    "TestPointer": "pass",
+    "TestPointerEquality": "pass",
+    "TestPointerFinalizer": "pass",
+    "TestPointerSize": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

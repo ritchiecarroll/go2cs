@@ -1,0 +1,68 @@
+{
+  "package": "poll",
+  "status": "validated",
+  "go": {
+    "TestConsume": "pass",
+    "TestEOFError": "pass",
+    "TestFileFdsAreInitialised": "pass",
+    "TestMutexClose": "pass",
+    "TestMutexCloseUnblock": "pass",
+    "TestMutexLock": "pass",
+    "TestMutexOverflowPanic": "pass",
+    "TestMutexPanic": "pass",
+    "TestMutexStress": "pass",
+    "TestRead": "pass",
+    "TestRead/SpecialFile": "pass",
+    "TestReadError": "pass",
+    "TestReadError/ErrNotPollable": "skip",
+    "TestSerialFdsAreInitialised": "fail",
+    "TestSerialFdsAreInitialised/COM1": "pass",
+    "TestSerialFdsAreInitialised/COM2": "pass",
+    "TestSerialFdsAreInitialised/COM3": "pass",
+    "TestSerialFdsAreInitialised/COM4": "fail",
+    "TestWSASocketConflict": "pass"
+  },
+  "csharp": {
+    "TestConsume": "pass",
+    "TestEOFError": "pass",
+    "TestFileFdsAreInitialised": "pass",
+    "TestMutexClose": "pass",
+    "TestMutexCloseUnblock": "pass",
+    "TestMutexLock": "pass",
+    "TestMutexOverflowPanic": "pass",
+    "TestMutexPanic": "pass",
+    "TestMutexStress": "pass",
+    "TestRead": "pass",
+    "TestRead/SpecialFile": "pass",
+    "TestReadError": "pass",
+    "TestReadError/ErrNotPollable": "skip",
+    "TestSerialFdsAreInitialised": "fail",
+    "TestSerialFdsAreInitialised/COM1": "pass",
+    "TestSerialFdsAreInitialised/COM2": "pass",
+    "TestSerialFdsAreInitialised/COM3": "pass",
+    "TestSerialFdsAreInitialised/COM4": "fail",
+    "TestWSASocketConflict": "pass"
+  },
+  "matched": true,
+  "skipped": [
+    "TestReadError/ErrNotPollable"
+  ],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "outOfScopeDisclosures": [
+    {
+      "name": "TestSplicePipePool",
+      "class": "codegen-liveness",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    }
+  ],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

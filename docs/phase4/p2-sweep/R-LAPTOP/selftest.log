@@ -1,0 +1,49 @@
+verdict parser:
+  ok    plain PASS -> PASS|4759|none|1761|
+  ok    PASS release-tiered -> PASS|197|none|119|
+  ok    host-conditional PASS -> PASS|67|host-conditional|40|
+  ok    host-conditional-disclosure -> PASS|115|host-conditional-disclosure|223|
+  ok    capability-absent PASS -> PASS|1340|capability-absent|400|
+  ok    host-limit PASS -> PASS|1340|host-limit|885|
+  ok    COUNT -> COUNT|4758|none|900|
+  ok    DISC -> DISC|4759|none|900|
+  ok    CVAC -> CVAC|4759|none|900|
+  ok    FAIL -> FAIL||none|900|
+  ok    ORACLE -> ORACLE||none|900|
+  ok    RERUN then FLAKED then PASS -> PASS|4759|oracle-rerun-discharge|900|
+  ok    RERUN then ORACLE -> ORACLE||none|900|
+  ok    RERUN then PASS without note -> PASS|4759|none|900|RERUN without ORACLE or the FLAKED note
+  ok    column-0 look-alike -> ||none||no verdict line
+  ok    8-space tail line -> ||none||no verdict line
+  ok    no-verdict log -> ||none||no verdict line
+  ok    doubled verdict -> ||none||doubled verdict line
+  ok    other row only -> ||none||no verdict line
+  ok    release-tiered suffix read -> release-tiered
+  ok    summary line read -> sweep: 1 pass / 0 fail  (12s)
+refusal markers (in .err and .log):
+  ok    marker in .err: DISK PREFLIGHT -> DISK PREFLIGHT
+  ok    marker in .log: DISK PREFLIGHT -> DISK PREFLIGHT
+  ok    marker in .err: Toolchain pin -> Toolchain pin
+  ok    marker in .log: Toolchain pin -> Toolchain pin
+  ok    marker in .err: No banked packages matched -> No banked packages matched
+  ok    marker in .log: No banked packages matched -> No banked packages matched
+  ok    marker in .err: Converter not built -> Converter not built
+  ok    marker in .log: Converter not built -> Converter not built
+  ok    marker in .err: converter build failed -> converter build failed
+  ok    marker in .log: converter build failed -> converter build failed
+  ok    S0.4 plant-refusal.log names its marker -> No banked packages matched
+page reader:
+  ok    page EQUAL -> EQUAL
+  ok    page MOVED (one cell) -> MOVED:TestB
+  ok    page MOVED (counts) -> MOVED counts 100|1->99|1
+  ok    page NOT REWRITTEN -> NOT REWRITTEN
+  ok    page counts N|D -> 100|1
+  ok    real page crypto/tls N|D|rows -> 4759|1|4760
+  ok    real page internal/gover N|D -> 5|0
+NUL-count tell over a D2-shape redirected log:
+  ok    D2 log NUL count -> 0
+  ok    D2 log carries Write-Host text -> True
+duration and budget arithmetic:
+  ok    10m -> 10
+  ok    2h -> 120
+SELF-TEST PASSED: 0 failure(s)

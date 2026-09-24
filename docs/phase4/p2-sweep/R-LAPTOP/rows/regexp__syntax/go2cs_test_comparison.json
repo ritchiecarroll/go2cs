@@ -1,0 +1,45 @@
+{
+  "package": "syntax",
+  "status": "validated",
+  "go": {
+    "TestAppendRangeCollapse": "pass",
+    "TestCompile": "pass",
+    "TestFoldConstants": "pass",
+    "TestParseFoldCase": "pass",
+    "TestParseInvalidRegexps": "pass",
+    "TestParseLiteral": "pass",
+    "TestParseMatchNL": "pass",
+    "TestParseNoMatchNL": "pass",
+    "TestParseSimple": "pass",
+    "TestSimplify": "pass",
+    "TestString": "pass",
+    "TestToStringEquivalentParse": "pass"
+  },
+  "csharp": {
+    "TestAppendRangeCollapse": "pass",
+    "TestCompile": "pass",
+    "TestFoldConstants": "pass",
+    "TestParseFoldCase": "pass",
+    "TestParseInvalidRegexps": "pass",
+    "TestParseLiteral": "pass",
+    "TestParseMatchNL": "pass",
+    "TestParseNoMatchNL": "pass",
+    "TestParseSimple": "pass",
+    "TestSimplify": "pass",
+    "TestString": "pass",
+    "TestToStringEquivalentParse": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "BenchmarkEmptyOpContext (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkIsWordChar (benchmark): benchmark execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

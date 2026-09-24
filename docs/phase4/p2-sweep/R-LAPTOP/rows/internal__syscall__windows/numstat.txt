@@ -1,0 +1,2 @@
+3	3	src/core/internal/syscall/windows/exec_windows_test.cs.auto
+7	0	src/core/internal/syscall/windows/windows/package_init.cs

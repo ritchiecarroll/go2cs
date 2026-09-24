@@ -1,0 +1,26 @@
+{
+  "package": "sys",
+  "status": "validated",
+  "go": {
+    "TestBswap32": "pass",
+    "TestBswap64": "pass",
+    "TestTrailingZeros32": "pass",
+    "TestTrailingZeros64": "pass"
+  },
+  "csharp": {
+    "TestBswap32": "pass",
+    "TestBswap64": "pass",
+    "TestTrailingZeros32": "pass",
+    "TestTrailingZeros64": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

@@ -1,0 +1,17 @@
+diff --git a/src/core/syscall/windows/package_init.cs b/src/core/syscall/windows/package_init.cs
+index e4b992a299..a2cd8c6e85 100644
+--- a/src/core/syscall/windows/package_init.cs
++++ b/src/core/syscall/windows/package_init.cs
+@@ -12,5 +12,12 @@ partial class syscall_package {
+         initᴛStdin();
+         initᴛStdout();
+         initᴛStderr();
++        initᴛᴛtests();
+     }
++
++    // -tests hook: implemented by the internal test variant's relocated-initializer
++    // file when its _test.go files need init-order relocation into this same class;
++    // erased entirely (declaration and call) when unimplemented — the production
++    // compile set excludes the *_test.cs implementation.
++    static partial void initᴛᴛtests();
+ } // end syscall_package

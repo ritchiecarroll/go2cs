@@ -1,0 +1,58 @@
+{
+  "package": "maps",
+  "status": "validated",
+  "go": {
+    "TestAll": "pass",
+    "TestClone": "pass",
+    "TestCloneLarge": "pass",
+    "TestCloneNil": "pass",
+    "TestCloneWithDelete": "pass",
+    "TestCloneWithMapAssign": "pass",
+    "TestCollect": "pass",
+    "TestCopy": "pass",
+    "TestDeleteFunc": "pass",
+    "TestEqual": "pass",
+    "TestEqualFunc": "pass",
+    "TestInsert": "pass",
+    "TestKeys": "pass",
+    "TestValues": "pass"
+  },
+  "csharp": {
+    "TestAll": "pass",
+    "TestClone": "pass",
+    "TestCloneLarge": "pass",
+    "TestCloneNil": "pass",
+    "TestCloneWithDelete": "pass",
+    "TestCloneWithMapAssign": "pass",
+    "TestCollect": "pass",
+    "TestCopy": "pass",
+    "TestDeleteFunc": "pass",
+    "TestEqual": "pass",
+    "TestEqualFunc": "pass",
+    "TestInsert": "pass",
+    "TestKeys": "pass",
+    "TestValues": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "BenchmarkMapClone (benchmark): benchmark execution is deferred to Phase 4D",
+    "ExampleAll (example): example execution is deferred to Phase 4D",
+    "ExampleClone (example): example execution is deferred to Phase 4D",
+    "ExampleCollect (example): example execution is deferred to Phase 4D",
+    "ExampleCopy (example): example execution is deferred to Phase 4D",
+    "ExampleDeleteFunc (example): example execution is deferred to Phase 4D",
+    "ExampleEqual (example): example execution is deferred to Phase 4D",
+    "ExampleEqualFunc (example): example execution is deferred to Phase 4D",
+    "ExampleInsert (example): example execution is deferred to Phase 4D",
+    "ExampleKeys (example): example execution is deferred to Phase 4D",
+    "ExampleValues (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

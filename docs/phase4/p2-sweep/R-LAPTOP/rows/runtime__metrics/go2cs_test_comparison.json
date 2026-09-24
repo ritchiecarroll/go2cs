@@ -1,0 +1,25 @@
+{
+  "package": "metrics",
+  "status": "validated",
+  "go": {
+    "TestDocs": "pass",
+    "TestNames": "pass"
+  },
+  "csharp": {
+    "TestDocs": "pass",
+    "TestNames": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "ExampleRead_readingAllMetrics (example): example execution is deferred to Phase 4D",
+    "ExampleRead_readingOneMetric (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

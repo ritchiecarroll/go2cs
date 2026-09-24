@@ -1,0 +1,20 @@
+{
+  "package": "platform",
+  "status": "validated",
+  "go": {
+    "TestGenerated": "pass"
+  },
+  "csharp": {
+    "TestGenerated": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

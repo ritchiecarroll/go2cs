@@ -1,0 +1,30 @@
+{
+  "package": "registry",
+  "status": "validated",
+  "go": {
+    "TestCreateOpenDeleteKey": "pass",
+    "TestExpandString": "pass",
+    "TestGetMUIStringValue": "pass",
+    "TestInvalidValues": "pass",
+    "TestReadSubKeyNames": "pass",
+    "TestValues": "pass"
+  },
+  "csharp": {
+    "TestCreateOpenDeleteKey": "pass",
+    "TestExpandString": "pass",
+    "TestGetMUIStringValue": "pass",
+    "TestInvalidValues": "pass",
+    "TestReadSubKeyNames": "pass",
+    "TestValues": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

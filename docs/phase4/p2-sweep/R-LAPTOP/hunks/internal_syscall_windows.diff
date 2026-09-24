@@ -1,0 +1,17 @@
+diff --git a/src/core/internal/syscall/windows/windows/package_init.cs b/src/core/internal/syscall/windows/windows/package_init.cs
+index fdc024343d..8e161e54ee 100644
+--- a/src/core/internal/syscall/windows/windows/package_init.cs
++++ b/src/core/internal/syscall/windows/windows/package_init.cs
+@@ -10,5 +10,12 @@ partial class windows_package {
+     static windows_package() {
+         initᴛSupportTCPInitialRTONoSYNRetransmissions();
+         initᴛinitTCPKeepAlive();
++        initᴛᴛtests();
+     }
++
++    // -tests hook: implemented by the internal test variant's relocated-initializer
++    // file when its _test.go files need init-order relocation into this same class;
++    // erased entirely (declaration and call) when unimplemented — the production
++    // compile set excludes the *_test.cs implementation.
++    static partial void initᴛᴛtests();
+ } // end windows_package

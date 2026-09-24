@@ -1,0 +1,59 @@
+{
+  "package": "scanner",
+  "status": "validated",
+  "go": {
+    "TestError": "pass",
+    "TestIOError": "pass",
+    "TestInvalidExponent": "pass",
+    "TestIssue29723": "pass",
+    "TestIssue30320": "pass",
+    "TestIssue50909": "pass",
+    "TestNext": "pass",
+    "TestNextEOFHandling": "pass",
+    "TestNumbers": "pass",
+    "TestPos": "pass",
+    "TestPosition": "pass",
+    "TestScan": "pass",
+    "TestScanCustomIdent": "pass",
+    "TestScanEOFHandling": "pass",
+    "TestScanNext": "pass",
+    "TestScanSelectedMask": "pass",
+    "TestScanWhitespace": "pass",
+    "TestScanZeroMode": "pass"
+  },
+  "csharp": {
+    "TestError": "pass",
+    "TestIOError": "pass",
+    "TestInvalidExponent": "pass",
+    "TestIssue29723": "pass",
+    "TestIssue30320": "pass",
+    "TestIssue50909": "pass",
+    "TestNext": "pass",
+    "TestNextEOFHandling": "pass",
+    "TestNumbers": "pass",
+    "TestPos": "pass",
+    "TestPosition": "pass",
+    "TestScan": "pass",
+    "TestScanCustomIdent": "pass",
+    "TestScanEOFHandling": "pass",
+    "TestScanNext": "pass",
+    "TestScanSelectedMask": "pass",
+    "TestScanWhitespace": "pass",
+    "TestScanZeroMode": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "Example (example): example execution is deferred to Phase 4D",
+    "Example_isIdentRune (example): example execution is deferred to Phase 4D",
+    "Example_mode (example): example execution is deferred to Phase 4D",
+    "Example_whitespace (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

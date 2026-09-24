@@ -1,0 +1,458 @@
+2026-09-24T07:18:05Z DRIVER START pid=42316 host=R-LAPTOP shard=S-R lastBoot=2026-09-19T19:00:01.5000000Z
+2026-09-24T07:18:05Z PINS go version=[go version go1.24.13 windows/amd64] go env GOROOT=[<goroot>] go env GOFLAGS=[] GOTOOLCHAIN=local CGO_ENABLED=0 dotnet=10.0.400 NUGET_API_KEY=False NuGetCertFingerprint=False GoTargetOS=False tiering-names=[]
+2026-09-24T07:18:06Z LIST count=89 first=crypto/tls second=internal/gover last=weak
+2026-09-24T07:18:06Z LIST crypto/tls internal/gover internal/itoa internal/pkgbits internal/platform internal/poll internal/profile internal/reflectlite internal/runtime/atomic internal/runtime/maps internal/runtime/math internal/runtime/sys internal/saferio internal/singleflight internal/sync internal/syscall/windows internal/syscall/windows/registry internal/sysinfo internal/testenv internal/trace/internal/oldtrace internal/types/errors internal/xcoff internal/zstd io io/fs io/ioutil iter log log/slog log/slog/internal/benchmarks log/slog/internal/buffer maps math math/big math/bits math/cmplx math/rand math/rand/v2 mime mime/multipart mime/quotedprintable net/http/cgi net/http/cookiejar net/http/fcgi net/http/httptest net/http/httptrace net/http/httputil net/http/internal net/http/internal/ascii net/mail net/netip net/rpc net/rpc/jsonrpc net/smtp net/textproto net/url os/exec os/exec/internal/fdtest os/signal os/user path path/filepath plugin regexp regexp/syntax runtime/debug runtime/metrics slices sort strconv strings sync sync/atomic syscall testing testing/fstest testing/iotest testing/quick testing/slogtest text/scanner text/tabwriter text/template text/template/parse time unicode unicode/utf16 unicode/utf8 unique weak
+2026-09-24T07:18:06Z FLOORS count=12 archive/zip=60m crypto/dsa=120m crypto/internal/fips140/mlkem=30m crypto/mlkem=30m crypto/tls=60m go/parser=90m hash/maphash=60m index/suffixarray=120m net=120m net/http=60m sync/atomic=150m time=40m
+2026-09-24T07:18:06Z START GATE uptime_h=108.3 freeGB=98.7
+2026-09-24T07:18:07Z RESUME terminal=0 of 89
+2026-09-24T07:18:07Z crypto/tls: go env GOFLAGS before=[]
+2026-09-24T07:18:07Z ROW crypto/tls attempt=1 pkgTimeout=90m budget=390m freeGB=98.7 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter crypto/tls -Exact -SkipBuild -TestTimeout 90m]
+2026-09-24T07:48:13Z crypto/tls: go env GOFLAGS after=[]
+2026-09-24T07:48:15Z RESTORE (after crypto/tls): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:48:15Z DONE crypto/tls word=PASS got=4759 disc=UNREADABLE banked=4759|1 wall=1805s outer=1806s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 4759|1 run 4759|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:48:15Z   VERDICT: PASS  crypto/tls                         4759 [1805s]
+2026-09-24T07:48:15Z   SUMMARY: sweep: 1 pass / 0 fail  (1805s)
+2026-09-24T07:48:16Z ROW internal/gover attempt=1 pkgTimeout=10m budget=70m freeGB=95.1 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/gover -Exact -SkipBuild]
+2026-09-24T07:48:45Z RESTORE (after internal/gover): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:48:45Z DONE internal/gover word=PASS got=5 disc=UNREADABLE banked=5|0 wall=28s outer=29s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 5|0 run 5|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:48:45Z   VERDICT: PASS  internal/gover                     5 [28s]
+2026-09-24T07:48:45Z   SUMMARY: sweep: 1 pass / 0 fail  (28s)
+2026-09-24T07:48:46Z ROW internal/itoa attempt=1 pkgTimeout=10m budget=70m freeGB=94.9 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/itoa -Exact -SkipBuild]
+2026-09-24T07:49:14Z RESTORE (after internal/itoa): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:49:14Z DONE internal/itoa word=PASS got=3 disc=UNREADABLE banked=3|0 wall=27s outer=28s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 3|0 run 3|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:49:14Z   VERDICT: PASS  internal/itoa                      3 [27s]
+2026-09-24T07:49:14Z   SUMMARY: sweep: 1 pass / 0 fail  (27s)
+2026-09-24T07:49:15Z ROW internal/pkgbits attempt=1 pkgTimeout=10m budget=70m freeGB=94.6 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/pkgbits -Exact -SkipBuild]
+2026-09-24T07:49:53Z RESTORE (after internal/pkgbits): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:49:53Z DONE internal/pkgbits word=PASS got=2 disc=UNREADABLE banked=2|0 wall=36s outer=37s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 2|0 run 2|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:49:53Z   VERDICT: PASS  internal/pkgbits                   2 [36s]
+2026-09-24T07:49:53Z   SUMMARY: sweep: 1 pass / 0 fail  (36s)
+2026-09-24T07:49:53Z ROW internal/platform attempt=1 pkgTimeout=10m budget=70m freeGB=94.3 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/platform -Exact -SkipBuild]
+2026-09-24T07:50:39Z RESTORE (after internal/platform): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:50:39Z DONE internal/platform word=PASS got=1 disc=UNREADABLE banked=1|0 wall=43s outer=44s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 1|0 run 1|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:50:39Z   VERDICT: PASS  internal/platform                  1 [43s]
+2026-09-24T07:50:39Z   SUMMARY: sweep: 1 pass / 0 fail  (44s)
+2026-09-24T07:50:39Z ROW internal/poll attempt=1 pkgTimeout=10m budget=70m freeGB=94 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/poll -Exact -SkipBuild]
+2026-09-24T07:51:25Z RESTORE (after internal/poll): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:51:25Z DONE internal/poll word=PASS got=19 disc=UNREADABLE banked=19|0 wall=43s outer=44s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 19|0 run 19|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:51:25Z   VERDICT: PASS  internal/poll                      19 [43s]
+2026-09-24T07:51:25Z   SUMMARY: sweep: 1 pass / 0 fail  (43s)
+2026-09-24T07:51:25Z ROW internal/profile attempt=1 pkgTimeout=10m budget=70m freeGB=93.8 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/profile -Exact -SkipBuild]
+2026-09-24T07:52:07Z RESTORE (after internal/profile): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:52:07Z DONE internal/profile word=PASS got=1 disc=UNREADABLE banked=1|0 wall=40s outer=41s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 1|0 run 1|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=1 REVIEW[src/core/internal/profile/package_init.cs] recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:52:07Z   VERDICT: PASS  internal/profile                   1 [40s]
+2026-09-24T07:52:07Z   SUMMARY: sweep: 1 pass / 0 fail  (40s)
+2026-09-24T07:52:07Z ROW internal/reflectlite attempt=1 pkgTimeout=10m budget=70m freeGB=93.4 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/reflectlite -Exact -SkipBuild]
+2026-09-24T07:52:57Z RESTORE (after internal/reflectlite): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:52:57Z DONE internal/reflectlite word=PASS got=30 disc=UNREADABLE banked=30|0 wall=47s outer=48s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 30|0 run 30|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:52:57Z   VERDICT: PASS  internal/reflectlite               30 [47s]
+2026-09-24T07:52:57Z   SUMMARY: sweep: 1 pass / 0 fail  (47s)
+2026-09-24T07:52:57Z ROW internal/runtime/atomic attempt=1 pkgTimeout=10m budget=70m freeGB=93 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/runtime/atomic -Exact -SkipBuild]
+2026-09-24T07:53:32Z RESTORE (after internal/runtime/atomic): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:53:32Z DONE internal/runtime/atomic word=PASS got=16 disc=UNREADABLE banked=16|0 wall=33s outer=34s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 16|0 run 16|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:53:32Z   VERDICT: PASS  internal/runtime/atomic            16 [33s]
+2026-09-24T07:53:32Z   SUMMARY: sweep: 1 pass / 0 fail  (33s)
+2026-09-24T07:53:32Z ROW internal/runtime/maps attempt=1 pkgTimeout=10m budget=70m freeGB=92.8 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/runtime/maps -Exact -SkipBuild]
+2026-09-24T07:55:37Z RESTORE (after internal/runtime/maps): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:55:37Z DONE internal/runtime/maps word=PASS got=3 disc=UNREADABLE banked=3|108 wall=122s outer=123s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 3|108 run 3|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:55:37Z   VERDICT: PASS  internal/runtime/maps              3 [122s]
+2026-09-24T07:55:37Z   SUMMARY: sweep: 1 pass / 0 fail  (122s)
+2026-09-24T07:55:37Z ROW internal/runtime/math attempt=1 pkgTimeout=10m budget=70m freeGB=92.6 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/runtime/math -Exact -SkipBuild]
+2026-09-24T07:57:38Z RESTORE (after internal/runtime/math): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:57:38Z DONE internal/runtime/math word=PASS got=1 disc=UNREADABLE banked=1|0 wall=119s outer=119s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 1|0 run 1|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:57:38Z   VERDICT: PASS  internal/runtime/math              1 [119s]
+2026-09-24T07:57:38Z   SUMMARY: sweep: 1 pass / 0 fail  (119s)
+2026-09-24T07:57:38Z ROW internal/runtime/sys attempt=1 pkgTimeout=10m budget=70m freeGB=92.3 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/runtime/sys -Exact -SkipBuild]
+2026-09-24T07:58:04Z RESTORE (after internal/runtime/sys): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:58:04Z DONE internal/runtime/sys word=PASS got=4 disc=UNREADABLE banked=4|0 wall=24s outer=25s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 4|0 run 4|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:58:04Z   VERDICT: PASS  internal/runtime/sys               4 [24s]
+2026-09-24T07:58:04Z   SUMMARY: sweep: 1 pass / 0 fail  (24s)
+2026-09-24T07:58:05Z ROW internal/saferio attempt=1 pkgTimeout=10m budget=70m freeGB=92.1 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/saferio -Exact -SkipBuild]
+2026-09-24T07:58:31Z RESTORE (after internal/saferio): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:58:31Z DONE internal/saferio word=PASS got=17 disc=UNREADABLE banked=17|0 wall=24s outer=25s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 17|0 run 17|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:58:31Z   VERDICT: PASS  internal/saferio                   17 [24s]
+2026-09-24T07:58:31Z   SUMMARY: sweep: 1 pass / 0 fail  (24s)
+2026-09-24T07:58:31Z ROW internal/singleflight attempt=1 pkgTimeout=10m budget=70m freeGB=91.9 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/singleflight -Exact -SkipBuild]
+2026-09-24T07:59:01Z RESTORE (after internal/singleflight): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:59:01Z DONE internal/singleflight word=PASS got=5 disc=UNREADABLE banked=5|0 wall=27s outer=28s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 5|0 run 5|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:59:01Z   VERDICT: PASS  internal/singleflight              5 [27s]
+2026-09-24T07:59:01Z   SUMMARY: sweep: 1 pass / 0 fail  (27s)
+2026-09-24T07:59:01Z ROW internal/sync attempt=1 pkgTimeout=10m budget=70m freeGB=91.7 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/sync -Exact -SkipBuild]
+2026-09-24T07:59:46Z RESTORE (after internal/sync): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T07:59:46Z DONE internal/sync word=PASS got=106 disc=UNREADABLE banked=106|0 wall=43s outer=44s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 106|0 run 106|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T07:59:46Z   VERDICT: PASS  internal/sync                      106 [43s]
+2026-09-24T07:59:46Z   SUMMARY: sweep: 1 pass / 0 fail  (43s)
+2026-09-24T07:59:47Z ROW internal/syscall/windows attempt=1 pkgTimeout=10m budget=70m freeGB=91.5 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/syscall/windows -Exact -SkipBuild]
+2026-09-24T08:00:24Z RESTORE (after internal/syscall/windows): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:00:24Z DONE internal/syscall/windows word=PASS got=3 disc=UNREADABLE banked=3|0 wall=35s outer=36s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 3|0 run 3|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=1 productionContent=1 REVIEW[src/core/internal/syscall/windows/windows/package_init.cs] recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:00:24Z   VERDICT: PASS  internal/syscall/windows           3 [35s]
+2026-09-24T08:00:24Z   SUMMARY: sweep: 1 pass / 0 fail  (35s)
+2026-09-24T08:00:25Z ROW internal/syscall/windows/registry attempt=1 pkgTimeout=10m budget=70m freeGB=91.3 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/syscall/windows/registry -Exact -SkipBuild]
+2026-09-24T08:01:16Z RESTORE (after internal/syscall/windows/registry): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:01:16Z DONE internal/syscall/windows/registry word=PASS got=6 disc=UNREADABLE banked=6|0 wall=49s outer=50s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 6|0 run 6|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=1 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:01:16Z   VERDICT: PASS  internal/syscall/windows/registry  6 [49s]
+2026-09-24T08:01:16Z   SUMMARY: sweep: 1 pass / 0 fail  (49s)
+2026-09-24T08:01:16Z ROW internal/sysinfo attempt=1 pkgTimeout=10m budget=70m freeGB=91 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/sysinfo -Exact -SkipBuild]
+2026-09-24T08:01:52Z RESTORE (after internal/sysinfo): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:01:52Z DONE internal/sysinfo word=PASS got=1 disc=UNREADABLE banked=1|0 wall=34s outer=35s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 1|0 run 1|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:01:52Z   VERDICT: PASS  internal/sysinfo                   1 [34s]
+2026-09-24T08:01:52Z   SUMMARY: sweep: 1 pass / 0 fail  (34s)
+2026-09-24T08:01:53Z ROW internal/testenv attempt=1 pkgTimeout=10m budget=70m freeGB=90.7 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/testenv -Exact -SkipBuild]
+2026-09-24T08:02:25Z RESTORE (after internal/testenv): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:02:25Z DONE internal/testenv word=PASS got=7 disc=UNREADABLE banked=7|0 wall=30s outer=31s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 7|0 run 7|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=1 REVIEW[src/core/internal/testenv/package_init.cs] recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:02:25Z   VERDICT: PASS  internal/testenv                   7 [30s]
+2026-09-24T08:02:25Z   SUMMARY: sweep: 1 pass / 0 fail  (30s)
+2026-09-24T08:02:25Z ROW internal/trace/internal/oldtrace attempt=1 pkgTimeout=10m budget=70m freeGB=90.5 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/trace/internal/oldtrace -Exact -SkipBuild]
+2026-09-24T08:03:02Z RESTORE (after internal/trace/internal/oldtrace): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:03:02Z DONE internal/trace/internal/oldtrace word=PASS got=3 disc=UNREADABLE banked=3|0 wall=35s outer=36s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 3|0 run 3|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:03:02Z   VERDICT: PASS  internal/trace/internal/oldtrace   3 [35s]
+2026-09-24T08:03:02Z   SUMMARY: sweep: 1 pass / 0 fail  (35s)
+2026-09-24T08:03:02Z ROW internal/types/errors attempt=1 pkgTimeout=10m budget=70m freeGB=90.2 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/types/errors -Exact -SkipBuild]
+2026-09-24T08:04:48Z RESTORE (after internal/types/errors): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:04:48Z DONE internal/types/errors word=PASS got=155 disc=UNREADABLE banked=155|0 wall=104s outer=105s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 155|0 run 155|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:04:48Z   VERDICT: PASS  internal/types/errors              155 [104s]
+2026-09-24T08:04:48Z   SUMMARY: sweep: 1 pass / 0 fail  (104s)
+2026-09-24T08:04:49Z ROW internal/xcoff attempt=1 pkgTimeout=10m budget=70m freeGB=89.1 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/xcoff -Exact -SkipBuild]
+2026-09-24T08:05:19Z RESTORE (after internal/xcoff): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:05:19Z DONE internal/xcoff word=PASS got=3 disc=UNREADABLE banked=3|0 wall=29s outer=29s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 3|0 run 3|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:05:19Z   VERDICT: PASS  internal/xcoff                     3 [29s]
+2026-09-24T08:05:19Z   SUMMARY: sweep: 1 pass / 0 fail  (29s)
+2026-09-24T08:05:20Z ROW internal/zstd attempt=1 pkgTimeout=10m budget=70m freeGB=88.9 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter internal/zstd -Exact -SkipBuild]
+2026-09-24T08:05:56Z RESTORE (after internal/zstd): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:05:56Z DONE internal/zstd word=PASS got=536 disc=UNREADABLE banked=536|0 wall=34s outer=35s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 536|0 run 536|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=1 REVIEW[src/core/internal/zstd/package_init.cs] recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:05:56Z   VERDICT: PASS  internal/zstd                      536 [34s]
+2026-09-24T08:05:56Z   SUMMARY: sweep: 1 pass / 0 fail  (34s)
+2026-09-24T08:05:57Z ROW io attempt=1 pkgTimeout=10m budget=70m freeGB=88.7 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter io -Exact -SkipBuild]
+2026-09-24T08:06:35Z RESTORE (after io): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:06:35Z DONE io word=PASS got=60 disc=UNREADABLE banked=60|1 wall=36s outer=37s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 60|1 run 60|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:06:35Z   VERDICT: PASS  io                                 60 [36s]
+2026-09-24T08:06:35Z   SUMMARY: sweep: 1 pass / 0 fail  (36s)
+2026-09-24T08:06:35Z ROW io/fs attempt=1 pkgTimeout=10m budget=70m freeGB=88.4 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter io/fs -Exact -SkipBuild]
+2026-09-24T08:07:07Z RESTORE (after io/fs): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:07:07Z DONE io/fs word=PASS got=18 disc=UNREADABLE banked=18|0 wall=30s outer=31s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 18|0 run 18|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:07:07Z   VERDICT: PASS  io/fs                              18 [30s]
+2026-09-24T08:07:07Z   SUMMARY: sweep: 1 pass / 0 fail  (30s)
+2026-09-24T08:07:07Z ROW io/ioutil attempt=1 pkgTimeout=10m budget=70m freeGB=88.1 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter io/ioutil -Exact -SkipBuild]
+2026-09-24T08:07:36Z RESTORE (after io/ioutil): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:07:36Z DONE io/ioutil word=PASS got=28 disc=UNREADABLE banked=28|0 wall=27s outer=28s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 28|0 run 28|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:07:36Z   VERDICT: PASS  io/ioutil                          28 [27s]
+2026-09-24T08:07:36Z   SUMMARY: sweep: 1 pass / 0 fail  (27s)
+2026-09-24T08:07:37Z ROW iter attempt=1 pkgTimeout=10m budget=70m freeGB=87.9 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter iter -Exact -SkipBuild]
+2026-09-24T08:08:06Z RESTORE (after iter): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:08:06Z DONE iter word=PASS got=28 disc=UNREADABLE banked=28|0 wall=27s outer=28s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 28|0 run 28|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:08:06Z   VERDICT: PASS  iter                               28 [27s]
+2026-09-24T08:08:06Z   SUMMARY: sweep: 1 pass / 0 fail  (27s)
+2026-09-24T08:08:06Z ROW log attempt=1 pkgTimeout=10m budget=70m freeGB=87.7 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter log -Exact -SkipBuild]
+2026-09-24T08:08:34Z RESTORE (after log): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:08:34Z DONE log word=PASS got=8 disc=UNREADABLE banked=8|1 wall=26s outer=27s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 8|1 run 8|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:08:34Z   VERDICT: PASS  log                                8 [26s]
+2026-09-24T08:08:34Z   SUMMARY: sweep: 1 pass / 0 fail  (26s)
+2026-09-24T08:08:34Z ROW log/slog attempt=1 pkgTimeout=10m budget=70m freeGB=87.5 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter log/slog -Exact -SkipBuild]
+2026-09-24T08:10:59Z RESTORE (after log/slog): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:10:59Z DONE log/slog word=PASS got=197 disc=UNREADABLE banked=197|19 wall=142s outer=143s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 197|19 run 197|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:10:59Z   VERDICT: PASS  log/slog                           197 [release-tiered] [142s]
+2026-09-24T08:10:59Z   SUMMARY: sweep: 1 pass / 0 fail  (142s)
+2026-09-24T08:10:59Z ROW log/slog/internal/benchmarks attempt=1 pkgTimeout=10m budget=70m freeGB=86.4 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter log/slog/internal/benchmarks -Exact -SkipBuild]
+2026-09-24T08:11:32Z RESTORE (after log/slog/internal/benchmarks): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:11:32Z DONE log/slog/internal/benchmarks word=PASS got=3 disc=UNREADABLE banked=3|0 wall=31s outer=32s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 3|0 run 3|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:11:32Z   VERDICT: PASS  log/slog/internal/benchmarks       3 [31s]
+2026-09-24T08:11:32Z   SUMMARY: sweep: 1 pass / 0 fail  (31s)
+2026-09-24T08:11:57Z PURGE (pre-row log/slog/internal/buffer; freeGB=86.2 sincePurge=30) rc=0 go2cs.exe present=True bin/obj/Generated=0 MB freeGB=98.4 log=purge-20260924-031132.log
+2026-09-24T08:11:57Z ROW log/slog/internal/buffer attempt=1 pkgTimeout=10m budget=70m freeGB=98.4 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter log/slog/internal/buffer -Exact -SkipBuild]
+2026-09-24T08:14:15Z RESTORE (after log/slog/internal/buffer): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:14:15Z DONE log/slog/internal/buffer word=PASS got=1 disc=UNREADABLE banked=1|1 wall=135s outer=136s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 1|1 run 1|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:14:15Z   VERDICT: PASS  log/slog/internal/buffer           1 [135s]
+2026-09-24T08:14:15Z   SUMMARY: sweep: 1 pass / 0 fail  (136s)
+2026-09-24T08:14:15Z ROW maps attempt=1 pkgTimeout=10m budget=70m freeGB=97.4 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter maps -Exact -SkipBuild]
+2026-09-24T08:14:43Z RESTORE (after maps): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:14:43Z DONE maps word=PASS got=14 disc=UNREADABLE banked=14|0 wall=26s outer=27s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 14|0 run 14|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:14:43Z   VERDICT: PASS  maps                               14 [26s]
+2026-09-24T08:14:43Z   SUMMARY: sweep: 1 pass / 0 fail  (26s)
+2026-09-24T08:14:43Z ROW math attempt=1 pkgTimeout=10m budget=70m freeGB=97.2 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter math -Exact -SkipBuild]
+2026-09-24T08:15:17Z RESTORE (after math): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:15:17Z DONE math word=PASS got=76 disc=UNREADABLE banked=76|0 wall=32s outer=33s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 76|0 run 76|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:15:17Z   VERDICT: PASS  math                               76 [32s]
+2026-09-24T08:15:17Z   SUMMARY: sweep: 1 pass / 0 fail  (32s)
+2026-09-24T08:15:17Z ROW math/big attempt=1 pkgTimeout=10m budget=70m freeGB=96.9 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter math/big -Exact -SkipBuild]
+2026-09-24T08:16:37Z RESTORE (after math/big): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:16:37Z DONE math/big word=PASS got=230 disc=UNREADABLE banked=230|1 wall=78s outer=79s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 230|1 run 230|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=1 REVIEW[src/core/math/big/package_init.cs] recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:16:37Z   VERDICT: PASS  math/big                           230 [78s]
+2026-09-24T08:16:37Z   SUMMARY: sweep: 1 pass / 0 fail  (78s)
+2026-09-24T08:16:37Z ROW math/bits attempt=1 pkgTimeout=10m budget=70m freeGB=95.8 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter math/bits -Exact -SkipBuild]
+2026-09-24T08:17:07Z RESTORE (after math/bits): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:17:07Z DONE math/bits word=PASS got=26 disc=UNREADABLE banked=26|0 wall=28s outer=29s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 26|0 run 26|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:17:07Z   VERDICT: PASS  math/bits                          26 [28s]
+2026-09-24T08:17:07Z   SUMMARY: sweep: 1 pass / 0 fail  (28s)
+2026-09-24T08:17:08Z ROW math/cmplx attempt=1 pkgTimeout=10m budget=70m freeGB=95.6 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter math/cmplx -Exact -SkipBuild]
+2026-09-24T08:17:35Z RESTORE (after math/cmplx): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:17:35Z DONE math/cmplx word=PASS got=24 disc=UNREADABLE banked=24|0 wall=26s outer=27s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 24|0 run 24|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:17:35Z   VERDICT: PASS  math/cmplx                         24 [26s]
+2026-09-24T08:17:35Z   SUMMARY: sweep: 1 pass / 0 fail  (26s)
+2026-09-24T08:17:36Z ROW math/rand attempt=1 pkgTimeout=10m budget=70m freeGB=95.4 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter math/rand -Exact -SkipBuild]
+2026-09-24T08:18:17Z RESTORE (after math/rand): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:18:17Z DONE math/rand word=PASS got=47 disc=UNREADABLE banked=47|0 wall=39s outer=40s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 47|0 run 47|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:18:17Z   VERDICT: PASS  math/rand                          47 [39s]
+2026-09-24T08:18:17Z   SUMMARY: sweep: 1 pass / 0 fail  (39s)
+2026-09-24T08:18:17Z ROW math/rand/v2 attempt=1 pkgTimeout=10m budget=70m freeGB=95.1 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter math/rand/v2 -Exact -SkipBuild]
+2026-09-24T08:19:22Z RESTORE (after math/rand/v2): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:19:22Z DONE math/rand/v2 word=PASS got=36 disc=UNREADABLE banked=36|0 wall=63s outer=64s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 36|0 run 36|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:19:22Z   VERDICT: PASS  math/rand/v2                       36 [63s]
+2026-09-24T08:19:22Z   SUMMARY: sweep: 1 pass / 0 fail  (63s)
+2026-09-24T08:19:22Z ROW mime attempt=1 pkgTimeout=10m budget=70m freeGB=94.5 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter mime -Exact -SkipBuild]
+2026-09-24T08:19:53Z RESTORE (after mime): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:19:53Z DONE mime word=PASS got=17 disc=UNREADABLE banked=17|1 wall=29s outer=30s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 17|1 run 17|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:19:53Z   VERDICT: PASS  mime                               17 [29s]
+2026-09-24T08:19:53Z   SUMMARY: sweep: 1 pass / 0 fail  (29s)
+2026-09-24T08:19:53Z ROW mime/multipart attempt=1 pkgTimeout=10m budget=70m freeGB=94.3 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter mime/multipart -Exact -SkipBuild]
+2026-09-24T08:21:02Z RESTORE (after mime/multipart): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:21:02Z DONE mime/multipart word=PASS got=52 disc=UNREADABLE banked=52|0 wall=67s outer=68s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 52|0 run 52|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:21:02Z   VERDICT: PASS  mime/multipart                     52 [67s]
+2026-09-24T08:21:02Z   SUMMARY: sweep: 1 pass / 0 fail  (67s)
+2026-09-24T08:21:02Z ROW mime/quotedprintable attempt=1 pkgTimeout=10m budget=70m freeGB=93.8 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter mime/quotedprintable -Exact -SkipBuild]
+2026-09-24T08:21:36Z RESTORE (after mime/quotedprintable): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:21:36Z DONE mime/quotedprintable word=PASS got=5 disc=UNREADABLE banked=5|0 wall=31s outer=32s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 5|0 run 5|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:21:36Z   VERDICT: PASS  mime/quotedprintable               5 [31s]
+2026-09-24T08:21:36Z   SUMMARY: sweep: 1 pass / 0 fail  (31s)
+2026-09-24T08:21:36Z ROW net/http/cgi attempt=1 pkgTimeout=10m budget=70m freeGB=93.5 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/http/cgi -Exact -SkipBuild]
+2026-09-24T08:24:35Z RESTORE (after net/http/cgi): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:24:35Z DONE net/http/cgi word=PASS got=38 disc=UNREADABLE banked=38|1 wall=176s outer=177s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 38|1 run 38|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:24:35Z   VERDICT: PASS  net/http/cgi                       38 [176s]
+2026-09-24T08:24:35Z   SUMMARY: sweep: 1 pass / 0 fail  (177s)
+2026-09-24T08:24:35Z ROW net/http/cookiejar attempt=1 pkgTimeout=10m budget=70m freeGB=91.1 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/http/cookiejar -Exact -SkipBuild]
+2026-09-24T08:25:26Z RESTORE (after net/http/cookiejar): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:25:26Z DONE net/http/cookiejar word=PASS got=17 disc=UNREADABLE banked=17|0 wall=49s outer=50s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 17|0 run 17|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:25:26Z   VERDICT: PASS  net/http/cookiejar                 17 [49s]
+2026-09-24T08:25:26Z   SUMMARY: sweep: 1 pass / 0 fail  (49s)
+2026-09-24T08:25:27Z ROW net/http/fcgi attempt=1 pkgTimeout=10m budget=70m freeGB=90.7 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/http/fcgi -Exact -SkipBuild]
+2026-09-24T08:26:21Z RESTORE (after net/http/fcgi): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:26:21Z DONE net/http/fcgi word=PASS got=12 disc=UNREADABLE banked=12|0 wall=52s outer=53s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 12|0 run 12|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:26:21Z   VERDICT: PASS  net/http/fcgi                      12 [52s]
+2026-09-24T08:26:21Z   SUMMARY: sweep: 1 pass / 0 fail  (52s)
+2026-09-24T08:26:21Z ROW net/http/httptest attempt=1 pkgTimeout=10m budget=70m freeGB=90.3 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/http/httptest -Exact -SkipBuild]
+2026-09-24T08:27:12Z RESTORE (after net/http/httptest): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:27:12Z DONE net/http/httptest word=PASS got=55 disc=UNREADABLE banked=55|0 wall=49s outer=50s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 55|0 run 55|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:27:12Z   VERDICT: PASS  net/http/httptest                  55 [49s]
+2026-09-24T08:27:12Z   SUMMARY: sweep: 1 pass / 0 fail  (49s)
+2026-09-24T08:27:13Z ROW net/http/httptrace attempt=1 pkgTimeout=10m budget=70m freeGB=90 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/http/httptrace -Exact -SkipBuild]
+2026-09-24T08:27:55Z RESTORE (after net/http/httptrace): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:27:55Z DONE net/http/httptrace word=PASS got=2 disc=UNREADABLE banked=2|0 wall=41s outer=42s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 2|0 run 2|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:27:55Z   VERDICT: PASS  net/http/httptrace                 2 [41s]
+2026-09-24T08:27:55Z   SUMMARY: sweep: 1 pass / 0 fail  (41s)
+2026-09-24T08:27:56Z ROW net/http/httputil attempt=1 pkgTimeout=10m budget=70m freeGB=89.7 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/http/httputil -Exact -SkipBuild]
+2026-09-24T08:28:53Z RESTORE (after net/http/httputil): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:28:53Z DONE net/http/httputil word=PASS got=53 disc=UNREADABLE banked=53|0 wall=56s outer=57s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 53|0 run 53|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:28:53Z   VERDICT: PASS  net/http/httputil                  53 [56s]
+2026-09-24T08:28:53Z   SUMMARY: sweep: 1 pass / 0 fail  (56s)
+2026-09-24T08:28:54Z ROW net/http/internal attempt=1 pkgTimeout=10m budget=70m freeGB=89.3 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/http/internal -Exact -SkipBuild]
+2026-09-24T08:29:23Z RESTORE (after net/http/internal): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:29:23Z DONE net/http/internal word=PASS got=14 disc=UNREADABLE banked=14|1 wall=27s outer=28s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 14|1 run 14|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:29:23Z   VERDICT: PASS  net/http/internal                  14 [27s]
+2026-09-24T08:29:23Z   SUMMARY: sweep: 1 pass / 0 fail  (28s)
+2026-09-24T08:29:24Z ROW net/http/internal/ascii attempt=1 pkgTimeout=10m budget=70m freeGB=89.1 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/http/internal/ascii -Exact -SkipBuild]
+2026-09-24T08:29:50Z RESTORE (after net/http/internal/ascii): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:29:50Z DONE net/http/internal/ascii word=PASS got=13 disc=UNREADABLE banked=13|0 wall=24s outer=25s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 13|0 run 13|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:29:50Z   VERDICT: PASS  net/http/internal/ascii            13 [24s]
+2026-09-24T08:29:50Z   SUMMARY: sweep: 1 pass / 0 fail  (24s)
+2026-09-24T08:29:50Z ROW net/mail attempt=1 pkgTimeout=10m budget=70m freeGB=88.9 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/mail -Exact -SkipBuild]
+2026-09-24T08:30:23Z RESTORE (after net/mail): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:30:23Z DONE net/mail word=PASS got=11 disc=UNREADABLE banked=11|0 wall=30s outer=31s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 11|0 run 11|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:30:23Z   VERDICT: PASS  net/mail                           11 [30s]
+2026-09-24T08:30:23Z   SUMMARY: sweep: 1 pass / 0 fail  (30s)
+2026-09-24T08:30:23Z ROW net/netip attempt=1 pkgTimeout=10m budget=70m freeGB=88.6 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/netip -Exact -SkipBuild]
+2026-09-24T08:31:00Z RESTORE (after net/netip): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:31:00Z DONE net/netip word=PASS got=211 disc=UNREADABLE banked=211|57 wall=35s outer=36s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 211|57 run 211|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:31:00Z   VERDICT: PASS  net/netip                          211 [35s]
+2026-09-24T08:31:00Z   SUMMARY: sweep: 1 pass / 0 fail  (35s)
+2026-09-24T08:31:01Z ROW net/rpc attempt=1 pkgTimeout=10m budget=70m freeGB=88.4 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/rpc -Exact -SkipBuild]
+2026-09-24T08:32:03Z RESTORE (after net/rpc): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:32:03Z DONE net/rpc word=PASS got=15 disc=UNREADABLE banked=15|0 wall=60s outer=61s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 15|0 run 15|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:32:03Z   VERDICT: PASS  net/rpc                            15 [60s]
+2026-09-24T08:32:03Z   SUMMARY: sweep: 1 pass / 0 fail  (60s)
+2026-09-24T08:32:04Z ROW net/rpc/jsonrpc attempt=1 pkgTimeout=10m budget=70m freeGB=87.8 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/rpc/jsonrpc -Exact -SkipBuild]
+2026-09-24T08:33:02Z RESTORE (after net/rpc/jsonrpc): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:33:02Z DONE net/rpc/jsonrpc word=PASS got=9 disc=UNREADABLE banked=9|0 wall=56s outer=57s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 9|0 run 9|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:33:02Z   VERDICT: PASS  net/rpc/jsonrpc                    9 [56s]
+2026-09-24T08:33:02Z   SUMMARY: sweep: 1 pass / 0 fail  (56s)
+2026-09-24T08:33:02Z ROW net/smtp attempt=1 pkgTimeout=10m budget=70m freeGB=87.4 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/smtp -Exact -SkipBuild]
+2026-09-24T08:33:49Z RESTORE (after net/smtp): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:33:49Z DONE net/smtp word=PASS got=20 disc=UNREADABLE banked=20|0 wall=45s outer=46s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 20|0 run 20|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:33:49Z   VERDICT: PASS  net/smtp                           20 [45s]
+2026-09-24T08:33:49Z   SUMMARY: sweep: 1 pass / 0 fail  (45s)
+2026-09-24T08:33:50Z ROW net/textproto attempt=1 pkgTimeout=10m budget=70m freeGB=87.1 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/textproto -Exact -SkipBuild]
+2026-09-24T08:34:19Z RESTORE (after net/textproto): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:34:19Z DONE net/textproto word=PASS got=26 disc=UNREADABLE banked=26|0 wall=27s outer=28s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 26|0 run 26|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:34:19Z   VERDICT: PASS  net/textproto                      26 [27s]
+2026-09-24T08:34:19Z   SUMMARY: sweep: 1 pass / 0 fail  (27s)
+2026-09-24T08:34:19Z ROW net/url attempt=1 pkgTimeout=10m budget=70m freeGB=86.8 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter net/url -Exact -SkipBuild]
+2026-09-24T08:34:53Z RESTORE (after net/url): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:34:53Z DONE net/url word=PASS got=49 disc=UNREADABLE banked=49|0 wall=32s outer=32s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 49|0 run 49|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:34:53Z   VERDICT: PASS  net/url                            49 [32s]
+2026-09-24T08:34:53Z   SUMMARY: sweep: 1 pass / 0 fail  (32s)
+2026-09-24T08:34:53Z ROW os/exec attempt=1 pkgTimeout=10m budget=70m freeGB=86.6 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter os/exec -Exact -SkipBuild]
+2026-09-24T08:38:00Z RESTORE (after os/exec): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:38:00Z DONE os/exec word=PASS got=116 disc=UNREADABLE banked=116|0 wall=184s outer=185s rc=0 page=MOVED [TestString] P2a=MISMATCH page 116|0 run 116|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:38:00Z   VERDICT: PASS  os/exec                            116 [184s]
+2026-09-24T08:38:00Z   SUMMARY: sweep: 1 pass / 0 fail  (184s)
+2026-09-24T08:38:00Z ROW os/exec/internal/fdtest attempt=1 pkgTimeout=10m budget=70m freeGB=86.1 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter os/exec/internal/fdtest -Exact -SkipBuild]
+2026-09-24T08:38:26Z RESTORE (after os/exec/internal/fdtest): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:38:26Z DONE os/exec/internal/fdtest word=PASS got=1 disc=UNREADABLE banked=1|0 wall=23s outer=24s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 1|0 run 1|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:38:26Z   VERDICT: PASS  os/exec/internal/fdtest            1 [23s]
+2026-09-24T08:38:26Z   SUMMARY: sweep: 1 pass / 0 fail  (23s)
+2026-09-24T08:38:26Z ROW os/signal attempt=1 pkgTimeout=10m budget=70m freeGB=86 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter os/signal -Exact -SkipBuild]
+2026-09-24T08:38:59Z RESTORE (after os/signal): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:38:59Z DONE os/signal word=PASS got=1 disc=UNREADABLE banked=1|0 wall=30s outer=31s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 1|0 run 1|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:38:59Z   VERDICT: PASS  os/signal                          1 [30s]
+2026-09-24T08:38:59Z   SUMMARY: sweep: 1 pass / 0 fail  (31s)
+2026-09-24T08:38:59Z ROW os/user attempt=1 pkgTimeout=10m budget=70m freeGB=85.8 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter os/user -Exact -SkipBuild]
+2026-09-24T08:39:34Z RESTORE (after os/user): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:39:34Z DONE os/user word=PASS got=17 disc=UNREADABLE banked=17|0 wall=32s outer=33s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 17|0 run 17|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:39:34Z   VERDICT: PASS  os/user                            17 [32s]
+2026-09-24T08:39:34Z   SUMMARY: sweep: 1 pass / 0 fail  (32s)
+2026-09-24T08:39:58Z PURGE (pre-row path; freeGB=85.5 sincePurge=30) rc=0 go2cs.exe present=True bin/obj/Generated=0 MB freeGB=98.3 log=purge-20260924-033934.log
+2026-09-24T08:39:58Z ROW path attempt=1 pkgTimeout=10m budget=70m freeGB=98.3 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter path -Exact -SkipBuild]
+2026-09-24T08:42:09Z RESTORE (after path): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:42:09Z DONE path word=PASS got=9 disc=UNREADABLE banked=9|0 wall=129s outer=130s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 9|0 run 9|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:42:09Z   VERDICT: PASS  path                               9 [129s]
+2026-09-24T08:42:09Z   SUMMARY: sweep: 1 pass / 0 fail  (129s)
+2026-09-24T08:42:10Z ROW path/filepath attempt=1 pkgTimeout=10m budget=70m freeGB=97.5 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter path/filepath -Exact -SkipBuild]
+2026-09-24T08:42:54Z RESTORE (after path/filepath): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:42:54Z DONE path/filepath word=PASS got=61 disc=UNREADABLE banked=61|0 wall=43s outer=44s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 61|0 run 61|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:42:54Z   VERDICT: PASS  path/filepath                      61 [43s]
+2026-09-24T08:42:54Z   SUMMARY: sweep: 1 pass / 0 fail  (43s)
+2026-09-24T08:42:55Z ROW plugin attempt=1 pkgTimeout=10m budget=70m freeGB=97.1 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter plugin -Exact -SkipBuild]
+2026-09-24T08:43:22Z RESTORE (after plugin): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:43:22Z DONE plugin word=PASS got=1 disc=UNREADABLE banked=1|0 wall=26s outer=27s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 1|0 run 1|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:43:22Z   VERDICT: PASS  plugin                             1 [26s]
+2026-09-24T08:43:22Z   SUMMARY: sweep: 1 pass / 0 fail  (26s)
+2026-09-24T08:43:22Z ROW regexp attempt=1 pkgTimeout=10m budget=70m freeGB=96.9 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter regexp -Exact -SkipBuild]
+2026-09-24T08:49:14Z RESTORE (after regexp): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:49:14Z DONE regexp word=PASS got=45 disc=UNREADABLE banked=45|0 wall=350s outer=351s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 45|0 run 45|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:49:14Z   VERDICT: PASS  regexp                             45 [350s]
+2026-09-24T08:49:14Z   SUMMARY: sweep: 1 pass / 0 fail  (350s)
+2026-09-24T08:49:14Z ROW regexp/syntax attempt=1 pkgTimeout=10m budget=70m freeGB=96.5 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter regexp/syntax -Exact -SkipBuild]
+2026-09-24T08:49:46Z RESTORE (after regexp/syntax): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:49:46Z DONE regexp/syntax word=PASS got=12 disc=UNREADABLE banked=12|0 wall=30s outer=31s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 12|0 run 12|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:49:46Z   VERDICT: PASS  regexp/syntax                      12 [30s]
+2026-09-24T08:49:46Z   SUMMARY: sweep: 1 pass / 0 fail  (30s)
+2026-09-24T08:49:47Z ROW runtime/debug attempt=1 pkgTimeout=10m budget=70m freeGB=96.3 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter runtime/debug -Exact -SkipBuild]
+2026-09-24T08:50:17Z RESTORE (after runtime/debug): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:50:17Z DONE runtime/debug word=PASS got=4 disc=UNREADABLE banked=4|5 wall=29s outer=30s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 4|5 run 4|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:50:17Z   VERDICT: PASS  runtime/debug                      4 [29s]
+2026-09-24T08:50:17Z   SUMMARY: sweep: 1 pass / 0 fail  (29s)
+2026-09-24T08:50:18Z ROW runtime/metrics attempt=1 pkgTimeout=10m budget=70m freeGB=96.1 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter runtime/metrics -Exact -SkipBuild]
+2026-09-24T08:51:08Z RESTORE (after runtime/metrics): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:51:08Z DONE runtime/metrics word=PASS got=2 disc=UNREADABLE banked=2|0 wall=48s outer=49s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 2|0 run 2|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:51:08Z   VERDICT: PASS  runtime/metrics                    2 [48s]
+2026-09-24T08:51:08Z   SUMMARY: sweep: 1 pass / 0 fail  (48s)
+2026-09-24T08:51:08Z ROW slices attempt=1 pkgTimeout=10m budget=70m freeGB=95.4 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter slices -Exact -SkipBuild]
+2026-09-24T08:51:40Z RESTORE (after slices): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:51:40Z DONE slices word=PASS got=120 disc=UNREADABLE banked=120|3 wall=30s outer=31s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 120|3 run 120|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:51:40Z   VERDICT: PASS  slices                             120 [30s]
+2026-09-24T08:51:40Z   SUMMARY: sweep: 1 pass / 0 fail  (30s)
+2026-09-24T08:51:41Z ROW sort attempt=1 pkgTimeout=10m budget=70m freeGB=95.2 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter sort -Exact -SkipBuild]
+2026-09-24T08:52:15Z RESTORE (after sort): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:52:15Z DONE sort word=PASS got=63 disc=UNREADABLE banked=63|0 wall=32s outer=33s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 63|0 run 63|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:52:15Z   VERDICT: PASS  sort                               63 [32s]
+2026-09-24T08:52:15Z   SUMMARY: sweep: 1 pass / 0 fail  (32s)
+2026-09-24T08:52:15Z ROW strconv attempt=1 pkgTimeout=10m budget=70m freeGB=95 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter strconv -Exact -SkipBuild]
+2026-09-24T08:52:49Z RESTORE (after strconv): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:52:49Z DONE strconv word=PASS got=55 disc=UNREADABLE banked=55|11 wall=32s outer=33s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 55|11 run 55|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:52:49Z   VERDICT: PASS  strconv                            55 [32s]
+2026-09-24T08:52:49Z   SUMMARY: sweep: 1 pass / 0 fail  (32s)
+2026-09-24T08:52:50Z ROW strings attempt=1 pkgTimeout=10m budget=70m freeGB=94.7 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter strings -Exact -SkipBuild]
+2026-09-24T08:53:32Z RESTORE (after strings): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:53:32Z DONE strings word=PASS got=69 disc=UNREADABLE banked=69|4 wall=41s outer=42s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 69|4 run 69|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:53:32Z   VERDICT: PASS  strings                            69 [41s]
+2026-09-24T08:53:32Z   SUMMARY: sweep: 1 pass / 0 fail  (41s)
+2026-09-24T08:53:33Z ROW sync attempt=1 pkgTimeout=10m budget=70m freeGB=94.5 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter sync -Exact -SkipBuild]
+2026-09-24T08:54:16Z RESTORE (after sync): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:54:16Z DONE sync word=PASS got=46 disc=UNREADABLE banked=46|6 wall=42s outer=43s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 46|6 run 46|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:54:16Z   VERDICT: PASS  sync                               46 [42s]
+2026-09-24T08:54:16Z   SUMMARY: sweep: 1 pass / 0 fail  (42s)
+2026-09-24T08:54:17Z ROW sync/atomic attempt=1 pkgTimeout=150m budget=630m freeGB=94.3 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter sync/atomic -Exact -SkipBuild]
+2026-09-24T08:56:55Z RESTORE (after sync/atomic): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:56:55Z DONE sync/atomic word=PASS got=108 disc=UNREADABLE banked=108|0 wall=156s outer=157s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 108|0 run 108|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:56:55Z   VERDICT: PASS  sync/atomic                        108 [156s]
+2026-09-24T08:56:55Z   SUMMARY: sweep: 1 pass / 0 fail  (156s)
+2026-09-24T08:56:55Z ROW syscall attempt=1 pkgTimeout=10m budget=70m freeGB=94 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter syscall -Exact -SkipBuild]
+2026-09-24T08:57:50Z RESTORE (after syscall): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:57:50Z DONE syscall word=PASS got=65 disc=UNREADABLE banked=65|0 wall=52s outer=53s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 65|0 run 65|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=1 REVIEW[src/core/syscall/windows/package_init.cs] recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:57:50Z   VERDICT: PASS  syscall                            65 [52s]
+2026-09-24T08:57:50Z   SUMMARY: sweep: 1 pass / 0 fail  (52s)
+2026-09-24T08:57:50Z ROW testing attempt=1 pkgTimeout=10m budget=70m freeGB=93.8 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter testing -Exact -SkipBuild]
+2026-09-24T08:58:57Z RESTORE (after testing): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:58:57Z DONE testing word=PASS got=53 disc=UNREADABLE banked=53|15 wall=65s outer=66s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 53|15 run 53|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:58:57Z   VERDICT: PASS  testing                            53 [65s]
+2026-09-24T08:58:57Z   SUMMARY: sweep: 1 pass / 0 fail  (65s)
+2026-09-24T08:58:57Z ROW testing/fstest attempt=1 pkgTimeout=10m budget=70m freeGB=93.4 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter testing/fstest -Exact -SkipBuild]
+2026-09-24T08:59:27Z RESTORE (after testing/fstest): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:59:27Z DONE testing/fstest word=PASS got=7 disc=UNREADABLE banked=7|0 wall=28s outer=29s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 7|0 run 7|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:59:27Z   VERDICT: PASS  testing/fstest                     7 [28s]
+2026-09-24T08:59:27Z   SUMMARY: sweep: 1 pass / 0 fail  (28s)
+2026-09-24T08:59:28Z ROW testing/iotest attempt=1 pkgTimeout=10m budget=70m freeGB=93.1 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter testing/iotest -Exact -SkipBuild]
+2026-09-24T08:59:56Z RESTORE (after testing/iotest): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T08:59:56Z DONE testing/iotest word=PASS got=18 disc=UNREADABLE banked=18|0 wall=26s outer=27s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 18|0 run 18|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T08:59:56Z   VERDICT: PASS  testing/iotest                     18 [26s]
+2026-09-24T08:59:56Z   SUMMARY: sweep: 1 pass / 0 fail  (26s)
+2026-09-24T08:59:56Z ROW testing/quick attempt=1 pkgTimeout=10m budget=70m freeGB=92.9 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter testing/quick -Exact -SkipBuild]
+2026-09-24T09:00:27Z RESTORE (after testing/quick): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T09:00:27Z DONE testing/quick word=PASS got=8 disc=UNREADABLE banked=8|0 wall=29s outer=30s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 8|0 run 8|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T09:00:27Z   VERDICT: PASS  testing/quick                      8 [29s]
+2026-09-24T09:00:27Z   SUMMARY: sweep: 1 pass / 0 fail  (29s)
+2026-09-24T09:00:27Z ROW testing/slogtest attempt=1 pkgTimeout=10m budget=70m freeGB=92.6 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter testing/slogtest -Exact -SkipBuild]
+2026-09-24T09:01:06Z RESTORE (after testing/slogtest): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T09:01:06Z DONE testing/slogtest word=PASS got=17 disc=UNREADABLE banked=17|0 wall=37s outer=38s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 17|0 run 17|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T09:01:06Z   VERDICT: PASS  testing/slogtest                   17 [37s]
+2026-09-24T09:01:06Z   SUMMARY: sweep: 1 pass / 0 fail  (37s)
+2026-09-24T09:01:06Z ROW text/scanner attempt=1 pkgTimeout=10m budget=70m freeGB=92.3 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter text/scanner -Exact -SkipBuild]
+2026-09-24T09:01:35Z RESTORE (after text/scanner): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T09:01:35Z DONE text/scanner word=PASS got=18 disc=UNREADABLE banked=18|0 wall=27s outer=28s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 18|0 run 18|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T09:01:35Z   VERDICT: PASS  text/scanner                       18 [27s]
+2026-09-24T09:01:35Z   SUMMARY: sweep: 1 pass / 0 fail  (27s)
+2026-09-24T09:01:35Z ROW text/tabwriter attempt=1 pkgTimeout=10m budget=70m freeGB=92 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter text/tabwriter -Exact -SkipBuild]
+2026-09-24T09:02:01Z RESTORE (after text/tabwriter): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T09:02:01Z DONE text/tabwriter word=PASS got=3 disc=UNREADABLE banked=3|0 wall=24s outer=25s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 3|0 run 3|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T09:02:01Z   VERDICT: PASS  text/tabwriter                     3 [24s]
+2026-09-24T09:02:01Z   SUMMARY: sweep: 1 pass / 0 fail  (24s)
+2026-09-24T09:02:02Z ROW text/template attempt=1 pkgTimeout=10m budget=70m freeGB=91.8 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter text/template -Exact -SkipBuild]
+2026-09-24T09:03:01Z RESTORE (after text/template): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T09:03:01Z DONE text/template word=PASS got=52 disc=UNREADABLE banked=52|0 wall=57s outer=58s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 52|0 run 52|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T09:03:01Z   VERDICT: PASS  text/template                      52 [57s]
+2026-09-24T09:03:01Z   SUMMARY: sweep: 1 pass / 0 fail  (57s)
+2026-09-24T09:03:01Z ROW text/template/parse attempt=1 pkgTimeout=10m budget=70m freeGB=91.4 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter text/template/parse -Exact -SkipBuild]
+2026-09-24T09:03:35Z RESTORE (after text/template/parse): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T09:03:35Z DONE text/template/parse word=PASS got=52 disc=UNREADABLE banked=52|0 wall=32s outer=33s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 52|0 run 52|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T09:03:35Z   VERDICT: PASS  text/template/parse                52 [32s]
+2026-09-24T09:03:35Z   SUMMARY: sweep: 1 pass / 0 fail  (33s)
+2026-09-24T09:03:36Z ROW time attempt=1 pkgTimeout=40m budget=190m freeGB=91.2 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter time -Exact -SkipBuild]
+2026-09-24T09:14:34Z RESTORE (after time): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T09:14:34Z DONE time word=PASS got=178 disc=UNREADABLE banked=178|0 wall=656s outer=658s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 178|0 run 178|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=1 REVIEW[src/core/time/package_init.cs] recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T09:14:34Z   VERDICT: PASS  time                               178 [656s]
+2026-09-24T09:14:34Z   SUMMARY: sweep: 1 pass / 0 fail  (657s)
+2026-09-24T09:14:35Z ROW unicode attempt=1 pkgTimeout=10m budget=70m freeGB=90.9 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter unicode -Exact -SkipBuild]
+2026-09-24T09:15:16Z RESTORE (after unicode): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T09:15:16Z DONE unicode word=PASS got=28 disc=UNREADABLE banked=28|0 wall=39s outer=41s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 28|0 run 28|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=1 REVIEW[src/core/unicode/package_init.cs] recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T09:15:16Z   VERDICT: PASS  unicode                            28 [39s]
+2026-09-24T09:15:16Z   SUMMARY: sweep: 1 pass / 0 fail  (39s)
+2026-09-24T09:15:17Z ROW unicode/utf16 attempt=1 pkgTimeout=10m budget=70m freeGB=90.7 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter unicode/utf16 -Exact -SkipBuild]
+2026-09-24T09:15:48Z RESTORE (after unicode/utf16): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T09:15:48Z DONE unicode/utf16 word=PASS got=8 disc=UNREADABLE banked=8|1 wall=29s outer=30s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 8|1 run 8|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T09:15:48Z   VERDICT: PASS  unicode/utf16                      8 [29s]
+2026-09-24T09:15:48Z   SUMMARY: sweep: 1 pass / 0 fail  (30s)
+2026-09-24T09:15:49Z ROW unicode/utf8 attempt=1 pkgTimeout=10m budget=70m freeGB=90.4 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter unicode/utf8 -Exact -SkipBuild]
+2026-09-24T09:16:15Z RESTORE (after unicode/utf8): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T09:16:15Z DONE unicode/utf8 word=PASS got=14 disc=UNREADABLE banked=14|1 wall=25s outer=26s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 14|1 run 14|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T09:16:15Z   VERDICT: PASS  unicode/utf8                       14 [25s]
+2026-09-24T09:16:15Z   SUMMARY: sweep: 1 pass / 0 fail  (25s)
+2026-09-24T09:16:15Z ROW unique attempt=1 pkgTimeout=10m budget=70m freeGB=90.2 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter unique -Exact -SkipBuild]
+2026-09-24T09:16:44Z RESTORE (after unique): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T09:16:44Z DONE unique word=PASS got=21 disc=UNREADABLE banked=21|1 wall=26s outer=27s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 21|1 run 21|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T09:16:44Z   VERDICT: PASS  unique                             21 [26s]
+2026-09-24T09:16:44Z   SUMMARY: sweep: 1 pass / 0 fail  (26s)
+2026-09-24T09:16:44Z ROW weak attempt=1 pkgTimeout=10m budget=70m freeGB=90 args=[<wt>\src\run-validated-sweep.p2-R-LAPTOP.ps1 -Filter weak -Exact -SkipBuild]
+2026-09-24T09:17:13Z RESTORE (after weak): removed 0 untracked; porcelain extra=0 ' D'=0 tracked=15394
+2026-09-24T09:17:13Z DONE weak word=PASS got=6 disc=UNREADABLE banked=6|0 wall=26s outer=27s rc=0 page=NOT REWRITTEN P2a=MISMATCH page 6|0 run 6|UNREADABLE drift=crlfOnly=0 testArtifactContent=0 csAuto=0 productionContent=0 recs=go2cs_test_comparison.json=fresh,go2cs_test_results.json=fresh,go2cs_test_results.xml=fresh orphaned= untrackedRemoved=0
+2026-09-24T09:17:13Z   VERDICT: PASS  weak                               6 [26s]
+2026-09-24T09:17:13Z   SUMMARY: sweep: 1 pass / 0 fail  (26s)
+2026-09-24T09:17:13Z END processed=89 listed=89
+DRIVER_EXIT=0

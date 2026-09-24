@@ -1,0 +1,8 @@
+  CGO_ENABLED=0 pinned for the whole run (was '0') -- the corpus emission state and the annotations' state of record on every platform
+validated sweep: 1 package(s), 28 expected verdicts, timeout 10m, test-config Release
+  PASS  unicode                            28 [39s]
+
+sweep: 1 pass / 0 fail  (39s)
+
+known -tests-closure emission class (1 files, documented, not drift):
+  7	0	src/core/unicode/package_init.cs

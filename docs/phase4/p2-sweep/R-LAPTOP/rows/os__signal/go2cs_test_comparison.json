@@ -1,0 +1,42 @@
+{
+  "package": "signal",
+  "status": "validated",
+  "go": {
+    "TestCtrlBreak": "pass"
+  },
+  "csharp": {
+    "TestCtrlBreak": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "ExampleNotify (example): example execution is deferred to Phase 4D",
+    "ExampleNotify_allSignals (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "outOfScopeDisclosures": [
+    {
+      "name": "TestAllThreadsSyscallSignals",
+      "class": "cgo-configuration",
+      "platforms": [
+        "linux"
+      ],
+      "goos": "windows"
+    },
+    {
+      "name": "TestSignalTrace",
+      "class": "runtime-capability",
+      "platforms": [
+        "linux",
+        "darwin"
+      ],
+      "goos": "windows"
+    }
+  ],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

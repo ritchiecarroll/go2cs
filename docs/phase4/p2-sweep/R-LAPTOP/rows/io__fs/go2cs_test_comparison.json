@@ -1,0 +1,56 @@
+{
+  "package": "fs",
+  "status": "validated",
+  "go": {
+    "TestCVE202230630": "pass",
+    "TestFileInfoToDirEntry": "pass",
+    "TestFileInfoToDirEntry/adir": "pass",
+    "TestFileInfoToDirEntry/notadir.txt": "pass",
+    "TestFormatDirEntry": "pass",
+    "TestFormatFileInfo": "pass",
+    "TestGlob": "pass",
+    "TestGlobError": "pass",
+    "TestGlobMethod": "pass",
+    "TestIssue51617": "pass",
+    "TestReadDir": "pass",
+    "TestReadDirPath": "pass",
+    "TestReadFile": "pass",
+    "TestReadFilePath": "pass",
+    "TestStat": "pass",
+    "TestSub": "pass",
+    "TestValidPath": "pass",
+    "TestWalkDir": "pass"
+  },
+  "csharp": {
+    "TestCVE202230630": "pass",
+    "TestFileInfoToDirEntry": "pass",
+    "TestFileInfoToDirEntry/adir": "pass",
+    "TestFileInfoToDirEntry/notadir.txt": "pass",
+    "TestFormatDirEntry": "pass",
+    "TestFormatFileInfo": "pass",
+    "TestGlob": "pass",
+    "TestGlobError": "pass",
+    "TestGlobMethod": "pass",
+    "TestIssue51617": "pass",
+    "TestReadDir": "pass",
+    "TestReadDirPath": "pass",
+    "TestReadFile": "pass",
+    "TestReadFilePath": "pass",
+    "TestStat": "pass",
+    "TestSub": "pass",
+    "TestValidPath": "pass",
+    "TestWalkDir": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "ExampleWalkDir (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

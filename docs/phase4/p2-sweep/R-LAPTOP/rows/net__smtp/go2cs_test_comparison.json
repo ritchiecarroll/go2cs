@@ -1,0 +1,62 @@
+{
+  "package": "smtp",
+  "status": "validated",
+  "go": {
+    "TestAuth": "pass",
+    "TestAuthFailed": "pass",
+    "TestAuthPlain": "pass",
+    "TestBasic": "pass",
+    "TestClientAuthTrimSpace": "pass",
+    "TestExtensions": "pass",
+    "TestExtensions/ehlo": "pass",
+    "TestExtensions/ehlo_8bitmime": "pass",
+    "TestExtensions/ehlo_8bitmime_smtputf8": "pass",
+    "TestExtensions/ehlo_smtputf8": "pass",
+    "TestExtensions/helo": "pass",
+    "TestHELOFailed": "pass",
+    "TestHello": "pass",
+    "TestNewClient": "pass",
+    "TestNewClient2": "pass",
+    "TestNewClientWithTLS": "pass",
+    "TestSendMail": "pass",
+    "TestSendMailWithAuth": "pass",
+    "TestTLSClient": "pass",
+    "TestTLSConnState": "pass"
+  },
+  "csharp": {
+    "TestAuth": "pass",
+    "TestAuthFailed": "pass",
+    "TestAuthPlain": "pass",
+    "TestBasic": "pass",
+    "TestClientAuthTrimSpace": "pass",
+    "TestExtensions": "pass",
+    "TestExtensions/ehlo": "pass",
+    "TestExtensions/ehlo_8bitmime": "pass",
+    "TestExtensions/ehlo_8bitmime_smtputf8": "pass",
+    "TestExtensions/ehlo_smtputf8": "pass",
+    "TestExtensions/helo": "pass",
+    "TestHELOFailed": "pass",
+    "TestHello": "pass",
+    "TestNewClient": "pass",
+    "TestNewClient2": "pass",
+    "TestNewClientWithTLS": "pass",
+    "TestSendMail": "pass",
+    "TestSendMailWithAuth": "pass",
+    "TestTLSClient": "pass",
+    "TestTLSConnState": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "Example (example): example execution is deferred to Phase 4D",
+    "ExamplePlainAuth (example): example execution is deferred to Phase 4D",
+    "ExampleSendMail (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

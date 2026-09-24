@@ -1,0 +1,3 @@
+ M docs/validation/index.md
+ M src/core/internal/syscall/windows/registry/registry_test.cs.auto
+?? src/run-validated-sweep.p2-R-LAPTOP.ps1

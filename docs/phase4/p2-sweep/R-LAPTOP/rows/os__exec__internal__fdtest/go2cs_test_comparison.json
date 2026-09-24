@@ -1,0 +1,22 @@
+{
+  "package": "fdtest",
+  "status": "validated",
+  "go": {
+    "TestExists": "skip"
+  },
+  "csharp": {
+    "TestExists": "skip"
+  },
+  "matched": true,
+  "skipped": [
+    "TestExists"
+  ],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

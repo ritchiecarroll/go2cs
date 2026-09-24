@@ -1,0 +1,47 @@
+{
+  "package": "utf16",
+  "status": "validated",
+  "go": {
+    "TestAllocationsDecode": "pass",
+    "TestAppendRune": "pass",
+    "TestConstants": "pass",
+    "TestDecode": "pass",
+    "TestDecodeRune": "pass",
+    "TestEncode": "pass",
+    "TestEncodeRune": "pass",
+    "TestIsSurrogate": "pass",
+    "TestRuneLen": "pass"
+  },
+  "csharp": {
+    "TestAllocationsDecode": "fail",
+    "TestAppendRune": "pass",
+    "TestConstants": "pass",
+    "TestDecode": "pass",
+    "TestDecodeRune": "pass",
+    "TestEncode": "pass",
+    "TestEncodeRune": "pass",
+    "TestIsSurrogate": "pass",
+    "TestRuneLen": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [
+    "TestAllocationsDecode (deferred): want-zero AllocsPerRun assert: Decode returns a []rune that the managed runtime heap-allocates where Go's escape analysis stack-allocates the non-escaping result (the test is guarded by testenv.SkipIfOptimizationOff precisely because the zero-alloc outcome depends on the optimizer); a malloc-counting shim would fail identically. TestDecode proves the decoded output is correct — only the allocation profile diverges. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O5): alloc-profile -\u003e deferred. Legs 2-4's unit is unrecorded because the host notes only a test's first nonzero call; each mints Decode's counted make on every run, so they are COUNT by construction."
+  ],
+  "excluded": [
+    "BenchmarkAppendRuneValidASCII (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkAppendRuneValidJapaneseChars (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkDecodeRune (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkDecodeValidASCII (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkDecodeValidJapaneseChars (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkEncodeRune (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkEncodeValidASCII (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkEncodeValidJapaneseChars (benchmark): benchmark execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

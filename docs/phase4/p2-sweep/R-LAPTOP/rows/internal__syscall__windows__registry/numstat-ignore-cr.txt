@@ -1,0 +1,1 @@
+5	3	src/core/internal/syscall/windows/registry/registry_test.cs.auto

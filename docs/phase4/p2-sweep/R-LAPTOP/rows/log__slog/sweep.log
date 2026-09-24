@@ -1,0 +1,6 @@
+  CGO_ENABLED=0 pinned for the whole run (was '0') -- the corpus emission state and the annotations' state of record on every platform
+validated sweep: 1 package(s), 197 expected verdicts, timeout 10m, test-config Release
+  1 row(s) carry a per-row execution config: log/slog [release-tiered]
+  PASS  log/slog                           197 [release-tiered] [142s]
+
+sweep: 1 pass / 0 fail  (142s)

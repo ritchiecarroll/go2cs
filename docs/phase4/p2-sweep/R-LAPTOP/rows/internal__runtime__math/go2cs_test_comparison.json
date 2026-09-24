@@ -1,0 +1,22 @@
+{
+  "package": "math",
+  "status": "validated",
+  "go": {
+    "TestMulUintptr": "pass"
+  },
+  "csharp": {
+    "TestMulUintptr": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "BenchmarkMulUintptr (benchmark): benchmark execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "package": "jsonrpc",
+  "status": "validated",
+  "go": {
+    "TestBuiltinTypes": "pass",
+    "TestClient": "pass",
+    "TestMalformedInput": "pass",
+    "TestMalformedOutput": "pass",
+    "TestServer": "pass",
+    "TestServerEmptyMessage": "pass",
+    "TestServerErrorHasNullResult": "pass",
+    "TestServerNoParams": "pass",
+    "TestUnexpectedError": "pass"
+  },
+  "csharp": {
+    "TestBuiltinTypes": "pass",
+    "TestClient": "pass",
+    "TestMalformedInput": "pass",
+    "TestMalformedOutput": "pass",
+    "TestServer": "pass",
+    "TestServerEmptyMessage": "pass",
+    "TestServerErrorHasNullResult": "pass",
+    "TestServerNoParams": "pass",
+    "TestUnexpectedError": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "package": "unique",
+  "status": "validated",
+  "go": {
+    "TestHandle": "pass",
+    "TestHandle/testEface/\"hello\"": "pass",
+    "TestHandle/testEface/\u003cnil\u003e": "pass",
+    "TestHandle/testIntArray/unique.testIntArray{7,_77,_777,_7777}": "pass",
+    "TestHandle/testString/\"\"": "pass",
+    "TestHandle/testString/\"bar\"": "pass",
+    "TestHandle/testString/\"foo\"": "pass",
+    "TestHandle/testStringArray/unique.testStringArray{\"a\",_\"b\",_\"c\"}": "pass",
+    "TestHandle/testStringStruct/unique.testStringStruct{a:\"x\"}": "pass",
+    "TestHandle/testStringStructArrayStruct/unique.testStringStructArrayStruct{s:[2]unique.testStringStruct{unique.testStringStruct{a:\"y\"},_unique.testStringStruct{a:\"z\"}}}": "pass",
+    "TestHandle/testStruct/unique.testStruct{z:0.5,_b:\"184\"}": "pass",
+    "TestHandle/testZeroSize/unique.testZeroSize{}": "pass",
+    "TestHandleUnsafeString": "pass",
+    "TestMakeCloneSeq": "pass",
+    "TestMakeCloneSeq/testEface": "pass",
+    "TestMakeCloneSeq/testIntArray": "pass",
+    "TestMakeCloneSeq/testString": "pass",
+    "TestMakeCloneSeq/testStringArray": "pass",
+    "TestMakeCloneSeq/testStringStruct": "pass",
+    "TestMakeCloneSeq/testStringStructArrayStruct": "pass",
+    "TestMakeCloneSeq/testStruct": "pass",
+    "TestMakeClonesStrings": "pass"
+  },
+  "csharp": {
+    "TestHandle": "pass",
+    "TestHandle/testEface/\"hello\"": "pass",
+    "TestHandle/testEface/\u003cnil\u003e": "pass",
+    "TestHandle/testIntArray/unique.testIntArray{7,_77,_777,_7777}": "pass",
+    "TestHandle/testString/\"\"": "pass",
+    "TestHandle/testString/\"bar\"": "pass",
+    "TestHandle/testString/\"foo\"": "pass",
+    "TestHandle/testStringArray/unique.testStringArray{\"a\",_\"b\",_\"c\"}": "pass",
+    "TestHandle/testStringStruct/unique.testStringStruct{a:\"x\"}": "pass",
+    "TestHandle/testStringStructArrayStruct/unique.testStringStructArrayStruct{s:[2]unique.testStringStruct{unique.testStringStruct{a:\"y\"},_unique.testStringStruct{a:\"z\"}}}": "pass",
+    "TestHandle/testStruct/unique.testStruct{z:0.5,_b:\"184\"}": "pass",
+    "TestHandle/testZeroSize/unique.testZeroSize{}": "pass",
+    "TestHandleUnsafeString": "pass",
+    "TestMakeCloneSeq": "pass",
+    "TestMakeCloneSeq/testEface": "pass",
+    "TestMakeCloneSeq/testIntArray": "pass",
+    "TestMakeCloneSeq/testString": "pass",
+    "TestMakeCloneSeq/testStringArray": "pass",
+    "TestMakeCloneSeq/testStringStruct": "pass",
+    "TestMakeCloneSeq/testStringStructArrayStruct": "pass",
+    "TestMakeCloneSeq/testStruct": "pass",
+    "TestMakeClonesStrings": "fail"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [
+    "TestMakeClonesStrings (codegen-liveness): codegen-liveness: Go's liveness maps drop a local at its LAST USE, so the test's cloned string is unreachable before runtime.GC() and the finalizer on its backing runs inside the one-second wait. The converted @string is a 16-byte readonly struct (byte[] + int + int -- exactly one managed reference), and the host keeps a caller frame slot rooted while the local remains in scope, so the backing survives the collection and the wait times out with Go's own message. MEASURED with a six-arm instrument, ONE ARM PER PROCESS, every arm also run under Go as its own oracle, and two controls that disagree in both directions at every configuration (a deliberately rooted referent reads RETAINED; a plainly dead byte slice, sharing none of the string machinery, reads COLLECTED). Readings as Go / Release+TC0 / Release-tiered / Debug -- (1) caller slot LIVE: COLLECTED / RETAINED / RETAINED / RETAINED; (2) caller slot OVERWRITTEN: COLLECTED / COLLECTED / RETAINED / RETAINED; (3) by-value hand-off to a callee THEN overwritten: COLLECTED / COLLECTED / RETAINED / RETAINED; (4) the real unique.Make call THEN overwritten, handle KeepAlive'd across the collection: COLLECTED / COLLECTED / RETAINED / RETAINED. Arms 2, 3 and 4 are identical in all four columns, so neither the callee's by-value copy nor the intern map nor the handle holds the caller's bytes: the clone half and the referent bridge both work, measured rather than argued, and the pin is SOLELY the caller's frame slot. This test's own shape is arm 1 -- it never overwrites its local -- which retains at every configuration. Optimization honours an overwritten slot at Release+TC0 and does not under tiering or in Debug, and it frees a merely-dead-but-in-scope slot at NO configuration measured. That is the host's liveness model, a representational fact rather than an unbuilt feature, which is why this is disclosed and not billed as work."
+  ],
+  "excluded": [
+    "BenchmarkMake (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkMakeMany (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkMakeManyMany (benchmark): benchmark execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

@@ -1,0 +1,5 @@
+=== RUN   TestOpenFileCreateExclDanglingSymlink
+    os_test.go:2227: skipping test: cannot make symlinks on windows/amd64: : you don't have enough privileges to create symlinks
+--- SKIP: TestOpenFileCreateExclDanglingSymlink (0.00s)
+PASS
+ok  	os	0.825s

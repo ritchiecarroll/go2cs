@@ -1,0 +1,44 @@
+{
+  "package": "ascii",
+  "status": "validated",
+  "go": {
+    "TestEqualFold": "pass",
+    "TestEqualFold/Unicode_Kelvin_symbol": "pass",
+    "TestEqualFold/empty": "pass",
+    "TestEqualFold/same_string": "pass",
+    "TestEqualFold/simple_match": "pass",
+    "TestIsPrint": "pass",
+    "TestIsPrint/ASCII_high": "pass",
+    "TestIsPrint/ASCII_low": "pass",
+    "TestIsPrint/ASCII_low_non-print": "pass",
+    "TestIsPrint/Ascii_high_non-print": "pass",
+    "TestIsPrint/Unicode_emoji": "pass",
+    "TestIsPrint/Unicode_letter": "pass",
+    "TestIsPrint/empty": "pass"
+  },
+  "csharp": {
+    "TestEqualFold": "pass",
+    "TestEqualFold/Unicode_Kelvin_symbol": "pass",
+    "TestEqualFold/empty": "pass",
+    "TestEqualFold/same_string": "pass",
+    "TestEqualFold/simple_match": "pass",
+    "TestIsPrint": "pass",
+    "TestIsPrint/ASCII_high": "pass",
+    "TestIsPrint/ASCII_low": "pass",
+    "TestIsPrint/ASCII_low_non-print": "pass",
+    "TestIsPrint/Ascii_high_non-print": "pass",
+    "TestIsPrint/Unicode_emoji": "pass",
+    "TestIsPrint/Unicode_letter": "pass",
+    "TestIsPrint/empty": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "package": "slogtest",
+  "status": "validated",
+  "go": {
+    "TestRun": "pass",
+    "TestRun/WithAttrs": "pass",
+    "TestRun/WithGroup": "pass",
+    "TestRun/attrs": "pass",
+    "TestRun/built-ins": "pass",
+    "TestRun/empty-PC": "pass",
+    "TestRun/empty-attr": "pass",
+    "TestRun/empty-group": "pass",
+    "TestRun/empty-group-record": "pass",
+    "TestRun/groups": "pass",
+    "TestRun/inline-group": "pass",
+    "TestRun/multi-With": "pass",
+    "TestRun/resolve": "pass",
+    "TestRun/resolve-WithAttrs": "pass",
+    "TestRun/resolve-WithAttrs-groups": "pass",
+    "TestRun/resolve-groups": "pass",
+    "TestRun/zero-time": "pass"
+  },
+  "csharp": {
+    "TestRun": "pass",
+    "TestRun/WithAttrs": "pass",
+    "TestRun/WithGroup": "pass",
+    "TestRun/attrs": "pass",
+    "TestRun/built-ins": "pass",
+    "TestRun/empty-PC": "pass",
+    "TestRun/empty-attr": "pass",
+    "TestRun/empty-group": "pass",
+    "TestRun/empty-group-record": "pass",
+    "TestRun/groups": "pass",
+    "TestRun/inline-group": "pass",
+    "TestRun/multi-With": "pass",
+    "TestRun/resolve": "pass",
+    "TestRun/resolve-WithAttrs": "pass",
+    "TestRun/resolve-WithAttrs-groups": "pass",
+    "TestRun/resolve-groups": "pass",
+    "TestRun/zero-time": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "Example_parsing (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

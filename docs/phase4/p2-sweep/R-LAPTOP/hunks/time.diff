@@ -1,0 +1,17 @@
+diff --git a/src/core/time/package_init.cs b/src/core/time/package_init.cs
+index b2c5456ce7..7d5e17f35f 100644
+--- a/src/core/time/package_init.cs
++++ b/src/core/time/package_init.cs
+@@ -10,5 +10,12 @@ partial class time_package {
+     static time_package() {
+         initᴛΔUTC();
+         initᴛΔLocal();
++        initᴛᴛtests();
+     }
++
++    // -tests hook: implemented by the internal test variant's relocated-initializer
++    // file when its _test.go files need init-order relocation into this same class;
++    // erased entirely (declaration and call) when unimplemented — the production
++    // compile set excludes the *_test.cs implementation.
++    static partial void initᴛᴛtests();
+ } // end time_package

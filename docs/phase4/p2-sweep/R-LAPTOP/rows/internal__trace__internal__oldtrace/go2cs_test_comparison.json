@@ -1,0 +1,24 @@
+{
+  "package": "oldtrace",
+  "status": "validated",
+  "go": {
+    "TestBuckets": "pass",
+    "TestCorruptedInputs": "pass",
+    "TestParseCanned": "pass"
+  },
+  "csharp": {
+    "TestBuckets": "pass",
+    "TestCorruptedInputs": "pass",
+    "TestParseCanned": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "package": "singleflight",
+  "status": "validated",
+  "go": {
+    "TestDo": "pass",
+    "TestDoAndForgetUnsharedRace": "pass",
+    "TestDoDupSuppress": "pass",
+    "TestDoErr": "pass",
+    "TestForgetUnshared": "pass"
+  },
+  "csharp": {
+    "TestDo": "pass",
+    "TestDoAndForgetUnsharedRace": "pass",
+    "TestDoDupSuppress": "pass",
+    "TestDoErr": "pass",
+    "TestForgetUnshared": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

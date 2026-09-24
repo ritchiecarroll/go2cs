@@ -1,0 +1,56 @@
+{
+  "package": "iotest",
+  "status": "validated",
+  "go": {
+    "TestDataErrReader_emptyReader": "pass",
+    "TestDataErrReader_nonEmptyReader": "pass",
+    "TestErrReader": "pass",
+    "TestErrReader/io.EOF": "pass",
+    "TestErrReader/nil_error": "pass",
+    "TestErrReader/non-nil_error": "pass",
+    "TestHalfReader_emptyReader": "pass",
+    "TestHalfReader_nonEmptyReader": "pass",
+    "TestOneByteReader_emptyReader": "pass",
+    "TestOneByteReader_nonEmptyReader": "pass",
+    "TestReadLogger": "pass",
+    "TestReadLogger_errorOnRead": "pass",
+    "TestStringsReader": "pass",
+    "TestTimeOutReader_emptyReader": "pass",
+    "TestTimeOutReader_nonEmptyReader": "pass",
+    "TestTruncateWriter": "pass",
+    "TestWriteLogger": "pass",
+    "TestWriteLogger_errorOnWrite": "pass"
+  },
+  "csharp": {
+    "TestDataErrReader_emptyReader": "pass",
+    "TestDataErrReader_nonEmptyReader": "pass",
+    "TestErrReader": "pass",
+    "TestErrReader/io.EOF": "pass",
+    "TestErrReader/nil_error": "pass",
+    "TestErrReader/non-nil_error": "pass",
+    "TestHalfReader_emptyReader": "pass",
+    "TestHalfReader_nonEmptyReader": "pass",
+    "TestOneByteReader_emptyReader": "pass",
+    "TestOneByteReader_nonEmptyReader": "pass",
+    "TestReadLogger": "pass",
+    "TestReadLogger_errorOnRead": "pass",
+    "TestStringsReader": "pass",
+    "TestTimeOutReader_emptyReader": "pass",
+    "TestTimeOutReader_nonEmptyReader": "pass",
+    "TestTruncateWriter": "pass",
+    "TestWriteLogger": "pass",
+    "TestWriteLogger_errorOnWrite": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "ExampleErrReader (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

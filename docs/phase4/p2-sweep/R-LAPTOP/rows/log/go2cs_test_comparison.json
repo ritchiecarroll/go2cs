@@ -1,0 +1,46 @@
+{
+  "package": "log",
+  "status": "validated",
+  "go": {
+    "TestAll": "pass",
+    "TestDefault": "pass",
+    "TestDiscard": "pass",
+    "TestEmptyPrintCreatesLine": "pass",
+    "TestFlagAndPrefixSetting": "pass",
+    "TestNonNewLogger": "pass",
+    "TestOutput": "pass",
+    "TestOutputRace": "pass",
+    "TestUTCFlag": "pass"
+  },
+  "csharp": {
+    "TestAll": "pass",
+    "TestDefault": "pass",
+    "TestDiscard": "fail",
+    "TestEmptyPrintCreatesLine": "pass",
+    "TestFlagAndPrefixSetting": "pass",
+    "TestNonNewLogger": "pass",
+    "TestOutput": "pass",
+    "TestOutputRace": "pass",
+    "TestUTCFlag": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [
+    "TestDiscard (deferred): at-most-one AllocsPerRun assert over l.Printf(\"%s\", \u003c102400-byte string\u003e): Go's single allocation is the variadic []any, and its `func(b []byte) []byte` closure over format/v does not escape Output, so Go's escape analysis keeps the closure off the heap entirely. The converted call must heap-allocate what Go stack-allocates — the params array, the display class the C# compiler emits for the same closure, and its delegate — measured 3 golib-site allocations per run against Go's 1, and that figure is a LOWER BOUND (go2cs's counter covers golib's sites, not compiler-emitted or BCL allocations). Same shape as bufio's TestReadStringAllocs: the count is comparable, it is WHERE the allocations live that differs. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O5): alloc-profile -\u003e deferred. Read at bb54ff0920: the two counted objects are the Printf params copy (log.cs:289) and the format literal; `Ꮡl.of(Logger.ᏑisDiscard)` (log.cs:226) is cached per (box, accessor) (golib/ж.cs:206-210) and costs nothing. The closure's display class and delegate this reason names are uncounted."
+  ],
+  "excluded": [
+    "BenchmarkConcurrent (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkDiscard (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkItoa (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkPrintln (benchmark): benchmark execution is deferred to Phase 4D",
+    "BenchmarkPrintlnNoFlags (benchmark): benchmark execution is deferred to Phase 4D",
+    "ExampleLogger (example): example execution is deferred to Phase 4D",
+    "ExampleLogger_Output (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

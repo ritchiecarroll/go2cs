@@ -1,0 +1,28 @@
+{
+  "package": "gover",
+  "status": "validated",
+  "go": {
+    "TestCompare": "pass",
+    "TestIsLang": "pass",
+    "TestIsValid": "pass",
+    "TestLang": "pass",
+    "TestParse": "pass"
+  },
+  "csharp": {
+    "TestCompare": "pass",
+    "TestIsLang": "pass",
+    "TestIsValid": "pass",
+    "TestLang": "pass",
+    "TestParse": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

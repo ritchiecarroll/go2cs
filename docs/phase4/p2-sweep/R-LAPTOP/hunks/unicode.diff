@@ -1,0 +1,17 @@
+diff --git a/src/core/unicode/package_init.cs b/src/core/unicode/package_init.cs
+index b20352c9b7..349df9b95a 100644
+--- a/src/core/unicode/package_init.cs
++++ b/src/core/unicode/package_init.cs
+@@ -17,5 +17,12 @@ partial class unicode_package {
+         initᴛCaseRanges();
+         initᴛFoldCategory();
+         initᴛFoldScript();
++        initᴛᴛtests();
+     }
++
++    // -tests hook: implemented by the internal test variant's relocated-initializer
++    // file when its _test.go files need init-order relocation into this same class;
++    // erased entirely (declaration and call) when unimplemented — the production
++    // compile set excludes the *_test.cs implementation.
++    static partial void initᴛᴛtests();
+ } // end unicode_package

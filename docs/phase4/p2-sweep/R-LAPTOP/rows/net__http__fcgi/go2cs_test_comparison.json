@@ -1,0 +1,42 @@
+{
+  "package": "fcgi",
+  "status": "validated",
+  "go": {
+    "TestChildServeCleansUp": "pass",
+    "TestChildServeReadsEnvVars": "pass",
+    "TestGetValues": "pass",
+    "TestMalformedParams": "pass",
+    "TestResponseWriterSniffsContentType": "pass",
+    "TestResponseWriterSniffsContentType/html": "pass",
+    "TestResponseWriterSniffsContentType/jpg": "pass",
+    "TestResponseWriterSniffsContentType/no_body": "pass",
+    "TestResponseWriterSniffsContentType/text": "pass",
+    "TestSize": "pass",
+    "TestSlowRequest": "pass",
+    "TestStreams": "pass"
+  },
+  "csharp": {
+    "TestChildServeCleansUp": "pass",
+    "TestChildServeReadsEnvVars": "pass",
+    "TestGetValues": "pass",
+    "TestMalformedParams": "pass",
+    "TestResponseWriterSniffsContentType": "pass",
+    "TestResponseWriterSniffsContentType/html": "pass",
+    "TestResponseWriterSniffsContentType/jpg": "pass",
+    "TestResponseWriterSniffsContentType/no_body": "pass",
+    "TestResponseWriterSniffsContentType/text": "pass",
+    "TestSize": "pass",
+    "TestSlowRequest": "pass",
+    "TestStreams": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

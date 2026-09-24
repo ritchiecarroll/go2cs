@@ -1,0 +1,45 @@
+{
+  "package": "mail",
+  "status": "validated",
+  "go": {
+    "TestAddressFormattingAndParsing": "pass",
+    "TestAddressParser": "pass",
+    "TestAddressParsing": "pass",
+    "TestAddressParsingAndFormatting": "pass",
+    "TestAddressParsingError": "pass",
+    "TestAddressParsingError/CustomWordDecoder": "pass",
+    "TestAddressString": "pass",
+    "TestDateParsing": "pass",
+    "TestDateParsingCFWS": "pass",
+    "TestEmptyAddress": "pass",
+    "TestParsing": "pass"
+  },
+  "csharp": {
+    "TestAddressFormattingAndParsing": "pass",
+    "TestAddressParser": "pass",
+    "TestAddressParsing": "pass",
+    "TestAddressParsingAndFormatting": "pass",
+    "TestAddressParsingError": "pass",
+    "TestAddressParsingError/CustomWordDecoder": "pass",
+    "TestAddressString": "pass",
+    "TestDateParsing": "pass",
+    "TestDateParsingCFWS": "pass",
+    "TestEmptyAddress": "pass",
+    "TestParsing": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "ExampleParseAddress (example): example execution is deferred to Phase 4D",
+    "ExampleParseAddressList (example): example execution is deferred to Phase 4D",
+    "ExampleParseDate (example): example execution is deferred to Phase 4D",
+    "ExampleReadMessage (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

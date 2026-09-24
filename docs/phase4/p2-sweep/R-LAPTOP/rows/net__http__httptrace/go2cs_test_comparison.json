@@ -1,0 +1,24 @@
+{
+  "package": "httptrace",
+  "status": "validated",
+  "go": {
+    "TestCompose": "pass",
+    "TestWithClientTrace": "pass"
+  },
+  "csharp": {
+    "TestCompose": "pass",
+    "TestWithClientTrace": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [
+    "Example (example): example execution is deferred to Phase 4D"
+  ],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}

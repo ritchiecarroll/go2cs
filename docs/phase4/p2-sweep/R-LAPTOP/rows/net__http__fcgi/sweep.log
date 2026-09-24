@@ -1,0 +1,5 @@
+  CGO_ENABLED=0 pinned for the whole run (was '0') -- the corpus emission state and the annotations' state of record on every platform
+validated sweep: 1 package(s), 12 expected verdicts, timeout 10m, test-config Release
+  PASS  net/http/fcgi                      12 [52s]
+
+sweep: 1 pass / 0 fail  (52s)

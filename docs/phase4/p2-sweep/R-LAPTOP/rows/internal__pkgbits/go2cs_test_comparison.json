@@ -1,0 +1,22 @@
+{
+  "package": "pkgbits",
+  "status": "validated",
+  "go": {
+    "TestRoundTrip": "pass",
+    "TestVersions": "pass"
+  },
+  "csharp": {
+    "TestRoundTrip": "pass",
+    "TestVersions": "pass"
+  },
+  "matched": true,
+  "skipped": [],
+  "disclosed": [],
+  "excluded": [],
+  "errors": [],
+  "environment": {
+    "configuration": "Release",
+    "tiered": false,
+    "oracleGoVersion": "go version go1.24.13 windows/amd64"
+  }
+}
