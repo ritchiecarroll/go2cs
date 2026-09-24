@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 08:48 -- SAVE-STATE refresh (ledger through mailbox 56300f7712): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, the Linux packaging train CUT (seat 1 accepted, seat 2 ACCEPTED with 2-A required, seat 3 REWORKED at 267c262307 and under COORD re-review, a corpus half owed), G's len/cap seat GATE-COMPLETE, the RUNTIME row held by the owner's separate cloud project, and C2's literal revision 4 under COORD verification (the owner awaits the tier brief); section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 09:00 -- SAVE-STATE refresh (ledger through mailbox b9f392681b): section 1b is the COORD new-session prompt: 1.24.13.1 PUBLISHED and its 14 deprecations DONE, release/go1.23 fast-forwarded, master ebb4acb8cf, the Linux packaging train CUT (seat 1 accepted, seat 2 ACCEPTED plus its 2-A..2-D commit, seat 3 REWORKED at 267c262307 and under COORD re-review, a corpus half owed), G's len/cap seat GATE-COMPLETE, the RUNTIME row held by the owner's separate cloud project, and C2's literal revision 4 VERIFIED with the tier brief delivered and the owner's ruling awaited; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -218,9 +218,16 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
  - OWNER DECISIONS OPEN: the string-literal tiers. C2's revision 3 is d382b60677 on claude/c2-literal-cache-draft, COORD's
    verification is on claude/coord-handover docs/phase4/reviews/literal-revision-3-verification-2026-09-24.md. REVISION 4
    ARRIVED: c555d91c55, inbox 20260924T125751Z-C2.md. It found revision 3's arms registered AFTER the import hooks, and it
-   measured hybrid lazy registration and does NOT recommend it; C2 is on STANDBY. COORD's revision-4 verification workflow is
-   running. Its output is (i) a verification note under docs/phase4/reviews/ and (ii) the TIER DECISION BRIEF for the owner,
-   which the owner asked to receive.
+   measured hybrid lazy registration and does NOT recommend it; C2 is on STANDBY. COORD VERIFIED IT (claude/coord-handover
+   docs/phase4/reviews/literal-revision-4-verification-2026-09-24.md; ledger "FINDING · c555d91c55"). The TIER DECISION
+   BRIEF went to the owner in the COORD session on 2026-09-24. COORD RECOMMENDS:
+   - sstring-first becomes the PRIMARY tier, starting with the O1 survival census (C2, read-only) and then the fmt pilot;
+   - approve now the Tier-2-independent seats: arm C, read-only views, G8 (restated as Go's own rule) + G10, and V-fix 11
+     plus its guard;
+   - DEFER Tier 2: it misses test-assembly literals, its tax is per process, and it has no Windows or NativeAOT legs. It
+     is revisited, sized against sstring-first's measured residual;
+   - arms A/B stay HELD.
+   AWAITING THE OWNER'S RULING. Then C1 records it in DESIGN §8 and COORD assigns the seats.
  - DONE 2026-09-24 (owner-approved; ledger "ANNOUNCE · b6746ab185"): the BRANCH release/go1.23 was FAST-FORWARDED from
    10c78227a7 (the 75% milestone, still pinned by tag stdlib-tests-75pct-2026-08-22) to b6746ab185, the commit of
    nuget-1.23.12.3, and read back by ls-remote. No tag moved. Mint release/go1.24 at the 1.25 cutover, not before. These are
@@ -2083,3 +2090,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 08:41 -- SAVE-STATE refresh: 1c records the seats 2-3 review verdicts and the train's owed corpus half.
 - 2026-09-24 08:43 -- SAVE-STATE refresh: 1c records the len/cap seat gate-complete and seat 2's CNR.
 - 2026-09-24 08:48 -- SAVE-STATE refresh: 1b records literal revision 4 arrived, the scrub item, and the seat-3 rework under re-review.
+- 2026-09-24 09:00 -- SAVE-STATE refresh: 1b records literal revision 4 verified and COORD's tier recommendation.
