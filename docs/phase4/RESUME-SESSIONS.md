@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-25 00:11 -- SAVE-STATE refresh (ledger through mailbox 7baf01e424): TRAIN A battery running (leg C red on seat 1's stale declared rows, repaired as ff67c57420 for merge after the battery); the CS0121 census is clean, and C2 cuts the twin pilot on arm C
+> **Status of this revision:** 2026-09-25 01:09 -- SAVE-STATE refresh (ledger through mailbox dfc0387333): TRAIN A battery at behavioral (GolibTests D+R green, CNR byte-identical 730); TRAIN B rehearsal green with two repairs (pre-resolved set claude/r-trainB-rehearsal 5e372a0a76); R sizes reflect
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -306,7 +306,10 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
        - TRAIN B (golib strings/allocs, owner's tier ruling): C2's REC-F 645a8e1f62, then G's V-fix 11 + guard
          claude/g-vfix11-sstring-counted fce07d9517 (ACCEPTED), then G's (b) follow-on a9b7d402d6 (ACCEPTED, ledger 525291b865); C2's REC-C §A 3c98968c5f and §B 0fcdba94d5;
          C2's Float*bits 9ac6051e46; R's claude/r-string-views-g8-g10 737c468bbf, GREEN and ACCEPTED (ledger 5374f5bee3; the first
-         gate pass's 56 B/call append box is fixed, with a bytes guard). R-LAPTOP IS REHEARSING THE UNION (dispatched 2026-09-25 00:00). TRAIN B's union MUST
+         gate pass's 56 B/call append box is fixed, with a bytes guard). R's REHEARSAL IS DONE AND GREEN WITH TWO REPAIRS (ledger dfc0387333):
+         the record ref claude/r-trainB-rehearsal 5e372a0a76 is the PRE-RESOLVED set (builtin.cs 93c38231d3 at merge 5, string.cs 32137b70ba
+         at merge 7). LIFT the union commit 9a66d45522 (the ByDesign entry for the one-byte table), NEVER 5e372a0a76 (REHEARSAL-ONLY).
+         Arm C's tip must be C2's duplicate-attribute repair ON TOP of 2d068bca59. Delete the record ref at the landing. TRAIN B's union MUST
          build the stdlib as a CS0121 check, because R's seat, REC-C §A/§B and V-fix 11 all add or reshape builtin/sstring overloads; C2's arm C claude/c2-arm-c
          2d068bca59, whose .NET legs are OWED BY COORD (corpus build, MSTest, the new behavioral test, the strconv member rows).
        - THE TWIN PILOT: the implicit-operator CS0121 census is CLEAN (the i9, ledger 7baf01e424). C2 is cutting the pilot, stacked on
@@ -393,7 +396,10 @@ Then take arm C's owed .NET legs: LocalStringConstHoist, the three re-emitted go
 ADDENDA: add the converter suite at the union, and at the END one ARM 1 build (sstring.cs:185 explicit -> implicit only; stdlib +
 go2cs.slnx; restore). NOTE: your synctest train's stale declared rows are repaired by COORD as claude/coord-trainA-synctest-declared-rows
 ff67c57420 (ledger 2f11145285); nothing for you to cut.
-First action: ls-remote your refs, then resume or restart the rehearsal.
+DONE 2026-09-25: the rehearsal is ACCEPTED as the pre-resolved set (ledger dfc0387333; record ref claude/r-trainB-rehearsal 5e372a0a76).
+NOW: SIZE the reflect managed-map seat, READ-ONLY, from the mustBeKind-tip reading 418/391/27/22: which divergences and disclosures
+it reaches, by name, its footprint, and the seams it shares with TRAIN A/B. No cut until COORD sends TRAIN A's union reading of reflect.
+First action: ls-remote your refs, then resume the sizing.
 ```
 
 ```
@@ -2212,3 +2218,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 23:51 -- SAVE-STATE refresh: TRAIN A assembled at bfd36bad0d; battery running from 23:50; owner deferred the i7 disk install
 - 2026-09-25 00:00 -- SAVE-STATE refresh: ACCEPT a9b7d402d6 + 737c468bbf; dispatches: R the TRAIN B rehearsal, the i9 the CS0121 census, C2 standby
 - 2026-09-25 00:11 -- SAVE-STATE refresh: leg C finding + repair ff67c57420; CS0121 census clean (the i9); C2 pilot dispatched; R's rehearsal addenda
+- 2026-09-25 01:09 -- SAVE-STATE refresh: TRAIN B rehearsal accepted; R to reflect sizing
