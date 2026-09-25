@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-25 01:09 -- SAVE-STATE refresh (ledger through mailbox dfc0387333): TRAIN A battery at behavioral (GolibTests D+R green, CNR byte-identical 730); TRAIN B rehearsal green with two repairs (pre-resolved set claude/r-trainB-rehearsal 5e372a0a76); R sizes reflect
+> **Status of this revision:** 2026-09-25 04:27 -- SAVE-STATE refresh (ledger through mailbox 38316c9fd5): TRAIN A LANDED (master db1bd885a2; net/http validated again; owner pinged); TRAIN B assembled at tB 8c757d5db8 with the tip emission check running; the i9 reviews the pilot; R on reflect seat (b)
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -284,19 +284,23 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    (2) DONE: the OWNER-APPROVED CLEANUP (0 refusals, 32 registrations pruned, C: 32 -> 76 GB free; ledger "STAMP · 9a5f63041b ·
        THE OWNER-APPROVED i7 CLEANUP IS DONE"). The worktrees LEFT are the owner's call (d0913b, kick, C:/go2cs-archive, the app's
        session worktrees) plus hnd, the main checkout and go2cs-mailbox.
-   (3) The owner DEFERRED the disk install (2026-09-24 23:45: "would rather things keep working and we find a better
-       stopping point at a later date"), so the i7 keeps working. TRAIN A IS ASSEMBLED (ledger "STAMP · bfd36bad0d"): head
-       bfd36bad0d in worktree C:/go2cs-tmp-coord/tA (local, not pushed, FROZEN during the battery), made of the merge
-       a7ae6c9182 (synctest 0b6bf15ab0), the signed PICK 6ba711dbe7 (8ef7f65ec8, same patch-id) and the merge bfd36bad0d
-       (mustBeKind 2e134cf77d). Its battery runs from the scratchpad's tA-battery-run1.sh, with logs and SUMMARY.txt in
-       tA-logs (started 23:50). When the battery reads green: rebank encoding/binary (140+6 -> 142+4 expected) and re-enter
-       net/http from the candidates (validation-bank skill), announce, push master, then PING THE OWNER (net/http landed ->
-       the cloud project resumes; its item 2 is already unblocked from master). If the battery session is lost: re-derive
-       the head from these three SHAs, and re-run the battery from a fresh per-run copy.
-       LEG C WAS RED on ONE test, from SEAT 1 itself (ledger 2f11145285): TestDeclaredNotImplementedCensus reads 'vanished 5' because
-       internal/synctest's five members were bodied without deleting their declared rows. It reproduces at 0b6bf15ab0 alone. REPAIR
-       claude/coord-trainA-synctest-declared-rows ff67c57420 (on 0b6bf15ab0, test table only). AFTER THE BATTERY: merge it into tA
-       (signed --no-ff), re-run leg C only, and transfer every other leg by tree equality (the only delta is that _test.go file).
+   (3) TRAIN A HAS LANDED (2026-09-25 ~06:00; ledger 'ANNOUNCE · db1bd885a2', mailbox 0813f0b840): master 9a5f63041b ->
+       db1bd885a2 by fast-forward, every commit signed. It holds the synctest merge a7ae6c9182, the atomic PICK 6ba711dbe7, the mustBeKind merge
+       bfd36bad0d, COORD's seat-1 repair merge ea7178a8af (ff67c57420, the stale synctest declared rows), the roster bank e75e3b4793
+       (encoding/binary 142+4; net/http re-enters at 1387 [release-tiered]; header 219/230), and the proof-page bank db1bd885a2.
+       The OWNER WAS PINGED (push notification): net/http is landed, and the cloud project resumes from master.
+       CANDIDATE READS at the union: reflect 418/391/27/22 (equal to R's base); internal/synctest 13 of 28 agree,
+       TestIteratorPush fails and a hang runs to the package deadline (routed to R). The owner DEFERRED the i7 disk install
+       (2026-09-24 23:45), so the i7 keeps working. Reclaim worktrees tA and tAfix (rm -rf, then git worktree prune).
+       TRAIN B IS ASSEMBLED in worktree C:/go2cs-tmp-coord/tB (local, not pushed): head 8c757d5db8 on master db1bd885a2 (ledger
+       38316c9fd5 has the composition). Nine signed seat merges: seats 1-7, arm C at 9baa1e563f, then the lifted union commit
+       efe3c0bf57, then the pilot 5b691c9c01 LAST. PRE-RESOLVED from R's rehearsal: builtin.cs (blob 724c2125a4) and string.cs
+       (blob 32137b70ba). NEW CONFLICTS against TRAIN A, hand-resolved: runtime/<goos>/package_info.cs takes print.go's map from
+       arm C and proc.go's map from TRAIN A PROVISIONALLY; fmt print.cs/scan.cs Printf/Sscanf take the pilot's signature and
+       REC-C A's sslice prologue. RUNNING: the tip emission check (tB-emitcheck.sh; three targets, runtime+fmt) to FIX proc.go's
+       map from the emission as one stated fixup commit. Then the battery (tB-battery.sh; set EXPECT_HEAD to the fixup head;
+       launch a per-run copy), and the landing only after the i9's byte-level review of the pilot reads AGREES (otherwise unseat
+       seat 9 and land 1-8). Delete claude/r-trainB-rehearsal at the landing.
        Later, when the owner installs the disk, propose a layout that moves the worktree and
        scratch roots onto the new disk.
    (4) Then the NEXT TRAINS, assembled from master 4c53b02a0a on the i7:
@@ -397,9 +401,12 @@ ADDENDA: add the converter suite at the union, and at the END one ARM 1 build (s
 go2cs.slnx; restore). NOTE: your synctest train's stale declared rows are repaired by COORD as claude/coord-trainA-synctest-declared-rows
 ff67c57420 (ledger 2f11145285); nothing for you to cut.
 DONE 2026-09-25: the rehearsal is ACCEPTED as the pre-resolved set (ledger dfc0387333; record ref claude/r-trainB-rehearsal 5e372a0a76).
-NOW: SIZE the reflect managed-map seat, READ-ONLY, from the mustBeKind-tip reading 418/391/27/22: which divergences and disclosures
-it reaches, by name, its footprint, and the seams it shares with TRAIN A/B. No cut until COORD sends TRAIN A's union reading of reflect.
-First action: ls-remote your refs, then resume the sizing.
+TRAIN A LANDED 2026-09-25 (master db1bd885a2, ledger 0813f0b840), carrying your synctest and mustBeKind seats. Reflect at the union reads
+418/391/27/22, equal to your base. The reflect sizing is RULED as three seats (ledger 95cd3789b5). NOW: (b) LAYOUT, cut from 9a5f63041b
+after the census (accepted, add the encoding/xml sweep). NEXT: (a) MAP SEMANTICS, cut from master db1bd885a2 once M3's measurement answers
+its design question. Then (c) arm-2a after (b). ALSO: size internal/synctest's union reading (13 of 28 agree; TestIteratorPush fails;
+a hang after TestNow runs to the 20:00 deadline).
+First action: ls-remote your refs, then resume seat (b).
 ```
 
 ```
@@ -491,9 +498,9 @@ CENSUS (read-only). Join the Go noescape verdicts to the C# filters and the mate
 production literal arguments and the 111 string(b) arguments, per GOOS; report the survivors, the residual and a pilot
 flip list. THEN arm C as a converter seat, from the post-1.24.13.2 master. Reply by inbox file.
 STATE 2026-09-25 00:00: the census and arm C are DONE. The atomic pick rides TRAIN A (6ba711dbe7). The implicit-operator CS0121 census is
-CLEAN (the i9, ledger 7baf01e424: 0 errors in both arms). NOW: CUT THE TWIN PILOT, stacked on claude/c2-arm-c 2d068bca59, as the new
-ref claude/c2-sstring-twin-pilot: the twin + priority + the implicit operator + one canonical value delegate per twinned function,
-red first, two-seeded footprint, a method-group guard. Name the .NET legs COORD owes; COORD routes them to the i9 or R.
+CLEAN (the i9, ledger 7baf01e424). DONE: arm C's duplicate-attribute fix 9baa1e563f and the twin pilot 5b691c9c01, both seated in
+TRAIN B (ledger 38316c9fd5), with the pilot LAST. Its .NET legs run in TRAIN B's i7 battery, and the i9 reviews it at the bytes.
+QUEUED from your SUGGEST: the inline `type F func(...)` plus `f := g` CS0246. STANDBY until the battery reports.
 ```
 
 ```
@@ -513,7 +520,10 @@ DONE 2026-09-24: the sstring TWIN compile probe, claude/i9-sstring-twin-probe b9
 groups under priority). NOW (dispatched 2026-09-25 00:00): the IMPLICIT u8->sstring CS0121 CENSUS at origin/master 9a5f63041b.
 ARM 0 = master; ARM 1 = the one edit making golib's u8->sstring operator implicit. Build go2cs-stdlib.slnx (windows) and
 go2cs.slnx in each arm, classify every ARM 1 error by overload pair, restore byte-identical, and report to COORD. Then light work.
-DONE 2026-09-25: the census is CLEAN and ACCEPTED (ledger 7baf01e424). NEXT: standby; the twin pilot's .NET legs are likely to come here.
+DONE 2026-09-25: the census is CLEAN and ACCEPTED (ledger 7baf01e424). NOW: the SEAT REVIEW OF RECORD of C2's twin pilot
+claude/c2-sstring-twin-pilot 5b691c9c01, AT THE BYTES: your own converter at the parent 9baa1e563f and at the seat, emission of fmt,
+unicode/utf8 and text/template on 3 targets plus the -tests value sites, the applied delta compared by real line diff, and AGREES or
+DIFFERS reported to COORD. The pilot lands in TRAIN B only if this AGREES.
 ```
 
 ## 1a. COORD — THE NEW SESSION PROMPT (2026-09-21, after the weekly limit; PROTOCOL v4 + fleet-read v2). PASTE THIS; it
@@ -2219,3 +2229,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-25 00:00 -- SAVE-STATE refresh: ACCEPT a9b7d402d6 + 737c468bbf; dispatches: R the TRAIN B rehearsal, the i9 the CS0121 census, C2 standby
 - 2026-09-25 00:11 -- SAVE-STATE refresh: leg C finding + repair ff67c57420; CS0121 census clean (the i9); C2 pilot dispatched; R's rehearsal addenda
 - 2026-09-25 01:09 -- SAVE-STATE refresh: TRAIN B rehearsal accepted; R to reflect sizing
+- 2026-09-25 04:27 -- SAVE-STATE refresh: TRAIN A landed; TRAIN B assembled
