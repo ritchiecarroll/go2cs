@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 23:51 -- SAVE-STATE refresh (ledger through mailbox 70fdc76231): TRAIN A assembled on the i7 (bfd36bad0d: synctest merge + the atomic pick + the mustBeKind merge), battery running; owner deferred the disk install
+> **Status of this revision:** 2026-09-25 00:00 -- SAVE-STATE refresh (ledger through mailbox 5374f5bee3): TRAIN A battery running; G's (b) follow-on and R's string views ACCEPTED for TRAIN B; R rehearses TRAIN B's union; the i9 runs the implicit-operator CS0121 census
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -300,12 +300,13 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
          commit 8ef7f65ec8 as a PICK, and R's mustBeKind 2e134cf77d. Verify that FuncLiteralCallerNames and GoroutineWaitState
          turn green (R's attribution).
        - TRAIN B (golib strings/allocs, owner's tier ruling): C2's REC-F 645a8e1f62, then G's V-fix 11 + guard
-         claude/g-vfix11-sstring-counted fce07d9517 (G's condition-A A/B pending); C2's REC-C §A 3c98968c5f and §B 0fcdba94d5;
-         C2's Float*bits 9ac6051e46; R's claude/r-string-views-g8-g10 (merged locally onto 4c53b02a0a as b0a8da854d; its first gate
-         pass found a 56 B/call append box, FIXED as 737c468bbf with a bytes guard; re-gating; not yet pushed). TRAIN B's union MUST
+         claude/g-vfix11-sstring-counted fce07d9517 (ACCEPTED), then G's (b) follow-on a9b7d402d6 (ACCEPTED, ledger 525291b865); C2's REC-C §A 3c98968c5f and §B 0fcdba94d5;
+         C2's Float*bits 9ac6051e46; R's claude/r-string-views-g8-g10 737c468bbf, GREEN and ACCEPTED (ledger 5374f5bee3; the first
+         gate pass's 56 B/call append box is fixed, with a bytes guard). R-LAPTOP IS REHEARSING THE UNION (dispatched 2026-09-25 00:00). TRAIN B's union MUST
          build the stdlib as a CS0121 check, because R's seat, REC-C §A/§B and V-fix 11 all add or reshape builtin/sstring overloads; C2's arm C claude/c2-arm-c
          2d068bca59, whose .NET legs are OWED BY COORD (corpus build, MSTest, the new behavioral test, the strconv member rows).
-       - BEFORE THE TWIN PILOT: the corpus-wide build under the implicit u8->sstring operator (a CS0121 census) on the i7.
+       - BEFORE THE TWIN PILOT: the corpus-wide build under the implicit u8->sstring operator (a CS0121 census), RE-ROUTED to the
+         i9 (dispatched 2026-09-25 00:00, at 9a5f63041b), because the i7 is running TRAIN A's battery.
  - UP NEXT, by OWNER ORDER (ledger 93410e7ef9): FIX THE LINUX PACKAGING PROBLEM. Owner G, after the in-flight len/cap
    seat. G SIZED IT (scratch prototypes on WSL against the published 1.24.13.1): it is THREE gaps. With all three hand-fixed,
    walkthrough steps 3-4 build on Linux and `dotnet run` output is byte-identical to `go run`. RULED by COORD (ledger
@@ -380,7 +381,12 @@ fd9a4976e8 are pushed under new names (nothing forced), and M9 is done. The must
 418/391/27/22, identical to the seat's, so no reflect verdict moves; its behavioral retry was running.
 TOOLS: the Bash tool's PATH needs `export PATH=/usr/bin:/bin:$PATH` first, plus the go/dotnet pins. The sweep and gate
 scripts run under powershell.exe 5.1; check-roster-format runs under pwsh 7.
-First action: ls-remote your refs; STANDBY until COORD assembles the post-release trains.
+NOW (2026-09-25 00:00): the string-views seat 737c468bbf is ACCEPTED for TRAIN B (ledger 5374f5bee3). Your task is TRAIN B's
+UNION REHEARSAL on R-LAPTOP, local and never pushed, at origin/master 9a5f63041b. Merge sequentially: REC-F 645a8e1f62, V-fix 11
+fce07d9517, G's (b) a9b7d402d6, REC-C §A 3c98968c5f, REC-C §B 0fcdba94d5, Float*bits 9ac6051e46, your views 737c468bbf, arm C
+2d068bca59. At the union, build go2cs-stdlib.slnx (the CS0121 check, every site named), go2cs.slnx, and GolibTests Release+Debug.
+Then take arm C's owed .NET legs: LocalStringConstHoist, the three re-emitted goldens, and the strconv row. Report to COORD.
+First action: ls-remote your refs, then resume or restart the rehearsal.
 ```
 
 ```
@@ -404,8 +410,8 @@ boxing). LANDED 2026-09-24 in master 4c53b02a0a (ledger "ANNOUNCE · 4c53b02a0a"
 and the GolibTests guard; the history below is superseded. NEXT: V-fix 11 + the guard on REC-F's tip, onto 4c53b02a0a.
 The train scratch may be reclaimed; keep the record ref claude/g-union-1.24.13.2-rehearsal.
 DONE since: V-fix 11 + the guard claude/g-vfix11-sstring-counted fce07d9517 (ACCEPTED for train B; condition A clean), and the
-1.24.13.2 post-publish smoke (GREEN on both platforms). NOW: the (b) UNCLASSIFIED classification seat on fce07d9517: classify the 21
-guard-pinned sites as a real undercount or by-design, route the real ones, and A/B the alloc rows. Then the TTY residual (SCOPE: verify WINDOWS in an
+1.24.13.2 post-publish smoke (GREEN on both platforms). DONE: the (b) follow-on claude/g-vfix11b-unclassified a9b7d402d6
+(ACCEPTED for TRAIN B after V-fix 11, ledger 525291b865; A/B 0 flips, 0 count moves). NOW: the TTY residual (SCOPE: verify WINDOWS in an
 interactive console too; the README sentence "in an interactive terminal the C# build does not yet print fatih/color's
 colors" names no platform and the evidence is linux-only; correct it in the same seat), the raw-SYSCALL x/sys residual, and
 the prlimit comment.
@@ -471,6 +477,9 @@ REVISION 4 is DONE (c555d91c55) and VERIFIED; the OWNER RULED (ledger "OWNER RUL
 CENSUS (read-only). Join the Go noescape verdicts to the C# filters and the materialization fixed point, over the 4,835
 production literal arguments and the 111 string(b) arguments, per GOOS; report the survivors, the residual and a pilot
 flip list. THEN arm C as a converter seat, from the post-1.24.13.2 master. Reply by inbox file.
+STATE 2026-09-25 00:00: the census and arm C are DONE. The atomic pick rides TRAIN A (6ba711dbe7). The implicit-operator CS0121 census is
+on the i9. STANDBY for the twin pilot (canonical value delegate shape), cut on post-TRAIN-B master once the census reports; a
+docs-only design note for the pilot's converter rule is welcome meanwhile.
 ```
 
 ```
@@ -487,7 +496,9 @@ Model Opus 5.5 / high. Pushed and banked: claude/i9-runtime-blockevent 5b5f35ff2
   They are superseded pre-hop job emissions, and no bundle is owed.
 - A corruption-era mailbox clone tip stays local.
 DONE 2026-09-24: the sstring TWIN compile probe, claude/i9-sstring-twin-probe b919919c96, ACCEPTED (decisive: CS0123 for method
-groups under priority). NEXT: standby for light items.
+groups under priority). NOW (dispatched 2026-09-25 00:00): the IMPLICIT u8->sstring CS0121 CENSUS at origin/master 9a5f63041b.
+ARM 0 = master; ARM 1 = the one edit making golib's u8->sstring operator implicit. Build go2cs-stdlib.slnx (windows) and
+go2cs.slnx in each arm, classify every ARM 1 error by overload pair, restore byte-identical, and report to COORD. Then light work.
 ```
 
 ## 1a. COORD — THE NEW SESSION PROMPT (2026-09-21, after the weekly limit; PROTOCOL v4 + fleet-read v2). PASTE THIS; it
@@ -2190,3 +2201,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 16:17 -- SAVE-STATE refresh: 1b/1c record the post-publish smoke GREEN and G's next seat.
 - 2026-09-24 19:56 -- SAVE-STATE refresh: 1b/1c record R's append-box fix, the Train B CS0121 union check, and the TTY seat's Windows scope.
 - 2026-09-24 23:51 -- SAVE-STATE refresh: TRAIN A assembled at bfd36bad0d; battery running from 23:50; owner deferred the i7 disk install
+- 2026-09-25 00:00 -- SAVE-STATE refresh: ACCEPT a9b7d402d6 + 737c468bbf; dispatches: R the TRAIN B rehearsal, the i9 the CS0121 census, C2 standby
