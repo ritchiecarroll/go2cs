@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 19:56 -- SAVE-STATE refresh (ledger through mailbox 095f97b8c9): section 1b is the COORD new-session prompt: go2cs 1.24.13.2 PUBLISHED and its nuget.org smoke GREEN; the cleanup DONE (76 GB free); the i7 idle for the owner's disk install; NEXT TRAIN A (synctest + atomic pick + mustBeKind; ping the owner when it lands) and TRAIN B (golib strings/allocs; its union MUST build the stdlib as a CS0121 check), plus the implicit-operator CS0121 build before the twin pilot; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 23:51 -- SAVE-STATE refresh (ledger through mailbox 70fdc76231): TRAIN A assembled on the i7 (bfd36bad0d: synctest merge + the atomic pick + the mustBeKind merge), battery running; owner deferred the disk install
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -284,7 +284,16 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    (2) DONE: the OWNER-APPROVED CLEANUP (0 refusals, 32 registrations pruned, C: 32 -> 76 GB free; ledger "STAMP · 9a5f63041b ·
        THE OWNER-APPROVED i7 CLEANUP IS DONE"). The worktrees LEFT are the owner's call (d0913b, kick, C:/go2cs-archive, the app's
        session worktrees) plus hnd, the main checkout and go2cs-mailbox.
-   (3) The owner's DISK-INSTALL window is OPEN: the i7 is idle. After it, propose a layout that moves the worktree and
+   (3) The owner DEFERRED the disk install (2026-09-24 23:45: "would rather things keep working and we find a better
+       stopping point at a later date"), so the i7 keeps working. TRAIN A IS ASSEMBLED (ledger "STAMP · bfd36bad0d"): head
+       bfd36bad0d in worktree C:/go2cs-tmp-coord/tA (local, not pushed, FROZEN during the battery), made of the merge
+       a7ae6c9182 (synctest 0b6bf15ab0), the signed PICK 6ba711dbe7 (8ef7f65ec8, same patch-id) and the merge bfd36bad0d
+       (mustBeKind 2e134cf77d). Its battery runs from the scratchpad's tA-battery-run1.sh, with logs and SUMMARY.txt in
+       tA-logs (started 23:50). When the battery reads green: rebank encoding/binary (140+6 -> 142+4 expected) and re-enter
+       net/http from the candidates (validation-bank skill), announce, push master, then PING THE OWNER (net/http landed ->
+       the cloud project resumes; its item 2 is already unblocked from master). If the battery session is lost: re-derive
+       the head from these three SHAs, and re-run the battery from a fresh per-run copy.
+       Later, when the owner installs the disk, propose a layout that moves the worktree and
        scratch roots onto the new disk.
    (4) Then the NEXT TRAINS, assembled from master 4c53b02a0a on the i7:
        - TRAIN A (runtime/reflect; the owner wants a ping when it lands): R's synctest re-entry 0b6bf15ab0, C2's atomic-loads
@@ -2180,3 +2189,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 16:04 -- SAVE-STATE refresh: 1b records the cleanup done and V-fix 11 accepted.
 - 2026-09-24 16:17 -- SAVE-STATE refresh: 1b/1c record the post-publish smoke GREEN and G's next seat.
 - 2026-09-24 19:56 -- SAVE-STATE refresh: 1b/1c record R's append-box fix, the Train B CS0121 union check, and the TTY seat's Windows scope.
+- 2026-09-24 23:51 -- SAVE-STATE refresh: TRAIN A assembled at bfd36bad0d; battery running from 23:50; owner deferred the i7 disk install
