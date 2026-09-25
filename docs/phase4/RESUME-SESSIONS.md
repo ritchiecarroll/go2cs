@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-24 16:17 -- SAVE-STATE refresh (ledger through mailbox 095f97b8c9): section 1b is the COORD new-session prompt: go2cs 1.24.13.2 PUBLISHED and its nuget.org smoke GREEN on linux and windows; the cleanup DONE (76 GB free); the i7 idle for the owner's disk install; NEXT TRAIN A (synctest + atomic pick + mustBeKind; ping the owner when it lands) and TRAIN B (golib strings/allocs), plus the implicit-operator CS0121 build before the twin pilot; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
+> **Status of this revision:** 2026-09-24 19:56 -- SAVE-STATE refresh (ledger through mailbox 095f97b8c9): section 1b is the COORD new-session prompt: go2cs 1.24.13.2 PUBLISHED and its nuget.org smoke GREEN; the cleanup DONE (76 GB free); the i7 idle for the owner's disk install; NEXT TRAIN A (synctest + atomic pick + mustBeKind; ping the owner when it lands) and TRAIN B (golib strings/allocs; its union MUST build the stdlib as a CS0121 check), plus the implicit-operator CS0121 build before the twin pilot; section 1c holds the lane prompts. Sections 1a-6 stay as history and standing rules.
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -292,7 +292,9 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
          turn green (R's attribution).
        - TRAIN B (golib strings/allocs, owner's tier ruling): C2's REC-F 645a8e1f62, then G's V-fix 11 + guard
          claude/g-vfix11-sstring-counted fce07d9517 (G's condition-A A/B pending); C2's REC-C §A 3c98968c5f and §B 0fcdba94d5;
-         C2's Float*bits 9ac6051e46; R's claude/r-string-views-g8-g10 (gating; not yet pushed); C2's arm C claude/c2-arm-c
+         C2's Float*bits 9ac6051e46; R's claude/r-string-views-g8-g10 (merged locally onto 4c53b02a0a as b0a8da854d; its first gate
+         pass found a 56 B/call append box, FIXED as 737c468bbf with a bytes guard; re-gating; not yet pushed). TRAIN B's union MUST
+         build the stdlib as a CS0121 check, because R's seat, REC-C §A/§B and V-fix 11 all add or reshape builtin/sstring overloads; C2's arm C claude/c2-arm-c
          2d068bca59, whose .NET legs are OWED BY COORD (corpus build, MSTest, the new behavioral test, the strconv member rows).
        - BEFORE THE TWIN PILOT: the corpus-wide build under the implicit u8->sstring operator (a CS0121 census) on the i7.
  - UP NEXT, by OWNER ORDER (ledger 93410e7ef9): FIX THE LINUX PACKAGING PROBLEM. Owner G, after the in-flight len/cap
@@ -394,8 +396,10 @@ and the GolibTests guard; the history below is superseded. NEXT: V-fix 11 + the 
 The train scratch may be reclaimed; keep the record ref claude/g-union-1.24.13.2-rehearsal.
 DONE since: V-fix 11 + the guard claude/g-vfix11-sstring-counted fce07d9517 (ACCEPTED for train B; condition A clean), and the
 1.24.13.2 post-publish smoke (GREEN on both platforms). NOW: the (b) UNCLASSIFIED classification seat on fce07d9517: classify the 21
-guard-pinned sites as a real undercount or by-design, route the real ones, and A/B the alloc rows. Then the TTY residual, the
-raw-SYSCALL x/sys residual, and the prlimit comment.
+guard-pinned sites as a real undercount or by-design, route the real ones, and A/B the alloc rows. Then the TTY residual (SCOPE: verify WINDOWS in an
+interactive console too; the README sentence "in an interactive terminal the C# build does not yet print fatih/color's
+colors" names no platform and the evidence is linux-only; correct it in the same seat), the raw-SYSCALL x/sys residual, and
+the prlimit comment.
 (HISTORY) CUT 2026-09-24 (ledger "RULING · 6c9aaae62e / 4378ae6cf2"), both UNMERGED:
 - claude/g-named-slice-len (the constrained len/cap golib seat, on 38529c765a, with the math/big retirement commit on top).
   GATE-COMPLETE and ACCEPTED for a post-release train (ledger "ACCEPT · b95abf9638"): behavioral 691/691 and Output 663/2/26,
@@ -2175,3 +2179,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 15:59 -- SAVE-STATE refresh: 1b records 1.24.13.2 PUBLISHED and the release-day lesson.
 - 2026-09-24 16:04 -- SAVE-STATE refresh: 1b records the cleanup done and V-fix 11 accepted.
 - 2026-09-24 16:17 -- SAVE-STATE refresh: 1b/1c record the post-publish smoke GREEN and G's next seat.
+- 2026-09-24 19:56 -- SAVE-STATE refresh: 1b/1c record R's append-box fix, the Train B CS0121 union check, and the TTY seat's Windows scope.
