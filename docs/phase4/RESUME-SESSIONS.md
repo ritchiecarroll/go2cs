@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-25 00:00 -- SAVE-STATE refresh (ledger through mailbox 5374f5bee3): TRAIN A battery running; G's (b) follow-on and R's string views ACCEPTED for TRAIN B; R rehearses TRAIN B's union; the i9 runs the implicit-operator CS0121 census
+> **Status of this revision:** 2026-09-25 00:11 -- SAVE-STATE refresh (ledger through mailbox 7baf01e424): TRAIN A battery running (leg C red on seat 1's stale declared rows, repaired as ff67c57420 for merge after the battery); the CS0121 census is clean, and C2 cuts the twin pilot on arm C
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -293,6 +293,10 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
        net/http from the candidates (validation-bank skill), announce, push master, then PING THE OWNER (net/http landed ->
        the cloud project resumes; its item 2 is already unblocked from master). If the battery session is lost: re-derive
        the head from these three SHAs, and re-run the battery from a fresh per-run copy.
+       LEG C WAS RED on ONE test, from SEAT 1 itself (ledger 2f11145285): TestDeclaredNotImplementedCensus reads 'vanished 5' because
+       internal/synctest's five members were bodied without deleting their declared rows. It reproduces at 0b6bf15ab0 alone. REPAIR
+       claude/coord-trainA-synctest-declared-rows ff67c57420 (on 0b6bf15ab0, test table only). AFTER THE BATTERY: merge it into tA
+       (signed --no-ff), re-run leg C only, and transfer every other leg by tree equality (the only delta is that _test.go file).
        Later, when the owner installs the disk, propose a layout that moves the worktree and
        scratch roots onto the new disk.
    (4) Then the NEXT TRAINS, assembled from master 4c53b02a0a on the i7:
@@ -305,8 +309,8 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
          gate pass's 56 B/call append box is fixed, with a bytes guard). R-LAPTOP IS REHEARSING THE UNION (dispatched 2026-09-25 00:00). TRAIN B's union MUST
          build the stdlib as a CS0121 check, because R's seat, REC-C §A/§B and V-fix 11 all add or reshape builtin/sstring overloads; C2's arm C claude/c2-arm-c
          2d068bca59, whose .NET legs are OWED BY COORD (corpus build, MSTest, the new behavioral test, the strconv member rows).
-       - BEFORE THE TWIN PILOT: the corpus-wide build under the implicit u8->sstring operator (a CS0121 census), RE-ROUTED to the
-         i9 (dispatched 2026-09-25 00:00, at 9a5f63041b), because the i7 is running TRAIN A's battery.
+       - THE TWIN PILOT: the implicit-operator CS0121 census is CLEAN (the i9, ledger 7baf01e424). C2 is cutting the pilot, stacked on
+         arm C 2d068bca59, and COORD owes the routing of its .NET legs.
  - UP NEXT, by OWNER ORDER (ledger 93410e7ef9): FIX THE LINUX PACKAGING PROBLEM. Owner G, after the in-flight len/cap
    seat. G SIZED IT (scratch prototypes on WSL against the published 1.24.13.1): it is THREE gaps. With all three hand-fixed,
    walkthrough steps 3-4 build on Linux and `dotnet run` output is byte-identical to `go run`. RULED by COORD (ledger
@@ -386,6 +390,9 @@ UNION REHEARSAL on R-LAPTOP, local and never pushed, at origin/master 9a5f63041b
 fce07d9517, G's (b) a9b7d402d6, REC-C §A 3c98968c5f, REC-C §B 0fcdba94d5, Float*bits 9ac6051e46, your views 737c468bbf, arm C
 2d068bca59. At the union, build go2cs-stdlib.slnx (the CS0121 check, every site named), go2cs.slnx, and GolibTests Release+Debug.
 Then take arm C's owed .NET legs: LocalStringConstHoist, the three re-emitted goldens, and the strconv row. Report to COORD.
+ADDENDA: add the converter suite at the union, and at the END one ARM 1 build (sstring.cs:185 explicit -> implicit only; stdlib +
+go2cs.slnx; restore). NOTE: your synctest train's stale declared rows are repaired by COORD as claude/coord-trainA-synctest-declared-rows
+ff67c57420 (ledger 2f11145285); nothing for you to cut.
 First action: ls-remote your refs, then resume or restart the rehearsal.
 ```
 
@@ -478,8 +485,9 @@ CENSUS (read-only). Join the Go noescape verdicts to the C# filters and the mate
 production literal arguments and the 111 string(b) arguments, per GOOS; report the survivors, the residual and a pilot
 flip list. THEN arm C as a converter seat, from the post-1.24.13.2 master. Reply by inbox file.
 STATE 2026-09-25 00:00: the census and arm C are DONE. The atomic pick rides TRAIN A (6ba711dbe7). The implicit-operator CS0121 census is
-on the i9. STANDBY for the twin pilot (canonical value delegate shape), cut on post-TRAIN-B master once the census reports; a
-docs-only design note for the pilot's converter rule is welcome meanwhile.
+CLEAN (the i9, ledger 7baf01e424: 0 errors in both arms). NOW: CUT THE TWIN PILOT, stacked on claude/c2-arm-c 2d068bca59, as the new
+ref claude/c2-sstring-twin-pilot: the twin + priority + the implicit operator + one canonical value delegate per twinned function,
+red first, two-seeded footprint, a method-group guard. Name the .NET legs COORD owes; COORD routes them to the i9 or R.
 ```
 
 ```
@@ -499,6 +507,7 @@ DONE 2026-09-24: the sstring TWIN compile probe, claude/i9-sstring-twin-probe b9
 groups under priority). NOW (dispatched 2026-09-25 00:00): the IMPLICIT u8->sstring CS0121 CENSUS at origin/master 9a5f63041b.
 ARM 0 = master; ARM 1 = the one edit making golib's u8->sstring operator implicit. Build go2cs-stdlib.slnx (windows) and
 go2cs.slnx in each arm, classify every ARM 1 error by overload pair, restore byte-identical, and report to COORD. Then light work.
+DONE 2026-09-25: the census is CLEAN and ACCEPTED (ledger 7baf01e424). NEXT: standby; the twin pilot's .NET legs are likely to come here.
 ```
 
 ## 1a. COORD — THE NEW SESSION PROMPT (2026-09-21, after the weekly limit; PROTOCOL v4 + fleet-read v2). PASTE THIS; it
@@ -2202,3 +2211,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-24 19:56 -- SAVE-STATE refresh: 1b/1c record R's append-box fix, the Train B CS0121 union check, and the TTY seat's Windows scope.
 - 2026-09-24 23:51 -- SAVE-STATE refresh: TRAIN A assembled at bfd36bad0d; battery running from 23:50; owner deferred the i7 disk install
 - 2026-09-25 00:00 -- SAVE-STATE refresh: ACCEPT a9b7d402d6 + 737c468bbf; dispatches: R the TRAIN B rehearsal, the i9 the CS0121 census, C2 standby
+- 2026-09-25 00:11 -- SAVE-STATE refresh: leg C finding + repair ff67c57420; CS0121 census clean (the i9); C2 pilot dispatched; R's rehearsal addenda
