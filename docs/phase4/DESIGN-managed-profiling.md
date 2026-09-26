@@ -562,6 +562,10 @@ the same way Go counts them.
   test binary imports `runtime/pprof` through `testing/internal/testdeps`, so an import-closure rule
   would opt in every package and put `TraceEvent` in every test host. A later row whose tests profile
   CPU joins the table.
+- **Packaging gap (recorded 2026-09-26, open):** the companion sets `IsPackable=false`, so a NuGet
+  consumer who sets the property has no companion package to reference; it is closed before the
+  sampler is advertised, by packing the companion as its own package or by having `go.lib`'s
+  `buildTransitive` targets reference it under the property, a release-time choice that is the owner's.
 
 ### 11.4 Where it falls back
 
