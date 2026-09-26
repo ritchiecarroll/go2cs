@@ -1987,4 +1987,35 @@ partial class runtime_package
         Callers(1, pc);
         return pc;
     }
+
+    /// <summary>Renders the crash traceback of a panic raised beneath a [StackTraceHidden] forwarder
+    /// probe, as an unrecovered panic's report prints it. Go has no frame for a forwarder, so the
+    /// traceback must name the raising function and this probe, and never the forwarder.</summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static string GoForwardedPanicTraceProbe()
+    {
+        try
+        {
+            goHiddenPanicForwarderProbe();
+        }
+        catch (PanicException panic)
+        {
+            return crashTraceback(panic, panic);
+        }
+
+        return string.Empty;
+    }
+
+    [System.Diagnostics.StackTraceHidden]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void goHiddenPanicForwarderProbe()
+    {
+        goPanicRaisingProbe();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void goPanicRaisingProbe()
+    {
+        throw panic((@string)"probe");
+    }
 }
