@@ -77,6 +77,12 @@ func (c *StdLibConverter) GenerateSolutionFile() error {
 	// the solution root (no folder), not among the import-path package folders.
 	coreProjects = append(coreProjects, golibProjectReference)
 
+	// The opt-in CPU sampler companion is hand-owned infrastructure too: listed at the root beside
+	// golib, and only when the tree carries it (a seeded output root does; a unit-test root may not).
+	if _, statErr := os.Stat(filepath.Join(c.go2csPath, filepath.FromSlash(cpuProfilerProjectReference))); statErr == nil {
+		coreProjects = append(coreProjects, cpuProfilerProjectReference)
+	}
+
 	// Sort for deterministic, stable output regardless of filesystem walk order.
 	sort.Strings(coreProjects)
 
@@ -176,6 +182,11 @@ func (c *StdLibConverter) collectConvertedProjects() (coreProjects []string, err
 		// golib is added explicitly by GenerateSolutionFile; skip any copy that happens to
 		// live under core/golib so it is not listed twice.
 		if rel == golibProjectReference || strings.HasPrefix(rel, "core/golib/") {
+			return nil
+		}
+
+		// The CPU sampler companion likewise: infrastructure, added by GenerateSolutionFile.
+		if rel == cpuProfilerProjectReference {
 			return nil
 		}
 
@@ -294,6 +305,12 @@ func buildSolutionXML(coreProjects []string) string {
 	writeProject(1, genProjectReference)
 	writeProject(1, golibProjectReference)
 
+	for _, project := range coreProjects {
+		if project == cpuProfilerProjectReference {
+			writeProject(1, cpuProfilerProjectReference)
+		}
+	}
+
 	// Every converted package nests under a solution folder named by its FULL Go import path, so
 	// the folder tree mirrors `import "..."` exactly: `bufio` → /bufio/, `crypto/aes` →
 	// /crypto/aes/, `archive/tar` → /archive/tar/. A package's own directory is core/<import
@@ -326,7 +343,7 @@ func buildSolutionXML(coreProjects []string) string {
 	folderSet := make(map[string]bool)
 
 	for _, project := range coreProjects {
-		if project == golibProjectReference {
+		if project == golibProjectReference || project == cpuProfilerProjectReference {
 			continue // emitted at the root above, not under an import-path folder
 		}
 

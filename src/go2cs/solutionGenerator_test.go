@@ -524,7 +524,7 @@ func TestSolutionListsTheCpuProfilerCompanionAtTheRoot(t *testing.T) {
 		t.Errorf("the companion must be listed exactly once\n---\n%s", xml)
 	}
 
-	if strings.Contains(xml, "/go2cs.CpuProfiler/") {
+	if strings.Contains(xml, `Name="/go2cs.CpuProfiler/"`) {
 		t.Errorf("the companion was placed under an import-path folder\n---\n%s", xml)
 	}
 }

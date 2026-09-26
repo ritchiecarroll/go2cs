@@ -8,6 +8,7 @@
     <File Path="deploy-core.bat" />
     <Project Path="core/go2cs/go2cs.shproj" />
     <Project Path="core/golib/golib.csproj" />
+    <Project Path="core/go2cs.CpuProfiler/go2cs.CpuProfiler.csproj" />
   </Folder>
   <Folder Name="/core/bytes/">
     <Project Path="core/bytes/bytes.csproj" />

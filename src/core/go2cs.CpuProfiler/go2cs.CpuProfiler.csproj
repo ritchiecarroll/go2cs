@@ -25,6 +25,10 @@
          never into this assembly: a referenced assembly's module initializer does not run until
          something loads it, and the program's own always does. -->
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <!-- Not a NuGet package: it is a member of go2cs-stdlib.slnx so the solution builds it, but the
+         opt-in reaches it through $(go2csPath) (section 11 option (ii)); a package route is option
+         (iii), deferred. -->
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OutDir)'=='' AND '$(BaseOutputPath)'==''">

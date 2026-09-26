@@ -6,6 +6,7 @@
   </Configurations>
   <Project Path="gen/go2cs-gen/go2cs-gen.csproj" />
   <Project Path="core/golib/golib.csproj" />
+  <Project Path="core/go2cs.CpuProfiler/go2cs.CpuProfiler.csproj" />
   <Folder Name="/archive/" />
   <Folder Name="/archive/tar/" Id="46c4be9e-64a0-547b-8b20-85f0b1288761">
     <Project Path="core/archive/tar/archive.tar.csproj" />
