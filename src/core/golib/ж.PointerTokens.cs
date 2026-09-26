@@ -142,7 +142,15 @@ public static class ManagedPointerTokens
     // reader on some OTHER thread racing the very first registration may still see zero and take the
     // native-address route, which is exactly what it would have done before this table existed: the
     // fast path can lose a race it was never in a position to win.
-    private static volatile int s_count;
+    //
+    // A RUNNING count, never ConcurrentDictionary.Count on a registration: Count takes EVERY bucket lock,
+    // and the lock array grows with the table and never shrinks, so reading it per registration cost
+    // ~14-15 us once a process had registered a few thousand pointers (i9 sizing, ledger 6e59daa04c).
+    // Registrations Interlocked-increment it, a removal decrements it, and Sweep re-syncs it. It may
+    // OVER-count (an overwrite of a live key increments it; Sweep corrects that) but it never reads BELOW
+    // the table, which is the one direction that matters: the `== 0` fast paths below must not skip a
+    // live entry. Non-volatile, written only through Interlocked and read through Volatile.Read.
+    private static int s_count;
 
     // Guards Sweep alone — registration and resolution never take it. Sweeping is rare and its
     // cost is proportional to the table, so one sweeper at a time is the point, not a bottleneck.
@@ -160,7 +168,7 @@ public static class ManagedPointerTokens
     /// Read by the registry's growth guard (GolibTests), which measures the bound the sweep policy
     /// claims — a claim about growth is a prediction until a run reads it.
     /// </summary>
-    internal static int RegisteredCount => s_count;
+    internal static int RegisteredCount => Volatile.Read(ref s_count);
 
     /// <summary>
     /// The table's EXACT size. <c>ConcurrentDictionary.Count</c> takes every bucket lock, so this is for
@@ -242,7 +250,7 @@ public static class ManagedPointerTokens
 
     internal static bool IsTokenArithmetic(nuint number)
     {
-        if (number == 0 || s_count == 0)
+        if (number == 0 || Volatile.Read(ref s_count) == 0)
             return false;
 
         nuint allocationBase = number & ~(nuint)0xFFFFFFFFu;
@@ -279,12 +287,13 @@ public static class ManagedPointerTokens
         if (box is Delegate del && del.Method is not null)
             s_delegateMethods[token] = del.Method;
 
-        s_count = s_table.Count;
+        // Only a genuinely new entry counts; the idempotent early return must stay before it.
+        int count = Interlocked.Increment(ref s_count);
 
         if (Q44RegistryCensus.Enabled)
             Q44RegistryCensus.Mint();
 
-        if (s_count >= s_sweepAt)
+        if (count >= s_sweepAt)
             Sweep();
     }
 
@@ -333,9 +342,11 @@ public static class ManagedPointerTokens
         }
 
         s_table[address] = new WeakReference<object>(box);
-        s_count = s_table.Count;
 
-        if (s_count >= s_sweepAt)
+        // Only a genuinely new entry counts; the idempotent early return must stay before it.
+        int count = Interlocked.Increment(ref s_count);
+
+        if (count >= s_sweepAt)
             Sweep();
     }
 
@@ -456,7 +467,7 @@ public static class ManagedPointerTokens
 
         // The fast path every non-reflect program takes: nothing was ever registered, so no token
         // can resolve and the conversion goes straight to its native-address route.
-        if (token == 0 || s_count == 0)
+        if (token == 0 || Volatile.Read(ref s_count) == 0)
             return null;
 
         if (!s_table.TryGetValue(token, out WeakReference<object>? weak))
@@ -465,7 +476,7 @@ public static class ManagedPointerTokens
         if (!weak.TryGetTarget(out object? box))
         {
             if (s_table.TryRemove(token, out _))
-                s_count = s_table.Count;
+                Interlocked.Decrement(ref s_count);
 
             return null;
         }
@@ -499,16 +510,31 @@ public static class ManagedPointerTokens
 
     // Drops entries whose box has been collected. One sweeper at a time; concurrent registrations
     // and resolutions continue against the table throughout.
+    //
+    // GATED ON A COLLECTION: no weak target can die without one, so a sweep with no collection since the
+    // last sweep can remove nothing, and walking the table for nothing was the running count's remaining
+    // cost (1.15 against 0.19-0.21 us per fresh registration, i9 sizing). An ungated call is then one
+    // CollectionCount read; the first registration after a collection sweeps.
+    private static int s_sweptAtCollection = -1;
+
     private static void Sweep()
     {
+        int collections = GC.CollectionCount(0);
+
+        if (collections == Volatile.Read(ref s_sweptAtCollection))
+            return;
+
         if (!Monitor.TryEnter(s_sweepLock))
             return;
 
         try
         {
             // Re-check under the gate: a thread that queued behind a sweep has nothing left to do.
-            if (s_table.Count < s_sweepAt)
+            if (Volatile.Read(ref s_count) < s_sweepAt)
                 return;
+
+            Volatile.Write(ref s_sweptAtCollection, collections);
+            int counted = Volatile.Read(ref s_count);
 
             foreach ((nuint token, WeakReference<object> weak) in s_table)
             {
@@ -516,10 +542,15 @@ public static class ManagedPointerTokens
                     s_table.TryRemove(token, out _);
             }
 
+            // Re-sync the running count to the table, EXACTLY when nothing else moved it meanwhile: the
+            // compare-exchange fails if a registration or a Resolve removal changed it during the walk,
+            // and then the count keeps its over-count (never an under-count) until the next sweep.
+            int actual = s_table.Count;
+            Interlocked.CompareExchange(ref s_count, actual, counted);
+
             // Re-arm above the surviving population so a table that is legitimately large does not
             // sweep on every registration.
-            s_count = s_table.Count;
-            s_sweepAt = s_count + SweepThreshold;
+            s_sweepAt = actual + SweepThreshold;
         }
         finally
         {
