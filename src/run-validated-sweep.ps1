@@ -548,6 +548,20 @@ function Get-DisclosedCount {
     return 0
 }
 
+# The committed proof page at HEAD, as lines, decoded as UTF-8. PowerShell decodes a native command's
+# output with [Console]::OutputEncoding, which is the OEM code page (IBM437 on the i9) under both 5.1
+# and pwsh 7, so `& git show` mis-decodes every non-ASCII verdict name on a page and each then reads
+# as MISSING against the UTF-8 comparison record. Measured 2026-09-26 on os (308 TestReadStdin
+# subtests named with non-ASCII text): 310 page names "missing" under the default decode, exactly the
+# 2 real ones under UTF-8, identically on both editions. The three page readers below all use this;
+# $LASTEXITCODE is git's, since the finally block runs no native command.
+function Get-CommittedPageLines([string] $PageRel) {
+    $previous = [Console]::OutputEncoding
+    [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+    try { return & git -C $repo show "HEAD:$PageRel" 2>$null }
+    finally { [Console]::OutputEncoding = $previous }
+}
+
 # Reads the two evidence artifacts the delta check needs -- the run's own comparison record and
 # the committed proof page -- and applies Test-HostConditionalDelta. Every unreadable input is a
 # rejection with its reason, never an acceptance: the mechanism only absorbs what it can prove.
@@ -570,7 +584,7 @@ function Get-HostConditionalVerdict {
     # become discarded ErrorRecords rather than a terminating abort (the 'Stop' hazard the drift
     # section documents), and the rejection below already names the path loudly.
     $pageRel = 'docs/validation/current/' + ($Row.Package -replace '/', '.') + '.md'
-    $pageLines = & git -C $repo show "HEAD:$pageRel" 2>$null
+    $pageLines = Get-CommittedPageLines $pageRel
     if ($LASTEXITCODE -ne 0 -or -not $pageLines) {
         return [PSCustomObject]@{ Accepted = $false; Extras = @(); Reason = "no committed proof page at HEAD:$pageRel" }
     }
@@ -677,7 +691,7 @@ function Get-CapabilityAbsentVerdict {
     }
 
     $pageRel = 'docs/validation/current/' + ($Row.Package -replace '/', '.') + '.md'
-    $pageLines = & git -C $repo show "HEAD:$pageRel" 2>$null
+    $pageLines = Get-CommittedPageLines $pageRel
     if ($LASTEXITCODE -ne 0 -or -not $pageLines) {
         return [PSCustomObject]@{ Accepted = $false; Reason = "no committed proof page at HEAD:$pageRel" }
     }
@@ -716,7 +730,7 @@ function Get-HostLimitVerdict {
     }
 
     $pageRel = 'docs/validation/current/' + ($Row.Package -replace '/', '.') + '.md'
-    $pageLines = & git -C $repo show "HEAD:$pageRel" 2>$null
+    $pageLines = Get-CommittedPageLines $pageRel
     if ($LASTEXITCODE -ne 0 -or -not $pageLines) {
         return [PSCustomObject]@{ Accepted = $false; Reason = "no committed proof page at HEAD:$pageRel" }
     }
