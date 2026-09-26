@@ -193,6 +193,17 @@ public static class RuntimeErrorPanic
         return new PanicException(MakeSliceLenOutOfRangeMessage);
     }
 
+    private const string RangeFunctionContinuedMessage = $"{RuntimeErrorMessage}range function continued iteration after function for loop body returned false";
+
+    /// <summary>
+    /// Go's panic for a range-over-func sequence that calls <c>yield</c> again after the loop body
+    /// answered false (runtime/panic.go's <c>rangeDoneError</c>).
+    /// </summary>
+    public static PanicException RangeFunctionContinued()
+    {
+        return new PanicException(RangeFunctionContinuedMessage);
+    }
+
     private const string MakeSliceCapOutOfRangeMessage = $"{RuntimeErrorMessage}makeslice: cap out of range";
     public static PanicException MakeSliceCapOutOfRange()
     {
