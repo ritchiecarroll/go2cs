@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -70,21 +71,32 @@ public class SystemGoroutineTests
     {
         channel<int> park = new(0);
 
-        int countBefore = Goroutine.Count;
-        int userBefore = Goroutine.UserCount;
+        // Exact, and by identity (StragglerStaging): the ONE goroutine minted is the guard, and the
+        // system count rises by exactly one for it. A user goroutine retiring meanwhile moves Count and
+        // UserCount together and leaves the system count alone, so neither assertion can be falsified
+        // by an earlier test's straggler; the old Count/UserCount deltas both could.
+        HashSet<long> live = StragglerStaging.LiveIds();
+        int systemBefore = SystemCount();
         afterBaseline?.Invoke();
 
         Goroutine.StartForGuard(() => park.Receive(), RuntimeMethod());
 
-        for (int i = 0; i < 400 && Goroutine.Count == countBefore; i++)
-            System.Threading.Thread.Sleep(5);
-        for (int i = 0; i < 400 && !Goroutine.Snapshot().Any(g => g.IsSystem && g.State == GoroutineState.Parked); i++)
-            System.Threading.Thread.Sleep(5);
+        Goroutine? guard = null;
+
+        for (int i = 0; i < 400 && guard is not { State: GoroutineState.Parked }; i++)
+        {
+            guard = StragglerStaging.Minted(live).FirstOrDefault(g => g.IsSystem);
+
+            if (guard is not { State: GoroutineState.Parked })
+                System.Threading.Thread.Sleep(5);
+        }
 
         try
         {
-            Assert.AreEqual(countBefore + 1, Goroutine.Count, "the registry must still hold the system goroutine");
-            Assert.AreEqual(userBefore, Goroutine.UserCount, "a system goroutine must not move the user count (runtime.NumGoroutine)");
+            List<Goroutine> minted = StragglerStaging.Minted(live);
+            Assert.AreEqual(1, minted.Count, "exactly one goroutine must be minted, the system goroutine");
+            Assert.IsTrue(minted[0].IsSystem, "the registry must hold the guard as a system goroutine");
+            Assert.AreEqual(systemBefore + 1, SystemCount(), "a system goroutine must be counted as system, not user (runtime.NumGoroutine)");
 
             string dump = CaptureStack(all: true);
 
@@ -97,6 +109,24 @@ public class SystemGoroutineTests
         finally
         {
             park.Close();
+
+            // Leave no straggler of our own: the guard retires before this returns.
+            if (guard is not null)
+                System.Threading.SpinWait.SpinUntil(() => Goroutine.FromId(guard.Id) is null, 30000);
+        }
+    }
+
+    // Count - UserCount, the registry's system count, read so a user goroutine retiring between the two
+    // reads cannot skew it: Count is re-read after UserCount and the pair retried until it held still.
+    private static int SystemCount()
+    {
+        while (true)
+        {
+            int count = Goroutine.Count;
+            int user = Goroutine.UserCount;
+
+            if (Goroutine.Count == count)
+                return count - user;
         }
     }
 
@@ -109,6 +139,7 @@ public class SystemGoroutineTests
     public void NumGoroutineReportsUserGoroutinesWithGosFloor()
     {
         channel<int> park = new(0);
+        HashSet<long> live = StragglerStaging.LiveIds();
 
         Goroutine.StartForGuard(() => park.Receive(), RuntimeMethod());
 
@@ -123,6 +154,10 @@ public class SystemGoroutineTests
         finally
         {
             park.Close();
+
+            // Leave no straggler of our own: a SYSTEM goroutine retiring inside a later test's window
+            // would move the system count that ASystemGoroutineIsOmittedFromStackAllAndNotCounted asserts.
+            System.Threading.SpinWait.SpinUntil(() => !StragglerStaging.Minted(live).Any(g => g.IsSystem), 30000);
         }
     }
 }

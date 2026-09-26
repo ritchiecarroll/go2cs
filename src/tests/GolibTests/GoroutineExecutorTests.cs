@@ -243,9 +243,13 @@ public class GoroutineExecutorTests
         // identity when it disposes — either would corrupt the live count under a host.
         using ManualResetEventSlim finished = new(false);
 
-        int beforeInner = 0;
-        int duringInner = 0;
-        int afterInner = 0;
+        // Exactness kept, taken by identity (StragglerStaging): ZERO goroutines minted by the nested
+        // Enter, and the outer goroutine itself still registered after the inner scope -- neither
+        // moved by an earlier test's goroutine retiring meanwhile, which a live-count delta is.
+        int mintedDuring = -1;
+        int mintedAfter = -1;
+        long outerId = 0;
+        bool outerRegistered = false;
         bool stillOnGoroutine = false;
 
         // Nothing is asserted INSIDE the body: no containment policy is installed here, so an
@@ -254,21 +258,28 @@ public class GoroutineExecutorTests
         // assertions happen on the test's thread.
         Goroutine.Start(() =>
         {
-            beforeInner = Goroutine.Count;
+            Goroutine outer = Goroutine.Current!;
+            outerId = outer.Id;
+            HashSet<long> live = StragglerStaging.LiveIds();
             afterBaseline?.Invoke();
 
             using (Goroutine.Enter())
-                duringInner = Goroutine.Count;
+                mintedDuring = StragglerStaging.Minted(live).Count;
 
-            afterInner = Goroutine.Count;
+            mintedAfter = StragglerStaging.Minted(live).Count;
+            outerRegistered = Goroutine.FromId(outer.Id) is not null;
             stillOnGoroutine = Goroutine.OnGoroutine;
             finished.Set();
         });
 
         Assert.IsTrue(finished.Wait(TimeoutMs), "goroutine did not run");
-        Assert.AreEqual(beforeInner, duringInner, "a nested Enter minted a second identity for one thread");
-        Assert.AreEqual(duringInner, afterInner, "the inner scope retired the outer identity");
+        Assert.AreEqual(0, mintedDuring, "a nested Enter minted a second identity for one thread");
+        Assert.AreEqual(0, mintedAfter, "disposing the inner scope minted a goroutine");
+        Assert.IsTrue(outerRegistered, "the inner scope retired the outer identity");
         Assert.IsTrue(stillOnGoroutine, "the thread stopped looking like a goroutine while it still was one");
+
+        // Leave no straggler of our own: the outer goroutine retires before this returns.
+        Assert.IsTrue(SpinWait.SpinUntil(() => Goroutine.FromId(outerId) is null, TimeoutMs), "the outer goroutine never retired");
     }
 
     [TestMethod]

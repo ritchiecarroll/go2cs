@@ -168,7 +168,9 @@ public class GoroutineParkAccountingTests
         // an IO completion, the finalizer, time's timer service thread. Every park site in the corpus
         // is reachable from one, so the scope has to be a no-op there rather than minting an identity,
         // touching the live count, or throwing.
-        int before = Goroutine.Count;
+        // "Touched nothing" is asserted by identity: no goroutine was minted (StragglerStaging -- a
+        // live-count delta also moves when an earlier test's goroutine retires meanwhile).
+        HashSet<long> before = StragglerStaging.LiveIds();
         afterBaseline?.Invoke();
 
         bool hadIdentity = true;
@@ -200,7 +202,8 @@ public class GoroutineParkAccountingTests
         Assert.IsFalse(hadIdentity, "a raw thread unexpectedly carried a goroutine identity");
         Assert.IsFalse(mintedIdentity, "an inert park minted an identity");
 
-        Assert.AreEqual(before, Goroutine.Count, "an inert park changed the live count");
+        List<Goroutine> minted = StragglerStaging.Minted(before);
+        Assert.AreEqual(0, minted.Count, $"an inert park minted {minted.Count} goroutine(s)");
     }
 
     [TestMethod]
