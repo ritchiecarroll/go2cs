@@ -400,6 +400,17 @@ private static (IntPtr ptr, error err) allocUTF16(@string s) {
     return (Marshal.StringToHGlobalUni(value), default!);
 }
 
+// go2cs HOST SEAM (not in Go): a composer the converted-test host installs, consulted with the
+// resolved executable path and the child's environment just before the environment block is built.
+// It returns null for "unchanged", and a program never has one. It exists for one measured case: a
+// host staging fixture trees as JUNCTIONS (no symbolic-link privilege) publishes
+// GODEBUG=winsymlink=0, and a test that starts the Go toolchain with its OWN GODEBUG replaces it,
+// because os/exec keeps the last duplicate key. The host's composer (testing's
+// PackageAncestry.ApplyJunctionGodebug) puts the setting back into a TOOLCHAIN child's GODEBUG only;
+// see there. Installed and cleared by reflection, since testing does not reference syscall. Plain CLR
+// types keep that reflective contract free of golib's.
+internal static Func<string, string[], string[]?>? childEnvironmentComposer;
+
 // StartProcess is the native transcription of exec_windows.go's StartProcess — see the file header
 // for why this one declaration cannot be a literal conversion. Ordering, validation and returned
 // errors follow the Go original exactly.
@@ -441,7 +452,32 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
     // and joining each argument with spaces.
     @string cmdline = (~sys).CmdLine != ""u8 ? sys.Value.CmdLine : makeCmdLine(argv);
 
-    var (envBlock, envErr) = createEnvBlock(attr.Env);
+    // The host seam above: a nil Env inherits the process environment, which already carries whatever
+    // the host published, so only an explicit environment is offered to the composer.
+    slice<@string> env = attr.Env;
+    Func<string, string[], string[]?>? composer = System.Threading.Volatile.Read(ref childEnvironmentComposer);
+
+    if (composer is not null && env != nil) {
+        string[] current = new string[len(env)];
+
+        for (nint i = 0; i < len(env); i++) {
+            current[i] = env[i].ToString();
+        }
+
+        string[]? composed = composer(argv0.ToString(), current);
+
+        if (composed is not null) {
+            @string[] replaced = new @string[composed.Length];
+
+            for (int i = 0; i < composed.Length; i++) {
+                replaced[i] = composed[i];
+            }
+
+            env = new slice<@string>(replaced);
+        }
+    }
+
+    var (envBlock, envErr) = createEnvBlock(env);
     if (envErr != default!) {
         return (0, 0, envErr);
     }

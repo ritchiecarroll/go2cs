@@ -567,8 +567,9 @@ public static class TestHost
     // The converted syscall package: type `go.syscall_package` in assembly `syscall`. Resolved by
     // name, for the reason TestFlagBridge gives at length — the generated test projects set
     // DisableTransitiveProjectReferences, so a `testing` -> `syscall` reference would not deploy
-    // syscall.dll beside a host whose own package does not import it.
-    private const string SyscallPackageTypeName = "go.syscall_package, syscall";
+    // syscall.dll beside a host whose own package does not import it. INTERNAL for PackageAncestry's
+    // toolchain-child composer, which reaches the same package the same way.
+    internal const string SyscallPackageTypeName = "go.syscall_package, syscall";
 
     /// <summary>
     /// Publishes the sandbox marker so a re-exec'd HELPER of this run can recognize itself.

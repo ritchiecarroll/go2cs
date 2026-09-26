@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
@@ -293,7 +294,7 @@ internal static class PackageAncestry
         // probe is the first thing that runs the toolchain through these links. The ANSWER is carried
         // forward rather than recomputed: a run whose own environment names winsymlink gets no setting
         // from this host, and the refusal below must not claim otherwise.
-        bool junctionGodebug = !symbolicLinks && ApplyJunctionGodebug();
+        bool junctionGodebug = !symbolicLinks && ApplyJunctionGodebug(goRoot);
 
         AssertToolchainAcceptsLinks(goRoot, staged, symbolicLinks, junctionGodebug);
 
@@ -458,7 +459,7 @@ internal static class PackageAncestry
 
             // Junctions now, so this run is on the fallback path after all and owes it the same
             // GODEBUG the fallback sets — before the re-probe, and before any fixture program runs.
-            junctionGodebug = ApplyJunctionGodebug();
+            junctionGodebug = ApplyJunctionGodebug(goRoot);
 
             refusal = FirstRefusal(goTool, staged);
 
@@ -620,7 +621,7 @@ internal static class PackageAncestry
     //
     // Returns whether THIS host applied the setting — false when the run's own environment already
     // names it, which the refusal text downstream has to be able to say.
-    private static bool ApplyJunctionGodebug()
+    private static bool ApplyJunctionGodebug(string goRoot)
     {
         // TAKEN WHOLE, AND OVER THE FILE'S EXISTING LOCK OBJECT. s_fixtureLinks already guards this
         // file's other cross-host state — the staged links themselves, at :326, :336 and :342 — and
@@ -699,6 +700,12 @@ internal static class PackageAncestry
                 $"testing: fixture trees staged as junctions (no symbolic-link privilege) — {GodebugVariable}={value} " +
                 "set for the Go toolchain, without which Go 1.24 refuses their internal/… imports");
 
+            // AND KEPT for a toolchain child that sets its OWN GODEBUG, which the publish above cannot
+            // reach: os/exec keeps the last duplicate key, so a test doing
+            // `append(os.Environ(), "GODEBUG=...")` hands the toolchain a GODEBUG without it (see
+            // SetToolchainGodebugComposer).
+            SetToolchainGodebugComposer(goRoot);
+
             return true;
         }
     }
@@ -742,6 +749,9 @@ internal static class PackageAncestry
             // next host to put back on top of its own.
             s_junctionGodebugApplied = false;
 
+            // The composer lives exactly as long as the setting it carries.
+            SetToolchainGodebugComposer(null);
+
             string? managed = s_junctionGodebugPreviousManaged;
             string? converted = s_junctionGodebugPreviousConverted;
             bool convertedPresent = s_junctionGodebugConvertedPresent;
@@ -757,6 +767,87 @@ internal static class PackageAncestry
             Environment.SetEnvironmentVariable(GodebugVariable, managed);
             TestHost.SetConvertedEnvironmentVariable(GodebugVariable, convertedPresent ? converted : null);
         }
+    }
+
+    // THE JUNCTION SETTING MUST REACH A TOOLCHAIN CHILD THAT SETS ITS OWN GODEBUG. The publish above
+    // puts winsymlink=0 into both environments, and a child that inherits them gets it. But a test
+    // that builds its child's environment as `append(os.Environ(), "GODEBUG=...")` replaces it, because
+    // os/exec keeps the LAST duplicate key. internal/trace's testTraceProg does exactly that: its
+    // `go run` of the junction-staged testprog is then refused ("use of internal package
+    // internal/profile not allowed"), all four TestTraceCPUProfile verdicts fail on a junction host,
+    // and appending winsymlink=0 to that one line made all four pass (i9, 2026-09-26, two runs).
+    //
+    // So while the fallback is in force, the host installs a composer at the one place every converted
+    // child starts: syscall's hand-owned StartProcess (syscall/windows/exec_windows.cs,
+    // childEnvironmentComposer), which offers it the RESOLVED executable path and the child's
+    // environment. The composer acts only when that path IS this GOROOT's toolchain -- the binary
+    // testenv.GoToolPath names, and the one AssertToolchainAcceptsLinks probed -- and then only if the
+    // child's GODEBUG does not already name winsymlink, whichever way (the child's own setting wins, as
+    // the run's own environment wins in ApplyJunctionGodebug). It appends to that GODEBUG, never
+    // reordering or altering another key, or adds one if the child has none. The program under test,
+    // and every other child, keeps its environment exactly. A host holding the symbolic-link
+    // privilege never gets here.
+    //
+    // Installed by reflection, since testing does not reference syscall (TestHost.SyscallPackageTypeName
+    // says why). No syscall assembly means no converted child can start, so there is nothing to carry.
+    // A syscall WITHOUT the seam is a stale pairing that would silently bring the refusal back, so it
+    // throws.
+    private static void SetToolchainGodebugComposer(string? goRoot)
+    {
+        Type? syscallPackage = Type.GetType(TestHost.SyscallPackageTypeName, throwOnError: false);
+
+        if (syscallPackage is null)
+            return;
+
+        FieldInfo? seam = syscallPackage.GetField(ChildEnvironmentComposerField, BindingFlags.NonPublic | BindingFlags.Static);
+
+        if (seam is null)
+        {
+            if (goRoot is null)
+                return;
+
+            throw new InvalidOperationException(
+                $"the junction fallback cannot carry {JunctionGodebugSetting} to a toolchain child that sets its own " +
+                $"{GodebugVariable}: syscall has no '{ChildEnvironmentComposerField}' seam (syscall/windows/exec_windows.cs)");
+        }
+
+        string? goTool = goRoot is null
+            ? null
+            : Path.GetFullPath(Path.Combine(goRoot, "bin", OperatingSystem.IsWindows() ? "go.exe" : "go"));
+
+        seam.SetValue(null, goTool is null ? null : (Func<string, string[], string[]?>)(
+            (executable, environment) => ComposeToolchainGodebug(goTool, executable, environment)));
+    }
+
+    // Returns null for "unchanged": not the toolchain, or its GODEBUG already names winsymlink.
+    private static string[]? ComposeToolchainGodebug(string goTool, string executable, string[] environment)
+    {
+        if (!string.Equals(Path.GetFullPath(executable), goTool, StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        // The LAST GODEBUG entry, the one that takes effect, matched as Windows matches names.
+        int at = -1;
+
+        for (int i = 0; i < environment.Length; i++)
+        {
+            if (environment[i].StartsWith(GodebugVariable + "=", StringComparison.OrdinalIgnoreCase))
+                at = i;
+        }
+
+        if (at < 0)
+            return [.. environment, $"{GodebugVariable}={JunctionGodebugSetting}"];
+
+        string value = environment[at][(GodebugVariable.Length + 1)..];
+
+        if (NamesJunctionSetting(value))
+            return null;
+
+        string[] composed = (string[])environment.Clone();
+        composed[at] = string.IsNullOrEmpty(value)
+            ? $"{GodebugVariable}={JunctionGodebugSetting}"
+            : $"{GodebugVariable}={value},{JunctionGodebugSetting}";
+
+        return composed;
     }
 
     // TOKEN-WISE, never a substring. GODEBUG is a comma-separated list of name=value settings, and the
@@ -826,6 +917,7 @@ internal static class PackageAncestry
     private const string GodebugVariable = "GODEBUG";
     private const string JunctionGodebugName = "winsymlink";
     private const string JunctionGodebugSetting = $"{JunctionGodebugName}=0";
+    private const string ChildEnvironmentComposerField = "childEnvironmentComposer";
 
     // Generous, because it is a safety net against a wedged child rather than a performance
     // assumption: a cold `go list` on a slow host pays for the module load before it answers.
