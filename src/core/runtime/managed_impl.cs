@@ -1875,4 +1875,58 @@ partial class runtime_package
 
         return null;
     }
+
+    // ---- the guard's view (GolibTests RuntimeStopTheWorldTests) ----
+
+    /// <summary>
+    /// Two stop/start-the-world pairs in sequence, each on its own goroutine, the shape of
+    /// TestDebugLog followed by TestDebugLogInterleaving. Returns the first pair's failure by name,
+    /// if it had one, and whether the second pair got through worldsema within the timeout: a
+    /// first pair that dies while holding worldsema leaves the second parked for ever.
+    /// </summary>
+    public static (string? firstFailure, bool secondCompleted) GoStopTheWorldTwiceProbe(int timeoutMs)
+    {
+        string? firstFailure = null;
+
+        using (ManualResetEventSlim first = new(false))
+        {
+            Goroutine.Start(() =>
+            {
+                try
+                {
+                    worldStop stw = stopTheWorld(stwUnknown);
+                    startTheWorld(stw);
+                }
+                catch (Exception ex)
+                {
+                    firstFailure = $"{ex.GetType().Name}: {ex.Message}";
+                }
+
+                first.Set();
+            });
+
+            if (!first.Wait(timeoutMs))
+                return ("the first stop-the-world never returned", false);
+        }
+
+        ManualResetEventSlim second = new(false);
+
+        Goroutine.Start(() =>
+        {
+            try
+            {
+                worldStop stw = stopTheWorld(stwUnknown);
+                startTheWorld(stw);
+            }
+            catch (Exception)
+            {
+                // A failure of the second pair still returned, which is not what this watches.
+            }
+
+            second.Set();
+        });
+
+        // The event is not disposed: on a leak the parked goroutine still holds it.
+        return (firstFailure, second.Wait(timeoutMs));
+    }
 }
