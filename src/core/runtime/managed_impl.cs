@@ -127,6 +127,8 @@ using go.golib;
 // The plain namespace using is what brings internal/runtime/atomic's [GoRecv] extension methods
 // (Int64.Load and friends) into scope — an alias alone does not participate in extension lookup.
 using go.@internal.runtime;
+using profilerecord = go.@internal.profilerecord_package;
+using @unsafe = go.unsafe_package;
 
 [module: go.GoManualConversion]
 
@@ -376,6 +378,43 @@ partial class runtime_package
     internal static void metricsLock() => s_metricsSema.Wait();
 
     internal static void metricsUnlock() => s_metricsSema.Release();
+
+    // stopTheWorld/startTheWorld (proc.go) keep Go's worldsema and nothing else. Go's bodies take
+    // worldsema and then stop every P (stopTheWorldWithSema: preemptall, retake Ps in syscalls,
+    // wait for sched.stopwait), and startTheWorld restarts them. None of that has a subject here:
+    // there are no Ps (m.p is nil by construction, stubs_impl.cs), and the converted
+    // stopTheWorldWithSema died on that nil P while worldsema was held. That leaked the permit to
+    // every later caller, a hang once runtime's semaphore could park (sema_impl.cs;
+    // TestDebugLogInterleaving held the linux row to its deadline).
+    //
+    // THE CONTRACT KEPT: mutual exclusion among stop-the-world callers, which is what worldsema
+    // gives Go too ("Holding worldsema grants an M the right to try to stop the world"), a
+    // worldStop carrying the reason and Go's timing fields, and release with handoff to the next
+    // waiter, as startTheWorld does. stopTheWorldGC/startTheWorldGC stay converted: their bodies
+    // are gcsema around this pair and nothing else.
+    //
+    // DROPPED, BY NAME: other goroutines are NOT stopped. A caller that reads state it expects
+    // the world to hold still (ReadMemStatsSlow, CountPagesInUse and the heap dump) reads it live.
+    // Also dropped: m.preemptoff, the STW trace events, and the sched.stwTotalTime* metrics. The
+    // stop itself takes no time, so startedStopping equals finishedStopping and stoppingCPUTime is 0.
+    internal static worldStop stopTheWorld(stwReason reason)
+    {
+        semacquire(Ꮡworldsema);
+        int64 now = nanotime();
+        return new worldStop(reason: reason, startedStopping: now, finishedStopping: now, stoppingCPUTime: 0);
+    }
+
+    internal static void startTheWorld(worldStop w) => semrelease1(Ꮡworldsema, true, 0);
+
+    // goroutineProfileWithLabels (mprof.go), behind runtime.GoroutineProfile, takes
+    // goroutineProfile.sema and then the world, and its concurrent collector reads
+    // sys.GetCallerSP/GetCallerPC, intrinsics that stay throwing by ruling. Every call therefore
+    // died holding goroutineProfile.sema AND worldsema. This refuses by name BEFORE either is
+    // taken, so the refusal leaks nothing. runtime/pprof's goroutine profile does not come
+    // through here: it has its own managed body over golib's goroutine registry
+    // (runtime/pprof/pprof_impl.cs). Sharing that body with this function is a separate seat.
+    internal static (nint n, bool ok) goroutineProfileWithLabels(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) =>
+        throw new PanicException("runtime: goroutineProfileWithLabels: the concurrent collector records each goroutine's stack through sys.GetCallerSP/GetCallerPC and stops the world to do it; neither exists in the managed model (runtime/pprof's goroutine profile has its own managed body)");
 
     // NumCgoCall returns the number of cgo calls made by the current process. Go's body walks the
     // scheduler's `allm` thread list summing per-m counters — a list the managed model never

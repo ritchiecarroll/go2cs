@@ -1290,13 +1290,7 @@ internal static (nint n, bool ok) pprof_goroutineProfileWithLabels(slice<profile
     return goroutineProfileWithLabels(Δp, labels);
 }
 
-// labels may be nil. If labels is non-nil, it must have the same length as p.
-internal static (nint n, bool ok) goroutineProfileWithLabels(slice<profilerecord.StackRecord> Δp, slice<@unsafe.Pointer> labels) {
-    if (labels != default! && len(labels) != len(Δp)) {
-        labels = default!;
-    }
-    return goroutineProfileWithLabelsConcurrent(Δp, labels);
-}
+// go2cs generated this placeholder — func goroutineProfileWithLabels is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 
 [GoType("dyn")] partial struct goroutineProfileᴛ1 {
