@@ -62,6 +62,16 @@ public static bool GoRegisterCpuSampler(IGoCpuSampler sampler)
     return Interlocked.CompareExchange(ref s_cpuSampler, sampler, null) is null;
 }
 
+/// <summary>The PC a CPU sample records for a sampled frame's method: its synthetic PC when the method is
+/// a frame Go's unwinder would report (the test <c>runtime.Callers</c> applies), else 0, which the sampler
+/// drops. The profile builder resolves the PC through <c>runtime.CallersFrames</c> to the method's Go
+/// name.</summary>
+public static uintptr GoCpuSamplePC(System.Reflection.MethodBase method)
+{
+    ArgumentNullException.ThrowIfNull(method);
+    return isGoSourceFrame(method) ? GoSyntheticPC.Of(method) : 0;
+}
+
 // Called by each target's setProcessCPUProfiler, with prof.signalLock held.
 private static void cpuSamplerSetRate(int32 hz) {
     IGoCpuSampler? sampler = Volatile.Read(ref s_cpuSampler);

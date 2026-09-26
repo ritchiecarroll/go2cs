@@ -46,6 +46,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.745401" />
+    <!-- ExcludeAssets drops the package props that copy its Windows ETW helpers (KernelTraceControl,
+         msdia140, TraceReloggerLib, Dia2Lib) into every build: the sampler parses an EventPipe trace
+         and uses none of them. -->
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.2.6" ExcludeAssets="build;buildTransitive" />
   </ItemGroup>
 
   <ItemGroup>
