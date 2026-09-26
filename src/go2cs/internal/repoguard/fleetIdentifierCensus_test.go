@@ -420,6 +420,12 @@ func scanFleetContent(path string, content []byte, denied, admit map[int]map[str
 	clearedTokens := fleetClearedTokenFiles[path] != ""
 	structural := !upstream
 
+	// What the PER-LINE pass actually recorded, keyed by arm and segment. The joined pass consults it
+	// so that a hit living on ONE line is reported once rather than twice -- see the suppression note
+	// above that pass.
+	reportedInline := map[string]bool{}
+	inlineDeniedToken := false
+
 	// Lines are walked in place rather than through strings.Split: this runs over every tracked
 	// file in the repository, and materialising a slice of every line of the converted corpus cost
 	// more than the matching did.
@@ -445,12 +451,16 @@ func scanFleetContent(path string, content []byte, denied, admit map[int]map[str
 			if fleetHasFold(line, "users") || bytes.Contains(line, []byte("/home/")) {
 				for _, m := range fleetProfileRe.FindAllSubmatch(line, -1) {
 					// No admit set: a nickname names a host, never an account.
-					fleetConsiderSegment(&out, path, n, "profile-path", string(m[1]), nil)
+					if fleetConsiderSegment(&out, path, n, "profile-path", string(m[1]), nil) {
+						reportedInline["profile-path|"+strings.ToLower(string(m[1]))] = true
+					}
 				}
 			}
 			if bytes.Contains(line, []byte(`\\`)) {
 				for _, m := range fleetNetworkRe.FindAllSubmatch(line, -1) {
-					fleetConsiderSegment(&out, path, n, "network-path", string(m[2]), fleetNicknameHostSegments)
+					if fleetConsiderSegment(&out, path, n, "network-path", string(m[2]), fleetNicknameHostSegments) {
+						reportedInline["network-path|"+strings.ToLower(string(m[2]))] = true
+					}
 				}
 			}
 		}
@@ -459,6 +469,7 @@ func scanFleetContent(path string, content []byte, denied, admit map[int]map[str
 		}
 		if fleetLineHasDeniedToken(line, denied, admit) {
 			out = append(out, fleetFinding{path, n, "denied-token"})
+			inlineDeniedToken = true
 		}
 	}
 
@@ -475,6 +486,29 @@ func scanFleetContent(path string, content []byte, denied, admit map[int]map[str
 	// ordinary prose; restricting the fusion to line boundaries keeps the false-positive surface to
 	// word pairs that a break separates. Findings carry line 0 and a "-split" kind, because a line
 	// number means nothing in joined text and a reader must not be sent to a line that reads clean.
+	//
+	// ⚠ SUPPRESSION: THIS PASS REPORTS ONLY WHAT THE PER-LINE PASS DID NOT (coordinator ruling,
+	// mailbox 1dd7d4671 §1, 2026-09-13). An INLINE hit survives the break-collapsing unchanged, so
+	// until that ruling every single-line hit matched in BOTH passes and was recorded twice --
+	// measured 4 of 4 classes: one leaked path printed `2 fleet-identifier hit(s)`, the second being
+	// the same hit at line 0. Over-report was never a SAFETY defect and the file list was always
+	// right; the cost was legibility, and in precisely the shape the paragraph above says line 0
+	// exists to avoid -- a reader sent to a non-line for a hit already named one line down.
+	//
+	// It was invisible for as long as it existed because every plant asserted that a hit of the
+	// expected kind was PRESENT and none asserted what ELSE was in the result: the clean arms are
+	// two-sided (`len(got) != 0`), the firing arms were one-sided. The plants now declare their whole
+	// finding SET, which is what red-proves this suppression -- an inline plant must read EXACTLY one
+	// finding of the per-line kind and a wrapped one EXACTLY one of the split kind, both in the same
+	// subtest, so a suppression that removed too much goes red beside one that removed too little.
+	//
+	// The structural arms suppress by (arm, SEGMENT), which is the finest span this scanner carries:
+	// a file holding an inline leak AND a differently-wrapped one still reports both. The DENIED-TOKEN
+	// arm is coarser and says so -- the joined side of it is a file-level boolean by construction
+	// (`fleetLineHasDeniedToken` over the whole joined text, one finding per file however many splits
+	// there are), so there is no finer span to compare and it suppresses when the per-line pass
+	// reported a denied token anywhere in the same file. Nothing actionable is lost: the file is
+	// already refused and already named, and a wrapped token still fires once the inline one is gone.
 	if joined := fleetJoinLineBreaks(content); joined != nil {
 		if structural {
 			if fleetHasFold(joined, "users") || bytes.Contains(joined, []byte("/home/")) {
@@ -503,17 +537,25 @@ func scanFleetContent(path string, content []byte, denied, admit map[int]map[str
 				for _, ix := range fleetProfileRe.FindAllSubmatchIndex(joined, -1) {
 					end := ix[3]
 					if end < len(joined) && (joined[end] == '/' || joined[end] == '\\') {
-						fleetConsiderSegment(&out, path, 0, "profile-path-split", string(joined[ix[2]:ix[3]]), nil)
+						seg := string(joined[ix[2]:ix[3]])
+						if reportedInline["profile-path|"+strings.ToLower(seg)] {
+							continue
+						}
+						fleetConsiderSegment(&out, path, 0, "profile-path-split", seg, nil)
 					}
 				}
 			}
 			if bytes.Contains(joined, []byte(`\\`)) {
 				for _, m := range fleetNetworkRe.FindAllSubmatch(joined, -1) {
-					fleetConsiderSegment(&out, path, 0, "network-path-split", string(m[2]), fleetNicknameHostSegments)
+					seg := string(m[2])
+					if reportedInline["network-path|"+strings.ToLower(seg)] {
+						continue
+					}
+					fleetConsiderSegment(&out, path, 0, "network-path-split", seg, fleetNicknameHostSegments)
 				}
 			}
 		}
-		if !clearedTokens && fleetLineHasDeniedToken(joined, denied, admit) {
+		if !clearedTokens && !inlineDeniedToken && fleetLineHasDeniedToken(joined, denied, admit) {
 			out = append(out, fleetFinding{path, 0, "denied-token-split"})
 		}
 	}
@@ -554,22 +596,26 @@ func fleetJoinLineBreaks(content []byte) []byte {
 // per-ARM allow set -- the network arm passes the fleet nicknames, the profile arm passes nothing --
 // so the SCOPE of an admission is carried by the caller that knows which arm it is, rather than
 // re-derived here from the kind string, where a drifting literal could widen it silently.
-func fleetConsiderSegment(out *[]fleetFinding, path string, line int, kind, seg string, admitted map[string]bool) {
+// It reports whether it RECORDED a finding, which the joined pass needs: a segment the per-line pass
+// already reported must not be reported a second time from the joined surface (see the suppression
+// note there), and "admitted" and "recorded" are not the same answer.
+func fleetConsiderSegment(out *[]fleetFinding, path string, line int, kind, seg string, admitted map[string]bool) bool {
 	if fleetIsPlaceholder(seg) {
-		return
+		return false
 	}
 	if admitted[strings.ToLower(seg)] {
-		return
+		return false
 	}
 
 	// PER KIND, and only here: the escape admit reaches the NETWORK-PATH arms and nothing else.
 	if strings.HasPrefix(kind, "network-path") && fleetIsUnicodeEscapeSegment(seg) {
-		return
+		return false
 	}
 	if _, ok := fleetClearedSegments[path+"|"+strings.ToLower(seg)]; ok {
-		return
+		return false
 	}
 	*out = append(*out, fleetFinding{path, line, kind})
+	return true
 }
 
 // fleetHasFold is a case-insensitive substring test that does not allocate a lowered copy of the
@@ -852,6 +898,25 @@ func TestFleetIdentifierScannerFiresAndRestores(t *testing.T) {
 		{"profile path split with a trailing space", fmt.Sprintf("root at /home/ \n%s/go\n", seg), "profile-path-split", true},
 		{"profile path split across a BLANK LINE", fmt.Sprintf("root at /home/\n\n%s/go\n", seg), "profile-path-split", true},
 		{"profile path split across a blank line with indent", fmt.Sprintf("root at /home/\n   \n   %s/go\n", seg), "profile-path-split", true},
+
+		// ⚠ network-path-split -- the class that had NO arm here at all until 2026-09-13, while every
+		// other kind this scanner emits had one. Its kind string appeared only at its own emit site,
+		// because every UNC fixture in this file is single-line.
+		//
+		// It was never DEAD, which is the part worth recording: measured through this same scan path,
+		// it fires on five of six wrap positions, and it had been firing all along inside
+		// TestFleetIdentifierNicknameHostsAreAdmitted on every INLINE UNC fixture -- with nothing
+		// asserting on it, because the assertions there ask only whether the expected kind is present.
+		// A class can be alive and invisible, and the gap was in the assertions rather than the arm.
+		//
+		// The sixth position is left OUT deliberately rather than silently: a break falling BEFORE the
+		// two backslashes puts the whole UNC on one line, and the per-line arm correctly reports
+		// `network-path` there. That is the reading, not a miss.
+		{"unc host split right after the two backslashes", fmt.Sprintf("share at \\\\\n%s\\public\\x\n", host), "network-path-split", true},
+		{"unc host split inside the host segment", fmt.Sprintf("share at \\\\%s\n%s\\public\\x\n", host[:6], host[6:]), "network-path-split", true},
+		{"unc host split before its own separator", fmt.Sprintf("share at \\\\%s\n\\public\\x\n", host), "network-path-split", true},
+		{"unc host split with an indented continuation", fmt.Sprintf("share at \\\\\n    %s\\public\\x\n", host), "network-path-split", true},
+		{"unc host split across a BLANK LINE", fmt.Sprintf("share at \\\\\n\n%s\\public\\x\n", host), "network-path-split", true},
 	}
 
 	for _, p := range plants {
@@ -888,6 +953,30 @@ func TestFleetIdentifierScannerFiresAndRestores(t *testing.T) {
 			wantLine := strings.Count(clean, "\n") + 1
 			if p.split {
 				wantLine = 0 // the joined pass has no meaningful line number
+			}
+
+			// ⚠ THE DECLARED SET, not merely membership in it (coordinator ruling, mailbox 1dd7d4671
+			// §1 item 2). Every plant below carries exactly ONE identifier, so the whole expected
+			// result is one finding of one kind -- and asserting that, rather than "the kind I want is
+			// somewhere in here", is what makes this arm able to see what it did not expect.
+			//
+			// It is here because the one-sided version hid a real defect for as long as it existed:
+			// until the joined pass gained its suppression, EVERY single-line hit was reported twice
+			// (once per pass, the second at line 0), measured on all four classes, and no arm could
+			// say so -- each looked only for the kind it planted. The clean arms were two-sided all
+			// along (`len(got) != 0`), which is why the zero direction was covered and this one was
+			// not. AN ASSERTION THAT ONLY LOOKS FOR WHAT IT EXPECTS CANNOT SEE WHAT IT DID NOT.
+			//
+			// It is also the red-proof of that suppression, in both directions at once: a suppression
+			// that removed too much drops the count to zero at the arm above, and one that removed too
+			// little puts a second finding here. i9's cross-arm clause (mailbox 1ae48b10b §2) in the
+			// form that lane measured to be satisfiable -- a set the plant DECLARES, not a blanket
+			// zero over arms that overlap by construction.
+			if len(got) != 1 {
+				t.Fatalf("planted %s produced %d findings %v, want EXACTLY one (%q at line %d) -- "+
+					"a plant carrying one identifier that reads as more than one finding is the scanner "+
+					"reporting the same hit twice, which no arm could see while they asserted presence only",
+					p.name, len(got), got, p.kind, wantLine)
 			}
 			found := false
 			for _, f := range got {
@@ -1341,10 +1430,15 @@ func TestFleetIdentifierEmbedPayloadsAreAdmittedAsFixtures(t *testing.T) {
 	}
 
 	// The control that makes every admit below mean something: the line IS a structural hit.
+	//
+	// ONE hit, not two. The payload line carries one UNC-shaped segment, and before the joined pass
+	// gained its suppression it read as `network-path` AND `network-path-split` -- the same segment
+	// found once per pass, the double report that ruling (mailbox 1dd7d4671 §1) removed. So the
+	// control now asserts the whole set: exactly one finding, of the per-line kind.
 	t.Run("the regex shape is a structural hit on its own", func(t *testing.T) {
 		got := scan(t, map[string]string{"docs/phase4/CONTROL-record.md": regexLine})
-		if !hasKind(got, "network-path") || !hasKind(got, "network-path-split") {
-			t.Fatalf("the fixture line does not reproduce the payload's two hits: %v", got)
+		if len(got) != 1 || !hasKind(got, "network-path") {
+			t.Fatalf("the fixture line must read as exactly one network-path hit: %v", got)
 		}
 	})
 
