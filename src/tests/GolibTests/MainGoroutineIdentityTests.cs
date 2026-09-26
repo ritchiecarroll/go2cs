@@ -136,10 +136,21 @@ public class MainGoroutineIdentityTests
     // The primitive's contract: adopting the main identity mints nothing, is not "on a goroutine"
     // (runtime.Goexit stays gated exactly as on the registering thread), and ends with the scope.
     [TestMethod]
-    public void AdoptingTheMainIdentityIsScopedAndRegistersNothing()
+    public void AdoptingTheMainIdentityIsScopedAndRegistersNothing() => AssertAdoptionIsScoped(afterBaseline: null);
+
+    // An earlier test's goroutine retiring inside this one's window (StragglerStaging), staged.
+    [TestMethod]
+    public void AdoptionStaysScopedWhileAnEarlierGoroutineRetires()
+    {
+        for (int i = 0; i < StragglerStaging.Iterations; i++)
+            AssertAdoptionIsScoped(StragglerStaging.Stage());
+    }
+
+    private static void AssertAdoptionIsScoped(Action? afterBaseline)
     {
         Goroutine? before = Goroutine.Current;
         int count = Goroutine.Count;
+        afterBaseline?.Invoke();
 
         using (Goroutine.EnterAsMain())
         {
@@ -160,7 +171,17 @@ public class MainGoroutineIdentityTests
     // retire it when the inert scope ends. On a dedicated thread so the MSTest thread's own state
     // is not the variable.
     [TestMethod]
-    public void AThreadAlreadyOnAGoroutineKeepsItsIdentity()
+    public void AThreadAlreadyOnAGoroutineKeepsItsIdentity() => AssertAGoroutineKeepsItsIdentity(afterBaseline: null);
+
+    // An earlier test's goroutine retiring inside this one's window (StragglerStaging), staged.
+    [TestMethod]
+    public void AGoroutineKeepsItsIdentityWhileAnEarlierGoroutineRetires()
+    {
+        for (int i = 0; i < StragglerStaging.Iterations; i++)
+            AssertAGoroutineKeepsItsIdentity(StragglerStaging.Stage());
+    }
+
+    private static void AssertAGoroutineKeepsItsIdentity(Action? afterBaseline)
     {
         Exception? failure = null;
 
@@ -172,6 +193,7 @@ public class MainGoroutineIdentityTests
 
                 Goroutine? mine = Goroutine.Current;
                 int count = Goroutine.Count;
+                afterBaseline?.Invoke();
 
                 Assert.IsNotNull(mine);
                 Assert.IsFalse(mine!.IsMain);

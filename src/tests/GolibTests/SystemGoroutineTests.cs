@@ -56,12 +56,23 @@ public class SystemGoroutineTests
     // renders, with its created-by line. Positive control (measured at the cut): the predicate
     // neutered to false -> the system block renders and UserCount moves -> RED.
     [TestMethod]
-    public void ASystemGoroutineIsOmittedFromStackAllAndNotCounted()
+    public void ASystemGoroutineIsOmittedFromStackAllAndNotCounted() => AssertSystemGoroutineOmitted(afterBaseline: null);
+
+    // An earlier test's goroutine retiring inside this one's window (StragglerStaging), staged.
+    [TestMethod]
+    public void ASystemGoroutineIsNotCountedWhileAnEarlierGoroutineRetires()
+    {
+        for (int i = 0; i < StragglerStaging.Iterations; i++)
+            AssertSystemGoroutineOmitted(StragglerStaging.Stage());
+    }
+
+    private static void AssertSystemGoroutineOmitted(Action? afterBaseline)
     {
         channel<int> park = new(0);
 
         int countBefore = Goroutine.Count;
         int userBefore = Goroutine.UserCount;
+        afterBaseline?.Invoke();
 
         Goroutine.StartForGuard(() => park.Receive(), RuntimeMethod());
 

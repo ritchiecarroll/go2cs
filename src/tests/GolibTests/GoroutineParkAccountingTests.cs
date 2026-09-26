@@ -149,7 +149,17 @@ public class GoroutineParkAccountingTests
     }
 
     [TestMethod]
-    public void ParkOnAThreadWithNoGoroutineIdentityIsInert()
+    public void ParkOnAThreadWithNoGoroutineIdentityIsInert() => AssertInertPark(afterBaseline: null);
+
+    // An earlier test's goroutine retiring inside this one's window (StragglerStaging), staged.
+    [TestMethod]
+    public void AnInertParkStaysInertWhileAnEarlierGoroutineRetires()
+    {
+        for (int i = 0; i < StragglerStaging.Iterations; i++)
+            AssertInertPark(StragglerStaging.Stage());
+    }
+
+    private static void AssertInertPark(Action? afterBaseline)
     {
         // A RAW thread, not this one: golib's module initializer registers whichever thread first
         // touched golib as the MAIN goroutine, and in an MSTest host that is the test thread — it has
@@ -159,6 +169,7 @@ public class GoroutineParkAccountingTests
         // is reachable from one, so the scope has to be a no-op there rather than minting an identity,
         // touching the live count, or throwing.
         int before = Goroutine.Count;
+        afterBaseline?.Invoke();
 
         bool hadIdentity = true;
         bool mintedIdentity = true;

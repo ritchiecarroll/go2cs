@@ -226,7 +226,17 @@ public class GoroutineExecutorTests
     }
 
     [TestMethod]
-    public void NestedEnterKeepsOneIdentity()
+    public void NestedEnterKeepsOneIdentity() => AssertNestedEnterKeepsOneIdentity(afterBaseline: null);
+
+    // An earlier test's goroutine retiring inside this one's window (StragglerStaging), staged.
+    [TestMethod]
+    public void NestedEnterKeepsOneIdentityWhileAnEarlierGoroutineRetires()
+    {
+        for (int i = 0; i < StragglerStaging.Iterations; i++)
+            AssertNestedEnterKeepsOneIdentity(StragglerStaging.Stage());
+    }
+
+    private static void AssertNestedEnterKeepsOneIdentity(Action? afterBaseline)
     {
         // The test host calls Enter() on a thread it created itself. Entering a thread that is ALREADY
         // a goroutine must not mint a second one for it, and the inner scope must not retire the outer
@@ -245,6 +255,7 @@ public class GoroutineExecutorTests
         Goroutine.Start(() =>
         {
             beforeInner = Goroutine.Count;
+            afterBaseline?.Invoke();
 
             using (Goroutine.Enter())
                 duringInner = Goroutine.Count;
