@@ -36,6 +36,9 @@ using atomic = @internal.runtime.atomic_package;
 partial class runtime_package {
 
 internal static void setProcessCPUProfiler(int32 hz) {
+    // Go's no-sampler shape, plus the opt-in sampler seam (cpusampler_impl.cs): a no-op unless a
+    // program registered a sampler.
+    cpuSamplerSetRate(hz);
 }
 
 internal static void setThreadCPUProfiler(int32 hz) {
