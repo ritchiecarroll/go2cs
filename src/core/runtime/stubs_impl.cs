@@ -129,14 +129,24 @@ partial class runtime_package
     [ThreadStatic]
     private static ж<g>? t_getg;
 
+    // The golib identity t_getg was minted for. A thread's identity CAN change under a live cache:
+    // Goroutine.EnterAsMain lends goroutine 1 to a thread that may already hold a g minted with no
+    // identity (goid 0, published nowhere), and a lent scope's end returns the thread to no identity
+    // while it still caches goroutine 1's g (the -tests host's run thread goes back to the pool). A
+    // mismatch re-mints, which also publishes the new g on the new identity's record.
+    [ThreadStatic]
+    private static Goroutine? t_getgOwner;
+
     internal static partial ж<g> getg()
     {
         ж<g>? gp = t_getg;
+        Goroutine? current = Goroutine.Current;
 
-        if (gp is null)
+        if (gp is null || !ReferenceEquals(t_getgOwner, current))
         {
             gp = mintGoroutineDescriptor();
             t_getg = gp;
+            t_getgOwner = current;
         }
 
         // The one H field programs mutate: refreshed from the mirror on every call, never cached,
@@ -310,6 +320,14 @@ partial class runtime_package
 
             gp.Value.waitreason = mapWaitReason(reason);
             casgstatus(gp, (uint32)_Grunning, (uint32)_Gwaiting);
+
+            // The parker publishes ITS g on the record the waker will ready. One record can be held by
+            // more than one thread (goroutine 1, lent by Goroutine.EnterAsMain), and publishing only at
+            // mint left it naming whichever holder minted LAST -- a running g, so the ready panicked
+            // "status is 2". Before golib publishes the reason, so a waker that finds this goroutine
+            // parked finds this g.
+            if (Goroutine.Current is { } current)
+                current.RuntimeDescriptor = gp;
         }
         else
         {
