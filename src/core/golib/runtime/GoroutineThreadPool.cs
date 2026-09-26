@@ -55,6 +55,12 @@ internal static class GoroutineThreadPool
     internal static int IdleCount => Volatile.Read(ref s_idleCount);
 
     /// <summary>
+    /// GolibTests' seam: runs on a worker after a body's goroutine has ended and before its thread is
+    /// reset (ThreadStateCensusTests plants a finished goroutine's leftovers through it). Null otherwise.
+    /// </summary>
+    internal static volatile Action? AfterBodyForTest;
+
+    /// <summary>
     /// Runs <paramref name="work"/> on a pooled worker (or a new one), under the caller's
     /// ExecutionContext. Returns once the work is handed over, not when it finishes.
     /// </summary>
@@ -124,6 +130,11 @@ internal static class GoroutineThreadPool
                     work();
                 else
                     ExecutionContext.Run(context, static state => ((Action)state!)(), work);
+
+                // The guard's seam: what a finished goroutine can leave on its thread is planted HERE,
+                // after its goroutine scope has closed and before the reset -- planting it inside a live
+                // goroutine would hand it to golib's own goroutine-exit machinery instead.
+                AfterBodyForTest?.Invoke();
 
                 // Nothing of that goroutine survives into the next one.
                 GoroutineThreadState.ResetForReuse();

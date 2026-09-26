@@ -177,34 +177,57 @@ public class ThreadStateCensusTests
         long goroutineA = 0, goroutineB = 0;
         Dictionary<string, object?> seenByB = [];
 
-        // A failure inside a coro body would reach golib's process-killing backstop, so each body
-        // captures its own and the test rethrows it here.
+        // A failure on a worker would reach golib's process-killing backstop, so each step captures its
+        // own and the test rethrows it here.
         Exception? failure = null;
+        int idleWhenPlanted = -1;
+        using ManualResetEventSlim planted = new(false);
 
-        Coro a = Coro.Start(() =>
+        // What a FINISHED goroutine leaves on its thread is planted after its goroutine scope has closed
+        // and before the worker resets -- the pool's own seam. Planting it inside the live goroutine
+        // would hand the panic slots to golib's goroutine-exit machinery instead (measured: that
+        // version took the whole test host down when run after the rest of the suite).
+        GoroutineThreadPool.AfterBodyForTest = () =>
         {
+            if (Environment.CurrentManagedThreadId != Volatile.Read(ref threadA) || planted.IsSet)
+                return;
+
             try
             {
-                threadA = Environment.CurrentManagedThreadId;
-                goroutineA = Goroutine.Current!.Id;
                 Dirty();
             }
             catch (Exception ex)
             {
                 failure = ex;
             }
-        });
 
-        a.Switch();
+            idleWhenPlanted = GoroutineThreadPool.IdleCount;
+            planted.Set();
+        };
+
+        try
+        {
+            OnGoroutine(() => Coro.Start(() =>
+            {
+                Volatile.Write(ref threadA, Environment.CurrentManagedThreadId);
+                goroutineA = Goroutine.Current!.Id;
+            }).Switch());
+
+            Assert.IsTrue(planted.Wait(10_000), "the worker never reached the post-body seam");
+
+            // The worker resets, then idles: wait for it to be back in the idle set before B asks for one.
+            for (int spin = 0; spin < 400 && GoroutineThreadPool.IdleCount <= idleWhenPlanted; spin++)
+                Thread.Sleep(5);
+        }
+        finally
+        {
+            GoroutineThreadPool.AfterBodyForTest = null;
+        }
 
         if (failure is not null)
-            throw new AssertFailedException("goroutine A failed", failure);
+            throw new AssertFailedException("planting goroutine A's leftovers failed", failure);
 
-        // The worker resets and idles after releasing A's resumer; wait for it to be available.
-        for (int spin = 0; spin < 200 && GoroutineThreadPool.IdleCount == 0; spin++)
-            Thread.Sleep(5);
-
-        Coro b = Coro.Start(() =>
+        OnGoroutine(() => Coro.Start(() =>
         {
             try
             {
@@ -218,9 +241,7 @@ public class ThreadStateCensusTests
             {
                 failure = ex;
             }
-        });
-
-        b.Switch();
+        }).Switch());
 
         if (failure is not null)
             throw new AssertFailedException("goroutine B failed", failure);
@@ -234,11 +255,45 @@ public class ThreadStateCensusTests
             Assert.AreEqual(clean, seenByB[name], $"{name}: goroutine B saw goroutine A's value on the reused thread");
     }
 
+    // Drives a coro from a FRESH goroutine, never from the test thread: MSTest's thread can hold the MAIN
+    // goroutine's identity lent to it (MainGoroutineIdentityTests), whose runtime g is published per
+    // thread, last writer wins -- so once the runtime has loaded, a coro exit's Ready of that resumer
+    // checks another thread's g and panics on a worker (measured in the full suite; a pre-existing
+    // main-identity hazard, routed separately, not this seat's).
+    private static void OnGoroutine(Action body)
+    {
+        Exception? error = null;
+        using ManualResetEventSlim done = new(false);
+
+        Goroutine.Start(() =>
+        {
+            try
+            {
+                body();
+            }
+            catch (Exception ex)
+            {
+                error = ex;
+            }
+            finally
+            {
+                done.Set();
+            }
+        });
+
+        Assert.IsTrue(done.Wait(30_000), "the driving goroutine never finished");
+
+        if (error is not null)
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(error).Throw();
+    }
+
     // Each golib-owned slot (read through reflection, since the fields are private) and the registered
     // probe: its name, how to read it on the current thread, and its clean value.
     private static IEnumerable<(string Name, Func<object?> Read, object? Clean)> Slots()
     {
-        yield return ("AllocationCounter.t_count", () => Field(typeof(AllocationCounter), "t_count").GetValue(null), 0L);
+        // The tally is not a zero: with counting enabled by an earlier test, B's own goroutine start
+        // counts its objects on this thread before B can read it. Clean means "not A's planted value".
+        yield return ("AllocationCounter.t_count", () => (long)Field(typeof(AllocationCounter), "t_count").GetValue(null)! == PlantedCount, false);
         yield return ("GoschedBackoff.t_consecutiveInertYields", () => Field(typeof(Coro).Assembly.GetType("go.golib.GoschedBackoff")!, "t_consecutiveInertYields").GetValue(null), 0);
         yield return ("SelectPending.t_frames", () => Field(typeof(Coro).Assembly.GetType("go.SelectPending")!, "t_frames").GetValue(null), null);
         yield return ("builtin.s_fallthrough", () => ((ThreadLocal<bool>)Field(typeof(builtin), "s_fallthrough").GetValue(null)!).Value, false);
@@ -249,9 +304,11 @@ public class ThreadStateCensusTests
         yield return ("registered probe", () => t_registeredProbe, 0);
     }
 
+    private const long PlantedCount = 1_234_567_890L;
+
     private static void Dirty()
     {
-        Field(typeof(AllocationCounter), "t_count").SetValue(null, 12345L);
+        Field(typeof(AllocationCounter), "t_count").SetValue(null, PlantedCount);
         Field(typeof(Coro).Assembly.GetType("go.golib.GoschedBackoff")!, "t_consecutiveInertYields").SetValue(null, 99);
         Field(typeof(Coro).Assembly.GetType("go.SelectPending")!, "t_frames").SetValue(null, Activator.CreateInstance(Field(typeof(Coro).Assembly.GetType("go.SelectPending")!, "t_frames").FieldType));
         ((ThreadLocal<bool>)Field(typeof(builtin), "s_fallthrough").GetValue(null)!).Value = true;
