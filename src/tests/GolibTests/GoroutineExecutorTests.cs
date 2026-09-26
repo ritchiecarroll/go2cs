@@ -14,9 +14,13 @@ public class GoroutineExecutorTests
     // the unit-level facts underneath it — the ones with no other witness, because runtime.NumGoroutine
     // does not yet read the registry and no emitted code can observe a goroutine's identity at all.
     //
-    // Every assertion here is written as a DELTA against a baseline rather than an absolute count:
-    // the registry is process-global and other tests in this assembly spawn goroutines of their own,
-    // so an exact count would be a flake waiting for a scheduling accident.
+    // No assertion here is an absolute count: the registry is process-global and other tests in this
+    // assembly spawn goroutines of their own, so an exact count would be a flake waiting for a
+    // scheduling accident. Nor is it a DELTA against a count taken before the test's own goroutines
+    // start: an earlier test's goroutine can still be retiring then (its body signalled, its thread
+    // has not yet unregistered), and it retires while the test counts, one short (see
+    // AssertRegistryTracks). Assertions name the test's own goroutines, or count relative to a peak
+    // they are all part of.
 
     // Comfortably more than any thread pool would have on hand, so a pool-backed executor could not
     // pass CapacityEqualsDemand by luck; small enough to stay well under a second.
@@ -121,18 +125,25 @@ public class GoroutineExecutorTests
         }
     }
 
+    // Asserted on the test's OWN goroutines, by identity, and on the count RELATIVE TO ITS OWN PEAK --
+    // never against a count taken before they started, which is what an earlier goroutine still
+    // retiring made one short. A goroutine that is not the test's can only RETIRE while the test runs
+    // (nothing else starts one), so every count assertion below is phrased so a retirement cannot
+    // falsify it; a missing registration or a missing retirement still does.
     private static void AssertRegistryTracks(int parked)
     {
-        int baseline = Goroutine.Count;
-
         using ManualResetEventSlim release = new(false);
         using CountdownEvent arrived = new(parked);
         using CountdownEvent finished = new(parked);
+        long[] ids = new long[parked];
 
         for (int i = 0; i < parked; i++)
         {
+            int slot = i;
+
             Goroutine.Start(() =>
             {
+                ids[slot] = Goroutine.Current!.Id;
                 arrived.Signal();
                 release.Wait();
                 finished.Signal();
@@ -141,18 +152,38 @@ public class GoroutineExecutorTests
 
         Assert.IsTrue(arrived.Wait(TimeoutMs), "not every goroutine started while the others were parked");
 
-        // All of them are live and parked at once, so the registry must account for all of them.
-        Assert.IsTrue(Goroutine.Count >= baseline + parked,
-            $"expected at least {baseline + parked} live goroutines, got {Goroutine.Count}");
+        // All of them are live and parked at once, so the registry must hold every one of them, and its
+        // count must cover them all.
+        int unregistered = 0;
+
+        foreach (long id in ids)
+        {
+            if (Goroutine.FromId(id) is null)
+                unregistered++;
+        }
+
+        Assert.AreEqual(0, unregistered, $"{unregistered} of {parked} live, parked goroutines are missing from the registry");
+
+        int peak = Goroutine.Count;
+        Assert.IsTrue(peak >= parked, $"expected at least {parked} live goroutines, got {peak}");
 
         release.Set();
         Assert.IsTrue(finished.Wait(TimeoutMs), "goroutines did not finish");
 
         // A goroutine that finished must stop being counted — the registry's half of "a thread that
         // finished its goroutine stops looking like one". The threads retire asynchronously, so this
-        // waits for the drain rather than reading immediately after the last body returned.
-        Assert.IsTrue(SpinWait.SpinUntil(() => Goroutine.Count < baseline + parked, TimeoutMs),
-            $"registry did not retire finished goroutines: still {Goroutine.Count} live");
+        // waits for the drain rather than reading immediately after the last body returned: every one
+        // of them leaves the registry, and the count falls by at least as many from the peak.
+        Assert.IsTrue(SpinWait.SpinUntil(() =>
+        {
+            foreach (long id in ids)
+            {
+                if (Goroutine.FromId(id) is not null)
+                    return false;
+            }
+
+            return Goroutine.Count <= peak - parked;
+        }, TimeoutMs), $"registry did not retire finished goroutines: still {Goroutine.Count} live against a peak of {peak}");
     }
 
     [TestMethod]
