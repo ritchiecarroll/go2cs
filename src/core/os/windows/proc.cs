@@ -22,7 +22,7 @@ public static slice<@string> Args;
     Args = runtime_args();
 }
 
-internal static slice<@string> runtime_args() {
+[global::System.Diagnostics.StackTraceHidden] internal static slice<@string> runtime_args() {
     return runtime.os_runtime_args();
 }
 

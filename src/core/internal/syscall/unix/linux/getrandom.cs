@@ -13,7 +13,7 @@ partial class unix_package {
 
 //go:linkname vgetrandom runtime.vgetrandom
 //go:noescape
-internal static (nint ret, bool supported) vgetrandom(slice<byte> p, uint32 flags) {
+[global::System.Diagnostics.StackTraceHidden] internal static (nint ret, bool supported) vgetrandom(slice<byte> p, uint32 flags) {
     var (ᴛ1, ᴛ2) = go.runtime_package.vgetrandom(p, flags);
     return (ᴛ1, ᴛ2);
 }

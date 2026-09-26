@@ -18,12 +18,12 @@ partial class fips140_package {
 // we don't need to explicitly annotate fully non-approved services.
 
 //go:linkname getIndicator crypto/internal/fips140.getIndicator
-internal static uint8 getIndicator() {
+[global::System.Diagnostics.StackTraceHidden] internal static uint8 getIndicator() {
     return go.runtime_package.fips_getIndicator();
 }
 
 //go:linkname setIndicator crypto/internal/fips140.setIndicator
-internal static void setIndicator(uint8 _) {
+[global::System.Diagnostics.StackTraceHidden] internal static void setIndicator(uint8 _) {
     go.runtime_package.fips_setIndicator(_);
 }
 

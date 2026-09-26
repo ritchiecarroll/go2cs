@@ -12,7 +12,7 @@ partial class unix_package {
 // Implemented in the runtime package.
 //
 //go:linkname fcntl runtime.fcntl
-internal static (int32, int32) fcntl(int32 fd, int32 cmd, int32 arg) {
+[global::System.Diagnostics.StackTraceHidden] internal static (int32, int32) fcntl(int32 fd, int32 cmd, int32 arg) {
     var (ᴛ1, ᴛ2) = go.runtime_package.fcntl(fd, cmd, arg);
     return (ᴛ1, ᴛ2);
 }

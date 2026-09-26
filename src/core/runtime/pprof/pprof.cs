@@ -935,7 +935,7 @@ public static error StartCPUProfile(io.Writer w) {
 // If profiling is turned off and all the profile data accumulated while it was
 // on has been returned, readProfile returns eof=true.
 // The caller must save the returned data and tags before calling readProfile again.
-internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) readProfile() {
+[global::System.Diagnostics.StackTraceHidden] internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) readProfile() {
     var (ᴛ1, ᴛ2, ᴛ3) = runtime.runtime_pprof_readProfile();
     return (ᴛ1, ᴛ2, ᴛ3);
 }
@@ -1063,7 +1063,7 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
 internal static partial (nint n, bool ok) pprof_goroutineProfileWithLabels(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels);
 
 //go:linkname pprof_cyclesPerSecond runtime/pprof.runtime_cyclesPerSecond
-internal static int64 pprof_cyclesPerSecond() {
+[global::System.Diagnostics.StackTraceHidden] internal static int64 pprof_cyclesPerSecond() {
     return runtime.pprof_cyclesPerSecond();
 }
 
@@ -1071,30 +1071,30 @@ internal static int64 pprof_cyclesPerSecond() {
 internal static partial (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.MemProfileRecord> p, bool inuseZero);
 
 //go:linkname pprof_blockProfileInternal runtime.pprof_blockProfileInternal
-internal static (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
+[global::System.Diagnostics.StackTraceHidden] internal static (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
     var (ᴛ1, ᴛ2) = runtime.pprof_blockProfileInternal(p);
     return (ᴛ1, ᴛ2);
 }
 
 //go:linkname pprof_mutexProfileInternal runtime.pprof_mutexProfileInternal
-internal static (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
+[global::System.Diagnostics.StackTraceHidden] internal static (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
     var (ᴛ1, ᴛ2) = runtime.pprof_mutexProfileInternal(p);
     return (ᴛ1, ᴛ2);
 }
 
 //go:linkname pprof_threadCreateInternal runtime.pprof_threadCreateInternal
-internal static (nint n, bool ok) pprof_threadCreateInternal(slice<profilerecord.StackRecord> p) {
+[global::System.Diagnostics.StackTraceHidden] internal static (nint n, bool ok) pprof_threadCreateInternal(slice<profilerecord.StackRecord> p) {
     var (ᴛ1, ᴛ2) = runtime.pprof_threadCreateInternal(p);
     return (ᴛ1, ᴛ2);
 }
 
 //go:linkname pprof_fpunwindExpand runtime.pprof_fpunwindExpand
-internal static nint pprof_fpunwindExpand(slice<uintptr> dst, slice<uintptr> src) {
+[global::System.Diagnostics.StackTraceHidden] internal static nint pprof_fpunwindExpand(slice<uintptr> dst, slice<uintptr> src) {
     return runtime.pprof_fpunwindExpand(dst, src);
 }
 
 //go:linkname pprof_makeProfStack runtime.pprof_makeProfStack
-internal static slice<uintptr> pprof_makeProfStack() {
+[global::System.Diagnostics.StackTraceHidden] internal static slice<uintptr> pprof_makeProfStack() {
     return runtime.pprof_makeProfStack();
 }
 

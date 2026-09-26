@@ -53,7 +53,7 @@ public static bool EqualFunc<M1, M2, K, V1, V2>(M1 m1, M2 m2, Func<V1, V2, bool>
 // clone is implemented in the runtime package.
 //
 //go:linkname clone maps.clone
-internal static any clone(any m) {
+[global::System.Diagnostics.StackTraceHidden] internal static any clone(any m) {
     return mapclone(m);
 }
 

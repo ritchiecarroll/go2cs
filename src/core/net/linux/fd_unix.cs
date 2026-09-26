@@ -254,7 +254,7 @@ internal static (ж<netFD> netfd, error err) accept(this ж<netFD> Ꮡfd) {
 }
 
 // Defined in os package.
-internal static ж<os.File> newUnixFile(nint fd, @string name) {
+[global::System.Diagnostics.StackTraceHidden] internal static ж<os.File> newUnixFile(nint fd, @string name) {
     return os.net_newUnixFile(fd, name);
 }
 

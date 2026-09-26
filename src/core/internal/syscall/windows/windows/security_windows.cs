@@ -139,7 +139,7 @@ public static UntypedInt USER_PRIV_USER => 1;
 // directory, which is typically, though not always, `C:\Windows\System32`.
 //
 //go:linkname GetSystemDirectory
-public static @string GetSystemDirectory() {
+[global::System.Diagnostics.StackTraceHidden] public static @string GetSystemDirectory() {
     return runtime.windows_GetSystemDirectory();
 }
 

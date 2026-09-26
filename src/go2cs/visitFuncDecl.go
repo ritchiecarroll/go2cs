@@ -1310,6 +1310,16 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	v.replaceMarker(functionParametersMarker, parameterSignature)
 
+	// A linkname or assembly-trampoline forwarder is not a Go frame: Go binds the name to the
+	// target's symbol (or JMPs to it), so the puller never appears on a stack. Marked
+	// [StackTraceHidden], it is skipped by runtime.Callers (managed_impl.cs, isGoSourceFrame) and
+	// omitted from Exception.StackTrace. Fully qualified so it needs no using.
+	forwarderPrefix := ""
+
+	if hasLinknameForward && linknamePanic == "" {
+		forwarderPrefix = "[global::System.Diagnostics.StackTraceHidden] "
+	}
+
 	if isModuleInitializer {
 		// The `runtime` package's own init functions are Go's runtime SELF-BOOTSTRAP (arena
 		// sizing checks, GC/proc setup): in real Go they run only after the assembly bootstrap
@@ -1321,12 +1331,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		if v.pkg.Path() == "runtime" {
 			v.replaceMarker(functionAttributeMarker, "/* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ ")
 		} else {
-			v.replaceMarker(functionAttributeMarker, v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name))+"[GoInit] ")
+			v.replaceMarker(functionAttributeMarker, forwarderPrefix+v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name))+"[GoInit] ")
 		}
 	} else if strings.HasPrefix(parameterSignature, "this ref ") {
-		v.replaceMarker(functionAttributeMarker, v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name))+"[GoRecv] ")
+		v.replaceMarker(functionAttributeMarker, forwarderPrefix+v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name))+"[GoRecv] ")
 	} else {
-		v.replaceMarker(functionAttributeMarker, v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name)))
+		v.replaceMarker(functionAttributeMarker, forwarderPrefix+v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name)))
 	}
 
 	var funcExecutionContext string

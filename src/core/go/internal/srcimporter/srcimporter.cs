@@ -308,7 +308,7 @@ internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Packa
 }
 
 //go:linkname setUsesCgo go/types.srcimporter_setUsesCgo
-internal static void setUsesCgo(ж<types.Config> conf) {
+[global::System.Diagnostics.StackTraceHidden] internal static void setUsesCgo(ж<types.Config> conf) {
     types.srcimporter_setUsesCgo(conf);
 }
 

@@ -159,7 +159,7 @@ internal static void registerCleanup() {
 // Implemented in runtime.
 
 //go:linkname runtime_registerUniqueMapCleanup
-internal static void runtime_registerUniqueMapCleanup(Action cleanup) {
+[global::System.Diagnostics.StackTraceHidden] internal static void runtime_registerUniqueMapCleanup(Action cleanup) {
     runtime.unique_runtime_registerUniqueMapCleanup(cleanup);
 }
 

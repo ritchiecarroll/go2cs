@@ -1645,8 +1645,9 @@ partial class runtime_package
     // The Go-frame test (see Callers). The frame's TOP-LEVEL declaring scope must be a
     // `<pkg>_package` class in namespace `go` — covering the package class itself, the struct
     // types nested in it, and a function literal's display class — and the method must not be
-    // go2cs machinery: a generated adapter (IGoAdapter, dispatch plumbing) or a go2cs-gen
-    // synthesized member (RecvGenerator's ж-forwarders carry [GeneratedCode("go2cs-gen", …)]).
+    // go2cs machinery: a generated adapter (IGoAdapter, dispatch plumbing), a go2cs-gen
+    // synthesized member (RecvGenerator's ж-forwarders carry [GeneratedCode("go2cs-gen", …)]), or a
+    // [StackTraceHidden] linkname forwarder.
     // Everything outside a package class — golib, the BCL, the test-host runtime — is not Go
     // code and never counts.
     private static bool isGoSourceFrame(System.Reflection.MethodBase method)
@@ -1657,6 +1658,11 @@ partial class runtime_package
             return false;
 
         if (typeof(IGoAdapter).IsAssignableFrom(declaring))
+            return false;
+
+        // A converted //go:linkname or assembly-trampoline forwarder (the converter marks it): Go binds
+        // the pull to the target's symbol, so no frame of the puller exists.
+        if (method.IsDefined(typeof(System.Diagnostics.StackTraceHiddenAttribute), inherit: false))
             return false;
 
         foreach (object attribute in method.GetCustomAttributes(typeof(System.CodeDom.Compiler.GeneratedCodeAttribute), inherit: false))

@@ -14,7 +14,7 @@ partial class fips140_package {
 // fatal is [runtime.fatal], pushed via linkname.
 //
 //go:linkname fatal crypto/internal/fips140.fatal
-internal static void fatal(@string _) {
+[global::System.Diagnostics.StackTraceHidden] internal static void fatal(@string _) {
     go.runtime_package.fips_fatal(_);
 }
 

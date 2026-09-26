@@ -437,7 +437,7 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
 // Implemented in the runtime package.
 //
 //go:noescape
-internal static @unsafe.Pointer resolveNameOff(@unsafe.Pointer ptrInModule, int32 off) {
+[global::System.Diagnostics.StackTraceHidden] internal static @unsafe.Pointer resolveNameOff(@unsafe.Pointer ptrInModule, int32 off) {
     return runtime.reflect_resolveNameOff(ptrInModule, off);
 }
 
@@ -446,7 +446,7 @@ internal static @unsafe.Pointer resolveNameOff(@unsafe.Pointer ptrInModule, int3
 // Implemented in the runtime package.
 //
 //go:noescape
-internal static @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, int32 off) {
+[global::System.Diagnostics.StackTraceHidden] internal static @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, int32 off) {
     return runtime.reflect_resolveTypeOff(rtype, off);
 }
 
@@ -455,7 +455,7 @@ internal static @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, int32 off)
 // Implemented in the runtime package.
 //
 //go:noescape
-internal static @unsafe.Pointer resolveTextOff(@unsafe.Pointer rtype, int32 off) {
+[global::System.Diagnostics.StackTraceHidden] internal static @unsafe.Pointer resolveTextOff(@unsafe.Pointer rtype, int32 off) {
     return runtime.reflect_resolveTextOff(rtype, off);
 }
 
@@ -473,7 +473,7 @@ internal static @unsafe.Pointer resolveTextOff(@unsafe.Pointer rtype, int32 off)
 //
 //go:linkname addReflectOff
 //go:noescape
-internal static int32 addReflectOff(@unsafe.Pointer ptr) {
+[global::System.Diagnostics.StackTraceHidden] internal static int32 addReflectOff(@unsafe.Pointer ptr) {
     return runtime.reflect_addReflectOff(ptr);
 }
 
