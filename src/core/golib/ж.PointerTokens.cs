@@ -163,6 +163,12 @@ public static class ManagedPointerTokens
     internal static int RegisteredCount => s_count;
 
     /// <summary>
+    /// The table's EXACT size. <c>ConcurrentDictionary.Count</c> takes every bucket lock, so this is for
+    /// the sweep's re-sync and the running-count guard (GolibTests) only, never a hot path.
+    /// </summary>
+    internal static int TableCount => s_table.Count;
+
+    /// <summary>
     /// Remembers that <paramref name="token"/> was handed out as the scalar form of
     /// <paramref name="box"/>, so a conversion back to a pointer can recover it.
     /// </summary>
