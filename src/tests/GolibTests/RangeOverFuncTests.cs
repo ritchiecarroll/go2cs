@@ -29,8 +29,41 @@ namespace GolibTests;
 [TestClass]
 public class RangeOverFuncTests
 {
+    // Every loop runs on a FRESH goroutine, never on the MSTest thread: that thread can hold the MAIN
+    // goroutine's lent identity, and a coro driven from it readies another thread's runtime g once the
+    // runtime has loaded (a pre-existing main-identity hazard, measured in the full suite on the pool
+    // seat's own reuse arm). Assertions made on the goroutine are rethrown here.
+    private static void OnGoroutine(Action body)
+    {
+        Exception? error = null;
+        using ManualResetEventSlim done = new(false);
+
+        Goroutine.Start(() =>
+        {
+            try
+            {
+                body();
+            }
+            catch (Exception ex)
+            {
+                error = ex;
+            }
+            finally
+            {
+                done.Set();
+            }
+        });
+
+        Assert.IsTrue(done.Wait(60_000), "the driving goroutine never finished");
+
+        if (error is not null)
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(error).Throw();
+    }
+
     [TestMethod]
-    public void PanicInSequence_ReachesTheRangingSide()
+    public void PanicInSequence_ReachesTheRangingSide() => OnGoroutine(PanicInSequence_ReachesTheRangingSideBody);
+
+    private static void PanicInSequence_ReachesTheRangingSideBody()
     {
         List<int> seen = [];
         Action<Func<int, bool>> seq = yield =>
@@ -91,7 +124,9 @@ public class RangeOverFuncTests
     }
 
     [TestMethod]
-    public void EarlyBreak_SequenceHasUnwoundWhenTheLoopStatementEnds()
+    public void EarlyBreak_SequenceHasUnwoundWhenTheLoopStatementEnds() => OnGoroutine(EarlyBreak_SequenceHasUnwoundWhenTheLoopStatementEndsBody);
+
+    private static void EarlyBreak_SequenceHasUnwoundWhenTheLoopStatementEndsBody()
     {
         // Repeated, because the predecessor's failure here was a RACE: seq finished unwinding on a pool
         // thread at some point after the loop, so a single iteration could pass by luck.
@@ -125,7 +160,9 @@ public class RangeOverFuncTests
     }
 
     [TestMethod]
-    public void SequenceThatKeepsYieldingAfterFalse_GetsGosPanic()
+    public void SequenceThatKeepsYieldingAfterFalse_GetsGosPanic() => OnGoroutine(SequenceThatKeepsYieldingAfterFalse_GetsGosPanicBody);
+
+    private static void SequenceThatKeepsYieldingAfterFalse_GetsGosPanicBody()
     {
         // A misbehaving seq that ignores yield's false.
         Action<Func<int, bool>> seq = yield =>
@@ -151,7 +188,9 @@ public class RangeOverFuncTests
     }
 
     [TestMethod]
-    public void ManyEarlyExitLoops_LeaveNoGoroutineOrThreadBehind()
+    public void ManyEarlyExitLoops_LeaveNoGoroutineOrThreadBehind() => OnGoroutine(ManyEarlyExitLoops_LeaveNoGoroutineOrThreadBehindBody);
+
+    private static void ManyEarlyExitLoops_LeaveNoGoroutineOrThreadBehindBody()
     {
         Action<Func<int, bool>> seq = yield =>
         {
