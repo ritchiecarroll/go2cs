@@ -170,6 +170,12 @@
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
   </ItemGroup>
 
+  <!-- THE OPT-IN CPU SAMPLER (section 11.3 of docs/phase4/DESIGN-managed-profiling.md). The converter
+       sets <GoCpuProfiler>true</GoCpuProfiler> above only for a package in cpuProfilerTestPackages
+       (testConversion.go); without it this Import is skipped and the host carries neither the
+       go2cs.CpuProfiler companion nor its diagnostics dependency. -->
+  <Import Project="$(go2csPath)core/go2cs.CpuProfiler/GoCpuProfiler.targets" Condition="'$(GoCpuProfiler)'=='true'" />
+
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>
