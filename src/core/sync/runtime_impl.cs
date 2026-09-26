@@ -246,6 +246,13 @@ partial class sync_package
     [ThreadStatic]
     private static bool t_procIdAssigned;
 
+    // A pooled coro thread's next goroutine is assigned its own shard id on first use.
+    private static readonly bool s_procIdReset = go.golib.GoroutineThreadState.Register(static () =>
+    {
+        t_procId = 0;
+        t_procIdAssigned = false;
+    });
+
     internal static partial nint runtime_procPin()
     {
         if (!t_procIdAssigned)

@@ -101,6 +101,9 @@ public static class AllocationCounter
     [ThreadStatic]
     private static long t_count;
 
+    /// <summary>Zeroes this thread's tally before a pooled thread runs its next goroutine.</summary>
+    internal static void ResetThread() => t_count = 0;
+
     /// <summary>
     /// Gets whether allocation counting is currently enabled for this process.
     /// </summary>

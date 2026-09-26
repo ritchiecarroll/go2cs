@@ -46,6 +46,19 @@ public class GoFuncRoot
     // superseding the unwind is Go's own replacement rule.
     protected static readonly ThreadLocal<System.Runtime.ExceptionServices.ExceptionDispatchInfo?> InFlightForeign = new();
 
+    /// <summary>
+    /// Clears this thread's panic slots before a pooled thread runs its next goroutine. Each is
+    /// frame-scoped and normally empty when a goroutine ends; a goroutine that ends on a Goexit or an
+    /// unrecovered unwind can leave one set, and the next goroutine must not see another's panic.
+    /// </summary>
+    internal static void ResetThread()
+    {
+        CapturedPanic.Value = null!;
+        HandledPanic.Value = null;
+        UnclaimedPanic.Value = null;
+        InFlightForeign.Value = null;
+    }
+
     internal static System.Runtime.ExceptionServices.ExceptionDispatchInfo? InFlightForeignException
     {
         get => InFlightForeign.Value;

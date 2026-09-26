@@ -834,6 +834,9 @@ internal static class SelectPending
 
     [ThreadStatic] private static Stack<Frame>? t_frames;
 
+    /// <summary>Drops this thread's pending frames before a pooled thread runs its next goroutine.</summary>
+    internal static void ResetThread() => t_frames = null;
+
     /// <summary>Pushes a committed receive (called by the select runtime, exactly once per recv win).</summary>
     internal static void Push(ChanCore core, object? value, bool ok)
     {

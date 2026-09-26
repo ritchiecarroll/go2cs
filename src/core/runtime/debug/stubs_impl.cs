@@ -78,9 +78,12 @@ partial class debug_package
     private static nint s_maxStack = 1_000_000_000;         // runtime.maxstacksize on 64-bit
     private static nint s_maxThreads = 10_000;              // runtime sched.maxmcount
 
-    // paniconfault is a per-goroutine flag in Go; a goroutine is a managed thread here.
+    // paniconfault is a per-goroutine flag in Go; a goroutine runs on one managed thread here, and a
+    // pooled coro thread clears it before its next goroutine.
     [ThreadStatic]
     private static bool t_panicOnFault;
+
+    private static readonly bool s_panicOnFaultReset = GoroutineThreadState.Register(static () => t_panicOnFault = false);
 
     internal static partial int32 setGCPercent(int32 @in)
     {

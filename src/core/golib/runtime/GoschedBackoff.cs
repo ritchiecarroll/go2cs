@@ -58,6 +58,9 @@ internal static class GoschedBackoff
     [ThreadStatic]
     private static int t_consecutiveInertYields;
 
+    /// <summary>Clears this thread's yield streak before a pooled thread runs its next goroutine.</summary>
+    internal static void ResetThread() => t_consecutiveInertYields = 0;
+
     // Total escalations across all threads — a test-visible observation point, not a control input.
     private static long s_escalations;
 

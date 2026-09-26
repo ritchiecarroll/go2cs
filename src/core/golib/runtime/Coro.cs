@@ -119,14 +119,13 @@ public sealed class Coro
         coro.m_bubble = Goroutine.Current?.Bubble;
         coro.m_bubble?.Spawned();
 
-        Thread thread = new(coro.Run, Goroutine.StackReserve)
-        {
-            IsBackground = true
-        };
-
+        // On a pooled goroutine-sized thread (GoroutineThreadPool): a coro's body mints its own
+        // goroutine identity (Run, below), runs under this caller's ExecutionContext as a new thread's
+        // would, and leaves the thread reset for the next one -- so reuse is invisible to Go code,
+        // while the ~100 µs of creating a 256 MB-reserve thread per coro is not paid again.
         try
         {
-            thread.Start();
+            GoroutineThreadPool.Run(coro.Run);
         }
         catch
         {

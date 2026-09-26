@@ -83,6 +83,15 @@ private const int heldLocksInline = 16;
 [ThreadStatic] private static ж<mutex>[]? t_heldLocks;
 [ThreadStatic] private static int t_heldCount;
 
+// A goroutine that ends mid-unwind can leave entries here; a pooled coro thread's next goroutine holds none.
+private static readonly bool s_heldLocksReset = GoroutineThreadState.Register(static () =>
+{
+    if (t_heldLocks is { } held)
+        Array.Clear(held);
+
+    t_heldCount = 0;
+});
+
 private static void pushHeld(ж<mutex> Ꮡl) {
     ж<mutex>[]? held = t_heldLocks;
     if (held is null) {

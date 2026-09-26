@@ -54,6 +54,9 @@ public static partial class builtin
 
     private static readonly ThreadLocal<bool> s_fallthrough = new();
 
+    // A pooled thread's next goroutine must not start inside another's fallthrough.
+    internal static void ResetFallthrough() => s_fallthrough.Value = false;
+
     [ModuleInitializer]
     internal static void InitializeGoLib()
     {
