@@ -768,7 +768,9 @@ partial class runtime_package
         {
             System.Reflection.MethodBase? method = frame.GetMethod();
 
-            if (method is null)
+            // A [StackTraceHidden] linkname forwarder has no Go frame (isGoSourceFrame skips it for
+            // Callers by the same predicate), and StackTrace.GetFrames() still returns it.
+            if (method is null || method.IsDefined(typeof(System.Diagnostics.StackTraceHiddenAttribute), inherit: false))
                 continue;
 
             trace.Append(goFrameName(method, frame)).Append("()\n");
