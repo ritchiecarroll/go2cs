@@ -129,6 +129,20 @@ public static class RuntimeSemaphore
     }
 
     /// <summary>
+    /// The number of goroutines queued on the semaphore addressed by <paramref name="s"/> -- Go's
+    /// <c>semaRoot.nwait</c>, read per word rather than per root, which is what runtime's export_test
+    /// <c>SemNwait</c> asks. A word nobody has waited on has no bucket and reads zero without making one.
+    /// </summary>
+    public static int Waiters(ж<uint32> s)
+    {
+        if (!semaTable.TryGetValue(s, out SemaBucket? b))
+            return 0;
+
+        lock (b)
+            return b.Waiters.Count;
+    }
+
+    /// <summary>
     /// Releases the semaphore addressed by <paramref name="s"/>, optionally handing ownership
     /// directly to the next waiter (Go's starvation mode).
     /// </summary>

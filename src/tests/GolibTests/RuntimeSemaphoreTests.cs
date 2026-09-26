@@ -21,4 +21,14 @@ public class RuntimeSemaphoreTests
         Assert.IsNull(failure, $"the acquirer failed: {failure}");
         Assert.IsTrue(acquired, "the acquirer did not return holding the permit");
     }
+
+    [TestMethod]
+    public void SemNwaitCountsTheGoroutineParkedOnTheWord()
+    {
+        (uint before, uint parked, uint after) = GoSemaWaitersProbe(TimeoutMs);
+
+        Assert.AreEqual(0u, before, "no goroutine has reached the semaphore yet");
+        Assert.AreEqual(1u, parked, "the parked acquirer is the one waiter");
+        Assert.AreEqual(0u, after, "the release dequeued it");
+    }
 }

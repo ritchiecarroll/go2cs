@@ -359,6 +359,16 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// death, TestSchedLocalQueueEmpty). Go only asks whether that number is 0, so runtime2_impl.cs
 		// answers "runnext is nil" over Volatile.Read of the reference, beside the family's other members.
 		"runqempty": goosAny,
+		// runtime's own semaphore (sema.go). The converted semacquire1 parks through acquireSudog, which
+		// reads the caller's P for its sudog cache; the managed model has no Ps, so the first semacquire
+		// that had to WAIT dereferenced a nil P on a goroutine and the runtime row's host died in
+		// TestSemaHandoff. runtime/sema_impl.cs puts both halves on golib's RuntimeSemaphore, the
+		// primitive sync's and internal/sync's semaphore pulls already use. SemNwait is export_test.go's
+		// read of the semaRoot treap's waiter count, which nothing maintains once the treap is gone;
+		// runtime/export_impl_test.cs answers it from RuntimeSemaphore.Waiters.
+		"semacquire1": goosAny,
+		"semrelease1": goosAny,
+		"SemNwait":    goosAny,
 		// The mutex/note key-slot protocol. Go has TWO flavors of it and selects one per GOOS:
 		// lock_sema.go (windows, darwin, plan9, aix …) smuggles an *m address through the uintptr
 		// slot and parks waiters on OS semaphores; lock_futex.go (linux, freebsd, dragonfly) uses a
