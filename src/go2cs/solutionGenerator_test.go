@@ -484,3 +484,47 @@ func TestBuildSolutionXMLPlacesRecoveredUnsafeCanonically(t *testing.T) {
 		t.Errorf("expected /unique/ < /unsafe/ < /vendor/ (got %d, %d, %d)\n---\n%s", uniqueIdx, unsafeIdx, vendorIdx, xml)
 	}
 }
+
+// The opt-in CPU sampler companion (core/go2cs.CpuProfiler, section 11.3 of
+// docs/phase4/DESIGN-managed-profiling.md) is infrastructure like golib, not a Go package: the solution
+// lists it once at the ROOT, never under an import-path folder (it has no import path), and the
+// converted-project walk does not collect it as a package.
+func TestSolutionListsTheCpuProfilerCompanionAtTheRoot(t *testing.T) {
+	root := t.TempDir()
+
+	for _, rel := range []string{"core/fmt/fmt.csproj", cpuProfilerProjectReference} {
+		full := filepath.Join(root, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(full), 0755); err != nil {
+			t.Fatalf("mkdir: %v", err)
+		}
+		if err := os.WriteFile(full, []byte("x"), 0644); err != nil {
+			t.Fatalf("write: %v", err)
+		}
+	}
+
+	coreProjects, err := (&StdLibConverter{go2csPath: root}).collectConvertedProjects()
+
+	if err != nil {
+		t.Fatalf("collectConvertedProjects: %v", err)
+	}
+
+	for _, project := range coreProjects {
+		if project == cpuProfilerProjectReference {
+			t.Errorf("the walk collected the companion as a converted package: %v", coreProjects)
+		}
+	}
+
+	xml := buildSolutionXML(append(coreProjects, golibProjectReference, cpuProfilerProjectReference))
+
+	if !strings.Contains(xml, "\r\n  <Project Path=\""+cpuProfilerProjectReference+"\" />\r\n") {
+		t.Errorf("the companion is not a root-level project\n---\n%s", xml)
+	}
+
+	if strings.Count(xml, cpuProfilerProjectReference) != 1 {
+		t.Errorf("the companion must be listed exactly once\n---\n%s", xml)
+	}
+
+	if strings.Contains(xml, "/go2cs.CpuProfiler/") {
+		t.Errorf("the companion was placed under an import-path folder\n---\n%s", xml)
+	}
+}

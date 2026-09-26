@@ -51,6 +51,11 @@ const (
 	// references already resolve — no absolute, machine-specific path is emitted.
 	golibProjectReference = "core/golib/golib.csproj"
 	genProjectReference   = "gen/go2cs-gen/go2cs-gen.csproj"
+
+	// cpuProfilerProjectReference is the opt-in CPU sampler companion (section 11.3 of
+	// docs/phase4/DESIGN-managed-profiling.md): hand-owned infrastructure beside golib, not a Go
+	// package, so it is listed at the solution root like golib and never collected by the walk.
+	cpuProfilerProjectReference = "core/go2cs.CpuProfiler/go2cs.CpuProfiler.csproj"
 )
 
 // GenerateSolutionFile writes a Visual Studio .slnx solution at the output root that
