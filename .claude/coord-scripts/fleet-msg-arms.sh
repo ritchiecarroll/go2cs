@@ -83,7 +83,7 @@ git -C "$SEED" add -- .claude/coord-scripts && git -C "$SEED" commit -q -m "arms
 git -C "$SEED" push -q "$BARE" master || setupfail "could not push the throwaway master"
 
 git -C "$SEED" checkout -q -B claude/mailbox master
-for L in COORD C1 C2 R G i9 FLEET; do
+for L in COORD C1 C2 R G i9 P1 P2 FLEET; do
     mkdir -p "$SEED/docs/phase4/inbox/$L"
     cp -- "$REAL/docs/phase4/inbox/$L/README.md" "$SEED/docs/phase4/inbox/$L/README.md" || setupfail "the real clone has no inbox/$L/README.md"
 done
