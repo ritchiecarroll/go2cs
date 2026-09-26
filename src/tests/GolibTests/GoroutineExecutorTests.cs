@@ -97,15 +97,39 @@ public class GoroutineExecutorTests
     }
 
     [TestMethod]
-    public void RegistryTracksLiveGoroutinesAndRetiresThem()
+    public void RegistryTracksLiveGoroutinesAndRetiresThem() => AssertRegistryTracks(ParkedGoroutines);
+
+    // The race this assembly's earlier tests hand the registry check: a goroutine whose body has
+    // SIGNALLED its test and returned, but whose thread has not yet run its Unregister (the scope's
+    // dispose, after the body), is still live when the next test reads the registry, and retires while
+    // that test counts. ExecutionContextFlowsIntoTheGoroutine and GoroutineRunsOnItsOwnDedicatedBackground-
+    // Thread end exactly so, one test before this one. Staged deliberately before every iteration here.
+    private const int StressIterations = 100;
+    private const int StressParked = 50;
+
+    [TestMethod]
+    public void RegistryTracksItsGoroutinesWhileAnEarlierOneIsStillRetiring()
+    {
+        for (int i = 0; i < StressIterations; i++)
+        {
+            using ManualResetEventSlim signalled = new(false);
+
+            Goroutine.Start(() => signalled.Set());
+            Assert.IsTrue(signalled.Wait(TimeoutMs), "the retiring goroutine did not run");
+
+            AssertRegistryTracks(StressParked);
+        }
+    }
+
+    private static void AssertRegistryTracks(int parked)
     {
         int baseline = Goroutine.Count;
 
         using ManualResetEventSlim release = new(false);
-        using CountdownEvent arrived = new(ParkedGoroutines);
-        using CountdownEvent finished = new(ParkedGoroutines);
+        using CountdownEvent arrived = new(parked);
+        using CountdownEvent finished = new(parked);
 
-        for (int i = 0; i < ParkedGoroutines; i++)
+        for (int i = 0; i < parked; i++)
         {
             Goroutine.Start(() =>
             {
@@ -118,8 +142,8 @@ public class GoroutineExecutorTests
         Assert.IsTrue(arrived.Wait(TimeoutMs), "not every goroutine started while the others were parked");
 
         // All of them are live and parked at once, so the registry must account for all of them.
-        Assert.IsTrue(Goroutine.Count >= baseline + ParkedGoroutines,
-            $"expected at least {baseline + ParkedGoroutines} live goroutines, got {Goroutine.Count}");
+        Assert.IsTrue(Goroutine.Count >= baseline + parked,
+            $"expected at least {baseline + parked} live goroutines, got {Goroutine.Count}");
 
         release.Set();
         Assert.IsTrue(finished.Wait(TimeoutMs), "goroutines did not finish");
@@ -127,7 +151,7 @@ public class GoroutineExecutorTests
         // A goroutine that finished must stop being counted — the registry's half of "a thread that
         // finished its goroutine stops looking like one". The threads retire asynchronously, so this
         // waits for the drain rather than reading immediately after the last body returned.
-        Assert.IsTrue(SpinWait.SpinUntil(() => Goroutine.Count < baseline + ParkedGoroutines, TimeoutMs),
+        Assert.IsTrue(SpinWait.SpinUntil(() => Goroutine.Count < baseline + parked, TimeoutMs),
             $"registry did not retire finished goroutines: still {Goroutine.Count} live");
     }
 
