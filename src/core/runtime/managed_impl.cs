@@ -1957,4 +1957,28 @@ partial class runtime_package
     {
         return (callerSpanStart(0), callerSpanStart(int.MaxValue) + (((nuint)1 << CallerSpanShift) - 1));
     }
+
+    /// <summary>Records <c>Callers(1, ...)</c> two frames deep beneath a converted linkname forwarder's
+    /// shape: this probe calls a [StackTraceHidden] forwarder, which calls the recording function. Go
+    /// has no frame for a forwarder, so the second frame must name this probe.</summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static slice<uintptr> GoForwardedCallersProbe()
+    {
+        return goHiddenForwarderProbe();
+    }
+
+    [System.Diagnostics.StackTraceHidden]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static slice<uintptr> goHiddenForwarderProbe()
+    {
+        return goCallersRecordingProbe();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static slice<uintptr> goCallersRecordingProbe()
+    {
+        slice<uintptr> pc = new slice<uintptr>(2);
+        Callers(1, pc);
+        return pc;
+    }
 }

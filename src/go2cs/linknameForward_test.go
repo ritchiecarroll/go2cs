@@ -88,6 +88,14 @@ func TestRecurseLinknameForwarder(t *testing.T) {
 	if strings.Contains(mainCs, "fwd(ж<uint16> filename);") {
 		t.Errorf("linkname func emitted as a bodyless partial stub, not a forwarder:\n%s", mainCs)
 	}
+
+	// The forwarder is not a Go frame: Go binds the pull to the target's symbol, so no frame of the
+	// puller exists. It is marked [StackTraceHidden], which runtime.Callers skips (managed_impl.cs,
+	// isGoSourceFrame) and Exception.StackTrace omits.
+	if !strings.Contains(mainCs, "[global::System.Diagnostics.StackTraceHidden] public static (Handle handle, Errno err) fwd(") &&
+		!strings.Contains(mainCs, "[global::System.Diagnostics.StackTraceHidden] internal static (Handle handle, Errno err) fwd(") {
+		t.Errorf("linkname forwarder is not marked [StackTraceHidden]:\n%s", mainCs)
+	}
 }
 
 // TestRecurseLinknameForwardDefinition guards the forward rows whose Go symbol is DEFINED UNDER
