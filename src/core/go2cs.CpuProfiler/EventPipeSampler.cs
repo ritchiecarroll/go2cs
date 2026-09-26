@@ -137,6 +137,12 @@ public sealed class EventPipeSampler : IGoCpuSampler
     /// <summary>Samples the last <see cref="Stop"/> wrote, per OS thread id (EventPipe's ThreadID).</summary>
     public IReadOnlyDictionary<int, int> LastWrittenByThread => m_writtenByThread;
 
+    /// <summary>The CPU time each OS thread used while the last session ran, as polled; the threads with no
+    /// written samples here are the ones whose CPU no sample stands for.</summary>
+    public IReadOnlyDictionary<int, TimeSpan> LastCpuByThread => m_cpuByThread;
+
+    private readonly Dictionary<int, TimeSpan> m_cpuByThread = [];
+
     private readonly Dictionary<int, int> m_writtenByThread = [];
 
     public void Start(int hz)
@@ -146,6 +152,7 @@ public sealed class EventPipeSampler : IGoCpuSampler
         LastManagedSamples = 0;
         LastSamplesWritten = 0;
         m_writtenByThread.Clear();
+        m_cpuByThread.Clear();
         m_hz = hz;
         golib.ProfileLabelEvents.Reset();
 
@@ -196,6 +203,12 @@ public sealed class EventPipeSampler : IGoCpuSampler
 
         m_cpuPoll = null;
         PollThreadCpu(baseline: false);
+
+        lock (m_cpuLock)
+        {
+            foreach (int thread in m_cpuLatest.Keys)
+                m_cpuByThread[thread] = CpuTimeOf(thread)!.Value;
+        }
 
         bool drained = false;
 

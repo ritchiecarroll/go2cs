@@ -186,6 +186,82 @@ public class EventPipeSamplerTests
         Assert.IsTrue(diff <= 0.10, $"samples x period must be within 10% of the CPU time used (Go's limit); sampled {sampledTotal / 1_000_000} ms against {usedTotal / 1_000_000} ms on CPU");
     }
 
+    [TestMethod]
+    public void AProfileAddsUpToTheProcessCpuTime()
+    {
+        if (!OperatingSystem.IsLinux())
+            Assert.Inconclusive("the per-thread names here are linux's /proc/self/task/<tid>/comm");
+
+        // Go's TestCPUProfileMultithreadMagnitude/serial: one hog, and the whole profile against the CPU
+        // time the process used while it ran (rusage there; the process's CPU time here).
+        const int hz = 100;
+        const int hogMilliseconds = 3000;
+
+        var sampler = new EventPipeSampler(EventPipeSampler.OpenInProcessSession);
+
+        sampler.Start(hz);
+        Assert.IsTrue(sampler.LastSessionOpened, "a SampleProfiler session must open on this process");
+
+        TimeSpan before = ProcessCpu();
+        var hog = new Thread(() => cpusamplerprobe_package.cpuHogger(hogMilliseconds));
+        hog.Start();
+        hog.Join();
+        TimeSpan used = ProcessCpu() - before;
+        Dictionary<int, string> names = ThreadNames();
+
+        sampler.Stop(CountingWriter);
+
+        const long periodNs = 1_000_000_000L / hz;
+        long profiled = sampler.LastSamplesWritten * periodNs;
+        long sampledCpu = 0, unsampledCpu = 0;
+
+        foreach ((int tid, TimeSpan cpu) in sampler.LastCpuByThread)
+        {
+            if (sampler.LastWrittenByThread.ContainsKey(tid))
+            {
+                sampledCpu += cpu.Ticks * 100;
+                continue;
+            }
+
+            unsampledCpu += cpu.Ticks * 100;
+
+            if (cpu > TimeSpan.Zero)
+                Console.WriteLine($"unsampled thread {names.GetValueOrDefault(tid, "(exited)")}: {cpu.TotalMilliseconds:F0} ms");
+        }
+
+        long usedNs = used.Ticks * 100;
+        double diff = (double)Math.Abs(usedNs - profiled) / Math.Max(usedNs, profiled);
+        Console.WriteLine($"process CPU {usedNs / 1_000_000} ms; profile {profiled / 1_000_000} ms; sampled threads' CPU {sampledCpu / 1_000_000} ms; unsampled threads' CPU {unsampledCpu / 1_000_000} ms; gap {(usedNs - profiled) / 1_000_000} ms; diff {diff:P1}");
+
+        Assert.IsTrue(diff <= 0.10, $"the profile must be within 10% of the process's CPU time (Go's limit); profile {profiled / 1_000_000} ms against {usedNs / 1_000_000} ms");
+    }
+
+    private static TimeSpan ProcessCpu()
+    {
+        using Process self = Process.GetCurrentProcess();
+        return self.TotalProcessorTime;
+    }
+
+    // /proc/self/task/<tid>/comm: the name each OS thread has now (the runtime names its own threads).
+    private static Dictionary<int, string> ThreadNames()
+    {
+        var names = new Dictionary<int, string>();
+
+        foreach (string task in System.IO.Directory.GetDirectories("/proc/self/task"))
+        {
+            try
+            {
+                names[int.Parse(System.IO.Path.GetFileName(task), System.Globalization.CultureInfo.InvariantCulture)] = System.IO.File.ReadAllText(System.IO.Path.Combine(task, "comm")).Trim();
+            }
+            catch (Exception)
+            {
+                // The thread exited while it was listed.
+            }
+        }
+
+        return names;
+    }
+
     // /proc/thread-self/schedstat: "<ns on a CPU> <ns runnable waiting> <timeslices>".
     private static long OnCpuNanoseconds() =>
         long.Parse(System.IO.File.ReadAllText("/proc/thread-self/schedstat").Split(' ')[0], System.Globalization.CultureInfo.InvariantCulture);
