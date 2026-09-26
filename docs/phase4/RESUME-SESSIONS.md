@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-25 04:27 -- SAVE-STATE refresh (ledger through mailbox 38316c9fd5): TRAIN A LANDED (master db1bd885a2; net/http validated again; owner pinged); TRAIN B assembled at tB 8c757d5db8 with the tip emission check running; the i9 reviews the pilot; R on reflect seat (b)
+> **Status of this revision:** 2026-09-26 01:59 -- SAVE-STATE refresh (ledger through mailbox 88c67ae13e): the i7 MOVED TO H: after a power outage; TRAIN B part 2 running at 81391a4a09 (the FindFirstFileData golden fixup); new lanes P1 (runtime) and P2 (profiling); C2's twin follow-on to TRAIN C; G on the Linux colour-remedy sizing
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -178,7 +178,7 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    master 074a12c4ae; one union conflict in fleetIdentifierCensus_test.go), plus two signed docs commits: ffa5c1015a (the
    Milestones cell names 509828948) and 38529c765a (the platforms note's package floor is 1.24.13.1; its Linux sentence
    stays until G's post-publish WSL walkthrough measures it, and the Roadmap Platforms row follows). At master's head: roster guard 1826 green, `release-nuget -VerifyOnly` "Tree is releasable"
-   (next 1.24.13.1; 9 origin tags, 0 missing). The i7's main checkout C:/Projects/go2cs is fast-forwarded to it.
+   (next 1.24.13.1; 9 origin tags, 0 missing). The i7's main checkout H:/Projects/go2cs is fast-forwarded to it.
  - ALL FIVE PARITY GATES HELD: P1 compile, P2 the §6 full-roster sweep (M: 218/218 covered once; 217 PASS + context 58|0 on
    G-LAPTOP, ruled a host-timing reading because the i7 reads 57|1 as banked; SF gate green, the rows identical at the sweep
    base and the release tree; no converter change between them), P3 behavioral, P4 the H6 gate (PASS 166/166), P5 the
@@ -196,7 +196,7 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    seat is owed: a per-RID compile surface. The LESSONS seed and method are on claude/coord-handover
    docs/phase4/briefs/lessons-learned-seed.md; run the write-up in a fresh session.
  - NEXT, in order:
-   (c) DONE 2026-09-24 (kept as the procedure for 1.24.13.2). THE OWNER'S RUN, at the i7's PHYSICAL console, in the main checkout C:/Projects/go2cs on master, fast-forwarded:
+   (c) DONE 2026-09-24 (kept as the procedure for 1.24.13.2). THE OWNER'S RUN, at the i7's PHYSICAL console, in the main checkout H:/Projects/go2cs on master, fast-forwarded:
        `git status --porcelain` must be EMPTY (a stray du.exe.stackdump was untracked there; the owner deletes it). The console
        environment: the go1.24.13 SDK bin first on PATH; GOROOT set to the BACKSLASH spelling of the go1.24.13 SDK;
        GOTOOLCHAIN=local, CGO_ENABLED=0, GOFLAGS empty; DOTNET_ROOT = the dotnet10 root, also first on PATH; both User-scope
@@ -284,7 +284,7 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    (2) DONE: the OWNER-APPROVED CLEANUP (0 refusals, 32 registrations pruned, C: 32 -> 76 GB free; ledger "STAMP · 9a5f63041b ·
        THE OWNER-APPROVED i7 CLEANUP IS DONE"). The worktrees LEFT are the owner's call (d0913b, kick, C:/go2cs-archive, the app's
        session worktrees) plus hnd, the main checkout and go2cs-mailbox.
-   (3) TRAIN A HAS LANDED (2026-09-25 ~06:00; ledger 'ANNOUNCE · db1bd885a2', mailbox 0813f0b840): master 9a5f63041b ->
+   (3) TRAIN A HAS LANDED (2026-09-25 04:13, corrected from an estimated ~06:00 in resume d4889d9ddb; ledger 'ANNOUNCE · db1bd885a2', mailbox 0813f0b840): master 9a5f63041b ->
        db1bd885a2 by fast-forward, every commit signed. It holds the synctest merge a7ae6c9182, the atomic PICK 6ba711dbe7, the mustBeKind merge
        bfd36bad0d, COORD's seat-1 repair merge ea7178a8af (ff67c57420, the stale synctest declared rows), the roster bank e75e3b4793
        (encoding/binary 142+4; net/http re-enters at 1387 [release-tiered]; header 219/230), and the proof-page bank db1bd885a2.
@@ -292,15 +292,25 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
        CANDIDATE READS at the union: reflect 418/391/27/22 (equal to R's base); internal/synctest 13 of 28 agree,
        TestIteratorPush fails and a hang runs to the package deadline (routed to R). The owner DEFERRED the i7 disk install
        (2026-09-24 23:45), so the i7 keeps working. Reclaim worktrees tA and tAfix (rm -rf, then git worktree prune).
-       TRAIN B IS ASSEMBLED in worktree C:/go2cs-tmp-coord/tB (local, not pushed): head 8c757d5db8 on master db1bd885a2 (ledger
-       38316c9fd5 has the composition). Nine signed seat merges: seats 1-7, arm C at 9baa1e563f, then the lifted union commit
-       efe3c0bf57, then the pilot 5b691c9c01 LAST. PRE-RESOLVED from R's rehearsal: builtin.cs (blob 724c2125a4) and string.cs
-       (blob 32137b70ba). NEW CONFLICTS against TRAIN A, hand-resolved: runtime/<goos>/package_info.cs takes print.go's map from
-       arm C and proc.go's map from TRAIN A PROVISIONALLY; fmt print.cs/scan.cs Printf/Sscanf take the pilot's signature and
-       REC-C A's sslice prologue. RUNNING: the tip emission check (tB-emitcheck.sh; three targets, runtime+fmt) to FIX proc.go's
-       map from the emission as one stated fixup commit. Then the battery (tB-battery.sh; set EXPECT_HEAD to the fixup head;
-       launch a per-run copy), and the landing only after the i9's byte-level review of the pilot reads AGREES (otherwise unseat
-       seat 9 and land 1-8). Delete claude/r-trainB-rehearsal at the landing.
+       2026-09-26: A POWER OUTAGE cut TRAIN B's battery after behavioral. By OWNER ORDER the i7 then MOVED ALL go2cs WORK TO
+       H: (ReFS 3.6 TB; ledger 88c67ae13e): H:/Projects/go2cs (main checkout, session cwd), H:/Projects/go2cs-mailbox (a standalone
+       clone), H:/go2cs-tmp-coord/{hnd,tB,d0913b,kick}, H:/go2cs-archive. The C: copies are CLEARED; only an empty C:/Projects/go2cs
+       dir, held by the app, remains. Worktree links were rewritten in place (git's repair cross-linked the two drives).
+       TRAIN B (worktree H:/go2cs-tmp-coord/tB, local, not pushed) is now at 81391a4a09 = 87a6efd4ab (nine seats + the lifted union
+       commit efe3c0bf57 + the proc.go map fixup 87a6efd4ab from the emission) + FIXUP 81391a4a09: FindFirstFileData's golden
+       re-baselined to arm C's hoist. It is a Windows-exclusive project, so arm C's Linux-hosted CNR could not reach it.
+       PART 1 READINGS (87a6efd4ab): converter suite ok; roster 1825; go2cs.slnx 0 errors (so NO CS0121 with twins); GolibTests
+       Debug 933/0/22 and Release 941/0/14; CNR CHANGED on FindFirstFileData only; behavioral 696 with FindFirstFileData [Target]
+       plus the pre-existing FuncLiteralCallerNames. PART 2 IS RUNNING (tB-battery-part2-run1.sh; logs in the scratchpad's tB-logs):
+       CNR must read NO REGRESSION, then behavioral filtered to FindFirstFileData, H7 x3, 53 sweep rows, reflect -tests and a
+       runtime -tests BUILD. Then land (announce, then push master) and delete claude/r-trainB-rehearsal. The pilot's reviews are
+       COMPLETE: the seat review AGREES and the whole-corpus arm is exactly 8 files per target.
+       TRAIN C (next, after B): R's reflect seats (b) 0b4522d2b5 (accepted), (a) map semantics (shape approved with 6 conditions,
+       ledger bc08828f97), (c) arm-2a after (b); G's claude/g-tty-readme d1ee5a87f8 (docs, accepted); C2's owner-directed twin
+       follow-on claude/c2-sstring-twin-gen 2650e2b9c6 (the i9's seat review is dispatched).
+       NEW LANES P1 and P2 (the owner's cloud project threads; mailbox 6dd56d7de6 added them to the LANES list; welcomes at inbox
+       P1 8cb05343d and P2 d557cdb96): P1 = the RUNTIME row; P2 = the PROFILING frontier (runtime/pprof + net/http/pprof, a sizing
+       first). Their paste prompts are in section 1c.
        Later, when the owner installs the disk, propose a layout that moves the worktree and
        scratch roots onto the new disk.
    (4) Then the NEXT TRAINS, assembled from master 4c53b02a0a on the i7:
@@ -357,7 +367,7 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
    - the identifier-census SCRUB of pre-existing hits on master: the BOARD's, plus a 'profile_root' hit in
      docs/ConversionStrategies-Reference.md (found by G 2026-09-24; it predates the packaging train). (A grep.exe.stackdump crash artifact in
      the main checkout was removed by COORD 2026-09-24; the checkout's porcelain is EMPTY.)
- - i7 WORKTREES under C:/go2cs-tmp-coord kept: hnd (THIS record; never remove), abcut (the cutover, now on origin),
+ - i7 WORKTREES under H:/go2cs-tmp-coord kept: hnd (THIS record; never remove), abcut (the cutover, now on origin),
    abh12, abrel, abcensus, abh6, abpost and abpost-stage (2.2 GB; reclaim after the release), plus older ones. Reclaim
    children-first; never Stop-Process by name.
  - PINS on the i7: GOROOT = the backslash spelling of the go1.24.13 SDK (go1.23.12 is beside it for the H6 gate's -FromGoRoot);
@@ -431,10 +441,11 @@ and the GolibTests guard; the history below is superseded. NEXT: V-fix 11 + the 
 The train scratch may be reclaimed; keep the record ref claude/g-union-1.24.13.2-rehearsal.
 DONE since: V-fix 11 + the guard claude/g-vfix11-sstring-counted fce07d9517 (ACCEPTED for train B; condition A clean), and the
 1.24.13.2 post-publish smoke (GREEN on both platforms). DONE: the (b) follow-on claude/g-vfix11b-unclassified a9b7d402d6
-(ACCEPTED for TRAIN B after V-fix 11, ledger 525291b865; A/B 0 flips, 0 count moves). NOW: the TTY residual (SCOPE: verify WINDOWS in an
-interactive console too; the README sentence "in an interactive terminal the C# build does not yet print fatih/color's
-colors" names no platform and the evidence is linux-only; correct it in the same seat), the raw-SYSCALL x/sys residual, and
-the prlimit comment.
+(ACCEPTED for TRAIN B after V-fix 11, ledger 525291b865; A/B 0 flips, 0 count moves). DONE 2026-09-26: the TTY residual SIZED
+(Windows has NO residual; Linux is rooted at IoctlGetTermios's EFAULT, the native-boundary layout class) and the docs cut
+claude/g-tty-readme d1ee5a87f8, ACCEPTED for TRAIN C (ledger 88c67ae13e). NOW: the LINUX REMEDY SIZING, posted before any
+cut: the token-collision bound MEASURED, whether the raw-SYSCALL x/sys residual shares the funnel (then one seat), and the
+struct-by-pointer population census with a positive control, on R's TypeLayout seat 0b4522d2b5. Then the prlimit comment.
 (HISTORY) CUT 2026-09-24 (ledger "RULING · 6c9aaae62e / 4378ae6cf2"), both UNMERGED:
 - claude/g-named-slice-len (the constrained len/cap golib seat, on 38529c765a, with the math/big retirement commit on top).
   GATE-COMPLETE and ACCEPTED for a post-release train (ledger "ACCEPT · b95abf9638"): behavioral 691/691 and Output 663/2/26,
@@ -500,7 +511,8 @@ flip list. THEN arm C as a converter seat, from the post-1.24.13.2 master. Reply
 STATE 2026-09-25 00:00: the census and arm C are DONE. The atomic pick rides TRAIN A (6ba711dbe7). The implicit-operator CS0121 census is
 CLEAN (the i9, ledger 7baf01e424). DONE: arm C's duplicate-attribute fix 9baa1e563f and the twin pilot 5b691c9c01, both seated in
 TRAIN B (ledger 38316c9fd5), with the pilot LAST. Its .NET legs run in TRAIN B's i7 battery, and the i9 reviews it at the bytes.
-QUEUED from your SUGGEST: the inline `type F func(...)` plus `f := g` CS0246. STANDBY until the battery reports.
+QUEUED from your SUGGEST: the inline `type F func(...)` plus `f := g` CS0246. DONE 2026-09-25 (owner-directed): the twin
+follow-on claude/c2-sstring-twin-gen 2650e2b9c6, ROUTED TO TRAIN C (ledger 88c67ae13e); the i9 reviews it at the bytes. STANDBY.
 ```
 
 ```
@@ -523,7 +535,176 @@ go2cs.slnx in each arm, classify every ARM 1 error by overload pair, restore byt
 DONE 2026-09-25: the census is CLEAN and ACCEPTED (ledger 7baf01e424). NOW: the SEAT REVIEW OF RECORD of C2's twin pilot
 claude/c2-sstring-twin-pilot 5b691c9c01, AT THE BYTES: your own converter at the parent 9baa1e563f and at the seat, emission of fmt,
 unicode/utf8 and text/template on 3 targets plus the -tests value sites, the applied delta compared by real line diff, and AGREES or
-DIFFERS reported to COORD. The pilot lands in TRAIN B only if this AGREES.
+DIFFERS reported to COORD. DONE: the review AGREES and the whole-corpus arm is exactly 8 files per target (ledger d4ec766dd5).
+NOW (2026-09-26): the SEAT REVIEW of C2's twin follow-on claude/c2-sstring-twin-gen 2650e2b9c6 against the pilot 5b691c9c01, plus
+one consumer build confirming the go2cs-gen StrGenerator forwarders. Report AGREES or DIFFERS.
+```
+
+```
+P1 (the owner's cloud project thread1). Paste-ready; the owner starts it. Comms: the mailbox tools, lane P1.
+You are lane **P1** of the go2cs fleet, a cloud project thread under the fleet coordinator (COORD).
+Model: Opus. Repo: ritchiecarroll/go2cs (a Go-to-C# transpiler; read CLAUDE.md first, it is the
+index and the safety floor). Standing goal: **100% of the implementable standard-library test
+packages validated.** Today 219 of the 224 implementable packages are banked; five candidates remain.
+**Your row: `runtime`.**
+
+## What is already ruled for runtime (read the ledger lines named below before cutting anything)
+The runtime candidate's host now runs far into Go's own suite. At the last reading (linux, Release,
+TC=0) C# produced 10,669 of Go's 10,884 results. The host died on a nil P in `acquireSudog`, reached
+through runtime's own semaphore in `TestSemaHandoff`. `TestSchedLocalQueueEmpty` PASSES but takes
+~35 min. Ruled items (ledger `RULING · 0b6bf15ab0`, 2026-09-24 10:56):
+1. **Hand-own `semacquire1`/`semrelease1` over golib's `RuntimeSemaphore`, adding a waiter count
+   for `SemNwait`.** This goes on ONE branch, `claude/p1-runtime-sema`, cut from **master**. Master
+   now carries R's synctest train and C2's atomic loads (TRAIN A, landed at `db1bd885a2`), so the old
+   "base on 0b6bf15ab0 + the 8ef7f65ec8 pick" condition is satisfied by master itself. R owns the park
+   seam and reviews the waiter count.
+2. **Item 3 rides the same branch:** libc bodies for `open`/`write1`/`pipe2`/`mincore`.
+3. **Item 2 is a SEPARATE branch cut from master** (`claude/p1-runtime-linkname`): converter
+   linkname forwards for `heapObjectsCanMove` and `fastrand` in `linknameForwardTargets`
+   (`src/go2cs/visitFuncDecl.go`). It is a CONVERTER change, so it owes CNR plus a two-seeded,
+   three-target footprint (the `corpus-reconvert` skill).
+4. `clone` and `GetCallerSP` stay throwing; whether they are disclosable is ruled at the bank. (Exclusion
+   classes E1-E4 are the OWNER's and apply to PACKAGES; for a single test the route is a disclosure, so
+   do not propose E3 for them.)
+
+**A prior measurement exists, and it is DATED** (a cloud thread, 2026-09-24, linux, Release TC0, 60m; tree
+= master ebb4acb8c + the synctest train + the atomic pick, which is close to today's master). Treat every
+number as a hypothesis to re-measure at master:
+- Go 10,884 / C# 10,669 before the host died (pass 10,468 / fail 176 / skip 16 / infra-error 9).
+- THE HOST KILLER: `TestSemaHandoff`. `semacquire1 -> acquireSudog` (runtime/linux/proc.cs) reads
+  `mp.p.ptr()`; the managed model has no Ps, so a nil deref on a goroutine kills the host. 124 top-level
+  tests never ran (everything alphabetically after it, and the whole parallel batch that runs last).
+- Stubs reached, each failing only its own test: `open` (TestBadOpen), `write1` (TestNetpollBreak),
+  `pipe2` (TestNonblockingPipe), `mincore` (TestMincoreErrorSign; the -errno sign IS the test), `clone`
+  (TestNewOSProc0), `heapObjectsCanMove` (TestHeapObjectsCanMove), `fastrand` (TestLegacyFastrand; the push
+  is `legacy_fastrand`), `internal/runtime/sys.GetCallerSP` (TestG0StackOverflow).
+- `TestSchedLocalQueueEmpty` PASSES but takes ~2,100 s. That is a DIAGNOSIS item (why is each rendezvous
+  slow? likely Gosched/osyield spinning under one thread per goroutine), not a stub. Read it before
+  proposing a body.
+- Other infra-errors: `TestMemclr` (IndexOutOfRange in `ElemRefBox.get_ValueSlot` via
+  `unsafe.Pointer.FromBox`) and `TestRuntimePanicWithRuntimeError` (the recovered value is a string, not a
+  `runtime.Error`; a known family). Both are worth sizing once the host survives.
+- The proposed shape for item 1 stands: a `runtime` `sema_impl.cs` companion over
+  `go.golib.RuntimeSemaphore.Acquire/Release` (the seam sync and internal/sync already use), with a
+  `Waiters(ж<uint32>)` read for `SemNwait`. Red first: an arm that calls Semacquire from a goroutine and
+  dies on the nil P today. Predicted: the host survives `TestSemaHandoff*` and reaches the 124.
+Also measured since, on R-LAPTOP (ledger `ACCEPT · 0b4522d2b5`): `TestEmptyMapWithInterfaceKey` and
+`TestNegativeZero` fail; they are R's reflect seat (a), the map semantics, so do not fix them here.
+runtime's own `TestGroupSizeZero` is a nil deref at the `*SwissMapType` arm-2a site (R's seat (c)).
+
+## How you work
+- **Red first.** Every fix is preceded by a failing arm that names it. Report every change as a
+  before/after `-tests` reading NAMING THE OS it was measured on, with anything unmeasured stated plainly.
+- **The roster's columns are the WINDOWS record.** Measure on your linux box; COORD or the i9 takes the
+  Windows reading at bank time. A `-tests` run on linux needs `GoTargetOS=linux` in its environment
+  (`.claude/rules/harness-gates.md`).
+- Gates per branch: `go test ./...` in `src/go2cs`; GolibTests at Debug AND Release if golib moves;
+  `go2cs.slnx` builds; CNR (`src/tests/Behavioral/check-no-regression.ps1`) for any converter change;
+  the runtime `-tests` reading before and after. Use the skills: `train-assembly`, `validation-bank`,
+  `gate-forensics`, `measurement-discipline`, `corpus-reconvert`.
+- **Branches:** new branches only, named `claude/p1-<topic>`, committed UNSIGNED. Never force-push and
+  never replace a SHA you have posted. PUSH-THEN-ANNOUNCE a new ref; ANNOUNCE-THEN-PUSH an existing one.
+  COORD owns every merge into master, through a train gated like any seat.
+
+## Security (non-negotiable)
+Nicknames only on anything you push or post: i7, i9, G-LAPTOP, R-LAPTOP, C1, C2, AZ1, P1, P2. Never a
+real hostname, username, profile path, IP address or share name. Never enter passwords or PINs. Never
+send email. The identifier census runs inside the message tool; for a branch, run
+`.claude/coord-scripts/coord-identifier-census.sh entry <file>` over your commit message and added
+lines before pushing.
+
+## Comms: the fleet mailbox, used as a plain tool (do not modify or extend it)
+The channel is the `claude/mailbox` branch of the same repo. Keep a SEPARATE clone with that branch checked out,
+and run both tools FROM THAT CLONE: the mailbox branch carries its own copy of them, and that copy knows your lane name.
+- **Read** at the start of every work block and between steps:
+  `bash .claude/coord-scripts/fleet-read.sh P1 <SINCE>`, where SINCE is the mailbox tip you last read
+  (omit it the first time). It prints your inbox (`docs/phase4/inbox/P1/`), the FLEET inbox and new
+  LEDGER lines, then `NEXT-SINCE <sha>`. Store that sha and pass it next time.
+- **Write** to COORD: put the body in a file, then
+  `FLEET_LANE=P1 bash .claude/coord-scripts/fleet-msg.sh COORD "<one-line subject>" <file>`.
+  One message per event; lead with the finding; put evidence as lines; name what you did not measure.
+- `docs/phase4/LEDGER.md` on that branch is the record of rulings: one line per ruling, written by COORD.
+  Read it; never write it.
+
+## First action
+Clone the repo, plus a second clone on `claude/mailbox`. Run `fleet-read.sh P1` from the mailbox clone: your inbox
+already holds COORD's welcome. `git ls-remote origin master` and confirm the tip is `db1bd885a2` or later. Read CLAUDE.md,
+then the LEDGER tail (the last 40 lines), then the three ruling lines named above. Post COORD a one-message
+ACK naming the master tip you read, your toolchain (Go 1.24.13, .NET 10, with GOROOT spelled exactly as
+`go env GOROOT` prints it), and your plan for item 1's red-first arm. Then begin.
+```
+
+```
+P2 (the owner's cloud project thread2). Paste-ready; the owner starts it. Comms: the mailbox tools, lane P2.
+You are lane **P2** of the go2cs fleet, a cloud project thread under the fleet coordinator (COORD).
+Model: Opus. Repo: ritchiecarroll/go2cs (a Go-to-C# transpiler; read CLAUDE.md first, it is the
+index and the safety floor). Standing goal: **100% of the implementable standard-library test
+packages validated.** Today 219 of the 224 implementable packages are banked; five candidates remain.
+**Your rows: `runtime/pprof` and `net/http/pprof`, the PROFILING frontier.** No other lane owns them.
+
+## What is known (read the roster and the ledger lines before designing anything)
+- `docs/ValidatedTestPackages.md`, the candidates table, has both rows' current standing.
+- **`net/http/pprof`**: measured, unbanked, **four real divergences**. The keystone is `asmcgocall`
+  (undisclosable). The owner ruled on 2026-09-07 that `TestDeltaProfile` is NOT a `platform-skip`: its
+  "mutex profile is not working" skip fires because our profiler returns zero samples, so it is WORK, not
+  a disclosure.
+- **`runtime/pprof`**: measured and not bankable as it stands (at an older tree it read 120 matched /
+  37 diverged, with 2 infra-errors and 10 Go-only rows that are structurally undisclosable). 12 of the 37
+  were ONE state leak, and fixing that leak ALONE made the row worse (disclosable fails became
+  undisclosable infra-errors). **Measure both rows at master first; every old number is a hypothesis.**
+- The ruled design direction (ledger 2026-09-24, the blockevent ruling): `saveblockevent` refuses by
+  name today. The **managed profiling arc** is BANKED as the route: a bucket store the managed model
+  can hold, PLUS events FED from the managed primitives (golib channels/select -> `blockevent`, the
+  hand-owned `sync.Mutex` -> `mutexevent`, the managed `lock2` -> `mLockProfile`). That is an arc, not
+  one seat.
+
+## Your first deliverable is a SIZING, not a cut
+1. Measure both rows at master on your linux box, with `GoTargetOS=linux` in the environment. Take the
+   verdict tables and group every divergence by MECHANISM, by name.
+2. Size the managed profiling arc against those names. Which golib/runtime seams each event needs; what
+   the bucket store must look like; which rows each increment moves; which rows stay undisclosable, and
+   why. Read the runtime's own `mprof.go` against the converted `src/core/runtime/mprof.cs` and its
+   hand-owns.
+3. Post the sizing to COORD as a design note on a new docs-only branch
+   (`claude/p2-profiling-sizing`, `docs/phase4/DESIGN-managed-profiling.md`), with the arc cut into
+   red-first increments. No code until COORD rules on the note.
+R (lane R) owns golib's park seam and channels. Any increment touching `golib/channel.cs`,
+`golib/runtime/*` or `sync` is reviewed by R; name that in the note.
+
+## How you work
+- **Red first.** Before/after `-tests` readings NAMING THE OS; anything unmeasured stated plainly.
+- The roster's columns are the WINDOWS record. Measure on linux; COORD or the i9 takes the Windows reading at
+  bank time. A linux `-tests` run needs `GoTargetOS=linux` in its environment.
+- Gates per code branch: `go test ./...` in `src/go2cs`; GolibTests at Debug AND Release; `go2cs.slnx`;
+  CNR for any converter change. Use the skills: `measurement-discipline`, `gate-forensics`,
+  `validation-bank`, `train-assembly`.
+- **Branches:** new only, `claude/p2-<topic>`, UNSIGNED. Never force-push; never replace a posted SHA.
+  PUSH-THEN-ANNOUNCE a new ref. COORD owns every merge.
+
+## Security (non-negotiable)
+Nicknames only on anything you push or post: i7, i9, G-LAPTOP, R-LAPTOP, C1, C2, AZ1, P1, P2. Never a real
+hostname, username, profile path, IP address or share name. Never enter passwords or PINs. Never send
+email. Run `.claude/coord-scripts/coord-identifier-census.sh entry <file>` over commit messages and added
+lines before pushing.
+
+## Comms: the fleet mailbox, used as a plain tool (do not modify or extend it)
+The channel is the `claude/mailbox` branch of the same repo. Keep a SEPARATE clone with that branch checked out,
+and run both tools FROM THAT CLONE: the mailbox branch carries its own copy of them, and that copy knows your lane name.
+- **Read** at the start of every work block and between steps:
+  `bash .claude/coord-scripts/fleet-read.sh P2 <SINCE>` (omit SINCE the first time). It prints your inbox
+  (`docs/phase4/inbox/P2/`), the FLEET inbox and new LEDGER lines, then `NEXT-SINCE <sha>`. Pass that
+  sha next time.
+- **Write** to COORD: put the body in a file, then
+  `FLEET_LANE=P2 bash .claude/coord-scripts/fleet-msg.sh COORD "<one-line subject>" <file>`.
+  One message per event; lead with the finding; put evidence as lines; name what you did not measure.
+- `docs/phase4/LEDGER.md` on that branch is COORD's record of rulings. Read it; never write it.
+
+## First action
+Clone the repo, plus a second clone on `claude/mailbox`. Run `fleet-read.sh P2` from the mailbox clone: your inbox
+already holds COORD's welcome. `git ls-remote origin master` and confirm the tip is `db1bd885a2` or later. Read CLAUDE.md,
+the LEDGER tail (the last 40 lines), and the candidates table in `docs/ValidatedTestPackages.md`. Post COORD
+a one-message ACK naming the master tip you read and your toolchain (Go 1.24.13, .NET 10). Then start the
+two measurements.
 ```
 
 ## 1a. COORD — THE NEW SESSION PROMPT (2026-09-21, after the weekly limit; PROTOCOL v4 + fleet-read v2). PASTE THIS; it
@@ -2230,3 +2411,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-25 00:11 -- SAVE-STATE refresh: leg C finding + repair ff67c57420; CS0121 census clean (the i9); C2 pilot dispatched; R's rehearsal addenda
 - 2026-09-25 01:09 -- SAVE-STATE refresh: TRAIN B rehearsal accepted; R to reflect sizing
 - 2026-09-25 04:27 -- SAVE-STATE refresh: TRAIN A landed; TRAIN B assembled
+- 2026-09-26 01:59 -- SAVE-STATE refresh: H: move, P1/P2 lanes, TRAIN B part 2
