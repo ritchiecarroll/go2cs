@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-26 05:30 -- SAVE-STATE refresh (ledger through mailbox c69eddaed8): TRAIN B part 3 re-take running at d78c1e815b (sNaN repair merged); TRAIN C rehearsed (20 seats, fmt pre-resolved); rulings through 5b54b65075
+> **Status of this revision:** 2026-09-26 14:27 -- SAVE-STATE refresh (ledger through mailbox f7ca99a234): TRAIN B and TRAIN C LANDED (master 7433c7ac38); TRAIN D rehearsed; cleanup done
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -295,37 +295,35 @@ WHERE THINGS STAND (verify every tip by ls-remote; the ledger stamps 2026-09-24 
        THE i7 WORKS ON H: (owner order after the 2026-09-26 power outage; ledger 88c67ae13e): H:/Projects/go2cs (main checkout,
        session cwd), H:/Projects/go2cs-mailbox (a standalone clone of claude/mailbox; the ledger and inbox tools run there),
        H:/go2cs-tmp-coord/{hnd,tB,tC-reh,bitcast,d0913b,kick}, H:/go2cs-archive. The C: copies are CLEARED.
-       TRAIN B (worktree H:/go2cs-tmp-coord/tB, local, not pushed), at d78c1e815b: nine seats, the lifted union commit efe3c0bf57,
-       the proc.go map fixup 87a6efd4ab, the FindFirstFileData golden fixup 81391a4a09, the REPAIR merge aedb7a147b
-       (claude/coord-bitcast-snan 8be9e8b449: under Release with tiering off, the JIT folds Unsafe.BitCast of a constant and QUIETS
-       a signaling NaN, 7f800001 -> 7fc00001; bitcast re-casts through a NoInlining helper only on a NaN result; red-first arm in
-       ValuePunBitcastTests), and the ROSTER BANK d78c1e815b (slices 120|3 -> 121|2, log/slog 197|19 -> 198|18; header 58,366
-       matching test verdicts, 278 disclosed). PART 3 is the post-repair re-take: GolibTests Debug 935/0/22 and Release 943/0/14,
-       H7 windows 0 errors, then reflect -tests (the 3 NaN tests must pass, nothing else may move against part 2) and eight sweeps
-       (math, encoding/binary, database/sql, log/slog, fmt, encoding/gob, strconv, slices). THEN: keep the slices and log/slog proof
-       pages and READMEs; restore all other dirt (the validation index: restore, with no new rows); the roster guard must pass
-       (1825); commit the bank artifacts; census the whole train delta; announce, then push master (a fast-forward from
-       db1bd885a2); delete claude/r-trainB-rehearsal; reclaim tB and bitcast.
-       TRAIN C is REHEARSED (H:/go2cs-tmp-coord/tC-reh, tip e86b02db2a, local): all 20 seats merge onto d78c1e815b and ONE conflict
-       is PRE-RESOLVED. At twin-gen, fmt print.cs and scan.cs take twin-gen's [GoStr] line with REC-C §A's .sslice() body.
-       The i7's tC-assemble.sh pins seats by SHA and takes the fmt blobs from e86b02db2a. If that tree is lost, RE-DERIVE by the same rule. SEATS, in order:
-       R (b) 0b4522d2b5 (BEFORE G's marshal, per R's review), R (a) 579bfa08c6, the R2 pin 99492aad9e; G tty-readme d1ee5a87f8,
-       G linux-syscall-marshal 2b31027b77 PLUS the COMMIT 3 G owes (an order-independent trailing-zero-size refusal plus an arm;
-       the [6] scratch arrays moved to [InlineArray(6)], or an Infrastructure union entry; ledger 4f9f45b9f1); C2 twin-gen
-       15ff6f6203 (the owner's [GoStr] string docs: the owner wants to know when this is on master), complex-bridge e454b62ddb,
-       complex64 8707a96433, float32 5cada2c041, generic-type-alias 72db81667f; C1 hop-lessons e7a3287d56, skills-routing
-       48eaa32d98, identifier-scrub 4f54d9afd3, validation-index-writer 5b591af555, index-guard-anchors d983cc2d5a,
-       readme-freshness f29e0f75c8; P2 I1 d87c34ccc5, class-I 877b241d93, I2 fecae49a35, caller-pc-spans 96ce90f997 (the i9
-       AGREES, ledger 730aebddaa; an optional commit 3 moves the band to 0x8000_8000_0000_0000), the profiling-sizing docs
-       0984a4ff4f; G's claude/g-funclit-noinline when posted (FuncLiteralCallerNames is a TEST fix: Go 1.24's inliner renames
-       directly called literals; ledger 4f9f45b9f1). P1's item 1 is HELD (ledger 7bb1332090). Owed legs: the full battery, plus
-       the emission check on twin-gen's corpus (a seeded reconvert of the touched packages must reproduce the tree), symbol-sync,
-       GenTests, the rows each acceptance lists, and the Windows readings for pprof.
-       LANES: P1 = the RUNTIME row (the STW hand-own under census ruling c73f2be58f); P2 = the PROFILING frontier (next: pc-spans
-       commit 3, then the forwarder-frame increment, ledger 5b54b65075); R = the Coro thread-pool seat, then R1, then (c) M4;
-       G = marshal commit 3, then funclit; C2 = alias-import fixes; C1 and the i9 = standby. P1/P2 paste prompts are in 1c.
-       OWNER DECISIONS OPEN: the class-C sampler, out of scope or build (sizing 9b18598ae4). RULED BY COORD: TestBlockProfileBias's
-       inlining gap is STRUCTURAL under the owner's class-I ruling (the targeted closure is 27% of std).
+       LANDED 2026-09-26: TRAIN B (master 3ffd1d8a8d, 05:41; slices 121, log/slog 198; the bitcast sNaN repair) and TRAIN C
+       (master 7433c7ac38, 13:56; 24 seats incl. C2's [GoStr] string docs, G's linux syscall marshal and 29 linux annotations,
+       R's reflect layout + map semantics, P2's caller-PC spans; emission check 0 union drift; 79/79 sweeps). The owner was
+       pinged for the [GoStr] docs. TRAIN C's 23 seat branches are pruned (origin ~88 heads; the prune manifests and bundles
+       are in the i7's go2cs archive, branch-prune-2026-09-26).
+       TRAIN D is REHEARSED (H:/go2cs-tmp-coord/tD-reh, local) with its seat table in the scratchpad's tD-seats.txt and the
+       assembly script tD-assemble.sh. Pre-resolutions: stubs_impl.cs at the i9's getg seat (keep R's s_getgReset AND the i9's
+       t_getgOwner, with its own GoroutineThreadState.Register reset), ConversionStrategies-Reference.md at C2's alias seat
+       (keep both new sections), visitFuncDecl.go at P2's forwarder seat (forwarderPrefix+twinMarker+noInlining), and the
+       runtime/<goos>/package_info.cs maps taken from the incoming side, then RE-DERIVED from a runtime emission (3 targets)
+       as a fixup. UNION COMMIT: census entries for t_getgOwner and t_cpuSamplerDraining (the sampler seam gets a
+       go.golib.GoroutineThreadState.Register reset), plus R's composed pooled-then-lent arm in GetgLentIdentityTests. That
+       arm was made DISCRIMINATING (another holder mints goroutine 1 first): red without the i9's fix ("status is 2"),
+       green with it. SEATS: R's coro pool 3024a93ecf and R1 f070febc4a (internal/synctest VALIDATES 27/27, a new row at
+       landing); the i9's getg da0845b2e7, registry race d9a7e8b81f, running count 2ba705db0a, os capability 5345c2a0b2 and
+       junction GODEBUG d4c9dd8305; C2's alias fixes d6fb50c663; G's repoguard re-cut 2111673768; P2's forwarder frames
+       187daab100, profiling docs 937832ca39, sampler seam 5cb606a2ce, companion 53ee28fe80, frames 3fb6a290e2, labels
+       dc19680049 and closure names 00ca353c89; P1's stack (959a88df3 line) and metrics histogram 0a074655e once their slnx
+       gate posts SHAs. The battery shape is TRAIN C's (tC-battery.sh with the two-arm emission check), plus a behavioral
+       and MSTest pass for C2's AliasImport projects and the solution builds for the new go2cs.CpuProfiler project.
+       NEXT AFTER TRAIN D: the committed test-source refresh (the i9, on the new SSD), the stranded docs batch (COORD), and
+       pruning TRAIN D's seat branches.
+       LANES: R = seat (c) M4 (TestIsZero) on 7433c7ac38; G = (b) FieldRefBox tokens (the os linux memory-safety fix) on
+       7433c7ac38; P1 = the 8 host-fatal runtime tests; P2 = class G (goroutine registration on the creating thread, stacked
+       on R's (A)), then magnitude; C1 = the crash backstop, then its stranded re-cuts; C2 = the anonymous-struct generic
+       alias sizing, then its stranded re-cuts; the i9 = the windows runtime/pprof classification (45 divergences).
+       OWNER HAND OPEN: the i9's session needs a permission rule for its last reclaim batch. OWNER RULED today: the CPU sampler
+       is BUILT, opt-in only (satisfied, measured); the standing cleanup rule (lanes delete verifiably stale local items; COORD
+       prunes GitHub branches; fleet total ~565 GB, origin 452 -> ~88 heads).
    (4) LANDED since the release: 1.24.13.2 (tag nuget-1.24.13.2 -> 4c53b02a0a, the Linux packaging train); TRAIN A (master
        db1bd885a2, 2026-09-25 04:13: R's synctest re-entry, C2's atomic-loads PICK, R's mustBeKind; net/http validates again at
        1387, execution release-tiered; GoroutineWaitState turned green there).
@@ -2382,3 +2380,4 @@ before every push. No chips; a SUGGEST item is one line to COORD. Owner hands: o
 - 2026-09-25 04:27 -- SAVE-STATE refresh: TRAIN A landed; TRAIN B assembled
 - 2026-09-26 01:59 -- SAVE-STATE refresh: H: move, P1/P2 lanes, TRAIN B part 2
 - 2026-09-26 05:30 -- SAVE-STATE refresh: TRAIN B at d78c1e815b (bitcast sNaN repair + roster bank), part 3 running; TRAIN C rehearsed on it (tC-reh e86b02db2a); P2 pc-spans cleared by the i9; the targeted NoInlining closure ruled structural; R's marshal finding ruled (G commit 3); FuncLiteralCallerNames a test fix
+- 2026-09-26 14:27 -- SAVE-STATE refresh: TRAIN C landed 7433c7ac38; TRAIN D rehearsed with pre-resolutions + union commit; branch prune 452 -> 88
