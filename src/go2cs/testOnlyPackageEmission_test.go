@@ -161,7 +161,7 @@ func convertTestOnlyFixture(t *testing.T, inputPath string) map[string]string {
 
 	projectName := projectFileBaseName(testOnlyFixtureDir)
 
-	if err = writeTestProject(filepath.Join(outputPath, projectName+testProjectFileSuffix), projectName, "go",
+	if err = writeTestProject(filepath.Join(outputPath, projectName+testProjectFileSuffix), projectName, "go", "",
 		testProjectWhiteboxReference, nil, nil, nil, nil, projectOptions); err != nil {
 		t.Fatalf("writeTestProject: %v", err)
 	}

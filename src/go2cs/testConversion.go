@@ -304,7 +304,29 @@ const (
 	TestCompileItemsMarker      = ">>MARKER:TEST_COMPILE_ITEMS<<"
 	TestFixtureItemsMarker      = ">>MARKER:TEST_FIXTURE_ITEMS<<"
 	TestProjectReferencesMarker = ">>MARKER:TEST_PROJECT_REFERENCES<<"
+	TestCpuProfilerMarker       = ">>MARKER:TEST_CPU_PROFILER<<"
 )
+
+// cpuProfilerTestPackages names the packages whose -tests host opts into the CPU sampler
+// (<GoCpuProfiler>true</GoCpuProfiler>, which imports go2cs.CpuProfiler/GoCpuProfiler.targets): the
+// packages whose tests read CPU profile samples. Section 11.3 of docs/phase4/DESIGN-managed-profiling.md,
+// the owner's class C ruling (build the sampler, OPT-IN ONLY). The table is EXPLICIT on purpose: every
+// test binary imports runtime/pprof through testing/internal/testdeps, so an import-closure rule would
+// put the sampler and its diagnostics dependency in every test host. A later row whose tests profile
+// CPU joins the table.
+var cpuProfilerTestPackages = map[string]bool{
+	"runtime/pprof":  true,
+	"net/http/pprof": true,
+}
+
+// testCpuProfilerProperty is the test csproj's opt-in property line for importPath, or "".
+func testCpuProfilerProperty(importPath string) string {
+	if cpuProfilerTestPackages[importPath] {
+		return "\r\n    <GoCpuProfiler>true</GoCpuProfiler>"
+	}
+
+	return ""
+}
 
 const unsupportedCapabilityReasonPrefix = "requires unsupported testing capabilities: "
 
@@ -900,7 +922,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		foreignImplementBasesResolver(options))...)
 
 	testProjectName := projectFileBaseName(projectName) + ".tests.csproj"
-	if err := writeTestProject(filepath.Join(outputPath, testProjectName), projectName, projectNamespace, model, productionFiles, outputFiles, fixtures, referenceImports, options); err != nil {
+	if err := writeTestProject(filepath.Join(outputPath, testProjectName), projectName, projectNamespace, production.PkgPath, model, productionFiles, outputFiles, fixtures, referenceImports, options); err != nil {
 		return err
 	}
 
@@ -4377,7 +4399,7 @@ var testProjectFixedReferences = []string{
 	`$(go2csPath)core/context/context.csproj`,
 }
 
-func writeTestProject(projectFile, projectName, namespace string, model testProjectModel, productionFiles, testFiles, fixtures, dependencies []string, options Options) error {
+func writeTestProject(projectFile, projectName, namespace, importPath string, model testProjectModel, productionFiles, testFiles, fixtures, dependencies []string, options Options) error {
 	references := HashSet[string]{}
 
 	for _, fixed := range testProjectFixedReferences {
@@ -4538,6 +4560,7 @@ func writeTestProject(projectFile, projectName, namespace string, model testProj
 		TestCompileItemsMarker, compileItems.String(),
 		TestFixtureItemsMarker, fixtureItems.String(),
 		TestProjectReferencesMarker, referenceItems.String(),
+		TestCpuProfilerMarker, testCpuProfilerProperty(importPath),
 	).Replace(string(testCsprojTemplate)))
 
 	if needToWriteFile(projectFile, contents) {

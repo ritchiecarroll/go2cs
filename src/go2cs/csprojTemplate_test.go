@@ -192,6 +192,7 @@ func renderTestCsprojTemplate() string {
 		TestCompileItemsMarker:      "\r\n    <Compile Include=\"value.cs\" />",
 		TestFixtureItemsMarker:      "",
 		TestProjectReferencesMarker: "\r\n    <ProjectReference Include=\"$(go2csPath)core\\testing\\testing.csproj\" />",
+		TestCpuProfilerMarker:       testCpuProfilerProperty("runtime/pprof"),
 	} {
 		contents = strings.ReplaceAll(contents, marker, value)
 	}
@@ -208,6 +209,36 @@ func TestTestCsprojTemplateEmitsWellFormedXml(t *testing.T) {
 
 	if err := assertWellFormedXml(contents); err != nil {
 		t.Fatalf("test-csproj-template.xml does not emit well-formed XML: %v", err)
+	}
+}
+
+// The CPU sampler opt-in (section 11.3 of docs/phase4/DESIGN-managed-profiling.md): the -tests host of a
+// tabled package sets <GoCpuProfiler>true</GoCpuProfiler>, and every test csproj carries the Import that
+// the property turns on; any other package's host sets nothing, so it carries neither the companion nor
+// its diagnostics dependency.
+func TestTestCsprojCpuProfilerOptIn(t *testing.T) {
+	const importLine = `<Import Project="$(go2csPath)core/go2cs.CpuProfiler/GoCpuProfiler.targets" Condition="'$(GoCpuProfiler)'=='true'" />`
+
+	for _, pkg := range []string{"runtime/pprof", "net/http/pprof"} {
+		if got := testCpuProfilerProperty(pkg); !strings.Contains(got, "<GoCpuProfiler>true</GoCpuProfiler>") {
+			t.Errorf("%s: the test host must opt into the CPU sampler, got %q", pkg, got)
+		}
+	}
+
+	for _, pkg := range []string{"runtime/debug", "testing", "fmt"} {
+		if got := testCpuProfilerProperty(pkg); got != "" {
+			t.Errorf("%s: the test host must NOT opt into the CPU sampler, got %q", pkg, got)
+		}
+	}
+
+	contents := renderTestCsprojTemplate()
+
+	if !strings.Contains(contents, importLine) {
+		t.Errorf("test-csproj-template.xml does not import GoCpuProfiler.targets under the opt-in property")
+	}
+
+	if !strings.Contains(contents, "<GoCpuProfiler>true</GoCpuProfiler>") {
+		t.Errorf("the rendered runtime/pprof test csproj does not carry the opt-in property")
 	}
 }
 

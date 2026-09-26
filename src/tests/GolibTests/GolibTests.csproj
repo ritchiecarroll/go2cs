@@ -227,6 +227,12 @@
          runtime.ReadMemStats, not a model of it. -->
     <ProjectReference Include="..\..\core\runtime\runtime.csproj" />
 
+    <!-- EventPipeSamplerTests: the opt-in CPU sampler companion (section 11 of
+         docs/phase4/DESIGN-managed-profiling.md). Referenced directly, WITHOUT GoCpuProfiler.targets,
+         so its module initializer is not linked in and RuntimeCpuSamplerSeamTests' proxy stays the
+         process's one registered sampler. -->
+    <ProjectReference Include="..\..\core\go2cs.CpuProfiler\go2cs.CpuProfiler.csproj" />
+
     <!-- GcPauseHistorySurfaceTests: the OTHER half of the same surface (S2/S3). The design's central
          claim is that runtime.ReadMemStats and runtime/debug.ReadGCStats read ONE snapshot, so the
          guard has to hold BOTH of them against each other — which needs both packages bound. -->

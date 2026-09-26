@@ -1820,7 +1820,7 @@ func TestWriteTestProjectReferenceModelBindsProductionProject(t *testing.T) {
 	testFiles := []string{"value_test.cs"}
 
 	projectFile := filepath.Join(dir, "value.tests.csproj")
-	if err := writeTestProject(projectFile, "value", "go", testProjectReference, productionFiles, testFiles, nil, nil, Options{go2csPath: dir}); err != nil {
+	if err := writeTestProject(projectFile, "value", "go", "", testProjectReference, productionFiles, testFiles, nil, nil, Options{go2csPath: dir}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1841,7 +1841,7 @@ func TestWriteTestProjectReferenceModelBindsProductionProject(t *testing.T) {
 	}
 
 	recompileFile := filepath.Join(dir, "value.recompile.tests.csproj")
-	if err := writeTestProject(recompileFile, "value", "go", testProjectRecompile, productionFiles, testFiles, nil, nil, Options{go2csPath: dir}); err != nil {
+	if err := writeTestProject(recompileFile, "value", "go", "", testProjectRecompile, productionFiles, testFiles, nil, nil, Options{go2csPath: dir}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -2661,7 +2661,7 @@ func TestWriteTestProjectFailsLoudlyOnDependencyError(t *testing.T) {
 	dir := t.TempDir()
 	importPackageDirs = map[string]importedPackageMeta{}
 
-	err := writeTestProject(filepath.Join(dir, "broken.tests.csproj"), "broken", "go", testProjectRecompile, nil, nil, nil,
+	err := writeTestProject(filepath.Join(dir, "broken.tests.csproj"), "broken", "go", "", testProjectRecompile, nil, nil, nil,
 		[]string{"go2cs.invalid/definitely/not/resolvable"}, Options{go2csPath: dir})
 
 	if err == nil {
@@ -5375,7 +5375,7 @@ func TestHostRowReferencesTheHostExactlyOnce(t *testing.T) {
 		directory := t.TempDir()
 		projectFile := filepath.Join(directory, projectFileBaseName(projectName)+".tests.csproj")
 
-		if err := writeTestProject(projectFile, projectName, "go", testProjectReference,
+		if err := writeTestProject(projectFile, projectName, "go", "", testProjectReference,
 			nil, []string{"x_test.cs"}, nil, nil, Options{go2csPath: directory}); err != nil {
 			t.Fatalf("writeTestProject(%q): %v", projectName, err)
 		}

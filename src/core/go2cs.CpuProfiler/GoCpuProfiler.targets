@@ -1,0 +1,15 @@
+<Project>
+
+  <!-- Imported by a converted project when it opts into CPU profile samples:
+         <GoCpuProfiler>true</GoCpuProfiler>
+         <Import Project="$(go2csPath)core/go2cs.CpuProfiler/GoCpuProfiler.targets" />
+       It adds the companion reference and ONE linked compile item, a module initializer in the
+       program's own assembly that registers the sampler (section 11.3 of
+       docs/phase4/DESIGN-managed-profiling.md). Without the property it adds nothing, so a
+       program that imports it but does not opt in is unchanged. -->
+  <ItemGroup Condition="'$(GoCpuProfiler)'=='true'">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)go2cs.CpuProfiler.csproj" />
+    <Compile Include="$(MSBuildThisFileDirectory)GoCpuProfilerRegistration.cs" Link="GoCpuProfilerRegistration.cs" />
+  </ItemGroup>
+
+</Project>

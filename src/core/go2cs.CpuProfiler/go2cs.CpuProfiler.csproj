@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- THE OPT-IN CPU SAMPLER COMPANION (section 11 of docs/phase4/DESIGN-managed-profiling.md; the
+       owner's class C ruling: build the sampler, OPT-IN ONLY). An ordinary converted program never
+       references this project: it and its diagnostics dependency ride only in a build that sets
+       <GoCpuProfiler>true</GoCpuProfiler> and imports GoCpuProfiler.targets, which adds the reference
+       and a module initializer that registers the sampler with runtime's seam
+       (runtime/cpusampler_impl.cs). Hand-owned; no Go source converts here. -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework Condition="'$(TargetFramework)'==''">net10.0</TargetFramework>
+    <RootNamespace>go.CpuProfiler</RootNamespace>
+    <AssemblyName>go2cs.CpuProfiler</AssemblyName>
+    <Product>go2cs</Product>
+    <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
+    <AssemblyTitle>$(Description)</AssemblyTitle>
+    <Authors>$(Product) Authors</Authors>
+    <Company>The $(Authors)</Company>
+    <Copyright>Copyright © 2018-2026 $(Company)</Copyright>
+    <RepositoryUrl>https://github.com/ritchiecarroll/go2cs</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <!-- The registration file is compiled into the OPTED-IN PROGRAM (GoCpuProfiler.targets links it),
+         never into this assembly: a referenced assembly's module initializer does not run until
+         something loads it, and the program's own always does. -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OutDir)'=='' AND '$(BaseOutputPath)'==''">
+    <OutDir>bin/$(Configuration)/$(TargetFramework)/</OutDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="EventPipeSampler.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../golib/golib.csproj" />
+    <ProjectReference Include="../runtime/runtime.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.745401" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="go.builtin" Static="True" />
+    <Using Include="System.Int64" Alias="int64" />
+  </ItemGroup>
+
+</Project>
