@@ -24,4 +24,5 @@ func main() {
 	n, ok := nr(7)
 	fmt.Println("named:", n, ok)
 	fmt.Println("struct:", AliasImportLib.B2{V: 4})
+	aliased()
 }

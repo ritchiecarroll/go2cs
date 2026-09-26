@@ -34,6 +34,7 @@ internal static void Main() {
     var (n, ok) = nr(7);
     fmt.Println(namedˢ, n, ok);
     fmt.Println(structˢ, new AliasImportLibꓸB2(V: 4));
+    aliased();
 }
 
 } // end main_package

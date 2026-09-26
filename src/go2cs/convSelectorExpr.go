@@ -710,6 +710,27 @@ func (v *Visitor) aliasResolvedSelector(selectorExpr *ast.SelectorExpr, rendered
 		return rendered
 	}
 
+	// An ALIASED import (`import pl "PALib"`) renders its base as the file's alias, but the table
+	// is keyed by the package's DECLARED name, so `pl.B2` found nothing and a composite literal of
+	// the imported type alias `B2` rendered `new pl.B2(…)`: B2 is a `global using`, not a member of
+	// the package class (CS0426). A published type alias is looked up under the declared name
+	// instead, and renders as its `global using` name (`PALibꓸB2`), as the canonical import does.
+	// Only a non-const type alias is redirected: every other member keeps the file-alias spelling.
+	if declared := pkgName.Imported().Name(); pkgName.Name() != declared {
+		if member, ok := strings.CutPrefix(rendered, pkgName.Name()+"."); ok {
+			key := getSanitizedIdentifier(declared) + "." + member
+
+			packageLock.Lock()
+			_, published := importedTypeAliases[key]
+			isConst := constImportedTypeAliases.Contains(key)
+			packageLock.Unlock()
+
+			if published && !isConst && aliasSourceMatchesPackage(key, pkgName.Imported()) {
+				return getAliasedTypeName(key)
+			}
+		}
+	}
+
 	if !aliasSourceMatchesPackage(rendered, pkgName.Imported()) {
 		return rendered
 	}
