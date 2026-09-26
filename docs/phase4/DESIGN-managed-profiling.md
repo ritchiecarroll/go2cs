@@ -493,6 +493,138 @@ GolibTests arm first, and R would review the `captureCallers` change.
 - The test-files-only variant's effect on `TestBlockProfileBias` is a prediction. It was not run.
 - The forwarder fix is not written, and the rows it would move were not identified.
 
+## 11. Addendum, 2026-09-26: the class C sampler, opt-in only
+
+> **STATUS: DESIGN for COORD and R (mailbox 2026-09-26 14:17Z). The owner ruled "BUILD the CPU
+> sampler, OPT-IN ONLY"; the sampler and its trace reader must never ride in an ordinary converted
+> program.** Docs only. Base: section 9 (the sizing) and I1 (`claude/p2-cpuprof-setters-unix`
+> `d87c34ccc5`, in TRAIN C), which makes every target's `setProcessCPUProfiler` a hand-owned no-op.
+
+### 11.1 The seam in Go's own start and stop path
+
+`SetCPUProfileRate` (cpuprof.go) holds `cpuprof.lock`. On start it opens `cpuprof.log` and calls
+`setcpuprofilerate(hz)`. On stop it calls `setcpuprofilerate(0)`, then `addExtra()`, then
+`cpuprof.log.close()`. `setcpuprofilerate` (proc.go:5631) takes `prof.signalLock` and calls
+`setProcessCPUProfiler(hz)` **before** it stores the new `prof.hz`. So inside `setProcessCPUProfiler(0)`:
+
+- the log is still open and `prof.hz` still reads the old rate;
+- `prof.signalLock` is held, so `cpuprof.add` would spin forever. The drain must write with
+  `cpuprof.log.write(tag, time, hdr, stk)` directly, which is what `add` does once it holds the lock.
+
+`setProcessCPUProfiler` is already hand-owned on all three targets (windows by the earlier seat, linux
+and darwin by I1). It is the one place a sampler starts and stops. Samples are drained there on stop,
+with their own timestamps, before `addExtra` and `close`. `profBuf` overflow counts as lost records
+the same way Go counts them.
+
+### 11.2 The options, weighed
+
+| option | what an ordinary program carries | how a program opts in | where it cannot work |
+|---|---|---|---|
+| (i) `runtime` loads a companion by name when `hz > 0` | a by-name load path in `runtime` | copy `go2cs.CpuProfiler.dll` beside the program | trimming and Native AOT drop or refuse a by-name load; the copy is manual |
+| (ii) an MSBuild property adds the companion and a registration item | the registration seam in `runtime` only | `<GoCpuProfiler>true</GoCpuProfiler>` in the program's csproj | Native AOT and `DOTNET_EnableDiagnostics=0` (fallback, 11.4) |
+| (iii) an owned nettrace reader, about a thousand lines | nothing extra | combines with (i) or (ii) | none beyond (ii)'s; it replaces the 3.3 MB `TraceEvent` in opted-in builds |
+
+**Recommendation: (ii), with `TraceEvent` inside the companion. (iii) is deferred.**
+
+- (ii) is explicit and safe under trimming and AOT, and loads nothing by name.
+- `TraceEvent` rides only in builds that opt in, so the owner's rule holds without (iii).
+- (iii) becomes worth its maintenance only if an opted-in build's size matters. The -tests hosts of
+  the two opted-in packages are the only such builds today.
+
+### 11.3 The shape of (ii)
+
+- **Companion:** a new project, `src/core/go2cs.CpuProfiler`. It references `runtime` and golib, plus
+  `Microsoft.Diagnostics.NETCore.Client` and `Microsoft.Diagnostics.TraceEvent`. It owns the EventPipe
+  session, the stream parse, frame resolution through `GoSyntheticPC`, the label join (9.2 step 3) and
+  the rate thinning.
+- **Registration:** the property adds two items to the program's build: a `ProjectReference` to the
+  companion, and one linked `Compile` item from the companion's folder. That item holds a
+  `[ModuleInitializer]` that calls `runtime_package.GoRegisterCpuSampler(...)`. A module initializer in
+  the program's OWN assembly always runs, which a referenced assembly's does not until something loads
+  it. The items live in a `.targets` file the converter's csproj templates import, conditioned on the
+  property.
+- **`runtime`'s seam:** a public sampler interface (`Start(hz)`, `Stop(write)`), one static slot, the
+  register method, and a call from each target's `setProcessCPUProfiler`. When no sampler is
+  registered, the setter stays I1's no-op, which is exactly today's zero-sample profile.
+- **Default-build footprint:**
+  - no added assembly, package reference or file in an ordinary program;
+  - zero bytes in every assembly except `runtime.dll`;
+  - `runtime.dll` grows by the seam's IL, **estimated under 2 KB and not measured**. The seam's
+    first cut owes the measured delta as a before-and-after size of `runtime.dll`, per target.
+
+  Zero bytes in `runtime.dll` too would need the drain writer and the setter hook to live outside
+  `runtime`, which has no seam to hang them on. I do not propose it.
+- **How a user opts in:** set `<GoCpuProfiler>true</GoCpuProfiler>` in the program's csproj. Then
+  `pprof.StartCPUProfile`, `testing`'s `-test.cpuprofile` and `net/http/pprof`'s `/debug/pprof/profile`
+  all record samples. Without the property they return a valid, empty profile, as they do today.
+- **The -tests host:** the converter emits the property into the generated test csproj for a table of
+  packages, starting with `runtime/pprof` and `net/http/pprof`. The table is explicit on purpose. Every
+  test binary imports `runtime/pprof` through `testing/internal/testdeps`, so an import-closure rule
+  would opt in every package and put `TraceEvent` in every test host. A later row whose tests profile
+  CPU joins the table.
+
+### 11.4 Where it falls back
+
+- **`DOTNET_EnableDiagnostics=0`:** the in-process session cannot open. `Start` catches the failure,
+  and the profile completes with zero samples. It never throws.
+- **Native AOT:** EventPipe's SampleProfiler support was not measured (9.3). The companion treats a
+  failed or empty session the same way.
+- **The sampler thread itself:** it runs in the companion, not in Go code, so it has no Go frames.
+  Its own samples are dropped. Go has no such thread; the signal handler samples in place.
+
+### 11.5 Sizing the magnitude calibration (the one unknown)
+
+`TestCPUProfileMultithreadMagnitude` compares the SUM OF ALL SAMPLES in the profile against the
+process's user plus system time from `getrusage`, within 10% (40% on some builders). It also requires
+samples in `cpuHog1`. The probe (9.1) read 0.77 to 0.93 of CPU time. **A cause, inferred and not
+measured:** the SampleProfiler samples managed threads only. CPU spent on the runtime's native
+threads (JIT and tiered compilation, and the GC's background threads) is in `getrusage` and in no
+sample.
+
+Two calibrations, each with its falsifier:
+
+1. **Time-weighted thinning alone (9.2 step 4).** Keep only Managed-state samples and weight each at
+   `1/hz`, thinned per thread by elapsed time. This is honest about what was sampled, and it misses
+   the native-thread share. *Falsifier:* if the probe's ratio stays below 0.90 with the hog on 1 and
+   4 threads, thinning alone cannot hold 10%.
+2. **Thinning plus a remainder record.** At stop, take the process's CPU delta over the profile
+   (`getrusage` on unix, `GetProcessTimes` on windows), subtract the sampled total, and write the
+   difference as one extra record. Go already writes such records with pseudo-frames:
+   `runtime._ExternalCode` and `runtime._System` from `addExtra`. The total then matches `getrusage`
+   up to rounding, as Go's own profile does, because Go counts non-Go time too.
+   *Risk:* a sampler that undersamples the hog hides inside the remainder. The guard is a GolibTests
+   arm that asserts the remainder stays under a stated share of the total on the hog probe.
+   *Falsifier:* if the share exceeds that bound on an idle-free hog run, the sampler is missing hog
+   time, not native time.
+
+**Proposal:** measure 1 first, since it costs one probe run per thread count. Take 2 only if 1 fails
+its falsifier. The measurement is the calibration cut's red arm. **Effort:** medium, as 9.3 said. The
+remainder record is small; the unknown is how stable the share is under parallel load, which 9.5
+already lists as unmeasured.
+
+### 11.6 Cuts, red first, in order
+
+| cut | piece | red arm | moves | reviewer |
+|---|---|---|---|---|
+| C1 | `runtime` seam: interface, slot, register, setter calls, drain writer | GolibTests: a fake sampler registered through the seam gets `Start(hz)` and `Stop`, and its records reach `readProfile` | none (a fake) | R |
+| C2 | companion project, the property and `.targets`, the -tests table, session lifetime, the 11.4 fallbacks | a program built WITHOUT the property carries no companion (its output directory lists none); `DOTNET_EnableDiagnostics=0` gives a valid empty profile | none | R, the owner (dependency) |
+| C3 | frame resolution and the synthetic-PC join | `TestCPUProfile` on linux | `TestCPUProfile`, `TestCPUProfileMultithreaded`, `TestMathBigDivide` (predicted, 9.4) | R |
+| C4 | label event and join (`runtime_setProfLabel`) | `TestCPUProfileLabel` | it and `TestLabelRace` (predicted) | R (label seam) |
+| C5 | magnitude calibration (11.5) | the probe ratio arm, then `/serial` and `/parallel` | the two magnitude rows (uncertain, 9.4) | R |
+
+`TestCPUProfileRecursion` and `TestTimeVDSO` stay uncertain on JIT inlining (9.4). Section 10's ruling
+makes an inlined-frame miss structural, so each is read once C3 lands and is classed from that
+reading. `TestMorestack` and `TestLabelSystemstack` do not move (9.4).
+
+### 11.7 Not measured, stated
+
+- The `runtime.dll` size delta of the seam (11.3) is an estimate. C1 measures it.
+- The native-thread cause of the 0.77 to 0.93 ratio (11.5) is inferred, not measured.
+- Native AOT and Windows/darwin session behavior: as 9.5.
+- The `.targets` import in the converter's csproj templates is designed, not written. C2 is where its
+  corpus footprint is measured: every emitted csproj gains one `Import` line or none, depending on
+  whether the templates already import a shared targets file.
+
 ## Appendix — the per-row list (linux, master `db1bd885a2`)
 
 `runtime/pprof`, Go=pass for every row below.
