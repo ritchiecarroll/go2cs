@@ -369,8 +369,16 @@ $absentFailComparison = [PSCustomObject]@{
     disclosed = @('TestFakeSuite (host-limit): the runner outruns its own deadline')
 }
 
-Assert-Equal 'capability-absent: the clean collapse is accepted' $true `
+# A SKIP root is an agreed match and STAYS in the matched count, so its collapse loses BlockSize - 1
+# verdicts (Got 2 here), where a FAIL root is disclosed and loses the whole block (Got 1). Until
+# 2026-09-26 the SKIP fixtures below used Got 1 -- a shape no real run produces (os measured it:
+# 1103 = 1105 - 2 against a three-verdict block) -- which is why the rule never fired for os.
+Assert-Equal 'capability-absent: the clean SKIP collapse (root stays matched, shortfall BlockSize - 1) is accepted' $true `
+    (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 0 -Block $block -Got 2 -Comparison $absentComparison -BankedNames $fullBankedNames).Accepted
+Assert-Equal 'capability-absent: a SKIP root at the FAIL shortfall (BlockSize) is refused -- keyed, never loosened' $false `
     (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 0 -Block $block -Got 1 -Comparison $absentComparison -BankedNames $fullBankedNames).Accepted
+Assert-Equal 'capability-absent: a FAIL root at the SKIP shortfall (BlockSize - 1) is refused -- keyed, never loosened' $false `
+    (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 0 -Block $block -Got 2 -Comparison $absentFailComparison -BankedNames $fullBankedNames).Accepted
 Assert-Equal 'capability-absent: the MEASURED collapse -- agreeing FAIL with the root disclosed -- is accepted' $true `
     (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 0 -Block $block -Got 1 -Comparison $absentFailComparison -BankedNames $fullBankedNames).Accepted
 Assert-Equal 'capability-absent: an agreeing FAIL whose extra disclosure is some OTHER row is refused' $false `
@@ -385,7 +393,7 @@ Assert-Equal 'capability-absent: an agreeing FAIL that discloses nothing at all 
         csharp = New-VerdictMap @{ TestOther = 'pass'; TestFakeSuite = 'fail' }
     }) -BankedNames $fullBankedNames).Accepted
 Assert-Equal 'capability-absent: an agreeing SKIP that nonetheless discloses the root is refused' $false `
-    (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 0 -Block $block -Got 1 -Comparison ([PSCustomObject]@{
+    (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 0 -Block $block -Got 2 -Comparison ([PSCustomObject]@{
         go = New-VerdictMap @{ TestOther = 'pass'; TestFakeSuite = 'skip' }
         csharp = New-VerdictMap @{ TestOther = 'pass'; TestFakeSuite = 'skip' }
         disclosed = @('TestFakeSuite (host-limit): the runner outruns its own deadline')
@@ -420,11 +428,11 @@ Assert-Equal 'capability-absent: a withdrawal outside the block does not disqual
         withdrawn = @('TestSomethingElse/case1')
     }) -BankedNames $fullBankedNames).Accepted
 Assert-Equal 'capability-absent: a shortfall that is not the registered block size is refused' $false `
-    (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 0 -Block $block -Got 2 -Comparison $absentComparison -BankedNames $fullBankedNames).Accepted
+    (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 0 -Block $block -Got 3 -Comparison $absentComparison -BankedNames $fullBankedNames).Accepted
 Assert-Equal 'capability-absent: a surplus (the surplus mechanism''s job, not this one''s) is refused' $false `
     (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 0 -Block $block -Got 5 -Comparison $fullComparison -BankedNames $fullBankedNames).Accepted
 Assert-Equal 'capability-absent: a subtest surviving alongside the collapse is refused, not absorbed' $false `
-    (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 0 -Block $block -Got 1 -Comparison ([PSCustomObject]@{
+    (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 0 -Block $block -Got 2 -Comparison ([PSCustomObject]@{
         go = New-VerdictMap @{ TestOther = 'pass'; TestFakeSuite = 'skip'; 'TestFakeSuite/case1' = 'skip' }
         csharp = New-VerdictMap @{ TestOther = 'pass'; TestFakeSuite = 'skip'; 'TestFakeSuite/case1' = 'skip' }
     }) -BankedNames $fullBankedNames).Accepted
@@ -437,16 +445,35 @@ Assert-Equal 'capability-absent: the top-level test agreeing on PASS instead of 
 # disclosed (TestPinned), the collapse is the clean skip -- so the expected live count is that same
 # 1, and a second disclosure means something OTHER than the capability moved.
 Assert-Equal 'capability-absent: a moved disclosed count is refused, not a capability shape' $false `
-    (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 1 -Block $block -Got 1 -Comparison ([PSCustomObject]@{
+    (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 1 -Block $block -Got 2 -Comparison ([PSCustomObject]@{
         go = New-VerdictMap @{ TestOther = 'pass'; TestPinned = 'pass'; TestFakeSuite = 'skip' }
         csharp = New-VerdictMap @{ TestOther = 'pass'; TestPinned = 'fail'; TestFakeSuite = 'skip' }
         disclosed = @('TestPinned (alloc-profile): x', 'TestOther (alloc-profile): y')
     }) -BankedNames @('TestOther', 'TestPinned', 'TestFakeSuite', 'TestFakeSuite/case1', 'TestFakeSuite/case2')).Accepted
 Assert-Equal 'capability-absent: an unaccounted extra live verdict is refused' $false `
-    (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 0 -Block $block -Got 1 -Comparison ([PSCustomObject]@{
+    (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 0 -Block $block -Got 2 -Comparison ([PSCustomObject]@{
         go = New-VerdictMap @{ TestOther = 'pass'; TestFakeSuite = 'skip'; TestRogue = 'pass' }
         csharp = New-VerdictMap @{ TestOther = 'pass'; TestFakeSuite = 'skip'; TestRogue = 'pass' }
     }) -BankedNames $fullBankedNames).Accepted
+
+# os's measured shape in miniature (2026-09-26, the i9, no symlink privilege): the block root SKIPS on
+# both runtimes at testenv.MustHaveSymlink, its two subtests are never spawned, and the row's two
+# disclosures (both alloc tests) stand unchanged -- banked 4 + 2 (root, InRoot, NoRoot, TestOther),
+# read 2 + 2. The privileged host is the second arm: it reads the banked count, which classifies as a
+# plain pass BEFORE any absorption is consulted (the sweep calls the rule only when the class is not
+# 'pass') -- a scratch stand-in for a privileged run, not one.
+$osBlock = [PSCustomObject]@{ Test = 'TestOpenFileCreateExclDanglingSymlink'; BlockSize = 3 }
+$osBankedNames = @('TestOther', 'TestUTF16Alloc', 'TestWriteStringAlloc', 'TestOpenFileCreateExclDanglingSymlink',
+    'TestOpenFileCreateExclDanglingSymlink/InRoot', 'TestOpenFileCreateExclDanglingSymlink/NoRoot')
+$osUnprivileged = [PSCustomObject]@{
+    go = New-VerdictMap @{ TestOther = 'pass'; TestUTF16Alloc = 'pass'; TestWriteStringAlloc = 'pass'; TestOpenFileCreateExclDanglingSymlink = 'skip' }
+    csharp = New-VerdictMap @{ TestOther = 'pass'; TestUTF16Alloc = 'fail'; TestWriteStringAlloc = 'fail'; TestOpenFileCreateExclDanglingSymlink = 'skip' }
+    disclosed = @('TestUTF16Alloc (deferred): x', 'TestWriteStringAlloc (deferred): y')
+}
+Assert-Equal 'capability-absent: os unprivileged -- SKIP root, InRoot/NoRoot absent -- is accepted at banked - 2' $true `
+    (Test-CapabilityAbsentDelta -Expected 4 -Disclosed 2 -Block $osBlock -Got 2 -Comparison $osUnprivileged -BankedNames $osBankedNames).Accepted
+Assert-Equal 'capability-absent: os privileged reads the banked count, a plain pass that never consults the rule' 'pass' `
+    (Get-SweepRowClassification -Expectation $winPlain -Got $winPlain.Expected -GotDisclosed 0 -TargetGoos 'windows')
 
 # ---- 1b2b. the host-conditional DISCLOSURE arm (Q31), exercised end to end ------------------------
 # Test-HostConditionalDisclosureDelta reads the live record alone. The fixture is os/exec's measured

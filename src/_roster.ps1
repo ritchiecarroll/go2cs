@@ -1462,7 +1462,8 @@ function Get-SweepRowClassification {
 # these (the BoGo/BoringSSL shim runner): 3,243 sub-verdicts -- 1 parent + 861 pass + 2,381 skip --
 # collapse to exactly one. "A lost verdict is never host-conditional" stays true for every OTHER
 # shortfall: a caller engages this ONLY for a package it registers, and ONLY when the shortfall
-# matches that package's block size exactly -- run-validated-sweep.ps1's
+# matches that package's block exactly (BlockSize for a FAIL root, BlockSize - 1 for a SKIP root,
+# which stays matched -- see the first check below) -- run-validated-sweep.ps1's
 # $capabilityConditionalBlocks table is where that registration lives; this function is the pure
 # rule, proven directly by check-roster-format.ps1's fixtures rather than through a roster row (the
 # evidence is a comparison record and a proof page, not a table cell).
@@ -1502,8 +1503,22 @@ function Test-CapabilityAbsentDelta {
         return [PSCustomObject]@{ Accepted = $accepted; Reason = $reason }
     }
 
+    # The expected shortfall is keyed on the root's COLLAPSED verdict, because the converter accounts
+    # the two collapses differently (the disclosed accounting below is the same fact from the other
+    # column). A FAIL root is DISCLOSED, so it leaves the matched count with the whole block: the
+    # shortfall is BlockSize (crypto/tls). A SKIP root is an agreed match and STAYS in it: the
+    # shortfall is BlockSize - 1 (os's TestOpenFileCreateExclDanglingSymlink, whose
+    # testenv.MustHaveSymlink skips before InRoot/NoRoot are spawned -- measured on the i9 2026-09-26,
+    # 1103 = 1105 - 2 against a three-verdict block). Each shape still demands its ONE exact figure;
+    # nothing here accepts a range. The verdict read is Go's, and the agreement check below refuses a
+    # C# side that collapsed differently.
+    $rootCollapsedToSkip = $null -ne $Comparison -and $null -ne $Comparison.go -and
+        $Comparison.go.ContainsKey($Block.Test) -and $Comparison.go[$Block.Test] -eq 'skip'
     $shortfall = $Expected - $Got
-    if ($shortfall -ne $Block.BlockSize) {
+    if ($rootCollapsedToSkip -and $shortfall -ne ($Block.BlockSize - 1)) {
+        return New-CapabilityAbsentResult $false "shortfall $shortfall does not match $($Block.Test)'s registered block size $($Block.BlockSize) less its SKIP root, which stays matched ($($Block.BlockSize - 1)) -- a lost verdict outside the named block is never capability-conditional"
+    }
+    if (-not $rootCollapsedToSkip -and $shortfall -ne $Block.BlockSize) {
         return New-CapabilityAbsentResult $false "shortfall $shortfall does not match $($Block.Test)'s registered block size $($Block.BlockSize) -- a lost verdict outside the named block is never capability-conditional"
     }
     if ($null -eq $Comparison -or $null -eq $Comparison.go -or $null -eq $Comparison.csharp) {

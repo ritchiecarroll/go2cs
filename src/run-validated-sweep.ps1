@@ -632,7 +632,8 @@ function Get-HostConditionalDisclosureVerdict {
 # count moves with it: see the measured note over Test-CapabilityAbsentDelta in _roster.ps1, which
 # is where the rule and its evidence live. "A lost verdict is never host-conditional" above stays
 # true for every OTHER shortfall: this path engages ONLY for a package registered here, and ONLY
-# when the shortfall matches that package's registered block size exactly -- anything else still
+# when the shortfall matches that package's registered block exactly (BlockSize for a FAIL root,
+# BlockSize - 1 for a SKIP root, which stays matched) -- anything else still
 # falls through to the same hard failure as before. In particular a host that HAS the capability but
 # whose converted side misses the runner's own deadline produces the identical shortfall with Go
 # PASSING, and this rule refuses it -- that shortfall is the converted side's, and it is absorbed
@@ -643,8 +644,16 @@ function Get-HostConditionalDisclosureVerdict {
 # itself plus every Go subtest under it) -- re-derive it from the committed proof page rather than
 # trust this number cold if the suite's own case matrix ever changes. ONE registration serves BOTH
 # shortfall rules on purpose: no package can reach either absorption without being named here.
+#
+# os: go1.24.13's TestOpenFileCreateExclDanglingSymlink calls testenv.MustHaveSymlink before
+# testMaybeRooted spawns its InRoot/NoRoot subtests, so a host without the Windows symbolic-link
+# creation privilege reports the root SKIP on both runtimes and never the two subtests. The roster
+# banks the privileged ceiling (1105, d81a14bbe8); an unprivileged host reads 1103 (d120e99eb7's page,
+# and the i9 2026-09-26). The root stays matched, so the expected shortfall is BlockSize - 1 = 2 --
+# the rule keys it on the collapsed verdict. Capability is printed on the PASS line when present.
 $capabilityConditionalBlocks = @{
     'crypto/tls' = @{ Test = 'TestBogoSuite'; BlockSize = 3419 }
+    'os'         = @{ Test = 'TestOpenFileCreateExclDanglingSymlink'; BlockSize = 3; Capability = 'the symbolic-link creation privilege (SeCreateSymbolicLinkPrivilege)' }
 }
 
 # Test-CapabilityAbsentDelta -- the pure decision rule -- lives in _roster.ps1 beside
@@ -1263,7 +1272,9 @@ foreach ($row in $rows) {
             'capability-absent' {
                 $pass++
                 $block = $capabilityConditionalBlocks[$pkg]
-                Write-Host "  PASS  $label $got = $($row.Effective.Expected) banked - $($block.BlockSize) ($($block.Test) capability absent) [${rowSecs}s]" -ForegroundColor Green
+                # The shortfall, not BlockSize: a SKIP root stays matched, so the two differ by one.
+                $capabilityNamed = if ($block.Capability) { ": $($block.Capability)" } else { '' }
+                Write-Host "  PASS  $label $got = $($row.Effective.Expected) banked - $($row.Effective.Expected - $got) ($($block.Test) capability absent$capabilityNamed) [${rowSecs}s]" -ForegroundColor Green
             }
             'host-limit' {
                 # A pass, and NOT a silent one: the line states the shortfall, the block that
