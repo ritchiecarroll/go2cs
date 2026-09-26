@@ -25,6 +25,12 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAddressOfParamWrite() => CheckTarget("AddressOfParamWrite");
 
     [TestMethod]
+    public void CheckAliasImport() => CheckTarget("AliasImport");
+
+    [TestMethod]
+    public void CheckAliasImportLib() => CheckTarget("AliasImportLib");
+
+    [TestMethod]
     public void CheckAliasNamespaceShadow() => CheckTarget("AliasNamespaceShadow");
 
     [TestMethod]

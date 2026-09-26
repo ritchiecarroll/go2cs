@@ -102,6 +102,12 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 
 		typeName := renderCSFullTypeName(v.getFullyQualifiedTypeName(typeSpecType, false), true)
 
+		// A func type target is built from its signature (usingAliasDelegateType): its string form
+		// drops a cross-package element's package class and mangles a variadic tail.
+		if sig, ok := typeSpecType.(*types.Signature); ok {
+			typeName = v.usingAliasDelegateType(sig)
+		}
+
 		v.inUsingAliasTarget = false
 
 		// The empty interface target (`type X any` / `type X = any` / `type X interface{}`) renders

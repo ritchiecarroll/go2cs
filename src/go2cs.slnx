@@ -257,6 +257,8 @@
   </Folder>
   <Folder Name="/tests/behavioral/target-projects/">
     <Project Path="tests/Behavioral/AddressOfParamWrite/AddressOfParamWrite.csproj" />
+    <Project Path="tests/Behavioral/AliasImport/AliasImport.csproj" />
+    <Project Path="tests/Behavioral/AliasImportLib/AliasImportLib.csproj" />
     <Project Path="tests/Behavioral/AliasNamespaceShadow/AliasNamespaceShadow.csproj" />
     <Project Path="tests/Behavioral/AliasNamespaceShadow/inner/AliasNamespaceShadow.inner.csproj" />
     <Project Path="tests/Behavioral/AliasNamespaceShadow/sortlocal/AliasNamespaceShadow.sortlocal.csproj" />

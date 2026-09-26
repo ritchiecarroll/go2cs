@@ -988,12 +988,14 @@ func applyExportedTypeAliases(results [][2]string, info PackageInfo, derived boo
 
 		typeName := getCoreSanitizedIdentifier(target)
 
-		if isCSharpBuiltinTypeName(target) {
+		if isCSharpBuiltinTypeName(target) || strings.HasPrefix(target, "System.") {
 			// A C# BUILT-IN type target (`object` from `type X any`, or a numeric/bool/string
 			// primitive) is NOT a package member — import it BARE, never @-escaped or
 			// go.<pkg>_package.-qualified. crypto's `type PublicKey any` exports "object"; an
 			// importer qualified it to `go.crypto_package.@object`, a nonexistent nested type
-			// (CS0426, crypto/md5 + crypto/internal/boring + every crypto importer).
+			// (CS0426, crypto/md5 + crypto/internal/boring + every crypto importer). A func alias's
+			// target is the BCL delegate, already rooted (`System.Func<nint, nint>`), and qualifying
+			// it named `go.<pkg>_package.System.Func<…>` in every importer (CS0234).
 			typeName = target
 		} else if strings.HasPrefix(typeName, "const:") {
 			typeName = strings.TrimPrefix(typeName, "const:")

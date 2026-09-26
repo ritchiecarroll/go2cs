@@ -242,6 +242,82 @@ func (v *Visitor) iifeDelegateType(sig *types.Signature) string {
 	return "Func" + family + "<" + strings.Join(typeArgs, ", ") + ">"
 }
 
+// usingAliasDelegateType renders a func type as the delegate a `global using` alias RHS names, built
+// from the signature the way iifeDelegateType builds it, but with every element in its ROOTED form:
+// a using-alias target resolves at compilation scope, where only fully qualified names resolve (see
+// renderCSFullTypeName). The string form it replaces lost information before it was parsed: a
+// cross-package element arrived path-stripped (`func(time.Duration) int` rendered
+// `System.Func<go.time.Duration, nint>`, CS0234) and a variadic tail arrived mangled
+// (`System.Func<go..@int, nint>`, CS1001). The delegate family roots as the string path roots it:
+// `System.Action`/`System.Func`, or golib's `go.Actionꓸꓸꓸ`/`go.Funcꓸꓸꓸ` for a variadic signature.
+// Call it with v.inUsingAliasTarget set, so a same-package element takes its package class.
+func (v *Visitor) usingAliasDelegateType(sig *types.Signature) string {
+	element := func(t types.Type) string {
+		if nested, ok := t.(*types.Signature); ok {
+			return v.usingAliasDelegateType(nested)
+		}
+
+		return getUsingAliasSafeTypeName(renderCSFullTypeName(v.getFullyQualifiedTypeName(t, false), true))
+	}
+
+	params := sig.Params()
+	results := sig.Results()
+	variadic := sig.Variadic() && params.Len() > 0
+	typeArgs := make([]string, 0, params.Len()+1)
+
+	for i := range params.Len() {
+		paramType := params.At(i).Type()
+
+		if variadic && i == params.Len()-1 {
+			if sliceType, ok := paramType.Underlying().(*types.Slice); ok {
+				paramType = sliceType.Elem()
+			} else {
+				variadic = false
+			}
+		}
+
+		typeArgs = append(typeArgs, element(paramType))
+	}
+
+	family := ""
+
+	if variadic {
+		family = EllipsisOperator
+	}
+
+	root := delegateRoot(true, family)
+
+	if results.Len() == 0 {
+		if len(typeArgs) == 0 {
+			return root + "Action"
+		}
+
+		return root + "Action" + family + "<" + strings.Join(typeArgs, ", ") + ">"
+	}
+
+	var resultType string
+
+	if results.Len() == 1 {
+		resultType = element(results.At(0).Type())
+	} else {
+		resultTypes := make([]string, results.Len())
+
+		for i := range results.Len() {
+			resultTypes[i] = element(results.At(i).Type())
+
+			if name := results.At(i).Name(); name != "" && name != "_" {
+				resultTypes[i] += " " + getSanitizedIdentifier(name)
+			}
+		}
+
+		resultType = "(" + strings.Join(resultTypes, ", ") + ")"
+	}
+
+	typeArgs = append(typeArgs, resultType)
+
+	return root + "Func" + family + "<" + strings.Join(typeArgs, ", ") + ">"
+}
+
 // signatureTypeName renders a func type structurally in GO syntax — `func(name type, …)
 // results` — with every parameter/result type resolved recursively through getAliasQualifiedTypeName, so a
 // cross-package element carries the short import-alias qualification the surrounding file uses
