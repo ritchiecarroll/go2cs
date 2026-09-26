@@ -318,3 +318,62 @@ stay on the BOARD. (Both lists are at the end.)
 2. Rule the skills routing (C1) as a separate seat or as part of this one.
 3. Confirm the section's placement: a new dated section after §6, before "Sources", with in-place step edits
    (A and the stars).
+
+## D. APPENDIX (2026-09-26, per COORD's ruling (2)): the SKILLS-ROUTING list, kept whole for its own seat
+
+These candidates are general instrument and measurement discipline. They were not written into the runbook; they
+are routed to `.claude/skills/gate-forensics` and `.claude/skills/measurement-discipline` in a SEPARATE seat,
+after the lessons seat lands. The IDs are those of the candidate files in C1's derivation (`derive-<slice>.md`,
+entry number). Each entry's full quote and provenance is carried into that seat.
+
+| id | candidate | primary cite |
+|:--|:--|:--|
+| B#5 | A run directory does not measure what ran; the output's own control line does | board.md:25655 |
+| B#10 | Scope a census, then run it once widened as a control | board.md:25369 |
+| B#11 | Test a C#-signature classifier against the shapes it will misread before its first reading | board.md:25391 |
+| B#12 | A sizing must read the guarding path as well as the emitting path | board.md:25378 |
+| B#13 | Name the axes a precedent shares, then ask about the one it does not | board.md:25484 |
+| B#14 | Footprint predictions owe the side effects: import aliases, map lines and counter-renumber tails | board.md:25418 |
+| B#37 | A rate needs its runs enumerated and its power stated; a row that crashed once is not a calibration standard | board.md:24510 |
+| B#38 | A drop in verdict count is tested for truncation by set comparison, and names the commit it sits beside | board.md:24354 |
+| B#39 | Bisect along `--first-parent`, assert ancestry, and never invent a full SHA | board.md:24447 |
+| B#40 | Count commits in an attribution window on a full clone | board.md:26021 |
+| B#46 | A skip inside a guard is a Fatal; check that a control ran, not its exit status | board.md:25387 |
+| B#47 | A zero from a predicate that has never fired is no evidence | board.md:25712 |
+| B#48 | A negative result needs a control on the side of the answer, placed in the run | board.md:25833 |
+| B#49 | A comparison against a missing reference answers yes | board.md:25541 |
+| B#50 | Before spending a gate, show that the tree can exhibit the condition | board.md:25810 |
+| B#51 | Read an edit back before running the arm it regresses | board.md:25398 |
+| B#52 | Walk the tree with `ls-files -z` | board.md:25701 |
+| L#57 | The real-root run is the gate, not a fixture spelled like the pattern | 2026-09-22 07:15 · LANDING · facb69304 |
+| L#58 | Census false green: zero-byte tool files read as clean | 2026-09-20 15:29 · STAMP · 0adf2e431 |
+| L#59 | CNR exited 0 without git | 2026-09-22 09:46 · STAMP · 598d1978a |
+| L#60 | Silent false-clean text tools on large lists | 2026-09-22 07:05 · STAMP · 07240495e |
+| M2#12 | The registry guards skip, and `go test` prints `ok`, when `src/core` is not beside the converter | mailbox-archive.md:29023 |
+| M2#22 | A zero in an instrument must be a printed line, and a post-condition needs a population assertion | mailbox-archive.md:33716 |
+| M2#23 | Merging the H5 set onto the version branch: a fast-forward or disjoint-path green is not a merge test | mailbox-archive.md:27554 |
+| M3#5 | Seat census rules: port the converter's predicate, keep the gate's exclusions, scan `.cs.auto`, control both ways | mailbox-archive.md:45734 |
+| M3#24 | H7 script: drive-letter paths under MSYS_NO_PATHCONV, and arms that gate on the command's rc | mailbox-archive.md:74104 |
+| M3#32 | Merge rehearsals: a merge-tree "clean" can be an instrument artifact | mailbox-archive.md:57292 |
+| M4#24 | Fire the gate's self-test on the scoring box first | mailbox-archive.md:76174 |
+| M4#25 | Look for the surviving census output before re-running | mailbox-archive.md:77535 |
+| M4#32 | A difference counter is not trusted unless something else can contradict it | mailbox-archive.md:82778 |
+| M4#52 | Wrapper post-processing cost dwarfed the converter on big rows | mailbox-archive.md:110448 |
+| M4#53 | Check a recon wrapper is alive by its PID's CPU delta, not a process-name census | mailbox-archive.md:95914 |
+| M4#55 | A stale comparison record produced PASS | mailbox-archive.md:105615 |
+| M4#56 | PowerShell 5.1 `ConvertFrom-Json` throws on subtest names that differ only by case | mailbox-archive.md:105873 |
+| M4#69 | MSYS `grep -F -i` aborts, and a crashing guard fails open | mailbox-archive.md:75882 |
+| M4#70 | A replica of a text-scanning predicate under-counts silently | mailbox-archive.md:77070 |
+| M4#71 | Floor-1 converter censuses are blind to custom-named binaries | mailbox-archive.md:89750 |
+| M4#72 | `/ head -N` on a state-writing tool can kill it mid-run | mailbox-archive.md:90755 |
+| M4#73 | `-run` against the root package is a false green | mailbox-archive.md:86935 |
+| M4#74 | A failed `cd` retargets the next git command at the wrong repository | mailbox-archive.md:89413 |
+| R#10 | Launcher traps: a net8-apphost pwsh under a dotnet10 PATH, and an unset `$LASTEXITCODE` reading rc 0 | resume.md:803 |
+| R#11 | GNU grep 3.0 with many `-e` patterns silently reads 0 matches when piped | resume.md:914 |
+| R#12 | From PowerShell, bare `bash` is the WSL launcher; call Git Bash by its full path | briefs/dns-probe-NOTES.md:254 |
+| R#13 | Windows PowerShell 5.1 traps: `*>` writes UTF-16LE, and one guard arm is red only under 5.1 (seed 10) | briefs/full-roster-sweep-repair-log.md:49 |
+| R#14 | Every battery script records its own PID and takes a worktree lock at start | resume.md:1280 |
+| R#23 | A reporting sub-agent's death is not the driver's: read the artifacts before re-running | resume.md:720 |
+| R#33 | A lane driver's per-row budget must clear the instrument's worst case: 4 × pkgTimeout + 30 min | briefs/full-roster-sweep-repair-log.md:29 |
+
+47 candidates.
