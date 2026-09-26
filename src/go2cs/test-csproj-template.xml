@@ -43,7 +43,7 @@
          internal/testenv dragging io/fs, namespace go.io) collides with the converter's
          in-namespace `using io = io_package;` alias emission (CS0576) — the alias machinery is
          computed against the direct import closure only. -->
-    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>>>MARKER:TEST_CPU_PROFILER<<
   </PropertyGroup>
 
   <!-- reflect.StructOf mints synthesized structs into the fixed-name dynamic assembly
@@ -132,6 +132,12 @@
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
   </ItemGroup>
+
+  <!-- THE OPT-IN CPU SAMPLER (section 11.3 of docs/phase4/DESIGN-managed-profiling.md). The converter
+       sets <GoCpuProfiler>true</GoCpuProfiler> above only for a package in cpuProfilerTestPackages
+       (testConversion.go); without it this Import is skipped and the host carries neither the
+       go2cs.CpuProfiler companion nor its diagnostics dependency. -->
+  <Import Project="$(go2csPath)core/go2cs.CpuProfiler/GoCpuProfiler.targets" Condition="'$(GoCpuProfiler)'=='true'" />
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 

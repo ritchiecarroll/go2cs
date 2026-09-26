@@ -74,6 +74,21 @@ public sealed class EventPipeSampler : IGoCpuSampler
     {
         LastSessionOpened = false;
         LastTraceBytes = 0;
+
+        try
+        {
+            ISession session = m_open();
+            MemoryStream trace = new();
+            m_drain = Task.Run(() => session.Events.CopyTo(trace));
+            m_trace = trace;
+            m_session = session;
+            LastSessionOpened = true;
+        }
+        catch (Exception)
+        {
+            // No session: the profile completes with zero samples (section 11.4).
+            m_session = null;
+        }
     }
 
     public void Stop(GoCpuSampleWriter write)
