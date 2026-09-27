@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-27 15:19 FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
+> **Status of this revision:** 2026-09-27 15:43 FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -155,14 +155,17 @@ WHERE THINGS STAND (2026-09-27 ~14:30, i7 local time):
      claude/coord-pages-check after the fixes land.
    * THE COST SCOUT (owner side quest: per-call costs Go does not pay) was PAUSED at the save. Re-run it later as a
      read-only scout; fixes wait until the last three packages are done.
- - OWNER HANDS, OPEN:
-   (1) the MinInt / -1 emission shape: golib quo(a, b) / rem(a, b) at every signed division by a variable (user code
-       included), a reads-like-Go call; COORD recommends accept (ledger 7eb8b61ab2);
-   (2) an owner-only security settings item from the Pages audit, reported to the owner in session (withheld here);
-   (3) the docs-site CI check: APPROVED by the owner 2026-09-27 15:31. COORD writes .github/workflows/docs-site.yml next
-       session (the Pages toolchain build + TestDocsSurviveJekyllLiquid + site_check.py). The one open choice is the FORM:
-       a check-only run on branch pushes touching docs/**, or the owner switches Pages to 'GitHub Actions' so the
-       workflow deploys only a site that passes.
+ - OWNER RULINGS 2026-09-27 (ledger 446950ea43), now WORK:
+   (1) MinInt / -1 ACCEPTED: C2 cuts it after the reset. Hide the check in go2cs-gen's numeric wrapper operators;
+       fold a constant -1; golib quo(a, b) / rem(a, b) only at a signed non-constant, non-len/cap divisor. XML doc
+       comments on quo and rem say WHY for a hover: Go wraps MinInt / -1, .NET throws OverflowException, and
+       recover cannot see it. The strategy docs gain the rule: a summary 'Division and remainder' paragraph and the
+       reference integer page.
+   (2) the go2cs.net DNS item is the OWNER's (the steps were given in session).
+   (3) the docs-site CI, form (b): COORD writes .github/workflows/docs-site.yml (the Pages-toolchain build +
+       TestDocsSurviveJekyllLiquid + site_check.py; deploy only when every check passes). It lands on master FIRST,
+       THEN the owner switches Settings -> Pages -> Source to 'GitHub Actions'.
+ - OWNER HANDS, OPEN: the DNS change; the Pages source switch, once COORD's workflow has landed.
  - COORD QUEUE besides the trains:
    - reflect's two readings on the i7 after TRAIN F lands (TestMapIterSet per-site bytes; TestMapAlloc's two blocks);
    - re-apply C1's two pure appends (board-goroot 5f0564da38, literal-tier-ruling 70e010aa46) at the next docs
@@ -343,7 +346,8 @@ BRANCH: claude/c2-output-attr-sync e9c57f833ea4a5cad24cbf2fe880e2fb4ab1726d on-o
 NOTE: probes never to merge: c2-getaddrinfo-probe 83385dad6c, c2-getaddrinfo-probe-before 9ecce1839c (retirement question open), c2-elemindex-probe 9483bc624b; superseded: c2-twin-pilot-design c0667831bd; the harness branch nifty-davinci-6i9u8x is pruned and contained in master
 LOCAL-ONLY: none
 WORKTREE: C2 mbx (claude/mailbox clone), clean
-NEXT: after the weekly reset, CUT the narrow-arithmetic SOURCE-SIDE pre-pass as ruled (ledger 8d62b909a1; sizing inbox COORD 20260927T201231Z-C2: 345 at-risk GOROOT sites) from master 4fb6e460c6e1633b1d20d3092fe0339c9438fe81, red first per consumer class, with the parenthesized-operand fix and the named-empty-interface arm; the MinInt/-1 quo/rem shape waits on the OWNER
+NEXT: after the weekly reset, CUT the narrow-arithmetic SOURCE-SIDE pre-pass as ruled (ledger 8d62b909a1; sizing inbox COORD 20260927T201231Z-C2: 345 at-risk GOROOT sites) from master 4fb6e460c6e1633b1d20d3092fe0339c9438fe81, red first per consumer class, with the parenthesized-operand fix and the named-empty-interface arm; then the MinInt/-1 quo/rem seat, which the OWNER ACCEPTED (ledger 446950ea43): the check is hidden in the generated
+  numeric wrapper operators, quo/rem carry a why-XML doc for hover, and the strategy docs gain the rule
 READ-FIRST: inbox COORD 20260927T193256Z-C2 (MinInt/-1 sizing) and 20260927T193445Z-C2 (the list sizing); ledger 7eb8b61ab2; inbox C2 20260926T112007Z (the anonymous-struct generic alias sizing, still queued) and 20260926T150835Z (the stranded re-cuts)
 BLOCKED-ON: none (the darwin option-2 branches wait on an owner hand)
 TOOLS: GOTOOLCHAIN=go1.24.13, dotnet SDK 10.0.112, python3 3.11.15, no pwsh
