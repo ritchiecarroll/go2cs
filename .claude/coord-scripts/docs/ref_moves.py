@@ -9,6 +9,9 @@ operation succeeded, each with its original line ending, BOM and trailing newlin
 
   create      {file, lines}
       A new page. Fails if the file exists. Lines are written with CRLF, like the rest of the reference.
+      Every docs/ page an operation creates or fills that holds '{{' or '{%' gets the Jekyll raw guard
+      on the line after its H1 (never line 1: that costs the published page its title); a page whose
+      guard sits on line 1 fails the run.
   heading     {file, before, text}
       Insert heading line `text` (and a blank line) above the one non-fenced line starting with `before`.
       For an entry that has only a bold lead: it needs a heading before it can move.
@@ -194,11 +197,20 @@ def needs_raw(lines):
                for l in lines)
 
 
-def ensure_raw_guard(d):
-    if needs_raw(d.lines) and not any(l.startswith(rc.RAW_OPEN_PREFIX) for l in d.lines):
-        d.lines = [RAW_OPEN] + d.lines + [rc.RAW_CLOSE]
-        return True
-    return False
+def ensure_raw_guard(d, what=''):
+    """A page holding Liquid tokens ('{{', '{%') gets the raw guard: the opener on the line AFTER the H1,
+    the closer as the last line. Jekyll titles a published page only from a heading at the very start of
+    the file, so a guard on line 1 costs the page its title (TestDocsSurviveJekyllLiquid)."""
+    if any(l.startswith(rc.RAW_OPEN_PREFIX) for l in d.lines):
+        if d.lines and d.lines[0].startswith(rc.RAW_OPEN_PREFIX):
+            raise Fail(f'{what}: the raw guard is on line 1, above the H1; move it below the H1 first')
+        return False
+    if not needs_raw(d.lines):
+        return False
+    if not d.lines or not d.lines[0].startswith('# '):
+        raise Fail(f'{what}: the page needs the raw guard, and its line 1 is not an H1 to place it under')
+    d.lines = [d.lines[0], RAW_OPEN] + d.lines[1:] + [rc.RAW_CLOSE]
+    return True
 
 
 # ------------------------------------------------------------------------------------------------
@@ -414,7 +426,7 @@ def op_move(repo, op):
     if dup:
         raise Fail(f'{what}: stub anchors collide with anchors already in {op["src"]}: {dup}')
     S.lines = S_lines
-    ensure_raw_guard(D) and repo.log.append(f'  raw guard added to {op["dst"]}')
+    ensure_raw_guard(D, op['dst']) and repo.log.append(f'  raw guard added to {op["dst"]}')
 
     # inbound links across the repository
     src_base = os.path.basename(src)
@@ -613,6 +625,11 @@ def main():
                 fn(repo, op)
             except Fail as e:
                 raise Fail(f'op {n} ({op["op"]}): {e}')
+        # every docs/ page an operation created or filled: Liquid tokens get the guard below the H1
+        for d in sorted(repo.docs.values(), key=lambda d: d.path):
+            rel = repo.rel(d.path)
+            if rel.startswith('docs/') and rel.endswith('.md') and d.changed():
+                ensure_raw_guard(d, rel) and repo.log.append(f'  raw guard added to {rel}')
     except Fail as e:
         for l in repo.log:
             print(l)
