@@ -1915,6 +1915,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckTcpLoopbackRoundTrip() => CheckTarget("TcpLoopbackRoundTrip");
 
     [TestMethod]
+    public void CheckTraceUserAnnotations() => CheckTarget("TraceUserAnnotations");
+
+    [TestMethod]
     public void CheckTransitiveAliasPreload() => CheckTarget("TransitiveAliasPreload");
 
     [TestMethod]

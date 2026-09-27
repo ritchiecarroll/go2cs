@@ -373,6 +373,11 @@ const (
 // deleting their rows; the train's reported gates did not include this suite. The union assembly's converter leg
 // read "vanished 5" (2026-09-25), and the rows go in a repair based on that train's tip.
 //
+// The four runtime/trace user-annotation members (userLog, userRegion, userTaskCreate, userTaskEnd)
+// left with their bodies in runtime/trace/annotation_impl.cs (2026-09-27, beside the managed execution
+// tracer): no-ops, which is Go's behaviour with tracing off and a named model limit with it on. Before
+// that, a converted program calling trace.NewTask died on the first call.
+//
 // ⚠ EDIT THIS TABLE IN THE COMMIT THAT MOVES THE TREE, never afterwards. That is the whole mechanism.
 var declaredPushStubs = map[string]string{
 	"crypto/x509/internal/macos.syscall":                 dispositionLatent,
@@ -433,10 +438,6 @@ var declaredPushStubs = map[string]string{
 	"runtime.mapdelete_faststr":         dispositionSuppliedElsewhere,
 	"runtime/pprof.mach_vm_region":      dispositionLatent,
 	"runtime/pprof.proc_regionfilename": dispositionLatent,
-	"runtime/trace.userLog":             dispositionLatent,
-	"runtime/trace.userRegion":          dispositionLatent,
-	"runtime/trace.userTaskCreate":      dispositionLatent,
-	"runtime/trace.userTaskEnd":         dispositionLatent,
 	"syscall.runtime_AfterFork":         dispositionLatent,
 	"syscall.runtime_AfterForkInChild":  dispositionLatent,
 	"syscall.runtime_BeforeFork":        dispositionLatent,

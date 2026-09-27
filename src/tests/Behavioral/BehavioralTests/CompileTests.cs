@@ -1912,6 +1912,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckTcpLoopbackRoundTrip() => CheckTarget("TcpLoopbackRoundTrip");
 
     [TestMethod]
+    public void CheckTraceUserAnnotations() => CheckTarget("TraceUserAnnotations");
+
+    [TestMethod]
     public void CheckTransitiveAliasPreload() => CheckTarget("TransitiveAliasPreload");
 
     [TestMethod]
