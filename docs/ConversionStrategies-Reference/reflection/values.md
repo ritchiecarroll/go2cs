@@ -687,19 +687,6 @@ five rules that belong to EVERY consumer of the bridge, not to reflectlite:
   pointee (`*[10]int`, the same unshifted-cargo rule `Elem()` applies).
   (`GoTypeDefinednessTests`.)
 
-#### The `*_impl_test.cs` convention
-
-**The `*_impl_test.cs` convention** is the piece that made the export_test surface hand-ownable:
-`export_test.go` hands the suite raw `Value{typ, ptr, flag}` construction over descriptor
-downcasts — unbridgeable literally — so `Field`/`TField`/`Zero` are registry hand-owns whose
-implementation lives in `export_impl_test.cs`, the first TEST-file companion. The `_test.cs`
-suffix keeps it under the production csproj's EXISTING test-artifact exclusion (no template
-change, no corpus churn); `testConversion` globs `*_impl_test.cs` into the tests project's
-compile items and the conversion digest. The companion mirrors `reflect`'s hand-owned
-`Value.Field`/`Zero` over `GoFields`/`FieldAliasBox`/`ZeroValueOf`, and `TField` hands the
-LITERAL `StructFieldType` the SYNTHESIZED `abi.StructType()` — the specialization section below —
-so the type-side and value-side walks read one projection.
-
 (Two converter emission rules landed with the closure, guarded by `structFieldEmission_test.go`:
 a PARENTHESIZED array field type — `x ([32]int32)` — keeps its `= new(N)` initializer through
 `ast.Unparen`, and the delegate lowering's parameter name-stripping shares

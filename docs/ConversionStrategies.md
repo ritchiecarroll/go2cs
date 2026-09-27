@@ -11280,7 +11280,7 @@ A function whose assembly jumps into a C library, such as `syscall`'s `libc_getg
 macOS, keeps this stub too. Go code only takes that function's address, and never calls it. The converter
 records which C function the jump names, so the address resolves to the real C function.
 
-**Full detail:** [Reference → `//go:linkname` and assembly forwarders](ConversionStrategies-Reference/manual-conversions.md#a-cross-package-golinkname-pull-emits-a-forwarder-not-a-throwing-stub) — how pull and push forwarders are chosen and how they bridge types, the curated target lists, assembly-trampoline limits, cgo dynamic-import records, stub addresses, and the guard tests.
+**Full detail:** [Reference → `//go:linkname` and assembly forwarders](ConversionStrategies-Reference/manual-conversions/linkname-and-trampolines.md#a-cross-package-golinkname-pull-emits-a-forwarder-not-a-throwing-stub) — how pull and push forwarders are chosen and how they bridge types, the curated target lists, assembly-trampoline limits, cgo dynamic-import records, stub addresses, and the guard tests.
 
 ---
 

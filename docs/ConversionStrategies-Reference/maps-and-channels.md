@@ -789,7 +789,7 @@ legacy `Sending` path):
   without servicing parked waiters, so the owner can REVOKE a value the channel already accepted.
   It is the only sanctioned way to un-send, and only sound for a channel whose producer owns it
   exclusively; `IsUnbuffered` keeps reporting the physical shape. Full semantics under
-  [Realizing the runtime TIMER contract](manual-conversions.md#realizing-the-runtime-timer-contract-sleep--newtimer--stoptimer--resettimer).
+  [Realizing the runtime TIMER contract](manual-conversions/runtime-contracts.md#realizing-the-runtime-timer-contract-sleep--newtimer--stoptimer--resettimer).
 * **Close/panic semantics are Go's**: send on closed panics (even from within a select, and even
   when a `default:` exists); close of closed and close of nil panic; a parked select-send woken by
   close panics on its own thread; parked receivers (plain and select) wake with `(zero, false)`;
