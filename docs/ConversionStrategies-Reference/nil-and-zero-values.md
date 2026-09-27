@@ -249,60 +249,7 @@ converter never emits the form (generated code compares with `== nil`), so the w
 exception list and catches the next hand-own wherever it lands; comment lines are skipped, and an
 empty walk is a FAILURE rather than a pass so it cannot go green over a hole.
 
-## `reflect.Value.Interface()` is a boundary into interface space, so it packs the typed nil too
-
-The rule above says the canonical instance is minted where the type becomes *observable* — at the
-boundary into interface space — and pointer slots themselves keep plain `null`, because their
-statically-typed world never needs the type carried. `reflect.Value.Interface()` is one of those
-boundaries, and it is the one a *slot read* arrives at: the Value's data came out of a slice
-element, an array element, a struct field, a map value or a `reflect.New(...).Elem()`, all of which
-hold `null` for a nil `*T`. Handing that `null` straight out erases the type at the one call whose
-entire job is to preserve it.
-
-Go's own form makes the obligation explicit. `packEface` builds an interface from a **type** and a
-**data word**, so a pointer-kinded Value with a nil data word packs as a non-nil interface holding
-`(type=*T, value=nil)`. Managed storage has no data word to keep the type beside, so the bridge
-reconstructs it from the Value's static type — which `makeTypedValue` recorded when the Value was
-built — and re-encodes a null pointer-kinded read as that type's canonical typed nil:
-
-```go
-in := make([]*Int, 1)              // one zero-filled *Int element
-v := reflect.ValueOf(in).Index(0)
-i := v.Interface()                 // (*Int)(nil), NOT nil
-data, err := i.(GobEncoder).GobEncode()   // assertion SUCCEEDS; nil receiver dispatches
-```
-
-The consumer that proves it is `encoding/gob`: `encodeGobEncoder` is literally
-`v.Interface().(GobEncoder).GobEncode()`, and `big.Int.GobEncode` opens with `if x == nil` because
-Go guarantees it will be reached that way. With the type erased, `i == nil` is true, `%T` prints
-`<nil>`, the assertion takes its failure arm, and the nil-receiver method never runs — which is the
-whole of math/big's `TestGobEncodingNilIntInSlice` / `TestGobEncodingNilRatInSlice`.
-
-Two boundaries of the rule, both load-bearing:
-
-- **Pointer kinds only.** An interface- or func-typed slot holding `null` *is* the nil interface /
-  nil func, and Go packs that as the nil eface. Re-encoding those would invert the bug.
-- **No new representation.** The value handed out is `ж<T>.NilBox` — the same singleton
-  `reflect.Zero` of a pointer kind already yields (`GoReflect.ZeroValueOf`) and every emitted
-  `nil`→`*T` conversion already mints. So the packed value compares equal to a language-level
-  `(*T)(nil)` and asserts through the ordinary witness machinery. A slot whose static type resolves
-  to no canonical nil keeps its `null`, so the rule can only *add* type information, never
-  substitute a wrong one.
-
-The fabrication path (`reflect.Zero`) and the write path were already on this encoding; this is the
-**read** path joining them, so there is one nil encoding system-wide rather than two.
-
-Guarded by `ReflectTypedNilInterface`, which runs typed nil → `Interface()` → `== nil` → type assert
-→ nil-receiver dispatch across every slot kind that funnels through `makeTypedValue`, each paired
-with a non-nil sibling so a blanket substitution fails as loudly as the erasure did, and pins
-`Elem()` of a typed nil as still **invalid** (how a walker tells a typed nil from a pointer to a zero
-value).
-
-⚠ **The emission side is a separate, open question.** A typed nil crossing into an interface in
-ordinary converted code — not through reflection — still collapses, because the pointer slot really
-does hold `null` and the conversion site is not always able to see that it needs the box. Closing
-that changes what `== nil` means for every converted interface and is a design decision, not a fix;
-`encoding/gob`'s own `TestNilPointerInsideInterface` is its standing witness.
+<a id="reflectvalueinterface-is-a-boundary-into-interface-space-so-it-packs-the-typed-nil-too"></a>Moved to [`reflect.Value.Interface()` is a boundary into interface space, so it packs the typed nil too](reflection/values.md#reflectvalueinterface-is-a-boundary-into-interface-space-so-it-packs-the-typed-nil-too).
 
 ## A pointer crossing into an interface carries its static type, however the pointer was produced
 The rule the boxing above is a special case of:

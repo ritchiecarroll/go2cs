@@ -240,29 +240,9 @@ literals — value and pointer — and type assertions in comma-ok, single-value
 same-package renamed type as the second control; output-compared vs `go run`. Verified to FAIL as CS0246
 with the fix reverted.)
 
-## The reflection bridge answers a read where the answer EXISTS — four members that did not (2026-08-19)
+<a id="the-reflection-bridge-answers-a-read-where-the-answer-exists--four-members-that-did-not-2026-08-19"></a>Moved to [The reflection bridge answers a read where the answer EXISTS — four members that did not (2026-08-19)](reflection/values.md#the-reflection-bridge-answers-a-read-where-the-answer-exists--four-members-that-did-not-2026-08-19).
 
-Four unrelated reads through `reflect` degraded rather than answered, and each degraded to a value that reads as a real answer, which is what kept them invisible. Recorded together because the discipline is one: a bridged member either honors the read or refuses it by name — never a plausible-looking substitute. (This is the r39d rule applied in the direction it is usually NOT applied: a descriptor field left unpopulated because it *seemed* unanswerable, where the answer was in fact already computed one layer down.)
-
-| Member | Was | Is |
-|:--|:--|:--|
-| `Value.Index` on a **string** | `panic: reflect: call of reflect.Value.Index on string Value` — Go's message for a kind that does not support indexing AT ALL | the i'th BYTE as a non-addressable `uint8` Value, Go's own arm |
-| `Value.Slice` on a **string** | the same ValueError | a string of the receiver's OWN type, so a NAMED string stays named (Go returns `Value{v.typ(), …}`) |
-| `Value.Slice3` | `invalid memory address or nil pointer dereference` — the auto conversion reinterprets the never-populated `ptr` slot as a raw `unsafeheader.Slice` and edits it in place | hand-owned over the same golib window machinery `Slice` uses, so the two- and three-index forms cannot disagree about what a window is |
-| `StructField.Offset` | `0` — a REAL answer for a field at the front of a struct, so an unpopulated descriptor read as a LAYOUT failure | the Go (amd64) offset, from the same memoized layout walk `internal/abi`'s `StructType()` already publishes |
-
-`Offset` is the one worth stating at length, because it had a stated reason for staying empty: *a Go byte offset exists only to be added to a data pointer, and managed storage has no such pointer*. That is true of `Offset` as an ADDRESS and false of `Offset` as layout METADATA, which is the only way anything has ever read it here — `unique`'s clone sequencer and `internal/reflectlite` through `abi`, and now `sync/atomic`'s `TestAutoAligned64`, which asserts `TypeOf(&struct{_ uint32; i Int64}{}).Elem().Field(1).Offset == 8`. Reading it off `GoReflect.GoFieldOffsets` is what makes the two Go-specific layout rules come out right where a naive `Marshal.OffsetOf` would not: a Go **zero-size** field occupies nothing (its C# surrogate is one byte), and an `align64`-bearing field is padded to its 8-byte boundary. The r39d rule still bites where it should — a struct holding a field whose Go size is unknowable makes every later offset a guess, `GoFieldOffsets` answers `null` for the whole struct there, and every field keeps the zero rather than a plausible number.
-
-`text/template`'s `index` and `slice` builtins are the measured consumers of the first three (`{{index `x` 0}}`, `{{slice .S 1 2}}`, `{{slice .SICap 6 10 10}}`), and closing them took the package from 49 to 50 of 52. Guarded by `ReflectStringWindow` (every arm plus Go's own out-of-range, wrong-kind and reversed-bound panic texts, and a byte-slice control that the string arms did not disturb the container path) and by `ReflectStructTagCopy` (offsets across a zero-size/aligned/tail layout, and a promoted field whose offset is relative to its own declaring struct).
-
-## A typed nil keeps its type across BOTH interface-space boundaries
-
-`Value.Interface()` has packed a nil pointer as Go's typed nil since the `packEface` work — a non-nil `any` carrying `(type=*T, value=nil)` — and two other paths had not joined that one nil encoding. Both surfaced as `text/template` rendering a value Go renders through its method:
-
-1. **`Value.Call` into an INTERFACE-typed parameter.** Go's assignment to such a parameter BUILDS an eface, and an eface keeps the type half. `marshalCallArg` read the slot's raw `null` and handed that across, so the callee's `reflect.ValueOf(arg)` answered the INVALID zero Value — `{{html .NIL}}` over a nil `*int` printed `&lt;no value&gt;` where Go prints `&lt;nil&gt;`. It packs through `packInterfaceValue` when — and only when — the destination is interface space; a concrete parameter type builds no eface and is untouched.
-2. **A nil RECEIVER dispatched through the runtime duck-typing SHELL tier.** Go's method set belongs to the TYPE, so `(*W)(nil).Error()` dispatches normally and the method decides what nil means (`if w == nil { return "nilW" }` is an idiom, not an edge case). golib's `error<T>` read `m_target_ptr.Value` BEFORE choosing between its `ж`-receiver and by-value overloads, so it threw on exactly that value — for a pointee the `ж` overload it then selected never needed. The throw was invisible: `fmt`'s `handleMethods` wraps every `Error()` call in Go's own `catchPanic`, which prints `<nil>` for a nil-pointer argument, so the symptom was a wrong RENDERING and the defect reproduced ONLY where the pair resolved through the runtime shell rather than through a generated nominal adapter — i.e. only when nothing in the program converts that type to that interface explicitly. Dereferencing on the by-value path is kept, because Go dereferences there too and a nil pointer must still panic.
-
-Guarded by `ReflectTypedNilInterface`, which carries a type reached only through the shell tier and the concrete-parameter control for the `Call` arm.
+<a id="a-typed-nil-keeps-its-type-across-both-interface-space-boundaries"></a>Moved to [A typed nil keeps its type across BOTH interface-space boundaries](reflection/values.md#a-typed-nil-keeps-its-type-across-both-interface-space-boundaries).
 
 ## Converted programs write UTF-8 stdout — the ambient console code page never reaches the bytes
 Go writes stdout as raw UTF-8, unconditionally: `fmt.Println("Hello, 世界")` emits the same bytes to a

@@ -9811,7 +9811,7 @@ parameters ([Generics](#generics)).
 matching golib generic type, such as `slice<T>`, and `StructOf` emits a new .NET value type. So code that
 receives such a type treats it like a converted one.
 
-**Full detail:** [Reference → Manually-Converted Declarations: the reflection bridge](ConversionStrategies-Reference/manual-conversions.md#structfieldtag-is-a-real-read--the-converter-has-always-emitted-the-tag-nothing-had-ever-read-it) — the bridge's rules one by one, from tag reads and type names to assignability, the array-length and channel-direction attributes, and the run-time type constructors.
+**Full detail:** [Reference → Manually-Converted Declarations: the reflection bridge](ConversionStrategies-Reference/reflection/types.md#structfieldtag-is-a-real-read--the-converter-has-always-emitted-the-tag-nothing-had-ever-read-it) — the bridge's rules one by one, from tag reads and type names to assignability, the array-length and channel-direction attributes, and the run-time type constructors.
 
 ---
 

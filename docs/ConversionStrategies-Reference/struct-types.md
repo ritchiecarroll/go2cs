@@ -1137,95 +1137,9 @@ still match `go run`. The whole converted standard library re-emits byte-identic
 0 changed), because the rule fires on nothing else: a method value whose signature is not variadic
 never reaches it.
 
-## `reflect.Value.Call` over a variadic func value is TYPED dispatch — no reflective invoke can carry the tail
+<a id="reflectvaluecall-over-a-variadic-func-value-is-typed-dispatch--no-reflective-invoke-can-carry-the-tail"></a>Moved to [`reflect.Value.Call` over a variadic func value is TYPED dispatch — no reflective invoke can carry the tail](reflection/values.md#reflectvaluecall-over-a-variadic-func-value-is-typed-dispatch--no-reflective-invoke-can-carry-the-tail).
 
-The `params Span<T>` tail above is what makes a converted variadic callable and readable from Go
-AND from C#. It also puts the value permanently out of reach of every reflective invoke path:
-`Span<T>` is a **ref struct**, and `Delegate.DynamicInvoke` and `MethodInfo.Invoke` both marshal
-their arguments through an `object?[]` a ref struct cannot enter. `System.Linq.Expressions`
-refuses one outright as well, so the method-value binder's `Expression.Lambda` approach
-(GoReflect.MethodSets.cs) does not generalize either. `reflect.Value.Call` therefore threw
-`NotImplementedException` for every variadic func value — which is 13 of `text/template`'s 52
-verdicts, since its whole `FuncMap` feature calls user functions exactly that way.
-
-The call is made in **typed code** instead (`GoReflect.InvokeVariadic`, GoReflect.TypeLayout.cs).
-One small generic trampoline per family arity — eighteen, the closed set golib's variadic.cs
-declares — is closed over the delegate's own parameter types by `MakeGenericMethod` and cached as
-an ordinary delegate, the `elementBoxViaAt` idiom GoReflect.FieldAccess.cs already uses:
-
-```csharp
-private static object? callVariadicFunc1<T1, TArg, TResult>(Delegate d, object?[] a, Array t)
-{ return ((Funcꓸꓸꓸ<T1, TArg, TResult>)d)((T1)a[0]!, new Span<TArg>((TArg[])t)); }
-```
-
-Inside the trampoline the tail is a `TArg[]` and its conversion to `Span<TArg>` is ordinary, so
-nothing is boxed and the tail ALIASES the array rather than copying it. Two consequences worth
-stating: a panic inside the callee propagates natively (a direct call wraps nothing in a
-`TargetInvocationException`, unlike the fixed-arity `DynamicInvoke` path beside it), and a fixed
-prefix beyond the family's eight throws a named `NotImplementedException` rather than mis-indexing.
-
-**The delegate being called is not always the family type, and the rebind is what makes that
-total.** A variadic func literal in an `any` slot — a `map[string]any` FuncMap value, the exact
-`text/template` shape — takes C#'s NATURAL delegate type instead, the same identity difference
-`TryFuncShape` had to stop reading off the type NAME. Those rebind onto the family by RETARGETING
-through `Invoke` (`Delegate.CreateDelegate(familyType, del, "Invoke")`), never by re-binding the
-original's own target and method: a delegate the BRIDGE itself built is expression-compiled — a
-variadic method value from `Value.Method` is exactly that — and a compiled lambda's `Method` is not
-a runtime `MethodInfo`, which `CreateDelegate` rejects with "MethodInfo must be a runtime MethodInfo
-object". Retargeting also carries a multicast invocation list intact. The family's type arguments
-are built FROM the delegate's own `Invoke` signature, so the two agree by construction.
-
-Go's `Call` contract shapes the arity rule too: `Call` itself builds the tail slice (`CallSlice` is
-the form that takes it pre-built), so the last `In()` is the tail SLICE, every argument from that
-position on is assignable to its ELEMENT, and there is no upper bound — only a lower one of
-`NumIn()-1`. (Guarded two ways: behavioral `ReflectVariadicCall` output-compares eleven shapes
-against `go run` — declared func, empty tail, no fixed params, `...any`, multi-return, no-result,
-two fixed params, a variadic METHOD value, and three `map[string]any` literals — while
-`GoReflectBridgeClosureTests` pins the three delegate identities, the tail's aliasing, the refusal
-of a non-variadic delegate, and every family arity of both families, which are golib-only shapes no
-Go program can construct. The arity row matters because only 0, 1 and 2 fixed parameters have a
-consumer in the corpus today: 3 through 8 would otherwise be discovered by whichever package
-reached them first.)
-
-## `reflect.MakeFunc` is `Value.Call`'s exact inverse — a compiled delegate over the descriptor's carried System.Type (2026-08-29)
-
-Go's `MakeFunc` is runtime machinery end to end: it reinterprets the descriptor into a `funcType`
-sub-record, asks `funcLayout` for a stack map, and pairs an assembly stub (`makeFuncStub`) with a
-closure context the scheduler calls back through. None of that exists behind a managed-backed
-descriptor — `abi.synthType` mints every one as a plain `heap<Type>` box with the CLR
-`System.Type` as cargo, so the `Reinterpret<abi.Type, funcType>()` recovers a **zero box** and
-`funcLayout` panics `reflect: funcLayout of non-func type <nil>`. First operational hit:
-`net/http/httptrace`'s `compose`, which walks `ClientTrace`'s func-typed fields and MakeFuncs a
-composed hook for every pair both traces set.
-
-The hand-owned form (`reflect/makefunc_impl.cs`, displaced via the `manualConversionFuncs`
-registry) runs the marshalling that `Value.Call` runs, in the opposite direction. Where `Call`
-marshals a `slice<Value>` into a delegate's `DynamicInvoke`, `MakeFunc` builds a delegate of
-**exactly** the descriptor's carried delegate type whose invocation boxes its CLR arguments,
-types each one by the func's STATIC parameter type (`makeTypedValue` — an interface-typed
-parameter reports Kind Interface, a nil pointer is a VALID typed-nil Value, and a `[N]byte`
-parameter carries the descriptor's `funcParamDims` cargo, the one route a fixed array parameter's
-length reaches reflect at all), runs `fn`, and marshals the result Values back out under the SAME
-assignability renderer Call's arguments use (`marshalIntoSlot` — one rule for both directions).
-A Go multi-return packs into the delegate's own declared `ValueTuple`. The delegate itself comes
-from golib's `GoReflect.MakeGoFuncDelegate` — expression-compiled once per delegate type into a
-factory (outer lambda takes the `Func<object?[], object?>` invoker, inner IS the typed delegate),
-the same memoization rule the method-value binder follows — so the result is callable DIRECTLY as
-a typed Go func (`t.DNSStart(info)`), through `Value.Call`, and through composition with itself.
-
-The returned Value rides `typ`'s **own** descriptor box rather than a fresh `synthType`, so the
-dims cargo survives and `Type()` interns back to the caller's wrapper: `MakeFunc(t, fn).Type() == t`
-by identity. A VARIADIC func type is a loud `NotImplementedException`, not a wrong delegate: its
-tail is `params Span<T>`, a byref-like type no expression tree can carry — the route that exists is
-the reverse of `InvokeVariadic`'s typed family trampolines above, unbuilt for want of a
-demonstrated consumer, exactly as `Value.CallSlice` records. `makeMethodValue`'s identical
-`funcLayout` read deliberately stays auto: it is reachable only through `flagMethod`, which the
-bridge never sets (`Value.Method` binds the receiver into an ordinary delegate instead). With
-MakeFunc live, `reflect/iter.cs`'s rangefunc `Seq`/`Seq2` funcs gain their real implementation
-path too. (Guarded by behavioral `ReflectMakeFunc`: the docs swap example invoked directly, the
-httptrace compose shape, multi-return, canonical `Type()` identity, `Call` over a made func, an
-interface-typed parameter, a typed-nil pointer argument, and a `[4]byte` parameter whose `Len()`
-proves the dims cargo threads through. Banked consumer: `net/http/httptrace` 2|0.)
+<a id="reflectmakefunc-is-valuecalls-exact-inverse--a-compiled-delegate-over-the-descriptors-carried-systemtype-2026-08-29"></a>Moved to [`reflect.MakeFunc` is `Value.Call`'s exact inverse — a compiled delegate over the descriptor's carried System.Type (2026-08-29)](reflection/values.md#reflectmakefunc-is-valuecalls-exact-inverse--a-compiled-delegate-over-the-descriptors-carried-systemtype-2026-08-29).
 
 ## Major-version import directories
 A `/vN` import path segment (math/rand/v2) hosts a package named for the PARENT segment, so the

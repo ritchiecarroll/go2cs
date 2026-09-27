@@ -1089,37 +1089,7 @@ else. The 10 runtime sites are dormant raw-metal; a site that WRITES through the
 stores into a detached box rather than corrupting punned memory, and real write-through semantics
 belong to the provenance arc.
 
-## A pointer `reflect` handed out as an `unsafe.Pointer` must convert BACK — the order token is remembered, not redefined
-
-A Go pointer to managed storage has no machine address to report, so every projection of one to a scalar answers with a stable **order token** instead: `INilPointer.PointerOrderToken`, whose own remarks say plainly that tokens "are order keys, never an identity substitute". `reflect.Value.Pointer` and `reflect.Value.UnsafePointer` both project through it (`reflect/value_impl.cs`'s `reflectPointerToken`), and that contract is exactly right for the consumers it was written for — `fmt`'s `%p`, and `internal/fmtsort`'s ordering of pointer-keyed map entries, which compares two tokens arithmetically.
-
-It is not sufficient for the other direction Go permits: converting the scalar back to a pointer and dereferencing it. `go/types`' own test suite does precisely that to reach the unexported `Config._Trace` field:
-
-```go
-func boolFieldAddr(conf *Config, name string) *bool {
-	v := reflect.Indirect(reflect.ValueOf(conf))
-	return (*bool)(v.FieldByName(name).Addr().UnsafePointer())
-}
-
-*boolFieldAddr(&conf, "_Trace") = manual && testing.Verbose()   // check_test.go:166
-```
-
-which converts to
-
-```csharp
-internal static ж<bool> boolFieldAddr(ж<types.Config> Ꮡconf, @string name) {
-    var v = reflect.Indirect(reflect.ValueOf(Ꮡconf.OrTypedNil()));
-    return (ж<bool>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
-}
-```
-
-`ж<T>`'s `explicit operator ж<T>(uintptr)` builds a **native-address** box over whatever number it is handed (`m_nativeAddr`), so the `.Value` store writes a `bool` at the numeric value of an order token — an access violation when that page is not mapped, and silent heap corruption when it is. It killed `go/types`' converted test host outright at the first test that reaches the idiom, `TestCheck/blank.go`, with 542 verdicts behind it; the fault arrives as a bare `System.AccessViolationException` in `testFilesImpl` with no frame below it, because the faulting store is inlined at the call site.
-
-The information needed to do better is never actually lost. `reflect.Value.Addr` surfaces the **real aliasing box** — an addressable Value already carries `addrBox`, minted by `GoReflect.FieldAliasBox` — and only the projection to a scalar discards it. So golib's `ManagedPointerTokens` (`golib/ж.PointerTokens.cs`) remembers the association the projection drops: the token that was handed out, and the box it named. `reflectPointerToken` registers on the way out, and the `uintptr → ж<T>` operator consults the table **first**, so a token that came from there recovers its own box and aliases the original storage exactly as Go's pointer would. Everything else keeps the pre-existing native-address route unchanged.
-
-Two properties are deliberate. **The token VALUE does not change.** The obvious alternative — minting self-identifying handles from a reserved numeric range — would also change what `%p` prints and what order pointer-keyed maps print in, because those read the very same token; carrying the association out of band instead leaves every existing observable byte-identical, and costs one dictionary probe on a conversion that was already allocating an object. **Entries are weak, and verified on resolve**: the table must never be the reason a box stays alive, and a resolve re-derives the box's current token and requires equality, so a stale entry cannot answer. The type-descriptor path (`typeDescriptorOrderToken`, which packs type NAMES so fmtsort orders them lexically) returns before registration and is untouched — those tokens are shared by every descriptor with the same name and are not identities to recover.
-
-Corpus footprint of the idiom: in all of GOROOT it is `go/types`' `check_test.go` (bool and string), its `cmd/compile/internal/types2` twin, and four descriptor-walking sites in `reflect/type.go`; `sync/atomic`'s two uses only test alignment (`p&7 != 0`) and never dereference. (Guarded by the `ReflectFieldAddrWrite` behavioral **output** test — writes to a bool, a string and an int field through `Addr().UnsafePointer()`, each read back through the ORIGINAL struct to prove aliasing rather than a detached copy, two derivations of one field compared for pointer equality, and the untouched neighbours asserted unchanged, all vs `go run`. It faults with an access violation on pre-fix golib.)
+<a id="a-pointer-reflect-handed-out-as-an-unsafepointer-must-convert-back--the-order-token-is-remembered-not-redefined"></a>Moved to [A pointer `reflect` handed out as an `unsafe.Pointer` must convert BACK — the order token is remembered, not redefined](reflection/values.md#a-pointer-reflect-handed-out-as-an-unsafepointer-must-convert-back--the-order-token-is-remembered-not-redefined).
 
 ## An OPAQUE `*struct{}` conversion mints a recoverable token — `syscall.Pointer(unsafe.Pointer(p))` keeps its referent
 
@@ -2215,7 +2185,7 @@ there; in the managed model a `ж<abi.Type>` holds only an `abi.Type`, so there 
 to downcast to. Those sites keep the address route and remain the raw-metal class — which is why the
 two of them that converted code actually *reaches*, `abi.Type.StructType()` and `ArrayType()`, are
 hand-owned and SYNTHESIZED instead (see
-[*`abi.Type`'s SPECIALIZATIONS are synthesized, not downcast*](manual-conversions.md#abitypes-specializations-are-synthesized-not-downcast--structtype--arraytype)).
+[*`abi.Type`'s SPECIALIZATIONS are synthesized, not downcast*](reflection/types.md#abitypes-specializations-are-synthesized-not-downcast--structtype--arraytype)).
 
 Emission detail: the peeling is shared with the identity-reinterpret elision
 (`pointerConversionSource` — it unwraps an optional `abi.NoEscape`/`noescape` wrapper and an
