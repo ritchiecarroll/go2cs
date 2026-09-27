@@ -223,8 +223,10 @@ buys five of the six rows for little.
 
 B. A's one advantage, native frames, is bought with a swallowed-panic hazard, an inverted cleanup
 order and a corpus-wide emission change. B reproduces the same frames for `Callers` where they are
-read, keeps every execution-order property the recover seat just established, and costs nothing when
-no panic is running. C remains the fallback for any row B cannot reach (`deferreturn`), stated per row.
+read, and keeps every execution-order property the recover seat just established. ~~Costs nothing when
+no panic is running.~~ **[P2-1]** On the no-panic path it costs one entry push and pop per deferring
+return, beside an existing save/restore, and the cut measures that. C remains the fallback for any row
+B cannot reach (`deferreturn`), stated per row.
 
 ## 5. Gate a cut would owe
 
