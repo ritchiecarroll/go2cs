@@ -8057,7 +8057,7 @@ semaphore. Most `sync/atomic` functions are one line: `AddInt32` returns
 `Interlocked.Add(ref addr.Value, delta)`. Here `addr` is a `ж<int32>`, golib's box for a Go pointer,
 and `.Value` is the `int32` it points to ([Pointers](#pointers)).
 
-**Full detail:** [Reference → Goroutine callees](ConversionStrategies-Reference/defer-panic-recover.md#a-value-returning-goroutine-callee-is-wrapped-in-a-discarding-lambda) —
+**Full detail:** [Reference → Goroutine callees](ConversionStrategies-Reference/goroutines.md#a-value-returning-goroutine-callee-is-wrapped-in-a-discarding-lambda) —
 the other `go`-statement forms (named function types, builtins, value receivers, multi-value arguments),
 where captured locals are copied, and the tests that guard each form.
 
