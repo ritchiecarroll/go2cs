@@ -159,7 +159,10 @@ WHERE THINGS STAND (2026-09-27 ~14:30, i7 local time):
    (1) the MinInt / -1 emission shape: golib quo(a, b) / rem(a, b) at every signed division by a variable (user code
        included), a reads-like-Go call; COORD recommends accept (ledger 7eb8b61ab2);
    (2) an owner-only security settings item from the Pages audit, reported to the owner in session (withheld here);
-   (3) the audit's CI proposal: a docs-site check workflow before deploy.
+   (3) the docs-site CI check: APPROVED by the owner 2026-09-27 15:31. COORD writes .github/workflows/docs-site.yml next
+       session (the Pages toolchain build + TestDocsSurviveJekyllLiquid + site_check.py). The one open choice is the FORM:
+       a check-only run on branch pushes touching docs/**, or the owner switches Pages to 'GitHub Actions' so the
+       workflow deploys only a site that passes.
  - COORD QUEUE besides the trains:
    - reflect's two readings on the i7 after TRAIN F lands (TestMapIterSet per-site bytes; TestMapAlloc's two blocks);
    - re-apply C1's two pure appends (board-goroot 5f0564da38, literal-tier-ruling 70e010aa46) at the next docs
