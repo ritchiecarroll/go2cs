@@ -9,3 +9,4 @@ g-trace-user-api|be03b26a23|G: runtime/trace's user API (NewTask, Log, regions) 
 p1-runtime-linkname|cd4fe9f1f7|P1: runtime.heapObjectsCanMove and the legacy fastrand trio are linkname forward targets (both runtime tests pass)
 # pending: R seat (iii) recover model; C1 reflect relabel (bank-only landing)
 # union note: casPointerLatched -> take r-runtime-claims' body (superset of P1's traceregion ValueSlot fix; ledger 245128257c); both arms must pass
+r-recover-model|f8dfffc99a|R: seat (iii) -- the recover model (chain, eligibility, nil defer); full behavioral 2807/2834, only the pre-existing trio

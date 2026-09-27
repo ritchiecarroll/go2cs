@@ -126,3 +126,91 @@
 15:11:57   S:sort:   PASS  sort                               63 [38s]
 15:13:00 LEG S:syscall rc=0 wall=62s free=3660G log=sweep-syscall.log
 15:13:00   S:syscall:   PASS  syscall                            65 [59s]
+15:24:22 LEG S:time rc=0 wall=682s free=3659G log=sweep-time.log
+15:24:23   S:time:   PASS  time                               178 [679s]
+15:24:58 LEG S:unique rc=0 wall=34s free=3659G log=sweep-unique.log
+15:24:58   S:unique:   PASS  unique                             21 [31s]
+15:26:07 LEG S:text/template rc=0 wall=68s free=3659G log=sweep-text.template.log
+15:26:07   S:text/template:   PASS  text/template                      52 [65s]
+15:26:49 LEG S:text/template/parse rc=0 wall=41s free=3659G log=sweep-text.template.parse.log
+15:26:49   S:text/template/parse:   PASS  text/template/parse                52 [38s]
+15:27:25 LEG S:math rc=0 wall=35s free=3659G log=sweep-math.log
+15:27:25   S:math:   PASS  math                               76 [32s]
+15:28:49 LEG S:crypto/cipher rc=0 wall=84s free=3658G log=sweep-crypto.cipher.log
+15:28:49   S:crypto/cipher:   PASS  crypto/cipher                      27272 [81s]
+15:44:08 LEG S:crypto/tls rc=0 wall=917s free=3658G log=sweep-crypto.tls.log
+15:44:08   S:crypto/tls:   PASS  crypto/tls                         1340 = 4759 banked - 3419 (TestBogoSuite host-limit disclosed; capability PRESENT, converted side over the deadline) [911s]
+15:49:25 LEG S:go/types rc=0 wall=317s free=3658G log=sweep-go.types.log
+15:49:25   S:go/types:   PASS  go/types                           574 [313s]
+15:51:56 LEG S:encoding/json rc=0 wall=149s free=3658G log=sweep-encoding.json.log
+15:51:56   S:encoding/json:   PASS  encoding/json                      532 [146s]
+15:56:20 LEG S:crypto/x509 rc=0 wall=263s free=3657G log=sweep-crypto.x509.log
+15:56:20   S:crypto/x509:   PASS  crypto/x509                        518 [259s]
+15:57:27 LEG S:go/build rc=0 wall=67s free=3657G log=sweep-go.build.log
+15:57:27   S:go/build:   PASS  go/build                           57 [63s]
+15:58:15 LEG S:flag rc=0 wall=46s free=3657G log=sweep-flag.log
+15:58:15   S:flag:   PASS  flag                               24 [43s]
+15:58:54 LEG S:testing/slogtest rc=0 wall=39s free=3657G log=sweep-testing.slogtest.log
+15:58:54   S:testing/slogtest:   PASS  testing/slogtest                   17 [36s]
+15:59:29 LEG S:errors rc=0 wall=33s free=3657G log=sweep-errors.log
+15:59:29   S:errors:   PASS  errors                             61 [30s]
+16:00:10 LEG S:runtime/debug rc=0 wall=40s free=3656G log=sweep-runtime.debug.log
+16:00:10   S:runtime/debug:   PASS  runtime/debug                      4 [37s]
+16:00:45 LEG S:math/cmplx rc=0 wall=34s free=3656G log=sweep-math.cmplx.log
+16:00:45   S:math/cmplx:   PASS  math/cmplx                         24 [31s]
+16:01:21 LEG S:maps rc=0 wall=36s free=3656G log=sweep-maps.log
+16:01:21   S:maps:   PASS  maps                               14 [33s]
+16:02:42 LEG S:encoding/xml rc=0 wall=79s free=3656G log=sweep-encoding.xml.log
+16:02:42   S:encoding/xml:   PASS  encoding/xml                       387 [76s]
+16:04:50 LEG S:expvar rc=0 wall=127s free=3656G log=sweep-expvar.log
+16:04:50   S:expvar:   PASS  expvar                             11 [124s]
+16:05:42 LEG S:archive/tar rc=0 wall=51s free=3656G log=sweep-archive.tar.log
+16:05:42   S:archive/tar:   PASS  archive/tar                        98 [48s]
+16:07:45 LEG S:archive/zip rc=0 wall=122s free=3655G log=sweep-archive.zip.log
+16:07:45   S:archive/zip:   PASS  archive/zip                        100 [118s]
+16:15:48 LEG S:go/parser rc=0 wall=482s free=3655G log=sweep-go.parser.log
+16:15:48   S:go/parser:   PASS  go/parser                          176 [479s]
+16:16:28 LEG S:go/printer rc=0 wall=39s free=3655G log=sweep-go.printer.log
+16:16:28   S:go/printer:   PASS  go/printer                         45 [36s]
+16:17:13 LEG S:go/ast rc=0 wall=45s free=3655G log=sweep-go.ast.log
+16:17:14   S:go/ast:   PASS  go/ast                             9 [42s]
+16:17:47 LEG S:unicode rc=0 wall=33s free=3655G log=sweep-unicode.log
+16:17:48   S:unicode:   PASS  unicode                            28 [30s]
+16:18:32 LEG S:go/doc rc=0 wall=43s free=3654G log=sweep-go.doc.log
+16:18:32   S:go/doc:   PASS  go/doc                             86 [41s]
+16:19:07 LEG S:go/scanner rc=0 wall=34s free=3654G log=sweep-go.scanner.log
+16:19:07   S:go/scanner:   PASS  go/scanner                         11 [31s]
+16:19:43 LEG S:go/format rc=0 wall=35s free=3654G log=sweep-go.format.log
+16:19:43   S:go/format:   PASS  go/format                          4 [32s]
+16:20:23 LEG S:go/token rc=0 wall=39s free=3654G log=sweep-go.token.log
+16:20:23   S:go/token:   PASS  go/token                           31 [36s]
+16:20:56 LEG S:text/tabwriter rc=0 wall=33s free=3654G log=sweep-text.tabwriter.log
+16:20:56   S:text/tabwriter:   PASS  text/tabwriter                     3 [30s]
+16:21:37 LEG S:io/fs rc=0 wall=40s free=3653G log=sweep-io.fs.log
+16:21:37   S:io/fs:   PASS  io/fs                              18 [37s]
+16:22:17 LEG S:encoding/csv rc=0 wall=38s free=3653G log=sweep-encoding.csv.log
+16:22:17   S:encoding/csv:   PASS  encoding/csv                       71 [35s]
+16:23:31 LEG S:html/template rc=0 wall=73s free=3653G log=sweep-html.template.log
+16:23:31   S:html/template:   PASS  html/template                      243 [69s]
+16:24:17 LEG S:net/url rc=0 wall=46s free=3653G log=sweep-net.url.log
+16:24:17   S:net/url:   PASS  net/url                            49 [43s]
+16:28:18 LEG S:os/exec rc=0 wall=239s free=3653G log=sweep-os.exec.log
+16:28:18   S:os/exec:   PASS  os/exec                            116 [236s]
+16:28:50 LEG S:iter rc=0 wall=31s free=3652G log=sweep-iter.log
+16:28:50   S:iter:   PASS  iter                               28 [28s]
+16:29:52 PURGE(after-sweep) purged=812 remaining=0 tracked-deletions=0 free=3667G
+16:29:54 BUILD converter sha=04b60ad2756a7bf9
+16:33:51 LEG T:reflect:all rc=0 wall=237s free=3669G log=tests-reflect-all.log
+16:33:52   T:reflect:all: Validated 395 tests against go test (2 skipped identically on both sides, 23 disclosed-divergent (, alloc-profile, codegen-liveness, runtime-capability), 37 disclosed-unsupported declarations excluded). 
+16:34:51 LEG T:internal/synctest:all rc=0 wall=59s free=3669G log=tests-internal.synctest-all.log
+16:34:52   T:internal/synctest:all: 
+16:43:16 LEG T:runtime/pprof:all rc=1 wall=503s free=3669G log=tests-runtime.pprof-all.log
+16:43:16   T:runtime/pprof:all: {"package":"runtime/pprof","test":"TestMemoryProfiler/proto","action":"fail","elapsed":0.0518624,"output":"Profile = PeriodType: space bytes\nPeriod: 1\nTime: 2026-09-27 16:43:02.316126 -0500 CDT\nSamples:\nalloc_objects/count alloc_space/bytes inuse_objects/count inuse_space/bytes\nLocations\nMappings\n1: 0x8000800000000000/0xffffffffffffffff/0x0 H:\\go2cs-tmp-coord\\tF\\src\\core\\runtime\\pprof\\bin\\tests\\publish\\runtime.pprof.tests.exe H:\\go2cs-tmp-coord\\tF\\src\\core\\runtime\\pprof\\b
+16:46:44 LEG T:net/http/pprof:all rc=1 wall=207s free=3668G log=tests-net.http.pprof-all.log
+16:46:44   T:net/http/pprof:all: 2026/09/27 16:46:43 Converted test action failed: Go/C# test comparison failed: TestHandlers//debug/pprof/trace: Go="pass" C#="fail"; TestDeltaProfile: Go="pass" C#="skip"; TestHandlers: Go="pass" C#="fail"; converted tests: H:\go2cs-tmp-coord\tF\src\core\net\http\pprof\bin\tests\publish\net.http.pprof.tests.exe --json -timeout 30m0s --result H:\go2cs-tmp-coord\tF\src\core\net\http\pprof\go2cs_test_results.json --junit H:\go2cs-tmp-coord\tF\src\core\net\http\pprof\go2cs_test_results.xml failed: 
+16:46:58 LEG T:runtime:convert rc=0 wall=14s free=3668G log=tests-runtime-convert.log
+16:46:58   T:runtime:convert: WARNING: Go const converted to C# using 'unsafe.Sizeof' may not match run-time value - verify usage: const traceRegionAllocBlockData = 64<<10 - unsafe.Sizeof(traceRegionAllocBlockHeader{}) in "traceregion.go" WARNING: Go const converted to C# using 'unsafe.Sizeof' may not match run-time value - verify usage: const n = (400 << 20) + (unsafe.Sizeof(uintptr(0))-4)<<40 in "gc_test.go" WARNING: Go const converted to C# using 'unsafe.Sizeof' may not match run-time value - verify usage: const _64bit = 
+16:50:43 LEG T:runtime:build rc=0 wall=223s free=3668G log=tests-runtime-build.log
+16:50:43   T:runtime:build: 
+16:50:55 END tracked-changes=177 tracked-deletions=0 head=efc9c093de
+16:50:55 BATTERY DONE

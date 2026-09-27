@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-27 15:43 FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
+> **Status of this revision:** 2026-09-27 16:51 FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -25,7 +25,7 @@
 ```
 LANE: COORD   MODEL: Opus 5.5/max   HOST: i7
 BRANCH: master 4fb6e460c6e1633b1d20d3092fe0339c9438fe81 on-origin yes landed -- the docs summary rewrite plus the GitHub Pages fix (the site builds and deploys again)
-BRANCH: claude/coord-trainF efc9c093deb1eb7fe17e26a7fe47075b5fb51e78 on-origin yes accepted -- TRAIN F: battery run 2 green through the behavioral and H7 legs; the 92 sweeps were running at the save
+BRANCH: claude/coord-trainF efc9c093deb1eb7fe17e26a7fe47075b5fb51e78 on-origin yes accepted -- TRAIN F: battery run 2 COMPLETE and GREEN (16:50); ready to land
 BRANCH: claude/coord-reflect-bank ae9f8850909c72cf05231de33fe9e7e30c5c5b11 on-origin yes cut -- reflect's bank (roster eb8d74967c + proof page ae9f885090), waiting on C1's alloc relabel
 BRANCH: claude/coord-docs-reference adec71b3746e864ed503189083abf7dd1f5006aa on-origin yes cut -- the strategy-reference restructure: the STRUCTURAL pass (1a, 1b, 1c) is COMPLETE; step 2 (prose) is next
 BRANCH: claude/coord-pages-check b912b7d8cdc86684a0a95c411671645175f7824b on-origin yes cut -- SCRATCH: a workflow that builds docs/ with the Pages toolchain; delete it once the site-audit fixes land
@@ -33,7 +33,7 @@ LOCAL-ONLY: none
 WORKTREE: i7 H:/go2cs-tmp-coord/tF claude/coord-trainF 0 the running battery (logs in the session scratch; a record copy is docs/phase4/briefs/trainF-battery-run2-summary.txt on this branch)
 WORKTREE: i7 H:/go2cs-tmp-coord/docs-ref claude/coord-docs-reference clean at the pushed tip
 WORKTREE: i7 H:/go2cs-tmp-coord/pages-fix and pages-check: landed or scratch; reclaim
-NEXT: land TRAIN F (steps in the paste prompt), starting at efc9c093deb1eb7fe17e26a7fe47075b5fb51e78
+NEXT: land TRAIN F (its battery is COMPLETE and GREEN; steps in the paste prompt), starting at efc9c093deb1eb7fe17e26a7fe47075b5fb51e78
 READ-FIRST: the ledger from "LAND · 4fb6e460c6" (2026-09-27 13:34) to the end; docs/phase4/inbox/COORD/ files after 20260927T191644Z
 BLOCKED-ON: none
 TOOLS: GOROOT go1.24.13 (backslash spelling on windows), GOTOOLCHAIN=local, DOTNET_ROOT .NET SDK 10.0.400 first on PATH, pwsh 7 (and PS 5.1 for the roster guard), python 3.11
@@ -94,7 +94,11 @@ WHERE THINGS STAND (2026-09-27 ~14:30, i7 local time):
    - CNR, 742 byte-identical;
    - behavioral, 673 compared, 0 failed;
    - H7 on windows and linux.
-   The 92 sweeps were running: 47 of 92 PASS and 0 failed at 15:13 (syscall was the latest). The record copy is docs/phase4/briefs/trainF-battery-run2-summary.txt on
+   BATTERY RUN 2 COMPLETE AND GREEN (16:50:55): all 83 sweeps PASS, 0 failed. The -tests legs: reflect validates 395 (as
+   banked-to-be); internal/synctest validates 28 of 28 with 0 disclosures (it banks at landing); runtime/pprof and
+   net/http/pprof diverge as expected (not banked; TRAIN G's P2 seats move them); the runtime build is clean. At the end the
+   tF worktree holds 177 tracked changes from the -tests legs' regenerated test sources (0 deletions): RESTORE them
+   (git restore on the listed paths) before the landing merge, and never git add -A. The record copy is docs/phase4/briefs/trainF-battery-run2-summary.txt on
    claude/coord-handover. If the i7's run is gone, re-run .claude/coord-scripts/trainF/tF-battery.sh with
    EXPECT_HEAD=efc9c093de.
    LANDING STEPS:
@@ -121,7 +125,9 @@ WHERE THINGS STAND (2026-09-27 ~14:30, i7 local time):
    - the i9: host-flag isolation 458b56f6e5.
    UNION: casPointerLatched takes r-runtime-claims' body.
    ADD IF READY:
-   - R's seat (iii), claude/r-recover-model;
+   - R's seat (iii), claude/r-recover-model f8dfffc99a: GATED and ACCEPTED. The TRAIN G battery must also show the
+     'invalid boolean value "bogus" for -test.v' GolibTests abort under `dotnet test go2cs.slnx` is GONE: it recurred
+     in 2 of 2 suite runs, and the i9's flag-isolation seat is the expected cure;
    - the i9's claude/i9-host-sandbox-marker;
    - P2's F, claude/p2-method-wrapper;
    - G's windows-AV sink guard;
@@ -214,14 +220,14 @@ Your first action is your NEXT line. Reply to COORD with an ACK naming the tips 
 LANE: R   MODEL: Opus 5.5/high   HOST: R-LAPTOP
 BRANCH: claude/r-compound-shift-guard e77c72409f6fe7bb2f7614c28078143d56a7ad6f on-origin yes accepted -- seat (i), compound shift-assign guard (TRAIN F)
 BRANCH: claude/r-runtime-claims 3fae75de813cc531610dba822de609ca46df9277 on-origin yes accepted -- seat (ii): minmax, map-key clone, panicnil + GODEBUG wiring (TRAIN G)
-BRANCH: claude/r-recover-model f8dfffc99ae7710370faa7b5cfb3ab4abd627b7f on-origin yes announced -- seat (iii): recover chain/eligibility + item C (nil defer); all gates green except the full behavioral suite, which was RUNNING
+BRANCH: claude/r-recover-model f8dfffc99ae7710370faa7b5cfb3ab4abd627b7f on-origin yes accepted -- seat (iii): recover chain/eligibility + item C (nil defer); GATED (full behavioral 2807/2834, only the pre-existing TestingRuntimeTests trio fails; GolibTests clean standalone): a TRAIN G seat
 BRANCH: claude/r-recover-design f019adfeadf457e811b4f1f5690c403d49f6fca4 on-origin yes accepted -- DESIGN-recover-model (approved)
 BRANCH: claude/r-panic-frames-design f4b6da3c32c8069550450f6fc02e3eb6257a26f6 on-origin yes accepted -- DESIGN-panic-stack-frames (B approved + P2's 4 changes + the GoWrapper rule)
 BRANCH: claude/r-pkgpath-verbatim 776491b6b0fc7154dc9126d74d15c3d15de22c07 on-origin yes cut -- option A: code + converter/golib arms red-first done; PREDICTION committed; footprint, corpus hunks, golden and gates NOT yet run
 BRANCH: claude/r-godebug-at-start c692b06bc16931ddc5edd17b26838b8ab4ff8263 on-origin yes cut -- parsedebugvars-at-start code half; does NOT build alone (needs the footprint's enableWER placeholder hunk); arms not yet written
 LOCAL-ONLY: none
 WORKTREE: R-LAPTOP r-minmax, r-shift, r-recover, r-recover-design, r-frames-design, r-pkgpath, r-godebugstart: 0 tracked changes (run artifacts only)
-NEXT: read seat (iii)'s full-behavioral result and post seat (iii) at f8dfffc99ae7710370faa7b5cfb3ab4abd627b7f; then option A's two-seeded 3-target footprint from 776491b6b0fc7154dc9126d74d15c3d15de22c07
+NEXT: option A's two-seeded 3-target footprint from 776491b6b0fc7154dc9126d74d15c3d15de22c07 (seat (iii) is gated and accepted for TRAIN G)
 READ-FIRST: docs/phase4/DESIGN-recover-model.md; docs/phase4/DESIGN-panic-stack-frames.md; docs/phase4/r-evidence/pkgpath/PREDICTION.md (on claude/r-pkgpath-verbatim); the ledger's R rulings of 2026-09-27 (option A 89dd66fa84, parsedebugvars ea8a9a8b7e, B plus 93c2bdd50b); mailbox e3a5725cff (P2's B review)
 BLOCKED-ON: none
 TOOLS: GOROOT go1.24.13 WITH GOTOOLCHAIN=local (R-LAPTOP's ambient GOTOOLCHAIN is go1.23.1 and switches silently without the pin); DOTNET_ROOT .NET SDK 10.0.400; python 3.11.15; linux lane: WSL Ubuntu-22.04 with go1.24.13 and dotnet10, driven by script files only
