@@ -310,17 +310,17 @@ internal static uint32 cheaprandn(uint32 n) {
 // Do not call these from package runtime.
 
 //go:linkname legacy_fastrand runtime.fastrand
-internal static uint32 legacy_fastrand() {
+public static uint32 legacy_fastrand() {
     return (uint32)rand();
 }
 
 //go:linkname legacy_fastrandn runtime.fastrandn
-internal static uint32 legacy_fastrandn(uint32 n) {
+public static uint32 legacy_fastrandn(uint32 n) {
     return randn(n);
 }
 
 //go:linkname legacy_fastrand64 runtime.fastrand64
-internal static uint64 legacy_fastrand64() {
+public static uint64 legacy_fastrand64() {
     return rand();
 }
 

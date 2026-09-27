@@ -155,7 +155,7 @@ internal static UntypedInt sweepMinHeapDistance => /* 1024 * 1024 */ 1048576;
 // this to true to break all the programs using assume-no-moving-gc.
 //
 //go:linkname heapObjectsCanMove
-internal static bool heapObjectsCanMove() {
+public static bool heapObjectsCanMove() {
     return false;
 }
 

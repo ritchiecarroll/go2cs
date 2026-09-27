@@ -2176,6 +2176,24 @@ var linknameForwardTargets = map[string]bool{
 	// row the pull was a throwing stub: the README walkthrough's third gap (COORD sizing 2026-09-24),
 	// alongside the asm trampolines asmTrampolines.go forwards.
 	"syscall.prlimit": true,
+	// runtime's moving-GC flag, pulled by runtime's OWN external test (heap_test.go:12,
+	// `//go:linkname heapObjectsCanMove runtime.heapObjectsCanMove`) for TestHeapObjectsCanMove, and
+	// authorized by the one-arg handle in mgc.go ("Do not remove or change the type signature",
+	// go4.org/unsafe/assume-no-moving-gc reads it). ORDINARY CONVERTED Go: it returns false. That is
+	// also the managed host's answer for what a Go program can observe: the CLR compacts, but an
+	// address a converted program can hold (an unsafe.Pointer or uintptr taken from a heap object)
+	// is a pinned token, never the object's movable CLR address, so no Go-visible address moves.
+	"runtime.heapObjectsCanMove": true,
+	// runtime's legacy fastrand family, pulled by runtime's own external test (rand_test.go:67-73,
+	// `//go:linkname fastrand runtime.fastrand` and its n and 64 siblings) for TestLegacyFastrand.
+	// Go keeps the three symbols linkable for legacy callers and gives each its body under another
+	// name with a two-arg directive (rand.go: `//go:linkname legacy_fastrand runtime.fastrand`), so
+	// each row carries its definition in linknameForwardDefinitions, time's legacy shape. The bodies
+	// are ORDINARY CONVERTED Go over rand()/randn(). No new project reference: runtime's own test
+	// already references runtime.
+	"runtime.fastrand":   true,
+	"runtime.fastrandn":  true,
+	"runtime.fastrand64": true,
 }
 
 // linknameForwardDefinitions names the DEFINITION of a linknameForwardTargets row whose symbol is not
@@ -2191,6 +2209,10 @@ var linknameForwardDefinitions = map[string]string{
 	"time.Time.abs": "time.legacyTimeTimeAbs",
 	"time.absClock": "time.legacyAbsClock",
 	"time.absDate":  "time.legacyAbsDate",
+
+	"runtime.fastrand":   "runtime.legacy_fastrand",
+	"runtime.fastrandn":  "runtime.legacy_fastrandn",
+	"runtime.fastrand64": "runtime.legacy_fastrand64",
 }
 
 // linknameForwardDefinitionSources is the reverse index of linknameForwardDefinitions: the set of
