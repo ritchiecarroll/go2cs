@@ -205,6 +205,141 @@ lifts a second, function-scoped name for the same Go type, and a container of it
 conversion to bridge the two. That is the recorded cross-context anonymous-lift identity split, which
 applies equally to the one-level shape and is a separate increment.)
 
+## An INITIALIZED var lifts its explicit anonymous declared type too — and a blank name lifts from the GO identifier
+
+`visitValueSpec` lifts a var whose DECLARED type is an anonymous struct/interface literal, but
+until 2026-08-09 only on the BODYLESS arm (`var x struct{…}`). Give the same var an
+**initializer** and nothing lifted it, so the raw Go text landed in both the declaration type
+and the value adapter's class name — and its braces close the C# member, making every following
+declaration in the file read as a namespace-level one:
+
+```go
+// crypto/ecdh's test half opens with the documented-interface witness idiom:
+var _ interface{ Equal(x crypto.PublicKey) bool } = &ecdh.PublicKey{}
+```
+```csharp
+// before — CS1519/CS1002 at the site, then CS0106 on every remaining member, CS1022 at EOF:
+internal static interface{Equal(x crypto.PublicKey) bool} _ᴛ1ʗ =
+    new ecdhꓸPublicKeyжinterface{Equal(x crypto.PublicKey) bool}(Ꮡ(new ecdhꓸPublicKey(nil)));
+// after:
+[GoType("dyn")] partial interface _ᴛ1 { bool Equal(cryptoꓸPublicKey x); }
+internal static _ᴛ1 _ᴛ1ʗ = new ecdh.ΔPublicKeyж_ᴛ1(Ꮡ(new ecdhꓸPublicKey(nil)));
+```
+
+The initialized arm now performs the bodyless arm's lift (both the struct and the interface
+twin). Ordering is not a constraint: the adapter name is minted EARLIER in the same iteration by
+`convertToInterfaceType`, but as a deferred `«DYNTYPE:…»` marker, so a lift registered afterwards
+still resolves it at the file-visit barrier.
+
+The lift is named from the **GO** identifier, not from `csIDName`. For an ordinary name the two
+agree (`csIDName` is that name sanitized, and `getUniqueLiftedTypeName` re-sanitizes its
+argument), but a BLANK `_` var's `csIDName` is a synthesized temp (`_ᴛ1ʗ`) that exists in no Go
+scope — so `getUniqueLiftedTypeName`'s `typeExists` check cannot see it and hands the type the
+field's own name back, giving one class a nested type and a field both called `_ᴛ1ʗ` (CS0102).
+Passing `_` finds the blank var among the package's defs and bumps the type to `_ᴛ1`, distinct
+by construction. (Guarded by the `AnonInterfaceVarWitness` behavioral test — two blank witnesses
+over different anonymous interfaces, a NAMED anonymous-interface var that is then called through
+its adapter, an anonymous-struct declared type, and a local interface value of the witness type,
+output-compared vs Go; and by `crypto/ecdh`'s banked 47-verdict suite, which is where it was
+found.)
+
+## Every type-name render resolves a lifted anonymous struct cross-file
+
+The registry/marker resolution above initially covered only two dedicated call sites
+(`dynamicStructTypeName`'s `ж.of(…)` address-of-field form and `convertToInterfaceType`), while
+the GENERAL type-name renderers — `getAliasQualifiedTypeName`/`getFullyQualifiedTypeName`, which every other emission
+path reaches (heap-box declarations, casts, generic arguments…) — still fell through to raw
+`t.String()` Go text on a `liftedTypeMap` miss. So ranging over a package-level anonymous-struct
+slice declared in a SIBLING file, with the loop variable escaping to a heap box, stringified the
+element type into the box declaration: bytes' `compareTests` (`[]struct{a, b []byte; i int}`,
+declared in compare_test.go, ranged from the earlier-sorted bytes_test.go) emitted
+`ref var tt = ref heap(new struct{a <>byte; b <>byte; i int}(), …)` — CS1526 plus a ~170-error
+parser cascade that blocked all of bytes (Phase-4 blocker B8).
+
+Both renderers now resolve a NON-EMPTY anonymous struct/interface through
+`deferredDynamicTypeName` before the `t.String()` fall-through: the shared
+`packageDynamicTypeNames` registry (the declaring file may already have been visited — file
+visits run in deterministic sorted-file order), else the deferred `«DYNTYPE:…»` marker. The
+empty `struct{}`/`interface{}` are excluded — their raw signatures intentionally map to
+`EmptyStruct`/`any` downstream. The marker payload is now the HEX-ENCODED signature rather than
+the raw text: these general render paths flow through string transformation passes
+(`convertToCSTypeName` rewrites every `[`/`]` to `<`/`>`, alias handling splits on `.`) that
+would corrupt an embedded raw signature before the post-barrier resolution could match it back
+to the registry; hex digits pass through every transform untouched, and the encoding is a pure
+function of the signature so equal signatures still render the identical (comparable) string.
+Emitted form:
+
+```csharp
+// zvars.cs (declaring file, visited AFTER the reference):
+[GoType("dyn")] partial struct compareTestsᴛ1 { … }
+internal static slice<compareTestsᴛ1> compareTests = …;
+// main.cs (cross-file range + heap box):
+foreach (var (_, vᴛ1) in compareTests) {
+    ref var tt = ref heap(new compareTestsᴛ1(), out var Ꮡtt);
+    …
+}
+```
+
+Guarded by `AnonStructCrossFile` (`zvars.go` declares `compareTests` and sorts after `main.go`,
+forcing the marker path; `avars.go` declares `sizeTests` and sorts before it, taking the direct
+registry hit — main.go ranges over both with `&tt`/`&st` forcing the heap box, output-compared vs
+Go).
+
+## A lifted type name is unique across the PACKAGE, and the `-tests` variant inherits production's
+
+Resolution (above) is one half; **naming** is the other. Every lifted type — an anonymous
+struct/interface, or a function-local declaration hoisted out of its body — is emitted as a
+**nested type of the single `<pkg>_package` partial class**, so its name has to be unique across
+the whole package. The uniquing set was per-FILE, which is a scope narrower than the emission
+target: two sibling files whose lifts reach for the same generated name each believed the name
+free and both declared it.
+
+Both spellings a lift can start from are exposed to this. An anonymous type with no name of its
+own falls back to the generic `type` (rendered `Δtype`, then `Δtypeᴛ1`, `Δtypeᴛ2`, … per
+collision), and a function-local declaration is prefixed with the **method name only** — which
+sibling files legitimately share, since Go allows one `probe` method per receiver type.
+encoding/gob hit both at once: production `type.cs` and the internal-variant `encoder_test.cs`
+each lifted a differently-shaped `struct{…}` to `Δtype`/`Δtypeᴛ1`, and the class then carried two
+definitions of each — CS0579 on the doubled `[GoType]` attribute plus CS0111/CS0557 on every
+member `go2cs-gen`'s `TypeGenerator` emitted for the duplicate (32 errors, the whole package
+blocked). Note the failure is **not** avoided when the two anonymous structs happen to be
+structurally identical: the second `[GoType("dyn")]` is still a duplicate attribute.
+
+The claim set is therefore package-scoped (`packageLiftedTypeNames`, reset per package/variant),
+with two deliberate exemptions:
+
+- A `[module: GoManualConversion]` file **does not claim**. Its emission is redirected to a
+  non-compiled `.cs.auto` review sibling, so a claim there would push a real file's type name to a
+  higher ordinal for a declaration that never compiles. Those visitors keep the per-file set alone.
+- The `-tests` **INTERNAL** variant is pre-seeded with the names the production conversion claimed
+  (`productionLiftedTypeNames`). That variant emits its `_test.go` files into the production
+  package class while the production `.cs` on disk are **not** regenerated, so those names are
+  immutable and the test-side lift is the side that moves — the same production-pinned rule
+  `testMethodRenames` applies to declarators and the Tier-C hoist seed applies to literal fields.
+  The seed is the production run's live claim set, captured in `convertTestVariants` before the
+  first variant's `resetPackageState` (production conversion runs moments earlier in the same
+  process). The **EXTERNAL** variant is not seeded: its `<pkg>_test_package` is a separate class
+  and may reuse every production name freely.
+
+```csharp
+// type.cs (production, pinned):        encoder_test.cs (internal variant, steps around):
+[GoType("dyn")] partial struct Δtype {  [GoType("dyn")] partial struct Δtypeᴛ7 {
+    internal nint r7;                       internal nint A;
+}                                       }
+```
+
+Residual: two package-level anonymous structs that are structurally IDENTICAL but declared in
+different files still lift to two distinct C# types (one Go type split in two) rather than
+sharing one. That combination cannot compile today either — it is the CS0579 case above — so
+nothing regressed; unifying them needs the second declaration's *emission* suppressed, not just
+its name reused.
+
+Guarded by `AnonStructCrossFile`'s `bvars.go`/`yvars.go` (both manifestations, straddling
+`main.go` so file order is exercised in both directions) and, for the `-tests` seed,
+`TestTestVariantPinsProductionLiftedTypeNames`.
+
+<a id="function-literal-parameters-share-the-body-scope"></a>Moved to [Function-literal parameters share the body scope](functions-and-closures.md#function-literal-parameters-share-the-body-scope).
+
 ## A global addressed only by the package's own `_test.go` is still heap-boxed
 A Go pointer to a package-level var aliases that var's real storage, which in C# means the global
 must be backed by a heap box (see [Pointers](pointers.md#pointers)); `packageAddressedGlobals` decides that by

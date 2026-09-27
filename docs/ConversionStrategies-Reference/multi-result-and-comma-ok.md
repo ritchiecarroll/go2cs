@@ -144,6 +144,66 @@ net's `var ctx, cancel = context.WithCancel(context.Background())` is the corpus
 `GlobalTupleVarDecl` extension — a local `var si, fi = ifaceAndFunc()` returning an interface and a
 func, both read back.)
 
+## A forwarded multi-value call deconstructs when tuple elements need interface conversion
+`return newRawConn(f)` forwards a `(*rawConn, error)` tuple into a `(syscall.RawConn, error)`
+result list — C# tuple conversions do not consult user conversions element-wise (CS0266). The
+converter deconstructs into temps and converts each element through the usual interface
+machinery (which also records the `GoImplement` pairing):
+
+```csharp
+var (ᴛ1, ᴛ2) = makeRelay();
+return (new relayжReporter(ᴛ1), ᴛ2);
+```
+
+Elements whose actual type is itself an interface are left alone (structural inheritance
+covers those). Guarded by `CrossPkgUser` (`getReporter` forwarding `makeRelay`).
+
+## A multi-value call spread into a call's parameters in an assignment hoists into temps
+Go lets a MULTI-VALUE call fill the parameters of an enclosing call — `r := t.newRange(t.parseControl("range"))`,
+where `parseControl` returns five values feeding `newRange`'s five parameters. C# has no splat, so the inner
+call is deconstructed into markers and passed expanded:
+
+```csharp
+var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl("range"u8);
+var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
+```
+
+`convExprList` already performs this expansion, but only when the call's `deferredDecls` hoist target is
+non-nil — passing the whole tuple as one argument is otherwise CS7036 (text/template/parse's `rangeControl`).
+The return-form threads that target (visitReturnStmt); the assignment forms do too, on BOTH lowering
+branches: the single-declare block and the mixed/escaping block (a pointer-result local that is heap-boxed is
+not counted in `declaredCount`, so it takes the latter — the `newRange` case above). A **statement-level**
+`f(g())` (a bare expression statement, not an assignment) carries no `deferredDecls` of its own, so the
+expansion now falls back to the enclosing `ExprStmt`'s `v.hoistedDecls` buffer — testing's
+`registerCover2(deps.InitRuntimeCoverage())`, where `InitRuntimeCoverage` returns three values:
+
+```csharp
+var (ᴛ1, ᴛ2, ᴛ3) = deps.InitRuntimeCoverage();
+registerCover2(ᴛ1, ᴛ2, ᴛ3);
+```
+
+The hoisted `var (…) = …;` lands in the statement's existing hoist buffer, emitted before the statement.
+Byte-identical corpus-wide except where the pattern occurs (and a harmless renumber of any later temps, since
+the per-file marker index is monotonic). Guarded by `TupleSpreadIntoCall` (a value result, an escaping pointer
+result, and a statement-level spread).
+
+A **PACKAGE-LEVEL var initializer** has no statement sink at all — `var debug = template.Must(
+template.New("RPC debug").Parse(debugText))` (net/rpc debug.go; also internal/trace/traceviewer) passed the
+whole `(ж<Template>, error)` tuple as `Must`'s one argument (CS7036). There the spill becomes a hidden
+once-evaluated static tuple FIELD (`v.globalDeclHoist`, flushed by visitValueSpec before the var's own
+field — C# static field initializers run in textual order, the same holder shape `visitPackageTupleVarSpec`
+emits for `var a, b = f()`), and the arguments read its components:
+
+```csharp
+internal static (nint, nint) tupleᴛ1ʗ = parts();
+internal static nint g = combine(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);
+```
+
+Guarded by the `TupleSpreadIntoCall` extension (a package-level `var` spreading a two-value call into a
+wrapping call, value read back in main).
+
+<a id="a-range-over-a-pointer-typed-type-conversion-parenthesizes-before-the-deref"></a>Moved to [A range over a pointer-typed type conversion parenthesizes before the deref](pointers.md#a-range-over-a-pointer-typed-type-conversion-parenthesizes-before-the-deref).
+
 ---
 
 [← Short Variable Redeclaration (Shadowing)](shadowing.md) · [Index](README.md) · [Slices and Arrays →](slices-and-arrays.md)
