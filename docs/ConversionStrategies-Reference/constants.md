@@ -279,6 +279,32 @@ The cast is spelled `nuint` for both native-width targets rather than naming the
 
 See [Named Numeric Types and Constant Contexts](named-numeric-types.md#named-numeric-types-and-constant-contexts) for how these interact with native-int and named numeric types. See also [example](https://github.com/ritchiecarroll/go2cs/tree/master/src/archived/Examples/Manual%20Tour%20of%20Go%20Conversions/basics/numeric-constants).
 
+## A COMPLEX constant expression must be FOLDED — .NET's mixed operators are not Go's arithmetic
+
+The float sibling of this rule (see *Named Numeric Types and Constant Contexts*) folds a constant
+expression only where a named untyped const forces it, on the stated ground that a pure-literal float
+constant "computes exactly in C# double, so its readable operator form is kept". That ground does not
+hold for COMPLEX, and the counter-example is ordinary: .NET's mixed real/complex operators are not
+Go's constant arithmetic and are not even IEEE. `Complex.operator -(double, Complex)` computes the
+imaginary part as `-right.Imaginary` rather than `left.Imaginary - right.Imaginary`, so
+
+```csharp
+1230000D - 0D.i()      // imaginary -0
+```
+
+where Go — which folds the untyped expression in exact rational arithmetic, and an exact zero has no
+sign — yields `+0`. `fmt`'s `TestSprintf` reads the sign back out: `%#12.5g` of `1230000 - 0i` printed
+`-0.0000i` against Go's `+0.0000i`.
+
+So the rule is stated the way Go states it: a complex-kind constant operator expression HAS an exact
+value and is emitted as that value, through the same `exactComplexConstString` a complex const
+DECLARATION already uses. Keyed on `constant.Complex` — go/constant normalizes a real-valued result to
+an Int/Float kind, so a real-only expression in a complex context is left to the float and integer
+folds above it. Deliberately no `/* <gofmt> */` annotation, unlike the float fold: the folded text
+re-renders in the same `re + imi` shape `convBasicLit` already emits, so the common case (`3 + 4i` →
+`3F + 4F.i()`) is byte-identical to the operator rendering it replaces, and only the cases where the
+two genuinely disagree move.
+
 ## `string()` of an untyped constant reference hops through the default type
 `string(utf8.RuneError)` renders the argument as its cross-package `static readonly` Untyped* wrapper, from which `@string` has no conversion (CS0030). The conversion hops through the constant's DEFAULT Go type first -- exactly Go's conversion semantics; a plain literal is already a C# constant and keeps its direct form:
 ```csharp

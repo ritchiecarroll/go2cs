@@ -48,7 +48,7 @@ The nil-key entry (see [The NIL map key](#the-nil-map-key)) is produced first; G
 unspecified and deliberately randomized, so the position is free.
 
 **One key shape makes the visit-time lookup the wrong instrument, and it is a real Go shape rather
-than a curiosity.** A [NaN key is equal to nothing, itself included](manual-conversions.md#a-nan-map-key-is-never-equal-to-anything-itself-included),
+than a curiosity.** A [NaN key is equal to nothing, itself included](#a-nan-map-key-is-never-equal-to-anything-itself-included),
 so `m[NaN] = v` twice stores *two* entries and neither can ever be read back **or deleted**. For such
 a key the lookup always misses, so a re-read on arrival silently drops every NaN entry from every
 range — a worse defect than the one this machinery exists to fix, because nothing raises. So a miss
@@ -281,6 +281,21 @@ wrapped (`TestQUICHandshakeError`). `error<T>` now carries the identical member 
 shell does: the `ж` box when pointer-backed (Go pointer-identity equality), the wrapped value
 otherwise. (Guarded by `GolibTests.ErrorShellCarrierEqualityTests` — two shells over one value, the
 pointer-identity flavor, and the protocol membership itself.)
+
+## A NaN map key is never equal to anything, itself included
+
+BCL `Double.Equals` reports NaN equal to NaN, deliberately, so that a NaN stored in a collection can
+be found again. Go applies `==` unchanged, so a NaN key is equal to nothing: `m[NaN] = 1` twice stores
+TWO entries, and neither can ever be read back or deleted. `fmt`'s own `TestSprintf` reads the
+difference out of `%v` of a map — `map[NaN:1]` against Go's `map[NaN:1 NaN:1]`.
+
+`GoEqualityComparer.ForKeys` therefore supplies a per-representation, non-boxing comparer for the four
+float representations, whose entire implementation is `==` — because C#'s float `==` IS the IEEE
+relation Go's map applies. The hash stays the type's own, and a NaN that hashes consistently while
+comparing unequal builds exactly the same-bucket/never-equal chain Go's map builds for it. Scoped to
+the raw representations: a NAMED float type's wrapper, and a struct or array that CONTAINS a float,
+still compare through their generated equality and inherit the BCL rule. No measured consumer reaches
+those, and covering them would mean routing every struct-keyed map through the reflective relation.
 
 ## Named map types and constrained map access
 

@@ -124,7 +124,7 @@ The same "a box is a temporary, the storage is the object" reasoning answers **l
 when the referent dies, and whether two boxes name the same allocation — which `runtime.SetFinalizer`
 and `sync.Cond`'s copy detector both depend on, and which is also why `Ꮡ(IArray<T>, index)` must take
 its target **by value**: see
-[A pointer's REFERENT, not its box, answers every lifetime and identity question](manual-conversions.md#a-pointers-referent-not-its-box-answers-every-lifetime-and-identity-question).
+[A pointer's REFERENT, not its box, answers every lifetime and identity question](#a-pointers-referent-not-its-box-answers-every-lifetime-and-identity-question).
 
 ## A pointer's nilness and identity are STRUCTURAL — the `IsNull` / `IsNilPointer` split
 
@@ -141,6 +141,42 @@ Fixed consumers: `operator ~` (both the `ж<T>` and the `IPointer<T>` interface 
 **Two identity rules changed with it.** (a) A standard heap box's identity was formerly *derived from the value it held* whenever `T` was a reference type — two distinct boxes wrapping one referent compared **equal**. That reported `&c == &d` **true** for two distinct `*int` variables holding the same pointer, collapsed `map[**int]V{&c: …, &d: …}` into a **single** entry, and made a pointer's **hash mutate when its pointee was assigned**, so a key inserted while its pointee was nil could never be found again (`m[q]` read back the zero value while `len(m)` still said 1). A pointer's identity is its storage: a standard box *is* the storage, so it hashes and compares by its own identity, and `&x == &x` holds because an addressed Go variable is heap-boxed **once**. (b) Conversely, two boxes **aliasing the same native address** (`m_nativeAddr`) are now the same pointer — a `uintptr` round-trip mints a fresh box each time, and Go requires `(*T)(unsafe.Pointer(p)) == (*T)(unsafe.Pointer(p))`.
 
 golib-only change — no emitted-code difference. (Guarded two ways, because the converter routes every reference-typed-pointee deref through `.ValueSlot` — verified with a 6-shape probe including generics — so `operator ~` is unreachable from converted Go and only golib-internal, hand-owned and reflection-bridge code takes it. The Go-expressible half is in the `PointerToNilPointerIdentity` behavioral output test: distinct-variable identity, `map[**int]` two-key distinctness, hash stability across a pointee assignment, and reference-typed field-reference deref + map keying — pre-fix `&c == &d` printed `true`, the two-key map held **1** entry, and the stable-key lookup read back empty. The unreachable half is in `GolibTests.PointerNilPredicateTests`, which drives `operator ~` (both forms), `DerefOrNil`, `ReadPointerSlot` through a hand-written stand-in for a generated named-pointer wrapper, and native-alias identity — 7 of its 10 assertions fail pre-fix.)
+
+## A pointer's REFERENT, not its box, answers every lifetime and identity question
+
+A `ж<T>` is a *pointer*, and go2cs mints them freely: `Ꮡ(s, i)` allocates a fresh box on every call,
+and `Ꮡx.of(T.Ꮡfield)` allocates one per field access. The box is therefore an **expression
+temporary** whose lifetime says nothing about the storage it names. Anything that asks a question
+about the *object* — when does it die, is this the same object — must ask it of the referent.
+`INilPointer.ReferentObject` (golib `ж.cs`) is that projection, and `ж<T>` resolves it the way
+`Equals` already resolves pointer identity:
+
+| Pointer shape | `ReferentObject` |
+|---|---|
+| array/slice element (`&s[i]`) | the canonical backing storage (`CanonicalElement` — the `T[]`, never a per-call header/view) |
+| struct field (`&x.f`), including a nested `of()` chain | the **root** allocation, resolved recursively through the per-call intermediate boxes |
+| standard heap box (`&x`, `new(T)`), whatever the pointee's type | the box itself — it *is* the allocation |
+| native alias (a `uintptr` round-trip) | the box itself — the address it wraps names no *managed* allocation, so there is nothing GC-keyed to resolve to (the one place this projection and `Equals`, which identifies such boxes by that address, part company) |
+
+Two consumers depend on it, and both were broken without it:
+
+* **`runtime.SetFinalizer`** keyed its `ConditionalWeakTable` registration on the boxed `obj`. Go
+  attaches a finalizer to the *object* a pointer points at — `runtime.SetFinalizer(&buf[0], f)`
+  finalizes `buf`'s allocation — so keying on the throwaway `ж<byte>` the argument expression
+  allocated registered against a lifetime nothing in the program shared: the finalizer became due
+  the moment the box died (or, under a JIT that roots the whole frame, could never become due at
+  all). It now keys on the referent, so the registration tracks exactly the allocation Go would
+  finalize, and two boxes for the same address correctly share one registration (Go's "finalizer
+  already set").
+* **`sync.Cond`'s `copyChecker`**, below.
+
+**`Ꮡ(IArray<T>, index)` takes its target BY VALUE, deliberately.** It used to be `in IArray<T>`.
+`in` on an *interface* parameter elides no copy — it is already one reference — but it forces the
+caller's boxing temp (a `slice<T>`/`array<T>` header is a struct, so every call boxes one) to be
+**address-exposed**, and an address-exposed slot is not lifetime-tracked: the JIT reports it live for
+the whole enclosing method. One `Ꮡ(s, i)` therefore pinned `s`'s backing array to the caller's frame
+until that method *returned*, in fully optimized code. Measured with a `WeakReference` probe against
+a `DOTNET_TieredCompilation=0` build: the `in` form leaks the array, the by-value form releases it.
 
 ## Reading a pointer and taking a field pointer allocate NOTHING — the two costs hidden inside `ж<T>`
 

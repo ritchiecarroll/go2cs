@@ -369,6 +369,30 @@ internal static void assignDescriber(ж<holder> Ꮡh, ж<Setting> Ꮡs) {
 
 This is intentionally keyed on selector/index expression type instead of the root identifier, so struct fields such as `go/types`' `operand.expr ast.Expr` and ordinary behavioral fields both take the same path. Guarded by `PointerInterfaceStructField`, including the assignment case after the struct-literal cases.
 
+## `new(T)` is Go's ZERO value — and for a container kind that means the NIL one
+
+`p := new([]int)` in Go yields a pointer to the zero slice, which is **nil**; likewise
+`new(map[K]V)` and `new(chan T)`. golib's container structs each declare a parameterless constructor
+that ALLOCATES (`map<K,V>` makes its backing dictionary, `slice<T>` takes the empty array), and
+`Activator.CreateInstance<T>` honors a declared parameterless constructor — so `new(T)` handed back a
+pointer to a non-nil EMPTY container.
+
+It went unnoticed because the two differ only under `== nil`: `len()` agrees at 0, a range over either
+yields nothing, and `encoding/json` marshals them by the same branch. It surfaced where the two
+zero-FABRICATION paths finally met. `reflect.Zero`/`New` build a zero through `GoReflect.ZeroValueOf`,
+which has always answered the NIL container for these kinds, so
+
+```go
+reflect.DeepEqual(new([]any), reflect.New(typ).Interface())
+```
+
+compared a nil slice against an empty one and was false — and that comparison is the precondition
+`encoding/json`'s whole `TestUnmarshal` table checks before every subtest, which is how one
+constructor blocked forty-odd verdicts at once. `builtin.@new<T>` now takes `default(T)` for the
+slice/map/chan kinds and keeps running the constructor for every other kind, because that is what
+materializes a struct's fixed-size ARRAY fields from the initializers the converter emits into it. The
+two rules are one classification now, asked of the same `KindOf`.
+
 ---
 
 [← Floating-Point Formatting](floating-point-formatting.md) · [Index](README.md) · [Empty Interface (`any`) →](empty-interface.md)
