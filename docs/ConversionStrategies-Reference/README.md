@@ -283,6 +283,18 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
     - [A capture-mode method on a shadow-renamed heap-boxed local uses the rendered box name](methods-and-receivers.md#a-capture-mode-method-on-a-shadow-renamed-heap-boxed-local-uses-the-rendered-box-name)
     - [A capture-mode method called on a FIELD CHAIN of a local is an address-of too](methods-and-receivers.md#a-capture-mode-method-called-on-a-field-chain-of-a-local-is-an-address-of-too)
     - [The same chain one level up: `&recv.f1.f2` on a POINTER RECEIVER](methods-and-receivers.md#the-same-chain-one-level-up-recvf1f2-on-a-pointer-receiver)
+- **[Variadic Parameters](variadic-parameters.md)**
+  - [Declaring a variadic parameter](variadic-parameters.md#declaring-a-variadic-parameter)
+    - [A variadic closure rebinds its `params` array to a slice](variadic-parameters.md#a-variadic-closure-rebinds-its-params-array-to-a-slice)
+    - [An UNNAMED or BLANK variadic parameter emits no rebinding](variadic-parameters.md#an-unnamed-or-blank-variadic-parameter-emits-no-rebinding)
+    - [A non-escaping variadic parameter binds through the stack-only `sslice<T>` view](variadic-parameters.md#a-non-escaping-variadic-parameter-binds-through-the-stack-only-sslicet-view)
+    - [A pack that is only COPIED FROM or FORWARDED takes the view too](variadic-parameters.md#a-pack-that-is-only-copied-from-or-forwarded-takes-the-view-too)
+    - [The `ꓸꓸꓸT` alias identifier mirrors the GO name](variadic-parameters.md#the-ꓸꓸꓸt-alias-identifier-mirrors-the-go-name)
+  - [Calling a variadic function](variadic-parameters.md#calling-a-variadic-function)
+    - [Every trailing argument of a variadic pointer parameter gets the box treatment](variadic-parameters.md#every-trailing-argument-of-a-variadic-pointer-parameter-gets-the-box-treatment)
+    - [A NAMED func type's call-result delegate resolves its signature through `Underlying()`](variadic-parameters.md#a-named-func-types-call-result-delegate-resolves-its-signature-through-underlying)
+    - [An untyped `nil` in a VARIADIC slot states its element type](variadic-parameters.md#an-untyped-nil-in-a-variadic-slot-states-its-element-type)
+    - [A SLICE or ARRAY as the SOLE argument of a variadic slot](variadic-parameters.md#a-slice-or-array-as-the-sole-argument-of-a-variadic-slot)
 - **[Type Accessibility and Publicization](type-accessibility.md)**
   - [Publicization](type-accessibility.md#publicization)
     - [Publicization decides WHAT a type's modifier is; the test-bridge arm only decides WHERE](type-accessibility.md#publicization-decides-what-a-types-modifier-is-the-test-bridge-arm-only-decides-where)
