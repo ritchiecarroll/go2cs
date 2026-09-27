@@ -17,9 +17,10 @@ operation succeeded, each with its original line ending, BOM and trailing newlin
       `before` lines, then `prefix` + the tail. Used to restore a lead lost in a splice.
   insert      {file, before_heading | after_line, lines}
       Insert lines above a heading (exact text) or after the one line equal to `after_line`.
-  move        {src, heading, level, dst, dst_group?, after?, dst_level?, stub}
+  move        {src, heading, level, dst, dst_group?, after?, dst_level?, until?, stub}
       Move the block from the heading (exact text, at `level`) to the line before the next heading of
-      the same or a higher level (or the page footer). With `dst_group` the block lands at the end of
+      the same or a higher level (or the page footer); `until` ends it earlier, before the first line
+      of the block that starts with that text. With `dst_group` the block lands at the end of
       that H2 in dst (created at the end of the page if missing), its top heading at level 3; without
       it the block keeps its level (or takes `dst_level`). `after` places it after the named heading's
       block instead of at the end. `stub` is "inplace" (the anchor paragraph replaces the block) or
@@ -287,6 +288,12 @@ def op_move(repo, op):
     what = f'move {op["heading"][:60]!r}'
     hs, k = find_heading(S.lines, op['heading'], level, what)
     i0, i1 = block_range(S.lines, hs, k)
+    if op.get('until'):
+        umask = rc.fence_mask(S.lines)
+        us = [i for i in range(i0 + 1, i1) if not umask[i] and S.lines[i].startswith(op['until'])]
+        if not us:
+            raise Fail(f'{what}: until-line {op["until"]!r} not inside the block')
+        i1 = trim_end(S.lines, i0, us[0])
     block = S.lines[i0:i1]
     bmask = rc.fence_mask(block)
     bheads = [(i - i0, lv, t, s) for (i, lv, t, s) in hs if i0 <= i < i1]
