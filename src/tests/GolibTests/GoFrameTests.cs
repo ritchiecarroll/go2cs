@@ -62,7 +62,9 @@ public class GoFrameTests
     // that completion, or the next test on this thread inherits a panic it never raised.
     private static PanicException Completed(PanicException escaped)
     {
-        _ = recover();
+        // Cleared directly: recover() outside a deferred sequence stops nothing (Go's direct-call
+        // rule, DESIGN-recover-model.md), so it can no longer serve as this cleanup.
+        GoFuncRoot.CapturedPanicValue = null;
         return escaped;
     }
 

@@ -282,18 +282,34 @@ public static partial class builtin
     /// </summary>
     /// <returns>Recovered panic state, or <c>null</c> when no panic is in flight.</returns>
     /// <remarks>
-    /// Reads the one thread-local slot the emitted <c>catch</c> parked the panic in
-    /// (<see cref="GoFrame.Capture"/>), so it resolves STATICALLY from wherever it is called —
-    /// which is what lets a deferred closure recover without holding a handle on the frame that
-    /// registered it. It replaces the <c>Recover</c> delegate the retired
-    /// <c>func((defer, recover) =&gt; ...)</c> execution context passed into the body; that
-    /// delegate's <c>HandleRecover</c> did exactly this, against exactly this slot.
+    /// Reads the panic the RUNNING deferred sequence may recover (<see cref="GoFrame.Run"/> scopes it),
+    /// so it resolves STATICALLY from wherever it is called — which is what lets a deferred closure
+    /// recover without holding a handle on the frame that registered it. That scoping is Go's rule
+    /// that only a deferred call the panic sequence itself runs can recover: a recover() in the
+    /// defers of a deferred function's own normal return reads nil. A panic already recovered reads
+    /// nil too, so its sequence's tail knows not to re-raise it (docs/phase4/DESIGN-recover-model.md).
+    /// It used to read and clear the one captured-panic slot, which a nested panic overwrote.
+    /// <para>
+    /// Known divergence, accepted: a recover() in a HELPER the deferred function calls still
+    /// recovers here, where Go's returns nil. The panic stops early instead of reaching an outer
+    /// recover or crashing.
+    /// </para>
     /// </remarks>
     public static object? recover()
     {
-        object? state = GoFuncRoot.CapturedPanicValue?.State;
-        GoFuncRoot.CapturedPanicValue = null;
-        return state;
+        PanicException? panic = GoFuncRoot.RecoverablePanicValue;
+
+        if (panic is null || panic.Recovered)
+            return null;
+
+        panic.Recovered = true;
+
+        // The traceback view (GoFuncRoot.InFlightPanic) falls back to the captured slot, and a
+        // recover always cleared it — kept, for exactly the panic being recovered.
+        if (ReferenceEquals(GoFuncRoot.CapturedPanicValue, panic))
+            GoFuncRoot.CapturedPanicValue = null;
+
+        return panic.State;
     }
 
     /// <summary>

@@ -60,6 +60,9 @@ public ref struct GoFrame
     // overflow list exists for correctness and is allocated by a vanishing fraction of frames.
     // A defer inside a LOOP registers once per iteration and is what actually reaches it, which is
     // also why the count cannot be a purely syntactic property (see docs/Phase4/DESIGN-closure-emission.md §4.2).
+    // What a nil deferred func does when it is called: Go's nil-dereference runtime error (panicmem).
+    private static readonly Action s_nilDeferredCall = static () => throw RuntimeErrorPanic.NilPointerDereference();
+
     private Action? m_d0, m_d1, m_d2, m_d3;
     private List<Action>? m_overflow;
     private int m_count;
@@ -73,17 +76,24 @@ public ref struct GoFrame
     /// <summary>
     /// Registers a deferred call, i.e. Go's <c>defer</c> statement.
     /// </summary>
-    /// <param name="deferred">Deferred call to register; a null registration is ignored.</param>
+    /// <param name="deferred">Deferred call to register; a null (Go's nil func) is registered too, and
+    /// raises the nil-dereference runtime error when it is called at function exit.</param>
     /// <remarks>
     /// Go evaluates a deferred call's ARGUMENTS at the <c>defer</c> statement and runs the call on
     /// function exit, so the emission captures the arguments here — see the <c>defer</c> arity
     /// ladder in <c>builtin.DeferRegistrations.cs</c>, which is what closes over them.
+    /// <para>
+    /// Go's spec: a deferred function value that is nil panics when the function is INVOKED, not when
+    /// the defer statement runs. A null registration used to be IGNORED, so `var f func(); defer f()`
+    /// returned normally (runtime's TestCallersDeferNilFuncPanic and its loop form). The argument-taking
+    /// rungs already wrap the call in a closure and fault correctly; the zero-argument rung hands the
+    /// delegate straight here.
+    /// </para>
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Push(Action? deferred)
     {
-        if (deferred is null)
-            return;
+        deferred ??= s_nilDeferredCall;
 
         switch (m_count)
         {
@@ -153,6 +163,15 @@ public ref struct GoFrame
 
             GoFuncRoot.HandledPanicValue = handling ?? outer;
 
+            // What a recover() in THIS sequence's deferred calls may stop: the panic being handled,
+            // or nothing for a normal-return sequence — NOT the outer sequence's panic, even when this
+            // frame is itself a deferred call that panic is running (Go's direct-call rule; runtime's
+            // TestRecoverMatching). Written only when it changes, and restored on exit below.
+            PanicException? outerRecoverable = GoFuncRoot.RecoverablePanicValue;
+
+            if (!ReferenceEquals(outerRecoverable, handling))
+                GoFuncRoot.RecoverablePanicValue = handling;
+
             try
             {
                 while (m_count > 0)
@@ -214,6 +233,7 @@ public ref struct GoFrame
 
                         GoFuncRoot.CapturedPanicValue = raised;
                         GoFuncRoot.HandledPanicValue = raised;
+                        GoFuncRoot.RecoverablePanicValue = raised;
                         handling = raised;
 
                         // A panic raised by THIS frame's own deferred call is this frame's to
@@ -226,11 +246,19 @@ public ref struct GoFrame
             finally
             {
                 GoFuncRoot.HandledPanicValue = outer;
+
+                if (!ReferenceEquals(GoFuncRoot.RecoverablePanicValue, outerRecoverable))
+                    GoFuncRoot.RecoverablePanicValue = outerRecoverable;
             }
         }
 
-        if (owned is not null && GoFuncRoot.CapturedPanicValue is not null)
-            throw GoFuncRoot.CapturedPanicValue;
+        // The owned panic continues exactly when nothing recovered IT. This used to read the thread's
+        // captured-panic slot instead, which a NESTED panic overwrites and its recover() clears — so a
+        // panic recovered inside one of this frame's deferred calls silently swallowed the panic this
+        // frame was running (runtime's TestIssue43921), or left an outer recover() reading nil
+        // (TestIssue43920). `owned` and the sequence's `handling` are always the same panic here.
+        if (owned is { Recovered: false })
+            throw owned;
 
         // The foreign-unwind correction's second half: no real panic superseded the sequence, so
         // the ORIGINAL foreign exception continues unwinding with its stack intact — instead of
@@ -337,6 +365,7 @@ public ref struct GoFrame
     public static void Capture(PanicException panic)
     {
         GoFuncRoot.InFlightForeignException = null; // a REAL panic supersedes any preserved foreign unwind
+        panic.Recovered = false; // a panic arriving at a catch is in flight: unrecovered by definition
         GoFuncRoot.CapturedPanicValue = panic;
         GoFuncRoot.ArmPanicClaim(panic);
     }

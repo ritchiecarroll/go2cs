@@ -23,6 +23,17 @@ public class PanicException(object? state, Exception? innerException = null) :
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public object? State { get; } = state;
 
+    /// <summary>
+    /// Whether a <c>recover()</c> has stopped this panic — Go's <c>_panic.recovered</c>. Set by
+    /// <see cref="builtin.recover"/>; cleared by <see cref="GoFrame.Capture"/>, because a panic
+    /// arriving at a frame's catch is in flight and therefore unrecovered by definition. The deferred
+    /// sequence that owns the panic re-raises it at its tail exactly when this is still false, so a
+    /// NESTED panic recovered inside one of its deferred calls can no longer make it disappear
+    /// (runtime's TestIssue43920/TestIssue43921; docs/phase4/DESIGN-recover-model.md).
+    /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    internal bool Recovered { get; set; }
+
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private string? m_message;
 

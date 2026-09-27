@@ -67,6 +67,7 @@ public class ThreadStateCensusTests
         ("golib/GoFuncRoot.cs|HandledPanic", Disposition.GolibReset, "HandledPanic.Value = null;", "the panic whose defers are running"),
         ("golib/GoFuncRoot.cs|UnclaimedPanic", Disposition.GolibReset, "UnclaimedPanic.Value = null;", "a captured panic no frame has claimed"),
         ("golib/GoFuncRoot.cs|InFlightForeign", Disposition.GolibReset, "InFlightForeign.Value = null;", "a foreign exception unwinding through emitted frames"),
+        ("golib/GoFuncRoot.cs|RecoverablePanic", Disposition.GolibReset, "RecoverablePanic.Value = null;", "the panic the running deferred sequence may recover"),
         ("golib/runtime/GoschedBackoff.cs|t_consecutiveInertYields", Disposition.GolibReset, "internal static void ResetThread() => t_consecutiveInertYields = 0;", "a Gosched backoff streak"),
         ("golib/runtime/Goroutine.cs|t_current", Disposition.RetiredByRun, "t_current = null;", "the goroutine identity; Goroutine.Run's scope retires it"),
         ("golib/runtime/Goroutine.cs|s_profileLabels", Disposition.FlowsWithContext, "AsyncLocal<object?> s_profileLabels", "pprof labels, inherited at goroutine creation"),
@@ -303,7 +304,7 @@ public class ThreadStateCensusTests
         yield return ("SelectPending.t_frames", () => Field(typeof(Coro).Assembly.GetType("go.SelectPending")!, "t_frames").GetValue(null), null);
         yield return ("builtin.s_fallthrough", () => ((ThreadLocal<bool>)Field(typeof(builtin), "s_fallthrough").GetValue(null)!).Value, false);
 
-        foreach (string slot in new[] { "CapturedPanic", "HandledPanic", "UnclaimedPanic", "InFlightForeign" })
+        foreach (string slot in new[] { "CapturedPanic", "HandledPanic", "UnclaimedPanic", "InFlightForeign", "RecoverablePanic" })
             yield return ($"GoFuncRoot.{slot}", () => LocalValue(Field(typeof(GoFuncRoot), slot).GetValue(null)!), null);
 
         yield return ("registered probe", () => t_registeredProbe, 0);
@@ -322,6 +323,7 @@ public class ThreadStateCensusTests
         SetLocal(Field(typeof(GoFuncRoot), "CapturedPanic").GetValue(null)!, stale);
         SetLocal(Field(typeof(GoFuncRoot), "HandledPanic").GetValue(null)!, stale);
         SetLocal(Field(typeof(GoFuncRoot), "UnclaimedPanic").GetValue(null)!, stale);
+        SetLocal(Field(typeof(GoFuncRoot), "RecoverablePanic").GetValue(null)!, stale);
         SetLocal(Field(typeof(GoFuncRoot), "InFlightForeign").GetValue(null)!, System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(new InvalidOperationException("A")));
 
         t_registeredProbe = 7;

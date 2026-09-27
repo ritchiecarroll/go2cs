@@ -46,6 +46,15 @@ public class GoFuncRoot
     // superseding the unwind is Go's own replacement rule.
     protected static readonly ThreadLocal<System.Runtime.ExceptionServices.ExceptionDispatchInfo?> InFlightForeign = new();
 
+    // The panic the deferred sequence RUNNING on this thread may recover — Go's rule that recover()
+    // succeeds only in a deferred call the panic sequence itself invoked. GoFrame.Run sets it once per
+    // sequence (to the panic it is handling, or null for a normal-return sequence), updates it when a
+    // deferred call's panic replaces the one being handled, and restores the outer value on exit. So a
+    // recover() inside the defers of a deferred function's OWN normal return reads null, exactly as
+    // Go's does (runtime's TestRecoverMatching), and the outer panic is still there for the outer
+    // sequence afterwards. docs/phase4/DESIGN-recover-model.md.
+    protected static readonly ThreadLocal<PanicException?> RecoverablePanic = new();
+
     /// <summary>
     /// Clears this thread's panic slots before a pooled thread runs its next goroutine. Each is
     /// frame-scoped and normally empty when a goroutine ends; a goroutine that ends on a Goexit or an
@@ -57,6 +66,7 @@ public class GoFuncRoot
         HandledPanic.Value = null;
         UnclaimedPanic.Value = null;
         InFlightForeign.Value = null;
+        RecoverablePanic.Value = null;
     }
 
     internal static System.Runtime.ExceptionServices.ExceptionDispatchInfo? InFlightForeignException
@@ -79,7 +89,7 @@ public class GoFuncRoot
     public static PanicException? InFlightPanic => HandledPanic.Value ?? CapturedPanic.Value;
 
     // The slots, reachable by the golib members that read and write them: GoFrame's catch/finally
-    // pair (all three) and builtin.recover() (the captured one).
+    // pair (all of them) and builtin.recover() (the recoverable one, and the captured one it clears).
     internal static PanicException? CapturedPanicValue
     {
         get => CapturedPanic.Value;
@@ -90,6 +100,12 @@ public class GoFuncRoot
     {
         get => HandledPanic.Value;
         set => HandledPanic.Value = value;
+    }
+
+    internal static PanicException? RecoverablePanicValue
+    {
+        get => RecoverablePanic.Value;
+        set => RecoverablePanic.Value = value;
     }
 
     // Arms the re-raise claim for a panic a frame's catch just captured.
