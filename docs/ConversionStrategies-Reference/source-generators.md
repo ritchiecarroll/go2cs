@@ -89,6 +89,26 @@ Mechanics worth knowing:
 * **The section sorts on the DECLARATION, not the line.** `typeAccessibilityKey` strips the attribute prefix before comparing, so a stamped entry keeps the place its accessibility/kind/name earns instead of being pulled into a leading block by its `[`. Sorting the raw line is legal but scrambles a section whose whole value is being readable at a glance.
 * **Not a semantic change anywhere.** The relocation moves *where the attribute is written*, exactly as the `TypeAccessibility` section moved where the modifier is written. Nothing observes a difference: the generated `Clone()` is identical, and `GoReflect`'s `%T` output is identical.
 
+## BCL names in generator templates are global::-qualified too
+
+**BCL names in generator templates are global::-qualified too — a Go type can shadow any bare BCL
+name.** The generated partials sit inside the package class, where every Go type in the package is
+a sibling member that wins name lookup over `System.*`: internal/trace/traceviewer declares
+`type Range struct`, so the named-string wrapper's sub-slice indexer `this[Range range]` bound the
+Go `Range` instead of `System.Range` (CS1503 inside its own `ViewType.g.cs`). This is a *class* of
+collisions, not one bug — any package declaring a type named `Range`, `Index`, `Type`, `Span`, … is
+exposed — so the audit qualified every BCL reference the TypeGenerator templates emit:
+`global::System.Range` (string/slice/array indexers), `global::System.Span<T>`/`ReadOnlySpan<byte>`,
+the `IEnumerator`/`IEnumerable` members, `ICloneable`, `IEquatable` and the `System.Numerics`
+operator interfaces on numeric wrappers, `System.Type`/`Reflection.MethodInfo`/`Activator`/
+`NotImplementedException`/`[DebuggerNonUserCode]` in the dynamic-interface machinery, and the
+`GeneratedCode` attribute stamped on every generated declaration (`Common.cs`, shared by all
+generators). golib names (`slice<T>`, `NilType`, `IChannel`, …) stay bare — they live in the `go`
+namespace the generated code owns. Converter-emitted visible code is not part of this rule (it
+renders BCL names by the file-scoped conventions above). (Guarded by `BclTypeNameShadow` —
+a package declaring `type Range struct` alongside a named string type and a named slice type, both
+sub-sliced with the Go `Range`'s fields as bounds, output vs Go.)
+
 ## ImplicitConvGenerator
 
 ### A GoImplicitConv record needs at least one LOCAL operand

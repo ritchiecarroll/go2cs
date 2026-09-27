@@ -443,73 +443,7 @@ printed and output-compared vs Go [the pre-fix emission provably prints `calls: 
 `calls: 4`], a `recover()` tag in a deferred multi-type switch, and a channel-receive tag that
 would deadlock on re-receive.)
 
-## Generated code global::-qualifies root-namespace references
-Inside a package whose namespace nests a same-named segment (go/build/constraint emits into
-`namespace go.go.build`), C# binds a generated reference's leading `go` RELATIVELY to `go.go`
-(CS0234). The generators qualify every type-reference position via `GlobalQualify`
-(Common.cs); generated signatures also carry parameter REF KINDS (`in slice<byte>`) and a
-canned `System.IFormattable` impl where the interface inherits it (the hand-finished io
-stub's dyn machinery).
-
-The **converter** faces the same `go.go` shadowing in the import `using` directives it emits for a
-`go/*` package (go/token lands in `namespace go.go`, imports `sync`/`unicode` sub-namespaces): a
-rooted `using atomic = go.sync.atomic_package;` / `using go.sync;` binds its leading `go` to the
-enclosing `go.go` namespace, resolving `go.sync` to the nonexistent `go.go.sync` (CS0234). `rootQualifyIfAmbiguous` routes its rooting returns through `rootQualified`, which emits `global::go.`
-instead of a bare `go.` when the package's namespace second segment is itself `go`:
-
-```csharp
-using atomic = global::go.sync.atomic_package;
-using global::go.sync;
-```
-
-The shadowing is NOT limited to `go/*` packages themselves: any package with a `go/*` package
-anywhere in its transitive import CLOSURE compiles with `namespace go.go` in scope (its referenced
-assembly makes `go.go` a member of namespace `go`), and C#'s inner-to-outer lookup then binds the
-bare leading `go` of a rooted using target to that member from EVERY namespace nested under the
-root — internal/fuzz (imports go/ast) emitted `using bits = go.math.bits_package;` inside
-`namespace go.@internal`, resolving to the nonexistent `go.go.math` (CS0234 ×16, plus the same
-shape in net/rpc's `Δhttp` alias and testing/internal/testdeps). `rootQualified` therefore also
-emits `global::go.` when `packageChildNamespaces` carries the `go.go` key (populated from the
-transitive import closure by `computeImportAliasRenames`' pre-pass). A package with no `go/*`
-anywhere in its closure — every package that was compiling before, and all pre-existing behavioral
-tests — keeps the bare `go.` prefix, so there is no golden churn. Cleared go/token, go/doc/comment,
-go/build/constraint (own-namespace branch); internal/fuzz's 18 CS0234 and net/rpc's latent pair
-(closure branch). Guarded by the `GoNamespaceShadow` behavioral test, which covers BOTH branches
-through a nested local module literally named `go/nsshadow` (emitting `namespace go.go`, the shape
-a single-file behavioral test cannot express): the nested lib imports `math` + `math/rand` so its
-own rooted using exercises the own-namespace branch, and the importing `main` package (namespace
-`go`, with `go.go` in its closure) exercises the closure branch.
-
-**Under `-tests` the shadow gate spans BOTH compilation halves, and the directly-composed using
-targets must go through it too.** The gate had two holes that only a test conversion can expose,
-and math/rand/v2 (whose `regress_test.go` imports `go/format`) hit both — 13 of the package's 22
-compile errors:
-
-1. *The closure was computed per PACKAGE, not per ASSEMBLY.* A `-tests` run recompiles the
-   package's PRODUCTION sources into the test assembly, so that assembly's reference closure is the
-   UNION of the production and `_test.go` closures. The production conversion pass saw only its own
-   half, never learned `go.go` was in scope, and emitted bare `using bits = go.math.bits_package;`
-   into a compilation that did contain `go.go`. `collectSiblingTestClosure` now runs a
-   metadata-only (`NeedName|NeedImports|NeedDeps`) load of the test variants before the production
-   conversion and records their transitive import paths in `siblingClosureImportPaths`, which
-   `computeImportAliasRenames` folds into the closure it walks — so every consumer of the namespace
-   maps (the shadow gate, `rootQualifyIfAmbiguous`, `isStrippedGoPathPackageRef`) describes the
-   assembly rather than the package. The set is empty for every non-`-tests` conversion, so no
-   other output moves.
-2. *Targets composed straight from `packageNamespace` bypassed `rootQualified` entirely.* Both the
-   package-under-test anchor (`visitImportSpec`'s `isPackageUnderTest` branch, which REPLACES the
-   `rootQualifyIfAmbiguous`-derived target with `<packageNamespace>.<pkg>_package`) and the test
-   host's `using go.testing_runtime;` were bare, which is why one emitted file could show a
-   correctly-qualified `using iotest = global::go.testing.iotest_package;` beside a broken
-   `using static go.math.rand.rand_package;`. `globalQualifyRooted` applies the same gate to an
-   ALREADY-rooted path and both sites now route through it. It is idempotent and a no-op with no
-   shadow, so unshadowed packages emit byte-identically.
-
-Both holes fire for ANY package whose test closure reaches a `go/*` package, and a `regress_test.go`
-importing `go/format` is a common stdlib idiom — this is not a v2 quirk. Guarded by
-`TestGlobalQualifyRootedForcesGlobalUnderRootShadow` and `TestSiblingClosureContributesRootShadow`
-(`src/go2cs/rootShadowQualification_test.go`); the behavioral corpus cannot cover them because it
-never runs `-tests` and no behavioral package imports a `go/*` package.
+<a id="generated-code-global-qualifies-root-namespace-references"></a>Moved to [Generated code global::-qualifies root-namespace references](golib-namespace.md#generated-code-global-qualifies-root-namespace-references).
 
 ## A GoImplement record's adapter key is canonical, not textual
 `interfaceImplementations` is keyed by RENDERED type name, so one resolved pair recorded under two
@@ -648,24 +582,6 @@ dependency list stays import-derived. This is what lets **os/signal** validate (
 `TestAliasReferenceImportsIgnoresConversionRecordAttributePayload`.
 
 **Referencing a `go/*`-package TYPE loses a root segment because the path's own `go` collides with the root namespace.** A `go/ast` type reference renders correctly as `go.go.ast_package.X` (root `go` + the path's `go.ast` → namespace `go.go`, class `ast_package`), but `convertToCSTypeName` then strips the *leading* `go.` as a redundant root (bodies live inside `namespace go`), leaving `go.ast_package.X` — namespace `go`, which has no `ast_package` (CS0234/CS0426 in the go/* consumers go/doc, go/printer, go/internal/typeparams, whose GoImplement attributes and `using` aliases both carry the stripped form). The two rooting helpers now recognise this: `isStrippedGoPathPackageRef` splits the ref at its first `_package` class segment and tests the *namespace* portion against `packageChildNamespaces` (the current package's rooted import-closure namespaces): the ref is stripped iff that namespace is NOT already a real rooted namespace but *becomes* one when the root `go.` is prepended. This is a **membership** test, not a string-shape test, so it recognises a stripped go/*-package ref at any depth — `go.ast_package` (ns `go`✗ → `go.go`✓), `go.build.constraint_package` (ns `go.build`✗ → `go.go.build`✓, three-segment `go/build/constraint`), `go.doc.comment_package` (ns `go.doc`✗ → `go.go.doc`✓) — while leaving a genuinely-rooted ref alone (`go.io.fs_package` — ns `go.io` is already real). (The earlier two-segment string heuristic — "the class segment sits immediately after `go.`" — recognised only the depth-one `go.ast_package` shape and silently missed the three-segment `go/build/constraint` and `go/doc/comment` sub-package refs, which are string-indistinguishable from a correctly-rooted `go.io.fs_package`; the membership test is what disambiguates them.) `rootQualifySubNamespaceTypeRefs` (the assembly-scope GoImplement/GoImplicitConv attributes) re-roots the stripped form to a bare `go.go.ast_package`; `rootQualifyIfAmbiguous` (the in-namespace `using` aliases) re-roots to `global::go.go.ast_package` — always `global::`, because a bare `go.go.<pkg>_package` re-binds its leading `go` to the nearest enclosing `go` from *any* importer (a go/*-package's own `go.go.*` namespace, and equally `internal/pkgbits` at `go.internal.pkgbits` resolving the second `go` inside `go.go`, CS0234). This un-blocks the whole go/* chain at the rooting level (go/doc's own-errors 17 → 1); each go/* package still needs its remaining per-package residuals (e.g. a methodless-func-type's `[GoTypeAlias]` still names an inline-rendered `ΔFilter`) to fully compile. The depth-one shape is now guarded by `GoNamespaceShadow` (its `go/nsshadow` nested module's import renders through `isStrippedGoPathPackageRef` → `using nsshadow = global::go.go.nsshadow_package;`); the multi-segment sub-package depth (`go/build/constraint`) remains census-verified only — the A/B reconvert-diff showed only the four `go/build/constraint`- and `go/doc/comment`-importing packages, go/build, go/doc, go/parser, go/printer, gaining the corrected double-`go` rooting, with the depth-one `go.go.ast_package` refs unchanged and zero collateral.
-
-**BCL names in generator templates are global::-qualified too — a Go type can shadow any bare BCL
-name.** The generated partials sit inside the package class, where every Go type in the package is
-a sibling member that wins name lookup over `System.*`: internal/trace/traceviewer declares
-`type Range struct`, so the named-string wrapper's sub-slice indexer `this[Range range]` bound the
-Go `Range` instead of `System.Range` (CS1503 inside its own `ViewType.g.cs`). This is a *class* of
-collisions, not one bug — any package declaring a type named `Range`, `Index`, `Type`, `Span`, … is
-exposed — so the audit qualified every BCL reference the TypeGenerator templates emit:
-`global::System.Range` (string/slice/array indexers), `global::System.Span<T>`/`ReadOnlySpan<byte>`,
-the `IEnumerator`/`IEnumerable` members, `ICloneable`, `IEquatable` and the `System.Numerics`
-operator interfaces on numeric wrappers, `System.Type`/`Reflection.MethodInfo`/`Activator`/
-`NotImplementedException`/`[DebuggerNonUserCode]` in the dynamic-interface machinery, and the
-`GeneratedCode` attribute stamped on every generated declaration (`Common.cs`, shared by all
-generators). golib names (`slice<T>`, `NilType`, `IChannel`, …) stay bare — they live in the `go`
-namespace the generated code owns. Converter-emitted visible code is not part of this rule (it
-renders BCL names by the file-scoped conventions above). (Guarded by `BclTypeNameShadow` —
-a package declaring `type Range struct` alongside a named string type and a named slice type, both
-sub-sliced with the Go `Range`'s fields as bounds, output vs Go.)
 
 ## Generic embedded fields
 A GENERIC embed (`entry[K,V]` embedding `node[K,V]`, internal/concurrent) arrives in the AST as

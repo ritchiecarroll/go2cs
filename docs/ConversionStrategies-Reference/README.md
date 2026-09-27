@@ -43,20 +43,17 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Generated output path: `$(OutDir)` defers to `$(BaseOutputPath)`](package-conversion.md#generated-output-path-outdir-defers-to-baseoutputpath)
   - [Per-GOOS sources: layout L3 and `$(GoTargetOS)`](package-conversion.md#per-goos-sources-layout-l3-and-gotargetos)
   - [Build-warning suppression: what the emitted `.csproj` silences, and what it deliberately does not](package-conversion.md#build-warning-suppression-what-the-emitted-csproj-silences-and-what-it-deliberately-does-not)
-  - [A doc-comment link resolves to a fully-qualified, version-pinned URL](package-conversion.md#a-doc-comment-link-resolves-to-a-fully-qualified-version-pinned-url)
   - [The README has TWO emission points, because its Tests badge reads a page the run writes LAST](package-conversion.md#the-readme-has-two-emission-points-because-its-tests-badge-reads-a-page-the-run-writes-last)
   - [Assembly metadata is one derivation chain, and the framework is hoisted to props](package-conversion.md#assembly-metadata-is-one-derivation-chain-and-the-framework-is-hoisted-to-props)
   - [Cross-package imports (importing another package / assembly)](package-conversion.md#cross-package-imports-importing-another-package--assembly)
   - [A cross-package type reference emits its `using <alias> = <namespace>;`](package-conversion.md#a-cross-package-type-reference-emits-its-using-alias--namespace)
   - [System-colliding local type names are root-qualified in assembly attributes](package-conversion.md#system-colliding-local-type-names-are-root-qualified-in-assembly-attributes)
-  - [An UPWARD `//go:linkname` var alias INVERTS its storage instead of giving up](package-conversion.md#an-upward-golinkname-var-alias-inverts-its-storage-instead-of-giving-up)
+  - [Exported structs and interfaces cross packages](package-conversion.md#exported-structs-and-interfaces-cross-packages)
+  - [A DOTTED build tag is matched against the host toolchain's tool tags](package-conversion.md#a-dotted-build-tag-is-matched-against-the-host-toolchains-tool-tags)
   - [Build constraints are parsed and evaluated by `go/build/constraint`](package-conversion.md#build-constraints-are-parsed-and-evaluated-by-gobuildconstraint)
   - [An import forces the imported package's `init` to run](package-conversion.md#an-import-forces-the-imported-packages-init-to-run)
   - [A `-tests` production-reference project forces the package under test's own `init`](package-conversion.md#a--tests-production-reference-project-forces-the-package-under-tests-own-init)
   - [A NuGet-referenced standard library carries its exported metadata IN THE CONVERTER](package-conversion.md#a-nuget-referenced-standard-library-carries-its-exported-metadata-in-the-converter)
-  - [A foreign implement record is keyed in ONE spelling, and a VALUE one is trusted only for a partial struct](package-conversion.md#a-foreign-implement-record-is-keyed-in-one-spelling-and-a-value-one-is-trusted-only-for-a-partial-struct)
-  - [A package records the pairs it SATISFIES, not only the ones it witnesses](package-conversion.md#a-package-records-the-pairs-it-satisfies-not-only-the-ones-it-witnesses)
-  - [The POINTER method set records the same way, for a different contract](package-conversion.md#the-pointer-method-set-records-the-same-way-for-a-different-contract)
   - [Standard-library solution file (`.slnx`)](package-conversion.md#standard-library-solution-file-slnx)
   - [Recurse per-project solution file (`.slnx`)](package-conversion.md#recurse-per-project-solution-file-slnx)
 - **[Package-Level Variable Initialization Order](variable-initialization-order.md)**
@@ -224,6 +221,8 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
 - **[Type Aliasing](type-aliasing.md)**
   - [Type Definitions](type-aliasing.md#type-definitions)
   - [Type Alias Declarations](type-aliasing.md#type-alias-declarations)
+  - [A collision-renamed alias chain resolves to its concrete target](type-aliasing.md#a-collision-renamed-alias-chain-resolves-to-its-concrete-target)
+  - [A same-named cross-package alias target is fully qualified](type-aliasing.md#a-same-named-cross-package-alias-target-is-fully-qualified)
   - [Generic Type Aliases](type-aliasing.md#generic-type-aliases)
 - **[Functions, Methods and Receivers](methods-and-receivers.md)**
   - [Receivers](methods-and-receivers.md#receivers)
@@ -354,7 +353,6 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Astral rune literals](struct-types.md#astral-rune-literals)
   - [Type-switch default arm binds the interface value](struct-types.md#type-switch-default-arm-binds-the-interface-value)
   - [The type-switch tag evaluates exactly once](struct-types.md#the-type-switch-tag-evaluates-exactly-once)
-  - [Generated code global::-qualifies root-namespace references](struct-types.md#generated-code-global-qualifies-root-namespace-references)
   - [A GoImplement record's adapter key is canonical, not textual](struct-types.md#a-goimplement-records-adapter-key-is-canonical-not-textual)
   - [A test project's references cover UNROOTED alias targets (single- AND multi-segment)](struct-types.md#a-test-projects-references-cover-unrooted-alias-targets-single--and-multi-segment)
   - [Generic embedded fields](struct-types.md#generic-embedded-fields)
@@ -419,6 +417,10 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
       - [GoImplement records de-duplicate at attribute emission](interfaces/records.md#goimplement-records-de-duplicate-at-attribute-emission)
     - [Sealing markers](interfaces/records.md#sealing-markers)
       - [A cross-package interface's unexported sealing marker is stubbed](interfaces/records.md#a-cross-package-interfaces-unexported-sealing-marker-is-stubbed)
+    - [Cross-package records](interfaces/records.md#cross-package-records)
+      - [A foreign implement record is keyed in ONE spelling, and a VALUE one is trusted only for a partial struct](interfaces/records.md#a-foreign-implement-record-is-keyed-in-one-spelling-and-a-value-one-is-trusted-only-for-a-partial-struct)
+      - [A package records the pairs it SATISFIES, not only the ones it witnesses](interfaces/records.md#a-package-records-the-pairs-it-satisfies-not-only-the-ones-it-witnesses)
+      - [The POINTER method set records the same way, for a different contract](interfaces/records.md#the-pointer-method-set-records-the-same-way-for-a-different-contract)
   - **[Interfaces: Run-Time Assertions](interfaces/runtime-asserts.md)**
     - [Duck-typing shells](interfaces/runtime-asserts.md#duck-typing-shells)
       - [Every eligible interface carries runtime duck-typing shells — the sole resolver of a structural assert](interfaces/runtime-asserts.md#every-eligible-interface-carries-runtime-duck-typing-shells--the-sole-resolver-of-a-structural-assert)
@@ -557,9 +559,12 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A DOT-IMPORTED renamed type is spelled through the same alias as the qualified reference](golib-namespace.md#a-dot-imported-renamed-type-is-spelled-through-the-same-alias-as-the-qualified-reference)
   - [Package aliases shadowed by method names](golib-namespace.md#package-aliases-shadowed-by-method-names)
   - [Converted programs write UTF-8 stdout — the ambient console code page never reaches the bytes](golib-namespace.md#converted-programs-write-utf-8-stdout--the-ambient-console-code-page-never-reaches-the-bytes)
+  - [Generated code global::-qualifies root-namespace references](golib-namespace.md#generated-code-global-qualifies-root-namespace-references)
+  - [A sub-package import whose leading segment is a package alias root-qualifies](golib-namespace.md#a-sub-package-import-whose-leading-segment-is-a-package-alias-root-qualifies)
 - **[Source Generators](source-generators.md)**
   - [`package_info.cs`'s `TypeAccessibility` section pins each type's accessibility IN SOURCE](source-generators.md#package_infocss-typeaccessibility-section-pins-each-types-accessibility-in-source)
   - [Extended attributes: what stays on the declaration and what moves](source-generators.md#extended-attributes-what-stays-on-the-declaration-and-what-moves)
+  - [BCL names in generator templates are global::-qualified too](source-generators.md#bcl-names-in-generator-templates-are-global-qualified-too)
   - [ImplicitConvGenerator](source-generators.md#implicitconvgenerator)
 - **[The standard-library conversion applies `-tags purego`](purego.md)**
   - [Known accepted divergence — `crypto/elliptic` P256 `Inverse` panics under purego](purego.md#known-accepted-divergence--cryptoelliptic-p256-inverse-panics-under-purego)
@@ -579,6 +584,8 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - **[Manually-Converted Declarations: Linkname and Trampolines](manual-conversions/linkname-and-trampolines.md)**
     - [Linkname pull and push](manual-conversions/linkname-and-trampolines.md#linkname-pull-and-push)
       - [A cross-package `//go:linkname` PULL emits a forwarder, not a throwing stub](manual-conversions/linkname-and-trampolines.md#a-cross-package-golinkname-pull-emits-a-forwarder-not-a-throwing-stub)
+      - [A `//go:linkname` VARIABLE pull becomes a forwarding property to the (publicized) remote](manual-conversions/linkname-and-trampolines.md#a-golinkname-variable-pull-becomes-a-forwarding-property-to-the-publicized-remote)
+      - [An UPWARD `//go:linkname` var alias INVERTS its storage instead of giving up](manual-conversions/linkname-and-trampolines.md#an-upward-golinkname-var-alias-inverts-its-storage-instead-of-giving-up)
       - [A cross-package `//go:linkname` PUSH resolves per recorded disposition — forwarder or announced panic](manual-conversions/linkname-and-trampolines.md#a-cross-package-golinkname-push-resolves-per-recorded-disposition--forwarder-or-announced-panic)
     - [Trampolines and scheduler brackets](manual-conversions/linkname-and-trampolines.md#trampolines-and-scheduler-brackets)
       - [A `//go:cgo_import_dynamic` trampoline gets a RECORD, so its address can be resolved rather than invented](manual-conversions/linkname-and-trampolines.md#a-gocgo_import_dynamic-trampoline-gets-a-record-so-its-address-can-be-resolved-rather-than-invented)
@@ -622,5 +629,6 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Where a comment is attached, and where it is not](comments.md#where-a-comment-is-attached-and-where-it-is-not)
   - [The rule](comments.md#the-rule)
   - [What is still deferred](comments.md#what-is-still-deferred)
+  - [A doc-comment link resolves to a fully-qualified, version-pinned URL](comments.md#a-doc-comment-link-resolves-to-a-fully-qualified-version-pinned-url)
 - **[Deterministic Output](deterministic-output.md)**
 - **[Packages That Do Not Type-Check](packages-that-do-not-type-check.md)**

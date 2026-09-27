@@ -537,72 +537,6 @@ the `NoWarn` set *exactly* (so adding a code forces the design-doc update, and d
 both halves of the publish-group split — a regression that moved `AllowUnsafeBlocks` under the condition
 would break the corpus in a way no warning count would reveal.
 
-## A doc-comment link resolves to a fully-qualified, version-pinned URL
-
-A converted package's `README.md` is its package-level Go doc comment rendered to Markdown, and a Go doc
-comment can link. Left to `go/doc/comment`'s defaults, those links come out **site-root-relative**:
-`[io.Reader]` renders as `[io.Reader](/io#Reader)`, because `Printer.DocLinkBaseURL` defaults to empty and
-`DocLink.DefaultURL` then composes a path from the site root. That is exactly right for pkg.go.dev, which
-serves the documentation at its own root, and exactly wrong everywhere this README is actually read:
-GitHub resolves `/io#Reader` against `github.com`, Pages/Jekyll against the site root, and nuget.org
-against `nuget.org`. The link is dead in all three.
-
-The emitter therefore installs its own `Printer.DocLinkURL` (`renderPackageDoc` in `readme.go`, resolver in
-`readmeDocLinks.go`). A standard-library target pins the Go release that produced the conversion —
-`https://pkg.go.dev/io@go1.24.13#Reader` — which is the same rule, and the same honesty doctrine, the Docs
-badge beside it already follows.
-
-**Completeness is structural here, not a judgement call, because the grammar is closed.**
-`go/doc/comment`'s `Text` interface has exactly four implementations — `Plain`, `Italic`, `*Link`,
-`*DocLink` — and only two carry a URL:
-
-* **`*Link` URLs are absolute by construction.** Both of the parser's two link sources require a scheme:
-  `parseLink` rejects a `[text]: url` definition whose url has no `isScheme(...)://`, and `autoURL` rejects
-  inline text on the same test (the accepted schemes are `file`, `ftp`, `gopher`, `http`, `https`,
-  `mailto`, `nntp`). A `*Link` therefore *cannot* reach the emitter with a relative URL, and passes through
-  untouched — which is also what the "already-absolute URLs are left alone" rule asks for.
-* **`*DocLink` is the sole relative-URL producer**, and its own documentation enumerates the exhaustive set
-  of five field combinations. `resolveDocLinkURL` answers all five.
-
-| `DocLink` fields | Emitted URL |
-|---|---|
-| `ImportPath` | `https://pkg.go.dev/io@go1.24.13` |
-| `ImportPath`, `Name` | `https://pkg.go.dev/io@go1.24.13#Reader` |
-| `ImportPath`, `Recv`, `Name` | `https://pkg.go.dev/io@go1.24.13#Writer.Write` |
-| `Name` | `https://pkg.go.dev/<current>@go1.24.13#Name` |
-| `Recv`, `Name` | `https://pkg.go.dev/<current>@go1.24.13#Recv.Name` |
-
-The two same-package forms cannot occur today — the converter leaves `Parser.LookupSym` nil, so `[NewInt]`
-stays literal text rather than becoming a link (which is why the corpus is full of escaped `\[Int]`,
-`\[Encoder]`, `\[Decode]`: those are not dead links, they are not links at all, and pkg.go.dev shows an
-unresolvable name the same way). Answering them anyway is what makes the resolver total against the
-*grammar* rather than against today's census, so enabling `LookupSym` later needs no second pass here.
-
-**An external module path is pinned only when the distribution actually pinned it.** A path whose first
-element carries a dot is a module, not a std package, and cannot be pinned to a Go release — it is not a Go
-release artifact. When GOROOT vendors that exact package, `src/vendor/modules.txt` records the snapshot the
-conversion read and the URL states it (`golang.org/x/sys@v0.22.0/cpu#X86`). When it does not —
-`golang.org/x/sys/windows` is referenced by std doc comments but is **not** among the x/sys packages GOROOT
-vendors — the URL is emitted fully qualified but **unversioned** rather than borrowing the pin from the
-module's other vendored packages. A fabricated pin is worse than an unpinned link: the unpinned one still
-resolves on all three surfaces, which is the entire defect being fixed. Same degradation the Source·Go
-badge makes for the same reason — an unresolvable pin costs precision, never correctness.
-
-Corpus census at the change: **99 relative link occurrences across 38 of 307 emitted READMEs** (40
-package-only `/pkg`, 57 `/pkg#Name`, 2 `/pkg#Recv.Name`, 0 bare-fragment `#Name` — exactly the distribution
-the grammar predicts with `LookupSym` nil), against 1,899 already-absolute targets that pass through
-unchanged.
-
-Guarded by `readmeDocLinks_test.go`, which enumerates the five combinations rather than sampling them and
-fails on any target that still begins at the site root, plus an end-to-end case over real godoc markup that
-asserts both halves of the contract — every doc link qualified, every absolute link untouched.
-
-**One thing that looks like this defect and is not.** `src/core/image/README.md` renders
-`\[Go Security Policy]([https://go.dev/security/policy](https://go.dev/security/policy))`. That is upstream
-Go writing **Markdown** link syntax inside a doc comment (`image/image.go:37`), which `go/doc/comment` does
-not support; pkg.go.dev renders it identically. Faithful conversion of an upstream quirk, not an emitter
-defect.
-
 ## The README has TWO emission points, because its Tests badge reads a page the run writes LAST
 
 A converted package's README carries the four-badge line, and the Tests badge is composed at CONVERSION
@@ -725,31 +659,7 @@ global using CrossPkgLibꓸTemperature = go.CrossPkgLib_package.Celsius;
 
 The consumer's converted code then refers to the alias as `CrossPkgLibꓸTemperature`. (This round-trip depends on the module-aware resolution above to locate the imported package's `package_info.cs`; a stdlib dependency is found under the `core` output tree, a local module via its `go/packages` directory.) Guarded by the `CrossPkgLib`/`CrossPkgUser` cross-package behavioral test pair.
 
-**A collision-renamed alias chain resolves to its concrete target.** When an exported type's name *collides* with a method name it is `Δ`-renamed (see [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)); and when that type is *also* an empty interface — `type Token any` colliding with a `Token()` method, encoding/json's shape — the producer's `package_info.cs` carries a **two-hop chain**. The collision analysis records `Token → ΔToken`, and `visitTypeSpec` (which renders an empty-interface target as `object`) records the renamed declaration `ΔToken → object`:
-
-```csharp
-[assembly: GoTypeAlias("Token", "ΔToken")]
-[assembly: GoTypeAlias("ΔToken", "object")]
-```
-
-A consumer that resolves only the FIRST hop and then qualifies the intermediate `Δ`-name as a package member emits `global using jsonꓸToken = go.encoding.json_package.ΔToken;` — but `ΔToken` is an assembly-scoped `global using`, **not** a namespace member of `json_package`, so it is CS0426 (encoding/json's `Token` consumed by html/template, internal/coverage/cfile, expvar, log/slog, internal/fuzz, …). The imported-alias loader (`loadImportedTypeAliases`) therefore follows the chain within the producer's OWN exported aliases to its **concrete** target, emitting `global using jsonꓸToken = object;`. A chain whose final target is a real `Δ`-renamed member (a delegate/struct such as `ΔFilter`, which is *not* itself an exported alias) stops there and stays package-qualified, unchanged. Guarded by the `CrossPkgLib`/`CrossPkgUser` pair — an empty-interface `Token` colliding with a `Sensor.Token()` method, named as a `var` type in the consumer and its boxed value read back, output-compared vs Go.
-
 **Imported stdlib alias metadata loads from the tree the assembly is COMPILED from — which since 2026-08-01 is the only tree there is.** *(Resolved; kept because the failure mode is instructive.)* The alias round-trip locates the imported package's `package_info.cs` under the `core` output tree. While the converted standard library lived in a SECOND tree, a `-tests` build compiled its stdlib dependencies from `go-src-converted` while `loadImportedTypeAliases` still read `package_info.cs` from the baseline `core` stub — and most stubs had **no** `package_info.cs` at all (`runtime` was impl-stubs only), so the alias map came back empty and a test's cross-package reference to a collision-renamed stdlib type rendered the RAW, undefined qualified name: `err.(runtime.Error)` → `runtime.Error` (CS0426) instead of `runtimeꓸError` → `runtime_package.ΔError` (math/bits' `Div` overflow/divide-zero panic asserts). The fix at the time derived the alias-load directory from the project-reference remap itself, so the two authorities could not drift. Both the remap and that derivation are now **deleted**: the converted stdlib lives at `$(go2csPath)core/<pkg>`, exactly where every resolver already pointed, so the alias-load path and the compile path are the same path by construction. The lesson outlives the machinery — *metadata must be read from the tree the code is compiled from, never from a parallel one that merely looks like it.*
-
-**A same-named cross-package alias target is fully qualified.** Two *different* packages can share a Go package name — html/template and text/template are both `package template`. When such a package aliases the other's type — html/template's `type FuncMap = template.FuncMap`, whose target lives in text/template — the alias RHS must name the target's OWN `(namespace, class)`: `go.text.template_package.FuncMap`. `getFullyQualifiedTypeName` had gated its cross-package branch on the package *name* (`pkg.Name() != packageName`), so a same-named foreign type read as *same-package* and fell through to the `t.String()` path, whose cross-package slash-strip drops BOTH the `text` path segment AND the `_package` class — emitting `global using FuncMap = go.template.FuncMap;` (CS0234; `template` is not a namespace of `go`). The check now compares package **identity** (`pkg != v.pkg`), matching `getAliasQualifiedTypeName` and `collectCrossPackagePaths`, so the branch fires and the target fully qualifies. (A code-*body* reference already rendered correctly — `getAliasQualifiedTypeName` keyed on identity — so only the `global using` alias RHS was wrong.) Guarded by the `CrossPkgSameNameAlias` behavioral test: a `package atomic` that aliases the same-named `sync/atomic`'s `Int32` (`type Int32 = atomic.Int32`), whose `global using` RHS must render `go.sync.atomic_package.Int32`, not the dropped-segment `go.atomic.Int32`.
-
-**A `//go:linkname` VARIABLE pull becomes a forwarding property to the (publicized) remote.** Go's `//go:linkname local pkgpath.remote` on a bodyless package var aliases `local` to another package's `remote` — SAME storage, resolved by the linker. math/bits' `//go:linkname overflowError runtime.overflowError` (its `Div` panics with `overflowError`, a `runtime.Error`) emitted a null field, so the converted `Div` panicked with `null`. Go 1.23 requires the *definition* side to authorize the pull with a one-argument handle (`runtime/linkname.go`'s bare `//go:linkname overflowError`); the authorization is puller-AGNOSTIC, so the faithful C# emission of a handle-marked var is **`public`** (a puller in a separate assembly must reach it) — a purely local decision each package makes from its own directives, no cross-package coordination. The pulling var then emits as a **forwarding property** to the fully-qualified remote (resolves in `namespace go;` without a using), and the remote's package is queued for a project reference:
-
-```csharp
-// runtime (definition side, one-arg handle):
-public static error overflowError = ((error)((errorString)(@string)"integer overflow"u8));
-// math/bits (two-arg pull):
-internal static error overflowError { get => go.runtime_package.overflowError; set => go.runtime_package.overflowError = value; }
-```
-
-Three safety gates keep the emission compilable, each narrowing forwarding to what C# can express (the rest keep the pre-feature null-field/heap-box form): (1) a handle var is publicized only when its **type is itself publicly accessible** — runtime's `sched` (`schedt`), `writeBarrier` (anon struct), `lastmoduledatap` (`*moduledata`) have unexported types and stay `internal`, since a public member cannot expose a less-accessible type (CS0052/CS0053) and such a var could not be pulled cross-assembly anyway; (2) a pull whose forwarding reference would form a **project-reference cycle** — `runtime` pulling `internal/syscall/windows.CanUseLongPaths`, where the target transitively depends on runtime — keeps its plain field (Go's link-time linkname has no package cycle; a C# project reference cannot be circular); (3) an **address-taken** pull — reflect's `//go:linkname zeroVal runtime.zeroVal` with `&zeroVal[0]` — keeps its addressed-global heap box, because a property has no address (`ᏑzeroVal` would be CS0103). The definition-side handle collection (`collectLinknameHandles`, a package-wide pre-pass like `collectPublicizedTypes`) and the pull recognition live in `linknameOperations.go`. (Guarded by the `LinknameVarPull`/`LinknameVarPullLib` behavioral test pair — a consumer package pulling an unexported handle var from a separate provider assembly, its value printed and output-compared vs `go run`; the full corpus compiles with the runtime handle vars publicized and the acyclic pulls forwarded. This is what unblocks math/bits' `Div` panic tests from `null`.)
-
-**Gate (2) asks its question three ways, because the cheapest oracle is not always available.** It used to read the `-stdlib` convert-set graph alone and answer "no cycle" whenever there was no graph — which is *every* single-package and every `-tests` conversion. That shortcut was W1: converting `runtime` under `-stdlib` suppressed the `CanUseLongPaths` pull, converting the SAME package under `-tests` emitted it, and the resulting `runtime -> internal/syscall/windows` reference closed six project cycles (MSB4006) through Go's own `internal/syscall/windows -> syscall -> runtime`. One variable, two answers, no diagnostic. The assumption behind the shortcut — that one package alone cannot form a cross-package cycle — is true of every reference the converter emits *except* this one: all the others descend from an `import`, and Go's import graph is acyclic by construction, whereas **a linkname edge is the one reference the converter emits that Go's own graph does not contain**. `linknamePullWouldCycle` now answers from, in cost order, the convert-set graph when a batch driver built one; the current package's own transitive import closure (if this package already reaches the target, the target cannot reach back); otherwise a memoized `packages.Load` of the pull TARGET, walked for the current package. A question that *cannot* be answered **refuses** the pull and says so on stderr — an unanswerable cycle question must not be answered "no", because "no" emits a reference that may not compile at all while "yes" emits the plain field the converter emitted before the feature existed.
 
 ## A cross-package type reference emits its `using <alias> = <namespace>;`
 
@@ -767,26 +677,7 @@ A Go package can name one of its own exported types after a top-level C# `System
 
 Foreign types are always package-qualified already (dotted) and are left untouched; no non-colliding name changes, so every non-colliding attribute emits byte-identically. (Guarded by the `SystemCollidingTypeName` behavioral test.)
 
-## An UPWARD `//go:linkname` var alias INVERTS its storage instead of giving up
-
-Gate (2) above keeps a cyclic pull compilable, but "compilable" is the whole of what it achieves: the two declarations become two unrelated fields, which is silently *not* what Go's directive says. A `//go:linkname` var alias is a **link-time identity** — `runtime.canUseLongPaths` and `internal/syscall/windows.CanUseLongPaths` are one word of memory, arranged with no import in either direction. C# has no link-time identity, so one assembly must hold the field and the other must reach it through a member reference, which is a **compile-time** edge and must be acyclic. Every aliased pair therefore forces one question:
-
-> **Which side holds the storage?**
-
-The project graph answers it: **storage goes in whichever package the other one already depends on.** `varLinknamePull` always puts it on the right of the two-argument directive, which is correct for a DOWNWARD pull (`math/bits → runtime`) and forms a cycle for an upward one. For the upward case the converter **inverts** rather than degrades — `runtime` keeps the storage (where Go's own write already is) and the isw declaration becomes the forwarding property:
-
-```csharp
-// runtime (storage side — publicized by packageVarAccess's alias arm, not by a handle):
-public static bool canUseLongPaths;
-// internal/syscall/windows (forwarding side, under Go's one-arg handle):
-public static bool CanUseLongPaths { get => go.runtime_package.canUseLongPaths; set => go.runtime_package.canUseLongPaths = value; }
-```
-
-Inverting costs **zero** new project references here — `isw → runtime` already exists — where the un-inverted direction costs six cycles. That asymmetry is not luck: it is the same fact stated twice, since the side that is already depended upon is by definition the side no new edge is needed to reach.
-
-**It needs a curated registry**, `linknameVarAliasTargets`, for the identical reason `linknamePushTargets` does: converting `internal/syscall/windows`, the converter cannot see runtime's directive. A package is converted from its own syntax, and its dependencies contribute *types, not comments* — so from isw's side a var under a one-arg handle is indistinguishable from any other opened var, and nothing in it names `runtime`. The row records the missing half as a judgment; `linknameVarAliasStorage` is **derived** from it (the `linknamePushSources` pattern) so the publicize arm and the registry cannot drift. Go's authorization is still required — the forwarding side must carry its one-arg handle, so a row that outlives Go's directive fails closed to a plain field rather than inventing an alias — and gate (3) is inherited on the target side, because an address-taken forwarding property would name a `Ꮡ` box that does not exist.
-
-**Forwarding and populating are one change** — the `GetSystemDirectory` rule again. `canUseLongPaths` is written only by `initLongPathSupport`, called only from `osinit`, which the converter emits already marked not-run and whose body bottoms out in `asmstdcall`; so the alias alone would have faithfully forwarded a permanent `false`. A naive "set it true" would be worse than the gap: `os.fixLongPath` would stop adding the `\\?\` prefix on a host where the PEB `IsLongPathAwareProcess` bit was *not* actually set, producing paths that silently fail. The flag is therefore tied to the **outcome**: golib's `InitializeWindowsLongPaths` reads the PEB bit back after writing it and records that observation in `WindowsLongPathsEnabled`, and the hand-owned `runtime/windows/os_windows_impl.cs` copies it into `canUseLongPaths` from a `[ModuleInitializer]` — the same slot, file and pattern as that file's existing `ᴛInitSysDirectory`. (Guarded by `TestRecurseLinknameVarAlias` for the four emission arms, `TestLinknameVarAliasRegistryMatchesGoSource` for both halves of each row against GOROOT, and the `LongPathRoundTrip` behavioral test for the semantics — a >MAX_PATH path round-tripped through `os` and output-compared vs `go run`. Design and the corrected root: [`docs/phase4/DESIGN-linkname-push-cycles.md`](../phase4/DESIGN-linkname-push-cycles.md).)
+## Exported structs and interfaces cross packages
 
 **Exported structs and interfaces cross packages.** An exported struct's fields and methods are reachable on the consumer side exactly as the producer emits them — `CrossPkgLib.Sensor{Name: …, Temp: …}` lowers to a C# constructor call and `s.Name` / `s.Hot()` to field/method access on the imported struct — because the struct and its `[GoRecv]` extension methods live in the (referenced) library assembly.
 
@@ -798,24 +689,7 @@ var _ Labeled = Sensor{}   // in CrossPkgLib — records GoImplement<Sensor, Lab
 
 With that, the library emits `[assembly: GoImplement<Sensor, Labeled>]`, `Sensor : Labeled` is realized in the library assembly, and a consumer's `var l CrossPkgLib.Labeled = s` / `CrossPkgLib.Describe(s)` compile as ordinary upcasts. (A library that returns the interface from a constructor — `func New(...) Labeled { return Sensor{…} }` — witnesses it the same way.) A type that satisfies an interface but is *never* used as it within its own package gets no nominal glue — proactively recording every local concrete→local interface structural match WAS tried (a declaration-site scan, 2026-07) and was RETIRED on 2026-07-25, because it could never be complete (it cannot see a dynamic type in a later-converted assembly) and paid for its incompleteness in speculative glue. Such a satisfaction is resolved at run time by the interface's duck-typing shells instead; a *declared* conversion still takes the nominal fast path. Also guarded by the `CrossPkgLib`/`CrossPkgUser` pair (Phase 3: struct field access + interface satisfaction).
 
-### A sub-package import whose leading segment is a package alias root-qualifies
-When a package imports both a parent package and its sub-package — testing/fstest importing `io` **and** `io/fs` — the converter emits `using io = io_package;` (a **type** alias for the io package class) and, for io/fs, a **relative** namespace target `io.fs_package`. In C# the leading `io` segment of `io.fs_package` binds to that type alias, so `io.fs_package[.FS]` resolves to the nonexistent nested type `io_package.fs_package[.FS]` — CS0426 (the `using fs = …` alias line, the embedded `fs.FS` getter, and the generated `TypeGenerator` copies). The converter records every direct-import using-alias identifier bound in the package and prefixes `go.` onto any multi-segment relative namespace/type whose leading segment is one of them, so the segment resolves as the child **namespace** it names:
-
-```go
-import (
-    "io"
-    "io/fs"
-)
-type fsOnly struct{ fs.FS }
-```
-```csharp
-using fs = go.io.fs_package;
-public go.io.fs_package.FS FS;
-```
-
-The unqualified `io.fs_package.FS` is retained as the `promotedInterfaceImplementations` map **key** (which feeds alias-less generator files where the relative form resolves). This complements the existing alias-vs-child-namespace Δ-rename, which only catches `<currentNS>.<alias>` collisions. (Recurs for any parent+sub-package import pair; a behavioral guard is owed — the io/fs embedded-interface pattern needs a parent+sub-package pair absent from the core baseline stdlib.)
-
-The same collision detection must see GOROOT-VENDORED namespaces. `visitImportSpec` resolves a GOROOT package's `golang.org/x/…` import to its on-disk `vendor/…` path (and namespace) when the importing file lives under GOROOT, but `computeImportAliasRenames` built `packageChildNamespaces` from the raw `imp.Path()` — so a vendored sub-namespace like `go.vendor.golang.org.x.text.unicode` was absent from the map. `rootQualifyIfAmbiguous` then could not see that a stdlib alias's leading segment collides with it: bidirule (at `vendor/golang.org/x/text/secure/bidirule`, importing both `unicode/utf8` and the vendored `golang.org/x/text/unicode/bidi`) emitted `using utf8 = unicode.utf8_package;`, whose `unicode` bound to the in-scope vendored `unicode` namespace rather than stdlib `go.unicode` (CS0234). `computeImportAliasRenames` now applies `resolveGorootVendoredPath` to each closure path when the package lives under GOROOT — matching the emission — so the vendored namespaces populate the map and the alias root-qualifies to `go.unicode.utf8_package`. Gated on GOROOT so a user module's own `golang.org/x` dependency is untouched; **guard owed** (the fix fires only for a GOROOT-vendored package, which the behavioral harness — never under GOROOT — cannot express; validated by the bidirule reconvert [A/B](../Glossary.md#ab)).
+## A DOTTED build tag is matched against the host toolchain's tool tags
 
 **A DOTTED build tag (`goexperiment.X`, `amd64.vN`) is matched against the host toolchain's tool tags.** The converter re-checks each file's `//go:build` constraint after `go/packages` has already loaded it (to drop files for the wrong GOOS/GOARCH when converting cross-platform). Its evaluator only handled bare identifiers (`linux`, `amd64`), so a *dotted* tag parsed as a selector and fell through to `false`. That is wrong for an experiment enabled BY DEFAULT: `coverageredesign`, `regabiwrappers`, and `regabiargs` are in the host's `go/build` `ToolTags`, so `go/packages` loaded their `//go:build goexperiment.X` `_on.go` files — but the re-check then re-EXCLUDED them (the selector → `false`), dropping the package-level consts (`testing`'s `goexperiment.CoverageRedesign`, CS0117 ×4). The evaluator now resolves a dotted tag by membership in `build.Default.ToolTags` — so an enabled experiment's `_on.go` survives and a disabled one's `!goexperiment.X` `_off.go` survives, exactly the one `go/packages` chose. Blast radius is only `internal/goexperiment` (the sole stdlib package whose file selection flipped). **Guard owed** — the fix depends on the host toolchain's active tool tags, which the `go2cs/*` behavioral harness cannot express portably; validated by the reconvert A/B (only `internal/goexperiment` changes) and the [census](../Glossary.md#census) (the consts appear, `testing`'s CS0117 clear). (That tag lookup now lives in the single `matchTag` callback described next; it was a `*ast.SelectorExpr` case while the converter still parsed constraints itself.)
 
@@ -1246,330 +1120,6 @@ converted standard library must be re-banked into `src/core` before it reaches
 mismatch, but it can only compare against the *committed* tree — it cannot detect that the committed tree
 is itself older than the published packages.
 
-## A foreign implement record is keyed in ONE spelling, and a VALUE one is trusted only for a partial struct
-
-The record scraped above answers one question at a cast site: *does the dependency's own assembly
-already implement this pair?* If it does, the bare value converts implicitly and a local
-`<pkg>_<T>ᴠ<Iface>` value adapter is dead machinery. Getting the answer wrong in either direction is
-expensive, so both halves — the KEY and the TRUST — are stated precisely here.
-
-**The key.** `implementRecordKey` composes `<declaring package>|<C# simple type>|<pkg>_package.<Iface>`
-and is called by BOTH sides of BOTH record sets: `loadPackageImplementLines`, over records parsed from a
-dependency's `package_info.cs`, and the value arms *and* the foreign-pointer arm of
-`convertToInterfaceType`, over a cast being converted. That it is one function is the whole point — the
-two sides used to compose it independently, over different alphabets, and agreed only when the
-dependency's import path was a single segment:
-
-| dependency | load side | use side | |
-|:--|:--|:--|:--|
-| `io` | `io\|noBody\|io_package.ReadCloser` | `io\|noBody\|io_package.ReadCloser` | match |
-| `encoding/binary` | `binary\|bigEndian\|binary_package.ByteOrder` | `binary\|bigEndian\|encoding.binary_package.ByteOrder` | **miss** |
-| `image/color` | `color\|ΔRGBA\|color_package.Color` | `color\|RGBA\|image.color_package.Color` | **miss** |
-| `text/template/parse` (ptr) | `parse\|ListNode\|parse_package.Node` | `parse\|ListNode\|text.template.parse_package.Node` | **miss** |
-| `go/types` (ptr) | `types\|TypeName\|go.types_package.Object` | `types\|TypeName\|types_package.Object` | **miss** |
-| `image` (ptr) | `image\|ΔRGBA\|image_package.Image` | `image\|RGBA\|image_package.Image` | **miss** |
-
-Two divergences, and the second is easy to miss because it only shows on a collision-renamed type.
-(1) The INTERFACE side: a parsed record names the recording package's own interface BARE and a foreign
-one whole (`go.image.color_package.Color`), while a cast site always renders the full namespace chain.
-`canonicalImplementRecordIfaceName` drops everything ahead of the `<pkg>_package` segment, so both reduce
-to `color_package.Color`; a member path under the class (`y_package.Outer.Inner`) survives intact. The
-package CLASS must stay — the simple name alone collides, and image's `Paletted`→`image.Image` record
-must not satisfy a `Paletted`→`draw.Image` cast. Note that neither side is reliably the *longer* one, so
-a "strip the chain" heuristic would not do: `go/types` records its OWN `Object` fully qualified where the
-cast site renders it short, while `text/template/parse` records its own `Node` bare where the cast site
-renders it whole. Which spelling a file produces depends on its own using/alias context — which is
-exactly why a canonical form, and not either side's raw text, is the key. (2) The TYPE side: a record
-carries the EMITTED C# name, so image/color's `RGBA` (collision-renamed against its own `RGBA()` method)
-is `ΔRGBA` there, while the use side was naming the GO type. Both sides now reduce the emitted name.
-
-The DECLARING-package component is what keeps a record honest. A package may record a value pair for a
-type declared in a THIRD assembly — `image` re-declared all of image/color's models — and go2cs-gen
-realizes that as a local adapter class, not as the type implementing the interface. The use side names
-the TARGET's package, so such a record can never satisfy a cast (`image|Alpha|…` against
-`color|Alpha|…`).
-
-**The trust.** A record says the declaring assembly implements the pair; it does not say HOW.
-`ImplementGenerator` makes every named Go type a `partial struct T : Iface` that really does implement
-it — struct, slice (`[GoType("[]Color")] partial struct Palette`), map, channel, numeric
-(`[GoType("num:nint")] partial struct ΔSignal`) — with exactly one exception: a named FUNC type arrives
-as a C# **delegate**, which cannot be a partial struct, so its `TypeKind.Delegate` arm emits an adapter
-CLASS in the declaring assembly instead. `valueRecordRealizesAsPartialStruct` gates on the target's Go
-underlying being a non-`*types.Signature`, at the use site where `go/types` can still see it. Without
-that gate the fix hands a bare delegate to an interface slot — CS0029 for net/http's
-`HandlerFunc` → `ΔHandler` in `expvar`, `net/http/cgi` and three more.
-
-**The POINTER set shares the key and needs no trust gate.** `[assembly: GoImplement<T, Iface>(Pointer =
-true)]` is not "the declaring assembly implements this somehow" — it is exactly the shape
-`ImplementGenerator` realizes as the public adapter class `<T>ж<Iface>`, so the record's existence *is*
-the answer and there is nothing further to ask. (The delegate hazard that forces
-`valueRecordRealizesAsPartialStruct` on the value side cannot arise: a pointer record already means the
-adapter route was taken.) An earlier ruling kept this set's key un-collapsed on the reasoning that
-matching a foreign record suppresses a LOCAL record the consumer needs; that hazard is real but it is a
-*realization* question, not a *key* question, and on the pointer side it does not exist at all.
-
-One consequence had to be fixed with the key, and only the collision-renamed types reach it: a foreign
-type whose name is Δ-renamed resolves through a whole-TYPE `global using` alias (`imageꓸRGBA =
-go.image_package.ΔRGBA`), which is a single identifier rather than a path — and the adapter is a MEMBER
-of the declaring package's class, so composing onto the alias names nothing (`imageꓸRGBAжImage`, CS0246
-×11 across five packages). The foreign-adapter arm therefore rebuilds a dotless base as the file's
-package qualifier plus the type's EMITTED simple name — `image.ΔRGBAжImage`, which is exactly what the
-declaring assembly's generator composed (`image/image.cs` reads `new ΔRGBAжImage(…)` for its own casts).
-
-**Pointer footprint,** from a whole-stdlib A/B with both roots seeded (304/304 converted per side):
-31 files, **66 constructions**, every one the same edit — `new <pkg>_<T>ж<Iface>(x)` becomes
-`new <pkg>.<T>ж<Iface>(x)`, the declaring package's own adapter — plus the 37 `(Pointer = true)` records
-that existed only to generate those local classes. Zero additions anywhere and the total adapter-
-construction census is unchanged at 4348, so it is a one-for-one redirection, not a removal. By
-declaring package: `text/template/parse`→`Node` 33, `go/types`→`Object`/`ΔType` 20, `image`→`Image` 4,
-`net/http`→`RoundTripper`/`ΔHandler` 4, `net/url`→`error` 2, `net/textproto`→`error` 1,
-`go/internal/srcimporter`→`types.Importer` 1, `go/build/constraint`→`Expr` 1. `go2cs-stdlib.slnx`
-builds 0 errors on the overlaid tree.
-
-The pointer form's symptom is milder than the value form's and worth stating precisely, because it is
-what makes this an increment rather than a bug fix. The generated adapter's `Equals` compares
-`IжAdapter.Box` by reference, so a redundant local adapter and the declaring assembly's own one still
-compare equal and still alias the same object — no observable divergence was reproduced. What is wrong
-is duplication plus a **non-deterministic dynamic type**: each adapter's module initializer calls
-`AdapterRegistry.Register(typeof(ж<T>), typeof(Iface), …)`, which is first-wins, so which assembly's
-class a type-assert re-wraps into depends on assembly load order. The value form's second-identity
-failure (`image/png`'s `%v`, below) is the same defect one degree worse.
-
-**Footprint,** from a whole-stdlib A/B with both roots seeded (302/302 converted per side): 13 files,
-every changed line the same edit — `new <pkg>_<T>ᴠ<Iface>(x)` becomes `x` — plus the 16
-`[assembly: GoImplement]` records that existed only to generate those adapters. **497 constructions**
-go away (472 of them in `image/color/palette`'s two palette literals); the rest of the corpus adapter
-census is identical count for count, `HandlerFuncᴠΔHandler` included. Two survivors are instructive
-because they are NOT this defect: `color.Palette`→`color.Model` (5) and `encoding/binary`'s
-`bigEndian`/`littleEndian`→`ByteOrder` (79) have no record to match at all — neither package ever
-converts that pair itself, so nothing writes the record and the local adapter is the only realization.
-A pair a package satisfies but never records is a separate root, closed by the section below.
-
-This is not merely a wasted allocation. The adapter is a **second identity** for one Go value: `reflect`
-and `fmt` see the wrapper where the Value's own type says the wrapped struct, which is how it surfaced —
-`image/png`'s `diff` printing `%v` of a `color.Color` died with `System.ArgumentException: Field 'R' … is
-not a field on the target object which is of type 'go.image_package+color_NRGBAᴠColor'`. (Guarded by the
-`ForeignValueImplementSuppression` behavioral test — a sibling package at a multi-segment path that
-converts its own values, a collision-renamed implementer, a second implementer, and a named FUNC type as
-the live negative; the pre-fix converter emits five adapters where the fixed one emits the func's alone.
-`ValueAdapterDynamicType` was its byte-identical complement — its sibling never converts, so its four
-adapters were real — until the declaring side began recording pairs it merely satisfies (next section),
-which is exactly that sibling's shape; its assertions now prove the bare value instead. The pointer form
-is guarded by `ForeignPointerImplementSuppression`, whose sibling `tone` self-converts a
-collision-renamed `*Tone` and an ordinary `*Plain` — both must reference tone's own adapters — against
-two live negatives that must keep minting their own: `*Lone`, a pair `tone` satisfies but never records,
-and `shade.Level`, an interface with the same SIMPLE name as `tone.Level`. The pre-fix converter emits
-four local adapters there where the fixed one emits the two negatives' alone. Unit-guarded by
-`TestImplementRecordKeyBothCompositionsAgree`,
-`TestImplementRecordKeyKeepsPackageClassDiscrimination` and `TestValueRecordRealizesAsPartialStruct`.)
-
-## A package records the pairs it SATISFIES, not only the ones it witnesses
-
-Every `[assembly: GoImplement<T, Iface>]` the converter writes comes from a **cast it converted** —
-`convertToInterfaceType` records the pair it just emitted. Go satisfies an interface **structurally**,
-so a package can implement one of its own interfaces completely and never write a conversion:
-`encoding/binary` declares `type bigEndian struct{}` with the whole `ByteOrder` method set and exports
-`var BigEndian bigEndian`, with no `var _ ByteOrder = BigEndian` anywhere. No cast, no record — so
-`binary_package.bigEndian` was emitted as a partial struct that does **not** implement `ByteOrder`, and
-every consumer minted its own `binary_bigEndianᴠByteOrder` adapter. This is the one place where *the
-declaring assembly implements this pair* is TRUE in Go and FALSE in the emitted C#, and it is the root
-the section above measured but did not close.
-
-`recordSamePackageImplements` (`samePackageImplements.go`, called from `processConversion` after
-the file visits and before `writePackageInfoFile`) walks the package scope and records the VALUE-form
-pairs the package satisfies. `encoding/binary`'s metadata gains:
-
-```csharp
-// <InterfaceImplementations>
-[assembly: GoImplement<bigEndian, AppendByteOrder>]
-[assembly: GoImplement<bigEndian, ByteOrder>]
-[assembly: GoImplement<littleEndian, AppendByteOrder>]
-[assembly: GoImplement<littleEndian, ByteOrder>]
-[assembly: GoImplement<nativeEndian, AppendByteOrder>]
-[assembly: GoImplement<nativeEndian, ByteOrder>]
-// </InterfaceImplementations>
-```
-
-and every consumer hands over the bare value, its own record and adapter gone with it — `debug/dwarf`'s
-`d.Value.order = new binary_bigEndianᴠByteOrder(binary.BigEndian)` becomes
-`d.Value.order = binary.BigEndian`, and `crypto/x509`'s
-`crypto.SignerOpts signerOpts = new crypto_HashᴠSignerOpts(hashFunc)` becomes
-`crypto.SignerOpts signerOpts = hashFunc`.
-
-It records **through** `convertToInterfaceType` with an EMPTY expression — the record-only probe path
-`convCompositeLit` / `convTypeAssertExpr` / `visitValueSpec` already use, since every emission arm is
-gated on `exprResult != ""`. That is the whole design: a synthesized pair is composed, keyed and pruned
-exactly as a real cast would compose, key and prune it, so no second naming path can drift from the cast
-site's — the divergence that made the FOREIGN lookup miss for six weeks. Scope names arrive sorted, so
-the record order is deterministic across runs.
-
-**Five gates bound it, and each one is load-bearing.**
-
-* **The interface is EXPORTED.** A record is a CROSS-ASSEMBLY contract — it exists so another
-  assembly's cast can drop its local adapter — and no other assembly can name an unexported interface,
-  so a record for one could never be consulted. The package's own casts already record what it needs
-  internally.
-* **The target's underlying is NOT a `*types.Signature`.** A named FUNC type is a C# delegate, which
-  cannot be a partial struct, so `ImplementGenerator` emits an adapter CLASS for it; a consumer trusting
-  THAT record hands a bare delegate to an interface slot (CS0029 — net/http's `HandlerFunc` → `ΔHandler`).
-  This is the declaring-side half of `valueRecordRealizesAsPartialStruct` above.
-* **Neither side is GENERIC.** A type argument cannot appear in an assembly-attribute type argument
-  (CS0246) — the same exclusion `convertToInterfaceType`'s `targetIsOpenGeneric` makes.
-* **Both sides are declared in a file this run CONVERTS.** A package scope holds every file's
-  declarations, including build-constraint-excluded ones, and a record naming a type no emitted file
-  declares is CS0246.
-* **Every interface method is REALIZABLE by the generator** — it resolves on the type itself or
-  through at most ONE embedded field (`types.LookupFieldOrMethod` index length ≤ 2).
-  `ImplementGenerator` forwards a promoted member through a single embed hop and says so ("Go's
-  promotion ambiguity rules make multi-embed satisfaction rare; extend when needed"), so a deeper
-  promotion emits a forwarder through the WRONG hop: `CrossPkgUser`'s `rig` embeds
-  `CrossPkgLib.Device`, which embeds `Sensor`, where `Label` lives, and
-  `CrossPkgLib_package.Label(this.Device)` is CS1503 for want of `this.Device.Sensor`. Promotion
-  through an embedded INTERFACE is the common shape this still admits (`sort`'s `reverse` embeds
-  `Interface`; `debug/macho`'s segment types embed `LoadBytes`). The bound is deliberately
-  CONSERVATIVE rather than a model of the generator's exact reach — it costs exactly two stdlib
-  records (`net`'s `tcpConnWithoutReadFrom`/`tcpConnWithoutWriteTo`→`Conn`, whose `*TCPConn` hop the
-  generator's `embedHopDeepPaths` arm can in fact follow), neither of which has a consumer, and
-  withholding a speculative record is always safe: the consumer keeps the adapter it had before.
-
-The gates bind only the SPECULATIVE recorder. A pair the source actually casts is DEMANDED and still
-records at its cast site — promotion depth and all — so none of this narrows existing behavior.
-
-The **POINTER** method set was deliberately out of scope here — `types.Implements(*T, Iface)` is the far
-larger set, its records are adapter-class *existence* signals with a different trust rule, and it was owed
-its own increment with its own measured footprint. That increment has since landed; see the next section.
-
-**Footprint,** from a whole-stdlib A/B with both roots seeded (302/302 converted per side, 3690 files
-compared CRLF-normalized): **68 files**, split evenly between metadata and code. **33 records** appear
-across sixteen declaring packages; **31** go away — three dropped by the existing interface-inheritance
-prune because a newly recorded pair subsumes one a cast had recorded (`flag`'s `textValue`→`Value` under
-`Getter`, and `net`/`runtime`'s `errorString`→`error` under their own `ΔError`, which embeds it), and
-twenty-eight consumer-local foreign records that existed only to generate an adapter. **89 adapter
-constructions** disappear across 34 files — exactly the census the previous section predicted, pair for
-pair: `binary_bigEndianᴠByteOrder` 43, `binary_littleEndianᴠByteOrder` 36, `color_PaletteᴠModel` 5,
-`crypto_HashᴠSignerOpts` 5. Every changed consumer line is the same edit, the adapter construction
-unwrapped to its argument; the full stdlib solution builds with 0 errors.
-
-Most of the 33 new records have no consumer today — they are the rule stating what Go already says
-(`sort`'s `reverse`→`Interface`, `image`'s `Rectangle`→`RGBA64Image`, `debug/macho`'s five `Load`
-implementers, `io`'s `discard`→`StringWriter`), and they cost one assembly attribute each. Notably
-ABSENT is `net/http`'s `HandlerFunc`→`ΔHandler`: the delegate gate holds on the corpus instance that
-motivated it.
-
-Guarded by the `SamePackageImplementNoWitness` behavioral test — a sibling `ledger` package that
-declares an exported interface and value implementers and never converts one to the other, with its
-negatives live rather than asserted (a named FUNC type, an unexported interface, a generic; the
-pointer-only implementer was a fourth until the next section made it a positive). The pre-fix converter
-records nothing and mints four adapters where the fixed one mints one; the delegate negative
-(`ledger_MeterᴠMetric`) is byte-identical across the fix. `CrossPkgLib`/`CrossPkgUser` and
-`ValueAdapterDynamicType` carry the same shape and re-baselined to the bare value. The realizability gate
-is guarded by COMPILE rather than by a golden, and by the corpus case that found it: `CrossPkgUser`'s
-`rig` is the depth-2 promotion, so dropping the gate puts a `GoImplement<rig, Labeled>` back and the suite
-goes red on CS1503 in the generated forwarder.
-
-## The POINTER method set records the same way, for a different contract
-
-The section above closed the VALUE half of "the declaring assembly implements this pair is TRUE in Go and
-FALSE in the emitted C#" and named the POINTER half as owed. This is that increment.
-
-**Why it is not just "the same rule with a bigger set."** A value record and a pointer record are consumed
-differently, and the difference decides both the gates and the failure mode. A VALUE record licenses an
-IMPLICIT conversion: the declaring assembly's `partial struct T : Iface` means a consumer hands over the
-bare value and names nothing. A POINTER record is an adapter-class EXISTENCE signal — `Pointer = true` is
-exactly the shape `ImplementGenerator` realizes as `<T>ж<Iface>` — and the consumer CONSUMES it by NAME,
-emitting `new pkg.TжIface(x)` where it would otherwise mint its own `pkg_TжIface`.
-
-**Why cast-site sourcing is not good enough, stated as the bug it caused.** Every record the converter
-writes comes from a cast it converted, so a pair's record lives or dies with the ONE body that happens to
-witness it. `syscall`'s three `Sockaddr{Inet4,Inet6,Unix} → Sockaddr` pairs are witnessed by exactly one
-method body, `(*RawSockaddrAny).Sockaddr`, and hand-owning that single function — which the blittable-
-mirror work has every reason to want — silently dropped all three `(Pointer = true)` records, after which a
-reconvert of `net` minted `syscall_SockaddrInet4жΔSockaddr` beside `syscall`'s own. Nothing failed to
-compile; the L10 lane found it only because it re-converted a dependent and diffed. The pointer form's
-symptom is milder than the value form's `%v`-over-the-wrapper crash — both adapters wrap the same box and
-compare equal — but it is a NON-DETERMINISTIC dynamic type: each adapter's module initializer calls
-`AdapterRegistry.Register` first-wins, so which class a type assert re-wraps into follows assembly load
-order. Sourcing the record from the METHOD SET makes the pair independent of which bodies a run converts,
-which is the root fix rather than a rule about what may be hand-owned.
-
-`recordSamePackageImplements` (the renamed `recordSamePackageValueImplements`) therefore asks BOTH
-questions of every candidate and records both forms. The pointer set is a SUPERSET of the value set, so a
-value-satisfied pair is recorded twice, and that is deliberate: Go's `T` and `*T` are two dynamic types,
-realized as the partial struct and the adapter respectively, and dropping the pointer record for such a
-pair leaves a consumer's `var i Iface = &t` with nothing to reference.
-
-**The gates are the same five, plus one.** The added gate is the trust rule made mechanical:
-
-* **BOTH sides are EXPORTED** (`pointerRecordIsPubliclyRealizable`). `ImplementGenerator` scopes the
-  adapter class `public` only when the struct and the interface are each public, `internal` otherwise. A
-  record is a cross-assembly contract, and this form's contract is *"this class exists and you may name
-  it"* — so a record naming an unexported participant advertises a class no consumer can reference
-  (CS0122), an existence signal that is a lie. The value form needs only the interface gate because its
-  contract is realized by a conversion that names nothing, which is why the two rules differ here and only
-  here.
-
-The realizability gate is not merely re-asked of `*T` — it is TIGHTENED, and that is the second place
-the two forms genuinely differ. `generatorCanForwardPointerMethodSet` requires every interface method to
-resolve **DIRECTLY** on the type (index length 1), admitting no promotion at all, where the value bound
-admits one embed hop. A partial struct's explicit implementation resolves a promoted member the way the
-converter's own call sites do; the ж adapter does not. Its promoted-member arms are keyed on embedded
-**POINTER** fields (`GetEmbeddedPointerHopNames`), and with exactly one such field the single-hop arm
-takes every unbound member *unconditionally* — which the generator says outright, and is right to, because
-for a DEMANDED record that member's promotion is what type-checked the cast. For a SPECULATIVE record it
-is not: the member's true source may be a different embed entirely.
-
-`StructPointerPromotionWithInterface`'s `MyCustomError` is the corpus instance, and the `go2cs.slnx` build
-found it rather than reasoning did. It embeds BOTH the `Abser` interface and `*MyError`; `Abs` is promoted
-from the INTERFACE, but the adapter's lone pointer embed is `*MyError`, so the generated forwarder bound
-`Abs` against `MyError` — where the only candidate in scope was `time.Abs(Duration)`: **CS1929**, in a
-generated file, naming `time` from a test about struct promotion. **Depth is not the discriminator** (that
-promotion is index length 2, which the value bound admits); the KIND of hop is, and modelling the
-generator's exact hop selection inside the converter would duplicate its internals in a second place —
-the very drift this recorder's design exists to prevent. So the bound is conservative in the same spirit
-as the value one and safe in the same way: withholding a speculative record leaves the consumer with the
-local adapter it already had. A pair the source actually CASTS is untouched and keeps the full promotion
-support the generator was built for, which is what that behavioral test guards. A named FUNC type is
-excluded before either question is asked, as before.
-
-**Footprint,** from a whole-stdlib A/B with both roots seeded (304/304 converted per side; marker gate
-54 marked files / 43 `*_impl.cs` companions / **0 violations** on both roots): **75 files** — 35
-`package_info.cs` and 40 code — with **0** `.csproj` and **0** `README.md` moved. **184 records appear**
-across 22 declaring packages (`go/ast` 96, `image` 17, `io` 14, `image/color` 12, `database/sql` 8,
-`net` 7, `math/rand/v2` 4, `sort` 3, …) and **117 go away**, every one a consumer-local duplicate the
-declaring assembly now owns: `go/parser` 49, `go/types` 28, `go/doc` 8, `go/printer` 5 (all of them
-`go/ast` node types), `net/http` 4, the five `debug/*` + `internal/xcoff` readers' `io.SectionReader`
-pairs, `net/http/httputil`'s `io.Pipe{Reader,Writer}`, and one each for `sync.Mutex`→`Locker`,
-`image/color.RGBA64`→`Color` and `parse.BranchNode`→`Node`. Net corpus movement is **+67** pointer
-records (1,071 → 1,138), not the 548 the deferral's raw pair count suggested — most of that set was
-already recorded from cast sites, and the gates take the rest.
-
-**318 adapter constructions** are repointed across 40 files, every changed line the same edit —
-`new pkg_TжIface(x)` becomes `new pkg.TжIface(x)` — which is the second-identity elimination measured:
-318 sites that used to name a locally minted duplicate now name the declaring assembly's one adapter.
-There is no third family; a classifier over the whole diff reports **zero** unclassified added lines.
-
-Guarded by `SamePackageImplementNoWitness`, whose `*Tally → Metric` pair moved from negative to positive
-(the consumer now references `ledger.TallyжMetric` instead of minting `ledger_TallyжMetric`) and which
-gained the negative this gate needs — `tick`, an UNEXPORTED target whose pointer set implements the
-exported interface, kept live through `ledger.Count` and absent from `ledger`'s metadata. Also guarded by
-`ForeignPointerImplementSuppression`, where `Lone` — a pair `tone` satisfies and never casts — flipped the
-same way and is now that test's proof that a record needs no witnessing cast, while its `shade.Level`
-negative (a same-SIMPLE-named interface in another package, which must keep its local adapter) is
-byte-identical across the change. Unit-guarded by `TestPointerRecordIsPubliclyRealizable`,
-`TestGeneratorCanForwardMethodSetDepthBound` and `TestPointerMethodSetSubsumesValueMethodSet`.
-
-**Acceptance witness — the L10 probe, re-run to prove the absence of what it once measured.** With
-`RawSockaddrAny.Sockaddr` suppressed through `manualConversionFuncs` (a scratch build on each side, so
-the only variable is the recorder), `syscall` and `net` were reconverted into seeded roots:
-
-| | `syscall`'s `(Pointer = true)` Sockaddr records | `net`'s six construction sites |
-|---|---|---|
-| pre-increment converter + suppression | **absent** (all three) | `new syscall_SockaddrInet4жΔSockaddr(…)` — locally minted duplicates |
-| post-increment converter + suppression | **all three present** | `new syscall.SockaddrInet4жΔSockaddr(…)` — syscall's own adapter |
-
-The pre-increment row is the regression exactly as L10 measured it; the post-increment row is the same
-probe finding nothing to report. That is what makes the hand-own safe rather than merely discouraged.
-
 ## Standard-library solution file (`.slnx`)
 
 A whole-standard-library run (`go2cs -stdlib`) also emits a Visual Studio solution — **`go2cs-stdlib.slnx`** — at the output root (`-go2cspath`), so the freshly converted stdlib is openable / buildable as **one unit** immediately after a run, rather than depending on a hand-maintained solution that drifts. It is the auto-generated counterpart of the committed `src/go2cs-stdlib.slnx`, and its XML mirrors the format of `src/go2cs.slnx` (a `<Configurations>` block plus `<Folder>`/`<Project>` entries, CRLF line endings, no BOM). It references:
@@ -1592,6 +1142,15 @@ Projects are grouped into **three top-level solution folders that mirror the `%G
 * **`/core/`** — the go2cs runtime/generator projects (`golib`, `go2cs-gen`).
 
 Each member is placed by **import path** (`isMainModulePackage` — the same rule that routes a package's output to `src\` vs. `pkg\`), so the solution folders agree with the on-disk parallel tree regardless of the `.slnx`-relative path shape. An **empty folder is omitted** — a dependency's own per-project solution has no `src` package — mirroring how the stdlib solution drops its `/tests/` folder when empty. Because the three folder names are unique leaves, no folder `Id` attribute is emitted (unlike the namespace-nested stdlib solution, whose duplicate leaves like `crypto`/`internal` require the hashed `folderID`). Paths are solution-relative forward slashes, CRLF line endings, no BOM; the file is rewritten only when its content changes. Rendered by `buildRecurseSolutionXML` (`solutionGenerator.go`), guarded by `TestBuildRecurseSolutionXML`, `TestBuildRecurseSolutionXMLSkipsEmptyFolders`, and the folder-order assertions in the `TestRecurseSyntheticModule` integration test.
+
+## Moved sections
+
+- <a id="an-upward-golinkname-var-alias-inverts-its-storage-instead-of-giving-up"></a>Moved to [An UPWARD `//go:linkname` var alias INVERTS its storage instead of giving up](manual-conversions/linkname-and-trampolines.md#an-upward-golinkname-var-alias-inverts-its-storage-instead-of-giving-up).
+- <a id="a-foreign-implement-record-is-keyed-in-one-spelling-and-a-value-one-is-trusted-only-for-a-partial-struct"></a>Moved to [A foreign implement record is keyed in ONE spelling, and a VALUE one is trusted only for a partial struct](interfaces/records.md#a-foreign-implement-record-is-keyed-in-one-spelling-and-a-value-one-is-trusted-only-for-a-partial-struct).
+- <a id="a-package-records-the-pairs-it-satisfies-not-only-the-ones-it-witnesses"></a>Moved to [A package records the pairs it SATISFIES, not only the ones it witnesses](interfaces/records.md#a-package-records-the-pairs-it-satisfies-not-only-the-ones-it-witnesses).
+- <a id="the-pointer-method-set-records-the-same-way-for-a-different-contract"></a>Moved to [The POINTER method set records the same way, for a different contract](interfaces/records.md#the-pointer-method-set-records-the-same-way-for-a-different-contract).
+- <a id="a-doc-comment-link-resolves-to-a-fully-qualified-version-pinned-url"></a>Moved to [A doc-comment link resolves to a fully-qualified, version-pinned URL](comments.md#a-doc-comment-link-resolves-to-a-fully-qualified-version-pinned-url).
+- <a id="a-sub-package-import-whose-leading-segment-is-a-package-alias-root-qualifies"></a>Moved to [A sub-package import whose leading segment is a package alias root-qualifies](golib-namespace.md#a-sub-package-import-whose-leading-segment-is-a-package-alias-root-qualifies).
 
 ---
 
