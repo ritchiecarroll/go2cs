@@ -36,7 +36,9 @@ operation succeeded, each with its original line ending, BOM and trailing newlin
       a doc path in src/migrate-tfm.ps1 whose anchored text moved is re-pointed. New slugs are
       computed in the destination page after insertion, with GitHub's -1/-2 suffixes.
       The move fails if any heading that stays behind (in src or dst) changes slug, or if an anchor it
-      creates collides with one already on the page.
+      creates collides with one already on the page. "Moved to" stubs that trail the block (left in place
+      by an earlier move) stay in src, where their anchors were published; a stub INSIDE the block fails
+      the move.
   index       {readme, new_pages: [{page, after}], children: {page: [pages]}, grouped: [pages],
                skip_h2: [texts]}
       Regenerate the Contents list of the reference index from the pages themselves: each page's H1,
@@ -152,6 +154,20 @@ def find_line(lines, pred, what):
     if len(ks) != 1:
         raise Fail(f'{what}: expected one matching line, found {len(ks)}')
     return ks[0]
+
+
+STUB_LINE_RE = re.compile(r'^\s*(?:- )?<a id="[^"]+"></a>Moved to \[')
+
+
+def trim_stubs(lines, start, end):
+    """End a moving block before the "Moved to" stubs that trail it. An in-place stub is spliced where an
+    earlier move removed a section, i.e. right after the section above it; it belongs to the PAGE (its
+    anchor was published there), so it must not travel with that section when the section moves too."""
+    mask = rc.fence_mask(lines)
+    j = end
+    while j > start + 1 and (lines[j - 1].strip() == '' or (not mask[j - 1] and STUB_LINE_RE.match(lines[j - 1]))):
+        j -= 1
+    return trim_end(lines, start, j)
 
 
 def splice(lines, pos, new):
@@ -306,7 +322,11 @@ def op_move(repo, op):
         if not us:
             raise Fail(f'{what}: until-line {op["until"]!r} not inside the block')
         i1 = trim_end(S.lines, i0, us[0])
+    i1 = trim_stubs(S.lines, i0, i1)
     block = S.lines[i0:i1]
+    if any(STUB_LINE_RE.match(l) for l, f in zip(block, rc.fence_mask(block)) if not f):
+        raise Fail(f'{what}: the block holds a "Moved to" stub between its sections; that stub belongs to '
+                   f'{op["src"]} and would travel with the block')
     bmask = rc.fence_mask(block)
     bheads = [(i - i0, lv, t, s) for (i, lv, t, s) in hs if i0 <= i < i1]
     old_slugs = [s for (_, _, _, s) in bheads]
