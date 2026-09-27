@@ -70,10 +70,22 @@ public class HostUnknownFlagPassThroughTests
     // decides — whether it answers an unrecognized flag itself, and whether execution REACHES the
     // stage where the converted flag package parses — and neither asks anything of flag's
     // error-handling mode.
+    // The original is put back after each test: flag.CommandLine is process-global and shared by every
+    // other in-process class (i9, 2026-09-27: the shared-CommandLine class).
+    private ж<flag_package.FlagSet>? m_originalCommandLine;
+
     [TestInitialize]
     public void OwnTheConvertedFlagSet()
     {
+        m_originalCommandLine = flag_package.CommandLine;
         flag_package.CommandLine = flag_package.NewFlagSet("guard", flag_package.ContinueOnError);
+    }
+
+    [TestCleanup]
+    public void RestoreTheCommandLine()
+    {
+        if (m_originalCommandLine is not null)
+            flag_package.CommandLine = m_originalCommandLine;
     }
 
     private static TestRegistry EmptyRegistry() => new("guard", []);

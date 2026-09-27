@@ -300,35 +300,57 @@ internal static class TestFlagBridge
     /// </remarks>
     internal static string[]? HostCommandLine { get; set; }
 
-    public static void Parse()
+    // Returns null to continue the run, or the exit status Go's ExitOnError would have exited with
+    // (2, or 0 for ErrHelp) when the parse FAILED under this host's in-process ExitOnError emulation
+    // (BeginInProcessRun). That status is never produced in a real converted test binary: there the
+    // CommandLine is ExitOnError and the converted flag package exits by itself, exactly as Go's does.
+    public static int? Parse()
     {
         Type? flagPackage = Type.GetType(FlagPackageTypeName, throwOnError: false);
 
         if (flagPackage is null)
-            return;
+            return null;
 
         MethodInfo parsed = Bind(flagPackage, "Parsed");
 
         if (parsed.Invoke(null, []) is bool alreadyParsed && alreadyParsed)
-            return;
+            return null;
 
         // The package-level Parse() reduces to CommandLine.Parse(os.Args[1:]); calling the FlagSet
         // method directly over the host's own args is the SAME call with the same argument in a
         // real test binary, and the right one where the ambient command line is the runner's.
         // A host that never announced its args (nothing does today) keeps Go's exact call.
-        if (HostCommandLine is not { } hostArgs || !TryParseHostArgs(flagPackage, hostArgs))
+        if (HostCommandLine is not { } hostArgs || !TryParseHostArgs(flagPackage, hostArgs, out object? error))
+        {
             Bind(flagPackage, "Parse").Invoke(null, []);
+            return null;
+        }
+
+        // flag has ALREADY printed its message and called the CommandLine's Usage (crypto/tls's
+        // os.Exit(89) fires there, first, as in Go); what ExitOnError would do next is exit. Under a
+        // CommandLine the caller made ContinueOnError the error is Go's to ignore, and it is.
+        if (error is not null && s_emulatedExitOnError)
+            return IsErrHelp(flagPackage, error) ? 0 : 2;
+
+        return null;
     }
 
-    // CommandLine.Parse(hostArgs) through the converted package's own extension method.
-    // Everything is resolved by NAME for the reason the whole bridge is: the host must not
-    // reference flag. False — never a throw — when the shape is not what this expects, so an
-    // unexpected flag package degrades to Go's own call rather than taking the run down.
-    private static bool TryParseHostArgs(Type flagPackage, string[] hostArgs)
+    private static bool IsErrHelp(Type flagPackage, object error)
     {
-        object? commandLine =
-            flagPackage.GetProperty("CommandLine", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ??
-            flagPackage.GetField("CommandLine", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+        object? errHelp = flagPackage.GetField("ErrHelp", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+
+        return errHelp is not null && (ReferenceEquals(error, errHelp) || error.Equals(errHelp));
+    }
+
+    // CommandLine.Parse(hostArgs) through the converted package's own extension method, handing back
+    // the error it returned. Everything is resolved by NAME for the reason the whole bridge is: the
+    // host must not reference flag. False — never a throw — when the shape is not what this expects,
+    // so an unexpected flag package degrades to Go's own call rather than taking the run down.
+    private static bool TryParseHostArgs(Type flagPackage, string[] hostArgs, out object? error)
+    {
+        error = null;
+
+        object? commandLine = CommandLineOf(flagPackage);
 
         if (commandLine is null)
             return false;
@@ -350,37 +372,167 @@ internal static class TestFlagBridge
             converted[i] = hostArgs[i];
         }
 
-        parse.Invoke(null, [commandLine, new slice<@string>(converted)]);
+        error = parse.Invoke(null, [commandLine, new slice<@string>(converted)]);
 
         return true;
     }
 
-    /// <summary>
-    /// Whether the converted <c>flag.CommandLine</c> defines <paramref name="name"/> — the question
-    /// that decides an unrecognized host flag, once the package under test has initialized.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// <b>False when the converted <c>flag</c> package is absent, and that is the right answer
-    /// rather than a fallback.</b> A package that does not import <c>flag</c> cannot have declared a
-    /// flag, so no name the host does not own can belong to it, and the host's rejection of a typo
-    /// stays exactly as strict as it was for the 124 of 141 test projects in that position.
-    /// </para>
-    /// <para>
-    /// Only DEFINEDNESS is asked. Whether the flag is boolean — Go's <c>parseOne</c> consults
-    /// <c>boolFlag.IsBoolFlag()</c> to decide if the next token is its value — is deliberately not,
-    /// because <see cref="TestOptions.Parse"/> has already stopped by the time this runs and left
-    /// the remainder to the program's own <c>flag.Parse()</c>, which answers it with the real flag
-    /// set instead of through reflection over a generated interface wrapper.
-    /// </para>
-    /// </remarks>
-    public static bool IsDefined(string name)
-    {
-        Type? flagPackage = Type.GetType(FlagPackageTypeName, throwOnError: false);
+    private static object? CommandLineOf(Type flagPackage) =>
+        flagPackage.GetProperty("CommandLine", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ??
+        flagPackage.GetField("CommandLine", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
 
-        return flagPackage is not null &&
-               BindLookup(flagPackage).Invoke(null, [(@string)name]) is not null;
+    // EACH IN-PROCESS TestHost.Run IS A FRESH FLAG PARSE (i9, 2026-09-27, COORD ruling). A real
+    // converted test binary runs TestHost.Run once per process, as Go runs one flag.Parse() per test
+    // binary, and nothing below touches it. The in-process MSTest tier runs many hosts in ONE process
+    // against ONE process-global flag.CommandLine: without this, the first run to reach m.Run parsed
+    // and every later run parsed NOTHING (Parse above returns once flag.Parsed() is true), so an
+    // undefined flag exited 0, a package flag kept an earlier run's value, and -h ran the tests
+    // (BehavioralTests' TestingRuntimeTests, every host). And an ExitOnError parse error in-process
+    // os.Exit-ed the test host itself.
+    //
+    // So an in-process run resets the CURRENT CommandLine's parse state IN PLACE: every flag an earlier
+    // parse set goes back to its DefValue, and parsed/actual/args are cleared. Every definition
+    // (formal), Usage, name and output are KEPT, and it is the same FlagSet object, so a flag a package
+    // initializer registered before the run, or a pointer a package captured, is untouched. A fresh
+    // NewFlagSet would drop them (COORD's constraint). If the CommandLine is ExitOnError (the real
+    // binary's default), the run EMULATES it: the set is ContinueOnError for the run, and Parse returns
+    // the status ExitOnError would have exited with. A CommandLine a caller made ContinueOnError keeps
+    // Go's contract (flag.Parse ignores the error). The mode is restored when the run ends.
+    //
+    // In-process is decided by the one fact HostCommandLine's own contract rests on: a real binary's
+    // generated Main passes its process arguments, so a run whose args differ from them is driven
+    // in-process. Any shape this does not expect degrades to the old behaviour (null), never a throw.
+    private static bool s_emulatedExitOnError;
+
+    internal static bool IsDrivenInProcess(string[] args) =>
+        !args.SequenceEqual(Environment.GetCommandLineArgs().Skip(1));
+
+    internal static IDisposable? BeginInProcessRun()
+    {
+        try
+        {
+            Type? flagPackage = Type.GetType(FlagPackageTypeName, throwOnError: false);
+
+            if (flagPackage is null || CommandLineOf(flagPackage) is not { } commandLine)
+                return null;
+
+            Type? setType = BoxedElementType(commandLine.GetType());
+            object? continueOnError = StaticValue(flagPackage, "ContinueOnError");
+            object? exitOnError = StaticValue(flagPackage, "ExitOnError");
+
+            if (setType is null || continueOnError is null || exitOnError is null)
+                return null;
+
+            // Values FIRST: flag.Visit walks the set flags (actual), which the reset below clears.
+            ResetSetFlagsToDefaults(flagPackage);
+
+            MethodInfo reset = typeof(TestFlagBridge).GetMethod(nameof(ResetParseState), BindingFlags.NonPublic | BindingFlags.Static)!
+                .MakeGenericMethod(setType);
+
+            object? previous = reset.Invoke(null, [commandLine, null, false]);
+            bool emulate = Equals(previous, exitOnError);
+
+            if (emulate)
+                reset.Invoke(null, [commandLine, continueOnError, true]);
+
+            s_emulatedExitOnError = emulate;
+            return new InProcessRun(commandLine, reset, emulate ? previous : null);
+        }
+        catch (Exception)
+        {
+            s_emulatedExitOnError = false;
+            return null;
+        }
     }
+
+    private sealed class InProcessRun(object commandLine, MethodInfo reset, object? restoreErrorHandling) : IDisposable
+    {
+        public void Dispose()
+        {
+            s_emulatedExitOnError = false;
+
+            if (restoreErrorHandling is not null)
+                reset.Invoke(null, [commandLine, restoreErrorHandling, true]);
+        }
+    }
+
+    // Clears parsed/actual/args on the FlagSet inside the box and, when errorHandling is non-null,
+    // sets that mode; returns the mode it found. modeOnly leaves the parse state alone (the restore).
+    private static object? ResetParseState<TSet>(ж<TSet> set, object? errorHandling, bool modeOnly)
+    {
+        object copy = set.Value!;
+        Type type = typeof(TSet);
+        FieldInfo handling = InstanceField(type, "errorHandling");
+        object? previous = handling.GetValue(copy);
+
+        if (!modeOnly)
+        {
+            InstanceField(type, "parsed").SetValue(copy, false);
+            ZeroField(InstanceField(type, "actual"), copy);
+            ZeroField(InstanceField(type, "args"), copy);
+        }
+
+        if (errorHandling is not null)
+            handling.SetValue(copy, errorHandling);
+
+        set.Value = (TSet)copy;
+        return previous;
+    }
+
+    // flag.Visit(fn) over the SET flags, each back to its DefValue through its own Value.Set.
+    private static void ResetSetFlagsToDefaults(Type flagPackage)
+    {
+        MethodInfo? visit = flagPackage.GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .FirstOrDefault(candidate => candidate.Name == "Visit" &&
+                                         candidate.GetParameters() is [{ ParameterType.IsGenericType: true } parameter] &&
+                                         parameter.ParameterType.GetGenericTypeDefinition() == typeof(Action<>));
+
+        if (visit is null)
+            return;
+
+        Type action = visit.GetParameters()[0].ParameterType;
+
+        if (BoxedElementType(action.GetGenericArguments()[0]) is not { } flagType)
+            return;
+
+        Delegate reset = Delegate.CreateDelegate(action,
+            typeof(TestFlagBridge).GetMethod(nameof(ResetFlagToDefault), BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(flagType));
+
+        visit.Invoke(null, [reset]);
+    }
+
+    private static void ResetFlagToDefault<TFlag>(ж<TFlag> flag)
+    {
+        object copy = flag.Value!;
+        FieldInfo valueField = InstanceField(typeof(TFlag), "Value");
+
+        if (valueField.GetValue(copy) is { } value && InstanceField(typeof(TFlag), "DefValue").GetValue(copy) is { } defValue)
+            valueField.FieldType.GetMethod("Set", [typeof(@string)])?.Invoke(value, [defValue]);
+    }
+
+    // T for the ж<T> a box is (walking a StandardBox<T>-style subclass up to ж<T> itself).
+    private static Type? BoxedElementType(Type? boxType)
+    {
+        for (Type? type = boxType; type is not null; type = type.BaseType)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ж<>))
+                return type.GetGenericArguments()[0];
+        }
+
+        return null;
+    }
+
+    private static object? StaticValue(Type type, string name) =>
+        type.GetProperty(name, BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ??
+        type.GetField(name, BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+
+    private static FieldInfo InstanceField(Type type, string name) =>
+        type.GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic) ??
+        throw new InvalidOperationException($"testing: the converted flag type {type.Name} has no field '{name}'");
+
+    // A nil map or slice: golib's are reference or value types depending on the kind.
+    private static void ZeroField(FieldInfo field, object target) =>
+        field.SetValue(target, field.FieldType.IsValueType ? Activator.CreateInstance(field.FieldType) : null);
 
     private static MethodInfo BindLookup(Type flagPackage) =>
         Bind(flagPackage, "Lookup", typeof(@string));

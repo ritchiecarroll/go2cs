@@ -141,6 +141,11 @@ public static class TestHost
         // difference between parsing this run's arguments and parsing the test RUNNER's.
         TestFlagBridge.HostCommandLine = args;
 
+        // In-process only: this run gets a fresh flag parse of the process's one CommandLine, every
+        // definition kept, and ExitOnError emulated without exiting (TestFlagBridge.BeginInProcessRun).
+        // A real converted test binary is not in-process and is untouched. Disposed at Run's end.
+        using IDisposable? inProcessFlagRun = TestFlagBridge.IsDrivenInProcess(args) ? TestFlagBridge.BeginInProcessRun() : null;
+
         TestOptions options;
 
         try
@@ -160,6 +165,7 @@ public static class TestHost
         CultureInfo previousUICulture = CultureInfo.CurrentUICulture;
         string previousDirectory = Environment.CurrentDirectory;
         string? previousTimezone = Environment.GetEnvironmentVariable("TZ");
+        string? previousSandboxMarker = Environment.GetEnvironmentVariable(SandboxMarkerVariable);
 
         // A RE-EXEC'D HELPER of an outer host run keeps the state its parent assigned instead of
         // sandboxing again. Go's re-exec'd test binary performs no chdir of its own, and the
@@ -426,6 +432,15 @@ public static class TestHost
             // The CLR-only form, matching the pin above — see its note: the publishing variant is
             // the TZ arc's unmeasured half and does not ride in this merge unit.
             Environment.SetEnvironmentVariable("TZ", previousTimezone);
+
+            // The sandbox marker is withdrawn on BOTH sides, as it was published. A real binary runs one
+            // host per process and the variable dies with it, but the in-process guard tier runs many,
+            // and a marker left behind made every later run read this one's deleted root, take itself
+            // for a re-exec'd helper, and run unsandboxed in its caller's directory (BehavioralTests'
+            // SetenvTempDirAndFixturesAreIsolated wrote its fixture SOURCE). A helper published nothing,
+            // so it has nothing to withdraw: the marker it inherited is its parent's.
+            if (!helperReExec)
+                PublishEnvironmentVariable(SandboxMarkerVariable, previousSandboxMarker);
 
             try
             {

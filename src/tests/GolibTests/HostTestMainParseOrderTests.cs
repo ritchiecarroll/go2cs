@@ -8,6 +8,20 @@ namespace GolibTests;
 [TestClass]
 public class HostTestMainParseOrderTests
 {
+    // This class swaps the process-global flag.CommandLine; every other in-process class shares it,
+    // so the original is put back after each test (i9, 2026-09-27: the shared-CommandLine class).
+    private ж<flag_package.FlagSet>? m_originalCommandLine;
+
+    [TestInitialize]
+    public void CaptureTheCommandLine() => m_originalCommandLine = flag_package.CommandLine;
+
+    [TestCleanup]
+    public void RestoreTheCommandLine()
+    {
+        if (m_originalCommandLine is not null)
+            flag_package.CommandLine = m_originalCommandLine;
+    }
+
     // THE INVARIANT: the host must not parse the command line before a package's TestMain runs.
     //
     // Go puts the parse in exactly one place — m.Run, testing.go:1944:

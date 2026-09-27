@@ -384,7 +384,10 @@ public static partial class testing_package
         // that exits 89 for the bogo runner, and an earlier parse resolved the same arguments through
         // the DEFAULT Usage and exited 2, so the override never applied and the wall was measured on
         // an accident rather than on Go's contract (i9's bogo re-run, rooted 2026-08-29).
-        TestFlagBridge.Parse();
+        // A status here is ExitOnError's, returned rather than exited, and only ever in the in-process
+        // tier (TestFlagBridge.BeginInProcessRun): Go's test binary exits in the parse, before any test.
+        if (TestFlagBridge.Parse() is { } status)
+            return status;
 
         return runner.RunAll();
     }
