@@ -2104,7 +2104,14 @@ var linknameForwardTargets = map[string]bool{
 	//
 	// pprof_makeProfStack is the per-GOOS member ({linux,windows,darwin}/proc.cs); runtime.fcntl above
 	// is its exact analogue and already proves the gate composes with a per-GOOS body.
-	// FIVE, not seven. pprof_memProfileInternal and pprof_goroutineProfileWithLabels are NOT here:
+	// SIX, not seven. pprof_goroutineProfileWithLabels is NOT here: runtime/pprof/pprof_impl.cs is a
+	// hand-owned companion that answers it, and forwarding it would be a REGRESSION, not a completion.
+	// pprof_memProfileInternal WAS left out beside it, answered there by an honest (0, true), until class
+	// M gave the runtime real memory-profile records (M1 allocations, M2 frees and cycles); its row was
+	// added below on 2026-09-27 (M2b, COORD ruling), the hand-owned body removed and TestFakeMapping's gate
+	// retired in the same commit. The text that follows is the reasoning as it stood before that.
+	//
+	// pprof_memProfileInternal and pprof_goroutineProfileWithLabels were NOT here:
 	// runtime/pprof/pprof_impl.cs is a hand-owned companion that already answers both, and forwarding
 	// them would be a REGRESSION, not a completion. Its goroutine body deliberately WITHHOLDS the label
 	// slice, because a label pointer goes stale under GC and printCountProfile then sizes a slice from a
@@ -2119,6 +2126,7 @@ var linknameForwardTargets = map[string]bool{
 	// so: the forwarder is on the CONSUMER side, across the runtime/pprof -> runtime edge that already
 	// exists, and injecting it reads 0 cycles on all three targets. It is the OTHER direction that
 	// costs 38/36/36. The five below are the ones that belief was wrongly blocking.
+	"runtime.pprof_memProfileInternal":   true,
 	"runtime.pprof_blockProfileInternal": true,
 	"runtime.pprof_mutexProfileInternal": true,
 	"runtime.pprof_threadCreateInternal": true,

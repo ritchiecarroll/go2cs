@@ -43,6 +43,8 @@
 // GoMemProfile.Rate, and memProfileAlloc records what golib's allocation doors sample (see the section
 // below and golib/GoMemProfile.cs). The rate starts at 0 unless runtime.pprof is in the program's static
 // assembly closure, Go's disableMemoryProfiling (COORD ruling 2026-09-27, option (a)).
+// Frees and GC cycles (piece M2) follow them: a weak reference per sampled allocation, swept in Go's
+// cycle order at the end of runtime.GC() and after each full collection nobody requested.
 //
 // Hand-owned (no mprof_impl.go exists, so a reconvert never regenerates this file).
 [module: go.GoManualConversion]
@@ -286,7 +288,8 @@ private static bool memProfileReachable(string? trustedPlatformAssemblies, Func<
 // skip is 1, because the only Go-source frame between the allocating function and callers() is this one
 // (golib's frames are not Go frames, and Go's own skip of 5 counts mProf_Malloc, profilealloc, mallocgc
 // and its entry points). And setprofilebucket, which ties the object to its bucket for the free side,
-// is M2's. An allocation no Go frame made is not recorded.
+// becomes a weak reference kept beside the bucket (memProfileTrack, M2). An allocation no Go frame made
+// is not recorded.
 [MethodImpl(MethodImplOptions.NoInlining)]
 private static void memProfileAlloc(object allocation, nuint size, bool noscan) {
     uintptr fullSize = roundupsize((uintptr)size, noscan);
@@ -305,6 +308,116 @@ private static void memProfileAlloc(object allocation, nuint size, bool noscan) 
     mpc.Value.allocs++;
     mpc.Value.alloc_bytes += fullSize;
     unlock(ᏑprofMemFutureLock.at<mutex>((nint)(index)));
+    memProfileTrack(allocation, b, fullSize);
+}
+
+// ---- the memory profile's frees and cycles (class M, piece M2; COORD ruling 2026-09-26) ----
+//
+// Go frees a sampled object in the sweep that follows the mark which found it unreachable: mspan.sweep
+// sees the special setprofilebucket attached and calls mProf_Free(b, size). And every GC cycle publishes
+// the profile in one order: mProf_NextCycle at mark termination (with the world stopped), mProf_Flush
+// once the world restarts, the sweep's frees, then mProf_PostSweep when runtime.GC() has finished
+// sweeping. Allocations are counted in cycle C+2 and frees in C+1, so a runtime.GC() publishes exactly
+// what was allocated before it and what it freed.
+//
+// Here the special is a weak reference per sampled allocation, and the sweep reads them: an allocation
+// whose weak reference has cleared was collected, and is freed with the size it was recorded with. The
+// cycle runs, in Go's order and under one lock, at the end of runtime.GC() (after its final collection)
+// and after any other full collection, which a per-collection sentinel observes. The sentinel is created
+// by the first sampled allocation, so a program that never samples one never pays for it.
+//
+// DEVIATIONS. A collection is a gen2 (full) CLR collection: garbage an ephemeral collection reclaims is
+// counted as freed at the next full collection or runtime.GC(), not at its own. A runtime.GC() can end
+// two cycles, when the sentinel observes its first collection before its own call runs; the extra cycle
+// publishes nothing new. The frees are those of the GO-VISIBLE allocations M1 records (golib's sampled
+// doors), not every heap object.
+
+private readonly struct memProfileLive {
+    internal memProfileLive(WeakReference allocation, ж<bucket> b, uintptr size) {
+        this.allocation = allocation;
+        this.b = b;
+        this.size = size;
+    }
+
+    internal readonly WeakReference allocation;
+    internal readonly ж<bucket> b;
+    internal readonly uintptr size;
+}
+
+private static readonly System.Collections.Generic.List<memProfileLive> memProfileLiveSet = new();
+private static readonly object memProfileLiveLock = new();
+private static readonly object memProfileCycleLock = new();
+private static long memProfileCycleGen = -1;
+private static int memProfileSentinelStarted;
+
+// setprofilebucket: remember the sampled allocation weakly, with the bucket and size mProf_Free needs.
+private static void memProfileTrack(object allocation, ж<bucket> b, uintptr size) {
+    var live = new memProfileLive(new WeakReference(allocation, trackResurrection: false), b, size);
+    lock (memProfileLiveLock) {
+        memProfileLiveSet.Add(live);
+    }
+    if (Volatile.Read(ref memProfileSentinelStarted) == 0 && Interlocked.Exchange(ref memProfileSentinelStarted, 1) == 0) {
+        lock (memProfileCycleLock) {
+            // Collections before the first sample end no cycle of the sentinel's.
+            if (memProfileCycleGen < 0) {
+                memProfileCycleGen = System.GC.CollectionCount(System.GC.MaxGeneration);
+            }
+        }
+        _ = new memProfileSentinel();
+    }
+}
+
+// One GC cycle's profile work, in Go's order. requested: runtime.GC() ends a cycle even when the
+// sentinel has already ended one for the same collection count; the sentinel ends at most one per
+// full collection.
+internal static void memProfileCycle(bool requested) {
+    lock (memProfileCycleLock) {
+        long gen = System.GC.CollectionCount(System.GC.MaxGeneration);
+        if (!requested && gen == memProfileCycleGen) {
+            return;
+        }
+        memProfileCycleGen = gen;
+
+        // gcMarkTermination: publish cycle C and open C+1; then flush it once the world restarts.
+        mProf_NextCycle();
+        mProf_Flush();
+
+        // The sweep: every sampled allocation the collection found unreachable is freed.
+        lock (memProfileLiveLock) {
+            int kept = 0;
+            for (int i = 0; i < memProfileLiveSet.Count; i++) {
+                var live = memProfileLiveSet[i];
+                if (live.allocation.IsAlive) {
+                    memProfileLiveSet[kept++] = live;
+                }
+                else {
+                    mProf_Free(live.b, live.size);
+                }
+            }
+            memProfileLiveSet.RemoveRange(kept, memProfileLiveSet.Count - kept);
+        }
+
+        // runtime.GC()'s end: all sweep frees are in, so publish as of the last mark termination.
+        mProf_PostSweep();
+    }
+}
+
+// Ends a cycle after each full collection nobody requested. Unreachable from birth, so every collection
+// that condemns its generation runs this finalizer, which re-registers it for the next one (the pattern
+// of golib's GcPauseRecorder sentinel). After its first promotion that is every gen2 collection, and the
+// collection-count check in memProfileCycle filters the ephemeral ones before it.
+private sealed class memProfileSentinel {
+    ~memProfileSentinel() {
+        try {
+            memProfileCycle(requested: false);
+        }
+        catch {
+            // An exception escaping a finalizer takes the process down; a missed cycle is only late.
+        }
+        if (!Environment.HasShutdownStarted) {
+            System.GC.ReRegisterForFinalize(this);
+        }
+    }
 }
 
 // ---- the guard's view (RuntimeBlockEventTests): GolibTests is outside runtime's InternalsVisibleTo

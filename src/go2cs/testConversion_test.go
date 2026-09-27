@@ -2999,8 +2999,8 @@ func TestDeclarationKeyedCapabilityEntries(t *testing.T) {
 	}{
 		// os/os_windows_test.go: `package os_test` → external → os_test.<Name>.
 		"os_test.TestRemoveAllWithExecutedProcess": {capability: "relocatable single-file test executable", internal: false},
-		// runtime/pprof/proto_test.go: `package pprof` → internal → runtime/pprof.<Name>.
-		"runtime/pprof.TestFakeMapping": {capability: "runtime-capability: the memory profiler records no samples on the converted runtime, so the test's mapping/symbolization loop runs over an empty location set (vacuous pass); lifts when an increment returns real memory-profile records", internal: true},
+		// runtime/pprof.TestFakeMapping (`package pprof`, internal) was pinned here until its gate retired
+		// on 2026-09-27 (M2b); the internal arm keeps a negative control below.
 		// testing/*_test.go: `package testing_test` -> external -> testing_test.<Name> (SUB-Q18's twelve, pinned at the train-24 union under this per-entry rule).
 		"testing_test.TestRaceReports":                        {capability: "race-detector-instrumented build: asserts a count of \"race detected\" in a re-exec'd child, a literal the host's reporter never writes", internal: false},
 		"testing_test.TestRaceName":                           {capability: "race-detector-instrumented build: asserts the verbose-run marker \"=== NAME\" is absent from a re-exec'd child, a literal the host's reporter never writes", internal: false},
@@ -3065,8 +3065,16 @@ func TestDeclarationKeyedCapabilityEntries(t *testing.T) {
 	// Negative controls, one per arm, so the guard is known to be able to FAIL: the internal-test
 	// entry spelled with the external suffix, the external-test entry spelled bare, and a test-named
 	// key nobody pinned. Each is the exact silent mis-key the guard exists to catch.
+	// No standing entry names an internal test since TestFakeMapping's gate retired, so the internal
+	// arm's control pins a synthetic INTERNAL entry under the external spelling for the duration of
+	// the check: known, internal, and suffixed, which only the internal arm refuses.
+	pinned["example/internal_test.TestInternalControl"] = struct {
+		capability string
+		internal   bool
+	}{internal: true}
+
 	for _, misKeyed := range []string{
-		"runtime/pprof_test.TestFakeMapping",
+		"example/internal_test.TestInternalControl",
 		"os.TestRemoveAllWithExecutedProcess",
 		"example_test.TestNobodyPinnedThis",
 	} {
@@ -3074,6 +3082,8 @@ func TestDeclarationKeyedCapabilityEntries(t *testing.T) {
 			t.Fatalf("negative control: the guard accepted mis-keyed entry %q", misKeyed)
 		}
 	}
+
+	delete(pinned, "example/internal_test.TestInternalControl")
 }
 
 // A DECLARATION-keyed gate is not a declaration-sized omission: eligibleTerminalTestResults cuts a

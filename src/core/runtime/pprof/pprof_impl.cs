@@ -5,50 +5,31 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-// pprof_memProfileInternal and pprof_goroutineProfileWithLabels -- two of the eight linkname
-// destinations pprof.cs declares bodyless, standing in for a push this corpus does not perform.
+// pprof_goroutineProfileWithLabels -- the one linkname destination pprof.cs declares bodyless that this
+// file answers itself rather than forwarding to the runtime's converted body.
 //
-// WHY THERE IS NO FORWARDER TO WRITE INSTEAD
-//   runtime HAS both functions, with real bodies (mprof.cs:1095 and :1331). The push that would
-//   connect them is an edge runtime -> runtime/pprof, and runtime/pprof imports runtime, so the
-//   forwarder would close a project-reference CYCLE -- MSB4006, every project on the path dead.
-//   That is W1 (DESIGN-linkname-push-cycles.md), and check-solution-integrity.ps1 asserts against
-//   it on every CNR run. So these are not "not done yet": no forwarder can exist, and the
-//   destination has to answer for itself.
+// WHY IT IS ANSWERED HERE AND NOT FORWARDED
+//   runtime HAS the function with a real body, and a forwarder across the runtime/pprof -> runtime edge
+//   would cost no project-reference cycle (the converter's linknameForwardTargets forwards six siblings
+//   that way). It stays here because its body deliberately WITHHOLDS the label slice: a label pointer
+//   goes stale under GC, and printCountProfile then sizes a slice from a corrupt map -- an
+//   OutOfMemoryException that kills the host and turns the row into an infrastructure-error rather
+//   than a verdict. That is a judgement the forwarder registry cannot make.
 //
-// THE TWO ANSWER DIFFERENTLY, AND THAT IS THE POINT OF THIS FILE
-//   A destination answers with whatever the managed runtime can state TRUTHFULLY, which is not the
-//   same amount for every profile. The memory profile has no records to report and says so. The
-//   goroutine profile has a real population to report -- golib maintains a live goroutine registry
-//   -- so it reports it. Neither models anything.
-//
-// WHY (0, true) IS HONEST FOR THE MEMORY PROFILE
-//   The contract is two values, and both are literally true there. `n` is the number of records
-//   available -- this runtime keeps no memory-profile records -- so it is zero. `ok` is "the slice
-//   you passed was large enough to hold them all" -- a zero-length result fits in anything, so it
-//   is true. Go's own implementation returns exactly this pair when its profile is empty; nothing
-//   here is modelled or approximated.
-//
-//   The alternative is PartialStubGenerator's throw, which surfaces as `infrastructure-error` -- a
-//   classification that means a HOST DEFECT and is not a verdict at all -- or, when it escapes on a
-//   goroutine, as a truncated results stream. Both make the row UNMEASURABLE. An empty profile is a
-//   measurable, honest, WRONG answer, and a wrong answer that states itself is worth more than a
-//   right answer that cannot be reached.
-//
-// WHAT THIS DELIBERATELY DOES NOT DO
-//   It does not fabricate records to make a content assertion pass. The check on that is
-//   TestFakeMapping, which reaches writeHeapInternal through Lookup("heap").WriteTo: with the
-//   memory-profile body it gets a well-formed profile carrying zero samples and FAILS on its own
-//   terms -- "want profile with at least one mapping entry, got 0 mapping". It must keep failing. A
-//   change here that makes it pass has laundered a false green, and that is the assertion to re-run
-//   before believing any future increment in this file.
+// WHAT THIS FILE NO LONGER DOES (2026-09-27, class M piece M2b, COORD ruling)
+//   It also answered pprof_memProfileInternal, with an honest (0, true): "this runtime keeps no
+//   memory-profile records". That stopped being true when class M gave the runtime real records (M1
+//   allocations sampled at golib's allocation doors under Go's MemProfileRate rule, M2 frees and GC
+//   cycles), so the body was removed, runtime.pprof_memProfileInternal joined linknameForwardTargets,
+//   and TestFakeMapping's capability gate -- which existed because the empty profile made that test
+//   pass vacuously -- was retired in the same commit, as its own retirement clause required. The
+//   header's earlier belief that "no forwarder can exist" (a runtime -> runtime/pprof cycle) was about
+//   the push direction and never applied to this pull; the full text is in git history at efc9c093de.
 //
 // NOT COVERED, AND NOT AN OVERSIGHT
-//   pprof_blockProfileInternal and pprof_mutexProfileInternal are the same shape as the memory
-//   profile and the same honest (0, true), but every row that reaches them sits behind the
-//   runtime.Stack(all) host-killer first, so bodies here would move nothing measurable.
-//   pprof_threadCreateInternal, pprof_fpunwindExpand and pprof_makeProfStack likewise stay
-//   throwing. Named so the next increment starts from a set rather than a search.
+//   pprof_blockProfileInternal, pprof_mutexProfileInternal, pprof_threadCreateInternal,
+//   pprof_fpunwindExpand and pprof_makeProfStack are converted forwarders now (linknameForwardTargets),
+//   not bodies here.
 //
 // Hand-owned (no pprof_impl.go exists, so a reconvert never regenerates this file).
 [module: go.GoManualConversion]
@@ -59,13 +40,6 @@ using profilerecord = go.@internal.profilerecord_package;
 using @unsafe = unsafe_package;
 
 partial class pprof_package {
-
-// This runtime keeps no memory-profile records: zero are available, and zero of them fit in
-// whatever the caller passed. writeHeapInternal's two-call loop takes the second branch on the
-// first iteration and emits a profile with no samples.
-internal static partial (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.MemProfileRecord> p, bool inuseZero) {
-    return (0, true);
-}
 
 // The GOROUTINE PROFILE, over golib's live goroutine registry. Design: the 2026-09-04 Q27 section
 // of BOARD-next-validation-candidates.md.

@@ -4050,41 +4050,12 @@ var unsupportedRuntimeCapabilities = map[string]string{
 	// reason string; each gets its own entry with its own evidence, per the map's own discipline.
 	"net/http_test.testTransportGCRequest": "codegen-liveness: managed GC provably retains the object (wrapper-field round-trip trigger, 10-variant isolation 2026-08-29)",
 
-	// runtime-capability, and the second entry that names a TEST rather than a symbol — this time an
-	// INTERNAL test (proto_test.go is `package pprof`), so the key is the bare import path: the
-	// types.Package path of the internal test variant is runtime/pprof, not runtime/pprof_test, and
-	// TestDeclarationKeyedCapabilityEntries pins the spelling per declared package kind.
-	//
-	// The gate exists because this test PASSES VACUOUSLY on the converted runtime, and a vacuous pass
-	// is never a match (the bar internal/abi's TestFuncPC set when its banked `0 == 0` was retired to
-	// `1 + 1 disclosed`). Read from Go's own source, not inferred: TestFakeMapping writes the heap
-	// profile through Lookup("heap").WriteTo and asserts on the result. The converted
-	// pprof_memProfileInternal is an honest zero-record reader — this runtime keeps no memory-profile
-	// records, so the profile carries zero samples. The test's FIRST assertion, "want profile with at
-	// least one mapping entry, got 0 mapping", can never fire on ANY platform: proto_other.go's
-	// readMapping reads /proc/self/maps (or emits the fake entry as the empty fallback), so mappings
-	// never come from samples and the profile always has at least one. Every REMAINING assertion
-	// iterates prof.Location, which is EMPTY with zero samples — so the test measures nothing about
-	// the reader and passes. Measured 2026-09-03 (gated before/after at 6fa031d08 → 3aa69f6e8,
-	// Release+TC0, oracle go1.23.12): infrastructure-error → PASS with 23 real host mappings and zero
-	// locations, while TestMemoryProfiler beside it honestly FAILS on `heap profile: 0: 0 [0: 1]`.
-	//
-	// Why a gate and not a disclosure, the same fork testTransportGCRequest took from the other side:
-	// the disclosure manifest pins a FAILURE's signature, and this test does not fail — it cannot be
-	// made to fail without editing it. So it goes through the capability gate, neither matched nor
-	// disclosed-failing, listed with its capability (ruled (b), 2026-09-03; the two content failures
-	// TestMemoryProfiler/debug=1 and /proto stay as honest Option-B disclosed rows, because they ARE
-	// the deliverable: a stated, measurable, wrong answer where there was a host classification).
-	//
-	// Registry doctrine's checks, run before adding this: TestFakeMapping is declared at exactly ONE
-	// GOROOT site (runtime/pprof/proto_test.go:426) and referenced nowhere else, and it has no
-	// subtests — so this entry withdraws exactly ONE verdict row and reaches no other package.
-	// runtime/pprof declares NO TestMain (the os/exec helper-registry hazard cannot fire).
-	//
-	// ⚠ RETIREMENT: this entry retires the day pprof_memProfileInternal returns real memory-profile
-	// records — the same test then regains its teeth without anyone remembering, and the entry is
-	// deleted in the same commit as that increment.
-	"runtime/pprof.TestFakeMapping": "runtime-capability: the memory profiler records no samples on the converted runtime, so the test's mapping/symbolization loop runs over an empty location set (vacuous pass); lifts when an increment returns real memory-profile records",
+	// RETIRED 2026-09-27: runtime/pprof.TestFakeMapping's runtime-capability gate (the first entry
+	// naming an INTERNAL test, added 2026-09-04 because the test passed vacuously over a heap profile
+	// with zero samples). Its retirement clause said it goes the day pprof_memProfileInternal returns
+	// real memory-profile records, in the same commit; class M piece M2b forwards that reader to the
+	// runtime's records (linknameForwardTargets). The entry's full reasoning is in git history at
+	// efc9c093de.
 	// ─── `testing`'s own suite ───────────────────────────────────────────────────────────────────
 	//
 	// Go's `testing` package is measured against the HAND-OWNED Phase-4 host (Option 1, owner-ruled

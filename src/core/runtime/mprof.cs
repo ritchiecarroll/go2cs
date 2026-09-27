@@ -923,7 +923,7 @@ internal static void copyMemProfileRecord(ж<MemProfileRecord> Ꮡdst, profilere
 }
 
 //go:linkname pprof_memProfileInternal
-internal static (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.MemProfileRecord> Δp, bool inuseZero) {
+public static (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.MemProfileRecord> Δp, bool inuseZero) {
     return memProfileInternal(len(Δp), inuseZero, (profilerecord.MemProfileRecord r) => {
         Δp[0] = r;
         Δp = Δp[1..];

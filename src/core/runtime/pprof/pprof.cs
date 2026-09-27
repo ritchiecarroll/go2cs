@@ -1068,7 +1068,10 @@ internal static partial (nint n, bool ok) pprof_goroutineProfileWithLabels(slice
 }
 
 //go:linkname pprof_memProfileInternal runtime.pprof_memProfileInternal
-internal static partial (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.MemProfileRecord> p, bool inuseZero);
+[global::System.Diagnostics.StackTraceHidden] internal static (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.MemProfileRecord> p, bool inuseZero) {
+    var (ᴛ1, ᴛ2) = runtime.pprof_memProfileInternal(p, inuseZero);
+    return (ᴛ1, ᴛ2);
+}
 
 //go:linkname pprof_blockProfileInternal runtime.pprof_blockProfileInternal
 [global::System.Diagnostics.StackTraceHidden] internal static (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.BlockProfileRecord> p) {

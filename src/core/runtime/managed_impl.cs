@@ -93,8 +93,10 @@
 //     only converted Go declarations and function literals count — adapter shells (IGoAdapter) and
 //     go2cs-gen forwarders are dispatch plumbing Go has no frame for, and golib/the BCL/the test
 //     host are not Go code. RELATIVE depths between two Callers calls on one goroutine therefore
-//     match Go's logical model (io's multiReader flatten tests assert exactly this); ABSOLUTE
-//     depth reflects the managed host's own frames below main. PC values are opaque
+//     match Go's logical model (io's multiReader flatten tests assert exactly this). A host method
+//     marked GoStackRoot reports the Go frame it stands in for (the test host's testing.tRunner),
+//     and a goroutine's walk ends at runtime.goexit as Go's does; the main goroutine's runtime.main
+//     root is not modeled. PC values are opaque
 //     process-lifetime tokens, never addresses; Frame.Function is the Go spelling (goFrameName);
 //     Frame.File/Line name the GO position the conversion recorded for that frame, and the
 //     converted `.cs` position where it recorded none (goFramePosition). FuncForPC
@@ -471,6 +473,11 @@ partial class runtime_package
         GoFinalizerQueue.WaitForIdle(GoFinalizerQueue.DrainBudgetMs);
 
         System.GC.Collect(System.GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+
+        // The heap profile's cycle for this collection, in Go's order: mark termination's
+        // mProf_NextCycle and mProf_Flush, the sweep's frees, then the mProf_PostSweep that Go's GC()
+        // calls once sweeping is done (mprof_impl.cs, class M piece M2).
+        memProfileCycle(requested: true);
 
         // §3.4's mitigation. The pause recorder's sentinel is woken by the FINALIZER thread, so a
         // ReadMemStats landing in the gap between a collection completing and its finalizer running
@@ -1858,8 +1865,10 @@ partial class runtime_package
     // display classes nested in the same scope). go2cs dispatch machinery does not: an interface
     // adapter shell or a generated forwarder has no Go frame, exactly as Go's interface dispatch
     // adds none. Depth DELTAS between two Callers calls on one goroutine therefore match Go's
-    // logical model — the property io's flatten tests assert (readDepth == myDepth+2) — while
-    // ABSOLUTE depth reflects the managed host (see the header).
+    // logical model — the property io's flatten tests assert (readDepth == myDepth+2). The BOTTOM
+    // is Go's too where the host can name it: a host method marked GoStackRoot reports the Go
+    // frame it stands in for (the test host's testing.tRunner), and a goroutine ends at
+    // runtime.goexit (see the walk's tail).
     //
     // ⚠ This method IS itself a Go-source frame by that test (it is declared on runtime_package),
     // as is every entry point above it, so each caller adds its own frame to `skip`. Keep them
@@ -1873,12 +1882,26 @@ partial class runtime_package
         nint remainingSkip = skip;
         nint count = 0;
 
+        bool sawRoot = false;
+
         foreach (StackFrame frame in stack.GetFrames())
         {
             System.Reflection.MethodBase? method = frame.GetMethod();
 
-            if (method is null || !isGoSourceFrame(method))
+            if (method is null)
                 continue;
+
+            GoStackRootAttribute? root = null;
+
+            if (!isGoSourceFrame(method))
+            {
+                root = stackRootOf(method);
+
+                if (root is null)
+                    continue;
+
+                sawRoot = true;
+            }
 
             if (remainingSkip > 0)
             {
@@ -1886,14 +1909,49 @@ partial class runtime_package
                 continue;
             }
 
+            // A full buffer ends the walk from the top, as Go's does: no root is forced in at the
+            // cost of a real frame.
             if (count >= len(pc))
-                break;
+                return count;
 
-            pc[count] = internCallerFrame(method, frame);
-            count++;
+            pc[count++] = root is null ? internCallerFrame(method, frame) : internRootFrame(root.Function, root.File, root.Line);
         }
 
+        // GO'S BOTTOM FRAME. Go's unwinder ends every goroutine at runtime.goexit, the return address
+        // newproc plants below the start function, and Go's own tests read that bottom (runtime's
+        // testCallersEqual drops the last frame it is given). A goroutine a `go` statement started
+        // carries a creator; a host method standing in for Go's own root (the test host's tRunner)
+        // carries GoStackRoot. The main goroutine's runtime.main root is not modeled, and a thread a
+        // host entered without a root gets none: nothing on it stands where a Go frame is.
+        if ((sawRoot || Goroutine.Current?.Creator is not null) && remainingSkip == 0 && count < len(pc))
+            pc[count++] = internRootFrame("runtime.goexit", "runtime/asm_amd64.s", 1700);
+
         return count;
+    }
+
+    // The GoStackRoot a host method carries, read once per method: a walk passes the same few host
+    // frames on every call.
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, GoStackRootAttribute?> s_stackRoots = new();
+
+    private static GoStackRootAttribute? stackRootOf(System.Reflection.MethodBase method) =>
+        s_stackRoots.GetOrAdd(method, static m => (GoStackRootAttribute?)Attribute.GetCustomAttribute(m, typeof(GoStackRootAttribute), inherit: false));
+
+    // Interns a root frame no live call site backs: the record is the Go frame itself, keyed by its
+    // Go function so every walk that reaches the root answers the same PC, as Go's does.
+    private static uintptr internRootFrame(string function, string file, int line)
+    {
+        string key = $"root:{function}";
+
+        lock (s_callerTableLock)
+        {
+            if (s_callerTokens.TryGetValue(key, out nuint token))
+                return token;
+
+            s_callerRecords.Add(new CallerFrameRecord { Function = function, File = file, Line = line });
+            token = callerSpanStart(s_callerRecords.Count - 1) + ((nuint)1 << (CallerSpanShift - 1));
+            s_callerTokens[key] = token;
+            return token;
+        }
     }
 
     // Frames.Next expands the next recorded PC into a Frame. The auto body resolves PCs through

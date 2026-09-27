@@ -54,10 +54,9 @@ public class MemProfileRecordTests
         return (p, pb, t, tb, z);
     }
 
-    // ONE test, and the order inside it matters: until M2 runs Go's cycle publication in runtime.GC(), a
-    // record reaches the reader only through memProfileInternal's "no GC has happened yet" path, which
-    // folds every pending cycle into the published one the FIRST time the profile is read and never
-    // again. So every allocation is made before the one read. Go's own tests read after runtime.GC().
+    // Read as Go's own tests read: after runtime.GC(), which publishes the cycle the allocations were
+    // counted in (M2). Before M2 a record reached the reader only through memProfileInternal's one-time
+    // "no GC has happened yet" fold, so this test had to make every allocation before its only read.
     [TestMethod]
     public void AllocationsAreRecordedUnderGosRateRule()
     {
@@ -83,6 +82,8 @@ public class MemProfileRecordTests
         {
             MemProfileRate = previous;
         }
+
+        runtime_package.GC();
 
         var (persistent, persistentBytes, transient, transientBytes, atZero) = RecordsOf(
             nameof(memprofprobe_package.allocatePersistent1K),

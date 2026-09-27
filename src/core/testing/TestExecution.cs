@@ -1183,6 +1183,10 @@ public sealed class TestExecution
         return $"{output}{Environment.NewLine}testing: {m_logsDropped} further log record(s) dropped after {MaxLogCharacters} characters";
     }
 
+    // Go runs every test body from testing.tRunner (testing.go:1792 is its `fn(t)`), and a Callers walk
+    // reports that frame here, where the host stands in for it, above runtime.goexit (GoStackRoot).
+    [GoStackRoot("testing.tRunner", "testing/testing.go", 1792)]
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
     private void Execute(Action<ж<testing_package.T>> action)
     {
         Stopwatch timer = Stopwatch.StartNew();
