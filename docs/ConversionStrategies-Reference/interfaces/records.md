@@ -113,6 +113,10 @@ interface at three instantiations, a sibling type named exactly like the type pa
 equality, struct-versus-interface comparison, and interface dispatch over a mixed slice, all
 output-compared against `go run`.
 
+### A local named-FUNC value record is exempt from the interface-inheritance prune
+
+**A local named-FUNC value record is exempt from the interface-inheritance prune.** Independently, `flag` failed **CS0246** on `boolFuncValueᴠValue` — a PRE-EXISTING defect the same masking hid, reproducible with the structural recorder reverted. A C# delegate cannot be a partial struct, so a `GoImplement` pair whose concrete is a named func type generates a per-interface `ᴠ` ADAPTER CLASS rather than an entry folded into the type's own base list. `flag`'s `boolFuncValue` is recorded against both `boolFlag` and `Value`, and `boolFlag` EMBEDS `Value`, so the subsumption prune dropped the `Value` pair as "covered by inheritance" — true for a partial struct, false for an adapter class, which is per-exact-interface. The ж-pointer form and the foreign-value form were already exempt (`adapterClassImplementations`); the local named-func value form now registers there too, so `flag.cs`'s `new boolFuncValueᴠValue(…)` keeps its record. This is the same reasoning that exempts `new net_ConnᴠWriter(…)`, applied to the one adapter-class shape the list had missed.
+
 ## De-duplication
 
 ### GoImplement records de-duplicate at attribute emission

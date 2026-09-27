@@ -268,20 +268,6 @@ definition of Go equality, and a second copy per shell class is exactly the drif
 an `Object` that is not a `dependency`, lookup after narrowing, lookup after re-widening, and the
 `Object(d) != obj` identity probe that pinned the equal-but-unfindable split.)
 
-The same relation gained its last carrier on 2026-08-19 (the crypto/tls regression): golib's own
-`error<T>` — the hand-written generic shell for `error`, the one shell go2cs-gen does not emit — had
-never joined the `IInterfaceAdapter` unwrap protocol its generated siblings define, so `AreEqual`
-could see through every carrier EXCEPT it and two independently minted carriers of the same error
-value compared by reference. The shape needs two minters for one value, which the white-box test
-model makes routine: crypto/tls's production code never casts `AlertError` to `error` (it only boxes
-it into `any`), so fmt's `%w` assert resolved the runtime shell, while the test assembly's
-`errors.Is` target arrived as its own generated `ᴠ` value adapter — and
-`errors.Is(err, AlertError(alertBadCertificate))` answered false for the very alert `quicError` had
-wrapped (`TestQUICHandshakeError`). `error<T>` now carries the identical member every generated
-shell does: the `ж` box when pointer-backed (Go pointer-identity equality), the wrapped value
-otherwise. (Guarded by `GolibTests.ErrorShellCarrierEqualityTests` — two shells over one value, the
-pointer-identity flavor, and the protocol membership itself.)
-
 ## A NaN map key is never equal to anything, itself included
 
 BCL `Double.Equals` reports NaN equal to NaN, deliberately, so that a NaN stored in a collection can

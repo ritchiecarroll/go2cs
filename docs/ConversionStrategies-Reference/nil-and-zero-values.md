@@ -350,24 +350,7 @@ nils through every one of those slots, `%T`, `==`, and a type assert, output-com
 before the fix it reports `dpi==nil true` where Go says `false` and panics dereferencing a nil box
 on the return path).
 
-## Pointer-to-interface assignment through selector fields
-A selector assignment whose LHS field is an interface (`h.d = s`) uses the type of the **whole selector expression**, not just the selected identifier name, when deciding whether to wrap the RHS in an interface adapter. If the RHS is a pointer-typed identifier, the adapter receives the pointer box so a dereferenced value alias is not copied into a pointer-only implementation. The generated form matches other pointer-to-interface conversion sites:
-
-```go
-func assignDescriber(h *holder, s *Setting) {
-    h.d = s
-}
-```
-```csharp
-internal static void assignDescriber(ж<holder> Ꮡh, ж<Setting> Ꮡs) {
-    ref var h = ref Ꮡh.Value;
-    ref var s = ref Ꮡs.Value;
-
-    h.d = new SettingжDescriber(Ꮡs);
-}
-```
-
-This is intentionally keyed on selector/index expression type instead of the root identifier, so struct fields such as `go/types`' `operand.expr ast.Expr` and ordinary behavioral fields both take the same path. Guarded by `PointerInterfaceStructField`, including the assignment case after the struct-literal cases.
+<a id="pointer-to-interface-assignment-through-selector-fields"></a>Moved to [Pointer-to-interface assignment through selector fields](interfaces/adapters.md#pointer-to-interface-assignment-through-selector-fields).
 
 ## `new(T)` is Go's ZERO value — and for a container kind that means the NIL one
 
