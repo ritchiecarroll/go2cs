@@ -11,7 +11,7 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-09-27 14:45 (first cut 14:29; an earlier '14:40' stamp was ahead of the clock) -- SAVE-STATE at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
+> **Status of this revision:** 2026-09-27 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
@@ -27,11 +27,11 @@ LANE: COORD   MODEL: Opus 5.5/max   HOST: i7
 BRANCH: master 4fb6e460c6e1633b1d20d3092fe0339c9438fe81 on-origin yes landed -- the docs summary rewrite plus the GitHub Pages fix (the site builds and deploys again)
 BRANCH: claude/coord-trainF efc9c093deb1eb7fe17e26a7fe47075b5fb51e78 on-origin yes accepted -- TRAIN F: battery run 2 green through the behavioral and H7 legs; the 92 sweeps were running at the save
 BRANCH: claude/coord-reflect-bank ae9f8850909c72cf05231de33fe9e7e30c5c5b11 on-origin yes cut -- reflect's bank (roster eb8d74967c + proof page ae9f885090), waiting on C1's alloc relabel
-BRANCH: claude/coord-docs-reference 705b34938bb0457156670e6b02884afd999bfce2 on-origin yes cut -- the strategy-reference restructure: stages 1a and 1b done, 1c part-way (read the branch log)
+BRANCH: claude/coord-docs-reference adec71b3746e864ed503189083abf7dd1f5006aa on-origin yes cut -- the strategy-reference restructure: the STRUCTURAL pass (1a, 1b, 1c) is COMPLETE; step 2 (prose) is next
 BRANCH: claude/coord-pages-check b912b7d8cdc86684a0a95c411671645175f7824b on-origin yes cut -- SCRATCH: a workflow that builds docs/ with the Pages toolchain; delete it once the site-audit fixes land
 LOCAL-ONLY: none
 WORKTREE: i7 H:/go2cs-tmp-coord/tF claude/coord-trainF 0 the running battery (logs in the session scratch; a record copy is docs/phase4/briefs/trainF-battery-run2-summary.txt on this branch)
-WORKTREE: i7 H:/go2cs-tmp-coord/docs-ref claude/coord-docs-reference in-flight stage 1c edits (discard with git restore if the stage agent is gone; the committed tip is pushed)
+WORKTREE: i7 H:/go2cs-tmp-coord/docs-ref claude/coord-docs-reference clean at the pushed tip
 WORKTREE: i7 H:/go2cs-tmp-coord/pages-fix and pages-check: landed or scratch; reclaim
 NEXT: land TRAIN F (steps in the paste prompt), starting at efc9c093deb1eb7fe17e26a7fe47075b5fb51e78
 READ-FIRST: the ledger from "LAND · 4fb6e460c6" (2026-09-27 13:34) to the end; docs/phase4/inbox/COORD/ files after 20260927T191644Z
@@ -134,8 +134,11 @@ WHERE THINGS STAND (2026-09-27 ~14:30, i7 local time):
      - The plan: .claude/coord-scripts/docs/docs-audit.json, keys plan.reference_*.
      - The tools: .claude/coord-scripts/docs/ref_*.py on THAT branch.
      - Done: 1a (the manual-conversions split, reflection/) and 1b (the pointers split, closures, methods).
-     - 1c was part-way: the interfaces, package-conversion and generics splits, plus the remaining moves. Read the
-       branch log; resume from the plan's list minus what the log shows done.
+     - 1c is done too (interfaces/, package-conversion/, generics.md, and new test-conversion, naming,
+       escape-analysis, variadic-parameters and goroutines pages). The branch is at adec71b374, a joining commit that
+       keeps the posted 705b34938b in history. The moves not made are listed in the commit messages.
+     - The step-2 worklist is .claude/coord-scripts/docs/step2-stranded-references.txt (184 positional references
+       the moves stranded); stubcheck.py verifies every stub sits on its anchor's page.
      - Then step 2: per-page clarity, per "Writing the conversion-strategy documents" in .claude/rules/docs-records.md.
      - Every commit needs ref_invariant.py PASS and TestDocsSurviveJekyllLiquid PASS.
    * THE SITE AUDIT (multi-agent, on a real Pages build) found four pre-existing issues:
@@ -150,7 +153,17 @@ WHERE THINGS STAND (2026-09-27 ~14:30, i7 local time):
      claude/coord-pages-check after the fixes land.
    * THE COST SCOUT (owner side quest: per-call costs Go does not pay) was PAUSED at the save. Re-run it later as a
      read-only scout; fixes wait until the last three packages are done.
- - OWNER HANDS: none open.
+ - OWNER HANDS, OPEN:
+   (1) the MinInt / -1 emission shape: golib quo(a, b) / rem(a, b) at every signed division by a variable (user code
+       included), a reads-like-Go call; COORD recommends accept (ledger 7eb8b61ab2);
+   (2) an owner-only security settings item from the Pages audit, reported to the owner in session (withheld here);
+   (3) the audit's CI proposal: a docs-site check workflow before deploy.
+ - COORD QUEUE besides the trains:
+   - reflect's two readings on the i7 after TRAIN F lands (TestMapIterSet per-site bytes; TestMapAlloc's two blocks);
+   - re-apply C1's two pure appends (board-goroot 5f0564da38, literal-tier-ruling 70e010aa46) at the next docs
+     landing;
+   - the Pages-audit fixes that need no owner decision (the layout's relative_url, the wrapped-code-span pages);
+   - reflect HASH-token residual onto the BOARD.
 
 LANES (every STATE BLOCK is in section 1d.2; confirm session names with ListAgents):
  - R (R-LAPTOP, Remote Control), in order:
@@ -264,37 +277,68 @@ BLOCKED-ON: none
 TOOLS: GOROOT go1.24.13, GOTOOLCHAIN=local, CGO_ENABLED=0, GOFLAGS=-p=4, DOTNET_ROOT .NET SDK 10.0.401, pwsh 7; HARDWARE ORDER (-m:4 / -p 4, one task at a time, crypto/tls banned here)
 ```
 
-#### P2 (COORD-written minimum until P2's block arrives)
+#### P2
 
 ```
-LANE: P2   MODEL: opus-class   HOST: P2 (cloud, linux)
-BRANCH: claude/p2-stack-roots b9d7f64248de8f1ca03c1065171ef9e80f69d1d7 on-origin yes accepted -- M3 stack roots, carries M2b cf95330847 (TRAIN G)
-BRANCH: claude/p2-mem-frees 04f0820e940353d8e1c91efba2da026155f20f3a on-origin yes accepted -- M2 frees and cycles (TRAIN G)
-BRANCH: claude/p2-creator-flake 29b5e0b02869ec11db36df85e89d9c416d74b77c on-origin yes accepted -- GoroutineCreatorTests flake (TRAIN G)
-BRANCH: claude/p2-method-wrapper 4d427a3afbc6f7d2ddd04b6c09a4b88cb47a7ef4 on-origin yes cut -- F: wrapper frames (GoWrapperAttribute), ruled 93c2bdd50b
-NEXT: finish and post F (red first, the 3-target footprint, CNR, GolibTests both flavours, the runtime row, runtime/pprof and net/http/pprof re-read); then E, then D; review G's AV guard and R's B cut
-READ-FIRST: ledger 93c2bdd50b (F), 1fa91dfea3 (M3 accept), f8f73cd0a9 (G's guard, P2 reviews); inbox P2 files of 2026-09-27
+LANE: P2   MODEL: opus-class/high   HOST: P2 (a cloud container)
+BRANCH: claude/p2-method-wrapper 4d427a3afbc6f7d2ddd04b6c09a4b88cb47a7ef4 on-origin yes cut -- F, method-expression wrapper frames (red aa2a7b1eeb46; on M3); its battery was RUNNING
+BRANCH: claude/p2-stack-roots b9d7f64248de8f1ca03c1065171ef9e80f69d1d7 on-origin yes accepted -- M3 stack roots, TRAIN G (carries M2b)
+BRANCH: claude/p2-mem-reader cf953308478712e659dfc71b31a41a3110d9165f on-origin yes superseded -- M2b, carried by M3's seat
+BRANCH: claude/p2-mem-frees 04f0820e940353d8e1c91efba2da026155f20f3a on-origin yes accepted -- M2, TRAIN G
+BRANCH: claude/p2-creator-flake 29b5e0b02869ec11db36df85e89d9c416d74b77c on-origin yes accepted -- flake fix, TRAIN G
+BRANCH: claude/p2-mem-records b5a2434f80cc056e480bbe2d1c656717b195aefe on-origin yes accepted -- M1, TRAIN F
+BRANCH: claude/p2-serial-billing c923fad3c762a0c82aee7d31a46ad093f2b953a7 on-origin yes cut -- /serial red with its instrument, parked (queue item c)
+NOTE: landed P2 refs (TRAIN C to E): cpu-sampler-magnitude, synthetic-text-mapping, funcpc-frames, closure-names, goroutine-registration and earlier
+LOCAL-ONLY: none
+WORKTREE: P2 wt-f, wt-m3, wt-mag: clean and pushed; wt-m2 a detached measurement tree, nothing to preserve
+NEXT: finish F's gate battery on 4d427a3afbc6f7d2ddd04b6c09a4b88cb47a7ef4 (the 3-target seeded footprint, a two-arm CNR, GolibTests Release and Debug, the runtime filter and full row, the runtime/pprof and net/http/pprof rows) and post the reading; if the battery is lost, re-run it from 4d427a3afb with base b9d7f64248
+READ-FIRST: ledger 2026-09-27 13:25 (F ruled) and 12:03 (B with P2's four changes); ledger 7eb8b61ab2 (P2's review of G's guard, accepted); inbox COORD 20260927T182409Z-P2 (F sizing); F's base readings = M3's AFTER readings at b9d7f64248 (full runtime row 10,625/234/16/8 of 10,883 on linux)
 BLOCKED-ON: none
+TOOLS: GOROOT go1.24.13 (GOTOOLCHAIN=local), dotnet SDK 10.0.112, python 3.11.15; GoTargetOS=linux CGO_ENABLED=0; no pwsh, so CNR is emulated as a two-arm in-place transpile plus a diff
+NOTE: QUEUE after F: E (mint *Func; start lines), D (TestLineNumber's cause first), R's B review, then M4, the map-growth model, class F (TestMutexBlockFullAggregation), /serial
 ```
 
-#### C1 (COORD-written minimum until C1's block arrives)
+#### C1
 
 ```
-LANE: C1   MODEL: opus-class   HOST: C1 (cloud)
-NOTE: C1's current seat, claude/c1-reflect-alloc-relabel, was not on origin at the save
-NEXT: the reflect alloc relabel: 37 TestDeepEqualAllocs labels retire (never run under SwissMap), 5 relabel from their readings (deferred / structural / alloc-count-semantics); roster guard green under pwsh 7 and PS 5.1; post the seat so COORD can land reflect's bank
-READ-FIRST: inbox C1 604cb2ebf (the assignment); the TRAIN E ledger lines about reflect's refused bank
+LANE: C1   MODEL: withheld per lane pin   HOST: C1 (a cloud container)
+BRANCH: claude/c1-reflect-alloc-relabel c745949c38919f0c593b0407476738490a4f87bd on-origin yes accepted -- reflect's manifest 59 -> 22: 37 retired, 3 relabelled with readings; 2 left for readings on the i7 (ledger 7eb8b61ab2)
+BRANCH: claude/c1-alloc-relabel-sizing c8e6ca9034647c3fecdd66476e437c20c29e2511 on-origin yes accepted -- CENSUS-alloc-label-relabel-go1.24.13.md, the record the relabel reads
+BRANCH: claude/c1-orphan-census f4903fad5f90194288155293db85bdcc2dc1b79e on-origin yes cut -- orphan-pin census (327 in 48 manifests), re-pushed today
+BRANCH: claude/c1-tests-production-alias-sizing 7227138c2652503a1425b7833570598dcdc5f867 on-origin yes cut -- the -tests alias rewrite is a compilation-unit axis, re-pushed today
+BRANCH: claude/c1-literal-tier-ruling 70e010aa462093c0112f52daccf407afc60fbf93 on-origin yes accepted -- the owner's literal-tier record (a pure append); COORD re-applies it at the next docs landing
+BRANCH: claude/c1-board-goroot 5f0564da38e05beb59383ac214660fa5259e6e52 on-origin yes accepted -- the BOARD -goroot entry (a pure append); COORD re-applies it at the next docs landing
+BRANCH: claude/c1-handown-address-guard 2b823dc951f20769296f03325764ddc1ed61aed3 on-origin yes stale -- train 49; re-cut on current master owed (item 1)
+BRANCH: claude/c1-handown-census-slice 5f7fef6683730bef6ca6fcb87d0028ba2a131bb5 on-origin yes stale -- train 49; re-cut owed (item 2)
+BRANCH: claude/c1-train49-guards 394de9fd684756d6e3aeed6975587720d3d73180 on-origin yes stale -- train 49; re-cut of the slnx dangling-path half owed (item 3)
+NOTE: announced records, closed: c1-hop-lessons-outline 742a53090a, c1-fips140test-classing 769fc17fb1, c1-reflect-divergence-classing 9f894ac07c, c1-synctest-sizing 93cc9e215a, c1-h6-rewrites c5fb9e0ed8, c1-mcleanup-handown 23d07f7426; 27 other C1 branches are ancestors of master
+LOCAL-ONLY: none
+WORKTREE: C1 rfx (the reflect seat) and mbx (mailbox transport) kept; 33 others reclaimed today (about 21 GB)
+NEXT: the train-49 re-cuts (1)-(3), each red first on current master
+READ-FIRST: inbox C1 20260926T150820Z-COORD.md (the stranded re-cuts); ledger 7eb8b61ab2
 BLOCKED-ON: none
+TOOLS: GOTOOLCHAIN=go1.24.13 (linux/amd64); no .NET SDK; no pwsh; python 3.11.15; git 2.43.0 (the roster guard and any .NET gate are run by COORD)
 ```
 
-#### C2 (COORD-written minimum until C2's block arrives)
+#### C2
 
 ```
-LANE: C2   MODEL: opus-class   HOST: C2 (cloud)
-NOTE: C2's refs are on origin as claude/c2-*; no seat is in flight for a train
-NEXT: size MinInt / -1 (inbox b7a948590), then the OutputComparisonTests list sizing
-READ-FIRST: inbox C2 files of 2026-09-26/27
-BLOCKED-ON: none
+LANE: C2   MODEL: withheld per standing rule (top class / high effort)   HOST: C2 (a cloud container)
+BRANCH: claude/c2-crlf-comment-emitter db37c4a03ec2d4756d841d0a18845511cd56d3e5 on-origin yes stale -- EOL seat accepted for train 49, never landed; re-cut on master
+BRANCH: claude/c2-sweep-hop-mode baf1fbe7273d0f44e246cfddd40d020e09c2c69c on-origin yes stale -- instrument debt; re-cut on master
+BRANCH: claude/c2-h5c-slnx-orphan 40f2b85145c27d10ed2c73652f0d5c6e6287d0f6 on-origin yes stale -- instrument debt; re-cut on master
+BRANCH: claude/c2-runbook-shard-amendment 4140a8e55d993ed30ad1d17939497e8a185c8502 on-origin yes stale -- runbook debt; re-cut on master
+BRANCH: claude/c2-darwin-trampoline-map 4bc0c35b01b0aff944c84f8433e105f81d6683c4 on-origin yes announced -- darwin option 2; waits on the owner's go/no-go
+BRANCH: claude/c2-darwin-option2-sizing 43e0dff04ccb19bc4dc7f753e1719b41598ff441 on-origin yes announced -- darwin option 2 sizing; same wait
+BRANCH: claude/c2-embed-sizing 602ba6f2739da1e4fec5e33ca95d06f9d9720af7 on-origin yes announced -- //go:embed DATA record, not landed
+BRANCH: claude/c2-literal-cache-draft 34b60c14dab0f04d0bb0d197b94ba5fa0b8e6226 on-origin yes announced -- O1 survival probe r2 record, not landed
+NOTE: probes never to merge: c2-getaddrinfo-probe 83385dad6c, c2-getaddrinfo-probe-before 9ecce1839c (retirement question open), c2-elemindex-probe 9483bc624b; superseded: c2-twin-pilot-design c0667831bd; the harness branch nifty-davinci-6i9u8x is pruned and contained in master
+LOCAL-ONLY: none
+WORKTREE: C2 mbx (claude/mailbox clone), clean
+NEXT: size the NARROW-ARITHMETIC-TO-INTERFACE defect first (int8 a+a reaching fmt prints 200 int32 where Go prints -56 int8; ledger 7eb8b61ab2), read-only on master 4fb6e460c6e1633b1d20d3092fe0339c9438fe81; cut claude/c2-output-attr-sync (two attributes plus a both-ways guard); the MinInt/-1 quo/rem shape waits on the OWNER
+READ-FIRST: inbox COORD 20260927T193256Z-C2 (MinInt/-1 sizing) and 20260927T193445Z-C2 (the list sizing); ledger 7eb8b61ab2; inbox C2 20260926T112007Z (the anonymous-struct generic alias sizing, still queued) and 20260926T150835Z (the stranded re-cuts)
+BLOCKED-ON: none (the darwin option-2 branches wait on an owner hand)
+TOOLS: GOTOOLCHAIN=go1.24.13, dotnet SDK 10.0.112, python3 3.11.15, no pwsh
 ```
 
 ---
