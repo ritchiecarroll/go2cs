@@ -492,7 +492,8 @@ def migrate_repoint(repo, src, dst, block):
                 m = re.search(r'Old\s*=\s*"((?:[^"`]|`.)*)"', seg)
                 if not m:
                     continue
-                old = m.group(1).replace('`"', '"').replace('``', '`').replace("`'", "'")
+                # PowerShell's escape character is the backtick, before ANY character: `" `$ `` `'
+                old = re.sub(r'`(.)', r'\1', m.group(1))
                 pat = re.escape(old).replace(re.escape('$From'), r'\S+').replace(re.escape('$To'), r'\S+')
                 if any(re.search(pat, bl) for bl in block):
                     dst_win = repo.rel(dst).replace('/', '\\')
