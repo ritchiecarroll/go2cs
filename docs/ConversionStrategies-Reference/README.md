@@ -117,6 +117,18 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
     - [`host-limit` — the third disclosed-divergence class: what the test HOST cannot BE](test-host-and-disclosures.md#host-limit--the-third-disclosed-divergence-class-what-the-test-host-cannot-be)
     - [`deferred` and `structural` — the two labels every allocation-count disclosure resolves into](test-host-and-disclosures.md#deferred-and-structural--the-two-labels-every-allocation-count-disclosure-resolves-into)
 - **[Compiled Library versus Source Code](compiled-library-vs-source.md)**
+- **[Escape Analysis and Heap Boxing](escape-analysis.md)**
+  - [Heap-boxed locals, parameters and results](escape-analysis.md#heap-boxed-locals-parameters-and-results)
+    - [An address-taken reference-typed local heap-boxes too — `Ꮡ(value)` copies are only for reads](escape-analysis.md#an-address-taken-reference-typed-local-heap-boxes-too--ꮡvalue-copies-are-only-for-reads)
+    - [An address-taken NAMED RESULT heap-boxes too](escape-analysis.md#an-address-taken-named-result-heap-boxes-too)
+    - [An address-taken VALUE PARAMETER heap-boxes too](escape-analysis.md#an-address-taken-value-parameter-heap-boxes-too)
+    - [A field-addressed value local heap-boxes — `Ꮡ(x).of(…)` copy-boxes orphan writes](escape-analysis.md#a-field-addressed-value-local-heap-boxes--ꮡxof-copy-boxes-orphan-writes)
+    - [A TYPE-SWITCH BINDING is escape-analyzed like any other local](escape-analysis.md#a-type-switch-binding-is-escape-analyzed-like-any-other-local)
+    - [A PACKAGE-LEVEL function literal's own locals are analyzed too](escape-analysis.md#a-package-level-function-literals-own-locals-are-analyzed-too)
+  - [Method values](escape-analysis.md#method-values)
+    - [A pointer-receiver METHOD VALUE heap-boxes its receiver — the implicit `(&x).M`](escape-analysis.md#a-pointer-receiver-method-value-heap-boxes-its-receiver--the-implicit-xm)
+  - [The field-view cache](escape-analysis.md#the-field-view-cache)
+    - [`Ꮡx.of(T.Ꮡf)` returns ONE view per (box, field) — the field-view cache](escape-analysis.md#ꮡxoftꮡf-returns-one-view-per-box-field--the-field-view-cache)
 - **[Constant Values](constants.md)**
   - [A constant C# cannot declare `const` is a get-only PROPERTY, not a `static readonly` field](constants.md#a-constant-c-cannot-declare-const-is-a-get-only-property-not-a-static-readonly-field)
   - [A complex constant emits a complex VALUE, rendered from its two exact halves](constants.md#a-complex-constant-emits-a-complex-value-rendered-from-its-two-exact-halves)
@@ -156,14 +168,6 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A multi-value RETURN reads its plain operands AFTER its calls](multi-assignment.md#a-multi-value-return-reads-its-plain-operands-after-its-calls)
   - [A SELECTOR left-hand side counts as a reassignment — a field swap must stay simultaneous](multi-assignment.md#a-selector-left-hand-side-counts-as-a-reassignment--a-field-swap-must-stay-simultaneous)
   - [A STAR-DEREF of a CALL result counts as a reassignment — the last shape of the classification gap](multi-assignment.md#a-star-deref-of-a-call-result-counts-as-a-reassignment--the-last-shape-of-the-classification-gap)
-  - [An address-taken reference-typed local heap-boxes too — `Ꮡ(value)` copies are only for reads](multi-assignment.md#an-address-taken-reference-typed-local-heap-boxes-too--ꮡvalue-copies-are-only-for-reads)
-  - [An address-taken NAMED RESULT heap-boxes too](multi-assignment.md#an-address-taken-named-result-heap-boxes-too)
-  - [An address-taken VALUE PARAMETER heap-boxes too](multi-assignment.md#an-address-taken-value-parameter-heap-boxes-too)
-  - [A field-addressed value local heap-boxes — `Ꮡ(x).of(…)` copy-boxes orphan writes](multi-assignment.md#a-field-addressed-value-local-heap-boxes--ꮡxof-copy-boxes-orphan-writes)
-  - [`Ꮡx.of(T.Ꮡf)` returns ONE view per (box, field) — the field-view cache](multi-assignment.md#ꮡxoftꮡf-returns-one-view-per-box-field--the-field-view-cache)
-  - [A TYPE-SWITCH BINDING is escape-analyzed like any other local](multi-assignment.md#a-type-switch-binding-is-escape-analyzed-like-any-other-local)
-  - [A PACKAGE-LEVEL function literal's own locals are analyzed too](multi-assignment.md#a-package-level-function-literals-own-locals-are-analyzed-too)
-  - [A pointer-receiver METHOD VALUE heap-boxes its receiver — the implicit `(&x).M`](multi-assignment.md#a-pointer-receiver-method-value-heap-boxes-its-receiver--the-implicit-xm)
 - **[Short Variable Redeclaration (Shadowing)](shadowing.md)**
   - [Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)
   - [Shadowing the names go2cs itself spells (`nil`, golib names, emitter-spelled type names, C# keywords)](shadowing.md#shadowing-the-names-go2cs-itself-spells-nil-golib-names-emitter-spelled-type-names-c-keywords)
